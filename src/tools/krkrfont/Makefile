@@ -134,21 +134,21 @@ $(PREC_GCH) : $(PREC_H)
 $(CP932_OUT_CPP) $(CP932_OUT_H) : $(CP932_IN)
 	(cd cp932map && $(PERL) conv.pl && $(PERL) conv_r.pl)
 
-depend: .depend
+depend: $(CPPFILES) .depend
 	$(RM)   .depend
 	$(MAKE) .depend
 
-.depend: $(CPPFILES)
+.depend:
 	$(CXX) -E -MM $(CPPFLAGS) $(CPPFILES)  > .depend
 
 ifeq (.depend,$(wildcard .depend))
 
 all: $(BIN)
-include .depend
+-include .depend
 
 else
 
-all: .depend $(BIN)
-include .depend
+all:  $(CPPFILES) .depend $(BIN)
+-include .depend
 
 endif

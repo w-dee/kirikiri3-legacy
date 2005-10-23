@@ -1,0 +1,203 @@
+# Kirikiri3 Pre-rendered font generator tool messages.
+# Copyright (C) 2005 W.Dee and contributors
+# This file is distributed under the same license as the Kirikiri3 package.
+# W.Dee <dee@kikyou.info>, 2005.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Kirikiri3-krkrfont 1.00\n"
+"POT-Creation-Date: 2005-10-24 00:55+0900\n"
+"PO-Revision-Date: 2005-10-03 10:53+0900\n"
+"Last-Translator: W.Dee <dee@kikyou.info>\n"
+"Language-Team: W.Dee <dee@kikyou.info>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Report-Msgid-Bugs-To: \n"
+
+#: krkrfont.xrcmsg:1
+msgid "Pre-rendered Font Generator"
+msgstr "レンダリング済みフォント作成"
+
+#: krkrfont.xrcmsg:2
+msgid "Font source"
+msgstr "フォント"
+
+#: krkrfont.xrcmsg:3
+msgid "&Select a font"
+msgstr "一覧から選択(&S)"
+
+#: krkrfont.xrcmsg:4
+msgid "Selec&t a file"
+msgstr "ファイルを指定(&T)"
+
+#: krkrfont.xrcmsg:5 krkrfont.xrcmsg:14
+msgid "..."
+msgstr "..."
+
+#: krkrfont.xrcmsg:6
+msgid "Font Setting"
+msgstr "フォント設定"
+
+#: krkrfont.xrcmsg:7
+msgid "Font Family &Name :"
+msgstr "フォントファミリ名(&N) :"
+
+#: krkrfont.xrcmsg:8
+msgid "Size (in &pixel) :"
+msgstr "サイズ(ピクセル単位)(&P) :"
+
+#: krkrfont.xrcmsg:9
+msgid "&Antialiased"
+msgstr "アンチエイリアス(&A)"
+
+#: krkrfont.xrcmsg:10
+msgid "Incl&ude private glyphs"
+msgstr "ユーザ定義文字(外字)を含める(&U)"
+
+#: krkrfont.xrcmsg:11
+msgid "&Bold"
+msgstr "太字(&B)"
+
+#: krkrfont.xrcmsg:12
+msgid "Generate font &metrics only"
+msgstr "フォントメトリックのみを生成(&M)"
+
+#: krkrfont.xrcmsg:13
+msgid "&Output file"
+msgstr "出力ファイル(&O)"
+
+#: krkrfont.xrcmsg:15
+msgid "Preview"
+msgstr "プレビュー"
+
+#: krkrfont.xrcmsg:16
+msgid "Generate"
+msgstr "作成"
+
+#: krkrfont.xrcmsg:17
+msgid "Close"
+msgstr "閉じる"
+
+#: krkrfont.xrcmsg:18
+msgid "Font Preview"
+msgstr "フォント プレビュー"
+
+#: krkrfont.xrcmsg:19
+msgid "Close preview window"
+msgstr "プレビューを閉じる"
+
+#: krkrfont.xrcmsg:20
+msgid "  Zoom :"
+msgstr "  倍率 :"
+
+#: krkrfont.xrcmsg:21
+msgid "x1"
+msgstr "等倍"
+
+#: krkrfont.xrcmsg:22
+msgid "x2"
+msgstr "x2"
+
+#: krkrfont.xrcmsg:23
+msgid "x3"
+msgstr "x3"
+
+#: krkrfont.xrcmsg:24
+msgid "x4"
+msgstr "x4"
+
+#: krkrfont.xrcmsg:25
+msgid "x5"
+msgstr "x5"
+
+#: krkrfont.xrcmsg:26
+msgid "x6"
+msgstr "x6"
+
+#: krkrfont.xrcmsg:27
+msgid "x7"
+msgstr "x7"
+
+#: krkrfont.xrcmsg:28
+msgid "x8"
+msgstr "x8"
+
+#: krkrfont.xrcmsg:29
+msgid "x10"
+msgstr "x10"
+
+#: krkrfont.xrcmsg:30
+msgid "x12"
+msgstr "x12"
+
+#: krkrfont.xrcmsg:31
+msgid "x14"
+msgstr "x14"
+
+#: krkrfont.xrcmsg:32
+msgid "x16"
+msgstr "x16"
+
+#: msw/NativeFreeTypeFace.cpp:84 msw/NativeFreeTypeFace.cpp:99
+#: msw/NativeFreeTypeFace.cpp:129 msw/NativeFreeTypeFace.cpp:151
+#: msw/NativeFreeTypeFace.cpp:167 msw/NativeFreeTypeFace.cpp:179
+#: msw/NativeFreeTypeFace.cpp:205 FreeType.cpp:126
+#, c-format
+msgid "Font '%1$s' cannot be used"
+msgstr "フォント '%1$s' は使用できません"
+
+#. デフォルトのフォントを探し、選択させる
+#. Default font initially selected in the main dialog.
+#. You can specify font cadidates separated with '|' (vertline)
+#. character, like "Tahoma|Times New Roman"
+#: MainDialog.cpp:55
+msgid "Tahoma"
+msgstr ""
+"ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3|ヒラギノ角ゴ Pro W6|ＪＳ明朝|ＤＦ平成ゴ"
+"シック体W5"
+
+#. messsage for select a font file
+#: MainDialog.cpp:281
+msgid "Select a font file"
+msgstr "一覧から選択"
+
+#: MainDialog.cpp:290
+msgid "All supported fonts|*.ttf;*.ttc;*.otf;*.fon"
+msgstr "全てのフォント|*.ttf;*.ttc;*.otf;*.fon"
+
+#: MainDialog.cpp:291
+msgid "TrueType fonts (*.ttf)|*.ttf"
+msgstr "TrueType フォント (*.ttf)|*.ttf"
+
+#: MainDialog.cpp:292
+msgid "TrueType Collection fonts (*.ttc)|*.ttc"
+msgstr "TrueType コレクションフォント (*.ttc)|*.ttc"
+
+#: MainDialog.cpp:293 MainDialog.cpp:294
+msgid "OpenType fonts (*.otf)|*.otf"
+msgstr "OpenType フォント (*.otf)|*.otf"
+
+#: MainDialog.cpp:295
+msgid "Windows fonts (*.fon)|*.fon"
+msgstr "Windows フォント (*.fon)|*.fon"
+
+#: MainDialog.cpp:296
+msgid "All files (*.*)|*.*"
+msgstr "全てのファイル (*.*)|*.*"
+
+#: FreeType.cpp:82
+#, c-format
+msgid "Can't open font file '%1$s'"
+msgstr ""
+
+#: PreviewWindow.cpp:457
+#, fuzzy, c-format
+msgid "Index : %d   Charcode : U+%06X"
+msgstr "インデックス : %d   文字コード : U+%06X"
+
+#: PreviewWindow.cpp:582
+#, c-format
+msgid "Glyph count : %d"
+msgstr "グリフ数 : %d"

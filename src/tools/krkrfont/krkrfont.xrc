@@ -1,0 +1,1264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resource>
+  <object class="wxDialog" name="wxMainDialog_Base">
+    <title>Pre-rendered Font Generator</title>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <label>Font source</label>
+          <orient>wxVERTICAL</orient>
+          <object class="sizeritem">
+            <object class="wxFlexGridSizer">
+              <cols>2</cols>
+              <rows>2</rows>
+              <object class="sizeritem">
+                <object class="wxRadioButton" name="SelectFontRadioButton">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <label>&amp;Select a font</label>
+                </object>
+              
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxChoice" name="SelectFontChoice">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <content/>
+                </object>
+              
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <option>1</option>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <border>1</border>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <ratio>1</ratio>
+              </object>
+              <object class="sizeritem">
+                <object class="wxRadioButton" name="SelectFileRadioButton">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <label>Selec&amp;t a file</label>
+                </object>
+              
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxBoxSizer">
+                  <orient>wxHORIZONTAL</orient>
+                  <object class="sizeritem">
+                    <object class="wxTextCtrl" name="SelectFileEdit">
+                      
+                      
+                      <style>wxTE_READONLY</style>
+                    </object>
+                  
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <option>1</option>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <flag>wxEXPAND</flag>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <ratio>1</ratio>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxButton" name="SelectFileRefButton">
+                      
+                      
+                      
+                      
+                      
+                      
+                    
+                      
+                      
+                      
+                      
+                      
+                    
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      <size>20,-1</size>
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      <label>...</label>
+                    </object>
+                  </object>
+                </object>
+              
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <option>1</option>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <border>1</border>
+              </object>
+              <growablecols>1</growablecols>
+            </object>
+          
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <option>1</option>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <flag>wxEXPAND</flag>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <ratio>1</ratio>
+          </object>
+        </object>
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <flag>wxALL|wxEXPAND</flag>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <label>Font Setting</label>
+          <orient>wxVERTICAL</orient>
+          <object class="sizeritem">
+            <object class="wxFlexGridSizer">
+              <cols>2</cols>
+              <rows>1</rows>
+              <object class="sizeritem">
+                <object class="wxStaticText">
+                  
+                  
+                  
+                  
+                  <label>Font Family &amp;Name :</label>
+                </object>
+                
+                
+                
+                
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxChoice" name="FaceNameChoice">
+                  
+                  
+                  
+                  
+                  <content/>
+                </object>
+                
+                
+                
+                
+                <option>1</option>
+                
+                
+                
+                
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                
+                
+                
+                
+                <border>1</border>
+                
+                
+                
+                
+                <ratio>1</ratio>
+              </object>
+              <growablecols>1</growablecols>
+            </object>
+            <option>1</option>
+            <flag>wxEXPAND</flag>
+            <ratio>1</ratio>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="wxStaticText">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <label>Size (in &amp;pixel) :</label>
+                </object>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxSpinCtrl" name="SizeSpinEdit">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <value>24</value>
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <min>4</min>
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <max>100</max>
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <size>75,-1</size>
+                </object>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+            </object>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <flag>wxTOP|wxBOTTOM</flag>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <border>2</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxFlexGridSizer">
+              <cols>2</cols>
+              <rows>2</rows>
+              <object class="sizeritem">
+                <object class="wxCheckBox" name="AntialiasedCheckBox">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <label>&amp;Antialiased</label>
+                
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <checked>1</checked>
+                </object>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxTOP|wxBOTTOM</flag>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <border>2</border>
+              </object>
+              <object class="sizeritem">
+                <object class="wxCheckBox" name="IncludePrivateGlyphsCheckButton">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <label>Incl&amp;ude private glyphs</label>
+                
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <checked>1</checked>
+                </object>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxTOP|wxBOTTOM</flag>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <border>2</border>
+              </object>
+              <object class="sizeritem">
+                <object class="wxCheckBox" name="BoldCheckBox">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <label>&amp;Bold</label>
+                </object>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxTOP|wxBOTTOM</flag>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <border>2</border>
+              </object>
+              <object class="sizeritem">
+                <object class="wxCheckBox" name="GenerateFontMetricsOnlyCheckBox">
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <label>Generate font &amp;metrics only</label>
+                </object>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <flag>wxTOP|wxBOTTOM</flag>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <border>2</border>
+              </object>
+            </object>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <flag>wxTOP|wxBOTTOM</flag>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <border>2</border>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <label>&amp;Output file</label>
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="OutputFileNameEdit"/>
+          
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <option>1</option>
+          
+            <flag>wxALIGN_CENTRE_VERTICAL</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="OutputFileNameRefButton">
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <label>...</label>
+            
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <size>20,-1</size>
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <style></style>
+            </object>
+          
+            <flag>wxALIGN_CENTRE_VERTICAL</flag>
+          </object>
+        </object>
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxButton" name="PreviewButton">
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <label>Preview</label>
+            </object>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <flag>wxRIGHT</flag>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <border>16</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="GenerateButton">
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <label>Generate</label>
+            
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <default>1</default>
+            </object>
+          
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <flag>wxRIGHT</flag>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <border>3</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="CloseButton">
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <label>Close</label>
+            </object>
+          </object>
+        </object>
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <flag>wxALL|wxALIGN_CENTRE_HORIZONTAL</flag>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <border>5</border>
+      </object>
+    </object>
+    <style>wxDEFAULT_DIALOG_STYLE</style>
+    <exstyle></exstyle>
+  </object>
+  <object class="wxFrame" name="wxPreviewFrame_Base">
+    <title>Font Preview</title>
+    <object class="wxToolBar" name="ToolBar">
+      <object class="tool" name="CloseButton">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <bitmap stock_id="wxART_QUIT"></bitmap>
+      
+        
+        
+        
+        
+        
+        
+        
+        <tooltip>Close preview window</tooltip>
+      </object>
+      <object class="wxStaticText">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <label>  Zoom :</label>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <style></style>
+      </object>
+      <object class="wxChoice" name="MagnifyChoice">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <content>
+          <item>x1</item>
+          <item>x2</item>
+          <item>x3</item>
+          <item>x4</item>
+          <item>x5</item>
+          <item>x6</item>
+          <item>x7</item>
+          <item>x8</item>
+          <item>x10</item>
+          <item>x12</item>
+          <item>x14</item>
+          <item>x16</item>
+        </content>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <selection>0</selection>
+      </object>
+      <style>wxTB_HORIZONTAL</style>
+    </object>
+    <style>wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFRAME_NO_TASKBAR</style>
+  </object>
+</resource>

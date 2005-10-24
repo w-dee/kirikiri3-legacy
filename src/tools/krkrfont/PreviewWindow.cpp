@@ -616,7 +616,7 @@ void wxPreviewFrame::CloseButtonClick(wxCommandEvent& event)
 //---------------------------------------------------------------------------
 void wxPreviewFrame::MagnifyChoiceSelected(wxCommandEvent& event)
 {
-	const char itemindextomag[] =
+	const static char itemindextomag[] =
 		{ 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16 };
 	PreviewScrolledWindow->SetMagnify(
 		itemindextomag[MagnifyChoice->GetSelection()]);

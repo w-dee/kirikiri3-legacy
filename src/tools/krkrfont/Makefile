@@ -120,11 +120,12 @@ $(XRCMSG): $(XRC)
 
 
 $(POT): $(XRCMSG) $(CPPFILES)
-	$(XGETTEXT) -c -C -k_ $(XRCMSG) $(CPPFILES) -o $(POT)
+	$(XGETTEXT) -c -C -k_ $(XRCMSG) $(CPPFILES) -o - | $(SED) "/^.POT-Creation-Date:/d" > $(POT)
 
 $(LANG_JA_PO): $(POT)
 	msgmerge --update $(LANG_JA_PO) $(POT)
-	
+	touch $(LANG_JA_PO)
+
 $(LANG_JA_MO): $(LANG_JA_PO)
 	msgfmt -o $(LANG_JA_MO) $(LANG_JA_PO)
 

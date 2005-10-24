@@ -18,6 +18,7 @@
 
 #include <ft2build.h>
 #include FT_TRUETYPE_UNPATENTED_H
+#include FT_SYNTHESIS_H
 
 #ifndef wxUSE_UNICODE
 	#error Kirikiri2 needs to be compiled with UNICODE enabled wxWidgets.
@@ -62,7 +63,7 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //! @param		fontname: フォント名
-//! @param		options: オプション
+//! @param		options: オプション(TVP_TF_XXXX 定数かTVP_FACE_OPTIONS_XXXX定数の組み合わせ)
 //---------------------------------------------------------------------------
 tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 options)
 {
@@ -249,6 +250,14 @@ bool tTVPGenericFreeTypeFace::OpenFaceByIndex(tjs_uint index, FT_Face & face)
 tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options)
 	: FontName(fontname)
 {
+	// フィールドをクリア
+	GlyphToCharcodeMap = NULL;
+	UnicodeToLocalChar = NULL;
+	LocalCharToUnicode = NULL;
+	Options = options;
+	Height = 10;
+
+
 	// フォントを開く
 	if(options & TVP_FACE_OPTIONS_FILE)
 	{
@@ -262,13 +271,6 @@ tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options)
 			// 例外がここで発生する可能性があるので注意
 	}
 	FTFace = Face->GetFTFace();
-
-	Height = 10;
-
-	// フィールドをクリア
-	GlyphToCharcodeMap = NULL;
-	UnicodeToLocalChar = NULL;
-	LocalCharToUnicode = NULL;
 
 	// マッピングを確認する
 	if(FTFace->charmap == NULL)
@@ -401,13 +403,26 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 	else
 		localcode = UnicodeToLocalChar(code);
 
-	// 文字をレンダリングする
+	// 文字コードから index を得る
+	FT_UInt glyph_index = FT_Get_Char_Index(FTFace, localcode);
+	if(glyph_index == 0)
+		return NULL;
+
+	// グリフスロットに文字を読み込む
 	FT_Error err;
-	err = FT_Load_Char(FTFace, localcode,
-		FT_LOAD_RENDER|FT_LOAD_NO_BITMAP
+	err = FT_Load_Glyph(FTFace, glyph_index, 
+		0
+		|FT_LOAD_NO_BITMAP
 //		|FT_LOAD_FORCE_AUTOHINT
 //		|FT_LOAD_NO_HINTING
 		);
+	if(err) return NULL;
+
+	// フォントの変形を行う
+	if(Options & TVP_TF_BOLD) FT_GlyphSlot_Embolden(FTFace->glyph);
+
+	// 文字をレンダリングする
+	err = FT_Render_Glyph(FTFace->glyph, FT_RENDER_MODE_NORMAL );
 			// note: ビットマップフォントを読み込みたくない場合は FT_LOAD_NO_BITMAP を指定
 			// note: デフォルトのレンダリングモードは FT_RENDER_MODE_NORMAL (256色グレースケール)
 	if(err) return NULL;

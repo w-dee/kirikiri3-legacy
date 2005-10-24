@@ -142,7 +142,7 @@ msgstr "x16"
 #: msw/NativeFreeTypeFace.cpp:84 msw/NativeFreeTypeFace.cpp:99
 #: msw/NativeFreeTypeFace.cpp:129 msw/NativeFreeTypeFace.cpp:151
 #: msw/NativeFreeTypeFace.cpp:167 msw/NativeFreeTypeFace.cpp:179
-#: msw/NativeFreeTypeFace.cpp:205 FreeType.cpp:126
+#: msw/NativeFreeTypeFace.cpp:205 FreeType.cpp:127
 #, c-format
 msgid "Font '%1$s' cannot be used"
 msgstr "フォント '%1$s' は使用できません"
@@ -151,41 +151,40 @@ msgstr "フォント '%1$s' は使用できません"
 #. Default font initially selected in the main dialog.
 #. You can specify font cadidates separated with '|' (vertline)
 #. character, like "Tahoma|Times New Roman"
-#: MainDialog.cpp:55
+#: MainDialog.cpp:56
 msgid "Tahoma"
-msgstr ""
-"ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3"
+msgstr "ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3"
 
 #. messsage for select a font file
-#: MainDialog.cpp:281
+#: MainDialog.cpp:300
 msgid "Select a font file"
 msgstr "一覧から選択"
 
-#: MainDialog.cpp:290
+#: MainDialog.cpp:309
 msgid "All supported fonts|*.ttf;*.ttc;*.otf;*.fon"
 msgstr "全てのフォント|*.ttf;*.ttc;*.otf;*.fon"
 
-#: MainDialog.cpp:291
+#: MainDialog.cpp:310
 msgid "TrueType fonts (*.ttf)|*.ttf"
 msgstr "TrueType フォント (*.ttf)|*.ttf"
 
-#: MainDialog.cpp:292
+#: MainDialog.cpp:311
 msgid "TrueType Collection fonts (*.ttc)|*.ttc"
 msgstr "TrueType コレクションフォント (*.ttc)|*.ttc"
 
-#: MainDialog.cpp:293 MainDialog.cpp:294
+#: MainDialog.cpp:312 MainDialog.cpp:313
 msgid "OpenType fonts (*.otf)|*.otf"
 msgstr "OpenType フォント (*.otf)|*.otf"
 
-#: MainDialog.cpp:295
+#: MainDialog.cpp:314
 msgid "Windows fonts (*.fon)|*.fon"
 msgstr "Windows フォント (*.fon)|*.fon"
 
-#: MainDialog.cpp:296
+#: MainDialog.cpp:315
 msgid "All files (*.*)|*.*"
 msgstr "全てのファイル (*.*)|*.*"
 
-#: FreeType.cpp:82
+#: FreeType.cpp:83
 #, c-format
 msgid "Can't open font file '%1$s'"
 msgstr "フォントファイル '%1$s' を開くことができません"

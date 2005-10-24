@@ -29,6 +29,7 @@ class tTVPFreeTypeFace
 	wxString FontName;		//!< フォント名
 	tTVPBaseFreeTypeFace * Face; //!< Face オブジェクト
 	FT_Face FTFace; //!< FreeType Face オブジェクト
+	tjs_uint32 Options; //!< フラグ
 
 	typedef std::map<FT_UInt, FT_ULong> tGlyphToCharcodeMap;
 	tGlyphToCharcodeMap * GlyphToCharcodeMap;		//!< グリフインデックスから文字コードへの変換マップ

@@ -37,10 +37,10 @@ struct tTVPFont
 //---------------------------------------------------------------------------
 // font ralated constants
 //---------------------------------------------------------------------------
-#define TVP_TF_ITALIC    0x01
-#define TVP_TF_BOLD      0x02
-#define TVP_TF_UNDERLINE 0x04
-#define TVP_TF_STRIKEOUT 0x08
+#define TVP_TF_ITALIC    0x0100
+#define TVP_TF_BOLD      0x0200
+#define TVP_TF_UNDERLINE 0x0400
+#define TVP_TF_STRIKEOUT 0x0800
 
 
 //---------------------------------------------------------------------------

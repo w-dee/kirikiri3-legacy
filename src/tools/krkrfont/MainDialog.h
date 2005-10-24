@@ -29,7 +29,7 @@ private:
 	void UpdateFace();
 	void UpdateFaceIndex();
 	void UpdateFaceHeight();
-
+	void Update();
 
 public:
 	// イベントハンドラ
@@ -41,6 +41,7 @@ public:
 	void FaceNameChoiceSelected(wxCommandEvent& event);
 	void SelectFontRadioButtonClick(wxCommandEvent& event);
 	void SelectFileRadioButtonClick(wxCommandEvent& event);
+	void BoldCheckBoxClicked(wxCommandEvent & event);
 	void SelectFileRefButtonClick(wxCommandEvent& event);
 	void OutputFileNameRefButtonClick(wxCommandEvent& event);
 

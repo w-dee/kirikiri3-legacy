@@ -27,6 +27,7 @@ BEGIN_EVENT_TABLE(wxMainDialog,wxMainDialog_Base)
 	EVT_RADIOBUTTON(XRCID("SelectFontRadioButton"), wxMainDialog::SelectFontRadioButtonClick)
 	EVT_RADIOBUTTON(XRCID("SelectFileRadioButton"), wxMainDialog::SelectFileRadioButtonClick)
 	EVT_CHOICE(XRCID("FaceNameChoice"), wxMainDialog::FaceNameChoiceSelected)
+	EVT_CHECKBOX(XRCID("BoldCheckBox"), wxMainDialog::BoldCheckBoxClicked)
 	EVT_BUTTON(XRCID("SelectFileRefButton"), wxMainDialog::SelectFileRefButtonClick)
 	EVT_BUTTON(XRCID("OutputFileNameRefButton"), wxMainDialog::OutputFileNameRefButtonClick)
 END_EVENT_TABLE()
@@ -129,6 +130,8 @@ void wxMainDialog::UpdateFaceIndex()
 		if(face_index < 0) face_index = 0;
 		tjs_uint32 options =
 			TVP_GET_FACE_INDEX_FROM_OPTIONS(face_index);
+		if(BoldCheckBox->GetValue())
+			options |= TVP_TF_BOLD;
 		if(SelectFileRadioButton->GetValue())
 		{
 			// ファイルによる指定
@@ -160,6 +163,17 @@ void wxMainDialog::UpdateFaceHeight()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		UpdateFace と UpdateFaceHeight と NotifyPreviewFrameFaceChanged の組み合わせ
+//---------------------------------------------------------------------------
+void wxMainDialog::Update()
+{
+	UpdateFace();
+	UpdateFaceHeight();
+	NotifyPreviewFrameFaceChanged();
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 //! @brief		SelectFontChoice のアイテムが選択されたとき
@@ -168,9 +182,7 @@ void wxMainDialog::UpdateFaceHeight()
 void wxMainDialog::SelectFontChoiceSelected(wxCommandEvent& event)
 {
 	SelectFontRadioButton->SetValue(true);
-	UpdateFace();
-	UpdateFaceHeight();
-	NotifyPreviewFrameFaceChanged();
+	Update();
 }
 //---------------------------------------------------------------------------
 
@@ -241,9 +253,7 @@ void wxMainDialog::FaceNameChoiceSelected(wxCommandEvent& event)
 //---------------------------------------------------------------------------
 void wxMainDialog::SelectFontRadioButtonClick(wxCommandEvent& event)
 {
-	UpdateFace();
-	UpdateFaceHeight();
-	NotifyPreviewFrameFaceChanged();
+	Update();
 }
 //---------------------------------------------------------------------------
 
@@ -262,10 +272,19 @@ void wxMainDialog::SelectFileRadioButtonClick(wxCommandEvent& event)
 	}
 	else
 	{
-		UpdateFace();
-		UpdateFaceHeight();
-		NotifyPreviewFrameFaceChanged();
+		Update();
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「太字」チェックボックスが押されたとき
+//! @param		event: イベントオブジェクト
+//---------------------------------------------------------------------------
+void wxMainDialog::BoldCheckBoxClicked(wxCommandEvent & event)
+{
+	Update();
 }
 //---------------------------------------------------------------------------
 
@@ -302,9 +321,7 @@ void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 		if(!SelectFileRadioButton->GetValue())
 			SelectFileRadioButton->SetValue(true);
 		SelectFileEdit->SetLabel(filename);
-		UpdateFace();
-		UpdateFaceHeight();
-		NotifyPreviewFrameFaceChanged();
+		Update();
 	}
 }
 //---------------------------------------------------------------------------

@@ -154,8 +154,7 @@ msgstr "フォント '%1$s' は使用できません"
 #: MainDialog.cpp:55
 msgid "Tahoma"
 msgstr ""
-"ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3|ヒラギノ角ゴ Pro W6|ＪＳ明朝|ＤＦ平成ゴ"
-"シック体W5"
+"ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3"
 
 #. messsage for select a font file
 #: MainDialog.cpp:281
@@ -189,7 +188,7 @@ msgstr "全てのファイル (*.*)|*.*"
 #: FreeType.cpp:82
 #, c-format
 msgid "Can't open font file '%1$s'"
-msgstr ""
+msgstr "フォントファイル '%1$s' を開くことができません"
 
 #: PreviewWindow.cpp:457
 #, fuzzy, c-format

@@ -303,6 +303,8 @@ void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 			SelectFileRadioButton->SetValue(true);
 		SelectFileEdit->SetLabel(filename);
 		UpdateFace();
+		UpdateFaceHeight();
+		NotifyPreviewFrameFaceChanged();
 	}
 }
 //---------------------------------------------------------------------------

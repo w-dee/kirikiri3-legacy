@@ -84,6 +84,7 @@ CPPINCLUDE = \
 CPPFLAGS = $(CPPINCLUDE) \
 	-g \
 	-O0 \
+	-Winvalid-pch \
 	-mwindows -mconsole \
 	-mthreads -fno-pcc-struct-return -fstrict-aliasing -Wall \
 	-D__WXMSW__ -D__GNUWIN32__ -D_UNICODE -DUNICODE -DWXUSINGDLL

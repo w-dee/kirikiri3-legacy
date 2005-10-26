@@ -252,7 +252,7 @@ tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options)
 	: FontName(fontname)
 {
 	// フィールドをクリア
-	GlyphToCharcodeMap = NULL;
+	GlyphIndexToCharcodeVector = NULL;
 	UnicodeToLocalChar = NULL;
 	LocalCharToUnicode = NULL;
 	Options = options;
@@ -299,7 +299,7 @@ tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options)
 //---------------------------------------------------------------------------
 tTVPFreeTypeFace::~tTVPFreeTypeFace()
 {
-	if(GlyphToCharcodeMap) delete GlyphToCharcodeMap;
+	if(GlyphIndexToCharcodeVector) delete GlyphIndexToCharcodeVector;
 	if(Face) delete Face;
 }
 //---------------------------------------------------------------------------
@@ -312,23 +312,15 @@ tTVPFreeTypeFace::~tTVPFreeTypeFace()
 tjs_uint tTVPFreeTypeFace::GetGlyphCount()
 {
 	if(!FTFace) return 0;
-	return FTFace->num_glyphs;
-}
-//---------------------------------------------------------------------------
 
-
-
-//---------------------------------------------------------------------------
-//! @brief		Glyph インデックスから対応する文字コードを得る
-//! @return		対応する文字コード
-//---------------------------------------------------------------------------
-tjs_char tTVPFreeTypeFace::CharcodeFromGlyphIndex(tjs_uint index)
-{
+	// FreeType が返してくるグリフの数は、実際に文字コードが割り当てられていない
+	// グリフをも含んだ数となっている
+	// ここで、実際にフォントに含まれているグリフを取得する
 	// TODO:スレッド保護されていないので注意！！！！！！
-	if(!GlyphToCharcodeMap)
+	if(!GlyphIndexToCharcodeVector)
 	{
 		// マップが作成されていないので作成する
-		GlyphToCharcodeMap = new tGlyphToCharcodeMap;
+		GlyphIndexToCharcodeVector = new tGlyphIndexToCharcodeVector;
 		FT_ULong  charcode;
 		FT_UInt   gindex;
 		charcode = FT_Get_First_Char( FTFace, &gindex );
@@ -339,23 +331,30 @@ tjs_char tTVPFreeTypeFace::CharcodeFromGlyphIndex(tjs_uint index)
 				code = LocalCharToUnicode(charcode);
 			else
 				code = charcode;
-			GlyphToCharcodeMap->insert(
-				std::pair<FT_UInt, FT_ULong>(gindex, code));
+			GlyphIndexToCharcodeVector->push_back(code);
 			charcode = FT_Get_Next_Char( FTFace, charcode, &gindex );
 		}
 	}
 
-	tGlyphToCharcodeMap::iterator it;
-	it = GlyphToCharcodeMap->find((FT_UInt)(index));
-	if(it != GlyphToCharcodeMap->end())
-	{
-		FT_ULong charcode = it->second;
-		// tjs_char で扱える範囲内にあるかをチェックし、扱えなければ 0 を返す
-		if((FT_ULong)(tjs_char)charcode  != charcode)
-			return 0;
-		return (tjs_char)charcode;
-	}
-	return 0;
+	return GlyphIndexToCharcodeVector->size();
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		Glyph インデックスから対応する文字コードを得る
+//! @param		index: インデックス(FreeTypeの管理している文字indexとは違うので注意)
+//! @return		対応する文字コード(対応するコードが無い場合は 0)
+//---------------------------------------------------------------------------
+tjs_char tTVPFreeTypeFace::GetCharcodeFromGlyphIndex(tjs_uint index)
+{
+	tjs_uint size = GetGlyphCount(); // グリフ数を得るついでにマップを作成する
+
+	if(!GlyphIndexToCharcodeVector) return 0;
+	if(index >= size) return 0;
+
+	return (tjs_char)(*GlyphIndexToCharcodeVector)[index];
 }
 //---------------------------------------------------------------------------
 
@@ -463,7 +462,7 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 				err = FT_Bitmap_Convert(FTFace->glyph->library,
 					&(FTFace->glyph->bitmap),
 					&new_bmp, 1);
-					// 結局 tTVPGlyphBitmap 形式に変換する際にアラインメントはし直すので
+					// 結局 tTVPGlyphBitmap 形式に変換する際にアラインメントをし直すので
 					// ここで指定する alignment は 1 でよい
 				if(err)
 				{

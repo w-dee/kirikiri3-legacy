@@ -23,6 +23,7 @@
 	#include <wx/fs_mem.h>
 	#include <wx/xrc/xh_all.h>
 	#include <windows.h>
+	#include <vector>
 	#include <map>
 	#include "tjsTypes.h"
 	#include "tjsString.h"

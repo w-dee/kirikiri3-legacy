@@ -31,8 +31,8 @@ class tTVPFreeTypeFace
 	FT_Face FTFace; //!< FreeType Face オブジェクト
 	tjs_uint32 Options; //!< フラグ
 
-	typedef std::map<FT_UInt, FT_ULong> tGlyphToCharcodeMap;
-	tGlyphToCharcodeMap * GlyphToCharcodeMap;		//!< グリフインデックスから文字コードへの変換マップ
+	typedef std::vector<FT_ULong> tGlyphIndexToCharcodeVector;
+	tGlyphIndexToCharcodeVector * GlyphIndexToCharcodeVector;		//!< グリフインデックスから文字コードへの変換マップ
 	tjs_int Height;		//!< フォントサイズ(高さ) in pixel
 
 	tjs_uint (*UnicodeToLocalChar)(tjs_char in); //!< SJISなどをUnicodeに変換する関数
@@ -43,7 +43,7 @@ public:
 	~tTVPFreeTypeFace();
 
 	tjs_uint GetGlyphCount();
-	tjs_char CharcodeFromGlyphIndex(tjs_uint index);
+	tjs_char GetCharcodeFromGlyphIndex(tjs_uint index);
 
 	void GetFaceNameList(wxArrayString &dest);
 

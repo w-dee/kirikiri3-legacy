@@ -315,7 +315,7 @@ void wxPreviewScrolledWindow::OnIdle(wxIdleEvent& event)
 		cy = vindex / nw;
 
 		// その位置に文字を表示
-		tjs_char ch = index < glyph_count ? FACE->CharcodeFromGlyphIndex(index) : wxT('\0');
+		tjs_char ch = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
 		PrintCharacter(ch, cx * cell_size , cy * cell_size );
 
 		// 表示した文字を IndexToUpdate から削除
@@ -383,7 +383,7 @@ void wxPreviewScrolledWindow::OnPaint(wxPaintEvent& event)
 				// また、その位置には仮の文字を表示しておく
 				wchar_t wcharbuf[5]; // UTF-16 or UTF-32
 				tjs_int32 utf32buf[2];
-				utf32buf[0] = index < glyph_count ? FACE->CharcodeFromGlyphIndex(index) : wxT('\0');
+				utf32buf[0] = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
 				utf32buf[1] = wxT('\0');
 				conv.MB2WC(wcharbuf, (const char *)&utf32buf, 4);
 				wxCoord tw = 0, th = 0;
@@ -451,7 +451,7 @@ void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 		tjs_int index = y * nw + x + lineFirst * nw;
 		if(index != LastStatusedIndex)
 		{
-			tjs_char ch = index < glyph_count ? FACE->CharcodeFromGlyphIndex(index) : wxT('\0');
+			tjs_char ch = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
 
 			wxString status = wxString::Format(
 				_("Index : %d   Charcode : U+%06X"), index, (tjs_int)ch);

@@ -41,7 +41,11 @@ public:
 	void FaceNameChoiceSelected(wxCommandEvent& event);
 	void SelectFontRadioButtonClick(wxCommandEvent& event);
 	void SelectFileRadioButtonClick(wxCommandEvent& event);
+	void AntialiasedCheckBoxClicked(wxCommandEvent & event);
 	void BoldCheckBoxClicked(wxCommandEvent & event);
+	void NoHintingCheckBoxClicked(wxCommandEvent & event);
+	void ForceAutoHintingCheckBoxClicked(wxCommandEvent & event);
+
 	void SelectFileRefButtonClick(wxCommandEvent& event);
 	void OutputFileNameRefButtonClick(wxCommandEvent& event);
 

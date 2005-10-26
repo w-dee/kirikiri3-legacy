@@ -31,7 +31,7 @@ msgstr "一覧から選択(&S)"
 msgid "Selec&t a file"
 msgstr "ファイルを指定(&T)"
 
-#: krkrfont.xrcmsg:5 krkrfont.xrcmsg:14
+#: krkrfont.xrcmsg:5 krkrfont.xrcmsg:15
 msgid "..."
 msgstr "..."
 
@@ -52,97 +52,101 @@ msgid "&Antialiased"
 msgstr "アンチエイリアス(&A)"
 
 #: krkrfont.xrcmsg:10
-msgid "Incl&ude private glyphs"
-msgstr "ユーザ定義文字(外字)を含める(&U)"
+msgid "No &Hinting"
+msgstr "ヒンティングを行わない(&H)"
 
 #: krkrfont.xrcmsg:11
 msgid "&Bold"
 msgstr "太字(&B)"
 
 #: krkrfont.xrcmsg:12
+msgid "For&ce Auto Hinting"
+msgstr "自動ヒンティングを行う(&C)"
+
+#: krkrfont.xrcmsg:13
 msgid "Generate font &metrics only"
 msgstr "フォントメトリックのみを生成(&M)"
 
-#: krkrfont.xrcmsg:13
+#: krkrfont.xrcmsg:14
 msgid "&Output file"
 msgstr "出力ファイル(&O)"
 
-#: krkrfont.xrcmsg:15
+#: krkrfont.xrcmsg:16
 msgid "Preview"
 msgstr "プレビュー"
 
-#: krkrfont.xrcmsg:16
+#: krkrfont.xrcmsg:17
 msgid "Generate"
 msgstr "作成"
 
-#: krkrfont.xrcmsg:17
+#: krkrfont.xrcmsg:18
 msgid "Close"
 msgstr "閉じる"
 
-#: krkrfont.xrcmsg:18
+#: krkrfont.xrcmsg:19
 msgid "Font Preview"
 msgstr "フォント プレビュー"
 
-#: krkrfont.xrcmsg:19
+#: krkrfont.xrcmsg:20
 msgid "Close preview window"
 msgstr "プレビューを閉じる"
 
-#: krkrfont.xrcmsg:20
+#: krkrfont.xrcmsg:21
 msgid "  Zoom :"
 msgstr "  倍率 :"
 
-#: krkrfont.xrcmsg:21
+#: krkrfont.xrcmsg:22
 msgid "x1"
 msgstr "等倍"
 
-#: krkrfont.xrcmsg:22
+#: krkrfont.xrcmsg:23
 msgid "x2"
 msgstr "x2"
 
-#: krkrfont.xrcmsg:23
+#: krkrfont.xrcmsg:24
 msgid "x3"
 msgstr "x3"
 
-#: krkrfont.xrcmsg:24
+#: krkrfont.xrcmsg:25
 msgid "x4"
 msgstr "x4"
 
-#: krkrfont.xrcmsg:25
+#: krkrfont.xrcmsg:26
 msgid "x5"
 msgstr "x5"
 
-#: krkrfont.xrcmsg:26
+#: krkrfont.xrcmsg:27
 msgid "x6"
 msgstr "x6"
 
-#: krkrfont.xrcmsg:27
+#: krkrfont.xrcmsg:28
 msgid "x7"
 msgstr "x7"
 
-#: krkrfont.xrcmsg:28
+#: krkrfont.xrcmsg:29
 msgid "x8"
 msgstr "x8"
 
-#: krkrfont.xrcmsg:29
+#: krkrfont.xrcmsg:30
 msgid "x10"
 msgstr "x10"
 
-#: krkrfont.xrcmsg:30
+#: krkrfont.xrcmsg:31
 msgid "x12"
 msgstr "x12"
 
-#: krkrfont.xrcmsg:31
+#: krkrfont.xrcmsg:32
 msgid "x14"
 msgstr "x14"
 
-#: krkrfont.xrcmsg:32
+#: krkrfont.xrcmsg:33
 msgid "x16"
 msgstr "x16"
 
 #: msw/NativeFreeTypeFace.cpp:84 msw/NativeFreeTypeFace.cpp:99
 #: msw/NativeFreeTypeFace.cpp:129 msw/NativeFreeTypeFace.cpp:151
 #: msw/NativeFreeTypeFace.cpp:167 msw/NativeFreeTypeFace.cpp:179
-#: msw/NativeFreeTypeFace.cpp:205 FreeType.cpp:127
+#: msw/NativeFreeTypeFace.cpp:205 FreeType.cpp:128
 #, c-format
 msgid "Font '%1$s' cannot be used"
 msgstr "フォント '%1$s' は使用できません"
@@ -151,40 +155,40 @@ msgstr "フォント '%1$s' は使用できません"
 #. Default font initially selected in the main dialog.
 #. You can specify font cadidates separated with '|' (vertline)
 #. character, like "Tahoma|Times New Roman"
-#: MainDialog.cpp:56
+#: MainDialog.cpp:59
 msgid "Tahoma"
 msgstr "ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3"
 
 #. messsage for select a font file
-#: MainDialog.cpp:300
+#: MainDialog.cpp:342
 msgid "Select a font file"
 msgstr "一覧から選択"
 
-#: MainDialog.cpp:309
+#: MainDialog.cpp:351
 msgid "All supported fonts|*.ttf;*.ttc;*.otf;*.fon"
 msgstr "全てのフォント|*.ttf;*.ttc;*.otf;*.fon"
 
-#: MainDialog.cpp:310
+#: MainDialog.cpp:352
 msgid "TrueType fonts (*.ttf)|*.ttf"
 msgstr "TrueType フォント (*.ttf)|*.ttf"
 
-#: MainDialog.cpp:311
+#: MainDialog.cpp:353
 msgid "TrueType Collection fonts (*.ttc)|*.ttc"
 msgstr "TrueType コレクションフォント (*.ttc)|*.ttc"
 
-#: MainDialog.cpp:312 MainDialog.cpp:313
+#: MainDialog.cpp:354 MainDialog.cpp:355
 msgid "OpenType fonts (*.otf)|*.otf"
 msgstr "OpenType フォント (*.otf)|*.otf"
 
-#: MainDialog.cpp:314
+#: MainDialog.cpp:356
 msgid "Windows fonts (*.fon)|*.fon"
 msgstr "Windows フォント (*.fon)|*.fon"
 
-#: MainDialog.cpp:315
+#: MainDialog.cpp:357
 msgid "All files (*.*)|*.*"
 msgstr "全てのファイル (*.*)|*.*"
 
-#: FreeType.cpp:83
+#: FreeType.cpp:84
 #, c-format
 msgid "Can't open font file '%1$s'"
 msgstr "フォントファイル '%1$s' を開くことができません"

@@ -19,6 +19,7 @@
 #include <ft2build.h>
 #include FT_TRUETYPE_UNPATENTED_H
 #include FT_SYNTHESIS_H
+#include FT_BITMAP_H
 
 #ifndef wxUSE_UNICODE
 	#error Kirikiri2 needs to be compiled with UNICODE enabled wxWidgets.
@@ -409,49 +410,115 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 		return NULL;
 
 	// グリフスロットに文字を読み込む
+	FT_Int32 load_glyph_flag = 0;
+	if(!(Options & TVP_FACE_OPTIONS_NO_ANTIALIASING))
+		load_glyph_flag |= FT_LOAD_NO_BITMAP;
+	else
+		load_glyph_flag |= FT_LOAD_TARGET_MONO;
+			// note: ビットマップフォントを読み込みたくない場合は FT_LOAD_NO_BITMAP を指定
+
+	if(Options & TVP_FACE_OPTIONS_NO_HINTING)
+		load_glyph_flag |= FT_LOAD_NO_HINTING;
+	if(Options & TVP_FACE_OPTIONS_FORCE_AUTO_HINTING)
+		load_glyph_flag |= FT_LOAD_FORCE_AUTOHINT;
+
 	FT_Error err;
-	err = FT_Load_Glyph(FTFace, glyph_index, 
-		0
-		|FT_LOAD_NO_BITMAP
-//		|FT_LOAD_FORCE_AUTOHINT
-//		|FT_LOAD_NO_HINTING
-		);
+	err = FT_Load_Glyph(FTFace, glyph_index, load_glyph_flag);
+
 	if(err) return NULL;
 
 	// フォントの変形を行う
 	if(Options & TVP_TF_BOLD) FT_GlyphSlot_Embolden(FTFace->glyph);
 
 	// 文字をレンダリングする
-	err = FT_Render_Glyph(FTFace->glyph, FT_RENDER_MODE_NORMAL );
-			// note: ビットマップフォントを読み込みたくない場合は FT_LOAD_NO_BITMAP を指定
-			// note: デフォルトのレンダリングモードは FT_RENDER_MODE_NORMAL (256色グレースケール)
-	if(err) return NULL;
-
-	// 一応ビットマップ形式をチェック
-	if(FTFace->glyph->bitmap.pixel_mode != ft_pixel_mode_grays)
+	if(FTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP)
 	{
-		// TODO: これチェック。internal error と見なされるべき？
-		return NULL;
+		FT_Render_Mode mode;
+		if(!(Options & TVP_FACE_OPTIONS_NO_ANTIALIASING))
+			mode = FT_RENDER_MODE_NORMAL;
+		else
+			mode = FT_RENDER_MODE_MONO;
+		err = FT_Render_Glyph(FTFace->glyph, mode);
+			// note: デフォルトのレンダリングモードは FT_RENDER_MODE_NORMAL (256色グレースケール)
+			//       FT_RENDER_MODE_MONO は 1bpp モノクローム
+		if(err) return NULL;
 	}
 
-	// メトリック構造体を作成
-	// CellIncX や CellIncY は ピクセル値が 64 倍された値なので注意
-	// これはもともと FreeType の仕様だけれども、吉里吉里でも内部的には
-	// この精度で CellIncX や CellIncY を扱う
-	// TODO: 文字のサブピクセル単位での位置調整とレンダリング
-	tTVPGlyphMetrics metrics;
-	metrics.CellIncX =  FTFace->glyph->advance.x;
-	metrics.CellIncY =  FTFace->glyph->advance.y;
+	// 一応ビットマップ形式をチェック
+	FT_Bitmap *ft_bmp = &(FTFace->glyph->bitmap);
+	FT_Bitmap new_bmp;
+	bool release_ft_bmp = false;
+	tTVPGlyphBitmap * glyph_bmp = NULL;
+	try
+	{
+		if(ft_bmp->rows && ft_bmp->width)
+		{
+			// ビットマップがサイズを持っている場合
+			if(ft_bmp->pixel_mode != ft_pixel_mode_grays)
+			{
+				// ft_pixel_mode_grays ではないので ft_pixel_mode_grays 形式に変換する
+				FT_Bitmap_New(&new_bmp);
+				release_ft_bmp = true;
+				ft_bmp = &new_bmp;
+				err = FT_Bitmap_Convert(FTFace->glyph->library,
+					&(FTFace->glyph->bitmap),
+					&new_bmp, 1);
+					// 結局 tTVPGlyphBitmap 形式に変換する際にアラインメントはし直すので
+					// ここで指定する alignment は 1 でよい
+				if(err)
+				{
+					if(release_ft_bmp) FT_Bitmap_Done(FTFace->glyph->library, ft_bmp);
+					return NULL;
+				}
+			}
 
-	// tTVPGlyphBitmap を作成して返す
-	return new tTVPGlyphBitmap(
-		FTFace->glyph->bitmap.buffer,
-		FTFace->glyph->bitmap.pitch,
-		  FTFace->glyph->bitmap_left,
-		(Height - 1) - FTFace->glyph->bitmap_top, // slot->bitmap_top は下方向が負なので注意
-		  FTFace->glyph->bitmap.width,
-		  FTFace->glyph->bitmap.rows,
-		metrics);
+			if(ft_bmp->num_grays != 256)
+			{
+				// gray レベルが 256 ではない
+				// 256 になるように乗算を行う
+				tjs_int32 multiply =
+					(tjs_int32)(((tjs_int32) 1 << 30) - 1) /
+						(ft_bmp->num_grays - 1);
+				for(tjs_int y = ft_bmp->rows - 1; y >= 0; y--)
+				{
+					unsigned char * p = ft_bmp->buffer + y * ft_bmp->pitch;
+					for(tjs_int x = ft_bmp->width - 1; x >= 0; x--)
+					{
+						tjs_int32 v = (tjs_int32)((*p * multiply)  >> 22);
+						*p = (unsigned char)v;
+						p++;
+					}
+				}
+			}
+		}
+
+		// メトリック構造体を作成
+		// CellIncX や CellIncY は ピクセル値が 64 倍された値なので注意
+		// これはもともと FreeType の仕様だけれども、吉里吉里でも内部的には
+		// この精度で CellIncX や CellIncY を扱う
+		// TODO: 文字のサブピクセル単位での位置調整とレンダリング
+		tTVPGlyphMetrics metrics;
+		metrics.CellIncX =  FTFace->glyph->advance.x;
+		metrics.CellIncY =  FTFace->glyph->advance.y;
+
+		// tTVPGlyphBitmap を作成して返す
+		glyph_bmp = new tTVPGlyphBitmap(
+			ft_bmp->buffer,
+			ft_bmp->pitch,
+			  FTFace->glyph->bitmap_left,
+			(Height - 1) - FTFace->glyph->bitmap_top, // slot->bitmap_top は下方向が負なので注意
+			  ft_bmp->width,
+			  ft_bmp->rows,
+			metrics);
+	}
+	catch(...)
+	{
+		if(release_ft_bmp) FT_Bitmap_Done(FTFace->glyph->library, ft_bmp);
+		throw;
+	}
+	if(release_ft_bmp) FT_Bitmap_Done(FTFace->glyph->library, ft_bmp);
+
+	return glyph_bmp;
 }
 //---------------------------------------------------------------------------
 

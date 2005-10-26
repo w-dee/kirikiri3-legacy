@@ -167,7 +167,7 @@ void tTVPBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 {
 	dest.Clear();
 
-//	flags |= TVP_FSF_TRUETYPEONLY; // 常に TrueType フォントのみを列挙する
+	flags |= TVP_FSF_TRUETYPEONLY; // 常に TrueType フォントのみを列挙する
 
 	tTVPFreeTypeFontEnumeraterHelper helper(dest, flags, encoding);
 	helper.DoEnumerate(); // 列挙を行う

@@ -27,7 +27,10 @@ BEGIN_EVENT_TABLE(wxMainDialog,wxMainDialog_Base)
 	EVT_RADIOBUTTON(XRCID("SelectFontRadioButton"), wxMainDialog::SelectFontRadioButtonClick)
 	EVT_RADIOBUTTON(XRCID("SelectFileRadioButton"), wxMainDialog::SelectFileRadioButtonClick)
 	EVT_CHOICE(XRCID("FaceNameChoice"), wxMainDialog::FaceNameChoiceSelected)
+	EVT_CHECKBOX(XRCID("AntialiasedCheckBox"), wxMainDialog::AntialiasedCheckBoxClicked)
 	EVT_CHECKBOX(XRCID("BoldCheckBox"), wxMainDialog::BoldCheckBoxClicked)
+	EVT_CHECKBOX(XRCID("NoHintingCheckBox"), wxMainDialog::NoHintingCheckBoxClicked)
+	EVT_CHECKBOX(XRCID("ForceAutoHintingCheckBox"), wxMainDialog::ForceAutoHintingCheckBoxClicked)
 	EVT_BUTTON(XRCID("SelectFileRefButton"), wxMainDialog::SelectFileRefButtonClick)
 	EVT_BUTTON(XRCID("OutputFileNameRefButton"), wxMainDialog::OutputFileNameRefButtonClick)
 END_EVENT_TABLE()
@@ -132,6 +135,12 @@ void wxMainDialog::UpdateFaceIndex()
 			TVP_GET_FACE_INDEX_FROM_OPTIONS(face_index);
 		if(BoldCheckBox->GetValue())
 			options |= TVP_TF_BOLD;
+		if(!AntialiasedCheckBox->GetValue())
+			options |= TVP_FACE_OPTIONS_NO_ANTIALIASING;
+		if(NoHintingCheckBox->GetValue())
+			options |= TVP_FACE_OPTIONS_NO_HINTING;
+		if(ForceAutoHintingCheckBox->GetValue())
+			options |= TVP_FACE_OPTIONS_FORCE_AUTO_HINTING;
 		if(SelectFileRadioButton->GetValue())
 		{
 			// ファイルによる指定
@@ -279,10 +288,43 @@ void wxMainDialog::SelectFileRadioButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
+//! @brief		「アンチエイリアス」チェックボックスが押されたとき
+//! @param		event: イベントオブジェクト
+//---------------------------------------------------------------------------
+void wxMainDialog::AntialiasedCheckBoxClicked(wxCommandEvent & event)
+{
+	Update();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		「太字」チェックボックスが押されたとき
 //! @param		event: イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxMainDialog::BoldCheckBoxClicked(wxCommandEvent & event)
+{
+	Update();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「ヒンティングを行わない」チェックボックスが押されたとき
+//! @param		event: イベントオブジェクト
+//---------------------------------------------------------------------------
+void wxMainDialog::NoHintingCheckBoxClicked(wxCommandEvent & event)
+{
+	Update();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「自動ヒンティングを行う」チェックボックスが押されたとき
+//! @param		event: イベントオブジェクト
+//---------------------------------------------------------------------------
+void wxMainDialog::ForceAutoHintingCheckBoxClicked(wxCommandEvent & event)
 {
 	Update();
 }

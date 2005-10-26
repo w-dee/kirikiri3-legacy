@@ -94,8 +94,8 @@ LDFLAGS = -g -mwindows -mconsole
 default: all
 
 clean:
-	${RM} $(OBJS) $(BIN) $(PREC_GCH) .depend \
-	$(XRCOUT_CPP).bak $(XRCMSG) $(XRCOUT_CPP) $(XRCOUT_H) $(POT) $(MO_FILES)
+	${RM} $(OBJS) $(BIN) $(PREC_GCH) .depend
+	${RM} $(XRCOUT_CPP).bak $(XRC).bak $(XRCMSG) $(XRCOUT_CPP) $(XRCOUT_H) $(POT) $(MO_FILES)
 	${RM} messages/*~
 
 $(BIN): $(PREC_GCH) $(LINKOBJS) $(RES) $(MO_FILES)
@@ -110,6 +110,9 @@ $(RES): $(RC)
 	$(WINDRES) $(CPPINCLUDE) -i $(RC) -o $(RES) -O coff $(INCLUDE)
 
 $(XRCOUT_CPP): $(XRC)
+	$(MV) $(XRC) $(XRC).bak
+	$(PERL) eliminate_spaces.pl $(XRC).bak > $(XRC)
+	$(RM) $(XRC).bak
 	$(WXRC) --cpp-code --extra-cpp-code $(XRC)
 	$(MV) $(XRCOUT_CPP) $(XRCOUT_CPP).bak
 	$(SED) "s:<wx/wxprec.h>:\x22prec.h\x22:g" $(XRCOUT_CPP).bak > $(XRCOUT_CPP)

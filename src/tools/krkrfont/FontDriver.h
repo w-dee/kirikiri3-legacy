@@ -75,7 +75,9 @@ public:
 #define	TVP_GET_FACE_INDEX_FROM_OPTIONS(x) ((x) & 0xff) //!< オプション整数からFaceインデックスを取り出すマクロ
 #define	TVP_FACE_OPTIONS_FACE_INDEX(x) ((x) & 0xff) //!< Faceインデックスをオプション整数に変換するマクロ
 #define	TVP_FACE_OPTIONS_FILE 0x00010000 //!< フォント名ではなくてファイル名によるフォントの指定を行う
-
+#define TVP_FACE_OPTIONS_NO_HINTING 0x00020000 //!< ヒンティングを行わない
+#define TVP_FACE_OPTIONS_FORCE_AUTO_HINTING 0x00020000 //!< 強制的に auto hinting を行う
+#define TVP_FACE_OPTIONS_NO_ANTIALIASING 0x00040000 //!< アンチエイリアスを行わない
 
 #endif
 

@@ -266,7 +266,7 @@ void tTVPNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 void tTVPNativeFreeTypeFace::Clear()
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
-	if(OldFont)
+	if(OldFont && DC)
 	{
 		HFONT font = (HFONT)SelectObject(DC, OldFont);
 		DeleteObject(font);
@@ -275,6 +275,8 @@ void tTVPNativeFreeTypeFace::Clear()
 	if(DC) ReleaseDC(0, DC), DC = NULL;
 }
 //---------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------
 //! @brief		FreeType 用 ストリーム読み込み関数
@@ -301,6 +303,7 @@ unsigned long tTVPNativeFreeTypeFace::IoFunc(
 	return 0;
 }
 //---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 //! @brief		FreeType 用 ストリーム削除関数

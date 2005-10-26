@@ -43,7 +43,7 @@ wxMainDialog::wxMainDialog()
 {
 	// フィールドのクリア
 	Face = NULL;
-	
+
 	// 使用可能なフォントを列挙する
 	wxArrayString array;
 	tTVPFreeTypeFontDriver::EnumerateFonts(array, 0);

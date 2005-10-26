@@ -252,6 +252,7 @@ tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options)
 	: FontName(fontname)
 {
 	// フィールドをクリア
+	Face = NULL;
 	GlyphIndexToCharcodeVector = NULL;
 	UnicodeToLocalChar = NULL;
 	LocalCharToUnicode = NULL;

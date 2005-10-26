@@ -24,6 +24,7 @@ class tTVPBaseFreeTypeFace
 public:
 	virtual FT_Face GetFTFace() const = 0; //!< FreeType の Face オブジェクトを返す
 	virtual void GetFaceNameList(wxArrayString & dest) const = 0; //!< このフォントファイルが持っているフォントを配列として返す
+	virtual ~tTVPBaseFreeTypeFace() {;}
 };
 //---------------------------------------------------------------------------
 

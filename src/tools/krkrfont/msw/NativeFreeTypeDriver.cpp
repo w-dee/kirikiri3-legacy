@@ -14,6 +14,22 @@
 #include "prec.h"
 #include "NativeFreeTypeDriver.h"
 
+
+// 以下の二つのdefineはOpenType フォントを表していて、
+// EnumFontsProc の lpntme->ntmTm.ntmFlags にビットセットとして渡されてくる。
+// (OpenTypeがサポートされた Windows 2000 以降で存在)
+// tTVPBaseFreeTypeFontDriver::EnumerateFonts ではTrueType フォントとともに
+// これらのフォントも列挙される。
+
+#ifndef NTM_PS_OPENTYPE
+#define NTM_PS_OPENTYPE     0x00020000 //!< PostScript 形式 OpenType フォント
+#endif
+
+#ifndef NTM_TT_OPENTYPE
+#define NTM_TT_OPENTYPE     0x00040000 //!< TrueType 形式 OpenType フォント
+#endif
+
+
 //---------------------------------------------------------------------------
 //! @brief		tTVPBaseFreeTypeFontDriver::EnumerateFonts で内部的に使われるクラス
 //---------------------------------------------------------------------------
@@ -23,6 +39,7 @@ private:
 	wxArrayString & Dest; //!< 格納先配列
 	tjs_uint32 Flags; //!< 列挙フラグ (tvpfontstruc.h の TVP_FSF_XXXXX 定数の bitor )
 	wxFontEncoding Encoding; //!< エンコーディング
+	wxString PrevFontName; //!< 直前に列挙したフォント名(重複をはじくために使う)
 
 public:
 	tTVPFreeTypeFontEnumeraterHelper(wxArrayString & dest,
@@ -32,8 +49,13 @@ public:
 	void DoEnumerate();
 
 private:
-	static int CALLBACK CallbackProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
-                                  DWORD WXUNUSED(dwStyle), LONG lParam);
+	static int CALLBACK CallbackProc(
+			ENUMLOGFONTEX *lpelfe,    // pointer to logical-font data
+			NEWTEXTMETRICEX *lpntme,  // pointer to physical-font data
+			int FontType,             // type of font
+			LPARAM lParam             // application-defined data
+		);
+
 
 };
 //---------------------------------------------------------------------------
@@ -65,18 +87,31 @@ tTVPFreeTypeFontEnumeraterHelper::~tTVPFreeTypeFontEnumeraterHelper()
 //---------------------------------------------------------------------------
 //! @brief		フォントを列挙する
 //---------------------------------------------------------------------------
-#if defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ) && !wxUSE_NORLANDER_HEADERS
-    #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
-#else
-    #define wxFONTENUMPROC FONTENUMPROC
-#endif
 void tTVPFreeTypeFontEnumeraterHelper::DoEnumerate()
 {
 	HDC refdc = GetDC(NULL); // ディスプレイの DC を参照元 DC として取得
 	try
 	{
-		::EnumFonts(refdc, NULL, (wxFONTENUMPROC)CallbackProc,
-			reinterpret_cast<LPARAM>(this));
+		PrevFontName = wxEmptyString;
+
+		LOGFONT l;
+		l.lfHeight = -12;
+		l.lfWidth = 0;
+		l.lfEscapement = 0;
+		l.lfOrientation = 0;
+		l.lfWeight = 400;
+		l.lfItalic = FALSE;
+		l.lfUnderline = FALSE;
+		l.lfStrikeOut = FALSE;
+		l.lfCharSet = DEFAULT_CHARSET;
+		l.lfOutPrecision = OUT_DEFAULT_PRECIS;
+		l.lfQuality = DEFAULT_QUALITY;
+		l.lfPitchAndFamily = 0;
+		l.lfFaceName[0] = wxT('\0');
+
+		::EnumFontFamiliesEx(refdc, &l,
+			(OLDFONTENUMPROCW)CallbackProc, // ここのキャストでエラーを起こすかも; 直して
+			reinterpret_cast<LPARAM>(this), 0);
 	}
 	catch(...)
 	{
@@ -95,8 +130,11 @@ void tTVPFreeTypeFontEnumeraterHelper::DoEnumerate()
 //! @param		dwStyle	DWORD style
 //! @param		lParam	User-defined data
 //---------------------------------------------------------------------------
-int CALLBACK tTVPFreeTypeFontEnumeraterHelper::CallbackProc(LPLOGFONT lplf,
-	LPTEXTMETRIC lptm, DWORD dwStyle, LONG lParam)
+int CALLBACK tTVPFreeTypeFontEnumeraterHelper::CallbackProc(
+			ENUMLOGFONTEX *lpelfe,    // pointer to logical-font data
+			NEWTEXTMETRICEX *lpntme,  // pointer to physical-font data
+			int FontType,             // type of font
+			LPARAM lParam  )
 {
 	tTVPFreeTypeFontEnumeraterHelper * _this =
 		reinterpret_cast<tTVPFreeTypeFontEnumeraterHelper*>(lParam);
@@ -106,11 +144,11 @@ int CALLBACK tTVPFreeTypeFontEnumeraterHelper::CallbackProc(LPLOGFONT lplf,
 		// fixed pitch only ?
 		// TMPF_FIXED_PITCH はフラグが立っていないときに固定ピッチを
 		// 表しているので注意
-		if(lptm->tmPitchAndFamily & TMPF_FIXED_PITCH) return 1;
+		if(lpntme->ntmTm.tmPitchAndFamily & TMPF_FIXED_PITCH) return 1;
 	}
 
 	if(_this->Encoding != wxFONTENCODING_SYSTEM &&
-		 wxGetFontEncFromCharSet(lplf->lfCharSet) != _this->Encoding)
+		 wxGetFontEncFromCharSet(lpelfe->elfLogFont.lfCharSet) != _this->Encoding)
 	{
 		// 指定されたエンコーディングでは使用できないフォント
 		return 1;
@@ -119,16 +157,23 @@ int CALLBACK tTVPFreeTypeFontEnumeraterHelper::CallbackProc(LPLOGFONT lplf,
 	if(_this->Flags & TVP_FSF_NOVERTICAL)
 	{
 		// not to list vertical fonts up ?
-		if(lplf->lfFaceName[0] == '@') return 1;
+		if(lpelfe->elfLogFont.lfFaceName[0] == '@') return 1;
 	}
 
-	if(_this->Flags & TVP_FSF_TRUETYPEONLY)
+	if(_this->Flags & TVP_FSF_OUTLINEONLY)
 	{
-		// true type only ?
-		if(!(dwStyle & TRUETYPE_FONTTYPE)) return 1;
+		// outline fonts only
+		bool is_outline =
+			(lpntme->ntmTm.ntmFlags &  NTM_PS_OPENTYPE) ||
+			(lpntme->ntmTm.ntmFlags &  NTM_TT_OPENTYPE) ||
+			(FontType & TRUETYPE_FONTTYPE);
+		if(!is_outline) return 1;
 	}
 
-	_this->Dest.Add(lplf->lfFaceName);
+	wxString fontname = wxString(lpelfe->elfLogFont.lfFaceName);
+	if(_this->PrevFontName != fontname)
+		_this->Dest.Add(fontname);
+	_this->PrevFontName = fontname;
 
 	return 1;
 }
@@ -167,7 +212,7 @@ void tTVPBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 {
 	dest.Clear();
 
-	flags |= TVP_FSF_TRUETYPEONLY; // 常に TrueType フォントのみを列挙する
+	flags |= TVP_FSF_OUTLINEONLY; // 常に(FreeTypeで使用可能な)アウトラインフォントのみを列挙する
 
 	tTVPFreeTypeFontEnumeraterHelper helper(dest, flags, encoding);
 	helper.DoEnumerate(); // 列挙を行う

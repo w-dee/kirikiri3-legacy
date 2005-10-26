@@ -47,7 +47,7 @@ struct tTVPFont
 #define TVP_FSF_FIXEDPITCH   1      // fsfFixedPitch
 #define TVP_FSF_SAMECHARSET  2      // fsfSameCharSet
 #define TVP_FSF_NOVERTICAL   4      // fsfNoVertical
-#define TVP_FSF_TRUETYPEONLY 8      // fsfTrueTypeOnly
+#define TVP_FSF_OUTLINEONLY  8      // fsfOutLineOnly
 #define TVP_FSF_USEFONTFACE  0x100  // fsfUseFontFace
 
 /*]*/

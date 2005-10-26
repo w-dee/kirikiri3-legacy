@@ -219,7 +219,6 @@
 </object>
 </object>
 <style>wxDEFAULT_DIALOG_STYLE</style>
-<exstyle></exstyle>
 </object>
 <object class="wxFrame" name="wxPreviewFrame_Base">
 <title>Font Preview</title>

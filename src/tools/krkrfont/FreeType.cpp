@@ -265,6 +265,7 @@ tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options)
 	{
 		// ファイルを開く
 		Face = new tTVPGenericFreeTypeFace(fontname, options);
+			// 例外がここで発生する可能性があるので注意
 	}
 	else
 	{
@@ -335,6 +336,9 @@ tjs_uint tTVPFreeTypeFace::GetGlyphCount()
 			GlyphIndexToCharcodeVector->push_back(code);
 			charcode = FT_Get_Next_Char( FTFace, charcode, &gindex );
 		}
+		std::sort(
+			GlyphIndexToCharcodeVector->begin(),
+			GlyphIndexToCharcodeVector->end()); // 文字コード順で並び替え
 	}
 
 	return GlyphIndexToCharcodeVector->size();

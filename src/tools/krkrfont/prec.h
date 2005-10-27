@@ -25,6 +25,7 @@
 	#include <windows.h>
 	#include <vector>
 	#include <map>
+	#include <algorithm>
 	#include "tjsTypes.h"
 	#include "tjsString.h"
 

@@ -116,7 +116,7 @@ $(XRCOUT_CPP): $(XRC)
 	$(RM) $(XRC).bak
 	$(WXRC) --cpp-code --extra-cpp-code $(XRC)
 	$(MV) $(XRCOUT_CPP) $(XRCOUT_CPP).bak
-	$(SED) "s:<wx/wxprec.h>:\x22prec.h\x22:g" $(XRCOUT_CPP).bak > $(XRCOUT_CPP)
+	$(SED) -f replace_prec.sed $(XRCOUT_CPP).bak > $(XRCOUT_CPP)
 	$(RM) $(XRCOUT_CPP).bak
 
 $(XRCMSG): $(XRC)
@@ -124,7 +124,7 @@ $(XRCMSG): $(XRC)
 
 
 $(POT): $(XRCMSG) $(CPPFILES)
-	$(XGETTEXT) -c -C -k_ $(XRCMSG) $(CPPFILES) -o - | $(SED) "/^.POT-Creation-Date:/d" > $(POT)
+	$(XGETTEXT) -c -C -k_ $(XRCMSG) $(CPPFILES) -o - | $(SED) -f remove_pot_creation_date.sed > $(POT)
 
 $(LANG_JA_PO): $(POT)
 	msgmerge --update $(LANG_JA_PO) $(POT)

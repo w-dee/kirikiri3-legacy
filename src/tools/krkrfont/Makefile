@@ -62,7 +62,7 @@ CPPFILES =  $(XRCOUT_CPP) \
 			KrkrFontApp.cpp \
 			msw/NativeFreeTypeFace.cpp msw/NativeFreeTypeDriver.cpp \
 			MainDialog.cpp FreeType.cpp PreviewWindow.cpp \
-			FontDriver.cpp $(CP932_OUT_CPP)
+			FontDriver.cpp WriteBFF.cpp $(CP932_OUT_CPP)
 
 HFILES =	$(CPPFILES:.cpp=.h) \
 			tjsString.h tjsTypes.h tvpfontstruc.h prec.h
@@ -75,7 +75,6 @@ LINKOBJS = $(OBJS)
 
 CPPINCLUDE = \
 	-I"$(MINGWROOT)/include" \
-	-I"$(MINGWROOT)/include/wx-2.6" \
 	-I"$(MINGWROOT)/lib/wx/include/msw-unicode-release-2.6" \
 	-I"$(MINGWROOT)/include/freetype2" \
 	-I"msw" \

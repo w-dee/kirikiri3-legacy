@@ -38,6 +38,7 @@ public:
 	void DialogClose(wxCloseEvent& event);
 	void PreviewButtonClick(wxCommandEvent& event);
 	void CloseButtonClick(wxCommandEvent& event);
+	void GenerateButtonClick(wxCommandEvent& event);
 	void FaceNameChoiceSelected(wxCommandEvent& event);
 	void SelectFontRadioButtonClick(wxCommandEvent& event);
 	void SelectFileRadioButtonClick(wxCommandEvent& event);

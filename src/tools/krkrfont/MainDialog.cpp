@@ -13,6 +13,7 @@
 #include "MainDialog.h"
 #include "FreeType.h"
 #include "PreviewWindow.h"
+#include "WriteBFF.h"
 
 
 //---------------------------------------------------------------------------
@@ -24,6 +25,7 @@ BEGIN_EVENT_TABLE(wxMainDialog,wxMainDialog_Base)
 	EVT_SPINCTRL(XRCID("SizeSpinEdit"), wxMainDialog::SizeSpinEditChange) 
 	EVT_BUTTON(XRCID("PreviewButton"), wxMainDialog::PreviewButtonClick)
 	EVT_BUTTON(XRCID("CloseButton"), wxMainDialog::CloseButtonClick)
+	EVT_BUTTON(XRCID("GenerateButton"), wxMainDialog::GenerateButtonClick)
 	EVT_RADIOBUTTON(XRCID("SelectFontRadioButton"), wxMainDialog::SelectFontRadioButtonClick)
 	EVT_RADIOBUTTON(XRCID("SelectFileRadioButton"), wxMainDialog::SelectFileRadioButtonClick)
 	EVT_CHOICE(XRCID("FaceNameChoice"), wxMainDialog::FaceNameChoiceSelected)
@@ -244,6 +246,31 @@ void wxMainDialog::CloseButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
+//! @brief		「作成」ボタンが押されたとき
+//! @param		event: イベントオブジェクト
+//---------------------------------------------------------------------------
+void wxMainDialog::GenerateButtonClick(wxCommandEvent& event)
+{
+	// BFF ファイルを書き出す
+	if(Face)
+	{
+		if(OutputFileNameEdit->GetLabel().IsEmpty())
+		{
+			// 出力ファイル欄にまだ何も入力されていなければ
+			// ファイル選択のダイアログボックスを開く
+			OutputFileNameRefButtonClick(event);
+			if(OutputFileNameEdit->GetLabel().IsEmpty()) return;
+		}
+
+		TVPWriteGlyphBitmap(Face, OutputFileNameEdit->GetLabel(),
+			!GenerateFontMetricsOnlyCheckBox->GetValue(), false,
+			this);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		「フォントファミリ名」の項目が選択された場合
 //! @param		event: イベントオブジェクト
 //---------------------------------------------------------------------------
@@ -343,7 +370,7 @@ void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 		// default_path
 		::wxEmptyString,
 		// default_filename
-		OutputFileNameEdit->GetLabel(),
+		SelectFileEdit->GetLabel(),
 		// default extension for selecting a font file
 		wxT("ttf"),
 		// filename filter for selecting a font file
@@ -352,8 +379,6 @@ void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 		_("TrueType fonts (*.ttf)|*.ttf")					+ wxT("|") +
 		_("TrueType Collection fonts (*.ttc)|*.ttc")		+ wxT("|") +
 		_("OpenType fonts (*.otf)|*.otf")					+ wxT("|") +
-		_("OpenType fonts (*.otf)|*.otf")					+ wxT("|") +
-		_("Windows fonts (*.fon)|*.fon")					+ wxT("|") +
 		_("All files (*.*)|*.*"),
 		// flags
 		wxHIDE_READONLY|wxOPEN|wxFILE_MUST_EXIST
@@ -375,6 +400,26 @@ void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 //---------------------------------------------------------------------------
 void wxMainDialog::OutputFileNameRefButtonClick(wxCommandEvent& event)
 {
+	wxString filename = ::wxFileSelector(
+		// messsage for select output file
+		_("Select output file"), 
+		// default_path
+		::wxEmptyString,
+		// default_filename
+		OutputFileNameEdit->GetLabel(),
+		// default extension for selecting output file (must be bff)
+		wxT("bff"),
+		// filename filter for selecting output file
+		wxString() + 
+		_("Kirikiri3 bitmap font (*.bff)|*.bff")	+ wxT("|") +
+		_("All files (*.*)|*.*"),
+		// flags
+		wxSAVE|wxOVERWRITE_PROMPT
+		);
+	if(!filename.empty())
+	{
+		OutputFileNameEdit->SetLabel(filename);
+	}
 }
 //---------------------------------------------------------------------------
 

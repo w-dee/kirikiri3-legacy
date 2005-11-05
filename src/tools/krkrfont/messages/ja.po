@@ -155,38 +155,43 @@ msgstr "フォント '%1$s' は使用できません"
 #. Default font initially selected in the main dialog.
 #. You can specify font cadidates separated with '|' (vertline)
 #. character, like "Tahoma|Times New Roman"
-#: MainDialog.cpp:59
+#: MainDialog.cpp:61
 msgid "Tahoma"
 msgstr "ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3"
 
 #. messsage for select a font file
-#: MainDialog.cpp:342
+#: MainDialog.cpp:369
 msgid "Select a font file"
 msgstr "一覧から選択"
 
-#: MainDialog.cpp:351
+#: MainDialog.cpp:378
 msgid "All supported fonts|*.ttf;*.ttc;*.otf;*.fon"
 msgstr "全てのフォント|*.ttf;*.ttc;*.otf;*.fon"
 
-#: MainDialog.cpp:352
+#: MainDialog.cpp:379
 msgid "TrueType fonts (*.ttf)|*.ttf"
 msgstr "TrueType フォント (*.ttf)|*.ttf"
 
-#: MainDialog.cpp:353
+#: MainDialog.cpp:380
 msgid "TrueType Collection fonts (*.ttc)|*.ttc"
 msgstr "TrueType コレクションフォント (*.ttc)|*.ttc"
 
-#: MainDialog.cpp:354 MainDialog.cpp:355
+#: MainDialog.cpp:381
 msgid "OpenType fonts (*.otf)|*.otf"
 msgstr "OpenType フォント (*.otf)|*.otf"
 
-#: MainDialog.cpp:356
-msgid "Windows fonts (*.fon)|*.fon"
-msgstr "Windows フォント (*.fon)|*.fon"
-
-#: MainDialog.cpp:357
+#: MainDialog.cpp:382 MainDialog.cpp:415
 msgid "All files (*.*)|*.*"
 msgstr "全てのファイル (*.*)|*.*"
+
+#. messsage for select output file
+#: MainDialog.cpp:405
+msgid "Select output file"
+msgstr "出力ファイルを選択"
+
+#: MainDialog.cpp:414
+msgid "Kirikiri3 bitmap font (*.bff)|*.bff"
+msgstr "吉里吉里3 ビットマップフォント (*.bff)|*.bff"
 
 #: FreeType.cpp:84
 #, c-format
@@ -194,7 +199,7 @@ msgid "Can't open font file '%1$s'"
 msgstr "フォントファイル '%1$s' を開くことができません"
 
 #: PreviewWindow.cpp:457
-#, fuzzy, c-format
+#, c-format
 msgid "Index : %d   Charcode : U+%06X"
 msgstr "インデックス : %d   文字コード : U+%06X"
 
@@ -202,3 +207,18 @@ msgstr "インデックス : %d   文字コード : U+%06X"
 #, c-format
 msgid "Glyph count : %d"
 msgstr "グリフ数 : %d"
+
+#: WriteBFF.cpp:126
+#, c-format
+msgid "Can't open output file '%1$s'"
+msgstr "フォントファイル '%1$s' を開くことができません"
+
+#. font generation progress dialog box's title
+#: WriteBFF.cpp:137
+msgid "Processing"
+msgstr "処理中"
+
+#. font generation progress dialog box's message
+#: WriteBFF.cpp:139
+msgid "Generating font file ..."
+msgstr "フォントファイルを作成中 ..."

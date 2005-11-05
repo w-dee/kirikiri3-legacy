@@ -51,8 +51,10 @@ public:
 	void SetHeight(int height);
 
 	tTVPGlyphBitmap * GetGlyphFromCharcode(tjs_char code);
+	bool GetGlyphMetricsFromCharcode(tjs_char code, tTVPGlyphMetrics & metrics);
 
 private:
+	bool LoadGlyphSlotFromCharcode(tjs_char code);
 };
 //---------------------------------------------------------------------------
 

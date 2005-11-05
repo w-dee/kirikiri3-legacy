@@ -393,48 +393,20 @@ void tTVPFreeTypeFace::SetHeight(int height)
 
 //---------------------------------------------------------------------------
 //! @brief		指定した文字コードに対するグリフビットマップを得る
-//! @param		文字コード
+//! @param		code: 文字コード
 //! @return		新規作成されたグリフビットマップオブジェクトへのポインタ
 //!				NULL の場合は変換に失敗した場合
 //---------------------------------------------------------------------------
 tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 {
-	// TODO: スレッド保護
-
-	// 文字コードを得る
-	FT_ULong localcode;
-	if(UnicodeToLocalChar == NULL)
-		localcode = code;
-	else
-		localcode = UnicodeToLocalChar(code);
-
-	// 文字コードから index を得る
-	FT_UInt glyph_index = FT_Get_Char_Index(FTFace, localcode);
-	if(glyph_index == 0)
+	// グリフスロットにグリフを読み込み、寸法を取得する
+	tTVPGlyphMetrics metrics;
+	if(!GetGlyphMetricsFromCharcode(code, metrics))
 		return NULL;
 
-	// グリフスロットに文字を読み込む
-	FT_Int32 load_glyph_flag = 0;
-	if(!(Options & TVP_FACE_OPTIONS_NO_ANTIALIASING))
-		load_glyph_flag |= FT_LOAD_NO_BITMAP;
-	else
-		load_glyph_flag |= FT_LOAD_TARGET_MONO;
-			// note: ビットマップフォントを読み込みたくない場合は FT_LOAD_NO_BITMAP を指定
-
-	if(Options & TVP_FACE_OPTIONS_NO_HINTING)
-		load_glyph_flag |= FT_LOAD_NO_HINTING;
-	if(Options & TVP_FACE_OPTIONS_FORCE_AUTO_HINTING)
-		load_glyph_flag |= FT_LOAD_FORCE_AUTOHINT;
-
-	FT_Error err;
-	err = FT_Load_Glyph(FTFace, glyph_index, load_glyph_flag);
-
-	if(err) return NULL;
-
-	// フォントの変形を行う
-	if(Options & TVP_TF_BOLD) FT_GlyphSlot_Embolden(FTFace->glyph);
-
 	// 文字をレンダリングする
+	FT_Error err;
+
 	if(FTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP)
 	{
 		FT_Render_Mode mode;
@@ -496,15 +468,6 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 			}
 		}
 
-		// メトリック構造体を作成
-		// CellIncX や CellIncY は ピクセル値が 64 倍された値なので注意
-		// これはもともと FreeType の仕様だけれども、吉里吉里でも内部的には
-		// この精度で CellIncX や CellIncY を扱う
-		// TODO: 文字のサブピクセル単位での位置調整とレンダリング
-		tTVPGlyphMetrics metrics;
-		metrics.CellIncX =  FTFace->glyph->advance.x;
-		metrics.CellIncY =  FTFace->glyph->advance.y;
-
 		// tTVPGlyphBitmap を作成して返す
 		glyph_bmp = new tTVPGlyphBitmap(
 			ft_bmp->buffer,
@@ -523,6 +486,77 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 	if(release_ft_bmp) FT_Bitmap_Done(FTFace->glyph->library, ft_bmp);
 
 	return glyph_bmp;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		指定した文字コードに対するグリフの寸法を得る
+//! @param		code: 文字コード
+//! @param		metrics: 寸法
+//! @return		成功の場合真、失敗の場合偽
+//---------------------------------------------------------------------------
+bool tTVPFreeTypeFace::GetGlyphMetricsFromCharcode(tjs_char code,
+	tTVPGlyphMetrics & metrics)
+{
+	if(!LoadGlyphSlotFromCharcode(code)) return false;
+
+	// メトリック構造体を作成
+	// CellIncX や CellIncY は ピクセル値が 64 倍された値なので注意
+	// これはもともと FreeType の仕様だけれども、吉里吉里でも内部的には
+	// この精度で CellIncX や CellIncY を扱う
+	// TODO: 文字のサブピクセル単位での位置調整とレンダリング
+	metrics.CellIncX =  FTFace->glyph->advance.x;
+	metrics.CellIncY =  FTFace->glyph->advance.y;
+
+	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		指定した文字コードに対するグリフをグリフスロットに設定する
+//! @param		code: 文字コード
+//! @return		成功の場合真、失敗の場合偽
+//---------------------------------------------------------------------------
+bool tTVPFreeTypeFace::LoadGlyphSlotFromCharcode(tjs_char code)
+{
+	// TODO: スレッド保護
+
+	// 文字コードを得る
+	FT_ULong localcode;
+	if(UnicodeToLocalChar == NULL)
+		localcode = code;
+	else
+		localcode = UnicodeToLocalChar(code);
+
+	// 文字コードから index を得る
+	FT_UInt glyph_index = FT_Get_Char_Index(FTFace, localcode);
+	if(glyph_index == 0)
+		return false;
+
+	// グリフスロットに文字を読み込む
+	FT_Int32 load_glyph_flag = 0;
+	if(!(Options & TVP_FACE_OPTIONS_NO_ANTIALIASING))
+		load_glyph_flag |= FT_LOAD_NO_BITMAP;
+	else
+		load_glyph_flag |= FT_LOAD_TARGET_MONO;
+			// note: ビットマップフォントを読み込みたくない場合は FT_LOAD_NO_BITMAP を指定
+
+	if(Options & TVP_FACE_OPTIONS_NO_HINTING)
+		load_glyph_flag |= FT_LOAD_NO_HINTING;
+	if(Options & TVP_FACE_OPTIONS_FORCE_AUTO_HINTING)
+		load_glyph_flag |= FT_LOAD_FORCE_AUTOHINT;
+
+	FT_Error err;
+	err = FT_Load_Glyph(FTFace, glyph_index, load_glyph_flag);
+
+	if(err) return false;
+
+	// フォントの変形を行う
+	if(Options & TVP_TF_BOLD) FT_GlyphSlot_Embolden(FTFace->glyph);
+
+	return true;
 }
 //---------------------------------------------------------------------------
 

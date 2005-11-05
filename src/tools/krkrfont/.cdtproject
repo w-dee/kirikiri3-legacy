@@ -65,29 +65,29 @@
 <item id="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 <target name="all" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>c:\mingw\bin\make.exe</buildCommand>
-<buildArguments></buildArguments>
+<buildCommand>c:/cygwin/bin/make</buildCommand>
+<buildArguments>-j 3</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>true</stopOnError>
-<useDefaultCommand>true</useDefaultCommand>
+<useDefaultCommand>false</useDefaultCommand>
 </target>
 <target name="depend" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>c:/mingw/bin/mingw32-make.exe</buildCommand>
-<buildArguments></buildArguments>
+<buildArguments>-j 3</buildArguments>
 <buildTarget>depend</buildTarget>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>true</useDefaultCommand>
 </target>
 <target name="rebuild" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>c:\mingw\bin\mingw32-make.exe</buildCommand>
-<buildArguments></buildArguments>
+<buildArguments>-j 3</buildArguments>
 <buildTarget>clean all</buildTarget>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>true</useDefaultCommand>
 </target>
 <target name="clean" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>c:\mingw\bin\mingw32-make.exe</buildCommand>
-<buildArguments></buildArguments>
+<buildArguments>-j 3</buildArguments>
 <buildTarget>clean</buildTarget>
 <stopOnError>true</stopOnError>
 <useDefaultCommand>true</useDefaultCommand>

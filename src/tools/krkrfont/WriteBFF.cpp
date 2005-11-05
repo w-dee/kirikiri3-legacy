@@ -131,7 +131,6 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 	tjs_uint total_glyph_count = face->GetGlyphCount();
 
 	// ダイアログボックスを作成する
-	// 先頭に /*D*/ がある行はダイアログボックス関連の行
 	wxProgressDialog dialog(
 							/* font generation progress dialog box's title */
 							_("Processing"),

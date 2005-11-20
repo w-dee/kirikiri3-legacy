@@ -1,0 +1,77 @@
+#: ConsoleMain.cpp:42
+#, c-format
+msgid "%d percent done\r"
+msgstr ""
+
+#. ディレクトリのオープンに失敗したとき
+#: FileList.cpp:65
+#, c-format
+msgid "Cannot open directory %s"
+msgstr " %s "
+
+#: FileList.cpp:69
+#, c-format
+msgid "Cannot read directory %s"
+msgstr " %s "
+
+#: FileList.cpp:152 FileList.cpp:159
+#, c-format
+msgid "Error while compiling regular expression %s"
+msgstr ""
+
+#. ファイル名が長すぎる
+#: WriteXP4.cpp:473
+msgid "Can't write metadata to the archive: too long file name"
+msgstr ""
+
+#. 圧縮に失敗
+#: WriteXP4.cpp:581
+msgid "Failed to compress the index data"
+msgstr ""
+
+#: wxFileWrapper.cpp:58
+#, c-format
+msgid "Can't create file %s"
+msgstr ""
+
+#: wxFileWrapper.cpp:72
+msgid "Standard Input"
+msgstr ""
+
+#: wxFileWrapper.cpp:74
+msgid "Standard Output"
+msgstr ""
+
+#: wxFileWrapper.cpp:76
+msgid "Standard Error Output"
+msgstr ""
+
+#: wxFileWrapper.cpp:78
+#, c-format
+msgid "File Descriptor %d"
+msgstr ""
+
+#: wxFileWrapper.cpp:92
+#, c-format
+msgid "Seeking failed on file %s, pointer %lld"
+msgstr ""
+
+#: wxFileWrapper.cpp:100
+#, c-format
+msgid "Read failed from flie %s"
+msgstr ""
+
+#: wxFileWrapper.cpp:107 wxFileWrapper.cpp:114
+#, c-format
+msgid "Write failed to flie %s"
+msgstr ""
+
+#: wxFileWrapper.cpp:122
+#, c-format
+msgid "Can't open file %s for reading"
+msgstr ""
+
+#: wxFileWrapper.cpp:126
+#, c-format
+msgid "Can't open file %s for writing"
+msgstr ""

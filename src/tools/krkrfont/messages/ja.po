@@ -214,11 +214,11 @@ msgid "Can't open output file '%1$s'"
 msgstr "フォントファイル '%1$s' を開くことができません"
 
 #. font generation progress dialog box's title
-#: WriteBFF.cpp:137
+#: WriteBFF.cpp:136
 msgid "Processing"
 msgstr "処理中"
 
 #. font generation progress dialog box's message
-#: WriteBFF.cpp:139
+#: WriteBFF.cpp:138
 msgid "Generating font file ..."
 msgstr "フォントファイルを作成中 ..."

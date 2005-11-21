@@ -2,6 +2,7 @@
 #include "ProgressCallback.h"
 #include "WriteXP4.h"
 #include "FileList.h"
+#include "ReadXP4Meta.h"
 
 //---------------------------------------------------------------------------
 //! @brief		アプリケーションクラス
@@ -54,6 +55,7 @@ void tTVPProgressCallback::OnProgress(int percent)
 //---------------------------------------------------------------------------
 bool wxKrkrReleaserConsoleApp::OnInit()
 {
+	setlocale(LC_ALL, "");
 	locale.Init(wxLANGUAGE_DEFAULT);
 	locale.AddCatalogLookupPathPrefix(wxT("locales")); 
 	locale.AddCatalogLookupPathPrefix(wxT("../locales")); 
@@ -92,13 +94,32 @@ int wxKrkrReleaserConsoleApp::OnRun()
 
 		agg.SetRange(8, 100);
 
-		tTVPXP4Writer writer(
-			&agg,
-			wxT("c:\\eclipse\\workspace\\krkrrel\\out"),
-			0,
-			filelist);
+		{
+			tTVPXP4Writer writer(
+				&agg,
+				wxT("c:\\eclipse\\workspace\\krkrrel\\out"),
+				0,
+				filelist);
 
-		writer.MakeArchive();
+			writer.MakeArchive();
+		}
+
+		{
+			tTVPXP4MetadataReaderArchive archive(
+				wxT("c:\\eclipse\\workspace\\krkrrel\\out.xp4"));
+
+			const std::vector<tTVPXP4MetadataReaderStorageItem> & vec =
+				archive.GetItemVector();
+
+			for(std::vector<tTVPXP4MetadataReaderStorageItem>::const_iterator
+					i = vec.begin(); i != vec.end(); i++)
+			{
+				wxString datestring = i->GetTime().Format();
+				wxPrintf(wxT("%s "), i->GetName().c_str());
+				wxPrintf(wxT("%d "), (int)(i->GetFlags()));
+				wxPrintf(wxT("%s\n"), datestring.c_str());
+			}
+		}
 	}
 	catch(const wxString & e)
 	{

@@ -52,6 +52,7 @@ MO_FILES = $(LANG_JA_MO)
 CPPFILES =  ConsoleMain.cpp \
 			FileList.cpp  \
 			WriteXP4.cpp \
+			ReadXP4Meta.cpp \
 			wxFileWrapper.cpp
 
 HFILES =	$(CPPFILES:.cpp=.h) \

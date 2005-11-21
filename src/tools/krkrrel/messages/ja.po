@@ -1,4 +1,4 @@
-#: ConsoleMain.cpp:42
+#: ConsoleMain.cpp:43
 #, c-format
 msgid "%d percent done\r"
 msgstr ""
@@ -19,14 +19,25 @@ msgstr " %s "
 msgid "Error while compiling regular expression %s"
 msgstr ""
 
-#. ファイル名が長すぎる
-#: WriteXP4.cpp:473
-msgid "Can't write metadata to the archive: too long file name"
+#. 圧縮に失敗
+#: WriteXP4.cpp:572
+msgid "Failed to compress the index data"
 msgstr ""
 
-#. 圧縮に失敗
-#: WriteXP4.cpp:581
-msgid "Failed to compress the index data"
+#. info チャンクが見つからなかった
+#: ReadXP4Meta.cpp:109
+msgid "chunk 'info' not found"
+msgstr ""
+
+#. シグニチャが一致しない
+#: ReadXP4Meta.cpp:166
+#, c-format
+msgid "'%s' is not an XP4 archive file"
+msgstr ""
+
+#: ReadXP4Meta.cpp:213
+#, c-format
+msgid "decompression of archive index of '%s' failed"
 msgstr ""
 
 #: wxFileWrapper.cpp:58

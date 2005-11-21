@@ -91,7 +91,7 @@ public:
 		const wxString & inputname,
 		const wxString & basedirname,
 		const wxString & inarchivename,
-		unsigned char flags = 0)
+		wxUint16 flags = 0)
 		: InputName(inputname),
 		BaseDirName(basedirname),
 		InArchiveName(inarchivename),
@@ -100,7 +100,7 @@ public:
 	wxString InputName; //!< 入力ファイル名(ベースディレクトリ名部分をのぞく)
 	wxString BaseDirName; //!< 入力ファイルのベースディレクトリ名
 	wxString InArchiveName; //!< アーカイブ内での名前(TVPNormalizeXP4ArchiveStorageNameで正規化後)
-	unsigned char Flags; //!< フラグ
+	wxUint16 Flags; //!< フラグ
 };
 //---------------------------------------------------------------------------
 
@@ -113,7 +113,6 @@ class tTVPXP4WriterStorage : protected tTVPXP4WriterInputFile
 	wxFileOffset Size; //!< (無圧縮時の)ファイルサイズ
 	wxDateTime ModTime; //!< ファイル修正のタイムスタンプ
 	std::vector<tTVPXP4WriterSegment> SegmentVector; //!< セグメントの配列
-	unsigned char Flags; //!< フラグ
 	tTVPXP4WriterHash Hash; //!< ハッシュ
 	bool IsReference; //!< 他のストレージアイテムを参照している場合は 真
 
@@ -127,7 +126,7 @@ public:
 
 	wxFileOffset GetSize() const { return Size; } //!< サイズを得る
 	const wxString & GetInputName() const { return InputName; } //!< 入力ファイル名を得る
-	unsigned char GetFlags() const { return Flags; } //!< フラグを得る
+	wxUint16 GetFlags() const { return Flags; } //!< フラグを得る
 	const tTVPXP4WriterHash & GetHash() const { return Hash; } //!< ハッシュを得る
 
 	void MakeHash(iTVPProgressCallback * callback);

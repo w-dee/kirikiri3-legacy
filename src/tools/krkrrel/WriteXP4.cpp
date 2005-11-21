@@ -14,8 +14,8 @@
 #include "ProgressCallback.h"
 #include "XP4Archive.h"
 #include "FileList.h"
-#include "zlib.h"
-#include "tomcrypt.h"
+#include <zlib.h>
+#include <tomcrypt.h>
 
 /*
 	XP4 アーカイブファイルは、実のところ XP3 アーカイブと大差はない。
@@ -430,13 +430,13 @@ void tTVPXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 		// time チャンクの構造は以下の通り(全てLE)
 		// uint32		'time' subchunk
 		// uint32		chunksize = 9
-		// int16		Year
-		// uint8		Month(0～)
-		// uint8		Day
-		// uint8		Hour
-		// uint8		Minute
-		// uint8		Second
-		// uint16		Millisecond
+		// +0 int16		Year
+		// +2 uint8		Month(0～)
+		// +3 uint8		Day
+		// +4 uint8		Hour
+		// +5 uint8		Minute
+		// +6 uint8		Second
+		// +7 uint16	Millisecond
 		static char time_chunk[4] = { 't', 'i', 'm', 'e' }; // time chunk name
 		newbuf.AppendData(time_chunk, 4);
 		i32 = wxUINT32_SWAP_ON_BE(9); // chunksize
@@ -455,26 +455,17 @@ void tTVPXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 	// info チャンクの書き込み
 	// info チャンクの構造
 	// uint32		'info' subchunk
-	// uint32		chunksize = 4 + (FileNameLength + 1)
+	// uint32		chunksize = 2 + (strlen(FileName) + 1)
 	// uint16		Flags
-	// uint16		FileNameLength (in utf-8 encoding, *without* null-terminator)
 	// char[]		FileName (in utf-8 encoding, *with* null-terminator)
 	static char info_chunk[4] = { 'i', 'n', 'f', 'o' }; // info chunk name
 	newbuf.AppendData(info_chunk, 4);
 	wxCharBuffer utf8name = InArchiveName.mb_str(wxConvUTF8);
 	size_t utf8name_len = strlen(utf8name);
-	i32 = wxUINT32_SWAP_ON_BE(4 + (utf8name_len + 1));
+	i32 = wxUINT32_SWAP_ON_BE(2 + (utf8name_len + 1));
 	newbuf.AppendData(&i32, sizeof(i32)); // chunksize
 	i16 = wxUINT16_SWAP_ON_BE(Flags);
 	newbuf.AppendData(&i16, sizeof(i16)); // Flags
-	if(utf8name_len >= 65535)
-	{
-		// ファイル名が長すぎる
-		throw wxString(_("Can't write metadata to the archive: too long file name"));
-	}
-	i16 = wxUINT16_SWAP_ON_BE((wxUint16)utf8name_len - 1);
-					// ここで -1 しているのはファイル名先頭の '/' を含めないため
-	newbuf.AppendData(&i16, sizeof(i16)); // FileNameLength
 	newbuf.AppendData(const_cast<char *>((const char *)utf8name) + 1,
 		utf8name_len - 1 + 1); // FileName
 
@@ -498,15 +489,15 @@ tTVPXP4WriterArchive::tTVPXP4WriterArchive(const wxString & filename) :
 	// 早速ファイルを開き、ヘッダを書き込む
 	wxFileEx file(FileName, wxFile::write);
 
-	static unsigned char XP3Mark1[] = // 8bytes
+	static unsigned char XP4Mark1[] = // 8bytes
 		{ 0x58/*'X'*/, 0x50/*'P'*/, 0x34/*'4'*/, 0x0d/*'\r'*/,
 		  0x0a/*'\n'*/, 0x20/*' '*/, 0x0a/*'\n'*/, 0x1a/*EOF*/,
 		  0xff /* sentinel */ };
-	static unsigned char XP3Mark2[] = // 3bytes
+	static unsigned char XP4Mark2[] = // 3bytes
 		{ 0x8b, 0x67, 0x01, 0xff/* sentinel */ };
 
-	file.WriteBuffer(XP3Mark1, 8);
-	file.WriteBuffer(XP3Mark2, 3);
+	file.WriteBuffer(XP4Mark1, 8);
+	file.WriteBuffer(XP4Mark2, 3);
 
 	// この時点で ファイルポインタは 11 バイト目!
 
@@ -593,14 +584,14 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 		file.Align(8); // 8バイト境界にアライン
 		index_ofs = file.Tell();
 		wxUint8 i8;
-		i8 = 1; // 1 = compressed (固定)
+		i8 = compress ? 1:0; // 1 = compressed ?
 		file.WriteBuffer(&i8, 1); // flags
 		wxUint32 i32;
 		i32 = wxUINT32_SWAP_ON_BE((wxUint32)storage_count);
 		file.WriteBuffer(&i32, sizeof(i32)); // storage count
 											// (これは目安。この数値を信じないこと)
 		i32 = wxUINT32_SWAP_ON_BE((wxUint32)inputsize);
-		file.WriteBuffer(&i32, sizeof(i32)); // index raw size
+		file.WriteBuffer(&i32, sizeof(i32)); // raw index size
 		i32 = wxUINT32_SWAP_ON_BE((wxUint32)compsize);
 		file.WriteBuffer(&i32, sizeof(i32)); // compressed index size
 		file.WriteBuffer(outbuf, compsize); // index

@@ -23,10 +23,15 @@
 #define TVP_XP4_SEGM_ENCODE_RAW       0
 #define TVP_XP4_SEGM_ENCODE_ZLIB      1
 
-#define TVP_XP4_FILE_DELETED    1
-#define TVP_XP4_FILE_COMPRESSED 2 //!< not a real code; only used in tTVPXP4Writer related
-#define TVP_XP4_FILE_EXCLUDED   4 //!< not a real code; only used in TVPClassifyFiles related
-
+#define TVP_XP4_FILE_COMPRESSED 0x80	//!< not a real code; only used in tTVPXP4Writer related
+										//!   (do not trust this flag, the actual
+										//!    compression bit is in each segment flags)
+#define TVP_XP4_FILE_MARKED		0x40
+#define TVP_XP4_FILE_STATE_MASK	0x0f
+#define TVP_XP4_FILE_ADDED		0
+#define TVP_XP4_FILE_DELETED	1
+#define TVP_XP4_FILE_MODIFIED	2
+#define TVP_XP4_FILE_EXCLUDED	3
 //---------------------------------------------------------------------------
 
 #endif

@@ -13,6 +13,7 @@
 #define _FILELIST_H_
 
 #include "WriteXP4.h"
+#include "ReadXP4Meta.h"
 //---------------------------------------------------------------------------
 void TVPGetFileListAt(iTVPProgressCallback * callback,
 	const wxString & dir, std::vector<tTVPXP4WriterInputFile> & dest);
@@ -22,6 +23,13 @@ void TVPClassifyFiles(iTVPProgressCallback * callback,
 	std::vector<tTVPXP4WriterInputFile> &  dest
 	);
 wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name);
+void TVPReadXP4Metadata(
+	iTVPProgressCallback * callback,
+	const wxString & archivename,
+	std::map<wxString, tTVPXP4MetadataReaderStorageItem> &dest);
+void TVPXP4MetadataReaderStorageItemToXP4WriterInputFile(
+	const std::map<wxString, tTVPXP4MetadataReaderStorageItem> & input,
+	std::vector<tTVPXP4WriterInputFile> & output);
 //---------------------------------------------------------------------------
 
 #endif

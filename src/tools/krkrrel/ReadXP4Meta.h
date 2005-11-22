@@ -9,6 +9,8 @@
 //! @file
 //! @brief XP4 メタデータの読み込み
 //---------------------------------------------------------------------------
+#ifndef _READXP4META_H_
+#define _READXP4META_H_
 
 /*
 	ここでは、XP4 アーカイブファイルのうち、アーカイブ内ファイルのファイル名と
@@ -22,16 +24,27 @@
 //---------------------------------------------------------------------------
 class tTVPXP4MetadataReaderStorageItem
 {
-	wxString Name; //!< ストレージ名
-	wxDateTime Time; //!< タイムスタンプ
+protected:
+	wxString InArchiveName; //!< ストレージ名
 	wxUint16 Flags; //!< フラグ
+	wxDateTime Time; //!< タイムスタンプ
 
 public:
+	tTVPXP4MetadataReaderStorageItem(
+		const wxString & inarchivename,
+		wxUint16 flags = 0,
+		const wxDateTime & time = wxDateTime()) :
+		InArchiveName(inarchivename),
+		Flags(flags),
+		Time(time)
+		{;} //!< コンストラクタ
+
 	tTVPXP4MetadataReaderStorageItem(const unsigned char * meta, size_t metasize);
 
-	const wxString & GetName() const { return Name; } //!< ストレージ名を得る
+	const wxString & GetInArchiveName() const { return InArchiveName; } //!< ストレージ名を得る
 	const wxDateTime & GetTime() const { return Time; } //!< タイムスタンプを得る
 	wxUint16 GetFlags() const { return Flags; } //!< フラグを得る
+	void SetFlags(wxUint16 flags) { Flags = flags; } 
 };
 //---------------------------------------------------------------------------
 
@@ -50,3 +63,4 @@ public:
 		GetItemVector() const { return ItemVector; } // ストレージの配列を得る
 };
 //---------------------------------------------------------------------------
+#endif

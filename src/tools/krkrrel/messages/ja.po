@@ -1,26 +1,74 @@
-#: ConsoleMain.cpp:43
+#: ConsoleMain.cpp:48
 #, c-format
 msgid "%d percent done\r"
 msgstr ""
 
+#: ConsoleMain.cpp:81
+msgid "show help message"
+msgstr ""
+
+#: ConsoleMain.cpp:83
+msgid "split archive in given size (MB)"
+msgstr ""
+
+#: ConsoleMain.cpp:85
+msgid "patch revision"
+msgstr ""
+
+#: ConsoleMain.cpp:87
+msgid "regex pattern for files to be compressed"
+msgstr ""
+
+#: ConsoleMain.cpp:89
+msgid "regex pattern for files to be excluded"
+msgstr ""
+
+#: ConsoleMain.cpp:91
+msgid "show progress"
+msgstr ""
+
+#: ConsoleMain.cpp:93
+msgid "do not make output"
+msgstr ""
+
+#: ConsoleMain.cpp:95
+msgid "force making a new archive set (do not make a patch)"
+msgstr ""
+
+#: ConsoleMain.cpp:97
+msgid "list files in archive set (default if no dir given)"
+msgstr ""
+
+#: ConsoleMain.cpp:99
+msgid "archive-file"
+msgstr ""
+
+#: ConsoleMain.cpp:101
+msgid "dir"
+msgstr ""
+
+#: ConsoleMain.cpp:118
+msgid "Kirikiri3 Releaser (utility for XP4 archive file system)"
+msgstr ""
+
 #. ディレクトリのオープンに失敗したとき
-#: FileList.cpp:65
+#: FileList.cpp:67
 #, c-format
 msgid "Cannot open directory %s"
 msgstr " %s "
 
-#: FileList.cpp:69
+#: FileList.cpp:72
 #, c-format
 msgid "Cannot read directory %s"
 msgstr " %s "
 
-#: FileList.cpp:152 FileList.cpp:159
+#: FileList.cpp:158 FileList.cpp:165
 #, c-format
 msgid "Error while compiling regular expression %s"
 msgstr ""
 
 #. 圧縮に失敗
-#: WriteXP4.cpp:572
+#: WriteXP4.cpp:568
 msgid "Failed to compress the index data"
 msgstr ""
 
@@ -30,12 +78,12 @@ msgid "chunk 'info' not found"
 msgstr ""
 
 #. シグニチャが一致しない
-#: ReadXP4Meta.cpp:166
+#: ReadXP4Meta.cpp:167
 #, c-format
 msgid "'%s' is not an XP4 archive file"
 msgstr ""
 
-#: ReadXP4Meta.cpp:213
+#: ReadXP4Meta.cpp:214
 #, c-format
 msgid "decompression of archive index of '%s' failed"
 msgstr ""

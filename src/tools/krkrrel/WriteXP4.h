@@ -15,7 +15,7 @@
 
 #include "ProgressCallback.h"
 #include "wxFileWrapper.h"
-
+#include "ReadXP4Meta.h"
 
 //---------------------------------------------------------------------------
 // 使用する hash アルゴリズムに関する定義
@@ -84,23 +84,35 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		XP4アーカイブへ格納するファイルのアイテム
 //---------------------------------------------------------------------------
-class tTVPXP4WriterInputFile
+class tTVPXP4WriterInputFile : public tTVPXP4MetadataReaderStorageItem
 {
-public:
-	tTVPXP4WriterInputFile(
-		const wxString & inputname,
-		const wxString & basedirname,
-		const wxString & inarchivename,
-		wxUint16 flags = 0)
-		: InputName(inputname),
-		BaseDirName(basedirname),
-		InArchiveName(inarchivename),
-		Flags(flags) {;} //!< コンストラクタ
-
+protected:
 	wxString InputName; //!< 入力ファイル名(ベースディレクトリ名部分をのぞく)
 	wxString BaseDirName; //!< 入力ファイルのベースディレクトリ名
-	wxString InArchiveName; //!< アーカイブ内での名前(TVPNormalizeXP4ArchiveStorageNameで正規化後)
-	wxUint16 Flags; //!< フラグ
+
+public:
+	tTVPXP4WriterInputFile(
+		const wxString & inarchivename,
+		wxUint16 flags = 0,
+		const wxDateTime & time = wxDateTime(),
+		const wxString & inputname = wxEmptyString,
+		const wxString & basedirname = wxEmptyString) :
+				tTVPXP4MetadataReaderStorageItem(inarchivename, flags, time),
+				InputName(inputname),
+				BaseDirName(basedirname)
+				 {;}  //!< コンストラクタ
+	tTVPXP4WriterInputFile(const tTVPXP4MetadataReaderStorageItem & ref) :
+		tTVPXP4MetadataReaderStorageItem(ref)
+				 {;} //!< コンストラクタ
+
+	bool operator < (const tTVPXP4WriterInputFile & rhs) const
+	{
+		// 比較用演算子
+		return InputName < rhs.InputName;
+	}
+
+	const wxString & GetInputName() const { return InputName; } //!< 入力ファイル名を得る
+	const wxString & GetBaseDirName() const { return BaseDirName; } //!< 入力ファイルのベースディレクトリ名を得る
 };
 //---------------------------------------------------------------------------
 
@@ -108,10 +120,9 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		アーカイブ内のストレージアイテムを表すクラス
 //---------------------------------------------------------------------------
-class tTVPXP4WriterStorage : protected tTVPXP4WriterInputFile
+class tTVPXP4WriterStorage : public tTVPXP4WriterInputFile
 {
 	wxFileOffset Size; //!< (無圧縮時の)ファイルサイズ
-	wxDateTime ModTime; //!< ファイル修正のタイムスタンプ
 	std::vector<tTVPXP4WriterSegment> SegmentVector; //!< セグメントの配列
 	tTVPXP4WriterHash Hash; //!< ハッシュ
 	bool IsReference; //!< 他のストレージアイテムを参照している場合は 真
@@ -125,8 +136,6 @@ public:
 		const tTVPXP4WriterStorage & ref);
 
 	wxFileOffset GetSize() const { return Size; } //!< サイズを得る
-	const wxString & GetInputName() const { return InputName; } //!< 入力ファイル名を得る
-	wxUint16 GetFlags() const { return Flags; } //!< フラグを得る
 	const tTVPXP4WriterHash & GetHash() const { return Hash; } //!< ハッシュを得る
 
 	void MakeHash(iTVPProgressCallback * callback);

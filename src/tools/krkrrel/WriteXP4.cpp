@@ -268,9 +268,6 @@ tTVPXP4WriterStorage::tTVPXP4WriterStorage(
 	{
 		Size = -1;
 	}
-
-	// ファイルの更新タイムスタンプを得る
-	ModTime = wxFileName(BaseDirName + InputName).GetModificationTime();
 }
 //---------------------------------------------------------------------------
 
@@ -290,7 +287,6 @@ tTVPXP4WriterStorage::tTVPXP4WriterStorage(
 
 	// 参照アイテムからデータをコピー
 	Size = ref.Size;
-	ModTime = ref.ModTime;
 	SegmentVector = ref.SegmentVector;
 	Hash = ref.Hash;
 }
@@ -441,14 +437,14 @@ void tTVPXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 		newbuf.AppendData(time_chunk, 4);
 		i32 = wxUINT32_SWAP_ON_BE(9); // chunksize
 		newbuf.AppendData(&i32, sizeof(i32));
-		i16 = wxINT16_SWAP_ON_BE(ModTime.GetYear());
+		i16 = wxINT16_SWAP_ON_BE(Time.GetYear());
 		newbuf.AppendData(&i16, sizeof(i16)); // Year
-		newbuf.AppendByte(ModTime.GetMonth()); // Month
-		newbuf.AppendByte(ModTime.GetDay()); // Day
-		newbuf.AppendByte(ModTime.GetHour()); // Hour
-		newbuf.AppendByte(ModTime.GetMinute()); // Minute
-		newbuf.AppendByte(ModTime.GetSecond()); // Second
-		i16 = wxUINT16_SWAP_ON_BE(ModTime.GetMillisecond());
+		newbuf.AppendByte(Time.GetMonth()); // Month
+		newbuf.AppendByte(Time.GetDay()); // Day
+		newbuf.AppendByte(Time.GetHour()); // Hour
+		newbuf.AppendByte(Time.GetMinute()); // Minute
+		newbuf.AppendByte(Time.GetSecond()); // Second
+		i16 = wxUINT16_SWAP_ON_BE(Time.GetMillisecond());
 		newbuf.AppendData(&i16, sizeof(i16)); // Millisecond
 	}
 

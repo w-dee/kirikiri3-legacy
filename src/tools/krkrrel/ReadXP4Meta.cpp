@@ -111,7 +111,8 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 
 	// info チャンクから情報を読み取る
 	Flags = TVPReadI16LEFromMem(chunk + 0);
-	Name = wxString((const char *)(chunk + 2), wxConvUTF8);
+	Flags &=~ TVP_XP4_FILE_MARKED; // MARKED はクリア
+	InArchiveName = wxT("/") + wxString((const char *)(chunk + 2), wxConvUTF8);
 
 	// time チャンクを探す
 	static unsigned char chunkname_date[] = { 't', 'i', 'm', 'e' };
@@ -120,7 +121,7 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 		// time チャンクから情報を読み取る
 		// time チャンクは ファイルが '削除' とマークされている場合は
 		// 存在しない
-		wxDateTime::Month monthes[] =
+		static wxDateTime::Month monthes[] =
 			{wxDateTime::Jan, wxDateTime::Feb, wxDateTime::Mar, wxDateTime::Apr,
 			 wxDateTime::May, wxDateTime::Jun, wxDateTime::Jul, wxDateTime::Aug,
 			 wxDateTime::Sep, wxDateTime::Oct, wxDateTime::Nov, wxDateTime::Dec};

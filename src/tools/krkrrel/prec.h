@@ -13,6 +13,8 @@
 	// for pre-compiled headers
 	// 頻繁に使うヘッダはこの中にかいてください
 	#include <wx/wx.h>
+	#include <wx/cmdline.h>
+	#include <wx/textfile.h>
 	#include <wx/file.h>
 	#include <wx/dir.h>
 	#include <wx/datetime.h>

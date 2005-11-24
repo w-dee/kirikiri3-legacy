@@ -14,6 +14,45 @@
 #include "ReadXP4Meta.h"
 #include "wxFileWrapper.h"
 #include <zlib.h>
+#include <tomcrypt.h>
+
+
+//---------------------------------------------------------------------------
+//! @brief		ファイルのハッシュ値を計算する
+//! @param		callback: 進捗コールバックオブジェクト
+//! @param		filename: ハッシュを計算するファイル名
+//---------------------------------------------------------------------------
+void tTVPXP4Hash::MakeHash(iTVPProgressCallback * callback, const wxString &filename)
+{
+	if(find_hash(TVP_XP4_HASH_METHOD_INTERNAL_STRING) == -1)
+	{
+		int errnum = register_hash(&TVP_XP4_HASH_DESC);
+		if(errnum != CRYPT_OK) throw wxString(error_to_string(errnum), wxConvUTF8);
+	}
+
+	hash_state st;
+	TVP_XP4_HASH_INIT(&st);
+
+	wxFileEx file(filename);
+
+	wxFileOffset size = file.Length();
+	wxFileOffset left = size;
+	unsigned char buf[8192];
+	while(left > 0)
+	{
+		unsigned long onesize = 
+			left > sizeof(buf) ? sizeof(buf) : (unsigned long)left;
+		file.ReadBuffer(buf, onesize);
+		TVP_XP4_HASH_DO_PROCESS(&st, buf, onesize);
+		left -= onesize;
+		if(callback) callback->OnProgress((int)((size - left) * 100 / size));
+	}
+
+	TVP_XP4_HASH_DONE(&st, Hash);
+}
+//---------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------
 //! @brief		指定された位置のメモリから16bit LE整数を読み込む
@@ -115,8 +154,8 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 	InArchiveName = wxT("/") + wxString((const char *)(chunk + 2), wxConvUTF8);
 
 	// time チャンクを探す
-	static unsigned char chunkname_date[] = { 't', 'i', 'm', 'e' };
-	if(TVPFindChunk(chunkname_date, meta, metasize, &chunk, &chunksize))
+	static unsigned char chunkname_time[] = { 't', 'i', 'm', 'e' };
+	if(TVPFindChunk(chunkname_time, meta, metasize, &chunk, &chunksize))
 	{
 		// time チャンクから情報を読み取る
 		// time チャンクは ファイルが '削除' とマークされている場合は
@@ -134,6 +173,50 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 			chunk[6], // second
 			TVPReadI16LEFromMem(chunk + 7) // millisecond
 			 );
+	}
+	else
+	{
+		if(!(Flags & TVP_XP4_FILE_DELETED))
+			throw wxString(_("chunk 'time' not found"));
+	}
+
+	// Segm チャンクを探す
+	static unsigned char chunkname_Segm[] = { 'S', 'e', 'g', 'm' };
+	if(TVPFindChunk(chunkname_Segm, meta, metasize, &chunk, &chunksize))
+	{
+		Size = 0;
+		// すべての segm チャンクを探し、サイズを合計する
+		static unsigned char chunkname_segm[] = { 's', 'e', 'g', 'm' };
+		const unsigned char * subchunk;
+		size_t subchunksize;
+		const unsigned char *chunk_limit = chunk + chunksize;
+		size_t left = chunk_limit - chunk;
+		while(TVPFindChunk(chunkname_segm, chunk, left, &subchunk, &subchunksize))
+		{
+			// Segm チャンクが見つかった
+			Size += TVPReadI64LEFromMem(subchunk + 9);
+			chunk = subchunk + subchunksize;
+			left = chunk_limit - chunk;
+		}
+	}
+	else
+	{
+		if(!(Flags & TVP_XP4_FILE_DELETED))
+			throw wxString(_("chunk 'Segm' not found"));
+	}
+
+	// sha1 チャンクを探す
+	static unsigned char chunkname_sha1[] = { 's', 'h', 'a', '1' };
+	if(TVPFindChunk(chunkname_sha1, meta, metasize, &chunk, &chunksize))
+	{
+		if(chunksize != (size_t)tTVPXP4Hash::GetSize())
+			throw wxString(_("invalid 'sha1' chunk"));
+		Hash.SetHash(chunk);
+	}
+	else
+	{
+		if(!(Flags & TVP_XP4_FILE_DELETED))
+			throw wxString(_("chunk 'sha1' not found"));
 	}
 }
 //---------------------------------------------------------------------------

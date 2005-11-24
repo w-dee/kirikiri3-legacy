@@ -15,11 +15,11 @@
 #include "WriteXP4.h"
 #include "ReadXP4Meta.h"
 //---------------------------------------------------------------------------
+void TVPXP4GetDefaultClassList(wxArrayString & dest);
 void TVPGetFileListAt(iTVPProgressCallback * callback,
 	const wxString & dir, std::vector<tTVPXP4WriterInputFile> & dest);
-void TVPClassifyFiles(iTVPProgressCallback * callback,
-	const wxArrayString & excludepat,
-	const wxArrayString & compresspat,
+void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
+	const wxArrayString & pattern,
 	std::vector<tTVPXP4WriterInputFile> &  dest
 	);
 wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name);
@@ -30,6 +30,7 @@ void TVPReadXP4Metadata(
 void TVPXP4MetadataReaderStorageItemToXP4WriterInputFile(
 	const std::map<wxString, tTVPXP4MetadataReaderStorageItem> & input,
 	std::vector<tTVPXP4WriterInputFile> & output);
+void TVPDeleteArchiveSet(const wxString & archivename);
 //---------------------------------------------------------------------------
 
 #endif

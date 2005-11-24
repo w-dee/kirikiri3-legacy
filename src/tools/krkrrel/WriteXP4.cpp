@@ -15,7 +15,6 @@
 #include "XP4Archive.h"
 #include "FileList.h"
 #include <zlib.h>
-#include <tomcrypt.h>
 
 /*
 	XP4 アーカイブファイルは、実のところ XP3 アーカイブと大差はない。
@@ -59,7 +58,7 @@ static wxFileOffset TVPCopyFile(iTVPProgressCallback * callback,
 {
 	wxFileOffset copied = 0;
 	unsigned char *buf = new unsigned char [TVP_COPY_BUF_SIZE];
-	callback->OnProgress(0);
+	if(callback) callback->OnProgress(0);
 	try
 	{
 		wxFileOffset left = size;
@@ -74,7 +73,7 @@ static wxFileOffset TVPCopyFile(iTVPProgressCallback * callback,
 			copied += one_size;
 			left -= one_size;
 
-			callback->OnProgress((int)(copied * 100 / size));
+			if(callback) callback->OnProgress((int)(copied * 100 / size));
 		}
 	}
 	catch(...)
@@ -83,7 +82,7 @@ static wxFileOffset TVPCopyFile(iTVPProgressCallback * callback,
 		throw;
 	}
 	delete [] buf;
-	callback->OnProgress(100);
+	if(callback) callback->OnProgress(100);
 	return copied;
 }
 //---------------------------------------------------------------------------
@@ -128,7 +127,7 @@ void tTVPXP4WriterSegment::WriteBody(iTVPProgressCallback * callback,
 		wxFileEx & input, wxFileEx & file)
 {
 	// コールバックを呼ぶ
-	callback->OnProgress(0);
+	if(callback) callback->OnProgress(0);
 
 	// アーカイブファイルを 8 bytes 境界にアラインメントする
 	file.Align(8);
@@ -195,7 +194,7 @@ void tTVPXP4WriterSegment::WriteBody(iTVPProgressCallback * callback,
 	}
 
 	// コールバックを呼ぶ
-	callback->OnProgress(100); // 100%
+	if(callback) callback->OnProgress(100); // 100%
 }
 //---------------------------------------------------------------------------
 
@@ -210,11 +209,11 @@ void tTVPXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
 	// データ構造(全てLE)
 	// uint32		'segm' subchunk
 	// uint32		chunksize = 33
-	// uint8		Flags
-	// uint64		Offset
-	// uint64		Size
-	// uint64		StoreOffset
-	// uint64		StoreSize
+	// +0  uint8	Flags
+	// +1  uint64	Offset
+	// +9  uint64	Size
+	// +17 uint64	StoreOffset
+	// +25 uint64	StoreSize
 	wxUint32 i32;
 	wxUint64 i64;
 
@@ -257,17 +256,6 @@ tTVPXP4WriterStorage::tTVPXP4WriterStorage(
 			: tTVPXP4WriterInputFile(inputfile)
 {
 	IsReference = false;
-
-	// ファイルサイズを得る
-	if(!(Flags & TVP_XP4_FILE_DELETED))
-	{
-		wxFileEx file(BaseDirName + InputName);
-		Size = file.Length();
-	}
-	else
-	{
-		Size = -1;
-	}
 }
 //---------------------------------------------------------------------------
 
@@ -294,35 +282,15 @@ tTVPXP4WriterStorage::tTVPXP4WriterStorage(
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルのハッシュ値を計算する
+//! @brief		ファイルのハッシュを得る
 //---------------------------------------------------------------------------
 void tTVPXP4WriterStorage::MakeHash(iTVPProgressCallback * callback)
 {
-	if(find_hash(TVP_XP4_HASH_METHOD_INTERNAL_STRING) == -1)
+	if(!Hash.GetHasHash())
 	{
-		int errnum = register_hash(&TVP_XP4_HASH_DESC);
-		if(errnum != CRYPT_OK) throw wxString(error_to_string(errnum), wxConvUTF8);
+		// ハッシュがまだ計算されていない場合は計算を行う
+		Hash.MakeHash(callback, BaseDirName + InputName);
 	}
-
-
-	hash_state st;
-	TVP_XP4_HASH_INIT(&st);
-
-	wxFileEx file(BaseDirName + InputName);
-
-	wxFileOffset left = Size;
-	unsigned char buf[8192];
-	while(left > 0)
-	{
-		unsigned long onesize = 
-			left > sizeof(buf) ? sizeof(buf) : (unsigned long)left;
-		file.ReadBuffer(buf, onesize);
-		TVP_XP4_HASH_DO_PROCESS(&st, buf, onesize);
-		left -= onesize;
-		callback->OnProgress((int)((Size - left) * 100 / Size));
-	}
-
-	TVP_XP4_HASH_DONE(&st, Hash);
 }
 //---------------------------------------------------------------------------
 
@@ -486,7 +454,7 @@ tTVPXP4WriterArchive::tTVPXP4WriterArchive(const wxString & filename) :
 	wxFileEx file(FileName, wxFile::write);
 
 	static unsigned char XP4Mark1[] = // 8bytes
-		{ 0x58/*'X'*/, 0x50/*'P'*/, 0x34/*'4'*/, 0x0d/*'\r'*/,
+		{ 0x58/*'\x00'*/, 0x50/*'P'*/, 0x34/*'4'*/, 0x0d/*'\r'*/,
 		  0x0a/*'\n'*/, 0x20/*' '*/, 0x0a/*'\n'*/, 0x1a/*EOF*/,
 		  0xff /* sentinel */ };
 	static unsigned char XP4Mark2[] = // 3bytes
@@ -494,6 +462,9 @@ tTVPXP4WriterArchive::tTVPXP4WriterArchive(const wxString & filename) :
 
 	file.WriteBuffer(XP4Mark1, 8);
 	file.WriteBuffer(XP4Mark2, 3);
+
+	// この時点で、ファイルの先頭のバイトは本来 'X' であるはずだが、\0 が
+	// 書き込まれている (アーカイブファイル作成の最終段階で 'X' に書き戻す)
 
 	// この時点で ファイルポインタは 11 バイト目!
 
@@ -565,7 +536,8 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 			if(res != Z_OK)
 			{
 				// 圧縮に失敗
-				throw wxString(_("Failed to compress the index data"));
+				throw wxString::Format(_("failed to compress the index data of file '%s'"),
+						FileName.c_str());
 			}
 		}
 		else
@@ -574,7 +546,7 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 			compsize = inputsize;
 		}
 
-		callback->OnProgress(75); // 75% ぐらい？
+		if(callback) callback->OnProgress(75); // 75% ぐらい？
 
 		// インデックスを書き込む
 		file.Align(8); // 8バイト境界にアライン
@@ -600,7 +572,7 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 	}
 	if(outbuf) delete [] outbuf;
 
-	callback->OnProgress(90); // 90% ぐらい？
+	if(callback) callback->OnProgress(90); // 90% ぐらい？
 
 	// インデックスへのオフセットを書き込む
 	file.SetPosition(11); // オフセットが書き込まれる位置
@@ -608,7 +580,11 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 	i64 = wxUINT64_SWAP_ON_BE(index_ofs);
 	file.WriteBuffer(&i64, sizeof(i64)); // index offset
 
-	callback->OnProgress(100);
+	// アーカイブファイルの先頭を 'X' にする
+	file.SetPosition(0);
+	file.WriteBuffer("X", 1);
+
+	if(callback) callback->OnProgress(100);
 }
 //---------------------------------------------------------------------------
 
@@ -686,12 +662,12 @@ void tTVPXP4Writer::MakeArchive()
 	// TODO: ファイルが無かった場合の処理は？
 
 	// どのファイルがどのアーカイブに入っているかをハッシュから求めるmap
-	std::map<tTVPXP4WriterHash, std::pair<size_t, size_t> > storage_archive_map;
+	std::map<tTVPXP4Hash, std::pair<size_t, size_t> > storage_archive_map;
 
 	// 進捗コールバックアグリゲータ
 	tTVPProgressCallbackAggregator agg(ProgressCallback, 0, 33);
 
-	// ファイルサイズを得ながら sorted_list に追加する
+	// ファイルサイズ・ハッシュを得ながら sorted_list に追加する
 	// 0 ～ 33% 区間
 	sorted_list.reserve(List.size());
 	size_t file_count = List.size();
@@ -743,7 +719,7 @@ void tTVPXP4Writer::MakeArchive()
 		size_t storage_idx = 0;
 
 		// map を参照する
-		std::map<tTVPXP4WriterHash, std::pair<size_t, size_t> >::iterator ih;
+		std::map<tTVPXP4Hash, std::pair<size_t, size_t> >::iterator ih;
 		ih = storage_archive_map.find(i->GetHash());
 		if(ih != storage_archive_map.end())
 		{
@@ -803,7 +779,7 @@ void tTVPXP4Writer::MakeArchive()
 
 		// map に追加
 		storage_archive_map.insert(
-			std::pair<tTVPXP4WriterHash, std::pair<size_t, size_t> >
+			std::pair<tTVPXP4Hash, std::pair<size_t, size_t> >
 					(sorted_list[idx].GetHash(),
 					std::pair<size_t, size_t>(volnum, storage_idx)));
 	}

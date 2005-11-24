@@ -44,8 +44,11 @@ public:
 
 	void OnProgress(int percent)
 	{
-		int p = percent * (PercentHigh - PercentLow) / 100 + PercentLow;
-		Destination->OnProgress(p);
+		if(Destination)
+		{
+			int p = percent * (PercentHigh - PercentLow) / 100 + PercentLow;
+			Destination->OnProgress(p);
+		}
 	}
 
 	void SetRange(int percentlow, int percenthigh)

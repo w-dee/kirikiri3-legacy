@@ -14,10 +14,10 @@ SH = sh
 
 LIBS = -L"$(MINGWROOT)/lib"  \
 	-Wl,--enable-auto-import \
-	-lwx_baseu-2.6.dll \
-	-lwx_mswu_core-2.6.dll \
-	-lwx_mswu_adv-2.6.dll \
-	-lwx_baseu_xml-2.6.dll \
+	-lwx_baseud-2.6.dll \
+	-lwx_mswud_core-2.6.dll \
+	-lwx_mswud_adv-2.6.dll \
+	-lwx_baseud_xml-2.6.dll \
 	-lwxzlib-2.6 \
 	-ltomcrypt \
 	-lunicows \
@@ -67,12 +67,12 @@ LINKOBJS = $(OBJS)
 CPPINCLUDE = \
 	-I"$(MINGWROOT)/include" \
 	-I"$(MINGWROOT)/include/tomcrypt" \
-	-I"$(MINGWROOT)/lib/wx/include/msw-unicode-release-2.6" \
-	-I"msw" \
+	-I"$(MINGWROOT)/include/wx-2.6" \
+	-I"$(MINGWROOT)/lib/wx/include/msw-unicode-debug-2.6" \
 	-I"."
 
 CPPFLAGS = $(CPPINCLUDE) \
-	-g \
+	-ggdb \
 	-O0 \
 	-Winvalid-pch \
 	-mconsole \

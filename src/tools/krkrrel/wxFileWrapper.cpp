@@ -55,7 +55,7 @@ void wxFileEx::Create(const wxChar* filename, bool overwrite, int access)
 	if(!inherited::Create(filename, overwrite, access))
 		RAISE_EXCEPTION(
 			wxString::Format(
-				_("Can't create file %s"), filename));
+				_("can not create file '%s'"), filename));
 	FileName = filename;
 }
 //---------------------------------------------------------------------------
@@ -89,7 +89,7 @@ void wxFileEx::SetPosition(wxFileOffset ofs)
 {
 	if(inherited::Seek(ofs) != ofs)
 		RAISE_EXCEPTION(
-			wxString::Format(_("Seeking failed on file %s, pointer %lld"),
+			wxString::Format(_("failed to seek on file '%s', pointer %lld"),
 				FileName.c_str(), (wxUint64)ofs));
 }
 //---------------------------------------------------------------------------
@@ -97,21 +97,21 @@ void wxFileEx::ReadBuffer(void* buffer, size_t count)
 {
 	if((size_t)inherited::Read(buffer, count) != count)
 		RAISE_EXCEPTION(
-			wxString::Format(_("Read failed from flie %s"), FileName.c_str()));
+			wxString::Format(_("failed to read from file '%s'"), FileName.c_str()));
 }
 //---------------------------------------------------------------------------
 void wxFileEx::WriteBuffer(const void* buffer, wxFileOffset count)
 {
 	if(inherited::Write(buffer, count) != count)
 		RAISE_EXCEPTION(
-			wxString::Format(_("Write failed to flie %s"), FileName.c_str()));
+			wxString::Format(_("failed to write to file '%s'"), FileName.c_str()));
 }
 //---------------------------------------------------------------------------
 void wxFileEx::Write(const wxString& s, wxMBConv& conv)
 {
 	if(!inherited::Write(s, conv))
 		RAISE_EXCEPTION(
-			wxString::Format(_("Write failed to flie %s"), FileName.c_str()));
+			wxString::Format(_("failed to write to file '%s'"), FileName.c_str()));
 }
 //---------------------------------------------------------------------------
 void wxFileEx::RaiseOpenError(const wxChar * filename, wxFile::OpenMode mode)
@@ -119,11 +119,11 @@ void wxFileEx::RaiseOpenError(const wxChar * filename, wxFile::OpenMode mode)
 	if(mode == wxFile::read)
 		RAISE_EXCEPTION(
 			wxString::Format(
-				_("Can't open file %s for reading"), filename));
+				_("can not open file '%s' for reading"), filename));
 	else
 		RAISE_EXCEPTION(
 			wxString::Format(
-				_("Can't open file %s for writing"), filename));
+				_("can not open file '%s' for writing"), filename));
 }
 //---------------------------------------------------------------------------
 

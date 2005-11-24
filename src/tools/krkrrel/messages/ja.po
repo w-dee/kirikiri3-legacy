@@ -1,136 +1,179 @@
-#: ConsoleMain.cpp:48
-#, c-format
-msgid "%d percent done\r"
+# Kirikiri3 Releaser tool messages.
+# Copyright (C) 2005 W.Dee and contributors
+# This file is distributed under the same license as the Kirikiri3 package.
+# W.Dee <dee@kikyou.info>, 2005.
+#
+msgid ""
 msgstr ""
+"Project-Id-Version: Kirikiri3-krkrrel 1.00\n"
+"PO-Revision-Date: 2005-10-03 10:53+0900\n"
+"Last-Translator: W.Dee <dee@kikyou.info>\n"
+"Language-Team: W.Dee <dee@kikyou.info>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Report-Msgid-Bugs-To: \n"
 
-#: ConsoleMain.cpp:81
+#: ConsoleMain.cpp:18
 msgid "show help message"
-msgstr ""
+msgstr "このヘルプを表示して終了"
 
-#: ConsoleMain.cpp:83
+#: ConsoleMain.cpp:20
 msgid "split archive in given size (MB)"
-msgstr ""
+msgstr "アーカイブを指定された容量(MB)で分割"
 
-#: ConsoleMain.cpp:85
+#: ConsoleMain.cpp:22
 msgid "patch revision"
-msgstr ""
+msgstr "パッチリビジョンを指定"
 
-#: ConsoleMain.cpp:87
-msgid "regex pattern for files to be compressed"
-msgstr ""
-
-#: ConsoleMain.cpp:89
-msgid "regex pattern for files to be excluded"
-msgstr ""
-
-#: ConsoleMain.cpp:91
+#: ConsoleMain.cpp:24
 msgid "show progress"
-msgstr ""
+msgstr "進捗を表示する"
 
-#: ConsoleMain.cpp:93
+#: ConsoleMain.cpp:26
 msgid "do not make output"
-msgstr ""
+msgstr "出力ファイルを作成しない(テスト用)"
+
+#: ConsoleMain.cpp:28
+msgid "regex list file for file classification"
+msgstr "ファイル分類用正規表現リストファイルを指定"
+
+#: ConsoleMain.cpp:30
+msgid "force making a new archive set (not a patch)"
+msgstr "パッチを作成せずに新規にファイルを作成"
+
+#: ConsoleMain.cpp:32
+msgid "show file list in archive set"
+msgstr "アーカイブセット内のファイル一覧を表示"
+
+#: ConsoleMain.cpp:34
+msgid "show default classification regex list"
+msgstr "デフォルトの分類用正規表現リストを表示"
+
+#: ConsoleMain.cpp:36
+msgid "archive-file"
+msgstr "アーカイブファイル"
+
+#: ConsoleMain.cpp:38
+msgid "dir"
+msgstr "対象ディレクトリ"
 
 #: ConsoleMain.cpp:95
-msgid "force making a new archive set (do not make a patch)"
-msgstr ""
+#, c-format
+msgid "%d percent done"
+msgstr "%d パーセント完了"
 
-#: ConsoleMain.cpp:97
-msgid "list files in archive set (default if no dir given)"
-msgstr ""
-
-#: ConsoleMain.cpp:99
-msgid "archive-file"
-msgstr ""
-
-#: ConsoleMain.cpp:101
-msgid "dir"
-msgstr ""
-
-#: ConsoleMain.cpp:118
+#. コマンドライン引数を解析
+#: ConsoleMain.cpp:147
 msgid "Kirikiri3 Releaser (utility for XP4 archive file system)"
-msgstr ""
+msgstr "吉里吉里3 Releaser (XP4アーカイブファイルのためのユーティリティ)"
+
+#: ConsoleMain.cpp:215
+msgid "please specify target 'dir'"
+msgstr "対象ディレクトリ 'dir' を指定してください"
+
+#: ConsoleMain.cpp:308
+#, c-format
+msgid "can not load class file '%s'"
+msgstr "分類用ファイル '%s' を開くことができません"
 
 #. ディレクトリのオープンに失敗したとき
-#: FileList.cpp:67
+#: FileList.cpp:153
 #, c-format
-msgid "Cannot open directory %s"
-msgstr " %s "
+msgid "can not open directory '%s'"
+msgstr "ディレクトリ '%s' を開くことができません"
 
-#: FileList.cpp:72
+#: FileList.cpp:158
 #, c-format
-msgid "Cannot read directory %s"
-msgstr " %s "
+msgid "can not read directory '%s'"
+msgstr "ディレクトリ '%s' を読み込むことができません"
 
-#: FileList.cpp:158 FileList.cpp:165
+#: FileList.cpp:273
 #, c-format
-msgid "Error while compiling regular expression %s"
-msgstr ""
+msgid "error in regular expression '%s'"
+msgstr "正規表現 '%s' にエラーがあります"
 
 #. 圧縮に失敗
-#: WriteXP4.cpp:568
-msgid "Failed to compress the index data"
-msgstr ""
+#: WriteXP4.cpp:539
+#, c-format
+msgid "failed to compress the index data of file '%s'"
+msgstr "ファイル '%s' のインデックスの圧縮に失敗しました"
 
 #. info チャンクが見つからなかった
-#: ReadXP4Meta.cpp:109
+#: ReadXP4Meta.cpp:148
 msgid "chunk 'info' not found"
-msgstr ""
+msgstr "チャンク 'info' が見つかりません"
+
+#: ReadXP4Meta.cpp:180
+msgid "chunk 'time' not found"
+msgstr "チャンク 'time' が見つかりません"
+
+#: ReadXP4Meta.cpp:205
+msgid "chunk 'Segm' not found"
+msgstr "チャンク 'Segm' が見つかりません"
+
+#: ReadXP4Meta.cpp:213
+msgid "invalid 'sha1' chunk"
+msgstr "'sha1' チャンクが異常です"
+
+#: ReadXP4Meta.cpp:219
+msgid "chunk 'sha1' not found"
+msgstr "チャンク 'sha1' が見つかりません"
 
 #. シグニチャが一致しない
-#: ReadXP4Meta.cpp:167
+#: ReadXP4Meta.cpp:250
 #, c-format
 msgid "'%s' is not an XP4 archive file"
-msgstr ""
+msgstr "'%s' は XP4 アーカイブファイルではありません"
 
-#: ReadXP4Meta.cpp:214
+#: ReadXP4Meta.cpp:297
 #, c-format
 msgid "decompression of archive index of '%s' failed"
-msgstr ""
+msgstr "アーカイブファイル '%s' のインデックスの展開に失敗しました"
 
 #: wxFileWrapper.cpp:58
 #, c-format
-msgid "Can't create file %s"
-msgstr ""
+msgid "can not create file '%s'"
+msgstr "ファイル '%s' を作成することができません"
 
 #: wxFileWrapper.cpp:72
 msgid "Standard Input"
-msgstr ""
+msgstr "標準入力"
 
 #: wxFileWrapper.cpp:74
 msgid "Standard Output"
-msgstr ""
+msgstr "標準出力"
 
 #: wxFileWrapper.cpp:76
 msgid "Standard Error Output"
-msgstr ""
+msgstr "標準エラー出力"
 
 #: wxFileWrapper.cpp:78
 #, c-format
 msgid "File Descriptor %d"
-msgstr ""
+msgstr "ファイル ディスクリプタ %d"
 
 #: wxFileWrapper.cpp:92
 #, c-format
-msgid "Seeking failed on file %s, pointer %lld"
-msgstr ""
+msgid "failed to seek on file '%s', pointer %lld"
+msgstr "ファイル '%s' の ポインタ %lld へのシークに失敗しました"
 
 #: wxFileWrapper.cpp:100
 #, c-format
-msgid "Read failed from flie %s"
-msgstr ""
+msgid "failed to read from file '%s'"
+msgstr "ファイル '%s' からの読み込みに失敗しました"
 
 #: wxFileWrapper.cpp:107 wxFileWrapper.cpp:114
 #, c-format
-msgid "Write failed to flie %s"
-msgstr ""
+msgid "failed to write to file '%s'"
+msgstr "ファイル '%s' への書き込みに失敗しました"
 
 #: wxFileWrapper.cpp:122
 #, c-format
-msgid "Can't open file %s for reading"
-msgstr ""
+msgid "can not open file '%s' for reading"
+msgstr "ファイル '%s' を読み込み用に開くことができません"
 
 #: wxFileWrapper.cpp:126
 #, c-format
-msgid "Can't open file %s for writing"
-msgstr ""
+msgid "can not open file '%s' for writing"
+msgstr "ファイル '%s' を書き込みように開くことができません"

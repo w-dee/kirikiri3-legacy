@@ -1,5 +1,7 @@
 BIN=krkrrel.exe
 
+DEBUG=yes
+
 MINGWROOT = C:/MinGW
 CXX = g++
 WINDRES = windres
@@ -12,12 +14,22 @@ SED = sed
 FIND = find
 SH = sh
 
+ifeq ($(DEBUG),yes)
+DEBUG_LIB_SUFFIX=d
+DEBUG_CFLAGS=-O0 -D__WXDEBUG__ -g
+WX_CONFIG_INCLUDE_NAME=debug
+else
+DEBUG_LIB_SUFFIX=
+DEBUG_CFLAGS=-O2 -g
+WX_CONFIG_INCLUDE_NAME=release
+endif
+
 LIBS = -L"$(MINGWROOT)/lib"  \
 	-Wl,--enable-auto-import \
-	-lwx_baseud-2.6.dll \
-	-lwx_mswud_core-2.6.dll \
-	-lwx_mswud_adv-2.6.dll \
-	-lwx_baseud_xml-2.6.dll \
+	-lwx_baseu$(DEBUG_LIB_SUFFIX)-2.6.dll \
+	-lwx_mswu$(DEBUG_LIB_SUFFIX)_core-2.6.dll \
+	-lwx_mswu$(DEBUG_LIB_SUFFIX)_adv-2.6.dll \
+	-lwx_baseu$(DEBUG_LIB_SUFFIX)_xml-2.6.dll \
 	-lwxzlib-2.6 \
 	-ltomcrypt \
 	-lunicows \
@@ -67,13 +79,11 @@ LINKOBJS = $(OBJS)
 CPPINCLUDE = \
 	-I"$(MINGWROOT)/include" \
 	-I"$(MINGWROOT)/include/tomcrypt" \
+	-I"$(MINGWROOT)/lib/wx/include/msw-unicode-$(WX_CONFIG_INCLUDE_NAME)-2.6" \
 	-I"$(MINGWROOT)/include/wx-2.6" \
-	-I"$(MINGWROOT)/lib/wx/include/msw-unicode-debug-2.6" \
 	-I"."
 
-CPPFLAGS = $(CPPINCLUDE) \
-	-ggdb \
-	-O0 \
+CPPFLAGS = $(CPPINCLUDE) $(DEBUG_CFLAGS) \
 	-Winvalid-pch \
 	-mconsole \
 	-mthreads -fno-pcc-struct-return -fstrict-aliasing -Wall \

@@ -16,6 +16,8 @@ static wxCmdLineEntryDesc * TVPGetCmdLineEntryDesc()
 	{
 		{ wxCMD_LINE_SWITCH, wxT("h"), wxT("help"),
 			_("show help message"), wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+		{ wxCMD_LINE_SWITCH, wxT("u"), wxT("use-archive-target"),
+			_("get target dir from the archive set"), (wxCmdLineParamType)0, 0 },
 		{ wxCMD_LINE_OPTION, wxT("s"), wxT("split"),
 			_("split archive in given size (MB)"), wxCMD_LINE_VAL_NUMBER, 0 },
 		{ wxCMD_LINE_OPTION, wxT("r"), wxT("revision"),
@@ -28,8 +30,8 @@ static wxCmdLineEntryDesc * TVPGetCmdLineEntryDesc()
 			_("regex list file for file classification"), wxCMD_LINE_VAL_STRING, 0 },
 		{ wxCMD_LINE_SWITCH, wxT("n"), wxT("new"),
 			_("force making a new archive set (not a patch)"), (wxCmdLineParamType)0, 0 },
-		{ wxCMD_LINE_SWITCH, wxT("l"), wxT("list"),
-			_("show file list in archive set"), (wxCmdLineParamType)0, 0 },
+		{ wxCMD_LINE_SWITCH, wxT("g"), wxT("show-generation"),
+			_("show archive patch generation history"), (wxCmdLineParamType)0, 0 },
 		{ wxCMD_LINE_SWITCH, NULL, wxT("show-default-class"),
 			_("show default classification regex list"), (wxCmdLineParamType)0, 0 },
 
@@ -78,8 +80,9 @@ wxLocale locale;
 class tTVPProgressCallback : public iTVPProgressCallback
 {
 	bool Show;
+	int PrevPercent;
 public:
-	tTVPProgressCallback(bool show = true) : Show(show) {;}
+	tTVPProgressCallback(bool show = true) : Show(show), PrevPercent(-1) {;}
 	void OnProgress(int percent); // パーセント単位での達成率
 };
 //---------------------------------------------------------------------------
@@ -92,8 +95,12 @@ void tTVPProgressCallback::OnProgress(int percent)
 {
 	if(Show)
 	{
-		wxFprintf(stderr, _("%d percent done"), percent);
-		wxFprintf(stderr, wxT("\n"));
+		if(PrevPercent != percent)
+		{
+			wxFprintf(stderr, _("%d percent done"), percent);
+			wxFprintf(stderr, wxT("\r"));
+			PrevPercent = percent;
+		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -156,9 +163,11 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		}
 
 		// フラグなど
-		tTVPProgressCallback callback(parser.Found(wxT("p")));
-		tTVPProgressCallbackAggregator agg(&callback, 0, 4);
+		bool show_progress = parser.Found(wxT("p"));
+		tTVPProgressCallback callback(show_progress);
+		tTVPProgressCallbackAggregator agg(&callback, 0, 2);
 
+		std::vector<tTVPXP4WriterInputFile> filelist;
 		std::map<wxString, tTVPXP4MetadataReaderStorageItem> in_archive_items_map;
 		wxString archive_base_name;
 		archive_base_name = parser.GetParam();
@@ -196,17 +205,43 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		// 既存のアーカイブファイルの内容を読み込む
 		if(!make_new_archive)
 		{
-			TVPReadXP4Metadata(NULL, archive_base_name, in_archive_items_map);
-
 			if(!target_dir_specified)
 			{
 				// ターゲットディレクトリが指定されていない場合
 				// アーカイブファイル内のリストを表示して終了
-				std::vector<tTVPXP4WriterInputFile> filelist;
-				TVPXP4MetadataReaderStorageItemToXP4WriterInputFile(
-										in_archive_items_map, filelist);
-				ListArchiveItems(filelist);
-				return 0;
+				if(!parser.Found(wxT("g")))
+				{
+					// パッチ履歴を表示しない場合
+					// 最新のデータのみを表示して終了
+					TVPReadXP4Metadata(NULL, archive_base_name, in_archive_items_map);
+					TVPXP4MetadataReaderStorageItemToXP4WriterInputFile(
+											in_archive_items_map, filelist);
+					ListArchiveItems(filelist);
+					return 0;
+				}
+				else
+				{
+					// パッチ履歴を表示する場合
+					// 個々のアーカイブファイルのパッチを表示
+					std::vector<wxString> archive_list;
+					TVPEnumerateArchiveFiles(archive_base_name, archive_list);
+					for(std::vector<wxString>::iterator i = archive_list.begin();
+						i != archive_list.end(); i++)
+					{
+						tTVPXP4MetadataReaderArchive arc(*i);
+						std::vector<tTVPXP4WriterInputFile> filelist;
+						for(std::vector<tTVPXP4MetadataReaderStorageItem>::const_iterator 
+								j = arc.GetItemVector().begin(); j != arc.GetItemVector().end(); j++)
+							filelist.push_back(tTVPXP4WriterInputFile(*j));
+						wxPrintf(wxT("%s\n"), i->c_str());
+						ListArchiveItems(filelist);
+					}
+					return 0;
+				}
+			}
+			else
+			{
+				TVPReadXP4Metadata(NULL, archive_base_name, in_archive_items_map);
 			}
 		}
 
@@ -215,8 +250,14 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			throw wxString(_("please specify target 'dir'"));
 						// 対象ディレクトリが指定されていない
 
-		std::vector<tTVPXP4WriterInputFile> filelist;
-		TVPGetFileListAt(&agg, parser.GetParam(1), filelist);
+		wxString target_dir = parser.GetParam(1);
+		TVPGetFileListAt(&agg, target_dir, filelist);
+
+		if(filelist.size() == 0)
+		{
+			throw wxString::Format(_("there are no files in target directory '%s'"),
+				target_dir.c_str());
+		}
 
 		// パターンを用意
 		//- デフォルトのパターン
@@ -258,10 +299,20 @@ int wxKrkrReleaserConsoleApp::OnRun()
 				// リビジョンが指定されていない場合
 				// リビジョンを現在時刻から作成する
 				// リビジョンは YYYYMMDDHHMMSS (local time)
-				rev = wxDateTime::Now().Format(wxT("%Y%m%d%H%M%S"));
+				rev = wxDateTime::Now().Format(wxT("p%Y%m%d%H%M%S"));
 			}
 			archive_base_name = output_filename.GetName() +
 				wxT(".") + rev;
+		}
+
+		// 既存のアーカイブと ディレクトリから読み取った情報を比較
+		agg.SetRange(2, 4);
+		TVPCompareXP4StorageNameMap(NULL, in_archive_items_map, filelist);
+
+		if(filelist.size() == 0)
+		{
+			throw wxString::Format(_("the archive is up to date; nothing is to be added/modified/deleted"),
+				target_dir.c_str());
 		}
 
 		// アーカイブを作成
@@ -273,13 +324,12 @@ int wxKrkrReleaserConsoleApp::OnRun()
 				archive_base_name,
 				split_limit,
 				filelist);
+			writer.MakeArchive();
 		}
 
 		//  リストを表示
-		if(parser.Found(wxT("l")))
-		{
-			ListArchiveItems(filelist);
-		}
+		if(show_progress) wxFprintf(stderr, wxT("\n"));
+		ListArchiveItems(filelist);
 	}
 	catch(const wxString & e)
 	{
@@ -339,14 +389,14 @@ void wxKrkrReleaserConsoleApp::ListArchiveItems(
 		// のマークが付く
 		switch(i->GetFlags() & TVP_XP4_FILE_STATE_MASK)
 		{
-		case TVP_XP4_FILE_ADDED:
-			wxPrintf(wxT("A ")); break;
-		case TVP_XP4_FILE_DELETED:
-			wxPrintf(wxT("D ")); break;
-		case TVP_XP4_FILE_MODIFIED:
-			wxPrintf(wxT("M ")); break;
+		case TVP_XP4_FILE_STATE_ADDED:
+			wxPrintf(wxT(" A ")); break;
+		case TVP_XP4_FILE_STATE_DELETED:
+			wxPrintf(wxT(" D ")); break;
+		case TVP_XP4_FILE_STATE_MODIFIED:
+			wxPrintf(wxT(" M ")); break;
 		default:
-			wxPrintf(wxT("  ")); break;
+			wxPrintf(wxT("   ")); break;
 		}
 
 		wxPrintf(wxT("%s\n"), i->GetInArchiveName().c_str());

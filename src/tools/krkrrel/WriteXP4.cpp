@@ -24,7 +24,7 @@
 	・ファイルマジック定数が違う(当たり前といえば当たり前)
 	・ファイル名が UTF-8 として記録されている
 	・PEXP3 のような PE との結合はサポートしない
-	・フラグ TVP_XP4_FILE_DELETED を持つ
+	・ステート TVP_XP4_FILE_STATE_DELETED を持つ
 	  (パッチによりファイルが削除されたことを示す)
 	・データ保護フラグ (TVP_XP3_FILE_PROTECTED) を持たない
 	  (非常に初期の、良識のある展開ツール作者は、このフラグの存在の
@@ -286,10 +286,13 @@ tTVPXP4WriterStorage::tTVPXP4WriterStorage(
 //---------------------------------------------------------------------------
 void tTVPXP4WriterStorage::MakeHash(iTVPProgressCallback * callback)
 {
-	if(!Hash.GetHasHash())
+	if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
 	{
-		// ハッシュがまだ計算されていない場合は計算を行う
-		Hash.MakeHash(callback, BaseDirName + InputName);
+		if(!Hash.GetHasHash())
+		{
+			// ハッシュがまだ計算されていない場合は計算を行う
+			Hash.MakeHash(callback, BaseDirName + InputName);
+		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -307,7 +310,7 @@ void tTVPXP4WriterStorage::WriteBody(
 		// このストレージアイテムが他のストレージアイテムを参照している場合は
 		// body として書き込む物は何もない
 
-	if(Flags & TVP_XP4_FILE_DELETED) return;
+	if((Flags & TVP_XP4_FILE_STATE_MASK) == TVP_XP4_FILE_STATE_DELETED) return;
 		// このストレージが「削除」を表す場合は何もしない
 
 	// セグメントを作成する
@@ -366,7 +369,7 @@ void tTVPXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 	wxUint16 i16;
 	wxUint32 i32;
 
-	if(!(Flags & TVP_XP4_FILE_DELETED))
+	if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
 	{
 		// 「削除」されたファイルではない場合
 		wxMemoryBuffer segmentsbuf;
@@ -706,7 +709,7 @@ void tTVPXP4Writer::MakeArchive()
 			(idx + 1) * 100 / file_count);
 
 		// deleted か？
-		if(i->GetFlags() & TVP_XP4_FILE_DELETED)
+		if((i->GetFlags() & TVP_XP4_FILE_STATE_MASK) == TVP_XP4_FILE_STATE_DELETED)
 		{
 			// 削除されたファイル
 			// 削除ファイルは無条件に 一番最初のボリュームに追加する

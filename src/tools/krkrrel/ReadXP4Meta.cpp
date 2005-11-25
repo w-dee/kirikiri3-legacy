@@ -176,7 +176,7 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 	}
 	else
 	{
-		if(!(Flags & TVP_XP4_FILE_DELETED))
+		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
 			throw wxString(_("chunk 'time' not found"));
 	}
 
@@ -201,7 +201,7 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 	}
 	else
 	{
-		if(!(Flags & TVP_XP4_FILE_DELETED))
+		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
 			throw wxString(_("chunk 'Segm' not found"));
 	}
 
@@ -215,7 +215,7 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 	}
 	else
 	{
-		if(!(Flags & TVP_XP4_FILE_DELETED))
+		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
 			throw wxString(_("chunk 'sha1' not found"));
 	}
 }

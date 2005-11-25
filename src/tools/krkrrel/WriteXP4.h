@@ -71,7 +71,8 @@ public:
 				tTVPXP4MetadataReaderStorageItem(
 						inarchivename,
 						flags,
-						flags & TVP_XP4_FILE_DELETED ?
+						(flags & TVP_XP4_FILE_STATE_MASK) ==
+								TVP_XP4_FILE_STATE_DELETED ?
 							-1 : wxFileEx(basedirname + inputname).Length(),
 						time),
 				InputName(inputname),
@@ -84,7 +85,7 @@ public:
 	bool operator < (const tTVPXP4WriterInputFile & rhs) const
 	{
 		// 比較用演算子
-		return InputName < rhs.InputName;
+		return InArchiveName < rhs.InArchiveName;
 	}
 
 	const wxString & GetInputName() const { return InputName; } //!< 入力ファイル名を得る

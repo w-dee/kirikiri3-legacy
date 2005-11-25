@@ -19,60 +19,75 @@ msgid "show help message"
 msgstr "このヘルプを表示して終了"
 
 #: ConsoleMain.cpp:20
+msgid "get target dir from the archive set"
+msgstr "対象ディレクトリをアーカイブから取得"
+
+#: ConsoleMain.cpp:22
 msgid "split archive in given size (MB)"
 msgstr "アーカイブを指定された容量(MB)で分割"
 
-#: ConsoleMain.cpp:22
+#: ConsoleMain.cpp:24
 msgid "patch revision"
 msgstr "パッチリビジョンを指定"
 
-#: ConsoleMain.cpp:24
+#: ConsoleMain.cpp:26
 msgid "show progress"
 msgstr "進捗を表示する"
 
-#: ConsoleMain.cpp:26
+#: ConsoleMain.cpp:28
 msgid "do not make output"
 msgstr "出力ファイルを作成しない(テスト用)"
 
-#: ConsoleMain.cpp:28
+#: ConsoleMain.cpp:30
 msgid "regex list file for file classification"
 msgstr "ファイル分類用正規表現リストファイルを指定"
 
-#: ConsoleMain.cpp:30
+#: ConsoleMain.cpp:32
 msgid "force making a new archive set (not a patch)"
 msgstr "パッチを作成せずに新規にファイルを作成"
 
-#: ConsoleMain.cpp:32
-msgid "show file list in archive set"
-msgstr "アーカイブセット内のファイル一覧を表示"
-
+#
 #: ConsoleMain.cpp:34
+msgid "show archive patch generation history"
+msgstr "アーカイブのパッチ世代履歴を表示"
+
+#: ConsoleMain.cpp:36
 msgid "show default classification regex list"
 msgstr "デフォルトの分類用正規表現リストを表示"
 
-#: ConsoleMain.cpp:36
+#: ConsoleMain.cpp:38
 msgid "archive-file"
 msgstr "アーカイブファイル"
 
-#: ConsoleMain.cpp:38
+#: ConsoleMain.cpp:40
 msgid "dir"
 msgstr "対象ディレクトリ"
 
-#: ConsoleMain.cpp:95
+#: ConsoleMain.cpp:100
 #, c-format
 msgid "%d percent done"
 msgstr "%d パーセント完了"
 
 #. コマンドライン引数を解析
-#: ConsoleMain.cpp:147
+#: ConsoleMain.cpp:154
 msgid "Kirikiri3 Releaser (utility for XP4 archive file system)"
 msgstr "吉里吉里3 Releaser (XP4アーカイブファイルのためのユーティリティ)"
 
-#: ConsoleMain.cpp:215
+#: ConsoleMain.cpp:250
 msgid "please specify target 'dir'"
 msgstr "対象ディレクトリ 'dir' を指定してください"
 
-#: ConsoleMain.cpp:308
+#: ConsoleMain.cpp:258
+#, c-format
+msgid "there are no files in target directory '%s'"
+msgstr "ディレクトリ '%s' にはファイルが一つもありません"
+
+#: ConsoleMain.cpp:314
+msgid "the archive is up to date; nothing is to be added/modified/deleted"
+msgstr ""
+"アーカイブはすでに最新ですので, 追加/更新/削除されるファイルはありません"
+
+#: ConsoleMain.cpp:358
 #, c-format
 msgid "can not load class file '%s'"
 msgstr "分類用ファイル '%s' を開くことができません"
@@ -88,13 +103,13 @@ msgstr "ディレクトリ '%s' を開くことができません"
 msgid "can not read directory '%s'"
 msgstr "ディレクトリ '%s' を読み込むことができません"
 
-#: FileList.cpp:273
+#: FileList.cpp:274
 #, c-format
 msgid "error in regular expression '%s'"
 msgstr "正規表現 '%s' にエラーがあります"
 
 #. 圧縮に失敗
-#: WriteXP4.cpp:539
+#: WriteXP4.cpp:542
 #, c-format
 msgid "failed to compress the index data of file '%s'"
 msgstr "ファイル '%s' のインデックスの圧縮に失敗しました"
@@ -177,3 +192,6 @@ msgstr "ファイル '%s' を読み込み用に開くことができません"
 #, c-format
 msgid "can not open file '%s' for writing"
 msgstr "ファイル '%s' を書き込みように開くことができません"
+
+#~ msgid "show file list in archive set"
+#~ msgstr "アーカイブセット内のファイル一覧を表示"

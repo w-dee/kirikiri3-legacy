@@ -57,8 +57,8 @@ static wxChar const  * const TVPXP4DefaultClassList[] = {
 	wxT("C:\\.tft$"),
 	wxT("C:\\.cks$"),
 	//-- 除外されるファイルのリスト
-	wxT("E:/CVS/"  ),   // CVS メタデータディレクトリ
-	wxT("E:/."     ),   // . で始まる名前を持つファイル/ディレクトリ
+	wxT("e:/CVS/"  ),   // CVS メタデータディレクトリ
+	wxT("E:/\\."     ), // . で始まる名前を持つファイル/ディレクトリ
 	wxT("E:\\.xpk$"),
 	wxT("E:\\.xp3$"),
 	wxT("E:\\.xp4$"),
@@ -162,7 +162,7 @@ static void TVPInternalGetFileListAt(iTVPProgressCallback * callback,
 	for(size_t i = 0; i < files.GetCount(); i++)
 	{
 		wxString item_name = files[i].c_str() + basedir.Length();
-		wxPrintf(wxT("adding file %s\n"), files[i].c_str());
+		wxPrintf(wxT("adding file %s\n"), (basedir + item_name).c_str());
 		wxFileName itemfile(files[i]);
 		dest.push_back(tTVPXP4WriterInputFile(
 			TVPNormalizeXP4ArchiveStorageName(item_name),
@@ -172,17 +172,18 @@ static void TVPInternalGetFileListAt(iTVPProgressCallback * callback,
 			basedir
 			));
 	}
-
+/*
 	// ディレクトリを再帰する
 	for(size_t i = 0; i < dirs.GetCount(); i++)
 	{
 		tTVPProgressCallbackAggregator agg(callback,
 			i     * 100 / dirs.GetCount(),
 			(i+1) * 100 / dirs.GetCount());
+		wxPrintf(wxT("recur dir %s\n"), dirs[i].c_str());
 		TVPInternalGetFileListAt(&agg,
 			dir + wxFileName::GetPathSeparator() + dirs[i], basedir, dest);
 	}
-
+*/
 }
 //---------------------------------------------------------------------------
 
@@ -283,11 +284,13 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 
 			// パターンごとに処理
 			wxUint16 flags = 0;
+			wxPrintf(wxT("file %s"), i->GetInArchiveName().c_str());
 			for(size_t j = 0; j < pattern_count; j++)
 			{
-				if(pattern[j].Matches(i->GetInArchiveName()))
+				if(patterns[j].regex.Matches(i->GetInArchiveName()))
 				{
 					// パターンに合致した
+				wxPrintf(wxT("matches %d\n"), patterns[j].type);
 					switch(patterns[j].type)
 					{
 					case tPattern::exclude:
@@ -303,8 +306,10 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 						flags &= ~ TVP_XP4_FILE_COMPRESSED;
 						break;
 					}
+					break;
 				}
 			}
+			wxPrintf(wxT("\n"));
 
 			// 情報を格納
 			if(flags & TVP_XP4_FILE_EXCLUDED)
@@ -314,7 +319,10 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 			}
 			else
 			{
-				i->SetFlags(flags); // フラグを設定
+				i->SetFlags(
+					(i->GetFlags() & 
+						~(TVP_XP4_FILE_EXCLUDED|TVP_XP4_FILE_COMPRESSED)
+					) | flags); // フラグを設定
 				i++;
 			}
 		}
@@ -376,10 +384,10 @@ void TVPApplyXP4StorageNameMap(
 		if(callback) callback->OnProgress((i - input.begin()) * 100 / input.size());
 		std::map<wxString, tTVPXP4MetadataReaderStorageItem>::iterator mi;
 		mi = map.find(i->GetInArchiveName());
-		if(i->GetFlags() & TVP_XP4_FILE_DELETED)
+		if((i->GetFlags() & TVP_XP4_FILE_STATE_MASK) == TVP_XP4_FILE_STATE_DELETED)
 		{
 			// 削除フラグがたっている
-			map.erase(mi); // アイテムを削除する
+			if(mi != map.end()) map.erase(mi); // アイテムを削除する
 		}
 		else
 		{
@@ -387,8 +395,12 @@ void TVPApplyXP4StorageNameMap(
 			if(mi != map.end()) map.erase(mi); // 旧データは削除する
 
 			// 追加する
+			tTVPXP4MetadataReaderStorageItem item(*i);
+			item.SetFlags((item.GetFlags() & ~ TVP_XP4_FILE_STATE_MASK) |
+									TVP_XP4_FILE_STATE_NONE);
+											// 状態をクリア
 			map.insert(std::pair<wxString, tTVPXP4MetadataReaderStorageItem>
-				(i->GetInArchiveName(), *i));
+				(i->GetInArchiveName(), item));
 		}
 	}
 }
@@ -402,7 +414,7 @@ void TVPApplyXP4StorageNameMap(
 //! @note		この関数を呼ぶ時点では archivename に対応するファイルは存在している
 //!				ことが確認できていなければならない
 //---------------------------------------------------------------------------
-static void TVPEnumerateArchiveFiles(const wxString & archivename,
+void TVPEnumerateArchiveFiles(const wxString & archivename,
 	std::vector<wxString> & archives)
 {
 	// archives の内容をクリア
@@ -411,23 +423,38 @@ static void TVPEnumerateArchiveFiles(const wxString & archivename,
 	// アーカイブファイルを列挙
 	// 列挙すべきは: そのアーカイブファイルそのもの
 	//               (そのアーカイブファイルから拡張子をのぞいたもの).*.xp4
-	archives.push_back(archivename); // アーカイブファイルそのものを push
+	archives.push_back(wxFileName(archivename).GetFullPath()); // アーカイブファイルそのものを push
 
 	wxFileName basename(archivename);
 	basename.ClearExt(); // 拡張子を取り去る
 
 	wxArrayString files;
-	wxDir::GetAllFiles(basename.GetPath(), &files, basename.GetName() + wxT(".*.xp4"),
-		 wxDIR_FILES);
+	wxString path(basename.GetPath());
+	bool skip_path = false;
+	if(path.IsEmpty())
+	{
+		// パスが存在しない場合は現在の作業ディレクトリを使用
+		path = wxGetCwd();
+		skip_path = true;// ディレクトリ部分は後でスキップする
+	}
+	wxString filespec(basename.GetName() + wxT(".*.xp4"));
+	wxPrintf(wxT("listing %s at %s\n"), filespec.c_str(), path.c_str());
+	wxDir::GetAllFiles(path, &files, filespec, wxDIR_FILES);
 
 	for(size_t i = 0; i < files.Count(); i++)
-		archives.push_back(files[i]);
+	{
+		if(skip_path)
+			archives.push_back(wxFileName(files[i]).GetFullName());
+		else
+			archives.push_back(files[i]);
+	}
+
+	// 先頭以外をファイル名順にソート
+	std::sort(archives.begin() + 1, archives.end());
 
 	for(std::vector<wxString>::iterator i = archives.begin(); i != archives.end(); i++)
 		wxPrintf(wxT("found archive %s\n"), i->c_str());
 
-	// 先頭以外をファイル名順にソート
-	std::sort(archives.begin() + 1, archives.end());
 }
 //---------------------------------------------------------------------------
 
@@ -510,19 +537,29 @@ void TVPCompareXP4StorageNameMap(
 				(i - ref.begin()    ) * 100 / ref.size(),
 				(i - ref.begin() + 1) * 100 / ref.size());
 
+		wxPrintf(wxT("file %s : "), i->GetInArchiveName().c_str());
+
 		// arc 内に i が存在するか？
 		std::map<wxString, tTVPXP4MetadataReaderStorageItem>::iterator mi;
 		mi = arc.find(i->GetInArchiveName());
 		if(mi != arc.end())
 		{
 			// i が存在した
+			wxDateTime arc_time = mi->second.GetTime();
+			wxDateTime item_time = i->GetTime();
+			wxPrintf(wxT("found in the archive : arc(%s), local(%s) : "),
+				arc_time .Format().c_str(),
+				item_time.Format().c_str() );
+
 			// タイプスタンプやサイズを比較
 			bool modified = false;
-			if(mi->second.GetTime() != i->GetTime())
+			if(arc_time != item_time)
 			{
+
 				// タイムスタンプが変わっている
 				if(mi->second.GetSize() == i->GetSize())
 				{
+					wxPrintf(wxT(" file size does not differ : "));
 					// タイムスタンプが変わっているが
 					// サイズが同じ場合は、ハッシュが異なるかどうかを
 					// チェックする
@@ -533,11 +570,13 @@ void TVPCompareXP4StorageNameMap(
 					}
 					if(i->GetHash() != mi->second.GetHash())
 					{
+						wxPrintf(wxT(" hash differs : "));
 						// ハッシュが違う
 						modified = true;
 					}
 					else
 					{
+						wxPrintf(wxT(" hash does not differ : "));
 						// つまり、タイムスタンプが違っていても
 						// サイズとハッシュが同じならば、更新されたとはみなさない
 					}
@@ -545,19 +584,21 @@ void TVPCompareXP4StorageNameMap(
 				else
 				{
 					// ファイルサイズが違う場合はどっちみち更新されている
+					wxPrintf(wxT(" file size differs : "));
 					modified = true;
 				}
 			}
 			else if(mi->second.GetSize() != i->GetSize())
 			{
 				// サイズが変わっている
+				wxPrintf(wxT("the same timestamp but file size differs : "));
 				modified = true;
 			}
 
 			if(modified)
 			{
 				// 置き換えるべきファイルとしてマークする
-				i->SetFlags((i->GetFlags() & ~ TVP_XP4_FILE_STATE_MASK) | TVP_XP4_FILE_MODIFIED);
+				i->SetFlags((i->GetFlags() & ~ TVP_XP4_FILE_STATE_MASK) | TVP_XP4_FILE_STATE_MODIFIED);
 			}
 			// mi にもフラグを設定する
 			mi->second.SetFlags(mi->second.GetFlags() | TVP_XP4_FILE_MARKED);
@@ -566,8 +607,10 @@ void TVPCompareXP4StorageNameMap(
 		{
 			// i が存在しない
 			// 追加すべきファイルとしてマークする
-			i->SetFlags((i->GetFlags() & ~ TVP_XP4_FILE_STATE_MASK) | TVP_XP4_FILE_ADDED);
+			i->SetFlags((i->GetFlags() & ~ TVP_XP4_FILE_STATE_MASK) | TVP_XP4_FILE_STATE_ADDED);
 		}
+
+		wxPrintf(wxT("\n"));
 	}
 
 	// 今度は arc のアイテムごとに処理をする
@@ -584,8 +627,18 @@ void TVPCompareXP4StorageNameMap(
 		{
 			// マークされていない
 			// ref に「削除」として追加する
-			ref.push_back(tTVPXP4WriterInputFile(i->first, TVP_XP4_FILE_DELETED));
+			ref.push_back(tTVPXP4WriterInputFile(i->first, TVP_XP4_FILE_STATE_DELETED));
 		}
+	}
+
+	// マークの付いていないファイルを ref から削除
+	for(std::vector<tTVPXP4WriterInputFile>::iterator i = ref.begin();
+		i != ref.end(); )
+	{
+		if((i->GetFlags() & TVP_XP4_FILE_STATE_MASK) == TVP_XP4_FILE_STATE_NONE)
+			i = ref.erase(i);
+		else
+			i++;
 	}
 }
 //---------------------------------------------------------------------------

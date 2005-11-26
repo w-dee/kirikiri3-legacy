@@ -22,6 +22,7 @@
 	#include <wx/regex.h>
 	#include <windows.h>
 	#include <vector>
+	#include <memory>
 	#include <map>
 	#include <algorithm>
 

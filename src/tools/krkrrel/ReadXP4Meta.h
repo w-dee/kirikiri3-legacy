@@ -41,16 +41,17 @@ class tTVPXP4Hash
 	unsigned char Hash[TVP_XP4_HASH_SIZE];
 	bool HasHash;
 public:
-	tTVPXP4Hash() { HasHash = false; }
+	tTVPXP4Hash() { HasHash = false; memset(Hash, 0, TVP_XP4_HASH_SIZE); }
 
 	operator unsigned char *() { return Hash; }
 	bool operator < (const tTVPXP4Hash & rhs) const
 	{
-		return memcmp(Hash, rhs.Hash, sizeof(Hash));
+		return memcmp(Hash, rhs.Hash, sizeof(Hash)) < 0;
 	}
 	bool operator == (const tTVPXP4Hash & rhs) const
 	{
-		return !memcmp(Hash, rhs.Hash, sizeof(Hash));
+		return HasHash == rhs.HasHash && 
+			!memcmp(Hash, rhs.Hash, sizeof(Hash));
 	}
 	bool operator != (const tTVPXP4Hash & rhs) const
 	{
@@ -59,9 +60,10 @@ public:
 	void SetHash(const unsigned char hash[TVP_XP4_HASH_SIZE])
 		{ memcpy(Hash, hash, TVP_XP4_HASH_SIZE); HasHash = true; }
 	bool GetHasHash() const { return HasHash; }
-	void SetHasHash(bool has = true) { HasHash = has; }
+	void SetHasHash(bool has = true) { HasHash = has; if(!has) memset(Hash, 0, TVP_XP4_HASH_SIZE); }
 	static size_t GetSize() { return TVP_XP4_HASH_SIZE; }
-	void MakeHash(iTVPProgressCallback * callback, const wxString &filename);
+	void Make(iTVPProgressCallback * callback, const wxString &filename);
+	void Print() const;
 };
 //---------------------------------------------------------------------------
 
@@ -109,13 +111,17 @@ public:
 //---------------------------------------------------------------------------
 class tTVPXP4MetadataReaderArchive
 {
+	wxString TargetDir;
 	std::vector<tTVPXP4MetadataReaderStorageItem> ItemVector; //!< ストレージの配列
 
 public:
 	tTVPXP4MetadataReaderArchive(const wxString & filename);
 
 	const std::vector<tTVPXP4MetadataReaderStorageItem> &
-		GetItemVector() const { return ItemVector; } // ストレージの配列を得る
+		GetItemVector() const { return ItemVector; } //!< ストレージの配列を得る
+
+	const wxString & GetTargetDir() const
+		{ return TargetDir; } //!< このアーカイブの元となった対象ディレクトリを得る
 };
 //---------------------------------------------------------------------------
 #endif

@@ -139,15 +139,19 @@ class tTVPXP4WriterArchive
 	std::vector<tTVPXP4WriterStorage> StorageVector; //!< このアーカイブ内に含まれるtTVPXP4WriterStorage の配列
 	wxFileOffset Size; //!< アーカイブのサイズ
 	wxString FileName; //!< アーカイブファイル名
+	wxString TargetDir; //!< アーカイブに格納されるファイルの元となったディレクトリ名
+	bool ArchiveOk; //!< アーカイブが正常に作成されたかどうか
 
 public:
-	tTVPXP4WriterArchive(const wxString & filename);
+	tTVPXP4WriterArchive(const wxString & filename, const wxString & targetdir);
+	~tTVPXP4WriterArchive();
 	wxFileOffset GetSize() const { return Size; } //!< アーカイブのファイルサイズを得る
 	const tTVPXP4WriterStorage & GetStorageItem(size_t idx)
 		{ return StorageVector[idx]; } //!< 指定されたインデックスにあるストレージオブジェクトを得る
 	size_t AddAndWriteBody(iTVPProgressCallback * callback,
 		const tTVPXP4WriterStorage & storage);
 	void WriteMetaData(iTVPProgressCallback * callback, bool compress);
+	void SetArchiveOk() { ArchiveOk = true; } //!< アーカイブを確定する
 };
 //---------------------------------------------------------------------------
 
@@ -161,8 +165,8 @@ class tTVPXP4Writer
 	wxString BaseFileName;	//!< ベースファイル名(パス付きだが拡張子をのぞく)
 	wxFileOffset  SplitLimit;	//!< 分割する際のファイルサイズの上限(バイト単位) 0=分割なし
 	std::vector<tTVPXP4WriterInputFile> List; //!< 入力ファイルのリスト
-	std::vector<tTVPXP4WriterArchive> ArchiveVector; //!< 各ボリュームファイルを表す配列
-
+	std::vector<tTVPXP4WriterArchive *> ArchiveVector; //!< 各ボリュームファイルを表す配列
+	wxString TargetDir; //!< アーカイブに格納されるファイルの元となったディレクトリ名
 
 	unsigned int NewArchive();
 
@@ -171,7 +175,8 @@ public:
 		iTVPProgressCallback * callback,
 		const wxString & basefilename,
 		wxFileOffset splitlimit,
-		const std::vector<tTVPXP4WriterInputFile> & list);
+		const std::vector<tTVPXP4WriterInputFile> & list,
+		const wxString & targetdir);
 	~tTVPXP4Writer();
 
 	void MakeArchive();

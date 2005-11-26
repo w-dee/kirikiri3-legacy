@@ -22,7 +22,7 @@
 //! @param		callback: 進捗コールバックオブジェクト
 //! @param		filename: ハッシュを計算するファイル名
 //---------------------------------------------------------------------------
-void tTVPXP4Hash::MakeHash(iTVPProgressCallback * callback, const wxString &filename)
+void tTVPXP4Hash::Make(iTVPProgressCallback * callback, const wxString &filename)
 {
 	if(find_hash(TVP_XP4_HASH_METHOD_INTERNAL_STRING) == -1)
 	{
@@ -49,6 +49,17 @@ void tTVPXP4Hash::MakeHash(iTVPProgressCallback * callback, const wxString &file
 	}
 
 	TVP_XP4_HASH_DONE(&st, Hash);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ハッシュ値を標準出力に表示する
+//---------------------------------------------------------------------------
+void tTVPXP4Hash::Print() const
+{
+	for(size_t i = 0; i < TVP_XP4_HASH_SIZE; i++)
+		wxPrintf(wxT("%02x"), (int)(Hash[i]));
 }
 //---------------------------------------------------------------------------
 
@@ -304,12 +315,22 @@ tTVPXP4MetadataReaderArchive::tTVPXP4MetadataReaderArchive(const wxString & file
 			memcpy(raw_index, compressed_index, compressed_index_size);
 		}
 
-		// インデックスの内容を読み込む
-		const unsigned char *mem = raw_index;
-		const unsigned char *mem_limit = raw_index + raw_index_size;
-		size_t left = mem_limit - mem;
+		// Item チャンクを探す
 		const unsigned char *chunk;
 		size_t chunksize;
+		static unsigned char chunkname_Item[] = { 'I', 't', 'e', 'm' };
+		if(!TVPFindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
+		{
+			throw wxString::Format(
+				_("chunk 'Item' not found in file '%s'"),
+				filename.c_str());
+		}
+
+		// Item チャンクの内容を読み込む
+		// Item チャンクの中には複数の File チャンクがある
+		const unsigned char *mem = chunk;
+		const unsigned char *mem_limit = mem + chunksize;
+		size_t left = mem_limit - mem;
 		static unsigned char chunkname_File[] = { 'F', 'i', 'l', 'e' };
 		while(TVPFindChunk(chunkname_File, mem, left, &chunk, &chunksize))
 		{
@@ -317,6 +338,21 @@ tTVPXP4MetadataReaderArchive::tTVPXP4MetadataReaderArchive(const wxString & file
 			ItemVector.push_back(tTVPXP4MetadataReaderStorageItem(chunk, chunksize));
 			mem = chunk + chunksize;
 			left = mem_limit - mem;
+		}
+
+		// Meta チャンクを探す
+		static unsigned char chunkname_Meta[] = { 'M', 'e', 't', 'a' };
+		if(TVPFindChunk(chunkname_Meta, raw_index, raw_index_size, &chunk, &chunksize))
+		{
+			// targ サブチャンクを探す
+			static unsigned char chunkname_targ[] = { 't', 'a', 'r', 'g' };
+			const unsigned char *targ_chunk;
+			size_t targ_chunksize;
+			if(TVPFindChunk(chunkname_targ, chunk, chunksize, &targ_chunk, &targ_chunksize))
+			{
+				// これはアーカイブの元となったファイル名
+				TargetDir = wxString((const char *)targ_chunk, wxConvUTF8);
+			}
 		}
 	}
 	catch(...)

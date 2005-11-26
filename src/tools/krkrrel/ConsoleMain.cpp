@@ -1,4 +1,5 @@
 #include "prec.h"
+#include "signal.h"
 #include "ProgressCallback.h"
 #include "WriteXP4.h"
 #include "FileList.h"
@@ -47,9 +48,6 @@ static wxCmdLineEntryDesc * TVPGetCmdLineEntryDesc()
 //---------------------------------------------------------------------------
 
 
-
-
-
 //---------------------------------------------------------------------------
 //! @brief		アプリケーションクラス
 //---------------------------------------------------------------------------
@@ -74,6 +72,27 @@ IMPLEMENT_APP_CONSOLE(wxKrkrReleaserConsoleApp)
 wxLocale locale;
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		シグナルハンドラ
+//---------------------------------------------------------------------------
+static bool TVPInterrupted = false;
+static void TVPSigInt(int sig)
+{
+	TVPInterrupted = true;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		進捗を表示するクラス
 //---------------------------------------------------------------------------
@@ -93,11 +112,12 @@ public:
 //---------------------------------------------------------------------------
 void tTVPProgressCallback::OnProgress(int percent)
 {
+	if(TVPInterrupted) throw wxString(_("operation was interrupted"));
 	if(Show)
 	{
 		if(PrevPercent != percent)
 		{
-			wxFprintf(stderr, _("%d percent done"), percent);
+			wxFprintf(stderr, _("%2d percent done"), percent);
 			wxFprintf(stderr, wxT("\r"));
 			PrevPercent = percent;
 		}
@@ -135,6 +155,10 @@ int wxKrkrReleaserConsoleApp::OnRun()
 {
 	try
 	{
+		// シグナルハンドラの設定
+		signal(SIGINT, TVPSigInt);
+
+		// コマンドラインパーサーオブジェクトを作成
 		wxCmdLineParser parser(TVPGetCmdLineEntryDesc(), argc, argv);
 
 		// --show-default-class を検索
@@ -165,16 +189,17 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		// フラグなど
 		bool show_progress = parser.Found(wxT("p"));
 		tTVPProgressCallback callback(show_progress);
-		tTVPProgressCallbackAggregator agg(&callback, 0, 2);
+		tTVPProgressCallbackAggregator agg(&callback, 0, 20);
 
 		std::vector<tTVPXP4WriterInputFile> filelist;
 		std::map<wxString, tTVPXP4MetadataReaderStorageItem> in_archive_items_map;
 		wxString archive_base_name;
 		archive_base_name = parser.GetParam();
-		wxPrintf(wxT("archive : %s\n"), archive_base_name.c_str());
 
 		bool make_new_archive = false; // 新しいアーカイブファイルを作成するかどうか
 		bool target_dir_specified = parser.GetParamCount() >= 2;
+		wxString target_dir;
+		if(target_dir_specified) target_dir = parser.GetParam(1);
 
 		// -n, --new をチェック
 		if(parser.Found(wxT("n")))
@@ -205,7 +230,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		// 既存のアーカイブファイルの内容を読み込む
 		if(!make_new_archive)
 		{
-			if(!target_dir_specified)
+			if(!target_dir_specified && !parser.Found(wxT("u")))
 			{
 				// ターゲットディレクトリが指定されていない場合
 				// アーカイブファイル内のリストを表示して終了
@@ -233,7 +258,8 @@ int wxKrkrReleaserConsoleApp::OnRun()
 						for(std::vector<tTVPXP4MetadataReaderStorageItem>::const_iterator 
 								j = arc.GetItemVector().begin(); j != arc.GetItemVector().end(); j++)
 							filelist.push_back(tTVPXP4WriterInputFile(*j));
-						wxPrintf(wxT("%s\n"), i->c_str());
+						wxPrintf(wxT("archive %s\n"), i->c_str());
+						wxPrintf(wxT("from    %s\n"), arc.GetTargetDir().c_str());
 						ListArchiveItems(filelist);
 					}
 					return 0;
@@ -241,7 +267,22 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			}
 			else
 			{
-				TVPReadXP4Metadata(NULL, archive_base_name, in_archive_items_map);
+				wxString target_dir_from_archive;
+				TVPReadXP4Metadata(NULL, archive_base_name, in_archive_items_map,
+					&target_dir_from_archive);
+
+				if(parser.Found(wxT("u")))
+				{
+					// 対象ディレクトリをアーカイブのデータから取得する場合
+					target_dir = target_dir_from_archive;
+					target_dir_specified = true;
+					if(target_dir.IsEmpty())
+					{
+						throw wxString::Format(
+							_("archive set '%s' does not have target directory information"),
+							archive_base_name.c_str());
+					}
+				}
 			}
 		}
 
@@ -250,7 +291,6 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			throw wxString(_("please specify target 'dir'"));
 						// 対象ディレクトリが指定されていない
 
-		wxString target_dir = parser.GetParam(1);
 		TVPGetFileListAt(&agg, target_dir, filelist);
 
 		if(filelist.size() == 0)
@@ -273,7 +313,8 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		}
 
 		// パターンに従ってリストを分類
-		TVPXP4ClassifyFiles(NULL, patterns, filelist);
+		agg.SetRange(20, 25);
+		TVPXP4ClassifyFiles(&agg, patterns, filelist);
 
 		// アーカイブファイルの分割情報を得る
 		wxFileOffset split_limit = 0;
@@ -288,7 +329,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		if(make_new_archive)
 		{
 			// 新規にアーカイブを作成する場合
-			archive_base_name = output_filename.GetName();
+			archive_base_name = output_filename.GetFullPath();
 		}
 		else
 		{
@@ -301,13 +342,13 @@ int wxKrkrReleaserConsoleApp::OnRun()
 				// リビジョンは YYYYMMDDHHMMSS (local time)
 				rev = wxDateTime::Now().Format(wxT("p%Y%m%d%H%M%S"));
 			}
-			archive_base_name = output_filename.GetName() +
+			archive_base_name = output_filename.GetFullPath() +
 				wxT(".") + rev;
 		}
 
 		// 既存のアーカイブと ディレクトリから読み取った情報を比較
-		agg.SetRange(2, 4);
-		TVPCompareXP4StorageNameMap(NULL, in_archive_items_map, filelist);
+		agg.SetRange(14, 15);
+		TVPCompareXP4StorageNameMap(&agg, in_archive_items_map, filelist);
 
 		if(filelist.size() == 0)
 		{
@@ -318,12 +359,13 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		// アーカイブを作成
 		if(!parser.Found(wxT("d"))) // dry-run で無ければ
 		{
-			agg.SetRange(4, 100);
+			agg.SetRange(25, 100);
 			tTVPXP4Writer writer(
 				&agg,
 				archive_base_name,
 				split_limit,
-				filelist);
+				filelist,
+				target_dir);
 			writer.MakeArchive();
 		}
 

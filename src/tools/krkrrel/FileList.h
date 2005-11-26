@@ -33,7 +33,8 @@ void TVPEnumerateArchiveFiles(const wxString & archivename,
 void TVPReadXP4Metadata(
 	iTVPProgressCallback * callback,
 	const wxString & archivename,
-	std::map<wxString, tTVPXP4MetadataReaderStorageItem> &dest);
+	std::map<wxString, tTVPXP4MetadataReaderStorageItem> &dest,
+	wxString * targetdir = NULL);
 
 void TVPCompareXP4StorageNameMap(
 	iTVPProgressCallback * callback,

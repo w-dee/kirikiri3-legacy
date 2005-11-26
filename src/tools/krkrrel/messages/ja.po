@@ -68,7 +68,7 @@ msgid "operation was interrupted"
 msgstr "操作は中断されました"
 
 #: ConsoleMain.cpp:120
-#, fuzzy, c-format
+#, c-format
 msgid "%2d percent done"
 msgstr "%2d%% 完了"
 
@@ -120,9 +120,9 @@ msgid "error in regular expression '%s'"
 msgstr "正規表現 '%s' にエラーがあります"
 
 #: FileList.cpp:463
-#, fuzzy, c-format
+#, c-format
 msgid "can not remove file '%s'"
-msgstr "ファイル '%s' を作成することができません"
+msgstr "ファイル '%s' を削除することができません"
 
 #. 圧縮に失敗
 #: WriteXP4.cpp:604

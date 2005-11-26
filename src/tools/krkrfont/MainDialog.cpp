@@ -381,7 +381,7 @@ void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 		_("OpenType fonts (*.otf)|*.otf")					+ wxT("|") +
 		_("All files (*.*)|*.*"),
 		// flags
-		wxHIDE_READONLY|wxOPEN|wxFILE_MUST_EXIST
+		wxOPEN|wxFILE_MUST_EXIST
 		);
 	if(!filename.empty())
 	{

@@ -69,7 +69,7 @@
 <buildArguments>-j 3</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
+<useDefaultCommand>true</useDefaultCommand>
 </target>
 <target name="depend" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>c:/mingw/bin/mingw32-make.exe</buildCommand>

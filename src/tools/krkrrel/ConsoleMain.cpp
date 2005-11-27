@@ -208,7 +208,8 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			if(wxFileName(archive_base_name).FileExists())
 			{
 				// 既存のアーカイブファイルを削除する
-				TVPDeleteArchiveSet(archive_base_name);
+				if(!parser.Found(wxT("d"))) // dry-run 時はファイルを削除しない
+					TVPDeleteArchiveSet(archive_base_name);
 			}
 			make_new_archive = true;
 		}
@@ -223,7 +224,8 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			// アーカイブファイルは存在しない
 			// アーカイブファイルの残渣が残ってないことを確実にするために
 			// 関連するファイルをすべて削除する
-			TVPDeleteArchiveSet(archive_base_name);
+			if(!parser.Found(wxT("d"))) // dry-run 時はファイルを削除しない
+				TVPDeleteArchiveSet(archive_base_name);
 			make_new_archive = true;
 		}
 

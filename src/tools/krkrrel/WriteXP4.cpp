@@ -388,9 +388,8 @@ void tTVPXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 		newbuf.AppendData(&i32, sizeof(i32));
 		newbuf.AppendData(segmentsbuf.GetData(), segmentsbuf.GetDataLen());
 
-		// sha1 チャンクの書き込み
-		static char sha1_chunk[4] = { 's', 'h', 'a', '1' }; // sha1 chunk name
-		newbuf.AppendData(sha1_chunk, 4);
+		// hash チャンクの書き込み
+		newbuf.AppendData(tTVPXP4Hash::GetHashChunkName(), 4);
 		i32 = wxUINT32_SWAP_ON_BE(Hash.GetSize());
 		newbuf.AppendData(&i32, sizeof(i32));
 		newbuf.AppendData(const_cast<unsigned char *>((const unsigned char *)Hash),

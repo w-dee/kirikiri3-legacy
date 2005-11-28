@@ -125,44 +125,44 @@ msgid "can not remove file '%s'"
 msgstr "ファイル '%s' を削除することができません"
 
 #. 圧縮に失敗
-#: WriteXP4.cpp:604
+#: WriteXP4.cpp:603
 #, c-format
 msgid "failed to compress the index data of file '%s'"
 msgstr "ファイル '%s' のインデックスの圧縮に失敗しました"
 
 #. info チャンクが見つからなかった
-#: ReadXP4Meta.cpp:159
+#: ReadXP4Meta.cpp:110
 msgid "chunk 'info' not found"
 msgstr "チャンク 'info' が見つかりません"
 
-#: ReadXP4Meta.cpp:191
+#: ReadXP4Meta.cpp:142
 msgid "chunk 'time' not found"
 msgstr "チャンク 'time' が見つかりません"
 
-#: ReadXP4Meta.cpp:216
+#: ReadXP4Meta.cpp:167
 msgid "chunk 'Segm' not found"
 msgstr "チャンク 'Segm' が見つかりません"
 
-#: ReadXP4Meta.cpp:224
-msgid "invalid 'sha1' chunk"
-msgstr "'sha1' チャンクが異常です"
+#: ReadXP4Meta.cpp:175
+msgid "invalid hash chunk"
+msgstr "ハッシュチャンクが異常です"
 
-#: ReadXP4Meta.cpp:230
-msgid "chunk 'sha1' not found"
-msgstr "チャンク 'sha1' が見つかりません"
+#: ReadXP4Meta.cpp:181
+msgid "hash chunk not found"
+msgstr "ハッシュチャンクが見つかりません"
 
 #. シグニチャが一致しない
-#: ReadXP4Meta.cpp:261
+#: ReadXP4Meta.cpp:212
 #, c-format
 msgid "'%s' is not an XP4 archive file"
 msgstr "'%s' は XP4 アーカイブファイルではありません"
 
-#: ReadXP4Meta.cpp:308
+#: ReadXP4Meta.cpp:259
 #, c-format
 msgid "decompression of archive index of '%s' failed"
 msgstr "アーカイブファイル '%s' のインデックスの展開に失敗しました"
 
-#: ReadXP4Meta.cpp:325
+#: ReadXP4Meta.cpp:276
 #, c-format
 msgid "chunk 'Item' not found in file '%s'"
 msgstr "チャンク 'Item' がファイル '%s' 内に見つかりません"
@@ -213,3 +213,6 @@ msgstr "ファイル '%s' を読み込み用に開くことができません"
 #, c-format
 msgid "can not open file '%s' for writing"
 msgstr "ファイル '%s' を書き込み用に開くことができません"
+
+#~ msgid "chunk 'sha1' not found"
+#~ msgstr "チャンク 'sha1' が見つかりません"

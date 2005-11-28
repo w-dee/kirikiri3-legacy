@@ -65,7 +65,8 @@ CPPFILES =  ConsoleMain.cpp \
 			FileList.cpp  \
 			WriteXP4.cpp \
 			ReadXP4Meta.cpp \
-			wxFileWrapper.cpp
+			wxFileWrapper.cpp \
+			XP4Hash.cpp
 
 HFILES =	$(CPPFILES:.cpp=.h) \
 			ProgressCallback.h

@@ -1,12 +1,12 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// TJS2 "Object" class implementation
+// TJS3 "Object" class implementation
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 

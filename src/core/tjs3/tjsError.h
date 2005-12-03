@@ -1,12 +1,12 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// TJS2's C++ exception class and exception message
+// TJS3's C++ exception class and exception message
 //---------------------------------------------------------------------------
 
 
@@ -371,7 +371,7 @@ TJS_MSG_DECL(TJSInvalidFormatString, TJS_W("Invalid format string"))
 TJS_MSG_DECL(TJSDivideByZero, TJS_W("Division by zero"))
 TJS_MSG_DECL(TJSNotReconstructiveRandomizeData, TJS_W("Cannot reconstruct random seeds"))
 TJS_MSG_DECL(TJSSymbol, TJS_W("ID"))
-TJS_MSG_DECL(TJSCallHistoryIsFromOutOfTJS2Script, TJS_W("[out of TJS2 script]"))
+TJS_MSG_DECL(TJSCallHistoryIsFromOutOfTJS3Script, TJS_W("[out of TJS3 script]"))
 TJS_MSG_DECL(TJSNObjectsWasNotFreed, TJS_W("Total %1 Object(s) was not freed"))
 TJS_MSG_DECL(TJSObjectCreationHistoryDelimiter, TJS_W(" <-- "));
 TJS_MSG_DECL(TJSObjectWasNotFreed, TJS_W("Object %1 [%2] wes not freed / The object was created at : %2"))

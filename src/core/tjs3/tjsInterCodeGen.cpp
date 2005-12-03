@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -28,8 +28,8 @@
 /*
 	'intermediate code' means that it is not a final code, yes.
 	I thought this should be converted to native machine code before execute,
-	at early phase of developping TJS2.
-	But TJS2 intermediate VM code has functions that are too abstract to
+	at early phase of developping TJS3.
+	But TJS3 intermediate VM code has functions that are too abstract to
 	be converted to native machine code, so I decided that I write a code
 	which directly drives intermediate VM code.
 */

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -2675,7 +2675,7 @@ void tTJSInterCodeContext::ProcessOctetFunction(const tjs_char *member, const tt
 //---------------------------------------------------------------------------
 void tTJSInterCodeContext::TypeOf(tTJSVariant &val)
 {
-	// processes TJS2's typeof operator.
+	// processes TJS3's typeof operator.
 	static tTJSString void_name(TJS_W("void"));
 	static tTJSString Object_name(TJS_W("Object"));
 	static tTJSString String_name(TJS_W("String"));

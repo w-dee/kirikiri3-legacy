@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -437,11 +437,11 @@ void TJSAddObjectHashRecord(void * object)
 	tTJSObjectHashMapRecord rec;
 	ttstr hist(TJSGetStackTraceString(4, (const tjs_char *)(TJSObjectCreationHistoryDelimiter)));
 	if(hist.IsEmpty())
-		hist = TJSMapGlobalStringMap((const tjs_char *)TJSCallHistoryIsFromOutOfTJS2Script);
+		hist = TJSMapGlobalStringMap((const tjs_char *)TJSCallHistoryIsFromOutOfTJS3Script);
 	rec.History = hist;
 	ttstr where(TJSGetStackTraceString(1));
 	if(where.IsEmpty())
-		where = TJSMapGlobalStringMap((const tjs_char *)TJSCallHistoryIsFromOutOfTJS2Script);
+		where = TJSMapGlobalStringMap((const tjs_char *)TJSCallHistoryIsFromOutOfTJS3Script);
 	rec.Where = where;
 	static ttstr InitialType(TJS_W("unknown type"));
 	rec.Type = InitialType;
@@ -514,7 +514,7 @@ bool TJSObjectHashAnyUnfreed()
 void TJSObjectHashMapSetLog(tTJSBinaryStream * stream)
 {
 	// Set log object. The log file object should not freed until
-	// the program (the program is the Process, not RTL nor TJS2 framework).
+	// the program (the program is the Process, not RTL nor TJS3 framework).
 	TJSObjectHashMapLog = stream;
 	TJSStoreLog(liiVersion);
 	TJSStoreLog(TJSVersionHex);

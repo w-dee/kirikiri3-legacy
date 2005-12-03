@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -15,7 +15,7 @@
 
 /*
 	Global String Map is a large string hash table, to share the string
-	which is already 'known' by the hash table, using TJS2 string heap
+	which is already 'known' by the hash table, using TJS3 string heap
 	management mechanism. This will dramatically decrease string heap
 	size which is used for constant strings (member names, string literals,
 	etc ...).

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -49,7 +49,7 @@ public:
 #ifdef __WIN32__
 #include <Windows.h>
 
-// we assume that sizeof(tjs_uint) is 4 on TJS2/win32.
+// we assume that sizeof(tjs_uint) is 4 on TJS3/win32.
 
 inline tjs_uint TJSInterlockedIncrement(tjs_uint & value)
 {

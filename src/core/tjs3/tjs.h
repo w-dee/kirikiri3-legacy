@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -67,7 +67,7 @@ extern bool TJSWarnOnNonGlobalEvalOperator;
 	// Output warning against non-local post-! operator.
 	// (For checking where the post-! operators are used)
 extern bool TJSEnableDebugMode;
-	// Enable TJS2 Debugging support. Enabling this may make the
+	// Enable TJS3 Debugging support. Enabling this may make the
 	// program somewhat slower and using more memory.
 	// Do not use this mode unless you want to debug the program.
 extern bool TJSWarnOnExecutionOnDeletingObject;

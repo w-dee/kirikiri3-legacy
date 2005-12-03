@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -56,7 +56,7 @@ tTJSNC_Math::tTJSNC_Math() :
 	srand(time_num);
 
 	/*
-		TJS2 cannot promise that the sequence of generated random numbers are
+		TJS3 cannot promise that the sequence of generated random numbers are
 		unique.
 		Math.random uses old-style random generator from stdlib
 		since Math.RandomGenerator provides Mersenne Twister high-quality random

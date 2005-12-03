@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005	 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -24,7 +24,7 @@ namespace TJS
 void (*TJSGetRandomBits128)(void *dest) = NULL;
 	// retrives 128-bits (16bytes) random bits for random seed.
 	// this can be override application-specified routine, otherwise
-	// TJS2 uses current time as a random seed.
+	// TJS3 uses current time as a random seed.
 //---------------------------------------------------------------------------
 
 

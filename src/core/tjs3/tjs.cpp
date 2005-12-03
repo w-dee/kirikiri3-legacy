@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
+	TJS3 Script Engine
 	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -39,9 +39,9 @@ extern iTJSDispatch2 * TJSCreateRegExpClass();
 //---------------------------------------------------------------------------
 // TJS Version
 //---------------------------------------------------------------------------
-const tjs_int TJSVersionMajor   = 2;
-const tjs_int TJSVersionMinor   = 4;
-const tjs_int TJSVersionRelease = 19;
+const tjs_int TJSVersionMajor   = 3;
+const tjs_int TJSVersionMinor   = 0;
+const tjs_int TJSVersionRelease = 0;
 const tjs_int TJSVersionHex =
 	TJSVersionMajor * 0x1000000 + TJSVersionMinor * 0x10000 + TJSVersionRelease;
 
@@ -61,7 +61,7 @@ bool TJSEvalOperatorIsOnGlobal = false;
 bool TJSWarnOnNonGlobalEvalOperator = false;
 	// Output warning against non-local post-! operator.
 bool TJSEnableDebugMode = false;
-	// Enable TJS2 Debugging support. Enabling this may make the
+	// Enable TJS3 Debugging support. Enabling this may make the
 	// program somewhat slower and using more memory.
 	// Do not use this mode unless you want to debug the program.
 bool TJSWarnOnExecutionOnDeletingObject = false;

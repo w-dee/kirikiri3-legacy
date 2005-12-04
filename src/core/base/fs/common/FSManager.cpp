@@ -22,10 +22,18 @@ tTVPFileSystemManager::tTVPFileSystemManager()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
+//! @brief		デストラクタ
 //---------------------------------------------------------------------------
 tTVPFileSystemManager::~tTVPFileSystemManager()
 {
+	tTJSCriticalSectionHolder holder(CS);
+
+	// すべてのファイルシステムを解放
+	tTJSHashTable<ttstr, iTVPFileSystem *>::tIterator i;
+	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
+	{
+		i->GetValue()->Release();
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -170,35 +178,71 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 
 //---------------------------------------------------------------------------
 //! @brief		ファイル一覧を取得する
-//! @param		callback
-//! @return		ディレクトリが存在する場合真
+//! @param		dirname: ディレクトリ名
+//! @param		callback: コールバックオブジェクト
+//! @param		recursive: 再帰的にファイル一覧を得るかどうか
+//! @return		取得できたファイル数
 //---------------------------------------------------------------------------
-bool tTVPFileSystemManager::FileExists(const ttstr & filename)
+size_t GetFileListAt(const ttstr & dirname,
+	iTVPFileSystemIterationCallback * callback, bool recursive = false)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	ttstr path(NormalizePath(dirname));
 
-	ttstr fspath;
-	ttstr fullpath(NormalizePath(filename));
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(fullpath, &fspath);
-	if(!fs) ThrowNoFileSystemError(filename);
-	try
+	if(!recursive)
 	{
-		return fs->FileExists(fspath);
+		// 再帰をしないならば
+		return InternalGetFileListAt(path, callback); // 話は簡単
 	}
-	catch(const eTJSError &e)
+
+	// 再帰をする場合
+	class tIteratorCallback : public iTVPFileSystemIterationCallback
 	{
-		TVPThrowExpceptionMessage(_("failed to retrieve existence of file '%1' : %2"),
-			fullpath, e.GetMessage()); // this method never returns
+		std::vector<ttstr> & List;
+		iTVPFileSystemIterationCallback *Destination;
+		size_t Count;
+		ttstr CurrentDirectory;
+
+		tIteratorCallback(std::vector<ttstr> &list,
+			iTVPFileSystemIterationCallback *destination)
+				: List(list), Destination(destination), Count(0);
+		{
+		}
+
+		bool OnFile(const ttstr & filename)
+		{
+			Count ++;
+			if(dest)
+				return dest->OnFile(CurrentDirectory + filename);
+			return true;
+		}
+		bool OnDirectory(const ttstr & dirname)
+		{
+			Count ++;
+			ttstr dir(CurrentDirectory  + filename);
+			if(dest)
+				return dest->OnDirectory(dir);
+			List.push_back(dir); // ディレクトリを list に push
+		}
+	} 
+	std::vector<ttstr> list; // ディレクトリのリスト
+	list.push_back(ttstr()); // 空ディレクトリを push
+
+	tIteratorCallback localcallback(list, callback);
+
+	while(list.size()) // ディレクトリのリストに残りがある限り繰り返す
+	{
+		ttstr dir(path + list.back());
+		list.pop_back();
+		InternalGetFileListAt(dir, &localcallback);
 	}
-	return false;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルが存在するかどうかを得る
-//! @param		dirname: ディレクトリ名
-//! @return		ディレクトリが存在する場合真
+//! @param		filename: ファイル名
+//! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 {
@@ -374,6 +418,34 @@ iTVPBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, t
 	{
 		TVPThrowExpceptionMessage(_("failed to create stream of '%1' : %2"),
 			fullpath, e.GetMessage());
+	}
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ファイル一覧を取得する(内部関数)
+//! @param		dirname: ディレクトリ名(正規化されているべきこと)
+//! @callback	コールバックオブジェクト
+//---------------------------------------------------------------------------
+size_t tTVPFileSystemManager::InternalGetFileListAt(
+	const ttstr & dirname,
+	iTVPFileSystemIterationCallback * callback)
+{
+	tTJSCriticalSectionHolder holder(CS);
+
+	ttstr fspath;
+	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(dirname, &fspath);
+	if(!fs) ThrowNoFileSystemError(dirname);
+	try
+	{
+		return fs->GetFileListAt(fspath, callcack);
+	}
+	catch(const eTJSError &e)
+	{
+		TVPThrowExpceptionMessage(_("failed to list files in directory '%1' : %2"),
+			dirname, e.GetMessage());
 	}
 	return NULL;
 }

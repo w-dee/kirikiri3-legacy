@@ -9,10 +9,55 @@
 //! @file
 //! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
-
 #ifndef _FSMANAGER_H_
 #define _FSMANAGER_H_
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		iTVPFileSystem::GetFileListAt で用いられるコールバックインターフェース
+//---------------------------------------------------------------------------
+class iTVPFileSystemIterationCallback
+{
+	virtual bool OnFile(const ttstr & filename) = 0;
+	virtual bool OnDirectory(const ttstr & dirname) = 0;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		iTVPFileSystem::Stat で返される構造体
+//---------------------------------------------------------------------------
+struct tTVPStatStruc
+{
+	wxFileOffset	Size	//!< ファイルサイズ (wxFileOffset)-1 の場合は無効
+	wxDateTime		MTime;	//!< ファイル修正時刻 (wxDateTime::IsValidで有効性をチェックのこと)
+	wxDateTime		ATime;	//!< アクセス時刻 (wxDateTime::IsValidで有効性をチェックのこと)
+	wxDateTime		CTime;	//!< 作成時刻 (wxDateTime::IsValidで有効性をチェックのこと)
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ファイルシステム純粋仮想クラス
+//---------------------------------------------------------------------------
+class iTVPFileSystem
+{
+public:
+	virtual void AddRef() = 0;  //!< 参照カウンタを一つ増やす
+	virtual void Release() = 0;  //!< 参照カウンタを一つ減らす
+
+	virtual size_t GetFileListAt(const ttstr & dirname,
+		iTVPFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
+	virtual bool FileExists(const ttstr & filename) = 0; //!< ファイルが存在するかどうかを得る
+	virtual bool DirectoryExists(const ttstr & dirname) = 0; //!< ディレクトリが存在するかどうかを得る
+	virtual void RemoveFile(const ttstr & filename) = 0; //!< ファイルを削除する
+	virtual void RemoveDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを削除する
+	virtual void CreateDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを作成する
+	virtual void Stat(const ttstr & filename, tTVPStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
+	virtual iTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -23,7 +68,7 @@ class tTVPFileSystemManager
 	tTJSHashTable<ttstr, iTVPFileSystem *> MountPoints; //!< マウントポイントのハッシュ表
 	ttstr CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
 
-	tTJSCriticalSection CS;
+	tTJSCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
 
 public:
 	tTVPFileSystemManager();
@@ -35,7 +80,7 @@ public:
 	ttstr NormalizePath(const ttstr & path);
 
 	size_t GetFileListAt(const ttstr & dirname,
-		iTVPFileSystemIterationCallback * callback, bool recursive = false); //!< ファイル一覧を取得
+		iTVPFileSystemIterationCallback * callback, bool recursive = false);
 	bool FileExists(const ttstr & filename);
 	bool DirectoryExists(const ttstr & dirname);
 	void RemoveFile(const ttstr & filename);
@@ -45,6 +90,8 @@ public:
 	iTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
 private:
+	size_t InternalGetFileListAt(const ttstr & dirname,
+		iTVPFileSystemIterationCallback * callback);
 	iTVPFileSystem * GetFileSystemAtNoAddRef(const ttstr & fullpath, ttstr * fspath = NULL);
 	static void ThrowNoFileSystemError(const ttstr & filename);
 };

@@ -326,7 +326,7 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 //---------------------------------------------------------------------------
 //! @brief		アーカイブ内ストレージの名前を正規化する
 //! @param		name: 正規化したいストレージ名
-//! @returns	正規化したストレージ名
+//! @return		正規化したストレージ名
 //---------------------------------------------------------------------------
 wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name)
 {

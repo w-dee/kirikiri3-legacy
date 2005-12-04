@@ -56,7 +56,7 @@ static inline wxUint64 TVPReadI64LEFromMem(const unsigned char *mem)
 //! @param		limit: 検索を行うメモリ領域のサイズ
 //! @param		chunkcontent: チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
 //! @param		chunksize: チャンクが見つかった場合、そのチャンクのサイズが入る
-//! @returns	チャンクが見つかった場合に 真、見つからなかった場合は偽
+//! @return		チャンクが見つかった場合に 真、見つからなかった場合は偽
 //---------------------------------------------------------------------------
 static bool TVPFindChunk(const unsigned char * chunkname,
 	const unsigned char *mem, size_t memsize,

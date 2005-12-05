@@ -22,6 +22,7 @@ tTVPMemoryStreamBlock::tTVPMemoryStreamBlock()
 	Block = NULL;
 	Size = 0;
 	AllocSize = 0;
+	RefCount = 1;
 }
 //---------------------------------------------------------------------------
 
@@ -36,6 +37,36 @@ tTVPMemoryStreamBlock::~tTVPMemoryStreamBlock()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		参照カウンタを一つ増やす
+//---------------------------------------------------------------------------
+void tTVPMemoryStreamBlock::AddRef()
+{
+	volatile tTJSCriticalSectionHolder holder(CS);
+
+	RefCount ++;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		参照カウンタを一つ減らす
+//---------------------------------------------------------------------------
+void tTVPMemoryStreamBlock::Release()
+{
+	tjs_uint decremented_count;
+
+	{
+		volatile tTJSCriticalSectionHolder holder(CS);
+
+		RefCount --;
+		decremented_count = RefCount;
+	}
+
+	if(decremented_count == 0) delete this;
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 //! @brief		メモリブロックのサイズを変更する
@@ -45,7 +76,7 @@ tTVPMemoryStreamBlock::~tTVPMemoryStreamBlock()
 //---------------------------------------------------------------------------
 void tTVPMemoryStreamBlock::ChangeSize(tjs_size size)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	if(Size < size && size <= AllocSize)
 	{
@@ -86,6 +117,7 @@ void tTVPMemoryStreamBlock::Fit()
 	// Size よりも大きくて AllocSize よりも小さな部分は無駄である。
 	// このメソッドは、メモリブロックのサイズを Size ぴったりにすることにより
 	// この無駄な部分を解放する。
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	if(Size != AllocSize)
 	{
@@ -104,24 +136,32 @@ void tTVPMemoryStreamBlock::Fit()
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
+//! @param		flags: アクセスフラグ
 //---------------------------------------------------------------------------
-tTVPMemoryStream::tTVPMemoryStream()
+tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flags)
 {
+	Flags = flags;
 	Block = new tTVPMemoryStreamBlock();
-	Reference = false;
-	CurrentPos = 0;
+
+	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+	CurrentPos = flags & TJS_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ(他のメモリブロックを参照する場合)
+//! @param		flags: アクセスフラグ
+//! @param		block: メモリブロック
 //---------------------------------------------------------------------------
-tTVPMemoryStream::tTVPMemoryStream(tTVPMemoryStreamBlock * block)
+tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flagstTVPMemoryStreamBlock * block)
 {
+	Flags = flags;
 	Block = block;
-	Reference = true;
-	CurrentPos = 0;
+
+	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+	Block->AddRef();
+	CurrentPos = flags & TJS_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
 }
 //---------------------------------------------------------------------------
 
@@ -131,7 +171,8 @@ tTVPMemoryStream::tTVPMemoryStream(tTVPMemoryStreamBlock * block)
 //---------------------------------------------------------------------------
 tTVPMemoryStream::~tTVPMemoryStream()
 {
-	if(!Reference) delete Block;
+	Block->Fit(); // メモリブロックのよけいな余裕を解放
+	Block->Release();
 }
 //---------------------------------------------------------------------------
 
@@ -141,7 +182,7 @@ tTVPMemoryStream::~tTVPMemoryStream()
 //---------------------------------------------------------------------------
 tjs_uint64 TJS_INTF_METHOD tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
 {
-	tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
 
 	tjs_int64 newpos;
 	switch(whence)
@@ -179,7 +220,12 @@ tjs_uint64 TJS_INTF_METHOD tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int when
 //---------------------------------------------------------------------------
 tjs_size TJS_INTF_METHOD tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
 {
-	tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+
+	if(!(Flags & TJS_BS_ACCESS_READ_BIT))
+		TVPThrowExceptionMessage(_("access denied (stream has no read-access)"));
+
+	if(CurrentPos > Block->GetSize()) return 0; // can not read from there
 
 	if(CurrentPos + read_size >= Block->GetSize())
 	{
@@ -200,7 +246,13 @@ tjs_size TJS_INTF_METHOD tTVPMemoryStream::Read(void *buffer, tjs_size read_size
 //---------------------------------------------------------------------------
 tjs_size TJS_INTF_METHOD tTVPMemoryStream::Write(const void *buffer, tjs_size write_size)
 {
-	tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+
+	if(!(Flags & TJS_BS_ACCESS_WRITE_BIT))
+		TVPThrowExceptionMessage(_("access denied (stream has no write-access)"));
+
+	// adjust current file pointer
+	if(CurrentPos > Block->GetSize()) return 0; // can not write there
 
 	// writing may increase the internal buffer size.
 	tjs_uint newpos = CurrentPos + write_size;
@@ -224,7 +276,10 @@ tjs_size TJS_INTF_METHOD tTVPMemoryStream::Write(const void *buffer, tjs_size wr
 //---------------------------------------------------------------------------
 void TJS_INTF_METHOD tTVPMemoryStream::SetEndOfFile()
 {
-	tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+
+	if(!(Flags & TJS_BS_ACCESS_WRITE_BIT))
+		TVPThrowExceptionMessage(_("access denied (stream has no write-access)"));
 
 	Block->ChangeSize(CurrentPos);
 }

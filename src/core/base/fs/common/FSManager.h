@@ -34,6 +34,9 @@ struct tTVPStatStruc
 	wxDateTime		MTime;	//!< ファイル修正時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 	wxDateTime		ATime;	//!< アクセス時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 	wxDateTime		CTime;	//!< 作成時刻 (wxDateTime::IsValidで有効性をチェックのこと)
+
+	tTVPStatStruc() { Clear(); }
+	void Clear() {  Size = (wxFileOffset) - 1; MTime = ATime = CTime = wxDateTime(); }
 };
 //---------------------------------------------------------------------------
 
@@ -94,6 +97,11 @@ private:
 		iTVPFileSystemIterationCallback * callback);
 	iTVPFileSystem * GetFileSystemAtNoAddRef(const ttstr & fullpath, ttstr * fspath = NULL);
 	static void ThrowNoFileSystemError(const ttstr & filename);
+
+public:
+	static void RaiseNoSuchFileOrDirectoryError();
+	static void SplitPathAndName(const ttstr & in, ttstr & path, ttstr & name);
+
 };
 //---------------------------------------------------------------------------
 

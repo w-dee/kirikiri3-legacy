@@ -320,7 +320,7 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを削除する
-//! @param		dirname: ファイル名
+//! @param		dirname: ディレクトリ名
 //! @param		recursive: 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursive)
@@ -346,7 +346,7 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを作成する
-//! @param		dirname: ファイル名
+//! @param		dirname: ディレクトリ名
 //! @param		recursive: 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursive)
@@ -512,3 +512,54 @@ void tTVPFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		「そのようなファイルやディレクトリは無い」例外を発生させる
+//---------------------------------------------------------------------------
+void tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError()
+{
+	TVPThrowExceptionMessage(
+		_("no such file or directory"));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		パス名をパスと名前に分離する ( /path/to/file を /path/to と file に分離する )
+//! @param		in: 入力パス名
+//! @param		path: (出力) パス
+//! @param		name: (出力) 名前
+//---------------------------------------------------------------------------
+void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr & path, ttstr & name)
+{
+	const tjs_char * p = in.c_str() + in.GetLen();
+	const tjs_char * pp = p;
+	const tjs_char * start = in.c_str();
+	p --;
+	while(p > start && *p != TJS_W('/')) p--;
+
+	if(*p == TJS_W('/')) p++;
+
+	path = ttstr(start, p - start);
+	name = ttstr(p);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		パス名の最後のパスデリミタ ('/') を取り去る ( /path/is/here/ を /path/is/here にする )
+//! @param		path: パス
+//---------------------------------------------------------------------------
+static void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
+{
+	if(path.EndWith(TJS_W('/')))
+	{
+		tjs_char *s = path.Independ();
+		tjs_char *p = s + path.GetLen() - 1;
+		while(p >= s && *p == TJS_W('/')) p--;
+		p++;
+		*p = 0;
+		path.FixLen();
+	}
+}
+//---------------------------------------------------------------------------

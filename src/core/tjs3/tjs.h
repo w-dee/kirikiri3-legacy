@@ -195,12 +195,15 @@ extern iTJSTextWriteStream * (*TJSCreateTextStreamForWrite)(const tTJSString &na
 //---------------------------------------------------------------------------
 // tTJSBinaryStream constants
 //---------------------------------------------------------------------------
-#define TJS_BS_READ 0
-#define TJS_BS_WRITE 1
-#define TJS_BS_APPEND 2
+#define TJS_BS_READ 1
+#define TJS_BS_WRITE 2
+#define TJS_BS_APPEND 7
 #define TJS_BS_UPDATE 3
 
-#define TJS_BS_ACCESS_MASK 0x0f
+#define TJS_BS_ACCESS_MASK 0x03
+#define TJS_BS_ACCESS_READ_BIT 1
+#define TJS_BS_ACCESS_WRITE_BIT 2
+#define TJS_BS_ACCESS_APPEND_BIT 4
 
 #define TJS_BS_SEEK_SET 0
 #define TJS_BS_SEEK_CUR 1

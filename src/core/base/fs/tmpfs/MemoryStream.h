@@ -25,10 +25,15 @@ class tTVPMemoryStreamBlock
 	void * Block;			//!< メモリブロック
 	tjs_size Size;			//!< メモリブロックのデータが入っている部分のサイズ
 	tjs_size AllocSize;		//!< メモリブロックのアロケートしているサイズ( Size <= AllocSize )
+	tjs_uint RefCount;		//!< 参照カウント
 
 public:
 	tTVPMemoryStreamBlock();
+protected:
 	~tTVPMemoryStreamBlock();
+public:
+	void AddRef();
+	void Release();
 
 	void ChangeSize(tjs_size);
 	void Fit();
@@ -52,12 +57,12 @@ class tTVPMemoryStream : public tTJSBinaryStream
 {
 protected:
 	tTVPMemoryStreamBlock * Block; //!< メモリブロック
-	bool Reference;			//!< ほかのメモリブロックを参照している場合に真
 	tjs_size CurrentPos;		//!< 現在のポインタ
+	tjs_uint32 Flags;			//!< アクセスフラグ
 
 public:
-	tTVPMemoryStream();
-	tTVPMemoryStream(tTVPMemoryStreamBlock * block);
+	tTVPMemoryStream(tjs_uint32 flags);
+	tTVPMemoryStream(tjs_uint32 flags, tTVPMemoryStreamBlock * block);
 	~tTVPMemoryStream();
 
 	tjs_uint64 TJS_INTF_METHOD Seek(tjs_int64 offset, tjs_int whence);

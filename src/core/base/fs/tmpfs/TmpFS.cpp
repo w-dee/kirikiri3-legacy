@@ -32,8 +32,106 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 	else
 	{
 		// ファイルのノードなので Block を作成
-		Block = new tTVPMemoryStreamBlock();
+		File = new tTVPMemoryStreamBlock();
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		シリアライズされたデータを読み取るコンストラクタ
+//! @param		src: 入力もとストリーム
+//---------------------------------------------------------------------------
+void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
+	tTVPBinaryStream * src) :
+	Parent(parent)
+{
+	if(Type == ntDirectory)
+	{
+		// ディレクトリのノードなので ハッシュ表を作成
+		Directory = new tTJSHashTable<ttstr, tTVPTmpFSNode *>();
+	}
+	else
+	{
+		// ファイルのノードなので Block を作成
+		File = new tTVPMemoryStreamBlock();
+	}
+
+	// メタデータを読み取る
+	while(true)
+	{
+		unsigned char metadataid;
+		src->ReadBuffer(&metadataid, 1);
+
+		if(metadataid == 0) break;
+
+		wxUint32 metalen;
+		src->ReadBuffer(&metalen, sizeof(metalen));
+		metalen = wxUINT32_SWAP_ON_BE(metalen);
+		if(metalen == 0)
+			TVPThrowExceptionMessage(_("invalid metadata length (data may be corrupted)"));
+
+		if(metadataid == 0x01)
+		{
+			// ファイル名
+			unsigned char * p = new unsigned char [metalen];
+			src->ReadBuffer(p, metalen);
+			p[metalen - 1] = 0;
+			Name = ttstr(wxString(p, wxConvUTF8()));
+		}
+		else
+		{
+			// 未知のメタデータなので読み飛ばす
+			src->SetPosition(src->GetPosition() + metalen);
+		}
+	}
+
+	// ノードタイプに従って処理
+	if(Type == ntDirectory)
+	{
+		// ディレクトリ
+		bool done = false;
+		while(!done)
+		{
+			// サブノードのタイプを読み取る
+			unsigned char nodetypeid;
+			src->ReadBuffer(&nodetypeid, 1);
+			tType subnodetype;
+			tTVPTmpFSNode * subnode = NULL;
+			switch(nodetypeid)
+			{
+			case 0x80: // ディレクトリ
+				subnode = new tTVPTmpFSNode(this, ntDirectory, src);
+				break;
+			case 0x81: // ファイル
+				subnode = new tTVPTmpFSNode(this, ntFile, src);
+				break;
+			case 0x88: // ディレクトリ終了
+				done = true;
+				break;
+			default:
+				TVPThrowExceptionMessage(
+						wxString::Format(_("unsupported node id %x"),
+						(int)nodetypeid));
+			}
+		}
+	}
+	else if(Type == ntFile)
+	{
+		// ファイル
+		wxUint64 blocksize;
+		src->ReadBuffer(&blocksize, sizeof(blocksize));
+		blocksize = wxUINT64_SWAP_ON_BE(blocksize);
+		if((size_t)blocksize != blocksize)
+				TVPThrowExceptionMessage(_("too big block size"));
+		File->ChangeSize((size_t)blocksize);
+		File->Fit();
+		src->ReadBuffer(File->GetBlock(), (size_t)blocksize);
+	}
+
+	// 親に自分を登録
+	if(Parent)
+		Parent->Directory->Add(Name, this);
 }
 //---------------------------------------------------------------------------
 
@@ -63,7 +161,58 @@ tTVPTmpFSNode::~tTVPTmpFSNode(const ttstr & name)
 	else if(Type == ntFile)
 	{
 		// このノードはファイル
-		File->Release();
+		File->Release(), File = NULL;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		内容をシリアライズする
+//! @param		dest: 出力先ストリーム
+//---------------------------------------------------------------------------
+void tTVPTmpFSNode::Serialize(tTVPBinaryStream * dest)
+{
+	// ノードのタイプを記録
+	if(Type == ntDirectory)
+		dest->WriteBuffer("\x80", 1); // ディレクトリを表す
+	else if(Type == ntFile)
+		dest->WriteBuffer("\x81", 1); // ファイルを表す
+
+	// 名前を格納
+	dest->WriteBuffer("\1", 1); // ファイル名
+
+	wxCharBuffer utf8name = InArchiveName.mb_str(wxConvUTF8);
+	size_t utf8name_len = strlen(utf8name);
+
+	wxUint32 i32;
+	i32 = wxUINT32_SWAP_ON_BE((wxUint32)(utf8name_len + 1));
+	dest->WriteBuffer(&i32, sizeof(i32));
+	dest->WriteBuffer(utf8name, utf8name_len + 1);
+
+	if(Type == ntDirectory)
+	{
+		// ディレクトリ
+		dest->WriteBuffer("\0", 1); // メタデータの終わりとディレクトリの開始
+
+		// 全ての子要素に対して再帰する
+		tTJSHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
+		for(i = Directory->GetFirst(); !i.IsNull(); i++)
+		{
+			i->GetValue()->Serialize(dest);
+		}
+
+		dest->WriteBuffer("\x88", 1); // ディレクトリの終わりを表す
+	}
+	else if(Type == ntFile)
+	{
+		// ファイル
+		dest->WriteBuffer("\x0", 1); // メタデータの終わりとファイルの中身の開始
+		wxUint64 i64;
+		tTJSCriticalSectionHolder holder(File->GetCS());
+		i64 = wxUINT64_SWAP_ON_BE(File->GetSize());
+		dest->WriteBuffer(&i64, sizeof(i64));
+		dest->WriteBuffer(File->GetBlock(), File->GetSize());
 	}
 }
 //---------------------------------------------------------------------------
@@ -179,23 +328,23 @@ size_t tTVPTmpFSNode::Iterate(iTVPFileSystemIterationCallback * callback)
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		内容をシリアライズする
-//! @param		dest: 出力先ストリーム
+//! @brief		シリアライズ時のファイルの先頭に着くマジック
 //---------------------------------------------------------------------------
-void tTVPTmpFSNode::Serialize(iTJSBinaryStream * dest)
-{
-	
-}
+const unsigned char tTVPTmpFS::SerializeMagic[] = {
+	't', 'm' , 'p', 'f', 's', 0x1a,
+	0x00, // ファイルレイアウトバージョン
+	0x00  // reserved
+};
 //---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
 
 
 //---------------------------------------------------------------------------
@@ -463,7 +612,7 @@ void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags: フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-iTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -475,6 +624,48 @@ iTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 fl
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		指定されたストリームに内容をシリアライズする
+//! @param		dest: 出力先ストリーム
+//---------------------------------------------------------------------------
+void tTVPTmpFS::SerializeTo(tTVPBinaryStream * dest)
+{
+	volatile tTJSCriticalSectionHolder holder(CS);
+
+	// マジックを書き込む
+	dest->WriteBuffer(SerializeMagic, 8);
+
+	// root に対して内容Serialize
+	// (すると後は自動的に全てのノードがシリアライズされる)
+	Root->Serialize(dest);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		指定されたストリームから内容を復元する
+//! @param		src: 入力もとストリーム
+//---------------------------------------------------------------------------
+void tTVPTmpFS::UnserializeFrom(tTVPBinaryStream * src)
+{
+	volatile tTJSCriticalSectionHolder holder(CS);
+
+	// マジックを読み込み、比較する
+	unsigned char magic[8];
+	src->ReadBuffer(magic, 8);
+
+	unsigned char firstnodetype;
+	src->ReadBuffer(&firstnodetype, 1);
+		// 最初のノードタイプ(ディレクトリを表す 0x80 になってないとおかしい)
+
+	if(memcmp(magic, SerialMagic, 8) || firstnodetype != 0x80)
+		TVPThrowExceptionMessage(_("not a tmpfs archive"));
+
+	// 再帰的に内容を読み込む
+	Root = new tTVPTmpFSNode(NULL, tTVPTmpFSNode::ntDirectory, src);
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -522,7 +713,7 @@ void tTVPTmpFS::CreateRoot()
 	if(Root) return;
 
 	// ルートノードを作成
-	Root = new tTVPTmpFSNode(NULL, ntDirectory, ttstr());
+	Root = new tTVPTmpFSNode(NULL, tTVPTmpFSNode::ntDirectory, ttstr());
 }
 //---------------------------------------------------------------------------
 

@@ -396,7 +396,7 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags: フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-iTVPBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tTVPBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, tjs_uint32 flags)
 {
 	tTJSCriticalSectionHolder holder(CS);
 
@@ -479,7 +479,6 @@ boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 				MountPoints.Find(subpath);
 			if(item)
 			{
-				/* (*item)->AddRef(); */ // AddRef() されないので注意
 				if(fspath) *fspath = start + subpath.GetLen();
 				return *item; // ファイルシステムが見つかった
 			}

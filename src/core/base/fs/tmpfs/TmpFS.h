@@ -33,7 +33,11 @@ class tTVPTmpFSNode
 	};
 public:
 	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, const ttstr & name);
+	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, tTVPBinaryStream * src);
 	~tTVPTmpFSNode();
+
+public:
+	void Serialize(tTVPBinaryStream * dest) const;
 
 	tTVPTmpFSNode * GetSubNode(const ttstr & name);
 	bool DeleteSubNodeByName(const ttstr & name);
@@ -51,7 +55,6 @@ public:
 	tjs_size GetSize() const;
 	size_t Iterate(iTVPFileSystemIterationCallback * callback);
 
-	void Serialize(iTJSBinaryStream * dest);
 };
 //---------------------------------------------------------------------------
 
@@ -64,8 +67,12 @@ class tTVPTmpFS : public iTVPFileSystem
 	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 	tTVPTmpFSNode * Root; //!< ルートノード
 
+	static const unsigned char SerializeMagic[];
+
 public:
 	tTVPTmpFS();
+
+	//-- iTVPFileSystem メンバ
 	~tTVPTmpFS();
 
 	size_t GetFileListAt(const ttstr & dirname,
@@ -76,7 +83,12 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	iTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+
+	//-- iTVPFileSystem メンバ ここまで
+
+	void SerializeTo(tTVPBinaryStream * dest);
+	void UnserializeFrom(tTVPBinaryStream * src);
 
 private:
 	tTVPTmpFSNode * GetNodeAt(const ttstr & name);

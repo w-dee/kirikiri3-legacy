@@ -57,7 +57,7 @@ public:
 	virtual void RemoveDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを削除する
 	virtual void CreateDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを作成する
 	virtual void Stat(const ttstr & filename, tTVPStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
-	virtual iTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
+	virtual tTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
 };
 //---------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	iTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
 private:
 	size_t InternalGetFileListAt(const ttstr & dirname,

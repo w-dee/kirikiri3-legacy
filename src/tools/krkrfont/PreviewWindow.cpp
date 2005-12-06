@@ -227,6 +227,13 @@ void wxPreviewScrolledWindow::PrintCharacter(tjs_char ch, int x, int y)
 
 	tTVPGlyphBitmap * srcbmp = FACE->GetGlyphFromCharcode(ch);
 	if(!srcbmp) return; // 文字が不正か、グリフが空なので表示できない
+	if(!srcbmp->GetBlackBoxW() || !srcbmp->GetBlackBoxH())
+	{
+		// サイズが 0 なので表示できない
+		srcbmp->Release();
+		return;
+	}
+
 	try
 	{
 		// wxImage を作成し、グリフイメージをコピーする

@@ -198,12 +198,12 @@ msgstr "吉里吉里3 ビットマップフォント (*.bff)|*.bff"
 msgid "Can't open font file '%1$s'"
 msgstr "フォントファイル '%1$s' を開くことができません"
 
-#: PreviewWindow.cpp:460
+#: PreviewWindow.cpp:467
 #, c-format
 msgid "Index : %d   Charcode : U+%06X"
 msgstr "インデックス : %d   文字コード : U+%06X"
 
-#: PreviewWindow.cpp:585
+#: PreviewWindow.cpp:592
 #, c-format
 msgid "Glyph count : %d"
 msgstr "グリフ数 : %d"

@@ -29,7 +29,7 @@ tTVPFileSystemManager::~tTVPFileSystemManager()
 	tTJSCriticalSectionHolder holder(CS);
 
 	// すべてのファイルシステムを解放
-	tTJSHashTable<ttstr, iTVPFileSystem *>::tIterator i;
+	tTJSHashTable<ttstr, boost::shared_ptr<iTVPFileSystem> >::tIterator i;
 	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
 	{
 		i->GetValue()->Release();
@@ -43,7 +43,7 @@ tTVPFileSystemManager::~tTVPFileSystemManager()
 //! @param		point: マウントポイント
 //! @param		fs: ファイルシステムオブジェクト
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::Mount(const ttstr & point, iTVPFileSystem * fs)
+void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFileSystem> fs)
 {
 	tTJSCriticalSectionHolder holder(CS);
 
@@ -53,7 +53,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point, iTVPFileSystem * fs)
 	if(!path.EndWith(TJS_W('/'))) path += TJS_W('/');
 
 	// すでにその場所にマウントが行われているかどうかをチェックする
-	iTVPFileSystem ** item = MountPoints.Find(path);
+	boost::shared_ptr<iTVPFileSystem> * item = MountPoints.Find(path);
 	if(item)
 	{
 		// ファイルシステムが見つかったのでそこにはマウントできない
@@ -62,9 +62,6 @@ void tTVPFileSystemManager::Mount(const ttstr & point, iTVPFileSystem * fs)
 
 	// マウントポイントを追加
 	MountPoints.Add(path, fs);
-
-	// fs を AddRef
-	fs->AddRef();
 }
 //---------------------------------------------------------------------------
 
@@ -83,7 +80,7 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 	if(!path.EndWith(TJS_W('/'))) path += TJS_W('/');
 
 	// その場所にマウントが行われているかどうかをチェックする
-	iTVPFileSystem ** item = MountPoints.Find(path);
+	boost::shared_ptr<iTVPFileSystem> * item = MountPoints.Find(path);
 	if(!item)
 	{
 		// そこにはなにもマウントされていない
@@ -92,9 +89,6 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 
 	// マウントポイントを削除
 	MountPoints.Delete(path);
-
-	// ファイルシステムを Release
-	(*item)->Release();
 }
 //---------------------------------------------------------------------------
 
@@ -250,7 +244,7 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(filename);
 	try
 	{
@@ -277,7 +271,7 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -303,7 +297,7 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -329,7 +323,7 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -355,7 +349,7 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -381,7 +375,7 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -408,7 +402,7 @@ iTVPBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, t
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -436,7 +430,7 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 	tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
-	tTVPFileSystem * fs = GetFileSystemAtNoAddRef(dirname, &fspath);
+	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(dirname, &fspath);
 	if(!fs) ThrowNoFileSystemError(dirname);
 	try
 	{
@@ -461,7 +455,8 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 //!				返されたインスタンスを使い終わるまでは、そのインスタンスが
 //!				存在し続けることを確実にするため、tTV
 //---------------------------------------------------------------------------
-iTVPFileSystem * tTVPFileSystemManager::GetFileSystemAtNoAddRef(const ttstr & fullpath, ttstr * fspath)
+boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
+					const ttstr & fullpath, ttstr * fspath)
 {
 	// フルパスの最後からディレクトリを削りながら見ていき、最初に
 	// マウントポイントに一致したディレクトリに対応するファイルシステムを
@@ -480,7 +475,7 @@ iTVPFileSystem * tTVPFileSystemManager::GetFileSystemAtNoAddRef(const ttstr & fu
 		{
 			// p が スラッシュ
 			ttstr subpath(start, p - start + 1);
-			iTVPFileSystem ** item =
+			boost::shared_ptr<iTVPFileSystem> * item =
 				MountPoints.Find(subpath);
 			if(item)
 			{

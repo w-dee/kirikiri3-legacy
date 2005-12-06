@@ -179,6 +179,16 @@ size_t tTVPTmpFSNode::Iterate(iTVPFileSystemIterationCallback * callback)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		内容をシリアライズする
+//! @param		dest: 出力先ストリーム
+//---------------------------------------------------------------------------
+void tTVPTmpFSNode::Serialize(iTJSBinaryStream * dest)
+{
+	
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -215,7 +225,7 @@ tTVPTmpFS::~tTVPTmpFS()
 //---------------------------------------------------------------------------
 void tTVPTmpFS::AddRef()
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(RefCountCS);
 
 	RefCount ++;
 }
@@ -230,7 +240,7 @@ void tTVPTmpFS::Release()
 	tjs_uint decremented_count;
 
 	{
-		volatile tTJSCriticalSectionHolder holder(CS);
+		volatile tTJSCriticalSectionHolder holder(RefCountCS);
 
 		RefCount --;
 		decremented_count = RefCount;
@@ -461,7 +471,7 @@ iTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 fl
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 	if(!node->IsFile()) TVPThrowExceptionMessage(_("specified name is not a file"));
 
-	return new tTVPMemoryStream(flags, node->GetMemoryStreamBlock());
+	return new tTVPMemoryStream(flags, node->GetMemoryStreamBlockNoAddRef());
 }
 //---------------------------------------------------------------------------
 

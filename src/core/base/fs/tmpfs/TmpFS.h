@@ -43,13 +43,15 @@ public:
 	tType GetType() const { return Type; }
 	bool IsFile() const { return Type == ntFile; }
 	bool IsDirectory() const { return Type == ntDirectory; }
-	tTVPMemoryStreamBlock * GetMemoryStreamBlock() { return File; } 
+	tTVPMemoryStreamBlock * GetMemoryStreamBlockNoAddRef() { return File; } 
 	tTVPTmpFSNode * GetParent() { return Parent; }
 	const ttstr & GetName() const { return Name; }
 	bool HasSubNode() const { return Type == ntDirectory &&
 							Directory->GetCount != 0; }
 	tjs_size GetSize() const;
 	size_t Iterate(iTVPFileSystemIterationCallback * callback);
+
+	void Serialize(iTJSBinaryStream * dest);
 };
 //---------------------------------------------------------------------------
 
@@ -60,16 +62,11 @@ public:
 class tTVPTmpFS : public iTVPFileSystem
 {
 	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
-	tjs_uint	RefCount; //!< 参照カウント
-
 	tTVPTmpFSNode * Root; //!< ルートノード
 
 public:
 	tTVPTmpFS();
 	~tTVPTmpFS();
-
-	void AddRef();  //!< 参照カウンタを一つ増やす
-	void Release();  //!< 参照カウンタを一つ減らす
 
 	size_t GetFileListAt(const ttstr & dirname,
 		iTVPFileSystemIterationCallback * callback);

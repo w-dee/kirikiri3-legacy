@@ -47,8 +47,7 @@ struct tTVPStatStruc
 class iTVPFileSystem
 {
 public:
-	virtual void AddRef() = 0;  //!< 参照カウンタを一つ増やす
-	virtual void Release() = 0;  //!< 参照カウンタを一つ減らす
+	virtual ~iTVPFileSystem() {;} //!< デストラクタ
 
 	virtual size_t GetFileListAt(const ttstr & dirname,
 		iTVPFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
@@ -68,7 +67,7 @@ public:
 //---------------------------------------------------------------------------
 class tTVPFileSystemManager
 {
-	tTJSHashTable<ttstr, iTVPFileSystem *> MountPoints; //!< マウントポイントのハッシュ表
+	tTJSHashTable<ttstr, boost::shared_ptr<iTVPFileSystem> > MountPoints; //!< マウントポイントのハッシュ表
 	ttstr CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
 
 	tTJSCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
@@ -77,7 +76,7 @@ public:
 	tTVPFileSystemManager();
 	~tTVPFileSystemManager();
 
-	void Mount(const ttstr & point, iTVPFileSystem * fs);
+	void Mount(const ttstr & point, boost::shared_ptr<iTVPFileSystem> fs);
 	void Unmount(const ttstr & point);
 
 	ttstr NormalizePath(const ttstr & path);
@@ -95,7 +94,7 @@ public:
 private:
 	size_t InternalGetFileListAt(const ttstr & dirname,
 		iTVPFileSystemIterationCallback * callback);
-	iTVPFileSystem * GetFileSystemAtNoAddRef(const ttstr & fullpath, ttstr * fspath = NULL);
+	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(const ttstr & fullpath, ttstr * fspath = NULL);
 	static void ThrowNoFileSystemError(const ttstr & filename);
 
 public:

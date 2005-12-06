@@ -69,7 +69,7 @@ static void TVPCompressGlyphBitmap(const tjs_uint8 * in,
 			if(diff[j] != 0) break;
 
 		// encode zero length
-		*(op++) = (tjs_uint8)(j - i);
+		*(op++) = static_cast<tjs_uint8>(j - i);
 		i = j;
 
 		// count non-zero part
@@ -78,7 +78,7 @@ static void TVPCompressGlyphBitmap(const tjs_uint8 * in,
 			if(diff[j] == 0) break;
 
 		// encode non-zero length
-		*(op++) = (tjs_uint8)(j - i);
+		*(op++) = static_cast<tjs_uint8>(j - i);
 
 		// output non-zero values
 		for(; i < j; i++)
@@ -196,7 +196,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 
 		// ビットマップを書き込む
 		wxFileOffset bitmap_offset = file.Tell();
-		bitmap_directory->Offset = wxUINT32_SWAP_ON_BE((tjs_uint32)bitmap_offset); // 修正
+		bitmap_directory->Offset = wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(bitmap_offset)); // 修正
 
 		//- ビットマップデータの先頭には 4 つの 0 を書く (仕様)
 		file.Write("\0\0\0\0", 4);
@@ -228,13 +228,13 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 
 				// map に情報を書き込む
 				map[actual_glyph_count].Unicode =
-					wxUINT32_SWAP_ON_BE((tjs_uint32)charcode);
+					wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(charcode));
 				map[actual_glyph_count].CellIncX =
 					wxINT32_SWAP_ON_BE(bitmap->GetMetrics().CellIncX);
 				map[actual_glyph_count].CellIncY =
 					wxINT32_SWAP_ON_BE(bitmap->GetMetrics().CellIncY);
 				map[actual_glyph_count].Offset =
-					wxUINT32_SWAP_ON_BE((tjs_uint32)(file.Tell() - bitmap_offset));
+					wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(file.Tell() - bitmap_offset));
 
 				// tTVPBFFBitmapHeader に情報を書き込む
 				tTVPBFFBitmapHeader header;
@@ -275,7 +275,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 
 				// map に情報を書き込む
 				map[actual_glyph_count].Unicode =
-					wxUINT32_SWAP_ON_BE((tjs_uint32)charcode);
+					wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(charcode));
 				map[actual_glyph_count].CellIncX =
 					wxINT32_SWAP_ON_BE(metrics.CellIncX);
 				map[actual_glyph_count].CellIncY =
@@ -307,7 +307,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 		{
 			// ビットマップのファイルサイズを修正
 			bitmap_directory->Size =
-				wxUINT32_SWAP_ON_BE((tjs_uint32)(file.Tell() - bitmap_offset)); // 修正
+				wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(file.Tell() - bitmap_offset)); // 修正
 
 			// 文字マップのファイルサイズを修正
 			char_map_directory->Size =
@@ -321,7 +321,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 			}
 
 			char_map_directory->Offset =
-				wxUINT32_SWAP_ON_BE((tjs_uint32)file.Tell()); // 修正
+				wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(file.Tell())); // 修正
 
 			file.Write(map, sizeof(tTVPBFFCharacterMap) * actual_glyph_count);
 

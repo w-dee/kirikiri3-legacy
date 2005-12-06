@@ -195,17 +195,17 @@ tjs_uint64 TJS_INTF_METHOD tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int when
 		return CurrentPos;
 
 	case TJS_BS_SEEK_CUR:
-		if((newpos = offset + (tjs_int64)CurrentPos) >= 0)
+		if((newpos = offset + static_cast<tjs_int64>(CurrentPos)) >= 0)
 		{
-			tjs_uint np = (tjs_uint)newpos;
+			tjs_uint np = static_cast<tjs_uint>(newpos);
 			if(np <= Block->GetSize()) CurrentPos = np;
 		}
 		return CurrentPos;
 
 	case TJS_BS_SEEK_END:
-		if((newpos = offset + (tjs_int64)Block->GetSize()) >= 0)
+		if((newpos = offset + static_cast<tjs_int64>(Block->GetSize())) >= 0)
 		{
-			tjs_uint np = (tjs_uint)newpos;
+			tjs_uint np = static_cast<tjs_uint>(newpos);
 			if(np <= Block->GetSize()) CurrentPos = np;
 		}
 		return CurrentPos;
@@ -232,7 +232,7 @@ tjs_size TJS_INTF_METHOD tTVPMemoryStream::Read(void *buffer, tjs_size read_size
 		read_size = Block->GetSize() - CurrentPos;
 	}
 
-	memcpy(buffer, (tjs_uint8*)Block->GetBlock() + CurrentPos, read_size);
+	memcpy(buffer, reinterpret_cast<tjs_uint8*>(Block->GetBlock()) + CurrentPos, read_size);
 
 	CurrentPos += read_size;
 
@@ -262,7 +262,7 @@ tjs_size TJS_INTF_METHOD tTVPMemoryStream::Write(const void *buffer, tjs_size wr
 		Block->ChangeSize(newpos);
 	}
 
-	memcpy((tjs_uint8*)Block->GetBlock() + CurrentPos, buffer, write_size);
+	memcpy(reinterpret_cast<tjs_uint8*>(Block->GetBlock()) + CurrentPos, buffer, write_size);
 
 	CurrentPos = newpos;
 

@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 static inline wxUint16 TVPReadI16LEFromMem(const unsigned char *mem)
 {
-	return (wxUint16)mem[0] + ((wxUint16)mem[1] << 8);
+	return static_cast<wxUint16>(mem[0]) + (static_cast<wxUint16>(mem[1]) << 8);
 }
 //---------------------------------------------------------------------------
 
@@ -31,8 +31,8 @@ static inline wxUint16 TVPReadI16LEFromMem(const unsigned char *mem)
 //---------------------------------------------------------------------------
 static inline wxUint32 TVPReadI32LEFromMem(const unsigned char *mem)
 {
-	return (wxUint32)mem[0] + ((wxUint32)mem[1] << 8) +
-		((wxUint32)mem[2] << 16) + ((wxUint32)mem[3] << 24);
+	return static_cast<wxUint32>(mem[0]) + (static_cast<wxUint32>(mem[1]) << 8) +
+		(static_cast<wxUint32>(mem[2]) << 16) + (static_cast<wxUint32>(mem[3]) << 24);
 }
 //---------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ static inline wxUint64 TVPReadI64LEFromMem(const unsigned char *mem)
 {
 	wxUint32 low  = TVPReadI32LEFromMem(mem);
 	wxUint32 high = TVPReadI32LEFromMem(mem + 4);
-	return ((wxUint64)high << 32) | ((wxUint64)low);
+	return (static_cast<wxUint64>(high) << 32) | (static_cast<wxUint64>(low));
 }
 //---------------------------------------------------------------------------
 
@@ -113,7 +113,7 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 	// info チャンクから情報を読み取る
 	Flags = TVPReadI16LEFromMem(chunk + 0);
 	Flags &=~ TVP_XP4_FILE_MARKED; // MARKED はクリア
-	InArchiveName = wxT("/") + wxString((const char *)(chunk + 2), wxConvUTF8);
+	InArchiveName = wxT("/") + wxString(reinterpret_cast<const char *>(chunk + 2), wxConvUTF8);
 
 	// time チャンクを探す
 	static unsigned char chunkname_time[] = { 't', 'i', 'm', 'e' };
@@ -128,7 +128,7 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 			 wxDateTime::Sep, wxDateTime::Oct, wxDateTime::Nov, wxDateTime::Dec};
 		Time.Set(
 			chunk[3], // day
-			monthes[(int)chunk[2] >= 12 ? 0 : (int)chunk[2]], // month
+			monthes[static_cast<int>(chunk[2]) >= 12 ? 0 : static_cast<int>(chunk[2])], // month
 			TVPReadI16LEFromMem(chunk + 0), // year
 			chunk[4], // hour
 			chunk[5], // minute
@@ -171,7 +171,7 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 	if(TVPFindChunk(tTVPXP4Hash::GetHashChunkName(), meta,
 		metasize, &chunk, &chunksize))
 	{
-		if(chunksize != (size_t)tTVPXP4Hash::GetSize())
+		if(chunksize != static_cast<size_t>(tTVPXP4Hash::GetSize()))
 			throw wxString(_("invalid hash chunk"));
 		Hash.SetHash(chunk);
 	}
@@ -302,7 +302,7 @@ tTVPXP4MetadataReaderArchive::tTVPXP4MetadataReaderArchive(const wxString & file
 			if(TVPFindChunk(chunkname_targ, chunk, chunksize, &targ_chunk, &targ_chunksize))
 			{
 				// これはアーカイブの元となったファイル名
-				TargetDir = wxString((const char *)targ_chunk, wxConvUTF8);
+				TargetDir = wxString(reinterpret_cast<const char *>(targ_chunk), wxConvUTF8);
 			}
 		}
 	}

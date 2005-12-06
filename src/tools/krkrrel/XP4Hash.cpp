@@ -40,11 +40,11 @@ void tTVPXP4Hash::Make(iTVPProgressCallback * callback, const wxString &filename
 	while(left > 0)
 	{
 		unsigned long onesize = 
-			left > sizeof(buf) ? sizeof(buf) : (unsigned long)left;
+			left > sizeof(buf) ? sizeof(buf) : static_cast<unsigned long>(left);
 		file.ReadBuffer(buf, onesize);
 		TVP_XP4_HASH_DO_PROCESS(&st, buf, onesize);
 		left -= onesize;
-		if(callback) callback->OnProgress((int)((size - left) * 100 / size));
+		if(callback) callback->OnProgress(static_cast<int>((size - left) * 100 / size));
 	}
 
 	TVP_XP4_HASH_DONE(&st, Hash);
@@ -58,7 +58,7 @@ void tTVPXP4Hash::Make(iTVPProgressCallback * callback, const wxString &filename
 void tTVPXP4Hash::Print() const
 {
 	for(size_t i = 0; i < TVP_XP4_HASH_SIZE; i++)
-		wxPrintf(wxT("%02x"), (int)(Hash[i]));
+		wxPrintf(wxT("%02x"), static_cast<int>(Hash[i]));
 }
 //---------------------------------------------------------------------------
 

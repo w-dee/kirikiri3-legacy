@@ -18,30 +18,30 @@ static wxCmdLineEntryDesc * TVPGetCmdLineEntryDesc()
 		{ wxCMD_LINE_SWITCH, wxT("h"), wxT("help"),
 			_("show help message"), wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
 		{ wxCMD_LINE_SWITCH, wxT("u"), wxT("use-archive-target"),
-			_("get target dir from the archive set"), (wxCmdLineParamType)0, 0 },
+			_("get target dir from the archive set"), static_cast<wxCmdLineParamType>(0), 0 },
 		{ wxCMD_LINE_OPTION, wxT("s"), wxT("split"),
 			_("split archive in given size (MB)"), wxCMD_LINE_VAL_NUMBER, 0 },
 		{ wxCMD_LINE_OPTION, wxT("r"), wxT("revision"),
 			_("patch revision"), wxCMD_LINE_VAL_STRING, 0 },
 		{ wxCMD_LINE_SWITCH, wxT("p"), wxT("show-progress"),
-			_("show progress"), (wxCmdLineParamType)0, 0 },
+			_("show progress"), static_cast<wxCmdLineParamType>(0), 0 },
 		{ wxCMD_LINE_SWITCH, wxT("d"), wxT("dry-run"),
-			_("do not make output"), (wxCmdLineParamType)0, 0 },
+			_("do not make output"), static_cast<wxCmdLineParamType>(0), 0 },
 		{ wxCMD_LINE_OPTION, wxT("c"), wxT("class-list"),
 			_("regex list file for file classification"), wxCMD_LINE_VAL_STRING, 0 },
 		{ wxCMD_LINE_SWITCH, wxT("n"), wxT("new"),
-			_("force making a new archive set (not a patch)"), (wxCmdLineParamType)0, 0 },
+			_("force making a new archive set (not a patch)"), static_cast<wxCmdLineParamType>(0), 0 },
 		{ wxCMD_LINE_SWITCH, wxT("g"), wxT("show-generation"),
-			_("show archive patch generation history"), (wxCmdLineParamType)0, 0 },
+			_("show archive patch generation history"), static_cast<wxCmdLineParamType>(0), 0 },
 		{ wxCMD_LINE_SWITCH, NULL, wxT("show-default-class"),
-			_("show default classification regex list"), (wxCmdLineParamType)0, 0 },
+			_("show default classification regex list"), static_cast<wxCmdLineParamType>(0), 0 },
 
 		{ wxCMD_LINE_PARAM,	 NULL, NULL, _("archive-file"),
 			  wxCMD_LINE_VAL_STRING, wxCMD_LINE_OPTION_MANDATORY },
 		{ wxCMD_LINE_PARAM,	 NULL, NULL, _("dir"),
 			  wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL },
 
-		{ wxCMD_LINE_NONE, NULL, NULL, NULL, (wxCmdLineParamType)0, 0 }
+		{ wxCMD_LINE_NONE, NULL, NULL, NULL, static_cast<wxCmdLineParamType>(0), 0 }
 	};
 	return cmdlinedesc;
 }
@@ -322,7 +322,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		wxFileOffset split_limit = 0;
 		long split_mb = 0;
 		if(parser.Found(wxT("s"), &split_mb))
-			split_limit = (wxFileOffset)split_mb * (1024l*1024l);
+			split_limit = static_cast<wxFileOffset>(split_mb) * (1024l*1024l);
 
 		// ファイル名を決定
 		wxFileName output_filename(archive_base_name);
@@ -349,7 +349,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		}
 
 		// 既存のアーカイブと ディレクトリから読み取った情報を比較
-		agg.SetRange(14, 15);
+		agg.SetRange(25, 30);
 		TVPCompareXP4StorageNameMap(&agg, in_archive_items_map, filelist);
 
 		if(filelist.size() == 0)
@@ -361,7 +361,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		// アーカイブを作成
 		if(!parser.Found(wxT("d"))) // dry-run で無ければ
 		{
-			agg.SetRange(25, 100);
+			agg.SetRange(30, 100);
 			tTVPXP4Writer writer(
 				&agg,
 				archive_base_name,

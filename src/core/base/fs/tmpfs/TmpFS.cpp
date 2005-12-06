@@ -112,7 +112,7 @@ void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType ty
 			default:
 				TVPThrowExceptionMessage(
 						wxString::Format(_("unsupported node id %x"),
-						(int)nodetypeid));
+						static_cast<int>(nodetypeid)));
 			}
 		}
 	}
@@ -122,11 +122,11 @@ void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType ty
 		wxUint64 blocksize;
 		src->ReadBuffer(&blocksize, sizeof(blocksize));
 		blocksize = wxUINT64_SWAP_ON_BE(blocksize);
-		if((size_t)blocksize != blocksize)
+		if(static_cast<size_t>(blocksize) != blocksize)
 				TVPThrowExceptionMessage(_("too big block size"));
-		File->ChangeSize((size_t)blocksize);
+		File->ChangeSize(static_cast<size_t>(blocksize));
 		File->Fit();
-		src->ReadBuffer(File->GetBlock(), (size_t)blocksize);
+		src->ReadBuffer(File->GetBlock(), static_cast<size_t>(blocksize));
 	}
 
 	// 親に自分を登録
@@ -186,7 +186,7 @@ void tTVPTmpFSNode::Serialize(tTVPBinaryStream * dest)
 	size_t utf8name_len = strlen(utf8name);
 
 	wxUint32 i32;
-	i32 = wxUINT32_SWAP_ON_BE((wxUint32)(utf8name_len + 1));
+	i32 = wxUINT32_SWAP_ON_BE(static_cast<wxUint32>(utf8name_len + 1));
 	dest->WriteBuffer(&i32, sizeof(i32));
 	dest->WriteBuffer(utf8name, utf8name_len + 1);
 

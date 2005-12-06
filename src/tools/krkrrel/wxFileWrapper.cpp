@@ -90,12 +90,12 @@ void wxFileEx::SetPosition(wxFileOffset ofs)
 	if(inherited::Seek(ofs) != ofs)
 		RAISE_EXCEPTION(
 			wxString::Format(_("failed to seek on file '%s', pointer %lld"),
-				FileName.c_str(), (wxUint64)ofs));
+				FileName.c_str(), static_cast<wxUint64>(ofs)));
 }
 //---------------------------------------------------------------------------
 void wxFileEx::ReadBuffer(void* buffer, size_t count)
 {
-	if((size_t)inherited::Read(buffer, count) != count)
+	if(static_cast<size_t>(inherited::Read(buffer, count)) != count)
 		RAISE_EXCEPTION(
 			wxString::Format(_("failed to read from file '%s'"), FileName.c_str()));
 }
@@ -153,10 +153,10 @@ void wxFileEx::Align(wxFileOffset alignbytes, unsigned int padding)
 void wxFileEx::Fill(wxFileOffset fillbytes, unsigned int padding)
 {
 	unsigned char buf[4096];
-	memset(buf, padding, fillbytes > sizeof(buf) ? sizeof(buf): (size_t)fillbytes);
+	memset(buf, padding, fillbytes > sizeof(buf) ? sizeof(buf): static_cast<size_t>(fillbytes));
 	while(fillbytes > 0)
 	{
-		size_t onesize = fillbytes > sizeof(buf) ? sizeof(buf): (size_t)fillbytes;
+		size_t onesize = fillbytes > sizeof(buf) ? sizeof(buf): static_cast<size_t>(fillbytes);
 		WriteBuffer(buf, onesize);
 		fillbytes -= onesize;
 	}

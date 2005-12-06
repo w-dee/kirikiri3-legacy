@@ -144,7 +144,7 @@ void wxPreviewScrolledWindow::UpdateDisplayInfo()
 		tjs_int nw = GetNCharsInLine();
 
 		// 縦に何行はいるかを計算
-		tjs_int nh = (tjs_int)((FACE->GetGlyphCount() - 1) / nw) + 1;
+		tjs_int nh = static_cast<tjs_int>((FACE->GetGlyphCount() - 1) / nw) + 1;
 
 		// スクロールバーを更新
 		SetLineCount(nh);
@@ -232,8 +232,9 @@ void wxPreviewScrolledWindow::PrintCharacter(tjs_char ch, int x, int y)
 		// wxImage を作成し、グリフイメージをコピーする
 		// 入力のビットマップは 8bpp のグレースケール、出力の image の
 		// ビットマップは 24bpp のフルカラー
-		wxImage destimage ((int)srcbmp->GetBlackBoxW(),
-			(int)srcbmp->GetBlackBoxH(), false);
+		wxImage destimage (
+			static_cast<int>(srcbmp->GetBlackBoxW()),
+			static_cast<int>(srcbmp->GetBlackBoxH()), false);
 		unsigned char * destimagedata = destimage.GetData();
 		for(tjs_uint line = 0; line < srcbmp->GetBlackBoxH(); line++)
 		{
@@ -251,8 +252,9 @@ void wxPreviewScrolledWindow::PrintCharacter(tjs_char ch, int x, int y)
 		if(Magnify != 1)
 		{
 			// イメージの拡大を行う
-			destimage.Rescale((int)srcbmp->GetBlackBoxW() * Magnify,
-				(int)srcbmp->GetBlackBoxH() * Magnify);
+			destimage.Rescale(
+				static_cast<int>(srcbmp->GetBlackBoxW()) * Magnify,
+				static_cast<int>(srcbmp->GetBlackBoxH()) * Magnify);
 		}
 
 		// image をデバイスコンテキストに blt する
@@ -298,7 +300,8 @@ void wxPreviewScrolledWindow::OnIdle(wxIdleEvent& event)
 		// 表示可能な範囲内にあるインデックスを探す
 		i = IndexToUpdate.begin();
 		index = i->first;
-		if((tjs_uint)index >= lineFirst * nw && (tjs_uint)index < (lineLast+1) * nw)
+		if( static_cast<tjs_uint>(index) >= lineFirst * nw &&
+			static_cast<tjs_uint>(index) < (lineLast+1) * nw)
 			break; // 表示できそう
 
 		// あきらかに表示可能な範囲内を超えている
@@ -385,7 +388,7 @@ void wxPreviewScrolledWindow::OnPaint(wxPaintEvent& event)
 				tjs_int32 utf32buf[2];
 				utf32buf[0] = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
 				utf32buf[1] = wxT('\0');
-				conv.MB2WC(wcharbuf, (const char *)&utf32buf, 4);
+				conv.MB2WC(wcharbuf, reinterpret_cast<const char *>(utf32buf), 4);
 				wxCoord tw = 0, th = 0;
 				dc.GetTextExtent(wcharbuf, &tw, &th);
 				dc.DestroyClippingRegion();
@@ -454,7 +457,7 @@ void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 			tjs_char ch = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
 
 			wxString status = wxString::Format(
-				_("Index : %d   Charcode : U+%06X"), index, (tjs_int)ch);
+				_("Index : %d   Charcode : U+%06X"), index, static_cast<tjs_int>(ch));
 			wxStaticCast(wxWindow::GetParent(), wxPreviewFrame)->GetStatusBar()->
 				SetStatusText(status, 0);
 			LastStatusedIndex = index;

@@ -55,8 +55,8 @@
 	typedef int tjs_int;
 	typedef unsigned int tjs_uint;
 
-	#define TJS_I64_VAL(x) ((tjs_int64)(x##LL))
-	#define TJS_UI64_VAL(x) ((tjs_uint64)(x##LL))
+	#define TJS_I64_VAL(x) (static_cast<tjs_int64>(x##LL))
+	#define TJS_UI64_VAL(x) (static_cast<tjs_uint64>(x##LL))
 
 	#ifdef WORDS_BIGENDIAN
 		#define TJS_HOST_IS_BIG_ENDIAN 1
@@ -103,8 +103,8 @@
 
 	#define TJS_USERENTRY __cdecl
 
-	#define TJS_I64_VAL(x) ((tjs_int64)(x##i64))
-	#define TJS_UI64_VAL(x) ((tjs_uint64)(x##i64))
+	#define TJS_I64_VAL(x) (static_cast<tjs_int64>(x##i64))
+	#define TJS_UI64_VAL(x) (static_cast<tjs_uint64>(x##i64))
 
 
 #endif /* end of defined(_WIN32) && !defined(__GNUC__) */
@@ -149,23 +149,23 @@ s = sign,  negative if this is 1, otherwise positive.
 #define TJS_IEEE_D_SIGNIFICAND_MASK       (TJS_UI64_VAL(0x000fffffffffffff))
 #define TJS_IEEE_D_SIGNIFICAND_MSB_MASK   (TJS_UI64_VAL(0x0008000000000000))
 
-#define TJS_IEEE_D_GET_SIGN(x)   ((bool)(x & TJS_IEEE_D_SIGN_MASK))
-#define TJS_IEEE_D_GET_EXP(x)  ((tjs_int)(((x & TJS_IEEE_D_EXP_MASK) >> \
+#define TJS_IEEE_D_GET_SIGN(x)   (static_cast<bool>(x & TJS_IEEE_D_SIGN_MASK))
+#define TJS_IEEE_D_GET_EXP(x)  (static_cast<tjs_int>(((x & TJS_IEEE_D_EXP_MASK) >> \
 								TJS_IEEE_D_SIGNIFICAND_BITS) - TJS_IEEE_D_EXP_BIAS))
 #define TJS_IEEE_D_GET_SIGNIFICAND(x) (x & TJS_IEEE_D_SIGNIFICAND_MASK)
 
 /* component composition */
 #define TJS_IEEE_D_MAKE_SIGN(x)  ((x)?TJS_UI64_VAL(0x8000000000000000):TJS_UI64_VAL(0))
-#define TJS_IEEE_D_MAKE_EXP(x)   ((tjs_uint64)(x + TJS_IEEE_D_EXP_BIAS) << 52)
-#define TJS_IEEE_D_MAKE_SIGNIFICAND(x) ((tjs_uint64)(x))
+#define TJS_IEEE_D_MAKE_EXP(x)   (static_cast<tjs_uint64>(x + TJS_IEEE_D_EXP_BIAS) << 52)
+#define TJS_IEEE_D_MAKE_SIGNIFICAND(x) (static_cast<tjs_uint64>(x))
 
 /* special expression */
  /* (quiet) NaN */
-  #define TJS_IEEE_D_P_NaN (tjs_uint64)(TJS_IEEE_D_EXP_MASK|TJS_IEEE_D_SIGNIFICAND_MSB_MASK)
-  #define TJS_IEEE_D_N_NaN (tjs_uint64)(TJS_IEEE_D_SIGN_MASK|TJS_IEEE_D_P_NaN)
+  #define TJS_IEEE_D_P_NaN static_cast<tjs_uint64>(TJS_IEEE_D_EXP_MASK|TJS_IEEE_D_SIGNIFICAND_MSB_MASK)
+  #define TJS_IEEE_D_N_NaN static_cast<tjs_uint64>(TJS_IEEE_D_SIGN_MASK|TJS_IEEE_D_P_NaN)
  /* infinite */
-  #define TJS_IEEE_D_P_INF (tjs_uint64)(TJS_IEEE_D_EXP_MASK)
-  #define TJS_IEEE_D_N_INF (tjs_uint64)(TJS_IEEE_D_SIGN_MASK|TJS_IEEE_D_P_INF)
+  #define TJS_IEEE_D_P_INF static_cast<tjs_uint64>(TJS_IEEE_D_EXP_MASK)
+  #define TJS_IEEE_D_N_INF static_cast<tjs_uint64>(TJS_IEEE_D_SIGN_MASK|TJS_IEEE_D_P_INF)
 
 /* special expression check */
   #define TJS_IEEE_D_IS_NaN(x) ((TJS_IEEE_D_EXP_MASK & (x)) == TJS_IEEE_D_EXP_MASK) && \

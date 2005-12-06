@@ -1357,7 +1357,7 @@ static bool inline _TVPSJISToUnicode(const char * & in, tjs_char *out)
 	if(ch != 0x0000U)
 	{
 		// 1byte
-		if(out) *out = (tjs_char)ch;
+		if(out) *out = static_cast<tjs_char>(ch);
 		in ++;
 		return true;
 	}
@@ -1372,7 +1372,7 @@ static bool inline _TVPSJISToUnicode(const char * & in, tjs_char *out)
 			if(ch != 0x0000U)
 			{
 				// 2 byte map found
-				if(out) *out = (tjs_char) ch;
+				if(out) *out = static_cast<tjs_char>(ch);
 				in += 2;
 				return true;
 			}
@@ -1396,13 +1396,13 @@ tjs_char TVPSJISToUnicode(tjs_uint sjis)
 	const char * p = buf;
 	if(sjis >= 0x100)
 	{
-		buf[0] = (char)(unsigned char)((sjis >> 8) & 0xff);
-		buf[1] = (char)(unsigned char)(sjis & 0xff);
+		buf[0] = static_cast<char>(static_cast<unsigned char>((sjis >> 8) & 0xff));
+		buf[1] = static_cast<char>(static_cast<unsigned char>((sjis     ) & 0xff));
 		buf[2] = '\0';
 	}
 	else
 	{
-		buf[0] = (char)(unsigned char)(sjis);
+		buf[0] = static_cast<char>(static_cast<unsigned char>(sjis));
 		buf[1] = '\0';
 	}
 	tjs_char out;
@@ -1431,13 +1431,13 @@ tjs_size TVPSJISToUnicodeString(const char * in, tjs_char *out)
 		if(out)
 		{
 			if(!_TVPSJISToUnicode(in, &c))
-				return (tjs_size)-1; // invalid character found
+				return static_cast<tjs_size>(-1); // invalid character found
 			*out++ = c;
 		}
 		else
 		{
 			if(!_TVPSJISToUnicode(in, NULL))
-				return (tjs_size)-1; // invalid character found
+				return static_cast<tjs_size>(-1); // invalid character found
 		}
 		count ++;
 	}

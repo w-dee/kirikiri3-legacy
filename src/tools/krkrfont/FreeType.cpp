@@ -180,19 +180,20 @@ unsigned long tTVPGenericFreeTypeFace::IoFunc(
 			unsigned char*  buffer,
 			unsigned long   count )
 {
-	tTVPGenericFreeTypeFace * _this = (tTVPGenericFreeTypeFace*)stream->descriptor.pointer;
+	tTVPGenericFreeTypeFace * _this =
+		static_cast<tTVPGenericFreeTypeFace*>(stream->descriptor.pointer);
 
 	size_t result;
 	if(count == 0)
 	{
 		// seek
 		result = 0;
-		_this->File.Seek((wxFileOffset)offset);
+		_this->File.Seek(static_cast<wxFileOffset>(offset));
 	}
 	else
 	{
 		// read
-		_this->File.Seek((wxFileOffset)offset);
+		_this->File.Seek(static_cast<wxFileOffset>(offset));
 		result = _this->File.Read(buffer, count);
 	}
 
@@ -359,7 +360,7 @@ tjs_char tTVPFreeTypeFace::GetCharcodeFromGlyphIndex(tjs_uint index)
 	if(!GlyphIndexToCharcodeVector) return 0;
 	if(index >= size) return 0;
 
-	return (tjs_char)(*GlyphIndexToCharcodeVector)[index];
+	return static_cast<tjs_char>((*GlyphIndexToCharcodeVector)[index]);
 }
 //---------------------------------------------------------------------------
 
@@ -453,15 +454,15 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 				// gray レベルが 256 ではない
 				// 256 になるように乗算を行う
 				tjs_int32 multiply =
-					(tjs_int32)(((tjs_int32) 1 << 30) - 1) /
+					static_cast<tjs_int32>((static_cast<tjs_int32> (1) << 30) - 1) /
 						(ft_bmp->num_grays - 1);
 				for(tjs_int y = ft_bmp->rows - 1; y >= 0; y--)
 				{
 					unsigned char * p = ft_bmp->buffer + y * ft_bmp->pitch;
 					for(tjs_int x = ft_bmp->width - 1; x >= 0; x--)
 					{
-						tjs_int32 v = (tjs_int32)((*p * multiply)  >> 22);
-						*p = (unsigned char)v;
+						tjs_int32 v = static_cast<tjs_int32>((*p * multiply)  >> 22);
+						*p = static_cast<unsigned char>(v);
 						p++;
 					}
 				}

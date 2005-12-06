@@ -148,14 +148,14 @@ void tTVPXP4WriterSegment::WriteBody(iTVPProgressCallback * callback,
 		unsigned char *outbuf  = NULL;
 		try
 		{
-			srcbuf = new unsigned char[(size_t)Size];
+			srcbuf = new unsigned char[static_cast<size_t>(Size)];
 			unsigned long compsize = 0;
 			outbuf = new BYTE[compsize =
-					(unsigned long)(Size + Size /100 + 1024)];
-			input.ReadBuffer(srcbuf, (unsigned int)Size);
+					static_cast<unsigned long>(Size + Size /100 + 1024)];
+			input.ReadBuffer(srcbuf, static_cast<unsigned int>(Size));
 
 			int res;
-			unsigned long srclen = (unsigned long)Size;
+			unsigned long srclen = static_cast<unsigned long>(Size);
 
 			// compress with zlib deflate
 			res = compress2(outbuf, &compsize, srcbuf, srclen,
@@ -435,7 +435,7 @@ void tTVPXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 	newbuf.AppendData(&i32, sizeof(i32)); // chunksize
 	i16 = wxUINT16_SWAP_ON_BE(Flags);
 	newbuf.AppendData(&i16, sizeof(i16)); // Flags
-	newbuf.AppendData(const_cast<char *>((const char *)utf8name) + 1,
+	newbuf.AppendData(const_cast<char *>(static_cast<const char *>(utf8name)) + 1,
 		utf8name_len - 1 + 1); // FileName
 
 	// File チャンクにまとめ、bufに書き込む
@@ -568,7 +568,7 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 		i32 = wxUINT32_SWAP_ON_BE(utf8name_len + 1);
 		meta_buf.AppendData(&i32, sizeof(i32)); // chunksize
 		meta_buf.AppendData(
-			const_cast<char *>((const char *)utf8name),
+			const_cast<char *>(static_cast<const char *>(utf8name)),
 				utf8name_len + 1); // target directory
 	
 		// Meta 用意
@@ -595,7 +595,7 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 		// compress with zlib deflate
 		if(compress)
 		{
-			res = compress2(outbuf, &compsize, (const unsigned char *)buf.GetData(),
+			res = compress2(outbuf, &compsize, static_cast<const unsigned char *>(buf.GetData()),
 				inputsize, Z_DEFAULT_COMPRESSION);
 			if(res != Z_OK)
 			{
@@ -617,12 +617,12 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 		index_ofs = file.Tell();
 		i8 = compress ? 1:0; // 1 = compressed ?
 		file.WriteBuffer(&i8, 1); // flags
-		i32 = wxUINT32_SWAP_ON_BE((wxUint32)storage_count);
+		i32 = wxUINT32_SWAP_ON_BE(static_cast<wxUint32>(storage_count));
 		file.WriteBuffer(&i32, sizeof(i32)); // storage count
 											// (これは目安。この数値を信じないこと)
-		i32 = wxUINT32_SWAP_ON_BE((wxUint32)inputsize);
+		i32 = wxUINT32_SWAP_ON_BE(static_cast<wxUint32>(inputsize));
 		file.WriteBuffer(&i32, sizeof(i32)); // raw index size
-		i32 = wxUINT32_SWAP_ON_BE((wxUint32)compsize);
+		i32 = wxUINT32_SWAP_ON_BE(static_cast<wxUint32>(compsize));
 		file.WriteBuffer(&i32, sizeof(i32)); // compressed index size
 		file.WriteBuffer(outbuf, compsize); // index
 		file.Align(8); // ファイルの最後も8バイト境界にアライン
@@ -801,7 +801,7 @@ void tTVPXP4Writer::MakeArchive()
 			ArchiveVector[volnum]->AddAndWriteBody(
 				&agg2,
 				tTVPXP4WriterStorage(
-					*(tTVPXP4WriterInputFile*)(&(*i)),
+					*static_cast<tTVPXP4WriterInputFile*>(&(*i)),
 					ArchiveVector[volnum]->GetStorageItem(storage_idx)));
 			continue; //------------------------------------- ↑ continue
 		}

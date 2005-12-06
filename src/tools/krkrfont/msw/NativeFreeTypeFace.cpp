@@ -70,7 +70,7 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 		l.lfFaceName[LF_FACESIZE] = wxT('\0');
 
 		HFONT newfont = CreateFontIndirect(&l);
-		OldFont = (HFONT)SelectObject(DC, newfont);
+		OldFont = static_cast<HFONT>(SelectObject(DC, newfont));
 
 		// このフォントが GetFontData API で扱えるかどうかを
 		// 'name' タグの内容を取得しようとすることでチェックする
@@ -268,7 +268,7 @@ void tTVPNativeFreeTypeFace::Clear()
 	if(Face) FT_Done_Face(Face), Face = NULL;
 	if(OldFont && DC)
 	{
-		HFONT font = (HFONT)SelectObject(DC, OldFont);
+		HFONT font = static_cast<HFONT>(SelectObject(DC, OldFont));
 		DeleteObject(font);
 		OldFont = NULL;
 	}
@@ -289,7 +289,8 @@ unsigned long tTVPNativeFreeTypeFace::IoFunc(
 {
 	if(count != 0)
 	{
-		tTVPNativeFreeTypeFace * _this = (tTVPNativeFreeTypeFace*)stream->descriptor.pointer;
+		tTVPNativeFreeTypeFace * _this =
+			static_cast<tTVPNativeFreeTypeFace*>(stream->descriptor.pointer);
 		DWORD result = GetFontData(_this->DC, 
 				_this->IsTTC ? TVP_TT_TABLE_ttcf : 0,
 				offset, buffer, count);

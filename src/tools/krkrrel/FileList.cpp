@@ -154,7 +154,7 @@ static void TVPInternalGetFileListAt(iTVPProgressCallback * callback,
 		throw wxString::Format(_("can not open directory '%s'"), dir.c_str());
 	}
 	if(dir_obj.Traverse(trav,
-					wxEmptyString, wxDIR_DEFAULT & (~wxDIR_HIDDEN)) == (size_t)-1)
+					wxEmptyString, wxDIR_DEFAULT & (~wxDIR_HIDDEN)) == static_cast<size_t>(-1))
 	{
 		throw wxString::Format(_("can not read directory '%s'"), dir.c_str());
 	}
@@ -337,7 +337,7 @@ wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name)
 	wxString ret(name);
 	if(ret.Length() > 0)
 	{
-		wxChar pathsep = (wxChar)(wxFileName::GetPathSeparator());
+		wxChar pathsep = static_cast<wxChar>(wxFileName::GetPathSeparator());
 		for(size_t n = 0; ret.GetChar(n); n++)
 		{
 			if(ret.GetChar(n) == pathsep)

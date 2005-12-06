@@ -108,12 +108,12 @@ tjs_uint TVPUnicodeToSJIS(tjs_char in)
 	while(e - s > 1)
 	{
 		tjs_int m = (s + e) / 2;
-		if(TVPUnicodeAndSJISPair[m].Unicode <= (tjs_uint16) in)
+		if(TVPUnicodeAndSJISPair[m].Unicode <= static_cast<tjs_uint16>(in))
 			s = m;
 		else
 			e = m;
 	}
-	if(TVPUnicodeAndSJISPair[s].Unicode == (tjs_uint16) in)
+	if(TVPUnicodeAndSJISPair[s].Unicode == static_cast<tjs_uint16>(in))
 		return TVPUnicodeAndSJISPair[s].SJIS; // 見つかった
 	return 0;
 }

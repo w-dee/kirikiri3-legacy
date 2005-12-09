@@ -449,11 +449,8 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 //---------------------------------------------------------------------------
 //! @brief		指定された正規フルパスに対応するファイルシステムを得る
 //! @param		fullpath: 正規フルパス
-//! @param		fspath: ファイルシステム内におけるパス(興味がない場合はNULL可)
-//! @return		ファイルシステムインスタンス(AddRefされないので注意すること)
-//! @note		ここから返されるファイルシステムインスタンスは AddRef されない。
-//!				返されたインスタンスを使い終わるまでは、そのインスタンスが
-//!				存在し続けることを確実にするため、tTV
+//! @param		fspath: ファイルシステム内におけるパス(興味がない場合はNULL可、最初の / は含まれない)
+//! @return		ファイルシステムインスタンス
 //---------------------------------------------------------------------------
 boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 					const ttstr & fullpath, ttstr * fspath)

@@ -18,7 +18,7 @@
 
 
 //---------------------------------------------------------------------------
-//!@brief		コンストラクタ
+//! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tTVPXP4StreamCache::tTVPXP4StreamCache()
 {
@@ -29,7 +29,7 @@ tTVPXP4StreamCache::tTVPXP4StreamCache()
 
 
 //---------------------------------------------------------------------------
-//!@brief		デストラクタ
+//! @brief		デストラクタ
 //---------------------------------------------------------------------------
 tTVPXP4StreamCache::~tTVPXP4StreamCache()
 {
@@ -46,7 +46,7 @@ tTVPXP4StreamCache::~tTVPXP4StreamCache()
 //---------------------------------------------------------------------------
 tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & name)
 {
-	tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tTJSCriticalSectionHolder cs_holder(CS);
 
 	// linear search wiil be enough here because the 
 	// TVP_MAX_ARCHIVE_Stream_CACHE is relatively small
@@ -76,7 +76,7 @@ tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & n
 //---------------------------------------------------------------------------
 void tTVPXP4StreamCache::ReleaseStream(void * pointer, tTJSBinaryStream * stream)
 {
-	tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tTJSCriticalSectionHolder cs_holder(CS);
 
 	// search empty cell in the pool
 	tjs_uint oldest_age = 0;
@@ -120,7 +120,7 @@ void tTVPXP4StreamCache::ReleaseStream(void * pointer, tTJSBinaryStream * stream
 //---------------------------------------------------------------------------
 void tTVPXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 {
-	tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tTJSCriticalSectionHolder cs_holder(CS);
 
 	for(tjs_int i = 0; i < MAX_ITEM; i++)
 	{
@@ -141,7 +141,7 @@ void tTVPXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 //---------------------------------------------------------------------------
 void tTVPXP4StreamCache::ReleaseAll()
 {
-	tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tTJSCriticalSectionHolder cs_holder(CS);
 
 	for(tjs_int i = 0; i < MAX_ITEM; i++)
 	{

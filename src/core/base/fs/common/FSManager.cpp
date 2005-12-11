@@ -516,12 +516,53 @@ void tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 
 
 //---------------------------------------------------------------------------
+//! @brief		パス名を拡張子より前と拡張子に分離する ( /path/to/file.ext を /path/to/file と .ext に分離する )
+//! @param		in: 入力パス名
+//! @param		other: (出力) 拡張子より前の部分へポインタ(興味ない場合はNULL可)
+//! @param		name: (出力) 拡張子へのポインタ(興味ない場合はNULL可)  拡張子には .(ドット) を含む。拡張子がない場合は空文字列になる
+//! @note		in と そのほかのパラメータに同じ文字列を指定しないこと
+//---------------------------------------------------------------------------
+void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttstr * ext)
+{
+	const tjs_char * p = in.c_str() + in.GetLen();
+	const tjs_char * pp = p;
+	const tjs_char * start = in.c_str();
+
+	// パス名を最後からスキャン
+	while(true)
+	{
+		if(p < start || *p == TJS_W('/'))
+		{
+			// * ファイル名の先頭を超えて前に行った
+			// * '/' にぶつかった
+			// このファイル名は拡張子を持っていない
+			if(other) *other = in;
+			if(ext)   ext->Clear();
+			return;
+		}
+
+		if(*p == TJS_W('.'))
+		{
+			// * '.' にぶつかった
+			if(other) *other = ttstr(start, p - start);
+			if(ext)   *ext   = ttstr(p);
+			return;
+		}
+
+		p--;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		パス名をパスと名前に分離する ( /path/to/file を /path/to と file に分離する )
 //! @param		in: 入力パス名
-//! @param		path: (出力) パス
-//! @param		name: (出力) 名前
+//! @param		path: (出力) パスへのポインタ(興味ない場合はNULL可)
+//! @param		name: (出力) 名前へのポインタ(興味ない場合はNULL可)
+//! @note		in と そのほかのパラメータに同じ文字列を指定しないこと
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr & path, ttstr & name)
+void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name)
 {
 	const tjs_char * p = in.c_str() + in.GetLen();
 	const tjs_char * pp = p;
@@ -531,8 +572,8 @@ void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr & path, tts
 
 	if(*p == TJS_W('/')) p++;
 
-	path = ttstr(start, p - start);
-	name = ttstr(p);
+	if(path) *path = ttstr(start, p - start);
+	if(name) *name = ttstr(p);
 }
 //---------------------------------------------------------------------------
 

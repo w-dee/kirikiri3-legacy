@@ -65,13 +65,11 @@ public:
 	tTVPMemoryStream(tjs_uint32 flags, tTVPMemoryStreamBlock * block);
 	~tTVPMemoryStream();
 
-	tjs_uint64 TJS_INTF_METHOD Seek(tjs_int64 offset, tjs_int whence);
-
-	tjs_size TJS_INTF_METHOD Read(void *buffer, tjs_size read_size);
-	tjs_size TJS_INTF_METHOD Write(const void *buffer, tjs_size write_size);
-	void TJS_INTF_METHOD SetEndOfFile();
-
-	tjs_uint64 TJS_INTF_METHOD GetSize() { return Size; }
+	tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
+	tjs_size Read(void *buffer, tjs_size read_size);
+	tjs_size Write(const void *buffer, tjs_size write_size);
+	void SetEndOfFile();
+	tjs_uint64 GetSize() { return Size; }
 
 	// non-tTJSBinaryStream based methods
 	void * GetInternalBuffer()  const { return Block->GetBlock(); }

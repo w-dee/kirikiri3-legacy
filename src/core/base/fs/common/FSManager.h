@@ -19,6 +19,7 @@
 //---------------------------------------------------------------------------
 class iTVPFileSystemIterationCallback
 {
+public:
 	virtual bool OnFile(const ttstr & filename) = 0;
 	virtual bool OnDirectory(const ttstr & dirname) = 0;
 };
@@ -65,7 +66,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
-class tTVPFileSystemManager
+class tTVPFileSystemManager : public boost::basic_singleton<tTVPXP4SegmentCache>
 {
 	tTJSHashTable<ttstr, boost::shared_ptr<iTVPFileSystem> > MountPoints; //!< マウントポイントのハッシュ表
 	ttstr CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
@@ -99,7 +100,8 @@ private:
 
 public:
 	static void RaiseNoSuchFileOrDirectoryError();
-	static void SplitPathAndName(const ttstr & in, ttstr & path, ttstr & name);
+	static void SplitExtension(const ttstr & in, ttstr * other, ttstr * ext);
+	static void SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name);
 
 };
 //---------------------------------------------------------------------------

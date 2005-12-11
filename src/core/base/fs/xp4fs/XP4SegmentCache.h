@@ -24,7 +24,7 @@
 //---------------------------------------------------------------------------
 //!@brief		セグメントキャッシュクラス
 //---------------------------------------------------------------------------
-class tTVPXP4SegmentCache : public boost::basic_singleton<tTVPXP4StreamCache>
+class tTVPXP4SegmentCache : public boost::basic_singleton<tTVPXP4SegmentCache>
 {
 	static const tjs_size ONE_LIMIT = 1024*1024; //!< これを超えるセグメントはキャッシュしない
 	static const tjs_size TOTAL_LIMIT = 1024*1024; //!< トータルでこれ以上はキャッシュしない

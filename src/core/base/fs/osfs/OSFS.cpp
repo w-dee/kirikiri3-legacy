@@ -189,8 +189,11 @@ size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 	while(cont)
 	{
 		count ++;
-		if(!callback->OnFile(ttstr(filename)))
-			return count;
+		if(callback)
+		{
+			if(!callback->OnFile(ttstr(filename)))
+				return count;
+		}
 		cont = dir.GetNext();
 	}
 
@@ -198,9 +201,15 @@ size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 	cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
 	while(cont)
 	{
-		count ++;
-		if(!callback->OnDirectory(ttstr(filename)))
-			return count;
+		if(filename != wxT("..") && filename != wxT("."))
+		{
+			count ++;
+			if(callback)
+			{
+				if(!callback->OnDirectory(ttstr(filename)))
+					return count;
+			}
+		}
 		cont = dir.GetNext();
 	}
 

@@ -316,11 +316,17 @@ size_t tTVPTmpFSNode::Iterate(iTVPFileSystemIterationCallback * callback)
 		count ++;
 		if(i->GetValue()->Type == ntDirectory)
 		{
-			if(!callback->OnDirectory(i->GetValue()->Name)) break;
+			if(callback)
+			{
+				if(!callback->OnDirectory(i->GetValue()->Name)) break;
+			}
 		}
 		else if(i->GetValue()->Type == ntFile)
 		{
-			if(!callback->OnFile(i->GetValue()->Name)) break;
+			if(callback)
+			{
+				if(!callback->OnFile(i->GetValue()->Name)) break;
+			}
 		}
 	}
 	return count;
@@ -575,7 +581,7 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 		ttstr path(dirname);
 		tTVPFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
 
-		tTVPFileSystemManager::SplitPathAndName(path, parentdir, name); // パスを分離
+		tTVPFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
 		
 		TTVPTmpFSNode * parentnode = GetNodeAt(parentdir);
 		if(!parentnode) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();

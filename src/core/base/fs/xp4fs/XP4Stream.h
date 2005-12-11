@@ -22,25 +22,24 @@
 //---------------------------------------------------------------------------
 //! @brief		XP4 In-Archive Stream Implmentation
 //---------------------------------------------------------------------------
-class tTVPXP3ArchiveStream : public tTJSBinaryStream
+class tTVPXP4ArchiveStream : public tTJSBinaryStream
 {
-	boost::weak_ptr<tTVPXP4FS> Owner; //!< このアーカイブストリームが属するアーカイブ
+	boost::shared_ptr<tTVPXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
 	tjs_size FileIndex; //!< アーカイブ中でのインデックス
 	tTJSBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
-	tjs_uint64 OrgSize; //!< (無圧縮状態での) ストリーム全体のサイズ
-	tjs_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号
-	tTVPXP3ArchiveSegment *CurSegment; //!< 現在開いているセグメント (NULLの場合はまだ開いていない)
-	tjs_int LastOpenedSegmentNum; //!< 最後に開いていたセグメント番号
+
+	tjs_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号(0～)
+	tjs_size LastOpenedSegmentNum; //!< 最後に開いていたセグメント番号(0～)
 	tjs_uint64 CurPos; //!< current position in absolute file position
 	tjs_uint64 SegmentRemain; //!< remain bytes in current segment
 	tjs_uint64 SegmentPos; //!< offset from current segment's start
 	boost::shared_ptr<tTVPDecompressedHolder> DecompressedData; // decompressed segment data
 
 public:
-	tTVPXP3ArchiveStream(tTVPXP3Archive *owner, tjs_int storageindex,
-		std::vector<tTVPXP3ArchiveSegment> *segments, tTJSBinaryStream *stream,
-			tjs_uint64 orgsize);
-	~tTVPXP3ArchiveStream();
+	tTVPXP4ArchiveStream(
+			boost::shared_ptr<tTVPArchive> ptr,
+			tjs_size idx, tjs_uint32 flags);
+	~tTVPXP4ArchiveStream();
 
 private:
 	void EnsureSegment(); // ensure accessing to current segment

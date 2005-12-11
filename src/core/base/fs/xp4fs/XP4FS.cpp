@@ -307,7 +307,11 @@ tTVPBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 fl
 	if(idx == static_cast<tjs_size>(-1))
 		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
-	return Archives[FileItems[idx].ArchiveIndex]->CreateStream(FileItems[idx].FileIndex, flags);
+	return Archives[FileItems[idx].ArchiveIndex]->
+		CreateStream(Archives[FileItems[idx].ArchiveIndex],
+		FileItems[idx].FileIndex, flags);
+			// boost::shared_ptr<tTVPArchive> を持ってるのはこのクラスだけなので
+			// これ経由でこのスマートポインタを渡してやらなければならない
 }
 //---------------------------------------------------------------------------
 

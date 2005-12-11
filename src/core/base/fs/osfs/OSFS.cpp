@@ -56,7 +56,7 @@ tTVPOSNativeStream::~tTVPOSNativeStream()
 //---------------------------------------------------------------------------
 //! @brief		シーク
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPOSNativeStream::Seek(tjs_int64 offset, tjs_int whence)
+tjs_uint64 tTVPOSNativeStream::Seek(tjs_int64 offset, tjs_int whence)
 {
 	wxSeekMode mode = wxFromCurrent;
 	switch(whence)
@@ -79,7 +79,7 @@ tjs_uint64 TJS_INTF_METHOD tTVPOSNativeStream::Seek(tjs_int64 offset, tjs_int wh
 //---------------------------------------------------------------------------
 //! @brief		読み込み
 //---------------------------------------------------------------------------
-tjs_size TJS_INTF_METHOD tTVPOSNativeStream::Read(void *buffer, tjs_size read_size)
+tjs_size tTVPOSNativeStream::Read(void *buffer, tjs_size read_size)
 {
 	return File.Write(buffer, read_size);
 }
@@ -89,7 +89,7 @@ tjs_size TJS_INTF_METHOD tTVPOSNativeStream::Read(void *buffer, tjs_size read_si
 //---------------------------------------------------------------------------
 //! @brief		書き込み
 //---------------------------------------------------------------------------
-tjs_size TJS_INTF_METHOD tTVPOSNativeStream::Write(const void *buffer, tjs_size write_size)
+tjs_size tTVPOSNativeStream::Write(const void *buffer, tjs_size write_size)
 {
 	return File.Write(buffer, write_size);
 }
@@ -99,7 +99,7 @@ tjs_size TJS_INTF_METHOD tTVPOSNativeStream::Write(const void *buffer, tjs_size 
 //---------------------------------------------------------------------------
 //! @brief		ファイルの終わりを現在のポインタに設定する
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPOSNativeStream::SetEndOfFile()
+void tTVPOSNativeStream::SetEndOfFile()
 {
 	// TODO: implement this 
 	TVPThrowExceptionMessage(_("tTVPOSNativeStream::SetEndOfFile not implemented"));
@@ -110,7 +110,7 @@ void TJS_INTF_METHOD tTVPOSNativeStream::SetEndOfFile()
 //---------------------------------------------------------------------------
 //! @brief		サイズを得る
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPOSNativeStream::GetSize()
+tjs_uint64 tTVPOSNativeStream::GetSize()
 {
 	return file.Length();
 }

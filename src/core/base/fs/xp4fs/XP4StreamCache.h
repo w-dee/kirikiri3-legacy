@@ -46,6 +46,7 @@ public:
 	void ReleaseStream(void * pointer, tTJSBinaryStream * stream);
 	void ReleaseStreamByPointer(void * pointer);
 	void ReleaseAll();
+	void Clear() { ReleaseAll(); }
 };
 //---------------------------------------------------------------------------
 

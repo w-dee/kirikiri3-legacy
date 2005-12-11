@@ -10,8 +10,8 @@
 //! @brief XP4ファイルシステムで用いられるストリームクラス
 //---------------------------------------------------------------------------
 
-#ifndef XP3ArchiveH
-#define XP3ArchiveH
+#ifndef XP3STREAMH
+#define XP3STREAMH
 
 #include <boost/shared_ptr.hpp>
 #include "XP4FS.h"
@@ -24,16 +24,21 @@
 //---------------------------------------------------------------------------
 class tTVPXP4ArchiveStream : public tTJSBinaryStream
 {
+	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+
 	boost::shared_ptr<tTVPXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
 	tjs_size FileIndex; //!< アーカイブ中でのインデックス
-	tTJSBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
+	const tTVPArchive::tFile & FileInfo; //!< ファイル情報
+	const tTVPArchive::tSegment * SegmentInfo; //!< セグメント情報
 
+	tTJSBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
 	tjs_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号(0～)
 	tjs_size LastOpenedSegmentNum; //!< 最後に開いていたセグメント番号(0～)
+	bool SegmentOpened; //!< セグメントが開かれているかどうか
 	tjs_uint64 CurPos; //!< current position in absolute file position
 	tjs_uint64 SegmentRemain; //!< remain bytes in current segment
 	tjs_uint64 SegmentPos; //!< offset from current segment's start
-	boost::shared_ptr<tTVPDecompressedHolder> DecompressedData; // decompressed segment data
+	tTVPXP4SegmentCache::tDataBlock DecompressedData; // decompressed segment data
 
 public:
 	tTVPXP4ArchiveStream(

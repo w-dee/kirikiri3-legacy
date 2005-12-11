@@ -72,14 +72,20 @@ public:
 		tjs_uint64 Size; //!< (非圧縮時の)サイズ
 		tjs_uint64 StoreOffset; //!< (実際に格納されている)オフセット
 		tjs_uint64 StoreSize; //!< (実際に格納されている)サイズ  無圧縮の場合は Size と同じ
+		bool IsCompressed() const
+			{ return (Flags & TVP_XP4_SEGM_ENCODE_METHOD_MASK) !=
+				TVP_XP4_SEGM_ENCODE_RAW; } //!< セグメントが圧縮されている場合に真
 	};
 
 private:
 	std::vector<tFile> Files; //!< ファイルの配列
 	std::vector<tSegment> Segments; //!< セグメントの配列
+	tTVPXP4SegmentCache::pointer SegmentCache; //!< セグメントキャッシュ
+	tTVPXP4StreamCache::pointer StreamCache; //!< ストリームキャッシュ
 
 public:
 	tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback & callback);
+	~tTVPXP4Archive();
 
 	void Stat(tjs_size idx, tTVPStatStruc & struc);
 	tTVPBinaryStream * CreateStream(
@@ -87,7 +93,12 @@ public:
 				tjs_size idx, tjs_uint32 flags);
 
 
-	std::vector<tSegment> & GetSegments() { return Segments; } // Segments を返す
+	std::vector<tSegment> & GetSegments()
+		{ return Segments; } //!< Segments を返す
+	const tFile & GetFileInfo(tjs_size idx) const
+		{ return Files[idx]; } //!< idx に対応する tFile 構造体を返す
+	const tSegment * GetSegmentInfo(tjs_size idx) const
+		{ return Segments.begin() + Files[idx].SegmentStart; } //!< idx に対応するセグメント情報を返す
 };
 //---------------------------------------------------------------------------
 #endif

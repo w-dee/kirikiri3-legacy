@@ -10,8 +10,8 @@
 //! @brief XP4 アーカイブファイルシステム
 //---------------------------------------------------------------------------
 
-#ifndef XP4ArchiveH
-#define XP4ArchiveH
+#ifndef XP4ArchiveDefsH
+#define XP4ArchiveDefsH
 
 
 

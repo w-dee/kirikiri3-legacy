@@ -180,7 +180,7 @@ tTVPMemoryStream::~tTVPMemoryStream()
 //---------------------------------------------------------------------------
 //! @brief		シーク
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
+tjs_uint64 tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
 {
 	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
 
@@ -218,7 +218,7 @@ tjs_uint64 TJS_INTF_METHOD tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int when
 //---------------------------------------------------------------------------
 //! @brief		読み込み
 //---------------------------------------------------------------------------
-tjs_size TJS_INTF_METHOD tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
+tjs_size tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
 {
 	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
 
@@ -244,7 +244,7 @@ tjs_size TJS_INTF_METHOD tTVPMemoryStream::Read(void *buffer, tjs_size read_size
 //---------------------------------------------------------------------------
 //! @brief		書き込み
 //---------------------------------------------------------------------------
-tjs_size TJS_INTF_METHOD tTVPMemoryStream::Write(const void *buffer, tjs_size write_size)
+tjs_size tTVPMemoryStream::Write(const void *buffer, tjs_size write_size)
 {
 	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
 
@@ -274,7 +274,7 @@ tjs_size TJS_INTF_METHOD tTVPMemoryStream::Write(const void *buffer, tjs_size wr
 //---------------------------------------------------------------------------
 //! @brief		ファイルの終わりを現在のポインタに設定する
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPMemoryStream::SetEndOfFile()
+void tTVPMemoryStream::SetEndOfFile()
 {
 	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
 

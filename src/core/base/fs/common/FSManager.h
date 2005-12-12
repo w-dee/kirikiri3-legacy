@@ -66,7 +66,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
-class tTVPFileSystemManager : public boost::basic_singleton<tTVPXP4SegmentCache>
+class tTVPFileSystemManager : public boost::basic_singleton<tTVPFileSystemManager>
 {
 	tTJSHashTable<ttstr, boost::shared_ptr<iTVPFileSystem> > MountPoints; //!< マウントポイントのハッシュ表
 	ttstr CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)

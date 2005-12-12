@@ -17,6 +17,7 @@
 
 //---------------------------------------------------------------------------
 //! @brief		指定された位置のメモリから16bit LE整数を読み込む
+//! @param		mem メモリ
 //---------------------------------------------------------------------------
 static inline wxUint16 TVPReadI16LEFromMem(const unsigned char *mem)
 {
@@ -27,6 +28,7 @@ static inline wxUint16 TVPReadI16LEFromMem(const unsigned char *mem)
 
 //---------------------------------------------------------------------------
 //! @brief		指定された位置のメモリから32bit LE整数を読み込む
+//! @param		mem メモリ
 //---------------------------------------------------------------------------
 static inline wxUint32 TVPReadI32LEFromMem(const unsigned char *mem)
 {
@@ -38,6 +40,7 @@ static inline wxUint32 TVPReadI32LEFromMem(const unsigned char *mem)
 
 //---------------------------------------------------------------------------
 //! @brief		指定された位置のメモリから64bit LE整数を読み込む
+//! @param		mem メモリ
 //---------------------------------------------------------------------------
 static inline wxUint64 TVPReadI64LEFromMem(const unsigned char *mem)
 {
@@ -50,11 +53,11 @@ static inline wxUint64 TVPReadI64LEFromMem(const unsigned char *mem)
 
 //---------------------------------------------------------------------------
 //! @brief		チャンクを探す
-//! @param		chunkname: チャンク名
-//! @param		mem: 検索を行うメモリ領域の先頭位置
-//! @param		limit: 検索を行うメモリ領域のサイズ
-//! @param		chunkcontent: チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
-//! @param		chunksize: チャンクが見つかった場合、そのチャンクのサイズが入る
+//! @param		chunkname チャンク名
+//! @param		mem 検索を行うメモリ領域の先頭位置
+//! @param		limit 検索を行うメモリ領域のサイズ
+//! @param		chunkcontent チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
+//! @param		chunksize チャンクが見つかった場合、そのチャンクのサイズが入る
 //! @return		チャンクが見つかった場合に 真、見つからなかった場合は偽
 //---------------------------------------------------------------------------
 static bool TVPFindChunk(const unsigned char * chunkname,
@@ -90,11 +93,11 @@ static bool TVPFindChunk(const unsigned char * chunkname,
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		owner: tTVPXP4Archive インスタンスへのポインタ
-//! @param		meta: 入力メタデータ
-//! @param		metasize: 入力メタデータのサイズ
-//! @param		inarchivename: このアーカイブアイテムの名前を格納する先
-//! @param		deleted: ファイルが削除されている時に真に設定される
+//! @param		owner tTVPXP4Archive インスタンスへのポインタ
+//! @param		meta 入力メタデータ
+//! @param		metasize 入力メタデータのサイズ
+//! @param		inarchivename このアーカイブアイテムの名前を格納する先
+//! @param		deleted ファイルが削除されている時に真に設定される
 //---------------------------------------------------------------------------
 tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 	size_t metasize, ttstr & inarchivename, bool &deleted)
@@ -202,8 +205,8 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		filename: アーカイブファイル名
-//! @param		callback: ファイル名とアーカイブ内インデックスの対応をpushするコールバック
+//! @param		filename アーカイブファイル名
+//! @param		callback ファイル名とアーカイブ内インデックスの対応をpushするコールバック
 //---------------------------------------------------------------------------
 tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback & callback)
 {
@@ -364,8 +367,8 @@ tTVPXP4Archive::~tTVPXP4Archive()
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルの stat を得る
-//! @param		idx: ファイルのインデックス
-//! @param		struc: stat 結果の出力先
+//! @param		idx ファイルのインデックス
+//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tTVPXP4Archive::Stat(tjs_size idx, tTVPStatStruc & struc)
 {
@@ -382,8 +385,8 @@ void tTVPXP4Archive::Stat(tjs_size idx, tTVPStatStruc & struc)
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルのストリームを得る
 //! @param		スマートポインタ (ストリームに渡す)
-//! @param		idx: ファイルのインデックス
-//! @param		flags: フラグ
+//! @param		idx ファイルのインデックス
+//! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
 tTVPBinaryStream * tTVPXP4Archive::CreateStream(

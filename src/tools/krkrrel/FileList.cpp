@@ -85,7 +85,7 @@ static wxChar const  * const TVPXP4DefaultClassList[] = {
 
 //---------------------------------------------------------------------------
 //! @brief		デフォルトの分類リストを配列にして返す
-//! @param		dest: 格納先配列(内容はクリアされる)
+//! @param		dest 格納先配列(内容はクリアされる)
 //---------------------------------------------------------------------------
 void TVPXP4GetDefaultClassList(wxArrayString & dest)
 {
@@ -105,10 +105,10 @@ void TVPXP4GetDefaultClassList(wxArrayString & dest)
 
 //---------------------------------------------------------------------------
 //! @brief		指定ディレクトリにあるファイルを再帰的に検索し、リストを取得する
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		dir: 対象ディレクトリ
-//! @param		basedir: ベースディレクトリ
-//! @param		dest: 格納先配列
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		dir 対象ディレクトリ
+//! @param		basedir ベースディレクトリ
+//! @param		dest 格納先配列
 //---------------------------------------------------------------------------
 static void TVPInternalGetFileListAt(iTVPProgressCallback * callback,
 	const wxString & dir, const wxString & basedir,
@@ -179,9 +179,9 @@ static void TVPInternalGetFileListAt(iTVPProgressCallback * callback,
 
 //---------------------------------------------------------------------------
 //! @brief		指定ディレクトリにあるファイルを再帰的に検索し、リストを取得する
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		dir: 対象ディレクトリ
-//! @param		dest: 格納先配列(内容はクリアされる)
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		dir 対象ディレクトリ
+//! @param		dest 格納先配列(内容はクリアされる)
 //---------------------------------------------------------------------------
 void TVPGetFileListAt(iTVPProgressCallback * callback,
 	const wxString & dir, std::vector<tTVPXP4WriterInputFile> & dest)
@@ -205,9 +205,9 @@ void TVPGetFileListAt(iTVPProgressCallback * callback,
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルをパターンに従って分類する
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		pattern: パターン
-//! @param		dest: 格納先配列
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		pattern パターン
+//! @param		dest 格納先配列
 //---------------------------------------------------------------------------
 void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 	const wxArrayString & pattern,
@@ -325,7 +325,7 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 
 //---------------------------------------------------------------------------
 //! @brief		アーカイブ内ストレージの名前を正規化する
-//! @param		name: 正規化したいストレージ名
+//! @param		name 正規化したいストレージ名
 //! @return		正規化したストレージ名
 //---------------------------------------------------------------------------
 wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name)
@@ -352,9 +352,9 @@ wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name)
 
 //---------------------------------------------------------------------------
 //! @brief		tTVPXP4MetadataReaderArchive から得た input 内の項目を map に追加する
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		map: 追加先map
-//! @param		input: 入力配列
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		map 追加先map
+//! @param		input 入力配列
 //! @note		すでに追加先に存在していた場合は追加先を書き換える。
 //!				削除すべき場合は削除する。
 //---------------------------------------------------------------------------
@@ -394,8 +394,8 @@ void TVPApplyXP4StorageNameMap(
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたアーカイブファイル名をベースとするすべてのアーカイブファイルを列挙する
-//! @param		archivename: アーカイブファイル名
-//! @param		archives: 格納先配列(内容はクリアされる)
+//! @param		archivename アーカイブファイル名
+//! @param		archives 格納先配列(内容はクリアされる)
 //! @note		この関数を呼ぶ時点では archivename に対応するファイルは存在している
 //!				ことが確認できていなければならない
 //---------------------------------------------------------------------------
@@ -445,7 +445,7 @@ void TVPEnumerateArchiveFiles(const wxString & archivename,
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたアーカイブファイル名をベースとするすべてのアーカイブファイルを削除する
-//! @param		archivename: アーカイブファイル名
+//! @param		archivename アーカイブファイル名
 //---------------------------------------------------------------------------
 void TVPDeleteArchiveSet(const wxString & archivename)
 {
@@ -469,10 +469,10 @@ void TVPDeleteArchiveSet(const wxString & archivename)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたアーカイブファイルのメタデータを読み込む
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		archivename: アーカイブファイル名
-//! @param		dest: 格納先マップ(内容はクリアされる)
-//! @param		targetdir: このアーカイブセットが元にした対象ディレクトリを格納するポインタ(null可)
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		archivename アーカイブファイル名
+//! @param		dest 格納先マップ(内容はクリアされる)
+//! @param		targetdir このアーカイブセットが元にした対象ディレクトリを格納するポインタ(null可)
 //---------------------------------------------------------------------------
 void TVPReadXP4Metadata(
 	iTVPProgressCallback * callback,
@@ -515,9 +515,9 @@ void TVPReadXP4Metadata(
 
 //---------------------------------------------------------------------------
 //! @brief		arc(アーカイブ内既存ファイル) と ref(ターゲットディレクトリ)を比較し、ref を更新する
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		arc: アーカイブ内の既存ファイルを現すmap
-//! @param		ref: ターゲットディレクトリから取得したファイル一覧
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		arc アーカイブ内の既存ファイルを現すmap
+//! @param		ref ターゲットディレクトリから取得したファイル一覧
 //---------------------------------------------------------------------------
 void TVPCompareXP4StorageNameMap(
 	iTVPProgressCallback * callback,
@@ -633,8 +633,8 @@ void TVPCompareXP4StorageNameMap(
 
 //---------------------------------------------------------------------------
 //! @brief		tTVPXP4MetadataReaderStorageItem の配列を tTVPXP4WriterInputFile に変換する
-//! @param		input: 入力 tTVPXP4MetadataReaderStorageItem の map
-//! @param		output: 出力 tTVPXP4WriterInputFile の配列(内容はクリアされる)
+//! @param		input 入力 tTVPXP4MetadataReaderStorageItem の map
+//! @param		output 出力 tTVPXP4WriterInputFile の配列(内容はクリアされる)
 //---------------------------------------------------------------------------
 void TVPXP4MetadataReaderStorageItemToXP4WriterInputFile(
 	const std::map<wxString, tTVPXP4MetadataReaderStorageItem> & input,

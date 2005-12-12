@@ -37,8 +37,8 @@ tTVPPathFS::~tTVPPathFS()
 
 //---------------------------------------------------------------------------
 //! @brief		ファイル一覧を取得する
-//! @param		dirname: ディレクトリ名
-//! @param		callback: コールバックオブジェクト
+//! @param		dirname ディレクトリ名
+//! @param		callback コールバックオブジェクト
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
@@ -67,7 +67,7 @@ size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルが存在するかどうかを得る
-//! @param		filename: ファイル名
+//! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPPathFS::FileExists(const ttstr & filename)
@@ -87,7 +87,7 @@ bool tTVPPathFS::FileExists(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリが存在するかどうかを得る
-//! @param		dirname: ディレクトリ名
+//! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPPathFS::DirectoryExists(const ttstr & dirname)
@@ -102,7 +102,7 @@ bool tTVPPathFS::DirectoryExists(const ttstr & dirname)
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルを削除する
-//! @param		filename: ファイル名
+//! @param		filename ファイル名
 //---------------------------------------------------------------------------
 void tTVPPathFS::RemoveFile(const ttstr & filename)
 {
@@ -113,8 +113,8 @@ void tTVPPathFS::RemoveFile(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを削除する
-//! @param		dirname: ディレクトリ名
-//! @param		recursive: 再帰的にディレクトリを削除するかどうか
+//! @param		dirname ディレクトリ名
+//! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tTVPPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
@@ -125,8 +125,8 @@ void tTVPPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを作成する
-//! @param		dirname: ディレクトリ名
-//! @param		recursive: 再帰的にディレクトリを作成するかどうか
+//! @param		dirname ディレクトリ名
+//! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
 void tTVPPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
@@ -137,8 +137,8 @@ void tTVPPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルの stat を得る
-//! @param		filename: ファイル名
-//! @param		struc: stat 結果の出力先
+//! @param		filename ファイル名
+//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
@@ -164,8 +164,8 @@ void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルのストリームを得る
-//! @param		filename: ファイル名
-//! @param		flags: フラグ
+//! @param		filename ファイル名
+//! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
 tTVPBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
@@ -217,7 +217,7 @@ void tTVPPathFS::AddDirectory(const ttstr & name, bool recursive = false)
 
 //---------------------------------------------------------------------------
 //! @brief		パスからディレクトリを削除する
-//! @param		name: 名前
+//! @param		name 名前
 //---------------------------------------------------------------------------
 void tTVPPathFS::RemoveDirectory(const ttstr & name)
 {

@@ -15,13 +15,13 @@
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		indata: 入力ビットマップ
-//! @param		inpitch: 入力ビットマップの横方向のバイト数
-//! @param		originx:   描画点からブラックボックスの左端までの位置
-//! @param		originy:   描画点からブラックボックスの上端までの位置
-//! @param		blackboxw: ブラックボックスの幅
-//! @param		blackboxh: ブラックボックスの高さ
-//! @param		metrics: メトリック
+//! @param		indata 入力ビットマップ
+//! @param		inpitch 入力ビットマップの横方向のバイト数
+//! @param		originx   描画点からブラックボックスの左端までの位置
+//! @param		originy   描画点からブラックボックスの上端までの位置
+//! @param		blackboxw ブラックボックスの幅
+//! @param		blackboxh ブラックボックスの高さ
+//! @param		metrics メトリック
 //! @note		入力ビットマップのサイズは blackboxw と blackboxh で指定
 //---------------------------------------------------------------------------
 tTVPGlyphBitmap::tTVPGlyphBitmap(
@@ -78,7 +78,7 @@ tTVPGlyphBitmap::tTVPGlyphBitmap(
 
 //---------------------------------------------------------------------------
 //! @brief		コピーコンストラクタ
-//! @param		ref: 参照オブジェクト
+//! @param		ref 参照オブジェクト
 //---------------------------------------------------------------------------
 tTVPGlyphBitmap::tTVPGlyphBitmap(const tTVPGlyphBitmap & ref)
 {

@@ -27,8 +27,8 @@
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		fontname: フォント名
-//! @param		options: オプション
+//! @param		fontname フォント名
+//! @param		options オプション
 //---------------------------------------------------------------------------
 tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 	tjs_uint32 options)
@@ -235,6 +235,7 @@ tTVPNativeFreeTypeFace::~tTVPNativeFreeTypeFace()
 }
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
 //! @brief		FreeType の Face オブジェクトを返す
 //---------------------------------------------------------------------------
@@ -247,6 +248,7 @@ FT_Face tTVPNativeFreeTypeFace::GetFTFace() const
 
 //---------------------------------------------------------------------------
 //! @brief		このフォントファイルが持っているフォントを配列として返す
+//! @param		dest 格納先配列
 //---------------------------------------------------------------------------
 void tTVPNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 {
@@ -280,6 +282,11 @@ void tTVPNativeFreeTypeFace::Clear()
 
 //---------------------------------------------------------------------------
 //! @brief		FreeType 用 ストリーム読み込み関数
+//! @param		stream FT_Streamへのポインタ
+//! @param		offset ストリーム先頭からのオフセット
+//! @param		buffer 格納先バッファ
+//! @param		count  読み出すバイト数
+//! @return		何バイト読み込まれたか
 //---------------------------------------------------------------------------
 unsigned long tTVPNativeFreeTypeFace::IoFunc(
 			FT_Stream stream,
@@ -308,6 +315,7 @@ unsigned long tTVPNativeFreeTypeFace::IoFunc(
 
 //---------------------------------------------------------------------------
 //! @brief		FreeType 用 ストリーム削除関数
+//! @param		stream FT_Streamへのポインタ
 //---------------------------------------------------------------------------
 void tTVPNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
 {
@@ -318,7 +326,7 @@ void tTVPNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
 
 //---------------------------------------------------------------------------
 //! @brief		指定インデックスのFaceを開く
-//! @param		開くindex
+//! @param		index	開くindex
 //! @return		Faceを開ければ true そうでなければ false
 //---------------------------------------------------------------------------
 bool tTVPNativeFreeTypeFace::OpenFaceByIndex(int index)

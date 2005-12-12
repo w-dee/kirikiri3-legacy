@@ -130,8 +130,8 @@ void wxFileEx::RaiseOpenError(const wxChar * filename, wxFile::OpenMode mode)
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルポインタのアラインメントを行う
-//! @param		alignbytes: アラインメント数
-//! @param		padding: 詰め物として書き込む文字
+//! @param		alignbytes アラインメント数
+//! @param		padding 詰め物として書き込む文字
 //---------------------------------------------------------------------------
 void wxFileEx::Align(wxFileOffset alignbytes, unsigned int padding)
 {
@@ -147,8 +147,8 @@ void wxFileEx::Align(wxFileOffset alignbytes, unsigned int padding)
 
 //---------------------------------------------------------------------------
 //! @brief		指定数の同じ文字を書き込む
-//! @param		fillbytes: 書き込むバイト数
-//! @param		padding: 書き込む文字
+//! @param		fillbytes 書き込むバイト数
+//! @param		padding 書き込む文字
 //---------------------------------------------------------------------------
 void wxFileEx::Fill(wxFileOffset fillbytes, unsigned int padding)
 {

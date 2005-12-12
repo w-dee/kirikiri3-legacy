@@ -18,8 +18,8 @@
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルのハッシュ値を計算する
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		filename: ハッシュを計算するファイル名
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		filename ハッシュを計算するファイル名
 //---------------------------------------------------------------------------
 void tTVPXP4Hash::Make(iTVPProgressCallback * callback, const wxString &filename)
 {

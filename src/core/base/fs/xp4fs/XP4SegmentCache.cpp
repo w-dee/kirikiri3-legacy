@@ -86,13 +86,13 @@ void tTVPXP4SegmentCache::Clear()
 
 //---------------------------------------------------------------------------
 //! @brief		キャッシュを検索する(無ければアイテムを作成して返す)
-//! @param		pointer: アーカイブインスタンスへのポインタ
-//! @param		storage_index: storage index in archive
-//! @param		segment_index: segment index in storage
-//! @param		instream: キャッシュ中に無かった場合に読みに行くストリーム
-//! @param		dataofs: キャッシュ中に無かった場合に読みに行くストリーム中のデータブロックのオフセット
-//! @param		insize: キャッシュ中に無かった場合に読みに行くバイト数
-//! @param		uncomp_size: キャッシュ中に無かった場合に読みに行ったデータを展開したら何バイトになるか
+//! @param		pointer アーカイブインスタンスへのポインタ
+//! @param		storage_index storage index in archive
+//! @param		segment_index segment index in storage
+//! @param		instream キャッシュ中に無かった場合に読みに行くストリーム
+//! @param		dataofs キャッシュ中に無かった場合に読みに行くストリーム中のデータブロックのオフセット
+//! @param		insize キャッシュ中に無かった場合に読みに行くバイト数
+//! @param		uncomp_size キャッシュ中に無かった場合に読みに行ったデータを展開したら何バイトになるか
 //! @return		展開されたデータブロック
 //---------------------------------------------------------------------------
 tTVPXP4SegmentCache::tDataBlock

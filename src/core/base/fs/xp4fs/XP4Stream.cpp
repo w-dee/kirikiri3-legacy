@@ -21,6 +21,9 @@
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
+//! @param		ptr tTVPArchive インスタンスへのスマートポインタ
+//! @param		idx アーカイブ内でのファイルのインデックス
+//! @param		flags アクセスフラグ
 //---------------------------------------------------------------------------
 tTVPXP4ArchiveStream::tTVPXP4ArchiveStream(
 			boost::shared_ptr<tTVPArchive> ptr,
@@ -99,7 +102,7 @@ void tTVPXP4ArchiveStream::EnsureSegment()
 
 //---------------------------------------------------------------------------
 //! @brief		指定位置にシークする
-//! @param		pos: シーク先の位置
+//! @param		pos シーク先の位置
 //! @note		この関数は内部状態を変えるだけであり、実際にセグメントを開くなどはしない
 //---------------------------------------------------------------------------
 void tTVPXP4ArchiveStream::SeekToPosition(tjs_uint64 pos)
@@ -154,6 +157,9 @@ bool tTVPXP4ArchiveStream::OpenNextSegment()
 
 //---------------------------------------------------------------------------
 //! @brief		シーク
+//! @param		offset 移動オフセット
+//! @param		whence 移動オフセットの基準 (TJS_BS_SEEK_* 定数)
+//! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
 tjs_uint64 tTVPXP4ArchiveStream::Seek(tjs_int64 offset, tjs_int whence)
 {
@@ -193,6 +199,9 @@ tjs_uint64 tTVPXP4ArchiveStream::Seek(tjs_int64 offset, tjs_int whence)
 
 //---------------------------------------------------------------------------
 //! @brief		読み込み
+//! @param		buffer 読み込み先バッファ
+//! @param		read_size 読み込むバイト数
+//! @return		実際に読み込まれたバイト数
 //---------------------------------------------------------------------------
 tjs_uint tTVPXP4ArchiveStream::Read(void *buffer, tjs_size read_size)
 {
@@ -240,6 +249,9 @@ tjs_uint tTVPXP4ArchiveStream::Read(void *buffer, tjs_size read_size)
 
 //---------------------------------------------------------------------------
 //! @brief		書き込み
+//! @param		buffer 書き込むバッファ
+//! @param		read_size 書き込みたいバイト数
+//! @return		実際に書き込まれたバイト数
 //---------------------------------------------------------------------------
 tjs_uint tTVPXP4ArchiveStream::Write(const void *buffer, tjs_size write_size)
 {
@@ -260,6 +272,7 @@ void tTVPMemoryStream::SetEndOfFile()
 
 //---------------------------------------------------------------------------
 //! @brief		サイズを得る
+//! @return		このストリームのサイズ
 //---------------------------------------------------------------------------
 tjs_uint64 tTVPXP4ArchiveStream::GetSize()
 {

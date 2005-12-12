@@ -40,8 +40,8 @@ tTVPFileSystemManager::~tTVPFileSystemManager()
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムをマウントする
-//! @param		point: マウントポイント
-//! @param		fs: ファイルシステムオブジェクト
+//! @param		point マウントポイント
+//! @param		fs ファイルシステムオブジェクト
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFileSystem> fs)
 {
@@ -68,7 +68,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFil
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムをアンマウントする
-//! @param		point: マウントポイント
+//! @param		point マウントポイント
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Unmount(const ttstr & point)
 {
@@ -95,7 +95,7 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 
 //---------------------------------------------------------------------------
 //! @brief		パスを正規化する
-//! @param		path: 正規化したいパス
+//! @param		path 正規化したいパス
 //! @return		正規化されたパス
 //---------------------------------------------------------------------------
 ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
@@ -172,9 +172,9 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 
 //---------------------------------------------------------------------------
 //! @brief		ファイル一覧を取得する
-//! @param		dirname: ディレクトリ名
-//! @param		callback: コールバックオブジェクト
-//! @param		recursive: 再帰的にファイル一覧を得るかどうか
+//! @param		dirname ディレクトリ名
+//! @param		callback コールバックオブジェクト
+//! @param		recursive 再帰的にファイル一覧を得るかどうか
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t GetFileListAt(const ttstr & dirname,
@@ -235,7 +235,7 @@ size_t GetFileListAt(const ttstr & dirname,
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルが存在するかどうかを得る
-//! @param		filename: ファイル名
+//! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPFileSystemManager::FileExists(const ttstr & filename)
@@ -262,7 +262,7 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリが存在するかどうかを得る
-//! @param		dirname: ディレクトリ名
+//! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
@@ -289,7 +289,7 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルを削除する
-//! @param		filename: ファイル名
+//! @param		filename ファイル名
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 {
@@ -314,8 +314,8 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを削除する
-//! @param		dirname: ディレクトリ名
-//! @param		recursive: 再帰的にディレクトリを削除するかどうか
+//! @param		dirname ディレクトリ名
+//! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
@@ -340,8 +340,8 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを作成する
-//! @param		dirname: ディレクトリ名
-//! @param		recursive: 再帰的にディレクトリを作成するかどうか
+//! @param		dirname ディレクトリ名
+//! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursive)
 {
@@ -366,8 +366,8 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルの stat を得る
-//! @param		filename: ファイル名
-//! @param		struc: stat 結果の出力先
+//! @param		filename ファイル名
+//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
@@ -392,8 +392,8 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルのストリームを得る
-//! @param		filename: ファイル名
-//! @param		flags: フラグ
+//! @param		filename ファイル名
+//! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
 tTVPBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, tjs_uint32 flags)
@@ -420,7 +420,8 @@ tTVPBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, t
 
 //---------------------------------------------------------------------------
 //! @brief		ファイル一覧を取得する(内部関数)
-//! @param		dirname: ディレクトリ名(正規化されているべきこと)
+//! @param		dirname ディレクトリ名(正規化されているべきこと)
+//! @param		callback コールバック先
 //! @callback	コールバックオブジェクト
 //---------------------------------------------------------------------------
 size_t tTVPFileSystemManager::InternalGetFileListAt(
@@ -448,8 +449,8 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 
 //---------------------------------------------------------------------------
 //! @brief		指定された正規フルパスに対応するファイルシステムを得る
-//! @param		fullpath: 正規フルパス
-//! @param		fspath: ファイルシステム内におけるパス(興味がない場合はNULL可、最初の / は含まれない)
+//! @param		fullpath 正規フルパス
+//! @param		fspath ファイルシステム内におけるパス(興味がない場合はNULL可、最初の / は含まれない)
 //! @return		ファイルシステムインスタンス
 //---------------------------------------------------------------------------
 boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
@@ -493,7 +494,7 @@ boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 
 //---------------------------------------------------------------------------
 //! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる
-//! @param		filename:マウントポイント
+//! @param		filenameマウントポイント
 //! @note		この関数は例外を発生させるため呼び出し元には戻らない
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
@@ -517,9 +518,9 @@ void tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 
 //---------------------------------------------------------------------------
 //! @brief		パス名を拡張子より前と拡張子に分離する ( /path/to/file.ext を /path/to/file と .ext に分離する )
-//! @param		in: 入力パス名
-//! @param		other: (出力) 拡張子より前の部分へポインタ(興味ない場合はNULL可)
-//! @param		name: (出力) 拡張子へのポインタ(興味ない場合はNULL可)  拡張子には .(ドット) を含む。拡張子がない場合は空文字列になる
+//! @param		in 入力パス名
+//! @param		other [out] 拡張子より前の部分へポインタ(興味ない場合はNULL可)
+//! @param		name [out] 拡張子へのポインタ(興味ない場合はNULL可)  拡張子には .(ドット) を含む。拡張子がない場合は空文字列になる
 //! @note		in と そのほかのパラメータに同じ文字列を指定しないこと
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttstr * ext)
@@ -557,9 +558,9 @@ void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttst
 
 //---------------------------------------------------------------------------
 //! @brief		パス名をパスと名前に分離する ( /path/to/file を /path/to と file に分離する )
-//! @param		in: 入力パス名
-//! @param		path: (出力) パスへのポインタ(興味ない場合はNULL可)
-//! @param		name: (出力) 名前へのポインタ(興味ない場合はNULL可)
+//! @param		in 入力パス名
+//! @param		path [out] パスへのポインタ(興味ない場合はNULL可)
+//! @param		name [out] 名前へのポインタ(興味ない場合はNULL可)
 //! @note		in と そのほかのパラメータに同じ文字列を指定しないこと
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name)
@@ -580,7 +581,7 @@ void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, tts
 
 //---------------------------------------------------------------------------
 //! @brief		パス名の最後のパスデリミタ ('/') を取り去る ( /path/is/here/ を /path/is/here にする )
-//! @param		path: パス
+//! @param		path パス
 //---------------------------------------------------------------------------
 static void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 {

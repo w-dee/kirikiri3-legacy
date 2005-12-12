@@ -40,8 +40,8 @@ tTVPXP4StreamCache::~tTVPXP4StreamCache()
 
 //---------------------------------------------------------------------------
 //! @brief		ストリームを取得する
-//! @param		pointer: アーカイブインスタンスへのポインタ (識別に用いられる)
-//! @param		name: アーカイブファイル名
+//! @param		pointer アーカイブインスタンスへのポインタ (識別に用いられる)
+//! @param		name アーカイブファイル名
 //! @return		ストリーム
 //---------------------------------------------------------------------------
 tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & name)
@@ -71,8 +71,8 @@ tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & n
 
 //---------------------------------------------------------------------------
 //! @brief		ストリームを解放する
-//! @param		pointer: アーカイブインスタンスへのポインタ
-//! @param		stream: ストリーム
+//! @param		pointer アーカイブインスタンスへのポインタ
+//! @param		stream ストリーム
 //---------------------------------------------------------------------------
 void tTVPXP4StreamCache::ReleaseStream(void * pointer, tTJSBinaryStream * stream)
 {
@@ -116,7 +116,7 @@ void tTVPXP4StreamCache::ReleaseStream(void * pointer, tTJSBinaryStream * stream
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたポインタを持つストリームをすべて解放する
-//! @param		pointer: アーカイブインスタンスへのポインタ
+//! @param		pointer アーカイブインスタンスへのポインタ
 //---------------------------------------------------------------------------
 void tTVPXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 {

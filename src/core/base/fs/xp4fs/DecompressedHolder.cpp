@@ -19,10 +19,10 @@
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ(メモリ上のデータを展開する場合)
-//! @param		method: 圧縮メソッド
-//! @param		indata: 入力データ
-//! @param		insize: 入力データのサイズ
-//! @param		uncomp_size: 入力データを展開した際のサイズ
+//! @param		method 圧縮メソッド
+//! @param		indata 入力データ
+//! @param		insize 入力データのサイズ
+//! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
 tTVPDecompressedHolder::tTVPDecompressedHolder(tTVPDecompressedHolder::tMethod method,
 		const tjs_uint8 * indata, tjs_size insize, 
@@ -39,10 +39,10 @@ tTVPDecompressedHolder::tTVPDecompressedHolder(tTVPDecompressedHolder::tMethod m
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ(ストリーム上のデータを展開する場合)
-//! @param		method: 圧縮メソッド
-//! @param		indata: 入力ストリーム
-//! @param		insize: 入力データのサイズ
-//! @param		uncomp_size: 入力データを展開した際のサイズ
+//! @param		method 圧縮メソッド
+//! @param		indata 入力ストリーム
+//! @param		insize 入力データのサイズ
+//! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
 tTVPDecompressedHolder::tTVPDecompressedHolder(tMethod method,
 		tTJSBinaryStream * instream, tjs_size insize, 
@@ -82,10 +82,10 @@ tTVPDecompressedHolder::~tTVPDecompressedHolder()
 
 //---------------------------------------------------------------------------
 //! @brief		メモリ上のデータを展開する
-//! @param		method: 圧縮メソッド
-//! @param		indata: 入力データ
-//! @param		insize: 入力データのサイズ
-//! @param		uncomp_size: 入力データを展開した際のサイズ
+//! @param		method 圧縮メソッド
+//! @param		indata 入力データ
+//! @param		insize 入力データのサイズ
+//! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
 void Decompress(tTVPDecompressedHolder::tMethod method, const tjs_uint8 * indata, tjs_size insize, 
 		tjs_size uncomp_size)

@@ -2543,7 +2543,7 @@ static const tTVPUnicodeAndSJISPair TVPUnicodeAndSJISPair[] = {
 
 //---------------------------------------------------------------------------
 //! @brief		UNICODEをShiftJIS(CP932)に変換する
-//! @param		変換したい文字
+//! @param		in 変換したい文字
 //! @return	変換されたShiftJIS文字(0=変換失敗)
 //! @note		ShiftJIS 文字は 16bit 数値で返される(実際の戻り値の型はtjs_uint)
 //! @note		が、いわゆる半角文字の場合は上位8ビットは0、いわゆる全角文字は

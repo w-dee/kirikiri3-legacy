@@ -153,8 +153,8 @@ tTVPXP4FS::~tTVPXP4FS()
 
 //---------------------------------------------------------------------------
 //! @brief		ファイル一覧を取得する
-//! @param		dirname: ディレクトリ名
-//! @param		callback: コールバックオブジェクト
+//! @param		dirname ディレクトリ名
+//! @param		callback コールバックオブジェクト
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
@@ -207,7 +207,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルが存在するかどうかを得る
-//! @param		filename: ファイル名
+//! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPXP4FS::FileExists(const ttstr & filename)
@@ -223,7 +223,7 @@ bool tTVPXP4FS::FileExists(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリが存在するかどうかを得る
-//! @param		dirname: ディレクトリ名
+//! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPXP4FS::DirectoryExists(const ttstr & dirname)
@@ -241,7 +241,7 @@ bool tTVPXP4FS::DirectoryExists(const ttstr & dirname)
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルを削除する
-//! @param		filename: ファイル名
+//! @param		filename ファイル名
 //---------------------------------------------------------------------------
 void tTVPXP4FS::RemoveFile(const ttstr & filename)
 {
@@ -252,8 +252,8 @@ void tTVPXP4FS::RemoveFile(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを削除する
-//! @param		dirname: ディレクトリ名
-//! @param		recursive: 再帰的にディレクトリを削除するかどうか
+//! @param		dirname ディレクトリ名
+//! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tTVPXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
@@ -264,8 +264,8 @@ void tTVPXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを作成する
-//! @param		dirname: ディレクトリ名
-//! @param		recursive: 再帰的にディレクトリを作成するかどうか
+//! @param		dirname ディレクトリ名
+//! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
 void tTVPXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
@@ -276,8 +276,8 @@ void tTVPXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルの stat を得る
-//! @param		filename: ファイル名
-//! @param		struc: stat 結果の出力先
+//! @param		filename ファイル名
+//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tTVPXP4FS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
@@ -294,8 +294,8 @@ void tTVPXP4FS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルのストリームを得る
-//! @param		filename: ファイル名
-//! @param		flags: フラグ
+//! @param		filename ファイル名
+//! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
 tTVPBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 flags)
@@ -321,7 +321,7 @@ tTVPBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 fl
 
 //---------------------------------------------------------------------------
 //! @brief		name ファイル名で始まる最初の FileItems内のインデックスを得る
-//! @param		name: 名前
+//! @param		name 名前
 //! @return		FileItems内のインデックス (見つからなかった場合は (tjs_size)-1 が返る)
 //---------------------------------------------------------------------------
 tjs_size tTVPXP4FS::GetFileItemStartIndex(const ttstr & name)
@@ -361,7 +361,7 @@ tjs_size tTVPXP4FS::GetFileItemStartIndex(const ttstr & name)
 
 //---------------------------------------------------------------------------
 //! @brief		name に対応する FileItems内のインデックスを得る
-//! @param		name: 名前
+//! @param		name 名前
 //! @return		FileItems内のインデックス (見つからなかった場合は (tjs_size)-1 が返る)
 //! @note		GetFileItemStartIndex と違い、その名前とぴったり一致しない限りは見つからないとみなす
 //---------------------------------------------------------------------------

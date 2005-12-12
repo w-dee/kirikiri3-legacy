@@ -45,10 +45,10 @@
 
 //---------------------------------------------------------------------------
 //! @brief		wxFile 同士のコピー
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		src: コピー元
-//! @param		dest: コピー先
-//! @param		size: コピーするバイト数 (wxFileOffset)
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		src コピー元
+//! @param		dest コピー先
+//! @param		size コピーするバイト数 (wxFileOffset)
 //! @return		コピーされたバイト数
 //! @note		コピー元もコピー先も、現在のファイルポインタからコピーされる。
 //!				また、コピー後に入力ファイルのファイルポインタが正確にコピー
@@ -94,9 +94,9 @@ static wxFileOffset TVPCopyFile(iTVPProgressCallback * callback,
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		offset: (非圧縮時の)ストレージ先頭からのオフセット
-//! @param		size:  (非圧縮時の)サイズ
-//! @param		ZLIB 圧縮の際に真
+//! @param		offset (非圧縮時の)ストレージ先頭からのオフセット
+//! @param		size  (非圧縮時の)サイズ
+//! @param		iscompressed ZLIB 圧縮の際に真
 //---------------------------------------------------------------------------
 tTVPXP4WriterSegment::tTVPXP4WriterSegment(
 		wxFileOffset offset,
@@ -122,9 +122,9 @@ tTVPXP4WriterSegment::~tTVPXP4WriterSegment()
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルをアーカイブに書き込む
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		input: 入力ファイル
-//! @param		file: アーカイブファイル
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		input 入力ファイル
+//! @param		file アーカイブファイル
 //---------------------------------------------------------------------------
 void tTVPXP4WriterSegment::WriteBody(iTVPProgressCallback * callback,
 		wxFileEx & input, wxFileEx & file)
@@ -204,7 +204,7 @@ void tTVPXP4WriterSegment::WriteBody(iTVPProgressCallback * callback,
 
 //---------------------------------------------------------------------------
 //! @brief		メタデータを書き込む
-//! @param		buf: 出力メモリバッファ
+//! @param		buf 出力メモリバッファ
 //---------------------------------------------------------------------------
 void tTVPXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
 {
@@ -250,8 +250,8 @@ void tTVPXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ(他のアイテムを参照しない場合)
-//! @param		inputfile: 入力ファイルの情報
-//! @param		basedirlength: アーカイブ対象ディレクトリのベース部分の長さ
+//! @param		inputfile 入力ファイルの情報
+//! @param		basedirlength アーカイブ対象ディレクトリのベース部分の長さ
 //---------------------------------------------------------------------------
 #define COMPRESS_SPLIT_UNIT 256*1024 //!< 圧縮時の分割バイト数
 tTVPXP4WriterStorage::tTVPXP4WriterStorage(
@@ -265,9 +265,9 @@ tTVPXP4WriterStorage::tTVPXP4WriterStorage(
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ(他のストレージアイテムを参照する場合)
-//! @param		inputfile: 入力ファイルの情報
-//! @param		basedirlength: アーカイブ対象ディレクトリのベース部分の長さ
-//! @param		ref: 参照アイテム
+//! @param		inputfile 入力ファイルの情報
+//! @param		basedirlength アーカイブ対象ディレクトリのベース部分の長さ
+//! @param		ref 参照アイテム
 //---------------------------------------------------------------------------
 tTVPXP4WriterStorage::tTVPXP4WriterStorage(
 	const tTVPXP4WriterInputFile & inputfile,
@@ -303,8 +303,8 @@ void tTVPXP4WriterStorage::MakeHash(iTVPProgressCallback * callback)
 
 //---------------------------------------------------------------------------
 //! @brief		XP4アーカイブへファイルを格納する
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		archive: アーカイブファイルオブジェクト
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		archive アーカイブファイルオブジェクト
 //---------------------------------------------------------------------------
 void tTVPXP4WriterStorage::WriteBody(
 	iTVPProgressCallback * callback, wxFileEx & archive)
@@ -363,7 +363,7 @@ void tTVPXP4WriterStorage::WriteBody(
 
 //---------------------------------------------------------------------------
 //! @brief		メタデータを書き込む
-//! @param		buf: 出力メモリバッファ
+//! @param		buf 出力メモリバッファ
 //---------------------------------------------------------------------------
 void tTVPXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 {
@@ -451,8 +451,8 @@ void tTVPXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		filename: アーカイブファイルのファイル名
-//! @param		targetdir: アーカイブに格納されるファイルの元となったディレクトリ名
+//! @param		filename アーカイブファイルのファイル名
+//! @param		targetdir アーカイブに格納されるファイルの元となったディレクトリ名
 //---------------------------------------------------------------------------
 tTVPXP4WriterArchive::tTVPXP4WriterArchive(
 	const wxString & filename,
@@ -502,8 +502,8 @@ tTVPXP4WriterArchive::~tTVPXP4WriterArchive()
 
 //---------------------------------------------------------------------------
 //! @brief		アーカイブにファイルを追加し、書き込む
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		storage: 書き込むファイル
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		storage 書き込むファイル
 //! @return		格納されたアーカイブ内のストレージのインデックス
 //---------------------------------------------------------------------------
 size_t tTVPXP4WriterArchive::AddAndWriteBody(iTVPProgressCallback * callback,
@@ -522,8 +522,8 @@ size_t tTVPXP4WriterArchive::AddAndWriteBody(iTVPProgressCallback * callback,
 
 //---------------------------------------------------------------------------
 //! @brief		アーカイブにメタデータを書き込む
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		compress: インデックスを圧縮するかどうか
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		compress インデックスを圧縮するかどうか
 //---------------------------------------------------------------------------
 void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 	bool compress)
@@ -655,11 +655,11 @@ void tTVPXP4WriterArchive::WriteMetaData(iTVPProgressCallback * callback,
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		callback: 進捗コールバックオブジェクト
-//! @param		basefilename: ベースファイル名(パス付きだが拡張子をのぞく)
-//! @param		splitlimit: 分割する際のファイルサイズの上限(バイト単位) 0=分割なし
-//! @param		list: 入力ファイルのリスト
-//! @param		targetdir: アーカイブに格納されるファイルの元となったディレクトリ名
+//! @param		callback 進捗コールバックオブジェクト
+//! @param		basefilename ベースファイル名(パス付きだが拡張子をのぞく)
+//! @param		splitlimit 分割する際のファイルサイズの上限(バイト単位) 0=分割なし
+//! @param		list 入力ファイルのリスト
+//! @param		targetdir アーカイブに格納されるファイルの元となったディレクトリ名
 //---------------------------------------------------------------------------
 tTVPXP4Writer::tTVPXP4Writer(
 	iTVPProgressCallback * callback,

@@ -165,7 +165,7 @@ void wxPreviewScrolledWindow::UpdateDisplayInfo()
 
 //---------------------------------------------------------------------------
 //! @brief		倍率を設定する
-//! @param		maginify: 倍率
+//! @param		maginify 倍率
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::SetMagnify(tjs_int magnify)
 {
@@ -178,7 +178,7 @@ void wxPreviewScrolledWindow::SetMagnify(tjs_int magnify)
 
 //---------------------------------------------------------------------------
 //! @brief		指定行の高さを得る(基底クラスのオーバーライド)
-//! @param		n 行
+//! @param		n   行
 //! @return		その行の高さ (この実装では固定値を返す)
 //---------------------------------------------------------------------------
 wxCoord wxPreviewScrolledWindow::OnGetLineHeight(size_t n) const
@@ -208,9 +208,9 @@ tjs_uint wxPreviewScrolledWindow::GetMargin() const
 
 //---------------------------------------------------------------------------
 //! @brief		指定位置にFreeTypeでレンダリングした文字を表示する
-//! @param		ch: 表示したい文字
-//! @param		x: 表示したいx位置
-//! @param		y: 表示したいy位置
+//! @param		ch 表示したい文字
+//! @param		x 表示したいx位置
+//! @param		y 表示したいy位置
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::PrintCharacter(tjs_char ch, int x, int y)
 {
@@ -286,7 +286,7 @@ void wxPreviewScrolledWindow::PrintCharacter(tjs_char ch, int x, int y)
 
 //---------------------------------------------------------------------------
 //! @brief		システムがアイドルなとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::OnIdle(wxIdleEvent& event)
 {
@@ -343,7 +343,7 @@ void wxPreviewScrolledWindow::OnIdle(wxIdleEvent& event)
 
 //---------------------------------------------------------------------------
 //! @brief		描画が必要なとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::OnPaint(wxPaintEvent& event)
 {
@@ -415,7 +415,7 @@ void wxPreviewScrolledWindow::OnPaint(wxPaintEvent& event)
 
 //---------------------------------------------------------------------------
 //! @brief		スクロールされるとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::OnScroll(wxScrollWinEvent& event)
 {
@@ -427,7 +427,7 @@ void wxPreviewScrolledWindow::OnScroll(wxScrollWinEvent& event)
 
 //---------------------------------------------------------------------------
 //! @brief		サイズが変更されたとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::OnSize(wxSizeEvent& event)
 {
@@ -439,7 +439,7 @@ void wxPreviewScrolledWindow::OnSize(wxSizeEvent& event)
 
 //---------------------------------------------------------------------------
 //! @brief		マウスカーソルが移動したとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 {
@@ -476,7 +476,7 @@ void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 
 //---------------------------------------------------------------------------
 //! @brief		マウスカーソルがウィンドウから退出したとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::OnLeaveWindow(wxMouseEvent & event)
 {
@@ -501,7 +501,7 @@ wxPreviewFrame * PreviewFrame = NULL;
 
 //---------------------------------------------------------------------------
 //! @brief		プレビューウィンドウを表示する
-//! @param		maindialog: メインダイアログオブジェクトへのポインタ
+//! @param		maindialog メインダイアログオブジェクトへのポインタ
 //! @note		まだプレビューウィンドウが作成されていなければ作成し、
 //!				既に作成されていたら最前面に表示する
 //---------------------------------------------------------------------------
@@ -600,7 +600,7 @@ void wxPreviewFrame::FaceChanged()
 
 //---------------------------------------------------------------------------
 //! @brief		ウィンドウが閉じるとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewFrame::FrameClose(wxCloseEvent& event)
 {
@@ -610,7 +610,7 @@ void wxPreviewFrame::FrameClose(wxCloseEvent& event)
 
 //---------------------------------------------------------------------------
 //! @brief		「閉じる」ボタンが押されたとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewFrame::CloseButtonClick(wxCommandEvent& event)
 {
@@ -622,7 +622,7 @@ void wxPreviewFrame::CloseButtonClick(wxCommandEvent& event)
 
 //---------------------------------------------------------------------------
 //! @brief		「倍率」リストボックスが選択されたとき
-//! @param		event: イベントオブジェクト
+//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void wxPreviewFrame::MagnifyChoiceSelected(wxCommandEvent& event)
 {

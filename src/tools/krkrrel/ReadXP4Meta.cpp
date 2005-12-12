@@ -51,11 +51,11 @@ static inline wxUint64 TVPReadI64LEFromMem(const unsigned char *mem)
 
 //---------------------------------------------------------------------------
 //! @brief		チャンクを探す
-//! @param		chunkname: チャンク名
-//! @param		mem: 検索を行うメモリ領域の先頭位置
-//! @param		limit: 検索を行うメモリ領域のサイズ
-//! @param		chunkcontent: チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
-//! @param		chunksize: チャンクが見つかった場合、そのチャンクのサイズが入る
+//! @param		chunkname チャンク名
+//! @param		mem 検索を行うメモリ領域の先頭位置
+//! @param		limit 検索を行うメモリ領域のサイズ
+//! @param		chunkcontent チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
+//! @param		chunksize チャンクが見つかった場合、そのチャンクのサイズが入る
 //! @return		チャンクが見つかった場合に 真、見つからなかった場合は偽
 //---------------------------------------------------------------------------
 static bool TVPFindChunk(const unsigned char * chunkname,
@@ -91,8 +91,8 @@ static bool TVPFindChunk(const unsigned char * chunkname,
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		meta: 入力メタデータ
-//! @param		metasize: 入力メタデータのサイズ
+//! @param		meta 入力メタデータ
+//! @param		metasize 入力メタデータのサイズ
 //---------------------------------------------------------------------------
 tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 										const unsigned char * meta, size_t metasize)
@@ -186,7 +186,7 @@ tTVPXP4MetadataReaderStorageItem::tTVPXP4MetadataReaderStorageItem(
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		filename: アーカイブファイル名
+//! @param		filename アーカイブファイル名
 //---------------------------------------------------------------------------
 tTVPXP4MetadataReaderArchive::tTVPXP4MetadataReaderArchive(const wxString & filename)
 {

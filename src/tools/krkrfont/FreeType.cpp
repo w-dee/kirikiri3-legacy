@@ -63,8 +63,8 @@ private:
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		fontname: フォント名
-//! @param		options: オプション(TVP_TF_XXXX 定数かTVP_FACE_OPTIONS_XXXX定数の組み合わせ)
+//! @param		fontname フォント名
+//! @param		options オプション(TVP_TF_XXXX 定数かTVP_FACE_OPTIONS_XXXX定数の組み合わせ)
 //---------------------------------------------------------------------------
 tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 options)
 {
@@ -213,8 +213,8 @@ void tTVPGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
 
 //---------------------------------------------------------------------------
 //! @brief		指定インデックスのFaceを開く
-//! @param		index: 開くindex
-//! @param		face: FT_Face 変数への参照
+//! @param		index 開くindex
+//! @param		face FT_Face 変数への参照
 //! @return		Faceを開ければ true そうでなければ false
 //! @note		初めて Face を開く場合は face で指定する変数には null を入れておくこと
 //---------------------------------------------------------------------------
@@ -246,8 +246,8 @@ bool tTVPGenericFreeTypeFace::OpenFaceByIndex(tjs_uint index, FT_Face & face)
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		fontname: フォント名
-//! @param		options: オプション
+//! @param		fontname フォント名
+//! @param		options オプション
 //---------------------------------------------------------------------------
 tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options)
 	: FontName(fontname)
@@ -350,7 +350,7 @@ tjs_uint tTVPFreeTypeFace::GetGlyphCount()
 
 //---------------------------------------------------------------------------
 //! @brief		Glyph インデックスから対応する文字コードを得る
-//! @param		index: インデックス(FreeTypeの管理している文字indexとは違うので注意)
+//! @param		index インデックス(FreeTypeの管理している文字indexとは違うので注意)
 //! @return		対応する文字コード(対応するコードが無い場合は 0)
 //---------------------------------------------------------------------------
 tjs_char tTVPFreeTypeFace::GetCharcodeFromGlyphIndex(tjs_uint index)
@@ -367,7 +367,7 @@ tjs_char tTVPFreeTypeFace::GetCharcodeFromGlyphIndex(tjs_uint index)
 
 //---------------------------------------------------------------------------
 //! @brief		このフォントに含まれるFace名のリストを得る
-//! @param		dest: 格納先配列
+//! @param		dest 格納先配列
 //---------------------------------------------------------------------------
 void tTVPFreeTypeFace::GetFaceNameList(wxArrayString &dest)
 {
@@ -378,7 +378,7 @@ void tTVPFreeTypeFace::GetFaceNameList(wxArrayString &dest)
 
 //---------------------------------------------------------------------------
 //! @brief		フォントの高さを設定する
-//! @param		height: フォントの高さ(ピクセル単位)
+//! @param		height フォントの高さ(ピクセル単位)
 //---------------------------------------------------------------------------
 void tTVPFreeTypeFace::SetHeight(int height)
 {
@@ -394,7 +394,7 @@ void tTVPFreeTypeFace::SetHeight(int height)
 
 //---------------------------------------------------------------------------
 //! @brief		指定した文字コードに対するグリフビットマップを得る
-//! @param		code: 文字コード
+//! @param		code 文字コード
 //! @return		新規作成されたグリフビットマップオブジェクトへのポインタ
 //!				NULL の場合は変換に失敗した場合
 //---------------------------------------------------------------------------
@@ -493,8 +493,8 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 
 //---------------------------------------------------------------------------
 //! @brief		指定した文字コードに対するグリフの寸法を得る
-//! @param		code: 文字コード
-//! @param		metrics: 寸法
+//! @param		code 文字コード
+//! @param		metrics 寸法
 //! @return		成功の場合真、失敗の場合偽
 //---------------------------------------------------------------------------
 bool tTVPFreeTypeFace::GetGlyphMetricsFromCharcode(tjs_char code,
@@ -517,7 +517,7 @@ bool tTVPFreeTypeFace::GetGlyphMetricsFromCharcode(tjs_char code,
 
 //---------------------------------------------------------------------------
 //! @brief		指定した文字コードに対するグリフをグリフスロットに設定する
-//! @param		code: 文字コード
+//! @param		code 文字コード
 //! @return		成功の場合真、失敗の場合偽
 //---------------------------------------------------------------------------
 bool tTVPFreeTypeFace::LoadGlyphSlotFromCharcode(tjs_char code)

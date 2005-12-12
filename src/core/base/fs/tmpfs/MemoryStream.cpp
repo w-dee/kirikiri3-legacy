@@ -70,6 +70,7 @@ void tTVPMemoryStreamBlock::Release()
 
 //---------------------------------------------------------------------------
 //! @brief		メモリブロックのサイズを変更する
+//! @param		size 新しいサイズ
 //! @note		サイズが拡張される場合、メモリブロックの内容は保たれるが、
 //!				サイズが拡張された部分の内容は不定となる。縮小される場合、
 //!				内容は最後が切りつめられる。
@@ -136,7 +137,7 @@ void tTVPMemoryStreamBlock::Fit()
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		flags: アクセスフラグ
+//! @param		flags アクセスフラグ
 //---------------------------------------------------------------------------
 tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flags)
 {
@@ -151,8 +152,8 @@ tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flags)
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ(他のメモリブロックを参照する場合)
-//! @param		flags: アクセスフラグ
-//! @param		block: メモリブロック
+//! @param		flags アクセスフラグ
+//! @param		block メモリブロック
 //---------------------------------------------------------------------------
 tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flagstTVPMemoryStreamBlock * block)
 {
@@ -179,6 +180,9 @@ tTVPMemoryStream::~tTVPMemoryStream()
 
 //---------------------------------------------------------------------------
 //! @brief		シーク
+//! @param		offset 移動オフセット
+//! @param		whence 移動オフセットの基準 (TJS_BS_SEEK_* 定数)
+//! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
 tjs_uint64 tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
 {
@@ -217,6 +221,9 @@ tjs_uint64 tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
 
 //---------------------------------------------------------------------------
 //! @brief		読み込み
+//! @param		buffer 読み込み先バッファ
+//! @param		read_size 読み込むバイト数
+//! @return		実際に読み込まれたバイト数
 //---------------------------------------------------------------------------
 tjs_size tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
 {
@@ -243,6 +250,9 @@ tjs_size tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
 
 //---------------------------------------------------------------------------
 //! @brief		書き込み
+//! @param		buffer 書き込むバッファ
+//! @param		read_size 書き込みたいバイト数
+//! @return		実際に書き込まれたバイト数
 //---------------------------------------------------------------------------
 tjs_size tTVPMemoryStream::Write(const void *buffer, tjs_size write_size)
 {

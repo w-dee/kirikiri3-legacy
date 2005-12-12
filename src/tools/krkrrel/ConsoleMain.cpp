@@ -388,8 +388,8 @@ int wxKrkrReleaserConsoleApp::OnRun()
 
 //---------------------------------------------------------------------------
 //! @brief		分類用ルールの書かれたファイルを読み込む
-//! @param		filename: ルールの書かれたファイルのファイル名
-//! @param		pattern: 格納先配列(内容はクリアされない)
+//! @param		filename ルールの書かれたファイルのファイル名
+//! @param		pattern 格納先配列(内容はクリアされない)
 //---------------------------------------------------------------------------
 void wxKrkrReleaserConsoleApp::LoadClassList(const wxString & filename,
 	wxArrayString &pattern)
@@ -412,7 +412,7 @@ void wxKrkrReleaserConsoleApp::LoadClassList(const wxString & filename,
 
 //---------------------------------------------------------------------------
 //! @brief		アーカイブ内のファイルをリスト表示する
-//! @param		files: ファイルリスト
+//! @param		files ファイルリスト
 //---------------------------------------------------------------------------
 void wxKrkrReleaserConsoleApp::ListArchiveItems(
 	const std::vector<tTVPXP4WriterInputFile> & files)

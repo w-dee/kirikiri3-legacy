@@ -17,6 +17,9 @@
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
+//! @param		parent 親ノード
+//! @param		type ノードタイプ
+//! @param		name ノードの名前
 //---------------------------------------------------------------------------
 tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 							const ttstr & name) :
@@ -40,7 +43,9 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 
 //---------------------------------------------------------------------------
 //! @brief		シリアライズされたデータを読み取るコンストラクタ
-//! @param		src: 入力もとストリーム
+//! @param		parent 親ノード
+//! @param		type ノードタイプ
+//! @param		src 入力もとストリーム
 //---------------------------------------------------------------------------
 void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 	tTVPBinaryStream * src) :
@@ -139,7 +144,7 @@ void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType ty
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPTmpFSNode::~tTVPTmpFSNode(const ttstr & name)
+tTVPTmpFSNode::~tTVPTmpFSNode()
 {
 	// デストラクタ
 	// デストラクタは、保持しているノードを「すべて」解放するので注意
@@ -169,7 +174,7 @@ tTVPTmpFSNode::~tTVPTmpFSNode(const ttstr & name)
 
 //---------------------------------------------------------------------------
 //! @brief		内容をシリアライズする
-//! @param		dest: 出力先ストリーム
+//! @param		dest 出力先ストリーム
 //---------------------------------------------------------------------------
 void tTVPTmpFSNode::Serialize(tTVPBinaryStream * dest)
 {
@@ -220,7 +225,7 @@ void tTVPTmpFSNode::Serialize(tTVPBinaryStream * dest)
 
 //---------------------------------------------------------------------------
 //! @brief		指定された名前を持つノードを返す
-//! @param		name: 名前
+//! @param		name 名前
 //! @return		ノード(ノードが見つからない場合は NULL)
 //! @note		このノードが File を表す場合も NULL が返る
 //---------------------------------------------------------------------------
@@ -237,7 +242,7 @@ tTVPTmpFSNode * tTVPTmpFSNode::GetSubNode(const ttstr & name)
 
 //---------------------------------------------------------------------------
 //! @brief		指定された名前を持つサブノードを削除する
-//! @param		name: 名前
+//! @param		name 名前
 //! @return		削除に成功すれば真
 //---------------------------------------------------------------------------
 bool tTVPTmpFSNode::DeleteSubNodeByName(const ttstr & name)
@@ -257,7 +262,7 @@ bool tTVPTmpFSNode::DeleteSubNodeByName(const ttstr & name)
 
 //---------------------------------------------------------------------------
 //! @brief		指定された名前を持つディレクトリを作成する
-//! @param		name: 名前
+//! @param		name 名前
 //! @return		新規に作成されたディレクトリノード
 //! @note		すでにその名前を持つノードがあった場合は何もしないで NULL を返すので注意
 //---------------------------------------------------------------------------
@@ -274,7 +279,7 @@ tTVPTmpFSNode * tTVPTmpFSNode::CreateDirectory(const ttstr & name)
 
 //---------------------------------------------------------------------------
 //! @brief		指定された名前を持つファイルを作成する
-//! @param		name: 名前
+//! @param		name 名前
 //! @return		新規に作成されたファイルノード
 //! @note		すでにその名前を持つノードがあった場合は何もしないで NULL を返すので注意
 //---------------------------------------------------------------------------
@@ -408,8 +413,8 @@ void tTVPTmpFS::Release()
 
 //---------------------------------------------------------------------------
 //! @brief		ファイル一覧を取得する
-//! @param		dirname: ディレクトリ名
-//! @param		callback: コールバックオブジェクト
+//! @param		dirname ディレクトリ名
+//! @param		callback コールバックオブジェクト
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tTVPTmpFS::GetFileListAt(const ttstr & dirname,
@@ -428,7 +433,7 @@ size_t tTVPTmpFS::GetFileListAt(const ttstr & dirname,
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルが存在するかどうかを得る
-//! @param		filename: ファイル名
+//! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPTmpFS::FileExists(const ttstr & filename)
@@ -445,7 +450,7 @@ bool tTVPTmpFS::FileExists(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリが存在するかどうかを得る
-//! @param		dirname: ディレクトリ名
+//! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
 bool tTVPTmpFS::DirectoryExists(const ttstr & dirname)
@@ -462,7 +467,7 @@ bool tTVPTmpFS::DirectoryExists(const ttstr & dirname)
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルを削除する
-//! @param		filename: ファイル名
+//! @param		filename ファイル名
 //---------------------------------------------------------------------------
 void tTVPTmpFS::RemoveFile(const ttstr & filename)
 {
@@ -482,8 +487,8 @@ void tTVPTmpFS::RemoveFile(const ttstr & filename)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを削除する
-//! @param		dirname: ディレクトリ名
-//! @param		recursive: 再帰的にディレクトリを削除するかどうか
+//! @param		dirname ディレクトリ名
+//! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tTVPTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
@@ -525,8 +530,8 @@ void tTVPTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 //---------------------------------------------------------------------------
 //! @brief		ディレクトリを作成する
-//! @param		dirname: ディレクトリ名
-//! @param		recursive: 再帰的にディレクトリを作成するかどうか
+//! @param		dirname ディレクトリ名
+//! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
 void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
@@ -594,8 +599,8 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルの stat を得る
-//! @param		filename: ファイル名
-//! @param		struc: stat 結果の出力先
+//! @param		filename ファイル名
+//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
@@ -614,8 +619,8 @@ void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたファイルのストリームを得る
-//! @param		filename: ファイル名
-//! @param		flags: フラグ
+//! @param		filename ファイル名
+//! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
 tTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
@@ -633,7 +638,7 @@ tTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 fl
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたストリームに内容をシリアライズする
-//! @param		dest: 出力先ストリーム
+//! @param		dest 出力先ストリーム
 //---------------------------------------------------------------------------
 void tTVPTmpFS::SerializeTo(tTVPBinaryStream * dest)
 {
@@ -651,7 +656,7 @@ void tTVPTmpFS::SerializeTo(tTVPBinaryStream * dest)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたストリームから内容を復元する
-//! @param		src: 入力もとストリーム
+//! @param		src 入力もとストリーム
 //---------------------------------------------------------------------------
 void tTVPTmpFS::UnserializeFrom(tTVPBinaryStream * src)
 {
@@ -676,7 +681,7 @@ void tTVPTmpFS::UnserializeFrom(tTVPBinaryStream * src)
 
 //---------------------------------------------------------------------------
 //! @brief		指定された位置のノードを得る
-//! @param		name: ノード
+//! @param		name ノード
 //! @return		その位置にあるノード。その位置が見つからない場合は NULL
 //---------------------------------------------------------------------------
 tTVPTmpFSNode * tTVPTmpFS::GetNodeAt(const ttstr & name)

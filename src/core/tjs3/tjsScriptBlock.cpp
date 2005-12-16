@@ -17,6 +17,7 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1028);
 //---------------------------------------------------------------------------
 int yyparse(void*);
 //---------------------------------------------------------------------------
@@ -162,11 +163,11 @@ ttstr tTJSScriptBlock::GetLineDescriptionString(tjs_int pos) const
 	else
 	{
 		tjs_char ptr[128];
-		TJS_sprintf(ptr, TJS_W("0x%p"), this);
-		name = ttstr(TJS_W("anonymous@")) + ptr;
+		TJS_pointer_to_str(this, ptr);
+		name = ttstr(TJS_WS("anonymous@0x")) + ptr;
 	}
 
-	return name + TJS_W("(") + ttstr(line) + TJS_W(")");
+	return name + TJS_WS("(") + ttstr(line) + TJS_WS(")");
 }
 //---------------------------------------------------------------------------
 void tTJSScriptBlock::ConsoleOutput(const tjs_char *msg, void *data)
@@ -197,15 +198,10 @@ extern tjs_uint time_ns_Commit;
 void tTJSScriptBlock::SetText(tTJSVariant *result, const tjs_char *text,
 	iTJSDispatch2 * context, bool isexpression)
 {
-	TJS_F_TRACE("tTJSScriptBlock::SetText");
-
-
 	// compiles text and executes its global level scripts.
 	// the script will be compiled as an expression if isexpressn is true.
 	if(!text) return;
 	if(!text[0]) return;
-
-	TJS_D((TJS_W("Counting lines ...\n")))
 
 	Script = new tjs_char[TJS_strlen(text)+1];
 	TJS_strcpy(Script, text);
@@ -215,11 +211,11 @@ void tTJSScriptBlock::SetText(tTJSVariant *result, const tjs_char *text,
 	tjs_char *p = Script;
 	while(*p)
 	{
-		if(*p == TJS_W('\r') || *p == TJS_W('\n'))
+		if(*p == TJS_WC('\r') || *p == TJS_WC('\n'))
 		{
 			LineVector.push_back(int(ls - Script));
 			LineLengthVector.push_back(int(p - ls));
-			if(*p == TJS_W('\r') && p[1] == TJS_W('\n')) p++;
+			if(*p == TJS_WC('\r') && p[1] == TJS_WC('\n')) p++;
 			p++;
 			ls = p;
 		}
@@ -290,7 +286,7 @@ void tTJSScriptBlock::SetText(tTJSVariant *result, const tjs_char *text,
 			InterCodeContextList.begin();
 		while(i != InterCodeContextList.end())
 		{
-			ConsoleOutput(TJS_W(""), (void*)this);
+			ConsoleOutput(TJS_WS(""), (void*)this);
 			ConsoleOutput((*i)->GetName(), (void*)this);
 			(*i)->Disassemble(ConsoleOutput, (void*)this);
 			i++;
@@ -339,7 +335,7 @@ void tTJSScriptBlock::ExecuteTopLevelScript(tTJSVariant *result,
 		TopLevelContext->FuncCall(0, NULL, NULL, result, 0, NULL, context);
 #ifdef TJS_DEBUG_PROFILE_TIME
 		tjs_char str[100];
-		TJS_sprintf(str, TJS_W("%d"), clock() - start);
+		TJS_sprintf(str, TJS_WS("%d"), clock() - start);
 		ConsoleOutput(str, (void*)this);
 #endif
 	}
@@ -372,12 +368,9 @@ void tTJSScriptBlock::PopContextStack(void)
 //---------------------------------------------------------------------------
 void tTJSScriptBlock::Parse(const tjs_char *script, bool isexpr, bool resultneeded)
 {
-	TJS_F_TRACE("tTJSScriptBlock::Parse");
-
 	if(!script) return;
 
 	CompileErrorCount = 0;
-
 
 	LexicalAnalyzer = new tTJSLexicalAnalyzer(this, script, isexpr, resultneeded);
 
@@ -416,7 +409,7 @@ ttstr tTJSScriptBlock::GetNameInfo() const
 	}
 	else
 	{
-		return ttstr(Name) + TJS_W("(line +") + ttstr(LineOffset) + TJS_W(")");
+		return ttstr(Name) + TJS_WS("(line +") + ttstr(LineOffset) + TJS_WS(")");
 	}
 }
 //---------------------------------------------------------------------------
@@ -426,11 +419,12 @@ void tTJSScriptBlock::Dump() const
 		InterCodeContextList.begin();
 	while(i != InterCodeContextList.end())
 	{
-		ConsoleOutput(TJS_W(""), (void*)this);
+		ConsoleOutput(TJS_WS(""), (void*)this);
 		tjs_char ptr[256];
-		TJS_sprintf(ptr, TJS_W(" 0x%p"), (*i));
-		ConsoleOutput((ttstr(TJS_W("(")) + ttstr((*i)->GetContextTypeName()) +
-			TJS_W(") ") + ttstr((*i)->GetName()) + ptr).c_str(), (void*)this);
+		TJS_strcpy(ptr, TJS_WS(" 0x"));
+		TJS_pointer_to_str((*i), ptr + 3);
+		ConsoleOutput((ttstr(TJS_WS("(")) + ttstr((*i)->GetContextTypeName()) +
+			TJS_WS(") ") + ttstr((*i)->GetName()) + ptr).c_str(), (void*)this);
 		(*i)->Disassemble(ConsoleOutput, (void*)this);
 		i++;
 	}

@@ -12,142 +12,94 @@
 #ifndef __TJSTYPES_H__
 #define __TJSTYPES_H__
 
-
-
-#ifdef HAVE_CONFIG_H
- #include "config.h"
-
- #ifndef HAVE_STRINGIZE
- # error "preprocessor stringize required."
- #endif
-
- #if SIZEOF_INT < 4
- # error "sizeof(int) must be larger than or equal to 4."
- #endif
-#endif /* end of HAVE_CONFIG_H */
+#ifdef TJS_SUPPORT_WX
+	#include <wx/wx_defs.h>
+#endif
 
 
 
-/* Functions that needs to be exported ( for non-class-member functions ) */
-/* This should only be applyed for function declaration in headers ( not body ) */
-#define TJS_EXP_FUNC_DEF(rettype, name, arg) extern rettype name arg
+#if defined(_WX_DEFS_H_)
+/* Use wxWidgets definitions */
+	#ifndef wxUSE_UNICODE
+		#error "Currently wxWidgets must be configured with UNICODE support"
+	#endif
 
+	typedef wxInt8 tjs_int8;
+	typedef wxUint8 tjs_uint8;
+	typedef wxInt16 tjs_int16;
+	typedef wxUint16 tjs_uint16;
+	typedef wxInt32 tjs_int32;
+	typedef wxUint32 tjs_uint32;
+	typedef wxLongLong_t tjs_int64;
+	typedef wxULongLong_t tjs_uint64;
+	typedef size_t tjs_size;
+	typedef ssize_t tjs_offset;
+	typedef wxInt32 tjs_int;    /* at least 32bits */
+	typedef wxUint32 tjs_uint;    /* at least 32bits */
 
-/* Functions that needs to be exported ( for class-member functions ) */
-#define TJS_METHOD_DEF(rettype, name, arg) rettype name arg
-#define TJS_CONST_METHOD_DEF(rettype, name, arg) rettype name arg const
-#define TJS_STATIC_METHOD_DEF(rettype, name, arg) static rettype name arg
-#define TJS_STATIC_CONST_METHOD_DEF(rettype, name, arg) static rettype name arg const
-#define TJS_METHOD_RET_EMPTY
-#define TJS_METHOD_RET(type)
+	#if SIZEOF_WCHAR_T == 4
+		typedef wchar_t tjs_char; /* UTF-32 */
+	#else
+		typedef tjs_int32 tjs_char; /* whatever, UTF-32 */
+	#endif
 
+	typedef double tjs_real;
 
+	typedef int tjs_int;
+	typedef unsigned int tjs_uint;
 
-#if defined(_WIN32)  && !defined(__GNUC__)
+	#ifdef WORDS_BIGENDIAN
+		#define TJS_HOST_IS_BIG_ENDIAN 1
+		#define TJS_HOST_IS_LITTLE_ENDIAN 0
+	#else
+		#define TJS_HOST_IS_BIG_ENDIAN 0
+		#define TJS_HOST_IS_LITTLE_ENDIAN 1
+	#endif
+
+#elif defined(WIN32)
 
 /* VC++/BCC */
+	typedef __int8 tjs_int8;
+	typedef unsigned __int8 tjs_uint8;
+	typedef __int16 tjs_int16;
+	typedef unsigned __int16 tjs_uint16;
+	typedef __int32 tjs_int32;
+	typedef unsigned __int32 tjs_uint32;
+	typedef __int64 tjs_int64;
+	typedef unsigned __int64 tjs_uint64;
+	typedef size_t tjs_size;
+	typedef ptrdiff_t tjs_offset;
+	typedef int tjs_int;    /* at least 32bits */
+	typedef unsigned int tjs_uint;    /* at least 32bits */
 
-/*[*/
-typedef __int8 tjs_int8;
-typedef unsigned __int8 tjs_uint8;
-typedef __int16 tjs_int16;
-typedef unsigned __int16 tjs_uint16;
-typedef __int32 tjs_int32;
-typedef unsigned __int32 tjs_uint32;
-typedef __int64 tjs_int64;
-typedef unsigned __int64 tjs_uint64;
-typedef int tjs_int;    /* at least 32bits */
-typedef unsigned int tjs_uint;    /* at least 32bits */
+	typedef tjs_int32 tjs_char; /* whatever, UTF-32 */
+	#ifndef SIZEOF_WCHAR_T
+		#define SIZEOF_WCHAR_T 2
+	#endif
 
-#ifdef __cplusplus
-typedef wchar_t tjs_char;
-#else
-typedef unsigned short tjs_char;
-#endif
+	typedef double tjs_real;
 
-typedef char tjs_nchar;
-typedef double tjs_real;
-
-#define TJS_HOST_IS_BIG_ENDIAN 0
-#define TJS_HOST_IS_LITTLE_ENDIAN 1
-
-#ifndef TJS_INTF_METHOD
-#define TJS_INTF_METHOD __cdecl
-	/* TJS_INTF_METHOD is "cdecl" (by default)
-		since TJS2 2.4.14 (kirikir2 2.25 beta 1) */
-#endif
-
-#define TJS_USERENTRY __cdecl
-
-#define TJS_I64_VAL(x) ((tjs_int64)(x##i64))
-#define TJS_UI64_VAL(x) ((tjs_uint64)(x##i64))
-
-/*]*/
-
-#else
-
-/* gcc ? */
-
-#ifndef __GNUC__
- #error "GNU C++ required."
-#endif
-/*
-#ifndef HAVE_CONFIG_H
- #error "-DHAVE_CONFIG_H and config.h required."
-#endif
-*/
-#include <sys/types.h>
-#include <stdint.h>
-
-
-#if defined(__linux__)
-	typedef int8_t tjs_int8;
-	typedef u_int8_t tjs_uint8;
-	typedef int16_t tjs_int16;
-	typedef u_int16_t tjs_uint16;
-	typedef int32_t tjs_int32;
-	typedef u_int32_t tjs_uint32;
-	typedef int64_t tjs_int64;
-	typedef u_int64_t tjs_uint64;
-#elif defined(__GNUC__)
-	typedef int8_t tjs_int8;
-	typedef uint8_t tjs_uint8;
-	typedef int16_t tjs_int16;
-	typedef uint16_t tjs_uint16;
-	typedef int32_t tjs_int32;
-	typedef uint32_t tjs_uint32;
-	typedef int64_t tjs_int64;
-	typedef uint64_t tjs_uint64;
-#endif
-
-typedef wchar_t tjs_char;
-
-typedef char tjs_nchar;
-typedef double tjs_real;
-
-typedef int tjs_int;
-typedef unsigned int tjs_uint;
-
-#define TJS_I64_VAL(x) ((tjs_int64)(x##LL))
-#define TJS_UI64_VAL(x) ((tjs_uint64)(x##LL))
-
-#ifdef WORDS_BIGENDIAN
-	#define TJS_HOST_IS_BIG_ENDIAN 1
-	#define TJS_HOST_IS_LITTLE_ENDIAN 0
-#else
 	#define TJS_HOST_IS_BIG_ENDIAN 0
 	#define TJS_HOST_IS_LITTLE_ENDIAN 1
-#endif
 
-#define TJS_INTF_METHOD
-#define TJS_USERENTRY
 
 
 #endif /* end of defined(_WIN32) && !defined(__GNUC__) */
 
-/*[*/
-#define TJS_W(X) L##X
-#define TJS_N(X) X
+
+#if defined(__VISUALC__)||defined(__BORLAND__)
+	#define TJS_I64_VAL(x) ((tjs_int64)(x##i64))
+	#define TJS_UI64_VAL(x) ((tjs_uint64)(x##i64))
+#else
+	#define TJS_I64_VAL(x)  ((tjs_int64)(x##LL))
+	#define TJS_UI64_VAL(x) ((tjs_uint64)(x##LL))
+#endif
+
+
+
+#if SIZEOF_WCHAR_T == 2
+	#define TJS_WCHAR_T_SIZE_IS_16BIT
+#endif
 
 
 typedef tjs_int32 tjs_error;
@@ -211,6 +163,7 @@ s = sign,  negative if this is 1, otherwise positive.
   #define TJS_IEEE_D_IS_INF(x) (((TJS_IEEE_D_EXP_MASK & (x)) == TJS_IEEE_D_EXP_MASK) && \
 				(!((x) & TJS_IEEE_D_SIGNIFICAND_MASK)))
 
-/*]*/
 
 #endif
+
+

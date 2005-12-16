@@ -27,7 +27,7 @@ public:
 	tjs_int32 Parse();
 
 	tTJS * TJS;
-	tjs_int GetNext (tjs_int &value);
+	tjs_int GetNext (tjs_int32 &value);
 
 	tTJS * GetTJS() { return TJS; }
 

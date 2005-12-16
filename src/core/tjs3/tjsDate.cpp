@@ -25,6 +25,7 @@ note:
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1008);
 //---------------------------------------------------------------------------
 static time_t TJSParseDateString(const tjs_char *str)
 {
@@ -43,7 +44,7 @@ tTJSNI_Date::tTJSNI_Date()
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Date::ClassID = (tjs_uint32)-1;
 tTJSNC_Date::tTJSNC_Date() :
-	tTJSNativeClass(TJS_W("Date"))
+	tTJSNativeClass(TJS_WS("Date"))
 {
 	// class constructor
 
@@ -212,7 +213,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getDate)
 
 	tm *t = localtime(&_this->DateTime);
 
-	if(result) result->CopyRef(tTJSVariant(t->tm_mday));
+	if(result) *result = (tTVInteger)(t->tm_mday);
 
 	return TJS_S_OK;
 }
@@ -224,7 +225,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getDay)
 
 	tm *t = localtime(&_this->DateTime);
 
-	if(result) result->CopyRef(tTJSVariant(t->tm_wday));
+	if(result) *result = (tTVInteger)(t->tm_wday);
 
 	return TJS_S_OK;
 }
@@ -236,7 +237,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getHours)
 
 	tm *t = localtime(&_this->DateTime);
 
-	if(result) result->CopyRef(tTJSVariant(t->tm_hour));
+	if(result) *result = (tTVInteger)(t->tm_hour);
 
 	return TJS_S_OK;
 }
@@ -248,7 +249,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getMinutes)
 
 	tm *t = localtime(&_this->DateTime);
 
-	if(result) result->CopyRef(tTJSVariant(t->tm_min));
+	if(result) *result = (tTVInteger)(t->tm_min);
 
 	return TJS_S_OK;
 }
@@ -260,7 +261,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getMonth)
 
 	tm *t = localtime(&_this->DateTime);
 
-	if(result) result->CopyRef(tTJSVariant(t->tm_mon));
+	if(result) *result = (tTVInteger)(t->tm_mon);
 
 	return TJS_S_OK;
 }
@@ -272,7 +273,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getSeconds)
 
 	tm *t = localtime(&_this->DateTime);
 
-	if(result) result->CopyRef(tTJSVariant(t->tm_sec));
+	if(result) *result = (tTVInteger)(t->tm_sec);
 
 	return TJS_S_OK;
 }
@@ -282,8 +283,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getTime)
 {
 	TJS_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tTJSNI_Date);
 
-	if(result) result->CopyRef(tTJSVariant(
-			(tjs_int64)(_this->DateTime)*1000L));
+	if(result) *result = (tjs_int64)(_this->DateTime)*1000L;
 
 	return TJS_S_OK;
 }
@@ -291,7 +291,7 @@ TJS_END_NATIVE_METHOD_DECL(/*func. name*/getTime)
 //----------------------------------------------------------------------
 TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getTimezoneOffset) // static
 {
-	if(result) result->CopyRef(tTJSVariant((tjs_int)(TJS_timezone/60)));
+	if(result) *result = (tTVInteger)(TJS_timezone/60);
 
 	return TJS_S_OK;
 }
@@ -303,7 +303,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getYear)
 
 	tm *t = localtime(&_this->DateTime);
 
-	if(result) result->CopyRef(tTJSVariant(t->tm_year+1900));
+	if(result) *result = (tTVInteger)(t->tm_year+1900);
 
 	return TJS_S_OK;
 }

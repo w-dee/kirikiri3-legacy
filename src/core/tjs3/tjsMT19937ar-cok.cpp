@@ -53,9 +53,12 @@
 #include <stdio.h>
 
 #include "tjsMT19937ar-cok.h"
+#include "tjsConfig.h"
+#include "tjsCharUtils.h"
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1022);
 
 /* Period parameters */	 
 #define N TJS_MT_N

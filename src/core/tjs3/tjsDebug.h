@@ -11,6 +11,7 @@
 #ifndef tjsDebugH
 #define tjsDebugH
 
+#include "tjs.h"
 #include "tjsString.h"
 
 namespace TJS

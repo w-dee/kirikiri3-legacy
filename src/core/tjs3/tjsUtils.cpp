@@ -14,6 +14,8 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1031);
+
 //---------------------------------------------------------------------------
 iTJSDispatch2 * TJSObjectTraceTarget;
 //---------------------------------------------------------------------------
@@ -25,9 +27,9 @@ static void TJSTrimStringLength(tTJSString &str, tjs_int len)
 		p[len] = 0; // trim length
 		if(len >= 3)
 		{
-			p[len-1] = TJS_W('.');
-			p[len-2] = TJS_W('.');
-			p[len-3] = TJS_W('.');
+			p[len-1] = TJS_WC('.');
+			p[len-2] = TJS_WC('.');
+			p[len-3] = TJS_WC('.');
 		}
 		str.FixLen();
 	}
@@ -37,14 +39,14 @@ const tjs_char * TJSVariantTypeToTypeString(tTJSVariantType type)
 {
 	switch(type)
 	{
-	case tvtVoid: return (const tjs_char *)TJS_W("void");
-	case tvtInteger: return (const tjs_char *)TJS_W("int");
-	case tvtReal: return (const tjs_char *)TJS_W("real");
-	case tvtString: return (const tjs_char *)TJS_W("string");
-	case tvtOctet: return (const tjs_char *)TJS_W("octet");
-	case tvtObject: return (const tjs_char *)TJS_W("object");
+	case tvtVoid: return (const tjs_char *)TJS_WS("void");
+	case tvtInteger: return (const tjs_char *)TJS_WS("int");
+	case tvtReal: return (const tjs_char *)TJS_WS("real");
+	case tvtString: return (const tjs_char *)TJS_WS("string");
+	case tvtOctet: return (const tjs_char *)TJS_WS("octet");
+	case tvtObject: return (const tjs_char *)TJS_WS("object");
 	}
-	return (const tjs_char *)TJS_W("unknown");
+	return (const tjs_char *)TJS_WS("unknown");
 }
 //---------------------------------------------------------------------------
 tTJSString TJSVariantToReadableString(const tTJSVariant &val,
@@ -59,36 +61,36 @@ tTJSString TJSVariantToReadableString(const tTJSVariant &val,
 	{
 	case tvtVoid:
 	  {
-		tTJSString str(TJS_W("(void)"));
+		tTJSString str(TJS_WS("(void)"));
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtInteger:
 	  {
-		tTJSString str(TJS_W("(int)"));
+		tTJSString str(TJS_WS("(int)"));
 		str += (tTJSString)val;
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtReal:
 	  {
-		tTJSString str(TJS_W("(real)"));
+		tTJSString str(TJS_WS("(real)"));
 		str += (tTJSString)val;
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtString:
 	  {
-		tTJSString str(TJS_W("(string)\""));
+		tTJSString str(TJS_WS("(string)\""));
 		str += ttstr(val).EscapeC();
-		str += TJS_W("\"");
+		str += TJS_WS("\"");
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtOctet:
 	  {
 		// TODO: octet conversion
-		tTJSString str(TJS_W("(octet)<% "));
+		tTJSString str(TJS_WS("(octet)<% "));
 		tTJSVariantString * s = TJSOctetToListString(val.AsOctetNoAddRef());
 		try
 		{
@@ -100,13 +102,13 @@ tTJSString TJSVariantToReadableString(const tTJSVariant &val,
 			throw;
 		}
 		if(s) s->Release();
-		str += TJS_W(" %>");
+		str += TJS_WS(" %>");
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtObject:
 	  {
-		tTJSString str(TJS_W("(object)"));
+		tTJSString str(TJS_WS("(object)"));
 		try
 		{
 			str += ttstr(val);
@@ -118,7 +120,7 @@ tTJSString TJSVariantToReadableString(const tTJSVariant &val,
 		return str;
 	  }
 	}
-	return TJS_W("");
+	return TJS_WS("");
 }
 //---------------------------------------------------------------------------
 tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
@@ -132,15 +134,15 @@ tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
 	{
 	case tvtVoid:
 	  {
-	  	return TJS_W("void");
+	  	return TJS_WS("void");
 	  }
 	case tvtInteger:
 	  {
-		return TJS_W("int ") + ttstr(val);
+		return TJS_WS("int ") + ttstr(val);
 	  }
 	case tvtReal:
 	  {
-		tTJSString str(TJS_W("real "));
+		tTJSString str(TJS_WS("real "));
 		tTJSVariantString *s = TJSRealToHexString(val.AsReal());
 		try
 		{
@@ -152,18 +154,18 @@ tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
 			throw;
 		}
 		if(s) s->Release();
-		return str + TJS_W(" /" "* ") + ttstr(val) + TJS_W(" *" "/");
+		return str + TJS_WS(" /" "* ") + ttstr(val) + TJS_WS(" *" "/");
 	  }
 	case tvtString:
 	  {
-		tTJSString str(TJS_W("string \""));
+		tTJSString str(TJS_WS("string \""));
 		str += ttstr(val).EscapeC();
-		str += TJS_W("\"");
+		str += TJS_WS("\"");
 		return str;
 	  }
 	case tvtOctet:
 	  {
-		tTJSString str(TJS_W("octet <% "));
+		tTJSString str(TJS_WS("octet <% "));
 		tTJSVariantString * s = TJSOctetToListString(val.AsOctetNoAddRef());
 		try
 		{
@@ -175,15 +177,15 @@ tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
 			throw;
 		}
 		if(s) s->Release();
-		str += TJS_W(" %>");
+		str += TJS_WS(" %>");
 		return str;
 	  }
 	case tvtObject:
 	  {
-		return TJS_W("");
+		return TJS_WS("");
 	  }
 	}
-	return TJS_W("");
+	return TJS_WS("");
 }
 //---------------------------------------------------------------------------
 

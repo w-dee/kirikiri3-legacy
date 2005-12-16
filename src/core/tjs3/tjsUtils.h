@@ -108,13 +108,13 @@ extern iTJSDispatch2 * TJSObjectTraceTarget;
 	if(TJSObjectTraceTarget == (iTJSDispatch2*)this) TJSNativeDebuggerBreak()
 #define TJS_SET_REFERENCE_BREAK(x) TJSObjectTraceTarget=(x)
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(const tjs_char *, TJSVariantTypeToTypeString, (tTJSVariantType type));
+const tjs_char *TJSVariantTypeToTypeString(tTJSVariantType type);
 	// convert given variant type to type string ( "void", "int", "object" etc.)
 
-TJS_EXP_FUNC_DEF(tTJSString, TJSVariantToReadableString, (const tTJSVariant &val, tjs_int maxlen = 512));
+tTJSString TJSVariantToReadableString(const tTJSVariant &val, tjs_int maxlen = 512);
 	// convert given variant to human-readable string
 	// ( eg. "(string)\"this is a\\nstring\"" )
-TJS_EXP_FUNC_DEF(tTJSString, TJSVariantToExpressionString, (const tTJSVariant &val));
+tTJSString TJSVariantToExpressionString(const tTJSVariant &val);
 	// convert given variant to string which can be interpret as an expression.
 	// this function does not convert objects ( returns empty string )
 
@@ -166,8 +166,8 @@ public:
 //---------------------------------------------------------------------------
 // TJSAlignedAlloc : aligned memory allocater
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(void *, TJSAlignedAlloc, (tjs_uint bytes, tjs_uint align_bits));
-TJS_EXP_FUNC_DEF(void, TJSAlignedDealloc, (void *ptr));
+void *TJSAlignedAlloc(tjs_uint bytes, tjs_uint align_bits);
+void TJSAlignedDealloc(void *ptr);
 //---------------------------------------------------------------------------
 
 /*[*/
@@ -191,7 +191,7 @@ TJS_EXP_FUNC_DEF(void, TJSAlignedDealloc, (void *ptr));
 
 
 /*]*/
-TJS_EXP_FUNC_DEF(tjs_uint32, TJSGetFPClass, (tjs_real r));
+tjs_uint32 TJSGetFPClass(tjs_real r);
 //---------------------------------------------------------------------------
 }
 

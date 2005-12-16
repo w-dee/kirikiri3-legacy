@@ -39,6 +39,8 @@
 
 NS_TJS_START
 
+TJS_DEFINE_SOURCE_ID(1002);
+
 /* yylex/yyerror prototype decl */
 #define YYLEX_PROTO_DECL int yylex(YYSTYPE *yylex, void *pm);
 
@@ -215,7 +217,7 @@ program
 
 /* global definitions */
 global_list
-	:										{ sb->PushContextStack(TJS_W("global"),
+	:										{ sb->PushContextStack(TJS_WS("global"),
 												ctTopLevel); }
 	  def_list								{ sb->PopContextStack(); }
 ;
@@ -365,7 +367,7 @@ func_def
 /* a function expression definition */
 func_expr_def
 	: "function"							{ sb->PushContextStack(
-												TJS_W("(anonymous)"),
+												TJS_WS("(anonymous)"),
 											  ctExprFunction);
 											  cc->EnterBlock(); }
 	  func_decl_arg_opt
@@ -433,7 +435,7 @@ property_handler_def_list
 
 property_handler_setter
 	: "setter" "(" T_SYMBOL ")"				{ sb->PushContextStack(
-												TJS_W("(setter)"),
+												TJS_WS("(setter)"),
 												ctPropertySetter);
 											  cc->EnterBlock();
 											  cc->SetPropertyDeclArg(
@@ -444,7 +446,7 @@ property_handler_setter
 
 property_handler_getter
 	: property_getter_handler_head			{ sb->PushContextStack(
-												TJS_W("(getter)"),
+												TJS_WS("(getter)"),
 												ctPropertyGetter);
 											  cc->EnterBlock(); }
 	  block									{ cc->ExitBlock();

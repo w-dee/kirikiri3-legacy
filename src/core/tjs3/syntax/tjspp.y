@@ -20,6 +20,7 @@
 #define YYLEX_PARAM pm
 
 NS_TJS_START
+TJS_DEFINE_SOURCE_ID(1004);
 
 /* yylex/yyerror prototype decl */
 #define YYLEX_PROTO_DECL int pplex(YYSTYPE *yylex, void *pm);

@@ -17,6 +17,7 @@
 #include "tjsArray.h"
 #include "tjsDictionary.h"
 #include "tjsUtils.h"
+#include "tjsCharUtils.h"
 
 #ifndef TJS_NO_REGEXP
 #include "tjsRegExp.h"
@@ -32,6 +33,7 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1005);
 //---------------------------------------------------------------------------
 static tjs_int32 ClassID_Array;
 //---------------------------------------------------------------------------
@@ -60,7 +62,7 @@ static bool IsNumber(const tjs_char *str, tjs_int &result)
 	if(!*str) return false;
 	while(*str && TJS_iswspace(*str)) str++;
 	if(!*str) return false;
-	if(*str == TJS_W('-')) str++; // sign
+	if(*str == TJS_WC('-')) str++; // sign
 	if(!*str) return false;
 	while(*str && TJS_iswspace(*str)) str++;
 	if(!*str) return false;
@@ -237,7 +239,7 @@ public:
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSArrayClass::ClassID = (tjs_uint32)-1;
 tTJSArrayClass::tTJSArrayClass() :
-	tTJSNativeClass(TJS_W("Array"))
+	tTJSNativeClass(TJS_WS("Array"))
 {
 	// class constructor
 
@@ -278,12 +280,10 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */load)
 		tjs_uint lines = 0;
 		while(*p)
 		{
-			if(*p == TJS_W('\r') || *p == TJS_W('\n'))
+			if(*p == TJS_WC('\r') || *p == TJS_WC('\n'))
 			{
-				tjs_uint l = p - sp;
-
 				p++;
-				if(p[-1] == TJS_W('\r') && p[0] == TJS_W('\n')) p++;
+				if(p[-1] == TJS_WC('\r') && p[0] == TJS_WC('\n')) p++;
 
 				lines++;
 
@@ -312,12 +312,12 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */load)
 		{
 			while(*p)
 			{
-				if(*p == TJS_W('\r') || *p == TJS_W('\n'))
+				if(*p == TJS_WC('\r') || *p == TJS_WC('\n'))
 				{
 					tjs_uint l = p - sp;
 
 					p++;
-					if(p[-1] == TJS_W('\r') && p[0] == TJS_W('\n')) p++;
+					if(p[-1] == TJS_WC('\r') && p[0] == TJS_WC('\n')) p++;
 
 					vs = TJSAllocVariantString(sp, l);
 					ni->Items[lines++] = vs;
@@ -375,9 +375,9 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */save)
 	{
 		tTJSArrayNI::tArrayItemIterator i = ni->Items.begin();
 #ifdef TJS_TEXT_OUT_CRLF
-		const static ttstr cr(TJS_W("\r\n"));
+		const static ttstr cr(TJS_WS("\r\n"));
 #else
-		const static ttstr cr(TJS_W("\n"));
+		const static ttstr cr(TJS_WS("\n"));
 #endif
 
 		while( i != ni->Items.end())
@@ -422,7 +422,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */saveStruct)
 		std::vector<iTJSDispatch2 *> stack;
 		stack.push_back(objthis);
 		tTJSStringAppender string;
-		ni->SaveStructuredData(stack, string, TJS_W(""));
+		ni->SaveStructuredData(stack, string, TJS_WS(""));
 		stream->Write(ttstr(string.GetData(), string.GetLen()));
 	}
 	catch(...)
@@ -568,7 +568,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 
 	TJS_GET_NATIVE_INSTANCE(/* var. name */ni, /* var. type */tTJSArrayNI);
 
-	tjs_nchar method = TJS_N('+');
+	char method = '+';
 	bool do_stable_sort = false;
 	tTJSVariantClosure closure;
 
@@ -585,19 +585,19 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 		{
 			// sort order letter
 			ttstr me = *param[0];
-			method = (tjs_nchar)(me.c_str()[0]);
+			method = (tjs_char)(me.c_str()[0]);
 
 			switch(method)
 			{
-			case TJS_N('+'):
-			case TJS_N('-'):
-			case TJS_N('0'):
-			case TJS_N('9'):
-			case TJS_N('a'):
-			case TJS_N('z'):
+			case '+':
+			case '-':
+			case '0':
+			case '9':
+			case 'a':
+			case 'z':
 				break;
 			default:
-				method = TJS_N('+');
+				method = '+';
 				break;
 			}
 		}
@@ -613,7 +613,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 	// sort
 	switch(method)
 	{
-	case TJS_N('+'):
+	case '+':
 		if(do_stable_sort)
 			std::stable_sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_NormalAscending());
@@ -621,7 +621,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 			std::sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_NormalAscending());
 		break;
-	case TJS_N('-'):
+	case '-':
 		if(do_stable_sort)
 			std::stable_sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_NormalDescending());
@@ -629,7 +629,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 			std::sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_NormalDescending());
 		break;
-	case TJS_N('0'):
+	case '0':
 		if(do_stable_sort)
 			std::stable_sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_NumericAscending());
@@ -637,7 +637,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 			std::sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_NumericAscending());
 		break;
-	case TJS_N('9'):
+	case '9':
 		if(do_stable_sort)
 			std::stable_sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_NumericDescending());
@@ -645,7 +645,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 			std::sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_NumericDescending());
 		break;
-	case TJS_N('a'):
+	case 'a':
 		if(do_stable_sort)
 			std::stable_sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_StringAscending());
@@ -653,7 +653,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 			std::sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_StringAscending());
 		break;
-	case TJS_N('z'):
+	case 'z':
 		if(do_stable_sort)
 			std::stable_sort(ni->Items.begin(), ni->Items.end(),
 				tTJSArraySortCompare_StringDescending());
@@ -767,9 +767,9 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */remove)
 
 	tTJSVariant & val = *param[0];
 
-	tjs_int count = ((tTJSArrayObject*)objthis)->Remove(ni, val, eraseall);
+	tjs_size count = ((tTJSArrayObject*)objthis)->Remove(ni, val, eraseall);
 
-	if(result) *result = count;
+	if(result) *result = (tTVInteger)count;
 
 	return TJS_S_OK;
 }
@@ -801,7 +801,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */add)
 
 	((tTJSArrayObject*)objthis)->Add(ni, *param[0]);
 
-	if(result) *result = (signed)ni->Items.size() -1;
+	if(result) *result = (tTVInteger)(ni->Items.size() -1);
 
 	return TJS_S_OK;
 }
@@ -818,11 +818,11 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */find)
 	if(result)
 	{
 		tTJSVariant & val = *param[0];
-		tjs_int start = 0;
+		tjs_offset start = 0;
 		if(numparams >= 2) start = *param[1];
 		if(start < 0) start += ni->Items.size();
 		if(start < 0) start = 0;
-		if(start >= (tjs_int)ni->Items.size()) { *result = -1; return TJS_S_OK; }
+		if((tjs_size)start >= ni->Items.size()) { *result = (tTVInteger)-1; return TJS_S_OK; }
 
 		tTJSArrayNI::tArrayItemIterator i;
 		for(i = ni->Items.begin() + start; i != ni->Items.end(); i++)
@@ -830,9 +830,9 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */find)
 			if(val.DiscernCompare(*i)) break;
 		}
 		if(i == ni->Items.end())
-			*result = -1;
+			*result = (tTVInteger)(-1);
 		else
-			*result = i - ni->Items.begin();
+			*result = (tTVInteger)(i - ni->Items.begin());
 	}
 
 	return TJS_S_OK;
@@ -893,7 +893,7 @@ tTJSArrayNI::tTJSArrayNI()
 	// constructor
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSArrayNI::Construct(tjs_int numparams, tTJSVariant **params,
+tjs_error tTJSArrayNI::Construct(tjs_int numparams, tTJSVariant **params,
 	iTJSDispatch2 * tjsobj)
 {
 	// called by TJS constructor
@@ -922,12 +922,13 @@ void tTJSArrayNI::Assign(iTJSDispatch2 * dsp)
 		tDictionaryEnumCallback callback;
 		callback.Items = &Items;
 
-		dsp->EnumMembers(TJS_IGNOREPROP, &tTJSVariantClosure(&callback, NULL), dsp);
+		tTJSVariantClosure clo(&callback, NULL);
+		dsp->EnumMembers(TJS_IGNOREPROP, &clo, dsp);
 
 	}
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSArrayNI::tDictionaryEnumCallback::FuncCall(
+tjs_error tTJSArrayNI::tDictionaryEnumCallback::FuncCall(
 	tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -940,7 +941,7 @@ tjs_error TJS_INTF_METHOD tTJSArrayNI::tDictionaryEnumCallback::FuncCall(
 	tjs_uint32 flags = (tjs_int)*param[1];
 	if(flags & TJS_HIDDENMEMBER)
 	{
-		if(result) *result = (tjs_int)1;
+		if(result) *result = (tTVInteger)1;
 		return TJS_S_OK;
 	}
 
@@ -949,7 +950,7 @@ tjs_error TJS_INTF_METHOD tTJSArrayNI::tDictionaryEnumCallback::FuncCall(
 	Items->push_back(*param[0]);
 	Items->push_back(*param[2]);
 
-	if(result) *result = (tjs_int)1;
+	if(result) *result = (tTVInteger)1;
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
@@ -957,12 +958,12 @@ void tTJSArrayNI::SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
 	tTJSStringAppender & string, const ttstr &indentstr)
 {
 #ifdef TJS_TEXT_OUT_CRLF
-	string += TJS_W("[\r\n");
+	string += TJS_WS("[\r\n");
 #else
-	string += TJS_W("[\n");
+	string += TJS_WS("[\n");
 #endif
 
-	ttstr indentstr2 = indentstr + TJS_W(" ");
+	ttstr indentstr2 = indentstr + TJS_WS(" ");
 
 	tArrayItemIterator i;
 	tjs_uint c = 0;
@@ -983,21 +984,21 @@ void tTJSArrayNI::SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
 		}
 #ifdef TJS_TEXT_OUT_CRLF
 		if(c != Items.size() -1) // unless last
-			string += TJS_W(",\r\n");
+			string += TJS_WS(",\r\n");
 		else
-			string += TJS_W("\r\n");
+			string += TJS_WS("\r\n");
 #else
 		if(c != Items.size() -1) // unless last
-			string += TJS_W(",\n");
+			string += TJS_WS(",\n");
 		else
-			string += TJS_W("\n");
+			string += TJS_WS("\n");
 #endif
 
 		c++;
 	}
 
 	string += indentstr;
-	string += TJS_W("]");
+	string += TJS_WS("]");
 }
 //---------------------------------------------------------------------------
 void tTJSArrayNI::SaveStructuredDataForObject(iTJSDispatch2 *dsp,
@@ -1011,7 +1012,7 @@ void tTJSArrayNI::SaveStructuredDataForObject(iTJSDispatch2 *dsp,
 		if(*i == dsp)
 		{
 			// object recursion detected
-			string += TJS_W("null /* object recursion detected */");
+			string += TJS_WS("null /* object recursion detected */");
 			return;
 		}
 	}
@@ -1038,15 +1039,15 @@ void tTJSArrayNI::SaveStructuredDataForObject(iTJSDispatch2 *dsp,
 	else if(dsp != NULL)
 	{
 		// other objects
-		string += TJS_W("null /* (object) \""); // stored as a null
+		string += TJS_WS("null /* (object) \""); // stored as a null
 		tTJSVariant val(dsp,dsp);
 		string += ttstr(val).EscapeC();
-		string += TJS_W("\" */");
+		string += TJS_WS("\" */");
 	}
 	else
 	{
 		// null
-		string += TJS_W("null");
+		string += TJS_WS("null");
 	}
 }
 //---------------------------------------------------------------------------
@@ -1347,7 +1348,7 @@ void tTJSArrayObject::Insert(tTJSArrayNI *ni, const tTJSVariant &val, tjs_int nu
 	CheckObjectClosureAdd(val);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::FuncCall(tjs_uint32 flag, const tjs_char * membername,
 	tjs_uint32 *hint,
 		tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
@@ -1360,7 +1361,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::FuncCall(flag, membername, hint, result, numparams, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::FuncCallByNum(tjs_uint32 flag, tjs_int num, tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 {
@@ -1372,7 +1373,7 @@ tjs_error TJS_INTF_METHOD
 	return TJSDefaultFuncCall(flag, val, result, numparams, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::PropGet(tjs_uint32 flag, const tjs_char * membername,
 	tjs_uint32*hint, tTJSVariant *result, iTJSDispatch2 *objthis)
 {
@@ -1382,7 +1383,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::PropGet(flag, membername, hint, result, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::PropGetByNum(tjs_uint32 flag, tjs_int num,
 		tTJSVariant *result, iTJSDispatch2 *objthis)
 {
@@ -1394,7 +1395,7 @@ tjs_error TJS_INTF_METHOD
 	return TJSDefaultPropGet(flag, val, result, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::PropSet(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint,
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
@@ -1405,7 +1406,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::PropSet(flag, membername, hint, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::PropSetByNum(tjs_uint32 flag, tjs_int num,
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
@@ -1436,7 +1437,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
@@ -1446,7 +1447,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::PropSetByVS(flag, membername, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::DeleteMember(tjs_uint32 flag, const tjs_char *membername,
 	tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
@@ -1457,7 +1458,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::DeleteMember(flag, membername, hint, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::DeleteMemberByNum(tjs_uint32 flag, tjs_int num,
 	iTJSDispatch2 *objthis)
 {
@@ -1473,7 +1474,7 @@ tjs_error TJS_INTF_METHOD
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::Invalidate(tjs_uint32 flag, const tjs_char *membername,
 	tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
@@ -1484,7 +1485,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::Invalidate(flag, membername, hint, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::InvalidateByNum(tjs_uint32 flag, tjs_int num,
 		iTJSDispatch2 *objthis)
 {
@@ -1496,7 +1497,7 @@ tjs_error TJS_INTF_METHOD
 	return TJSDefaultInvalidate(flag, val, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::IsValid(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint,
 		iTJSDispatch2 *objthis)
@@ -1507,7 +1508,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::IsValid(flag, membername, hint, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::IsValidByNum(tjs_uint32 flag, tjs_int num,
 		iTJSDispatch2 *objthis)
 {
@@ -1519,7 +1520,7 @@ tjs_error TJS_INTF_METHOD
 	return TJSDefaultIsValid(flag, val, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::CreateNew(tjs_uint32 flag, const tjs_char * membername,
 		tjs_uint32 *hint,
 		iTJSDispatch2 **result, tjs_int numparams, tTJSVariant **param,
@@ -1531,7 +1532,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::CreateNew(flag, membername, hint, result, numparams, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::CreateNewByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 **result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 {
@@ -1543,7 +1544,7 @@ tjs_error TJS_INTF_METHOD
 	return TJSDefaultCreateNew(flag, val, result, numparams, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::IsInstanceOf(tjs_uint32 flag,const  tjs_char *membername,
 		tjs_uint32 *hint,
 		const tjs_char *classname, iTJSDispatch2 *objthis)
@@ -1554,7 +1555,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::IsInstanceOf(flag, membername, hint, classname, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::IsInstanceOfByNum(tjs_uint32 flag, tjs_int num,
 		const tjs_char *classname, iTJSDispatch2 *objthis)
 {
@@ -1566,7 +1567,7 @@ tjs_error TJS_INTF_METHOD
 	return TJSDefaultIsInstanceOf(flag, val, classname, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSArrayObject::Operation(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint,
 		tTJSVariant *result, const tTJSVariant *param, iTJSDispatch2 *objthis)
@@ -1577,7 +1578,7 @@ tjs_error TJS_INTF_METHOD
 	return inherited::Operation(flag, membername, hint, result, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD 
+tjs_error
 	tTJSArrayObject::OperationByNum(tjs_uint32 flag, tjs_int num,
 		tTJSVariant *result, const tTJSVariant *param, iTJSDispatch2 *objthis)
 {

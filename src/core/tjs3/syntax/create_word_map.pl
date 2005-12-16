@@ -67,10 +67,10 @@ sub gen
 				}
 				else
 				{
-					$caselist .= "${padding}case TJS_W('$fc'):\n";
+					$caselist .= "${padding}case TJS_WC('$fc'):\n";
 					if($fc =~ /[a-z]/)
 					{
-						$caselist .= "${padding}case TJS_W('".uc $fc."'):\n";
+						$caselist .= "${padding}case TJS_WC('".uc $fc."'):\n";
 					}
 					$caselist .= &gen($level + 1, \%newlist);
 					$caselist .= "${padding} break;\n";
@@ -95,10 +95,10 @@ sub gen
 		}
 		else
 		{
-			$caselist .= "${padding}case TJS_W('$fc'):\n";
+			$caselist .= "${padding}case TJS_WC('$fc'):\n";
 			if($fc =~ /[a-z]/)
 			{
-				$caselist .= "${padding}case TJS_W('".uc $fc."'):\n";
+				$caselist .= "${padding}case TJS_WC('".uc $fc."'):\n";
 			}
 			$caselist .= &gen($level + 1, \%newlist);
 			$caselist .= "${padding} break;\n";

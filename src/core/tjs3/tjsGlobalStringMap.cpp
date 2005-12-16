@@ -27,7 +27,7 @@
 
 namespace TJS
 {
-
+TJS_DEFINE_SOURCE_ID(1015);
 //---------------------------------------------------------------------------
 // tTJSGlobalStringMap - hash map to keep constant strings shared
 //---------------------------------------------------------------------------

@@ -19,6 +19,8 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1032);
+
 //---------------------------------------------------------------------------
 // tTJSVariantOctet related
 //---------------------------------------------------------------------------
@@ -112,7 +114,9 @@ tTJSVariantString * TJSOctetToListString(const tTJSVariantOctet *oct)
 	tTJSVariantString * str = TJSAllocVariantStringBuffer(stringlen);
 
 	tjs_char *buf = const_cast<tjs_char*>(str->operator const tjs_char*());
-	static const tjs_char hex[] = TJS_W("0123456789ABCDEF");
+	static const tjs_char hex[] = { 
+		L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'A',
+		L'B', L'C', L'D', L'E', L'F' };
 	const tjs_uint8 *data = oct->GetData();
 	tjs_uint n = oct->GetLength();
 	while(n--)
@@ -120,7 +124,7 @@ tTJSVariantString * TJSOctetToListString(const tTJSVariantOctet *oct)
 		buf[0] = hex[*data >> 4];
 		buf[1] = hex[*data & 0x0f];
 		if(n != 0)
-			buf[2] = TJS_W(' ');
+			buf[2] = TJS_WC(' ');
 		buf+=3;
 		data++;
 	}
@@ -143,20 +147,15 @@ void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantType to)
 {
 	if(to == tvtObject)
 	{
-		ttstr msg(TJSVariantConvertErrorToObject);
-
-		msg.Replace(TJS_W("%1"), TJSVariantToReadableString(from));
-
+		ttstr msg(TJS_WS_TR("can not convert %1 to object"),
+			TJSVariantToReadableString(from));
 		TJS_eTJSVariantError(msg);
 	}
 	else
 	{
-		ttstr msg(TJSVariantConvertError);
-
-		msg.Replace(TJS_W("%1"), TJSVariantToReadableString(from));
-
-		msg.Replace(TJS_W("%2"), TJSVariantTypeToTypeString(to));
-
+		ttstr msg(TJS_WS_TR("can not convert %1 to type %2"),
+			TJSVariantToReadableString(from),
+			TJSVariantTypeToTypeString(to));
 		TJS_eTJSVariantError(msg);
 	}
 }
@@ -164,13 +163,10 @@ void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantType to)
 void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantType to1,
 	tTJSVariantType to2)
 {
-	ttstr msg(TJSVariantConvertError);
-
-	msg.Replace(TJS_W("%1"), TJSVariantToReadableString(from));
-
-	msg.Replace(TJS_W("%2"), TJSVariantTypeToTypeString(to1) + ttstr(TJS_W("/")) +
-		TJSVariantTypeToTypeString(to2));
-
+	ttstr msg(TJS_WS_TR("can not convert %1 to type %2 or %3"),
+			TJSVariantToReadableString(from),
+			TJSVariantTypeToTypeString(to1),
+			TJSVariantTypeToTypeString(to2));
 	TJS_eTJSVariantError(msg);
 }
 //---------------------------------------------------------------------------
@@ -192,25 +188,35 @@ tTJSVariantString * TJSObjectToString(const tTJSVariantClosure &dsp)
 	if(TJSObjectTypeInfoEnabled())
 	{
 		// retrieve object type information from debugging facility
-		tjs_char tmp[256];
-		TJS_sprintf(tmp, TJS_W("(object 0x%p"), dsp.Object);
-		ttstr ret = tmp;
-		ttstr type = TJSGetObjectTypeInfo(dsp.Object);
-		if(!type.IsEmpty()) ret += TJS_W("[") + type + TJS_W("]");
-		TJS_sprintf(tmp, TJS_W(":0x%p"), dsp.ObjThis);
-		ret += tmp;
-		type = TJSGetObjectTypeInfo(dsp.ObjThis);
-		if(!type.IsEmpty()) ret += TJS_W("[") + type + TJS_W("]");
-		ret += TJS_W(")");
+		tjs_char tmp1[30];
+		tjs_char tmp2[30];
+		TJS_pointer_to_str(dsp.Object,  tmp1);
+		TJS_pointer_to_str(dsp.ObjThis, tmp2);
+		ttstr type1 = TJSGetObjectTypeInfo(dsp.Object);
+		ttstr type2 = TJSGetObjectTypeInfo(dsp.ObjThis);
+		if(!type1.IsEmpty()) type1 = TJS_WS("[") + type1 + TJS_WS("]");
+		if(!type2.IsEmpty()) type2 = TJS_WS("[") + type2 + TJS_WS("]");
+
+		ttstr ret(ttstr(TJS_WS("(Object 0x%1%2:0x%3%4)")),
+			ttstr(tmp1), type1, ttstr(tmp2), type2);
+
 		tTJSVariantString * str = ret.AsVariantStringNoAddRef();
 		str->AddRef();
 		return str;
 	}
 	else
 	{
-		tjs_char tmp[256];
-		TJS_sprintf(tmp, TJS_W("(object 0x%p:0x%p)"), dsp.Object, dsp.ObjThis);
-		return TJSAllocVariantString(tmp);
+		tjs_char tmp1[30];
+		tjs_char tmp2[30];
+		TJS_pointer_to_str(dsp.Object,  tmp1);
+		TJS_pointer_to_str(dsp.ObjThis, tmp2);
+
+		ttstr ret(ttstr(TJS_WS("(Object 0x%1:0x%2)")),
+			ttstr(tmp1), ttstr(tmp2));
+
+		tTJSVariantString * str = ret.AsVariantStringNoAddRef();
+		str->AddRef();
+		return str;
 	}
 }
 //---------------------------------------------------------------------------
@@ -226,21 +232,21 @@ static  tTJSVariantString * TJSSpecialRealToString(tjs_real r)
 
 	if(TJS_FC_IS_NAN(cls))
 	{
-		return TJSAllocVariantString(TJS_W("NaN"));
+		return TJSAllocVariantString(TJS_WS("NaN"));
 	}
 	if(TJS_FC_IS_INF(cls))
 	{
 		if(TJS_FC_IS_NEGATIVE(cls))
-			return TJSAllocVariantString(TJS_W("-Infinity"));
+			return TJSAllocVariantString(TJS_WS("-Infinity"));
 		else
-			return TJSAllocVariantString(TJS_W("+Infinity"));
+			return TJSAllocVariantString(TJS_WS("+Infinity"));
 	}
 	if(r == 0.0)
 	{
 		if(TJS_FC_IS_NEGATIVE(cls))
-			return TJSAllocVariantString(TJS_W("-0.0"));
+			return TJSAllocVariantString(TJS_WS("-0.0"));
 		else
-			return TJSAllocVariantString(TJS_W("+0.0"));
+			return TJSAllocVariantString(TJS_WS("+0.0"));
 	}
 	return NULL;
 }
@@ -251,8 +257,12 @@ tTJSVariantString * TJSRealToString(tjs_real r)
 	if(v) return v;
 
 	TJSSetFPUE();
-	tjs_char tmp[128];
-	TJS_sprintf(tmp, TJS_W("%.15lg"), r);
+
+	// ここでは一度 ナロー文字列として数値を書き出してから
+	// tjs_char 文字列に変換する方法を採る
+	tjs_char tmp[25];
+	TJS_tTVReal_to_str(r, tmp);
+
 	return TJSAllocVariantString(tmp);
 }
 //---------------------------------------------------------------------------
@@ -269,16 +279,16 @@ tTJSVariantString * TJSRealToHexString(tjs_real r)
 
 	if(TJS_IEEE_D_GET_SIGN(*ui64))
 	{
-		TJS_strcpy(tmp, TJS_W("-0x1."));
+		TJS_strcpy(tmp, TJS_WS("-0x1."));
 		p = tmp + 5;
 	}
 	else
 	{
-		TJS_strcpy(tmp, TJS_W("0x1."));
+		TJS_strcpy(tmp, TJS_WS("0x1."));
 		p = tmp + 4;
 	}
 
-	static tjs_char hexdigits[] = TJS_W("0123456789ABCDEF");
+	const tjs_char * hexdigits = TJS_WS("0123456789ABCDEF");
 
 	tjs_int exp = TJS_IEEE_D_GET_EXP(*ui64);
 
@@ -291,8 +301,8 @@ tTJSVariantString * TJSRealToHexString(tjs_real r)
 		*(p++) = hexdigits[(tjs_int)(*ui64 >> bits) & 0x0f];
 	}
 
-	*(p++) = TJS_W('p');
-	TJS_sprintf(p, TJS_W("%d"), exp);
+	*(p++) = TJS_WC('p');
+	TJS_int_to_str(exp, p);
 
 	return TJSAllocVariantString(tmp);
 }
@@ -393,6 +403,8 @@ void tTJSVariant::Clear()
 		break;
 	case tvtOctet:
 		if(Octet) Octet->Release();
+		break;
+	default:
 		break;
 	}
 }
@@ -603,33 +615,6 @@ tTJSVariant & tTJSVariant::operator =(const tjs_char *ref) //  from String
 }
 
 //---------------------------------------------------------------------------
-tTJSVariant & tTJSVariant::operator =(const tjs_nchar *ref) // from narrow string
-{
-	ReleaseContent();
-	vt=tvtString;
-	String = TJSAllocVariantString(ref);
-	return *this;
-}
-
-//---------------------------------------------------------------------------
-tTJSVariant & tTJSVariant::operator =(bool ref)
-{
-	ReleaseContent();
-	vt=tvtInteger;
-	Integer=(tjs_int64)(tjs_int)ref;
-	return *this;
-}
-
-//---------------------------------------------------------------------------
-tTJSVariant & tTJSVariant::operator =(tjs_int32 ref)
-{
-	ReleaseContent();
-	vt=tvtInteger;
-	Integer=(tTVInteger)ref;
-	return *this;
-}
-
-//---------------------------------------------------------------------------
 tTJSVariant & tTJSVariant::operator =(const tTVInteger ref) // from Integer64
 {
 	ReleaseContent();
@@ -834,8 +819,9 @@ bool tTJSVariant::GreaterThan(const tTJSVariant &val2) const
 	s2 = val2.AsString();
 	const tjs_char *p1 = *s1;
 	const tjs_char *p2 = *s2;
-	if(!p1) p1=TJS_W("");
-	if(!p2) p2=TJS_W("");
+	static tjs_char empty[] = { 0 };
+	if(!p1) p1=empty;
+	if(!p2) p2=empty;
 	bool res = TJS_strcmp(p1, p2)<0;
 	if(s1) s1->Release();
 	if(s2) s2->Release();
@@ -860,8 +846,9 @@ bool tTJSVariant::LittlerThan(const tTJSVariant &val2) const
 	s2 = val2.AsString();
 	const tjs_char *p1 = *s1;
 	const tjs_char *p2 = *s2;
-	if(!p1) p1=TJS_W("");
-	if(!p2) p2=TJS_W("");
+	static tjs_char empty[] = { 0 };
+	if(!p1) p1=empty;
+	if(!p2) p2=empty;
 	bool res = TJS_strcmp(p1, p2)>0;
 	if(s1) s1->Release();
 	if(s2) s2->Release();
@@ -1043,7 +1030,7 @@ void tTJSVariant::tonumber()
 		return;
 	}
 
-	if(vt==tvtVoid) { *this = 0; return; }
+	if(vt==tvtVoid) { *this = (tTVInteger)0; return; }
 
 	TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
 }

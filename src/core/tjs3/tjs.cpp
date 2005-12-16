@@ -32,6 +32,9 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1001);
+
+
 #ifndef TJS_NO_REGEXP
 extern iTJSDispatch2 * TJSCreateRegExpClass();
 	// to avoid to include large regexp library header
@@ -44,10 +47,6 @@ const tjs_int TJSVersionMinor   = 0;
 const tjs_int TJSVersionRelease = 0;
 const tjs_int TJSVersionHex =
 	TJSVersionMajor * 0x1000000 + TJSVersionMinor * 0x10000 + TJSVersionRelease;
-
-tjs_char TJSCompiledDate[] = TJS_W("" __DATE__ " " __TIME__);
-	// first empty literal string is to avoid a compile error with bcc which can not
-	// process directly L __DATE__ as a pre-processer wide literal string.
 //---------------------------------------------------------------------------
 
 
@@ -128,13 +127,13 @@ tTJS::tTJS()
 
 		// push version value to pp value
 		PPValues = new tTJSPPMap();
-		PPValues->Values.Add(ttstr(TJS_W("version")), TJSVersionHex);
+		PPValues->Values.Add(ttstr(TJS_WS("version")), TJSVersionHex);
 
 		// create the GLOBAL object
 		Global = new tTJSCustomObject(TJS_GLOBAL_HASH_BITS);
 
 		if(TJSObjectHashMapEnabled())
-			TJSObjectHashSetType(Global, TJS_W("the global object"));
+			TJSObjectHashSetType(Global, ttstr(TJS_WS("the global object")));
 
 		// register some default classes to the GLOBAL
 		iTJSDispatch2 *dsp;
@@ -144,19 +143,19 @@ tTJS::tTJS()
 		dsp = new tTJSArrayClass(); //TJSCreateArrayClass();
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("Array"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_WS("Array"), NULL, &val, Global);
 
 		// Dictionary
 		dsp = new tTJSDictionaryClass();
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("Dictionary"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_WS("Dictionary"), NULL, &val, Global);
 
 		// Date
 		dsp = new tTJSNC_Date();
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("Date"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_WS("Date"), NULL, &val, Global);
 
 		// Math
 		{
@@ -165,26 +164,26 @@ tTJS::tTJS()
 			dsp = math = new tTJSNC_Math();
 			val = tTJSVariant(dsp, NULL);
 			dsp->Release();
-			Global->PropSet(TJS_MEMBERENSURE, TJS_W("Math"), NULL, &val, Global);
+			Global->PropSet(TJS_MEMBERENSURE, TJS_WS("Math"), NULL, &val, Global);
 
 			// Math.RandomGenerator
 			dsp = new tTJSNC_RandomGenerator();
 			val = tTJSVariant(dsp, NULL);
 			dsp->Release();
-			math->PropSet(TJS_MEMBERENSURE, TJS_W("RandomGenerator"), NULL, &val, math);
+			math->PropSet(TJS_MEMBERENSURE, TJS_WS("RandomGenerator"), NULL, &val, math);
 		}
 
 		// Exception
 		dsp = new tTJSNC_Exception();
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("Exception"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_WS("Exception"), NULL, &val, Global);
 #ifndef TJS_NO_REGEXP
 		// RegExp
 		dsp = TJSCreateRegExpClass(); // the body is implemented in tjsRegExp.cpp
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("RegExp"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_WS("RegExp"), NULL, &val, Global);
 #endif
 	}
 	catch(...)
@@ -313,7 +312,7 @@ void tTJS::OutputToConsoleWithCentering(const tjs_char *msg, tjs_uint width) con
 	{
 		tjs_char *outbuf = new tjs_char[ns + len +1];
 		tjs_char *p = outbuf;
-		while(ns--) *(p++)= TJS_W(' ');
+		while(ns--) *(p++)= TJS_WC(' ');
 		TJS_strcpy(p, msg);
 		try
 		{
@@ -355,10 +354,11 @@ void tTJS::OutputToConsoleSeparator(const tjs_char *text, tjs_uint count) const
 //---------------------------------------------------------------------------
 void tTJS::Dump(tjs_uint width) const
 {
+#if 0
 	// dumps all existing script block
 	tjs_char version[100];
-	TJS_sprintf(version, TJS_W("TJS version %d.%d.%d (%s)"), TJSVersionMajor,
-		TJSVersionMinor, TJSVersionRelease, TJSCompiledDate);
+	TJS_sprintf(version, TJS_WS("TJS version %d.%d.%d"), TJSVersionMajor,
+		TJSVersionMinor, TJSVersionRelease);
 
 	OutputToConsoleSeparator(TJS_W("#"), width);
 	OutputToConsoleWithCentering(TJS_W("TJS Context Dump"), width);
@@ -457,13 +457,13 @@ void tTJS::Dump(tjs_uint width) const
 		OutputToConsole(TJS_W(""));
 		OutputToConsole(TJS_W("There are no script blocks in the system."));
 	}
+#endif
 }
 //---------------------------------------------------------------------------
 void tTJS::ExecScript(const tjs_char *script, tTJSVariant *result,
 	iTJSDispatch2 *context,
 	const tjs_char *name, tjs_int lineofs)
 {
-	TJS_F_TRACE("tTJS::ExecScript");
 	TJSSetFPUE();
 	if(Cache) Cache->ExecScript(script, result, context, name, lineofs);
 }
@@ -542,12 +542,12 @@ iTJSTextWriteStream * (*TJSCreateTextStreamForWrite)(const tTJSString &name,
 // tTJSBinaryStream
 //---------------------------------------------------------------------------
 
-void TJS_INTF_METHOD tTJSBinaryStream::SetEndOfStorage()
+void tTJSBinaryStream::SetEndOfStorage()
 {
 	TJS_eTJSError(TJSWriteError);
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTJSBinaryStream::GetSize()
+tjs_uint64 tTJSBinaryStream::GetSize()
 {
 	tjs_uint64 orgpos = GetPosition();
 	tjs_uint64 size = Seek(0, TJS_BS_SEEK_END);

@@ -43,12 +43,13 @@ int _USERENTRY _matherrl(struct _exception *e)
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1020);
 //---------------------------------------------------------------------------
 // tTJSNC_Math : TJS Native Class : Math
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Math::ClassID = (tjs_uint32)-1;
 tTJSNC_Math::tTJSNC_Math() :
-	tTJSNativeClass(TJS_W("Math"))
+	tTJSNativeClass(TJS_WS("Math"))
 {
 	// constructor
 	time_t time_num;

@@ -20,6 +20,7 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1025);
 
 //---------------------------------------------------------------------------
 // utility functions
@@ -107,7 +108,7 @@ tTJSDispatch::~tTJSDispatch()
 	}
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD  tTJSDispatch::AddRef(void)
+tjs_uint tTJSDispatch::AddRef(void)
 {
 #ifdef TVP_IN_PLUGIN_STUB // TVP plug-in support
 	TVPPluginGlobalRefCount++;
@@ -115,7 +116,7 @@ tjs_uint TJS_INTF_METHOD  tTJSDispatch::AddRef(void)
 	return ++RefCount;
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD  tTJSDispatch::Release(void)
+tjs_uint tTJSDispatch::Release(void)
 {
 #ifdef TVP_IN_PLUGIN_STUB // TVP plug-in support
 	TVPPluginGlobalRefCount--;
@@ -138,7 +139,7 @@ tjs_uint TJS_INTF_METHOD  tTJSDispatch::Release(void)
 	return --RefCount;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::FuncCallByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -153,7 +154,7 @@ tjs_error TJS_INTF_METHOD
 	return FuncCall(flag, buf, NULL, result, numparams, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::PropGetByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -166,7 +167,7 @@ tjs_error TJS_INTF_METHOD
 	return PropGet(flag, buf, NULL, result, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::PropSetByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -179,7 +180,7 @@ tjs_error TJS_INTF_METHOD
 	return PropSet(flag, buf, NULL, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::GetCountByNum(
 		tjs_int *result,
 		tjs_int num,
@@ -191,7 +192,7 @@ tjs_error TJS_INTF_METHOD
 	return GetCount(result, buf, NULL, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::DeleteMemberByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -203,7 +204,7 @@ tjs_error TJS_INTF_METHOD
 	return DeleteMember(flag, buf, NULL, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::InvalidateByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -215,7 +216,7 @@ tjs_error TJS_INTF_METHOD
 	return Invalidate(flag, buf, NULL, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::IsValidByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -227,7 +228,7 @@ tjs_error TJS_INTF_METHOD
 	return IsValid(flag, buf, NULL, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::CreateNewByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -242,7 +243,7 @@ tjs_error TJS_INTF_METHOD
 	return CreateNew(flag, buf, NULL, result, numparams, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::IsInstanceOfByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -255,7 +256,7 @@ tjs_error TJS_INTF_METHOD
 	return IsInstanceOf(flag, buf, NULL, classname, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::OperationByNum(
 		tjs_uint32 flag,
 		tjs_int num,
@@ -269,7 +270,7 @@ tjs_error TJS_INTF_METHOD
 	return Operation(flag, buf, NULL, result, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDispatch::Operation(
 		tjs_uint32 flag,
 		const tjs_char *membername,
@@ -321,7 +322,7 @@ public:
 	{
 	};
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	 tTJSVariant *result,
 		iTJSDispatch2 *objthis)
@@ -332,7 +333,7 @@ public:
 	}
 
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	 const tTJSVariant *param,
 		iTJSDispatch2 *objthis)
@@ -342,7 +343,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
 	{
@@ -405,8 +406,8 @@ tTJSCustomObject::tTJSCustomObject(tjs_int hashbits)
 	if(FinalizeName.IsEmpty())
 	{
 		// first time; initialize 'finalize' name and 'missing' name
-		FinalizeName = TJSMapGlobalStringMap(TJS_W("finalize"));
-		MissingName  = TJSMapGlobalStringMap(TJS_W("missing"));
+		FinalizeName = TJSMapGlobalStringMap(TJS_WS("finalize"));
+		MissingName  = TJSMapGlobalStringMap(TJS_WS("missing"));
 	}
 	finalize_name = FinalizeName;
 	missing_name = MissingName;
@@ -487,7 +488,7 @@ bool tTJSCustomObject::CallGetMissing(const tjs_char *name, tTJSVariant &result)
 		try
 		{
 			tTJSVariant args[3];
-			args[0] = (tjs_int) false; // false: get
+			args[0] = (tTVInteger) false; // false: get
 			args[1] = name;        // member name
 			args[2] = prop;
 			tTJSVariant *pargs[3] = {args +0, args +1, args +2};
@@ -534,7 +535,7 @@ bool tTJSCustomObject::CallSetMissing(const tjs_char *name, const tTJSVariant &v
 		try
 		{
 			tTJSVariant args[3];
-			args[0] = (tjs_int) true; // true: set
+			args[0] = (tTVInteger) true; // true: set
 			args[1] = name;        // member name
 			args[2] = prop;
 			tTJSVariant *pargs[3] = {args +0, args +1, args +2};
@@ -771,7 +772,6 @@ void tTJSCustomObject::RebuildHash()
 	try
 	{
 		memset(newsymbols, 0, sizeof(tTJSSymbolData) * newhashsize);
-		tjs_int i;
 		tTJSSymbolData * lv1 = Symbols;
 		tTJSSymbolData * lv1lim = lv1 + HashSize;
 		for(; lv1 < lv1lim; lv1++)
@@ -1184,7 +1184,7 @@ bool tTJSCustomObject::CallEnumCallbackForData(
 	if(data->SymFlags & TJS_SYMBOL_STATIC) newflags |= TJS_STATICMEMBER;
 
 	*params[0] = data->Name;
-	*params[1] = (tjs_int)newflags;
+	*params[1] = (tTVInteger)newflags;
 
 	if(!(flags & TJS_ENUM_NO_VALUE))
 	{
@@ -1194,7 +1194,7 @@ bool tTJSCustomObject::CallEnumCallbackForData(
 	}
 
 	tTJSVariant res;
-	if(TJS_FAILED(callback.FuncCall(NULL, NULL, NULL, &res,
+	if(TJS_FAILED(callback.FuncCall(0, NULL, NULL, &res,
 		(flags & TJS_ENUM_NO_VALUE) ? 2 : 3, params, NULL))) return false;
 	return (bool)(tjs_int)(res);
 }
@@ -1307,7 +1307,7 @@ tjs_error TJSDefaultFuncCall(tjs_uint32 flag, tTJSVariant &targ, tTJSVariant *re
 	return TJS_E_INVALIDTYPE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 {
@@ -1383,7 +1383,7 @@ tjs_error TJSDefaultPropGet(tjs_uint32 flag, tTJSVariant &targ, tTJSVariant *res
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result,
 	iTJSDispatch2 *objthis)
@@ -1467,7 +1467,7 @@ tjs_error TJSDefaultPropSet(tjs_uint32 flag, tTJSVariant &targ, const tTJSVarian
 
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
@@ -1548,7 +1548,7 @@ tTJSCustomObject::PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint3
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::GetCount(tjs_int *result, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 {
@@ -1562,7 +1562,7 @@ tTJSCustomObject::GetCount(tjs_int *result, const tjs_char *membername, tjs_uint
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 	const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
@@ -1643,7 +1643,7 @@ tTJSCustomObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback, iTJSDispatch2 *objthis)
 {
 	if(!GetValidity()) return TJS_E_INVALIDOBJECT;
@@ -1653,7 +1653,7 @@ tTJSCustomObject::EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback, iTJ
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::DeleteMember(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 {
@@ -1688,7 +1688,7 @@ tjs_error TJSDefaultInvalidate(tjs_uint32 flag, tTJSVariant &targ, iTJSDispatch2
 	return TJS_E_INVALIDTYPE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::Invalidate(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 {
@@ -1738,7 +1738,7 @@ tjs_error TJSDefaultIsValid(tjs_uint32 flag, tTJSVariant &targ, iTJSDispatch2 * 
 	return TJS_S_TRUE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::IsValid(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 {
@@ -1785,7 +1785,7 @@ tjs_error TJSDefaultCreateNew(tjs_uint32 flag, tTJSVariant &targ,
 	return TJS_E_INVALIDTYPE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	iTJSDispatch2 **result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -1819,7 +1819,7 @@ tTJSCustomObject::CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_ui
 }
 //---------------------------------------------------------------------------
 /*
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::GetSuperClass(tjs_uint32 flag, iTJSDispatch2 **result,
 		iTJSDispatch2 *objthis)
 {
@@ -1841,7 +1841,7 @@ tjs_error TJSDefaultIsInstanceOf(tjs_uint32 flag, tTJSVariant &targ, const tjs_c
 		return TJS_S_FALSE;
 	}
 
-	if(!TJS_strcmp(name, TJS_W("Object"))) return TJS_S_TRUE;
+	if(!TJS_strcmp(name, TJS_WS("Object"))) return TJS_S_TRUE;
 
 
 	switch(vt)
@@ -1850,13 +1850,13 @@ tjs_error TJSDefaultIsInstanceOf(tjs_uint32 flag, tTJSVariant &targ, const tjs_c
 		return TJS_S_FALSE; // returns always false about tvtVoid
 	case tvtInteger:
 	case tvtReal:
-		if(!TJS_strcmp(name, TJS_W("Number"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(name, TJS_WS("Number"))) return TJS_S_TRUE;
 		return TJS_S_FALSE;
 	case tvtString:
-		if(!TJS_strcmp(name, TJS_W("String"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(name, TJS_WS("String"))) return TJS_S_TRUE;
 		return TJS_S_FALSE;
 	case tvtOctet:
-		if(!TJS_strcmp(name, TJS_W("Octet"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(name, TJS_WS("Octet"))) return TJS_S_TRUE;
 		return TJS_S_FALSE;
 	case tvtObject:
 		if(vt == tvtObject)
@@ -1876,7 +1876,7 @@ tjs_error TJSDefaultIsInstanceOf(tjs_uint32 flag, tTJSVariant &targ, const tjs_c
 	return TJS_S_FALSE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	const tjs_char *classname, iTJSDispatch2 *objthis)
 {
@@ -1886,7 +1886,7 @@ tTJSCustomObject::IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_
 	if(membername == NULL)
 	{
 		// always returns true if "Object" is specified
-		if(!TJS_strcmp(classname, TJS_W("Object")))
+		if(!TJS_strcmp(classname, TJS_WS("Object")))
 		{
 			return TJS_S_TRUE;
 		}
@@ -1974,7 +1974,7 @@ tjs_error TJSDefaultOperation(tjs_uint32 flag, tTJSVariant &targ,
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	tTJSVariant *result, const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
@@ -2062,7 +2062,7 @@ tTJSCustomObject::Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uin
 
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSCustomObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid,
 		iTJSNativeInstance **pointer)
 {
@@ -2099,7 +2099,7 @@ tTJSCustomObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid,
 	return TJS_E_NOTIMPL;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD 
+tjs_error
 tTJSCustomObject::ClassInstanceInfo(tjs_uint32 flag, tjs_uint num, tTJSVariant *value)
 {
 	switch(flag)
@@ -2109,7 +2109,7 @@ tTJSCustomObject::ClassInstanceInfo(tjs_uint32 flag, tjs_uint num, tTJSVariant *
 		// add value
 		ttstr name = value->AsStringNoAddRef();
 		if(TJSObjectHashMapEnabled() && ClassNames.size() == 0)
-			TJSObjectHashSetType(this, TJS_W("instance of class ") + name);
+			TJSObjectHashSetType(this, TJS_WS("instance of class ") + name);
 				// First class name is used for the object classname
 				// because the order of the class name
 				// registration is from descendant to ancestor.

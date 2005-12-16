@@ -97,29 +97,6 @@ public:
 	}
 };
 //---------------------------------------------------------------------------
-template <>
-class tTJSHashFunc<tjs_nchar *> // a specialized template of tTJSHashFunc for tjs_nchar
-{
-public:
-	static tjs_uint32 Make(const tjs_nchar *str)
-	{
-		if(!str) return 0;
-		tjs_uint32 ret = 0;
-		while(*str)
-		{
-			ret += *str;
-			ret += (ret << 10);
-			ret ^= (ret >> 6);
-			str++;
-		}
-		ret += (ret << 3);
-		ret ^= (ret >> 11);
-		ret += (ret << 15);
-		if(!ret) ret = (tjs_uint32)-1;
-		return ret;
-	}
-};
-//---------------------------------------------------------------------------
 // tTJSHashTable : a simple implementation of Chain Hash algorithm
 //---------------------------------------------------------------------------
 /*
@@ -439,7 +416,7 @@ public:
 		return ret;
 	}
 
-	tjs_uint GetCount() { return Count; }
+	tjs_uint GetCount() const { return Count; }
 
 private:
 	void InternalClear()
@@ -614,27 +591,27 @@ public:
 	void Add(const KeyT &key, const ValueT &value)
 	{
 		inherited::Add(key, value);
-		if(GetCount() > MaxCount)
+		if(inherited::GetCount() > MaxCount)
 		{
-			ChopLast(GetCount() - MaxCount);
+			ChopLast(inherited::GetCount() - MaxCount);
 		}
 	}
 
 	void AddWithHash(const KeyT &key, tjs_uint32 hash, const ValueT &value)
 	{
 		inherited::AddWithHash(key, hash, value);
-		if(GetCount() > MaxCount)
+		if(inherited::GetCount() > MaxCount)
 		{
-			ChopLast(GetCount() - MaxCount);
+			ChopLast(inherited::GetCount() - MaxCount);
 		}
 	}
 
 	void SetMaxCount(tjs_uint maxcount)
 	{
 		MaxCount = maxcount;
-		if(GetCount() > MaxCount)
+		if(inherited::GetCount() > MaxCount)
 		{
-			ChopLast(GetCount() - MaxCount);
+			ChopLast(inherited::GetCount() - MaxCount);
 		}
 	}
 

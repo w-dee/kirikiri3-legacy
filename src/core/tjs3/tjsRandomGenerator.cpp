@@ -20,6 +20,7 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1026);
 //---------------------------------------------------------------------------
 void (*TJSGetRandomBits128)(void *dest) = NULL;
 	// retrives 128-bits (16bytes) random bits for random seed.
@@ -89,7 +90,7 @@ void tTJSNI_RandomGenerator::Randomize(tTJSVariant ** param, tjs_int numparams)
 				data = new tTJSMersenneTwisterData;
 
 				// get state array
-				TJS_THROW_IF_ERROR(clo.PropGet(TJS_MEMBERMUSTEXIST, TJS_W("state"),
+				TJS_THROW_IF_ERROR(clo.PropGet(TJS_MEMBERMUSTEXIST, TJS_WS("state"),
 					NULL, &val, NULL));
 
 				state = val;
@@ -117,11 +118,11 @@ void tTJSNI_RandomGenerator::Randomize(tTJSVariant ** param, tjs_int numparams)
 				}
 
 				// get other members
-				TJS_THROW_IF_ERROR(clo.PropGet(TJS_MEMBERMUSTEXIST, TJS_W("left"), NULL,
+				TJS_THROW_IF_ERROR(clo.PropGet(TJS_MEMBERMUSTEXIST, TJS_WS("left"), NULL,
 					&val, NULL));
 				data->left = (tjs_int)val;
 
-				TJS_THROW_IF_ERROR(clo.PropGet(TJS_MEMBERMUSTEXIST, TJS_W("next"), NULL,
+				TJS_THROW_IF_ERROR(clo.PropGet(TJS_MEMBERMUSTEXIST, TJS_WS("next"), NULL,
 					&val, NULL));
 				data->next = (tjs_int)val + data->state;
 
@@ -168,7 +169,7 @@ iTJSDispatch2 * tTJSNI_RandomGenerator::Serialize()
 		tjs_char *p = state.AllocBuffer(TJS_MT_N * 8);
 		for(tjs_int i = 0; i < TJS_MT_N; i++)
 		{
-			const static tjs_char hex[] = TJS_W("0123456789abcdef");
+			const tjs_char* hex = TJS_WS("0123456789abcdef");
 			p[0] = hex[(data.state[i]  >> 28) & 0x000f];
 			p[1] = hex[(data.state[i]  >> 24) & 0x000f];
 			p[2] = hex[(data.state[i]  >> 20) & 0x000f];
@@ -185,13 +186,13 @@ iTJSDispatch2 * tTJSNI_RandomGenerator::Serialize()
 		dic = TJSCreateDictionaryObject();
 
 		val = state;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("state"), NULL, &val, dic);
+		dic->PropSet(TJS_MEMBERENSURE, TJS_WS("state"), NULL, &val, dic);
 
-		val = (tjs_int)data.left;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("left"), NULL, &val, dic);
+		val = (tTVInteger)data.left;
+		dic->PropSet(TJS_MEMBERENSURE, TJS_WS("left"), NULL, &val, dic);
 
-		val = (tjs_int)(data.next - data.state);
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("next"), NULL, &val, dic);
+		val = (tTVInteger)(data.next - data.state);
+		dic->PropSet(TJS_MEMBERENSURE, TJS_WS("next"), NULL, &val, dic);
 	}
 	catch(...)
 	{
@@ -259,7 +260,7 @@ tjs_int64 tTJSNI_RandomGenerator::Random64()
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_RandomGenerator::ClassID = (tjs_uint32)-1;
 tTJSNC_RandomGenerator::tTJSNC_RandomGenerator() :
-	tTJSNativeClass(TJS_W("RandomGenerator"))
+	tTJSNativeClass(TJS_WS("RandomGenerator"))
 {
 	// class constructor
 

@@ -24,6 +24,7 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1016);
 //---------------------------------------------------------------------------
 // utility functions
 //---------------------------------------------------------------------------
@@ -46,9 +47,9 @@ static void GetStringProperty(tTJSVariant *result, const tTJSVariant *str,
 	if(member.Type() != tvtInteger && member.Type() != tvtReal)
 	{
 		const tjs_char *name = member.GetString();
-		if(!name) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_W(""));
+		if(!name) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_WS(""));
 
-		if(!TJS_strcmp(name, TJS_W("length")))
+		if(!TJS_strcmp(name, TJS_WS("length")))
 		{
 			// get string length
 			const tTJSVariantString * s = str->AsStringNoAddRef();
@@ -60,13 +61,13 @@ static void GetStringProperty(tTJSVariant *result, const tTJSVariant *str,
 			*result = tTVInteger(s->GetLength());
 			return;
 		}
-		else if(name[0] >= TJS_W('0') && name[0] <= TJS_W('9'))
+		else if(name[0] >= TJS_WC('0') && name[0] <= TJS_WC('9'))
 		{
 			const tTJSVariantString * valstr = str->AsStringNoAddRef();
 			const tjs_char *s = str->GetString();
 			tjs_int n = TJS_atoi(name);
 			tjs_int len = valstr->GetLength();
-			if(n == len) { *result = tTJSVariant(TJS_W("")); return; }
+			if(n == len) { *result = tTJSVariant(TJS_WS("")); return; }
 			if(n<0 || n>len)
 				TJS_eTJSError(TJSRangeError);
 			tjs_char bf[2];
@@ -84,7 +85,7 @@ static void GetStringProperty(tTJSVariant *result, const tTJSVariant *str,
 		const tjs_char *s = str->GetString();
 		tjs_int n = (tjs_int)member.AsInteger();
 		tjs_int len = valstr->GetLength();
-		if(n == len) { *result = tTJSVariant(TJS_W("")); return; }
+		if(n == len) { *result = tTJSVariant(TJS_WS("")); return; }
 		if(n<0 || n>len)
 			TJS_eTJSError(TJSRangeError);
 		tjs_char bf[2];
@@ -102,22 +103,22 @@ static void SetStringProperty(tTJSVariant *param, const tTJSVariant *str,
 	if(member.Type() != tvtInteger && member.Type() != tvtReal)
 	{
 		const tjs_char *name = member.GetString();
-		if(!name) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_W(""));
+		if(!name) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_WS(""));
 
-		if(!TJS_strcmp(name, TJS_W("length")))
+		if(!TJS_strcmp(name, TJS_WS("length")))
 		{
-			TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_W(""));
+			TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_WS(""));
 		}
-		else if(name[0] >= TJS_W('0') && name[0] <= TJS_W('9'))
+		else if(name[0] >= TJS_WC('0') && name[0] <= TJS_WC('9'))
 		{
-			TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_W(""));
+			TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_WS(""));
 		}
 
 		TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, name);
 	}
 	else // member.Type() == tvtInteger || member.Type() == tvtReal
 	{
-		TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_W(""));
+		TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_WS(""));
 	}
 }
 //---------------------------------------------------------------------------
@@ -128,9 +129,9 @@ static void GetOctetProperty(tTJSVariant *result, const tTJSVariant *octet,
 	if(member.Type() != tvtInteger && member.Type() != tvtReal)
 	{
 		const tjs_char *name = member.GetString();
-		if(!name) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_W(""));
+		if(!name) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_WS(""));
 
-		if(!TJS_strcmp(name, TJS_W("length")))
+		if(!TJS_strcmp(name, TJS_WS("length")))
 		{
 			// get string length
 			tTJSVariantOctet *o = octet->AsOctetNoAddRef();
@@ -140,7 +141,7 @@ static void GetOctetProperty(tTJSVariant *result, const tTJSVariant *octet,
 				*result = tTVInteger(0);
 			return;
 		}
-		else if(name[0] >= TJS_W('0') && name[0] <= TJS_W('9'))
+		else if(name[0] >= TJS_WC('0') && name[0] <= TJS_WC('9'))
 		{
 			tTJSVariantOctet *o = octet->AsOctetNoAddRef();
 			tjs_int n = TJS_atoi(name);
@@ -172,22 +173,22 @@ static void SetOctetProperty(tTJSVariant *param, const tTJSVariant *octet,
 	if(member.Type() != tvtInteger && member.Type() != tvtReal)
 	{
 		const tjs_char *name = member.GetString();
-		if(!name) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_W(""));
+		if(!name) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_WS(""));
 
-		if(!TJS_strcmp(name, TJS_W("length")))
+		if(!TJS_strcmp(name, TJS_WS("length")))
 		{
-			TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_W(""));
+			TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_WS(""));
 		}
-		else if(name[0] >= TJS_W('0') && name[0] <= TJS_W('9'))
+		else if(name[0] >= TJS_WC('0') && name[0] <= TJS_WC('9'))
 		{
-			TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_W(""));
+			TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_WS(""));
 		}
 
 		TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, name);
 	}
 	else // member.Type() == tvtInteger || member.Type() == tvtReal
 	{
-		TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_W(""));
+		TJSThrowFrom_tjs_error(TJS_E_ACCESSDENYED, TJS_WS(""));
 	}
 }
 
@@ -232,13 +233,13 @@ private:
 
 public:
 
-	tjs_uint TJS_INTF_METHOD  AddRef(void)
+	tjs_uint AddRef(void)
 	{
 		return 1;
 //		return ++RefCount;
 	}
 
-	tjs_uint TJS_INTF_METHOD  Release(void)
+	tjs_uint Release(void)
 	{
 		return 1;
 /*
@@ -259,7 +260,7 @@ public:
 #define OBJ1 ((objthis)?(objthis):(Dispatch1))
 #define OBJ2 ((objthis)?(objthis):(Dispatch2))
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
@@ -271,7 +272,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	FuncCallByNum(tjs_uint32 flag, tjs_int num, tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 	{
@@ -282,7 +283,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result,
 		iTJSDispatch2 *objthis)
@@ -294,7 +295,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropGetByNum(tjs_uint32 flag, tjs_int num, tTJSVariant *result,
 		iTJSDispatch2 *objthis)
 	{
@@ -305,7 +306,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	const tTJSVariant *param,
 		iTJSDispatch2 *objthis)
@@ -317,7 +318,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropSetByNum(tjs_uint32 flag, tjs_int num, const tTJSVariant *param,
 		iTJSDispatch2 *objthis)
 	{
@@ -328,7 +329,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	GetCount(tjs_int *result, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 	{
@@ -339,7 +340,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	GetCountByNum(tjs_int *result, tjs_int num, iTJSDispatch2 *objthis)
 	{
 		tjs_error hr =
@@ -349,7 +350,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
 	{
@@ -360,13 +361,13 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback, iTJSDispatch2 *objthis)
 	{
 		return TJS_E_NOTIMPL;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	DeleteMember(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 	{
@@ -377,7 +378,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	DeleteMemberByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 *objthis)
 	{
 		tjs_error hr =
@@ -387,7 +388,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	Invalidate(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 		iTJSDispatch2 *objthis)
 	{
@@ -398,7 +399,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	InvalidateByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 *objthis)
 	{
 		tjs_error hr =
@@ -408,7 +409,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	IsValid(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 	{
@@ -419,7 +420,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	IsValidByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 *objthis)
 	{
 		tjs_error hr =
@@ -429,7 +430,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	iTJSDispatch2 **result,
 		tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis)
@@ -441,7 +442,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	CreateNewByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 **result,
 		tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis)
 	{
@@ -452,13 +453,13 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	Reserved1()
 	{
 		return TJS_E_NOTIMPL;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	const tjs_char *classname,
 		iTJSDispatch2 *objthis)
@@ -470,7 +471,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	IsInstanceOfByNum(tjs_uint32 flag, tjs_int num, const tjs_char *classname,
 		iTJSDispatch2 *objthis)
 	{
@@ -481,7 +482,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	tTJSVariant *result,
 		const tTJSVariant *param,	iTJSDispatch2 *objthis)
@@ -493,7 +494,7 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	OperationByNum(tjs_uint32 flag, tjs_int num, tTJSVariant *result,
 		const tTJSVariant *param,	iTJSDispatch2 *objthis)
 	{
@@ -504,22 +505,22 @@ public:
 		return hr;
 	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid,
 		iTJSNativeInstance **pointer)  { return TJS_E_NOTIMPL; }
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	ClassInstanceInfo(tjs_uint32 flag, tjs_uint num, tTJSVariant *value)
 		{ return TJS_E_NOTIMPL;	}
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	Reserved2()
 	{
 		return TJS_E_NOTIMPL;
 	}
 
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	Reserved3()
 	{
 		return TJS_E_NOTIMPL;
@@ -897,24 +898,24 @@ void tTJSInterCodeContext::DisplayExceptionGeneratedCode(tjs_int codepos,
 {
 	tTJS *tjs = Block->GetTJS();
 	ttstr info(
-		TJS_W("==== An exception occured at ") +
+		TJS_WS("==== An exception occured at ") +
 		GetPositionDescriptionString(codepos) +
-		TJS_W(", VM ip = ") + ttstr(codepos) + TJS_W(" ===="));
+		TJS_WS(", VM ip = ") + ttstr(codepos) + TJS_WS(" ===="));
 	tjs_int info_len = info.GetLen();
 
 	tjs->OutputToConsole(info.c_str());
-	tjs->OutputToConsole(TJS_W("-- Disassembled VM code --"));
+	tjs->OutputToConsole(TJS_WS("-- Disassembled VM code --"));
 	DisassenbleSrcLine(codepos);
 
-	tjs->OutputToConsole(TJS_W("-- Register dump --"));
+	tjs->OutputToConsole(TJS_WS("-- Register dump --"));
 
 	const tTJSVariant *ra_start = ra - (MaxVariableCount + VariableReserveCount);
 	tjs_int ra_count = MaxVariableCount + VariableReserveCount + 1 + MaxFrameCount;
 	ttstr line;
 	for(tjs_int i = 0; i < ra_count; i ++)
 	{
-		ttstr reg_info = TJS_W("%") + ttstr(i - (MaxVariableCount + VariableReserveCount))
-			+ TJS_W("=") + TJSVariantToReadableString(ra_start[i]);
+		ttstr reg_info = TJS_WS("%") + ttstr(i - (MaxVariableCount + VariableReserveCount))
+			+ TJS_WS("=") + TJSVariantToReadableString(ra_start[i]);
 		if(line.GetLen() + reg_info.GetLen() + 2 > info_len)
 		{
 			tjs->OutputToConsole(line.c_str());
@@ -922,7 +923,7 @@ void tTJSInterCodeContext::DisplayExceptionGeneratedCode(tjs_int codepos,
 		}
 		else
 		{
-			if(!line.IsEmpty()) line += TJS_W("  ");
+			if(!line.IsEmpty()) line += TJS_WS("  ");
 			line += reg_info;
 		}
 	}
@@ -932,7 +933,7 @@ void tTJSInterCodeContext::DisplayExceptionGeneratedCode(tjs_int codepos,
 		tjs->OutputToConsole(line.c_str());
 	}
 
-	tjs->OutputToConsoleSeparator(TJS_W("-"), info_len);
+	tjs->OutputToConsoleSeparator(TJS_WS("-"), info_len);
 }
 //---------------------------------------------------------------------------
 void tTJSInterCodeContext::ThrowScriptException(tTJSVariant &val,
@@ -947,12 +948,12 @@ void tTJSInterCodeContext::ThrowScriptException(tTJSVariant &val,
 			if(clo.Object != NULL)
 			{
 				tTJSVariant v2;
-				static tTJSString message_name(TJS_W("message"));
+				static tTJSString message_name(TJS_WS("message"));
 				tjs_error hr = clo.PropGet(0, message_name.c_str(),
 					message_name.GetHint(), &v2, NULL);
 				if(TJS_SUCCEEDED(hr))
 				{
-					msg = ttstr(TJS_W("script exception : ")) + ttstr(v2);
+					msg = ttstr(TJS_WS("script exception : ")) + ttstr(v2);
 				}
 			}
 		}
@@ -963,7 +964,7 @@ void tTJSInterCodeContext::ThrowScriptException(tTJSVariant &val,
 
 	if(msg.IsEmpty())
 	{
-		msg = TJS_W("script exception");
+		msg = TJS_WS("script exception");
 	}
 
 	TJS_eTJSScriptException(msg, this, srcpos, val);
@@ -1049,12 +1050,12 @@ tjs_int tTJSInterCodeContext::ExecuteCode(tTJSVariant *ra_org, tjs_int startip,
 				break;
 
 			case VM_SETF:
-				TJS_GET_VM_REG(ra, code[1]) = flag;
+				TJS_GET_VM_REG(ra, code[1]) = (tTVInteger)flag;
 				code += 2;
 				break;
 
 			case VM_SETNF:
-				TJS_GET_VM_REG(ra, code[1]) = !flag;
+				TJS_GET_VM_REG(ra, code[1]) = (tTVInteger)!flag;
 				code += 2;
 				break;
 
@@ -1187,14 +1188,14 @@ tjs_int tTJSInterCodeContext::ExecuteCode(tTJSVariant *ra_org, tjs_int startip,
 				break;
 
 			case VM_INV:
-				TJS_GET_VM_REG(ra, code[1]) =
+				TJS_GET_VM_REG(ra, code[1]) = (tTVInteger)
 					(TJS_GET_VM_REG(ra, code[1]).AsObjectClosureNoAddRef().Invalidate(0,
 					NULL, NULL, ra[-1].AsObjectNoAddRef()) == TJS_S_TRUE);
 				code += 2;
 				break;
 
 			case VM_CHKINV:
-				TJS_GET_VM_REG(ra, code[1]) =
+				TJS_GET_VM_REG(ra, code[1]) = (tTVInteger)
 					TJSIsObjectValid(TJS_GET_VM_REG(ra, code[1]).AsObjectClosureNoAddRef().IsValid(0,
 					NULL, NULL, ra[-1].AsObjectNoAddRef()));
 				code += 2;
@@ -1416,34 +1417,27 @@ tjs_int tTJSInterCodeContext::ExecuteCode(tTJSVariant *ra_org, tjs_int startip,
 		DisplayExceptionGeneratedCode(codesave - CodeArea, ra_org);
 		TJS_eTJSScriptError(e.GetMessage(), this, codesave-CodeArea);
 	}
+/*
+	TODO: standard exception catch
 	catch(exception &e)
 	{
 		DisplayExceptionGeneratedCode(codesave - CodeArea, ra_org);
 		TJS_eTJSScriptError(e.what(), this, codesave-CodeArea);
 	}
+*/
 	catch(const wchar_t *text)
 	{
 		DisplayExceptionGeneratedCode(codesave - CodeArea, ra_org);
 		TJS_eTJSScriptError(text, this, codesave-CodeArea);
 	}
+/*
+	TODO: narrow text catch
 	catch(const char *text)
 	{
 		DisplayExceptionGeneratedCode(codesave - CodeArea, ra_org);
 		TJS_eTJSScriptError(text, this, codesave-CodeArea);
 	}
-#ifdef TJS_SUPPORT_VCL
-	catch(const EAccessViolation &e)
-	{
-		DisplayExceptionGeneratedCode(codesave - CodeArea, ra_org);
-		TJS_eTJSScriptError(e.Message.c_str(), this, codesave-CodeArea);
-	}
-	catch(const Exception &e)
-	{
-		DisplayExceptionGeneratedCode(codesave - CodeArea, ra_org);
-		TJS_eTJSScriptError(e.Message.c_str(), this, codesave-CodeArea);
-	}
-#endif
-
+*/
 	return codesave-CodeArea;
 }
 //---------------------------------------------------------------------------
@@ -1944,9 +1938,9 @@ void tTJSInterCodeContext::DeleteMemberDirect(tTJSVariant *ra,
 	if(code[1])
 	{
 		if(TJS_FAILED(hr))
-			TJS_GET_VM_REG(ra, code[1]) = false;
+			TJS_GET_VM_REG(ra, code[1]) = (tTVInteger)false;
 		else
-			TJS_GET_VM_REG(ra, code[1]) = true;
+			TJS_GET_VM_REG(ra, code[1]) = (tTVInteger)true;
 	}
 }
 //---------------------------------------------------------------------------
@@ -1975,9 +1969,9 @@ void tTJSInterCodeContext::DeleteMemberIndirect(tTJSVariant *ra,
 		if(code[1])
 		{
 			if(TJS_FAILED(hr))
-				TJS_GET_VM_REG(ra, code[1]) = false;
+				TJS_GET_VM_REG(ra, code[1]) = (tTVInteger)false;
 			else
-				TJS_GET_VM_REG(ra, code[1]) = true;
+				TJS_GET_VM_REG(ra, code[1]) = (tTVInteger)true;
 		}
 	}
 	catch(...)
@@ -2033,7 +2027,7 @@ void tTJSInterCodeContext::TypeOfMemberDirect(tTJSVariant *ra,
 	}
 	else if(hr == TJS_E_MEMBERNOTFOUND)
 	{
-		TJS_GET_VM_REG(ra, code[1]) = TJS_W("undefined");
+		TJS_GET_VM_REG(ra, code[1]) = TJS_WS("undefined");
 	}
 	else if(TJS_FAILED(hr))
 		TJSThrowFrom_tjs_error(hr, TJS_GET_VM_REG(DataArea, code[3]).GetString());
@@ -2088,7 +2082,7 @@ void tTJSInterCodeContext::TypeOfMemberIndirect(tTJSVariant *ra,
 			}
 			else if(hr == TJS_E_MEMBERNOTFOUND)
 			{
-				TJS_GET_VM_REG(ra, code[1]) = TJS_W("undefined");
+				TJS_GET_VM_REG(ra, code[1]) = TJS_WS("undefined");
 			}
 			else if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, *str);
 		}
@@ -2115,7 +2109,7 @@ void tTJSInterCodeContext::TypeOfMemberIndirect(tTJSVariant *ra,
 			}
 			else if(hr == TJS_E_MEMBERNOTFOUND)
 			{
-				TJS_GET_VM_REG(ra, code[1]) = TJS_W("undefined");
+				TJS_GET_VM_REG(ra, code[1]) = TJS_WS("undefined");
 			}
 			else if(TJS_FAILED(hr))
 				ThrowFrom_tjs_error_num(hr,
@@ -2297,7 +2291,7 @@ tjs_int tTJSInterCodeContext::CallFunction(tTJSVariant *ra,
 
 	TJS_END_FUNC_CALL_ARGS
 
-	if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, TJS_W(""));
+	if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, TJS_WS(""));
 
 	return code_size + 3;
 }
@@ -2420,18 +2414,26 @@ void tTJSInterCodeContext::AddClassInstanceInfo(tTJSVariant *ra,
 	}
 }
 //---------------------------------------------------------------------------
-static tjs_char *StrFuncs[] = { TJS_W("charAt"), TJS_W("indexOf"), TJS_W("toUpperCase"),
-	TJS_W("toLowerCase"), TJS_W("substring"), TJS_W("substr"), TJS_W("sprintf"),
-		TJS_W("replace"), TJS_W("escape"), TJS_W("split") };
+static const tjs_char *StrFuncs[] = {
+	TJS_WS("charAt"),
+	TJS_WS("indexOf"),
+	TJS_WS("toUpperCase"),
+	TJS_WS("toLowerCase"),
+	TJS_WS("substring"),
+	TJS_WS("substr"),
+	TJS_WS("sprintf"),
+	TJS_WS("replace"),
+	TJS_WS("escape"),
+	TJS_WS("split") };
 #define TJS_STRFUNC_MAX (sizeof(StrFuncs) / sizeof(StrFuncs[0]))
 static tjs_int32 StrFuncHash[TJS_STRFUNC_MAX];
 static bool TJSStrFuncInit = false;
 static void InitTJSStrFunc()
 {
 	TJSStrFuncInit = true;
-	for(tjs_int i=0; i<TJS_STRFUNC_MAX; i++)
+	for(tjs_size i=0; i<TJS_STRFUNC_MAX; i++)
 	{
-		tjs_char *p = StrFuncs[i];
+		const tjs_char *p = StrFuncs[i];
 		tjs_int32 hash = 0;
 		while(*p) hash += *p, p++;
 		StrFuncHash[i] = hash;
@@ -2445,7 +2447,7 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 
 	tjs_int32 hash;
 
-	if(!member) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_W(""));
+	if(!member) TJSThrowFrom_tjs_error(TJS_E_MEMBERNOTFOUND, TJS_WS(""));
 
 	const tjs_char *m = member;
 	hash = 0;
@@ -2459,13 +2461,13 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 		if(numargs != 1) TJSThrowFrom_tjs_error(TJS_E_BADPARAMCOUNT);
 		if(s_len == 0)
 		{
-			if(result) *result = TJS_W("");
+			if(result) *result = TJS_WS("");
 			return;
 		}
 		tjs_int i = (tjs_int)*args[0];
 		if(i<0 || i>=s_len)
 		{
-			if(result) *result = TJS_W("");
+			if(result) *result = TJS_WS("");
 			return;
 		}
 		tjs_char bt[2];
@@ -2481,7 +2483,7 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 
 		if(!s || !pstr)
 		{
-			if(result) *result = (tjs_int)-1;
+			if(result) *result = (tTVInteger)-1;
 			if(pstr) pstr->Release();
 			return;
 		}
@@ -2504,19 +2506,19 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 		}
 		if(start >= s_len)
 		{
-			if(result) *result = (tjs_int)-1;
+			if(result) *result = (tTVInteger)-1;
 			if(pstr) pstr->Release();
 			return;
 		}
 		tjs_char *p;
-		p = wcsstr(s + start, (const tjs_char*)*pstr);
+		p = TJS_strstr(s + start, (const tjs_char*)*pstr);
 		if(!p)
 		{
-			if(result) *result = (tjs_int)-1;
+			if(result) *result = (tTVInteger)-1;
 		}
 		else
 		{
-			if(result) *result = (tjs_int)(p-s);
+			if(result) *result = (tTVInteger)(p-s);
 		}
 		if(pstr) pstr->Release();
 		return;
@@ -2533,7 +2535,7 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 				tjs_char *p = (tjs_char*)pstr;    // WARNING!! modification of const
 				while(*p)
 				{
-					if(*p>=TJS_W('a') && *p<=TJS_W('z')) *p += TJS_W('Z')-TJS_W('z');
+					if(*p>=TJS_WC('a') && *p<=TJS_WC('z')) *p += TJS_WC('Z')-TJS_WC('z');
 					p++;
 				}
 			}
@@ -2552,7 +2554,7 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 				tjs_char *p = (tjs_char*)pstr;    // WARNING!! modification of const
 				while(*p)
 				{
-					if(*p>=TJS_W('A') && *p<=TJS_W('Z')) *p += TJS_W('z')-TJS_W('Z');
+					if(*p>=TJS_WC('A') && *p<=TJS_WC('Z')) *p += TJS_WC('z')-TJS_WC('Z');
 					p++;
 				}
 			}
@@ -2566,7 +2568,7 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 		tjs_int start = (tjs_int)*args[0];
 		if(start < 0 || start >= s_len)
 		{
-			if(result) *result=TJS_W("");
+			if(result) *result=TJS_WS("");
 			return;
 		}
 		tjs_int count;
@@ -2575,7 +2577,7 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 			count = (tjs_int)*args[1];
 			if(count<0)
 			{
-				if(result) *result = TJS_W("");
+				if(result) *result = TJS_WS("");
 				return;
 			}
 			if(start + count > s_len) count = s_len - start;
@@ -2609,7 +2611,7 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 		tTJSVariantClosure clo = args[0]->AsObjectClosureNoAddRef();
 		tTJSVariant str = target;
 		tTJSVariant *params[] = { &str, args[1] };
-		static tTJSString replace_name(TJS_W("replace"));
+		static tTJSString replace_name(TJS_WS("replace"));
 		clo.FuncCall(0, replace_name.c_str(), replace_name.GetHint(),
 			result, 2, params, NULL);
 
@@ -2646,7 +2648,7 @@ void tTJSInterCodeContext::ProcessStringFunction(const tjs_char *member,
 				arg_count ++;
 				params[3] = args[2];
 			}
-			static tTJSString split_name(TJS_W("split"));
+			static tTJSString split_name(TJS_WS("split"));
 			array->FuncCall(0, split_name.c_str(), split_name.GetHint(),
 				NULL, arg_count, params, array);
 
@@ -2676,12 +2678,12 @@ void tTJSInterCodeContext::ProcessOctetFunction(const tjs_char *member, const tt
 void tTJSInterCodeContext::TypeOf(tTJSVariant &val)
 {
 	// processes TJS3's typeof operator.
-	static tTJSString void_name(TJS_W("void"));
-	static tTJSString Object_name(TJS_W("Object"));
-	static tTJSString String_name(TJS_W("String"));
-	static tTJSString Integer_name(TJS_W("Integer"));
-	static tTJSString Real_name(TJS_W("Real"));
-	static tTJSString Octet_name(TJS_W("Octet"));
+	static tTJSString void_name(TJS_WS("void"));
+	static tTJSString Object_name(TJS_WS("Object"));
+	static tTJSString String_name(TJS_WS("String"));
+	static tTJSString Integer_name(TJS_WS("Integer"));
+	static tTJSString Real_name(TJS_WS("Real"));
+	static tTJSString Octet_name(TJS_WS("Octet"));
 
 	switch(val.Type())
 	{
@@ -2777,10 +2779,10 @@ void tTJSInterCodeContext::InstanceOf(const tTJSVariant &name, tTJSVariant &targ
 		str->Release();
 		if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr);
 
-		targ = (hr == TJS_S_TRUE);
+		targ = (tTVInteger)(hr == TJS_S_TRUE);
 		return;
 	}
-	targ = false;
+	targ = (tTVInteger)false;
 }
 //---------------------------------------------------------------------------
 void tTJSInterCodeContext::RegisterObjectMember(iTJSDispatch2 * dest)
@@ -2793,7 +2795,7 @@ void tTJSInterCodeContext::RegisterObjectMember(iTJSDispatch2 * dest)
 	{
 	public:
 		iTJSDispatch2 * Dest; // destination object
-		tjs_error TJS_INTF_METHOD FuncCall(
+		tjs_error FuncCall(
 			tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 			tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 			iTJSDispatch2 *objthis)
@@ -2815,7 +2817,7 @@ void tTJSInterCodeContext::RegisterObjectMember(iTJSDispatch2 * dest)
 					Dest->PropSet(TJS_MEMBERENSURE|TJS_IGNOREPROP|flags,
 					param[0]->GetString(), NULL, &val, Dest);
 			}
-			if(result) *result = (tjs_int)(1); // returns true
+			if(result) *result = (tTVInteger)(1); // returns true
 			return TJS_S_OK;
 		}
 	};
@@ -2824,8 +2826,9 @@ void tTJSInterCodeContext::RegisterObjectMember(iTJSDispatch2 * dest)
 	callback.Dest = dest;
 
 	// enumerate members
+	tTJSVariantClosure clo(&callback, (iTJSDispatch2*)NULL);
 	EnumMembers(TJS_IGNOREPROP,
-		&tTJSVariantClosure(&callback, (iTJSDispatch2*)NULL), this);
+		&clo, this);
 }
 //---------------------------------------------------------------------------
 #define TJS_DO_SUPERCLASS_PROXY_BEGIN \
@@ -2846,7 +2849,7 @@ void tTJSInterCodeContext::RegisterObjectMember(iTJSDispatch2 * dest)
 			} \
 		}
 
-tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::FuncCall(
+tjs_error  tTJSInterCodeContext::FuncCall(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 			tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
@@ -2876,6 +2879,7 @@ tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::FuncCall(
 			break;
 
 		case ctProperty:
+		case ctSuperClassGetter:
 			return TJS_E_INVALIDTYPE;
 		}
 
@@ -2897,7 +2901,7 @@ tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::FuncCall(
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::PropGet(tjs_uint32 flag,
+tjs_error  tTJSInterCodeContext::PropGet(tjs_uint32 flag,
 	const tjs_char * membername, tjs_uint32 *hint, tTJSVariant *result,
 		iTJSDispatch2 *objthis)
 {
@@ -2931,7 +2935,7 @@ tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::PropGet(tjs_uint32 flag,
 
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::PropSet(tjs_uint32 flag,
+tjs_error  tTJSInterCodeContext::PropSet(tjs_uint32 flag,
 	const tjs_char *membername, tjs_uint32 *hint,
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
@@ -2986,7 +2990,7 @@ tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::PropSet(tjs_uint32 flag,
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::CreateNew(tjs_uint32 flag,
+tjs_error  tTJSInterCodeContext::CreateNew(tjs_uint32 flag,
 	const tjs_char * membername, tjs_uint32 *hint,
 	iTJSDispatch2 **result, tjs_int numparams,
 	tTJSVariant **param, iTJSDispatch2 *objthis)
@@ -3031,7 +3035,7 @@ tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::CreateNew(tjs_uint32 flag,
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::IsInstanceOf(tjs_uint32 flag,
+tjs_error  tTJSInterCodeContext::IsInstanceOf(tjs_uint32 flag,
 	const tjs_char *membername, tjs_uint32 *hint, const tjs_char *classname,
 		iTJSDispatch2 *objthis)
 {
@@ -3050,15 +3054,15 @@ tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::IsInstanceOf(tjs_uint32 flag,
 
 		case ctFunction:
 		case ctExprFunction:
-			if(!TJS_strcmp(classname, TJS_W("Function"))) return TJS_S_TRUE;
+			if(!TJS_strcmp(classname, TJS_WS("Function"))) return TJS_S_TRUE;
 			break;
 
 		case ctProperty:
-			if(!TJS_strcmp(classname, TJS_W("Property"))) return TJS_S_TRUE;
+			if(!TJS_strcmp(classname, TJS_WS("Property"))) return TJS_S_TRUE;
 			break;
 			
 		case ctClass:
-			if(!TJS_strcmp(classname, TJS_W("Class"))) return TJS_S_TRUE;
+			if(!TJS_strcmp(classname, TJS_WS("Class"))) return TJS_S_TRUE;
 			break;
 		}
 	}
@@ -3077,7 +3081,7 @@ tjs_error TJS_INTF_METHOD  tTJSInterCodeContext::IsInstanceOf(tjs_uint32 flag,
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSInterCodeContext::GetCount(tjs_int *result, const tjs_char *membername,
 		tjs_uint32 *hint, iTJSDispatch2 *objthis)
 {
@@ -3096,7 +3100,7 @@ tjs_error TJS_INTF_METHOD
 
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSInterCodeContext::DeleteMember(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint,  iTJSDispatch2 *objthis)
 {
@@ -3114,7 +3118,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSInterCodeContext::Invalidate(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint, iTJSDispatch2 *objthis)
 {
@@ -3132,7 +3136,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSInterCodeContext::IsValid(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint, iTJSDispatch2 *objthis)
 {
@@ -3150,7 +3154,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSInterCodeContext::Operation(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint, tTJSVariant *result,
 			const tTJSVariant *param,	iTJSDispatch2 *objthis)
@@ -3169,8 +3173,6 @@ tjs_error TJS_INTF_METHOD
 				objthis);
 		}
 	}
-
-	tjs_error hr;
 
 	if(membername != NULL && ContextType == ctClass && SuperClassGetter)
 	{

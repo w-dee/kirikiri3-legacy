@@ -23,9 +23,10 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1019);
 
 
-tjs_nchar tjsEnableDicFuncQuickHack_mark[] = " - 0 <- Put '1' to enable dicfunc quick-hack - ";
+char tjsEnableDicFuncQuickHack_mark[] = " - 0 <- Put '1' to enable dicfunc quick-hack - ";
 bool tjsEnableDicFuncQuickHack = tjsEnableDicFuncQuickHack_mark[3] != '0';
 	//----- dicfunc quick-hack
 
@@ -92,9 +93,9 @@ bool TJSSkipSpace(const tjs_char **ptr)
 // TJSHexNum
 tjs_int TJSHexNum(tjs_char ch) throw()
 {
-	if(ch>=TJS_W('a') && ch<=TJS_W('f')) return ch-TJS_W('a')+10;
-	if(ch>=TJS_W('A') && ch<=TJS_W('F')) return ch-TJS_W('A')+10;
-	if(ch>=TJS_W('0') && ch<=TJS_W('9')) return ch-TJS_W('0');
+	if(ch>=TJS_WC('a') && ch<=TJS_WC('f')) return ch-TJS_WC('a')+10;
+	if(ch>=TJS_WC('A') && ch<=TJS_WC('F')) return ch-TJS_WC('A')+10;
+	if(ch>=TJS_WC('0') && ch<=TJS_WC('9')) return ch-TJS_WC('0');
 	return -1;
 }
 //---------------------------------------------------------------------------
@@ -105,7 +106,7 @@ tjs_int TJSHexNum(tjs_char ch) throw()
 //---------------------------------------------------------------------------
 tjs_int TJSOctNum(tjs_char ch) throw()
 {
-	if(ch>=TJS_W('0') && ch<=TJS_W('7')) return ch-TJS_W('0');
+	if(ch>=TJS_WC('0') && ch<=TJS_WC('7')) return ch-TJS_WC('0');
 	return -1;
 }
 //---------------------------------------------------------------------------
@@ -116,7 +117,7 @@ tjs_int TJSOctNum(tjs_char ch) throw()
 //---------------------------------------------------------------------------
 tjs_int TJSDecNum(tjs_char ch) throw()
 {
-	if(ch>=TJS_W('0') && ch<=TJS_W('9')) return ch-TJS_W('0');
+	if(ch>=TJS_WC('0') && ch<=TJS_WC('9')) return ch-TJS_WC('0');
 	return -1;
 }
 //---------------------------------------------------------------------------
@@ -127,8 +128,8 @@ tjs_int TJSDecNum(tjs_char ch) throw()
 //---------------------------------------------------------------------------
 tjs_int TJSBinNum(tjs_char ch) throw()
 {
-	if(ch==TJS_W('0')) return 0;
-	if(ch==TJS_W('1')) return 1;
+	if(ch==TJS_WC('0')) return 0;
+	if(ch==TJS_WC('1')) return 1;
 	return -1;
 }
 //---------------------------------------------------------------------------
@@ -144,13 +145,13 @@ tjs_int TJSUnescapeBackSlash(tjs_char ch) throw()
 	// ch must indicate "?"
 	switch(ch)
 	{
-	case TJS_W('a'): return 0x07;
-	case TJS_W('b'): return 0x08;
-	case TJS_W('f'): return 0x0c;
-	case TJS_W('n'): return 0x0a;
-	case TJS_W('r'): return 0x0d;
-	case TJS_W('t'): return 0x09;
-	case TJS_W('v'): return 0x0b;
+	case TJS_WC('a'): return 0x07;
+	case TJS_WC('b'): return 0x08;
+	case TJS_WC('f'): return 0x0c;
+	case TJS_WC('n'): return 0x0a;
+	case TJS_WC('r'): return 0x0d;
+	case TJS_WC('t'): return 0x09;
+	case TJS_WC('v'): return 0x0b;
 	default : return ch;
 	}
 }
@@ -162,12 +163,12 @@ tjs_int TJSUnescapeBackSlash(tjs_char ch) throw()
 //---------------------------------------------------------------------------
 static tTJSSkipCommentResult TJSSkipComment(const tjs_char **ptr)
 {
-	if((*ptr)[0] != TJS_W('/')) return scrNotComment;
+	if((*ptr)[0] != TJS_WC('/')) return scrNotComment;
 
-	if((*ptr)[1] == TJS_W('/'))
+	if((*ptr)[1] == TJS_WC('/'))
 	{
 		// line comment; skip to newline
-		while(*(*ptr)!=TJS_W('\n')) if(!TJSNext(&(*ptr))) break;
+		while(*(*ptr)!=TJS_WC('\n')) if(!TJSNext(&(*ptr))) break;
 		if(*(*ptr) ==0) return scrEnded;
 		(*ptr)++;
 		TJSSkipSpace(&(*ptr));
@@ -175,7 +176,7 @@ static tTJSSkipCommentResult TJSSkipComment(const tjs_char **ptr)
 
 		return scrContinue;
 	}
-	else if((*ptr)[1] == TJS_W('*'))
+	else if((*ptr)[1] == TJS_WC('*'))
 	{
 		// block comment; skip to the next '*' '/'
 		// and we must allow nesting of the comment.
@@ -184,13 +185,13 @@ static tTJSSkipCommentResult TJSSkipComment(const tjs_char **ptr)
 		tjs_int level = 0;
 		for(;;)
 		{
-			if((*ptr)[0] == TJS_W('/') && (*ptr)[1] == TJS_W('*'))
+			if((*ptr)[0] == TJS_WC('/') && (*ptr)[1] == TJS_WC('*'))
 			{
 				// note: we cannot avoid comment processing when the
 				// nested comment is in string literals.
 				level ++;
 			}
-			if((*ptr)[0] == TJS_W('*') && (*ptr)[1] == TJS_W('/'))
+			if((*ptr)[0] == TJS_WC('*') && (*ptr)[1] == TJS_WC('/'))
 			{
 				if(level == 0)
 				{
@@ -232,7 +233,7 @@ bool TJSStringMatch(const tjs_char **sc, const tjs_char *wrd, bool isword)
 	if(*wrd) { (*sc)=save; return false; }
 	if(isword)
 	{
-		if(TJS_iswalpha(*(*sc)) || *(*sc) == TJS_W('_'))
+		if(TJS_iswalpha(*(*sc)) || *(*sc) == TJS_WC('_'))
 			{ (*sc)=save; return false; }
 	}
 	return true;
@@ -258,11 +259,11 @@ static tTJSInternalParseStringResult
 
 	for(;*(*ptr);)
 	{
-		if(*(*ptr)==TJS_W('\\'))
+		if(*(*ptr)==TJS_WC('\\'))
 		{
 			// escape
 			if(!TJSNext(ptr)) break;
-			if(*(*ptr)==TJS_W('x') || *(*ptr)==TJS_W('X'))
+			if(*(*ptr)==TJS_WC('x') || *(*ptr)==TJS_WC('X'))
 			{
 				// hex
 				// starts with a "\x", be parsed while characters are
@@ -272,7 +273,7 @@ static tTJSInternalParseStringResult
 				tjs_int num;
 				tjs_int code = 0;
 				tjs_int count = 0;
-				while((num = TJSHexNum(*(*ptr)))!=-1 && count<(sizeof(tjs_char)*2))
+				while((num = TJSHexNum(*(*ptr)))!=-1 && (size_t)count<(sizeof(tjs_char)*2))
 				{
 					code*=16;
 					code+=num;
@@ -282,7 +283,7 @@ static tTJSInternalParseStringResult
 				if(*(*ptr) == 0) break;
 				str+=(tjs_char)code;
 			}
-			else if(*(*ptr) == TJS_W('0'))
+			else if(*(*ptr) == TJS_WC('0'))
 			{
 				// octal
 				if(!TJSNext(ptr)) break;
@@ -327,20 +328,20 @@ static tTJSInternalParseStringResult
 				break;
 			}
 		}
-		else if(embexpmode && *(*ptr) == TJS_W('&'))
+		else if(embexpmode && *(*ptr) == TJS_WC('&'))
 		{
 			// '&'
 			if(!TJSNext(ptr)) break;
 			status = psrAmpersand;
 			break;
 		}
-		else if(embexpmode && *(*ptr) == TJS_W('$'))
+		else if(embexpmode && *(*ptr) == TJS_WC('$'))
 		{
 			// '$'
 			// '{' must be placed immediately after '$'
 			const tjs_char *p = (*ptr);
 			if(!TJSNext(ptr)) break;
-			if(*(*ptr) == TJS_W('{'))
+			if(*(*ptr) == TJS_WC('{'))
 			{
 				if(!TJSNext(ptr)) break;
 				status = psrDollar;
@@ -403,7 +404,7 @@ static tTJSString TJSExtractNumber(tjs_int (*validdigits)(tjs_char ch),
 			tmp += **ptr;
 			if(!TJSNext(ptr)) break;
 		}
-		else if(**ptr == TJS_W('.') && !point_found && !exp_found)
+		else if(**ptr == TJS_WC('.') && !point_found && !exp_found)
 		{
 			point_found = true;
 			tmp += **ptr;
@@ -415,13 +416,13 @@ static tTJSString TJSExtractNumber(tjs_int (*validdigits)(tjs_char ch),
 			tmp += **ptr;
 			if(!TJSNext(ptr)) break;
 			if(!TJSSkipSpace(ptr)) break;
-			if(**ptr == TJS_W('+'))
+			if(**ptr == TJS_WC('+'))
 			{
 				tmp += **ptr;
 				if(!TJSNext(ptr)) break;
 				if(!TJSSkipSpace(ptr)) break;
 			}
-			else if(**ptr == TJS_W('-'))
+			else if(**ptr == TJS_WC('-'))
 			{
 				tmp += **ptr;
 				if(!TJSNext(ptr)) break;
@@ -454,24 +455,24 @@ static bool TJSParseNonDecimalReal(tTJSVariant &val, const tjs_char **ptr,
 	// scan input
 	while(true)
 	{
-		if(**ptr == TJS_W('.'))
+		if(**ptr == TJS_WC('.'))
 		{
 			pointpassed = true;
 		}
-		else if(**ptr == TJS_W('p') || **ptr == TJS_W('P'))
+		else if(**ptr == TJS_WC('p') || **ptr == TJS_WC('P'))
 		{
 			if(!TJSNext(ptr)) break;
 			if(!TJSSkipSpace(ptr)) break;
 
 			bool biassign = false;
-			if(**ptr == TJS_W('+'))
+			if(**ptr == TJS_WC('+'))
 			{
 				biassign = false;
 				if(!TJSNext(ptr)) break;
 				if(!TJSSkipSpace(ptr)) break;
 			}
 
-			if(**ptr == TJS_W('-'))
+			if(**ptr == TJS_WC('-'))
 			{
 				biassign = true;
 				if(!TJSNext(ptr)) break;
@@ -591,7 +592,7 @@ static bool TJSParseNonDecimalNumber(tTJSVariant &val, const tjs_char **ptr,
 	tjs_int (*validdigits)(tjs_char ch), tjs_int base)
 {
 	bool isreal = false;
-	tTJSString tmp(TJSExtractNumber(validdigits, TJS_W("Pp"), ptr, isreal));
+	tTJSString tmp(TJSExtractNumber(validdigits, TJS_WS("Pp"), ptr, isreal));
 
 	if(tmp.IsEmpty()) return false;
 
@@ -628,17 +629,17 @@ static bool TJSParseNumber2(tTJSVariant &val, const tjs_char **ptr)
 {
 	// stage 2
 
-	if(TJSStringMatch(ptr, TJS_W("true"), true))
+	if(TJSStringMatch(ptr, TJS_WS("true"), true))
 	{
-		val = (tjs_int)true;
+		val = (tTVInteger)true;
 		return true;
 	}
-	if(TJSStringMatch(ptr, TJS_W("false"), true))
+	if(TJSStringMatch(ptr, TJS_WS("false"), true))
 	{
-		val = (tjs_int)false;
+		val = (tTVInteger)false;
 		return true;
 	}
-	if(TJSStringMatch(ptr, TJS_W("NaN"), true))
+	if(TJSStringMatch(ptr, TJS_WS("NaN"), true))
 	{
 		// Not a Number
 		tjs_real d;
@@ -646,7 +647,7 @@ static bool TJSParseNumber2(tTJSVariant &val, const tjs_char **ptr)
 		val = d;
 		return true;
 	}
-	if(TJSStringMatch(ptr, TJS_W("Infinity"), true))
+	if(TJSStringMatch(ptr, TJS_WS("Infinity"), true))
 	{
 		// positive inifinity
 		tjs_real d;
@@ -657,45 +658,45 @@ static bool TJSParseNumber2(tTJSVariant &val, const tjs_char **ptr)
 
 	const tjs_char *ptr_save = *ptr;
 
-	if(**ptr == TJS_W('0'))
+	if(**ptr == TJS_WC('0'))
 	{
 		if(!TJSNext(ptr))
 		{
-			val = (tjs_int) 0;
+			val = (tTVInteger) 0;
 			return true;
 		}
 
 		tjs_char mark = **ptr;
 
-		if(mark == TJS_W('X') || mark == TJS_W('x'))
+		if(mark == TJS_WC('X') || mark == TJS_WC('x'))
 		{
 			// hexadecimal
 			if(!TJSNext(ptr)) return false;
 			return TJSParseNonDecimalNumber(val, ptr, TJSHexNum, 4);
 		}
 
-		if(mark == TJS_W('B') || mark == TJS_W('b'))
+		if(mark == TJS_WC('B') || mark == TJS_WC('b'))
 		{
 			// binary
 			if(!TJSNext(ptr)) return false;
 			return TJSParseNonDecimalNumber(val, ptr, TJSBinNum, 1);
 		}
 
-		if(mark == TJS_W('.'))
+		if(mark == TJS_WC('.'))
 		{
 			// decimal point
 			*ptr = ptr_save;
 			goto decimal;
 		}
 
-		if(mark == TJS_W('E') || mark == TJS_W('e'))
+		if(mark == TJS_WC('E') || mark == TJS_WC('e'))
 		{
 			// exp
 			*ptr = ptr_save;
 			goto decimal;
 		}
 
-		if(mark == TJS_W('P') || mark == TJS_W('p'))
+		if(mark == TJS_WC('P') || mark == TJS_WC('p'))
 		{
 			// 2^n exp
 			return false;
@@ -709,7 +710,7 @@ static bool TJSParseNumber2(tTJSVariant &val, const tjs_char **ptr)
 	// integer decimal or real decimal
 decimal:
 	bool isreal = false;
-	tTJSString tmp(TJSExtractNumber(TJSDecNum, TJS_W("Ee"), ptr, isreal));
+	tTJSString tmp(TJSExtractNumber(TJSDecNum, TJS_WS("Ee"), ptr, isreal));
 
 	if(tmp.IsEmpty()) return false;
 
@@ -730,13 +731,13 @@ bool TJSParseNumber(tTJSVariant &val, const tjs_char **ptr)
 
 	bool sign = false; // true if negative
 
-	if(**ptr == TJS_W('+'))
+	if(**ptr == TJS_WC('+'))
 	{
 		sign = false;
 		if(!TJSNext(ptr)) return false;
 		if(!TJSSkipSpace(ptr)) return false;
 	}
-	else if(**ptr == TJS_W('-'))
+	else if(**ptr == TJS_WC('-'))
 	{
 		sign = true;
 		if(!TJSNext(ptr)) return false;
@@ -787,7 +788,7 @@ static bool TJSParseOctet(tTJSVariant &val, const tjs_char **ptr)
 
 		const tjs_char *next = *ptr;
 		TJSNext(&next);
-		if(*(*ptr) == TJS_W('%') && *next == TJS_W('>'))
+		if(*(*ptr) == TJS_WC('%') && *next == TJS_WC('>'))
 		{
 			*ptr = next;
 			TJSNext(ptr);
@@ -833,7 +834,7 @@ static bool TJSParseOctet(tTJSVariant &val, const tjs_char **ptr)
 			}
 		}
 
-		if(!leading && ch == TJS_W(','))
+		if(!leading && ch == TJS_WC(','))
 		{
 			buf = (tjs_uint8*)TJS_realloc(buf, buflen+1);
 			if(!buf)
@@ -876,7 +877,7 @@ static bool TJSParseRegExp(tTJSVariant &pat, const tjs_char **ptr)
 
 	for(;*(*ptr);)
 	{
-		if(*(*ptr)==TJS_W('\\'))
+		if(*(*ptr)==TJS_WC('\\'))
 		{
 			str+=*(*ptr);
 			if(lastbackslash)
@@ -884,7 +885,7 @@ static bool TJSParseRegExp(tTJSVariant &pat, const tjs_char **ptr)
 			else
 				lastbackslash = true;
 		}
-		else if(*(*ptr)==TJS_W('/') && !lastbackslash)
+		else if(*(*ptr)==TJS_WC('/') && !lastbackslash)
 		{
 			// string delimiters
 //			lastbackslash = false;
@@ -897,12 +898,12 @@ static bool TJSParseRegExp(tTJSVariant &pat, const tjs_char **ptr)
 
 			// flags can be here
 			ttstr flag;
-			while(*(*ptr) >= TJS_W('a') && *(*ptr) <= TJS_W('z'))
+			while(*(*ptr) >= TJS_WC('a') && *(*ptr) <= TJS_WC('z'))
 			{
 				flag += *(*ptr);
 				if(!TJSNext(ptr)) break;
 			}
-			str = TJS_W("/""/")+ flag + TJS_W("/") + str;
+			str = TJS_WS("/""/")+ flag + TJS_WS("/") + str;
 			ok = true;
 			break;
 		}
@@ -959,12 +960,12 @@ void TJSReservedWordsHashRelease()
 //---------------------------------------------------------------------------
 static void TJSRegisterReservedWordsHash(const tjs_char *word, tjs_int num)
 {
-	tTJSVariant val(num);
+	tTJSVariant val((tTVInteger)num);
 	TJSReservedWordHash->PropSet(TJS_MEMBERENSURE, word, NULL, &val,
 		TJSReservedWordHash);
 }
 //---------------------------------------------------------------------------
-#define TJS_REG_RES_WORD(word, value) TJSRegisterReservedWordsHash(TJS_W(word), value);
+#define TJS_REG_RES_WORD(word, value) TJSRegisterReservedWordsHash(TJS_WS(word), value);
 static void TJSInitReservedWordsHashTable()
 {
 	if(TJSReservedWordHashInit) return;
@@ -1043,8 +1044,6 @@ tTJSLexicalAnalyzer::tTJSLexicalAnalyzer(tTJSScriptBlock *block,
 {
 	// resneeded is valid only if exprmode is true
 
-	TJS_F_TRACE("tTJSLexicalAnalyzer::tTJSLexicalAnalyzer");
-
 	TJSInitReservedWordsHashTable();
 
 	Block = block;
@@ -1057,23 +1056,23 @@ tTJSLexicalAnalyzer::tTJSLexicalAnalyzer(tTJSScriptBlock *block,
 	if(ExprMode)
 	{
 		// append ';' on expression analyze mode
-		Script[len] = TJS_W(';');
+		Script[len] = TJS_WC(';');
 		Script[len+1] = 0;
 	}
 	else
 	{
-		if(Script[0] == TJS_W('#') && Script[1] == TJS_W('!'))
+		if(Script[0] == TJS_WC('#') && Script[1] == TJS_WC('!'))
 		{
 			// shell script like file
-			Script[0] = TJS_W('/');
-			Script[1] = TJS_W('/');  // convert #! to //
+			Script[0] = TJS_WC('/');
+			Script[1] = TJS_WC('/');  // convert #! to //
 		}
 	}
 
 	if(tjsEnableDicFuncQuickHack) //----- dicfunc quick-hack
 	{
 		DicFunc = false;
-		if(ExprMode && (Script[0] == TJS_W('[') || (Script[0] == TJS_W('%') && Script[1] == TJS_W('['))))
+		if(ExprMode && (Script[0] == TJS_WC('[') || (Script[0] == TJS_WC('%') && Script[1] == TJS_WC('['))))
 		{
 			DicFunc = true;
 		}
@@ -1101,7 +1100,7 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::SkipUntil_endif()
 	IfLevel ++;
 	while(true)
 	{
-		if(*Current == TJS_W('/'))
+		if(*Current == TJS_WC('/'))
 		{
 			switch(TJSSkipComment(&Current))
 			{
@@ -1116,23 +1115,23 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::SkipUntil_endif()
 				break;
 			}
 		}
-		else if(*Current == TJS_W('@'))
+		else if(*Current == TJS_WC('@'))
 		{
 			Current ++;
 			bool skipp = false;
 
-			if(!TJS_strncmp(Current, TJS_W("if"), 2))
+			if(!TJS_strncmp(Current, TJS_WS("if"), 2))
 			{
 				IfLevel ++;
 				Current += 2;
 				skipp = true;
 			}
-			else if(!TJS_strncmp(Current, TJS_W("set"), 3))
+			else if(!TJS_strncmp(Current, TJS_WS("set"), 3))
 			{
 				Current += 3;
 				skipp = true;
 			}
-			else if(!TJS_strncmp(Current, TJS_W("endif"), 5))
+			else if(!TJS_strncmp(Current, TJS_WS("endif"), 5))
 			{
 				// endif
 				Current += 5;
@@ -1156,15 +1155,15 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::SkipUntil_endif()
 				if(!TJSSkipSpace(&Current))
 					TJS_eTJSCompileError(TJSPPError, Block, Current-Script);
 
-				if(*Current!=TJS_W('('))
+				if(*Current!=TJS_WC('('))
 					TJS_eTJSCompileError(TJSPPError, Block, Current-Script);
 
 				TJSNext(&Current);
 				tjs_int plevel = 0;
-				while(*Current && (plevel || *Current!=TJS_W(')')))
+				while(*Current && (plevel || *Current!=TJS_WC(')')))
 				{
-					if(*Current == TJS_W('(')) plevel++;
-					else if(*Current == TJS_W(')')) plevel--;
+					if(*Current == TJS_WC('(')) plevel++;
+					else if(*Current == TJS_WC(')')) plevel--;
 					TJSNext(&Current);
 				}
 				if(!*Current)
@@ -1190,7 +1189,7 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::ProcessPPStatement()
 
 	Current ++;
 
-	if(!TJS_strncmp(Current, TJS_W("set"), 3))
+	if(!TJS_strncmp(Current, TJS_WS("set"), 3))
 	{
 		// set statement
 		Block->NotifyUsingPreProcessor();
@@ -1198,16 +1197,16 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::ProcessPPStatement()
 		if(!TJSSkipSpace(&Current))
 			TJS_eTJSCompileError(TJSPPError, Block, Current-Script);
 
-		if(*Current!=TJS_W('('))
+		if(*Current!=TJS_WC('('))
 			TJS_eTJSCompileError(TJSPPError, Block, Current-Script);
 
 		TJSNext(&Current);
 		const tjs_char *st = Current;
 		tjs_int plevel = 0;
-		while(*Current && (plevel || *Current!=TJS_W(')')))
+		while(*Current && (plevel || *Current!=TJS_WC(')')))
 		{
-			if(*Current == TJS_W('(')) plevel++;
-			else if(*Current == TJS_W(')')) plevel--;
+			if(*Current == TJS_WC('(')) plevel++;
+			else if(*Current == TJS_WC(')')) plevel--;
 			TJSNext(&Current);
 		}
 		const tjs_char *ed = Current;
@@ -1229,7 +1228,7 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::ProcessPPStatement()
 		return scrContinue;
 	}
 
-	if(!TJS_strncmp(Current, TJS_W("if"), 2))
+	if(!TJS_strncmp(Current, TJS_WS("if"), 2))
 	{
 		// if statement
 
@@ -1238,16 +1237,16 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::ProcessPPStatement()
 		if(!TJSSkipSpace(&Current))
 			TJS_eTJSCompileError(TJSPPError, Block, Current-Script);
 
-		if(*Current!=TJS_W('('))
+		if(*Current!=TJS_WC('('))
 			TJS_eTJSCompileError(TJSPPError, Block, Current-Script);
 
 		TJSNext(&Current);
 		const tjs_char *st = Current;
 		tjs_int plevel = 0;
-		while(*Current && (plevel || *Current!=TJS_W(')')))
+		while(*Current && (plevel || *Current!=TJS_WC(')')))
 		{
-			if(*Current == TJS_W('(')) plevel++;
-			else if(*Current == TJS_W(')')) plevel--;
+			if(*Current == TJS_WC('(')) plevel++;
+			else if(*Current == TJS_WC(')')) plevel--;
 			TJSNext(&Current);
 		}
 		const tjs_char *ed = Current;
@@ -1275,7 +1274,7 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::ProcessPPStatement()
 	}
 
 
-	if(!TJS_strncmp(Current, TJS_W("endif"), 5))
+	if(!TJS_strncmp(Current, TJS_WS("endif"), 5))
 	{
 		Current += 5;
 		IfLevel --;
@@ -1292,13 +1291,13 @@ tTJSSkipCommentResult tTJSLexicalAnalyzer::ProcessPPStatement()
 }
 //---------------------------------------------------------------------------
 #define TJS_MATCH_W(word, code) \
-	if(TJSStringMatch(&Current, TJS_W(word), true)) return (code)
+	if(TJSStringMatch(&Current, TJS_WS(word), true)) return (code)
 #define TJS_MATCH_S(word, code) \
-	if(TJSStringMatch(&Current, TJS_W(word), false)) return (code)
+	if(TJSStringMatch(&Current, TJS_WS(word), false)) return (code)
 #define TJS_MATCH_W_V(word, code, val) \
-	if(TJSStringMatch(&Current, TJS_W(word), true)) { n=PutValue(val); return (code); }
+	if(TJSStringMatch(&Current, TJS_WS(word), true)) { n=PutValue(val); return (code); }
 #define TJS_MATCH_S_V(word, code, val) \
-	if(TJSStringMatch(&Current, TJS_W(word), false)) { n=PutValue(val); return (code); }
+	if(TJSStringMatch(&Current, TJS_WS(word), false)) { n=PutValue(val); return (code); }
 #define TJS_1CHAR(code) \
 	TJSNext(&Current); return (code)
 tjs_int tTJSLexicalAnalyzer::GetToken(tjs_int &n)
@@ -1327,7 +1326,7 @@ re_match:
 
 	switch(*Current)
 	{
-	case TJS_W('>'):
+	case TJS_WC('>'):
 		TJS_MATCH_S(">>>=", T_RBITSHIFTEQUAL);
 		TJS_MATCH_S(">>>", T_RBITSHIFT);
 		TJS_MATCH_S(">>=", T_RARITHSHIFTEQUAL);
@@ -1335,7 +1334,7 @@ re_match:
 		TJS_MATCH_S(">=", T_GTOREQUAL);
 		TJS_1CHAR(T_GT);
 
-	case TJS_W('<'):
+	case TJS_WC('<'):
 		TJS_MATCH_S("<<=", T_LARITHSHIFTEQUAL);
 		TJS_MATCH_S("<->", T_SWAP);
 		TJS_MATCH_S("<=", T_LTOREQUAL);
@@ -1343,7 +1342,7 @@ re_match:
 		{
 			const tjs_char *next = Current;
 			TJSNext(&next);
-			if(*next == TJS_W('%'))
+			if(*next == TJS_WC('%'))
 			{
 				// '<%'   octet literal
 				tTJSVariant v;
@@ -1354,32 +1353,32 @@ re_match:
 		}
 		TJS_1CHAR(T_LT);
 
-	case TJS_W('='):
+	case TJS_WC('='):
 		TJS_MATCH_S("===", T_DISCEQUAL);
 		TJS_MATCH_S("==", T_EQUALEQUAL);
 		TJS_MATCH_S("=>", T_COMMA);
 			// just a replacement for comma, like perl
 		TJS_1CHAR(T_EQUAL);
 
-	case TJS_W('!'):
+	case TJS_WC('!'):
 		TJS_MATCH_S("!==", T_DISCNOTEQUAL);
 		TJS_MATCH_S("!=", T_NOTEQUAL);
 		TJS_1CHAR(T_EXCRAMATION);
 
-	case TJS_W('&'):
+	case TJS_WC('&'):
 		TJS_MATCH_S("&&=", T_LOGICALANDEQUAL);
 		TJS_MATCH_S("&&", T_LOGICALAND);
 		TJS_MATCH_S("&=", T_AMPERSANDEQUAL);
 		TJS_1CHAR(T_AMPERSAND);
 
-	case TJS_W('|'):
+	case TJS_WC('|'):
 		TJS_MATCH_S("||=", T_LOGICALOREQUAL);
 		TJS_MATCH_S("||", T_LOGICALOR);
 		TJS_MATCH_S("|=", T_VERTLINEEQUAL);
 		TJS_1CHAR(T_VERTLINE);
 
-	case TJS_W('.'):
-		if(Current[1] >= TJS_W('0') && Current[1] <= TJS_W('9'))
+	case TJS_WC('.'):
+		if(Current[1] >= TJS_WC('0') && Current[1] <= TJS_WC('9'))
 		{
 			// number
 			tTJSVariant v;
@@ -1390,21 +1389,21 @@ re_match:
 		TJS_MATCH_S("...", T_OMIT);
 		TJS_1CHAR(T_DOT);
 
-	case TJS_W('+'):
+	case TJS_WC('+'):
 		TJS_MATCH_S("++", T_INCREMENT);
 		TJS_MATCH_S("+=", T_PLUSEQUAL);
 		TJS_1CHAR(T_PLUS);
 
-	case TJS_W('-'):
+	case TJS_WC('-'):
 		TJS_MATCH_S("-=", T_MINUSEQUAL);
 		TJS_MATCH_S("--", T_DECREMENT);
 		TJS_1CHAR(T_MINUS);
 
-	case TJS_W('*'):
+	case TJS_WC('*'):
 		TJS_MATCH_S("*=", T_ASTERISKEQUAL);
 		TJS_1CHAR(T_ASTERISK);
 
-	case TJS_W('/'):
+	case TJS_WC('/'):
 		// check comments
 		switch(TJSSkipComment(&Current))
 		{
@@ -1419,65 +1418,65 @@ re_match:
 		TJS_MATCH_S("/=", T_SLASHEQUAL);
 		TJS_1CHAR(T_SLASH);
 
-	case TJS_W('\\'):
+	case TJS_WC('\\'):
 		TJS_MATCH_S("\\=", T_BACKSLASHEQUAL);
 		TJS_1CHAR(T_BACKSLASH);
 
-	case TJS_W('%'):
+	case TJS_WC('%'):
 		TJS_MATCH_S("%=", T_PERCENTEQUAL);
 		TJS_1CHAR(T_PERCENT);
 
-	case TJS_W('^'):
+	case TJS_WC('^'):
 		TJS_MATCH_S("^=", T_CHEVRONEQUAL);
 		TJS_1CHAR(T_CHEVRON);
 
-	case TJS_W('['):
+	case TJS_WC('['):
 		NestLevel++;
 		TJS_1CHAR(T_LBRACKET);
 
-	case TJS_W(']'):
+	case TJS_WC(']'):
 		NestLevel--;
 		TJS_1CHAR(T_RBRACKET);
 
-	case TJS_W('('):
+	case TJS_WC('('):
 		NestLevel++;
 		TJS_1CHAR(T_LPARENTHESIS);
 
-	case TJS_W(')'):
+	case TJS_WC(')'):
 		NestLevel--;
 		TJS_1CHAR(T_RPARENTHESIS);
 
-	case TJS_W('~'):
+	case TJS_WC('~'):
 		TJS_1CHAR(T_TILDE);
 
-	case TJS_W('?'):
+	case TJS_WC('?'):
 		TJS_1CHAR(T_QUESTION);
 
-	case TJS_W(':'):
+	case TJS_WC(':'):
 		TJS_1CHAR(T_COLON);
 
-	case TJS_W(','):
+	case TJS_WC(','):
 		TJS_1CHAR(T_COMMA);
 
-	case TJS_W(';'):
+	case TJS_WC(';'):
 		TJS_1CHAR(T_SEMICOLON);
 
-	case TJS_W('{'):
+	case TJS_WC('{'):
 		NestLevel++;
 		TJS_1CHAR(T_LBRACE);
 
-	case TJS_W('}'):
+	case TJS_WC('}'):
 		NestLevel--;
 		TJS_1CHAR(T_RBRACE);
 
-	case TJS_W('#'):
+	case TJS_WC('#'):
 		TJS_1CHAR(T_SHARP);
 
-	case TJS_W('$'):
+	case TJS_WC('$'):
 		TJS_1CHAR(T_DOLLAR);
 
-	case TJS_W('\''):
-	case TJS_W('\"'):
+	case TJS_WC('\''):
+	case TJS_WC('\"'):
 		// literal string
 	  {
 		tTJSVariant v;
@@ -1486,13 +1485,13 @@ re_match:
 		return T_CONSTVAL;
 	  }
 
-	case TJS_W('@'):
+	case TJS_WC('@'):
 		// embeddable expression in string (such as @"this can be embeddable like &variable;")
 	  {
 		const tjs_char *org = Current;
 		if(!TJSNext(&Current)) return 0;
 		if(!TJSSkipSpace(&Current)) return 0;
-		if(*Current == TJS_W('\'') || *Current == TJS_W('\"'))
+		if(*Current == TJS_WC('\'') || *Current == TJS_WC('\"'))
 		{
 			tEmbeddableExpressionData data;
 			data.State = evsStart;
@@ -1522,16 +1521,16 @@ re_match:
 		break;
 	  }
 
-	case TJS_W('0'):
-	case TJS_W('1'):
-	case TJS_W('2'):
-	case TJS_W('3'):
-	case TJS_W('4'):
-	case TJS_W('5'):
-	case TJS_W('6'):
-	case TJS_W('7'):
-	case TJS_W('8'):
-	case TJS_W('9'):
+	case TJS_WC('0'):
+	case TJS_WC('1'):
+	case TJS_WC('2'):
+	case TJS_WC('3'):
+	case TJS_WC('4'):
+	case TJS_WC('5'):
+	case TJS_WC('6'):
+	case TJS_WC('7'):
+	case TJS_WC('8'):
+	case TJS_WC('9'):
 		// number
 	  {
 		tTJSVariant v;
@@ -1542,24 +1541,24 @@ re_match:
 	  }
 	}
 
-	if(!TJS_iswalpha(*Current) && *Current!=TJS_W('_'))
+	if(!TJS_iswalpha(*Current) && *Current!=TJS_WC('_'))
 	{
 		ttstr str(TJSInvalidChar);
-		str.Replace(TJS_W("%1"), ttstr(*Current).EscapeC());
+		str.Replace(TJS_WS("%1"), ttstr(*Current).EscapeC());
 		TJS_eTJSError(str);
 	}
 
 
 	const tjs_char *ptr = Current;
 	tjs_int nch = 0;
-	while(TJS_iswdigit(*ptr) || TJS_iswalpha(*ptr) || *ptr==TJS_W('_') ||
+	while(TJS_iswdigit(*ptr) || TJS_iswalpha(*ptr) || *ptr==TJS_WC('_') ||
 		*ptr>0x0100 || *ptr == TJS_SKIP_CODE)
 		ptr++, nch++;
 
 	if(nch == 0)
 	{
 		ttstr str(TJSInvalidChar);
-		str.Replace(TJS_W("%1"), ttstr(*Current).EscapeC());
+		str.Replace(TJS_WS("%1"), ttstr(*Current).EscapeC());
 		TJS_eTJSError(str);
 	}
 
@@ -1667,25 +1666,20 @@ tjs_int32 tTJSLexicalAnalyzer::ParsePPExpression(const tjs_char *start, tjs_int 
 //---------------------------------------------------------------------------
 void tTJSLexicalAnalyzer::PreProcess(void)
 {
-	TJS_F_TRACE("tTJSLexicalAnalyzer::PreProcess");
-
-
 	// pre-process
 
 	// proceeds newline code unification, conditional compile control.
 
 
 	/* unify new line codes */
-	TJS_D((TJS_W("unifying new line codes ...\n")))
-
 	tjs_char *p;
 	p=Script;
 	while(*p)
 	{
-		if(*p==TJS_W('\r') && *(p+1)==TJS_W('\n'))
+		if(*p==TJS_WC('\r') && *(p+1)==TJS_WC('\n'))
 			*p=TJS_SKIP_CODE;
-		else if(*p==TJS_W('\r'))
-			*p=TJS_W('\n');
+		else if(*p==TJS_WC('\r'))
+			*p=TJS_WC('\n');
 		p++;
 	}
 }
@@ -1723,13 +1717,9 @@ tjs_int tTJSLexicalAnalyzer::GetCurrentPosition()
 //---------------------------------------------------------------------------
 tjs_int tTJSLexicalAnalyzer::GetNext(tjs_int &value)
 {
-	TJS_F_TRACE("tTJSLexicalAnalyzer::GetNext");
 
 	if(First)
 	{
-		TJS_D((TJS_W("pre-processing ...\n")))
-
-
 		First = false;
 		try
 		{
@@ -1830,7 +1820,7 @@ tjs_int tTJSLexicalAnalyzer::GetNext(tjs_int &value)
 					tTJSVariant v;
 					tTJSInternalParseStringResult res =
 						TJSInternalParseString(v, &Current,
-							data.Delimiter, TJS_W('&'));
+							data.Delimiter, TJS_WC('&'));
 					if(res == psrDelimiter)
 					{
 						// embeddable expression mode ended

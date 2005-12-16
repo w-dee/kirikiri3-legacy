@@ -19,7 +19,7 @@
 
 namespace TJS
 {
-
+TJS_DEFINE_SOURCE_ID(1013);
 //---------------------------------------------------------------------------
 // TJSGetExceptionObject : retrieves TJS 'Exception' object
 //---------------------------------------------------------------------------
@@ -31,7 +31,7 @@ void TJSGetExceptionObject(tTJS *tjs, tTJSVariant *res, tTJSVariant &msg,
 	// retrieve class "Exception" from global
 	iTJSDispatch2 *global = tjs->GetGlobalNoAddRef();
 	tTJSVariant val;
-	static tTJSString Exception_name(TJS_W("Exception"));
+	static tTJSString Exception_name(TJS_WS("Exception"));
 	tjs_error hr = global->PropGet(0, Exception_name.c_str(),
 		Exception_name.GetHint(), &val, global);
 	if(TJS_FAILED(hr)) TJS_eTJSError(TJSExceptionNotFound);
@@ -43,7 +43,7 @@ void TJSGetExceptionObject(tTJS *tjs, tTJSVariant *res, tTJSVariant &msg,
 	if(TJS_FAILED(hr)) TJS_eTJSError(TJSExceptionNotFound);
 	if(trace)
 	{
-		static tTJSString trace_name(TJS_W("trace"));
+		static tTJSString trace_name(TJS_WS("trace"));
 		excpobj->PropSet(TJS_MEMBERENSURE, trace_name.c_str(), trace_name.GetHint(),
 			trace, excpobj);
 	}
@@ -89,7 +89,7 @@ tjs_int eTJSScriptError::GetSourceLine() const
 const tjs_char * eTJSScriptError::GetBlockName() const
 {
 	const tjs_char * name = Block.Block->GetName() ;
-	return name ? name : TJS_W("");
+	return name ? name : TJS_WS("");
 }
 //---------------------------------------------------------------------------
 bool eTJSScriptError::AddTrace(tTJSScriptBlock *block, tjs_int srcpos)
@@ -97,7 +97,7 @@ bool eTJSScriptError::AddTrace(tTJSScriptBlock *block, tjs_int srcpos)
 	tjs_int len = Trace.GetLen();
 	if(len >= TJS_MAX_TRACE_TEXT_LEN) return false;
 
-	if(len != 0) Trace += TJS_W(" <-- ");
+	if(len != 0) Trace += TJS_WS(" <-- ");
 	Trace += block->GetLineDescriptionString(srcpos);
 
 	return true;
@@ -108,7 +108,7 @@ bool eTJSScriptError::AddTrace(tTJSInterCodeContext *context, tjs_int codepos)
 	tjs_int len = Trace.GetLen();
 	if(len >= TJS_MAX_TRACE_TEXT_LEN) return false;
 
-	if(len != 0) Trace += TJS_W(" <-- ");
+	if(len != 0) Trace += TJS_WS(" <-- ");
 	Trace += context->GetPositionDescriptionString(codepos);
 
 	return true;
@@ -118,7 +118,7 @@ bool eTJSScriptError::AddTrace(const ttstr & data)
 {
 	tjs_int len = Trace.GetLen();
 	if(len >= TJS_MAX_TRACE_TEXT_LEN) return false;
-	if(len != 0) Trace += TJS_W(" <-- ");
+	if(len != 0) Trace += TJS_WS(" <-- ");
 	Trace += data;
 	return true;
 }
@@ -135,7 +135,7 @@ static void TJSReportExceptionSource(const ttstr &msg, tTJSScriptBlock *block,
 	tjs_int srcpos)
 {
 	tTJS *tjs = block->GetTJS();
-	tjs->OutputExceptionToConsole((msg + TJS_W(" at ") +
+	tjs->OutputExceptionToConsole((msg + TJS_WS(" at ") +
 		block->GetLineDescriptionString(srcpos)).c_str());
 }
 //---------------------------------------------------------------------------
@@ -143,7 +143,7 @@ static void TJSReportExceptionSource(const ttstr &msg,
 	tTJSInterCodeContext *context, tjs_int codepos)
 {
 	tTJS *tjs = context->GetBlock()->GetTJS();
-	tjs->OutputExceptionToConsole((msg + TJS_W(" at ") +
+	tjs->OutputExceptionToConsole((msg + TJS_WS(" at ") +
 		context->GetPositionDescriptionString(codepos)).c_str());
 }
 //---------------------------------------------------------------------------
@@ -234,7 +234,7 @@ void TJSThrowFrom_tjs_error(tjs_error hr, const tjs_char *name)
 		if(name)
 		{
 			ttstr str(TJSMemberNotFound);
-			str.Replace(TJS_W("%1"), name);
+			str.Replace(TJS_WS("%1"), name);
 			TJS_eTJSError(str);
 		}
 		else
@@ -259,9 +259,8 @@ void TJSThrowFrom_tjs_error(tjs_error hr, const tjs_char *name)
 	default:
 		if(TJS_FAILED(hr))
 		{
-			tjs_char buf[256];
-			TJS_sprintf(buf, TJS_W("Unknown failure : %08X"), hr);
-			TJS_eTJSError(buf);
+			ttstr p(TJS_WS("Unknown failure : %08X"), TJSInt32ToHex(hr));
+			TJS_eTJSError(p);
 		}
 	}
 }
@@ -271,7 +270,7 @@ void TJSThrowFrom_tjs_error(tjs_error hr, const tjs_char *name)
 //---------------------------------------------------------------------------
 // error messages  ( can be localized )
 //---------------------------------------------------------------------------
-ttstr TJSNonamedException = TJS_W("No-named exception");
+ttstr TJSNonamedException = TJS_WS("No-named exception");
 //---------------------------------------------------------------------------
 } // namespace TJS
 

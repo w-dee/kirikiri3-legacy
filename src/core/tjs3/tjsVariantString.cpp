@@ -18,6 +18,8 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1033);
+
 //---------------------------------------------------------------------------
 // throwing error functions
 //---------------------------------------------------------------------------
@@ -238,7 +240,7 @@ void TJSDumpStringHeap(void)
 }
 #endif
 //---------------------------------------------------------------------------
-static int TJS_USERENTRY TJSStringHeapSortFunction(const void *a, const void *b)
+static int TJSStringHeapSortFunction(const void *a, const void *b)
 {
 	return *(const tTJSVariantString **)b - *(const tTJSVariantString **)a;
 }
@@ -518,12 +520,12 @@ tTVReal tTJSVariantString::ToReal() const
 //---------------------------------------------------------------------------
 void tTJSVariantString::ToNumber(tTJSVariant &dest) const
 {
-	if(!this) { dest = 0; return; }
+	if(!this) { dest = (tTVInteger)0; return; }
 
 	const tjs_char *ptr = this->operator const tjs_char *();
 	if(TJSParseNumber(dest, &ptr)) return;
 
-	dest = 0;
+	dest = (tTVInteger)0;
 }
 //---------------------------------------------------------------------------
 tTJSVariantString * tTJSVariantString::FixLength()
@@ -561,21 +563,21 @@ tTJSVariantString * TJSAllocVariantString(const tjs_char *ref1, const tjs_char *
 		}
 	}
 
-	tjs_int len1 = ref1?wcslen(ref1):0;
-	tjs_int len2 = ref2?wcslen(ref2):0;
+	tjs_int len1 = ref1?TJS_strlen(ref1):0;
+	tjs_int len2 = ref2?TJS_strlen(ref2):0;
 
 	tTJSVariantString *ret = TJSAllocStringHeap();
 
 	if(len1+len2>TJS_VS_SHORT_LEN)
 	{
 		ret->LongString = TJSVS_malloc(len1+len2+1);
-		if(ref1) wcscpy(ret->LongString , ref1);
-		if(ref2) wcscpy(ret->LongString + len1, ref2);
+		if(ref1) TJS_strcpy(ret->LongString , ref1);
+		if(ref2) TJS_strcpy(ret->LongString + len1, ref2);
 	}
 	else
 	{
-		if(ref1) wcscpy(ret->ShortString, ref1);
-		if(ref2) wcscpy(ret->ShortString + len1, ref2);
+		if(ref1) TJS_strcpy(ret->ShortString, ref1);
+		if(ref2) TJS_strcpy(ret->ShortString + len1, ref2);
 	}
 	ret->Length = len1+len2;
 	return ret;
@@ -590,6 +592,27 @@ tTJSVariantString * TJSAllocVariantString(const tjs_char *ref)
 	return ret;
 }
 //---------------------------------------------------------------------------
+
+
+#ifdef TJS_WCHAR_T_SIZE_IS_16BIT
+//---------------------------------------------------------------------------
+//! @brief		文字列ブロックを確保(wchar_tより)
+//! @param		ref     コピー元文字列
+//! @return		確保された文字列
+//---------------------------------------------------------------------------
+tTJSVariantString *TJSAllocVariantString(const wchar_t *ref)
+{
+	if(!ref) return NULL;
+	if(ref[0]==0) return NULL;
+	tTJSVariantString *ret = TJSAllocStringHeap();
+	ret->SetString(ref);
+	return ret;
+}
+//---------------------------------------------------------------------------
+#endif
+
+
+//---------------------------------------------------------------------------
 tTJSVariantString * TJSAllocVariantString(const tjs_char *ref, tjs_int n)
 {
 	if(n==0) return NULL;
@@ -597,15 +620,6 @@ tTJSVariantString * TJSAllocVariantString(const tjs_char *ref, tjs_int n)
 	if(ref[0]==0) return NULL;
 	tTJSVariantString *ret = TJSAllocStringHeap();
 	ret->SetString(ref, n);
-	return ret;
-}
-//---------------------------------------------------------------------------
-tTJSVariantString * TJSAllocVariantString(const tjs_nchar *ref)
-{
-	if(!ref) return NULL;
-	if(ref[0]==0) return NULL;
-	tTJSVariantString *ret = TJSAllocStringHeap();
-	ret->SetString(ref);
 	return ret;
 }
 //---------------------------------------------------------------------------
@@ -669,7 +683,7 @@ class tTVPVariantStringHolder
 	tTJSVariantString * String;
 public:
 	tTVPVariantStringHolder()
-	{ String = TJSAllocVariantString(TJS_W("This is a dummy.")); }
+	{ String = TJSAllocVariantString(TJS_WS("This is a dummy.")); }
 	~tTVPVariantStringHolder()
 	{ String->Release(); }
 } static TVPVariantStringHolder;
@@ -681,6 +695,8 @@ public:
 tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 	tTJSVariant **params)
 {
+	return NULL;
+#if 0
 	// TODO: more reliable implementation
 
 	// format the string with the format illustrated as "format"
@@ -716,7 +732,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 
 	for(;*f;)
 	{
-		if(*f!=TJS_W('%'))
+		if(*f!=TJS_WC('%'))
 		{
 			check_alloc;
 			o[s++] = *(f++);
@@ -740,9 +756,9 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 	// flags
 		switch(*f)
 		{
-		case TJS_W('-'): flag = TJS_W('-'); break;
-		case TJS_W('+'): flag = TJS_W('+'); break;
-		case TJS_W('#'): flag = TJS_W('#'); break;
+		case TJS_WC('-'): flag = TJS_WC('-'); break;
+		case TJS_WC('+'): flag = TJS_WC('+'); break;
+		case TJS_WC('#'): flag = TJS_WC('#'); break;
 		default: goto width;
 		}
 
@@ -752,7 +768,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 	width:
 		switch(*f)
 		{
-		case TJS_W('0'): /*zeropad = true;*/ break;
+		case TJS_WC('0'): /*zeropad = true;*/ break;
 		default: goto width_2;
 		}
 
@@ -762,7 +778,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 	width_2:
 		switch(*f)
 		{
-		case TJS_W('*'): width_ind = true; break;
+		case TJS_WC('*'): width_ind = true; break;
 		default: goto width_3;
 		}
 
@@ -774,8 +790,8 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 	width_3:
 		while(true)
 		{
-			if(*f >= TJS_W('0') && *f <= TJS_W('9'))
-				width = width *10 + (*f - TJS_W('0'));
+			if(*f >= TJS_WC('0') && *f <= TJS_WC('9'))
+				width = width *10 + (*f - TJS_WC('0'));
 			else
 				break;
 			f++;
@@ -784,30 +800,30 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 		if(!*f) goto error;
 
 	prec:
-		if(*f == TJS_W('.'))
+		if(*f == TJS_WC('.'))
 		{
 			f++;
 			if(!*f) goto error;
-			if(*f == TJS_W('*'))
+			if(*f == TJS_WC('*'))
 			{
 				prec_ind = true;
 				f++;
 				if(!*f) goto error;
 				goto type_char;
 			}
-			if(*f < TJS_W('0') || *f > TJS_W('9')) goto error;
+			if(*f < TJS_WC('0') || *f > TJS_WC('9')) goto error;
 			/*precspec = true;*/
 			do
 			{
-				prec = prec * 10 + (*f-TJS_W('0'));
+				prec = prec * 10 + (*f-TJS_WC('0'));
 				f++;
-			} while(*f >= TJS_W('0') && *f <= TJS_W('9'));
+			} while(*f >= TJS_WC('0') && *f <= TJS_WC('9'));
 		}
 
 	type_char:
 		switch(*f)
 		{
-		case TJS_W('%'):
+		case TJS_WC('%'):
 			// literal '%'
 			check_alloc;
 			o[s++] = '%';
@@ -815,8 +831,8 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 			continue;
 
 
-		case TJS_W('c'):
-		case TJS_W('s'):
+		case TJS_WC('c'):
+		case TJS_WC('s'):
 		  {
 			if(width_ind)
 			{
@@ -834,7 +850,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 			{
 				tjs_uint slen = str->GetLength();
 				if(!prec) prec = slen;
-				if(*f == TJS_W('c') && prec > 1 ) prec = 1;
+				if(*f == TJS_WC('c') && prec > 1 ) prec = 1;
 				if(width < prec) width = prec;
 				if(s + width > allocsize)
 				{
@@ -854,19 +870,19 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 				tjs_uint pad = width - prec;
 				if(pad)
 				{
-					if(flag == TJS_W('-'))
+					if(flag == TJS_WC('-'))
 					{
 						// left align
 						if(str) TJS_strncpy(o+s, *str, prec);
 						tjs_char * p = o + s + prec;
-						while(pad--) 0[p++] = TJS_W(' ');
+						while(pad--) 0[p++] = TJS_WC(' ');
 					}
 					else
 					{
 						// right align
 						if(str) TJS_strncpy(o+s+pad, *str, prec);
 						tjs_char *p = o + s;
-						while(pad--) 0[p++] = TJS_W(' ');
+						while(pad--) 0[p++] = TJS_WC(' ');
 					}
 					s += width;
 				}
@@ -880,8 +896,8 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 			f++;
 			continue;
 		  }
-		case TJS_W('d'): case TJS_W('i'): case TJS_W('o'): case TJS_W('u'):
-		case TJS_W('x'): case TJS_W('X'):
+		case TJS_WC('d'): case TJS_WC('i'): case TJS_WC('o'): case TJS_WC('u'):
+		case TJS_WC('x'): case TJS_WC('X'):
 		  {
 			// integers
 			if(width+prec > 900) goto error;// too long
@@ -891,7 +907,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 			tjs_uint fmtlen = f - fst;
 			if(fmtlen > 67) goto error;  // too long
 			TJS_strncpy(fmt, fst, fmtlen);
-			fmt[fmtlen] = TJS_W('L'); //// CHECK!! 'L' must indicate a 64bit integer
+			fmt[fmtlen] = TJS_WC('L'); //// CHECK!! 'L' must indicate a 64bit integer
 			fmt[fmtlen+1] = *f;
 			fmt[fmtlen+2] = 0;
 			int ind[2];
@@ -937,8 +953,8 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 			f++;
 			continue;
 		  }
-		case TJS_W('f'): case TJS_W('e'): case TJS_W('g'): case TJS_W('E'):
-		case TJS_W('G'):
+		case TJS_WC('f'): case TJS_WC('e'): case TJS_WC('g'): case TJS_WC('E'):
+		case TJS_WC('G'):
 		  {
 			// reals
  			if(width+prec > 900) goto error;// too long
@@ -947,7 +963,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 			tjs_uint fmtlen = f - fst;
 			if(fmtlen > 67) goto error;  // too long
 			TJS_strncpy(fmt, fst, fmtlen);
-			fmt[fmtlen] = TJS_W('l'); //// CHECK!! 'l' must indicate a 64bit real
+			fmt[fmtlen] = TJS_WC('l'); //// CHECK!! 'l' must indicate a 64bit real
 			fmt[fmtlen+1] = *f;
 			fmt[fmtlen+2] = 0;
 			int ind[2];
@@ -1005,6 +1021,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
 error:
 	TJS_eTJSVariantError(TJSInvalidFormatString);
 	return NULL; // not reached
+#endif
 }
 //---------------------------------------------------------------------------
 

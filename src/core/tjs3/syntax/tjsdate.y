@@ -14,12 +14,15 @@
 
 #include "tjsTypes.h"
 #include "tjsDateParser.h"
+#include "tjsCharUtils.h"
 
 /* param */
 #define YYPARSE_PARAM pm
 #define YYLEX_PARAM pm
 
 NS_TJS_START
+TJS_DEFINE_SOURCE_ID(1003);
+
 
 /* yylex/yyerror prototype decl */
 int dplex(YYSTYPE *yylex, void *pm);

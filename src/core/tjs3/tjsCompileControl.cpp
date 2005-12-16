@@ -21,6 +21,7 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1006);
 //---------------------------------------------------------------------------
 
 int ppparse(void*);
@@ -104,82 +105,82 @@ tjs_int tTJSPPExprParser::GetNext(tjs_int32 &value)
 
 	switch(*Current)
 	{
-	case TJS_W('('):
+	case TJS_WC('('):
 		Current++;
 		return PT_LPARENTHESIS;
 
-	case TJS_W(')'):
+	case TJS_WC(')'):
 		Current++;
 		return PT_RPARENTHESIS;
 
-	case TJS_W(','):
+	case TJS_WC(','):
 		Current++;
 		return PT_COMMA;
 
-	case TJS_W('='):
-		if(*(Current+1) == TJS_W('=')) { Current+=2; return PT_EQUALEQUAL; }
+	case TJS_WC('='):
+		if(*(Current+1) == TJS_WC('=')) { Current+=2; return PT_EQUALEQUAL; }
 		Current++;
 		return PT_EQUAL;
 
-	case TJS_W('!'):
-		if(*(Current+1) == TJS_W('=')) { Current+=2; return PT_NOTEQUAL; }
+	case TJS_WC('!'):
+		if(*(Current+1) == TJS_WC('=')) { Current+=2; return PT_NOTEQUAL; }
 		Current++;
 		return PT_EXCLAMATION;
 
-	case TJS_W('|'):
-		if(*(Current+1) == TJS_W('|')) { Current+=2; return PT_LOGICALOR; }
+	case TJS_WC('|'):
+		if(*(Current+1) == TJS_WC('|')) { Current+=2; return PT_LOGICALOR; }
 		Current++;
 		return PT_VERTLINE;
 
-	case TJS_W('&'):
-		if(*(Current+1) == TJS_W('&')) { Current+=2; return PT_LOGICALAND; }
+	case TJS_WC('&'):
+		if(*(Current+1) == TJS_WC('&')) { Current+=2; return PT_LOGICALAND; }
 		Current++;
 		return PT_AMPERSAND;
 
-	case TJS_W('^'):
+	case TJS_WC('^'):
 		Current++;
 		return PT_CHEVRON;
 
-	case TJS_W('+'):
+	case TJS_WC('+'):
 		Current++;
 		return PT_PLUS;
 
-	case TJS_W('-'):
+	case TJS_WC('-'):
 		Current++;
 		return PT_MINUS;
 
-	case TJS_W('*'):
+	case TJS_WC('*'):
 		Current++;
 		return PT_ASTERISK;
 
-	case TJS_W('/'):
+	case TJS_WC('/'):
 		Current++;
 		return PT_SLASH;
 
-	case TJS_W('%'):
+	case TJS_WC('%'):
 		Current++;
 		return PT_PERCENT;
 
-	case TJS_W('<'):
-		if(*(Current+1) == TJS_W('=')) { Current+=2; return PT_LTOREQUAL; }
+	case TJS_WC('<'):
+		if(*(Current+1) == TJS_WC('=')) { Current+=2; return PT_LTOREQUAL; }
 		Current++;
 		return PT_LT;
 
-	case TJS_W('>'):
-		if(*(Current+1) == TJS_W('=')) { Current+=2; return PT_GTOREQUAL; }
+	case TJS_WC('>'):
+		if(*(Current+1) == TJS_WC('=')) { Current+=2; return PT_GTOREQUAL; }
 		Current++;
 		return PT_GT;
 
-	case TJS_W('0'):
-	case TJS_W('1'):
-	case TJS_W('2'):
-	case TJS_W('3'):
-	case TJS_W('4'):
-	case TJS_W('5'):
-	case TJS_W('6'):
-	case TJS_W('7'):
-	case TJS_W('8'):
-	case TJS_W('9'):
+	case TJS_WC('0'):
+	case TJS_WC('1'):
+	case TJS_WC('2'):
+	case TJS_WC('3'):
+	case TJS_WC('4'):
+	case TJS_WC('5'):
+	case TJS_WC('6'):
+	case TJS_WC('7'):
+	case TJS_WC('8'):
+	case TJS_WC('9'):
 	  {
 		// number
 		tTJSVariant val;
@@ -197,14 +198,14 @@ tjs_int tTJSPPExprParser::GetNext(tjs_int32 &value)
 
 	}
 
-	if(!TJS_iswalpha(*Current) && *Current!=TJS_W('_'))
+	if(!TJS_iswalpha(*Current) && *Current!=TJS_WC('_'))
 	{
 		return PT_ERROR;
 	}
 
 	const tjs_char *st = Current;
 	while((TJS_iswalpha(*Current) || TJS_iswdigit(*Current) ||
-		*Current==TJS_W('_')) && *Current)
+		*Current==TJS_WC('_')) && *Current)
 		Current++;
 
 	ttstr str(st, Current-st);

@@ -20,6 +20,7 @@ using namespace boost;
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1027);
 //---------------------------------------------------------------------------
 // Flags
 //---------------------------------------------------------------------------
@@ -44,11 +45,11 @@ static tjs_uint32 TJSRegExpFlagToValue(tjs_char ch, tjs_uint32 prev)
 
 	switch(ch)
 	{
-	case TJS_W('g'): // global search
+	case TJS_WC('g'): // global search
 		prev|=globalsearch; return prev;
-	case TJS_W('i'): // ignore case
+	case TJS_WC('i'): // ignore case
 		prev|=regbase::icase; return prev;
-	case TJS_W('l'): // use localized collation
+	case TJS_WC('l'): // use localized collation
 		prev &= ~regbase::nocollate; return prev;
 	default:
 		return prev;
@@ -61,7 +62,7 @@ static tjs_uint32 TJSGetRegExpFlagsFromString(const tjs_char *string)
 
 	tjs_uint32 flag = TJSRegExpFlagToValue(0, 0);
 
-	while(*string && *string != TJS_W('/'))
+	while(*string && *string != TJS_WC('/'))
 	{
 		flag = TJSRegExpFlagToValue(*string, flag);
 		string++;
@@ -291,7 +292,7 @@ void tTJSNI_RegExp::Split(iTJSDispatch2 ** array, const ttstr &target, bool purg
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_RegExp::ClassID = (tjs_uint32)-1;
 tTJSNC_RegExp::tTJSNC_RegExp() :
-	tTJSNativeClass(TJS_W("RegExp"))
+	tTJSNativeClass(TJS_WS("RegExp"))
 {
 	// class constructor
 
@@ -350,10 +351,10 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/_compile)
 	const tjs_char *p = expr.c_str();
 	if(!p || !p[0]) return TJS_E_FAIL;
 
-	if(p[0] != TJS_W('/') || p[1] != TJS_W('/')) return TJS_E_FAIL;
+	if(p[0] != TJS_WC('/') || p[1] != TJS_WC('/')) return TJS_E_FAIL;
 
 	p+=2;
-	const tjs_char *exprstart = TJS_strchr(p, TJS_W('/'));
+	const tjs_char *exprstart = TJS_strchr(p, TJS_WC('/'));
 	if(!exprstart) return TJS_E_FAIL;
 	exprstart ++;
 
@@ -722,7 +723,7 @@ void tTJSNC_RegExp::Compile(tjs_int numparams, tTJSVariant **param, tTJSNI_RegEx
 		flags = TJSRegExpFlagToValue(0, 0);
 	}
 
-	if(expr.IsEmpty()) expr = TJS_W("(?:)"); // generate empty regular expression
+	if(expr.IsEmpty()) expr = TJS_WS("(?:)"); // generate empty regular expression
 
 	try
 	{
@@ -777,7 +778,7 @@ iTJSDispatch2 * tTJSNC_RegExp::GetResultArray(bool matched, tTJSNI_RegExp *_this
 	{
 		if(_this->RegEx.empty())
 		{
-			tTJSVariant val(TJS_W(""));
+			tTJSVariant val(TJS_WS(""));
 			array->PropSetByNum(TJS_MEMBERENSURE|TJS_IGNOREPROP,
 					0, &val, array);
 		}

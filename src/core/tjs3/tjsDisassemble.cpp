@@ -17,6 +17,7 @@
 //---------------------------------------------------------------------------
 namespace TJS  // following is in the namespace
 {
+TJS_DEFINE_SOURCE_ID(1012);
 //---------------------------------------------------------------------------
 tTJSString tTJSInterCodeContext::GetValueComment(const tTJSVariant &val)
 {
@@ -31,6 +32,7 @@ void tTJSInterCodeContext::Disassemble(
 	void (*output_func_src)(const tjs_char *msg, const tjs_char *name, tjs_int line,
 	void *data), void *data, tjs_int start, tjs_int end)
 {
+#if 0
 	// dis-assemble the intermediate code.
 	// "output_func" points a line output function.
 
@@ -68,7 +70,7 @@ void tTJSInterCodeContext::Disassemble(
 					TJS_strcpy_maxlen(buf, src, len);
 					try
 					{
-						output_func_src(buf, TJS_W(""), curline, data);
+						output_func_src(buf, TJS_WS(""), curline, data);
 					}
 					catch(...)
 					{
@@ -92,7 +94,7 @@ void tTJSInterCodeContext::Disassemble(
 			TJS_strcpy_maxlen(buf, src, len);
 			try
 			{
-				output_func_src((const tjs_char*)buf, TJS_W(""), line, data);
+				output_func_src((const tjs_char*)buf, TJS_WS(""), line, data);
 			}
 			catch(...)
 			{
@@ -108,22 +110,22 @@ void tTJSInterCodeContext::Disassemble(
 		switch(CodeArea[i])
 		{
 		case VM_NOP:
-			msg.printf(TJS_W("nop"));
+			msg.printf(TJS_WS("nop"));
 			size = 1;
 			break;
 
 		case VM_NF:
-			msg.printf(TJS_W("nf"));
+			msg.printf(TJS_WS("nf"));
 			size = 1;
 			break;
 
 		case VM_CONST:
-			msg.printf(TJS_W("const %%%d, *%d"),
+			msg.printf(TJS_WS("const %%%d, *%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]));
 			if(DataArea)
 			{
-				com.printf(TJS_W("*%d = %ls"), TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
+				com.printf(TJS_WS("*%d = %ls"), TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 					GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i+2])).c_str());
 			}
 			size = 3;
@@ -554,7 +556,7 @@ void tTJSInterCodeContext::Disassemble(
 
 		i+=size;
 	}
-
+#endif
 }
 //---------------------------------------------------------------------------
 struct of_data
@@ -568,6 +570,7 @@ void tTJSInterCodeContext::_output_func(const tjs_char *msg,
 		tjs_int size, void *data)
 
 {
+#if 0
 	tjs_char *buf = new tjs_char[TJS_strlen(msg) + TJS_strlen(comment) + 20];
 
 	TJS_sprintf(buf, TJS_W("%08d %ls"), addr, msg);
@@ -589,10 +592,12 @@ void tTJSInterCodeContext::_output_func(const tjs_char *msg,
 	}
 
 	delete [] buf;
+#endif
 }
 void tTJSInterCodeContext::_output_func_src(const tjs_char *msg,
 	const tjs_char *name, tjs_int line, void *data)
 {
+#if 0
 	tjs_char *buf = new tjs_char[TJS_strlen(msg) + TJS_strlen(name) + 20];
 	if(line >= 0)
 		TJS_sprintf(buf, TJS_W("#%ls(%d) %ls"), name, line+1, msg);
@@ -610,6 +615,7 @@ void tTJSInterCodeContext::_output_func_src(const tjs_char *msg,
 	}
 
 	delete [] buf;
+#endif
 }
 //---------------------------------------------------------------------------
 void tTJSInterCodeContext::Disassemble(

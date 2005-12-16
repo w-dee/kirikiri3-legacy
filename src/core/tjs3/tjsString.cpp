@@ -17,12 +17,12 @@
 #include "tjsString.h"
 #include "tjsVariant.h"
 
-#define TJS_TTSTR_SPRINTF_BUF_SIZE 8192
-
 
 namespace TJS
 {
-const tjs_char *TJSNullStrPtr = TJS_W("");
+TJS_DEFINE_SOURCE_ID(1030);
+
+const tjs_char *TJSNullStrPtr = TJS_WS("");
 //---------------------------------------------------------------------------
 tTJSString::tTJSString(const tTJSVariant & val)
 {
@@ -34,18 +34,254 @@ tTJSString::tTJSString(tjs_int n) // from int
 	Ptr = TJSIntegerToString(n);
 }
 //---------------------------------------------------------------------------
-tjs_int tTJSString::GetNarrowStrLen() const
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ(文字列中の%1などを置き換えたいとき)
+//! @param		文字列 (中に %1 などの指令を埋め込む)
+//! @param		文字列中の %1 と置き換えたい文字列
+//---------------------------------------------------------------------------
+tTJSString::tTJSString(
+	const tTJSString &str,
+	const tTJSString &s1)
 {
-	// note that this function will return -1 when there are invalid chars in string.
-	if(!Ptr) return 0;
-	return TJS_wcstombs(NULL, c_str(), 0);
+	tjs_offset allocsize = str.GetLen() + s1.GetLen();
+	if(allocsize <= 0)
+	{
+		// str が2CP以下
+		Ptr = str.Ptr; if(Ptr) Ptr->AddRef();
+	}
+	else
+	{
+		bool s1_emit = false;
+		Ptr = TJSAllocVariantStringBuffer(allocsize);
+		tjs_char *dest = *Ptr;
+		const tjs_char *strp = str.c_str();
+
+		while(*strp)
+		{
+			if     (*strp == TJS_WC('%') && strp[1] == TJS_WC('1') && !s1_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s1.c_str());
+				dest += s1.GetLen();
+				s1_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('%'))
+			{
+				strp += 2;
+				*(dest++) = TJS_WC('%');
+			}
+			else
+			{
+				*(dest++) = *(strp++);
+			}
+		}
+		*dest = 0;
+
+		Ptr->FixLength();
+	}
 }
 //---------------------------------------------------------------------------
-void tTJSString::ToNarrowStr(tjs_nchar *dest, tjs_int destmaxlen) const
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ(文字列中の%1などを置き換えたいとき)
+//! @param		文字列 (中に %1 などの指令を埋め込む)
+//! @param		文字列中の %1 と置き換えたい文字列
+//! @param		文字列中の %2 と置き換えたい文字列
+//---------------------------------------------------------------------------
+tTJSString::tTJSString(
+	const tTJSString &str,
+	const tTJSString &s1,
+	const tTJSString &s2)
 {
-	// dest must be an array of char, its size must be at least destmaxlen+1
-	dest[TJS_wcstombs(dest, c_str(), destmaxlen)] = 0;
+	tjs_offset allocsize = str.GetLen() + s1.GetLen() + s2.GetLen();
+	if(allocsize <= 0)
+	{
+		Ptr = str.Ptr; if(Ptr) Ptr->AddRef();
+	}
+	else
+	{
+		bool s1_emit = false;
+		bool s2_emit = false;
+		Ptr = TJSAllocVariantStringBuffer(allocsize);
+		tjs_char *dest = *Ptr;
+		const tjs_char *strp = str.c_str();
+
+		while(*strp)
+		{
+			if     (*strp == TJS_WC('%') && strp[1] == TJS_WC('1') && !s1_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s1.c_str());
+				dest += s1.GetLen();
+				s1_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('2') && !s2_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s2.c_str());
+				dest += s2.GetLen();
+				s2_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('%'))
+			{
+				strp += 2;
+				*(dest++) = TJS_WC('%');
+			}
+			else
+			{
+				*(dest++) = *(strp++);
+			}
+		}
+		*dest = 0;
+
+		Ptr->FixLength();
+	}
 }
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ(文字列中の%1などを置き換えたいとき)
+//! @param		文字列 (中に %1 などの指令を埋め込む)
+//! @param		文字列中の %1 と置き換えたい文字列
+//! @param		文字列中の %2 と置き換えたい文字列
+//! @param		文字列中の %3 と置き換えたい文字列
+//---------------------------------------------------------------------------
+tTJSString::tTJSString(
+	const tTJSString &str,
+	const tTJSString &s1,
+	const tTJSString &s2,
+	const tTJSString &s3)
+{
+	tjs_offset allocsize = str.GetLen() + s1.GetLen() + s2.GetLen() + s3.GetLen();
+	if(allocsize <= 0)
+	{
+		Ptr = str.Ptr; if(Ptr) Ptr->AddRef();
+	}
+	else
+	{
+		bool s1_emit = false;
+		bool s2_emit = false;
+		bool s3_emit = false;
+		Ptr = TJSAllocVariantStringBuffer(allocsize);
+		tjs_char *dest = *Ptr;
+		const tjs_char *strp = str.c_str();
+
+		while(*strp)
+		{
+			if     (*strp == TJS_WC('%') && strp[1] == TJS_WC('1') && !s1_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s1.c_str());
+				dest += s1.GetLen();
+				s1_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('2') && !s2_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s2.c_str());
+				dest += s2.GetLen();
+				s2_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('3') && !s3_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s3.c_str());
+				dest += s3.GetLen();
+				s3_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('%'))
+			{
+				strp += 2;
+				*(dest++) = TJS_WC('%');
+			}
+			else
+			{
+				*(dest++) = *(strp++);
+			}
+		}
+		*dest = 0;
+
+		Ptr->FixLength();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ(文字列中の%1などを置き換えたいとき)
+//! @param		文字列 (中に %1 などの指令を埋め込む)
+//! @param		文字列中の %1 と置き換えたい文字列
+//! @param		文字列中の %2 と置き換えたい文字列
+//! @param		文字列中の %3 と置き換えたい文字列
+//! @param		文字列中の %4 と置き換えたい文字列
+//---------------------------------------------------------------------------
+tTJSString::tTJSString(
+	const tTJSString &str,
+	const tTJSString &s1,
+	const tTJSString &s2,
+	const tTJSString &s3,
+	const tTJSString &s4)
+{
+	tjs_offset allocsize = str.GetLen() +
+		s1.GetLen() + s2.GetLen() + s3.GetLen() + s4.GetLen();
+	if(allocsize <= 0)
+	{
+		Ptr = str.Ptr; if(Ptr) Ptr->AddRef();
+	}
+	else
+	{
+		bool s1_emit = false;
+		bool s2_emit = false;
+		bool s3_emit = false;
+		Ptr = TJSAllocVariantStringBuffer(allocsize);
+		tjs_char *dest = *Ptr;
+		const tjs_char *strp = str.c_str();
+
+		while(*strp)
+		{
+			if     (*strp == TJS_WC('%') && strp[1] == TJS_WC('1') && !s1_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s1.c_str());
+				dest += s1.GetLen();
+				s1_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('2') && !s2_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s2.c_str());
+				dest += s2.GetLen();
+				s2_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('3') && !s3_emit)
+			{
+				strp += 2;
+				TJS_strcpy(dest, s3.c_str());
+				dest += s3.GetLen();
+				s3_emit = true;
+			}
+			else if(*strp == TJS_WC('%') && strp[1] == TJS_WC('%'))
+			{
+				strp += 2;
+				*(dest++) = TJS_WC('%');
+			}
+			else
+			{
+				*(dest++) = *(strp++);
+			}
+		}
+		*dest = 0;
+
+		Ptr->FixLength();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
 //---------------------------------------------------------------------------
 tjs_char * tTJSString::InternalIndepend()
 {
@@ -107,8 +343,8 @@ tTJSString tTJSString::AsLowerCase() const
 	tjs_char *d = ret.Independ();
 	while(*s)
 	{
-		if(*s >= TJS_W('A') && *s <= TJS_W('Z'))
-			*d = *s +(TJS_W('a')-TJS_W('A'));
+		if(*s >= TJS_WC('A') && *s <= TJS_WC('Z'))
+			*d = *s +(TJS_WC('a')-TJS_WC('A'));
 		else
 			*d = *s;
 		d++;
@@ -130,8 +366,8 @@ tTJSString tTJSString::AsUpperCase() const
 	tjs_char *d = ret.Independ();
 	while(*s)
 	{
-		if(*s >= TJS_W('a') && *s <= TJS_W('z'))
-			*d = *s +(TJS_W('A')-TJS_W('a'));
+		if(*s >= TJS_WC('a') && *s <= TJS_WC('z'))
+			*d = *s +(TJS_WC('A')-TJS_WC('a'));
 		else
 			*d = *s;
 		d++;
@@ -148,8 +384,8 @@ void tTJSString::ToLowerCase()
 	{
 		while(*p)
 		{
-			if(*p >= TJS_W('A') && *p <= TJS_W('Z'))
-				*p += (TJS_W('a')-TJS_W('A'));
+			if(*p >= TJS_WC('A') && *p <= TJS_WC('Z'))
+				*p += (TJS_WC('a')-TJS_WC('A'));
 			p++;
 		}
 	}
@@ -162,42 +398,16 @@ void tTJSString::ToUppserCase()
 	{
 		while(*p)
 		{
-			if(*p >= TJS_W('a') && *p <= TJS_W('z'))
-				*p += (TJS_W('A')-TJS_W('a'));
+			if(*p >= TJS_WC('a') && *p <= TJS_WC('z'))
+				*p += (TJS_WC('A')-TJS_WC('a'));
 			p++;
 		}
 	}
 }
 //---------------------------------------------------------------------------
-tjs_int TJS_cdecl tTJSString::printf(const tjs_char *format, ...)
-{
-	tjs_int r;
-	tjs_char *buf = new tjs_char [TJS_TTSTR_SPRINTF_BUF_SIZE];
-	try
-	{
-		tjs_int size = TJS_TTSTR_SPRINTF_BUF_SIZE-1; /*TJS_vsnprintf(NULL, 0, format, param);*/
-		va_list param;
-		va_start(param, format);
-		r = TJS_vsnprintf(buf, size, format, param);
-		AllocBuffer(r);
-		if(r)
-		{
-			TJS_strcpy(const_cast<tjs_char*>(c_str()), buf);
-		}
-		va_end(param);
-		FixLen();
-	}
-	catch(...)
-	{
-		delete [] buf;
-		throw;
-	}
-	delete [] buf;
-	return r;
-}
-//---------------------------------------------------------------------------
 tTJSString tTJSString::EscapeC() const
 {
+	const tjs_char * hexchars = TJS_WS("0123456789");
 	ttstr ret;
 	const tjs_char * p = c_str();
 	bool hexflag = false;
@@ -205,25 +415,29 @@ tTJSString tTJSString::EscapeC() const
 	{
 		switch(*p)
 		{
-		case 0x07: ret += TJS_W("\\a"); hexflag = false; continue;
-		case 0x08: ret += TJS_W("\\b"); hexflag = false; continue;
-		case 0x0c: ret += TJS_W("\\f"); hexflag = false; continue;
-		case 0x0a: ret += TJS_W("\\n"); hexflag = false; continue;
-		case 0x0d: ret += TJS_W("\\r"); hexflag = false; continue;
-		case 0x09: ret += TJS_W("\\t"); hexflag = false; continue;
-		case 0x0b: ret += TJS_W("\\v"); hexflag = false; continue;
-		case TJS_W('\\'): ret += TJS_W("\\\\"); hexflag = false; continue;
-		case TJS_W('\''): ret += TJS_W("\\\'"); hexflag = false; continue;
-		case TJS_W('\"'): ret += TJS_W("\\\""); hexflag = false; continue;
+		case 0x07: ret += TJS_WS("\\a"); hexflag = false; continue;
+		case 0x08: ret += TJS_WS("\\b"); hexflag = false; continue;
+		case 0x0c: ret += TJS_WS("\\f"); hexflag = false; continue;
+		case 0x0a: ret += TJS_WS("\\n"); hexflag = false; continue;
+		case 0x0d: ret += TJS_WS("\\r"); hexflag = false; continue;
+		case 0x09: ret += TJS_WS("\\t"); hexflag = false; continue;
+		case 0x0b: ret += TJS_WS("\\v"); hexflag = false; continue;
+		case TJS_WC('\\'): ret += TJS_WS("\\\\"); hexflag = false; continue;
+		case TJS_WC('\''): ret += TJS_WS("\\\'"); hexflag = false; continue;
+		case TJS_WC('\"'): ret += TJS_WS("\\\""); hexflag = false; continue;
 		default:
 			if(hexflag)
 			{
-				if(*p >= TJS_W('a') && *p <= TJS_W('f') ||
-					*p >= TJS_W('A') && *p <= TJS_W('F') ||
-						*p >= TJS_W('0') && *p <= TJS_W('9') )
+				if(*p >= TJS_WC('a') && *p <= TJS_WC('f') ||
+					*p >= TJS_WC('A') && *p <= TJS_WC('F') ||
+						*p >= TJS_WC('0') && *p <= TJS_WC('9') )
 				{
-					tjs_char buf[20];
-					TJS_sprintf(buf, TJS_W("\\x%02x"), (int)*p);
+					tjs_char buf[5];
+					buf[0] = TJS_WC('\\');
+					buf[1] = TJS_WC('x');
+					buf[2] = hexchars[ (*p >> 4)  & 0x0f];
+					buf[3] = hexchars[ (*p     )  & 0x0f];
+					buf[4] = 0;
 					hexflag = true;
 					ret += buf;
 					continue;
@@ -232,8 +446,12 @@ tTJSString tTJSString::EscapeC() const
 
 			if(*p < 0x20)
 			{
-				tjs_char buf[20];
-				TJS_sprintf(buf, TJS_W("\\x%02x"), (int)*p);
+				tjs_char buf[5];
+				buf[0] = TJS_WC('\\');
+				buf[1] = TJS_WC('x');
+				buf[2] = hexchars[ (*p >> 4)  & 0x0f];
+				buf[3] = hexchars[ (*p     )  & 0x0f];
+				buf[4] = 0;
 				hexflag = true;
 				ret += buf;
 			}
@@ -250,7 +468,7 @@ tTJSString tTJSString::EscapeC() const
 tTJSString tTJSString::UnescapeC() const
 {
 	// TODO: UnescapeC
-	return TJS_W("");
+	return TJS_WS("");
 }
 //---------------------------------------------------------------------------
 bool tTJSString::StartsWith(const tjs_char *string) const
@@ -296,7 +514,7 @@ tTJSString TJSInt32ToHex(tjs_uint32 num, int zeropad)
 
 	do
 	{
-		*(p++) = (TJS_W("0123456789ABCDEF"))[num % 16];
+		*(p++) = (TJS_WS("0123456789ABCDEF"))[num % 16];
 		num /= 16;
 		zeropad --;
 	} while(zeropad || num);

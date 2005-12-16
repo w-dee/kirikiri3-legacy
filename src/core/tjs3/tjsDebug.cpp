@@ -20,8 +20,7 @@
 
 namespace TJS
 {
-
-
+TJS_DEFINE_SOURCE_ID(1010);
 //---------------------------------------------------------------------------
 // ObjectHashMap : hash map to track object construction/destruction
 //--------------------------------------------------------------------------
@@ -245,13 +244,15 @@ public:
 			// warn running code on deleting-in-progress object
 			ttstr warn(TJSWarning);
 			tjs_char tmp[64];
-			TJS_sprintf(tmp, TJS_W("0x%p"), object);
+			tmp[0] = TJS_WC('0');
+			tmp[1] = TJS_WC('x');
+			TJS_pointer_to_str(object, tmp + 2);
 
 			ttstr info(TJSWarnRunningCodeOnDeletingObject);
-			info.Replace(TJS_W("%1"), tmp);
-			info.Replace(TJS_W("%2"), rec->Type);
-			info.Replace(TJS_W("%3"), rec->Where);
-			info.Replace(TJS_W("%4"), TJSGetStackTraceString(1));
+			info.Replace(TJS_WS("%1"), tmp);
+			info.Replace(TJS_WS("%2"), rec->Type);
+			info.Replace(TJS_WS("%3"), rec->Where);
+			info.Replace(TJS_WS("%4"), TJSGetStackTraceString(1));
 
 			output->Print((warn + info).c_str());
 		}
@@ -261,7 +262,7 @@ public:
 	{
 		{
 			ttstr msg = (const tjs_char *)TJSNObjectsWasNotFreed;
-			msg.Replace(TJS_W("%1"), ttstr((tjs_int)Hash.GetCount()));
+			msg.Replace(TJS_WS("%1"), ttstr((tjs_int)Hash.GetCount()));
 			output->Print(msg.c_str());
 		}
 
@@ -270,16 +271,18 @@ public:
 		for(i = Hash.GetFirst(); !i.IsNull(); i++)
 		{
 			tjs_char addr[65];
-			TJS_sprintf(addr, TJS_W("0x%p"), i.GetKey());
+			addr[0] = TJS_WC('0');
+			addr[1] = TJS_WC('x');
+			TJS_pointer_to_str(i.GetKey(), addr + 2);
 			ttstr info = (const tjs_char *)TJSObjectWasNotFreed;
-			info.Replace(TJS_W("%1"), addr);
-			info.Replace(TJS_W("%2"), i.GetValue().Type);
-			info.Replace(TJS_W("%3"), i.GetValue().History);
+			info.Replace(TJS_WS("%1"), addr);
+			info.Replace(TJS_WS("%2"), i.GetValue().Type);
+			info.Replace(TJS_WS("%3"), i.GetValue().History);
 			output->Print(info.c_str());
 		}
 
 		// group by the history and object type
-		output->Print(TJS_W("---"));
+		output->Print(TJS_WS("---"));
 		output->Print((const tjs_char *)TJSGroupByObjectTypeAndHistory);
 		std::vector<tTJSObjectHashMapRecord> items;
 		for(i = Hash.GetFirst(); !i.IsNull(); i++)
@@ -298,12 +301,10 @@ public:
 				if(i != items.begin() &&
 					(i == items.end() || history != i->History || type != i->Type))
 				{
-					tjs_char tmp[64];
-					TJS_sprintf(tmp, TJS_W("%6d"), (int)count);
 					ttstr info = (const tjs_char *)TJSObjectCountingMessageGroupByObjectTypeAndHistory;
-					info.Replace(TJS_W("%1"), tmp);
-					info.Replace(TJS_W("%2"), type);
-					info.Replace(TJS_W("%3"), history);
+					info.Replace(TJS_WS("%1"), ttstr(count));
+					info.Replace(TJS_WS("%2"), type);
+					info.Replace(TJS_WS("%3"), history);
 					output->Print(info.c_str());
 
 					if(i == items.end()) break;
@@ -318,7 +319,7 @@ public:
 		}
 
 		// group by object type
-		output->Print(TJS_W("---"));
+		output->Print(TJS_WS("---"));
 		output->Print((const tjs_char *)TJSGroupByObjectType);
 		std::stable_sort(items.begin(), items.end(),
 			tTJSObjectHashMapRecordComparator_Type());
@@ -333,11 +334,9 @@ public:
 				if(i != items.begin() &&
 					(i == items.end() || type != i->Type))
 				{
-					tjs_char tmp[64];
-					TJS_sprintf(tmp, TJS_W("%6d"), (int)count);
 					ttstr info = (const tjs_char *)TJSObjectCountingMessageTJSGroupByObjectType;
-					info.Replace(TJS_W("%1"), tmp);
-					info.Replace(TJS_W("%2"), type);
+					info.Replace(TJS_WS("%1"), ttstr(count));
+					info.Replace(TJS_WS("%2"), type);
 					output->Print(info.c_str());
 
 					if(i == items.end()) break;
@@ -383,7 +382,7 @@ public:
 			{
 				tjs_int v = TJSRestoreLog<tjs_int>();
 				if(v != TJSVersionHex)
-					TJS_eTJSError(TJS_W("Object Hash Map log version mismatch"));
+					TJS_eTJSError(TJS_WS("Object Hash Map log version mismatch"));
 			}
 			else if(id == liiAdd)     // 02 add a object
 			{
@@ -412,7 +411,7 @@ public:
 			}
 			else
 			{
-				TJS_eTJSError(TJS_W("Currupted Object Hash Map log"));
+				TJS_eTJSError(TJS_WS("Currupted Object Hash Map log"));
 			}
 		}
 	}
@@ -443,7 +442,7 @@ void TJSAddObjectHashRecord(void * object)
 	if(where.IsEmpty())
 		where = TJSMapGlobalStringMap((const tjs_char *)TJSCallHistoryIsFromOutOfTJS3Script);
 	rec.Where = where;
-	static ttstr InitialType(TJS_W("unknown type"));
+	static ttstr InitialType(TJS_WS("unknown type"));
 	rec.Type = InitialType;
 
 	if(TJSObjectHashMap)
@@ -559,8 +558,8 @@ tTJSStackTracer * TJSStackTracer;
 struct tTJSStackRecord
 {
 	tTJSInterCodeContext * Context;
-	const tjs_int * CodeBase;
-	tjs_int * const * CodePtr;
+	const tjs_int32 * CodeBase;
+	tjs_int32 * const * CodePtr;
 	bool InTry;
 
 	tTJSStackRecord(tTJSInterCodeContext * context, bool in_try)
@@ -658,7 +657,7 @@ public:
 	ttstr GetTraceString(tjs_int limit, const tjs_char * delimiter)
 	{
 		// get stack trace string
-		if(delimiter == NULL) delimiter = TJS_W(" <-- ");
+		if(delimiter == NULL) delimiter = TJS_WS(" <-- ");
 
 		ttstr ret;
 		tjs_int top = (tjs_int)(Stack.size() - 1);

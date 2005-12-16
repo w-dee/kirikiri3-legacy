@@ -16,12 +16,11 @@
 namespace TJS
 {
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(tjs_int32, TJSRegisterNativeClass, (const tjs_char *name));
-TJS_EXP_FUNC_DEF(tjs_int32, TJSFindNativeClassID, (const tjs_char *name));
-TJS_EXP_FUNC_DEF(const tjs_char *, TJSFindNativeClassName, (tjs_int32 id));
+tjs_int32 TJSRegisterNativeClass(const tjs_char *name);
+tjs_int32 TJSFindNativeClassID(const tjs_char *name);
+const tjs_char *TJSFindNativeClassName(tjs_int32 id);
 //---------------------------------------------------------------------------
 
-/*[*/
 //---------------------------------------------------------------------------
 // tTJSNativeInstanceType
 //---------------------------------------------------------------------------
@@ -35,46 +34,36 @@ enum tTJSNativeInstanceType
 
 
 
-/*]*/
-/*[*/
 //---------------------------------------------------------------------------
 // tTJSNativeInstance
 //---------------------------------------------------------------------------
 class tTJSNativeInstance : public iTJSNativeInstance
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD Construct(tjs_int numparams,
+	virtual tjs_error Construct(tjs_int numparams,
 		tTJSVariant **param, iTJSDispatch2 *tjs_obj) {return TJS_S_OK;}
-	virtual void TJS_INTF_METHOD Invalidate() {;}
-	virtual void TJS_INTF_METHOD Destruct() { delete this; }
+	virtual void Invalidate() {;}
+	virtual void Destruct() { delete this; }
 	virtual ~tTJSNativeInstance() {;};
 };
 //---------------------------------------------------------------------------
 
 
 
-/*]*/
-/*[*/
 //---------------------------------------------------------------------------
 // tTJSNativeClassMethod
 //---------------------------------------------------------------------------
-typedef tjs_error (TJS_INTF_METHOD *tTJSNativeClassMethodCallback)
+typedef tjs_error (*tTJSNativeClassMethodCallback)
 	(tTJSVariant *result,tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis);
-/*]*/
 #ifdef __TP_STUB_H__
-/*[*/
 class tTJSNativeClassMethod : public iTJSDispatch2 { };
-/*]*/
 #else
 class tTJSNativeClassMethod;
 #endif
-/*[*/
 
 
-/*]*/
-TJS_EXP_FUNC_DEF(tTJSNativeClassMethod *, TJSCreateNativeClassMethod,
-	(tTJSNativeClassMethodCallback callback));
+tTJSNativeClassMethod *TJSCreateNativeClassMethod (tTJSNativeClassMethodCallback callback);
 //---------------------------------------------------------------------------
 class tTJSNativeClassMethod : public tTJSDispatch
 {
@@ -87,11 +76,11 @@ public:
 	tTJSNativeClassMethod(tTJSNativeClassMethodCallback processfunc);
 	~tTJSNativeClassMethod();
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 		const tjs_char *classname,
 		iTJSDispatch2 *objthis);
-	tjs_error  TJS_INTF_METHOD
+	tjs_error 
 		FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis);
@@ -103,8 +92,7 @@ public:
 //---------------------------------------------------------------------------
 // tTJSNativeClassConstructor
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(tTJSNativeClassMethod *, TJSCreateNativeClassConstructor,
-	(tTJSNativeClassMethodCallback callback));
+tTJSNativeClassMethod *TJSCreateNativeClassConstructor(tTJSNativeClassMethodCallback callback);
 //---------------------------------------------------------------------------
 class tTJSNativeClassConstructor : public tTJSNativeClassMethod
 {
@@ -113,7 +101,7 @@ public:
 	tTJSNativeClassConstructor(tTJSNativeClassMethodCallback processfunc)
 		: tTJSNativeClassMethod(processfunc) {;}
 
-	tjs_error  TJS_INTF_METHOD
+	tjs_error 
 		FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis);
@@ -123,28 +111,22 @@ public:
 
 
 
-/*[*/
 //---------------------------------------------------------------------------
 // tTJSNativeClassProperty
 //---------------------------------------------------------------------------
-typedef tjs_error (TJS_INTF_METHOD *tTJSNativeClassPropertyGetCallback)
+typedef tjs_error (*tTJSNativeClassPropertyGetCallback)
 	(tTJSVariant *result, iTJSDispatch2 *objthis);
-typedef tjs_error (TJS_INTF_METHOD *tTJSNativeClassPropertySetCallback)
+typedef tjs_error (*tTJSNativeClassPropertySetCallback)
 	(const tTJSVariant *param, iTJSDispatch2 *objthis);
-/*]*/
 #ifdef __TP_STUB_H__
-/*[*/
 class tTJSNativeClassProperty : public iTJSDispatch2 { };
-/*]*/
 #else
 class tTJSNativeClassProperty;
 #endif
-/*[*/
 
-/*]*/
-TJS_EXP_FUNC_DEF(tTJSNativeClassProperty *, TJSCreateNativeClassProperty,
+tTJSNativeClassProperty *TJSCreateNativeClassProperty
 	(tTJSNativeClassPropertyGetCallback get,
-	 tTJSNativeClassPropertySetCallback set));
+	 tTJSNativeClassPropertySetCallback set);
 //---------------------------------------------------------------------------
 class tTJSNativeClassProperty : public tTJSDispatch
 {
@@ -159,17 +141,17 @@ public:
 		tTJSNativeClassPropertySetCallback set);
 	~tTJSNativeClassProperty();
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 		const tjs_char *classname,
 		iTJSDispatch2 *objthis);
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 		iTJSDispatch2 *objthis);
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 		const tTJSVariant *param,
 		iTJSDispatch2 *objthis);
@@ -208,15 +190,15 @@ protected:
 private:
 
 public:
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 			tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis);
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		 iTJSDispatch2 **result,
 			tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis);
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 		 const tjs_char *classname,
 		iTJSDispatch2 *objthis);
@@ -227,20 +209,20 @@ public:
 	void SetClassID(tjs_int32 classid) { _ClassID = classid; }
 };
 //---------------------------------------------------------------------------
-inline TJS_EXP_FUNC_DEF(void, TJSNativeClassRegisterNCM, (
+inline void TJSNativeClassRegisterNCM(
 		tTJSNativeClass *cls,
 		const tjs_char *name,
 		iTJSDispatch2 *dsp,
 		const tjs_char *classname,
 		tTJSNativeInstanceType type,
-		tjs_uint32 flags = 0))
+		tjs_uint32 flags = 0)
 {
 	cls->RegisterNCM(name, dsp, classname, type, flags);
 }
 //---------------------------------------------------------------------------
-inline TJS_EXP_FUNC_DEF(void, TJSNativeClassSetClassID, (
+inline void TJSNativeClassSetClassID(
 		tTJSNativeClass *cls,
-		tjs_int32 classid))
+		tjs_int32 classid)
 {
 	cls->SetClassID(classid);
 }
@@ -248,23 +230,17 @@ inline TJS_EXP_FUNC_DEF(void, TJSNativeClassSetClassID, (
 
 
 
-/*[*/
 //---------------------------------------------------------------------------
 // tTJSNativeClassForPlugin : service class for plugins
 //---------------------------------------------------------------------------
-typedef iTJSNativeInstance * (TJS_INTF_METHOD *tTJSCreateNativeInstance)();
-/*]*/
+typedef iTJSNativeInstance * (*tTJSCreateNativeInstance)();
 #ifdef __TP_STUB_H__
-/*[*/
 class tTJSNativeClass : public iTJSDispatch2 { };
 class tTJSNativeClassForPlugin : public tTJSNativeClass { };
-/*]*/
 #else
 class tTJSNativeClassForPlugin;
 #endif
-/*[*/
 
-/*]*/
 //---------------------------------------------------------------------------
 // This class is for nasty workaround of inter-compiler compatibility
 class tTJSNativeClassForPlugin : public tTJSNativeClass
@@ -273,7 +249,7 @@ class tTJSNativeClassForPlugin : public tTJSNativeClass
 public:
 	tTJSNativeClassForPlugin(const ttstr &name,
 		tTJSCreateNativeInstance proc) :
-			procCreateNativeInstance(proc), tTJSNativeClass(name)
+			tTJSNativeClass(name), procCreateNativeInstance(proc)
 	{
 		;
 	}
@@ -283,8 +259,8 @@ protected:
 		{return procCreateNativeInstance();}
 };
 //---------------------------------------------------------------------------
-inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugin,
-	(const ttstr &name, tTJSCreateNativeInstance createinstance))
+inline tTJSNativeClassForPlugin *TJSCreateNativeClassForPlugin
+	(const ttstr &name, tTJSCreateNativeInstance createinstance)
 {
 	return new tTJSNativeClassForPlugin(name, createinstance);
 }
@@ -292,22 +268,17 @@ inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugi
 
 
 
-/*[*/
 //---------------------------------------------------------------------------
 // following macros are to be written in the constructor of child class
 // to define native methods/properties.
-/*]*/
 #ifdef __TP_STUB_H__
-/*[*/
 #define TJS_NCM_REG_THIS classobj
 #define TJS_NATIVE_SET_ClassID TJS_NATIVE_CLASSID_NAME = TJS_NCM_CLASSID;
-/*]*/
 #else
 #define TJS_NCM_REG_THIS  this
 #define TJS_NATIVE_SET_ClassID ClassID = TJS_NCM_CLASSID;
 #define TJS_NATIVE_CLASSID_NAME TJS_NCM_CLASSID
 #endif
-/*[*/
 
 #define TJS_GET_NATIVE_INSTANCE(varname, typename) \
 		if(!objthis) return TJS_E_NATIVECLASSCRASH; \
@@ -331,7 +302,7 @@ inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugi
 
 #define TJS_BEGIN_NATIVE_MEMBERS(classname) \
 	{ \
-		static const tjs_char *__classname = TJS_W(#classname); \
+		static const tjs_char *__classname = TJS_WS(#classname); \
 		static tjs_int32 TJS_NCM_CLASSID = \
 			TJSRegisterNativeClass(__classname); \
 		TJSNativeClassSetClassID(TJS_NCM_REG_THIS, TJS_NCM_CLASSID); \
@@ -339,7 +310,7 @@ inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugi
 
 #define TJS_BEGIN_NATIVE_METHOD_DECL(name) \
 		struct NCM_##name { \
-			static tjs_error TJS_INTF_METHOD \
+			static tjs_error \
 			Process( tTJSVariant *result, \
 				tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis) {
 
@@ -349,24 +320,24 @@ inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugi
 
 #define TJS_END_NATIVE_METHOD_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_WS(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), __classname, nitMethod);
 
 #define TJS_END_NATIVE_HIDDEN_METHOD_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_WS(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), __classname, nitMethod, \
 		TJS_HIDDENMEMBER);
 
 #define TJS_END_NATIVE_STATIC_METHOD_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_WS(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), __classname, nitMethod, \
 		TJS_STATICMEMBER);
 
 #define TJS_END_NATIVE_METHOD_DECL_OUTER(object, name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM((object), TJS_W(#name), \
+		TJSNativeClassRegisterNCM((object), TJS_WS(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), \
 		(object)->GetClassName().c_str(), nitMethod);
 
@@ -390,7 +361,7 @@ inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugi
 
 #define TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL_NO_INSTANCE(classname) \
 		struct NCM_##classname { \
-			static tjs_error TJS_INTF_METHOD \
+			static tjs_error \
 			Process(tTJSVariant *result, \
 			tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis) {
 
@@ -400,13 +371,13 @@ inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugi
 
 #define TJS_END_NATIVE_CONSTRUCTOR_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_WS(#name), \
 		TJSCreateNativeClassConstructor(NCM_##name::Process), __classname, \
 		nitMethod);
 
 #define TJS_END_NATIVE_STATIC_CONSTRUCTOR_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_WS(#name), \
 		TJSCreateNativeClassConstructor(NCM_##name::Process), __classname, \
 		nitMethod, TJS_STATICMEMBER);
 
@@ -414,41 +385,41 @@ inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugi
 		struct NCM_##name
 
 #define TJS_END_NATIVE_PROP_DECL(name) \
-		;TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		;TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_WS(#name), \
 		TJSCreateNativeClassProperty(NCM_##name::Get, NCM_##name::Set), \
 		__classname, nitProperty);
 
 #define TJS_END_NATIVE_PROP_DECL_OUTER(object, name) \
-		;TJSNativeClassRegisterNCM((object), TJS_W(#name), \
+		;TJSNativeClassRegisterNCM((object), TJS_WS(#name), \
 		TJSCreateNativeClassProperty(NCM_##name::Get, NCM_##name::Set), \
 		(object)->GetClassName().c_str(), nitProperty);
 
 #define TJS_END_NATIVE_STATIC_PROP_DECL(name) \
-		;TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		;TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_WS(#name), \
 		TJSCreateNativeClassProperty(NCM_##name::Get, NCM_##name::Set), \
 		__classname, nitProperty, TJS_STATICMEMBER);
 
 #define TJS_BEGIN_NATIVE_PROP_GETTER \
-		static tjs_error TJS_INTF_METHOD Get(tTJSVariant *result, \
+		static tjs_error Get(tTJSVariant *result, \
 		iTJSDispatch2 *objthis) { \
 
 #define TJS_END_NATIVE_PROP_GETTER \
 		}
 
 #define TJS_DENY_NATIVE_PROP_GETTER \
-		static tjs_error TJS_INTF_METHOD Get(tTJSVariant *result, \
+		static tjs_error Get(tTJSVariant *result, \
 		iTJSDispatch2 *objthis) \
 		{ return TJS_E_ACCESSDENYED; }
 
 #define TJS_BEGIN_NATIVE_PROP_SETTER \
-		static tjs_error TJS_INTF_METHOD Set(const tTJSVariant *param, \
+		static tjs_error Set(const tTJSVariant *param, \
 		iTJSDispatch2 *objthis) { \
 
 #define TJS_END_NATIVE_PROP_SETTER \
 		}
 
 #define TJS_DENY_NATIVE_PROP_SETTER \
-		static tjs_error TJS_INTF_METHOD Set(const tTJSVariant *param, \
+		static tjs_error Set(const tTJSVariant *param, \
 		iTJSDispatch2 *objthis) \
 		{ return TJS_E_ACCESSDENYED; }
 
@@ -458,7 +429,6 @@ inline TJS_EXP_FUNC_DEF(tTJSNativeClassForPlugin *, TJSCreateNativeClassForPlugi
 #define TJS_PARAM_EXIST(num) (numparams>(num) ? param[num]->Type()!=tvtVoid : false)
 
 
-/*]*/
 
 //---------------------------------------------------------------------------
 // tTJSNativeFunction
@@ -472,11 +442,11 @@ public:
 		// 'name' is just to be used as a label for debugging
 	~tTJSNativeFunction();
 
-	tjs_error TJS_INTF_METHOD FuncCall(
+	tjs_error FuncCall(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
 
-	tjs_error TJS_INTF_METHOD
+	tjs_error
 	IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 		const tjs_char *classname,
 		iTJSDispatch2 *objthis);

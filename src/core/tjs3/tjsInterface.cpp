@@ -10,11 +10,12 @@
 //---------------------------------------------------------------------------
 
 #include "tjsCommHead.h"
-
 #include "tjsInterface.h"
+#include "tjsCharUtils.h"
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1018);
 //---------------------------------------------------------------------------
 
 

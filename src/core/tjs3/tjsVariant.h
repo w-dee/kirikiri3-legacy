@@ -14,9 +14,6 @@
 #include <stdlib.h>
 //#include <stdexcept>
 
-#ifdef TJS_SUPPORT_VCL
- #include <vcl.h>
-#endif
 
 #include "tjsInterface.h"
 #include "tjsVariantString.h"
@@ -24,8 +21,8 @@
 
 namespace TJS
 {
-TJS_EXP_FUNC_DEF(void, TJSThrowNullAccess, ());
-TJS_EXP_FUNC_DEF(void, TJSThrowDivideByZero, ());
+void TJSThrowNullAccess();
+void TJSThrowDivideByZero();
 //---------------------------------------------------------------------------
 class tTJSVariantString;
 class tTJSString;
@@ -33,7 +30,6 @@ class tTJSString;
 
 
 
-/*[*/
 //---------------------------------------------------------------------------
 // tTJSVariantOctet
 //---------------------------------------------------------------------------
@@ -46,34 +42,29 @@ struct tTJSVariantOctet_S
 	tjs_uint8 *Data;
 };
 #pragma pack(pop)
-/*]*/
 
-/*start-of-tTJSVariantOctet*/
 class tTJSVariantOctet : protected tTJSVariantOctet_S
 {
 public:
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariantOctet,
-		(const tjs_uint8 *data, tjs_uint length));
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariantOctet,
-		(const tjs_uint8 *data1, tjs_uint len1, const tjs_uint8 *data2,
-		tjs_uint len2));
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariantOctet,
-		(const tTJSVariantOctet *o1, const tTJSVariantOctet *o2));
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, ~tTJSVariantOctet, ());
+	tTJSVariantOctet(const tjs_uint8 *data, tjs_uint length);
+	tTJSVariantOctet(const tjs_uint8 *data1, tjs_uint len1, const tjs_uint8 *data2,
+		tjs_uint len2);
+	tTJSVariantOctet(const tTJSVariantOctet *o1, const tTJSVariantOctet *o2);
+	~tTJSVariantOctet();
 
-	TJS_METHOD_DEF(void, AddRef, ())
+	void AddRef()
 	{
 		RefCount ++;
 	}
 
-	TJS_METHOD_DEF(void, Release, ());
+	void Release();
 
-	TJS_CONST_METHOD_DEF(tjs_uint, GetLength, ())
+	tjs_uint GetLength() const
 	{
 		return Length;
 	}
 
-	TJS_CONST_METHOD_DEF(const tjs_uint8 *,  GetData, ())
+	const tjs_uint8 *GetData() const
 	{
 		return Data;
 	}
@@ -85,21 +76,19 @@ public:
 		if(Data) TJS_octetcpy(dest + sizeof(tjs_uint), Data, Length);
 	}
 };
-/*end-of-tTJSVariantOctet*/
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(tTJSVariantOctet *, TJSAllocVariantOctet, (const tjs_uint8 *data, tjs_uint length));
-TJS_EXP_FUNC_DEF(tTJSVariantOctet *, TJSAllocVariantOctet, (const tjs_uint8 *data1, tjs_uint len1,
-	const tjs_uint8 *data2, tjs_uint len2));
-TJS_EXP_FUNC_DEF(tTJSVariantOctet *, TJSAllocVariantOctet, (const tTJSVariantOctet *o1, const
-	tTJSVariantOctet *o2));
-TJS_EXP_FUNC_DEF(tTJSVariantOctet *, TJSAllocVariantOctet, (const tjs_uint8 **src));
-TJS_EXP_FUNC_DEF(void, TJSDeallocVariantOctet, (tTJSVariantOctet *o));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSOctetToListString, (const tTJSVariantOctet *oct));
+tTJSVariantOctet *TJSAllocVariantOctet(const tjs_uint8 *data, tjs_uint length);
+tTJSVariantOctet *TJSAllocVariantOctet(const tjs_uint8 *data1, tjs_uint len1,
+	const tjs_uint8 *data2, tjs_uint len2);
+tTJSVariantOctet *TJSAllocVariantOctet(const tTJSVariantOctet *o1, const
+	tTJSVariantOctet *o2);
+tTJSVariantOctet *TJSAllocVariantOctet(const tjs_uint8 **src);
+void TJSDeallocVariantOctet(tTJSVariantOctet *o);
+tTJSVariantString *TJSOctetToListString(const tTJSVariantOctet *oct);
 //---------------------------------------------------------------------------
 
 
 
-/*[*/
 //---------------------------------------------------------------------------
 // tTJSVariant_S
 //---------------------------------------------------------------------------
@@ -118,13 +107,11 @@ enum tTJSVariantType
 #ifdef __BORLANDC__
 #pragma option pop
 #endif
-/*]*/
 //---------------------------------------------------------------------------
 #ifdef __BORLANDC__
 #pragma option push -b -a4
 #endif
 
-/*[*/
 #pragma pack(push, 4)
 class iTJSDispatch2;
 struct tTJSVariantClosure_S
@@ -156,7 +143,6 @@ struct tTJSVariant_S
 	tTJSVariantType vt;
 };
 #pragma pack(pop)
-/*]*/
 
 #ifdef __BORLANDC__
 #pragma option pop
@@ -166,19 +152,9 @@ struct tTJSVariant_S
 //---------------------------------------------------------------------------
 extern tTJSVariantClosure_S TJSNullVariantClosure;
 
-/*[*/
 //---------------------------------------------------------------------------
 // tTJSVariantClosure
 //---------------------------------------------------------------------------
-/*]*/
-#if 0
-// for plug-in
-/*[*/
-void TJSThrowNullAccess();
-/*]*/
-#endif
-/*[*/
-
 class tTJSVariantClosure : public tTJSVariantClosure_S
 {
 	// tTJSVariantClosure does not provide any function of object lifetime
@@ -438,14 +414,13 @@ public:
 
 
 
-/*]*/
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSObjectToString, (const tTJSVariantClosure &dsp));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSIntegerToString, (tjs_int64 i));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSRealToString, (tjs_real r));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSRealToHexString, (tjs_real r));
-TJS_EXP_FUNC_DEF(tTVInteger, TJSStringToInteger, (const tjs_char *str));
-TJS_EXP_FUNC_DEF(tTVReal, TJSStringToReal, (const tjs_char *str));
+tTJSVariantString *TJSObjectToString(const tTJSVariantClosure &dsp);
+tTJSVariantString *TJSIntegerToString(tjs_int64 i);
+tTJSVariantString *TJSRealToString(tjs_real r);
+tTJSVariantString *TJSRealToHexString(tjs_real r);
+tTVInteger TJSStringToInteger(const tjs_char *str);
+tTVReal TJSStringToReal(const tjs_char *str);
 //---------------------------------------------------------------------------
 extern void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantType to);
 extern void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantType to1,
@@ -457,14 +432,6 @@ extern void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantTyp
 //---------------------------------------------------------------------------
 // tTJSVariant
 //---------------------------------------------------------------------------
-
-#ifdef TJS_SUPPORT_VCL //  suppresses warnings about inline function
-	#pragma warn -8027
-	#pragma warn -8026
-#endif
-
-
-/*start-of-tTJSVariant*/
 class tTJSVariant : protected tTJSVariant_S
 {
 
@@ -516,7 +483,7 @@ private:
 
 public:
 
-	TJS_METHOD_DEF(void, ChangeClosureObjThis, (iTJSDispatch2 *objthis))
+	void ChangeClosureObjThis(iTJSDispatch2 *objthis)
 	{
 		if(objthis) objthis->AddRef();
 		if(vt!=tvtObject) TJSThrowVariantConvertError(*this, tvtObject);
@@ -532,14 +499,14 @@ public:
 	//---- constructor ------------------------------------------------------
 public:
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, ())
+	tTJSVariant()
 	{
 		vt=tvtVoid;
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (const tTJSVariant &ref)); // from tTJSVariant
+	tTJSVariant(const tTJSVariant &ref); // from tTJSVariant
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (iTJSDispatch2 *ref)) // from Object
+	tTJSVariant(iTJSDispatch2 *ref) // from Object
 	{
 		if(ref) ref->AddRef();
 		vt=tvtObject;
@@ -547,7 +514,7 @@ public:
 		Object.ObjThis = NULL;
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (iTJSDispatch2 *obj, iTJSDispatch2 *objthis)) // from closure
+	tTJSVariant(iTJSDispatch2 *obj, iTJSDispatch2 *objthis) // from closure
 	{
 		if(obj) obj->AddRef();
 		if(objthis) objthis->AddRef();
@@ -556,7 +523,7 @@ public:
 		Object.ObjThis = objthis;
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (const tjs_char *ref)) //  from String
+	tTJSVariant(const tjs_char *ref) //  from String
 	{
 		vt=tvtString;
 		if(ref)
@@ -569,27 +536,14 @@ public:
 		}
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (const tTJSString & ref)) // from tTJSString
+	tTJSVariant(const tTJSString & ref) // from tTJSString
 	{
 		vt = tvtString;
 		String = ref.AsVariantStringNoAddRef();
 		if(String) String->AddRef();
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (const tjs_nchar *ref)) //  from NarrowString
-	{
-		vt=tvtString;
-		if(ref)
-		{
-			String=TJSAllocVariantString(ref);
-		}
-		else
-		{
-			String=NULL;
-		}
-	}
-
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (const tjs_uint8 *ref, tjs_uint len)) // from octet
+	tTJSVariant(const tjs_uint8 *ref, tjs_uint len) // from octet
 	{
 		vt=tvtOctet;
 		if(ref)
@@ -602,69 +556,58 @@ public:
 		}
 	}
 
-#ifdef TJS_SUPPORT_VCL
-	tTJSVariant(const WideString ref) // from WideString
-	{
-		vt=tvtString;
-		if(ref.IsEmpty())
-			String=NULL;
-		else
-			String=TJSAllocVariantString(ref);
-	}
-#endif
-
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (bool ref))
+	tTJSVariant(bool ref)
 	{
 		vt=tvtInteger;
 		Integer=(tjs_int64)(tjs_int)ref;
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (tjs_int32 ref))
+	tTJSVariant(tjs_int32 ref)
 	{
 		vt=tvtInteger;
 		Integer=(tjs_int64)ref;
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (tjs_int64 ref))  // from Integer64
+	tTJSVariant(tjs_int64 ref)  // from Integer64
 	{
 		vt=tvtInteger;
 		Integer=ref;
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (tjs_real ref))  // from double
+	tTJSVariant(tjs_real ref)  // from double
 	{
 		vt=tvtReal;
 		TJSSetFPUE();
 		Real=ref;
 	}
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, tTJSVariant, (const tjs_uint8 ** src)); // from persistent storage
+	tTJSVariant(const tjs_uint8 ** src); // from persistent storage
 
 	//---- destructor -------------------------------------------------------
 
-	TJS_METHOD_DEF(TJS_METHOD_RET_EMPTY, ~tTJSVariant, ());
+	~tTJSVariant();
 
 	//---- type -------------------------------------------------------------
 
-	TJS_METHOD_DEF(tTJSVariantType, Type, ()) const { return vt; }
+	tTJSVariantType Type() const { return vt; }
 
 	//---- compare ----------------------------------------------------------
 
-	TJS_CONST_METHOD_DEF(bool, NormalCompare, (const tTJSVariant &val2));
-	TJS_CONST_METHOD_DEF(bool, DiscernCompare, (const tTJSVariant &val2));
-	TJS_CONST_METHOD_DEF(bool, DiscernCompareStrictReal, (const tTJSVariant &val2));
-	TJS_CONST_METHOD_DEF(bool, GreaterThan, (const tTJSVariant &val2));
-	TJS_CONST_METHOD_DEF(bool, LittlerThan, (const tTJSVariant &val2));
+	bool NormalCompare(const tTJSVariant &val2) const;
+	bool DiscernCompare(const tTJSVariant &val2) const;
+	bool DiscernCompareStrictReal(const tTJSVariant &val2) const;
+	bool GreaterThan(const tTJSVariant &val2) const;
+	bool LittlerThan(const tTJSVariant &val2) const;
 
-	TJS_CONST_METHOD_DEF(bool, IsInstanceOf, (const tjs_char * classname));
+	bool IsInstanceOf(const tjs_char * classname) const;
 
 	//---- clear ------------------------------------------------------------
 
-	TJS_METHOD_DEF(void, Clear, ());
+	void Clear();
 
 	//---- type conversion --------------------------------------------------
 
-	TJS_CONST_METHOD_DEF(iTJSDispatch2 *, AsObject, ())
+	iTJSDispatch2 *AsObject()
 	{
 		if(vt==tvtObject)
 		{
@@ -677,7 +620,7 @@ public:
 		return NULL;
 	}
 
-	TJS_CONST_METHOD_DEF(iTJSDispatch2 *, AsObjectNoAddRef, ())
+	iTJSDispatch2 *AsObjectNoAddRef() const
 	{
 		if(vt==tvtObject)
 			return Object.Object;
@@ -685,7 +628,7 @@ public:
 		return NULL;
 	}
 
-	TJS_CONST_METHOD_DEF(iTJSDispatch2 *, AsObjectThis, ())
+	iTJSDispatch2 *AsObjectThis()
 	{
 		if(vt==tvtObject)
 		{
@@ -696,7 +639,7 @@ public:
 		return NULL;
 	}
 
-	TJS_CONST_METHOD_DEF(iTJSDispatch2 *, AsObjectThisNoAddRef, ())
+	iTJSDispatch2 *AsObjectThisNoAddRef() const
 	{
 		if(vt==tvtObject)
 		{
@@ -706,7 +649,7 @@ public:
 		return NULL;
 	}
 
-	TJS_METHOD_DEF(tTJSVariantClosure &, AsObjectClosure, ())
+	tTJSVariantClosure &AsObjectClosure()
 	{
 		if(vt==tvtObject)
 		{
@@ -718,7 +661,7 @@ public:
 	}
 
 
-	TJS_CONST_METHOD_DEF(tTJSVariantClosure &, AsObjectClosureNoAddRef, ())
+	tTJSVariantClosure & AsObjectClosureNoAddRef() const
 	{
 		if(vt==tvtObject)
 		{
@@ -728,7 +671,7 @@ public:
 		return *(tTJSVariantClosure*)&TJSNullVariantClosure;
 	}
 
-	TJS_METHOD_DEF(void, ToObject, ())
+	void ToObject()
 	{
 		switch(vt)
 		{
@@ -742,21 +685,12 @@ public:
 
 	}
 
-#ifdef TJS_SUPPORT_VCL
-	void AttachTo(WideString &ws)
-	{
-		tTJSVariantString *str = AsString();
-		ws.Attach(SysAllocString(*str));
-		if(str) str->Release();
-	}
-#endif
-
-	TJS_METHOD_DEF(TJS_METHOD_RET(iTJSDispatch2 *), operator iTJSDispatch2 *, ())
+	operator iTJSDispatch2 *()
 	{
 		return AsObject();
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariantString *, AsString, ())
+	tTJSVariantString *AsString() const
 	{
 		switch(vt)
 		{
@@ -770,7 +704,7 @@ public:
 		return NULL;
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariantString *, AsStringNoAddRef, ())
+	tTJSVariantString *AsStringNoAddRef() const
 	{
 		switch(vt)
 		{
@@ -784,16 +718,16 @@ public:
 		return NULL;
 	}
 
-	TJS_METHOD_DEF(void, ToString, ());
+	void ToString();
 
-	TJS_CONST_METHOD_DEF(const tjs_char *, GetString, ())
+	const tjs_char *GetString() const
 	{
 		// returns String
 		if(vt!=tvtString) TJSThrowVariantConvertError(*this, tvtString);
 		return *String;
 	}
 
-	TJS_METHOD_DEF(tjs_uint32 *, GetHint, ())
+	tjs_uint32 *GetHint()
 	{
 		// returns String Hint
 		if(vt!=tvtString) TJSThrowVariantConvertError(*this, tvtString);
@@ -801,7 +735,7 @@ public:
 		return String->GetHint();
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariantOctet *, AsOctet, ())
+	tTJSVariantOctet *AsOctet() const
 	{
 		switch(vt)
 		{
@@ -815,7 +749,7 @@ public:
 		return NULL;
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariantOctet *, AsOctetNoAddRef, ())
+	tTJSVariantOctet *AsOctetNoAddRef() const
 	{
 		switch(vt)
 		{
@@ -829,34 +763,9 @@ public:
 		return NULL;
 	}
 
-	TJS_METHOD_DEF(void, ToOctet, ());
+	void ToOctet();
 
-
-#ifdef TJS_SUPPORT_VCL
-	operator AnsiString () const
-	{
-		if(vt==tvtString)
-		{
-			return AnsiString(*String);
-		}
-		else
-		{
-			tTJSVariantString *s=AsString();
-			if(s)
-			{
-				AnsiString r=AnsiString(*s);
-				s->Release();
-				return r;
-			}
-			else
-			{
-				return "";
-			}
-		}
-	}
-#endif
-
-	TJS_CONST_METHOD_DEF(tTVInteger, AsInteger, ())
+	tTVInteger AsInteger() const
 	{
 		switch(vt)
 		{
@@ -870,11 +779,11 @@ public:
 		return 0;
 	}
 
-	TJS_CONST_METHOD_DEF(void, AsNumber, (tTJSVariant &targ))
+	void AsNumber(tTJSVariant &targ) const
 	{
 		switch(vt)
 		{
-		case tvtVoid:    targ = (tjs_int)0; return;
+		case tvtVoid:    targ = (tTVInteger)0; return;
 		case tvtObject:  TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
 		case tvtString:  String->ToNumber(targ); return;
 		case tvtInteger: targ = Integer; return;
@@ -884,14 +793,14 @@ public:
 		return;
 	}
 
-	TJS_METHOD_DEF(void, ToInteger, ());
+	void ToInteger();
 
-	TJS_CONST_METHOD_DEF(TJS_METHOD_RET(tTVInteger), operator tTVInteger, ())
+	operator tTVInteger() const
 	{
 		return AsInteger();
 	}
 
-	TJS_CONST_METHOD_DEF(TJS_METHOD_RET(bool), operator bool, ())
+	operator bool() const
 	{
 		switch(vt)
 		{
@@ -905,12 +814,12 @@ public:
 		return false;
 	}
 
-	TJS_CONST_METHOD_DEF(TJS_METHOD_RET(tjs_int), operator tjs_int, ())
+	operator tjs_int() const
 	{
 		return (tjs_int)AsInteger();
 	}
 
-	TJS_CONST_METHOD_DEF(tTVReal, AsReal, ())
+	tTVReal AsReal() const
 	{
 		TJSSetFPUE();
 
@@ -926,159 +835,153 @@ public:
 		return 0.0f;
 	}
 
-	TJS_METHOD_DEF(void, ToReal, ());
+	void ToReal();
 
-	TJS_CONST_METHOD_DEF(TJS_METHOD_RET(tTVReal), operator tTVReal, ())
+	operator tTVReal() const
 	{
 		return AsReal();
 	}
 
 	//---- substitution -----------------------------------------------------
 
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (const tTJSVariant &ref))
+	tTJSVariant & operator =(const tTJSVariant &ref)
 	{
 		// from tTJSVariant
 		CopyRef(ref);
 		return *this;
 	}
-	TJS_METHOD_DEF(void, CopyRef, (const tTJSVariant & ref)); // from reference to tTJSVariant
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (iTJSDispatch2 *ref)); // from Object
-	TJS_METHOD_DEF(tTJSVariant &, SetObject, (iTJSDispatch2 *ref)) { return this->operator =(ref); }
-	TJS_METHOD_DEF(tTJSVariant &, SetObject, (iTJSDispatch2 *object, iTJSDispatch2 *objthis));
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (tTJSVariantClosure ref)); // from Object Closure
-#ifdef TJS_SUPPORT_VCL
-	tTJSVariant & operator =(WideString s); // from WideString
-#endif
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (tTJSVariantString *ref)); // from tTJSVariantString
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (tTJSVariantOctet *ref)); // from tTJSVariantOctet
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (const tTJSString & ref)); // from tTJSString
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (const tjs_char *ref)); //  from String
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (const tjs_nchar *ref)); // from narrow string
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (bool ref));
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (tjs_int32 ref));
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (const tTVInteger ref)); // from Integer64
-	TJS_METHOD_DEF(tTJSVariant &, operator =, (tjs_real ref)); // from double
+	void CopyRef(const tTJSVariant & ref); // from reference to tTJSVariant
+	tTJSVariant & operator = (iTJSDispatch2 *ref); // from Object
+	tTJSVariant & SetObject(iTJSDispatch2 *ref) { return this->operator =(ref); }
+	tTJSVariant & SetObject(iTJSDispatch2 *object, iTJSDispatch2 *objthis);
+	tTJSVariant & operator = (tTJSVariantClosure ref); // from Object Closure
+	tTJSVariant & operator = (tTJSVariantString *ref); // from tTJSVariantString
+	tTJSVariant & operator = (tTJSVariantOctet *ref); // from tTJSVariantOctet
+	tTJSVariant & operator = (const tTJSString & ref); // from tTJSString
+	tTJSVariant & operator = (const tjs_char *ref); //  from String
+	tTJSVariant & operator = (const tTVInteger ref); // from Integer64
+	tTJSVariant & operator = (tjs_real ref); // from double
 
 	//---- operators --------------------------------------------------------
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator ||, (const tTJSVariant & rhs))
+	tTJSVariant operator || (const tTJSVariant & rhs)
 	{
 		return operator bool()||rhs.operator bool();
 	}
 
-	TJS_METHOD_DEF(void, logicalorequal, (const tTJSVariant &rhs));
+	void logicalorequal(const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator &&, (const tTJSVariant & rhs))
+	tTJSVariant operator && (const tTJSVariant & rhs) const
 	{
 		return operator bool()&&rhs.operator bool();
 	}
 
-	TJS_METHOD_DEF(void, logicalandequal, (const tTJSVariant &rhs));
+	void logicalandequal(const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator |, (const tTJSVariant & rhs))
+	tTJSVariant operator | (const tTJSVariant & rhs) const
 	{
 		return (tTVInteger)(AsInteger()|rhs.AsInteger());
 	}
 
-	TJS_METHOD_DEF(void, operator |=, (const tTJSVariant &rhs));
+	void operator |= (const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator ^, (const tTJSVariant & rhs))
+	tTJSVariant operator ^ (const tTJSVariant & rhs) const
 	{
 		return (tTVInteger)(AsInteger()^rhs.AsInteger());
 	}
 
-	TJS_METHOD_DEF(void, increment, ());
+	void increment();
 
-	TJS_METHOD_DEF(void, decrement, ());
+	void decrement();
 
-	TJS_METHOD_DEF(void, operator ^=, (const tTJSVariant &rhs));
+	void operator ^= (const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator &, (const tTJSVariant & rhs))
+	tTJSVariant operator &(const tTJSVariant & rhs) const
 	{
 		return (tTVInteger)(AsInteger()&rhs.AsInteger());
 	}
 
-	TJS_METHOD_DEF(void, operator &=, (const tTJSVariant &rhs));
+	void operator &= (const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator !=, (const tTJSVariant & rhs))
+	tTJSVariant operator !=(const tTJSVariant & rhs) const
 	{
 		return !NormalCompare(rhs);
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator ==, (const tTJSVariant & rhs))
+	tTJSVariant operator == (const tTJSVariant & rhs) const
 	{
 		return NormalCompare(rhs);
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator <, (const tTJSVariant & rhs))
+	tTJSVariant operator < (const tTJSVariant & rhs) const
 	{
 		return GreaterThan(rhs);
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator >, (const tTJSVariant & rhs))
+	tTJSVariant operator > (const tTJSVariant & rhs) const
 	{
 		return LittlerThan(rhs);
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator <=, (const tTJSVariant & rhs))
+	tTJSVariant operator <= (const tTJSVariant & rhs) const
 	{
 		return !LittlerThan(rhs);
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator >=, (const tTJSVariant & rhs))
+	tTJSVariant operator >= (const tTJSVariant & rhs) const
 	{
 		return !GreaterThan(rhs);
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator >>, (const tTJSVariant & rhs))
+	tTJSVariant operator >> (const tTJSVariant & rhs) const
 	{
 		return (tTVInteger)(AsInteger()>>(tjs_int)rhs.AsInteger());
 	}
 
-	TJS_METHOD_DEF(void, operator >>=, (const tTJSVariant &rhs));
+	void operator >>= (const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, rbitshift, (tjs_int count))
+	tTJSVariant rbitshift(tjs_int count) const
 	{
 		return (tTVInteger)((tjs_uint64)AsInteger()>> count);
 	}
 
-	TJS_METHOD_DEF(void, rbitshiftequal, (const tTJSVariant &rhs));
+	void rbitshiftequal(const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator <<, (const tTJSVariant & rhs))
+	tTJSVariant operator <<(const tTJSVariant & rhs) const
 	{
 		return (tTVInteger)(AsInteger()<<(tjs_int)rhs.AsInteger());
 	}
 
-	TJS_METHOD_DEF(void, operator <<=, (const tTJSVariant &rhs));
+	void operator <<=(const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator %, (const tTJSVariant & rhs))
+	tTJSVariant operator % (const tTJSVariant & rhs) const
 	{
 		tTVInteger r = rhs.AsInteger();
 		if(r == 0) TJSThrowDivideByZero();
 		return (tTVInteger)(AsInteger()%r);
 	}
 
-	TJS_METHOD_DEF(void, operator %=, (const tTJSVariant &rhs));
+	void operator %=(const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator /, (const tTJSVariant & rhs))
+	tTJSVariant operator / (const tTJSVariant & rhs) const
 	{
 		TJSSetFPUE();
 		tTVReal r = rhs.AsReal();
 		return (AsReal()/r);
 	}
 
-	TJS_METHOD_DEF(void, operator /=, (const tTJSVariant &rhs));
+	void operator /= (const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, idiv, (const tTJSVariant & rhs))
+	tTJSVariant idiv(const tTJSVariant & rhs) const
 	{
 		tTVInteger r = rhs.AsInteger();
 		if(r == 0) TJSThrowDivideByZero();
 		return (tTVInteger)(AsInteger() / r);
 	}
 
-	TJS_METHOD_DEF(void, idivequal, (const tTJSVariant &rhs));
+	void idivequal(const tTJSVariant &rhs);
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator *, (const tTJSVariant & rhs))
+	tTJSVariant operator *(const tTJSVariant & rhs) const
 	{
 		tTJSVariant l(*this);
 		l *= rhs;
@@ -1088,7 +991,7 @@ public:
 private:
 	void InternalMul(const tTJSVariant &rhs);
 public:
-	TJS_METHOD_DEF(void, operator *=, (const tTJSVariant &rhs))
+	void operator *=(const tTJSVariant &rhs)
 	{
 		if(vt == tvtInteger && rhs.vt == tvtInteger)
 		{
@@ -1098,30 +1001,30 @@ public:
 		InternalMul(rhs);
 	}
 
-	TJS_METHOD_DEF(void, logicalnot, ());
+	void logicalnot();
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator !, ())
+	tTJSVariant operator !() const
 	{
-		return (tjs_int)!operator bool();
+		return (tTVInteger)!operator bool();
 	}
 
-	TJS_METHOD_DEF(void, bitnot, ());
+	void bitnot();
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator ~, ())
+	tTJSVariant operator ~ () const
 	{
 		return (tjs_int64)~AsInteger();
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator -, (const tTJSVariant & rhs))
+	tTJSVariant operator - (const tTJSVariant & rhs) const
 	{
 		tTJSVariant l(*this);
 		l -= rhs;
 		return l;
 	}
 
-	TJS_METHOD_DEF(void, tonumber, ());
+	void tonumber();
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator +, ())
+	tTJSVariant operator +() const
 	{
 		if(vt==tvtInteger || vt==tvtReal) return *this;
 
@@ -1132,7 +1035,7 @@ public:
 			return val;
 		}
 
-		if(vt==tvtVoid) return 0;
+		if(vt==tvtVoid) return (tTVInteger)0;
 
 		TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
 		return tTJSVariant();
@@ -1141,7 +1044,7 @@ public:
 private:
 	void InternalChangeSign();
 public:
-	TJS_METHOD_DEF(void, changesign, ())
+	void changesign()
 	{
 		if(vt==tvtInteger)
 		{
@@ -1151,7 +1054,7 @@ public:
 		InternalChangeSign();
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator -, ())
+	tTJSVariant operator - () const
 	{
 		tTJSVariant v(*this);
 		v.changesign();
@@ -1161,7 +1064,7 @@ public:
 private:
 	void InternalSub(const tTJSVariant &rhs);
 public:
-	TJS_METHOD_DEF(void, operator -=, (const tTJSVariant &rhs))
+	void operator -= (const tTJSVariant &rhs)
 	{
 		if(vt == tvtInteger && rhs.vt == tvtInteger)
 		{
@@ -1171,7 +1074,7 @@ public:
         InternalSub(rhs);
 	}
 
-	TJS_CONST_METHOD_DEF(tTJSVariant, operator +, (const tTJSVariant & rhs))
+	tTJSVariant operator +(const tTJSVariant & rhs) const
 	{
 		if(vt==tvtString || rhs.vt==tvtString)
 		{
@@ -1221,28 +1124,12 @@ public:
 	}
 
 
-	TJS_METHOD_DEF(void, operator +=, (const tTJSVariant &rhs));
-
-	//------ allocator/deallocater ------------------------------------------
-	TJS_STATIC_METHOD_DEF(void *, operator new, (size_t size)) { return new char[size]; }
-	TJS_STATIC_METHOD_DEF(void, operator delete, (void * p)) { delete [] ((char*)p); }
-
-	TJS_STATIC_METHOD_DEF(void *, operator new [], (size_t size)) { return new char[size]; }
-	TJS_STATIC_METHOD_DEF(void, operator delete [], (void *p)) { delete [] ((char*)p); }
-
-	TJS_STATIC_METHOD_DEF(void *, operator new, (size_t size, void *buf)) { return buf; }
-
-	//------ persist --------------------------------------------------------
+	void operator +=(const tTJSVariant &rhs);
 
 	tjs_int QueryPersistSize() const;
 	void Persist(tjs_uint8 * dest);
 };
-/*end-of-tTJSVariant*/
 //---------------------------------------------------------------------------
-#ifdef TJS_SUPPORT_VCL
-	#pragma warn .8027
-	#pragma warn .8026
-#endif
 
 //---------------------------------------------------------------------------
 

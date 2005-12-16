@@ -38,6 +38,7 @@
 //---------------------------------------------------------------------------
 namespace TJS  // following is in the namespace
 {
+TJS_DEFINE_SOURCE_ID(1017);
 //---------------------------------------------------------------------------
 
 
@@ -70,19 +71,19 @@ int _yyerror(const tjs_char * msg, void *pm, tjs_int pos)
 
 	// message conversion
 	ttstr str;
-	/*if(!TJS_strncmp(msg, TJS_W("parse error, expecting "), 23))
+	/*if(!TJS_strncmp(msg, TJS_WS("parse error, expecting "), 23))
 	{
 		str = TJSExpected;
-		if(!TJS_strncmp(msg+23, TJS_W("T_SYMBOL"), 8))
-			str.Replace(TJS_W("%1"), ttstr(TJSSymbol), false);
+		if(!TJS_strncmp(msg+23, TJS_WS("T_SYMBOL"), 8))
+			str.Replace(TJS_WS("%1"), ttstr(TJSSymbol), false);
 		else
-			str.Replace(TJS_W("%1"), msg+23, false);
+			str.Replace(TJS_WS("%1"), msg+23, false);
 
 	}
-	else */if(!TJS_strncmp(msg, TJS_W("syntax error"), 11))
+	else */if(!TJS_strncmp(msg, TJS_WS("syntax error"), 11))
 	{
 		str = TJSSyntaxError;
-		str.Replace(TJS_W("%1"), ttstr(msg), false);
+		str.Replace(TJS_WS("%1"), ttstr(msg), false);
 	}
 	else
 	{
@@ -99,9 +100,7 @@ int _yyerror(const tjs_char * msg, void *pm, tjs_int pos)
 
 	sb->CompileErrorCount++;
 
-	tjs_char buf[43];
-	TJS_sprintf(buf, TJS_W(" at line %d"), 1+sb->SrcPosToLine(errpos));
-	str += buf;
+	str += ttstr(TJS_WS(" at line ")) + ttstr(1+sb->SrcPosToLine(errpos)) ;
 
 	sb->GetTJS()->OutputToConsole(str.c_str());
 
@@ -331,21 +330,21 @@ const tjs_char* tTJSInterCodeContext::GetContextTypeName() const
 {
 	switch(ContextType)
 	{
-	case ctTopLevel:		return TJS_W("top level script");
-	case ctFunction:		return TJS_W("function");
-	case ctExprFunction:	return TJS_W("function expression");
-	case ctProperty:		return TJS_W("property");
-	case ctPropertySetter:	return TJS_W("property setter");
-	case ctPropertyGetter:	return TJS_W("property getter");
-	case ctClass:			return TJS_W("class");
-	case ctSuperClassGetter:return TJS_W("super class getter proxy");
-	default:				return TJS_W("unknown");
+	case ctTopLevel:		return TJS_WS("top level script");
+	case ctFunction:		return TJS_WS("function");
+	case ctExprFunction:	return TJS_WS("function expression");
+	case ctProperty:		return TJS_WS("property");
+	case ctPropertySetter:	return TJS_WS("property setter");
+	case ctPropertyGetter:	return TJS_WS("property getter");
+	case ctClass:			return TJS_WS("class");
+	case ctSuperClassGetter:return TJS_WS("super class getter proxy");
+	default:				return TJS_WS("unknown");
 	}
 }
 //---------------------------------------------------------------------------
 ttstr tTJSInterCodeContext::GetShortDescription() const
 {
-	ttstr ret(TJS_W("(") + ttstr(GetContextTypeName()) + TJS_W(")"));
+	ttstr ret(TJS_WS("(") + ttstr(GetContextTypeName()) + TJS_WS(")"));
 
 	const tjs_char *name;
 	if(ContextType == ctPropertySetter || ContextType == ctPropertyGetter)
@@ -360,14 +359,14 @@ ttstr tTJSInterCodeContext::GetShortDescription() const
 		name = Name;
 	}
 
-	if(name) ret += TJS_W(" ") + ttstr(name);
+	if(name) ret += TJS_WS(" ") + ttstr(name);
 
 	return ret;
 }
 //---------------------------------------------------------------------------
 ttstr tTJSInterCodeContext::GetShortDescriptionWithClassName() const
 {
-	ttstr ret(TJS_W("(") + ttstr(GetContextTypeName()) + TJS_W(")"));
+	ttstr ret(TJS_WS("(") + ttstr(GetContextTypeName()) + TJS_WS(")"));
 
 	tTJSInterCodeContext * parent;
 
@@ -398,8 +397,8 @@ ttstr tTJSInterCodeContext::GetShortDescriptionWithClassName() const
 
 	if(name)
 	{
-		ret += TJS_W(" ");
-		if(classname) ret += ttstr(classname) + TJS_W(".");
+		ret += TJS_WS(" ");
+		if(classname) ret += ttstr(classname) + TJS_WS(".");
 		ret += ttstr(name);
 	}
 
@@ -415,12 +414,11 @@ void tTJSInterCodeContext::OutputWarning(const tjs_char *msg, tjs_int pos)
 	tjs_int errpos =
 		pos == -1 ? Block->GetLexicalAnalyzer()->GetCurrentPosition(): pos;
 
-	str += TJS_W(" at ");
+	str += TJS_WS(" at ");
 	str += Block->GetName();
 
-	tjs_char buf[43];
-	TJS_sprintf(buf, TJS_W(" line %d"), 1+Block->SrcPosToLine(errpos));
-	str += buf;
+	str += TJS_WS(" line ");
+	str += ttstr(1+Block->SrcPosToLine(errpos));
 
 	Block->GetTJS()->OutputToConsole(str.c_str());
 }
@@ -538,7 +536,7 @@ tjs_int tTJSInterCodeContext::PutData(const tTJSVariant &val)
 	return _DataAreaSize++;
 }
 //---------------------------------------------------------------------------
-int TJS_USERENTRY tTJSInterCodeContext::tSourcePos::
+int tTJSInterCodeContext::tSourcePos::
 	SortFunction(const void *a, const void *b)
 {
 	const tSourcePos *aa = (const tSourcePos*)a;
@@ -960,7 +958,7 @@ tjs_int tTJSInterCodeContext::FindSrcLineStartCodePos(tjs_int codepos) const
 ttstr tTJSInterCodeContext::GetPositionDescriptionString(tjs_int codepos) const
 {
 	return Block->GetLineDescriptionString(CodePosToSrcPos(codepos)) +
-		TJS_W("[") + GetShortDescription() + TJS_W("]");
+		TJS_WS("[") + GetShortDescription() + TJS_WS("]");
 }
 //---------------------------------------------------------------------------
 static bool inline TJSIsModifySubType(tTJSSubType type)
@@ -2099,7 +2097,6 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 	  {
 		// refer super class
 
-		tjs_int dp;
 		tTJSExprNode * node;
 		if(Parent && Parent->ContextType == ctProperty)
 		{
@@ -2197,7 +2194,7 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 	  {
 		// inline array
 
-		tjs_int arraydp = PutData(tTJSVariant(TJS_W("Array")));
+		tjs_int arraydp = PutData(tTJSVariant(TJS_WS("Array")));
 		//	global %frame0
 		//	gpd %frame1, %frame0 . #arraydp // #arraydp = Array
 		tjs_int frame0 = frame;
@@ -2265,7 +2262,7 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 	case T_INLINEDIC:
 	  {
 		// inline dictionary
-		tjs_int dicdp = PutData(tTJSVariant(TJS_W("Dictionary")));
+		tjs_int dicdp = PutData(tTJSVariant(TJS_WS("Dictionary")));
 		//	global %frame0
 		//	gpd %frame1, %frame0 . #dicdp // #dicdp = Dictionary
 		tjs_int frame0 = frame;
@@ -2319,9 +2316,9 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 	  {
 		// constant regular expression
 		if(!(restype & TJS_RT_NEEDED)) return 0;
-		tjs_int regexpdp = PutData(tTJSVariant(TJS_W("RegExp")));
+		tjs_int regexpdp = PutData(tTJSVariant(TJS_WS("RegExp")));
 		tjs_int patdp = PutData(node->GetValue());
-		tjs_int compiledp = PutData(tTJSVariant(TJS_W("_compile")));
+		tjs_int compiledp = PutData(tTJSVariant(TJS_WS("_compile")));
 		// global %frame0
 		//	gpd %frame1, %frame0 . #regexpdp // #regexpdp = RegExp
 		tjs_int frame0 = frame;
@@ -3294,8 +3291,6 @@ void tTJSInterCodeContext::ProcessThrowCode(tTJSExprNode *node)
 void tTJSInterCodeContext::CreateExtendsExprCode(tTJSExprNode *node, bool hold)
 {
 	// process class extender
-
-	tjs_int num;
 
 	tjs_int fr = FrameBase;
 	tjs_int resaddr = GenNodeCode(fr, node, TJS_RT_NEEDED, 0, tSubParam());

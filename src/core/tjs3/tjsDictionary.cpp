@@ -16,6 +16,7 @@
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(1011);
 //---------------------------------------------------------------------------
 static tjs_int32 ClassID_Dictionary;
 //---------------------------------------------------------------------------
@@ -23,7 +24,7 @@ static tjs_int32 ClassID_Dictionary;
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSDictionaryClass::ClassID = (tjs_uint32)-1;
 tTJSDictionaryClass::tTJSDictionaryClass() :
-	tTJSNativeClass(TJS_W("Dictionary"))
+	tTJSNativeClass(TJS_WS("Dictionary"))
 {
 	// TJS class constructor
 
@@ -76,7 +77,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func.name*/saveStruct)
 		std::vector<iTJSDispatch2 *> stack;
 		stack.push_back(objthis);
 		tTJSStringAppender string;
-		ni->SaveStructuredData(stack, string, TJS_W(""));
+		ni->SaveStructuredData(stack, string, TJS_WS(""));
 		stream->Write(ttstr(string.GetData(), string.GetLen()));
 	}
 	catch(...)
@@ -180,7 +181,7 @@ tTJSDictionaryNI::~tTJSDictionaryNI()
 {
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSDictionaryNI::Construct(tjs_int numparams,
+tjs_error tTJSDictionaryNI::Construct(tjs_int numparams,
 	tTJSVariant **param, iTJSDispatch2 *tjsobj)
 {
 	// called from TJS constructor
@@ -189,7 +190,7 @@ tjs_error TJS_INTF_METHOD tTJSDictionaryNI::Construct(tjs_int numparams,
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSDictionaryNI::Invalidate() // Invalidate override
+void tTJSDictionaryNI::Invalidate() // Invalidate override
 {
 	// put here something on invalidation
 	Owner = NULL;
@@ -225,8 +226,8 @@ void tTJSDictionaryNI::Assign(iTJSDispatch2 * dsp, bool clear)
 		if(clear) Owner->Clear();
 		tAssignCallback callback;
 		callback.Owner = Owner;
-
-		dsp->EnumMembers(TJS_IGNOREPROP, &tTJSVariantClosure(&callback, NULL), dsp);
+		tTJSVariantClosure clo(&callback, NULL);
+		dsp->EnumMembers(TJS_IGNOREPROP, &clo, dsp);
 
 	}
 }
@@ -236,7 +237,7 @@ void tTJSDictionaryNI::Clear()
 	Owner->Clear();
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 tTJSDictionaryNI::tAssignCallback::FuncCall(tjs_uint32 flag,
 	const tjs_char * membername, tjs_uint32 *hint, tTJSVariant *result,
 	tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
@@ -249,14 +250,14 @@ tTJSDictionaryNI::tAssignCallback::FuncCall(tjs_uint32 flag,
 	tjs_uint32 flags = (tjs_int)*param[1];
 	if(flags & TJS_HIDDENMEMBER)
 	{
-		if(result) *result = (tjs_int)1;
+		if(result) *result = (tTVInteger)1;
 		return TJS_S_OK;
 	}
 
 	Owner->PropSetByVS(TJS_MEMBERENSURE|TJS_IGNOREPROP|flags,
 		param[0]->AsStringNoAddRef(), param[2], Owner);
 
-	if(result) *result = (tjs_int)1;
+	if(result) *result = (tTVInteger)1;
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
@@ -264,30 +265,30 @@ void tTJSDictionaryNI::SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
 	tTJSStringAppender & string, const ttstr &indentstr)
 {
 #ifdef TJS_TEXT_OUT_CRLF
-	string += TJS_W("%[\r\n");
+	string += TJS_WS("%[\r\n");
 #else
-	string += TJS_W("%[\n");
+	string += TJS_WS("%[\n");
 #endif
-	ttstr indentstr2 = indentstr + TJS_W(" ");
+	ttstr indentstr2 = indentstr + TJS_WS(" ");
 
 	tSaveStructCallback callback;
 	callback.Stack = &stack;
 	callback.String = &string;
 	callback.IndentStr = &indentstr2;
 	callback.First = true;
-
-	Owner->EnumMembers(TJS_IGNOREPROP, &tTJSVariantClosure(&callback, NULL), Owner);
+	tTJSVariantClosure clo(&callback, NULL);
+	Owner->EnumMembers(TJS_IGNOREPROP, &clo, Owner);
 
 #ifdef TJS_TEXT_OUT_CRLF
-	if(!callback.First) string += TJS_W("\r\n");
+	if(!callback.First) string += TJS_WS("\r\n");
 #else
-	if(!callback.First) string += TJS_W("\n");
+	if(!callback.First) string += TJS_WS("\n");
 #endif
 	string += indentstr;
-	string += TJS_W("]");
+	string += TJS_WS("]");
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tSaveStructCallback::FuncCall(
+tjs_error tTJSDictionaryNI::tSaveStructCallback::FuncCall(
 	tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -300,23 +301,23 @@ tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tSaveStructCallback::FuncCall(
 	tjs_uint32 flags = (tjs_int)*param[1];
 	if(flags & TJS_HIDDENMEMBER)
 	{
-		if(result) *result = (tjs_int)1;
+		if(result) *result = (tTVInteger)1;
 		return TJS_S_OK;
 	}
 
 #ifdef TJS_TEXT_OUT_CRLF
-	if(!First) *String += TJS_W(",\r\n");
+	if(!First) *String += TJS_WS(",\r\n");
 #else
-	if(!First) *String += TJS_W(",\n");
+	if(!First) *String += TJS_WS(",\n");
 #endif
 
 	First = false;
 
 	*String += *IndentStr;
 
-	*String += TJS_W("\"");
+	*String += TJS_WS("\"");
 	*String += ttstr(*param[0]).EscapeC();
-	*String += TJS_W("\" => ");
+	*String += TJS_WS("\" => ");
 
 	tTJSVariantType type = param[2]->Type();
 	if(type == tvtObject)
@@ -331,7 +332,7 @@ tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tSaveStructCallback::FuncCall(
 		*String += TJSVariantToExpressionString(*param[2]);
 	}
 
-	if(result) *result = (tjs_int)1;
+	if(result) *result = (tTVInteger)1;
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
@@ -353,7 +354,8 @@ void tTJSDictionaryNI::AssignStructure(iTJSDispatch2 * dsp,
 			callback.Dest = Owner;
 			callback.Stack = &stack;
 
-			dsp->EnumMembers(TJS_IGNOREPROP, &tTJSVariantClosure(&callback, NULL), dsp);
+			tTJSVariantClosure clo(&callback, NULL);
+			dsp->EnumMembers(TJS_IGNOREPROP, &clo, dsp);
 		}
 		catch(...)
 		{
@@ -369,7 +371,7 @@ void tTJSDictionaryNI::AssignStructure(iTJSDispatch2 * dsp,
 
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tAssignStructCallback::FuncCall(
+tjs_error tTJSDictionaryNI::tAssignStructCallback::FuncCall(
 	tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -383,7 +385,7 @@ tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tAssignStructCallback::FuncCall(
 	tjs_uint32 flags = (tjs_int)*param[1];
 	if(flags & TJS_HIDDENMEMBER)
 	{
-		if(result) *result = (tjs_int)1;
+		if(result) *result = (tTVInteger)1;
 		return TJS_S_OK;
 	}
 
@@ -480,7 +482,7 @@ tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tAssignStructCallback::FuncCall(
 		Dest->PropSetByVS(TJS_MEMBERENSURE|TJS_IGNOREPROP, param[0]->AsStringNoAddRef(), &value, Dest);
 	}
 
-	if(result) *result = (tjs_int)1;
+	if(result) *result = (tTVInteger)1;
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
@@ -500,7 +502,7 @@ tTJSDictionaryObject::~tTJSDictionaryObject()
 {
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDictionaryObject::FuncCall(tjs_uint32 flag, const tjs_char * membername,
 		tjs_uint32 *hint,
 		tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
@@ -513,7 +515,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDictionaryObject::PropGet(tjs_uint32 flag, const tjs_char * membername,
 		tjs_uint32 *hint,
 		tTJSVariant *result, iTJSDispatch2 *objthis)
@@ -528,7 +530,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
+tjs_error
 	tTJSDictionaryObject::CreateNew(tjs_uint32 flag, const tjs_char * membername,
 		tjs_uint32 *hint,
 		iTJSDispatch2 **result, tjs_int numparams, tTJSVariant **param,
@@ -541,7 +543,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD 
+tjs_error
 	tTJSDictionaryObject::Operation(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint,
 		tTJSVariant *result, const tTJSVariant *param, iTJSDispatch2 *objthis)

@@ -30,8 +30,6 @@ extern const tjs_int TJSVersionMajor;
 extern const tjs_int TJSVersionMinor;
 extern const tjs_int TJSVersionRelease;
 extern const tjs_int TJSVersionHex;
-
-extern tjs_char TJSCompiledDate[];
 //---------------------------------------------------------------------------
 
 
@@ -170,15 +168,15 @@ class tTJSString;
 class iTJSTextReadStream
 {
 public:
-	virtual tjs_uint TJS_INTF_METHOD Read(tTJSString & targ, tjs_uint size) = 0;
-	virtual void TJS_INTF_METHOD Destruct() = 0; // must delete itself
+	virtual tjs_uint Read(tTJSString & targ, tjs_uint size) = 0;
+	virtual void Destruct() = 0; // must delete itself
 };
 //---------------------------------------------------------------------------
 class iTJSTextWriteStream
 {
 public:
-	virtual void TJS_INTF_METHOD Write(const tTJSString & targ) = 0;
-	virtual void TJS_INTF_METHOD Destruct() = 0; // must delete itself
+	virtual void Write(const tTJSString & targ) = 0;
+	virtual void Destruct() = 0; // must delete itself
 };
 //---------------------------------------------------------------------------
 extern iTJSTextReadStream * (*TJSCreateTextStreamForRead)(const tTJSString &name,
@@ -226,22 +224,22 @@ class tTJSBinaryStream
 private:
 public:
 	//-- must implement
-	virtual tjs_uint64 TJS_INTF_METHOD Seek(tjs_int64 offset, tjs_int whence) = 0;
+	virtual tjs_uint64 Seek(tjs_int64 offset, tjs_int whence) = 0;
 		/* if error, position is not changed */
 
 	//-- optionally to implement
-	virtual tjs_uint TJS_INTF_METHOD Read(void *buffer, tjs_uint read_size) = 0;
+	virtual tjs_uint Read(void *buffer, tjs_uint read_size) = 0;
 		/* returns actually read size */
 
-	virtual tjs_uint TJS_INTF_METHOD Write(const void *buffer, tjs_uint write_size) = 0;
+	virtual tjs_uint Write(const void *buffer, tjs_uint write_size) = 0;
 		/* returns actually written size */
 
-	virtual void TJS_INTF_METHOD SetEndOfStorage();
+	virtual void SetEndOfStorage();
 		// the default behavior is raising a exception
 		/* if error, raises exception */
 
 	//-- should re-implement for higher performance
-	virtual tjs_uint64 TJS_INTF_METHOD GetSize() = 0;
+	virtual tjs_uint64 GetSize() = 0;
 
 	virtual ~tTJSBinaryStream() {;}
 

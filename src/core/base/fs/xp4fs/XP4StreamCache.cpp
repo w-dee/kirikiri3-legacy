@@ -9,6 +9,9 @@
 //! @file
 //! @brief アーカイブファイルのストリームのキャッシュ
 //---------------------------------------------------------------------------
+#include "prec.h"
+TJS_DEFINE_SOURCE_ID(2010);
+
 
 #include "XP4FS.h"
 #include "XP4StreamCache.h"

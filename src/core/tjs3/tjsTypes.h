@@ -6,14 +6,14 @@
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
-/* "TJS3" type definitions                                                   */
+/*! @brief TJS3 で使う型などの宣言                                           */
 /*---------------------------------------------------------------------------*/
 
 #ifndef __TJSTYPES_H__
 #define __TJSTYPES_H__
 
 #ifdef TJS_SUPPORT_WX
-	#include <wx/wx_defs.h>
+	#include <wx/wx.h>
 #endif
 
 
@@ -33,9 +33,9 @@
 	typedef wxLongLong_t tjs_int64;
 	typedef wxULongLong_t tjs_uint64;
 	typedef size_t tjs_size;
-	typedef ssize_t tjs_offset;
-	typedef wxInt32 tjs_int;    /* at least 32bits */
-	typedef wxUint32 tjs_uint;    /* at least 32bits */
+	typedef ptrdiff_t tjs_offset;
+	typedef int tjs_int;    /* at least 32bits */
+	typedef unsigned int tjs_uint;    /* at least 32bits */
 
 	#if SIZEOF_WCHAR_T == 4
 		typedef wchar_t tjs_char; /* UTF-32 */
@@ -44,9 +44,6 @@
 	#endif
 
 	typedef double tjs_real;
-
-	typedef int tjs_int;
-	typedef unsigned int tjs_uint;
 
 	#ifdef WORDS_BIGENDIAN
 		#define TJS_HOST_IS_BIG_ENDIAN 1

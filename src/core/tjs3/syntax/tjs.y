@@ -7,6 +7,7 @@
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
+/*! @brief   TJS3 bison 入力ファイル (文法定義) */
 /* tjs.y */
 /* TJS3 bison input file */
 

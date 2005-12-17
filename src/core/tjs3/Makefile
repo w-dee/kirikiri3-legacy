@@ -29,7 +29,8 @@ CPPFLAGS = $(CPPINCLUDE) $(DEBUG_CFLAGS) \
 	-Winvalid-pch \
 	-mthreads -fno-pcc-struct-return -fstrict-aliasing -Wall \
 	-D__WXMSW__ -D__GNUWIN32__ -D_UNICODE -DUNICODE -DWXUSINGDLL \
-	-DTJS_NO_REGEXP
+	-DTJS_NO_REGEXP \
+	-DTJS_SUPPORT_WX
 
 CPPINCLUDE = \
 	-I"$(MINGWROOT)/include" \

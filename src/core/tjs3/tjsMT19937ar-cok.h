@@ -1,3 +1,5 @@
+//! @brief  Mersenne Twister による疑似乱数発生器
+
 #ifndef tjsMT19937ar_cok_H
 #define tjsMT19937ar_cok_H
 

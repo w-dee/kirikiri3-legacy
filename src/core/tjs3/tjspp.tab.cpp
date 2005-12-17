@@ -133,6 +133,7 @@
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
+/*! @brief   プリプロセッサ式評価 */
 /* tjspp.y */
 /* TJS3 conditional compiling control's conditional expression parser */
 
@@ -182,7 +183,7 @@ int _pperror(char * msg, void *pm)
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 43 "syntax/tjspp.y"
+#line 44 "syntax/tjspp.y"
 typedef union YYSTYPE {
 	tjs_int32		val;
 	tjs_int			nv;
@@ -190,7 +191,7 @@ typedef union YYSTYPE {
 YYLEX_PROTO_DECL
 
 /* Line 196 of yacc.c.  */
-#line 191 "tjspp.tab.c"
+#line 192 "tjspp.tab.c"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -202,7 +203,7 @@ YYLEX_PROTO_DECL
 
 
 /* Line 219 of yacc.c.  */
-#line 203 "tjspp.tab.c"
+#line 204 "tjspp.tab.c"
 
 #if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
 # define YYSIZE_T __SIZE_TYPE__
@@ -433,9 +434,9 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    98,    98,   102,   103,   104,   105,   106,   107,   108,
-     109,   110,   111,   112,   113,   114,   115,   116,   117,   118,
-     119,   120,   121,   122,   123,   124,   125
+       0,    99,    99,   103,   104,   105,   106,   107,   108,   109,
+     110,   111,   112,   113,   114,   115,   116,   117,   118,   119,
+     120,   121,   122,   123,   124,   125,   126
 };
 #endif
 
@@ -1247,127 +1248,127 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 98 "syntax/tjspp.y"
+#line 99 "syntax/tjspp.y"
     { ep->Result = (yyvsp[0].val); ;}
     break;
 
   case 3:
-#line 102 "syntax/tjspp.y"
+#line 103 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[0].val); ;}
     break;
 
   case 4:
-#line 103 "syntax/tjspp.y"
+#line 104 "syntax/tjspp.y"
     { tjs->SetPPValue(ep->GetString((yyvsp[-2].nv)), (yyvsp[0].val)); (yyval.val) = (yyvsp[0].val); ;}
     break;
 
   case 5:
-#line 104 "syntax/tjspp.y"
+#line 105 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) != (yyvsp[0].val); ;}
     break;
 
   case 6:
-#line 105 "syntax/tjspp.y"
+#line 106 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) == (yyvsp[0].val); ;}
     break;
 
   case 7:
-#line 106 "syntax/tjspp.y"
+#line 107 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) || (yyvsp[0].val); ;}
     break;
 
   case 8:
-#line 107 "syntax/tjspp.y"
+#line 108 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) && (yyvsp[0].val); ;}
     break;
 
   case 9:
-#line 108 "syntax/tjspp.y"
+#line 109 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) | (yyvsp[0].val); ;}
     break;
 
   case 10:
-#line 109 "syntax/tjspp.y"
+#line 110 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) ^ (yyvsp[0].val); ;}
     break;
 
   case 11:
-#line 110 "syntax/tjspp.y"
+#line 111 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) & (yyvsp[0].val); ;}
     break;
 
   case 12:
-#line 111 "syntax/tjspp.y"
+#line 112 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) < (yyvsp[0].val); ;}
     break;
 
   case 13:
-#line 112 "syntax/tjspp.y"
+#line 113 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) > (yyvsp[0].val); ;}
     break;
 
   case 14:
-#line 113 "syntax/tjspp.y"
+#line 114 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) >= (yyvsp[0].val); ;}
     break;
 
   case 15:
-#line 114 "syntax/tjspp.y"
+#line 115 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) <= (yyvsp[0].val); ;}
     break;
 
   case 16:
-#line 115 "syntax/tjspp.y"
+#line 116 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) + (yyvsp[0].val); ;}
     break;
 
   case 17:
-#line 116 "syntax/tjspp.y"
+#line 117 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) - (yyvsp[0].val); ;}
     break;
 
   case 18:
-#line 117 "syntax/tjspp.y"
+#line 118 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) % (yyvsp[0].val); ;}
     break;
 
   case 19:
-#line 118 "syntax/tjspp.y"
+#line 119 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-2].val) * (yyvsp[0].val); ;}
     break;
 
   case 20:
-#line 119 "syntax/tjspp.y"
+#line 120 "syntax/tjspp.y"
     { if((yyvsp[0].val)==0) { YYABORT; } else { (yyval.val) = (yyvsp[-2].val) / (yyvsp[0].val); } ;}
     break;
 
   case 21:
-#line 120 "syntax/tjspp.y"
+#line 121 "syntax/tjspp.y"
     { (yyval.val) = ! (yyvsp[0].val); ;}
     break;
 
   case 22:
-#line 121 "syntax/tjspp.y"
+#line 122 "syntax/tjspp.y"
     { (yyval.val) = + (yyvsp[0].val); ;}
     break;
 
   case 23:
-#line 122 "syntax/tjspp.y"
+#line 123 "syntax/tjspp.y"
     { (yyval.val) = - (yyvsp[0].val); ;}
     break;
 
   case 24:
-#line 123 "syntax/tjspp.y"
+#line 124 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[-1].val); ;}
     break;
 
   case 25:
-#line 124 "syntax/tjspp.y"
+#line 125 "syntax/tjspp.y"
     { (yyval.val) = (yyvsp[0].val); ;}
     break;
 
   case 26:
-#line 125 "syntax/tjspp.y"
+#line 126 "syntax/tjspp.y"
     { (yyval.val) = tjs->GetPPValue(ep->GetString((yyvsp[0].nv))); ;}
     break;
 
@@ -1376,7 +1377,7 @@ yyreduce:
     }
 
 /* Line 1126 of yacc.c.  */
-#line 1377 "tjspp.tab.c"
+#line 1378 "tjspp.tab.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1644,7 +1645,7 @@ yyreturn:
 }
 
 
-#line 128 "syntax/tjspp.y"
+#line 129 "syntax/tjspp.y"
 
 
 

@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// tTJSVariant friendly string class implementation
+//! @brief 文字列クラス tTJSString ( ttstr ) の実装
 //---------------------------------------------------------------------------
 
 #ifndef tjsStringH
@@ -71,13 +71,6 @@ public:
 #endif
 	tTJSString(const tTJSStringBufferLength len)
 		{ Ptr = TJSAllocVariantStringBuffer(len.n); }
-	tTJSString(tjs_char rch)
-	{
-		tjs_char ch[2];
-		ch[0] = rch;
-		ch[1] = 0;
-		Ptr = TJSAllocVariantString(ch);
-	}
 
 	tTJSString(const tTJSVariant & val);
 
@@ -86,9 +79,7 @@ public:
 
 	tTJSString(const tjs_char *str, int n) // same as above except for str's type
 		{ Ptr = TJSAllocVariantString(str, n); }
-
 	tTJSString(tjs_int n); // from int
-
 	tTJSString(const tTJSString &str, const tTJSString &s1);
 	tTJSString(const tTJSString &str, const tTJSString &s1, const tTJSString &s2);
 	tTJSString(const tTJSString &str, const tTJSString &s1, const tTJSString &s2, const tTJSString &s3);
@@ -103,12 +94,15 @@ public:
 		{ return Ptr?Ptr->operator const tjs_char *():TJSNullStrPtr; }
 
 #ifdef TJS_SUPPORT_WX
-	const AnsiString AsWxString() const
+	const wxString AsWxString() const
 	{
 		if(!Ptr) return wxString();
 
 	#ifdef TJS_WCHAR_T_SIZE_IS_16BIT
-		return wxString(Ptr->operator const tjs_char *(), wxConvUTF32());
+		wxMBConvUTF32 conv;
+		return wxString(
+			reinterpret_cast<const char *>(Ptr->operator const tjs_char *()),
+				*(wxMBConv *)&conv);
 	#else
 		return wxString(Ptr->operator const tjs_char *());
 	#endif

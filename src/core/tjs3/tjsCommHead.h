@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// tjs common header
+//! @brief tjs 共通ヘッダ (コンパイル済みヘッダ用)
 //---------------------------------------------------------------------------
 
 
@@ -16,6 +16,9 @@
 #ifndef tjsCommHeadH
 #define tjsCommHeadH
 
+#ifdef TJS_SUPPORT_WX
+	#include <wx/wx.h>
+#endif
 
 #ifdef __WIN32__
 #include <windows.h>

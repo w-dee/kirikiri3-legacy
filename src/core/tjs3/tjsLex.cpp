@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// TJS3 lexical analyzer
+//! @brief TJS3 レキシカル・アナライザ(字句解析機)の実装
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 
@@ -1544,7 +1544,10 @@ re_match:
 	if(!TJS_iswalpha(*Current) && *Current!=TJS_WC('_'))
 	{
 		ttstr str(TJSInvalidChar);
-		str.Replace(TJS_WS("%1"), ttstr(*Current).EscapeC());
+		tjs_char ch[2];
+		ch[0] = *Current;
+		ch[1] = 0;
+		str.Replace(TJS_WS("%1"), ttstr(ch).EscapeC());
 		TJS_eTJSError(str);
 	}
 
@@ -1558,7 +1561,10 @@ re_match:
 	if(nch == 0)
 	{
 		ttstr str(TJSInvalidChar);
-		str.Replace(TJS_WS("%1"), ttstr(*Current).EscapeC());
+		tjs_char ch[2];
+		ch[0] = *Current;
+		ch[1] = 0;
+		str.Replace(TJS_WS("%1"), ttstr(ch).EscapeC());
 		TJS_eTJSError(str);
 	}
 

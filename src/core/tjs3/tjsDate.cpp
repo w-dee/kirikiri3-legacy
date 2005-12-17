@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Date class implementation
+//! @brief Date クラス実装
 //---------------------------------------------------------------------------
 
 #include "tjsCommHead.h"

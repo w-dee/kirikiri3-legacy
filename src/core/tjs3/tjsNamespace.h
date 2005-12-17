@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Name Space Processing
+//! @brief コンパイル時の名前空間の管理
 //---------------------------------------------------------------------------
 #ifndef tjsNamespaceH
 #define tjsNamespaceH

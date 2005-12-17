@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// utility functions
+//! @brief ユーティリティ
 //---------------------------------------------------------------------------
 #ifndef tjsUtilsH
 #define tjsUtilsH
@@ -17,21 +17,34 @@
 namespace TJS
 {
 //---------------------------------------------------------------------------
-// tTJSCriticalSection ( implement on each platform for multi-threading support )
+// クリティカルセクション
 //---------------------------------------------------------------------------
-#ifdef __WIN32__
+#ifdef TJS_SUPPORT_WX
+// wxWidgets サポートの場合
+#include <wx/thread.h>
+
+// wxWidgets の物を使う
+typedef wxCriticalSection tTJSCriticalSection;
+
+#elif
+// Windows プラットフォームの場合
+
 #include <Windows.h>
+
+//! @brief クリティカルセクションの実装
 class tTJSCriticalSection
 {
-	CRITICAL_SECTION CS;
+	CRITICAL_SECTION CS; //!< Win32 クリティカルセクションオブジェクト
 public:
-	tTJSCriticalSection() { InitializeCriticalSection(&CS); }
-	~tTJSCriticalSection() { DeleteCriticalSection(&CS); }
+	tTJSCriticalSection() { InitializeCriticalSection(&CS); } //!< コンストラクタ
+	~tTJSCriticalSection() { DeleteCriticalSection(&CS); } //!< デストラクタ
 
-	void Enter() { EnterCriticalSection(&CS); }
-	void Leave() { LeaveCriticalSection(&CS); }
+	void Enter() { EnterCriticalSection(&CS); } //!< クリティカルセクションに入る
+	void Leave() { LeaveCriticalSection(&CS); } //!< クリティカルセクションから出る
 };
 #else
+// wxWidgets でも Windows でもない場合はサポートしない
+
 class tTJSCriticalSection
 {
 public:
@@ -41,40 +54,33 @@ public:
 	void Enter() { ; }
 	void Leave() { ; }
 };
-#endif
-//---------------------------------------------------------------------------
-// interlocked operation ( implement on each platform for multi-threading support )
-//---------------------------------------------------------------------------
-/*
-#ifdef __WIN32__
-#include <Windows.h>
-
-// we assume that sizeof(tjs_uint) is 4 on TJS3/win32.
-
-inline tjs_uint TJSInterlockedIncrement(tjs_uint & value)
-{
-	return InterlockedIncrement((long*)&value);
-}
-
-#else
-
-inline
 
 #endif
-*/
 //---------------------------------------------------------------------------
-// tTJSCriticalSectionHolder
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief クリティカルセクションを保持するクラス
 //---------------------------------------------------------------------------
 class tTJSCriticalSectionHolder
 {
-	tTJSCriticalSection *Section;
+	tTJSCriticalSection *Section; //!< クリティカルセクションオブジェクト
 public:
+
+	//! @brief コンストラクタ
+	//! @param クリティカルセクションオブジェクトへの参照
 	tTJSCriticalSectionHolder(tTJSCriticalSection &cs)
 	{
 		Section = &cs;
 		Section->Enter();
 	}
 
+	//! @brief デストラクタ
 	~tTJSCriticalSectionHolder()
 	{
 		Section->Leave();
@@ -83,6 +89,13 @@ public:
 };
 typedef tTJSCriticalSectionHolder tTJSCSH;
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 // tTJSAtExit / tTJSAtStart

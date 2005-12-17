@@ -9,14 +9,15 @@
 //! @file
 //! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
-
+#include "prec.h"
+TJS_DEFINE_SOURCE_ID(2000);
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tTVPFileSystemManager::tTVPFileSystemManager()
 {
-	CurrentDirectory = TJS_W("/");
+	CurrentDirectory = TJS_WS("/");
 }
 //---------------------------------------------------------------------------
 
@@ -50,7 +51,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFil
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
 	ttstr path(NormalizePath(point));
-	if(!path.EndWith(TJS_W('/'))) path += TJS_W('/');
+	if(!path.EndWith(TJS_WC('/'))) path += TJS_WC('/');
 
 	// すでにその場所にマウントが行われているかどうかをチェックする
 	boost::shared_ptr<iTVPFileSystem> * item = MountPoints.Find(path);
@@ -77,7 +78,7 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
 	ttstr path(NormalizePath(point));
-	if(!path.EndWith(TJS_W('/'))) path += TJS_W('/');
+	if(!path.EndWith(TJS_WC('/'))) path += TJS_WC('/');
 
 	// その場所にマウントが行われているかどうかをチェックする
 	boost::shared_ptr<iTVPFileSystem> * item = MountPoints.Find(path);
@@ -105,7 +106,7 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 	// 相対ディレクトリかどうかをチェック
 	// 先頭が '/' でなければ相対パスとみなし、パスの先頭に CurrentDirectory
 	// を挿入する
-	if(path[0] != TJS_W('/'))
+	if(path[0] != TJS_WC('/'))
 	{
 		tTJSCriticalSectionHolder holder(CS);
 		path = CurrentDirectory + path;
@@ -122,28 +123,28 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 	// ・ ../ の巻き戻し
 	while(*s)
 	{
-		if(s[0] == TJS_W('/'))
+		if(s[0] == TJS_WC('/'))
 		{
 			// *s が /
-			if(s[1] == TJS_W('/'))
+			if(s[1] == TJS_WC('/'))
 			{
 				// s[1] も /
 				// / が重複している
 				s+=2;
-				while(*s  == TJS_W('/')) s++;
+				while(*s  == TJS_WC('/')) s++;
 				s--;
 			}
-			else if(s[1] == TJS_W('.') && s[2] == TJS_W('.') &&
-				(s[3] == 0 || s[3] == TJS_W('/')))
+			else if(s[1] == TJS_WC('.') && s[2] == TJS_WC('.') &&
+				(s[3] == 0 || s[3] == TJS_WC('/')))
 			{
 				// s[2] 以降が ..
 				s += 3;
 				// d を巻き戻す
-				while(d > start && *d != TJS_W('/')) d--;
+				while(d > start && *d != TJS_WC('/')) d--;
 				// この時点で d は '/' を指している
 			}
-			else if(s[1] == TJS_W('.') &&
-				(s[2] == 0 || s[2] == TJS_W('/')))
+			else if(s[1] == TJS_WC('.') &&
+				(s[2] == 0 || s[2] == TJS_WC('/')))
 			{
 				// s[2] 以降が .
 				s += 2; // 読み飛ばす
@@ -160,7 +161,7 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 			s++;
 		}
 	}
-	if(d == start) *(d++) = TJS_W('/'); // 処理によっては最初の / が消えてしまうので
+	if(d == start) *(d++) = TJS_WC('/'); // 処理によっては最初の / が消えてしまうので
 	*d = 0; // 文字列を終結
 
 	ret.FixLen(); // ttstrの内部状態を更新
@@ -469,7 +470,7 @@ boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 
 	while(p >= start)
 	{
-		if(*p == TJS_W('/'))
+		if(*p == TJS_WC('/'))
 		{
 			// p が スラッシュ
 			ttstr subpath(start, p - start + 1);
@@ -532,7 +533,7 @@ void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttst
 	// パス名を最後からスキャン
 	while(true)
 	{
-		if(p < start || *p == TJS_W('/'))
+		if(p < start || *p == TJS_WC('/'))
 		{
 			// * ファイル名の先頭を超えて前に行った
 			// * '/' にぶつかった
@@ -542,7 +543,7 @@ void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttst
 			return;
 		}
 
-		if(*p == TJS_W('.'))
+		if(*p == TJS_WC('.'))
 		{
 			// * '.' にぶつかった
 			if(other) *other = ttstr(start, p - start);
@@ -569,9 +570,9 @@ void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, tts
 	const tjs_char * pp = p;
 	const tjs_char * start = in.c_str();
 	p --;
-	while(p > start && *p != TJS_W('/')) p--;
+	while(p > start && *p != TJS_WC('/')) p--;
 
-	if(*p == TJS_W('/')) p++;
+	if(*p == TJS_WC('/')) p++;
 
 	if(path) *path = ttstr(start, p - start);
 	if(name) *name = ttstr(p);
@@ -585,11 +586,11 @@ void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, tts
 //---------------------------------------------------------------------------
 static void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 {
-	if(path.EndWith(TJS_W('/')))
+	if(path.EndWith(TJS_WC('/')))
 	{
 		tjs_char *s = path.Independ();
 		tjs_char *p = s + path.GetLen() - 1;
-		while(p >= s && *p == TJS_W('/')) p--;
+		while(p >= s && *p == TJS_WC('/')) p--;
 		p++;
 		*p = 0;
 		path.FixLen();

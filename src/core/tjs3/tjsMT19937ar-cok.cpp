@@ -1,3 +1,4 @@
+//! @brief  Mersenne Twister による疑似乱数発生器
 /* 
    A C-program for MT19937, with initialization improved 2002/2/10.
    Coded by Takuji Nishimura and Makoto Matsumoto.

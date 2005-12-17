@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// implementation of tTJSVariant
+//! @brief tTJSVariant (バリアント型) クラスの実装
 //---------------------------------------------------------------------------
 #ifndef tjsVariantH
 #define tjsVariantH

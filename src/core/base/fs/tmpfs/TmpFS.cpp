@@ -9,6 +9,8 @@
 //! @file
 //! @brief tmpfs の実装
 //---------------------------------------------------------------------------
+#include "prec.h"
+TJS_DEFINE_SOURCE_ID(2004);
 
 #include "TmpFS.h"
 
@@ -548,7 +550,7 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 		tTVPTmpFSNode *node = Root;
 		while(*p)
 		{
-			while(*p != TJS_W('/') && *p != 0) p++;
+			while(*p != TJS_WC('/') && *p != 0) p++;
 			if(p != pp)
 			{
 				// '/' で挟まれた区間が得られた
@@ -694,7 +696,7 @@ tTVPTmpFSNode * tTVPTmpFS::GetNodeAt(const ttstr & name)
 
 	while(*p)
 	{
-		while(*p != TJS_W('/') && *p != 0) p++;
+		while(*p != TJS_WC('/') && *p != 0) p++;
 		if(p != pp)
 		{
 			// '/' で挟まれた区間が得られた
@@ -704,7 +706,7 @@ tTVPTmpFSNode * tTVPTmpFS::GetNodeAt(const ttstr & name)
 		pp = p;
 	}
 
-	if(name.EndWith(TJS_W('/')) && !node->IsDirectory())
+	if(name.EndWith(TJS_WC('/')) && !node->IsDirectory())
 	{
 		// 名前の最後が '/' で終わっている (つまり、ディレクトリである
 		// ことを期待している) がノードがディレクトリではない

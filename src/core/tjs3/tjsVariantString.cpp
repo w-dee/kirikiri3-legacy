@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// string heap management used by tTJSVariant and tTJSString
+//! @brief tTJSVariant ã‚„ tTJSString ã§ä½¿ã‚ã‚Œã‚‹æ–‡å­—åˆ—ã®ç®¡ç†
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 
@@ -596,9 +596,9 @@ tTJSVariantString * TJSAllocVariantString(const tjs_char *ref)
 
 #ifdef TJS_WCHAR_T_SIZE_IS_16BIT
 //---------------------------------------------------------------------------
-//! @brief		•¶š—ñƒuƒƒbƒN‚ğŠm•Û(wchar_t‚æ‚è)
-//! @param		ref     ƒRƒs[Œ³•¶š—ñ
-//! @return		Šm•Û‚³‚ê‚½•¶š—ñ
+//! @brief		è­ãƒ»ï½­æ€œãƒ»ç¹æ‚¶ÎŸç¹ãƒ»ã‘ç¹§å ¤ï½¢ï½ºè«é´€(wchar_tç¹§åŒ»ï½Š)
+//! @param		ref     ç¹§ï½³ç¹æ–ãƒ»èœˆãƒ»æšèŸ„æ€œãƒ»
+//! @return		é’ï½ºè«æ˜´ï¼†ç¹§å¾Œâ—†è­ãƒ»ï½­æ€œãƒ»
 //---------------------------------------------------------------------------
 tTJSVariantString *TJSAllocVariantString(const wchar_t *ref)
 {

@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Dictionary class implementation
+//! @brief Dictionary クラスの実装
 //---------------------------------------------------------------------------
 
 #include "tjsCommHead.h"

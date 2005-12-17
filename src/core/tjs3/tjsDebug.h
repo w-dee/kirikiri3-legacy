@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// TJS Debugging support
+//! @brief デバッグのサポート
 //---------------------------------------------------------------------------
 #ifndef tjsDebugH
 #define tjsDebugH

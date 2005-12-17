@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Conditional Compile Control
+//! @brief 条件コンパイル式処理
 //---------------------------------------------------------------------------
 
 #ifndef tjsCompileControlH

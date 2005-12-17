@@ -95,6 +95,7 @@
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
+/*! @brief   日付文字列パーサー */
 /* tjsdate.y */
 /* TJS3 date string parser */
 
@@ -144,14 +145,14 @@ int dperror(char * msg)
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 43 "tjsdate.y"
+#line 44 "tjsdate.y"
 typedef union YYSTYPE {
 	tjs_int32					val;
 } YYSTYPE;
 YYLEX_PROTO_DECL
 
 /* Line 196 of yacc.c.  */
-#line 152 "tjsdate.tab.c"
+#line 153 "tjsdate.tab.c"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -163,7 +164,7 @@ YYLEX_PROTO_DECL
 
 
 /* Line 219 of yacc.c.  */
-#line 164 "tjsdate.tab.c"
+#line 165 "tjsdate.tab.c"
 
 #if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
 # define YYSIZE_T __SIZE_TYPE__
@@ -399,10 +400,10 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    64,    64,    74,    81,    88,    95,   102,   109,   116,
-     124,   132,   139,   146,   157,   161,   162,   163,   168,   172,
-     173,   178,   179,   183,   191,   201,   202,   206,   207,   208,
-     212,   213,   217,   218,   219,   225,   225,   227,   231
+       0,    65,    65,    75,    82,    89,    96,   103,   110,   117,
+     125,   133,   140,   147,   158,   162,   163,   164,   169,   173,
+     174,   179,   180,   184,   192,   202,   203,   207,   208,   209,
+     213,   214,   218,   219,   220,   226,   226,   228,   232
 };
 #endif
 
@@ -1211,84 +1212,84 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 78 "tjsdate.y"
+#line 79 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-4].val));
 															dp->SetYear((yyvsp[-2].val)); ;}
     break;
 
   case 4:
-#line 85 "tjsdate.y"
+#line 86 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-5].val));
 															dp->SetYear((yyvsp[-2].val)); ;}
     break;
 
   case 5:
-#line 92 "tjsdate.y"
+#line 93 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-6].val));
 															dp->SetYear((yyvsp[-2].val)); ;}
     break;
 
   case 6:
-#line 99 "tjsdate.y"
+#line 100 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-3].val));
 															dp->SetYear((yyvsp[-2].val)); ;}
     break;
 
   case 7:
-#line 106 "tjsdate.y"
+#line 107 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-3].val));
 															dp->SetYear((yyvsp[-2].val)); ;}
     break;
 
   case 8:
-#line 113 "tjsdate.y"
+#line 114 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-4].val));
 															dp->SetYear((yyvsp[-2].val)); ;}
     break;
 
   case 9:
-#line 121 "tjsdate.y"
+#line 122 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-4].val));
 															dp->SetYear((yyvsp[-1].val)); ;}
     break;
 
   case 10:
-#line 129 "tjsdate.y"
+#line 130 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-5].val));
 															dp->SetYear((yyvsp[-1].val)); ;}
     break;
 
   case 11:
-#line 136 "tjsdate.y"
+#line 137 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-3].val));
 															dp->SetYear((yyvsp[-1].val)); ;}
     break;
 
   case 12:
-#line 143 "tjsdate.y"
+#line 144 "tjsdate.y"
     {	dp->SetMDay((yyvsp[-3].val));
 															dp->SetYear((yyvsp[-1].val)); ;}
     break;
 
   case 13:
-#line 151 "tjsdate.y"
+#line 152 "tjsdate.y"
     {	dp->SetMonth((yyvsp[-4].val)-1);
 															dp->SetYear((yyvsp[-6].val));
 															dp->SetMDay((yyvsp[-2].val)); ;}
     break;
 
   case 18:
-#line 168 "tjsdate.y"
+#line 169 "tjsdate.y"
     { dp->SetMonth((yyvsp[0].val)); ;}
     break;
 
   case 21:
-#line 178 "tjsdate.y"
+#line 179 "tjsdate.y"
     { /* TODO: sub-seconds support */ ;}
     break;
 
   case 23:
-#line 186 "tjsdate.y"
+#line 187 "tjsdate.y"
     {
 			dp->SetHours((yyvsp[-5].val));
 			dp->SetMin((yyvsp[-3].val));
@@ -1297,7 +1298,7 @@ yyreduce:
     break;
 
   case 24:
-#line 193 "tjsdate.y"
+#line 194 "tjsdate.y"
     {
 			dp->SetHours((yyvsp[-2].val));
 			dp->SetMin((yyvsp[0].val));
@@ -1306,32 +1307,32 @@ yyreduce:
     break;
 
   case 25:
-#line 201 "tjsdate.y"
+#line 202 "tjsdate.y"
     { dp->SetAMPM(false); ;}
     break;
 
   case 26:
-#line 202 "tjsdate.y"
+#line 203 "tjsdate.y"
     { dp->SetAMPM(true); ;}
     break;
 
   case 30:
-#line 212 "tjsdate.y"
+#line 213 "tjsdate.y"
     { dp->SetTimeZone((yyvsp[0].val)); ;}
     break;
 
   case 32:
-#line 217 "tjsdate.y"
+#line 218 "tjsdate.y"
     { dp->SetTimeZoneOffset((yyvsp[0].val)); ;}
     break;
 
   case 33:
-#line 218 "tjsdate.y"
+#line 219 "tjsdate.y"
     { dp->SetTimeZoneOffset(-(yyvsp[0].val)); ;}
     break;
 
   case 35:
-#line 225 "tjsdate.y"
+#line 226 "tjsdate.y"
     { dp->SkipToRightParenthesis(); ;}
     break;
 
@@ -1340,7 +1341,7 @@ yyreduce:
     }
 
 /* Line 1126 of yacc.c.  */
-#line 1341 "tjsdate.tab.c"
+#line 1342 "tjsdate.tab.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1608,7 +1609,7 @@ yyreturn:
 }
 
 
-#line 237 "tjsdate.y"
+#line 238 "tjsdate.y"
 
 
 

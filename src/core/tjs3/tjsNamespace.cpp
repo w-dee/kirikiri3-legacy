@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Name Space Processing
+//! @brief コンパイル時の名前空間の管理
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 
@@ -109,7 +109,7 @@ void tTJSLocalSymbolList::Remove(const tjs_char *name)
 // tTJSLocalNamespace
 //---------------------------------------------------------------------------
 /*
-�@a class for compile-time local variables look-up
+縲a class for compile-time local variables look-up
 */
 #ifdef TJS_DEBUG_PROFILE_TIME
 tjs_uint time_ns_Push = 0;

@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// implementation of tTJSVariant
+//! @brief tTJSVariant (ãƒãƒªã‚¢ãƒ³ãƒˆå‹) ã‚¯ãƒ©ã‚¹ã®å®Ÿè£…
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 
@@ -258,8 +258,8 @@ tTJSVariantString * TJSRealToString(tjs_real r)
 
 	TJSSetFPUE();
 
-	// ‚±‚±‚Å‚Íˆê“x ƒiƒ[•¶š—ñ‚Æ‚µ‚Ä”’l‚ğ‘‚«o‚µ‚Ä‚©‚ç
-	// tjs_char •¶š—ñ‚É•ÏŠ·‚·‚é•û–@‚ğÌ‚é
+	// ã“ã“ã§ã¯ä¸€åº¦ ãƒŠãƒ­ãƒ¼æ–‡å­—åˆ—ã¨ã—ã¦æ•°å€¤ã‚’æ›¸ãå‡ºã—ã¦ã‹ã‚‰
+	// tjs_char æ–‡å­—åˆ—ã«å¤‰æ›ã™ã‚‹æ–¹æ³•ã‚’æ¡ã‚‹
 	tjs_char tmp[25];
 	TJS_tTVReal_to_str(r, tmp);
 

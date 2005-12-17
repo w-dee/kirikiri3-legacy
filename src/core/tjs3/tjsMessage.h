@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// message management
+//! @brief エラーメッセージなどの管理
 //---------------------------------------------------------------------------
 #ifndef tjsMessageH
 #define tjsMessageH

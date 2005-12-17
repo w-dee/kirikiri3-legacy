@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// string heap management used by tTJSVariant and tTJSString
+//! @brief tTJSVariant ã‚„ tTJSString ã§ä½¿ã‚ã‚Œã‚‹æ–‡å­—åˆ—ã®ç®¡ç†
 //---------------------------------------------------------------------------
 #ifndef tjsVariantStringH
 #define tjsVariantStringH
@@ -105,18 +105,18 @@ public:
 	}
 
 #ifdef TJS_WCHAR_T_SIZE_IS_16BIT
-	//! @brief		•¶š—ñ‚Ìİ’è (wchar_t ‚æ‚è)
-	//! @param		ref •¶š—ñ
+	//! @brief		æ–‡å­—åˆ—ã®è¨­å®š (wchar_t ã‚ˆã‚Š)
+	//! @param		ref æ–‡å­—åˆ—
 	void SetString(const wchar_t *ref)
 	{
 		tjs_size len = 1;
 		const wchar_t *p = ref;
-		while(*p) len++, p++;  // •¶š—ñ’·‚ğæ“¾
+		while(*p) len++, p++;  // æ–‡å­—åˆ—é•·ã‚’å–å¾—
 		tjs_char *tjsstr = new tjs_char[len];
 		try
 		{
 			TJSConvertUTF16ToTJSCharString(tjsstr,
-					reinterpret_cast<const tjs_uint16 *>(ref)); // UTF16 ‚ğ UTF32 ‚É•ÏŠ·
+					reinterpret_cast<const tjs_uint16 *>(ref)); // UTF16 ã‚’ UTF32 ã«å¤‰æ›
 			SetString(tjsstr);
 		}
 		catch(...)

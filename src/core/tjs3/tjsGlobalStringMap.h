@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// TJS Global String Map
+//! @brief 広域文字列マップの実装
 //---------------------------------------------------------------------------
 #ifndef tjsGlobalStringMapH
 #define tjsGlobalStringMapH

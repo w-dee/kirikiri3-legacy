@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Intermediate Code Execution
+//! @brief VMの実装
 //---------------------------------------------------------------------------
 
 #include "tjsCommHead.h"

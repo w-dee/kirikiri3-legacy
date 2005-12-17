@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// VM code disassembler
+//! @brief VM コードの逆アセンブラ
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 
@@ -25,7 +25,6 @@ tTJSString tTJSInterCodeContext::GetValueComment(const tTJSVariant &val)
 	return TJSVariantToReadableString(val);
 }
 //---------------------------------------------------------------------------
-static tjs_uint32 dummy = (tjs_uint32)-1; // for data alignment
 void tTJSInterCodeContext::Disassemble(
 	void (*output_func)(const tjs_char *msg, const tjs_char *comment, tjs_int addr,
 	const tjs_int32 *codestart, tjs_int size, void *data),

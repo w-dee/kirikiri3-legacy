@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// TJS Math class implementation
+//! @brief Math クラス実装
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 

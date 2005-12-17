@@ -6,6 +6,7 @@
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
+/*!  日付文字列解析用 Lexer の実装 */
 /*
 	Date/time string parser lexical analyzer word cutter.
 

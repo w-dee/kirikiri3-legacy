@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// iTJSDispatch2 interface definition
+//! @brief iTJSDispatch2 (オブジェクトやクラス、関数などのインターフェース) 定義
 //---------------------------------------------------------------------------
 #ifndef tjsInterfaceH
 #define tjsInterfaceH

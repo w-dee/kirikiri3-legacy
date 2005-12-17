@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Date/time string parser
+//! @brief 日付文字列パーサー
 //---------------------------------------------------------------------------
 #ifndef tjsDateParserH
 #define tjsDateParserH

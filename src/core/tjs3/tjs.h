@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// "tTJS" script language API class implementation
+//! @brief "tTJS" スクリプト言語クラスの実装
 //---------------------------------------------------------------------------
 
 #ifndef tjsH

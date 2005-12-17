@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Regular Expression Support
+//! @brief RegExp クラス実装
 //---------------------------------------------------------------------------
 #ifndef tjsRegExpH
 #define tjsRegExpH

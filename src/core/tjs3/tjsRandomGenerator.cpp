@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Math.RandomGenerator implementation
+//! @brief Math.RandomGenerator クラス実装
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 

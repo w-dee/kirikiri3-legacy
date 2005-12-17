@@ -88,7 +88,7 @@ namespace TJS {
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 43 "tjspp.y"
+#line 44 "tjspp.y"
 typedef union YYSTYPE {
 	tjs_int32		val;
 	tjs_int			nv;

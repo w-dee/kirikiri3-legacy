@@ -50,7 +50,7 @@ namespace TJS {
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 43 "tjsdate.y"
+#line 44 "tjsdate.y"
 typedef union YYSTYPE {
 	tjs_int32					val;
 } YYSTYPE;

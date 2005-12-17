@@ -9,6 +9,8 @@
 //! @file
 //! @brief オンメモリストリームの実装
 //---------------------------------------------------------------------------
+#include "prec.h"
+TJS_DEFINE_SOURCE_ID(2003);
 
 #include "MemoryStream.h"
 

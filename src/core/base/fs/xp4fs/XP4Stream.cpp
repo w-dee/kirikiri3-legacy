@@ -9,6 +9,9 @@
 //! @file
 //! @brief XP4ファイルシステムで用いられるストリームクラス
 //---------------------------------------------------------------------------
+#include "prec.h"
+TJS_DEFINE_SOURCE_ID(2009);
+
 
 #include "XP4FS.h"
 #include "XP4Archive.h"

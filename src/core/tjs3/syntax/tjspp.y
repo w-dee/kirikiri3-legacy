@@ -7,6 +7,7 @@
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
+/*! @brief   プリプロセッサ式評価 */
 /* tjspp.y */
 /* TJS3 conditional compiling control's conditional expression parser */
 

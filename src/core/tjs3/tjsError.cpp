@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// TJS3's C++ exception class and exception message
+//! @brief C++ 例外処理とエラーメッセージ
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 

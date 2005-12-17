@@ -9,10 +9,13 @@
 //! @file
 //! @brief Pathファイルシステムの実装
 //---------------------------------------------------------------------------
+#include "prec.h"
+TJS_DEFINE_SOURCE_ID(2002);
 
 #include "FSManager.h"
 
 #include <algorithm>
+
 
 
 
@@ -48,7 +51,7 @@ size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
 
 	// PathFS にはファイルシステムの / しか存在しない
 	// そのためディレクトリ指定は / へのアクセスしか認めない
-	if(dirname != TJS_W("/") || !dirname.IsEmpty())
+	if(dirname != TJS_WS("/") || !dirname.IsEmpty())
 		TVPThrowExceptionMessage(_("no such directory"));
 
 	Ensure();
@@ -75,7 +78,7 @@ bool tTVPPathFS::FileExists(const ttstr & filename)
 	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fn;
-	if(filename.StartsWith(TJS_W('/')))
+	if(filename.StartsWith(TJS_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
 		fn = filename;
@@ -93,7 +96,7 @@ bool tTVPPathFS::FileExists(const ttstr & filename)
 bool tTVPPathFS::DirectoryExists(const ttstr & dirname)
 {
 	// PathFS にはサブディレクトリは存在しない
-	if(dirname != TJS_W("/") || !dirname.IsEmpty())
+	if(dirname != TJS_WS("/") || !dirname.IsEmpty())
 		return false;
 	return true;
 }
@@ -145,7 +148,7 @@ void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fn;
-	if(filename.StartsWith(TJS_W('/')))
+	if(filename.StartsWith(TJS_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
 		fn = filename;
@@ -173,7 +176,7 @@ tTVPBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 f
 	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fn;
-	if(filename.StartsWith(TJS_W('/')))
+	if(filename.StartsWith(TJS_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
 		fn = filename;
@@ -201,13 +204,13 @@ void tTVPPathFS::AddDirectory(const ttstr & name, bool recursive = false)
 
 	// ディレクトリ名の最後に '/' がついていなければ追加
 	ttstr fn(name);
-	if(fn.EndsWith(TJS_W('/'))) fn += TJS_W('/');
+	if(fn.EndsWith(TJS_WC('/'))) fn += TJS_WC('/');
 
 	// ディレクトリが存在しないことを確かにする
 	RemoveDirectory(fn);
 
 	// Paths に追加する
-	Paths.push_back((recursive ? TJS_W("+") : TJS_W(" ")) + fn);
+	Paths.push_back((recursive ? TJS_WS("+") : TJS_WS(" ")) + fn);
 
 	// フラグを立てる
 	NeedRebuild = true;
@@ -227,14 +230,14 @@ void tTVPPathFS::RemoveDirectory(const ttstr & name)
 
 	// ディレクトリ名の最後に '/' がついていなければ追加
 	ttstr fn(name);
-	if(fn.EndsWith(TJS_W('/'))) fn += TJS_W('/');
+	if(fn.EndsWith(TJS_WC('/'))) fn += TJS_WC('/');
 
 	// ' ' + name が存在するか
-	i = std::find(Paths.begin(), Paths.end(), TJS_W(" ") + fn);
+	i = std::find(Paths.begin(), Paths.end(), TJS_WS(" ") + fn);
 	if(i != Paths.end()) { Paths.erase(i); NeedRebuild = true; return; }
 
 	// '+' + name が存在するか
-	i = std::find(Paths.begin(), Paths.end(), TJS_W("+") + fn);
+	i = std::find(Paths.begin(), Paths.end(), TJS_WS("+") + fn);
 	if(i != Paths.end()) { Paths.erase(i); NeedRebuild = true; return; }
 }
 //---------------------------------------------------------------------------
@@ -280,7 +283,7 @@ void tTVPPathFS::Ensure()
 	// 全てのパスに対して
 	for(std::vector<ttstr>::iterator i = Paths.begin(); i != Paths.end(); i++)
 	{
-		bool recursive = (i->c_str() == static_cast<tjs_char>(TJS_W('+')));
+		bool recursive = (i->c_str() == static_cast<tjs_char>(TJS_WC('+')));
 		ttstr dirname(i->c_str() + 1);
 		fsman->GetFileListAt(dirname, &callback, recursive);
 	}

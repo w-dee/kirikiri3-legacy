@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// Support for C++ native class/method/property definitions
+//! @brief C++ バインディングのサポート
 //---------------------------------------------------------------------------
 #ifndef tjsNativeH
 #define tjsNativeH

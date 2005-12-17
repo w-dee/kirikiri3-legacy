@@ -9,6 +9,8 @@
 //! @file
 //! @brief XP4ファイルシステムの実装
 //---------------------------------------------------------------------------
+#include "prec.h"
+TJS_DEFINE_SOURCE_ID(2007);
 
 #include "XP4FS.h"
 #include "XP4Archive.h"
@@ -49,9 +51,9 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 			const ttstr & b, const ttstr & e, const ttstr & p) :
 
 			archive_names(n),
-			name_noext(b + TJS_W(".")),
+			name_noext(b + TJS_WS(".")),
 			exclude(e),
-			path(p + TJS_W("/"))
+			path(p + TJS_WS("/"))
 
 			{;}
 
@@ -164,7 +166,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 
 	// dir_name の最後に '/' がついていなければ追加
 	ttstr dir_name(dirname);
-	if(!dir_name.EndsWith(TJS_W('/'))) dir_name += TJS_W('/');
+	if(!dir_name.EndsWith(TJS_WC('/'))) dir_name += TJS_WC('/');
 
 	// dir_name を名前の先頭に持つ最初のインデックスを取得
 	tjs_size idx = GetFileItemStartIndex(dir_name);
@@ -183,7 +185,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 
 		ttstr name(FileItems[idx].Name.c_str() + dir_name.GetLem());
 		const char * slashp;
-		if(!(slashp = TJS_strchr(name.c_str(), TJS_W('/'))))
+		if(!(slashp = TJS_strchr(name.c_str(), TJS_WC('/'))))
 		{
 			// 名前の部分に / を含んでいない; つまりファイル名
 			count ++;
@@ -197,7 +199,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 			lastdir = ttstr(name.c_str() + (p - name.c_str())); // ディレクトリ名
 			count ++;
 			if(callback) if(!callback->OnDirectory(lastdir)) return count;
-			lastdir += TJS_W('/');
+			lastdir += TJS_WC('/');
 		}
 	}
 	return count;
@@ -214,7 +216,7 @@ bool tTVPXP4FS::FileExists(const ttstr & filename)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	if(filename.EndsWith(TJS_W('/'))) return false; // ディレクトリは違う
+	if(filename.EndsWith(TJS_WC('/'))) return false; // ディレクトリは違う
 
 	return GetFileItemIndex(filename) != static_cast<tjs_size>(-1);
 }
@@ -232,7 +234,7 @@ bool tTVPXP4FS::DirectoryExists(const ttstr & dirname)
 
 	// dir_name の最後に '/' がついていなければ追加
 	ttstr dir_name(dirname);
-	if(!dir_name.EndsWith(TJS_W('/'))) dir_name += TJS_W('/');
+	if(!dir_name.EndsWith(TJS_WC('/'))) dir_name += TJS_WC('/');
 
 	return GetFileItemStartIndex(dir_name) != static_cast<tjs_size>(-1);
 }

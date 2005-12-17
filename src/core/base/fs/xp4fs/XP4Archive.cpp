@@ -10,6 +10,9 @@
 //! @brief XP4 アーカイブの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
+TJS_DEFINE_SOURCE_ID(2006);
+
+#include "prec.h"
 #include "XP4Archive.h"
 #include "ReadXP4Meta.h"
 #include "wxFileWrapper.h"

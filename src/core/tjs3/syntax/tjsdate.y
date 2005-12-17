@@ -7,6 +7,7 @@
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
+/*! @brief   日付文字列パーサー */
 /* tjsdate.y */
 /* TJS3 date string parser */
 

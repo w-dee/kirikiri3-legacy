@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// configuration
+//! @brief TJS3 設定 (プラットフォーム依存実装など)
 //---------------------------------------------------------------------------
 #include "tjsCommHead.h"
 #include "tjsCharUtils.h"

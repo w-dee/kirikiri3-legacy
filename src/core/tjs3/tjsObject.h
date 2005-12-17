@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// TJS3 "Object" class implementation
+//! @brief Object クラスの実装
 //---------------------------------------------------------------------------
 #ifndef tjsObjectH
 #define tjsObjectH

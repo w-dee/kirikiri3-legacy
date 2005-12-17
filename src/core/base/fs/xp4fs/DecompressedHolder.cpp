@@ -9,6 +9,8 @@
 //! @file
 //! @brief 圧縮ブロックを展開された状態でメモリ上に保持するクラス
 //---------------------------------------------------------------------------
+#include "prec.h"
+TJS_DEFINE_SOURCE_ID(2005);
 
 
 #include "DecompressedHolder.h"

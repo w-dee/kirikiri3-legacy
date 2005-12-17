@@ -298,7 +298,7 @@ namespace TJS {
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 58 "tjs.y"
+#line 59 "tjs.y"
 typedef union YYSTYPE {
 	tjs_int			num;
 	tTJSExprNode *		np;

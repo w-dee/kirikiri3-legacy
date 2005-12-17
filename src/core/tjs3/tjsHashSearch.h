@@ -6,7 +6,7 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// An Implementation of Hash Searching
+//! @brief ハッシュ表とそれを利用したキャッシュ機構の実装
 //---------------------------------------------------------------------------
 #ifndef HashSearchH
 #define HashSearchH

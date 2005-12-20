@@ -12,8 +12,6 @@
 #ifndef tjsConfigH
 #define tjsConfigH
 
-namespace TJS
-{
 //---------------------------------------------------------------------------
 
 
@@ -32,6 +30,8 @@ namespace TJS
 #include "tjsTypes.h"
 #include "stdarg.h"
 
+namespace TJS
+{
 
 // #define TJS_NO_AVOID_ISWDIGIT
 // #define TJS_SUPPORT_VCL

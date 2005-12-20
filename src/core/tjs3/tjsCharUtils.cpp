@@ -277,7 +277,7 @@ int TJS_strcmp(const tjs_char *s1, const tjs_char *s2)
 //! @param		n    最大コードポイント数
 //! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
 //---------------------------------------------------------------------------
-int TJS_strncmp(const char *s1, const char *s2, size_t n)
+int TJS_strncmp(const tjs_char *s1, const tjs_char *s2, size_t n)
 {
 	for(;;)
 	{

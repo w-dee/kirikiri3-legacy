@@ -16,7 +16,8 @@
 	#include <wx/wx.h>
 #endif
 
-
+namespace TJS
+{
 
 #if defined(_WX_DEFS_H_)
 /* Use wxWidgets definitions */
@@ -161,6 +162,7 @@ s = sign,  negative if this is 1, otherwise positive.
 				(!((x) & TJS_IEEE_D_SIGNIFICAND_MASK)))
 
 
-#endif
+} // namespace TJS
 
+#endif
 

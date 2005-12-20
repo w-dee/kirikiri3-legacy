@@ -94,7 +94,7 @@ public:
 		{ return Ptr?Ptr->operator const tjs_char *():TJSNullStrPtr; }
 
 #ifdef TJS_SUPPORT_WX
-	const wxString AsWxString() const
+	wxString AsWxString() const
 	{
 		if(!Ptr) return wxString();
 

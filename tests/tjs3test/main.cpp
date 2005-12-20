@@ -20,7 +20,7 @@ public:
     {
         if(numparams < 1) return TJS_E_BADPARAMCOUNT; // 引数が足りない
 
-		wxPrintf(wxT("%s\n"), ((ttstr)(*param[0])).AsWxString().c_str());
+		wxPrintf(wxT("%s\n"), param[0]->AsWxString().c_str());
 
         return TJS_S_OK; // 正常に終わったことを示すため TJS_S_OK を返す
     }
@@ -87,7 +87,7 @@ int Application::OnRun()
 		global->PropSet(TJS_MEMBERENSURE, TJS_WS("test"), NULL, &func_var, NULL));
 			// 登録
 
-	tjsengine->EvalExpression(TJS_WS("test('ほげらもげ')"), NULL, NULL, NULL);
+	tjsengine->EvalExpression(TJS_WS("test('中３マキロン地獄！')"), NULL, NULL, NULL);
 		// tTJS::EvalExpression を使って式を実行
 
 	tjsengine->Release();

@@ -727,6 +727,21 @@ public:
 		return *String;
 	}
 
+#ifdef TJS_SUPPORT_WX
+	wxString AsWxString() const
+	{
+		if(vt!=tvtString) TJSThrowVariantConvertError(*this, tvtString);
+	#ifdef TJS_WCHAR_T_SIZE_IS_16BIT
+		wxMBConvUTF32 conv;
+		return wxString(
+			reinterpret_cast<const char *>(String->operator const tjs_char *()),
+				*(wxMBConv *)&conv);
+	#else
+		return wxString(String->operator const tjs_char *());
+	#endif
+	}
+#endif
+
 	tjs_uint32 *GetHint()
 	{
 		// returns String Hint

@@ -117,12 +117,12 @@ void TJSConvertUTF16ToTJSCharString(tjs_char * out, const tjs_uint16 * in);
 	#endif
 			if(!Converted)
 			{
-				Converted = true;
 				TJSConvertUTF16ToTJSCharString(Utf32Array,
 					reinterpret_cast<const tjs_uint16 *>(utf16));
 	#ifdef DEBUG
 				SourceString = utf16;
 	#endif
+				Converted = true;
 			}
 		}
 		operator const tjs_char * () const { return Utf32Array; }

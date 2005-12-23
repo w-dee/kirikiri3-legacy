@@ -1,0 +1,42 @@
+DOWNLOAD_ROOT=http://kikyou.info/tvp/build_libs
+DOWNLOADER=wget -nv
+
+default: all
+
+all: build_lib
+
+
+download_lib: download_completed
+
+download_completed: Makefile
+	$(DOWNLOADER) $(DOWNLOAD_ROOT)/$(DOWNLOAD_FILE)
+	touch download_completed
+
+extract_lib: extract_completed
+
+extract_completed: Makefile download_completed
+	mkdir src || true
+	set -e; case $(DOWNLOAD_FILE) in                     \
+		*.tar.gz|*.tgz)                                  \
+			cd src ;                                     \
+			tar zxvf ../$(DOWNLOAD_FILE) ;               \
+			cd .. ;                                      \
+			;;                                           \
+		*.tar.bz2|*.tbz)                                 \
+			cd src ;                                     \
+			tar jxvf ../$(DOWNLOAD_FILE) ;               \
+			cd .. ;                                      \
+			;;                                           \
+	esac
+	touch extract_completed
+
+
+build_lib: build_completed
+
+build_completed: Makefile extract_completed
+	./build.sh
+	touch build_completed
+
+clean:
+	rm -f $(DOWNLOAD_FILE)* build_completed extract_completed download_completed
+	for dir in *; do if [ -d "$$dir" ]; then rm -rf $$dir; fi; done

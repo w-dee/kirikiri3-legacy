@@ -25,10 +25,20 @@ wxLocale locale;
 //---------------------------------------------------------------------------
 bool wxKrkrFontApp::OnInit()
 {
+	// アプリケーションのディレクトリを得て、その下にある locale か、
+	// <アプリケーションのあるディレクトリ>../share/locale をメッセージカタログ
+	// の検索パスに指定する
+	// wxApp::argv[0] がアプリケーションのファイル名を表していると仮定する
+	wxFileName appfilename(argv[0]);
+	wxString appdir = appfilename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
+
 	locale.Init(wxLANGUAGE_DEFAULT);
-	locale.AddCatalogLookupPathPrefix(wxT("locales")); 
-	locale.AddCatalogLookupPathPrefix(wxT("../locales")); 
+	locale.AddCatalogLookupPathPrefix(appdir + wxT("locale")); 
+	locale.AddCatalogLookupPathPrefix(appdir + wxT("../share/locale")); 
+
+	// メッセージカタログを追加する
 	locale.AddCatalog(wxT("krkrfont"));
+	locale.AddCatalog(wxT("wxstd"));
 
 	wxXmlResource::Get()->InitAllHandlers();
 	InitXmlResource();

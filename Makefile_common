@@ -70,6 +70,14 @@ prec.h.gch: prec.h
 	mkdir -p $(BUILD_OUT_DIR)/share/locale/$(basename $(notdir $@))/LC_MESSAGES/
 	cp $@ $(BUILD_OUT_DIR)/share/locale/$(basename $(notdir $@))/LC_MESSAGES/$(PROGRAM_ID).mo || rm $@
 
+ifdef XRCFILES
+ XRCMSG=.xrcmsg
+endif
+
+ifdef XRCFILES
+ $(XRCMSG): $(XRCFILES)
+	$(WXRC) --gettext $(XRCFILES) -o $(XRCMSG)
+endif
 
 messages.pot: $(CPPFILES) $(CFILES) $(XRCMSG)
 	$(XGETTEXT) --from-code=utf-8 -c -C -k_ $^ -o - | \
@@ -97,6 +105,7 @@ $(PO_FILES): messages.pot
 	mv $@ $@.bak
 	sed 's|<wx/wxprec.h>|"prec.h"|g' $@.bak > $@
 	rm -f $@.bak
+
 
 $(XRCFILES:.xrc=.xpp): $(XRCFILES)
 

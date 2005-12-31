@@ -155,8 +155,6 @@ bool wxKrkrReleaserConsoleApp::OnInit()
 	wxFileName appfilename(argv[0]);
 	wxString appdir = appfilename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
 
-//	wxFprintf(stderr, wxT("app dir : %s\n"), appdir.c_str());
-
 	locale.Init(wxLANGUAGE_DEFAULT);
 	locale.AddCatalogLookupPathPrefix(appdir + wxT("locale")); 
 	locale.AddCatalogLookupPathPrefix(appdir + wxT("../share/locale")); 

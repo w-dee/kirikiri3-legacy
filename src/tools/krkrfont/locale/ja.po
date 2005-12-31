@@ -7,141 +7,13 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Kirikiri3-krkrfont 1.00\n"
+"Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: 2005-10-03 10:53+0900\n"
 "Last-Translator: W.Dee <dee@kikyou.info>\n"
 "Language-Team: W.Dee <dee@kikyou.info>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Report-Msgid-Bugs-To: \n"
-
-#: krkrfont.xrcmsg:1
-msgid "Pre-rendered Font Generator"
-msgstr "レンダリング済みフォント作成"
-
-#: krkrfont.xrcmsg:2
-msgid "Font source"
-msgstr "フォント"
-
-#: krkrfont.xrcmsg:3
-msgid "&Select a font"
-msgstr "一覧から選択(&S)"
-
-#: krkrfont.xrcmsg:4
-msgid "Selec&t a file"
-msgstr "ファイルを指定(&T)"
-
-#: krkrfont.xrcmsg:5 krkrfont.xrcmsg:15
-msgid "..."
-msgstr "..."
-
-#: krkrfont.xrcmsg:6
-msgid "Font Setting"
-msgstr "フォント設定"
-
-#: krkrfont.xrcmsg:7
-msgid "Font Family &Name :"
-msgstr "フォントファミリ名(&N) :"
-
-#: krkrfont.xrcmsg:8
-msgid "Size (in &pixel) :"
-msgstr "サイズ(ピクセル単位)(&P) :"
-
-#: krkrfont.xrcmsg:9
-msgid "&Antialiased"
-msgstr "アンチエイリアス(&A)"
-
-#: krkrfont.xrcmsg:10
-msgid "No &Hinting"
-msgstr "ヒンティングを行わない(&H)"
-
-#: krkrfont.xrcmsg:11
-msgid "&Bold"
-msgstr "太字(&B)"
-
-#: krkrfont.xrcmsg:12
-msgid "For&ce Auto Hinting"
-msgstr "自動ヒンティングを行う(&C)"
-
-#: krkrfont.xrcmsg:13
-msgid "Generate font &metrics only"
-msgstr "フォントメトリックのみを生成(&M)"
-
-#: krkrfont.xrcmsg:14
-msgid "&Output file"
-msgstr "出力ファイル(&O)"
-
-#: krkrfont.xrcmsg:16
-msgid "Preview"
-msgstr "プレビュー"
-
-#: krkrfont.xrcmsg:17
-msgid "Generate"
-msgstr "作成"
-
-#: krkrfont.xrcmsg:18
-msgid "Close"
-msgstr "閉じる"
-
-#: krkrfont.xrcmsg:19
-msgid "Font Preview"
-msgstr "フォント プレビュー"
-
-#: krkrfont.xrcmsg:20
-msgid "Close preview window"
-msgstr "プレビューを閉じる"
-
-#: krkrfont.xrcmsg:21
-msgid "  Zoom :"
-msgstr "  倍率 :"
-
-#: krkrfont.xrcmsg:22
-msgid "x1"
-msgstr "等倍"
-
-#: krkrfont.xrcmsg:23
-msgid "x2"
-msgstr "x2"
-
-#: krkrfont.xrcmsg:24
-msgid "x3"
-msgstr "x3"
-
-#: krkrfont.xrcmsg:25
-msgid "x4"
-msgstr "x4"
-
-#: krkrfont.xrcmsg:26
-msgid "x5"
-msgstr "x5"
-
-#: krkrfont.xrcmsg:27
-msgid "x6"
-msgstr "x6"
-
-#: krkrfont.xrcmsg:28
-msgid "x7"
-msgstr "x7"
-
-#: krkrfont.xrcmsg:29
-msgid "x8"
-msgstr "x8"
-
-#: krkrfont.xrcmsg:30
-msgid "x10"
-msgstr "x10"
-
-#: krkrfont.xrcmsg:31
-msgid "x12"
-msgstr "x12"
-
-#: krkrfont.xrcmsg:32
-msgid "x14"
-msgstr "x14"
-
-#: krkrfont.xrcmsg:33
-msgid "x16"
-msgstr "x16"
 
 #: msw/NativeFreeTypeFace.cpp:84 msw/NativeFreeTypeFace.cpp:99
 #: msw/NativeFreeTypeFace.cpp:129 msw/NativeFreeTypeFace.cpp:151
@@ -222,3 +94,99 @@ msgstr "処理中"
 #: WriteBFF.cpp:138
 msgid "Generating font file ..."
 msgstr "フォントファイルを作成中 ..."
+
+#~ msgid "Pre-rendered Font Generator"
+#~ msgstr "レンダリング済みフォント作成"
+
+#~ msgid "Font source"
+#~ msgstr "フォント"
+
+#~ msgid "&Select a font"
+#~ msgstr "一覧から選択(&S)"
+
+#~ msgid "Selec&t a file"
+#~ msgstr "ファイルを指定(&T)"
+
+#~ msgid "..."
+#~ msgstr "..."
+
+#~ msgid "Font Setting"
+#~ msgstr "フォント設定"
+
+#~ msgid "Font Family &Name :"
+#~ msgstr "フォントファミリ名(&N) :"
+
+#~ msgid "Size (in &pixel) :"
+#~ msgstr "サイズ(ピクセル単位)(&P) :"
+
+#~ msgid "&Antialiased"
+#~ msgstr "アンチエイリアス(&A)"
+
+#~ msgid "No &Hinting"
+#~ msgstr "ヒンティングを行わない(&H)"
+
+#~ msgid "&Bold"
+#~ msgstr "太字(&B)"
+
+#~ msgid "For&ce Auto Hinting"
+#~ msgstr "自動ヒンティングを行う(&C)"
+
+#~ msgid "Generate font &metrics only"
+#~ msgstr "フォントメトリックのみを生成(&M)"
+
+#~ msgid "&Output file"
+#~ msgstr "出力ファイル(&O)"
+
+#~ msgid "Preview"
+#~ msgstr "プレビュー"
+
+#~ msgid "Generate"
+#~ msgstr "作成"
+
+#~ msgid "Close"
+#~ msgstr "閉じる"
+
+#~ msgid "Font Preview"
+#~ msgstr "フォント プレビュー"
+
+#~ msgid "Close preview window"
+#~ msgstr "プレビューを閉じる"
+
+#~ msgid "  Zoom :"
+#~ msgstr "  倍率 :"
+
+#~ msgid "x1"
+#~ msgstr "等倍"
+
+#~ msgid "x2"
+#~ msgstr "x2"
+
+#~ msgid "x3"
+#~ msgstr "x3"
+
+#~ msgid "x4"
+#~ msgstr "x4"
+
+#~ msgid "x5"
+#~ msgstr "x5"
+
+#~ msgid "x6"
+#~ msgstr "x6"
+
+#~ msgid "x7"
+#~ msgstr "x7"
+
+#~ msgid "x8"
+#~ msgstr "x8"
+
+#~ msgid "x10"
+#~ msgstr "x10"
+
+#~ msgid "x12"
+#~ msgstr "x12"
+
+#~ msgid "x14"
+#~ msgstr "x14"
+
+#~ msgid "x16"
+#~ msgstr "x16"

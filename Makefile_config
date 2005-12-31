@@ -1,0 +1,135 @@
+###### 設定
+
+XGETTEXT = xgettext
+MSGMERGE = msgmerge
+MSGFMT = msgfmt
+
+
+
+
+###### CFLAGS と CXXFLAGS や CPPFLAGS
+
+# システム標準のライブラリ (プラットフォームによって変える必要あり)
+COMMON_LIBS = \
+	-lunicows \
+	-lkernel32 \
+	-luser32 \
+	-lgdi32 \
+	-lcomdlg32 \
+	-lwinspool \
+	-lwinmm \
+	-lshell32 \
+	-lcomctl32 \
+	-lole32 \
+	-loleaut32 \
+	-luuid \
+	-lrpcrt4 \
+	-ladvapi32 \
+	-lwsock32 \
+	-lodbc32 \
+	-lopengl32  
+
+# 標準の CFLAGS など
+
+COMMON_CFLAGS   = -Winvalid-pch -I. -I./$(PLATFORM_SUBDIR)
+COMMON_CXXFLAGS = -Winvalid-pch -I. -I./$(PLATFORM_SUBDIR)
+COMMON_CPPFLAGS = -Winvalid-pch -I. -I./$(PLATFORM_SUBDIR)
+
+
+# コンパイラなどのツールについては、ベースは wxWidgets の設定を用いる
+
+# wx-config の名前
+WXWIDGETS_CONFIG = $(WXWIDGETS_DIR)/bin/wx-config
+
+# wx-config に渡す標準のオプション
+WXWIDGETS_CONFIG_BASE_ARG=--unicode
+WXWIDGETS_CONFIG_ARG=$(WXWIDGETS_CONFIG_BASE_ARG)
+
+# freetype-config の名前
+FREETYPE_CONFIG = $(FREETYPE_DIR)/bin/freetype-config
+
+# freetype-config に渡す標準のオプション
+FREETYPE_CONFIG_BASE_ARG=
+FREETYPE_CONFIG_ARG=$(FREETYPE_CONFIG_BASE_ARG)
+
+# 使用するフラグなどを調べる
+# wx-config の --libs の出力するフラグのうち、-Wl,--subsystem,windows と
+# -mwindows はアプリケーションによっては必要が無いので削除する
+
+MAKEFILE_BUILD_CONFIG_RELEASE = $(TOP_DIR)/Makefile_build_config_release
+MAKEFILE_BUILD_CONFIG_DEBUG   = $(TOP_DIR)/Makefile_build_config_debug
+MAKEFILE_BUILD_CONFIGS = $(MAKEFILE_BUILD_CONFIG_RELEASE) $(MAKEFILE_BUILD_CONFIG_DEBUG)
+
+$(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
+	@echo "Gathering build environment information ..."
+	@echo "wxWidgets ..."
+	@(set -e ;\
+		get() { \
+			echo "####  wxWidgets config: $(WXWIDGETS_CONFIG_ARG) $$conf ####" ;\
+			echo  -n "CC := " ;\
+				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cc ;\
+			echo  -n "CXX := " ;\
+				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cxx ;\
+			echo  -n "WX_CFLAGS := " ;\
+				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cflags ;\
+			echo  -n "WX_CXXFLAGS := " ;\
+				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cxxflags ;\
+			echo  -n "WX_CPPFLAGS := " ;\
+				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cppflags ;\
+			echo  -n "WX_LIBS := " ;\
+				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --libs | \
+					sed -e "s|-Wl,--subsystem,windows||g" -e "s|-mwindows||g" ;\
+		};\
+		conf=--debug=no;  get > $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
+		conf=--debug=yes; get > $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
+	)
+	@echo "zlib ..."
+	@(set -e ;\
+		echo "####  zlib config  ####" ;\
+		echo "ZLIB_LIBS := -L$(ZLIB_DIR)/lib -lz" ;\
+		echo "ZLIB_CFLAGS   := -I$(ZLIB_DIR)/include" ;\
+		echo "ZLIB_CXXFLAGS := -I$(ZLIB_DIR)/include" ;\
+		echo "ZLIB_CPPFLAGS := -I$(ZLIB_DIR)/include" ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@echo "libtomcrypt ..."
+	@(set -e ;\
+		echo "####  libtomcrypt config  ####" ;\
+		echo "LIBTOMCRYPT_CFLAGS   := -I$(LIBTOMCRYPT_DIR)/include" ;\
+		echo "LIBTOMCRYPT_CXXFLAGS := -I$(LIBTOMCRYPT_DIR)/include" ;\
+		echo "LIBTOMCRYPT_CPPFLAGS := -I$(LIBTOMCRYPT_DIR)/include" ;\
+		echo "LIBTOMCRYPT_LIBS := -L$(LIBTOMCRYPT_DIR)/lib -ltomcrypt" ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@echo "freetype ..."
+	@(set -e ;\
+		get() { \
+			echo "####  freetype config ####" ;\
+			echo  -n "FREETYPE_CFLAGS := " ;\
+				$(FREETYPE_CONFIG) $(FREETYPE_CONFIG_ARG) --cflags ;\
+			echo  -n "FREETYPE_CXXFLAGS := " ;\
+				$(FREETYPE_CONFIG) $(FREETYPE_CONFIG_ARG) --cflags ;\
+			echo  -n "FREETYPE_CPPFLAGS := " ;\
+				$(FREETYPE_CONFIG) $(FREETYPE_CONFIG_ARG) --cflags ;\
+			echo  -n "FREETYPE_LIBS := " ;\
+				$(FREETYPE_CONFIG) $(FREETYPE_CONFIG_ARG) --libs ;\
+		};\
+		get \
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+
+
+ifeq ($(DEBUG),yes)
+ -include $(TOP_DIR)/Makefile_build_config_debug
+else
+ -include $(TOP_DIR)/Makefile_build_config_release
+endif
+
+# ただし ld は例外
+
+LD=$(CXX)
+
+
+# WXRC
+# wxwidgets をインストールした位置の wxrc は DLL にパスが通ってない
+# などの理由で実行できない場合があるので lib に path を通した上で
+# 利用する
+
+WXRC = $(LD_LIBRARY_PATH_ENV_NAME)=$$$(LD_LIBRARY_PATH_ENV_NAME):$(WXWIDGETS_DIR)/lib $(WXWIDGETS_DIR)/bin/wxrc

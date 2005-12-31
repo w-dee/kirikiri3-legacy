@@ -1,0 +1,26 @@
+# プラットフォームごとの設定
+# TODO: 他のプラットフォームごとの設定の追加
+
+###### デバッグ設定
+
+DEBUG ?= yes
+
+## Windows用設定
+
+
+
+WINDRES = windres
+CONSOLE_LDFLAGS = -mconsole
+ifeq ($(DEBUG),yes)
+ GUI_LDFLAGS = -g $(CONSOLE_LD_FLAG) $(WXWIDGETS_DIR)/lib/wx_msw_rc.o
+else
+ GUI_LDFLAGS = -g -mwindows $(WXWIDGETS_DIR)/lib/wx_msw_rc.o
+endif
+BIN_SUFFIX=.exe
+PLATFORM=windows
+
+PLATFORM_SUBDIR=msw
+
+# windows では DLL の検索にも PATH を使う
+LD_LIBRARY_PATH_ENV_NAME = PATH
+

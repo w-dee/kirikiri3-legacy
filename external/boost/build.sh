@@ -13,7 +13,7 @@ jam_build_cmd()
 
 
 
-# boost ‚Ìƒrƒ‹ƒh
+# boost ã®ãƒ“ãƒ«ãƒ‰
 
 common_configure_options="
 	--prefix=$prefix
@@ -28,7 +28,7 @@ custom_build()
 {
 	current=`pwd`
 
-	# bjam ‚Ìƒrƒ‹ƒh
+	# bjam ã®ãƒ“ãƒ«ãƒ‰
 	cd tools/build/jam_src
 
 	jam_build_cmd
@@ -38,7 +38,7 @@ custom_build()
 	# configure
 	./configure $common_configure_options
 
-	# ƒrƒ‹ƒh
+	# ãƒ“ãƒ«ãƒ‰
 	make && make install
 }
 

@@ -6,99 +6,99 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Kirikiri3-krkrrel 1.00\n"
+"Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: 2005-10-03 10:53+0900\n"
 "Last-Translator: W.Dee <dee@kikyou.info>\n"
 "Language-Team: W.Dee <dee@kikyou.info>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Report-Msgid-Bugs-To: \n"
 
-#: ConsoleMain.cpp:19
+#: ConsoleMain.cpp:31
 msgid "show help message"
 msgstr "このヘルプを表示して終了"
 
-#: ConsoleMain.cpp:21
+#: ConsoleMain.cpp:33
 msgid "get target dir from the archive set"
 msgstr "対象ディレクトリをアーカイブから取得"
 
-#: ConsoleMain.cpp:23
+#: ConsoleMain.cpp:35
 msgid "split archive in given size (MB)"
 msgstr "アーカイブを指定された容量(MB)で分割"
 
-#: ConsoleMain.cpp:25
+#: ConsoleMain.cpp:37
 msgid "patch revision"
 msgstr "パッチリビジョンを指定"
 
-#: ConsoleMain.cpp:27
+#: ConsoleMain.cpp:39
 msgid "show progress"
 msgstr "進捗を表示する"
 
-#: ConsoleMain.cpp:29
+#: ConsoleMain.cpp:41
 msgid "do not make output"
 msgstr "出力ファイルを作成しない(テスト用)"
 
-#: ConsoleMain.cpp:31
+#: ConsoleMain.cpp:43
 msgid "regex list file for file classification"
 msgstr "ファイル分類用正規表現リストファイルを指定"
 
-#: ConsoleMain.cpp:33
+#: ConsoleMain.cpp:45
 msgid "force making a new archive set (not a patch)"
 msgstr "パッチを作成せずに新規にファイルを作成"
 
 #
-#: ConsoleMain.cpp:35
+#: ConsoleMain.cpp:47
 msgid "show archive patch generation history"
 msgstr "アーカイブのパッチ世代履歴を表示"
 
-#: ConsoleMain.cpp:37
+#: ConsoleMain.cpp:49
 msgid "show default classification regex list"
 msgstr "デフォルトの分類用正規表現リストを表示"
 
-#: ConsoleMain.cpp:39
+#: ConsoleMain.cpp:51
 msgid "archive-file"
 msgstr "アーカイブファイル"
 
-#: ConsoleMain.cpp:41
+#: ConsoleMain.cpp:53
 msgid "dir"
 msgstr "対象ディレクトリ"
 
-#: ConsoleMain.cpp:115
+#: ConsoleMain.cpp:127
 msgid "operation was interrupted"
 msgstr "操作は中断されました"
 
-#: ConsoleMain.cpp:120
+#: ConsoleMain.cpp:132
 #, c-format
 msgid "%2d percent done"
 msgstr "%2d%% 完了"
 
 #. コマンドライン引数を解析
-#: ConsoleMain.cpp:178
+#: ConsoleMain.cpp:202
 msgid "Kirikiri3 Releaser (utility for XP4 archive file system)"
 msgstr "吉里吉里3 Releaser (XP4アーカイブファイルのためのユーティリティ)"
 
-#: ConsoleMain.cpp:284
+#: ConsoleMain.cpp:308
 #, c-format
 msgid "archive set '%s' does not have target directory information"
 msgstr ""
 "アーカイブセット '%s' は対象ディレクトリの情報を持っていないため 対象ディレク"
 "トリを特定できません"
 
-#: ConsoleMain.cpp:293
+#: ConsoleMain.cpp:317
 msgid "please specify target 'dir'"
 msgstr "対象ディレクトリ 'dir' を指定してください"
 
-#: ConsoleMain.cpp:300
+#: ConsoleMain.cpp:324
 #, c-format
 msgid "there are no files in target directory '%s'"
 msgstr "ディレクトリ '%s' にはファイルが一つもありません"
 
-#: ConsoleMain.cpp:357
+#: ConsoleMain.cpp:381
 msgid "the archive is up to date; nothing is to be added/modified/deleted"
 msgstr ""
 "アーカイブはすでに最新ですので, 追加/更新/削除されるファイルはありません"
 
-#: ConsoleMain.cpp:402
+#: ConsoleMain.cpp:426
 #, c-format
 msgid "can not load class file '%s'"
 msgstr "分類用ファイル '%s' を開くことができません"

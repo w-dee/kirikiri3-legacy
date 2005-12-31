@@ -9,7 +9,7 @@
 //! @file
 //! @brief プレビューウィンドウの実装
 //---------------------------------------------------------------------------
-#include "resource.h"
+#include "krkrfont_res.h"
 
 class wxMainDialog;
 class wxPreviewScrolledWindow;

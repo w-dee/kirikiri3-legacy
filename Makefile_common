@@ -1,0 +1,119 @@
+include $(TOP_DIR)/Makefile_config
+
+
+#### 最終ターゲット (ふつう、出力バイナリや出力ライブラリ)
+
+target: prepare binary
+
+prepare:
+	$(MAKE) INCLUDE_MKTMP=yes make_prepare
+
+ifdef BIN
+  binary:
+	$(MAKE) INCLUDE_MKTMP=yes INCLUDE_DEPS=yes $(BIN)
+else
+ ifdef LIB
+  binary:
+	$(MAKE) INCLUDE_MKTMP=yes INCLUDE_DEPS=yes $(LIB)
+ endif
+endif
+
+make_prepare:;
+
+
+#### プロジェクトに必要なファイルなどを列挙して .mktmp に格納
+
+CFLAGS_F    := $(patsubst %,$$(%_CFLAGS),$(DEP_LIBS))
+CXXFLAGS_F  := $(patsubst %,$$(%_CXXFLAGS),$(DEP_LIBS))
+CPPFLAGS_F  := $(patsubst %,$$(%_CPPFLAGS),$(DEP_LIBS))
+LIBS_F      := $(patsubst %,$$(%_LIBS),$(DEP_LIBS))
+
+.mktmp: Makefile
+	echo 'CFLAGS    := $(CFLAGS_F)'    >  .mktmp
+	echo 'CXXFLAGS  := $(CXXFLAGS_F)'  >> .mktmp
+	echo 'CPPFLAGS  := $(CPPFLAGS_F)'  >> .mktmp
+	echo 'LIBS      := $(LIBS_F)'      >> .mktmp
+
+ifdef INCLUDE_MKTMP
+ -include .mktmp
+endif
+
+
+###### 依存関係
+
+ifdef INCLUDE_DEPS
+ -include $(CPPFILES:.cpp=.d) $(CFILES:.cpp=.d)
+endif
+
+###### ルール
+
+## C++ソース→オブジェクトファイル
+%.o: %.cpp
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+
+## コンパイル済みヘッダ
+%.h.gch: %.h
+	$(CXX) $(CXXFLAGS) $< -o $@
+
+prec.h.gch: prec.h
+
+## 依存関係記述ファイル
+%.d: %.cpp
+	$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $< \
+					  | sed "s|\($*\)\.o[ :]*|\1.o $@ : |g" > $@; \
+					  [ -s $@ ] || rm -f $@'
+
+## メッセージオブジェクト関連
+%.mo: %.po
+	$(MSGFMT) -o $@ $<
+	mkdir -p $(BUILD_OUT_DIR)/share/locale/$(basename $(notdir $@))/LC_MESSAGES/
+	cp $@ $(BUILD_OUT_DIR)/share/locale/$(basename $(notdir $@))/LC_MESSAGES/$(PROGRAM_ID).mo || rm $@
+
+
+messages.pot: $(CPPFILES) $(CFILES) $(XRCMSG)
+	$(XGETTEXT) --from-code=utf-8 -c -C -k_ $^ -o - | \
+		sed '/^.POT-Creation-Date:/d' > $@
+
+PO_FILES=$(wildcard locale/*.po)
+
+MESSAGE_OBJECTS=$(PO_FILES:.po=.mo)
+
+$(MESSAGE_OBJECTS): $(PO_FILES)
+
+$(PO_FILES): messages.pot
+	$(MSGMERGE) --update $@ messages.pot
+	touch $@
+
+## XRC 関連
+
+%.cpp: %.xrc
+	mv $< $<.bak
+	sed -e 's/^[	 ]*//g' -e 's/[	 ]*$$//g' -e '/^$$/d' $<.bak > $<
+	rm -f $<.bak
+	$(WXRC) --cpp-code --extra-cpp-code $<
+	mv resource.cpp $@
+	mv resource.h $(@:.cpp=.h)
+	mv $@ $@.bak
+	sed 's|<wx/wxprec.h>|"prec.h"|g' $@.bak > $@
+	rm -f $@.bak
+
+$(XRCFILES:.xrc=.xpp): $(XRCFILES)
+
+## バイナリ
+
+$(BIN): $(BIN_DEPS) prec.h.gch $(OBJS) $(MESSAGE_OBJECTS)
+	$(LD) $(LDFLAGS) $(OBJS) -o $(BIN) $(LIBS)
+
+## クリーン
+
+clean:
+	rm -f $(OBJS) $(BIN) prec.h.gch *.d
+	rm -f messages.pot $(MESSAGE_OBJECTS)
+	rm -f locale/*~
+	rm -f .mktmp
+	rm -f *.bak resource.cpp resource.h
+	rm -f $(patsubst %.xrc,%.cpp,$(wildcard *.xrc))
+	rm -f $(patsubst %.xrc,%.h,$(wildcard *.xrc))
+
+

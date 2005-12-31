@@ -36,7 +36,7 @@ export LDFLAGS
 
 common_configure_options="--with-opengl --enable-exceptions
 	--enable-catch_segvs --enable-mousewheel --enable-unicode
-	--enable-mslu --disable-compat24 --prefix=$prefix
+	--enable-intl --enable-mslu --disable-compat24 --prefix=$prefix
 	--with-zlib=sys
 	--with-expat=sys
 	--with-libpng=sys
@@ -52,7 +52,10 @@ build_debug()
 	cd temp_build
 	# configure
 	../configure --enable-debug $common_configure_options
-	make && make install
+	make
+	# mo ファイルだけはなぜか個別に作り直さなければならない
+	(cd ../locale && make allmo)
+	make install
 	cd ..
 }
 
@@ -64,7 +67,10 @@ build_release()
 	cd temp_build
 	# configure
 	../configure $common_configure_options
-	make && make install
+	make
+	# mo ファイルだけはなぜか個別に作り直さなければならない
+	(cd locale && make allmo)
+	make install
 	cd ..
 }
 
@@ -79,4 +85,6 @@ for dir in *; do
 		build_release
 	fi
 done
+
+
 

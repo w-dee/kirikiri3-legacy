@@ -1,1 +1,0 @@
-/^.POT-Creation-Date:/d

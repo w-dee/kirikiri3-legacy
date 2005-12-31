@@ -1,3 +1,15 @@
+//---------------------------------------------------------------------------
+/*
+	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Copyright (C) 2000-2005  W.Dee <dee@kikyou.info> and contributors
+
+	See details of license at "license.txt"
+*/
+//---------------------------------------------------------------------------
+//! @file
+//! @brief 吉里吉里3 Releaser
+//---------------------------------------------------------------------------
+
 #include "prec.h"
 #include "signal.h"
 #include "ProgressCallback.h"
@@ -136,10 +148,22 @@ void tTVPProgressCallback::OnProgress(int percent)
 //---------------------------------------------------------------------------
 bool wxKrkrReleaserConsoleApp::OnInit()
 {
+	// アプリケーションのディレクトリを得て、その下にある locale か、
+	// <アプリケーションのあるディレクトリ>../share/locale をメッセージカタログ
+	// の検索パスに指定する
+	// wxApp::argv[0] がアプリケーションのファイル名を表していると仮定する
+	wxFileName appfilename(argv[0]);
+	wxString appdir = appfilename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
+
+//	wxFprintf(stderr, wxT("app dir : %s\n"), appdir.c_str());
+
 	locale.Init(wxLANGUAGE_DEFAULT);
-	locale.AddCatalogLookupPathPrefix(wxT("locales")); 
-	locale.AddCatalogLookupPathPrefix(wxT("../locales")); 
+	locale.AddCatalogLookupPathPrefix(appdir + wxT("locale")); 
+	locale.AddCatalogLookupPathPrefix(appdir + wxT("../share/locale")); 
+
+	// メッセージカタログを追加する
 	locale.AddCatalog(wxT("krkrrel"));
+	locale.AddCatalog(wxT("wxstd"));
 	return true;
 }
 //---------------------------------------------------------------------------

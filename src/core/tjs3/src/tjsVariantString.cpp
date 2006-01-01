@@ -596,9 +596,9 @@ tTJSVariantString * TJSAllocVariantString(const tjs_char *ref)
 
 #ifdef TJS_WCHAR_T_SIZE_IS_16BIT
 //---------------------------------------------------------------------------
-//! @brief		譁・ｭ怜・繝悶Ο繝・け繧堤｢ｺ菫魘(wchar_t繧医ｊ)
-//! @param		ref     繧ｳ繝斐・蜈・枚蟄怜・
-//! @return		遒ｺ菫昴＆繧後◆譁・ｭ怜・
+//! @brief		文字列管理ブロックを確保(wchar_tより)
+//! @param		ref     コピー元文字列
+//! @return		確保された文字列管理ブロック
 //---------------------------------------------------------------------------
 tTJSVariantString *TJSAllocVariantString(const wchar_t *ref)
 {

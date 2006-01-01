@@ -1,5 +1,5 @@
 # Kirikiri3 Releaser tool messages.
-# Copyright (C) 2005 W.Dee and contributors
+# Copyright (C) 2006 W.Dee and contributors
 # This file is distributed under the same license as the Kirikiri3 package.
 # W.Dee <dee@kikyou.info>, 2005.
 #

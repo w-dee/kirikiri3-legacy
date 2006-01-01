@@ -1,0 +1,20 @@
+# ëºÇÃÉvÉçÉOÉâÉÄÇÃMakefileÇ…includeÇµÇƒégÇ§ÇΩÇﬂÇÃtjsÇÃê›íË
+
+TJS3_DIR=$(TOP_DIR)/src/core/tjs3
+
+$(TJS3_LIB):
+	(cd $(TJS3_DIR) && make)
+
+TJS3_CXXFLAGS := $(shell $(TJS3_DIR)/bin/tjs3-config --cxxflags)
+TJS3_CPPFLAGS := $(shell $(TJS3_DIR)/bin/tjs3-config --cppflags)
+TJS3_LIBS     := $(shell $(TJS3_DIR)/bin/tjs3-config --libs)
+
+ifneq ($(filter WX,$(DEP_LIBS)),WX)
+ DEP_LIBS += WX
+endif
+CXXFLAGS += $(TJS3_CXXFLAGS)
+CPPFLAGS += $(TJS3_CPPFLAGS)
+LIBS     += $(TJS3_LIBS)
+
+$(TJS3_LIB)/Makefile_for_user: $(TJS3_LIB)
+

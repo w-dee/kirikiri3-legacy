@@ -117,12 +117,14 @@ $(XRCFILES:.xrc=.cpp): $(XRCFILES)
 ifeq ($(suffix $(BIN)),.a)
 # ライブラリの場合
  $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS)
+	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
 	rm -f $(BIN)
 	$(AR) rs $(BIN) $(OBJS)
 else
 # executableの場合
  $(BIN): $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
-	$(LD) $(LDFLAGS) $(OBJS) -o $(BIN) $(DEFAULT_LIBS) $(LIBS)
+	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
+	$(LD) $(LDFLAGS) $(OBJS) -o $(BIN) $(LIBS) $(DEFAULT_LIBS)
 endif
 
 ## クリーン

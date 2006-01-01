@@ -114,7 +114,7 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 		};\
 		get \
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
-
+	
 
 ifeq ($(DEBUG),yes)
  -include $(TOP_DIR)/Makefile_build_config_debug

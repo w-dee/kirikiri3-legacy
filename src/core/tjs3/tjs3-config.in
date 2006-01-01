@@ -1,0 +1,40 @@
+#!/bin/sh
+
+libs=@LIBS@
+cxxflags=@CXXFLAGS@
+cppflags=@CPPFLAGS@
+
+usage()
+{
+	cat <<EOF
+Usage: tjs3-config [OPTION]
+Get TJS3 compilation and linking information.
+
+Options:
+  --libs           display flags for linking with the TJS3 library
+  --cxxflags       display cxxflags for compiling with the TJS3 library
+  --cppflags       display cppflags for compiling with the TJS3 library
+EOF
+	exit $1
+}
+
+if test $# -eq 0 ; then
+  usage 1 1>&2
+fi
+
+case $1 in
+--libs)
+	echo $libs
+	;;
+--cxxflags)
+	echo $cxxflags
+	;;
+--cppflags)
+	echo $cppflags
+	;;
+*)
+  usage 1 1>&2
+	;;
+esac
+
+

@@ -1,3 +1,5 @@
+# TODO: 任意のprefixのディレクトリに install 出来るように
+
 TOP_DIR=../../..
 include $(TOP_DIR)/Makefile_filenames
 
@@ -7,7 +9,9 @@ include $(TOP_DIR)/Makefile_filenames
 PROGRAM_ID=tjs3
 
 # 出力バイナリ名
-BIN=./libtjs3.a
+TJS3_LIB_OUTPUT_DIR := $(shell pwd)/lib
+TJS3_BIN_OUTPUT_DIR := $(shell pwd)/bin
+BIN=$(TJS3_LIB_OUTPUT_DIR)/libtjs3.a
 
 # このバイナリが依存しているライブラリ
 DEP_LIBS=WX
@@ -65,5 +69,21 @@ PREC_H_NAME = include/tjsCommHead.h
 
 INCLUDES = -Iinclude
 
+#----------------------------#
+
+# 設定ファイルを書き出す
+
+TJS3_INCLUDE_DIR := $(shell pwd)/include
+
+$(TJS3_BIN_OUTPUT_DIR)/tjs3-config: Makefile
+	mkdir -p $(TJS3_BIN_OUTPUT_DIR)
+	sed tjs3-config.in \
+		-e 's|@LIBS@|"-L$(TJS3_LIB_OUTPUT_DIR) -ltjs3"|' \
+		-e 's|@CXXFLAGS@|"-I$(TJS3_INCLUDE_DIR) $(CXXFLAGS)"|' \
+		-e 's|@CPPFLAGS@|"-I$(TJS3_INCLUDE_DIR) $(CXXFLAGS)"|' \
+		  > $(TJS3_BIN_OUTPUT_DIR)/tjs3-config
+	chmod +x $(TJS3_BIN_OUTPUT_DIR)/tjs3-config
+
+BIN_DEPS = $(TJS3_BIN_OUTPUT_DIR)/tjs3-config
 #----------------------------#
 include $(TOP_DIR)/Makefile_common

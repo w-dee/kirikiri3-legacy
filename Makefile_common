@@ -18,7 +18,8 @@ else
  endif
 endif
 
-make_prepare:;
+make_prepare:
+	if [ ! -d $(BUILD_OUT_DIR)/bin ]; then mkdir -p $(BUILD_OUT_DIR)/bin; fi
 
 
 #### プロジェクトに必要なファイルなどを列挙して .mktmp に格納

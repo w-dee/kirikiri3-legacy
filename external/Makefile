@@ -30,6 +30,7 @@ download:
 
 ifeq ($(PLATFORM),windows)
  copy_dll:
+	mkdir -p $(BUILD_OUT_DIR)/bin
 	for dir in $(SUBLIBS) ; do \
 		for subdir in bin lib; do \
 			if [ -d $$dir/$$subdir ]; then \
@@ -49,6 +50,7 @@ endif
 # mo ファイルをターゲットの share/locale ディレクトリに配置する
 
 copy_mo:
+	mkdir -p $(BUILD_OUT_DIR)/share
 	for dir in $(SUBLIBS) ; do \
 		if [ -d $$dir/share/locale ]; then \
 			cp -pR $$dir/share/locale $(BUILD_OUT_DIR)/share ;\

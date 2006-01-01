@@ -73,32 +73,32 @@ msgid "%2d percent done"
 msgstr "%2d%% 完了"
 
 #. コマンドライン引数を解析
-#: ConsoleMain.cpp:202
+#: ConsoleMain.cpp:200
 msgid "Kirikiri3 Releaser (utility for XP4 archive file system)"
 msgstr "吉里吉里3 Releaser (XP4アーカイブファイルのためのユーティリティ)"
 
-#: ConsoleMain.cpp:308
+#: ConsoleMain.cpp:306
 #, c-format
 msgid "archive set '%s' does not have target directory information"
 msgstr ""
 "アーカイブセット '%s' は対象ディレクトリの情報を持っていないため 対象ディレク"
 "トリを特定できません"
 
-#: ConsoleMain.cpp:317
+#: ConsoleMain.cpp:315
 msgid "please specify target 'dir'"
 msgstr "対象ディレクトリ 'dir' を指定してください"
 
-#: ConsoleMain.cpp:324
+#: ConsoleMain.cpp:322
 #, c-format
 msgid "there are no files in target directory '%s'"
 msgstr "ディレクトリ '%s' にはファイルが一つもありません"
 
-#: ConsoleMain.cpp:381
+#: ConsoleMain.cpp:379
 msgid "the archive is up to date; nothing is to be added/modified/deleted"
 msgstr ""
 "アーカイブはすでに最新ですので, 追加/更新/削除されるファイルはありません"
 
-#: ConsoleMain.cpp:426
+#: ConsoleMain.cpp:424
 #, c-format
 msgid "can not load class file '%s'"
 msgstr "分類用ファイル '%s' を開くことができません"

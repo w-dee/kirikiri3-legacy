@@ -24,9 +24,6 @@ CPPFILES =  ConsoleMain.cpp \
 			wxFileWrapper.cpp \
 			XP4Hash.cpp
 
-HFILES =	$(CPPFILES:.cpp=.h) \
-			ProgressCallback.h
-
 OBJS = $(CPPFILES:.cpp=.o)
 
 #----------------------------#

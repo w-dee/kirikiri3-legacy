@@ -28,9 +28,6 @@ CPPFILES =  $(XRCFILES:.xrc=.cpp) \
 			MainDialog.cpp FreeType.cpp PreviewWindow.cpp \
 			FontDriver.cpp WriteBFF.cpp uni_cp932.cpp cp932_uni.cpp
 
-HFILES =	$(CPPFILES:.cpp=.h) \
-			tjsString.h tjsTypes.h tvpfontstruc.h prec.h
-
 OBJS = $(CPPFILES:.cpp=.o)
 
 #----------------------------#

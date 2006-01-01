@@ -26,10 +26,10 @@ namespace TJS
 // wxWidgets の物を使う
 typedef wxCriticalSection tTJSCriticalSection;
 
-#elif
+#elif _WIN32
 // Windows プラットフォームの場合
 
-#include <Windows.h>
+#include <windows.h>
 
 //! @brief クリティカルセクションの実装
 class tTJSCriticalSection

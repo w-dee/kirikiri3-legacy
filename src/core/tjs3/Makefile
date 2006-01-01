@@ -1,104 +1,69 @@
-LIB=tjs3.a
+TOP_DIR=../../..
+include $(TOP_DIR)/Makefile_filenames
 
-MINGWROOT = C:/MinGW
-CXX = g++
-AR = ar
-WINDRES = windres
-RM = rm -f
-MV = mv
-XGETTEXT = xgettext
-MSGMERGE = msgmerge
-PERL = perl
-SED = sed
-FIND = find
-SH = sh
+#----------------------------#
 
-DEBUG=yes
+# プログラムID (プログラムやライブラリのbasenameとなる)
+PROGRAM_ID=tjs3
 
-ifeq ($(DEBUG),yes)
-DEBUG_LIB_SUFFIX=d
-DEBUG_CFLAGS=-O0 -D__WXDEBUG__ -g
-WX_CONFIG_INCLUDE_NAME=debug
-else
-DEBUG_LIB_SUFFIX=
-DEBUG_CFLAGS=-O2 -g
-WX_CONFIG_INCLUDE_NAME=release
-endif
+# 出力バイナリ名
+BIN=./libtjs3.a
 
-CPPFLAGS = $(CPPINCLUDE) $(DEBUG_CFLAGS) \
-	-Winvalid-pch \
-	-mthreads -fno-pcc-struct-return -fstrict-aliasing -Wall \
-	-D__WXMSW__ -D__GNUWIN32__ -D_UNICODE -DUNICODE -DWXUSINGDLL \
+# このバイナリが依存しているライブラリ
+DEP_LIBS=WX
+
+# 最終ターゲット (ふつう、出力バイナリや出力ライブラリ)
+default: $(BIN)
+
+#----------------------------#
+
+CXXFLAGS = \
 	-DTJS_NO_REGEXP \
 	-DTJS_SUPPORT_WX
 
-CPPINCLUDE = \
-	-I"$(MINGWROOT)/include" \
-	-I"$(MINGWROOT)/include/boost-1_33_1" \
-	-I"$(MINGWROOT)/lib/wx/include/msw-unicode-$(WX_CONFIG_INCLUDE_NAME)-2.6" \
-	-I"$(MINGWROOT)/include/wx-2.6" \
-	-I"."
+CPPFLAGS = $(CXXFLAGS)
 
-PREC_H    = tjsCommHead.h
-PREC_GCH  = tjsCommHead.h.gch
+#----------------------------#
 
-
-CPPFILES = 	tjs.cpp                     \
-			tjs.tab.cpp                 \
-			tjsArray.cpp                \
-			tjsCharUtils.cpp            \
-			tjsCompileControl.cpp       \
-			tjsConfig.cpp               \
-			tjsDate.cpp                 \
-			tjsDateParser.cpp           \
-			tjsDebug.cpp                \
-			tjsDictionary.cpp           \
-			tjsDisassemble.cpp          \
-			tjsError.cpp                \
-			tjsException.cpp            \
-			tjsGlobalStringMap.cpp      \
-			tjsInterCodeExec.cpp        \
-			tjsInterCodeGen.cpp         \
-			tjsInterface.cpp            \
-			tjsLex.cpp                  \
-			tjsMT19937ar-cok.cpp        \
-			tjsMath.cpp                 \
-			tjsMessage.cpp              \
-			tjsNamespace.cpp            \
-			tjsNative.cpp               \
-			tjsObject.cpp               \
-			tjsRandomGenerator.cpp      \
-			tjsScriptBlock.cpp          \
-			tjsScriptCache.cpp          \
-			tjsString.cpp               \
-			tjsUtils.cpp                \
-			tjsVariant.cpp              \
-			tjsVariantString.cpp        \
-			tjsdate.tab.cpp             \
-			tjspp.tab.cpp               
+CPPFILES = 	src/tjs.cpp                     \
+			src/tjs.tab.cpp                 \
+			src/tjsArray.cpp                \
+			src/tjsCharUtils.cpp            \
+			src/tjsCompileControl.cpp       \
+			src/tjsConfig.cpp               \
+			src/tjsDate.cpp                 \
+			src/tjsDateParser.cpp           \
+			src/tjsDebug.cpp                \
+			src/tjsDictionary.cpp           \
+			src/tjsDisassemble.cpp          \
+			src/tjsError.cpp                \
+			src/tjsException.cpp            \
+			src/tjsGlobalStringMap.cpp      \
+			src/tjsInterCodeExec.cpp        \
+			src/tjsInterCodeGen.cpp         \
+			src/tjsInterface.cpp            \
+			src/tjsLex.cpp                  \
+			src/tjsMT19937ar-cok.cpp        \
+			src/tjsMath.cpp                 \
+			src/tjsMessage.cpp              \
+			src/tjsNamespace.cpp            \
+			src/tjsNative.cpp               \
+			src/tjsObject.cpp               \
+			src/tjsRandomGenerator.cpp      \
+			src/tjsScriptBlock.cpp          \
+			src/tjsScriptCache.cpp          \
+			src/tjsString.cpp               \
+			src/tjsUtils.cpp                \
+			src/tjsVariant.cpp              \
+			src/tjsVariantString.cpp        \
+			src/tjsdate.tab.cpp             \
+			src/tjspp.tab.cpp               
 
 OBJS = $(CPPFILES:.cpp=.o)
 
-.SUFFIXES:
-.SUFFIXES: .o .c .cpp .cc .f .p
+PREC_H_NAME = include/tjsCommHead.h
 
-default: all
+INCLUDES = -Iinclude
 
-%.d: %.cpp
-	$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $< \
-					  | sed "s/\($*\)\.o[ :]*/\1.o $@ : /g" > $@; \
-					  [ -s $@ ] || rm -f $@'
-
-clean:
-	${RM} $(OBJS) $(LIB) $(PREC_GCH) *.d
-
-
-$(PREC_GCH) : $(PREC_H)
-	$(CXX) $(CPPFLAGS) $(PREC_H) -o $(PREC_GCH)
-
-$(LIB) : $(OBJS)
-	$(AR) rs $(LIB) $(OBJS)
-
-all: $(PREC_GCH) $(LIB)
-
--include $(CPPFILES:.cpp=.d)
+#----------------------------#
+include $(TOP_DIR)/Makefile_common

@@ -30,10 +30,10 @@ CPPFLAGS_F  := $(patsubst %,$$(%_CPPFLAGS),$(DEP_LIBS))
 LIBS_F      := $(patsubst %,$$(%_LIBS),$(DEP_LIBS))
 
 .mktmp: Makefile
-	echo 'CFLAGS    := $(CFLAGS_F)'    >  .mktmp
-	echo 'CXXFLAGS  := $(CXXFLAGS_F)'  >> .mktmp
-	echo 'CPPFLAGS  := $(CPPFLAGS_F)'  >> .mktmp
-	echo 'LIBS      := $(LIBS_F)'      >> .mktmp
+	echo 'DEFAULT_CFLAGS    := $(CFLAGS_F)'    >  .mktmp
+	echo 'DEFAULT_CXXFLAGS  := $(CXXFLAGS_F)'  >> .mktmp
+	echo 'DEFAULT_CPPFLAGS  := $(CPPFLAGS_F)'  >> .mktmp
+	echo 'DEFAULT_LIBS      := $(LIBS_F)'      >> .mktmp
 
 ifdef INCLUDE_MKTMP
  -include .mktmp
@@ -43,25 +43,27 @@ endif
 ###### 依存関係
 
 ifdef INCLUDE_DEPS
- -include $(CPPFILES:.cpp=.d) $(CFILES:.cpp=.d)
+ -include $(CPPFILES:.cpp=.d) $(CFILES:.c=.d)
 endif
 
 ###### ルール
 
 ## C++ソース→オブジェクトファイル
 %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(DEFAULT_CXXFLAGS) $(CXXFLAGS) $(INCLUDES) $< -o $@
 
 
 ## コンパイル済みヘッダ
 %.h.gch: %.h
-	$(CXX) $(CXXFLAGS) $< -o $@
+	$(CXX) $(DEFAULT_CXXFLAGS) $(CXXFLAGS) $(INCLUDES) $< -o $@
 
-prec.h.gch: prec.h
+PREC_H_NAME ?= prec.h
+
+$(PREC_H_NAME).gch: $(PREC_H_NAME)
 
 ## 依存関係記述ファイル
 %.d: %.cpp
-	$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $< \
+	$(SHELL) -ec '$(CC) -MM $(DEFAULT_CPPFLAGS) $(CPPFLAGS) $(INCLUDES) $< \
 					  | sed "s|\($*\)\.o[ :]*|\1.o $@ : |g" > $@; \
 					  [ -s $@ ] || rm -f $@'
 
@@ -104,21 +106,29 @@ $(PO_FILES): messages.pot
 	mv resource.cpp $@
 	mv resource.h $(@:.cpp=.h)
 	mv $@ $@.bak
-	sed 's|<wx/wxprec.h>|"prec.h"|g' $@.bak > $@
+	sed 's|<wx/wxprec.h>|"$(PREC_H_NAME)"|g' $@.bak > $@
 	rm -f $@.bak
 
 
-$(XRCFILES:.xrc=.xpp): $(XRCFILES)
+$(XRCFILES:.xrc=.cpp): $(XRCFILES)
 
 ## バイナリ
 
-$(BIN): $(BIN_DEPS) prec.h.gch $(OBJS) $(MESSAGE_OBJECTS)
-	$(LD) $(LDFLAGS) $(OBJS) -o $(BIN) $(LIBS)
+ifeq ($(suffix $(BIN)),.a)
+# ライブラリの場合
+ $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS)
+	rm -f $(BIN)
+	$(AR) rs $(BIN) $(OBJS)
+else
+# executableの場合
+ $(BIN): $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
+	$(LD) $(LDFLAGS) $(OBJS) -o $(BIN) $(DEFAULT_LIBS) $(LIBS)
+endif
 
 ## クリーン
 
 clean:
-	rm -f $(OBJS) $(BIN) prec.h.gch *.d
+	rm -f $(OBJS) $(BIN) $(PREC_H_NAME).gch $(CPPFILES:.cpp=.d) $(CFILES:.c=.d)
 	rm -f messages.pot $(MESSAGE_OBJECTS)
 	rm -f locale/*~
 	rm -f .mktmp

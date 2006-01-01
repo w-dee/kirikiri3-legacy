@@ -3,19 +3,19 @@ include $(TOP_DIR)/Makefile_filenames
 
 #----------------------------#
 
-# ƒvƒƒOƒ‰ƒ€ID (ƒvƒƒOƒ‰ƒ€‚âƒ‰ƒCƒuƒ‰ƒŠ‚Ìbasename‚Æ‚È‚é)
+# ãƒ—ãƒ­ã‚°ãƒ©ãƒ ID (ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚„ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®basenameã¨ãªã‚‹)
 PROGRAM_ID=krkrfont
 
-# o—ÍƒoƒCƒiƒŠ–¼
+# å‡ºåŠ›ãƒã‚¤ãƒŠãƒªå
 BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
 
-# ‚±‚ÌƒoƒCƒiƒŠ‚ªˆË‘¶‚µ‚Ä‚¢‚éƒ‰ƒCƒuƒ‰ƒŠ
+# ã“ã®ãƒã‚¤ãƒŠãƒªãŒä¾å­˜ã—ã¦ã„ã‚‹ãƒ©ã‚¤ãƒ–ãƒ©ãƒª
 DEP_LIBS=WX FREETYPE COMMON
 
-# ƒŠƒ“ƒJ‚É“n‚·ƒtƒ‰ƒO
+# ãƒªãƒ³ã‚«ã«æ¸¡ã™ãƒ•ãƒ©ã‚°
 LDFLAGS = -g $(GUI_LDFLAGS)
 
-# ÅIƒ^[ƒQƒbƒg (‚Ó‚Â‚¤Ao—ÍƒoƒCƒiƒŠ‚âo—Íƒ‰ƒCƒuƒ‰ƒŠ)
+# æœ€çµ‚ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ (ãµã¤ã†ã€å‡ºåŠ›ãƒã‚¤ãƒŠãƒªã‚„å‡ºåŠ›ãƒ©ã‚¤ãƒ–ãƒ©ãƒª)
 default: $(BIN)
 
 #----------------------------#

@@ -1,22 +1,22 @@
-# TODO: ”CˆÓ‚Ìprefix‚ÌƒfƒBƒŒƒNƒgƒŠ‚É install o—ˆ‚é‚æ‚¤‚É
+# TODO: ä»»æ„ã®prefixã®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã« install å‡ºæ¥ã‚‹ã‚ˆã†ã«
 
 TOP_DIR=../../..
 include $(TOP_DIR)/Makefile_filenames
 
 #----------------------------#
 
-# ƒvƒƒOƒ‰ƒ€ID (ƒvƒƒOƒ‰ƒ€‚âƒ‰ƒCƒuƒ‰ƒŠ‚Ìbasename‚Æ‚È‚é)
+# ãƒ—ãƒ­ã‚°ãƒ©ãƒ ID (ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚„ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®basenameã¨ãªã‚‹)
 PROGRAM_ID=tjs3
 
-# o—ÍƒoƒCƒiƒŠ–¼
+# å‡ºåŠ›ãƒã‚¤ãƒŠãƒªå
 TJS3_LIB_OUTPUT_DIR := $(shell pwd)/lib
 TJS3_BIN_OUTPUT_DIR := $(shell pwd)/bin
 BIN=$(TJS3_LIB_OUTPUT_DIR)/libtjs3.a
 
-# ‚±‚ÌƒoƒCƒiƒŠ‚ªˆË‘¶‚µ‚Ä‚¢‚éƒ‰ƒCƒuƒ‰ƒŠ
+# ã“ã®ãƒã‚¤ãƒŠãƒªãŒä¾å­˜ã—ã¦ã„ã‚‹ãƒ©ã‚¤ãƒ–ãƒ©ãƒª
 DEP_LIBS=WX
 
-# ÅIƒ^[ƒQƒbƒg (‚Ó‚Â‚¤Ao—ÍƒoƒCƒiƒŠ‚âo—Íƒ‰ƒCƒuƒ‰ƒŠ)
+# æœ€çµ‚ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ (ãµã¤ã†ã€å‡ºåŠ›ãƒã‚¤ãƒŠãƒªã‚„å‡ºåŠ›ãƒ©ã‚¤ãƒ–ãƒ©ãƒª)
 default: $(BIN)
 
 #----------------------------#
@@ -71,7 +71,7 @@ INCLUDES = -Iinclude
 
 #----------------------------#
 
-# Ý’èƒtƒ@ƒCƒ‹‚ð‘‚«o‚·
+# è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã‚’æ›¸ãå‡ºã™
 
 TJS3_INCLUDE_DIR := $(shell pwd)/include
 

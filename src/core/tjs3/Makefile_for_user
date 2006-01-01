@@ -1,4 +1,4 @@
-# ‘¼‚ÌƒvƒƒOƒ‰ƒ€‚ÌMakefile‚Éinclude‚µ‚Äg‚¤‚½‚ß‚Ìtjs‚Ìİ’è
+# ä»–ã®ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®Makefileã«includeã—ã¦ä½¿ã†ãŸã‚ã®tjsã®è¨­å®š
 
 TJS3_DIR=$(TOP_DIR)/src/core/tjs3
 

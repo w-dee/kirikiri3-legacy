@@ -3,21 +3,21 @@ include $(TOP_DIR)/Makefile_filenames
 
 #----------------------------#
 
-# ƒvƒƒOƒ‰ƒ€ID (ƒvƒƒOƒ‰ƒ€‚âƒ‰ƒCƒuƒ‰ƒŠ‚Ìbasename‚Æ‚È‚é)
+# ãƒ—ãƒ­ã‚°ãƒ©ãƒ ID (ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚„ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®basenameã¨ãªã‚‹)
 PROGRAM_ID=tjs3test
 
-# o—ÍƒoƒCƒiƒŠ–¼
+# å‡ºåŠ›ãƒã‚¤ãƒŠãƒªå
 BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
 
-# ‚±‚ÌƒoƒCƒiƒŠ‚ªˆË‘¶‚µ‚Ä‚¢‚éƒ‰ƒCƒuƒ‰ƒŠ
+# ã“ã®ãƒã‚¤ãƒŠãƒªãŒä¾å­˜ã—ã¦ã„ã‚‹ãƒ©ã‚¤ãƒ–ãƒ©ãƒª
 DEP_LIBS=
 
-# ƒŠƒ“ƒJ‚É“n‚·ƒtƒ‰ƒO
+# ãƒªãƒ³ã‚«ã«æ¸¡ã™ãƒ•ãƒ©ã‚°
 LDFLAGS = -g $(CONSOLE_LDFLAGS)
 
 #----------------------------#
 
-# tjs3 ‚ðŽg‚¤‚½‚ß‚ÌÝ’è
+# tjs3 ã‚’ä½¿ã†ãŸã‚ã®è¨­å®š
 include ../../src/core/tjs3/Makefile_for_user
 
 #----------------------------#

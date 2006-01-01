@@ -21,7 +21,7 @@ namespace TJS
 TJS_DEFINE_SOURCE_ID(1033);
 
 //---------------------------------------------------------------------------
-// throwing error functions
+// 例外を送出するための関数群
 //---------------------------------------------------------------------------
 void TJSThrowStringDeallocError()
 {
@@ -52,7 +52,7 @@ tjs_int TJSGetShorterStrLen(const tjs_char *str, tjs_int max)
 
 
 //---------------------------------------------------------------------------
-// base memory allocation functions for long string
+// 長い文字列用の文字列確保ルーチン
 //---------------------------------------------------------------------------
 #define TJSVS_ALLOC_INC_SIZE_S 16
 	// additional space for long string heap under TJSVS_ALLOC_DOUBLE_LIMIT
@@ -596,7 +596,7 @@ tTJSVariantString * TJSAllocVariantString(const tjs_char *ref)
 
 #ifdef TJS_WCHAR_T_SIZE_IS_16BIT
 //---------------------------------------------------------------------------
-//! @brief		譁・ｭ怜・繝悶Ο繝・け繧堤｢ｺ菫鴀(wchar_t繧医ｊ)
+//! @brief		譁・ｭ怜・繝悶Ο繝・け繧堤｢ｺ菫魘(wchar_t繧医ｊ)
 //! @param		ref     繧ｳ繝斐・蜈・枚蟄怜・
 //! @return		遒ｺ菫昴＆繧後◆譁・ｭ怜・
 //---------------------------------------------------------------------------

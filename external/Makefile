@@ -28,9 +28,17 @@ download:
 
 # TODO: win32 以外の動作
 
+
+# Windows の場合、dll は実行可能ファイルと同じ場所か、
+# パスの通った場所におかれていなければならない
+# ここでは、生成された DLL をすべて探し、$(BUILD_OUT_DIR)/bin
+# にコピーする
+# また、マルチスレッドヘルパーである mingwm*.dll も bin ディレ
+# クトリにコピーする
 ifeq ($(PLATFORM),windows)
  copy_dll:
 	mkdir -p $(BUILD_OUT_DIR)/bin
+	cp `which mingwm10.dll` $(BUILD_OUT_DIR)/bin
 	for dir in $(SUBLIBS) ; do \
 		for subdir in bin lib; do \
 			if [ -d $$dir/$$subdir ]; then \

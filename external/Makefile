@@ -7,7 +7,7 @@ SUBLIBS= zlib libpng libjpeg expat wxWidgets icu libtomcrypt freetype boost
 
 
 # デフォルトターゲット
-target: default compile_wx_win_res copy_mo copy_dll
+target: default compile_wx_win_res copy_mo copy_dll print_all_done_mes
 
 # 各サブディレクトリに対して再帰
 
@@ -38,7 +38,11 @@ download:
 ifeq ($(PLATFORM),windows)
  copy_dll:
 	mkdir -p $(BUILD_OUT_DIR)/bin
-	cp `which mingwm10.dll` $(BUILD_OUT_DIR)/bin
+	@cp `which mingwm10.dll` $(BUILD_OUT_DIR)/bin || \
+		(echo "error: mingwm10.dll missing." ; exit 1)
+	@cp `which unicows.dll` $(BUILD_OUT_DIR)/bin || \
+		(echo "error: unicows.dll missing. did you forget installing \
+		MSLU into MinGW bin directory ?" ; exit 1)
 	for dir in $(SUBLIBS) ; do \
 		for subdir in bin lib; do \
 			if [ -d $$dir/$$subdir ]; then \
@@ -76,4 +80,11 @@ compile_wx_win_res: $(WX_WIN_RES_OBJ)
 
 $(WX_WIN_RES_OBJ): $(WX_WIN_RES_SRC)
 	$(WINDRES) --include-dir $(WX_INCLUDE_DIR) $(WX_WIN_RES_SRC) -o $(WX_WIN_RES_OBJ)
+
+
+
+### 構築終了のメッセージを表示する
+print_all_done_mes:
+	@echo
+	@echo All done.
 

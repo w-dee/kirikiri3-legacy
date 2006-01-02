@@ -72,16 +72,21 @@ copy_mo:
 
 ### wxWidgets の windows 用のデフォルトのリソースファイルをコンパイルする
 
-WX_WIN_RES_OBJ  = wxWidgets/lib/wx_msw_rc.o
-WX_INCLUDE_DIR := $(shell find wxWidgets/include -name msw -type d)/../..
-WX_WIN_RES_SRC  = $(WX_INCLUDE_DIR)/wx/msw/wx.rc
-
-compile_wx_win_res: $(WX_WIN_RES_OBJ)
-
-$(WX_WIN_RES_OBJ): $(WX_WIN_RES_SRC)
-	$(WINDRES) --include-dir $(WX_INCLUDE_DIR) $(WX_WIN_RES_SRC) -o $(WX_WIN_RES_OBJ)
-
-
+ifeq ($(PLATFORM),windows)
+ compile_wx_win_res:
+	(set -e ;\
+		WX_WIN_RES_OBJ=wxWidgets/lib/wx_msw_rc.o ;\
+		WX_MSW_INCLUDE_DIR=`find wxWidgets/include -name msw -type d` ;\
+		WX_INCLUDE_DIR=$$WX_MSW_INCLUDE_DIR/../.. ;\
+		WX_WIN_RES_SRC=$$WX_INCLUDE_DIR/wx/msw/wx.rc ;\
+		if [ "x$$WX_MSW_INCLUDE_DIR" = "x" ]; then \
+			echo "error: wxWidgets was not properly built. stop"; exit 1; fi ;\
+		$(WINDRES) --include-dir $$WX_INCLUDE_DIR $$WX_WIN_RES_SRC -o $$WX_WIN_RES_OBJ \
+	)
+else
+ compile_wx_win_res:
+	@true
+endif
 
 ### 構築終了のメッセージを表示する
 print_all_done_mes:

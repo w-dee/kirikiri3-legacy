@@ -13,7 +13,8 @@
 TJS_DEFINE_SOURCE_ID(2002);
 
 #include "FSManager.h"
-
+#include "PathFS.h"
+#include "TVPException.h"
 #include <algorithm>
 
 
@@ -24,7 +25,7 @@ TJS_DEFINE_SOURCE_ID(2002);
 //---------------------------------------------------------------------------
 tTVPPathFS::tTVPPathFS()
 {
-	NeedRebuld = true;
+	NeedRebuild = true;
 }
 //---------------------------------------------------------------------------
 
@@ -60,7 +61,7 @@ size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
 	for(tHash::tIterator i = Hash.GetFirst(); !i.IsNull(); i++)
 	{
 		count ++;
-		if(callback) if(!callback->OnFile(i->GetKey())) break;
+		if(callback) if(!callback->OnFile(i.GetKey())) break;
 	}
 
 	return count;
@@ -159,8 +160,7 @@ void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 	if(!mapped_filename)
 		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
-	tTVPFileSystemManager::pointer fsman;
-	fsman->Stat(*mapped_filename, struc);
+	tTVPFileSystemManager::instance().Stat(*mapped_filename, struc);
 }
 //---------------------------------------------------------------------------
 
@@ -171,7 +171,7 @@ void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTVPBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tTJSBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -187,8 +187,7 @@ tTVPBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 f
 	if(!mapped_filename)
 		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
-	tTVPFileSystemManager::pointer fsman;
-	return fsman->CreateStream(*mapped_filename, flags);
+	return tTVPFileSystemManager::instance().CreateStream(*mapped_filename, flags);
 }
 //---------------------------------------------------------------------------
 
@@ -198,7 +197,7 @@ tTVPBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 f
 //! @brief		name: 名前
 //! @brief		recursive: 再帰的に名前を検索するかどうか
 //---------------------------------------------------------------------------
-void tTVPPathFS::AddDirectory(const ttstr & name, bool recursive = false)
+void tTVPPathFS::Add(const ttstr & name, bool recursive)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -207,7 +206,7 @@ void tTVPPathFS::AddDirectory(const ttstr & name, bool recursive = false)
 	if(fn.EndsWith(TJS_WC('/'))) fn += TJS_WC('/');
 
 	// ディレクトリが存在しないことを確かにする
-	RemoveDirectory(fn);
+	Remove(fn);
 
 	// Paths に追加する
 	Paths.push_back((recursive ? TJS_WS("+") : TJS_WS(" ")) + fn);
@@ -222,7 +221,7 @@ void tTVPPathFS::AddDirectory(const ttstr & name, bool recursive = false)
 //! @brief		パスからディレクトリを削除する
 //! @param		name 名前
 //---------------------------------------------------------------------------
-void tTVPPathFS::RemoveDirectory(const ttstr & name)
+void tTVPPathFS::Remove(const ttstr & name)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -249,8 +248,6 @@ void tTVPPathFS::RemoveDirectory(const ttstr & name)
 void tTVPPathFS::Ensure()
 {
 	if(!NeedRebuild) return; // 作り直す必要はない
-
-	tTVPFileSystemManager::pointer fsman;
 
 	// コールバックを準備
 	class tCallback : public iTVPFileSystemIterationCallback
@@ -283,9 +280,9 @@ void tTVPPathFS::Ensure()
 	// 全てのパスに対して
 	for(std::vector<ttstr>::iterator i = Paths.begin(); i != Paths.end(); i++)
 	{
-		bool recursive = (i->c_str() == static_cast<tjs_char>(TJS_WC('+')));
+		bool recursive = (i->c_str()[0] == static_cast<tjs_char>(TJS_WC('+')));
 		ttstr dirname(i->c_str() + 1);
-		fsman->GetFileListAt(dirname, &callback, recursive);
+		tTVPFileSystemManager::instance().GetFileListAt(dirname, &callback, recursive);
 	}
 
 	// フラグを倒す

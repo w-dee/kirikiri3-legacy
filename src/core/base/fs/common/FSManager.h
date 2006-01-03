@@ -19,8 +19,6 @@
 #include <boost/pool/detail/singleton.hpp>
 #include <boost/smart_ptr.hpp>
 
-using namespace boost;
-
 //---------------------------------------------------------------------------
 //! @brief		iTVPFileSystem::GetFileListAt で用いられるコールバックインターフェース
 //---------------------------------------------------------------------------
@@ -83,6 +81,10 @@ class tTVPFileSystemManager
 public:
 	tTVPFileSystemManager();
 	~tTVPFileSystemManager();
+
+	static tTVPFileSystemManager & instance() { return
+		boost::details::pool::singleton_default<tTVPFileSystemManager>::instance();
+			} //!< このシングルトンのインスタンスを返す
 
 	void Mount(const ttstr & point, boost::shared_ptr<iTVPFileSystem> fs);
 	void Unmount(const ttstr & point);

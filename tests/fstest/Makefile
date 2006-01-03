@@ -10,7 +10,7 @@ PROGRAM_ID=fstest
 BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
 
 # このバイナリが依存しているライブラリ
-DEP_LIBS=BOOST
+DEP_LIBS=BOOST ZLIB COMMON
 
 # リンカに渡すフラグ
 LDFLAGS = -g $(CONSOLE_LDFLAGS)
@@ -34,10 +34,18 @@ INCLUDES= \
 		-I.
 
 CPPFILES = \
-		$(BASE_DIR)/fs/common/FSManager.cpp        \
-		$(BASE_DIR)/fs/tmpfs/MemoryStream.cpp      \
-		$(BASE_DIR)/fs/tmpfs/TmpFS.cpp             \
-		$(BASE_DIR)/exception/TVPException.cpp     \
+		$(BASE_DIR)/fs/common/FSManager.cpp         \
+		$(BASE_DIR)/fs/tmpfs/MemoryStream.cpp       \
+		$(BASE_DIR)/fs/tmpfs/TmpFS.cpp              \
+		$(BASE_DIR)/fs/osfs/OSFS.cpp                \
+		$(BASE_DIR)/fs/pathfs/PathFS.cpp            \
+		$(BASE_DIR)/fs/xp4fs/DecompressedHolder.cpp \
+		$(BASE_DIR)/fs/xp4fs/XP4Archive.cpp         \
+		$(BASE_DIR)/fs/xp4fs/XP4FS.cpp              \
+		$(BASE_DIR)/fs/xp4fs/XP4SegmentCache.cpp    \
+		$(BASE_DIR)/fs/xp4fs/XP4Stream.cpp          \
+		$(BASE_DIR)/fs/xp4fs/XP4StreamCache.cpp     \
+		$(BASE_DIR)/exception/TVPException.cpp      \
 		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)

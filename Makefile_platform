@@ -7,8 +7,6 @@ DEBUG ?= yes
 
 ## Windows用設定
 
-
-
 WINDRES = windres
 CONSOLE_LDFLAGS = -mconsole
 ifeq ($(DEBUG),yes)

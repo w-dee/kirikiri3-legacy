@@ -63,9 +63,14 @@ $(PREC_H_NAME).gch: $(PREC_H_NAME)
 
 ## 依存関係記述ファイル
 %.d: %.cpp
-	$(SHELL) -ec '$(CC) -MM $(DEFAULT_CPPFLAGS) $(CPPFLAGS) $(INCLUDES) $< \
-					  | sed "s|\($*\)\.o[ :]*|\1.o $@ : |g" > $@; \
-					  [ -s $@ ] || rm -f $@'
+	$(CC) -MM $(DEFAULT_CPPFLAGS) $(CPPFLAGS) $(INCLUDES) $< > "$@t" ;\
+	if [ -s "$@t" ]; then \
+		echo -n "$(dir $@)" > $@ ;\
+		sed "s|: | $@ : |g" $@t >> $@ ;\
+		rm -f "$@t" ;\
+	else \
+		rm -f "$@t" ;\
+	fi
 
 ## メッセージオブジェクト関連
 %.mo: %.po
@@ -122,7 +127,7 @@ ifeq ($(suffix $(BIN)),.a)
 	$(AR) rs $(BIN) $(OBJS)
 else
 # executableの場合
- $(BIN): $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
+ $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
 	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
 	$(LD) $(LDFLAGS) $(OBJS) -o $(BIN) $(LIBS) $(DEFAULT_LIBS)
 endif
@@ -130,10 +135,10 @@ endif
 ## クリーン
 
 clean:
-	rm -f $(OBJS) $(BIN) $(PREC_H_NAME).gch $(CPPFILES:.cpp=.d) $(CFILES:.c=.d)
+	rm -f $(OBJS) $(BIN) $(PREC_H_NAME).gch 
 	rm -f messages.pot $(MESSAGE_OBJECTS)
-	rm -f locale/*~
-	rm -f .mktmp
+	rm -f locale/*~ $(CPPFILES:.cpp=.d) $(CPPFILES:.cpp=.dt)
+	rm -f .mktmp $(CFILES:.c=.d) $(CFILES:.c=.dt)
 	rm -f *.bak resource.cpp resource.h
 	rm -f $(patsubst %.xrc,%.cpp,$(wildcard *.xrc))
 	rm -f $(patsubst %.xrc,%.h,$(wildcard *.xrc))

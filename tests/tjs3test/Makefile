@@ -18,7 +18,7 @@ LDFLAGS = -g $(CONSOLE_LDFLAGS)
 #----------------------------#
 
 # tjs3 を使うための設定
-include ../../src/core/tjs3/Makefile_for_user
+include $(TOP_DIR)/src/core/tjs3/Makefile_for_user
 
 #----------------------------#
 

@@ -1,8 +1,12 @@
 include $(TOP_DIR)/Makefile_platform
 
+###### カレントディレクトリ
+
+CURRENT_DIR = $(PWD)
+
 ###### 各ライブラリのルートディレクトリ
 
-EXTERNAL_DIR=$(shell pwd)/$(TOP_DIR)/external
+EXTERNAL_DIR=$(CURRENT_DIR)/$(TOP_DIR)/external
 
 BOOST_DIR=$(EXTERNAL_DIR)/boost
 EXPAT_DIR=$(EXTERNAL_DIR)/expat
@@ -17,7 +21,7 @@ ZLIB_DIR=$(EXTERNAL_DIR)/zlib
 
 ###### ビルド出力先
 
-BUILD_OUT_DIR=$(shell pwd)/$(TOP_DIR)/build_output
+BUILD_OUT_DIR=$(CURRENT_DIR)/$(TOP_DIR)/build_output
 
 
 ###### 最終ターゲット

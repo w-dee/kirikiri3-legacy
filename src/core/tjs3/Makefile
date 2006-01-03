@@ -9,8 +9,8 @@ include $(TOP_DIR)/Makefile_filenames
 PROGRAM_ID=tjs3
 
 # 出力バイナリ名
-TJS3_LIB_OUTPUT_DIR := $(shell pwd)/lib
-TJS3_BIN_OUTPUT_DIR := $(shell pwd)/bin
+TJS3_LIB_OUTPUT_DIR := $(CURRENT_DIR)/lib
+TJS3_BIN_OUTPUT_DIR := $(CURRENT_DIR)/bin
 BIN=$(TJS3_LIB_OUTPUT_DIR)/libtjs3.a
 
 # このバイナリが依存しているライブラリ

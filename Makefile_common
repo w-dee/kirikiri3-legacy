@@ -63,7 +63,8 @@ $(PREC_H_NAME).gch: $(PREC_H_NAME)
 
 ## 依存関係記述ファイル
 %.d: %.cpp
-	$(CC) -MM $(DEFAULT_CPPFLAGS) $(CPPFLAGS) $(INCLUDES) $< > "$@t" ;\
+	@echo "Generating dependency information for $<"
+	@$(CC) -MM $(DEFAULT_CPPFLAGS) $(CPPFLAGS) $(INCLUDES) $< > "$@t" ;\
 	if [ -s "$@t" ]; then \
 		echo -n "$(dir $@)" > $@ ;\
 		sed "s|: | $@ : |g" $@t >> $@ ;\

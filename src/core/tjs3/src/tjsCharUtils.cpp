@@ -135,7 +135,11 @@ tjs_char * TJS_tTVReal_to_str(tjs_real value, tjs_char *string)
 	return string;
 #else
 	char tmp[25];
+#ifdef _MSC_VER
+	_snprintf(tmp, sizeof(tmp), "%.15lg", value);
+#else
 	snprintf(tmp, sizeof(tmp), "%.15lg", value);
+#endif
 	const char *p = tmp;
 	tjs_char *d = string;
 	while(*p) *(d++) = static_cast<tjs_char>(*(p++));
@@ -160,7 +164,11 @@ tjs_char * TJS_pointer_to_str(const void *value, tjs_char *string)
 	return string;
 #else
 	char tmp[25];
+#ifdef _MSC_VER
+	_snprintf(tmp, sizeof(tmp), "%p", value);
+#else
 	snprintf(tmp, sizeof(tmp), "%p", value);
+#endif
 	const char *p = tmp;
 	tjs_char *d = string;
 	while(*p) *(d++) = static_cast<tjs_char>(*(p++));

@@ -29,6 +29,9 @@ typedef wxCriticalSection tTJSCriticalSection;
 #elif _WIN32
 // Windows プラットフォームの場合
 
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 
 //! @brief クリティカルセクションの実装

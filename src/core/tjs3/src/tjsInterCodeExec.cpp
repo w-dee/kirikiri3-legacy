@@ -1415,6 +1415,12 @@ tjs_int tTJSInterCodeContext::ExecuteCode(tTJSVariant *ra_org, tjs_int startip,
 	catch(eTJS &e)
 	{
 		DisplayExceptionGeneratedCode(codesave - CodeArea, ra_org);
+        #ifdef _MSC_VER
+            // GetMessageマクロがTJS::eTJS::GetMessageを邪魔するので消す
+            #ifdef GetMessage
+            #undef GetMessage
+            #endif
+        #endif
 		TJS_eTJSScriptError(e.GetMessage(), this, codesave-CodeArea);
 	}
 /*
@@ -1463,6 +1469,12 @@ tjs_int tTJSInterCodeContext::ExecuteCodeInTryBlock(tTJSVariant *ra, tjs_int sta
 		if(TJSStackTracerEnabled()) TJSStackTracerPop();
 		return ret;
 	}
+    #ifdef _MSC_VER
+        // GetMessageマクロがTJS::eTJS::GetMessageを邪魔するので消す
+        #ifdef GetMessage
+        #undef GetMessage
+        #endif
+    #endif
 	TJS_CONVERT_TO_TJS_EXCEPTION_OBJECT(
 			Block->GetTJS(),
 			exobjreg,

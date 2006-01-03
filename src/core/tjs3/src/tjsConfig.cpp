@@ -12,6 +12,9 @@
 #include "tjsCharUtils.h"
 
 #ifdef TJS_DEBUG_PROFILE_TIME
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #endif
 

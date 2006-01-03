@@ -127,9 +127,6 @@
 				RelativePath="..\src\tjsDateParser.cpp">
 			</File>
 			<File
-				RelativePath="..\src\tjsDateWordMap.cc">
-			</File>
-			<File
 				RelativePath="..\src\tjsDebug.cpp">
 			</File>
 			<File

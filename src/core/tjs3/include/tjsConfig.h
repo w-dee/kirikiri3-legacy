@@ -63,6 +63,13 @@ namespace TJS
 	#define TJS_timezone _timezone
 	#define TJS_rand _lrand
 	#define TJS_RAND_MAX LRAND_MAX
+#elif _MSC_VER
+	#define TJS_cdecl __cdecl
+	#define TJS_vsnprintf		_vsnwprintf
+	#define TJS_sprintf			swprintf
+	#define TJS_timezone _timezone
+	#define TJS_rand rand
+	#define TJS_RAND_MAX RAND_MAX
 #endif
 
 void TJS_debug_out(const tjs_char *format, ...);

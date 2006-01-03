@@ -109,7 +109,11 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func.name*/assign)
 		ni->Assign(clo.ObjThis, clear);
 	else if(clo.Object)
 		ni->Assign(clo.Object, clear);
+#ifdef _MSC_VER
+	else TJS::TJS_eTJSError(TJSNullAccess);
+#else
 	else TJS_eTJSError(TJSNullAccess);
+#endif
 
 	return TJS_S_OK;
 }
@@ -129,7 +133,11 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */assignStruct)
 		ni->AssignStructure(clo.ObjThis, stack);
 	else if(clo.Object)
 		ni->AssignStructure(clo.Object, stack);
+#ifdef _MSC_VER
+	else TJS::TJS_eTJSError(TJSNullAccess);
+#else
 	else TJS_eTJSError(TJSNullAccess);
+#endif 
 
 	return TJS_S_OK;
 }

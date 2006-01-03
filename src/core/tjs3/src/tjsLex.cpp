@@ -903,7 +903,7 @@ static bool TJSParseRegExp(tTJSVariant &pat, const tjs_char **ptr)
 				flag += *(*ptr);
 				if(!TJSNext(ptr)) break;
 			}
-			str = TJS_WS("/""/")+ flag + TJS_WS("/") + str;
+			str = TJS_WS("//")+ flag + TJS_WS("/") + str;
 			ok = true;
 			break;
 		}
@@ -1733,6 +1733,12 @@ tjs_int tTJSLexicalAnalyzer::GetNext(tjs_int &value)
 		}
 		catch(eTJSCompileError &e)
 		{
+            #ifdef _MSC_VER
+                // GetMessageマクロがTJS::eTJS::GetMessageを邪魔するので消す
+                #ifdef GetMessage
+                #undef GetMessage
+                #endif
+            #endif
 			_yyerror(e.GetMessage().c_str(), Block, e.GetPosition());
 			return 0;
 		}
@@ -1891,6 +1897,12 @@ tjs_int tTJSLexicalAnalyzer::GetNext(tjs_int &value)
 
 			if(n == 0)
 			{
+                #ifdef _MSC_VER
+                    // GetMessageマクロがTJS::eTJS::GetMessageを邪魔するので消す
+                    #ifdef GetMessage
+                    #undef GetMessage
+                    #endif
+                #endif
 				if(IfLevel != 0)
 					TJS_eTJSCompileError(TJSPPError, Block, Current-Script);
 			}
@@ -1907,6 +1919,12 @@ tjs_int tTJSLexicalAnalyzer::GetNext(tjs_int &value)
 		}
 		catch(eTJS &e)
 		{
+            #ifdef _MSC_VER
+                // GetMessageマクロがTJS::eTJS::GetMessageを邪魔するので消す
+                #ifdef GetMessage
+                #undef GetMessage
+                #endif
+            #endif
 			_yyerror(e.GetMessage().c_str(), Block);
 			return 0;
 		}

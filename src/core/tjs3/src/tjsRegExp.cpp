@@ -13,7 +13,13 @@
 #include "tjsRegExp.h"
 #include "tjsArray.h"
 
+#if !defined(_MSC_VER)
 #include <function.h>
+#endif
+
+#if defined (_MSC_VER)
+#include <boost/functional.hpp>
+#endif
 
 using namespace boost;
 

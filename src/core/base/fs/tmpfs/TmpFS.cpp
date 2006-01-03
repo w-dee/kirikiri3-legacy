@@ -10,10 +10,10 @@
 //! @brief tmpfs の実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-TJS_DEFINE_SOURCE_ID(2004);
-
 #include "TmpFS.h"
+#include "TVPException.h"
 
+TJS_DEFINE_SOURCE_ID(2004);
 
 
 
@@ -49,8 +49,8 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 //! @param		type ノードタイプ
 //! @param		src 入力もとストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
-	tTVPBinaryStream * src) :
+tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
+	tTJSBinaryStream * src) :
 	Parent(parent)
 {
 	if(Type == ntDirectory)
@@ -84,7 +84,7 @@ void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType ty
 			unsigned char * p = new unsigned char [metalen];
 			src->ReadBuffer(p, metalen);
 			p[metalen - 1] = 0;
-			Name = ttstr(wxString(p, wxConvUTF8()));
+			Name = ttstr(wxString(reinterpret_cast<char*>(p), wxConvUTF8));
 		}
 		else
 		{
@@ -117,9 +117,9 @@ void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType ty
 				done = true;
 				break;
 			default:
-				eTVPException::Throw(
+				eTVPException::Throw(ttstr(
 						wxString::Format(TJS_WS_TR("unsupported node id %x"),
-						static_cast<int>(nodetypeid)));
+						static_cast<int>(nodetypeid))));
 			}
 		}
 	}
@@ -158,8 +158,8 @@ tTVPTmpFSNode::~tTVPTmpFSNode()
 		tTJSHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
-			delete (i->GetValue());
-			i->GetValue() = NULL;
+			delete (i.GetValue());
+			i.GetValue() = NULL;
 		}
 
 		// Directory も解放する
@@ -178,7 +178,7 @@ tTVPTmpFSNode::~tTVPTmpFSNode()
 //! @brief		内容をシリアライズする
 //! @param		dest 出力先ストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFSNode::Serialize(tTVPBinaryStream * dest)
+void tTVPTmpFSNode::Serialize(tTJSBinaryStream * dest) const
 {
 	// ノードのタイプを記録
 	if(Type == ntDirectory)
@@ -189,7 +189,7 @@ void tTVPTmpFSNode::Serialize(tTVPBinaryStream * dest)
 	// 名前を格納
 	dest->WriteBuffer("\1", 1); // ファイル名
 
-	wxCharBuffer utf8name = InArchiveName.mb_str(wxConvUTF8);
+	wxCharBuffer utf8name = Name.AsWxString().mb_str(wxConvUTF8);
 	size_t utf8name_len = strlen(utf8name);
 
 	wxUint32 i32;
@@ -206,7 +206,7 @@ void tTVPTmpFSNode::Serialize(tTVPBinaryStream * dest)
 		tTJSHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
-			i->GetValue()->Serialize(dest);
+			i.GetValue()->Serialize(dest);
 		}
 
 		dest->WriteBuffer("\x88", 1); // ディレクトリの終わりを表す
@@ -250,7 +250,7 @@ tTVPTmpFSNode * tTVPTmpFSNode::GetSubNode(const ttstr & name)
 bool tTVPTmpFSNode::DeleteSubNodeByName(const ttstr & name)
 {
 	if(Type != ntDirectory) return false;
-	iTVPTmpFSNode * node = GetSubNode(name);
+	tTVPTmpFSNode * node = GetSubNode(name);
 	if(node)
 	{
 		delete node;
@@ -321,18 +321,18 @@ size_t tTVPTmpFSNode::Iterate(iTVPFileSystemIterationCallback * callback)
 	for(i = Directory->GetFirst(); !i.IsNull(); i++)
 	{
 		count ++;
-		if(i->GetValue()->Type == ntDirectory)
+		if(i.GetValue()->Type == ntDirectory)
 		{
 			if(callback)
 			{
-				if(!callback->OnDirectory(i->GetValue()->Name)) break;
+				if(!callback->OnDirectory(i.GetValue()->Name)) break;
 			}
 		}
-		else if(i->GetValue()->Type == ntFile)
+		else if(i.GetValue()->Type == ntFile)
 		{
 			if(callback)
 			{
-				if(!callback->OnFile(i->GetValue()->Name)) break;
+				if(!callback->OnFile(i.GetValue()->Name)) break;
 			}
 		}
 	}
@@ -366,7 +366,6 @@ const unsigned char tTVPTmpFS::SerializeMagic[] = {
 tTVPTmpFS::tTVPTmpFS()
 {
 	// 変数初期化
-	RefCount = 1; // 初期の参照カウントは1
 	CreateRoot();
 }
 //---------------------------------------------------------------------------
@@ -378,37 +377,6 @@ tTVPTmpFS::tTVPTmpFS()
 tTVPTmpFS::~tTVPTmpFS()
 {
 	RemoveRoot();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		参照カウンタを一つ増やす
-//---------------------------------------------------------------------------
-void tTVPTmpFS::AddRef()
-{
-	volatile tTJSCriticalSectionHolder holder(RefCountCS);
-
-	RefCount ++;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		参照カウンタを一つ減らす
-//---------------------------------------------------------------------------
-void tTVPTmpFS::Release()
-{
-	tjs_uint decremented_count;
-
-	{
-		volatile tTJSCriticalSectionHolder holder(RefCountCS);
-
-		RefCount --;
-		decremented_count = RefCount;
-	}
-
-	if(decremented_count == 0) delete this;
 }
 //---------------------------------------------------------------------------
 
@@ -459,7 +427,7 @@ bool tTVPTmpFS::DirectoryExists(const ttstr & dirname)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	tTVPTmpFSNode * node = GetNodeAt(filename);
+	tTVPTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) return false;
 	if(!node->IsDirectory()) return false; // それがディレクトリではない場合も false
 	return true;
@@ -587,10 +555,10 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 
 		ttstr path(dirname);
 		tTVPFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
-
+		ttstr parentdir, name;
 		tTVPFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
-		
-		TTVPTmpFSNode * parentnode = GetNodeAt(parentdir);
+
+		tTVPTmpFSNode * parentnode = GetNodeAt(parentdir);
 		if(!parentnode) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 		parentnode->CreateDirectory(name);
 	}
@@ -609,7 +577,7 @@ void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 	volatile tTJSCriticalSectionHolder holder(CS);
 
 	// XXX: MACタイムは現バージョンでは保存していない
-	struc.Clear():
+	struc.Clear();
 
 	tTVPTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
@@ -625,7 +593,7 @@ void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tTJSBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -642,7 +610,7 @@ tTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 fl
 //! @brief		指定されたストリームに内容をシリアライズする
 //! @param		dest 出力先ストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFS::SerializeTo(tTVPBinaryStream * dest)
+void tTVPTmpFS::SerializeTo(tTJSBinaryStream * dest)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -660,7 +628,7 @@ void tTVPTmpFS::SerializeTo(tTVPBinaryStream * dest)
 //! @brief		指定されたストリームから内容を復元する
 //! @param		src 入力もとストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFS::UnserializeFrom(tTVPBinaryStream * src)
+void tTVPTmpFS::UnserializeFrom(tTJSBinaryStream * src)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -672,7 +640,7 @@ void tTVPTmpFS::UnserializeFrom(tTVPBinaryStream * src)
 	src->ReadBuffer(&firstnodetype, 1);
 		// 最初のノードタイプ(ディレクトリを表す 0x80 になってないとおかしい)
 
-	if(memcmp(magic, SerialMagic, 8) || firstnodetype != 0x80)
+	if(memcmp(magic, SerializeMagic, 8) || firstnodetype != 0x80)
 		eTVPException::Throw(TJS_WS_TR("not a tmpfs archive"));
 
 	// 再帰的に内容を読み込む
@@ -706,7 +674,7 @@ tTVPTmpFSNode * tTVPTmpFS::GetNodeAt(const ttstr & name)
 		pp = p;
 	}
 
-	if(name.EndWith(TJS_WC('/')) && !node->IsDirectory())
+	if(name.EndsWith(TJS_WC('/')) && !node->IsDirectory())
 	{
 		// 名前の最後が '/' で終わっている (つまり、ディレクトリである
 		// ことを期待している) がノードがディレクトリではない

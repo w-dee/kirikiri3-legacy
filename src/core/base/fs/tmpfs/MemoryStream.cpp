@@ -13,7 +13,7 @@
 TJS_DEFINE_SOURCE_ID(2003);
 
 #include "MemoryStream.h"
-
+#include "TVPException.h"
 
 
 //---------------------------------------------------------------------------
@@ -100,7 +100,7 @@ void tTVPMemoryStreamBlock::ChangeSize(tjs_size size)
 	AllocSize = size + onesize;
 
 	// メモリを確保する
-	Block = Realloc(Block, AllocSize);
+	Block = realloc(Block, AllocSize);
 
 	if(AllocSize && !Block)
 		eTVPException::Throw(TJS_WS_TR("insufficient memory"));
@@ -124,7 +124,7 @@ void tTVPMemoryStreamBlock::Fit()
 
 	if(Size != AllocSize)
 	{
-		Block = Realloc(Block, Size);
+		Block = realloc(Block, Size);
 		if(Size && !Block)
 			eTVPException::Throw(TJS_WS_TR("insufficient memory"));
 		AllocSize = Size;
@@ -157,7 +157,7 @@ tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flags)
 //! @param		flags アクセスフラグ
 //! @param		block メモリブロック
 //---------------------------------------------------------------------------
-tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flagstTVPMemoryStreamBlock * block)
+tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flags, tTVPMemoryStreamBlock * block)
 {
 	Flags = flags;
 	Block = block;

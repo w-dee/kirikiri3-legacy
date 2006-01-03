@@ -25,17 +25,20 @@ include $(TOP_DIR)/src/core/tjs3/Makefile_for_user
 BASE_DIR=$(TOP_DIR)/src/core/base
 
 INCLUDES= \
-		-I. \
 		-I$(BASE_DIR)/fs/common  \
 		-I$(BASE_DIR)/fs/osfs    \
 		-I$(BASE_DIR)/fs/pathfs  \
 		-I$(BASE_DIR)/fs/tmpfs   \
 		-I$(BASE_DIR)/fs/xp4fs   \
-		-I$(BASE_DIR)/exception
+		-I$(BASE_DIR)/exception  \
+		-I.
 
-CPPFILES = main.cpp \
+CPPFILES = \
 		$(BASE_DIR)/fs/common/FSManager.cpp        \
-		$(BASE_DIR)/exception/TVPException.cpp
+		$(BASE_DIR)/fs/tmpfs/MemoryStream.cpp      \
+		$(BASE_DIR)/fs/tmpfs/TmpFS.cpp             \
+		$(BASE_DIR)/exception/TVPException.cpp     \
+		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)
 

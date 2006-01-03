@@ -21,8 +21,10 @@
 //---------------------------------------------------------------------------
 class tTVPTmpFSNode
 {
+public:
 	enum tType { ntDirectory, ntFile  };
 
+private:
 	tTVPTmpFSNode * Parent; //!< 親へのリンク
 	tType Type; //!< ノードのタイプ
 	ttstr Name;
@@ -33,11 +35,11 @@ class tTVPTmpFSNode
 	};
 public:
 	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, const ttstr & name);
-	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, tTVPBinaryStream * src);
+	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, tTJSBinaryStream * src);
 	~tTVPTmpFSNode();
 
 public:
-	void Serialize(tTVPBinaryStream * dest) const;
+	void Serialize(tTJSBinaryStream * dest) const;
 
 	tTVPTmpFSNode * GetSubNode(const ttstr & name);
 	bool DeleteSubNodeByName(const ttstr & name);
@@ -51,7 +53,7 @@ public:
 	tTVPTmpFSNode * GetParent() { return Parent; }
 	const ttstr & GetName() const { return Name; }
 	bool HasSubNode() const { return Type == ntDirectory &&
-							Directory->GetCount != 0; }
+							Directory->GetCount() != 0; }
 	tjs_size GetSize() const;
 	size_t Iterate(iTVPFileSystemIterationCallback * callback);
 
@@ -83,12 +85,12 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
 	//-- iTVPFileSystem メンバ ここまで
 
-	void SerializeTo(tTVPBinaryStream * dest);
-	void UnserializeFrom(tTVPBinaryStream * src);
+	void SerializeTo(tTJSBinaryStream * dest);
+	void UnserializeFrom(tTJSBinaryStream * src);
 
 private:
 	tTVPTmpFSNode * GetNodeAt(const ttstr & name);

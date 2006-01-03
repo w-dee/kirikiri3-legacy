@@ -12,6 +12,7 @@
 #ifndef MemoryStreamH
 #define MemoryStreamH
 
+#include "tjsUtils.h"
 
 
 //---------------------------------------------------------------------------
@@ -69,7 +70,7 @@ public:
 	tjs_size Read(void *buffer, tjs_size read_size);
 	tjs_size Write(const void *buffer, tjs_size write_size);
 	void SetEndOfFile();
-	tjs_uint64 GetSize() { return Size; }
+	tjs_uint64 GetSize() { return Block->GetSize(); }
 
 	// non-tTJSBinaryStream based methods
 	void * GetInternalBuffer()  const { return Block->GetBlock(); }

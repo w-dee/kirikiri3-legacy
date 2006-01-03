@@ -13,16 +13,13 @@
 #ifndef XP4STREAMCACHEH
 #define XP4STREAMCACHEH
 
-
-#include "StorageIntf.h"
-
-#include <boost/singleton.hpp>
+#include <boost/pool/detail/singleton.hpp>
 
 
 //---------------------------------------------------------------------------
 //!@brief		ストリームキャッシュクラス
 //---------------------------------------------------------------------------
-class tTVPXP4StreamCache : public boost::basic_singleton<tTVPXP4StreamCache>
+class tTVPXP4StreamCache
 {
 	static const int MAX_ITEM = 8; //!< キャッシュするハンドル数
 
@@ -37,9 +34,13 @@ class tTVPXP4StreamCache : public boost::basic_singleton<tTVPXP4StreamCache>
 		tjs_uint Age; //!< キャッシュ世代
 	} Pool[MAX_ITEM];
 
-protected:
+public:
 	tTVPXP4StreamCache();
 	~tTVPXP4StreamCache();
+
+	static tTVPXP4StreamCache & instance() { return
+		boost::details::pool::singleton_default<tTVPXP4StreamCache>::instance();
+			} //!< このシングルトンのインスタンスを返す
 
 public:
 	tTJSBinaryStream * GetStream(void * pointer, const ttstr & name);

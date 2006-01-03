@@ -9,19 +9,21 @@
 //! @file
 //! @brief XP4ファイルシステムの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
-TJS_DEFINE_SOURCE_ID(2008);
-
 /*
 	XP4 アーカイブ中の圧縮されたセグメントは、このソースファイルに実装された
 	機構によりメモリ上にキャッシュされる
 */
 
+#include "prec.h"
+#include "tjsUtils.h"
 #include "XP4FS.h"
 #include "XP4Archive.h"
-
+#include "XP4SegmentCache.h"
+#include "DecompressedHolder.h"
 #include <zlib.h>
 #include <algorithm>
+
+TJS_DEFINE_SOURCE_ID(2008);
 
 
 
@@ -113,7 +115,7 @@ tTVPXP4SegmentCache::tDataBlock
 	tjs_uint32 hash = tKeyHasher::Make(key);
 
 	// これ以降をスレッド保護
-	volatile tTJSCriticalSectionHolder cs_holder(TVPSegmentCacheCS);
+	volatile tTJSCriticalSectionHolder cs_holder(CS);
 
 	// ハッシュテーブルを検索する
 	boost::shared_ptr<tTVPDecompressedHolder> * ptr = 
@@ -131,13 +133,13 @@ tTVPXP4SegmentCache::tDataBlock
 	// データブロックを新たに作成
 	tDataBlock block(
 		new tTVPDecompressedHolder(
-			tTVPDecompressedHolder::zhmZlib,
+			tTVPDecompressedHolder::dhmZLib,
 			instream,
 			insize,
 			uncomp_size));
 
 	// ハッシュに入れる
-	HashTable.AddWithHash(key, block, hash);
+	HashTable.AddWithHash(key, hash, block);
 
 	// データブロックを返す
 	return block;

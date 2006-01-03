@@ -77,3 +77,15 @@ void eTVPException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2, 
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		内部エラー例外を発生させる
+//! @param		line     エラーの起こった行
+//! @param		filename エラーの起こったファイル名
+//---------------------------------------------------------------------------
+void eTVPException::ThrowInternalError(int line, const char * filename)
+{
+	Throw(TJS_WS_TR("Internal error at $2 line $1"), ttstr(line), ttstr(wxString(filename, wxConvUTF8)));
+}
+//---------------------------------------------------------------------------
+

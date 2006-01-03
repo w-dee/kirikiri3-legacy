@@ -31,14 +31,14 @@ private:
 public:
 	enum tMethod 
 	{
-		dhmZLib; // zlib 圧縮
+		dhmZLib // zlib 圧縮
 	};
 
 	tTVPDecompressedHolder(tMethod method, const tjs_uint8 * indata, tjs_size insize, 
 		tjs_size uncomp_size);
 	tTVPDecompressedHolder(tMethod method, tTJSBinaryStream * instream, tjs_size insize, 
 		tjs_size uncomp_size);
-	~tTVPDecompressedHolder() { delete [] Data; }
+	~tTVPDecompressedHolder();
 
 	tjs_size GetSize() const { return Size; } //!< サイズを返す
 	tjs_uint8 * GetData() const { return Data; } //!< データブロックを返す

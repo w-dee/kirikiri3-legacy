@@ -67,7 +67,7 @@ tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & n
 
 	// not found in the pool
 	// simply create a stream and return it
-	return TVPCreateStream(name);
+	return tTVPFileSystemManager::instance().CreateStream(name, TJS_BS_READ);
 }
 //---------------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ void tTVPXP4StreamCache::ReleaseStream(void * pointer, tTJSBinaryStream * stream
 	// counter overflow can worsen the cache performance,
 	// but it occurs only when the counter is overflowed
 	// (it's too far less than usual)
-	tItem *item = Pool + oldest;
+	tItem *oldest_item = Pool + oldest;
 	delete oldest_item->Stream, oldest_item->Stream = NULL;
 	oldest_item->Pointer = pointer;
 	oldest_item->Stream = stream;

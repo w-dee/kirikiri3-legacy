@@ -14,6 +14,7 @@
 #define XP4FSH
 
 #include <boost/shared_ptr.hpp>
+#include "FSManager.h"
 #include "XP4Archive.h"
 
 
@@ -42,17 +43,8 @@ class tTVPXP4FS : public iTVPFileSystem
 			{ return Name < rhs.Name; } //!< 比較関数
 	};
 
-	std::vector<boost::shared_ptr<tTVPArchive> > Archives; //!< アーカイブの配列
+	std::vector<boost::shared_ptr<tTVPXP4Archive> > Archives; //!< アーカイブの配列
 	std::vector<tFileItemInfo> FileItems; //! ファイルの情報の配列
-
-public:
-	//! @brief アーカイブを読み込む際に各アーカイブ内のファイルごとに呼ばれるコールバック
-	class iMapCallback
-	{
-		virtual void operator () (const ttstr & name, tjs_size file_index) = 0; //!< 追加/置き換えの場合
-		virtual void operator () (const ttstr & name) = 0; //!< 削除の場合
-	};
-
 
 public:
 	tTVPXP4FS(const ttstr & name);
@@ -68,7 +60,7 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
 	//-- iTVPFileSystem メンバ ここまで
 private:

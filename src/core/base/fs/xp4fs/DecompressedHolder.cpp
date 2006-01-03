@@ -10,13 +10,11 @@
 //! @brief 圧縮ブロックを展開された状態でメモリ上に保持するクラス
 //---------------------------------------------------------------------------
 #include "prec.h"
-TJS_DEFINE_SOURCE_ID(2005);
-
-
 #include "DecompressedHolder.h"
-
+#include "TVPException.h"
 #include <zlib.h>
 
+TJS_DEFINE_SOURCE_ID(2005);
 
 
 //---------------------------------------------------------------------------
@@ -89,7 +87,7 @@ tTVPDecompressedHolder::~tTVPDecompressedHolder()
 //! @param		insize 入力データのサイズ
 //! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
-void Decompress(tTVPDecompressedHolder::tMethod method, const tjs_uint8 * indata, tjs_size insize, 
+void tTVPDecompressedHolder::Decompress(tTVPDecompressedHolder::tMethod method, const tjs_uint8 * indata, tjs_size insize, 
 		tjs_size uncomp_size)
 {
 	// すでにメモリブロックが割り当てられていた場合はメモリブロックを解放

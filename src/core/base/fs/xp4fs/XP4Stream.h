@@ -10,8 +10,8 @@
 //! @brief XP4ファイルシステムで用いられるストリームクラス
 //---------------------------------------------------------------------------
 
-#ifndef XP3STREAMH
-#define XP3STREAMH
+#ifndef XP4STREAMH
+#define XP4STREAMH
 
 #include <boost/shared_ptr.hpp>
 #include "XP4FS.h"
@@ -28,8 +28,8 @@ class tTVPXP4ArchiveStream : public tTJSBinaryStream
 
 	boost::shared_ptr<tTVPXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
 	tjs_size FileIndex; //!< アーカイブ中でのインデックス
-	const tTVPArchive::tFile & FileInfo; //!< ファイル情報
-	const tTVPArchive::tSegment * SegmentInfo; //!< セグメント情報
+	const tTVPXP4Archive::tFile & FileInfo; //!< ファイル情報
+	const tTVPXP4Archive::tSegment * SegmentInfo; //!< セグメント情報
 
 	tTJSBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
 	tjs_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号(0～)
@@ -42,7 +42,7 @@ class tTVPXP4ArchiveStream : public tTJSBinaryStream
 
 public:
 	tTVPXP4ArchiveStream(
-			boost::shared_ptr<tTVPArchive> ptr,
+			boost::shared_ptr<tTVPXP4Archive> ptr,
 			tjs_size idx, tjs_uint32 flags);
 	~tTVPXP4ArchiveStream();
 
@@ -51,13 +51,13 @@ private:
 	void SeekToPosition(tjs_uint64 pos); // open segment at 'pos' and seek
 	bool OpenNextSegment();
 
-
 public:
 	tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
 	tjs_size Read(void *buffer, tjs_size read_size);
 	tjs_size Write(const void *buffer, tjs_size write_size);
 	void SetEndOfFile();
-	tjs_uint64 GetSize():
+	tjs_uint64 GetSize();
+
 };
 //---------------------------------------------------------------------------
 

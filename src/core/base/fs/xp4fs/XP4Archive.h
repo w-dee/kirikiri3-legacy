@@ -12,39 +12,9 @@
 #ifndef _XP4ARCHIVE_
 #define _XP4ARCHIVE_
 
-#include "XP4FS.h"
-
-
-//---------------------------------------------------------------------------
-//! @brief		アーカイブ内のストレージアイテムを現すクラス
-//---------------------------------------------------------------------------
-class tTVPXP4MetadataReaderStorageItem
-{
-
-public:
-	tTVPXP4MetadataReaderStorageItem(
-		const wxString & inarchivename,
-		wxUint16 flags = 0,
-		wxFileOffset size = -1,
-		const wxDateTime & time = wxDateTime()) :
-		InArchiveName(inarchivename),
-		Flags(flags),
-		Size(size),
-		Time(time)
-		{;} //!< コンストラクタ
-
-	tTVPXP4MetadataReaderStorageItem(const unsigned char * meta, size_t metasize);
-
-	const wxString & GetInArchiveName() const { return InArchiveName; } //!< ストレージ名を得る
-	wxFileOffset GetSize() const { return Size; } //!< サイズを得る
-	wxUint16 GetFlags() const { return Flags; } //!< フラグを得る
-	const wxDateTime & GetTime() const { return Time; } //!< タイムスタンプを得る
-	void SetFlags(wxUint16 flags) { Flags = flags; } 
-	const tTVPXP4Hash & GetHash() const { return Hash; } //!< ハッシュを得る
-	tTVPXP4Hash & GetHash() { return Hash; } //!< ハッシュを得る
-};
-//---------------------------------------------------------------------------
-
+#include <wx/datetime.h>
+#include "FSManager.h"
+#include "XP4ArchiveDefs.h"
 
 //---------------------------------------------------------------------------
 //! @brief		一つのアーカイブを現すクラス
@@ -62,10 +32,10 @@ public:
 		tjs_uint8 Hash[20]; //!< SHA1 ハッシュ
 
 		tFile(tTVPXP4Archive *owner, const unsigned char * meta,
-							size_t metasize, ttstr & inarchivename, bool &delete);
+							size_t metasize, ttstr & inarchivename, bool &deleted);
 	};
 
-	struct tSement
+	struct tSegment
 	{
 		tjs_uint8  Flags; //!< フラグ
 		tjs_uint64 Offset; //!< (非圧縮時の)ストレージ先頭からのオフセット
@@ -77,19 +47,27 @@ public:
 				TVP_XP4_SEGM_ENCODE_RAW; } //!< セグメントが圧縮されている場合に真
 	};
 
+	//! @brief アーカイブを読み込む際に各アーカイブ内のファイルごとに呼ばれるコールバック
+	class iMapCallback
+	{
+	public:
+		virtual void operator () (const ttstr & name, tjs_size file_index) = 0; //!< 追加/置き換えの場合
+		virtual void operator () (const ttstr & name) = 0; //!< 削除の場合
+	};
+
 private:
 	std::vector<tFile> Files; //!< ファイルの配列
 	std::vector<tSegment> Segments; //!< セグメントの配列
-	tTVPXP4SegmentCache::pointer SegmentCache; //!< セグメントキャッシュ
-	tTVPXP4StreamCache::pointer StreamCache; //!< ストリームキャッシュ
+
+	ttstr FileName;
 
 public:
-	tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback & callback);
+	tTVPXP4Archive(const ttstr & filename, iMapCallback & callback);
 	~tTVPXP4Archive();
 
 	void Stat(tjs_size idx, tTVPStatStruc & struc);
-	tTVPBinaryStream * CreateStream(
-				boost::shared_ptr<tTVPArchive> ptr,
+	tTJSBinaryStream * CreateStream(
+				boost::shared_ptr<tTVPXP4Archive> ptr,
 				tjs_size idx, tjs_uint32 flags);
 
 
@@ -98,7 +76,9 @@ public:
 	const tFile & GetFileInfo(tjs_size idx) const
 		{ return Files[idx]; } //!< idx に対応する tFile 構造体を返す
 	const tSegment * GetSegmentInfo(tjs_size idx) const
-		{ return Segments.begin() + Files[idx].SegmentStart; } //!< idx に対応するセグメント情報を返す
+		{ return &(Segments[Files[idx].SegmentStart]); } //!< idx に対応するセグメント情報を返す
+	const ttstr & GetFileName() const
+		{ return FileName; } //!< ファイル名を返す
 };
 //---------------------------------------------------------------------------
 #endif

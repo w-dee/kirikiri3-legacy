@@ -10,12 +10,13 @@
 //! @brief XP4ファイルシステムの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-TJS_DEFINE_SOURCE_ID(2007);
-
 #include "XP4FS.h"
 #include "XP4Archive.h"
-
+#include "TVPException.h"
 #include <algorithm>
+#include <map>
+
+TJS_DEFINE_SOURCE_ID(2007);
 
 
 
@@ -60,7 +61,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 		bool OnFile(const ttstr & filename)
 		{
 			// ファイル名が name_noext に合致するかを調べる
-			if(filename.StartWith(name_noext) && filename != exclude)
+			if(filename.StartsWith(name_noext) && filename != exclude)
 			{
 				// 名前が name_noext で始まり、exclude ではない場合
 				archive_names.push_back(path + filename); // ファイル名に追加
@@ -75,8 +76,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 		}
 	} lister(archive_names, name_noext, name_nopath, path);
 
-	tTVPFileSystemManager::pointer filesystem;
-	filesystem->GetFileListAt(path, &lister);
+	tTVPFileSystemManager::instance().GetFileListAt(path, &lister);
 
 	//- archive_names の先頭の要素以外を名前順に並べ替え
 	std::sort(archive_names.begin() + 1, archive_names.end());
@@ -84,7 +84,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 	// パッチリビジョンを追うためのマップを作成
 	std::map<ttstr, tFileItemBasicInfo> map;
 
-	class tMapper : public iMapCallback
+	class tMapper : public tTVPXP4Archive::iMapCallback
 	{
 		std::map<ttstr, tFileItemBasicInfo> & Map;
 		tjs_size CurrentArchiveIndex;
@@ -101,12 +101,12 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 			std::map<ttstr, tFileItemBasicInfo>::iterator i;
 			i = Map.find(name);
 
-			if(i != Map.end()) map.erase(i);
+			if(i != Map.end()) Map.erase(i);
 
-			tFileItem item;
+			tFileItemBasicInfo item;
 			item.ArchiveIndex = CurrentArchiveIndex;
 			item.FileIndex = file_index;
-			Map.insert(std::pair<ttstr, tFileItem>(name,item));
+			Map.insert(std::pair<ttstr, tFileItemBasicInfo>(name,item));
 		}
 		void operator () (
 			const ttstr & name )
@@ -125,7 +125,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 		i != archive_names.end(); i++)
 	{
 		mapper.SetArchiveIndex(i - archive_names.begin());
-		boost::shared_ptr<tTVPArchive> arc(new tTVPArchive(*i, mapper));
+		boost::shared_ptr<tTVPXP4Archive> arc(new tTVPXP4Archive(*i, mapper));
 		Archives.push_back(arc);
 	}
 
@@ -183,8 +183,8 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 	{
 		if(!FileItems[idx].Name.StartsWith(dir_name)) break; // 終わり
 
-		ttstr name(FileItems[idx].Name.c_str() + dir_name.GetLem());
-		const char * slashp;
+		ttstr name(FileItems[idx].Name.c_str() + dir_name.GetLen());
+		const tjs_char * slashp;
 		if(!(slashp = TJS_strchr(name.c_str(), TJS_WC('/'))))
 		{
 			// 名前の部分に / を含んでいない; つまりファイル名
@@ -196,7 +196,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 			// 名前の部分に / を含んでいる; つまりディレクトリ名
 			if(!lastdir.IsEmpty() && name.StartsWith(lastdir))
 				continue; // すでに列挙した
-			lastdir = ttstr(name.c_str() + (p - name.c_str())); // ディレクトリ名
+			lastdir = ttstr(name.c_str() + (slashp - name.c_str())); // ディレクトリ名
 			count ++;
 			if(callback) if(!callback->OnDirectory(lastdir)) return count;
 			lastdir += TJS_WC('/');
@@ -300,7 +300,7 @@ void tTVPXP4FS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTVPBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tTJSBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 flags)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -309,7 +309,7 @@ tTVPBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 fl
 		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	// 書き込みを伴う動作はできない
-	if(Flags & TJS_BS_ACCESS_WRITE_BIT)
+	if(flags & TJS_BS_ACCESS_WRITE_BIT)
 		eTVPException::Throw(TJS_WS_TR("access denied (filesystem is read-only)"));
 
 	return Archives[FileItems[idx].ArchiveIndex]->
@@ -389,10 +389,10 @@ tjs_size tTVPXP4FS::GetFileItemIndex(const ttstr & name)
 	// at this point, s or s+1 should point the target.
 	// be certain.
 	if(s >= (tjs_int)total_count) return static_cast<tjs_size>(-1); // out of the index
-	if(FileItems[s] == name) return s;
+	if(FileItems[s].Name == name) return s;
 	s++;
 	if(s >= (tjs_int)total_count) return static_cast<tjs_size>(-1); // out of the index
-	if(FileItems[s] == name) return s;
+	if(FileItems[s].Name == name) return s;
 	return static_cast<tjs_size>(-1);
 }
 //---------------------------------------------------------------------------

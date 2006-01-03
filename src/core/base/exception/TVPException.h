@@ -28,7 +28,12 @@ public:
 	static void Throw(const ttstr &msg, const ttstr & s1, const ttstr & s2);
 	static void Throw(const ttstr &msg, const ttstr & s1, const ttstr & s2, const ttstr & s3);
 	static void Throw(const ttstr &msg, const ttstr & s1, const ttstr & s2, const ttstr & s3, const ttstr & s4);
+
+	static void ThrowInternalError(int line, const char * filename);
 };
 //---------------------------------------------------------------------------
+
+
+#define TVPThrowInternalError eTVPException::ThrowInternalError(__LINE__, __FILE__)
 
 #endif

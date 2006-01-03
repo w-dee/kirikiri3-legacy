@@ -10,13 +10,15 @@
 //! @brief XP4 アーカイブの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-TJS_DEFINE_SOURCE_ID(2006);
-
-#include "prec.h"
-#include "XP4Archive.h"
-#include "ReadXP4Meta.h"
-#include "wxFileWrapper.h"
 #include <zlib.h>
+#include "TVPException.h"
+#include "FSManager.h"
+#include "XP4Archive.h"
+#include "XP4SegmentCache.h"
+#include "XP4StreamCache.h"
+#include "XP4Stream.h"
+
+TJS_DEFINE_SOURCE_ID(2006);
 
 //---------------------------------------------------------------------------
 //! @brief		指定された位置のメモリから16bit LE整数を読み込む
@@ -211,12 +213,14 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 //! @param		filename アーカイブファイル名
 //! @param		callback ファイル名とアーカイブ内インデックスの対応をpushするコールバック
 //---------------------------------------------------------------------------
-tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback & callback)
+tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, iMapCallback & callback)
 {
 	// アーカイブファイルを読み込む
+	FileName = filename;
 
 	// アーカイブファイルを開く
-	std::auto_ptr<tTJSBinaryStream> stream(TVPCreateStream(filename));
+	std::auto_ptr<tTJSBinaryStream>
+		stream(tTVPFileSystemManager::instance().CreateStream(filename, TJS_BS_READ));
 
 	// ヘッダのシグニチャをチェック
 	static unsigned char XP4Mark1[] = // 8bytes
@@ -232,8 +236,8 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback &
 		memcmp(buf+8, XP4Mark2, 3))
 	{
 		// シグニチャが一致しない
-		eTVPException::Throw(wxString::Format(TJS_WS_TR("'%s' is not an XP4 archive file"),
-			wxString(filename).c_str()));
+		eTVPException::Throw(ttstr(wxString::Format(TJS_WS_TR("'%s' is not an XP4 archive file"),
+			filename.AsWxString().c_str())));
 	}
 
 	// インデックスまでシーク
@@ -280,9 +284,9 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback &
 			if(res != Z_OK || output_size != raw_index_size)
 			{
 				// 圧縮インデックスの展開に失敗した
-				eTVPException::Throw(wxString::Format(
+				eTVPException::Throw(ttstr(wxString::Format(
 					TJS_WS_TR("decompression of archive index of '%s' failed"),
-					wxString(filename).c_str()));
+					filename.AsWxString().c_str())));
 			}
 		}
 		else
@@ -297,9 +301,9 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback &
 		static unsigned char chunkname_Item[] = { 'I', 't', 'e', 'm' };
 		if(!TVPFindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
 		{
-			eTVPException::Throw(wxString::Format(
+			eTVPException::Throw(ttstr(wxString::Format(
 				TJS_WS_TR("chunk 'Item' not found in file '%s'"),
-				wxString(filename).c_str()));
+				filename.AsWxString().c_str())));
 		}
 
 		// Item チャンクの内容を読み込む
@@ -362,8 +366,8 @@ tTVPXP4Archive::~tTVPXP4Archive()
 	// キャッシュをクリアする
 	// このアーカイブに関連したキャッシュのみを解放できるように実装することも
 	// できるが、処理の単純化のためにすべてキャッシュをクリアしてしまうことにする
-	SegmentCache->Clear();
-	StreamCache->Clear();
+	tTVPXP4SegmentCache::instance().Clear();
+	tTVPXP4StreamCache::instance().Clear();
 }
 //---------------------------------------------------------------------------
 
@@ -392,10 +396,10 @@ void tTVPXP4Archive::Stat(tjs_size idx, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTVPBinaryStream * tTVPXP4Archive::CreateStream(
-			boost::shared_ptr<tTVPArchive> ptr,
+tTJSBinaryStream * tTVPXP4Archive::CreateStream(
+			boost::shared_ptr<tTVPXP4Archive> ptr,
 			tjs_size idx, tjs_uint32 flags)
 {
-	return new tTVPXP4Archvie(ptr, idx, flags);
+	return new tTVPXP4ArchiveStream(ptr, idx, flags);
 }
 //---------------------------------------------------------------------------

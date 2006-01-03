@@ -15,8 +15,8 @@
 #define XP4SEGMENTCACHEH
 
 
-#include <boost/singleton.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/pool/detail/singleton.hpp>
+#include <boost/smart_ptr.hpp>
 #include "DecompressedHolder.h"
 
 
@@ -24,7 +24,7 @@
 //---------------------------------------------------------------------------
 //!@brief		セグメントキャッシュクラス
 //---------------------------------------------------------------------------
-class tTVPXP4SegmentCache : public boost::basic_singleton<tTVPXP4SegmentCache>
+class tTVPXP4SegmentCache
 {
 	static const tjs_size ONE_LIMIT = 1024*1024; //!< これを超えるセグメントはキャッシュしない
 	static const tjs_size TOTAL_LIMIT = 1024*1024; //!< トータルでこれ以上はキャッシュしない
@@ -38,6 +38,10 @@ class tTVPXP4SegmentCache : public boost::basic_singleton<tTVPXP4SegmentCache>
 		void * Pointer; //!< アーカイブインスタンスへのポインタ
 		tjs_size StorageIndex; //!< storage index in archive
 		tjs_size SegmentIndex; //!< segment index in storage
+		bool operator == (const tKey & rhs) const
+			{ return Pointer == rhs.Pointer &&
+				StorageIndex == rhs.StorageIndex &&
+				SegmentIndex == rhs.SegmentIndex; }
 	};
 
 	//! @brief tKey のハッシュを作成するクラス
@@ -46,6 +50,7 @@ class tTVPXP4SegmentCache : public boost::basic_singleton<tTVPXP4SegmentCache>
 	public:
 		static tjs_uint32 Make(const tKey &val)
 		{
+			tjs_uint32 v;
 			v  = reinterpret_cast<tjs_uint32>(val.Pointer);
 			v ^= v >> 4;
 			v ^= static_cast<tjs_uint32>(val.StorageIndex);
@@ -62,9 +67,13 @@ private:
 
 	tHashTable HashTable; //!< ハッシュテーブル
 
-protected:
+public:
 	tTVPXP4SegmentCache();
 	~tTVPXP4SegmentCache();
+
+	static tTVPXP4SegmentCache & instance() { return
+		boost::details::pool::singleton_default<tTVPXP4SegmentCache>::instance();
+			} //!< このシングルトンのインスタンスを返す
 
 public:
 	void CheckLimit();

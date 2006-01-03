@@ -10,16 +10,16 @@
 //! @brief XP4ファイルシステムで用いられるストリームクラス
 //---------------------------------------------------------------------------
 #include "prec.h"
-TJS_DEFINE_SOURCE_ID(2009);
-
-
 #include "XP4FS.h"
 #include "XP4Archive.h"
-
+#include "XP4Stream.h"
+#include "XP4StreamCache.h"
+#include "TVPException.h"
 #include <zlib.h>
 #include <algorithm>
 
 
+TJS_DEFINE_SOURCE_ID(2009);
 
 
 //---------------------------------------------------------------------------
@@ -29,21 +29,20 @@ TJS_DEFINE_SOURCE_ID(2009);
 //! @param		flags アクセスフラグ
 //---------------------------------------------------------------------------
 tTVPXP4ArchiveStream::tTVPXP4ArchiveStream(
-			boost::shared_ptr<tTVPArchive> ptr,
+			boost::shared_ptr<tTVPXP4Archive> ptr,
 			tjs_size idx, tjs_uint32 flags)
 				: Owner(ptr) , FileIndex(idx),
-				FileInfo(ptr->GetFileInfo()),
-				SegmentInfo(ptr->GetSegmentInfo())
+				FileInfo(ptr->GetFileInfo(idx)),
+				SegmentInfo(ptr->GetSegmentInfo(idx))
 {
 	CurSegmentNum = 0;
-	LastOpenedSegmentNum = -1;
+	LastOpenedSegmentNum = static_cast<tjs_size>(-1);
 	SegmentOpened = false;
 	CurPos = 0;
 	SegmentRemain = 0;
 	SegmentPos = 0;
 
-	tTVPXP4StreamCache::pointer streamcache;
-	Stream = streamcache->GetStream(Owner.get(), ptr->GetFileName());
+	Stream = tTVPXP4StreamCache::instance().GetStream(Owner.get(), ptr->GetFileName());
 }
 //---------------------------------------------------------------------------
 
@@ -55,8 +54,7 @@ tTVPXP4ArchiveStream::~tTVPXP4ArchiveStream()
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	tTVPXP4StreamCache::pointer streamcache;
-	streamcache->Release(Owner.get(), Stream);
+	tTVPXP4StreamCache::instance().ReleaseStream(Owner.get(), Stream);
 }
 //---------------------------------------------------------------------------
 
@@ -73,28 +71,26 @@ void tTVPXP4ArchiveStream::EnsureSegment()
 	if(LastOpenedSegmentNum == CurSegmentNum)
 	{
 		// セグメントが圧縮されていない場合はストリームをシークして返る
-		if(!Segments[CurSegmentNum].IsCompressed())
-			Stream->SetPosition(Segments[CurSegmentNum].StoreSize + SegmentPos);
+		if(!SegmentInfo[CurSegmentNum].IsCompressed())
+			Stream->SetPosition(SegmentInfo[CurSegmentNum].StoreSize + SegmentPos);
 		return;
 	}
 
 	// is compressed segment ?
-	if(Segments[CurSegmentNum].IsCompressed)
+	if(SegmentInfo[CurSegmentNum].IsCompressed())
 	{
 		// a compressed segment
-		tTVPXP4SegmentCache::pointer segmentcache;
-
 		// セグメントキャッシュの中から探す
-		DecompressedData = segmentcache->Find(
+		DecompressedData = tTVPXP4SegmentCache::instance().Find(
 			Owner.get(), FileIndex, CurSegmentNum,
-			Stream, Segments[CurSegmentNum].StoreOffset,
-			Segments[CurSegmentNum].StoreSize,
-			Segments[CurSegmentNum].Size);
+			Stream, SegmentInfo[CurSegmentNum].StoreOffset,
+			SegmentInfo[CurSegmentNum].StoreSize,
+			SegmentInfo[CurSegmentNum].Size);
 	}
 	else
 	{
 		// not a compressed segment
-		Stream->SetPosition(Segments[CurSegmentNum].StoreSize + SegmentPos);
+		Stream->SetPosition(SegmentInfo[CurSegmentNum].StoreSize + SegmentPos);
 	}
 
 	SegmentOpened = true;
@@ -133,7 +129,7 @@ void tTVPXP4ArchiveStream::SeekToPosition(tjs_uint64 pos)
 	SegmentOpened = false;
 
 	SegmentPos = pos - SegmentInfo[CurSegmentNum].Offset;
-	SegmentRemain = SegmentInfo[CurSegmentNum].OrgSize - SegmentPos;
+	SegmentRemain = SegmentInfo[CurSegmentNum].Size - SegmentPos;
 	CurPos = pos;
 }
 //---------------------------------------------------------------------------
@@ -225,7 +221,7 @@ tjs_uint tTVPXP4ArchiveStream::Read(void *buffer, tjs_size read_size)
 		tjs_size one_size =
 			read_size > SegmentRemain ? static_cast<tjs_uint>(SegmentRemain) : read_size;
 
-		if(Segments[CurSegmentNum].IsCompressed())
+		if(SegmentInfo[CurSegmentNum].IsCompressed())
 		{
 			// compressed segment; read from uncompressed data in memory
 			memcpy((tjs_uint8*)buffer + write_size,
@@ -266,7 +262,7 @@ tjs_uint tTVPXP4ArchiveStream::Write(const void *buffer, tjs_size write_size)
 //---------------------------------------------------------------------------
 //! @brief		ファイルの終わりを現在のポインタに設定する
 //---------------------------------------------------------------------------
-void tTVPMemoryStream::SetEndOfFile()
+void tTVPXP4ArchiveStream::SetEndOfFile()
 {
 	eTVPException::Throw(TJS_WS_TR("access denied (filesystem is read-only)"));
 }

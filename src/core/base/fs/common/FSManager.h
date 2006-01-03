@@ -12,7 +12,14 @@
 #ifndef _FSMANAGER_H_
 #define _FSMANAGER_H_
 
+#include <wx/datetime.h>
+#include "tjs.h"
+#include "tjsUtils.h"
+#include "tjsHashSearch.h"
+#include <boost/pool/detail/singleton.hpp>
+#include <boost/smart_ptr.hpp>
 
+using namespace boost;
 
 //---------------------------------------------------------------------------
 //! @brief		iTVPFileSystem::GetFileListAt で用いられるコールバックインターフェース
@@ -31,7 +38,7 @@ public:
 //---------------------------------------------------------------------------
 struct tTVPStatStruc
 {
-	wxFileOffset	Size	//!< ファイルサイズ (wxFileOffset)-1 の場合は無効
+	wxFileOffset	Size;	//!< ファイルサイズ (wxFileOffset)-1 の場合は無効
 	wxDateTime		MTime;	//!< ファイル修正時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 	wxDateTime		ATime;	//!< アクセス時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 	wxDateTime		CTime;	//!< 作成時刻 (wxDateTime::IsValidで有効性をチェックのこと)
@@ -58,7 +65,7 @@ public:
 	virtual void RemoveDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを削除する
 	virtual void CreateDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを作成する
 	virtual void Stat(const ttstr & filename, tTVPStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
-	virtual tTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
+	virtual tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
 };
 //---------------------------------------------------------------------------
 
@@ -66,7 +73,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
-class tTVPFileSystemManager : public boost::basic_singleton<tTVPFileSystemManager>
+class tTVPFileSystemManager
 {
 	tTJSHashTable<ttstr, boost::shared_ptr<iTVPFileSystem> > MountPoints; //!< マウントポイントのハッシュ表
 	ttstr CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
@@ -90,7 +97,7 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
 private:
 	size_t InternalGetFileListAt(const ttstr & dirname,
@@ -102,6 +109,7 @@ public:
 	static void RaiseNoSuchFileOrDirectoryError();
 	static void SplitExtension(const ttstr & in, ttstr * other, ttstr * ext);
 	static void SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name);
+	static void TrimLastPathDelimiter(ttstr & path);
 
 };
 //---------------------------------------------------------------------------

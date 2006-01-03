@@ -103,7 +103,7 @@ void tTVPMemoryStreamBlock::ChangeSize(tjs_size size)
 	Block = Realloc(Block, AllocSize);
 
 	if(AllocSize && !Block)
-		TVPThrowExceptionMessage(_("insufficient memory"));
+		eTVPException::Throw(TJS_WS_TR("insufficient memory"));
 		// this exception cannot be repaird; a fatal error.
 
 	AllocSize = Size = size;
@@ -126,7 +126,7 @@ void tTVPMemoryStreamBlock::Fit()
 	{
 		Block = Realloc(Block, Size);
 		if(Size && !Block)
-			TVPThrowExceptionMessage(_("insufficient memory"));
+			eTVPException::Throw(TJS_WS_TR("insufficient memory"));
 		AllocSize = Size;
 	}
 }
@@ -232,7 +232,7 @@ tjs_size tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
 	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
 
 	if(!(Flags & TJS_BS_ACCESS_READ_BIT))
-		TVPThrowExceptionMessage(_("access denied (stream has no read-access)"));
+		eTVPException::Throw(TJS_WS_TR("access denied (stream has no read-access)"));
 
 	if(CurrentPos > Block->GetSize()) return 0; // can not read from there
 
@@ -261,7 +261,7 @@ tjs_size tTVPMemoryStream::Write(const void *buffer, tjs_size write_size)
 	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
 
 	if(!(Flags & TJS_BS_ACCESS_WRITE_BIT))
-		TVPThrowExceptionMessage(_("access denied (stream has no write-access)"));
+		eTVPException::Throw(TJS_WS_TR("access denied (stream has no write-access)"));
 
 	// adjust current file pointer
 	if(CurrentPos > Block->GetSize()) return 0; // can not write there
@@ -291,7 +291,7 @@ void tTVPMemoryStream::SetEndOfFile()
 	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
 
 	if(!(Flags & TJS_BS_ACCESS_WRITE_BIT))
-		TVPThrowExceptionMessage(_("access denied (stream has no write-access)"));
+		eTVPException::Throw(TJS_WS_TR("access denied (stream has no write-access)"));
 
 	Block->ChangeSize(CurrentPos);
 }

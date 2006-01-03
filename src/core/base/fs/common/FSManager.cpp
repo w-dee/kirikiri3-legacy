@@ -10,6 +10,10 @@
 //! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
 #include "prec.h"
+#include "FSManager.h"
+#include "TVPException.h"
+#include <vector>
+
 TJS_DEFINE_SOURCE_ID(2000);
 
 //---------------------------------------------------------------------------
@@ -29,12 +33,7 @@ tTVPFileSystemManager::~tTVPFileSystemManager()
 {
 	tTJSCriticalSectionHolder holder(CS);
 
-	// すべてのファイルシステムを解放
-	tTJSHashTable<ttstr, boost::shared_ptr<iTVPFileSystem> >::tIterator i;
-	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
-	{
-		i->GetValue()->Release();
-	}
+	;
 }
 //---------------------------------------------------------------------------
 
@@ -51,14 +50,14 @@ void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFil
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
 	ttstr path(NormalizePath(point));
-	if(!path.EndWith(TJS_WC('/'))) path += TJS_WC('/');
+	if(!path.EndsWith(TJS_WC('/'))) path += TJS_WC('/');
 
 	// すでにその場所にマウントが行われているかどうかをチェックする
 	boost::shared_ptr<iTVPFileSystem> * item = MountPoints.Find(path);
 	if(item)
 	{
 		// ファイルシステムが見つかったのでそこにはマウントできない
-		TVPThrowExceptionMessage(_("can not mount filesystem: the mount point '$1' is already mounted"), path);
+		eTVPException::Throw(TJS_WS_TR("can not mount filesystem: the mount point '$1' is already mounted"), path);
 	}
 
 	// マウントポイントを追加
@@ -78,14 +77,14 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
 	ttstr path(NormalizePath(point));
-	if(!path.EndWith(TJS_WC('/'))) path += TJS_WC('/');
+	if(!path.EndsWith(TJS_WC('/'))) path += TJS_WC('/');
 
 	// その場所にマウントが行われているかどうかをチェックする
 	boost::shared_ptr<iTVPFileSystem> * item = MountPoints.Find(path);
 	if(!item)
 	{
 		// そこにはなにもマウントされていない
-		TVPThrowExceptionMessage(_("there are no filesystem at mount point '$1'"), path);
+		eTVPException::Throw(TJS_WS_TR("there are no filesystem at mount point '$1'"), path);
 	}
 
 	// マウントポイントを削除
@@ -106,10 +105,10 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 	// 相対ディレクトリかどうかをチェック
 	// 先頭が '/' でなければ相対パスとみなし、パスの先頭に CurrentDirectory
 	// を挿入する
-	if(path[0] != TJS_WC('/'))
+	if(ret[0] != TJS_WC('/'))
 	{
 		tTJSCriticalSectionHolder holder(CS);
-		path = CurrentDirectory + path;
+		ret = CurrentDirectory + ret;
 	}
 
 	// これから後の変換は、文字列が短くなる方向にしか働かない
@@ -178,8 +177,8 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 //! @param		recursive 再帰的にファイル一覧を得るかどうか
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
-size_t GetFileListAt(const ttstr & dirname,
-	iTVPFileSystemIterationCallback * callback, bool recursive = false)
+size_t tTVPFileSystemManager::GetFileListAt(const ttstr & dirname,
+	iTVPFileSystemIterationCallback * callback, bool recursive)
 {
 	ttstr path(NormalizePath(dirname));
 
@@ -197,28 +196,30 @@ size_t GetFileListAt(const ttstr & dirname,
 		size_t Count;
 		ttstr CurrentDirectory;
 
+	public:
 		tIteratorCallback(std::vector<ttstr> &list,
 			iTVPFileSystemIterationCallback *destination)
-				: List(list), Destination(destination), Count(0);
+				: List(list), Destination(destination), Count(0)
 		{
+			;
 		}
 
 		bool OnFile(const ttstr & filename)
 		{
 			Count ++;
-			if(dest)
-				return dest->OnFile(CurrentDirectory + filename);
+			if(Destination)
+				return Destination->OnFile(CurrentDirectory + filename);
 			return true;
 		}
 		bool OnDirectory(const ttstr & dirname)
 		{
 			Count ++;
-			ttstr dir(CurrentDirectory  + filename);
-			if(dest)
-				return dest->OnDirectory(dir);
+			ttstr dir(CurrentDirectory  + dirname);
+			if(Destination)
+				return Destination->OnDirectory(dir);
 			List.push_back(dir); // ディレクトリを list に push
 		}
-	} 
+	} ;
 	std::vector<ttstr> list; // ディレクトリのリスト
 	list.push_back(ttstr()); // 空ディレクトリを push
 
@@ -253,7 +254,7 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 	}
 	catch(const eTJSError &e)
 	{
-		TVPThrowExpceptionMessage(_("failed to retrieve existence of file '%1' : %2"),
+		eTVPException::Throw(TJS_WS_TR("failed to retrieve existence of file '%1' : %2"),
 			fullpath, e.GetMessage()); // this method never returns
 	}
 	return false;
@@ -272,7 +273,7 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -280,7 +281,7 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 	}
 	catch(const eTJSError &e)
 	{
-		TVPThrowExpceptionMessage(_("failed to retrieve existence of directory '%1' : %2"),
+		eTVPException::Throw(TJS_WS_TR("failed to retrieve existence of directory '%1' : %2"),
 			fullpath, e.GetMessage()); // this method never returns
 	}
 	return false;
@@ -298,7 +299,7 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -306,7 +307,7 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 	}
 	catch(const eTJSError &e)
 	{
-		TVPThrowExpceptionMessage(_("failed to remove file '%1' : %2"),
+		eTVPException::Throw(TJS_WS_TR("failed to remove file '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -324,7 +325,7 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -332,7 +333,7 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 	}
 	catch(const eTJSError &e)
 	{
-		TVPThrowExpceptionMessage(_("failed to remove directory '%1' : %2"),
+		eTVPException::Throw(TJS_WS_TR("failed to remove directory '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -350,7 +351,7 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -358,7 +359,7 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 	}
 	catch(const eTJSError &e)
 	{
-		TVPThrowExpceptionMessage(_("failed to create directory '%1' : %2"),
+		eTVPException::Throw(TJS_WS_TR("failed to create directory '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -376,7 +377,7 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -384,7 +385,7 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 	}
 	catch(const eTJSError &e)
 	{
-		TVPThrowExpceptionMessage(_("failed to stat '%1' : %2"),
+		eTVPException::Throw(TJS_WS_TR("failed to stat '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -397,13 +398,13 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTVPBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tTJSBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, tjs_uint32 flags)
 {
 	tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -411,7 +412,7 @@ tTVPBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, t
 	}
 	catch(const eTJSError &e)
 	{
-		TVPThrowExpceptionMessage(_("failed to create stream of '%1' : %2"),
+		eTVPException::Throw(TJS_WS_TR("failed to create stream of '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 	return NULL;
@@ -436,14 +437,14 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 	if(!fs) ThrowNoFileSystemError(dirname);
 	try
 	{
-		return fs->GetFileListAt(fspath, callcack);
+		return fs->GetFileListAt(fspath, callback);
 	}
 	catch(const eTJSError &e)
 	{
-		TVPThrowExpceptionMessage(_("failed to list files in directory '%1' : %2"),
+		eTVPException::Throw(TJS_WS_TR("failed to list files in directory '%1' : %2"),
 			dirname, e.GetMessage());
 	}
-	return NULL;
+	return 0;
 }
 //---------------------------------------------------------------------------
 
@@ -466,7 +467,7 @@ boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 	tTJSCriticalSectionHolder holder(CS);
 
 	const tjs_char *start = fullpath.c_str();
-	const tjs_char *p = start + fullPath.GetLen();
+	const tjs_char *p = start + fullpath.GetLen();
 
 	while(p >= start)
 	{
@@ -488,20 +489,20 @@ boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 	// 最低でも / (ルート) に割り当てられているファイルシステムが見つからないと
 	// おかしいので、ここに来るはずはないのだが ...
 	// (fullpath に空文字列が渡されるとここに来るかもしれない)
-	return NULL;
+	return boost::shared_ptr<iTVPFileSystem>();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる
-//! @param		filenameマウントポイント
+//! @param		filename  マウントポイント
 //! @note		この関数は例外を発生させるため呼び出し元には戻らない
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 {
-	TVPThrowExceptionMessage(
-		_("Could not find filesystem at path '%1'"), mountpoint);
+	eTVPException::Throw(
+		TJS_WS_TR("Could not find filesystem at path '%1'"), filename);
 }
 //---------------------------------------------------------------------------
 
@@ -511,8 +512,8 @@ void tTVPFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 {
-	TVPThrowExceptionMessage(
-		_("no such file or directory"));
+	eTVPException::Throw(
+		TJS_WS_TR("no such file or directory"));
 }
 //---------------------------------------------------------------------------
 
@@ -584,9 +585,9 @@ void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, tts
 //! @brief		パス名の最後のパスデリミタ ('/') を取り去る ( /path/is/here/ を /path/is/here にする )
 //! @param		path パス
 //---------------------------------------------------------------------------
-static void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
+void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 {
-	if(path.EndWith(TJS_WC('/')))
+	if(path.EndsWith(TJS_WC('/')))
 	{
 		tjs_char *s = path.Independ();
 		tjs_char *p = s + path.GetLen() - 1;

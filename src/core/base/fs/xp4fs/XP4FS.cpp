@@ -173,7 +173,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 	if(idx == static_cast<tjs_size>(-1))
 	{
 		// なかった、つまりディレクトリが存在しない
-		TVPThrowExceptionMessage(_("can not open directory"));
+		eTVPException::Throw(TJS_WS_TR("can not open directory"));
 	}
 
 	// idx から検索を開始する
@@ -247,7 +247,7 @@ bool tTVPXP4FS::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tTVPXP4FS::RemoveFile(const ttstr & filename)
 {
-	TVPThrowExceptionMessage(_("can not delete file (filesystem is read-only)"));
+	eTVPException::Throw(TJS_WS_TR("can not delete file (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -259,7 +259,7 @@ void tTVPXP4FS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	TVPThrowExceptionMessage(_("can not delete directory (filesystem is read-only)"));
+	eTVPException::Throw(TJS_WS_TR("can not delete directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -271,7 +271,7 @@ void tTVPXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	TVPThrowExceptionMessage(_("can not make directory (filesystem is read-only)"));
+	eTVPException::Throw(TJS_WS_TR("can not make directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -310,7 +310,7 @@ tTVPBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 fl
 
 	// 書き込みを伴う動作はできない
 	if(Flags & TJS_BS_ACCESS_WRITE_BIT)
-		TVPThrowExceptionMessage(_("access denied (filesystem is read-only)"));
+		eTVPException::Throw(TJS_WS_TR("access denied (filesystem is read-only)"));
 
 	return Archives[FileItems[idx].ArchiveIndex]->
 		CreateStream(Archives[FileItems[idx].ArchiveIndex],

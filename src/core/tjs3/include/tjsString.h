@@ -359,6 +359,22 @@ public:
 	bool StartsWith(const tjs_char *string) const;
 	bool StartsWith(const tTJSString & string) const
 		{ return StartsWith(string.c_str()); }
+	bool StartsWith(tjs_char ch) const
+		{
+			if(GetLen() == 0)
+				return ch == 0;
+			return c_str()[0] == ch;
+		}
+
+	bool EndsWith(const tjs_char *string) const;
+	bool EndsWith(const tTJSString & string) const
+		{ return StartsWith(string.c_str()); }
+	bool EndsWith(tjs_char ch) const
+		{
+			if(GetLen() == 0)
+				return ch == 0;
+			return c_str()[GetLen() - 1] == ch;
+		}
 
 	tjs_uint32 * GetHint() const { if(!Ptr) return NULL; return Ptr->GetHint(); }
 

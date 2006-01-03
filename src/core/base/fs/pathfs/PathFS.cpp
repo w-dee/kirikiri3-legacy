@@ -52,7 +52,7 @@ size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
 	// PathFS にはファイルシステムの / しか存在しない
 	// そのためディレクトリ指定は / へのアクセスしか認めない
 	if(dirname != TJS_WS("/") || !dirname.IsEmpty())
-		TVPThrowExceptionMessage(_("no such directory"));
+		eTVPException::Throw(TJS_WS_TR("no such directory"));
 
 	Ensure();
 
@@ -109,7 +109,7 @@ bool tTVPPathFS::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tTVPPathFS::RemoveFile(const ttstr & filename)
 {
-	TVPThrowExceptionMessage(_("can not delete file (filesystem is read-only)"));
+	eTVPException::Throw(TJS_WS_TR("can not delete file (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -121,7 +121,7 @@ void tTVPPathFS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	TVPThrowExceptionMessage(_("can not delete directory (filesystem is read-only)"));
+	eTVPException::Throw(TJS_WS_TR("can not delete directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -133,7 +133,7 @@ void tTVPPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	TVPThrowExceptionMessage(_("can not make directory (filesystem is read-only)"));
+	eTVPException::Throw(TJS_WS_TR("can not make directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 

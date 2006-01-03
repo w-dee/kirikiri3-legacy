@@ -1,0 +1,45 @@
+TOP_DIR=../..
+include $(TOP_DIR)/Makefile_filenames
+
+#----------------------------#
+
+# プログラムID (プログラムやライブラリのbasenameとなる)
+PROGRAM_ID=fstest
+
+# 出力バイナリ名
+BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
+
+# このバイナリが依存しているライブラリ
+DEP_LIBS=BOOST
+
+# リンカに渡すフラグ
+LDFLAGS = -g $(CONSOLE_LDFLAGS)
+
+#----------------------------#
+
+# tjs3 を使うための設定
+include $(TOP_DIR)/src/core/tjs3/Makefile_for_user
+
+#----------------------------#
+
+BASE_DIR=$(TOP_DIR)/src/core/base
+
+INCLUDES= \
+		-I. \
+		-I$(BASE_DIR)/fs/common  \
+		-I$(BASE_DIR)/fs/osfs    \
+		-I$(BASE_DIR)/fs/pathfs  \
+		-I$(BASE_DIR)/fs/tmpfs   \
+		-I$(BASE_DIR)/fs/xp4fs   \
+		-I$(BASE_DIR)/exception
+
+CPPFILES = main.cpp \
+		$(BASE_DIR)/fs/common/FSManager.cpp        \
+		$(BASE_DIR)/exception/TVPException.cpp
+
+OBJS = $(CPPFILES:.cpp=.o)
+
+#----------------------------#
+
+include $(TOP_DIR)/Makefile_common
+

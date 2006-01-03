@@ -115,7 +115,7 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 	if(!TVPFindChunk(chunkname_info, meta, metasize, &chunk, &chunksize))
 	{
 		// info チャンクが見つからなかった
-		TVPThrowExceptionMessage(_("chunk 'info' not found"));
+		eTVPException::Throw(TJS_WS_TR("chunk 'info' not found"));
 	}
 
 	// info チャンクから情報を読み取る
@@ -148,7 +148,7 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 	else
 	{
 		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
-			TVPThrowExceptionMessage(_("chunk 'time' not found"));
+			eTVPException::Throw(TJS_WS_TR("chunk 'time' not found"));
 	}
 
 	// Segm チャンクを探す
@@ -185,7 +185,7 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 	else
 	{
 		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
-			TVPThrowExceptionMessage(_("chunk 'Segm' not found"));
+			eTVPException::Throw(TJS_WS_TR("chunk 'Segm' not found"));
 	}
 
 	// ハッシュ用 チャンクを探す(現状はsha1固定)
@@ -194,13 +194,13 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 		metasize, &chunk, &chunksize))
 	{
 		if(chunksize != sizeof(Hash))
-			TVPThrowExceptionMessage(_("invalid hash chunk"));
+			eTVPException::Throw(TJS_WS_TR("invalid hash chunk"));
 		memcpy(Hash, chunk, sizeof(Hash));
 	}
 	else
 	{
 		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
-			TVPThrowExceptionMessage(_("hash chunk not found"));
+			eTVPException::Throw(TJS_WS_TR("hash chunk not found"));
 	}
 }
 //---------------------------------------------------------------------------
@@ -232,7 +232,7 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback &
 		memcmp(buf+8, XP4Mark2, 3))
 	{
 		// シグニチャが一致しない
-		TVPThrowExceptionMessage(wxString::Format(_("'%s' is not an XP4 archive file"),
+		eTVPException::Throw(wxString::Format(TJS_WS_TR("'%s' is not an XP4 archive file"),
 			wxString(filename).c_str()));
 	}
 
@@ -280,8 +280,8 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback &
 			if(res != Z_OK || output_size != raw_index_size)
 			{
 				// 圧縮インデックスの展開に失敗した
-				TVPThrowExceptionMessage(wxString::Format(
-					_("decompression of archive index of '%s' failed"),
+				eTVPException::Throw(wxString::Format(
+					TJS_WS_TR("decompression of archive index of '%s' failed"),
 					wxString(filename).c_str()));
 			}
 		}
@@ -297,8 +297,8 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, tTVPXP4FS::iMapCallback &
 		static unsigned char chunkname_Item[] = { 'I', 't', 'e', 'm' };
 		if(!TVPFindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
 		{
-			TVPThrowExceptionMessage(wxString::Format(
-				_("chunk 'Item' not found in file '%s'"),
+			eTVPException::Throw(wxString::Format(
+				TJS_WS_TR("chunk 'Item' not found in file '%s'"),
 				wxString(filename).c_str()));
 		}
 

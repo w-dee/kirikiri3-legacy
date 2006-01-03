@@ -76,7 +76,7 @@ void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType ty
 		src->ReadBuffer(&metalen, sizeof(metalen));
 		metalen = wxUINT32_SWAP_ON_BE(metalen);
 		if(metalen == 0)
-			TVPThrowExceptionMessage(_("invalid metadata length (data may be corrupted)"));
+			eTVPException::Throw(TJS_WS_TR("invalid metadata length (data may be corrupted)"));
 
 		if(metadataid == 0x01)
 		{
@@ -117,8 +117,8 @@ void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType ty
 				done = true;
 				break;
 			default:
-				TVPThrowExceptionMessage(
-						wxString::Format(_("unsupported node id %x"),
+				eTVPException::Throw(
+						wxString::Format(TJS_WS_TR("unsupported node id %x"),
 						static_cast<int>(nodetypeid)));
 			}
 		}
@@ -130,7 +130,7 @@ void tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType ty
 		src->ReadBuffer(&blocksize, sizeof(blocksize));
 		blocksize = wxUINT64_SWAP_ON_BE(blocksize);
 		if(static_cast<size_t>(blocksize) != blocksize)
-				TVPThrowExceptionMessage(_("too big block size"));
+				eTVPException::Throw(TJS_WS_TR("too big block size"));
 		File->ChangeSize(static_cast<size_t>(blocksize));
 		File->Fit();
 		src->ReadBuffer(File->GetBlock(), static_cast<size_t>(blocksize));
@@ -426,7 +426,7 @@ size_t tTVPTmpFS::GetFileListAt(const ttstr & dirname,
 
 	tTVPTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsDirectory()) TVPThrowExceptionMessage(_("specified name is not a directory"));
+	if(!node->IsDirectory()) eTVPException::Throw(TJS_WS_TR("specified name is not a directory"));
 
 	return node->Iterate(callback);
 }
@@ -477,7 +477,7 @@ void tTVPTmpFS::RemoveFile(const ttstr & filename)
 
 	tTVPTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) TVPThrowExceptionMessage(_("specified name is not a file"));
+	if(!node->IsFile()) eTVPException::Throw(TJS_WS_TR("specified name is not a file"));
 
 	// 親ノードから切り離す
 	tTVPTmpFSNode * parent = node->GetParent();
@@ -498,17 +498,17 @@ void tTVPTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 	tTVPTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsDirectory()) TVPThrowExceptionMessage(_("specified name is not a directory"));
+	if(!node->IsDirectory()) eTVPException::Throw(TJS_WS_TR("specified name is not a directory"));
 
 	if(!recursive)
 	{
 		// recursive が false の場合、消そうとしたディレクトリが空で無ければ
 		// 失敗する。
 
-		if(node->HasSubNode()) TVPThrowExceptionMessage(_("specified directory is not empty"));
+		if(node->HasSubNode()) eTVPException::Throw(TJS_WS_TR("specified directory is not empty"));
 
 		// root ノードは消すことはできない
-		if(node == Root) TVPThrowExceptionMessage(_("can not remove file system root directory"));
+		if(node == Root) eTVPException::Throw(TJS_WS_TR("can not remove file system root directory"));
 	}
 	else
 	{
@@ -573,7 +573,7 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 					if(node->IsFile())
 					{
 						// ファイルだったりする
-						TVPThrowExceptionMessage(_("about to create file on "));
+						eTVPException::Throw(TJS_WS_TR("about to create file on "));
 					}
 				}
 			}
@@ -631,7 +631,7 @@ tTVPBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 fl
 
 	tTVPTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) TVPThrowExceptionMessage(_("specified name is not a file"));
+	if(!node->IsFile()) eTVPException::Throw(TJS_WS_TR("specified name is not a file"));
 
 	return new tTVPMemoryStream(flags, node->GetMemoryStreamBlockNoAddRef());
 }
@@ -673,7 +673,7 @@ void tTVPTmpFS::UnserializeFrom(tTVPBinaryStream * src)
 		// 最初のノードタイプ(ディレクトリを表す 0x80 になってないとおかしい)
 
 	if(memcmp(magic, SerialMagic, 8) || firstnodetype != 0x80)
-		TVPThrowExceptionMessage(_("not a tmpfs archive"));
+		eTVPException::Throw(TJS_WS_TR("not a tmpfs archive"));
 
 	// 再帰的に内容を読み込む
 	Root = new tTVPTmpFSNode(NULL, tTVPTmpFSNode::ntDirectory, src);

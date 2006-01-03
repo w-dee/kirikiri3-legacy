@@ -109,7 +109,7 @@ void Decompress(tTVPDecompressedHolder::tMethod method, const tjs_uint8 * indata
 		int result = uncompress( (unsigned char*)indata, &destlen,
 				(unsigned char*)indata, insize);
 		if(result != Z_OK || destlen != Size)
-			TVPThrowExceptionMessage(_("Decompression failed. Data may be corrupted."));
+			eTVPException::Throw(TJS_WS_TR("Decompression failed. Data may be corrupted."));
 	}
 	catch(...)
 	{

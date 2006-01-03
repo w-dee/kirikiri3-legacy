@@ -258,7 +258,7 @@ tjs_uint tTVPXP4ArchiveStream::Read(void *buffer, tjs_size read_size)
 //---------------------------------------------------------------------------
 tjs_uint tTVPXP4ArchiveStream::Write(const void *buffer, tjs_size write_size)
 {
-	TVPThrowExceptionMessage(_("access denied (filesystem is read-only)"));
+	eTVPException::Throw(TJS_WS_TR("access denied (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -268,7 +268,7 @@ tjs_uint tTVPXP4ArchiveStream::Write(const void *buffer, tjs_size write_size)
 //---------------------------------------------------------------------------
 void tTVPMemoryStream::SetEndOfFile()
 {
-	TVPThrowExceptionMessage(_("access denied (filesystem is read-only)"));
+	eTVPException::Throw(TJS_WS_TR("access denied (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 

@@ -12,8 +12,8 @@
 #ifndef _OSFSH_
 #define _OSFSH_
 
+#include <wx/file.h>
 #include "FSManager.h"
-
 
 //---------------------------------------------------------------------------
 //! @brief		OS ネイティブファイルストリーム
@@ -62,13 +62,13 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTVPBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
 	//-- iTVPFileSystem メンバ ここまで
 private:
 	static wxString ConvertToNativePathDelimiter(const wxString & path);
 
-	static bool CheckFileNameCase(const wxString & path_to_check, bool raise = true);
+	bool CheckFileNameCase(const wxString & path_to_check, bool raise = true);
 };
 //---------------------------------------------------------------------------
 

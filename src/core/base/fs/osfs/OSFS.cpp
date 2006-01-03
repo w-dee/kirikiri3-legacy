@@ -10,10 +10,12 @@
 //! @brief OSFSの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-TJS_DEFINE_SOURCE_ID(2001);
-
+#include <wx/filename.h>
+#include <wx/dir.h>
 #include "OSFS.h"
+#include "TVPException.h"
 
+TJS_DEFINE_SOURCE_ID(2001);
 
 
 
@@ -37,13 +39,13 @@ tTVPOSNativeStream::tTVPOSNativeStream(const wxString & filename, tjs_uint32 fla
 	}
 
 	// ファイルを開く
-	if(!file.Open(filename))
-		eTVPException::Throw(wxString::Format(TJS_WS_TR("can not open file '%s'"),
-			filename.c_str()));
+	if(!File.Open(filename))
+		eTVPException::Throw(ttstr(wxString::Format(TJS_WS_TR("can not open file '%s'"),
+			filename.c_str())));
 
 	// APPEND の場合はファイルポインタを最後に移動する
 	if(flags & TJS_BS_ACCESS_APPEND_BIT)
-		file.SeekEnd();
+		File.SeekEnd();
 }
 //---------------------------------------------------------------------------
 
@@ -126,7 +128,7 @@ void tTVPOSNativeStream::SetEndOfFile()
 //---------------------------------------------------------------------------
 tjs_uint64 tTVPOSNativeStream::GetSize()
 {
-	return file.Length();
+	return File.Length();
 }
 //---------------------------------------------------------------------------
 
@@ -145,18 +147,18 @@ tjs_uint64 tTVPOSNativeStream::GetSize()
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tTVPOSFS::tTVPOSFS(const ttstr & basedir, bool checkcase) : 
-	BaseDirectory((wxString)basedir), CheckCase(checkcase)
+	BaseDirectory(basedir.AsWxString()), CheckCase(checkcase)
 {
 	// ベースディレクトリのパス区切りをネイティブなものに変更
-	BaseDirectory = ConvertPathDelimiter(BaseDirectory);
+	BaseDirectory = ConvertToNativePathDelimiter(BaseDirectory);
 
 	// ベースディレクトリ名を正規化
-	wxFileName basedir(BaseDirectory);
-	basedir.Normalize();
-	BaseDirectory = basedir.GetFullPath();
+	wxFileName normalized(BaseDirectory);
+	normalized.Normalize();
+	BaseDirectory = normalized.GetFullPath();
 
 	// ベースディレクトリ名の最後がパスデリミタでおわっていなけばそれを追加
-	if(wxFileName::IsPathSeparator(BaseDirectory.Last())
+	if(wxFileName::IsPathSeparator(BaseDirectory.Last()))
 		BaseDirectory += wxFileName::GetPathSeparator();
 }
 //---------------------------------------------------------------------------
@@ -180,11 +182,13 @@ tTVPOSFS::~tTVPOSFS()
 size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 	iTVPFileSystemIterationCallback * callback)
 {
-	CheckFileNameCase(dirname);
+	wxString wxdirname(dirname.AsWxString());
+
+	CheckFileNameCase(wxdirname);
 
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	wxString native_name(BaseDirectory + ConvertPathDelimiter((wxString)dirname));
+	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter((wxString)wxdirname));
 
 	wxDir dir;
 	bool stop = false;
@@ -195,8 +199,8 @@ size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 	// ディレクトリの存在をチェック
 	if(!wxFileName::DirExists(native_name)
 		|| !dir.Open(native_name))
-			eTVPException::Throw(wxString::Format(
-				TJS_WS_TR("can not open directory '%s'"), native_name.c_str()));
+			eTVPException::Throw(ttstr(wxString::Format(
+				TJS_WS_TR("can not open directory '%s'"), native_name.c_str())));
 
 	// ファイルを列挙
 	cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
@@ -208,7 +212,7 @@ size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 			if(!callback->OnFile(ttstr(filename)))
 				return count;
 		}
-		cont = dir.GetNext();
+		cont = dir.GetNext(&filename);
 	}
 
 	// ディレクトリを列挙
@@ -224,7 +228,7 @@ size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 					return count;
 			}
 		}
-		cont = dir.GetNext();
+		cont = dir.GetNext(&filename);
 	}
 
 	return count;
@@ -239,11 +243,13 @@ size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tTVPOSFS::FileExists(const ttstr & filename)
 {
-	if(!CheckFileNameCase(filename, false)) return false;
+	wxString wxfilename(filename.AsWxString());
+
+	if(!CheckFileNameCase(wxfilename, false)) return false;
 
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	wxString native_name(BaseDirectory + ConvertPathDelimiter((wxString)dirname));
+	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
 	return wxFileName::FileExists(native_name);
 }
@@ -257,11 +263,13 @@ bool tTVPOSFS::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 bool tTVPOSFS::DirectoryExists(const ttstr & dirname)
 {
-	if(!CheckFileNameCase(dirname, false)) return false;
+	wxString wxdirname(dirname.AsWxString());
+
+	if(!CheckFileNameCase(wxdirname, false)) return false;
 
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	wxString native_name(BaseDirectory + ConvertPathDelimiter((wxString)dirname));
+	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
 	return wxFileName::DirExists(native_name);
 }
@@ -274,14 +282,16 @@ bool tTVPOSFS::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tTVPOSFS::RemoveFile(const ttstr & filename)
 {
-	CheckFileNameCase(filename);
+	wxString wxfilename(filename.AsWxString());
+
+	CheckFileNameCase(wxfilename);
 
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	wxString native_name(BaseDirectory + ConvertPathDelimiter((wxString)dirname));
+	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
-	if(!::wxRemoveFie(native_name))
-		eTVPException::Throw(wxString::Format(TJS_WS_TR("can not remove file '%s'"), native_name.c_str()));
+	if(!::wxRemoveFile(native_name))
+		eTVPException::Throw(ttstr(wxString::Format(TJS_WS_TR("can not remove file '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
@@ -293,18 +303,20 @@ void tTVPOSFS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	CheckFileNameCase(dirname);
+	wxString wxdirname(dirname.AsWxString());
+
+	CheckFileNameCase(wxdirname);
 
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	wxString native_name(BaseDirectory + ConvertPathDelimiter((wxString)dirname));
+	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
 	if(recursive)
 		eTVPException::Throw(
 			TJS_WS_TR("recursive directory remove is not yet implemented"));
 
 	if(::wxRmdir(native_name))
-		eTVPException::Throw(wxString::Format(TJS_WS_TR("can not remove directory '%s'"), native_name.c_str()));
+		eTVPException::Throw(ttstr(wxString::Format(TJS_WS_TR("can not remove directory '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
@@ -316,14 +328,16 @@ void tTVPOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	CheckFileNameCase(dirname);
+	wxString wxdirname(dirname.AsWxString());
+
+	CheckFileNameCase(wxdirname);
 
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	wxString native_name(BaseDirectory + ConvertPathDelimiter((wxString)dirname));
+	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
 	if(!wxFileName::Mkdir(native_name, 0777, recursive?wxPATH_MKDIR_FULL:0))
-		eTVPException::Throw(wxString::Format(TJS_WS_TR("can not create directory '%s'"), native_name.c_str()));
+		eTVPException::Throw(ttstr(wxString::Format(TJS_WS_TR("can not create directory '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
@@ -335,23 +349,28 @@ void tTVPOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPOSFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
-	CheckFileNameCase(filename);
+	wxString wxfilename(filename.AsWxString());
+
+	CheckFileNameCase(wxfilename);
 
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	wxString native_name(BaseDirectory + ConvertPathDelimiter((wxString)dirname));
+	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
 	// 格納先構造体をクリア
 	struc.Clear();
 
 	// 時刻を取得
-	if(!wxFileName::GetTimes(&struc.ATime, &struc.MTime, &struc.CTime))
-		eTVPException::Throw(wxString::Format(TJS_WS_TR("can not stat file '%s'"), native_name.c_str()));
+	wxFileName filename_obj(native_name);
+
+	if(!filename_obj.GetTimes(&struc.ATime, &struc.MTime, &struc.CTime))
+		eTVPException::Throw(ttstr(wxString::Format(TJS_WS_TR("can not stat file '%s'"), native_name.c_str())));
 
 	// サイズを取得
 	wxFile file;
-	if(!file.Oepn(native_name))
-		eTVPException::Throw(wxString::Format(TJS_WS_TR("can not stat file '%s'"), native_name.c_str()));
+	if(!file.Open(native_name))
+		eTVPException::Throw(ttstr(wxString::Format(TJS_WS_TR("can not stat file '%s'"), native_name.c_str())));
+
 	struc.Size = file.Length();
 }
 //---------------------------------------------------------------------------
@@ -363,13 +382,15 @@ void tTVPOSFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTVPBinaryStream * tTVPOSFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tTJSBinaryStream * tTVPOSFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
 {
-	CheckFileNameCase(filename);
+	wxString wxfilename(filename.AsWxString());
+
+	CheckFileNameCase(wxfilename);
 
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	wxString native_name(BaseDirectory + ConvertPathDelimiter((wxString)dirname));
+	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
 	return new tTVPOSNativeStream(native_name, flags);
 }
@@ -404,14 +425,14 @@ wxString tTVPOSFS::ConvertToNativePathDelimiter(const wxString & path)
 //! @return		一致した場合に真、しなかった場合に偽
 //! @note		ファイルが「見つからない」場合は真が帰るので注意
 //---------------------------------------------------------------------------
-void tTVPOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
+bool tTVPOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 {
 	// TODO: UNIX系OSでのチェック
-	if(!CheckCase) return; // 大文字・小文字をチェックしない場合はそのまま帰る
+	if(!CheckCase) return true; // 大文字・小文字をチェックしない場合はそのまま帰る
 
 	// うーん、VMS 形式のパスは相手にすべきなのだろうか
 
-	const wxChar * msg = TJS_WS_TR("file '%s' does not exist (but '%s' exists, you mean this?)";
+	const wxChar * msg = TJS_WS_TR("file '%s' does not exist (but '%s' exists, you mean this?");
 
 	// パスを分解する
 	wxString existing;
@@ -419,7 +440,7 @@ void tTVPOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 	wxFileName testpath(path_to_check);
 	wxDir dir;
 
-	wxFileName::SplitPath(path_to_check, &volume, &path);
+	wxFileName::SplitPath(path_to_check, &volume, &path, NULL, NULL);
 	name = testpath.GetFullName();
 
 	// まずファイル名をチェック
@@ -433,8 +454,8 @@ void tTVPOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 			{
 				// ファイル名が違う
 				if(raise)
-					eTVPException::Throw(wxString::Format(msg, path_to_check.c_str(),
-						(subpath + existing).c_str());
+					eTVPException::Throw(ttstr(wxString::Format(msg, path_to_check.c_str(),
+						(subpath + existing).c_str())));
 				else
 					return false;
 			}
@@ -453,8 +474,8 @@ void tTVPOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 			{
 				// ファイル名が違う
 				if(raise)
-					eTVPException::Throw(wxString::Format(msg, testpath.GetFullPath().c_str(),
-						(subpath + existing).c_str());
+					eTVPException::Throw(ttstr(wxString::Format(msg, testpath.GetFullPath().c_str(),
+						(subpath + existing).c_str())));
 				else
 					return false;
 			}

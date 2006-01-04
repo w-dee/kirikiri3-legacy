@@ -4,8 +4,16 @@ prefix=`pwd`
 
 jam_build_cmd()
 {
-	echo "build.bat mingw" > launch.bat
-	cmd "/C launch.bat"
+	echo "
+#include <stdlib.h>
+
+int main(void)
+{
+	return system(\"build.bat mingw\");
+}
+" > launch.c
+	gcc -o launch.exe launch.c
+	./launch.exe
 	mv bin.ntx86/* .
 }
 

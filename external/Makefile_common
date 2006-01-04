@@ -16,15 +16,16 @@ extract_lib: extract_completed
 
 extract_completed: Makefile download_completed
 	mkdir src || true
-	set -e; case $(DOWNLOAD_FILE) in                     \
+	@echo "extracting archive $(DOWNLOAD_FILE) ..."
+	@set -e; case $(DOWNLOAD_FILE) in                    \
 		*.tar.gz|*.tgz)                                  \
 			cd src ;                                     \
-			tar zxvf ../$(DOWNLOAD_FILE) ;               \
+			tar zxf ../$(DOWNLOAD_FILE) ;                \
 			cd .. ;                                      \
 			;;                                           \
 		*.tar.bz2|*.tbz)                                 \
 			cd src ;                                     \
-			tar jxvf ../$(DOWNLOAD_FILE) ;               \
+			tar jxf ../$(DOWNLOAD_FILE) ;                \
 			cd .. ;                                      \
 			;;                                           \
 	esac

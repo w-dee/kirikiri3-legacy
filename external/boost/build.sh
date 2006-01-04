@@ -1,5 +1,8 @@
 #!/bin/sh -e
 
+
+# TODO: support platforms other than MinGW
+
 prefix=`pwd`
 
 jam_build_cmd()
@@ -48,6 +51,11 @@ custom_build()
 
 	# ビルド
 	make && make install
+
+	# lib 中の *.lib を *.a に
+	cd $prefix/lib
+	for fname in *.lib; do mv $fname ${fname%.lib}.a; done
+	cd $current
 }
 
 

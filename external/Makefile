@@ -12,13 +12,13 @@ target: default compile_wx_win_res copy_mo copy_dll print_all_done_mes
 # 各サブディレクトリに対して再帰
 
 default:
-	for dir in $(SUBLIBS); do ( cd $$dir && $(MAKE)  all      ); done
+	(set -e; for dir in $(SUBLIBS); do (set -e; cd $$dir && $(MAKE)  all      ) || exit 1; done )
 
 clean:
-	for dir in $(SUBLIBS); do ( cd $$dir && $(MAKE)  clean    ); done
+	(set -e; for dir in $(SUBLIBS); do (set -e; cd $$dir && $(MAKE)  clean    ) || exit 1; done )
 
 download:
-	for dir in $(SUBLIBS); do ( cd $$dir && $(MAKE)  download ); done
+	(set -e; for dir in $(SUBLIBS); do (set -e; cd $$dir && $(MAKE)  download ) || exit 1; done )
 
 
 

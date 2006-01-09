@@ -22,7 +22,7 @@
 //---------------------------------------------------------------------------
 //! @brief		XP4FS の実装
 //---------------------------------------------------------------------------
-class tTVPXP4FS : public iTVPFileSystem
+class tTVPXP4FS : public tTVPFileSystem
 {
 	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
@@ -49,11 +49,11 @@ class tTVPXP4FS : public iTVPFileSystem
 public:
 	tTVPXP4FS(const ttstr & name);
 
-	//-- iTVPFileSystem メンバ
+	//-- tTVPFileSystem メンバ
 	~tTVPXP4FS();
 
 	size_t GetFileListAt(const ttstr & dirname,
-		iTVPFileSystemIterationCallback * callback);
+		tTVPFileSystemIterationCallback * callback);
 	bool FileExists(const ttstr & filename);
 	bool DirectoryExists(const ttstr & dirname);
 	void RemoveFile(const ttstr & filename);
@@ -62,7 +62,7 @@ public:
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
 	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
-	//-- iTVPFileSystem メンバ ここまで
+	//-- tTVPFileSystem メンバ ここまで
 private:
 	tjs_size GetFileItemStartIndex(const ttstr & name);
 	tjs_size GetFileItemIndex(const ttstr & name);

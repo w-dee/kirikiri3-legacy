@@ -35,16 +35,21 @@ INCLUDES= \
 
 CPPFILES = \
 		$(BASE_DIR)/fs/common/FSManager.cpp         \
+		$(BASE_DIR)/fs/common/FSManagerBind.cpp     \
+		$(BASE_DIR)/fs/osfs/OSFS.cpp                \
+		$(BASE_DIR)/fs/osfs/OSFSBind.cpp            \
+		$(BASE_DIR)/fs/pathfs/PathFS.cpp            \
+		$(BASE_DIR)/fs/pathfs/PathFSBind.cpp        \
 		$(BASE_DIR)/fs/tmpfs/MemoryStream.cpp       \
 		$(BASE_DIR)/fs/tmpfs/TmpFS.cpp              \
-		$(BASE_DIR)/fs/osfs/OSFS.cpp                \
-		$(BASE_DIR)/fs/pathfs/PathFS.cpp            \
+		$(BASE_DIR)/fs/tmpfs/TmpFSBind.cpp          \
 		$(BASE_DIR)/fs/xp4fs/DecompressedHolder.cpp \
 		$(BASE_DIR)/fs/xp4fs/XP4Archive.cpp         \
 		$(BASE_DIR)/fs/xp4fs/XP4FS.cpp              \
 		$(BASE_DIR)/fs/xp4fs/XP4SegmentCache.cpp    \
 		$(BASE_DIR)/fs/xp4fs/XP4Stream.cpp          \
 		$(BASE_DIR)/fs/xp4fs/XP4StreamCache.cpp     \
+		$(BASE_DIR)/fs/xp4fs/XP4FSBind.cpp          \
 		$(BASE_DIR)/exception/TVPException.cpp      \
 		main.cpp
 

@@ -40,7 +40,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 
 	//- ディレクトリ中にあるファイルを列挙し、name_noext に合致する
 	//- ファイルを archive_names に追加する
-	class tLister : public iTVPFileSystemIterationCallback
+	class tLister : public tTVPFileSystemIterationCallback
 	{
 		std::vector<ttstr>& archive_names;
 		const ttstr & name_noext;
@@ -160,7 +160,7 @@ tTVPXP4FS::~tTVPXP4FS()
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
-	iTVPFileSystemIterationCallback * callback)
+	tTVPFileSystemIterationCallback * callback)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 

@@ -12,8 +12,9 @@
 #ifndef _OSFSH_
 #define _OSFSH_
 
-#include <wx/file.h>
 #include "FSManager.h"
+#include "tjsNative.h"
+#include <wx/file.h>
 
 //---------------------------------------------------------------------------
 //! @brief		OS ネイティブファイルストリーム
@@ -41,7 +42,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		OS ファイルシステム
 //---------------------------------------------------------------------------
-class tTVPOSFS : public iTVPFileSystem
+class tTVPOSFS : public tTVPFileSystem
 {
 	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
@@ -51,11 +52,11 @@ class tTVPOSFS : public iTVPFileSystem
 public:
 	tTVPOSFS(const ttstr & basedir, bool checkcase = true);
 
-	//-- iTVPFileSystem メンバ
+	//-- tTVPFileSystem メンバ
 	~tTVPOSFS();
 
 	size_t GetFileListAt(const ttstr & dirname,
-		iTVPFileSystemIterationCallback * callback);
+		tTVPFileSystemIterationCallback * callback);
 	bool FileExists(const ttstr & filename);
 	bool DirectoryExists(const ttstr & dirname);
 	void RemoveFile(const ttstr & filename);
@@ -64,7 +65,7 @@ public:
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
 	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
-	//-- iTVPFileSystem メンバ ここまで
+	//-- tTVPFileSystem メンバ ここまで
 private:
 	static wxString ConvertToNativePathDelimiter(const wxString & path);
 

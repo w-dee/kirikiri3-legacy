@@ -12,9 +12,21 @@
 #include "prec.h"
 #include "FSManager.h"
 #include "TVPException.h"
+#include "FSManagerBind.h"
 #include <vector>
 
 TJS_DEFINE_SOURCE_ID(2000);
+
+
+
+
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
@@ -41,11 +53,25 @@ tTVPFileSystemManager::~tTVPFileSystemManager()
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムをマウントする
 //! @param		point マウントポイント
-//! @param		fs ファイルシステムオブジェクト
+//! @param		fs_tjsobj ファイルシステムオブジェクトを表すTJSオブジェクト
+//! @note		メインスレッド以外から呼び出さないこと
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFileSystem> fs)
+void tTVPFileSystemManager::Mount(const ttstr & point,
+	iTJSDispatch2 * fs_tjsobj)
 {
 	tTJSCriticalSectionHolder holder(CS);
+
+	// tjs_obj がファイルシステムのインスタンスを持っているかどうかを
+	// 確認する
+	if(!fs_tjsobj ||
+		TJS_FAILED(fs_tjsobj->NativeInstanceSupport(
+						TJS_NIS_GETINSTANCE,
+						tTJSNI_FileSystemNativeInstance::ClassID,
+						NULL)) )
+	{
+		// ファイルシステムのインスタンスを持っていない
+		eTVPException::Throw(TJS_WS_TR("the object given is not a filesystem object"));
+	}
 
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
@@ -53,7 +79,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFil
 	if(!path.EndsWith(TJS_WC('/'))) path += TJS_WC('/');
 
 	// すでにその場所にマウントが行われているかどうかをチェックする
-	boost::shared_ptr<iTVPFileSystem> * item = MountPoints.Find(path);
+	tFileSystemInfo * item = MountPoints.Find(path);
 	if(item)
 	{
 		// ファイルシステムが見つかったのでそこにはマウントできない
@@ -61,7 +87,8 @@ void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFil
 	}
 
 	// マウントポイントを追加
-	MountPoints.Add(path, fs);
+	tFileSystemInfo info(fs_tjsobj);
+	MountPoints.Add(path, info);
 }
 //---------------------------------------------------------------------------
 
@@ -69,6 +96,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point, boost::shared_ptr<iTVPFil
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムをアンマウントする
 //! @param		point マウントポイント
+//! @note		メインスレッド以外から呼び出さないこと
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Unmount(const ttstr & point)
 {
@@ -80,7 +108,7 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 	if(!path.EndsWith(TJS_WC('/'))) path += TJS_WC('/');
 
 	// その場所にマウントが行われているかどうかをチェックする
-	boost::shared_ptr<iTVPFileSystem> * item = MountPoints.Find(path);
+	tFileSystemInfo * item = MountPoints.Find(path);
 	if(!item)
 	{
 		// そこにはなにもマウントされていない
@@ -88,7 +116,43 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 	}
 
 	// マウントポイントを削除
+	tTJSRefHolder<iTJSDispatch2> tjs_object_holder (item->TJSObject);
 	MountPoints.Delete(path);
+
+	// tjs_object_holder はここで削除される。
+	// この時点で TJSObject への参照が無くなり、TJSObject が Invalidate
+	// される可能性がある。tTJSNI_FileSystemNativeInstance 内では
+	// この際に Unmount(TJSObject) を呼び出すが、この時点ではすでに
+	// どのマウントポイントにもそのファイルシステムはマウントされていないので
+	// 何も操作は行われない。
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ファイルシステムをアンマウントする
+//! @param		fs_tjsobj アンマウントしたいファイルシステムを表すTJSオブジェクト
+//! @note		メインスレッド以外から呼び出さないこと
+//---------------------------------------------------------------------------
+void tTVPFileSystemManager::Unmount(iTJSDispatch2 * fs_tjsobj)
+{
+	tTJSCriticalSectionHolder holder(CS);
+
+	// そのファイルシステムがマウントされているマウントポイントを調べる
+	std::vector<ttstr> points;
+
+	tTJSHashTable<ttstr, tFileSystemInfo>::tIterator i;
+	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
+	{
+		if(i.GetValue().TJSObject.GetObjectNoAddRef() == fs_tjsobj)
+			points.push_back(i.GetKey());
+	}
+
+	// 調べたマウントポイントをすべてアンマウントする
+	for(std::vector<ttstr>::iterator i = points.begin(); i != points.end(); i++)
+	{
+		Unmount(*i);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -178,7 +242,7 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tTVPFileSystemManager::GetFileListAt(const ttstr & dirname,
-	iTVPFileSystemIterationCallback * callback, bool recursive)
+	tTVPFileSystemIterationCallback * callback, bool recursive)
 {
 	ttstr path(NormalizePath(dirname));
 
@@ -189,16 +253,16 @@ size_t tTVPFileSystemManager::GetFileListAt(const ttstr & dirname,
 	}
 
 	// 再帰をする場合
-	class tIteratorCallback : public iTVPFileSystemIterationCallback
+	class tIteratorCallback : public tTVPFileSystemIterationCallback
 	{
 		std::vector<ttstr> & List;
-		iTVPFileSystemIterationCallback *Destination;
+		tTVPFileSystemIterationCallback *Destination;
 		size_t Count;
 		ttstr CurrentDirectory;
 
 	public:
 		tIteratorCallback(std::vector<ttstr> &list,
-			iTVPFileSystemIterationCallback *destination)
+			tTVPFileSystemIterationCallback *destination)
 				: List(list), Destination(destination), Count(0)
 		{
 			;
@@ -246,7 +310,7 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(filename);
 	try
 	{
@@ -273,7 +337,7 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -299,7 +363,7 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -325,7 +389,7 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -351,7 +415,7 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -377,7 +441,7 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -398,13 +462,14 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTJSBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tTJSBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename,
+	tjs_uint32 flags)
 {
 	tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -428,12 +493,12 @@ tTJSBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename, t
 //---------------------------------------------------------------------------
 size_t tTVPFileSystemManager::InternalGetFileListAt(
 	const ttstr & dirname,
-	iTVPFileSystemIterationCallback * callback)
+	tTVPFileSystemIterationCallback * callback)
 {
 	tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
-	boost::shared_ptr<iTVPFileSystem> fs = GetFileSystemAt(dirname, &fspath);
+	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(dirname, &fspath);
 	if(!fs) ThrowNoFileSystemError(dirname);
 	try
 	{
@@ -455,7 +520,7 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 //! @param		fspath ファイルシステム内におけるパス(興味がない場合はNULL可、最初の / は含まれない)
 //! @return		ファイルシステムインスタンス
 //---------------------------------------------------------------------------
-boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
+boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 					const ttstr & fullpath, ttstr * fspath)
 {
 	// フルパスの最後からディレクトリを削りながら見ていき、最初に
@@ -475,13 +540,29 @@ boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 		{
 			// p が スラッシュ
 			ttstr subpath(start, p - start + 1);
-			boost::shared_ptr<iTVPFileSystem> * item =
+			tFileSystemInfo * item =
 				MountPoints.Find(subpath);
 			if(item)
 			{
 				if(fspath) *fspath = start + subpath.GetLen();
-				return *item; // ファイルシステムが見つかった
+
+				// item->TJSObject.GetObjectNoAddRef() が TJS オブジェクト
+				// TJSオブジェクトからtTJSNI_FileSystemNativeInstanceの
+				// ネイティブインスタンスを得る
+				iTJSDispatch2 * obj = item->TJSObject.GetObjectNoAddRef();
+				tTJSNI_FileSystemNativeInstance * ni;
+				if(obj)
+				{
+					if(TJS_SUCCEEDED(obj->NativeInstanceSupport(
+						TJS_NIS_GETINSTANCE,
+						tTJSNI_FileSystemNativeInstance::ClassID,
+						(iTJSNativeInstance**)&ni)) )
+					{
+						return ni->GetFileSystem(); // ファイルシステムが見つかった
+					}
+				}
 			}
+			break;
 		}
 		p--;
 	}
@@ -489,7 +570,7 @@ boost::shared_ptr<iTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 	// 最低でも / (ルート) に割り当てられているファイルシステムが見つからないと
 	// おかしいので、ここに来るはずはないのだが ...
 	// (fullpath に空文字列が渡されるとここに来るかもしれない)
-	return boost::shared_ptr<iTVPFileSystem>();
+	return boost::shared_ptr<tTVPFileSystem>();
 }
 //---------------------------------------------------------------------------
 
@@ -598,3 +679,60 @@ void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		拡張子を切り落とす
+//! @param		in 処理したいファイル名
+//! @return		拡張子が取り落とされたファイル名
+//---------------------------------------------------------------------------
+ttstr tTVPFileSystemManager::ChopExtension(const ttstr & in)
+{
+	ttstr ret;
+	SplitExtension(in, &ret, NULL);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		拡張子を取り出す
+//! @param		in 処理したいファイル名
+//! @return		拡張子(ドットも含む; 拡張子が無い場合は空文字)
+//---------------------------------------------------------------------------
+ttstr tTVPFileSystemManager::ExtractExtension(const ttstr & in)
+{
+	ttstr ret;
+	SplitExtension(in, NULL, &ret);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ファイル名を返す (パスの部分を含まない)
+//! @param		in 処理したいファイル名
+//! @return		ファイル名
+//---------------------------------------------------------------------------
+ttstr tTVPFileSystemManager::ExtractName(const ttstr & in)
+{
+	ttstr ret;
+	SplitPathAndName(in, NULL, &ret);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ファイル名のパス名を返す
+//! @param		in 処理したいファイル名
+//! @return		パス名
+//---------------------------------------------------------------------------
+ttstr tTVPFileSystemManager::ExtractPath(const ttstr & in)
+{
+	ttstr ret;
+	SplitPathAndName(in, &ret, NULL);
+	return ret;
+}
+//---------------------------------------------------------------------------
+

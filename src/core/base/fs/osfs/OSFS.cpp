@@ -10,10 +10,11 @@
 //! @brief OSFSの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
+#include "OSFS.h"
+#include "OSFSBind.h"
+#include "TVPException.h"
 #include <wx/filename.h>
 #include <wx/dir.h>
-#include "OSFS.h"
-#include "TVPException.h"
 
 TJS_DEFINE_SOURCE_ID(2001);
 
@@ -180,7 +181,7 @@ tTVPOSFS::~tTVPOSFS()
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
-	iTVPFileSystemIterationCallback * callback)
+	tTVPFileSystemIterationCallback * callback)
 {
 	wxString wxdirname(dirname.AsWxString());
 

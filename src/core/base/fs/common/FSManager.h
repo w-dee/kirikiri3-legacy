@@ -20,9 +20,9 @@
 #include <boost/smart_ptr.hpp>
 
 //---------------------------------------------------------------------------
-//! @brief		iTVPFileSystem::GetFileListAt で用いられるコールバックインターフェース
+//! @brief		tTVPFileSystem::GetFileListAt で用いられるコールバックインターフェース
 //---------------------------------------------------------------------------
-class iTVPFileSystemIterationCallback
+class tTVPFileSystemIterationCallback
 {
 public:
 	virtual bool OnFile(const ttstr & filename) = 0;
@@ -32,7 +32,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		iTVPFileSystem::Stat で返される構造体
+//! @brief		tTVPFileSystem::Stat で返される構造体
 //---------------------------------------------------------------------------
 struct tTVPStatStruc
 {
@@ -48,15 +48,21 @@ struct tTVPStatStruc
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルシステム純粋仮想クラス
+//! @brief		ファイルシステム基底クラス
 //---------------------------------------------------------------------------
-class iTVPFileSystem
+class tTVPFileSystem
 {
+	//---------- このクラスで実装する物
+protected:
+
 public:
-	virtual ~iTVPFileSystem() {;} //!< デストラクタ
+
+	//---------- 各サブクラスで(も)実装すべき物
+public:
+	virtual ~tTVPFileSystem() {;}
 
 	virtual size_t GetFileListAt(const ttstr & dirname,
-		iTVPFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
+		tTVPFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
 	virtual bool FileExists(const ttstr & filename) = 0; //!< ファイルが存在するかどうかを得る
 	virtual bool DirectoryExists(const ttstr & dirname) = 0; //!< ディレクトリが存在するかどうかを得る
 	virtual void RemoveFile(const ttstr & filename) = 0; //!< ファイルを削除する
@@ -73,7 +79,15 @@ public:
 //---------------------------------------------------------------------------
 class tTVPFileSystemManager
 {
-	tTJSHashTable<ttstr, boost::shared_ptr<iTVPFileSystem> > MountPoints; //!< マウントポイントのハッシュ表
+	//! @brief ファイルシステムマネージャ内で管理されるファイルシステムの情報
+	struct tFileSystemInfo
+	{
+		tTJSRefHolder<iTJSDispatch2> TJSObject; //!< TJSオブジェクト
+		tFileSystemInfo(iTJSDispatch2 *tjs_obj) : 
+			TJSObject(tjs_obj)  {;} //!< コンストラクタ
+	};
+
+	tTJSHashTable<ttstr, tFileSystemInfo> MountPoints; //!< マウントポイントのハッシュ表
 	ttstr CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
 
 	tTJSCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
@@ -86,13 +100,14 @@ public:
 		boost::details::pool::singleton_default<tTVPFileSystemManager>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
-	void Mount(const ttstr & point, boost::shared_ptr<iTVPFileSystem> fs);
+	void Mount(const ttstr & point, iTJSDispatch2 * fs_tjsobj);
 	void Unmount(const ttstr & point);
+	void Unmount(iTJSDispatch2 * fs_tjsobj);
 
 	ttstr NormalizePath(const ttstr & path);
 
 	size_t GetFileListAt(const ttstr & dirname,
-		iTVPFileSystemIterationCallback * callback, bool recursive = false);
+		tTVPFileSystemIterationCallback * callback, bool recursive = false);
 	bool FileExists(const ttstr & filename);
 	bool DirectoryExists(const ttstr & dirname);
 	void RemoveFile(const ttstr & filename);
@@ -103,8 +118,8 @@ public:
 
 private:
 	size_t InternalGetFileListAt(const ttstr & dirname,
-		iTVPFileSystemIterationCallback * callback);
-	boost::shared_ptr<iTVPFileSystem> GetFileSystemAt(const ttstr & fullpath, ttstr * fspath = NULL);
+		tTVPFileSystemIterationCallback * callback);
+	boost::shared_ptr<tTVPFileSystem> GetFileSystemAt(const ttstr & fullpath, ttstr * fspath = NULL);
 	static void ThrowNoFileSystemError(const ttstr & filename);
 
 public:
@@ -113,6 +128,11 @@ public:
 	static void SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name);
 	static void TrimLastPathDelimiter(ttstr & path);
 
+	static ttstr ChopExtension(const ttstr & in);
+	static ttstr ExtractExtension(const ttstr & in);
+	static ttstr ExtractName(const ttstr & in);
+	static ttstr ExtractPath(const ttstr & in);
+	ttstr GetFullPath(const ttstr & in) { return NormalizePath(in); }
 };
 //---------------------------------------------------------------------------
 

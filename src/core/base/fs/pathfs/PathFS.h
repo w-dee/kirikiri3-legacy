@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 //! @brief		PathFS の実装
 //---------------------------------------------------------------------------
-class tTVPPathFS : public iTVPFileSystem
+class tTVPPathFS : public tTVPFileSystem
 {
 	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 	typedef tTJSHashTable<ttstr, ttstr> tHash; //!< ファイルシステム中のファイル名と実際のファイル名の対応表のtypedef
@@ -32,11 +32,11 @@ class tTVPPathFS : public iTVPFileSystem
 public:
 	tTVPPathFS();
 
-	//-- iTVPFileSystem メンバ
+	//-- tTVPFileSystem メンバ
 	~tTVPPathFS();
 
 	size_t GetFileListAt(const ttstr & dirname,
-		iTVPFileSystemIterationCallback * callback);
+		tTVPFileSystemIterationCallback * callback);
 	bool FileExists(const ttstr & filename);
 	bool DirectoryExists(const ttstr & dirname);
 	void RemoveFile(const ttstr & filename);
@@ -45,7 +45,7 @@ public:
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
 	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
 
-	//-- iTVPFileSystem メンバ ここまで
+	//-- tTVPFileSystem メンバ ここまで
 public:
 	void Add(const ttstr & name, bool recursive = false);
 	void Remove(const ttstr & name);

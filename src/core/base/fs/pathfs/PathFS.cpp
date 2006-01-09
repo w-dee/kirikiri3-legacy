@@ -46,7 +46,7 @@ tTVPPathFS::~tTVPPathFS()
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
-	iTVPFileSystemIterationCallback * callback)
+	tTVPFileSystemIterationCallback * callback)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -250,7 +250,7 @@ void tTVPPathFS::Ensure()
 	if(!NeedRebuild) return; // 作り直す必要はない
 
 	// コールバックを準備
-	class tCallback : public iTVPFileSystemIterationCallback
+	class tCallback : public tTVPFileSystemIterationCallback
 	{
 		tHash & Hash;
 		ttstr DirName;

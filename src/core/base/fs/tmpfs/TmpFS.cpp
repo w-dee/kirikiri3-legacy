@@ -313,7 +313,7 @@ tjs_size tTVPTmpFSNode::GetSize() const
 //! @brief		すべての子要素に対して callback を呼び出す
 //! @return		callback を呼び出した回数
 //---------------------------------------------------------------------------
-size_t tTVPTmpFSNode::Iterate(iTVPFileSystemIterationCallback * callback)
+size_t tTVPTmpFSNode::Iterate(tTVPFileSystemIterationCallback * callback)
 {
 	if(Type != ntDirectory) return 0;
 	size_t count = 0;
@@ -388,7 +388,7 @@ tTVPTmpFS::~tTVPTmpFS()
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tTVPTmpFS::GetFileListAt(const ttstr & dirname,
-	iTVPFileSystemIterationCallback * callback)
+	tTVPFileSystemIterationCallback * callback)
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
@@ -625,8 +625,22 @@ void tTVPTmpFS::SerializeTo(tTJSBinaryStream * dest)
 
 
 //---------------------------------------------------------------------------
+//! @brief		指定されたファイルに内容をシリアライズする
+//! @param		filename 出力先ファイル名
+//---------------------------------------------------------------------------
+void tTVPTmpFS::SerializeTo(const ttstr & filename)
+{
+	std::auto_ptr<tTJSBinaryStream>
+		stream(tTVPFileSystemManager::instance().CreateStream(filename, TJS_BS_WRITE));
+
+	SerializeTo(stream.get());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		指定されたストリームから内容を復元する
-//! @param		src 入力もとストリーム
+//! @param		src 入力元ストリーム
 //---------------------------------------------------------------------------
 void tTVPTmpFS::UnserializeFrom(tTJSBinaryStream * src)
 {
@@ -645,6 +659,20 @@ void tTVPTmpFS::UnserializeFrom(tTJSBinaryStream * src)
 
 	// 再帰的に内容を読み込む
 	Root = new tTVPTmpFSNode(NULL, tTVPTmpFSNode::ntDirectory, src);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		指定されたファイルから内容を復元する
+//! @param		filename 入力元ファイル
+//---------------------------------------------------------------------------
+void tTVPTmpFS::UnserializeFrom(const ttstr & filename)
+{
+	std::auto_ptr<tTJSBinaryStream>
+		stream(tTVPFileSystemManager::instance().CreateStream(filename, TJS_BS_READ));
+
+	UnserializeFrom(stream.get());
 }
 //---------------------------------------------------------------------------
 

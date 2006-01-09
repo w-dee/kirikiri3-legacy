@@ -57,6 +57,22 @@ void TJSConvertUTF16ToTJSCharString(tjs_char * out, const tjs_uint16 * in);
 //---------------------------------------------------------------------------
 // TJS_WS 実装(UTF-32リテラル)
 
+#if defined(DEBUG) || defined(_DEBUG) || defined(__WXDEBUG__)
+	#define TJS_CHARUTILS_DEBUG
+#endif
+
+#ifdef TJS_CHARUTILS_DEBUG
+	#define TJS_DEFINE_SOURCE_ID(x) \
+		bool TJS_DEFINE_SOURCE_ID_CHECK_##x = false; \
+		static const int TJSUniqueSourceNumber = x
+#else
+	#define TJS_DEFINE_SOURCE_ID(x) \
+		static const int TJSUniqueSourceNumber = x
+#endif
+
+//		class ___Test { ___Test() { get(); } bool get() { return TJS_DEFINE_SOURCE_ID_CHECK_##x; } } ___test; \
+
+
 #ifndef TJS_WCHAR_T_SIZE_IS_16BIT
 	// wchar_t がもともと32bitの環境では L"文字列" で UTF32 を生成できることを
 	// 期待できるのでこのマクロをそのまま使う
@@ -94,8 +110,8 @@ void TJSConvertUTF16ToTJSCharString(tjs_char * out, const tjs_uint16 * in);
 	// 際に例外が発生する(ただしデバッグビルド時のみ)。
 	// 一行中に複数のTJS_WSを書きたい場合は、２個目以降をTJS_WS2、TJS_WS3にする。
 
-	#ifdef DEBUG
-	void TJSThrowWSAssertionFailure(const wchar_t * source, tjs_int line)
+	#ifdef TJS_CHARUTILS_DEBUG
+	void TJSThrowWSAssertionFailure(const wchar_t * source, tjs_int line);
 	#endif
 
 	//! @brief UTF-32 リテラル文字列を保持するクラス
@@ -104,23 +120,27 @@ void TJSConvertUTF16ToTJSCharString(tjs_char * out, const tjs_uint16 * in);
 	{
 		static tjs_char Utf32Array[SIZE];
 		static bool Converted;
-	#ifdef DEBUG
+	#ifdef TJS_CHARUTILS_DEBUG
 		static const wchar_t * SourceString;
 	#endif
 
 	public:
+	#ifdef TJS_CHARUTILS_DEBUG
+		tTJSUtf16ToUtf32(const wchar_t * utf16, const wchar_t *sourcefile)
+	#else
 		tTJSUtf16ToUtf32(const wchar_t * utf16)
+	#endif
 		{
-	#ifdef DEBUG
+	#ifdef TJS_CHARUTILS_DEBUG
 			if(SourceString && utf16 != SourceString)
-				TJSThrowWSAssertionFailure();
+				TJSThrowWSAssertionFailure(sourcefile, SOURCELINE);
 	#endif
 			if(!Converted)
 			{
 				Converted = true;
 				TJSConvertUTF16ToTJSCharString(Utf32Array,
 					reinterpret_cast<const tjs_uint16 *>(utf16));
-	#ifdef DEBUG
+	#ifdef TJS_CHARUTILS_DEBUG
 				SourceString = utf16;
 	#endif
 			}
@@ -135,32 +155,37 @@ void TJSConvertUTF16ToTJSCharString(tjs_char * out, const tjs_uint16 * in);
 	template<size_t SIZE, int SOURCEID, int SOURCELINE, int SEQID>
 	tjs_char tTJSUtf16ToUtf32<SIZE, SOURCEID, SOURCELINE, SEQID>::Utf32Array[SIZE] = {0};
 
-	#ifdef DEBUG
+	#ifdef TJS_CHARUTILS_DEBUG
 	template<size_t SIZE, int SOURCEID, int SOURCELINE, int SEQID>
 	const wchar_t * tTJSUtf16ToUtf32<SIZE, SOURCEID, SOURCELINE, SEQID>::SourceString = NULL;
 	#endif
 
 
-	#ifdef DEBUG
-		#define TJS_DEFINE_SOURCE_ID(x) \
-			bool TJS_DEFINE_SOURCE_ID_CHECK_##x = false; \
-			static const int TJSUniqueSourceNumber = x
+	#ifdef TJS_CHARUTILS_DEBUG
+		#define _TJS_TO_WCHAR_STRING(X) (L##X)
+		#define TJS_TO_WCHAR_STRING(X) _TJS_TO_WCHAR_STRING(X)
+		#define TJS_WS(X)  ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 0>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS1(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 1>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS2(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 2>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS3(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 3>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS4(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 4>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS5(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 5>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS6(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 6>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS7(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 7>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS8(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 8>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
+		#define TJS_WS9(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 9>(L##X, TJS_TO_WCHAR_STRING(__FILE__)))
 	#else
-		#define TJS_DEFINE_SOURCE_ID(x) \
-			static const int TJSUniqueSourceNumber = x
+		#define TJS_WS(X)  ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 0>(L##X))
+		#define TJS_WS1(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 1>(L##X))
+		#define TJS_WS2(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 2>(L##X))
+		#define TJS_WS3(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 3>(L##X))
+		#define TJS_WS4(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 4>(L##X))
+		#define TJS_WS5(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 5>(L##X))
+		#define TJS_WS6(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 6>(L##X))
+		#define TJS_WS7(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 7>(L##X))
+		#define TJS_WS8(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 8>(L##X))
+		#define TJS_WS9(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 9>(L##X))
 	#endif
-
-	#define TJS_WS(X)  ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 0>(L##X))
-	#define TJS_WS1(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 1>(L##X))
-	#define TJS_WS2(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 2>(L##X))
-	#define TJS_WS3(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 3>(L##X))
-	#define TJS_WS4(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 4>(L##X))
-	#define TJS_WS5(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 5>(L##X))
-	#define TJS_WS6(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 6>(L##X))
-	#define TJS_WS7(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 7>(L##X))
-	#define TJS_WS8(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 8>(L##X))
-	#define TJS_WS9(X) ((const tjs_char *)tTJSUtf16ToUtf32<sizeof(X), TJSUniqueSourceNumber, __LINE__, 9>(L##X))
-
 
 #endif
 

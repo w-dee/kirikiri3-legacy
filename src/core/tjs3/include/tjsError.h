@@ -317,7 +317,7 @@ void TJSThrowFrom_tjs_error(tjs_error hr, const tjs_char *name = NULL);
 namespace TJS
 {
 #ifdef TJS_DECL_MESSAGE_BODY
-	#define TJS_MSG_DECL(name, msg) tTJSMessageHolder name(TJS_WS(#name), msg);
+	#define TJS_MSG_DECL(name, msg) tTJSMessageHolder name(TJS_WS2(#name), msg);
 #else
 	#define TJS_MSG_DECL(name, msg) extern tTJSMessageHolder name;
 #endif

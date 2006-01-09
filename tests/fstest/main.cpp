@@ -3,7 +3,7 @@
 #include "prec.h"
 #include "tjsNative.h"
 
-TJS_DEFINE_SOURCE_ID(0);
+TJS_DEFINE_SOURCE_ID(1);
 
 
 

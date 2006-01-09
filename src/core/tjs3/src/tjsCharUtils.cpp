@@ -11,11 +11,13 @@
 #include "tjsCommHead.h"
 #include "tjsConfig.h"
 #include "tjsCharUtils.h"
+#include "tjsString.h"
+#include "tjsError.h"
 
-TJS_DEFINE_SOURCE_ID(0);
 
 namespace TJS
 {
+TJS_DEFINE_SOURCE_ID(0);
 
 //---------------------------------------------------------------------------
 //! @brief		tjs_char 版 atoi
@@ -444,13 +446,15 @@ void TJSConvertUTF16ToTJSCharString(tjs_char * out, const tjs_uint16 * in)
 
 
 
-#ifdef DEBUG
+#ifdef TJS_CHARUTILS_DEBUG
+#include <stdio.h>
 //---------------------------------------------------------------------------
 //! @brief		一行中に複数の TJS_WS を使用した場合に例外を送出する関数
 //---------------------------------------------------------------------------
 void TJSThrowWSAssertionFailure(const wchar_t * source, tjs_int line)
 {
-	TVPThrowExceptionMessage(
+	fprintf(stderr, "assertion failure at %ls line %d\n", source, line);
+	TJS_eTJSError(
 		ttstr(TJS_WS("you can not use multiple TJS_WS in a line; use TJS_WS, TJS_WS2, TJS_WS3 ... at %1 line %2"),
 			ttstr(source), ttstr(line)));
 }

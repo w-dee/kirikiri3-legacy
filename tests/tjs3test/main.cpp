@@ -3,7 +3,7 @@
 #include "prec.h"
 #include "tjsNative.h"
 
-TJS_DEFINE_SOURCE_ID(0);
+TJS_DEFINE_SOURCE_ID(1);
 
 
 
@@ -74,23 +74,30 @@ bool Application::OnInit()
 //---------------------------------------------------------------------------
 int Application::OnRun()
 {
-	tTJS *tjsengine = new tTJS();
+	try
+	{
+		tTJS *tjsengine = new tTJS();
 
-	iTJSDispatch2 * global = tjsengine->GetGlobalNoAddRef();
-		// グローバルオブジェクトを取得
+		iTJSDispatch2 * global = tjsengine->GetGlobalNoAddRef();
+			// グローバルオブジェクトを取得
 
-	iTJSDispatch2 *func = new TestFunc(); // TestFunc のオブジェクトを作成
-	tTJSVariant func_var(func); // tTJSVariant 型 func_var にオブジェクトを設定
-	func->Release(); // func を Release
+		iTJSDispatch2 *func = new TestFunc(); // TestFunc のオブジェクトを作成
+		tTJSVariant func_var(func); // tTJSVariant 型 func_var にオブジェクトを設定
+		func->Release(); // func を Release
 
-	TJS_THROW_IF_ERROR(
-		global->PropSet(TJS_MEMBERENSURE, TJS_WS("test"), NULL, &func_var, NULL));
-			// 登録
+		TJS_THROW_IF_ERROR(
+			global->PropSet(TJS_MEMBERENSURE, TJS_WS("test"), NULL, &func_var, NULL));
+				// 登録
 
-	tjsengine->EvalExpression(TJS_WS("test('中３マキロン地獄！')"), NULL, NULL, NULL);
-		// tTJS::EvalExpression を使って式を実行
+		tjsengine->EvalExpression(TJS_WS("test('中３マキロン地獄！')"), NULL, NULL, NULL);
+			// tTJS::EvalExpression を使って式を実行
 
-	tjsengine->Release();
+		tjsengine->Release();
+	}
+	catch(const eTJS & err)
+	{
+		wxFprintf(stderr, wxT("Error: %s\n"), err.GetMessage().AsWxString().c_str());
+	}
 	return 0;
 }
 //---------------------------------------------------------------------------

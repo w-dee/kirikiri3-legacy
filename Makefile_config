@@ -71,18 +71,18 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cc ;\
 			echo  -n "CXX := " ;\
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cxx ;\
-			echo  -n "WX_CFLAGS := " ;\
+			echo  -n "WX_CFLAGS := $$comflags " ;\
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cflags ;\
-			echo  -n "WX_CXXFLAGS := " ;\
+			echo  -n "WX_CXXFLAGS := $$comflags " ;\
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cxxflags ;\
-			echo  -n "WX_CPPFLAGS := " ;\
+			echo  -n "WX_CPPFLAGS := $$comflags " ;\
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --cppflags ;\
 			echo  -n "WX_LIBS := " ;\
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --libs | \
 					sed -e "s|-Wl,--subsystem,windows||g" -e "s|-mwindows||g" ;\
 		};\
-		conf=--debug=no;  get > $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
-		conf=--debug=yes; get > $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
+		comflags="";   conf=--debug=no;  get > $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
+		comflags="-g"; conf=--debug=yes; get > $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
 		touch $(TOP_DIR)/config_success ;\
 	)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: wxWidgets configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi

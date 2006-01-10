@@ -10,16 +10,16 @@ prepare:
 
 ifdef BIN
   binary:
-	$(MAKE) INCLUDE_MKTMP=yes INCLUDE_DEPS=yes $(BIN)
+	@$(MAKE) INCLUDE_MKTMP=yes INCLUDE_DEPS=yes $(BIN)
 else
  ifdef LIB
   binary:
-	$(MAKE) INCLUDE_MKTMP=yes INCLUDE_DEPS=yes $(LIB)
+	@$(MAKE) INCLUDE_MKTMP=yes INCLUDE_DEPS=yes $(LIB)
  endif
 endif
 
 make_prepare:
-	if [ ! -d $(BUILD_OUT_DIR)/bin ]; then mkdir -p $(BUILD_OUT_DIR)/bin; fi
+	@if [ ! -d $(BUILD_OUT_DIR)/bin ]; then mkdir -p $(BUILD_OUT_DIR)/bin; fi
 
 
 #### プロジェクトに必要なファイルなどを列挙して .mktmp に格納
@@ -40,12 +40,6 @@ ifdef INCLUDE_MKTMP
 endif
 
 
-###### 依存関係
-
-ifdef INCLUDE_DEPS
- -include $(CPPFILES:.cpp=.d) $(CFILES:.c=.d)
-endif
-
 ###### ルール
 
 ## C++ソース→オブジェクトファイル
@@ -62,16 +56,31 @@ PREC_H_NAME ?= prec.h
 $(PREC_H_NAME).gch: $(PREC_H_NAME)
 
 ## 依存関係記述ファイル
+$(PREC_H_NAME).d: $(PREC_H_NAME)
+	@echo "Generating dependency information for $<"
+	@$(CXX) -MM $(DEFAULT_CPPFLAGS) $(CPPFLAGS) $(INCLUDES) $< > "$@t" ;\
+	if [ -s "$@t" ]; then \
+		echo -n "$(dir $@)" > $@ ;\
+		sed -e "s|^$(basename $(notdir $(PREC_H_NAME))).o|$(notdir $(PREC_H_NAME)).gch|" \
+			-e "s|: | $@ : |g" $@t >> $@ ;\
+	fi; \
+	rm -f "$@t"
+
 %.d: %.cpp
 	@echo "Generating dependency information for $<"
-	@$(CC) -MM $(DEFAULT_CPPFLAGS) $(CPPFLAGS) $(INCLUDES) $< > "$@t" ;\
+	@$(CXX) -MM $(DEFAULT_CPPFLAGS) $(CPPFLAGS) $(INCLUDES) $< > "$@t" ;\
 	if [ -s "$@t" ]; then \
 		echo -n "$(dir $@)" > $@ ;\
 		sed "s|: | $@ : |g" $@t >> $@ ;\
-		rm -f "$@t" ;\
-	else \
-		rm -f "$@t" ;\
-	fi
+	fi; \
+	rm -f "$@t"
+
+## 依存関係
+
+ifdef INCLUDE_DEPS
+ -include $(CPPFILES:.cpp=.d) $(CFILES:.c=.d) $(PREC_H_NAME).d
+
+endif
 
 ## メッセージオブジェクト関連
 %.mo: %.po
@@ -136,7 +145,7 @@ endif
 ## クリーン
 
 clean:
-	rm -f $(OBJS) $(BIN) $(PREC_H_NAME).gch 
+	rm -f $(OBJS) $(BIN) $(PREC_H_NAME).gch $(PREC_H_NAME).d 
 	rm -f messages.pot $(MESSAGE_OBJECTS)
 	rm -f locale/*~ $(CPPFILES:.cpp=.d) $(CPPFILES:.cpp=.dt)
 	rm -f .mktmp $(CFILES:.c=.d) $(CFILES:.c=.dt)

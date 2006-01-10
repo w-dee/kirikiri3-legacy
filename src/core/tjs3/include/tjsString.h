@@ -98,14 +98,7 @@ public:
 	{
 		if(!Ptr) return wxString();
 
-	#ifdef TJS_WCHAR_T_SIZE_IS_16BIT
-		wxMBConvUTF32 conv;
-		return wxString(
-			reinterpret_cast<const char *>(Ptr->operator const tjs_char *()),
-				*(wxMBConv *)&conv);
-	#else
-		return wxString(Ptr->operator const tjs_char *());
-	#endif
+		return TJSCharToWxString(Ptr->operator const tjs_char *());
 	}
 #endif
 

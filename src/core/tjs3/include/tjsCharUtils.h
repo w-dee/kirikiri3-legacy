@@ -54,6 +54,11 @@ void TJSConvertUTF16ToTJSCharString(tjs_char * out, const tjs_uint16 * in);
 	#define TJS_strchr			wcschr
 	#define TJS_strtod			wcstod
 #endif
+
+#ifdef TJS_SUPPORT_WX
+wxString TJSCharToWxString(const tjs_char * str);
+#endif
+
 //---------------------------------------------------------------------------
 // TJS_WS 実装(UTF-32リテラル)
 

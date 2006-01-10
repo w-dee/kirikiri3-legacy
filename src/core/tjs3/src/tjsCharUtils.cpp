@@ -441,6 +441,50 @@ void TJSConvertUTF16ToTJSCharString(tjs_char * out, const tjs_uint16 * in)
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		tjs_char 型の文字列を wxString に変換する
+//! @param		str  tjs_char*型の文字列
+//! @return		wxString型の文字列
+//---------------------------------------------------------------------------
+wxString TJSCharToWxString(const tjs_char * str)
+{
+	if(!str) return wxString();
+	if(str[0] == 0) return wxString();
+#ifdef TJS_WCHAR_T_SIZE_IS_16BIT
+	// UTF-32 から UTF-16 への変換が必要
+	wxMBConvUTF32 conv;
+
+	// 変換後の文字列長を取得
+	size_t converted_size =
+		conv.MB2WC(NULL, reinterpret_cast<const char *>(str), 0);
+	if(converted_size == static_cast<size_t>(-1))
+		return wxString(); // failed to convert
+
+	// 変換後の文字列を一時的に格納するバッファを確保
+	wchar_t *buf = new wchar_t[converted_size + 1];
+	try
+	{
+		if(conv.MB2WC(buf, reinterpret_cast<const char *>(str),
+						converted_size + 1) == static_cast<size_t>(-1))
+		{
+			delete [] buf;
+			return wxString();
+		}
+		wxString ret(buf);
+		delete [] buf, buf = NULL;
+		return ret;
+	}
+	catch(...)
+	{
+		delete [] buf;
+		throw;
+	}
+#else
+	return wxString(str);
+#endif
+}
+//---------------------------------------------------------------------------
+
 
 
 

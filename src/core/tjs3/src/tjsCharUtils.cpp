@@ -358,7 +358,12 @@ tjs_char *TJS_strstr(const tjs_char *s1, const tjs_char *s2)
 	while(*s1)
 	{
 		if(*s1 == *s2)
-			if(!TJS_strcmp(s1, s2)) return const_cast<tjs_char*>(s1);
+		{
+			const tjs_char *p1 = s1 + 1;
+			const tjs_char *p2 = s2 + 1;
+			while(*p2 && *p1 == *p2) p1++, p2++;
+			if(*p2 == 0) return const_cast<tjs_char*>(s1);
+		}
 		s1 ++;
 	}
 	return NULL;

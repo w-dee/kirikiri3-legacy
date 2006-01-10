@@ -154,7 +154,7 @@ tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
 			throw;
 		}
 		if(s) s->Release();
-		return str + TJS_WS(" /") + TJS_WS("* ") + ttstr(val) + TJS_WS(" *") + TJS_WS("/");
+		return str + TJS_WS1(" /") + TJS_WS2("* ") + ttstr(val) + TJS_WS3(" *") + TJS_WS4("/");
 	  }
 	case tvtString:
 	  {

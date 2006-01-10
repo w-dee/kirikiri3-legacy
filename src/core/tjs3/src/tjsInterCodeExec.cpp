@@ -898,9 +898,9 @@ void tTJSInterCodeContext::DisplayExceptionGeneratedCode(tjs_int codepos,
 {
 	tTJS *tjs = Block->GetTJS();
 	ttstr info(
-		TJS_WS("==== An exception occured at ") +
+		TJS_WS1("==== An exception occured at ") +
 		GetPositionDescriptionString(codepos) +
-		TJS_WS(", VM ip = ") + ttstr(codepos) + TJS_WS(" ===="));
+		TJS_WS2(", VM ip = ") + ttstr(codepos) + TJS_WS3(" ===="));
 	tjs_int info_len = info.GetLen();
 
 	tjs->OutputToConsole(info.c_str());

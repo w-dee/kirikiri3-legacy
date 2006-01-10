@@ -194,8 +194,8 @@ tTJSVariantString * TJSObjectToString(const tTJSVariantClosure &dsp)
 		TJS_pointer_to_str(dsp.ObjThis, tmp2);
 		ttstr type1 = TJSGetObjectTypeInfo(dsp.Object);
 		ttstr type2 = TJSGetObjectTypeInfo(dsp.ObjThis);
-		if(!type1.IsEmpty()) type1 = TJS_WS("[") + type1 + TJS_WS("]");
-		if(!type2.IsEmpty()) type2 = TJS_WS("[") + type2 + TJS_WS("]");
+		if(!type1.IsEmpty()) type1 = TJS_WS1("[") + type1 + TJS_WS2("]");
+		if(!type2.IsEmpty()) type2 = TJS_WS1("[") + type2 + TJS_WS2("]");
 
 		ttstr ret(ttstr(TJS_WS("(Object 0x%1%2:0x%3%4)")),
 			ttstr(tmp1), type1, ttstr(tmp2), type2);

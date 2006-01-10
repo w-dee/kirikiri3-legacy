@@ -903,7 +903,7 @@ static bool TJSParseRegExp(tTJSVariant &pat, const tjs_char **ptr)
 				flag += *(*ptr);
 				if(!TJSNext(ptr)) break;
 			}
-			str = TJS_WS("//")+ flag + TJS_WS("/") + str;
+			str = TJS_WS1("//")+ flag + TJS_WS2("/") + str;
 			ok = true;
 			break;
 		}

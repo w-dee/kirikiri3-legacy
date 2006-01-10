@@ -167,7 +167,7 @@ ttstr tTJSScriptBlock::GetLineDescriptionString(tjs_int pos) const
 		name = ttstr(TJS_WS("anonymous@0x")) + ptr;
 	}
 
-	return name + TJS_WS("(") + ttstr(line) + TJS_WS(")");
+	return name + TJS_WS1("(") + ttstr(line) + TJS_WS2(")");
 }
 //---------------------------------------------------------------------------
 void tTJSScriptBlock::ConsoleOutput(const tjs_char *msg, void *data)
@@ -409,7 +409,7 @@ ttstr tTJSScriptBlock::GetNameInfo() const
 	}
 	else
 	{
-		return ttstr(Name) + TJS_WS("(line +") + ttstr(LineOffset) + TJS_WS(")");
+		return ttstr(Name) + TJS_WS1("(line +") + ttstr(LineOffset) + TJS_WS2(")");
 	}
 }
 //---------------------------------------------------------------------------

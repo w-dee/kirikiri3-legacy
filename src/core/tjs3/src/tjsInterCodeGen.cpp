@@ -344,7 +344,7 @@ const tjs_char* tTJSInterCodeContext::GetContextTypeName() const
 //---------------------------------------------------------------------------
 ttstr tTJSInterCodeContext::GetShortDescription() const
 {
-	ttstr ret(TJS_WS("(") + ttstr(GetContextTypeName()) + TJS_WS(")"));
+	ttstr ret(TJS_WS1("(") + ttstr(GetContextTypeName()) + TJS_WS2(")"));
 
 	const tjs_char *name;
 	if(ContextType == ctPropertySetter || ContextType == ctPropertyGetter)
@@ -366,7 +366,7 @@ ttstr tTJSInterCodeContext::GetShortDescription() const
 //---------------------------------------------------------------------------
 ttstr tTJSInterCodeContext::GetShortDescriptionWithClassName() const
 {
-	ttstr ret(TJS_WS("(") + ttstr(GetContextTypeName()) + TJS_WS(")"));
+	ttstr ret(TJS_WS1("(") + ttstr(GetContextTypeName()) + TJS_WS2(")"));
 
 	tTJSInterCodeContext * parent;
 
@@ -958,7 +958,7 @@ tjs_int tTJSInterCodeContext::FindSrcLineStartCodePos(tjs_int codepos) const
 ttstr tTJSInterCodeContext::GetPositionDescriptionString(tjs_int codepos) const
 {
 	return Block->GetLineDescriptionString(CodePosToSrcPos(codepos)) +
-		TJS_WS("[") + GetShortDescription() + TJS_WS("]");
+		TJS_WS1("[") + GetShortDescription() + TJS_WS2("]");
 }
 //---------------------------------------------------------------------------
 static bool inline TJSIsModifySubType(tTJSSubType type)

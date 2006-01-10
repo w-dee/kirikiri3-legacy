@@ -33,6 +33,7 @@ TJS_DEFINE_SOURCE_ID(2000);
 //---------------------------------------------------------------------------
 tTVPFileSystemManager::tTVPFileSystemManager()
 {
+	// カレントディレクトリを / に設定
 	CurrentDirectory = TJS_WS("/");
 }
 //---------------------------------------------------------------------------
@@ -567,10 +568,16 @@ boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 		p--;
 	}
 
-	// 最低でも / (ルート) に割り当てられているファイルシステムが見つからないと
-	// おかしいので、ここに来るはずはないのだが ...
-	// (fullpath に空文字列が渡されるとここに来るかもしれない)
-	return boost::shared_ptr<tTVPFileSystem>();
+	// 通常はここにこない
+	// ここにくるのは以下のどちらか
+	// ・  / (ルート) に割り当てられているファイルシステムが見つからない
+	// ・  fullpath にが渡された
+
+	if(fullpath.GetLen() == 0)
+		return boost::shared_ptr<tTVPFileSystem>();
+	else
+		eTVPException::Throw(
+			TJS_WS_TR("Could not find the root filesystem"));
 }
 //---------------------------------------------------------------------------
 
@@ -736,3 +743,32 @@ ttstr tTVPFileSystemManager::ExtractPath(const ttstr & in)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		現在の作業ディレクトリを得る
+//! @return		作業ディレクトリ
+//---------------------------------------------------------------------------
+const ttstr & tTVPFileSystemManager::GetCurrentDirectory()
+{
+	tTJSCriticalSectionHolder holder(CS);
+
+	return CurrentDirectory;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		作業ディレクトリを設定する
+//! @param		dir   作業ディレクトリ
+//! @note		実際にそのディレクトリが存在するかどうかのチェックは行わない
+//---------------------------------------------------------------------------
+void tTVPFileSystemManager::SetCurrentDirectory(const ttstr &dir)
+{
+	tTJSCriticalSectionHolder holder(CS);
+
+	if(dir.EndsWith(TJS_WC('/')))
+		CurrentDirectory = dir;
+	else
+		CurrentDirectory = dir + TJS_WS("/");
+}
+//---------------------------------------------------------------------------

@@ -231,7 +231,8 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
 		@note
 		<p>
 			フルパスを得ます。ファイル名が相対パスだった場合 (先頭が
-			'/' で始まってない場合) にはカレントディレクトリが補完されます。
+			'/' で始まってない場合) には <code>FileSystem.cwd</code> で
+			指定されたカレントディレクトリが補完されます。
 			<tt>..</tt> (一つ上のディレクトリを表す) などがパス名中に含まれている
 			場合は圧縮されます。
 		</p>
@@ -302,6 +303,37 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
 	return TJS_S_OK;
 }
 TJS_END_NATIVE_METHOD_DECL(/*func. name*/unmount)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(cwd)
+{
+	/*%
+		@brief	作業ディレクトリ
+		@note
+		<p>
+			現在の作業ディレクトリを表します。
+			値を設定することもできます。デフォルトは "/" (ルート) になっています。
+		</p>
+		<p>
+			値を設定すると現在の作業ディレクトリを変更できます。ただし、このプロパティを
+			設定する時点ではそのディレクトリが実際に存在しているかどうかの
+			チェックは行いません。
+		</p>
+	*/
+	TJS_BEGIN_NATIVE_PROP_GETTER
+	{
+		if(result) *result = tTVPFileSystemManager::instance().GetCurrentDirectory();
+		return TJS_S_OK;
+	}
+	TJS_END_NATIVE_PROP_GETTER
+
+	TJS_BEGIN_NATIVE_PROP_SETTER
+	{
+		tTVPFileSystemManager::instance().SetCurrentDirectory(*param);
+		return TJS_S_OK;
+	}
+	TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(cwd)
 //----------------------------------------------------------------------
 	TJS_END_NATIVE_MEMBERS
 }

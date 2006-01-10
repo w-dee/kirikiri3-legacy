@@ -132,7 +132,11 @@ public:
 	static ttstr ExtractExtension(const ttstr & in);
 	static ttstr ExtractName(const ttstr & in);
 	static ttstr ExtractPath(const ttstr & in);
+
 	ttstr GetFullPath(const ttstr & in) { return NormalizePath(in); }
+
+	const ttstr & GetCurrentDirectory();
+	void SetCurrentDirectory(const ttstr &dir);
 };
 //---------------------------------------------------------------------------
 

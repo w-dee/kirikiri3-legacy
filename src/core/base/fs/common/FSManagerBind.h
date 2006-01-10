@@ -85,4 +85,35 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief クラスレジストラ
+//---------------------------------------------------------------------------
+class tTVPFileSystemRegisterer
+{
+	iTJSDispatch2 * FileSystemClass;
+public:
+	tTVPFileSystemRegisterer();
+	~tTVPFileSystemRegisterer();
+
+	static tTVPFileSystemRegisterer & instance() { return
+		boost::details::pool::singleton_default<tTVPFileSystemRegisterer>::instance();
+			} //!< このシングルトンのインスタンスを返す
+
+	void RegisterClassObject(const tjs_char *name, iTJSDispatch2 * object);
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 #endif

@@ -14,6 +14,7 @@
 #include "TmpFSBind.h"
 #include "TVPException.h"
 
+
 TJS_DEFINE_SOURCE_ID(2014);
 
 
@@ -151,4 +152,31 @@ tTJSNativeInstance *tTJSNC_TmpFS::CreateNativeInstance()
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tTVPTmpFSRegisterer::tTVPTmpFSRegisterer()
+{
+	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
+	iTJSDispatch2 * cls = new tTJSNC_TmpFS();
+	try
+	{
+		tTVPFileSystemRegisterer::instance().RegisterClassObject(
+							TJS_WS("TmpFS"), cls);
+	}
+	catch(...)
+	{
+		cls->Release();
+		throw;
+	}
+	cls->Release();
+}
+//---------------------------------------------------------------------------
 

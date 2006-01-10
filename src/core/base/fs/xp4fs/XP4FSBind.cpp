@@ -104,3 +104,25 @@ tTJSNativeInstance *tTJSNC_XP4FS::CreateNativeInstance()
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tTVPXP4FSRegisterer::tTVPXP4FSRegisterer()
+{
+	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
+	iTJSDispatch2 * cls = new tTJSNC_XP4FS();
+	try
+	{
+		tTVPFileSystemRegisterer::instance().RegisterClassObject(
+							TJS_WS("XP4FS"), cls);
+	}
+	catch(...)
+	{
+		cls->Release();
+		throw;
+	}
+	cls->Release();
+}
+//---------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 #include "FSManager.h"
 #include "FSManagerBind.h"
 #include "TVPException.h"
+#include "TJSEngine.h"
 
 TJS_DEFINE_SOURCE_ID(2011);
 
@@ -338,3 +339,59 @@ TJS_END_NATIVE_PROP_DECL(cwd)
 	TJS_END_NATIVE_MEMBERS
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tTVPFileSystemRegisterer::tTVPFileSystemRegisterer()
+{
+	FileSystemClass = new tTJSNC_FileSystem();
+	try
+	{
+		tTVPTJS3ScriptEngine::instance().RegisterGlobalObject(TJS_WS("FileSystem"), FileSystemClass);
+	}
+	catch(...)
+	{
+		FileSystemClass->Release();
+		throw;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		デストラクタ
+//---------------------------------------------------------------------------
+tTVPFileSystemRegisterer::~tTVPFileSystemRegisterer()
+{
+	FileSystemClass->Release();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ファイルシステムにクラスオブジェクトを登録する
+//! @param		name    クラス名
+//! @param		object  クラスオブジェクト
+//---------------------------------------------------------------------------
+void tTVPFileSystemRegisterer::RegisterClassObject(const tjs_char *name,
+											iTJSDispatch2 * object)
+{
+	tTJSVariant val(object, NULL);
+	tjs_error er;
+	er = FileSystemClass->PropSet(TJS_MEMBERENSURE, name, NULL, &val, FileSystemClass);
+	if(TJS_FAILED(er))
+		TJSThrowFrom_tjs_error(er, name);
+}
+//---------------------------------------------------------------------------
+
+

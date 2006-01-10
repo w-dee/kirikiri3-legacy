@@ -31,6 +31,7 @@ INCLUDES= \
 		-I$(BASE_DIR)/fs/tmpfs   \
 		-I$(BASE_DIR)/fs/xp4fs   \
 		-I$(BASE_DIR)/exception  \
+		-I$(BASE_DIR)/script     \
 		-I.
 
 CPPFILES = \
@@ -51,6 +52,7 @@ CPPFILES = \
 		$(BASE_DIR)/fs/xp4fs/XP4StreamCache.cpp     \
 		$(BASE_DIR)/fs/xp4fs/XP4FSBind.cpp          \
 		$(BASE_DIR)/exception/TVPException.cpp      \
+		$(BASE_DIR)/script/TJSEngine.cpp            \
 		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)

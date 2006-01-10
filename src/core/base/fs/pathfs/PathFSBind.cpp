@@ -154,3 +154,29 @@ tTJSNativeInstance *tTJSNC_PathFS::CreateNativeInstance()
 //---------------------------------------------------------------------------
 
 
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tTVPPathFSRegisterer::tTVPPathFSRegisterer()
+{
+	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
+	iTJSDispatch2 * cls = new tTJSNC_PathFS();
+	try
+	{
+		tTVPFileSystemRegisterer::instance().RegisterClassObject(
+							TJS_WS("PathFS"), cls);
+	}
+	catch(...)
+	{
+		cls->Release();
+		throw;
+	}
+	cls->Release();
+}
+//---------------------------------------------------------------------------
+
+
+

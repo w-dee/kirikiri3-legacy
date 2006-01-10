@@ -106,3 +106,30 @@ tTJSNativeInstance *tTJSNC_OSFS::CreateNativeInstance()
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tTVPOSFSRegisterer::tTVPOSFSRegisterer()
+{
+	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
+	iTJSDispatch2 * cls = new tTJSNC_OSFS();
+	try
+	{
+		tTVPFileSystemRegisterer::instance().RegisterClassObject(
+							TJS_WS("OSFS"), cls);
+	}
+	catch(...)
+	{
+		cls->Release();
+		throw;
+	}
+	cls->Release();
+}
+//---------------------------------------------------------------------------
+
+

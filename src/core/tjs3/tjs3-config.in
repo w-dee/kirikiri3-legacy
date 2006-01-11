@@ -3,6 +3,7 @@
 libs=@LIBS@
 cxxflags=@CXXFLAGS@
 cppflags=@CPPFLAGS@
+linkdeps=@LINKDEPS@
 
 usage()
 {
@@ -14,6 +15,7 @@ Options:
   --libs           display flags for linking with the TJS3 library
   --cxxflags       display cxxflags for compiling with the TJS3 library
   --cppflags       display cppflags for compiling with the TJS3 library
+  --linkdeps       display link deps for Makefile with the TJS3 library
 EOF
 	exit $1
 }
@@ -31,6 +33,9 @@ case $1 in
 	;;
 --cppflags)
 	echo $cppflags
+	;;
+--linkdeps)
+	echo $linkdeps
 	;;
 *)
   usage 1 1>&2

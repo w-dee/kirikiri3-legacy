@@ -81,6 +81,7 @@ $(TJS3_BIN_OUTPUT_DIR)/tjs3-config: Makefile
 		-e 's|@LIBS@|"-L$(TJS3_LIB_OUTPUT_DIR) -ltjs3"|' \
 		-e 's|@CXXFLAGS@|"-I$(TJS3_INCLUDE_DIR) $(CXXFLAGS)"|' \
 		-e 's|@CPPFLAGS@|"-I$(TJS3_INCLUDE_DIR) $(CXXFLAGS)"|' \
+		-e 's|@LINKDEPS@|"$(BIN)"|' \
 		  > $(TJS3_BIN_OUTPUT_DIR)/tjs3-config
 	chmod +x $(TJS3_BIN_OUTPUT_DIR)/tjs3-config
 

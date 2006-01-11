@@ -160,7 +160,7 @@ void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 	if(!mapped_filename)
 		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
-	tTVPFileSystemManager::instance().Stat(*mapped_filename, struc);
+	tTVPFileSystemManager::instance()->Stat(*mapped_filename, struc);
 }
 //---------------------------------------------------------------------------
 
@@ -187,7 +187,7 @@ tTJSBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 f
 	if(!mapped_filename)
 		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
-	return tTVPFileSystemManager::instance().CreateStream(*mapped_filename, flags);
+	return tTVPFileSystemManager::instance()->CreateStream(*mapped_filename, flags);
 }
 //---------------------------------------------------------------------------
 
@@ -282,7 +282,7 @@ void tTVPPathFS::Ensure()
 	{
 		bool recursive = (i->c_str()[0] == static_cast<tjs_char>(TJS_WC('+')));
 		ttstr dirname(i->c_str() + 1);
-		tTVPFileSystemManager::instance().GetFileListAt(dirname, &callback, recursive);
+		tTVPFileSystemManager::instance()->GetFileListAt(dirname, &callback, recursive);
 	}
 
 	// フラグを倒す

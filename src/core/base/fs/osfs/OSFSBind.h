@@ -15,6 +15,7 @@
 #include "FSManagerBind.h"
 #include "OSFS.h"
 #include "tjsNative.h"
+#include "Singleton.h"
 
 //---------------------------------------------------------------------------
 //! @brief OSFS ネイティブインスタンス
@@ -62,11 +63,13 @@ private:
 //---------------------------------------------------------------------------
 class tTVPOSFSRegisterer
 {
+	tTVPSingleton<tTVPTJS3ScriptEngine> ref_tTVPTJS3ScriptEngine; //!< tTVPTJS3ScriptEngine に依存
+	tTVPSingleton<tTVPFileSystemRegisterer> ref_tTVPFileSystemRegisterer; //!< tTVPFileSystemRegisterer に依存
 public:
 	tTVPOSFSRegisterer();
 
-	static tTVPOSFSRegisterer & instance() { return
-		boost::details::pool::singleton_default<tTVPOSFSRegisterer>::instance();
+	static boost::shared_ptr<tTVPOSFSRegisterer> & instance() { return
+		tTVPSingleton<tTVPOSFSRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------

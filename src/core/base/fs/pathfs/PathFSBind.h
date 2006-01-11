@@ -64,11 +64,13 @@ private:
 //---------------------------------------------------------------------------
 class tTVPPathFSRegisterer
 {
+	tTVPSingleton<tTVPTJS3ScriptEngine> ref_tTVPTJS3ScriptEngine; //!< tTVPTJS3ScriptEngine に依存
+	tTVPSingleton<tTVPFileSystemRegisterer> ref_tTVPFileSystemRegisterer; //!< tTVPFileSystemRegisterer に依存
 public:
 	tTVPPathFSRegisterer();
 
-	static tTVPPathFSRegisterer & instance() { return
-		boost::details::pool::singleton_default<tTVPPathFSRegisterer>::instance();
+	static boost::shared_ptr<tTVPPathFSRegisterer> & instance() { return
+		tTVPSingleton<tTVPPathFSRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------

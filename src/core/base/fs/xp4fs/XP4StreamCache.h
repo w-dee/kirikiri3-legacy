@@ -13,8 +13,7 @@
 #ifndef XP4STREAMCACHEH
 #define XP4STREAMCACHEH
 
-#include <boost/pool/detail/singleton.hpp>
-
+#include "Singleton.h"
 
 //---------------------------------------------------------------------------
 //!@brief		ストリームキャッシュクラス
@@ -38,8 +37,8 @@ public:
 	tTVPXP4StreamCache();
 	~tTVPXP4StreamCache();
 
-	static tTVPXP4StreamCache & instance() { return
-		boost::details::pool::singleton_default<tTVPXP4StreamCache>::instance();
+	static boost::shared_ptr<tTVPXP4StreamCache> & instance() { return
+		tTVPSingleton<tTVPXP4StreamCache>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 public:

@@ -67,7 +67,7 @@ tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & n
 
 	// not found in the pool
 	// simply create a stream and return it
-	return tTVPFileSystemManager::instance().CreateStream(name, TJS_BS_READ);
+	return tTVPFileSystemManager::instance()->CreateStream(name, TJS_BS_READ);
 }
 //---------------------------------------------------------------------------
 

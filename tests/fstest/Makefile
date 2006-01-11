@@ -22,7 +22,8 @@ include $(TOP_DIR)/src/core/tjs3/Makefile_for_user
 
 #----------------------------#
 
-BASE_DIR=$(TOP_DIR)/src/core/base
+CORE_DIR=$(TOP_DIR)/src/core
+BASE_DIR=$(CORE_DIR)/base
 
 INCLUDES= \
 		-I$(BASE_DIR)/fs/common  \
@@ -32,6 +33,8 @@ INCLUDES= \
 		-I$(BASE_DIR)/fs/xp4fs   \
 		-I$(BASE_DIR)/exception  \
 		-I$(BASE_DIR)/script     \
+		-I$(BASE_DIR)/script     \
+		-I$(CORE_DIR)/utils      \
 		-I.
 
 CPPFILES = \

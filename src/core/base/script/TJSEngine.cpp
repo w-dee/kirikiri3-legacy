@@ -32,9 +32,11 @@ tTVPTJS3ScriptEngine::~tTVPTJS3ScriptEngine()
 {
 	if(Engine)
 	{
+/*
 #ifdef __WXDEBUG__
 		wxFprintf(stderr, wxT("warning: tTVPTJS3ScriptEngine::instance().Shutdown() should be called before main() ends.\n"));
 #endif
+*/
 		Shutdown();
 	}
 }

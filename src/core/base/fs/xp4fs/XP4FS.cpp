@@ -76,7 +76,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 		}
 	} lister(archive_names, name_noext, name_nopath, path);
 
-	tTVPFileSystemManager::instance().GetFileListAt(path, &lister);
+	tTVPFileSystemManager::instance()->GetFileListAt(path, &lister);
 
 	//- archive_names の先頭の要素以外を名前順に並べ替え
 	std::sort(archive_names.begin() + 1, archive_names.end());

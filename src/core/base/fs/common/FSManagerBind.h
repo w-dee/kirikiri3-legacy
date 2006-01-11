@@ -14,6 +14,9 @@
 
 #include "FSManager.h"
 #include "tjsNative.h"
+#include "Singleton.h"
+#include "TJSEngine.h"
+
 
 //---------------------------------------------------------------------------
 //! @brief ファイルシステム ネイティブインスタンス
@@ -98,12 +101,15 @@ public:
 class tTVPFileSystemRegisterer
 {
 	iTJSDispatch2 * FileSystemClass;
+
+	tTVPSingleton<tTVPTJS3ScriptEngine> ref_tTVPTJS3ScriptEngine; //!< tTVPTJS3ScriptEngine に依存
+
 public:
 	tTVPFileSystemRegisterer();
 	~tTVPFileSystemRegisterer();
 
-	static tTVPFileSystemRegisterer & instance() { return
-		boost::details::pool::singleton_default<tTVPFileSystemRegisterer>::instance();
+	static boost::shared_ptr<tTVPFileSystemRegisterer> & instance() { return
+		tTVPSingleton<tTVPFileSystemRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 	void RegisterClassObject(const tjs_char *name, iTJSDispatch2 * object);

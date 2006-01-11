@@ -42,7 +42,7 @@ tTVPXP4ArchiveStream::tTVPXP4ArchiveStream(
 	SegmentRemain = 0;
 	SegmentPos = 0;
 
-	Stream = tTVPXP4StreamCache::instance().GetStream(Owner.get(), ptr->GetFileName());
+	Stream = tTVPXP4StreamCache::instance()->GetStream(Owner.get(), ptr->GetFileName());
 }
 //---------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ tTVPXP4ArchiveStream::~tTVPXP4ArchiveStream()
 {
 	volatile tTJSCriticalSectionHolder holder(CS);
 
-	tTVPXP4StreamCache::instance().ReleaseStream(Owner.get(), Stream);
+	tTVPXP4StreamCache::instance()->ReleaseStream(Owner.get(), Stream);
 }
 //---------------------------------------------------------------------------
 
@@ -81,7 +81,7 @@ void tTVPXP4ArchiveStream::EnsureSegment()
 	{
 		// a compressed segment
 		// セグメントキャッシュの中から探す
-		DecompressedData = tTVPXP4SegmentCache::instance().Find(
+		DecompressedData = tTVPXP4SegmentCache::instance()->Find(
 			Owner.get(), FileIndex, CurSegmentNum,
 			Stream, SegmentInfo[CurSegmentNum].StoreOffset,
 			SegmentInfo[CurSegmentNum].StoreSize,

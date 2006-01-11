@@ -16,8 +16,9 @@
 #include "tjs.h"
 #include "tjsUtils.h"
 #include "tjsHashSearch.h"
-#include <boost/pool/detail/singleton.hpp>
+#include "Singleton.h"
 #include <boost/smart_ptr.hpp>
+
 
 //---------------------------------------------------------------------------
 //! @brief		tTVPFileSystem::GetFileListAt で用いられるコールバックインターフェース
@@ -96,8 +97,8 @@ public:
 	tTVPFileSystemManager();
 	~tTVPFileSystemManager();
 
-	static tTVPFileSystemManager & instance() { return
-		boost::details::pool::singleton_default<tTVPFileSystemManager>::instance();
+	static boost::shared_ptr<tTVPFileSystemManager> & instance() { return
+		tTVPSingleton<tTVPFileSystemManager>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 	void Mount(const ttstr & point, iTJSDispatch2 * fs_tjsobj);

@@ -15,6 +15,7 @@
 #include "FSManagerBind.h"
 #include "XP4FS.h"
 #include "tjsNative.h"
+#include "Singleton.h"
 
 //---------------------------------------------------------------------------
 //! @brief XP4FS ネイティブインスタンス
@@ -66,11 +67,13 @@ private:
 //---------------------------------------------------------------------------
 class tTVPXP4FSRegisterer
 {
+	tTVPSingleton<tTVPTJS3ScriptEngine> ref_tTVPTJS3ScriptEngine; //!< tTVPTJS3ScriptEngine に依存
+	tTVPSingleton<tTVPFileSystemRegisterer> ref_tTVPFileSystemRegisterer; //!< tTVPFileSystemRegisterer に依存
 public:
 	tTVPXP4FSRegisterer();
 
-	static tTVPXP4FSRegisterer & instance() { return
-		boost::details::pool::singleton_default<tTVPXP4FSRegisterer>::instance();
+	static boost::shared_ptr<tTVPXP4FSRegisterer> & instance() { return
+		tTVPSingleton<tTVPXP4FSRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------

@@ -15,9 +15,9 @@
 #define XP4SEGMENTCACHEH
 
 
-#include <boost/pool/detail/singleton.hpp>
 #include <boost/smart_ptr.hpp>
 #include "DecompressedHolder.h"
+#include "Singleton.h"
 
 
 
@@ -71,8 +71,8 @@ public:
 	tTVPXP4SegmentCache();
 	~tTVPXP4SegmentCache();
 
-	static tTVPXP4SegmentCache & instance() { return
-		boost::details::pool::singleton_default<tTVPXP4SegmentCache>::instance();
+	static boost::shared_ptr<tTVPXP4SegmentCache> & instance() { return
+		tTVPSingleton<tTVPXP4SegmentCache>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 public:

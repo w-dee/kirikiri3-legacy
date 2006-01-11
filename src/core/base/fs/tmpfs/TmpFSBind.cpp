@@ -168,7 +168,7 @@ tTVPTmpFSRegisterer::tTVPTmpFSRegisterer()
 	iTJSDispatch2 * cls = new tTJSNC_TmpFS();
 	try
 	{
-		tTVPFileSystemRegisterer::instance().RegisterClassObject(
+		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
 							TJS_WS("TmpFS"), cls);
 	}
 	catch(...)

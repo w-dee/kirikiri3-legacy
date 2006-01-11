@@ -77,7 +77,7 @@ int Application::OnRun()
 {
 	try
 	{
-		iTJSDispatch2 * global = tTVPTJS3ScriptEngine::instance().GetGlobalNoAddRef();
+		iTJSDispatch2 * global = tTVPTJS3ScriptEngine::instance()->GetGlobalNoAddRef();
 			// グローバルオブジェクトを取得
 
 		iTJSDispatch2 *func = new TestFunc(); // TestFunc のオブジェクトを作成
@@ -88,12 +88,11 @@ int Application::OnRun()
 			global->PropSet(TJS_MEMBERENSURE, TJS_WS("test"), NULL, &func_var, NULL));
 				// 登録
 
-		tTVPTJS3ScriptEngine::instance().GetEngineNoAddRef()->EvalExpression(
+		tTVPTJS3ScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
 			TJS_WS("FileSystem.mount('/', new FileSystem.TmpFS())"),
 			NULL, NULL, NULL);
 			// tTJS::EvalExpression を使って式を実行
 
-		tTVPTJS3ScriptEngine::instance().Shutdown();
 	}
 	catch(const eTJS &e)
 	{

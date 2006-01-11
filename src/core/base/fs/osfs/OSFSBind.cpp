@@ -120,7 +120,7 @@ tTVPOSFSRegisterer::tTVPOSFSRegisterer()
 	iTJSDispatch2 * cls = new tTJSNC_OSFS();
 	try
 	{
-		tTVPFileSystemRegisterer::instance().RegisterClassObject(
+		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
 							TJS_WS("OSFS"), cls);
 	}
 	catch(...)

@@ -220,7 +220,7 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, iMapCallback & callback)
 
 	// アーカイブファイルを開く
 	std::auto_ptr<tTJSBinaryStream>
-		stream(tTVPFileSystemManager::instance().CreateStream(filename, TJS_BS_READ));
+		stream(tTVPFileSystemManager::instance()->CreateStream(filename, TJS_BS_READ));
 
 	// ヘッダのシグニチャをチェック
 	static unsigned char XP4Mark1[] = // 8bytes
@@ -366,8 +366,8 @@ tTVPXP4Archive::~tTVPXP4Archive()
 	// キャッシュをクリアする
 	// このアーカイブに関連したキャッシュのみを解放できるように実装することも
 	// できるが、処理の単純化のためにすべてキャッシュをクリアしてしまうことにする
-	tTVPXP4SegmentCache::instance().Clear();
-	tTVPXP4StreamCache::instance().Clear();
+	tTVPXP4SegmentCache::instance()->Clear();
+	tTVPXP4StreamCache::instance()->Clear();
 }
 //---------------------------------------------------------------------------
 

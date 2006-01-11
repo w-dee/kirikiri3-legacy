@@ -115,7 +115,7 @@ tTVPXP4FSRegisterer::tTVPXP4FSRegisterer()
 	iTJSDispatch2 * cls = new tTJSNC_XP4FS();
 	try
 	{
-		tTVPFileSystemRegisterer::instance().RegisterClassObject(
+		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
 							TJS_WS("XP4FS"), cls);
 	}
 	catch(...)

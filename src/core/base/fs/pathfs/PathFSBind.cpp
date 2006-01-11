@@ -166,7 +166,7 @@ tTVPPathFSRegisterer::tTVPPathFSRegisterer()
 	iTJSDispatch2 * cls = new tTJSNC_PathFS();
 	try
 	{
-		tTVPFileSystemRegisterer::instance().RegisterClassObject(
+		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
 							TJS_WS("PathFS"), cls);
 	}
 	catch(...)

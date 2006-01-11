@@ -631,7 +631,7 @@ void tTVPTmpFS::SerializeTo(tTJSBinaryStream * dest)
 void tTVPTmpFS::SerializeTo(const ttstr & filename)
 {
 	std::auto_ptr<tTJSBinaryStream>
-		stream(tTVPFileSystemManager::instance().CreateStream(filename, TJS_BS_WRITE));
+		stream(tTVPFileSystemManager::instance()->CreateStream(filename, TJS_BS_WRITE));
 
 	SerializeTo(stream.get());
 }
@@ -670,7 +670,7 @@ void tTVPTmpFS::UnserializeFrom(tTJSBinaryStream * src)
 void tTVPTmpFS::UnserializeFrom(const ttstr & filename)
 {
 	std::auto_ptr<tTJSBinaryStream>
-		stream(tTVPFileSystemManager::instance().CreateStream(filename, TJS_BS_READ));
+		stream(tTVPFileSystemManager::instance()->CreateStream(filename, TJS_BS_READ));
 
 	UnserializeFrom(stream.get());
 }

@@ -13,8 +13,7 @@
 #define TJSENGINEH
 
 #include "tjs.h"
-#include <boost/pool/detail/singleton.hpp>
-
+#include "Singleton.h"
 
 
 //---------------------------------------------------------------------------
@@ -28,8 +27,8 @@ public:
 	tTVPTJS3ScriptEngine();
 	~tTVPTJS3ScriptEngine();
 
-	static tTVPTJS3ScriptEngine & instance() { return
-		boost::details::pool::singleton_default<tTVPTJS3ScriptEngine>::instance();
+	static boost::shared_ptr<tTVPTJS3ScriptEngine> & instance() { return
+		tTVPSingleton<tTVPTJS3ScriptEngine>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 	void Shutdown();

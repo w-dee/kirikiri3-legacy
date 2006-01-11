@@ -43,7 +43,7 @@ tTJSNI_FileSystemNativeInstance::tTJSNI_FileSystemNativeInstance(
 void tTJSNI_FileSystemNativeInstance::Invalidate()
 {
 	// ファイルシステムマネージャからこのファイルシステムをアンマウントする
-	tTVPFileSystemManager::instance().Unmount(Owner);
+	tTVPFileSystemManager::instance()->Unmount(Owner);
 
 	// FileSystem にこれ以上アクセスできないようにreset
 	FileSystem.reset();
@@ -154,7 +154,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/chopExt)
 
 	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance().ChopExtension(*param[0]);
+		*result = tTVPFileSystemManager::instance()->ChopExtension(*param[0]);
 	return TJS_S_OK;
 }
 TJS_END_NATIVE_METHOD_DECL(/*func. name*/chopExt)
@@ -178,7 +178,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractExt)
 
 	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance().ExtractExtension(*param[0]);
+		*result = tTVPFileSystemManager::instance()->ExtractExtension(*param[0]);
 	return TJS_S_OK;
 }
 TJS_END_NATIVE_METHOD_DECL(/*func. name*/extractExt)
@@ -198,7 +198,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractName)
 
 	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance().ExtractName(*param[0]);
+		*result = tTVPFileSystemManager::instance()->ExtractName(*param[0]);
 	return TJS_S_OK;
 }
 TJS_END_NATIVE_METHOD_DECL(/*func. name*/extractName)
@@ -218,7 +218,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractPath)
 
 	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance().ExtractPath(*param[0]);
+		*result = tTVPFileSystemManager::instance()->ExtractPath(*param[0]);
 	return TJS_S_OK;
 }
 TJS_END_NATIVE_METHOD_DECL(/*func. name*/extractPath)
@@ -241,7 +241,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
 
 	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance().GetFullPath(*param[0]);
+		*result = tTVPFileSystemManager::instance()->GetFullPath(*param[0]);
 	return TJS_S_OK;
 }
 TJS_END_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
@@ -278,7 +278,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
 
 	ttstr mountpoint = *param[0];
 	iTJSDispatch2 * dsp = param[1]->AsObjectNoAddRef();
-	tTVPFileSystemManager::instance().Mount(mountpoint, dsp);
+	tTVPFileSystemManager::instance()->Mount(mountpoint, dsp);
 
 	return TJS_S_OK;
 }
@@ -299,7 +299,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
 
 	ttstr mountpoint = *param[0];
 
-	tTVPFileSystemManager::instance().Unmount(mountpoint);
+	tTVPFileSystemManager::instance()->Unmount(mountpoint);
 
 	return TJS_S_OK;
 }
@@ -322,14 +322,14 @@ TJS_BEGIN_NATIVE_PROP_DECL(cwd)
 	*/
 	TJS_BEGIN_NATIVE_PROP_GETTER
 	{
-		if(result) *result = tTVPFileSystemManager::instance().GetCurrentDirectory();
+		if(result) *result = tTVPFileSystemManager::instance()->GetCurrentDirectory();
 		return TJS_S_OK;
 	}
 	TJS_END_NATIVE_PROP_GETTER
 
 	TJS_BEGIN_NATIVE_PROP_SETTER
 	{
-		tTVPFileSystemManager::instance().SetCurrentDirectory(*param);
+		tTVPFileSystemManager::instance()->SetCurrentDirectory(*param);
 		return TJS_S_OK;
 	}
 	TJS_END_NATIVE_PROP_SETTER
@@ -357,7 +357,7 @@ tTVPFileSystemRegisterer::tTVPFileSystemRegisterer()
 	FileSystemClass = new tTJSNC_FileSystem();
 	try
 	{
-		tTVPTJS3ScriptEngine::instance().RegisterGlobalObject(TJS_WS("FileSystem"), FileSystemClass);
+		tTVPTJS3ScriptEngine::instance()->RegisterGlobalObject(TJS_WS("FileSystem"), FileSystemClass);
 	}
 	catch(...)
 	{

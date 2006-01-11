@@ -31,6 +31,7 @@ public:
 
 class s3
 {
+	tTVPSingleton<s0> referer_s0;
 	tTVPSingleton<s1> referer_s1;
 	tTVPSingleton<s2> referer_s2;
 	int n;

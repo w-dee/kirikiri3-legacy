@@ -51,7 +51,10 @@ build_debug()
 	mkdir temp_build
 	cd temp_build
 	# configure
-	../configure --enable-debug $common_configure_options
+	../configure \
+		--enable-debug --enable-debug_gdb --enable-debug_cntxt \
+		--disable-optimise \
+		$common_configure_options
 	make
 	# mo ファイルだけはなぜか個別に作り直さなければならない
 	(cd ../locale && make allmo)
@@ -66,7 +69,8 @@ build_release()
 	mkdir temp_build
 	cd temp_build
 	# configure
-	../configure $common_configure_options
+	../configure \
+		$common_configure_options
 	make
 	# mo ファイルだけはなぜか個別に作り直さなければならない
 	(cd locale && make allmo)

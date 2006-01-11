@@ -43,7 +43,8 @@ ifeq ($(PLATFORM),windows)
 	@cp `which unicows.dll` $(BUILD_OUT_DIR)/bin || \
 		(echo "error: unicows.dll missing. did you forget installing \
 		MSLU into MinGW bin directory ?" ; exit 1)
-	for dir in $(SUBLIBS) ; do \
+	@echo "copying dlls to the target directory ..."
+	@for dir in $(SUBLIBS) ; do \
 		for subdir in bin lib; do \
 			if [ -d $$dir/$$subdir ]; then \
 				files=`find $$dir/$$subdir -name '*.dll'` ;\
@@ -63,7 +64,8 @@ endif
 
 copy_mo:
 	mkdir -p $(BUILD_OUT_DIR)/share
-	for dir in $(SUBLIBS) ; do \
+	@echo "copying message objects to the target directory ..."
+	@for dir in $(SUBLIBS) ; do \
 		if [ -d $$dir/share/locale ]; then \
 			cp -pR $$dir/share/locale $(BUILD_OUT_DIR)/share ;\
 		fi ;\
@@ -74,7 +76,8 @@ copy_mo:
 
 ifeq ($(PLATFORM),windows)
  compile_wx_win_res:
-	(set -e ;\
+	@echo "compiling wxWidgets resource ..."
+	@(set -e ;\
 		WX_WIN_RES_OBJ=wxWidgets/lib/wx_msw_rc.o ;\
 		WX_MSW_INCLUDE_DIR=`find wxWidgets/include -name msw -type d` ;\
 		WX_INCLUDE_DIR=$$WX_MSW_INCLUDE_DIR/../.. ;\

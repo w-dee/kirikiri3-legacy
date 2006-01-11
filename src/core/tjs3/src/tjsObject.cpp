@@ -2073,7 +2073,7 @@ tTJSCustomObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid,
 		{
 			if(ClassIDs[i] == classid)
 			{
-				*pointer = ClassInstances[i];
+				if(pointer) *pointer = ClassInstances[i];
 				return TJS_S_OK;
 			}
 		}
@@ -2088,6 +2088,7 @@ tTJSCustomObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid,
 			if(ClassIDs[i] == -1)
 			{
 				// found... writes there
+				if(!pointer) return TJS_E_FAIL;
 				ClassIDs[i] = classid;
 				ClassInstances[i] = *pointer;
 				return TJS_S_OK;

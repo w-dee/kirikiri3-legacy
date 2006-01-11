@@ -32,9 +32,11 @@ public:
 		boost::details::pool::singleton_default<tTVPTJS3ScriptEngine>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
+	void Shutdown();
+
 	tTJS * GetEngineNoAddRef() { return Engine; } //!< スクリプトエンジンを返す
 	iTJSDispatch2 * GetGlobalNoAddRef()
-		{ return Engine->GetGlobalNoAddRef(); } //!< スクリプトエンジンを返す
+		{ if(!Engine) return NULL; return Engine->GetGlobalNoAddRef(); } //!< スクリプトエンジンを返す
 	void RegisterGlobalObject(const tjs_char *name, iTJSDispatch2 * object);
 
 };

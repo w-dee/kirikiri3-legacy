@@ -44,9 +44,34 @@ tTVPFileSystemManager::tTVPFileSystemManager()
 //---------------------------------------------------------------------------
 tTVPFileSystemManager::~tTVPFileSystemManager()
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
-	;
+	// 全てのマウントポイントをアンマウントする
+	// 全てのTJSオブジェクトをvectorにとり、最後にこれが削除されることにより
+	// すべての TJS オブジェクトを解放する。
+	std::vector<tTJSRefHolder<iTJSDispatch2> > objects;
+	objects.reserve(MountPoints.GetCount());
+
+	std::vector<ttstr> points;
+
+	tTJSHashTable<ttstr, tFileSystemInfo>::tIterator i;
+	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
+	{
+		objects.push_back(i.GetValue().TJSObject);
+	}
+
+	//- MountPoints をクリア
+	MountPoints.Clear();
+
+	//- 全ての objects を invalidate
+	for(std::vector<tTJSRefHolder<iTJSDispatch2> >::iterator i =
+		objects.begin(); i != objects.end(); i++)
+	{
+		i->GetObjectNoAddRef()->Invalidate(0, NULL, NULL, NULL);
+	}
+
+
+	// この時点で objects に配置されたオブジェクトは全て解放される。
 }
 //---------------------------------------------------------------------------
 
@@ -60,8 +85,6 @@ tTVPFileSystemManager::~tTVPFileSystemManager()
 void tTVPFileSystemManager::Mount(const ttstr & point,
 	iTJSDispatch2 * fs_tjsobj)
 {
-	tTJSCriticalSectionHolder holder(CS);
-
 	// tjs_obj がファイルシステムのインスタンスを持っているかどうかを
 	// 確認する
 	if(!fs_tjsobj ||
@@ -73,6 +96,8 @@ void tTVPFileSystemManager::Mount(const ttstr & point,
 		// ファイルシステムのインスタンスを持っていない
 		eTVPException::Throw(TJS_WS_TR("the object given is not a filesystem object"));
 	}
+
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
@@ -101,7 +126,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point,
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Unmount(const ttstr & point)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
@@ -117,7 +142,7 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 	}
 
 	// マウントポイントを削除
-	tTJSRefHolder<iTJSDispatch2> tjs_object_holder (item->TJSObject);
+	volatile tTJSRefHolder<iTJSDispatch2> tjs_object_holder (item->TJSObject);
 	MountPoints.Delete(path);
 
 	// tjs_object_holder はここで削除される。
@@ -137,7 +162,7 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Unmount(iTJSDispatch2 * fs_tjsobj)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	// そのファイルシステムがマウントされているマウントポイントを調べる
 	std::vector<ttstr> points;
@@ -172,7 +197,7 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 	// を挿入する
 	if(ret[0] != TJS_WC('/'))
 	{
-		tTJSCriticalSectionHolder holder(CS);
+		volatile tTJSCriticalSectionHolder holder(CS);
 		ret = CurrentDirectory + ret;
 	}
 
@@ -307,7 +332,7 @@ size_t tTVPFileSystemManager::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
@@ -334,7 +359,7 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
@@ -360,7 +385,7 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
@@ -386,7 +411,7 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
@@ -412,7 +437,7 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
@@ -438,7 +463,7 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
@@ -466,7 +491,7 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 tTJSBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename,
 	tjs_uint32 flags)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
@@ -496,7 +521,7 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 	const ttstr & dirname,
 	tTVPFileSystemIterationCallback * callback)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(dirname, &fspath);
@@ -530,7 +555,7 @@ boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 	// マウントポイントに一致したディレクトリが本当に存在するかや、
 	// fullpath で指定したディレクトリが本当に存在するかどうかは
 	// チェックしない。
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	const tjs_char *start = fullpath.c_str();
 	const tjs_char *p = start + fullpath.GetLen();
@@ -750,7 +775,7 @@ ttstr tTVPFileSystemManager::ExtractPath(const ttstr & in)
 //---------------------------------------------------------------------------
 const ttstr & tTVPFileSystemManager::GetCurrentDirectory()
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	return CurrentDirectory;
 }
@@ -764,7 +789,7 @@ const ttstr & tTVPFileSystemManager::GetCurrentDirectory()
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::SetCurrentDirectory(const ttstr &dir)
 {
-	tTJSCriticalSectionHolder holder(CS);
+	volatile tTJSCriticalSectionHolder holder(CS);
 
 	if(dir.EndsWith(TJS_WC('/')))
 		CurrentDirectory = dir;

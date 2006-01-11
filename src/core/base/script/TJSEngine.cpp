@@ -30,8 +30,28 @@ tTVPTJS3ScriptEngine::tTVPTJS3ScriptEngine()
 //---------------------------------------------------------------------------
 tTVPTJS3ScriptEngine::~tTVPTJS3ScriptEngine()
 {
-	Engine->Shutdown();
-	Engine->Release();
+	if(Engine)
+	{
+#ifdef __WXDEBUG__
+		wxFprintf(stderr, wxT("warning: tTVPTJS3ScriptEngine::instance().Shutdown() should be called before main() ends.\n"));
+#endif
+		Shutdown();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		シャットダウン
+//---------------------------------------------------------------------------
+void tTVPTJS3ScriptEngine::Shutdown()
+{
+	if(Engine)
+	{
+		Engine->Shutdown();
+		Engine->Release();
+		Engine = NULL;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -44,6 +64,7 @@ tTVPTJS3ScriptEngine::~tTVPTJS3ScriptEngine()
 void tTVPTJS3ScriptEngine::RegisterGlobalObject(const tjs_char *name,
 	iTJSDispatch2 * object)
 {
+	if(!Engine) return;
 	tTJSVariant val(object, NULL);
 	iTJSDispatch2 * global = Engine->GetGlobalNoAddRef();
 	tjs_error er;

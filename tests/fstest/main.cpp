@@ -89,9 +89,11 @@ int Application::OnRun()
 				// 登録
 
 		tTVPTJS3ScriptEngine::instance().GetEngineNoAddRef()->EvalExpression(
-			TJS_WS("test((string)(FileSystem.TmpFS)+(string)(FileSystem.XP4FS)+(string)(FileSystem.PathFS)+(string)(FileSystem.OSFS))"),
+			TJS_WS("FileSystem.mount('/', new FileSystem.TmpFS())"),
 			NULL, NULL, NULL);
 			// tTJS::EvalExpression を使って式を実行
+
+		tTVPTJS3ScriptEngine::instance().Shutdown();
 	}
 	catch(const eTJS &e)
 	{

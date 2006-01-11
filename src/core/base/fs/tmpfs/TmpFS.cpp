@@ -216,7 +216,7 @@ void tTVPTmpFSNode::Serialize(tTJSBinaryStream * dest) const
 		// ファイル
 		dest->WriteBuffer("\x0", 1); // メタデータの終わりとファイルの中身の開始
 		wxUint64 i64;
-		tTJSCriticalSectionHolder holder(File->GetCS());
+		volatile tTJSCriticalSectionHolder  holder(File->GetCS());
 		i64 = wxUINT64_SWAP_ON_BE(File->GetSize());
 		dest->WriteBuffer(&i64, sizeof(i64));
 		dest->WriteBuffer(File->GetBlock(), File->GetSize());

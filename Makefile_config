@@ -81,8 +81,8 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --libs | \
 					sed -e "s|-Wl,--subsystem,windows||g" -e "s|-mwindows||g" ;\
 		};\
-		comflags="";   conf=--debug=no;  get > $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
-		comflags="-g"; conf=--debug=yes; get > $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
+		comflags="";           conf=--debug=no;  get > $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
+		comflags="-g -DDEBUG"; conf=--debug=yes; get > $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
 		touch $(TOP_DIR)/config_success ;\
 	)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: wxWidgets configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi

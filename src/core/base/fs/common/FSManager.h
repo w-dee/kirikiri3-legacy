@@ -97,6 +97,9 @@ public:
 	tTVPFileSystemManager();
 	~tTVPFileSystemManager();
 
+private:
+	tTVPSingletonObjectLifeTracer<tTVPFileSystemManager> singleton_object_life_tracer;
+public:
 	static boost::shared_ptr<tTVPFileSystemManager> & instance() { return
 		tTVPSingleton<tTVPFileSystemManager>::instance();
 			} //!< このシングルトンのインスタンスを返す

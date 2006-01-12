@@ -75,6 +75,9 @@ class tTVPTmpFSRegisterer
 public:
 	tTVPTmpFSRegisterer();
 
+private:
+	tTVPSingletonObjectLifeTracer<tTVPTmpFSRegisterer> singleton_object_life_tracer;
+public:
 	static boost::shared_ptr<tTVPTmpFSRegisterer> & instance() { return
 		tTVPSingleton<tTVPTmpFSRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す

@@ -72,6 +72,9 @@ class tTVPXP4FSRegisterer
 public:
 	tTVPXP4FSRegisterer();
 
+private:
+	tTVPSingletonObjectLifeTracer<tTVPXP4FSRegisterer> singleton_object_life_tracer;
+public:
 	static boost::shared_ptr<tTVPXP4FSRegisterer> & instance() { return
 		tTVPSingleton<tTVPXP4FSRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す

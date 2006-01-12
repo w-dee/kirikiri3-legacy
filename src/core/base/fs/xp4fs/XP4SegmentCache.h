@@ -71,6 +71,9 @@ public:
 	tTVPXP4SegmentCache();
 	~tTVPXP4SegmentCache();
 
+private:
+	tTVPSingletonObjectLifeTracer<tTVPXP4SegmentCache> singleton_object_life_tracer;
+public:
 	static boost::shared_ptr<tTVPXP4SegmentCache> & instance() { return
 		tTVPSingleton<tTVPXP4SegmentCache>::instance();
 			} //!< このシングルトンのインスタンスを返す

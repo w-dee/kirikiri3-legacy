@@ -25,6 +25,8 @@
 */
 
 #include <boost/smart_ptr.hpp>
+#include <stdio.h>
+#include <typeinfo>
 
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト用クラス
@@ -163,6 +165,30 @@ s0 destruct
 
 
 */
+
+//---------------------------------------------------------------------------
+//! @brief  オブジェクトの生成と消滅のトレース
+//! @note   このクラスのオブジェクトを好きな所に書いておくと生成時と消滅時に
+//!         メッセージが表示されるというだけ
+//---------------------------------------------------------------------------
+template <typename T>
+class tTVPSingletonObjectLifeTracer
+{
+public:
+	tTVPSingletonObjectLifeTracer()
+	{
+#ifdef DEBUG
+		fprintf(stderr, "class %s created\n", typeid(T).name());
+#endif
+	}
+	~tTVPSingletonObjectLifeTracer()
+	{
+#ifdef DEBUG
+		fprintf(stderr, "class %s deleted\n", typeid(T).name());
+#endif
+	}
+};
+//---------------------------------------------------------------------------
 
 #endif
 

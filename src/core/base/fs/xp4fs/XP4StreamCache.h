@@ -37,6 +37,9 @@ public:
 	tTVPXP4StreamCache();
 	~tTVPXP4StreamCache();
 
+private:
+	tTVPSingletonObjectLifeTracer<tTVPXP4StreamCache> singleton_object_life_tracer;
+public:
 	static boost::shared_ptr<tTVPXP4StreamCache> & instance() { return
 		tTVPSingleton<tTVPXP4StreamCache>::instance();
 			} //!< このシングルトンのインスタンスを返す

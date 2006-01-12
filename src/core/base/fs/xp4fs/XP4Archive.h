@@ -15,12 +15,16 @@
 #include <wx/datetime.h>
 #include "FSManager.h"
 #include "XP4ArchiveDefs.h"
+#include "XP4SegmentCache.h"
+#include "XP4StreamCache.h"
 
 //---------------------------------------------------------------------------
 //! @brief		一つのアーカイブを現すクラス
 //---------------------------------------------------------------------------
 class tTVPXP4Archive
 {
+	tTVPSingleton<tTVPXP4SegmentCache> ref_tTVPXP4SegmentCache; // tTVPXP4SegmentCache に依存
+	tTVPSingleton<tTVPXP4StreamCache> ref_tTVPXP4StreamCache; // tTVPXP4StreamCache に依存
 public:
 	struct tFile
 	{

@@ -27,6 +27,9 @@ public:
 	tTVPTJS3ScriptEngine();
 	~tTVPTJS3ScriptEngine();
 
+private:
+	tTVPSingletonObjectLifeTracer<tTVPTJS3ScriptEngine> singleton_object_life_tracer;
+public:
 	static boost::shared_ptr<tTVPTJS3ScriptEngine> & instance() { return
 		tTVPSingleton<tTVPTJS3ScriptEngine>::instance();
 			} //!< このシングルトンのインスタンスを返す

@@ -505,7 +505,7 @@ bool tRisaFreeTypeFace::GetGlyphMetricsFromCharcode(risse_char code,
 
 	// メトリック構造体を作成
 	// CellIncX や CellIncY は ピクセル値が 64 倍された値なので注意
-	// これはもともと FreeType の仕様だけれども、吉里吉里でも内部的には
+	// これはもともと FreeType の仕様だけれども、Risaでも内部的には
 	// この精度で CellIncX や CellIncY を扱う
 	// TODO: 文字のサブピクセル単位での位置調整とレンダリング
 	metrics.CellIncX =  FTFace->glyph->advance.x;

@@ -24,13 +24,13 @@
 //---------------------------------------------------------------------------
 class tTVPXP4FS : public tTVPFileSystem
 {
-	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
 	//! @brief ファイル一個一個の情報
 	struct tFileItemBasicInfo
 	{
-		tjs_size ArchiveIndex; //!< どのアーカイブに含まれるか
-		tjs_size FileIndex; //!< そのアーカイブ内でのファイルのインデックス
+		risse_size ArchiveIndex; //!< どのアーカイブに含まれるか
+		risse_size FileIndex; //!< そのアーカイブ内でのファイルのインデックス
 	};
 
 	//! @brief 
@@ -60,12 +60,12 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
 
 	//-- tTVPFileSystem メンバ ここまで
 private:
-	tjs_size GetFileItemStartIndex(const ttstr & name);
-	tjs_size GetFileItemIndex(const ttstr & name);
+	risse_size GetFileItemStartIndex(const ttstr & name);
+	risse_size GetFileItemIndex(const ttstr & name);
 
 };
 //---------------------------------------------------------------------------

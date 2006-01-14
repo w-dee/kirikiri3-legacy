@@ -7,15 +7,15 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief ファイルシステムマネージャのTJS3バインディング
+//! @brief ファイルシステムマネージャのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "FSManager.h"
 #include "FSManagerBind.h"
 #include "TVPException.h"
-#include "TJSEngine.h"
+#include "RisseEngine.h"
 
-TJS_DEFINE_SOURCE_ID(2011);
+RISSE_DEFINE_SOURCE_ID(2011);
 
 
 
@@ -25,11 +25,11 @@ TJS_DEFINE_SOURCE_ID(2011);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //! @param		filesystem  ファイルシステムオブジェクト
-//! @param		owner       このインスタンスを保持している TJS オブジェクト
+//! @param		owner       このインスタンスを保持している Risse オブジェクト
 //---------------------------------------------------------------------------
-tTJSNI_FileSystemNativeInstance::tTJSNI_FileSystemNativeInstance(
+tRisseNI_FileSystemNativeInstance::tRisseNI_FileSystemNativeInstance(
 					boost::shared_ptr<tTVPFileSystem> filesystem,
-					iTJSDispatch2 * owner) :
+					iRisseDispatch2 * owner) :
 						FileSystem(filesystem),
 						Owner(owner)
 {
@@ -38,9 +38,9 @@ tTJSNI_FileSystemNativeInstance::tTJSNI_FileSystemNativeInstance(
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS 無効化関数
+//! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
-void tTJSNI_FileSystemNativeInstance::Invalidate()
+void tRisseNI_FileSystemNativeInstance::Invalidate()
 {
 	// ファイルシステムマネージャからこのファイルシステムをアンマウントする
 	tTVPFileSystemManager::instance()->Unmount(Owner);
@@ -61,16 +61,16 @@ void tTJSNI_FileSystemNativeInstance::Invalidate()
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNI_BaseFileSystem::tTJSNI_BaseFileSystem()
+tRisseNI_BaseFileSystem::tRisseNI_BaseFileSystem()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS 無効化関数
+//! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
-void tTJSNI_BaseFileSystem::Invalidate()
+void tRisseNI_BaseFileSystem::Invalidate()
 {
 	// FileSystem にこれ以上アクセスできないようにreset
 	FileSystem.reset();
@@ -79,27 +79,27 @@ void tTJSNI_BaseFileSystem::Invalidate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		tTJSNI_FileSystemNativeInstance をファイルシステムから構築し、
+//! @brief		tRisseNI_FileSystemNativeInstance をファイルシステムから構築し、
 //!             オブジェクトに登録する
-//! @param		tjs_obj		登録先TJSオブジェクト
+//! @param		risse_obj		登録先Risseオブジェクト
 //! @param		fs_obj		ファイルシステムオブジェクト
 //---------------------------------------------------------------------------
-void tTJSNI_BaseFileSystem::RegisterFileSystemNativeInstance(
-		iTJSDispatch2 * tjs_obj,
+void tRisseNI_BaseFileSystem::RegisterFileSystemNativeInstance(
+		iRisseDispatch2 * risse_obj,
 		tTVPFileSystem * fs_obj)
 {
 	boost::shared_ptr<tTVPFileSystem> filesystem(fs_obj);
 	FileSystem = filesystem;
 
-	// tTJSNI_FileSystemNativeInstance オブジェクトの生成
-	tTJSNI_FileSystemNativeInstance *ni =
-		new tTJSNI_FileSystemNativeInstance(filesystem, tjs_obj);
+	// tRisseNI_FileSystemNativeInstance オブジェクトの生成
+	tRisseNI_FileSystemNativeInstance *ni =
+		new tRisseNI_FileSystemNativeInstance(filesystem, risse_obj);
 	try
 	{
-		// tTJSNI_FileSystemNativeInstance オブジェクトを tjs_obj に登録
-		tjs_obj->NativeInstanceSupport(TJS_NIS_REGISTER,
-			tTJSNI_FileSystemNativeInstance::ClassID,
-				(iTJSNativeInstance**)&ni);
+		// tRisseNI_FileSystemNativeInstance オブジェクトを risse_obj に登録
+		risse_obj->NativeInstanceSupport(RISSE_NIS_REGISTER,
+			tRisseNI_FileSystemNativeInstance::ClassID,
+				(iRisseNativeInstance**)&ni);
 	}
 	catch(...)
 	{
@@ -115,30 +115,30 @@ void tTJSNI_BaseFileSystem::RegisterFileSystemNativeInstance(
 //---------------------------------------------------------------------------
 //! @brief   FileSystemクラスID
 //---------------------------------------------------------------------------
-tjs_uint32 tTJSNC_FileSystem::ClassID = (tjs_uint32)-1;
+risse_uint32 tRisseNC_FileSystem::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief   コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNC_FileSystem::tTJSNC_FileSystem() :
-	tTJSNativeClass(TJS_WS("FileSystem"))
+tRisseNC_FileSystem::tRisseNC_FileSystem() :
+	tRisseNativeClass(RISSE_WS("FileSystem"))
 {
 	// class constructor
 
-	TJS_BEGIN_NATIVE_MEMBERS(/*TJS class name*/FileSystem)
-	TJS_DECL_EMPTY_FINALIZE_METHOD
+	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/FileSystem)
+	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL_NO_INSTANCE(/*TJS class name*/ FileSystem)
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL_NO_INSTANCE(/*Risse class name*/ FileSystem)
 {
 	// このクラスはオブジェクトを持たないので (static class) 
 	// ここでは何もしない
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/FileSystem)
+RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/FileSystem)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/chopExt)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/chopExt)
 {
 	/*%
 		@brief	ファイル名から拡張子を取り去る
@@ -152,14 +152,14 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/chopExt)
 		</p>
 	*/
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
 		*result = tTVPFileSystemManager::instance()->ChopExtension(*param[0]);
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/chopExt)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/chopExt)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractExt)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractExt)
 {
 	/*%
 		@brief	ファイル名から拡張子を取り出す
@@ -176,14 +176,14 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractExt)
 		</p>
 	*/
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
 		*result = tTVPFileSystemManager::instance()->ExtractExtension(*param[0]);
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/extractExt)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractExt)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractName)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractName)
 {
 	/*%
 		@brief	ファイル名からパス名を除いた部分を取り出す
@@ -196,14 +196,14 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractName)
 		</p>
 	*/
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
 		*result = tTVPFileSystemManager::instance()->ExtractName(*param[0]);
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/extractName)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractName)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractPath)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractPath)
 {
 	/*%
 		@brief	ファイル名からパス名を取り出す
@@ -216,14 +216,14 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractPath)
 		</p>
 	*/
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
 		*result = tTVPFileSystemManager::instance()->ExtractPath(*param[0]);
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/extractPath)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractPath)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
 {
 	/*%
 		@brief	フルパスを得る
@@ -239,14 +239,14 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
 		</p>
 	*/
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
 		*result = tTVPFileSystemManager::instance()->GetFullPath(*param[0]);
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
 {
 	/*%
 		@brief	ファイルシステムをマウントする
@@ -260,7 +260,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
 		</p>
 		<p>
 			ファイルシステムオブジェクトは <code>new FileSystem.OSFS("data")</code> のように
-			new で生成されたファイルシステムを表す TJS オブジェクトでなければ
+			new で生成されたファイルシステムを表す Risse オブジェクトでなければ
 			なりません。
 		</p>
 		<p>
@@ -274,17 +274,17 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
 		</p>
 	*/
 
-	if(numparams < 2) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 2) return RISSE_E_BADPARAMCOUNT;
 
 	ttstr mountpoint = *param[0];
-	iTJSDispatch2 * dsp = param[1]->AsObjectNoAddRef();
+	iRisseDispatch2 * dsp = param[1]->AsObjectNoAddRef();
 	tTVPFileSystemManager::instance()->Mount(mountpoint, dsp);
 
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/mount)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/mount)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
 {
 	/*%
 		@brief	ファイルシステムをアンマウントする
@@ -295,17 +295,17 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
 			マウントを解除(アンマウント)します。
 		</p>
 	*/
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
 	ttstr mountpoint = *param[0];
 
 	tTVPFileSystemManager::instance()->Unmount(mountpoint);
 
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/unmount)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/unmount)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_PROP_DECL(cwd)
+RISSE_BEGIN_NATIVE_PROP_DECL(cwd)
 {
 	/*%
 		@brief	作業ディレクトリ
@@ -320,23 +320,23 @@ TJS_BEGIN_NATIVE_PROP_DECL(cwd)
 			チェックは行いません。
 		</p>
 	*/
-	TJS_BEGIN_NATIVE_PROP_GETTER
+	RISSE_BEGIN_NATIVE_PROP_GETTER
 	{
 		if(result) *result = tTVPFileSystemManager::instance()->GetCurrentDirectory();
-		return TJS_S_OK;
+		return RISSE_S_OK;
 	}
-	TJS_END_NATIVE_PROP_GETTER
+	RISSE_END_NATIVE_PROP_GETTER
 
-	TJS_BEGIN_NATIVE_PROP_SETTER
+	RISSE_BEGIN_NATIVE_PROP_SETTER
 	{
 		tTVPFileSystemManager::instance()->SetCurrentDirectory(*param);
-		return TJS_S_OK;
+		return RISSE_S_OK;
 	}
-	TJS_END_NATIVE_PROP_SETTER
+	RISSE_END_NATIVE_PROP_SETTER
 }
-TJS_END_NATIVE_PROP_DECL(cwd)
+RISSE_END_NATIVE_PROP_DECL(cwd)
 //----------------------------------------------------------------------
-	TJS_END_NATIVE_MEMBERS
+	RISSE_END_NATIVE_MEMBERS
 }
 //---------------------------------------------------------------------------
 
@@ -354,10 +354,10 @@ TJS_END_NATIVE_PROP_DECL(cwd)
 //---------------------------------------------------------------------------
 tTVPFileSystemRegisterer::tTVPFileSystemRegisterer()
 {
-	FileSystemClass = new tTJSNC_FileSystem();
+	FileSystemClass = new tRisseNC_FileSystem();
 	try
 	{
-		tTVPTJS3ScriptEngine::instance()->RegisterGlobalObject(TJS_WS("FileSystem"), FileSystemClass);
+		tTVPRisseScriptEngine::instance()->RegisterGlobalObject(RISSE_WS("FileSystem"), FileSystemClass);
 	}
 	catch(...)
 	{
@@ -383,14 +383,14 @@ tTVPFileSystemRegisterer::~tTVPFileSystemRegisterer()
 //! @param		name    クラス名
 //! @param		object  クラスオブジェクト
 //---------------------------------------------------------------------------
-void tTVPFileSystemRegisterer::RegisterClassObject(const tjs_char *name,
-											iTJSDispatch2 * object)
+void tTVPFileSystemRegisterer::RegisterClassObject(const risse_char *name,
+											iRisseDispatch2 * object)
 {
-	tTJSVariant val(object, NULL);
-	tjs_error er;
-	er = FileSystemClass->PropSet(TJS_MEMBERENSURE, name, NULL, &val, FileSystemClass);
-	if(TJS_FAILED(er))
-		TJSThrowFrom_tjs_error(er, name);
+	tRisseVariant val(object, NULL);
+	risse_error er;
+	er = FileSystemClass->PropSet(RISSE_MEMBERENSURE, name, NULL, &val, FileSystemClass);
+	if(RISSE_FAILED(er))
+		RisseThrowFrom_risse_error(er, name);
 }
 //---------------------------------------------------------------------------
 

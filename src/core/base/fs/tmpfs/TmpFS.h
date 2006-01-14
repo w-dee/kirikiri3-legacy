@@ -30,16 +30,16 @@ private:
 	ttstr Name;
 	union
 	{
-		tTJSHashTable<ttstr, tTVPTmpFSNode *> * Directory; //!< ディレクトリ
+		tRisseHashTable<ttstr, tTVPTmpFSNode *> * Directory; //!< ディレクトリ
 		tTVPMemoryStreamBlock * File; //!< ファイル
 	};
 public:
 	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, const ttstr & name);
-	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, tTJSBinaryStream * src);
+	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, tRisseBinaryStream * src);
 	~tTVPTmpFSNode();
 
 public:
-	void Serialize(tTJSBinaryStream * dest) const;
+	void Serialize(tRisseBinaryStream * dest) const;
 
 	tTVPTmpFSNode * GetSubNode(const ttstr & name);
 	bool DeleteSubNodeByName(const ttstr & name);
@@ -54,7 +54,7 @@ public:
 	const ttstr & GetName() const { return Name; }
 	bool HasSubNode() const { return Type == ntDirectory &&
 							Directory->GetCount() != 0; }
-	tjs_size GetSize() const;
+	risse_size GetSize() const;
 	size_t Iterate(tTVPFileSystemIterationCallback * callback);
 
 };
@@ -66,7 +66,7 @@ public:
 //---------------------------------------------------------------------------
 class tTVPTmpFS : public tTVPFileSystem
 {
-	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 	tTVPTmpFSNode * Root; //!< ルートノード
 
 	static const unsigned char SerializeMagic[];
@@ -85,12 +85,12 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
 	//-- tTVPFileSystem メンバ ここまで
 
-	void SerializeTo(tTJSBinaryStream * dest);
+	void SerializeTo(tRisseBinaryStream * dest);
 	void SerializeTo(const ttstr & filename);
-	void UnserializeFrom(tTJSBinaryStream * src);
+	void UnserializeFrom(tRisseBinaryStream * src);
 	void UnserializeFrom(const ttstr & filename);
 
 private:

@@ -15,7 +15,7 @@
 */
 
 #include "prec.h"
-#include "tjsUtils.h"
+#include "risseUtils.h"
 #include "XP4FS.h"
 #include "XP4Archive.h"
 #include "XP4SegmentCache.h"
@@ -23,7 +23,7 @@
 #include <zlib.h>
 #include <algorithm>
 
-TJS_DEFINE_SOURCE_ID(2008);
+RISSE_DEFINE_SOURCE_ID(2008);
 
 
 
@@ -51,7 +51,7 @@ tTVPXP4SegmentCache::~tTVPXP4SegmentCache()
 //---------------------------------------------------------------------------
 void tTVPXP4SegmentCache::CheckLimit()
 {
-	volatile tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
 	// TotalBytes が TOTAL_LIMIT 以下になるまでキャッシュの最後
 	// を削除する
@@ -62,7 +62,7 @@ void tTVPXP4SegmentCache::CheckLimit()
 		i = HashTable.GetLast();
 		if(!i.IsNull())
 		{
-			tjs_size size = i.GetValue()->GetSize();
+			risse_size size = i.GetValue()->GetSize();
 			TotalBytes -= size;
 			HashTable.ChopLast(1);
 		}
@@ -80,7 +80,7 @@ void tTVPXP4SegmentCache::CheckLimit()
 //---------------------------------------------------------------------------
 void tTVPXP4SegmentCache::Clear()
 {
-	volatile tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
 	HashTable.Clear();
 	TotalBytes = 0;
@@ -100,10 +100,10 @@ void tTVPXP4SegmentCache::Clear()
 //! @return		展開されたデータブロック
 //---------------------------------------------------------------------------
 tTVPXP4SegmentCache::tDataBlock
-	tTVPXP4SegmentCache::Find(void * pointer, tjs_size storage_index,
-		tjs_size segment_index,
-		tTJSBinaryStream * instream, tjs_uint64 dataofs, tjs_size insize,
-		tjs_size uncomp_size)
+	tTVPXP4SegmentCache::Find(void * pointer, risse_size storage_index,
+		risse_size segment_index,
+		tRisseBinaryStream * instream, risse_uint64 dataofs, risse_size insize,
+		risse_size uncomp_size)
 {
 	// 検索キーを作る
 	tKey key;
@@ -112,10 +112,10 @@ tTVPXP4SegmentCache::tDataBlock
 	key.SegmentIndex = segment_index;
 
 	// ハッシュを作成
-	tjs_uint32 hash = tKeyHasher::Make(key);
+	risse_uint32 hash = tKeyHasher::Make(key);
 
 	// これ以降をスレッド保護
-	volatile tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
 	// ハッシュテーブルを検索する
 	boost::shared_ptr<tTVPDecompressedHolder> * ptr = 

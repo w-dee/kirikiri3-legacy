@@ -13,26 +13,26 @@
 #define _OSFSH_
 
 #include "FSManager.h"
-#include "tjsNative.h"
+#include "risseNative.h"
 #include <wx/file.h>
 
 //---------------------------------------------------------------------------
 //! @brief		OS ネイティブファイルストリーム
 //---------------------------------------------------------------------------
-class tTVPOSNativeStream : public tTJSBinaryStream
+class tTVPOSNativeStream : public tRisseBinaryStream
 {
 protected:
 	wxFile File;
 
 public:
-	tTVPOSNativeStream(const wxString & filename, tjs_uint32 flags);
+	tTVPOSNativeStream(const wxString & filename, risse_uint32 flags);
 	~tTVPOSNativeStream();
 
-	tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
-	tjs_size Read(void *buffer, tjs_size read_size);
-	tjs_size Write(const void *buffer, tjs_size write_size);
+	risse_uint64 Seek(risse_int64 offset, risse_int whence);
+	risse_size Read(void *buffer, risse_size read_size);
+	risse_size Write(const void *buffer, risse_size write_size);
 	void SetEndOfFile();
-	tjs_uint64 GetSize();
+	risse_uint64 GetSize();
 };
 //---------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ public:
 //---------------------------------------------------------------------------
 class tTVPOSFS : public tTVPFileSystem
 {
-	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
 	wxString BaseDirectory; //!< このファイルシステムがマウントしているOSのディレクトリ
 	bool CheckCase; //!< ファイル名の大文字・小文字をチェックする場合は真
@@ -63,7 +63,7 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
 
 	//-- tTVPFileSystem メンバ ここまで
 private:

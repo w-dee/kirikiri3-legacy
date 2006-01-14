@@ -14,7 +14,7 @@
 #define WaveLoopManagerH
 //---------------------------------------------------------------------------
 
-#include "tjsTypes.h"
+#include "risseTypes.h"
 #include <vector>
 #include <string>
 
@@ -29,45 +29,45 @@
 	typedef char   tTVPLabelCharType;
 #else
 	typedef ttstr tTVPLabelStringType;
-	typedef tjs_char tTVPLabelCharType;
+	typedef risse_char tTVPLabelCharType;
 #endif
 //---------------------------------------------------------------------------
 
 
 #ifdef TVP_IN_LOOP_TUNER
 	//---------------------------------------------------------------------------
-	// tTJSCriticalSection ( taken from tjsUtils.h )
+	// tRisseCriticalSection ( taken from risseUtils.h )
 	//---------------------------------------------------------------------------
-	class tTJSCriticalSection
+	class tRisseCriticalSection
 	{
 		CRITICAL_SECTION CS;
 	public:
-		tTJSCriticalSection() { InitializeCriticalSection(&CS); }
-		~tTJSCriticalSection() { DeleteCriticalSection(&CS); }
+		tRisseCriticalSection() { InitializeCriticalSection(&CS); }
+		~tRisseCriticalSection() { DeleteCriticalSection(&CS); }
 
 		void Enter() { EnterCriticalSection(&CS); }
 		void Leave() { LeaveCriticalSection(&CS); }
 	};
 	//---------------------------------------------------------------------------
-	// tTJSCriticalSectionHolder ( taken from tjsUtils.h )
+	// tRisseCriticalSectionHolder ( taken from risseUtils.h )
 	//---------------------------------------------------------------------------
-	class tTJSCriticalSectionHolder
+	class tRisseCriticalSectionHolder
 	{
-		tTJSCriticalSection *Section;
+		tRisseCriticalSection *Section;
 	public:
-		tTJSCriticalSectionHolder(tTJSCriticalSection &cs)
+		tRisseCriticalSectionHolder(tRisseCriticalSection &cs)
 		{
 			Section = &cs;
 			Section->Enter();
 		}
 
-		~tTJSCriticalSectionHolder()
+		~tRisseCriticalSectionHolder()
 		{
 			Section->Leave();
 		}
 	};
 #else
-	#include "tjsUtils.h"
+	#include "risseUtils.h"
 #endif
 //---------------------------------------------------------------------------
 
@@ -91,18 +91,18 @@ public:
 	};
 
 private:
-	tjs_int64 From;		//!< 'From' in sample position
-	tjs_int64 To;		//!< 'To' in sample position
+	risse_int64 From;		//!< 'From' in sample position
+	risse_int64 To;		//!< 'To' in sample position
 	bool Smooth;		//!< Smooth transition (uses short 50ms crossfade)
 	tLinkCondition Condition;	//!< Condition
-	tjs_int RefValue;	//!< リンク条件の「値」
-	tjs_int CondVar;	//!< Condition variable index
+	risse_int RefValue;	//!< リンク条件の「値」
+	risse_int CondVar;	//!< Condition variable index
 #ifdef TVP_IN_LOOP_TUNER
 	// these are only used by the loop tuner
-	tjs_int FromTier;	//!< display tier of vertical 'from' line
-	tjs_int LinkTier;	//!< display tier of horizontal link
-	tjs_int ToTier;		//!< display tier of vertical 'to' allow line
-	tjs_int Index;		//!< link index
+	risse_int FromTier;	//!< display tier of vertical 'from' line
+	risse_int LinkTier;	//!< display tier of horizontal link
+	risse_int ToTier;		//!< display tier of vertical 'to' allow line
+	risse_int Index;		//!< link index
 
 	struct tSortByDistanceFuncObj
 	{
@@ -110,9 +110,9 @@ private:
 			const tTVPWaveLoopLink &lhs,
 			const tTVPWaveLoopLink &rhs) const
 		{
-			tjs_int64 lhs_dist = lhs.From - lhs.To;
+			risse_int64 lhs_dist = lhs.From - lhs.To;
 			if(lhs_dist < 0) lhs_dist = -lhs_dist;
-			tjs_int64 rhs_dist = rhs.From - rhs.To;
+			risse_int64 rhs_dist = rhs.From - rhs.To;
 			if(rhs_dist < 0) rhs_dist = -rhs_dist;
 			return lhs_dist < rhs_dist;
 		}
@@ -175,9 +175,9 @@ bool inline operator < (const tTVPWaveLoopLink & lhs, const tTVPWaveLoopLink & r
 class tTVPWaveLabel
 {
 public:
-	tjs_int64 Position; //!< label position
+	risse_int64 Position; //!< label position
 	tTVPLabelStringType Name; //!< label name
-	tjs_int Offset;
+	risse_int Offset;
 		/*!< オフセット
 			@note
 			This member will be set in tTVPWaveLoopManager::Decode,
@@ -186,8 +186,8 @@ public:
 		*/
 #ifdef TVP_IN_LOOP_TUNER
 	// these are only used by the loop tuner
-	tjs_int NameWidth; //!< display name width
-	tjs_int Index; //!< index
+	risse_int NameWidth; //!< display name width
+	risse_int Index; //!< index
 #endif
 
 	struct tSortByPositionFuncObj
@@ -279,33 +279,33 @@ private:
 	struct tSegment
 	{
 		//! @brief コンストラクタ
-		tSegment(tjs_int64 start, tjs_int64 length)
+		tSegment(risse_int64 start, risse_int64 length)
 			{ Start = start; Length = length; }
-		tjs_int64 Start; //!< スタート位置 (PCM サンプル数単位)
-		tjs_int64 Length; //!< セグメントの長さ (PCM サンプル数単位)
+		risse_int64 Start; //!< スタート位置 (PCM サンプル数単位)
+		risse_int64 Length; //!< セグメントの長さ (PCM サンプル数単位)
 	};
 
-	tTJSCriticalSection FlagsCS; //!< CS to protect flags/links/labels
+	tRisseCriticalSection FlagsCS; //!< CS to protect flags/links/labels
 	int Flags[MaxFlags]; //!< フラグ
 	bool FlagsModifiedByLabelExpression; //!< true if the flags are modified by EvalLabelExpression
 	std::vector<tTVPWaveLoopLink> Links; //!< リンクの配列
 	std::vector<tTVPWaveLabel> Labels; //!< ラベルの配列
-	tTJSCriticalSection DataCS; // CS to protect other members
+	tRisseCriticalSection DataCS; // CS to protect other members
 	tTVPWaveFormat * Format; //!< PCMフォーマット
 	tTVPWaveDecoder * Decoder; //!< デコーダ
 
-	tjs_int ShortCrossFadeHalfSamples;
+	risse_int ShortCrossFadeHalfSamples;
 		//!< SmoothTimeHalf in sample unit
 
 	bool Looping; 
 		//!< ループ再生しているときは真 (ただしこれはループ情報を読み込んでいない場合の設定で、
 		//   ループ情報を読み込んでいる場合はこの設定に従わない
 
-	tjs_int64 Position; //!< decoding position
+	risse_int64 Position; //!< decoding position
 
-	tjs_uint8 *CrossFadeSamples; //!< sample buffer for crossfading
-	tjs_int CrossFadeLen; //!< 現在クロスフェード中の場合、そのクロスフェードの長さ
-	tjs_int CrossFadePosition; //!< 現在クロスフェード中の場合、そのデコード位置
+	risse_uint8 *CrossFadeSamples; //!< sample buffer for crossfading
+	risse_int CrossFadeLen; //!< 現在クロスフェード中の場合、そのクロスフェードの長さ
+	risse_int CrossFadePosition; //!< 現在クロスフェード中の場合、そのデコード位置
 
 	bool IsLinksSorted; //!< false if links are not yet sorted
 	bool IsLabelsSorted; //!< false if labels are not yet sorted
@@ -318,10 +318,10 @@ public:
 
 	void SetDecoder(tTVPWaveDecoder * decoder);
 
-	int GetFlag(tjs_int index);
-	void CopyFlags(tjs_int *dest);
+	int GetFlag(risse_int index);
+	void CopyFlags(risse_int *dest);
 	bool GetFlagsModifiedByLabelExpression();
-	void SetFlag(tjs_int index, tjs_int f);
+	void SetFlag(risse_int index, risse_int f);
 	void ClearFlags();
 	void ClearLinksAndLabels();
 
@@ -334,25 +334,25 @@ public:
 	bool GetIgnoreLinks() const;
 	void SetIgnoreLinks(bool b);
 
-	tjs_int64 GetPosition() const;
-	void SetPosition(tjs_int64 pos);
+	risse_int64 GetPosition() const;
+	void SetPosition(risse_int64 pos);
 
 	bool GetLooping() const { return Looping; } //!< ループ情報を読み込んでいないときにループを行うかどうかを得る
 	void SetLooping(bool b) { Looping = b; } //!< ループ情報を読み込んでいないときにループを行うかどうかを設定する
 
-	void Decode(void *dest, tjs_uint samples, tjs_uint &written,
+	void Decode(void *dest, risse_uint samples, risse_uint &written,
 		std::vector<tSegment> &segments,
 		std::vector<tTVPWaveLabel> &labels);
 
 private:
-	bool GetNearestEvent(tjs_int64 current,
+	bool GetNearestEvent(risse_int64 current,
 		tTVPWaveLoopLink & link, bool ignore_conditions);
 
-	void GetLabelAt(tjs_int64 from, tjs_int64 to,
+	void GetLabelAt(risse_int64 from, risse_int64 to,
 		std::vector<tTVPWaveLabel> & labels);
 
-	void DoCrossFade(void *dest, void *src1, void *src2, tjs_int samples,
-		tjs_int ratiostart, tjs_int ratioend);
+	void DoCrossFade(void *dest, void *src1, void *src2, risse_int samples,
+		risse_int ratiostart, risse_int ratioend);
 
 	void ClearCrossFadeInformation();
 
@@ -374,19 +374,19 @@ private:
 public:
 	static bool GetLabelExpression(const tTVPLabelStringType &label,
 		tExpressionToken * ope = NULL,
-		tjs_int *lv = NULL,
-		tjs_int *rv = NULL, bool *is_rv_indirect = NULL);
+		risse_int *lv = NULL,
+		risse_int *rv = NULL, bool *is_rv_indirect = NULL);
 private:
 	bool EvalLabelExpression(const tTVPLabelStringType &label);
 
-	static tExpressionToken GetExpressionToken(const tTVPLabelCharType * &  p , tjs_int * value);
-	static bool GetLabelCharInt(const tTVPLabelCharType *s, tjs_int &v);
+	static tExpressionToken GetExpressionToken(const tTVPLabelCharType * &  p , risse_int * value);
+	static bool GetLabelCharInt(const tTVPLabelCharType *s, risse_int &v);
 
 
 //--- loop information input/output stuff
 private:
-	static bool GetInt(char *s, tjs_int &v);
-	static bool GetInt64(char *s, tjs_int64 &v);
+	static bool GetInt(char *s, risse_int &v);
+	static bool GetInt64(char *s, risse_int64 &v);
 	static bool GetBool(char *s, bool &v);
 	static bool GetCondition(char *s, tTVPWaveLoopLinkCondition &v);
 	static bool GetString(char *s, tTVPLabelStringType &v);
@@ -401,8 +401,8 @@ public:
 #ifdef TVP_IN_LOOP_TUNER
 	// output facility (currently only available with VCL interface)
 private:
-	static void PutInt(AnsiString &s, tjs_int v);
-	static void PutInt64(AnsiString &s, tjs_int64 v);
+	static void PutInt(AnsiString &s, risse_int v);
+	static void PutInt64(AnsiString &s, risse_int64 v);
 	static void PutBool(AnsiString &s, bool v);
 	static void PutCondition(AnsiString &s, tTVPWaveLoopLinkCondition v);
 	static void PutString(AnsiString &s, tTVPLabelStringType v);

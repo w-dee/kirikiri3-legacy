@@ -12,7 +12,7 @@
 #ifndef MemoryStreamH
 #define MemoryStreamH
 
-#include "tjsUtils.h"
+#include "risseUtils.h"
 
 
 //---------------------------------------------------------------------------
@@ -22,11 +22,11 @@
 //---------------------------------------------------------------------------
 class tTVPMemoryStreamBlock
 {
-	tTJSCriticalSection CS; //!< このメモリブロックへのアクセスを保護するクリティカルセクション
+	tRisseCriticalSection CS; //!< このメモリブロックへのアクセスを保護するクリティカルセクション
 	void * Block;			//!< メモリブロック
-	tjs_size Size;			//!< メモリブロックのデータが入っている部分のサイズ
-	tjs_size AllocSize;		//!< メモリブロックのアロケートしているサイズ( Size <= AllocSize )
-	tjs_uint RefCount;		//!< 参照カウント
+	risse_size Size;			//!< メモリブロックのデータが入っている部分のサイズ
+	risse_size AllocSize;		//!< メモリブロックのアロケートしているサイズ( Size <= AllocSize )
+	risse_uint RefCount;		//!< 参照カウント
 
 public:
 	tTVPMemoryStreamBlock();
@@ -36,13 +36,13 @@ public:
 	void AddRef();
 	void Release();
 
-	void ChangeSize(tjs_size);
+	void ChangeSize(risse_size);
 	void Fit();
 
 	void * GetBlock() { return Block; } //!< ブロックを得る
 
-	tTJSCriticalSection & GetCS( ) { return CS; } //!< クリティカルセクションオブジェクトを得る
-	tjs_size GetSize() const { return Size; } //!< ブロックのサイズを得る
+	tRisseCriticalSection & GetCS( ) { return CS; } //!< クリティカルセクションオブジェクトを得る
+	risse_size GetSize() const { return Size; } //!< ブロックのサイズを得る
 };
 //---------------------------------------------------------------------------
 
@@ -52,27 +52,27 @@ public:
 //! @brief		メモリストリーム
 //---------------------------------------------------------------------------
 /*
-	this class provides a tTJSBinaryStream based access method for a memory block.
+	this class provides a tRisseBinaryStream based access method for a memory block.
 */
-class tTVPMemoryStream : public tTJSBinaryStream
+class tTVPMemoryStream : public tRisseBinaryStream
 {
 protected:
 	tTVPMemoryStreamBlock * Block; //!< メモリブロック
-	tjs_size CurrentPos;		//!< 現在のポインタ
-	tjs_uint32 Flags;			//!< アクセスフラグ
+	risse_size CurrentPos;		//!< 現在のポインタ
+	risse_uint32 Flags;			//!< アクセスフラグ
 
 public:
-	tTVPMemoryStream(tjs_uint32 flags);
-	tTVPMemoryStream(tjs_uint32 flags, tTVPMemoryStreamBlock * block);
+	tTVPMemoryStream(risse_uint32 flags);
+	tTVPMemoryStream(risse_uint32 flags, tTVPMemoryStreamBlock * block);
 	~tTVPMemoryStream();
 
-	tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
-	tjs_size Read(void *buffer, tjs_size read_size);
-	tjs_size Write(const void *buffer, tjs_size write_size);
+	risse_uint64 Seek(risse_int64 offset, risse_int whence);
+	risse_size Read(void *buffer, risse_size read_size);
+	risse_size Write(const void *buffer, risse_size write_size);
 	void SetEndOfFile();
-	tjs_uint64 GetSize() { return Block->GetSize(); }
+	risse_uint64 GetSize() { return Block->GetSize(); }
 
-	// non-tTJSBinaryStream based methods
+	// non-tRisseBinaryStream based methods
 	void * GetInternalBuffer()  const { return Block->GetBlock(); }
 };
 //---------------------------------------------------------------------------

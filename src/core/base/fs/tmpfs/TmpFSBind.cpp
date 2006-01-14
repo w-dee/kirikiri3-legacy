@@ -7,7 +7,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief TmpFSのTJS3バインディング
+//! @brief TmpFSのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "TmpFS.h"
@@ -15,24 +15,24 @@
 #include "TVPException.h"
 
 
-TJS_DEFINE_SOURCE_ID(2014);
+RISSE_DEFINE_SOURCE_ID(2014);
 
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNI_TmpFS::tTJSNI_TmpFS()
+tRisseNI_TmpFS::tRisseNI_TmpFS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS コンストラクタ
+//! @brief		Risse コンストラクタ
 //---------------------------------------------------------------------------
-tjs_error tTJSNI_TmpFS::Construct(tjs_int numparams,
-		tTJSVariant **param, iTJSDispatch2 *tjs_obj)
+risse_error tRisseNI_TmpFS::Construct(risse_int numparams,
+		tRisseVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		TmpFS.TmpFS
@@ -40,15 +40,15 @@ tjs_error tTJSNI_TmpFS::Construct(tjs_int numparams,
 	*/
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(tjs_obj, new tTVPTmpFS());
+	RegisterFileSystemNativeInstance(risse_obj, new tTVPTmpFS());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS 無効化関数
+//! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
-void tTJSNI_TmpFS::Invalidate()
+void tRisseNI_TmpFS::Invalidate()
 {
 }
 //---------------------------------------------------------------------------
@@ -61,29 +61,29 @@ void tTJSNI_TmpFS::Invalidate()
 //---------------------------------------------------------------------------
 //! @brief		TmpFS クラスID
 //---------------------------------------------------------------------------
-tjs_uint32 tTJSNC_TmpFS::ClassID = (tjs_uint32)-1;
+risse_uint32 tRisseNC_TmpFS::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNC_TmpFS::tTJSNC_TmpFS() :
-	tTJSNativeClass(TJS_WS("TmpFS"))
+tRisseNC_TmpFS::tRisseNC_TmpFS() :
+	tRisseNativeClass(RISSE_WS("TmpFS"))
 {
 	// class constructor
 
-	TJS_BEGIN_NATIVE_MEMBERS(/*TJS class name*/TmpFS)
-	TJS_DECL_EMPTY_FINALIZE_METHOD
+	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/TmpFS)
+	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tTJSNI_TmpFS,
-	/*TJS class name*/ TmpFS)
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_TmpFS,
+	/*Risse class name*/ TmpFS)
 {
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/TmpFS)
+RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/TmpFS)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/save)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/save)
 {
 	/*%
 		@brief	ファイルシステムの内容を保存する
@@ -99,18 +99,18 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/save)
 		</p>
 	*/
 
-	TJS_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tTJSNI_TmpFS);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_TmpFS);
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	ttstr filename = *param[0];
 
 	_this->GetFileSystem()->SerializeTo(filename);
 
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/save)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/save)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/load)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/load)
 {
 	/*%
 		@brief	ファイルシステムの内容を復元する
@@ -126,18 +126,18 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/load)
 		</p>
 	*/
 
-	TJS_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tTJSNI_TmpFS);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_TmpFS);
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	ttstr filename = *param[0];
 
 	_this->GetFileSystem()->UnserializeFrom(filename);
 
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/load)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/load)
 //----------------------------------------------------------------------
-	TJS_END_NATIVE_MEMBERS
+	RISSE_END_NATIVE_MEMBERS
 }
 //---------------------------------------------------------------------------
 
@@ -146,9 +146,9 @@ TJS_END_NATIVE_METHOD_DECL(/*func. name*/load)
 //! @brief		ネイティブインスタンスを作成して返す
 //! @return		ネイティブインスタンス
 //---------------------------------------------------------------------------
-tTJSNativeInstance *tTJSNC_TmpFS::CreateNativeInstance()
+tRisseNativeInstance *tRisseNC_TmpFS::CreateNativeInstance()
 {
-	return new tTJSNI_TmpFS();
+	return new tRisseNI_TmpFS();
 }
 //---------------------------------------------------------------------------
 
@@ -165,11 +165,11 @@ tTJSNativeInstance *tTJSNC_TmpFS::CreateNativeInstance()
 tTVPTmpFSRegisterer::tTVPTmpFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
-	iTJSDispatch2 * cls = new tTJSNC_TmpFS();
+	iRisseDispatch2 * cls = new tRisseNC_TmpFS();
 	try
 	{
 		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
-							TJS_WS("TmpFS"), cls);
+							RISSE_WS("TmpFS"), cls);
 	}
 	catch(...)
 	{

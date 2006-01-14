@@ -131,9 +131,9 @@ void wxMainDialog::UpdateFaceIndex()
 
 	try
 	{
-		tjs_int face_index = FaceNameChoice->GetSelection();
+		risse_int face_index = FaceNameChoice->GetSelection();
 		if(face_index < 0) face_index = 0;
-		tjs_uint32 options =
+		risse_uint32 options =
 			TVP_GET_FACE_INDEX_FROM_OPTIONS(face_index);
 		if(BoldCheckBox->GetValue())
 			options |= TVP_TF_BOLD;

@@ -34,7 +34,7 @@ private:
 	FT_StreamRec Stream;
 
 public:
-	tTVPNativeFreeTypeFace(const wxString &fontname, tjs_uint32 options);
+	tTVPNativeFreeTypeFace(const wxString &fontname, risse_uint32 options);
 	virtual ~tTVPNativeFreeTypeFace();
 
 	virtual FT_Face GetFTFace() const;

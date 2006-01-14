@@ -1,29 +1,29 @@
-//!@ brief TJS3 テスト用プログラム
+//!@ brief Risse テスト用プログラム
 
 #include "prec.h"
-#include "TJSEngine.h"
-#include "tjsNative.h"
+#include "RisseEngine.h"
+#include "risseNative.h"
 
-TJS_DEFINE_SOURCE_ID(1);
+RISSE_DEFINE_SOURCE_ID(1);
 
 
 
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS テスト関数
+//! @brief		Risse テスト関数
 //---------------------------------------------------------------------------
-class TestFunc : public tTJSNativeFunction
+class TestFunc : public tRisseNativeFunction
 {
 public:
-    tjs_error Process(tTJSVariant *result, tjs_int numparams,
-        tTJSVariant **param, iTJSDispatch2 *objthis)
+    risse_error Process(tRisseVariant *result, risse_int numparams,
+        tRisseVariant **param, iRisseDispatch2 *objthis)
     {
-        if(numparams < 1) return TJS_E_BADPARAMCOUNT; // 引数が足りない
+        if(numparams < 1) return RISSE_E_BADPARAMCOUNT; // 引数が足りない
 
 		wxPrintf(wxT("%s\n"), param[0]->AsWxString().c_str());
 
-        return TJS_S_OK; // 正常に終わったことを示すため TJS_S_OK を返す
+        return RISSE_S_OK; // 正常に終わったことを示すため RISSE_S_OK を返す
     }
 };
 //---------------------------------------------------------------------------
@@ -77,24 +77,24 @@ int Application::OnRun()
 {
 	try
 	{
-		iTJSDispatch2 * global = tTVPTJS3ScriptEngine::instance()->GetGlobalNoAddRef();
+		iRisseDispatch2 * global = tTVPRisseScriptEngine::instance()->GetGlobalNoAddRef();
 			// グローバルオブジェクトを取得
 
-		iTJSDispatch2 *func = new TestFunc(); // TestFunc のオブジェクトを作成
-		tTJSVariant func_var(func); // tTJSVariant 型 func_var にオブジェクトを設定
+		iRisseDispatch2 *func = new TestFunc(); // TestFunc のオブジェクトを作成
+		tRisseVariant func_var(func); // tRisseVariant 型 func_var にオブジェクトを設定
 		func->Release(); // func を Release
 
-		TJS_THROW_IF_ERROR(
-			global->PropSet(TJS_MEMBERENSURE, TJS_WS("test"), NULL, &func_var, NULL));
+		RISSE_THROW_IF_ERROR(
+			global->PropSet(RISSE_MEMBERENSURE, RISSE_WS("test"), NULL, &func_var, NULL));
 				// 登録
 
-		tTVPTJS3ScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
-			TJS_WS("FileSystem.mount('/', new FileSystem.TmpFS())"),
+		tTVPRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
+			RISSE_WS("FileSystem.mount('/', new FileSystem.TmpFS())"),
 			NULL, NULL, NULL);
-			// tTJS::EvalExpression を使って式を実行
+			// tRisse::EvalExpression を使って式を実行
 
 	}
-	catch(const eTJS &e)
+	catch(const eRisse &e)
 	{
 		wxFprintf(stderr, wxT("error : %s\n"), e.GetMessage().AsWxString().c_str());
 	}

@@ -18,8 +18,8 @@
 //---------------------------------------------------------------------------
 struct tTVPGlyphMetrics
 {
-	tjs_int CellIncX;		//!< 一文字進めるの必要なX方向のピクセル数(64倍されている数値なので注意)
-	tjs_int CellIncY;		//!< 一文字進めるの必要なY方向のピクセル数(64倍されている数値なので注意)
+	risse_int CellIncX;		//!< 一文字進めるの必要なX方向のピクセル数(64倍されている数値なので注意)
+	risse_int CellIncY;		//!< 一文字進めるの必要なY方向のピクセル数(64倍されている数値なので注意)
 };
 //---------------------------------------------------------------------------
 
@@ -29,21 +29,21 @@ struct tTVPGlyphMetrics
 //---------------------------------------------------------------------------
 class tTVPGlyphBitmap
 {
-	tjs_uint RefCount;				//!< 参照カウンタ
-	tjs_uint8 * Data;				//!< ビットマップデータ(8bpp, グレースケール)
-	tjs_int Pitch;					//!< ビットマップデータの横方向のバイト数
-	tjs_int OriginX;				//!< 描画点からブラックボックスの左端までの位置
-	tjs_int OriginY;				//!< 描画点からブラックボックスの上端までの位置
-	tjs_uint BlackBoxW;				//!< ブラックボックスの幅
-	tjs_uint BlackBoxH;				//!< ブラックボックスの高さ
+	risse_uint RefCount;				//!< 参照カウンタ
+	risse_uint8 * Data;				//!< ビットマップデータ(8bpp, グレースケール)
+	risse_int Pitch;					//!< ビットマップデータの横方向のバイト数
+	risse_int OriginX;				//!< 描画点からブラックボックスの左端までの位置
+	risse_int OriginY;				//!< 描画点からブラックボックスの上端までの位置
+	risse_uint BlackBoxW;				//!< ブラックボックスの幅
+	risse_uint BlackBoxH;				//!< ブラックボックスの高さ
 	tTVPGlyphMetrics	Metrics;	//!< メトリック
 
 public:
 	tTVPGlyphBitmap(
-		tjs_uint8 * indata,
-		tjs_int inpitch,
-		tjs_int originx, tjs_int originy,
-		tjs_uint blackboxw, tjs_uint blackboxh,
+		risse_uint8 * indata,
+		risse_int inpitch,
+		risse_int originx, risse_int originy,
+		risse_uint blackboxw, risse_uint blackboxh,
 		const tTVPGlyphMetrics & metrics);
 	tTVPGlyphBitmap(const tTVPGlyphBitmap & ref);
 
@@ -57,12 +57,12 @@ public:
 
 public:
 	// アクセサの類
-	const tjs_uint8 * GetData() const { return Data; }
-	tjs_int GetPitch() const { return Pitch; }
-	tjs_int GetOriginX() const { return OriginX; }
-	tjs_int GetOriginY() const { return OriginY; }
-	tjs_uint GetBlackBoxW() const { return BlackBoxW; }
-	tjs_uint GetBlackBoxH() const { return BlackBoxH; }
+	const risse_uint8 * GetData() const { return Data; }
+	risse_int GetPitch() const { return Pitch; }
+	risse_int GetOriginX() const { return OriginX; }
+	risse_int GetOriginY() const { return OriginY; }
+	risse_uint GetBlackBoxW() const { return BlackBoxW; }
+	risse_uint GetBlackBoxH() const { return BlackBoxH; }
 	const tTVPGlyphMetrics & GetMetrics() const { return Metrics; }
 };
 //---------------------------------------------------------------------------

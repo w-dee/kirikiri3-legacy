@@ -101,7 +101,7 @@ foreach $key (sort keys %cmap)
 	if($prev_group != $group)
 	{
 		printf FH ("};\n\n") if($prev_group != -1);
-		printf FH "static const tjs_uint16 TVPSJIS2UNICODE_Submap_map_%02X[%d]={\n/* 0x%02X%02X - 0x%02X%02X */\n",
+		printf FH "static const risse_uint16 TVPSJIS2UNICODE_Submap_map_%02X[%d]={\n/* 0x%02X%02X - 0x%02X%02X */\n",
 			$group, $high[$group] - $low[$group] + 1,
 			$group, $low[$group] , $group, $high[$group];
 		$count = 0;
@@ -126,9 +126,9 @@ print FH <<EOF;
 //---------------------------------------------------------------------------
 struct tTVPSJIS2UNICODE_Submap
 {
-	tjs_uint8	low;
-	tjs_uint8	high;
-	const tjs_uint16	*submap;
+	risse_uint8	low;
+	risse_uint8	high;
+	const risse_uint16	*submap;
 };
 //---------------------------------------------------------------------------
 
@@ -166,16 +166,16 @@ print FH <<EOF;
 //! \@param		out 出力 UNICODE (wchar_t)
 //! \@return		変換に成功すれば真、失敗すれば偽
 //---------------------------------------------------------------------------
-static bool inline _TVPSJISToUnicode(const char * & in, tjs_char *out)
+static bool inline _TVPSJISToUnicode(const char * & in, risse_char *out)
 {
 	const unsigned char * & p = (const unsigned char * &)in;
 
 	// 1 byte 文字をチェック
-	tjs_uint16 ch = TVPSJIS2UNICODE_Submap_map_00[p[0]];
+	risse_uint16 ch = TVPSJIS2UNICODE_Submap_map_00[p[0]];
 	if(ch != 0x0000U)
 	{
 		// 1byte
-		if(out) *out = static_cast<tjs_char>(ch);
+		if(out) *out = static_cast<risse_char>(ch);
 		in ++;
 		return true;
 	}
@@ -190,7 +190,7 @@ static bool inline _TVPSJISToUnicode(const char * & in, tjs_char *out)
 			if(ch != 0x0000U)
 			{
 				// 2 byte map found
-				if(out) *out = static_cast<tjs_char>(ch);
+				if(out) *out = static_cast<risse_char>(ch);
 				in += 2;
 				return true;
 			}
@@ -208,7 +208,7 @@ static bool inline _TVPSJISToUnicode(const char * & in, tjs_char *out)
 //! \@param		in 入力 sjisコード  例: '漢' = 0x8abf  '0' = 0x0030
 //! \@return		出力 UNICODE (wchar_t) 変換に失敗すれば 0
 //---------------------------------------------------------------------------
-tjs_char TVPSJISToUnicode(tjs_uint sjis)
+risse_char TVPSJISToUnicode(risse_uint sjis)
 {
 	char buf[3];
 	const char * p = buf;
@@ -223,7 +223,7 @@ tjs_char TVPSJISToUnicode(tjs_uint sjis)
 		buf[0] = static_cast<char>(static_cast<unsigned char>(sjis));
 		buf[1] = '\\0';
 	}
-	tjs_char out;
+	risse_char out;
 	if(_TVPSJISToUnicode(p, &out)) return out;
 	return 0;
 }
@@ -237,25 +237,25 @@ tjs_char TVPSJISToUnicode(tjs_uint sjis)
 //! \@param		out 出力 UNICODE (wchar_t) 文字列 (NULLの場合は書き込まれない)
 //! \@return		出力された文字数
 //!				(最後に\\0は書き込まれないしその文字数も含まれないので注意)
-//!				(tjs_size)-1 = 異常な文字が見つかった
+//!				(risse_size)-1 = 異常な文字が見つかった
 //---------------------------------------------------------------------------
-tjs_size TVPSJISToUnicodeString(const char * in, tjs_char *out)
+risse_size TVPSJISToUnicodeString(const char * in, risse_char *out)
 {
 	// convert input Shift-JIS (CP932) string to output wide string
 	int count = 0;
 	while(*in)
 	{
-		tjs_char c;
+		risse_char c;
 		if(out)
 		{
 			if(!_TVPSJISToUnicode(in, &c))
-				return static_cast<tjs_size>(-1); // invalid character found
+				return static_cast<risse_size>(-1); // invalid character found
 			*out++ = c;
 		}
 		else
 		{
 			if(!_TVPSJISToUnicode(in, NULL))
-				return static_cast<tjs_size>(-1); // invalid character found
+				return static_cast<risse_size>(-1); // invalid character found
 		}
 		count ++;
 	}
@@ -271,8 +271,8 @@ print HH <<EOF;
 #ifndef _CP932_UNI_
 #define _CP932_UNI_
 
-tjs_size TVPSJISToUnicodeString(const char * in, tjs_char *out);
-tjs_char TVPSJISToUnicode(tjs_uint sjis);
+risse_size TVPSJISToUnicodeString(const char * in, risse_char *out);
+risse_char TVPSJISToUnicode(risse_uint sjis);
 
 #endif
 

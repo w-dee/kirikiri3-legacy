@@ -7,31 +7,31 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief PathFSのTJS3バインディング
+//! @brief PathFSのRisseバインディング
 //---------------------------------------------------------------------------
 #ifndef _PATHSFSBIND_H_
 #define _PATHSFSBIND_H_
 
 #include "FSManagerBind.h"
 #include "PathFS.h"
-#include "tjsNative.h"
+#include "risseNative.h"
 
 //---------------------------------------------------------------------------
 //! @brief PathFS ネイティブインスタンス
 //---------------------------------------------------------------------------
-class tTJSNI_PathFS : public tTJSNI_BaseFileSystem
+class tRisseNI_PathFS : public tRisseNI_BaseFileSystem
 {
 public:
-	tTJSNI_PathFS();
+	tRisseNI_PathFS();
 
-	tjs_error Construct(tjs_int numparams,
-		tTJSVariant **param, iTJSDispatch2 *tjs_obj);
+	risse_error Construct(risse_int numparams,
+		tRisseVariant **param, iRisseDispatch2 *risse_obj);
 	void Invalidate();
 
 	tTVPPathFS * GetFileSystem() 
 	{
 		return reinterpret_cast<tTVPPathFS*>(
-			tTJSNI_BaseFileSystem::GetFileSystem().get());
+			tRisseNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
 private:
@@ -42,15 +42,15 @@ private:
 //---------------------------------------------------------------------------
 //! @brief PathFS ネイティブクラス
 //---------------------------------------------------------------------------
-class tTJSNC_PathFS : public tTJSNativeClass
+class tRisseNC_PathFS : public tRisseNativeClass
 {
 public:
-	tTJSNC_PathFS();
+	tRisseNC_PathFS();
 
-	static tjs_uint32 ClassID;
+	static risse_uint32 ClassID;
 
 private:
-	tTJSNativeInstance *CreateNativeInstance();
+	tRisseNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 
@@ -64,7 +64,7 @@ private:
 //---------------------------------------------------------------------------
 class tTVPPathFSRegisterer
 {
-	tTVPSingleton<tTVPTJS3ScriptEngine> ref_tTVPTJS3ScriptEngine; //!< tTVPTJS3ScriptEngine に依存
+	tTVPSingleton<tTVPRisseScriptEngine> ref_tTVPRisseScriptEngine; //!< tTVPRisseScriptEngine に依存
 	tTVPSingleton<tTVPFileSystemRegisterer> ref_tTVPFileSystemRegisterer; //!< tTVPFileSystemRegisterer に依存
 public:
 	tTVPPathFSRegisterer();

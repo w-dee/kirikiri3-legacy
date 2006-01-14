@@ -10,7 +10,7 @@
 //! @brief Pathファイルシステムの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-TJS_DEFINE_SOURCE_ID(2002);
+RISSE_DEFINE_SOURCE_ID(2002);
 
 #include "FSManager.h"
 #include "PathFS.h"
@@ -48,16 +48,16 @@ tTVPPathFS::~tTVPPathFS()
 size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
 	tTVPFileSystemIterationCallback * callback)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// PathFS にはファイルシステムの / しか存在しない
 	// そのためディレクトリ指定は / へのアクセスしか認めない
-	if(dirname != TJS_WS("/") || !dirname.IsEmpty())
-		eTVPException::Throw(TJS_WS_TR("no such directory"));
+	if(dirname != RISSE_WS("/") || !dirname.IsEmpty())
+		eTVPException::Throw(RISSE_WS_TR("no such directory"));
 
 	Ensure();
 
-	tjs_size count = 0;
+	risse_size count = 0;
 	for(tHash::tIterator i = Hash.GetFirst(); !i.IsNull(); i++)
 	{
 		count ++;
@@ -76,10 +76,10 @@ size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tTVPPathFS::FileExists(const ttstr & filename)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fn;
-	if(filename.StartsWith(TJS_WC('/')))
+	if(filename.StartsWith(RISSE_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
 		fn = filename;
@@ -97,7 +97,7 @@ bool tTVPPathFS::FileExists(const ttstr & filename)
 bool tTVPPathFS::DirectoryExists(const ttstr & dirname)
 {
 	// PathFS にはサブディレクトリは存在しない
-	if(dirname != TJS_WS("/") || !dirname.IsEmpty())
+	if(dirname != RISSE_WS("/") || !dirname.IsEmpty())
 		return false;
 	return true;
 }
@@ -110,7 +110,7 @@ bool tTVPPathFS::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tTVPPathFS::RemoveFile(const ttstr & filename)
 {
-	eTVPException::Throw(TJS_WS_TR("can not delete file (filesystem is read-only)"));
+	eTVPException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ void tTVPPathFS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	eTVPException::Throw(TJS_WS_TR("can not delete directory (filesystem is read-only)"));
+	eTVPException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ void tTVPPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	eTVPException::Throw(TJS_WS_TR("can not make directory (filesystem is read-only)"));
+	eTVPException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -146,10 +146,10 @@ void tTVPPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fn;
-	if(filename.StartsWith(TJS_WC('/')))
+	if(filename.StartsWith(RISSE_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
 		fn = filename;
@@ -171,12 +171,12 @@ void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTJSBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tRisseBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fn;
-	if(filename.StartsWith(TJS_WC('/')))
+	if(filename.StartsWith(RISSE_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
 		fn = filename;
@@ -199,17 +199,17 @@ tTJSBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, tjs_uint32 f
 //---------------------------------------------------------------------------
 void tTVPPathFS::Add(const ttstr & name, bool recursive)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// ディレクトリ名の最後に '/' がついていなければ追加
 	ttstr fn(name);
-	if(fn.EndsWith(TJS_WC('/'))) fn += TJS_WC('/');
+	if(fn.EndsWith(RISSE_WC('/'))) fn += RISSE_WC('/');
 
 	// ディレクトリが存在しないことを確かにする
 	Remove(fn);
 
 	// Paths に追加する
-	Paths.push_back((recursive ? TJS_WS("+") : TJS_WS(" ")) + fn);
+	Paths.push_back((recursive ? RISSE_WS("+") : RISSE_WS(" ")) + fn);
 
 	// フラグを立てる
 	NeedRebuild = true;
@@ -223,20 +223,20 @@ void tTVPPathFS::Add(const ttstr & name, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPPathFS::Remove(const ttstr & name)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	std::vector<ttstr>::iterator i;
 
 	// ディレクトリ名の最後に '/' がついていなければ追加
 	ttstr fn(name);
-	if(fn.EndsWith(TJS_WC('/'))) fn += TJS_WC('/');
+	if(fn.EndsWith(RISSE_WC('/'))) fn += RISSE_WC('/');
 
 	// ' ' + name が存在するか
-	i = std::find(Paths.begin(), Paths.end(), TJS_WS(" ") + fn);
+	i = std::find(Paths.begin(), Paths.end(), RISSE_WS(" ") + fn);
 	if(i != Paths.end()) { Paths.erase(i); NeedRebuild = true; return; }
 
 	// '+' + name が存在するか
-	i = std::find(Paths.begin(), Paths.end(), TJS_WS("+") + fn);
+	i = std::find(Paths.begin(), Paths.end(), RISSE_WS("+") + fn);
 	if(i != Paths.end()) { Paths.erase(i); NeedRebuild = true; return; }
 }
 //---------------------------------------------------------------------------
@@ -280,7 +280,7 @@ void tTVPPathFS::Ensure()
 	// 全てのパスに対して
 	for(std::vector<ttstr>::iterator i = Paths.begin(); i != Paths.end(); i++)
 	{
-		bool recursive = (i->c_str()[0] == static_cast<tjs_char>(TJS_WC('+')));
+		bool recursive = (i->c_str()[0] == static_cast<risse_char>(RISSE_WC('+')));
 		ttstr dirname(i->c_str() + 1);
 		tTVPFileSystemManager::instance()->GetFileListAt(dirname, &callback, recursive);
 	}

@@ -7,32 +7,32 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief TmpFSのTJS3バインディング
+//! @brief TmpFSのRisseバインディング
 //---------------------------------------------------------------------------
 #ifndef _TMPFSBIND_H_
 #define _TMPFSBIND_H_
 
 #include "FSManagerBind.h"
 #include "TmpFS.h"
-#include "tjsNative.h"
+#include "risseNative.h"
 #include "Singleton.h"
 
 //---------------------------------------------------------------------------
 //! @brief TmpFS ネイティブインスタンス
 //---------------------------------------------------------------------------
-class tTJSNI_TmpFS : public tTJSNI_BaseFileSystem
+class tRisseNI_TmpFS : public tRisseNI_BaseFileSystem
 {
 public:
-	tTJSNI_TmpFS();
+	tRisseNI_TmpFS();
 
-	tjs_error Construct(tjs_int numparams,
-		tTJSVariant **param, iTJSDispatch2 *tjs_obj);
+	risse_error Construct(risse_int numparams,
+		tRisseVariant **param, iRisseDispatch2 *risse_obj);
 	void Invalidate();
 
 	tTVPTmpFS * GetFileSystem() 
 	{
 		return reinterpret_cast<tTVPTmpFS*>(
-			tTJSNI_BaseFileSystem::GetFileSystem().get());
+			tRisseNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
 private:
@@ -47,15 +47,15 @@ private:
 //---------------------------------------------------------------------------
 //! @brief TmpFS ネイティブクラス
 //---------------------------------------------------------------------------
-class tTJSNC_TmpFS : public tTJSNativeClass
+class tRisseNC_TmpFS : public tRisseNativeClass
 {
 public:
-	tTJSNC_TmpFS();
+	tRisseNC_TmpFS();
 
-	static tjs_uint32 ClassID;
+	static risse_uint32 ClassID;
 
 private:
-	tTJSNativeInstance *CreateNativeInstance();
+	tRisseNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ private:
 //---------------------------------------------------------------------------
 class tTVPTmpFSRegisterer
 {
-	tTVPSingleton<tTVPTJS3ScriptEngine> ref_tTVPTJS3ScriptEngine; //!< tTVPTJS3ScriptEngine に依存
+	tTVPSingleton<tTVPRisseScriptEngine> ref_tTVPRisseScriptEngine; //!< tTVPRisseScriptEngine に依存
 	tTVPSingleton<tTVPFileSystemRegisterer> ref_tTVPFileSystemRegisterer; //!< tTVPFileSystemRegisterer に依存
 public:
 	tTVPTmpFSRegisterer();

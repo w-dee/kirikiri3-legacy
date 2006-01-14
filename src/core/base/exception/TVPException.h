@@ -12,16 +12,16 @@
 #ifndef _TVPExceptionH_
 #define _TVPExceptionH_
 
-#include "tjsError.h"
+#include "risseError.h"
 
 //---------------------------------------------------------------------------
 //! @brief 吉里吉里3用の汎用例外クラス
 //---------------------------------------------------------------------------
-class eTVPException : public eTJSError
+class eTVPException : public eRisseError
 {
 public:
-	eTVPException(const ttstr & msg) : eTJSError(msg) {;}
-	eTVPException(const eTVPException & ref) : eTJSError(ref) {;}
+	eTVPException(const ttstr & msg) : eRisseError(msg) {;}
+	eTVPException(const eTVPException & ref) : eRisseError(ref) {;}
 
 	static void Throw(const ttstr &msg);
 	static void Throw(const ttstr &msg, const ttstr & s1);

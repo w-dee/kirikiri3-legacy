@@ -37,13 +37,13 @@ class tTVPFreeTypeFontEnumeraterHelper
 {
 private:
 	wxArrayString & Dest; //!< 格納先配列
-	tjs_uint32 Flags; //!< 列挙フラグ (tvpfontstruc.h の TVP_FSF_XXXXX 定数の bitor )
+	risse_uint32 Flags; //!< 列挙フラグ (tvpfontstruc.h の TVP_FSF_XXXXX 定数の bitor )
 	wxFontEncoding Encoding; //!< エンコーディング
 	wxString PrevFontName; //!< 直前に列挙したフォント名(重複をはじくために使う)
 
 public:
 	tTVPFreeTypeFontEnumeraterHelper(wxArrayString & dest,
-		tjs_uint32 Flags, wxFontEncoding encoding);
+		risse_uint32 Flags, wxFontEncoding encoding);
 	~tTVPFreeTypeFontEnumeraterHelper();
 
 	void DoEnumerate();
@@ -68,7 +68,7 @@ private:
 //! @param		dest	格納先配列 (配列はクリアされる)
 //---------------------------------------------------------------------------
 tTVPFreeTypeFontEnumeraterHelper::tTVPFreeTypeFontEnumeraterHelper(wxArrayString & dest,
-	tjs_uint32 flags, wxFontEncoding encoding ) :
+	risse_uint32 flags, wxFontEncoding encoding ) :
 		 Dest(dest), Flags(flags), Encoding(encoding)
 {
 }
@@ -208,7 +208,7 @@ tTVPBaseFreeTypeFontDriver::~tTVPBaseFreeTypeFontDriver()
 //!				flags に指定できるのは、TVP_FSF_FIXEDPITCH 、 TVP_FSF_NOVERTICAL のみ。
 //---------------------------------------------------------------------------
 void tTVPBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
-		tjs_uint32 flags, wxFontEncoding encoding)
+		risse_uint32 flags, wxFontEncoding encoding)
 {
 	dest.Clear();
 

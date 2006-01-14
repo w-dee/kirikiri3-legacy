@@ -15,8 +15,8 @@
 #ifndef _CP932_UNI_
 #define _CP932_UNI_
 
-tjs_size TVPSJISToUnicodeString(const char * in, tjs_char *out);
-tjs_char TVPSJISToUnicode(tjs_uint sjis);
+risse_size TVPSJISToUnicodeString(const char * in, risse_char *out);
+risse_char TVPSJISToUnicode(risse_uint sjis);
 
 #endif
 

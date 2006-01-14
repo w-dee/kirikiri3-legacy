@@ -17,8 +17,8 @@ LDFLAGS = -g $(CONSOLE_LDFLAGS)
 
 #----------------------------#
 
-# tjs3 を使うための設定
-include $(TOP_DIR)/src/core/tjs3/Makefile_for_user
+# risse を使うための設定
+include $(TOP_DIR)/src/core/risse/Makefile_for_user
 
 #----------------------------#
 
@@ -55,7 +55,7 @@ CPPFILES = \
 		$(BASE_DIR)/fs/xp4fs/XP4StreamCache.cpp     \
 		$(BASE_DIR)/fs/xp4fs/XP4FSBind.cpp          \
 		$(BASE_DIR)/exception/TVPException.cpp      \
-		$(BASE_DIR)/script/TJSEngine.cpp            \
+		$(BASE_DIR)/script/RisseEngine.cpp            \
 		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)

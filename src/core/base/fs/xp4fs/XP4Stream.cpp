@@ -19,7 +19,7 @@
 #include <algorithm>
 
 
-TJS_DEFINE_SOURCE_ID(2009);
+RISSE_DEFINE_SOURCE_ID(2009);
 
 
 //---------------------------------------------------------------------------
@@ -30,13 +30,13 @@ TJS_DEFINE_SOURCE_ID(2009);
 //---------------------------------------------------------------------------
 tTVPXP4ArchiveStream::tTVPXP4ArchiveStream(
 			boost::shared_ptr<tTVPXP4Archive> ptr,
-			tjs_size idx, tjs_uint32 flags)
+			risse_size idx, risse_uint32 flags)
 				: Owner(ptr) , FileIndex(idx),
 				FileInfo(ptr->GetFileInfo(idx)),
 				SegmentInfo(ptr->GetSegmentInfo(idx))
 {
 	CurSegmentNum = 0;
-	LastOpenedSegmentNum = static_cast<tjs_size>(-1);
+	LastOpenedSegmentNum = static_cast<risse_size>(-1);
 	SegmentOpened = false;
 	CurPos = 0;
 	SegmentRemain = 0;
@@ -52,7 +52,7 @@ tTVPXP4ArchiveStream::tTVPXP4ArchiveStream(
 //---------------------------------------------------------------------------
 tTVPXP4ArchiveStream::~tTVPXP4ArchiveStream()
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	tTVPXP4StreamCache::instance()->ReleaseStream(Owner.get(), Stream);
 }
@@ -104,21 +104,21 @@ void tTVPXP4ArchiveStream::EnsureSegment()
 //! @param		pos シーク先の位置
 //! @note		この関数は内部状態を変えるだけであり、実際にセグメントを開くなどはしない
 //---------------------------------------------------------------------------
-void tTVPXP4ArchiveStream::SeekToPosition(tjs_uint64 pos)
+void tTVPXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
 {
 	// open segment at 'pos' and seek
 	// pos must between zero thru OrgSize
 	if(CurPos == pos) return;
 
 	// do binary search to determine current segment number
-	tjs_size st = 0;
-	tjs_size et = FileInfo.SegmentCount;
-	tjs_size seg_num;
+	risse_size st = 0;
+	risse_size et = FileInfo.SegmentCount;
+	risse_size seg_num;
 
 	while(true)
 	{
 		if(et-st <= 1) { seg_num = st; break; }
-		tjs_int m = st + (et-st)/2;
+		risse_int m = st + (et-st)/2;
 		if(SegmentInfo[m].Offset > pos)
 			et = m;
 		else
@@ -157,17 +157,17 @@ bool tTVPXP4ArchiveStream::OpenNextSegment()
 //---------------------------------------------------------------------------
 //! @brief		シーク
 //! @param		offset 移動オフセット
-//! @param		whence 移動オフセットの基準 (TJS_BS_SEEK_* 定数)
+//! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
 //! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
-tjs_uint64 tTVPXP4ArchiveStream::Seek(tjs_int64 offset, tjs_int whence)
+risse_uint64 tTVPXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tjs_int64 newpos;
+	risse_int64 newpos;
 	switch(whence)
 	{
-	case TJS_BS_SEEK_SET:
+	case RISSE_BS_SEEK_SET:
 		newpos = offset;
 		if(offset >= 0 && offset <= FileInfo.Size)
 		{
@@ -175,7 +175,7 @@ tjs_uint64 tTVPXP4ArchiveStream::Seek(tjs_int64 offset, tjs_int whence)
 		}
 		return CurPos;
 
-	case TJS_BS_SEEK_CUR:
+	case RISSE_BS_SEEK_CUR:
 		newpos = offset + CurPos;
 		if(offset >= 0 && offset <= FileInfo.Size)
 		{
@@ -183,7 +183,7 @@ tjs_uint64 tTVPXP4ArchiveStream::Seek(tjs_int64 offset, tjs_int whence)
 		}
 		return CurPos;
 
-	case TJS_BS_SEEK_END:
+	case RISSE_BS_SEEK_END:
 		newpos = offset + FileInfo.Size;
 		if(offset >= 0 && offset <= FileInfo.Size)
 		{
@@ -202,13 +202,13 @@ tjs_uint64 tTVPXP4ArchiveStream::Seek(tjs_int64 offset, tjs_int whence)
 //! @param		read_size 読み込むバイト数
 //! @return		実際に読み込まれたバイト数
 //---------------------------------------------------------------------------
-tjs_uint tTVPXP4ArchiveStream::Read(void *buffer, tjs_size read_size)
+risse_uint tTVPXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	EnsureSegment();
 
-	tjs_size write_size = 0;
+	risse_size write_size = 0;
 	while(read_size)
 	{
 		while(SegmentRemain == 0)
@@ -218,19 +218,19 @@ tjs_uint tTVPXP4ArchiveStream::Read(void *buffer, tjs_size read_size)
 				return write_size; // could not read more
 		}
 
-		tjs_size one_size =
-			read_size > SegmentRemain ? static_cast<tjs_uint>(SegmentRemain) : read_size;
+		risse_size one_size =
+			read_size > SegmentRemain ? static_cast<risse_uint>(SegmentRemain) : read_size;
 
 		if(SegmentInfo[CurSegmentNum].IsCompressed())
 		{
 			// compressed segment; read from uncompressed data in memory
-			memcpy((tjs_uint8*)buffer + write_size,
-				DecompressedData->GetData() + static_cast<tjs_size>(SegmentPos), one_size);
+			memcpy((risse_uint8*)buffer + write_size,
+				DecompressedData->GetData() + static_cast<risse_size>(SegmentPos), one_size);
 		}
 		else
 		{
 			// read directly from stream
-			Stream->ReadBuffer(reinterpret_cast<tjs_uint8*>(buffer) + write_size, one_size);
+			Stream->ReadBuffer(reinterpret_cast<risse_uint8*>(buffer) + write_size, one_size);
 		}
 
 		// adjust members
@@ -252,9 +252,9 @@ tjs_uint tTVPXP4ArchiveStream::Read(void *buffer, tjs_size read_size)
 //! @param		read_size 書き込みたいバイト数
 //! @return		実際に書き込まれたバイト数
 //---------------------------------------------------------------------------
-tjs_uint tTVPXP4ArchiveStream::Write(const void *buffer, tjs_size write_size)
+risse_uint tTVPXP4ArchiveStream::Write(const void *buffer, risse_size write_size)
 {
-	eTVPException::Throw(TJS_WS_TR("access denied (filesystem is read-only)"));
+	eTVPException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -264,7 +264,7 @@ tjs_uint tTVPXP4ArchiveStream::Write(const void *buffer, tjs_size write_size)
 //---------------------------------------------------------------------------
 void tTVPXP4ArchiveStream::SetEndOfFile()
 {
-	eTVPException::Throw(TJS_WS_TR("access denied (filesystem is read-only)"));
+	eTVPException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -273,7 +273,7 @@ void tTVPXP4ArchiveStream::SetEndOfFile()
 //! @brief		サイズを得る
 //! @return		このストリームのサイズ
 //---------------------------------------------------------------------------
-tjs_uint64 tTVPXP4ArchiveStream::GetSize()
+risse_uint64 tTVPXP4ArchiveStream::GetSize()
 {
 	return FileInfo.Size;
 }

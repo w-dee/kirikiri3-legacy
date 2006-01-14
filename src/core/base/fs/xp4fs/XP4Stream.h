@@ -22,41 +22,41 @@
 //---------------------------------------------------------------------------
 //! @brief		XP4 In-Archive Stream Implmentation
 //---------------------------------------------------------------------------
-class tTVPXP4ArchiveStream : public tTJSBinaryStream
+class tTVPXP4ArchiveStream : public tRisseBinaryStream
 {
-	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
 	boost::shared_ptr<tTVPXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
-	tjs_size FileIndex; //!< アーカイブ中でのインデックス
+	risse_size FileIndex; //!< アーカイブ中でのインデックス
 	const tTVPXP4Archive::tFile & FileInfo; //!< ファイル情報
 	const tTVPXP4Archive::tSegment * SegmentInfo; //!< セグメント情報
 
-	tTJSBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
-	tjs_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号(0～)
-	tjs_size LastOpenedSegmentNum; //!< 最後に開いていたセグメント番号(0～)
+	tRisseBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
+	risse_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号(0～)
+	risse_size LastOpenedSegmentNum; //!< 最後に開いていたセグメント番号(0～)
 	bool SegmentOpened; //!< セグメントが開かれているかどうか
-	tjs_uint64 CurPos; //!< current position in absolute file position
-	tjs_uint64 SegmentRemain; //!< remain bytes in current segment
-	tjs_uint64 SegmentPos; //!< offset from current segment's start
+	risse_uint64 CurPos; //!< current position in absolute file position
+	risse_uint64 SegmentRemain; //!< remain bytes in current segment
+	risse_uint64 SegmentPos; //!< offset from current segment's start
 	tTVPXP4SegmentCache::tDataBlock DecompressedData; // decompressed segment data
 
 public:
 	tTVPXP4ArchiveStream(
 			boost::shared_ptr<tTVPXP4Archive> ptr,
-			tjs_size idx, tjs_uint32 flags);
+			risse_size idx, risse_uint32 flags);
 	~tTVPXP4ArchiveStream();
 
 private:
 	void EnsureSegment(); // ensure accessing to current segment
-	void SeekToPosition(tjs_uint64 pos); // open segment at 'pos' and seek
+	void SeekToPosition(risse_uint64 pos); // open segment at 'pos' and seek
 	bool OpenNextSegment();
 
 public:
-	tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
-	tjs_size Read(void *buffer, tjs_size read_size);
-	tjs_size Write(const void *buffer, tjs_size write_size);
+	risse_uint64 Seek(risse_int64 offset, risse_int whence);
+	risse_size Read(void *buffer, risse_size read_size);
+	risse_size Write(const void *buffer, risse_size write_size);
 	void SetEndOfFile();
-	tjs_uint64 GetSize();
+	risse_uint64 GetSize();
 
 };
 //---------------------------------------------------------------------------

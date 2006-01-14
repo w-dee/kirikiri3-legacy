@@ -52,13 +52,13 @@
 //---------------------------------------------------------------------------
 struct tTVPWaveFormat
 {
-	tjs_uint SamplesPerSec;		//!< sample granule per sec
-	tjs_uint Channels;			//!< number of channels (1=Mono, 2=Stereo ... etc)
-	tjs_uint BitsPerSample;		//!< bits per one sample
-	tjs_uint BytesPerSample;	//!< bytes per one sample
-	tjs_uint64 TotalSamples;	//!< total samples in sample granule; unknown for zero
-	tjs_uint64 TotalTime;		//!< in ms; unknown for zero
-	tjs_uint32 SpeakerConfig;	//!< bitwise OR of SPEAKER_* constants
+	risse_uint SamplesPerSec;		//!< sample granule per sec
+	risse_uint Channels;			//!< number of channels (1=Mono, 2=Stereo ... etc)
+	risse_uint BitsPerSample;		//!< bits per one sample
+	risse_uint BytesPerSample;	//!< bytes per one sample
+	risse_uint64 TotalSamples;	//!< total samples in sample granule; unknown for zero
+	risse_uint64 TotalTime;		//!< in ms; unknown for zero
+	risse_uint32 SpeakerConfig;	//!< bitwise OR of SPEAKER_* constants
 	bool IsFloat;				//!< true if the data is IEEE floating point
 	bool Seekable;				//!< true if able to seek, otherwise false
 };
@@ -79,7 +79,7 @@ public:
 			@note
 			Retrieve PCM format, etc. */
 
-	virtual bool Render(void *buf, tjs_uint bufsamplelen, tjs_uint& rendered) = 0;
+	virtual bool Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered) = 0;
 		/*!< @brief サウンドをレンダリングする
 			@note
 			Render PCM from current position.
@@ -91,7 +91,7 @@ public:
 			should not end until the returned value becomes false.
 		*/
 
-	virtual bool SetPosition(tjs_uint64 samplepos) = 0;
+	virtual bool SetPosition(risse_uint64 samplepos) = 0;
 		/*!< @brief デコード位置を変更する
 			@note
 			Seek to "samplepos". "samplepos" must be given in unit of sample granule.

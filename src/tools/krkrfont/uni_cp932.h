@@ -15,6 +15,6 @@
 #ifndef _UNI_CP932_H_
 #define _UNI_CP932_H_
 
-tjs_uint TVPUnicodeToSJIS(tjs_char in);
+risse_uint TVPUnicodeToSJIS(risse_char in);
 
 #endif

@@ -25,10 +25,10 @@
 //! @note		入力ビットマップのサイズは blackboxw と blackboxh で指定
 //---------------------------------------------------------------------------
 tTVPGlyphBitmap::tTVPGlyphBitmap(
-	tjs_uint8 * indata,
-	tjs_int inpitch,
-	tjs_int originx, tjs_int originy,
-	tjs_uint blackboxw, tjs_uint blackboxh,
+	risse_uint8 * indata,
+	risse_int inpitch,
+	risse_int originx, risse_int originy,
+	risse_uint blackboxw, risse_uint blackboxh,
 	const tTVPGlyphMetrics & metrics)
 {
 	// フィールドのクリア
@@ -54,10 +54,10 @@ tTVPGlyphBitmap::tTVPGlyphBitmap(
 			Pitch = (((blackboxw - 1) >> 3) + 1) << 3;
 
 			//- バイト数を計算してメモリを確保
-			Data = new tjs_uint8 [Pitch * blackboxh];
+			Data = new risse_uint8 [Pitch * blackboxh];
 
 			//- ビットマップをコピー
-			for(tjs_uint y = 0; y < blackboxh; y++)
+			for(risse_uint y = 0; y < blackboxh; y++)
 			{
 				memcpy(
 					Data + Pitch * y,

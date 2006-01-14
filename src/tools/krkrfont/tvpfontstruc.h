@@ -17,9 +17,9 @@
 //---------------------------------------------------------------------------
 struct tTVPFont
 {
-	tjs_int Height; // height of text
-	tjs_uint32 Flags;
-	tjs_int Angle; // rotation angle ( in tenths of degrees ) 0 .. 1800 .. 3600
+	risse_int Height; // height of text
+	risse_uint32 Flags;
+	risse_int Angle; // rotation angle ( in tenths of degrees ) 0 .. 1800 .. 3600
 
 	ttstr Face; // font name
 

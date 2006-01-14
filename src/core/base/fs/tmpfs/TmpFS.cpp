@@ -13,7 +13,7 @@
 #include "TmpFS.h"
 #include "TVPException.h"
 
-TJS_DEFINE_SOURCE_ID(2004);
+RISSE_DEFINE_SOURCE_ID(2004);
 
 
 
@@ -32,7 +32,7 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 	if(Type == ntDirectory)
 	{
 		// ディレクトリのノードなので ハッシュ表を作成
-		Directory = new tTJSHashTable<ttstr, tTVPTmpFSNode *>();
+		Directory = new tRisseHashTable<ttstr, tTVPTmpFSNode *>();
 	}
 	else
 	{
@@ -50,13 +50,13 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 //! @param		src 入力もとストリーム
 //---------------------------------------------------------------------------
 tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
-	tTJSBinaryStream * src) :
+	tRisseBinaryStream * src) :
 	Parent(parent)
 {
 	if(Type == ntDirectory)
 	{
 		// ディレクトリのノードなので ハッシュ表を作成
-		Directory = new tTJSHashTable<ttstr, tTVPTmpFSNode *>();
+		Directory = new tRisseHashTable<ttstr, tTVPTmpFSNode *>();
 	}
 	else
 	{
@@ -76,7 +76,7 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 		src->ReadBuffer(&metalen, sizeof(metalen));
 		metalen = wxUINT32_SWAP_ON_BE(metalen);
 		if(metalen == 0)
-			eTVPException::Throw(TJS_WS_TR("invalid metadata length (data may be corrupted)"));
+			eTVPException::Throw(RISSE_WS_TR("invalid metadata length (data may be corrupted)"));
 
 		if(metadataid == 0x01)
 		{
@@ -118,7 +118,7 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 				break;
 			default:
 				eTVPException::Throw(ttstr(
-						wxString::Format(TJS_WS_TR("unsupported node id %x"),
+						wxString::Format(RISSE_WS_TR("unsupported node id %x"),
 						static_cast<int>(nodetypeid))));
 			}
 		}
@@ -130,7 +130,7 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 		src->ReadBuffer(&blocksize, sizeof(blocksize));
 		blocksize = wxUINT64_SWAP_ON_BE(blocksize);
 		if(static_cast<size_t>(blocksize) != blocksize)
-				eTVPException::Throw(TJS_WS_TR("too big block size"));
+				eTVPException::Throw(RISSE_WS_TR("too big block size"));
 		File->ChangeSize(static_cast<size_t>(blocksize));
 		File->Fit();
 		src->ReadBuffer(File->GetBlock(), static_cast<size_t>(blocksize));
@@ -155,7 +155,7 @@ tTVPTmpFSNode::~tTVPTmpFSNode()
 	{
 		// このノードはディレクトリ
 		// Directory が保持しているすべての要素を解放する
-		tTJSHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
+		tRisseHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
 			delete (i.GetValue());
@@ -178,7 +178,7 @@ tTVPTmpFSNode::~tTVPTmpFSNode()
 //! @brief		内容をシリアライズする
 //! @param		dest 出力先ストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFSNode::Serialize(tTJSBinaryStream * dest) const
+void tTVPTmpFSNode::Serialize(tRisseBinaryStream * dest) const
 {
 	// ノードのタイプを記録
 	if(Type == ntDirectory)
@@ -203,7 +203,7 @@ void tTVPTmpFSNode::Serialize(tTJSBinaryStream * dest) const
 		dest->WriteBuffer("\0", 1); // メタデータの終わりとディレクトリの開始
 
 		// 全ての子要素に対して再帰する
-		tTJSHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
+		tRisseHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
 			i.GetValue()->Serialize(dest);
@@ -216,7 +216,7 @@ void tTVPTmpFSNode::Serialize(tTJSBinaryStream * dest) const
 		// ファイル
 		dest->WriteBuffer("\x0", 1); // メタデータの終わりとファイルの中身の開始
 		wxUint64 i64;
-		volatile tTJSCriticalSectionHolder  holder(File->GetCS());
+		volatile tRisseCriticalSectionHolder  holder(File->GetCS());
 		i64 = wxUINT64_SWAP_ON_BE(File->GetSize());
 		dest->WriteBuffer(&i64, sizeof(i64));
 		dest->WriteBuffer(File->GetBlock(), File->GetSize());
@@ -300,7 +300,7 @@ tTVPTmpFSNode * tTVPTmpFSNode::CreateFile(const ttstr & name)
 //! @brief		ノードのサイズを取得する
 //! @return		ノードのサイズ (ファイルの場合はファイルサイズ、そうでない場合は 0)
 //---------------------------------------------------------------------------
-tjs_size tTVPTmpFSNode::GetSize() const
+risse_size tTVPTmpFSNode::GetSize() const
 {
 	if(Type == ntDirectory) return 0;
 	if(Type == ntFile) return File->GetSize();
@@ -317,7 +317,7 @@ size_t tTVPTmpFSNode::Iterate(tTVPFileSystemIterationCallback * callback)
 {
 	if(Type != ntDirectory) return 0;
 	size_t count = 0;
-	tTJSHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
+	tRisseHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
 	for(i = Directory->GetFirst(); !i.IsNull(); i++)
 	{
 		count ++;
@@ -390,11 +390,11 @@ tTVPTmpFS::~tTVPTmpFS()
 size_t tTVPTmpFS::GetFileListAt(const ttstr & dirname,
 	tTVPFileSystemIterationCallback * callback)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	tTVPTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsDirectory()) eTVPException::Throw(TJS_WS_TR("specified name is not a directory"));
+	if(!node->IsDirectory()) eTVPException::Throw(RISSE_WS_TR("specified name is not a directory"));
 
 	return node->Iterate(callback);
 }
@@ -408,7 +408,7 @@ size_t tTVPTmpFS::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tTVPTmpFS::FileExists(const ttstr & filename)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	tTVPTmpFSNode * node = GetNodeAt(filename);
 	if(!node) return false;
@@ -425,7 +425,7 @@ bool tTVPTmpFS::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 bool tTVPTmpFS::DirectoryExists(const ttstr & dirname)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	tTVPTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) return false;
@@ -441,11 +441,11 @@ bool tTVPTmpFS::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tTVPTmpFS::RemoveFile(const ttstr & filename)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	tTVPTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) eTVPException::Throw(TJS_WS_TR("specified name is not a file"));
+	if(!node->IsFile()) eTVPException::Throw(RISSE_WS_TR("specified name is not a file"));
 
 	// 親ノードから切り離す
 	tTVPTmpFSNode * parent = node->GetParent();
@@ -462,21 +462,21 @@ void tTVPTmpFS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	tTVPTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsDirectory()) eTVPException::Throw(TJS_WS_TR("specified name is not a directory"));
+	if(!node->IsDirectory()) eTVPException::Throw(RISSE_WS_TR("specified name is not a directory"));
 
 	if(!recursive)
 	{
 		// recursive が false の場合、消そうとしたディレクトリが空で無ければ
 		// 失敗する。
 
-		if(node->HasSubNode()) eTVPException::Throw(TJS_WS_TR("specified directory is not empty"));
+		if(node->HasSubNode()) eTVPException::Throw(RISSE_WS_TR("specified directory is not empty"));
 
 		// root ノードは消すことはできない
-		if(node == Root) eTVPException::Throw(TJS_WS_TR("can not remove file system root directory"));
+		if(node == Root) eTVPException::Throw(RISSE_WS_TR("can not remove file system root directory"));
 	}
 	else
 	{
@@ -505,20 +505,20 @@ void tTVPTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 
 	if(recursive)
 	{
 		// 再帰的にディレクトリを作成する場合
 		// '/' で name を区切り、順に root からノードをたどっていく
-		const tjs_char * p = dirname.c_str();
-		const tjs_char *pp = p;
+		const risse_char * p = dirname.c_str();
+		const risse_char *pp = p;
 
 		tTVPTmpFSNode *node = Root;
 		while(*p)
 		{
-			while(*p != TJS_WC('/') && *p != 0) p++;
+			while(*p != RISSE_WC('/') && *p != 0) p++;
 			if(p != pp)
 			{
 				// '/' で挟まれた区間が得られた
@@ -541,7 +541,7 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 					if(node->IsFile())
 					{
 						// ファイルだったりする
-						eTVPException::Throw(TJS_WS_TR("about to create file on "));
+						eTVPException::Throw(RISSE_WS_TR("about to create file on "));
 					}
 				}
 			}
@@ -574,7 +574,7 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// XXX: MACタイムは現バージョンでは保存していない
 	struc.Clear();
@@ -593,13 +593,13 @@ void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTJSBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tRisseBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	tTVPTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) eTVPException::Throw(TJS_WS_TR("specified name is not a file"));
+	if(!node->IsFile()) eTVPException::Throw(RISSE_WS_TR("specified name is not a file"));
 
 	return new tTVPMemoryStream(flags, node->GetMemoryStreamBlockNoAddRef());
 }
@@ -610,9 +610,9 @@ tTJSBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, tjs_uint32 fl
 //! @brief		指定されたストリームに内容をシリアライズする
 //! @param		dest 出力先ストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFS::SerializeTo(tTJSBinaryStream * dest)
+void tTVPTmpFS::SerializeTo(tRisseBinaryStream * dest)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// マジックを書き込む
 	dest->WriteBuffer(SerializeMagic, 8);
@@ -630,8 +630,8 @@ void tTVPTmpFS::SerializeTo(tTJSBinaryStream * dest)
 //---------------------------------------------------------------------------
 void tTVPTmpFS::SerializeTo(const ttstr & filename)
 {
-	std::auto_ptr<tTJSBinaryStream>
-		stream(tTVPFileSystemManager::instance()->CreateStream(filename, TJS_BS_WRITE));
+	std::auto_ptr<tRisseBinaryStream>
+		stream(tTVPFileSystemManager::instance()->CreateStream(filename, RISSE_BS_WRITE));
 
 	SerializeTo(stream.get());
 }
@@ -642,9 +642,9 @@ void tTVPTmpFS::SerializeTo(const ttstr & filename)
 //! @brief		指定されたストリームから内容を復元する
 //! @param		src 入力元ストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFS::UnserializeFrom(tTJSBinaryStream * src)
+void tTVPTmpFS::UnserializeFrom(tRisseBinaryStream * src)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// マジックを読み込み、比較する
 	unsigned char magic[8];
@@ -655,7 +655,7 @@ void tTVPTmpFS::UnserializeFrom(tTJSBinaryStream * src)
 		// 最初のノードタイプ(ディレクトリを表す 0x80 になってないとおかしい)
 
 	if(memcmp(magic, SerializeMagic, 8) || firstnodetype != 0x80)
-		eTVPException::Throw(TJS_WS_TR("not a tmpfs archive"));
+		eTVPException::Throw(RISSE_WS_TR("not a tmpfs archive"));
 
 	// 再帰的に内容を読み込む
 	Root = new tTVPTmpFSNode(NULL, tTVPTmpFSNode::ntDirectory, src);
@@ -669,8 +669,8 @@ void tTVPTmpFS::UnserializeFrom(tTJSBinaryStream * src)
 //---------------------------------------------------------------------------
 void tTVPTmpFS::UnserializeFrom(const ttstr & filename)
 {
-	std::auto_ptr<tTJSBinaryStream>
-		stream(tTVPFileSystemManager::instance()->CreateStream(filename, TJS_BS_READ));
+	std::auto_ptr<tRisseBinaryStream>
+		stream(tTVPFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
 
 	UnserializeFrom(stream.get());
 }
@@ -685,14 +685,14 @@ void tTVPTmpFS::UnserializeFrom(const ttstr & filename)
 tTVPTmpFSNode * tTVPTmpFS::GetNodeAt(const ttstr & name)
 {
 	// '/' で name を区切り、順に root からノードをたどっていく
-	const tjs_char * p = name.c_str();
-	const tjs_char *pp = p;
+	const risse_char * p = name.c_str();
+	const risse_char *pp = p;
 
 	tTVPTmpFSNode *node = Root;
 
 	while(*p)
 	{
-		while(*p != TJS_WC('/') && *p != 0) p++;
+		while(*p != RISSE_WC('/') && *p != 0) p++;
 		if(p != pp)
 		{
 			// '/' で挟まれた区間が得られた
@@ -702,7 +702,7 @@ tTVPTmpFSNode * tTVPTmpFS::GetNodeAt(const ttstr & name)
 		pp = p;
 	}
 
-	if(name.EndsWith(TJS_WC('/')) && !node->IsDirectory())
+	if(name.EndsWith(RISSE_WC('/')) && !node->IsDirectory())
 	{
 		// 名前の最後が '/' で終わっている (つまり、ディレクトリである
 		// ことを期待している) がノードがディレクトリではない

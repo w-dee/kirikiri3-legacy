@@ -27,21 +27,21 @@
 //! @note		このアルゴリズムは最悪の場合で入力データを 2 倍 + 1にする
 //! 			そのため、out には in_size の 2 倍 + 1のデータ領域を確保すること
 //---------------------------------------------------------------------------
-static void TVPCompressGlyphBitmap(const tjs_uint8 * in,
-	tjs_uint in_w, tjs_uint in_h,
-	tjs_int in_pitch,
-	tjs_uint8 * out, tjs_uint *out_size)
+static void TVPCompressGlyphBitmap(const risse_uint8 * in,
+	risse_uint in_w, risse_uint in_h,
+	risse_int in_pitch,
+	risse_uint8 * out, risse_uint *out_size)
 {
 	// 圧縮は、展開時にあまり CPU 負荷をかけなくても済むように、単純な
 	// ランレングス圧縮を変形した物とする
 
 	// TODO: 圧縮方式の説明をここに書く
-	tjs_uint8 * diff = new tjs_uint8 [in_w * in_h];
-	for(tjs_uint y = 0, i = 0; y < in_h; y++)
+	risse_uint8 * diff = new risse_uint8 [in_w * in_h];
+	for(risse_uint y = 0, i = 0; y < in_h; y++)
 	{
-		tjs_uint8 prev = 0;
-		const tjs_uint8 * ln = in + y * in_pitch;
-		for(tjs_uint x = 0; x < in_w; x++)
+		risse_uint8 prev = 0;
+		const risse_uint8 * ln = in + y * in_pitch;
+		for(risse_uint x = 0; x < in_w; x++)
 		{
 			diff[i] = ln[x] - prev;
 			prev = ln[x];
@@ -49,19 +49,19 @@ static void TVPCompressGlyphBitmap(const tjs_uint8 * in,
 		}
 	}
 
-	tjs_uint in_size = in_w * in_h;
+	risse_uint in_size = in_w * in_h;
 
-	for(tjs_uint i = in_w; i < in_size; i++)
+	for(risse_uint i = in_w; i < in_size; i++)
 	{
 		diff[i] -= diff[i - in_w];
 	}
 
-	tjs_uint8 * op = out;
+	risse_uint8 * op = out;
 
-	for(tjs_uint i = 0; i < in_size; i++)
+	for(risse_uint i = 0; i < in_size; i++)
 	{
-		tjs_uint j;
-		tjs_uint limit;
+		risse_uint j;
+		risse_uint limit;
 
 		// count zero part
 		limit = std::min(i + 255, in_size);
@@ -69,7 +69,7 @@ static void TVPCompressGlyphBitmap(const tjs_uint8 * in,
 			if(diff[j] != 0) break;
 
 		// encode zero length
-		*(op++) = static_cast<tjs_uint8>(j - i);
+		*(op++) = static_cast<risse_uint8>(j - i);
 		i = j;
 
 		// count non-zero part
@@ -78,7 +78,7 @@ static void TVPCompressGlyphBitmap(const tjs_uint8 * in,
 			if(diff[j] == 0) break;
 
 		// encode non-zero length
-		*(op++) = static_cast<tjs_uint8>(j - i);
+		*(op++) = static_cast<risse_uint8>(j - i);
 
 		// output non-zero values
 		for(; i < j; i++)
@@ -107,7 +107,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 	bool write_kerning_vector, wxWindow * parent)
 {
 	tTVPBFFHeader header;
-	tjs_uint num_files = 0;
+	risse_uint num_files = 0;
 	tTVPBFFDirectory directory[3];
 	tTVPBFFDirectory * char_map_directory = directory + 0;
 	tTVPBFFDirectory * bitmap_directory = directory + 1;
@@ -115,7 +115,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 	tTVPBFFCharacterMap *map = NULL;
 	tTVPBFFKerningVector *kern_vector = NULL;
 	tTVPGlyphBitmap * bitmap = NULL;
-	tjs_uint8 * bitmap_tmp = NULL;
+	risse_uint8 * bitmap_tmp = NULL;
 	bool canceled = false;
 
 	// 出力ファイルを開く
@@ -128,7 +128,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 	}
 
 	// 全部のグリフ数を得る
-	tjs_uint total_glyph_count = face->GetGlyphCount();
+	risse_uint total_glyph_count = face->GetGlyphCount();
 
 	// ダイアログボックスを作成する
 	wxProgressDialog dialog(
@@ -190,29 +190,29 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 
 		// ファイルポインタを 4 byte 境界にアラインメントする
 		{
-			tjs_uint align_fill_bytes = (4 - (file.Tell() & 0x03)) & 0x03;
+			risse_uint align_fill_bytes = (4 - (file.Tell() & 0x03)) & 0x03;
 			if(align_fill_bytes > 0) file.Write("\0\0\0\0", align_fill_bytes);
 		}
 
 		// ビットマップを書き込む
 		wxFileOffset bitmap_offset = file.Tell();
-		bitmap_directory->Offset = wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(bitmap_offset)); // 修正
+		bitmap_directory->Offset = wxUINT32_SWAP_ON_BE(static_cast<risse_uint32>(bitmap_offset)); // 修正
 
 		//- ビットマップデータの先頭には 4 つの 0 を書く (仕様)
 		file.Write("\0\0\0\0", 4);
 
 		//- すべてのグリフに対してビットマップデータを書き出す
-		tjs_uint actual_glyph_count = 0;
-		for(tjs_uint i = 0; i < total_glyph_count; i++)
+		risse_uint actual_glyph_count = 0;
+		for(risse_uint i = 0; i < total_glyph_count; i++)
 		{
 			//- ファイルポインタを 2 byte 境界にアラインメントする
 			{
-				tjs_uint align_fill_bytes = (2 - (file.Tell() & 0x01)) & 0x01;
+				risse_uint align_fill_bytes = (2 - (file.Tell() & 0x01)) & 0x01;
 				if(align_fill_bytes > 0) file.Write("\0\0", align_fill_bytes);
 			}
 
 			// このインデックスに対応する文字コードを得る
-			tjs_char charcode = face->GetCharcodeFromGlyphIndex(i);
+			risse_char charcode = face->GetCharcodeFromGlyphIndex(i);
 
 			if(write_bitmap)
 			{
@@ -228,13 +228,13 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 
 				// map に情報を書き込む
 				map[actual_glyph_count].Unicode =
-					wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(charcode));
+					wxUINT32_SWAP_ON_BE(static_cast<risse_uint32>(charcode));
 				map[actual_glyph_count].CellIncX =
 					wxINT32_SWAP_ON_BE(bitmap->GetMetrics().CellIncX);
 				map[actual_glyph_count].CellIncY =
 					wxINT32_SWAP_ON_BE(bitmap->GetMetrics().CellIncY);
 				map[actual_glyph_count].Offset =
-					wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(file.Tell() - bitmap_offset));
+					wxUINT32_SWAP_ON_BE(static_cast<risse_uint32>(file.Tell() - bitmap_offset));
 
 				// tTVPBFFBitmapHeader に情報を書き込む
 				tTVPBFFBitmapHeader header;
@@ -245,9 +245,9 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 				header.BlackBoxH = wxUINT16_SWAP_ON_BE(bitmap->GetBlackBoxH());
 
 				// ビットマップを圧縮
-				bitmap_tmp = new tjs_uint8[
+				bitmap_tmp = new risse_uint8[
 					bitmap->GetBlackBoxW() * bitmap->GetBlackBoxH() * 2 + 2];
-				tjs_uint bitmap_comp_size = 0;
+				risse_uint bitmap_comp_size = 0;
 				TVPCompressGlyphBitmap(bitmap->GetData(),
 					bitmap->GetBlackBoxW(),
 					bitmap->GetBlackBoxH(),
@@ -275,7 +275,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 
 				// map に情報を書き込む
 				map[actual_glyph_count].Unicode =
-					wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(charcode));
+					wxUINT32_SWAP_ON_BE(static_cast<risse_uint32>(charcode));
 				map[actual_glyph_count].CellIncX =
 					wxINT32_SWAP_ON_BE(metrics.CellIncX);
 				map[actual_glyph_count].CellIncY =
@@ -307,7 +307,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 		{
 			// ビットマップのファイルサイズを修正
 			bitmap_directory->Size =
-				wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(file.Tell() - bitmap_offset)); // 修正
+				wxUINT32_SWAP_ON_BE(static_cast<risse_uint32>(file.Tell() - bitmap_offset)); // 修正
 
 			// 文字マップのファイルサイズを修正
 			char_map_directory->Size =
@@ -316,12 +316,12 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 			// 文字マップを書き込む
 			//- ファイルポインタを 16 byte 境界にアラインメントする
 			{
-				tjs_uint align_fill_bytes = (16 - (file.Tell() & 15)) & 15;
+				risse_uint align_fill_bytes = (16 - (file.Tell() & 15)) & 15;
 				if(align_fill_bytes > 0) file.Write("\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", align_fill_bytes);
 			}
 
 			char_map_directory->Offset =
-				wxUINT32_SWAP_ON_BE(static_cast<tjs_uint32>(file.Tell())); // 修正
+				wxUINT32_SWAP_ON_BE(static_cast<risse_uint32>(file.Tell())); // 修正
 
 			file.Write(map, sizeof(tTVPBFFCharacterMap) * actual_glyph_count);
 
@@ -334,7 +334,7 @@ void TVPWriteGlyphBitmap(tTVPFreeTypeFace * face, const wxString & out_file,
 				// カーニングベクトルを書き込む
 				//- ファイルポインタを 4 byte 境界にアラインメントする
 				{
-					tjs_uint align_fill_bytes = (4 - (file.Tell() & 0x03)) & 0x03;
+					risse_uint align_fill_bytes = (4 - (file.Tell() & 0x03)) & 0x03;
 					if(align_fill_bytes > 0) file.Write("\0\0\0\0", align_fill_bytes);
 				}
 			}

@@ -15,7 +15,7 @@
 #include "FSManagerBind.h"
 #include <vector>
 
-TJS_DEFINE_SOURCE_ID(2000);
+RISSE_DEFINE_SOURCE_ID(2000);
 
 
 
@@ -34,7 +34,7 @@ TJS_DEFINE_SOURCE_ID(2000);
 tTVPFileSystemManager::tTVPFileSystemManager()
 {
 	// カレントディレクトリを / に設定
-	CurrentDirectory = TJS_WS("/");
+	CurrentDirectory = RISSE_WS("/");
 }
 //---------------------------------------------------------------------------
 
@@ -44,27 +44,27 @@ tTVPFileSystemManager::tTVPFileSystemManager()
 //---------------------------------------------------------------------------
 tTVPFileSystemManager::~tTVPFileSystemManager()
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// 全てのマウントポイントをアンマウントする
-	// 全てのTJSオブジェクトをvectorにとり、最後にこれが削除されることにより
-	// すべての TJS オブジェクトを解放する。
-	std::vector<tTJSRefHolder<iTJSDispatch2> > objects;
+	// 全てのRisseオブジェクトをvectorにとり、最後にこれが削除されることにより
+	// すべての Risse オブジェクトを解放する。
+	std::vector<tRisseRefHolder<iRisseDispatch2> > objects;
 	objects.reserve(MountPoints.GetCount());
 
 	std::vector<ttstr> points;
 
-	tTJSHashTable<ttstr, tFileSystemInfo>::tIterator i;
+	tRisseHashTable<ttstr, tFileSystemInfo>::tIterator i;
 	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
 	{
-		objects.push_back(i.GetValue().TJSObject);
+		objects.push_back(i.GetValue().RisseObject);
 	}
 
 	//- MountPoints をクリア
 	MountPoints.Clear();
 
 	//- 全ての objects を invalidate
-	for(std::vector<tTJSRefHolder<iTJSDispatch2> >::iterator i =
+	for(std::vector<tRisseRefHolder<iRisseDispatch2> >::iterator i =
 		objects.begin(); i != objects.end(); i++)
 	{
 		i->GetObjectNoAddRef()->Invalidate(0, NULL, NULL, NULL);
@@ -79,41 +79,41 @@ tTVPFileSystemManager::~tTVPFileSystemManager()
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムをマウントする
 //! @param		point マウントポイント
-//! @param		fs_tjsobj ファイルシステムオブジェクトを表すTJSオブジェクト
+//! @param		fs_risseobj ファイルシステムオブジェクトを表すRisseオブジェクト
 //! @note		メインスレッド以外から呼び出さないこと
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Mount(const ttstr & point,
-	iTJSDispatch2 * fs_tjsobj)
+	iRisseDispatch2 * fs_risseobj)
 {
-	// tjs_obj がファイルシステムのインスタンスを持っているかどうかを
+	// risse_obj がファイルシステムのインスタンスを持っているかどうかを
 	// 確認する
-	if(!fs_tjsobj ||
-		TJS_FAILED(fs_tjsobj->NativeInstanceSupport(
-						TJS_NIS_GETINSTANCE,
-						tTJSNI_FileSystemNativeInstance::ClassID,
+	if(!fs_risseobj ||
+		RISSE_FAILED(fs_risseobj->NativeInstanceSupport(
+						RISSE_NIS_GETINSTANCE,
+						tRisseNI_FileSystemNativeInstance::ClassID,
 						NULL)) )
 	{
 		// ファイルシステムのインスタンスを持っていない
-		eTVPException::Throw(TJS_WS_TR("the object given is not a filesystem object"));
+		eTVPException::Throw(RISSE_WS_TR("the object given is not a filesystem object"));
 	}
 
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
 	ttstr path(NormalizePath(point));
-	if(!path.EndsWith(TJS_WC('/'))) path += TJS_WC('/');
+	if(!path.EndsWith(RISSE_WC('/'))) path += RISSE_WC('/');
 
 	// すでにその場所にマウントが行われているかどうかをチェックする
 	tFileSystemInfo * item = MountPoints.Find(path);
 	if(item)
 	{
 		// ファイルシステムが見つかったのでそこにはマウントできない
-		eTVPException::Throw(TJS_WS_TR("can not mount filesystem: the mount point '$1' is already mounted"), path);
+		eTVPException::Throw(RISSE_WS_TR("can not mount filesystem: the mount point '$1' is already mounted"), path);
 	}
 
 	// マウントポイントを追加
-	tFileSystemInfo info(fs_tjsobj);
+	tFileSystemInfo info(fs_risseobj);
 	MountPoints.Add(path, info);
 }
 //---------------------------------------------------------------------------
@@ -126,29 +126,29 @@ void tTVPFileSystemManager::Mount(const ttstr & point,
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Unmount(const ttstr & point)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
 	ttstr path(NormalizePath(point));
-	if(!path.EndsWith(TJS_WC('/'))) path += TJS_WC('/');
+	if(!path.EndsWith(RISSE_WC('/'))) path += RISSE_WC('/');
 
 	// その場所にマウントが行われているかどうかをチェックする
 	tFileSystemInfo * item = MountPoints.Find(path);
 	if(!item)
 	{
 		// そこにはなにもマウントされていない
-		eTVPException::Throw(TJS_WS_TR("there are no filesystem at mount point '$1'"), path);
+		eTVPException::Throw(RISSE_WS_TR("there are no filesystem at mount point '$1'"), path);
 	}
 
 	// マウントポイントを削除
-	volatile tTJSRefHolder<iTJSDispatch2> tjs_object_holder (item->TJSObject);
+	volatile tRisseRefHolder<iRisseDispatch2> risse_object_holder (item->RisseObject);
 	MountPoints.Delete(path);
 
-	// tjs_object_holder はここで削除される。
-	// この時点で TJSObject への参照が無くなり、TJSObject が Invalidate
-	// される可能性がある。tTJSNI_FileSystemNativeInstance 内では
-	// この際に Unmount(TJSObject) を呼び出すが、この時点ではすでに
+	// risse_object_holder はここで削除される。
+	// この時点で RisseObject への参照が無くなり、RisseObject が Invalidate
+	// される可能性がある。tRisseNI_FileSystemNativeInstance 内では
+	// この際に Unmount(RisseObject) を呼び出すが、この時点ではすでに
 	// どのマウントポイントにもそのファイルシステムはマウントされていないので
 	// 何も操作は行われない。
 }
@@ -157,20 +157,20 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムをアンマウントする
-//! @param		fs_tjsobj アンマウントしたいファイルシステムを表すTJSオブジェクト
+//! @param		fs_risseobj アンマウントしたいファイルシステムを表すRisseオブジェクト
 //! @note		メインスレッド以外から呼び出さないこと
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::Unmount(iTJSDispatch2 * fs_tjsobj)
+void tTVPFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// そのファイルシステムがマウントされているマウントポイントを調べる
 	std::vector<ttstr> points;
 
-	tTJSHashTable<ttstr, tFileSystemInfo>::tIterator i;
+	tRisseHashTable<ttstr, tFileSystemInfo>::tIterator i;
 	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
 	{
-		if(i.GetValue().TJSObject.GetObjectNoAddRef() == fs_tjsobj)
+		if(i.GetValue().RisseObject.GetObjectNoAddRef() == fs_risseobj)
 			points.push_back(i.GetKey());
 	}
 
@@ -195,16 +195,16 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 	// 相対ディレクトリかどうかをチェック
 	// 先頭が '/' でなければ相対パスとみなし、パスの先頭に CurrentDirectory
 	// を挿入する
-	if(ret[0] != TJS_WC('/'))
+	if(ret[0] != RISSE_WC('/'))
 	{
-		volatile tTJSCriticalSectionHolder holder(CS);
+		volatile tRisseCriticalSectionHolder holder(CS);
 		ret = CurrentDirectory + ret;
 	}
 
 	// これから後の変換は、文字列が短くなる方向にしか働かない
-	tjs_char *d = ret.Independ();
-	tjs_char *s = d;
-	tjs_char *start = d;
+	risse_char *d = ret.Independ();
+	risse_char *s = d;
+	risse_char *start = d;
 
 	// 行う作業は
 	// ・ 重複する / の除去
@@ -212,28 +212,28 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 	// ・ ../ の巻き戻し
 	while(*s)
 	{
-		if(s[0] == TJS_WC('/'))
+		if(s[0] == RISSE_WC('/'))
 		{
 			// *s が /
-			if(s[1] == TJS_WC('/'))
+			if(s[1] == RISSE_WC('/'))
 			{
 				// s[1] も /
 				// / が重複している
 				s+=2;
-				while(*s  == TJS_WC('/')) s++;
+				while(*s  == RISSE_WC('/')) s++;
 				s--;
 			}
-			else if(s[1] == TJS_WC('.') && s[2] == TJS_WC('.') &&
-				(s[3] == 0 || s[3] == TJS_WC('/')))
+			else if(s[1] == RISSE_WC('.') && s[2] == RISSE_WC('.') &&
+				(s[3] == 0 || s[3] == RISSE_WC('/')))
 			{
 				// s[2] 以降が ..
 				s += 3;
 				// d を巻き戻す
-				while(d > start && *d != TJS_WC('/')) d--;
+				while(d > start && *d != RISSE_WC('/')) d--;
 				// この時点で d は '/' を指している
 			}
-			else if(s[1] == TJS_WC('.') &&
-				(s[2] == 0 || s[2] == TJS_WC('/')))
+			else if(s[1] == RISSE_WC('.') &&
+				(s[2] == 0 || s[2] == RISSE_WC('/')))
 			{
 				// s[2] 以降が .
 				s += 2; // 読み飛ばす
@@ -250,7 +250,7 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 			s++;
 		}
 	}
-	if(d == start) *(d++) = TJS_WC('/'); // 処理によっては最初の / が消えてしまうので
+	if(d == start) *(d++) = RISSE_WC('/'); // 処理によっては最初の / が消えてしまうので
 	*d = 0; // 文字列を終結
 
 	ret.FixLen(); // ttstrの内部状態を更新
@@ -332,7 +332,7 @@ size_t tTVPFileSystemManager::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
@@ -342,9 +342,9 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 	{
 		return fs->FileExists(fspath);
 	}
-	catch(const eTJSError &e)
+	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(TJS_WS_TR("failed to retrieve existence of file '%1' : %2"),
+		eTVPException::Throw(RISSE_WS_TR("failed to retrieve existence of file '%1' : %2"),
 			fullpath, e.GetMessage()); // this method never returns
 	}
 	return false;
@@ -359,7 +359,7 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
@@ -369,9 +369,9 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 	{
 		return fs->DirectoryExists(fspath);
 	}
-	catch(const eTJSError &e)
+	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(TJS_WS_TR("failed to retrieve existence of directory '%1' : %2"),
+		eTVPException::Throw(RISSE_WS_TR("failed to retrieve existence of directory '%1' : %2"),
 			fullpath, e.GetMessage()); // this method never returns
 	}
 	return false;
@@ -385,7 +385,7 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
@@ -395,9 +395,9 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 	{
 		fs->RemoveFile(fspath);
 	}
-	catch(const eTJSError &e)
+	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(TJS_WS_TR("failed to remove file '%1' : %2"),
+		eTVPException::Throw(RISSE_WS_TR("failed to remove file '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -411,7 +411,7 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
@@ -421,9 +421,9 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 	{
 		fs->RemoveDirectory(fspath, recursive);
 	}
-	catch(const eTJSError &e)
+	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(TJS_WS_TR("failed to remove directory '%1' : %2"),
+		eTVPException::Throw(RISSE_WS_TR("failed to remove directory '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -437,7 +437,7 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
@@ -447,9 +447,9 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 	{
 		fs->CreateDirectory(fspath, recursive);
 	}
-	catch(const eTJSError &e)
+	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(TJS_WS_TR("failed to create directory '%1' : %2"),
+		eTVPException::Throw(RISSE_WS_TR("failed to create directory '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -463,7 +463,7 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
@@ -473,9 +473,9 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 	{
 		fs->Stat(fspath, struc);
 	}
-	catch(const eTJSError &e)
+	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(TJS_WS_TR("failed to stat '%1' : %2"),
+		eTVPException::Throw(RISSE_WS_TR("failed to stat '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -488,10 +488,10 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTJSBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename,
-	tjs_uint32 flags)
+tRisseBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename,
+	risse_uint32 flags)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
@@ -501,9 +501,9 @@ tTJSBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename,
 	{
 		return fs->CreateStream(fspath, flags);
 	}
-	catch(const eTJSError &e)
+	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(TJS_WS_TR("failed to create stream of '%1' : %2"),
+		eTVPException::Throw(RISSE_WS_TR("failed to create stream of '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 	return NULL;
@@ -521,7 +521,7 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 	const ttstr & dirname,
 	tTVPFileSystemIterationCallback * callback)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(dirname, &fspath);
@@ -530,9 +530,9 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 	{
 		return fs->GetFileListAt(fspath, callback);
 	}
-	catch(const eTJSError &e)
+	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(TJS_WS_TR("failed to list files in directory '%1' : %2"),
+		eTVPException::Throw(RISSE_WS_TR("failed to list files in directory '%1' : %2"),
 			dirname, e.GetMessage());
 	}
 	return 0;
@@ -555,14 +555,14 @@ boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 	// マウントポイントに一致したディレクトリが本当に存在するかや、
 	// fullpath で指定したディレクトリが本当に存在するかどうかは
 	// チェックしない。
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
-	const tjs_char *start = fullpath.c_str();
-	const tjs_char *p = start + fullpath.GetLen();
+	const risse_char *start = fullpath.c_str();
+	const risse_char *p = start + fullpath.GetLen();
 
 	while(p >= start)
 	{
-		if(*p == TJS_WC('/'))
+		if(*p == RISSE_WC('/'))
 		{
 			// p が スラッシュ
 			ttstr subpath(start, p - start + 1);
@@ -572,17 +572,17 @@ boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 			{
 				if(fspath) *fspath = start + subpath.GetLen();
 
-				// item->TJSObject.GetObjectNoAddRef() が TJS オブジェクト
-				// TJSオブジェクトからtTJSNI_FileSystemNativeInstanceの
+				// item->RisseObject.GetObjectNoAddRef() が Risse オブジェクト
+				// RisseオブジェクトからtRisseNI_FileSystemNativeInstanceの
 				// ネイティブインスタンスを得る
-				iTJSDispatch2 * obj = item->TJSObject.GetObjectNoAddRef();
-				tTJSNI_FileSystemNativeInstance * ni;
+				iRisseDispatch2 * obj = item->RisseObject.GetObjectNoAddRef();
+				tRisseNI_FileSystemNativeInstance * ni;
 				if(obj)
 				{
-					if(TJS_SUCCEEDED(obj->NativeInstanceSupport(
-						TJS_NIS_GETINSTANCE,
-						tTJSNI_FileSystemNativeInstance::ClassID,
-						(iTJSNativeInstance**)&ni)) )
+					if(RISSE_SUCCEEDED(obj->NativeInstanceSupport(
+						RISSE_NIS_GETINSTANCE,
+						tRisseNI_FileSystemNativeInstance::ClassID,
+						(iRisseNativeInstance**)&ni)) )
 					{
 						return ni->GetFileSystem(); // ファイルシステムが見つかった
 					}
@@ -602,7 +602,7 @@ boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 		return boost::shared_ptr<tTVPFileSystem>();
 	else
 		eTVPException::Throw(
-			TJS_WS_TR("Could not find the root filesystem"));
+			RISSE_WS_TR("Could not find the root filesystem"));
 }
 //---------------------------------------------------------------------------
 
@@ -615,7 +615,7 @@ boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 void tTVPFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 {
 	eTVPException::Throw(
-		TJS_WS_TR("Could not find filesystem at path '%1'"), filename);
+		RISSE_WS_TR("Could not find filesystem at path '%1'"), filename);
 }
 //---------------------------------------------------------------------------
 
@@ -626,7 +626,7 @@ void tTVPFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 void tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 {
 	eTVPException::Throw(
-		TJS_WS_TR("no such file or directory"));
+		RISSE_WS_TR("no such file or directory"));
 }
 //---------------------------------------------------------------------------
 
@@ -640,14 +640,14 @@ void tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttstr * ext)
 {
-	const tjs_char * p = in.c_str() + in.GetLen();
-	const tjs_char * pp = p;
-	const tjs_char * start = in.c_str();
+	const risse_char * p = in.c_str() + in.GetLen();
+	const risse_char * pp = p;
+	const risse_char * start = in.c_str();
 
 	// パス名を最後からスキャン
 	while(true)
 	{
-		if(p < start || *p == TJS_WC('/'))
+		if(p < start || *p == RISSE_WC('/'))
 		{
 			// * ファイル名の先頭を超えて前に行った
 			// * '/' にぶつかった
@@ -657,7 +657,7 @@ void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttst
 			return;
 		}
 
-		if(*p == TJS_WC('.'))
+		if(*p == RISSE_WC('.'))
 		{
 			// * '.' にぶつかった
 			if(other) *other = ttstr(start, p - start);
@@ -680,13 +680,13 @@ void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttst
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name)
 {
-	const tjs_char * p = in.c_str() + in.GetLen();
-	const tjs_char * pp = p;
-	const tjs_char * start = in.c_str();
+	const risse_char * p = in.c_str() + in.GetLen();
+	const risse_char * pp = p;
+	const risse_char * start = in.c_str();
 	p --;
-	while(p > start && *p != TJS_WC('/')) p--;
+	while(p > start && *p != RISSE_WC('/')) p--;
 
-	if(*p == TJS_WC('/')) p++;
+	if(*p == RISSE_WC('/')) p++;
 
 	if(path) *path = ttstr(start, p - start);
 	if(name) *name = ttstr(p);
@@ -700,11 +700,11 @@ void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, tts
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 {
-	if(path.EndsWith(TJS_WC('/')))
+	if(path.EndsWith(RISSE_WC('/')))
 	{
-		tjs_char *s = path.Independ();
-		tjs_char *p = s + path.GetLen() - 1;
-		while(p >= s && *p == TJS_WC('/')) p--;
+		risse_char *s = path.Independ();
+		risse_char *p = s + path.GetLen() - 1;
+		while(p >= s && *p == RISSE_WC('/')) p--;
 		p++;
 		*p = 0;
 		path.FixLen();
@@ -775,7 +775,7 @@ ttstr tTVPFileSystemManager::ExtractPath(const ttstr & in)
 //---------------------------------------------------------------------------
 const ttstr & tTVPFileSystemManager::GetCurrentDirectory()
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	return CurrentDirectory;
 }
@@ -789,11 +789,11 @@ const ttstr & tTVPFileSystemManager::GetCurrentDirectory()
 //---------------------------------------------------------------------------
 void tTVPFileSystemManager::SetCurrentDirectory(const ttstr &dir)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
-	if(dir.EndsWith(TJS_WC('/')))
+	if(dir.EndsWith(RISSE_WC('/')))
 		CurrentDirectory = dir;
 	else
-		CurrentDirectory = dir + TJS_WS("/");
+		CurrentDirectory = dir + RISSE_WS("/");
 }
 //---------------------------------------------------------------------------

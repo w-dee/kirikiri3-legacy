@@ -31,7 +31,7 @@ sub gen
 	{
 		;# 選択が一つしかない、かつ末端
 		($v, $tok) = split("\t", $list{"\b"});
-		return "${padding} if(!TJS_iswalpha(InputPointer[$level])) ".
+		return "${padding} if(!Risse_iswalpha(InputPointer[$level])) ".
 			"{ InputPointer += $level; yylex->val = $v; return $tok; }\n"
 	}
 
@@ -62,15 +62,15 @@ sub gen
 					;# 末端
 					$deflist .= "${padding}default:\n";
 					($v, $tok) = split("\t", $list{"\b"});
-					$deflist .= "${padding} if(!TJS_iswalpha(InputPointer[$level])) ".
+					$deflist .= "${padding} if(!Risse_iswalpha(InputPointer[$level])) ".
 						"{ InputPointer += $level; yylex->val = $v; return $tok; }\n";
 				}
 				else
 				{
-					$caselist .= "${padding}case TJS_WC('$fc'):\n";
+					$caselist .= "${padding}case RISSE_WC('$fc'):\n";
 					if($fc =~ /[a-z]/)
 					{
-						$caselist .= "${padding}case TJS_WC('".uc $fc."'):\n";
+						$caselist .= "${padding}case RISSE_WC('".uc $fc."'):\n";
 					}
 					$caselist .= &gen($level + 1, \%newlist);
 					$caselist .= "${padding} break;\n";
@@ -95,10 +95,10 @@ sub gen
 		}
 		else
 		{
-			$caselist .= "${padding}case TJS_WC('$fc'):\n";
+			$caselist .= "${padding}case RISSE_WC('$fc'):\n";
 			if($fc =~ /[a-z]/)
 			{
-				$caselist .= "${padding}case TJS_WC('".uc $fc."'):\n";
+				$caselist .= "${padding}case RISSE_WC('".uc $fc."'):\n";
 			}
 			$caselist .= &gen($level + 1, \%newlist);
 			$caselist .= "${padding} break;\n";
@@ -111,7 +111,8 @@ sub gen
 print <<EOF;
 /*---------------------------------------------------------------------------*/
 /*
-	TJS3 Script Engine
+	Risse [りせ]
+	 stands for "Risse Is a Sweet Script Engine"
 	Copyright (C) 2000-2006 W.Dee <dee\@kikyou.info> and contributors
 
 	See details of license at "license.txt"

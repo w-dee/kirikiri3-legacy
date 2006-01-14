@@ -46,7 +46,7 @@ static wxChar const  * const TVPXP4DefaultClassList[] = {
 	wxT("C:\\.smf$"),
 	wxT("C:\\.swf$"),
 	wxT("C:\\.ks$" ),
-	wxT("C:\\.tjs$"),
+	wxT("C:\\.risse$"),
 	wxT("C:\\.ma$" ),
 	wxT("C:\\.asq$"),
 	wxT("C:\\.asd$"),

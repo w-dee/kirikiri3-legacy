@@ -7,32 +7,32 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief OSFSのTJS3バインディング
+//! @brief OSFSのRisseバインディング
 //---------------------------------------------------------------------------
 #ifndef _OSFSBIND_H_
 #define _OSFSBIND_H_
 
 #include "FSManagerBind.h"
 #include "OSFS.h"
-#include "tjsNative.h"
+#include "risseNative.h"
 #include "Singleton.h"
 
 //---------------------------------------------------------------------------
 //! @brief OSFS ネイティブインスタンス
 //---------------------------------------------------------------------------
-class tTJSNI_OSFS : public tTJSNI_BaseFileSystem
+class tRisseNI_OSFS : public tRisseNI_BaseFileSystem
 {
 public:
-	tTJSNI_OSFS();
+	tRisseNI_OSFS();
 
-	tjs_error Construct(tjs_int numparams,
-		tTJSVariant **param, iTJSDispatch2 *tjs_obj);
+	risse_error Construct(risse_int numparams,
+		tRisseVariant **param, iRisseDispatch2 *risse_obj);
 	void Invalidate();
 
 	tTVPOSFS * GetFileSystem() 
 	{
 		return reinterpret_cast<tTVPOSFS*>(
-			tTJSNI_BaseFileSystem::GetFileSystem().get());
+			tRisseNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
 private:
@@ -43,15 +43,15 @@ private:
 //---------------------------------------------------------------------------
 //! @brief OSFS ネイティブクラス
 //---------------------------------------------------------------------------
-class tTJSNC_OSFS : public tTJSNativeClass
+class tRisseNC_OSFS : public tRisseNativeClass
 {
 public:
-	tTJSNC_OSFS();
+	tRisseNC_OSFS();
 
-	static tjs_uint32 ClassID;
+	static risse_uint32 ClassID;
 
 private:
-	tTJSNativeInstance *CreateNativeInstance();
+	tRisseNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ private:
 //---------------------------------------------------------------------------
 class tTVPOSFSRegisterer
 {
-	tTVPSingleton<tTVPTJS3ScriptEngine> ref_tTVPTJS3ScriptEngine; //!< tTVPTJS3ScriptEngine に依存
+	tTVPSingleton<tTVPRisseScriptEngine> ref_tTVPRisseScriptEngine; //!< tTVPRisseScriptEngine に依存
 	tTVPSingleton<tTVPFileSystemRegisterer> ref_tTVPFileSystemRegisterer; //!< tTVPFileSystemRegisterer に依存
 public:
 	tTVPOSFSRegisterer();

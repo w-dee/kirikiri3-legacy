@@ -23,8 +23,8 @@
 class tTVPDecompressedHolder
 {
 private:
-	tjs_size Size; //!< このデータが保持する(無圧縮状態の)サイズ
-	tjs_uint8 * Data; //!< このデータが保持する(無圧縮状態の)データブロック
+	risse_size Size; //!< このデータが保持する(無圧縮状態の)サイズ
+	risse_uint8 * Data; //!< このデータが保持する(無圧縮状態の)データブロック
 
 	tTVPDecompressedHolder::tTVPDecompressedHolder(const tTVPDecompressedHolder & ref) {;} // コピー禁止
 
@@ -34,18 +34,18 @@ public:
 		dhmZLib // zlib 圧縮
 	};
 
-	tTVPDecompressedHolder(tMethod method, const tjs_uint8 * indata, tjs_size insize, 
-		tjs_size uncomp_size);
-	tTVPDecompressedHolder(tMethod method, tTJSBinaryStream * instream, tjs_size insize, 
-		tjs_size uncomp_size);
+	tTVPDecompressedHolder(tMethod method, const risse_uint8 * indata, risse_size insize, 
+		risse_size uncomp_size);
+	tTVPDecompressedHolder(tMethod method, tRisseBinaryStream * instream, risse_size insize, 
+		risse_size uncomp_size);
 	~tTVPDecompressedHolder();
 
-	tjs_size GetSize() const { return Size; } //!< サイズを返す
-	tjs_uint8 * GetData() const { return Data; } //!< データブロックを返す
+	risse_size GetSize() const { return Size; } //!< サイズを返す
+	risse_uint8 * GetData() const { return Data; } //!< データブロックを返す
 
 private:
-	void Decompress(tMethod method, const tjs_uint8 * indata, tjs_size insize, 
-		tjs_size uncomp_size);
+	void Decompress(tMethod method, const risse_uint8 * indata, risse_size insize, 
+		risse_size uncomp_size);
 };
 //---------------------------------------------------------------------------
 

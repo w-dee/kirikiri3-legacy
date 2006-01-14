@@ -1,16 +1,16 @@
 /*---------------------------------------------------------------------------*/
 /*
-	TJS2 Script Engine
+	Risse2 Script Engine
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
-/* "TJS2" string definition (wxString compatibility)                         */
+/* "Risse2" string definition (wxString compatibility)                         */
 /*---------------------------------------------------------------------------*/
 
-#ifndef __TJSSTRING_H__
-#define __TJSSTRING_H__
+#ifndef __RisseSTRING_H__
+#define __RisseSTRING_H__
 
 typedef wxString ttstr;
 

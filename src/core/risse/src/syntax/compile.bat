@@ -1,27 +1,27 @@
 @echo off
-echo tjs.y :
-perl CR.pl tjs.y
-bison -dv tjs.y
-perl postbison.pl tjs.tab.c
-perl wrapTJSns.pl tjs.tab.h
+echo risse.y :
+perl CR.pl risse.y
+bison -dv risse.y
+perl postbison.pl risse.tab.c
+perl wrapRissens.pl risse.tab.h
 echo copying ...
-echo tjspp.y :
-perl CR.pl tjspp.y
-bison -dv --name-prefix=pp tjspp.y
-perl postbison.pl tjspp.tab.c
-perl wrapTJSns.pl tjspp.tab.h
+echo rissepp.y :
+perl CR.pl rissepp.y
+bison -dv --name-prefix=pp rissepp.y
+perl postbison.pl rissepp.tab.c
+perl wrapRissens.pl rissepp.tab.h
 echo copying ...
-copy tjs.tab.c ..\tjs.tab.cpp
-copy tjs.tab.h ..\tjs.tab.h
-copy tjspp.tab.c ..\tjspp.tab.cpp
-copy tjspp.tab.h ..\tjspp.tab.h
-echo tjsdate.y :
-perl CR.pl tjsdate.y
-bison -dv --name-prefix=dp tjsdate.y
-perl postbison.pl tjsdate.tab.c
-perl wrapTJSns.pl tjsdate.tab.h
+copy risse.tab.c ..\risse.tab.cpp
+copy risse.tab.h ..\risse.tab.h
+copy rissepp.tab.c ..\rissepp.tab.cpp
+copy rissepp.tab.h ..\rissepp.tab.h
+echo rissedate.y :
+perl CR.pl rissedate.y
+bison -dv --name-prefix=dp rissedate.y
+perl postbison.pl rissedate.tab.c
+perl wrapRissens.pl rissedate.tab.h
 echo copying ...
-copy tjsdate.tab.c ..\tjsdate.tab.cpp
-copy tjsdate.tab.h ..\tjsdate.tab.h
+copy rissedate.tab.c ..\rissedate.tab.cpp
+copy rissedate.tab.h ..\rissedate.tab.h
 call gen_wordtable.bat
 pause

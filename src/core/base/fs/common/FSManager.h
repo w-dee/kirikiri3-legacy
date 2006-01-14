@@ -13,9 +13,9 @@
 #define _FSMANAGER_H_
 
 #include <wx/datetime.h>
-#include "tjs.h"
-#include "tjsUtils.h"
-#include "tjsHashSearch.h"
+#include "risse.h"
+#include "risseUtils.h"
+#include "risseHashSearch.h"
 #include "Singleton.h"
 #include <boost/smart_ptr.hpp>
 
@@ -70,7 +70,7 @@ public:
 	virtual void RemoveDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを削除する
 	virtual void CreateDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを作成する
 	virtual void Stat(const ttstr & filename, tTVPStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
-	virtual tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
+	virtual tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
 };
 //---------------------------------------------------------------------------
 
@@ -83,15 +83,15 @@ class tTVPFileSystemManager
 	//! @brief ファイルシステムマネージャ内で管理されるファイルシステムの情報
 	struct tFileSystemInfo
 	{
-		tTJSRefHolder<iTJSDispatch2> TJSObject; //!< TJSオブジェクト
-		tFileSystemInfo(iTJSDispatch2 *tjs_obj) : 
-			TJSObject(tjs_obj)  {;} //!< コンストラクタ
+		tRisseRefHolder<iRisseDispatch2> RisseObject; //!< Risseオブジェクト
+		tFileSystemInfo(iRisseDispatch2 *risse_obj) : 
+			RisseObject(risse_obj)  {;} //!< コンストラクタ
 	};
 
-	tTJSHashTable<ttstr, tFileSystemInfo> MountPoints; //!< マウントポイントのハッシュ表
+	tRisseHashTable<ttstr, tFileSystemInfo> MountPoints; //!< マウントポイントのハッシュ表
 	ttstr CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
 
-	tTJSCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
+	tRisseCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
 
 public:
 	tTVPFileSystemManager();
@@ -104,9 +104,9 @@ public:
 		tTVPSingleton<tTVPFileSystemManager>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
-	void Mount(const ttstr & point, iTJSDispatch2 * fs_tjsobj);
+	void Mount(const ttstr & point, iRisseDispatch2 * fs_risseobj);
 	void Unmount(const ttstr & point);
-	void Unmount(iTJSDispatch2 * fs_tjsobj);
+	void Unmount(iRisseDispatch2 * fs_risseobj);
 
 	ttstr NormalizePath(const ttstr & path);
 
@@ -118,7 +118,7 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
 
 private:
 	size_t InternalGetFileListAt(const ttstr & dirname,

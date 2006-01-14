@@ -14,7 +14,7 @@
 #include "TVPException.h"
 #include <zlib.h>
 
-TJS_DEFINE_SOURCE_ID(2005);
+RISSE_DEFINE_SOURCE_ID(2005);
 
 
 //---------------------------------------------------------------------------
@@ -25,8 +25,8 @@ TJS_DEFINE_SOURCE_ID(2005);
 //! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
 tTVPDecompressedHolder::tTVPDecompressedHolder(tTVPDecompressedHolder::tMethod method,
-		const tjs_uint8 * indata, tjs_size insize, 
-		tjs_size uncomp_size)
+		const risse_uint8 * indata, risse_size insize, 
+		risse_size uncomp_size)
 {
 	Size = 0;
 	Data = NULL;
@@ -45,14 +45,14 @@ tTVPDecompressedHolder::tTVPDecompressedHolder(tTVPDecompressedHolder::tMethod m
 //! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
 tTVPDecompressedHolder::tTVPDecompressedHolder(tMethod method,
-		tTJSBinaryStream * instream, tjs_size insize, 
-		tjs_size uncomp_size)
+		tRisseBinaryStream * instream, risse_size insize, 
+		risse_size uncomp_size)
 {
 	Size = 0;
 	Data = NULL;
 
 	// 入力データをメモリに読み込む
-	tjs_uint8 * indata = new tjs_uint8[insize];
+	risse_uint8 * indata = new risse_uint8[insize];
 	try
 	{
 		instream->ReadBuffer(indata, insize);
@@ -87,8 +87,8 @@ tTVPDecompressedHolder::~tTVPDecompressedHolder()
 //! @param		insize 入力データのサイズ
 //! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
-void tTVPDecompressedHolder::Decompress(tTVPDecompressedHolder::tMethod method, const tjs_uint8 * indata, tjs_size insize, 
-		tjs_size uncomp_size)
+void tTVPDecompressedHolder::Decompress(tTVPDecompressedHolder::tMethod method, const risse_uint8 * indata, risse_size insize, 
+		risse_size uncomp_size)
 {
 	// すでにメモリブロックが割り当てられていた場合はメモリブロックを解放
 	delete [] Data, Data = NULL;
@@ -99,7 +99,7 @@ void tTVPDecompressedHolder::Decompress(tTVPDecompressedHolder::tMethod method, 
 
 	// 出力メモリブロックを確保
 	Size = uncomp_size;
-	Data = new tjs_uint8[uncomp_size];
+	Data = new risse_uint8[uncomp_size];
 	try
 	{
 		// uncompress data
@@ -107,7 +107,7 @@ void tTVPDecompressedHolder::Decompress(tTVPDecompressedHolder::tMethod method, 
 		int result = uncompress( (unsigned char*)indata, &destlen,
 				(unsigned char*)indata, insize);
 		if(result != Z_OK || destlen != Size)
-			eTVPException::Throw(TJS_WS_TR("Decompression failed. Data may be corrupted."));
+			eTVPException::Throw(RISSE_WS_TR("Decompression failed. Data may be corrupted."));
 	}
 	catch(...)
 	{

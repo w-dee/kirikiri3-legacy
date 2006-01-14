@@ -18,7 +18,7 @@
 #include "XP4StreamCache.h"
 #include "XP4Stream.h"
 
-TJS_DEFINE_SOURCE_ID(2006);
+RISSE_DEFINE_SOURCE_ID(2006);
 
 //---------------------------------------------------------------------------
 //! @brief		指定された位置のメモリから16bit LE整数を読み込む
@@ -117,7 +117,7 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 	if(!TVPFindChunk(chunkname_info, meta, metasize, &chunk, &chunksize))
 	{
 		// info チャンクが見つからなかった
-		eTVPException::Throw(TJS_WS_TR("chunk 'info' not found"));
+		eTVPException::Throw(RISSE_WS_TR("chunk 'info' not found"));
 	}
 
 	// info チャンクから情報を読み取る
@@ -150,7 +150,7 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 	else
 	{
 		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
-			eTVPException::Throw(TJS_WS_TR("chunk 'time' not found"));
+			eTVPException::Throw(RISSE_WS_TR("chunk 'time' not found"));
 	}
 
 	// Segm チャンクを探す
@@ -187,7 +187,7 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 	else
 	{
 		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
-			eTVPException::Throw(TJS_WS_TR("chunk 'Segm' not found"));
+			eTVPException::Throw(RISSE_WS_TR("chunk 'Segm' not found"));
 	}
 
 	// ハッシュ用 チャンクを探す(現状はsha1固定)
@@ -196,13 +196,13 @@ tTVPXP4Archive::tFile::tFile(tTVPXP4Archive *owner, const unsigned char * meta,
 		metasize, &chunk, &chunksize))
 	{
 		if(chunksize != sizeof(Hash))
-			eTVPException::Throw(TJS_WS_TR("invalid hash chunk"));
+			eTVPException::Throw(RISSE_WS_TR("invalid hash chunk"));
 		memcpy(Hash, chunk, sizeof(Hash));
 	}
 	else
 	{
 		if((Flags & TVP_XP4_FILE_STATE_MASK) != TVP_XP4_FILE_STATE_DELETED)
-			eTVPException::Throw(TJS_WS_TR("hash chunk not found"));
+			eTVPException::Throw(RISSE_WS_TR("hash chunk not found"));
 	}
 }
 //---------------------------------------------------------------------------
@@ -219,8 +219,8 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, iMapCallback & callback)
 	FileName = filename;
 
 	// アーカイブファイルを開く
-	std::auto_ptr<tTJSBinaryStream>
-		stream(tTVPFileSystemManager::instance()->CreateStream(filename, TJS_BS_READ));
+	std::auto_ptr<tRisseBinaryStream>
+		stream(tTVPFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
 
 	// ヘッダのシグニチャをチェック
 	static unsigned char XP4Mark1[] = // 8bytes
@@ -236,7 +236,7 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, iMapCallback & callback)
 		memcmp(buf+8, XP4Mark2, 3))
 	{
 		// シグニチャが一致しない
-		eTVPException::Throw(ttstr(wxString::Format(TJS_WS_TR("'%s' is not an XP4 archive file"),
+		eTVPException::Throw(ttstr(wxString::Format(RISSE_WS_TR("'%s' is not an XP4 archive file"),
 			filename.AsWxString().c_str())));
 	}
 
@@ -285,7 +285,7 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, iMapCallback & callback)
 			{
 				// 圧縮インデックスの展開に失敗した
 				eTVPException::Throw(ttstr(wxString::Format(
-					TJS_WS_TR("decompression of archive index of '%s' failed"),
+					RISSE_WS_TR("decompression of archive index of '%s' failed"),
 					filename.AsWxString().c_str())));
 			}
 		}
@@ -302,7 +302,7 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, iMapCallback & callback)
 		if(!TVPFindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
 		{
 			eTVPException::Throw(ttstr(wxString::Format(
-				TJS_WS_TR("chunk 'Item' not found in file '%s'"),
+				RISSE_WS_TR("chunk 'Item' not found in file '%s'"),
 				filename.AsWxString().c_str())));
 		}
 
@@ -317,7 +317,7 @@ tTVPXP4Archive::tTVPXP4Archive(const ttstr & filename, iMapCallback & callback)
 		while(TVPFindChunk(chunkname_File, mem, left, &chunk, &chunksize))
 		{
 			// File チャンクが見つかった
-			tjs_size idx = Files.size();
+			risse_size idx = Files.size();
 			Files.push_back(tFile(this, chunk, chunksize, inarchivename, deleted));
 			mem = chunk + chunksize;
 			left = mem_limit - mem;
@@ -377,7 +377,7 @@ tTVPXP4Archive::~tTVPXP4Archive()
 //! @param		idx ファイルのインデックス
 //! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
-void tTVPXP4Archive::Stat(tjs_size idx, tTVPStatStruc & struc)
+void tTVPXP4Archive::Stat(risse_size idx, tTVPStatStruc & struc)
 {
 	struc.Clear();
 
@@ -396,9 +396,9 @@ void tTVPXP4Archive::Stat(tjs_size idx, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTJSBinaryStream * tTVPXP4Archive::CreateStream(
+tRisseBinaryStream * tTVPXP4Archive::CreateStream(
 			boost::shared_ptr<tTVPXP4Archive> ptr,
-			tjs_size idx, tjs_uint32 flags)
+			risse_size idx, risse_uint32 flags)
 {
 	return new tTVPXP4ArchiveStream(ptr, idx, flags);
 }

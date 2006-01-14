@@ -7,37 +7,37 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief ファイルシステムマネージャのTJS3バインディング
+//! @brief ファイルシステムマネージャのRisseバインディング
 //---------------------------------------------------------------------------
 #ifndef _FSMANAGERBIND_H_
 #define _FSMANAGERBIND_H_
 
 #include "FSManager.h"
-#include "tjsNative.h"
+#include "risseNative.h"
 #include "Singleton.h"
-#include "TJSEngine.h"
+#include "RisseEngine.h"
 
 
 //---------------------------------------------------------------------------
 //! @brief ファイルシステム ネイティブインスタンス
-//! @note  このクラスは、TJSのオブジェクトにNativeInstanceとして(tTJSNI_BaseFileSystemとは別に)
+//! @note  このクラスは、RisseのオブジェクトにNativeInstanceとして(tRisseNI_BaseFileSystemとは別に)
 //         登録する。
-//!        下にあるtTJSNI_BaseFileSystemと混同しないこと。
-//!        クラスIDは-2011 (固定) が割り当てられている (TJS_DEFINE_SOURCE_IDと同じ)
+//!        下にあるtRisseNI_BaseFileSystemと混同しないこと。
+//!        クラスIDは-2011 (固定) が割り当てられている (RISSE_DEFINE_SOURCE_IDと同じ)
 //---------------------------------------------------------------------------
-class tTJSNI_FileSystemNativeInstance : public tTJSNativeInstance
+class tRisseNI_FileSystemNativeInstance : public tRisseNativeInstance
 {
 public:
-	static const tjs_int32 ClassID = -2011; // = TJS_DEFINE_SOURCE_ID in FSManagerBind.cpp
+	static const risse_int32 ClassID = -2011; // = RISSE_DEFINE_SOURCE_ID in FSManagerBind.cpp
 
 private:
 	boost::shared_ptr<tTVPFileSystem> FileSystem; //!< ファイルシステムオブジェクト
-	iTJSDispatch2 * Owner; //!< このインスタンスを保持している TJS オブジェクト(AddRefしないこと)
+	iRisseDispatch2 * Owner; //!< このインスタンスを保持している Risse オブジェクト(AddRefしないこと)
 
 public:
-	tTJSNI_FileSystemNativeInstance(
+	tRisseNI_FileSystemNativeInstance(
 		boost::shared_ptr<tTVPFileSystem> filesystem,
-		iTJSDispatch2 * owner);
+		iRisseDispatch2 * owner);
 
 	void Invalidate();
 
@@ -50,19 +50,19 @@ private:
 
 //---------------------------------------------------------------------------
 //! @brief ファイルシステム 基底ネイティブインスタンス
-//! @note	各ファイルシステムのTJSネイティブインスタンスはこれを継承して用いる
+//! @note	各ファイルシステムのRisseネイティブインスタンスはこれを継承して用いる
 //---------------------------------------------------------------------------
-class tTJSNI_BaseFileSystem : public tTJSNativeInstance
+class tRisseNI_BaseFileSystem : public tRisseNativeInstance
 {
 public:
-	tTJSNI_BaseFileSystem();
+	tRisseNI_BaseFileSystem();
 
 	void Invalidate();
 
 	boost::shared_ptr<tTVPFileSystem> & GetFileSystem() { return FileSystem; }
 
 protected:
-	void RegisterFileSystemNativeInstance(iTJSDispatch2 * tjs_obj,
+	void RegisterFileSystemNativeInstance(iRisseDispatch2 * risse_obj,
 		tTVPFileSystem * filesystem);
 
 private:
@@ -74,16 +74,16 @@ private:
 
 //---------------------------------------------------------------------------
 //! @brief		FileSystem ネイティブクラス (tTVPFileSystemManager のバインディング)
-//! @note		TJSでのクラス名は FileSystem であるためこのように "FileSystem"
+//! @note		Risseでのクラス名は FileSystem であるためこのように "FileSystem"
 //!				の名が付いているが、実際は ファイルシステムマネージャへのバインディング
 //!				であってファイルシステムへのバインディングではないので注意
 //---------------------------------------------------------------------------
-class tTJSNC_FileSystem : public tTJSNativeClass
+class tRisseNC_FileSystem : public tRisseNativeClass
 {
 public:
-	tTJSNC_FileSystem();
+	tRisseNC_FileSystem();
 
-	static tjs_uint32 ClassID;
+	static risse_uint32 ClassID;
 };
 //---------------------------------------------------------------------------
 
@@ -100,9 +100,9 @@ public:
 //---------------------------------------------------------------------------
 class tTVPFileSystemRegisterer
 {
-	iTJSDispatch2 * FileSystemClass;
+	iRisseDispatch2 * FileSystemClass;
 
-	tTVPSingleton<tTVPTJS3ScriptEngine> ref_tTVPTJS3ScriptEngine; //!< tTVPTJS3ScriptEngine に依存
+	tTVPSingleton<tTVPRisseScriptEngine> ref_tTVPRisseScriptEngine; //!< tTVPRisseScriptEngine に依存
 
 public:
 	tTVPFileSystemRegisterer();
@@ -112,7 +112,7 @@ public:
 		tTVPSingleton<tTVPFileSystemRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
-	void RegisterClassObject(const tjs_char *name, iTJSDispatch2 * object);
+	void RegisterClassObject(const risse_char *name, iRisseDispatch2 * object);
 };
 //---------------------------------------------------------------------------
 

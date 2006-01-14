@@ -7,31 +7,31 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief PathFSのTJS3バインディング
+//! @brief PathFSのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "PathFS.h"
 #include "PathFSBind.h"
 #include "TVPException.h"
 
-TJS_DEFINE_SOURCE_ID(2013);
+RISSE_DEFINE_SOURCE_ID(2013);
 
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNI_PathFS::tTJSNI_PathFS()
+tRisseNI_PathFS::tRisseNI_PathFS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS コンストラクタ
+//! @brief		Risse コンストラクタ
 //---------------------------------------------------------------------------
-tjs_error tTJSNI_PathFS::Construct(tjs_int numparams,
-		tTJSVariant **param, iTJSDispatch2 *tjs_obj)
+risse_error tRisseNI_PathFS::Construct(risse_int numparams,
+		tRisseVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		PathFS.PathFS
@@ -39,15 +39,15 @@ tjs_error tTJSNI_PathFS::Construct(tjs_int numparams,
 	*/
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(tjs_obj, new tTVPPathFS());
+	RegisterFileSystemNativeInstance(risse_obj, new tTVPPathFS());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS 無効化関数
+//! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
-void tTJSNI_PathFS::Invalidate()
+void tRisseNI_PathFS::Invalidate()
 {
 }
 //---------------------------------------------------------------------------
@@ -60,29 +60,29 @@ void tTJSNI_PathFS::Invalidate()
 //---------------------------------------------------------------------------
 //! @brief		PathFS クラスID
 //---------------------------------------------------------------------------
-tjs_uint32 tTJSNC_PathFS::ClassID = (tjs_uint32)-1;
+risse_uint32 tRisseNC_PathFS::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNC_PathFS::tTJSNC_PathFS() :
-	tTJSNativeClass(TJS_WS("PathFS"))
+tRisseNC_PathFS::tRisseNC_PathFS() :
+	tRisseNativeClass(RISSE_WS("PathFS"))
 {
 	// class constructor
 
-	TJS_BEGIN_NATIVE_MEMBERS(/*TJS class name*/PathFS)
-	TJS_DECL_EMPTY_FINALIZE_METHOD
+	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/PathFS)
+	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tTJSNI_PathFS,
-	/*TJS class name*/ PathFS)
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_PathFS,
+	/*Risse class name*/ PathFS)
 {
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/PathFS)
+RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/PathFS)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/add)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/add)
 {
 	/*%
 		@brief	パスにディレクトリを追加する
@@ -107,19 +107,19 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/add)
 		</p>
 	*/
 
-	TJS_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tTJSNI_PathFS);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_PathFS);
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	ttstr dir = *param[0];
-	bool recursive = TJS_PARAM_EXIST(1) ? (tjs_int)*param[1] : false;
+	bool recursive = RISSE_PARAM_EXIST(1) ? (risse_int)*param[1] : false;
 
 	_this->GetFileSystem()->Add(dir, recursive);
 
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/add)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/add)
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/remove)
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/remove)
 {
 	/*%
 		@brief	パスからディレクトリを削除する
@@ -127,18 +127,18 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/remove)
 		@note
 	*/
 
-	TJS_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tTJSNI_PathFS);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_PathFS);
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	ttstr dir = *param[0];
 
 	_this->GetFileSystem()->Remove(dir);
 
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_METHOD_DECL(/*func. name*/remove)
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/remove)
 //----------------------------------------------------------------------
-	TJS_END_NATIVE_MEMBERS
+	RISSE_END_NATIVE_MEMBERS
 }
 //---------------------------------------------------------------------------
 
@@ -147,9 +147,9 @@ TJS_END_NATIVE_METHOD_DECL(/*func. name*/remove)
 //! @brief		ネイティブインスタンスを作成して返す
 //! @return		ネイティブインスタンス
 //---------------------------------------------------------------------------
-tTJSNativeInstance *tTJSNC_PathFS::CreateNativeInstance()
+tRisseNativeInstance *tRisseNC_PathFS::CreateNativeInstance()
 {
-	return new tTJSNI_PathFS();
+	return new tRisseNI_PathFS();
 }
 //---------------------------------------------------------------------------
 
@@ -163,11 +163,11 @@ tTJSNativeInstance *tTJSNC_PathFS::CreateNativeInstance()
 tTVPPathFSRegisterer::tTVPPathFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
-	iTJSDispatch2 * cls = new tTJSNC_PathFS();
+	iRisseDispatch2 * cls = new tRisseNC_PathFS();
 	try
 	{
 		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
-							TJS_WS("PathFS"), cls);
+							RISSE_WS("PathFS"), cls);
 	}
 	catch(...)
 	{

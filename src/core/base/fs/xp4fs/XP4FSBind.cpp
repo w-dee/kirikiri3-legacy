@@ -7,31 +7,31 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief XP4FSのTJS3バインディング
+//! @brief XP4FSのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "XP4FS.h"
 #include "XP4FSBind.h"
 #include "TVPException.h"
 
-TJS_DEFINE_SOURCE_ID(2015);
+RISSE_DEFINE_SOURCE_ID(2015);
 
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNI_XP4FS::tTJSNI_XP4FS()
+tRisseNI_XP4FS::tRisseNI_XP4FS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS コンストラクタ
+//! @brief		Risse コンストラクタ
 //---------------------------------------------------------------------------
-tjs_error tTJSNI_XP4FS::Construct(tjs_int numparams,
-		tTJSVariant **param, iTJSDispatch2 *tjs_obj)
+risse_error tRisseNI_XP4FS::Construct(risse_int numparams,
+		tRisseVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		XP4FS.XP4FS
@@ -39,20 +39,20 @@ tjs_error tTJSNI_XP4FS::Construct(tjs_int numparams,
 		@param	filename		XP4アーカイブファイル名
 	*/
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
 	ttstr filename = *param[0];
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(tjs_obj, new tTVPXP4FS(filename));
+	RegisterFileSystemNativeInstance(risse_obj, new tTVPXP4FS(filename));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS 無効化関数
+//! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
-void tTJSNI_XP4FS::Invalidate()
+void tRisseNI_XP4FS::Invalidate()
 {
 }
 //---------------------------------------------------------------------------
@@ -65,30 +65,30 @@ void tTJSNI_XP4FS::Invalidate()
 //---------------------------------------------------------------------------
 //! @brief		XP4FS クラスID
 //---------------------------------------------------------------------------
-tjs_uint32 tTJSNC_XP4FS::ClassID = (tjs_uint32)-1;
+risse_uint32 tRisseNC_XP4FS::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNC_XP4FS::tTJSNC_XP4FS() :
-	tTJSNativeClass(TJS_WS("XP4FS"))
+tRisseNC_XP4FS::tRisseNC_XP4FS() :
+	tRisseNativeClass(RISSE_WS("XP4FS"))
 {
 	// class constructor
 
-	TJS_BEGIN_NATIVE_MEMBERS(/*TJS class name*/XP4FS)
-	TJS_DECL_EMPTY_FINALIZE_METHOD
+	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/XP4FS)
+	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tTJSNI_XP4FS,
-	/*TJS class name*/ XP4FS)
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_XP4FS,
+	/*Risse class name*/ XP4FS)
 {
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/XP4FS)
+RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/XP4FS)
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
-	TJS_END_NATIVE_MEMBERS
+	RISSE_END_NATIVE_MEMBERS
 }
 //---------------------------------------------------------------------------
 
@@ -97,9 +97,9 @@ TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/XP4FS)
 //! @brief		ネイティブインスタンスを作成して返す
 //! @return		ネイティブインスタンス
 //---------------------------------------------------------------------------
-tTJSNativeInstance *tTJSNC_XP4FS::CreateNativeInstance()
+tRisseNativeInstance *tRisseNC_XP4FS::CreateNativeInstance()
 {
-	return new tTJSNI_XP4FS();
+	return new tRisseNI_XP4FS();
 }
 //---------------------------------------------------------------------------
 
@@ -112,11 +112,11 @@ tTJSNativeInstance *tTJSNC_XP4FS::CreateNativeInstance()
 tTVPXP4FSRegisterer::tTVPXP4FSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
-	iTJSDispatch2 * cls = new tTJSNC_XP4FS();
+	iRisseDispatch2 * cls = new tRisseNC_XP4FS();
 	try
 	{
 		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
-							TJS_WS("XP4FS"), cls);
+							RISSE_WS("XP4FS"), cls);
 	}
 	catch(...)
 	{

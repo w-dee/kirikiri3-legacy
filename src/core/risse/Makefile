@@ -6,12 +6,12 @@ include $(TOP_DIR)/Makefile_filenames
 #----------------------------#
 
 # プログラムID (プログラムやライブラリのbasenameとなる)
-PROGRAM_ID=tjs3
+PROGRAM_ID=risse
 
 # 出力バイナリ名
-TJS3_LIB_OUTPUT_DIR := $(CURRENT_DIR)/lib
-TJS3_BIN_OUTPUT_DIR := $(CURRENT_DIR)/bin
-BIN=$(TJS3_LIB_OUTPUT_DIR)/libtjs3.a
+Risse_LIB_OUTPUT_DIR := $(CURRENT_DIR)/lib
+Risse_BIN_OUTPUT_DIR := $(CURRENT_DIR)/bin
+BIN=$(Risse_LIB_OUTPUT_DIR)/librisse.a
 
 # このバイナリが依存しているライブラリ
 DEP_LIBS=WX
@@ -22,50 +22,50 @@ default: $(BIN)
 #----------------------------#
 
 CXXFLAGS = \
-	-DTJS_NO_REGEXP \
-	-DTJS_SUPPORT_WX
+	-DRISSE_NO_REGEXP \
+	-DRISSE_SUPPORT_WX
 
 CPPFLAGS = $(CXXFLAGS)
 
 #----------------------------#
 
-CPPFILES = 	src/tjs.cpp                     \
-			src/tjs.tab.cpp                 \
-			src/tjsArray.cpp                \
-			src/tjsCharUtils.cpp            \
-			src/tjsCompileControl.cpp       \
-			src/tjsConfig.cpp               \
-			src/tjsDate.cpp                 \
-			src/tjsDateParser.cpp           \
-			src/tjsDebug.cpp                \
-			src/tjsDictionary.cpp           \
-			src/tjsDisassemble.cpp          \
-			src/tjsError.cpp                \
-			src/tjsException.cpp            \
-			src/tjsGlobalStringMap.cpp      \
-			src/tjsInterCodeExec.cpp        \
-			src/tjsInterCodeGen.cpp         \
-			src/tjsInterface.cpp            \
-			src/tjsLex.cpp                  \
-			src/tjsMT19937ar-cok.cpp        \
-			src/tjsMath.cpp                 \
-			src/tjsMessage.cpp              \
-			src/tjsNamespace.cpp            \
-			src/tjsNative.cpp               \
-			src/tjsObject.cpp               \
-			src/tjsRandomGenerator.cpp      \
-			src/tjsScriptBlock.cpp          \
-			src/tjsScriptCache.cpp          \
-			src/tjsString.cpp               \
-			src/tjsUtils.cpp                \
-			src/tjsVariant.cpp              \
-			src/tjsVariantString.cpp        \
-			src/tjsdate.tab.cpp             \
-			src/tjspp.tab.cpp               
+CPPFILES = 	src/risse.cpp                     \
+			src/risse.tab.cpp                 \
+			src/risseArray.cpp                \
+			src/risseCharUtils.cpp            \
+			src/risseCompileControl.cpp       \
+			src/risseConfig.cpp               \
+			src/risseDate.cpp                 \
+			src/risseDateParser.cpp           \
+			src/risseDebug.cpp                \
+			src/risseDictionary.cpp           \
+			src/risseDisassemble.cpp          \
+			src/risseError.cpp                \
+			src/risseException.cpp            \
+			src/risseGlobalStringMap.cpp      \
+			src/risseInterCodeExec.cpp        \
+			src/risseInterCodeGen.cpp         \
+			src/risseInterface.cpp            \
+			src/risseLex.cpp                  \
+			src/risseMT19937ar-cok.cpp        \
+			src/risseMath.cpp                 \
+			src/risseMessage.cpp              \
+			src/risseNamespace.cpp            \
+			src/risseNative.cpp               \
+			src/risseObject.cpp               \
+			src/risseRandomGenerator.cpp      \
+			src/risseScriptBlock.cpp          \
+			src/risseScriptCache.cpp          \
+			src/risseString.cpp               \
+			src/risseUtils.cpp                \
+			src/risseVariant.cpp              \
+			src/risseVariantString.cpp        \
+			src/rissedate.tab.cpp             \
+			src/rissepp.tab.cpp               
 
 OBJS = $(CPPFILES:.cpp=.o)
 
-PREC_H_NAME = include/tjsCommHead.h
+PREC_H_NAME = include/risseCommHead.h
 
 INCLUDES = -Iinclude
 
@@ -73,18 +73,18 @@ INCLUDES = -Iinclude
 
 # 設定ファイルを書き出す
 
-TJS3_INCLUDE_DIR := $(shell pwd)/include
+Risse_INCLUDE_DIR := $(shell pwd)/include
 
-$(TJS3_BIN_OUTPUT_DIR)/tjs3-config: Makefile
-	mkdir -p $(TJS3_BIN_OUTPUT_DIR)
-	sed tjs3-config.in \
-		-e 's|@LIBS@|"-L$(TJS3_LIB_OUTPUT_DIR) -ltjs3"|' \
-		-e 's|@CXXFLAGS@|"-I$(TJS3_INCLUDE_DIR) $(CXXFLAGS)"|' \
-		-e 's|@CPPFLAGS@|"-I$(TJS3_INCLUDE_DIR) $(CXXFLAGS)"|' \
+$(Risse_BIN_OUTPUT_DIR)/risse-config: Makefile risse-config.in
+	mkdir -p $(Risse_BIN_OUTPUT_DIR)
+	sed risse-config.in \
+		-e 's|@LIBS@|"-L$(Risse_LIB_OUTPUT_DIR) -lrisse"|' \
+		-e 's|@CXXFLAGS@|"-I$(Risse_INCLUDE_DIR) $(CXXFLAGS)"|' \
+		-e 's|@CPPFLAGS@|"-I$(Risse_INCLUDE_DIR) $(CXXFLAGS)"|' \
 		-e 's|@LINKDEPS@|"$(BIN)"|' \
-		  > $(TJS3_BIN_OUTPUT_DIR)/tjs3-config
-	chmod +x $(TJS3_BIN_OUTPUT_DIR)/tjs3-config
+		  > $(Risse_BIN_OUTPUT_DIR)/risse-config
+	chmod +x $(Risse_BIN_OUTPUT_DIR)/risse-config
 
-BIN_DEPS = $(TJS3_BIN_OUTPUT_DIR)/tjs3-config
+BIN_DEPS = $(Risse_BIN_OUTPUT_DIR)/risse-config
 #----------------------------#
 include $(TOP_DIR)/Makefile_common

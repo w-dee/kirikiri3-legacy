@@ -12,7 +12,7 @@
 #include "prec.h"
 #include "TVPException.h"
 
-TJS_DEFINE_SOURCE_ID(2100);
+RISSE_DEFINE_SOURCE_ID(2100);
 
 //---------------------------------------------------------------------------
 //! @brief		eTVPExceptionŒ^‚Ì—áŠO‚ð“Š‚°‚é
@@ -85,7 +85,7 @@ void eTVPException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2, 
 //---------------------------------------------------------------------------
 void eTVPException::ThrowInternalError(int line, const char * filename)
 {
-	Throw(TJS_WS_TR("Internal error at $2 line $1"), ttstr(line), ttstr(wxString(filename, wxConvUTF8)));
+	Throw(RISSE_WS_TR("Internal error at $2 line $1"), ttstr(line), ttstr(wxString(filename, wxConvUTF8)));
 }
 //---------------------------------------------------------------------------
 

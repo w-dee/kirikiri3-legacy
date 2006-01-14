@@ -41,7 +41,7 @@ private:
 	FT_StreamRec Stream;
 
 public:
-	tTVPGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 options);
+	tTVPGenericFreeTypeFace(const ttstr &fontname, risse_uint32 options);
 	virtual ~tTVPGenericFreeTypeFace();
 
 	virtual FT_Face GetFTFace() const;
@@ -56,7 +56,7 @@ private:
 			unsigned long   count );
 	static void CloseFunc( FT_Stream  stream );
 
-	bool OpenFaceByIndex(tjs_uint index, FT_Face & face);
+	bool OpenFaceByIndex(risse_uint index, FT_Face & face);
 };
 //---------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ private:
 //! @param		fontname フォント名
 //! @param		options オプション(TVP_TF_XXXX 定数かTVP_FACE_OPTIONS_XXXX定数の組み合わせ)
 //---------------------------------------------------------------------------
-tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 options)
+tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, risse_uint32 options)
 {
 	// フィールドの初期化
 	Face = NULL;
@@ -96,11 +96,11 @@ tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, tjs_uint
 		fsr->close = CloseFunc;
 
 		// Face をそれぞれ開き、Face名を取得して FaceNames に格納する
-		tjs_uint face_num = 1;
+		risse_uint face_num = 1;
 
 		FT_Face face = NULL;
 
-		for(tjs_uint i = 0; i < face_num; i++)
+		for(risse_uint i = 0; i < face_num; i++)
 		{
 			if(!OpenFaceByIndex(i, face))
 			{
@@ -120,7 +120,7 @@ tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, tjs_uint
 
 
 		// FreeType エンジンでファイルを開こうとしてみる
-		tjs_uint index = TVP_GET_FACE_INDEX_FROM_OPTIONS(options);
+		risse_uint index = TVP_GET_FACE_INDEX_FROM_OPTIONS(options);
 		if(!OpenFaceByIndex(index, Face))
 		{
 			// フォントを開けなかった
@@ -218,7 +218,7 @@ void tTVPGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
 //! @return		Faceを開ければ true そうでなければ false
 //! @note		初めて Face を開く場合は face で指定する変数には null を入れておくこと
 //---------------------------------------------------------------------------
-bool tTVPGenericFreeTypeFace::OpenFaceByIndex(tjs_uint index, FT_Face & face)
+bool tTVPGenericFreeTypeFace::OpenFaceByIndex(risse_uint index, FT_Face & face)
 {
 	if(face) FT_Done_Face(face), face = NULL;
 
@@ -249,7 +249,7 @@ bool tTVPGenericFreeTypeFace::OpenFaceByIndex(tjs_uint index, FT_Face & face)
 //! @param		fontname フォント名
 //! @param		options オプション
 //---------------------------------------------------------------------------
-tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options)
+tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, risse_uint32 options)
 	: FontName(fontname)
 {
 	// フィールドをクリア
@@ -312,7 +312,7 @@ tTVPFreeTypeFace::~tTVPFreeTypeFace()
 //! @brief		このFaceが保持しているglyphの数を得る
 //! @return		このFaceが保持しているglyphの数
 //---------------------------------------------------------------------------
-tjs_uint tTVPFreeTypeFace::GetGlyphCount()
+risse_uint tTVPFreeTypeFace::GetGlyphCount()
 {
 	if(!FTFace) return 0;
 
@@ -353,14 +353,14 @@ tjs_uint tTVPFreeTypeFace::GetGlyphCount()
 //! @param		index インデックス(FreeTypeの管理している文字indexとは違うので注意)
 //! @return		対応する文字コード(対応するコードが無い場合は 0)
 //---------------------------------------------------------------------------
-tjs_char tTVPFreeTypeFace::GetCharcodeFromGlyphIndex(tjs_uint index)
+risse_char tTVPFreeTypeFace::GetCharcodeFromGlyphIndex(risse_uint index)
 {
-	tjs_uint size = GetGlyphCount(); // グリフ数を得るついでにマップを作成する
+	risse_uint size = GetGlyphCount(); // グリフ数を得るついでにマップを作成する
 
 	if(!GlyphIndexToCharcodeVector) return 0;
 	if(index >= size) return 0;
 
-	return static_cast<tjs_char>((*GlyphIndexToCharcodeVector)[index]);
+	return static_cast<risse_char>((*GlyphIndexToCharcodeVector)[index]);
 }
 //---------------------------------------------------------------------------
 
@@ -398,7 +398,7 @@ void tTVPFreeTypeFace::SetHeight(int height)
 //! @return		新規作成されたグリフビットマップオブジェクトへのポインタ
 //!				NULL の場合は変換に失敗した場合
 //---------------------------------------------------------------------------
-tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
+tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 {
 	// グリフスロットにグリフを読み込み、寸法を取得する
 	tTVPGlyphMetrics metrics;
@@ -453,15 +453,15 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 			{
 				// gray レベルが 256 ではない
 				// 256 になるように乗算を行う
-				tjs_int32 multiply =
-					static_cast<tjs_int32>((static_cast<tjs_int32> (1) << 30) - 1) /
+				risse_int32 multiply =
+					static_cast<risse_int32>((static_cast<risse_int32> (1) << 30) - 1) /
 						(ft_bmp->num_grays - 1);
-				for(tjs_int y = ft_bmp->rows - 1; y >= 0; y--)
+				for(risse_int y = ft_bmp->rows - 1; y >= 0; y--)
 				{
 					unsigned char * p = ft_bmp->buffer + y * ft_bmp->pitch;
-					for(tjs_int x = ft_bmp->width - 1; x >= 0; x--)
+					for(risse_int x = ft_bmp->width - 1; x >= 0; x--)
 					{
-						tjs_int32 v = static_cast<tjs_int32>((*p * multiply)  >> 22);
+						risse_int32 v = static_cast<risse_int32>((*p * multiply)  >> 22);
 						*p = static_cast<unsigned char>(v);
 						p++;
 					}
@@ -497,7 +497,7 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 //! @param		metrics 寸法
 //! @return		成功の場合真、失敗の場合偽
 //---------------------------------------------------------------------------
-bool tTVPFreeTypeFace::GetGlyphMetricsFromCharcode(tjs_char code,
+bool tTVPFreeTypeFace::GetGlyphMetricsFromCharcode(risse_char code,
 	tTVPGlyphMetrics & metrics)
 {
 	if(!LoadGlyphSlotFromCharcode(code)) return false;
@@ -520,7 +520,7 @@ bool tTVPFreeTypeFace::GetGlyphMetricsFromCharcode(tjs_char code,
 //! @param		code 文字コード
 //! @return		成功の場合真、失敗の場合偽
 //---------------------------------------------------------------------------
-bool tTVPFreeTypeFace::LoadGlyphSlotFromCharcode(tjs_char code)
+bool tTVPFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
 {
 	// TODO: スレッド保護
 
@@ -645,7 +645,7 @@ void tTVPFreeTypeLibrary::Hook()
 //! @brief		参照カウンタを減らす
 //! @return		参照カウンタを減らした後の参照カウンタの値
 //---------------------------------------------------------------------------
-tjs_int tTVPFreeTypeLibrary::Unhook()
+risse_int tTVPFreeTypeLibrary::Unhook()
 {
 	return --RefCount;
 }

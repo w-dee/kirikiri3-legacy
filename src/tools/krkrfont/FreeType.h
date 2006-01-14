@@ -29,32 +29,32 @@ class tTVPFreeTypeFace
 	wxString FontName;		//!< フォント名
 	tTVPBaseFreeTypeFace * Face; //!< Face オブジェクト
 	FT_Face FTFace; //!< FreeType Face オブジェクト
-	tjs_uint32 Options; //!< フラグ
+	risse_uint32 Options; //!< フラグ
 
 	typedef std::vector<FT_ULong> tGlyphIndexToCharcodeVector;
 	tGlyphIndexToCharcodeVector * GlyphIndexToCharcodeVector;		//!< グリフインデックスから文字コードへの変換マップ
-	tjs_int Height;		//!< フォントサイズ(高さ) in pixel
+	risse_int Height;		//!< フォントサイズ(高さ) in pixel
 
-	tjs_uint (*UnicodeToLocalChar)(tjs_char in); //!< SJISなどをUnicodeに変換する関数
-	tjs_char (*LocalCharToUnicode)(tjs_uint in); //!< UnicodeをSJISなどに変換する関数
+	risse_uint (*UnicodeToLocalChar)(risse_char in); //!< SJISなどをUnicodeに変換する関数
+	risse_char (*LocalCharToUnicode)(risse_uint in); //!< UnicodeをSJISなどに変換する関数
 
 public:
-	tTVPFreeTypeFace(const wxString &fontname, tjs_uint32 options);
+	tTVPFreeTypeFace(const wxString &fontname, risse_uint32 options);
 	~tTVPFreeTypeFace();
 
-	tjs_uint GetGlyphCount();
-	tjs_char GetCharcodeFromGlyphIndex(tjs_uint index);
+	risse_uint GetGlyphCount();
+	risse_char GetCharcodeFromGlyphIndex(risse_uint index);
 
 	void GetFaceNameList(wxArrayString &dest);
 
-	tjs_int GetHeight() { return Height; }
+	risse_int GetHeight() { return Height; }
 	void SetHeight(int height);
 
-	tTVPGlyphBitmap * GetGlyphFromCharcode(tjs_char code);
-	bool GetGlyphMetricsFromCharcode(tjs_char code, tTVPGlyphMetrics & metrics);
+	tTVPGlyphBitmap * GetGlyphFromCharcode(risse_char code);
+	bool GetGlyphMetricsFromCharcode(risse_char code, tTVPGlyphMetrics & metrics);
 
 private:
-	bool LoadGlyphSlotFromCharcode(tjs_char code);
+	bool LoadGlyphSlotFromCharcode(risse_char code);
 };
 //---------------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ class tTVPFreeTypeLibrary
 {
 	static tTVPFreeTypeLibrary * GlobalLibrary;	//!< FreeType ライブラリ
 
-	tjs_int RefCount;	//!< 参照カウンタ
+	risse_int RefCount;	//!< 参照カウンタ
 	FT_Library Library;	//!< FreeType ライブラリ
 
 public:
@@ -86,7 +86,7 @@ private:
 	~tTVPFreeTypeLibrary();
 
 	void Hook();
-	tjs_int Unhook();
+	risse_int Unhook();
 };
 //---------------------------------------------------------------------------
 

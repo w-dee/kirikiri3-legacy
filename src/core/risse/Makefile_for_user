@@ -1,22 +1,22 @@
-# 他のプログラムのMakefileにincludeして使うためのtjsの設定
+# 他のプログラムのMakefileにincludeして使うためのrisseの設定
 
-TJS3_DIR=$(TOP_DIR)/src/core/tjs3
+Risse_DIR=$(TOP_DIR)/src/core/risse
 
-$(TJS3_LIB):
-	(cd $(TJS3_DIR) && make)
+$(Risse_LIB):
+	(cd $(Risse_DIR) && make)
 
-TJS3_CXXFLAGS := $(shell $(TJS3_DIR)/bin/tjs3-config --cxxflags)
-TJS3_CPPFLAGS := $(shell $(TJS3_DIR)/bin/tjs3-config --cppflags)
-TJS3_LIBS     := $(shell $(TJS3_DIR)/bin/tjs3-config --libs)
-TJS3_LINKDEPS := $(shell $(TJS3_DIR)/bin/tjs3-config --linkdeps)
+Risse_CXXFLAGS := $(shell $(Risse_DIR)/bin/risse-config --cxxflags)
+Risse_CPPFLAGS := $(shell $(Risse_DIR)/bin/risse-config --cppflags)
+Risse_LIBS     := $(shell $(Risse_DIR)/bin/risse-config --libs)
+Risse_LINKDEPS := $(shell $(Risse_DIR)/bin/risse-config --linkdeps)
 
 ifneq ($(filter WX,$(DEP_LIBS)),WX)
  DEP_LIBS += WX
 endif
-CXXFLAGS += $(TJS3_CXXFLAGS)
-CPPFLAGS += $(TJS3_CPPFLAGS)
-LIBS     += $(TJS3_LIBS)
-BIN_DEPS += $(TJS3_LINKDEPS)
+CXXFLAGS += $(Risse_CXXFLAGS)
+CPPFLAGS += $(Risse_CPPFLAGS)
+LIBS     += $(Risse_LIBS)
+BIN_DEPS += $(Risse_LINKDEPS)
 
-$(TJS3_LIB)/Makefile_for_user: $(TJS3_LIB)
+$(Risse_LIB)/Makefile_for_user: $(Risse_LIB)
 

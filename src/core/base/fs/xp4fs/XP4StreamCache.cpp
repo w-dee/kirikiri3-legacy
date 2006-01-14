@@ -10,7 +10,7 @@
 //! @brief アーカイブファイルのストリームのキャッシュ
 //---------------------------------------------------------------------------
 #include "prec.h"
-TJS_DEFINE_SOURCE_ID(2010);
+RISSE_DEFINE_SOURCE_ID(2010);
 
 
 #include "XP4FS.h"
@@ -47,19 +47,19 @@ tTVPXP4StreamCache::~tTVPXP4StreamCache()
 //! @param		name アーカイブファイル名
 //! @return		ストリーム
 //---------------------------------------------------------------------------
-tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & name)
+tRisseBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & name)
 {
-	volatile tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
 	// linear search wiil be enough here because the 
 	// TVP_MAX_ARCHIVE_Stream_CACHE is relatively small
-	for(tjs_int i =0; i < MAX_ITEM; i++)
+	for(risse_int i =0; i < MAX_ITEM; i++)
 	{
 		tItem *item = Pool + i;
 		if(item->Stream && item->Pointer == pointer)
 		{
 			// found in the pool
-			tTJSBinaryStream * stream = item->Stream;
+			tRisseBinaryStream * stream = item->Stream;
 			item->Stream = NULL;
 			return stream;
 		}
@@ -67,7 +67,7 @@ tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & n
 
 	// not found in the pool
 	// simply create a stream and return it
-	return tTVPFileSystemManager::instance()->CreateStream(name, TJS_BS_READ);
+	return tTVPFileSystemManager::instance()->CreateStream(name, RISSE_BS_READ);
 }
 //---------------------------------------------------------------------------
 
@@ -77,14 +77,14 @@ tTJSBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & n
 //! @param		pointer アーカイブインスタンスへのポインタ
 //! @param		stream ストリーム
 //---------------------------------------------------------------------------
-void tTVPXP4StreamCache::ReleaseStream(void * pointer, tTJSBinaryStream * stream)
+void tTVPXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * stream)
 {
-	volatile tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
 	// search empty cell in the pool
-	tjs_uint oldest_age = 0;
-	tjs_int oldest = 0;
-	for(tjs_int i = 0; i < MAX_ITEM; i++)
+	risse_uint oldest_age = 0;
+	risse_int oldest = 0;
+	for(risse_int i = 0; i < MAX_ITEM; i++)
 	{
 		tItem *item = Pool + i;
 		if(item->Stream == NULL)
@@ -123,9 +123,9 @@ void tTVPXP4StreamCache::ReleaseStream(void * pointer, tTJSBinaryStream * stream
 //---------------------------------------------------------------------------
 void tTVPXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 {
-	volatile tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
-	for(tjs_int i = 0; i < MAX_ITEM; i++)
+	for(risse_int i = 0; i < MAX_ITEM; i++)
 	{
 		tItem *item = Pool + i;
 		if(item->Stream && item->Pointer == pointer)
@@ -144,9 +144,9 @@ void tTVPXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 //---------------------------------------------------------------------------
 void tTVPXP4StreamCache::ReleaseAll()
 {
-	volatile tTJSCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
-	for(tjs_int i = 0; i < MAX_ITEM; i++)
+	for(risse_int i = 0; i < MAX_ITEM; i++)
 	{
 		tItem *item = Pool + i;
 		if(item->Stream)

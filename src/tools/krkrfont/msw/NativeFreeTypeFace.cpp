@@ -31,7 +31,7 @@
 //! @param		options オプション
 //---------------------------------------------------------------------------
 tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
-	tjs_uint32 options)
+	risse_uint32 options)
 {
 	// フィールドのクリア
 	FaceName = fontname;
@@ -43,7 +43,7 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 
 	unsigned char *name_content    = NULL; // Windows から取得した name タグの内容
 	unsigned char *name_content_ft = NULL; // FreeType から取得した name タグの内容
-	tjs_size name_content_size;
+	risse_size name_content_size;
 
 	// TrueType ライブラリをフック
 	tTVPFreeTypeLibrary::AddRef();
@@ -101,7 +101,7 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 		}
 
 		// フォントファイルのサイズを取得する
-		tjs_size fontsize;
+		risse_size fontsize;
 
 		//- TTC (True Type Collection) ファイルのチェック
 		//- GetFontData API の仕様では、TTC ファイルに対しては、現在選択されている

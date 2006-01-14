@@ -28,15 +28,15 @@ public:
 	~wxPreviewScrolledWindow();
 
 private:
-	tjs_int GetNCharsInLine() const;
+	risse_int GetNCharsInLine() const;
 public:
 	void PushTopLeftIndex();
 	void UpdateDisplayInfo();
-	void SetMagnify(tjs_int magnify);
+	void SetMagnify(risse_int magnify);
 private:
 	wxCoord OnGetLineHeight(size_t n) const;
-	tjs_uint GetMargin() const;
-	void PrintCharacter(tjs_char ch, int x, int y);
+	risse_uint GetMargin() const;
+	void PrintCharacter(risse_char ch, int x, int y);
 
 public:
 	void OnIdle(wxIdleEvent& event);
@@ -50,11 +50,11 @@ private:
 	DECLARE_EVENT_TABLE()
 
 private:
-	typedef std::map<tjs_int, bool> tIndexToUpdate;
+	typedef std::map<risse_int, bool> tIndexToUpdate;
 	tIndexToUpdate IndexToUpdate; //!< 更新すべき文字を含んだリスト
-	tjs_int LastStatusedIndex; //!< 最後にステータスバーに表示した index 情報
-	tjs_uint Magnify; //!< 拡大率
-	tjs_uint LastTopLeftIndex; //!< 最後に左上に表示していた文字のインデックス
+	risse_int LastStatusedIndex; //!< 最後にステータスバーに表示した index 情報
+	risse_uint Magnify; //!< 拡大率
+	risse_uint LastTopLeftIndex; //!< 最後に左上に表示していた文字のインデックス
 };
 //---------------------------------------------------------------------------
 
@@ -104,15 +104,15 @@ wxPreviewScrolledWindow::~wxPreviewScrolledWindow()
 //! @brief		一行に何文字はいるかを現在のクライアントサイズから計算する
 //! @return		一行に入る文字数
 //---------------------------------------------------------------------------
-tjs_int wxPreviewScrolledWindow::GetNCharsInLine() const
+risse_int wxPreviewScrolledWindow::GetNCharsInLine() const
 {
 	// 横に何文字入るかを計算
 	if(!FACE) return 1;
 
-	tjs_int cw = 0, ch = 0;
+	risse_int cw = 0, ch = 0;
 	GetClientSize(&cw, &ch);
 
-	tjs_int nw = cw / (FACE->GetHeight() * Magnify + GetMargin() * 2);
+	risse_int nw = cw / (FACE->GetHeight() * Magnify + GetMargin() * 2);
 	if(nw == 0) nw = 1;
 
 	return nw;
@@ -126,7 +126,7 @@ tjs_int wxPreviewScrolledWindow::GetNCharsInLine() const
 //---------------------------------------------------------------------------
 void wxPreviewScrolledWindow::PushTopLeftIndex()
 {
-	tjs_int nw = GetNCharsInLine();
+	risse_int nw = GetNCharsInLine();
 	size_t lineFirst = GetFirstVisibleLine();
 	LastTopLeftIndex = lineFirst * nw;
 }
@@ -141,10 +141,10 @@ void wxPreviewScrolledWindow::UpdateDisplayInfo()
 	// 横に何文字入るかを計算
 	if(FACE)
 	{
-		tjs_int nw = GetNCharsInLine();
+		risse_int nw = GetNCharsInLine();
 
 		// 縦に何行はいるかを計算
-		tjs_int nh = static_cast<tjs_int>((FACE->GetGlyphCount() - 1) / nw) + 1;
+		risse_int nh = static_cast<risse_int>((FACE->GetGlyphCount() - 1) / nw) + 1;
 
 		// スクロールバーを更新
 		SetLineCount(nh);
@@ -167,7 +167,7 @@ void wxPreviewScrolledWindow::UpdateDisplayInfo()
 //! @brief		倍率を設定する
 //! @param		maginify 倍率
 //---------------------------------------------------------------------------
-void wxPreviewScrolledWindow::SetMagnify(tjs_int magnify)
+void wxPreviewScrolledWindow::SetMagnify(risse_int magnify)
 {
 	PushTopLeftIndex();
 	Magnify = magnify;
@@ -193,10 +193,10 @@ wxCoord wxPreviewScrolledWindow::OnGetLineHeight(size_t n) const
 //! @brief		文字のセルの周りのマージンを得る
 //! @return		マージン(ピクセル単位)
 //---------------------------------------------------------------------------
-tjs_uint wxPreviewScrolledWindow::GetMargin() const
+risse_uint wxPreviewScrolledWindow::GetMargin() const
 {
 	if(!FACE) return TVP_PREVIEW_MARGIN_MIN; // FACE が NULL の場合は特に意味のない値を返す
-	tjs_size size = FACE->GetHeight();
+	risse_size size = FACE->GetHeight();
 	size *= (int)(TVP_PREVIEW_MARGIN_RATIO * 256);
 	size /= 256;
 	if(size < TVP_PREVIEW_MARGIN_MIN) size = TVP_PREVIEW_MARGIN_MIN;
@@ -212,13 +212,13 @@ tjs_uint wxPreviewScrolledWindow::GetMargin() const
 //! @param		x 表示したいx位置
 //! @param		y 表示したいy位置
 //---------------------------------------------------------------------------
-void wxPreviewScrolledWindow::PrintCharacter(tjs_char ch, int x, int y)
+void wxPreviewScrolledWindow::PrintCharacter(risse_char ch, int x, int y)
 {
 	// 文字のグリフイメージを取得する
 	// image の転送先を背景色でクリア
 	if(!FACE) return; // FACE が NULL の場合はここで帰る
 
-	tjs_uint margin = GetMargin();
+	risse_uint margin = GetMargin();
 	wxClientDC dc(this);
 	dc.SetBrush(*wxWHITE_BRUSH);
 	dc.SetPen(*wxTRANSPARENT_PEN);
@@ -243,13 +243,13 @@ void wxPreviewScrolledWindow::PrintCharacter(tjs_char ch, int x, int y)
 			static_cast<int>(srcbmp->GetBlackBoxW()),
 			static_cast<int>(srcbmp->GetBlackBoxH()), false);
 		unsigned char * destimagedata = destimage.GetData();
-		for(tjs_uint line = 0; line < srcbmp->GetBlackBoxH(); line++)
+		for(risse_uint line = 0; line < srcbmp->GetBlackBoxH(); line++)
 		{
-			const tjs_uint8 * srcimagedata = srcbmp->GetData() +
+			const risse_uint8 * srcimagedata = srcbmp->GetData() +
 										srcbmp->GetPitch() * line;
-			for(tjs_uint x = 0; x < srcbmp->GetBlackBoxW(); x++)
+			for(risse_uint x = 0; x < srcbmp->GetBlackBoxW(); x++)
 			{
-				tjs_uint8 v = 255 - *srcimagedata;
+				risse_uint8 v = 255 - *srcimagedata;
 				destimagedata[0] = destimagedata[1] = destimagedata[2] = v;
 				destimagedata += 3;
 				srcimagedata ++;
@@ -296,19 +296,19 @@ void wxPreviewScrolledWindow::OnIdle(wxIdleEvent& event)
 	int nw = GetNCharsInLine();
 	int glyph_count = FACE->GetGlyphCount();
 	tIndexToUpdate::iterator i = IndexToUpdate.end();
-	tjs_uint margin = GetMargin();
+	risse_uint margin = GetMargin();
 	int cell_size = (FACE->GetHeight() * Magnify + margin * 2);
 	size_t lineFirst = GetFirstVisibleLine(), lineLast = GetLastVisibleLine();
 
-	tjs_int index, cx, cy, vindex;
+	risse_int index, cx, cy, vindex;
 
 	while(!IndexToUpdate.empty())
 	{
 		// 表示可能な範囲内にあるインデックスを探す
 		i = IndexToUpdate.begin();
 		index = i->first;
-		if( static_cast<tjs_uint>(index) >= lineFirst * nw &&
-			static_cast<tjs_uint>(index) < (lineLast+1) * nw)
+		if( static_cast<risse_uint>(index) >= lineFirst * nw &&
+			static_cast<risse_uint>(index) < (lineLast+1) * nw)
 			break; // 表示できそう
 
 		// あきらかに表示可能な範囲内を超えている
@@ -325,7 +325,7 @@ void wxPreviewScrolledWindow::OnIdle(wxIdleEvent& event)
 		cy = vindex / nw;
 
 		// その位置に文字を表示
-		tjs_char ch = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
+		risse_char ch = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
 		PrintCharacter(ch, cx * cell_size , cy * cell_size );
 
 		// 表示した文字を IndexToUpdate から削除
@@ -362,7 +362,7 @@ void wxPreviewScrolledWindow::OnPaint(wxPaintEvent& event)
 
 	int glyph_count = FACE->GetGlyphCount();
 
-	tjs_uint margin = GetMargin();
+	risse_uint margin = GetMargin();
 	int cell_size = (FACE->GetHeight() * Magnify + margin * 2);
 
 	// 表示行を取得
@@ -374,25 +374,25 @@ void wxPreviewScrolledWindow::OnPaint(wxPaintEvent& event)
 	while (upd)
 	{
 		wxRect rect(upd.GetRect());
-		tjs_int cxs = rect.GetLeft() / cell_size;
-		tjs_int cxe = (rect.GetRight() - 1) / cell_size;
-		tjs_int cys = rect.GetTop() / cell_size;
-		tjs_int cye = (rect.GetBottom() - 1) / cell_size;
+		risse_int cxs = rect.GetLeft() / cell_size;
+		risse_int cxe = (rect.GetRight() - 1) / cell_size;
+		risse_int cys = rect.GetTop() / cell_size;
+		risse_int cye = (rect.GetBottom() - 1) / cell_size;
 
 		if(cxe >= nw) cxe = nw - 1;
 
-		for(tjs_int y = cys; y <= cye; y++)
+		for(risse_int y = cys; y <= cye; y++)
 		{
-			for(tjs_int x = cxs; x <= cxe; x++)
+			for(risse_int x = cxs; x <= cxe; x++)
 			{
 				// rect が包含する位置にある文字はダメージを受けたとみなし、
 				// IndexToUpdate に入れておく
-				tjs_int index = y * nw + x + lineFirst * nw;
-				IndexToUpdate.insert(std::pair<tjs_int, bool>(index, false));
+				risse_int index = y * nw + x + lineFirst * nw;
+				IndexToUpdate.insert(std::pair<risse_int, bool>(index, false));
 
 				// また、その位置には仮の文字を表示しておく
 				wchar_t wcharbuf[5]; // UTF-16 or UTF-32
-				tjs_int32 utf32buf[2];
+				risse_int32 utf32buf[2];
 				utf32buf[0] = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
 				utf32buf[1] = wxT('\0');
 				conv.MB2WC(wcharbuf, reinterpret_cast<const char *>(utf32buf), 4);
@@ -452,19 +452,19 @@ void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 		long y = event.GetY();
 		int nw = GetNCharsInLine();
 		int glyph_count = FACE->GetGlyphCount();
-		tjs_uint margin = GetMargin();
+		risse_uint margin = GetMargin();
 		int cell_size = (FACE->GetHeight() * Magnify + margin * 2);
 		size_t lineFirst = GetFirstVisibleLine();
 
 		x /= cell_size;
 		y /= cell_size;
-		tjs_int index = y * nw + x + lineFirst * nw;
+		risse_int index = y * nw + x + lineFirst * nw;
 		if(index != LastStatusedIndex)
 		{
-			tjs_char ch = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
+			risse_char ch = index < glyph_count ? FACE->GetCharcodeFromGlyphIndex(index) : wxT('\0');
 
 			wxString status = wxString::Format(
-				_("Index : %d   Charcode : U+%06X"), index, static_cast<tjs_int>(ch));
+				_("Index : %d   Charcode : U+%06X"), index, static_cast<risse_int>(ch));
 			wxStaticCast(wxWindow::GetParent(), wxPreviewFrame)->GetStatusBar()->
 				SetStatusText(status, 0);
 			LastStatusedIndex = index;

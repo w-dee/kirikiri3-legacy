@@ -26,7 +26,7 @@ public:
 	~tTVPBaseFreeTypeFontDriver();
 
 	static void EnumerateFonts(wxArrayString & dest,
-		tjs_uint32 flags,
+		risse_uint32 flags,
 		wxFontEncoding encoding = wxFONTENCODING_SYSTEM);
 };
 //---------------------------------------------------------------------------

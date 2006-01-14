@@ -14,18 +14,18 @@
 #define RIFFWAVEDECODERH
 
 #include "WaveDecoder.h"
-#include "tjs.h"
+#include "risse.h"
 
 //---------------------------------------------------------------------------
 //! @brief	 RIFF Wave デコーダ
 //---------------------------------------------------------------------------
 class tTVPRIFFWaveDecoder : public tTVPWaveDecoder
 {
-	tTJSBinaryStream * Stream; //!< 入力ストリーム
+	tRisseBinaryStream * Stream; //!< 入力ストリーム
 	tTVPWaveFormat Format; //!< サウンド形式
-	tjs_uint64 DataStart; //!< ファイル中でのデータの開始位置
-	tjs_uint64 CurrentPos; //!< ファイル中でのデータの読み込み位置
-	tjs_uint SampleSize; //!< 1サンプルのサイズ
+	risse_uint64 DataStart; //!< ファイル中でのデータの開始位置
+	risse_uint64 CurrentPos; //!< ファイル中でのデータの読み込み位置
+	risse_uint SampleSize; //!< 1サンプルのサイズ
 
 public:
 	tTVPRIFFWaveDecoder(const ttstr & filename);
@@ -33,12 +33,12 @@ public:
 	// tTVPWaveDecoder をオーバーライドするもの
 	virtual ~tTVPRIFFWaveDecoder();
 	virtual void GetFormat(tTVPWaveFormat & format);
-	virtual bool Render(void *buf, tjs_uint bufsamplelen, tjs_uint& rendered);
-	virtual bool SetPosition(tjs_uint64 samplepos);
+	virtual bool Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered);
+	virtual bool SetPosition(risse_uint64 samplepos);
 
 private:
 	void Open();
-	static bool FindRIFFChunk(tTJSStream * stream, const tjs_uint8 *chunk);
+	static bool FindRIFFChunk(tRisseStream * stream, const risse_uint8 *chunk);
 };
 //---------------------------------------------------------------------------
 

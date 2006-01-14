@@ -26,7 +26,7 @@
 	#include <vector>
 	#include <map>
 	#include <algorithm>
-	#include "tjsTypes.h"
-	#include "tjsString.h"
+	#include "risseTypes.h"
+	#include "risseString.h"
 
 #endif

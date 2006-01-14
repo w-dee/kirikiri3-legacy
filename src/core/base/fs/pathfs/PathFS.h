@@ -23,8 +23,8 @@
 //---------------------------------------------------------------------------
 class tTVPPathFS : public tTVPFileSystem
 {
-	tTJSCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
-	typedef tTJSHashTable<ttstr, ttstr> tHash; //!< ファイルシステム中のファイル名と実際のファイル名の対応表のtypedef
+	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	typedef tRisseHashTable<ttstr, ttstr> tHash; //!< ファイルシステム中のファイル名と実際のファイル名の対応表のtypedef
 	tHash Hash;//!< ファイルシステム中のファイル名と実際のファイル名の対応表
 	std::vector<ttstr> Paths; //!< パス(最初の文字が ' ' ならばディレクトリ単独、'+' ならばrecursive)
 	bool NeedRebuild; //!< パスのハッシュ表を作り直す必要がある場合に真になる
@@ -43,7 +43,7 @@ public:
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
 	void Stat(const ttstr & filename, tTVPStatStruc & struc);
-	tTJSBinaryStream * CreateStream(const ttstr & filename, tjs_uint32 flags);
+	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
 
 	//-- tTVPFileSystem メンバ ここまで
 public:

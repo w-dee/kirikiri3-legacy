@@ -22,15 +22,15 @@ class tTVPXP4StreamCache
 {
 	static const int MAX_ITEM = 8; //!< キャッシュするハンドル数
 
-	tTJSCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-	tjs_uint Age; //!< キャッシュ世代
+	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	risse_uint Age; //!< キャッシュ世代
 
 	//!@brief キャッシュアイテムの構造体
 	struct tItem
 	{
 		void * Pointer; //!< アーカイブインスタンスへのポインタ
-		tTJSBinaryStream * Stream; //!< 入力ストリームオブジェクト
-		tjs_uint Age; //!< キャッシュ世代
+		tRisseBinaryStream * Stream; //!< 入力ストリームオブジェクト
+		risse_uint Age; //!< キャッシュ世代
 	} Pool[MAX_ITEM];
 
 public:
@@ -45,8 +45,8 @@ public:
 			} //!< このシングルトンのインスタンスを返す
 
 public:
-	tTJSBinaryStream * GetStream(void * pointer, const ttstr & name);
-	void ReleaseStream(void * pointer, tTJSBinaryStream * stream);
+	tRisseBinaryStream * GetStream(void * pointer, const ttstr & name);
+	void ReleaseStream(void * pointer, tRisseBinaryStream * stream);
 	void ReleaseStreamByPointer(void * pointer);
 	void ReleaseAll();
 	void Clear() { ReleaseAll(); }

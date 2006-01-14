@@ -36,10 +36,10 @@ enum tTVPBFFFileTags
 #pragma pack(push, 1)
 struct tTVPBFFHeader
 {
-	tjs_uint8 Magic[4];			//!< マジック("BFF\0"固定)
-	tjs_uint8 Version[1]; 		//!< バージョン(現在は1)
-	tjs_uint8 Reserved0[3];		//!< 予備(すべて0で埋めること)
-	tjs_uint32 NumFiles;		//!< ディレクトリ中に存在するアイテム数
+	risse_uint8 Magic[4];			//!< マジック("BFF\0"固定)
+	risse_uint8 Version[1]; 		//!< バージョン(現在は1)
+	risse_uint8 Reserved0[3];		//!< 予備(すべて0で埋めること)
+	risse_uint32 NumFiles;		//!< ディレクトリ中に存在するアイテム数
 };
 #pragma pack(pop)
 //---------------------------------------------------------------------------
@@ -53,10 +53,10 @@ struct tTVPBFFHeader
 #pragma pack(push, 1)
 struct tTVPBFFDirectory
 {
-	tjs_uint32 Tag;				//!< タグ(4バイト) tTVPBFFFileTags のいずれか
-	tjs_uint32 Size;			//!< アイテムサイズ
-	tjs_uint32 Offset;			//!< アイテムオフセット (BFFファイル先頭から)
-	tjs_uint32 Reserved;		//!< 予備(0にすること)
+	risse_uint32 Tag;				//!< タグ(4バイト) tTVPBFFFileTags のいずれか
+	risse_uint32 Size;			//!< アイテムサイズ
+	risse_uint32 Offset;			//!< アイテムオフセット (BFFファイル先頭から)
+	risse_uint32 Reserved;		//!< 予備(0にすること)
 };
 #pragma pack(pop)
 //---------------------------------------------------------------------------
@@ -70,10 +70,10 @@ struct tTVPBFFDirectory
 #pragma pack(push, 1)
 struct tTVPBFFCharacterMap
 {
-	tjs_uint32 Unicode;			//!< Unicode 文字
-	tjs_int32  CellIncX;		//!< 一文字進めるの必要なX方向のピクセル数(64倍されている数値なので注意)
-	tjs_int32  CellIncY;		//!< 一文字進めるの必要なY方向のピクセル数(64倍されている数値なので注意)
-	tjs_uint32 Offset;			//!< ビットマップ中でのオフセット (0=ビットマップなしの場合)
+	risse_uint32 Unicode;			//!< Unicode 文字
+	risse_int32  CellIncX;		//!< 一文字進めるの必要なX方向のピクセル数(64倍されている数値なので注意)
+	risse_int32  CellIncY;		//!< 一文字進めるの必要なY方向のピクセル数(64倍されている数値なので注意)
+	risse_uint32 Offset;			//!< ビットマップ中でのオフセット (0=ビットマップなしの場合)
 };
 #pragma pack(pop)
 //---------------------------------------------------------------------------
@@ -87,10 +87,10 @@ struct tTVPBFFCharacterMap
 #pragma pack(push, 1)
 struct tTVPBFFKerningVector
 {
-	tjs_uint32 Unicode1;		//!< 前の文字
-	tjs_uint32 Unicode2;		//!< 次の文字
-	tjs_int32  AdjustX;			//!< 一文字進めるの必要なX方向のピクセル調整値(64倍されている数値なので注意)
-	tjs_int32  AdjustY;			//!< 一文字進めるの必要なY方向のピクセル調整値(64倍されている数値なので注意)
+	risse_uint32 Unicode1;		//!< 前の文字
+	risse_uint32 Unicode2;		//!< 次の文字
+	risse_int32  AdjustX;			//!< 一文字進めるの必要なX方向のピクセル調整値(64倍されている数値なので注意)
+	risse_int32  AdjustY;			//!< 一文字進めるの必要なY方向のピクセル調整値(64倍されている数値なので注意)
 };
 #pragma pack(pop)
 //---------------------------------------------------------------------------
@@ -108,11 +108,11 @@ struct tTVPBFFKerningVector
 #pragma pack(push, 1)
 struct tTVPBFFBitmapHeader
 {
-	tjs_uint16 Flags;			//!< 未定義: 常に 0 であること(将来的にはビットマップ形式とか圧縮形式とかを表すのに使う)
-	tjs_int16  OriginX;			//!< 描画点からブラックボックスの左端までの位置
-	tjs_int16  OriginY;			//!< 描画点からブラックボックスの上端までの位置
-	tjs_uint16 BlackBoxW;		//!< ブラックボックスの幅(ie. ビットマップのサイズ)
-	tjs_uint16 BlackBoxH;		//!< ブラックボックスの高さ(ie. ビットマップのサイズ)
+	risse_uint16 Flags;			//!< 未定義: 常に 0 であること(将来的にはビットマップ形式とか圧縮形式とかを表すのに使う)
+	risse_int16  OriginX;			//!< 描画点からブラックボックスの左端までの位置
+	risse_int16  OriginY;			//!< 描画点からブラックボックスの上端までの位置
+	risse_uint16 BlackBoxW;		//!< ブラックボックスの幅(ie. ビットマップのサイズ)
+	risse_uint16 BlackBoxH;		//!< ブラックボックスの高さ(ie. ビットマップのサイズ)
 };
 #pragma pack(pop)
 //---------------------------------------------------------------------------

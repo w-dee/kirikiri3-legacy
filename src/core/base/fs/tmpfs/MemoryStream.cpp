@@ -13,7 +13,7 @@
 #include "MemoryStream.h"
 #include "TVPException.h"
 
-TJS_DEFINE_SOURCE_ID(2003);
+RISSE_DEFINE_SOURCE_ID(2003);
 
 
 //---------------------------------------------------------------------------
@@ -44,7 +44,7 @@ tTVPMemoryStreamBlock::~tTVPMemoryStreamBlock()
 //---------------------------------------------------------------------------
 void tTVPMemoryStreamBlock::AddRef()
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	RefCount ++;
 }
@@ -56,10 +56,10 @@ void tTVPMemoryStreamBlock::AddRef()
 //---------------------------------------------------------------------------
 void tTVPMemoryStreamBlock::Release()
 {
-	tjs_uint decremented_count;
+	risse_uint decremented_count;
 
 	{
-		volatile tTJSCriticalSectionHolder holder(CS);
+		volatile tRisseCriticalSectionHolder holder(CS);
 
 		RefCount --;
 		decremented_count = RefCount;
@@ -77,9 +77,9 @@ void tTVPMemoryStreamBlock::Release()
 //!				サイズが拡張された部分の内容は不定となる。縮小される場合、
 //!				内容は最後が切りつめられる。
 //---------------------------------------------------------------------------
-void tTVPMemoryStreamBlock::ChangeSize(tjs_size size)
+void tTVPMemoryStreamBlock::ChangeSize(risse_size size)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	if(Size < size && size <= AllocSize)
 	{
@@ -92,7 +92,7 @@ void tTVPMemoryStreamBlock::ChangeSize(tjs_size size)
 	// ならない場合
 
 	// 確保するサイズを決定する
-	tjs_size onesize;
+	risse_size onesize;
 	if(AllocSize < 64*1024) onesize = 4*1024;
 	else if(AllocSize < 512*1024) onesize = 16*1024;
 	else if(AllocSize < 4096*1024) onesize = 256*1024;
@@ -103,7 +103,7 @@ void tTVPMemoryStreamBlock::ChangeSize(tjs_size size)
 	Block = realloc(Block, AllocSize);
 
 	if(AllocSize && !Block)
-		eTVPException::Throw(TJS_WS_TR("insufficient memory"));
+		eTVPException::Throw(RISSE_WS_TR("insufficient memory"));
 		// this exception cannot be repaird; a fatal error.
 
 	AllocSize = Size = size;
@@ -120,13 +120,13 @@ void tTVPMemoryStreamBlock::Fit()
 	// Size よりも大きくて AllocSize よりも小さな部分は無駄である。
 	// このメソッドは、メモリブロックのサイズを Size ぴったりにすることにより
 	// この無駄な部分を解放する。
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	if(Size != AllocSize)
 	{
 		Block = realloc(Block, Size);
 		if(Size && !Block)
-			eTVPException::Throw(TJS_WS_TR("insufficient memory"));
+			eTVPException::Throw(RISSE_WS_TR("insufficient memory"));
 		AllocSize = Size;
 	}
 }
@@ -141,13 +141,13 @@ void tTVPMemoryStreamBlock::Fit()
 //! @brief		コンストラクタ
 //! @param		flags アクセスフラグ
 //---------------------------------------------------------------------------
-tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flags)
+tTVPMemoryStream::tTVPMemoryStream(risse_uint32 flags)
 {
 	Flags = flags;
 	Block = new tTVPMemoryStreamBlock();
 
-	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
-	CurrentPos = flags & TJS_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
+	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
+	CurrentPos = flags & RISSE_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
 }
 //---------------------------------------------------------------------------
 
@@ -157,14 +157,14 @@ tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flags)
 //! @param		flags アクセスフラグ
 //! @param		block メモリブロック
 //---------------------------------------------------------------------------
-tTVPMemoryStream::tTVPMemoryStream(tjs_uint32 flags, tTVPMemoryStreamBlock * block)
+tTVPMemoryStream::tTVPMemoryStream(risse_uint32 flags, tTVPMemoryStreamBlock * block)
 {
 	Flags = flags;
 	Block = block;
 
-	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 	Block->AddRef();
-	CurrentPos = flags & TJS_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
+	CurrentPos = flags & RISSE_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
 }
 //---------------------------------------------------------------------------
 
@@ -183,35 +183,35 @@ tTVPMemoryStream::~tTVPMemoryStream()
 //---------------------------------------------------------------------------
 //! @brief		シーク
 //! @param		offset 移動オフセット
-//! @param		whence 移動オフセットの基準 (TJS_BS_SEEK_* 定数)
+//! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
 //! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
-tjs_uint64 tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
+risse_uint64 tTVPMemoryStream::Seek(risse_int64 offset, risse_int whence)
 {
-	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 
-	tjs_int64 newpos;
+	risse_int64 newpos;
 	switch(whence)
 	{
-	case TJS_BS_SEEK_SET:
+	case RISSE_BS_SEEK_SET:
 		if(offset >= 0)
 		{
 			if(offset <= Block->GetSize()) CurrentPos = offset;
 		}
 		return CurrentPos;
 
-	case TJS_BS_SEEK_CUR:
-		if((newpos = offset + static_cast<tjs_int64>(CurrentPos)) >= 0)
+	case RISSE_BS_SEEK_CUR:
+		if((newpos = offset + static_cast<risse_int64>(CurrentPos)) >= 0)
 		{
-			tjs_uint np = static_cast<tjs_uint>(newpos);
+			risse_uint np = static_cast<risse_uint>(newpos);
 			if(np <= Block->GetSize()) CurrentPos = np;
 		}
 		return CurrentPos;
 
-	case TJS_BS_SEEK_END:
-		if((newpos = offset + static_cast<tjs_int64>(Block->GetSize())) >= 0)
+	case RISSE_BS_SEEK_END:
+		if((newpos = offset + static_cast<risse_int64>(Block->GetSize())) >= 0)
 		{
-			tjs_uint np = static_cast<tjs_uint>(newpos);
+			risse_uint np = static_cast<risse_uint>(newpos);
 			if(np <= Block->GetSize()) CurrentPos = np;
 		}
 		return CurrentPos;
@@ -227,12 +227,12 @@ tjs_uint64 tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
 //! @param		read_size 読み込むバイト数
 //! @return		実際に読み込まれたバイト数
 //---------------------------------------------------------------------------
-tjs_size tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
+risse_size tTVPMemoryStream::Read(void *buffer, risse_size read_size)
 {
-	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 
-	if(!(Flags & TJS_BS_ACCESS_READ_BIT))
-		eTVPException::Throw(TJS_WS_TR("access denied (stream has no read-access)"));
+	if(!(Flags & RISSE_BS_ACCESS_READ_BIT))
+		eTVPException::Throw(RISSE_WS_TR("access denied (stream has no read-access)"));
 
 	if(CurrentPos > Block->GetSize()) return 0; // can not read from there
 
@@ -241,7 +241,7 @@ tjs_size tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
 		read_size = Block->GetSize() - CurrentPos;
 	}
 
-	memcpy(buffer, reinterpret_cast<tjs_uint8*>(Block->GetBlock()) + CurrentPos, read_size);
+	memcpy(buffer, reinterpret_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos, read_size);
 
 	CurrentPos += read_size;
 
@@ -256,25 +256,25 @@ tjs_size tTVPMemoryStream::Read(void *buffer, tjs_size read_size)
 //! @param		read_size 書き込みたいバイト数
 //! @return		実際に書き込まれたバイト数
 //---------------------------------------------------------------------------
-tjs_size tTVPMemoryStream::Write(const void *buffer, tjs_size write_size)
+risse_size tTVPMemoryStream::Write(const void *buffer, risse_size write_size)
 {
-	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 
-	if(!(Flags & TJS_BS_ACCESS_WRITE_BIT))
-		eTVPException::Throw(TJS_WS_TR("access denied (stream has no write-access)"));
+	if(!(Flags & RISSE_BS_ACCESS_WRITE_BIT))
+		eTVPException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
 
 	// adjust current file pointer
 	if(CurrentPos > Block->GetSize()) return 0; // can not write there
 
 	// writing may increase the internal buffer size.
-	tjs_uint newpos = CurrentPos + write_size;
+	risse_uint newpos = CurrentPos + write_size;
 	if(newpos >= Block->GetSize())
 	{
 		// exceeds Size
 		Block->ChangeSize(newpos);
 	}
 
-	memcpy(reinterpret_cast<tjs_uint8*>(Block->GetBlock()) + CurrentPos, buffer, write_size);
+	memcpy(reinterpret_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos, buffer, write_size);
 
 	CurrentPos = newpos;
 
@@ -288,10 +288,10 @@ tjs_size tTVPMemoryStream::Write(const void *buffer, tjs_size write_size)
 //---------------------------------------------------------------------------
 void tTVPMemoryStream::SetEndOfFile()
 {
-	volatile tTJSCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 
-	if(!(Flags & TJS_BS_ACCESS_WRITE_BIT))
-		eTVPException::Throw(TJS_WS_TR("access denied (stream has no write-access)"));
+	if(!(Flags & RISSE_BS_ACCESS_WRITE_BIT))
+		eTVPException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
 
 	Block->ChangeSize(CurrentPos);
 }

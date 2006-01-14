@@ -18,8 +18,8 @@
 //---------------------------------------------------------------------------
 struct tTVPUnicodeAndSJISPair
 {
-	tjs_uint16 Unicode;
-	tjs_uint16 SJIS;
+	risse_uint16 Unicode;
+	risse_uint16 SJIS;
 };
 //---------------------------------------------------------------------------
 
@@ -2545,26 +2545,26 @@ static const tTVPUnicodeAndSJISPair TVPUnicodeAndSJISPair[] = {
 //! @brief		UNICODEをShiftJIS(CP932)に変換する
 //! @param		in 変換したい文字
 //! @return	変換されたShiftJIS文字(0=変換失敗)
-//! @note		ShiftJIS 文字は 16bit 数値で返される(実際の戻り値の型はtjs_uint)
+//! @note		ShiftJIS 文字は 16bit 数値で返される(実際の戻り値の型はrisse_uint)
 //! @note		が、いわゆる半角文字の場合は上位8ビットは0、いわゆる全角文字は
 //! @note		ShiftJISコードがそのまま入る。
 //---------------------------------------------------------------------------
-tjs_uint TVPUnicodeToSJIS(tjs_char in)
+risse_uint TVPUnicodeToSJIS(risse_char in)
 {
 	// TVPUnicodeAndSJISPair に対して二分検索を行う
 	if(in >= 0x10000) return 0;
 		// 0x10000 以上のコードポイントに対してはSJIS文字変換は定義されていない
 
-	tjs_uint s = 0, e = TVPNumUnicodeAndSJISPair;
+	risse_uint s = 0, e = TVPNumUnicodeAndSJISPair;
 	while(e - s > 1)
 	{
-		tjs_int m = (s + e) / 2;
-		if(TVPUnicodeAndSJISPair[m].Unicode <= static_cast<tjs_uint16>(in))
+		risse_int m = (s + e) / 2;
+		if(TVPUnicodeAndSJISPair[m].Unicode <= static_cast<risse_uint16>(in))
 			s = m;
 		else
 			e = m;
 	}
-	if(TVPUnicodeAndSJISPair[s].Unicode == static_cast<tjs_uint16>(in))
+	if(TVPUnicodeAndSJISPair[s].Unicode == static_cast<risse_uint16>(in))
 		return TVPUnicodeAndSJISPair[s].SJIS; // 見つかった
 	return 0;
 }
@@ -2578,11 +2578,11 @@ tjs_uint TVPUnicodeToSJIS(tjs_char in)
 
 int main(void)
 {
-	for(tjs_uint i = 1; i < 65536; i++)
+	for(risse_uint i = 1; i < 65536; i++)
 	{
-		tjs_uint sjis = TVPUnicodeToSJIS(i);
+		risse_uint sjis = TVPUnicodeToSJIS(i);
 		if(sjis == 0) continue;
-		tjs_uint uni_out = TVPSJISToUnicode(sjis);
+		risse_uint uni_out = TVPSJISToUnicode(sjis);
 		if(uni_out != i)
 		{
 			printf("fail: uni input:%x, sjis:%x, uni output:%x\n",

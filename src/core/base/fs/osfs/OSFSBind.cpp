@@ -7,31 +7,31 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief OSFSのTJS3バインディング
+//! @brief OSFSのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "OSFS.h"
 #include "OSFSBind.h"
 #include "TVPException.h"
 
-TJS_DEFINE_SOURCE_ID(2012);
+RISSE_DEFINE_SOURCE_ID(2012);
 
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNI_OSFS::tTJSNI_OSFS()
+tRisseNI_OSFS::tRisseNI_OSFS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS コンストラクタ
+//! @brief		Risse コンストラクタ
 //---------------------------------------------------------------------------
-tjs_error tTJSNI_OSFS::Construct(tjs_int numparams,
-		tTJSVariant **param, iTJSDispatch2 *tjs_obj)
+risse_error tRisseNI_OSFS::Construct(risse_int numparams,
+		tRisseVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		OSFS.OSFS
@@ -41,21 +41,21 @@ tjs_error tTJSNI_OSFS::Construct(tjs_int numparams,
 								大文字小文字を区別するか
 	*/
 
-	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
+	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
 	ttstr basedir = *param[0];
-	bool checkcase = TJS_PARAM_EXIST(1) ? (tjs_int)*param[1] : true;
+	bool checkcase = RISSE_PARAM_EXIST(1) ? (risse_int)*param[1] : true;
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(tjs_obj, new tTVPOSFS(basedir, checkcase));
+	RegisterFileSystemNativeInstance(risse_obj, new tTVPOSFS(basedir, checkcase));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS 無効化関数
+//! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
-void tTJSNI_OSFS::Invalidate()
+void tRisseNI_OSFS::Invalidate()
 {
 }
 //---------------------------------------------------------------------------
@@ -68,29 +68,29 @@ void tTJSNI_OSFS::Invalidate()
 //---------------------------------------------------------------------------
 //! @brief		OSFS クラスID
 //---------------------------------------------------------------------------
-tjs_uint32 tTJSNC_OSFS::ClassID = (tjs_uint32)-1;
+risse_uint32 tRisseNC_OSFS::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTJSNC_OSFS::tTJSNC_OSFS() :
-	tTJSNativeClass(TJS_WS("OSFS"))
+tRisseNC_OSFS::tRisseNC_OSFS() :
+	tRisseNativeClass(RISSE_WS("OSFS"))
 {
 	// class constructor
 
-	TJS_BEGIN_NATIVE_MEMBERS(/*TJS class name*/OSFS)
-	TJS_DECL_EMPTY_FINALIZE_METHOD
+	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/OSFS)
+	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tTJSNI_OSFS,
-	/*TJS class name*/ OSFS)
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_OSFS,
+	/*Risse class name*/ OSFS)
 {
-	return TJS_S_OK;
+	return RISSE_S_OK;
 }
-TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/OSFS)
+RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/OSFS)
 //----------------------------------------------------------------------
-	TJS_END_NATIVE_MEMBERS
+	RISSE_END_NATIVE_MEMBERS
 }
 //---------------------------------------------------------------------------
 
@@ -99,9 +99,9 @@ TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/OSFS)
 //! @brief		ネイティブインスタンスを作成して返す
 //! @return		ネイティブインスタンス
 //---------------------------------------------------------------------------
-tTJSNativeInstance *tTJSNC_OSFS::CreateNativeInstance()
+tRisseNativeInstance *tRisseNC_OSFS::CreateNativeInstance()
 {
-	return new tTJSNI_OSFS();
+	return new tRisseNI_OSFS();
 }
 //---------------------------------------------------------------------------
 
@@ -117,11 +117,11 @@ tTJSNativeInstance *tTJSNC_OSFS::CreateNativeInstance()
 tTVPOSFSRegisterer::tTVPOSFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
-	iTJSDispatch2 * cls = new tTJSNC_OSFS();
+	iRisseDispatch2 * cls = new tRisseNC_OSFS();
 	try
 	{
 		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
-							TJS_WS("OSFS"), cls);
+							RISSE_WS("OSFS"), cls);
 	}
 	catch(...)
 	{

@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <map>
 
-TJS_DEFINE_SOURCE_ID(2007);
+RISSE_DEFINE_SOURCE_ID(2007);
 
 
 
@@ -52,9 +52,9 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 			const ttstr & b, const ttstr & e, const ttstr & p) :
 
 			archive_names(n),
-			name_noext(b + TJS_WS(".")),
+			name_noext(b + RISSE_WS(".")),
 			exclude(e),
-			path(p + TJS_WS("/"))
+			path(p + RISSE_WS("/"))
 
 			{;}
 
@@ -87,7 +87,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 	class tMapper : public tTVPXP4Archive::iMapCallback
 	{
 		std::map<ttstr, tFileItemBasicInfo> & Map;
-		tjs_size CurrentArchiveIndex;
+		risse_size CurrentArchiveIndex;
 	public:
 		tMapper(std::map<ttstr, tFileItemBasicInfo> & map) :
 			Map(map), CurrentArchiveIndex(0)
@@ -95,7 +95,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 
 		void operator () (
 			const ttstr & name,
-			tjs_size file_index)
+			risse_size file_index)
 		{
 			// 追加/置き換えの場合
 			std::map<ttstr, tFileItemBasicInfo>::iterator i;
@@ -116,7 +116,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 			i = Map.find(name);
 			if(i != Map.end()) Map.erase(i);
 		}
-		void SetArchiveIndex(tjs_size n) { CurrentArchiveIndex = n; }
+		void SetArchiveIndex(risse_size n) { CurrentArchiveIndex = n; }
 	} mapper(map);
 
 	// アーカイブそれぞれを順に読み込む
@@ -162,18 +162,18 @@ tTVPXP4FS::~tTVPXP4FS()
 size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 	tTVPFileSystemIterationCallback * callback)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// dir_name の最後に '/' がついていなければ追加
 	ttstr dir_name(dirname);
-	if(!dir_name.EndsWith(TJS_WC('/'))) dir_name += TJS_WC('/');
+	if(!dir_name.EndsWith(RISSE_WC('/'))) dir_name += RISSE_WC('/');
 
 	// dir_name を名前の先頭に持つ最初のインデックスを取得
-	tjs_size idx = GetFileItemStartIndex(dir_name);
-	if(idx == static_cast<tjs_size>(-1))
+	risse_size idx = GetFileItemStartIndex(dir_name);
+	if(idx == static_cast<risse_size>(-1))
 	{
 		// なかった、つまりディレクトリが存在しない
-		eTVPException::Throw(TJS_WS_TR("can not open directory"));
+		eTVPException::Throw(RISSE_WS_TR("can not open directory"));
 	}
 
 	// idx から検索を開始する
@@ -184,8 +184,8 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 		if(!FileItems[idx].Name.StartsWith(dir_name)) break; // 終わり
 
 		ttstr name(FileItems[idx].Name.c_str() + dir_name.GetLen());
-		const tjs_char * slashp;
-		if(!(slashp = TJS_strchr(name.c_str(), TJS_WC('/'))))
+		const risse_char * slashp;
+		if(!(slashp = Risse_strchr(name.c_str(), RISSE_WC('/'))))
 		{
 			// 名前の部分に / を含んでいない; つまりファイル名
 			count ++;
@@ -199,7 +199,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 			lastdir = ttstr(name.c_str() + (slashp - name.c_str())); // ディレクトリ名
 			count ++;
 			if(callback) if(!callback->OnDirectory(lastdir)) return count;
-			lastdir += TJS_WC('/');
+			lastdir += RISSE_WC('/');
 		}
 	}
 	return count;
@@ -214,11 +214,11 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tTVPXP4FS::FileExists(const ttstr & filename)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
-	if(filename.EndsWith(TJS_WC('/'))) return false; // ディレクトリは違う
+	if(filename.EndsWith(RISSE_WC('/'))) return false; // ディレクトリは違う
 
-	return GetFileItemIndex(filename) != static_cast<tjs_size>(-1);
+	return GetFileItemIndex(filename) != static_cast<risse_size>(-1);
 }
 //---------------------------------------------------------------------------
 
@@ -230,13 +230,13 @@ bool tTVPXP4FS::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 bool tTVPXP4FS::DirectoryExists(const ttstr & dirname)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// dir_name の最後に '/' がついていなければ追加
 	ttstr dir_name(dirname);
-	if(!dir_name.EndsWith(TJS_WC('/'))) dir_name += TJS_WC('/');
+	if(!dir_name.EndsWith(RISSE_WC('/'))) dir_name += RISSE_WC('/');
 
-	return GetFileItemStartIndex(dir_name) != static_cast<tjs_size>(-1);
+	return GetFileItemStartIndex(dir_name) != static_cast<risse_size>(-1);
 }
 //---------------------------------------------------------------------------
 
@@ -247,7 +247,7 @@ bool tTVPXP4FS::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tTVPXP4FS::RemoveFile(const ttstr & filename)
 {
-	eTVPException::Throw(TJS_WS_TR("can not delete file (filesystem is read-only)"));
+	eTVPException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -259,7 +259,7 @@ void tTVPXP4FS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tTVPXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	eTVPException::Throw(TJS_WS_TR("can not delete directory (filesystem is read-only)"));
+	eTVPException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -271,7 +271,7 @@ void tTVPXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	eTVPException::Throw(TJS_WS_TR("can not make directory (filesystem is read-only)"));
+	eTVPException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -283,10 +283,10 @@ void tTVPXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tTVPXP4FS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tjs_size idx = GetFileItemIndex(filename);
-	if(idx == static_cast<tjs_size>(-1))
+	risse_size idx = GetFileItemIndex(filename);
+	if(idx == static_cast<risse_size>(-1))
 		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	Archives[FileItems[idx].ArchiveIndex]->Stat(FileItems[idx].FileIndex, struc);
@@ -300,17 +300,17 @@ void tTVPXP4FS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tTJSBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 flags)
+tRisseBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
-	volatile tTJSCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tjs_size idx = GetFileItemIndex(filename);
-	if(idx == static_cast<tjs_size>(-1))
+	risse_size idx = GetFileItemIndex(filename);
+	if(idx == static_cast<risse_size>(-1))
 		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	// 書き込みを伴う動作はできない
-	if(flags & TJS_BS_ACCESS_WRITE_BIT)
-		eTVPException::Throw(TJS_WS_TR("access denied (filesystem is read-only)"));
+	if(flags & RISSE_BS_ACCESS_WRITE_BIT)
+		eTVPException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
 
 	return Archives[FileItems[idx].ArchiveIndex]->
 		CreateStream(Archives[FileItems[idx].ArchiveIndex],
@@ -324,19 +324,19 @@ tTJSBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, tjs_uint32 fl
 //---------------------------------------------------------------------------
 //! @brief		name ファイル名で始まる最初の FileItems内のインデックスを得る
 //! @param		name 名前
-//! @return		FileItems内のインデックス (見つからなかった場合は (tjs_size)-1 が返る)
+//! @return		FileItems内のインデックス (見つからなかった場合は (risse_size)-1 が返る)
 //---------------------------------------------------------------------------
-tjs_size tTVPXP4FS::GetFileItemStartIndex(const ttstr & name)
+risse_size tTVPXP4FS::GetFileItemStartIndex(const ttstr & name)
 {
 	// returns first index which have 'name' at start of the name.
 	// returns -1 if the target is not found.
 	// the item must be sorted by ttstr::operator < , otherwise this function
 	// will not work propertly.
-	tjs_size total_count = FileItems.size();
-	tjs_size s = 0, e = total_count;
+	risse_size total_count = FileItems.size();
+	risse_size s = 0, e = total_count;
 	while(e - s > 1)
 	{
-		tjs_int m = (e + s) / 2;
+		risse_int m = (e + s) / 2;
 		if(!(FileItems[m].Name < name))
 		{
 			// m is after or at the target
@@ -351,12 +351,12 @@ tjs_size tTVPXP4FS::GetFileItemStartIndex(const ttstr & name)
 
 	// at this point, s or s+1 should point the target.
 	// be certain.
-	if(s >= (tjs_int)total_count) return static_cast<tjs_size>(-1); // out of the index
+	if(s >= (risse_int)total_count) return static_cast<risse_size>(-1); // out of the index
 	if(FileItems[s].Name.StartsWith(name)) return s;
 	s++;
-	if(s >= (tjs_int)total_count) return static_cast<tjs_size>(-1); // out of the index
+	if(s >= (risse_int)total_count) return static_cast<risse_size>(-1); // out of the index
 	if(FileItems[s].Name.StartsWith(name)) return s;
-	return static_cast<tjs_size>(-1);
+	return static_cast<risse_size>(-1);
 }
 //---------------------------------------------------------------------------
 
@@ -364,16 +364,16 @@ tjs_size tTVPXP4FS::GetFileItemStartIndex(const ttstr & name)
 //---------------------------------------------------------------------------
 //! @brief		name に対応する FileItems内のインデックスを得る
 //! @param		name 名前
-//! @return		FileItems内のインデックス (見つからなかった場合は (tjs_size)-1 が返る)
+//! @return		FileItems内のインデックス (見つからなかった場合は (risse_size)-1 が返る)
 //! @note		GetFileItemStartIndex と違い、その名前とぴったり一致しない限りは見つからないとみなす
 //---------------------------------------------------------------------------
-tjs_size tTVPXP4FS::GetFileItemIndex(const ttstr & name)
+risse_size tTVPXP4FS::GetFileItemIndex(const ttstr & name)
 {
-	tjs_size total_count = FileItems.size();
-	tjs_size s = 0, e = total_count;
+	risse_size total_count = FileItems.size();
+	risse_size s = 0, e = total_count;
 	while(e - s > 1)
 	{
-		tjs_int m = (e + s) / 2;
+		risse_int m = (e + s) / 2;
 		if(!(FileItems[m].Name < name))
 		{
 			// m is after or at the target
@@ -388,12 +388,12 @@ tjs_size tTVPXP4FS::GetFileItemIndex(const ttstr & name)
 
 	// at this point, s or s+1 should point the target.
 	// be certain.
-	if(s >= (tjs_int)total_count) return static_cast<tjs_size>(-1); // out of the index
+	if(s >= (risse_int)total_count) return static_cast<risse_size>(-1); // out of the index
 	if(FileItems[s].Name == name) return s;
 	s++;
-	if(s >= (tjs_int)total_count) return static_cast<tjs_size>(-1); // out of the index
+	if(s >= (risse_int)total_count) return static_cast<risse_size>(-1); // out of the index
 	if(FileItems[s].Name == name) return s;
-	return static_cast<tjs_size>(-1);
+	return static_cast<risse_size>(-1);
 }
 //---------------------------------------------------------------------------
 

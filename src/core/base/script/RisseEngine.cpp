@@ -7,20 +7,20 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief TJS3スクリプトエンジンの開始・終了・スクリプト実行などのインターフェース
+//! @brief Risseスクリプトエンジンの開始・終了・スクリプト実行などのインターフェース
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "TJSEngine.h"
-#include "tjsError.h"
-TJS_DEFINE_SOURCE_ID(2200);
+#include "RisseEngine.h"
+#include "risseError.h"
+RISSE_DEFINE_SOURCE_ID(2200);
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPTJS3ScriptEngine::tTVPTJS3ScriptEngine()
+tTVPRisseScriptEngine::tTVPRisseScriptEngine()
 {
-	Engine = new tTJS();
+	Engine = new tRisse();
 }
 //---------------------------------------------------------------------------
 
@@ -28,13 +28,13 @@ tTVPTJS3ScriptEngine::tTVPTJS3ScriptEngine()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPTJS3ScriptEngine::~tTVPTJS3ScriptEngine()
+tTVPRisseScriptEngine::~tTVPRisseScriptEngine()
 {
 	if(Engine)
 	{
 /*
 #ifdef __WXDEBUG__
-		wxFprintf(stderr, wxT("warning: tTVPTJS3ScriptEngine::instance().Shutdown() should be called before main() ends.\n"));
+		wxFprintf(stderr, wxT("warning: tTVPRisseScriptEngine::instance().Shutdown() should be called before main() ends.\n"));
 #endif
 */
 		Shutdown();
@@ -46,7 +46,7 @@ tTVPTJS3ScriptEngine::~tTVPTJS3ScriptEngine()
 //---------------------------------------------------------------------------
 //! @brief		シャットダウン
 //---------------------------------------------------------------------------
-void tTVPTJS3ScriptEngine::Shutdown()
+void tTVPRisseScriptEngine::Shutdown()
 {
 	if(Engine)
 	{
@@ -63,15 +63,15 @@ void tTVPTJS3ScriptEngine::Shutdown()
 //! @param		name    オブジェクトにつけたい名前
 //! @param		object  その名前で登録したいオブジェクト
 //---------------------------------------------------------------------------
-void tTVPTJS3ScriptEngine::RegisterGlobalObject(const tjs_char *name,
-	iTJSDispatch2 * object)
+void tTVPRisseScriptEngine::RegisterGlobalObject(const risse_char *name,
+	iRisseDispatch2 * object)
 {
 	if(!Engine) return;
-	tTJSVariant val(object, NULL);
-	iTJSDispatch2 * global = Engine->GetGlobalNoAddRef();
-	tjs_error er;
-	er = global->PropSet(TJS_MEMBERENSURE, name, NULL, &val, global);
-	if(TJS_FAILED(er))
-		TJSThrowFrom_tjs_error(er, name);
+	tRisseVariant val(object, NULL);
+	iRisseDispatch2 * global = Engine->GetGlobalNoAddRef();
+	risse_error er;
+	er = global->PropSet(RISSE_MEMBERENSURE, name, NULL, &val, global);
+	if(RISSE_FAILED(er))
+		RisseThrowFrom_risse_error(er, name);
 }
 //---------------------------------------------------------------------------

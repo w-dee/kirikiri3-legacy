@@ -7,39 +7,39 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief TJS3スクリプトエンジンの開始・終了・スクリプト実行などのインターフェース
+//! @brief Risseスクリプトエンジンの開始・終了・スクリプト実行などのインターフェース
 //---------------------------------------------------------------------------
-#ifndef TJSENGINEH
-#define TJSENGINEH
+#ifndef RisseENGINEH
+#define RisseENGINEH
 
-#include "tjs.h"
+#include "risse.h"
 #include "Singleton.h"
 
 
 //---------------------------------------------------------------------------
-//! @brief		TJS3スクリプトエンジンへのインターフェース
+//! @brief		Risseスクリプトエンジンへのインターフェース
 //---------------------------------------------------------------------------
-class tTVPTJS3ScriptEngine
+class tTVPRisseScriptEngine
 {
-	tTJS *Engine;
+	tRisse *Engine;
 
 public:
-	tTVPTJS3ScriptEngine();
-	~tTVPTJS3ScriptEngine();
+	tTVPRisseScriptEngine();
+	~tTVPRisseScriptEngine();
 
 private:
-	tTVPSingletonObjectLifeTracer<tTVPTJS3ScriptEngine> singleton_object_life_tracer;
+	tTVPSingletonObjectLifeTracer<tTVPRisseScriptEngine> singleton_object_life_tracer;
 public:
-	static boost::shared_ptr<tTVPTJS3ScriptEngine> & instance() { return
-		tTVPSingleton<tTVPTJS3ScriptEngine>::instance();
+	static boost::shared_ptr<tTVPRisseScriptEngine> & instance() { return
+		tTVPSingleton<tTVPRisseScriptEngine>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 	void Shutdown();
 
-	tTJS * GetEngineNoAddRef() { return Engine; } //!< スクリプトエンジンを返す
-	iTJSDispatch2 * GetGlobalNoAddRef()
+	tRisse * GetEngineNoAddRef() { return Engine; } //!< スクリプトエンジンを返す
+	iRisseDispatch2 * GetGlobalNoAddRef()
 		{ if(!Engine) return NULL; return Engine->GetGlobalNoAddRef(); } //!< スクリプトエンジンを返す
-	void RegisterGlobalObject(const tjs_char *name, iTJSDispatch2 * object);
+	void RegisterGlobalObject(const risse_char *name, iRisseDispatch2 * object);
 
 };
 //---------------------------------------------------------------------------

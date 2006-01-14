@@ -677,17 +677,17 @@ tRisseVariantString * RisseAppendVariantString(tRisseVariantString *str,
 
 
 //---------------------------------------------------------------------------
-class tTVPVariantStringHolder
+class tRisaVariantStringHolder
 {
 	// this class keeps one Variant String from program start to program end,
 	// to ensure heap system are alive during program's lifetime.
 	tRisseVariantString * String;
 public:
-	tTVPVariantStringHolder()
+	tRisaVariantStringHolder()
 	{ String = RisseAllocVariantString(RISSE_WS("This is a dummy.")); }
-	~tTVPVariantStringHolder()
+	~tRisaVariantStringHolder()
 	{ String->Release(); }
-} static TVPVariantStringHolder;
+} static RisaVariantStringHolder;
 //---------------------------------------------------------------------------
 
 

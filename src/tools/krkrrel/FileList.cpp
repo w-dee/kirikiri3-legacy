@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -35,7 +36,7 @@
 // たとえば、c のリストをクリアしたい場合は a:. を指定する
 // たとえば、e のリストをクリアしたい場合は i:. を指定する
 
-static wxChar const  * const TVPXP4DefaultClassList[] = {
+static wxChar const  * const RisaXP4DefaultClassList[] = {
 	//-- 圧縮を行うファイルのリスト
 	wxT("C:\\.wav$"),
 	wxT("C:\\.dll$"),
@@ -87,10 +88,10 @@ static wxChar const  * const TVPXP4DefaultClassList[] = {
 //! @brief		デフォルトの分類リストを配列にして返す
 //! @param		dest 格納先配列(内容はクリアされる)
 //---------------------------------------------------------------------------
-void TVPXP4GetDefaultClassList(wxArrayString & dest)
+void RisaXP4GetDefaultClassList(wxArrayString & dest)
 {
 	dest.clear();
-	wxChar const * const * p = TVPXP4DefaultClassList;
+	wxChar const * const * p = RisaXP4DefaultClassList;
 	while(*p)
 	{
 		dest.Add(*p);
@@ -110,9 +111,9 @@ void TVPXP4GetDefaultClassList(wxArrayString & dest)
 //! @param		basedir ベースディレクトリ
 //! @param		dest 格納先配列
 //---------------------------------------------------------------------------
-static void TVPInternalGetFileListAt(iTVPProgressCallback * callback,
+static void RisaInternalGetFileListAt(iRisaProgressCallback * callback,
 	const wxString & dir, const wxString & basedir,
-	std::vector<tTVPXP4WriterInputFile> & dest)
+	std::vector<tRisaXP4WriterInputFile> & dest)
 {
 	wxArrayString tmp;
 
@@ -165,8 +166,8 @@ static void TVPInternalGetFileListAt(iTVPProgressCallback * callback,
 		callback->OnProgress(i * 100 / files.GetCount());
 		wxString item_name = files[i].c_str() + basedir.Length();
 		wxFileName itemfile(files[i]);
-		dest.push_back(tTVPXP4WriterInputFile(
-			TVPNormalizeXP4ArchiveStorageName(item_name),
+		dest.push_back(tRisaXP4WriterInputFile(
+			RisaNormalizeXP4ArchiveStorageName(item_name),
 			0,
 			itemfile.GetModificationTime(),
 			item_name,
@@ -183,8 +184,8 @@ static void TVPInternalGetFileListAt(iTVPProgressCallback * callback,
 //! @param		dir 対象ディレクトリ
 //! @param		dest 格納先配列(内容はクリアされる)
 //---------------------------------------------------------------------------
-void TVPGetFileListAt(iTVPProgressCallback * callback,
-	const wxString & dir, std::vector<tTVPXP4WriterInputFile> & dest)
+void RisaGetFileListAt(iRisaProgressCallback * callback,
+	const wxString & dir, std::vector<tRisaXP4WriterInputFile> & dest)
 {
 	// 格納先 vector のクリア
 	dest.clear();
@@ -198,7 +199,7 @@ void TVPGetFileListAt(iTVPProgressCallback * callback,
 	// 対象ディレクトリを再帰的に探る
 	// callback は全てのディレクトリに一様にファイルが入っているわけではないので
 	// ほとんど意味をなさない(正確な進捗報告をするのは無理)
-	TVPInternalGetFileListAt(callback, target_dir, target_dir, dest);
+	RisaInternalGetFileListAt(callback, target_dir, target_dir, dest);
 }
 //---------------------------------------------------------------------------
 
@@ -209,9 +210,9 @@ void TVPGetFileListAt(iTVPProgressCallback * callback,
 //! @param		pattern パターン
 //! @param		dest 格納先配列
 //---------------------------------------------------------------------------
-void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
+void RisaXP4ClassifyFiles(iRisaProgressCallback * callback,
 	const wxArrayString & pattern,
-	std::vector<tTVPXP4WriterInputFile> &  dest
+	std::vector<tRisaXP4WriterInputFile> &  dest
 	)
 {
 	// 正規表現パターンをコンパイルする
@@ -231,15 +232,15 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 		patterns = new tPattern[pattern.GetCount()];
 
 #ifdef wxHAS_REGEX_ADVANCED
-	#define TVP_XP4_RULE_RE wxRE_ADVANCED
+	#define RISA__XP4_RULE_RE wxRE_ADVANCED
 #else
-	#define TVP_XP4_RULE_RE wxRE_DEFAULT
+	#define RISA__XP4_RULE_RE wxRE_DEFAULT
 #endif
 
 		for(size_t i = 0; i < pattern.GetCount(); i++)
 		{
 			const wxString & pat = pattern[i];
-			int flags = TVP_XP4_RULE_RE;
+			int flags = RISA__XP4_RULE_RE;
 			if     (pat.StartsWith(wxT("e:"))) // exlucde, case sens
 				patterns[pattern_count].type = tPattern::exclude;
 			else if(pat.StartsWith(wxT("E:"))) // exlucde, case ignore
@@ -265,7 +266,7 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 		}
 
 		// リストを元に分類を行う
-		for(std::vector<tTVPXP4WriterInputFile>::iterator i = dest.begin();
+		for(std::vector<tRisaXP4WriterInputFile>::iterator i = dest.begin();
 			i != dest.end(); )
 		{
 			// 進捗を報告
@@ -281,23 +282,23 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 					switch(patterns[j].type)
 					{
 					case tPattern::exclude:
-						flags |=   TVP_XP4_FILE_EXCLUDED;
+						flags |=   RISA__XP4_FILE_EXCLUDED;
 						break;
 					case tPattern::include:
-						flags &= ~ TVP_XP4_FILE_EXCLUDED;
+						flags &= ~ RISA__XP4_FILE_EXCLUDED;
 						break;
 					case tPattern::compress:
-						flags |=   TVP_XP4_FILE_COMPRESSED;
+						flags |=   RISA__XP4_FILE_COMPRESSED;
 						break;
 					case tPattern::asis:
-						flags &= ~ TVP_XP4_FILE_COMPRESSED;
+						flags &= ~ RISA__XP4_FILE_COMPRESSED;
 						break;
 					}
 				}
 			}
 
 			// 情報を格納
-			if(flags & TVP_XP4_FILE_EXCLUDED)
+			if(flags & RISA__XP4_FILE_EXCLUDED)
 			{
 				// 削除の場合
 				i = dest.erase(i);
@@ -306,7 +307,7 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 			{
 				i->SetFlags(
 					(i->GetFlags() & 
-						~(TVP_XP4_FILE_EXCLUDED|TVP_XP4_FILE_COMPRESSED)
+						~(RISA__XP4_FILE_EXCLUDED|RISA__XP4_FILE_COMPRESSED)
 					) | flags); // フラグを設定
 				i++;
 			}
@@ -328,7 +329,7 @@ void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
 //! @param		name 正規化したいストレージ名
 //! @return		正規化したストレージ名
 //---------------------------------------------------------------------------
-wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name)
+wxString RisaNormalizeXP4ArchiveStorageName(const wxString & name)
 {
 	// TODO: UNICODE 正規化
 
@@ -351,25 +352,25 @@ wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name)
 
 
 //---------------------------------------------------------------------------
-//! @brief		tTVPXP4MetadataReaderArchive から得た input 内の項目を map に追加する
+//! @brief		tRisaXP4MetadataReaderArchive から得た input 内の項目を map に追加する
 //! @param		callback 進捗コールバックオブジェクト
 //! @param		map 追加先map
 //! @param		input 入力配列
 //! @note		すでに追加先に存在していた場合は追加先を書き換える。
 //!				削除すべき場合は削除する。
 //---------------------------------------------------------------------------
-void TVPApplyXP4StorageNameMap(
-	iTVPProgressCallback * callback,
-	std::map<wxString, tTVPXP4MetadataReaderStorageItem> &map,
-	const std::vector<tTVPXP4MetadataReaderStorageItem> &input)
+void RisaApplyXP4StorageNameMap(
+	iRisaProgressCallback * callback,
+	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &map,
+	const std::vector<tRisaXP4MetadataReaderStorageItem> &input)
 {
-	for(std::vector<tTVPXP4MetadataReaderStorageItem>::const_iterator i =
+	for(std::vector<tRisaXP4MetadataReaderStorageItem>::const_iterator i =
 		input.begin(); i != input.end(); i++)
 	{
 		if(callback) callback->OnProgress((i - input.begin()) * 100 / input.size());
-		std::map<wxString, tTVPXP4MetadataReaderStorageItem>::iterator mi;
+		std::map<wxString, tRisaXP4MetadataReaderStorageItem>::iterator mi;
 		mi = map.find(i->GetInArchiveName());
-		if((i->GetFlags() & TVP_XP4_FILE_STATE_MASK) == TVP_XP4_FILE_STATE_DELETED)
+		if((i->GetFlags() & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED)
 		{
 			// 削除フラグがたっている
 			if(mi != map.end()) map.erase(mi); // アイテムを削除する
@@ -380,11 +381,11 @@ void TVPApplyXP4StorageNameMap(
 			if(mi != map.end()) map.erase(mi); // 旧データは削除する
 
 			// 追加する
-			tTVPXP4MetadataReaderStorageItem item(*i);
-			item.SetFlags((item.GetFlags() & ~ TVP_XP4_FILE_STATE_MASK) |
-									TVP_XP4_FILE_STATE_NONE);
+			tRisaXP4MetadataReaderStorageItem item(*i);
+			item.SetFlags((item.GetFlags() & ~ RISA__XP4_FILE_STATE_MASK) |
+									RISA__XP4_FILE_STATE_NONE);
 											// 状態をクリア
-			map.insert(std::pair<wxString, tTVPXP4MetadataReaderStorageItem>
+			map.insert(std::pair<wxString, tRisaXP4MetadataReaderStorageItem>
 				(i->GetInArchiveName(), item));
 		}
 	}
@@ -399,7 +400,7 @@ void TVPApplyXP4StorageNameMap(
 //! @note		この関数を呼ぶ時点では archivename に対応するファイルは存在している
 //!				ことが確認できていなければならない
 //---------------------------------------------------------------------------
-void TVPEnumerateArchiveFiles(const wxString & archivename,
+void RisaEnumerateArchiveFiles(const wxString & archivename,
 	std::vector<wxString> & archives)
 {
 	// archives の内容をクリア
@@ -447,11 +448,11 @@ void TVPEnumerateArchiveFiles(const wxString & archivename,
 //! @brief		指定されたアーカイブファイル名をベースとするすべてのアーカイブファイルを削除する
 //! @param		archivename アーカイブファイル名
 //---------------------------------------------------------------------------
-void TVPDeleteArchiveSet(const wxString & archivename)
+void RisaDeleteArchiveSet(const wxString & archivename)
 {
 	// アーカイブファイルを列挙
 	std::vector<wxString> archives;
-	TVPEnumerateArchiveFiles(archivename, archives);
+	RisaEnumerateArchiveFiles(archivename, archives);
 
 	// アーカイブファイルを削除
 	for(std::vector<wxString>::iterator i = archives.begin();
@@ -474,10 +475,10 @@ void TVPDeleteArchiveSet(const wxString & archivename)
 //! @param		dest 格納先マップ(内容はクリアされる)
 //! @param		targetdir このアーカイブセットが元にした対象ディレクトリを格納するポインタ(null可)
 //---------------------------------------------------------------------------
-void TVPReadXP4Metadata(
-	iTVPProgressCallback * callback,
+void RisaReadXP4Metadata(
+	iRisaProgressCallback * callback,
 	const wxString & archivename,
-	std::map<wxString, tTVPXP4MetadataReaderStorageItem> &dest,
+	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &dest,
 	wxString * targetdir)
 {
 	// dest の内容をクリア
@@ -488,16 +489,16 @@ void TVPReadXP4Metadata(
 
 	// ファイルを列挙
 	std::vector<wxString> archives;
-	TVPEnumerateArchiveFiles(archivename, archives);
+	RisaEnumerateArchiveFiles(archivename, archives);
 
 	// ファイル名順にアーカイブを読み込み、map に追加
 	for(std::vector<wxString>::iterator i = archives.begin(); i != archives.end(); i++)
 	{
-		tTVPProgressCallbackAggregator agg(callback,
+		tRisaProgressCallbackAggregator agg(callback,
 				(i - archives.begin()    )* 100 / archives.size(),
 				(i - archives.begin() + 1)* 100 / archives.size());
-		tTVPXP4MetadataReaderArchive archive(*i);
-		TVPApplyXP4StorageNameMap(&agg, dest, archive.GetItemVector());
+		tRisaXP4MetadataReaderArchive archive(*i);
+		RisaApplyXP4StorageNameMap(&agg, dest, archive.GetItemVector());
 
 		// targetdir を取得
 		if(targetdir)
@@ -519,10 +520,10 @@ void TVPReadXP4Metadata(
 //! @param		arc アーカイブ内の既存ファイルを現すmap
 //! @param		ref ターゲットディレクトリから取得したファイル一覧
 //---------------------------------------------------------------------------
-void TVPCompareXP4StorageNameMap(
-	iTVPProgressCallback * callback,
-	std::map<wxString, tTVPXP4MetadataReaderStorageItem> &arc,
-	std::vector<tTVPXP4WriterInputFile> & ref)
+void RisaCompareXP4StorageNameMap(
+	iRisaProgressCallback * callback,
+	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &arc,
+	std::vector<tRisaXP4WriterInputFile> & ref)
 {
 	size_t ref_size = ref.size();
 	size_t arc_size = arc.size();
@@ -530,16 +531,16 @@ void TVPCompareXP4StorageNameMap(
 	// ref のアイテムごとに処理をする
 	callback->OnProgress(0);
 	size_t ref_idx = 0;
-	for(std::vector<tTVPXP4WriterInputFile>::iterator i = ref.begin();
+	for(std::vector<tRisaXP4WriterInputFile>::iterator i = ref.begin();
 		i != ref.end(); i++, ref_idx ++)
 	{
 		if(callback) callback->OnProgress(ref_idx * 100 / (ref_size + arc_size));
-		tTVPProgressCallbackAggregator agg(callback,
+		tRisaProgressCallbackAggregator agg(callback,
 				(ref_idx    ) * 100 / (ref_size + arc_size),
 				(ref_idx + 1) * 100 / (ref_size + arc_size));
 
 		// arc 内に i が存在するか？
-		std::map<wxString, tTVPXP4MetadataReaderStorageItem>::iterator mi;
+		std::map<wxString, tRisaXP4MetadataReaderStorageItem>::iterator mi;
 		mi = arc.find(i->GetInArchiveName());
 		if(mi != arc.end())
 		{
@@ -589,40 +590,40 @@ void TVPCompareXP4StorageNameMap(
 			if(modified)
 			{
 				// 置き換えるべきファイルとしてマークする
-				i->SetFlags((i->GetFlags() & ~ TVP_XP4_FILE_STATE_MASK) | TVP_XP4_FILE_STATE_MODIFIED);
+				i->SetFlags((i->GetFlags() & ~ RISA__XP4_FILE_STATE_MASK) | RISA__XP4_FILE_STATE_MODIFIED);
 			}
 			// mi にもフラグを設定する
-			mi->second.SetFlags(mi->second.GetFlags() | TVP_XP4_FILE_MARKED);
+			mi->second.SetFlags(mi->second.GetFlags() | RISA__XP4_FILE_MARKED);
 		}
 		else
 		{
 			// i が存在しない
 			// 追加すべきファイルとしてマークする
-			i->SetFlags((i->GetFlags() & ~ TVP_XP4_FILE_STATE_MASK) | TVP_XP4_FILE_STATE_ADDED);
+			i->SetFlags((i->GetFlags() & ~ RISA__XP4_FILE_STATE_MASK) | RISA__XP4_FILE_STATE_ADDED);
 		}
 	}
 
 	// 今度は arc のアイテムごとに処理をする
-	// arc のうち、TVP_XP4_FILE_MARKED のフラグがついていないファイルは
+	// arc のうち、RISA__XP4_FILE_MARKED のフラグがついていないファイルは
 	// ターゲットディレクトリに存在せず、削除されたファイルである
 	size_t arc_index = 0;
-	for(std::map<wxString, tTVPXP4MetadataReaderStorageItem>::iterator i = arc.begin();
+	for(std::map<wxString, tRisaXP4MetadataReaderStorageItem>::iterator i = arc.begin();
 		i != arc.end(); i++, arc_index++)
 	{
 		if(callback) callback->OnProgress((arc_index + ref_size) * 100 / (ref_size + arc_size));
-		if(!(i->second.GetFlags() & TVP_XP4_FILE_MARKED))
+		if(!(i->second.GetFlags() & RISA__XP4_FILE_MARKED))
 		{
 			// マークされていない
 			// ref に「削除」として追加する
-			ref.push_back(tTVPXP4WriterInputFile(i->first, TVP_XP4_FILE_STATE_DELETED));
+			ref.push_back(tRisaXP4WriterInputFile(i->first, RISA__XP4_FILE_STATE_DELETED));
 		}
 	}
 
 	// マークの付いていないファイルを ref から削除
-	for(std::vector<tTVPXP4WriterInputFile>::iterator i = ref.begin();
+	for(std::vector<tRisaXP4WriterInputFile>::iterator i = ref.begin();
 		i != ref.end(); )
 	{
-		if((i->GetFlags() & TVP_XP4_FILE_STATE_MASK) == TVP_XP4_FILE_STATE_NONE)
+		if((i->GetFlags() & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_NONE)
 			i = ref.erase(i);
 		else
 			i++;
@@ -632,23 +633,23 @@ void TVPCompareXP4StorageNameMap(
 
 
 //---------------------------------------------------------------------------
-//! @brief		tTVPXP4MetadataReaderStorageItem の配列を tTVPXP4WriterInputFile に変換する
-//! @param		input 入力 tTVPXP4MetadataReaderStorageItem の map
-//! @param		output 出力 tTVPXP4WriterInputFile の配列(内容はクリアされる)
+//! @brief		tRisaXP4MetadataReaderStorageItem の配列を tRisaXP4WriterInputFile に変換する
+//! @param		input 入力 tRisaXP4MetadataReaderStorageItem の map
+//! @param		output 出力 tRisaXP4WriterInputFile の配列(内容はクリアされる)
 //---------------------------------------------------------------------------
-void TVPXP4MetadataReaderStorageItemToXP4WriterInputFile(
-	const std::map<wxString, tTVPXP4MetadataReaderStorageItem> & input,
-	std::vector<tTVPXP4WriterInputFile> & output)
+void RisaXP4MetadataReaderStorageItemToXP4WriterInputFile(
+	const std::map<wxString, tRisaXP4MetadataReaderStorageItem> & input,
+	std::vector<tRisaXP4WriterInputFile> & output)
 {
 	// output の内容をクリア
 	output.clear();
 	output.reserve(input.size());
 
 	// input の内容を変換しながら output に追加
-	for(std::map<wxString, tTVPXP4MetadataReaderStorageItem>::const_iterator i = input.begin();
+	for(std::map<wxString, tRisaXP4MetadataReaderStorageItem>::const_iterator i = input.begin();
 		i != input.end(); i++)
 	{
-		output.push_back(tTVPXP4WriterInputFile((i->second)));
+		output.push_back(tRisaXP4WriterInputFile((i->second)));
 	}
 }
 //---------------------------------------------------------------------------

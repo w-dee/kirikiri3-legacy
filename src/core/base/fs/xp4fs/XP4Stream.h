@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -22,14 +23,14 @@
 //---------------------------------------------------------------------------
 //! @brief		XP4 In-Archive Stream Implmentation
 //---------------------------------------------------------------------------
-class tTVPXP4ArchiveStream : public tRisseBinaryStream
+class tRisaXP4ArchiveStream : public tRisseBinaryStream
 {
 	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
-	boost::shared_ptr<tTVPXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
+	boost::shared_ptr<tRisaXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
 	risse_size FileIndex; //!< アーカイブ中でのインデックス
-	const tTVPXP4Archive::tFile & FileInfo; //!< ファイル情報
-	const tTVPXP4Archive::tSegment * SegmentInfo; //!< セグメント情報
+	const tRisaXP4Archive::tFile & FileInfo; //!< ファイル情報
+	const tRisaXP4Archive::tSegment * SegmentInfo; //!< セグメント情報
 
 	tRisseBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
 	risse_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号(0～)
@@ -38,13 +39,13 @@ class tTVPXP4ArchiveStream : public tRisseBinaryStream
 	risse_uint64 CurPos; //!< current position in absolute file position
 	risse_uint64 SegmentRemain; //!< remain bytes in current segment
 	risse_uint64 SegmentPos; //!< offset from current segment's start
-	tTVPXP4SegmentCache::tDataBlock DecompressedData; // decompressed segment data
+	tRisaXP4SegmentCache::tDataBlock DecompressedData; // decompressed segment data
 
 public:
-	tTVPXP4ArchiveStream(
-			boost::shared_ptr<tTVPXP4Archive> ptr,
+	tRisaXP4ArchiveStream(
+			boost::shared_ptr<tRisaXP4Archive> ptr,
 			risse_size idx, risse_uint32 flags);
-	~tTVPXP4ArchiveStream();
+	~tRisaXP4ArchiveStream();
 
 private:
 	void EnsureSegment(); // ensure accessing to current segment

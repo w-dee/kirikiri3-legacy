@@ -54,7 +54,7 @@ CPPFILES = \
 		$(BASE_DIR)/fs/xp4fs/XP4Stream.cpp          \
 		$(BASE_DIR)/fs/xp4fs/XP4StreamCache.cpp     \
 		$(BASE_DIR)/fs/xp4fs/XP4FSBind.cpp          \
-		$(BASE_DIR)/exception/TVPException.cpp      \
+		$(BASE_DIR)/exception/RisaException.cpp      \
 		$(BASE_DIR)/script/RisseEngine.cpp            \
 		main.cpp
 

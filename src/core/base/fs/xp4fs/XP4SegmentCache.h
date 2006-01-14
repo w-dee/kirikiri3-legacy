@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -24,7 +25,7 @@
 //---------------------------------------------------------------------------
 //!@brief		セグメントキャッシュクラス
 //---------------------------------------------------------------------------
-class tTVPXP4SegmentCache
+class tRisaXP4SegmentCache
 {
 	static const risse_size ONE_LIMIT = 1024*1024; //!< これを超えるセグメントはキャッシュしない
 	static const risse_size TOTAL_LIMIT = 1024*1024; //!< トータルでこれ以上はキャッシュしない
@@ -60,7 +61,7 @@ class tTVPXP4SegmentCache
 	};
 
 public:
-	typedef boost::shared_ptr<tTVPDecompressedHolder> tDataBlock; //!< キャッシュアイテムのvalueのtypedef
+	typedef boost::shared_ptr<tRisaDecompressedHolder> tDataBlock; //!< キャッシュアイテムのvalueのtypedef
 
 private:
 	typedef tRisseHashTable<tKey, tDataBlock, tKeyHasher> tHashTable; //!< ハッシュテーブルのtypedef
@@ -68,14 +69,14 @@ private:
 	tHashTable HashTable; //!< ハッシュテーブル
 
 public:
-	tTVPXP4SegmentCache();
-	~tTVPXP4SegmentCache();
+	tRisaXP4SegmentCache();
+	~tRisaXP4SegmentCache();
 
 private:
-	tTVPSingletonObjectLifeTracer<tTVPXP4SegmentCache> singleton_object_life_tracer;
+	tRisaSingletonObjectLifeTracer<tRisaXP4SegmentCache> singleton_object_life_tracer;
 public:
-	static boost::shared_ptr<tTVPXP4SegmentCache> & instance() { return
-		tTVPSingleton<tTVPXP4SegmentCache>::instance();
+	static boost::shared_ptr<tRisaXP4SegmentCache> & instance() { return
+		tRisaSingleton<tRisaXP4SegmentCache>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 public:

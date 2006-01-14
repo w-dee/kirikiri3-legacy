@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -12,7 +13,7 @@
 #include "prec.h"
 #include "FSManager.h"
 #include "FSManagerBind.h"
-#include "TVPException.h"
+#include "RisaException.h"
 #include "RisseEngine.h"
 
 RISSE_DEFINE_SOURCE_ID(2011);
@@ -28,7 +29,7 @@ RISSE_DEFINE_SOURCE_ID(2011);
 //! @param		owner       このインスタンスを保持している Risse オブジェクト
 //---------------------------------------------------------------------------
 tRisseNI_FileSystemNativeInstance::tRisseNI_FileSystemNativeInstance(
-					boost::shared_ptr<tTVPFileSystem> filesystem,
+					boost::shared_ptr<tRisaFileSystem> filesystem,
 					iRisseDispatch2 * owner) :
 						FileSystem(filesystem),
 						Owner(owner)
@@ -43,7 +44,7 @@ tRisseNI_FileSystemNativeInstance::tRisseNI_FileSystemNativeInstance(
 void tRisseNI_FileSystemNativeInstance::Invalidate()
 {
 	// ファイルシステムマネージャからこのファイルシステムをアンマウントする
-	tTVPFileSystemManager::instance()->Unmount(Owner);
+	tRisaFileSystemManager::instance()->Unmount(Owner);
 
 	// FileSystem にこれ以上アクセスできないようにreset
 	FileSystem.reset();
@@ -86,9 +87,9 @@ void tRisseNI_BaseFileSystem::Invalidate()
 //---------------------------------------------------------------------------
 void tRisseNI_BaseFileSystem::RegisterFileSystemNativeInstance(
 		iRisseDispatch2 * risse_obj,
-		tTVPFileSystem * fs_obj)
+		tRisaFileSystem * fs_obj)
 {
-	boost::shared_ptr<tTVPFileSystem> filesystem(fs_obj);
+	boost::shared_ptr<tRisaFileSystem> filesystem(fs_obj);
 	FileSystem = filesystem;
 
 	// tRisseNI_FileSystemNativeInstance オブジェクトの生成
@@ -154,7 +155,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/chopExt)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance()->ChopExtension(*param[0]);
+		*result = tRisaFileSystemManager::instance()->ChopExtension(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/chopExt)
@@ -178,7 +179,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractExt)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance()->ExtractExtension(*param[0]);
+		*result = tRisaFileSystemManager::instance()->ExtractExtension(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractExt)
@@ -198,7 +199,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractName)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance()->ExtractName(*param[0]);
+		*result = tRisaFileSystemManager::instance()->ExtractName(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractName)
@@ -218,7 +219,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractPath)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance()->ExtractPath(*param[0]);
+		*result = tRisaFileSystemManager::instance()->ExtractPath(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractPath)
@@ -241,7 +242,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tTVPFileSystemManager::instance()->GetFullPath(*param[0]);
+		*result = tRisaFileSystemManager::instance()->GetFullPath(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
@@ -278,7 +279,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
 
 	ttstr mountpoint = *param[0];
 	iRisseDispatch2 * dsp = param[1]->AsObjectNoAddRef();
-	tTVPFileSystemManager::instance()->Mount(mountpoint, dsp);
+	tRisaFileSystemManager::instance()->Mount(mountpoint, dsp);
 
 	return RISSE_S_OK;
 }
@@ -299,7 +300,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
 
 	ttstr mountpoint = *param[0];
 
-	tTVPFileSystemManager::instance()->Unmount(mountpoint);
+	tRisaFileSystemManager::instance()->Unmount(mountpoint);
 
 	return RISSE_S_OK;
 }
@@ -322,14 +323,14 @@ RISSE_BEGIN_NATIVE_PROP_DECL(cwd)
 	*/
 	RISSE_BEGIN_NATIVE_PROP_GETTER
 	{
-		if(result) *result = tTVPFileSystemManager::instance()->GetCurrentDirectory();
+		if(result) *result = tRisaFileSystemManager::instance()->GetCurrentDirectory();
 		return RISSE_S_OK;
 	}
 	RISSE_END_NATIVE_PROP_GETTER
 
 	RISSE_BEGIN_NATIVE_PROP_SETTER
 	{
-		tTVPFileSystemManager::instance()->SetCurrentDirectory(*param);
+		tRisaFileSystemManager::instance()->SetCurrentDirectory(*param);
 		return RISSE_S_OK;
 	}
 	RISSE_END_NATIVE_PROP_SETTER
@@ -352,12 +353,12 @@ RISSE_END_NATIVE_PROP_DECL(cwd)
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPFileSystemRegisterer::tTVPFileSystemRegisterer()
+tRisaFileSystemRegisterer::tRisaFileSystemRegisterer()
 {
 	FileSystemClass = new tRisseNC_FileSystem();
 	try
 	{
-		tTVPRisseScriptEngine::instance()->RegisterGlobalObject(RISSE_WS("FileSystem"), FileSystemClass);
+		tRisaRisseScriptEngine::instance()->RegisterGlobalObject(RISSE_WS("FileSystem"), FileSystemClass);
 	}
 	catch(...)
 	{
@@ -371,7 +372,7 @@ tTVPFileSystemRegisterer::tTVPFileSystemRegisterer()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPFileSystemRegisterer::~tTVPFileSystemRegisterer()
+tRisaFileSystemRegisterer::~tRisaFileSystemRegisterer()
 {
 	FileSystemClass->Release();
 }
@@ -383,7 +384,7 @@ tTVPFileSystemRegisterer::~tTVPFileSystemRegisterer()
 //! @param		name    クラス名
 //! @param		object  クラスオブジェクト
 //---------------------------------------------------------------------------
-void tTVPFileSystemRegisterer::RegisterClassObject(const risse_char *name,
+void tRisaFileSystemRegisterer::RegisterClassObject(const risse_char *name,
 											iRisseDispatch2 * object)
 {
 	tRisseVariant val(object, NULL);

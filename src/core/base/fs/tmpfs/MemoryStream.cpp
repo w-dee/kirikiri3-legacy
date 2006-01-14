@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -11,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "MemoryStream.h"
-#include "TVPException.h"
+#include "RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(2003);
 
@@ -19,7 +20,7 @@ RISSE_DEFINE_SOURCE_ID(2003);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPMemoryStreamBlock::tTVPMemoryStreamBlock()
+tRisaMemoryStreamBlock::tRisaMemoryStreamBlock()
 {
 	Block = NULL;
 	Size = 0;
@@ -32,7 +33,7 @@ tTVPMemoryStreamBlock::tTVPMemoryStreamBlock()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPMemoryStreamBlock::~tTVPMemoryStreamBlock()
+tRisaMemoryStreamBlock::~tRisaMemoryStreamBlock()
 {
 	if(Block) free(Block);
 }
@@ -42,7 +43,7 @@ tTVPMemoryStreamBlock::~tTVPMemoryStreamBlock()
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを一つ増やす
 //---------------------------------------------------------------------------
-void tTVPMemoryStreamBlock::AddRef()
+void tRisaMemoryStreamBlock::AddRef()
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -54,7 +55,7 @@ void tTVPMemoryStreamBlock::AddRef()
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを一つ減らす
 //---------------------------------------------------------------------------
-void tTVPMemoryStreamBlock::Release()
+void tRisaMemoryStreamBlock::Release()
 {
 	risse_uint decremented_count;
 
@@ -77,7 +78,7 @@ void tTVPMemoryStreamBlock::Release()
 //!				サイズが拡張された部分の内容は不定となる。縮小される場合、
 //!				内容は最後が切りつめられる。
 //---------------------------------------------------------------------------
-void tTVPMemoryStreamBlock::ChangeSize(risse_size size)
+void tRisaMemoryStreamBlock::ChangeSize(risse_size size)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -103,7 +104,7 @@ void tTVPMemoryStreamBlock::ChangeSize(risse_size size)
 	Block = realloc(Block, AllocSize);
 
 	if(AllocSize && !Block)
-		eTVPException::Throw(RISSE_WS_TR("insufficient memory"));
+		eRisaException::Throw(RISSE_WS_TR("insufficient memory"));
 		// this exception cannot be repaird; a fatal error.
 
 	AllocSize = Size = size;
@@ -114,7 +115,7 @@ void tTVPMemoryStreamBlock::ChangeSize(risse_size size)
 //---------------------------------------------------------------------------
 //! @brief		メモリブロックのサイズをSizeぴったりのサイズに変更する
 //---------------------------------------------------------------------------
-void tTVPMemoryStreamBlock::Fit()
+void tRisaMemoryStreamBlock::Fit()
 {
 	// 通常、AllocSize は Size よりも大きくなるが、
 	// Size よりも大きくて AllocSize よりも小さな部分は無駄である。
@@ -126,7 +127,7 @@ void tTVPMemoryStreamBlock::Fit()
 	{
 		Block = realloc(Block, Size);
 		if(Size && !Block)
-			eTVPException::Throw(RISSE_WS_TR("insufficient memory"));
+			eRisaException::Throw(RISSE_WS_TR("insufficient memory"));
 		AllocSize = Size;
 	}
 }
@@ -141,10 +142,10 @@ void tTVPMemoryStreamBlock::Fit()
 //! @brief		コンストラクタ
 //! @param		flags アクセスフラグ
 //---------------------------------------------------------------------------
-tTVPMemoryStream::tTVPMemoryStream(risse_uint32 flags)
+tRisaMemoryStream::tRisaMemoryStream(risse_uint32 flags)
 {
 	Flags = flags;
-	Block = new tTVPMemoryStreamBlock();
+	Block = new tRisaMemoryStreamBlock();
 
 	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 	CurrentPos = flags & RISSE_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
@@ -157,7 +158,7 @@ tTVPMemoryStream::tTVPMemoryStream(risse_uint32 flags)
 //! @param		flags アクセスフラグ
 //! @param		block メモリブロック
 //---------------------------------------------------------------------------
-tTVPMemoryStream::tTVPMemoryStream(risse_uint32 flags, tTVPMemoryStreamBlock * block)
+tRisaMemoryStream::tRisaMemoryStream(risse_uint32 flags, tRisaMemoryStreamBlock * block)
 {
 	Flags = flags;
 	Block = block;
@@ -172,7 +173,7 @@ tTVPMemoryStream::tTVPMemoryStream(risse_uint32 flags, tTVPMemoryStreamBlock * b
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPMemoryStream::~tTVPMemoryStream()
+tRisaMemoryStream::~tRisaMemoryStream()
 {
 	Block->Fit(); // メモリブロックのよけいな余裕を解放
 	Block->Release();
@@ -186,7 +187,7 @@ tTVPMemoryStream::~tTVPMemoryStream()
 //! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
 //! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
-risse_uint64 tTVPMemoryStream::Seek(risse_int64 offset, risse_int whence)
+risse_uint64 tRisaMemoryStream::Seek(risse_int64 offset, risse_int whence)
 {
 	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 
@@ -227,12 +228,12 @@ risse_uint64 tTVPMemoryStream::Seek(risse_int64 offset, risse_int whence)
 //! @param		read_size 読み込むバイト数
 //! @return		実際に読み込まれたバイト数
 //---------------------------------------------------------------------------
-risse_size tTVPMemoryStream::Read(void *buffer, risse_size read_size)
+risse_size tRisaMemoryStream::Read(void *buffer, risse_size read_size)
 {
 	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 
 	if(!(Flags & RISSE_BS_ACCESS_READ_BIT))
-		eTVPException::Throw(RISSE_WS_TR("access denied (stream has no read-access)"));
+		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no read-access)"));
 
 	if(CurrentPos > Block->GetSize()) return 0; // can not read from there
 
@@ -256,12 +257,12 @@ risse_size tTVPMemoryStream::Read(void *buffer, risse_size read_size)
 //! @param		read_size 書き込みたいバイト数
 //! @return		実際に書き込まれたバイト数
 //---------------------------------------------------------------------------
-risse_size tTVPMemoryStream::Write(const void *buffer, risse_size write_size)
+risse_size tRisaMemoryStream::Write(const void *buffer, risse_size write_size)
 {
 	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 
 	if(!(Flags & RISSE_BS_ACCESS_WRITE_BIT))
-		eTVPException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
+		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
 
 	// adjust current file pointer
 	if(CurrentPos > Block->GetSize()) return 0; // can not write there
@@ -286,12 +287,12 @@ risse_size tTVPMemoryStream::Write(const void *buffer, risse_size write_size)
 //---------------------------------------------------------------------------
 //! @brief		ファイルの終わりを現在のポインタに設定する
 //---------------------------------------------------------------------------
-void tTVPMemoryStream::SetEndOfFile()
+void tRisaMemoryStream::SetEndOfFile()
 {
 	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
 
 	if(!(Flags & RISSE_BS_ACCESS_WRITE_BIT))
-		eTVPException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
+		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
 
 	Block->ChangeSize(CurrentPos);
 }

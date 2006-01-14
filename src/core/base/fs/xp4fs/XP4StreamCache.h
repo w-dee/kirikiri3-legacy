@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -18,7 +19,7 @@
 //---------------------------------------------------------------------------
 //!@brief		ストリームキャッシュクラス
 //---------------------------------------------------------------------------
-class tTVPXP4StreamCache
+class tRisaXP4StreamCache
 {
 	static const int MAX_ITEM = 8; //!< キャッシュするハンドル数
 
@@ -34,14 +35,14 @@ class tTVPXP4StreamCache
 	} Pool[MAX_ITEM];
 
 public:
-	tTVPXP4StreamCache();
-	~tTVPXP4StreamCache();
+	tRisaXP4StreamCache();
+	~tRisaXP4StreamCache();
 
 private:
-	tTVPSingletonObjectLifeTracer<tTVPXP4StreamCache> singleton_object_life_tracer;
+	tRisaSingletonObjectLifeTracer<tRisaXP4StreamCache> singleton_object_life_tracer;
 public:
-	static boost::shared_ptr<tTVPXP4StreamCache> & instance() { return
-		tTVPSingleton<tTVPXP4StreamCache>::instance();
+	static boost::shared_ptr<tRisaXP4StreamCache> & instance() { return
+		tRisaSingleton<tRisaXP4StreamCache>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 public:

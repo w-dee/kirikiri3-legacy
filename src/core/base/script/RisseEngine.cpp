@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -18,7 +19,7 @@ RISSE_DEFINE_SOURCE_ID(2200);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPRisseScriptEngine::tTVPRisseScriptEngine()
+tRisaRisseScriptEngine::tRisaRisseScriptEngine()
 {
 	Engine = new tRisse();
 }
@@ -28,13 +29,13 @@ tTVPRisseScriptEngine::tTVPRisseScriptEngine()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPRisseScriptEngine::~tTVPRisseScriptEngine()
+tRisaRisseScriptEngine::~tRisaRisseScriptEngine()
 {
 	if(Engine)
 	{
 /*
 #ifdef __WXDEBUG__
-		wxFprintf(stderr, wxT("warning: tTVPRisseScriptEngine::instance().Shutdown() should be called before main() ends.\n"));
+		wxFprintf(stderr, wxT("warning: tRisaRisseScriptEngine::instance().Shutdown() should be called before main() ends.\n"));
 #endif
 */
 		Shutdown();
@@ -46,7 +47,7 @@ tTVPRisseScriptEngine::~tTVPRisseScriptEngine()
 //---------------------------------------------------------------------------
 //! @brief		シャットダウン
 //---------------------------------------------------------------------------
-void tTVPRisseScriptEngine::Shutdown()
+void tRisaRisseScriptEngine::Shutdown()
 {
 	if(Engine)
 	{
@@ -63,7 +64,7 @@ void tTVPRisseScriptEngine::Shutdown()
 //! @param		name    オブジェクトにつけたい名前
 //! @param		object  その名前で登録したいオブジェクト
 //---------------------------------------------------------------------------
-void tTVPRisseScriptEngine::RegisterGlobalObject(const risse_char *name,
+void tRisaRisseScriptEngine::RegisterGlobalObject(const risse_char *name,
 	iRisseDispatch2 * object)
 {
 	if(!Engine) return;

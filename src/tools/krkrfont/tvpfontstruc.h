@@ -1,21 +1,22 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [‚è‚³]      alias ‹g—¢‹g—¢3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// "tTVPFont" definition
+// "tRisaFont" definition
 //---------------------------------------------------------------------------
 
-#ifndef __TVPFONTSTRUC_H__
-#define __TVPFONTSTRUC_H__
+#ifndef __RisaFONTSTRUC_H__
+#define __RisaFONTSTRUC_H__
 
 //---------------------------------------------------------------------------
-// tTVPFont definition
+// tRisaFont definition
 //---------------------------------------------------------------------------
-struct tTVPFont
+struct tRisaFont
 {
 	risse_int Height; // height of text
 	risse_uint32 Flags;
@@ -23,7 +24,7 @@ struct tTVPFont
 
 	ttstr Face; // font name
 
-	bool operator == (const tTVPFont & rhs) const
+	bool operator == (const tRisaFont & rhs) const
 	{
 		return Height == rhs.Height &&
 			Flags == rhs.Flags &&
@@ -37,18 +38,18 @@ struct tTVPFont
 //---------------------------------------------------------------------------
 // font ralated constants
 //---------------------------------------------------------------------------
-#define TVP_TF_ITALIC    0x0100
-#define TVP_TF_BOLD      0x0200
-#define TVP_TF_UNDERLINE 0x0400
-#define TVP_TF_STRIKEOUT 0x0800
+#define RISA__TF_ITALIC    0x0100
+#define RISA__TF_BOLD      0x0200
+#define RISA__TF_UNDERLINE 0x0400
+#define RISA__TF_STRIKEOUT 0x0800
 
 
 //---------------------------------------------------------------------------
-#define TVP_FSF_FIXEDPITCH   1      // fsfFixedPitch
-#define TVP_FSF_SAMECHARSET  2      // fsfSameCharSet
-#define TVP_FSF_NOVERTICAL   4      // fsfNoVertical
-#define TVP_FSF_OUTLINEONLY  8      // fsfOutLineOnly
-#define TVP_FSF_USEFONTFACE  0x100  // fsfUseFontFace
+#define RISA__FSF_FIXEDPITCH   1      // fsfFixedPitch
+#define RISA__FSF_SAMECHARSET  2      // fsfSameCharSet
+#define RISA__FSF_NOVERTICAL   4      // fsfNoVertical
+#define RISA__FSF_OUTLINEONLY  8      // fsfOutLineOnly
+#define RISA__FSF_USEFONTFACE  0x100  // fsfUseFontFace
 
 /*]*/
 

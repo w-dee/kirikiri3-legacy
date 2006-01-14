@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -11,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "TmpFS.h"
-#include "TVPException.h"
+#include "RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(2004);
 
@@ -23,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(2004);
 //! @param		type ノードタイプ
 //! @param		name ノードの名前
 //---------------------------------------------------------------------------
-tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
+tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType type,
 							const ttstr & name) :
 	Parent(parent),
 	Type(type),
@@ -32,12 +33,12 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 	if(Type == ntDirectory)
 	{
 		// ディレクトリのノードなので ハッシュ表を作成
-		Directory = new tRisseHashTable<ttstr, tTVPTmpFSNode *>();
+		Directory = new tRisseHashTable<ttstr, tRisaTmpFSNode *>();
 	}
 	else
 	{
 		// ファイルのノードなので Block を作成
-		File = new tTVPMemoryStreamBlock();
+		File = new tRisaMemoryStreamBlock();
 	}
 }
 //---------------------------------------------------------------------------
@@ -49,19 +50,19 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 //! @param		type ノードタイプ
 //! @param		src 入力もとストリーム
 //---------------------------------------------------------------------------
-tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
+tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType type,
 	tRisseBinaryStream * src) :
 	Parent(parent)
 {
 	if(Type == ntDirectory)
 	{
 		// ディレクトリのノードなので ハッシュ表を作成
-		Directory = new tRisseHashTable<ttstr, tTVPTmpFSNode *>();
+		Directory = new tRisseHashTable<ttstr, tRisaTmpFSNode *>();
 	}
 	else
 	{
 		// ファイルのノードなので Block を作成
-		File = new tTVPMemoryStreamBlock();
+		File = new tRisaMemoryStreamBlock();
 	}
 
 	// メタデータを読み取る
@@ -76,7 +77,7 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 		src->ReadBuffer(&metalen, sizeof(metalen));
 		metalen = wxUINT32_SWAP_ON_BE(metalen);
 		if(metalen == 0)
-			eTVPException::Throw(RISSE_WS_TR("invalid metadata length (data may be corrupted)"));
+			eRisaException::Throw(RISSE_WS_TR("invalid metadata length (data may be corrupted)"));
 
 		if(metadataid == 0x01)
 		{
@@ -104,20 +105,20 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 			unsigned char nodetypeid;
 			src->ReadBuffer(&nodetypeid, 1);
 			tType subnodetype;
-			tTVPTmpFSNode * subnode = NULL;
+			tRisaTmpFSNode * subnode = NULL;
 			switch(nodetypeid)
 			{
 			case 0x80: // ディレクトリ
-				subnode = new tTVPTmpFSNode(this, ntDirectory, src);
+				subnode = new tRisaTmpFSNode(this, ntDirectory, src);
 				break;
 			case 0x81: // ファイル
-				subnode = new tTVPTmpFSNode(this, ntFile, src);
+				subnode = new tRisaTmpFSNode(this, ntFile, src);
 				break;
 			case 0x88: // ディレクトリ終了
 				done = true;
 				break;
 			default:
-				eTVPException::Throw(ttstr(
+				eRisaException::Throw(ttstr(
 						wxString::Format(RISSE_WS_TR("unsupported node id %x"),
 						static_cast<int>(nodetypeid))));
 			}
@@ -130,7 +131,7 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 		src->ReadBuffer(&blocksize, sizeof(blocksize));
 		blocksize = wxUINT64_SWAP_ON_BE(blocksize);
 		if(static_cast<size_t>(blocksize) != blocksize)
-				eTVPException::Throw(RISSE_WS_TR("too big block size"));
+				eRisaException::Throw(RISSE_WS_TR("too big block size"));
 		File->ChangeSize(static_cast<size_t>(blocksize));
 		File->Fit();
 		src->ReadBuffer(File->GetBlock(), static_cast<size_t>(blocksize));
@@ -146,7 +147,7 @@ tTVPTmpFSNode::tTVPTmpFSNode(tTVPTmpFSNode *parent, tTVPTmpFSNode::tType type,
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPTmpFSNode::~tTVPTmpFSNode()
+tRisaTmpFSNode::~tRisaTmpFSNode()
 {
 	// デストラクタ
 	// デストラクタは、保持しているノードを「すべて」解放するので注意
@@ -155,7 +156,7 @@ tTVPTmpFSNode::~tTVPTmpFSNode()
 	{
 		// このノードはディレクトリ
 		// Directory が保持しているすべての要素を解放する
-		tRisseHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
+		tRisseHashTable<ttstr, tRisaTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
 			delete (i.GetValue());
@@ -178,7 +179,7 @@ tTVPTmpFSNode::~tTVPTmpFSNode()
 //! @brief		内容をシリアライズする
 //! @param		dest 出力先ストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFSNode::Serialize(tRisseBinaryStream * dest) const
+void tRisaTmpFSNode::Serialize(tRisseBinaryStream * dest) const
 {
 	// ノードのタイプを記録
 	if(Type == ntDirectory)
@@ -203,7 +204,7 @@ void tTVPTmpFSNode::Serialize(tRisseBinaryStream * dest) const
 		dest->WriteBuffer("\0", 1); // メタデータの終わりとディレクトリの開始
 
 		// 全ての子要素に対して再帰する
-		tRisseHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
+		tRisseHashTable<ttstr, tRisaTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
 			i.GetValue()->Serialize(dest);
@@ -231,11 +232,11 @@ void tTVPTmpFSNode::Serialize(tRisseBinaryStream * dest) const
 //! @return		ノード(ノードが見つからない場合は NULL)
 //! @note		このノードが File を表す場合も NULL が返る
 //---------------------------------------------------------------------------
-tTVPTmpFSNode * tTVPTmpFSNode::GetSubNode(const ttstr & name)
+tRisaTmpFSNode * tRisaTmpFSNode::GetSubNode(const ttstr & name)
 {
 	if(Type != ntDirectory) return NULL;
 
-	tTVPTmpFSNode ** node = Directory->Find(name);
+	tRisaTmpFSNode ** node = Directory->Find(name);
 	if(!node) return NULL;
 	return * node;
 }
@@ -247,10 +248,10 @@ tTVPTmpFSNode * tTVPTmpFSNode::GetSubNode(const ttstr & name)
 //! @param		name 名前
 //! @return		削除に成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPTmpFSNode::DeleteSubNodeByName(const ttstr & name)
+bool tRisaTmpFSNode::DeleteSubNodeByName(const ttstr & name)
 {
 	if(Type != ntDirectory) return false;
-	tTVPTmpFSNode * node = GetSubNode(name);
+	tRisaTmpFSNode * node = GetSubNode(name);
 	if(node)
 	{
 		delete node;
@@ -268,11 +269,11 @@ bool tTVPTmpFSNode::DeleteSubNodeByName(const ttstr & name)
 //! @return		新規に作成されたディレクトリノード
 //! @note		すでにその名前を持つノードがあった場合は何もしないで NULL を返すので注意
 //---------------------------------------------------------------------------
-tTVPTmpFSNode * tTVPTmpFSNode::CreateDirectory(const ttstr & name)
+tRisaTmpFSNode * tRisaTmpFSNode::CreateDirectory(const ttstr & name)
 {
 	if(Type != ntDirectory) return false;
 	if(GetSubNode(name)) return NULL; // すでにそこに何かがある
-	tTVPTmpFSNode *newnode = new tTVPTmpFSNode(this, ntDirectory, name);
+	tRisaTmpFSNode *newnode = new tRisaTmpFSNode(this, ntDirectory, name);
 	Directory->Add(name, newnode);
 	return newnode;
 }
@@ -285,11 +286,11 @@ tTVPTmpFSNode * tTVPTmpFSNode::CreateDirectory(const ttstr & name)
 //! @return		新規に作成されたファイルノード
 //! @note		すでにその名前を持つノードがあった場合は何もしないで NULL を返すので注意
 //---------------------------------------------------------------------------
-tTVPTmpFSNode * tTVPTmpFSNode::CreateFile(const ttstr & name)
+tRisaTmpFSNode * tRisaTmpFSNode::CreateFile(const ttstr & name)
 {
 	if(Type != ntDirectory) return false;
 	if(GetSubNode(name)) return NULL; // すでにそこに何かがある
-	tTVPTmpFSNode *newnode = new tTVPTmpFSNode(this, ntFile, name);
+	tRisaTmpFSNode *newnode = new tRisaTmpFSNode(this, ntFile, name);
 	Directory->Add(name, newnode);
 	return newnode;
 }
@@ -300,7 +301,7 @@ tTVPTmpFSNode * tTVPTmpFSNode::CreateFile(const ttstr & name)
 //! @brief		ノードのサイズを取得する
 //! @return		ノードのサイズ (ファイルの場合はファイルサイズ、そうでない場合は 0)
 //---------------------------------------------------------------------------
-risse_size tTVPTmpFSNode::GetSize() const
+risse_size tRisaTmpFSNode::GetSize() const
 {
 	if(Type == ntDirectory) return 0;
 	if(Type == ntFile) return File->GetSize();
@@ -313,11 +314,11 @@ risse_size tTVPTmpFSNode::GetSize() const
 //! @brief		すべての子要素に対して callback を呼び出す
 //! @return		callback を呼び出した回数
 //---------------------------------------------------------------------------
-size_t tTVPTmpFSNode::Iterate(tTVPFileSystemIterationCallback * callback)
+size_t tRisaTmpFSNode::Iterate(tRisaFileSystemIterationCallback * callback)
 {
 	if(Type != ntDirectory) return 0;
 	size_t count = 0;
-	tRisseHashTable<ttstr, tTVPTmpFSNode *>::tIterator i;
+	tRisseHashTable<ttstr, tRisaTmpFSNode *>::tIterator i;
 	for(i = Directory->GetFirst(); !i.IsNull(); i++)
 	{
 		count ++;
@@ -352,7 +353,7 @@ size_t tTVPTmpFSNode::Iterate(tTVPFileSystemIterationCallback * callback)
 //---------------------------------------------------------------------------
 //! @brief		シリアライズ時のファイルの先頭に着くマジック
 //---------------------------------------------------------------------------
-const unsigned char tTVPTmpFS::SerializeMagic[] = {
+const unsigned char tRisaTmpFS::SerializeMagic[] = {
 	't', 'm' , 'p', 'f', 's', 0x1a,
 	0x00, // ファイルレイアウトバージョン
 	0x00  // reserved
@@ -363,7 +364,7 @@ const unsigned char tTVPTmpFS::SerializeMagic[] = {
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPTmpFS::tTVPTmpFS()
+tRisaTmpFS::tRisaTmpFS()
 {
 	// 変数初期化
 	CreateRoot();
@@ -374,7 +375,7 @@ tTVPTmpFS::tTVPTmpFS()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPTmpFS::~tTVPTmpFS()
+tRisaTmpFS::~tRisaTmpFS()
 {
 	RemoveRoot();
 }
@@ -387,14 +388,14 @@ tTVPTmpFS::~tTVPTmpFS()
 //! @param		callback コールバックオブジェクト
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
-size_t tTVPTmpFS::GetFileListAt(const ttstr & dirname,
-	tTVPFileSystemIterationCallback * callback)
+size_t tRisaTmpFS::GetFileListAt(const ttstr & dirname,
+	tRisaFileSystemIterationCallback * callback)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tTVPTmpFSNode * node = GetNodeAt(dirname);
-	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsDirectory()) eTVPException::Throw(RISSE_WS_TR("specified name is not a directory"));
+	tRisaTmpFSNode * node = GetNodeAt(dirname);
+	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	if(!node->IsDirectory()) eRisaException::Throw(RISSE_WS_TR("specified name is not a directory"));
 
 	return node->Iterate(callback);
 }
@@ -406,11 +407,11 @@ size_t tTVPTmpFS::GetFileListAt(const ttstr & dirname,
 //! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPTmpFS::FileExists(const ttstr & filename)
+bool tRisaTmpFS::FileExists(const ttstr & filename)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tTVPTmpFSNode * node = GetNodeAt(filename);
+	tRisaTmpFSNode * node = GetNodeAt(filename);
 	if(!node) return false;
 	if(!node->IsFile()) return false; // それがファイルではない場合も false
 	return true;
@@ -423,11 +424,11 @@ bool tTVPTmpFS::FileExists(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPTmpFS::DirectoryExists(const ttstr & dirname)
+bool tRisaTmpFS::DirectoryExists(const ttstr & dirname)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tTVPTmpFSNode * node = GetNodeAt(dirname);
+	tRisaTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) return false;
 	if(!node->IsDirectory()) return false; // それがディレクトリではない場合も false
 	return true;
@@ -439,16 +440,16 @@ bool tTVPTmpFS::DirectoryExists(const ttstr & dirname)
 //! @brief		ファイルを削除する
 //! @param		filename ファイル名
 //---------------------------------------------------------------------------
-void tTVPTmpFS::RemoveFile(const ttstr & filename)
+void tRisaTmpFS::RemoveFile(const ttstr & filename)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tTVPTmpFSNode * node = GetNodeAt(filename);
-	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) eTVPException::Throw(RISSE_WS_TR("specified name is not a file"));
+	tRisaTmpFSNode * node = GetNodeAt(filename);
+	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	if(!node->IsFile()) eRisaException::Throw(RISSE_WS_TR("specified name is not a file"));
 
 	// 親ノードから切り離す
-	tTVPTmpFSNode * parent = node->GetParent();
+	tRisaTmpFSNode * parent = node->GetParent();
 	if(!parent) return; // parent が null なのは root ノードだけなのでこれはあり得ないが...
 	parent->DeleteSubNodeByName(node->GetName());
 }
@@ -460,23 +461,23 @@ void tTVPTmpFS::RemoveFile(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
-void tTVPTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
+void tRisaTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tTVPTmpFSNode * node = GetNodeAt(dirname);
-	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsDirectory()) eTVPException::Throw(RISSE_WS_TR("specified name is not a directory"));
+	tRisaTmpFSNode * node = GetNodeAt(dirname);
+	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	if(!node->IsDirectory()) eRisaException::Throw(RISSE_WS_TR("specified name is not a directory"));
 
 	if(!recursive)
 	{
 		// recursive が false の場合、消そうとしたディレクトリが空で無ければ
 		// 失敗する。
 
-		if(node->HasSubNode()) eTVPException::Throw(RISSE_WS_TR("specified directory is not empty"));
+		if(node->HasSubNode()) eRisaException::Throw(RISSE_WS_TR("specified directory is not empty"));
 
 		// root ノードは消すことはできない
-		if(node == Root) eTVPException::Throw(RISSE_WS_TR("can not remove file system root directory"));
+		if(node == Root) eRisaException::Throw(RISSE_WS_TR("can not remove file system root directory"));
 	}
 	else
 	{
@@ -486,7 +487,7 @@ void tTVPTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 	// 親ノードから切り離す
 	if(node != Root)
 	{
-		tTVPTmpFSNode * parent = node->GetParent();
+		tRisaTmpFSNode * parent = node->GetParent();
 		if(parent) parent->DeleteSubNodeByName(node->GetName());
 	}
 	else
@@ -503,7 +504,7 @@ void tTVPTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
-void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
+void tRisaTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -515,14 +516,14 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 		const risse_char * p = dirname.c_str();
 		const risse_char *pp = p;
 
-		tTVPTmpFSNode *node = Root;
+		tRisaTmpFSNode *node = Root;
 		while(*p)
 		{
 			while(*p != RISSE_WC('/') && *p != 0) p++;
 			if(p != pp)
 			{
 				// '/' で挟まれた区間が得られた
-				tTVPTmpFSNode *parent = node;
+				tRisaTmpFSNode *parent = node;
 				ttstr partname(p, p - pp);
 				node = node->GetSubNode(partname);
 				if(!node)
@@ -541,7 +542,7 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 					if(node->IsFile())
 					{
 						// ファイルだったりする
-						eTVPException::Throw(RISSE_WS_TR("about to create file on "));
+						eRisaException::Throw(RISSE_WS_TR("about to create file on "));
 					}
 				}
 			}
@@ -554,12 +555,12 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 		// 最終的なディレクトリ名となる名前を取得する
 
 		ttstr path(dirname);
-		tTVPFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
+		tRisaFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
 		ttstr parentdir, name;
-		tTVPFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
+		tRisaFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
 
-		tTVPTmpFSNode * parentnode = GetNodeAt(parentdir);
-		if(!parentnode) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		tRisaTmpFSNode * parentnode = GetNodeAt(parentdir);
+		if(!parentnode) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 		parentnode->CreateDirectory(name);
 	}
 
@@ -572,15 +573,15 @@ void tTVPTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //! @param		filename ファイル名
 //! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
-void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
+void tRisaTmpFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// XXX: MACタイムは現バージョンでは保存していない
 	struc.Clear();
 
-	tTVPTmpFSNode * node = GetNodeAt(filename);
-	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	tRisaTmpFSNode * node = GetNodeAt(filename);
+	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	struc.Size = node->GetSize();
 }
@@ -593,15 +594,15 @@ void tTVPTmpFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, risse_uint32 flags)
+tRisseBinaryStream * tRisaTmpFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tTVPTmpFSNode * node = GetNodeAt(filename);
-	if(!node) tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) eTVPException::Throw(RISSE_WS_TR("specified name is not a file"));
+	tRisaTmpFSNode * node = GetNodeAt(filename);
+	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	if(!node->IsFile()) eRisaException::Throw(RISSE_WS_TR("specified name is not a file"));
 
-	return new tTVPMemoryStream(flags, node->GetMemoryStreamBlockNoAddRef());
+	return new tRisaMemoryStream(flags, node->GetMemoryStreamBlockNoAddRef());
 }
 //---------------------------------------------------------------------------
 
@@ -610,7 +611,7 @@ tRisseBinaryStream * tTVPTmpFS::CreateStream(const ttstr & filename, risse_uint3
 //! @brief		指定されたストリームに内容をシリアライズする
 //! @param		dest 出力先ストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFS::SerializeTo(tRisseBinaryStream * dest)
+void tRisaTmpFS::SerializeTo(tRisseBinaryStream * dest)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -628,10 +629,10 @@ void tTVPTmpFS::SerializeTo(tRisseBinaryStream * dest)
 //! @brief		指定されたファイルに内容をシリアライズする
 //! @param		filename 出力先ファイル名
 //---------------------------------------------------------------------------
-void tTVPTmpFS::SerializeTo(const ttstr & filename)
+void tRisaTmpFS::SerializeTo(const ttstr & filename)
 {
 	std::auto_ptr<tRisseBinaryStream>
-		stream(tTVPFileSystemManager::instance()->CreateStream(filename, RISSE_BS_WRITE));
+		stream(tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_WRITE));
 
 	SerializeTo(stream.get());
 }
@@ -642,7 +643,7 @@ void tTVPTmpFS::SerializeTo(const ttstr & filename)
 //! @brief		指定されたストリームから内容を復元する
 //! @param		src 入力元ストリーム
 //---------------------------------------------------------------------------
-void tTVPTmpFS::UnserializeFrom(tRisseBinaryStream * src)
+void tRisaTmpFS::UnserializeFrom(tRisseBinaryStream * src)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -655,10 +656,10 @@ void tTVPTmpFS::UnserializeFrom(tRisseBinaryStream * src)
 		// 最初のノードタイプ(ディレクトリを表す 0x80 になってないとおかしい)
 
 	if(memcmp(magic, SerializeMagic, 8) || firstnodetype != 0x80)
-		eTVPException::Throw(RISSE_WS_TR("not a tmpfs archive"));
+		eRisaException::Throw(RISSE_WS_TR("not a tmpfs archive"));
 
 	// 再帰的に内容を読み込む
-	Root = new tTVPTmpFSNode(NULL, tTVPTmpFSNode::ntDirectory, src);
+	Root = new tRisaTmpFSNode(NULL, tRisaTmpFSNode::ntDirectory, src);
 }
 //---------------------------------------------------------------------------
 
@@ -667,10 +668,10 @@ void tTVPTmpFS::UnserializeFrom(tRisseBinaryStream * src)
 //! @brief		指定されたファイルから内容を復元する
 //! @param		filename 入力元ファイル
 //---------------------------------------------------------------------------
-void tTVPTmpFS::UnserializeFrom(const ttstr & filename)
+void tRisaTmpFS::UnserializeFrom(const ttstr & filename)
 {
 	std::auto_ptr<tRisseBinaryStream>
-		stream(tTVPFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
+		stream(tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
 
 	UnserializeFrom(stream.get());
 }
@@ -682,13 +683,13 @@ void tTVPTmpFS::UnserializeFrom(const ttstr & filename)
 //! @param		name ノード
 //! @return		その位置にあるノード。その位置が見つからない場合は NULL
 //---------------------------------------------------------------------------
-tTVPTmpFSNode * tTVPTmpFS::GetNodeAt(const ttstr & name)
+tRisaTmpFSNode * tRisaTmpFS::GetNodeAt(const ttstr & name)
 {
 	// '/' で name を区切り、順に root からノードをたどっていく
 	const risse_char * p = name.c_str();
 	const risse_char *pp = p;
 
-	tTVPTmpFSNode *node = Root;
+	tRisaTmpFSNode *node = Root;
 
 	while(*p)
 	{
@@ -717,12 +718,12 @@ tTVPTmpFSNode * tTVPTmpFS::GetNodeAt(const ttstr & name)
 //---------------------------------------------------------------------------
 //! @brief		ルートディレクトリを作成する
 //---------------------------------------------------------------------------
-void tTVPTmpFS::CreateRoot()
+void tRisaTmpFS::CreateRoot()
 {
 	if(Root) return;
 
 	// ルートノードを作成
-	Root = new tTVPTmpFSNode(NULL, tTVPTmpFSNode::ntDirectory, ttstr());
+	Root = new tRisaTmpFSNode(NULL, tRisaTmpFSNode::ntDirectory, ttstr());
 }
 //---------------------------------------------------------------------------
 
@@ -730,7 +731,7 @@ void tTVPTmpFS::CreateRoot()
 //---------------------------------------------------------------------------
 //! @brief		ルートディレクトリを削除する
 //---------------------------------------------------------------------------
-void tTVPTmpFS::RemoveRoot()
+void tRisaTmpFS::RemoveRoot()
 {
 	// root ノードを削除
 	delete Root, Root = NULL;
@@ -741,7 +742,7 @@ void tTVPTmpFS::RemoveRoot()
 //---------------------------------------------------------------------------
 //! @brief		内容をすべてクリアする
 //---------------------------------------------------------------------------
-void tTVPTmpFS::Clear()
+void tRisaTmpFS::Clear()
 {
 	RemoveRoot();
 	CreateRoot();

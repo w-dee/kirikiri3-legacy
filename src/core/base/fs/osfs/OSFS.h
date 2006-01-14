@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -19,14 +20,14 @@
 //---------------------------------------------------------------------------
 //! @brief		OS ネイティブファイルストリーム
 //---------------------------------------------------------------------------
-class tTVPOSNativeStream : public tRisseBinaryStream
+class tRisaOSNativeStream : public tRisseBinaryStream
 {
 protected:
 	wxFile File;
 
 public:
-	tTVPOSNativeStream(const wxString & filename, risse_uint32 flags);
-	~tTVPOSNativeStream();
+	tRisaOSNativeStream(const wxString & filename, risse_uint32 flags);
+	~tRisaOSNativeStream();
 
 	risse_uint64 Seek(risse_int64 offset, risse_int whence);
 	risse_size Read(void *buffer, risse_size read_size);
@@ -42,7 +43,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		OS ファイルシステム
 //---------------------------------------------------------------------------
-class tTVPOSFS : public tTVPFileSystem
+class tRisaOSFS : public tRisaFileSystem
 {
 	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
@@ -50,22 +51,22 @@ class tTVPOSFS : public tTVPFileSystem
 	bool CheckCase; //!< ファイル名の大文字・小文字をチェックする場合は真
 
 public:
-	tTVPOSFS(const ttstr & basedir, bool checkcase = true);
+	tRisaOSFS(const ttstr & basedir, bool checkcase = true);
 
-	//-- tTVPFileSystem メンバ
-	~tTVPOSFS();
+	//-- tRisaFileSystem メンバ
+	~tRisaOSFS();
 
 	size_t GetFileListAt(const ttstr & dirname,
-		tTVPFileSystemIterationCallback * callback);
+		tRisaFileSystemIterationCallback * callback);
 	bool FileExists(const ttstr & filename);
 	bool DirectoryExists(const ttstr & dirname);
 	void RemoveFile(const ttstr & filename);
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
-	void Stat(const ttstr & filename, tTVPStatStruc & struc);
+	void Stat(const ttstr & filename, tRisaStatStruc & struc);
 	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
 
-	//-- tTVPFileSystem メンバ ここまで
+	//-- tRisaFileSystem メンバ ここまで
 private:
 	static wxString ConvertToNativePathDelimiter(const wxString & path);
 

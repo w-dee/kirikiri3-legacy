@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -11,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "proc.h"
 #include "RIFFWaveDecoder.h"
-#include "TVPException.h"
+#include "RisaException.h"
 #include "FSManager.h"
 
 RISSE_DEFINE_SOURCE_ID(2200);
@@ -35,10 +36,10 @@ RISSE_DEFINE_SOURCE_ID(2200);
 
 
 // WAVEFORMATEXTENSIBLE で使用されている GUID
-static risse_uint8 TVP_GUID_KSDATAFORMAT_SUBTYPE_PCM[16] =
+static risse_uint8 RISA__GUID_KSDATAFORMAT_SUBTYPE_PCM[16] =
 { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
   0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 };
-static risse_uint8 TVP_GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
+static risse_uint8 RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
 { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
   0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 };
 
@@ -49,14 +50,14 @@ static risse_uint8 TVP_GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPRIFFWaveDecoder::tTVPRIFFWaveDecoder(const ttstr & filename)
+tRisaRIFFWaveDecoder::tRisaRIFFWaveDecoder(const ttstr & filename)
 {
-	Stream = tTVPFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
+	Stream = tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
 
 	try
 	{
 		if(!Open())
-			eTVPException::Throw(RISSE_WS_TR("can not open file '%1' : invalid format"),
+			eRisaException::Throw(RISSE_WS_TR("can not open file '%1' : invalid format"),
 				filename);
 	}
 	catch(...)
@@ -71,7 +72,7 @@ tTVPRIFFWaveDecoder::tTVPRIFFWaveDecoder(const ttstr & filename)
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-~tTVPRIFFWaveDecoder()
+~tRisaRIFFWaveDecoder()
 {
 	delete Stream;
 }
@@ -82,7 +83,7 @@ tTVPRIFFWaveDecoder::tTVPRIFFWaveDecoder(const ttstr & filename)
 //! @brief		サウンド形式を得る
 //! @param		format   形式を格納するための構造体
 //---------------------------------------------------------------------------
-void tTVPRIFFWaveDecoder::GetFormat(tTVPWaveFormat & format)
+void tRisaRIFFWaveDecoder::GetFormat(tRisaWaveFormat & format)
 {
 	format = Format;
 }
@@ -99,7 +100,7 @@ void tTVPRIFFWaveDecoder::GetFormat(tTVPWaveFormat & format)
 //!				示さない。返値が偽になったかどうかでサウンドの最後に達したかどうかを
 //!				判断すること。
 //---------------------------------------------------------------------------
-bool tTVPRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
+bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
 {
 	risse_uint64 remain = Format.TotalSamples - CurrentPos;
 	risse_uint writesamples = bufsamplelen < remain ? bufsamplelen : (risse_uint)remain;
@@ -170,7 +171,7 @@ bool tTVPRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint&
 //! @param		samplepos		変更したい位置
 //! @return		デコード位置の変更に成功すると真
 //---------------------------------------------------------------------------
-bool tTVPRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
+bool tRisaRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
 {
 	if(Format.TotalSamples <= samplepos) return false;
 
@@ -194,7 +195,7 @@ bool tTVPRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
 //! @brief		サウンドを開く
 //! @return		開くことに成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPRIFFWaveDecoder::Open()
+bool tRisaRIFFWaveDecoder::Open()
 {
 	// Stream を RIFF Wave サウンドとして開く
 
@@ -222,13 +223,13 @@ bool tTVPRIFFWaveDecoder::Open()
 	if(memcmp(buf, wave_mark, 4)) return false;
 
 	// find fmt chunk
-	if(!TVPFindRIFFChunk(Stream, fmt_mark)) return false;
+	if(!RisaFindRIFFChunk(Stream, fmt_mark)) return false;
 
 	size = Stream->ReadI32LE();
 	next = Stream->GetPosition() + size;
 
 	// read Format
-	tTVPWaveFormat Format;
+	tRisaWaveFormat Format;
 
 	risse_uint16 format_tag = Stream->ReadI16LE(); // wFormatTag
 	if(format_tag != WAVE_FORMAT_PCM &&
@@ -256,9 +257,9 @@ bool tTVPRIFFWaveDecoder::Open()
 
 		risse_uint8 guid[16];
 		if(16 != Stream->Read(guid, 16)) return false;
-		if(!memcmp(guid, TVP_GUID_KSDATAFORMAT_SUBTYPE_PCM, 16))
+		if(!memcmp(guid, RISA__GUID_KSDATAFORMAT_SUBTYPE_PCM, 16))
 			Format.IsFloat = false;
-		else if(!memcmp(guid, TVP_GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 16))
+		else if(!memcmp(guid, RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 16))
 			Format.IsFloat = true;
 		else
 			return false;
@@ -295,7 +296,7 @@ bool tTVPRIFFWaveDecoder::Open()
 	if(next != Stream->Seek(next, RISSE_BS_SEEK_SET)) return false;
 
 	// find data chunk
-	if(!TVPFindRIFFChunk(Stream, data_mark)) return false;
+	if(!RisaFindRIFFChunk(Stream, data_mark)) return false;
 
 	size = Stream->ReadI32LE();
 
@@ -324,7 +325,7 @@ bool tTVPRIFFWaveDecoder::Open()
 //! @param		chunk		探したいチャンク
 //! @return		指定された RIFF チャンクが見つかれば真
 //---------------------------------------------------------------------------
-bool tTVPRIFFWaveDecoder::FindRIFFChunk(tRisseStream * stream, const risse_uint8 *chunk)
+bool tRisaRIFFWaveDecoder::FindRIFFChunk(tRisseStream * stream, const risse_uint8 *chunk)
 {
 	risse_uint8 buf[4];
 	while(true)

@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -9,8 +10,8 @@
 //! @file
 //! @brief シングルトンを実現する自家製テンプレートクラス
 //---------------------------------------------------------------------------
-#ifndef TVPSINGLETONH
-#define TVPSINGLETONH
+#ifndef RisaSINGLETONH
+#define RisaSINGLETONH
 
 /*!
 	@note
@@ -32,15 +33,15 @@
 //! @brief  シングルトンオブジェクト用クラス
 //---------------------------------------------------------------------------
 template <typename T>
-class tTVPSingleton
+class tRisaSingleton
 {
 	struct object_creator
 	{
 		// この構造体は static 領域に配置され、main 関数よりも前に作成される。
-		// コンストラクタでは tTVPSingleton<T>::instance() が呼ばれるため、
-		// tTVPSingleton<T>::instance() 中の object が main 関数よりも前に
+		// コンストラクタでは tRisaSingleton<T>::instance() が呼ばれるため、
+		// tRisaSingleton<T>::instance() 中の object が main 関数よりも前に
 		// 作成されることを保証する。
-		object_creator() { tTVPSingleton<T>::instance(); }
+		object_creator() { tRisaSingleton<T>::instance(); }
 		inline void do_nothing() const { }
 	};
 	static object_creator create_object;
@@ -50,13 +51,13 @@ public:
 	// このクラスのオブジェクトを作成することは、
 	// このクラスのオブジェクトの存在期間中、T のインスタンスが存在することを
 	// 保証する。
-	// クラスのメンバとして tTVPSingleton<T> 型のメンバを記述すれば、
+	// クラスのメンバとして tRisaSingleton<T> 型のメンバを記述すれば、
 	// そのクラスのオブジェクトが存在し続ける間は T のインスタンスが存在
 	// することになる。
 	// これの寿命管理には shared_ptr を用いた参照カウンタを用いているため、
 	// 相互参照があるとオブジェクトが解放されないままになるので注意が必要である。
 
-	tTVPSingleton() : referrer(instance()) {;}
+	tRisaSingleton() : referrer(instance()) {;}
 
 	static boost::shared_ptr<T> & instance()
 	{
@@ -67,8 +68,8 @@ public:
 	}
 };
 template <typename T>
-typename tTVPSingleton<T>::object_creator
-tTVPSingleton<T>::create_object;
+typename tRisaSingleton<T>::object_creator
+tRisaSingleton<T>::create_object;
 //---------------------------------------------------------------------------
 
 /*!
@@ -110,7 +111,7 @@ public:
 
 class s1
 {
-	tTVPSingleton<s0> referer_s0;
+	tRisaSingleton<s0> referer_s0;
 public:
 	s1() { printf("s1 construct\n"); }
 	~s1() { printf("s1 destruct\n"); }
@@ -118,7 +119,7 @@ public:
 
 class s2
 {
-	tTVPSingleton<s0> referer_s0;
+	tRisaSingleton<s0> referer_s0;
 public:
 	s2() { printf("s2 construct\n"); }
 	~s2() { printf("s2 destruct\n"); }
@@ -126,8 +127,8 @@ public:
 
 class s3
 {
-	tTVPSingleton<s1> referer_s1;
-	tTVPSingleton<s2> referer_s2;
+	tRisaSingleton<s1> referer_s1;
+	tRisaSingleton<s2> referer_s2;
 	int n;
 public:
 	s3() { printf("s3 construct\n"); n = 1; }
@@ -138,7 +139,7 @@ public:
 int main()
 {
 	printf("main begin\n");
-	printf("n : %d\n", tTVPSingleton<s3>::instance()->getN());
+	printf("n : %d\n", tRisaSingleton<s3>::instance()->getN());
 	printf("main end\n");
 }
 
@@ -172,16 +173,16 @@ s0 destruct
 //!         メッセージが表示されるというだけ
 //---------------------------------------------------------------------------
 template <typename T>
-class tTVPSingletonObjectLifeTracer
+class tRisaSingletonObjectLifeTracer
 {
 public:
-	tTVPSingletonObjectLifeTracer()
+	tRisaSingletonObjectLifeTracer()
 	{
 #ifdef DEBUG
 		fprintf(stderr, "class %s created\n", typeid(T).name());
 #endif
 	}
-	~tTVPSingletonObjectLifeTracer()
+	~tRisaSingletonObjectLifeTracer()
 	{
 #ifdef DEBUG
 		fprintf(stderr, "class %s deleted\n", typeid(T).name());

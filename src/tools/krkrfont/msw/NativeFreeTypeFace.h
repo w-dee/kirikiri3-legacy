@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -21,7 +22,7 @@
 //---------------------------------------------------------------------------
 //! @brief		Win32 GDI 経由でのFreeType Face クラス
 //---------------------------------------------------------------------------
-class tTVPNativeFreeTypeFace : public tTVPBaseFreeTypeFace
+class tRisaNativeFreeTypeFace : public tRisaBaseFreeTypeFace
 {
 protected:
 	wxString FaceName;	//!< Face名 = フォント名
@@ -34,8 +35,8 @@ private:
 	FT_StreamRec Stream;
 
 public:
-	tTVPNativeFreeTypeFace(const wxString &fontname, risse_uint32 options);
-	virtual ~tTVPNativeFreeTypeFace();
+	tRisaNativeFreeTypeFace(const wxString &fontname, risse_uint32 options);
+	virtual ~tRisaNativeFreeTypeFace();
 
 	virtual FT_Face GetFTFace() const;
 	virtual void GetFaceNameList(wxArrayString & dest) const; 

@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -14,7 +15,7 @@ RISSE_DEFINE_SOURCE_ID(2002);
 
 #include "FSManager.h"
 #include "PathFS.h"
-#include "TVPException.h"
+#include "RisaException.h"
 #include <algorithm>
 
 
@@ -23,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(2002);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPPathFS::tTVPPathFS()
+tRisaPathFS::tRisaPathFS()
 {
 	NeedRebuild = true;
 }
@@ -33,7 +34,7 @@ tTVPPathFS::tTVPPathFS()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPPathFS::~tTVPPathFS()
+tRisaPathFS::~tRisaPathFS()
 {
 }
 //---------------------------------------------------------------------------
@@ -45,15 +46,15 @@ tTVPPathFS::~tTVPPathFS()
 //! @param		callback コールバックオブジェクト
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
-size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
-	tTVPFileSystemIterationCallback * callback)
+size_t tRisaPathFS::GetFileListAt(const ttstr & dirname,
+	tRisaFileSystemIterationCallback * callback)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	// PathFS にはファイルシステムの / しか存在しない
 	// そのためディレクトリ指定は / へのアクセスしか認めない
 	if(dirname != RISSE_WS("/") || !dirname.IsEmpty())
-		eTVPException::Throw(RISSE_WS_TR("no such directory"));
+		eRisaException::Throw(RISSE_WS_TR("no such directory"));
 
 	Ensure();
 
@@ -74,7 +75,7 @@ size_t tTVPPathFS::GetFileListAt(const ttstr & dirname,
 //! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPPathFS::FileExists(const ttstr & filename)
+bool tRisaPathFS::FileExists(const ttstr & filename)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -94,7 +95,7 @@ bool tTVPPathFS::FileExists(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPPathFS::DirectoryExists(const ttstr & dirname)
+bool tRisaPathFS::DirectoryExists(const ttstr & dirname)
 {
 	// PathFS にはサブディレクトリは存在しない
 	if(dirname != RISSE_WS("/") || !dirname.IsEmpty())
@@ -108,9 +109,9 @@ bool tTVPPathFS::DirectoryExists(const ttstr & dirname)
 //! @brief		ファイルを削除する
 //! @param		filename ファイル名
 //---------------------------------------------------------------------------
-void tTVPPathFS::RemoveFile(const ttstr & filename)
+void tRisaPathFS::RemoveFile(const ttstr & filename)
 {
-	eTVPException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -120,9 +121,9 @@ void tTVPPathFS::RemoveFile(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
-void tTVPPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
+void tRisaPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	eTVPException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -132,9 +133,9 @@ void tTVPPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
-void tTVPPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
+void tRisaPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	eTVPException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -144,7 +145,7 @@ void tTVPPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //! @param		filename ファイル名
 //! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
-void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
+void tRisaPathFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -158,9 +159,9 @@ void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 
 	ttstr * mapped_filename = Hash.Find(fn);
 	if(!mapped_filename)
-		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
-	tTVPFileSystemManager::instance()->Stat(*mapped_filename, struc);
+	tRisaFileSystemManager::instance()->Stat(*mapped_filename, struc);
 }
 //---------------------------------------------------------------------------
 
@@ -171,7 +172,7 @@ void tTVPPathFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, risse_uint32 flags)
+tRisseBinaryStream * tRisaPathFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -185,9 +186,9 @@ tRisseBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, risse_uint
 
 	ttstr * mapped_filename = Hash.Find(fn);
 	if(!mapped_filename)
-		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
-	return tTVPFileSystemManager::instance()->CreateStream(*mapped_filename, flags);
+	return tRisaFileSystemManager::instance()->CreateStream(*mapped_filename, flags);
 }
 //---------------------------------------------------------------------------
 
@@ -197,7 +198,7 @@ tRisseBinaryStream * tTVPPathFS::CreateStream(const ttstr & filename, risse_uint
 //! @brief		name: 名前
 //! @brief		recursive: 再帰的に名前を検索するかどうか
 //---------------------------------------------------------------------------
-void tTVPPathFS::Add(const ttstr & name, bool recursive)
+void tRisaPathFS::Add(const ttstr & name, bool recursive)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -221,7 +222,7 @@ void tTVPPathFS::Add(const ttstr & name, bool recursive)
 //! @brief		パスからディレクトリを削除する
 //! @param		name 名前
 //---------------------------------------------------------------------------
-void tTVPPathFS::Remove(const ttstr & name)
+void tRisaPathFS::Remove(const ttstr & name)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -245,12 +246,12 @@ void tTVPPathFS::Remove(const ttstr & name)
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステム中のファイル名と実際のファイル名の対応表を作り直す
 //---------------------------------------------------------------------------
-void tTVPPathFS::Ensure()
+void tRisaPathFS::Ensure()
 {
 	if(!NeedRebuild) return; // 作り直す必要はない
 
 	// コールバックを準備
-	class tCallback : public tTVPFileSystemIterationCallback
+	class tCallback : public tRisaFileSystemIterationCallback
 	{
 		tHash & Hash;
 		ttstr DirName;
@@ -261,7 +262,7 @@ void tTVPPathFS::Ensure()
 		{
 			// filename の名前だけを取り出す
 			ttstr basename;
-			tTVPFileSystemManager::SplitPathAndName(filename, NULL, &basename);
+			tRisaFileSystemManager::SplitPathAndName(filename, NULL, &basename);
 
 			// 表に追加
 			Hash.Add(basename, DirName + filename);
@@ -282,7 +283,7 @@ void tTVPPathFS::Ensure()
 	{
 		bool recursive = (i->c_str()[0] == static_cast<risse_char>(RISSE_WC('+')));
 		ttstr dirname(i->c_str() + 1);
-		tTVPFileSystemManager::instance()->GetFileListAt(dirname, &callback, recursive);
+		tRisaFileSystemManager::instance()->GetFileListAt(dirname, &callback, recursive);
 	}
 
 	// フラグを倒す

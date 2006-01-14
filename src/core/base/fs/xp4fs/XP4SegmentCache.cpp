@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -30,7 +31,7 @@ RISSE_DEFINE_SOURCE_ID(2008);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPXP4SegmentCache::tTVPXP4SegmentCache()
+tRisaXP4SegmentCache::tRisaXP4SegmentCache()
 {
 	TotalBytes = 0;
 }
@@ -40,7 +41,7 @@ tTVPXP4SegmentCache::tTVPXP4SegmentCache()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPXP4SegmentCache::~tTVPXP4SegmentCache()
+tRisaXP4SegmentCache::~tRisaXP4SegmentCache()
 {
 }
 //---------------------------------------------------------------------------
@@ -49,7 +50,7 @@ tTVPXP4SegmentCache::~tTVPXP4SegmentCache()
 //---------------------------------------------------------------------------
 //! @brief		キャッシュの上限に達していないかどうかをチェックし、はみ出た分を削除
 //---------------------------------------------------------------------------
-void tTVPXP4SegmentCache::CheckLimit()
+void tRisaXP4SegmentCache::CheckLimit()
 {
 	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
@@ -78,7 +79,7 @@ void tTVPXP4SegmentCache::CheckLimit()
 //---------------------------------------------------------------------------
 //! @brief		キャッシュをすべてクリアする
 //---------------------------------------------------------------------------
-void tTVPXP4SegmentCache::Clear()
+void tRisaXP4SegmentCache::Clear()
 {
 	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
@@ -99,8 +100,8 @@ void tTVPXP4SegmentCache::Clear()
 //! @param		uncomp_size キャッシュ中に無かった場合に読みに行ったデータを展開したら何バイトになるか
 //! @return		展開されたデータブロック
 //---------------------------------------------------------------------------
-tTVPXP4SegmentCache::tDataBlock
-	tTVPXP4SegmentCache::Find(void * pointer, risse_size storage_index,
+tRisaXP4SegmentCache::tDataBlock
+	tRisaXP4SegmentCache::Find(void * pointer, risse_size storage_index,
 		risse_size segment_index,
 		tRisseBinaryStream * instream, risse_uint64 dataofs, risse_size insize,
 		risse_size uncomp_size)
@@ -118,7 +119,7 @@ tTVPXP4SegmentCache::tDataBlock
 	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
 	// ハッシュテーブルを検索する
-	boost::shared_ptr<tTVPDecompressedHolder> * ptr = 
+	boost::shared_ptr<tRisaDecompressedHolder> * ptr = 
 		HashTable.FindAndTouchWithHash(key, hash);
 	if(ptr)
 	{
@@ -132,8 +133,8 @@ tTVPXP4SegmentCache::tDataBlock
 
 	// データブロックを新たに作成
 	tDataBlock block(
-		new tTVPDecompressedHolder(
-			tTVPDecompressedHolder::dhmZLib,
+		new tRisaDecompressedHolder(
+			tRisaDecompressedHolder::dhmZLib,
 			instream,
 			insize,
 			uncomp_size));

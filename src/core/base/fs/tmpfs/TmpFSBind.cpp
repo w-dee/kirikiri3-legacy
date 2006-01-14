@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -12,7 +13,7 @@
 #include "prec.h"
 #include "TmpFS.h"
 #include "TmpFSBind.h"
-#include "TVPException.h"
+#include "RisaException.h"
 
 
 RISSE_DEFINE_SOURCE_ID(2014);
@@ -40,7 +41,7 @@ risse_error tRisseNI_TmpFS::Construct(risse_int numparams,
 	*/
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(risse_obj, new tTVPTmpFS());
+	RegisterFileSystemNativeInstance(risse_obj, new tRisaTmpFS());
 }
 //---------------------------------------------------------------------------
 
@@ -162,13 +163,13 @@ tRisseNativeInstance *tRisseNC_TmpFS::CreateNativeInstance()
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPTmpFSRegisterer::tTVPTmpFSRegisterer()
+tRisaTmpFSRegisterer::tRisaTmpFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
 	iRisseDispatch2 * cls = new tRisseNC_TmpFS();
 	try
 	{
-		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
+		tRisaFileSystemRegisterer::instance()->RegisterClassObject(
 							RISSE_WS("TmpFS"), cls);
 	}
 	catch(...)

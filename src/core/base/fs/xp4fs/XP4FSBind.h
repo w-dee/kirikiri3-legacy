@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -29,9 +30,9 @@ public:
 		tRisseVariant **param, iRisseDispatch2 *risse_obj);
 	void Invalidate();
 
-	tTVPXP4FS * GetFileSystem() 
+	tRisaXP4FS * GetFileSystem() 
 	{
-		return reinterpret_cast<tTVPXP4FS*>(
+		return reinterpret_cast<tRisaXP4FS*>(
 			tRisseNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
@@ -65,18 +66,18 @@ private:
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tTVPXP4FSRegisterer
+class tRisaXP4FSRegisterer
 {
-	tTVPSingleton<tTVPRisseScriptEngine> ref_tTVPRisseScriptEngine; //!< tTVPRisseScriptEngine に依存
-	tTVPSingleton<tTVPFileSystemRegisterer> ref_tTVPFileSystemRegisterer; //!< tTVPFileSystemRegisterer に依存
+	tRisaSingleton<tRisaRisseScriptEngine> ref_tRisaRisseScriptEngine; //!< tRisaRisseScriptEngine に依存
+	tRisaSingleton<tRisaFileSystemRegisterer> ref_tRisaFileSystemRegisterer; //!< tRisaFileSystemRegisterer に依存
 public:
-	tTVPXP4FSRegisterer();
+	tRisaXP4FSRegisterer();
 
 private:
-	tTVPSingletonObjectLifeTracer<tTVPXP4FSRegisterer> singleton_object_life_tracer;
+	tRisaSingletonObjectLifeTracer<tRisaXP4FSRegisterer> singleton_object_life_tracer;
 public:
-	static boost::shared_ptr<tTVPXP4FSRegisterer> & instance() { return
-		tTVPSingleton<tTVPXP4FSRegisterer>::instance();
+	static boost::shared_ptr<tRisaXP4FSRegisterer> & instance() { return
+		tRisaSingleton<tRisaXP4FSRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------

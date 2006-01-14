@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -20,7 +21,7 @@
 //! @note		このメモリブロックは、複数のストリームで共有される可能性があり、
 //!				複数スレッドから同時アクセスされる可能性がある
 //---------------------------------------------------------------------------
-class tTVPMemoryStreamBlock
+class tRisaMemoryStreamBlock
 {
 	tRisseCriticalSection CS; //!< このメモリブロックへのアクセスを保護するクリティカルセクション
 	void * Block;			//!< メモリブロック
@@ -29,9 +30,9 @@ class tTVPMemoryStreamBlock
 	risse_uint RefCount;		//!< 参照カウント
 
 public:
-	tTVPMemoryStreamBlock();
+	tRisaMemoryStreamBlock();
 protected:
-	~tTVPMemoryStreamBlock();
+	~tRisaMemoryStreamBlock();
 public:
 	void AddRef();
 	void Release();
@@ -54,17 +55,17 @@ public:
 /*
 	this class provides a tRisseBinaryStream based access method for a memory block.
 */
-class tTVPMemoryStream : public tRisseBinaryStream
+class tRisaMemoryStream : public tRisseBinaryStream
 {
 protected:
-	tTVPMemoryStreamBlock * Block; //!< メモリブロック
+	tRisaMemoryStreamBlock * Block; //!< メモリブロック
 	risse_size CurrentPos;		//!< 現在のポインタ
 	risse_uint32 Flags;			//!< アクセスフラグ
 
 public:
-	tTVPMemoryStream(risse_uint32 flags);
-	tTVPMemoryStream(risse_uint32 flags, tTVPMemoryStreamBlock * block);
-	~tTVPMemoryStream();
+	tRisaMemoryStream(risse_uint32 flags);
+	tRisaMemoryStream(risse_uint32 flags, tRisaMemoryStreamBlock * block);
+	~tRisaMemoryStream();
 
 	risse_uint64 Seek(risse_int64 offset, risse_int whence);
 	risse_size Read(void *buffer, risse_size read_size);

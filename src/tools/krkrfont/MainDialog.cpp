@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -48,7 +49,7 @@ wxMainDialog::wxMainDialog()
 
 	// 使用可能なフォントを列挙する
 	wxArrayString array;
-	tTVPFreeTypeFontDriver::EnumerateFonts(array, 0);
+	tRisaFreeTypeFontDriver::EnumerateFonts(array, 0);
 	int n = array.Count();
 	for(int i = 0; i < n; i++)
 		SelectFontChoice->Append(array[i]);
@@ -134,25 +135,25 @@ void wxMainDialog::UpdateFaceIndex()
 		risse_int face_index = FaceNameChoice->GetSelection();
 		if(face_index < 0) face_index = 0;
 		risse_uint32 options =
-			TVP_GET_FACE_INDEX_FROM_OPTIONS(face_index);
+			RISA__GET_FACE_INDEX_FROM_OPTIONS(face_index);
 		if(BoldCheckBox->GetValue())
-			options |= TVP_TF_BOLD;
+			options |= RISA__TF_BOLD;
 		if(!AntialiasedCheckBox->GetValue())
-			options |= TVP_FACE_OPTIONS_NO_ANTIALIASING;
+			options |= RISA__FACE_OPTIONS_NO_ANTIALIASING;
 		if(NoHintingCheckBox->GetValue())
-			options |= TVP_FACE_OPTIONS_NO_HINTING;
+			options |= RISA__FACE_OPTIONS_NO_HINTING;
 		if(ForceAutoHintingCheckBox->GetValue())
-			options |= TVP_FACE_OPTIONS_FORCE_AUTO_HINTING;
+			options |= RISA__FACE_OPTIONS_FORCE_AUTO_HINTING;
 		if(SelectFileRadioButton->GetValue())
 		{
 			// ファイルによる指定
-			Face = new tTVPFreeTypeFace(
-				SelectFileEdit->GetLabel(), options | TVP_FACE_OPTIONS_FILE);
+			Face = new tRisaFreeTypeFace(
+				SelectFileEdit->GetLabel(), options | RISA__FACE_OPTIONS_FILE);
 		}
 		else
 		{
 			// フォント名による指定
-			Face = new tTVPFreeTypeFace(
+			Face = new tRisaFreeTypeFace(
 				SelectFontChoice->GetStringSelection(), options);
 		}
 	}
@@ -262,7 +263,7 @@ void wxMainDialog::GenerateButtonClick(wxCommandEvent& event)
 			if(OutputFileNameEdit->GetLabel().IsEmpty()) return;
 		}
 
-		TVPWriteGlyphBitmap(Face, OutputFileNameEdit->GetLabel(),
+		RisaWriteGlyphBitmap(Face, OutputFileNameEdit->GetLabel(),
 			!GenerateFontMetricsOnlyCheckBox->GetValue(), false,
 			this);
 	}

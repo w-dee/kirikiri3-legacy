@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -16,7 +17,7 @@
 //---------------------------------------------------------------------------
 //! @brief		１グリフのメトリックを表す構造体
 //---------------------------------------------------------------------------
-struct tTVPGlyphMetrics
+struct tRisaGlyphMetrics
 {
 	risse_int CellIncX;		//!< 一文字進めるの必要なX方向のピクセル数(64倍されている数値なので注意)
 	risse_int CellIncY;		//!< 一文字進めるの必要なY方向のピクセル数(64倍されている数値なので注意)
@@ -27,7 +28,7 @@ struct tTVPGlyphMetrics
 //---------------------------------------------------------------------------
 //! @brief		１グリフを表すクラス
 //---------------------------------------------------------------------------
-class tTVPGlyphBitmap
+class tRisaGlyphBitmap
 {
 	risse_uint RefCount;				//!< 参照カウンタ
 	risse_uint8 * Data;				//!< ビットマップデータ(8bpp, グレースケール)
@@ -36,20 +37,20 @@ class tTVPGlyphBitmap
 	risse_int OriginY;				//!< 描画点からブラックボックスの上端までの位置
 	risse_uint BlackBoxW;				//!< ブラックボックスの幅
 	risse_uint BlackBoxH;				//!< ブラックボックスの高さ
-	tTVPGlyphMetrics	Metrics;	//!< メトリック
+	tRisaGlyphMetrics	Metrics;	//!< メトリック
 
 public:
-	tTVPGlyphBitmap(
+	tRisaGlyphBitmap(
 		risse_uint8 * indata,
 		risse_int inpitch,
 		risse_int originx, risse_int originy,
 		risse_uint blackboxw, risse_uint blackboxh,
-		const tTVPGlyphMetrics & metrics);
-	tTVPGlyphBitmap(const tTVPGlyphBitmap & ref);
+		const tRisaGlyphMetrics & metrics);
+	tRisaGlyphBitmap(const tRisaGlyphBitmap & ref);
 
 private:
 	// デストラクタはprivate
-	~tTVPGlyphBitmap();
+	~tRisaGlyphBitmap();
 
 public:
 	void AddRef();
@@ -63,7 +64,7 @@ public:
 	risse_int GetOriginY() const { return OriginY; }
 	risse_uint GetBlackBoxW() const { return BlackBoxW; }
 	risse_uint GetBlackBoxH() const { return BlackBoxH; }
-	const tTVPGlyphMetrics & GetMetrics() const { return Metrics; }
+	const tRisaGlyphMetrics & GetMetrics() const { return Metrics; }
 };
 //---------------------------------------------------------------------------
 
@@ -72,12 +73,12 @@ public:
 //---------------------------------------------------------------------------
 // Face を開くときのオプションなど
 //---------------------------------------------------------------------------
-#define	TVP_GET_FACE_INDEX_FROM_OPTIONS(x) ((x) & 0xff) //!< オプション整数からFaceインデックスを取り出すマクロ
-#define	TVP_FACE_OPTIONS_FACE_INDEX(x) ((x) & 0xff) //!< Faceインデックスをオプション整数に変換するマクロ
-#define	TVP_FACE_OPTIONS_FILE 0x00010000 //!< フォント名ではなくてファイル名によるフォントの指定を行う
-#define TVP_FACE_OPTIONS_NO_HINTING 0x00020000 //!< ヒンティングを行わない
-#define TVP_FACE_OPTIONS_FORCE_AUTO_HINTING 0x00020000 //!< 強制的に auto hinting を行う
-#define TVP_FACE_OPTIONS_NO_ANTIALIASING 0x00040000 //!< アンチエイリアスを行わない
+#define	RISA__GET_FACE_INDEX_FROM_OPTIONS(x) ((x) & 0xff) //!< オプション整数からFaceインデックスを取り出すマクロ
+#define	RISA__FACE_OPTIONS_FACE_INDEX(x) ((x) & 0xff) //!< Faceインデックスをオプション整数に変換するマクロ
+#define	RISA__FACE_OPTIONS_FILE 0x00010000 //!< フォント名ではなくてファイル名によるフォントの指定を行う
+#define RISA__FACE_OPTIONS_NO_HINTING 0x00020000 //!< ヒンティングを行わない
+#define RISA__FACE_OPTIONS_FORCE_AUTO_HINTING 0x00020000 //!< 強制的に auto hinting を行う
+#define RISA__FACE_OPTIONS_NO_ANTIALIASING 0x00040000 //!< アンチエイリアスを行わない
 
 #endif
 

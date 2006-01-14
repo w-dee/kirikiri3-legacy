@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -15,8 +16,8 @@
 #include "MainDialog.h"
 
 
-#define TVP_PREVIEW_MARGIN_RATIO 0.5
-#define TVP_PREVIEW_MARGIN_MIN   1
+#define RISA__PREVIEW_MARGIN_RATIO 0.5
+#define RISA__PREVIEW_MARGIN_MIN   1
 
 //---------------------------------------------------------------------------
 //! @brief		プレビューウィンドウのクライアントとなるスクロールウィンドウクラス
@@ -195,11 +196,11 @@ wxCoord wxPreviewScrolledWindow::OnGetLineHeight(size_t n) const
 //---------------------------------------------------------------------------
 risse_uint wxPreviewScrolledWindow::GetMargin() const
 {
-	if(!FACE) return TVP_PREVIEW_MARGIN_MIN; // FACE が NULL の場合は特に意味のない値を返す
+	if(!FACE) return RISA__PREVIEW_MARGIN_MIN; // FACE が NULL の場合は特に意味のない値を返す
 	risse_size size = FACE->GetHeight();
-	size *= (int)(TVP_PREVIEW_MARGIN_RATIO * 256);
+	size *= (int)(RISA__PREVIEW_MARGIN_RATIO * 256);
 	size /= 256;
-	if(size < TVP_PREVIEW_MARGIN_MIN) size = TVP_PREVIEW_MARGIN_MIN;
+	if(size < RISA__PREVIEW_MARGIN_MIN) size = RISA__PREVIEW_MARGIN_MIN;
 	return size * Magnify;
 
 }
@@ -225,7 +226,7 @@ void wxPreviewScrolledWindow::PrintCharacter(risse_char ch, int x, int y)
 	wxCoord char_size = FACE->GetHeight() * Magnify + margin * 2;
 	dc.DrawRectangle(x, y, char_size, char_size);
 
-	tTVPGlyphBitmap * srcbmp = FACE->GetGlyphFromCharcode(ch);
+	tRisaGlyphBitmap * srcbmp = FACE->GetGlyphFromCharcode(ch);
 	if(!srcbmp) return; // 文字が不正か、グリフが空なので表示できない
 	if(!srcbmp->GetBlackBoxW() || !srcbmp->GetBlackBoxH())
 	{

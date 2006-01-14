@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -23,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(2010);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPXP4StreamCache::tTVPXP4StreamCache()
+tRisaXP4StreamCache::tRisaXP4StreamCache()
 {
 	// 変数を初期化
 	Age = 0;
@@ -34,7 +35,7 @@ tTVPXP4StreamCache::tTVPXP4StreamCache()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPXP4StreamCache::~tTVPXP4StreamCache()
+tRisaXP4StreamCache::~tRisaXP4StreamCache()
 {
 	ReleaseAll(); // すべてを解放
 }
@@ -47,12 +48,12 @@ tTVPXP4StreamCache::~tTVPXP4StreamCache()
 //! @param		name アーカイブファイル名
 //! @return		ストリーム
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr & name)
+tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const ttstr & name)
 {
 	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
 	// linear search wiil be enough here because the 
-	// TVP_MAX_ARCHIVE_Stream_CACHE is relatively small
+	// RISA__MAX_ARCHIVE_Stream_CACHE is relatively small
 	for(risse_int i =0; i < MAX_ITEM; i++)
 	{
 		tItem *item = Pool + i;
@@ -67,7 +68,7 @@ tRisseBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr &
 
 	// not found in the pool
 	// simply create a stream and return it
-	return tTVPFileSystemManager::instance()->CreateStream(name, RISSE_BS_READ);
+	return tRisaFileSystemManager::instance()->CreateStream(name, RISSE_BS_READ);
 }
 //---------------------------------------------------------------------------
 
@@ -77,7 +78,7 @@ tRisseBinaryStream * tTVPXP4StreamCache::GetStream(void * pointer, const ttstr &
 //! @param		pointer アーカイブインスタンスへのポインタ
 //! @param		stream ストリーム
 //---------------------------------------------------------------------------
-void tTVPXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * stream)
+void tRisaXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * stream)
 {
 	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
@@ -103,7 +104,7 @@ void tTVPXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * stre
 
 	// empty cell not found
 	// free oldest cell and fill it.
-	// counter overflow in TVPArchiveStreamCacheAge
+	// counter overflow in RisaArchiveStreamCacheAge
 	// is not so a big problem.
 	// counter overflow can worsen the cache performance,
 	// but it occurs only when the counter is overflowed
@@ -121,7 +122,7 @@ void tTVPXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * stre
 //! @brief		指定されたポインタを持つストリームをすべて解放する
 //! @param		pointer アーカイブインスタンスへのポインタ
 //---------------------------------------------------------------------------
-void tTVPXP4StreamCache::ReleaseStreamByPointer(void * pointer)
+void tRisaXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 {
 	volatile tRisseCriticalSectionHolder cs_holder(CS);
 
@@ -142,7 +143,7 @@ void tTVPXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 //---------------------------------------------------------------------------
 //! @brief		すべてのストリームを解放する
 //---------------------------------------------------------------------------
-void tTVPXP4StreamCache::ReleaseAll()
+void tRisaXP4StreamCache::ReleaseAll()
 {
 	volatile tRisseCriticalSectionHolder cs_holder(CS);
 

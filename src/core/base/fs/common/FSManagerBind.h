@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -31,17 +32,17 @@ public:
 	static const risse_int32 ClassID = -2011; // = RISSE_DEFINE_SOURCE_ID in FSManagerBind.cpp
 
 private:
-	boost::shared_ptr<tTVPFileSystem> FileSystem; //!< ファイルシステムオブジェクト
+	boost::shared_ptr<tRisaFileSystem> FileSystem; //!< ファイルシステムオブジェクト
 	iRisseDispatch2 * Owner; //!< このインスタンスを保持している Risse オブジェクト(AddRefしないこと)
 
 public:
 	tRisseNI_FileSystemNativeInstance(
-		boost::shared_ptr<tTVPFileSystem> filesystem,
+		boost::shared_ptr<tRisaFileSystem> filesystem,
 		iRisseDispatch2 * owner);
 
 	void Invalidate();
 
-	boost::shared_ptr<tTVPFileSystem> GetFileSystem() { return FileSystem; }
+	boost::shared_ptr<tRisaFileSystem> GetFileSystem() { return FileSystem; }
 
 private:
 };
@@ -59,21 +60,21 @@ public:
 
 	void Invalidate();
 
-	boost::shared_ptr<tTVPFileSystem> & GetFileSystem() { return FileSystem; }
+	boost::shared_ptr<tRisaFileSystem> & GetFileSystem() { return FileSystem; }
 
 protected:
 	void RegisterFileSystemNativeInstance(iRisseDispatch2 * risse_obj,
-		tTVPFileSystem * filesystem);
+		tRisaFileSystem * filesystem);
 
 private:
-	boost::shared_ptr<tTVPFileSystem> FileSystem; //!< ファイルシステムオブジェクト
+	boost::shared_ptr<tRisaFileSystem> FileSystem; //!< ファイルシステムオブジェクト
 };
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-//! @brief		FileSystem ネイティブクラス (tTVPFileSystemManager のバインディング)
+//! @brief		FileSystem ネイティブクラス (tRisaFileSystemManager のバインディング)
 //! @note		Risseでのクラス名は FileSystem であるためこのように "FileSystem"
 //!				の名が付いているが、実際は ファイルシステムマネージャへのバインディング
 //!				であってファイルシステムへのバインディングではないので注意
@@ -98,18 +99,18 @@ public:
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tTVPFileSystemRegisterer
+class tRisaFileSystemRegisterer
 {
 	iRisseDispatch2 * FileSystemClass;
 
-	tTVPSingleton<tTVPRisseScriptEngine> ref_tTVPRisseScriptEngine; //!< tTVPRisseScriptEngine に依存
+	tRisaSingleton<tRisaRisseScriptEngine> ref_tRisaRisseScriptEngine; //!< tRisaRisseScriptEngine に依存
 
 public:
-	tTVPFileSystemRegisterer();
-	~tTVPFileSystemRegisterer();
+	tRisaFileSystemRegisterer();
+	~tRisaFileSystemRegisterer();
 
-	static boost::shared_ptr<tTVPFileSystemRegisterer> & instance() { return
-		tTVPSingleton<tTVPFileSystemRegisterer>::instance();
+	static boost::shared_ptr<tRisaFileSystemRegisterer> & instance() { return
+		tRisaSingleton<tRisaFileSystemRegisterer>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 	void RegisterClassObject(const risse_char *name, iRisseDispatch2 * object);

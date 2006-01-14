@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -12,7 +13,7 @@
 #include "prec.h"
 #include "XP4FS.h"
 #include "XP4Archive.h"
-#include "TVPException.h"
+#include "RisaException.h"
 #include <algorithm>
 #include <map>
 
@@ -23,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(2007);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPXP4FS::tTVPXP4FS(const ttstr & name)
+tRisaXP4FS::tRisaXP4FS(const ttstr & name)
 {
 	// まず、nameで示されたディレクトリにあるすべてのパッチアーカイブを列挙する
 	std::vector<ttstr> archive_names;
@@ -32,15 +33,15 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 	ttstr name_nopath; // name からパスを取り除いた物
 
 	//- 入力ファイル名を分解
-	tTVPFileSystemManager::SplitPathAndName(name, &path, &name_nopath);
-	tTVPFileSystemManager::SplitExtension(name_nopath, &name_noext, NULL);
+	tRisaFileSystemManager::SplitPathAndName(name, &path, &name_nopath);
+	tRisaFileSystemManager::SplitExtension(name_nopath, &name_noext, NULL);
 
 	//- archive_names の先頭に name を追加
 	archive_names.push_back(name);
 
 	//- ディレクトリ中にあるファイルを列挙し、name_noext に合致する
 	//- ファイルを archive_names に追加する
-	class tLister : public tTVPFileSystemIterationCallback
+	class tLister : public tRisaFileSystemIterationCallback
 	{
 		std::vector<ttstr>& archive_names;
 		const ttstr & name_noext;
@@ -76,7 +77,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 		}
 	} lister(archive_names, name_noext, name_nopath, path);
 
-	tTVPFileSystemManager::instance()->GetFileListAt(path, &lister);
+	tRisaFileSystemManager::instance()->GetFileListAt(path, &lister);
 
 	//- archive_names の先頭の要素以外を名前順に並べ替え
 	std::sort(archive_names.begin() + 1, archive_names.end());
@@ -84,7 +85,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 	// パッチリビジョンを追うためのマップを作成
 	std::map<ttstr, tFileItemBasicInfo> map;
 
-	class tMapper : public tTVPXP4Archive::iMapCallback
+	class tMapper : public tRisaXP4Archive::iMapCallback
 	{
 		std::map<ttstr, tFileItemBasicInfo> & Map;
 		risse_size CurrentArchiveIndex;
@@ -125,7 +126,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 		i != archive_names.end(); i++)
 	{
 		mapper.SetArchiveIndex(i - archive_names.begin());
-		boost::shared_ptr<tTVPXP4Archive> arc(new tTVPXP4Archive(*i, mapper));
+		boost::shared_ptr<tRisaXP4Archive> arc(new tRisaXP4Archive(*i, mapper));
 		Archives.push_back(arc);
 	}
 
@@ -147,7 +148,7 @@ tTVPXP4FS::tTVPXP4FS(const ttstr & name)
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPXP4FS::~tTVPXP4FS()
+tRisaXP4FS::~tRisaXP4FS()
 {
 }
 //---------------------------------------------------------------------------
@@ -159,8 +160,8 @@ tTVPXP4FS::~tTVPXP4FS()
 //! @param		callback コールバックオブジェクト
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
-size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
-	tTVPFileSystemIterationCallback * callback)
+size_t tRisaXP4FS::GetFileListAt(const ttstr & dirname,
+	tRisaFileSystemIterationCallback * callback)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -173,7 +174,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 	if(idx == static_cast<risse_size>(-1))
 	{
 		// なかった、つまりディレクトリが存在しない
-		eTVPException::Throw(RISSE_WS_TR("can not open directory"));
+		eRisaException::Throw(RISSE_WS_TR("can not open directory"));
 	}
 
 	// idx から検索を開始する
@@ -212,7 +213,7 @@ size_t tTVPXP4FS::GetFileListAt(const ttstr & dirname,
 //! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPXP4FS::FileExists(const ttstr & filename)
+bool tRisaXP4FS::FileExists(const ttstr & filename)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -228,7 +229,7 @@ bool tTVPXP4FS::FileExists(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPXP4FS::DirectoryExists(const ttstr & dirname)
+bool tRisaXP4FS::DirectoryExists(const ttstr & dirname)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -245,9 +246,9 @@ bool tTVPXP4FS::DirectoryExists(const ttstr & dirname)
 //! @brief		ファイルを削除する
 //! @param		filename ファイル名
 //---------------------------------------------------------------------------
-void tTVPXP4FS::RemoveFile(const ttstr & filename)
+void tRisaXP4FS::RemoveFile(const ttstr & filename)
 {
-	eTVPException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -257,9 +258,9 @@ void tTVPXP4FS::RemoveFile(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
-void tTVPXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
+void tRisaXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	eTVPException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -269,9 +270,9 @@ void tTVPXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
-void tTVPXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
+void tRisaXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	eTVPException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -281,13 +282,13 @@ void tTVPXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 //! @param		filename ファイル名
 //! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
-void tTVPXP4FS::Stat(const ttstr & filename, tTVPStatStruc & struc)
+void tRisaXP4FS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	risse_size idx = GetFileItemIndex(filename);
 	if(idx == static_cast<risse_size>(-1))
-		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	Archives[FileItems[idx].ArchiveIndex]->Stat(FileItems[idx].FileIndex, struc);
 }
@@ -300,22 +301,22 @@ void tTVPXP4FS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, risse_uint32 flags)
+tRisseBinaryStream * tRisaXP4FS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	risse_size idx = GetFileItemIndex(filename);
 	if(idx == static_cast<risse_size>(-1))
-		tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	// 書き込みを伴う動作はできない
 	if(flags & RISSE_BS_ACCESS_WRITE_BIT)
-		eTVPException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
+		eRisaException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
 
 	return Archives[FileItems[idx].ArchiveIndex]->
 		CreateStream(Archives[FileItems[idx].ArchiveIndex],
 		FileItems[idx].FileIndex, flags);
-			// boost::shared_ptr<tTVPArchive> を持ってるのはこのクラスだけなので
+			// boost::shared_ptr<tRisaArchive> を持ってるのはこのクラスだけなので
 			// これ経由でこのスマートポインタを渡してやらなければならない
 }
 //---------------------------------------------------------------------------
@@ -326,7 +327,7 @@ tRisseBinaryStream * tTVPXP4FS::CreateStream(const ttstr & filename, risse_uint3
 //! @param		name 名前
 //! @return		FileItems内のインデックス (見つからなかった場合は (risse_size)-1 が返る)
 //---------------------------------------------------------------------------
-risse_size tTVPXP4FS::GetFileItemStartIndex(const ttstr & name)
+risse_size tRisaXP4FS::GetFileItemStartIndex(const ttstr & name)
 {
 	// returns first index which have 'name' at start of the name.
 	// returns -1 if the target is not found.
@@ -367,7 +368,7 @@ risse_size tTVPXP4FS::GetFileItemStartIndex(const ttstr & name)
 //! @return		FileItems内のインデックス (見つからなかった場合は (risse_size)-1 が返る)
 //! @note		GetFileItemStartIndex と違い、その名前とぴったり一致しない限りは見つからないとみなす
 //---------------------------------------------------------------------------
-risse_size tTVPXP4FS::GetFileItemIndex(const ttstr & name)
+risse_size tRisaXP4FS::GetFileItemIndex(const ttstr & name)
 {
 	risse_size total_count = FileItems.size();
 	risse_size s = 0, e = total_count;

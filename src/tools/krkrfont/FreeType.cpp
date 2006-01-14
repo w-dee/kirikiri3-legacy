@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -30,7 +31,7 @@
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステム経由でのFreeType Face クラス
 //---------------------------------------------------------------------------
-class tTVPGenericFreeTypeFace : public tTVPBaseFreeTypeFace
+class tRisaGenericFreeTypeFace : public tRisaBaseFreeTypeFace
 {
 protected:
 	FT_Face Face;	//!< FreeType face オブジェクト
@@ -41,8 +42,8 @@ private:
 	FT_StreamRec Stream;
 
 public:
-	tTVPGenericFreeTypeFace(const ttstr &fontname, risse_uint32 options);
-	virtual ~tTVPGenericFreeTypeFace();
+	tRisaGenericFreeTypeFace(const ttstr &fontname, risse_uint32 options);
+	virtual ~tRisaGenericFreeTypeFace();
 
 	virtual FT_Face GetFTFace() const;
 	virtual void GetFaceNameList(wxArrayString & dest) const;
@@ -64,16 +65,16 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //! @param		fontname フォント名
-//! @param		options オプション(TVP_TF_XXXX 定数かTVP_FACE_OPTIONS_XXXX定数の組み合わせ)
+//! @param		options オプション(RISA__TF_XXXX 定数かRISA__FACE_OPTIONS_XXXX定数の組み合わせ)
 //---------------------------------------------------------------------------
-tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, risse_uint32 options)
+tRisaGenericFreeTypeFace::tRisaGenericFreeTypeFace(const ttstr &fontname, risse_uint32 options)
 {
 	// フィールドの初期化
 	Face = NULL;
 	memset(&Stream, 0, sizeof(Stream));
 
 	// TrueType ライブラリをフック
-	tTVPFreeTypeLibrary::AddRef();
+	tRisaFreeTypeLibrary::AddRef();
 
 	try
 	{
@@ -120,7 +121,7 @@ tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, risse_ui
 
 
 		// FreeType エンジンでファイルを開こうとしてみる
-		risse_uint index = TVP_GET_FACE_INDEX_FROM_OPTIONS(options);
+		risse_uint index = RISA__GET_FACE_INDEX_FROM_OPTIONS(options);
 		if(!OpenFaceByIndex(index, Face))
 		{
 			// フォントを開けなかった
@@ -131,7 +132,7 @@ tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, risse_ui
 	}
 	catch(...)
 	{
-		tTVPFreeTypeLibrary::Release(); // FreeType ライブラリを unhook
+		tRisaFreeTypeLibrary::Release(); // FreeType ライブラリを unhook
 		throw;
 	}
 	
@@ -142,10 +143,10 @@ tTVPGenericFreeTypeFace::tTVPGenericFreeTypeFace(const ttstr &fontname, risse_ui
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPGenericFreeTypeFace::~tTVPGenericFreeTypeFace()
+tRisaGenericFreeTypeFace::~tRisaGenericFreeTypeFace()
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
-	tTVPFreeTypeLibrary::Release(); // FreeType ライブラリを unhook
+	tRisaFreeTypeLibrary::Release(); // FreeType ライブラリを unhook
 }
 //---------------------------------------------------------------------------
 
@@ -153,7 +154,7 @@ tTVPGenericFreeTypeFace::~tTVPGenericFreeTypeFace()
 //---------------------------------------------------------------------------
 //! @brief		FreeType の Face オブジェクトを返す
 //---------------------------------------------------------------------------
-FT_Face tTVPGenericFreeTypeFace::GetFTFace() const
+FT_Face tRisaGenericFreeTypeFace::GetFTFace() const
 {
 	return Face;
 }
@@ -163,7 +164,7 @@ FT_Face tTVPGenericFreeTypeFace::GetFTFace() const
 //---------------------------------------------------------------------------
 //! @brief		このフォントファイルが持っているフォントを配列として返す
 //---------------------------------------------------------------------------
-void tTVPGenericFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
+void tRisaGenericFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 {
 	dest = FaceNames;
 }
@@ -174,14 +175,14 @@ void tTVPGenericFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 //---------------------------------------------------------------------------
 //! @brief		FreeType 用 ストリーム読み込み関数
 //---------------------------------------------------------------------------
-unsigned long tTVPGenericFreeTypeFace::IoFunc(
+unsigned long tRisaGenericFreeTypeFace::IoFunc(
 			FT_Stream stream,
 			unsigned long   offset,
 			unsigned char*  buffer,
 			unsigned long   count )
 {
-	tTVPGenericFreeTypeFace * _this =
-		static_cast<tTVPGenericFreeTypeFace*>(stream->descriptor.pointer);
+	tRisaGenericFreeTypeFace * _this =
+		static_cast<tRisaGenericFreeTypeFace*>(stream->descriptor.pointer);
 
 	size_t result;
 	if(count == 0)
@@ -204,7 +205,7 @@ unsigned long tTVPGenericFreeTypeFace::IoFunc(
 //---------------------------------------------------------------------------
 //! @brief		FreeType 用 ストリーム削除関数
 //---------------------------------------------------------------------------
-void tTVPGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
+void tRisaGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
 {
 	// 何もしない
 }
@@ -218,7 +219,7 @@ void tTVPGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
 //! @return		Faceを開ければ true そうでなければ false
 //! @note		初めて Face を開く場合は face で指定する変数には null を入れておくこと
 //---------------------------------------------------------------------------
-bool tTVPGenericFreeTypeFace::OpenFaceByIndex(risse_uint index, FT_Face & face)
+bool tRisaGenericFreeTypeFace::OpenFaceByIndex(risse_uint index, FT_Face & face)
 {
 	if(face) FT_Done_Face(face), face = NULL;
 
@@ -234,7 +235,7 @@ bool tTVPGenericFreeTypeFace::OpenFaceByIndex(risse_uint index, FT_Face & face)
 	args.num_params = 1;
 	args.params = parameters;
 
-	FT_Error err = FT_Open_Face(tTVPFreeTypeLibrary::Get(), &args, index, &face);
+	FT_Error err = FT_Open_Face(tRisaFreeTypeLibrary::Get(), &args, index, &face);
 
 	return err == 0;
 }
@@ -249,7 +250,7 @@ bool tTVPGenericFreeTypeFace::OpenFaceByIndex(risse_uint index, FT_Face & face)
 //! @param		fontname フォント名
 //! @param		options オプション
 //---------------------------------------------------------------------------
-tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, risse_uint32 options)
+tRisaFreeTypeFace::tRisaFreeTypeFace(const wxString &fontname, risse_uint32 options)
 	: FontName(fontname)
 {
 	// フィールドをクリア
@@ -262,16 +263,16 @@ tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, risse_uint32 option
 
 
 	// フォントを開く
-	if(options & TVP_FACE_OPTIONS_FILE)
+	if(options & RISA__FACE_OPTIONS_FILE)
 	{
 		// ファイルを開く
-		Face = new tTVPGenericFreeTypeFace(fontname, options);
+		Face = new tRisaGenericFreeTypeFace(fontname, options);
 			// 例外がここで発生する可能性があるので注意
 	}
 	else
 	{
 		// ネイティブのフォント名による指定 (プラットフォーム依存)
-		Face = new tTVPNativeFreeTypeFace(fontname, options);
+		Face = new tRisaNativeFreeTypeFace(fontname, options);
 			// 例外がここで発生する可能性があるので注意
 	}
 	FTFace = Face->GetFTFace();
@@ -289,8 +290,8 @@ tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, risse_uint32 option
 		{
 			// SJIS への切り替えが成功した
 			// 変換関数をセットする
-			UnicodeToLocalChar = TVPUnicodeToSJIS;
-			LocalCharToUnicode = TVPSJISToUnicode;
+			UnicodeToLocalChar = RisaUnicodeToSJIS;
+			LocalCharToUnicode = RisaSJISToUnicode;
 		}
 	}
 }
@@ -300,7 +301,7 @@ tTVPFreeTypeFace::tTVPFreeTypeFace(const wxString &fontname, risse_uint32 option
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPFreeTypeFace::~tTVPFreeTypeFace()
+tRisaFreeTypeFace::~tRisaFreeTypeFace()
 {
 	if(GlyphIndexToCharcodeVector) delete GlyphIndexToCharcodeVector;
 	if(Face) delete Face;
@@ -312,7 +313,7 @@ tTVPFreeTypeFace::~tTVPFreeTypeFace()
 //! @brief		このFaceが保持しているglyphの数を得る
 //! @return		このFaceが保持しているglyphの数
 //---------------------------------------------------------------------------
-risse_uint tTVPFreeTypeFace::GetGlyphCount()
+risse_uint tRisaFreeTypeFace::GetGlyphCount()
 {
 	if(!FTFace) return 0;
 
@@ -353,7 +354,7 @@ risse_uint tTVPFreeTypeFace::GetGlyphCount()
 //! @param		index インデックス(FreeTypeの管理している文字indexとは違うので注意)
 //! @return		対応する文字コード(対応するコードが無い場合は 0)
 //---------------------------------------------------------------------------
-risse_char tTVPFreeTypeFace::GetCharcodeFromGlyphIndex(risse_uint index)
+risse_char tRisaFreeTypeFace::GetCharcodeFromGlyphIndex(risse_uint index)
 {
 	risse_uint size = GetGlyphCount(); // グリフ数を得るついでにマップを作成する
 
@@ -369,7 +370,7 @@ risse_char tTVPFreeTypeFace::GetCharcodeFromGlyphIndex(risse_uint index)
 //! @brief		このフォントに含まれるFace名のリストを得る
 //! @param		dest 格納先配列
 //---------------------------------------------------------------------------
-void tTVPFreeTypeFace::GetFaceNameList(wxArrayString &dest)
+void tRisaFreeTypeFace::GetFaceNameList(wxArrayString &dest)
 {
 	Face->GetFaceNameList(dest);
 }
@@ -380,7 +381,7 @@ void tTVPFreeTypeFace::GetFaceNameList(wxArrayString &dest)
 //! @brief		フォントの高さを設定する
 //! @param		height フォントの高さ(ピクセル単位)
 //---------------------------------------------------------------------------
-void tTVPFreeTypeFace::SetHeight(int height)
+void tRisaFreeTypeFace::SetHeight(int height)
 {
 	Height = height;
 	FT_Error err = FT_Set_Pixel_Sizes(FTFace, 0, Height);
@@ -398,10 +399,10 @@ void tTVPFreeTypeFace::SetHeight(int height)
 //! @return		新規作成されたグリフビットマップオブジェクトへのポインタ
 //!				NULL の場合は変換に失敗した場合
 //---------------------------------------------------------------------------
-tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(risse_char code)
+tRisaGlyphBitmap * tRisaFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 {
 	// グリフスロットにグリフを読み込み、寸法を取得する
-	tTVPGlyphMetrics metrics;
+	tRisaGlyphMetrics metrics;
 	if(!GetGlyphMetricsFromCharcode(code, metrics))
 		return NULL;
 
@@ -411,7 +412,7 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 	if(FTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP)
 	{
 		FT_Render_Mode mode;
-		if(!(Options & TVP_FACE_OPTIONS_NO_ANTIALIASING))
+		if(!(Options & RISA__FACE_OPTIONS_NO_ANTIALIASING))
 			mode = FT_RENDER_MODE_NORMAL;
 		else
 			mode = FT_RENDER_MODE_MONO;
@@ -425,7 +426,7 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 	FT_Bitmap *ft_bmp = &(FTFace->glyph->bitmap);
 	FT_Bitmap new_bmp;
 	bool release_ft_bmp = false;
-	tTVPGlyphBitmap * glyph_bmp = NULL;
+	tRisaGlyphBitmap * glyph_bmp = NULL;
 	try
 	{
 		if(ft_bmp->rows && ft_bmp->width)
@@ -440,7 +441,7 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 				err = FT_Bitmap_Convert(FTFace->glyph->library,
 					&(FTFace->glyph->bitmap),
 					&new_bmp, 1);
-					// 結局 tTVPGlyphBitmap 形式に変換する際にアラインメントをし直すので
+					// 結局 tRisaGlyphBitmap 形式に変換する際にアラインメントをし直すので
 					// ここで指定する alignment は 1 でよい
 				if(err)
 				{
@@ -469,8 +470,8 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 			}
 		}
 
-		// tTVPGlyphBitmap を作成して返す
-		glyph_bmp = new tTVPGlyphBitmap(
+		// tRisaGlyphBitmap を作成して返す
+		glyph_bmp = new tRisaGlyphBitmap(
 			ft_bmp->buffer,
 			ft_bmp->pitch,
 			  FTFace->glyph->bitmap_left,
@@ -497,8 +498,8 @@ tTVPGlyphBitmap * tTVPFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 //! @param		metrics 寸法
 //! @return		成功の場合真、失敗の場合偽
 //---------------------------------------------------------------------------
-bool tTVPFreeTypeFace::GetGlyphMetricsFromCharcode(risse_char code,
-	tTVPGlyphMetrics & metrics)
+bool tRisaFreeTypeFace::GetGlyphMetricsFromCharcode(risse_char code,
+	tRisaGlyphMetrics & metrics)
 {
 	if(!LoadGlyphSlotFromCharcode(code)) return false;
 
@@ -520,7 +521,7 @@ bool tTVPFreeTypeFace::GetGlyphMetricsFromCharcode(risse_char code,
 //! @param		code 文字コード
 //! @return		成功の場合真、失敗の場合偽
 //---------------------------------------------------------------------------
-bool tTVPFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
+bool tRisaFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
 {
 	// TODO: スレッド保護
 
@@ -538,15 +539,15 @@ bool tTVPFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
 
 	// グリフスロットに文字を読み込む
 	FT_Int32 load_glyph_flag = 0;
-	if(!(Options & TVP_FACE_OPTIONS_NO_ANTIALIASING))
+	if(!(Options & RISA__FACE_OPTIONS_NO_ANTIALIASING))
 		load_glyph_flag |= FT_LOAD_NO_BITMAP;
 	else
 		load_glyph_flag |= FT_LOAD_TARGET_MONO;
 			// note: ビットマップフォントを読み込みたくない場合は FT_LOAD_NO_BITMAP を指定
 
-	if(Options & TVP_FACE_OPTIONS_NO_HINTING)
+	if(Options & RISA__FACE_OPTIONS_NO_HINTING)
 		load_glyph_flag |= FT_LOAD_NO_HINTING;
-	if(Options & TVP_FACE_OPTIONS_FORCE_AUTO_HINTING)
+	if(Options & RISA__FACE_OPTIONS_FORCE_AUTO_HINTING)
 		load_glyph_flag |= FT_LOAD_FORCE_AUTOHINT;
 
 	FT_Error err;
@@ -555,7 +556,7 @@ bool tTVPFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
 	if(err) return false;
 
 	// フォントの変形を行う
-	if(Options & TVP_TF_BOLD) FT_GlyphSlot_Embolden(FTFace->glyph);
+	if(Options & RISA__TF_BOLD) FT_GlyphSlot_Embolden(FTFace->glyph);
 
 	return true;
 }
@@ -565,20 +566,20 @@ bool tTVPFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
 
 
 //---------------------------------------------------------------------------
-// tTVPFreeTypeLibrary: FreeType ライブラリラッパー(singleton)
+// tRisaFreeTypeLibrary: FreeType ライブラリラッパー(singleton)
 //---------------------------------------------------------------------------
-tTVPFreeTypeLibrary * tTVPFreeTypeLibrary::GlobalLibrary = NULL;
+tRisaFreeTypeLibrary * tRisaFreeTypeLibrary::GlobalLibrary = NULL;
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを増やす
 //---------------------------------------------------------------------------
-void tTVPFreeTypeLibrary::AddRef()
+void tRisaFreeTypeLibrary::AddRef()
 {
 	if(!GlobalLibrary)
 	{
 		// ライブラリを初期化する
-		GlobalLibrary = new tTVPFreeTypeLibrary();
+		GlobalLibrary = new tRisaFreeTypeLibrary();
 	}
 	else
 	{
@@ -590,7 +591,7 @@ void tTVPFreeTypeLibrary::AddRef()
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを減らす
 //---------------------------------------------------------------------------
-void tTVPFreeTypeLibrary::Release()
+void tRisaFreeTypeLibrary::Release()
 {
 	if(!GlobalLibrary)
 	{
@@ -610,7 +611,7 @@ void tTVPFreeTypeLibrary::Release()
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPFreeTypeLibrary::tTVPFreeTypeLibrary()
+tRisaFreeTypeLibrary::tRisaFreeTypeLibrary()
 {
 	RefCount = 1;
 	FT_Error err = FT_Init_FreeType(&Library);
@@ -626,7 +627,7 @@ tTVPFreeTypeLibrary::tTVPFreeTypeLibrary()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPFreeTypeLibrary::~tTVPFreeTypeLibrary()
+tRisaFreeTypeLibrary::~tRisaFreeTypeLibrary()
 {
 	FT_Done_FreeType(Library);
 }
@@ -635,7 +636,7 @@ tTVPFreeTypeLibrary::~tTVPFreeTypeLibrary()
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを増やす
 //---------------------------------------------------------------------------
-void tTVPFreeTypeLibrary::Hook()
+void tRisaFreeTypeLibrary::Hook()
 {
 	RefCount ++;
 }
@@ -645,7 +646,7 @@ void tTVPFreeTypeLibrary::Hook()
 //! @brief		参照カウンタを減らす
 //! @return		参照カウンタを減らした後の参照カウンタの値
 //---------------------------------------------------------------------------
-risse_int tTVPFreeTypeLibrary::Unhook()
+risse_int tRisaFreeTypeLibrary::Unhook()
 {
 	return --RefCount;
 }
@@ -658,12 +659,12 @@ risse_int tTVPFreeTypeLibrary::Unhook()
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPFreeTypeFontDriver::tTVPFreeTypeFontDriver()
+tRisaFreeTypeFontDriver::tRisaFreeTypeFontDriver()
 {
 	// コンストラクタ
 }
 //---------------------------------------------------------------------------
-tTVPFreeTypeFontDriver::~tTVPFreeTypeFontDriver()
+tRisaFreeTypeFontDriver::~tRisaFreeTypeFontDriver()
 {
 	// デストラクタ
 }

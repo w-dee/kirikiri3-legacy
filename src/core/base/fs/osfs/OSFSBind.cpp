@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -12,7 +13,7 @@
 #include "prec.h"
 #include "OSFS.h"
 #include "OSFSBind.h"
-#include "TVPException.h"
+#include "RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(2012);
 
@@ -47,7 +48,7 @@ risse_error tRisseNI_OSFS::Construct(risse_int numparams,
 	bool checkcase = RISSE_PARAM_EXIST(1) ? (risse_int)*param[1] : true;
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(risse_obj, new tTVPOSFS(basedir, checkcase));
+	RegisterFileSystemNativeInstance(risse_obj, new tRisaOSFS(basedir, checkcase));
 }
 //---------------------------------------------------------------------------
 
@@ -114,13 +115,13 @@ tRisseNativeInstance *tRisseNC_OSFS::CreateNativeInstance()
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPOSFSRegisterer::tTVPOSFSRegisterer()
+tRisaOSFSRegisterer::tRisaOSFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
 	iRisseDispatch2 * cls = new tRisseNC_OSFS();
 	try
 	{
-		tTVPFileSystemRegisterer::instance()->RegisterClassObject(
+		tRisaFileSystemRegisterer::instance()->RegisterClassObject(
 							RISSE_WS("OSFS"), cls);
 	}
 	catch(...)

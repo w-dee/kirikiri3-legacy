@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -23,47 +24,47 @@
 //---------------------------------------------------------------------------
 // 使用する hash アルゴリズムに関する定義
 //---------------------------------------------------------------------------
-#define TVP_XP4_HASH_INIT						sha1_init
-#define TVP_XP4_HASH_DO_PROCESS					sha1_process
-#define TVP_XP4_HASH_DONE						sha1_done
-#define TVP_XP4_HASH_DESC						sha1_desc
-#define TVP_XP4_HASH_METHOD_STRING				"SHA1"
-#define TVP_XP4_HASH_METHOD_INTERNAL_STRING		"sha1"
-#define TVP_XP4_HASH_METHOD_CHUNK_NAME			{ 's', 'h', 'a', '1' }
-#define TVP_XP4_HASH_SIZE						20
+#define RISA__XP4_HASH_INIT						sha1_init
+#define RISA__XP4_HASH_DO_PROCESS					sha1_process
+#define RISA__XP4_HASH_DONE						sha1_done
+#define RISA__XP4_HASH_DESC						sha1_desc
+#define RISA__XP4_HASH_METHOD_STRING				"SHA1"
+#define RISA__XP4_HASH_METHOD_INTERNAL_STRING		"sha1"
+#define RISA__XP4_HASH_METHOD_CHUNK_NAME			{ 's', 'h', 'a', '1' }
+#define RISA__XP4_HASH_SIZE						20
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 // ハッシュを表すクラス
 //---------------------------------------------------------------------------
-class tTVPXP4Hash
+class tRisaXP4Hash
 {
-	unsigned char Hash[TVP_XP4_HASH_SIZE];
+	unsigned char Hash[RISA__XP4_HASH_SIZE];
 	bool HasHash;
 public:
-	tTVPXP4Hash() { HasHash = false; memset(Hash, 0, TVP_XP4_HASH_SIZE); }
+	tRisaXP4Hash() { HasHash = false; memset(Hash, 0, RISA__XP4_HASH_SIZE); }
 
 	operator unsigned char *() { return Hash; }
-	bool operator < (const tTVPXP4Hash & rhs) const
+	bool operator < (const tRisaXP4Hash & rhs) const
 	{
 		return memcmp(Hash, rhs.Hash, sizeof(Hash)) < 0;
 	}
-	bool operator == (const tTVPXP4Hash & rhs) const
+	bool operator == (const tRisaXP4Hash & rhs) const
 	{
 		return HasHash == rhs.HasHash && 
 			!memcmp(Hash, rhs.Hash, sizeof(Hash));
 	}
-	bool operator != (const tTVPXP4Hash & rhs) const
+	bool operator != (const tRisaXP4Hash & rhs) const
 	{
 		return !(operator ==(rhs));
 	}
-	void SetHash(const unsigned char hash[TVP_XP4_HASH_SIZE])
-		{ memcpy(Hash, hash, TVP_XP4_HASH_SIZE); HasHash = true; }
+	void SetHash(const unsigned char hash[RISA__XP4_HASH_SIZE])
+		{ memcpy(Hash, hash, RISA__XP4_HASH_SIZE); HasHash = true; }
 	bool GetHasHash() const { return HasHash; }
-	void SetHasHash(bool has = true) { HasHash = has; if(!has) memset(Hash, 0, TVP_XP4_HASH_SIZE); }
-	static size_t GetSize() { return TVP_XP4_HASH_SIZE; }
-	void Make(iTVPProgressCallback * callback, const wxString &filename);
+	void SetHasHash(bool has = true) { HasHash = has; if(!has) memset(Hash, 0, RISA__XP4_HASH_SIZE); }
+	static size_t GetSize() { return RISA__XP4_HASH_SIZE; }
+	void Make(iRisaProgressCallback * callback, const wxString &filename);
 	void Print() const;
 	static /* const */ unsigned  char * GetHashChunkName();
 };

@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -24,12 +25,12 @@
 //! @param		metrics メトリック
 //! @note		入力ビットマップのサイズは blackboxw と blackboxh で指定
 //---------------------------------------------------------------------------
-tTVPGlyphBitmap::tTVPGlyphBitmap(
+tRisaGlyphBitmap::tRisaGlyphBitmap(
 	risse_uint8 * indata,
 	risse_int inpitch,
 	risse_int originx, risse_int originy,
 	risse_uint blackboxw, risse_uint blackboxh,
-	const tTVPGlyphMetrics & metrics)
+	const tRisaGlyphMetrics & metrics)
 {
 	// フィールドのクリア
 	RefCount = 1; // 参照カウンタの初期値は 1
@@ -80,11 +81,11 @@ tTVPGlyphBitmap::tTVPGlyphBitmap(
 //! @brief		コピーコンストラクタ
 //! @param		ref 参照オブジェクト
 //---------------------------------------------------------------------------
-tTVPGlyphBitmap::tTVPGlyphBitmap(const tTVPGlyphBitmap & ref)
+tRisaGlyphBitmap::tRisaGlyphBitmap(const tRisaGlyphBitmap & ref)
 {
 	// コピーコンストラクタは未サポート
 	// TODO: ちゃんとした例外オブジェクトを投げよう
-	throw "unimplemented: tTVPGlyphBitmap::tTVPGlyphBitmap(const tTVPGlyphBitmap & ref)";
+	throw "unimplemented: tRisaGlyphBitmap::tRisaGlyphBitmap(const tRisaGlyphBitmap & ref)";
 }
 //---------------------------------------------------------------------------
 
@@ -92,7 +93,7 @@ tTVPGlyphBitmap::tTVPGlyphBitmap(const tTVPGlyphBitmap & ref)
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPGlyphBitmap::~tTVPGlyphBitmap()
+tRisaGlyphBitmap::~tRisaGlyphBitmap()
 {
 	if(Data) delete [] Data;
 }
@@ -102,7 +103,7 @@ tTVPGlyphBitmap::~tTVPGlyphBitmap()
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを一つ増やす
 //---------------------------------------------------------------------------
-void tTVPGlyphBitmap::AddRef()
+void tRisaGlyphBitmap::AddRef()
 {
 	++RefCount;
 }
@@ -112,7 +113,7 @@ void tTVPGlyphBitmap::AddRef()
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを一つ減らし、0になればオブジェクトを消滅させる
 //---------------------------------------------------------------------------
-void tTVPGlyphBitmap::Release()
+void tRisaGlyphBitmap::Release()
 {
 	if(--RefCount == 0)
 		delete this;

@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -19,43 +20,43 @@
 //---------------------------------------------------------------------------
 //! @brief ノードを表すクラス
 //---------------------------------------------------------------------------
-class tTVPTmpFSNode
+class tRisaTmpFSNode
 {
 public:
 	enum tType { ntDirectory, ntFile  };
 
 private:
-	tTVPTmpFSNode * Parent; //!< 親へのリンク
+	tRisaTmpFSNode * Parent; //!< 親へのリンク
 	tType Type; //!< ノードのタイプ
 	ttstr Name;
 	union
 	{
-		tRisseHashTable<ttstr, tTVPTmpFSNode *> * Directory; //!< ディレクトリ
-		tTVPMemoryStreamBlock * File; //!< ファイル
+		tRisseHashTable<ttstr, tRisaTmpFSNode *> * Directory; //!< ディレクトリ
+		tRisaMemoryStreamBlock * File; //!< ファイル
 	};
 public:
-	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, const ttstr & name);
-	tTVPTmpFSNode(tTVPTmpFSNode *parent, tType type, tRisseBinaryStream * src);
-	~tTVPTmpFSNode();
+	tRisaTmpFSNode(tRisaTmpFSNode *parent, tType type, const ttstr & name);
+	tRisaTmpFSNode(tRisaTmpFSNode *parent, tType type, tRisseBinaryStream * src);
+	~tRisaTmpFSNode();
 
 public:
 	void Serialize(tRisseBinaryStream * dest) const;
 
-	tTVPTmpFSNode * GetSubNode(const ttstr & name);
+	tRisaTmpFSNode * GetSubNode(const ttstr & name);
 	bool DeleteSubNodeByName(const ttstr & name);
-	tTVPTmpFSNode * CreateDirectory(const ttstr & name);
-	tTVPTmpFSNode * CreateFile(const ttstr & name);
+	tRisaTmpFSNode * CreateDirectory(const ttstr & name);
+	tRisaTmpFSNode * CreateFile(const ttstr & name);
 
 	tType GetType() const { return Type; }
 	bool IsFile() const { return Type == ntFile; }
 	bool IsDirectory() const { return Type == ntDirectory; }
-	tTVPMemoryStreamBlock * GetMemoryStreamBlockNoAddRef() { return File; } 
-	tTVPTmpFSNode * GetParent() { return Parent; }
+	tRisaMemoryStreamBlock * GetMemoryStreamBlockNoAddRef() { return File; } 
+	tRisaTmpFSNode * GetParent() { return Parent; }
 	const ttstr & GetName() const { return Name; }
 	bool HasSubNode() const { return Type == ntDirectory &&
 							Directory->GetCount() != 0; }
 	risse_size GetSize() const;
-	size_t Iterate(tTVPFileSystemIterationCallback * callback);
+	size_t Iterate(tRisaFileSystemIterationCallback * callback);
 
 };
 //---------------------------------------------------------------------------
@@ -64,29 +65,29 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		tmp ファイルシステム
 //---------------------------------------------------------------------------
-class tTVPTmpFS : public tTVPFileSystem
+class tRisaTmpFS : public tRisaFileSystem
 {
 	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
-	tTVPTmpFSNode * Root; //!< ルートノード
+	tRisaTmpFSNode * Root; //!< ルートノード
 
 	static const unsigned char SerializeMagic[];
 
 public:
-	tTVPTmpFS();
+	tRisaTmpFS();
 
-	//-- tTVPFileSystem メンバ
-	~tTVPTmpFS();
+	//-- tRisaFileSystem メンバ
+	~tRisaTmpFS();
 
 	size_t GetFileListAt(const ttstr & dirname,
-		tTVPFileSystemIterationCallback * callback);
+		tRisaFileSystemIterationCallback * callback);
 	bool FileExists(const ttstr & filename);
 	bool DirectoryExists(const ttstr & dirname);
 	void RemoveFile(const ttstr & filename);
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
-	void Stat(const ttstr & filename, tTVPStatStruc & struc);
+	void Stat(const ttstr & filename, tRisaStatStruc & struc);
 	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
-	//-- tTVPFileSystem メンバ ここまで
+	//-- tRisaFileSystem メンバ ここまで
 
 	void SerializeTo(tRisseBinaryStream * dest);
 	void SerializeTo(const ttstr & filename);
@@ -94,7 +95,7 @@ public:
 	void UnserializeFrom(const ttstr & filename);
 
 private:
-	tTVPTmpFSNode * GetNodeAt(const ttstr & name);
+	tRisaTmpFSNode * GetNodeAt(const ttstr & name);
 	static void SplitPathAndName(const ttstr & in, ttstr & path, ttstr & name);
 	static void TrimLastPathDelimiter(ttstr & path);
 	void CreateRoot();

@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -25,17 +26,17 @@
 //---------------------------------------------------------------------------
 //! @brief		アーカイブ内のストレージアイテムを現すクラス
 //---------------------------------------------------------------------------
-class tTVPXP4MetadataReaderStorageItem
+class tRisaXP4MetadataReaderStorageItem
 {
 protected:
 	wxString InArchiveName; //!< ストレージ名
 	wxUint16 Flags; //!< フラグ
 	wxFileOffset Size; //!< (無圧縮時の)ファイルサイズ
 	wxDateTime Time; //!< タイムスタンプ
-	tTVPXP4Hash Hash; //!< ハッシュ
+	tRisaXP4Hash Hash; //!< ハッシュ
 
 public:
-	tTVPXP4MetadataReaderStorageItem(
+	tRisaXP4MetadataReaderStorageItem(
 		const wxString & inarchivename,
 		wxUint16 flags = 0,
 		wxFileOffset size = -1,
@@ -46,15 +47,15 @@ public:
 		Time(time)
 		{;} //!< コンストラクタ
 
-	tTVPXP4MetadataReaderStorageItem(const unsigned char * meta, size_t metasize);
+	tRisaXP4MetadataReaderStorageItem(const unsigned char * meta, size_t metasize);
 
 	const wxString & GetInArchiveName() const { return InArchiveName; } //!< ストレージ名を得る
 	wxFileOffset GetSize() const { return Size; } //!< サイズを得る
 	wxUint16 GetFlags() const { return Flags; } //!< フラグを得る
 	const wxDateTime & GetTime() const { return Time; } //!< タイムスタンプを得る
 	void SetFlags(wxUint16 flags) { Flags = flags; } 
-	const tTVPXP4Hash & GetHash() const { return Hash; } //!< ハッシュを得る
-	tTVPXP4Hash & GetHash() { return Hash; } //!< ハッシュを得る
+	const tRisaXP4Hash & GetHash() const { return Hash; } //!< ハッシュを得る
+	tRisaXP4Hash & GetHash() { return Hash; } //!< ハッシュを得る
 };
 //---------------------------------------------------------------------------
 
@@ -62,15 +63,15 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		一つのアーカイブを現すクラス
 //---------------------------------------------------------------------------
-class tTVPXP4MetadataReaderArchive
+class tRisaXP4MetadataReaderArchive
 {
 	wxString TargetDir;
-	std::vector<tTVPXP4MetadataReaderStorageItem> ItemVector; //!< ストレージの配列
+	std::vector<tRisaXP4MetadataReaderStorageItem> ItemVector; //!< ストレージの配列
 
 public:
-	tTVPXP4MetadataReaderArchive(const wxString & filename);
+	tRisaXP4MetadataReaderArchive(const wxString & filename);
 
-	const std::vector<tTVPXP4MetadataReaderStorageItem> &
+	const std::vector<tRisaXP4MetadataReaderStorageItem> &
 		GetItemVector() const { return ItemVector; } //!< ストレージの配列を得る
 
 	const wxString & GetTargetDir() const

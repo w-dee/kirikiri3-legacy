@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -21,9 +22,9 @@
 
 
 //---------------------------------------------------------------------------
-//! @brief		tTVPFileSystem::GetFileListAt で用いられるコールバックインターフェース
+//! @brief		tRisaFileSystem::GetFileListAt で用いられるコールバックインターフェース
 //---------------------------------------------------------------------------
-class tTVPFileSystemIterationCallback
+class tRisaFileSystemIterationCallback
 {
 public:
 	virtual bool OnFile(const ttstr & filename) = 0;
@@ -33,16 +34,16 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		tTVPFileSystem::Stat で返される構造体
+//! @brief		tRisaFileSystem::Stat で返される構造体
 //---------------------------------------------------------------------------
-struct tTVPStatStruc
+struct tRisaStatStruc
 {
 	wxFileOffset	Size;	//!< ファイルサイズ (wxFileOffset)-1 の場合は無効
 	wxDateTime		MTime;	//!< ファイル修正時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 	wxDateTime		ATime;	//!< アクセス時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 	wxDateTime		CTime;	//!< 作成時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 
-	tTVPStatStruc() { Clear(); }
+	tRisaStatStruc() { Clear(); }
 	void Clear() {  Size = (wxFileOffset) - 1; MTime = ATime = CTime = wxDateTime(); }
 };
 //---------------------------------------------------------------------------
@@ -51,7 +52,7 @@ struct tTVPStatStruc
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステム基底クラス
 //---------------------------------------------------------------------------
-class tTVPFileSystem
+class tRisaFileSystem
 {
 	//---------- このクラスで実装する物
 protected:
@@ -60,16 +61,16 @@ public:
 
 	//---------- 各サブクラスで(も)実装すべき物
 public:
-	virtual ~tTVPFileSystem() {;}
+	virtual ~tRisaFileSystem() {;}
 
 	virtual size_t GetFileListAt(const ttstr & dirname,
-		tTVPFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
+		tRisaFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
 	virtual bool FileExists(const ttstr & filename) = 0; //!< ファイルが存在するかどうかを得る
 	virtual bool DirectoryExists(const ttstr & dirname) = 0; //!< ディレクトリが存在するかどうかを得る
 	virtual void RemoveFile(const ttstr & filename) = 0; //!< ファイルを削除する
 	virtual void RemoveDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを削除する
 	virtual void CreateDirectory(const ttstr & dirname, bool recursive = false) = 0; //!< ディレクトリを作成する
-	virtual void Stat(const ttstr & filename, tTVPStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
+	virtual void Stat(const ttstr & filename, tRisaStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
 	virtual tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
 };
 //---------------------------------------------------------------------------
@@ -78,7 +79,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
-class tTVPFileSystemManager
+class tRisaFileSystemManager
 {
 	//! @brief ファイルシステムマネージャ内で管理されるファイルシステムの情報
 	struct tFileSystemInfo
@@ -94,14 +95,14 @@ class tTVPFileSystemManager
 	tRisseCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
 
 public:
-	tTVPFileSystemManager();
-	~tTVPFileSystemManager();
+	tRisaFileSystemManager();
+	~tRisaFileSystemManager();
 
 private:
-	tTVPSingletonObjectLifeTracer<tTVPFileSystemManager> singleton_object_life_tracer;
+	tRisaSingletonObjectLifeTracer<tRisaFileSystemManager> singleton_object_life_tracer;
 public:
-	static boost::shared_ptr<tTVPFileSystemManager> & instance() { return
-		tTVPSingleton<tTVPFileSystemManager>::instance();
+	static boost::shared_ptr<tRisaFileSystemManager> & instance() { return
+		tRisaSingleton<tRisaFileSystemManager>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 	void Mount(const ttstr & point, iRisseDispatch2 * fs_risseobj);
@@ -111,19 +112,19 @@ public:
 	ttstr NormalizePath(const ttstr & path);
 
 	size_t GetFileListAt(const ttstr & dirname,
-		tTVPFileSystemIterationCallback * callback, bool recursive = false);
+		tRisaFileSystemIterationCallback * callback, bool recursive = false);
 	bool FileExists(const ttstr & filename);
 	bool DirectoryExists(const ttstr & dirname);
 	void RemoveFile(const ttstr & filename);
 	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
 	void CreateDirectory(const ttstr & dirname, bool recursive = false);
-	void Stat(const ttstr & filename, tTVPStatStruc & struc);
+	void Stat(const ttstr & filename, tRisaStatStruc & struc);
 	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
 
 private:
 	size_t InternalGetFileListAt(const ttstr & dirname,
-		tTVPFileSystemIterationCallback * callback);
-	boost::shared_ptr<tTVPFileSystem> GetFileSystemAt(const ttstr & fullpath, ttstr * fspath = NULL);
+		tRisaFileSystemIterationCallback * callback);
+	boost::shared_ptr<tRisaFileSystem> GetFileSystemAt(const ttstr & fullpath, ttstr * fspath = NULL);
 	static void ThrowNoFileSystemError(const ttstr & filename);
 
 public:

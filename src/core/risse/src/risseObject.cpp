@@ -95,8 +95,8 @@ tRisseDispatch::tRisseDispatch()
 {
 	BeforeDestructionCalled = false;
 	RefCount = 1;
-#ifdef TVP_IN_PLUGIN_STUB // TVP plug-in support
-	TVPPluginGlobalRefCount++;
+#ifdef RISA__IN_PLUGIN_STUB // Risa plug-in support
+	RisaPluginGlobalRefCount++;
 #endif
 }
 //---------------------------------------------------------------------------
@@ -111,16 +111,16 @@ tRisseDispatch::~tRisseDispatch()
 //---------------------------------------------------------------------------
 risse_uint tRisseDispatch::AddRef(void)
 {
-#ifdef TVP_IN_PLUGIN_STUB // TVP plug-in support
-	TVPPluginGlobalRefCount++;
+#ifdef RISA__IN_PLUGIN_STUB // Risa plug-in support
+	RisaPluginGlobalRefCount++;
 #endif
 	return ++RefCount;
 }
 //---------------------------------------------------------------------------
 risse_uint tRisseDispatch::Release(void)
 {
-#ifdef TVP_IN_PLUGIN_STUB // TVP plug-in support
-	TVPPluginGlobalRefCount--;
+#ifdef RISA__IN_PLUGIN_STUB // Risa plug-in support
+	RisaPluginGlobalRefCount--;
 #endif
 	if(RefCount == 1) // avoid to call "BeforeDestruction" with RefCount == 0
 	{

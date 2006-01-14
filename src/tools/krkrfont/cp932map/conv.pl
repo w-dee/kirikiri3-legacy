@@ -26,7 +26,8 @@ open HH, ">../cp932_uni.h" or die;
 $head =  <<EOF;
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee\@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -101,7 +102,7 @@ foreach $key (sort keys %cmap)
 	if($prev_group != $group)
 	{
 		printf FH ("};\n\n") if($prev_group != -1);
-		printf FH "static const risse_uint16 TVPSJIS2UNICODE_Submap_map_%02X[%d]={\n/* 0x%02X%02X - 0x%02X%02X */\n",
+		printf FH "static const risse_uint16 RisaSJIS2UNICODE_Submap_map_%02X[%d]={\n/* 0x%02X%02X - 0x%02X%02X */\n",
 			$group, $high[$group] - $low[$group] + 1,
 			$group, $low[$group] , $group, $high[$group];
 		$count = 0;
@@ -124,7 +125,7 @@ print FH <<EOF;
 //---------------------------------------------------------------------------
 //! \@brief		CP932 ( = Shift-JIS) -> UNICODE table lookup structure
 //---------------------------------------------------------------------------
-struct tTVPSJIS2UNICODE_Submap
+struct tRisaSJIS2UNICODE_Submap
 {
 	risse_uint8	low;
 	risse_uint8	high;
@@ -136,7 +137,7 @@ struct tTVPSJIS2UNICODE_Submap
 //---------------------------------------------------------------------------
 //! \@brief		CP932 ( = Shift-JIS) -> UNICODE table
 //---------------------------------------------------------------------------
-static const tTVPSJIS2UNICODE_Submap TVPSJIS2UNICODE_Submap[128] = {
+static const tRisaSJIS2UNICODE_Submap RisaSJIS2UNICODE_Submap[128] = {
 EOF
 
 
@@ -149,7 +150,7 @@ for($i = 128; $i < 256; $i++)
 	}
 	else
 	{
-		printf FH "{ 0x%02X, 0x%02X, TVPSJIS2UNICODE_Submap_map_%02X },\n",
+		printf FH "{ 0x%02X, 0x%02X, RisaSJIS2UNICODE_Submap_map_%02X },\n",
 			$low[$i], $high[$i], $i;
 	}
 }
@@ -166,12 +167,12 @@ print FH <<EOF;
 //! \@param		out 出力 UNICODE (wchar_t)
 //! \@return		変換に成功すれば真、失敗すれば偽
 //---------------------------------------------------------------------------
-static bool inline _TVPSJISToUnicode(const char * & in, risse_char *out)
+static bool inline _RisaSJISToUnicode(const char * & in, risse_char *out)
 {
 	const unsigned char * & p = (const unsigned char * &)in;
 
 	// 1 byte 文字をチェック
-	risse_uint16 ch = TVPSJIS2UNICODE_Submap_map_00[p[0]];
+	risse_uint16 ch = RisaSJIS2UNICODE_Submap_map_00[p[0]];
 	if(ch != 0x0000U)
 	{
 		// 1byte
@@ -182,8 +183,8 @@ static bool inline _TVPSJISToUnicode(const char * & in, risse_char *out)
 
 	if(p[0] >= 0x80)
 	{
-		 const tTVPSJIS2UNICODE_Submap & submap =
-		 	TVPSJIS2UNICODE_Submap[p[0]-0x80];
+		 const tRisaSJIS2UNICODE_Submap & submap =
+		 	RisaSJIS2UNICODE_Submap[p[0]-0x80];
 		if(submap.submap && submap.low <= p[1] && submap.high >= p[1])
 		{
 			ch = submap.submap[p[1]-submap.low];
@@ -208,7 +209,7 @@ static bool inline _TVPSJISToUnicode(const char * & in, risse_char *out)
 //! \@param		in 入力 sjisコード  例: '漢' = 0x8abf  '0' = 0x0030
 //! \@return		出力 UNICODE (wchar_t) 変換に失敗すれば 0
 //---------------------------------------------------------------------------
-risse_char TVPSJISToUnicode(risse_uint sjis)
+risse_char RisaSJISToUnicode(risse_uint sjis)
 {
 	char buf[3];
 	const char * p = buf;
@@ -224,7 +225,7 @@ risse_char TVPSJISToUnicode(risse_uint sjis)
 		buf[1] = '\\0';
 	}
 	risse_char out;
-	if(_TVPSJISToUnicode(p, &out)) return out;
+	if(_RisaSJISToUnicode(p, &out)) return out;
 	return 0;
 }
 //---------------------------------------------------------------------------
@@ -239,7 +240,7 @@ risse_char TVPSJISToUnicode(risse_uint sjis)
 //!				(最後に\\0は書き込まれないしその文字数も含まれないので注意)
 //!				(risse_size)-1 = 異常な文字が見つかった
 //---------------------------------------------------------------------------
-risse_size TVPSJISToUnicodeString(const char * in, risse_char *out)
+risse_size RisaSJISToUnicodeString(const char * in, risse_char *out)
 {
 	// convert input Shift-JIS (CP932) string to output wide string
 	int count = 0;
@@ -248,13 +249,13 @@ risse_size TVPSJISToUnicodeString(const char * in, risse_char *out)
 		risse_char c;
 		if(out)
 		{
-			if(!_TVPSJISToUnicode(in, &c))
+			if(!_RisaSJISToUnicode(in, &c))
 				return static_cast<risse_size>(-1); // invalid character found
 			*out++ = c;
 		}
 		else
 		{
-			if(!_TVPSJISToUnicode(in, NULL))
+			if(!_RisaSJISToUnicode(in, NULL))
 				return static_cast<risse_size>(-1); // invalid character found
 		}
 		count ++;
@@ -271,8 +272,8 @@ print HH <<EOF;
 #ifndef _CP932_UNI_
 #define _CP932_UNI_
 
-risse_size TVPSJISToUnicodeString(const char * in, risse_char *out);
-risse_char TVPSJISToUnicode(risse_uint sjis);
+risse_size RisaSJISToUnicodeString(const char * in, risse_char *out);
+risse_char RisaSJISToUnicode(risse_uint sjis);
 
 #endif
 

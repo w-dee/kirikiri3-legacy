@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -14,7 +15,7 @@
 #include "XP4Archive.h"
 #include "XP4Stream.h"
 #include "XP4StreamCache.h"
-#include "TVPException.h"
+#include "RisaException.h"
 #include <zlib.h>
 #include <algorithm>
 
@@ -24,12 +25,12 @@ RISSE_DEFINE_SOURCE_ID(2009);
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		ptr tTVPArchive インスタンスへのスマートポインタ
+//! @param		ptr tRisaArchive インスタンスへのスマートポインタ
 //! @param		idx アーカイブ内でのファイルのインデックス
 //! @param		flags アクセスフラグ
 //---------------------------------------------------------------------------
-tTVPXP4ArchiveStream::tTVPXP4ArchiveStream(
-			boost::shared_ptr<tTVPXP4Archive> ptr,
+tRisaXP4ArchiveStream::tRisaXP4ArchiveStream(
+			boost::shared_ptr<tRisaXP4Archive> ptr,
 			risse_size idx, risse_uint32 flags)
 				: Owner(ptr) , FileIndex(idx),
 				FileInfo(ptr->GetFileInfo(idx)),
@@ -42,7 +43,7 @@ tTVPXP4ArchiveStream::tTVPXP4ArchiveStream(
 	SegmentRemain = 0;
 	SegmentPos = 0;
 
-	Stream = tTVPXP4StreamCache::instance()->GetStream(Owner.get(), ptr->GetFileName());
+	Stream = tRisaXP4StreamCache::instance()->GetStream(Owner.get(), ptr->GetFileName());
 }
 //---------------------------------------------------------------------------
 
@@ -50,11 +51,11 @@ tTVPXP4ArchiveStream::tTVPXP4ArchiveStream(
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPXP4ArchiveStream::~tTVPXP4ArchiveStream()
+tRisaXP4ArchiveStream::~tRisaXP4ArchiveStream()
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
-	tTVPXP4StreamCache::instance()->ReleaseStream(Owner.get(), Stream);
+	tRisaXP4StreamCache::instance()->ReleaseStream(Owner.get(), Stream);
 }
 //---------------------------------------------------------------------------
 
@@ -62,7 +63,7 @@ tTVPXP4ArchiveStream::~tTVPXP4ArchiveStream()
 //---------------------------------------------------------------------------
 //! @brief		現在のセグメントが開かれていることを確実にする
 //---------------------------------------------------------------------------
-void tTVPXP4ArchiveStream::EnsureSegment()
+void tRisaXP4ArchiveStream::EnsureSegment()
 {
 	// ensure accessing to current segment
 	if(SegmentOpened) return; // すでにセグメントが開かれている場合は何もしない
@@ -81,7 +82,7 @@ void tTVPXP4ArchiveStream::EnsureSegment()
 	{
 		// a compressed segment
 		// セグメントキャッシュの中から探す
-		DecompressedData = tTVPXP4SegmentCache::instance()->Find(
+		DecompressedData = tRisaXP4SegmentCache::instance()->Find(
 			Owner.get(), FileIndex, CurSegmentNum,
 			Stream, SegmentInfo[CurSegmentNum].StoreOffset,
 			SegmentInfo[CurSegmentNum].StoreSize,
@@ -104,7 +105,7 @@ void tTVPXP4ArchiveStream::EnsureSegment()
 //! @param		pos シーク先の位置
 //! @note		この関数は内部状態を変えるだけであり、実際にセグメントを開くなどはしない
 //---------------------------------------------------------------------------
-void tTVPXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
+void tRisaXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
 {
 	// open segment at 'pos' and seek
 	// pos must between zero thru OrgSize
@@ -138,7 +139,7 @@ void tTVPXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
 //---------------------------------------------------------------------------
 //! @brief		次のセグメントを開く
 //---------------------------------------------------------------------------
-bool tTVPXP4ArchiveStream::OpenNextSegment()
+bool tRisaXP4ArchiveStream::OpenNextSegment()
 {
 	// open next segment
 	if(CurSegmentNum == FileInfo.SegmentCount)
@@ -160,7 +161,7 @@ bool tTVPXP4ArchiveStream::OpenNextSegment()
 //! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
 //! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
-risse_uint64 tTVPXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
+risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -202,7 +203,7 @@ risse_uint64 tTVPXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 //! @param		read_size 読み込むバイト数
 //! @return		実際に読み込まれたバイト数
 //---------------------------------------------------------------------------
-risse_uint tTVPXP4ArchiveStream::Read(void *buffer, risse_size read_size)
+risse_uint tRisaXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -252,9 +253,9 @@ risse_uint tTVPXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 //! @param		read_size 書き込みたいバイト数
 //! @return		実際に書き込まれたバイト数
 //---------------------------------------------------------------------------
-risse_uint tTVPXP4ArchiveStream::Write(const void *buffer, risse_size write_size)
+risse_uint tRisaXP4ArchiveStream::Write(const void *buffer, risse_size write_size)
 {
-	eTVPException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -262,9 +263,9 @@ risse_uint tTVPXP4ArchiveStream::Write(const void *buffer, risse_size write_size
 //---------------------------------------------------------------------------
 //! @brief		ファイルの終わりを現在のポインタに設定する
 //---------------------------------------------------------------------------
-void tTVPXP4ArchiveStream::SetEndOfFile()
+void tRisaXP4ArchiveStream::SetEndOfFile()
 {
-	eTVPException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -273,7 +274,7 @@ void tTVPXP4ArchiveStream::SetEndOfFile()
 //! @brief		サイズを得る
 //! @return		このストリームのサイズ
 //---------------------------------------------------------------------------
-risse_uint64 tTVPXP4ArchiveStream::GetSize()
+risse_uint64 tRisaXP4ArchiveStream::GetSize()
 {
 	return FileInfo.Size;
 }

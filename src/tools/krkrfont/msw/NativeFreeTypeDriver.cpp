@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -9,7 +10,7 @@
 //! @file
 //! @brief Win32 GDI 経由でのFreeType Face
 //! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
-//! tTVPFreeTypeFace もプラットフォームごとに異なった実装となる。
+//! tRisaFreeTypeFace もプラットフォームごとに異なった実装となる。
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "NativeFreeTypeDriver.h"
@@ -18,7 +19,7 @@
 // 以下の二つのdefineはOpenType フォントを表していて、
 // EnumFontsProc の lpntme->ntmTm.ntmFlags にビットセットとして渡されてくる。
 // (OpenTypeがサポートされた Windows 2000 以降で存在)
-// tTVPBaseFreeTypeFontDriver::EnumerateFonts ではTrueType フォントとともに
+// tRisaBaseFreeTypeFontDriver::EnumerateFonts ではTrueType フォントとともに
 // これらのフォントも列挙される。
 
 #ifndef NTM_PS_OPENTYPE
@@ -31,20 +32,20 @@
 
 
 //---------------------------------------------------------------------------
-//! @brief		tTVPBaseFreeTypeFontDriver::EnumerateFonts で内部的に使われるクラス
+//! @brief		tRisaBaseFreeTypeFontDriver::EnumerateFonts で内部的に使われるクラス
 //---------------------------------------------------------------------------
-class tTVPFreeTypeFontEnumeraterHelper
+class tRisaFreeTypeFontEnumeraterHelper
 {
 private:
 	wxArrayString & Dest; //!< 格納先配列
-	risse_uint32 Flags; //!< 列挙フラグ (tvpfontstruc.h の TVP_FSF_XXXXX 定数の bitor )
+	risse_uint32 Flags; //!< 列挙フラグ (tvpfontstruc.h の RISA__FSF_XXXXX 定数の bitor )
 	wxFontEncoding Encoding; //!< エンコーディング
 	wxString PrevFontName; //!< 直前に列挙したフォント名(重複をはじくために使う)
 
 public:
-	tTVPFreeTypeFontEnumeraterHelper(wxArrayString & dest,
+	tRisaFreeTypeFontEnumeraterHelper(wxArrayString & dest,
 		risse_uint32 Flags, wxFontEncoding encoding);
-	~tTVPFreeTypeFontEnumeraterHelper();
+	~tRisaFreeTypeFontEnumeraterHelper();
 
 	void DoEnumerate();
 
@@ -63,11 +64,11 @@ private:
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		flags	列挙フラグ (tvpfontstruc.h の TVP_FSF_XXXXX 定数の bitor )
+//! @param		flags	列挙フラグ (tvpfontstruc.h の RISA__FSF_XXXXX 定数の bitor )
 //! @param		encoding	エンコーディング (wxFontEncoding)
 //! @param		dest	格納先配列 (配列はクリアされる)
 //---------------------------------------------------------------------------
-tTVPFreeTypeFontEnumeraterHelper::tTVPFreeTypeFontEnumeraterHelper(wxArrayString & dest,
+tRisaFreeTypeFontEnumeraterHelper::tRisaFreeTypeFontEnumeraterHelper(wxArrayString & dest,
 	risse_uint32 flags, wxFontEncoding encoding ) :
 		 Dest(dest), Flags(flags), Encoding(encoding)
 {
@@ -78,7 +79,7 @@ tTVPFreeTypeFontEnumeraterHelper::tTVPFreeTypeFontEnumeraterHelper(wxArrayString
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPFreeTypeFontEnumeraterHelper::~tTVPFreeTypeFontEnumeraterHelper()
+tRisaFreeTypeFontEnumeraterHelper::~tRisaFreeTypeFontEnumeraterHelper()
 {
 }
 //---------------------------------------------------------------------------
@@ -87,7 +88,7 @@ tTVPFreeTypeFontEnumeraterHelper::~tTVPFreeTypeFontEnumeraterHelper()
 //---------------------------------------------------------------------------
 //! @brief		フォントを列挙する
 //---------------------------------------------------------------------------
-void tTVPFreeTypeFontEnumeraterHelper::DoEnumerate()
+void tRisaFreeTypeFontEnumeraterHelper::DoEnumerate()
 {
 	HDC refdc = GetDC(NULL); // ディスプレイの DC を参照元 DC として取得
 	try
@@ -130,16 +131,16 @@ void tTVPFreeTypeFontEnumeraterHelper::DoEnumerate()
 //! @param		dwStyle	DWORD style
 //! @param		lParam	User-defined data
 //---------------------------------------------------------------------------
-int CALLBACK tTVPFreeTypeFontEnumeraterHelper::CallbackProc(
+int CALLBACK tRisaFreeTypeFontEnumeraterHelper::CallbackProc(
 			ENUMLOGFONTEX *lpelfe,    // pointer to logical-font data
 			NEWTEXTMETRICEX *lpntme,  // pointer to physical-font data
 			int FontType,             // type of font
 			LPARAM lParam  )
 {
-	tTVPFreeTypeFontEnumeraterHelper * _this =
-		reinterpret_cast<tTVPFreeTypeFontEnumeraterHelper*>(lParam);
+	tRisaFreeTypeFontEnumeraterHelper * _this =
+		reinterpret_cast<tRisaFreeTypeFontEnumeraterHelper*>(lParam);
 
-	if(_this->Flags & TVP_FSF_FIXEDPITCH)
+	if(_this->Flags & RISA__FSF_FIXEDPITCH)
 	{
 		// fixed pitch only ?
 		// TMPF_FIXED_PITCH はフラグが立っていないときに固定ピッチを
@@ -154,13 +155,13 @@ int CALLBACK tTVPFreeTypeFontEnumeraterHelper::CallbackProc(
 		return 1;
 	}
 
-	if(_this->Flags & TVP_FSF_NOVERTICAL)
+	if(_this->Flags & RISA__FSF_NOVERTICAL)
 	{
 		// not to list vertical fonts up ?
 		if(lpelfe->elfLogFont.lfFaceName[0] == '@') return 1;
 	}
 
-	if(_this->Flags & TVP_FSF_OUTLINEONLY)
+	if(_this->Flags & RISA__FSF_OUTLINEONLY)
 	{
 		// outline fonts only
 		bool is_outline =
@@ -185,7 +186,7 @@ int CALLBACK tTVPFreeTypeFontEnumeraterHelper::CallbackProc(
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPBaseFreeTypeFontDriver::tTVPBaseFreeTypeFontDriver()
+tRisaBaseFreeTypeFontDriver::tRisaBaseFreeTypeFontDriver()
 {
 }
 //---------------------------------------------------------------------------
@@ -193,7 +194,7 @@ tTVPBaseFreeTypeFontDriver::tTVPBaseFreeTypeFontDriver()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPBaseFreeTypeFontDriver::~tTVPBaseFreeTypeFontDriver()
+tRisaBaseFreeTypeFontDriver::~tRisaBaseFreeTypeFontDriver()
 {
 }
 //---------------------------------------------------------------------------
@@ -201,20 +202,20 @@ tTVPBaseFreeTypeFontDriver::~tTVPBaseFreeTypeFontDriver()
 //---------------------------------------------------------------------------
 //! @brief		FreeType フォントドライバで使用可能なフォントを列挙する
 //! @param		dest	格納先配列 (配列はクリアされる)
-//! @param		flags	列挙フラグ (tvpfontstruc.h の TVP_FSF_XXXXX 定数の bitor )
+//! @param		flags	列挙フラグ (tvpfontstruc.h の RISA__FSF_XXXXX 定数の bitor )
 //! @param		encoding	エンコーディング (wxFontEncoding)
 //! @note		encoding を文字列から変換するには wxFontMapper::CharsetToEncoding を
 //!				使うことができる。
-//!				flags に指定できるのは、TVP_FSF_FIXEDPITCH 、 TVP_FSF_NOVERTICAL のみ。
+//!				flags に指定できるのは、RISA__FSF_FIXEDPITCH 、 RISA__FSF_NOVERTICAL のみ。
 //---------------------------------------------------------------------------
-void tTVPBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
+void tRisaBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 		risse_uint32 flags, wxFontEncoding encoding)
 {
 	dest.Clear();
 
-	flags |= TVP_FSF_OUTLINEONLY; // 常に(FreeTypeで使用可能な)アウトラインフォントのみを列挙する
+	flags |= RISA__FSF_OUTLINEONLY; // 常に(FreeTypeで使用可能な)アウトラインフォントのみを列挙する
 
-	tTVPFreeTypeFontEnumeraterHelper helper(dest, flags, encoding);
+	tRisaFreeTypeFontEnumeraterHelper helper(dest, flags, encoding);
 	helper.DoEnumerate(); // 列挙を行う
 }
 //---------------------------------------------------------------------------

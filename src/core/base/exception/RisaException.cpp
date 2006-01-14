@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -10,70 +11,70 @@
 //! @brief 吉里吉里3で内部的に用いている例外クラスの管理など
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "TVPException.h"
+#include "RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(2100);
 
 //---------------------------------------------------------------------------
-//! @brief		eTVPException型の例外を投げる
+//! @brief		eRisaException型の例外を投げる
 //---------------------------------------------------------------------------
-void eTVPException::Throw(const ttstr &str)
+void eRisaException::Throw(const ttstr &str)
 {
-	throw eTVPException(str);
+	throw eRisaException(str);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		eTVPException型の例外を投げる
+//! @brief		eRisaException型の例外を投げる
 //! @param		str  文字列 (中に %1 などの指令を埋め込む)
 //! @param		s1   文字列中の %1 と置き換えたい文字列
 //---------------------------------------------------------------------------
-void eTVPException::Throw(const ttstr &str, const ttstr & s1)
+void eRisaException::Throw(const ttstr &str, const ttstr & s1)
 {
-	throw eTVPException(ttstr(str, s1));
+	throw eRisaException(ttstr(str, s1));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		eTVPException型の例外を投げる
+//! @brief		eRisaException型の例外を投げる
 //! @param		str  文字列 (中に %1 などの指令を埋め込む)
 //! @param		s1   文字列中の %1 と置き換えたい文字列
 //! @param		s2   文字列中の %2 と置き換えたい文字列
 //---------------------------------------------------------------------------
-void eTVPException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2)
+void eRisaException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2)
 {
-	throw eTVPException(ttstr(str, s1, s2));
+	throw eRisaException(ttstr(str, s1, s2));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		eTVPException型の例外を投げる
+//! @brief		eRisaException型の例外を投げる
 //! @param		str  文字列 (中に %1 などの指令を埋め込む)
 //! @param		s1   文字列中の %1 と置き換えたい文字列
 //! @param		s2   文字列中の %2 と置き換えたい文字列
 //! @param		s3   文字列中の %3 と置き換えたい文字列
 //---------------------------------------------------------------------------
-void eTVPException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2, const ttstr & s3)
+void eRisaException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2, const ttstr & s3)
 {
-	throw eTVPException(ttstr(str, s1, s2, s3));
+	throw eRisaException(ttstr(str, s1, s2, s3));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		eTVPException型の例外を投げる
+//! @brief		eRisaException型の例外を投げる
 //! @param		str  文字列 (中に %1 などの指令を埋め込む)
 //! @param		s1   文字列中の %1 と置き換えたい文字列
 //! @param		s2   文字列中の %2 と置き換えたい文字列
 //! @param		s3   文字列中の %3 と置き換えたい文字列
 //! @param		s4   文字列中の %4 と置き換えたい文字列
 //---------------------------------------------------------------------------
-void eTVPException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2, const ttstr & s3, const ttstr & s4)
+void eRisaException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2, const ttstr & s3, const ttstr & s4)
 {
-	throw eTVPException(ttstr(str, s1, s2, s3, s4));
+	throw eRisaException(ttstr(str, s1, s2, s3, s4));
 }
 //---------------------------------------------------------------------------
 
@@ -83,7 +84,7 @@ void eTVPException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2, 
 //! @param		line     エラーの起こった行
 //! @param		filename エラーの起こったファイル名
 //---------------------------------------------------------------------------
-void eTVPException::ThrowInternalError(int line, const char * filename)
+void eRisaException::ThrowInternalError(int line, const char * filename)
 {
 	Throw(RISSE_WS_TR("Internal error at $2 line $1"), ttstr(line), ttstr(wxString(filename, wxConvUTF8)));
 }

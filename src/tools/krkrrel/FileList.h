@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [‚è‚³]      alias ‹g—¢‹g—¢3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -15,37 +16,37 @@
 #include "WriteXP4.h"
 #include "ReadXP4Meta.h"
 //---------------------------------------------------------------------------
-void TVPXP4GetDefaultClassList(wxArrayString & dest);
+void RisaXP4GetDefaultClassList(wxArrayString & dest);
 
-void TVPGetFileListAt(iTVPProgressCallback * callback,
-	const wxString & dir, std::vector<tTVPXP4WriterInputFile> & dest);
+void RisaGetFileListAt(iRisaProgressCallback * callback,
+	const wxString & dir, std::vector<tRisaXP4WriterInputFile> & dest);
 
-void TVPXP4ClassifyFiles(iTVPProgressCallback * callback,
+void RisaXP4ClassifyFiles(iRisaProgressCallback * callback,
 	const wxArrayString & pattern,
-	std::vector<tTVPXP4WriterInputFile> &  dest
+	std::vector<tRisaXP4WriterInputFile> &  dest
 	);
 
-wxString TVPNormalizeXP4ArchiveStorageName(const wxString & name);
+wxString RisaNormalizeXP4ArchiveStorageName(const wxString & name);
 
-void TVPEnumerateArchiveFiles(const wxString & archivename,
+void RisaEnumerateArchiveFiles(const wxString & archivename,
 	std::vector<wxString> & archives);
 
-void TVPReadXP4Metadata(
-	iTVPProgressCallback * callback,
+void RisaReadXP4Metadata(
+	iRisaProgressCallback * callback,
 	const wxString & archivename,
-	std::map<wxString, tTVPXP4MetadataReaderStorageItem> &dest,
+	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &dest,
 	wxString * targetdir = NULL);
 
-void TVPCompareXP4StorageNameMap(
-	iTVPProgressCallback * callback,
-	std::map<wxString, tTVPXP4MetadataReaderStorageItem> &arc,
-	std::vector<tTVPXP4WriterInputFile> & ref);
+void RisaCompareXP4StorageNameMap(
+	iRisaProgressCallback * callback,
+	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &arc,
+	std::vector<tRisaXP4WriterInputFile> & ref);
 
-void TVPXP4MetadataReaderStorageItemToXP4WriterInputFile(
-	const std::map<wxString, tTVPXP4MetadataReaderStorageItem> & input,
-	std::vector<tTVPXP4WriterInputFile> & output);
+void RisaXP4MetadataReaderStorageItemToXP4WriterInputFile(
+	const std::map<wxString, tRisaXP4MetadataReaderStorageItem> & input,
+	std::vector<tRisaXP4WriterInputFile> & output);
 
-void TVPDeleteArchiveSet(const wxString & archivename);
+void RisaDeleteArchiveSet(const wxString & archivename);
 //---------------------------------------------------------------------------
 
 #endif

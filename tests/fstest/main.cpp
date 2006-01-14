@@ -77,7 +77,7 @@ int Application::OnRun()
 {
 	try
 	{
-		iRisseDispatch2 * global = tTVPRisseScriptEngine::instance()->GetGlobalNoAddRef();
+		iRisseDispatch2 * global = tRisaRisseScriptEngine::instance()->GetGlobalNoAddRef();
 			// グローバルオブジェクトを取得
 
 		iRisseDispatch2 *func = new TestFunc(); // TestFunc のオブジェクトを作成
@@ -88,7 +88,7 @@ int Application::OnRun()
 			global->PropSet(RISSE_MEMBERENSURE, RISSE_WS("test"), NULL, &func_var, NULL));
 				// 登録
 
-		tTVPRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
+		tRisaRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
 			RISSE_WS("FileSystem.mount('/', new FileSystem.TmpFS())"),
 			NULL, NULL, NULL);
 			// tRisse::EvalExpression を使って式を実行

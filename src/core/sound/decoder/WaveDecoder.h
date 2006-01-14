@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -50,7 +51,7 @@
 //---------------------------------------------------------------------------
 //! @brief		PCM データフォーマット (内部用)
 //---------------------------------------------------------------------------
-struct tTVPWaveFormat
+struct tRisaWaveFormat
 {
 	risse_uint SamplesPerSec;		//!< sample granule per sec
 	risse_uint Channels;			//!< number of channels (1=Mono, 2=Stereo ... etc)
@@ -69,12 +70,12 @@ struct tTVPWaveFormat
 //---------------------------------------------------------------------------
 //! @brief	 デコーダインターフェース
 //---------------------------------------------------------------------------
-class tTVPWaveDecoder
+class tRisaWaveDecoder
 {
 public:
-	virtual ~tTVPWaveDecoder() {};
+	virtual ~tRisaWaveDecoder() {};
 
-	virtual void GetFormat(tTVPWaveFormat & format) = 0;
+	virtual void GetFormat(tRisaWaveFormat & format) = 0;
 		/*!< @brief フォーマットを取得する
 			@note
 			Retrieve PCM format, etc. */

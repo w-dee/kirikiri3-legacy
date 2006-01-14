@@ -23,7 +23,8 @@ open HH, ">../uni_cp932.h" or die;
 $head =  <<EOF;
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee\@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -44,7 +45,7 @@ print HH <<EOF;
 #ifndef _UNI_CP932_H_
 #define _UNI_CP932_H_
 
-risse_uint TVPUnicodeToSJIS(risse_char in);
+risse_uint RisaUnicodeToSJIS(risse_char in);
 
 #endif
 EOF
@@ -55,7 +56,7 @@ print FH <<EOF;
 //---------------------------------------------------------------------------
 //! \@brief		UNICODEとShiftJISコードの組を表す型
 //---------------------------------------------------------------------------
-struct tTVPUnicodeAndSJISPair
+struct tRisaUnicodeAndSJISPair
 {
 	risse_uint16 Unicode;
 	risse_uint16 SJIS;
@@ -65,7 +66,7 @@ struct tTVPUnicodeAndSJISPair
 //---------------------------------------------------------------------------
 //! \@brief		UNICODEとShiftJISコードの組(UNICODEでソート済み)
 //---------------------------------------------------------------------------
-static const tTVPUnicodeAndSJISPair TVPUnicodeAndSJISPair[] = {
+static const tRisaUnicodeAndSJISPair RisaUnicodeAndSJISPair[] = {
 EOF
 
 $n = 0;
@@ -86,8 +87,8 @@ print FH <<EOF;
 //---------------------------------------------------------------------------
 //! \@brief		UNICODEとShiftJISコードの組の数
 //---------------------------------------------------------------------------
-#define TVPNumUnicodeAndSJISPair \\
-	(sizeof(TVPUnicodeAndSJISPair) / sizeof(TVPUnicodeAndSJISPair[0]))
+#define RisaNumUnicodeAndSJISPair \\
+	(sizeof(RisaUnicodeAndSJISPair) / sizeof(RisaUnicodeAndSJISPair[0]))
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
@@ -98,23 +99,23 @@ print FH <<EOF;
 //! \@note		が、いわゆる半角文字の場合は上位8ビットは0、いわゆる全角文字は
 //! \@note		ShiftJISコードがそのまま入る。
 //---------------------------------------------------------------------------
-risse_uint TVPUnicodeToSJIS(risse_char in)
+risse_uint RisaUnicodeToSJIS(risse_char in)
 {
-	// TVPUnicodeAndSJISPair に対して二分検索を行う
+	// RisaUnicodeAndSJISPair に対して二分検索を行う
 	if(in >= 0x10000) return 0;
 		// 0x10000 以上のコードポイントに対してはSJIS文字変換は定義されていない
 
-	risse_uint s = 0, e = TVPNumUnicodeAndSJISPair;
+	risse_uint s = 0, e = RisaNumUnicodeAndSJISPair;
 	while(e - s > 1)
 	{
 		risse_int m = (s + e) / 2;
-		if(TVPUnicodeAndSJISPair[m].Unicode <= static_cast<risse_uint16>(in))
+		if(RisaUnicodeAndSJISPair[m].Unicode <= static_cast<risse_uint16>(in))
 			s = m;
 		else
 			e = m;
 	}
-	if(TVPUnicodeAndSJISPair[s].Unicode == static_cast<risse_uint16>(in))
-		return TVPUnicodeAndSJISPair[s].SJIS; // 見つかった
+	if(RisaUnicodeAndSJISPair[s].Unicode == static_cast<risse_uint16>(in))
+		return RisaUnicodeAndSJISPair[s].SJIS; // 見つかった
 	return 0;
 }
 //---------------------------------------------------------------------------
@@ -129,9 +130,9 @@ int main(void)
 {
 	for(risse_uint i = 1; i < 65536; i++)
 	{
-		risse_uint sjis = TVPUnicodeToSJIS(i);
+		risse_uint sjis = RisaUnicodeToSJIS(i);
 		if(sjis == 0) continue;
-		risse_uint uni_out = TVPSJISToUnicode(sjis);
+		risse_uint uni_out = RisaSJISToUnicode(sjis);
 		if(uni_out != i)
 		{
 			printf("fail: uni input:%x, sjis:%x, uni output:%x\\n",

@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -21,8 +22,8 @@
 //---------------------------------------------------------------------------
 //! @brief		ストレージ内の各セグメントを表すクラス
 //---------------------------------------------------------------------------
-class tTVPXP4WriterStorage;
-class tTVPXP4WriterSegment
+class tRisaXP4WriterStorage;
+class tRisaXP4WriterSegment
 {
 	wxFileOffset Offset; //!< (非圧縮時の)ストレージ先頭からのオフセット
 	wxFileOffset Size; //!< (非圧縮時の)サイズ
@@ -32,19 +33,19 @@ class tTVPXP4WriterSegment
 	wxFileOffset StoreSize; //!< (実際に格納されている)サイズ  無圧縮の場合は Size と同じ
 
 public:
-	tTVPXP4WriterSegment(
+	tRisaXP4WriterSegment(
 		wxFileOffset offset,
 		wxFileOffset size,
 		bool iscompressed);
 
-	~tTVPXP4WriterSegment();
+	~tRisaXP4WriterSegment();
 
 	wxFileOffset GetStoreOffset() const //!< (実際に格納された)オフセットを得る
 		{ return StoreOffset; }
 	wxFileOffset GetStoreSize() const //!< (実際に格納された)サイズを得る
 		{ return StoreSize; }
 
-	void WriteBody(iTVPProgressCallback * callback,
+	void WriteBody(iRisaProgressCallback * callback,
 		wxFileEx & input, wxFileEx & file);
 
 	void WriteMetaData(wxMemoryBuffer & buf);
@@ -55,34 +56,34 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		XP4アーカイブへ格納するファイルのアイテム
 //---------------------------------------------------------------------------
-class tTVPXP4WriterInputFile : public tTVPXP4MetadataReaderStorageItem
+class tRisaXP4WriterInputFile : public tRisaXP4MetadataReaderStorageItem
 {
 protected:
 	wxString InputName; //!< 入力ファイル名(ベースディレクトリ名部分をのぞく)
 	wxString BaseDirName; //!< 入力ファイルのベースディレクトリ名
 
 public:
-	tTVPXP4WriterInputFile(
+	tRisaXP4WriterInputFile(
 		const wxString & inarchivename,
 		wxUint16 flags = 0,
 		const wxDateTime & time = wxDateTime(),
 		const wxString & inputname = wxEmptyString,
 		const wxString & basedirname = wxEmptyString) :
-				tTVPXP4MetadataReaderStorageItem(
+				tRisaXP4MetadataReaderStorageItem(
 						inarchivename,
 						flags,
-						(flags & TVP_XP4_FILE_STATE_MASK) ==
-								TVP_XP4_FILE_STATE_DELETED ?
+						(flags & RISA__XP4_FILE_STATE_MASK) ==
+								RISA__XP4_FILE_STATE_DELETED ?
 							-1 : wxFileEx(basedirname + inputname).Length(),
 						time),
 				InputName(inputname),
 				BaseDirName(basedirname)
 				 {;}  //!< コンストラクタ
-	tTVPXP4WriterInputFile(const tTVPXP4MetadataReaderStorageItem & ref) :
-		tTVPXP4MetadataReaderStorageItem(ref)
+	tRisaXP4WriterInputFile(const tRisaXP4MetadataReaderStorageItem & ref) :
+		tRisaXP4MetadataReaderStorageItem(ref)
 				 {;} //!< コンストラクタ
 
-	bool operator < (const tTVPXP4WriterInputFile & rhs) const
+	bool operator < (const tRisaXP4WriterInputFile & rhs) const
 	{
 		// 比較用演算子
 		return InArchiveName < rhs.InArchiveName;
@@ -99,27 +100,27 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		アーカイブ内のストレージアイテムを表すクラス
 //---------------------------------------------------------------------------
-class tTVPXP4WriterStorage : public tTVPXP4WriterInputFile
+class tRisaXP4WriterStorage : public tRisaXP4WriterInputFile
 {
-	std::vector<tTVPXP4WriterSegment> SegmentVector; //!< セグメントの配列
+	std::vector<tRisaXP4WriterSegment> SegmentVector; //!< セグメントの配列
 	bool IsReference; //!< 他のストレージアイテムを参照している場合は 真
 
 public:
-	tTVPXP4WriterStorage(
-		const tTVPXP4WriterInputFile & inputfile);
+	tRisaXP4WriterStorage(
+		const tRisaXP4WriterInputFile & inputfile);
 
-	tTVPXP4WriterStorage(
-		const tTVPXP4WriterInputFile & inputfile,
-		const tTVPXP4WriterStorage & ref);
+	tRisaXP4WriterStorage(
+		const tRisaXP4WriterInputFile & inputfile,
+		const tRisaXP4WriterStorage & ref);
 
-	void MakeHash(iTVPProgressCallback * callback);
+	void MakeHash(iRisaProgressCallback * callback);
 
-	void WriteBody(iTVPProgressCallback * callback, wxFileEx & archive);
+	void WriteBody(iRisaProgressCallback * callback, wxFileEx & archive);
 
 	void WriteMetaData(wxMemoryBuffer & buf);
 
 	//! @brief ソート用比較関数
-	bool operator < (const tTVPXP4WriterStorage &rhs) const
+	bool operator < (const tRisaXP4WriterStorage &rhs) const
 	{
 		// サイズにおいて降順でソートするための関数
 		// サイズは 2MB 単位で比較する
@@ -134,23 +135,23 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		アーカイブを表すクラス
 //---------------------------------------------------------------------------
-class tTVPXP4WriterArchive
+class tRisaXP4WriterArchive
 {
-	std::vector<tTVPXP4WriterStorage> StorageVector; //!< このアーカイブ内に含まれるtTVPXP4WriterStorage の配列
+	std::vector<tRisaXP4WriterStorage> StorageVector; //!< このアーカイブ内に含まれるtRisaXP4WriterStorage の配列
 	wxFileOffset Size; //!< アーカイブのサイズ
 	wxString FileName; //!< アーカイブファイル名
 	wxString TargetDir; //!< アーカイブに格納されるファイルの元となったディレクトリ名
 	bool ArchiveOk; //!< アーカイブが正常に作成されたかどうか
 
 public:
-	tTVPXP4WriterArchive(const wxString & filename, const wxString & targetdir);
-	~tTVPXP4WriterArchive();
+	tRisaXP4WriterArchive(const wxString & filename, const wxString & targetdir);
+	~tRisaXP4WriterArchive();
 	wxFileOffset GetSize() const { return Size; } //!< アーカイブのファイルサイズを得る
-	const tTVPXP4WriterStorage & GetStorageItem(size_t idx)
+	const tRisaXP4WriterStorage & GetStorageItem(size_t idx)
 		{ return StorageVector[idx]; } //!< 指定されたインデックスにあるストレージオブジェクトを得る
-	size_t AddAndWriteBody(iTVPProgressCallback * callback,
-		const tTVPXP4WriterStorage & storage);
-	void WriteMetaData(iTVPProgressCallback * callback, bool compress);
+	size_t AddAndWriteBody(iRisaProgressCallback * callback,
+		const tRisaXP4WriterStorage & storage);
+	void WriteMetaData(iRisaProgressCallback * callback, bool compress);
 	void SetArchiveOk() { ArchiveOk = true; } //!< アーカイブを確定する
 };
 //---------------------------------------------------------------------------
@@ -159,25 +160,25 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		XP4アーカイブへの書き込みを管理するクラス
 //---------------------------------------------------------------------------
-class tTVPXP4Writer
+class tRisaXP4Writer
 {
-	iTVPProgressCallback * ProgressCallback; //!< コールバック用オブジェクト
+	iRisaProgressCallback * ProgressCallback; //!< コールバック用オブジェクト
 	wxString BaseFileName;	//!< ベースファイル名(パス付きだが拡張子をのぞく)
 	wxFileOffset  SplitLimit;	//!< 分割する際のファイルサイズの上限(バイト単位) 0=分割なし
-	std::vector<tTVPXP4WriterInputFile> List; //!< 入力ファイルのリスト
-	std::vector<tTVPXP4WriterArchive *> ArchiveVector; //!< 各ボリュームファイルを表す配列
+	std::vector<tRisaXP4WriterInputFile> List; //!< 入力ファイルのリスト
+	std::vector<tRisaXP4WriterArchive *> ArchiveVector; //!< 各ボリュームファイルを表す配列
 	wxString TargetDir; //!< アーカイブに格納されるファイルの元となったディレクトリ名
 
 	unsigned int NewArchive();
 
 public:
-	tTVPXP4Writer(
-		iTVPProgressCallback * callback,
+	tRisaXP4Writer(
+		iRisaProgressCallback * callback,
 		const wxString & basefilename,
 		wxFileOffset splitlimit,
-		const std::vector<tTVPXP4WriterInputFile> & list,
+		const std::vector<tRisaXP4WriterInputFile> & list,
 		const wxString & targetdir);
-	~tTVPXP4Writer();
+	~tRisaXP4Writer();
 
 	void MakeArchive();
 };

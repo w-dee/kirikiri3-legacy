@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [�肳]      alias �g���g��3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -19,19 +20,19 @@
 //---------------------------------------------------------------------------
 //! @brief		Risseスクリプトエンジンへのインターフェース
 //---------------------------------------------------------------------------
-class tTVPRisseScriptEngine
+class tRisaRisseScriptEngine
 {
 	tRisse *Engine;
 
 public:
-	tTVPRisseScriptEngine();
-	~tTVPRisseScriptEngine();
+	tRisaRisseScriptEngine();
+	~tRisaRisseScriptEngine();
 
 private:
-	tTVPSingletonObjectLifeTracer<tTVPRisseScriptEngine> singleton_object_life_tracer;
+	tRisaSingletonObjectLifeTracer<tRisaRisseScriptEngine> singleton_object_life_tracer;
 public:
-	static boost::shared_ptr<tTVPRisseScriptEngine> & instance() { return
-		tTVPSingleton<tTVPRisseScriptEngine>::instance();
+	static boost::shared_ptr<tRisaRisseScriptEngine> & instance() { return
+		tRisaSingleton<tRisaRisseScriptEngine>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
 	void Shutdown();

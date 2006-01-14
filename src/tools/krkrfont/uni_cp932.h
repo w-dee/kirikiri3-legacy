@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [‚è‚³]      alias ‹g—¢‹g—¢3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -15,6 +16,6 @@
 #ifndef _UNI_CP932_H_
 #define _UNI_CP932_H_
 
-risse_uint TVPUnicodeToSJIS(risse_char in);
+risse_uint RisaUnicodeToSJIS(risse_char in);
 
 #endif

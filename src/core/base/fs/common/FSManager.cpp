@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -11,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "FSManager.h"
-#include "TVPException.h"
+#include "RisaException.h"
 #include "FSManagerBind.h"
 #include <vector>
 
@@ -31,7 +32,7 @@ RISSE_DEFINE_SOURCE_ID(2000);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPFileSystemManager::tTVPFileSystemManager()
+tRisaFileSystemManager::tRisaFileSystemManager()
 {
 	// カレントディレクトリを / に設定
 	CurrentDirectory = RISSE_WS("/");
@@ -42,7 +43,7 @@ tTVPFileSystemManager::tTVPFileSystemManager()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPFileSystemManager::~tTVPFileSystemManager()
+tRisaFileSystemManager::~tRisaFileSystemManager()
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -82,7 +83,7 @@ tTVPFileSystemManager::~tTVPFileSystemManager()
 //! @param		fs_risseobj ファイルシステムオブジェクトを表すRisseオブジェクト
 //! @note		メインスレッド以外から呼び出さないこと
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::Mount(const ttstr & point,
+void tRisaFileSystemManager::Mount(const ttstr & point,
 	iRisseDispatch2 * fs_risseobj)
 {
 	// risse_obj がファイルシステムのインスタンスを持っているかどうかを
@@ -94,7 +95,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point,
 						NULL)) )
 	{
 		// ファイルシステムのインスタンスを持っていない
-		eTVPException::Throw(RISSE_WS_TR("the object given is not a filesystem object"));
+		eRisaException::Throw(RISSE_WS_TR("the object given is not a filesystem object"));
 	}
 
 	volatile tRisseCriticalSectionHolder holder(CS);
@@ -109,7 +110,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point,
 	if(item)
 	{
 		// ファイルシステムが見つかったのでそこにはマウントできない
-		eTVPException::Throw(RISSE_WS_TR("can not mount filesystem: the mount point '$1' is already mounted"), path);
+		eRisaException::Throw(RISSE_WS_TR("can not mount filesystem: the mount point '$1' is already mounted"), path);
 	}
 
 	// マウントポイントを追加
@@ -124,7 +125,7 @@ void tTVPFileSystemManager::Mount(const ttstr & point,
 //! @param		point マウントポイント
 //! @note		メインスレッド以外から呼び出さないこと
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::Unmount(const ttstr & point)
+void tRisaFileSystemManager::Unmount(const ttstr & point)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -138,7 +139,7 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 	if(!item)
 	{
 		// そこにはなにもマウントされていない
-		eTVPException::Throw(RISSE_WS_TR("there are no filesystem at mount point '$1'"), path);
+		eRisaException::Throw(RISSE_WS_TR("there are no filesystem at mount point '$1'"), path);
 	}
 
 	// マウントポイントを削除
@@ -160,7 +161,7 @@ void tTVPFileSystemManager::Unmount(const ttstr & point)
 //! @param		fs_risseobj アンマウントしたいファイルシステムを表すRisseオブジェクト
 //! @note		メインスレッド以外から呼び出さないこと
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
+void tRisaFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -188,7 +189,7 @@ void tTVPFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 //! @param		path 正規化したいパス
 //! @return		正規化されたパス
 //---------------------------------------------------------------------------
-ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
+ttstr tRisaFileSystemManager::NormalizePath(const ttstr & path)
 {
 	ttstr ret(path);
 
@@ -267,8 +268,8 @@ ttstr tTVPFileSystemManager::NormalizePath(const ttstr & path)
 //! @param		recursive 再帰的にファイル一覧を得るかどうか
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
-size_t tTVPFileSystemManager::GetFileListAt(const ttstr & dirname,
-	tTVPFileSystemIterationCallback * callback, bool recursive)
+size_t tRisaFileSystemManager::GetFileListAt(const ttstr & dirname,
+	tRisaFileSystemIterationCallback * callback, bool recursive)
 {
 	ttstr path(NormalizePath(dirname));
 
@@ -279,16 +280,16 @@ size_t tTVPFileSystemManager::GetFileListAt(const ttstr & dirname,
 	}
 
 	// 再帰をする場合
-	class tIteratorCallback : public tTVPFileSystemIterationCallback
+	class tIteratorCallback : public tRisaFileSystemIterationCallback
 	{
 		std::vector<ttstr> & List;
-		tTVPFileSystemIterationCallback *Destination;
+		tRisaFileSystemIterationCallback *Destination;
 		size_t Count;
 		ttstr CurrentDirectory;
 
 	public:
 		tIteratorCallback(std::vector<ttstr> &list,
-			tTVPFileSystemIterationCallback *destination)
+			tRisaFileSystemIterationCallback *destination)
 				: List(list), Destination(destination), Count(0)
 		{
 			;
@@ -330,13 +331,13 @@ size_t tTVPFileSystemManager::GetFileListAt(const ttstr & dirname,
 //! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPFileSystemManager::FileExists(const ttstr & filename)
+bool tRisaFileSystemManager::FileExists(const ttstr & filename)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(filename);
 	try
 	{
@@ -344,7 +345,7 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 	}
 	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(RISSE_WS_TR("failed to retrieve existence of file '%1' : %2"),
+		eRisaException::Throw(RISSE_WS_TR("failed to retrieve existence of file '%1' : %2"),
 			fullpath, e.GetMessage()); // this method never returns
 	}
 	return false;
@@ -357,13 +358,13 @@ bool tTVPFileSystemManager::FileExists(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
+bool tRisaFileSystemManager::DirectoryExists(const ttstr & dirname)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -371,7 +372,7 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 	}
 	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(RISSE_WS_TR("failed to retrieve existence of directory '%1' : %2"),
+		eRisaException::Throw(RISSE_WS_TR("failed to retrieve existence of directory '%1' : %2"),
 			fullpath, e.GetMessage()); // this method never returns
 	}
 	return false;
@@ -383,13 +384,13 @@ bool tTVPFileSystemManager::DirectoryExists(const ttstr & dirname)
 //! @brief		ファイルを削除する
 //! @param		filename ファイル名
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
+void tRisaFileSystemManager::RemoveFile(const ttstr & filename)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -397,7 +398,7 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 	}
 	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(RISSE_WS_TR("failed to remove file '%1' : %2"),
+		eRisaException::Throw(RISSE_WS_TR("failed to remove file '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -409,13 +410,13 @@ void tTVPFileSystemManager::RemoveFile(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursive)
+void tRisaFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -423,7 +424,7 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 	}
 	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(RISSE_WS_TR("failed to remove directory '%1' : %2"),
+		eRisaException::Throw(RISSE_WS_TR("failed to remove directory '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -435,13 +436,13 @@ void tTVPFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursiv
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursive)
+void tRisaFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursive)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(dirname));
-	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -449,7 +450,7 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 	}
 	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(RISSE_WS_TR("failed to create directory '%1' : %2"),
+		eRisaException::Throw(RISSE_WS_TR("failed to create directory '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -461,13 +462,13 @@ void tTVPFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursiv
 //! @param		filename ファイル名
 //! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
+void tRisaFileSystemManager::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -475,7 +476,7 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 	}
 	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(RISSE_WS_TR("failed to stat '%1' : %2"),
+		eRisaException::Throw(RISSE_WS_TR("failed to stat '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 }
@@ -488,14 +489,14 @@ void tTVPFileSystemManager::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename,
+tRisseBinaryStream * tRisaFileSystemManager::CreateStream(const ttstr & filename,
 	risse_uint32 flags)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
-	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -503,7 +504,7 @@ tRisseBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename,
 	}
 	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(RISSE_WS_TR("failed to create stream of '%1' : %2"),
+		eRisaException::Throw(RISSE_WS_TR("failed to create stream of '%1' : %2"),
 			fullpath, e.GetMessage());
 	}
 	return NULL;
@@ -517,14 +518,14 @@ tRisseBinaryStream * tTVPFileSystemManager::CreateStream(const ttstr & filename,
 //! @param		callback コールバック先
 //! @callback	コールバックオブジェクト
 //---------------------------------------------------------------------------
-size_t tTVPFileSystemManager::InternalGetFileListAt(
+size_t tRisaFileSystemManager::InternalGetFileListAt(
 	const ttstr & dirname,
-	tTVPFileSystemIterationCallback * callback)
+	tRisaFileSystemIterationCallback * callback)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
 	ttstr fspath;
-	boost::shared_ptr<tTVPFileSystem> fs = GetFileSystemAt(dirname, &fspath);
+	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(dirname, &fspath);
 	if(!fs) ThrowNoFileSystemError(dirname);
 	try
 	{
@@ -532,7 +533,7 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 	}
 	catch(const eRisseError &e)
 	{
-		eTVPException::Throw(RISSE_WS_TR("failed to list files in directory '%1' : %2"),
+		eRisaException::Throw(RISSE_WS_TR("failed to list files in directory '%1' : %2"),
 			dirname, e.GetMessage());
 	}
 	return 0;
@@ -546,7 +547,7 @@ size_t tTVPFileSystemManager::InternalGetFileListAt(
 //! @param		fspath ファイルシステム内におけるパス(興味がない場合はNULL可、最初の / は含まれない)
 //! @return		ファイルシステムインスタンス
 //---------------------------------------------------------------------------
-boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
+boost::shared_ptr<tRisaFileSystem> tRisaFileSystemManager::GetFileSystemAt(
 					const ttstr & fullpath, ttstr * fspath)
 {
 	// フルパスの最後からディレクトリを削りながら見ていき、最初に
@@ -599,9 +600,9 @@ boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 	// ・  fullpath にが渡された
 
 	if(fullpath.GetLen() == 0)
-		return boost::shared_ptr<tTVPFileSystem>();
+		return boost::shared_ptr<tRisaFileSystem>();
 	else
-		eTVPException::Throw(
+		eRisaException::Throw(
 			RISSE_WS_TR("Could not find the root filesystem"));
 }
 //---------------------------------------------------------------------------
@@ -612,9 +613,9 @@ boost::shared_ptr<tTVPFileSystem> tTVPFileSystemManager::GetFileSystemAt(
 //! @param		filename  マウントポイント
 //! @note		この関数は例外を発生させるため呼び出し元には戻らない
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
+void tRisaFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 {
-	eTVPException::Throw(
+	eRisaException::Throw(
 		RISSE_WS_TR("Could not find filesystem at path '%1'"), filename);
 }
 //---------------------------------------------------------------------------
@@ -623,9 +624,9 @@ void tTVPFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 //---------------------------------------------------------------------------
 //! @brief		「そのようなファイルやディレクトリは無い」例外を発生させる
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError()
+void tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 {
-	eTVPException::Throw(
+	eRisaException::Throw(
 		RISSE_WS_TR("no such file or directory"));
 }
 //---------------------------------------------------------------------------
@@ -638,7 +639,7 @@ void tTVPFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 //! @param		name [out] 拡張子へのポインタ(興味ない場合はNULL可)  拡張子には .(ドット) を含む。拡張子がない場合は空文字列になる
 //! @note		in と そのほかのパラメータに同じ文字列を指定しないこと
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttstr * ext)
+void tRisaFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttstr * ext)
 {
 	const risse_char * p = in.c_str() + in.GetLen();
 	const risse_char * pp = p;
@@ -678,7 +679,7 @@ void tTVPFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttst
 //! @param		name [out] 名前へのポインタ(興味ない場合はNULL可)
 //! @note		in と そのほかのパラメータに同じ文字列を指定しないこと
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name)
+void tRisaFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name)
 {
 	const risse_char * p = in.c_str() + in.GetLen();
 	const risse_char * pp = p;
@@ -698,7 +699,7 @@ void tTVPFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, tts
 //! @brief		パス名の最後のパスデリミタ ('/') を取り去る ( /path/is/here/ を /path/is/here にする )
 //! @param		path パス
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
+void tRisaFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 {
 	if(path.EndsWith(RISSE_WC('/')))
 	{
@@ -718,7 +719,7 @@ void tTVPFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 //! @param		in 処理したいファイル名
 //! @return		拡張子が取り落とされたファイル名
 //---------------------------------------------------------------------------
-ttstr tTVPFileSystemManager::ChopExtension(const ttstr & in)
+ttstr tRisaFileSystemManager::ChopExtension(const ttstr & in)
 {
 	ttstr ret;
 	SplitExtension(in, &ret, NULL);
@@ -732,7 +733,7 @@ ttstr tTVPFileSystemManager::ChopExtension(const ttstr & in)
 //! @param		in 処理したいファイル名
 //! @return		拡張子(ドットも含む; 拡張子が無い場合は空文字)
 //---------------------------------------------------------------------------
-ttstr tTVPFileSystemManager::ExtractExtension(const ttstr & in)
+ttstr tRisaFileSystemManager::ExtractExtension(const ttstr & in)
 {
 	ttstr ret;
 	SplitExtension(in, NULL, &ret);
@@ -746,7 +747,7 @@ ttstr tTVPFileSystemManager::ExtractExtension(const ttstr & in)
 //! @param		in 処理したいファイル名
 //! @return		ファイル名
 //---------------------------------------------------------------------------
-ttstr tTVPFileSystemManager::ExtractName(const ttstr & in)
+ttstr tRisaFileSystemManager::ExtractName(const ttstr & in)
 {
 	ttstr ret;
 	SplitPathAndName(in, NULL, &ret);
@@ -760,7 +761,7 @@ ttstr tTVPFileSystemManager::ExtractName(const ttstr & in)
 //! @param		in 処理したいファイル名
 //! @return		パス名
 //---------------------------------------------------------------------------
-ttstr tTVPFileSystemManager::ExtractPath(const ttstr & in)
+ttstr tRisaFileSystemManager::ExtractPath(const ttstr & in)
 {
 	ttstr ret;
 	SplitPathAndName(in, &ret, NULL);
@@ -773,7 +774,7 @@ ttstr tTVPFileSystemManager::ExtractPath(const ttstr & in)
 //! @brief		現在の作業ディレクトリを得る
 //! @return		作業ディレクトリ
 //---------------------------------------------------------------------------
-const ttstr & tTVPFileSystemManager::GetCurrentDirectory()
+const ttstr & tRisaFileSystemManager::GetCurrentDirectory()
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 
@@ -787,7 +788,7 @@ const ttstr & tTVPFileSystemManager::GetCurrentDirectory()
 //! @param		dir   作業ディレクトリ
 //! @note		実際にそのディレクトリが存在するかどうかのチェックは行わない
 //---------------------------------------------------------------------------
-void tTVPFileSystemManager::SetCurrentDirectory(const ttstr &dir)
+void tRisaFileSystemManager::SetCurrentDirectory(const ttstr &dir)
 {
 	volatile tRisseCriticalSectionHolder holder(CS);
 

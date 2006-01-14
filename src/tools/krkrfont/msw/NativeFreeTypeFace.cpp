@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -9,7 +10,7 @@
 //! @file
 //! @brief Win32 GDI 経由でのFreeType Face
 //! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
-//! tTVPFreeTypeFace もプラットフォームごとに異なった実装となる。
+//! tRisaFreeTypeFace もプラットフォームごとに異なった実装となる。
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "NativeFreeTypeFace.h"
@@ -22,15 +23,15 @@
 #include FT_TRUETYPE_UNPATENTED_H
 
 
-#define TVP_TT_TABLE_ttcf  (('t' << 0) + ('t' << 8) + ('c' << 16) + ('f' << 24))
-#define TVP_TT_TABLE_name  (('n' << 0) + ('a' << 8) + ('m' << 16) + ('e' << 24))
+#define RISA__TT_TABLE_ttcf  (('t' << 0) + ('t' << 8) + ('c' << 16) + ('f' << 24))
+#define RISA__TT_TABLE_name  (('n' << 0) + ('a' << 8) + ('m' << 16) + ('e' << 24))
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //! @param		fontname フォント名
 //! @param		options オプション
 //---------------------------------------------------------------------------
-tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
+tRisaNativeFreeTypeFace::tRisaNativeFreeTypeFace(const wxString &fontname,
 	risse_uint32 options)
 {
 	// フィールドのクリア
@@ -46,7 +47,7 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 	risse_size name_content_size;
 
 	// TrueType ライブラリをフック
-	tTVPFreeTypeLibrary::AddRef();
+	tRisaFreeTypeLibrary::AddRef();
 	try
 	{
 		// 指定のフォントを持ったデバイスコンテキストを作成する
@@ -76,7 +77,7 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 		// 'name' タグの内容を取得しようとすることでチェックする
 		// (name タグは GetFontData が扱うような TrueType/OpenType フォントには
 		//  必ず入っている)
-		DWORD result = GetFontData(DC, TVP_TT_TABLE_name, 0, NULL, 0);
+		DWORD result = GetFontData(DC, RISA__TT_TABLE_name, 0, NULL, 0);
 		if(result == GDI_ERROR)
 		{
 			// エラー; GetFontData では扱えなかった
@@ -91,7 +92,7 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 		name_content_ft = new unsigned char [name_content_size]; // メモリを確保
 
 		//- name タグの内容をメモリに読み込む
-		result = GetFontData(DC, TVP_TT_TABLE_name, 0, name_content, name_content_size);
+		result = GetFontData(DC, RISA__TT_TABLE_name, 0, name_content, name_content_size);
 		if(result == GDI_ERROR)
 		{
 			// エラー; メモリに読み込むことが出来なかった
@@ -110,11 +111,11 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 		//- ファイル全体の情報を得ることが出来る。
 		//- 参照 : microsoft.public.win32.programmer.gdi GetFontData and TTC fonts
 		unsigned char buf[4];
-		result = GetFontData(DC, TVP_TT_TABLE_ttcf, 0, &buf, 1);
+		result = GetFontData(DC, RISA__TT_TABLE_ttcf, 0, &buf, 1);
 		if(result == 1)
 		{
 			// TTC ファイルだと思われる
-			result = GetFontData(DC, TVP_TT_TABLE_ttcf, 0, NULL, 0);
+			result = GetFontData(DC, RISA__TT_TABLE_ttcf, 0, NULL, 0);
 			IsTTC = true;
 		}
 		else
@@ -215,7 +216,7 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 		Clear();
 		if(name_content) delete [] name_content;
 		if(name_content_ft) delete [] name_content_ft;
-		tTVPFreeTypeLibrary::Release();
+		tRisaFreeTypeLibrary::Release();
 		throw;
 	}
 	delete [] name_content;
@@ -228,10 +229,10 @@ tTVPNativeFreeTypeFace::tTVPNativeFreeTypeFace(const wxString &fontname,
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPNativeFreeTypeFace::~tTVPNativeFreeTypeFace()
+tRisaNativeFreeTypeFace::~tRisaNativeFreeTypeFace()
 {
 	Clear();
-	tTVPFreeTypeLibrary::Release();
+	tRisaFreeTypeLibrary::Release();
 }
 //---------------------------------------------------------------------------
 
@@ -239,7 +240,7 @@ tTVPNativeFreeTypeFace::~tTVPNativeFreeTypeFace()
 //---------------------------------------------------------------------------
 //! @brief		FreeType の Face オブジェクトを返す
 //---------------------------------------------------------------------------
-FT_Face tTVPNativeFreeTypeFace::GetFTFace() const
+FT_Face tRisaNativeFreeTypeFace::GetFTFace() const
 {
 	return Face;
 }
@@ -250,7 +251,7 @@ FT_Face tTVPNativeFreeTypeFace::GetFTFace() const
 //! @brief		このフォントファイルが持っているフォントを配列として返す
 //! @param		dest 格納先配列
 //---------------------------------------------------------------------------
-void tTVPNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
+void tRisaNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 {
 	// このFaceの場合、既にFaceは特定されているため、利用可能な
 	// Face 数は常に1で、フォント名はこのオブジェクトが構築された際に渡された
@@ -265,7 +266,7 @@ void tTVPNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 //---------------------------------------------------------------------------
 //! @brief		全てのオブジェクトを解放する
 //---------------------------------------------------------------------------
-void tTVPNativeFreeTypeFace::Clear()
+void tRisaNativeFreeTypeFace::Clear()
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
 	if(OldFont && DC)
@@ -288,7 +289,7 @@ void tTVPNativeFreeTypeFace::Clear()
 //! @param		count  読み出すバイト数
 //! @return		何バイト読み込まれたか
 //---------------------------------------------------------------------------
-unsigned long tTVPNativeFreeTypeFace::IoFunc(
+unsigned long tRisaNativeFreeTypeFace::IoFunc(
 			FT_Stream stream,
 			unsigned long   offset,
 			unsigned char*  buffer,
@@ -296,10 +297,10 @@ unsigned long tTVPNativeFreeTypeFace::IoFunc(
 {
 	if(count != 0)
 	{
-		tTVPNativeFreeTypeFace * _this =
-			static_cast<tTVPNativeFreeTypeFace*>(stream->descriptor.pointer);
+		tRisaNativeFreeTypeFace * _this =
+			static_cast<tRisaNativeFreeTypeFace*>(stream->descriptor.pointer);
 		DWORD result = GetFontData(_this->DC, 
-				_this->IsTTC ? TVP_TT_TABLE_ttcf : 0,
+				_this->IsTTC ? RISA__TT_TABLE_ttcf : 0,
 				offset, buffer, count);
 		if(result == GDI_ERROR)
 		{
@@ -317,7 +318,7 @@ unsigned long tTVPNativeFreeTypeFace::IoFunc(
 //! @brief		FreeType 用 ストリーム削除関数
 //! @param		stream FT_Streamへのポインタ
 //---------------------------------------------------------------------------
-void tTVPNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
+void tRisaNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
 {
 	// 何もしない
 }
@@ -329,7 +330,7 @@ void tTVPNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
 //! @param		index	開くindex
 //! @return		Faceを開ければ true そうでなければ false
 //---------------------------------------------------------------------------
-bool tTVPNativeFreeTypeFace::OpenFaceByIndex(int index)
+bool tRisaNativeFreeTypeFace::OpenFaceByIndex(int index)
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
 
@@ -345,7 +346,7 @@ bool tTVPNativeFreeTypeFace::OpenFaceByIndex(int index)
 	args.num_params = 1;
 	args.params = parameters;
 
-	FT_Error err = FT_Open_Face(tTVPFreeTypeLibrary::Get(), &args, index, &Face);
+	FT_Error err = FT_Open_Face(tRisaFreeTypeLibrary::Get(), &args, index, &Face);
 	return err == 0;
 }
 //---------------------------------------------------------------------------

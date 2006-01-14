@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -19,22 +20,22 @@
 #include <string>
 
 
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 	#include "WaveReader.h"
 #endif
 
 //---------------------------------------------------------------------------
-#ifdef TVP_IN_LOOP_TUNER
-	typedef AnsiString tTVPLabelStringType;
-	typedef char   tTVPLabelCharType;
+#ifdef RISA__IN_LOOP_TUNER
+	typedef AnsiString tRisaLabelStringType;
+	typedef char   tRisaLabelCharType;
 #else
-	typedef ttstr tTVPLabelStringType;
-	typedef risse_char tTVPLabelCharType;
+	typedef ttstr tRisaLabelStringType;
+	typedef risse_char tRisaLabelCharType;
 #endif
 //---------------------------------------------------------------------------
 
 
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 	//---------------------------------------------------------------------------
 	// tRisseCriticalSection ( taken from risseUtils.h )
 	//---------------------------------------------------------------------------
@@ -75,7 +76,7 @@
 //---------------------------------------------------------------------------
 //! @brief リンクを表すクラス
 //---------------------------------------------------------------------------
-class tTVPWaveLoopLink
+class tRisaWaveLoopLink
 {
 public:
 	//! @brief リンクの条件を表す列挙型
@@ -97,7 +98,7 @@ private:
 	tLinkCondition Condition;	//!< Condition
 	risse_int RefValue;	//!< リンク条件の「値」
 	risse_int CondVar;	//!< Condition variable index
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 	// these are only used by the loop tuner
 	risse_int FromTier;	//!< display tier of vertical 'from' line
 	risse_int LinkTier;	//!< display tier of horizontal link
@@ -107,8 +108,8 @@ private:
 	struct tSortByDistanceFuncObj
 	{
 		bool operator()(
-			const tTVPWaveLoopLink &lhs,
-			const tTVPWaveLoopLink &rhs) const
+			const tRisaWaveLoopLink &lhs,
+			const tRisaWaveLoopLink &rhs) const
 		{
 			risse_int64 lhs_dist = lhs.From - lhs.To;
 			if(lhs_dist < 0) lhs_dist = -lhs_dist;
@@ -121,8 +122,8 @@ private:
 	struct tSortByIndexFuncObj
 	{
 		bool operator()(
-			const tTVPWaveLoopLink &lhs,
-			const tTVPWaveLoopLink &rhs) const
+			const tRisaWaveLoopLink &lhs,
+			const tRisaWaveLoopLink &rhs) const
 		{
 			return lhs.Index < rhs.Index;
 		}
@@ -130,14 +131,14 @@ private:
 #endif
 
 	//! @brief コンストラクタ
-	tTVPWaveLoopLink()
+	tRisaWaveLoopLink()
 	{
 		From = To = 0;
 		Smooth = false;
 		Condition = llcNone;
 		RefValue = CondVar = 0;
 
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 		FromTier = LinkTier = ToTier = 0;
 		Index = 0;
 #endif
@@ -153,7 +154,7 @@ private:
 //! @param		rhs		演算子の右側
 //! @return		lhs < rhs の場合真、それ以外の場合は偽
 //---------------------------------------------------------------------------
-bool inline operator < (const tTVPWaveLoopLink & lhs, const tTVPWaveLoopLink & rhs)
+bool inline operator < (const tRisaWaveLoopLink & lhs, const tRisaWaveLoopLink & rhs)
 {
 	if(lhs.From < rhs.From) return true;
 	if(lhs.From == rhs.From)
@@ -172,19 +173,19 @@ bool inline operator < (const tTVPWaveLoopLink & lhs, const tTVPWaveLoopLink & r
 //---------------------------------------------------------------------------
 //! @brief		ラベルを表すクラス
 //---------------------------------------------------------------------------
-class tTVPWaveLabel
+class tRisaWaveLabel
 {
 public:
 	risse_int64 Position; //!< label position
-	tTVPLabelStringType Name; //!< label name
+	tRisaLabelStringType Name; //!< label name
 	risse_int Offset;
 		/*!< オフセット
 			@note
-			This member will be set in tTVPWaveLoopManager::Decode,
+			This member will be set in tRisaWaveLoopManager::Decode,
 			and will contain the sample granule offset from first decoding
-			point at call of tTVPWaveLoopManager::Decode().
+			point at call of tRisaWaveLoopManager::Decode().
 		*/
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 	// these are only used by the loop tuner
 	risse_int NameWidth; //!< display name width
 	risse_int Index; //!< index
@@ -193,8 +194,8 @@ public:
 	struct tSortByPositionFuncObj
 	{
 		bool operator()(
-			const tTVPWaveLabel &lhs,
-			const tTVPWaveLabel &rhs) const
+			const tRisaWaveLabel &lhs,
+			const tRisaWaveLabel &rhs) const
 		{
 			return lhs.Position < rhs.Position;
 		}
@@ -203,19 +204,19 @@ public:
 	struct tSortByOffsetFuncObj
 	{
 		bool operator()(
-			const tTVPWaveLabel &lhs,
-			const tTVPWaveLabel &rhs) const
+			const tRisaWaveLabel &lhs,
+			const tRisaWaveLabel &rhs) const
 		{
 			return lhs.Offset < rhs.Offset;
 		}
 	};
 
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 	struct tSortByIndexFuncObj
 	{
 		bool operator()(
-			const tTVPWaveLabel &lhs,
-			const tTVPWaveLabel &rhs) const
+			const tRisaWaveLabel &lhs,
+			const tRisaWaveLabel &rhs) const
 		{
 			return lhs.Index < rhs.Index;
 		}
@@ -223,11 +224,11 @@ public:
 #endif
 
 	//! @brief コンストラクタ
-	tTVPWaveLabel()
+	tRisaWaveLabel()
 	{
 		Position = 0;
 		Offset = 0;
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 		NameWidth = 0;
 		Index = 0;
 #endif
@@ -242,7 +243,7 @@ public:
 //! @param		rhs		演算子の右側
 //! @return		lhs < rhs の場合真、それ以外の場合は偽
 //---------------------------------------------------------------------------
-bool inline operator < (const tTVPWaveLabel & lhs, const tTVPWaveLabel & rhs)
+bool inline operator < (const tRisaWaveLabel & lhs, const tRisaWaveLabel & rhs)
 {
 	return lhs.Position < rhs.Position;
 }
@@ -255,16 +256,16 @@ bool inline operator < (const tTVPWaveLabel & lhs, const tTVPWaveLabel & rhs)
 //---------------------------------------------------------------------------
 //! @brief		Wave ループマネージャ
 //---------------------------------------------------------------------------
-class tTVPWaveDecoder;
-class tTVPWaveFormat;
-class tTVPWaveLoopManager
+class tRisaWaveDecoder;
+class tRisaWaveFormat;
+class tRisaWaveLoopManager
 {
 public:
 	// 定数
-	static const int TVPWaveLoopLinkGiveUpCount = 10;
+	static const int RisaWaveLoopLinkGiveUpCount = 10;
 		/*!< This is for preventing infinite loop caused by recursive links.
 		 If the decoding point does not change when the loop manager follows the
-		 links, after 'TVPWaveLoopLinkGiveUpCount' times the loop manager
+		 links, after 'RisaWaveLoopLinkGiveUpCount' times the loop manager
 		 will give up the decoding.*/
 
 	static const int MaxFlags = 16; //!< フラグの最大数
@@ -275,7 +276,7 @@ public:
 
 private:
 
-	//! @brief 再生セグメント情報 (tTVPWaveLoopManager::Decodeメソッド で返される)
+	//! @brief 再生セグメント情報 (tRisaWaveLoopManager::Decodeメソッド で返される)
 	struct tSegment
 	{
 		//! @brief コンストラクタ
@@ -288,11 +289,11 @@ private:
 	tRisseCriticalSection FlagsCS; //!< CS to protect flags/links/labels
 	int Flags[MaxFlags]; //!< フラグ
 	bool FlagsModifiedByLabelExpression; //!< true if the flags are modified by EvalLabelExpression
-	std::vector<tTVPWaveLoopLink> Links; //!< リンクの配列
-	std::vector<tTVPWaveLabel> Labels; //!< ラベルの配列
+	std::vector<tRisaWaveLoopLink> Links; //!< リンクの配列
+	std::vector<tRisaWaveLabel> Labels; //!< ラベルの配列
 	tRisseCriticalSection DataCS; // CS to protect other members
-	tTVPWaveFormat * Format; //!< PCMフォーマット
-	tTVPWaveDecoder * Decoder; //!< デコーダ
+	tRisaWaveFormat * Format; //!< PCMフォーマット
+	tRisaWaveDecoder * Decoder; //!< デコーダ
 
 	risse_int ShortCrossFadeHalfSamples;
 		//!< SmoothTimeHalf in sample unit
@@ -313,10 +314,10 @@ private:
 	bool IgnoreLinks; //!< decode the samples with ignoring links
 
 public:
-	tTVPWaveLoopManager();
-	virtual ~tTVPWaveLoopManager();
+	tRisaWaveLoopManager();
+	virtual ~tRisaWaveLoopManager();
 
-	void SetDecoder(tTVPWaveDecoder * decoder);
+	void SetDecoder(tRisaWaveDecoder * decoder);
 
 	int GetFlag(risse_int index);
 	void CopyFlags(risse_int *dest);
@@ -325,11 +326,11 @@ public:
 	void ClearFlags();
 	void ClearLinksAndLabels();
 
-	const std::vector<tTVPWaveLoopLink> & GetLinks() const;
-	const std::vector<tTVPWaveLabel> & GetLabels() const;
+	const std::vector<tRisaWaveLoopLink> & GetLinks() const;
+	const std::vector<tRisaWaveLabel> & GetLabels() const;
 
-	void SetLinks(const std::vector<tTVPWaveLoopLink> & links);
-	void SetLabels(const std::vector<tTVPWaveLabel> & labels);
+	void SetLinks(const std::vector<tRisaWaveLoopLink> & links);
+	void SetLabels(const std::vector<tRisaWaveLabel> & labels);
 
 	bool GetIgnoreLinks() const;
 	void SetIgnoreLinks(bool b);
@@ -342,14 +343,14 @@ public:
 
 	void Decode(void *dest, risse_uint samples, risse_uint &written,
 		std::vector<tSegment> &segments,
-		std::vector<tTVPWaveLabel> &labels);
+		std::vector<tRisaWaveLabel> &labels);
 
 private:
 	bool GetNearestEvent(risse_int64 current,
-		tTVPWaveLoopLink & link, bool ignore_conditions);
+		tRisaWaveLoopLink & link, bool ignore_conditions);
 
 	void GetLabelAt(risse_int64 from, risse_int64 to,
-		std::vector<tTVPWaveLabel> & labels);
+		std::vector<tRisaWaveLabel> & labels);
 
 	void DoCrossFade(void *dest, void *src1, void *src2, risse_int samples,
 		risse_int ratiostart, risse_int ratioend);
@@ -372,15 +373,15 @@ private:
 		etDecrement		// '--'
 	};
 public:
-	static bool GetLabelExpression(const tTVPLabelStringType &label,
+	static bool GetLabelExpression(const tRisaLabelStringType &label,
 		tExpressionToken * ope = NULL,
 		risse_int *lv = NULL,
 		risse_int *rv = NULL, bool *is_rv_indirect = NULL);
 private:
-	bool EvalLabelExpression(const tTVPLabelStringType &label);
+	bool EvalLabelExpression(const tRisaLabelStringType &label);
 
-	static tExpressionToken GetExpressionToken(const tTVPLabelCharType * &  p , risse_int * value);
-	static bool GetLabelCharInt(const tTVPLabelCharType *s, risse_int &v);
+	static tExpressionToken GetExpressionToken(const tRisaLabelCharType * &  p , risse_int * value);
+	static bool GetLabelCharInt(const tRisaLabelCharType *s, risse_int &v);
 
 
 //--- loop information input/output stuff
@@ -388,24 +389,24 @@ private:
 	static bool GetInt(char *s, risse_int &v);
 	static bool GetInt64(char *s, risse_int64 &v);
 	static bool GetBool(char *s, bool &v);
-	static bool GetCondition(char *s, tTVPWaveLoopLinkCondition &v);
-	static bool GetString(char *s, tTVPLabelStringType &v);
+	static bool GetCondition(char *s, tRisaWaveLoopLinkCondition &v);
+	static bool GetString(char *s, tRisaLabelStringType &v);
 
 	static bool GetEntityToken(char * & p, char **name, char **value);
 
-	static bool ReadLinkInformation(char * & p, tTVPWaveLoopLink &link);
-	static bool ReadLabelInformation(char * & p, tTVPWaveLabel &label);
+	static bool ReadLinkInformation(char * & p, tRisaWaveLoopLink &link);
+	static bool ReadLabelInformation(char * & p, tRisaWaveLabel &label);
 public:
 	bool ReadInformation(char * p);
 
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 	// output facility (currently only available with VCL interface)
 private:
 	static void PutInt(AnsiString &s, risse_int v);
 	static void PutInt64(AnsiString &s, risse_int64 v);
 	static void PutBool(AnsiString &s, bool v);
-	static void PutCondition(AnsiString &s, tTVPWaveLoopLinkCondition v);
-	static void PutString(AnsiString &s, tTVPLabelStringType v);
+	static void PutCondition(AnsiString &s, tRisaWaveLoopLinkCondition v);
+	static void PutString(AnsiString &s, tRisaLabelStringType v);
 	static void DoSpacing(AnsiString &l, int col);
 public:
 	void WriteInformation(AnsiString &s);

@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -24,10 +25,10 @@
 //---------------------------------------------------------------------------
 //! @brief		FreeType フォント face
 //---------------------------------------------------------------------------
-class tTVPFreeTypeFace
+class tRisaFreeTypeFace
 {
 	wxString FontName;		//!< フォント名
-	tTVPBaseFreeTypeFace * Face; //!< Face オブジェクト
+	tRisaBaseFreeTypeFace * Face; //!< Face オブジェクト
 	FT_Face FTFace; //!< FreeType Face オブジェクト
 	risse_uint32 Options; //!< フラグ
 
@@ -39,8 +40,8 @@ class tTVPFreeTypeFace
 	risse_char (*LocalCharToUnicode)(risse_uint in); //!< UnicodeをSJISなどに変換する関数
 
 public:
-	tTVPFreeTypeFace(const wxString &fontname, risse_uint32 options);
-	~tTVPFreeTypeFace();
+	tRisaFreeTypeFace(const wxString &fontname, risse_uint32 options);
+	~tRisaFreeTypeFace();
 
 	risse_uint GetGlyphCount();
 	risse_char GetCharcodeFromGlyphIndex(risse_uint index);
@@ -50,8 +51,8 @@ public:
 	risse_int GetHeight() { return Height; }
 	void SetHeight(int height);
 
-	tTVPGlyphBitmap * GetGlyphFromCharcode(risse_char code);
-	bool GetGlyphMetricsFromCharcode(risse_char code, tTVPGlyphMetrics & metrics);
+	tRisaGlyphBitmap * GetGlyphFromCharcode(risse_char code);
+	bool GetGlyphMetricsFromCharcode(risse_char code, tRisaGlyphMetrics & metrics);
 
 private:
 	bool LoadGlyphSlotFromCharcode(risse_char code);
@@ -65,9 +66,9 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		FreeType ライブラリラッパー(singleton)
 //---------------------------------------------------------------------------
-class tTVPFreeTypeLibrary
+class tRisaFreeTypeLibrary
 {
-	static tTVPFreeTypeLibrary * GlobalLibrary;	//!< FreeType ライブラリ
+	static tRisaFreeTypeLibrary * GlobalLibrary;	//!< FreeType ライブラリ
 
 	risse_int RefCount;	//!< 参照カウンタ
 	FT_Library Library;	//!< FreeType ライブラリ
@@ -82,8 +83,8 @@ public:
 								return GlobalLibrary->Library; }
 
 private:
-	tTVPFreeTypeLibrary();
-	~tTVPFreeTypeLibrary();
+	tRisaFreeTypeLibrary();
+	~tRisaFreeTypeLibrary();
 
 	void Hook();
 	risse_int Unhook();
@@ -99,11 +100,11 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		FreeType フォントドライバ
 //---------------------------------------------------------------------------
-class tTVPFreeTypeFontDriver : public tTVPBaseFreeTypeFontDriver
+class tRisaFreeTypeFontDriver : public tRisaBaseFreeTypeFontDriver
 {
 public:
-	tTVPFreeTypeFontDriver();
-	~tTVPFreeTypeFontDriver();
+	tRisaFreeTypeFontDriver();
+	~tRisaFreeTypeFontDriver();
 
 private:
 };

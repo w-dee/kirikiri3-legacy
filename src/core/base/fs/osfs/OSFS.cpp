@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -12,7 +13,7 @@
 #include "prec.h"
 #include "OSFS.h"
 #include "OSFSBind.h"
-#include "TVPException.h"
+#include "RisaException.h"
 #include <wx/filename.h>
 #include <wx/dir.h>
 
@@ -23,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(2001);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPOSNativeStream::tTVPOSNativeStream(const wxString & filename, risse_uint32 flags)
+tRisaOSNativeStream::tRisaOSNativeStream(const wxString & filename, risse_uint32 flags)
 {
 	// モードを決定する
 	wxFile::OpenMode mode;
@@ -41,7 +42,7 @@ tTVPOSNativeStream::tTVPOSNativeStream(const wxString & filename, risse_uint32 f
 
 	// ファイルを開く
 	if(!File.Open(filename))
-		eTVPException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not open file '%s'"),
+		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not open file '%s'"),
 			filename.c_str())));
 
 	// APPEND の場合はファイルポインタを最後に移動する
@@ -54,7 +55,7 @@ tTVPOSNativeStream::tTVPOSNativeStream(const wxString & filename, risse_uint32 f
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPOSNativeStream::~tTVPOSNativeStream()
+tRisaOSNativeStream::~tRisaOSNativeStream()
 {
 }
 //---------------------------------------------------------------------------
@@ -66,7 +67,7 @@ tTVPOSNativeStream::~tTVPOSNativeStream()
 //! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
 //! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
-risse_uint64 tTVPOSNativeStream::Seek(risse_int64 offset, risse_int whence)
+risse_uint64 tRisaOSNativeStream::Seek(risse_int64 offset, risse_int whence)
 {
 	wxSeekMode mode = wxFromCurrent;
 	switch(whence)
@@ -79,7 +80,7 @@ risse_uint64 tTVPOSNativeStream::Seek(risse_int64 offset, risse_int whence)
 
 	wxFileOffset newpos = File.Seek(offset, mode);
 	if(newpos == wxInvalidOffset)
-		eTVPException::Throw(RISSE_WS_TR("seek failed"));
+		eRisaException::Throw(RISSE_WS_TR("seek failed"));
 
 	return newpos;
 }
@@ -92,7 +93,7 @@ risse_uint64 tTVPOSNativeStream::Seek(risse_int64 offset, risse_int whence)
 //! @param		read_size 読み込むバイト数
 //! @return		実際に読み込まれたバイト数
 //---------------------------------------------------------------------------
-risse_size tTVPOSNativeStream::Read(void *buffer, risse_size read_size)
+risse_size tRisaOSNativeStream::Read(void *buffer, risse_size read_size)
 {
 	return File.Write(buffer, read_size);
 }
@@ -105,7 +106,7 @@ risse_size tTVPOSNativeStream::Read(void *buffer, risse_size read_size)
 //! @param		read_size 書き込みたいバイト数
 //! @return		実際に書き込まれたバイト数
 //---------------------------------------------------------------------------
-risse_size tTVPOSNativeStream::Write(const void *buffer, risse_size write_size)
+risse_size tRisaOSNativeStream::Write(const void *buffer, risse_size write_size)
 {
 	return File.Write(buffer, write_size);
 }
@@ -115,10 +116,10 @@ risse_size tTVPOSNativeStream::Write(const void *buffer, risse_size write_size)
 //---------------------------------------------------------------------------
 //! @brief		ファイルの終わりを現在のポインタに設定する
 //---------------------------------------------------------------------------
-void tTVPOSNativeStream::SetEndOfFile()
+void tRisaOSNativeStream::SetEndOfFile()
 {
 	// TODO: implement this 
-	eTVPException::Throw(RISSE_WS_TR("tTVPOSNativeStream::SetEndOfFile not implemented"));
+	eRisaException::Throw(RISSE_WS_TR("tRisaOSNativeStream::SetEndOfFile not implemented"));
 }
 //---------------------------------------------------------------------------
 
@@ -127,7 +128,7 @@ void tTVPOSNativeStream::SetEndOfFile()
 //! @brief		サイズを得る
 //! @return		このストリームのサイズ
 //---------------------------------------------------------------------------
-risse_uint64 tTVPOSNativeStream::GetSize()
+risse_uint64 tRisaOSNativeStream::GetSize()
 {
 	return File.Length();
 }
@@ -147,7 +148,7 @@ risse_uint64 tTVPOSNativeStream::GetSize()
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPOSFS::tTVPOSFS(const ttstr & basedir, bool checkcase) : 
+tRisaOSFS::tRisaOSFS(const ttstr & basedir, bool checkcase) : 
 	BaseDirectory(basedir.AsWxString()), CheckCase(checkcase)
 {
 	// ベースディレクトリのパス区切りをネイティブなものに変更
@@ -168,7 +169,7 @@ tTVPOSFS::tTVPOSFS(const ttstr & basedir, bool checkcase) :
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPOSFS::~tTVPOSFS()
+tRisaOSFS::~tRisaOSFS()
 {
 }
 //---------------------------------------------------------------------------
@@ -180,8 +181,8 @@ tTVPOSFS::~tTVPOSFS()
 //! @param		callback コールバックオブジェクト
 //! @return		取得できたファイル数
 //---------------------------------------------------------------------------
-size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
-	tTVPFileSystemIterationCallback * callback)
+size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
+	tRisaFileSystemIterationCallback * callback)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -200,7 +201,7 @@ size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 	// ディレクトリの存在をチェック
 	if(!wxFileName::DirExists(native_name)
 		|| !dir.Open(native_name))
-			eTVPException::Throw(ttstr(wxString::Format(
+			eRisaException::Throw(ttstr(wxString::Format(
 				RISSE_WS_TR("can not open directory '%s'"), native_name.c_str())));
 
 	// ファイルを列挙
@@ -242,7 +243,7 @@ size_t tTVPOSFS::GetFileListAt(const ttstr & dirname,
 //! @param		filename ファイル名
 //! @return		ファイルが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPOSFS::FileExists(const ttstr & filename)
+bool tRisaOSFS::FileExists(const ttstr & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -262,7 +263,7 @@ bool tTVPOSFS::FileExists(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
-bool tTVPOSFS::DirectoryExists(const ttstr & dirname)
+bool tRisaOSFS::DirectoryExists(const ttstr & dirname)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -281,7 +282,7 @@ bool tTVPOSFS::DirectoryExists(const ttstr & dirname)
 //! @brief		ファイルを削除する
 //! @param		filename ファイル名
 //---------------------------------------------------------------------------
-void tTVPOSFS::RemoveFile(const ttstr & filename)
+void tRisaOSFS::RemoveFile(const ttstr & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -292,7 +293,7 @@ void tTVPOSFS::RemoveFile(const ttstr & filename)
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
 	if(!::wxRemoveFile(native_name))
-		eTVPException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not remove file '%s'"), native_name.c_str())));
+		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not remove file '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
@@ -302,7 +303,7 @@ void tTVPOSFS::RemoveFile(const ttstr & filename)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
-void tTVPOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
+void tRisaOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -313,11 +314,11 @@ void tTVPOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
 	if(recursive)
-		eTVPException::Throw(
+		eRisaException::Throw(
 			RISSE_WS_TR("recursive directory remove is not yet implemented"));
 
 	if(::wxRmdir(native_name))
-		eTVPException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not remove directory '%s'"), native_name.c_str())));
+		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not remove directory '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
@@ -327,7 +328,7 @@ void tTVPOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //! @param		dirname ディレクトリ名
 //! @param		recursive 再帰的にディレクトリを作成するかどうか
 //---------------------------------------------------------------------------
-void tTVPOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
+void tRisaOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -338,7 +339,7 @@ void tTVPOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
 	if(!wxFileName::Mkdir(native_name, 0777, recursive?wxPATH_MKDIR_FULL:0))
-		eTVPException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not create directory '%s'"), native_name.c_str())));
+		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not create directory '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
@@ -348,7 +349,7 @@ void tTVPOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //! @param		filename ファイル名
 //! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
-void tTVPOSFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
+void tRisaOSFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -365,12 +366,12 @@ void tTVPOSFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 	wxFileName filename_obj(native_name);
 
 	if(!filename_obj.GetTimes(&struc.ATime, &struc.MTime, &struc.CTime))
-		eTVPException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
+		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
 
 	// サイズを取得
 	wxFile file;
 	if(!file.Open(native_name))
-		eTVPException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
+		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
 
 	struc.Size = file.Length();
 }
@@ -383,7 +384,7 @@ void tTVPOSFS::Stat(const ttstr & filename, tTVPStatStruc & struc)
 //! @param		flags フラグ
 //! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tTVPOSFS::CreateStream(const ttstr & filename, risse_uint32 flags)
+tRisseBinaryStream * tRisaOSFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -393,7 +394,7 @@ tRisseBinaryStream * tTVPOSFS::CreateStream(const ttstr & filename, risse_uint32
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
-	return new tTVPOSNativeStream(native_name, flags);
+	return new tRisaOSNativeStream(native_name, flags);
 }
 //---------------------------------------------------------------------------
 
@@ -403,7 +404,7 @@ tRisseBinaryStream * tTVPOSFS::CreateStream(const ttstr & filename, risse_uint32
 //! @param		path パス名
 //! @return		OSネイティブなパス区切りに変更された後のパス名
 //---------------------------------------------------------------------------
-wxString tTVPOSFS::ConvertToNativePathDelimiter(const wxString & path)
+wxString tRisaOSFS::ConvertToNativePathDelimiter(const wxString & path)
 {
 	wxString ret(path);
 	if(ret.Length() > 0)
@@ -426,7 +427,7 @@ wxString tTVPOSFS::ConvertToNativePathDelimiter(const wxString & path)
 //! @return		一致した場合に真、しなかった場合に偽
 //! @note		ファイルが「見つからない」場合は真が帰るので注意
 //---------------------------------------------------------------------------
-bool tTVPOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
+bool tRisaOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 {
 	// TODO: UNIX系OSでのチェック
 	if(!CheckCase) return true; // 大文字・小文字をチェックしない場合はそのまま帰る
@@ -455,7 +456,7 @@ bool tTVPOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 			{
 				// ファイル名が違う
 				if(raise)
-					eTVPException::Throw(ttstr(wxString::Format(msg, path_to_check.c_str(),
+					eRisaException::Throw(ttstr(wxString::Format(msg, path_to_check.c_str(),
 						(subpath + existing).c_str())));
 				else
 					return false;
@@ -475,7 +476,7 @@ bool tTVPOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 			{
 				// ファイル名が違う
 				if(raise)
-					eTVPException::Throw(ttstr(wxString::Format(msg, testpath.GetFullPath().c_str(),
+					eRisaException::Throw(ttstr(wxString::Format(msg, testpath.GetFullPath().c_str(),
 						(subpath + existing).c_str())));
 				else
 					return false;

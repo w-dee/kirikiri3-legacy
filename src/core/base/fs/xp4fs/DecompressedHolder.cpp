@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -11,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "DecompressedHolder.h"
-#include "TVPException.h"
+#include "RisaException.h"
 #include <zlib.h>
 
 RISSE_DEFINE_SOURCE_ID(2005);
@@ -24,7 +25,7 @@ RISSE_DEFINE_SOURCE_ID(2005);
 //! @param		insize 入力データのサイズ
 //! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
-tTVPDecompressedHolder::tTVPDecompressedHolder(tTVPDecompressedHolder::tMethod method,
+tRisaDecompressedHolder::tRisaDecompressedHolder(tRisaDecompressedHolder::tMethod method,
 		const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size)
 {
@@ -44,7 +45,7 @@ tTVPDecompressedHolder::tTVPDecompressedHolder(tTVPDecompressedHolder::tMethod m
 //! @param		insize 入力データのサイズ
 //! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
-tTVPDecompressedHolder::tTVPDecompressedHolder(tMethod method,
+tRisaDecompressedHolder::tRisaDecompressedHolder(tMethod method,
 		tRisseBinaryStream * instream, risse_size insize, 
 		risse_size uncomp_size)
 {
@@ -73,7 +74,7 @@ tTVPDecompressedHolder::tTVPDecompressedHolder(tMethod method,
 //---------------------------------------------------------------------------
 //!@brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPDecompressedHolder::~tTVPDecompressedHolder()
+tRisaDecompressedHolder::~tRisaDecompressedHolder()
 {
 	delete [] Data;
 }
@@ -87,7 +88,7 @@ tTVPDecompressedHolder::~tTVPDecompressedHolder()
 //! @param		insize 入力データのサイズ
 //! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
-void tTVPDecompressedHolder::Decompress(tTVPDecompressedHolder::tMethod method, const risse_uint8 * indata, risse_size insize, 
+void tRisaDecompressedHolder::Decompress(tRisaDecompressedHolder::tMethod method, const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size)
 {
 	// すでにメモリブロックが割り当てられていた場合はメモリブロックを解放
@@ -95,7 +96,7 @@ void tTVPDecompressedHolder::Decompress(tTVPDecompressedHolder::tMethod method, 
 	Size = 0;
 
 	// メソッドをチェック (現在はzlibのみ)
-	if(method != dhmZLib) TVPThrowInternalError;
+	if(method != dhmZLib) RisaThrowInternalError;
 
 	// 出力メモリブロックを確保
 	Size = uncomp_size;
@@ -107,7 +108,7 @@ void tTVPDecompressedHolder::Decompress(tTVPDecompressedHolder::tMethod method, 
 		int result = uncompress( (unsigned char*)indata, &destlen,
 				(unsigned char*)indata, insize);
 		if(result != Z_OK || destlen != Size)
-			eTVPException::Throw(RISSE_WS_TR("Decompression failed. Data may be corrupted."));
+			eRisaException::Throw(RISSE_WS_TR("Decompression failed. Data may be corrupted."));
 	}
 	catch(...)
 	{

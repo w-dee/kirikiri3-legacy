@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -10,7 +11,7 @@
 //! @brief Waveループマネージャ
 //---------------------------------------------------------------------------
 /*
-	This module will be shared between TVP2 and
+	This module will be shared between Risa2 and
 	Loop Tuner 2 (a GUI loop-point editor)
 */
 
@@ -20,7 +21,7 @@
 #include "risseTypes.h"
 #include "WaveLoopManager.h"
 
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 	#include "WaveReader.h"
 #else
 	#include "WaveDecoder.h"
@@ -38,18 +39,18 @@
 	#pragma pack(push,1)
 #endif
 //! @brief  8bit PCM型
-struct tTVPPCM8
+struct tRisaPCM8
 {
 	risse_uint8 value;
-	tTVPPCM8(risse_int v) { value = (risse_uint8)(v + 0x80); }
+	tRisaPCM8(risse_int v) { value = (risse_uint8)(v + 0x80); }
 	void operator = (risse_int v) { value = (risse_uint8)(v + 0x80); }
 	operator risse_int () const { return (risse_int)value - 0x80; }
 };
 //! @brief  24bit PCM型
-struct tTVPPCM24
+struct tRisaPCM24
 {
 	risse_uint8 value[3];
-	tTVPPCM24(risse_int v)
+	tRisaPCM24(risse_int v)
 	{
 		operator = (v);
 	}
@@ -98,7 +99,7 @@ struct tTVPPCM24
 //! @param		channels	対象PCMのチャンネル数
 //---------------------------------------------------------------------------
 template <typename T>
-static void TVPCrossFadeIntegerBlend(void *dest, void *src1, void *src2,
+static void RisaCrossFadeIntegerBlend(void *dest, void *src1, void *src2,
 	risse_int ratiostart, risse_int ratioend,
 	risse_int samples, risse_int channels)
 {
@@ -136,7 +137,7 @@ static void TVPCrossFadeIntegerBlend(void *dest, void *src1, void *src2,
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tTVPWaveLoopManager::tTVPWaveLoopManager()
+tRisaWaveLoopManager::tRisaWaveLoopManager()
 {
 	Position = 0;
 	IsLinksSorted = false;
@@ -147,7 +148,7 @@ tTVPWaveLoopManager::tTVPWaveLoopManager()
 	Decoder = NULL;
 	IgnoreLinks = false;
 	Looping = false;
-	Format = new tTVPWaveFormat;
+	Format = new tRisaWaveFormat;
 	memset(Format, 0, sizeof(*Format));
 
 	ClearFlags();
@@ -159,7 +160,7 @@ tTVPWaveLoopManager::tTVPWaveLoopManager()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tTVPWaveLoopManager::~tTVPWaveLoopManager()
+tRisaWaveLoopManager::~tRisaWaveLoopManager()
 {
 	ClearCrossFadeInformation();
 	delete Format;
@@ -171,7 +172,7 @@ tTVPWaveLoopManager::~tTVPWaveLoopManager()
 //! @brief		デコーダを設定する
 //! @param		decoder		デコーダ
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::SetDecoder(tTVPWaveDecoder * decoder)
+void tRisaWaveLoopManager::SetDecoder(tRisaWaveDecoder * decoder)
 {
 	// set decoder and compute ShortCrossFadeHalfSamples
 	Decoder = decoder;
@@ -190,7 +191,7 @@ void tTVPWaveLoopManager::SetDecoder(tTVPWaveDecoder * decoder)
 //! @param		index    フラグのインデックス
 //! @return		そのインデックスに対応するフラグの値
 //---------------------------------------------------------------------------
-int tTVPWaveLoopManager::GetFlag(risse_int index)
+int tRisaWaveLoopManager::GetFlag(risse_int index)
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 	return Flags[index];
@@ -203,7 +204,7 @@ int tTVPWaveLoopManager::GetFlag(risse_int index)
 //! @param		dest		コピー先
 //! @note		この関数を呼ぶと FlagsModifiedByLabelExpression は偽にリセットされる
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::CopyFlags(risse_int *dest)
+void tRisaWaveLoopManager::CopyFlags(risse_int *dest)
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 	// copy flags into dest, and clear FlagsModifiedByLabelExpression
@@ -218,7 +219,7 @@ void tTVPWaveLoopManager::CopyFlags(risse_int *dest)
 //! @return		フラグがラベル式によって変更されたかどうか
 //! @note		このフラグは CopyFlags により偽にリセットされる
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetFlagsModifiedByLabelExpression()
+bool tRisaWaveLoopManager::GetFlagsModifiedByLabelExpression()
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 	return FlagsModifiedByLabelExpression;
@@ -231,7 +232,7 @@ bool tTVPWaveLoopManager::GetFlagsModifiedByLabelExpression()
 //! @param		index		フラグのインデックス
 //! @param		f			フラグの値
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::SetFlag(risse_int index, risse_int f)
+void tRisaWaveLoopManager::SetFlag(risse_int index, risse_int f)
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 	if(f < 0) f = 0;
@@ -244,7 +245,7 @@ void tTVPWaveLoopManager::SetFlag(risse_int index, risse_int f)
 //---------------------------------------------------------------------------
 //! @brief		フラグをすべて 0 にする
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::ClearFlags()
+void tRisaWaveLoopManager::ClearFlags()
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 	for(risse_int i = 0; i < MaxFlags; i++) Flags[i] = 0;
@@ -255,7 +256,7 @@ void tTVPWaveLoopManager::ClearFlags()
 //---------------------------------------------------------------------------
 //! @brief		リンクやラベルをすべてクリアする
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::ClearLinksAndLabels()
+void tRisaWaveLoopManager::ClearLinksAndLabels()
 {
 	// clear links and labels
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
@@ -271,10 +272,10 @@ void tTVPWaveLoopManager::ClearLinksAndLabels()
 //! @brief		リンクの配列を得る
 //! @return		リンクの配列への参照
 //---------------------------------------------------------------------------
-const std::vector<tTVPWaveLoopLink> & tTVPWaveLoopManager::GetLinks() const
+const std::vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
 {
 	volatile tRisseCriticalSectionHolder
-		CS(const_cast<tTVPWaveLoopManager*>(this)->FlagsCS);
+		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
 	return Links;
 }
 //---------------------------------------------------------------------------
@@ -284,10 +285,10 @@ const std::vector<tTVPWaveLoopLink> & tTVPWaveLoopManager::GetLinks() const
 //! @brief		ラベルの配列を得る
 //! @return		ラベルの配列への参照
 //---------------------------------------------------------------------------
-const std::vector<tTVPWaveLabel> & tTVPWaveLoopManager::GetLabels() const
+const std::vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
 {
 	volatile tRisseCriticalSectionHolder
-		CS(const_cast<tTVPWaveLoopManager*>(this)->FlagsCS);
+		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
 	return Labels;
 }
 //---------------------------------------------------------------------------
@@ -297,7 +298,7 @@ const std::vector<tTVPWaveLabel> & tTVPWaveLoopManager::GetLabels() const
 //! @brief		リンクの配列を設定する
 //! @param		links		設定したい配列
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::SetLinks(const std::vector<tTVPWaveLoopLink> & links)
+void tRisaWaveLoopManager::SetLinks(const std::vector<tRisaWaveLoopLink> & links)
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 	Links = links;
@@ -310,7 +311,7 @@ void tTVPWaveLoopManager::SetLinks(const std::vector<tTVPWaveLoopLink> & links)
 //! @brief		ラベルの配列を設定する
 //! @param		links		設定したい配列
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::SetLabels(const std::vector<tTVPWaveLabel> & labels)
+void tRisaWaveLoopManager::SetLabels(const std::vector<tRisaWaveLabel> & labels)
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 	Labels = labels;
@@ -323,10 +324,10 @@ void tTVPWaveLoopManager::SetLabels(const std::vector<tTVPWaveLabel> & labels)
 //! @brief		リンクを無視しながら再生しているかどうかを返す
 //! @return		リンクを無視しながら再生しているかどうか
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetIgnoreLinks() const
+bool tRisaWaveLoopManager::GetIgnoreLinks() const
 {
 	volatile tRisseCriticalSectionHolder
-		CS(const_cast<tTVPWaveLoopManager*>(this)->DataCS);
+		CS(const_cast<tRisaWaveLoopManager*>(this)->DataCS);
 	return IgnoreLinks;
 }
 //---------------------------------------------------------------------------
@@ -336,7 +337,7 @@ bool tTVPWaveLoopManager::GetIgnoreLinks() const
 //! @brief		リンクを無視しながら再生しているかどうかを設定する
 //! @param		b		リンクを蒸ししながら再生するかどうか
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::SetIgnoreLinks(bool b)
+void tRisaWaveLoopManager::SetIgnoreLinks(bool b)
 {
 	volatile tRisseCriticalSectionHolder CS(DataCS);
 	IgnoreLinks = b;
@@ -348,11 +349,11 @@ void tTVPWaveLoopManager::SetIgnoreLinks(bool b)
 //! @brief		現在のデコード位置を得る
 //! @return		現在のデコード位置
 //---------------------------------------------------------------------------
-risse_int64 tTVPWaveLoopManager::GetPosition() const
+risse_int64 tRisaWaveLoopManager::GetPosition() const
 {
 	// we cannot assume that the 64bit data access is truely atomic on 32bit machines.
 	volatile tRisseCriticalSectionHolder
-		CS(const_cast<tTVPWaveLoopManager*>(this)->FlagsCS);
+		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
 	return Position;
 }
 //---------------------------------------------------------------------------
@@ -362,7 +363,7 @@ risse_int64 tTVPWaveLoopManager::GetPosition() const
 //! @brief		現在のデコード位置を設定する
 //! @param		pos		現在のデコード位置
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::SetPosition(risse_int64 pos)
+void tRisaWaveLoopManager::SetPosition(risse_int64 pos)
 {
 	volatile tRisseCriticalSectionHolder CS(DataCS);
 	Position = pos;
@@ -380,9 +381,9 @@ void tTVPWaveLoopManager::SetPosition(risse_int64 pos)
 //! @param		segments	再生セグメント情報を書き込む配列
 //! @param		labels		通過ラベル情報を書き込む配列
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &written,
-		std::vector<tTVPWaveLoopManager::tSegment> &segments,
-		std::vector<tTVPWaveLabel> &labels)
+void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &written,
+		std::vector<tRisaWaveLoopManager::tSegment> &segments,
+		std::vector<tRisaWaveLabel> &labels)
 {
 	// decode from current position
 	volatile tRisseCriticalSectionHolder CS(DataCS);
@@ -402,7 +403,7 @@ void tTVPWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wri
 		risse_int before_count;
 
 		// check nearest link
-		tTVPWaveLoopLink link;
+		tRisaWaveLoopLink link;
 		if(!IgnoreLinks && GetNearestEvent(Position, link, false))
 		{
 			// nearest event found ...
@@ -410,7 +411,7 @@ void tTVPWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wri
 			{
 				// do jump
 				give_up_count ++;
-				if(give_up_count >= TVPWaveLoopLinkGiveUpCount)
+				if(give_up_count >= RisaWaveLoopLinkGiveUpCount)
 					break; // give up decoding
 
 				Position = link.To;
@@ -451,7 +452,7 @@ void tTVPWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wri
 					if(Format->TotalSamples - link.To < after_count)
 						after_count =
 							(risse_int)(Format->TotalSamples - link.To);
-					tTVPWaveLoopLink over_to_link;
+					tRisaWaveLoopLink over_to_link;
 					if(GetNearestEvent(link.To, over_to_link, true))
 					{
 						if(over_to_link.From - link.To < after_count)
@@ -546,7 +547,7 @@ void tTVPWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wri
 		// evaluate each label
 		risse_uint label_base = labels.size();
 		GetLabelAt(Position, Position + one_unit, labels);
-		for(std::vector<tTVPWaveLabel>::iterator i = labels.begin() + label_base;
+		for(std::vector<tRisaWaveLabel>::iterator i = labels.begin() + label_base;
 			i != labels.end(); i++)
 		{
 			if(i->Name.c_str()[0] == ':')
@@ -557,7 +558,7 @@ void tTVPWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wri
 		}
 
 		// calculate each label offset
-		for(std::vector<tTVPWaveLabel>::iterator i = labels.begin() + label_base;
+		for(std::vector<tRisaWaveLabel>::iterator i = labels.begin() + label_base;
 			i != labels.end(); i++)
 			i->Offset = (risse_int)(i->Position - Position) + written;
 
@@ -615,8 +616,8 @@ void tTVPWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wri
 //! @param		ignore_conditions	リンク条件を無視して検索を行うかどうか
 //! @return		リンクが見つかれば真、見つからなければ偽
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetNearestEvent(risse_int64 current,
-		tTVPWaveLoopLink & link, bool ignore_conditions)
+bool tRisaWaveLoopManager::GetNearestEvent(risse_int64 current,
+		tRisaWaveLoopLink & link, bool ignore_conditions)
 {
 	// search nearest event in future, from current.
 	// this checks conditions unless ignore_conditions is true.
@@ -722,8 +723,8 @@ bool tTVPWaveLoopManager::GetNearestEvent(risse_int64 current,
 //! @param		to			検索終了位置
 //! @param		labels		結果を格納する配列
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::GetLabelAt(risse_int64 from, risse_int64 to,
-		std::vector<tTVPWaveLabel> & labels)
+void tRisaWaveLoopManager::GetLabelAt(risse_int64 from, risse_int64 to,
+		std::vector<tRisaWaveLabel> & labels)
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 
@@ -784,7 +785,7 @@ void tTVPWaveLoopManager::GetLabelAt(risse_int64 from, risse_int64 to,
 //! @param		ratioend	ブレンド率の終了値(%)
 //! @param		samples		この関数の呼び出しで処理すべきサンプル数
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::DoCrossFade(void *dest, void *src1,
+void tRisaWaveLoopManager::DoCrossFade(void *dest, void *src1,
 	void *src2, risse_int samples, risse_int ratiostart, risse_int ratioend)
 {
 	// do on-memory wave crossfade
@@ -815,22 +816,22 @@ void tTVPWaveLoopManager::DoCrossFade(void *dest, void *src1,
 	{
 		if(Format->BytesPerSample == 1)
 		{
-			TVPCrossFadeIntegerBlend<tTVPPCM8>(dest, src1, src2,
+			RisaCrossFadeIntegerBlend<tRisaPCM8>(dest, src1, src2,
 				ratiostart, ratioend, samples, Format->Channels);
 		}
 		else if(Format->BytesPerSample == 2)
 		{
-			TVPCrossFadeIntegerBlend<risse_int16>(dest, src1, src2,
+			RisaCrossFadeIntegerBlend<risse_int16>(dest, src1, src2,
 				ratiostart, ratioend, samples, Format->Channels);
 		}
 		else if(Format->BytesPerSample == 3)
 		{
-			TVPCrossFadeIntegerBlend<tTVPPCM24>(dest, src1, src2,
+			RisaCrossFadeIntegerBlend<tRisaPCM24>(dest, src1, src2,
 				ratiostart, ratioend, samples, Format->Channels);
 		}
 		else if(Format->BytesPerSample == 4)
 		{
-			TVPCrossFadeIntegerBlend<risse_int32>(dest, src1, src2,
+			RisaCrossFadeIntegerBlend<risse_int32>(dest, src1, src2,
 				ratiostart, ratioend, samples, Format->Channels);
 		}
 	}
@@ -841,7 +842,7 @@ void tTVPWaveLoopManager::DoCrossFade(void *dest, void *src1,
 //---------------------------------------------------------------------------
 //! @brief		内部にキャッシュされているクロスフェードの情報をクリアする
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::ClearCrossFadeInformation()
+void tRisaWaveLoopManager::ClearCrossFadeInformation()
 {
 	if(CrossFadeSamples) delete [] CrossFadeSamples, CrossFadeSamples = NULL;
 }
@@ -857,12 +858,12 @@ void tTVPWaveLoopManager::ClearCrossFadeInformation()
 //! @param		is_rv_indirect	右辺値が間接参照の場合は真、そうでない場合は偽が格納される
 //! @param		解析に成功すれば真、式が間違っているなどで失敗したら偽
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetLabelExpression(const tTVPLabelStringType &label,
-	tTVPWaveLoopManager::tExpressionToken * ope,
+bool tRisaWaveLoopManager::GetLabelExpression(const tRisaLabelStringType &label,
+	tRisaWaveLoopManager::tExpressionToken * ope,
 	risse_int *lv,
 	risse_int *rv, bool *is_rv_indirect)
 {
-	const tTVPLabelCharType * p = label.c_str();
+	const tRisaLabelCharType * p = label.c_str();
 	tExpressionToken token;
 	tExpressionToken operation;
 	risse_int value  = 0;
@@ -940,7 +941,7 @@ bool tTVPWaveLoopManager::GetLabelExpression(const tTVPLabelStringType &label,
 //! @param		label		ラベル
 //! @return		評価に成功すれば真、失敗すれば偽
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::EvalLabelExpression(const tTVPLabelStringType &label)
+bool tRisaWaveLoopManager::EvalLabelExpression(const tRisaLabelStringType &label)
 {
 	// eval expression specified by 'label'
 	// commit the result when 'commit' is true.
@@ -994,8 +995,8 @@ bool tTVPWaveLoopManager::EvalLabelExpression(const tTVPLabelStringType &label)
 //! @param		value	トークンの値を格納する変数へのアドレス
 //! @return		トークンのタイプ
 //---------------------------------------------------------------------------
-tTVPWaveLoopManager::tExpressionToken
-	tTVPWaveLoopManager::GetExpressionToken(const tTVPLabelCharType *  & p, risse_int * value)
+tRisaWaveLoopManager::tExpressionToken
+	tRisaWaveLoopManager::GetExpressionToken(const tRisaLabelCharType *  & p, risse_int * value)
 {
 	// get token at pointer 'p'
 
@@ -1049,7 +1050,7 @@ tTVPWaveLoopManager::tExpressionToken
 //! @param		v		値を格納する変数
 //! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetLabelCharInt(const tTVPLabelCharType *s, risse_int &v)
+bool tRisaWaveLoopManager::GetLabelCharInt(const tRisaLabelCharType *s, risse_int &v)
 {
 	// convert string to integer
 	risse_int r = 0;
@@ -1083,7 +1084,7 @@ bool tTVPWaveLoopManager::GetLabelCharInt(const tTVPLabelCharType *s, risse_int 
 //! @param		v		値を格納する変数
 //! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetInt(char *s, risse_int &v)
+bool tRisaWaveLoopManager::GetInt(char *s, risse_int &v)
 {
 	// convert string to integer
 	risse_int r = 0;
@@ -1117,7 +1118,7 @@ bool tTVPWaveLoopManager::GetInt(char *s, risse_int &v)
 //! @param		v		値を格納する変数
 //! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetInt64(char *s, risse_int64 &v)
+bool tRisaWaveLoopManager::GetInt64(char *s, risse_int64 &v)
 {
 	// convert string to integer
 	risse_int64 r = 0;
@@ -1151,7 +1152,7 @@ bool tTVPWaveLoopManager::GetInt64(char *s, risse_int64 &v)
 //! @param		v		値を格納する変数
 //! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetBool(char *s, bool &v)
+bool tRisaWaveLoopManager::GetBool(char *s, bool &v)
 {
 	// convert string to boolean
 	if(!strcasecmp(s, "True"))		{	v = true;	return true;	}
@@ -1169,7 +1170,7 @@ bool tTVPWaveLoopManager::GetBool(char *s, bool &v)
 //! @param		v		値を格納する変数
 //! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetCondition(char *s, tTVPWaveLoopLinkCondition &v)
+bool tRisaWaveLoopManager::GetCondition(char *s, tRisaWaveLoopLinkCondition &v)
 {
 	// get condition value
 	if(!strcasecmp(s, "no"))		{ v = llcNone;				return true;	}
@@ -1190,20 +1191,20 @@ bool tTVPWaveLoopManager::GetCondition(char *s, tTVPWaveLoopLinkCondition &v)
 //! @param		v		値を格納する変数
 //! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetString(char *s, tTVPLabelStringType &v)
+bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 {
 	// convert utf-8 string s to v
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 
 	// compute output (unicode) size
-	risse_int size = TVPUtf8ToWideCharString(s, NULL);
+	risse_int size = RisaUtf8ToWideCharString(s, NULL);
 	if(size == -1) return false; // not able to convert the string
 
 	// allocate output buffer
 	risse_char *us = new risse_char[size + 1];
 	try
 	{
-		TVPUtf8ToWideCharString(s, us);
+		RisaUtf8ToWideCharString(s, us);
 		us[size] = RISSE_W('\0');
 
 		// convert us (an array of wchar_t) to AnsiString
@@ -1233,7 +1234,7 @@ bool tTVPWaveLoopManager::GetString(char *s, tTVPLabelStringType &v)
 //! @note		このメソッドは、name および value が終了する位置に \0 を書き込む。
 //!				つまり、p を破壊する。
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)
+bool tRisaWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)
 {
 	// get name=value string at 'p'.
 	// returns whether the token can be got or not.
@@ -1311,7 +1312,7 @@ bool tTVPWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)
 //! @param		link	情報格納先クラス
 //! @return		読み取りに成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::ReadLinkInformation(char * & p, tTVPWaveLoopLink &link)
+bool tRisaWaveLoopManager::ReadLinkInformation(char * & p, tRisaWaveLoopLink &link)
 {
 	// read link information from 'p'.
 	// p must point '{' , which indicates start of the block.
@@ -1372,7 +1373,7 @@ bool tTVPWaveLoopManager::ReadLinkInformation(char * & p, tTVPWaveLoopLink &link
 //! @param		link	情報格納先クラス
 //! @return		読み取りに成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::ReadLabelInformation(char * & p, tTVPWaveLabel &label)
+bool tRisaWaveLoopManager::ReadLabelInformation(char * & p, tRisaWaveLabel &label)
 {
 	// read label information from 'p'.
 	// p must point '{' , which indicates start of the block.
@@ -1424,7 +1425,7 @@ bool tTVPWaveLoopManager::ReadLabelInformation(char * & p, tTVPWaveLabel &label)
 //! @param		p		読み取り開始位置
 //! @return		読み取りに成功すれば真
 //---------------------------------------------------------------------------
-bool tTVPWaveLoopManager::ReadInformation(char * p)
+bool tRisaWaveLoopManager::ReadInformation(char * p)
 {
 	// read information from 'p'
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
@@ -1440,7 +1441,7 @@ bool tTVPWaveLoopManager::ReadInformation(char * p)
 		char *p_length = strstr(p, "LoopLength=");
 		char *p_start  = strstr(p, "LoopStart=");
 		if(!p_length || !p_start) return false; // read error
-		tTVPWaveLoopLink link;
+		tRisaWaveLoopLink link;
 		link.Smooth = false;
 		link.Condition = llcNone;
 		link.RefValue = 0;
@@ -1482,7 +1483,7 @@ bool tTVPWaveLoopManager::ReadInformation(char * p)
 				p += 4;
 				while(isspace(*p)) p++;
 				if(!*p) return false;
-				tTVPWaveLoopLink link;
+				tRisaWaveLoopLink link;
 				if(!ReadLinkInformation(p, link)) return false;
 				Links.push_back(link);
 			}
@@ -1491,7 +1492,7 @@ bool tTVPWaveLoopManager::ReadInformation(char * p)
 				p += 5;
 				while(isspace(*p)) p++;
 				if(!*p) return false;
-				tTVPWaveLabel label;
+				tRisaWaveLabel label;
 				if(!ReadLabelInformation(p, label)) return false;
 				Labels.push_back(label);
 			}
@@ -1513,29 +1514,29 @@ bool tTVPWaveLoopManager::ReadInformation(char * p)
 
 
 
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 
 
 // ここはループチューナ内でのみ使われる部分
 
 
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::PutInt(AnsiString &s, risse_int v)
+void tRisaWaveLoopManager::PutInt(AnsiString &s, risse_int v)
 {
 	s += AnsiString((int)v);
 }
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::PutInt64(AnsiString &s, risse_int64 v)
+void tRisaWaveLoopManager::PutInt64(AnsiString &s, risse_int64 v)
 {
 	s += AnsiString((__int64)v);
 }
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::PutBool(AnsiString &s, bool v)
+void tRisaWaveLoopManager::PutBool(AnsiString &s, bool v)
 {
 	s += v ? "True" : "False";
 }
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::PutCondition(AnsiString &s, tTVPWaveLoopLinkCondition v)
+void tRisaWaveLoopManager::PutCondition(AnsiString &s, tRisaWaveLoopLinkCondition v)
 {
 	switch(v)
 	{
@@ -1549,12 +1550,12 @@ void tTVPWaveLoopManager::PutCondition(AnsiString &s, tTVPWaveLoopLinkCondition 
 	}
 }
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::PutString(AnsiString &s, tTVPLabelStringType v)
+void tRisaWaveLoopManager::PutString(AnsiString &s, tRisaLabelStringType v)
 {
 	// convert v to a utf-8 string
 	const risse_char *pi;
 
-#ifdef TVP_IN_LOOP_TUNER
+#ifdef RISA__IN_LOOP_TUNER
 	WideString wstr = v;
 	pi = wstr.c_bstr();
 #else
@@ -1562,13 +1563,13 @@ void tTVPWaveLoopManager::PutString(AnsiString &s, tTVPLabelStringType v)
 #endif
 
 	// count output bytes
-	int size = TVPWideCharToUtf8String(pi, NULL);
+	int size = RisaWideCharToUtf8String(pi, NULL);
 
 	char * out = new char [size + 1];
 	try
 	{
 		// convert the string
-		TVPWideCharToUtf8String(pi, out);
+		RisaWideCharToUtf8String(pi, out);
 		out[size] = '\0';
 
 		// append the string with quotation
@@ -1582,7 +1583,7 @@ void tTVPWaveLoopManager::PutString(AnsiString &s, tTVPLabelStringType v)
 	delete [] out;
 }
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::DoSpacing(AnsiString &l, int col)
+void tRisaWaveLoopManager::DoSpacing(AnsiString &l, int col)
 {
 	// fill space until the string becomes specified length
 	static const char * spaces16 = "                ";
@@ -1599,7 +1600,7 @@ void tTVPWaveLoopManager::DoSpacing(AnsiString &l, int col)
 	}
 }
 //---------------------------------------------------------------------------
-void tTVPWaveLoopManager::WriteInformation(AnsiString &s)
+void tRisaWaveLoopManager::WriteInformation(AnsiString &s)
 {
 	// write current link/label information into s
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
@@ -1612,7 +1613,7 @@ void tTVPWaveLoopManager::WriteInformation(AnsiString &s)
 /*
 Link { From=0000000000000000; To=0000000000000000; Smooth=False; Condition=ne; RefValue=444444444; CondVar=99; }
 */
-	for(std::vector<tTVPWaveLoopLink>::iterator i = Links.begin();
+	for(std::vector<tRisaWaveLoopLink>::iterator i = Links.begin();
 		i != Links.end(); i++)
 	{
 		AnsiString l;
@@ -1657,7 +1658,7 @@ Link { From=0000000000000000; To=0000000000000000; Smooth=False; Condition=ne; R
 /*
 Label { Position=0000000000000000; name="                                         "; }
 */
-	for(std::vector<tTVPWaveLabel>::iterator i = Labels.begin();
+	for(std::vector<tRisaWaveLabel>::iterator i = Labels.begin();
 		i != Labels.end(); i++)
 	{
 		AnsiString l;

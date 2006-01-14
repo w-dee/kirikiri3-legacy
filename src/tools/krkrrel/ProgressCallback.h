@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 /*
-	TVP3 ( T Visual Presenter 3 )  A script authoring tool
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
@@ -15,7 +16,7 @@
 //---------------------------------------------------------------------------
 //! @brief		進捗コールバック用クラス
 //---------------------------------------------------------------------------
-class iTVPProgressCallback
+class iRisaProgressCallback
 {
 public:
 	virtual void OnProgress(int percent) = 0; // パーセント単位での達成率
@@ -26,15 +27,15 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		サブの処理のパーセント進捗をトータルのパーセント進捗として報告するクラス
 //---------------------------------------------------------------------------
-class tTVPProgressCallbackAggregator : public iTVPProgressCallback
+class tRisaProgressCallbackAggregator : public iRisaProgressCallback
 {
-	iTVPProgressCallback * Destination;
+	iRisaProgressCallback * Destination;
 	int PercentLow;
 	int PercentHigh;
 
 public:
-	tTVPProgressCallbackAggregator(
-		iTVPProgressCallback *destination,
+	tRisaProgressCallbackAggregator(
+		iRisaProgressCallback *destination,
 		int percentlow, int percenthigh
 				) :
 			Destination(destination),

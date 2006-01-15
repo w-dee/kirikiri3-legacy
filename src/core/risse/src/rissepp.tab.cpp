@@ -127,8 +127,8 @@
 
 /*---------------------------------------------------------------------------*/
 /*
-	Risse [�肹]
-	alias RISE [りせ], acronym of "Rise Is a Script Engine"
+	Risse [りせ]
+	 stands for "Risse Is a Sweet Script Engine"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"

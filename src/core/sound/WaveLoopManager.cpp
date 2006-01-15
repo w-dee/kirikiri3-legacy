@@ -11,7 +11,7 @@
 //! @brief Waveループマネージャ
 //---------------------------------------------------------------------------
 /*
-	This module will be shared between Risa2 and
+	This module will be shared between Risa and
 	Loop Tuner 2 (a GUI loop-point editor)
 */
 

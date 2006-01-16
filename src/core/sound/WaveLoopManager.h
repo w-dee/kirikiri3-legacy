@@ -74,11 +74,10 @@
 
 
 //---------------------------------------------------------------------------
-//! @brief リンクを表すクラス
+//! @brief リンクを表す構造体
 //---------------------------------------------------------------------------
-class tRisaWaveLoopLink
+struct tRisaWaveLoopLink
 {
-public:
 	//! @brief リンクの条件を表す列挙型
 	enum tLinkCondition
 	{
@@ -91,7 +90,6 @@ public:
 		llcLesserOrEqual	//!< 値がフラグ以下のとき
 	};
 
-private:
 	risse_int64 From;		//!< 'From' in sample position
 	risse_int64 To;		//!< 'To' in sample position
 	bool Smooth;		//!< Smooth transition (uses short 50ms crossfade)
@@ -171,11 +169,10 @@ bool inline operator < (const tRisaWaveLoopLink & lhs, const tRisaWaveLoopLink &
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラベルを表すクラス
+//! @brief		ラベルを表す構造体
 //---------------------------------------------------------------------------
-class tRisaWaveLabel
+struct tRisaWaveLabel
 {
-public:
 	risse_int64 Position; //!< label position
 	tRisaLabelStringType Name; //!< label name
 	risse_int Offset;
@@ -389,7 +386,7 @@ private:
 	static bool GetInt(char *s, risse_int &v);
 	static bool GetInt64(char *s, risse_int64 &v);
 	static bool GetBool(char *s, bool &v);
-	static bool GetCondition(char *s, tRisaWaveLoopLinkCondition &v);
+	static bool GetCondition(char *s, tRisaWaveLoopLink::tLinkCondition &v);
 	static bool GetString(char *s, tRisaLabelStringType &v);
 
 	static bool GetEntityToken(char * & p, char **name, char **value);
@@ -405,7 +402,7 @@ private:
 	static void PutInt(AnsiString &s, risse_int v);
 	static void PutInt64(AnsiString &s, risse_int64 v);
 	static void PutBool(AnsiString &s, bool v);
-	static void PutCondition(AnsiString &s, tRisaWaveLoopLinkCondition v);
+	static void PutCondition(AnsiString &s, tRisaWaveLoopLink::tLinkCondition v);
 	static void PutString(AnsiString &s, tRisaLabelStringType v);
 	static void DoSpacing(AnsiString &l, int col);
 public:

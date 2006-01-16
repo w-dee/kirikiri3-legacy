@@ -53,15 +53,15 @@
 //---------------------------------------------------------------------------
 struct tRisaWaveFormat
 {
-	risse_uint SamplesPerSec;		//!< sample granule per sec
-	risse_uint Channels;			//!< number of channels (1=Mono, 2=Stereo ... etc)
-	risse_uint BitsPerSample;		//!< bits per one sample
-	risse_uint BytesPerSample;	//!< bytes per one sample
-	risse_uint64 TotalSamples;	//!< total samples in sample granule; unknown for zero
-	risse_uint64 TotalTime;		//!< in ms; unknown for zero
-	risse_uint32 SpeakerConfig;	//!< bitwise OR of SPEAKER_* constants
-	bool IsFloat;				//!< true if the data is IEEE floating point
-	bool Seekable;				//!< true if able to seek, otherwise false
+	risse_uint Frequency;				//!< sample granule per sec
+	risse_uint Channels;				//!< number of channels (1=Mono, 2=Stereo ... etc)
+	risse_uint BitsPerSample;			//!< bits per one sample
+	risse_uint BytesPerSample;			//!< bytes per one sample
+	risse_uint64 TotalSampleGranules;	//!< total samples in sample granule; unknown for zero
+	risse_uint64 TotalTime;				//!< in ms; unknown for zero
+	risse_uint32 SpeakerConfig;			//!< bitwise OR of SPEAKER_* constants
+	bool IsFloat;						//!< true if the data is IEEE floating point
+	bool Seekable;						//!< true if able to seek, otherwise false
 };
 //---------------------------------------------------------------------------
 

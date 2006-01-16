@@ -15,10 +15,8 @@
 	Loop Tuner 2 (a GUI loop-point editor)
 */
 
-#include "risseCommHead.h"
-
+#include "prec.h"
 #include <algorithm>
-#include "risseTypes.h"
 #include "WaveLoopManager.h"
 
 #ifdef RISA__IN_LOOP_TUNER
@@ -119,7 +117,7 @@ static void RisaCrossFadeIntegerBlend(void *dest, void *src1, void *src2,
 			risse_int si2 = (risse_int)*s2;
 			risse_int o = (risse_int) (
 						(((risse_int64)si2 * (risse_uint64)ratio) >> 32) +
-						(((risse_int64)si1 * (0x100000000ui64 - (risse_uint64)ratio) ) >> 32) );
+						(((risse_int64)si1 * (RISSE_UI64_VAL(0x100000000) - (risse_uint64)ratio) ) >> 32) );
 			*out = o;
 			s1 ++;
 			s2 ++;
@@ -181,7 +179,7 @@ void tRisaWaveLoopManager::SetDecoder(tRisaWaveDecoder * decoder)
 	else
 		memset(Format, 0, sizeof(*Format));
 	ShortCrossFadeHalfSamples =
-		Format->SamplesPerSec * SmoothTimeHalf / 1000;
+		Format->Frequency * SmoothTimeHalf / 1000;
 }
 //---------------------------------------------------------------------------
 
@@ -446,12 +444,12 @@ void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wr
 					before_count = link.From - Position;
 					// adjust after count
 					risse_int after_count = ShortCrossFadeHalfSamples;
-					if(Format->TotalSamples - link.From < after_count)
+					if(Format->TotalSampleGranules - link.From < after_count)
 						after_count =
-							(risse_int)(Format->TotalSamples - link.From);
-					if(Format->TotalSamples - link.To < after_count)
+							(risse_int)(Format->TotalSampleGranules - link.From);
+					if(Format->TotalSampleGranules - link.To < after_count)
 						after_count =
-							(risse_int)(Format->TotalSamples - link.To);
+							(risse_int)(Format->TotalSampleGranules - link.To);
 					tRisaWaveLoopLink over_to_link;
 					if(GetNearestEvent(link.To, over_to_link, true))
 					{
@@ -671,24 +669,24 @@ bool tRisaWaveLoopManager::GetNearestEvent(risse_int64 current,
 				bool match = false;
 				switch(Links[s].Condition)
 				{
-				case llcNone:
+				case tRisaWaveLoopLink::llcNone:
 					match = true; break;
-				case llcEqual:
+				case tRisaWaveLoopLink::llcEqual:
 					if(Links[s].RefValue == Flags[Links[s].CondVar]) match = true;
 					break;
-				case llcNotEqual:
+				case tRisaWaveLoopLink::llcNotEqual:
 					if(Links[s].RefValue != Flags[Links[s].CondVar]) match = true;
 					break;
-				case llcGreater:
+				case tRisaWaveLoopLink::llcGreater:
 					if(Links[s].RefValue <  Flags[Links[s].CondVar]) match = true;
 					break;
-				case llcGreaterOrEqual:
+				case tRisaWaveLoopLink::llcGreaterOrEqual:
 					if(Links[s].RefValue <= Flags[Links[s].CondVar]) match = true;
 					break;
-				case llcLesser:
+				case tRisaWaveLoopLink::llcLesser:
 					if(Links[s].RefValue >  Flags[Links[s].CondVar]) match = true;
 					break;
-				case llcLesserOrEqual:
+				case tRisaWaveLoopLink::llcLesserOrEqual:
 					if(Links[s].RefValue >= Flags[Links[s].CondVar]) match = true;
 					break;
 				default:
@@ -1170,16 +1168,16 @@ bool tRisaWaveLoopManager::GetBool(char *s, bool &v)
 //! @param		v		値を格納する変数
 //! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetCondition(char *s, tRisaWaveLoopLinkCondition &v)
+bool tRisaWaveLoopManager::GetCondition(char *s, tRisaWaveLoopLink::tLinkCondition &v)
 {
 	// get condition value
-	if(!strcasecmp(s, "no"))		{ v = llcNone;				return true;	}
-	if(!strcasecmp(s, "eq"))		{ v = llcEqual;				return true;	}
-	if(!strcasecmp(s, "ne"))		{ v = llcNotEqual;			return true;	}
-	if(!strcasecmp(s, "gt"))		{ v = llcGreater;			return true;	}
-	if(!strcasecmp(s, "ge"))		{ v = llcGreaterOrEqual;	return true;	}
-	if(!strcasecmp(s, "lt"))		{ v = llcLesser;			return true;	}
-	if(!strcasecmp(s, "le"))		{ v = llcLesserOrEqual;		return true;	}
+	if(!strcasecmp(s, "no")) { v = tRisaWaveLoopLink::llcNone;				return true;	}
+	if(!strcasecmp(s, "eq")) { v = tRisaWaveLoopLink::llcEqual;				return true;	}
+	if(!strcasecmp(s, "ne")) { v = tRisaWaveLoopLink::llcNotEqual;			return true;	}
+	if(!strcasecmp(s, "gt")) { v = tRisaWaveLoopLink::llcGreater;			return true;	}
+	if(!strcasecmp(s, "ge")) { v = tRisaWaveLoopLink::llcGreaterOrEqual;	return true;	}
+	if(!strcasecmp(s, "lt")) { v = tRisaWaveLoopLink::llcLesser;			return true;	}
+	if(!strcasecmp(s, "le")) { v = tRisaWaveLoopLink::llcLesserOrEqual;		return true;	}
 	return false;
 }
 //---------------------------------------------------------------------------
@@ -1219,7 +1217,7 @@ bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 	delete [] us;
 	return true;
 #else
-	v = ttstr(wxString(s, wxConvUtf8()));
+	v = ttstr(wxString(s, wxConvUTF8));
 #endif
 }
 //---------------------------------------------------------------------------
@@ -1443,7 +1441,7 @@ bool tRisaWaveLoopManager::ReadInformation(char * p)
 		if(!p_length || !p_start) return false; // read error
 		tRisaWaveLoopLink link;
 		link.Smooth = false;
-		link.Condition = llcNone;
+		link.Condition = tRisaWaveLoopLink::llcNone;
 		link.RefValue = 0;
 		link.CondVar = 0;
 		risse_int64 start;
@@ -1536,17 +1534,17 @@ void tRisaWaveLoopManager::PutBool(AnsiString &s, bool v)
 	s += v ? "True" : "False";
 }
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::PutCondition(AnsiString &s, tRisaWaveLoopLinkCondition v)
+void tRisaWaveLoopManager::PutCondition(AnsiString &s, tRisaWaveLoopLink::tLinkCondition v)
 {
 	switch(v)
 	{
-		case llcNone:             s += "no" ; break;
-		case llcEqual:            s += "eq" ; break;
-		case llcNotEqual:         s += "ne" ; break;
-		case llcGreater:          s += "gt" ; break;
-		case llcGreaterOrEqual:   s += "ge" ; break;
-		case llcLesser:           s += "lt" ; break;
-		case llcLesserOrEqual:    s += "le" ; break;
+		case tRisaWaveLoopLink::llcNone:             s += "no" ; break;
+		case tRisaWaveLoopLink::llcEqual:            s += "eq" ; break;
+		case tRisaWaveLoopLink::llcNotEqual:         s += "ne" ; break;
+		case tRisaWaveLoopLink::llcGreater:          s += "gt" ; break;
+		case tRisaWaveLoopLink::llcGreaterOrEqual:   s += "ge" ; break;
+		case tRisaWaveLoopLink::llcLesser:           s += "lt" ; break;
+		case tRisaWaveLoopLink::llcLesserOrEqual:    s += "le" ; break;
 	}
 }
 //---------------------------------------------------------------------------

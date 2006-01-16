@@ -87,6 +87,7 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: wxWidgets configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
 	@echo "zlib ..."
 	@(set -e ;\
 		echo "####  zlib config  ####" ;\
@@ -98,6 +99,7 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: zlib configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
 	@echo "libtomcrypt ..."
 	@(set -e ;\
 		echo "####  libtomcrypt config  ####" ;\
@@ -109,6 +111,7 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: libtomcrypt configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
 	@echo "freetype ..."
 	@(set -e ;\
 		get() { \
@@ -127,6 +130,7 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: freetype configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
 	@echo "boost ..."
 	@(set -e ;\
 		get() { \
@@ -148,6 +152,33 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 		touch $(TOP_DIR)/config_success ;\
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: boost configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
+	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
+	@echo "libogg ..."
+	@(set -e ;\
+		if [ -f $(LIBOGG_DIR)/lib/libogg.dll.a ]; then LIBOGG_LIBNAME=ogg.dll; else LIBOGG_LIBNAME=ogg; fi; \
+		echo "####  libogg config  ####" ;\
+		echo "LIBOGG_CFLAGS   := -I$(LIBOGG_DIR)/include" ;\
+		echo "LIBOGG_CXXFLAGS := -I$(LIBOGG_DIR)/include" ;\
+		echo "LIBOGG_CPPFLAGS := -I$(LIBOGG_DIR)/include" ;\
+		echo "LIBOGG_LIBS     := -L$(LIBOGG_DIR)/lib -l$$LIBOGG_LIBNAME" ;\
+		touch $(TOP_DIR)/config_success ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: libvogg configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
+	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
+	@echo "libvorbis ..."
+	@(set -e ;\
+		if [ -f $(LIBVORBIS_DIR)/lib/libvorbis.dll.a ]; then LIBVORBIS_LIBNAME=vorbis.dll; else LIBVORBIS_LIBNAME=vorbis; fi; \
+		if [ -f $(LIBVORBIS_DIR)/lib/libvorbisfile.dll.a ]; then LIBVORBISFILE_LIBNAME=vorbisfile.dll; else LIBVORBISFILE_LIBNAME=vorbisfile; fi; \
+		echo "####  libvorbis config  ####" ;\
+		echo "LIBVORBIS_CFLAGS   := -I$(LIBVORBIS_DIR)/include" ;\
+		echo "LIBVORBIS_CXXFLAGS := -I$(LIBVORBIS_DIR)/include" ;\
+		echo "LIBVORBIS_CPPFLAGS := -I$(LIBVORBIS_DIR)/include" ;\
+		echo "LIBVORBIS_LIBS     := -L$(LIBVORBIS_DIR)/lib -l$$LIBVORBIS_LIBNAME -l$$LIBVORBISFILE_LIBNAME" ;\
+		touch $(TOP_DIR)/config_success ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: libvorbis configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
 
 ifeq ($(DEBUG),yes)

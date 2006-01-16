@@ -10,12 +10,12 @@
 //! @file
 //! @brief RIFF Wave デコーダ
 //---------------------------------------------------------------------------
-#include "proc.h"
+#include "prec.h"
 #include "RIFFWaveDecoder.h"
 #include "RisaException.h"
 #include "FSManager.h"
 
-RISSE_DEFINE_SOURCE_ID(2200);
+RISSE_DEFINE_SOURCE_ID(2300);
 
 
 //---------------------------------------------------------------------------
@@ -49,6 +49,7 @@ static risse_uint8 RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
+//! @param		filename   ファイル名
 //---------------------------------------------------------------------------
 tRisaRIFFWaveDecoder::tRisaRIFFWaveDecoder(const ttstr & filename)
 {
@@ -72,7 +73,7 @@ tRisaRIFFWaveDecoder::tRisaRIFFWaveDecoder(const ttstr & filename)
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-~tRisaRIFFWaveDecoder()
+tRisaRIFFWaveDecoder::~tRisaRIFFWaveDecoder()
 {
 	delete Stream;
 }
@@ -102,7 +103,7 @@ void tRisaRIFFWaveDecoder::GetFormat(tRisaWaveFormat & format)
 //---------------------------------------------------------------------------
 bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
 {
-	risse_uint64 remain = Format.TotalSamples - CurrentPos;
+	risse_uint64 remain = Format.TotalSampleGranules - CurrentPos;
 	risse_uint writesamples = bufsamplelen < remain ? bufsamplelen : (risse_uint)remain;
 	if(writesamples == 0)
 	{
@@ -173,7 +174,7 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 //---------------------------------------------------------------------------
 bool tRisaRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
 {
-	if(Format.TotalSamples <= samplepos) return false;
+	if(Format.TotalSampleGranules <= samplepos) return false;
 
 	risse_uint64 streampos = DataStart + samplepos * SampleSize;
 	risse_uint64 possave = Stream->GetPosition();
@@ -223,7 +224,7 @@ bool tRisaRIFFWaveDecoder::Open()
 	if(memcmp(buf, wave_mark, 4)) return false;
 
 	// find fmt chunk
-	if(!RisaFindRIFFChunk(Stream, fmt_mark)) return false;
+	if(!FindRIFFChunk(Stream, fmt_mark)) return false;
 
 	size = Stream->ReadI32LE();
 	next = Stream->GetPosition() + size;
@@ -238,7 +239,7 @@ bool tRisaRIFFWaveDecoder::Open()
 
 
 	Format.Channels = Stream->ReadI16LE(); // nChannels
-	Format.SamplesPerSec = Stream->ReadI32LE(); // nSamplesPerSec
+	Format.Frequency = Stream->ReadI32LE(); // nSamplesPerSec
 
 	if(4 != Stream->Read(buf, 4)) return false; // nAvgBytesPerSec; discard
 
@@ -296,7 +297,7 @@ bool tRisaRIFFWaveDecoder::Open()
 	if(next != Stream->Seek(next, RISSE_BS_SEEK_SET)) return false;
 
 	// find data chunk
-	if(!RisaFindRIFFChunk(Stream, data_mark)) return false;
+	if(!FindRIFFChunk(Stream, data_mark)) return false;
 
 	size = Stream->ReadI32LE();
 
@@ -308,8 +309,8 @@ bool tRisaRIFFWaveDecoder::Open()
 		// data ends before "size" described in the header
 
 	// compute total sample count and total length in time
-	Format.TotalSamples = size / (Format.Channels * Format.BitsPerSample / 8);
-	Format.TotalTime = Format.TotalSamples * 1000 / Format.SamplesPerSec;
+	Format.TotalSampleGranules = size / (Format.Channels * Format.BytesPerSample);
+	Format.TotalTime = Format.TotalSampleGranules * 1000 / Format.Frequency;
 
 	// the stream is seekable
 	Format.Seekable = true;
@@ -325,7 +326,7 @@ bool tRisaRIFFWaveDecoder::Open()
 //! @param		chunk		探したいチャンク
 //! @return		指定された RIFF チャンクが見つかれば真
 //---------------------------------------------------------------------------
-bool tRisaRIFFWaveDecoder::FindRIFFChunk(tRisseStream * stream, const risse_uint8 *chunk)
+bool tRisaRIFFWaveDecoder::FindRIFFChunk(tRisseBinaryStream * stream, const risse_uint8 *chunk)
 {
 	risse_uint8 buf[4];
 	while(true)

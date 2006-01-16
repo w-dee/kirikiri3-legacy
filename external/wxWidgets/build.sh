@@ -52,6 +52,7 @@ build_debug()
 	cd temp_build
 	# configure
 	../configure \
+		--disable-shared --enable-static \
 		--enable-debug --enable-debug_gdb --enable-debug_cntxt \
 		--disable-optimise \
 		$common_configure_options

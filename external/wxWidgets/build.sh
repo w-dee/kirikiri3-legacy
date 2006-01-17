@@ -74,7 +74,7 @@ build_release()
 		$common_configure_options
 	make
 	# mo ファイルだけはなぜか個別に作り直さなければならない
-	(cd locale && make allmo)
+	(cd ../locale && make allmo)
 	make install
 	cd ..
 }

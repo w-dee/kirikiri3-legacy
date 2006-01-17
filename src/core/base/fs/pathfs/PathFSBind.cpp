@@ -41,6 +41,8 @@ risse_error tRisseNI_PathFS::Construct(risse_int numparams,
 
 	// filesystem オブジェクトの生成と登録
 	RegisterFileSystemNativeInstance(risse_obj, new tRisaPathFS());
+
+	return RISSE_S_OK;
 }
 //---------------------------------------------------------------------------
 

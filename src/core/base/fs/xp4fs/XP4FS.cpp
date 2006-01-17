@@ -352,10 +352,10 @@ risse_size tRisaXP4FS::GetFileItemStartIndex(const ttstr & name)
 
 	// at this point, s or s+1 should point the target.
 	// be certain.
-	if(s >= (risse_int)total_count) return static_cast<risse_size>(-1); // out of the index
+	if(s >= total_count) return static_cast<risse_size>(-1); // out of the index
 	if(FileItems[s].Name.StartsWith(name)) return s;
 	s++;
-	if(s >= (risse_int)total_count) return static_cast<risse_size>(-1); // out of the index
+	if(s >= total_count) return static_cast<risse_size>(-1); // out of the index
 	if(FileItems[s].Name.StartsWith(name)) return s;
 	return static_cast<risse_size>(-1);
 }
@@ -389,10 +389,10 @@ risse_size tRisaXP4FS::GetFileItemIndex(const ttstr & name)
 
 	// at this point, s or s+1 should point the target.
 	// be certain.
-	if(s >= (risse_int)total_count) return static_cast<risse_size>(-1); // out of the index
+	if(s >= total_count) return static_cast<risse_size>(-1); // out of the index
 	if(FileItems[s].Name == name) return s;
 	s++;
-	if(s >= (risse_int)total_count) return static_cast<risse_size>(-1); // out of the index
+	if(s >= total_count) return static_cast<risse_size>(-1); // out of the index
 	if(FileItems[s].Name == name) return s;
 	return static_cast<risse_size>(-1);
 }

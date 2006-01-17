@@ -193,7 +193,6 @@ size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter((wxString)wxdirname));
 
 	wxDir dir;
-	bool stop = false;
 	size_t count = 0;
 	wxString filename;
 	bool cont;
@@ -416,6 +415,7 @@ wxString tRisaOSFS::ConvertToNativePathDelimiter(const wxString & path)
 				ret.GetWritableChar(n) = pathsep;
 		}
 	}
+	return ret;
 }
 //---------------------------------------------------------------------------
 

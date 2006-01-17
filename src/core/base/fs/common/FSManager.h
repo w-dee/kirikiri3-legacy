@@ -27,6 +27,7 @@
 class tRisaFileSystemIterationCallback
 {
 public:
+	virtual ~tRisaFileSystemIterationCallback() {;}
 	virtual bool OnFile(const ttstr & filename) = 0;
 	virtual bool OnDirectory(const ttstr & dirname) = 0;
 };

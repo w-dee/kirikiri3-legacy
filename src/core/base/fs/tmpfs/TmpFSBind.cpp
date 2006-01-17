@@ -42,6 +42,8 @@ risse_error tRisseNI_TmpFS::Construct(risse_int numparams,
 
 	// filesystem オブジェクトの生成と登録
 	RegisterFileSystemNativeInstance(risse_obj, new tRisaTmpFS());
+
+	return RISSE_S_OK;
 }
 //---------------------------------------------------------------------------
 

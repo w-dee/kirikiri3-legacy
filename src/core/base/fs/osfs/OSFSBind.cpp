@@ -49,6 +49,8 @@ risse_error tRisseNI_OSFS::Construct(risse_int numparams,
 
 	// filesystem オブジェクトの生成と登録
 	RegisterFileSystemNativeInstance(risse_obj, new tRisaOSFS(basedir, checkcase));
+
+	return RISSE_S_OK;
 }
 //---------------------------------------------------------------------------
 

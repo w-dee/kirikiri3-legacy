@@ -210,7 +210,7 @@ bool tRisaRIFFWaveDecoder::Open()
 		{ /*d*/0x64, /*a*/0x61, /*t*/0x74, /*a*/0x61 };
 
 	risse_uint32 size;
-	risse_int64 next;
+	risse_uint64 next;
 
 	// check RIFF mark
 	risse_uint8 buf[4];
@@ -336,7 +336,7 @@ bool tRisaRIFFWaveDecoder::FindRIFFChunk(tRisseBinaryStream * stream, const riss
 		{
 			// skip to next chunk
 			risse_uint32 chunksize = stream->ReadI32LE();
-			risse_int64 next = stream->GetPosition() + chunksize;
+			risse_uint64 next = stream->GetPosition() + chunksize;
 			if(next != stream->Seek(next, RISSE_BS_SEEK_SET)) return false;
 		}
 		else

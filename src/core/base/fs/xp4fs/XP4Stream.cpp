@@ -170,7 +170,7 @@ risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 	{
 	case RISSE_BS_SEEK_SET:
 		newpos = offset;
-		if(offset >= 0 && offset <= FileInfo.Size)
+		if(offset >= 0 && offset <= static_cast<risse_int64>(FileInfo.Size))
 		{
 			SeekToPosition(newpos);
 		}
@@ -178,7 +178,7 @@ risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 
 	case RISSE_BS_SEEK_CUR:
 		newpos = offset + CurPos;
-		if(offset >= 0 && offset <= FileInfo.Size)
+		if(offset >= 0 && offset <= static_cast<risse_int64>(FileInfo.Size))
 		{
 			SeekToPosition(newpos);
 		}
@@ -186,7 +186,7 @@ risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 
 	case RISSE_BS_SEEK_END:
 		newpos = offset + FileInfo.Size;
-		if(offset >= 0 && offset <= FileInfo.Size)
+		if(offset >= 0 && offset <= static_cast<risse_int64>(FileInfo.Size))
 		{
 			SeekToPosition(newpos);
 		}
@@ -256,6 +256,7 @@ risse_uint tRisaXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 risse_uint tRisaXP4ArchiveStream::Write(const void *buffer, risse_size write_size)
 {
 	eRisaException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
+	return 0;
 }
 //---------------------------------------------------------------------------
 

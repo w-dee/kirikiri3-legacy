@@ -104,7 +104,6 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 			// サブノードのタイプを読み取る
 			unsigned char nodetypeid;
 			src->ReadBuffer(&nodetypeid, 1);
-			tType subnodetype;
 			tRisaTmpFSNode * subnode = NULL;
 			switch(nodetypeid)
 			{

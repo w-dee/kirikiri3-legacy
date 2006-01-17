@@ -306,10 +306,13 @@ size_t tRisaFileSystemManager::GetFileListAt(const ttstr & dirname,
 		{
 			Count ++;
 			ttstr dir(CurrentDirectory  + dirname);
+			List.push_back(dir); // ディレクトリを list に push
 			if(Destination)
 				return Destination->OnDirectory(dir);
-			List.push_back(dir); // ディレクトリを list に push
+			return true;
 		}
+
+		size_t GetCount() const { return Count; }
 	} ;
 	std::vector<ttstr> list; // ディレクトリのリスト
 	list.push_back(ttstr()); // 空ディレクトリを push
@@ -322,6 +325,8 @@ size_t tRisaFileSystemManager::GetFileListAt(const ttstr & dirname,
 		list.pop_back();
 		InternalGetFileListAt(dir, &localcallback);
 	}
+
+	return localcallback.GetCount();
 }
 //---------------------------------------------------------------------------
 
@@ -599,11 +604,10 @@ boost::shared_ptr<tRisaFileSystem> tRisaFileSystemManager::GetFileSystemAt(
 	// ・  / (ルート) に割り当てられているファイルシステムが見つからない
 	// ・  fullpath にが渡された
 
-	if(fullpath.GetLen() == 0)
-		return boost::shared_ptr<tRisaFileSystem>();
-	else
+	if(fullpath.GetLen() != 0)
 		eRisaException::Throw(
 			RISSE_WS_TR("Could not find the root filesystem"));
+	return boost::shared_ptr<tRisaFileSystem>();
 }
 //---------------------------------------------------------------------------
 
@@ -642,7 +646,6 @@ void tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 void tRisaFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttstr * ext)
 {
 	const risse_char * p = in.c_str() + in.GetLen();
-	const risse_char * pp = p;
 	const risse_char * start = in.c_str();
 
 	// パス名を最後からスキャン
@@ -682,7 +685,6 @@ void tRisaFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, tts
 void tRisaFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name)
 {
 	const risse_char * p = in.c_str() + in.GetLen();
-	const risse_char * pp = p;
 	const risse_char * start = in.c_str();
 	p --;
 	while(p > start && *p != RISSE_WC('/')) p--;

@@ -266,6 +266,7 @@ void tRisaPathFS::Ensure()
 
 			// 表に追加
 			Hash.Add(basename, DirName + filename);
+			return true;
 		}
 		bool OnDirectory(const ttstr & dirname)
 		{

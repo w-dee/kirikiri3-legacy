@@ -444,10 +444,10 @@ void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wr
 					before_count = link.From - Position;
 					// adjust after count
 					risse_int after_count = ShortCrossFadeHalfSamples;
-					if(Format->TotalSampleGranules - link.From < after_count)
+					if(Format->TotalSampleGranules - link.From < static_cast<risse_uint64>(after_count))
 						after_count =
 							(risse_int)(Format->TotalSampleGranules - link.From);
-					if(Format->TotalSampleGranules - link.To < after_count)
+					if(Format->TotalSampleGranules - link.To < static_cast<risse_uint64>(after_count))
 						after_count =
 							(risse_int)(Format->TotalSampleGranules - link.To);
 					tRisaWaveLoopLink over_to_link;
@@ -977,6 +977,9 @@ bool tRisaWaveLoopManager::EvalLabelExpression(const tRisaLabelStringType &label
 		FlagsModifiedByLabelExpression = true;
 		Flags[lvalue] --;
 		break;
+	default:
+		;
+		break; // nothing to do
 	}
 
 	if(Flags[lvalue] < 0) Flags[lvalue] = 0;
@@ -1218,6 +1221,7 @@ bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 	return true;
 #else
 	v = ttstr(wxString(s, wxConvUTF8));
+	return true;
 #endif
 }
 //---------------------------------------------------------------------------

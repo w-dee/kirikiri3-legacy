@@ -46,6 +46,8 @@ risse_error tRisseNI_XP4FS::Construct(risse_int numparams,
 
 	// filesystem オブジェクトの生成と登録
 	RegisterFileSystemNativeInstance(risse_obj, new tRisaXP4FS(filename));
+
+	return RISSE_S_OK;
 }
 //---------------------------------------------------------------------------
 

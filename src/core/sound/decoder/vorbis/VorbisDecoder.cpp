@@ -84,7 +84,7 @@ bool tRisaOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uin
 	int pcmsize = Format.BytesPerSample;
 
 	int res;
-	int pos = 0; // decoded PCM (in bytes)
+	risse_uint pos = 0; // decoded PCM (in bytes)
 	int remain = bufsamplelen * Format.Channels * pcmsize; // remaining PCM (in bytes)
 
 	while(remain)

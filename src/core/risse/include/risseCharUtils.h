@@ -76,8 +76,6 @@ wxString RisseCharToWxString(const risse_char * str);
 		static const int RisseUniqueSourceNumber = x
 #endif
 
-//		class ___Test { ___Test() { get(); } bool get() { return RISSE_DEFINE_SOURCE_ID_CHECK_##x; } } ___test; \
-
 
 #ifndef RISSE_WCHAR_T_SIZE_IS_16BIT
 	// wchar_t がもともと32bitの環境では L"文字列" で UTF32 を生成できることを

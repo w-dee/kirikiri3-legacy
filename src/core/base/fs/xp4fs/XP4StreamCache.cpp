@@ -28,6 +28,12 @@ tRisaXP4StreamCache::tRisaXP4StreamCache()
 {
 	// 変数を初期化
 	Age = 0;
+	for(int i = 0; i < MAX_ITEM; i++)
+	{
+		Pool[i].Pointer = NULL;
+		Pool[i].Stream = NULL;
+		Pool[i].Age = 0;
+	}
 }
 //---------------------------------------------------------------------------
 

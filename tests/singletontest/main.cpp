@@ -44,6 +44,9 @@ public:
 int main()
 {
 	printf("main begin\n");
+	printf("InitAll begin\n");
+	tRisaSingletonManager::InitAll();
+	printf("InitAll end\n");
 	printf("n : %d\n", tRisaSingleton<s3>::instance()->getN());
 	printf("main end\n");
 }

@@ -24,6 +24,7 @@ INCLUDES= \
 		-I.
 
 CPPFILES = \
+		$(CORE_DIR)/utils/Singleton.cpp  \
 		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)

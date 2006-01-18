@@ -77,6 +77,8 @@ int Application::OnRun()
 {
 	try
 	{
+		tRisaSingletonManager::InitAll(); // 全てのシングルトンを初期化
+
 		iRisseDispatch2 * global = tRisaRisseScriptEngine::instance()->GetGlobalNoAddRef();
 			// グローバルオブジェクトを取得
 

@@ -230,8 +230,6 @@ bool tRisaRIFFWaveDecoder::Open()
 	next = Stream->GetPosition() + size;
 
 	// read Format
-	tRisaWaveFormat Format;
-
 	risse_uint16 format_tag = Stream->ReadI16LE(); // wFormatTag
 	if(format_tag != WAVE_FORMAT_PCM &&
 		format_tag != WAVE_FORMAT_IEEE_FLOAT &&

@@ -95,7 +95,7 @@ risse_uint64 tRisaOSNativeStream::Seek(risse_int64 offset, risse_int whence)
 //---------------------------------------------------------------------------
 risse_size tRisaOSNativeStream::Read(void *buffer, risse_size read_size)
 {
-	return File.Write(buffer, read_size);
+	return File.Read(buffer, read_size);
 }
 //---------------------------------------------------------------------------
 
@@ -160,7 +160,7 @@ tRisaOSFS::tRisaOSFS(const ttstr & basedir, bool checkcase) :
 	BaseDirectory = normalized.GetFullPath();
 
 	// ベースディレクトリ名の最後がパスデリミタでおわっていなけばそれを追加
-	if(wxFileName::IsPathSeparator(BaseDirectory.Last()))
+	if(!wxFileName::IsPathSeparator(BaseDirectory.Last()))
 		BaseDirectory += wxFileName::GetPathSeparator();
 }
 //---------------------------------------------------------------------------

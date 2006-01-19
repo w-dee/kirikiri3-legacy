@@ -65,7 +65,7 @@ private:
 	void Clear();
 
 public:
-	void ThrowIfError();
+	void ThrowIfError(const risse_char * message);
 	void ClearErrorState();
 	tRisseCriticalSection & GetCS() { return CS; }
 
@@ -100,11 +100,11 @@ tRisaOpenAL::tRisaOpenAL()
 	{
 		// コンテキストを作成する
 		Context = alcCreateContext(Device, NULL);
-		ThrowIfError();
+		ThrowIfError(RISSE_WS("alcCreateContext"));
 
 		// コンテキストを選択する
 		alcMakeContextCurrent(Context);
-		ThrowIfError();
+		ThrowIfError(RISSE_WS("alcMakeContextCurrent"));
 	}
 	catch(...)
 	{
@@ -146,14 +146,16 @@ void tRisaOpenAL::Clear()
 
 //---------------------------------------------------------------------------
 //! @brief		現在のエラーに対応する例外を投げる
+//! @param		message メッセージ
 //! @note		エラーが何も発生していない場合は何もしない
 //---------------------------------------------------------------------------
-void tRisaOpenAL::ThrowIfError()
+void tRisaOpenAL::ThrowIfError(const risse_char * message)
 {
 	ALCenum err = alGetError();
 	if(err == AL_NO_ERROR) return ; // エラーはなにも起きていない
 	const ALCchar *msg = alcGetString(Device, err);
-	eRisaException::Throw(RISSE_WS_TR("OpenAL error : %1"),
+	eRisaException::Throw(RISSE_WS_TR("OpenAL error in %1 : %2"),
+		ttstr(message),
 		ttstr(wxString(msg, wxConvUTF8)));
 }
 //---------------------------------------------------------------------------
@@ -194,6 +196,7 @@ private:
 	risse_uint SampleGranuleBytes; //!< サンプルグラニュールのバイト数 = Channels * BytesPerSample
 	risse_uint OneBufferSampleGranules; //!< 一つのバッファのサイズ (サンプルグラニュール単位)
 	risse_uint8 * RenderBuffer; //!< レンダリング用のテンポラリバッファ
+	risse_uint BufferQueuedCount; //!< キューに入っているバッファの数
 
 public:
 	tRisaALBuffer(boost::shared_ptr<tRisaWaveDecoder> decoder, bool streaming);
@@ -225,6 +228,8 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveDecoder> decoder, bool s
 	RenderBuffer = NULL;
 	Streaming = streaming;
 	Decoder = decoder;
+	BufferQueuedCount = 0;
+	ALFormat = 0;
 
 	// decoder のチェック
 	// TODO: 正しいすべての形式のチェックと基本形式へのフォールバック
@@ -260,7 +265,7 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveDecoder> decoder, bool s
 		// バッファの生成
 		risse_uint alloc_count = Streaming ? STREAMING_NUM_BUFFERS : 1;
 		alGenBuffers(alloc_count, Buffers);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGenBuffers"));
 		BufferAllocatedCount = alloc_count;
 
 		// 非ストリーミングの場合はここで全てをデコードする
@@ -297,7 +302,7 @@ void tRisaALBuffer::Clear()
 	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
 	alDeleteBuffers(BufferAllocatedCount, Buffers);
-	tRisaOpenAL::instance()->ThrowIfError();
+	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alDeleteBuffers"));
 	BufferAllocatedCount = 0;
 
 	delete [] RenderBuffer, RenderBuffer = NULL;
@@ -326,13 +331,13 @@ void tRisaALBuffer::PrepareStream(ALuint source)
 //---------------------------------------------------------------------------
 bool tRisaALBuffer::QueueStream(ALuint source)
 {
-	ALuint  buffer;
+	ALuint  buffer = 0;
 
 	// ストリーミングではない場合はそのまま返る
 	if(!Streaming) return false;
 
 	// バッファにすべてキューされている？
-	if(BufferAllocatedCount == STREAMING_NUM_BUFFERS)
+	if(BufferQueuedCount == STREAMING_NUM_BUFFERS)
 	{
 		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
@@ -340,18 +345,20 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 		// キューされているバッファをアンキューしないとならない
 		ALint processed;
 		alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_BUFFERS_PROCESSED)"));
 		if(processed < 1) return false; // アンキュー出来るバッファがない
 
 		// アンキューする
 		alSourceUnqueueBuffers(source, 1, &buffer);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourceUnqueueBuffers"));
+		wxPrintf(wxT("buffer %u unqueued\n"), buffer);
 	}
 	else
 	{
 		// まだすべてはキューされていない
-		buffer = Buffers[BufferAllocatedCount]; // まだキューされていないバッファ
-		BufferAllocatedCount ++;
+		buffer = Buffers[BufferQueuedCount]; // まだキューされていないバッファ
+		BufferQueuedCount ++;
+		wxPrintf(wxT("buffer %u to be used\n"), buffer);
 	}
 
 	// バッファにデータをレンダリングする
@@ -385,6 +392,7 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 				memset(
 					RenderBuffer + rendered * SampleGranuleBytes,
 					0x00, remain * SampleGranuleBytes); // 無音は 0
+			break;
 		}
 	}
 
@@ -392,12 +400,15 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 	{
 		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
+		wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
+			ALFormat, OneBufferSampleGranules * SampleGranuleBytes, Format.Frequency);
 		alBufferData(buffer, ALFormat, RenderBuffer,
 			OneBufferSampleGranules * SampleGranuleBytes, Format.Frequency);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("streaming alBufferData"));
 
+		wxPrintf(wxT("buffer %u to be queued\n"), buffer);
 		alSourceQueueBuffers(source, 1, &buffer);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourceQueueBuffers"));
 	}
 
 	return true;
@@ -442,7 +453,7 @@ void tRisaALBuffer::Load()
 		{
 			risse_uint one_rendered;
 			bool cont = Decoder->Render(
-				RenderBuffer + rendered * SampleGranuleBytes,
+				temp + rendered * SampleGranuleBytes,
 				remain, one_rendered);
 
 			rendered += one_rendered;
@@ -464,7 +475,7 @@ void tRisaALBuffer::Load()
 		// バッファにデータを割り当てる
 		alBufferData(Buffers[0], ALFormat, temp,
 			temp_sample_granules * SampleGranuleBytes, Format.Frequency);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("non streaming alBufferData"));
 	}
 	catch(...)
 	{
@@ -499,6 +510,8 @@ public:
 	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer);
 	~tRisaALSource();
 
+	ALuint GetSource() const { return Source; } // Source を得る
+
 private:
 	void Clear();
 
@@ -526,15 +539,18 @@ tRisaALSource::tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer) :
 
 		// ソースの生成
 		alGenSources(1, &Source);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGenSources"));
 		SourceAllocated = true;
 
 		alSourcei(Source, AL_LOOPING, AL_FALSE);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
 
 		// ストリーミングを行わない場合は、バッファをソースにアタッチ
-		alSourcei(Source, AL_BUFFER, Buffer->GetBuffer());
-		tRisaOpenAL::instance()->ThrowIfError();
+		if(!Buffer->GetStreaming())
+		{
+			alSourcei(Source, AL_BUFFER, Buffer->GetBuffer());
+			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_BUFFER)"));
+		}
 	}
 	catch(...)
 	{
@@ -562,9 +578,9 @@ void tRisaALSource::Clear()
 {
 	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
-	alDeleteSources(1, &Source);
-	tRisaOpenAL::instance()->ThrowIfError();
-	Source = false;
+	if(SourceAllocated) alDeleteSources(1, &Source);
+	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alDeleteSources"));
+	SourceAllocated = false;
 }
 //---------------------------------------------------------------------------
 
@@ -587,7 +603,7 @@ void tRisaALSource::Play()
 		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
 		alSourcePlay(Source);
-		tRisaOpenAL::instance()->ThrowIfError();
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
 }
 //---------------------------------------------------------------------------
@@ -652,7 +668,16 @@ int Application::OnRun()
 		boost::shared_ptr<tRisaALBuffer> buffer(new tRisaALBuffer(decoder, true));
 		tRisaALSource source(buffer);
 
-		// hoge
+		source.Play();
+
+		while(true)
+		{
+			buffer->QueueStream(source.GetSource());
+			Sleep(100);
+			ALint pos;
+			alGetSourcei( source.GetSource(), AL_SAMPLE_OFFSET, &pos);
+			wxPrintf(wxT("position : %d\n"), pos);
+		}
 	}
 	catch(const eRisse &e)
 	{

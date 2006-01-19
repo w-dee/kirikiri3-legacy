@@ -26,7 +26,6 @@ class tRisaRIFFWaveDecoder : public tRisaWaveDecoder
 	tRisaWaveFormat Format; //!< サウンド形式
 	risse_uint64 DataStart; //!< ファイル中でのデータの開始位置
 	risse_uint64 CurrentPos; //!< ファイル中でのデータの読み込み位置
-	risse_uint SampleSize; //!< 1サンプルのサイズ
 
 public:
 	tRisaRIFFWaveDecoder(const ttstr & filename);

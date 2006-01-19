@@ -112,7 +112,7 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 		return false;
 	}
 
-	risse_uint readsize = writesamples * SampleSize;
+	risse_uint readsize = writesamples * (Format.BytesPerSample * Format.Channels);
 	risse_uint read = Stream->Read(buf, readsize);
 
 #if RISSE_HOST_IS_BIG_ENDIAN
@@ -156,7 +156,7 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 #endif
 
 
-	rendered = read / SampleSize;
+	rendered = read / (Format.BytesPerSample * Format.Channels);
 	CurrentPos += rendered;
 
 	if(read < readsize || writesamples < bufsamplelen)
@@ -176,7 +176,7 @@ bool tRisaRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
 {
 	if(Format.TotalSampleGranules <= samplepos) return false;
 
-	risse_uint64 streampos = DataStart + samplepos * SampleSize;
+	risse_uint64 streampos = DataStart + samplepos * Format.BytesPerSample * Format.Channels;
 	risse_uint64 possave = Stream->GetPosition();
 
 	if(streampos != Stream->Seek(streampos, RISSE_BS_SEEK_SET))

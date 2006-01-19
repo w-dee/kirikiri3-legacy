@@ -154,6 +154,10 @@ tRisaOSFS::tRisaOSFS(const ttstr & basedir, bool checkcase) :
 	// ベースディレクトリのパス区切りをネイティブなものに変更
 	BaseDirectory = ConvertToNativePathDelimiter(BaseDirectory);
 
+	// ベースディレクトリ名の最後がパスデリミタでおわっていなけばそれを追加
+	if(!wxFileName::IsPathSeparator(BaseDirectory.Last()))
+		BaseDirectory += wxFileName::GetPathSeparator();
+
 	// ベースディレクトリ名を正規化
 	wxFileName normalized(BaseDirectory);
 	normalized.Normalize();

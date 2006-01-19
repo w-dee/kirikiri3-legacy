@@ -644,7 +644,7 @@ int Application::OnRun()
 		tRisaSingletonManager::InitAll(); // 全てのシングルトンインスタンスを初期化
 
 		tRisaRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
-			RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('./'))"),
+			RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 			NULL, NULL, NULL);
 
 		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test.wav")));

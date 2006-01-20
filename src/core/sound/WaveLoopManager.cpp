@@ -19,6 +19,9 @@
 #include <algorithm>
 #include "WaveLoopManager.h"
 
+RISSE_DEFINE_SOURCE_ID(2302);
+
+
 #ifdef RISA__IN_LOOP_TUNER
 	#include "WaveReader.h"
 #else

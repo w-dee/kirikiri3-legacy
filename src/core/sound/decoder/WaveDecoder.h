@@ -14,57 +14,7 @@
 #define _WAVEDECODERH_
 
 
-
-
-//---------------------------------------------------------------------------
-//! @brief		スピーカー定義
-//---------------------------------------------------------------------------
-#ifndef SPEAKER_FRONT_LEFT
-// from Windows ksmedia.h
-// speaker config
-
-#define     SPEAKER_FRONT_LEFT              0x1
-#define     SPEAKER_FRONT_RIGHT             0x2
-#define     SPEAKER_FRONT_CENTER            0x4
-#define     SPEAKER_LOW_FREQUENCY           0x8
-#define     SPEAKER_BACK_LEFT               0x10
-#define     SPEAKER_BACK_RIGHT              0x20
-#define     SPEAKER_FRONT_LEFT_OF_CENTER    0x40
-#define     SPEAKER_FRONT_RIGHT_OF_CENTER   0x80
-#define     SPEAKER_BACK_CENTER             0x100
-#define     SPEAKER_SIDE_LEFT               0x200
-#define     SPEAKER_SIDE_RIGHT              0x400
-#define     SPEAKER_TOP_CENTER              0x800
-#define     SPEAKER_TOP_FRONT_LEFT          0x1000
-#define     SPEAKER_TOP_FRONT_CENTER        0x2000
-#define     SPEAKER_TOP_FRONT_RIGHT         0x4000
-#define     SPEAKER_TOP_BACK_LEFT           0x8000
-#define     SPEAKER_TOP_BACK_CENTER         0x10000
-#define     SPEAKER_TOP_BACK_RIGHT          0x20000
-
-#endif
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		PCM データフォーマット (内部用)
-//---------------------------------------------------------------------------
-struct tRisaWaveFormat
-{
-	risse_uint Frequency;				//!< sample granule per sec
-	risse_uint Channels;				//!< number of channels (1=Mono, 2=Stereo ... etc)
-	risse_uint BitsPerSample;			//!< bits per one sample
-	risse_uint BytesPerSample;			//!< bytes per one sample
-	risse_uint64 TotalSampleGranules;	//!< total samples in sample granule; unknown for zero
-	risse_uint64 TotalTime;				//!< in ms; unknown for zero
-	risse_uint32 SpeakerConfig;			//!< bitwise OR of SPEAKER_* constants
-	bool IsFloat;						//!< true if the data is IEEE floating point
-	bool Seekable;						//!< true if able to seek, otherwise false
-};
-//---------------------------------------------------------------------------
-
+#include "Wave.h"
 
 
 //---------------------------------------------------------------------------

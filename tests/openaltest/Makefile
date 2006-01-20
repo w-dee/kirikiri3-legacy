@@ -63,6 +63,7 @@ CPPFILES = \
 		$(CORE_DIR)/base/exception/RisaException.cpp                 \
 		$(CORE_DIR)/base/script/RisseEngine.cpp                      \
 		$(CORE_DIR)/utils/Singleton.cpp                              \
+		$(CORE_DIR)/sound/WaveFormatConverter.cpp                    \
 		$(CORE_DIR)/sound/WaveLoopManager.cpp                        \
 		$(CORE_DIR)/sound/decoder/riffwave/RIFFWaveDecoder.cpp       \
 		$(CORE_DIR)/sound/decoder/vorbis/VorbisDecoder.cpp           \

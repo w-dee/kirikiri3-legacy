@@ -196,7 +196,6 @@ private:
 	risse_uint SampleGranuleBytes; //!< サンプルグラニュールのバイト数 = Channels * BytesPerSample
 	risse_uint OneBufferSampleGranules; //!< 一つのバッファのサイズ (サンプルグラニュール単位)
 	risse_uint8 * RenderBuffer; //!< レンダリング用のテンポラリバッファ
-	risse_uint BufferQueuedCount; //!< キューに入っているバッファの数
 
 public:
 	tRisaALBuffer(boost::shared_ptr<tRisaWaveDecoder> decoder, bool streaming);
@@ -208,6 +207,7 @@ private:
 public:
 	void PrepareStream(ALuint source);
 	bool QueueStream(ALuint source);
+	void UnqueueAllBuffers(ALuint source);
 	void Load();
 
 	bool GetStreaming() const { return Streaming; }
@@ -228,7 +228,6 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveDecoder> decoder, bool s
 	RenderBuffer = NULL;
 	Streaming = streaming;
 	Decoder = decoder;
-	BufferQueuedCount = 0;
 	ALFormat = 0;
 
 	// decoder のチェック
@@ -336,8 +335,18 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 	// ストリーミングではない場合はそのまま返る
 	if(!Streaming) return false;
 
+	// ソースにキューされているバッファの数を得る
+	ALint queued;
+
+	{
+		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+		alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
+		tRisaOpenAL::instance()->ThrowIfError(
+			RISSE_WS("alGetSourcei(AL_BUFFERS_QUEUED) at tRisaALBuffer::QueueStream"));
+	}
+
 	// バッファにすべてキューされている？
-	if(BufferQueuedCount == STREAMING_NUM_BUFFERS)
+	if((risse_uint)queued == STREAMING_NUM_BUFFERS)
 	{
 		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
@@ -345,19 +354,20 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 		// キューされているバッファをアンキューしないとならない
 		ALint processed;
 		alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_BUFFERS_PROCESSED)"));
+		tRisaOpenAL::instance()->ThrowIfError(
+			RISSE_WS("alGetSourcei(AL_BUFFERS_PROCESSED)"));
 		if(processed < 1) return false; // アンキュー出来るバッファがない
 
 		// アンキューする
 		alSourceUnqueueBuffers(source, 1, &buffer);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourceUnqueueBuffers"));
+		tRisaOpenAL::instance()->ThrowIfError(
+			RISSE_WS("alSourceUnqueueBuffers at tRisaALBuffer::QueueStream"));
 		wxPrintf(wxT("buffer %u unqueued\n"), buffer);
 	}
 	else
 	{
 		// まだすべてはキューされていない
-		buffer = Buffers[BufferQueuedCount]; // まだキューされていないバッファ
-		BufferQueuedCount ++;
+		buffer = Buffers[queued]; // まだキューされていないバッファ
 		wxPrintf(wxT("buffer %u to be used\n"), buffer);
 	}
 
@@ -412,6 +422,33 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 	}
 
 	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		全てのバッファをアンキューする
+//! @param		全てのバッファをアンキューしたい source
+//---------------------------------------------------------------------------
+void tRisaALBuffer::UnqueueAllBuffers(ALuint source)
+{
+	// ソースにキューされているバッファの数を得る
+	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+
+	ALint queued;
+	alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
+	tRisaOpenAL::instance()->ThrowIfError(
+		RISSE_WS("alGetSourcei(AL_BUFFERS_QUEUED) at tRisaALBuffer::UnqueueAllBuffers"));
+
+	if(queued > 0)
+	{
+		ALuint dummy_buffers[MAX_NUM_BUFFERS];
+
+		// アンキューする
+		alSourceUnqueueBuffers(source, queued, dummy_buffers);
+		tRisaOpenAL::instance()->ThrowIfError(
+			RISSE_WS("alSourceUnqueueBuffers at tRisaALBuffer::UnqueueAllBuffers"));
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -517,6 +554,7 @@ private:
 
 public:
 	void Play();
+	void Stop();
 
 };
 //---------------------------------------------------------------------------
@@ -609,6 +647,42 @@ void tRisaALSource::Play()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		再生の停止
+//---------------------------------------------------------------------------
+void tRisaALSource::Stop()
+{
+	// 再生を停止する
+	{
+		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+
+		alSourceStop(Source);
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
+	}
+
+	if(Buffer->GetStreaming())
+	{
+		// 全てのバッファを unqueueする
+		Buffer->UnqueueAllBuffers(Source);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 //! @brief		アプリケーションクラス
@@ -663,8 +737,8 @@ int Application::OnRun()
 			RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 			NULL, NULL, NULL);
 
-		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test.wav")));
-//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaOggVorbisDecoder(RISSE_WS("test.ogg")));
+//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test.wav")));
+		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaOggVorbisDecoder(RISSE_WS("test.ogg")));
 		boost::shared_ptr<tRisaALBuffer> buffer(new tRisaALBuffer(decoder, true));
 		tRisaALSource source(buffer);
 

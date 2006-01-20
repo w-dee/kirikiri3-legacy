@@ -200,7 +200,7 @@ int tRisaOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int w
 
 	tRisaOggVorbisDecoder * decoder = reinterpret_cast<tRisaOggVorbisDecoder*>(datasource);
 
-	risse_int seek_type = STREAM_SEEK_SET;
+	risse_int seek_type = RISSE_BS_SEEK_SET;
 
 	switch(whence)
 	{
@@ -215,11 +215,13 @@ int tRisaOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int w
 		break;
 	}
 
-	if(offset != 0)
+	try
 	{
-		risse_uint64 curpos = decoder->Stream->GetPosition();
-		if(decoder->Stream->Seek(offset, seek_type) == curpos)
-			return -1; // failed
+		decoder->Stream->Seek(offset, seek_type);
+	}
+	catch(...)
+	{
+		return -1; // failed
 	}
 
 	return 0;

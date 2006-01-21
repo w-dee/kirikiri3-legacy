@@ -15,7 +15,7 @@
 #include "RisaException.h"
 #include <zlib.h>
 
-RISSE_DEFINE_SOURCE_ID(2005);
+RISSE_DEFINE_SOURCE_ID(47081,32049,45767,18248,53175,52305,56890,58573);
 
 
 //---------------------------------------------------------------------------

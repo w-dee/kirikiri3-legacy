@@ -15,7 +15,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1031);
+RISSE_DEFINE_SOURCE_ID(3401,9600,47324,18071,37028,228,43889,3977);
 
 //---------------------------------------------------------------------------
 iRisseDispatch2 * RisseObjectTraceTarget;

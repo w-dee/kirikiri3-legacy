@@ -20,7 +20,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1013);
+RISSE_DEFINE_SOURCE_ID(5355,12061,19867,17380,25492,34558,59866,5421);
 //---------------------------------------------------------------------------
 // RisseGetExceptionObject : retrieves risse 'Exception' object
 //---------------------------------------------------------------------------

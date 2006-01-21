@@ -15,7 +15,7 @@
 #include "risseNamespace.h"
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1023);
+RISSE_DEFINE_SOURCE_ID(16765,6763,44155,19343,49075,36506,42875,57529);
 
 //---------------------------------------------------------------------------
 // tRisseLocalSymbolList

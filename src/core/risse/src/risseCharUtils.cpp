@@ -18,7 +18,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(0);
+RISSE_DEFINE_SOURCE_ID(1411,29360,55440,18029,27323,38271,59690,56185);
 
 //---------------------------------------------------------------------------
 //! @brief		risse_char 版 atoi

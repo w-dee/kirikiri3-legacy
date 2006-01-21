@@ -369,7 +369,7 @@
 
 namespace Risse {
 
-RISSE_DEFINE_SOURCE_ID(1002);
+RISSE_DEFINE_SOURCE_ID(52729,25009,17371,17846,26762,25097,10680,24069);
 
 /* yylex/yyerror prototype decl */
 #define YYLEX_PROTO_DECL int yylex(YYSTYPE *yylex, void *pm);

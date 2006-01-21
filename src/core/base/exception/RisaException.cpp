@@ -13,7 +13,7 @@
 #include "prec.h"
 #include "RisaException.h"
 
-RISSE_DEFINE_SOURCE_ID(2100);
+RISSE_DEFINE_SOURCE_ID(51314,64088,22515,17558,46471,30589,44752,43930);
 
 //---------------------------------------------------------------------------
 //! @brief		eRisaException型の例外を投げる

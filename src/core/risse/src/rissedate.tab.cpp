@@ -111,7 +111,7 @@
 #define YYLEX_PARAM pm
 
 namespace Risse {
-RISSE_DEFINE_SOURCE_ID(1003);
+RISSE_DEFINE_SOURCE_ID(8963,12274,26863,20008,22929,26090,4548,1577);
 
 
 /* yylex/yyerror prototype decl */

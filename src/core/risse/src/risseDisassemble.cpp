@@ -18,7 +18,7 @@
 //---------------------------------------------------------------------------
 namespace Risse  // following is in the namespace
 {
-RISSE_DEFINE_SOURCE_ID(1012);
+RISSE_DEFINE_SOURCE_ID(9417,63301,50714,18296,47522,26784,35105,31076);
 //---------------------------------------------------------------------------
 tRisseString tRisseInterCodeContext::GetValueComment(const tRisseVariant &val)
 {

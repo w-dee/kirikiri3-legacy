@@ -21,7 +21,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1030);
+RISSE_DEFINE_SOURCE_ID(35412,4231,23251,16964,5557,10004,55378,56854);
 
 const risse_char *RisseNullStrPtr = RISSE_WS("");
 //---------------------------------------------------------------------------

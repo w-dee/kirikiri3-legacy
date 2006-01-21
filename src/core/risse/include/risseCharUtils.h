@@ -68,12 +68,26 @@ wxString RisseCharToWxString(const risse_char * str);
 #endif
 
 #ifdef RISSE_CHARUTILS_DEBUG
-	#define RISSE_DEFINE_SOURCE_ID(x) \
-		bool RISSE_DEFINE_SOURCE_ID_CHECK_##x = false; \
-		static const int RisseUniqueSourceNumber = x
+	#define RISSE_DEFINE_SOURCE_ID(x1,x2,x3,x4,x5,x6,x7,x8) \
+		bool RISSE_SOURCE_ID_DUPLICATION_CHECK_##x1##_##x2##_##x3##_##x4##_##x5##_##x6##_##x7##_##x8 = false; \
+		static const int RisseUSN1 = x1;\
+		static const int RisseUSN2 = x2;\
+		static const int RisseUSN3 = x3;\
+		static const int RisseUSN4 = x4;\
+		static const int RisseUSN5 = x5;\
+		static const int RisseUSN6 = x6;\
+		static const int RisseUSN7 = x7;\
+		static const int RisseUSN8 = x8
 #else
-	#define RISSE_DEFINE_SOURCE_ID(x) \
-		static const int RisseUniqueSourceNumber = x
+	#define RISSE_DEFINE_SOURCE_ID(x1,x2,x3,x4,x5,x6,x7,x8) \
+		static const int RisseUSN1 = x1;\
+		static const int RisseUSN2 = x2;\
+		static const int RisseUSN3 = x3;\
+		static const int RisseUSN4 = x4;\
+		static const int RisseUSN5 = x5;\
+		static const int RisseUSN6 = x6;\
+		static const int RisseUSN7 = x7;\
+		static const int RisseUSN8 = x8
 #endif
 
 
@@ -105,10 +119,13 @@ wxString RisseCharToWxString(const risse_char * str);
 	// で識別される。
 
 	// 各ソースファイルには必ず 
-	// RISSE_DEFINE_SOURCE_ID(番号);
-	// を記述すること。番号はソースファイルごとにユニークな値にする。値が重なっていた場合は
+	// RISSE_DEFINE_SOURCE_ID(s1,s2,s3,s4,s5,s6,s7,s8);
+	// を記述すること。番号s1～s8はソースファイルごとにユニークな値にする。値が重なっていた場合は
 	// リンク時に 「"RISSE_DEFINE_SOURCE_ID_CHECK_番号" というシンボルが重複している」
 	// と警告される(ただしデバッグビルド時のみ)。
+	// Risaの場合、ソースツリーのルートに update_id.sh というユーティリティシェルスクリプトが
+	// あり、ソース中に RISSE_DEFINE_SOURCE_ID() と記述してからこのユーティリティを実行すると、
+	// 自動的に ユニークな ID を挿入してくれる。
 
 	// 一行中に複数の RISSE_WS を書くことはできない。もし書いた場合は、実行時にそこを通過した
 	// 際に例外が発生する(ただしデバッグビルド時のみ)。
@@ -119,7 +136,7 @@ wxString RisseCharToWxString(const risse_char * str);
 	#endif
 
 	//! @brief UTF-32 リテラル文字列を保持するクラス
-	template<size_t SIZE, int SOURCEID, int SOURCELINE, int SEQID>
+	template<size_t SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
 	class tRisseUtf16ToUtf32
 	{
 		static risse_char Utf32Array[SIZE];
@@ -153,42 +170,42 @@ wxString RisseCharToWxString(const risse_char * str);
 	};
 
 
-	template<size_t SIZE, int SOURCEID, int SOURCELINE, int SEQID>
-	bool tRisseUtf16ToUtf32<SIZE, SOURCEID, SOURCELINE, SEQID>::Converted = false;
+	template<size_t SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
+		bool tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::Converted = false;
 
-	template<size_t SIZE, int SOURCEID, int SOURCELINE, int SEQID>
-	risse_char tRisseUtf16ToUtf32<SIZE, SOURCEID, SOURCELINE, SEQID>::Utf32Array[SIZE] = {0};
+	template<size_t SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
+	risse_char tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::Utf32Array[SIZE] = {0};
 
 	#ifdef RISSE_CHARUTILS_DEBUG
-	template<size_t SIZE, int SOURCEID, int SOURCELINE, int SEQID>
-	const wchar_t * tRisseUtf16ToUtf32<SIZE, SOURCEID, SOURCELINE, SEQID>::SourceString = NULL;
+	template<size_t SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
+	const wchar_t * tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::SourceString = NULL;
 	#endif
 
 
 	#ifdef RISSE_CHARUTILS_DEBUG
 		#define _RISSE_TO_WCHAR_STRING(X) (L##X)
 		#define RISSE_TO_WCHAR_STRING(X) _RISSE_TO_WCHAR_STRING(X)
-		#define RISSE_WS(X)  ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 0>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS1(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 1>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS2(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 2>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS3(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 3>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS4(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 4>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS5(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 5>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS6(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 6>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS7(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 7>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS8(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 8>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS9(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 9>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS(X)  ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 0>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS1(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 1>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS2(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 2>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS3(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 3>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS4(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 4>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS5(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 5>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS6(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 6>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS7(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 7>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS8(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 8>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS9(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 9>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
 	#else
-		#define RISSE_WS(X)  ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 0>(L##X))
-		#define RISSE_WS1(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 1>(L##X))
-		#define RISSE_WS2(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 2>(L##X))
-		#define RISSE_WS3(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 3>(L##X))
-		#define RISSE_WS4(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 4>(L##X))
-		#define RISSE_WS5(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 5>(L##X))
-		#define RISSE_WS6(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 6>(L##X))
-		#define RISSE_WS7(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 7>(L##X))
-		#define RISSE_WS8(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 8>(L##X))
-		#define RISSE_WS9(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUniqueSourceNumber, __LINE__, 9>(L##X))
+		#define RISSE_WS(X)  ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 0>(L##X))
+		#define RISSE_WS1(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 1>(L##X))
+		#define RISSE_WS2(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 2>(L##X))
+		#define RISSE_WS3(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 3>(L##X))
+		#define RISSE_WS4(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 4>(L##X))
+		#define RISSE_WS5(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 5>(L##X))
+		#define RISSE_WS6(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 6>(L##X))
+		#define RISSE_WS7(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 7>(L##X))
+		#define RISSE_WS8(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 8>(L##X))
+		#define RISSE_WS9(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 9>(L##X))
 	#endif
 
 #endif

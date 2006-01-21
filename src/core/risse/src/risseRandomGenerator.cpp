@@ -21,7 +21,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1026);
+RISSE_DEFINE_SOURCE_ID(47172,40016,36657,19844,14753,2903,55023,7986);
 //---------------------------------------------------------------------------
 void (*RisseGetRandomBits128)(void *dest) = NULL;
 	// retrives 128-bits (16bytes) random bits for random seed.

@@ -19,7 +19,7 @@
 #include "XP4StreamCache.h"
 #include "XP4Stream.h"
 
-RISSE_DEFINE_SOURCE_ID(2006);
+RISSE_DEFINE_SOURCE_ID(63449,40639,29098,17674,37258,38306,59594,20366);
 
 //---------------------------------------------------------------------------
 //! @brief		指定された位置のメモリから16bit LE整数を読み込む

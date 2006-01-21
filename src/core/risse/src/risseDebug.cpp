@@ -21,7 +21,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1010);
+RISSE_DEFINE_SOURCE_ID(37721,57543,13976,19997,6330,1842,60033,38333);
 //---------------------------------------------------------------------------
 // ObjectHashMap : hash map to track object construction/destruction
 //--------------------------------------------------------------------------

@@ -20,7 +20,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1032);
+RISSE_DEFINE_SOURCE_ID(48473,29200,16591,20340,48528,338,1161,40290);
 
 //---------------------------------------------------------------------------
 // tRisseVariantOctet related

@@ -14,7 +14,7 @@
 #include "ALCommon.h"
 #include "ALBuffer.h"
 
-RISSE_DEFINE_SOURCE_ID(2304);
+RISSE_DEFINE_SOURCE_ID(24518,55437,60218,19380,17845,8848,1743,50558);
 
 
 //---------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 #include "RisaException.h"
 #include "FSManager.h"
 
-RISSE_DEFINE_SOURCE_ID(2300);
+RISSE_DEFINE_SOURCE_ID(17161,14775,60981,18892,4009,20341,33502,766);
 
 
 //---------------------------------------------------------------------------

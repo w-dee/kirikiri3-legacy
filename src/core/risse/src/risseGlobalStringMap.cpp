@@ -28,7 +28,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1015);
+RISSE_DEFINE_SOURCE_ID(3432,21654,59229,18534,14983,9197,55037,52986);
 //---------------------------------------------------------------------------
 // tRisseGlobalStringMap - hash map to keep constant strings shared
 //---------------------------------------------------------------------------

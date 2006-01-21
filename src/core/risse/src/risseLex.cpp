@@ -24,7 +24,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1019);
+RISSE_DEFINE_SOURCE_ID(31558,6146,58648,17904,52124,56524,47688,27296);
 
 
 char risseEnableDicFuncQuickHack_mark[] = " - 0 <- Put '1' to enable dicfunc quick-hack - ";

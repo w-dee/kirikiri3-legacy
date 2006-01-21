@@ -44,7 +44,7 @@ int _USERENTRY _matherrl(struct _exception *e)
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(1020);
+RISSE_DEFINE_SOURCE_ID(3841,57304,4824,18412,13216,16765,5735,42050);
 //---------------------------------------------------------------------------
 // tRisseNC_Math : risse Native Class : Math
 //---------------------------------------------------------------------------

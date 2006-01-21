@@ -136,15 +136,18 @@ void tRisaWaveFormatConverter::Convert(
 
 	// 変換ループ用テーブル
 	typedef void (*func_t)(void * dest, const void * src, size_t numsamples);
-	#define R_TF(d, s) &RisaPCMConvertLoop<tRisaPCMTypes::d, tRisaPCMTypes::s>
+	#ifdef R
+		#undef R
+	#endif
+	#define R(d, s) &RisaPCMConvertLoop<tRisaPCMTypes::d, tRisaPCMTypes::s>
 	static func_t table[tRisaPCMTypes::tnum][tRisaPCMTypes::tnum] = {
-	{ R_TF( i8,i8),R_TF( i8,i16),R_TF( i8,i24),R_TF( i8,i32),R_TF( i8,f32), },
-	{ R_TF(i16,i8),R_TF(i16,i16),R_TF(i16,i24),R_TF(i16,i32),R_TF(i16,f32), },
-	{ R_TF(i24,i8),R_TF(i24,i16),R_TF(i24,i24),R_TF(i24,i32),R_TF(i24,f32), },
-	{ R_TF(i32,i8),R_TF(i32,i16),R_TF(i32,i24),R_TF(i32,i32),R_TF(i32,f32), },
-	{ R_TF(f32,i8),R_TF(f32,i16),R_TF(f32,i24),R_TF(f32,i32),R_TF(f32,f32), },
+	{ R( i8,i8),R( i8,i16),R( i8,i24),R( i8,i32),R( i8,f32), },
+	{ R(i16,i8),R(i16,i16),R(i16,i24),R(i16,i32),R(i16,f32), },
+	{ R(i24,i8),R(i24,i16),R(i24,i24),R(i24,i32),R(i24,f32), },
+	{ R(i32,i8),R(i32,i16),R(i32,i24),R(i32,i32),R(i32,f32), },
+	{ R(f32,i8),R(f32,i16),R(f32,i24),R(f32,i32),R(f32,f32), },
 	};
-	#undef R_TF
+	#undef R
 
 
 	// 変換ループ用に分岐

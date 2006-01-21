@@ -65,6 +65,9 @@ CPPFILES = \
 		$(CORE_DIR)/utils/Singleton.cpp                              \
 		$(CORE_DIR)/sound/WaveFormatConverter.cpp                    \
 		$(CORE_DIR)/sound/WaveLoopManager.cpp                        \
+		$(CORE_DIR)/sound/ALCommon.cpp                               \
+		$(CORE_DIR)/sound/ALSource.cpp                               \
+		$(CORE_DIR)/sound/ALBuffer.cpp                               \
 		$(CORE_DIR)/sound/decoder/riffwave/RIFFWaveDecoder.cpp       \
 		$(CORE_DIR)/sound/decoder/vorbis/VorbisDecoder.cpp           \
 		main.cpp

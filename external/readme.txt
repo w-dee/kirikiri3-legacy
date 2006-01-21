@@ -78,6 +78,19 @@ $ export http_proxy
   と出ました。これよりも failed のターゲットが極端に多い場合は ICU が正しく
   コンパイルできていなかったりする可能性が高いです。
 
+・libvorbis と libogg
+
+  入手先: http://www.vorbis.com/
+
+・openal
+
+  入手先: http://www.openal.org/
+
+  Makefile が自動的にダウンロードするのは本家においてあるアーカイブではなく
+  kikyou.info においてある、W.Deeが独自に作成したアーカイブです。
+  このアーカイブには必要なライブラリやヘッダが含まれていますが、現状
+  Win32 のみです。
+
 --
 
 gzip: stdin: not in gzip format

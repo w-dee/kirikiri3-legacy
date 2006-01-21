@@ -10,7 +10,7 @@ PROGRAM_ID=openaltest
 BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
 
 # このバイナリが依存しているライブラリ
-DEP_LIBS=BOOST ZLIB WX LIBOGG LIBVORBIS COMMON
+DEP_LIBS=BOOST ZLIB WX LIBOGG LIBVORBIS OPENAL COMMON
 
 # リンカに渡すフラグ
 LDFLAGS = -g $(CONSOLE_LDFLAGS)
@@ -73,8 +73,6 @@ CPPFILES = \
 		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)
-
-LIBS += -L. -lopenal
 
 #----------------------------#
 

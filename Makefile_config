@@ -180,6 +180,18 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: libvorbis configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
+	@echo "openal ..."
+	@(set -e ;\
+		echo "####  openal config  ####" ;\
+		echo "OPENAL_CFLAGS   := -I$(OPENAL_DIR)/include" ;\
+		echo "OPENAL_CXXFLAGS := -I$(OPENAL_DIR)/include" ;\
+		echo "OPENAL_CPPFLAGS := -I$(OPENAL_DIR)/include" ;\
+		echo "OPENAL_LIBS     := -L$(OPENAL_DIR)/lib -lopenal" ;\
+		touch $(TOP_DIR)/config_success ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: openal configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
+	@rm -f $(TOP_DIR)/config_success
 
 ifeq ($(DEBUG),yes)
  -include $(TOP_DIR)/Makefile_build_config_debug

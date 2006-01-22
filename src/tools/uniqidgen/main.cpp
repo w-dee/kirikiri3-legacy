@@ -37,5 +37,7 @@ int main()
 		if(i != 0) cout << ",";
 		cout << num[i];
 	}
+
+	return 0;
 }
 

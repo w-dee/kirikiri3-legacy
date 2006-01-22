@@ -41,6 +41,8 @@ INCLUDES= \
 		-I$(CORE_DIR)/sound/decoder            \
 		-I$(CORE_DIR)/sound/decoder/riffwave   \
 		-I$(CORE_DIR)/sound/decoder/vorbis     \
+		-I$(CORE_DIR)/sound/filter             \
+		-I$(CORE_DIR)/sound/filter/pitchshifter\
 		-I.
 
 CPPFILES = \
@@ -70,6 +72,9 @@ CPPFILES = \
 		$(CORE_DIR)/sound/ALBuffer.cpp                               \
 		$(CORE_DIR)/sound/decoder/riffwave/RIFFWaveDecoder.cpp       \
 		$(CORE_DIR)/sound/decoder/vorbis/VorbisDecoder.cpp           \
+		$(CORE_DIR)/sound/filter/BasicWaveFilter.cpp                 \
+		$(CORE_DIR)/sound/filter/pitchshifter/smbPitchShift.cpp      \
+		$(CORE_DIR)/sound/filter/pitchshifter/PitchShifter.cpp       \
 		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)

@@ -33,6 +33,20 @@ struct tRisaPCMTypes
 		tnum			//!< 有効な型の数
 	};
 
+	//! @brief type に必要なバイト数を返す
+	static size_t TypeToSampleBytes(tType type)
+	{
+		switch(type)
+		{
+		case ti8:	return 1;
+		case ti16:	return 2;
+		case ti24:	return 3;
+		case ti32:	return 4;
+		case tf32:	return 4;
+		default:	return 0;
+		}
+	}
+
 	//! @brief  8bit integer linear PCM type
 	struct i8
 	{
@@ -219,6 +233,21 @@ struct tRisaWaveFormat
 			}
 		}
 		return tRisaPCMTypes::tunknown;
+	}
+
+	//! @brief tRisaPCMTypes::tType に従って PCM のタイプを設定する
+	//! @note BitsPerSample, BytesPerSample, IsFloat 以外のメンバは変更しない
+	void SetRisaPCMType(tRisaPCMTypes::tType type)
+	{
+		switch(type)
+		{
+		case tRisaPCMTypes::ti8:	BitsPerSample =  8; BytesPerSample = 1; IsFloat = false; return;
+		case tRisaPCMTypes::ti16:	BitsPerSample = 16; BytesPerSample = 2; IsFloat = false; return;
+		case tRisaPCMTypes::ti24:	BitsPerSample = 24; BytesPerSample = 3; IsFloat = false; return;
+		case tRisaPCMTypes::ti32:	BitsPerSample = 32; BytesPerSample = 4; IsFloat = false; return;
+		case tRisaPCMTypes::tf32:	BitsPerSample = 32; BytesPerSample = 4; IsFloat = true;  return;
+		default:	return ;
+		}
 	}
 
 };

@@ -15,6 +15,7 @@
 
 #include "al.h"
 #include "alc.h"
+#include "WaveFilter.h"
 
 //---------------------------------------------------------------------------
 //! @brief		OpenALバッファ
@@ -33,20 +34,28 @@ private:
 	ALuint Buffers[MAX_NUM_BUFFERS]; //!< OpenAL バッファ
 	risse_uint BufferAllocatedCount; //!< OpenAL バッファに実際に割り当てられたバッファ数
 	bool Streaming; //!< ストリーミングを行うかどうか
-	boost::shared_ptr<tRisaWaveDecoder> Decoder; //!< デコーダ
-	ALenum ALFormat; //!< OpenAL Format
-	tRisaWaveFormat Format; //!< Risa 形式の Format descripter
+	boost::shared_ptr<tRisaWaveFilter> Filter; //!< 入力フィルタ
+	ALenum ALFormat; //!< OpenAL バッファの Format
+	risse_uint ALFrequency; //!< OpenAL バッファのサンプリングレート
+	risse_uint ALSampleGranuleBytes; //!< OpenAL バッファのbytes/sg
+	risse_uint ALOneBufferRenderUnit; //!< ストリーミング時の一つのバッファのサンプル数
 
-	risse_uint SampleGranuleBytes; //!< サンプルグラニュールのバイト数 = Channels * BytesPerSample
-	risse_uint OneBufferSampleGranules; //!< 一つのバッファのサイズ (サンプルグラニュール単位)
 	risse_uint8 * RenderBuffer; //!< レンダリング用のテンポラリバッファ
+	size_t RenderBufferSize; //!< RenderBuffer に割り当てられたサイズ(バイト単位)
+
+	risse_uint8 * ConvertBuffer; //!< レンダリング用のテンポラリバッファ
+	size_t ConvertBufferSize; //!< RenderBuffer に割り当てられたサイズ(バイト単位)
 
 public:
-	tRisaALBuffer(boost::shared_ptr<tRisaWaveDecoder> decoder, bool streaming);
+	tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> Filter, bool streaming);
 	~tRisaALBuffer();
 
 private:
 	void Clear();
+	void FreeTempBuffers();
+
+	bool FillALBuffer(ALuint buffer, risse_uint samples,
+		std::vector<tRisaWaveSegment> &segments, std::vector<tRisaWaveEvent> &events);
 
 public:
 	void PrepareStream(ALuint source);

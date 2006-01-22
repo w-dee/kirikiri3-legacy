@@ -13,53 +13,46 @@
 #include "prec.h"
 #include "ALCommon.h"
 #include "ALBuffer.h"
+#include "WaveFormatConverter.h"
 
 RISSE_DEFINE_SOURCE_ID(24518,55437,60218,19380,17845,8848,1743,50558);
 
 
+
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		decoder		デコーダ
+//! @param		filter 入力フィルタ
 //! @param		streaming	ストリーミング再生を行うかどうか
 //---------------------------------------------------------------------------
-tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveDecoder> decoder, bool streaming)
+tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool streaming)
 {
 	// フィールドの初期化
 	BufferAllocatedCount  = 0;
 	RenderBuffer = NULL;
+	RenderBufferSize = 0;
+	ConvertBuffer = NULL;
+	ConvertBufferSize = 0;
 	Streaming = streaming;
-	Decoder = decoder;
+	Filter = filter;
 	ALFormat = 0;
 
-	// decoder のチェック
-	// TODO: 正しいすべての形式のチェックと基本形式へのフォールバック
-	decoder->GetFormat(Format);
-	if     (!Format.IsFloat && Format.Channels == 1 && Format.BytesPerSample == 1)
-		ALFormat = AL_FORMAT_MONO8;
-	else if(!Format.IsFloat && Format.Channels == 2 && Format.BytesPerSample == 1)
-		ALFormat = AL_FORMAT_STEREO8;
-	else if(!Format.IsFloat && Format.Channels == 1 && Format.BytesPerSample == 2)
+	// filter のチェック
+	// tRisaALBuffer は常に 16bit の OpenAL バッファを使う
+	// (他の形式の場合は tRisaALBuffer 内部で変換を行うため)
+	const tRisaWaveFormat & format = Filter->GetFormat();
+	if     (format.Channels == 1)
 		ALFormat = AL_FORMAT_MONO16;
-	else if(!Format.IsFloat && Format.Channels == 2 && Format.BytesPerSample == 2)
+	else if(format.Channels == 2)
 		ALFormat = AL_FORMAT_STEREO16;
 	else
-		eRisaException::Throw(RISSE_WS_TR("not acceptable PCM format"));
+		eRisaException::Throw(RISSE_WS_TR("not acceptable PCM channels (must be stereo or mono)"));
+
+	ALFrequency = format.Frequency;
+	ALSampleGranuleBytes = format.Channels * sizeof(risse_uint16);
+	ALOneBufferRenderUnit = format.Frequency / STREAMING_BUFFER_HZ;
 
 	try
 	{
-		// 一つのバッファサイズを計算し、RenderBuffer を確保する
-		SampleGranuleBytes = Format.Channels * Format.BytesPerSample;
-		if(Streaming)
-		{
-			OneBufferSampleGranules = Format.Frequency / STREAMING_BUFFER_HZ;
-			RenderBuffer = new risse_uint8 [OneBufferSampleGranules * SampleGranuleBytes];
-		}
-		else
-		{
-			OneBufferSampleGranules = 0;
-			RenderBuffer = NULL;
-		}
-
 		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
 		// バッファの生成
@@ -72,7 +65,8 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveDecoder> decoder, bool s
 		if(!Streaming)
 		{
 			Load();
-			Decoder.reset(); // もうデコーダは要らない
+			Filter.reset(); // もうフィルタは要らない
+			FreeTempBuffers(); // 一時的に割り当てられたバッファも解放
 		}
 	}
 	catch(...)
@@ -105,7 +99,201 @@ void tRisaALBuffer::Clear()
 	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alDeleteBuffers"));
 	BufferAllocatedCount = 0;
 
-	delete [] RenderBuffer, RenderBuffer = NULL;
+	FreeTempBuffers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		一時的に割り当てられたバッファの解放
+//---------------------------------------------------------------------------
+void tRisaALBuffer::FreeTempBuffers()
+{
+
+	free(RenderBuffer), RenderBuffer = NULL;
+	RenderBufferSize = 0;
+	free(ConvertBuffer), ConvertBuffer = NULL;
+	ConvertBufferSize = 0;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		OpenALバッファにデータを詰める
+//! @param		buffer		対象とする OpenAL バッファ
+//! @param		samples		最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
+//! @param		segments	再生セグメント情報を書き込む配列
+//! @param		events		通過イベント情報(=ラベル情報)を書き込む配列
+//! @return		バッファにデータが入ったら真
+//---------------------------------------------------------------------------
+bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
+	std::vector<tRisaWaveSegment> &segments, std::vector<tRisaWaveEvent> &events)
+{
+	// バッファにデータをレンダリングする
+
+	segments.clear(); // segments はここでクリアされるので注意
+	events.clear(); // events もここでクリアされるので注意
+
+	risse_uint remain = samples;
+	if(remain == 0)
+		remain = static_cast<risse_uint>(-1); // remain に整数の最大値を入れる
+
+	risse_uint rendered = 0;
+	while(remain > 0)
+	{
+		bool cont = true;
+		risse_uint one_rendered = 0;
+		risse_uint one_want = remain;
+
+		// フィルタの現在のフォーマット形式をチェックする
+		const tRisaWaveFormat & format = Filter->GetFormat();
+
+		if(format.Frequency != ALFrequency)
+			cont = false; // 周波数が変わった
+		else if(
+			ALFormat == AL_FORMAT_STEREO16 && format.Channels != 2 ||
+			ALFormat == AL_FORMAT_MONO16   && format.Channels != 1)
+			cont = false; // チャンネル数が変わった
+
+		tRisaPCMTypes::tType filter_pcm_type = tRisaPCMTypes::tunknown;
+		risse_uint filter_sample_granule_bytes = 0;
+
+		if(cont)
+		{
+			filter_pcm_type = format.GetRisaPCMType();
+			filter_sample_granule_bytes = format.BytesPerSample * format.Channels;
+		}
+
+		// 一回のこのループ単位で要求するサイズを決定
+		if(cont)
+		{
+			risse_uint max_request_granules = 512*1024 / filter_sample_granule_bytes;
+			if(one_want > max_request_granules) one_want = max_request_granules;
+		}
+
+		// 形式変換の必要は？
+		bool need_convert = filter_pcm_type != tRisaPCMTypes::ti16;
+
+		// ところで書き込み先バッファのサイズは十分？
+		if(cont)
+		{
+			// RenderBuffer のサイズをチェック
+			size_t buffer_size_needed = ( rendered + one_want ) * ALSampleGranuleBytes;
+			if(RenderBufferSize < buffer_size_needed)
+			{
+				void * newbuffer = realloc(RenderBuffer, buffer_size_needed);
+				if(!newbuffer)
+				{
+					free(RenderBuffer), RenderBuffer = NULL;
+					RenderBufferSize = 0;
+					cont = false;
+				}
+				else
+				{
+					RenderBuffer = reinterpret_cast<risse_uint8 *>(newbuffer);
+					RenderBufferSize = buffer_size_needed;
+				}
+			}
+
+			if(need_convert)
+			{
+				// ConvertBuffer のサイズもチェック
+				buffer_size_needed = one_want * filter_sample_granule_bytes;
+				if(ConvertBufferSize < buffer_size_needed)
+				{
+					void * newbuffer = realloc(ConvertBuffer, buffer_size_needed);
+					if(!newbuffer)
+					{
+						free(ConvertBuffer), ConvertBuffer = NULL;
+						ConvertBufferSize = 0;
+						cont = false;
+					}
+					else
+					{
+						ConvertBuffer = reinterpret_cast<risse_uint8 *>(newbuffer);
+						ConvertBufferSize = buffer_size_needed;
+					}
+				}
+			}
+		}
+
+		// フィルタのデータの書き込み先を決定
+		risse_uint8 * filter_destination = NULL;
+		if(cont)
+		{
+			if(!need_convert)
+			{
+				// フィルタの出力タイプが 整数 16bit なので直接出力バッファに書き込む
+				filter_destination = RenderBuffer + rendered * ALSampleGranuleBytes;
+			}
+			else
+			{
+				// フィルタの出力タイプが 整数 16bit ではないのでいったん変換バッファに書き込む
+				filter_destination = ConvertBuffer;
+			}
+		}
+
+		// フィルタにデータを要求する
+		size_t events_start = events.size();
+		if(cont)
+			cont = Filter->Render(
+				filter_destination,
+				one_want, one_rendered, segments, events);
+
+		// events の Offset の修正
+		for(std::vector<tRisaWaveEvent>::iterator i = events.begin() + events_start;
+			i != events.end(); i++)
+		{
+			i->Offset += rendered;
+		}
+
+		// ループの初回でデコードが終了したか？
+		if(rendered == 0 && !cont)
+		{
+			// このループ初回かつ、デコード終了
+			return false;
+		}
+
+		// PCM 形式の変換
+		if(need_convert)
+		{
+			tRisaWaveFormatConverter::Convert(tRisaPCMTypes::ti16,
+				RenderBuffer + rendered * ALSampleGranuleBytes,
+				filter_pcm_type,
+				ConvertBuffer,
+				ALFormat == AL_FORMAT_STEREO16 ? 2 : ALFormat == AL_FORMAT_MONO16 ? 1 : 0,
+				one_rendered);
+		}
+
+		// カウンタを進める
+		rendered += one_rendered;
+		remain -= one_rendered;
+
+		if(!cont)
+		{
+			// デコードの終了
+			// 残りを無音で埋める
+			if(samples != 0)
+			{
+				memset(
+					RenderBuffer + rendered * ALSampleGranuleBytes,
+					0x00, remain * ALSampleGranuleBytes); // 無音は 0
+			}
+			break;
+		}
+	}
+
+	// バッファにデータを割り当てる
+
+	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+
+//		wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
+//			ALFormat, OneBufferSampleGranules * ALSampleGranuleBytes, Format.Frequency);
+	alBufferData(buffer, ALFormat, RenderBuffer,
+		rendered * ALSampleGranuleBytes, ALFrequency);
+	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));
+
+	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -163,66 +351,32 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 		alSourceUnqueueBuffers(source, 1, &buffer);
 		tRisaOpenAL::instance()->ThrowIfError(
 			RISSE_WS("alSourceUnqueueBuffers at tRisaALBuffer::QueueStream"));
-		wxPrintf(wxT("buffer %u unqueued\n"), buffer);
+//		wxPrintf(wxT("buffer %u unqueued\n"), buffer);
 	}
 	else
 	{
 		// まだすべてはキューされていない
 		buffer = Buffers[queued]; // まだキューされていないバッファ
-		wxPrintf(wxT("buffer %u to be used\n"), buffer);
+//		wxPrintf(wxT("buffer %u to be used\n"), buffer);
 	}
 
-	// バッファにデータをレンダリングする
-	risse_uint remain = OneBufferSampleGranules;
-	risse_uint rendered = 0;
-	while(remain > 0)
-	{
-		risse_uint one_rendered;
-		bool cont = Decoder->Render(
-			RenderBuffer + rendered * SampleGranuleBytes,
-			remain, one_rendered);
-		if(remain == OneBufferSampleGranules && !cont)
-		{
-			// このループ初回かつ、デコード終了
-			// もう完全にデコードが終わっているため、
-			// バッファはキューしない
-			return false;
-		}
 
-		rendered += one_rendered;
-		remain -= one_rendered;
-		if(!cont)
-		{
-			// デコードの終了
-			// 残りを無音で埋める
-			if(Format.BytesPerSample == 1)
-				memset(
-					RenderBuffer + rendered * SampleGranuleBytes,
-					0x80, remain * SampleGranuleBytes); // 無音は 0x80
-			else
-				memset(
-					RenderBuffer + rendered * SampleGranuleBytes,
-					0x00, remain * SampleGranuleBytes); // 無音は 0
-			break;
-		}
-	}
+	// バッファにデータを流し込む
+	// TODO: segments と events のハンドリング
+	std::vector<tRisaWaveSegment> segments;
+	std::vector<tRisaWaveEvent> events;
+	bool filled = FillALBuffer(buffer, ALOneBufferRenderUnit, segments, events);
 
 	// バッファにデータを割り当て、キューする
+	if(filled)
 	{
-		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
-		wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
-			ALFormat, OneBufferSampleGranules * SampleGranuleBytes, Format.Frequency);
-		alBufferData(buffer, ALFormat, RenderBuffer,
-			OneBufferSampleGranules * SampleGranuleBytes, Format.Frequency);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("streaming alBufferData"));
-
-		wxPrintf(wxT("buffer %u to be queued\n"), buffer);
+//		wxPrintf(wxT("buffer %u to be queued\n"), buffer);
 		alSourceQueueBuffers(source, 1, &buffer);
 		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourceQueueBuffers"));
 	}
 
-	return true;
+	return filled;
 }
 //---------------------------------------------------------------------------
 
@@ -259,68 +413,16 @@ void tRisaALBuffer::UnqueueAllBuffers(ALuint source)
 //---------------------------------------------------------------------------
 void tRisaALBuffer::Load()
 {
-	// OpenAL バッファに Decoder からの入力を「すべて」デコードし、入れる
+	// OpenAL バッファに Filter からの入力を「すべて」デコードし、入れる
 
 	// TODO: WaveLoopManager のリンク無効化 (そうしないと延々とサウンドを
 	//       メモリが無くなるまでデコードし続ける)
+	// TODO: segments と events のハンドリング
+	std::vector<tRisaWaveSegment> segments;
+	std::vector<tRisaWaveEvent> events;
+	bool filled = FillALBuffer(Buffers[0], 0, segments, events);
 
-	risse_uint8 * temp = NULL;
-	risse_size temp_sample_granules = 0;
-
-	int increase_size = 1024*512 / SampleGranuleBytes;
-
-	try
-	{
-		// 初期の temp のサイズを決定
-		if(static_cast<risse_size>(temp_sample_granules) == temp_sample_granules)
-		{
-			temp_sample_granules = Format.TotalSampleGranules ? Format.TotalSampleGranules : increase_size;
-			temp = (risse_uint8*)malloc(temp_sample_granules * SampleGranuleBytes);
-		}
-		else
-		{
-			// 大きすぎる
-			temp = NULL;
-		}
-		if(!temp)
-			eRisaException::Throw(RISSE_WS_TR("can not play sound; too large to play"));
-
-		risse_size rendered = 0;
-		risse_size remain = temp_sample_granules;
-		while(true)
-		{
-			risse_uint one_rendered;
-			bool cont = Decoder->Render(
-				temp + rendered * SampleGranuleBytes,
-				remain, one_rendered);
-
-			rendered += one_rendered;
-			remain   -= one_rendered;
-
-			if(!cont) break;
-
-			if(remain == 0)
-			{
-				// 残りメモリが足りないので増やす
-				temp = (risse_uint8*)realloc(temp, (temp_sample_granules + increase_size) * SampleGranuleBytes);
-				if(!temp)
-					eRisaException::Throw(RISSE_WS_TR("can not play sound; too large to play"));
-				temp_sample_granules += increase_size;
-				remain = increase_size;
-			}
-		}
-
-		// バッファにデータを割り当てる
-		alBufferData(Buffers[0], ALFormat, temp,
-			temp_sample_granules * SampleGranuleBytes, Format.Frequency);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("non streaming alBufferData"));
-	}
-	catch(...)
-	{
-		if(temp) free(temp);
-		throw;
-	}
-
-	if(temp) free(temp);
+	if(!filled)
+		eRisaException::Throw(RISSE_WS_TR("no data to play"));
 }
 //---------------------------------------------------------------------------

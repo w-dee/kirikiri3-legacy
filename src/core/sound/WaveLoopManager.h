@@ -16,16 +16,18 @@
 //---------------------------------------------------------------------------
 
 #include "risseTypes.h"
+#include "WaveFilter.h"
+#include "WaveDecoder.h"
 #include <vector>
 #include <string>
 
 
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	#include "WaveReader.h"
 #endif
 
 //---------------------------------------------------------------------------
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	typedef AnsiString tRisaLabelStringType;
 	typedef char   tRisaLabelCharType;
 #else
@@ -35,7 +37,7 @@
 //---------------------------------------------------------------------------
 
 
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	//---------------------------------------------------------------------------
 	// tRisseCriticalSection ( taken from risseUtils.h )
 	//---------------------------------------------------------------------------
@@ -96,7 +98,7 @@ struct tRisaWaveLoopLink
 	tLinkCondition Condition;	//!< Condition
 	risse_int RefValue;	//!< リンク条件の「値」
 	risse_int CondVar;	//!< Condition variable index
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	// these are only used by the loop tuner
 	risse_int FromTier;	//!< display tier of vertical 'from' line
 	risse_int LinkTier;	//!< display tier of horizontal link
@@ -136,13 +138,17 @@ struct tRisaWaveLoopLink
 		Condition = llcNone;
 		RefValue = CondVar = 0;
 
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 		FromTier = LinkTier = ToTier = 0;
 		Index = 0;
 #endif
 	}
 };
 //---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -171,18 +177,9 @@ bool inline operator < (const tRisaWaveLoopLink & lhs, const tRisaWaveLoopLink &
 //---------------------------------------------------------------------------
 //! @brief		ラベルを表す構造体
 //---------------------------------------------------------------------------
-struct tRisaWaveLabel
+struct tRisaWaveLabel : public tRisaWaveEvent
 {
-	risse_int64 Position; //!< label position
-	tRisaLabelStringType Name; //!< label name
-	risse_int Offset;
-		/*!< オフセット
-			@note
-			This member will be set in tRisaWaveLoopManager::Decode,
-			and will contain the sample granule offset from first decoding
-			point at call of tRisaWaveLoopManager::Decode().
-		*/
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	// these are only used by the loop tuner
 	risse_int NameWidth; //!< display name width
 	risse_int Index; //!< index
@@ -198,17 +195,7 @@ struct tRisaWaveLabel
 		}
 	};
 
-	struct tSortByOffsetFuncObj
-	{
-		bool operator()(
-			const tRisaWaveLabel &lhs,
-			const tRisaWaveLabel &rhs) const
-		{
-			return lhs.Offset < rhs.Offset;
-		}
-	};
-
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	struct tSortByIndexFuncObj
 	{
 		bool operator()(
@@ -223,15 +210,14 @@ struct tRisaWaveLabel
 	//! @brief コンストラクタ
 	tRisaWaveLabel()
 	{
-		Position = 0;
-		Offset = 0;
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 		NameWidth = 0;
 		Index = 0;
 #endif
 	}
 };
 //---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------
@@ -250,12 +236,17 @@ bool inline operator < (const tRisaWaveLabel & lhs, const tRisaWaveLabel & rhs)
 
 
 
+
+
 //---------------------------------------------------------------------------
 //! @brief		Wave ループマネージャ
+/*! @note
+		
+*/
 //---------------------------------------------------------------------------
 class tRisaWaveDecoder;
 class tRisaWaveFormat;
-class tRisaWaveLoopManager
+class tRisaWaveLoopManager : public tRisaWaveFilter
 {
 public:
 	// 定数
@@ -272,17 +263,6 @@ public:
 	static const int MaxIDLen = 16; //!< 識別子の最大長
 
 private:
-
-	//! @brief 再生セグメント情報 (tRisaWaveLoopManager::Decodeメソッド で返される)
-	struct tSegment
-	{
-		//! @brief コンストラクタ
-		tSegment(risse_int64 start, risse_int64 length)
-			{ Start = start; Length = length; }
-		risse_int64 Start; //!< スタート位置 (PCM サンプル数単位)
-		risse_int64 Length; //!< セグメントの長さ (PCM サンプル数単位)
-	};
-
 	tRisseCriticalSection FlagsCS; //!< CS to protect flags/links/labels
 	int Flags[MaxFlags]; //!< フラグ
 	bool FlagsModifiedByLabelExpression; //!< true if the flags are modified by EvalLabelExpression
@@ -290,7 +270,7 @@ private:
 	std::vector<tRisaWaveLabel> Labels; //!< ラベルの配列
 	tRisseCriticalSection DataCS; // CS to protect other members
 	tRisaWaveFormat * Format; //!< PCMフォーマット
-	tRisaWaveDecoder * Decoder; //!< デコーダ
+	boost::shared_ptr<tRisaWaveDecoder> Decoder; //!< デコーダ
 
 	risse_int ShortCrossFadeHalfSamples;
 		//!< SmoothTimeHalf in sample unit
@@ -311,10 +291,10 @@ private:
 	bool IgnoreLinks; //!< decode the samples with ignoring links
 
 public:
-	tRisaWaveLoopManager();
+	tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> decoder);
 	virtual ~tRisaWaveLoopManager();
 
-	void SetDecoder(tRisaWaveDecoder * decoder);
+	void SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decoder);
 
 	int GetFlag(risse_int index);
 	void CopyFlags(risse_int *dest);
@@ -338,16 +318,21 @@ public:
 	bool GetLooping() const { return Looping; } //!< ループ情報を読み込んでいないときにループを行うかどうかを得る
 	void SetLooping(bool b) { Looping = b; } //!< ループ情報を読み込んでいないときにループを行うかどうかを設定する
 
-	void Decode(void *dest, risse_uint samples, risse_uint &written,
-		std::vector<tSegment> &segments,
-		std::vector<tRisaWaveLabel> &labels);
+	//------- tRisaWaveFilter メソッド  ここから
+	void SetInput(boost::shared_ptr<tRisaWaveFilter> input) {;}
+		//!< @note tRisaWaveLoopManager には入力するフィルタがないのでこのメソッドはなにもしない
+	bool Render(void *dest, risse_uint samples, risse_uint &written,
+		std::vector<tRisaWaveSegment> &segments,
+		std::vector<tRisaWaveEvent> &events);
+	const tRisaWaveFormat & GetFormat();
+	//------- tRisaWaveFilter メソッド  ここまで
 
 private:
-	bool GetNearestEvent(risse_int64 current,
+	bool GetNearestLink(risse_int64 current,
 		tRisaWaveLoopLink & link, bool ignore_conditions);
 
-	void GetLabelAt(risse_int64 from, risse_int64 to,
-		std::vector<tRisaWaveLabel> & labels);
+	void GetEventAt(risse_int64 from, risse_int64 to,
+		std::vector<tRisaWaveEvent> & labels);
 
 	void DoCrossFade(void *dest, void *src1, void *src2, risse_int samples,
 		risse_int ratiostart, risse_int ratioend);
@@ -396,7 +381,7 @@ private:
 public:
 	bool ReadInformation(char * p);
 
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	// output facility (currently only available with VCL interface)
 private:
 	static void PutInt(AnsiString &s, risse_int v);

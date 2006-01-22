@@ -10,6 +10,9 @@
 //! @file
 //! @brief Wave(PCM) のプリミティブ型などの定義
 //---------------------------------------------------------------------------
+#ifndef WaveH
+#define WaveH
+
 
 #include "risseTypes.h"
 
@@ -43,7 +46,7 @@ struct tRisaPCMTypes
 		i8(risse_int32 v) { value = (risse_uint8)(v + 0x80); }
 		void operator = (risse_int32 v) { value = (risse_uint8)(v + 0x80); }
 		operator risse_int32 () const { return (risse_int32)value - 0x80; }
-		risse_int32 geti32() const { return (risse_int32)(value - 0x80) << 24; }
+		risse_int32 geti32() const { return ((risse_int32)value - 0x80) << 24; }
 		void seti32(risse_int32 v) { value = (risse_uint8)((v >> 24) + 0x80); }
 	};
 
@@ -61,7 +64,7 @@ struct tRisaPCMTypes
 		void operator = (risse_int32 v) { value = (risse_int16)v ; }
 		operator risse_int32 () const { return (risse_int32)value; }
 		risse_int32 geti32() const { return (risse_int32)value << 16; }
-		void seti32(risse_int32 v) { value = (risse_uint32)(value >> 16); }
+		void seti32(risse_int32 v) { value = (risse_uint16)(v >> 16); }
 	};
 
 	//! @brief  24bit integer linear PCM type
@@ -198,12 +201,31 @@ struct tRisaWaveFormat
 	bool IsFloat;						//!< true if the data is IEEE floating point
 	bool Seekable;						//!< true if able to seek, otherwise false
 
-	tRisaPCMTypes::tType GetRisaPCMType() const;
+	//! @brief		この形式に対応する tRisaPCMTypes::tType を返す
+	tRisaPCMTypes::tType GetRisaPCMType() const
+	{
+		if(IsFloat)
+		{
+			if(BytesPerSample == 4) return tRisaPCMTypes::tf32;
+		}
+		else
+		{
+			switch(BytesPerSample)
+			{
+			case 1: return tRisaPCMTypes::ti8;
+			case 2: return tRisaPCMTypes::ti16;
+			case 3: return tRisaPCMTypes::ti24;
+			case 4: return tRisaPCMTypes::ti32;
+			}
+		}
+		return tRisaPCMTypes::tunknown;
+	}
+
 };
 //---------------------------------------------------------------------------
 
 
 
-
+#endif
 
 

@@ -87,12 +87,18 @@ bool tRisaOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uin
 	risse_uint pos = 0; // decoded PCM (in bytes)
 	int remain = bufsamplelen * Format.Channels * pcmsize; // remaining PCM (in bytes)
 
+#if RISSE_HOST_IS_BIG_ENDIAN
+	static const int endianp = 1;
+#else
+	static const int endianp = 0;
+#endif
+
 	while(remain)
 	{
 		do
 		{
 			res = ov_read(&InputFile, ((char*)buf + pos), remain,
-				0, pcmsize, 1, &CurrentSection); // decode via ov_read
+				endianp, pcmsize, 1, &CurrentSection); // decode via ov_read
 		} while(res<0); // ov_read would return a negative number
 						// if the decoding is not ready
 		if(res==0) break;

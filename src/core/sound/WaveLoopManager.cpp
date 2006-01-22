@@ -22,7 +22,7 @@
 RISSE_DEFINE_SOURCE_ID(8592,58083,15398,17259,37009,18155,50172,63359);
 
 
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	#include "WaveReader.h"
 #else
 	#include "WaveDecoder.h"
@@ -138,7 +138,7 @@ static void RisaCrossFadeIntegerBlend(void *dest, void *src1, void *src2,
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisaWaveLoopManager::tRisaWaveLoopManager()
+tRisaWaveLoopManager::tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> decoder)
 {
 	Position = 0;
 	IsLinksSorted = false;
@@ -146,7 +146,6 @@ tRisaWaveLoopManager::tRisaWaveLoopManager()
 	CrossFadeSamples = NULL;
 	CrossFadeLen = 0;
 	CrossFadePosition = 0;
-	Decoder = NULL;
 	IgnoreLinks = false;
 	Looping = false;
 	Format = new tRisaWaveFormat;
@@ -154,6 +153,8 @@ tRisaWaveLoopManager::tRisaWaveLoopManager()
 
 	ClearFlags();
 	FlagsModifiedByLabelExpression = false;
+
+	SetDecoder(decoder);
 }
 //---------------------------------------------------------------------------
 
@@ -173,7 +174,7 @@ tRisaWaveLoopManager::~tRisaWaveLoopManager()
 //! @brief		デコーダを設定する
 //! @param		decoder		デコーダ
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetDecoder(tRisaWaveDecoder * decoder)
+void tRisaWaveLoopManager::SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decoder)
 {
 	// set decoder and compute ShortCrossFadeHalfSamples
 	Decoder = decoder;
@@ -380,17 +381,16 @@ void tRisaWaveLoopManager::SetPosition(risse_int64 pos)
 //! @param		samples		デコードを行いたいサンプル数
 //! @param		written		実際にデコード出来たサンプル数
 //! @param		segments	再生セグメント情報を書き込む配列
-//! @param		labels		通過ラベル情報を書き込む配列
+//! @param		events		通過イベント情報(=ラベル情報)を書き込む配列
+//! @return		まだデコードすべきデータが残っているかどうか
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &written,
-		std::vector<tRisaWaveLoopManager::tSegment> &segments,
-		std::vector<tRisaWaveLabel> &labels)
+bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &written,
+		std::vector<tRisaWaveSegment> &segments,
+		std::vector<tRisaWaveEvent> &events)
 {
 	// decode from current position
 	volatile tRisseCriticalSectionHolder CS(DataCS);
 
-	segments.clear();
-	labels.clear();
 	written = 0;
 	risse_uint8 *d = (risse_uint8*)dest;
 
@@ -405,7 +405,7 @@ void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wr
 
 		// check nearest link
 		tRisaWaveLoopLink link;
-		if(!IgnoreLinks && GetNearestEvent(Position, link, false))
+		if(!IgnoreLinks && GetNearestLink(Position, link, false))
 		{
 			// nearest event found ...
 			if(link.From == Position)
@@ -454,7 +454,7 @@ void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wr
 						after_count =
 							(risse_int)(Format->TotalSampleGranules - link.To);
 					tRisaWaveLoopLink over_to_link;
-					if(GetNearestEvent(link.To, over_to_link, true))
+					if(GetNearestLink(link.To, over_to_link, true))
 					{
 						if(over_to_link.From - link.To < after_count)
 							after_count =
@@ -541,15 +541,15 @@ void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wr
 			if(one_unit > CrossFadeLen - CrossFadePosition)
 				one_unit = CrossFadeLen - CrossFadePosition;
 		}
-		segments.push_back(tSegment(Position, one_unit));
+		segments.push_back(tRisaWaveSegment(Position, one_unit));
 
 		if(one_unit > 0) give_up_count = 0; // reset give up count
 
 		// evaluate each label
-		risse_uint label_base = labels.size();
-		GetLabelAt(Position, Position + one_unit, labels);
-		for(std::vector<tRisaWaveLabel>::iterator i = labels.begin() + label_base;
-			i != labels.end(); i++)
+		risse_uint label_base = events.size();
+		GetEventAt(Position, Position + one_unit, events);
+		for(std::vector<tRisaWaveEvent>::iterator i = events.begin() + label_base;
+			i != events.end(); i++)
 		{
 			if(i->Name.c_str()[0] == ':')
 			{
@@ -559,8 +559,8 @@ void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wr
 		}
 
 		// calculate each label offset
-		for(std::vector<tRisaWaveLabel>::iterator i = labels.begin() + label_base;
-			i != labels.end(); i++)
+		for(std::vector<tRisaWaveEvent>::iterator i = events.begin() + label_base;
+			i != events.end(); i++)
 			i->Offset = (risse_int)(i->Position - Position) + written;
 
 		// decode or copy
@@ -606,6 +606,18 @@ void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wr
 			}
 		}
 	}	// while 
+	return written == samples;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		PCM形式を返す
+//! @note		PCM形式への参照
+//---------------------------------------------------------------------------
+const tRisaWaveFormat & tRisaWaveLoopManager::GetFormat()
+{
+	return *Format;
 }
 //---------------------------------------------------------------------------
 
@@ -617,7 +629,7 @@ void tRisaWaveLoopManager::Decode(void *dest, risse_uint samples, risse_uint &wr
 //! @param		ignore_conditions	リンク条件を無視して検索を行うかどうか
 //! @return		リンクが見つかれば真、見つからなければ偽
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetNearestEvent(risse_int64 current,
+bool tRisaWaveLoopManager::GetNearestLink(risse_int64 current,
 		tRisaWaveLoopLink & link, bool ignore_conditions)
 {
 	// search nearest event in future, from current.
@@ -719,13 +731,13 @@ bool tRisaWaveLoopManager::GetNearestEvent(risse_int64 current,
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定位置以降で指定位置未満の中のラベルを取得する
+//! @brief		指定位置以降で指定位置未満の中のイベント(ラベル)を取得する
 //! @param		from		検索開始位置
 //! @param		to			検索終了位置
-//! @param		labels		結果を格納する配列
+//! @param		events		結果を格納する配列
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::GetLabelAt(risse_int64 from, risse_int64 to,
-		std::vector<tRisaWaveLabel> & labels)
+void tRisaWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
+		std::vector<tRisaWaveEvent> & events)
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 
@@ -769,7 +781,7 @@ void tRisaWaveLoopManager::GetLabelAt(risse_int64 from, risse_int64 to,
 	for(; s < (int)Labels.size(); s++)
 	{
 		if(Labels[s].Position >= from && Labels[s].Position < to)
-			labels.push_back(Labels[s]);
+			events.push_back(*reinterpret_cast<tRisaWaveEvent*>(&(Labels[s])));
 		else
 			break;
 	}
@@ -1198,7 +1210,7 @@ bool tRisaWaveLoopManager::GetCondition(char *s, tRisaWaveLoopLink::tLinkConditi
 bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 {
 	// convert utf-8 string s to v
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 
 	// compute output (unicode) size
 	risse_int size = RisaUtf8ToWideCharString(s, NULL);
@@ -1519,7 +1531,7 @@ bool tRisaWaveLoopManager::ReadInformation(char * p)
 
 
 
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 
 
 // ここはループチューナ内でのみ使われる部分
@@ -1560,7 +1572,7 @@ void tRisaWaveLoopManager::PutString(AnsiString &s, tRisaLabelStringType v)
 	// convert v to a utf-8 string
 	const risse_char *pi;
 
-#ifdef RISA__IN_LOOP_TUNER
+#ifdef RISA_IN_LOOP_TUNER
 	WideString wstr = v;
 	pi = wstr.c_bstr();
 #else

@@ -20,10 +20,11 @@
 //---------------------------------------------------------------------------
 class tRisaWaveFormatConverter
 {
+public:
 	static void Convert(
-		const tRisaWaveFormat &outformat, void * outdata,
-		const tRisaWaveFormat &informat, const void * indata,
-		size_t numsamples);
+		tRisaPCMTypes::tType outformat, void * outdata,
+		tRisaPCMTypes::tType informat, const void * indata,
+		risse_int channels, size_t numsamples);
 };
 //---------------------------------------------------------------------------
 #endif

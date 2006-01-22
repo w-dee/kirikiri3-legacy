@@ -35,12 +35,13 @@ static void RisaPCMConvertLoop(void * dest, const void * src, size_t numsamples)
 	{
 		// 型が違うので変換を行う
 		risse_uint8 * d = reinterpret_cast<risse_uint8*>(dest);
-		const risse_uint8 * s = reinterpret_cast<risse_uint8*>(dest);
+		const risse_uint8 * s = reinterpret_cast<const risse_uint8*>(src);
 		const risse_uint8 * s_lim = s + SRCTYPE::size * numsamples;
 
 		while(s < s_lim)
 		{
-			reinterpret_cast<DESTTYPE*>(d)->seti32(reinterpret_cast<const SRCTYPE*>(s)->geti32());
+			risse_int32 value = reinterpret_cast<const SRCTYPE*>(s)->geti32();
+			reinterpret_cast<DESTTYPE*>(d)->seti32(value);
 			d += DESTTYPE::size;
 			s += SRCTYPE::size;
 		}
@@ -57,7 +58,7 @@ static void RisaPCMConvertLoop<tRisaPCMTypes::f32, tRisaPCMTypes::i16>
 {
 	// 型が違うので変換を行う
 	risse_uint8 * d = reinterpret_cast<risse_uint8*>(dest);
-	const risse_uint8 * s = reinterpret_cast<risse_uint8*>(dest);
+	const risse_uint8 * s = reinterpret_cast<const risse_uint8*>(src);
 	const risse_uint8 * s_lim = s + tRisaPCMTypes::i16::size * numsamples;
 
 	while(s < s_lim)
@@ -80,7 +81,7 @@ static void RisaPCMConvertLoop<tRisaPCMTypes::i16, tRisaPCMTypes::f32>
 {
 	// 型が違うので変換を行う
 	risse_uint8 * d = reinterpret_cast<risse_uint8*>(dest);
-	const risse_uint8 * s = reinterpret_cast<risse_uint8*>(dest);
+	const risse_uint8 * s = reinterpret_cast<const risse_uint8*>(src);
 	const risse_uint8 * s_lim = s + tRisaPCMTypes::f32::size * numsamples;
 
 	while(s < s_lim)
@@ -106,31 +107,23 @@ static void RisaPCMConvertLoop<tRisaPCMTypes::i16, tRisaPCMTypes::f32>
 //! @param		outdata			出力フォーマットを書き出すバッファ
 //! @param		informat		入力フォーマット
 //! @param		indata			入力データ
-//! @param		numsamples		処理を行うサンプル数
+//! @param		channels		チャンネル数
+//! @param		numsamples		処理を行うサンプルグラニュール数
 //---------------------------------------------------------------------------
 void tRisaWaveFormatConverter::Convert(
-		const tRisaWaveFormat &outformat, void * outdata,
-		const tRisaWaveFormat &informat, const void * indata,
-		size_t numsamples)
+		tRisaPCMTypes::tType outformat, void * outdata,
+		tRisaPCMTypes::tType informat, const void * indata,
+		risse_int channels, size_t numsamples)
 {
-	// 形式のチェック
-	if(outformat.Channels != informat.Channels) // チャンネル数が違う?
-		eRisaException::Throw(
-			RISSE_WS_TR("tRisaWaveFormatConverter::Convert: can not convert PCM format: number of channels does not match"));
-
 	// チャンネルはインターリーブされているので、numsamples にチャンネル数を掛ける
-	numsamples *= outformat.Channels;
+	numsamples *= channels;
 
 	// 形式の特定を行う
-	tRisaPCMTypes::tType outtype, intype;
-
-	outtype = outformat.GetRisaPCMType();
-	if(outtype == tRisaPCMTypes::tunknown)
+	if(outformat == tRisaPCMTypes::tunknown)
 		eRisaException::Throw(
 			RISSE_WS_TR("tRisaWaveFormatConverter::Convert: unsupported destination format"));
 
-	intype = informat.GetRisaPCMType();
-	if(intype == tRisaPCMTypes::tunknown)
+	if(informat == tRisaPCMTypes::tunknown)
 		eRisaException::Throw(
 			RISSE_WS_TR("tRisaWaveFormatConverter::Convert: unsupported source format"));
 
@@ -151,34 +144,9 @@ void tRisaWaveFormatConverter::Convert(
 
 
 	// 変換ループ用に分岐
-	(table[outtype][intype])(outdata, indata, numsamples);
+	(table[outformat][informat])(outdata, indata, numsamples);
 }
 //---------------------------------------------------------------------------
 
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		この形式に対応する tRisaPCMTypes::tType を返す
-//---------------------------------------------------------------------------
-tRisaPCMTypes::tType tRisaWaveFormat::GetRisaPCMType() const
-{
-	if(IsFloat)
-	{
-		if(BytesPerSample == 4) return tRisaPCMTypes::tf32;
-	}
-	else
-	{
-		switch(BytesPerSample)
-		{
-		case 1: return tRisaPCMTypes::ti8;
-		case 2: return tRisaPCMTypes::ti16;
-		case 3: return tRisaPCMTypes::ti24;
-		case 4: return tRisaPCMTypes::ti32;
-		}
-	}
-	return tRisaPCMTypes::tunknown;
-}
-//---------------------------------------------------------------------------
 
 

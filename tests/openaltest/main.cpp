@@ -4,6 +4,7 @@
 #include "RisseEngine.h"
 #include "RIFFWaveDecoder.h"
 #include "VorbisDecoder.h"
+#include "WaveLoopManager.h"
 #include "ALCommon.h"
 #include "ALSource.h"
 #include "ALBuffer.h"
@@ -76,9 +77,10 @@ int Application::OnRun()
 			RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 			NULL, NULL, NULL);
 
-//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test.wav")));
+//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test8.wav")));
 		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaOggVorbisDecoder(RISSE_WS("test.ogg")));
-		boost::shared_ptr<tRisaALBuffer> buffer(new tRisaALBuffer(decoder, true));
+		boost::shared_ptr<tRisaWaveLoopManager> loop_manager(new tRisaWaveLoopManager(decoder));
+		boost::shared_ptr<tRisaALBuffer> buffer(new tRisaALBuffer(loop_manager, false));
 		tRisaALSource source(buffer);
 
 		source.Play();

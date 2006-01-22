@@ -14,202 +14,202 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ConsoleMain.cpp:31
+#: ConsoleMain.cpp:32
 msgid "show help message"
 msgstr "このヘルプを表示して終了"
 
-#: ConsoleMain.cpp:33
+#: ConsoleMain.cpp:34
 msgid "get target dir from the archive set"
 msgstr "対象ディレクトリをアーカイブから取得"
 
-#: ConsoleMain.cpp:35
+#: ConsoleMain.cpp:36
 msgid "split archive in given size (MB)"
 msgstr "アーカイブを指定された容量(MB)で分割"
 
-#: ConsoleMain.cpp:37
+#: ConsoleMain.cpp:38
 msgid "patch revision"
 msgstr "パッチリビジョンを指定"
 
-#: ConsoleMain.cpp:39
+#: ConsoleMain.cpp:40
 msgid "show progress"
 msgstr "進捗を表示する"
 
-#: ConsoleMain.cpp:41
+#: ConsoleMain.cpp:42
 msgid "do not make output"
 msgstr "出力ファイルを作成しない(テスト用)"
 
-#: ConsoleMain.cpp:43
+#: ConsoleMain.cpp:44
 msgid "regex list file for file classification"
 msgstr "ファイル分類用正規表現リストファイルを指定"
 
-#: ConsoleMain.cpp:45
+#: ConsoleMain.cpp:46
 msgid "force making a new archive set (not a patch)"
 msgstr "パッチを作成せずに新規にファイルを作成"
 
 #
-#: ConsoleMain.cpp:47
+#: ConsoleMain.cpp:48
 msgid "show archive patch generation history"
 msgstr "アーカイブのパッチ世代履歴を表示"
 
-#: ConsoleMain.cpp:49
+#: ConsoleMain.cpp:50
 msgid "show default classification regex list"
 msgstr "デフォルトの分類用正規表現リストを表示"
 
-#: ConsoleMain.cpp:51
+#: ConsoleMain.cpp:52
 msgid "archive-file"
 msgstr "アーカイブファイル"
 
-#: ConsoleMain.cpp:53
+#: ConsoleMain.cpp:54
 msgid "dir"
 msgstr "対象ディレクトリ"
 
-#: ConsoleMain.cpp:127
+#: ConsoleMain.cpp:128
 msgid "operation was interrupted"
 msgstr "操作は中断されました"
 
-#: ConsoleMain.cpp:132
+#: ConsoleMain.cpp:133
 #, c-format
 msgid "%2d percent done"
 msgstr "%2d%% 完了"
 
 #. コマンドライン引数を解析
-#: ConsoleMain.cpp:200
+#: ConsoleMain.cpp:201
 msgid "Kirikiri3 Releaser (utility for XP4 archive file system)"
 msgstr "吉里吉里3 Releaser (XP4アーカイブファイルのためのユーティリティ)"
 
-#: ConsoleMain.cpp:306
+#: ConsoleMain.cpp:307
 #, c-format
 msgid "archive set '%s' does not have target directory information"
 msgstr ""
 "アーカイブセット '%s' は対象ディレクトリの情報を持っていないため 対象ディレク"
 "トリを特定できません"
 
-#: ConsoleMain.cpp:315
+#: ConsoleMain.cpp:316
 msgid "please specify target 'dir'"
 msgstr "対象ディレクトリ 'dir' を指定してください"
 
-#: ConsoleMain.cpp:322
+#: ConsoleMain.cpp:323
 #, c-format
 msgid "there are no files in target directory '%s'"
 msgstr "ディレクトリ '%s' にはファイルが一つもありません"
 
-#: ConsoleMain.cpp:379
+#: ConsoleMain.cpp:380
 msgid "the archive is up to date; nothing is to be added/modified/deleted"
 msgstr ""
 "アーカイブはすでに最新ですので, 追加/更新/削除されるファイルはありません"
 
-#: ConsoleMain.cpp:424
+#: ConsoleMain.cpp:425
 #, c-format
 msgid "can not load class file '%s'"
 msgstr "分類用ファイル '%s' を開くことができません"
 
 #. ディレクトリのオープンに失敗したとき
-#: FileList.cpp:154
+#: FileList.cpp:155
 #, c-format
 msgid "can not open directory '%s'"
 msgstr "ディレクトリ '%s' を開くことができません"
 
-#: FileList.cpp:159
+#: FileList.cpp:160
 #, c-format
 msgid "can not read directory '%s'"
 msgstr "ディレクトリ '%s' を読み込むことができません"
 
-#: FileList.cpp:263
+#: FileList.cpp:264
 #, c-format
 msgid "error in regular expression '%s'"
 msgstr "正規表現 '%s' にエラーがあります"
 
-#: FileList.cpp:463
+#: FileList.cpp:464
 #, c-format
 msgid "can not remove file '%s'"
 msgstr "ファイル '%s' を削除することができません"
 
 #. 圧縮に失敗
-#: WriteXP4.cpp:603
+#: WriteXP4.cpp:604
 #, c-format
 msgid "failed to compress the index data of file '%s'"
 msgstr "ファイル '%s' のインデックスの圧縮に失敗しました"
 
 #. info チャンクが見つからなかった
-#: ReadXP4Meta.cpp:110
+#: ReadXP4Meta.cpp:111
 msgid "chunk 'info' not found"
 msgstr "チャンク 'info' が見つかりません"
 
-#: ReadXP4Meta.cpp:142
+#: ReadXP4Meta.cpp:143
 msgid "chunk 'time' not found"
 msgstr "チャンク 'time' が見つかりません"
 
-#: ReadXP4Meta.cpp:167
+#: ReadXP4Meta.cpp:168
 msgid "chunk 'Segm' not found"
 msgstr "チャンク 'Segm' が見つかりません"
 
-#: ReadXP4Meta.cpp:175
+#: ReadXP4Meta.cpp:176
 msgid "invalid hash chunk"
 msgstr "ハッシュチャンクが異常です"
 
-#: ReadXP4Meta.cpp:181
+#: ReadXP4Meta.cpp:182
 msgid "hash chunk not found"
 msgstr "ハッシュチャンクが見つかりません"
 
 #. シグニチャが一致しない
-#: ReadXP4Meta.cpp:212
+#: ReadXP4Meta.cpp:213
 #, c-format
 msgid "'%s' is not an XP4 archive file"
 msgstr "'%s' は XP4 アーカイブファイルではありません"
 
-#: ReadXP4Meta.cpp:259
+#: ReadXP4Meta.cpp:260
 #, c-format
 msgid "decompression of archive index of '%s' failed"
 msgstr "アーカイブファイル '%s' のインデックスの展開に失敗しました"
 
-#: ReadXP4Meta.cpp:276
+#: ReadXP4Meta.cpp:277
 #, c-format
 msgid "chunk 'Item' not found in file '%s'"
 msgstr "チャンク 'Item' がファイル '%s' 内に見つかりません"
 
-#: wxFileWrapper.cpp:58
+#: wxFileWrapper.cpp:59
 #, c-format
 msgid "can not create file '%s'"
 msgstr "ファイル '%s' を作成することができません"
 
-#: wxFileWrapper.cpp:72
+#: wxFileWrapper.cpp:73
 msgid "Standard Input"
 msgstr "標準入力"
 
-#: wxFileWrapper.cpp:74
+#: wxFileWrapper.cpp:75
 msgid "Standard Output"
 msgstr "標準出力"
 
-#: wxFileWrapper.cpp:76
+#: wxFileWrapper.cpp:77
 msgid "Standard Error Output"
 msgstr "標準エラー出力"
 
-#: wxFileWrapper.cpp:78
+#: wxFileWrapper.cpp:79
 #, c-format
 msgid "File Descriptor %d"
 msgstr "ファイル ディスクリプタ %d"
 
-#: wxFileWrapper.cpp:92
+#: wxFileWrapper.cpp:93
 #, c-format
 msgid "failed to seek on file '%s', pointer %lld"
 msgstr "ファイル '%s' の ポインタ %lld へのシークに失敗しました"
 
-#: wxFileWrapper.cpp:100
+#: wxFileWrapper.cpp:101
 #, c-format
 msgid "failed to read from file '%s'"
 msgstr "ファイル '%s' からの読み込みに失敗しました"
 
-#: wxFileWrapper.cpp:107 wxFileWrapper.cpp:114
+#: wxFileWrapper.cpp:108 wxFileWrapper.cpp:115
 #, c-format
 msgid "failed to write to file '%s'"
 msgstr "ファイル '%s' への書き込みに失敗しました"
 
-#: wxFileWrapper.cpp:122
+#: wxFileWrapper.cpp:123
 #, c-format
 msgid "can not open file '%s' for reading"
 msgstr "ファイル '%s' を読み込み用に開くことができません"
 
-#: wxFileWrapper.cpp:126
+#: wxFileWrapper.cpp:127
 #, c-format
 msgid "can not open file '%s' for writing"
 msgstr "ファイル '%s' を書き込み用に開くことができません"

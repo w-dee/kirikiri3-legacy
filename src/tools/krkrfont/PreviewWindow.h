@@ -27,13 +27,13 @@ void NotifyPreviewFrameFaceChanged();
 //---------------------------------------------------------------------------
 //! @brief プレビューウィンドウクラス
 //---------------------------------------------------------------------------
-class wxPreviewFrame:public wxPreviewFrame_Base
+class wxFontPreviewFrame:public wxPreviewFrame_Base
 {
 	wxMainDialog * MainDialog;
 	wxPreviewScrolledWindow * PreviewScrolledWindow;
 public:
-	wxPreviewFrame(wxMainDialog * maindialog);
-	~wxPreviewFrame();
+	wxFontPreviewFrame(wxMainDialog * maindialog);
+	~wxFontPreviewFrame();
 
 	wxMainDialog * GetMainDialog() { return MainDialog; }
 	void FaceChanged();

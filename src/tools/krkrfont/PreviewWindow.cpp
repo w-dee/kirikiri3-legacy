@@ -98,7 +98,7 @@ wxPreviewScrolledWindow::~wxPreviewScrolledWindow()
 //---------------------------------------------------------------------------
 
 
-#define FACE wxStaticCast(wxWindow::GetParent(), wxPreviewFrame)->GetMainDialog()->GetFace()
+#define FACE wxStaticCast(wxWindow::GetParent(), wxFontPreviewFrame)->GetMainDialog()->GetFace()
 
 
 //---------------------------------------------------------------------------
@@ -466,7 +466,7 @@ void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 
 			wxString status = wxString::Format(
 				_("Index : %d   Charcode : U+%06X"), index, static_cast<risse_int>(ch));
-			wxStaticCast(wxWindow::GetParent(), wxPreviewFrame)->GetStatusBar()->
+			wxStaticCast(wxWindow::GetParent(), wxFontPreviewFrame)->GetStatusBar()->
 				SetStatusText(status, 0);
 			LastStatusedIndex = index;
 		}
@@ -482,7 +482,7 @@ void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 void wxPreviewScrolledWindow::OnLeaveWindow(wxMouseEvent & event)
 {
 	// ステータスバーの文字を消去
-	wxStaticCast(wxWindow::GetParent(), wxPreviewFrame)->GetStatusBar()->
+	wxStaticCast(wxWindow::GetParent(), wxFontPreviewFrame)->GetStatusBar()->
 		SetStatusText(wxEmptyString, 0);
 	LastStatusedIndex = -1;
 }
@@ -497,7 +497,7 @@ void wxPreviewScrolledWindow::OnLeaveWindow(wxMouseEvent & event)
 //---------------------------------------------------------------------------
 // グローバル変数など
 //---------------------------------------------------------------------------
-wxPreviewFrame * PreviewFrame = NULL;
+wxFontPreviewFrame * PreviewFrame = NULL;
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
@@ -509,7 +509,7 @@ wxPreviewFrame * PreviewFrame = NULL;
 void ShowPreviewFrame(wxMainDialog *maindialog)
 {
 	if(!PreviewFrame)
-		PreviewFrame = new wxPreviewFrame(maindialog);
+		PreviewFrame = new wxFontPreviewFrame(maindialog);
 	else
 	{
 		PreviewFrame->Raise();
@@ -551,17 +551,17 @@ void DestroyPreviewFrame()
 //---------------------------------------------------------------------------
 //! @brief		イベントテーブル定義
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(wxPreviewFrame, wxPreviewFrame_Base)
-	EVT_CLOSE(wxPreviewFrame::FrameClose)
-	EVT_TOOL(XRCID("CloseButton"), wxPreviewFrame::CloseButtonClick)
-	EVT_CHOICE(XRCID("MagnifyChoice"), wxPreviewFrame::MagnifyChoiceSelected)
+BEGIN_EVENT_TABLE(wxFontPreviewFrame, wxPreviewFrame_Base)
+	EVT_CLOSE(wxFontPreviewFrame::FrameClose)
+	EVT_TOOL(XRCID("CloseButton"), wxFontPreviewFrame::CloseButtonClick)
+	EVT_CHOICE(XRCID("MagnifyChoice"), wxFontPreviewFrame::MagnifyChoiceSelected)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-wxPreviewFrame::wxPreviewFrame(wxMainDialog * maindialog) : MainDialog(maindialog)
+wxFontPreviewFrame::wxFontPreviewFrame(wxMainDialog * maindialog) : MainDialog(maindialog)
 {
 	PreviewScrolledWindow = NULL;
 	SetToolBar(ToolBar);
@@ -576,7 +576,7 @@ wxPreviewFrame::wxPreviewFrame(wxMainDialog * maindialog) : MainDialog(maindialo
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-wxPreviewFrame::~wxPreviewFrame()
+wxFontPreviewFrame::~wxFontPreviewFrame()
 {
 	PreviewFrame = NULL;
 }
@@ -586,7 +586,7 @@ wxPreviewFrame::~wxPreviewFrame()
 //---------------------------------------------------------------------------
 //! @brief		Faceやそのプロパティが変わったときにMainDialogから呼ばれる
 //---------------------------------------------------------------------------
-void wxPreviewFrame::FaceChanged()
+void wxFontPreviewFrame::FaceChanged()
 {
 	wxString status2;
 	int count = GetMainDialog()->GetFace() ? GetMainDialog()->GetFace()->GetGlyphCount() : 0;
@@ -603,7 +603,7 @@ void wxPreviewFrame::FaceChanged()
 //! @brief		ウィンドウが閉じるとき
 //! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
-void wxPreviewFrame::FrameClose(wxCloseEvent& event)
+void wxFontPreviewFrame::FrameClose(wxCloseEvent& event)
 {
 	Destroy();
 }
@@ -613,7 +613,7 @@ void wxPreviewFrame::FrameClose(wxCloseEvent& event)
 //! @brief		「閉じる」ボタンが押されたとき
 //! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
-void wxPreviewFrame::CloseButtonClick(wxCommandEvent& event)
+void wxFontPreviewFrame::CloseButtonClick(wxCommandEvent& event)
 {
 	Destroy();
 }
@@ -625,7 +625,7 @@ void wxPreviewFrame::CloseButtonClick(wxCommandEvent& event)
 //! @brief		「倍率」リストボックスが選択されたとき
 //! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
-void wxPreviewFrame::MagnifyChoiceSelected(wxCommandEvent& event)
+void wxFontPreviewFrame::MagnifyChoiceSelected(wxCommandEvent& event)
 {
 	const static char itemindextomag[] =
 		{ 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16 };

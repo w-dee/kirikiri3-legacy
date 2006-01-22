@@ -15,10 +15,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: msw/NativeFreeTypeFace.cpp:84 msw/NativeFreeTypeFace.cpp:99
-#: msw/NativeFreeTypeFace.cpp:129 msw/NativeFreeTypeFace.cpp:151
-#: msw/NativeFreeTypeFace.cpp:167 msw/NativeFreeTypeFace.cpp:179
-#: msw/NativeFreeTypeFace.cpp:205 FreeType.cpp:128
+#: msw/NativeFreeTypeFace.cpp:85 msw/NativeFreeTypeFace.cpp:100
+#: msw/NativeFreeTypeFace.cpp:130 msw/NativeFreeTypeFace.cpp:152
+#: msw/NativeFreeTypeFace.cpp:168 msw/NativeFreeTypeFace.cpp:180
+#: msw/NativeFreeTypeFace.cpp:206 FreeType.cpp:129
 #, c-format
 msgid "Font '%1$s' cannot be used"
 msgstr "フォント '%1$s' は使用できません"
@@ -27,71 +27,71 @@ msgstr "フォント '%1$s' は使用できません"
 #. Default font initially selected in the main dialog.
 #. You can specify font cadidates separated with '|' (vertline)
 #. character, like "Tahoma|Times New Roman"
-#: MainDialog.cpp:61
+#: MainDialog.cpp:62
 msgid "Tahoma"
 msgstr "ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3"
 
 #. messsage for select a font file
-#: MainDialog.cpp:369
+#: MainDialog.cpp:370
 msgid "Select a font file"
 msgstr "一覧から選択"
 
-#: MainDialog.cpp:378
+#: MainDialog.cpp:379
 msgid "All supported fonts|*.ttf;*.ttc;*.otf;*.fon"
 msgstr "全てのフォント|*.ttf;*.ttc;*.otf;*.fon"
 
-#: MainDialog.cpp:379
+#: MainDialog.cpp:380
 msgid "TrueType fonts (*.ttf)|*.ttf"
 msgstr "TrueType フォント (*.ttf)|*.ttf"
 
-#: MainDialog.cpp:380
+#: MainDialog.cpp:381
 msgid "TrueType Collection fonts (*.ttc)|*.ttc"
 msgstr "TrueType コレクションフォント (*.ttc)|*.ttc"
 
-#: MainDialog.cpp:381
+#: MainDialog.cpp:382
 msgid "OpenType fonts (*.otf)|*.otf"
 msgstr "OpenType フォント (*.otf)|*.otf"
 
-#: MainDialog.cpp:382 MainDialog.cpp:415
+#: MainDialog.cpp:383 MainDialog.cpp:416
 msgid "All files (*.*)|*.*"
 msgstr "全てのファイル (*.*)|*.*"
 
 #. messsage for select output file
-#: MainDialog.cpp:405
+#: MainDialog.cpp:406
 msgid "Select output file"
 msgstr "出力ファイルを選択"
 
-#: MainDialog.cpp:414
+#: MainDialog.cpp:415
 msgid "Kirikiri3 bitmap font (*.bff)|*.bff"
 msgstr "吉里吉里3 ビットマップフォント (*.bff)|*.bff"
 
-#: FreeType.cpp:84
+#: FreeType.cpp:85
 #, c-format
 msgid "Can't open font file '%1$s'"
 msgstr "フォントファイル '%1$s' を開くことができません"
 
-#: PreviewWindow.cpp:467
+#: PreviewWindow.cpp:468
 #, c-format
 msgid "Index : %d   Charcode : U+%06X"
 msgstr "インデックス : %d   文字コード : U+%06X"
 
-#: PreviewWindow.cpp:592
+#: PreviewWindow.cpp:593
 #, c-format
 msgid "Glyph count : %d"
 msgstr "グリフ数 : %d"
 
-#: WriteBFF.cpp:126
+#: WriteBFF.cpp:127
 #, c-format
 msgid "Can't open output file '%1$s'"
 msgstr "フォントファイル '%1$s' を開くことができません"
 
 #. font generation progress dialog box's title
-#: WriteBFF.cpp:136
+#: WriteBFF.cpp:137
 msgid "Processing"
 msgstr "処理中"
 
 #. font generation progress dialog box's message
-#: WriteBFF.cpp:138
+#: WriteBFF.cpp:139
 msgid "Generating font file ..."
 msgstr "フォントファイルを作成中 ..."
 

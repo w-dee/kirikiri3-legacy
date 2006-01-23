@@ -157,6 +157,8 @@ struct tRisaWaveSegment
 	//! @brief コンストラクタ
 	tRisaWaveSegment(risse_int64 start, risse_int64 length)
 		{ Start = start; Length = FilteredLength = length; }
+	tRisaWaveSegment(risse_int64 start, risse_int64 length, risse_int64 filteredlength)
+		{ Start = start; Length = length; FilteredLength = filteredlength; }
 	risse_int64 Start; //!< オリジナルデコーダ上でのセグメントのスタート位置 (PCM サンプルグラニュール数単位)
 	risse_int64 Length; //!< オリジナルデコーダ上でのセグメントの長さ (PCM サンプルグラニュール数単位)
 	risse_int64 FilteredLength; //!< フィルタ後の長さ (PCM サンプルグラニュール数単位)

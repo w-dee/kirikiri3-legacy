@@ -173,6 +173,7 @@ bool tRisaOggVorbisDecoder::Open()
 	else
 		Format.TotalTime = static_cast<risse_uint64>(timetotal * 1000.0);
 
+	Format.SpeakerConfig = 0; // 何も指定しない
 	Format.IsFloat = false; // とりあえず false 固定
 	Format.Seekable = seekable;
 

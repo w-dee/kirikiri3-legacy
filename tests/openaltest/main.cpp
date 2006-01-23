@@ -78,8 +78,8 @@ int Application::OnRun()
 			RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 			NULL, NULL, NULL);
 
-//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test8.wav")));
-		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaOggVorbisDecoder(RISSE_WS("test.ogg")));
+		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test8.wav")));
+//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaOggVorbisDecoder(RISSE_WS("test.ogg")));
 		boost::shared_ptr<tRisaWaveLoopManager> loop_manager(new tRisaWaveLoopManager(decoder));
 		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaPitchShifter(1.2, 4096));
 		filter->SetInput(loop_manager);

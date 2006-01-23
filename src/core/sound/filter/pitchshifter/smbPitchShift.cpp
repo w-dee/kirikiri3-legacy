@@ -299,7 +299,7 @@ double smbPitchShifter::atan2(double x, double y)
   if (x == 0.) return 0.;
   if (y == 0.) return signx * M_PI / 2.;
   
-  return atan2(x, y);
+  return ::atan2(x, y);
 }
 
 

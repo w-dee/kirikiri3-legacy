@@ -613,7 +613,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 //---------------------------------------------------------------------------
 //! @brief		PCM形式を返す
-//! @note		PCM形式への参照
+//! @return		PCM形式への参照
 //---------------------------------------------------------------------------
 const tRisaWaveFormat & tRisaWaveLoopManager::GetFormat()
 {

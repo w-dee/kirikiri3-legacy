@@ -38,6 +38,10 @@ build_completed: Makefile extract_completed
 	./build.sh
 	touch build_completed
 
-clean:
+distclean:
 	rm -f $(DOWNLOAD_FILE)* build_completed extract_completed download_completed
 	for dir in *; do if [ -d "$$dir" ]; then rm -rf $$dir; fi; done
+
+clean:
+	rm -f $(DOWNLOAD_FILE)* extract_completed download_completed
+	for dir in src; do if [ -d "$$dir" ]; then rm -rf $$dir; fi; done

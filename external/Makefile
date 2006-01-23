@@ -14,6 +14,9 @@ target: default compile_wx_win_res copy_mo copy_dll print_all_done_mes
 default:
 	(set -e; for dir in $(SUBLIBS); do (set -e; cd $$dir && $(MAKE)  all      ) || exit 1; done )
 
+distclean:
+	(set -e; for dir in $(SUBLIBS); do (set -e; cd $$dir && $(MAKE)  distclean) || exit 1; done )
+
 clean:
 	(set -e; for dir in $(SUBLIBS); do (set -e; cd $$dir && $(MAKE)  clean    ) || exit 1; done )
 

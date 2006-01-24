@@ -6,6 +6,7 @@
 #include "VorbisDecoder.h"
 #include "WaveLoopManager.h"
 #include "PitchShifter.h"
+#include "Reverb.h"
 #include "ALCommon.h"
 #include "ALSource.h"
 #include "ALBuffer.h"
@@ -78,10 +79,11 @@ int Application::OnRun()
 			RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 			NULL, NULL, NULL);
 
-		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test8.wav")));
-//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaOggVorbisDecoder(RISSE_WS("test.ogg")));
+//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("test8.wav")));
+		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaOggVorbisDecoder(RISSE_WS("test2.ogg")));
 		boost::shared_ptr<tRisaWaveLoopManager> loop_manager(new tRisaWaveLoopManager(decoder));
-		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaPitchShifter(1.2, 4096));
+//		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaPitchShifter(1.0, 1.1, 4096, 4096/8));
+		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaReverb());
 		filter->SetInput(loop_manager);
 		boost::shared_ptr<tRisaALBuffer> buffer(new tRisaALBuffer(filter, true));
 		tRisaALSource source(buffer);
@@ -91,7 +93,7 @@ int Application::OnRun()
 		while(true)
 		{
 			buffer->QueueStream(source.GetSource());
-			Sleep(100);
+			Sleep(50);
 			ALint pos;
 			alGetSourcei( source.GetSource(), AL_SAMPLE_OFFSET, &pos);
 			wxPrintf(wxT("position : %d\n"), pos);

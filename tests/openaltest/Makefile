@@ -42,7 +42,8 @@ INCLUDES= \
 		-I$(CORE_DIR)/sound/decoder/riffwave   \
 		-I$(CORE_DIR)/sound/decoder/vorbis     \
 		-I$(CORE_DIR)/sound/filter             \
-		-I$(CORE_DIR)/sound/filter/pitchshifter\
+		-I$(CORE_DIR)/sound/filter/phasevocoder\
+		-I$(CORE_DIR)/sound/filter/reverb      \
 		-I.
 
 CPPFILES = \
@@ -73,8 +74,13 @@ CPPFILES = \
 		$(CORE_DIR)/sound/decoder/riffwave/RIFFWaveDecoder.cpp       \
 		$(CORE_DIR)/sound/decoder/vorbis/VorbisDecoder.cpp           \
 		$(CORE_DIR)/sound/filter/BasicWaveFilter.cpp                 \
-		$(CORE_DIR)/sound/filter/pitchshifter/smbPitchShift.cpp      \
-		$(CORE_DIR)/sound/filter/pitchshifter/PitchShifter.cpp       \
+		$(CORE_DIR)/sound/filter/phasevocoder/chuck_fft.cpp          \
+		$(CORE_DIR)/sound/filter/phasevocoder/PhaseVocoder.cpp       \
+		$(CORE_DIR)/sound/filter/phasevocoder/PitchShifter.cpp       \
+		$(CORE_DIR)/sound/filter/reverb/fv_allpass.cpp               \
+		$(CORE_DIR)/sound/filter/reverb/fv_comb.cpp                  \
+		$(CORE_DIR)/sound/filter/reverb/fv_revmodel.cpp              \
+		$(CORE_DIR)/sound/filter/reverb/Reverb.cpp                   \
 		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)

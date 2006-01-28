@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risa [‚è‚³]      alias ‹g—¢‹g—¢3 [kirikiri-3]
+	Risa [ã‚Šã•]      alias å‰é‡Œå‰é‡Œ3 [kirikiri-3]
 	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief Phase Vocoder ‚ÌÀ‘•
+//! @brief Phase Vocoder ã®å®Ÿè£…
 //---------------------------------------------------------------------------
 #ifndef RisaPhaseVocoderH
 #define RisaPhaseVocoderH
@@ -16,56 +16,56 @@
 #include "RingBuffer.h"
 
 //---------------------------------------------------------------------------
-//! @brief Phase Vocoder DSP ƒNƒ‰ƒX
+//! @brief Phase Vocoder DSP ã‚¯ãƒ©ã‚¹
 //---------------------------------------------------------------------------
 class tRisaPhaseVocoderDSP
 {
-	const static float MAX_TIME_SCALE = 1.95; //!< Å‘å‚Ì time scale ’l
-	const static float MIN_TIME_SCALE = 0.25; //!< Å¬‚Ì time scale ’l
+	const static float MAX_TIME_SCALE = 1.95; //!< æœ€å¤§ã® time scale å€¤
+	const static float MIN_TIME_SCALE = 0.25; //!< æœ€å°ã® time scale å€¤
 
-	float * AnalWork; //!< ‰ğÍ(Analyze)—pƒoƒbƒtƒ@(FrameSizeŒÂ) –¼‘O‚ÅÎ‚í‚È‚¢‚æ‚¤‚É
-	float * SynthWork; //!< ‡¬—pì‹Æƒoƒbƒtƒ@(FrameSize)
-	float ** LastAnalPhase; //!< ‘O‰ñ‰ğÍ‚ÌŠeƒtƒBƒ‹ƒ^ƒoƒ“ƒh‚ÌˆÊ‘Š (Šeƒ`ƒƒƒ“ƒlƒ‹‚²‚Æ‚ÉFrameSize/2ŒÂ)
-	float ** LastSynthPhase; //!< ‘O‰ñ‡¬‚ÌŠeƒtƒBƒ‹ƒ^ƒoƒ“ƒh‚ÌˆÊ‘Š (Šeƒ`ƒƒƒ“ƒlƒ‹‚²‚Æ‚ÉFrameSize/2ŒÂ)
+	float * AnalWork; //!< è§£æ(Analyze)ç”¨ãƒãƒƒãƒ•ã‚¡(FrameSizeå€‹) åå‰ã§ç¬‘ã‚ãªã„ã‚ˆã†ã«
+	float * SynthWork; //!< åˆæˆç”¨ä½œæ¥­ãƒãƒƒãƒ•ã‚¡(FrameSize)
+	float ** LastAnalPhase; //!< å‰å›è§£ææ™‚ã®å„ãƒ•ã‚£ãƒ«ã‚¿ãƒãƒ³ãƒ‰ã®ä½ç›¸ (å„ãƒãƒ£ãƒ³ãƒãƒ«ã”ã¨ã«FrameSize/2å€‹)
+	float ** LastSynthPhase; //!< å‰å›åˆæˆæ™‚ã®å„ãƒ•ã‚£ãƒ«ã‚¿ãƒãƒ³ãƒ‰ã®ä½ç›¸ (å„ãƒãƒ£ãƒ³ãƒãƒ«ã”ã¨ã«FrameSize/2å€‹)
 
-	int * FFTWorkIp; //!< rdft ‚É“n‚· ip ƒpƒ‰ƒ[ƒ^
-	float * FFTWorkW; //!< rdft ‚É“n‚· w ƒpƒ‰ƒ[ƒ^
-	float * InputWindow; //!< “ü—Í—p‘‹ŠÖ”
-	float * OutputWindow; //!< o—Í—p‘‹ŠÖ”
+	int * FFTWorkIp; //!< rdft ã«æ¸¡ã™ ip ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+	float * FFTWorkW; //!< rdft ã«æ¸¡ã™ w ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+	float * InputWindow; //!< å…¥åŠ›ç”¨çª“é–¢æ•°
+	float * OutputWindow; //!< å‡ºåŠ›ç”¨çª“é–¢æ•°
 
-	unsigned int FrameSize; //!< FFTƒTƒCƒY
-	unsigned int OverSampling; //!< ƒI[ƒo[EƒTƒ“ƒvƒŠƒ“ƒOŒW”
-	unsigned int Frequency; //!< PCM ƒTƒ“ƒvƒŠƒ“ƒOü”g”
-	unsigned int Channels; //!< PCM ƒ`ƒƒƒ“ƒlƒ‹”
+	unsigned int FrameSize; //!< FFTã‚µã‚¤ã‚º
+	unsigned int OverSampling; //!< ã‚ªãƒ¼ãƒãƒ¼ãƒ»ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ä¿‚æ•°
+	unsigned int Frequency; //!< PCM ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°å‘¨æ³¢æ•°
+	unsigned int Channels; //!< PCM ãƒãƒ£ãƒ³ãƒãƒ«æ•°
 	unsigned int InputHopSize; //!< FrameSize/OverSampling
 
-	tRisaRingBuffer<float> InputBuffer; //!< “ü—Í—pƒŠƒ“ƒOƒoƒbƒtƒ@
-	tRisaRingBuffer<float> OutputBuffer; //!< o—Í—pƒŠƒ“ƒOƒoƒbƒtƒ@
+	tRisaRingBuffer<float> InputBuffer; //!< å…¥åŠ›ç”¨ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡
+	tRisaRingBuffer<float> OutputBuffer; //!< å‡ºåŠ›ç”¨ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡
 
-	float	TimeScale; //!< ŠÔ²•ûŒü‚ÌƒXƒP[ƒ‹(o—Í/“ü—Í)
-	float	FrequencyScale; //!< ü”g”•ûŒü‚ÌƒXƒP[ƒ‹(o—Í/“ü—Í)
+	float	TimeScale; //!< æ™‚é–“è»¸æ–¹å‘ã®ã‚¹ã‚±ãƒ¼ãƒ«(å‡ºåŠ›/å…¥åŠ›)
+	float	FrequencyScale; //!< å‘¨æ³¢æ•°æ–¹å‘ã®ã‚¹ã‚±ãƒ¼ãƒ«(å‡ºåŠ›/å…¥åŠ›)
 
-	bool	RebuildParams; //!< “à•”“I‚Èƒpƒ‰ƒ[ƒ^‚È‚Ç‚ğÄ\’z‚µ‚È‚¯‚ê‚Î‚È‚ç‚È‚¢‚Æ‚«‚É^
+	bool	RebuildParams; //!< å†…éƒ¨çš„ãªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãªã©ã‚’å†æ§‹ç¯‰ã—ãªã‘ã‚Œã°ãªã‚‰ãªã„ã¨ãã«çœŸ
 
-	unsigned int LastSynthPhaseAdjustConter; //!< LastSynthPhase ‚ğ•â³‚·‚éüŠú‚ğ‚Í‚©‚é‚½‚ß‚ÌƒJƒEƒ“ƒ^
-	const static unsigned int LastSynthPhaseAdjustInterval = 64; //!< LastSynthPhase ‚ğ•â³‚·‚éüŠú
+	unsigned int LastSynthPhaseAdjustConter; //!< LastSynthPhase ã‚’è£œæ­£ã™ã‚‹å‘¨æœŸã‚’ã¯ã‹ã‚‹ãŸã‚ã®ã‚«ã‚¦ãƒ³ã‚¿
+	const static unsigned int LastSynthPhaseAdjustInterval = 64; //!< LastSynthPhase ã‚’è£œæ­£ã™ã‚‹å‘¨æœŸ
 
-	// ˆÈ‰ºARebuildParams ‚ª^‚Ì‚ÉÄ\’z‚³‚ê‚éƒpƒ‰ƒ[ƒ^
-	// ‚±‚±‚É‚ ‚éƒƒ“ƒoˆÈŠO‚Å‚ÍAInputWindow ‚Æ OutputWindow ‚àÄ\’z‚³‚ê‚é
+	// ä»¥ä¸‹ã€RebuildParams ãŒçœŸã®æ™‚ã«å†æ§‹ç¯‰ã•ã‚Œã‚‹ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+	// ã“ã“ã«ã‚ã‚‹ãƒ¡ãƒ³ãƒä»¥å¤–ã§ã¯ã€InputWindow ã¨ OutputWindow ã‚‚å†æ§‹ç¯‰ã•ã‚Œã‚‹
 	unsigned int OutputHopSize; //!< InputHopSize * TimeScale
 	float OverSamplingRadian; //!< (2.0*M_PI)/OverSampling
-	float OverSamplingRadianRecp; //!< OverSamplingRadian ‚Ì‹t”
+	float OverSamplingRadianRecp; //!< OverSamplingRadian ã®é€†æ•°
 	float FrequencyPerFilterBand; //!< Frequency/FrameSize
-	float FrequencyPerFilterBandRecp; //!< FrequencyPerFilterBand ‚Ì‹t”
-	float ExactTimeScale; //!< Œµ–§‚ÈTimeScale = OutputHopSize / InputHopSize
+	float FrequencyPerFilterBandRecp; //!< FrequencyPerFilterBand ã®é€†æ•°
+	float ExactTimeScale; //!< å³å¯†ãªTimeScale = OutputHopSize / InputHopSize
 
 public:
-	//! @brief Process ‚ª•Ô‚·ƒXƒe[ƒ^ƒX
+	//! @brief Process ãŒè¿”ã™ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹
 	enum tStatus
 	{
-		psNoError, //!< –â‘è‚È‚µ
-		psInputNotEnough, //!< “ü—Í‚ª‚à‚¤‚È‚¢ (GetInputBuffer‚Å“¾‚½ƒ|ƒCƒ“ƒ^‚É‘‚¢‚Ä‚©‚çÄs‚¹‚æ)
-		psOutputFull //!< o—Íƒoƒbƒtƒ@‚ª‚¢‚Á‚Ï‚¢ (GetOutputBuffer‚Å“¾‚½ƒ|ƒCƒ“ƒ^‚©‚ç“Ç‚İo‚µ‚Ä‚©‚çÄs‚¹‚æ)
+		psNoError, //!< å•é¡Œãªã—
+		psInputNotEnough, //!< å…¥åŠ›ãŒã‚‚ã†ãªã„ (GetInputBufferã§å¾—ãŸãƒã‚¤ãƒ³ã‚¿ã«æ›¸ã„ã¦ã‹ã‚‰å†è©¦è¡Œã›ã‚ˆ)
+		psOutputFull //!< å‡ºåŠ›ãƒãƒƒãƒ•ã‚¡ãŒã„ã£ã±ã„ (GetOutputBufferã§å¾—ãŸãƒã‚¤ãƒ³ã‚¿ã‹ã‚‰èª­ã¿å‡ºã—ã¦ã‹ã‚‰å†è©¦è¡Œã›ã‚ˆ)
 	};
 
 public:
@@ -73,10 +73,10 @@ public:
 					unsigned int frequency, unsigned int channels);
 	~tRisaPhaseVocoderDSP();
 
-	float GetTimeScale() const { return TimeScale; } //!< ŠÔ²•ûŒü‚ÌƒXƒP[ƒ‹‚ğ“¾‚é
+	float GetTimeScale() const { return TimeScale; } //!< æ™‚é–“è»¸æ–¹å‘ã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚’å¾—ã‚‹
 	void SetTimeScale(float v);
 
-	float GetFrequencyScale() const { return FrequencyScale; } //!< ü”g”²•ûŒü‚ÌƒXƒP[ƒ‹‚ğ“¾‚é
+	float GetFrequencyScale() const { return FrequencyScale; } //!< å‘¨æ³¢æ•°è»¸æ–¹å‘ã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚’å¾—ã‚‹
 	void SetFrequencyScale(float v);
 
 private:

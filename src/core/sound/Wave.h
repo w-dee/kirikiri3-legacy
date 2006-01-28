@@ -47,6 +47,17 @@ struct tRisaPCMTypes
 		}
 	}
 
+	//! @brief type の無音を作るときにfillすべき値を返す
+	static int GetSilenceValueFromType(tType type)
+	{
+		// ti8 が 0x80 、それ以外は 0
+		switch(type)
+		{
+		case ti8:	return 0x80;
+		default:	return 0;
+		}
+	}
+
 	//! @brief  8bit integer linear PCM type
 	struct i8
 	{

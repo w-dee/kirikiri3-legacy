@@ -17,6 +17,9 @@
 #include "BasicWaveFilter.h"
 #include "fv_revmodel.hpp"
 
+//---------------------------------------------------------------------------
+//! @brief リバーブフィルタクラス
+//---------------------------------------------------------------------------
 class tRisaReverb : public tRisaBasicWaveFilter
 {
 	static const size_t NumBufferSampleGranules = 4096;
@@ -33,6 +36,7 @@ private:
 	void InputChanged();
 	void Filter();
 };
+//---------------------------------------------------------------------------
 
 
 #endif

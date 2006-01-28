@@ -13,6 +13,7 @@
 #ifndef RingBufferH
 #define RingBufferH
 
+#include <stddef.h>
 /*
 	リングバッファ, ring buffer, circular buffer, 環状バッファ
 */
@@ -33,10 +34,10 @@ public:
 	//! @brief コンストラクタ
 	tRisaRingBuffer(size_t size)
 	{
-		Size = size:
+		Size = size;
 		Buffer = new T[Size];
 		WritePos = ReadPos = 0;
-		DataSize = Size;
+		DataSize = 0;
 	}
 
 	//! @brief デストラクタ
@@ -66,6 +67,7 @@ public:
 	//! @param	p1size	p1の表すブロックのサイズ
 	//! @param	p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
 	//! @param	p2size	p2の表すブロックのサイズ(0があり得る)
+	//! @param	offset	ReadPos に加算されるオフセット
 	//! @note	環状バッファといっても、実際はリニアな領域にバッファが確保されている。
 	//!			そのため、 ReadPos + readsize がバッファの終端を超えている場合、得たい
 	//!			ブロックは２つに分断されることになる。
@@ -73,23 +75,26 @@ public:
 	//!			などのチェックはいっさい行わない。事前に GetDataSize を調べ、読み込みたい
 	//!			サイズが実際にバッファにあるかどうかをチェックすること。
 	void GetReadPointer(size_t readsize,
-						T * const & p1, size_t &p1size,
-						T * const & p2, size_t &p2size)
+						const T * & p1, size_t &p1size,
+						const T * & p2, size_t &p2size,
+						ptrdiff_t offset = 0)
 	{
-		if(readsize + ReadPos >= Size)
+		size_t pos = ReadPos + offset;
+		while(pos >= Size) pos -= Size;
+		if(readsize + pos > Size)
 		{
-			// readsize + ReadPos がバッファの終端を超えている
+			// readsize + pos がバッファの終端を超えている
 			//  → 返されるブロックは2つ
-			p1 = ReadPos + Buffer;
-			p1size = Size - ReadPos;
+			p1 = pos + Buffer;
+			p1size = Size - pos;
 			p2 = Buffer;
 			p2size = readsize - p1size;
 		}
 		else
 		{
-			// readsize + ReadPos がバッファの終端を超えていない
+			// readsize + pos がバッファの終端を超えていない
 			//  → 返されるブロックは1つ
-			p1 = ReadPos + Buffer;
+			p1 = pos + Buffer;
 			p1size = readsize;
 			p2 = NULL;
 			p2size = 0;
@@ -113,25 +118,29 @@ public:
 	//! @param	p1size	p1の表すブロックのサイズ
 	//! @param	p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
 	//! @param	p2size	p2の表すブロックのサイズ(0があり得る)
+	//! @param	offset	WritePos に加算されるオフセット
 	//! @note	GetReadPointerの説明も参照のこと
 	void GetWritePointer(size_t writesize,
 						T * & p1, size_t &p1size,
-						T * & p2, size_t &p2size)
+						T * & p2, size_t &p2size,
+						ptrdiff_t offset = 0)
 	{
-		if(writesize + WritePos >= Size)
+		size_t pos = WritePos + offset;
+		while(pos >= Size) pos -= Size;
+		if(writesize + pos > Size)
 		{
-			// writesize + WritePos がバッファの終端を超えている
+			// writesize + pos がバッファの終端を超えている
 			//  → 返されるブロックは2つ
-			p1 = WritePos + Buffer;
-			p1size = Size - WritePos;
+			p1 = pos + Buffer;
+			p1size = Size - pos;
 			p2 = Buffer;
 			p2size = writesize - p1size;
 		}
 		else
 		{
-			// writesize + WritePos がバッファの終端を超えていない
+			// writesize + pos がバッファの終端を超えていない
 			//  → 返されるブロックは1つ
-			p1 = WritePos + Buffer;
+			p1 = pos + Buffer;
 			p1size = writesize;
 			p2 = NULL;
 			p2size = 0;

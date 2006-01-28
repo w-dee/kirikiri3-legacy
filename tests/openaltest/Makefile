@@ -65,6 +65,7 @@ CPPFILES = \
 		$(CORE_DIR)/base/fs/xp4fs/XP4FSBind.cpp                      \
 		$(CORE_DIR)/base/exception/RisaException.cpp                 \
 		$(CORE_DIR)/base/script/RisseEngine.cpp                      \
+		$(CORE_DIR)/utils/fftsg.cpp                                  \
 		$(CORE_DIR)/utils/Singleton.cpp                              \
 		$(CORE_DIR)/sound/WaveFormatConverter.cpp                    \
 		$(CORE_DIR)/sound/WaveLoopManager.cpp                        \
@@ -74,14 +75,14 @@ CPPFILES = \
 		$(CORE_DIR)/sound/decoder/riffwave/RIFFWaveDecoder.cpp       \
 		$(CORE_DIR)/sound/decoder/vorbis/VorbisDecoder.cpp           \
 		$(CORE_DIR)/sound/filter/BasicWaveFilter.cpp                 \
-		$(CORE_DIR)/sound/filter/phasevocoder/chuck_fft.cpp          \
 		$(CORE_DIR)/sound/filter/phasevocoder/PhaseVocoder.cpp       \
-		$(CORE_DIR)/sound/filter/phasevocoder/PitchShifter.cpp       \
+		$(CORE_DIR)/sound/filter/phasevocoder/PhaseVocoderDSP.cpp    \
 		$(CORE_DIR)/sound/filter/reverb/fv_allpass.cpp               \
 		$(CORE_DIR)/sound/filter/reverb/fv_comb.cpp                  \
 		$(CORE_DIR)/sound/filter/reverb/fv_revmodel.cpp              \
 		$(CORE_DIR)/sound/filter/reverb/Reverb.cpp                   \
 		main.cpp
+
 
 OBJS = $(CPPFILES:.cpp=.o)
 

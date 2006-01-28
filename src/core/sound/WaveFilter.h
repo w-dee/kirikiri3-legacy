@@ -88,6 +88,16 @@ RisaのWaveフィルタについて
   writtenを samples よりも少なく返し、後ろのフィルタが再度 GetFormat と
   Render メソッドを呼ぶようにしなければならない。
 
+■ Resetメソッドについて
+
+  再生開始前には必ずResetメソッドが呼ばれる。各フィルタでは、このResetメソッ
+  ドをトリガにして、内部状態の初期化などを行うことができる。Resetメソッドは
+  SetInputメソッドより後に呼ばれる。
+  フィルタは、Resetメソッドで自己のフィルタのリセット処理が完了したら、
+  SetInputメソッドで指定された入力フィルタのResetメソッドも同様に呼びださな
+  ければならない。
+
+
 ■ tRisaWaveEvent
 
   tRisaWaveEvent は、サウンド上に設定されたイベントを表す構造体である。
@@ -199,6 +209,11 @@ class tRisaWaveFilter
 {
 public:
 	virtual ~tRisaWaveFilter() {;}
+
+	virtual void Reset() = 0;
+		/*!<
+			@brief	フィルタのリセット
+		*/
 
 	virtual void SetInput(boost::shared_ptr<tRisaWaveFilter> input) = 0;
 		/*!<

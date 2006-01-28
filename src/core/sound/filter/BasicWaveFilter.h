@@ -45,6 +45,7 @@ public:
 	tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_type);
 	~tRisaBasicWaveFilter();
 
+	void Reset();
 	void SetInput(boost::shared_ptr<tRisaWaveFilter> input);
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
 		std::vector<tRisaWaveSegment> &segments,
@@ -60,6 +61,7 @@ protected:
 		// 出力キューにデータをおく
 
 	risse_uint Fill(void * dest, risse_uint numsamplegranules, tRisaPCMTypes::tType desired_type,
+		bool fill_silence,
 		std::vector<tRisaWaveSegment> &segments, std::vector<tRisaWaveEvent> &events);
 		// dest に最低でも numsamplegranules のサンプルグラニュールを書き込む
 		// 実際に書き込まれたサンプル数が返る

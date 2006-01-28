@@ -46,6 +46,17 @@ tRisaBasicWaveFilter::~tRisaBasicWaveFilter()
 
 
 //---------------------------------------------------------------------------
+//! @brief		フィルタをリセットする際に呼ばれる
+//---------------------------------------------------------------------------
+void tRisaBasicWaveFilter::Reset()
+{
+	InputChanged();
+	Input->Reset(); // 入力フィルタの Reset メソッドも呼び出す
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		フィルタの入力を設定する
 //! @param		input  入力となるフィルタ
 //---------------------------------------------------------------------------
@@ -218,18 +229,21 @@ void tRisaBasicWaveFilter::Queue(risse_uint numsamplegranules,
 //! @param		dest				書き込みたいバッファ
 //! @param		numsamplegranules	欲しいサンプルグラニュール数
 //! @param		desired_type		欲しいPCM形式
+//! @param		fill_silence		欲しいサンプルグラニュール数に入力が満たないとき、残りを無音で埋めるかどうか
 //! @param		segments	再生セグメント情報を書き込む配列
 //! @param		events		通過イベント情報(=ラベル情報)を書き込む配列
 //! @return		実際に書き込まれたサンプルグラニュール数
 //---------------------------------------------------------------------------
 risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 	tRisaPCMTypes::tType desired_type, 
+	bool fill_silence,
 	std::vector<tRisaWaveSegment> &segments, std::vector<tRisaWaveEvent> &events)
 {
 	// バッファにデータをレンダリングする
 	if(!Input) return 0; // Input が無い
 
-	risse_uint desired_type_sample_bytes = tRisaPCMTypes::TypeToSampleBytes(desired_type);
+	risse_uint desired_type_samplegranule_bytes =
+		tRisaPCMTypes::TypeToSampleBytes(desired_type) * InputFormat.Channels;
 	risse_uint8 * render_buffer = reinterpret_cast<risse_uint8*>(dest);
 	risse_uint remain = numsamplegranules;
 	if(remain == 0)
@@ -302,7 +316,7 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 			{
 				// フィルタの出力タイプが 整数 16bit なので直接出力バッファに書き込む
 				filter_destination = render_buffer +
-					rendered * desired_type_sample_bytes;
+					rendered * desired_type_samplegranule_bytes;
 			}
 			else
 			{
@@ -337,7 +351,7 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 		{
 			tRisaWaveFormatConverter::Convert(
 				desired_type,
-				render_buffer + rendered * desired_type_sample_bytes,
+				render_buffer + rendered * desired_type_samplegranule_bytes,
 				filter_pcm_type,
 				ConvertBuffer,
 				InputFormat.Channels,
@@ -353,6 +367,15 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 			// デコードの終了
 			break;
 		}
+	}
+
+	if(fill_silence && rendered < numsamplegranules)
+	{
+		// 残りを無音で埋める
+		int sil_value = tRisaPCMTypes::GetSilenceValueFromType(desired_type);
+		memset(render_buffer + rendered * desired_type_samplegranule_bytes,
+			sil_value,
+			desired_type_samplegranule_bytes * (numsamplegranules - rendered));
 	}
 
 	return rendered;

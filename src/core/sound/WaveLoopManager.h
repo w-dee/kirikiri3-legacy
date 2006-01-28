@@ -319,6 +319,7 @@ public:
 	void SetLooping(bool b) { Looping = b; } //!< ループ情報を読み込んでいないときにループを行うかどうかを設定する
 
 	//------- tRisaWaveFilter メソッド  ここから
+	void Reset() {;} //!< @note tRisaWaveLoopManager ではなにもしない
 	void SetInput(boost::shared_ptr<tRisaWaveFilter> input) {;}
 		//!< @note tRisaWaveLoopManager には入力するフィルタがないのでこのメソッドはなにもしない
 	bool Render(void *dest, risse_uint samples, risse_uint &written,

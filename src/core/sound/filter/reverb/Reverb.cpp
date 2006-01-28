@@ -16,22 +16,38 @@
 RISSE_DEFINE_SOURCE_ID(8600,37386,12503,16952,7601,59827,19639,49324);
 
 //---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
 tRisaReverb::tRisaReverb() :
 	tRisaBasicWaveFilter(tRisaPCMTypes::tf32)
 {
 }
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		デストラクタ
+//---------------------------------------------------------------------------
 tRisaReverb::~tRisaReverb()
 {
 	delete [] Buffer;
 }
+//---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		入力となるフィルタが変わったとき、あるいはリセットされるとき
+//---------------------------------------------------------------------------
 void tRisaReverb::InputChanged()
 {
 	Model.mute();
 }
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		フィルタ動作を行うとき
+//---------------------------------------------------------------------------
 void tRisaReverb::Filter()
 {
 	// Buffer にデータを読み込む
@@ -49,18 +65,9 @@ void tRisaReverb::Filter()
 	if(!dest_buf) return;
 
 	// 入力からデータを読み取る
-	risse_uint filled = Fill(Buffer, NumBufferSampleGranules, tRisaPCMTypes::tf32, segments, events);
+	risse_uint filled = Fill(Buffer, NumBufferSampleGranules, tRisaPCMTypes::tf32, true, segments, events);
 
-	if(filled < NumBufferSampleGranules)
-	{
-		// データが足りない
-		// 後半を 0 で埋める
-		for(; filled < NumBufferSampleGranules; filled++)
-		{
-			for(risse_uint i = 0; i < channels; i++)
-				Buffer[filled * channels + i] = 0;
-		}
-	}
+	if(filled == 0) return;
 
 	// リバーブエフェクトの実行
 	Model.processreplace(Buffer, Buffer+1, dest_buf, dest_buf+1, NumBufferSampleGranules, 2);
@@ -68,6 +75,7 @@ void tRisaReverb::Filter()
 	// キューする
 	Queue(NumBufferSampleGranules, segments, events);
 }
+//---------------------------------------------------------------------------
 
 
 

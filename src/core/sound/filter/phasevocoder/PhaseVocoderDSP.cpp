@@ -75,6 +75,8 @@ tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
 	FrequencyScale = 1.0;
 	RebuildParams = true; // 必ず初回にパラメータを再構築するように真
 
+	LastSynthPhaseAdjustConter = 0;
+
 	try
 	{
 		// ワークなどの確保
@@ -513,6 +515,29 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 			if(p2)
 				Interleave(p2 + ch, SynthWork + p1len,
 							OutputWindow + p1len, p2len);
+		}
+	}
+
+	// LastSynthPhase を再調整するか
+	if(++LastSynthPhaseAdjustConter == LastSynthPhaseAdjustInterval)
+	{
+		// LastSynthPhase を再調整するカウントになった
+		LastSynthPhaseAdjustConter = 0;
+
+		// ここで行う調整は LastSynthPhase の unwrapping である。
+		// LastSynthPhase は位相の差が累積されるので大きな数値になっていくが、
+		// 適当な間隔でこれを unwrapping しないと、いずれ(数値が大きすぎて)精度
+		// 落ちが発生し、正常に合成が出来なくなってしまう。
+		// ただし、精度が保たれればよいため、毎回この unwrapping を行う必要はない。
+		// ここでは LastSynthPhaseAdjustInterval 回ごとに調整を行う。
+
+		for(unsigned int ch = 0; ch < Channels; ch++)
+		{
+			for(unsigned int i = 0; i < framesize_d2; i++)
+			{
+				long int n = static_cast<long int>(LastSynthPhase[ch][i] / (2.0*M_PI));
+				LastSynthPhase[ch][i] -= n * (2.0*M_PI);
+			}
 		}
 	}
 

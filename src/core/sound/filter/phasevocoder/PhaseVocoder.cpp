@@ -58,8 +58,8 @@ void tRisaPhaseVocoder::InputChanged()
 	Clear();
 	DSP = new tRisaPhaseVocoderDSP(FrameSize, OverSampling,
 		InputFormat.Frequency, InputFormat.Channels);
-//	DSP->SetTimeScale(TimeScale);
-//	DSP->SetFrequencyScale(FrequencyScale);
+	DSP->SetTimeScale(TimeScale);
+	DSP->SetFrequencyScale(FrequencyScale);
 }
 //---------------------------------------------------------------------------
 

@@ -287,8 +287,8 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 
 	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
-	wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
-			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
+//	wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
+//			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
 	alBufferData(buffer, ALFormat, RenderBuffer,
 		rendered * ALSampleGranuleBytes, ALFrequency);
 	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));

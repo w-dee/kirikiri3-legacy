@@ -94,10 +94,12 @@ int Application::OnRun()
 		while(true)
 		{
 			buffer->QueueStream(source.GetSource());
-			Sleep(1);
+			Sleep(10);
+/*
 			ALint pos;
 			alGetSourcei( source.GetSource(), AL_SAMPLE_OFFSET, &pos);
 			wxPrintf(wxT("position : %d\n"), pos);
+*/
 		}
 	}
 	catch(const eRisse &e)

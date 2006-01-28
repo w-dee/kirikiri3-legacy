@@ -22,8 +22,8 @@
 //---------------------------------------------------------------------------
 class tRisaPhaseVocoder : public tRisaBasicWaveFilter
 {
-	static const int DEFAULT_FRAME_SIZE = 4096; //!< default frame size
-	static const int DEFAULT_OVERSAMPLING = 8; //!< default oversampling factor
+	static const int DEFAULT_FRAME_SIZE = 128; //!< default frame size
+	static const int DEFAULT_OVERSAMPLING = 4; //!< default oversampling factor
 
 	tRisaPhaseVocoderDSP * DSP; //!< PhaseVocoder DSP
 

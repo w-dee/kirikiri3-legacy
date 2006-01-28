@@ -42,6 +42,8 @@
 //! @param		oversamp		オーバーサンプリング係数(2～)
 //! @param		frequency		入力PCMのサンプリングレート
 //! @param		channels		入力PCMのチャンネル数
+//! @note		音楽用ではframesize=4096,oversamp=16ぐらいがよく、
+//! @note		ボイス用ではframesize=128,oversamp=4ぐらいがよい。
 //---------------------------------------------------------------------------
 tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
 				unsigned int framesize, unsigned int oversamp,
@@ -69,7 +71,7 @@ tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
 	Channels = channels;
 	InputHopSize = FrameSize / OverSampling;
 
-	TimeScale = 1/1.3;
+	TimeScale = 1.0;
 	FrequencyScale = 1.0;
 	RebuildParams = true; // 必ず初回にパラメータを再構築するように真
 
@@ -212,6 +214,10 @@ size_t tRisaPhaseVocoderDSP::GetInputFreeSize()
 //! @param		p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
 //! @param		p2size	p2の表すブロックのサンプルグラニュール数(0があり得る)
 //! @return		空き容量が足りなければ偽、空き容量が足り、ポインタが返されれば真
+//! @note		p1 と p2 のように２つのポインタとそのサイズが返されるのは、
+//!				このバッファが実際はリングバッファで、リングバッファ内部のリニアなバッファ
+//!				の終端をまたぐ可能性があるため。またがない場合はp2はNULLになるが、またぐ
+//!				場合は p1 のあとに p2 に続けて書き込まなければならない。
 //---------------------------------------------------------------------------
 bool tRisaPhaseVocoderDSP::GetInputBuffer(
 	size_t numsamplegranules,
@@ -253,6 +259,10 @@ size_t tRisaPhaseVocoderDSP::GetOutputReadySize()
 //! @param		p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
 //! @param		p2size	p2の表すブロックのサンプルグラニュール数(0があり得る)
 //! @return		準備されたサンプルが足りなければ偽、サンプルが足り、ポインタが返されれば真
+//! @note		p1 と p2 のように２つのポインタとそのサイズが返されるのは、
+//!				このバッファが実際はリングバッファで、リングバッファ内部のリニアなバッファ
+//!				の終端をまたぐ可能性があるため。またがない場合はp2はNULLになるが、またぐ
+//!				場合は p1 のあとに p2 を続けて読み出さなければならない。
 //---------------------------------------------------------------------------
 bool tRisaPhaseVocoderDSP::GetOutputBuffer(
 	size_t numsamplegranules,
@@ -289,11 +299,13 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 	if(RebuildParams)
 	{
 		// 窓関数の計算(ここではcosine窓)
+		float output_volume = 
+			TimeScale / FrameSize  / sqrt(FrequencyScale) / OverSampling * 4;
 		for(unsigned int i = 0; i < FrameSize; i++)
 		{
 			double window = cos(2.0*M_PI*((double)i+0.5)/FrameSize) * -0.5 + 0.5;
 			InputWindow[i]  = (float)(window);
-			OutputWindow[i] = (float)(window / FrameSize * TimeScale / sqrt(FrequencyScale) /2);
+			OutputWindow[i] = (float)(window *output_volume);
 		}
 
 		// そのほかのパラメータの再計算

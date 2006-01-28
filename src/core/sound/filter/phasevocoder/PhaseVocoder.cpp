@@ -58,6 +58,8 @@ void tRisaPhaseVocoder::InputChanged()
 	Clear();
 	DSP = new tRisaPhaseVocoderDSP(FrameSize, OverSampling,
 		InputFormat.Frequency, InputFormat.Channels);
+	DSP->SetTimeScale(TimeScale);
+	DSP->SetFrequencyScale(FrequencyScale);
 }
 //---------------------------------------------------------------------------
 
@@ -71,7 +73,7 @@ void tRisaPhaseVocoder::Filter()
 	std::vector<tRisaWaveSegment> segments;
 	std::vector<tRisaWaveEvent> events;
 
-	while(true) // DSP から出力が出てくるまで繰り返す)
+	while(true) // DSP から出力が出てくるまで繰り返す
 	{
 		// DSP の入力空きを調べる
 		size_t inputfree = DSP->GetInputFreeSize();
@@ -90,10 +92,11 @@ void tRisaPhaseVocoder::Filter()
 		// DSP に処理をさせる
 		(void) DSP->Process();
 
-		// DSP の出力空きを調べる
+		// DSP の出力バッファの準備済みサンプル数を調べる
 		size_t outputready = DSP->GetOutputReadySize();
 		if(outputready > 0)
 		{
+			// 準備済みサンプルがある
 
 			// バッファを確保
 			float * dest_buf = reinterpret_cast<float*>(PrepareQueue(outputready));

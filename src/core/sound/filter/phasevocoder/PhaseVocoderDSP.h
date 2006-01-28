@@ -20,8 +20,8 @@
 //---------------------------------------------------------------------------
 class tRisaPhaseVocoderDSP
 {
-	const static float MAX_TIME_SCALE = 2.0; //!< 最大の time scale 値
-	const static float MIN_TIME_SCALE = 0.5; //!< 最小の time scale 値
+	const static float MAX_TIME_SCALE = 1.95; //!< 最大の time scale 値
+	const static float MIN_TIME_SCALE = 0.25; //!< 最小の time scale 値
 
 	float * AnalWork; //!< 解析(Analyze)用バッファ(FrameSize個) 名前で笑わないように
 	float * SynthWork; //!< 合成用作業バッファ(FrameSize)

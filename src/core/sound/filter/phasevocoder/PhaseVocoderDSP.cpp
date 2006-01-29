@@ -38,8 +38,8 @@
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		framesize		フレームサイズ(2の累乗)
-//! @param		oversamp		オーバーサンプリング係数(2～)
+//! @param		framesize		フレームサイズ(2の累乗, 16～)
+//! @param		oversamp		オーバーサンプリング係数(2の累乗, 2～)
 //! @param		frequency		入力PCMのサンプリングレート
 //! @param		channels		入力PCMのチャンネル数
 //! @note		音楽用ではframesize=4096,oversamp=16ぐらいがよく、
@@ -286,8 +286,6 @@ bool tRisaPhaseVocoderDSP::GetOutputBuffer(
 }
 //---------------------------------------------------------------------------
 
-#include <stdio.h>
-
 //---------------------------------------------------------------------------
 //! @brief		処理を1ステップ行う
 //! @return		処理結果を表すenum
@@ -300,12 +298,12 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 	// パラメータの再計算の必要がある場合は再計算をする
 	if(RebuildParams)
 	{
-		// 窓関数の計算(ここではcosine窓)
+		// 窓関数の計算(ここではHamming窓)
 		float output_volume = 
 			TimeScale / FrameSize  / sqrt(FrequencyScale) / OverSampling * 4;
 		for(unsigned int i = 0; i < FrameSize; i++)
 		{
-			double window = cos(2.0*M_PI*((double)i+0.5)/FrameSize) * -0.5 + 0.5;
+			double window = cos(2.0*M_PI*((double)i+0.5)/FrameSize) * -0.46 + 0.54;
 			InputWindow[i]  = (float)(window);
 			OutputWindow[i] = (float)(window *output_volume);
 		}
@@ -450,6 +448,11 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 						AnalWork[index*2+1] +
 						frac * (AnalWork[index*2+3]-AnalWork[index*2+1]) );
 				}
+				else if(index < framesize_d2)
+				{
+					SynthWork[i*2  ] = AnalWork[index*2  ];
+					SynthWork[i*2+1] = AnalWork[index*2+1] * FrequencyScale;
+				}
 				else
 				{
 					SynthWork[i*2  ] = 0.0;
@@ -519,7 +522,8 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 	}
 
 	// LastSynthPhase を再調整するか
-	if(++LastSynthPhaseAdjustConter == LastSynthPhaseAdjustInterval)
+	LastSynthPhaseAdjustConter += LastSynthPhaseAdjustIncrement;
+	if(LastSynthPhaseAdjustConter >= LastSynthPhaseAdjustInterval)
 	{
 		// LastSynthPhase を再調整するカウントになった
 		LastSynthPhaseAdjustConter = 0;
@@ -529,8 +533,7 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 		// 適当な間隔でこれを unwrapping しないと、いずれ(数値が大きすぎて)精度
 		// 落ちが発生し、正常に合成が出来なくなってしまう。
 		// ただし、精度が保たれればよいため、毎回この unwrapping を行う必要はない。
-		// ここでは LastSynthPhaseAdjustInterval 回ごとに調整を行う。
-
+		// ここでは LastSynthPhaseAdjustInterval/LastSynthPhaseAdjustIncrement 回ごとに調整を行う。
 		for(unsigned int ch = 0; ch < Channels; ch++)
 		{
 			for(unsigned int i = 0; i < framesize_d2; i++)
@@ -564,7 +567,7 @@ void tRisaPhaseVocoderDSP::Deinterleave(float * dest, const float * src,
 	unsigned int numch = Channels;
 	while(len--)
 	{
-		dest[0] = *src * *win; // re
+		dest[0] = *src * *win;
 		src += numch;
 		dest ++;
 		win ++;

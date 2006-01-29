@@ -47,8 +47,9 @@ class tRisaPhaseVocoderDSP
 
 	bool	RebuildParams; //!< 内部的なパラメータなどを再構築しなければならないときに真
 
-	unsigned int LastSynthPhaseAdjustConter; //!< LastSynthPhase を補正する周期をはかるためのカウンタ
-	const static unsigned int LastSynthPhaseAdjustInterval = 64; //!< LastSynthPhase を補正する周期
+	unsigned long LastSynthPhaseAdjustConter; //!< LastSynthPhase を補正する周期をはかるためのカウンタ
+	const static unsigned long LastSynthPhaseAdjustIncrement = 0x03e8a444; //!< LastSynthPhaseAdjustConterに加算する値
+	const static unsigned long LastSynthPhaseAdjustInterval  = 0xfa2911fe; //!< LastSynthPhase を補正する周期
 
 	// 以下、RebuildParams が真の時に再構築されるパラメータ
 	// ここにあるメンバ以外では、InputWindow と OutputWindow も再構築される

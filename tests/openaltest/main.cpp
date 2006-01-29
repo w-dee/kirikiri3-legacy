@@ -79,10 +79,21 @@ int Application::OnRun()
 			RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 			NULL, NULL, NULL);
 
-//		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaRIFFWaveDecoder(RISSE_WS("v02.wav")));
-		boost::shared_ptr<tRisaWaveDecoder> decoder(new tRisaOggVorbisDecoder(RISSE_WS("test3.ogg")));
+
+		if(argc < 2)
+		{
+			wxFprintf(stderr, wxT("Specify filename to play\n"));
+			return 1;
+		}
+
+		boost::shared_ptr<tRisaWaveDecoder> decoder;
+		wxString filename = argv[1];
+		if(filename.Contains(wxT(".ogg")))
+			decoder = boost::shared_ptr<tRisaWaveDecoder>(new tRisaOggVorbisDecoder(ttstr(filename)));
+		else
+			decoder = boost::shared_ptr<tRisaWaveDecoder>(new tRisaRIFFWaveDecoder(ttstr(filename)));
+
 		boost::shared_ptr<tRisaWaveLoopManager> loop_manager(new tRisaWaveLoopManager(decoder));
-//		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaPitchShifter(1.1, 4096));
 		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaPhaseVocoder());
 //		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaReverb());
 		filter->SetInput(loop_manager);

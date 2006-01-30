@@ -498,7 +498,7 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 			LastSynthPhase[ch][i] -= tmp;
 			float ang = LastSynthPhase[ch][i];
 
-			// 直交座標系→極座標系
+			// 極座標系→直交座標系
 			SynthWork[i*2  ] = mag * cos(ang);
 			SynthWork[i*2+1] = mag * sin(ang);
 		}

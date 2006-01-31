@@ -240,12 +240,9 @@ bool inline operator < (const tRisaWaveLabel & lhs, const tRisaWaveLabel & rhs)
 
 //---------------------------------------------------------------------------
 //! @brief		Wave ループマネージャ
-/*! @note
-		
-*/
 //---------------------------------------------------------------------------
 class tRisaWaveDecoder;
-class tRisaWaveFormat;
+class tRisaWaveFileInfo;
 class tRisaWaveLoopManager : public tRisaWaveFilter
 {
 public:
@@ -269,8 +266,9 @@ private:
 	std::vector<tRisaWaveLoopLink> Links; //!< リンクの配列
 	std::vector<tRisaWaveLabel> Labels; //!< ラベルの配列
 	tRisseCriticalSection DataCS; // CS to protect other members
-	tRisaWaveFormat * Format; //!< PCMフォーマット
+	tRisaWaveFileInfo * FileInfo; //!< デコーダのファイル情報
 	boost::shared_ptr<tRisaWaveDecoder> Decoder; //!< デコーダ
+	bool FirstRendered; //!< 最初のサンプルをレンダリングしたかどうか
 
 	risse_int ShortCrossFadeHalfSamples;
 		//!< SmoothTimeHalf in sample unit
@@ -294,8 +292,10 @@ public:
 	tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> decoder);
 	virtual ~tRisaWaveLoopManager();
 
+private:
 	void SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decoder);
 
+public:
 	int GetFlag(risse_int index);
 	void CopyFlags(risse_int *dest);
 	bool GetFlagsModifiedByLabelExpression();
@@ -322,9 +322,9 @@ public:
 	void Reset() {;} //!< @note tRisaWaveLoopManager ではなにもしない
 	void SetInput(boost::shared_ptr<tRisaWaveFilter> input) {;}
 		//!< @note tRisaWaveLoopManager には入力するフィルタがないのでこのメソッドはなにもしない
+	void SuggestFormat(const tRisaWaveFormat & format);
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
-		std::vector<tRisaWaveSegment> &segments,
-		std::vector<tRisaWaveEvent> &events);
+		tRisaWaveSegmentQueue & segmentqueue);
 	const tRisaWaveFormat & GetFormat();
 	//------- tRisaWaveFilter メソッド  ここまで
 
@@ -333,7 +333,7 @@ private:
 		tRisaWaveLoopLink & link, bool ignore_conditions);
 
 	void GetEventAt(risse_int64 from, risse_int64 to,
-		std::vector<tRisaWaveEvent> & labels);
+		std::deque<tRisaWaveEvent> & labels);
 
 	void DoCrossFade(void *dest, void *src1, void *src2, risse_int samples,
 		risse_int ratiostart, risse_int ratioend);
@@ -343,17 +343,17 @@ private:
 //--- flag manupulation by label expression
 	enum tExpressionToken {
 		etUnknown,
-		etEOE,			// End of the expression
-		etLBracket,		// '['
-		etRBracket,		// ']'
-		etInteger,		// integer number
-		etEqual,		// '='
-		etPlus,			// '+'
-		etMinus,		// '-'
-		etPlusEqual,	// '+='
-		etMinusEqual,	// '-='
-		etIncrement,	// '++'
-		etDecrement		// '--'
+		etEOE,			//!< End of the expression
+		etLBracket,		//!< '['
+		etRBracket,		//!< ']'
+		etInteger,		//!< integer number
+		etEqual,		//!< '='
+		etPlus,			//!< '+'
+		etMinus,		//!< '-'
+		etPlusEqual,	//!< '+='
+		etMinusEqual,	//!< '-='
+		etIncrement,	//!< '++'
+		etDecrement		//!< '--'
 	};
 public:
 	static bool GetLabelExpression(const tRisaLabelStringType &label,

@@ -19,6 +19,19 @@
 //---------------------------------------------------------------------------
 // PCMサンプル型の定義
 //---------------------------------------------------------------------------
+/*
+	注意
+
+	これらの型はコンパイラのパディング次第では、想定した長さにならない。
+	たとえば、tRisaPCMTypes::i24 は 24bit linear PCM 型だが、本来の長さである
+	3バイトではなく、コンパイラはおそらくこれに1バイトのパディングを足し、
+	これを4バイトのサイズとして扱う。
+	そのためこれらの型をそのまま配列にしないこと (tRisaPCMTypes::i24 [1024]
+	のような型は正常に動作しない )。また、イテレーションを行う場合は
+	size メンバのサイズ(バイト単位)を参照しながらポインタをバイト単位で
+	加算していくこと (TODO:イテレータでも作ろうか)
+*/
+
 //! @brief  PCMサンプル型
 struct tRisaPCMTypes
 {
@@ -218,52 +231,48 @@ struct tRisaWaveFormat
 {
 	risse_uint Frequency;				//!< sample granule per sec
 	risse_uint Channels;				//!< number of channels (1=Mono, 2=Stereo ... etc)
-	risse_uint BitsPerSample;			//!< bits per one sample
-	risse_uint BytesPerSample;			//!< bytes per one sample
-	risse_uint64 TotalSampleGranules;	//!< total samples in sample granule; unknown for zero
-	risse_uint64 TotalTime;				//!< in ms; unknown for zero
-	risse_uint32 SpeakerConfig;			//!< bitwise OR of SPEAKER_* constants
-	bool IsFloat;						//!< true if the data is IEEE floating point
-	bool Seekable;						//!< true if able to seek, otherwise false
+	risse_uint32 SpeakerConfig;			//!< bitwise OR of SPEAKER_* constants (0=default)
+	tRisaPCMTypes::tType PCMType;			//!< PCM type
 
-	//! @brief		この形式に対応する tRisaPCMTypes::tType を返す
-	tRisaPCMTypes::tType GetRisaPCMType() const
+	/*
+		SuggestFormat でPCM形式を提案する場合は、
+		・Frequency
+		  特に指定しない場合は 0 を指定する
+		・Channels, SpeakerConfig
+		  特に指定しない場合は両方とも0を指定する
+		・PCMType
+		  tRisaPCMTypes::tunknown にする
+	*/
+
+	//! @brief		構造体のメンバを「特に指定しない」状態にする
+	void Reset()
 	{
-		if(IsFloat)
-		{
-			if(BytesPerSample == 4) return tRisaPCMTypes::tf32;
-		}
-		else
-		{
-			switch(BytesPerSample)
-			{
-			case 1: return tRisaPCMTypes::ti8;
-			case 2: return tRisaPCMTypes::ti16;
-			case 3: return tRisaPCMTypes::ti24;
-			case 4: return tRisaPCMTypes::ti32;
-			}
-		}
-		return tRisaPCMTypes::tunknown;
+		Frequency = 0;
+		Channels = 0;
+		SpeakerConfig = 0;
+		PCMType = tRisaPCMTypes::tunknown;
 	}
 
-	//! @brief tRisaPCMTypes::tType に従って PCM のタイプを設定する
-	//! @note BitsPerSample, BytesPerSample, IsFloat 以外のメンバは変更しない
-	void SetRisaPCMType(tRisaPCMTypes::tType type)
+	//! @brief 1サンプルグラニュールあたりのバイト数を得る
+	size_t GetSampleGranuleSize() const
 	{
-		switch(type)
-		{
-		case tRisaPCMTypes::ti8:	BitsPerSample =  8; BytesPerSample = 1; IsFloat = false; return;
-		case tRisaPCMTypes::ti16:	BitsPerSample = 16; BytesPerSample = 2; IsFloat = false; return;
-		case tRisaPCMTypes::ti24:	BitsPerSample = 24; BytesPerSample = 3; IsFloat = false; return;
-		case tRisaPCMTypes::ti32:	BitsPerSample = 32; BytesPerSample = 4; IsFloat = false; return;
-		case tRisaPCMTypes::tf32:	BitsPerSample = 32; BytesPerSample = 4; IsFloat = true;  return;
-		default:	return ;
-		}
+		return tRisaPCMTypes::TypeToSampleBytes(PCMType) * Channels;
 	}
 
 };
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		Wave入力ファイルの情報
+//---------------------------------------------------------------------------
+struct tRisaWaveFileInfo : public tRisaWaveFormat
+{
+	risse_uint64 TotalSampleGranules;	//!< total samples in sample granule; unknown for zero
+	risse_uint64 TotalTime;				//!< in ms; unknown for zero
+	bool Seekable;						//!< true if able to seek, otherwise false
+};
+//---------------------------------------------------------------------------
 
 
 #endif

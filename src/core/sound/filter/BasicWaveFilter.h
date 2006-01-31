@@ -38,8 +38,7 @@ protected:
 	risse_uint QueuedDataAllocSize; //!< キューに割り当てられたメモリサイズ(バイト単位)
 	risse_uint QueuedSampleGranuleCount; //!< キューに入っている全体のサンプルグラニュール数
 	risse_uint QueuedSampleGranuleRemain; //!< キューに入っている残りのサンプルグラニュール数
-	std::vector<tRisaWaveSegment> QueuedSegments; //!< キューに入っているセグメント
-	std::vector<tRisaWaveEvent> QueuedEvents; //!< キューに入っているイベント
+	tRisaWaveSegmentQueue SegmentQueue; //!< キューに入っているセグメント
 
 public:
 	tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_type);
@@ -47,9 +46,10 @@ public:
 
 	void Reset();
 	void SetInput(boost::shared_ptr<tRisaWaveFilter> input);
+	void SuggestFormat(const tRisaWaveFormat & format) {;}
+		//!< @note ここではなにもしない。必要ならばサブクラスで実装すること。
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
-		std::vector<tRisaWaveSegment> &segments,
-		std::vector<tRisaWaveEvent> &events);
+		tRisaWaveSegmentQueue & segmentqueue);
 	const tRisaWaveFormat & GetFormat();
 
 protected:
@@ -57,12 +57,12 @@ protected:
 	void * PrepareQueue(risse_uint numsamplegranules);
 		// キューを準備する
 	void Queue(risse_uint numsamplegranules,
-		const std::vector<tRisaWaveSegment> &segments, const std::vector<tRisaWaveEvent> &events);
+		const tRisaWaveSegmentQueue & segmentqueue);
 		// 出力キューにデータをおく
 
 	risse_uint Fill(void * dest, risse_uint numsamplegranules, tRisaPCMTypes::tType desired_type,
 		bool fill_silence,
-		std::vector<tRisaWaveSegment> &segments, std::vector<tRisaWaveEvent> &events);
+		tRisaWaveSegmentQueue & segmentqueue);
 		// dest に最低でも numsamplegranules のサンプルグラニュールを書き込む
 		// 実際に書き込まれたサンプル数が返る
 

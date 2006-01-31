@@ -38,6 +38,7 @@ class tRisaPhaseVocoderDSP
 	unsigned int Frequency; //!< PCM サンプリング周波数
 	unsigned int Channels; //!< PCM チャンネル数
 	unsigned int InputHopSize; //!< FrameSize/OverSampling
+	unsigned int OutputHopSize; //!< InputHopSize * TimeScale (SetTimeScale時に再計算される)
 
 	tRisaRingBuffer<float> InputBuffer; //!< 入力用リングバッファ
 	tRisaRingBuffer<float> OutputBuffer; //!< 出力用リングバッファ
@@ -53,7 +54,6 @@ class tRisaPhaseVocoderDSP
 
 	// 以下、RebuildParams が真の時に再構築されるパラメータ
 	// ここにあるメンバ以外では、InputWindow と OutputWindow も再構築される
-	unsigned int OutputHopSize; //!< InputHopSize * TimeScale
 	float OverSamplingRadian; //!< (2.0*M_PI)/OverSampling
 	float OverSamplingRadianRecp; //!< OverSamplingRadian の逆数
 	float FrequencyPerFilterBand; //!< Frequency/FrameSize
@@ -79,6 +79,9 @@ public:
 
 	float GetFrequencyScale() const { return FrequencyScale; } //!< 周波数軸方向のスケールを得る
 	void SetFrequencyScale(float v);
+
+	unsigned int GetInputHopSize() const { return InputHopSize; } //!< InputHopSizeを得る
+	unsigned int GetOutputHopSize() const { return OutputHopSize; } //!< OutputHopSize を得る
 
 private:
 	void Clear();

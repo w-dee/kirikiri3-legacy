@@ -25,7 +25,7 @@
 class tRisaOggVorbisDecoder : public tRisaWaveDecoder
 {
 	tRisseBinaryStream * Stream; //!< 入力ストリーム
-	tRisaWaveFormat Format; //!< サウンド形式
+	tRisaWaveFileInfo FileInfo; //!< サウンドファイル情報
 	OggVorbis_File InputFile; //!< OggVorbis_File instance
 	int CurrentSection;
 
@@ -34,7 +34,8 @@ public:
 
 	// tRisaWaveDecoder をオーバーライドするもの
 	virtual ~tRisaOggVorbisDecoder();
-	virtual void GetFormat(tRisaWaveFormat & format);
+	virtual void SuggestFormat(const tRisaWaveFormat & format);
+	virtual void GetFormat(tRisaWaveFileInfo & fileinfo);
 	virtual bool Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered);
 	virtual bool SetPosition(risse_uint64 samplepos);
 

@@ -109,7 +109,6 @@ void tRisaALBuffer::Clear()
 //---------------------------------------------------------------------------
 void tRisaALBuffer::FreeTempBuffers()
 {
-
 	free(RenderBuffer), RenderBuffer = NULL;
 	RenderBufferSize = 0;
 	free(ConvertBuffer), ConvertBuffer = NULL;
@@ -122,17 +121,14 @@ void tRisaALBuffer::FreeTempBuffers()
 //! @brief		OpenALバッファにデータを詰める
 //! @param		buffer		対象とする OpenAL バッファ
 //! @param		samples		最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
-//! @param		segments	再生セグメント情報を書き込む配列
-//! @param		events		通過イベント情報(=ラベル情報)を書き込む配列
+//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 //! @return		バッファにデータが入ったら真
 //---------------------------------------------------------------------------
 bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
-	std::vector<tRisaWaveSegment> &segments, std::vector<tRisaWaveEvent> &events)
+	tRisaWaveSegmentQueue & segmentqueue)
 {
 	// バッファにデータをレンダリングする
-
-	segments.clear(); // segments はここでクリアされるので注意
-	events.clear(); // events もここでクリアされるので注意
+	segmentqueue.Clear(); // queue はここでクリアされるので注意
 
 	risse_uint remain = samples;
 	if(remain == 0)
@@ -160,8 +156,8 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 
 		if(cont)
 		{
-			filter_pcm_type = format.GetRisaPCMType();
-			filter_sample_granule_bytes = format.BytesPerSample * format.Channels;
+			filter_pcm_type = format.PCMType;
+			filter_sample_granule_bytes = format.GetSampleGranuleSize();
 		}
 
 		// 一回のこのループ単位で要求するサイズを決定
@@ -234,18 +230,10 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 		}
 
 		// フィルタにデータを要求する
-		size_t events_start = events.size();
 		if(cont)
 			cont = Filter->Render(
 				filter_destination,
-				one_want, one_rendered, segments, events);
-
-		// events の Offset の修正
-		for(std::vector<tRisaWaveEvent>::iterator i = events.begin() + events_start;
-			i != events.end(); i++)
-		{
-			i->Offset += rendered;
-		}
+				one_want, one_rendered, segmentqueue);
 
 		// ループの初回でデコードが終了したか？
 		if(rendered == 0 && !cont)
@@ -363,9 +351,8 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 
 	// バッファにデータを流し込む
 	// TODO: segments と events のハンドリング
-	std::vector<tRisaWaveSegment> segments;
-	std::vector<tRisaWaveEvent> events;
-	bool filled = FillALBuffer(buffer, ALOneBufferRenderUnit, segments, events);
+	tRisaWaveSegmentQueue segumentqueue;
+	bool filled = FillALBuffer(buffer, ALOneBufferRenderUnit, segumentqueue);
 
 	// バッファにデータを割り当て、キューする
 	if(filled)
@@ -418,9 +405,8 @@ void tRisaALBuffer::Load()
 	// TODO: WaveLoopManager のリンク無効化 (そうしないと延々とサウンドを
 	//       メモリが無くなるまでデコードし続ける)
 	// TODO: segments と events のハンドリング
-	std::vector<tRisaWaveSegment> segments;
-	std::vector<tRisaWaveEvent> events;
-	bool filled = FillALBuffer(Buffers[0], 0, segments, events);
+	tRisaWaveSegmentQueue segumentqueue;
+	bool filled = FillALBuffer(Buffers[0], 0, segumentqueue);
 
 	if(!filled)
 		eRisaException::Throw(RISSE_WS_TR("no data to play"));

@@ -11,7 +11,7 @@
 //! @brief Waveセグメント/イベントキュー管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "WaveSegment.h"
+#include "WaveSegmentQueue.h"
 
 
 RISSE_DEFINE_SOURCE_ID(41279,59678,37773,16849,57737,10358,8969,57779);
@@ -46,6 +46,26 @@ void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveSegmentQueue & queue)
 //---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveSegment & segment)
 {
+	if(Segments.size() > 0)
+	{
+		// 既存のセグメントが 1 個以上ある
+		tRisaWaveSegment & last = Segments.back();
+		// 最後のセグメントとこれから追加しようとするセグメントが連続してるか？
+		if(last.Start + last.Length == segment.Start &&
+			(double)last.FilteredLength / last.Length ==
+			(double)segment.FilteredLength / segment.Length)
+		{
+			// 連続していて、かつ、比率も完全に同じなので
+			// 既存の最後のセグメントを延長する
+			// (ちなみにここで比率の比較の際に誤差が生じたとしても
+			//  大きな問題とはならない)
+			last.FilteredLength += segment.FilteredLength;
+			last.Length += segment.Length;
+			return ; // おわり
+		}
+	}
+
+	// 単純に最後に要素を追加
 	Segments.push_back(segment);
 }
 //---------------------------------------------------------------------------
@@ -53,8 +73,8 @@ void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveSegment & segment)
 
 //---------------------------------------------------------------------------
 //! @brief		tRisaWaveEventをエンキューする
-//! @note		Offset は修正されないので注意
 //! @param		queue		エンキューしたいtRisaWaveEventオブジェクト
+//! @note		Offset は修正されないので注意
 //---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveEvent & event)
 {
@@ -67,11 +87,11 @@ void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveEvent & event)
 //! @brief		tRisaWaveSegmentの配列をエンキューする
 //! @param		queue		エンキューしたい std::dequeue<tRisaWaveSegment>オブジェクト
 //---------------------------------------------------------------------------
-void Enqueue(const std::dequeue<tRisaWaveSegment> & segments)
+void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveSegment> & segments)
 {
 	// segment の追加
-	for(std::deque<tRisaWaveSegment>::iterator i = segment.begin();
-		i != segment.end(); i++)
+	for(std::deque<tRisaWaveSegment>::const_iterator i = segments.begin();
+		i != segments.end(); i++)
 		Enqueue(*i);
 }
 //---------------------------------------------------------------------------
@@ -81,14 +101,14 @@ void Enqueue(const std::dequeue<tRisaWaveSegment> & segments)
 //! @brief		tRisaWaveEventの配列をエンキューする
 //! @param		queue		エンキューしたい std::dequeue<tRisaWaveEvent>オブジェクト
 //---------------------------------------------------------------------------
-void Enqueue(const std::dequeue<tRisaWaveEvent> & events)
+void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveEvent> & events)
 {
 	// オフセットに加算する値を得る
 	risse_int64 event_offset = GetLength();
 
 	// event の追加
-	for(std::deque<tRisaWaveEvent>::iterator i = event.begin();
-		i != event.end(); i++)
+	for(std::deque<tRisaWaveEvent>::const_iterator i = events.begin();
+		i != events.end(); i++)
 	{
 		tRisaWaveEvent one_event(*i);
 		one_event.Offset += event_offset; // offset の修正
@@ -115,7 +135,7 @@ void tRisaWaveSegmentQueue::Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 le
 	{
 		if(Segments.front().FilteredLength <= remain)
 		{
-			// i->FilteredLength が remain 以下
+			// Segments.front().FilteredLength が remain 以下
 			// → この要素を dest にエンキューして this から削除
 			remain -= Segments.front().FilteredLength;
 			dest.Enqueue(Segments.front());
@@ -123,20 +143,20 @@ void tRisaWaveSegmentQueue::Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 le
 		}
 		else
 		{
-			// i->FilteredLength が remain よりも大きい
+			// Segments.front().FilteredLength が remain よりも大きい
 			// → 要素を途中でぶったぎって dest にエンキュー
 			// FilteredLength を元に切り出しを行ってるので
 			// Length は 線形補間を行う
 			risse_int64 newlength =
 				static_cast<risse_int64>(
-					(double)i->Length / (double)i->FilteredLength * remain);
+					(double)Segments.front().Length / (double)Segments.front().FilteredLength * remain);
 			if(newlength > 0)
-				dest.Enqueue(tRisaWaveSegment(i1, newlength, remain));
+				dest.Enqueue(tRisaWaveSegment(Segments.front().Start, newlength, remain));
 
-			// i の Length と FilteredLength を修正
-			i->Length -= remain;
-			i->FilteredLength -= newlength;
-			if(i->Length == 0 || i->FilteredLength == 0)
+			// Segments.front() の Length と FilteredLength を修正
+			Segments.front().Length -= remain;
+			Segments.front().FilteredLength -= newlength;
+			if(Segments.front().Length == 0 || Segments.front().FilteredLength == 0)
 			{
 				// ぶった切った結果 (線形補完した結果の誤差で)
 				// 長さが0になってしまった
@@ -178,7 +198,7 @@ risse_int64 tRisaWaveSegmentQueue::GetLength() const
 {
 	// キューの長さは すべての Segments のFilteredLengthの合計
 	risse_int64 length = 0;
-	for(std::deque<tRisaWaveSegment>::iterator i = Segments.begin();
+	for(std::deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
 		i != Segments.end(); i++)
 		length += i->FilteredLength;
 
@@ -197,7 +217,7 @@ void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_length)
 	// キューの FilteredLength を変化させる
 	risse_int64 total_length_was = GetLength(); // 変化前の長さ
 
-	if(total_length_was == 0) return 0; // 元の長さがないのでスケール出来ない
+	if(total_length_was == 0) return; // 元の長さがないのでスケール出来ない
 
 	// Segments の修正
 	risse_int64 offset_was = 0; // 変化前のオフセット

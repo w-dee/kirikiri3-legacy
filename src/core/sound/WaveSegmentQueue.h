@@ -76,12 +76,13 @@ public:
 	void Enqueue(const tRisaWaveSegmentQueue & queue);
 	void Enqueue(const tRisaWaveSegment & segment);
 	void Enqueue(const tRisaWaveEvent & event);
-	void Enqueue(const std::dequeue<tRisaWaveSegment> & segments);
-	void Enqueue(const std::dequeue<tRisaWaveEvent> & events);
+	void Enqueue(const std::deque<tRisaWaveSegment> & segments);
+	void Enqueue(const std::deque<tRisaWaveEvent> & events);
 	void Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 length);
 	risse_int64 GetLength() const;
 	void Scale(risse_int64 new_total_length);
 };
 //---------------------------------------------------------------------------
 
+#endif
 

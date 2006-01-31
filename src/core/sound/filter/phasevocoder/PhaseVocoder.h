@@ -32,6 +32,8 @@ class tRisaPhaseVocoder : public tRisaBasicWaveFilter
 	float	TimeScale; //!< 時間軸方向のスケール(出力/入力)
 	float	FrequencyScale; //!< 周波数方向のスケール(出力/入力)
 
+	tRisaWaveSegmentQueue SegmentQueue;
+
 public:
 	tRisaPhaseVocoder();
 	~tRisaPhaseVocoder();

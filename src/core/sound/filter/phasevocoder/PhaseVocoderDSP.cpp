@@ -69,7 +69,7 @@ tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
 	OverSampling = oversamp;
 	Frequency = frequency;
 	Channels = channels;
-	InputHopSize = FrameSize / OverSampling;
+	InputHopSize = OutputHopSize = FrameSize / OverSampling;
 
 	TimeScale = 1.0;
 	FrequencyScale = 1.0;
@@ -152,7 +152,12 @@ void tRisaPhaseVocoderDSP::SetTimeScale(float v)
 	if(TimeScale < MIN_TIME_SCALE) TimeScale = MIN_TIME_SCALE;
 	else if(TimeScale > MAX_TIME_SCALE) TimeScale = MAX_TIME_SCALE;
 	RebuildParams = true;
-} 
+	OutputHopSize = static_cast<unsigned int>(InputHopSize * TimeScale) & ~1;
+		// ↑ 偶数にアライン(重要)
+		// 複素数 re,im, re,im, ... の配列が逆FFTにより同数の(複素数の個数×2の)
+		// PCMサンプルに変換されるため、PCMサンプルも２個ずつで扱わないとならない.
+		// この実際の OutputHopSize に従って ExactTimeScale が計算される.
+}
 //---------------------------------------------------------------------------
 
 
@@ -286,6 +291,7 @@ bool tRisaPhaseVocoderDSP::GetOutputBuffer(
 }
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
 //! @brief		処理を1ステップ行う
 //! @return		処理結果を表すenum
@@ -309,11 +315,6 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 		}
 
 		// そのほかのパラメータの再計算
-		OutputHopSize = static_cast<unsigned int>(InputHopSize * TimeScale) & ~1;
-			// ↑ 偶数にアライン(重要)
-			// 複素数 re,im, re,im, ... の配列が逆FFTにより同数の(複素数の個数×2の)
-			// PCMサンプルに変換されるため、PCMサンプルも２個ずつで扱わないとならない.
-			// この実際の OutputHopSize に従って ExactTimeScale が計算される.
 		OverSamplingRadian = (float)((2.0*M_PI)/OverSampling);
 		OverSamplingRadianRecp = (float)(1.0/OverSamplingRadian);
 		FrequencyPerFilterBand = (float)((double)Frequency/FrameSize);

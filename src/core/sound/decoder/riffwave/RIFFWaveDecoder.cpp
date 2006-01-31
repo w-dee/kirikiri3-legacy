@@ -81,12 +81,12 @@ tRisaRIFFWaveDecoder::~tRisaRIFFWaveDecoder()
 
 
 //---------------------------------------------------------------------------
-//! @brief		サウンド形式を得る
-//! @param		format   形式を格納するための構造体
+//! @brief		サウンド情報を得る
+//! @param		fileinfo   情報を格納するための構造体
 //---------------------------------------------------------------------------
-void tRisaRIFFWaveDecoder::GetFormat(tRisaWaveFormat & format)
+void tRisaRIFFWaveDecoder::GetFormat(tRisaWaveFileInfo & fileinfo)
 {
-	format = Format;
+	fileinfo = FileInfo;
 }
 //---------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ void tRisaRIFFWaveDecoder::GetFormat(tRisaWaveFormat & format)
 //---------------------------------------------------------------------------
 bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
 {
-	risse_uint64 remain = Format.TotalSampleGranules - CurrentPos;
+	risse_uint64 remain = FileInfo.TotalSampleGranules - CurrentPos;
 	risse_uint writesamples = bufsamplelen < remain ? bufsamplelen : (risse_uint)remain;
 	if(writesamples == 0)
 	{
@@ -112,51 +112,59 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 		return false;
 	}
 
-	risse_uint readsize = writesamples * (Format.BytesPerSample * Format.Channels);
+	risse_uint readsize = writesamples * FileInfo.GetSampleGranuleSize();
 	risse_uint read = Stream->Read(buf, readsize);
 
 #if RISSE_HOST_IS_BIG_ENDIAN
 	// endian-ness conversion
-	if(Format.BytesPerSample == 2)
+	switch(FileInfo.PCMType)
 	{
-		risse_uint16 *p = (risse_uint16 *)buf;
-		risse_uint16 *plim = (risse_uint16 *)( (risse_uint8*)buf + read);
-		while(p < plim)
+	tRisaPCMTypes::ti16:
 		{
-			*p = (*p>>8) + (*p<<8);
-			p++;
+			risse_uint16 *p = (risse_uint16 *)buf;
+			risse_uint16 *plim = (risse_uint16 *)( (risse_uint8*)buf + read);
+			while(p < plim)
+			{
+				*p = (*p>>8) + (*p<<8);
+				p++;
+			}
 		}
-	}
-	else if(Format.BytesPerSample == 3)
-	{
-		risse_uint8 *p = (risse_uint8 *)buf;
-		risse_uint8 *plim = (risse_uint8 *)( (risse_uint8*)buf + read);
-		while(p < plim)
+		break;
+	tRisaPCMTypes::ti24:
 		{
-			risse_uint8 tmp = p[0];
-			p[0] = p[2];
-			p[2] = tmp;
-			p += 3;
+			risse_uint8 *p = (risse_uint8 *)buf;
+			risse_uint8 *plim = (risse_uint8 *)( (risse_uint8*)buf + read);
+			while(p < plim)
+			{
+				risse_uint8 tmp = p[0];
+				p[0] = p[2];
+				p[2] = tmp;
+				p += 3;
+			}
 		}
-	}
-	else if(Format.BytesPerSample == 4)
-	{
-		risse_uint32 *p = (risse_uint32 *)buf;
-		risse_uint32 *plim = (risse_uint32 *)( (risse_uint8*)buf + read);
-		while(p < plim)
+		break;
+	tRisaPCMTypes::ti32:
+	tRisaPCMTypes::tf32:
 		{
-			*p =
-				(*p &0xff000000) >> 24 +
-				(*p &0x00ff0000) >> 8 +
-				(*p &0x0000ff00) << 8 +
-				(*p &0x000000ff) << 24;
-			p ++;
+			risse_uint32 *p = (risse_uint32 *)buf;
+			risse_uint32 *plim = (risse_uint32 *)( (risse_uint8*)buf + read);
+			while(p < plim)
+			{
+				*p =
+					(*p &0xff000000) >> 24 +
+					(*p &0x00ff0000) >> 8 +
+					(*p &0x0000ff00) << 8 +
+					(*p &0x000000ff) << 24;
+				p ++;
+			}
 		}
+		break;
+	default:
+		break;
 	}
 #endif
 
-
-	rendered = read / (Format.BytesPerSample * Format.Channels);
+	rendered = read / FileInfo.GetSampleGranuleSize();
 	CurrentPos += rendered;
 
 	if(read < readsize || writesamples < bufsamplelen)
@@ -174,9 +182,9 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 //---------------------------------------------------------------------------
 bool tRisaRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
 {
-	if(Format.TotalSampleGranules <= samplepos) return false;
+	if(FileInfo.TotalSampleGranules <= samplepos) return false;
 
-	risse_uint64 streampos = DataStart + samplepos * Format.BytesPerSample * Format.Channels;
+	risse_uint64 streampos = DataStart + samplepos * FileInfo.GetSampleGranuleSize();
 	risse_uint64 possave = Stream->GetPosition();
 
 	if(streampos != Stream->Seek(streampos, RISSE_BS_SEEK_SET))
@@ -229,67 +237,68 @@ bool tRisaRIFFWaveDecoder::Open()
 	size = Stream->ReadI32LE();
 	next = Stream->GetPosition() + size;
 
-	// read Format
+	// read FileInfo
 	risse_uint16 format_tag = Stream->ReadI16LE(); // wFormatTag
 	if(format_tag != WAVE_FORMAT_PCM &&
 		format_tag != WAVE_FORMAT_IEEE_FLOAT &&
 		format_tag != WAVE_FORMAT_EXTENSIBLE) return false;
 
 
-	Format.Channels = Stream->ReadI16LE(); // nChannels
-	Format.Frequency = Stream->ReadI32LE(); // nSamplesPerSec
+	FileInfo.Channels = Stream->ReadI16LE(); // nChannels
+	FileInfo.Frequency = Stream->ReadI32LE(); // nSamplesPerSec
 
 	if(4 != Stream->Read(buf, 4)) return false; // nAvgBytesPerSec; discard
 
 	risse_uint16 block_align = Stream->ReadI16LE(); // nBlockAlign
 
-	Format.BitsPerSample = Stream->ReadI16LE(); // wBitsPerSample
+	int bits_per_sample = Stream->ReadI16LE(); // wBitsPerSample
+	bool is_float = false;
 
 	risse_uint16 ext_size = Stream->ReadI16LE(); // cbSize
 	if(format_tag == WAVE_FORMAT_EXTENSIBLE)
 	{
 		if(ext_size != 22) return false; // invalid extension length
-		if(Format.BitsPerSample & 0x07) return false;  // not integer multiply by 8
-		Format.BytesPerSample = Format.BitsPerSample / 8;
-		Format.BitsPerSample = Stream->ReadI16LE(); // wValidBitsPerSample
-		Format.SpeakerConfig = Stream->ReadI32LE(); // dwChannelMask
+		if(bits_per_sample & 0x07) return false;  // not integer multiply by 8
+		Stream->ReadI16LE(); // wValidBitsPerSample; discard
+		FileInfo.SpeakerConfig = Stream->ReadI32LE(); // dwChannelMask
 
 		risse_uint8 guid[16];
 		if(16 != Stream->Read(guid, 16)) return false;
 		if(!memcmp(guid, RISA__GUID_KSDATAFORMAT_SUBTYPE_PCM, 16))
-			Format.IsFloat = false;
+			is_float = false;
 		else if(!memcmp(guid, RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 16))
-			Format.IsFloat = true;
+			is_float = true;
 		else
 			return false;
 	}
 	else
 	{
-		if(Format.BitsPerSample & 0x07) return false; // not integer multiplyed by 8
-		Format.BytesPerSample = Format.BitsPerSample / 8;
+		if(bits_per_sample & 0x07) return false; // not integer multiplyed by 8
 
-		if(Format.Channels == 4)
-			Format.SpeakerConfig = 0;
-		else if(Format.Channels == 6)
-			Format.SpeakerConfig = 0;
+		if(FileInfo.Channels == 4)
+			FileInfo.SpeakerConfig = 0;
+		else if(FileInfo.Channels == 6)
+			FileInfo.SpeakerConfig = 0;
 		else
-			Format.SpeakerConfig = 0;
+			FileInfo.SpeakerConfig = 0;
 
-		Format.IsFloat = format_tag == WAVE_FORMAT_IEEE_FLOAT;
+		is_float = format_tag == WAVE_FORMAT_IEEE_FLOAT;
 	}
 
+	if(is_float && bits_per_sample == 32)
+		FileInfo.PCMType = tRisaPCMTypes::tf32;
+	else if(!is_float && bits_per_sample == 32)
+		FileInfo.PCMType = tRisaPCMTypes::ti32;
+	else if(!is_float && bits_per_sample == 24)
+		FileInfo.PCMType = tRisaPCMTypes::ti24;
+	else if(!is_float && bits_per_sample == 16)
+		FileInfo.PCMType = tRisaPCMTypes::ti16;
+	else if(!is_float && bits_per_sample == 8)
+		FileInfo.PCMType = tRisaPCMTypes::ti8;
+	else
+		return false;
 
-	if(Format.BitsPerSample > 32) return false; // too large bits
-	if(Format.BitsPerSample < 8) return false; // too less bits
-	if(Format.BitsPerSample > Format.BytesPerSample * 8)
-		return false; // bits per sample is larger than bytes per sample
-	if(Format.IsFloat)
-	{
-		if(Format.BitsPerSample != 32) return false; // not a 32-bit IEEE float
-		if(Format.BytesPerSample != 4) return false;
-	}
-
-	if((risse_int) block_align != (risse_int)(Format.BytesPerSample * Format.Channels))
+	if((risse_int) block_align != (risse_int)((bits_per_sample / 8) * FileInfo.Channels))
 		return false; // invalid align
 
 	if(next != Stream->Seek(next, RISSE_BS_SEEK_SET)) return false;
@@ -307,11 +316,11 @@ bool tRisaRIFFWaveDecoder::Open()
 		// data ends before "size" described in the header
 
 	// compute total sample count and total length in time
-	Format.TotalSampleGranules = size / (Format.Channels * Format.BytesPerSample);
-	Format.TotalTime = Format.TotalSampleGranules * 1000 / Format.Frequency;
+	FileInfo.TotalSampleGranules = size / (FileInfo.Channels * (bits_per_sample / 8));
+	FileInfo.TotalTime = FileInfo.TotalSampleGranules * 1000 / FileInfo.Frequency;
 
 	// the stream is seekable
-	Format.Seekable = true;
+	FileInfo.Seekable = true;
 
 	return true;
 }

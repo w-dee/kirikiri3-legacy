@@ -62,7 +62,7 @@ public:
 	size_t GetFreeSize() { return Size - DataSize; }
 
 	//! @brief	バッファから読み込むためのポインタを得る
-	//! @param	readsize 読み込みたいデータ数
+	//! @param	readsize 読み込みたいデータ数 ( 1 以上の整数; 0 を渡さないこと )
 	//! @param	p1		ブロック1の先頭へのポインタを格納するための変数
 	//! @param	p1size	p1の表すブロックのサイズ
 	//! @param	p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
@@ -113,7 +113,7 @@ public:
 	}
 
 	//! @brief	バッファに書き込むのポインタを得る
-	//! @param	writesize 書き込みたいデータ数
+	//! @param	writesize 書き込みたいデータ数 ( 1 以上の整数; 0 を渡さないこと )
 	//! @param	p1		ブロック1の先頭へのポインタを格納するための変数
 	//! @param	p1size	p1の表すブロックのサイズ
 	//! @param	p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)

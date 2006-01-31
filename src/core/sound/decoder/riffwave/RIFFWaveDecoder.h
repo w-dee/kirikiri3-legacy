@@ -23,7 +23,7 @@
 class tRisaRIFFWaveDecoder : public tRisaWaveDecoder
 {
 	tRisseBinaryStream * Stream; //!< 入力ストリーム
-	tRisaWaveFormat Format; //!< サウンド形式
+	tRisaWaveFileInfo FileInfo; //!< サウンド形式
 	risse_uint64 DataStart; //!< ファイル中でのデータの開始位置
 	risse_uint64 CurrentPos; //!< ファイル中でのデータの読み込み位置
 
@@ -32,7 +32,8 @@ public:
 
 	// tRisaWaveDecoder をオーバーライドするもの
 	virtual ~tRisaRIFFWaveDecoder();
-	virtual void GetFormat(tRisaWaveFormat & format);
+	virtual void SuggestFormat(const tRisaWaveFormat & format) {;}
+	virtual void GetFormat(tRisaWaveFileInfo & format);
 	virtual bool Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered);
 	virtual bool SetPosition(risse_uint64 samplepos);
 

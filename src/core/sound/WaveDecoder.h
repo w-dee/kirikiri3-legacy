@@ -19,14 +19,32 @@
 
 //---------------------------------------------------------------------------
 //! @brief	 デコーダインターフェース
+/*! @note
+	一般的なデコーダの使用方法の流れは、
+	1. インスタンスを作成する
+	2. (必要であれば) SuggestFormat で欲しいファイル形式を提案する
+	3. GetFormat でファイルフォーマットを取得する
+	4. Render や SetPosition を必要回数呼び出す。
+	となる。一度RenderやSetPositionを呼び出した後はファイル形式を変えることは
+	できないし、許されない。
+*/
 //---------------------------------------------------------------------------
 class tRisaWaveDecoder
 {
 public:
 	virtual ~tRisaWaveDecoder() {};
 
-	virtual void GetFormat(tRisaWaveFormat & format) = 0;
-		/*!< @brief フォーマットを取得する
+	virtual void SuggestFormat(const tRisaWaveFormat & format) = 0;
+		/*!< @brief Wave形式を提案する
+			@note
+			このインターフェースを利用する側が欲しいPCM形式を
+			提案する。ただし、デコーダ側はこの形式に従う必要はない。
+			また、利用する側はデコーダがこれに従うことを期待しては
+			ならない。
+		*/
+
+	virtual void GetFormat(tRisaWaveFileInfo & fileinfo) = 0;
+		/*!< @brief ファイル情報を取得する
 			@note
 			Retrieve PCM format, etc. */
 

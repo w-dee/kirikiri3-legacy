@@ -55,7 +55,7 @@ private:
 	void FreeTempBuffers();
 
 	bool FillALBuffer(ALuint buffer, risse_uint samples,
-		std::vector<tRisaWaveSegment> &segments, std::vector<tRisaWaveEvent> &events);
+		tRisaWaveSegmentQueue & segmentqueue);
 
 public:
 	void PrepareStream(ALuint source);

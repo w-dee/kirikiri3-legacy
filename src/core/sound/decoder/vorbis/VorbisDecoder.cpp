@@ -58,12 +58,25 @@ tRisaOggVorbisDecoder::~tRisaOggVorbisDecoder()
 
 
 //---------------------------------------------------------------------------
-//! @brief		サウンド形式を得る
-//! @param		format   形式を格納するための構造体
+//! @brief		PCMフォーマットを提案する
+//! @param		format   PCMフォーマット
 //---------------------------------------------------------------------------
-void tRisaOggVorbisDecoder::GetFormat(tRisaWaveFormat & format)
+void tRisaOggVorbisDecoder::SuggestFormat(const tRisaWaveFormat & format)
 {
-	format = Format;
+	// float が求められている場合は float にする
+	if(format.PCMType == tRisaPCMTypes::tf32)
+		FileInfo.PCMType = tRisaPCMTypes::tf32;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		サウンド情報を得る
+//! @param		fileinfo   情報を格納するための構造体
+//---------------------------------------------------------------------------
+void tRisaOggVorbisDecoder::GetFormat(tRisaWaveFileInfo & fileinfo)
+{
+	fileinfo = FileInfo;
 }
 //---------------------------------------------------------------------------
 
@@ -81,32 +94,70 @@ void tRisaOggVorbisDecoder::GetFormat(tRisaWaveFormat & format)
 bool tRisaOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
 {
 	// render output PCM
-	int pcmsize = Format.BytesPerSample;
 
-	int res;
+	long res;
 	risse_uint pos = 0; // decoded PCM (in bytes)
-	int remain = bufsamplelen * Format.Channels * pcmsize; // remaining PCM (in bytes)
 
-#if RISSE_HOST_IS_BIG_ENDIAN
-	static const int endianp = 1;
-#else
-	static const int endianp = 0;
-#endif
-
-	while(remain)
+	if(FileInfo.PCMType == tRisaPCMTypes::ti16)
 	{
-		do
+		// 16bit 整数 PCM 出力の場合
+		int pcmsize = 2;
+
+	#if RISSE_HOST_IS_BIG_ENDIAN
+		static const int endianp = 1;
+	#else
+		static const int endianp = 0;
+	#endif
+
+		int remain = bufsamplelen * FileInfo.Channels * pcmsize; // remaining PCM (in bytes)
+
+		while(remain)
 		{
-			res = ov_read(&InputFile, ((char*)buf + pos), remain,
-				endianp, pcmsize, 1, &CurrentSection); // decode via ov_read
-		} while(res<0); // ov_read would return a negative number
-						// if the decoding is not ready
-		if(res==0) break;
-		pos += res;
-		remain -= res;
+			do
+			{
+				res = ov_read(&InputFile, ((char*)buf + pos), remain,
+					endianp, pcmsize, 1, &CurrentSection); // decode via ov_read
+			} while(res<0); // ov_read would return a negative number
+							// if the decoding is not ready
+			if(res==0) break;
+			pos += res;
+			remain -= res;
+		}
+		pos /= (FileInfo.Channels * pcmsize); // convert to PCM position
+	}
+	else if(FileInfo.PCMType == tRisaPCMTypes::tf32)
+	{
+		// 32bit float PCM 出力の場合
+		float **pcm;
+		int remain = bufsamplelen; // remaining PCM (in sample granules)
+		int channels = FileInfo.Channels;
+
+		while(remain)
+		{
+			do
+			{
+				res = ov_read_float(&InputFile, &pcm, remain, &CurrentSection); // decode via ov_read_float
+			} while(res<0); // ov_read would return a negative number
+							// if the decoding is not ready
+			if(res==0) break;
+
+			// インターリーブする
+			for(int i = 0; i < channels; i++)
+			{
+				float * dest = (float*)((char*)buf + pos * sizeof(float) * channels) + i;
+				const float * src = pcm[i];
+				for(long j = 0; j < res; j++)
+				{
+					*dest = src[j];
+					dest += channels;
+				}
+			}
+
+			pos += res;
+			remain -= res;
+		}
 	}
 
-	pos /= (Format.Channels * pcmsize); // convert to PCM position
 
 	rendered = pos; // return renderd PCM samples
 
@@ -155,27 +206,25 @@ bool tRisaOggVorbisDecoder::Open()
 		return E_FAIL;
 	}
 
-	// set Format up
-	Format.Frequency = vi->rate;
-	Format.Channels = vi->channels;
-	Format.BitsPerSample = 16; // とりあえず 16bit 固定
-	Format.BytesPerSample = Format.BitsPerSample / 8;
+	// set FileInfo up
+	FileInfo.Frequency = vi->rate;
+	FileInfo.Channels = vi->channels;
+	FileInfo.PCMType = tRisaPCMTypes::tf32; // とりあえず整数 16bit
 
 	bool seekable = true;
 
 	risse_int64 pcmtotal = ov_pcm_total(&InputFile, -1); // PCM total samples
 	if(pcmtotal<0) seekable = false, pcmtotal = 0;
-	Format.TotalSampleGranules = pcmtotal;
+	FileInfo.TotalSampleGranules = pcmtotal;
 
 	double timetotal = ov_time_total(&InputFile, -1); // total time in sec.
 	if(timetotal<0)
-		seekable = false, Format.TotalTime = 0;
+		seekable = false, FileInfo.TotalTime = 0;
 	else
-		Format.TotalTime = static_cast<risse_uint64>(timetotal * 1000.0);
+		FileInfo.TotalTime = static_cast<risse_uint64>(timetotal * 1000.0);
 
-	Format.SpeakerConfig = 0; // 何も指定しない
-	Format.IsFloat = false; // とりあえず false 固定
-	Format.Seekable = seekable;
+	FileInfo.SpeakerConfig = 0; // 何も指定しない
+	FileInfo.Seekable = seekable;
 
 	return true; // 成功
 }

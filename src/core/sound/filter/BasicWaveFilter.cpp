@@ -65,8 +65,15 @@ void tRisaBasicWaveFilter::SetInput(boost::shared_ptr<tRisaWaveFilter> input)
 	Input = input;
 	InputFormat = input->GetFormat();
 	OutputFormat = InputFormat;
-	OutputFormat.SetRisaPCMType(DesiredOutputType);
+	OutputFormat.PCMType = DesiredOutputType;
 	InputChanged();
+
+	// もう一度入力フォーマットを得る
+	// (サブクラスがInputChanged内でSuggestFormatをInputに対して行い
+	//  その結果入力のPCM形式が変わっている可能性があるため)
+	InputFormat = input->GetFormat();
+	OutputFormat = InputFormat;
+	OutputFormat.PCMType = DesiredOutputType;
 }
 //---------------------------------------------------------------------------
 
@@ -76,17 +83,15 @@ void tRisaBasicWaveFilter::SetInput(boost::shared_ptr<tRisaWaveFilter> input)
 //! @param		dest		デコード結果を格納するバッファ
 //! @param		samples		デコードを行いたいサンプル数
 //! @param		written		実際にデコード出来たサンプル数
-//! @param		segments	再生セグメント情報を書き込む配列
-//! @param		events		通過イベント情報(=ラベル情報)を書き込む配列
+//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 //! @return		まだデコードすべきデータが残っているかどうか
 //---------------------------------------------------------------------------
 bool tRisaBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &written,
-	std::vector<tRisaWaveSegment> &segments,
-	std::vector<tRisaWaveEvent> &events)
+	tRisaWaveSegmentQueue & segmentqueue)
 {
 	written = 0;
 	risse_uint8 * dest_buf = reinterpret_cast<risse_uint8*>(dest);
-	risse_uint sample_granule_bytes = OutputFormat.Channels * OutputFormat.BytesPerSample;
+	risse_uint sample_granule_bytes = OutputFormat.GetSampleGranuleSize();
 
 	while(samples > 0)
 	{
@@ -108,40 +113,8 @@ bool tRisaBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &wr
 			QueuedData + copy_start * sample_granule_bytes,
 			one_unit * sample_granule_bytes);
 
-		// segments の該当部分をコピー
-		risse_int64 ofs = 0;
-		for(std::vector<tRisaWaveSegment>::iterator i = QueuedSegments.begin();
-			i != QueuedSegments.end(); i++)
-		{
-			// [ofs, ofs+i->FilteredLength) と [copy_start, copy_start + one_unit) の交差を得る
-			risse_int64 i1, i2;
-			i1 = std::max(ofs, static_cast<risse_int64>(copy_start));
-			i2 = std::min(ofs + i->FilteredLength, static_cast<risse_int64>(copy_start + one_unit));
-			if(i2 > i1)
-			{
-				// length は線形補間を行う
-				risse_int64 length =
-					static_cast<risse_int64>(
-						(double)i->Length / (double)i->FilteredLength * (i2-i1));
-				if(length > 0)
-					segments.push_back(tRisaWaveSegment(i1, length, i2-i1));
-			}
-			ofs += i->FilteredLength;
-		}
-
-		// events の該当部分をコピー
-		for(std::vector<tRisaWaveEvent>::iterator i = QueuedEvents.begin();
-			i != QueuedEvents.end(); i++)
-		{
-			if(static_cast<risse_uint>(i->Offset) >= copy_start &&
-				static_cast<risse_uint>(i->Offset) < copy_start + one_unit)
-			{
-				// イベントのオフセットを修正して push
-				tRisaWaveEvent ev(*i);
-				ev.Offset = ev.Offset - copy_start + written;
-				events.push_back(ev);
-			}
-		}
+		// SegmentQueue の先頭から one_unit 分を segmentqueue にコピー
+		SegmentQueue.Dequeue(segmentqueue, one_unit);
 
 		// カウンタの調整
 		QueuedSampleGranuleRemain -= one_unit;
@@ -175,7 +148,7 @@ const tRisaWaveFormat & tRisaBasicWaveFilter::GetFormat()
 void * tRisaBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 {
 	// キューを準備する
-	risse_uint buffer_size_needed = numsamplegranules * OutputFormat.BytesPerSample * OutputFormat.Channels;
+	risse_uint buffer_size_needed = numsamplegranules * OutputFormat.GetSampleGranuleSize();
 	if(QueuedDataAllocSize < buffer_size_needed)
 	{
 		void * newbuffer = realloc(QueuedData, buffer_size_needed);
@@ -191,8 +164,7 @@ void * tRisaBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 		}
 	}
 
-	QueuedSegments.clear();
-	QueuedEvents.clear();
+	SegmentQueue.Clear();
 
 	QueuedSampleGranuleCount = QueuedSampleGranuleRemain = 0;
 
@@ -204,22 +176,15 @@ void * tRisaBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 //---------------------------------------------------------------------------
 //! @brief		出力キューにデータをおく
 //! @param		numsamplegranules	サンプル数
-//! @param		segments			セグメント配列
-//! @param		events				イベント配列
+//! @param		segmentqueue	再生セグメントキュー情報
 //---------------------------------------------------------------------------
 void tRisaBasicWaveFilter::Queue(risse_uint numsamplegranules,
-		const std::vector<tRisaWaveSegment> &segments, const std::vector<tRisaWaveEvent> &events)
+		const tRisaWaveSegmentQueue & segmentqueue)
 {
 	// 出力キューにデータをおく
 	QueuedSampleGranuleCount = numsamplegranules;
 	QueuedSampleGranuleRemain = QueuedSampleGranuleCount;
-
-	for(std::vector<tRisaWaveSegment>::const_iterator i = segments.begin();
-		i != segments.end(); i++)
-		QueuedSegments.push_back(*i);
-	for(std::vector<tRisaWaveEvent>::const_iterator i = events.begin();
-		i != events.end(); i++)
-		QueuedEvents.push_back(*i);
+	SegmentQueue = segmentqueue;
 }
 //---------------------------------------------------------------------------
 
@@ -230,14 +195,13 @@ void tRisaBasicWaveFilter::Queue(risse_uint numsamplegranules,
 //! @param		numsamplegranules	欲しいサンプルグラニュール数
 //! @param		desired_type		欲しいPCM形式
 //! @param		fill_silence		欲しいサンプルグラニュール数に入力が満たないとき、残りを無音で埋めるかどうか
-//! @param		segments	再生セグメント情報を書き込む配列
-//! @param		events		通過イベント情報(=ラベル情報)を書き込む配列
+//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 //! @return		実際に書き込まれたサンプルグラニュール数
 //---------------------------------------------------------------------------
 risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 	tRisaPCMTypes::tType desired_type, 
 	bool fill_silence,
-	std::vector<tRisaWaveSegment> &segments, std::vector<tRisaWaveEvent> &events)
+	tRisaWaveSegmentQueue & segmentqueue)
 {
 	// バッファにデータをレンダリングする
 	if(!Input) return 0; // Input が無い
@@ -269,8 +233,8 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 
 		if(cont)
 		{
-			filter_pcm_type = format.GetRisaPCMType();
-			filter_sample_granule_bytes = format.BytesPerSample * format.Channels;
+			filter_pcm_type = format.PCMType;
+			filter_sample_granule_bytes = format.GetSampleGranuleSize();
 		}
 
 		// 一回のこのループ単位で要求するサイズを決定
@@ -326,18 +290,10 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 		}
 
 		// フィルタにデータを要求する
-		size_t events_start = events.size();
 		if(cont)
 			cont = Input->Render(
 				filter_destination,
-				one_want, one_rendered, segments, events);
-
-		// events の Offset の修正
-		for(std::vector<tRisaWaveEvent>::iterator i = events.begin() + events_start;
-			i != events.end(); i++)
-		{
-			i->Offset += rendered;
-		}
+				one_want, one_rendered, segmentqueue);
 
 		// ループの初回でデコードが終了したか？
 		if(rendered == 0 && !cont)

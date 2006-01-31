@@ -28,65 +28,6 @@ RISSE_DEFINE_SOURCE_ID(8592,58083,15398,17259,37009,18155,50172,63359);
 	#include "WaveDecoder.h"
 #endif
 
-#ifndef RISSE_HOST_IS_BIG_ENDIAN
-	#define RISSE_HOST_IS_BIG_ENDIAN 0
-#endif
-
-//---------------------------------------------------------------------------
-// PCMサンプル型の定義
-//---------------------------------------------------------------------------
-#ifdef __WIN32__
-	// for assembler compatibility
-	#pragma pack(push,1)
-#endif
-//! @brief  8bit PCM型
-struct tRisaPCM8
-{
-	risse_uint8 value;
-	tRisaPCM8(risse_int v) { value = (risse_uint8)(v + 0x80); }
-	void operator = (risse_int v) { value = (risse_uint8)(v + 0x80); }
-	operator risse_int () const { return (risse_int)value - 0x80; }
-};
-//! @brief  24bit PCM型
-struct tRisaPCM24
-{
-	risse_uint8 value[3];
-	tRisaPCM24(risse_int v)
-	{
-		operator = (v);
-	}
-	void operator =(risse_int v)
-	{
-#if RISSE_HOST_IS_BIG_ENDIAN
-		value[0] = (v & 0xff0000) >> 16;
-		value[1] = (v & 0x00ff00) >> 8;
-		value[2] = (v & 0x0000ff);
-#else
-		value[0] = (v & 0x0000ff);
-		value[1] = (v & 0x00ff00) >> 8;
-		value[2] = (v & 0xff0000) >> 16;
-#endif
-	}
-	operator risse_int () const
-	{
-		risse_int t;
-#if RISSE_HOST_IS_BIG_ENDIAN
-		t = ((risse_int)value[0] << 16) + ((risse_int)value[1] << 8) + ((risse_int)value[2]);
-#else
-		t = ((risse_int)value[2] << 16) + ((risse_int)value[1] << 8) + ((risse_int)value[0]);
-#endif
-		t |= -(t&0x800000); // extend sign
-		return t;
-	}
-};
-#ifdef __WIN32__
-	#pragma pack(pop)
-#endif
-/*
-	16bit型と32bit型はそれぞれrisse_int16とrisse_int32のプリミティブ型を用いる
-*/
-//---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------
@@ -100,7 +41,7 @@ struct tRisaPCM24
 //! @param		channels	対象PCMのチャンネル数
 //---------------------------------------------------------------------------
 template <typename T>
-static void RisaCrossFadeIntegerBlend(void *dest, void *src1, void *src2,
+static void RisaCrossFadeBlend(void *dest, void *src1, void *src2,
 	risse_int ratiostart, risse_int ratioend,
 	risse_int samples, risse_int channels)
 {
@@ -108,23 +49,25 @@ static void RisaCrossFadeIntegerBlend(void *dest, void *src1, void *src2,
 		(
 			(ratioend - ratiostart) * ((risse_int64)1<<32) / 100
 		) / samples);
-	const T *s1 = (const T *)src1;
-	const T *s2 = (const T *)src2;
-	T *out = (T *)dest;
+
+	risse_uint8 * d = reinterpret_cast<risse_uint8*>(dest);
+	const risse_uint8 * s1 = reinterpret_cast<const risse_uint8*>(src1);
+	const risse_uint8 * s2 = reinterpret_cast<const risse_uint8*>(src2);
+
 	risse_uint ratio = (risse_int)(ratiostart * ((risse_int64)1<<32) / 100);
 	for(risse_int i = 0; i < samples; i++)
 	{
 		for(risse_int j = channels - 1; j >= 0; j--)
 		{
-			risse_int si1 = (risse_int)*s1;
-			risse_int si2 = (risse_int)*s2;
+			risse_int32 si1 = reinterpret_cast<const T*>(s1)->geti32();
+			risse_int32 si2 = reinterpret_cast<const T*>(s2)->geti32();
 			risse_int o = (risse_int) (
 						(((risse_int64)si2 * (risse_uint64)ratio) >> 32) +
 						(((risse_int64)si1 * (RISSE_UI64_VAL(0x100000000) - (risse_uint64)ratio) ) >> 32) );
-			*out = o;
-			s1 ++;
-			s2 ++;
-			out ++;
+			reinterpret_cast<T*>(d)->seti32(o);
+			d += T::size;
+			s1 += T::size;
+			s2 += T::size;
 		}
 		ratio += blend_step;
 	}
@@ -148,8 +91,9 @@ tRisaWaveLoopManager::tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> d
 	CrossFadePosition = 0;
 	IgnoreLinks = false;
 	Looping = false;
-	Format = new tRisaWaveFormat;
-	memset(Format, 0, sizeof(*Format));
+	FileInfo = new tRisaWaveFileInfo;
+	memset(FileInfo, 0, sizeof(*FileInfo));
+	FirstRendered = false;
 
 	ClearFlags();
 	FlagsModifiedByLabelExpression = false;
@@ -165,7 +109,7 @@ tRisaWaveLoopManager::tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> d
 tRisaWaveLoopManager::~tRisaWaveLoopManager()
 {
 	ClearCrossFadeInformation();
-	delete Format;
+	delete FileInfo;
 }
 //---------------------------------------------------------------------------
 
@@ -176,14 +120,9 @@ tRisaWaveLoopManager::~tRisaWaveLoopManager()
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decoder)
 {
-	// set decoder and compute ShortCrossFadeHalfSamples
+	// set decoder
 	Decoder = decoder;
-	if(decoder)
-		decoder->GetFormat(*Format);
-	else
-		memset(Format, 0, sizeof(*Format));
-	ShortCrossFadeHalfSamples =
-		Format->Frequency * SmoothTimeHalf / 1000;
+	FirstRendered = false;
 }
 //---------------------------------------------------------------------------
 
@@ -380,14 +319,24 @@ void tRisaWaveLoopManager::SetPosition(risse_int64 pos)
 //! @param		dest		デコード結果を格納するバッファ
 //! @param		samples		デコードを行いたいサンプル数
 //! @param		written		実際にデコード出来たサンプル数
-//! @param		segments	再生セグメント情報を書き込む配列
-//! @param		events		通過イベント情報(=ラベル情報)を書き込む配列
+//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 //! @return		まだデコードすべきデータが残っているかどうか
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &written,
-		std::vector<tRisaWaveSegment> &segments,
-		std::vector<tRisaWaveEvent> &events)
+		tRisaWaveSegmentQueue & segmentqueue)
 {
+	// check if this is the first try to render
+	if(!FirstRendered)
+	{
+		if(Decoder)
+			Decoder->GetFormat(*FileInfo);
+		else
+			memset(FileInfo, 0, sizeof(*FileInfo));
+		ShortCrossFadeHalfSamples =
+			FileInfo->Frequency * SmoothTimeHalf / 1000;
+		FirstRendered = true;
+	}
+
 	// decode from current position
 	volatile tRisseCriticalSectionHolder CS(DataCS);
 
@@ -396,8 +345,13 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 	risse_int give_up_count = 0;
 
-	while(written != samples/* && Position < Format->TotalSamples*/)
+	std::deque<tRisaWaveEvent> events;
+
+	while(written != samples/* && Position < FileInfo->TotalSamples*/)
 	{
+		// clear events
+		events.clear();
+
 		// decide next operation
 		risse_int64 next_event_pos;
 		bool next_not_found = false;
@@ -407,7 +361,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 		tRisaWaveLoopLink link;
 		if(!IgnoreLinks && GetNearestLink(Position, link, false))
 		{
-			// nearest event found ...
+			// nearest link found ...
 			if(link.From == Position)
 			{
 				// do jump
@@ -447,12 +401,12 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 					before_count = link.From - Position;
 					// adjust after count
 					risse_int after_count = ShortCrossFadeHalfSamples;
-					if(Format->TotalSampleGranules - link.From < static_cast<risse_uint64>(after_count))
+					if(FileInfo->TotalSampleGranules - link.From < static_cast<risse_uint64>(after_count))
 						after_count =
-							(risse_int)(Format->TotalSampleGranules - link.From);
-					if(Format->TotalSampleGranules - link.To < static_cast<risse_uint64>(after_count))
+							(risse_int)(FileInfo->TotalSampleGranules - link.From);
+					if(FileInfo->TotalSampleGranules - link.To < static_cast<risse_uint64>(after_count))
 						after_count =
-							(risse_int)(Format->TotalSampleGranules - link.To);
+							(risse_int)(FileInfo->TotalSampleGranules - link.To);
 					tRisaWaveLoopLink over_to_link;
 					if(GetNearestLink(link.To, over_to_link, true))
 					{
@@ -468,7 +422,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 					{
 						risse_int alloc_size =
 							(before_count + after_count) * 
-								Format->BytesPerSample * Format->Channels;
+								FileInfo->GetSampleGranuleSize();
 						CrossFadeSamples = new risse_uint8[alloc_size];
 						src1 = new risse_uint8[alloc_size];
 						src2 = new risse_uint8[alloc_size];
@@ -499,7 +453,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 						// perform crossfade
 						risse_int after_offset =
-							before_count * Format->BytesPerSample * Format->Channels;
+							before_count * FileInfo->GetSampleGranuleSize();
 						DoCrossFade(CrossFadeSamples,
 							src1, src2, before_count, 0, 50);
 						DoCrossFade(CrossFadeSamples + after_offset,
@@ -541,14 +495,13 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 			if(one_unit > CrossFadeLen - CrossFadePosition)
 				one_unit = CrossFadeLen - CrossFadePosition;
 		}
-		segments.push_back(tRisaWaveSegment(Position, one_unit));
+		segmentqueue.Enqueue(tRisaWaveSegment(Position, one_unit));
 
 		if(one_unit > 0) give_up_count = 0; // reset give up count
 
 		// evaluate each label
-		risse_uint label_base = events.size();
 		GetEventAt(Position, Position + one_unit, events);
-		for(std::vector<tRisaWaveEvent>::iterator i = events.begin() + label_base;
+		for(std::deque<tRisaWaveEvent>::iterator i = events.begin();
 			i != events.end(); i++)
 		{
 			if(i->Name.c_str()[0] == ':')
@@ -559,9 +512,12 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 		}
 
 		// calculate each label offset
-		for(std::vector<tRisaWaveEvent>::iterator i = events.begin() + label_base;
+		for(std::deque<tRisaWaveEvent>::iterator i = events.begin();
 			i != events.end(); i++)
 			i->Offset = (risse_int)(i->Position - Position) + written;
+
+		// enqueue events
+		segmentqueue.Enqueue(events);
 
 		// decode or copy
 		if(!CrossFadeSamples)
@@ -585,7 +541,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 				Position = 0;
 				Decoder->SetPosition(0);
 			}
-			d += decoded * Format->BytesPerSample * Format->Channels;
+			d += decoded * FileInfo->GetSampleGranuleSize();
 		}
 		else
 		{
@@ -593,12 +549,12 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 			// copy prepared samples
 			memcpy((void *)d,
 				CrossFadeSamples +
-					CrossFadePosition * Format->BytesPerSample * Format->Channels,
-				one_unit * Format->BytesPerSample * Format->Channels);
+					CrossFadePosition * FileInfo->GetSampleGranuleSize(),
+				one_unit * FileInfo->GetSampleGranuleSize());
 			CrossFadePosition += one_unit;
 			Position += one_unit;
 			written += one_unit;
-			d += one_unit * Format->BytesPerSample * Format->Channels;
+			d += one_unit * FileInfo->GetSampleGranuleSize();
 			if(CrossFadePosition == CrossFadeLen)
 			{
 				// crossfade has finished
@@ -612,12 +568,34 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 
 //---------------------------------------------------------------------------
+//! @brief		PCMフォーマットを提案する
+//! @param		format   PCMフォーマット
+//---------------------------------------------------------------------------
+void tRisaWaveLoopManager::SuggestFormat(const tRisaWaveFormat & format)
+{
+	// PCM 形式の変更は、最初に Render が呼ばれるよりも前でなければならない
+	if(!FirstRendered)
+	{
+		// そのまま Decoder に要求を流す
+		Decoder->SuggestFormat(format);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		PCM形式を返す
 //! @return		PCM形式への参照
 //---------------------------------------------------------------------------
 const tRisaWaveFormat & tRisaWaveLoopManager::GetFormat()
 {
-	return *Format;
+	if(!FirstRendered)
+	{
+		// まだ形式を入力から得てない場合はここで得る
+		Decoder->GetFormat(*FileInfo);
+	}
+
+	return *FileInfo;
 }
 //---------------------------------------------------------------------------
 
@@ -737,7 +715,7 @@ bool tRisaWaveLoopManager::GetNearestLink(risse_int64 current,
 //! @param		events		結果を格納する配列
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
-		std::vector<tRisaWaveEvent> & events)
+		std::deque<tRisaWaveEvent> & events)
 {
 	volatile tRisseCriticalSectionHolder CS(FlagsCS);
 
@@ -805,48 +783,30 @@ void tRisaWaveLoopManager::DoCrossFade(void *dest, void *src1,
 	// using src1 (fading out) and src2 (fading in).
 	if(samples == 0) return; // nothing to do
 
-	if(Format->IsFloat)
+	switch(FileInfo->PCMType)
 	{
-		float blend_step =
-			(float)((ratioend - ratiostart) / 100.0 / samples);
-		const float *s1 = (const float *)src1;
-		const float *s2 = (const float *)src2;
-		float *out = (float *)dest;
-		float ratio = ratiostart / 100.0;
-		for(risse_int i = 0; i < samples; i++)
-		{
-			for(risse_int j = Format->Channels - 1; j >= 0; j--)
-			{
-				*out = *s1 + (*s2 - *s1) * ratio;
-				s1 ++;
-				s2 ++;
-				out ++;
-			}
-			ratio += blend_step;
-		}
-	}
-	else
-	{
-		if(Format->BytesPerSample == 1)
-		{
-			RisaCrossFadeIntegerBlend<tRisaPCM8>(dest, src1, src2,
-				ratiostart, ratioend, samples, Format->Channels);
-		}
-		else if(Format->BytesPerSample == 2)
-		{
-			RisaCrossFadeIntegerBlend<risse_int16>(dest, src1, src2,
-				ratiostart, ratioend, samples, Format->Channels);
-		}
-		else if(Format->BytesPerSample == 3)
-		{
-			RisaCrossFadeIntegerBlend<tRisaPCM24>(dest, src1, src2,
-				ratiostart, ratioend, samples, Format->Channels);
-		}
-		else if(Format->BytesPerSample == 4)
-		{
-			RisaCrossFadeIntegerBlend<risse_int32>(dest, src1, src2,
-				ratiostart, ratioend, samples, Format->Channels);
-		}
+	case tRisaPCMTypes::ti8 :			//!< 8bit integer linear PCM type
+		RisaCrossFadeBlend<tRisaPCMTypes::i8>(dest, src1, src2,
+			ratiostart, ratioend, samples, FileInfo->Channels);
+		break;
+	case tRisaPCMTypes::ti16:			//!< 16bit integer linear PCM type
+		RisaCrossFadeBlend<tRisaPCMTypes::i16>(dest, src1, src2,
+			ratiostart, ratioend, samples, FileInfo->Channels);
+		break;
+	case tRisaPCMTypes::ti24:			//!< 24bit integer linear PCM type
+		RisaCrossFadeBlend<tRisaPCMTypes::i24>(dest, src1, src2,
+			ratiostart, ratioend, samples, FileInfo->Channels);
+		break;
+	case tRisaPCMTypes::ti32:			//!< 32bit integer linear PCM type
+		RisaCrossFadeBlend<tRisaPCMTypes::i32>(dest, src1, src2,
+			ratiostart, ratioend, samples, FileInfo->Channels);
+		break;
+	case tRisaPCMTypes::tf32:			//!< 32bit float linear PCM type
+		RisaCrossFadeBlend<tRisaPCMTypes::f32>(dest, src1, src2,
+			ratiostart, ratioend, samples, FileInfo->Channels);
+		break;
+	default:
+		break; // unknown type
 	}
 }
 //---------------------------------------------------------------------------

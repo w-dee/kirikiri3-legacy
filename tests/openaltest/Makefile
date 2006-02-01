@@ -36,7 +36,8 @@ INCLUDES= \
 		-I$(CORE_DIR)/base/decoder             \
 		-I$(CORE_DIR)/base/decoder/riffwave    \
 		-I$(CORE_DIR)/base/decoder/vorbis      \
-		-I$(CORE_DIR)/utils                    \
+		-I$(CORE_DIR)/base/utils               \
+		-I$(CORE_DIR)/base/log                 \
 		-I$(CORE_DIR)/sound                    \
 		-I$(CORE_DIR)/sound/decoder            \
 		-I$(CORE_DIR)/sound/decoder/riffwave   \
@@ -65,8 +66,9 @@ CPPFILES = \
 		$(CORE_DIR)/base/fs/xp4fs/XP4FSBind.cpp                      \
 		$(CORE_DIR)/base/exception/RisaException.cpp                 \
 		$(CORE_DIR)/base/script/RisseEngine.cpp                      \
-		$(CORE_DIR)/utils/fftsg.cpp                                  \
-		$(CORE_DIR)/utils/Singleton.cpp                              \
+		$(CORE_DIR)/base/utils/fftsg.cpp                             \
+		$(CORE_DIR)/base/utils/Singleton.cpp                         \
+		$(CORE_DIR)/base/log/Log.cpp                                 \
 		$(CORE_DIR)/sound/WaveFormatConverter.cpp                    \
 		$(CORE_DIR)/sound/WaveLoopManager.cpp                        \
 		$(CORE_DIR)/sound/ALCommon.cpp                               \

@@ -427,6 +427,7 @@ tRisseString RisseInt32ToHex(risse_uint32 num, int zeropad = 8);
 /*[*/
 typedef tRisseString ttstr;
 /*]*/
+extern tRisseString RisseEmptyString; // holds an empty string
 //---------------------------------------------------------------------------
 } // namespace Risse
 #endif

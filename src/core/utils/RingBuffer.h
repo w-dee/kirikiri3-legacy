@@ -105,14 +105,36 @@ public:
 	//! @param	advance		進める要素数
 	//! @note	このメソッドは実際に advance < GetDataSize() であることを確認しない。
 	//!			必要ならば呼び出し側でチェックすること。
-	void AdvanceReadPos(size_t advance)
+	void AdvanceReadPos(size_t advance = 1)
 	{
 		ReadPos += advance;
 		if(ReadPos >= Size) ReadPos -= Size;
 		DataSize -= advance;
 	}
 
-	//! @brief	バッファに書き込むのポインタを得る
+	//! @brief	最初の要素を返す
+	//! @return	最初の要素への参照
+	//! @note	最初の要素への参照が帰ってくる。要素がバッファ内に無いときは無効な要素
+	//!			(アクセスできない要素)が帰ってくるので、事前にバッファ内に要素が1つ以上
+	//!			存在することを確認すること。このメソッドは読み込みポインタを移動しない。
+	const T & GetFirst() const
+	{
+		size_t pos = ReadPos;
+		return Buffer[pos];
+	}
+
+	//! @brief	n番目の要素を返す
+	//! @return	n番目の要素への参照
+	//! @note	n番目の要素への参照が帰ってくる。要素がバッファ内に無いときや範囲外の時
+	//!			の動作は未定義である。このメソッドは読み込みポインタを移動しない。
+	const T & GetAt(size_t n) const
+	{
+		size_t pos = ReadPos + n;
+		while(pos >= Size) pos -= Size;
+		return Buffer[pos];
+	}
+
+	//! @brief	バッファに書き込むためのポインタを得る
 	//! @param	writesize 書き込みたいデータ数 ( 1 以上の整数; 0 を渡さないこと )
 	//! @param	p1		ブロック1の先頭へのポインタを格納するための変数
 	//! @param	p1size	p1の表すブロックのサイズ
@@ -151,14 +173,36 @@ public:
 	//! @param	advance		進める要素数
 	//! @note	このメソッドは実際に advance < GetFreeSize() であることを確認しない。
 	//!			必要ならば呼び出し側でチェックすること。
-	void AdvanceWritePos(size_t advance)
+	void AdvanceWritePos(size_t advance = 1)
 	{
 		WritePos += advance;
 		if(WritePos >= Size) WritePos -= Size;
 		DataSize += advance;
 	}
 
+	//! @brief	書き込みポインタを進め、バッファがあふれたら先頭を捨てる
+	//! @param	advance		進める要素数
+	//! @note	AdvanceWritePos と異なり、バッファがあふれたら、データの先頭を捨てる。
+	void AdvanceWritePosWithDiscard(size_t advance = 1)
+	{
+		WritePos += advance;
+		if(WritePos >= Size) WritePos -= Size;
+		DataSize += advance;
+		if(DataSize > Size)
+		{
+			AdvanceReadPos(DataSize - Size);
+		}
+	}
 
+	//! @brief	書き込み位置の要素を返す
+	//! @return	書き込み位置の要素への参照
+	//! @note	書き込み位置の要素への参照が帰ってくる。このメソッドはバッファに空き
+	//!			があるかどうかのチェックは行わないので注意すること。
+	//!			このメソッドはバッファの書き込み位置を移動しない。
+	T & GetLast()
+	{
+		return Buffer[WritePos];
+	}
 };
 
 #endif

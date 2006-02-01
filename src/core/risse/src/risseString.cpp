@@ -560,5 +560,8 @@ tRisseString RisseInt32ToHex(risse_uint32 num, int zeropad)
 	return ttstr(buf2); 
 }
 //---------------------------------------------------------------------------
+
+tRisseString RisseEmptyString; // holds an empty string
+
 } // namespace Risse
 

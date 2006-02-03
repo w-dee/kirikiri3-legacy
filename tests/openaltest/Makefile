@@ -68,7 +68,6 @@ CPPFILES = \
 		$(CORE_DIR)/base/script/RisseEngine.cpp                      \
 		$(CORE_DIR)/base/utils/fftsg.cpp                             \
 		$(CORE_DIR)/base/utils/Singleton.cpp                         \
-		$(CORE_DIR)/base/log/Log.cpp                                 \
 		$(CORE_DIR)/sound/WaveFormatConverter.cpp                    \
 		$(CORE_DIR)/sound/WaveLoopManager.cpp                        \
 		$(CORE_DIR)/sound/ALCommon.cpp                               \
@@ -86,6 +85,7 @@ CPPFILES = \
 		$(CORE_DIR)/sound/filter/reverb/Reverb.cpp                   \
 		main.cpp
 
+#		$(CORE_DIR)/base/log/Log.cpp                                 \
 
 OBJS = $(CPPFILES:.cpp=.o)
 

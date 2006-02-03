@@ -94,8 +94,11 @@ int Application::OnRun()
 			decoder = boost::shared_ptr<tRisaWaveDecoder>(new tRisaRIFFWaveDecoder(ttstr(filename)));
 
 		boost::shared_ptr<tRisaWaveLoopManager> loop_manager(new tRisaWaveLoopManager(decoder));
-		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaPhaseVocoder());
-//		boost::shared_ptr<tRisaWaveFilter> filter(new tRisaReverb());
+		boost::shared_ptr<tRisaPhaseVocoder> filter(new tRisaPhaseVocoder());
+		filter->SetOverSampling(16);
+		filter->SetFrameSize(4096);
+		filter->SetTimeScale(1.4);
+//		boost::shared_ptr<tRisaReverb> filter(new tRisaReverb());
 		filter->SetInput(loop_manager);
 		boost::shared_ptr<tRisaALBuffer> buffer(new tRisaALBuffer(filter, true));
 		tRisaALSource source(buffer);

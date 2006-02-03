@@ -38,8 +38,22 @@ public:
 	tRisaPhaseVocoder();
 	~tRisaPhaseVocoder();
 
+	int GetFrameSize() const;
+	void SetFrameSize(int v);
+
+	int GetOverSampling() const;
+	void SetOverSampling(int v);
+
+	float GetTimeScale() const;
+	void SetTimeScale(float v);
+
+	float GetFrequencyScale() const;
+	void SetFrequencyScale(float v);
+
 private:
 	void Clear();
+
+	void RebuildDSP();
 
 	void InputChanged();
 	void Filter();

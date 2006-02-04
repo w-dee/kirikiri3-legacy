@@ -19,6 +19,26 @@ PLATFORM=windows
 
 PLATFORM_SUBDIR=msw
 
+# システム標準のライブラリ (プラットフォームによって変える必要あり)
+COMMON_LIBS = \
+	-lunicows \
+	-lkernel32 \
+	-luser32 \
+	-lgdi32 \
+	-lcomdlg32 \
+	-lwinspool \
+	-lwinmm \
+	-lshell32 \
+	-lcomctl32 \
+	-lole32 \
+	-loleaut32 \
+	-luuid \
+	-lrpcrt4 \
+	-ladvapi32 \
+	-lwsock32 \
+	-lodbc32 \
+	-lopengl32  
+
 # windows では DLL の検索にも PATH を使う
 LD_LIBRARY_PATH_ENV_NAME = PATH
 

@@ -20,6 +20,8 @@ default: $(BIN)
 
 #----------------------------#
 
+INCLUDES = -I.
+
 XRCFILES = krkrfont_res.xrc
 
 CPPFILES =  $(XRCFILES:.xrc=.cpp) \

@@ -17,6 +17,8 @@ LDFLAGS = -g $(CONSOLE_LDFLAGS)
 
 #----------------------------#
 
+INCLUDES = -I.
+
 CPPFILES =  ConsoleMain.cpp \
 			FileList.cpp  \
 			WriteXP4.cpp \

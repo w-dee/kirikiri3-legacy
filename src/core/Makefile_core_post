@@ -1,0 +1,7 @@
+# core 共通の makefile 定義
+
+OBJS = $(CPPFILES:.cpp=.o)
+include $(TOP_DIR)/Makefile_common
+
+
+

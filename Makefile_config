@@ -9,32 +9,12 @@ MSGFMT = msgfmt
 
 ###### CFLAGS と CXXFLAGS や CPPFLAGS
 
-# システム標準のライブラリ (プラットフォームによって変える必要あり)
-COMMON_LIBS = \
-	-lunicows \
-	-lkernel32 \
-	-luser32 \
-	-lgdi32 \
-	-lcomdlg32 \
-	-lwinspool \
-	-lwinmm \
-	-lshell32 \
-	-lcomctl32 \
-	-lole32 \
-	-loleaut32 \
-	-luuid \
-	-lrpcrt4 \
-	-ladvapi32 \
-	-lwsock32 \
-	-lodbc32 \
-	-lopengl32  
 
 # 標準の CFLAGS など
 
-COMMON_CFLAGS   = -Winvalid-pch -I. -I./$(PLATFORM_SUBDIR)
-COMMON_CXXFLAGS = -Winvalid-pch -I. -I./$(PLATFORM_SUBDIR)
-COMMON_CPPFLAGS = -Winvalid-pch -I. -I./$(PLATFORM_SUBDIR)
-
+COMMON_CFLAGS   = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
+COMMON_CXXFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
+COMMON_CPPFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
 
 # コンパイラなどのツールについては、ベースは wxWidgets の設定を用いる
 

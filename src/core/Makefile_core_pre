@@ -8,6 +8,7 @@ include $(TOP_DIR)/Makefile_filenames
 PREC_H_NAME = $(CURRENT_DIR)/$(CORE_DIR)/prec.h
 
 # このバイナリが依存しているライブラリ
+# 注: Makefile_core の記述とあわせること
 DEP_LIBS=BOOST ZLIB WX LIBOGG LIBVORBIS OPENAL COMMON
 
 # risse を使うための設定

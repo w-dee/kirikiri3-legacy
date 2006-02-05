@@ -1,0 +1,36 @@
+TOP_DIR=../..
+include $(TOP_DIR)/Makefile_filenames
+
+#----------------------------#
+
+# プログラムID (プログラムやライブラリのbasenameとなる)
+PROGRAM_ID=k3_core
+
+# 出力バイナリ名
+BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
+
+# このバイナリが依存しているライブラリ
+# 注: Makefile_core_pre の記述とあわせること
+DEP_LIBS=BOOST ZLIB WX LIBOGG LIBVORBIS OPENAL COMMON
+
+# リンカに渡すフラグ
+LDFLAGS = -g $(GUI_LDFLAGS)
+
+#----------------------------#
+
+# risse を使うための設定
+include $(TOP_DIR)/src/core/risse/Makefile_for_user
+
+#----------------------------#
+
+CORE_DIR=$(TOP_DIR)/src/core
+
+INCLUDES=
+CPPFILES=
+
+OBJS = $(addsuffix /subsys.a,$(SUBSYS_DIRS))
+
+#----------------------------#
+
+include $(TOP_DIR)/Makefile_common
+

@@ -22,6 +22,7 @@
 //---------------------------------------------------------------------------
 //! @brief		ロガークラス(シングルトン)
 //---------------------------------------------------------------------------
+class tRisaLogViewer;
 class tRisaLogger
 {
 	const static size_t MaxLogItems = 4096; //!< 最大のログ行数
@@ -30,13 +31,13 @@ public:
 	//! @brief ログの１アイテム(１行) を表す構造体
 	struct tItem
 	{
-		//! @brief ログアイテムのエラーの種別
+		//! @brief ログアイテムの種別
 		enum tType
 		{
 			itDebug,	//!< デバッグに関する物
-			itInfo,		//!< 通知
-			itNotice,	//!< 通常状態だが大事な情報
-			itWarning,	//!< 警告状態
+			itInfo,		//!< 情報通知
+			itNotice,	//!< 通常状態だが大事な情報通知
+			itWarning,	//!< 警告
 			itError,	//!< 通常のエラー
 			itCritical	//!< 致命的なエラー
 		};
@@ -44,7 +45,7 @@ public:
 		wxDateTime Timestamp; //!< ログが行われた日付時刻
 		ttstr Content; //!< ログの内容
 		ttstr Link; //!< リンク情報
-		tType Type; //!< エラーの種別
+		tType Type; //!< 種別
 	};
 
 	tRisaRingBuffer<tItem> Buffer; //!< ログを格納するためのリングバッファ
@@ -60,8 +61,15 @@ public:
 		tRisaSingleton<tRisaLogger>::instance();
 			} //!< このシングルトンのインスタンスを返す
 
+public:
+	const tRisaRingBuffer<tItem> & GetBuffer() const 
+		{ return Buffer; } //!< Buffer への参照を得る
+	void SendAllLogsToLogViewer();
+
+
 	void Log(const ttstr & content, tItem::tType type = tItem::itInfo,
 		const ttstr & linkinfo = RisseEmptyString);
+
 };
 //---------------------------------------------------------------------------
 

@@ -12,12 +12,9 @@ include $(CORE_DIR)/Makefile_core_pre
 # このディレクトリにあるソースファイルを列挙
 #-----------------------------------------
 CPPFILES = \
-		Log.cpp                     \
-		LogViewer.cpp               
-
+	Main.cpp
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし
 #-----------------------------------------
 include $(CORE_DIR)/Makefile_core_post
-

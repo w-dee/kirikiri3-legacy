@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "Log.h"
 #include "risseError.h"
+#include "LogViewer.h"
 
 RISSE_DEFINE_SOURCE_ID(53503,8125,25269,17586,20367,40881,26023,16793);
 
@@ -31,6 +32,24 @@ tRisaLogger::tRisaLogger() : Buffer(MaxLogItems)
 //---------------------------------------------------------------------------
 tRisaLogger::~tRisaLogger()
 {
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		全てのログをビューアに送る
+//---------------------------------------------------------------------------
+void tRisaLogger::SendAllLogsToLogViewer()
+{
+/*
+	size_t num_logs = Buffer.GetDataSize();
+
+	LogViewer->StopUpdate(); // LogViewer の表示更新を停止
+	for(size_t i = 0; i < num_logs; i++)
+	{
+		LogViewer->AddItem(
+	}
+*/
 }
 //---------------------------------------------------------------------------
 

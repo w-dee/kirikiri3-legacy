@@ -136,10 +136,21 @@ ifeq ($(suffix $(BIN)),.a)
 	rm -f $(BIN)
 	$(AR) rs $(BIN) $(OBJS)
 else
+
+ifeq ($(suffix $(BIN)),.o)
+# relocatable-objectの場合
+ $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS)
+	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
+	rm -f $(BIN)
+	$(LD) -r -o $(BIN) $(OBJS)
+else
+
 # executableの場合
+# リンカドライバとしては CXX を用いる
  $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
 	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
-	$(LD) $(LDFLAGS) $(OBJS) -o $(BIN) $(LIBS) $(DEFAULT_LIBS)
+	$(CXX) $(LDFLAGS) $(OBJS) -o $(BIN) $(LIBS) $(DEFAULT_LIBS)
+endif
 endif
 
 ## クリーン

@@ -15,7 +15,6 @@
 #include "RisseEngine.h"
 #include "LogViewer.h"
 
-
 RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
 
 
@@ -63,7 +62,6 @@ bool tRisaApplication::OnInit()
 	// すべてのシングルトンインスタンスを初期化する
 	tRisaSingletonManager::InitAll(); // 全てのシングルトンインスタンスを初期化
 
-
 	//---- ↓↓テストコード↓↓ ----
 	// ファイルシステムのルートにカレントディレクトリをマウント
 	tRisaRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
@@ -72,7 +70,8 @@ bool tRisaApplication::OnInit()
 
 	// コンソールをメインウィンドウとして表示
 	tRisaLogViewerFrame *frame = new tRisaLogViewerFrame();
-	frame->Show();
+//	wxFrame *frame = new wxFrame(NULL, wxID_ANY, wxT("hoge"));
+	frame->Show(true);
 
 	//---- ↑↑テストコード↑↑ ----
 

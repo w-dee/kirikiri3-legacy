@@ -4,7 +4,7 @@ include $(CORE_DIR)/Makefile_core_common
 
 # ターゲットなど
 PROGRAM_ID=subsys
-BIN=subsys.a
+BIN=subsys.o
 default: $(BIN)
 OBJS = $(CPPFILES:.cpp=.o)
 

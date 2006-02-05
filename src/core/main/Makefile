@@ -18,7 +18,7 @@ default: $(BIN)
 
 CPPFILES=Main.cpp
 
-OBJS =  $(CPPFILES:.cpp=.o) $(addsuffix /subsys.a,$(SUBSYS_DIRS))
+OBJS =  $(CPPFILES:.cpp=.o) $(addsuffix /subsys.o,$(SUBSYS_DIRS))
 
 #----------------------------#
 

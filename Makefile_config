@@ -179,9 +179,12 @@ else
  -include $(TOP_DIR)/Makefile_build_config_release
 endif
 
-# ただし ld は例外
+# note: 
+# wxWidgets の吐く ld へのオプションは CXX へのオプションを
+# 含んでいたりするので、リンカドライバとしては通常CXXを使う。
+# 本物の「リンカ」を使わなければならないのは -r オプション
+# で複数の .o ファイルを一つにまとめる場合。
 
-LD=$(CXX)
 
 
 # WXRC

@@ -16,7 +16,7 @@
 #include "LogViewer.h"
 
 
-RISSE_DEFINE_SOURCE_ID(57288,52924,45855,20290,20385,24474,35332,13597);
+RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
 
 
 //---------------------------------------------------------------------------
@@ -57,7 +57,7 @@ bool tRisaApplication::OnInit()
 	locale.AddCatalogLookupPathPrefix(appdir + wxT("../share/locale")); 
 
 	// メッセージカタログを追加する
-	locale.AddCatalog(wxT("kirikiri3"));
+	locale.AddCatalog(wxT("k3"));
 	locale.AddCatalog(wxT("wxstd"));
 
 	// すべてのシングルトンインスタンスを初期化する

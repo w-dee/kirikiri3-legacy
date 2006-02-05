@@ -1,26 +1,14 @@
-# makefile のあるサブディレクトリの定義
-
-SUBSYS_DIRS=\
-	base/exception     \
-	base/fs            \
-	base/log           \
-	base/main          \
-	base/script        \
-	base/utils         \
-	sound
-
-SUB_DIRS = risse  $(SUBSYS_DIRS)
-
-export SUBSYS_DIRS
-
+# 共通の makefile を読み込む
+CORE_DIR=.
+include Makefile_core_common
 
 # デフォルトターゲット
-target: subdirs link
+target: subdirs
 
 # 各サブディレクトリに対してMakeを実行する
 
 subdirs:
-	(set -e; \
+	@(set -e; \
 	pwd=$$(PWD); \
 	for dir in $(SUB_DIRS); do \
 		cd $$dir; \
@@ -39,8 +27,4 @@ distclean:
 clean:
 	(set -e; for dir in $(SUB_DIRS); do (set -e; cd $$dir && $(MAKE)  clean    ) || exit 1; done )
 
-
-# リンク
-link:
-	$(MAKE) -f Makefile_core
 

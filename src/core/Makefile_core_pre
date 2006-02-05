@@ -1,43 +1,6 @@
-# core 共通の makefile 定義
-
-TOP_DIR=$(CORE_DIR)/../..
-
-include $(TOP_DIR)/Makefile_filenames
-
-# pre-compiled header 用ファイル
-PREC_H_NAME = $(CURRENT_DIR)/$(CORE_DIR)/prec.h
-
-# このバイナリが依存しているライブラリ
-# 注: Makefile_core の記述とあわせること
-DEP_LIBS=BOOST ZLIB WX LIBOGG LIBVORBIS OPENAL COMMON
-
-# risse を使うための設定
-include $(TOP_DIR)/src/core/risse/Makefile_for_user
-
-# INCLUDES の設定
-INCLUDES = \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/fs/common              \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/fs/osfs                \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/fs/pathfs              \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/fs/tmpfs               \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/fs/xp4fs               \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/exception              \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/script                 \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/sound                  \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/decoder                \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/decoder/riffwave       \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/decoder/vorbis         \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/utils                  \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/base/log                    \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/sound                       \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/sound/decoder               \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/sound/decoder/riffwave      \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/sound/decoder/vorbis        \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/sound/filter                \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/sound/filter/phasevocoder   \
-		-I$(CURRENT_DIR)/$(CORE_DIR)/sound/filter/reverb         \
-		-I$(CURRENT_DIR)/$(CORE_DIR)                             \
-
+# core 共通の subsys用 makefile 定義
+# core 共通の makefile 定義を読み込む
+include $(CORE_DIR)/Makefile_core_common
 
 # ターゲットなど
 PROGRAM_ID=subsys

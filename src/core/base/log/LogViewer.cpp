@@ -61,13 +61,14 @@ public:
 	void AddLine(const tRisaLogger::tItem & logger_item);
 
 	wxCoord OnGetLineHeight(size_t n) const; // override
+
 public:
-	void OnIdle(wxIdleEvent& event);
+//	void OnIdle(wxIdleEvent& event);
 	void OnPaint(wxPaintEvent& event);
-	void OnScroll(wxScrollWinEvent& event);
-	void OnSize(wxSizeEvent& event);
-	void OnMotion(wxMouseEvent & event);
-	void OnLeaveWindow(wxMouseEvent & event);
+//	void OnScroll(wxScrollWinEvent& event);
+//	void OnSize(wxSizeEvent& event);
+//	void OnMotion(wxMouseEvent & event);
+//	void OnLeaveWindow(wxMouseEvent & event);
 
 private:
 	DECLARE_EVENT_TABLE()
@@ -123,12 +124,12 @@ private:
 //! @brief		イベントテーブルの定義
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRisaLogScrollView, wxVScrolledWindow)
-	EVT_IDLE			(tRisaLogScrollView::OnIdle)
+//	EVT_IDLE			(tRisaLogScrollView::OnIdle)
 	EVT_PAINT			(tRisaLogScrollView::OnPaint)
-	EVT_SCROLLWIN		(tRisaLogScrollView::OnScroll)
-	EVT_SIZE			(tRisaLogScrollView::OnSize)
-	EVT_MOTION			(tRisaLogScrollView::OnMotion)
-	EVT_LEAVE_WINDOW	(tRisaLogScrollView::OnLeaveWindow)
+//	EVT_SCROLLWIN		(tRisaLogScrollView::OnScroll)
+//	EVT_SIZE			(tRisaLogScrollView::OnSize)
+//	EVT_MOTION			(tRisaLogScrollView::OnMotion)
+//	EVT_LEAVE_WINDOW	(tRisaLogScrollView::OnLeaveWindow)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -397,6 +398,16 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 
 
 
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		イベントテーブルの定義
+//---------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tRisaLogViewerFrame, wxFrame)
+END_EVENT_TABLE()
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

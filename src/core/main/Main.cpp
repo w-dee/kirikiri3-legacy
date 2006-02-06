@@ -14,6 +14,7 @@
 #include <wx/filename.h>
 #include "RisseEngine.h"
 #include "LogViewer.h"
+#include "Log.h"
 
 RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
 
@@ -67,6 +68,10 @@ bool tRisaApplication::OnInit()
 	tRisaRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
 		RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 		NULL, NULL, NULL);
+
+	tRisaLogger::instance()->Log(RISSE_WS("ファイルシステムのルートにカレントディレクトリをマウント"));
+	tRisaLogger::instance()->Log(RISSE_WS("全てのシングルトンインスタンスを初期化"));
+	tRisaLogger::instance()->Log(RISSE_WS("アプリケーションのディレクトリを得て、その下にある locale か、 <アプリケーションのあるディレクトリ>../share/locale をメッセージカタログの検索パスに指定する"));
 
 	// コンソールをメインウィンドウとして表示
 	tRisaLogViewerFrame *frame = new tRisaLogViewerFrame();

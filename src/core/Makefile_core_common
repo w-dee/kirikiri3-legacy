@@ -2,7 +2,7 @@ TOP_DIR=$(CORE_DIR)/../..
 
 include $(TOP_DIR)/Makefile_filenames
 
-# subsys.a のあるサブディレクトリの定義
+# subsys.o のある(subsys.oが作成される)サブディレクトリの定義
 
 SUBSYS_DIRS=\
 	$(CORE_DIR)/base/exception     \

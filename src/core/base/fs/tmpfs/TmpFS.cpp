@@ -216,7 +216,7 @@ void tRisaTmpFSNode::Serialize(tRisseBinaryStream * dest) const
 		// ファイル
 		dest->WriteBuffer("\x0", 1); // メタデータの終わりとファイルの中身の開始
 		wxUint64 i64;
-		volatile tRisseCriticalSectionHolder  holder(File->GetCS());
+		volatile tRisseCriticalSection::tLocker  holder(File->GetCS());
 		i64 = wxUINT64_SWAP_ON_BE(File->GetSize());
 		dest->WriteBuffer(&i64, sizeof(i64));
 		dest->WriteBuffer(File->GetBlock(), File->GetSize());
@@ -390,7 +390,7 @@ tRisaTmpFS::~tRisaTmpFS()
 size_t tRisaTmpFS::GetFileListAt(const ttstr & dirname,
 	tRisaFileSystemIterationCallback * callback)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	tRisaTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
@@ -408,7 +408,7 @@ size_t tRisaTmpFS::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tRisaTmpFS::FileExists(const ttstr & filename)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	tRisaTmpFSNode * node = GetNodeAt(filename);
 	if(!node) return false;
@@ -425,7 +425,7 @@ bool tRisaTmpFS::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 bool tRisaTmpFS::DirectoryExists(const ttstr & dirname)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	tRisaTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) return false;
@@ -441,7 +441,7 @@ bool tRisaTmpFS::DirectoryExists(const ttstr & dirname)
 //---------------------------------------------------------------------------
 void tRisaTmpFS::RemoveFile(const ttstr & filename)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	tRisaTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
@@ -462,7 +462,7 @@ void tRisaTmpFS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tRisaTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	tRisaTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
@@ -505,7 +505,7 @@ void tRisaTmpFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tRisaTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 
 	if(recursive)
@@ -574,7 +574,7 @@ void tRisaTmpFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tRisaTmpFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	// XXX: MACタイムは現バージョンでは保存していない
 	struc.Clear();
@@ -595,7 +595,7 @@ void tRisaTmpFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 //---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaTmpFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	tRisaTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
@@ -612,7 +612,7 @@ tRisseBinaryStream * tRisaTmpFS::CreateStream(const ttstr & filename, risse_uint
 //---------------------------------------------------------------------------
 void tRisaTmpFS::SerializeTo(tRisseBinaryStream * dest)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	// マジックを書き込む
 	dest->WriteBuffer(SerializeMagic, 8);
@@ -644,7 +644,7 @@ void tRisaTmpFS::SerializeTo(const ttstr & filename)
 //---------------------------------------------------------------------------
 void tRisaTmpFS::UnserializeFrom(tRisseBinaryStream * src)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	// マジックを読み込み、比較する
 	unsigned char magic[8];

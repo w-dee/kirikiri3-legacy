@@ -49,7 +49,7 @@ tRisaPathFS::~tRisaPathFS()
 size_t tRisaPathFS::GetFileListAt(const ttstr & dirname,
 	tRisaFileSystemIterationCallback * callback)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	// PathFS にはファイルシステムの / しか存在しない
 	// そのためディレクトリ指定は / へのアクセスしか認めない
@@ -77,7 +77,7 @@ size_t tRisaPathFS::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tRisaPathFS::FileExists(const ttstr & filename)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	ttstr fn;
 	if(filename.StartsWith(RISSE_WC('/')))
@@ -147,7 +147,7 @@ void tRisaPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tRisaPathFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	ttstr fn;
 	if(filename.StartsWith(RISSE_WC('/')))
@@ -174,7 +174,7 @@ void tRisaPathFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 //---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaPathFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	ttstr fn;
 	if(filename.StartsWith(RISSE_WC('/')))
@@ -200,7 +200,7 @@ tRisseBinaryStream * tRisaPathFS::CreateStream(const ttstr & filename, risse_uin
 //---------------------------------------------------------------------------
 void tRisaPathFS::Add(const ttstr & name, bool recursive)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	// ディレクトリ名の最後に '/' がついていなければ追加
 	ttstr fn(name);
@@ -224,7 +224,7 @@ void tRisaPathFS::Add(const ttstr & name, bool recursive)
 //---------------------------------------------------------------------------
 void tRisaPathFS::Remove(const ttstr & name)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	std::vector<ttstr>::iterator i;
 

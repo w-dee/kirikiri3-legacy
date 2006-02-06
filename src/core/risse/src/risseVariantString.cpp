@@ -285,7 +285,7 @@ void RisseCompactStringHeap()
 	if(!RisseStringHeapList) return;
 
 	{	// thread-protected
-		tRisseCSH csh(*RisseStringHeapCS);
+		tRisseCriticalSection::tLocker csh(*RisseStringHeapCS);
 
 #ifndef __CODEGUARD__
 	// may be very slow when used with codeguard
@@ -407,7 +407,7 @@ tRisseVariantString * RisseAllocStringHeap(void)
 	}
 
 	{	// thread-protected
-		tRisseCSH csh(*RisseStringHeapCS);
+		tRisseCriticalSection::tLocker csh(*RisseStringHeapCS);
 
 #ifdef RISSE_VS_USE_SYSTEM_NEW
 		tRisseVariantString *ret = new tRisseVariantString();
@@ -437,7 +437,7 @@ void RisseDeallocStringHeap(tRisseVariantString * vs)
 	// free vs
 
 	{	// thread-pretected
-		tRisseCSH csh(*RisseStringHeapCS);
+		tRisseCriticalSection::tLocker csh(*RisseStringHeapCS);
 
 #ifdef RISSE_DEBUG_CHECK_STRING_HEAP_INTEGRITY
 		{

@@ -45,7 +45,7 @@ tRisaMemoryStreamBlock::~tRisaMemoryStreamBlock()
 //---------------------------------------------------------------------------
 void tRisaMemoryStreamBlock::AddRef()
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	RefCount ++;
 }
@@ -60,7 +60,7 @@ void tRisaMemoryStreamBlock::Release()
 	risse_uint decremented_count;
 
 	{
-		volatile tRisseCriticalSectionHolder holder(CS);
+		volatile tRisseCriticalSection::tLocker holder(CS);
 
 		RefCount --;
 		decremented_count = RefCount;
@@ -80,7 +80,7 @@ void tRisaMemoryStreamBlock::Release()
 //---------------------------------------------------------------------------
 void tRisaMemoryStreamBlock::ChangeSize(risse_size size)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	if(Size < size && size <= AllocSize)
 	{
@@ -121,7 +121,7 @@ void tRisaMemoryStreamBlock::Fit()
 	// Size よりも大きくて AllocSize よりも小さな部分は無駄である。
 	// このメソッドは、メモリブロックのサイズを Size ぴったりにすることにより
 	// この無駄な部分を解放する。
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	if(Size != AllocSize)
 	{
@@ -147,7 +147,7 @@ tRisaMemoryStream::tRisaMemoryStream(risse_uint32 flags)
 	Flags = flags;
 	Block = new tRisaMemoryStreamBlock();
 
-	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSection::tLocker holder(Block->GetCS());
 	CurrentPos = flags & RISSE_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
 }
 //---------------------------------------------------------------------------
@@ -163,7 +163,7 @@ tRisaMemoryStream::tRisaMemoryStream(risse_uint32 flags, tRisaMemoryStreamBlock 
 	Flags = flags;
 	Block = block;
 
-	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSection::tLocker holder(Block->GetCS());
 	Block->AddRef();
 	CurrentPos = flags & RISSE_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
 }
@@ -189,7 +189,7 @@ tRisaMemoryStream::~tRisaMemoryStream()
 //---------------------------------------------------------------------------
 risse_uint64 tRisaMemoryStream::Seek(risse_int64 offset, risse_int whence)
 {
-	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSection::tLocker holder(Block->GetCS());
 
 	risse_int64 newpos;
 	switch(whence)
@@ -230,7 +230,7 @@ risse_uint64 tRisaMemoryStream::Seek(risse_int64 offset, risse_int whence)
 //---------------------------------------------------------------------------
 risse_size tRisaMemoryStream::Read(void *buffer, risse_size read_size)
 {
-	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSection::tLocker holder(Block->GetCS());
 
 	if(!(Flags & RISSE_BS_ACCESS_READ_BIT))
 		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no read-access)"));
@@ -259,7 +259,7 @@ risse_size tRisaMemoryStream::Read(void *buffer, risse_size read_size)
 //---------------------------------------------------------------------------
 risse_size tRisaMemoryStream::Write(const void *buffer, risse_size write_size)
 {
-	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSection::tLocker holder(Block->GetCS());
 
 	if(!(Flags & RISSE_BS_ACCESS_WRITE_BIT))
 		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
@@ -289,7 +289,7 @@ risse_size tRisaMemoryStream::Write(const void *buffer, risse_size write_size)
 //---------------------------------------------------------------------------
 void tRisaMemoryStream::SetEndOfFile()
 {
-	volatile tRisseCriticalSectionHolder holder(Block->GetCS());
+	volatile tRisseCriticalSection::tLocker holder(Block->GetCS());
 
 	if(!(Flags & RISSE_BS_ACCESS_WRITE_BIT))
 		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));

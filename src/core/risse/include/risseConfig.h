@@ -34,6 +34,11 @@
 namespace Risse
 {
 
+#if defined(DEBUG) || defined(_DEBUG) || defined(__WXDEBUG__)
+	#define RISSE_DEBUG
+#endif
+
+
 // #define RISSE_NO_AVOID_ISWDIGIT
 // #define RISSE_SUPPORT_VCL
 // #define RISSE_MSG_EMPTY
@@ -79,8 +84,6 @@ extern void RisseNativeDebuggerBreak();
 
 extern void RisseSetFPUE();
 extern void RisseRestoreFPUE();
-
-
 
 
 

@@ -12,52 +12,97 @@
 #ifndef risseUtilsH
 #define risseUtilsH
 
+#include "risseConfig.h"
 #include "risseVariant.h"
 #include "risseString.h"
 
-namespace Risse
-{
 //---------------------------------------------------------------------------
 // クリティカルセクション
 //---------------------------------------------------------------------------
-#ifdef RISSE_SUPPORT_WX
-// wxWidgets サポートの場合
-#include <wx/thread.h>
 
-// wxWidgets の物を使う
-typedef wxCriticalSection tRisseCriticalSection;
+/*
+	Risse のクリティカルセクションは、再突入可能 ( recursive ) であることが
+	保証できなくてはならない。
+	この条件を満たすのは Win32 のクリティカルセクションや boost の
+	recursive_mutex で、wxWidgets の wxCriticalSection はこの保証がないので
+	使えない。
+*/
 
-#elif _WIN32
-// Windows プラットフォームの場合
+#if _WIN32
+	// Windows プラットフォームの場合
 
-#ifdef _MSC_VER
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+	#ifdef _MSC_VER
+	#define WIN32_LEAN_AND_MEAN
+	#endif
+	#include <windows.h>
 
-//! @brief クリティカルセクションの実装
-class tRisseCriticalSection
-{
-	CRITICAL_SECTION CS; //!< Win32 クリティカルセクションオブジェクト
-public:
-	tRisseCriticalSection() { InitializeCriticalSection(&CS); } //!< コンストラクタ
-	~tRisseCriticalSection() { DeleteCriticalSection(&CS); } //!< デストラクタ
+	namespace Risse
+	{
+	//! @brief クリティカルセクションの実装
+	class tRisseCriticalSection
+	{
+		CRITICAL_SECTION CS; //!< Win32 クリティカルセクションオブジェクト
+	public:
+		tRisseCriticalSection() { InitializeCriticalSection(&CS); } //!< コンストラクタ
+		~tRisseCriticalSection() { DeleteCriticalSection(&CS); } //!< デストラクタ
 
-	void Enter() { EnterCriticalSection(&CS); } //!< クリティカルセクションに入る
-	void Leave() { LeaveCriticalSection(&CS); } //!< クリティカルセクションから出る
-};
+	private:
+		tRisseCriticalSection(const tRisseCriticalSection &); // non-copyable
+
+	private:
+		void Enter() { EnterCriticalSection(&CS); } //!< クリティカルセクションに入る
+		void Leave() { LeaveCriticalSection(&CS); } //!< クリティカルセクションから出る
+
+	public:
+		class tLocker
+		{
+			tRisseCriticalSection & CS;
+		public:
+			tLocker(tRisseCriticalSection & cs) : CS(cs)
+			{
+				CS.Enter();
+			}
+			~tLocker()
+			{
+				CS.Leave();
+			}
+		private:
+			tLocker(const tLocker &); // non-copyable
+		};
+	};
+
+	} // namespace Risse
 #else
-// wxWidgets でも Windows でもない場合はサポートしない
 
-class tRisseCriticalSection
-{
-public:
-	tRisseCriticalSection() { ; }
-	~tRisseCriticalSection() { ; }
+	// boost の recursive_mutex をつかう
 
-	void Enter() { ; }
-	void Leave() { ; }
-};
+	#include <boost/thread.hpp>
+
+	namespace Risse
+	{
+	//! @brief クリティカルセクションの実装
+	class tRisseCriticalSection
+	{
+		boost::recursive_mutex mutex; //!< boost::recursive_mutex mutexオブジェクト
+	public:
+		tRisseCriticalSection() { ; } //!< コンストラクタ
+		~tRisseCriticalSection() { ; } //!< デストラクタ
+
+	private:
+		tRisseCriticalSection(const tRisseCriticalSection &); // non-copyable
+
+	public:
+		class tLocker
+		{
+			boost::recursive_mutex::scoped_lock lock;
+		public:
+			tLocker(tRisseCriticalSection & cs) : lock(cs.mutex) {;}
+		private:
+			tLocker(const tLocker &); // non-copyable
+		};
+	};
+
+	} // namespace Risse
 
 #endif
 //---------------------------------------------------------------------------
@@ -66,39 +111,8 @@ public:
 
 
 
-
-
-//---------------------------------------------------------------------------
-//! @brief クリティカルセクションを保持するクラス
-//---------------------------------------------------------------------------
-class tRisseCriticalSectionHolder
+namespace Risse
 {
-	tRisseCriticalSection *Section; //!< クリティカルセクションオブジェクト
-public:
-
-	//! @brief コンストラクタ
-	//! @param クリティカルセクションオブジェクトへの参照
-	tRisseCriticalSectionHolder(tRisseCriticalSection &cs)
-	{
-		Section = &cs;
-		Section->Enter();
-	}
-
-	//! @brief デストラクタ
-	~tRisseCriticalSectionHolder()
-	{
-		Section->Leave();
-	}
-
-};
-typedef tRisseCriticalSectionHolder tRisseCSH;
-//---------------------------------------------------------------------------
-
-
-
-
-
-
 
 
 //---------------------------------------------------------------------------

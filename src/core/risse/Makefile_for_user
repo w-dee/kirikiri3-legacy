@@ -13,6 +13,9 @@ Risse_LINKDEPS := $(shell $(Risse_DIR)/bin/risse-config --linkdeps)
 ifneq ($(filter WX,$(DEP_LIBS)),WX)
  DEP_LIBS += WX
 endif
+ifneq ($(filter BOOST,$(DEP_LIBS)),BOOST)
+ DEP_LIBS += BOOST
+endif
 CXXFLAGS += $(Risse_CXXFLAGS)
 CPPFLAGS += $(Risse_CPPFLAGS)
 LIBS     += $(Risse_LIBS)

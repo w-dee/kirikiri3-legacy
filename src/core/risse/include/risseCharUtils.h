@@ -63,7 +63,7 @@ wxString RisseCharToWxString(const risse_char * str);
 //---------------------------------------------------------------------------
 // RISSE_WS 実装(UTF-32リテラル)
 
-#if defined(DEBUG) || defined(_DEBUG) || defined(__WXDEBUG__)
+#if defined(DEBUG) || defined(_DEBUG) || defined(__WXDEBUG__) || defined(RISSE_DEBUG)
 	#define RISSE_CHARUTILS_DEBUG
 #endif
 

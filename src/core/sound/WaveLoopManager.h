@@ -37,44 +37,6 @@
 //---------------------------------------------------------------------------
 
 
-#ifdef RISA_IN_LOOP_TUNER
-	//---------------------------------------------------------------------------
-	// tRisseCriticalSection ( taken from risseUtils.h )
-	//---------------------------------------------------------------------------
-	class tRisseCriticalSection
-	{
-		CRITICAL_SECTION CS;
-	public:
-		tRisseCriticalSection() { InitializeCriticalSection(&CS); }
-		~tRisseCriticalSection() { DeleteCriticalSection(&CS); }
-
-		void Enter() { EnterCriticalSection(&CS); }
-		void Leave() { LeaveCriticalSection(&CS); }
-	};
-	//---------------------------------------------------------------------------
-	// tRisseCriticalSectionHolder ( taken from risseUtils.h )
-	//---------------------------------------------------------------------------
-	class tRisseCriticalSectionHolder
-	{
-		tRisseCriticalSection *Section;
-	public:
-		tRisseCriticalSectionHolder(tRisseCriticalSection &cs)
-		{
-			Section = &cs;
-			Section->Enter();
-		}
-
-		~tRisseCriticalSectionHolder()
-		{
-			Section->Leave();
-		}
-	};
-#else
-	#include "risseUtils.h"
-#endif
-//---------------------------------------------------------------------------
-
-
 //---------------------------------------------------------------------------
 //! @brief リンクを表す構造体
 //---------------------------------------------------------------------------

@@ -52,7 +52,7 @@ tRisaXP4SegmentCache::~tRisaXP4SegmentCache()
 //---------------------------------------------------------------------------
 void tRisaXP4SegmentCache::CheckLimit()
 {
-	volatile tRisseCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSection::tLocker cs_holder(CS);
 
 	// TotalBytes が TOTAL_LIMIT 以下になるまでキャッシュの最後
 	// を削除する
@@ -81,7 +81,7 @@ void tRisaXP4SegmentCache::CheckLimit()
 //---------------------------------------------------------------------------
 void tRisaXP4SegmentCache::Clear()
 {
-	volatile tRisseCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSection::tLocker cs_holder(CS);
 
 	HashTable.Clear();
 	TotalBytes = 0;
@@ -116,7 +116,7 @@ tRisaXP4SegmentCache::tDataBlock
 	risse_uint32 hash = tKeyHasher::Make(key);
 
 	// これ以降をスレッド保護
-	volatile tRisseCriticalSectionHolder cs_holder(CS);
+	volatile tRisseCriticalSection::tLocker cs_holder(CS);
 
 	// ハッシュテーブルを検索する
 	boost::shared_ptr<tRisaDecompressedHolder> * ptr = 

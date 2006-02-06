@@ -47,7 +47,7 @@ public:
 	//! @brief OpenAL APIを保護するためのクリティカルセクションホルダ
 	struct tCriticalSectionHolder
 	{
-		tRisseCriticalSectionHolder holder;
+		tRisseCriticalSection::tLocker holder;
 		tCriticalSectionHolder() : holder(tRisaOpenAL::instance()->GetCS())
 		{
 			// エラー状態をクリアする

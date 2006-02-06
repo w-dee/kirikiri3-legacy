@@ -24,12 +24,12 @@
 //! @note  このクラスは、RisseのオブジェクトにNativeInstanceとして(tRisseNI_BaseFileSystemとは別に)
 //         登録する。
 //!        下にあるtRisseNI_BaseFileSystemと混同しないこと。
-//!        クラスIDは-2011 (固定) が割り当てられている (RISSE_DEFINE_SOURCE_IDと同じ)
+//!        クラスIDは-2011 (固定) が割り当てられている
 //---------------------------------------------------------------------------
 class tRisseNI_FileSystemNativeInstance : public tRisseNativeInstance
 {
 public:
-	static const risse_int32 ClassID = -2011; // = RISSE_DEFINE_SOURCE_ID in FSManagerBind.cpp
+	static const risse_int32 ClassID = -2011;
 
 private:
 	boost::shared_ptr<tRisaFileSystem> FileSystem; //!< ファイルシステムオブジェクト

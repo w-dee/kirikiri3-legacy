@@ -23,6 +23,7 @@ RISSE_DEFINE_SOURCE_ID(53503,8125,25269,17586,20367,40881,26023,16793);
 //---------------------------------------------------------------------------
 tRisaLogger::tRisaLogger() : Buffer(MaxLogItems)
 {
+	LogSending = false;
 }
 //---------------------------------------------------------------------------
 
@@ -37,19 +38,71 @@ tRisaLogger::~tRisaLogger()
 
 
 //---------------------------------------------------------------------------
-//! @brief		全てのログをビューアに送る
+//! @brief		指定行分のログを指定のtRisaLogReceiverに送る
+//! @param		target		ログの送り先となるレシーバオブジェクト
+//! @param		maxitems	送るログの最大行数 (これよりもtRisaLoggerが保持している
+//!							ログのサイズが大きい場合は、最後の maxitms 個が送られる)
 //---------------------------------------------------------------------------
-void tRisaLogger::SendAllLogsToLogViewer()
+void tRisaLogger::SendLogs(tRisaLogReceiver *target, size_t maxitems)
 {
-/*
-	size_t num_logs = Buffer.GetDataSize();
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
-	LogViewer->StopUpdate(); // LogViewer の表示更新を停止
-	for(size_t i = 0; i < num_logs; i++)
+	// ログを送信中にログの記録は行わない
+	// 捨てない方がいいのかもしれないが...
+	if(LogSending) return;
+
+	// maxitems の調整
+	size_t buffer_datasize = Buffer.GetDataSize();
+	if(maxitems == static_cast<size_t>(-1L))
+		maxitems = buffer_datasize;
+	else if(maxitems > buffer_datasize)
+		maxitems = buffer_datasize;
+
+	// maxitems 個を target に送る
+	LogSending = true;
+	try
 	{
-		LogViewer->AddItem(
+		for(size_t n = buffer_datasize - maxitems; n < buffer_datasize; n++)
+		{
+			target->OnLog(Buffer.GetAt(n));
+		}
 	}
-*/
+	catch(...)
+	{
+		LogSending = false;
+		throw;
+	}
+	LogSending = false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ログを受信するための tRisaLogReceiver を登録する
+//! @param		receiver	レシーバオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogger::RegisterReceiver(tRisaLogReceiver * receiver)
+{
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	if(std::find(Receivers.begin(), Receivers.end(), receiver) == Receivers.end())
+		Receivers.push_back(receiver);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ログを受信するための tRisaLogReceiver の登録を解除する
+//! @param		receiver	レシーバオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
+{
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	std::vector<tRisaLogReceiver*>::iterator i;
+	i = std::find(Receivers.begin(), Receivers.end(), receiver);
+	if(i != Receivers.end())
+		Receivers.erase(i);
 }
 //---------------------------------------------------------------------------
 
@@ -64,12 +117,39 @@ void tRisaLogger::Log(const ttstr & content,
 	tRisaLogger::tItem::tType type,
 	const ttstr & linkinfo)
 {
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	// ログを送信中にログの記録は行わない
+	// 捨てない方がいいのかもしれないが...
+	if(LogSending) return;
+
+	// Buffer の書き込み位置に記録
 	tItem & item = Buffer.GetLast();
 	item.Timestamp = wxDateTime::Now();
 	item.Content = content;
 	item.Link = linkinfo;
 	item.Type = type;
+
+	// Buffer の書き込みポインタを進める
+	// (バッファがあふれた場合は古いログを捨てる)
 	Buffer.AdvanceWritePosWithDiscard();
+
+	// 全てのレシーバにログの情報を伝える
+	LogSending = true;
+	try
+	{
+		for(std::vector<tRisaLogReceiver*>::iterator i = Receivers.begin();
+			i != Receivers.end(); i++)
+		{
+			(*i)->OnLog(item);
+		}
+	}
+	catch(...)
+	{
+		LogSending = false;
+		throw;
+	}
+	LogSending = false;
 }
 //---------------------------------------------------------------------------
 

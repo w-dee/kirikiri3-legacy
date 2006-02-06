@@ -19,12 +19,16 @@
 #include <deque>
 #include <wx/datetime.h>
 
+
+class tRisaLogReceiver;
+
 //---------------------------------------------------------------------------
 //! @brief		ロガークラス(シングルトン)
 //---------------------------------------------------------------------------
-class tRisaLogViewer;
 class tRisaLogger
 {
+	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+
 	const static size_t MaxLogItems = 4096; //!< 最大のログ行数
 public:
 
@@ -50,12 +54,17 @@ public:
 
 	tRisaRingBuffer<tItem> Buffer; //!< ログを格納するためのリングバッファ
 
+	std::vector<tRisaLogReceiver*> Receivers; //!< ログを受信するオブジェクト(レシーバ)の配列
+
+	bool LogSending; //!< レシーバにログを送っている最中に真
+
 public:
 	tRisaLogger();
 	~tRisaLogger();
 
 private:
 	tRisaSingletonObjectLifeTracer<tRisaLogger> singleton_object_life_tracer;
+
 public:
 	static boost::shared_ptr<tRisaLogger> & instance() { return
 		tRisaSingleton<tRisaLogger>::instance();
@@ -64,14 +73,34 @@ public:
 public:
 	const tRisaRingBuffer<tItem> & GetBuffer() const 
 		{ return Buffer; } //!< Buffer への参照を得る
-	void SendAllLogsToLogViewer();
 
+	void SendLogs(tRisaLogReceiver *target, size_t maxitems = static_cast<size_t>(-1L));
+
+	void RegisterReceiver(tRisaLogReceiver * receiver);
+	void UnregisterReceiver(tRisaLogReceiver * receiver);
 
 	void Log(const ttstr & content, tItem::tType type = tItem::itInfo,
 		const ttstr & linkinfo = RisseEmptyString);
-
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ログを受け取るためのインターフェース
+//---------------------------------------------------------------------------
+class tRisaLogger;
+class tRisaLogReceiver
+{
+public:
+	//! @brief ログが追加されるとき
+	//! @param	item  ログアイテム
+	//! @note  このメソッドは複数のスレッドから呼ばれることがある。
+	//!			ただし、複数のスレッドから「同時には呼ばれない」ことは
+	//!			tRisaLogger が保証する。
+	virtual void OnLog(const tRisaLogger::tItem & item) = 0;
+};
+//---------------------------------------------------------------------------
+
 
 
 

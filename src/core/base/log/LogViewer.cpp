@@ -14,6 +14,7 @@
 #include "Log.h"
 #include "LogViewer.h"
 #include "risseError.h"
+#include <stdlib.h>
 #include <deque>
 #include <wx/vscroll.h>
 
@@ -37,7 +38,7 @@ RISSE_DEFINE_SOURCE_ID(57288,52924,45855,20290,20385,24474,35332,13597);
 //---------------------------------------------------------------------------
 //! @brief		ログビューアウィンドウ
 //---------------------------------------------------------------------------
-class tRisaLogScrollView : public wxVScrolledWindow
+class tRisaLogScrollView : public wxVScrolledWindow, public tRisaLogReceiver
 {
 	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
@@ -55,20 +56,24 @@ private:
 
 	void LayoutOneLine(size_t buffer_offset);
 	wxString CreateOneLineString(const tRisaLogger::tItem & item);
+	void LayoutAllLines();
 
 public:
+	void OnLog(const tRisaLogger::tItem & logger_item); // tRisaLogReceiver の override
 
+protected:
 	void AddLine(const tRisaLogger::tItem & logger_item);
+	wxCoord OnGetLineHeight(size_t n) const; // wxVScrolledWindow の override
 
-	wxCoord OnGetLineHeight(size_t n) const; // override
 
 public:
 //	void OnIdle(wxIdleEvent& event);
 	void OnPaint(wxPaintEvent& event);
 //	void OnScroll(wxScrollWinEvent& event);
-//	void OnSize(wxSizeEvent& event);
+	void OnSize(wxSizeEvent& event);
 //	void OnMotion(wxMouseEvent & event);
 //	void OnLeaveWindow(wxMouseEvent & event);
+	void OnChar(wxKeyEvent &event);
 
 private:
 	DECLARE_EVENT_TABLE()
@@ -116,6 +121,21 @@ private:
 	std::deque<tDisplayLine> DisplayLines; //!< 表示行の deque
 	wxFont CurrentFont; //!< フォント
 	size_t LineHeight; //!< 一行の高さ(pixel単位)
+
+	//! @brief 論理行とその論理行中の文字位置を表すペア
+	struct tCharacterPosition
+	{
+		size_t LogicalIndex; //!< 論理行
+		size_t CharPosition; //!< 文字位置
+
+		tCharacterPosition() { Invalidate(); }
+		bool IsInvalid() { return LogicalIndex == static_cast<size_t>(-1L); }
+		bool IsValid() { return !IsInvalid(); }
+		void Invalidate() { LogicalIndex = static_cast<size_t>(-1L); }
+	};
+
+	tCharacterPosition SelStart; //!< 選択領域の開始位置
+	tCharacterPosition SelEnd; //!< 選択領域の終了位置
 };
 //---------------------------------------------------------------------------
 
@@ -127,9 +147,10 @@ BEGIN_EVENT_TABLE(tRisaLogScrollView, wxVScrolledWindow)
 //	EVT_IDLE			(tRisaLogScrollView::OnIdle)
 	EVT_PAINT			(tRisaLogScrollView::OnPaint)
 //	EVT_SCROLLWIN		(tRisaLogScrollView::OnScroll)
-//	EVT_SIZE			(tRisaLogScrollView::OnSize)
+	EVT_SIZE			(tRisaLogScrollView::OnSize)
 //	EVT_MOTION			(tRisaLogScrollView::OnMotion)
 //	EVT_LEAVE_WINDOW	(tRisaLogScrollView::OnLeaveWindow)
+	EVT_CHAR			(tRisaLogScrollView::OnChar)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -138,12 +159,27 @@ END_EVENT_TABLE()
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
-	wxVScrolledWindow(parent),
+	wxVScrolledWindow(parent, wxID_ANY,
+                            wxDefaultPosition, wxDefaultSize,
+                            wxSUNKEN_BORDER),
 	CurrentFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT))
 {
-	LineHeight = 12; // TODO: 実際の行の高さの取得
+	LineHeight = 12; // あとで実際の文字の高さに調整する
 	SetBackgroundColour(GetBackgroundColour());
+
+	SelStart.LogicalIndex = 0;
+	SelStart.CharPosition = 3;
+	SelEnd.LogicalIndex = 2;
+	SelEnd.CharPosition = 11;
+
+	// ウィンドウを表示する
 	Show();
+
+	// 既存のログをレイアウトする
+	tRisaLogger::instance()->SendLogs(this);
+
+	// レシーバとしてこのオブジェクトを登録する
+	tRisaLogger::instance()->RegisterReceiver(this);
 }
 //---------------------------------------------------------------------------
 
@@ -153,6 +189,8 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 //---------------------------------------------------------------------------
 tRisaLogScrollView::~tRisaLogScrollView()
 {
+	// レシーバとしてこのオブジェクトを登録解除する
+	tRisaLogger::instance()->UnregisterReceiver(this);
 }
 //---------------------------------------------------------------------------
 
@@ -168,19 +206,19 @@ void tRisaLogScrollView::GetFontFromLogItemType(tRisaLogger::tItem::tType type,
 {
 	switch(type)
 	{
-	case tRisaLogger::tItem::itDebug:	//!< デバッグに関する物
+	case tRisaLogger::tItem::itDebug:		//!< デバッグに関する物
 		{ static wxColour c(0xa0, 0xa0, 0xa0); colour = c; bold = false; }
 		break;
 	case tRisaLogger::tItem::itInfo:		//!< 通知
 		{ static wxColour c(0xff, 0xff, 0xff); colour = c; bold = false; }
 		break;
-	case tRisaLogger::tItem::itNotice:	//!< 通常状態だが大事な情報
+	case tRisaLogger::tItem::itNotice:		//!< 通常状態だが大事な情報
 		{ static wxColour c(0x00, 0xff, 0x00); colour = c; bold = false; }
 		break;
-	case tRisaLogger::tItem::itWarning:	//!< 警告
+	case tRisaLogger::tItem::itWarning:		//!< 警告
 		{ static wxColour c(0xff, 0xff, 0x00); colour = c; bold = false; }
 		break;
-	case tRisaLogger::tItem::itError:	//!< 通常のエラー
+	case tRisaLogger::tItem::itError:		//!< 通常のエラー
 		{ static wxColour c(0xff, 0x80, 0x80); colour = c; bold = false; }
 		break;
 	case tRisaLogger::tItem::itCritical:	//!< 致命的なエラー
@@ -217,9 +255,10 @@ void tRisaLogScrollView::LayoutOneLine(size_t log_index)
 	const tLogicalLine & item = LogicalLines[log_index];
 
 	// フォントをデバイスコンテキストに選択
-	wxPaintDC dc(this);
+	wxClientDC dc(this);
 	CurrentFont.SetWeight((!item.Bold)?wxFONTWEIGHT_NORMAL:wxFONTWEIGHT_BOLD);
 	dc.SetFont(CurrentFont);
+	LineHeight = dc.GetCharHeight();
 
 	// 各文字位置での extentを得る
 	wxArrayInt widths;
@@ -236,19 +275,22 @@ void tRisaLogScrollView::LayoutOneLine(size_t log_index)
 	while(index < logline_len)
 	{
 		int left_char = index;
-		int left_pixel = widths[left_char];
+		int left_pixel = left_char == 0 ? 0 : widths[left_char - 1];
 
-		// 横幅を超えるまで(一行に収まるまで)の文字列の長さを調べる
-		for(; index < logline_len; index++)
+		// 横幅を超えるまで(一行に収まらなくなるまで)の文字列の長さを調べる
+		index ++;
+		while(index < logline_len)
 		{
 			if(widths[index] - left_pixel > cw) break;
+			index ++;
 		}
-		int disp_len = index - left_char - 1;
+
+		int disp_len = index - left_char;
 		if(disp_len < 1) disp_len = 1;
 		if(left_char + disp_len > logline_len)
 			disp_len = logline_len - left_char;
 
-		if(logline_len > 0)
+		if(disp_len > 0)
 		{
 			// その横幅に収まる文字で表示行を作る
 			DisplayLines.push_back(tDisplayLine(log_index, left_char, disp_len));
@@ -299,13 +341,47 @@ wxString tRisaLogScrollView::CreateOneLineString(const tRisaLogger::tItem & item
 
 
 //---------------------------------------------------------------------------
+//! @brief		全てのログの行のレイアウトをし直す
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::LayoutAllLines()
+{
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	// DisplayLines はいったん全てクリア
+	size_t num_disp_lines_before = DisplayLines.size();
+	DisplayLines.clear();
+
+	// 全ての論理行に対してレイアウトを行う
+	size_t num_log_lines = LogicalLines.size();
+	for(size_t n = 0; n < num_log_lines; n++)
+		LayoutOneLine(n);
+
+	// 全体の行数を設定
+	size_t num_disp_lines_after = DisplayLines.size();
+	if(num_disp_lines_before != num_disp_lines_after) SetLineCount(num_disp_lines_after);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		tRisaLogReceiver::OnLog のオーバーライド
+//! @param		logger_item  tRisaLogger::tItem 型
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnLog(const tRisaLogger::tItem & logger_item)
+{
+	AddLine(logger_item);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		一行分をDisplayLinesに追加し、レイアウトを行う
-//! @param		log_index  tRisaLogger::tItem 型
+//! @param		logger_item  tRisaLogger::tItem 型
 //! @note		このメソッドは様々なスレッドから呼ばれる可能性があるので注意
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 {
-	volatile tRisseCriticalSectionHolder holder(CS);
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	wxString line = CreateOneLineString(logger_item);
 	wxString link = logger_item.Link.AsWxString();
@@ -316,6 +392,18 @@ void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 	LogicalLines.push_back(tLogicalLine(line, link, colour, bold));
 
 	LayoutOneLine(LogicalLines.size() - 1);
+
+	SetLineCount(DisplayLines.size());
+
+	// 常に最後を表示する
+	risse_int cw = 0, ch = 0;
+	GetClientSize(&cw, &ch);
+	size_t lines_per_window = ch / LineHeight;
+
+	if(lines_per_window < DisplayLines.size())
+		ScrollToLine(DisplayLines.size() - lines_per_window);
+	else
+		ScrollToLine(0);
 }
 //---------------------------------------------------------------------------
 
@@ -339,6 +427,8 @@ wxCoord tRisaLogScrollView::OnGetLineHeight(size_t n) const
 void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 {
 	wxPaintDC dc(this);
+
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	// 表示行を取得
 	size_t lineFirst = GetFirstVisibleLine();
@@ -367,32 +457,110 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 			draw_line_last = l;
 		else
 			if(draw_line_last < f) draw_line_last = f;
+
+		upd ++;
 	}
 
 	// draw_line_first と draw_line_last 間の全ての行を表示
-	wxCoord y = draw_line_first * LineHeight;
-	for(risse_int n = draw_line_first; n <= draw_line_last; n++)
+	if(draw_line_first != -1 && draw_line_last != -1)
 	{
-		const tDisplayLine & displayline = DisplayLines[n + lineFirst];
-		const tLogicalLine & logicalline = LogicalLines[displayline.LogicalIndex];
+		wxCoord y = draw_line_first * LineHeight;
+		for(risse_int n = draw_line_first; n <= draw_line_last; n++)
+		{
+			if(n+lineFirst < 0 || static_cast<size_t>(n+lineFirst) >= DisplayLines.size())
+			{
+				// 配列の範囲外
+				continue;
+			}
 
-		// フォントをデバイスコンテキストに選択
-		wxPaintDC dc(this);
-		CurrentFont.SetWeight((!logicalline.Bold)?wxFONTWEIGHT_NORMAL:wxFONTWEIGHT_BOLD);
-		dc.SetFont(CurrentFont);
+			const tDisplayLine & displayline = DisplayLines[n + lineFirst];
+			const tLogicalLine & logicalline = LogicalLines[displayline.LogicalIndex];
 
-		// 部分文字列を取り出す
-		wxString substr(logicalline.Line.c_str() + displayline.CharStart,
-						displayline.CharLength);
+			// フォントをデバイスコンテキストに選択
+			CurrentFont.SetWeight((!logicalline.Bold)?wxFONTWEIGHT_NORMAL:wxFONTWEIGHT_BOLD);
+			dc.SetTextForeground(logicalline.Colour);
+			dc.SetFont(CurrentFont);
 
-		// 文字列を描画
-		dc.DrawText(substr, 0, y);
-		y += LineHeight;
+			// 部分文字列を取り出す
+			wxString substr(logicalline.Line.c_str() + displayline.CharStart,
+							displayline.CharLength);
+
+			// 文字列を描画
+			dc.DrawText(substr, 0, y);
+
+			// 選択範囲がある場合
+			if(SelStart.IsValid() &&
+				displayline.LogicalIndex >= SelStart.LogicalIndex &&
+				displayline.LogicalIndex <= SelEnd.LogicalIndex)
+			{
+				// 反転を行う範囲を探す
+				size_t inv_start = displayline.CharStart;
+				size_t inv_end   = displayline.CharStart + displayline.CharLength;
+				if(displayline.LogicalIndex == SelStart.LogicalIndex)
+					if(inv_start < SelStart.CharPosition)
+						inv_start = SelStart.CharPosition;
+				if(displayline.LogicalIndex == SelEnd.LogicalIndex)
+					if(inv_end > SelEnd.CharPosition)
+						inv_end = SelEnd.CharPosition;
+
+				if(inv_end > inv_start)
+				{
+					inv_start -= displayline.CharStart;
+					inv_end   -= displayline.CharStart;
+
+					// 反転を行う範囲をピクセル単位に変換する
+					wxArrayInt widths;
+					dc.GetPartialTextExtents(substr, widths);
+					int startx = inv_start == 0 ? 0 : widths[inv_start - 1];
+					int endx   = inv_end   == 0 ? 0 : widths[inv_end   - 1];
+
+					// 範囲を反転する
+					dc.SetLogicalFunction(wxINVERT);
+					dc.DrawRectangle(startx, y, endx - startx, LineHeight);
+					dc.SetLogicalFunction(wxCOPY);
+				}
+			}
+
+			// y 位置を下に
+			y += LineHeight;
+		}
 	}
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		サイズが変更されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnSize(wxSizeEvent& event)
+{
+	LayoutAllLines();
+	Refresh();
+
+	event.Skip();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		キーが押されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnChar(wxKeyEvent &event)
+{
+	// テスト
+	// ランダムな文字列をランダムな長さで作成
+
+	size_t len = rand() % 50 + 10;
+	risse_char buf[100];
+	for(size_t i = 0; i < len; i++)
+		buf[i] = rand() % 27 + 'A';
+	buf[len] = 0;
+
+	tRisaLogger::instance()->Log(buf);
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -413,7 +581,8 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisaLogViewerFrame::tRisaLogViewerFrame()
+tRisaLogViewerFrame::tRisaLogViewerFrame() :
+	wxFrame(NULL, wxID_ANY, _("Console"))
 {
 	ScrollView = new tRisaLogScrollView(this);
 }

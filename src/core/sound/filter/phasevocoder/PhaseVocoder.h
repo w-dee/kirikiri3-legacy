@@ -14,8 +14,8 @@
 #ifndef PhaseVocoderH
 #define PhaseVocoderH
 
-#include "BasicWaveFilter.h"
-#include "PhaseVocoderDSP.h"
+#include "sound/filter/BasicWaveFilter.h"
+#include "sound/filter/phasevocoder/PhaseVocoderDSP.h"
 
 //---------------------------------------------------------------------------
 //! @brief フェーズボコーダフィルタクラス

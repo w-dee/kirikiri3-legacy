@@ -13,7 +13,7 @@
 #ifndef _LOGVIEWER_H
 #define _LOGVIEWER_H
 
-#include "risse.h"
+#include "risse/include/risse.h"
 #include <deque>
 
 

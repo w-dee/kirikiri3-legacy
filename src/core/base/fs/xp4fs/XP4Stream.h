@@ -15,8 +15,8 @@
 #define XP4STREAMH
 
 #include <boost/shared_ptr.hpp>
-#include "XP4FS.h"
-#include "XP4SegmentCache.h"
+#include "base/fs/xp4fs/XP4FS.h"
+#include "base/fs/xp4fs/XP4SegmentCache.h"
 
 
 

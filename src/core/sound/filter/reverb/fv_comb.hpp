@@ -7,7 +7,7 @@
 #ifndef _comb_
 #define _comb_
 
-#include "fv_denormals.h"
+#include "sound/filter/reverb/fv_denormals.h"
 
 class comb
 {

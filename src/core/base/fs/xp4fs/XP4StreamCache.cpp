@@ -14,8 +14,8 @@
 RISSE_DEFINE_SOURCE_ID(49404,13781,19467,19024,25758,42474,10136,44880);
 
 
-#include "XP4FS.h"
-#include "XP4StreamCache.h"
+#include "base/fs/xp4fs/XP4FS.h"
+#include "base/fs/xp4fs/XP4StreamCache.h"
 
 
 

@@ -11,9 +11,9 @@
 //! @brief PathFSのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "PathFS.h"
-#include "PathFSBind.h"
-#include "RisaException.h"
+#include "base/fs/pathfs/PathFS.h"
+#include "base/fs/pathfs/PathFSBind.h"
+#include "base/exception/RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(7556,48904,60264,18196,46767,10992,26980,15305);
 

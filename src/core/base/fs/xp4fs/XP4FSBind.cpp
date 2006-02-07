@@ -11,9 +11,9 @@
 //! @brief XP4FSのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "XP4FS.h"
-#include "XP4FSBind.h"
-#include "RisaException.h"
+#include "base/fs/xp4fs/XP4FS.h"
+#include "base/fs/xp4fs/XP4FSBind.h"
+#include "base/exception/RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(9275,55924,36625,18920,3221,39026,35386,15362);
 

@@ -11,10 +11,10 @@
 //! @brief ファイルシステムマネージャのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "FSManager.h"
-#include "FSManagerBind.h"
-#include "RisaException.h"
-#include "RisseEngine.h"
+#include "base/fs/common/FSManager.h"
+#include "base/fs/common/FSManagerBind.h"
+#include "base/exception/RisaException.h"
+#include "base/script/RisseEngine.h"
 
 RISSE_DEFINE_SOURCE_ID(57103,491,17401,17369,5283,30429,30396,3005);
 

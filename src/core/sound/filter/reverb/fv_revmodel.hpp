@@ -7,9 +7,9 @@
 #ifndef _revmodel_
 #define _revmodel_
 
-#include "fv_comb.hpp"
-#include "fv_allpass.hpp"
-#include "fv_tuning.h"
+#include "sound/filter/reverb/fv_comb.hpp"
+#include "sound/filter/reverb/fv_allpass.hpp"
+#include "sound/filter/reverb/fv_tuning.h"
 
 class revmodel
 {

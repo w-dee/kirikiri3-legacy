@@ -13,7 +13,7 @@
 #ifndef MemoryStreamH
 #define MemoryStreamH
 
-#include "risseUtils.h"
+#include "risse/include/risseUtils.h"
 
 
 //---------------------------------------------------------------------------

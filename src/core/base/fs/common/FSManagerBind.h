@@ -13,10 +13,10 @@
 #ifndef _FSMANAGERBIND_H_
 #define _FSMANAGERBIND_H_
 
-#include "FSManager.h"
-#include "risseNative.h"
-#include "Singleton.h"
-#include "RisseEngine.h"
+#include "base/fs/common/FSManager.h"
+#include "risse/include/risseNative.h"
+#include "base/utils/Singleton.h"
+#include "base/script/RisseEngine.h"
 
 
 //---------------------------------------------------------------------------

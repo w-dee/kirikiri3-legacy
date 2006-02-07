@@ -11,9 +11,9 @@
 //! @brief ログビューア
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "Log.h"
-#include "LogViewer.h"
-#include "risseError.h"
+#include "base/log/Log.h"
+#include "base/log/LogViewer.h"
+#include "risse/include/risseError.h"
 #include <stdlib.h>
 #include <deque>
 #include <wx/vscroll.h>
@@ -38,7 +38,7 @@ RISSE_DEFINE_SOURCE_ID(57288,52924,45855,20290,20385,24474,35332,13597);
 //---------------------------------------------------------------------------
 //! @brief		ログビューアウィンドウ
 //---------------------------------------------------------------------------
-class tRisaLogScrollView : public wxVScrolledWindow, public tRisaLogReceiver
+class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 {
 	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
@@ -63,13 +63,12 @@ public:
 
 protected:
 	void AddLine(const tRisaLogger::tItem & logger_item);
-	wxCoord OnGetLineHeight(size_t n) const; // wxVScrolledWindow の override
 
 
 public:
 //	void OnIdle(wxIdleEvent& event);
 	void OnPaint(wxPaintEvent& event);
-//	void OnScroll(wxScrollWinEvent& event);
+	void OnScroll(wxScrollWinEvent& event);
 	void OnSize(wxSizeEvent& event);
 //	void OnMotion(wxMouseEvent & event);
 //	void OnLeaveWindow(wxMouseEvent & event);
@@ -143,10 +142,10 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		イベントテーブルの定義
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tRisaLogScrollView, wxVScrolledWindow)
+BEGIN_EVENT_TABLE(tRisaLogScrollView, wxPanel)
 //	EVT_IDLE			(tRisaLogScrollView::OnIdle)
 	EVT_PAINT			(tRisaLogScrollView::OnPaint)
-//	EVT_SCROLLWIN		(tRisaLogScrollView::OnScroll)
+	EVT_SCROLLWIN		(tRisaLogScrollView::OnScroll)
 	EVT_SIZE			(tRisaLogScrollView::OnSize)
 //	EVT_MOTION			(tRisaLogScrollView::OnMotion)
 //	EVT_LEAVE_WINDOW	(tRisaLogScrollView::OnLeaveWindow)
@@ -159,9 +158,9 @@ END_EVENT_TABLE()
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
-	wxVScrolledWindow(parent, wxID_ANY,
+	wxPanel(parent, wxID_ANY,
                             wxDefaultPosition, wxDefaultSize,
-                            wxSUNKEN_BORDER),
+                            wxSUNKEN_BORDER|wxVSCROLL),
 	CurrentFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT))
 {
 	LineHeight = 12; // あとで実際の文字の高さに調整する
@@ -357,8 +356,15 @@ void tRisaLogScrollView::LayoutAllLines()
 		LayoutOneLine(n);
 
 	// 全体の行数を設定
-	size_t num_disp_lines_after = DisplayLines.size();
-	if(num_disp_lines_before != num_disp_lines_after) SetLineCount(num_disp_lines_after);
+	// スクロールバーの調整
+	size_t num_disp_lines = DisplayLines.size();
+	risse_int cw = 0, ch = 0;
+	GetClientSize(&cw, &ch);
+	size_t lines_per_window = ch / LineHeight;
+
+	risse_int new_top = num_disp_lines > lines_per_window ? num_disp_lines - lines_per_window : 0;
+
+	SetScrollbar(wxVERTICAL, new_top, lines_per_window - 1, LogicalLines.size() + 1);
 }
 //---------------------------------------------------------------------------
 
@@ -393,29 +399,24 @@ void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 
 	LayoutOneLine(LogicalLines.size() - 1);
 
-	SetLineCount(DisplayLines.size());
+	// スクロールバーの調整
+	risse_int old_top = GetScrollPos(wxVERTICAL);
 
-	// 常に最後を表示する
+	size_t num_disp_lines = DisplayLines.size();
 	risse_int cw = 0, ch = 0;
 	GetClientSize(&cw, &ch);
 	size_t lines_per_window = ch / LineHeight;
 
-	if(lines_per_window < DisplayLines.size())
-		ScrollToLine(DisplayLines.size() - lines_per_window);
-	else
-		ScrollToLine(0);
-}
-//---------------------------------------------------------------------------
+	risse_int new_top = num_disp_lines > lines_per_window ? num_disp_lines - lines_per_window : 0;
 
+	SetScrollbar(wxVERTICAL, new_top, lines_per_window - 1, LogicalLines.size() + 1);
 
-//---------------------------------------------------------------------------
-//! @brief		指定行の高さを得る(基底クラスのオーバーライド)
-//! @param		n   行
-//! @return		その行の高さ (この実装では固定値を返す)
-//---------------------------------------------------------------------------
-wxCoord tRisaLogScrollView::OnGetLineHeight(size_t n) const
-{
-	return LineHeight;
+	if(old_top != new_top)
+	{
+		// スクロールを行う
+		ScrollWindow(0, (old_top - new_top) * LineHeight);
+		Refresh();
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -431,7 +432,7 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 	volatile tRisseCriticalSection::tLocker holder(CS);
 
 	// 表示行を取得
-	size_t lineFirst = GetFirstVisibleLine();
+	size_t lineFirst = GetScrollPos(wxVERTICAL);
 
 	// 更新矩形を取得
 	wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
@@ -467,14 +468,17 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 		wxCoord y = draw_line_first * LineHeight;
 		for(risse_int n = draw_line_first; n <= draw_line_last; n++)
 		{
-			if(n+lineFirst < 0 || static_cast<size_t>(n+lineFirst) >= DisplayLines.size())
+			if(n+lineFirst < 0 ||
+				static_cast<size_t>(n+lineFirst) >= DisplayLines.size())
 			{
 				// 配列の範囲外
 				continue;
 			}
 
-			const tDisplayLine & displayline = DisplayLines[n + lineFirst];
-			const tLogicalLine & logicalline = LogicalLines[displayline.LogicalIndex];
+			const tDisplayLine & displayline =
+					DisplayLines[n + lineFirst];
+			const tLogicalLine & logicalline =
+					LogicalLines[displayline.LogicalIndex];
 
 			// フォントをデバイスコンテキストに選択
 			CurrentFont.SetWeight((!logicalline.Bold)?wxFONTWEIGHT_NORMAL:wxFONTWEIGHT_BOLD);
@@ -524,6 +528,24 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 			// y 位置を下に
 			y += LineHeight;
 		}
+	}
+
+	event.Skip();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		スクロールされたとき
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnScroll(wxScrollWinEvent& event)
+{
+	WXTYPE ev_type = event.GetEventType();
+	if(ev_type == wxEVT_SCROLLWIN_THUMBRELEASE || ev_type == wxEVT_SCROLLWIN_THUMBTRACK)
+	{
+		int pos = event.GetPosition();
+		SetScrollPos(wxVERTICAL, pos);
+		Refresh();
 	}
 }
 //---------------------------------------------------------------------------

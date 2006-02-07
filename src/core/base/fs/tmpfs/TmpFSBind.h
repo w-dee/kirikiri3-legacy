@@ -13,10 +13,10 @@
 #ifndef _TMPFSBIND_H_
 #define _TMPFSBIND_H_
 
-#include "FSManagerBind.h"
-#include "TmpFS.h"
-#include "risseNative.h"
-#include "Singleton.h"
+#include "base/fs/common/FSManagerBind.h"
+#include "base/fs/tmpfs/TmpFS.h"
+#include "risse/include/risseNative.h"
+#include "base/utils/Singleton.h"
 
 //---------------------------------------------------------------------------
 //! @brief TmpFS ネイティブインスタンス

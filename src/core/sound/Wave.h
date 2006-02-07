@@ -14,7 +14,7 @@
 #define WaveH
 
 
-#include "risseTypes.h"
+#include "risse/include/risseTypes.h"
 
 //---------------------------------------------------------------------------
 // PCMサンプル型の定義

@@ -12,9 +12,9 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include <wx/filename.h>
-#include "RisseEngine.h"
-#include "LogViewer.h"
-#include "Log.h"
+#include "base/script/RisseEngine.h"
+#include "base/log/LogViewer.h"
+#include "base/log/Log.h"
 
 RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
 

@@ -13,7 +13,7 @@
 #ifndef _RisaExceptionH_
 #define _RisaExceptionH_
 
-#include "risseError.h"
+#include "risse/include/risseError.h"
 
 //---------------------------------------------------------------------------
 //! @brief Risa用の汎用例外クラス

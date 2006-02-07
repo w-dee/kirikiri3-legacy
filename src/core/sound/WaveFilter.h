@@ -13,8 +13,8 @@
 #ifndef _WAVEFILTERH_
 #define _WAVEFILTERH_
 
-#include "WaveDecoder.h"
-#include "WaveSegmentQueue.h"
+#include "sound/WaveDecoder.h"
+#include "sound/WaveSegmentQueue.h"
 /*
 
 RisaのWaveフィルタについて

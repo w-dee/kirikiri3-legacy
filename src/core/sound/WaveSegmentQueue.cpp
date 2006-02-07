@@ -11,7 +11,7 @@
 //! @brief Waveセグメント/イベントキュー管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "WaveSegmentQueue.h"
+#include "sound/WaveSegmentQueue.h"
 
 
 RISSE_DEFINE_SOURCE_ID(41279,59678,37773,16849,57737,10358,8969,57779);

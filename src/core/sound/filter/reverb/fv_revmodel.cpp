@@ -4,7 +4,7 @@
 // http://www.dreampoint.co.uk
 // This code is public domain
 
-#include "fv_revmodel.hpp"
+#include "sound/filter/reverb/fv_revmodel.hpp"
 
 revmodel::revmodel()
 {

@@ -14,7 +14,7 @@
 #ifndef XP4STREAMCACHEH
 #define XP4STREAMCACHEH
 
-#include "Singleton.h"
+#include "base/utils/Singleton.h"
 
 //---------------------------------------------------------------------------
 //!@brief		ストリームキャッシュクラス

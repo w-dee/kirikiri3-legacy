@@ -13,10 +13,10 @@
 #ifndef _XP4FSBIND_H_
 #define _XP4FSBIND_H_
 
-#include "FSManagerBind.h"
-#include "XP4FS.h"
-#include "risseNative.h"
-#include "Singleton.h"
+#include "base/fs/common/FSManagerBind.h"
+#include "base/fs/xp4fs/XP4FS.h"
+#include "risse/include/risseNative.h"
+#include "base/utils/Singleton.h"
 
 //---------------------------------------------------------------------------
 //! @brief XP4FS ネイティブインスタンス

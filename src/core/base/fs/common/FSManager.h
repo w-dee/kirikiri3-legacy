@@ -14,10 +14,10 @@
 #define _FSMANAGER_H_
 
 #include <wx/datetime.h>
-#include "risse.h"
-#include "risseUtils.h"
-#include "risseHashSearch.h"
-#include "Singleton.h"
+#include "risse/include/risse.h"
+#include "risse/include/risseUtils.h"
+#include "risse/include/risseHashSearch.h"
+#include "base/utils/Singleton.h"
 #include <boost/smart_ptr.hpp>
 
 

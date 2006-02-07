@@ -13,10 +13,10 @@
 #ifndef _OSFSBIND_H_
 #define _OSFSBIND_H_
 
-#include "FSManagerBind.h"
-#include "OSFS.h"
-#include "risseNative.h"
-#include "Singleton.h"
+#include "base/fs/common/FSManagerBind.h"
+#include "base/fs/osfs/OSFS.h"
+#include "risse/include/risseNative.h"
+#include "base/utils/Singleton.h"
 
 //---------------------------------------------------------------------------
 //! @brief OSFS ネイティブインスタンス

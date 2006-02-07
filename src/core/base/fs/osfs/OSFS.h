@@ -13,8 +13,8 @@
 #ifndef _OSFSH_
 #define _OSFSH_
 
-#include "FSManager.h"
-#include "risseNative.h"
+#include "base/fs/common/FSManager.h"
+#include "risse/include/risseNative.h"
 #include <wx/file.h>
 
 //---------------------------------------------------------------------------

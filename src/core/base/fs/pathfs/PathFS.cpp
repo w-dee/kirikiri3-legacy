@@ -11,12 +11,12 @@
 //! @brief Pathファイルシステムの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-RISSE_DEFINE_SOURCE_ID(65407,38273,27682,16596,13498,36425,59585,4169);
-
-#include "FSManager.h"
-#include "PathFS.h"
-#include "RisaException.h"
+#include "base/fs/common/FSManager.h"
+#include "base/fs/pathfs/PathFS.h"
+#include "base/exception/RisaException.h"
 #include <algorithm>
+
+RISSE_DEFINE_SOURCE_ID(65407,38273,27682,16596,13498,36425,59585,4169);
 
 
 

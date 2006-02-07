@@ -12,12 +12,12 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include <zlib.h>
-#include "RisaException.h"
-#include "FSManager.h"
-#include "XP4Archive.h"
-#include "XP4SegmentCache.h"
-#include "XP4StreamCache.h"
-#include "XP4Stream.h"
+#include "base/exception/RisaException.h"
+#include "base/fs/common/FSManager.h"
+#include "base/fs/xp4fs/XP4Archive.h"
+#include "base/fs/xp4fs/XP4SegmentCache.h"
+#include "base/fs/xp4fs/XP4StreamCache.h"
+#include "base/fs/xp4fs/XP4Stream.h"
 
 RISSE_DEFINE_SOURCE_ID(63449,40639,29098,17674,37258,38306,59594,20366);
 

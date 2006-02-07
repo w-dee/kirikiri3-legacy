@@ -11,9 +11,9 @@
 //! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "FSManager.h"
-#include "RisaException.h"
-#include "FSManagerBind.h"
+#include "base/fs/common/FSManager.h"
+#include "base/exception/RisaException.h"
+#include "base/fs/common/FSManagerBind.h"
 #include <vector>
 
 RISSE_DEFINE_SOURCE_ID(57835,14019,1274,20023,25994,43742,64617,60148);

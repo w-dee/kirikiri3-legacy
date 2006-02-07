@@ -11,9 +11,9 @@
 //! @brief OSFSのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "OSFS.h"
-#include "OSFSBind.h"
-#include "RisaException.h"
+#include "base/fs/osfs/OSFS.h"
+#include "base/fs/osfs/OSFSBind.h"
+#include "base/exception/RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(5731,26202,12507,18005,22157,59190,3112,30254);
 

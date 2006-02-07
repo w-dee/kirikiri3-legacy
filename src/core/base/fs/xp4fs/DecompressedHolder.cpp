@@ -11,8 +11,8 @@
 //! @brief 圧縮ブロックを展開された状態でメモリ上に保持するクラス
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "DecompressedHolder.h"
-#include "RisaException.h"
+#include "base/fs/xp4fs/DecompressedHolder.h"
+#include "base/exception/RisaException.h"
 #include <zlib.h>
 
 RISSE_DEFINE_SOURCE_ID(47081,32049,45767,18248,53175,52305,56890,58573);

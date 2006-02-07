@@ -13,9 +13,9 @@
 #ifndef ALBufferH
 #define ALBufferH
 
-#include "al.h"
-#include "alc.h"
-#include "WaveFilter.h"
+#include <al.h>
+#include <alc.h>
+#include "sound/WaveFilter.h"
 
 //---------------------------------------------------------------------------
 //! @brief		OpenALバッファ

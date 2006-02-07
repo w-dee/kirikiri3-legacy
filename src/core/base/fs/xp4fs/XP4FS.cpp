@@ -11,9 +11,9 @@
 //! @brief XP4ファイルシステムの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "XP4FS.h"
-#include "XP4Archive.h"
-#include "RisaException.h"
+#include "base/fs/xp4fs/XP4FS.h"
+#include "base/fs/xp4fs/XP4Archive.h"
+#include "base/exception/RisaException.h"
 #include <algorithm>
 #include <map>
 

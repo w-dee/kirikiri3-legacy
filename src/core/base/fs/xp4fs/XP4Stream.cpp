@@ -11,11 +11,11 @@
 //! @brief XP4ファイルシステムで用いられるストリームクラス
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "XP4FS.h"
-#include "XP4Archive.h"
-#include "XP4Stream.h"
-#include "XP4StreamCache.h"
-#include "RisaException.h"
+#include "base/fs/xp4fs/XP4FS.h"
+#include "base/fs/xp4fs/XP4Archive.h"
+#include "base/fs/xp4fs/XP4Stream.h"
+#include "base/fs/xp4fs/XP4StreamCache.h"
+#include "base/exception/RisaException.h"
 #include <zlib.h>
 #include <algorithm>
 

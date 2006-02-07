@@ -11,7 +11,7 @@
 //! @brief フェーズボコーダフィルタ
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "Phasevocoder.h"
+#include "sound/filter/phasevocoder/Phasevocoder.h"
 
 RISSE_DEFINE_SOURCE_ID(38521,252,49793,17297,63880,47889,47025,34954);
 

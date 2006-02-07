@@ -6,7 +6,7 @@
 
 #ifndef _allpass_
 #define _allpass_
-#include "fv_denormals.h"
+#include "sound/filter/reverb/fv_denormals.h"
 
 class allpass
 {

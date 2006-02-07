@@ -11,9 +11,9 @@
 //! @brief OpenAL バッファ管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "ALCommon.h"
-#include "ALBuffer.h"
-#include "WaveFormatConverter.h"
+#include "sound/ALCommon.h"
+#include "sound/ALBuffer.h"
+#include "sound/WaveFormatConverter.h"
 
 RISSE_DEFINE_SOURCE_ID(24518,55437,60218,19380,17845,8848,1743,50558);
 

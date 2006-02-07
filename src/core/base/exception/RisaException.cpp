@@ -11,7 +11,7 @@
 //! @brief Risaで内部的に用いている例外クラスの管理など
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "RisaException.h"
+#include "base/exception/RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(51314,64088,22515,17558,46471,30589,44752,43930);
 

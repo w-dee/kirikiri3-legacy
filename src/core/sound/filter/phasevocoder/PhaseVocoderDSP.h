@@ -13,7 +13,7 @@
 #ifndef RisaPhaseVocoderH
 #define RisaPhaseVocoderH
 
-#include "RingBuffer.h"
+#include "base/utils/RingBuffer.h"
 
 //---------------------------------------------------------------------------
 //! @brief Phase Vocoder DSP クラス

@@ -15,7 +15,7 @@
 #define WaveFormatConverterH
 //---------------------------------------------------------------------------
 
-#include "Wave.h"
+#include "sound/Wave.h"
 
 //---------------------------------------------------------------------------
 class tRisaWaveFormatConverter

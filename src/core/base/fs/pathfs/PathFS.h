@@ -15,7 +15,7 @@
 #define PATHFSH
 
 #include <boost/shared_ptr.hpp>
-#include "FSManager.h"
+#include "base/fs/common/FSManager.h"
 
 
 

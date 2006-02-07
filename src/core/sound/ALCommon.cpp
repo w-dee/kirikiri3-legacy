@@ -11,9 +11,9 @@
 //! @brief OpenAL 共通
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "RisaException.h"
-#include "WaveDecoder.h"
-#include "ALCommon.h"
+#include "base/exception/RisaException.h"
+#include "sound/WaveDecoder.h"
+#include "sound/ALCommon.h"
 
 RISSE_DEFINE_SOURCE_ID(9828,18466,5910,19138,44164,25475,18182,51394);
 

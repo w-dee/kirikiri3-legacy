@@ -11,9 +11,9 @@
 //! @brief TmpFSのRisseバインディング
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "TmpFS.h"
-#include "TmpFSBind.h"
-#include "RisaException.h"
+#include "base/fs/tmpfs/TmpFS.h"
+#include "base/fs/tmpfs/TmpFSBind.h"
+#include "base/exception/RisaException.h"
 
 
 RISSE_DEFINE_SOURCE_ID(8315,58560,35490,17582,45491,52576,20915,60482);

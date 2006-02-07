@@ -15,8 +15,8 @@
 #define XP4FSH
 
 #include <boost/shared_ptr.hpp>
-#include "FSManager.h"
-#include "XP4Archive.h"
+#include "base/fs/common/FSManager.h"
+#include "base/fs/xp4fs/XP4Archive.h"
 
 
 

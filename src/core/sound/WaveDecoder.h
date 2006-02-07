@@ -14,7 +14,7 @@
 #define _WAVEDECODERH_
 
 
-#include "Wave.h"
+#include "sound/Wave.h"
 
 
 //---------------------------------------------------------------------------

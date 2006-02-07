@@ -15,16 +15,12 @@
 #define WaveLoopManagerH
 //---------------------------------------------------------------------------
 
-#include "risseTypes.h"
-#include "WaveFilter.h"
-#include "WaveDecoder.h"
+#include "risse/include/risseTypes.h"
+#include "sound/WaveFilter.h"
+#include "sound/WaveDecoder.h"
 #include <vector>
 #include <string>
 
-
-#ifdef RISA_IN_LOOP_TUNER
-	#include "WaveReader.h"
-#endif
 
 //---------------------------------------------------------------------------
 #ifdef RISA_IN_LOOP_TUNER

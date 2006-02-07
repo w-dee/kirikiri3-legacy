@@ -13,9 +13,9 @@
 #ifndef _PATHSFSBIND_H_
 #define _PATHSFSBIND_H_
 
-#include "FSManagerBind.h"
-#include "PathFS.h"
-#include "risseNative.h"
+#include "base/fs/common/FSManagerBind.h"
+#include "base/fs/pathfs/PathFS.h"
+#include "risse/include/risseNative.h"
 
 //---------------------------------------------------------------------------
 //! @brief PathFS ネイティブインスタンス

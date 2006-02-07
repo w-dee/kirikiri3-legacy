@@ -11,8 +11,8 @@
 //! @brief OpenAL ソース管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "Singleton.h"
-#include "ALSource.h"
+#include "base/utils/Singleton.h"
+#include "sound/ALSource.h"
 
 
 

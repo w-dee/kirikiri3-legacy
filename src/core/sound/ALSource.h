@@ -13,10 +13,10 @@
 #ifndef ALSourceH
 #define ALSourceH
 
-#include "al.h"
-#include "alc.h"
-#include "ALCommon.h"
-#include "ALBuffer.h"
+#include <al.h>
+#include <alc.h>
+#include "sound/ALCommon.h"
+#include "sound/ALBuffer.h"
 
 
 //---------------------------------------------------------------------------

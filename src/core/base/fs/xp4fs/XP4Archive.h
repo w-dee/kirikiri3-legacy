@@ -14,10 +14,10 @@
 #define _XP4ARCHIVE_
 
 #include <wx/datetime.h>
-#include "FSManager.h"
-#include "XP4ArchiveDefs.h"
-#include "XP4SegmentCache.h"
-#include "XP4StreamCache.h"
+#include "base/fs/common/FSManager.h"
+#include "base/fs/xp4fs/XP4ArchiveDefs.h"
+#include "base/fs/xp4fs/XP4SegmentCache.h"
+#include "base/fs/xp4fs/XP4StreamCache.h"
 
 //---------------------------------------------------------------------------
 //! @brief		一つのアーカイブを現すクラス

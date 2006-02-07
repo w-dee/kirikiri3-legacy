@@ -13,10 +13,10 @@
 #ifndef ALCommonH
 #define ALCommonH
 
-#include "WaveDecoder.h"
-#include "al.h"
-#include "alc.h"
-#include "Singleton.h"
+#include "sound/WaveDecoder.h"
+#include <al.h>
+#include <alc.h>
+#include "base/utils/Singleton.h"
 
 
 /*

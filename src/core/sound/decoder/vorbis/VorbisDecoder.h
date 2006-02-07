@@ -14,10 +14,10 @@
 #ifndef OGGVORBISDECODERH
 #define OGGVORBISDECODERH
 
-#include "WaveDecoder.h"
-#include "risse.h"
-#include "ogg/ogg.h"
-#include "vorbis/vorbisfile.h"
+#include "sound/WaveDecoder.h"
+#include "risse/include/risse.h"
+#include <ogg/ogg.h>
+#include <vorbis/vorbisfile.h>
 
 //---------------------------------------------------------------------------
 //! @brief	 OggVorbis デコーダ

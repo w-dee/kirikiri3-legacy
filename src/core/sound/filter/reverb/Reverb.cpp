@@ -11,7 +11,7 @@
 //! @brief リバーブフィルタの実装 (Freeverb)
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "Reverb.h"
+#include "sound/filter/reverb/Reverb.h"
 
 RISSE_DEFINE_SOURCE_ID(8600,37386,12503,16952,7601,59827,19639,49324);
 

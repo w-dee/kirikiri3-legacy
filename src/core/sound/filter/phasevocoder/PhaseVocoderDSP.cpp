@@ -32,8 +32,8 @@
 
 
 #include <math.h>
-#include "fftsg.h"
-#include "PhaseVocoderDSP.h"
+#include "base/utils/fftsg.h"
+#include "sound/filter/phasevocoder/PhaseVocoderDSP.h"
 #include <string.h>
 
 //---------------------------------------------------------------------------

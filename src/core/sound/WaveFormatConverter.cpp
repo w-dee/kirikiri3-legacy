@@ -13,8 +13,8 @@
 
 #include "prec.h"
 #include <algorithm>
-#include "WaveFormatConverter.h"
-#include "RisaException.h"
+#include "sound/WaveFormatConverter.h"
+#include "base/exception/RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(58054,38608,61255,17526,21894,38819,54476,53804);
 

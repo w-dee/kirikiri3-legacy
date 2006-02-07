@@ -13,13 +13,10 @@
 
 	// for pre-compiled headers
 	// 頻繁に使うヘッダはこの中にかいてください
-	#include "risse.h"
-	#include "risseNative.h"
-	#include "RisaException.h"
+	#include "risse/include/risse.h"
+	#include "risse/include/risseNative.h"
+	#include "base/exception/RisaException.h"
 	#include <wx/wx.h>
 	#include <boost/smart_ptr.hpp>
-	#include "Singleton.h"
-	#include "al.h"
-	#include "alc.h"
-	#include "alc.h"
+	#include "base/utils/Singleton.h"
 #endif

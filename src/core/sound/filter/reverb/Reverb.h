@@ -14,8 +14,8 @@
 #ifndef ReverbH
 #define ReverbH
 
-#include "BasicWaveFilter.h"
-#include "fv_revmodel.hpp"
+#include "sound/filter/BasicWaveFilter.h"
+#include "sound/filter/reverb/fv_revmodel.hpp"
 
 //---------------------------------------------------------------------------
 //! @brief リバーブフィルタクラス

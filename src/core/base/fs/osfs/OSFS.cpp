@@ -11,9 +11,9 @@
 //! @brief OSFSの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "OSFS.h"
-#include "OSFSBind.h"
-#include "RisaException.h"
+#include "base/fs/osfs/OSFS.h"
+#include "base/fs/osfs/OSFSBind.h"
+#include "base/exception/RisaException.h"
 #include <wx/filename.h>
 #include <wx/dir.h>
 

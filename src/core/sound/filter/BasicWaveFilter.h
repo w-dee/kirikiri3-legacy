@@ -14,7 +14,7 @@
 #ifndef BasicWaveFilterH
 #define BasicWaveFilterH
 
-#include "WaveFilter.h"
+#include "sound/WaveFilter.h"
 
 
 //---------------------------------------------------------------------------

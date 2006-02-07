@@ -13,9 +13,9 @@
 #ifndef _LOG_H
 #define _LOG_H
 
-#include "risse.h"
-#include "Singleton.h"
-#include "RingBuffer.h"
+#include "risse/include/risse.h"
+#include "base/utils/Singleton.h"
+#include "base/utils/RingBuffer.h"
 #include <deque>
 #include <wx/datetime.h>
 

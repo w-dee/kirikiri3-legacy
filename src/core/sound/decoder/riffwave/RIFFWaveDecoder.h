@@ -14,8 +14,8 @@
 #ifndef RIFFWAVEDECODERH
 #define RIFFWAVEDECODERH
 
-#include "WaveDecoder.h"
-#include "risse.h"
+#include "sound/WaveDecoder.h"
+#include "risse/include/risse.h"
 
 //---------------------------------------------------------------------------
 //! @brief	 RIFF Wave デコーダ

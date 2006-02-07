@@ -17,8 +17,8 @@
 
 
 #include <boost/smart_ptr.hpp>
-#include "DecompressedHolder.h"
-#include "Singleton.h"
+#include "base/fs/xp4fs/DecompressedHolder.h"
+#include "base/utils/Singleton.h"
 
 
 

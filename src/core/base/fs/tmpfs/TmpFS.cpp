@@ -11,8 +11,8 @@
 //! @brief tmpfs の実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "TmpFS.h"
-#include "RisaException.h"
+#include "base/fs/tmpfs/TmpFS.h"
+#include "base/exception/RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(20965,62764,62977,19688,31398,64150,8840,17077);
 

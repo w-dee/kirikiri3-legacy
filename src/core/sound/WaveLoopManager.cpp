@@ -17,16 +17,12 @@
 
 #include "prec.h"
 #include <algorithm>
-#include "WaveLoopManager.h"
+#include "sound/WaveLoopManager.h"
 
 RISSE_DEFINE_SOURCE_ID(8592,58083,15398,17259,37009,18155,50172,63359);
 
 
-#ifdef RISA_IN_LOOP_TUNER
-	#include "WaveReader.h"
-#else
-	#include "WaveDecoder.h"
-#endif
+#include "sound/WaveDecoder.h"
 
 
 

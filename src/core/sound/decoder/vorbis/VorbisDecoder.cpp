@@ -11,10 +11,10 @@
 //! @brief OggVorbis デコーダ
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "VorbisDecoder.h"
-#include "RisaException.h"
-#include "FSManager.h"
-#include "vorbis/vorbisfile.h"
+#include "sound/decoder/vorbis/VorbisDecoder.h"
+#include "base/exception/RisaException.h"
+#include "base/fs/common/FSManager.h"
+#include <vorbis/vorbisfile.h>
 
 
 RISSE_DEFINE_SOURCE_ID(11001,39824,8006,19566,26243,29715,33801,62487);

@@ -11,9 +11,9 @@
 //! @brief 基本的なWaveFilterの各機能の実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "BasicWaveFilter.h"
-#include "RisaException.h"
-#include "WaveFormatConverter.h"
+#include "sound/filter/BasicWaveFilter.h"
+#include "base/exception/RisaException.h"
+#include "sound/WaveFormatConverter.h"
 
 RISSE_DEFINE_SOURCE_ID(35549,59301,21418,20212,56467,33012,49239,37291);
 

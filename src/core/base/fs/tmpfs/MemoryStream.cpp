@@ -11,8 +11,8 @@
 //! @brief オンメモリストリームの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "MemoryStream.h"
-#include "RisaException.h"
+#include "base/fs/tmpfs/MemoryStream.h"
+#include "base/exception/RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(64253,18417,33137,18368,23694,7632,14591,23108);
 

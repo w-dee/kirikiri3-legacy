@@ -11,9 +11,9 @@
 //! @brief RIFF Wave デコーダ
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "RIFFWaveDecoder.h"
-#include "RisaException.h"
-#include "FSManager.h"
+#include "sound/decoder/riffwave/RIFFWaveDecoder.h"
+#include "base/exception/RisaException.h"
+#include "base/fs/common/FSManager.h"
 
 RISSE_DEFINE_SOURCE_ID(17161,14775,60981,18892,4009,20341,33502,766);
 

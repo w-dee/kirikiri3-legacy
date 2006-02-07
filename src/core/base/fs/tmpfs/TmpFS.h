@@ -13,8 +13,8 @@
 #ifndef TmpFSH
 #define TmpFSH
 
-#include "FSManager.h"
-#include "MemoryStream.h"
+#include "base/fs/common/FSManager.h"
+#include "base/fs/tmpfs/MemoryStream.h"
 
 
 //---------------------------------------------------------------------------

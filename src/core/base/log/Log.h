@@ -31,21 +31,20 @@ class tRisaLogger
 
 	const static size_t MaxLogItems = 4096; //!< 最大のログ行数
 public:
+	//! @brief ログアイテムの種別
+	enum tType
+	{
+		itDebug,	//!< デバッグに関する物
+		itInfo,		//!< 情報通知
+		itNotice,	//!< 通常状態だが大事な情報通知
+		itWarning,	//!< 警告
+		itError,	//!< 通常のエラー
+		itCritical	//!< 致命的なエラー
+	};
 
 	//! @brief ログの１アイテム(１行) を表す構造体
 	struct tItem
 	{
-		//! @brief ログアイテムの種別
-		enum tType
-		{
-			itDebug,	//!< デバッグに関する物
-			itInfo,		//!< 情報通知
-			itNotice,	//!< 通常状態だが大事な情報通知
-			itWarning,	//!< 警告
-			itError,	//!< 通常のエラー
-			itCritical	//!< 致命的なエラー
-		};
-
 		wxDateTime Timestamp; //!< ログが行われた日付時刻
 		ttstr Content; //!< ログの内容
 		ttstr Link; //!< リンク情報
@@ -79,7 +78,7 @@ public:
 	void RegisterReceiver(tRisaLogReceiver * receiver);
 	void UnregisterReceiver(tRisaLogReceiver * receiver);
 
-	void Log(const ttstr & content, tItem::tType type = tItem::itInfo,
+	void Log(const ttstr & content, tType type = itInfo,
 		const ttstr & linkinfo = RisseEmptyString);
 };
 //---------------------------------------------------------------------------

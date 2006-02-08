@@ -40,7 +40,7 @@ tRisaLogger::~tRisaLogger()
 //! @brief		指定行分のログを指定のtRisaLogReceiverに送る
 //! @param		target		ログの送り先となるレシーバオブジェクト
 //! @param		maxitems	送るログの最大行数 (これよりもtRisaLoggerが保持している
-//!							ログのサイズが大きい場合は、最後の maxitms 個が送られる)
+//!							ログのサイズが大きい場合は、最後の maxitems 個が送られる)
 //---------------------------------------------------------------------------
 void tRisaLogger::SendLogs(tRisaLogReceiver *target, size_t maxitems)
 {
@@ -113,7 +113,7 @@ void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 //! @param		linkinfo	リンク情報
 //---------------------------------------------------------------------------
 void tRisaLogger::Log(const ttstr & content,
-	tRisaLogger::tItem::tType type,
+	tRisaLogger::tType type,
 	const ttstr & linkinfo)
 {
 	volatile tRisseCriticalSection::tLocker holder(CS);

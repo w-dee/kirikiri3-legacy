@@ -17,6 +17,11 @@
 #include <stdlib.h>
 #include <deque>
 
+#ifdef wxUSE_DRAG_AND_DROP
+#include <wx/dataobj.h>
+#include <wx/dnd.h>
+#endif
+
 RISSE_DEFINE_SOURCE_ID(57288,52924,45855,20290,20385,24474,35332,13597);
 
 /*
@@ -29,7 +34,7 @@ RISSE_DEFINE_SOURCE_ID(57288,52924,45855,20290,20385,24474,35332,13597);
 	する。
 	また、tRisaLogViewer は非表示の場合はログ内容を保持しない。表示状態
 	になったときにいったん tRisaLogger からログ内容をすべて取得し、
-	あとは tRisaLogger にログが追加されれば、そのログ tRisaLogViewer も追加
+	あとは tRisaLogger にログが追加されれば、tRisaLogViewer もそのログを追加
 	するといった同期動作を行う。再び非表示状態になれば同期動作をしなくなる。
 */
 
@@ -39,6 +44,9 @@ RISSE_DEFINE_SOURCE_ID(57288,52924,45855,20290,20385,24474,35332,13597);
 //---------------------------------------------------------------------------
 class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 {
+	static const size_t RotateLimit = 2100; //!< この論理行数を超えるとローテーションを行う
+	static const size_t RotateTo    = 2000; //!< 一回のローテーションではこの論理行数までにログを減らす
+
 	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	struct tLogicalLine
@@ -86,6 +94,9 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 	wxFont CurrentFont; //!< フォント
 	size_t LineHeight; //!< 一行の高さ(pixel単位)
 	size_t LinesPerWindow; //!< 一画面中の有効な行数(半端な行を含まず)
+	size_t ViewWidth; //!< ビューのサイズ(横)
+	size_t ViewHeight; //!< ビューのサイズ(縦)
+	int ViewOriginX; //!< ビューのオフセット
 
 	//! @brief 論理/表示行とその論理行中の文字位置を表すペア
 	struct tCharacterPosition
@@ -127,7 +138,8 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 	tCharacterPosition SelStart; //!< 選択領域の開始位置
 	tCharacterPosition SelEnd; //!< 選択領域の終了位置
 	bool MouseSelecting; //!< 範囲選択中は真
-	tCharacterPosition MouseSelStart; //!< マウスでの選択開始位置
+	tCharacterPosition MouseSelStart1; //!< マウスでの選択開始位置1
+	tCharacterPosition MouseSelStart2; //!< マウスでの選択開始位置1
 
 	//! @brief マウスで選択中にスクロールを行うためのタイマークラス
 	class tScrollTimer : public wxTimer
@@ -147,7 +159,7 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 		}
 	};
 	tScrollTimer * ScrollTimer; //!< マウスで選択中にスクロールを行うためのタイマー
-	int ScrollTimerScrollMount; //!< ScrollTimer でスクロールすべき量
+	int ScrollTimerScrollAmount; //!< ScrollTimer でスクロールすべき量
 
 public:
 	tRisaLogScrollView(wxWindow * parent);
@@ -158,6 +170,8 @@ private:
 		bool & bold, wxColour &colour);
 
 	wxColour GetBackgroundColour();
+
+	void Rotate();
 
 	void LayoutOneLine(size_t buffer_offset);
 	wxString CreateOneLineString(const tRisaLogger::tItem & item);
@@ -170,8 +184,10 @@ private:
 	void ScrollView(risse_int old_top, risse_int new_top);
 	void RefreshDisplayLine(size_t index, risse_int range);
 
-	void ViewPositionToCharacterPosition(risse_int x, risse_int y, tCharacterPosition & charpos);
-	void SetSelection(const tCharacterPosition & pos1, const tCharacterPosition & pos2);
+	void ViewPositionToCharacterPosition(risse_int x, risse_int y, tCharacterPosition & charpos, size_t *charlength = NULL);
+	bool IsViewPositionInSelection(risse_int x, risse_int y);
+	wxString GetSelectionString();
+	void SetSelection(const tCharacterPosition & pos1, const tCharacterPosition & pos2, const tCharacterPosition & pos3);
 	void RefreshSelection(const tCharacterPosition & pos1, const tCharacterPosition & pos2);
 
 	void LogicalPositionToDisplayPosition(const tCharacterPosition & log_pos,
@@ -230,6 +246,10 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 	LineHeight = 12; // あとで実際の文字の高さに調整する
 	SetBackgroundColour(GetBackgroundColour());
 
+	ViewWidth = 100; // あとで実際の文字の高さに調整する
+	ViewHeight = 100; // あとで実際の文字の高さに調整する
+	ViewOriginX = 8;
+
 	SelStart.LogicalIndex = 0;
 	SelStart.CharPosition = 3;
 	SelEnd.LogicalIndex = 2;
@@ -237,7 +257,7 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 
 	MouseSelecting = false;
 	ScrollTimer = NULL;
-	ScrollTimerScrollMount = 0;
+	ScrollTimerScrollAmount = 0;
 
 	// ウィンドウを表示する
 	Show();
@@ -256,6 +276,8 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 //---------------------------------------------------------------------------
 tRisaLogScrollView::~tRisaLogScrollView()
 {
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
 	// レシーバとしてこのオブジェクトを登録解除する
 	tRisaLogger::instance()->UnregisterReceiver(this);
 
@@ -317,6 +339,94 @@ wxColour tRisaLogScrollView::GetBackgroundColour()
 
 
 //---------------------------------------------------------------------------
+//! @brief		ログのローテーションを行う
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::Rotate()
+{
+	if(LogicalLines.size() < RotateLimit) return; // まだローテーションするほどではない
+	if(MouseSelecting) return; // 範囲選択中はローテーションを行わない
+
+	// これから先頭の (LogicalLines.size() - RotateTo) 個の論理行を削除する。
+	size_t log_num_delete_items = LogicalLines.size() - RotateTo;
+
+	// 削除されるべき表示行に対応する論理行を得る
+	size_t disp_num_delete_items;
+	for(disp_num_delete_items = 0; disp_num_delete_items < DisplayLines.size();
+		disp_num_delete_items++)
+	{
+		if(DisplayLines[disp_num_delete_items].LogicalIndex >= log_num_delete_items)
+			break;
+	}
+
+	// LogicalLines の fixup
+	for(std::deque<tLogicalLine>::iterator i = LogicalLines.begin() + log_num_delete_items;
+		i != LogicalLines.end(); i++)
+	{
+		i->DisplayIndex -= disp_num_delete_items;
+	}
+
+	// DisplayLines の fixup
+	for(std::deque<tDisplayLine>::iterator i = DisplayLines.begin() + disp_num_delete_items;
+		i != DisplayLines.end(); i++)
+	{
+		i->LogicalIndex -= log_num_delete_items;
+	}
+
+	// LogicalLines, DisplayLines の先頭部分を削除
+	LogicalLines.erase(LogicalLines.begin(), LogicalLines.begin() + log_num_delete_items);
+	DisplayLines.erase(DisplayLines.begin(), DisplayLines.begin() + disp_num_delete_items);
+
+	// SelStart と SelEnd の fixup
+	if(SelStart.LogicalIndex < log_num_delete_items)
+	{
+		SelStart.LogicalIndex = 0;
+		SelStart.CharPosition = 0;
+	}
+	else
+	{
+		SelStart.LogicalIndex -= log_num_delete_items;
+	}
+
+	if(SelEnd.LogicalIndex < log_num_delete_items)
+	{
+		SelEnd.LogicalIndex = 0;
+		SelEnd.CharPosition = 0;
+	}
+	else
+	{
+		SelEnd.LogicalIndex -= log_num_delete_items;
+	}
+
+	if(SelStart == SelEnd)
+	{
+		SelStart.Invalidate();
+		SelEnd.Invalidate();
+	}
+
+	// スクロールバーの位置を調整
+	int anchor = GetScrollAnchor();
+	if(anchor != -1)
+	{
+		// 表示位置が最後部に固定されていない場合
+		int top = GetScrollPos(wxVERTICAL);
+		top -= disp_num_delete_items;
+		if(top < 0)
+		{
+			Refresh();
+			top = 0;
+		}
+		SetScrollPos(wxVERTICAL, top);
+		anchor = top;
+	}
+	SetScrollBarInfo(anchor);
+
+	// 表示を更新する
+	Refresh();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		一行分のレイアウトを行い、DisplayLinesに追加する
 //! @param		buffer_offset  バッファのオフセット
 //---------------------------------------------------------------------------
@@ -338,10 +448,6 @@ void tRisaLogScrollView::LayoutOneLine(size_t log_index)
 	wxArrayInt widths;
 	dc.GetPartialTextExtents(item.Line, widths);
 
-	// ウィンドウの横幅を得る
-	risse_int cw, ch;
-	GetClientSize(&cw, &ch);
-
 	// 横幅位置でloglineを区切る
 	const wxString & logline = item.Line;
 	int logline_len = logline.Length();
@@ -355,7 +461,7 @@ void tRisaLogScrollView::LayoutOneLine(size_t log_index)
 		index ++;
 		while(index < logline_len)
 		{
-			if(widths[index] - left_pixel > cw) break;
+			if(widths[index] - left_pixel > static_cast<int>(ViewWidth)) break;
 			index ++;
 		}
 
@@ -419,8 +525,6 @@ wxString tRisaLogScrollView::CreateOneLineString(const tRisaLogger::tItem & item
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::LayoutAllLines()
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
-
 	// DisplayLines はいったん全てクリア
 	DisplayLines.clear();
 
@@ -438,12 +542,9 @@ void tRisaLogScrollView::LayoutAllLines()
 //---------------------------------------------------------------------------
 //! @brief		一行分をDisplayLinesに追加し、レイアウトを行う
 //! @param		logger_item  tRisaLogger::tItem 型
-//! @note		このメソッドは様々なスレッドから呼ばれる可能性があるので注意
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
-
 	size_t old_num_displaylines = DisplayLines.size();
 
 	wxString line = CreateOneLineString(logger_item);
@@ -454,11 +555,15 @@ void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 	LogicalLines.push_back(tLogicalLine(line, link, colour, bold));
 	LayoutOneLine(LogicalLines.size() - 1);
 
+	// 必要であればローテーションを行う
+	Rotate();
+
 	// スクロールバーの調整
 	SetScrollBarInfo(GetScrollAnchor());
 
 	// 新しく追加した領域の再描画
 	RefreshDisplayLine(old_num_displaylines, DisplayLines.size() - old_num_displaylines);
+
 }
 //---------------------------------------------------------------------------
 
@@ -470,10 +575,13 @@ void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::DoScroll(risse_int amount, bool absolute)
 {
+	if(!absolute && amount == 0) return ; // スクロールしない
+
 	// 現在のスクロールバー位置を取得
 	int old_pos = GetScrollPos(wxVERTICAL);
 	int new_pos = old_pos;
 	int pos_max = GetScrollRange(wxVERTICAL) - GetScrollThumb(wxVERTICAL);
+	if(pos_max <= 0) return; // スクロールできない
 
 	// スクロール量を加算
 	if(absolute)
@@ -545,12 +653,9 @@ void tRisaLogScrollView::ScrollView(risse_int old_top, risse_int new_top)
 		{
 			// スクロールで新しく表示される部分が確実に再描画されるように
 			// 再描画範囲を指定する
-			risse_int cw = 0, ch = 0;
-			GetClientSize(&cw, &ch);
-
-			wxRect r(0,
+			wxRect r(ViewOriginX,
 				(LinesPerWindow - (new_top-old_top))*LineHeight,
-				cw,
+				ViewWidth,
 				LineHeight*(new_top-old_top));
 			RefreshRect(r);
 		}
@@ -567,16 +672,12 @@ void tRisaLogScrollView::ScrollView(risse_int old_top, risse_int new_top)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::RefreshDisplayLine(size_t index, risse_int range)
 {
-	// index は表示可能範囲内か
+	// index は表示可能範囲内かどうかはチェックしない
 	size_t top = GetScrollPos(wxVERTICAL);
-	if(top > index) return;
-	if(index > top + LinesPerWindow) return;
 
 	index -= top;
-	risse_int cw = 0, ch = 0;
-	GetClientSize(&cw, &ch);
 
-	RefreshRect(wxRect(0, index * LineHeight, cw, LineHeight*range));
+	RefreshRect(wxRect(ViewOriginX, index * LineHeight, ViewWidth, LineHeight*range));
 }
 //---------------------------------------------------------------------------
 
@@ -585,11 +686,18 @@ void tRisaLogScrollView::RefreshDisplayLine(size_t index, risse_int range)
 //! @brief		ビュー内の位置から文字位置を割り出す
 //! @param		x ビュー内の位置x
 //! @param		y ビュー内の位置y
-//! @param		charpos 文字位置を格納する先
+//! @param		charpos 文字位置を格納する先(論理位置)
+//! @param		charlength その行の文字長さを格納する先(NULL可)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::ViewPositionToCharacterPosition(risse_int x,
-	risse_int y, tCharacterPosition & charpos)
+	risse_int y, tCharacterPosition & charpos, size_t *charlength)
 {
+	// あらかじめ charlength に 0 を入れておく
+	if(charlength) *charlength = 0;
+
+	// x から ViewOriginX を引く
+	x -= ViewOriginX;
+
 	// y からビュー内の行数に変換
 	if(y < 0)
 		y = y / static_cast<risse_int>(LineHeight) - 1;
@@ -622,6 +730,7 @@ void tRisaLogScrollView::ViewPositionToCharacterPosition(risse_int x,
 	const tDisplayLine & displayline = DisplayLines[displayline_index];
 	const tLogicalLine & logicalline = LogicalLines[displayline.LogicalIndex];
 	charpos.LogicalIndex = displayline.LogicalIndex;
+	if(charlength) *charlength = displayline.CharLength;
 
 	// フォントをデバイスコンテキストに選択
 	wxClientDC dc(this);
@@ -662,34 +771,84 @@ void tRisaLogScrollView::ViewPositionToCharacterPosition(risse_int x,
 
 
 //---------------------------------------------------------------------------
+//! @brief		ビュー内の位置が選択範囲内かどうかを判断する
+//! @param		x ビュー内の位置x
+//! @param		y ビュー内の位置y
+//! @return		範囲内かどうか
+//---------------------------------------------------------------------------
+bool tRisaLogScrollView::IsViewPositionInSelection(risse_int x, risse_int y)
+{
+	if(!SelStart.IsValid() || !SelEnd.IsValid()) return false;
+	tCharacterPosition charpos;
+	ViewPositionToCharacterPosition(x, y, charpos);
+	if(!charpos.IsValid()) return false;
+	return !(SelStart > charpos) && charpos < SelEnd;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		選択範囲の文字列を取得する
+//---------------------------------------------------------------------------
+wxString tRisaLogScrollView::GetSelectionString()
+{
+	if(!SelStart.IsValid() || !SelEnd.IsValid()) return wxEmptyString;
+
+	wxString ret;
+	for(size_t log_index = SelStart.LogicalIndex;
+		log_index <= SelEnd.LogicalIndex; log_index++)
+	{
+		if(log_index == SelStart.LogicalIndex &&
+			log_index == SelEnd.LogicalIndex)
+		{
+			return wxString(LogicalLines[log_index].Line.c_str() +
+						SelStart.CharPosition,
+						SelEnd.CharPosition - SelStart.CharPosition);
+		}
+
+		if(log_index == SelStart.LogicalIndex)
+			ret += wxString(LogicalLines[log_index].Line.c_str() + SelStart.CharPosition) + wxT("\n");
+		else if(log_index == SelEnd.LogicalIndex)
+			ret += wxString(LogicalLines[log_index].Line.c_str(), SelEnd.CharPosition);
+		else
+			ret += LogicalLines[log_index].Line + wxT("\n");
+	}
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		選択範囲を設定する
-//! @param		pos1   選択範囲の始点
-//! @param		pos2   選択範囲の終点
-//! @note		pos1 > pos2 でもかまわない(自動で判別する)
+//! @param		pos1   選択範囲の始点終点(論理位置)
+//! @param		pos2   選択範囲の始点終点(論理位置)
+//! @param		pos3   選択範囲の始点終点(論理位置)
+//! @note		min(pos1, pos2, pos3) ～ max(pos1, pos2, pos3) が選択される
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::SetSelection(
-	const tCharacterPosition & pos1, const tCharacterPosition & pos2)
+	const tCharacterPosition & pos1, const tCharacterPosition & pos2, const tCharacterPosition & pos3)
 {
 	// 新しい SelStart と SelEnd を決定
 	tCharacterPosition new_selstart;
 	tCharacterPosition new_selend;
 
-	if(pos1.IsValid() && pos2.IsValid())
+	if(pos1.IsValid())
 	{
-		if(pos1 < pos2)
-		{
-			new_selstart = pos1;
-			new_selend   = pos2;
-		}
-		else if(pos2 < pos1)
-		{
-			new_selstart = pos2;
-			new_selend   = pos1;
-		}
+		new_selstart = pos1;
+		new_selend   = pos1;
 	}
 
-	printf("selection(%d,%d)-(%d,%d)\n", new_selstart.LogicalIndex, new_selstart.CharPosition,
-		new_selend.LogicalIndex, new_selend.CharPosition);
+	if(pos2.IsValid())
+	{
+		if(new_selstart > pos2) new_selstart = pos2;
+		if(new_selend   < pos2) new_selend   = pos2;
+	}
+
+	if(pos3.IsValid())
+	{
+		if(new_selstart > pos3) new_selstart = pos3;
+		if(new_selend   < pos3) new_selend   = pos3;
+	}
 
 	// 更新された部分を Refresh
 	if(new_selstart.IsValid() && !SelStart.IsValid())
@@ -714,8 +873,8 @@ void tRisaLogScrollView::SetSelection(
 
 //---------------------------------------------------------------------------
 //! @brief		指定された範囲を再描画する
-//! @param		pos1   範囲の始点
-//! @param		pos2   範囲の終点
+//! @param		pos1   範囲の始点(論理位置)
+//! @param		pos2   範囲の終点(論理位置)
 //! @note		pos1 > pos2 でもかまわない(自動で判別する)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::RefreshSelection(const tCharacterPosition & pos1, const tCharacterPosition & pos2)
@@ -773,7 +932,7 @@ void tRisaLogScrollView::LogicalPositionToDisplayPosition(const tCharacterPositi
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::ScrollByTimer()
 {
-	DoScroll(ScrollTimerScrollMount, false);
+	DoScroll(ScrollTimerScrollAmount, false);
 }
 //---------------------------------------------------------------------------
 
@@ -785,6 +944,8 @@ void tRisaLogScrollView::ScrollByTimer()
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnLog(const tRisaLogger::tItem & logger_item)
 {
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
 	AddLine(logger_item);
 }
 //---------------------------------------------------------------------------
@@ -812,6 +973,12 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 	while (upd)
 	{
 		wxRect rect(upd.GetRect());
+
+		printf("(%d,%d)-(%d,%d)\n",
+			rect.GetLeft(),
+			rect.GetTop(),
+			rect.GetRight(),
+			rect.GetBottom());
 
 		// rect が影響している行を計算
 		risse_int f = rect.GetTop() / LineHeight;
@@ -860,7 +1027,7 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 							displayline.CharLength);
 
 			// 文字列を描画
-			dc.DrawText(substr, 0, y);
+			dc.DrawText(substr, ViewOriginX, y);
 
 			// 選択範囲がある場合
 			if(SelStart.IsValid() &&
@@ -890,7 +1057,7 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 
 					// 範囲を反転する
 					dc.SetLogicalFunction(wxINVERT);
-					dc.DrawRectangle(startx, y, endx - startx, LineHeight);
+					dc.DrawRectangle(startx + ViewOriginX, y, endx - startx, LineHeight);
 					dc.SetLogicalFunction(wxCOPY);
 				}
 			}
@@ -908,6 +1075,8 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnScroll(wxScrollWinEvent& event)
 {
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
 	// イベントをスキップ
 	event.Skip();
 
@@ -941,6 +1110,8 @@ void tRisaLogScrollView::OnScroll(wxScrollWinEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnMouseWheel(wxMouseEvent& event)
 {
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
 	// イベントをスキップ
 	event.Skip();
 
@@ -959,10 +1130,16 @@ void tRisaLogScrollView::OnMouseWheel(wxMouseEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnSize(wxSizeEvent& event)
 {
-	// LinesPerWindow を計算
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	// LinesPerWindow などを計算
 	risse_int cw = 0, ch = 0;
 	GetClientSize(&cw, &ch);
-	LinesPerWindow = ch / LineHeight;
+
+	ViewWidth = cw - ViewOriginX;
+	ViewHeight = ch;
+
+	LinesPerWindow = ViewHeight / LineHeight;
 
 	// 全ての行をレイアウト
 	LayoutAllLines();
@@ -980,18 +1157,52 @@ void tRisaLogScrollView::OnSize(wxSizeEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 {
-	tCharacterPosition pos;
-	ViewPositionToCharacterPosition(event.GetX(), event.GetY(), pos);
-	MouseSelStart = pos;
-	SetSelection(tCharacterPosition(), tCharacterPosition());
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
-	MouseSelecting = true;
+#if wxUSE_DRAG_AND_DROP
+	if(IsViewPositionInSelection(event.GetX(), event.GetY()))
+	{
+		// ドラッグを開始する
+		wxPoint start_mouse = ::wxGetMousePosition();
+		wxTextDataObject text_data(GetSelectionString());
+		wxDropSource source(text_data, this);
+		source.DoDragDrop();
+		// ドラッグされていないようならば選択範囲をクリアする
+		if(start_mouse == ::wxGetMousePosition())
+			SetSelection(tCharacterPosition(), tCharacterPosition(), tCharacterPosition());
+	}
+	else
+#endif
+	{
+		tCharacterPosition pos;
+		size_t charlength;
+		ViewPositionToCharacterPosition(event.GetX(), event.GetY(), pos, &charlength);
+		if(event.GetX() < ViewOriginX)
+		{
+			// 行選択
+			MouseSelStart1 = pos;
+			MouseSelStart2 = pos;
+			MouseSelStart2.CharPosition += charlength;
+			printf("charlength : %d\n", charlength);
+			SetSelection(MouseSelStart1, MouseSelStart2, tCharacterPosition());
+		}
+		else
+		{
+			// 文字選択
+			MouseSelStart1 = pos;
+			MouseSelStart2 = pos;
+			SetSelection(tCharacterPosition(), tCharacterPosition(), tCharacterPosition());
+		}
 
-	if(!HasCapture())
-		CaptureMouse();
+		MouseSelecting = true;
 
-	if(!ScrollTimer)
-		ScrollTimer = new tScrollTimer(this);
+		if(!HasCapture())
+			CaptureMouse();
+
+		ScrollTimerScrollAmount = 0;
+		if(!ScrollTimer)
+			ScrollTimer = new tScrollTimer(this);
+	}
 
 	event.Skip(true);
 }
@@ -1004,9 +1215,11 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnLeftUp(wxMouseEvent & event)
 {
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
 	tCharacterPosition pos;
 	ViewPositionToCharacterPosition(event.GetX(), event.GetY(), pos);
-	SetSelection(MouseSelStart, pos);
+	SetSelection(MouseSelStart1, MouseSelStart2, pos);
 
 	MouseSelecting = false;
 
@@ -1014,6 +1227,7 @@ void tRisaLogScrollView::OnLeftUp(wxMouseEvent & event)
 		ReleaseMouse();
 
 	delete ScrollTimer, ScrollTimer = NULL;
+	ScrollTimerScrollAmount = 0;
 
 	event.Skip(true);
 }
@@ -1026,21 +1240,43 @@ void tRisaLogScrollView::OnLeftUp(wxMouseEvent & event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnMotion(wxMouseEvent & event)
 {
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	// マウスカーソルの形状を決定
+	if(event.GetX() < ViewOriginX)
+	{
+		SetCursor(wxCursor(wxCURSOR_RIGHT_ARROW));
+	}
+	else
+	{
+#if wxUSE_DRAG_AND_DROP
+		// 範囲選択内を指していた場合は普通のカーソルにするが、
+		// それ以外は I-Beam
+		if(!MouseSelecting &&
+			IsViewPositionInSelection(event.GetX(), event.GetY()))
+			SetCursor(wxCursor(wxCURSOR_ARROW));
+		else
+			SetCursor(wxCursor(wxCURSOR_IBEAM));
+#else
+		SetCursor(wxCursor(wxCURSOR_IBEAM));
+#endif
+	}
+
+	// マウスによる領域の選択中か
 	if(MouseSelecting)
 	{
 		tCharacterPosition pos;
 		ViewPositionToCharacterPosition(event.GetX(), event.GetY(), pos);
-		SetSelection(MouseSelStart, pos);
-
-		risse_int cw = 0, ch = 0;
-		GetClientSize(&cw, &ch);
+		SetSelection(MouseSelStart1, MouseSelStart2, pos);
 
 		if(event.GetY() < 0)
-			ScrollTimerScrollMount = -1;
-		else if(event.GetY() > ch)
-			ScrollTimerScrollMount = +1;
+			ScrollTimerScrollAmount = -1;
+		else if(static_cast<size_t>(event.GetY()) > ViewHeight)
+			ScrollTimerScrollAmount = +1;
 		else
-			ScrollTimerScrollMount = 0;
+			ScrollTimerScrollAmount = 0;
+
+		DoScroll(ScrollTimerScrollAmount, false);
 	}
 }
 //---------------------------------------------------------------------------
@@ -1052,16 +1288,21 @@ void tRisaLogScrollView::OnMotion(wxMouseEvent & event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnChar(wxKeyEvent &event)
 {
-	// テスト
-	// ランダムな文字列をランダムな長さで作成
+	volatile tRisseCriticalSection::tLocker holder(CS);
 
-	size_t len = rand() % 50 + 10;
-	risse_char buf[100];
-	for(size_t i = 0; i < len; i++)
-		buf[i] = rand() % 27 + 'A';
-	buf[len] = 0;
+	for(int n = 0; n < 100; n++)
+	{
+		// テスト
+		// ランダムな文字列をランダムな長さで作成
 
-	tRisaLogger::instance()->Log(buf);
+		size_t len = rand() % 50 + 10;
+		risse_char buf[100];
+		for(size_t i = 0; i < len; i++)
+			buf[i] = rand() % 27 + 'A';
+		buf[len] = 0;
+
+		tRisaLogger::instance()->Log(buf);
+	}
 }
 //---------------------------------------------------------------------------
 

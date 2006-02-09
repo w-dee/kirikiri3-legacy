@@ -29,7 +29,7 @@ class tRisaLogger
 {
 	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	const static size_t MaxLogItems = 4096; //!< 最大のログ行数
+	const static size_t MaxLogItems = 2048; //!< 最大のログ行数
 public:
 	//! @brief ログアイテムの種別
 	enum tType

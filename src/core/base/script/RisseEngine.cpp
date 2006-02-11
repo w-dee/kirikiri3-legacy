@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "base/script/RisseEngine.h"
 #include "risse/include/risseError.h"
+#include "base/log/Log.h"
 
 RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);
 
@@ -75,5 +76,41 @@ void tRisaRisseScriptEngine::RegisterGlobalObject(const risse_char *name,
 	er = global->PropSet(RISSE_MEMBERENSURE, name, NULL, &val, global);
 	if(RISSE_FAILED(er))
 		RisseThrowFrom_risse_error(er, name);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		式を評価して結果をコンソールに表示する
+//! @param		expression 式
+//---------------------------------------------------------------------------
+void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const ttstr & expression)
+{
+	// execute the expression
+	ttstr result_str;
+	tRisseVariant result;
+	try
+	{
+		Engine->EvalExpression(expression, &result);
+	}
+	catch(eRisse &e)
+	{
+		// An exception had been occured in console quick Risse expression evaluation
+		result_str = ttstr(RISSE_WS_TR("(Console) ")) + expression +
+			ttstr(RISSE_WS_TR(" = (exception) ")) +
+			e.GetMessage();
+		tRisaLogger::instance()->Log(result_str, tRisaLogger::itError);
+		return;
+	}
+	catch(...)
+	{
+		throw;
+	}
+
+	// success in console quick Risse expression evaluation
+	result_str = ttstr(RISSE_WS_TR("(Console) ")) + expression +
+		ttstr(RISSE_WS_TR(" = ")) +
+		RisseVariantToReadableString(result);
+	tRisaLogger::instance()->Log(result_str);
 }
 //---------------------------------------------------------------------------

@@ -41,7 +41,7 @@ public:
 	iRisseDispatch2 * GetGlobalNoAddRef()
 		{ if(!Engine) return NULL; return Engine->GetGlobalNoAddRef(); } //!< スクリプトエンジンを返す
 	void RegisterGlobalObject(const risse_char *name, iRisseDispatch2 * object);
-
+	void EvalExpresisonAndPrintResultToConsole(const ttstr & expression);
 };
 //---------------------------------------------------------------------------
 

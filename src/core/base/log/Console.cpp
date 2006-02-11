@@ -14,7 +14,7 @@
 #include "base/log/Log.h"
 #include "base/log/LogViewer.h"
 #include "base/log/Console.h"
-#include "risse/include/risseError.h"
+#include "base/script/RisseEngine.h"
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>
@@ -119,8 +119,11 @@ void tRisaLogViewerStatusBar::OnSize(wxSizeEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogViewerStatusBar::OnTextCtrlEnter(wxCommandEvent & event)
 {
-	::wxMessageBox(TextCtrl->GetValue());
+	// Risse に式を評価させ、結果をコンソールに表示する
+	tRisaRisseScriptEngine::instance()->
+		EvalExpresisonAndPrintResultToConsole(ttstr(event.GetString()));
 
+	// これ以上イベントを処理しないように ...
 	event.Skip(false);
 }
 //---------------------------------------------------------------------------

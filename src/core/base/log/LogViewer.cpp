@@ -979,7 +979,8 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 	volatile tRisseCriticalSection::tLocker holder(CS);
 
 #if wxUSE_DRAG_AND_DROP
-	if(IsViewPositionInSelection(event.GetX(), event.GetY()))
+	if(event.GetX() >= ViewOriginX &&
+		 IsViewPositionInSelection(event.GetX(), event.GetY()))
 	{
 		// ドラッグを開始する
 		wxPoint start_mouse = ::wxGetMousePosition();

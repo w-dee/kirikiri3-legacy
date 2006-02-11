@@ -13,7 +13,7 @@
 #include "prec.h"
 #include <wx/filename.h>
 #include "base/script/RisseEngine.h"
-#include "base/log/LogViewer.h"
+#include "base/log/Console.h"
 #include "base/log/Log.h"
 
 RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
@@ -74,7 +74,7 @@ bool tRisaApplication::OnInit()
 	tRisaLogger::instance()->Log(RISSE_WS("アプリケーションのディレクトリを得て、その下にある locale か、 <アプリケーションのあるディレクトリ>../share/locale をメッセージカタログの検索パスに指定する"), tRisaLogger::itError);
 
 	// コンソールをメインウィンドウとして表示
-	tRisaLogViewerFrame *frame = new tRisaLogViewerFrame();
+	tRisaConsoleFrame *frame = new tRisaConsoleFrame();
 //	wxFrame *frame = new wxFrame(NULL, wxID_ANY, wxT("hoge"));
 	frame->Show(true);
 

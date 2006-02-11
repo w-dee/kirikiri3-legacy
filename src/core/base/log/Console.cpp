@@ -13,17 +13,13 @@
 #include "prec.h"
 #include "base/log/Log.h"
 #include "base/log/LogViewer.h"
+#include "base/log/Console.h"
 #include "risse/include/risseError.h"
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>
 
-#ifdef wxUSE_DRAG_AND_DROP
-#include <wx/dataobj.h>
-#include <wx/dnd.h>
-#endif
-
-RISSE_DEFINE_SOURCE_ID();
+RISSE_DEFINE_SOURCE_ID(42206,11515,36168,20323,34721,49407,49922,37589);
 
 
 //---------------------------------------------------------------------------
@@ -31,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID();
 //---------------------------------------------------------------------------
 class tRisaLogViewerStatusBar : public wxStatusBar
 {
-	enum t
+	enum
 	{
 		ID_TextCtrl = 1
 	};
@@ -125,7 +121,7 @@ void tRisaLogViewerStatusBar::OnTextCtrlEnter(wxCommandEvent & event)
 {
 	::wxMessageBox(TextCtrl->GetValue());
 
-	event.Skip();
+	event.Skip(false);
 }
 //---------------------------------------------------------------------------
 

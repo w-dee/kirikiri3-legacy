@@ -13,7 +13,8 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 #-----------------------------------------
 CPPFILES = \
 		Log.cpp                     \
-		LogViewer.cpp               
+		LogViewer.cpp               \
+		Console.cpp                 
 
 
 #-----------------------------------------

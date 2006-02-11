@@ -235,6 +235,8 @@ public:
 	tRisaLogViewerStatusBar(wxWindow *parent);
 	virtual ~tRisaLogViewerStatusBar();
 
+	void FocusToTextCtrl();
+
 private:
 	void AdjustControlSize();
 
@@ -276,6 +278,16 @@ tRisaLogViewerStatusBar::tRisaLogViewerStatusBar(wxWindow *parent)
 //---------------------------------------------------------------------------
 tRisaLogViewerStatusBar::~tRisaLogViewerStatusBar()
 {
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		テキストコントロールにフォーカスを合わせる
+//---------------------------------------------------------------------------
+void tRisaLogViewerStatusBar::FocusToTextCtrl()
+{
+	TextCtrl->SetFocus();
 }
 //---------------------------------------------------------------------------
 
@@ -348,7 +360,11 @@ tRisaConsoleFrame::tRisaConsoleFrame() :
 {
 	ScrollView = new tRisaLogScrollView(this);
 
-	SetStatusBar(new tRisaLogViewerStatusBar(this));
+	tRisaLogViewerStatusBar * bar = new tRisaLogViewerStatusBar(this);
+
+	SetStatusBar(bar);
+
+	bar->FocusToTextCtrl();
 }
 //---------------------------------------------------------------------------
 

@@ -25,6 +25,13 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 	static const size_t RotateLimit = 2100; //!< この論理行数を超えるとローテーションを行う
 	static const size_t RotateTo    = 2000; //!< 一回のローテーションではこの論理行数までにログを減らす
 
+	//! @brief	メニューアイテムID
+	enum
+	{
+		Menu_Copy = 100, //!< コピー
+		Menu_SelectAll  //!< すべて選択
+	};
+
 	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	struct tLogicalLine
@@ -86,6 +93,8 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 		};
 		size_t CharPosition; //!< 文字位置
 
+		tCharacterPosition(size_t index, size_t pos)
+			{ LogicalIndex = index, CharPosition = pos; }
 		tCharacterPosition() { Invalidate(); }
 		bool IsInvalid() const { return LogicalIndex == static_cast<size_t>(-1L); }
 		bool IsValid() const { return !IsInvalid(); }
@@ -164,8 +173,12 @@ private:
 
 	void ViewPositionToCharacterPosition(risse_int x, risse_int y, tCharacterPosition & charpos, size_t *charlength = NULL);
 	bool IsViewPositionInSelection(risse_int x, risse_int y);
+	bool AnySelected();
 	wxString GetSelectionString();
-	void SetSelection(const tCharacterPosition & pos1, const tCharacterPosition & pos2, const tCharacterPosition & pos3);
+	void SetSelection(const tCharacterPosition & pos1,
+		const tCharacterPosition & pos2,
+		const tCharacterPosition & pos3);
+	void SelectAll();
 	void RefreshSelection(const tCharacterPosition & pos1, const tCharacterPosition & pos2);
 
 	void LogicalPositionToDisplayPosition(const tCharacterPosition & log_pos,
@@ -173,20 +186,29 @@ private:
 
 	void ScrollByTimer();
 
+	void ShowContextMenu(const wxPoint & pos);
+
 public:
 	void OnLog(const tRisaLogger::tItem & logger_item); // tRisaLogReceiver の override
 
 private:
-//	void OnIdle(wxIdleEvent& event);
 	void OnPaint(wxPaintEvent& event);
+	void OnChar(wxKeyEvent & event);
 	void OnScroll(wxScrollWinEvent& event);
 	void OnMouseWheel(wxMouseEvent& event);
 	void OnSize(wxSizeEvent& event);
 	void OnLeftDown(wxMouseEvent & event);
 	void OnLeftUp(wxMouseEvent & event);
 	void OnMotion(wxMouseEvent & event);
-//	void OnLeaveWindow(wxMouseEvent & event);
-	void OnChar(wxKeyEvent &event);
+	void OnMenuCopy(wxCommandEvent &event);
+	void OnMenuSelectAll(wxCommandEvent &event);
+
+#if USE_CONTEXT_MENU
+	void OnContextMenu(wxContextMenuEvent& event);
+#else
+	void OnRightUp(wxMouseEvent& event)
+		{ ShowContextMenu(event.GetPosition()); }
+#endif
 
 	DECLARE_EVENT_TABLE()
 

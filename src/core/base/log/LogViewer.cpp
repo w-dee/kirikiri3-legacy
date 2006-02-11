@@ -17,6 +17,11 @@
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>
+#include <wx/clipbrd.h>
+
+#if wxUSE_OWNER_DRAWN
+#include <wx/artprov.h>
+#endif
 
 #ifdef wxUSE_DRAG_AND_DROP
 #include <wx/dataobj.h>
@@ -45,16 +50,25 @@ RISSE_DEFINE_SOURCE_ID(57288,52924,45855,20290,20385,24474,35332,13597);
 //! @brief		イベントテーブルの定義
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRisaLogScrollView, wxPanel)
-//	EVT_IDLE			(tRisaLogScrollView::OnIdle)
-	EVT_PAINT			(tRisaLogScrollView::OnPaint)
-	EVT_SCROLLWIN		(tRisaLogScrollView::OnScroll)
-	EVT_MOUSEWHEEL		(tRisaLogScrollView::OnMouseWheel) 
-	EVT_SIZE			(tRisaLogScrollView::OnSize)
-	EVT_LEFT_DOWN		(tRisaLogScrollView::OnLeftDown)
-	EVT_LEFT_UP			(tRisaLogScrollView::OnLeftUp)
-	EVT_MOTION			(tRisaLogScrollView::OnMotion)
-//	EVT_LEAVE_WINDOW	(tRisaLogScrollView::OnLeaveWindow)
-	EVT_CHAR			(tRisaLogScrollView::OnChar)
+	EVT_PAINT(							tRisaLogScrollView::OnPaint)
+	EVT_CHAR(							tRisaLogScrollView::OnChar)
+	EVT_SCROLLWIN(						tRisaLogScrollView::OnScroll)
+	EVT_MOUSEWHEEL(						tRisaLogScrollView::OnMouseWheel)
+	EVT_SIZE(							tRisaLogScrollView::OnSize)
+	EVT_LEFT_DOWN(						tRisaLogScrollView::OnLeftDown)
+	EVT_LEFT_UP(						tRisaLogScrollView::OnLeftUp)
+	EVT_MOTION(							tRisaLogScrollView::OnMotion)
+	EVT_CHAR(							tRisaLogScrollView::OnChar)
+
+	EVT_MENU(Menu_Copy,					tRisaLogScrollView::OnMenuCopy)
+	EVT_MENU(Menu_SelectAll,			tRisaLogScrollView::OnMenuSelectAll)
+
+#if USE_CONTEXT_MENU
+	EVT_CONTEXT_MENU(					tRisaLogScrollView::OnContextMenu)
+#else
+	EVT_RIGHT_UP(						tRisaLogScrollView::OnRightUp)
+#endif
+
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -65,7 +79,7 @@ END_EVENT_TABLE()
 tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 	wxPanel(parent, wxID_ANY,
                             wxDefaultPosition, wxDefaultSize,
-                            wxSUNKEN_BORDER|wxVSCROLL),
+                            wxSUNKEN_BORDER|wxVSCROLL|wxTAB_TRAVERSAL ),
 	CurrentFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT))
 {
 	LineHeight = 12; // あとで実際の文字の高さに調整する
@@ -613,6 +627,17 @@ bool tRisaLogScrollView::IsViewPositionInSelection(risse_int x, risse_int y)
 
 
 //---------------------------------------------------------------------------
+//! @brief		選択が行われているかどうかを返す
+//! @return		選択が行われているかどうか
+//---------------------------------------------------------------------------
+bool tRisaLogScrollView::AnySelected()
+{
+	return SelStart.IsValid() && SelEnd.IsValid();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		選択範囲の文字列を取得する
 //---------------------------------------------------------------------------
 wxString tRisaLogScrollView::GetSelectionString()
@@ -675,6 +700,13 @@ void tRisaLogScrollView::SetSelection(
 		if(new_selend   < pos3) new_selend   = pos3;
 	}
 
+	if(new_selstart == new_selend)
+	{
+		// 始点と終点が同じ -> 選択されていないと見なす
+		new_selstart.Invalidate();
+		new_selend.Invalidate();
+	}
+
 	// 更新された部分を Refresh
 	if(new_selstart.IsValid() && !SelStart.IsValid())
 		RefreshSelection(new_selstart, new_selend);
@@ -692,6 +724,20 @@ void tRisaLogScrollView::SetSelection(
 	// SelStart と SelEnd を更新
 	SelStart = new_selstart;
 	SelEnd   = new_selend;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		すべてを選択する
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::SelectAll()
+{
+	if(LogicalLines.size() == 0) return;
+	tCharacterPosition start(0, 0);
+	tCharacterPosition end(LogicalLines.size() - 1,
+		LogicalLines[LogicalLines.size()-1].Line.Length());
+	SetSelection(start, end, tCharacterPosition());
 }
 //---------------------------------------------------------------------------
 
@@ -762,6 +808,30 @@ void tRisaLogScrollView::ScrollByTimer()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		コンテキストメニューを表示する
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::ShowContextMenu(const wxPoint & pos)
+{
+	wxMenu menu;
+
+	{
+		volatile tRisseCriticalSection::tLocker holder(CS);
+
+		// context menu of console log viewer
+	    wxMenuItem *item = new wxMenuItem(&menu, Menu_Copy, _("&Copy"));
+#if wxUSE_OWNER_DRAWN
+		item->SetBitmap(wxArtProvider::GetBitmap(wxART_COPY, wxART_MENU));
+#endif
+		menu.Append(item);
+		item->Enable(AnySelected());
+		menu.Append(Menu_SelectAll, _("Select &all"));
+	}
+
+	PopupMenu(&menu, pos.x, pos.y);
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 //! @brief		tRisaLogReceiver::OnLog のオーバーライド
@@ -789,12 +859,10 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 	// 表示行を取得
 	size_t lineFirst = GetScrollPos(wxVERTICAL);
 
-	// 更新矩形を取得
-	wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
-
 	// 更新矩形に影響している行の範囲を取得
 	risse_int draw_line_first = -1;
 	risse_int draw_line_last  = -1;
+	wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
 	while (upd)
 	{
 		wxRect rect(upd.GetRect());
@@ -882,8 +950,41 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 			}
 		}
 	}
+}
+//---------------------------------------------------------------------------
 
-	event.Skip();
+
+//---------------------------------------------------------------------------
+//! @brief		キーが押されたとき
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnChar(wxKeyEvent & event)
+{
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	switch ( event.GetKeyCode() )
+	{
+		case WXK_UP:  // 上キー
+			DoScroll(-1, false);
+			break;
+
+		case WXK_DOWN: // 下キー
+			DoScroll(+1, false);
+			break;
+
+		case WXK_PAGEUP:
+			DoScroll(-LinesPerWindow, false);
+			break;
+
+		case WXK_PAGEDOWN:
+			DoScroll(+LinesPerWindow, false);
+			break;
+
+		default:
+			event.Skip(true);
+			return;
+	}
+
+	event.Skip(false);
 }
 //---------------------------------------------------------------------------
 
@@ -976,15 +1077,25 @@ void tRisaLogScrollView::OnSize(wxSizeEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
-
 #if wxUSE_DRAG_AND_DROP
 	if(event.GetX() >= ViewOriginX &&
 		 IsViewPositionInSelection(event.GetX(), event.GetY()))
 	{
 		// ドラッグを開始する
 		wxPoint start_mouse = ::wxGetMousePosition();
-		wxTextDataObject text_data(GetSelectionString());
+		// 注意: DoDragDrop はドロップが終了するまで戻ってこない。
+		// ここ全体をクリティカルセクションで保護してしまうことは避ける。
+		// ただし、選択範囲のテキストをとってくるGetSelectionStringだけは保護しなければ
+		// ならない。
+		wxString selection;
+
+		{
+			volatile tRisseCriticalSection::tLocker holder(CS);
+			selection = GetSelectionString();
+		}
+
+		// ドラッグの準備をする
+		wxTextDataObject text_data(selection);
 		wxDropSource source(text_data, this);
 		source.DoDragDrop();
 		// ドラッグされていないようならば選択範囲をクリアする
@@ -994,6 +1105,8 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 	else
 #endif
 	{
+		volatile tRisseCriticalSection::tLocker holder(CS);
+
 		tCharacterPosition pos;
 		size_t charlength;
 		ViewPositionToCharacterPosition(event.GetX(), event.GetY(), pos, &charlength);
@@ -1103,14 +1216,67 @@ void tRisaLogScrollView::OnMotion(wxMouseEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		キーが押されたとき
+//! @brief		コンテキストメニューの Copy が選択されたとき
 //! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnChar(wxKeyEvent &event)
+void tRisaLogScrollView::OnMenuCopy(wxCommandEvent &event)
 {
 	volatile tRisseCriticalSection::tLocker holder(CS);
 
+	// 選択範囲をコピーする
+	if (wxTheClipboard->Open())
+	{
+		// This data objects are held by the clipboard, 
+		// so do not delete them in the app.
+
+		// GetSelectionString はクリティカルセクションで保護すること。
+		wxString selection;
+
+		{
+			volatile tRisseCriticalSection::tLocker holder(CS);
+			selection = GetSelectionString();
+		}
+
+		wxTheClipboard->SetData(new wxTextDataObject(selection));
+		wxTheClipboard->Close();
+	}
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		コンテキストメニューの「すべて選択」が選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnMenuSelectAll(wxCommandEvent &event)
+{
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	SelectAll();
+}
+//---------------------------------------------------------------------------
+
+
+#if USE_CONTEXT_MENU
+//---------------------------------------------------------------------------
+//! @brief		コンテキストメニューを表示するとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnContextMenu(wxContextMenuEvent& event)
+{
+	wxPoint point = event.GetPosition();
+	// If from keyboard
+	if (point.x == -1 && point.y == -1)
+	{
+		wxSize size = GetSize();
+		point.x = size.x / 2;
+		point.y = size.y / 2;
+	}
+	else
+	{
+		point = ScreenToClient(point);
+	}
+	ShowContextMenu(point);
+}
+//---------------------------------------------------------------------------
+#endif

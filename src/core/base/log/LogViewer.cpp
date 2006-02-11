@@ -16,6 +16,7 @@
 #include "risse/include/risseError.h"
 #include <stdlib.h>
 #include <deque>
+#include <wx/textctrl.h>
 
 #ifdef wxUSE_DRAG_AND_DROP
 #include <wx/dataobj.h>
@@ -974,12 +975,6 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 	{
 		wxRect rect(upd.GetRect());
 
-		printf("(%d,%d)-(%d,%d)\n",
-			rect.GetLeft(),
-			rect.GetTop(),
-			rect.GetRight(),
-			rect.GetBottom());
-
 		// rect が影響している行を計算
 		risse_int f = rect.GetTop() / LineHeight;
 		risse_int l = rect.GetBottom() / LineHeight;
@@ -1290,21 +1285,153 @@ void tRisaLogScrollView::OnChar(wxKeyEvent &event)
 {
 	volatile tRisseCriticalSection::tLocker holder(CS);
 
-	for(int n = 0; n < 100; n++)
-	{
-		// テスト
-		// ランダムな文字列をランダムな長さで作成
-
-		size_t len = rand() % 50 + 10;
-		risse_char buf[100];
-		for(size_t i = 0; i < len; i++)
-			buf[i] = rand() % 27 + 'A';
-		buf[len] = 0;
-
-		tRisaLogger::instance()->Log(buf);
-	}
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ログビューア用のカスタムステータスバー
+//---------------------------------------------------------------------------
+class tRisaLogViewerStatusBar : public wxStatusBar
+{
+	enum t
+	{
+		ID_TextCtrl = 1
+	};
+
+	wxTextCtrl * TextCtrl;
+
+public:
+	tRisaLogViewerStatusBar(wxWindow *parent);
+	virtual ~tRisaLogViewerStatusBar();
+
+private:
+	void AdjustControlSize();
+
+
+	void OnSize(wxSizeEvent& event);
+	void OnTextCtrlEnter(wxCommandEvent & event);
+	DECLARE_EVENT_TABLE()
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ログビューア用のカスタムステータスバー用のイベントテーブル
+//---------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tRisaLogViewerStatusBar, wxStatusBar)
+	EVT_SIZE(					tRisaLogViewerStatusBar::OnSize)
+	EVT_TEXT_ENTER(ID_TextCtrl,	tRisaLogViewerStatusBar::OnTextCtrlEnter)
+END_EVENT_TABLE()
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tRisaLogViewerStatusBar::tRisaLogViewerStatusBar(wxWindow *parent)
+		   : wxStatusBar(parent, wxID_ANY)
+{
+	SetFieldsCount(1);
+
+	TextCtrl = new wxTextCtrl(
+		this, ID_TextCtrl, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxTE_PROCESS_ENTER);
+
+    SetMinHeight(TextCtrl->GetSize().GetWidth() + 4);
+
+	AdjustControlSize();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		デストラクタ
+//---------------------------------------------------------------------------
+tRisaLogViewerStatusBar::~tRisaLogViewerStatusBar()
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コントロールのサイズを調整する
+//---------------------------------------------------------------------------
+void tRisaLogViewerStatusBar::AdjustControlSize()
+{
+	wxRect rect;
+	GetFieldRect(0, rect);
+
+	TextCtrl->SetSize(rect.x +2, rect.y +2, rect.width - 4, rect.height - 4);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		サイズが変更されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogViewerStatusBar::OnSize(wxSizeEvent& event)
+{
+	AdjustControlSize();
+
+	event.Skip();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		テキストコントロールでEnterキーが押されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogViewerStatusBar::OnTextCtrlEnter(wxCommandEvent & event)
+{
+	::wxMessageBox(TextCtrl->GetValue());
+
+	event.Skip();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1329,8 +1456,11 @@ tRisaLogViewerFrame::tRisaLogViewerFrame() :
 	wxFrame(NULL, wxID_ANY, _("Console"))
 {
 	ScrollView = new tRisaLogScrollView(this);
+
+	SetStatusBar(new tRisaLogViewerStatusBar(this));
 }
 //---------------------------------------------------------------------------
+
 
 
 

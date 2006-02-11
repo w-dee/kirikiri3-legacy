@@ -8,23 +8,22 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief ログビューア
+//! @brief コンソールフレーム
 //---------------------------------------------------------------------------
-#ifndef _LOGVIEWER_H
-#define _LOGVIEWER_H
+#ifndef _CONSOLE_H
+#define _CONSOLE_H
 
 #include "risse/include/risse.h"
-#include <deque>
 
 
 //---------------------------------------------------------------------------
-//! @brief		ログビューアのフレーム
+//! @brief		コンソールのフレーム
 //---------------------------------------------------------------------------
 class tRisaLogScrollView;
-class tRisaLogViewerFrame : public wxFrame
+class tRisaConsoleFrame : public wxFrame
 {
 public:
-	tRisaLogViewerFrame();
+	tRisaConsoleFrame();
 
 private:
 	tRisaLogScrollView *ScrollView;

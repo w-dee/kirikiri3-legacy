@@ -42,6 +42,9 @@ public:
 		{ if(!Engine) return NULL; return Engine->GetGlobalNoAddRef(); } //!< スクリプトエンジンを返す
 	void RegisterGlobalObject(const risse_char *name, iRisseDispatch2 * object);
 	void EvalExpresisonAndPrintResultToConsole(const ttstr & expression);
+	void ExecuteScript(const ttstr &script, tRisseVariant *result = NULL,
+		iRisseDispatch2 *context = NULL,
+		const ttstr *name = NULL, risse_int lineofs = 0);
 };
 //---------------------------------------------------------------------------
 

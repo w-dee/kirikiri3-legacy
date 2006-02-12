@@ -114,3 +114,22 @@ void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const ttstr &
 	tRisaLogger::instance()->Log(result_str);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		スクリプトブロックを実行する
+//! @param		script		スクリプト
+//! @param		result		実行結果を受け取るtRisseVariant型オブジェクトへのポインタ(要らない場合はNULLを)
+//! @param		context		実行を行うコンテキスト(globalで動かしたい場合はNULL)
+//! @param		name		スクリプトブロック名
+//! @param		lineofs		このスクリプトブロックの(オリジナルのファイル全体に対する)開始行
+//---------------------------------------------------------------------------
+void tRisaRisseScriptEngine::ExecuteScript(
+		const ttstr &script, tRisseVariant *result,
+		iRisseDispatch2 *context,
+		const ttstr *name, risse_int lineofs)
+{
+	Engine->ExecScript(script, result, context, name, lineofs);
+}
+//---------------------------------------------------------------------------
+

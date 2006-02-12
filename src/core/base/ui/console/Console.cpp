@@ -12,8 +12,8 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/log/Log.h"
-#include "base/log/LogViewer.h"
-#include "base/log/Console.h"
+#include "base/ui/console/LogViewer.h"
+#include "base/ui/console/Console.h"
 #include "base/script/RisseEngine.h"
 #include <stdlib.h>
 #include <deque>

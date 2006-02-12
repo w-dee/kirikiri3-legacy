@@ -12,7 +12,8 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 # このディレクトリにあるソースファイルを列挙
 #-----------------------------------------
 CPPFILES = \
-		Log.cpp                 
+		console/LogViewer.cpp       \
+		console/Console.cpp         
 
 
 #-----------------------------------------

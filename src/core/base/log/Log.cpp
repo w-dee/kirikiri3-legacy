@@ -109,11 +109,11 @@ void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 //---------------------------------------------------------------------------
 //! @brief		ログを記録する
 //! @param		content		ログの内容
-//! @param		type		ログのタイプ
+//! @param		level		ログレベル
 //! @param		linkinfo	リンク情報
 //---------------------------------------------------------------------------
 void tRisaLogger::Log(const ttstr & content,
-	tRisaLogger::tType type,
+	tRisaLogger::tLevel level,
 	const ttstr & linkinfo)
 {
 	volatile tRisseCriticalSection::tLocker holder(CS);
@@ -127,7 +127,7 @@ void tRisaLogger::Log(const ttstr & content,
 	item.Timestamp = wxDateTime::Now();
 	item.Content = content;
 	item.Link = linkinfo;
-	item.Type = type;
+	item.Level = level;
 
 	// Buffer の書き込みポインタを進める
 	// (バッファがあふれた場合は古いログを捨てる)

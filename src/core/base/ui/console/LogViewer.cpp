@@ -127,31 +127,31 @@ tRisaLogScrollView::~tRisaLogScrollView()
 
 //---------------------------------------------------------------------------
 //! @brief		ログアイテムの種別からフォントを得る
-//! @param		type		ログアイテムの種別
+//! @param		level		ログレベル
 //! @param		bold		太字にするかどうか
 //! @param		colour		wxColor クラスへの参照
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::GetFontFromLogItemType(tRisaLogger::tType type,
+void tRisaLogScrollView::GetFontFromLogItemLevel(tRisaLogger::tLevel level,
 		bool & bold, wxColour &colour)
 {
-	switch(type)
+	switch(level)
 	{
-	case tRisaLogger::itDebug:		//!< デバッグに関する物
+	case tRisaLogger::llDebug:		//!< デバッグに関する物
 		{ static wxColour c(0xa0, 0xa0, 0xa0); colour = c; bold = false; }
 		break;
-	case tRisaLogger::itInfo:		//!< 通知
+	case tRisaLogger::llInfo:		//!< 通知
 		{ static wxColour c(0xff, 0xff, 0xff); colour = c; bold = false; }
 		break;
-	case tRisaLogger::itNotice:		//!< 通常状態だが大事な情報
+	case tRisaLogger::llNotice:		//!< 通常状態だが大事な情報
 		{ static wxColour c(0x00, 0xff, 0x00); colour = c; bold = false; }
 		break;
-	case tRisaLogger::itWarning:	//!< 警告
+	case tRisaLogger::llWarning:	//!< 警告
 		{ static wxColour c(0xff, 0xff, 0x00); colour = c; bold = false; }
 		break;
-	case tRisaLogger::itError:		//!< 通常のエラー
+	case tRisaLogger::llError:		//!< 通常のエラー
 		{ static wxColour c(0xff, 0x80, 0x80); colour = c; bold = false; }
 		break;
-	case tRisaLogger::itCritical:	//!< 致命的なエラー
+	case tRisaLogger::llCritical:	//!< 致命的なエラー
 		{ static wxColour c(0xff, 0x00, 0x00); colour = c; bold = true;  }
 		break;
 	default:
@@ -331,19 +331,19 @@ wxString tRisaLogScrollView::CreateOneLineString(const tRisaLogger::tItem & item
 	wxString logline = item.Timestamp.FormatTime() + wxT(" ");
 
 	// ログレベル
-	switch(item.Type)
+	switch(item.Level)
 	{
-	case tRisaLogger::itDebug:
+	case tRisaLogger::llDebug:
 		logline += _("[D] "); break; // [D]ebug
-	case tRisaLogger::itInfo:
+	case tRisaLogger::llInfo:
 		logline += _("[I] "); break; // [I]nformation
-	case tRisaLogger::itNotice:
+	case tRisaLogger::llNotice:
 		logline += _("[N] "); break; // [N]otice
-	case tRisaLogger::itWarning:
+	case tRisaLogger::llWarning:
 		logline += _("[W] "); break; // [W]arning
-	case tRisaLogger::itError:
+	case tRisaLogger::llError:
 		logline += _("[E] "); break; // [E]rror
-	case tRisaLogger::itCritical:
+	case tRisaLogger::llCritical:
 		logline += _("[C] "); break; // [C]ritical
 	}
 
@@ -386,7 +386,7 @@ void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 	wxString link = logger_item.Link.AsWxString();
 	wxColour colour;
 	bool bold;
-	GetFontFromLogItemType(logger_item.Type, bold, colour);
+	GetFontFromLogItemLevel(logger_item.Level, bold, colour);
 	LogicalLines.push_back(tLogicalLine(line, link, colour, bold));
 	LayoutOneLine(LogicalLines.size() - 1);
 

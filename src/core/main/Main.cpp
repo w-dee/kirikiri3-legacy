@@ -69,10 +69,6 @@ bool tRisaApplication::OnInit()
 		RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 		NULL, NULL, NULL);
 
-	tRisaLogger::instance()->Log(RISSE_WS("ファイルシステムのルートにカレントディレクトリをマウント"));
-	tRisaLogger::instance()->Log(RISSE_WS("全てのシングルトンインスタンスを初期化"));
-	tRisaLogger::instance()->Log(RISSE_WS("アプリケーションのディレクトリを得て、その下にある locale か、 <アプリケーションのあるディレクトリ>../share/locale をメッセージカタログの検索パスに指定する"), tRisaLogger::itError);
-
 	// コンソールをメインウィンドウとして表示
 	tRisaConsoleFrame *frame = new tRisaConsoleFrame();
 //	wxFrame *frame = new wxFrame(NULL, wxID_ANY, wxT("hoge"));

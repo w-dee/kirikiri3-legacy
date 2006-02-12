@@ -153,7 +153,7 @@ public:
 	~tRisaLogScrollView();
 
 private:
-	void GetFontFromLogItemType(tRisaLogger::tType type,
+	void GetFontFromLogItemLevel(tRisaLogger::tLevel level,
 		bool & bold, wxColour &colour);
 
 	wxColour GetBackgroundColour();

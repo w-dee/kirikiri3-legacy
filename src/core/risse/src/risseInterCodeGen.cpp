@@ -112,8 +112,26 @@ int _yyerror(const risse_char * msg, void *pm, risse_int pos)
 int __yyerror(char * msg, void * pm)
 {
 	// yyerror ( for bison )
-	ttstr str(msg);
-	return _yyerror(str.c_str(), pm);
+
+	// 簡易的にここでは char * を そのまま risse_char に展開して使用する
+	int ret;
+	size_t len = strlen(msg);
+	risse_char * buf = new risse_char[len + 1];
+	try
+	{
+		risse_char *p = buf;
+		while((*p = *msg) != 0) p++, msg++;
+
+		ret = _yyerror(buf, pm);
+	}
+	catch(...)
+	{
+		delete [] buf;
+		throw;
+	}
+	delete [] buf;
+
+	return ret;
 }
 //---------------------------------------------------------------------------
 

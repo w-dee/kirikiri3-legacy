@@ -192,6 +192,13 @@ void tRisaHistoryTextCtrl::OnChar(wxKeyEvent & event)
 			break;
 		}
 
+		case WXK_TAB: // TAB
+			// ログビューアにフォーカスを合わせる
+			wxWindow * top = GetParent();
+			while(top->GetParent()) top = top->GetParent(); // トップレベルウィンドウを探す
+			reinterpret_cast<tRisaConsoleFrame*>(top)->SetFocusToLogViewer();
+			break;
+
 		default:
 			event.Skip(true);
 			return;
@@ -235,7 +242,7 @@ public:
 	tRisaLogViewerStatusBar(wxWindow *parent);
 	virtual ~tRisaLogViewerStatusBar();
 
-	void FocusToTextCtrl();
+	void FocusToTextCtrl(int insert_code);
 
 private:
 	void AdjustControlSize();
@@ -284,10 +291,14 @@ tRisaLogViewerStatusBar::~tRisaLogViewerStatusBar()
 
 //---------------------------------------------------------------------------
 //! @brief		テキストコントロールにフォーカスを合わせる
+//! @param		insert_code		テキストコントロールにフォーカスを合わせた際に
+//!								押されたキー (必要ならばこれを挿入する)
 //---------------------------------------------------------------------------
-void tRisaLogViewerStatusBar::FocusToTextCtrl()
+void tRisaLogViewerStatusBar::FocusToTextCtrl(int insert_code)
 {
 	TextCtrl->SetFocus();
+	if(insert_code >= 0x20)
+		TextCtrl->WriteText(wxString(static_cast<wxChar>(insert_code)));
 }
 //---------------------------------------------------------------------------
 
@@ -356,19 +367,40 @@ END_EVENT_TABLE()
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaConsoleFrame::tRisaConsoleFrame() :
-	wxFrame(NULL, wxID_ANY, _("Console"))
+	wxFrame(NULL, wxID_ANY, _("Console"), wxDefaultPosition, wxDefaultSize,
+		wxDEFAULT_FRAME_STYLE)
 {
 	ScrollView = new tRisaLogScrollView(this);
 
-	tRisaLogViewerStatusBar * bar = new tRisaLogViewerStatusBar(this);
+	StatusBar = new tRisaLogViewerStatusBar(this);
 
-	SetStatusBar(bar);
+	SetStatusBar(StatusBar);
 
-	bar->FocusToTextCtrl();
+	SetFocusToTextCtrl();
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		ログビューアにフォーカスを合わせる
+//---------------------------------------------------------------------------
+void tRisaConsoleFrame::SetFocusToLogViewer()
+{
+	ScrollView->SetFocus();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		テキストコントロールにフォーカスを合わせる
+//! @param		insert_code		テキストコントロールにフォーカスを合わせた際に
+//!								押されたキー (必要ならばこれを挿入する)
+//---------------------------------------------------------------------------
+void tRisaConsoleFrame::SetFocusToTextCtrl(int insert_code)
+{
+	StatusBar->FocusToTextCtrl(insert_code);
+}
+//---------------------------------------------------------------------------
 
 
 

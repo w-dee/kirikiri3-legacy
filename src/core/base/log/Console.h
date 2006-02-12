@@ -20,13 +20,18 @@
 //! @brief		コンソールのフレーム
 //---------------------------------------------------------------------------
 class tRisaLogScrollView;
+class tRisaLogViewerStatusBar;
 class tRisaConsoleFrame : public wxFrame
 {
 public:
 	tRisaConsoleFrame();
 
+	void SetFocusToLogViewer();
+	void SetFocusToTextCtrl(int insert_code = 0);
+
 private:
 	tRisaLogScrollView *ScrollView;
+	tRisaLogViewerStatusBar *StatusBar;
 
 	DECLARE_EVENT_TABLE()
 };

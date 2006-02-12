@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "base/log/Log.h"
 #include "base/log/LogViewer.h"
+#include "base/log/Console.h"
 #include "risse/include/risseError.h"
 #include <stdlib.h>
 #include <deque>
@@ -79,7 +80,7 @@ END_EVENT_TABLE()
 tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 	wxPanel(parent, wxID_ANY,
                             wxDefaultPosition, wxDefaultSize,
-                            wxSUNKEN_BORDER|wxVSCROLL|wxTAB_TRAVERSAL ),
+                            wxSUNKEN_BORDER|wxVSCROLL),
 	CurrentFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT))
 {
 	LineHeight = 12; // あとで実際の文字の高さに調整する
@@ -961,7 +962,9 @@ void tRisaLogScrollView::OnChar(wxKeyEvent & event)
 {
 	volatile tRisseCriticalSection::tLocker holder(CS);
 
-	switch ( event.GetKeyCode() )
+	int keycode = event.GetKeyCode();
+
+	switch (keycode)
 	{
 		case WXK_UP:  // 上キー
 			DoScroll(-1, false);
@@ -971,17 +974,29 @@ void tRisaLogScrollView::OnChar(wxKeyEvent & event)
 			DoScroll(+1, false);
 			break;
 
-		case WXK_PAGEUP:
+		case WXK_PRIOR: // Page Up
 			DoScroll(-LinesPerWindow, false);
 			break;
 
-		case WXK_PAGEDOWN:
+		case WXK_NEXT: // Page Down
 			DoScroll(+LinesPerWindow, false);
 			break;
 
 		default:
-			event.Skip(true);
-			return;
+			if(keycode == WXK_TAB || (keycode >= 0x20 && keycode < 256))
+			{
+				// 通常のキーが入力された場合
+				// テキストコントロールにフォーカスを合わせる
+				wxWindow * top = GetParent();
+				while(top->GetParent()) top = top->GetParent(); // トップレベルウィンドウを探す
+				reinterpret_cast<tRisaConsoleFrame*>(top)->SetFocusToTextCtrl(keycode);
+				break;
+			}
+			else
+			{
+				event.Skip(true);
+				return;
+			}
 	}
 
 	event.Skip(false);

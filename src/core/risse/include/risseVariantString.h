@@ -129,6 +129,20 @@ public:
 	}
 #endif
 
+	//! @brief		文字列の設定 (UTF-8 char より)
+	//! @param		ref 文字列
+	void SetString(const char *ref)
+	{
+		size_t w_len = RisseUtf8ToRisseCharString(ref, NULL);
+		if(w_len == static_cast<size_t>(-1L))
+		{
+			return; // TODO: Error handling
+		}
+		AllocBuffer(w_len);
+		RisseUtf8ToRisseCharString(ref, operator risse_char *());
+		FixLength();
+	}
+
 	void AllocBuffer(risse_uint len)
 	{
 		/* note that you must call FixLength if you allocate larger than the
@@ -293,6 +307,7 @@ tRisseVariantString *RisseAllocVariantString(const risse_char *ref);
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 tRisseVariantString *RisseAllocVariantString(const wchar_t *ref);
 #endif
+tRisseVariantString *RisseAllocVariantString(const char *ref);
 tRisseVariantString *RisseAllocVariantString(const risse_uint8 **src);
 tRisseVariantString *RisseAllocVariantStringBuffer(risse_uint len);
 tRisseVariantString *RisseAppendVariantString(tRisseVariantString *str,

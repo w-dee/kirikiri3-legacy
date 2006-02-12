@@ -37,6 +37,8 @@ size_t Risse_strlen(const risse_char *d);
 
 void RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in);
 
+size_t RisseUtf8ToRisseCharString(const char * in, risse_char *out);
+size_t RisseRisseCharToUtf8String(const risse_char *in, char * out);
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	int Risse_strcmp(const risse_char *s1, const risse_char *s2);

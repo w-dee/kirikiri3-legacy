@@ -612,6 +612,19 @@ tRisseVariantString *RisseAllocVariantString(const wchar_t *ref)
 //---------------------------------------------------------------------------
 #endif
 
+//---------------------------------------------------------------------------
+//! @brief		文字列管理ブロックを確保(UTF-8 char* より)
+//---------------------------------------------------------------------------
+tRisseVariantString *RisseAllocVariantString(const char *ref)
+{
+	if(!ref) return NULL;
+	if(ref[0]==0) return NULL;
+	tRisseVariantString *ret = RisseAllocStringHeap();
+	ret->SetString(ref);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 tRisseVariantString * RisseAllocVariantString(const risse_char *ref, risse_int n)

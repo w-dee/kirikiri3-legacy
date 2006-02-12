@@ -70,6 +70,7 @@ public:
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	tRisseString(const wchar_t *str) { Ptr = RisseAllocVariantString(str); }
 #endif
+	tRisseString(const char *str) { Ptr = RisseAllocVariantString(str); }
 	tRisseString(const tRisseStringBufferLength len)
 		{ Ptr = RisseAllocVariantStringBuffer(len.n); }
 

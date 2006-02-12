@@ -90,11 +90,6 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 	ViewHeight = 100; // あとで実際の文字の高さに調整する
 	ViewOriginX = 8;
 
-	SelStart.LogicalIndex = 0;
-	SelStart.CharPosition = 3;
-	SelEnd.LogicalIndex = 2;
-	SelEnd.CharPosition = 11;
-
 	MouseSelecting = false;
 	ScrollTimer = NULL;
 	ScrollTimerScrollAmount = 0;
@@ -103,7 +98,7 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 	Show();
 
 	// 既存のログをレイアウトする
-	tRisaLogger::instance()->SendLogs(this);
+	tRisaLogger::instance()->SendLogs(this, RotateTo);
 
 	// レシーバとしてこのオブジェクトを登録する
 	tRisaLogger::instance()->RegisterReceiver(this);

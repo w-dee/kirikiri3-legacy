@@ -408,7 +408,7 @@ double Risse_strtod(const risse_char *nptr, risse_char **endptr)
 	*bp = 0;
 	char *ep;
 	double val = strtod(buf, &ep);
-	*endptr = const_cast<risse_char *>((ep - buf) + nptr);
+	if(endptr) *endptr = const_cast<risse_char *>((ep - buf) + nptr);
 	return val;
 }
 //---------------------------------------------------------------------------

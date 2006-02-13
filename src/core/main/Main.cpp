@@ -14,6 +14,7 @@
 #include <wx/filename.h>
 #include "base/script/RisseEngine.h"
 #include "base/ui/console/Console.h"
+#include "base/ui/editor/ScriptEditor.h"
 #include "base/log/Log.h"
 
 RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
@@ -70,9 +71,12 @@ bool tRisaApplication::OnInit()
 		NULL, NULL, NULL);
 
 	// コンソールをメインウィンドウとして表示
-	tRisaConsoleFrame *frame = new tRisaConsoleFrame();
+	tRisaConsoleFrame *console = new tRisaConsoleFrame();
 //	wxFrame *frame = new wxFrame(NULL, wxID_ANY, wxT("hoge"));
-	frame->Show(true);
+	console->Show(true);
+
+	tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
+	editor->Show(true);
 
 	//---- ↑↑テストコード↑↑ ----
 

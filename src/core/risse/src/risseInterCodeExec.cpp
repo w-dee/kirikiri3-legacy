@@ -1416,13 +1416,7 @@ risse_int tRisseInterCodeContext::ExecuteCode(tRisseVariant *ra_org, risse_int s
 	catch(eRisse &e)
 	{
 		DisplayExceptionGeneratedCode(codesave - CodeArea, ra_org);
-        #ifdef _MSC_VER
-            // GetMessageマクロがRisse::eRisse::GetMessageを邪魔するので消す
-            #ifdef GetMessage
-            #undef GetMessage
-            #endif
-        #endif
-		Risse_eRisseScriptError(e.GetMessage(), this, codesave-CodeArea);
+		Risse_eRisseScriptError(e.GetMessageString(), this, codesave-CodeArea);
 	}
 /*
 	TODO: standard exception catch
@@ -1470,12 +1464,6 @@ risse_int tRisseInterCodeContext::ExecuteCodeInTryBlock(tRisseVariant *ra, risse
 		if(RisseStackTracerEnabled()) RisseStackTracerPop();
 		return ret;
 	}
-    #ifdef _MSC_VER
-        // GetMessageマクロがRisse::eRisse::GetMessageを邪魔するので消す
-        #ifdef GetMessage
-        #undef GetMessage
-        #endif
-    #endif
 	RISSE_CONVERT_TO_RISSE_EXCEPTION_OBJECT(
 			Block->GetRisse(),
 			exobjreg,

@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include <wx/filename.h>
+#include <wx/app.h>
 #include "base/script/RisseEngine.h"
 #include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
@@ -23,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
 //---------------------------------------------------------------------------
 //! @brief アプリケーションクラス
 //---------------------------------------------------------------------------
-class tRisaApplication:public wxApp
+class tRisaApplication : public wxApp
 {
 public:
 	bool OnInit();

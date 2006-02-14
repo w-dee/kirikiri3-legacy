@@ -11,6 +11,7 @@
 //! @brief OpenAL バッファ管理
 //---------------------------------------------------------------------------
 #include "prec.h"
+#include "base/exception/RisaException.h"
 #include "sound/ALCommon.h"
 #include "sound/ALBuffer.h"
 #include "sound/WaveFormatConverter.h"

@@ -1734,13 +1734,7 @@ risse_int tRisseLexicalAnalyzer::GetNext(risse_int &value)
 		}
 		catch(eRisseCompileError &e)
 		{
-            #ifdef _MSC_VER
-                // GetMessageマクロがRisse::eRisse::GetMessageを邪魔するので消す
-                #ifdef GetMessage
-                #undef GetMessage
-                #endif
-            #endif
-			_yyerror(e.GetMessage().c_str(), Block, e.GetPosition());
+			_yyerror(e.GetMessageString().c_str(), Block, e.GetPosition());
 			return 0;
 		}
 		Current = Script;
@@ -1898,35 +1892,23 @@ risse_int tRisseLexicalAnalyzer::GetNext(risse_int &value)
 
 			if(n == 0)
 			{
-                #ifdef _MSC_VER
-                    // GetMessageマクロがRisse::eRisse::GetMessageを邪魔するので消す
-                    #ifdef GetMessage
-                    #undef GetMessage
-                    #endif
-                #endif
 				if(IfLevel != 0)
 					Risse_eRisseCompileError(RissePPError, Block, Current-Script);
 			}
 		}
 		catch(eRisseCompileError &e)
 		{
-			_yyerror(e.GetMessage().c_str(), Block);
+			_yyerror(e.GetMessageString().c_str(), Block);
 			return 0;
 		}
 		catch(eRisseScriptError &e)
 		{
-			_yyerror(e.GetMessage().c_str(), Block);
+			_yyerror(e.GetMessageString().c_str(), Block);
 			return 0;
 		}
 		catch(eRisse &e)
 		{
-            #ifdef _MSC_VER
-                // GetMessageマクロがRisse::eRisse::GetMessageを邪魔するので消す
-                #ifdef GetMessage
-                #undef GetMessage
-                #endif
-            #endif
-			_yyerror(e.GetMessage().c_str(), Block);
+			_yyerror(e.GetMessageString().c_str(), Block);
 			return 0;
 		}
 	#ifdef RISSE_SUPPORT_VCL

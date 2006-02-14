@@ -18,7 +18,7 @@
 #define risseCommHeadH
 
 #ifdef RISSE_SUPPORT_WX
-	#include <wx/wx.h>
+	#include <wx/defs.h>
 #endif
 
 #ifdef __WIN32__
@@ -26,12 +26,6 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#ifdef _MSC_VER
-    // GetMessageマクロがRisse::eRisse::GetMessageを邪魔するので消す
-    #ifdef GetMessage
-    #undef GetMessage
-    #endif
-#endif
 #endif
 
 

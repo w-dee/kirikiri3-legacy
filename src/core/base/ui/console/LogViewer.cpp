@@ -61,8 +61,8 @@ BEGIN_EVENT_TABLE(tRisaLogScrollView, wxPanel)
 	EVT_MOTION(							tRisaLogScrollView::OnMotion)
 	EVT_CHAR(							tRisaLogScrollView::OnChar)
 
-	EVT_MENU(Menu_Copy,					tRisaLogScrollView::OnMenuCopy)
-	EVT_MENU(Menu_SelectAll,			tRisaLogScrollView::OnMenuSelectAll)
+	EVT_MENU(ID_Menu_Copy,				tRisaLogScrollView::OnMenuCopy)
+	EVT_MENU(ID_Menu_SelectAll,			tRisaLogScrollView::OnMenuSelectAll)
 
 #if USE_CONTEXT_MENU
 	EVT_CONTEXT_MENU(					tRisaLogScrollView::OnContextMenu)
@@ -806,6 +806,7 @@ void tRisaLogScrollView::ScrollByTimer()
 
 //---------------------------------------------------------------------------
 //! @brief		コンテキストメニューを表示する
+//! @param		pos  表示位置
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::ShowContextMenu(const wxPoint & pos)
 {
@@ -815,13 +816,13 @@ void tRisaLogScrollView::ShowContextMenu(const wxPoint & pos)
 		volatile tRisseCriticalSection::tLocker holder(CS);
 
 		// context menu of console log viewer
-	    wxMenuItem *item = new wxMenuItem(&menu, Menu_Copy, _("&Copy"));
+		wxMenuItem *item = new wxMenuItem(&menu, ID_Menu_Copy, _("&Copy"));
 #if wxUSE_OWNER_DRAWN
 		item->SetBitmap(wxArtProvider::GetBitmap(wxART_COPY, wxART_MENU));
 #endif
 		menu.Append(item);
 		item->Enable(AnySelected());
-		menu.Append(Menu_SelectAll, _("Select &all"));
+		menu.Append(ID_Menu_SelectAll, _("Select &All"));
 	}
 
 	PopupMenu(&menu, pos.x, pos.y);

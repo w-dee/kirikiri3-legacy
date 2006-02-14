@@ -98,7 +98,7 @@ void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const ttstr &
 		// An exception had been occured in console quick Risse expression evaluation
 		result_str = ttstr(RISSE_WS_TR("(Console) ")) + expression +
 			ttstr(RISSE_WS_TR(" = (exception) ")) +
-			e.GetMessage();
+			e.GetMessageString();
 		tRisaLogger::instance()->Log(result_str, tRisaLogger::llError);
 		return;
 	}

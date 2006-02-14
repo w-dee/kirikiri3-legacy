@@ -13,6 +13,7 @@
 #ifndef _FSMANAGER_H_
 #define _FSMANAGER_H_
 
+#include <wx/file.h>
 #include <wx/datetime.h>
 #include "risse/include/risse.h"
 #include "risse/include/risseUtils.h"

@@ -14,7 +14,9 @@
 #define __RisseTYPES_H__
 
 #ifdef RISSE_SUPPORT_WX
-	#include <wx/wx.h>
+	#include <wx/defs.h>
+	#include <wx/string.h>
+	#include <wx/intl.h>
 #endif
 
 namespace Risse

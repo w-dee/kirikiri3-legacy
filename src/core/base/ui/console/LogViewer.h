@@ -28,8 +28,10 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 	//! @brief	メニューアイテムID
 	enum
 	{
-		Menu_Copy = 100, //!< コピー
-		Menu_SelectAll  //!< すべて選択
+		ID_First = 100,
+		ID_Menu_Copy, //!< コピー
+		ID_Menu_SelectAll,  //!< すべて選選択
+		ID_Last
 	};
 
 	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション

@@ -353,7 +353,7 @@ bool tRisaFileSystemManager::FileExists(const ttstr & filename)
 	catch(const eRisseError &e)
 	{
 		eRisaException::Throw(RISSE_WS_TR("failed to retrieve existence of file '%1' : %2"),
-			fullpath, e.GetMessage()); // this method never returns
+			fullpath, e.GetMessageString()); // this method never returns
 	}
 	return false;
 }
@@ -380,7 +380,7 @@ bool tRisaFileSystemManager::DirectoryExists(const ttstr & dirname)
 	catch(const eRisseError &e)
 	{
 		eRisaException::Throw(RISSE_WS_TR("failed to retrieve existence of directory '%1' : %2"),
-			fullpath, e.GetMessage()); // this method never returns
+			fullpath, e.GetMessageString()); // this method never returns
 	}
 	return false;
 }
@@ -406,7 +406,7 @@ void tRisaFileSystemManager::RemoveFile(const ttstr & filename)
 	catch(const eRisseError &e)
 	{
 		eRisaException::Throw(RISSE_WS_TR("failed to remove file '%1' : %2"),
-			fullpath, e.GetMessage());
+			fullpath, e.GetMessageString());
 	}
 }
 //---------------------------------------------------------------------------
@@ -432,7 +432,7 @@ void tRisaFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursi
 	catch(const eRisseError &e)
 	{
 		eRisaException::Throw(RISSE_WS_TR("failed to remove directory '%1' : %2"),
-			fullpath, e.GetMessage());
+			fullpath, e.GetMessageString());
 	}
 }
 //---------------------------------------------------------------------------
@@ -458,7 +458,7 @@ void tRisaFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursi
 	catch(const eRisseError &e)
 	{
 		eRisaException::Throw(RISSE_WS_TR("failed to create directory '%1' : %2"),
-			fullpath, e.GetMessage());
+			fullpath, e.GetMessageString());
 	}
 }
 //---------------------------------------------------------------------------
@@ -484,7 +484,7 @@ void tRisaFileSystemManager::Stat(const ttstr & filename, tRisaStatStruc & struc
 	catch(const eRisseError &e)
 	{
 		eRisaException::Throw(RISSE_WS_TR("failed to stat '%1' : %2"),
-			fullpath, e.GetMessage());
+			fullpath, e.GetMessageString());
 	}
 }
 //---------------------------------------------------------------------------
@@ -512,7 +512,7 @@ tRisseBinaryStream * tRisaFileSystemManager::CreateStream(const ttstr & filename
 	catch(const eRisseError &e)
 	{
 		eRisaException::Throw(RISSE_WS_TR("failed to create stream of '%1' : %2"),
-			fullpath, e.GetMessage());
+			fullpath, e.GetMessageString());
 	}
 	return NULL;
 }
@@ -542,7 +542,7 @@ size_t tRisaFileSystemManager::InternalGetFileListAt(
 	catch(const eRisseError &e)
 	{
 		eRisaException::Throw(RISSE_WS_TR("failed to list files in directory '%1' : %2"),
-			dirname, e.GetMessage());
+			dirname, e.GetMessageString());
 	}
 	return 0;
 }

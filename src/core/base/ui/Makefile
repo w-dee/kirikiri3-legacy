@@ -12,6 +12,7 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 # このディレクトリにあるソースファイルを列挙
 #-----------------------------------------
 CPPFILES = \
+		art/ArtProvider.cpp         \
 		console/LogViewer.cpp       \
 		console/Console.cpp         \
 		editor/ScriptEditor.cpp     

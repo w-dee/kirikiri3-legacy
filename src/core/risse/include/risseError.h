@@ -61,7 +61,7 @@ extern ttstr RisseNonamedException;
 	} \
 	catch(const eRisse &e) \
 	{ \
-		Risse_eRisseError(e.GetMessage()); \
+		Risse_eRisseError(e.GetMessageString()); \
 	} \
 	catch(const std::exception &e) \
 	{ \
@@ -130,7 +130,7 @@ extern void RisseGetExceptionObject(tRisse *risse, tRisseVariant *res, tRisseVar
 		before_catched \
 		if(result_condition) \
 		{ \
-			tRisseVariant msg(e.GetMessage()); \
+			tRisseVariant msg(e.GetMessageString()); \
 			tRisseVariant trace(e.GetTrace()); \
 			RisseGetExceptionObject((risse), (result_addr), msg, &trace); \
 		} \
@@ -141,7 +141,7 @@ extern void RisseGetExceptionObject(tRisse *risse, tRisseVariant *res, tRisseVar
 		before_catched \
 		if(result_condition) \
 		{ \
-			tRisseVariant msg(e.GetMessage()); \
+			tRisseVariant msg(e.GetMessageString()); \
 			RisseGetExceptionObject((risse), (result_addr), msg, NULL); \
 		} \
 		when_catched; \
@@ -182,7 +182,7 @@ public:
 	eRisse(const eRisse&) {;}
 	eRisse& operator= (const eRisse& e) { return *this; }
 	virtual ~eRisse() {;}
-	virtual const ttstr & GetMessage() const 
+	virtual const ttstr & GetMessageString() const 
 	{ return RisseNonamedException; }
 };
 //---------------------------------------------------------------------------
@@ -193,7 +193,7 @@ class eRisseError : public eRisse
 public:
 	eRisseError(const ttstr & Msg) :
 		Message(Msg) {;}
-	const ttstr & GetMessage() const { return Message; }
+	const ttstr & GetMessageString() const { return Message; }
 
 	void AppendMessage(const ttstr & msg) { Message += msg; }
 

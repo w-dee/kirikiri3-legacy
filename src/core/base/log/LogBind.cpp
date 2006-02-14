@@ -14,6 +14,7 @@
 #include "base/log/Log.h"
 #include "base/exception/RisaException.h"
 #include "base/script/RisseEngine.h"
+#include "risse/include/risseNative.h"
 
 RISSE_DEFINE_SOURCE_ID(17391,44513,60617,19121,16540,39031,65356,19696);
 

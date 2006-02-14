@@ -17,6 +17,11 @@
 #include <deque>
 #include <wx/textctrl.h>
 
+#if wxUSE_OWNER_DRAWN
+#include <wx/artprov.h>
+#endif
+
+
 RISSE_DEFINE_SOURCE_ID(45447,29186,11918,17485,47798,28394,33256,47673);
 
 
@@ -26,11 +31,54 @@ RISSE_DEFINE_SOURCE_ID(45447,29186,11918,17485,47798,28394,33256,47673);
 //---------------------------------------------------------------------------
 class tRisaScriptEditorTextCtrl : public wxTextCtrl
 {
+	enum
+	{
+		ID_First = 100,
+		ID_Menu_Execute,
+		ID_Menu_Undo,
+		ID_Menu_Redo,
+		ID_Menu_Cut,
+		ID_Menu_Copy,
+		ID_Menu_Paste,
+		ID_Menu_Delete,
+		ID_Menu_SelectAll,
+		ID_Last
+	};
 
 public:
 	tRisaScriptEditorTextCtrl(wxWindow *parent);
 	~tRisaScriptEditorTextCtrl();
+
 private:
+	void ShowContextMenu(const wxPoint & pos);
+
+#if USE_CONTEXT_MENU
+	void OnContextMenu(wxContextMenuEvent& event)
+	{
+		wxPoint point = event.GetPosition();
+		// If from keyboard
+		if (point.x == -1 && point.y == -1)
+		{
+			wxSize size = GetSize();
+			point.x = size.x / 2;
+			point.y = size.y / 2;
+		}
+		else
+		{
+			point = ScreenToClient(point);
+		}
+		ShowContextMenu(point);
+		event.Skip(false);
+	}
+
+#else
+	void OnRightUp(wxMouseEvent& event)
+	{
+		SetFocus();
+		ShowContextMenu(event.GetPosition());
+		event.Skip(false);
+	}
+#endif
 
 	DECLARE_EVENT_TABLE()
 };
@@ -41,6 +89,11 @@ private:
 //! @brief		イベントテーブル
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRisaScriptEditorTextCtrl, wxTextCtrl)
+#if USE_CONTEXT_MENU
+	EVT_CONTEXT_MENU(					tRisaScriptEditorTextCtrl::OnContextMenu)
+#else
+	EVT_RIGHT_UP(						tRisaScriptEditorTextCtrl::OnRightUp)
+#endif
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -66,6 +119,70 @@ tRisaScriptEditorTextCtrl::~tRisaScriptEditorTextCtrl()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		コンテキストメニューを表示する
+//! @param		pos  表示位置
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::ShowContextMenu(const wxPoint & pos)
+{
+	// 切り取り、コピー、貼り付け、削除
+	wxMenu menu;
+	wxMenuItem * item;
+
+	// context menu of script editor
+	item = new wxMenuItem(&menu, ID_Menu_Execute, _("&Execute"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxT("RisaRightTriangle"), wxART_MENU));
+#endif
+	menu.Append(item);
+//	item->Enable(AnySelected());
+
+	item = new wxMenuItem(&menu, ID_Menu_Undo, _("&Undo"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_UNDO, wxART_MENU));
+#endif
+	menu.Append(item);
+//	item->Enable(AnySelected());
+
+	item = new wxMenuItem(&menu, ID_Menu_Redo, _("&Redo"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_REDO, wxART_MENU));
+#endif
+	menu.Append(item);
+//	item->Enable(AnySelected());
+
+	item = new wxMenuItem(&menu, ID_Menu_Cut, _("Cu&t"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_CUT, wxART_MENU));
+#endif
+	menu.Append(item);
+//	item->Enable(AnySelected());
+
+	item = new wxMenuItem(&menu, ID_Menu_Copy, _("&Copy"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_COPY, wxART_MENU));
+#endif
+	menu.Append(item);
+//	item->Enable(AnySelected());
+
+	item = new wxMenuItem(&menu, ID_Menu_Paste, _("&Paste"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_PASTE, wxART_MENU));
+#endif
+	menu.Append(item);
+//	item->Enable(AnySelected());
+
+	item = new wxMenuItem(&menu, ID_Menu_Delete, _("&Delete"));
+	menu.Append(item);
+//	item->Enable(AnySelected());
+
+	item = new wxMenuItem(&menu, ID_Menu_SelectAll, _("Select &All"));
+	menu.Append(item);
+//	item->Enable(AnySelected());
+
+	PopupMenu(&menu, pos.x, pos.y);
+}
+//---------------------------------------------------------------------------
 
 
 

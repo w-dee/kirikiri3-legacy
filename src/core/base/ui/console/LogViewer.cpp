@@ -748,6 +748,8 @@ void tRisaLogScrollView::RefreshSelection(const tCharacterPosition & pos1, const
 {
 	// 厳密には指定された領域を文字単位で再描画することになるが、
 	// ここでは簡略化のため、行単位で再描画を行う
+	if(!pos1.IsValid() || !pos2.IsValid()) return;
+
 	tCharacterPosition start = pos1;
 	tCharacterPosition end   = pos2;
 	if(end < start) std::swap(start, end);

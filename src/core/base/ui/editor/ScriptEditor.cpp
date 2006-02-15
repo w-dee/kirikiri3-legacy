@@ -45,9 +45,15 @@ class tRisaScriptEditorTextCtrl : public wxTextCtrl
 		ID_Last
 	};
 
+	wxMenu ContextMenu; //!< ポップアップメニュー
+
 public:
 	tRisaScriptEditorTextCtrl(wxWindow *parent);
 	~tRisaScriptEditorTextCtrl();
+
+#if wxUSE_ACCEL
+	wxAcceleratorTable GetMenuAcceleratorTable();
+#endif
 
 private:
 	void ShowContextMenu(const wxPoint & pos);
@@ -80,6 +86,15 @@ private:
 	}
 #endif
 
+	void OnMenuExecute(wxCommandEvent & event);
+	void OnMenuUndo(wxCommandEvent & event);
+	void OnMenuRedo(wxCommandEvent & event);
+	void OnMenuCut(wxCommandEvent & event);
+	void OnMenuCopy(wxCommandEvent & event);
+	void OnMenuPaste(wxCommandEvent & event);
+	void OnMenuDelete(wxCommandEvent & event);
+	void OnMenuSelectAll(wxCommandEvent & event);
+
 	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------
@@ -94,6 +109,14 @@ BEGIN_EVENT_TABLE(tRisaScriptEditorTextCtrl, wxTextCtrl)
 #else
 	EVT_RIGHT_UP(						tRisaScriptEditorTextCtrl::OnRightUp)
 #endif
+	EVT_MENU(ID_Menu_Execute,			tRisaScriptEditorTextCtrl::OnMenuExecute)
+	EVT_MENU(ID_Menu_Undo,				tRisaScriptEditorTextCtrl::OnMenuUndo)
+	EVT_MENU(ID_Menu_Redo,				tRisaScriptEditorTextCtrl::OnMenuRedo)
+	EVT_MENU(ID_Menu_Cut,				tRisaScriptEditorTextCtrl::OnMenuCut)
+	EVT_MENU(ID_Menu_Copy,				tRisaScriptEditorTextCtrl::OnMenuCopy)
+	EVT_MENU(ID_Menu_Paste,				tRisaScriptEditorTextCtrl::OnMenuPaste)
+	EVT_MENU(ID_Menu_Delete,			tRisaScriptEditorTextCtrl::OnMenuDelete)
+	EVT_MENU(ID_Menu_SelectAll,			tRisaScriptEditorTextCtrl::OnMenuSelectAll)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -106,6 +129,56 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 	wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
 		wxTE_MULTILINE|wxTE_RICH)
 {
+	wxMenuItem * item;
+
+	// context ContextMenu of script editor
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Execute, _("&Execute\tCtrl+Enter"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxT("RisaRightTriangle"), wxART_MENU));
+#endif
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Undo, _("&Undo\tCtrl+Z"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_UNDO, wxART_MENU));
+#endif
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Redo, _("&Redo\tCtrl+Y"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_REDO, wxART_MENU));
+#endif
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Cut, _("Cu&t\tCtrl+X"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_CUT, wxART_MENU));
+#endif
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Copy, _("&Copy\tCtrl+C"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_COPY, wxART_MENU));
+#endif
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Paste, _("&Paste\tCtrl+V"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_PASTE, wxART_MENU));
+#endif
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Delete, _("&Delete\tDel"));
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_SelectAll, _("Select &All\tCtrl+A"));
+	ContextMenu.Append(item);
+
+
+#if wxUSE_ACCEL
+	SetAcceleratorTable(GetMenuAcceleratorTable());
+#endif
+
 }
 //---------------------------------------------------------------------------
 
@@ -119,70 +192,160 @@ tRisaScriptEditorTextCtrl::~tRisaScriptEditorTextCtrl()
 //---------------------------------------------------------------------------
 
 
+#if wxUSE_ACCEL
+//---------------------------------------------------------------------------
+//! @brief		アクセラレータテーブルを返す
+//! @return		アクセラレータテーブル
+//---------------------------------------------------------------------------
+wxAcceleratorTable tRisaScriptEditorTextCtrl::GetMenuAcceleratorTable()
+{
+	// メニューからアクセラレータの一覧を取得し、それをテーブルに格納して返す
+	wxAcceleratorEntry * entries =
+		new wxAcceleratorEntry[ContextMenu.GetMenuItemCount()];
+	try
+	{
+		size_t item_count = 0;
+		wxMenuItemList& items = ContextMenu.GetMenuItems();
+		for(wxMenuItemList::iterator i = items.begin();
+			i != items.end(); i++)
+		{
+			wxAcceleratorEntry *accel = (*i)->GetAccel();
+			if(accel)
+			{
+				entries[item_count].Set(accel->GetFlags(),
+							accel->GetKeyCode(), (*i)->GetId());
+				item_count++;
+				delete accel;
+			}
+		}
+		wxAcceleratorTable table(item_count, entries);
+		if(entries) delete [] entries, entries = NULL;
+		return table;
+	}
+	catch(...)
+	{
+		if(entries) delete [] entries;
+		throw;
+	}
+}
+//---------------------------------------------------------------------------
+#endif
+
+
 //---------------------------------------------------------------------------
 //! @brief		コンテキストメニューを表示する
 //! @param		pos  表示位置
 //---------------------------------------------------------------------------
 void tRisaScriptEditorTextCtrl::ShowContextMenu(const wxPoint & pos)
 {
-	// 切り取り、コピー、貼り付け、削除
-	wxMenu menu;
-	wxMenuItem * item;
+	ContextMenu.FindItem(ID_Menu_Undo)->Enable(CanUndo());
+	ContextMenu.FindItem(ID_Menu_Redo)->Enable(CanRedo());
+	ContextMenu.FindItem(ID_Menu_Cut)->Enable(CanCut());
+	ContextMenu.FindItem(ID_Menu_Copy)->Enable(CanCopy());
+	ContextMenu.FindItem(ID_Menu_Paste)->Enable(CanPaste());
+	long selstart, selend;
+	GetSelection(&selstart, &selend);
+	ContextMenu.FindItem(ID_Menu_Delete)->Enable(selstart != selend);
 
-	// context menu of script editor
-	item = new wxMenuItem(&menu, ID_Menu_Execute, _("&Execute"));
-#if wxUSE_OWNER_DRAWN
-	item->SetBitmap(wxArtProvider::GetBitmap(wxT("RisaRightTriangle"), wxART_MENU));
-#endif
-	menu.Append(item);
-//	item->Enable(AnySelected());
-
-	item = new wxMenuItem(&menu, ID_Menu_Undo, _("&Undo"));
-#if wxUSE_OWNER_DRAWN
-	item->SetBitmap(wxArtProvider::GetBitmap(wxART_UNDO, wxART_MENU));
-#endif
-	menu.Append(item);
-//	item->Enable(AnySelected());
-
-	item = new wxMenuItem(&menu, ID_Menu_Redo, _("&Redo"));
-#if wxUSE_OWNER_DRAWN
-	item->SetBitmap(wxArtProvider::GetBitmap(wxART_REDO, wxART_MENU));
-#endif
-	menu.Append(item);
-//	item->Enable(AnySelected());
-
-	item = new wxMenuItem(&menu, ID_Menu_Cut, _("Cu&t"));
-#if wxUSE_OWNER_DRAWN
-	item->SetBitmap(wxArtProvider::GetBitmap(wxART_CUT, wxART_MENU));
-#endif
-	menu.Append(item);
-//	item->Enable(AnySelected());
-
-	item = new wxMenuItem(&menu, ID_Menu_Copy, _("&Copy"));
-#if wxUSE_OWNER_DRAWN
-	item->SetBitmap(wxArtProvider::GetBitmap(wxART_COPY, wxART_MENU));
-#endif
-	menu.Append(item);
-//	item->Enable(AnySelected());
-
-	item = new wxMenuItem(&menu, ID_Menu_Paste, _("&Paste"));
-#if wxUSE_OWNER_DRAWN
-	item->SetBitmap(wxArtProvider::GetBitmap(wxART_PASTE, wxART_MENU));
-#endif
-	menu.Append(item);
-//	item->Enable(AnySelected());
-
-	item = new wxMenuItem(&menu, ID_Menu_Delete, _("&Delete"));
-	menu.Append(item);
-//	item->Enable(AnySelected());
-
-	item = new wxMenuItem(&menu, ID_Menu_SelectAll, _("Select &All"));
-	menu.Append(item);
-//	item->Enable(AnySelected());
-
-	PopupMenu(&menu, pos.x, pos.y);
+	PopupMenu(&ContextMenu, pos.x, pos.y);
 }
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		「実行」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuExecute(wxCommandEvent & event)
+{
+	wxMessageBox(wxT("execute!"));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「元に戻す」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuUndo(wxCommandEvent & event)
+{
+	Undo();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「やり直し」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuRedo(wxCommandEvent & event)
+{
+	Redo();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「切り取り」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuCut(wxCommandEvent & event)
+{
+	Cut();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「コピー」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuCopy(wxCommandEvent & event)
+{
+	Copy();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「貼り付け」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuPaste(wxCommandEvent & event)
+{
+	Paste();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「削除」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuDelete(wxCommandEvent & event)
+{
+	long from, to;
+	GetSelection(&from, &to);
+	Remove(from, to);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「すべて選択」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuSelectAll(wxCommandEvent & event)
+{
+	SetSelection(-1, -1);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -311,6 +474,19 @@ void tRisaScriptEditorStatusBar::OnSize(wxSizeEvent& event)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		イベントテーブルの定義
 //---------------------------------------------------------------------------
@@ -330,6 +506,7 @@ tRisaScriptEditorFrame::tRisaScriptEditorFrame() :
 	StatusBar = new tRisaScriptEditorStatusBar(this);
 
 	SetStatusBar(StatusBar);
+
 }
 //---------------------------------------------------------------------------
 

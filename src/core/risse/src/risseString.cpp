@@ -523,6 +523,30 @@ bool tRisseString::EndsWith(const risse_char *string) const
 
 
 //---------------------------------------------------------------------------
+//! @brief		UTF-8文字列に変換を行った場合の長さを返す
+//! @return		UTF-8文字列の長さ(null terminatorを含まず) (size_t)-1L = 変換に失敗した場合
+//---------------------------------------------------------------------------
+size_t tRisseString::GetUtf8Length() const
+{
+	return RisseRisseCharToUtf8String(c_str(), NULL);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		UTF-8文字列に変換する
+//! @param		dest 書き込み先 (GetUtf8Length() +1 の長さが最低でも必要)
+//---------------------------------------------------------------------------
+void tRisseString::GetUtf8String(char * dest) const
+{
+	size_t written = RisseRisseCharToUtf8String(c_str(), dest);
+	if(written != static_cast<size_t>(-1L))
+		dest[written] = 0;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString operator + (const risse_char *lhs, const tRisseString &rhs)
 {
 	tRisseString ret(lhs);

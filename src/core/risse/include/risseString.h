@@ -417,6 +417,10 @@ public:
 		const risse_char * p = Ptr->operator const risse_char*();
 		return p[Ptr->GetLength() - 1];
 	}
+
+	size_t GetUtf8Length() const;
+	void GetUtf8String(char * dest) const;
+
 };
 /*end-of-tRisseString*/
 tRisseString operator +(const risse_char *lhs, const tRisseString &rhs);

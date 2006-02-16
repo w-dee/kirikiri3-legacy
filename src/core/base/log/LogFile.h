@@ -28,19 +28,23 @@ class tRisaLogReceiver;
 //---------------------------------------------------------------------------
 class tRisaLogFile
 {
+	static const size_t NumLastLog  = 50; //!< ファイルへのログ記録を開始した際に出力する LastLog の行数
+
 	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	//! @brief ログを受け取るためのレシーバークラス
 	class tReceiver : public tRisaLogReceiver
 	{
-		tRisaLogFile * Owner; //!< tRisaLogFile へのポインタ
-		tReceiver(tRisaLogFile * owner) : Owner(owner) {;} //!< コンストラクタ
+		tRisaLogFile & Owner; //!< tRisaLogFile へのポインタ
+	public:
+		tReceiver(tRisaLogFile & owner) : Owner(owner) {;} //!< コンストラクタ
 		//! @brief ログアイテムを記録するとき
 		void OnLog(const tRisaLogger::tItem & item)
 		{
-			Owner->OnLog(item);
+			Owner.OnLog(item);
 		}
 	};
+	tReceiver Receiver; //!< レシーバオブジェクト
 
 public:
 	wxFile LogFile; //!< ログファイル
@@ -50,11 +54,14 @@ public:
 	~tRisaLogFile();
 
 private:
+	void OutputOneLine(const ttstr & str);
 	void OnLog(const tRisaLogger::tItem & item);
+
+public:
+	void Begin();
 
 private:
 	tRisaSingleton<tRisaLogger> ref_tRisaLogger; //!< tRisaLogger に依存
-
 	tRisaSingletonObjectLifeTracer<tRisaLogFile> singleton_object_life_tracer;
 
 public:

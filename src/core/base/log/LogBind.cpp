@@ -140,7 +140,8 @@ tRisaLogRegisterer::tRisaLogRegisterer()
 		"var llNotice = 2;"		//!< 通常状態だが大事な情報通知
 		"var llWarning = 3;"	//!< 警告
 		"var llError = 4;"		//!< 通常のエラー
-		"var llCritical = 5;"	//!< 致命的なエラー
+		"var llRecord = 5;"		//!< 記録すべき重要な情報
+		"var llCritical = 6;"	//!< 致命的なエラー
 		));
 }
 //---------------------------------------------------------------------------

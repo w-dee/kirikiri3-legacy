@@ -21,15 +21,11 @@
 
 
 class tRisaLogReceiver;
-
 //---------------------------------------------------------------------------
 //! @brief		ロガークラス(シングルトン)
 //---------------------------------------------------------------------------
 class tRisaLogger
 {
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-
-	const static size_t MaxLogItems = 2048; //!< 最大のログ行数
 public:
 	//! @brief ログアイテムのレベル(ログレベル)
 	enum tLevel
@@ -39,6 +35,7 @@ public:
 		llNotice,	//!< 通常状態だが大事な情報通知
 		llWarning,	//!< 警告
 		llError,	//!< 通常のエラー
+		llRecord,	//!< 記録すべき重要な情報
 		llCritical	//!< 致命的なエラー
 	};
 
@@ -51,10 +48,15 @@ public:
 		tLevel Level; //!< ログレベル
 	};
 
+private:
+	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	const static size_t MaxLogItems = 2048; //!< 最大のログ行数
+	const static tLevel LogPreserveMinLevel = llError; //!< PreserveBuffer に入れる最小のログレベル
+
+
 	tRisaRingBuffer<tItem> Buffer; //!< ログを格納するためのリングバッファ
-
+	std::vector<tItem> PreserveBuffer; //!< ログからあふれたアイテムを保持し続けるバッファ
 	std::vector<tRisaLogReceiver*> Receivers; //!< ログを受信するオブジェクト(レシーバ)の配列
-
 	bool LogSending; //!< レシーバにログを送っている最中に真
 
 public:
@@ -73,6 +75,7 @@ public:
 	const tRisaRingBuffer<tItem> & GetBuffer() const 
 		{ return Buffer; } //!< Buffer への参照を得る
 
+	void SendPreservedLogs(tRisaLogReceiver *target);
 	void SendLogs(tRisaLogReceiver *target, size_t maxitems = static_cast<size_t>(-1L));
 
 	void RegisterReceiver(tRisaLogReceiver * receiver);
@@ -84,10 +87,10 @@ public:
 //---------------------------------------------------------------------------
 
 
+class tRisaLogger;
 //---------------------------------------------------------------------------
 //! @brief		ログを受け取るためのインターフェース
 //---------------------------------------------------------------------------
-class tRisaLogger;
 class tRisaLogReceiver
 {
 public:

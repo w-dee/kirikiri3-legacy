@@ -122,6 +122,8 @@ void tRisaLogFile::OnLog(const tRisaLogger::tItem & item)
 		logline += RISSE_WS("[W] "); break; // [W]arning
 	case tRisaLogger::llError:
 		logline += RISSE_WS("[E] "); break; // [E]rror
+	case tRisaLogger::llRecord:
+		logline += RISSE_WS("[R] "); break; // [R]ecord
 	case tRisaLogger::llCritical:
 		logline += RISSE_WS("[C] "); break; // [C]ritical
 	}
@@ -171,6 +173,7 @@ void tRisaLogFile::Begin()
 	OutputOneLine(RisseEmptyString);
 
 	// LastLogを出力
+	tRisaLogger::instance()->SendPreservedLogs(&Receiver);
 	tRisaLogger::instance()->SendLogs(&Receiver, NumLastLog);
 
 	// セパレータを出力

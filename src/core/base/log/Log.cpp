@@ -37,6 +37,38 @@ tRisaLogger::~tRisaLogger()
 
 
 //---------------------------------------------------------------------------
+//! @brief		PreserveBuffer の内容を指定のtRisaLogReceiverに送る
+//! @param		target		ログの送り先となるレシーバオブジェクト
+//---------------------------------------------------------------------------
+void tRisaLogger::SendPreservedLogs(tRisaLogReceiver *target)
+{
+	volatile tRisseCriticalSection::tLocker holder(CS);
+
+	// ログを送信中にログの記録は行わない
+	// 捨てない方がいいのかもしれないが...
+	if(LogSending) return;
+
+	// target に送る
+	LogSending = true;
+	try
+	{
+		for(std::vector<tItem>::iterator i = PreserveBuffer.begin();
+			i != PreserveBuffer.end(); i++)
+		{
+			target->OnLog(*i);
+		}
+	}
+	catch(...)
+	{
+		LogSending = false;
+		throw;
+	}
+	LogSending = false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		指定行分のログを指定のtRisaLogReceiverに送る
 //! @param		target		ログの送り先となるレシーバオブジェクト
 //! @param		maxitems	送るログの最大行数 (これよりもtRisaLoggerが保持している
@@ -121,6 +153,18 @@ void tRisaLogger::Log(const ttstr & content,
 	// ログを送信中にログの記録は行わない
 	// 捨てない方がいいのかもしれないが...
 	if(LogSending) return;
+
+	// バッファがあふれそうな場合は古いログを捨てる
+	if(Buffer.GetDataSize() == Buffer.GetSize())
+	{
+		tItem & last = Buffer.GetLast();
+		if(last.Level >= LogPreserveMinLevel)
+		{
+			// レベルが LogPreserveMinLevel なので、捨てないで PreserveBuffer
+			// に入れる
+			PreserveBuffer.push_back(last);
+		}
+	}
 
 	// Buffer の書き込み位置に記録
 	tItem & item = Buffer.GetLast();

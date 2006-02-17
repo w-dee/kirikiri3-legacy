@@ -343,6 +343,8 @@ wxString tRisaLogScrollView::CreateOneLineString(const tRisaLogger::tItem & item
 		logline += _("[W] "); break; // [W]arning
 	case tRisaLogger::llError:
 		logline += _("[E] "); break; // [E]rror
+	case tRisaLogger::llRecord:
+		logline += _("[R] "); break; // [R]ecord
 	case tRisaLogger::llCritical:
 		logline += _("[C] "); break; // [C]ritical
 	}

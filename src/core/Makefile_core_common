@@ -5,6 +5,7 @@ include $(TOP_DIR)/Makefile_filenames
 # subsys.o のある(subsys.oが作成される)サブディレクトリの定義
 
 SUBSYS_DIRS=\
+	$(CORE_DIR)/base/config        \
 	$(CORE_DIR)/base/exception     \
 	$(CORE_DIR)/base/fs            \
 	$(CORE_DIR)/base/log           \

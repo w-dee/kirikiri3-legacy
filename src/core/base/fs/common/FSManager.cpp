@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/fs/common/FSManager.h"
+#include "base/fs/osfs/OSFS.h"
 #include "base/exception/RisaException.h"
 #include "base/fs/common/FSManagerBind.h"
 #include <vector>
@@ -501,6 +502,14 @@ tRisseBinaryStream * tRisaFileSystemManager::CreateStream(const ttstr & filename
 {
 	volatile tRisseCriticalSection::tLocker holder(CS);
 
+	// 先頭が native: で始まる場合は OSFS ストリーム経由で直接アクセスする
+	if(filename.StartsWith(RISSE_WS("native:")))
+	{
+		// +7 = "native:" の文字数
+		return new tRisaOSNativeStream(ttstr(filename.c_str() + 7).AsWxString(), flags);
+	}
+
+	// 通常のファイルシステム経由のストリームの作成
 	ttstr fspath;
 	ttstr fullpath(NormalizePath(filename));
 	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);

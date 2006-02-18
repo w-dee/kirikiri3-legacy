@@ -15,6 +15,7 @@
 #include "base/ui/console/LogViewer.h"
 #include "base/ui/console/Console.h"
 #include "base/script/RisseEngine.h"
+#include "base/config/ConfigData.h"
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>
@@ -36,7 +37,9 @@ class tRisaHistoryTextCtrl : public wxTextCtrl
 public:
 	tRisaHistoryTextCtrl(wxWindow *parent);
 	~tRisaHistoryTextCtrl();
+
 private:
+	tRisaSingleton<tRisaConfig> ref_tRisaConfig; //!< tRisaConfig に依存
 
 	void PushHistory(const wxString & item);
 
@@ -68,6 +71,19 @@ tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
 {
 	HistoryIndex = InvalidIndex;
 	DiscardEdits();
+
+	// ヒストリなどを設定情報から読み出す
+	tRisaConfigData & config =
+		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+	for(int cnt = 0;;cnt++)
+	{
+		wxString item;
+		if(config.Read(wxT("console/history/") + wxString::Format(wxT("%d"), cnt),
+			&item))
+			History.push_back(item);
+		else
+			break;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -77,6 +93,17 @@ tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
 //---------------------------------------------------------------------------
 tRisaHistoryTextCtrl::~tRisaHistoryTextCtrl()
 {
+	// ヒストリなどを設定情報に書き出す
+	tRisaConfigData & config =
+		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+
+	config.DeleteGroup(wxT("console/history"));
+	int cnt = 0;
+	for(std::deque<wxString>::iterator i = History.begin();
+		i != History.end(); i++, cnt++)
+	{
+		config.Write(wxT("console/history/") + wxString::Format(wxT("%d"), cnt), *i);
+	}
 }
 //---------------------------------------------------------------------------
 

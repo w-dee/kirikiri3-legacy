@@ -20,6 +20,12 @@ CPPFILES=Main.cpp
 
 OBJS =  $(CPPFILES:.cpp=.o) $(addsuffix /subsys.o,$(SUBSYS_DIRS))
 
+BIN_DEPS = make_var_and_etc
+
+make_var_and_etc:
+	mkdir -p $(BUILD_OUT_DIR)/var
+	mkdir -p $(BUILD_OUT_DIR)/etc
+
 #----------------------------#
 
 include $(TOP_DIR)/Makefile_common

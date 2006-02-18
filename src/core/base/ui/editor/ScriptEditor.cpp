@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "base/script/RisseEngine.h"
 #include "base/ui/Editor/ScriptEditor.h"
+#include "base/config/ConfigData.h"
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>
@@ -56,6 +57,8 @@ public:
 #endif
 
 private:
+	tRisaSingleton<tRisaConfig> ref_tRisaConfig; //!< tRisaConfig に依存
+
 	void ShowContextMenu(const wxPoint & pos);
 
 #if USE_CONTEXT_MENU
@@ -179,6 +182,12 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 	SetAcceleratorTable(GetMenuAcceleratorTable());
 #endif
 
+	// 内容を設定情報から読み出す
+	tRisaConfigData & config =
+		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+	wxString content;
+	if(config.Read(wxT("editor/content"), &content))
+		SetValue(content);
 }
 //---------------------------------------------------------------------------
 
@@ -188,6 +197,11 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 //---------------------------------------------------------------------------
 tRisaScriptEditorTextCtrl::~tRisaScriptEditorTextCtrl()
 {
+	// 内容を設定情報に書き出す
+	tRisaConfigData & config =
+		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+
+	config.Write(wxT("editor/content"), GetValue());
 }
 //---------------------------------------------------------------------------
 

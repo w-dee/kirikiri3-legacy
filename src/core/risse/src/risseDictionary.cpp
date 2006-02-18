@@ -83,10 +83,10 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func.name*/saveStruct)
 	}
 	catch(...)
 	{
-		stream->Destruct();
+		delete stream;
 		throw;
 	}
-	stream->Destruct();
+	delete stream;
 
 	if(result) *result = tRisseVariant(objthis, objthis);
 

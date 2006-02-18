@@ -169,15 +169,13 @@ class tRisseString;
 class iRisseTextReadStream
 {
 public:
-	virtual risse_uint Read(tRisseString & targ, risse_uint size) = 0;
-	virtual void Destruct() = 0; // must delete itself
+	virtual risse_size Read(tRisseString & targ, risse_size size) = 0;
 };
 //---------------------------------------------------------------------------
 class iRisseTextWriteStream
 {
 public:
 	virtual void Write(const tRisseString & targ) = 0;
-	virtual void Destruct() = 0; // must delete itself
 };
 //---------------------------------------------------------------------------
 extern iRisseTextReadStream * (*RisseCreateTextStreamForRead)(const tRisseString &name,

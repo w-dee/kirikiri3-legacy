@@ -593,8 +593,6 @@ static bool inline RisseUtf8ToRisseChar(const char * & in, risse_char *out)
 //---------------------------------------------------------------------------
 
 
-
-
 //---------------------------------------------------------------------------
 //! @brief		UTF-8 文字列を risse_char 文字列に変換する
 //! @param		in   入力 UTF-8 文字列
@@ -632,7 +630,7 @@ size_t RisseUtf8ToRisseCharString(const char * in, risse_char *out)
 //! @param		out  出力 UTF-8 文字列 (NULL可)
 //! @return		変換後の UTF-8 のバイト数 (null-terminatorを含まず)
 //---------------------------------------------------------------------------
-size_t RisseRisseCharToUtf8String(const risse_char *in, char * out)
+size_t RisseRisseCharToUtf8String(const risse_char * in, char * out)
 {
 	// convert input wide string to output utf-8 string
 	size_t count = 0;

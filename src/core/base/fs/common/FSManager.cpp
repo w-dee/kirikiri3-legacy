@@ -111,7 +111,7 @@ void tRisaFileSystemManager::Mount(const ttstr & point,
 	if(item)
 	{
 		// ファイルシステムが見つかったのでそこにはマウントできない
-		eRisaException::Throw(RISSE_WS_TR("can not mount filesystem: the mount point '$1' is already mounted"), path);
+		eRisaException::Throw(RISSE_WS_TR("can not mount filesystem: the mount point '%1' is already mounted"), path);
 	}
 
 	// マウントポイントを追加
@@ -141,7 +141,7 @@ void tRisaFileSystemManager::Unmount(const ttstr & point)
 	if(!item)
 	{
 		// そこにはなにもマウントされていない
-		eRisaException::Throw(RISSE_WS_TR("there are no filesystem at mount point '$1'"), path);
+		eRisaException::Throw(RISSE_WS_TR("there are no filesystem at mount point '%1'"), path);
 	}
 
 	// マウントポイントを削除

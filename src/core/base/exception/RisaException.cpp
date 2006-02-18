@@ -86,7 +86,7 @@ void eRisaException::Throw(const ttstr &str, const ttstr & s1, const ttstr & s2,
 //---------------------------------------------------------------------------
 void eRisaException::ThrowInternalError(int line, const char * filename)
 {
-	Throw(RISSE_WS_TR("Internal error at $2 line $1"), ttstr(line), ttstr(wxString(filename, wxConvUTF8)));
+	Throw(RISSE_WS_TR("Internal error at %2 line %1"), ttstr(line), ttstr(wxString(filename, wxConvUTF8)));
 }
 //---------------------------------------------------------------------------
 

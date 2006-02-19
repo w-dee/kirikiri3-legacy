@@ -78,7 +78,7 @@ tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
 	for(int cnt = 0;;cnt++)
 	{
 		wxString item;
-		if(config.Read(wxT("console/history/") + wxString::Format(wxT("%d"), cnt),
+		if(config.Read(wxT("ui/console/history/") + wxString::Format(wxT("%d"), cnt),
 			&item))
 			History.push_back(item);
 		else
@@ -97,12 +97,12 @@ tRisaHistoryTextCtrl::~tRisaHistoryTextCtrl()
 	tRisaConfigData & config =
 		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
 
-	config.DeleteGroup(wxT("console/history"));
+	config.DeleteGroup(wxT("ui/console/history"));
 	int cnt = 0;
 	for(std::deque<wxString>::iterator i = History.begin();
 		i != History.end(); i++, cnt++)
 	{
-		config.Write(wxT("console/history/") + wxString::Format(wxT("%d"), cnt), *i);
+		config.Write(wxT("ui/console/history/") + wxString::Format(wxT("%d"), cnt), *i);
 	}
 }
 //---------------------------------------------------------------------------
@@ -385,7 +385,7 @@ void tRisaLogViewerStatusBar::OnSize(wxSizeEvent& event)
 //---------------------------------------------------------------------------
 //! @brief		イベントテーブルの定義
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tRisaConsoleFrame, wxFrame)
+BEGIN_EVENT_TABLE(tRisaConsoleFrame, tRisaUIFrame)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -394,8 +394,7 @@ END_EVENT_TABLE()
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaConsoleFrame::tRisaConsoleFrame() :
-	wxFrame(NULL, wxID_ANY, _("Console"), wxDefaultPosition, wxDefaultSize,
-		wxDEFAULT_FRAME_STYLE)
+	tRisaUIFrame(wxT("ui/console"), _("Console"))
 {
 	ScrollView = new tRisaLogScrollView(this);
 

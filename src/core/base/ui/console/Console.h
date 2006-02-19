@@ -14,6 +14,7 @@
 #define _CONSOLE_H
 
 #include "risse/include/risse.h"
+#include "base/ui/UIUtils.h"
 
 
 //---------------------------------------------------------------------------
@@ -21,7 +22,7 @@
 //---------------------------------------------------------------------------
 class tRisaLogScrollView;
 class tRisaLogViewerStatusBar;
-class tRisaConsoleFrame : public wxFrame
+class tRisaConsoleFrame : public tRisaUIFrame
 {
 public:
 	tRisaConsoleFrame();

@@ -186,8 +186,12 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 	tRisaConfigData & config =
 		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
 	wxString content;
-	if(config.Read(wxT("editor/content"), &content))
+	if(config.Read(wxT("ui/editor/content"), &content))
 		SetValue(content);
+	long ins_pos;
+	if(config.Read(wxT("ui/editor/insertion_point"), &ins_pos))
+		SetInsertionPoint(ins_pos);
+	SetSelection(0, 0);
 }
 //---------------------------------------------------------------------------
 
@@ -201,7 +205,8 @@ tRisaScriptEditorTextCtrl::~tRisaScriptEditorTextCtrl()
 	tRisaConfigData & config =
 		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
 
-	config.Write(wxT("editor/content"), GetValue());
+	config.Write(wxT("ui/editor/content"), GetValue());
+	config.Write(wxT("ui/editor/insertion_point"), GetInsertionPoint());
 }
 //---------------------------------------------------------------------------
 
@@ -504,7 +509,7 @@ void tRisaScriptEditorStatusBar::OnSize(wxSizeEvent& event)
 //---------------------------------------------------------------------------
 //! @brief		イベントテーブルの定義
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tRisaScriptEditorFrame, wxFrame)
+BEGIN_EVENT_TABLE(tRisaScriptEditorFrame, tRisaUIFrame)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -513,8 +518,7 @@ END_EVENT_TABLE()
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaScriptEditorFrame::tRisaScriptEditorFrame() :
-	wxFrame(NULL, wxID_ANY, _("Script Editor"), wxDefaultPosition, wxDefaultSize,
-		wxDEFAULT_FRAME_STYLE)
+	tRisaUIFrame(wxT("ui/editor"), _("Script Editor"))
 {
 	TextCtrl = new tRisaScriptEditorTextCtrl(this);
 	StatusBar = new tRisaScriptEditorStatusBar(this);

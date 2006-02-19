@@ -14,6 +14,7 @@
 #define _SCRIPTEDITOR_H
 
 #include "risse/include/risse.h"
+#include "base/ui/UIUtils.h"
 
 
 //---------------------------------------------------------------------------
@@ -21,7 +22,7 @@
 //---------------------------------------------------------------------------
 class tRisaScriptEditorTextCtrl;
 class tRisaScriptEditorStatusBar;
-class tRisaScriptEditorFrame : public wxFrame
+class tRisaScriptEditorFrame : public tRisaUIFrame
 {
 public:
 	tRisaScriptEditorFrame();

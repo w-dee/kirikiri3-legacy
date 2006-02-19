@@ -35,8 +35,7 @@ tRisaUIFrame::tRisaUIFrame(const wxString & id, const wxString & title) :
 tRisaUIFrame::~tRisaUIFrame()
 {
 	// サイズを config に格納する
-	tRisaConfigData & config =
-		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
 
 	wxPoint pos = GetPosition();
 	wxSize  size= GetSize();
@@ -54,8 +53,7 @@ tRisaUIFrame::~tRisaUIFrame()
 //---------------------------------------------------------------------------
 wxPoint tRisaUIFrame::GetStoredPosition(const wxString & id)
 {
-	tRisaConfigData & config =
-		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
 	wxPoint ret;
 	long x, y;
 	if( config.Read(id + wxT("/left"), &x) &&
@@ -85,8 +83,7 @@ wxPoint tRisaUIFrame::GetStoredPosition(const wxString & id)
 //---------------------------------------------------------------------------
 wxSize tRisaUIFrame::GetStoredSize(const wxString & id)
 {
-	tRisaConfigData & config =
-		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
 	wxSize ret;
 	long w, h;
 	if( config.Read(id + wxT("/width"),  &w) &&

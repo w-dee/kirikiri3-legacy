@@ -73,8 +73,7 @@ tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
 	DiscardEdits();
 
 	// ヒストリなどを設定情報から読み出す
-	tRisaConfigData & config =
-		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
 	for(int cnt = 0;;cnt++)
 	{
 		wxString item;
@@ -94,8 +93,7 @@ tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
 tRisaHistoryTextCtrl::~tRisaHistoryTextCtrl()
 {
 	// ヒストリなどを設定情報に書き出す
-	tRisaConfigData & config =
-		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
 
 	config.DeleteGroup(wxT("ui/console/history"));
 	int cnt = 0;

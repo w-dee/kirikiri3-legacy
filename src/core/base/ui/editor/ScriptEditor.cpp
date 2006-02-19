@@ -202,8 +202,7 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 tRisaScriptEditorTextCtrl::~tRisaScriptEditorTextCtrl()
 {
 	// 内容を設定情報に書き出す
-	tRisaConfigData & config =
-		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
 
 	config.Write(wxT("ui/editor/content"), GetValue());
 	config.Write(wxT("ui/editor/insertion_point"), GetInsertionPoint());

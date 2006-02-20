@@ -13,6 +13,7 @@
 #include "prec.h"
 #include <wx/filename.h>
 #include <wx/app.h>
+#include "base/event/Event.h"
 #include "base/script/RisseEngine.h"
 #include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
@@ -29,6 +30,7 @@ class tRisaApplication : public wxApp
 public:
 	bool OnInit();
 	int OnExit();
+	bool ProcessIdle();
 };
 //---------------------------------------------------------------------------
 
@@ -84,7 +86,9 @@ bool tRisaApplication::OnInit()
 	return true;
 }
 //---------------------------------------------------------------------------
- 
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		アプリケーションが終了するとき
 //---------------------------------------------------------------------------
@@ -94,4 +98,15 @@ int tRisaApplication::OnExit()
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		Idleイベントを配信するとき
+//---------------------------------------------------------------------------
+bool tRisaApplication::ProcessIdle()
+{
+	bool cont = tRisaEventSystem::instance()->ProcessEvents();
+	cont = wxApp::ProcessIdle() || cont;
+	return cont;
+}
+//---------------------------------------------------------------------------
 

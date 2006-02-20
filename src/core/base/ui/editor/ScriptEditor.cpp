@@ -135,46 +135,47 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 	wxMenuItem * item;
 
 	// context ContextMenu of script editor
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Execute, _("&Execute\tCtrl+Enter"));
+	wxString acc_sep(wxT("\t"));
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Execute, _("&Execute") + acc_sep + wxT("Ctrl+Enter"));
 #if wxUSE_OWNER_DRAWN
 	item->SetBitmap(wxArtProvider::GetBitmap(wxT("RisaRightTriangle"), wxART_MENU));
 #endif
 	ContextMenu.Append(item);
 
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Undo, _("&Undo\tCtrl+Z"));
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Undo, _("&Undo") + acc_sep + wxT("Ctrl+Z"));
 #if wxUSE_OWNER_DRAWN
 	item->SetBitmap(wxArtProvider::GetBitmap(wxART_UNDO, wxART_MENU));
 #endif
 	ContextMenu.Append(item);
 
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Redo, _("&Redo\tCtrl+Y"));
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Redo, _("&Redo") + acc_sep + wxT("Ctrl+Y"));
 #if wxUSE_OWNER_DRAWN
 	item->SetBitmap(wxArtProvider::GetBitmap(wxART_REDO, wxART_MENU));
 #endif
 	ContextMenu.Append(item);
 
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Cut, _("Cu&t\tCtrl+X"));
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Cut, _("Cu&t") + acc_sep + wxT("Ctrl+X"));
 #if wxUSE_OWNER_DRAWN
 	item->SetBitmap(wxArtProvider::GetBitmap(wxART_CUT, wxART_MENU));
 #endif
 	ContextMenu.Append(item);
 
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Copy, _("&Copy\tCtrl+C"));
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Copy, _("&Copy") + acc_sep + wxT("Ctrl+C"));
 #if wxUSE_OWNER_DRAWN
 	item->SetBitmap(wxArtProvider::GetBitmap(wxART_COPY, wxART_MENU));
 #endif
 	ContextMenu.Append(item);
 
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Paste, _("&Paste\tCtrl+V"));
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Paste, _("&Paste") + acc_sep + wxT("Ctrl+V"));
 #if wxUSE_OWNER_DRAWN
 	item->SetBitmap(wxArtProvider::GetBitmap(wxART_PASTE, wxART_MENU));
 #endif
 	ContextMenu.Append(item);
 
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Delete, _("&Delete\tDel"));
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Delete, _("&Delete") + acc_sep + wxT("Del"));
 	ContextMenu.Append(item);
 
-	item = new wxMenuItem(&ContextMenu, ID_Menu_SelectAll, _("Select &All\tCtrl+A"));
+	item = new wxMenuItem(&ContextMenu, ID_Menu_SelectAll, _("Select &All") + acc_sep + wxT("Ctrl+A"));
 	ContextMenu.Append(item);
 
 

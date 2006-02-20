@@ -170,6 +170,7 @@ void tRisaEventSystem::DeliverEvents()
 	{
 		volatile tRisseCriticalSection::tLocker holder(CS);
 
+		if(!HasPendingEvents) return; // 未配信のイベントはない
 		HasPendingEvents = false; // いったんこのフラグはここで偽に
 
 		for(int i = tRisaEventBase::epMin; i <= tRisaEventBase::epMax; i++)
@@ -219,7 +220,7 @@ void tRisaEventSystem::DeliverEvents()
 		{
 			if(i != tRisaEventBase::epExclusive)
 			{
-				while(Queues[i].front() == NULL)
+				while(Queues[i].size() > 0 && Queues[i].front() == NULL)
 					Queues[i].pop_front();
 			}
 		}

@@ -125,7 +125,8 @@ int tRisaApplication::OnExit()
 //---------------------------------------------------------------------------
 bool tRisaApplication::ProcessIdle()
 {
-	bool cont = tRisaEventSystem::instance()->ProcessEvents();
+	bool cont = false;
+	if(tRisaEventSystem::alive()) tRisaEventSystem::instance()->ProcessEvents();
 	cont = wxApp::ProcessIdle() || cont;
 	return cont;
 }

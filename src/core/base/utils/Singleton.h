@@ -247,11 +247,11 @@ class singleton_base
 		object_holder() : object(create()), weak_object(object)
 		{
 			tRisaSingletonManager::RegisterDisconnector(&singleton_base<T>::disconnect);
-//			fprintf(stderr, "created %s\n", singleton_base<T>::get_name());
+			fprintf(stderr, "created %s\n", singleton_base<T>::get_name());
 		}
 		static T* create()
 		{
-//			fprintf(stderr, "creating %s\n", singleton_base<T>::get_name());
+			fprintf(stderr, "creating %s\n", singleton_base<T>::get_name());
 			return new T();
 		}
 	};
@@ -282,6 +282,7 @@ class singleton_base
 	//! @brief オブジェクトへの参照を切る
 	static void disconnect()
 	{
+		fprintf(stderr, "disconnecting %s\n", get_name());
 		(void) manipulate_object(true);
 	}
 

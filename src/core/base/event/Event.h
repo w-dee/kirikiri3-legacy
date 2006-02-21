@@ -80,7 +80,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		イベント管理システム
 //---------------------------------------------------------------------------
-class tRisaEventSystem
+class tRisaEventSystem : public singleton_base<tRisaEventSystem>
 {
 public:
 	//! @brief イベントのタイプ
@@ -115,13 +115,6 @@ public:
 		iRisseDispatch2 * source, tRisaEventBase::tPriority prio, size_t limit = 1);
 	void CancelEvents(iRisseDispatch2 * source);
 	bool GetCanDeliverEvents() const { return CanDeliverEvents; } //!< イベントを配信可能かどうかを返す
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaEventSystem> singleton_object_life_tracer;
-public:
-	static boost::shared_ptr<tRisaEventSystem> & instance() { return
-		tRisaSingleton<tRisaEventSystem>::instance();
-			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------
 

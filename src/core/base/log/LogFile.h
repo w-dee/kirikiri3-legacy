@@ -26,7 +26,7 @@ class tRisaLogReceiver;
 //---------------------------------------------------------------------------
 //! @brief		ログファイルクラス(シングルトン)
 //---------------------------------------------------------------------------
-class tRisaLogFile
+class tRisaLogFile : public singleton_base<tRisaLogFile>, depends_on<tRisaLogger>
 {
 	static const size_t NumLastLog  = 50; //!< ファイルへのログ記録を開始した際に出力する LastLog の行数
 
@@ -59,15 +59,6 @@ private:
 
 public:
 	void Begin();
-
-private:
-	tRisaSingleton<tRisaLogger> ref_tRisaLogger; //!< tRisaLogger に依存
-	tRisaSingletonObjectLifeTracer<tRisaLogFile> singleton_object_life_tracer;
-
-public:
-	static boost::shared_ptr<tRisaLogFile> & instance() { return
-		tRisaSingleton<tRisaLogFile>::instance();
-			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------
 

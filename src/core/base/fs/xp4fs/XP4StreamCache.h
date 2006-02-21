@@ -19,7 +19,7 @@
 //---------------------------------------------------------------------------
 //!@brief		ストリームキャッシュクラス
 //---------------------------------------------------------------------------
-class tRisaXP4StreamCache
+class tRisaXP4StreamCache : public singleton_base<tRisaXP4StreamCache>
 {
 	static const int MAX_ITEM = 8; //!< キャッシュするハンドル数
 
@@ -37,13 +37,6 @@ class tRisaXP4StreamCache
 public:
 	tRisaXP4StreamCache();
 	~tRisaXP4StreamCache();
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaXP4StreamCache> singleton_object_life_tracer;
-public:
-	static boost::shared_ptr<tRisaXP4StreamCache> & instance() { return
-		tRisaSingleton<tRisaXP4StreamCache>::instance();
-			} //!< このシングルトンのインスタンスを返す
 
 public:
 	tRisseBinaryStream * GetStream(void * pointer, const ttstr & name);

@@ -19,6 +19,7 @@
 #include "risse/include/risseUtils.h"
 #include "risse/include/risseHashSearch.h"
 #include "base/utils/Singleton.h"
+#include "base/script/RisseEngine.h"
 #include <boost/smart_ptr.hpp>
 
 
@@ -81,7 +82,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
-class tRisaFileSystemManager
+class tRisaFileSystemManager : public singleton_base<tRisaFileSystemManager>, depends_on<tRisaRisseScriptEngine>
 {
 	//! @brief ファイルシステムマネージャ内で管理されるファイルシステムの情報
 	struct tFileSystemInfo
@@ -100,13 +101,7 @@ public:
 	tRisaFileSystemManager();
 	~tRisaFileSystemManager();
 
-private:
-	tRisaSingletonObjectLifeTracer<tRisaFileSystemManager> singleton_object_life_tracer;
 public:
-	static boost::shared_ptr<tRisaFileSystemManager> & instance() { return
-		tRisaSingleton<tRisaFileSystemManager>::instance();
-			} //!< このシングルトンのインスタンスを返す
-
 	void Mount(const ttstr & point, iRisseDispatch2 * fs_risseobj);
 	void Unmount(const ttstr & point);
 	void Unmount(iRisseDispatch2 * fs_risseobj);

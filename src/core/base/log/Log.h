@@ -24,7 +24,7 @@ class tRisaLogReceiver;
 //---------------------------------------------------------------------------
 //! @brief		ロガークラス(シングルトン)
 //---------------------------------------------------------------------------
-class tRisaLogger
+class tRisaLogger : public singleton_base<tRisaLogger>
 {
 public:
 	//! @brief ログアイテムのレベル(ログレベル)
@@ -62,14 +62,6 @@ private:
 public:
 	tRisaLogger();
 	~tRisaLogger();
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaLogger> singleton_object_life_tracer;
-
-public:
-	static boost::shared_ptr<tRisaLogger> & instance() { return
-		tRisaSingleton<tRisaLogger>::instance();
-			} //!< このシングルトンのインスタンスを返す
 
 public:
 	const tRisaRingBuffer<tItem> & GetBuffer() const 

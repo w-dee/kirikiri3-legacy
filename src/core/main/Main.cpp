@@ -65,7 +65,16 @@ bool tRisaApplication::OnInit()
 	locale.AddCatalog(wxT("wxstd"));
 
 	// すべてのシングルトンインスタンスを初期化する
-	tRisaSingletonManager::InitAll(); // 全てのシングルトンインスタンスを初期化
+	try
+	{
+		tRisaSingletonManager::InitAll(); // 全てのシングルトンインスタンスを初期化
+	}
+	catch(...)
+	{
+		// something ??
+		fprintf(stderr, "something caught\n");
+		return false;
+	}
 
 	//---- ↓↓テストコード↓↓ ----
 	// ファイルシステムのルートにカレントディレクトリをマウント
@@ -94,6 +103,18 @@ bool tRisaApplication::OnInit()
 //---------------------------------------------------------------------------
 int tRisaApplication::OnExit()
 {
+	printf("tRisaApplication::OnExit entered\n");
+
+	// すべてのシングルトンインスタンスへの参照を切る
+	tRisaSingletonManager::DisconnectAll(); // 全てのシングルトンインスタンスを初期化
+
+	printf("all singletons should be destroyed within this time ...\n");
+
+	// まだシステムに残っているシングルトンインスタンスを表示する
+	tRisaSingletonManager::ReportAliveObjects();
+
+	printf("tRisaApplication::OnExit ended\n");
+
 	return 0;
 }
 //---------------------------------------------------------------------------
@@ -109,4 +130,35 @@ bool tRisaApplication::ProcessIdle()
 	return cont;
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace boost
+{
+
+//---------------------------------------------------------------------------
+//! @brief		boost の assertion failure を捕捉する
+//---------------------------------------------------------------------------
+void assertion_failed(char const * expr, char const * function, char const * file, long line)
+{
+	// user defined
+	fprintf(stderr, "boost assertion failure on expression '%s' at function '%s' file %s line %ld\n",
+		expr, function, file, line);
+	abort();
+}
+//---------------------------------------------------------------------------
+
+
+} // namespace boost
 

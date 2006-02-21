@@ -39,7 +39,7 @@ RISSE_DEFINE_SOURCE_ID(7464,23094,50611,20409,11701,31915,19285,41427);
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
-//! @param		ファイル名
+//! @param		filename ファイル名
 //---------------------------------------------------------------------------
 tRisaConfigData::tRisaConfigData(const wxString & filename) :
 	wxFileConfig(wxEmptyString, wxEmptyString, filename,
@@ -94,7 +94,7 @@ wxString tRisaConfig::GetConfigFileName(const wxString &realm)
 {
 	// 設定ファイルはどこからとってくるかについては議論の余地があるが、
 	// System   realm: (実行可能ファイルのパス)/../etc/k3.ini
-	// Variable realm: (実行可能ファイルのパス)/../var/k3variables.ini
+	// Variable realm: (実行可能ファイルのパス)/../var/k3vars.ini
 	// からとってくることにする。
 
 	wxFileName appfilename(wxTheApp->argv[0]);

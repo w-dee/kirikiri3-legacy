@@ -25,7 +25,7 @@
 //---------------------------------------------------------------------------
 //!@brief		セグメントキャッシュクラス
 //---------------------------------------------------------------------------
-class tRisaXP4SegmentCache
+class tRisaXP4SegmentCache : public singleton_base<tRisaXP4SegmentCache>
 {
 	static const risse_size ONE_LIMIT = 1024*1024; //!< これを超えるセグメントはキャッシュしない
 	static const risse_size TOTAL_LIMIT = 1024*1024; //!< トータルでこれ以上はキャッシュしない
@@ -71,13 +71,6 @@ private:
 public:
 	tRisaXP4SegmentCache();
 	~tRisaXP4SegmentCache();
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaXP4SegmentCache> singleton_object_life_tracer;
-public:
-	static boost::shared_ptr<tRisaXP4SegmentCache> & instance() { return
-		tRisaSingleton<tRisaXP4SegmentCache>::instance();
-			} //!< このシングルトンのインスタンスを返す
 
 public:
 	void CheckLimit();

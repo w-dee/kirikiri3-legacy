@@ -99,19 +99,13 @@ public:
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaFileSystemRegisterer
+class tRisaFileSystemRegisterer : public singleton_base<tRisaFileSystemRegisterer>, depends_on<tRisaRisseScriptEngine>
 {
 	iRisseDispatch2 * FileSystemClass;
-
-	tRisaSingleton<tRisaRisseScriptEngine> ref_tRisaRisseScriptEngine; //!< tRisaRisseScriptEngine に依存
 
 public:
 	tRisaFileSystemRegisterer();
 	~tRisaFileSystemRegisterer();
-
-	static boost::shared_ptr<tRisaFileSystemRegisterer> & instance() { return
-		tRisaSingleton<tRisaFileSystemRegisterer>::instance();
-			} //!< このシングルトンのインスタンスを返す
 
 	void RegisterClassObject(const risse_char *name, iRisseDispatch2 * object);
 };

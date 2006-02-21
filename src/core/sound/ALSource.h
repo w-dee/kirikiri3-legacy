@@ -22,12 +22,11 @@
 //---------------------------------------------------------------------------
 //! @brief		OpenALソース
 //---------------------------------------------------------------------------
-class tRisaALSource
+class tRisaALSource : depends_on<tRisaOpenAL>
 {
 	risse_uint NumBuffersQueued; //!< キューに入っているバッファの数
 	ALuint Source; //!< OpenAL ソース
 	bool SourceAllocated; //!< Source がすでに割り当てられているかどうか
-	tRisaSingleton<tRisaOpenAL> ref_tRisaOpenAL; //!< tRisaOpenAL インスタンス
 	boost::shared_ptr<tRisaALBuffer> Buffer; // バッファ
 
 public:

@@ -62,19 +62,13 @@ private:
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaOSFSRegisterer
+class tRisaOSFSRegisterer :
+	public singleton_base<tRisaOSFSRegisterer>,
+	depends_on<tRisaRisseScriptEngine>,
+	depends_on<tRisaFileSystemRegisterer>
 {
-	tRisaSingleton<tRisaRisseScriptEngine> ref_tRisaRisseScriptEngine; //!< tRisaRisseScriptEngine に依存
-	tRisaSingleton<tRisaFileSystemRegisterer> ref_tRisaFileSystemRegisterer; //!< tRisaFileSystemRegisterer に依存
 public:
 	tRisaOSFSRegisterer();
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaOSFSRegisterer> singleton_object_life_tracer;
-public:
-	static boost::shared_ptr<tRisaOSFSRegisterer> & instance() { return
-		tRisaSingleton<tRisaOSFSRegisterer>::instance();
-			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------
 

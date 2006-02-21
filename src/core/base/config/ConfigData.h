@@ -37,7 +37,7 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		設定情報管理クラス
 //---------------------------------------------------------------------------
-class tRisaConfig
+class tRisaConfig : public singleton_base<tRisaConfig>
 {
 	tRisaConfigData Variable;
 	tRisaConfigData System;
@@ -45,10 +45,6 @@ class tRisaConfig
 public:
 	tRisaConfig();
 	~tRisaConfig();
-
-	static boost::shared_ptr<tRisaConfig> & instance() { return
-		tRisaSingleton<tRisaConfig>::instance();
-			} //!< このシングルトンのインスタンスを返す
 
 public:
 	tRisaConfigData & GetVariableConfig() { return Variable; } //!< Variable設定情報を返す

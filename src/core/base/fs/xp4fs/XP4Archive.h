@@ -22,10 +22,10 @@
 //---------------------------------------------------------------------------
 //! @brief		一つのアーカイブを現すクラス
 //---------------------------------------------------------------------------
-class tRisaXP4Archive
+class tRisaXP4Archive :
+	depends_on<tRisaXP4SegmentCache>,
+	depends_on<tRisaXP4StreamCache>
 {
-	tRisaSingleton<tRisaXP4SegmentCache> ref_tRisaXP4SegmentCache; // tRisaXP4SegmentCache に依存
-	tRisaSingleton<tRisaXP4StreamCache> ref_tRisaXP4StreamCache; // tRisaXP4StreamCache に依存
 public:
 	struct tFile
 	{

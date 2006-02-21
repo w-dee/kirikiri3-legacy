@@ -27,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID(42206,11515,36168,20323,34721,49407,49922,37589);
 //---------------------------------------------------------------------------
 //! @brief		コンソール用のヒストリ付きカスタムテキストコントロール
 //---------------------------------------------------------------------------
-class tRisaHistoryTextCtrl : public wxTextCtrl
+class tRisaHistoryTextCtrl :  public wxTextCtrl, depends_on<tRisaConfig>
 {
 	const static size_t MaxNumHistoryItems = 100; //!< ヒストリの最大個数
 	const static size_t InvalidIndex = static_cast<size_t>(-1L); //!< 無効なインデックス値
@@ -39,8 +39,6 @@ public:
 	~tRisaHistoryTextCtrl();
 
 private:
-	tRisaSingleton<tRisaConfig> ref_tRisaConfig; //!< tRisaConfig に依存
-
 	void PushHistory(const wxString & item);
 
 	void OnEnter(wxCommandEvent & event);

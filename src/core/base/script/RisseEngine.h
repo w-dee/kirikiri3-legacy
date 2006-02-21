@@ -20,20 +20,13 @@
 //---------------------------------------------------------------------------
 //! @brief		Risseスクリプトエンジンへのインターフェース
 //---------------------------------------------------------------------------
-class tRisaRisseScriptEngine
+class tRisaRisseScriptEngine : public singleton_base<tRisaRisseScriptEngine>
 {
 	tRisse *Engine;
 
 public:
 	tRisaRisseScriptEngine();
 	~tRisaRisseScriptEngine();
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaRisseScriptEngine> singleton_object_life_tracer;
-public:
-	static boost::shared_ptr<tRisaRisseScriptEngine> & instance() { return
-		tRisaSingleton<tRisaRisseScriptEngine>::instance();
-			} //!< このシングルトンのインスタンスを返す
 
 	void Shutdown();
 

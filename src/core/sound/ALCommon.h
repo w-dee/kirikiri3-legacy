@@ -41,7 +41,7 @@
 //---------------------------------------------------------------------------
 //! @brief		OpenAL管理クラス
 //---------------------------------------------------------------------------
-class tRisaOpenAL
+class tRisaOpenAL : public singleton_base<tRisaOpenAL>
 {
 public:
 	//! @brief OpenAL APIを保護するためのクリティカルセクションホルダ
@@ -74,14 +74,6 @@ public:
 	void ThrowIfError(const risse_char * message);
 	void ClearErrorState();
 	tRisseCriticalSection & GetCS() { return CS; }
-
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaOpenAL> singleton_object_life_tracer;
-public:
-	static boost::shared_ptr<tRisaOpenAL> & instance() { return
-		tRisaSingleton<tRisaOpenAL>::instance();
-	}
 };
 //---------------------------------------------------------------------------
 #endif

@@ -22,88 +22,21 @@
 	・オブジェクトの構築順を依存関係から保証できること
 	・オブジェクトの消滅順も依存関係から保証できること
 	・オブジェクトの構築時に発生する例外を捕捉できること
+	・オブジェクトの構築と消滅をアプリケーションの初期化・終了の
+	  任意の時点でできること
 
-	boost::details::pool::singleton_default を参考にしています
+	boost::details::pool::singleton_default を参考にしている。
+
+
+	シングルトンの機構を構成するクラスは３つある。
+
+	一つは内部的に用いられている tRisaSingletonManager、もう一つは
+	シングルトンクラスがシングルトンたる動作を規定している
+	テンプレートクラスである singleton_base 、最後の一つは
+	依存しているシングルトンを表す depends_on 。
+
+	詳しくは例を参照のこと。
 */
-
-#include <vector>
-#include <boost/smart_ptr.hpp>
-#include <stdio.h>
-#include <typeinfo>
-
-//---------------------------------------------------------------------------
-//! @brief  シングルトンオブジェクト管理用クラス
-//---------------------------------------------------------------------------
-class tRisaSingletonManager
-{
-	typedef void (*tEnsureFunction)(); //!< ensure 関数のtypedef
-	static std::vector<tEnsureFunction> * EnsureFunctions; //!< ensure関数の配列
-	static unsigned int RefCount; //!< リファレンスカウンタ
-
-public:
-	static void Register(tEnsureFunction function);
-	static void Unregister();
-
-	static void InitAll();
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief  シングルトンオブジェクト用クラス
-//---------------------------------------------------------------------------
-template <typename T>
-class tRisaSingleton
-{
-	struct object_registerer
-	{
-		// この構造体は static 領域に配置され、main 関数よりも前に作成される。
-		// コンストラクタでは tRisaSingletonManager::Register() が呼ばれ、
-		// tRisaSingleton<T>::ensure が tRisaSingletonManager の vector に登録される。
-		// これにより、tRisaSingletonManager::InitAll() の呼び出しで全ての
-		// シングルトンインスタンスが作成されることを保証する。
-		// もしシングルトンインスタンスの構築時に発生する例外を捕捉したいならば、
-		// InitAll() を呼び出す際に捕捉することができる。
-		// InitAll() を呼び出さなくてもシングルトンオブジェクトは必要時に自動的に
-		// 生成されるが、その部分はマルチスレッドアクセスに対応していないので
-		// かならず明示的に(他のスレッドが走っていない状態で) InitAll() を呼ぶことを
-		// 推奨する。
-		object_registerer() { tRisaSingletonManager::Register(&tRisaSingleton<T>::ensure); }
-		~object_registerer() { tRisaSingletonManager::Unregister(); }
-		inline void do_nothing() const { }
-	};
-	static object_registerer register_object;
-
-	boost::shared_ptr<T> & referrer;
-public:
-	// このクラスのオブジェクトを作成することは、
-	// このクラスのオブジェクトの存在期間中、T のインスタンスが存在することを
-	// 保証する。
-	// クラスのメンバとして tRisaSingleton<T> 型のメンバを記述すれば、
-	// そのクラスのオブジェクトが存在し続ける間は T のインスタンスが存在
-	// することになる。
-	// これの寿命管理には shared_ptr を用いた参照カウンタを用いているため、
-	// 相互参照があるとオブジェクトが解放されないままになるので注意が必要である。
-
-	tRisaSingleton() : referrer(instance()) {;}
-
-	//! @brief シングルトンオブジェクトのインスタンスを返す
-	static boost::shared_ptr<T> & instance()
-	{
-		static boost::shared_ptr<T> object(new T());
-		register_object.do_nothing();
-		return object;
-	}
-
-	//! @brief オブジェクトが存在することを確かにする
-	static void ensure()
-	{
-		instance();
-	}
-};
-template <typename T>
-typename tRisaSingleton<T>::object_registerer tRisaSingleton<T>::register_object;
-//---------------------------------------------------------------------------
 
 /*!
 @note
@@ -135,34 +68,32 @@ s1 → s0
 #include <stdio.h>
 #include "Singleton.h"
 
-class s0
+class s0 : singleton_of<s0>
 {
 public:
 	s0() { printf("s0 construct\n"); }
 	~s0() { printf("s0 destruct\n"); }
 };
 
-class s1
+class s1 : singleton_of<s1>, depends_on<s0>
 {
-	tRisaSingleton<s0> referer_s0;
 public:
 	s1() { printf("s1 construct\n"); }
 	~s1() { printf("s1 destruct\n"); }
 };
 
-class s2
+class s2 : singleton_of<s2>, depends_on<s0>
 {
-	tRisaSingleton<s0> referer_s0;
 public:
 	s2() { printf("s2 construct\n"); }
 	~s2() { printf("s2 destruct\n"); }
 };
 
-class s3
+class s3 : singleton_of<s3>,
+		depends_on<s0>,
+		depends_on<s1>,
+		depends_on<s2>
 {
-	tRisaSingleton<s0> referer_s0;
-	tRisaSingleton<s1> referer_s1;
-	tRisaSingleton<s2> referer_s2;
 	int n;
 public:
 	s3() { printf("s3 construct\n"); n = 1; }
@@ -172,14 +103,18 @@ public:
 
 int main()
 {
-	printf("main begin\n");
-	printf("InitAll begin\n");
+//	s3::referrer s3;
+	fprintf(stderr, "main begin\n");
+	fprintf(stderr, "InitAll begin\n");
 	tRisaSingletonManager::InitAll();
-	printf("InitAll end\n");
-	printf("n : %d\n", tRisaSingleton<s3>::instance()->getN());
-	printf("main end\n");
+	fprintf(stderr, "InitAll end\n");
+	fprintf(stderr, "n : %d\n", s3::instance()->getN());
+	fprintf(stderr, "Disconnect begin\n");
+	tRisaSingletonManager::DisconnectAll();
+	fprintf(stderr, "Disconnect end\n");
+	tRisaSingletonManager::ReportAliveObjects();
+	fprintf(stderr, "main end\n");
 }
-
 
 </code>
 
@@ -196,11 +131,13 @@ s2 construct
 s3 construct
 InitAll end
 n : 1
-main end
+Disconnect begin
 s3 destruct
 s2 destruct
 s1 destruct
 s0 destruct
+Disconnect end
+main end
 
 
 </pre>
@@ -208,29 +145,229 @@ s0 destruct
 
 */
 
+
+#include <vector>
+#include <boost/smart_ptr.hpp>
+#include <stdio.h>
+#include <typeinfo>
+
 //---------------------------------------------------------------------------
-//! @brief  オブジェクトの生成と消滅のトレース
-//! @note   このクラスのオブジェクトを好きな所に書いておくと生成時と消滅時に
-//!         メッセージが表示されるというだけ
+//! @brief  シングルトンオブジェクト管理用クラス
 //---------------------------------------------------------------------------
-template <typename T>
-class tRisaSingletonObjectLifeTracer
+class tRisaSingletonManager
 {
+	typedef void (*tFunction)(); //!< ensure/disconnect 関数のtypedef
+	typedef const char * (*tGetNameFunction)(); //!< GetName 関数のtypedef
+	typedef bool (*tAliveFunction)(); //!< Alive 関数のtypedef
+	struct tRegisterInfo
+	{
+		tFunction Ensure; //!< ensure関数
+		tGetNameFunction GetName; //!< get_name 関数
+		tAliveFunction Alive; //!< ailve 関数
+	};
+
+	static std::vector<tRegisterInfo> * Functions; //!< ensure関数の配列
+	static std::vector<tFunction> * Disconnectors; //!< disconnect関数の配列
+	static unsigned int RefCount; //!< リファレンスカウンタ
+
 public:
-	tRisaSingletonObjectLifeTracer()
+	static void Register(const tRegisterInfo & info);
+	static void RegisterDisconnector(tFunction func);
+	static void Unregister();
+
+	static void InitAll();
+	static void DisconnectAll();
+	static void ReportAliveObjects();
+
+	//! @brief 空の構造体
+	struct empty
 	{
-#ifdef DEBUG
-		fprintf(stderr, "class %s created\n", typeid(T).name());
-#endif
-	}
-	~tRisaSingletonObjectLifeTracer()
-	{
-#ifdef DEBUG
-		fprintf(stderr, "class %s deleted\n", typeid(T).name());
-#endif
-	}
+		struct referrer
+		{
+		};
+	};
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief  シングルトンオブジェクト用クラス
+//! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス、次以降は
+//!			このシングルトンが依存しているクラスである。
+//---------------------------------------------------------------------------
+template <typename T>
+class singleton_base
+{
+	singleton_base(const singleton_base &); //!< non-copyable
+
+	//! @brief シングルトンクラスをマネージャに登録するための構造体
+	//! @note
+	//! この構造体は static 領域に配置され、main 関数よりも前に作成される。
+	//! コンストラクタでは tRisaSingletonManager::Register() が呼ばれ、
+	//! シングルトンクラスに関する情報が tRisaSingletonManager の vector に登録される。
+	//! この中にはシングルトンインスタンスを作成するための関数へのポインタも
+	//! 含まれており、tRisaSingletonManager::InitAll() の呼び出しで全ての
+	//! シングルトンインスタンスが作成されることを保証する。
+	//! もしシングルトンインスタンスの構築時に発生する例外を捕捉したいならば、
+	//! InitAll() を呼び出す際に捕捉することができる。
+	//! InitAll() を呼び出さなくてもシングルトンオブジェクトは必要時に自動的に
+	//! 生成されるが、その部分はマルチスレッドアクセスに対応していないので
+	//! かならず明示的に(他のスレッドが走っていない状態で) InitAll() を呼ぶことを
+	//! 推奨する。
+	struct object_registerer
+	{
+		//! @brief コンストラクタ
+		object_registerer()
+		{
+			tRisaSingletonManager::tRegisterInfo info;
+			info.Ensure =      &singleton_base<T>::ensure;
+			info.GetName =     &singleton_base<T>::get_name;
+			info.Alive =       &singleton_base<T>::alive;
+
+			tRisaSingletonManager::Register(info);
+		}
+		//! @brief デストラクタ
+		~object_registerer() { tRisaSingletonManager::Unregister(); }
+		//! @brief このクラスが最適化で消されないようにするためのダミー
+		inline void do_nothing() const { }
+	};
+	static object_registerer register_object; //!< object_registerer のstatic変数
+
+	//! @brief オブジェクトを保持する構造体
+	//! @note
+	//! このクラスのコンストラクタは manipulate_object 内のローカルスコープにある static 変数
+	//! が初めて作成される際に呼ばれ、マネージャに disconnect メソッドを登録する。
+	//! この関数が呼ばれるのは必ず依存先→依存元の順番となるため、マネージャは
+	//! disconnect をこれとは逆順に呼ぶことで依存関係を保ったままオブジェクトの
+	//! 消滅を行おうとする。
+	struct object_holder
+	{
+		boost::shared_ptr<T> object; //!< シングルトンオブジェクト
+		boost::weak_ptr<T> weak_object; //!< シングルトンオブジェクトへの弱参照
+		object_holder() : object(create()), weak_object(object)
+		{
+			tRisaSingletonManager::RegisterDisconnector(&singleton_base<T>::disconnect);
+//			fprintf(stderr, "created %s\n", singleton_base<T>::get_name());
+		}
+		static T* create()
+		{
+//			fprintf(stderr, "creating %s\n", singleton_base<T>::get_name());
+			return new T();
+		}
+	};
+
+	//! @brief オブジェクトを操作するメソッド
+	//! @note
+	//! このメソッドはローカルに disconnector_registerer 型のオブジェクトを
+	//! static で持つ。
+	//! reset が true の場合は object.object を reset することによって
+	//! 参照を切る。is_alive が非nullの場合は、object.weak_object を
+	//! 参照することによりシングルトンオブジェクトが有効かどうかを*is_aliveに
+	//! 書き込む。
+	static boost::shared_ptr<T> & manipulate_object(bool reset=false, bool * is_alive = NULL)
+	{
+		static object_holder holder;
+		register_object.do_nothing();
+		if(reset) holder.object.reset();
+		if(is_alive) *is_alive = !holder.weak_object.expired();
+		return holder.object;
+	}
+
+	//! @brief オブジェクトが存在することを確かにする
+	static void ensure()
+	{
+		(void) manipulate_object();
+	}
+
+	//! @brief オブジェクトへの参照を切る
+	static void disconnect()
+	{
+		(void) manipulate_object(true);
+	}
+
+	//! @brief クラス名を得る
+	static const char * get_name()
+	{
+		return typeid(T).name();
+	}
+
+protected:
+	//! @brief コンストラクタ
+	singleton_base()
+	{
+		register_object.do_nothing();
+			// 何もしないダミーのメソッドである do_nothing を呼ぶことにより、
+			// register_object が作成されることを確実にする
+	}
+
+	//! @brief デストラクタ
+	~singleton_base() {;}
+
+public:
+
+	//! @brief シングルトンオブジェクトのインスタンスを返す
+	static boost::shared_ptr<T> & instance()
+	{
+		return manipulate_object();
+	}
+
+	//! @brief オブジェクトが有効かどうかを得る
+	static bool alive()
+	{
+		bool alive;
+		(void) manipulate_object(false, &alive);
+		return alive;
+	}
+
+	//! @brief シングルトン参照用クラス
+	//! @note
+	//! このクラスのオブジェクトを作成することは、
+	//! このクラスのオブジェクトの存在期間中、T のインスタンスが存在することを
+	//! 保証する。
+	//! クラスのメンバとして singleton_base<T>::referrer 型のメンバを記述すれば、
+	//! そのクラスのオブジェクトが存在し続ける間は T のインスタンスが存在
+	//! することになる。
+	//! これの寿命管理には shared_ptr を用いた参照カウンタを用いているため、
+	//! 相互参照があるとオブジェクトが解放されないままになるので注意が必要である。
+	class referrer
+	{
+		boost::shared_ptr<T> object; //!< シングルトンオブジェクトへの参照を保持するメンバ
+	public:
+		referrer() : object(singleton_base<T>::instance()) {;}
+	};
+};
+template <typename T>
+typename singleton_base<T>::object_registerer singleton_base<T>::register_object;
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	シングルトン基底クラス用define
+//! @note	これは単純に、class A : public singleton_base<T> よりも class A: singleton_of<A> と
+//!			書けた方が幸せだろうというだけのこと。混乱の元ならば書かない方が使わない方が
+//!			いいかもしれないがそもそもテンプレートを使いまくってる時点で混乱するんだからこれぐらいの
+//!			混乱はなんと言うことはないのだろうか→結局これ使ってません
+//---------------------------------------------------------------------------
+#define singleton_of public singleton_base
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief  シングルトン用依存関係定義テンプレート
+//! @note
+//! 特定のシングルトンクラスに依存していることを表すためにこれを継承させる。例を参照。
+//---------------------------------------------------------------------------
+template <typename T>
+class depends_on
+{
+	boost::shared_ptr<T> __referrer_object; //!< シングルトンオブジェクトへの参照を保持するメンバ
+public:
+	depends_on() : __referrer_object(singleton_base<T>::instance()) {;}
+};
+//---------------------------------------------------------------------------
+
+
 
 #endif
 

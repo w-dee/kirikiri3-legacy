@@ -1,39 +1,37 @@
 //! @file
 //! @brief シングルトンを実現する自家製テンプレートクラスをテストするプログラム
-
-
 #include "prec.h"
+
+
 #include <stdio.h>
 #include "Singleton.h"
 
-class s0
+class s0 : singleton_of<s0>
 {
 public:
 	s0() { printf("s0 construct\n"); }
 	~s0() { printf("s0 destruct\n"); }
 };
 
-class s1
+class s1 : singleton_of<s1>, depends_on<s0>
 {
-	tRisaSingleton<s0> referer_s0;
 public:
 	s1() { printf("s1 construct\n"); }
 	~s1() { printf("s1 destruct\n"); }
 };
 
-class s2
+class s2 : singleton_of<s2>, depends_on<s0>
 {
-	tRisaSingleton<s0> referer_s0;
 public:
 	s2() { printf("s2 construct\n"); }
 	~s2() { printf("s2 destruct\n"); }
 };
 
-class s3
+class s3 : singleton_of<s3>,
+		depends_on<s0>,
+		depends_on<s1>,
+		depends_on<s2>
 {
-	tRisaSingleton<s0> referer_s0;
-	tRisaSingleton<s1> referer_s1;
-	tRisaSingleton<s2> referer_s2;
 	int n;
 public:
 	s3() { printf("s3 construct\n"); n = 1; }
@@ -43,11 +41,15 @@ public:
 
 int main()
 {
-	printf("main begin\n");
-	printf("InitAll begin\n");
+//	s3::referrer s3;
+	fprintf(stderr, "main begin\n");
+	fprintf(stderr, "InitAll begin\n");
 	tRisaSingletonManager::InitAll();
-	printf("InitAll end\n");
-	printf("n : %d\n", tRisaSingleton<s3>::instance()->getN());
-	printf("main end\n");
+	fprintf(stderr, "InitAll end\n");
+	fprintf(stderr, "n : %d\n", s3::instance()->getN());
+	fprintf(stderr, "Disconnect begin\n");
+	tRisaSingletonManager::DisconnectAll();
+	fprintf(stderr, "Disconnect end\n");
+	tRisaSingletonManager::ReportAliveObjects();
+	fprintf(stderr, "main end\n");
 }
-

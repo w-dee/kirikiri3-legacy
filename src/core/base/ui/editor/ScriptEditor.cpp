@@ -30,7 +30,7 @@ RISSE_DEFINE_SOURCE_ID(45447,29186,11918,17485,47798,28394,33256,47673);
 //---------------------------------------------------------------------------
 //! @brief		テキストエディタ用のカスタムテキストコントロール
 //---------------------------------------------------------------------------
-class tRisaScriptEditorTextCtrl : public wxTextCtrl
+class tRisaScriptEditorTextCtrl : public wxTextCtrl, depends_on<tRisaConfig>
 {
 	enum
 	{
@@ -57,8 +57,6 @@ public:
 #endif
 
 private:
-	tRisaSingleton<tRisaConfig> ref_tRisaConfig; //!< tRisaConfig に依存
-
 	void ShowContextMenu(const wxPoint & pos);
 
 #if USE_CONTEXT_MENU
@@ -185,7 +183,7 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 
 	// 内容を設定情報から読み出す
 	tRisaConfigData & config =
-		tRisaSingleton<tRisaConfig>::instance()->GetVariableConfig();
+		tRisaConfig::instance()->GetVariableConfig();
 	wxString content;
 	if(config.Read(wxT("ui/editor/content"), &content))
 		SetValue(content);

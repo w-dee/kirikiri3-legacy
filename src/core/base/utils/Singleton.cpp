@@ -15,7 +15,8 @@
 
 
 //---------------------------------------------------------------------------
-std::vector<tRisaSingletonManager::tEnsureFunction> * tRisaSingletonManager::EnsureFunctions = NULL;
+std::vector<tRisaSingletonManager::tRegisterInfo> * tRisaSingletonManager::Functions = NULL;
+std::vector<tRisaSingletonManager::tFunction> * tRisaSingletonManager::Disconnectors = NULL;
 unsigned int tRisaSingletonManager::RefCount = 0;
 //---------------------------------------------------------------------------
 
@@ -23,28 +24,44 @@ unsigned int tRisaSingletonManager::RefCount = 0;
 //---------------------------------------------------------------------------
 //! @brief		ensure 関数を登録する
 //---------------------------------------------------------------------------
-void tRisaSingletonManager::Register(tRisaSingletonManager::tEnsureFunction function)
+void tRisaSingletonManager::Register(const tRisaSingletonManager::tRegisterInfo & info)
 {
-	if(EnsureFunctions == NULL)
-		EnsureFunctions = new std::vector<tEnsureFunction>();
+//	fprintf(stderr, "singleton %s\n", info.GetName());
 
-	EnsureFunctions->push_back(function);
+	if(Functions == NULL)
+		Functions = new std::vector<tRegisterInfo>();
+
+	Functions->push_back(info);
 
 	RefCount ++;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		disconnect 関数を登録する
+//---------------------------------------------------------------------------
+void tRisaSingletonManager::RegisterDisconnector(tFunction func)
+{
+	if(Disconnectors == NULL)
+		Disconnectors = new std::vector<tFunction>();
+	Disconnectors->push_back(func);
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 //! @brief		ensure 関数の登録を解除する
 //---------------------------------------------------------------------------
 void tRisaSingletonManager::Unregister()
 {
-	if(EnsureFunctions)
+	if(Functions)
 	{
 		RefCount --;
 		if(RefCount == 0)
 		{
-			delete EnsureFunctions, EnsureFunctions = NULL;
+			delete Functions, Functions = NULL;
+			delete Disconnectors, Disconnectors = NULL;
 		}
 	}
 }
@@ -53,18 +70,69 @@ void tRisaSingletonManager::Unregister()
 
 //---------------------------------------------------------------------------
 //! @brief		全てのシングルトンを初期化する
+//! @note		この間に発生した例外は呼び出し元で捕捉できる
 //---------------------------------------------------------------------------
 void tRisaSingletonManager::InitAll()
 {
-	if(EnsureFunctions)
+	if(Functions)
 	{
-		for(std::vector<tEnsureFunction>::iterator i = EnsureFunctions->begin();
-			i != EnsureFunctions->end(); i++)
+/*
+		fprintf(stderr, "-- singleton list start --\n");
+		for(std::vector<tRegisterInfo>::iterator i = Functions->begin();
+			i != Functions->end(); i++)
 		{
-			tEnsureFunction function = *i;
-			function();
+			fprintf(stderr, "singleton %s\n", i->GetName());
+		}
+		fprintf(stderr, "-- singleton list end --\n");
+*/
+		for(std::vector<tRegisterInfo>::iterator i = Functions->begin();
+			i != Functions->end(); i++)
+		{
+			i->Ensure();
 		}
 	}
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		全てのシングルトンへの参照を切る
+//! @note		これによりすべてのシングルトンが消滅する保証はない。
+//!				他の場所でこのシングルトンオブジェクトへの参照が残っていた場合は
+//!				その参照が無くなるまでそのシングルトンオブジェクトおよびそれが
+//!				依存しているシングルトンオブジェクトは消滅しないままとなる。
+//!				disconnect関数の呼び出しは、RegisterDisconnector を呼び出した順とは
+//!				逆順となる。
+//---------------------------------------------------------------------------
+void tRisaSingletonManager::DisconnectAll()
+{
+	if(Disconnectors)
+	{
+		for(std::vector<tFunction>::reverse_iterator i = Disconnectors->rbegin();
+			i != Disconnectors->rend(); i++)
+		{
+			(*i)();
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		削除されずに残っているオブジェクトを標準エラー出力に表示する
+//---------------------------------------------------------------------------
+void tRisaSingletonManager::ReportAliveObjects()
+{
+	if(Functions)
+	{
+		for(std::vector<tRegisterInfo>::iterator i = Functions->begin();
+			i != Functions->end(); i++)
+		{
+			if(i->Alive())
+			{
+				fprintf(stderr, "object %s is alive\n", i->GetName());
+			}
+		}
+	}
+}
+//---------------------------------------------------------------------------

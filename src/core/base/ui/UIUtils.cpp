@@ -21,7 +21,7 @@ RISSE_DEFINE_SOURCE_ID(23912,37381,23527,19276,1668,15249,42569,48188);
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaUIFrame::tRisaUIFrame(const wxString & id, const wxString & title) :
-		tRisaUIFrameBase(NULL, wxID_ANY, title, GetStoredPosition(id), GetStoredSize(id),
+		wxFrame(NULL, wxID_ANY, title, GetStoredPosition(id), GetStoredSize(id),
 		wxDEFAULT_FRAME_STYLE),
 		FrameId(id)
 {

@@ -96,16 +96,10 @@ RISSE_END_NATIVE_METHOD_DECL(/*func. name*/message)
 //---------------------------------------------------------------------------
 //! @brief Logクラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaLogRegisterer
+class tRisaLogRegisterer :  public singleton_base<tRisaLogRegisterer>, depends_on<tRisaRisseScriptEngine>
 {
-	tRisaSingleton<tRisaRisseScriptEngine> ref_tRisaRisseScriptEngine; //!< tRisaRisseScriptEngine に依存
-
 public:
 	tRisaLogRegisterer();
-
-	static boost::shared_ptr<tRisaLogRegisterer> & instance() { return
-		tRisaSingleton<tRisaLogRegisterer>::instance();
-			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------
 

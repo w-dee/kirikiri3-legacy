@@ -16,12 +16,13 @@
 
 #include "risse/include/risse.h"
 #include "base/utils/Singleton.h"
+#include "base/script/RisseEngine.h"
 
 
 //---------------------------------------------------------------------------
 //! @brief		テキストストリームをスクリプトエンジンに登録するクラス
 //---------------------------------------------------------------------------
-class tRisaTextStreamRegisterer
+class tRisaTextStreamRegisterer : public singleton_base<tRisaTextStreamRegisterer>, depends_on<tRisaRisseScriptEngine>
 {
 	static iRisseTextReadStream * CreateForRead(const tRisseString &name,
 		const tRisseString &modestr);
@@ -31,13 +32,6 @@ class tRisaTextStreamRegisterer
 public:
 	tRisaTextStreamRegisterer();
 	~tRisaTextStreamRegisterer();
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaTextStreamRegisterer> singleton_object_life_tracer;
-public:
-	static boost::shared_ptr<tRisaTextStreamRegisterer> & instance() { return
-		tRisaSingleton<tRisaTextStreamRegisterer>::instance();
-			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------
 

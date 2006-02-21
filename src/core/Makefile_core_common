@@ -27,6 +27,9 @@ SUB_DIRS=\
 # このバイナリが依存しているライブラリ
 DEP_LIBS=BOOST ZLIB WX LIBOGG LIBVORBIS OPENAL COMMON
 
+# 追加の CFLAGS
+CXXFLAGS += -DBOOST_ENABLE_ASSERT_HANDLER
+
 # pre-compiled header 用ファイル
 PREC_H_NAME = $(CURRENT_DIR)/$(CORE_DIR)/prec.h
 
@@ -35,7 +38,7 @@ include $(TOP_DIR)/src/core/risse/Makefile_for_user
 
 # INCLUDES の設定
 INCLUDES = \
-		-I$(CURRENT_DIR)/$(CORE_DIR)                             \
+		-I$(CURRENT_DIR)/$(CORE_DIR)
 
 
 

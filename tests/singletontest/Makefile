@@ -20,11 +20,12 @@ LDFLAGS = -g $(CONSOLE_LDFLAGS)
 CORE_DIR=$(TOP_DIR)/src/core
 
 INCLUDES= \
-		-I$(CORE_DIR)/utils  \
+		-I$(CORE_DIR)             \
+		-I$(CORE_DIR)/base/utils  \
 		-I.
 
 CPPFILES = \
-		$(CORE_DIR)/utils/Singleton.cpp  \
+		$(CORE_DIR)/base/utils/Singleton.cpp  \
 		main.cpp
 
 OBJS = $(CPPFILES:.cpp=.o)

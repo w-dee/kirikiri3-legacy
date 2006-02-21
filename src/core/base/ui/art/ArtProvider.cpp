@@ -54,7 +54,7 @@ wxBitmap tRisaArtProvider::CreateBitmap(const wxArtID& id,
 //---------------------------------------------------------------------------
 //! @brief		tRisaArtProvider を登録するためのシングルトン
 //---------------------------------------------------------------------------
-class tRisaArtProviderRegisterer
+class tRisaArtProviderRegisterer : public singleton_base<tRisaArtProviderRegisterer>
 {
 	tRisaArtProvider * Provider;
 public:
@@ -64,14 +64,6 @@ public:
 		Provider = new tRisaArtProvider;
 		wxArtProvider::PushProvider(Provider);
 	}
-
-private:
-	tRisaSingletonObjectLifeTracer<tRisaArtProviderRegisterer> singleton_object_life_tracer;
-
-public:
-	static boost::shared_ptr<tRisaArtProviderRegisterer> & instance() { return
-		tRisaSingleton<tRisaArtProviderRegisterer>::instance();
-			} //!< このシングルトンのインスタンスを返す
 };
 //---------------------------------------------------------------------------
 

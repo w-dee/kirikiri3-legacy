@@ -44,7 +44,11 @@ tRisseNI_FileSystemNativeInstance::tRisseNI_FileSystemNativeInstance(
 void tRisseNI_FileSystemNativeInstance::Invalidate()
 {
 	// ファイルシステムマネージャからこのファイルシステムをアンマウントする
-	tRisaFileSystemManager::instance()->Unmount(Owner);
+	// ただしファイルシステムマネージャがシャットダウン中にこの関数が
+	// 呼ばれるときは、すでにアンマウントされることが決定しているので
+	// 呼ばない。
+	if(tRisaFileSystemManager::alive())
+		tRisaFileSystemManager::instance()->Unmount(Owner);
 
 	// FileSystem にこれ以上アクセスできないようにreset
 	FileSystem.reset();

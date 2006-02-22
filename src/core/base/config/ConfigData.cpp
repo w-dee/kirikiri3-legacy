@@ -49,9 +49,13 @@ tRisaConfigData::tRisaConfigData(const wxString & filename) :
 //---------------------------------------------------------------------------
 
 
-
-
-
+//---------------------------------------------------------------------------
+//! @brief		デストラクタ
+//---------------------------------------------------------------------------
+tRisaConfigData::~tRisaConfigData()
+{
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -100,15 +104,26 @@ wxString tRisaConfig::GetConfigFileName(const wxString &realm)
 	wxFileName appfilename(wxTheApp->argv[0]);
 	wxString appdir = appfilename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
 
-	if(realm == wxT("system"  ))
+	wxString ret;
+
+	if     (realm == wxT("system"  ))
+		ret = appdir + wxT("../etc/k3.ini");
+	else if(realm == wxT("variable"))
+		ret = appdir + wxT("../var/k3vars.ini");
+
+	if(ret != wxEmptyString)
 	{
-		return appdir + wxT("../etc/k3.ini");
+		// どうもここでパスの正規化を行わないと
+		// wxFileConfig 内で呼んでいる wxFileName::CreateTempFileName が
+		// エラーを起こすようなので正規化を行う
+		wxFileName abspath(ret);
+		abspath.Normalize();
+		ret = abspath.GetFullPath();
 	}
-	if(realm == wxT("variable"))
-	{
-		return appdir + wxT("../var/k3vars.ini");
-	}
-	return wxEmptyString;
+
+	wxFprintf(stderr, wxT("config '%s' realm filename: %s\n"), realm.c_str(), ret.c_str());
+
+	return ret;
 }
 //---------------------------------------------------------------------------
 

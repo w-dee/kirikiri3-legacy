@@ -27,6 +27,7 @@ class tRisaConfigData : public wxFileConfig
 
 protected:
 	tRisaConfigData(const wxString & filename);
+	~tRisaConfigData();
 
 private:
 };

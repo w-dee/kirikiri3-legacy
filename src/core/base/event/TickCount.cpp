@@ -15,7 +15,7 @@
 
 RISSE_DEFINE_SOURCE_ID(37180,40935,47171,16902,29833,29636,3244,55820);
 
-/*
+/*! @note
 	Risa の TickCount は 64bit 整数によるミリ秒単位のティックカウント
 	を提供する。
 	wxWidgets は wxStopWatch でミリ秒単位の経過時刻情報を提供するが、
@@ -32,10 +32,19 @@ RISSE_DEFINE_SOURCE_ID(37180,40935,47171,16902,29833,29636,3244,55820);
 	かといってすべての状況に対応するのも難しいので、ここでは少々泥臭いが
 	以下の方法で我慢をする。
 
-	・Windows ファミリー 
-		GetTickCount を使う (DWORDの周回の監視を行う)
+	・Windows ファミリー
+
+		Win32/Win64
+			timeGetTime を使う (DWORDの周回の監視を行う)
+
+		そのほか(WindowsMobileなど？)
+			GetTickCount を使う (DWORDの周回の監視を行う)
+
+		timeGettime/GetTickCount を使うときはタイマの分解能に注意する
+		( TickCount.h にある tRisaWinTimerResolutionAdjuster を参照のこと )
 
 	・それ以外
+
 		wxGetLocalTimeMillis を使う
 */
 

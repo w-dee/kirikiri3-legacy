@@ -16,8 +16,7 @@
 RISSE_DEFINE_SOURCE_ID(37180,40935,47171,16902,29833,29636,3244,55820);
 
 /*! @note
-	Risa の TickCount は 64bit 整数によるミリ秒単位のティックカウント
-	を提供する。
+	tRisaTickCount は 64bit 整数によるミリ秒単位のティックカウントを提供する。
 	wxWidgets は wxStopWatch でミリ秒単位の経過時刻情報を提供するが、
 	返される値が long であり、long の範囲を超えた場合の動作の保証はいっさい
 	無い。
@@ -58,6 +57,7 @@ tRisaTickCount::tWatcher::tWatcher(tRisaTickCount & owner) :
 	wxThread(wxTHREAD_JOINABLE),
 	Semaphore(0, 1), Owner(owner)
 {
+	Terminated = false;
 	Create();
 	Run();
 }
@@ -69,8 +69,12 @@ tRisaTickCount::tWatcher::tWatcher(tRisaTickCount & owner) :
 //---------------------------------------------------------------------------
 tRisaTickCount::tWatcher::~tWatcher()
 {
+	// Terminated は Semapore.Post() よりも先に真にしておく必要がある
+	// (セマフォでたたき起こされたスレッドが、Terminate されていないことを
+	// 見つけるとまた眠ってしまうため)
+	Terminate(); // スレッドの終了を伝える
 	Semaphore.Post(); // セマフォ待ちを解除する
-	Delete(); // スレッドの終了を待つ
+	Delete(); // スレッドの終了を待ち、スレッドを消す
 }
 //---------------------------------------------------------------------------
 
@@ -81,7 +85,7 @@ tRisaTickCount::tWatcher::~tWatcher()
 //---------------------------------------------------------------------------
 wxThread::ExitCode tRisaTickCount::tWatcher::Entry()
 {
-	while(!TestDestroy())
+	while(!Terminated && !TestDestroy())
 	{
 		// 60秒をまつか、セマフォが取得できるまで待つ。
 		// 実際の所これはこれほど短い秒数を待つ必要は全くなく、

@@ -89,6 +89,8 @@ class tRisaTickCount : public singleton_base<tRisaTickCount>
 	{
 		wxSemaphore Semaphore; //!< セマフォ
 		tRisaTickCount & Owner;
+		volatile bool Terminated; //!< スレッドを終了すべきかどうか
+		volatile void Terminate() { Terminated = true; }
 	public:
 		tWatcher(tRisaTickCount & owner);
 		~tWatcher();
@@ -102,6 +104,9 @@ class tRisaTickCount : public singleton_base<tRisaTickCount>
 #endif
 
 public:
+	static const risse_uint64 InvalidTickCount = ~ static_cast<risse_uint64>(0);
+		// 無効な tick を表す値
+
 	tRisaTickCount();
 	~tRisaTickCount();
 

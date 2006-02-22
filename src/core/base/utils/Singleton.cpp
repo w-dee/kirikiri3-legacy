@@ -17,6 +17,7 @@
 //---------------------------------------------------------------------------
 std::vector<tRisaSingletonManager::tRegisterInfo> * tRisaSingletonManager::Functions = NULL;
 std::vector<tRisaSingletonManager::tFunction> * tRisaSingletonManager::Disconnectors = NULL;
+std::vector<tRisaSingletonManager::tFunction> * tRisaSingletonManager::ManualStarts = NULL;
 unsigned int tRisaSingletonManager::RefCount = 0;
 //---------------------------------------------------------------------------
 
@@ -34,6 +35,18 @@ void tRisaSingletonManager::Register(const tRisaSingletonManager::tRegisterInfo 
 	Functions->push_back(info);
 
 	RefCount ++;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		手動起動を表すクラスの ensure 関数を登録する
+//---------------------------------------------------------------------------
+void tRisaSingletonManager::RegisterManualStart(tFunction func)
+{
+	if(ManualStarts == NULL)
+		ManualStarts = new std::vector<tFunction>();
+	ManualStarts->push_back(func);
 }
 //---------------------------------------------------------------------------
 
@@ -62,6 +75,7 @@ void tRisaSingletonManager::Unregister()
 		{
 			delete Functions, Functions = NULL;
 			delete Disconnectors, Disconnectors = NULL;
+			delete ManualStarts, ManualStarts = NULL;
 		}
 	}
 }
@@ -88,6 +102,16 @@ void tRisaSingletonManager::InitAll()
 		for(std::vector<tRegisterInfo>::iterator i = Functions->begin();
 			i != Functions->end(); i++)
 		{
+			if(ManualStarts)
+			{
+				// ManualStarts の中から i->Ensure を探す。
+				// 一致した物があった場合、ここでの作成は行わない。
+				// 単純な線形検索だが、シングルトンオブジェクトが数千などに
+				// ならない限りそれほどパフォーマンスロスにはならないだろう
+				std::vector<tFunction>::iterator p = 
+					std::find(ManualStarts->begin(), ManualStarts->end(), i->Ensure);
+				if(p != ManualStarts->end()) continue;
+			}
 			i->Ensure();
 		}
 	}

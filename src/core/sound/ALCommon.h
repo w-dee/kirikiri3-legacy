@@ -41,7 +41,7 @@
 //---------------------------------------------------------------------------
 //! @brief		OpenAL管理クラス
 //---------------------------------------------------------------------------
-class tRisaOpenAL : public singleton_base<tRisaOpenAL>
+class tRisaOpenAL : public singleton_base<tRisaOpenAL>, manual_start<tRisaOpenAL>
 {
 public:
 	//! @brief OpenAL APIを保護するためのクリティカルセクションホルダ

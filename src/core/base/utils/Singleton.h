@@ -28,12 +28,15 @@
 	boost::details::pool::singleton_default を参考にしている。
 
 
-	シングルトンの機構を構成するクラスは３つある。
+	シングルトンの機構を構成するクラスは４つある。
 
-	一つは内部的に用いられている tRisaSingletonManager、もう一つは
-	シングルトンクラスがシングルトンたる動作を規定している
-	テンプレートクラスである singleton_base 、最後の一つは
-	依存しているシングルトンを表す depends_on 。
+	・シングルトンの管理を行う tRisaSingletonManager
+	・シングルトンクラスがシングルトンたる動作を規定している
+	  テンプレートクラスである singleton_base
+	・依存しているシングルトンを表す depends_on
+	・tRisaSingletonManager::InitAll で初期化されずに、
+	  初めて必要となった際に初期化されることを示すための
+	  manual_start
 
 	詳しくは例を参照のこと。
 */
@@ -64,6 +67,7 @@ s1 → s0
 
 
 <code>
+
 
 #include <stdio.h>
 #include "Singleton.h"
@@ -101,6 +105,16 @@ public:
 	int getN() const { return n; }
 };
 
+class s4 : singleton_of<s4>, manual_start<s4>
+{
+	int n;
+public:
+	s4() { printf("s4 construct\n"); n = 2; }
+	~s4() { printf("s4 destruct\n"); n = 0; }
+	int getN() const { return n; }
+};
+
+
 int main()
 {
 //	s3::referrer s3;
@@ -108,7 +122,8 @@ int main()
 	fprintf(stderr, "InitAll begin\n");
 	tRisaSingletonManager::InitAll();
 	fprintf(stderr, "InitAll end\n");
-	fprintf(stderr, "n : %d\n", s3::instance()->getN());
+	fprintf(stderr, "s3::n : %d\n", s3::instance()->getN());
+	fprintf(stderr, "s4::n : %d\n", s4::instance()->getN());
 	fprintf(stderr, "Disconnect begin\n");
 	tRisaSingletonManager::DisconnectAll();
 	fprintf(stderr, "Disconnect end\n");
@@ -168,10 +183,12 @@ class tRisaSingletonManager
 
 	static std::vector<tRegisterInfo> * Functions; //!< ensure関数の配列
 	static std::vector<tFunction> * Disconnectors; //!< disconnect関数の配列
+	static std::vector<tFunction> * ManualStarts; //!< 手動起動をするクラスのensure関数の配列
 	static unsigned int RefCount; //!< リファレンスカウンタ
 
 public:
 	static void Register(const tRegisterInfo & info);
+	static void RegisterManualStart(tFunction func);
 	static void RegisterDisconnector(tFunction func);
 	static void Unregister();
 
@@ -214,6 +231,13 @@ class singleton_base
 	//! 生成されるが、その部分はマルチスレッドアクセスに対応していないので
 	//! かならず明示的に(他のスレッドが走っていない状態で) InitAll() を呼ぶことを
 	//! 推奨する。
+	//! manual_start クラスを作成すると、そのシングルトン
+	//! クラスが tRisaSingletonManager::InitAll() の呼び出しではなく、実際に必要と
+	//! なったとき (初回の instance() が呼ばれたときあるいは depends_on クラスの
+	//! オブジェクトが作成されたとき) に初めて作成される。
+	//! ただし、こちらについてもマルチスレッドによるアクセスは考慮されていないので
+	//! 注意すること。サブスレッドからのアクセスは、かならずそのシングルトンインスタンスが
+	//! メインスレッドで作成されていることを保証してから、などの考慮が必要となる。
 	struct object_registerer
 	{
 		//! @brief コンストラクタ
@@ -247,6 +271,7 @@ class singleton_base
 		object_holder() : object(create()), weak_object(object)
 		{
 			tRisaSingletonManager::RegisterDisconnector(&singleton_base<T>::disconnect);
+			singleton_base<T>::object_created = true;
 			fprintf(stderr, "created %s\n", singleton_base<T>::get_name());
 		}
 		static T* create()
@@ -255,6 +280,9 @@ class singleton_base
 			return new T();
 		}
 	};
+
+	//! @brief オブジェクトが作成されたかどうか
+	static bool object_created;
 
 	//! @brief オブジェクトを操作するメソッド
 	//! @note
@@ -271,12 +299,6 @@ class singleton_base
 		if(reset) holder.object.reset();
 		if(is_alive) *is_alive = !holder.weak_object.expired();
 		return holder.object;
-	}
-
-	//! @brief オブジェクトが存在することを確かにする
-	static void ensure()
-	{
-		(void) manipulate_object();
 	}
 
 	//! @brief オブジェクトへの参照を切る
@@ -306,6 +328,12 @@ protected:
 
 public:
 
+	//! @brief オブジェクトが存在することを確かにする
+	static void ensure()
+	{
+		(void) manipulate_object();
+	}
+
 	//! @brief シングルトンオブジェクトのインスタンスを返す
 	static boost::shared_ptr<T> & instance()
 	{
@@ -315,6 +343,7 @@ public:
 	//! @brief オブジェクトが有効かどうかを得る
 	static bool alive()
 	{
+		if(!object_created) return false;
 		bool alive;
 		(void) manipulate_object(false, &alive);
 		return alive;
@@ -339,6 +368,8 @@ public:
 };
 template <typename T>
 typename singleton_base<T>::object_registerer singleton_base<T>::register_object;
+template <typename T>
+bool singleton_base<T>::object_created = false;
 //---------------------------------------------------------------------------
 
 
@@ -366,6 +397,37 @@ class depends_on
 public:
 	depends_on() : __referrer_object(singleton_base<T>::instance()) {;}
 };
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief  手動起動のシングルトンを表すためのテンプレートクラス
+//! @note
+//! このシングルトンは手動起動であることを表すためにこれを継承させる。例
+//---------------------------------------------------------------------------
+template <typename T>
+class manual_start
+{
+	struct manual_object_registerer
+	{
+		//! @brief コンストラクタ
+		manual_object_registerer()
+		{
+			tRisaSingletonManager::RegisterManualStart(&singleton_base<T>::ensure);
+		}
+		//! @brief このクラスが最適化で消されないようにするためのダミー
+		inline void do_nothing() const { }
+	};
+	static manual_object_registerer manual_register_object; //!< manual_object_registerer のstatic変数
+public:
+	manual_start()
+	{
+		manual_register_object.do_nothing();
+	}
+};
+//---------------------------------------------------------------------------
+template <typename T>
+typename manual_start<T>::manual_object_registerer manual_start<T>::manual_register_object;
 //---------------------------------------------------------------------------
 
 

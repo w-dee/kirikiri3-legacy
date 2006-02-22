@@ -145,8 +145,11 @@ s1 construct
 s2 construct
 s3 construct
 InitAll end
-n : 1
+s3::n : 1
+s4 construct
+s4::n : 2
 Disconnect begin
+s4 destruct
 s3 destruct
 s2 destruct
 s1 destruct

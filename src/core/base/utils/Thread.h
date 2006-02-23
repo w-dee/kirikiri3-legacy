@@ -14,7 +14,6 @@
 #define _RISATHREAD_H
 
 #include <wx/thread.h>
-#include <boost/thread.hpp>
 #include "risse/include/risseUtils.h"
 
 

@@ -53,13 +53,9 @@ RISSE_DEFINE_SOURCE_ID(37180,40935,47171,16902,29833,29636,3244,55820);
 //! @brief		コンストラクタ
 //! @param		owner		このオブジェクトを所有する tRisaTickCount オブジェクト
 //---------------------------------------------------------------------------
-tRisaTickCount::tWatcher::tWatcher(tRisaTickCount & owner) :
-	wxThread(wxTHREAD_JOINABLE),
-	Semaphore(0, 1), Owner(owner)
+tRisaTickCount::tWatcher::tWatcher(tRisaTickCount & owner) : Owner(owner)
 {
-	Terminated = false;
-	Create();
-	Run();
+	Run(); // スレッドの実行を開始
 }
 //---------------------------------------------------------------------------
 
@@ -69,34 +65,28 @@ tRisaTickCount::tWatcher::tWatcher(tRisaTickCount & owner) :
 //---------------------------------------------------------------------------
 tRisaTickCount::tWatcher::~tWatcher()
 {
-	// Terminated は Semapore.Post() よりも先に真にしておく必要がある
-	// (セマフォでたたき起こされたスレッドが、Terminate されていないことを
-	// 見つけるとまた眠ってしまうため)
 	Terminate(); // スレッドの終了を伝える
-	Semaphore.Post(); // セマフォ待ちを解除する
-	Delete(); // スレッドの終了を待ち、スレッドを消す
+	Event.Signal(); // スレッドをたたき起こす
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		スレッドのエントリーポイント
-//! @return		スレッドの終了コード
 //---------------------------------------------------------------------------
-wxThread::ExitCode tRisaTickCount::tWatcher::Entry()
+void tRisaTickCount::tWatcher::Execute()
 {
-	while(!Terminated && !TestDestroy())
+	while(!ShouldTerminate())
 	{
-		// 60秒をまつか、セマフォが取得できるまで待つ。
-		// 実際の所これはこれほど短い秒数を待つ必要は全くなく、
-		// tick count の wraparound を検出できるほどに長ければよい
-		Semaphore.WaitTimeout(60*1000); // 60秒待つ
-
 		// tick count を取得する
 		// この際、wrap around も正常に処理される
 		(void) Owner.GetTickCount();
+
+		// 60秒をまつか、セマフォが取得できるまで待つ。
+		// 実際の所これはこれほど短い秒数を待つ必要は全くなく、
+		// tick count の wraparound を検出できるほどに長ければよい
+		Event.Wait(60*1000); // 60秒待つ
 	}
-	return 0;
 }
 //---------------------------------------------------------------------------
 #endif
@@ -121,7 +111,8 @@ tRisaTickCount::tRisaTickCount()
 {
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
 	// フィールドの初期化
-	Value = 0;
+	Value = 1;
+		// 0 でもよいが、0 と ~0 (=InvalidTickCount) だけは予約しておきたいので1
 	LastTick = GetTick();
 
 	// スレッドの開始
@@ -149,7 +140,7 @@ tRisaTickCount::~tRisaTickCount()
 //---------------------------------------------------------------------------
 risse_uint64 tRisaTickCount::GetTickCount()
 {
-	volatile tRisseCriticalSection::tLocker cs_holder(CS);
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
 	// 現在の tick と前回取得した tick の差を Value に追加する。

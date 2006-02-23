@@ -111,7 +111,7 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 //---------------------------------------------------------------------------
 tRisaLogScrollView::~tRisaLogScrollView()
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// レシーバとしてこのオブジェクトを登録解除する
 	tRisaLogger::instance()->UnregisterReceiver(this);
@@ -817,7 +817,7 @@ void tRisaLogScrollView::ShowContextMenu(const wxPoint & pos)
 	wxMenu menu;
 
 	{
-		volatile tRisseCriticalSection::tLocker holder(CS);
+		volatile tRisaCriticalSection::tLocker holder(CS);
 
 		// context menu of console log viewer
 		wxMenuItem *item = new wxMenuItem(&menu, ID_Menu_Copy, _("&Copy"));
@@ -840,7 +840,7 @@ void tRisaLogScrollView::ShowContextMenu(const wxPoint & pos)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnLog(const tRisaLogger::tItem & logger_item)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	AddLine(logger_item);
 }
@@ -855,7 +855,7 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 {
 	wxPaintDC dc(this);
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// 表示行を取得
 	size_t lineFirst = GetScrollPos(wxVERTICAL);
@@ -960,7 +960,7 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnChar(wxKeyEvent & event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	int keycode = event.GetKeyCode();
 
@@ -1010,7 +1010,7 @@ void tRisaLogScrollView::OnChar(wxKeyEvent & event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnScroll(wxScrollWinEvent& event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// イベントをスキップ
 	event.Skip();
@@ -1045,7 +1045,7 @@ void tRisaLogScrollView::OnScroll(wxScrollWinEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnMouseWheel(wxMouseEvent& event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// イベントをスキップ
 	event.Skip();
@@ -1065,7 +1065,7 @@ void tRisaLogScrollView::OnMouseWheel(wxMouseEvent& event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnSize(wxSizeEvent& event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// LinesPerWindow などを計算
 	risse_int cw = 0, ch = 0;
@@ -1105,7 +1105,7 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 		wxString selection;
 
 		{
-			volatile tRisseCriticalSection::tLocker holder(CS);
+			volatile tRisaCriticalSection::tLocker holder(CS);
 			selection = GetSelectionString();
 		}
 
@@ -1120,7 +1120,7 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 	else
 #endif
 	{
-		volatile tRisseCriticalSection::tLocker holder(CS);
+		volatile tRisaCriticalSection::tLocker holder(CS);
 
 		tCharacterPosition pos;
 		size_t charlength;
@@ -1163,7 +1163,7 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnLeftUp(wxMouseEvent & event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	tCharacterPosition pos;
 	ViewPositionToCharacterPosition(event.GetX(), event.GetY(), pos);
@@ -1188,7 +1188,7 @@ void tRisaLogScrollView::OnLeftUp(wxMouseEvent & event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnMotion(wxMouseEvent & event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// マウスカーソルの形状を決定
 	if(event.GetX() < ViewOriginX)
@@ -1236,7 +1236,7 @@ void tRisaLogScrollView::OnMotion(wxMouseEvent & event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnMenuCopy(wxCommandEvent &event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// 選択範囲をコピーする
 	if (wxTheClipboard->Open())
@@ -1248,7 +1248,7 @@ void tRisaLogScrollView::OnMenuCopy(wxCommandEvent &event)
 		wxString selection;
 
 		{
-			volatile tRisseCriticalSection::tLocker holder(CS);
+			volatile tRisaCriticalSection::tLocker holder(CS);
 			selection = GetSelectionString();
 		}
 
@@ -1265,7 +1265,7 @@ void tRisaLogScrollView::OnMenuCopy(wxCommandEvent &event)
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::OnMenuSelectAll(wxCommandEvent &event)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	SelectAll();
 }

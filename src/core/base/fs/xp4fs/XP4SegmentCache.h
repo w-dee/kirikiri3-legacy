@@ -19,6 +19,7 @@
 #include <boost/smart_ptr.hpp>
 #include "base/fs/xp4fs/DecompressedHolder.h"
 #include "base/utils/Singleton.h"
+#include "base/utils/Thread.h"
 
 
 
@@ -30,7 +31,7 @@ class tRisaXP4SegmentCache : public singleton_base<tRisaXP4SegmentCache>
 	static const risse_size ONE_LIMIT = 1024*1024; //!< これを超えるセグメントはキャッシュしない
 	static const risse_size TOTAL_LIMIT = 1024*1024; //!< トータルでこれ以上はキャッシュしない
 
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_size TotalBytes; //!< このクラスが保持しているトータルのバイト数
 
 	//! @brief キャッシュアイテムのkeyとなる構造体

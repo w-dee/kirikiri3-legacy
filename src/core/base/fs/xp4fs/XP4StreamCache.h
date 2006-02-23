@@ -15,6 +15,7 @@
 #define XP4STREAMCACHEH
 
 #include "base/utils/Singleton.h"
+#include "base/utils/Thread.h"
 
 //---------------------------------------------------------------------------
 //!@brief		ストリームキャッシュクラス
@@ -23,7 +24,7 @@ class tRisaXP4StreamCache : public singleton_base<tRisaXP4StreamCache>
 {
 	static const int MAX_ITEM = 8; //!< キャッシュするハンドル数
 
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_uint Age; //!< キャッシュ世代
 
 	//!@brief キャッシュアイテムの構造体

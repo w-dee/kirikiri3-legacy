@@ -16,6 +16,7 @@
 //---------------------------------------------------------------------------
 
 #include "risse/include/risseTypes.h"
+#include "base/utils/Thread.h"
 #include "sound/WaveFilter.h"
 #include "sound/WaveDecoder.h"
 #include <vector>
@@ -218,12 +219,12 @@ public:
 	static const int MaxIDLen = 16; //!< 識別子の最大長
 
 private:
-	tRisseCriticalSection FlagsCS; //!< CS to protect flags/links/labels
+	tRisaCriticalSection FlagsCS; //!< CS to protect flags/links/labels
 	int Flags[MaxFlags]; //!< フラグ
 	bool FlagsModifiedByLabelExpression; //!< true if the flags are modified by EvalLabelExpression
 	std::vector<tRisaWaveLoopLink> Links; //!< リンクの配列
 	std::vector<tRisaWaveLabel> Labels; //!< ラベルの配列
-	tRisseCriticalSection DataCS; // CS to protect other members
+	tRisaCriticalSection DataCS; // CS to protect other members
 	tRisaWaveFileInfo * FileInfo; //!< デコーダのファイル情報
 	boost::shared_ptr<tRisaWaveDecoder> Decoder; //!< デコーダ
 	bool FirstRendered; //!< 最初のサンプルをレンダリングしたかどうか

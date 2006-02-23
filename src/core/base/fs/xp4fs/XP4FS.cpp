@@ -163,7 +163,7 @@ tRisaXP4FS::~tRisaXP4FS()
 size_t tRisaXP4FS::GetFileListAt(const ttstr & dirname,
 	tRisaFileSystemIterationCallback * callback)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// dir_name の最後に '/' がついていなければ追加
 	ttstr dir_name(dirname);
@@ -215,7 +215,7 @@ size_t tRisaXP4FS::GetFileListAt(const ttstr & dirname,
 //---------------------------------------------------------------------------
 bool tRisaXP4FS::FileExists(const ttstr & filename)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	if(filename.EndsWith(RISSE_WC('/'))) return false; // ディレクトリは違う
 
@@ -231,7 +231,7 @@ bool tRisaXP4FS::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 bool tRisaXP4FS::DirectoryExists(const ttstr & dirname)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// dir_name の最後に '/' がついていなければ追加
 	ttstr dir_name(dirname);
@@ -284,7 +284,7 @@ void tRisaXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tRisaXP4FS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	risse_size idx = GetFileItemIndex(filename);
 	if(idx == static_cast<risse_size>(-1))
@@ -303,7 +303,7 @@ void tRisaXP4FS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 //---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaXP4FS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	risse_size idx = GetFileItemIndex(filename);
 	if(idx == static_cast<risse_size>(-1))

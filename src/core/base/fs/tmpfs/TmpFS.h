@@ -15,6 +15,7 @@
 
 #include "base/fs/common/FSManager.h"
 #include "base/fs/tmpfs/MemoryStream.h"
+#include "base/utils/Thread.h"
 
 
 //---------------------------------------------------------------------------
@@ -67,7 +68,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisaTmpFS : public tRisaFileSystem
 {
-	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 	tRisaTmpFSNode * Root; //!< ルートノード
 
 	static const unsigned char SerializeMagic[];

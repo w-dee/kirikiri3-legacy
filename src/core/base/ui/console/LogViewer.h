@@ -13,6 +13,7 @@
 #ifndef _LOGVIEWER_H
 #define _LOGVIEWER_H
 
+#include "base/utils/Thread.h"
 #include <wx/wx.h>
 #include <deque>
 
@@ -34,7 +35,7 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 		ID_Last
 	};
 
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	struct tLogicalLine
 	{

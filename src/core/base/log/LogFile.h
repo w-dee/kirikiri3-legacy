@@ -16,6 +16,7 @@
 #include "risse/include/risse.h"
 #include "base/utils/Singleton.h"
 #include "base/log/Log.h"
+#include "base/utils/Thread.h"
 #include <deque>
 #include <wx/datetime.h>
 #include <wx/file.h>
@@ -30,7 +31,7 @@ class tRisaLogFile : public singleton_base<tRisaLogFile>, depends_on<tRisaLogger
 {
 	static const size_t NumLastLog  = 50; //!< ファイルへのログ記録を開始した際に出力する LastLog の行数
 
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	//! @brief ログを受け取るためのレシーバークラス
 	class tReceiver : public tRisaLogReceiver

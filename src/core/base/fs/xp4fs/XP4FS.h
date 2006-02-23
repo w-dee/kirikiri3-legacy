@@ -17,6 +17,7 @@
 #include <boost/shared_ptr.hpp>
 #include "base/fs/common/FSManager.h"
 #include "base/fs/xp4fs/XP4Archive.h"
+#include "base/utils/Thread.h"
 
 
 
@@ -25,7 +26,7 @@
 //---------------------------------------------------------------------------
 class tRisaXP4FS : public tRisaFileSystem
 {
-	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
 	//! @brief ファイル一個一個の情報
 	struct tFileItemBasicInfo

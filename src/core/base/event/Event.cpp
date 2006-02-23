@@ -120,7 +120,7 @@ void tRisaEventSystem::DeliverQueue(tRisaEventBase::tPriority prio)
 		// キューからイベントを一つ拾ってくる
 		// ここは複数スレッドからのアクセスから保護する
 		{
-			volatile tRisseCriticalSection::tLocker holder(CS);
+			volatile tRisaCriticalSection::tLocker holder(CS);
 			if(queue.size() == 0) break;
 			event = queue.front();
 			if(!event) break; // イベントがNULLなのでpopせずに戻る
@@ -144,7 +144,7 @@ void tRisaEventSystem::DeliverQueue(tRisaEventBase::tPriority prio)
 
 		// ここは複数スレッドからのアクセスから保護する
 		{
-			volatile tRisseCriticalSection::tLocker holder(CS);
+			volatile tRisaCriticalSection::tLocker holder(CS);
 
 			// キューに epExclusive のイベントがpostされたら戻る
 			if(prio != tRisaEventBase::epExclusive &&
@@ -168,7 +168,7 @@ void tRisaEventSystem::DeliverEvents()
 	// に入れる
 	// ここは複数スレッドからのアクセスから保護する
 	{
-		volatile tRisseCriticalSection::tLocker holder(CS);
+		volatile tRisaCriticalSection::tLocker holder(CS);
 
 		if(!HasPendingEvents) return; // 未配信のイベントはない
 		HasPendingEvents = false; // いったんこのフラグはここで偽に
@@ -191,7 +191,7 @@ void tRisaEventSystem::DeliverEvents()
 
 			// ここは複数スレッドからのアクセスから保護する
 			{
-				volatile tRisseCriticalSection::tLocker holder(CS);
+				volatile tRisaCriticalSection::tLocker holder(CS);
 
 				// キューに epExclusive のイベントがpostされたら
 				// もう一度最初から
@@ -214,7 +214,7 @@ void tRisaEventSystem::DeliverEvents()
 	// 最初に挿入したセンチネルを取り除く
 	// ここは複数スレッドからのアクセスから保護する
 	{
-		volatile tRisseCriticalSection::tLocker holder(CS);
+		volatile tRisaCriticalSection::tLocker holder(CS);
 		for(int i = tRisaEventBase::epMin;
 			i <= tRisaEventBase::epMax; i++)
 		{
@@ -248,7 +248,7 @@ bool tRisaEventSystem::ProcessEvents()
 //---------------------------------------------------------------------------
 void tRisaEventSystem::DiscardQueue(tQueue & queue)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// キュー中のイベントをすべて削除する
 	for(tQueue::iterator i = queue.begin(); i != queue.end(); i++)
@@ -271,7 +271,7 @@ void tRisaEventSystem::PostEvent(tRisaEventBase * event, tEventType type)
 {
 	if(!tRisaEventBase::IsPriorityValid(event->GetPriority())) return; // 優先度が無効
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// type をチェック
 	if((type & etDiscardable) && !CanDeliverEvents)
@@ -324,7 +324,7 @@ size_t tRisaEventSystem::CountEventsInQueue(
 {
 	if(!tRisaEventBase::IsPriorityValid(prio)) return false; // 優先度が無効
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// キューを検索する
 	size_t count = 0;
@@ -349,7 +349,7 @@ size_t tRisaEventSystem::CountEventsInQueue(
 //---------------------------------------------------------------------------
 void tRisaEventSystem::CancelEvents(iRisseDispatch2 * source)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	for(int n = tRisaEventBase::epMin; n <= tRisaEventBase::epMax; n++)
 	{

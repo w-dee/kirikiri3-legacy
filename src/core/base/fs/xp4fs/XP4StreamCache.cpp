@@ -56,7 +56,7 @@ tRisaXP4StreamCache::~tRisaXP4StreamCache()
 //---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const ttstr & name)
 {
-	volatile tRisseCriticalSection::tLocker cs_holder(CS);
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
 	// linear search wiil be enough here because the 
 	// RISA__MAX_ARCHIVE_Stream_CACHE is relatively small
@@ -86,7 +86,7 @@ tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const ttstr 
 //---------------------------------------------------------------------------
 void tRisaXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * stream)
 {
-	volatile tRisseCriticalSection::tLocker cs_holder(CS);
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
 	// search empty cell in the pool
 	risse_uint oldest_age = 0;
@@ -130,7 +130,7 @@ void tRisaXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * str
 //---------------------------------------------------------------------------
 void tRisaXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 {
-	volatile tRisseCriticalSection::tLocker cs_holder(CS);
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
 	for(risse_int i = 0; i < MAX_ITEM; i++)
 	{
@@ -151,7 +151,7 @@ void tRisaXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 //---------------------------------------------------------------------------
 void tRisaXP4StreamCache::ReleaseAll()
 {
-	volatile tRisseCriticalSection::tLocker cs_holder(CS);
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
 	for(risse_int i = 0; i < MAX_ITEM; i++)
 	{

@@ -42,7 +42,7 @@ tRisaLogger::~tRisaLogger()
 //---------------------------------------------------------------------------
 void tRisaLogger::SendPreservedLogs(tRisaLogReceiver *target)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// ログを送信中にログの記録は行わない
 	// 捨てない方がいいのかもしれないが...
@@ -76,7 +76,7 @@ void tRisaLogger::SendPreservedLogs(tRisaLogReceiver *target)
 //---------------------------------------------------------------------------
 void tRisaLogger::SendLogs(tRisaLogReceiver *target, size_t maxitems)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// ログを送信中にログの記録は行わない
 	// 捨てない方がいいのかもしれないが...
@@ -114,7 +114,7 @@ void tRisaLogger::SendLogs(tRisaLogReceiver *target, size_t maxitems)
 //---------------------------------------------------------------------------
 void tRisaLogger::RegisterReceiver(tRisaLogReceiver * receiver)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	if(std::find(Receivers.begin(), Receivers.end(), receiver) == Receivers.end())
 		Receivers.push_back(receiver);
@@ -128,7 +128,7 @@ void tRisaLogger::RegisterReceiver(tRisaLogReceiver * receiver)
 //---------------------------------------------------------------------------
 void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	std::vector<tRisaLogReceiver*>::iterator i;
 	i = std::find(Receivers.begin(), Receivers.end(), receiver);
@@ -148,7 +148,7 @@ void tRisaLogger::Log(const ttstr & content,
 	tRisaLogger::tLevel level,
 	const ttstr & linkinfo)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// ログを送信中にログの記録は行わない
 	// 捨てない方がいいのかもしれないが...

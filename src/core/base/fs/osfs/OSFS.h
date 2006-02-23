@@ -15,6 +15,7 @@
 
 #include "base/fs/common/FSManager.h"
 #include "risse/include/risseNative.h"
+#include "base/utils/Thread.h"
 #include <wx/file.h>
 
 //---------------------------------------------------------------------------
@@ -45,7 +46,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisaOSFS : public tRisaFileSystem
 {
-	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
 	wxString BaseDirectory; //!< このファイルシステムがマウントしているOSのディレクトリ
 	bool CheckCase; //!< ファイル名の大文字・小文字をチェックする場合は真

@@ -16,9 +16,9 @@
 #include <wx/file.h>
 #include <wx/datetime.h>
 #include "risse/include/risse.h"
-#include "risse/include/risseUtils.h"
 #include "risse/include/risseHashSearch.h"
 #include "base/utils/Singleton.h"
+#include "base/utils/Thread.h"
 #include "base/script/RisseEngine.h"
 #include <boost/smart_ptr.hpp>
 
@@ -95,7 +95,7 @@ class tRisaFileSystemManager : public singleton_base<tRisaFileSystemManager>, de
 	tRisseHashTable<ttstr, tFileSystemInfo> MountPoints; //!< マウントポイントのハッシュ表
 	ttstr CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
 
-	tRisseCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
 
 public:
 	tRisaFileSystemManager();

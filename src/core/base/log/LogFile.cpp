@@ -37,7 +37,7 @@ tRisaLogFile::tRisaLogFile() : Receiver(*this)
 //---------------------------------------------------------------------------
 tRisaLogFile::~tRisaLogFile()
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	if(LogFile.IsOpened())
 		tRisaLogger::instance()->UnregisterReceiver(&Receiver);
@@ -99,7 +99,7 @@ void tRisaLogFile::OutputOneLine(const ttstr & str)
 //---------------------------------------------------------------------------
 void tRisaLogFile::OnLog(const tRisaLogger::tItem & item)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	if(!LogFile.IsOpened()) return;
 
@@ -141,7 +141,7 @@ void tRisaLogFile::OnLog(const tRisaLogger::tItem & item)
 //---------------------------------------------------------------------------
 void tRisaLogFile::Begin()
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// すでに Begin している場合は戻る
 	if(LogFile.IsOpened()) return;

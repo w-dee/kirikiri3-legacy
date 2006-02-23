@@ -17,6 +17,7 @@
 #include <boost/shared_ptr.hpp>
 #include "base/fs/xp4fs/XP4FS.h"
 #include "base/fs/xp4fs/XP4SegmentCache.h"
+#include "base/utils/Thread.h"
 
 
 
@@ -25,7 +26,7 @@
 //---------------------------------------------------------------------------
 class tRisaXP4ArchiveStream : public tRisseBinaryStream
 {
-	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
 	boost::shared_ptr<tRisaXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
 	risse_size FileIndex; //!< アーカイブ中でのインデックス

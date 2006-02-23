@@ -14,6 +14,7 @@
 #define _TICKCOUNT_H
 
 #include "base/utils/Singleton.h"
+#include "base/utils/Thread.h"
 
 #ifdef __WXMSW__
 	#define RISA_DECLARE_TYPEDEF typedef DWORD tRisaTickCountBasicType;
@@ -67,7 +68,7 @@
 
 
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
-	#include <wx/thread.h>
+	#include "base/utils/Thread.h"
 #endif
 
 //---------------------------------------------------------------------------
@@ -78,23 +79,21 @@ class tRisaTickCount : public singleton_base<tRisaTickCount>
 		, RISA_TICKCOUNT_DEPENDS_ON
 	#endif
 {
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	RISA_DECLARE_TYPEDEF
 	RISA_DECLARE_GETTICK
 
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
 	//! @brief	tickcount の wraparound を検出するためのスレッド
-	class tWatcher : public wxThread
+	class tWatcher : public tRisaThread
 	{
-		wxSemaphore Semaphore; //!< セマフォ
+		tRisaThreadEvent Event; //!< イベントオブジェクト
 		tRisaTickCount & Owner;
-		volatile bool Terminated; //!< スレッドを終了すべきかどうか
-		volatile void Terminate() { Terminated = true; }
 	public:
 		tWatcher(tRisaTickCount & owner);
 		~tWatcher();
-		ExitCode Entry();
+		void Execute();
 	};
 
 	tWatcher *Watcher;

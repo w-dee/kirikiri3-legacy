@@ -16,6 +16,7 @@
 #include "risse/include/risse.h"
 #include "base/utils/Singleton.h"
 #include "base/utils/RingBuffer.h"
+#include "base/utils/Thread.h"
 #include <deque>
 #include <wx/datetime.h>
 
@@ -49,7 +50,7 @@ public:
 	};
 
 private:
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	const static size_t MaxLogItems = 2048; //!< 最大のログ行数
 	const static tLevel LogPreserveMinLevel = llError; //!< PreserveBuffer に入れる最小のログレベル
 

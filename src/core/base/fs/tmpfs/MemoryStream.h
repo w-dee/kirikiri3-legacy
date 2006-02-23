@@ -13,7 +13,7 @@
 #ifndef MemoryStreamH
 #define MemoryStreamH
 
-#include "risse/include/risseUtils.h"
+#include "base/utils/Thread.h"
 
 
 //---------------------------------------------------------------------------
@@ -23,7 +23,7 @@
 //---------------------------------------------------------------------------
 class tRisaMemoryStreamBlock
 {
-	tRisseCriticalSection CS; //!< このメモリブロックへのアクセスを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このメモリブロックへのアクセスを保護するクリティカルセクション
 	void * Block;			//!< メモリブロック
 	risse_size Size;			//!< メモリブロックのデータが入っている部分のサイズ
 	risse_size AllocSize;		//!< メモリブロックのアロケートしているサイズ( Size <= AllocSize )
@@ -42,7 +42,7 @@ public:
 
 	void * GetBlock() { return Block; } //!< ブロックを得る
 
-	tRisseCriticalSection & GetCS( ) { return CS; } //!< クリティカルセクションオブジェクトを得る
+	tRisaCriticalSection & GetCS( ) { return CS; } //!< クリティカルセクションオブジェクトを得る
 	risse_size GetSize() const { return Size; } //!< ブロックのサイズを得る
 };
 //---------------------------------------------------------------------------

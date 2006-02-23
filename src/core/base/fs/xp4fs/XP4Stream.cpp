@@ -53,7 +53,7 @@ tRisaXP4ArchiveStream::tRisaXP4ArchiveStream(
 //---------------------------------------------------------------------------
 tRisaXP4ArchiveStream::~tRisaXP4ArchiveStream()
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	tRisaXP4StreamCache::instance()->ReleaseStream(Owner.get(), Stream);
 }
@@ -163,7 +163,7 @@ bool tRisaXP4ArchiveStream::OpenNextSegment()
 //---------------------------------------------------------------------------
 risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	risse_int64 newpos;
 	switch(whence)
@@ -205,7 +205,7 @@ risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 //---------------------------------------------------------------------------
 risse_uint tRisaXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 {
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	EnsureSegment();
 

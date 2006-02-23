@@ -192,7 +192,7 @@ size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
 
 	CheckFileNameCase(wxdirname);
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter((wxString)wxdirname));
 
@@ -252,7 +252,7 @@ bool tRisaOSFS::FileExists(const ttstr & filename)
 
 	if(!CheckFileNameCase(wxfilename, false)) return false;
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
@@ -272,7 +272,7 @@ bool tRisaOSFS::DirectoryExists(const ttstr & dirname)
 
 	if(!CheckFileNameCase(wxdirname, false)) return false;
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
@@ -291,7 +291,7 @@ void tRisaOSFS::RemoveFile(const ttstr & filename)
 
 	CheckFileNameCase(wxfilename);
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
@@ -312,7 +312,7 @@ void tRisaOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 	CheckFileNameCase(wxdirname);
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
@@ -337,7 +337,7 @@ void tRisaOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 
 	CheckFileNameCase(wxdirname);
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
@@ -358,7 +358,7 @@ void tRisaOSFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 
 	CheckFileNameCase(wxfilename);
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
@@ -393,7 +393,7 @@ tRisseBinaryStream * tRisaOSFS::CreateStream(const ttstr & filename, risse_uint3
 
 	CheckFileNameCase(wxfilename);
 
-	volatile tRisseCriticalSection::tLocker holder(CS);
+	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 

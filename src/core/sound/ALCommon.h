@@ -17,6 +17,7 @@
 #include <al.h>
 #include <alc.h>
 #include "base/utils/Singleton.h"
+#include "base/utils/Thread.h"
 
 
 /*
@@ -47,7 +48,7 @@ public:
 	//! @brief OpenAL APIを保護するためのクリティカルセクションホルダ
 	struct tCriticalSectionHolder
 	{
-		tRisseCriticalSection::tLocker holder;
+		tRisaCriticalSection::tLocker holder;
 		tCriticalSectionHolder() : holder(tRisaOpenAL::instance()->GetCS())
 		{
 			// エラー状態をクリアする
@@ -60,7 +61,7 @@ private:
 	ALCdevice * Device; //!< デバイス
 	ALCcontext * Context; //!< コンテキスト
 
-	tRisseCriticalSection CS; //!< OpenAL API を保護する CS
+	tRisaCriticalSection CS; //!< OpenAL API を保護する CS
 
 
 public:
@@ -73,7 +74,7 @@ private:
 public:
 	void ThrowIfError(const risse_char * message);
 	void ClearErrorState();
-	tRisseCriticalSection & GetCS() { return CS; }
+	tRisaCriticalSection & GetCS() { return CS; }
 };
 //---------------------------------------------------------------------------
 #endif

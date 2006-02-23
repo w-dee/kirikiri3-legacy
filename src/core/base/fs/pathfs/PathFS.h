@@ -15,6 +15,7 @@
 #define PATHFSH
 
 #include <boost/shared_ptr.hpp>
+#include "base/utils/Thread.h"
 #include "base/fs/common/FSManager.h"
 
 
@@ -24,7 +25,7 @@
 //---------------------------------------------------------------------------
 class tRisaPathFS : public tRisaFileSystem
 {
-	tRisseCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 	typedef tRisseHashTable<ttstr, ttstr> tHash; //!< ファイルシステム中のファイル名と実際のファイル名の対応表のtypedef
 	tHash Hash;//!< ファイルシステム中のファイル名と実際のファイル名の対応表
 	std::vector<ttstr> Paths; //!< パス(最初の文字が ' ' ならばディレクトリ単独、'+' ならばrecursive)

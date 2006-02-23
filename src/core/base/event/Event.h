@@ -15,6 +15,7 @@
 
 #include <deque>
 #include <boost/array.hpp>
+#include "base/utils/Thread.h"
 #include "base/utils/Singleton.h"
 
 
@@ -92,7 +93,7 @@ public:
 	};
 
 private:
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	typedef std::deque<tRisaEventBase *> tQueue; //!< キュー用コンテナの typedef
 	tQueue Queues[tRisaEventBase::epMax + 1]; //!< イベント用キュー

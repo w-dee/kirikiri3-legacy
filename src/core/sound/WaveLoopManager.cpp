@@ -130,7 +130,7 @@ void tRisaWaveLoopManager::SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decode
 //---------------------------------------------------------------------------
 int tRisaWaveLoopManager::GetFlag(risse_int index)
 {
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	return Flags[index];
 }
 //---------------------------------------------------------------------------
@@ -143,7 +143,7 @@ int tRisaWaveLoopManager::GetFlag(risse_int index)
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::CopyFlags(risse_int *dest)
 {
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	// copy flags into dest, and clear FlagsModifiedByLabelExpression
 	memcpy(dest, Flags, sizeof(Flags));
 	FlagsModifiedByLabelExpression = false;
@@ -158,7 +158,7 @@ void tRisaWaveLoopManager::CopyFlags(risse_int *dest)
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetFlagsModifiedByLabelExpression()
 {
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	return FlagsModifiedByLabelExpression;
 }
 //---------------------------------------------------------------------------
@@ -171,7 +171,7 @@ bool tRisaWaveLoopManager::GetFlagsModifiedByLabelExpression()
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetFlag(risse_int index, risse_int f)
 {
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	if(f < 0) f = 0;
 	if(f > MaxFlagValue) f = MaxFlagValue;
 	Flags[index] = f;
@@ -184,7 +184,7 @@ void tRisaWaveLoopManager::SetFlag(risse_int index, risse_int f)
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::ClearFlags()
 {
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	for(risse_int i = 0; i < MaxFlags; i++) Flags[i] = 0;
 }
 //---------------------------------------------------------------------------
@@ -196,7 +196,7 @@ void tRisaWaveLoopManager::ClearFlags()
 void tRisaWaveLoopManager::ClearLinksAndLabels()
 {
 	// clear links and labels
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	Labels.clear();
 	Links.clear();
 	IsLinksSorted = false;
@@ -211,7 +211,7 @@ void tRisaWaveLoopManager::ClearLinksAndLabels()
 //---------------------------------------------------------------------------
 const std::vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
 {
-	volatile tRisseCriticalSection::tLocker
+	volatile tRisaCriticalSection::tLocker
 		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
 	return Links;
 }
@@ -224,7 +224,7 @@ const std::vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
 //---------------------------------------------------------------------------
 const std::vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
 {
-	volatile tRisseCriticalSection::tLocker
+	volatile tRisaCriticalSection::tLocker
 		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
 	return Labels;
 }
@@ -237,7 +237,7 @@ const std::vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetLinks(const std::vector<tRisaWaveLoopLink> & links)
 {
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	Links = links;
 	IsLinksSorted = false;
 }
@@ -250,7 +250,7 @@ void tRisaWaveLoopManager::SetLinks(const std::vector<tRisaWaveLoopLink> & links
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetLabels(const std::vector<tRisaWaveLabel> & labels)
 {
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	Labels = labels;
 	IsLabelsSorted = false;
 }
@@ -263,7 +263,7 @@ void tRisaWaveLoopManager::SetLabels(const std::vector<tRisaWaveLabel> & labels)
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetIgnoreLinks() const
 {
-	volatile tRisseCriticalSection::tLocker
+	volatile tRisaCriticalSection::tLocker
 		CS(const_cast<tRisaWaveLoopManager*>(this)->DataCS);
 	return IgnoreLinks;
 }
@@ -276,7 +276,7 @@ bool tRisaWaveLoopManager::GetIgnoreLinks() const
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetIgnoreLinks(bool b)
 {
-	volatile tRisseCriticalSection::tLocker CS(DataCS);
+	volatile tRisaCriticalSection::tLocker CS(DataCS);
 	IgnoreLinks = b;
 }
 //---------------------------------------------------------------------------
@@ -289,7 +289,7 @@ void tRisaWaveLoopManager::SetIgnoreLinks(bool b)
 risse_int64 tRisaWaveLoopManager::GetPosition() const
 {
 	// we cannot assume that the 64bit data access is truely atomic on 32bit machines.
-	volatile tRisseCriticalSection::tLocker
+	volatile tRisaCriticalSection::tLocker
 		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
 	return Position;
 }
@@ -302,7 +302,7 @@ risse_int64 tRisaWaveLoopManager::GetPosition() const
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetPosition(risse_int64 pos)
 {
-	volatile tRisseCriticalSection::tLocker CS(DataCS);
+	volatile tRisaCriticalSection::tLocker CS(DataCS);
 	Position = pos;
 	ClearCrossFadeInformation();
 	Decoder->SetPosition(pos);
@@ -334,7 +334,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 	}
 
 	// decode from current position
-	volatile tRisseCriticalSection::tLocker CS(DataCS);
+	volatile tRisaCriticalSection::tLocker CS(DataCS);
 
 	written = 0;
 	risse_uint8 *d = (risse_uint8*)dest;
@@ -911,7 +911,7 @@ bool tRisaWaveLoopManager::EvalLabelExpression(const tRisaLabelStringType &label
 	// eval expression specified by 'label'
 	// commit the result when 'commit' is true.
 	// returns whether the label syntax is correct.
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 
 	tExpressionToken operation;
 	risse_int lvalue;
@@ -1397,7 +1397,7 @@ bool tRisaWaveLoopManager::ReadLabelInformation(char * & p, tRisaWaveLabel &labe
 bool tRisaWaveLoopManager::ReadInformation(char * p)
 {
 	// read information from 'p'
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 
 	char *p_org = p;
 	Links.clear();
@@ -1572,7 +1572,7 @@ void tRisaWaveLoopManager::DoSpacing(AnsiString &l, int col)
 void tRisaWaveLoopManager::WriteInformation(AnsiString &s)
 {
 	// write current link/label information into s
-	volatile tRisseCriticalSection::tLocker CS(FlagsCS);
+	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 
 	// write banner
 	s = "#2.00\n# Sound Loop Information (utf-8)\n"

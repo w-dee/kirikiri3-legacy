@@ -117,8 +117,6 @@ wxThread::ExitCode tRisaThread::Entry()
 		// ??? なにかここでやるべき？
 	}
 
-	ThreadMutex.Unlock();
-
 	Exit(0); // この関数はもどらない
 
 	return 0;

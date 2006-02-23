@@ -16,6 +16,9 @@ endif
 ifneq ($(filter BOOST,$(DEP_LIBS)),BOOST)
  DEP_LIBS += BOOST
 endif
+ifneq ($(filter BOOST_THREAD,$(DEP_LIBS)),BOOST_THREAD)
+ DEP_LIBS += BOOST_THREAD
+endif
 CXXFLAGS += $(Risse_CXXFLAGS)
 CPPFLAGS += $(Risse_CPPFLAGS)
 LIBS     += $(Risse_LIBS)

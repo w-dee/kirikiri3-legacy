@@ -43,6 +43,8 @@ MAKEFILE_BUILD_CONFIGS = $(MAKEFILE_BUILD_CONFIG_RELEASE) $(MAKEFILE_BUILD_CONFI
 $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	@echo "Gathering build environment information ..."
 	@rm -f $(TOP_DIR)/config_success
+	@rm -f $(MAKEFILE_BUILD_CONFIG_RELEASE) $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@#-----------------------------------------------------------------------------
 	@echo "wxWidgets ..."
 	@(set -e ;\
 		get() { \
@@ -61,8 +63,8 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --libs | \
 					sed -e "s|-Wl,--subsystem,windows||g" -e "s|-mwindows||g" ;\
 		};\
-		comflags="-Wall ";           conf=--debug=no;  get > $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
-		comflags="-Wall -g -DDEBUG"; conf=--debug=yes; get > $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
+		comflags="-Wall ";           conf=--debug=no;  get >> $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
+		comflags="-Wall -g -DDEBUG"; conf=--debug=yes; get >> $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
 		touch $(TOP_DIR)/config_success ;\
 	)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: wxWidgets configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
@@ -127,10 +129,20 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 			echo  "BOOST_CXXFLAGS := -I$$boost_include_dir" ;\
 			echo  "BOOST_CPPFLAGS := -I$$boost_include_dir" ;\
 			echo  "BOOST_LIBS     := -L$$boost_lib_dir"     ;\
+			boost_libs=`cd $(BOOST_DIR)/lib/; echo libboost_*$$compiler$$mt$$static_debug.a`; \
+			for lib in $$boost_libs; do \
+				libname=`echo -n $$lib | sed -e "s|^lib||" -e "s|$$compiler$$mt$$static_debug.a\$$||" | tr '[a-z]' '[A-Z]'` ;\
+				echo    "$${libname}_CFLAGS   :=" ;\
+				echo    "$${libname}_CXXFLAGS :=" ;\
+				echo    "$${libname}_CPPFLAGS :=" ;\
+				echo -n "$${libname}_LIBS     := -l" ;\
+				echo $$lib | sed -e "s|^lib||" -e "s|.a\$$||" ;\
+			done ;\
 		};\
-		get ;\
+		compiler="-gcc"; mt="-mt" static_debug="";   get >> $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
+		compiler="-gcc"; mt="-mt" static_debug="-d"; get >> $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
 		touch $(TOP_DIR)/config_success ;\
-	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: boost configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
 	@#-----------------------------------------------------------------------------

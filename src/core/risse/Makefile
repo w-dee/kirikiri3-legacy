@@ -82,10 +82,8 @@ Risse_INCLUDE_DIR := $(shell pwd)/include
 $(Risse_BIN_OUTPUT_DIR)/risse-config: Makefile risse-config.in src/risseUtils.d
 	mkdir -p $(Risse_BIN_OUTPUT_DIR)
 	(set -e ;\
-		threads=""; \
-		if [ `grep -c "boost/thread.hpp" src/risseUtils.d` != 0 ]; then threads="$(BOOST_LIBS) -lboost_thread-gcc-mt"; fi; \
 		sed risse-config.in \
-			-e "s|@LIBS@|\"-L$(Risse_LIB_OUTPUT_DIR) -lrisse $$threads\"|" \
+			-e "s|@LIBS@|\"-L$(Risse_LIB_OUTPUT_DIR) -lrisse\"|" \
 			-e "s|@CXXFLAGS@|\"-I$(Risse_INCLUDE_DIR) $(CXXFLAGS)\"|" \
 			-e "s|@CPPFLAGS@|\"-I$(Risse_INCLUDE_DIR) $(CXXFLAGS)\"|" \
 			-e "s|@LINKDEPS@|\"$(BIN)\"|" \

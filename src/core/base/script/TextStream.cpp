@@ -101,6 +101,7 @@ tRisaTextReadStream::tRisaTextReadStream(const ttstr & name, const ttstr & modes
 		// "signatures" は最大 4 バイトである
 		tEncoding enc = eUTF8;
 		risse_uint8 mark[4] = {0xcc,0xcc,0xcc,0xcc};
+			// 0xcc= シグニチャの他のバイトと見間違えないテキトーな値
 		Stream->Read(mark, 4);
 
 		if(mark[0] == 0xfe && mark[1] == 0xff)

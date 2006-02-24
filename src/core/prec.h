@@ -19,4 +19,6 @@
 	#include "risse/include/risseUtils.h"
 	#include <boost/smart_ptr.hpp>
 	#include "base/utils/Singleton.h"
+	#include "base/utils/RingBuffer.h"
+	#include "base/utils/Thread.h"
 #endif

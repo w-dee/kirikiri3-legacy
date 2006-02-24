@@ -109,7 +109,7 @@ public:
 	tRisaTickCount();
 	~tRisaTickCount();
 
-	risse_uint64 GetTickCount();
+	risse_uint64 Get();
 };
 //---------------------------------------------------------------------------
 

@@ -16,7 +16,28 @@
 RISSE_DEFINE_SOURCE_ID(37180,40935,47171,16902,29833,29636,3244,55820);
 
 /*! @note
-	tRisaTickCount は 64bit 整数によるミリ秒単位のティックカウントを提供する。
+	tRisaTickCount は 64bit 整数によるミリ秒単位のティックカウントを
+	提供する。
+
+	ティックカウントは任意時間ごとにカウントアップされていく値であり、
+	単位はミリ秒である。「任意時間」はOSや環境によって異なり、1msだったり
+	10msだったりする。これは、連続してティックカウントを読み出していっても
+	1msごとの増加とならずに10msごとにとびとびの値として読み出される可能性が
+	あるということである。単位はミリ秒ではあるが、精度はミリ秒ではない、
+	とも言える。
+	ティックカウントの値はRisaの実行開始時からの経過時間であったり、
+	UNIX epoch からの経過時間だったりする(実装依存)。
+	基本的には、二点間の時間的距離を計測する用途に用いるが、
+	tRisaTimerSchedulerなどではこのtRisaTickCountが返すティックカウント
+	を「絶対TickCount」とよび、時間の基準としている。
+
+	tRisaTickCount が拠り所としているクロック源はシステムのWall-Clock
+	(日付時刻)とは異なる場合がある。長期間計測を行うと、tRisaTickCountが
+	返す時間と日付時刻取得関数(たとえばRisseのDateクラスなど)が水晶発振子の
+	誤差などによりずれてくる可能性があるということである。
+	tRisaTickCountを拠り所としているtRisaTimerSchedulerもWall-Clockに対して
+	ずれる可能性がある。
+
 	wxWidgets は wxStopWatch でミリ秒単位の経過時刻情報を提供するが、
 	返される値が long であり、long の範囲を超えた場合の動作の保証はいっさい
 	無い。
@@ -80,7 +101,7 @@ void tRisaTickCount::tWatcher::Execute()
 	{
 		// tick count を取得する
 		// この際、wrap around も正常に処理される
-		(void) Owner.GetTickCount();
+		(void) Owner.Get();
 
 		// 60秒をまつか、セマフォが取得できるまで待つ。
 		// 実際の所これはこれほど短い秒数を待つ必要は全くなく、
@@ -138,7 +159,7 @@ tRisaTickCount::~tRisaTickCount()
 //---------------------------------------------------------------------------
 //! @brief		Tick Count を得る
 //---------------------------------------------------------------------------
-risse_uint64 tRisaTickCount::GetTickCount()
+risse_uint64 tRisaTickCount::Get()
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 

@@ -106,10 +106,10 @@ void tRisaThread::Wait()
 //---------------------------------------------------------------------------
 wxThread::ExitCode tRisaThread::Entry()
 {
-	wxMutexLocker lock(ThreadMutex); // スレッドが終了するまで待つ
-
 	try
 	{
+		volatile wxMutexLocker lock(ThreadMutex); // スレッドが終了するまで待つ
+
 		Execute(); // スレッドのメイン関数を実行する
 	}
 	catch(...)

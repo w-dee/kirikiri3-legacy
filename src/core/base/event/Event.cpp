@@ -66,21 +66,6 @@ Risa のイベントシステムについて
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントの優先順位を比較するための関数オブジェクトクラス
-//---------------------------------------------------------------------------
-struct tRisaEventPriorityCompare :
-	std::binary_function<tRisaEventBase*, tRisaEventBase*, bool>
-{
-    bool operator()(const tRisaEventBase*& X, const tRisaEventBase*& Y) const
-    {
-        return (X->GetPriority() < Y->GetPriority());
-    }
-};
-//---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaEventSystem::tRisaEventSystem()
@@ -98,7 +83,7 @@ tRisaEventSystem::tRisaEventSystem()
 tRisaEventSystem::~tRisaEventSystem()
 {
 	// キューをすべて破棄する
-	for(int i = tRisaEventBase::epMin; i <= tRisaEventBase::epMax; i++)
+	for(int i = tRisaEventInfo::epMin; i <= tRisaEventInfo::epMax; i++)
 		DiscardQueue(Queues[i]);
 }
 //---------------------------------------------------------------------------
@@ -107,15 +92,15 @@ tRisaEventSystem::~tRisaEventSystem()
 //---------------------------------------------------------------------------
 //! @brief		指定された優先度のキューの中のイベントを配信する
 //! @param		prio		優先度
-//! @note		prio!=tRisaEventBase::epExclusiveの場合、epExclusiveのイベントが
+//! @note		prio!=tRisaEventInfo::epExclusiveの場合、epExclusiveのイベントが
 //!				ポストされたり、CanDeliverEvents が偽になった場合は即座に戻る。
 //---------------------------------------------------------------------------
-void tRisaEventSystem::DeliverQueue(tRisaEventBase::tPriority prio)
+void tRisaEventSystem::DeliverQueue(tRisaEventInfo::tPriority prio)
 {
 	tQueue & queue = Queues[prio];
 	while(true)
 	{
-		tRisaEventBase * event;
+		tRisaEventInfo * event;
 
 		// キューからイベントを一つ拾ってくる
 		// ここは複数スレッドからのアクセスから保護する
@@ -147,8 +132,8 @@ void tRisaEventSystem::DeliverQueue(tRisaEventBase::tPriority prio)
 			volatile tRisaCriticalSection::tLocker holder(CS);
 
 			// キューに epExclusive のイベントがpostされたら戻る
-			if(prio != tRisaEventBase::epExclusive &&
-				Queues[tRisaEventBase::epExclusive].size() != 0) break;
+			if(prio != tRisaEventInfo::epExclusive &&
+				Queues[tRisaEventInfo::epExclusive].size() != 0) break;
 
 			// CanDeliverEvents が偽になったら戻る
 			if(!CanDeliverEvents) break;
@@ -173,9 +158,9 @@ void tRisaEventSystem::DeliverEvents()
 		if(!HasPendingEvents) return; // 未配信のイベントはない
 		HasPendingEvents = false; // いったんこのフラグはここで偽に
 
-		for(int i = tRisaEventBase::epMin; i <= tRisaEventBase::epMax; i++)
+		for(int i = tRisaEventInfo::epMin; i <= tRisaEventInfo::epMax; i++)
 		{
-			if(i != tRisaEventBase::epExclusive)
+			if(i != tRisaEventInfo::epExclusive)
 				Queues[i].push_back(NULL);
 		}
 	}
@@ -184,10 +169,10 @@ void tRisaEventSystem::DeliverEvents()
 	bool events_in_exclusive = false;
 	do
 	{
-		for(int i = tRisaEventBase::epMin;
-			i <= tRisaEventBase::epMax; i++)
+		for(int i = tRisaEventInfo::epMin;
+			i <= tRisaEventInfo::epMax; i++)
 		{
-			DeliverQueue(static_cast<tRisaEventBase::tPriority>(i));
+			DeliverQueue(static_cast<tRisaEventInfo::tPriority>(i));
 
 			// ここは複数スレッドからのアクセスから保護する
 			{
@@ -195,7 +180,7 @@ void tRisaEventSystem::DeliverEvents()
 
 				// キューに epExclusive のイベントがpostされたら
 				// もう一度最初から
-				if(Queues[tRisaEventBase::epExclusive].size() != 0)
+				if(Queues[tRisaEventInfo::epExclusive].size() != 0)
 				{
 					events_in_exclusive = true;
 					break;
@@ -215,10 +200,10 @@ void tRisaEventSystem::DeliverEvents()
 	// ここは複数スレッドからのアクセスから保護する
 	{
 		volatile tRisaCriticalSection::tLocker holder(CS);
-		for(int i = tRisaEventBase::epMin;
-			i <= tRisaEventBase::epMax; i++)
+		for(int i = tRisaEventInfo::epMin;
+			i <= tRisaEventInfo::epMax; i++)
 		{
-			if(i != tRisaEventBase::epExclusive)
+			if(i != tRisaEventInfo::epExclusive)
 			{
 				while(Queues[i].size() > 0 && Queues[i].front() == NULL)
 					Queues[i].pop_front();
@@ -253,7 +238,7 @@ void tRisaEventSystem::DiscardQueue(tQueue & queue)
 	// キュー中のイベントをすべて削除する
 	for(tQueue::iterator i = queue.begin(); i != queue.end(); i++)
 	{
-		tRisaEventBase * event = *i;
+		tRisaEventInfo * event = *i;
 		*i = NULL; // 二度と解放しないように
 		delete event;
 	}
@@ -267,9 +252,9 @@ void tRisaEventSystem::DiscardQueue(tQueue & queue)
 //---------------------------------------------------------------------------
 //! @brief		イベントをポストする
 //---------------------------------------------------------------------------
-void tRisaEventSystem::PostEvent(tRisaEventBase * event, tEventType type)
+void tRisaEventSystem::PostEvent(tRisaEventInfo * event, tEventType type)
 {
-	if(!tRisaEventBase::IsPriorityValid(event->GetPriority())) return; // 優先度が無効
+	if(!tRisaEventInfo::IsPriorityValid(event->GetPriority())) return; // 優先度が無効
 
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -282,7 +267,7 @@ void tRisaEventSystem::PostEvent(tRisaEventBase * event, tEventType type)
 	}
 
 	if((type & etSingle) && CountEventsInQueue(
-		event->GetName(), event->GetSourceNoAddRef(), event->GetPriority()))
+		event->GetId(), event->GetSource(), event->GetPriority()))
 	{
 		// イベントがすでにキュー内にある場合
 		delete event; // イベントを削除して
@@ -312,17 +297,16 @@ void tRisaEventSystem::PostEvent(tRisaEventBase * event, tEventType type)
 
 //---------------------------------------------------------------------------
 //! @brief		指定されたイベントがすでにキューに入っているかどうかを調べる
-//! @param		name		イベント名
+//! @param		id			イベントID
 //! @param		source		イベント発生元
 //! @param		prio		優先度
 //! @param		limit		数え上げる最大値(0=全部数える)
 //! @return		name と source と prio が一致するイベントがすでにキューにあるかどうか
 //---------------------------------------------------------------------------
 size_t tRisaEventSystem::CountEventsInQueue(
-	const ttstr & name,
-	iRisseDispatch2 * source, tRisaEventBase::tPriority prio, size_t limit)
+	int id, void * source, tRisaEventInfo::tPriority prio, size_t limit)
 {
-	if(!tRisaEventBase::IsPriorityValid(prio)) return false; // 優先度が無効
+	if(!tRisaEventInfo::IsPriorityValid(prio)) return false; // 優先度が無効
 
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -331,7 +315,7 @@ size_t tRisaEventSystem::CountEventsInQueue(
 	tQueue queue = Queues[prio];
 	for(tQueue::iterator i = queue.begin(); i != queue.end(); i++)
 	{
-		if(*i && (*i)->GetSourceNoAddRef() == source && (*i)->GetName() == name)
+		if(*i && (*i)->GetSource() == source && (*i)->GetId() == id)
 		{
 			count ++;
 			if(limit && count >= limit) return count;
@@ -347,18 +331,18 @@ size_t tRisaEventSystem::CountEventsInQueue(
 //! @brief		イベントをキャンセルする
 //! @param		キャンセルしたいイベントの発生元
 //---------------------------------------------------------------------------
-void tRisaEventSystem::CancelEvents(iRisseDispatch2 * source)
+void tRisaEventSystem::CancelEvents(void * source)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	for(int n = tRisaEventBase::epMin; n <= tRisaEventBase::epMax; n++)
+	for(int n = tRisaEventInfo::epMin; n <= tRisaEventInfo::epMax; n++)
 	{
 		tQueue & queue = Queues[n];
 		for(tQueue::iterator i = queue.begin(); i != queue.end(); )
 		{
-			if((*i) && (*i)->GetSourceNoAddRef() == source)
+			if((*i) && (*i)->GetSource() == source)
 			{
-				tRisaEventBase * ev = *i;
+				tRisaEventInfo * ev = *i;
 				i = queue.erase(i);
 				delete ev;
 			}

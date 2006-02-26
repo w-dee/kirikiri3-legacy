@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief タイマークラス
+//! @brief 高精度タイマーの実装
 //---------------------------------------------------------------------------
 #ifndef _RISATIMER_H
 #define _RISATIMER_H
@@ -68,8 +68,8 @@ class tRisaTimerConsumer
 	tRisaTimerScheduler * Owner;
 	risse_uint64 NextTick; // 次に OnPeriod を呼ぶべき絶対Tick
 protected:
-	tRisaTimerConsumer(tRisaTimerScheduler * owner) : Owner(owner) {Owner->Register(this);}
-	virtual ~tRisaTimerConsumer() {Owner->Unregister(this);}
+	tRisaTimerConsumer(tRisaTimerScheduler * owner);
+	virtual ~tRisaTimerConsumer();
 public:
 	risse_uint64 GetNextTick() const { return NextTick; } //!< 次にOnPeriodをコールバックすべき絶対TickCountを返す
 	void SetNextTick(risse_uint64 nexttick);

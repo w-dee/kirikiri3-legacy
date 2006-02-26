@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief タイマークラス
+//! @brief 高精度タイマーの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/event/Timer.h"
@@ -184,12 +184,11 @@ void tRisaTimerScheduler::Execute()
 		// 実際に待つ時間は、本当に待つべき時間よりも少なくてもかまわない
 		// (その場合は再スケジュールされるだけなので)
 		// ここでは最長60秒待つことにする
-		if(sleep_ms == -1 || sleep_ms > 60*1000)
+		if(sleep_ms < 0 || sleep_ms > 60*1000)
 			sleep_ms = 60*1000;
-		if(sleep_ms == 0) sleep_ms = 1; // 0 ms 待ちはしない(最低でも1ms)
 
 		// 待つ
-		Event.Wait(static_cast<unsigned long>(sleep_ms));
+		if(sleep_ms != 0) Event.Wait(static_cast<unsigned long>(sleep_ms));
 	}
 }
 //---------------------------------------------------------------------------
@@ -199,12 +198,50 @@ void tRisaTimerScheduler::Execute()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tRisaTimerConsumer::tRisaTimerConsumer(tRisaTimerScheduler * owner) : Owner(owner)
+{
+	// フィールドの初期化
+	NextTick = tRisaTickCount::InvalidTickCount;
+
+	// スケジューラにコンシューマを登録
+	Owner->Register(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		デストラクタ
+//---------------------------------------------------------------------------
+tRisaTimerConsumer::~tRisaTimerConsumer()
+{
+	// スケジューラからコンシューマを削除
+	Owner->Unregister(this);
+}
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 //! @brief		次にOnPeriodをコールバックすべき絶対tickを設定する
 //! @param		nexttick 絶対TickCount (呼んで欲しくない場合はtRisaTickCount::InvalidTickCount)
 //! @note		nexttick が現在あるいはすでに過去だった場合は即座に OnPeriodが呼ばれる。
 //! @note		ここでいう「絶対TickCount」とは tRisaTickCount が返すようなTickCountのことである。
-//!				たとえば５秒後にOnPeriodを呼びたいならば、
+//!				たとえば5秒後にOnPeriodを呼びたいならば、
 //!				SetNextTick(tRisaTickCount::instance()->Get() + 5000) とする。
 //---------------------------------------------------------------------------
 void tRisaTimerConsumer::SetNextTick(risse_uint64 nexttick)

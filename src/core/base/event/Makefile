@@ -14,7 +14,8 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 CPPFILES=\
 	Event.cpp                      \
 	TickCount.cpp                  \
-	Timer.cpp
+	Timer.cpp                      \
+	TimerBind.cpp
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

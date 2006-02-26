@@ -19,11 +19,25 @@
 #include "base/utils/Singleton.h"
 
 
+
+class tRisaEventInfo;
 //---------------------------------------------------------------------------
-//! @brief		イベントの基本クラス
+//! @brief		イベントの発生先インターフェース
 //---------------------------------------------------------------------------
-class tRisaEventBase
+class tRisaEventDestination
 {
+public:
+	virtual void OnEvent(tRisaEventInfo * info) = 0; //!< イベントが配信されるとき
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		イベント情報クラス
+//---------------------------------------------------------------------------
+class tRisaEventInfo
+{
+	friend class tRisaEventSystem;
 public:
 	//! @brief  イベントの優先度
 	enum tPriority
@@ -39,40 +53,38 @@ public:
 		//!< 優先度が有効な値の範囲であるかどうか
 
 private:
-	ttstr Name; //!< イベント名
-	iRisseDispatch2 * Source; //!< イベントの発生元 Risse オブジェクト
-	iRisseDispatch2 * Destination; //!< イベントの配信先 Risse オブジェクト
+	int Id; //!< イベントID (Source固有)
+	void * Source; //!< イベントの発生元
+	tRisaEventDestination * Destination; //!< イベントの配信先 Risse オブジェクト
 	tPriority Priority; //!< イベントの優先度
+
+protected:
+	virtual void Deliver() { if(Destination) Destination->OnEvent(this); } //!< イベントを配信先に配信する
 
 public:
 	//! @brief コンストラクタ
-	tRisaEventBase(
-		const ttstr & name,
-		iRisseDispatch2 * source = NULL,
-		iRisseDispatch2 * destination = NULL,
+	tRisaEventInfo(
+		int id,
+		void * source = NULL,
+		tRisaEventDestination * destination = NULL,
 		tPriority prio = epNormal) :
-			Name(name),
+			Id(id),
 			Source(source),
 			Destination(Destination),
 			Priority(prio)
 	{
-		if(Source) Source->AddRef();
-		if(Destination) Destination->AddRef();
 	}
 
 	//! @brief デストラクタ
-	virtual ~tRisaEventBase()
+	virtual ~tRisaEventInfo()
 	{
-		if(Destination) Destination->Release();
-		if(Source) Source->Release();
 	}
 
-	const ttstr & GetName() const { return Name; } //!< イベント名を得る
-	iRisseDispatch2 * GetSourceNoAddRef() const { return Source; } //!< イベント発生源を得る
-	iRisseDispatch2 * GetDestinationNoAddRef() const { return Destination; } //!< イベント配信先を得る
+	int GetId() const { return Id; } //!< IDを得る
+	void * GetSource() { return Source; } //!< イベント発生源を得る
+	tRisaEventDestination * GetDestination() { return Destination; } //!< イベント配信先を得る
 	tPriority GetPriority() const { return Priority; } //!< イベントの優先順位を得る
 
-	virtual void Deliver() = 0; //!< イベントを配信先に配信する
 };
 //---------------------------------------------------------------------------
 
@@ -95,8 +107,8 @@ public:
 private:
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	typedef std::deque<tRisaEventBase *> tQueue; //!< キュー用コンテナの typedef
-	tQueue Queues[tRisaEventBase::epMax + 1]; //!< イベント用キュー
+	typedef std::deque<tRisaEventInfo *> tQueue; //!< キュー用コンテナの typedef
+	tQueue Queues[tRisaEventInfo::epMax + 1]; //!< イベント用キュー
 	bool CanDeliverEvents; //!< イベントを配信可能かどうか
 	bool HasPendingEvents; //!< post してから処理されていないイベントが存在する場合に真
 
@@ -106,15 +118,15 @@ public:
 
 private:
 	void DiscardQueue(tQueue & queue);
-	void DeliverQueue(tRisaEventBase::tPriority prio);
+	void DeliverQueue(tRisaEventInfo::tPriority prio);
 	void DeliverEvents();
 
 public:
 	bool ProcessEvents();
-	void PostEvent(tRisaEventBase * event, tEventType type = etDefault);
-	size_t CountEventsInQueue(const ttstr & name,
-		iRisseDispatch2 * source, tRisaEventBase::tPriority prio, size_t limit = 1);
-	void CancelEvents(iRisseDispatch2 * source);
+	void PostEvent(tRisaEventInfo * event, tEventType type = etDefault);
+	size_t CountEventsInQueue(int id,
+		void * source, tRisaEventInfo::tPriority prio, size_t limit = 1);
+	void CancelEvents(void * source);
 	bool GetCanDeliverEvents() const { return CanDeliverEvents; } //!< イベントを配信可能かどうかを返す
 };
 //---------------------------------------------------------------------------

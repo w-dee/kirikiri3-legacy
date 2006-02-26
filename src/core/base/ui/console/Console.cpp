@@ -39,6 +39,8 @@ public:
 	~tRisaHistoryTextCtrl();
 
 private:
+	void WriteConfig();
+
 	void PushHistory(const wxString & item);
 
 	void OnEnter(wxCommandEvent & event);
@@ -91,6 +93,16 @@ tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
 tRisaHistoryTextCtrl::~tRisaHistoryTextCtrl()
 {
 	// ヒストリなどを設定情報に書き出す
+	WriteConfig();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ヒストリを設定情報に書き出す
+//---------------------------------------------------------------------------
+void tRisaHistoryTextCtrl::WriteConfig()
+{
 	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
 
 	config.DeleteGroup(wxT("ui/console/history"));
@@ -127,6 +139,10 @@ void tRisaHistoryTextCtrl::PushHistory(const wxString & item)
 //---------------------------------------------------------------------------
 void tRisaHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 {
+	// ヒストリの内容をファイルに保存する
+	WriteConfig();
+	tRisaConfig::instance()->GetVariableConfig().Flush();
+
 	// Risse に式を評価させ、結果をコンソールに表示する
 	wxString value = event.GetString();
 	tRisaRisseScriptEngine::instance()->

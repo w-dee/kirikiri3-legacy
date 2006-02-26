@@ -51,7 +51,10 @@ class tRisaScriptEditorTextCtrl : public wxTextCtrl, depends_on<tRisaConfig>
 public:
 	tRisaScriptEditorTextCtrl(wxWindow *parent);
 	~tRisaScriptEditorTextCtrl();
+private:
+	void WriteConfig();
 
+public:
 #if wxUSE_ACCEL
 	wxAcceleratorTable GetMenuAcceleratorTable();
 #endif
@@ -201,6 +204,17 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 tRisaScriptEditorTextCtrl::~tRisaScriptEditorTextCtrl()
 {
 	// 内容を設定情報に書き出す
+	WriteConfig();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		内容を設定情報に書き出す
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::WriteConfig()
+{
+	// 内容を設定情報に書き出す
 	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
 
 	config.Write(wxT("ui/editor/content"), GetValue());
@@ -269,14 +283,20 @@ void tRisaScriptEditorTextCtrl::ShowContextMenu(const wxPoint & pos)
 //---------------------------------------------------------------------------
 
 
-
 //---------------------------------------------------------------------------
 //! @brief		「実行」メニューが選択されたとき
 //! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void tRisaScriptEditorTextCtrl::OnMenuExecute(wxCommandEvent & event)
 {
-	wxMessageBox(wxT("execute!"));
+	// 内容をファイルに保存する
+	WriteConfig();
+	tRisaConfig::instance()->GetVariableConfig().Flush();
+
+	// Risse に実行させる
+	ttstr block_name("Script Editor");
+	tRisaRisseScriptEngine::instance()->
+		ExecuteScript(ttstr(GetValue()), NULL, NULL, &block_name, 0);
 }
 //---------------------------------------------------------------------------
 

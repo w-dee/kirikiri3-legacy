@@ -16,6 +16,7 @@
 #include "base/utils/Singleton.h"
 #include "base/utils/Thread.h"
 #include "base/event/TickCount.h"
+#include "base/event/Event.h"
 
 
 
@@ -60,6 +61,12 @@ protected:
 
 
 
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		タイマーのタイミング発生先となるクラス
 //---------------------------------------------------------------------------
@@ -86,6 +93,76 @@ public:
 	//! @note	このメソッドはタイマ用スレッドから呼ばれる。必要であれば
 	//!			スレッド保護を行うこと
 	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick) = 0;
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		イベントタイマースケジューラ
+//! @note		Risaのイベントシステムと協調して動作するスケジューラ。
+//!				素の tRisaTimerScheduler/tRisaTimerConsumer は マルチスレッド
+//!				で動作するので少々扱いづらいが、
+//!				イベントタイマーはイベントシステムを使って、イベントハンドラが
+//!				メインスレッドから呼ばれることを確実にするほか、いくつかの機能
+//!				のカプセル化も行う。
+//---------------------------------------------------------------------------
+class tRisaEventTimerScheduler :
+				public tRisaTimerScheduler,
+				public singleton_base<tRisaEventTimerScheduler>, // このクラスはシングルトンオブジェクト
+				manual_start<tRisaEventTimerScheduler> // このクラスのインスタンスは手動起動
+{
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		イベントタイマータイマーコンシューマ
+//---------------------------------------------------------------------------
+class tRisaEventTimerConsumer :
+	public tRisaTimerConsumer,
+	public tRisaEventDestination,
+	depends_on<tRisaEventTimerScheduler>, // このクラスは tRisaEventTimerScheduler に依存
+	depends_on<tRisaEventSystem> // イベント管理システムに依存
+{
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	bool Enabled; //!< タイマーが有効かどうか
+	risse_uint64 Interval; //!< タイマー周期
+	risse_uint64 ReferenceTick; //!< 周期の基準となるTick
+
+
+protected:
+	tRisaEventTimerConsumer();
+	~tRisaEventTimerConsumer();
+
+public:
+	bool GetEnabled() const { return Enabled; } //!< 有効かどうかを得る
+	void SetEnabled(bool enabled);
+	risse_uint64 GetInterval() const { return Interval; } //!< タイマー周期を得る
+	void SetInterval(risse_uint64 interval);
+	void Reset();
+
+private:
+	void ResetInterval();
+
+	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick); // from tRisaScriptTimerConsumer
+	virtual void OnEvent(tRisaEventInfo * info); // from tRisaEventDestination
+
+public:
+	virtual void OnTimer() = 0; //!< タイマイベントが発生した
+
 };
 //---------------------------------------------------------------------------
 

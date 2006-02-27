@@ -76,7 +76,7 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 	tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
 	editor->SetContent(ttstr(e.GetBlockNoAddRef()->GetScript()).AsWxString());
 	editor->SetReadOnly(true);
-	editor->SetLinePosition(1+e.GetBlockNoAddRef()->SrcPosToLine(e.GetPosition() )
+	editor->SetLinePosition(e.GetBlockNoAddRef()->SrcPosToLine(e.GetPosition() )
 			- e.GetBlockNoAddRef()->GetLineOffset());
 	editor->SetStatusString(e.GetMessageString().AsWxString());
 	editor->Show(true);

@@ -42,7 +42,6 @@ class tRisaScriptEditorTextCtrl : public wxTextCtrl, depends_on<tRisaConfig>
 		ID_Menu_Cut,
 		ID_Menu_Copy,
 		ID_Menu_Paste,
-		ID_Menu_Delete,
 		ID_Menu_SelectAll,
 		ID_Last
 	};
@@ -100,7 +99,6 @@ private:
 	void OnMenuCut(wxCommandEvent & event);
 	void OnMenuCopy(wxCommandEvent & event);
 	void OnMenuPaste(wxCommandEvent & event);
-	void OnMenuDelete(wxCommandEvent & event);
 	void OnMenuSelectAll(wxCommandEvent & event);
 
 	DECLARE_EVENT_TABLE()
@@ -123,7 +121,6 @@ BEGIN_EVENT_TABLE(tRisaScriptEditorTextCtrl, wxTextCtrl)
 	EVT_MENU(ID_Menu_Cut,				tRisaScriptEditorTextCtrl::OnMenuCut)
 	EVT_MENU(ID_Menu_Copy,				tRisaScriptEditorTextCtrl::OnMenuCopy)
 	EVT_MENU(ID_Menu_Paste,				tRisaScriptEditorTextCtrl::OnMenuPaste)
-	EVT_MENU(ID_Menu_Delete,			tRisaScriptEditorTextCtrl::OnMenuDelete)
 	EVT_MENU(ID_Menu_SelectAll,			tRisaScriptEditorTextCtrl::OnMenuSelectAll)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
@@ -175,9 +172,6 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 #if wxUSE_OWNER_DRAWN
 	item->SetBitmap(wxArtProvider::GetBitmap(wxART_PASTE, wxART_MENU));
 #endif
-	ContextMenu.Append(item);
-
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Delete, _("&Delete") + acc_sep + wxT("Del"));
 	ContextMenu.Append(item);
 
 	item = new wxMenuItem(&ContextMenu, ID_Menu_SelectAll, _("Select &All") + acc_sep + wxT("Ctrl+A"));
@@ -293,7 +287,6 @@ void tRisaScriptEditorTextCtrl::ShowContextMenu(const wxPoint & pos)
 	ContextMenu.FindItem(ID_Menu_Paste)->Enable(CanPaste());
 	long selstart, selend;
 	GetSelection(&selstart, &selend);
-	ContextMenu.FindItem(ID_Menu_Delete)->Enable(selstart != selend);
 
 	PopupMenu(&ContextMenu, pos.x, pos.y);
 }
@@ -373,19 +366,6 @@ void tRisaScriptEditorTextCtrl::OnMenuCopy(wxCommandEvent & event)
 void tRisaScriptEditorTextCtrl::OnMenuPaste(wxCommandEvent & event)
 {
 	Paste();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		「削除」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
-void tRisaScriptEditorTextCtrl::OnMenuDelete(wxCommandEvent & event)
-{
-	long from, to;
-	GetSelection(&from, &to);
-	Remove(from, to);
 }
 //---------------------------------------------------------------------------
 

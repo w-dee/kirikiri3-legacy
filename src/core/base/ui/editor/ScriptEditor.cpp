@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/script/RisseEngine.h"
+#include "base/exception/RisaException.h"
 #include "base/ui/Editor/ScriptEditor.h"
 #include "base/config/ConfigData.h"
 #include <stdlib.h>
@@ -51,10 +52,13 @@ class tRisaScriptEditorTextCtrl : public wxTextCtrl, depends_on<tRisaConfig>
 public:
 	tRisaScriptEditorTextCtrl(wxWindow *parent);
 	~tRisaScriptEditorTextCtrl();
+
 private:
 	void WriteConfig();
 
 public:
+	void GoToLine(long l);
+
 #if wxUSE_ACCEL
 	wxAcceleratorTable GetMenuAcceleratorTable();
 #endif
@@ -223,6 +227,19 @@ void tRisaScriptEditorTextCtrl::WriteConfig()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		指定行に移動する
+//! @param		l		移動したい行
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::GoToLine(long l)
+{
+	long pos = XYToPosition(0, l);
+	SetInsertionPoint(pos);
+	ShowPosition(pos);
+}
+//---------------------------------------------------------------------------
+
+
 #if wxUSE_ACCEL
 //---------------------------------------------------------------------------
 //! @brief		アクセラレータテーブルを返す
@@ -294,9 +311,13 @@ void tRisaScriptEditorTextCtrl::OnMenuExecute(wxCommandEvent & event)
 	tRisaConfig::instance()->GetVariableConfig().Flush();
 
 	// Risse に実行させる
-	ttstr block_name("Script Editor");
-	tRisaRisseScriptEngine::instance()->
-		ExecuteScript(ttstr(GetValue()), NULL, NULL, &block_name, 0);
+	try
+	{
+		ttstr block_name("Script Editor");
+		tRisaRisseScriptEngine::instance()->
+			ExecuteScript(ttstr(GetValue()), NULL, NULL, &block_name, 0);
+	}
+	RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(RISSE_WS_TR("Script Editor"))
 }
 //---------------------------------------------------------------------------
 
@@ -543,6 +564,50 @@ tRisaScriptEditorFrame::tRisaScriptEditorFrame() :
 
 	SetStatusBar(StatusBar);
 
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		編集内容を設定する
+//! @param		content		編集内容
+//---------------------------------------------------------------------------
+void tRisaScriptEditorFrame::SetContent(const wxString & content)
+{
+	TextCtrl->SetValue(content);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		書き込み禁止かどうかを設定する
+//! @param		b		書き込み禁止かどうか
+//---------------------------------------------------------------------------
+void tRisaScriptEditorFrame::SetReadOnly(bool b)
+{
+	TextCtrl->SetEditable(!b);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		キャレットを指定行に移動する
+//! @param		pos		論理行
+//---------------------------------------------------------------------------
+void tRisaScriptEditorFrame::SetLinePosition(unsigned long pos)
+{
+	TextCtrl->GoToLine(pos);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ステータスバーの文字列を設定する
+//! @param		status	ステータスバーに表示したい文字列
+//---------------------------------------------------------------------------
+void tRisaScriptEditorFrame::SetStatusString(const wxString & status)
+{
+	StatusBar->SetStatusText(status);
 }
 //---------------------------------------------------------------------------
 

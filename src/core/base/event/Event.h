@@ -128,6 +128,7 @@ public:
 		void * source, tRisaEventInfo::tPriority prio, size_t limit = 1);
 	void CancelEvents(void * source);
 	bool GetCanDeliverEvents() const { return CanDeliverEvents; } //!< イベントを配信可能かどうかを返す
+	void SetCanDeliverEvents(bool b) { CanDeliverEvents = b; } //!< イベントを配信可能かどうかを設定する
 };
 //---------------------------------------------------------------------------
 

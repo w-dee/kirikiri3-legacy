@@ -278,13 +278,15 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 		{
 			if(!need_convert)
 			{
-				// フィルタの出力タイプが 整数 16bit なので直接出力バッファに書き込む
+				// サブクラスの望む形式が入力フィルタの出力形式と
+				// 同じなので直接出力バッファに書き込む
 				filter_destination = render_buffer +
 					rendered * desired_type_samplegranule_bytes;
 			}
 			else
 			{
-				// フィルタの出力タイプが 整数 16bit ではないのでいったん変換バッファに書き込む
+				// サブクラスの望む形式が入力フィルタの出力形式と
+				// 違うのでいったん変換バッファに書き込む
 				filter_destination = ConvertBuffer;
 			}
 		}

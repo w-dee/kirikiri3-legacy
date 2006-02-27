@@ -8,38 +8,30 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief スクリプトエディタフレーム
+//! @brief ハンドルされなかった例外のハンドル
 //---------------------------------------------------------------------------
-#ifndef _SCRIPTEDITOR_H
-#define _SCRIPTEDITOR_H
+#ifndef _UnhandledH_
+#define _UnhandledH_
 
-#include "risse/include/risse.h"
-#include "base/ui/UIUtils.h"
-
+#include "base/utils/Singleton.h"
+#include "risse/include/risseError.h"
 
 //---------------------------------------------------------------------------
-//! @brief		コンソールのフレーム
+//! @brief ハンドルされなかった例外のハンドルを行うクラス
 //---------------------------------------------------------------------------
-class tRisaScriptEditorTextCtrl;
-class tRisaScriptEditorStatusBar;
-class tRisaScriptEditorFrame : public tRisaUIFrame
+class tRisaUnhandledExceptionHandler
 {
 public:
-	tRisaScriptEditorFrame();
+	static void ShowScriptException(eRisse &e);
+	static void ShowScriptException(eRisseScriptError &e);
 
-public:
-	void SetContent(const wxString & content);
-	void SetReadOnly(bool b);
-	void SetLinePosition(unsigned long pos);
-	void SetStatusString(const wxString & status);
-
-private:
-	tRisaScriptEditorTextCtrl *TextCtrl;
-	tRisaScriptEditorStatusBar *StatusBar;
-
-	DECLARE_EVENT_TABLE()
+	static void Process(eRisseScriptException &e);
+	static void Process(eRisseScriptError &e);
+	static void Process(eRisse &e);
 };
 //---------------------------------------------------------------------------
 
+
+#define RisaThrowInternalError eRisaException::ThrowInternalError(__LINE__, __FILE__)
 
 #endif

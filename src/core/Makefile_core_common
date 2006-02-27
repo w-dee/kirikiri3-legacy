@@ -11,6 +11,7 @@ SUBSYS_DIRS=\
 	$(CORE_DIR)/base/fs            \
 	$(CORE_DIR)/base/log           \
 	$(CORE_DIR)/base/script        \
+	$(CORE_DIR)/base/system        \
 	$(CORE_DIR)/base/ui            \
 	$(CORE_DIR)/base/utils         \
 	$(CORE_DIR)/sound              

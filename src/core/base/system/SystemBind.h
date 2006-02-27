@@ -8,38 +8,31 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief スクリプトエディタフレーム
+//! @brief System クラス バインディング
 //---------------------------------------------------------------------------
-#ifndef _SCRIPTEDITOR_H
-#define _SCRIPTEDITOR_H
+#ifndef _SYSTEMBIND_H
+#define _SYSTEMBIND_H
 
-#include "risse/include/risse.h"
-#include "base/ui/UIUtils.h"
+#include "base/script/RisseEngine.h"
+#include "risse/include/risseNative.h"
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンソールのフレーム
+//! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaScriptEditorTextCtrl;
-class tRisaScriptEditorStatusBar;
-class tRisaScriptEditorFrame : public tRisaUIFrame
+class tRisaSystemRegisterer :
+			public singleton_base<tRisaSystemRegisterer>,
+			depends_on<tRisaRisseScriptEngine>
 {
-public:
-	tRisaScriptEditorFrame();
+	iRisseDispatch2 * SystemClass;
 
 public:
-	void SetContent(const wxString & content);
-	void SetReadOnly(bool b);
-	void SetLinePosition(unsigned long pos);
-	void SetStatusString(const wxString & status);
+	tRisaSystemRegisterer();
+	~tRisaSystemRegisterer();
 
-private:
-	tRisaScriptEditorTextCtrl *TextCtrl;
-	tRisaScriptEditorStatusBar *StatusBar;
-
-	DECLARE_EVENT_TABLE()
+	bool GetExceptionHandlerObject(tRisseVariantClosure & dest);
 };
 //---------------------------------------------------------------------------
 
-
 #endif
+

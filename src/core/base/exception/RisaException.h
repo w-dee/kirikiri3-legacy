@@ -14,9 +14,10 @@
 #define _RisaExceptionH_
 
 #include "risse/include/risseError.h"
+#include "base/exception/UnhandledException.h"
 
 //---------------------------------------------------------------------------
-//! @brief Risa用の汎用例外クラス
+//! @brief		Risa用の汎用例外クラス
 //---------------------------------------------------------------------------
 class eRisaException : public eRisseError
 {
@@ -35,6 +36,64 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		内部エラーをthrowするマクロ
+//---------------------------------------------------------------------------
 #define RisaThrowInternalError eRisaException::ThrowInternalError(__LINE__, __FILE__)
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		例外を捕捉し、必要ならばエラー表示を行うマクロ
+//---------------------------------------------------------------------------
+#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(origin) \
+	catch(eRisseScriptException &e) \
+	{ \
+		e.AddTrace(ttstr(origin)); \
+		tRisaUnhandledExceptionHandler::Process(e); \
+	} \
+	catch(eRisseScriptError &e) \
+	{ \
+		e.AddTrace(ttstr(origin)); \
+		tRisaUnhandledExceptionHandler::Process(e); \
+	} \
+	catch(eRisse &e) \
+	{ \
+		tRisaUnhandledExceptionHandler::Process(e); \
+	} \
+	catch(...) \
+	{ \
+		throw; \
+	}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		例外を捕捉し、強制的にエラー表示を行うマクロ
+//---------------------------------------------------------------------------
+#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION_FORCE_SHOW_EXCEPTION(origin) \
+	catch(eRisseScriptError &e) \
+	{ \
+		e.AddTrace(ttstr(origin)); \
+		tRisaUnhandledExceptionHandler::ShowScriptException(e); \
+	} \
+	catch(eRisse &e) \
+	{ \
+		tRisaUnhandledExceptionHandler::ShowScriptException(e); \
+	} \
+	catch(...) \
+	{ \
+		throw; \
+	}
+//---------------------------------------------------------------------------
+
+
 
 #endif

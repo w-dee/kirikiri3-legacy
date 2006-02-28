@@ -97,56 +97,59 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 //---------------------------------------------------------------------------
 void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 {
-	bool result;
+	bool result = false;
 	tRisseVariantClosure clo;
 	clo.Object = clo.ObjThis = NULL;
 
-	try
+	do
 	{
-		// スクリプトエンジンを取得する
-		if(!tRisaRisseScriptEngine::alive()) throw e; // スクリプトエンジンはすでに終了
-		if(!tRisaSystemRegisterer::alive()) throw e; // "System" レジストラも終了
+		try
+		{
+			// スクリプトエンジンを取得する
+			if(!tRisaRisseScriptEngine::alive()) break; // スクリプトエンジンはすでに終了
+			if(!tRisaSystemRegisterer::alive()) break; // "System" レジストラも終了
 
-		// get System.exceptionHandler
-		if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
-			throw e; // System.exceptionHandler cannot be retrieved
+			// get System.exceptionHandler
+			if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
+				break; // System.exceptionHandler cannot be retrieved
 
-		//---- 例外オブジェクトを取得するstart ----
-		tRisseVariant obj;
-		tRisseVariant msg(e.GetMessageString());
-		tRisseVariant trace(e.GetTrace());
-		RisseGetExceptionObject(
-					tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
-					&obj, msg, &trace);
-		//---- 例外オブジェクトを取得するend ----
+			//---- 例外オブジェクトを取得するstart ----
+			tRisseVariant obj;
+			tRisseVariant msg(e.GetMessageString());
+			tRisseVariant trace(e.GetTrace());
+			RisseGetExceptionObject(
+						tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
+						&obj, msg, &trace);
+			//---- 例外オブジェクトを取得するend ----
 
-		// execute clo
-		tRisseVariant *pval[] =  { &obj };
+			// execute clo
+			tRisseVariant *pval[] =  { &obj };
 
-		tRisseVariant res;
+			tRisseVariant res;
 
-		clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
+			clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
 
-		result = res.operator bool();
-	}
-	catch(eRisseScriptError &e)
-	{
+			result = res.operator bool();
+		}
+		catch(eRisseScriptError &e)
+		{
+			clo.Release();
+			ShowScriptException(e);
+			return;
+		}
+		catch(eRisse &e)
+		{
+			clo.Release();
+			ShowScriptException(e);
+			return;
+		}
+		catch(...)
+		{
+			clo.Release();
+			throw;
+		}
 		clo.Release();
-		ShowScriptException(e);
-		return;
-	}
-	catch(eRisse &e)
-	{
-		clo.Release();
-		ShowScriptException(e);
-		return;
-	}
-	catch(...)
-	{
-		clo.Release();
-		throw;
-	}
-	clo.Release();
+	} while(0);
 
 	if(!result) ShowScriptException(e);
 }
@@ -159,56 +162,59 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 //---------------------------------------------------------------------------
 void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 {
-	bool result;
+	bool result = false;
 	tRisseVariantClosure clo;
 	clo.Object = clo.ObjThis = NULL;
 
-	try
+	do
 	{
-		// スクリプトエンジンを取得する
-		if(!tRisaRisseScriptEngine::alive()) throw e; // スクリプトエンジンはすでに終了
-		if(!tRisaSystemRegisterer::alive()) throw e; // "System" レジストラも終了
+		try
+		{
+			// スクリプトエンジンを取得する
+			if(!tRisaRisseScriptEngine::alive()) break; // スクリプトエンジンはすでに終了
+			if(!tRisaSystemRegisterer::alive()) break; // "System" レジストラも終了
 
-		// get System.exceptionHandler
-		if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
-			throw e; // System.exceptionHandler cannot be retrieved
+			// get System.exceptionHandler
+			if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
+				break; // System.exceptionHandler cannot be retrieved
 
-		//---- 例外オブジェクトを取得するstart ----
-		tRisseVariant obj;
-		tRisseVariant msg(e.GetMessageString());
-		tRisseVariant trace(e.GetTrace());
-		RisseGetExceptionObject(
-				tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
-				&obj, msg);
-		//---- 例外オブジェクトを取得するend ----
+			//---- 例外オブジェクトを取得するstart ----
+			tRisseVariant obj;
+			tRisseVariant msg(e.GetMessageString());
+			tRisseVariant trace(e.GetTrace());
+			RisseGetExceptionObject(
+					tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
+					&obj, msg);
+			//---- 例外オブジェクトを取得するend ----
 
-		// execute clo
-		tRisseVariant *pval[] =  { &obj };
+			// execute clo
+			tRisseVariant *pval[] =  { &obj };
 
-		tRisseVariant res;
+			tRisseVariant res;
 
-		clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
+			clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
 
-		result = res.operator bool();
-	}
-	catch(eRisseScriptError &e)
-	{
+			result = res.operator bool();
+		}
+		catch(eRisseScriptError &e)
+		{
+			clo.Release();
+			ShowScriptException(e);
+			return;
+		}
+		catch(eRisse &e)
+		{
+			clo.Release();
+			ShowScriptException(e);
+			return;
+		}
+		catch(...)
+		{
+			clo.Release();
+			throw;
+		}
 		clo.Release();
-		ShowScriptException(e);
-		return;
-	}
-	catch(eRisse &e)
-	{
-		clo.Release();
-		ShowScriptException(e);
-		return;
-	}
-	catch(...)
-	{
-		clo.Release();
-		throw;
-	}
-	clo.Release();
+	} while(0);
 
 	if(!result) ShowScriptException(e);
 }
@@ -221,55 +227,58 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 //---------------------------------------------------------------------------
 void tRisaUnhandledExceptionHandler::Process(eRisse &e)
 {
-	bool result;
+	bool result = false;
 	tRisseVariantClosure clo;
 	clo.Object = clo.ObjThis = NULL;
 
-	try
+	do
 	{
-		// スクリプトエンジンを取得する
-		if(!tRisaRisseScriptEngine::alive()) throw e; // スクリプトエンジンはすでに終了
-		if(!tRisaSystemRegisterer::alive()) throw e; // "System" レジストラも終了
+		try
+		{
+			// スクリプトエンジンを取得する
+			if(!tRisaRisseScriptEngine::alive()) break; // スクリプトエンジンはすでに終了
+			if(!tRisaSystemRegisterer::alive()) break; // "System" レジストラも終了
 
-		// get System.exceptionHandler
-		if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
-			throw e; // System.exceptionHandler cannot be retrieved
+			// get System.exceptionHandler
+			if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
+				break; // System.exceptionHandler cannot be retrieved
 
-		//---- 例外オブジェクトを取得するstart ----
-		tRisseVariant obj;
-		tRisseVariant msg(e.GetMessageString());
-		RisseGetExceptionObject(
-			tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
-			&obj, msg);
-		//---- 例外オブジェクトを取得するend ----
+			//---- 例外オブジェクトを取得するstart ----
+			tRisseVariant obj;
+			tRisseVariant msg(e.GetMessageString());
+			RisseGetExceptionObject(
+				tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
+				&obj, msg);
+			//---- 例外オブジェクトを取得するend ----
 
-		// execute clo
-		tRisseVariant *pval[] =  { &obj };
+			// execute clo
+			tRisseVariant *pval[] =  { &obj };
 
-		tRisseVariant res;
+			tRisseVariant res;
 
-		clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
+			clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
 
-		result = res.operator bool();
-	}
-	catch(eRisseScriptError &e)
-	{
+			result = res.operator bool();
+		}
+		catch(eRisseScriptError &e)
+		{
+			clo.Release();
+			ShowScriptException(e);
+			return;
+		}
+		catch(eRisse &e)
+		{
+			clo.Release();
+			ShowScriptException(e);
+			return;
+		}
+		catch(...)
+		{
+			clo.Release();
+			throw;
+		}
 		clo.Release();
-		ShowScriptException(e);
-		return;
-	}
-	catch(eRisse &e)
-	{
-		clo.Release();
-		ShowScriptException(e);
-		return;
-	}
-	catch(...)
-	{
-		clo.Release();
-		throw;
-	}
-	clo.Release();
+	} while(0);
 
 	if(!result) ShowScriptException(e);
 }

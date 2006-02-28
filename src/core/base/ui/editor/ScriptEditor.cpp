@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>
+#include <wx/bmpbuttn.h>
 
 #if wxUSE_OWNER_DRAWN
 #include <wx/artprov.h>
@@ -408,7 +409,7 @@ void tRisaScriptEditorTextCtrl::OnMenuSelectAll(wxCommandEvent & event)
 //---------------------------------------------------------------------------
 class tRisaScriptEditorStatusBar : public wxStatusBar
 {
-//	tRisaHistoryTextCtrl * TextCtrl; //!< テキストコントロール
+	wxBitmapButton * ExecuteButton; //!< 実行ボタン
 
 public:
 	tRisaScriptEditorStatusBar(wxWindow *parent);
@@ -442,9 +443,10 @@ tRisaScriptEditorStatusBar::tRisaScriptEditorStatusBar(wxWindow *parent)
 {
 	SetFieldsCount(1);
 
-//	TextCtrl = new tRisaHistoryTextCtrl(this);
+	ExecuteButton = new wxBitmapButton(this, wxID_ANY,
+		wxArtProvider::GetBitmap(wxT("RisaRightTriangle"), wxART_MENU, wxSize(12,12)));
 
-//	SetMinHeight(TextCtrl->GetSize().GetWidth() + 4);
+	SetMinHeight(ExecuteButton->GetSize().GetHeight() + 4);
 
 	AdjustControlSize();
 }
@@ -468,7 +470,7 @@ void tRisaScriptEditorStatusBar::AdjustControlSize()
 	wxRect rect;
 	GetFieldRect(0, rect);
 
-//	TextCtrl->SetSize(rect.x +2, rect.y +2, rect.width - 4, rect.height - 4);
+	ExecuteButton->SetSize(rect.x +2, rect.y +2, rect.height - 4, rect.height - 4);
 }
 //---------------------------------------------------------------------------
 

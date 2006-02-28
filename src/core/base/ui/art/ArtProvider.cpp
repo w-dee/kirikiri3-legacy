@@ -22,6 +22,7 @@ RISSE_DEFINE_SOURCE_ID(1864,60513,53990,19952,46254,61777,48308,42907);
 // このプロバイダが提供するビットマップ
 //---------------------------------------------------------------------------
 #include "right_triangle.xpm"
+#include "right_triangle_small.xpm"
 //---------------------------------------------------------------------------
 
 
@@ -42,10 +43,15 @@ protected:
 //---------------------------------------------------------------------------
 wxBitmap tRisaArtProvider::CreateBitmap(const wxArtID& id,
 									 const wxArtClient& client,
-									 const wxSize& WXUNUSED(size))
+									 const wxSize& size)
 {
 	if(id == wxT("RisaRightTriangle"))
-		return wxBitmap(right_triangle_xpm);
+	{
+		if(size != wxDefaultSize && size.GetWidth() <= 12 && size.GetHeight() <= 12)
+			return wxBitmap(right_triangle_small_xpm);
+		else
+			return wxBitmap(right_triangle_xpm);
+	}
 	return wxNullBitmap;
 }
 //---------------------------------------------------------------------------

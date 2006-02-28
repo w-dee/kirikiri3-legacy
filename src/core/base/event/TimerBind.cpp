@@ -69,7 +69,6 @@ risse_error tRisseNI_Timer::Construct(risse_int numparams,
 		@fn		Timer.Timer
 		@brief	Timerを構築する
 	*/
-	fprintf(stderr, "risse_obj : %p\n", risse_obj);
 	Owner = risse_obj;
 	return RISSE_S_OK;
 }

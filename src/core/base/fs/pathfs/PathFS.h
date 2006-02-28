@@ -15,7 +15,7 @@
 #define PATHFSH
 
 #include <boost/shared_ptr.hpp>
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include "base/fs/common/FSManager.h"
 
 

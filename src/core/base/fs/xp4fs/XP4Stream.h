@@ -17,7 +17,7 @@
 #include <boost/shared_ptr.hpp>
 #include "base/fs/xp4fs/XP4FS.h"
 #include "base/fs/xp4fs/XP4SegmentCache.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 
 

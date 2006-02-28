@@ -15,7 +15,7 @@
 
 #include "base/fs/common/FSManager.h"
 #include "base/fs/tmpfs/MemoryStream.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 
 //---------------------------------------------------------------------------

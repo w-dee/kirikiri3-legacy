@@ -14,7 +14,7 @@
 #define _RISATIMER_H
 
 #include "base/utils/Singleton.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include "base/event/TickCount.h"
 #include "base/event/Event.h"
 

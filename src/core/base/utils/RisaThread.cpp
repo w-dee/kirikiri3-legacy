@@ -11,7 +11,7 @@
 //! @brief マルチスレッド関連ユーティリティ
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 RISSE_DEFINE_SOURCE_ID(24795,6838,687,16805,21894,40786,6545,48673);
 

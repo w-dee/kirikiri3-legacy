@@ -17,7 +17,7 @@
 #include <al.h>
 #include <alc.h>
 #include "base/utils/Singleton.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 
 /*

@@ -105,6 +105,9 @@ int tRisaApplication::OnExit()
 {
 	printf("tRisaApplication::OnExit entered\n");
 
+	// スクリプトエンジンをシャットダウンする
+	tRisaRisseScriptEngine::instance()->Shutdown();
+
 	// すべてのシングルトンインスタンスへの参照を切る
 	tRisaSingletonManager::DisconnectAll(); // 全てのシングルトンインスタンスを初期化
 

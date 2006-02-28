@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/event/Event.h"
+#include "base/exception/RisaException.h"
 
 RISSE_DEFINE_SOURCE_ID(1676,31212,48005,18878,7819,32358,49817,14499);
 
@@ -117,14 +118,18 @@ void tRisaEventSystem::DeliverQueue(tRisaEventInfo::tPriority prio)
 		{
 			try
 			{
-				event->Deliver();
-			}
-			catch(...)
-			{
+				try
+				{
+					event->Deliver();
+				}
+				catch(...)
+				{
+					delete event;
+					throw;
+				}
 				delete event;
-				throw;
 			}
-			delete event;
+			RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(RISSE_WS("Asynchronous Event"))
 		}
 
 		// ここは複数スレッドからのアクセスから保護する

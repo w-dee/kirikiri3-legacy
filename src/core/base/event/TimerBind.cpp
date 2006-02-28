@@ -15,6 +15,7 @@
 #include "base/event/Event.h"
 #include "base/event/Timer.h"
 #include "base/script/RisseEngine.h"
+#include "base/exception/RisaException.h"
 #include "risse/include/risseNative.h"
 
 RISSE_DEFINE_SOURCE_ID(25021,49177,9141,20257,35249,61240,44766,27087);
@@ -64,6 +65,11 @@ tRisseNI_Timer::tRisseNI_Timer()
 risse_error tRisseNI_Timer::Construct(risse_int numparams,
 		tRisseVariant **param, iRisseDispatch2 *risse_obj)
 {
+	/*%
+		@fn		Timer.Timer
+		@brief	Timerを構築する
+	*/
+	fprintf(stderr, "risse_obj : %p\n", risse_obj);
 	Owner = risse_obj;
 	return RISSE_S_OK;
 }
@@ -90,6 +96,11 @@ void tRisseNI_Timer::Invalidate()
 //---------------------------------------------------------------------------
 void tRisseNI_Timer::OnTimer()
 {
+	if(!Owner)
+	{
+		eRisaException::Throw(RISSE_WS_TR("constructor onTimer was not properly called; call the constructor from subclass constructor"));
+	}
+
 	static ttstr onTimer_name(RISSE_WS("onTimer"));
 	Owner->FuncCall(
 		0, // flag

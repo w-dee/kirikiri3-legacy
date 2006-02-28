@@ -18,7 +18,7 @@
 #include "risse/include/risse.h"
 #include "risse/include/risseHashSearch.h"
 #include "base/utils/Singleton.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include "base/script/RisseEngine.h"
 #include <boost/smart_ptr.hpp>
 

@@ -19,7 +19,7 @@
 #include <boost/smart_ptr.hpp>
 #include "base/fs/xp4fs/DecompressedHolder.h"
 #include "base/utils/Singleton.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 
 

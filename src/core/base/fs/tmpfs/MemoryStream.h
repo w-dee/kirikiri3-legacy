@@ -13,7 +13,7 @@
 #ifndef MemoryStreamH
 #define MemoryStreamH
 
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 
 //---------------------------------------------------------------------------

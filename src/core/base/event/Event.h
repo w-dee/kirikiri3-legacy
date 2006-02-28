@@ -15,7 +15,7 @@
 
 #include <deque>
 #include <boost/array.hpp>
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
 
 
@@ -70,7 +70,7 @@ public:
 		tPriority prio = epNormal) :
 			Id(id),
 			Source(source),
-			Destination(Destination),
+			Destination(destination),
 			Priority(prio)
 	{
 	}

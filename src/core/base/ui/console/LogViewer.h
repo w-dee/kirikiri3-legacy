@@ -13,7 +13,7 @@
 #ifndef _LOGVIEWER_H
 #define _LOGVIEWER_H
 
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include <wx/wx.h>
 #include <deque>
 

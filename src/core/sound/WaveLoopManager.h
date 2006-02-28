@@ -16,7 +16,7 @@
 //---------------------------------------------------------------------------
 
 #include "risse/include/risseTypes.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include "sound/WaveFilter.h"
 #include "sound/WaveDecoder.h"
 #include <vector>

@@ -15,7 +15,7 @@
 #define XP4STREAMCACHEH
 
 #include "base/utils/Singleton.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 //---------------------------------------------------------------------------
 //!@brief		ストリームキャッシュクラス

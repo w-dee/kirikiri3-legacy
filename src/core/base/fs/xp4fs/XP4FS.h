@@ -17,7 +17,7 @@
 #include <boost/shared_ptr.hpp>
 #include "base/fs/common/FSManager.h"
 #include "base/fs/xp4fs/XP4Archive.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 
 

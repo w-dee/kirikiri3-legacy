@@ -16,7 +16,7 @@
 #include "risse/include/risse.h"
 #include "base/utils/Singleton.h"
 #include "base/log/Log.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include <deque>
 #include <wx/datetime.h>
 #include <wx/file.h>

@@ -14,7 +14,7 @@
 #define _TICKCOUNT_H
 
 #include "base/utils/Singleton.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 #ifdef __WXMSW__
 	#define RISA_DECLARE_TYPEDEF typedef DWORD tRisaTickCountBasicType;
@@ -66,10 +66,6 @@
 	#include <wx/timer.h>
 #endif
 
-
-#ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
-	#include "base/utils/Thread.h"
-#endif
 
 //---------------------------------------------------------------------------
 //! @brief		Tickcountを提供するクラス

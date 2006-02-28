@@ -12,9 +12,9 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 # このディレクトリにあるソースファイルを列挙
 #-----------------------------------------
 CPPFILES = \
-	fftsg.cpp     \
-	Singleton.cpp \
-	Thread.cpp
+	fftsg.cpp                  \
+	Singleton.cpp              \
+	RisaThread.cpp
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

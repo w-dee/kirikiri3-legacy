@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risa [‚è‚³]      alias ‹g—¢‹g—¢3 [kirikiri-3]
+	Risa [ã‚Šã•]      alias å‰é‡Œå‰é‡Œ3 [kirikiri-3]
 	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief Risa‚ÌƒAƒCƒRƒ“‚È‚Ç‚ÌƒvƒƒoƒCƒ_
+//! @brief Risaã®ã‚¢ã‚¤ã‚³ãƒ³ãªã©ã®ãƒ—ãƒ­ãƒã‚¤ãƒ€
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/utils/Singleton.h"
@@ -19,7 +19,7 @@ RISSE_DEFINE_SOURCE_ID(1864,60513,53990,19952,46254,61777,48308,42907);
 
 
 //---------------------------------------------------------------------------
-// ‚±‚ÌƒvƒƒoƒCƒ_‚ª’ñ‹Ÿ‚·‚éƒrƒbƒgƒ}ƒbƒv
+// ã“ã®ãƒ—ãƒ­ãƒã‚¤ãƒ€ãŒæä¾›ã™ã‚‹ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—
 //---------------------------------------------------------------------------
 #include "right_triangle.xpm"
 #include "right_triangle_small.xpm"
@@ -27,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID(1864,60513,53990,19952,46254,61777,48308,42907);
 
 
 //---------------------------------------------------------------------------
-//! @brief Risa—pArtProvider
+//! @brief Risaç”¨ArtProvider
 //---------------------------------------------------------------------------
 class tRisaArtProvider : public wxArtProvider
 {
@@ -39,7 +39,7 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief ƒrƒbƒgƒ}ƒbƒv‚ğì¬‚µ‚Ä•Ô‚·
+//! @brief ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ã‚’ä½œæˆã—ã¦è¿”ã™
 //---------------------------------------------------------------------------
 wxBitmap tRisaArtProvider::CreateBitmap(const wxArtID& id,
 									 const wxArtClient& client,
@@ -58,13 +58,13 @@ wxBitmap tRisaArtProvider::CreateBitmap(const wxArtID& id,
 
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaArtProvider ‚ğ“o˜^‚·‚é‚½‚ß‚ÌƒVƒ“ƒOƒ‹ƒgƒ“
+//! @brief		tRisaArtProvider ã‚’ç™»éŒ²ã™ã‚‹ãŸã‚ã®ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³
 //---------------------------------------------------------------------------
 class tRisaArtProviderRegisterer : public singleton_base<tRisaArtProviderRegisterer>
 {
 	tRisaArtProvider * Provider;
 public:
-	//! @brief ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//! @brief ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	tRisaArtProviderRegisterer()
 	{
 		Provider = new tRisaArtProvider;

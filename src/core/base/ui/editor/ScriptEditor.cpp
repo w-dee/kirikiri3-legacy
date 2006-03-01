@@ -783,7 +783,6 @@ void tRisaScriptEditorFrame::SetStatusString(const wxString & status)
 //---------------------------------------------------------------------------
 void tRisaScriptEditorFrame::OnCommandExecute(wxCommandEvent & event)
 {
-	wxFile dum(wxT("hoge"));
 	TextCtrl->Execute();
 }
 //---------------------------------------------------------------------------

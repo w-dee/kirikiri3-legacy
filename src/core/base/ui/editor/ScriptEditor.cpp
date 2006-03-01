@@ -36,7 +36,7 @@ class tRisaScriptEditorTextCtrl : public wxTextCtrl, depends_on<tRisaConfig>
 {
 	enum
 	{
-		ID_First = 100,
+		ID_First = tRisaScriptEditorFrame::ID_Last,
 		ID_Menu_Execute,
 		ID_Menu_Undo,
 		ID_Menu_Redo,
@@ -44,10 +44,16 @@ class tRisaScriptEditorTextCtrl : public wxTextCtrl, depends_on<tRisaConfig>
 		ID_Menu_Copy,
 		ID_Menu_Paste,
 		ID_Menu_SelectAll,
+		ID_Menu_Open,
+		ID_Menu_Save,
+		ID_Menu_SaveAs,
 		ID_Last
 	};
 
 	wxMenu ContextMenu; //!< ポップアップメニュー
+	wxString FileName; //!< ファイル名
+	wxString DefaultExt; //!< (ファイル選択ダイアログボックスにおける)デフォルトの拡張子
+	wxString DefaultFilter; //!< (ファイル選択ダイアログボックスにおける)デフォルトのフィルタ
 
 public:
 	tRisaScriptEditorTextCtrl(wxWindow *parent);
@@ -93,14 +99,19 @@ private:
 		event.Skip(false);
 	}
 #endif
+public:
+	void Execute();
 
-	void OnMenuExecute(wxCommandEvent & event);
+private:
 	void OnMenuUndo(wxCommandEvent & event);
 	void OnMenuRedo(wxCommandEvent & event);
 	void OnMenuCut(wxCommandEvent & event);
 	void OnMenuCopy(wxCommandEvent & event);
 	void OnMenuPaste(wxCommandEvent & event);
 	void OnMenuSelectAll(wxCommandEvent & event);
+	void OnMenuOpen(wxCommandEvent & event);
+	void OnMenuSave(wxCommandEvent & event);
+	void OnMenuSaveAs(wxCommandEvent & event);
 
 	DECLARE_EVENT_TABLE()
 };
@@ -116,13 +127,15 @@ BEGIN_EVENT_TABLE(tRisaScriptEditorTextCtrl, wxTextCtrl)
 #else
 	EVT_RIGHT_UP(						tRisaScriptEditorTextCtrl::OnRightUp)
 #endif
-	EVT_MENU(ID_Menu_Execute,			tRisaScriptEditorTextCtrl::OnMenuExecute)
 	EVT_MENU(ID_Menu_Undo,				tRisaScriptEditorTextCtrl::OnMenuUndo)
 	EVT_MENU(ID_Menu_Redo,				tRisaScriptEditorTextCtrl::OnMenuRedo)
 	EVT_MENU(ID_Menu_Cut,				tRisaScriptEditorTextCtrl::OnMenuCut)
 	EVT_MENU(ID_Menu_Copy,				tRisaScriptEditorTextCtrl::OnMenuCopy)
 	EVT_MENU(ID_Menu_Paste,				tRisaScriptEditorTextCtrl::OnMenuPaste)
 	EVT_MENU(ID_Menu_SelectAll,			tRisaScriptEditorTextCtrl::OnMenuSelectAll)
+	EVT_MENU(ID_Menu_Open,				tRisaScriptEditorTextCtrl::OnMenuOpen)
+	EVT_MENU(ID_Menu_Save,				tRisaScriptEditorTextCtrl::OnMenuSave)
+	EVT_MENU(ID_Menu_SaveAs,			tRisaScriptEditorTextCtrl::OnMenuSaveAs)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -132,14 +145,28 @@ END_EVENT_TABLE()
 //! @param		parent 親ウィンドウ
 //---------------------------------------------------------------------------
 tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
-	wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-		wxTE_MULTILINE|wxTE_RICH)
+	wxTextCtrl(parent, tRisaScriptEditorFrame::ID_TextCtrl,
+		wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxTE_MULTILINE|wxTE_RICH|wxTE_DONTWRAP)
 {
+	// フィールドの初期化
+	// for file dialog box default ext/filter of script editor
+	DefaultExt = wxT("rs");
+	DefaultFilter = wxString() + 
+		_("Risse script (*.rs)|*.rs")	+ wxT("|") +
+		_("Text file (*.txt)|*.txt")	+ wxT("|") +
+		_("All files (*.*)|*.*"),
+
+	// UI アップデートイベントの受け取り
+	SetExtraStyle(GetExtraStyle()|wxWS_EX_PROCESS_UI_UPDATES);
+
+	// ContextMenu の作成
 	wxMenuItem * item;
 
 	// context ContextMenu of script editor
 	wxString acc_sep(wxT("\t"));
-	item = new wxMenuItem(&ContextMenu, ID_Menu_Execute, _("&Execute") + acc_sep + wxT("Ctrl+Enter"));
+	item = new wxMenuItem(&ContextMenu, tRisaScriptEditorFrame::ID_Command_Execute, 
+											_("&Execute") + acc_sep + wxT("Ctrl+Enter"));
 #if wxUSE_OWNER_DRAWN
 	item->SetBitmap(wxArtProvider::GetBitmap(wxT("RisaRightTriangle"), wxART_MENU));
 #endif
@@ -176,6 +203,27 @@ tRisaScriptEditorTextCtrl::tRisaScriptEditorTextCtrl(wxWindow *parent):
 	ContextMenu.Append(item);
 
 	item = new wxMenuItem(&ContextMenu, ID_Menu_SelectAll, _("Select &All") + acc_sep + wxT("Ctrl+A"));
+	ContextMenu.Append(item);
+
+
+	ContextMenu.AppendSeparator();
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Open, _("&Open...") + acc_sep + wxT("Ctrl+O"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_MENU));
+#endif
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_Save, _("&Save") + acc_sep + wxT("Ctrl+S"));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_MENU));
+#endif
+	ContextMenu.Append(item);
+
+	item = new wxMenuItem(&ContextMenu, ID_Menu_SaveAs, _("Save &As..."));
+#if wxUSE_OWNER_DRAWN
+	item->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_MENU));
+#endif
 	ContextMenu.Append(item);
 
 
@@ -295,10 +343,9 @@ void tRisaScriptEditorTextCtrl::ShowContextMenu(const wxPoint & pos)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「実行」メニューが選択されたとき
-//! @param		event イベントオブジェクト
+//! @brief		内容を Risse で実行する
 //---------------------------------------------------------------------------
-void tRisaScriptEditorTextCtrl::OnMenuExecute(wxCommandEvent & event)
+void tRisaScriptEditorTextCtrl::Execute()
 {
 	// 内容をファイルに保存する
 	WriteConfig();
@@ -382,6 +429,76 @@ void tRisaScriptEditorTextCtrl::OnMenuSelectAll(wxCommandEvent & event)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		「開く」 メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuOpen(wxCommandEvent & event)
+{
+	wxString filename = ::wxFileSelector(
+		// messsage for selecting an input file of script editor
+		_("Select a file to open"), 
+		// default_path
+		::wxEmptyString,
+		// default_filename
+		FileName,
+		// default extension for selecting a font file
+		DefaultExt,
+		// filename filter for selecting a font file
+		DefaultFilter,
+		// flags
+		wxOPEN|wxFILE_MUST_EXIST
+		);
+	if(!filename.empty())
+	{
+		FileName = filename;
+		LoadFile(FileName);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「保存」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuSave(wxCommandEvent & event)
+{
+	if(FileName.empty())
+		OnMenuSaveAs(event);
+	else
+		SaveFile(FileName);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		「名前を付けて保存」メニューが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorTextCtrl::OnMenuSaveAs(wxCommandEvent & event)
+{
+	wxString filename = ::wxFileSelector(
+		// messsage for select output file
+		_("Select an output file"), 
+		// default_path
+		::wxEmptyString,
+		// default_filename
+		FileName,
+		// default extension for selecting output file (must be bff)
+		DefaultExt,
+		// filename filter for selecting output file
+		DefaultFilter,
+		// flags
+		wxSAVE|wxOVERWRITE_PROMPT
+		);
+	if(!filename.empty())
+	{
+		FileName = filename;
+		SaveFile(FileName);
+	}
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -409,12 +526,23 @@ void tRisaScriptEditorTextCtrl::OnMenuSelectAll(wxCommandEvent & event)
 //---------------------------------------------------------------------------
 class tRisaScriptEditorStatusBar : public wxStatusBar
 {
+	enum
+	{
+		Col_ExecuteButton,
+		Col_Position,
+		Col_Message
+	};
+
 	wxBitmapButton * ExecuteButton; //!< 実行ボタン
+	long LastX;
+	long LastY;
 
 public:
 	tRisaScriptEditorStatusBar(wxWindow *parent);
 	virtual ~tRisaScriptEditorStatusBar();
 
+	wxString GetCaretPosStatusString(long x, long y);
+	void SetCaretPosStatus(long x, long y);
 
 private:
 	void AdjustControlSize();
@@ -441,13 +569,30 @@ END_EVENT_TABLE()
 tRisaScriptEditorStatusBar::tRisaScriptEditorStatusBar(wxWindow *parent)
 		   : wxStatusBar(parent, wxID_ANY)
 {
-	SetFieldsCount(1);
+	// フィールドの初期化
+	LastX = -1;
+	LastY = -1;
 
-	ExecuteButton = new wxBitmapButton(this, wxID_ANY,
+	// create a bitmap button attached to the status bar
+	ExecuteButton = new wxBitmapButton(this, tRisaScriptEditorFrame::ID_Command_Execute,
 		wxArtProvider::GetBitmap(wxT("RisaRightTriangle"), wxART_MENU, wxSize(12,12)));
+	ExecuteButton->SetToolTip(_("Execute"));
 
 	SetMinHeight(ExecuteButton->GetSize().GetHeight() + 4);
 
+	// ステータスバーの各フィールドのサイズを計算
+	wxRect rect;
+	GetFieldRect(Col_ExecuteButton, rect);
+
+	wxClientDC dc(this);
+	wxCoord tw=0, th=0;
+	// 位置表示部分は、とりあえず 9999,9999 を表示させた場合のサイズにする
+	dc.GetTextExtent(GetCaretPosStatusString(9999, 9999), &tw, &th);
+	int widths[3] = { rect.height, tw, -1 };
+	SetFieldsCount(sizeof(widths)/sizeof(*widths), widths);
+	SetCaretPosStatus(-1, -1);
+
+	// コントロールのサイズを調整
 	AdjustControlSize();
 }
 //---------------------------------------------------------------------------
@@ -463,12 +608,47 @@ tRisaScriptEditorStatusBar::~tRisaScriptEditorStatusBar()
 
 
 //---------------------------------------------------------------------------
+//! @brief		キャレットの位置を表す文字列を取得する
+//---------------------------------------------------------------------------
+wxString tRisaScriptEditorStatusBar::GetCaretPosStatusString(long x, long y)
+{
+	if(x == -1 && y == -1)
+	{
+		return wxEmptyString;
+	}
+	else
+	{
+		// caret position status
+		return wxString::Format(_("line %ld, col %ld"), y+1, x+1);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		キャレットの位置を表示する
+//! @param		x   桁位置
+//! @param		y   行位置
+//---------------------------------------------------------------------------
+void tRisaScriptEditorStatusBar::SetCaretPosStatus(long x, long y)
+{
+	if(LastX != x || LastY != y)
+	{
+		LastX = x;
+		LastY = y;
+		SetStatusText(GetCaretPosStatusString(x, y), Col_Position);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		コントロールのサイズを調整する
 //---------------------------------------------------------------------------
 void tRisaScriptEditorStatusBar::AdjustControlSize()
 {
 	wxRect rect;
-	GetFieldRect(0, rect);
+	GetFieldRect(Col_ExecuteButton, rect);
 
 	ExecuteButton->SetSize(rect.x +2, rect.y +2, rect.height - 4, rect.height - 4);
 }
@@ -531,6 +711,9 @@ void tRisaScriptEditorStatusBar::OnSize(wxSizeEvent& event)
 //! @brief		イベントテーブルの定義
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRisaScriptEditorFrame, tRisaUIFrame)
+EVT_MENU(ID_Command_Execute,			tRisaScriptEditorFrame::OnCommandExecute)
+EVT_BUTTON(ID_Command_Execute,			tRisaScriptEditorFrame::OnCommandExecute)
+EVT_UPDATE_UI(ID_TextCtrl,				tRisaScriptEditorFrame::OnTextCtrlUpdateUI) 
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -589,8 +772,34 @@ void tRisaScriptEditorFrame::SetLinePosition(unsigned long pos)
 //---------------------------------------------------------------------------
 void tRisaScriptEditorFrame::SetStatusString(const wxString & status)
 {
-	StatusBar->SetStatusText(status);
+	StatusBar->SetStatusText(status, 2);
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		「実行」メニューや実行ボタンが選択されたとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorFrame::OnCommandExecute(wxCommandEvent & event)
+{
+	wxFile dum(wxT("hoge"));
+	TextCtrl->Execute();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		TextCtrl の UI アップデートイベントが発生したとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaScriptEditorFrame::OnTextCtrlUpdateUI(wxUpdateUIEvent & event)
+{
+	// ステータスバーのテキストを更新する
+	long pos = TextCtrl->GetInsertionPoint();
+	long x, y;
+	TextCtrl->PositionToXY(pos, &x, &y);
+	StatusBar->SetCaretPosStatus(x, y);
+}
+//---------------------------------------------------------------------------
 

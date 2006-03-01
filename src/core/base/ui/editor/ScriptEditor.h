@@ -18,12 +18,21 @@
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンソールのフレーム
+//! @brief		スクリプトエディタのフレーム
 //---------------------------------------------------------------------------
 class tRisaScriptEditorTextCtrl;
 class tRisaScriptEditorStatusBar;
 class tRisaScriptEditorFrame : public tRisaUIFrame
 {
+public:
+	enum
+	{
+		ID_First = 100,
+		ID_TextCtrl,
+		ID_Command_Execute,
+		ID_Last
+	};
+
 public:
 	tRisaScriptEditorFrame();
 
@@ -36,6 +45,9 @@ public:
 private:
 	tRisaScriptEditorTextCtrl *TextCtrl;
 	tRisaScriptEditorStatusBar *StatusBar;
+
+	void OnCommandExecute(wxCommandEvent & event);
+	void OnTextCtrlUpdateUI(wxUpdateUIEvent & event);
 
 	DECLARE_EVENT_TABLE()
 };

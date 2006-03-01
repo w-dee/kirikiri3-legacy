@@ -24,17 +24,21 @@ typedef tRisseCriticalSection tRisaCriticalSection;
 //---------------------------------------------------------------------------
 
 
+class tRisaThreadInternal;
 //---------------------------------------------------------------------------
 //! @brief		スレッドの基本クラス
 //---------------------------------------------------------------------------
-class tRisaThread : protected wxThread
+class tRisaThread
 {
+	friend class tRisaThreadInternal;
+
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	volatile bool _Terminated; //!< スレッドが終了すべきかどうか
 	volatile bool Get_Terminated() const { return _Terminated; }
 	volatile void Set_Terminated(bool b) { _Terminated = b; }
 	wxMutex ThreadMutex; //!< スレッドが終了するまで保持されるロック
+	tRisaThreadInternal * Internal; //!< 内部スレッドの実装
 
 public:
 	tRisaThread();
@@ -46,8 +50,7 @@ public:
 	void Terminate() { Set_Terminated(true); } //!< スレッドに終了を通知する
 
 protected:
-	bool ShouldTerminate() { return Get_Terminated() || TestDestroy(); } //!< スレッドが終了すべきかどうか
-	virtual ExitCode Entry();
+	volatile bool ShouldTerminate();
 
 	//! @brief		スレッドのメイン関数(サブクラスで実装する)
 	//! @note		以下のような形式で記述する
@@ -102,11 +105,7 @@ public:
 	//! @brief どれか一つの待ちスレッドを解放する
 	void Signal()
 	{
-		// Post されている状態で Post を行うとセマフォカウンタが
-		// オーバーフローするため (上限が1なのでそうなる)、
-		// いったん TryWait でカウンタを 0 に戻してから
-		// Post を行う。
-		(void) Semaphore.TryWait();
+	    wxLogNull logNo; // セマフォがオーバーフローするとエラーを吐くので抑止
 		Semaphore.Post();
 	}
 

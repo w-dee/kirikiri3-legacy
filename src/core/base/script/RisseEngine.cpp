@@ -99,7 +99,7 @@ void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const ttstr &
 		result_str = ttstr(RISSE_WS_TR("(Console) ")) + expression +
 			ttstr(RISSE_WS_TR(" = (exception) ")) +
 			e.GetMessageString();
-		tRisaLogger::instance()->Log(result_str, tRisaLogger::llError);
+		tRisaLogger::Log(result_str, tRisaLogger::llError);
 		return;
 	}
 	catch(...)
@@ -111,7 +111,7 @@ void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const ttstr &
 	result_str = ttstr(RISSE_WS_TR("(Console) ")) + expression +
 		ttstr(RISSE_WS_TR(" = ")) +
 		RisseVariantToReadableString(result);
-	tRisaLogger::instance()->Log(result_str);
+	tRisaLogger::Log(result_str);
 }
 //---------------------------------------------------------------------------
 

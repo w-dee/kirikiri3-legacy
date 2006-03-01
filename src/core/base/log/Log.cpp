@@ -144,7 +144,7 @@ void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 //! @param		level		ログレベル
 //! @param		linkinfo	リンク情報
 //---------------------------------------------------------------------------
-void tRisaLogger::Log(const ttstr & content,
+void tRisaLogger::InternalLog(const ttstr & content,
 	tRisaLogger::tLevel level,
 	const ttstr & linkinfo)
 {
@@ -196,4 +196,103 @@ void tRisaLogger::Log(const ttstr & content,
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tRisaWxLogProxy::tRisaWxLogProxy()
+{
+	OldLog = wxLog::SetActiveTarget(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tRisaWxLogProxy::~tRisaWxLogProxy()
+{
+	wxLog::SetActiveTarget(OldLog);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ログを行う
+//! @note		wxWidgets の wxLog クラスの説明を参照のこと
+//---------------------------------------------------------------------------
+void tRisaWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
+{
+	// wxWidgets のログレベルを Risa のログレベルにマッピングする
+	tRisaLogger::tLevel risa_level = tRisaLogger::llDebug; // default notice ??
+	switch(level)
+	{
+	case wxLOG_FatalError: // program can't continue, abort immediately
+		risa_level = tRisaLogger::llCritical;
+		break;
+	case wxLOG_Error:      // a serious error, user must be informed about it
+		risa_level = tRisaLogger::llError;
+		break;
+	case wxLOG_Warning:    // user is normally informed about it but may be ignored
+		risa_level = tRisaLogger::llWarning;
+		break;
+	case wxLOG_Message:    // normal message (i.e. normal output of a non GUI app)
+		risa_level = tRisaLogger::llNotice;
+		break;
+	case wxLOG_Status:     // informational: might go to the status line of GUI app
+	case wxLOG_Info:       // informational message (a.k.a. 'Verbose')
+		risa_level = tRisaLogger::llInfo;
+		break;
+	case wxLOG_Debug:      // never shown to the user, disabled in release mode
+	case wxLOG_Trace:      // trace messages are also only enabled in debug mode
+	case wxLOG_Progress:   // used for progress indicator (not yet)
+		risa_level = tRisaLogger::llDebug;
+		break;
+	default:
+		;
+	}
+
+	// Risa のログ機構に流し込む
+	tRisaLogger::Log(RISSE_WS("(wx) ") + ttstr(szString), risa_level);
+
+	// OldLog に流し込む
+	if(OldLog)
+	{
+		// 気持ち悪いキャストだが wxLogChain の実装がこうなってるので倣う
+		((tRisaWxLogProxy *)OldLog)->DoLog(level, szString, t);
+	}
+}
+//---------------------------------------------------------------------------
 

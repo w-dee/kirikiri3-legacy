@@ -35,13 +35,10 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisse &e)
 		tRisaEventSystem::instance()->SetCanDeliverEvents(false);
 
 	// ログ
-	if(tRisaLogger::alive())
-	{
-		tRisaLogger::instance()->Log(
-			RISSE_WS_TR("An exception had been occured"), tRisaLogger::llError);
-		tRisaLogger::instance()->Log(
-			e.GetMessageString(), tRisaLogger::llError);
-	}
+	tRisaLogger::Log(
+		RISSE_WS_TR("An exception had been occured"), tRisaLogger::llError);
+	tRisaLogger::Log(
+		e.GetMessageString(), tRisaLogger::llError);
 
 	// メッセージボックスを表示
 	wxMessageBox(wxString(_("An exception had been occured")) + wxT("\n") +
@@ -63,12 +60,12 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 	// ログ
 	if(tRisaLogger::alive())
 	{
-		tRisaLogger::instance()->Log(
+		tRisaLogger::Log(
 			RISSE_WS_TR("An exception had been occured"), tRisaLogger::llError);
-		tRisaLogger::instance()->Log(
+		tRisaLogger::Log(
 			e.GetMessageString(), tRisaLogger::llError);
 		if(e.GetTrace().GetLen() != 0)
-			tRisaLogger::instance()->Log(
+			tRisaLogger::Log(
 				ttstr(RISSE_WS_TR("Trace: ")) + e.GetTrace(), tRisaLogger::llError);
 	}
 

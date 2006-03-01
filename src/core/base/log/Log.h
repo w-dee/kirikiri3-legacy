@@ -74,8 +74,19 @@ public:
 	void RegisterReceiver(tRisaLogReceiver * receiver);
 	void UnregisterReceiver(tRisaLogReceiver * receiver);
 
-	void Log(const ttstr & content, tLevel level = llInfo,
+private:
+	void InternalLog(const ttstr & content, tLevel level = llInfo,
 		const ttstr & linkinfo = RisseEmptyString);
+
+public:
+	//! @brief ログを行う
+	//! @note 通常のログ記録にはこちらを使うこと
+	static void Log(const ttstr & content, tLevel level = llInfo,
+		const ttstr & linkinfo = RisseEmptyString)
+	{
+		if(tRisaLogger::alive())
+			tRisaLogger::instance()->InternalLog(content, level, linkinfo);
+	}
 };
 //---------------------------------------------------------------------------
 
@@ -103,5 +114,27 @@ public:
 
 
 
-#endif
 //---------------------------------------------------------------------------
+//! @brief		wxWidgets のログを Risa のログ機構に流し込むためのクラス
+//---------------------------------------------------------------------------
+class tRisaWxLogProxy :
+	public wxLog,
+	public singleton_base<tRisaWxLogProxy>,
+	depends_on<tRisaLogger>
+{
+	wxLog * OldLog; //!< このオブジェクトが作成される前に存在していたActiveなログ
+
+public:
+	tRisaWxLogProxy();
+	~tRisaWxLogProxy();
+
+protected:
+	// implement sink function
+	virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
+
+	DECLARE_NO_COPY_CLASS(tRisaWxLogProxy)
+};
+//---------------------------------------------------------------------------
+
+
+#endif

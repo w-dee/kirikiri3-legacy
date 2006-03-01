@@ -64,10 +64,18 @@ bool tRisaApplication::OnInit()
 	locale.AddCatalog(wxT("k3"));
 	locale.AddCatalog(wxT("wxstd"));
 
+	// UpdateUIEvent と IdleEvent を指定されたウィンドウだけに送るように
+	wxIdleEvent::SetMode(wxIDLE_PROCESS_SPECIFIED);
+	wxUpdateUIEvent::SetMode(wxUPDATE_UI_PROCESS_SPECIFIED);
+
 	// すべてのシングルトンインスタンスを初期化する
 	try
 	{
-		tRisaSingletonManager::InitAll(); // 全てのシングルトンインスタンスを初期化
+		// 先だって初期化しておきたい物
+		tRisaWxLogProxy::ensure();
+
+		// 残り全てのシングルトンインスタンスを初期化
+		tRisaSingletonManager::InitAll();
 	}
 	catch(...)
 	{
@@ -109,7 +117,7 @@ int tRisaApplication::OnExit()
 	tRisaRisseScriptEngine::instance()->Shutdown();
 
 	// すべてのシングルトンインスタンスへの参照を切る
-	tRisaSingletonManager::DisconnectAll(); // 全てのシングルトンインスタンスを初期化
+	tRisaSingletonManager::DisconnectAll();
 
 	printf("all singletons should be destroyed within this time ...\n");
 

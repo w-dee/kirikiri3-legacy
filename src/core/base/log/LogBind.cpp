@@ -78,7 +78,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/message)
 	if(RISSE_PARAM_EXIST(1))
 		level = static_cast<tRisaLogger::tLevel>((risse_int)*param[1]);
 
-	tRisaLogger::instance()->Log(msg, level);
+	tRisaLogger::Log(msg, level);
 
 	return RISSE_S_OK;
 }

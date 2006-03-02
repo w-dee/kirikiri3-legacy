@@ -23,6 +23,7 @@ RISSE_DEFINE_SOURCE_ID(1864,60513,53990,19952,46254,61777,48308,42907);
 //---------------------------------------------------------------------------
 #include "right_triangle.xpm"
 #include "right_triangle_small.xpm"
+#include "event.xpm"
 //---------------------------------------------------------------------------
 
 
@@ -51,6 +52,10 @@ wxBitmap tRisaArtProvider::CreateBitmap(const wxArtID& id,
 			return wxBitmap(right_triangle_small_xpm);
 		else
 			return wxBitmap(right_triangle_xpm);
+	}
+	if(id == wxT("RisaEvent"))
+	{
+		return wxBitmap(event_xpm);
 	}
 	return wxNullBitmap;
 }

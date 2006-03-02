@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>
+#include <wx/artprov.h>
 
 RISSE_DEFINE_SOURCE_ID(42206,11515,36168,20323,34721,49407,49922,37589);
 
@@ -408,12 +409,21 @@ END_EVENT_TABLE()
 tRisaConsoleFrame::tRisaConsoleFrame() :
 	tRisaUIFrame(wxT("ui/console"), _("Console"))
 {
+	// ツールバーを追加
+	CreateToolBar();
+	GetToolBar()->AddCheckTool(ID_Event, _("Deliver events"),
+		wxArtProvider::GetBitmap(wxT("RisaEvent"), wxART_TOOLBAR),
+		wxNullBitmap, _("Whether to deliver events"));
+	GetToolBar()->Realize();
+
+	// ログビューアを追加
 	ScrollView = new tRisaLogScrollView(this);
 
+	// ステータスバーを追加
 	StatusBar = new tRisaLogViewerStatusBar(this);
-
 	SetStatusBar(StatusBar);
 
+	// ステータスバー内のテキストコントロールにフォーカスを設定
 	SetFocusToTextCtrl();
 }
 //---------------------------------------------------------------------------

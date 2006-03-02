@@ -24,6 +24,11 @@ class tRisaLogScrollView;
 class tRisaLogViewerStatusBar;
 class tRisaConsoleFrame : public tRisaUIFrame
 {
+	enum
+	{
+		ID_First = 100,
+		ID_Event
+	};
 public:
 	tRisaConsoleFrame();
 

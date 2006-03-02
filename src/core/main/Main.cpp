@@ -75,7 +75,7 @@ bool tRisaApplication::OnInit()
 		tRisaWxLogProxy::ensure();
 
 		// 残り全てのシングルトンインスタンスを初期化
-		tRisaSingletonManager::InitAll();
+		singleton_manager::init_all();
 	}
 	catch(...)
 	{
@@ -117,12 +117,12 @@ int tRisaApplication::OnExit()
 	tRisaRisseScriptEngine::instance()->Shutdown();
 
 	// すべてのシングルトンインスタンスへの参照を切る
-	tRisaSingletonManager::DisconnectAll();
+	singleton_manager::disconnect_all();
 
 	printf("all singletons should be destroyed within this time ...\n");
 
 	// まだシステムに残っているシングルトンインスタンスを表示する
-	tRisaSingletonManager::ReportAliveObjects();
+	singleton_manager::report_alive_objects();
 
 	printf("tRisaApplication::OnExit ended\n");
 

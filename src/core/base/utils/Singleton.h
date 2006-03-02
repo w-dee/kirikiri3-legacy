@@ -30,11 +30,11 @@
 
 	シングルトンの機構を構成するクラスは４つある。
 
-	・シングルトンの管理を行う tRisaSingletonManager
+	・シングルトンの管理を行う singleton_manager
 	・シングルトンクラスがシングルトンたる動作を規定している
 	  テンプレートクラスである singleton_base
 	・依存しているシングルトンを表す depends_on
-	・tRisaSingletonManager::InitAll で初期化されずに、
+	・singleton_manager::init_all で初期化されずに、
 	  初めて必要となった際に初期化されることを示すための
 	  manual_start
 
@@ -119,15 +119,15 @@ int main()
 {
 //	s3::referrer s3;
 	fprintf(stderr, "main begin\n");
-	fprintf(stderr, "InitAll begin\n");
-	tRisaSingletonManager::InitAll();
-	fprintf(stderr, "InitAll end\n");
+	fprintf(stderr, "init_all begin\n");
+	singleton_manager::init_all();
+	fprintf(stderr, "init_all end\n");
 	fprintf(stderr, "s3::n : %d\n", s3::instance()->getN());
 	fprintf(stderr, "s4::n : %d\n", s4::instance()->getN());
 	fprintf(stderr, "Disconnect begin\n");
-	tRisaSingletonManager::DisconnectAll();
+	singleton_manager::disconnect_all();
 	fprintf(stderr, "Disconnect end\n");
-	tRisaSingletonManager::ReportAliveObjects();
+	singleton_manager::report_alive_objects();
 	fprintf(stderr, "main end\n");
 }
 
@@ -139,12 +139,12 @@ int main()
 <pre>
 
 main begin
-InitAll begin
+init_all begin
 s0 construct
 s1 construct
 s2 construct
 s3 construct
-InitAll end
+init_all end
 s3::n : 1
 s4 construct
 s4::n : 2
@@ -172,40 +172,32 @@ main end
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト管理用クラス
 //---------------------------------------------------------------------------
-class tRisaSingletonManager
+class singleton_manager
 {
-	typedef void (*tFunction)(); //!< ensure/disconnect 関数のtypedef
-	typedef const char * (*tGetNameFunction)(); //!< GetName 関数のtypedef
-	typedef bool (*tAliveFunction)(); //!< Alive 関数のtypedef
-	struct tRegisterInfo
+	typedef void (*handler_t)(); //!< ensure/disconnect 関数のtypedef
+	typedef const char * (*get_name_function_t)(); //!< get_name 関数のtypedef
+	typedef bool (*alive_function_t)(); //!< alive 関数のtypedef
+	struct register_info_t
 	{
-		tFunction Ensure; //!< ensure関数
-		tGetNameFunction GetName; //!< get_name 関数
-		tAliveFunction Alive; //!< ailve 関数
+		handler_t ensure; //!< ensure関数
+		get_name_function_t get_name; //!< get_name 関数
+		alive_function_t alive; //!< ailve 関数
 	};
 
-	static std::vector<tRegisterInfo> * Functions; //!< ensure関数の配列
-	static std::vector<tFunction> * Disconnectors; //!< disconnect関数の配列
-	static std::vector<tFunction> * ManualStarts; //!< 手動起動をするクラスのensure関数の配列
-	static unsigned int RefCount; //!< リファレンスカウンタ
+	static std::vector<register_info_t> * functions; //!< ensure関数の配列
+	static std::vector<handler_t> * disconnectors; //!< disconnect関数の配列
+	static std::vector<handler_t> * manual_starts; //!< 手動起動をするクラスのensure関数の配列
+	static unsigned int ref_count; //!< リファレンスカウンタ
 
 public:
-	static void Register(const tRegisterInfo & info);
-	static void RegisterManualStart(tFunction func);
-	static void RegisterDisconnector(tFunction func);
-	static void Unregister();
+	static void register_info(const register_info_t & info);
+	static void register_manual_start(handler_t func);
+	static void register_disconnector(handler_t func);
+	static void unregister_info();
 
-	static void InitAll();
-	static void DisconnectAll();
-	static void ReportAliveObjects();
-
-	//! @brief 空の構造体
-	struct empty
-	{
-		struct referrer
-		{
-		};
-	};
+	static void init_all();
+	static void disconnect_all();
+	static void report_alive_objects();
 };
 //---------------------------------------------------------------------------
 
@@ -219,23 +211,24 @@ template <typename T>
 class singleton_base
 {
 	singleton_base(const singleton_base &); //!< non-copyable
+	void operator = (const singleton_base &); //!< non-copyable
 
 	//! @brief シングルトンクラスをマネージャに登録するための構造体
 	//! @note
 	//! この構造体は static 領域に配置され、main 関数よりも前に作成される。
-	//! コンストラクタでは tRisaSingletonManager::Register() が呼ばれ、
-	//! シングルトンクラスに関する情報が tRisaSingletonManager の vector に登録される。
+	//! コンストラクタでは singleton_manager::register_info() が呼ばれ、
+	//! シングルトンクラスに関する情報が singleton_manager の vector に登録される。
 	//! この中にはシングルトンインスタンスを作成するための関数へのポインタも
-	//! 含まれており、tRisaSingletonManager::InitAll() の呼び出しで全ての
+	//! 含まれており、singleton_manager::init_all() の呼び出しで全ての
 	//! シングルトンインスタンスが作成されることを保証する。
 	//! もしシングルトンインスタンスの構築時に発生する例外を捕捉したいならば、
-	//! InitAll() を呼び出す際に捕捉することができる。
-	//! InitAll() を呼び出さなくてもシングルトンオブジェクトは必要時に自動的に
+	//! init_all() を呼び出す際に捕捉することができる。
+	//! init_all() を呼び出さなくてもシングルトンオブジェクトは必要時に自動的に
 	//! 生成されるが、その部分はマルチスレッドアクセスに対応していないので
-	//! かならず明示的に(他のスレッドが走っていない状態で) InitAll() を呼ぶことを
+	//! かならず明示的に(他のスレッドが走っていない状態で) init_all() を呼ぶことを
 	//! 推奨する。
 	//! manual_start クラスを作成すると、そのシングルトン
-	//! クラスが tRisaSingletonManager::InitAll() の呼び出しではなく、実際に必要と
+	//! クラスが singleton_manager::init_all() の呼び出しではなく、実際に必要と
 	//! なったとき (初回の instance() が呼ばれたときあるいは depends_on クラスの
 	//! オブジェクトが作成されたとき) に初めて作成される。
 	//! ただし、こちらについてもマルチスレッドによるアクセスは考慮されていないので
@@ -246,15 +239,15 @@ class singleton_base
 		//! @brief コンストラクタ
 		object_registerer()
 		{
-			tRisaSingletonManager::tRegisterInfo info;
-			info.Ensure =      &singleton_base<T>::ensure;
-			info.GetName =     &singleton_base<T>::get_name;
-			info.Alive =       &singleton_base<T>::alive;
+			singleton_manager::register_info_t info;
+			info.ensure =    &singleton_base<T>::ensure;
+			info.get_name =  &singleton_base<T>::get_name;
+			info.alive =     &singleton_base<T>::alive;
 
-			tRisaSingletonManager::Register(info);
+			singleton_manager::register_info(info);
 		}
 		//! @brief デストラクタ
-		~object_registerer() { tRisaSingletonManager::Unregister(); }
+		~object_registerer() { singleton_manager::unregister_info(); }
 		//! @brief このクラスが最適化で消されないようにするためのダミー
 		inline void do_nothing() const { }
 	};
@@ -273,7 +266,7 @@ class singleton_base
 		boost::weak_ptr<T> weak_object; //!< シングルトンオブジェクトへの弱参照
 		object_holder() : object(create()), weak_object(object)
 		{
-			tRisaSingletonManager::RegisterDisconnector(&singleton_base<T>::disconnect);
+			singleton_manager::register_disconnector(&singleton_base<T>::disconnect);
 			singleton_base<T>::object_created = true;
 			fprintf(stderr, "created %s\n", singleton_base<T>::get_name());
 		}
@@ -416,7 +409,7 @@ class manual_start
 		//! @brief コンストラクタ
 		manual_object_registerer()
 		{
-			tRisaSingletonManager::RegisterManualStart(&singleton_base<T>::ensure);
+			singleton_manager::register_manual_start(&singleton_base<T>::ensure);
 		}
 		//! @brief このクラスが最適化で消されないようにするためのダミー
 		inline void do_nothing() const { }

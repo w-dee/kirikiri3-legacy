@@ -15,26 +15,26 @@
 
 
 //---------------------------------------------------------------------------
-std::vector<tRisaSingletonManager::tRegisterInfo> * tRisaSingletonManager::Functions = NULL;
-std::vector<tRisaSingletonManager::tFunction> * tRisaSingletonManager::Disconnectors = NULL;
-std::vector<tRisaSingletonManager::tFunction> * tRisaSingletonManager::ManualStarts = NULL;
-unsigned int tRisaSingletonManager::RefCount = 0;
+std::vector<singleton_manager::register_info_t> * singleton_manager::functions = NULL;
+std::vector<singleton_manager::handler_t> * singleton_manager::disconnectors = NULL;
+std::vector<singleton_manager::handler_t> * singleton_manager::manual_starts = NULL;
+unsigned int singleton_manager::ref_count = 0;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		ensure 関数を登録する
 //---------------------------------------------------------------------------
-void tRisaSingletonManager::Register(const tRisaSingletonManager::tRegisterInfo & info)
+void singleton_manager::register_info(const singleton_manager::register_info_t & info)
 {
-//	fprintf(stderr, "singleton %s\n", info.GetName());
+//	fprintf(stderr, "singleton %s\n", info.get_name());
 
-	if(Functions == NULL)
-		Functions = new std::vector<tRegisterInfo>();
+	if(functions == NULL)
+		functions = new std::vector<register_info_t>();
 
-	Functions->push_back(info);
+	functions->push_back(info);
 
-	RefCount ++;
+	ref_count ++;
 }
 //---------------------------------------------------------------------------
 
@@ -42,11 +42,11 @@ void tRisaSingletonManager::Register(const tRisaSingletonManager::tRegisterInfo 
 //---------------------------------------------------------------------------
 //! @brief		手動起動を表すクラスの ensure 関数を登録する
 //---------------------------------------------------------------------------
-void tRisaSingletonManager::RegisterManualStart(tFunction func)
+void singleton_manager::register_manual_start(handler_t func)
 {
-	if(ManualStarts == NULL)
-		ManualStarts = new std::vector<tFunction>();
-	ManualStarts->push_back(func);
+	if(manual_starts == NULL)
+		manual_starts = new std::vector<handler_t>();
+	manual_starts->push_back(func);
 }
 //---------------------------------------------------------------------------
 
@@ -54,11 +54,11 @@ void tRisaSingletonManager::RegisterManualStart(tFunction func)
 //---------------------------------------------------------------------------
 //! @brief		disconnect 関数を登録する
 //---------------------------------------------------------------------------
-void tRisaSingletonManager::RegisterDisconnector(tFunction func)
+void singleton_manager::register_disconnector(handler_t func)
 {
-	if(Disconnectors == NULL)
-		Disconnectors = new std::vector<tFunction>();
-	Disconnectors->push_back(func);
+	if(disconnectors == NULL)
+		disconnectors = new std::vector<handler_t>();
+	disconnectors->push_back(func);
 }
 //---------------------------------------------------------------------------
 
@@ -66,16 +66,16 @@ void tRisaSingletonManager::RegisterDisconnector(tFunction func)
 //---------------------------------------------------------------------------
 //! @brief		ensure 関数の登録を解除する
 //---------------------------------------------------------------------------
-void tRisaSingletonManager::Unregister()
+void singleton_manager::unregister_info()
 {
-	if(Functions)
+	if(functions)
 	{
-		RefCount --;
-		if(RefCount == 0)
+		ref_count --;
+		if(ref_count == 0)
 		{
-			delete Functions, Functions = NULL;
-			delete Disconnectors, Disconnectors = NULL;
-			delete ManualStarts, ManualStarts = NULL;
+			delete functions, functions = NULL;
+			delete disconnectors, disconnectors = NULL;
+			delete manual_starts, manual_starts = NULL;
 		}
 	}
 }
@@ -86,33 +86,33 @@ void tRisaSingletonManager::Unregister()
 //! @brief		全てのシングルトンを初期化する
 //! @note		この間に発生した例外は呼び出し元で捕捉できる
 //---------------------------------------------------------------------------
-void tRisaSingletonManager::InitAll()
+void singleton_manager::init_all()
 {
-	if(Functions)
+	if(functions)
 	{
 /*
 		fprintf(stderr, "-- singleton list start --\n");
-		for(std::vector<tRegisterInfo>::iterator i = Functions->begin();
-			i != Functions->end(); i++)
+		for(std::vector<register_info_t>::iterator i = functions->begin();
+			i != functions->end(); i++)
 		{
-			fprintf(stderr, "singleton %s\n", i->GetName());
+			fprintf(stderr, "singleton %s\n", i->get_name());
 		}
 		fprintf(stderr, "-- singleton list end --\n");
 */
-		for(std::vector<tRegisterInfo>::iterator i = Functions->begin();
-			i != Functions->end(); i++)
+		for(std::vector<register_info_t>::iterator i = functions->begin();
+			i != functions->end(); i++)
 		{
-			if(ManualStarts)
+			if(manual_starts)
 			{
-				// ManualStarts の中から i->Ensure を探す。
+				// manual_starts の中から i->ensure を探す。
 				// 一致した物があった場合、ここでの作成は行わない。
 				// 単純な線形検索だが、シングルトンオブジェクトが数千などに
 				// ならない限りそれほどパフォーマンスロスにはならないだろう
-				std::vector<tFunction>::iterator p = 
-					std::find(ManualStarts->begin(), ManualStarts->end(), i->Ensure);
-				if(p != ManualStarts->end()) continue;
+				std::vector<handler_t>::iterator p = 
+					std::find(manual_starts->begin(), manual_starts->end(), i->ensure);
+				if(p != manual_starts->end()) continue;
 			}
-			i->Ensure();
+			i->ensure();
 		}
 	}
 }
@@ -125,15 +125,15 @@ void tRisaSingletonManager::InitAll()
 //!				他の場所でこのシングルトンオブジェクトへの参照が残っていた場合は
 //!				その参照が無くなるまでそのシングルトンオブジェクトおよびそれが
 //!				依存しているシングルトンオブジェクトは消滅しないままとなる。
-//!				disconnect関数の呼び出しは、RegisterDisconnector を呼び出した順とは
+//!				disconnect関数の呼び出しは、register_disconnector を呼び出した順とは
 //!				逆順となる。
 //---------------------------------------------------------------------------
-void tRisaSingletonManager::DisconnectAll()
+void singleton_manager::disconnect_all()
 {
-	if(Disconnectors)
+	if(disconnectors)
 	{
-		for(std::vector<tFunction>::reverse_iterator i = Disconnectors->rbegin();
-			i != Disconnectors->rend(); i++)
+		for(std::vector<handler_t>::reverse_iterator i = disconnectors->rbegin();
+			i != disconnectors->rend(); i++)
 		{
 			(*i)();
 		}
@@ -145,18 +145,19 @@ void tRisaSingletonManager::DisconnectAll()
 //---------------------------------------------------------------------------
 //! @brief		削除されずに残っているオブジェクトを標準エラー出力に表示する
 //---------------------------------------------------------------------------
-void tRisaSingletonManager::ReportAliveObjects()
+void singleton_manager::report_alive_objects()
 {
-	if(Functions)
+	if(functions)
 	{
-		for(std::vector<tRegisterInfo>::iterator i = Functions->begin();
-			i != Functions->end(); i++)
+		for(std::vector<register_info_t>::iterator i = functions->begin();
+			i != functions->end(); i++)
 		{
-			if(i->Alive())
+			if(i->alive())
 			{
-				fprintf(stderr, "object %s is alive\n", i->GetName());
+				fprintf(stderr, "object %s is alive\n", i->get_name());
 			}
 		}
 	}
 }
 //---------------------------------------------------------------------------
+

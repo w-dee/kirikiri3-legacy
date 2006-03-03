@@ -15,6 +15,7 @@
 
 #include "risse/include/risse.h"
 #include "base/ui/UIUtils.h"
+#include "base/event/Event.h"
 
 
 //---------------------------------------------------------------------------
@@ -22,7 +23,8 @@
 //---------------------------------------------------------------------------
 class tRisaLogScrollView;
 class tRisaLogViewerStatusBar;
-class tRisaConsoleFrame : public tRisaUIFrame
+class tRisaConsoleFrame : public tRisaUIFrame,
+						depends_on<tRisaEventSystem>
 {
 	enum
 	{
@@ -38,6 +40,9 @@ public:
 private:
 	tRisaLogScrollView *ScrollView;
 	tRisaLogViewerStatusBar *StatusBar;
+
+	void OnEventTool(wxCommandEvent & event);
+	void OnUpdateUI(wxUpdateUIEvent & event);
 
 	DECLARE_EVENT_TABLE()
 };

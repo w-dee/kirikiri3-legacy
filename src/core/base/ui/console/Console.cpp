@@ -399,6 +399,8 @@ void tRisaLogViewerStatusBar::OnSize(wxSizeEvent& event)
 //! @brief		イベントテーブルの定義
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRisaConsoleFrame, tRisaUIFrame)
+	EVT_TOOL(ID_Event,				tRisaConsoleFrame::OnEventTool)
+	EVT_UPDATE_UI(wxID_ANY,			tRisaConsoleFrame::OnUpdateUI)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -409,6 +411,9 @@ END_EVENT_TABLE()
 tRisaConsoleFrame::tRisaConsoleFrame() :
 	tRisaUIFrame(wxT("ui/console"), _("Console"))
 {
+	// UI アップデートイベントの受け取り
+	SetExtraStyle(GetExtraStyle()|wxWS_EX_PROCESS_UI_UPDATES);
+
 	// ツールバーを追加
 	CreateToolBar();
 	GetToolBar()->AddCheckTool(ID_Event, _("Deliver events"),
@@ -451,7 +456,34 @@ void tRisaConsoleFrame::SetFocusToTextCtrl(int insert_code)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		"Event" ボタンが押された
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaConsoleFrame::OnEventTool(wxCommandEvent & event)
+{
+	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
+	tRisaEventSystem::instance()->SetCanDeliverEvents(event_enabled);
+}
+//---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		UI アップデートイベントが発生したとき
+//! @param		event イベントオブジェクト
+//---------------------------------------------------------------------------
+void tRisaConsoleFrame::OnUpdateUI(wxUpdateUIEvent & event)
+{
+	// "Event" ボタンの状態を更新
+	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
+	if(event_enabled != tRisaEventSystem::instance()->GetCanDeliverEvents())
+	{
+		GetToolBar()->ToggleTool(ID_Event,
+			tRisaEventSystem::instance()->GetCanDeliverEvents());
+	}
+
+	event.Skip(false);
+}
+//---------------------------------------------------------------------------
 
 

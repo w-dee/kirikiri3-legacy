@@ -799,6 +799,8 @@ void tRisaScriptEditorFrame::OnTextCtrlUpdateUI(wxUpdateUIEvent & event)
 	long x, y;
 	TextCtrl->PositionToXY(pos, &x, &y);
 	StatusBar->SetCaretPosStatus(x, y);
+
+	event.Skip(false);
 }
 //---------------------------------------------------------------------------
 

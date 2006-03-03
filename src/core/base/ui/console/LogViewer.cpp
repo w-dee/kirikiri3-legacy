@@ -277,7 +277,6 @@ void tRisaLogScrollView::LayoutOneLine(size_t log_index)
 	wxClientDC dc(this);
 	CurrentFont.SetWeight((!item.Bold)?wxFONTWEIGHT_NORMAL:wxFONTWEIGHT_BOLD);
 	dc.SetFont(CurrentFont);
-	LineHeight = dc.GetCharHeight();
 
 	// 各文字位置での extentを得る
 	wxArrayInt widths;
@@ -1067,18 +1066,24 @@ void tRisaLogScrollView::OnSize(wxSizeEvent& event)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	// LinesPerWindow などを計算
+	// クライアントサイズを取得
 	risse_int cw = 0, ch = 0;
 	GetClientSize(&cw, &ch);
 
 	ViewWidth = cw - ViewOriginX;
 	ViewHeight = ch;
 
-	LinesPerWindow = ViewHeight / LineHeight;
-
 	// 全ての行をレイアウト
 	LayoutAllLines();
 	Refresh();
+
+	// LineHeight と LinesPerWindow の計算
+	// いったんフォントをデバイスコンテキストに選択
+	wxClientDC dc(this);
+	CurrentFont.SetWeight(wxFONTWEIGHT_NORMAL);
+	dc.SetFont(CurrentFont);
+	LineHeight = dc.GetCharHeight();
+	LinesPerWindow = ViewHeight / LineHeight;
 
 	// イベントをスキップ
 	event.Skip();

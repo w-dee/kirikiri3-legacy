@@ -285,6 +285,7 @@ tRisaEventTimerConsumer::tRisaEventTimerConsumer() :
 {
 	// フィールドの初期化
 	Enabled = false;
+	Capacity = DefaultCapacity;
 	Interval = 0;
 	ReferenceTick = tRisaTickCount::InvalidTickCount;
 }
@@ -348,6 +349,18 @@ void tRisaEventTimerConsumer::Reset()
 
 
 //---------------------------------------------------------------------------
+//! @brief		容量を設定する
+//---------------------------------------------------------------------------
+void tRisaEventTimerConsumer::SetCapacity(size_t capa)
+{
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
+	Capacity = capa;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		タイマー周期をリセットする
 //---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::ResetInterval()
@@ -367,6 +380,7 @@ void tRisaEventTimerConsumer::ResetInterval()
 	}
 
 	tRisaEventSystem::instance()->CancelEvents(this); // pending なイベントはすべてキャンセル
+	QueueCount = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -382,13 +396,18 @@ void tRisaEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64
 
 	if(Enabled && Interval != tRisaTickCount::InvalidTickCount)
 	{
-		// イベント管理システムにイベントをPostする
-		tRisaEventSystem::instance()->PostEvent(
-			new tRisaEventInfo(
-				0, // id
-				this, // source
-				this // destination
-				) );
+		// キュー中に入るべきイベントの量は問題ないか？
+		if(Capacity == 0 || QueueCount < Capacity)
+		{
+			// イベント管理システムにイベントをPostする
+			tRisaEventSystem::instance()->PostEvent(
+				new tRisaEventInfo(
+					0, // id
+					this, // source
+					this // destination
+					) );
+			QueueCount ++;
+		}
 
 		// 次にこのイベントを発生すべき tick を設定する
 		ReferenceTick += Interval;
@@ -408,6 +427,12 @@ void tRisaEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64
 //---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::OnEvent(tRisaEventInfo * info)
 {
+	{
+		// キューカウンタを減らす
+		volatile tRisaCriticalSection::tLocker cs_holder(CS);
+		QueueCount --;
+	}
+
 	if(Enabled && Interval != tRisaTickCount::InvalidTickCount)
 		OnTimer();
 }

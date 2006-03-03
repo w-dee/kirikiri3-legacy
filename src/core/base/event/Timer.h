@@ -137,11 +137,14 @@ class tRisaEventTimerConsumer :
 	depends_on<tRisaEventTimerScheduler>, // このクラスは tRisaEventTimerScheduler に依存
 	depends_on<tRisaEventSystem> // イベント管理システムに依存
 {
+	static const size_t DefaultCapacity = 6; //!< Capacity のデフォルトの値
+
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	bool Enabled; //!< タイマーが有効かどうか
 	risse_uint64 Interval; //!< タイマー周期
 	risse_uint64 ReferenceTick; //!< 周期の基準となるTick
-
+	size_t Capacity; //!< 一度にイベントキューにためることのできる量(0=制限無し)
+	size_t QueueCount; //!< キューにたまっているイベントの数
 
 protected:
 	tRisaEventTimerConsumer();
@@ -153,6 +156,8 @@ public:
 	risse_uint64 GetInterval() const { return Interval; } //!< タイマー周期を得る
 	void SetInterval(risse_uint64 interval);
 	void Reset();
+	void SetCapacity(size_t capa);
+	size_t GetCapacity() const { return Capacity; }
 
 private:
 	void ResetInterval();

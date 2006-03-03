@@ -261,6 +261,46 @@ RISSE_BEGIN_NATIVE_PROP_DECL(interval)
 }
 RISSE_END_NATIVE_PROP_DECL(interval)
 //----------------------------------------------------------------------
+RISSE_BEGIN_NATIVE_PROP_DECL(capacity)
+{
+	/*%
+		@brief	イベント容量
+		@note
+		<p>
+			イベントキューに一度に入れることのできる、このタイマーのイベントの数を表します。
+		</p>
+		<p>
+			イベントの処理に時間がかかっている場合、次のタイマー周期が来ると、
+			イベントはイベントキューに入ります。イベントの処理が終わり次第
+			イベントキューに入っているイベントは処理されますが、このプロパティ
+			ではそのイベントキューに一度に入ることのできるイベントの数を
+			制限することが出来ます。
+		</p>
+		<p>
+			デフォルトの値は 6 です。 0 を指定するとイベントキューに一度に入る
+			ことの出来るイベントの数を無制限にすることが出来ますが、
+			システムがイベントを処理しきることが出来ずにフリーズする可能性も
+			あるため、注意が必要です。
+		</p>
+	*/
+	RISSE_BEGIN_NATIVE_PROP_GETTER
+	{
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Timer);
+		if(result) *result = (tTVInteger)_this->GetCapacity();
+		return RISSE_S_OK;
+	}
+	RISSE_END_NATIVE_PROP_GETTER
+
+	RISSE_BEGIN_NATIVE_PROP_SETTER
+	{
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Timer);
+		_this->SetCapacity((tTVInteger)*param);
+		return RISSE_S_OK;
+	}
+	RISSE_END_NATIVE_PROP_SETTER
+}
+RISSE_END_NATIVE_PROP_DECL(capacity)
+//----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
 	RISSE_END_NATIVE_MEMBERS

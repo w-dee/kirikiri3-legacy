@@ -129,7 +129,7 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 	tCharacterPosition SelEnd; //!< 選択領域の終了位置
 	bool MouseSelecting; //!< 範囲選択中は真
 	tCharacterPosition MouseSelStart1; //!< マウスでの選択開始位置1
-	tCharacterPosition MouseSelStart2; //!< マウスでの選択開始位置1
+	tCharacterPosition MouseSelStart2; //!< マウスでの選択開始位置2
 
 	//! @brief マウスで選択中にスクロールを行うためのタイマークラス
 	class tScrollTimer : public wxTimer
@@ -162,6 +162,7 @@ private:
 	wxColour GetBackgroundColour();
 
 	void Rotate();
+	static bool FixupSelection(tCharacterPosition &sel1, tCharacterPosition &sel2, size_t log_num_delete_items);
 
 	void LayoutOneLine(size_t buffer_offset);
 	wxString CreateOneLineString(const tRisaLogger::tItem & item);

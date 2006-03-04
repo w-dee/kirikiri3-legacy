@@ -212,31 +212,11 @@ void tRisaLogScrollView::Rotate()
 	DisplayLines.erase(DisplayLines.begin(), DisplayLines.begin() + disp_num_delete_items);
 
 	// SelStart と SelEnd の fixup
-	if(SelStart.LogicalIndex < log_num_delete_items)
-	{
-		SelStart.LogicalIndex = 0;
-		SelStart.CharPosition = 0;
-	}
-	else
-	{
-		SelStart.LogicalIndex -= log_num_delete_items;
-	}
+	FixupSelection(SelStart, SelEnd, log_num_delete_items);
 
-	if(SelEnd.LogicalIndex < log_num_delete_items)
-	{
-		SelEnd.LogicalIndex = 0;
-		SelEnd.CharPosition = 0;
-	}
-	else
-	{
-		SelEnd.LogicalIndex -= log_num_delete_items;
-	}
-
-	if(SelStart == SelEnd)
-	{
-		SelStart.Invalidate();
-		SelEnd.Invalidate();
-	}
+	// MouseSelStart1 と MouseSelStart2 の fixup
+	if(!FixupSelection(MouseSelStart1, MouseSelStart2, log_num_delete_items))
+		MouseSelecting = false;
 
 	// スクロールバーの位置を調整
 	int anchor = GetScrollAnchor();
@@ -259,6 +239,54 @@ void tRisaLogScrollView::Rotate()
 	Refresh();
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		選択範囲のfixupを行う(選択範囲をlog_num_delete_items分 切りつめる)
+//! @param		sel1 選択始点
+//! @param		sel2 選択終点
+//! @param		log_num_delete_items 切りつめる行数
+//! @return		切りつめた結果、選択範囲が残っていれば真、消えれば偽
+//---------------------------------------------------------------------------
+bool tRisaLogScrollView::FixupSelection(
+	tCharacterPosition &sel1, tCharacterPosition &sel2, size_t log_num_delete_items)
+{
+	if(sel1.IsValid())
+	{
+		if(sel1.LogicalIndex < log_num_delete_items)
+		{
+			sel1.LogicalIndex = 0;
+			sel1.CharPosition = 0;
+		}
+		else
+		{
+			sel1.LogicalIndex -= log_num_delete_items;
+		}
+	}
+
+	if(sel2.IsValid())
+	{
+		if(sel2.LogicalIndex < log_num_delete_items)
+		{
+			sel2.LogicalIndex = 0;
+			sel2.CharPosition = 0;
+		}
+		else
+		{
+			sel2.LogicalIndex -= log_num_delete_items;
+		}
+	}
+
+	if(sel1 == sel2)
+	{
+		sel1.Invalidate();
+		sel2.Invalidate();
+		return false;
+	}
+	return true;
+}
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------
@@ -700,6 +728,13 @@ void tRisaLogScrollView::SetSelection(
 	if(new_selstart == new_selend)
 	{
 		// 始点と終点が同じ -> 選択されていないと見なす
+		new_selstart.Invalidate();
+		new_selend.Invalidate();
+	}
+
+	if(!new_selstart.IsValid() || !new_selend.IsValid())
+	{
+		// どちらかが Invalid -> 選択されていないと見なす
 		new_selstart.Invalidate();
 		new_selend.Invalidate();
 	}

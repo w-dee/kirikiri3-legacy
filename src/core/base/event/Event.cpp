@@ -212,8 +212,20 @@ void tRisaEventSystem::DeliverEvents()
 		{
 			if(i != tRisaEventInfo::epExclusive)
 			{
-				while(Queues[i].size() > 0 && Queues[i].back() == NULL)
-					Queues[i].pop_back();
+				// NULL を探す
+				tQueue & queue = Queues[i];
+				tQueue::iterator i = std::find(queue.begin(), queue.end(),
+								reinterpret_cast<tRisaEventInfo*>(NULL));
+				// NULL を除去
+				if(i != queue.end())
+				{
+					do
+					{
+						i = queue.erase(i);
+						if(i == queue.end()) break;
+						if(*i != reinterpret_cast<tRisaEventInfo*>(NULL)) break;
+					} while(true);
+				}
 			}
 		}
 	}

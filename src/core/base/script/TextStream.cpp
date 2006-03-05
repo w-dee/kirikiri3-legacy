@@ -237,13 +237,13 @@ void tRisaTextReadStream::ReadBuffer()
 		size_t i;
 		for(i = read - 1; i >= 0 && !(in[i] < 0x80 || in[i] >= 0xc3 && in[i] < 0xfe); i--) ;
 
-		if     (in[0] < 0x80) lastcharbytes = 1;
-		else if(in[0] < 0xc2) lastcharbytes = 0;
-		else if(in[0] < 0xe0) lastcharbytes = 2;
-		else if(in[0] < 0xf0) lastcharbytes = 3;
-		else if(in[0] < 0xf8) lastcharbytes = 4;
-		else if(in[0] < 0xfc) lastcharbytes = 5;
-		else if(in[0] < 0xfe) lastcharbytes = 6;
+		if     (in[i] < 0x80) lastcharbytes = 1;
+		else if(in[i] < 0xc2) lastcharbytes = 0;
+		else if(in[i] < 0xe0) lastcharbytes = 2;
+		else if(in[i] < 0xf0) lastcharbytes = 3;
+		else if(in[i] < 0xf8) lastcharbytes = 4;
+		else if(in[i] < 0xfc) lastcharbytes = 5;
+		else if(in[i] < 0xfe) lastcharbytes = 6;
 		else                  lastcharbytes = 0;
 
 		// 足りないバイト数を読み足す

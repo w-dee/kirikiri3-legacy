@@ -344,23 +344,6 @@ public:
 		(void) manipulate_object(false, &alive);
 		return alive;
 	}
-
-	//! @brief シングルトン参照用クラス
-	//! @note
-	//! このクラスのオブジェクトを作成することは、
-	//! このクラスのオブジェクトの存在期間中、T のインスタンスが存在することを
-	//! 保証する。
-	//! クラスのメンバとして singleton_base<T>::referrer 型のメンバを記述すれば、
-	//! そのクラスのオブジェクトが存在し続ける間は T のインスタンスが存在
-	//! することになる。
-	//! これの寿命管理には shared_ptr を用いた参照カウンタを用いているため、
-	//! 相互参照があるとオブジェクトが解放されないままになるので注意が必要である。
-	class referrer
-	{
-		boost::shared_ptr<T> object; //!< シングルトンオブジェクトへの参照を保持するメンバ
-	public:
-		referrer() : object(singleton_base<T>::instance()) {;}
-	};
 };
 template <typename T>
 typename singleton_base<T>::object_registerer singleton_base<T>::register_object;
@@ -399,7 +382,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief  手動起動のシングルトンを表すためのテンプレートクラス
 //! @note
-//! このシングルトンは手動起動であることを表すためにこれを継承させる。例
+//! このシングルトンは手動起動であることを表すためにこれを継承させる。例を参照。
 //---------------------------------------------------------------------------
 template <typename T>
 class manual_start

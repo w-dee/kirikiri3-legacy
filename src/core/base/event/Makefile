@@ -13,6 +13,7 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 #-----------------------------------------
 CPPFILES=\
 	Event.cpp                      \
+	IdleEvent.cpp                  \
 	TickCount.cpp                  \
 	Timer.cpp                      \
 	TimerBind.cpp

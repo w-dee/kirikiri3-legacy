@@ -96,7 +96,7 @@ tRisaEventSystem::~tRisaEventSystem()
 //! @note		prio!=tRisaEventInfo::epExclusiveの場合、epExclusiveのイベントが
 //!				ポストされたり、CanDeliverEvents が偽になった場合は即座に戻る。
 //---------------------------------------------------------------------------
-void tRisaEventSystem::DeliverQueue(tRisaEventInfo::tPriority prio)
+void tRisaEventSystem::DeliverQueue(tRisaEventInfo::tPriority prio, risse_uint64 mastertick)
 {
 	tQueue & queue = Queues[prio];
 	while(true)
@@ -120,6 +120,7 @@ void tRisaEventSystem::DeliverQueue(tRisaEventInfo::tPriority prio)
 			{
 				try
 				{
+					event->SetTick(mastertick); // tick の設定
 					event->Deliver();
 				}
 				catch(...)
@@ -151,7 +152,7 @@ void tRisaEventSystem::DeliverQueue(tRisaEventInfo::tPriority prio)
 //---------------------------------------------------------------------------
 //! @brief		すべてのイベントを配信する
 //---------------------------------------------------------------------------
-void tRisaEventSystem::DeliverEvents()
+void tRisaEventSystem::DeliverEvents(risse_uint64 mastertick)
 {
 	// 一回で配信するイベントの量を、現時点でのイベントまでに
 	// 制限するため、イベントのセンチネルとして null を各キュー(ただしepExclusive以外)
@@ -179,7 +180,7 @@ void tRisaEventSystem::DeliverEvents()
 		for(int i = tRisaEventInfo::epMin;
 			i <= tRisaEventInfo::epMax; i++)
 		{
-			DeliverQueue(static_cast<tRisaEventInfo::tPriority>(i));
+			DeliverQueue(static_cast<tRisaEventInfo::tPriority>(i), mastertick);
 
 			// ここは複数スレッドからのアクセスから保護する
 			{
@@ -238,9 +239,9 @@ void tRisaEventSystem::DeliverEvents()
 //! @return		まだ処理すべきイベントがあるかどうか
 //! @note		wxApp::ProcessIdle から呼ばれる
 //---------------------------------------------------------------------------
-bool tRisaEventSystem::ProcessEvents()
+bool tRisaEventSystem::ProcessEvents(risse_uint64 mastertick)
 {
-	DeliverEvents();
+	DeliverEvents(mastertick);
 	return HasPendingEvents;
 }
 //---------------------------------------------------------------------------

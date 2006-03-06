@@ -14,6 +14,7 @@
 #include <wx/filename.h>
 #include <wx/app.h>
 #include "base/event/Event.h"
+#include "base/event/TickCount.h"
 #include "base/script/RisseEngine.h"
 #include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
@@ -137,7 +138,8 @@ int tRisaApplication::OnExit()
 bool tRisaApplication::ProcessIdle()
 {
 	bool cont = false;
-	if(tRisaEventSystem::alive()) tRisaEventSystem::instance()->ProcessEvents();
+	if(tRisaEventSystem::alive() && tRisaTickCount::alive())
+		tRisaEventSystem::instance()->ProcessEvents(tRisaTickCount::instance()->Get());
 	cont = wxApp::ProcessIdle() || cont;
 	return cont;
 }

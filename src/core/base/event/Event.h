@@ -57,6 +57,9 @@ private:
 	void * Source; //!< イベントの発生元
 	tRisaEventDestination * Destination; //!< イベントの配信先 Risse オブジェクト
 	tPriority Priority; //!< イベントの優先度
+	risse_uint64 Tick; //!< イベントが配信される tick
+
+	void SetTick(risse_uint64 tick)  { Tick = tick; } // Tick を設定する
 
 protected:
 	virtual void Deliver() { if(Destination) Destination->OnEvent(this); } //!< イベントを配信先に配信する
@@ -82,6 +85,7 @@ public:
 
 	int GetId() const { return Id; } //!< IDを得る
 	void * GetSource() { return Source; } //!< イベント発生源を得る
+	risse_uint64 GetTick() const { return Tick; } //!< Tick を得る
 	tRisaEventDestination * GetDestination() { return Destination; } //!< イベント配信先を得る
 	tPriority GetPriority() const { return Priority; } //!< イベントの優先順位を得る
 
@@ -118,11 +122,11 @@ public:
 
 private:
 	void DiscardQueue(tQueue & queue);
-	void DeliverQueue(tRisaEventInfo::tPriority prio);
-	void DeliverEvents();
+	void DeliverQueue(tRisaEventInfo::tPriority prio, risse_uint64 mastertick);
+	void DeliverEvents(risse_uint64 mastertick);
 
 public:
-	bool ProcessEvents();
+	bool ProcessEvents(risse_uint64 mastertick);
 	void PostEvent(tRisaEventInfo * event, tEventType type = etDefault);
 	size_t CountEventsInQueue(int id,
 		void * source, tRisaEventInfo::tPriority prio, size_t limit = 1);

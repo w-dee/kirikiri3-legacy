@@ -99,8 +99,8 @@ void singleton_manager::init_all()
 		}
 		fprintf(stderr, "-- singleton list end --\n");
 */
-		for(std::vector<register_info_t>::iterator i = functions->begin();
-			i != functions->end(); i++)
+		for(std::vector<register_info_t>::reverse_iterator i = functions->rbegin();
+			i != functions->rend(); i++)
 		{
 			if(manual_starts)
 			{

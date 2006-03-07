@@ -62,11 +62,17 @@ void tRisaIdleEventManager::Unregister(tRisaIdleEventDestination * item)
 bool tRisaIdleEventManager::Deliver(risse_uint64 mastertick)
 {
 	bool need_more = false;
-	pointer_list<tRisaIdleEventDestination>::scoped_lock lock(Destinations);
-	for(size_t i = 0; i < Destinations.get_locked_count(); i++)
+
+	// Idleイベントは tRisaEventSystem がイベントを配信可能かどうかを見る
+	if(tRisaEventSystem::alive() && tRisaEventSystem::instance()->GetCanDeliverEvents())
 	{
-		if(Destinations.get_locked(i)->OnIdle(mastertick))
-			need_more = true;
+		// イベントを配信する
+		pointer_list<tRisaIdleEventDestination>::scoped_lock lock(Destinations);
+		for(size_t i = 0; i < Destinations.get_locked_count(); i++)
+		{
+			if(Destinations.get_locked(i)->OnIdle(mastertick))
+				need_more = true;
+		}
 	}
 	return need_more;
 }

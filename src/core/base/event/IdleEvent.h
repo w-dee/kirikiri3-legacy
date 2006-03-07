@@ -71,7 +71,7 @@ public:
 	{
 		clSlowBeat, // on every 5 sec.
 		clDeactivate, // on application/window deactivate
-		clMinimize // on minimizing application
+		clDeactivateApp // on application deactivate
 	};
 };
 //---------------------------------------------------------------------------
@@ -101,7 +101,7 @@ protected:
 
 public:
 	void OnDeactivate();
-	void OnMinimize();
+	void OnDeactivateApp();
 };
 //---------------------------------------------------------------------------
 

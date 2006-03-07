@@ -14,6 +14,7 @@
 #include <wx/filename.h>
 #include <wx/app.h>
 #include "base/event/Event.h"
+#include "base/event/IdleEvent.h"
 #include "base/event/TickCount.h"
 #include "base/script/RisseEngine.h"
 #include "base/ui/console/Console.h"
@@ -32,9 +33,14 @@ public:
 	bool OnInit();
 	int OnExit();
 	bool ProcessIdle();
+
+private:
+	void OnActivate(wxActivateEvent & event);
+	void OnActivateApp(wxActivateEvent & event);
+
+	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------
@@ -42,6 +48,16 @@ public:
 //---------------------------------------------------------------------------
 IMPLEMENT_APP(tRisaApplication)
 wxLocale locale;
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+// アプリケーションイベントテーブル
+//---------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tRisaApplication, wxApp)
+	EVT_ACTIVATE(			tRisaApplication::OnActivate)
+	EVT_ACTIVATE_APP(		tRisaApplication::OnActivateApp)
+END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
 
@@ -133,20 +149,56 @@ int tRisaApplication::OnExit()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Idleイベントを配信するとき
+//! @brief		Idleイベントを処理するとき
 //---------------------------------------------------------------------------
 bool tRisaApplication::ProcessIdle()
 {
 	bool cont = false;
-	if(tRisaEventSystem::alive() && tRisaTickCount::alive())
-		tRisaEventSystem::instance()->ProcessEvents(tRisaTickCount::instance()->Get());
+	if(tRisaTickCount::alive())
+	{
+		// この回で呼び出すハンドラに渡すtickを得る
+		risse_uint64 tick = tRisaTickCount::instance()->Get();
+
+		// 各サブシステムを呼び出す
+
+		// イベントの配信
+		if(tRisaEventSystem::alive())
+			cont = tRisaEventSystem::instance()->ProcessEvents(tick) || cont;
+
+		// アイドルイベントの配信
+		if(tRisaIdleEventManager::alive())
+			cont = tRisaIdleEventManager::instance()->Deliver(tick) || cont;
+	}
 	cont = wxApp::ProcessIdle() || cont;
 	return cont;
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		ウィンドウなどがアクティブ化/非アクティブ化したとき
+//---------------------------------------------------------------------------
+void tRisaApplication::OnActivate(wxActivateEvent & event)
+{
+	if(!event.GetActive() && tRisaCompactEventManager::alive())
+	{
+		tRisaCompactEventManager::instance()->OnDeactivate();
+	}
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		アプリケーションがアクティブ化/非アクティブ化したとき
+//---------------------------------------------------------------------------
+void tRisaApplication::OnActivateApp(wxActivateEvent & event)
+{
+	if(!event.GetActive() && tRisaCompactEventManager::alive())
+	{
+		tRisaCompactEventManager::instance()->OnDeactivateApp();
+	}
+}
+//---------------------------------------------------------------------------
 
 
 

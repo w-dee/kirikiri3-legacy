@@ -312,3 +312,57 @@ long tRisaOggVorbisDecoder::tell_func(void *datasource)
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		デコーダファクトリクラス
+//---------------------------------------------------------------------------
+class tRisaOggVorbisWaveDecoderFactory : public tRisaWaveDecoderFactory
+{
+public:
+	//! @brief デコーダを作成する
+	boost::shared_ptr<tRisaWaveDecoder> Create(const ttstr & filename)
+	{
+		boost::shared_ptr<tRisaWaveDecoder>
+			decoder(new tRisaOggVorbisDecoder(filename));
+		return decoder;
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		デコーダファクトリレジストラ
+//---------------------------------------------------------------------------
+class tRisaOggVorbisWaveDecoderFactoryRegisterer :
+	public singleton_base<tRisaOggVorbisWaveDecoderFactoryRegisterer>,
+	depends_on<tRisaWaveDecoderFactoryManager>
+{
+public:
+	//! @brief コンストラクタ
+	tRisaOggVorbisWaveDecoderFactoryRegisterer()
+	{
+		boost::shared_ptr<tRisaWaveDecoderFactory>
+			factory(new tRisaOggVorbisWaveDecoderFactory());
+		tRisaWaveDecoderFactoryManager::instance()->Register(RISSE_WS(".ogg"), factory);
+	}
+	//! @brief デストラクタ
+	~tRisaOggVorbisWaveDecoderFactoryRegisterer()
+	{
+		tRisaWaveDecoderFactoryManager::instance()->Unregister(RISSE_WS(".ogg"));
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+

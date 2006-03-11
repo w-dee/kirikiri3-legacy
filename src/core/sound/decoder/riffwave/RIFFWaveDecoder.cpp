@@ -354,3 +354,54 @@ bool tRisaRIFFWaveDecoder::FindRIFFChunk(tRisseBinaryStream * stream, const riss
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		デコーダファクトリクラス
+//---------------------------------------------------------------------------
+class tRisaRIFFWaveWaveDecoderFactory : public tRisaWaveDecoderFactory
+{
+public:
+	//! @brief デコーダを作成する
+	boost::shared_ptr<tRisaWaveDecoder> Create(const ttstr & filename)
+	{
+		boost::shared_ptr<tRisaWaveDecoder>
+			decoder(new tRisaRIFFWaveDecoder(filename));
+		return decoder;
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		デコーダファクトリレジストラ
+//---------------------------------------------------------------------------
+class tRisaRIFFWaveWaveDecoderFactoryRegisterer :
+	public singleton_base<tRisaRIFFWaveWaveDecoderFactoryRegisterer>,
+	depends_on<tRisaWaveDecoderFactoryManager>
+{
+public:
+	//! @brief コンストラクタ
+	tRisaRIFFWaveWaveDecoderFactoryRegisterer()
+	{
+		boost::shared_ptr<tRisaWaveDecoderFactory>
+			factory(new tRisaRIFFWaveWaveDecoderFactory());
+		tRisaWaveDecoderFactoryManager::instance()->Register(RISSE_WS(".wav"), factory);
+	}
+	//! @brief デストラクタ
+	~tRisaRIFFWaveWaveDecoderFactoryRegisterer()
+	{
+		tRisaWaveDecoderFactoryManager::instance()->Unregister(RISSE_WS(".wav"));
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+

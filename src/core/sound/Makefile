@@ -12,11 +12,14 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 # このディレクトリにあるソースファイルを列挙
 #-----------------------------------------
 CPPFILES=\
-		WaveFormatConverter.cpp                    \
-		WaveLoopManager.cpp                        \
+		ALBuffer.cpp                               \
 		ALCommon.cpp                               \
 		ALSource.cpp                               \
-		ALBuffer.cpp                               \
+		Sound.cpp                                  \
+		SoundBind.cpp                              \
+		WaveDecoder.cpp                            \
+		WaveFormatConverter.cpp                    \
+		WaveLoopManager.cpp                        \
 		WaveSegmentQueue.cpp                       \
 		decoder/riffwave/RIFFWaveDecoder.cpp       \
 		decoder/vorbis/VorbisDecoder.cpp           \

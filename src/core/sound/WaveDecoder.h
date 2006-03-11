@@ -15,7 +15,8 @@
 
 
 #include "sound/Wave.h"
-
+#include "base/utils/Singleton.h"
+#include <map>
 
 //---------------------------------------------------------------------------
 //! @brief	 デコーダインターフェース
@@ -68,6 +69,40 @@ public:
 		*/
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	 	デコーダファクトリ
+//! @note		Risa は 拡張子で音楽形式を判断する。ファクトリの登録は
+//!				tRisaWaveDecoderFactoryManager を通して行うこと。
+//---------------------------------------------------------------------------
+class tRisaWaveDecoderFactory
+{
+public:
+	virtual boost::shared_ptr<tRisaWaveDecoder> Create(const ttstr & filename) = 0; //!< デコーダを作成する
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	 	デコーダファクトリーマネージャ
+//---------------------------------------------------------------------------
+class tRisaWaveDecoderFactoryManager : public singleton_base<tRisaWaveDecoderFactoryManager>
+{
+	typedef std::map<ttstr, boost::shared_ptr<tRisaWaveDecoderFactory> >  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
+	tMap Map; //!< 拡張子→ファクトリのマップ
+
+public:
+	tRisaWaveDecoderFactoryManager();
+	~tRisaWaveDecoderFactoryManager();
+
+	void Register(const ttstr & extension, boost::shared_ptr<tRisaWaveDecoderFactory> factory);
+	void Unregister(const ttstr & extension);
+
+	boost::shared_ptr<tRisaWaveDecoder> Create(const ttstr & filename);
+};
+//---------------------------------------------------------------------------
+
 
 
 #endif

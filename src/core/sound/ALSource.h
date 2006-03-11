@@ -19,24 +19,35 @@
 #include "sound/ALBuffer.h"
 
 
+class tRisaWaveDecodeThread;
 //---------------------------------------------------------------------------
 //! @brief		OpenALソース
 //---------------------------------------------------------------------------
 class tRisaALSource : depends_on<tRisaOpenAL>
 {
+	friend class tRisaWaveDecodeThread;
+
 	risse_uint NumBuffersQueued; //!< キューに入っているバッファの数
 	ALuint Source; //!< OpenAL ソース
 	bool SourceAllocated; //!< Source がすでに割り当てられているかどうか
-	boost::shared_ptr<tRisaALBuffer> Buffer; // バッファ
+	boost::shared_ptr<tRisaALBuffer> Buffer; //!< バッファ
+	tRisaWaveDecodeThread * DecodeThread; //!< デコードスレッド
 
 public:
 	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer);
+	tRisaALSource(const tRisaALSource * ref);
 	~tRisaALSource();
 
-	ALuint GetSource() const { return Source; } // Source を得る
+private:
+	void Init(boost::shared_ptr<tRisaALBuffer> buffer);
+
+public:
+	ALuint GetSource() const { return Source; } //!< Source を得る
 
 private:
 	void Clear();
+
+	void FillBuffer();
 
 public:
 	void Play();

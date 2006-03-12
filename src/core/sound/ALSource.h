@@ -17,21 +17,59 @@
 #include <alc.h>
 #include "sound/ALCommon.h"
 #include "sound/ALBuffer.h"
+#include "base/utils/RisaThread.h"
+#include "base/utils/Singleton.h"
+
+
+class tRisaALSource;
+//---------------------------------------------------------------------------
+//! @brief		監視用スレッド
+//! @note		監視用スレッドは、約50ms周期のコールバックをすべての
+//!				ソースに発生させる。ソースではいくつかポーリングを
+//!				行わなければならない場面でこのコールバックを利用する。
+//---------------------------------------------------------------------------
+class tRisaWaveWatchThread :
+	public singleton_base<tRisaWaveWatchThread>,
+	manual_start<tRisaWaveWatchThread>,
+	public tRisaThread
+{
+	tRisaThreadEvent Event; //!< スレッドをたたき起こすため/スレッドを眠らせるためのイベント
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+
+	std::vector<tRisaALSource*> Sources; //!< Source の配列
+
+public:
+	tRisaWaveWatchThread();
+	~tRisaWaveWatchThread();
+
+	void RegisterSource(tRisaALSource * source);
+	void UnregisterSource(tRisaALSource * source);
+
+protected:
+	void Execute(void);
+};
+//---------------------------------------------------------------------------
+
+
+
 
 
 class tRisaWaveDecodeThread;
 //---------------------------------------------------------------------------
 //! @brief		OpenALソース
 //---------------------------------------------------------------------------
-class tRisaALSource : depends_on<tRisaOpenAL>
+class tRisaALSource : depends_on<tRisaOpenAL>, depends_on<tRisaWaveWatchThread>
 {
 	friend class tRisaWaveDecodeThread;
+	friend class tRisaWaveWatchThread;
 
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_uint NumBuffersQueued; //!< キューに入っているバッファの数
 	ALuint Source; //!< OpenAL ソース
 	bool SourceAllocated; //!< Source がすでに割り当てられているかどうか
 	boost::shared_ptr<tRisaALBuffer> Buffer; //!< バッファ
 	tRisaWaveDecodeThread * DecodeThread; //!< デコードスレッド
+	volatile bool Playing; //!< 再生中に真
 
 public:
 	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer);
@@ -48,10 +86,12 @@ private:
 	void Clear();
 
 	void FillBuffer();
+	void WatchCallback();
 
 public:
 	void Play();
 	void Stop();
+	bool GetPlaying() const { return Playing; }
 
 };
 //---------------------------------------------------------------------------

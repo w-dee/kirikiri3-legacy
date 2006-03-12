@@ -84,6 +84,7 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool str
 //---------------------------------------------------------------------------
 tRisaALBuffer::~tRisaALBuffer()
 {
+	tRisaCriticalSection::tLocker lock(CS);
 	Clear();
 }
 //---------------------------------------------------------------------------
@@ -292,6 +293,8 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 //---------------------------------------------------------------------------
 void tRisaALBuffer::PrepareStream(ALuint source)
 {
+	tRisaCriticalSection::tLocker lock(CS);
+
 	if(!Streaming) return;
 
 	for(risse_uint i = 0; i < STREAMING_PREPARE_BUFFERS; i++)
@@ -308,6 +311,8 @@ void tRisaALBuffer::PrepareStream(ALuint source)
 //---------------------------------------------------------------------------
 bool tRisaALBuffer::QueueStream(ALuint source)
 {
+	tRisaCriticalSection::tLocker lock(CS);
+
 	ALuint  buffer = 0;
 
 	// ストリーミングではない場合はそのまま返る
@@ -375,6 +380,8 @@ bool tRisaALBuffer::QueueStream(ALuint source)
 //---------------------------------------------------------------------------
 void tRisaALBuffer::UnqueueAllBuffers(ALuint source)
 {
+	tRisaCriticalSection::tLocker lock(CS);
+
 	// ソースにキューされているバッファの数を得る
 	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
@@ -401,6 +408,8 @@ void tRisaALBuffer::UnqueueAllBuffers(ALuint source)
 //---------------------------------------------------------------------------
 void tRisaALBuffer::Load()
 {
+	tRisaCriticalSection::tLocker lock(CS);
+
 	// OpenAL バッファに Filter からの入力を「すべて」デコードし、入れる
 
 	// TODO: WaveLoopManager のリンク無効化 (そうしないと延々とサウンドを

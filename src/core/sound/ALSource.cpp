@@ -300,6 +300,88 @@ void tRisaWaveDecodeThreadPool::Free(tRisaWaveDecodeThread * thread)
 
 
 
+/*
+	tRisaWaveWatchThread の定義はこのヘッダファイルにある
+*/
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tRisaWaveWatchThread::tRisaWaveWatchThread()
+{
+	Run(); // スレッドの実行を開始
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		デストラクタ
+//---------------------------------------------------------------------------
+tRisaWaveWatchThread::~tRisaWaveWatchThread()
+{
+	Terminate(); // スレッドの終了を伝える
+	Event.Signal(); // スレッドをたたき起こす
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ソースを登録する
+//! @param		source ソース
+//---------------------------------------------------------------------------
+void tRisaWaveWatchThread::RegisterSource(tRisaALSource * source)
+{
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	if(Sources.size() == 0) Event.Signal(); // ながめに眠っていたソースをたたき起こす
+	Sources.push_back(source);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ソースの登録を解除する
+//! @param		source ソース
+//---------------------------------------------------------------------------
+void tRisaWaveWatchThread::UnregisterSource(tRisaALSource * source)
+{
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	std::vector<tRisaALSource*>::iterator i =
+		std::find(Sources.begin(), Sources.end(), source);
+	if(i != Sources.end()) Sources.erase(i);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		スレッドのエントリーポイント
+//---------------------------------------------------------------------------
+void tRisaWaveWatchThread::Execute(void)
+{
+	while(!ShouldTerminate())
+	{
+		long sleep_time;
+
+		{
+			volatile tRisaCriticalSection::tLocker cs_holder(CS);
+			if(Sources.size())
+			{
+				// すべてのソースの WatchCallback を呼び出す
+				for(std::vector<tRisaALSource*>::iterator i = Sources.begin();
+						i != Sources.end(); i++)
+					(*i)->WatchCallback();
+				sleep_time = 50; // 50ms 固定
+			}
+			else
+			{
+				sleep_time = 60 * 1000; // ソースが登録されていないので長めに眠る
+			}
+		}
+
+		Event.Wait(sleep_time); // 適当な時間待つ
+	}
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -368,28 +450,36 @@ void tRisaALSource::Init(boost::shared_ptr<tRisaALBuffer> buffer)
 	// フィールドの初期化
 	SourceAllocated = false;
 	DecodeThread = NULL;
+	Playing = false;
 
 	// スレッドプールを作成
 	tRisaWaveDecodeThreadPool::ensure();
 
 	try
 	{
-		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+		volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
-		// ソースの生成
-		alGenSources(1, &Source);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGenSources"));
-		SourceAllocated = true;
-
-		alSourcei(Source, AL_LOOPING, AL_FALSE);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
-
-		// ストリーミングを行わない場合は、バッファをソースにアタッチ
-		if(!Buffer->GetStreaming())
 		{
-			alSourcei(Source, AL_BUFFER, Buffer->GetBuffer());
-			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_BUFFER)"));
+			volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+
+			// ソースの生成
+			alGenSources(1, &Source);
+			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGenSources"));
+			SourceAllocated = true;
+
+			alSourcei(Source, AL_LOOPING, AL_FALSE);
+			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
+
+			// ストリーミングを行わない場合は、バッファをソースにアタッチ
+			if(!Buffer->GetStreaming())
+			{
+				alSourcei(Source, AL_BUFFER, Buffer->GetBuffer());
+				tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_BUFFER)"));
+			}
 		}
+
+		// Watch Thread に追加 (これ以降非同期にWatchCallbackが呼ばれるので注意)
+		tRisaWaveWatchThread::instance()->RegisterSource(this);
 	}
 	catch(...)
 	{
@@ -405,10 +495,19 @@ void tRisaALSource::Init(boost::shared_ptr<tRisaALBuffer> buffer)
 //---------------------------------------------------------------------------
 void tRisaALSource::Clear()
 {
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
+	// 再生の停止
+	Stop();
+
+	// Watch Thread から登録解除
+	tRisaWaveWatchThread::instance()->UnregisterSource(this);
+
+	// デコードスレッドの削除
 	if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
 
-	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
-
+	// ソースの削除
+	volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 	if(SourceAllocated) alDeleteSources(1, &Source);
 	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alDeleteSources"));
 	SourceAllocated = false;
@@ -421,6 +520,8 @@ void tRisaALSource::Clear()
 //---------------------------------------------------------------------------
 void tRisaALSource::FillBuffer()
 {
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
 	if(Buffer->GetStreaming())
 	{
 		Buffer->QueueStream(Source);
@@ -430,10 +531,46 @@ void tRisaALSource::FillBuffer()
 
 
 //---------------------------------------------------------------------------
+//! @brief		監視用コールバック(tRisaWaveWatchThreadから約50msごとに呼ばれる)
+//---------------------------------------------------------------------------
+void tRisaALSource::WatchCallback()
+{
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
+	if(Playing)
+	{
+		ALint state;
+
+		{
+			volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
+			alGetSourcei(Source, AL_SOURCE_STATE, &state );
+			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_SOURCE_STATE)"));
+		}
+
+		if(state != AL_PLAYING)
+		{
+			// Playing が真を表しているにもかかわらず、OpenAL のソースは再生を
+			// 停止している
+			// 状態を修正
+			Playing = false;
+			// デコードスレッドも返す
+			if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
+		}
+	}
+
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		再生の開始
 //---------------------------------------------------------------------------
 void tRisaALSource::Play()
 {
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
+	if(Playing) return; // すでに再生している場合は再生をしない
+
 	if(Buffer->GetStreaming())
 	{
 		// 初期サンプルをいくつか queue する
@@ -447,9 +584,10 @@ void tRisaALSource::Play()
 
 	// 再生を開始する
 	{
-		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+		volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 
 		alSourcePlay(Source);
+		Playing = true;
 		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
 }
@@ -461,6 +599,8 @@ void tRisaALSource::Play()
 //---------------------------------------------------------------------------
 void tRisaALSource::Stop()
 {
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
 	// デコードスレッドを削除する
 	if(Buffer->GetStreaming())
 	{
@@ -471,9 +611,10 @@ void tRisaALSource::Stop()
 
 	// 再生を停止する
 	{
-		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+		volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 
 		alSourceStop(Source);
+		Playing = false;
 		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
 

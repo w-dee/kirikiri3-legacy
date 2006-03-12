@@ -31,6 +31,7 @@ public:
 	static const risse_uint MAX_NUM_BUFFERS = STREAMING_NUM_BUFFERS; //!< 一つの tRisaALSource が保持する最大のバッファ数
 
 private:
+	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	ALuint Buffers[MAX_NUM_BUFFERS]; //!< OpenAL バッファ
 	risse_uint BufferAllocatedCount; //!< OpenAL バッファに実際に割り当てられたバッファ数
 	bool Streaming; //!< ストリーミングを行うかどうか

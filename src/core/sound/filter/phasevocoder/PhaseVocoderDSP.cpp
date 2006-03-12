@@ -75,7 +75,7 @@ tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
 	FrequencyScale = 1.0;
 	RebuildParams = true; // 必ず初回にパラメータを再構築するように真
 
-	LastSynthPhaseAdjustConter = 0;
+	LastSynthPhaseAdjustCounter = 0;
 
 	try
 	{
@@ -523,11 +523,11 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 	}
 
 	// LastSynthPhase を再調整するか
-	LastSynthPhaseAdjustConter += LastSynthPhaseAdjustIncrement;
-	if(LastSynthPhaseAdjustConter >= LastSynthPhaseAdjustInterval)
+	LastSynthPhaseAdjustCounter += LastSynthPhaseAdjustIncrement;
+	if(LastSynthPhaseAdjustCounter >= LastSynthPhaseAdjustInterval)
 	{
 		// LastSynthPhase を再調整するカウントになった
-		LastSynthPhaseAdjustConter = 0;
+		LastSynthPhaseAdjustCounter = 0;
 
 		// ここで行う調整は LastSynthPhase の unwrapping である。
 		// LastSynthPhase は位相の差が累積されるので大きな数値になっていくが、

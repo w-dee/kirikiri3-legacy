@@ -93,7 +93,7 @@ wxLocale locale;
 //---------------------------------------------------------------------------
 //! @brief		シグナルハンドラ
 //---------------------------------------------------------------------------
-static bool RisaInterrupted = false;
+static volatile sig_atomic_t RisaInterrupted = false;
 static void RisaSigInt(int sig)
 {
 	RisaInterrupted = true;

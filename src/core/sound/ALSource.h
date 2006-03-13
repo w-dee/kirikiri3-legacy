@@ -19,6 +19,7 @@
 #include "sound/ALBuffer.h"
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
+#include "base/event/Event.h"
 
 
 class tRisaALSource;
@@ -53,15 +54,45 @@ protected:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		tRisaALSourceのステータスを含むクラス
+//---------------------------------------------------------------------------
+class tRisaALSourceStatus
+{
+public:
+	//! @brief	サウンドソースの状態
+	enum tStatus
+	{
+		ssUnload, //!< data is not specified (tRisaALSourceではこの状態は存在しない)
+		ssStop, //!< stopping
+		ssPlay, //!< playing
+		ssPause, //!< pausing
+	};
+};
+//---------------------------------------------------------------------------
+
+
 
 class tRisaWaveDecodeThread;
 //---------------------------------------------------------------------------
 //! @brief		OpenALソース
 //---------------------------------------------------------------------------
-class tRisaALSource : depends_on<tRisaOpenAL>, depends_on<tRisaWaveWatchThread>
+class tRisaALSource :
+				depends_on<tRisaOpenAL>,
+				depends_on<tRisaWaveWatchThread>,
+				depends_on<tRisaEventSystem>,
+				protected tRisaEventDestination,
+				public tRisaALSourceStatus
 {
 	friend class tRisaWaveDecodeThread;
 	friend class tRisaWaveWatchThread;
+
+private:
+	//! @brief	イベントのID
+	enum tEventId
+	{
+		eiStatusChanged, // ステータスが変更された
+	};
 
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_uint NumBuffersQueued; //!< キューに入っているバッファの数
@@ -70,11 +101,13 @@ class tRisaALSource : depends_on<tRisaOpenAL>, depends_on<tRisaWaveWatchThread>
 	boost::shared_ptr<tRisaALBuffer> Buffer; //!< バッファ
 	tRisaWaveDecodeThread * DecodeThread; //!< デコードスレッド
 	volatile bool Playing; //!< 再生中に真
+	tStatus Status; //!< サウンドステータス
+	tStatus PrevStatus; //!< 直前のサウンドステータス
 
 public:
 	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer);
 	tRisaALSource(const tRisaALSource * ref);
-	~tRisaALSource();
+	virtual ~tRisaALSource();
 
 private:
 	void Init(boost::shared_ptr<tRisaALBuffer> buffer);
@@ -88,11 +121,19 @@ private:
 	void FillBuffer();
 	void WatchCallback();
 
+	void CallStatusChanged();
+
+protected:
+	void OnEvent(tRisaEventInfo * info);
+
 public:
 	void Play();
 	void Stop();
 	bool GetPlaying() const { return Playing; }
 
+
+public:
+	virtual void OnStatusChanged(tStatus status) {;}
 };
 //---------------------------------------------------------------------------
 

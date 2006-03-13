@@ -21,12 +21,42 @@
 #include "sound/WaveFilter.h"
 
 
+class tRisaSound;
+//---------------------------------------------------------------------------
+//! @brief		OpenALイベントの発生先を tRisaSound に固定した OpenAL ソースクラス
+//---------------------------------------------------------------------------
+class tRisaSoundALSource : public tRisaALSource
+{
+	tRisaSound * Owner;
+
+public:
+	tRisaSoundALSource(tRisaSound * owner, boost::shared_ptr<tRisaALBuffer> buffer);
+	tRisaSoundALSource(tRisaSound * owner, const tRisaALSource * ref);
+
+protected:
+	void OnStatusChanged(tStatus status);
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		サウンドクラス
 //---------------------------------------------------------------------------
-class tRisaSound : depends_on<tRisaOpenAL>, depends_on<tRisaWaveDecoderFactoryManager>
+class tRisaSound :
+	depends_on<tRisaOpenAL>,
+	depends_on<tRisaWaveDecoderFactoryManager>,
+	public tRisaALSourceStatus
 {
-	boost::shared_ptr<tRisaALSource> Source;
+	friend class tRisaSoundALSource;
+
+	tStatus Status; //!< 直前のステータス
+
+	boost::shared_ptr<tRisaSoundALSource> Source;
 	boost::shared_ptr<tRisaALBuffer> Buffer;
 	std::vector<boost::shared_ptr<tRisaWaveFilter> > Filters;
 	boost::shared_ptr<tRisaWaveLoopManager> LoopManager;
@@ -35,7 +65,7 @@ class tRisaSound : depends_on<tRisaOpenAL>, depends_on<tRisaWaveDecoderFactoryMa
 public:
 	tRisaSound();
 	tRisaSound(const ttstr & filename);
-	~tRisaSound();
+	virtual ~tRisaSound();
 
 private:
 	void Init();
@@ -43,11 +73,17 @@ private:
 protected:
 	void Clear();
 
+	void CallOnStatusChanged(tStatus status);
+
 public:
 	void Open(const ttstr & filename);
 	void Close();
 	void Play();
 	void Stop();
+
+	virtual void OnStatusChanged(tStatus status) {;}
+
+	tStatus GetStatus() const { return Status; } //!< ステータスを返す
 };
 //---------------------------------------------------------------------------
 

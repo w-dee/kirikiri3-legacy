@@ -31,6 +31,12 @@ public:
 	risse_error Construct(risse_int numparams,
 		tRisseVariant **param, iRisseDispatch2 *risse_obj);
 	void Invalidate();
+
+	void OnStatusChanged(tStatus status); //  from tRisaSound
+
+	ttstr GetStatusString() const;
+
+	static ttstr StatusToString(tStatus status);
 };
 //---------------------------------------------------------------------------
 
@@ -67,16 +73,79 @@ risse_error tRisseNI_Sound::Construct(risse_int numparams,
 //---------------------------------------------------------------------------
 void tRisseNI_Sound::Invalidate()
 {
-	// 内部状態のクリア
-	Clear();
-
 	// Owner を NULL に
 	Owner = NULL;
+
+	// 内部状態のクリア
+	Clear();
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		ステータスが変わった
+//! @param		status  ステータス
+//---------------------------------------------------------------------------
+void tRisseNI_Sound::OnStatusChanged(tStatus status)
+{
+	// イベント関数を呼ぶ
+	if(Owner)
+	{
+		static ttstr onStatusChanged_name(RISSE_WS("onStatusChanged"));
+		tRisseVariant val(StatusToString(status));
+		tRisseVariant *params[] = {&val};
+		Owner->FuncCall(
+			0, // flag
+			onStatusChanged_name.c_str(), // name
+			onStatusChanged_name.GetHint(), // hint
+			NULL, // result
+			1, // numparams
+			params, // parameters
+			Owner // objthis
+			);
+	}
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		ステータス文字列を得る
+//---------------------------------------------------------------------------
+ttstr tRisseNI_Sound::GetStatusString() const
+{
+	return StatusToString(GetStatus());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ステータス列挙からステータス文字列に変換を行う
+//! @param		status ステータス
+//! @return		ステータス文字列
+//---------------------------------------------------------------------------
+ttstr tRisseNI_Sound::StatusToString(tStatus status)
+{
+	static ttstr unload(RISSE_WS("unload"));
+	static ttstr play  (RISSE_WS("play"));
+	static ttstr stop  (RISSE_WS("stop"));
+	static ttstr pause (RISSE_WS("pause"));
+	static ttstr unknown (RISSE_WS("unknown"));
+
+	switch(status)
+	{
+	case ssUnload:
+		return unload;
+	case ssPlay:
+		return play;
+	case ssStop:
+		return stop;
+	case ssPause:
+		return pause;
+	}
+
+	return unknown;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -205,6 +274,50 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/stop)
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/stop)
+//----------------------------------------------------------------------
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/onStatusChanged)
+{
+	/*%
+		@type event
+		@brief	ステータスが変更された
+		@param	status  ステータス文字列
+		@note
+		<p>
+			ステータスが変更された際に呼び出されます。
+			ステータス文字列は "unload" (メディアが読み込まれていない)、
+			"stop" (停止中)、"play" (再生中)、"pause" (一時停止中) の
+			いずれかです。
+		</p>
+	*/
+	return RISSE_S_OK;
+}
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/onStatusChanged)
+//----------------------------------------------------------------------
+RISSE_BEGIN_NATIVE_PROP_DECL(status)
+{
+	/*%
+		@brief	ステータス
+		@note
+		<p>
+			現在のステータスを表す文字列です。読み出し専用です。
+		</p>
+		<p>
+			ステータス文字列は "unload" (メディアが読み込まれていない)、
+			"stop" (停止中)、"play" (再生中)、"pause" (一時停止中) の
+			いずれかです。
+		</p>
+	*/
+	RISSE_BEGIN_NATIVE_PROP_GETTER
+	{
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		if(result) *result = _this->GetStatusString();
+		return RISSE_S_OK;
+	}
+	RISSE_END_NATIVE_PROP_GETTER
+
+	RISSE_DENY_NATIVE_PROP_SETTER
+}
+RISSE_END_NATIVE_PROP_DECL(status)
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------

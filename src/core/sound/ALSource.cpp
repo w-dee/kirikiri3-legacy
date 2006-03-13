@@ -436,7 +436,9 @@ tRisaALSource::tRisaALSource(const tRisaALSource * ref)
 //---------------------------------------------------------------------------
 tRisaALSource::~tRisaALSource()
 {
+	tRisaEventSystem::instance()->CancelEvents(this); // pending のイベントを削除する
 	Clear();
+	tRisaEventSystem::instance()->CancelEvents(this); // 念のため ...
 }
 //---------------------------------------------------------------------------
 
@@ -451,6 +453,7 @@ void tRisaALSource::Init(boost::shared_ptr<tRisaALBuffer> buffer)
 	SourceAllocated = false;
 	DecodeThread = NULL;
 	Playing = false;
+	Status = PrevStatus = ssStop;
 
 	// スレッドプールを作成
 	tRisaWaveDecodeThreadPool::ensure();
@@ -520,7 +523,10 @@ void tRisaALSource::Clear()
 //---------------------------------------------------------------------------
 void tRisaALSource::FillBuffer()
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	// ここはクリティカルセクションでは保護しない！！！！！！！！！
+	// (処理が長時間かかる場合があるので)
+	// Buffer がアクセス不可の時にここが呼ばれないようにするのは
+	// 他の箇所で保証すること
 
 	if(Buffer->GetStreaming())
 	{
@@ -553,11 +559,48 @@ void tRisaALSource::WatchCallback()
 			// 停止している
 			// 状態を修正
 			Playing = false;
+			Status = ssStop;
 			// デコードスレッドも返す
 			if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
+			// イベントシステムにコールバックの発生を指示する
+			tRisaEventSystem::instance()->PostEvent(
+				new tRisaEventInfo(eiStatusChanged, this, this));
 		}
 	}
 
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		前回とステータスが変わっていたら OnStatusChanged を呼ぶ
+//! @note		必ずメインスレッドから呼び出すこと
+//---------------------------------------------------------------------------
+void tRisaALSource::CallStatusChanged()
+{
+	if(PrevStatus != Status)
+	{
+		OnStatusChanged(Status);
+		PrevStatus = Status;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		イベントが発生したとき
+//! @param		info  イベント情報
+//---------------------------------------------------------------------------
+void tRisaALSource::OnEvent(tRisaEventInfo * info)
+{
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
+	switch(static_cast<tEventId>(info->GetId()))
+	{
+	case eiStatusChanged: // ステータスの変更を伝えるとき
+		CallStatusChanged();
+		break;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -573,6 +616,10 @@ void tRisaALSource::Play()
 
 	if(Buffer->GetStreaming())
 	{
+		// もし仮にデコードスレッドがあったとしても
+		// ここで解放する
+		if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
+
 		// 初期サンプルをいくつか queue する
 		Buffer->PrepareStream(Source);
 
@@ -590,6 +637,10 @@ void tRisaALSource::Play()
 		Playing = true;
 		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
+
+	// ステータスの変更を通知
+	Status = ssPlay;
+	CallStatusChanged();
 }
 //---------------------------------------------------------------------------
 
@@ -618,6 +669,11 @@ void tRisaALSource::Stop()
 		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
 
+	// ステータスの変更を通知
+	Status = ssStop;
+	CallStatusChanged();
+
+	// ステータスの変更を通知
 	if(Buffer->GetStreaming())
 	{
 		// 全てのバッファを unqueueする

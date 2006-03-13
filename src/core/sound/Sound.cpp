@@ -16,6 +16,44 @@
 RISSE_DEFINE_SOURCE_ID(47626,3140,27936,19656,12175,17772,57131,58681);
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tRisaSoundALSource::tRisaSoundALSource(tRisaSound * owner, boost::shared_ptr<tRisaALBuffer> buffer) :
+	tRisaALSource(buffer), Owner(owner)
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tRisaSoundALSource::tRisaSoundALSource(tRisaSound * owner, const tRisaALSource * ref) :
+	tRisaALSource(ref), Owner(owner)
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ステータスが変更された
+//! @param		status  ステータス
+//---------------------------------------------------------------------------
+void tRisaSoundALSource::OnStatusChanged(tStatus status)
+{
+	Owner->CallOnStatusChanged(status);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 /*
 	メモ
 	データの流れ
@@ -66,7 +104,7 @@ tRisaSound::~tRisaSound()
 //---------------------------------------------------------------------------
 void tRisaSound::Init()
 {
-
+	Status = ssUnload;
 }
 //---------------------------------------------------------------------------
 
@@ -85,6 +123,24 @@ void tRisaSound::Clear()
 	Filters.clear();
 	Buffer.reset();
 	Source.reset();
+
+	// ステータスを unload に
+	CallOnStatusChanged(ssUnload);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		OnStatusChanged を呼ぶ
+//! @param		status ステータス
+//---------------------------------------------------------------------------
+void tRisaSound::CallOnStatusChanged(tStatus status)
+{
+	if(Status != status)
+	{
+		Status = status;
+		OnStatusChanged(status);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -111,7 +167,10 @@ void tRisaSound::Open(const ttstr & filename)
 		Buffer = boost::shared_ptr<tRisaALBuffer>(new tRisaALBuffer(LoopManager, true));
 
 		// ソースを作成
-		Source = boost::shared_ptr<tRisaALSource>(new tRisaALSource(Buffer));
+		Source = boost::shared_ptr<tRisaSoundALSource>(new tRisaSoundALSource(this, Buffer));
+
+		// ステータスを更新
+		CallOnStatusChanged(ssStop);
 	}
 	catch(...)
 	{
@@ -131,7 +190,6 @@ void tRisaSound::Close()
 	Clear();
 }
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------

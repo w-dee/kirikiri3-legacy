@@ -211,7 +211,7 @@ RISSE_BEGIN_NATIVE_PROP_DECL(enabled)
 		@brief	有効か無効か
 		@note
 		<p>
-			タイマーが有効か、無効化を表します。真ならば有効で onTimer イベントが
+			タイマーが有効か、無効かを表します。真ならば有効で onTimer イベントが
 			発生し、偽ならば無効で、イベントは発生しません。
 		</p>
 	*/

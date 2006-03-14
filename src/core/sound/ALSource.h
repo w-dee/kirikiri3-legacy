@@ -100,7 +100,6 @@ private:
 	bool SourceAllocated; //!< Source がすでに割り当てられているかどうか
 	boost::shared_ptr<tRisaALBuffer> Buffer; //!< バッファ
 	tRisaWaveDecodeThread * DecodeThread; //!< デコードスレッド
-	volatile bool Playing; //!< 再生中に真
 	tStatus Status; //!< サウンドステータス
 	tStatus PrevStatus; //!< 直前のサウンドステータス
 
@@ -129,7 +128,7 @@ protected:
 public:
 	void Play();
 	void Stop();
-	bool GetPlaying() const { return Playing; }
+	void Pause();
 
 
 public:

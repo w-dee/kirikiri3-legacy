@@ -452,7 +452,6 @@ void tRisaALSource::Init(boost::shared_ptr<tRisaALBuffer> buffer)
 	// フィールドの初期化
 	SourceAllocated = false;
 	DecodeThread = NULL;
-	Playing = false;
 	Status = PrevStatus = ssStop;
 
 	// スレッドプールを作成
@@ -543,7 +542,7 @@ void tRisaALSource::WatchCallback()
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
-	if(Playing)
+	if(Status == ssPlay)
 	{
 		ALint state;
 
@@ -558,7 +557,6 @@ void tRisaALSource::WatchCallback()
 			// Playing が真を表しているにもかかわらず、OpenAL のソースは再生を
 			// 停止している
 			// 状態を修正
-			Playing = false;
 			Status = ssStop;
 			// デコードスレッドも返す
 			if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
@@ -612,7 +610,7 @@ void tRisaALSource::Play()
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
-	if(Playing) return; // すでに再生している場合は再生をしない
+	if(Status == ssPlay) return; // すでに再生している場合は再生をしない
 
 	if(Buffer->GetStreaming())
 	{
@@ -634,7 +632,6 @@ void tRisaALSource::Play()
 		volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 
 		alSourcePlay(Source);
-		Playing = true;
 		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
 
@@ -665,7 +662,6 @@ void tRisaALSource::Stop()
 		volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 
 		alSourceStop(Source);
-		Playing = false;
 		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
 
@@ -673,11 +669,36 @@ void tRisaALSource::Stop()
 	Status = ssStop;
 	CallStatusChanged();
 
-	// ステータスの変更を通知
+	// 全てのバッファを unqueueする
 	if(Buffer->GetStreaming())
 	{
-		// 全てのバッファを unqueueする
 		Buffer->UnqueueAllBuffers(Source);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		再生の一時停止
+//---------------------------------------------------------------------------
+void tRisaALSource::Pause()
+{
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
+	// 再生中の場合は
+	if(Status == ssPlay)
+	{
+		// 再生を一時停止する
+		{
+			volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
+
+			alSourcePause(Source);
+			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePause"));
+		}
+
+		// ステータスの変更を通知
+		Status = ssPause;
+		CallStatusChanged();
 	}
 }
 //---------------------------------------------------------------------------

@@ -55,6 +55,7 @@ class tRisaSound :
 	friend class tRisaSoundALSource;
 
 	tStatus Status; //!< 直前のステータス
+	bool NeedRewind; //!< リワインド (巻き戻し) が必要な場合に真
 
 	boost::shared_ptr<tRisaSoundALSource> Source;
 	boost::shared_ptr<tRisaALBuffer> Buffer;
@@ -73,6 +74,8 @@ private:
 protected:
 	void Clear();
 
+	void Rewind();
+
 	void CallOnStatusChanged(tStatus status);
 
 public:
@@ -80,6 +83,7 @@ public:
 	void Close();
 	void Play();
 	void Stop();
+	void Pause();
 
 	virtual void OnStatusChanged(tStatus status) {;}
 

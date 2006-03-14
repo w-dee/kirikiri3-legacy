@@ -275,6 +275,23 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/stop)
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/stop)
 //----------------------------------------------------------------------
+RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/pause)
+{
+	/*%
+		@brief	再生を一時停止する
+		@note
+		<p>
+			再生を一時停止します。
+		</p>
+	*/
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+
+	_this->Pause();
+
+	return RISSE_S_OK;
+}
+RISSE_END_NATIVE_METHOD_DECL(/*func. name*/pause)
+//----------------------------------------------------------------------
 RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/onStatusChanged)
 {
 	/*%

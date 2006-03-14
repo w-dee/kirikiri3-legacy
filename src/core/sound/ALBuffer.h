@@ -51,6 +51,8 @@ public:
 	tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> Filter, bool streaming);
 	~tRisaALBuffer();
 
+	boost::shared_ptr<tRisaWaveFilter> & GetFilter() { return Filter; } //!< 入力フィルタを得る
+
 private:
 	void Clear();
 	void FreeTempBuffers();

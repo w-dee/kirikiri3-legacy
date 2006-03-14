@@ -86,6 +86,10 @@ class tRisaALSource :
 {
 	friend class tRisaWaveDecodeThread;
 	friend class tRisaWaveWatchThread;
+public:
+	// 定数など
+	static const risse_uint STREAMING_NUM_BUFFERS = tRisaALBuffer::MAX_NUM_BUFFERS; //!< ストリーミング時のバッファの数(調整可)
+	static const risse_uint STREAMING_PREPARE_BUFFERS = 4; //!< 再生開始前にソースにキューしておくバッファの数
 
 private:
 	//! @brief	イベントのID
@@ -117,7 +121,12 @@ public:
 private:
 	void Clear();
 
+private: //---- queue/buffer management
 	void FillBuffer();
+	void UnqueueAllBuffers();
+	void QueueBuffer();
+
+private:
 	void WatchCallback();
 
 	void CallStatusChanged();

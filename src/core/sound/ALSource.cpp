@@ -529,7 +529,80 @@ void tRisaALSource::FillBuffer()
 
 	if(Buffer->GetStreaming())
 	{
-		Buffer->QueueStream(Source);
+		QueueBuffer();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		すべてのバッファをアンキューする
+//---------------------------------------------------------------------------
+void tRisaALSource::UnqueueAllBuffers()
+{
+	// ソースにキューされているバッファの数を得る
+	ALint queued;
+	alGetSourcei(Source, AL_BUFFERS_QUEUED, &queued);
+	tRisaOpenAL::instance()->ThrowIfError(
+		RISSE_WS("alGetSourcei(AL_BUFFERS_QUEUED) at tRisaALSource::UnqueueAllBuffers"));
+
+	if(queued > 0)
+	{
+		ALuint dummy_buffers[STREAMING_NUM_BUFFERS];
+
+		// アンキューする
+		alSourceUnqueueBuffers(Source, queued, dummy_buffers);
+		tRisaOpenAL::instance()->ThrowIfError(
+			RISSE_WS("alSourceUnqueueBuffers at tRisaALSource::UnqueueAllBuffers"));
+	}
+
+	Buffer->FreeAllBuffers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		バッファをソースにキューする
+//! @note		キューできない場合は何もしない
+//---------------------------------------------------------------------------
+void tRisaALSource::QueueBuffer()
+{
+	// アンキューできるバッファがあるかを調べる
+	{
+		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+
+		ALint processed;
+		alGetSourcei(Source, AL_BUFFERS_PROCESSED, &processed);
+		tRisaOpenAL::instance()->ThrowIfError(
+			RISSE_WS("alGetSourcei(AL_BUFFERS_PROCESSED)"));
+		if(processed >= 1)
+		{
+			// アンキューできるバッファがある
+			// 一つアンキューする
+			ALuint  buffer = 0;
+			alSourceUnqueueBuffers(Source, 1, &buffer);
+			tRisaOpenAL::instance()->ThrowIfError(
+				RISSE_WS("alSourceUnqueueBuffers at tRisaALSource::QueueStream"));
+			Buffer->PushFreeBuffer(buffer); // アンキューしたバッファを返す
+		}
+	}
+
+	// バッファに空きバッファがあるか
+	if(Buffer->HasFreeBuffer())
+	{
+		// データが流し込まれたバッファを得る
+		// TODO: segments と events のハンドリング
+		tRisaWaveSegmentQueue segumentqueue;
+		ALuint  buffer = 0;
+		bool filled = Buffer->PopFilledBuffer(buffer, segumentqueue);
+
+		// バッファにデータを割り当て、キューする
+		if(filled)
+		{
+			volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+			alSourceQueueBuffers(Source, 1, &buffer);
+			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourceQueueBuffers"));
+		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -565,7 +638,6 @@ void tRisaALSource::WatchCallback()
 				new tRisaEventInfo(eiStatusChanged, this, this));
 		}
 	}
-
 }
 //---------------------------------------------------------------------------
 
@@ -619,7 +691,8 @@ void tRisaALSource::Play()
 		if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
 
 		// 初期サンプルをいくつか queue する
-		Buffer->PrepareStream(Source);
+		for(risse_uint n = 0; n < STREAMING_PREPARE_BUFFERS; n++)
+			QueueBuffer();
 
 		// デコードスレッドを作成する
 		if(!DecodeThread) DecodeThread = tRisaWaveDecodeThreadPool::Get(this);
@@ -672,7 +745,7 @@ void tRisaALSource::Stop()
 	// 全てのバッファを unqueueする
 	if(Buffer->GetStreaming())
 	{
-		Buffer->UnqueueAllBuffers(Source);
+		UnqueueAllBuffers();
 	}
 }
 //---------------------------------------------------------------------------

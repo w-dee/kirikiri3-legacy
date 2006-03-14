@@ -26,14 +26,14 @@ public:
 	// 定数など
 	static const risse_uint STREAMING_BUFFER_HZ = 8; //!< ストリーミング時の1/(一つのバッファの時間)(調整可)
 	static const risse_uint STREAMING_CHECK_SLEEP_MS = 70; //!< ストリーミング時のバッファをチェックする間隔(調整可)
-	static const risse_uint STREAMING_NUM_BUFFERS = 16; //!< ストリーミング時のバッファの数(調整可)
-	static const risse_uint STREAMING_PREPARE_BUFFERS = 4; //!< 再生開始前にソースにキューしておくバッファの数
-	static const risse_uint MAX_NUM_BUFFERS = STREAMING_NUM_BUFFERS; //!< 一つの tRisaALSource が保持する最大のバッファ数
+	static const risse_uint MAX_NUM_BUFFERS = 16; //!< 一つの tRisaALBuffer が保持する最大のバッファ数
 
 private:
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	ALuint Buffers[MAX_NUM_BUFFERS]; //!< OpenAL バッファ
 	risse_uint BufferAllocatedCount; //!< OpenAL バッファに実際に割り当てられたバッファ数
+	ALuint FreeBuffers[MAX_NUM_BUFFERS]; //!< フリーのバッファ
+	risse_uint FreeBufferCount; //!< フリーのバッファの数
 	bool Streaming; //!< ストリーミングを行うかどうか
 	boost::shared_ptr<tRisaWaveFilter> Filter; //!< 入力フィルタ
 	ALenum ALFormat; //!< OpenAL バッファの Format
@@ -61,9 +61,10 @@ private:
 		tRisaWaveSegmentQueue & segmentqueue);
 
 public:
-	void PrepareStream(ALuint source);
-	bool QueueStream(ALuint source);
-	void UnqueueAllBuffers(ALuint source);
+	void PushFreeBuffer(ALuint buffer);
+	bool HasFreeBuffer();
+	bool PopFilledBuffer(ALuint & buffer, tRisaWaveSegmentQueue & segmentqueue);
+	void FreeAllBuffers();
 	void Load();
 
 	bool GetStreaming() const { return Streaming; }

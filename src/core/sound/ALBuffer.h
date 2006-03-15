@@ -69,6 +69,8 @@ public:
 
 	bool GetStreaming() const { return Streaming; }
 	ALuint GetBuffer() const { return Buffers[0]; } // 非ストリーミング用
+
+	risse_uint GetOneBufferRenderUnit() const { return ALOneBufferRenderUnit; }
 };
 //---------------------------------------------------------------------------
 

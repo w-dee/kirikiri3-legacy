@@ -336,6 +336,48 @@ RISSE_BEGIN_NATIVE_PROP_DECL(status)
 }
 RISSE_END_NATIVE_PROP_DECL(status)
 //----------------------------------------------------------------------
+RISSE_BEGIN_NATIVE_PROP_DECL(samplePosition)
+{
+	/*%
+		@brief	再生位置
+		@note
+		<p>
+			現在の再生位置を(元のメディア上の)サンプル数単位で表します。
+		</p>
+	*/
+	RISSE_BEGIN_NATIVE_PROP_GETTER
+	{
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		if(result) *result = (tTVInteger)_this->GetSamplePosition();
+		return RISSE_S_OK;
+	}
+	RISSE_END_NATIVE_PROP_GETTER
+
+	RISSE_DENY_NATIVE_PROP_SETTER
+}
+RISSE_END_NATIVE_PROP_DECL(samplePosition)
+//----------------------------------------------------------------------
+RISSE_BEGIN_NATIVE_PROP_DECL(position)
+{
+	/*%
+		@brief	再生位置
+		@note
+		<p>
+			現在の再生位置を(元のメディア上の)時間で表します。単位はミリ秒です。
+		</p>
+	*/
+	RISSE_BEGIN_NATIVE_PROP_GETTER
+	{
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		if(result) *result = _this->GetTimePosition();
+		return RISSE_S_OK;
+	}
+	RISSE_END_NATIVE_PROP_GETTER
+
+	RISSE_DENY_NATIVE_PROP_SETTER
+}
+RISSE_END_NATIVE_PROP_DECL(position)
+//----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
 	RISSE_END_NATIVE_MEMBERS

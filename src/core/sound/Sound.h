@@ -84,6 +84,8 @@ public:
 	void Play();
 	void Stop();
 	void Pause();
+	risse_uint64 GetSamplePosition();
+	double GetTimePosition();
 
 	virtual void OnStatusChanged(tStatus status) {;}
 

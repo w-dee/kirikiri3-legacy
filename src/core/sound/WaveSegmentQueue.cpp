@@ -104,7 +104,7 @@ void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveSegment> & segment
 void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveEvent> & events)
 {
 	// オフセットに加算する値を得る
-	risse_int64 event_offset = GetLength();
+	risse_int64 event_offset = GetFilteredLength();
 
 	// event の追加
 	for(std::deque<tRisaWaveEvent>::const_iterator i = events.begin();
@@ -194,7 +194,7 @@ void tRisaWaveSegmentQueue::Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 le
 //! @brief		このキューの全体の長さを得る
 //! @return		このキューの長さ (サンプルグラニュール単位)
 //---------------------------------------------------------------------------
-risse_int64 tRisaWaveSegmentQueue::GetLength() const
+risse_int64 tRisaWaveSegmentQueue::GetFilteredLength() const
 {
 	// キューの長さは すべての Segments のFilteredLengthの合計
 	risse_int64 length = 0;
@@ -209,13 +209,13 @@ risse_int64 tRisaWaveSegmentQueue::GetLength() const
 
 //---------------------------------------------------------------------------
 //! @brief		このキューの長さを変化させる
-//! @param		new_total_length 新しいキューの長さ (サンプルグラニュール単位)
+//! @param		new_total_filtered_length 新しいキューの長さ (サンプルグラニュール単位)
 //! @note		キュー中のSegments などの長さや Eventsの位置は線形補間される
 //---------------------------------------------------------------------------
-void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_length)
+void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_filtered_length)
 {
 	// キューの FilteredLength を変化させる
-	risse_int64 total_length_was = GetLength(); // 変化前の長さ
+	risse_int64 total_length_was = GetFilteredLength(); // 変化前の長さ
 
 	if(total_length_was == 0) return; // 元の長さがないのでスケール出来ない
 
@@ -234,7 +234,7 @@ void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_length)
 						static_cast<double>(total_length_was);
 
 		// 新しい old_end はどの位置にあるべき？
-		risse_int64 new_end = static_cast<risse_int64>(ratio * new_total_length);
+		risse_int64 new_end = static_cast<risse_int64>(ratio * new_total_filtered_length);
 
 		// FilteredLength の修正
 		i->FilteredLength = new_end - offset_is;
@@ -253,7 +253,7 @@ void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_length)
 	}
 
 	// Events の修正
-	double ratio = (double)new_total_length / (double)total_length_was;
+	double ratio = (double)new_total_filtered_length / (double)total_length_was;
 	for(std::deque<tRisaWaveEvent>::iterator i = Events.begin();
 		i != Events.end(); i++)
 	{
@@ -263,3 +263,34 @@ void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_length)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		フィルタされた位置からデコード位置へ変換を行う
+//! @param		pos フィルタされた位置
+//! @note		デコード位置
+//---------------------------------------------------------------------------
+risse_int64 tRisaWaveSegmentQueue::FilteredPositionToDecodePosition(risse_int64 pos) const
+{
+	// Segments の修正
+	risse_int64 offset_filtered = 0;
+
+	for(std::deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
+		i != Segments.end(); i++)
+	{
+		if(offset_filtered <= pos && pos < offset_filtered + i->FilteredLength)
+		{
+			// 対応する区間が見つかったので線形で補完して返す
+			return (risse_int64)(i->Start + (pos - offset_filtered) *
+				(double)i->Length / (double)i->FilteredLength );
+		}
+
+		offset_filtered += i->FilteredLength;
+	}
+
+	// 対応する区間が見つからないので、明らかに負であれば 0 を、
+	// そうでなければ最後の位置を返す
+	fprintf(stderr, "position not found\n");
+	if(pos<0) return 0;
+	if(Segments.size() == 0) return 0;
+	return Segments[Segments.size()-1].Start + Segments[Segments.size()-1].Length;
+}
+//---------------------------------------------------------------------------

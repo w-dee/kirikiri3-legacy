@@ -79,8 +79,10 @@ public:
 	void Enqueue(const std::deque<tRisaWaveSegment> & segments);
 	void Enqueue(const std::deque<tRisaWaveEvent> & events);
 	void Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 length);
-	risse_int64 GetLength() const;
+	risse_int64 GetFilteredLength() const;
 	void Scale(risse_int64 new_total_length);
+
+	risse_int64 FilteredPositionToDecodePosition(risse_int64 pos) const;
 };
 //---------------------------------------------------------------------------
 

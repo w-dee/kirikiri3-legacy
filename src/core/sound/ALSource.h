@@ -17,6 +17,7 @@
 #include <alc.h>
 #include "sound/ALCommon.h"
 #include "sound/ALBuffer.h"
+#include "sound/WaveSegmentQueue.h"
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
 #include "base/event/Event.h"
@@ -106,6 +107,7 @@ private:
 	tRisaWaveDecodeThread * DecodeThread; //!< デコードスレッド
 	tStatus Status; //!< サウンドステータス
 	tStatus PrevStatus; //!< 直前のサウンドステータス
+	std::deque<tRisaWaveSegmentQueue> SegmentQueues; //!< セグメントキューの配列
 
 public:
 	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer);
@@ -138,7 +140,7 @@ public:
 	void Play();
 	void Stop();
 	void Pause();
-
+	risse_uint64 GetPosition();
 
 public:
 	virtual void OnStatusChanged(tStatus status) {;}

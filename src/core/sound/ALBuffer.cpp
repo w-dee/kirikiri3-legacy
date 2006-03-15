@@ -334,7 +334,7 @@ bool tRisaALBuffer::PopFilledBuffer(ALuint & buffer, tRisaWaveSegmentQueue & seg
 	// ストリーミングではない場合はそのまま返る
 	if(!Streaming) return false;
 
-	// フリーのバッファが無い場合はそのまま変える
+	// フリーのバッファが無い場合はそのまま返る
 	if(!FreeBufferCount) return false;
 
 	// バッファにデータを流し込む

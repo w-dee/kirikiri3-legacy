@@ -556,7 +556,11 @@ void tRisaALSource::UnqueueAllBuffers()
 			RISSE_WS("alSourceUnqueueBuffers at tRisaALSource::UnqueueAllBuffers"));
 	}
 
+	// バッファもすべてアンキュー
 	Buffer->FreeAllBuffers();
+
+	// セグメントキューもクリア
+	SegmentQueues.clear();
 }
 //---------------------------------------------------------------------------
 
@@ -584,6 +588,11 @@ void tRisaALSource::QueueBuffer()
 			tRisaOpenAL::instance()->ThrowIfError(
 				RISSE_WS("alSourceUnqueueBuffers at tRisaALSource::QueueStream"));
 			Buffer->PushFreeBuffer(buffer); // アンキューしたバッファを返す
+
+			{
+				volatile tRisaCriticalSection::tLocker cs_holder(CS);
+				SegmentQueues.pop_front(); // セグメントキューからも削除
+			}
 		}
 	}
 
@@ -592,9 +601,9 @@ void tRisaALSource::QueueBuffer()
 	{
 		// データが流し込まれたバッファを得る
 		// TODO: segments と events のハンドリング
-		tRisaWaveSegmentQueue segumentqueue;
+		tRisaWaveSegmentQueue segmentqueue;
 		ALuint  buffer = 0;
-		bool filled = Buffer->PopFilledBuffer(buffer, segumentqueue);
+		bool filled = Buffer->PopFilledBuffer(buffer, segmentqueue);
 
 		// バッファにデータを割り当て、キューする
 		if(filled)
@@ -602,6 +611,13 @@ void tRisaALSource::QueueBuffer()
 			volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 			alSourceQueueBuffers(Source, 1, &buffer);
 			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourceQueueBuffers"));
+		}
+
+		// セグメントキューに追加
+		if(filled)
+		{
+			volatile tRisaCriticalSection::tLocker cs_holder(CS);
+			SegmentQueues.push_back(segmentqueue);
 		}
 	}
 }
@@ -717,6 +733,9 @@ void tRisaALSource::Play()
 
 //---------------------------------------------------------------------------
 //! @brief		再生の停止
+//! @note		このメソッドはメディアの巻き戻しを行わない(ソースはそこら辺を
+//!				管理しているループマネージャがどこにあるかを知らないので)
+//!				巻き戻しの処理は現在tRisaSound内で行われている
 //---------------------------------------------------------------------------
 void tRisaALSource::Stop()
 {
@@ -775,3 +794,47 @@ void tRisaALSource::Pause()
 	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		再生位置を得る
+//! @return		再生位置   (デコーダ出力時におけるサンプルグラニュール数単位)
+//! @note		返される値は、デコーダ上(つまり元のメディア上での)サンプルグラニュール数
+//!				単位となる。これは、フィルタとして時間の拡縮を行うようなフィルタが
+//!				挟まっていた場合は、実際に再生されたサンプルグラニュール数とは
+//!				異なる場合があるということである。
+//---------------------------------------------------------------------------
+risse_uint64 tRisaALSource::GetPosition()
+{
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
+	// 再生中や一時停止中でない場合は 0 を返す
+	if(Status != ssPlay && Status != ssPause) return 0;
+	if(SegmentQueues.size() == 0) return 0;
+
+	// 再生位置を取得する
+	ALint pos = 0;
+	{
+		volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
+
+		alGetSourcei(Source, AL_SAMPLE_OFFSET, &pos);
+		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_SAMPLE_OFFSET)"));
+	}
+
+	// 返された値は キューの先頭からの再生オフセットなので、該当する
+	// キューを探す
+	unsigned int queue_index = pos / Buffer->GetOneBufferRenderUnit();
+
+	// キューの範囲をはみ出していないか？
+	if(queue_index >= SegmentQueues.size())
+	{
+		// はみ出している
+		fprintf(stderr, "segment count ran out\n");
+		return 0;
+	}
+
+	// 得られたのはフィルタ後の位置なのでフィルタ前のデコード位置に変換してから返す
+	return SegmentQueues[queue_index].FilteredPositionToDecodePosition(pos);
+}
+//---------------------------------------------------------------------------
+

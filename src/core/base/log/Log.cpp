@@ -154,6 +154,20 @@ void tRisaLogger::InternalLog(const ttstr & content,
 	// 捨てない方がいいのかもしれないが...
 	if(LogSending) return;
 
+	// レベルが llError 以上の場合は stderr にも出力する
+	if(level >= llError)
+	{
+		wxFprintf(stderr, wxT("%s "), wxDateTime::Now().Format().c_str());
+		switch(level)
+		{
+		case llError   : wxFprintf(stderr, wxT("(Error) ")); break;
+		case llRecord  : wxFprintf(stderr, wxT("(Record) ")); break;
+		case llCritical: wxFprintf(stderr, wxT("(Critical) ")); break;
+		default: break;
+		}
+		wxFprintf(stderr, wxT("%s\n"), content.AsWxString().c_str());
+	}
+
 	// バッファがあふれそうな場合は古いログを捨てる
 	if(Buffer.GetDataSize() == Buffer.GetSize())
 	{

@@ -54,6 +54,9 @@ public:
 			// エラー状態をクリアする
 			tRisaOpenAL::instance()->ClearErrorState();
 		}
+		~tCriticalSectionHolder()
+		{
+		}
 	};
 
 

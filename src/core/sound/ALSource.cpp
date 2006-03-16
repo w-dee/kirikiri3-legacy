@@ -573,20 +573,28 @@ void tRisaALSource::QueueBuffer()
 {
 	// アンキューできるバッファがあるかを調べる
 	{
-		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
-
 		ALint processed;
-		alGetSourcei(Source, AL_BUFFERS_PROCESSED, &processed);
-		tRisaOpenAL::instance()->ThrowIfError(
-			RISSE_WS("alGetSourcei(AL_BUFFERS_PROCESSED)"));
+
+		{
+			volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+			alGetSourcei(Source, AL_BUFFERS_PROCESSED, &processed);
+			tRisaOpenAL::instance()->ThrowIfError(
+				RISSE_WS("alGetSourcei(AL_BUFFERS_PROCESSED)"));
+		}
+
 		if(processed >= 1)
 		{
 			// アンキューできるバッファがある
 			// 一つアンキューする
 			ALuint  buffer = 0;
-			alSourceUnqueueBuffers(Source, 1, &buffer);
-			tRisaOpenAL::instance()->ThrowIfError(
-				RISSE_WS("alSourceUnqueueBuffers at tRisaALSource::QueueStream"));
+
+			{
+				volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+				alSourceUnqueueBuffers(Source, 1, &buffer);
+				tRisaOpenAL::instance()->ThrowIfError(
+					RISSE_WS("alSourceUnqueueBuffers at tRisaALSource::QueueStream"));
+			}
+
 			Buffer->PushFreeBuffer(buffer); // アンキューしたバッファを返す
 
 			{

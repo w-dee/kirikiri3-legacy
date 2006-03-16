@@ -39,10 +39,13 @@ class tRisaThread
 	volatile void Set_Terminated(bool b) { _Terminated = b; }
 	wxMutex ThreadMutex; //!< スレッドが終了するまで保持されるロック
 	tRisaThreadInternal * Internal; //!< 内部スレッドの実装
+	wxString Name; //!< スレッドの名前
 
 public:
-	tRisaThread();
+	tRisaThread(wxString name = wxT("unknown"));
 	virtual ~tRisaThread();
+
+	const wxChar * GetName() const { return Name.c_str(); }
 
 	void Run(); // オーバーライド
 	void Wait(); // オーバーライド

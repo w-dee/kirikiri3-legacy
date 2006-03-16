@@ -12,6 +12,8 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/utils/RisaThread.h"
+#include "base/log/Log.h"
+#include <exception>
 
 RISSE_DEFINE_SOURCE_ID(24795,6838,687,16805,21894,40786,6545,48673);
 
@@ -70,6 +72,9 @@ public:
 
 private:
 	ExitCode Entry();
+
+private:
+	void RecordUnhandledException(const risse_char *message_risse, const char * message_char);
 };
 //---------------------------------------------------------------------------
 
@@ -110,10 +115,50 @@ wxThread::ExitCode tRisaThreadInternal::Entry()
 	Owner->ThreadMutex.Lock();
 
 	// スレッドのメイン関数を実行する
-	Owner->Execute();
+	try
+	{
+		Owner->Execute();
+	}
+	catch(const eRisse &e)
+	{
+		// !!!!!!! 例外が投げられた
+		RecordUnhandledException(e.GetMessageString().c_str(), NULL);
+	}
+	catch(const std::exception &e)
+	{
+		// !!!!!!! 例外が投げられた
+		RecordUnhandledException(NULL, e.what());
+	}
 	return 0;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		捕捉されない例外の表示・ログ
+//! @param		message_risse		risse_char * 形式のメッセージ
+//! @param		message_char		char * 形式のメッセージ
+//---------------------------------------------------------------------------
+void tRisaThreadInternal::RecordUnhandledException(
+				const risse_char *message_risse, const char * message_char)
+{
+	tRisaLogger::Log(RISSE_WS("Unhandleded exception caught in sub-thread."), tRisaLogger::llCritical);
+	tRisaLogger::Log(RISSE_WS("This should be considered as a fatal error!"), tRisaLogger::llCritical);
+	tRisaLogger::Log(RISSE_WS("Thread: ") + ttstr(Owner->GetName()), tRisaLogger::llCritical);
+	if(message_risse)
+	{
+		tRisaLogger::Log(RISSE_WS("Message: ") + ttstr(message_risse), tRisaLogger::llCritical);
+	}
+	if(message_char)
+	{
+		tRisaLogger::Log(RISSE_WS("Message: ") + ttstr(message_char), tRisaLogger::llCritical);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -122,7 +167,7 @@ wxThread::ExitCode tRisaThreadInternal::Entry()
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisaThread::tRisaThread()
+tRisaThread::tRisaThread(wxString name) : Name(name)
 {
 	_Terminated = false;
 	Internal = new tRisaThreadInternal(this);

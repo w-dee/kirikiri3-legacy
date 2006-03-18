@@ -30,7 +30,8 @@ class tRisaSoundALSource : public tRisaALSource
 	tRisaSound * Owner;
 
 public:
-	tRisaSoundALSource(tRisaSound * owner, boost::shared_ptr<tRisaALBuffer> buffer);
+	tRisaSoundALSource(tRisaSound * owner, boost::shared_ptr<tRisaALBuffer> buffer,
+		boost::shared_ptr<tRisaWaveLoopManager> loopmanager);
 	tRisaSoundALSource(tRisaSound * owner, const tRisaALSource * ref);
 
 protected:
@@ -55,7 +56,6 @@ class tRisaSound :
 	friend class tRisaSoundALSource;
 
 	tStatus Status; //!< 直前のステータス
-	bool NeedRewind; //!< リワインド (巻き戻し) が必要な場合に真
 
 	boost::shared_ptr<tRisaSoundALSource> Source;
 	boost::shared_ptr<tRisaALBuffer> Buffer;

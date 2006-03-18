@@ -407,10 +407,16 @@ void tRisaWaveWatchThread::Execute(void)
 //! @brief		コンストラクタ
 //! @param		buffer		OpenAL バッファを管理する tRisaALBuffer インスタンス
 //---------------------------------------------------------------------------
-tRisaALSource::tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer) :
-	Buffer(buffer)
+tRisaALSource::tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer,
+	boost::shared_ptr<tRisaWaveLoopManager> loopmanager) :
+	Buffer(buffer), LoopManager(loopmanager)
 {
 	Init(buffer);
+	if(!Buffer->GetStreaming())
+	{
+		// バッファが非ストリーミングの場合は LoopManager は必要ないので解放する
+		LoopManager.reset();
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -453,6 +459,7 @@ void tRisaALSource::Init(boost::shared_ptr<tRisaALBuffer> buffer)
 	SourceAllocated = false;
 	DecodeThread = NULL;
 	Status = PrevStatus = ssStop;
+	NeedRewind = false;
 
 	// スレッドプールを作成
 	tRisaWaveDecodeThreadPool::ensure();
@@ -662,6 +669,8 @@ void tRisaALSource::WatchCallback()
 			// イベントシステムにコールバックの発生を指示する
 			tRisaEventSystem::instance()->PostEvent(
 				new tRisaEventInfo(eiStatusChanged, this, this));
+			// 次回再生開始前に巻き戻しが必要
+			NeedRewind = true;
 		}
 	}
 }
@@ -715,6 +724,16 @@ void tRisaALSource::Play()
 		// もし仮にデコードスレッドがあったとしても
 		// ここで解放する
 		if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
+
+		// 巻き戻しを行う
+		if(NeedRewind)
+		{
+			// すべての状況で巻き戻しが必要なわけではないので
+			// NeedRewind が真の時にしかここでは巻き戻しを行わない
+			NeedRewind = false;
+			LoopManager->SetPosition(0); // 再生位置を最初に
+			Buffer->GetFilter()->Reset(); // フィルタをリセット
+		}
 
 		// 初期サンプルをいくつか queue する
 		for(risse_uint n = 0; n < STREAMING_PREPARE_BUFFERS; n++)
@@ -776,6 +795,9 @@ void tRisaALSource::Stop()
 	{
 		UnqueueAllBuffers();
 	}
+
+	// 次回再生開始前に巻き戻しが必要
+	NeedRewind = true;
 }
 //---------------------------------------------------------------------------
 

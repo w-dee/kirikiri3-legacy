@@ -21,8 +21,9 @@ RISSE_DEFINE_SOURCE_ID(47626,3140,27936,19656,12175,17772,57131,58681);
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisaSoundALSource::tRisaSoundALSource(tRisaSound * owner, boost::shared_ptr<tRisaALBuffer> buffer) :
-	tRisaALSource(buffer), Owner(owner)
+tRisaSoundALSource::tRisaSoundALSource(tRisaSound * owner,
+	boost::shared_ptr<tRisaALBuffer> buffer, boost::shared_ptr<tRisaWaveLoopManager> loopmanager) :
+	tRisaALSource(buffer, loopmanager), Owner(owner)
 {
 }
 //---------------------------------------------------------------------------
@@ -105,7 +106,6 @@ tRisaSound::~tRisaSound()
 void tRisaSound::Init()
 {
 	Status = ssUnload;
-	NeedRewind = false;
 }
 //---------------------------------------------------------------------------
 
@@ -127,21 +127,6 @@ void tRisaSound::Clear()
 
 	// ステータスを unload に
 	CallOnStatusChanged(ssUnload);
-
-	// 巻き戻しは不要
-	NeedRewind = false;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		巻き戻しを行う
-//---------------------------------------------------------------------------
-void tRisaSound::Rewind()
-{
-	if(!Source) return; // ソースがないので巻き戻しができない
-	LoopManager->SetPosition(0); // 再生位置を最初に
-	Buffer->GetFilter()->Reset(); // フィルタをリセット
 }
 //---------------------------------------------------------------------------
 
@@ -183,7 +168,7 @@ void tRisaSound::Open(const ttstr & filename)
 		Buffer = boost::shared_ptr<tRisaALBuffer>(new tRisaALBuffer(LoopManager, true));
 
 		// ソースを作成
-		Source = boost::shared_ptr<tRisaSoundALSource>(new tRisaSoundALSource(this, Buffer));
+		Source = boost::shared_ptr<tRisaSoundALSource>(new tRisaSoundALSource(this, Buffer, LoopManager));
 
 		// ステータスを更新
 		CallOnStatusChanged(ssStop);
@@ -214,13 +199,6 @@ void tRisaSound::Close()
 void tRisaSound::Play()
 {
 	if(!Source) return; // ソースがないので再生を開始できない
-	if(NeedRewind)
-	{
-		// 巻き戻しが必要な場合
-		// 巻き戻しを行う
-		Rewind();
-		NeedRewind = false;
-	}
 	Source->Play(); // 再生を開始
 }
 //---------------------------------------------------------------------------
@@ -233,7 +211,6 @@ void tRisaSound::Stop()
 {
 	if(!Source) return; // ソースがないので再生を停止できない
 	Source->Stop(); // 再生を停止
-	NeedRewind = true; // 次回再生前に巻き戻しが必要
 }
 //---------------------------------------------------------------------------
 

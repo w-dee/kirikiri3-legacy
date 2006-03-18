@@ -18,6 +18,7 @@
 #include "sound/ALCommon.h"
 #include "sound/ALBuffer.h"
 #include "sound/WaveSegmentQueue.h"
+#include "sound/WaveLoopManager.h"
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
 #include "base/event/Event.h"
@@ -104,13 +105,16 @@ private:
 	ALuint Source; //!< OpenAL ソース
 	bool SourceAllocated; //!< Source がすでに割り当てられているかどうか
 	boost::shared_ptr<tRisaALBuffer> Buffer; //!< バッファ
+	boost::shared_ptr<tRisaWaveLoopManager> LoopManager; //!< ループマネージャ
+	bool NeedRewind; //!< リワインド (巻き戻し) が必要な場合に真
 	tRisaWaveDecodeThread * DecodeThread; //!< デコードスレッド
 	tStatus Status; //!< サウンドステータス
 	tStatus PrevStatus; //!< 直前のサウンドステータス
 	std::deque<tRisaWaveSegmentQueue> SegmentQueues; //!< セグメントキューの配列
 
 public:
-	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer);
+	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer,
+		boost::shared_ptr<tRisaWaveLoopManager> loopmanager = boost::shared_ptr<tRisaWaveLoopManager>());
 	tRisaALSource(const tRisaALSource * ref);
 	virtual ~tRisaALSource();
 

@@ -294,3 +294,41 @@ risse_int64 tRisaWaveSegmentQueue::FilteredPositionToDecodePosition(risse_int64 
 	return Segments[Segments.size()-1].Start + Segments[Segments.size()-1].Length;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		内容を標準エラー出力にダンプする(デバッグ用)
+//---------------------------------------------------------------------------
+void tRisaWaveSegmentQueue::Dump() const
+{
+	bool first;
+
+	fprintf(stderr, "Segments [");
+	first = true;
+	for(std::deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
+		i != Segments.end(); i++)
+	{
+		if(!first)
+			fprintf(stderr, ", ");
+		first = false;
+		fprintf(stderr, "St:%ld Len:%ld FLen:%ld", (long)i->Start, (long)i->Length, (long)i->FilteredLength);
+	}
+	fprintf(stderr, "]");
+
+	fprintf(stderr, "  Events [");
+	first = true;
+	for(std::deque<tRisaWaveEvent>::const_iterator i = Events.begin();
+		i != Events.end(); i++)
+	{
+		if(!first)
+			fprintf(stderr, ", ");
+		first = false;
+		wxFprintf(stderr, wxT("Name:%s Pos:%ld Ofs:%d"), i->Name.AsWxString().c_str(),
+			(long)i->Position, i->Offset);
+	}
+	fprintf(stderr, "]");
+	fprintf(stderr, "\n");
+}
+//---------------------------------------------------------------------------
+
+

@@ -626,6 +626,8 @@ void tRisaALSource::QueueBuffer()
 		{
 			volatile tRisaCriticalSection::tLocker cs_holder(CS);
 			SegmentQueues.push_back(segmentqueue);
+//			fprintf(stderr, "queue : ");
+//			segmentqueue.Dump();
 		}
 	}
 }
@@ -831,7 +833,9 @@ risse_uint64 tRisaALSource::GetPosition()
 
 	// 返された値は キューの先頭からの再生オフセットなので、該当する
 	// キューを探す
-	unsigned int queue_index = pos / Buffer->GetOneBufferRenderUnit();
+	unsigned int unit = Buffer->GetOneBufferRenderUnit();
+	unsigned int queue_index  = pos / unit;
+	unsigned int queue_offset = pos % unit;
 
 	// キューの範囲をはみ出していないか？
 	if(queue_index >= SegmentQueues.size())
@@ -841,8 +845,11 @@ risse_uint64 tRisaALSource::GetPosition()
 		return 0;
 	}
 
+//	fprintf(stderr, "get position queue in offset %d at queue index %d : ", queue_offset, queue_index);
+//	SegmentQueues[queue_index].Dump();
+
 	// 得られたのはフィルタ後の位置なのでフィルタ前のデコード位置に変換してから返す
-	return SegmentQueues[queue_index].FilteredPositionToDecodePosition(pos);
+	return SegmentQueues[queue_index].FilteredPositionToDecodePosition(queue_offset);
 }
 //---------------------------------------------------------------------------
 

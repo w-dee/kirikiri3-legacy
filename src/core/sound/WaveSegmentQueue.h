@@ -83,6 +83,8 @@ public:
 	void Scale(risse_int64 new_total_length);
 
 	risse_int64 FilteredPositionToDecodePosition(risse_int64 pos) const;
+
+	void Dump() const;
 };
 //---------------------------------------------------------------------------
 

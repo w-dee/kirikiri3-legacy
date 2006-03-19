@@ -353,7 +353,13 @@ RISSE_BEGIN_NATIVE_PROP_DECL(samplePosition)
 	}
 	RISSE_END_NATIVE_PROP_GETTER
 
-	RISSE_DENY_NATIVE_PROP_SETTER
+	RISSE_BEGIN_NATIVE_PROP_SETTER
+	{
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		_this->SetSamplePosition((tTVInteger)*param);
+		return RISSE_S_OK;
+	}
+	RISSE_END_NATIVE_PROP_SETTER
 }
 RISSE_END_NATIVE_PROP_DECL(samplePosition)
 //----------------------------------------------------------------------
@@ -374,7 +380,13 @@ RISSE_BEGIN_NATIVE_PROP_DECL(position)
 	}
 	RISSE_END_NATIVE_PROP_GETTER
 
-	RISSE_DENY_NATIVE_PROP_SETTER
+	RISSE_BEGIN_NATIVE_PROP_SETTER
+	{
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		_this->SetTimePosition((double)*param);
+		return RISSE_S_OK;
+	}
+	RISSE_END_NATIVE_PROP_SETTER
 }
 RISSE_END_NATIVE_PROP_DECL(position)
 //----------------------------------------------------------------------

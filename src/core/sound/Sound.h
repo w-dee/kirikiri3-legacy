@@ -87,6 +87,9 @@ public:
 	risse_uint64 GetSamplePosition();
 	double GetTimePosition();
 
+	void SetSamplePosition(risse_uint64 pos);
+	void SetTimePosition(double pos);
+
 	virtual void OnStatusChanged(tStatus status) {;}
 
 	tStatus GetStatus() const { return Status; } //!< ステータスを返す

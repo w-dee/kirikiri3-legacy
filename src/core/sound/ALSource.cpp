@@ -875,3 +875,68 @@ risse_uint64 tRisaALSource::GetPosition()
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		再生位置を設定する
+//! @param		pos  再生位置 (デコーダ出力におけるサンプルグラニュール数単位)
+//---------------------------------------------------------------------------
+void tRisaALSource::SetPosition(risse_uint64 pos)
+{
+	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+
+	if(Buffer->GetStreaming())
+	{
+		if(Status == ssPlay || Status == ssPause)
+		{
+			// デコードスレッドをいったん削除する
+			if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
+					// デコードスレッドを削除した時点で
+					// FillBuffer は呼ばれなくなる
+
+			// 再生を停止する
+			{
+				volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
+
+				alSourceStop(Source);
+				depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alSourceStop"));
+			}
+		}
+
+		// 全てのバッファを unqueueする
+		UnqueueAllBuffers();
+
+		// 再生位置の変更を行う
+		NeedRewind = false;
+		LoopManager->SetPosition(pos); // 再生位置を最初に
+		Buffer->GetFilter()->Reset(); // フィルタをリセット
+
+		if(Status == ssPlay || Status == ssPause)
+		{
+			// 初期サンプルをいくつか queue する
+			for(risse_uint n = 0; n < STREAMING_PREPARE_BUFFERS; n++)
+				QueueBuffer();
+
+			// デコードスレッドを作成する
+			if(!DecodeThread) DecodeThread = tRisaWaveDecodeThreadPool::Get(this);
+			// デコードスレッドを作成するとその時点から
+			// FillBuffer が呼ばれるようになる
+		}
+
+		if(Status == ssPlay)
+		{
+			// 再生を開始する
+			{
+				volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
+
+				alSourcePlay(Source);
+				depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
+			}
+		}
+	}
+	else
+	{
+		// TODO: 非ストリーミング時の動作
+	}
+}
+//---------------------------------------------------------------------------
+

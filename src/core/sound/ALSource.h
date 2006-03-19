@@ -145,6 +145,7 @@ public:
 	void Stop();
 	void Pause();
 	risse_uint64 GetPosition();
+	void SetPosition(risse_uint64 pos);
 
 public:
 	virtual void OnStatusChanged(tStatus status) {;}

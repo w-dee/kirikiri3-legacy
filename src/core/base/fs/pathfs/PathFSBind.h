@@ -65,8 +65,8 @@ private:
 //---------------------------------------------------------------------------
 class tRisaPathFSRegisterer :
 	public singleton_base<tRisaPathFSRegisterer>,
-	depends_on<tRisaRisseScriptEngine>,
-	depends_on<tRisaFileSystemRegisterer>
+	protected depends_on<tRisaRisseScriptEngine>,
+	protected depends_on<tRisaFileSystemRegisterer>
 {
 public:
 	tRisaPathFSRegisterer();

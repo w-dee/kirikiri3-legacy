@@ -412,7 +412,7 @@ tRisseNativeInstance *tRisseNC_Sound::CreateNativeInstance()
 //---------------------------------------------------------------------------
 class tRisaSoundRegisterer :
 			public singleton_base<tRisaSoundRegisterer>,
-			depends_on<tRisaRisseScriptEngine>
+			protected depends_on<tRisaRisseScriptEngine>
 {
 public:
 	tRisaSoundRegisterer()
@@ -420,7 +420,7 @@ public:
 		iRisseDispatch2 * cls =  new tRisseNC_Sound();
 		try
 		{
-			tRisaRisseScriptEngine::instance()->
+			depends_on<tRisaRisseScriptEngine>::locked_instance()->
 				RegisterGlobalObject(RISSE_WS("Sound"), cls);
 		}
 		catch(...)

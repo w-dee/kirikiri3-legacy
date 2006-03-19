@@ -43,7 +43,7 @@ tRisaXP4ArchiveStream::tRisaXP4ArchiveStream(
 	SegmentRemain = 0;
 	SegmentPos = 0;
 
-	Stream = tRisaXP4StreamCache::instance()->GetStream(Owner.get(), ptr->GetFileName());
+	Stream = depends_on<tRisaXP4StreamCache>::locked_instance()->GetStream(Owner.get(), ptr->GetFileName());
 }
 //---------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ tRisaXP4ArchiveStream::~tRisaXP4ArchiveStream()
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	tRisaXP4StreamCache::instance()->ReleaseStream(Owner.get(), Stream);
+	depends_on<tRisaXP4StreamCache>::locked_instance()->ReleaseStream(Owner.get(), Stream);
 }
 //---------------------------------------------------------------------------
 
@@ -82,7 +82,7 @@ void tRisaXP4ArchiveStream::EnsureSegment()
 	{
 		// a compressed segment
 		// セグメントキャッシュの中から探す
-		DecompressedData = tRisaXP4SegmentCache::instance()->Find(
+		DecompressedData = depends_on<tRisaXP4SegmentCache>::locked_instance()->Find(
 			Owner.get(), FileIndex, CurSegmentNum,
 			Stream, SegmentInfo[CurSegmentNum].StoreOffset,
 			SegmentInfo[CurSegmentNum].StoreSize,

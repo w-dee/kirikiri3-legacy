@@ -99,7 +99,9 @@ public:
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaFileSystemRegisterer : public singleton_base<tRisaFileSystemRegisterer>, depends_on<tRisaRisseScriptEngine>
+class tRisaFileSystemRegisterer :
+		public singleton_base<tRisaFileSystemRegisterer>,
+		protected depends_on<tRisaRisseScriptEngine>
 {
 	iRisseDispatch2 * FileSystemClass;
 

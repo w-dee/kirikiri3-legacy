@@ -27,7 +27,7 @@ class tRisaLogReceiver;
 //---------------------------------------------------------------------------
 //! @brief		ログファイルクラス(シングルトン)
 //---------------------------------------------------------------------------
-class tRisaLogFile : public singleton_base<tRisaLogFile>, depends_on<tRisaLogger>
+class tRisaLogFile : public singleton_base<tRisaLogFile>, protected depends_on<tRisaLogger>
 {
 	static const size_t NumLastLog  = 50; //!< ファイルへのログ記録を開始した際に出力する LastLog の行数
 

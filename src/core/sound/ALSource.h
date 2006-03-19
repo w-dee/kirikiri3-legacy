@@ -80,9 +80,9 @@ class tRisaWaveDecodeThread;
 //! @brief		OpenALソース
 //---------------------------------------------------------------------------
 class tRisaALSource :
-				depends_on<tRisaOpenAL>,
-				depends_on<tRisaWaveWatchThread>,
-				depends_on<tRisaEventSystem>,
+				protected depends_on<tRisaOpenAL>,
+				protected depends_on<tRisaWaveWatchThread>,
+				protected depends_on<tRisaEventSystem>,
 				protected tRisaEventDestination,
 				public tRisaALSourceStatus
 {

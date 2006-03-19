@@ -118,7 +118,7 @@ tRisaXP4FSRegisterer::tRisaXP4FSRegisterer()
 	iRisseDispatch2 * cls = new tRisseNC_XP4FS();
 	try
 	{
-		tRisaFileSystemRegisterer::instance()->RegisterClassObject(
+		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(
 							RISSE_WS("XP4FS"), cls);
 	}
 	catch(...)

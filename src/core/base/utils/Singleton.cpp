@@ -23,7 +23,7 @@ unsigned int singleton_manager::ref_count = 0;
 
 
 //---------------------------------------------------------------------------
-//! @brief		ensure 関数を登録する
+//! @brief		シングルトン情報を登録する
 //---------------------------------------------------------------------------
 void singleton_manager::register_info(const singleton_manager::register_info_t & info)
 {
@@ -40,7 +40,7 @@ void singleton_manager::register_info(const singleton_manager::register_info_t &
 
 
 //---------------------------------------------------------------------------
-//! @brief		手動起動を表すクラスの ensure 関数を登録する
+//! @brief		手動起動を表すシングルトンの情報を登録する
 //---------------------------------------------------------------------------
 void singleton_manager::register_manual_start(handler_t func)
 {
@@ -64,7 +64,7 @@ void singleton_manager::register_disconnector(handler_t func)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ensure 関数の登録を解除する
+//! @brief		シングルトン情報の登録を解除する
 //---------------------------------------------------------------------------
 void singleton_manager::unregister_info()
 {

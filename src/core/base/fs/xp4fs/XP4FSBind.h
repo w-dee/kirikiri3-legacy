@@ -68,8 +68,8 @@ private:
 //---------------------------------------------------------------------------
 class tRisaXP4FSRegisterer :
 	public singleton_base<tRisaXP4FSRegisterer>,
-	depends_on<tRisaRisseScriptEngine>,
-	depends_on<tRisaFileSystemRegisterer>
+	protected depends_on<tRisaRisseScriptEngine>,
+	protected depends_on<tRisaFileSystemRegisterer>
 {
 public:
 	tRisaXP4FSRegisterer();

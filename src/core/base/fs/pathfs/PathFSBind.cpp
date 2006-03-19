@@ -169,7 +169,7 @@ tRisaPathFSRegisterer::tRisaPathFSRegisterer()
 	iRisseDispatch2 * cls = new tRisseNC_PathFS();
 	try
 	{
-		tRisaFileSystemRegisterer::instance()->RegisterClassObject(
+		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(
 							RISSE_WS("PathFS"), cls);
 	}
 	catch(...)

@@ -22,7 +22,7 @@
 //---------------------------------------------------------------------------
 //! @brief		テキストストリームをスクリプトエンジンに登録するクラス
 //---------------------------------------------------------------------------
-class tRisaTextStreamRegisterer : public singleton_base<tRisaTextStreamRegisterer>, depends_on<tRisaRisseScriptEngine>
+class tRisaTextStreamRegisterer : public singleton_base<tRisaTextStreamRegisterer>, protected depends_on<tRisaRisseScriptEngine>
 {
 	static iRisseTextReadStream * CreateForRead(const tRisseString &name,
 		const tRisseString &modestr);

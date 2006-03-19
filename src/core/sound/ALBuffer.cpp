@@ -60,7 +60,7 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool str
 		// バッファの生成
 		risse_uint alloc_count = Streaming ? MAX_NUM_BUFFERS : 1;
 		alGenBuffers(alloc_count, Buffers);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGenBuffers"));
+		depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alGenBuffers"));
 		BufferAllocatedCount = alloc_count;
 
 		// 非ストリーミングの場合はここで全てをデコードする
@@ -105,7 +105,7 @@ void tRisaALBuffer::Clear()
 	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 
 	alDeleteBuffers(BufferAllocatedCount, Buffers);
-	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alDeleteBuffers"));
+	depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alDeleteBuffers"));
 	BufferAllocatedCount = 0;
 	FreeBufferCount = 0;
 
@@ -289,7 +289,7 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 //			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
 	alBufferData(buffer, ALFormat, RenderBuffer,
 		rendered * ALSampleGranuleBytes, ALFrequency);
-	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));
+	depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alBufferData"));
 
 	return true;
 }

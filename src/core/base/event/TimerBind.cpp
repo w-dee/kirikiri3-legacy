@@ -335,7 +335,7 @@ tRisseNativeInstance *tRisseNC_Timer::CreateNativeInstance()
 //---------------------------------------------------------------------------
 class tRisaTimerRegisterer :
 			public singleton_base<tRisaTimerRegisterer>,
-			depends_on<tRisaRisseScriptEngine>
+			protected depends_on<tRisaRisseScriptEngine>
 {
 public:
 	tRisaTimerRegisterer()
@@ -343,7 +343,7 @@ public:
 		iRisseDispatch2 * cls =  new tRisseNC_Timer();
 		try
 		{
-			tRisaRisseScriptEngine::instance()->
+			depends_on<tRisaRisseScriptEngine>::locked_instance()->
 				RegisterGlobalObject(RISSE_WS("Timer"), cls);
 		}
 		catch(...)

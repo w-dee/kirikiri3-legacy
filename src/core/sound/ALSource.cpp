@@ -27,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID(51552,26074,48813,19041,30653,39645,11297,33602);
 //---------------------------------------------------------------------------
 //! @brief		デコード用スレッド
 //---------------------------------------------------------------------------
-class tRisaWaveDecodeThread : public tRisaThread, depends_on<tRisaTickCount>
+class tRisaWaveDecodeThread : public tRisaThread, protected depends_on<tRisaTickCount>
 {
 	tRisaALSource * Source; //!< このスレッドに関連づけられているソース
 	tRisaThreadEvent Event; //!< スレッドをたたき起こすため/スレッドを眠らせるためのイベント
@@ -94,7 +94,7 @@ void tRisaWaveDecodeThread::Execute(void)
 		}
 		else
 		{
-			risse_uint64 start_tick = tRisaTickCount::instance()->Get();
+			risse_uint64 start_tick = depends_on<tRisaTickCount>::locked_instance()->Get();
 			// ソースが割り当てられている
 			{
 				volatile tRisaCriticalSection::tLocker cs_holder(CS);
@@ -105,7 +105,7 @@ void tRisaWaveDecodeThread::Execute(void)
 			// ここでは大まかに FillBuffer が tRisaALBuffer::STREAMING_CHECK_SLEEP_MS
 			// 周期で実行されるように調整する。
 			// 楽観的なアルゴリズムなので Sleep 精度は問題にはならない。
-			risse_uint64 end_tick = tRisaTickCount::instance()->Get();
+			risse_uint64 end_tick = depends_on<tRisaTickCount>::locked_instance()->Get();
 			int sleep_ms = 
 				tRisaALBuffer::STREAMING_CHECK_SLEEP_MS -
 					static_cast<int>(end_tick - start_tick);
@@ -262,10 +262,10 @@ void tRisaWaveDecodeThreadPool::Unacquire(tRisaWaveDecodeThread * thread)
 tRisaWaveDecodeThread * tRisaWaveDecodeThreadPool::Get(tRisaALSource * source)
 {
 	tRisaWaveDecodeThread * th;
-	if(!alive())
-		th = new tRisaWaveDecodeThread();
+	if(pointer r = instance())
+		th = r->Acquire();
 	else
-		th = instance()->Acquire();
+		th = new tRisaWaveDecodeThread();
 	th->SetSource(source);
 	return th;
 }
@@ -280,10 +280,10 @@ void tRisaWaveDecodeThreadPool::Free(tRisaWaveDecodeThread * thread)
 {
 	thread->SetSource(NULL); // source を null に
 
-	if(!alive())
-		delete thread;
+	if(pointer r = instance())
+		r->Unacquire(thread);
 	else
-		instance()->Unacquire(thread);
+		delete thread;
 }
 //---------------------------------------------------------------------------
 
@@ -442,9 +442,9 @@ tRisaALSource::tRisaALSource(const tRisaALSource * ref)
 //---------------------------------------------------------------------------
 tRisaALSource::~tRisaALSource()
 {
-	tRisaEventSystem::instance()->CancelEvents(this); // pending のイベントを削除する
+	depends_on<tRisaEventSystem>::locked_instance()->CancelEvents(this); // pending のイベントを削除する
 	Clear();
-	tRisaEventSystem::instance()->CancelEvents(this); // 念のため ...
+	depends_on<tRisaEventSystem>::locked_instance()->CancelEvents(this); // 念のため ...
 }
 //---------------------------------------------------------------------------
 
@@ -473,22 +473,22 @@ void tRisaALSource::Init(boost::shared_ptr<tRisaALBuffer> buffer)
 
 			// ソースの生成
 			alGenSources(1, &Source);
-			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGenSources"));
+			depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alGenSources"));
 			SourceAllocated = true;
 
 			alSourcei(Source, AL_LOOPING, AL_FALSE);
-			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
+			depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
 
 			// ストリーミングを行わない場合は、バッファをソースにアタッチ
 			if(!Buffer->GetStreaming())
 			{
 				alSourcei(Source, AL_BUFFER, Buffer->GetBuffer());
-				tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_BUFFER)"));
+				depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alSourcei(AL_BUFFER)"));
 			}
 		}
 
 		// Watch Thread に追加 (これ以降非同期にWatchCallbackが呼ばれるので注意)
-		tRisaWaveWatchThread::instance()->RegisterSource(this);
+		depends_on<tRisaWaveWatchThread>::locked_instance()->RegisterSource(this);
 	}
 	catch(...)
 	{
@@ -510,7 +510,7 @@ void tRisaALSource::Clear()
 	Stop();
 
 	// Watch Thread から登録解除
-	tRisaWaveWatchThread::instance()->UnregisterSource(this);
+	depends_on<tRisaWaveWatchThread>::locked_instance()->UnregisterSource(this);
 
 	// デコードスレッドの削除
 	if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
@@ -518,7 +518,7 @@ void tRisaALSource::Clear()
 	// ソースの削除
 	volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 	if(SourceAllocated) alDeleteSources(1, &Source);
-	tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alDeleteSources"));
+	depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alDeleteSources"));
 	SourceAllocated = false;
 }
 //---------------------------------------------------------------------------
@@ -550,7 +550,7 @@ void tRisaALSource::UnqueueAllBuffers()
 	// ソースにキューされているバッファの数を得る
 	ALint queued;
 	alGetSourcei(Source, AL_BUFFERS_QUEUED, &queued);
-	tRisaOpenAL::instance()->ThrowIfError(
+	depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(
 		RISSE_WS("alGetSourcei(AL_BUFFERS_QUEUED) at tRisaALSource::UnqueueAllBuffers"));
 
 	if(queued > 0)
@@ -559,7 +559,7 @@ void tRisaALSource::UnqueueAllBuffers()
 
 		// アンキューする
 		alSourceUnqueueBuffers(Source, queued, dummy_buffers);
-		tRisaOpenAL::instance()->ThrowIfError(
+		depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(
 			RISSE_WS("alSourceUnqueueBuffers at tRisaALSource::UnqueueAllBuffers"));
 	}
 
@@ -585,7 +585,7 @@ void tRisaALSource::QueueBuffer()
 		{
 			volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 			alGetSourcei(Source, AL_BUFFERS_PROCESSED, &processed);
-			tRisaOpenAL::instance()->ThrowIfError(
+			depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(
 				RISSE_WS("alGetSourcei(AL_BUFFERS_PROCESSED)"));
 		}
 
@@ -598,7 +598,7 @@ void tRisaALSource::QueueBuffer()
 			{
 				volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 				alSourceUnqueueBuffers(Source, 1, &buffer);
-				tRisaOpenAL::instance()->ThrowIfError(
+				depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(
 					RISSE_WS("alSourceUnqueueBuffers at tRisaALSource::QueueStream"));
 			}
 
@@ -625,7 +625,7 @@ void tRisaALSource::QueueBuffer()
 		{
 			volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
 			alSourceQueueBuffers(Source, 1, &buffer);
-			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourceQueueBuffers"));
+			depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alSourceQueueBuffers"));
 		}
 
 		// セグメントキューに追加
@@ -655,7 +655,7 @@ void tRisaALSource::WatchCallback()
 		{
 			volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 			alGetSourcei(Source, AL_SOURCE_STATE, &state );
-			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_SOURCE_STATE)"));
+			depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_SOURCE_STATE)"));
 		}
 
 		if(state != AL_PLAYING)
@@ -667,7 +667,7 @@ void tRisaALSource::WatchCallback()
 			// デコードスレッドも返す
 			if(DecodeThread) tRisaWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
 			// イベントシステムにコールバックの発生を指示する
-			tRisaEventSystem::instance()->PostEvent(
+			depends_on<tRisaEventSystem>::locked_instance()->PostEvent(
 				new tRisaEventInfo(eiStatusChanged, this, this));
 			// 次回再生開始前に巻き戻しが必要
 			NeedRewind = true;
@@ -750,7 +750,7 @@ void tRisaALSource::Play()
 		volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 
 		alSourcePlay(Source);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
+		depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
 
 	// ステータスの変更を通知
@@ -783,7 +783,7 @@ void tRisaALSource::Stop()
 		volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 
 		alSourceStop(Source);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
+		depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alSourceStop"));
 	}
 
 	// ステータスの変更を通知
@@ -817,7 +817,7 @@ void tRisaALSource::Pause()
 			volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 
 			alSourcePause(Source);
-			tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePause"));
+			depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alSourcePause"));
 		}
 
 		// ステータスの変更を通知
@@ -850,7 +850,7 @@ risse_uint64 tRisaALSource::GetPosition()
 		volatile tRisaOpenAL::tCriticalSectionHolder al_cs_holder;
 
 		alGetSourcei(Source, AL_SAMPLE_OFFSET, &pos);
-		tRisaOpenAL::instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_SAMPLE_OFFSET)"));
+		depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_SAMPLE_OFFSET)"));
 	}
 
 	// 返された値は キューの先頭からの再生オフセットなので、該当する

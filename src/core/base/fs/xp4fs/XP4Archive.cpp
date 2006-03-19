@@ -367,8 +367,8 @@ tRisaXP4Archive::~tRisaXP4Archive()
 	// キャッシュをクリアする
 	// このアーカイブに関連したキャッシュのみを解放できるように実装することも
 	// できるが、処理の単純化のためにすべてキャッシュをクリアしてしまうことにする
-	tRisaXP4SegmentCache::instance()->Clear();
-	tRisaXP4StreamCache::instance()->Clear();
+	depends_on<tRisaXP4SegmentCache>::locked_instance()->Clear();
+	depends_on<tRisaXP4StreamCache>::locked_instance()->Clear();
 }
 //---------------------------------------------------------------------------
 

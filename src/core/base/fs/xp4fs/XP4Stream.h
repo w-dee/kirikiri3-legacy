@@ -24,7 +24,9 @@
 //---------------------------------------------------------------------------
 //! @brief		XP4 In-Archive Stream Implmentation
 //---------------------------------------------------------------------------
-class tRisaXP4ArchiveStream : public tRisseBinaryStream
+class tRisaXP4ArchiveStream : public tRisseBinaryStream,
+	protected depends_on<tRisaXP4StreamCache>,
+	protected depends_on<tRisaXP4SegmentCache>
 {
 	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 

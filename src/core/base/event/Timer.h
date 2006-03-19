@@ -27,7 +27,7 @@ class tRisaTimerConsumer;
 //---------------------------------------------------------------------------
 //! @brief		タイマーのタイミングを管理するクラス(スケジューラ)
 //---------------------------------------------------------------------------
-class tRisaTimerScheduler : depends_on<tRisaTickCount>,
+class tRisaTimerScheduler : protected depends_on<tRisaTickCount>,
 							public tRisaThread
 {
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
@@ -134,8 +134,9 @@ class tRisaEventTimerScheduler :
 class tRisaEventTimerConsumer :
 	public tRisaTimerConsumer,
 	public tRisaEventDestination,
-	depends_on<tRisaEventTimerScheduler>, // このクラスは tRisaEventTimerScheduler に依存
-	depends_on<tRisaEventSystem> // イベント管理システムに依存
+	protected depends_on<tRisaEventTimerScheduler>, // このクラスは tRisaEventTimerScheduler に依存
+	protected depends_on<tRisaEventSystem>, // イベント管理システムに依存
+	protected depends_on<tRisaTickCount> // このクラスは tRisaTickCount に依存
 {
 	static const size_t DefaultCapacity = 6; //!< Capacity のデフォルトの値
 

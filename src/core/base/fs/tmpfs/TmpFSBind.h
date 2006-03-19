@@ -71,8 +71,8 @@ private:
 //---------------------------------------------------------------------------
 class tRisaTmpFSRegisterer :
 	public singleton_base<tRisaTmpFSRegisterer>,
-	depends_on<tRisaRisseScriptEngine>,
-	depends_on<tRisaFileSystemRegisterer>
+	protected depends_on<tRisaRisseScriptEngine>,
+	protected depends_on<tRisaFileSystemRegisterer>
 {
 public:
 	tRisaTmpFSRegisterer();

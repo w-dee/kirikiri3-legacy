@@ -123,7 +123,7 @@ tRisaOSFSRegisterer::tRisaOSFSRegisterer()
 	iRisseDispatch2 * cls = new tRisseNC_OSFS();
 	try
 	{
-		tRisaFileSystemRegisterer::instance()->RegisterClassObject(
+		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(
 							RISSE_WS("OSFS"), cls);
 	}
 	catch(...)

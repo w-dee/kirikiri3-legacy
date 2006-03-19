@@ -40,7 +40,7 @@ tRisaLogFile::~tRisaLogFile()
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	if(LogFile.IsOpened())
-		tRisaLogger::instance()->UnregisterReceiver(&Receiver);
+		depends_on<tRisaLogger>::locked_instance()->UnregisterReceiver(&Receiver);
 }
 //---------------------------------------------------------------------------
 
@@ -154,7 +154,7 @@ void tRisaLogFile::Begin()
 	if(!LogFile.IsOpened()) return;
 
 	// レシーバを登録
-	tRisaLogger::instance()->UnregisterReceiver(&Receiver);
+	depends_on<tRisaLogger>::locked_instance()->UnregisterReceiver(&Receiver);
 
 	// ログファイルの最後に移動
 	wxFileOffset write_start = LogFile.SeekEnd();
@@ -173,8 +173,8 @@ void tRisaLogFile::Begin()
 	OutputOneLine(RisseEmptyString);
 
 	// LastLogを出力
-	tRisaLogger::instance()->SendPreservedLogs(&Receiver);
-	tRisaLogger::instance()->SendLogs(&Receiver, NumLastLog);
+	depends_on<tRisaLogger>::locked_instance()->SendPreservedLogs(&Receiver);
+	depends_on<tRisaLogger>::locked_instance()->SendLogs(&Receiver, NumLastLog);
 
 	// セパレータを出力
 	const risse_char * sep2 = 

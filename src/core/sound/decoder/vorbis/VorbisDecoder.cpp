@@ -345,7 +345,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisaOggVorbisWaveDecoderFactoryRegisterer :
 	public singleton_base<tRisaOggVorbisWaveDecoderFactoryRegisterer>,
-	depends_on<tRisaWaveDecoderFactoryManager>
+	protected depends_on<tRisaWaveDecoderFactoryManager>
 {
 public:
 	//! @brief コンストラクタ
@@ -353,12 +353,12 @@ public:
 	{
 		boost::shared_ptr<tRisaWaveDecoderFactory>
 			factory(new tRisaOggVorbisWaveDecoderFactory());
-		tRisaWaveDecoderFactoryManager::instance()->Register(RISSE_WS(".ogg"), factory);
+		depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Register(RISSE_WS(".ogg"), factory);
 	}
 	//! @brief デストラクタ
 	~tRisaOggVorbisWaveDecoderFactoryRegisterer()
 	{
-		tRisaWaveDecoderFactoryManager::instance()->Unregister(RISSE_WS(".ogg"));
+		depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Unregister(RISSE_WS(".ogg"));
 	}
 };
 //---------------------------------------------------------------------------

@@ -23,8 +23,8 @@
 //! @brief		一つのアーカイブを現すクラス
 //---------------------------------------------------------------------------
 class tRisaXP4Archive :
-	depends_on<tRisaXP4SegmentCache>,
-	depends_on<tRisaXP4StreamCache>
+	protected depends_on<tRisaXP4SegmentCache>,
+	protected depends_on<tRisaXP4StreamCache>
 {
 public:
 	struct tFile

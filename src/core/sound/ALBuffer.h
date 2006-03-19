@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------------
 //! @brief		OpenALバッファ
 //---------------------------------------------------------------------------
-class tRisaALBuffer
+class tRisaALBuffer : protected depends_on<tRisaOpenAL>
 {
 public:
 	// 定数など

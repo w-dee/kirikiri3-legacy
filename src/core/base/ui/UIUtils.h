@@ -19,7 +19,7 @@
 //---------------------------------------------------------------------------
 //! @brief		Risa UI 用フレームの基本クラス
 //---------------------------------------------------------------------------
-class tRisaUIFrame : public wxFrame, depends_on<tRisaConfig>
+class tRisaUIFrame : public wxFrame, protected depends_on<tRisaConfig>
 {
 	wxString FrameId; //!< フレームの Id (位置を記録したりするのに使う)
 
@@ -28,8 +28,8 @@ public:
 	~tRisaUIFrame();
 
 private:
-	static wxPoint GetStoredPosition(const wxString & id);
-	static wxSize GetStoredSize(const wxString & id);
+	wxPoint GetStoredPosition(const wxString & id);
+	wxSize GetStoredSize(const wxString & id);
 };
 //---------------------------------------------------------------------------
 

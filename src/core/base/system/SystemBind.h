@@ -22,7 +22,7 @@
 //---------------------------------------------------------------------------
 class tRisaSystemRegisterer :
 			public singleton_base<tRisaSystemRegisterer>,
-			depends_on<tRisaRisseScriptEngine>
+			protected depends_on<tRisaRisseScriptEngine>
 {
 	iRisseDispatch2 * SystemClass;
 

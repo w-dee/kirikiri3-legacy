@@ -32,6 +32,9 @@
 	tRisaOpenAL::instance()->ThrowIfError();
 
 	でエラーをチェックするという方法をとること。
+	( depends_on でインスタンスの存在を確実にできる場合は
+	 depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError())
+	 の方が効率がよい )
 
 	OpenAL の API は API 実行後に alGetError でエラーコードを取得するという
 	方法をとるが、API 実行とalGetErrorの間に、ほかのスレッドが他の API を
@@ -46,13 +49,13 @@ class tRisaOpenAL : public singleton_base<tRisaOpenAL>, manual_start<tRisaOpenAL
 {
 public:
 	//! @brief OpenAL APIを保護するためのクリティカルセクションホルダ
-	struct tCriticalSectionHolder
+	struct tCriticalSectionHolder : protected depends_on<tRisaOpenAL>
 	{
 		tRisaCriticalSection::tLocker holder;
-		tCriticalSectionHolder() : holder(tRisaOpenAL::instance()->GetCS())
+		tCriticalSectionHolder() : holder(depends_on<tRisaOpenAL>::locked_instance()->GetCS())
 		{
 			// エラー状態をクリアする
-			tRisaOpenAL::instance()->ClearErrorState();
+			depends_on<tRisaOpenAL>::locked_instance()->ClearErrorState();
 		}
 		~tCriticalSectionHolder()
 		{

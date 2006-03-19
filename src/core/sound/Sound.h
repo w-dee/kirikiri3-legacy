@@ -49,8 +49,8 @@ protected:
 //! @brief		サウンドクラス
 //---------------------------------------------------------------------------
 class tRisaSound :
-	depends_on<tRisaOpenAL>,
-	depends_on<tRisaWaveDecoderFactoryManager>,
+	protected depends_on<tRisaOpenAL>,
+	protected depends_on<tRisaWaveDecoderFactoryManager>,
 	public tRisaALSourceStatus
 {
 	friend class tRisaSoundALSource;

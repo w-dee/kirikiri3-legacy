@@ -64,14 +64,17 @@ bool tRisaIdleEventManager::Deliver(risse_uint64 mastertick)
 	bool need_more = false;
 
 	// Idleイベントは tRisaEventSystem がイベントを配信可能かどうかを見る
-	if(tRisaEventSystem::alive() && tRisaEventSystem::instance()->GetCanDeliverEvents())
+	if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
 	{
-		// イベントを配信する
-		pointer_list<tRisaIdleEventDestination>::scoped_lock lock(Destinations);
-		for(size_t i = 0; i < Destinations.get_locked_count(); i++)
+		if(r->GetCanDeliverEvents())
 		{
-			if(Destinations.get_locked(i)->OnIdle(mastertick))
-				need_more = true;
+			// イベントを配信する
+			pointer_list<tRisaIdleEventDestination>::scoped_lock lock(Destinations);
+			for(size_t i = 0; i < Destinations.get_locked_count(); i++)
+			{
+				if(Destinations.get_locked(i)->OnIdle(mastertick))
+					need_more = true;
+			}
 		}
 	}
 	return need_more;
@@ -105,7 +108,7 @@ tRisaIdleEventDestination::tRisaIdleEventDestination()
 //---------------------------------------------------------------------------
 tRisaIdleEventDestination::~tRisaIdleEventDestination()
 {
-	if(Receiving) tRisaIdleEventManager::instance()->Unregister(this);
+	if(Receiving) depends_on<tRisaIdleEventManager>::locked_instance()->Unregister(this);
 }
 //---------------------------------------------------------------------------
 
@@ -117,7 +120,7 @@ void tRisaIdleEventDestination::StartReceiveIdle()
 {
 	if(!Receiving)
 	{
-		tRisaIdleEventManager::instance()->Register(this);
+		depends_on<tRisaIdleEventManager>::locked_instance()->Register(this);
 		Receiving = true;
 	}
 }
@@ -131,7 +134,7 @@ void tRisaIdleEventDestination::EndReceiveIdle()
 {
 	if(Receiving)
 	{
-		tRisaIdleEventManager::instance()->Unregister(this);
+		depends_on<tRisaIdleEventManager>::locked_instance()->Unregister(this);
 		Receiving = false;
 	}
 }

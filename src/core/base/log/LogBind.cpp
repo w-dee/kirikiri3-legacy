@@ -96,7 +96,7 @@ RISSE_END_NATIVE_METHOD_DECL(/*func. name*/message)
 //---------------------------------------------------------------------------
 //! @brief Logクラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaLogRegisterer :  public singleton_base<tRisaLogRegisterer>, depends_on<tRisaRisseScriptEngine>
+class tRisaLogRegisterer :  public singleton_base<tRisaLogRegisterer>, protected depends_on<tRisaRisseScriptEngine>
 {
 public:
 	tRisaLogRegisterer();
@@ -117,7 +117,7 @@ tRisaLogRegisterer::tRisaLogRegisterer()
 	iRisseDispatch2 *dsp = new tRisseNC_Log();
 	try
 	{
-		tRisaRisseScriptEngine::instance()->RegisterGlobalObject(RISSE_WS("Log"), dsp);
+		depends_on<tRisaRisseScriptEngine>::locked_instance()->RegisterGlobalObject(RISSE_WS("Log"), dsp);
 	}
 	catch(...)
 	{
@@ -127,7 +127,7 @@ tRisaLogRegisterer::tRisaLogRegisterer()
 	dsp->Release();
 
 	// 定数を登録する
-	tRisaRisseScriptEngine::instance()->ExecuteScript(
+	depends_on<tRisaRisseScriptEngine>::locked_instance()->ExecuteScript(
 		ttstr(
 		"var llDebug = 0;"		//!< デバッグに関する物
 		"var llInfo = 1;"		//!< 情報通知

@@ -47,8 +47,8 @@ void tRisseNI_FileSystemNativeInstance::Invalidate()
 	// ただしファイルシステムマネージャがシャットダウン中にこの関数が
 	// 呼ばれるときは、すでにアンマウントされることが決定しているので
 	// 呼ばない。
-	if(tRisaFileSystemManager::alive())
-		tRisaFileSystemManager::instance()->Unmount(Owner);
+	if(tRisaFileSystemManager::pointer r = tRisaFileSystemManager::instance())
+		r->Unmount(Owner);
 
 	// FileSystem にこれ以上アクセスできないようにreset
 	FileSystem.reset();
@@ -362,7 +362,7 @@ tRisaFileSystemRegisterer::tRisaFileSystemRegisterer()
 	FileSystemClass = new tRisseNC_FileSystem();
 	try
 	{
-		tRisaRisseScriptEngine::instance()->RegisterGlobalObject(RISSE_WS("FileSystem"), FileSystemClass);
+		depends_on<tRisaRisseScriptEngine>::locked_instance()->RegisterGlobalObject(RISSE_WS("FileSystem"), FileSystemClass);
 	}
 	catch(...)
 	{

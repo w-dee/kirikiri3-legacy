@@ -31,8 +31,8 @@ RISSE_DEFINE_SOURCE_ID(28545,30194,3434,19984,56458,2209,37707,53134);
 void tRisaUnhandledExceptionHandler::ShowScriptException(eRisse &e)
 {
 	// イベント配信を無効に
-	if(tRisaEventSystem::alive())
-		tRisaEventSystem::instance()->SetCanDeliverEvents(false);
+	if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
+		r->SetCanDeliverEvents(false);
 
 	// ログ
 	tRisaLogger::Log(
@@ -54,8 +54,8 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisse &e)
 void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 {
 	// イベント配信を無効に
-	if(tRisaEventSystem::alive())
-		tRisaEventSystem::instance()->SetCanDeliverEvents(false);
+	if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
+		r->SetCanDeliverEvents(false);
 
 	// ログ
 	if(tRisaLogger::alive())
@@ -103,11 +103,13 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 		try
 		{
 			// スクリプトエンジンを取得する
-			if(!tRisaRisseScriptEngine::alive()) break; // スクリプトエンジンはすでに終了
-			if(!tRisaSystemRegisterer::alive()) break; // "System" レジストラも終了
+			tRisaRisseScriptEngine::pointer script_engine = tRisaRisseScriptEngine::instance();
+			tRisaSystemRegisterer::pointer system_registerer = tRisaSystemRegisterer::instance();
+			if(!script_engine) break; // スクリプトエンジンはすでに終了
+			if(!system_registerer) break; // "System" レジストラも終了
 
 			// get System.exceptionHandler
-			if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
+			if(!system_registerer->GetExceptionHandlerObject(clo))
 				break; // System.exceptionHandler cannot be retrieved
 
 			//---- 例外オブジェクトを取得するstart ----
@@ -115,7 +117,7 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 			tRisseVariant msg(e.GetMessageString());
 			tRisseVariant trace(e.GetTrace());
 			RisseGetExceptionObject(
-						tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
+						script_engine->GetEngineNoAddRef(),
 						&obj, msg, &trace);
 			//---- 例外オブジェクトを取得するend ----
 
@@ -168,11 +170,13 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 		try
 		{
 			// スクリプトエンジンを取得する
-			if(!tRisaRisseScriptEngine::alive()) break; // スクリプトエンジンはすでに終了
-			if(!tRisaSystemRegisterer::alive()) break; // "System" レジストラも終了
+			tRisaRisseScriptEngine::pointer script_engine = tRisaRisseScriptEngine::instance();
+			tRisaSystemRegisterer::pointer system_registerer = tRisaSystemRegisterer::instance();
+			if(!script_engine) break; // スクリプトエンジンはすでに終了
+			if(!system_registerer) break; // "System" レジストラも終了
 
 			// get System.exceptionHandler
-			if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
+			if(!system_registerer->GetExceptionHandlerObject(clo))
 				break; // System.exceptionHandler cannot be retrieved
 
 			//---- 例外オブジェクトを取得するstart ----
@@ -180,7 +184,7 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 			tRisseVariant msg(e.GetMessageString());
 			tRisseVariant trace(e.GetTrace());
 			RisseGetExceptionObject(
-					tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
+					script_engine->GetEngineNoAddRef(),
 					&obj, msg);
 			//---- 例外オブジェクトを取得するend ----
 
@@ -233,18 +237,20 @@ void tRisaUnhandledExceptionHandler::Process(eRisse &e)
 		try
 		{
 			// スクリプトエンジンを取得する
-			if(!tRisaRisseScriptEngine::alive()) break; // スクリプトエンジンはすでに終了
-			if(!tRisaSystemRegisterer::alive()) break; // "System" レジストラも終了
+			tRisaRisseScriptEngine::pointer script_engine = tRisaRisseScriptEngine::instance();
+			tRisaSystemRegisterer::pointer system_registerer = tRisaSystemRegisterer::instance();
+			if(!script_engine) break; // スクリプトエンジンはすでに終了
+			if(!system_registerer) break; // "System" レジストラも終了
 
 			// get System.exceptionHandler
-			if(!tRisaSystemRegisterer::instance()->GetExceptionHandlerObject(clo))
+			if(!system_registerer->GetExceptionHandlerObject(clo))
 				break; // System.exceptionHandler cannot be retrieved
 
 			//---- 例外オブジェクトを取得するstart ----
 			tRisseVariant obj;
 			tRisseVariant msg(e.GetMessageString());
 			RisseGetExceptionObject(
-				tRisaRisseScriptEngine::instance()->GetEngineNoAddRef(),
+				script_engine->GetEngineNoAddRef(),
 				&obj, msg);
 			//---- 例外オブジェクトを取得するend ----
 

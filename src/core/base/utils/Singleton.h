@@ -204,8 +204,7 @@ public:
 
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト用クラス
-//! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス、次以降は
-//!			このシングルトンが依存しているクラスである。
+//! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス
 //---------------------------------------------------------------------------
 template <typename T>
 class singleton_base
@@ -282,19 +281,19 @@ class singleton_base
 
 	//! @brief オブジェクトを操作するメソッド
 	//! @note
-	//! このメソッドはローカルに disconnector_registerer 型のオブジェクトを
+	//! このメソッドはローカルに object_holder 型のオブジェクトを
 	//! static で持つ。
 	//! reset が true の場合は object.object を reset することによって
 	//! 参照を切る。is_alive が非nullの場合は、object.weak_object を
 	//! 参照することによりシングルトンオブジェクトが有効かどうかを*is_aliveに
 	//! 書き込む。
-	static boost::shared_ptr<T> & manipulate_object(bool reset=false, bool * is_alive = NULL)
+	static boost::weak_ptr<T> & manipulate_object(bool reset=false, bool * is_alive = NULL)
 	{
 		static object_holder holder;
 		register_object.do_nothing();
 		if(reset) holder.object.reset();
 		if(is_alive) *is_alive = !holder.weak_object.expired();
-		return holder.object;
+		return holder.weak_object;
 	}
 
 	//! @brief オブジェクトへの参照を切る
@@ -323,6 +322,8 @@ protected:
 	~singleton_base() {;}
 
 public:
+	//! @brief shared_ptr の typdef
+	typedef boost::shared_ptr<T> pointer;
 
 	//! @brief オブジェクトが存在することを確かにする
 	static void ensure()
@@ -331,12 +332,29 @@ public:
 	}
 
 	//! @brief シングルトンオブジェクトのインスタンスを返す
-	static boost::shared_ptr<T> & instance()
+	//! @note  一度 boost::weak_ptr から boost::shared_ptr に変換が
+	//! 行われるため、少々高価である。もし depends_on によって
+	//! オブジェクトが生きていることが保証できるならば、
+	//! depends_on::locked_instance の方が(変換の手間がないだけに)
+	//! 効率的にアクセスを行うことができる。
+	//! オブジェクトがすでに無効の場合は空のポインタが帰る。
+	static pointer instance()
 	{
-		return manipulate_object();
+		return manipulate_object().lock();
 	}
 
 	//! @brief オブジェクトが有効かどうかを得る
+	//! @note
+	//! 当然ながらこの関数が呼ばれた時点の状態を返す。
+	//! 次の瞬間にオブジェクトがいまだ有効かどうかは保証がない。
+	//! 要するに、if(singleton::alive()) singleton::instance()-> ...
+	//! のような使い方では、最初に if 文中の alive で確認した状態で
+	//! 有効であっても、次の instance() では無効なオブジェクトが
+	//! 返される可能性があると言うこと。
+	//! 一般的に、シングルトンオブジェクトが生きている間だけ
+	//! 処理を行いたい場合は以下の構文を用いる:
+	//! if(SingletonClass::pointer r = SingletonClass::instance())
+	//! { /* use r */ }
 	static bool alive()
 	{
 		if(!object_created) return false;
@@ -375,6 +393,9 @@ class depends_on
 	boost::shared_ptr<T> __referrer_object; //!< シングルトンオブジェクトへの参照を保持するメンバ
 public:
 	depends_on() : __referrer_object(singleton_base<T>::instance()) {;}
+
+	//! @brief オブジェクトのインスタンスを得る
+	boost::shared_ptr<T> & locked_instance() { return __referrer_object; }
 };
 //---------------------------------------------------------------------------
 

@@ -82,7 +82,9 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
-class tRisaFileSystemManager : public singleton_base<tRisaFileSystemManager>, depends_on<tRisaRisseScriptEngine>
+class tRisaFileSystemManager :
+	public singleton_base<tRisaFileSystemManager>,
+	protected depends_on<tRisaRisseScriptEngine>
 {
 	//! @brief ファイルシステムマネージャ内で管理されるファイルシステムの情報
 	struct tFileSystemInfo

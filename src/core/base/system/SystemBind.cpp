@@ -106,7 +106,7 @@ tRisaSystemRegisterer::tRisaSystemRegisterer()
 	SystemClass =  new tRisseNC_System();
 	try
 	{
-		tRisaRisseScriptEngine::instance()->
+		depends_on<tRisaRisseScriptEngine>::locked_instance()->
 			RegisterGlobalObject(RISSE_WS("System"), SystemClass);
 	}
 	catch(...)

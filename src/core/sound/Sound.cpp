@@ -158,7 +158,7 @@ void tRisaSound::Open(const ttstr & filename)
 	try
 	{
 		// デコーダを作成
-		Decoder = tRisaWaveDecoderFactoryManager::instance()->Create(filename);
+		Decoder = depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Create(filename);
 
 		// LoopManager を作成
 		LoopManager =

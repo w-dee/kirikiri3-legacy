@@ -84,8 +84,8 @@ public:
 	static void Log(const ttstr & content, tLevel level = llInfo,
 		const ttstr & linkinfo = RisseEmptyString)
 	{
-		if(tRisaLogger::alive())
-			tRisaLogger::instance()->InternalLog(content, level, linkinfo);
+		if(tRisaLogger::pointer r = instance())
+			r->InternalLog(content, level, linkinfo);
 	}
 };
 //---------------------------------------------------------------------------
@@ -120,7 +120,7 @@ public:
 class tRisaWxLogProxy :
 	public wxLog,
 	public singleton_base<tRisaWxLogProxy>,
-	depends_on<tRisaLogger>
+	protected depends_on<tRisaLogger>
 {
 	wxLog * OldLog; //!< このオブジェクトが作成される前に存在していたActiveなログ
 

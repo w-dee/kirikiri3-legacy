@@ -42,7 +42,7 @@ public:
 //! @brief		アイドル時に発生するイベントの送り先となるクラス
 //! @note		StartReceiveIdle を呼ばない限りはイベントは発生しない
 //---------------------------------------------------------------------------
-class tRisaIdleEventDestination : depends_on<tRisaIdleEventManager>
+class tRisaIdleEventDestination : protected depends_on<tRisaIdleEventManager>
 {
 	bool Receiving; //!< イベント配信が有効かどうか
 
@@ -109,12 +109,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		コンパクト時に発生するイベントの送り先となるクラス
 //---------------------------------------------------------------------------
-class tRisaCompactEventDestination : depends_on<tRisaCompactEventManager>,
+class tRisaCompactEventDestination : protected depends_on<tRisaCompactEventManager>,
 								public tRisaCompactEventEnum
 {
 public:
-	tRisaCompactEventDestination() { tRisaCompactEventManager::instance()->Register(this); }
-	virtual ~tRisaCompactEventDestination() { tRisaCompactEventManager::instance()->Unregister(this); }
+	tRisaCompactEventDestination()
+	{ depends_on<tRisaCompactEventManager>::locked_instance()->Register(this); }
+	virtual ~tRisaCompactEventDestination()
+	{ depends_on<tRisaCompactEventManager>::locked_instance()->Unregister(this); }
 
 public:
 	//! @brief		コンパクトイベントが配信されるとき

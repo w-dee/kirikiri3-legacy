@@ -384,7 +384,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisaRIFFWaveWaveDecoderFactoryRegisterer :
 	public singleton_base<tRisaRIFFWaveWaveDecoderFactoryRegisterer>,
-	depends_on<tRisaWaveDecoderFactoryManager>
+	protected depends_on<tRisaWaveDecoderFactoryManager>
 {
 public:
 	//! @brief コンストラクタ
@@ -392,12 +392,12 @@ public:
 	{
 		boost::shared_ptr<tRisaWaveDecoderFactory>
 			factory(new tRisaRIFFWaveWaveDecoderFactory());
-		tRisaWaveDecoderFactoryManager::instance()->Register(RISSE_WS(".wav"), factory);
+		depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Register(RISSE_WS(".wav"), factory);
 	}
 	//! @brief デストラクタ
 	~tRisaRIFFWaveWaveDecoderFactoryRegisterer()
 	{
-		tRisaWaveDecoderFactoryManager::instance()->Unregister(RISSE_WS(".wav"));
+		depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Unregister(RISSE_WS(".wav"));
 	}
 };
 //---------------------------------------------------------------------------

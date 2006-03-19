@@ -171,7 +171,7 @@ tRisaTmpFSRegisterer::tRisaTmpFSRegisterer()
 	iRisseDispatch2 * cls = new tRisseNC_TmpFS();
 	try
 	{
-		tRisaFileSystemRegisterer::instance()->RegisterClassObject(
+		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(
 							RISSE_WS("TmpFS"), cls);
 	}
 	catch(...)

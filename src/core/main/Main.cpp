@@ -154,20 +154,20 @@ int tRisaApplication::OnExit()
 bool tRisaApplication::ProcessIdle()
 {
 	bool cont = false;
-	if(tRisaTickCount::alive())
+	if(tRisaTickCount::pointer tick_count = tRisaTickCount::instance())
 	{
 		// この回で呼び出すハンドラに渡すtickを得る
-		risse_uint64 tick = tRisaTickCount::instance()->Get();
+		risse_uint64 tick = tick_count->Get();
 
 		// 各サブシステムを呼び出す
 
 		// イベントの配信
-		if(tRisaEventSystem::alive())
-			cont = tRisaEventSystem::instance()->ProcessEvents(tick) || cont;
+		if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
+			cont = r->ProcessEvents(tick) || cont;
 
 		// アイドルイベントの配信
-		if(tRisaIdleEventManager::alive())
-			cont = tRisaIdleEventManager::instance()->Deliver(tick) || cont;
+		if(tRisaIdleEventManager::pointer r = tRisaIdleEventManager::instance())
+			cont = r->Deliver(tick) || cont;
 	}
 	cont = wxApp::ProcessIdle() || cont;
 	return cont;
@@ -180,9 +180,10 @@ bool tRisaApplication::ProcessIdle()
 //---------------------------------------------------------------------------
 void tRisaApplication::OnActivate(wxActivateEvent & event)
 {
-	if(!event.GetActive() && tRisaCompactEventManager::alive())
+	if(!event.GetActive())
 	{
-		tRisaCompactEventManager::instance()->OnDeactivate();
+		if(tRisaCompactEventManager::pointer r = tRisaCompactEventManager::instance())
+			r->OnDeactivate();
 	}
 }
 //---------------------------------------------------------------------------
@@ -193,9 +194,10 @@ void tRisaApplication::OnActivate(wxActivateEvent & event)
 //---------------------------------------------------------------------------
 void tRisaApplication::OnActivateApp(wxActivateEvent & event)
 {
-	if(!event.GetActive() && tRisaCompactEventManager::alive())
+	if(!event.GetActive())
 	{
-		tRisaCompactEventManager::instance()->OnDeactivateApp();
+		if(tRisaCompactEventManager::pointer r = tRisaCompactEventManager::instance())
+			r->OnDeactivateApp();
 	}
 }
 //---------------------------------------------------------------------------

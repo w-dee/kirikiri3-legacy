@@ -37,7 +37,7 @@ tRisaRisseScriptEngine::~tRisaRisseScriptEngine()
 	{
 /*
 #ifdef __WXDEBUG__
-		wxFprintf(stderr, wxT("warning: tRisaRisseScriptEngine::instance().Shutdown() should be called before main() ends.\n"));
+		wxFprintf(stderr, wxT("warning: tRisaRisseScriptEngine::instance()->Shutdown() should be called before main() ends.\n"));
 #endif
 */
 		Shutdown();

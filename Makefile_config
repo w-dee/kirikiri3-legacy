@@ -184,6 +184,18 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: openal configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
+	@echo "Boehm GC ..."
+	@(set -e ;\
+		echo "####  Boehm GC config  ####" ;\
+		echo "GC_CFLAGS   := -I$(GC_DIR)/include" ;\
+		echo "GC_CXXFLAGS := -I$(GC_DIR)/include" ;\
+		echo "GC_CPPFLAGS := -I$(GC_DIR)/include" ;\
+		echo "GC_LIBS     := -L$(GC_DIR)/lib -lgc" ;\
+		touch $(TOP_DIR)/config_success ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: Boehm GC configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
+	@rm -f $(TOP_DIR)/config_success
 
 ifeq ($(DEBUG),yes)
  -include $(TOP_DIR)/Makefile_build_config_debug

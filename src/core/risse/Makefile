@@ -14,7 +14,7 @@ Risse_BIN_OUTPUT_DIR := $(CURRENT_DIR)/bin
 BIN=$(Risse_LIB_OUTPUT_DIR)/librisse.a
 
 # このバイナリが依存しているライブラリ
-DEP_LIBS=BOOST WX
+DEP_LIBS=BOOST WX GC
 
 # 最終ターゲット (ふつう、出力バイナリや出力ライブラリ)
 default: $(BIN)
@@ -30,38 +30,9 @@ CPPFLAGS = $(CXXFLAGS)
 #----------------------------#
 
 CPPFILES = 	src/risse.cpp                     \
-			src/risse.tab.cpp                 \
-			src/risseArray.cpp                \
 			src/risseCharUtils.cpp            \
-			src/risseCompileControl.cpp       \
 			src/risseConfig.cpp               \
-			src/risseDate.cpp                 \
-			src/risseDateParser.cpp           \
-			src/risseDebug.cpp                \
-			src/risseDictionary.cpp           \
-			src/risseDisassemble.cpp          \
-			src/risseError.cpp                \
-			src/risseException.cpp            \
-			src/risseGlobalStringMap.cpp      \
-			src/risseInterCodeExec.cpp        \
-			src/risseInterCodeGen.cpp         \
-			src/risseInterface.cpp            \
-			src/risseLex.cpp                  \
-			src/risseMT19937ar-cok.cpp        \
-			src/risseMath.cpp                 \
-			src/risseMessage.cpp              \
-			src/risseNamespace.cpp            \
-			src/risseNative.cpp               \
-			src/risseObject.cpp               \
-			src/risseRandomGenerator.cpp      \
-			src/risseScriptBlock.cpp          \
-			src/risseScriptCache.cpp          \
-			src/risseString.cpp               \
-			src/risseUtils.cpp                \
-			src/risseVariant.cpp              \
-			src/risseVariantString.cpp        \
-			src/rissedate.tab.cpp             \
-			src/rissepp.tab.cpp               
+			src/risseString.cpp               
 
 OBJS = $(CPPFILES:.cpp=.o)
 

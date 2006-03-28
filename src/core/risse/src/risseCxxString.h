@@ -16,9 +16,6 @@ namespace risse
 {
 //---------------------------------------------------------------------------
 //! @brief	文字列ブロック
-//! @note
-//! 複数の文字列ブロックが同じBufferを共有することができる。
-//! 文字列の部位を効率的に共有することができる。
 //---------------------------------------------------------------------------
 class tRisseStringBlock : public gc
 {
@@ -27,15 +24,17 @@ class tRisseStringBlock : public gc
 
 	const risse_char MightBeShared  = static_cast<risse_char>(-1L);
 		//!< 共有可能性フラグとして Buffer[-1] に設定する値
+
 	static risse_char EmptyBuffer[2];
 		//!< -1, 0 が入っている配列(空のバッファを表す)
+	#define RISSE_STRING_EMPTY_BUFFER (EmptyBuffer+1)
 
 public:
 	//! @brief デフォルトコンストラクタ
 	tRisseStringBlock()
 	{
 		// TODO: gc はメモリを0でクリアする？ならば以下の操作は不要
-		Buffer = EmptyBuffer;
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
 		Length = 0;
 	}
 
@@ -62,7 +61,7 @@ public:
 		}
 		else
 		{
-			Buffer = EmptyBuffer;
+			Buffer = RISSE_STRING_EMPTY_BUFFER;
 			Length = 0;
 		}
 	}
@@ -110,7 +109,7 @@ public: // object property
 		if(n)
 			Buffer[n] = 0;
 		else
-			Buffer = EmptyBuffer; // Buffer を解放
+			Buffer = RISSE_STRING_EMPTY_BUFFER; // Buffer を解放
 	}
 
 public: // comparison
@@ -170,14 +169,20 @@ public: // operators
 	}
 
 private:
-	//! @brief		n個のコードポイントからなるバッファを割り当てる
-	//! @param		n	コードポイント数
-	//! @return		割り当てられたバッファ
-	//! @note		実際には n+2 個分が割り当てられ、２番目の文字を指すポインタが帰る
-	risse_char * AllocateInternalBuffer(risse_size n)
+	static risse_char * AllocateInternalBuffer(risse_size n, risse_char *prevbuf = NULL);
+
+
+	//! @brief		バッファに割り当てられているコードポイント数(容量)を得る
+	//! @param		buffer バッファ
+	//! @return		コードポイント数
+	//! @note		Buffer[-1] が 0 の時のみにこのメソッドを呼ぶこと。
+	//!				それ以外の場合は返値は信用してはならない。
+	static risse_size GetBufferCapacity(const risse_char * buffer)
 	{
-		return reinterpret_cast<risse_char*>(
-			GC_malloc_atomic((n + 2)*sizeof(risse_char))) + 1;
+		return
+			*reinterpret_cast<const risse_size *>(
+				reinterpret_cast<const char *>(buffer) -
+					(sizeof(risse_char) + sizeof(risse_size)));
 	}
 
 public: // pointer
@@ -190,10 +195,9 @@ public: // pointer
 	risse_char * Allocate(risse_size n)
 	{
 		if(n)
-			Buffer = AllocateInternalBuffer(n),
-			Buffer[n+1] = Buffer[-1] = 0;
+			Buffer = AllocateInternalBuffer(n), Buffer[n] = 0;
 		else
-			Buffer = EmptyBuffer;
+			Buffer = RISSE_STRING_EMPTY_BUFFER;
 		Length = n;
 	}
 
@@ -201,7 +205,7 @@ public: // pointer
 	void FixLength()
 	{
 		if((Length = Risse_strlen(Buffer)) == 0)
-			Buffer = EmptyBuffer;
+			Buffer = RISSE_STRING_EMPTY_BUFFER;
 	}
 
 	//! @brief C 言語スタイルのポインタを得る

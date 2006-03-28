@@ -39,20 +39,24 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 ■ バッファ
 
-	バッファは 最低でも Length + 2 の長さ(risse_char 単位で)を持つ。
-	tRisseStringBlock が任意の文字列を元に作成される場合、Length + 2 の長さ
-	のバッファがまず確保され、文字列中の各文字は以下のように配置される。
+	バッファは 最低でも (Length + 2) * sizeof(risse_char) + sizeof(risse_size)
+	を持つ。
+	tRisseStringBlock が任意の文字列を元に作成される場合、
+	(Length + 2) * sizeof(risse_char) + sizeof(size_t) の長さのバッファがま
+	ず確保され、文字列中の各文字は以下のように配置される。
 
-	\0 文字0 文字1 文字3 .... \0
+	capacity \0 文字0 文字1 文字3 .... \0
 
-	このように、各 CP の両端に \0 がついたバッファとなる。
+	このように、最初は capacity としてバッファに実際に確保されている長さが
+	入り、それ以降は 各 CP の両端に \0 がついたバッファとなる。
+	capacity は、バッファの長さがぴったりであれば Length と同じになる。
 
-	tRisseStringBlock::Buffer は、最初の \0 ではなく、その次の文字0(つまり
-	文字列の先頭) を指すようになる。
+	tRisseStringBlock::Buffer は、最初の capacity や \0 ではなく、その次の
+	文字0(つまり文字列の先頭) を指すようになる。
 
-	先頭の \0 は Buffer が他の tRisseStringBlock と共有されている場合に \0 
-	ではなくなる。最後の \0 は、終端が \0 であることを期待している C 言語系
-	の関数に渡す際に NULL終端 を表す。
+	cpacity の次の \0 は、 Buffer が他の tRisseStringBlock と共有されている
+	場合に \0 ではなくなる。最後の \0 は、終端が \0 であることを期待してい
+	る C 言語系の関数に渡す際に NULL終端 を表す。
 
 ■ バッファの共有
 
@@ -67,7 +71,7 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 	tRisseStringBlock a が以下のバッファを持っている場合、
 
-	\0 文字0 文字1 文字2 文字3 \0
+	4 \0 文字0 文字1 文字2 文字3 \0
 	    ↑
 	   Buffer
 	Length = 4
@@ -75,7 +79,7 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 	文字1 ～ 文字2 の２文字を表す tRisseStringBlock b は以下のように表すこ
 	とができる。
 
-	-1 文字0 文字1 文字2 文字3 \0
+	4 -1 文字0 文字1 文字2 文字3 \0
 	          ↑
 	        Buffer
 	Length = 2
@@ -101,6 +105,18 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 	これらは共有の可能性を表すだけである。可能性があっても実際は共有されてい
 	ない場合があり得る。
+
+■ バッファの容量と実際の Length
+
+	+= 演算子などで Length が長くなり、バッファが拡張される際、バッファは実
+	際に必要な容量よりもすこし多めに確保され、次の拡張時にバッファを再度確保
+	しなくても済むようになる。
+	この際、実際にバッファが格納可能な CP 数を表すのが、バッファの先頭に
+	size_t 型で確保されている領域である。
+	ここの領域は、Buffer[-1] が 0 のとき (共有している可能性がない場合)に
+	のみ有効な値を保持していると考えるべきである。実際のところ、Buffer[-1] が
+	0 でない場合は += のようなバッファの内容を破壊する操作では直前に
+	バッファの内容のコピーが行われるため、この領域が参照されることはない。
 
 ■ Independ
 
@@ -144,12 +160,11 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref)
 {
 	if((Length = Risse_strlen(ref)) == 0)
 	{
-		Buffer = EmptyBuffer;
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
 	}
 	else
 	{
 		Buffer = AllocateInternalBuffer(Length);
-		Buffer[-1] = 0;
 		Risse_strcpy(Buffer, ref);
 	}
 }
@@ -167,12 +182,11 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 	Length = n;
 	if(n == 0)
 	{
-		Buffer = EmptyBuffer;
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
 	}
 	else
 	{
 		Buffer = AllocateInternalBuffer(Length);
-		Buffer[-1] = 0;
 		Buffer[n] = 0;
 		memcpy(Buffer, ref, sizeof(risse_char) * n);
 	}
@@ -215,12 +229,26 @@ tRisseStringBlock & tRisseStringBlock::opetator += (const tRisseStringBlock & re
 		risse_char * newbuf = AllocateInternalBuffer(newlength);
 		memcpy(newbuf, Buffer, Length * sizeof(risse_char));
 		memcpy(newbuf + Length, ref.Buffer, ref.Length * sizeof(risse_char));
+		Buffer = newbuf;
 	}
 	else
 	{
 		// 共有可能性フラグは立っていない
-		// 現在の領域を拡張し、拡張した部分に ref の Buffer をコピーする
-		Buffer = reinterpret_cast<risse_char*>(GC_realloc((newlength + 2)*sizeof(risse_char))) + 1;
+		// 現在の領域を拡張する必要がある？
+		if(GetBufferCapacity(Buffer) < newlength)
+		{
+			// 容量が足りないので拡張する必要あり
+			// 適当に新規確保の容量を計算
+			risse_size newcpacity;
+			if(newlength < 16*1024)
+				newcpacity = newlength * 2;
+			else
+				newcpacity = newlength + 16*1024;
+			// バッファを再確保
+			Buffer = AllocateInternalBuffer(newcapacity, Buffer);
+		}
+
+		// 現在保持している文字列の直後に ref の Buffer をコピーする
 		memcpy(Buffer + Length, ref.Buffer, ref.Length * sizeof(risse_char));
 	}
 
@@ -253,6 +281,43 @@ tRisseStringBlock tRisseStringBlock::opetator +  (const tRisseStringBlock & ref)
 
 
 //---------------------------------------------------------------------------
+//! @brief		n個のコードポイントからなるバッファを割り当てる
+//! @param		n	コードポイント数
+//! @param		prevbuf	以前のバッファ(バッファを再確保する場合)
+//! @return		割り当てられたバッファ
+//! @note		実際には (n+2)*sizeof(risse_char) + sizeof(risse_size) が割り当
+//! てられ、2番目の文字を指すポインタが帰る。共有可能性フラグはクリアされ、
+//! 容量も書き込まれるが、null終端は書き込まれないので注意。
+//---------------------------------------------------------------------------
+static risse_char * tRisseStringBlock::AllocateInternalBuffer(
+	risse_size n, risse_char *prevbuf)
+{
+	// バッファを確保
+	size_t newbytes = sizeof(risse_size) + (n + 2)*sizeof(risse_char);
+	void *ptr;
+	if(!prevbuf)
+		ptr = GC_malloc_atomic(newbytes);
+	else
+		ptr = GC_realloc(prevbuf, newbytes);
+
+	// ２番目の文字を指すポインタを獲る
+	risse_char *  buffer = reinterpret_cast<risse_char*>(
+		reinterpret_cast<char*>(ptr) +
+				( sizeof(risse_char) + sizeof(risse_size) ) );
+
+	// 共有可能性フラグを 0 に
+	buffer[-1] = 0;
+
+	// 確保容量を書き込む
+	*reinterpret_cast<risse_size *>(ptr) = n;
+
+	// もどる
+	return buffer;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		文字列バッファをコピーし、独立させる
 //! @return		内部バッファ
 //---------------------------------------------------------------------------
@@ -261,7 +326,6 @@ risse_char * tRisseStringBlock::InternalIndepend() const
 	risse_char * newbuf = AllocateInternalBuffer(Length);
 	memcpy(newbuf, Buffer, sizeof(risse_char) * Length);
 	newbuf[Length] = 0;
-	newbuf[-1] = 0;
 	return Buffer = newbuf;
 }
 //---------------------------------------------------------------------------

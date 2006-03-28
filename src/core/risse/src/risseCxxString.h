@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risse [‚è‚¹]
+	Risse [ã‚Šã›]
 	 stands for "Risse Is a Sweet Script Engine"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
@@ -8,54 +8,54 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief •¶š—ñ‘€ì
+//! @brief æ–‡å­—åˆ—æ“ä½œ
 //---------------------------------------------------------------------------
 
 
 namespace risse
 {
 //---------------------------------------------------------------------------
-//! @brief	•¶š—ñƒuƒƒbƒN
+//! @brief	æ–‡å­—åˆ—ãƒ–ãƒ­ãƒƒã‚¯
 //---------------------------------------------------------------------------
 class tRisseStringBlock : public gc
 {
-	mutable risse_char  *	Buffer;	//!< •¶š—ñƒoƒbƒtƒ@
-	risse_size				Length;	//!< •¶š—ñ’· (ÅŒã‚Ì \0 ‚ÍŠÜ‚ß‚È‚¢)
+	mutable risse_char  *	Buffer;	//!< æ–‡å­—åˆ—ãƒãƒƒãƒ•ã‚¡
+	risse_size				Length;	//!< æ–‡å­—åˆ—é•· (æœ€å¾Œã® \0 ã¯å«ã‚ãªã„)
 
 	const risse_char MightBeShared  = static_cast<risse_char>(-1L);
-		//!< ‹¤—L‰Â”\«ƒtƒ‰ƒO‚Æ‚µ‚Ä Buffer[-1] ‚Éİ’è‚·‚é’l
+		//!< å…±æœ‰å¯èƒ½æ€§ãƒ•ãƒ©ã‚°ã¨ã—ã¦ Buffer[-1] ã«è¨­å®šã™ã‚‹å€¤
 
 	static risse_char EmptyBuffer[2];
-		//!< -1, 0 ‚ª“ü‚Á‚Ä‚¢‚é”z—ñ(‹ó‚Ìƒoƒbƒtƒ@‚ğ•\‚·)
+		//!< -1, 0 ãŒå…¥ã£ã¦ã„ã‚‹é…åˆ—(ç©ºã®ãƒãƒƒãƒ•ã‚¡ã‚’è¡¨ã™)
 	#define RISSE_STRING_EMPTY_BUFFER (EmptyBuffer+1)
 
 public:
-	//! @brief ƒfƒtƒHƒ‹ƒgƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//! @brief ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	tRisseStringBlock()
 	{
-		// TODO: gc ‚Íƒƒ‚ƒŠ‚ğ0‚ÅƒNƒŠƒA‚·‚éH‚È‚ç‚ÎˆÈ‰º‚Ì‘€ì‚Í•s—v
+		// TODO: gc ã¯ãƒ¡ãƒ¢ãƒªã‚’0ã§ã‚¯ãƒªã‚¢ã™ã‚‹ï¼Ÿãªã‚‰ã°ä»¥ä¸‹ã®æ“ä½œã¯ä¸è¦
 		Buffer = RISSE_STRING_EMPTY_BUFFER;
 		Length = 0;
 	}
 
-	//! @brief ƒRƒs[ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-	//! @param ref ƒRƒs[Œ³ƒIƒuƒWƒFƒNƒg
+	//! @brief ã‚³ãƒ”ãƒ¼ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	//! @param ref ã‚³ãƒ”ãƒ¼å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 	tRisseStringBlock(const tRisseStringBlock & ref)
 	{
 		*this = ref;
 	}
 
-	//! @brief •”•ª•¶š—ñ‚ğì‚é‚½‚ß‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒ^
-	//! @param ref		ƒRƒs[Œ³ƒIƒuƒWƒFƒNƒg
-	//! @param offset	Ø‚èo‚·ŠJnˆÊ’u
-	//! @param length	Ø‚èo‚·’·‚³
+	//! @brief éƒ¨åˆ†æ–‡å­—åˆ—ã‚’ä½œã‚‹ãŸã‚ã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	//! @param ref		ã‚³ãƒ”ãƒ¼å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @param offset	åˆ‡ã‚Šå‡ºã™é–‹å§‹ä½ç½®
+	//! @param length	åˆ‡ã‚Šå‡ºã™é•·ã•
 	tRisseStringBlock(const tRisseStringBlock & ref, risse_size offset, risse_size length)
 	{
 		if(length)
 		{
 			RISSE_ASSERT(ref.Length - offset >= length);
 			if(ref.Buffer[-1] == 0)
-				ref.Buffer[-1] = MightBeShared; // ‹¤—L‰Â”\«ƒtƒ‰ƒO‚ğ‚½‚Ä‚é
+				ref.Buffer[-1] = MightBeShared; // å…±æœ‰å¯èƒ½æ€§ãƒ•ãƒ©ã‚°ã‚’ãŸã¦ã‚‹
 			Buffer = ref.Buffer + offset;
 			Length = length;
 		}
@@ -70,37 +70,37 @@ public:
 	tRisseStringBlock(const risse_char * ref, risse_size n);
 	tRisseStringBlock(const char * ref);
 
-	//! @brief	‘ã“ü‰‰Zq
-	//! @param	ref	ƒRƒs[Œ³ƒIƒuƒWƒFƒNƒg
-	//! @return	‚±‚ÌƒIƒuƒWƒFƒNƒg‚Ö‚ÌQÆ
+	//! @brief	ä»£å…¥æ¼”ç®—å­
+	//! @param	ref	ã‚³ãƒ”ãƒ¼å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @return	ã“ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¸ã®å‚ç…§
 	tRisseStringBlock & operator = (const tRisseStringBlock & ref)
 	{
 		if(ref.Buffer[-1] == 0)
-			ref.Buffer[-1] = MightBeShared; // ‹¤—L‰Â”\«ƒtƒ‰ƒO‚ğ‚½‚Ä‚é
+			ref.Buffer[-1] = MightBeShared; // å…±æœ‰å¯èƒ½æ€§ãƒ•ãƒ©ã‚°ã‚’ãŸã¦ã‚‹
 		Buffer = ref.Buffer;
 		Length = ref.Length;
 		return *this;
 	}
 
-	//! @brief	ƒoƒbƒtƒ@‚ğƒRƒs[‚µAV‚µ‚¢ tRisseStringBlock ‚ğ•Ô‚·
-	//! @param	ref	ƒRƒs[Œ³ƒIƒuƒWƒFƒNƒg
-	//! @return	V‚µ‚¢ tRisseStringBlock ƒIƒuƒWƒFƒNƒg
-	//! @note	‚±‚Ìƒƒ\ƒbƒh‚ÍA•K‚¸ƒoƒbƒtƒ@‚ğƒRƒs[‚µ‚Ä•Ô‚µA
-	//!			Œ³‚Ì•¶š—ñ (‚±‚Ì•¶š—ñ) ‚Ì‹¤—Ló‘Ô‚È‚Ç‚Í‚¢‚Á‚³‚¢
-	//!			•ÏX‚µ‚È‚¢B”j‰ó‚ğ‘O’ñ‚Æ‚µ‚½•¶š—ñ‚ğ‘¼‚Ì•¶š—ñ
-	//!			‚©‚çì¬‚·‚éê‡‚È‚Ç‚ÉŒø—¦“IB
+	//! @brief	ãƒãƒƒãƒ•ã‚¡ã‚’ã‚³ãƒ”ãƒ¼ã—ã€æ–°ã—ã„ tRisseStringBlock ã‚’è¿”ã™
+	//! @param	ref	ã‚³ãƒ”ãƒ¼å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @return	æ–°ã—ã„ tRisseStringBlock ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @note	ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã¯ã€å¿…ãšãƒãƒƒãƒ•ã‚¡ã‚’ã‚³ãƒ”ãƒ¼ã—ã¦è¿”ã—ã€
+	//!			å…ƒã®æ–‡å­—åˆ— (ã“ã®æ–‡å­—åˆ—) ã®å…±æœ‰çŠ¶æ…‹ãªã©ã¯ã„ã£ã•ã„
+	//!			å¤‰æ›´ã—ãªã„ã€‚ç ´å£Šã‚’å‰æã¨ã—ãŸæ–‡å­—åˆ—ã‚’ä»–ã®æ–‡å­—åˆ—
+	//!			ã‹ã‚‰ä½œæˆã™ã‚‹å ´åˆãªã©ã«åŠ¹ç‡çš„ã€‚
 	tRisseStringBlock MakeBufferCopy(const tRisseStringBlock & ref) const
 	{
 		return tRisseStringBlock(Buffer, Length);
 	}
 
 public: // object property
-	//! @brief •¶š—ñ‚Ì’·‚³‚ğ“¾‚é
-	//! @return	•¶š—ñ‚Ì’·‚³(ƒR[ƒhƒ|ƒCƒ“ƒg’PˆÊ) (\0 ‚ÍŠÜ‚Ü‚ê‚È‚¢)
+	//! @brief æ–‡å­—åˆ—ã®é•·ã•ã‚’å¾—ã‚‹
+	//! @return	æ–‡å­—åˆ—ã®é•·ã•(ã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒ³ãƒˆå˜ä½) (\0 ã¯å«ã¾ã‚Œãªã„)
 	risse_size GetLength() const { return Length; }
 
-	//! @brief •¶š—ñ‚Ì’·‚³‚ğİ’è‚·‚é(Ø‚è‚Â‚ß‚Ì‚İ‰Â)
-	//! @param	n V‚µ‚¢’·‚³(ƒR[ƒhƒ|ƒCƒ“ƒg’PˆÊ)
+	//! @brief æ–‡å­—åˆ—ã®é•·ã•ã‚’è¨­å®šã™ã‚‹(åˆ‡ã‚Šã¤ã‚ã®ã¿å¯)
+	//! @param	n æ–°ã—ã„é•·ã•(ã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒ³ãƒˆå˜ä½)
 	void SetLength(risse_size n) const
 	{
 		RISSE_ASSERT(n <= Length);
@@ -109,49 +109,49 @@ public: // object property
 		if(n)
 			Buffer[n] = 0;
 		else
-			Buffer = RISSE_STRING_EMPTY_BUFFER; // Buffer ‚ğ‰ğ•ú
+			Buffer = RISSE_STRING_EMPTY_BUFFER; // Buffer ã‚’è§£æ”¾
 	}
 
 public: // comparison
-	//! @brief < ‰‰Zq
-	//! @param	ref		”äŠr‚·‚éƒIƒuƒWƒFƒNƒg
-	//! @return	*this<ref‚©‚Ç‚¤‚©
+	//! @brief < æ¼”ç®—å­
+	//! @param	ref		æ¯”è¼ƒã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @return	*this<refã‹ã©ã†ã‹
 	bool operator <  (const tRisseStringBlock & ref) const
 	{
 	}
 
-	//! @brief > ‰‰Zq
-	//! @param	ref		”äŠr‚·‚éƒIƒuƒWƒFƒNƒg
-	//! @return	*this>ref‚©‚Ç‚¤‚©
+	//! @brief > æ¼”ç®—å­
+	//! @param	ref		æ¯”è¼ƒã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @return	*this>refã‹ã©ã†ã‹
 	bool operator >  (const tRisseStringBlock & ref) const
 		{ return ref < *this; }
 
-	//! @brief <= ‰‰Zq
-	//! @param	ref		”äŠr‚·‚éƒIƒuƒWƒFƒNƒg
-	//! @return	*this<=ref‚©‚Ç‚¤‚©
+	//! @brief <= æ¼”ç®—å­
+	//! @param	ref		æ¯”è¼ƒã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @return	*this<=refã‹ã©ã†ã‹
 	bool operator <= (const tRisseStringBlock & ref) const
 		{ return ! (*this > ref); }
 
-	//! @brief >= ‰‰Zq
-	//! @param	ref		”äŠr‚·‚éƒIƒuƒWƒFƒNƒg
-	//! @return	*this>=ref‚©‚Ç‚¤‚©
+	//! @brief >= æ¼”ç®—å­
+	//! @param	ref		æ¯”è¼ƒã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @return	*this>=refã‹ã©ã†ã‹
 	bool operator >= (const tRisseStringBlock & ref) const
 		{ return ! (*this < ref); }
 
-	//! @brief “¯ˆê”äŠr
-	//! @param	ref		”äŠr‚·‚éƒIƒuƒWƒFƒNƒg
-	//! @return	*this==ref‚©‚Ç‚¤‚©
+	//! @brief åŒä¸€æ¯”è¼ƒ
+	//! @param	ref		æ¯”è¼ƒã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @return	*this==refã‹ã©ã†ã‹
 	bool operator == (const tRisseStringBlock & ref) const
 	{
-		if(this == &ref) return true; // “¯‚¶ƒ|ƒCƒ“ƒ^
-		if(Buffer == ref.Buffer) return true; // “¯‚¶ƒoƒbƒtƒ@
-		if(Length != ref.Length) return false; // ˆá‚¤’·‚³
+		if(this == &ref) return true; // åŒã˜ãƒã‚¤ãƒ³ã‚¿
+		if(Buffer == ref.Buffer) return true; // åŒã˜ãƒãƒƒãƒ•ã‚¡
+		if(Length != ref.Length) return false; // é•ã†é•·ã•
 		return !Risse_strcmp(Buffer, ref.Buffer);
 	}
 
-	//! @brief •sˆê’v”»’è
-	//! @param	ref		”äŠr‚·‚éƒIƒuƒWƒFƒNƒg
-	//! @return	*this!=ref‚©‚Ç‚¤‚©
+	//! @brief ä¸ä¸€è‡´åˆ¤å®š
+	//! @param	ref		æ¯”è¼ƒã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	//! @return	*this!=refã‹ã©ã†ã‹
 	bool operator != (cosnt tRisseStringBlock & ref) const
 		{ return ! (*this == ref); }
 
@@ -159,9 +159,9 @@ public: // operators
 	tRisseStringBlock & opetator += (const tRisseStringBlock & ref);
 	tRisseStringBlock opetator +  (const tRisseStringBlock & ref) const;
 
-	//! @brief [] ‰‰Zq
-	//! @param		n		ˆÊ’u
-	//! @return		n‚ÌˆÊ’u‚É‚ ‚éƒR[ƒh
+	//! @brief [] æ¼”ç®—å­
+	//! @param		n		ä½ç½®
+	//! @return		nã®ä½ç½®ã«ã‚ã‚‹ã‚³ãƒ¼ãƒ‰
 	risse_char operator [] (risse_size n) const
 	{
 		RISSE_ASSERT(n < Length);
@@ -172,11 +172,11 @@ private:
 	static risse_char * AllocateInternalBuffer(risse_size n, risse_char *prevbuf = NULL);
 
 
-	//! @brief		ƒoƒbƒtƒ@‚ÉŠ„‚è“–‚Ä‚ç‚ê‚Ä‚¢‚éƒR[ƒhƒ|ƒCƒ“ƒg”(—e—Ê)‚ğ“¾‚é
-	//! @param		buffer ƒoƒbƒtƒ@
-	//! @return		ƒR[ƒhƒ|ƒCƒ“ƒg”
-	//! @note		Buffer[-1] ‚ª 0 ‚Ì‚Ì‚İ‚É‚±‚Ìƒƒ\ƒbƒh‚ğŒÄ‚Ô‚±‚ÆB
-	//!				‚»‚êˆÈŠO‚Ìê‡‚Í•Ô’l‚ÍM—p‚µ‚Ä‚Í‚È‚ç‚È‚¢B
+	//! @brief		ãƒãƒƒãƒ•ã‚¡ã«å‰²ã‚Šå½“ã¦ã‚‰ã‚Œã¦ã„ã‚‹ã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒ³ãƒˆæ•°(å®¹é‡)ã‚’å¾—ã‚‹
+	//! @param		buffer ãƒãƒƒãƒ•ã‚¡
+	//! @return		ã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒ³ãƒˆæ•°
+	//! @note		Buffer[-1] ãŒ 0 ã®æ™‚ã®ã¿ã«ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’å‘¼ã¶ã“ã¨ã€‚
+	//!				ãã‚Œä»¥å¤–ã®å ´åˆã¯è¿”å€¤ã¯ä¿¡ç”¨ã—ã¦ã¯ãªã‚‰ãªã„ã€‚
 	static risse_size GetBufferCapacity(const risse_char * buffer)
 	{
 		return
@@ -186,12 +186,12 @@ private:
 	}
 
 public: // pointer
-	//! @brief ƒoƒbƒtƒ@‚ğŠ„‚è“–‚Ä‚é
-	//! @param  n ƒoƒbƒtƒ@‚ÉŠ„‚è“–‚Ä‚é•¶š” (ÅŒã‚Ì \0 ‚ÍŠÜ‚Ü‚È‚¢)
-	//! @return	•¶š—ñƒoƒbƒtƒ@
-	//! @note ‚±‚Ìƒƒ\ƒbƒh‚ğg‚Á‚½ŒãA‚à‚µ n ‚ÆˆÙ‚È‚é
-	//! ’·‚³‚ğ‘‚«‚ñ‚¾ê‡‚ÍAFixLength ‚ ‚é‚¢‚Í
-	//! SetLength ‚ğŒÄ‚Ô‚±‚ÆB
+	//! @brief ãƒãƒƒãƒ•ã‚¡ã‚’å‰²ã‚Šå½“ã¦ã‚‹
+	//! @param  n ãƒãƒƒãƒ•ã‚¡ã«å‰²ã‚Šå½“ã¦ã‚‹æ–‡å­—æ•° (æœ€å¾Œã® \0 ã¯å«ã¾ãªã„)
+	//! @return	æ–‡å­—åˆ—ãƒãƒƒãƒ•ã‚¡
+	//! @note ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ã£ãŸå¾Œã€ã‚‚ã— n ã¨ç•°ãªã‚‹
+	//! é•·ã•ã‚’æ›¸ãè¾¼ã‚“ã å ´åˆã¯ã€FixLength ã‚ã‚‹ã„ã¯
+	//! SetLength ã‚’å‘¼ã¶ã“ã¨ã€‚
 	risse_char * Allocate(risse_size n)
 	{
 		if(n)
@@ -201,44 +201,44 @@ public: // pointer
 		Length = n;
 	}
 
-	//! @brief “à•”‚Å‚Á‚Ä‚¢‚é•¶š—ñ‚Ì’·‚³‚ğAÀÛ‚Ì’·‚³‚É‡‚í‚¹‚é
+	//! @brief å†…éƒ¨ã§æŒã£ã¦ã„ã‚‹æ–‡å­—åˆ—ã®é•·ã•ã‚’ã€å®Ÿéš›ã®é•·ã•ã«åˆã‚ã›ã‚‹
 	void FixLength()
 	{
 		if((Length = Risse_strlen(Buffer)) == 0)
 			Buffer = RISSE_STRING_EMPTY_BUFFER;
 	}
 
-	//! @brief C Œ¾ŒêƒXƒ^ƒCƒ‹‚Ìƒ|ƒCƒ“ƒ^‚ğ“¾‚é
-	//! @note  tRisseStringBlock ‚Í“à•”‚É•Û‚µ‚Ä‚¢‚éƒoƒbƒtƒ@‚ÌÅŒã‚ª \0 ‚Å
-	//! I‚í‚Á‚Ä‚È‚¢ê‡‚ÍAƒoƒbƒtƒ@‚ğV‚½‚ÉƒRƒs[‚µ‚Ä \0 ‚ÅI‚í‚ç‚¹A‚»‚Ì
-	//! ƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚ğ•Ô‚·B‚Ü‚½A‹ó•¶š—ñ‚Ìê‡‚Í NULL ‚ğ•Ô‚³‚¸‚É
-	//! "" ‚Ö‚Ìƒ|ƒCƒ“ƒ^‚ğ•Ô‚·B
+	//! @brief C è¨€èªã‚¹ã‚¿ã‚¤ãƒ«ã®ãƒã‚¤ãƒ³ã‚¿ã‚’å¾—ã‚‹
+	//! @note  tRisseStringBlock ã¯å†…éƒ¨ã«ä¿æŒã—ã¦ã„ã‚‹ãƒãƒƒãƒ•ã‚¡ã®æœ€å¾ŒãŒ \0 ã§
+	//! çµ‚ã‚ã£ã¦ãªã„å ´åˆã¯ã€ãƒãƒƒãƒ•ã‚¡ã‚’æ–°ãŸã«ã‚³ãƒ”ãƒ¼ã—ã¦ \0 ã§çµ‚ã‚ã‚‰ã›ã€ãã®
+	//! ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã‚’è¿”ã™ã€‚ã¾ãŸã€ç©ºæ–‡å­—åˆ—ã®å ´åˆã¯ NULL ã‚’è¿”ã•ãšã«
+	//! "" ã¸ã®ãƒã‚¤ãƒ³ã‚¿ã‚’è¿”ã™ã€‚
 	const risse_char * c_str() const
 	{
 		if(Buffer[Length]) return Independ();
 		return Buffer;
 	}
 
-	//! @brief “à•”ƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚ğ•Ô‚·
-	//! @return “à•”ƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^
-	//! @note  ‚±‚Ìƒƒ\ƒbƒh‚Å•Ô‚³‚ê‚éƒ|ƒCƒ“ƒ^‚ÍA‚µ‚Î‚µ‚Î
-	//! Šú‘Ò‚µ‚½ˆÊ’u‚É \0 ‚ª‚È‚¢ (nullIŒ‹‚µ‚Ä‚¢‚é•ÛØ‚ª‚È‚¢)
+	//! @brief å†…éƒ¨ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã‚’è¿”ã™
+	//! @return å†…éƒ¨ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿
+	//! @note  ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã§è¿”ã•ã‚Œã‚‹ãƒã‚¤ãƒ³ã‚¿ã¯ã€ã—ã°ã—ã°
+	//! æœŸå¾…ã—ãŸä½ç½®ã« \0 ãŒãªã„ (nullçµ‚çµã—ã¦ã„ã‚‹ä¿è¨¼ãŒãªã„)
 	const risse_char * Pointer() const { return Buffer; }
 
-	//! @brief •¶š—ñƒoƒbƒtƒ@‚ğƒRƒs[‚µA“Æ—§‚³‚¹‚é
-	//! @return “à•”ƒoƒbƒtƒ@
-	//! @note tRisseStringBlock ‚Íˆê‚Â‚Ìƒoƒbƒtƒ@‚ğ•¡”‚Ì•¶š—ñƒCƒ“ƒXƒ^ƒ“ƒX‚ª
-	//! ‹¤—L‚·‚éê‡‚ª‚ ‚é‚ªA‚±‚Ìƒƒ\ƒbƒh‚Í‹¤—L‚ğØ‚èA•¶š—ñƒoƒbƒtƒ@‚ğ
-	//! “Æ—§‚·‚éBRisse ‚Ì GC ‚Ì“Á«ãA‚»‚Ì•¶š—ñ‚ª‚·‚Å‚É“Æ—§‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğ
-	//! ŠmÀ‚É’m‚é‚·‚×‚Í‚È‚­A‚±‚Ìƒƒ\ƒbƒh‚Í‚©‚È‚è‚ÌŠm—¦‚Åƒoƒbƒtƒ@‚ğƒRƒs[‚·‚é‚½‚ßA
-	//! Às‚ª‚‰¿‚É‚È‚éê‡‚ª‚ ‚é‚±‚Æ‚É’ˆÓ‚·‚é‚±‚ÆB
-	//! ‚±‚Ìƒƒ\ƒbƒh‚Í“à•”ƒoƒbƒtƒ@‚Ö‚Ìƒ|ƒCƒ“ƒ^‚ğ•Ô‚·‚ªA‚±‚Ìƒoƒbƒtƒ@‚ÉA‚à‚µ‚à‚Æ‚Ì
-	//! ’·‚³‚æ‚è‚à’Z‚¢’·‚³‚Ì•¶š—ñ‚ğ‘‚«‚ñ‚¾ê‡‚ÍAFixLength ‚ ‚é‚¢‚Í
-	//! SetLength ‚ğŒÄ‚Ô‚±‚ÆB
-	//! ‚±‚Ìƒƒ\ƒbƒh‚ÍA“à—e‚ª‹ó‚Ì‚Í“Æ—§‚ğs‚í‚È‚¸‚É NULL ‚ğ•Ô‚·
+	//! @brief æ–‡å­—åˆ—ãƒãƒƒãƒ•ã‚¡ã‚’ã‚³ãƒ”ãƒ¼ã—ã€ç‹¬ç«‹ã•ã›ã‚‹
+	//! @return å†…éƒ¨ãƒãƒƒãƒ•ã‚¡
+	//! @note tRisseStringBlock ã¯ä¸€ã¤ã®ãƒãƒƒãƒ•ã‚¡ã‚’è¤‡æ•°ã®æ–‡å­—åˆ—ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãŒ
+	//! å…±æœ‰ã™ã‚‹å ´åˆãŒã‚ã‚‹ãŒã€ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã¯å…±æœ‰ã‚’åˆ‡ã‚Šã€æ–‡å­—åˆ—ãƒãƒƒãƒ•ã‚¡ã‚’
+	//! ç‹¬ç«‹ã™ã‚‹ã€‚Risse ã® GC ã®ç‰¹æ€§ä¸Šã€ãã®æ–‡å­—åˆ—ãŒã™ã§ã«ç‹¬ç«‹ã—ã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’
+	//! ç¢ºå®Ÿã«çŸ¥ã‚‹ã™ã¹ã¯ãªãã€ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã¯ã‹ãªã‚Šã®ç¢ºç‡ã§ãƒãƒƒãƒ•ã‚¡ã‚’ã‚³ãƒ”ãƒ¼ã™ã‚‹ãŸã‚ã€
+	//! å®Ÿè¡ŒãŒé«˜ä¾¡ã«ãªã‚‹å ´åˆãŒã‚ã‚‹ã“ã¨ã«æ³¨æ„ã™ã‚‹ã“ã¨ã€‚
+	//! ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã¯å†…éƒ¨ãƒãƒƒãƒ•ã‚¡ã¸ã®ãƒã‚¤ãƒ³ã‚¿ã‚’è¿”ã™ãŒã€ã“ã®ãƒãƒƒãƒ•ã‚¡ã«ã€ã‚‚ã—ã‚‚ã¨ã®
+	//! é•·ã•ã‚ˆã‚Šã‚‚çŸ­ã„é•·ã•ã®æ–‡å­—åˆ—ã‚’æ›¸ãè¾¼ã‚“ã å ´åˆã¯ã€FixLength ã‚ã‚‹ã„ã¯
+	//! SetLength ã‚’å‘¼ã¶ã“ã¨ã€‚
+	//! ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã¯ã€å†…å®¹ãŒç©ºã®æ™‚ã¯ç‹¬ç«‹ã‚’è¡Œã‚ãªãšã« NULL ã‚’è¿”ã™
 	risse_char * Independ() const
 	{
-		if(Buffer[-1]) // ‹¤—L‰Â”\«ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚éH
+		if(Buffer[-1]) // å…±æœ‰å¯èƒ½æ€§ãƒ•ãƒ©ã‚°ãŒç«‹ã£ã¦ã„ã‚‹ï¼Ÿ
 			return InternalIndepend();
 		return Buffer;
 	}

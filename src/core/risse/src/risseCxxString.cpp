@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risse [�肹]
+	Risse [りせ]
 	 stands for "Risse Is a Sweet Script Engine"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief �����񑀍�
+//! @brief 文字列操作
 //---------------------------------------------------------------------------
 #include "prec.h"
 
@@ -17,128 +17,128 @@
 RISSE_DEFINE_SOURCE_ID(45632,47818,10920,18335,63117,13582,59145,24628);
 
 /*! @note
-Risse ������ɂ���
+Risse 文字列について
 
-Risse ������� tRisseStringBlock �N���X�ŕ\�����B
-���̃N���X�́Arisse_char * �^�̕������ێ�����B���̕������ \0 ���܂ނ�
-�Ƃ͂ł��Ȃ��B
+Risse 文字列は tRisseStringBlock クラスで表される。
+このクラスは、risse_char * 型の文字列を保持する。この文字列は \0 を含むこ
+とはできない。
 
-�ȉ��̐����ł̓R�[�h�|�C���g���u�����v�ƕ\�L����B
+以下の説明ではコードポイントを「文字」と表記する。
 
-�� �\��
+■ 構造
 
-	tRisseStringBlock �͈ȉ��̓�̃����o�������Ă���B
+	tRisseStringBlock は以下の二つのメンバを持っている。
 
-	risse_char  *	Buffer;	// ������o�b�t�@
-	risse_size		Length;	// ������ (�Ō�� \0 �͊܂߂Ȃ�)
+	risse_char  *	Buffer;	// 文字列バッファ
+	risse_size		Length;	// 文字列長 (最後の \0 は含めない)
 
-	tRisseStringBlock �͂��̓�̃����o��p���A�uBuffer����n�܂�Length����
-	��������������v��\���B
-	�����̂Ȃ� (���) ������̏ꍇ�ABuffer �ɂ� NULL ������ALength �� 0 �ɂȂ�B
+	tRisseStringBlock はこの二つのメンバを用い、「Bufferから始まるLength分の
+	長さを持つ文字列」を表す。
+	長さのない (空の) 文字列の場合、Buffer には NULL が入り、Length は 0 になる。
 
 
-�� �o�b�t�@
+■ バッファ
 
-	�o�b�t�@�� �Œ�ł� (Length + 2) * sizeof(risse_char) + sizeof(risse_size)
-	�����B
-	tRisseStringBlock ���C�ӂ̕���������ɍ쐬�����ꍇ�A
-	(Length + 2) * sizeof(risse_char) + sizeof(size_t) �̒����̃o�b�t�@����
-	���m�ۂ���A�����񒆂̊e�����͈ȉ��̂悤�ɔz�u�����B
+	バッファは 最低でも (Length + 2) * sizeof(risse_char) + sizeof(risse_size)
+	を持つ。
+	tRisseStringBlock が任意の文字列を元に作成される場合、
+	(Length + 2) * sizeof(risse_char) + sizeof(size_t) の長さのバッファがま
+	ず確保され、文字列中の各文字は以下のように配置される。
 
-	capacity \0 ����0 ����1 ����3 .... \0
+	capacity \0 文字0 文字1 文字3 .... \0
 
-	���̂悤�ɁA�ŏ��� capacity �Ƃ��ăo�b�t�@�Ɏ��ۂɊm�ۂ���Ă��钷����
-	����A����ȍ~�� �e CP �̗��[�� \0 �������o�b�t�@�ƂȂ�B
-	capacity �́A�o�b�t�@�̒������҂�����ł���� Length �Ɠ����ɂȂ�B
+	このように、最初は capacity としてバッファに実際に確保されている長さが
+	入り、それ以降は 各 CP の両端に \0 がついたバッファとなる。
+	capacity は、バッファの長さがぴったりであれば Length と同じになる。
 
-	tRisseStringBlock::Buffer �́A�ŏ��� capacity �� \0 �ł͂Ȃ��A���̎���
-	����0(�܂蕶����̐擪) ���w���悤�ɂȂ�B
+	tRisseStringBlock::Buffer は、最初の capacity や \0 ではなく、その次の
+	文字0(つまり文字列の先頭) を指すようになる。
 
-	cpacity �̎��� \0 �́A Buffer ������ tRisseStringBlock �Ƌ��L����Ă���
-	�ꍇ�� \0 �ł͂Ȃ��Ȃ�B�Ō�� \0 �́A�I�[�� \0 �ł��邱�Ƃ����҂��Ă�
-	�� C ����n�̊֐��ɓn���ۂ� NULL�I�[ ��\���B
+	cpacity の次の \0 は、 Buffer が他の tRisseStringBlock と共有されている
+	場合に \0 ではなくなる。最後の \0 は、終端が \0 であることを期待してい
+	る C 言語系の関数に渡す際に NULL終端 を表す。
 
-�� �o�b�t�@�̋��L
+■ バッファの共有
 
-	tRisseStringBlock �̃R�s�[�R���X�g���N�^�������Z�q�́A�o�b�t�@�̒��g��
-	�R�s�[�����ABuffer �� Length �������R�s�[����B���̍ہA�o�b�t�@�����ł�
-	���L���ꂽ���Ƃ�\�����߁ABuffer[-1] �� \0 �łȂ���΁ABuffer[-1] ��
-	-1 ��������B����̓o�b�t�@�����L����Ă���\����\���B
+	tRisseStringBlock のコピーコンストラクタや代入演算子は、バッファの中身は
+	コピーせず、Buffer と Length だけをコピーする。この際、バッファがすでに
+	共有されたことを表すため、Buffer[-1] が \0 でなければ、Buffer[-1] に
+	-1 を代入する。これはバッファが共有されている可能性を表す。
 
-�� ����������̋��L
+■ 部分文字列の共有
 
-	tRisseStringBlock �́A���̕�����̈ꕔ���w���������Ƃ��ł���B
+	tRisseStringBlock は、他の文字列の一部を指し示すことができる。
 
-	tRisseStringBlock a ���ȉ��̃o�b�t�@�������Ă���ꍇ�A
+	tRisseStringBlock a が以下のバッファを持っている場合、
 
-	4 \0 ����0 ����1 ����2 ����3 \0
-	    ��
+	4 \0 文字0 文字1 文字2 文字3 \0
+	    ↑
 	   Buffer
 	Length = 4
 
-	����1 �` ����2 �̂Q������\�� tRisseStringBlock b �͈ȉ��̂悤�ɕ\����
-	�Ƃ��ł���B
+	文字1 ～ 文字2 の２文字を表す tRisseStringBlock b は以下のように表すこ
+	とができる。
 
-	4 -1 ����0 ����1 ����2 ����3 \0
-	          ��
+	4 -1 文字0 文字1 文字2 文字3 \0
+	          ↑
 	        Buffer
 	Length = 2
 
-	���̏ꍇ���o�b�t�@�̋��L�Ɠ������A�o�b�t�@�̐擪�� \0 �� -1 �ɏ���������
-	��A�o�b�t�@�����L����Ă��邱�Ƃ�\���B
+	この場合もバッファの共有と同じく、バッファの先頭の \0 が -1 に書き換えら
+	れ、バッファが共有されていることを表す。
 
-�� �o�b�t�@�̋��L�̔���
+■ バッファの共有の判定
 
-	tRisseStringBlock ������ tRisseStringBlock �ƃo�b�t�@�����L���Ă���\
-	�������邩�ǂ����𔻒f����ɂ́ABuffer[-1] �� \0 �łȂ����ǂ����������
-	�悢�BBuffer[-1] �� �� \0 �ł���̓o�b�t�@�͋��L����Ă���\��������B
+	tRisseStringBlock が他の tRisseStringBlock とバッファを共有している可能
+	性があるかどうかを判断するには、Buffer[-1] が \0 でないかどうかを見れば
+	よい。Buffer[-1] が 非 \0 であれはバッファは共有されている可能性がある。
 
-	tRisseStringBlock �͕���������L����ꍇ�ABuffer[-1] ���� \0 �̏ꍇ��
-	 -1 �������邪�A����ɂ��o�b�t�@�����L����Ă���\����\���B
+	tRisseStringBlock は文字列を共有する場合、Buffer[-1] が非 \0 の場合に
+	 -1 を代入するが、これによりバッファが共有されている可能性を表す。
 
-	tRisseStringBlock �͕�������������L����ꍇ�A�ꕶ����� Buffer[-1] ��
-	�� \0�̏ꍇ�� -1 �������邵�A����������� Buffer[-1] �͕K�R�I�� \0 ��
-	�Ȃ�B����́A���������񂪕ꕶ����̐擪���狤�L���Ă���Ȃ�΁ABuffer[-1]
-	�͕ꕶ����Ɠ��� -1 �ɂȂ邵�A���������񂪕ꕶ����̓r�����狤�L���Ă���
-	�Ȃ�΁ABuffer[-1] �͒��O�̕�����\���AtRisseStringBlock �͕����񒆂�
-	\0 ���܂ނ��Ƃ͂Ȃ�����A����͔� \0 �ƂȂ�B
+	tRisseStringBlock は部分文字列を共有する場合、母文字列は Buffer[-1] が
+	非 \0の場合に -1 を代入するし、部分文字列は Buffer[-1] は必然的に \0 に
+	なる。これは、部分文字列が母文字列の先頭から共有しているならば、Buffer[-1]
+	は母文字列と同じ -1 になるし、部分文字列が母文字列の途中から共有している
+	ならば、Buffer[-1] は直前の文字を表し、tRisseStringBlock は文字列中に
+	\0 を含むことはないから、これは非 \0 となる。
 
-	�����͋��L�̉\����\�������ł���B�\���������Ă����ۂ͋��L����Ă�
-	�Ȃ��ꍇ�����蓾��B
+	これらは共有の可能性を表すだけである。可能性があっても実際は共有されてい
+	ない場合があり得る。
 
-�� �o�b�t�@�̗e�ʂƎ��ۂ� Length
+■ バッファの容量と実際の Length
 
-	+= ���Z�q�Ȃǂ� Length �������Ȃ�A�o�b�t�@���g�������ہA�o�b�t�@�͎�
-	�ۂɕK�v�ȗe�ʂ������������߂Ɋm�ۂ���A���̊g�����Ƀo�b�t�@���ēx�m��
-	���Ȃ��Ă��ςނ悤�ɂȂ�B
-	���̍ہA���ۂɃo�b�t�@���i�[�\�� CP ����\���̂��A�o�b�t�@�̐擪��
-	size_t �^�Ŋm�ۂ���Ă���̈�ł���B
-	�����̗̈�́ABuffer[-1] �� 0 �̂Ƃ� (���L���Ă���\�����Ȃ��ꍇ)��
-	�̂ݗL���Ȓl��ێ����Ă���ƍl����ׂ��ł���B���ۂ̂Ƃ���ABuffer[-1] ��
-	0 �łȂ��ꍇ�� += �̂悤�ȃo�b�t�@�̓��e��j�󂷂鑀��ł͒��O��
-	�o�b�t�@�̓��e�̃R�s�[���s���邽�߁A���̗̈悪�Q�Ƃ���邱�Ƃ͂Ȃ��B
+	+= 演算子などで Length が長くなり、バッファが拡張される際、バッファは実
+	際に必要な容量よりもすこし多めに確保され、次の拡張時にバッファを再度確保
+	しなくても済むようになる。
+	この際、実際にバッファが格納可能な CP 数を表すのが、バッファの先頭に
+	size_t 型で確保されている領域である。
+	ここの領域は、Buffer[-1] が 0 のとき (共有している可能性がない場合)に
+	のみ有効な値を保持していると考えるべきである。実際のところ、Buffer[-1] が
+	0 でない場合は += のようなバッファの内容を破壊する操作では直前に
+	バッファの内容のコピーが行われるため、この領域が参照されることはない。
 
-�� Independ
+■ Independ
 
-	Independ ���\�b�h�́A�����񂪂��̃o�b�t�@�����L���Ă���\��������ꍇ�A
-	�V���Ƀo�b�t�@���m�ۂ��A���e���R�s�[����B����ɂ��A�o�b�t�@�ɉ�����
-	�X����������ł��A���̕�����ɉe�����y�΂Ȃ��悤�ɂ��邱�Ƃ��ł���B
+	Independ メソッドは、文字列がそのバッファを共有している可能性がある場合、
+	新たにバッファを確保し、内容をコピーする。これにより、バッファに何か変
+	更を書き込んでも、他の文字列に影響が及ばないようにすることができる。
 
-	Independ �͐V���Ɋm�ۂ����o�b�t�@�̐擪�� \0 �ɂ��邪�A���̃o�b�t�@��
-	���e�ɂ͎�������Ȃ��B���̃o�b�t�@�̓��e�́A����ɑ��̕����񂩂狤�L
-	����Ă���\�������邪�A���ۂɋ��L����Ă���̂��A���邢�͂���Ă���
-	���̂��́AtRisseStringBlock �������Ă����񂩂�͔���ł��Ȃ�����ł���B
+	Independ は新たに確保したバッファの先頭は \0 にするが、元のバッファの
+	内容には手を加えない。元のバッファの内容は、さらに他の文字列から共有
+	されている可能性があるが、実際に共有されているのか、あるいはされていな
+	いのかは、tRisseStringBlock が持っている情報からは判定できないからである。
 
-�� c_str()
+■ c_str()
 
-	c_str() �́A������ C ����n API �����҂���悤�ȁANULL �I�[�������Ԃ��B
-	�����񂪑��̕�����̕����������\���Ă���ꍇ�A������̍Ōオ \0 �ł���
-	�ۏ؂͂Ȃ����A���̂悤�ȏꍇ�́Ac_str() �͐V���Ƀo�b�t�@���m�ۂ��A�Ōオ
-	\0 �ŏI�����Ă���o�b�t�@�����A�����Ԃ��B
+	c_str() は、多くの C 言語系 API が期待するような、NULL 終端文字列を返す。
+	文字列が他の文字列の部分文字列を表している場合、文字列の最後が \0 である
+	保証はないが、そのような場合は、c_str() は新たにバッファを確保し、最後が
+	\0 で終了しているバッファを作り、それを返す。
 
-�� �o�b�t�@�̉��
+■ バッファの解放
 
-	�Q�Ƃ���Ȃ��Ȃ����o�b�t�@�́AGC �ɂ�莩���I�ɉ�������B
+	参照されなくなったバッファは、GC により自動的に回収される。
 
 */
 
@@ -146,15 +146,15 @@ namespace risse
 {
 
 //---------------------------------------------------------------------------
-//! @brief -1, 0 �������Ă���z��(��̃o�b�t�@��\��)
+//! @brief -1, 0 が入っている配列(空のバッファを表す)
 //---------------------------------------------------------------------------
 risse_char tRisseStringBlock::EmptyBuffer[2] = { tRisseStringBlock::MightBeShared, 0 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		�R���X�g���N�^(risse_char * ����)
-//! @param		ref		���̕�����
+//! @brief		コンストラクタ(risse_char * から)
+//! @param		ref		元の文字列
 //---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const risse_char * ref)
 {
@@ -172,10 +172,10 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref)
 
 
 //---------------------------------------------------------------------------
-//! @brief		�R���X�g���N�^(risse_char * ����A�R�[�h�|�C���g�������t��)
-//! @param		ref		���̕�����
-//! @param		n		�R�[�h�|�C���g��
-//! @note		[ref, ref+n) �͈̔͂ɂ� \0 ���Ȃ�����
+//! @brief		コンストラクタ(risse_char * から、コードポイント数制限付き)
+//! @param		ref		元の文字列
+//! @param		n		コードポイント数
+//! @note		[ref, ref+n) の範囲には \0 がないこと
 //---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 {
@@ -195,14 +195,14 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 
 
 //---------------------------------------------------------------------------
-//! @brief		�R���X�g���N�^(char * ����)
-//! @param		ref		���̕�����
+//! @brief		コンストラクタ(char * から)
+//! @param		ref		元の文字列
 //---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const char * ref)
 {
-	Length = RisseUtf8ToRisseCharString(ref, NULL); // �R�[�h�|�C���g���𓾂�
+	Length = RisseUtf8ToRisseCharString(ref, NULL); // コードポイント数を得る
 //	if(Length == static_cast<risse_size>(-1L))
-//		; /////////////////////////////////////////// TODO: ��O�𓊂���
+//		; /////////////////////////////////////////// TODO: 例外を投げる
 	Buffer = AllocateInternalBuffer(Length);
 	RisseUtf8ToRisseCharString(ref, Buffer);
 	Buffer[Length] = 0;
@@ -211,21 +211,21 @@ tRisseStringBlock::tRisseStringBlock(const char * ref)
 
 
 //---------------------------------------------------------------------------
-//! @brief		������̘A��
-//! @param		ref		�A�����镶����
-//! @return		���̃I�u�W�F�N�g
+//! @brief		文字列の連結
+//! @param		ref		連結する文字列
+//! @return		このオブジェクト
 //---------------------------------------------------------------------------
 tRisseStringBlock & tRisseStringBlock::opetator += (const tRisseStringBlock & ref)
 {
-	if(ref.Length == 0) return *this; // �ǉ�������̂Ȃ�
-	if(Length == 0) return *this = ref; // �P���ȃR�s�[�ł悢
+	if(ref.Length == 0) return *this; // 追加するものなし
+	if(Length == 0) return *this = ref; // 単純なコピーでよい
 
 	risse_size newlength = Length + ref.Length;
 
 	if(Buffer[-1])
 	{
-		// ���L�\���t���O�������Ă���
-		// �V�����̈���m�ۂ��A�����ɃR�s�[����
+		// 共有可能性フラグが立っている
+		// 新しく領域を確保し、そこにコピーする
 		risse_char * newbuf = AllocateInternalBuffer(newlength);
 		memcpy(newbuf, Buffer, Length * sizeof(risse_char));
 		memcpy(newbuf + Length, ref.Buffer, ref.Length * sizeof(risse_char));
@@ -233,26 +233,26 @@ tRisseStringBlock & tRisseStringBlock::opetator += (const tRisseStringBlock & re
 	}
 	else
 	{
-		// ���L�\���t���O�͗����Ă��Ȃ�
-		// ���݂̗̈���g������K�v������H
+		// 共有可能性フラグは立っていない
+		// 現在の領域を拡張する必要がある？
 		if(GetBufferCapacity(Buffer) < newlength)
 		{
-			// �e�ʂ�����Ȃ��̂Ŋg������K�v����
-			// �K���ɐV�K�m�ۂ̗e�ʂ��v�Z
+			// 容量が足りないので拡張する必要あり
+			// 適当に新規確保の容量を計算
 			risse_size newcpacity;
 			if(newlength < 16*1024)
 				newcpacity = newlength * 2;
 			else
 				newcpacity = newlength + 16*1024;
-			// �o�b�t�@���Ċm��
+			// バッファを再確保
 			Buffer = AllocateInternalBuffer(newcapacity, Buffer);
 		}
 
-		// ���ݕێ����Ă��镶����̒���� ref �� Buffer ���R�s�[����
+		// 現在保持している文字列の直後に ref の Buffer をコピーする
 		memcpy(Buffer + Length, ref.Buffer, ref.Length * sizeof(risse_char));
 	}
 
-	// null �I�[��ݒ肷��
+	// null 終端を設定する
 	Length = newlength;
 	newbuf[newlength] = 0;
 
@@ -262,7 +262,7 @@ tRisseStringBlock & tRisseStringBlock::opetator += (const tRisseStringBlock & re
 
 
 //---------------------------------------------------------------------------
-//! @brief		������̘A��
+//! @brief		文字列の連結
 //---------------------------------------------------------------------------
 tRisseStringBlock tRisseStringBlock::opetator +  (const tRisseStringBlock & ref) const
 {
@@ -281,18 +281,18 @@ tRisseStringBlock tRisseStringBlock::opetator +  (const tRisseStringBlock & ref)
 
 
 //---------------------------------------------------------------------------
-//! @brief		n�̃R�[�h�|�C���g����Ȃ�o�b�t�@�����蓖�Ă�
-//! @param		n	�R�[�h�|�C���g��
-//! @param		prevbuf	�ȑO�̃o�b�t�@(�o�b�t�@���Ċm�ۂ���ꍇ)
-//! @return		���蓖�Ă�ꂽ�o�b�t�@
-//! @note		���ۂɂ� (n+2)*sizeof(risse_char) + sizeof(risse_size) �����蓖
-//! �Ă��A2�Ԗڂ̕������w���|�C���^���A��B���L�\���t���O�̓N���A����A
-//! �e�ʂ��������܂�邪�Anull�I�[�͏������܂�Ȃ��̂Œ��ӁB
+//! @brief		n個のコードポイントからなるバッファを割り当てる
+//! @param		n	コードポイント数
+//! @param		prevbuf	以前のバッファ(バッファを再確保する場合)
+//! @return		割り当てられたバッファ
+//! @note		実際には (n+2)*sizeof(risse_char) + sizeof(risse_size) が割り当
+//! てられ、2番目の文字を指すポインタが帰る。共有可能性フラグはクリアされ、
+//! 容量も書き込まれるが、null終端は書き込まれないので注意。
 //---------------------------------------------------------------------------
 static risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	risse_size n, risse_char *prevbuf)
 {
-	// �o�b�t�@���m��
+	// バッファを確保
 	size_t newbytes = sizeof(risse_size) + (n + 2)*sizeof(risse_char);
 	void *ptr;
 	if(!prevbuf)
@@ -300,26 +300,26 @@ static risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	else
 		ptr = GC_realloc(prevbuf, newbytes);
 
-	// �Q�Ԗڂ̕������w���|�C���^���l��
+	// ２番目の文字を指すポインタを獲る
 	risse_char *  buffer = reinterpret_cast<risse_char*>(
 		reinterpret_cast<char*>(ptr) +
 				( sizeof(risse_char) + sizeof(risse_size) ) );
 
-	// ���L�\���t���O�� 0 ��
+	// 共有可能性フラグを 0 に
 	buffer[-1] = 0;
 
-	// �m�ۗe�ʂ���������
+	// 確保容量を書き込む
 	*reinterpret_cast<risse_size *>(ptr) = n;
 
-	// ���ǂ�
+	// もどる
 	return buffer;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		������o�b�t�@���R�s�[���A�Ɨ�������
-//! @return		�����o�b�t�@
+//! @brief		文字列バッファをコピーし、独立させる
+//! @return		内部バッファ
 //---------------------------------------------------------------------------
 risse_char * tRisseStringBlock::InternalIndepend() const
 {

@@ -142,7 +142,7 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 */
 
-namespace risse
+namespace Risse
 {
 
 //---------------------------------------------------------------------------
@@ -215,7 +215,7 @@ tRisseStringBlock::tRisseStringBlock(const char * ref)
 //! @param		ref		連結する文字列
 //! @return		このオブジェクト
 //---------------------------------------------------------------------------
-tRisseStringBlock & tRisseStringBlock::opetator += (const tRisseStringBlock & ref)
+tRisseStringBlock & tRisseStringBlock::operator += (const tRisseStringBlock & ref)
 {
 	if(ref.Length == 0) return *this; // 追加するものなし
 	if(Length == 0) return *this = ref; // 単純なコピーでよい
@@ -239,11 +239,11 @@ tRisseStringBlock & tRisseStringBlock::opetator += (const tRisseStringBlock & re
 		{
 			// 容量が足りないので拡張する必要あり
 			// 適当に新規確保の容量を計算
-			risse_size newcpacity;
+			risse_size newcapacity;
 			if(newlength < 16*1024)
-				newcpacity = newlength * 2;
+				newcapacity = newlength * 2;
 			else
-				newcpacity = newlength + 16*1024;
+				newcapacity = newlength + 16*1024;
 			// バッファを再確保
 			Buffer = AllocateInternalBuffer(newcapacity, Buffer);
 		}
@@ -254,7 +254,7 @@ tRisseStringBlock & tRisseStringBlock::opetator += (const tRisseStringBlock & re
 
 	// null 終端を設定する
 	Length = newlength;
-	newbuf[newlength] = 0;
+	Buffer[newlength] = 0;
 
 	return *this;
 }
@@ -264,7 +264,7 @@ tRisseStringBlock & tRisseStringBlock::opetator += (const tRisseStringBlock & re
 //---------------------------------------------------------------------------
 //! @brief		文字列の連結
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::opetator +  (const tRisseStringBlock & ref) const
+tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref) const
 {
 	if(Length == 0) return ref;
 	if(ref.Length == 0) return *this;
@@ -289,7 +289,7 @@ tRisseStringBlock tRisseStringBlock::opetator +  (const tRisseStringBlock & ref)
 //! てられ、2番目の文字を指すポインタが帰る。共有可能性フラグはクリアされ、
 //! 容量も書き込まれるが、null終端は書き込まれないので注意。
 //---------------------------------------------------------------------------
-static risse_char * tRisseStringBlock::AllocateInternalBuffer(
+risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	risse_size n, risse_char *prevbuf)
 {
 	// バッファを確保
@@ -333,4 +333,4 @@ risse_char * tRisseStringBlock::InternalIndepend() const
 
 
 //---------------------------------------------------------------------------
-} // namespace risse
+} // namespace Risse

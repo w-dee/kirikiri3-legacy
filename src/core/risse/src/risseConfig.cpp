@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risse 設定 (プラットフォーム依存実装など)
 //---------------------------------------------------------------------------
-#include "risseCommHead.h"
+#include "prec.h"
 #include "risseCharUtils.h"
 
 #ifdef RISSE_DEBUG_PROFILE_TIME

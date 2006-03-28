@@ -29,14 +29,14 @@ CPPFLAGS = $(CXXFLAGS)
 
 #----------------------------#
 
-CPPFILES = 	src/risse.cpp                     \
-			src/risseCharUtils.cpp            \
+CPPFILES =  src/risseCharUtils.cpp            \
 			src/risseConfig.cpp               \
-			src/risseCxxString.cpp            
+			src/risseCxxString.cpp            \
+			src/risseUtils.cpp                
 
 OBJS = $(CPPFILES:.cpp=.o)
 
-PREC_H_NAME = include/risseCommHead.h
+PREC_H_NAME = src/prec.h
 
 INCLUDES = -Iinclude
 

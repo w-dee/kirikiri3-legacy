@@ -10,11 +10,10 @@
 //! @file
 //! @brief risse_char 操作関数群
 //---------------------------------------------------------------------------
-#include "risseCommHead.h"
+#include "prec.h"
 #include "risseConfig.h"
 #include "risseCharUtils.h"
-#include "risseString.h"
-#include "risseError.h"
+#include "risseCxxString.h"
 
 
 namespace Risse
@@ -720,9 +719,12 @@ wxString RisseCharToWxString(const risse_char * str)
 void RisseThrowWSAssertionFailure(const wchar_t * source, risse_int line)
 {
 	fprintf(stderr, "assertion failure at %ls line %d\n", source, line);
+	abort();
+#if 0
 	Risse_eRisseError(
 		ttstr(RISSE_WS("you can not use multiple RISSE_WS in a line; use RISSE_WS, RISSE_WS2, RISSE_WS3 ... at %1 line %2"),
 			ttstr(source), ttstr(line)));
+#endif
 }
 //---------------------------------------------------------------------------
 #endif

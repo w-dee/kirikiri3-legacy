@@ -11,8 +11,17 @@
 //! @brief 文字列操作
 //---------------------------------------------------------------------------
 
+#ifndef risseCxxStringH
+#define risseCxxStringH
 
-namespace risse
+
+#include "risseCharUtils.h"
+#include "risseTypes.h"
+#include "risseAssert.h"
+#include "gc_cpp.h"
+
+
+namespace Risse
 {
 //---------------------------------------------------------------------------
 //! @brief	文字列ブロック
@@ -22,7 +31,7 @@ class tRisseStringBlock : public gc
 	mutable risse_char  *	Buffer;	//!< 文字列バッファ
 	risse_size				Length;	//!< 文字列長 (最後の \0 は含めない)
 
-	const risse_char MightBeShared  = static_cast<risse_char>(-1L);
+	const static risse_char MightBeShared  = static_cast<risse_char>(-1L);
 		//!< 共有可能性フラグとして Buffer[-1] に設定する値
 
 	static risse_char EmptyBuffer[2];
@@ -101,7 +110,7 @@ public: // object property
 
 	//! @brief 文字列の長さを設定する(切りつめのみ可)
 	//! @param	n 新しい長さ(コードポイント単位)
-	void SetLength(risse_size n) const
+	void SetLength(risse_size n)
 	{
 		RISSE_ASSERT(n <= Length);
 		Independ();
@@ -118,6 +127,7 @@ public: // comparison
 	//! @return	*this<refかどうか
 	bool operator <  (const tRisseStringBlock & ref) const
 	{
+		return Risse_strcmp(Buffer, ref.Buffer) < 0;
 	}
 
 	//! @brief > 演算子
@@ -152,12 +162,12 @@ public: // comparison
 	//! @brief 不一致判定
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this!=refかどうか
-	bool operator != (cosnt tRisseStringBlock & ref) const
+	bool operator != (const tRisseStringBlock & ref) const
 		{ return ! (*this == ref); }
 
 public: // operators
-	tRisseStringBlock & opetator += (const tRisseStringBlock & ref);
-	tRisseStringBlock opetator +  (const tRisseStringBlock & ref) const;
+	tRisseStringBlock & operator += (const tRisseStringBlock & ref);
+	tRisseStringBlock operator +  (const tRisseStringBlock & ref) const;
 
 	//! @brief [] 演算子
 	//! @param		n		位置
@@ -199,6 +209,7 @@ public: // pointer
 		else
 			Buffer = RISSE_STRING_EMPTY_BUFFER;
 		Length = n;
+		return Buffer;
 	}
 
 	//! @brief 内部で持っている文字列の長さを、実際の長さに合わせる
@@ -252,4 +263,7 @@ private:
 
 
 //---------------------------------------------------------------------------
-} // namespace risse
+} // namespace Risse
+
+
+#endif

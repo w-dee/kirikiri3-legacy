@@ -144,8 +144,8 @@ public: // comparison
 	bool operator == (const tRisseStringBlock & ref) const
 	{
 		if(this == &ref) return true; // 同じポインタ
-		if(Buffer == ref.Buffer) return true; // 同じバッファ
 		if(Length != ref.Length) return false; // 違う長さ
+		if(Buffer == ref.Buffer) return true; // 同じバッファ
 		return !Risse_strcmp(Buffer, ref.Buffer);
 	}
 

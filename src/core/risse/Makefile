@@ -32,6 +32,7 @@ CPPFLAGS = $(CXXFLAGS)
 CPPFILES =  src/risseCharUtils.cpp            \
 			src/risseConfig.cpp               \
 			src/risseCxxString.cpp            \
+			src/risseCxxOctet.cpp             \
 			src/risseUtils.cpp                
 
 OBJS = $(CPPFILES:.cpp=.o)

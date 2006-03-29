@@ -309,6 +309,8 @@ tRisseStringBlock & tRisseStringBlock::operator += (const tRisseStringBlock & re
 
 //---------------------------------------------------------------------------
 //! @brief		文字列の連結
+//! @param		ref		連結する文字列
+//! @return		新しく連結された文字列
 //---------------------------------------------------------------------------
 tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref) const
 {

@@ -42,8 +42,8 @@ public:
 	//! @brief デフォルトコンストラクタ
 	tRisseStringBlock()
 	{
-		// TODO: gc はメモリを0でクリアする？ならば以下の操作は不要
 		Buffer = RISSE_STRING_EMPTY_BUFFER;
+		// TODO: gc はメモリを0でクリアする？ならば以下の操作は不要
 		Length = 0;
 	}
 

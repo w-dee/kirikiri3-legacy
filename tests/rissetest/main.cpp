@@ -1,18 +1,10 @@
 // openal を使って音声をストリーミング再生するテスト
 
 #include "prec.h"
-#include "RisseEngine.h"
-#include "RIFFWaveDecoder.h"
-#include "VorbisDecoder.h"
-#include "WaveLoopManager.h"
-#include "PhaseVocoder.h"
-#include "Reverb.h"
-#include "ALCommon.h"
-#include "ALSource.h"
-#include "ALBuffer.h"
+#include "risseCxxString.h"
 
 
-RISSE_DEFINE_SOURCE_ID(58175,40687,29014,16466,35998,12636,24025,23840);
+RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
 
 
 
@@ -23,7 +15,7 @@ RISSE_DEFINE_SOURCE_ID(58175,40687,29014,16466,35998,12636,24025,23840);
 
 
 
-
+using namespace Risse;
 
 
 //---------------------------------------------------------------------------
@@ -54,10 +46,6 @@ wxLocale locale;
 //---------------------------------------------------------------------------
 bool Application::OnInit()
 {
-	locale.Init(wxLANGUAGE_DEFAULT);
-	locale.AddCatalogLookupPathPrefix(wxT("locales")); 
-	locale.AddCatalogLookupPathPrefix(wxT("../locales")); 
-	locale.AddCatalog(wxT("openaltest"));
 	return true;
 }
 //---------------------------------------------------------------------------
@@ -71,55 +59,18 @@ bool Application::OnInit()
 //---------------------------------------------------------------------------
 int Application::OnRun()
 {
-	try
-	{
-		tRisaSingletonManager::InitAll(); // 全てのシングルトンインスタンスを初期化
+	tRisseStringBlock str1("hoge");
+	tRisseStringBlock str2(str1);
+	str1 = "hage";
+	tRisseStringBlock str3(str1, 1, 2);
+//	str1 = "moge";
 
-		tRisaRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
-			RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
-			NULL, NULL, NULL);
+	for(int i = 0; i < 10; i++)
+		str1 += str2;
 
-
-		if(argc < 2)
-		{
-			wxFprintf(stderr, wxT("Specify filename to play\n"));
-			return 1;
-		}
-
-		boost::shared_ptr<tRisaWaveDecoder> decoder;
-		wxString filename = argv[1];
-		if(filename.Contains(wxT(".ogg")))
-			decoder = boost::shared_ptr<tRisaWaveDecoder>(new tRisaOggVorbisDecoder(ttstr(filename)));
-		else
-			decoder = boost::shared_ptr<tRisaWaveDecoder>(new tRisaRIFFWaveDecoder(ttstr(filename)));
-
-		boost::shared_ptr<tRisaWaveLoopManager> loop_manager(new tRisaWaveLoopManager(decoder));
-		boost::shared_ptr<tRisaPhaseVocoder> filter(new tRisaPhaseVocoder());
-		filter->SetOverSampling(16);
-		filter->SetFrameSize(4096);
-		filter->SetTimeScale(1.4);
-//		boost::shared_ptr<tRisaReverb> filter(new tRisaReverb());
-		filter->SetInput(loop_manager);
-		boost::shared_ptr<tRisaALBuffer> buffer(new tRisaALBuffer(filter, true));
-		tRisaALSource source(buffer);
-
-		source.Play();
-
-		while(true)
-		{
-			buffer->QueueStream(source.GetSource());
-			Sleep(10);
-/*
-			ALint pos;
-			alGetSourcei( source.GetSource(), AL_SAMPLE_OFFSET, &pos);
-			wxPrintf(wxT("position : %d\n"), pos);
-*/
-		}
-	}
-	catch(const eRisse &e)
-	{
-		wxFprintf(stderr, wxT("error : %s\n"), e.GetMessage().AsWxString().c_str());
-	}
+	wxPrintf(wxT("str1 : %s\n"), str1.AsWxString().c_str());
+	wxPrintf(wxT("str2 : %s\n"), str2.AsWxString().c_str());
+	wxPrintf(wxT("str3 : %s\n"), str3.AsWxString().c_str());
 
 	return 0;
 }

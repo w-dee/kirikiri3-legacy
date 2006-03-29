@@ -54,30 +54,38 @@ public:
 		*this = ref;
 	}
 
-	//! @brief 部分文字列を作るためのコンストラクタ
-	//! @param ref		コピー元オブジェクト
-	//! @param offset	切り出す開始位置
-	//! @param length	切り出す長さ
-	tRisseStringBlock(const tRisseStringBlock & ref, risse_size offset, risse_size length)
+	tRisseStringBlock(const tRisseStringBlock & ref,
+		risse_size offset, risse_size length);
+
+	//! @brief		コンストラクタ(risse_char * から)
+	//! @param		ref		元の文字列
+	tRisseStringBlock(const risse_char * ref)
 	{
-		if(length)
-		{
-			RISSE_ASSERT(ref.Length - offset >= length);
-			if(ref.Buffer[-1] == 0)
-				ref.Buffer[-1] = MightBeShared; // 共有可能性フラグをたてる
-			Buffer = ref.Buffer + offset;
-			Length = length;
-		}
-		else
-		{
-			Buffer = RISSE_STRING_EMPTY_BUFFER;
-			Length = 0;
-		}
+		*this = ref;
 	}
 
-	tRisseStringBlock(const risse_char * ref);
 	tRisseStringBlock(const risse_char * ref, risse_size n);
-	tRisseStringBlock(const char * ref);
+
+#ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
+	//! @brief		コンストラクタ(wchar_t * から)
+	//! @param		ref		元の文字列
+	tRisseStringBlock(const wchar_t *ref)
+	{
+		*this = ref;
+	}
+#endif
+
+//#ifdef RISSE_SUPPORT_WX
+// TODO: パフォーマンス的に問題になりそうならばこれを実装すること
+//	tRisseStringBlock(const wxString & ref);
+//#endif
+
+	//! @brief		コンストラクタ(char * から)
+	//! @param		ref		元の文字列
+	tRisseStringBlock(const char * ref)
+	{
+		*this = ref;
+	}
 
 	//! @brief	代入演算子
 	//! @param	ref	コピー元オブジェクト
@@ -90,6 +98,19 @@ public:
 		Length = ref.Length;
 		return *this;
 	}
+
+	tRisseStringBlock & operator = (const risse_char * ref);
+
+#ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
+	tRisseStringBlock & operator = (const wchar_t *ref);
+#endif
+
+//#ifdef RISSE_SUPPORT_WX
+// TODO: パフォーマンス的に問題になりそうならばこれを実装すること
+//	tRisseStringBlock & operator = (const wxString & ref);
+//#endif
+
+	tRisseStringBlock & operator = (const char * ref);
 
 	//! @brief	バッファをコピーし、新しい tRisseStringBlock を返す
 	//! @param	ref	コピー元オブジェクト
@@ -178,7 +199,16 @@ public: // operators
 		return Buffer[n];
 	}
 
-private:
+public: // conversion
+
+#ifdef RISSE_SUPPORT_WX
+	wxString AsWxString() const
+		{ return RisseCharToWxString(Buffer, Length); }
+	operator wxString() const
+		{ return AsWxString(); }
+#endif
+
+private: // buffer management
 	static risse_char * AllocateInternalBuffer(risse_size n, risse_char *prevbuf = NULL);
 
 

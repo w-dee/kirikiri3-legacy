@@ -31,20 +31,22 @@ risse_char * Risse_tTVInt_to_str(risse_int64 value, risse_char *string);
 risse_char * Risse_tTVReal_to_str(risse_real value, risse_char *string);
 risse_char * Risse_pointer_to_str(const void *value, risse_char *string);
 risse_int Risse_straicmp(const risse_char *s1, const risse_char *s2);
-void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, size_t len);
+void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len);
 void Risse_strcpy(risse_char *d, const risse_char *s);
-size_t Risse_strlen(const risse_char *d);
+risse_size Risse_strlen(const risse_char *d);
 
 
-void RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in);
+risse_size RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in);
+risse_size RisseConvertRisseCharToUTF16String(risse_uint16 * out, const risse_char * in,
+						risse_size in_len = static_cast<risse_size>(-1L));
 
-size_t RisseUtf8ToRisseCharString(const char * in, risse_char *out);
-size_t RisseRisseCharToUtf8String(const risse_char *in, char * out);
+risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out);
+risse_size RisseRisseCharToUtf8String(const risse_char *in, char * out);
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	int Risse_strcmp(const risse_char *s1, const risse_char *s2);
-	int Risse_strncmp(const risse_char *s1, const risse_char *s2, size_t n);
-	risse_char *Risse_strncpy(risse_char *d, const risse_char *s, size_t len);
+	int Risse_strncmp(const risse_char *s1, const risse_char *s2, risse_size n);
+	risse_char *Risse_strncpy(risse_char *d, const risse_char *s, risse_size len);
 	risse_char *Risse_strcat(risse_char *d, const risse_char *s);
 	risse_char *Risse_strstr(const risse_char *s1, const risse_char *s2);
 	risse_char *Risse_strchr(const risse_char *s, int c);
@@ -60,7 +62,7 @@ size_t RisseRisseCharToUtf8String(const risse_char *in, char * out);
 #endif
 
 #ifdef RISSE_SUPPORT_WX
-wxString RisseCharToWxString(const risse_char * str);
+wxString RisseCharToWxString(const risse_char * str, risse_size length = static_cast<risse_size>(-1L));
 #endif
 
 //---------------------------------------------------------------------------
@@ -139,7 +141,7 @@ wxString RisseCharToWxString(const risse_char * str);
 	#endif
 
 	//! @brief UTF-32 リテラル文字列を保持するクラス
-	template<size_t SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
+	template<risse_size SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
 	class tRisseUtf16ToUtf32
 	{
 		static risse_char Utf32Array[SIZE];
@@ -173,14 +175,14 @@ wxString RisseCharToWxString(const risse_char * str);
 	};
 
 
-	template<size_t SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
+	template<risse_size SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
 		bool tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::Converted = false;
 
-	template<size_t SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
+	template<risse_size SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
 	risse_char tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::Utf32Array[SIZE] = {0};
 
 	#ifdef RISSE_CHARUTILS_DEBUG
-	template<size_t SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
+	template<risse_size SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
 	const wchar_t * tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::SourceString = NULL;
 	#endif
 

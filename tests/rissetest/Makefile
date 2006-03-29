@@ -25,6 +25,7 @@ include $(TOP_DIR)/src/core/risse/Makefile_for_user
 CORE_DIR=$(TOP_DIR)/src/core
 
 INCLUDES= \
+		-I../../src/core/risse/src       \
 		-I.
 
 CPPFILES = \

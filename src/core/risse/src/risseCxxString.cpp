@@ -153,19 +153,26 @@ risse_char tRisseStringBlock::EmptyBuffer[2] = { tRisseStringBlock::MightBeShare
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(risse_char * から)
-//! @param		ref		元の文字列
+//! @brief 部分文字列を作るためのコンストラクタ
+//! @param ref		コピー元オブジェクト
+//! @param offset	切り出す開始位置
+//! @param length	切り出す長さ
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const risse_char * ref)
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock & ref,
+	risse_size offset, risse_size length)
 {
-	if((Length = Risse_strlen(ref)) == 0)
+	if(length)
 	{
-		Buffer = RISSE_STRING_EMPTY_BUFFER;
+		RISSE_ASSERT(ref.Length - offset >= length);
+		if(ref.Buffer[-1] == 0)
+			ref.Buffer[-1] = MightBeShared; // 共有可能性フラグをたてる
+		Buffer = ref.Buffer + offset;
+		Length = length;
 	}
 	else
 	{
-		Buffer = AllocateInternalBuffer(Length);
-		Risse_strcpy(Buffer, ref);
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
+		Length = 0;
 	}
 }
 //---------------------------------------------------------------------------
@@ -195,10 +202,48 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(char * から)
+//! @brief		代入演算子(risse_char * から)
 //! @param		ref		元の文字列
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const char * ref)
+tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
+{
+	if((Length = Risse_strlen(ref)) == 0)
+	{
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
+	}
+	else
+	{
+		Buffer = AllocateInternalBuffer(Length);
+		Risse_strcpy(Buffer, ref);
+	}
+	return *this;
+}
+//---------------------------------------------------------------------------
+
+
+#ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
+//---------------------------------------------------------------------------
+//! @brief		代入演算子(wchar_t * から)
+//! @param		ref		元の文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
+{
+	risse_size org_len = wcslen(str);
+	Buffer = AllocateInternalBuffer(org_len);
+	risse_size new_len = RisseConvertUTF16ToRisseCharString(Buffer,
+		reinterpret_cast<const risse_uint16 *>(str)); // UTF16 を UTF32 に変換
+	SetLength(new_len);
+	return *this;
+}
+//---------------------------------------------------------------------------
+#endif
+
+
+//---------------------------------------------------------------------------
+//! @brief		代入演算子(char * から)
+//! @param		ref		元の文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 {
 	Length = RisseUtf8ToRisseCharString(ref, NULL); // コードポイント数を得る
 //	if(Length == static_cast<risse_size>(-1L))
@@ -206,6 +251,7 @@ tRisseStringBlock::tRisseStringBlock(const char * ref)
 	Buffer = AllocateInternalBuffer(Length);
 	RisseUtf8ToRisseCharString(ref, Buffer);
 	Buffer[Length] = 0;
+	return *this;
 }
 //---------------------------------------------------------------------------
 
@@ -283,7 +329,7 @@ tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref)
 //---------------------------------------------------------------------------
 //! @brief		n個のコードポイントからなるバッファを割り当てる
 //! @param		n	コードポイント数
-//! @param		prevbuf	以前のバッファ(バッファを再確保する場合)
+//! @param		prevbuf	以前のバッファ(バッファを再確保する場合のみ;prevbuf[-1] は 0 =非共有であること)
 //! @return		割り当てられたバッファ
 //! @note		実際には (n+2)*sizeof(risse_char) + sizeof(risse_size) が割り当
 //! てられ、2番目の文字を指すポインタが帰る。共有可能性フラグはクリアされ、
@@ -296,9 +342,15 @@ risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	size_t newbytes = sizeof(risse_size) + (n + 2)*sizeof(risse_char);
 	void *ptr;
 	if(!prevbuf)
+	{
 		ptr = GC_malloc_atomic(newbytes);
+	}
 	else
-		ptr = GC_realloc(prevbuf, newbytes);
+	{
+		char * buffer_head = reinterpret_cast<char *>(prevbuf) -
+			 ( sizeof(risse_char) + sizeof(risse_size) );
+		ptr = GC_realloc(buffer_head, newbytes);
+	}
 
 	// ２番目の文字を指すポインタを獲る
 	risse_char *  buffer = reinterpret_cast<risse_char*>(

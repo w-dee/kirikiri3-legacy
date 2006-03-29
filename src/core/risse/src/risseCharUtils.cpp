@@ -218,7 +218,7 @@ risse_int Risse_straicmp(const risse_char *s1, const risse_char *s2)
 //!				いなければならない。また、s が len に達していない場合、
 //!				d の残りは null では埋められない。
 //---------------------------------------------------------------------------
-void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, size_t len)
+void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len)
 {
 	risse_char ch;
 	len++;
@@ -247,7 +247,7 @@ void Risse_strcpy(risse_char *d, const risse_char *s)
 //! @param		d    文字列
 //! @return		文字列長
 //---------------------------------------------------------------------------
-size_t Risse_strlen(const risse_char *d)
+risse_size Risse_strlen(const risse_char *d)
 {
 	const risse_char *p = d;
 	while(*d) d++;
@@ -288,7 +288,7 @@ int Risse_strcmp(const risse_char *s1, const risse_char *s2)
 //! @param		n    最大コードポイント数
 //! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
 //---------------------------------------------------------------------------
-int Risse_strncmp(const risse_char *s1, const risse_char *s2, size_t n)
+int Risse_strncmp(const risse_char *s1, const risse_char *s2, risse_size n)
 {
 	for(;;)
 	{
@@ -314,7 +314,7 @@ int Risse_strncmp(const risse_char *s1, const risse_char *s2, size_t n)
 //! @return		d が返る
 //! @note		動作については strncpy と同じ
 //---------------------------------------------------------------------------
-risse_char *Risse_strncpy(risse_char *d, const risse_char *s, size_t len)
+risse_char *Risse_strncpy(risse_char *d, const risse_char *s, risse_size len)
 {
 	risse_char * pd = d;
 
@@ -403,7 +403,7 @@ double Risse_strtod(const risse_char *nptr, risse_char **endptr)
 	char buf[50];
 	const risse_char *p = nptr;
 	char *bp = buf;
-	while(*p && static_cast<size_t>(bp - buf) < sizeof(buf) - 1 )
+	while(*p && static_cast<risse_size>(bp - buf) < sizeof(buf) - 1 )
 		*bp = static_cast<char>(*p), bp++, p++;
 	*bp = 0;
 	char *ep;
@@ -416,18 +416,20 @@ double Risse_strtod(const risse_char *nptr, risse_char **endptr)
 
 //---------------------------------------------------------------------------
 //! @brief		UTF16文字列をrisse_char(UTF-32文字列) に変換
-//! @param		out 出力文字列 (最低でもinと同じ要素数を持つこと)
+//! @param		out 出力文字列 (最低でもinと同じ要素数を持つこと) null終端は書き込まれる
 //! @param		in  入力文字列
+//! @return		出力バッファのサイズ (null終端を含まず, risse_char単位)
 //---------------------------------------------------------------------------
-void RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in)
+risse_size RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in)
 {
+	risse_char *org_out = out;
 	while(*in)
 	{
 		if((*in<0xd800) || (*in>0xdfff))
 		{
 			*(out++) = *(in++);
 		}
-		else if ((*in<0xd800) || (*in>0xdfff))
+		else if((*in<0xd800) || (*in>0xdfff))
 		{
 			// 無効領域
 			*(out++) = '?';
@@ -441,8 +443,55 @@ void RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * i
 		}
 	}
 	*out = 0;
+	return out - org_out;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		risse_char(UTF-32文字列) をUTF16文字列に変換
+//! @param		out 出力文字列(NULL可)  null終端は書き込まれる
+//! @param		in  入力文字列
+//! @param		in_len 入力文字列のサイズ (-1L の場合は自動判定)
+//! @return		出力バッファのサイズ (null終端を含まず, risse_uint16単位)
+//---------------------------------------------------------------------------
+risse_size RisseConvertRisseCharToUTF16String(risse_uint16 * out,
+	const risse_char * in, risse_size in_len)
+{
+	// in_len が -1 の場合はすでにそれが risse_size で表すことのできる
+	// 最大値であるとみなし、ここでは in_len の補正は行わない
+
+	risse_size out_size = 0;
+	while(in_len -- && *in)
+	{
+		if(*in<=0xffff)
+		{
+			if (out) *(out++) = (risse_uint16)*in;
+			out_size ++;
+		}
+		else if(*in>=0x110000)
+		{
+			if (out) *(out++) = '?';
+			out_size ++;
+		}
+		else
+		{
+			// サロゲートペア
+			if(out)
+			{
+				out[0] = (risse_uint16) ((*in >> 10)+0xd7c0);
+				out[1] = (risse_uint16) ((*in&0x3ff)+0xdc00);
+				out += 2;
+			}
+			out_size += 2;
+		}
+		in ++;
+	}
+	if(out) *out = 0;
+	return out_size;
+}
+//---------------------------------------------------------------------------
+
 #endif  // #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 
 
@@ -599,23 +648,23 @@ static bool inline RisseUtf8ToRisseChar(const char * & in, risse_char *out)
 //! @param		out  出力 risse_char 文字列 (NULL可)
 //! @return		変換後の risse_char のコードポイント数 (null-terminatorを含まず)
 //---------------------------------------------------------------------------
-size_t RisseUtf8ToRisseCharString(const char * in, risse_char *out)
+risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out)
 {
 	// convert input utf-8 string to output wide string
-	size_t count = 0;
+	risse_size count = 0;
 	while(*in)
 	{
 		risse_char c;
 		if(out)
 		{
 			if(!RisseUtf8ToRisseChar(in, &c))
-				return static_cast<size_t>(-1L); // invalid character found
+				return static_cast<risse_size>(-1L); // invalid character found
 			*out++ = c;
 		}
 		else
 		{
 			if(!RisseUtf8ToRisseChar(in, NULL))
-				return static_cast<size_t>(-1L); // invalid character found
+				return static_cast<risse_size>(-1L); // invalid character found
 		}
 		count ++;
 	}
@@ -630,10 +679,10 @@ size_t RisseUtf8ToRisseCharString(const char * in, risse_char *out)
 //! @param		out  出力 UTF-8 文字列 (NULL可)
 //! @return		変換後の UTF-8 のバイト数 (null-terminatorを含まず)
 //---------------------------------------------------------------------------
-size_t RisseRisseCharToUtf8String(const risse_char * in, char * out)
+risse_size RisseRisseCharToUtf8String(const risse_char * in, char * out)
 {
 	// convert input wide string to output utf-8 string
-	size_t count = 0;
+	risse_size count = 0;
 	while(*in)
 	{
 		risse_int n;
@@ -651,7 +700,7 @@ size_t RisseRisseCharToUtf8String(const risse_char * in, char * out)
 					RisseRisseCharToUtf8.
 				*/
 		}
-		if(n == -1) return static_cast<size_t>(-1L); // invalid character found
+		if(n == -1) return static_cast<risse_size>(-1L); // invalid character found
 		count += n;
 		in++;
 	}
@@ -665,43 +714,33 @@ size_t RisseRisseCharToUtf8String(const risse_char * in, char * out)
 //---------------------------------------------------------------------------
 //! @brief		risse_char 型の文字列を wxString に変換する
 //! @param		str  risse_char*型の文字列
+//! @param		len  文字列の長さ(コードポイント単位) -1 = 自動判別
 //! @return		wxString型の文字列
 //---------------------------------------------------------------------------
-wxString RisseCharToWxString(const risse_char * str)
+wxString RisseCharToWxString(const risse_char * str, risse_size len)
 {
 	if(!str) return wxString();
 	if(str[0] == 0) return wxString();
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	// UTF-32 から UTF-16 への変換が必要
-	wxMBConvUTF32 conv;
 
 	// 変換後の文字列長を取得
-	size_t converted_size =
-		conv.MB2WC(NULL, reinterpret_cast<const char *>(str), 0);
-	if(converted_size == static_cast<size_t>(-1L))
+	risse_size converted_size =
+		RisseConvertRisseCharToUTF16String(NULL, str, len); // lenは-1になりうるので注意
+
+	if(converted_size == static_cast<risse_size>(-1L))
 		return wxString(); // failed to convert
 
 	// 変換後の文字列を一時的に格納するバッファを確保
-	wchar_t *buf = new wchar_t[converted_size + 1];
-	try
-	{
-		if(conv.MB2WC(buf, reinterpret_cast<const char *>(str),
-						converted_size + 1) == static_cast<size_t>(-1))
-		{
-			delete [] buf;
-			return wxString();
-		}
-		wxString ret(buf);
-		delete [] buf, buf = NULL;
-		return ret;
-	}
-	catch(...)
-	{
-		delete [] buf;
-		throw;
-	}
+	wchar_t *buf = new (PointerFreeGC) wchar_t[converted_size + 1];
+	if(RisseConvertRisseCharToUTF16String(
+			reinterpret_cast<risse_uint16*>(buf), str, len)
+					== static_cast<risse_size>(-1))
+		return wxString();
+
+	return wxString(buf);
 #else
-	return wxString(str);
+	return wxString(str, (len == static_cast<risse_size>(-1L)) ? wxSTRING_MAXLEN:len);
 #endif
 }
 //---------------------------------------------------------------------------

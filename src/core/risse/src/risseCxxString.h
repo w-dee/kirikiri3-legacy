@@ -43,7 +43,6 @@ public:
 	tRisseStringBlock()
 	{
 		Buffer = RISSE_STRING_EMPTY_BUFFER;
-		// TODO: gc はメモリを0でクリアする？ならば以下の操作は不要
 		Length = 0;
 	}
 
@@ -291,6 +290,7 @@ private:
 //---------------------------------------------------------------------------
 
 
+typedef tRisseStringBlock tRisseString; //!< いまのところ tRisseString は tRisseStringBlock と同じ
 
 //---------------------------------------------------------------------------
 } // namespace Risse

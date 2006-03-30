@@ -35,7 +35,6 @@ public:
 	//! @brief デフォルトコンストラクタ
 	tRisseOctetBlock()
 	{
-		// TODO: gc はメモリを0でクリアする？ならば以下の操作は不要
 		Buffer = 0;
 		Capacity = Length = 0;
 	}
@@ -43,7 +42,7 @@ public:
 
 	tRisseOctetBlock(const risse_uint8 * buf, risse_size length);
 
-	tRisseOctetBlock::tRisseOctetBlock(const tRisseOctetBlock & ref,
+	tRisseOctetBlock(const tRisseOctetBlock & ref,
 			risse_size offset, risse_size length);
 
 	//! @brief コピーコンストラクタ
@@ -124,7 +123,8 @@ public: // comparison
 
 public: // operators
 	tRisseOctetBlock & operator += (const tRisseOctetBlock & ref);
-	tRisseOctetBlock operator +  (const tRisseOctetBlock & ref) const;
+	tRisseOctetBlock operator + (const tRisseOctetBlock & ref) const;
+	void Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & ref) const;
 
 	//! @brief [] 演算子
 	//! @param		n		位置
@@ -160,6 +160,128 @@ private:
 };
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief	オクテット列
+//---------------------------------------------------------------------------
+class tRisseOctet : public gc
+{
+	tRisseOctetBlock * Block; //!< ブロックへのポインタ
+
+public:
+	//! @brief デフォルトコンストラクタ
+	tRisseOctet()
+	{
+		Block = new tRisseOctetBlock();
+	}
+
+
+	tRisseOctet(const risse_uint8 * buf, risse_size length)
+	{
+		Block = new tRisseOctetBlock(buf, length);
+	}
+
+	tRisseOctet(const tRisseOctet & ref,
+			risse_size offset, risse_size length)
+	{
+		Block = new tRisseOctetBlock(*ref.Block, offset, length);
+	}
+
+	//! @brief コピーコンストラクタ
+	//! @param ref コピー元オブジェクト
+	tRisseOctet(const tRisseOctet & ref)
+	{
+		*this = ref;
+	}
+
+	//! @brief	代入演算子
+	//! @param	ref	コピー元オブジェクト
+	//! @return	このオブジェクトへの参照
+	tRisseOctet & operator = (const tRisseOctet & ref)
+	{
+		*Block = *ref.Block;
+		return *this;
+	}
+
+
+public: // object property
+	//! @brief オクテット列の長さを得る
+	//! @return	オクテット列の長さ(コードポイント単位) (\0 は含まれない)
+	risse_size GetLength() const { return Block->GetLength(); }
+
+	//! @brief オクテット列の長さを設定する(切りつめのみ可)
+	//! @param	n 新しい長さ(コードポイント単位)
+	void SetLength(risse_size n)
+	{
+		Block->SetLength(n);
+	}
+
+public: // pointer
+	//! @brief  n バイト分のバッファを確保する
+	//! @param  n 確保したいバイト数
+	//! @return 確保した内部バッファ
+	//! @note	n よりも短いオクテット列を返した場合は
+	//! 		SetLength で正しい長さを設定すること。
+	risse_uint8 * Allocate(risse_size n)
+	{
+		return Block->Allocate(n);
+	}
+
+public: // comparison
+
+	//! @brief 同一比較
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this==refかどうか
+	bool operator == (const tRisseOctet & ref) const
+	{
+		return *Block == *ref.Block;
+	}
+
+	//! @brief 不一致判定
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this!=refかどうか
+	bool operator != (const tRisseOctet & ref) const
+		{ return ! (*this == ref); }
+
+public: // operators
+	tRisseOctet & operator += (const tRisseOctet & ref)
+	{
+		*Block += *ref.Block;
+		return *this;
+	}
+	tRisseOctet operator + (const tRisseOctet & ref) const
+	{
+		tRisseOctet ret;
+		Block->Concat(ret.Block, *ref.Block);
+		return ret;
+	}
+
+	//! @brief [] 演算子
+	//! @param		n		位置
+	//! @return		nの位置にあるコード
+	risse_uint8 operator [] (risse_size n) const
+	{
+		return (*Block)[n];
+	}
+
+public: // pointer
+
+	//! @brief バッファをコピーし、独立させる
+	//! @return 内部バッファ
+	//! @note tRisseOctetBlock は一つのバッファを複数のオクテット列インスタンスが
+	//! 共有する場合があるが、このメソッドは共有を切り、オクテット列バッファを
+	//! 独立する。Risse の GC の特性上、そのオクテット列がすでに独立しているかどうかを
+	//! 確実に知るすべはなく、このメソッドはかなりの確率でバッファをコピーするため、
+	//! 実行が高価になる場合があることに注意すること。
+	//! このメソッドは内部バッファへのポインタを返すが、このバッファに、もしもとの
+	//! 長さよりも短い長さのオクテット列を書き込んだ場合は、SetLength を呼ぶこと。
+	//! このメソッドは、内容が空の時は独立を行わなずに NULL を返す
+	risse_uint8 * Independ() const
+	{
+		return Block->Independ();
+	}
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

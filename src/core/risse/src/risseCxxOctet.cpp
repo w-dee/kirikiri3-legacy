@@ -129,16 +129,27 @@ tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
 //---------------------------------------------------------------------------
 tRisseOctetBlock tRisseOctetBlock::operator + (const tRisseOctetBlock & ref) const
 {
-	if(Length == 0) return ref;
-	if(ref.Length == 0) return *this;
+	tRisseOctetBlock block;
+	Concat(&block, ref);
+	return block;
+}
+//---------------------------------------------------------------------------
 
-	tRisseOctetBlock newblock;
+
+//---------------------------------------------------------------------------
+//! @brief		オクテット列の連結
+//! @param		dest	連結されたオクテット列が格納される先(*this + ref がここに入る)
+//! @param		ref		連結するオクテット列
+//---------------------------------------------------------------------------
+void tRisseOctetBlock::Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & ref) const
+{
+	if(Length == 0) { *dest = ref; return; }
+	if(ref.Length == 0) { *dest = *this; return; }
+
 	risse_size newsize = Length + ref.Length;
-	newblock.Allocate(newsize);
-	memcpy(newblock.Buffer, Buffer, Length);
-	memcpy(newblock.Buffer + Length, ref.Buffer, ref.Length);
-
-	return newblock;
+	dest->Allocate(newsize);
+	memcpy(dest->Buffer, Buffer, Length);
+	memcpy(dest->Buffer + Length, ref.Buffer, ref.Length);
 }
 //---------------------------------------------------------------------------
 

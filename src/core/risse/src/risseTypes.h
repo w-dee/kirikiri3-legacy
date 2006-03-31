@@ -166,7 +166,45 @@ s = sign,  negative if this is 1, otherwise positive.
 				(!((x) & RISSE_IEEE_D_SIGNIFICAND_MASK)))
 
 
-} // namespace Risse
+
+
+
+#ifdef __cplusplus
+	// C++ only
+
+template <int size>
+struct tRissePointerSizedInteger
+{
+	typedef long type;
+	typedef unsigned long utype;
+};
+template <>
+struct tRissePointerSizedInteger<8>
+{
+	typedef risse_int64 type;
+	typedef risse_uint64 utype;
+};
+template <>
+struct tRissePointerSizedInteger<4>
+{
+	typedef risse_int32 type;
+	typedef risse_uint32 utype;
+};
+struct tRissePointerSizedIntegerSelected
+	: public tRissePointerSizedInteger<sizeof(void*) >
+{
+};
+
+//! @brief risse_ptrint は、ポインタと同じサイズを持つことが保証されている符号付き整数型
+typedef tRissePointerSizedIntegerSelected::type risse_ptrint;
+//! @brief risse_ptrint は、ポインタと同じサイズを持つことが保証されている符号なし整数型
+typedef tRissePointerSizedIntegerSelected::utype risse_ptruint;
+
+
+
+#endif
+
+} /* namespace Risse */
 
 #endif
 

@@ -27,12 +27,15 @@ namespace Risse
 //! @brief	バリアント型
 /*! @note
 
-tRisseString, tRisseObject, tRisseOctet の各先頭のメンバは必ず何かのポインタ
-である。それらはメンバ Type とストレージを共有する。
+tRisseStringData, tRisseObjectData, tRisseOctetData の各先頭のメンバは必ず
+何かのポインタである。それらはメンバ Type とストレージを共有する。これらは
+実際にはそれぞれ tRisseString, tRisseObject, tRisseOctet として扱われるが、
+データメンバのレイアウトは同一である。
 
-少なくともそれらのポインタは4の倍数のアドレスにしか配置されないので、下位2
-ビットは必ず遊んでいることになる。また、0x10 未満のような極端に低い番地にこ
-れらのポインタが配置されることはあり得ない。
+各ポインタは4の倍数のアドレスにしか配置されないことがメモリアロケータの仕様
+および risse_char のサイズにより保証されている。このため、下位2ビットは必ず遊
+んでいることになる。また、0x10 未満のような極端に低い番地にこれらのポインタ
+が配置されることはあり得ない。
 
 そのため、tRisseVariant::GetType() を見ればわかるとおり、Type が 4 以上
 ならば下位2ビット+4を Type とし、4 未満ならばそれをそのまま Type として返
@@ -197,7 +200,7 @@ public:
 		return static_cast<tType>((Type & 3) + ( (Type >= 4) << 2 ));
 
 		// 上記の行は以下の2行と同じ
-		//	if(Type >= 4) return static_cast<tType>(Type & 3) + 4;
+		//	if(Type >= 4) return static_cast<tType>((Type & 3) + 4);
 		//	return static_cast<tType>(Type);
 	}
 

@@ -404,6 +404,33 @@ risse_char * tRisseStringBlock::InternalIndepend() const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief 文字列のハッシュを計算して返す
+//! @return ハッシュ値
+//---------------------------------------------------------------------------
+risse_uint32 tRisseStringBlock::GetHash() const
+{
+	// the hash function used here is similar to one which used in perl 5.8,
+	// see also http://burtleburtle.net/bob/hash/doobs.html (One-at-a-Time Hash)
+
+	const risse_char *p = Buffer;
+	const risse_char *plim = Buffer + Length;
+	risse_uint32 ret = 0;
+	while(p<plim)
+	{
+		ret += *p;
+		ret += (ret << 10);
+		ret ^= (ret >> 6);
+		p++;
+	}
+	ret += (ret << 3);
+	ret ^= (ret >> 11);
+	ret += (ret << 15);
+	if(!ret) ret = (risse_uint32)-1L;
+	return ret;
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 } // namespace Risse

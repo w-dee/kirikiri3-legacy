@@ -297,6 +297,57 @@ public: // pointer
 private:
 	risse_char * InternalIndepend() const;
 
+public: // hint/hash
+	//! @brief	ヒントへのポインタを得る
+	//! @return ヒントへのポインタ
+	//! @note
+	//! ここで返されるヒントのポインタは、この文字列オブジェクトの他の
+	//! 破壊的メソッドを呼ぶと無効になる。<br>
+	//! 破壊的メソッドは const メソッドでも内部バッファを破壊する場合がある
+	//! ので注意。これにはc_str()も含む。Pointer() や GetLength(),
+	//! operator [] は大丈夫。 <br>
+	//! 使用可能ならば常に GetHint() か SetHint() を用いること。<br>
+	//! このポインタは、ヒントが使用不可の場合は NULL が帰る。
+	risse_uint32 * GetHintPointer() const
+	{
+		if(!Buffer[Length])
+		{
+			// バッファの期待した位置に \0終端がある。
+			// この場合はその次をヒントへのポインタと見なすことができる。
+			return reinterpret_cast<risse_uint32*>(Buffer + Length + 1);
+		}
+		return NULL;
+	}
+
+	//! @brief ヒントを得る
+	//! @return ヒント (0 = ヒントが無効)
+	risse_uint32 GetHint() const
+	{
+		if(!Buffer[Length])
+			return *reinterpret_cast<risse_uint32*>(Buffer + Length + 1);
+		return 0;
+	}
+
+	//! @brief 現在の文字列のハッシュに従ってヒントを設定する
+	//! @note このメソッドはバッファの内容を変更するにもかかわらず const
+	//! メソッドである。
+	void SetHint() const
+	{
+		if(!Buffer[Length])
+			*reinterpret_cast<risse_uint32*>(Buffer + Length + 1) = GetHash();
+	}
+
+	//! @brief ヒントを設定する
+	//! @brief hint  ハッシュ値
+	//! @note このメソッドはバッファの内容を変更するにもかかわらず const
+	//! メソッドである。
+	void SetHint(risse_uint32 hint) const
+	{
+		if(!Buffer[Length])
+			*reinterpret_cast<risse_uint32*>(Buffer + Length + 1) = hint;
+	}
+
+	risse_uint32 GetHash() const;
 };
 //---------------------------------------------------------------------------
 

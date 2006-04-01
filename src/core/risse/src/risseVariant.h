@@ -52,6 +52,9 @@ tRisseString の内部ポインタが指し示している場所は、文字列�
 
 とりあえず tRiseVariant のサイズを抑えたいがための苦肉の策。こんなことをしな
 い方が速いかもしれないし、こうした方が速いかもしれない。 
+
+tRisseVariant はパフォーマンスの関係上、IL32 システムでは 3 * 32bit, LP64 シス
+テムでは 2 * 64bit に収まるようにすること。
 */
 //---------------------------------------------------------------------------
 class tRisseVariant : public gc
@@ -61,27 +64,27 @@ protected:
 	//! @brief void ストレージ型
 	struct tVoid
 	{
-		risse_ptruint Type; //!< バリアントタイプ: 4 固定
+		risse_ptruint Type; //!< バリアントタイプ: 0 固定
 	};
 
 	//! @brief integer ストレージ型
 	struct tInteger
 	{
-		risse_ptruint Type; //!< バリアントタイプ: 5 固定
+		risse_ptruint Type; //!< バリアントタイプ: 1 固定
 		risse_int64  Value; //!< 値
 	};
 
 	//! @brief real ストレージ型
 	struct tReal
 	{
-		risse_ptruint Type; //!< バリアントタイプ: 6 固定
+		risse_ptruint Type; //!< バリアントタイプ: 2 固定
 		double Value; //!< 値
 	};
 
 	//! @beief bool ストレージ型
 	struct tBool
 	{
-		risse_ptruint Type; //!< バリアントタイプ: 7 固定
+		risse_ptruint Type; //!< バリアントタイプ: 3 固定
 		bool Value; //!< 値
 	};
 

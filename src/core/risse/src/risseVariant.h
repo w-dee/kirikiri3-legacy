@@ -53,7 +53,7 @@ tRisseString の内部ポインタが指し示している場所は、文字列�
 とりあえず tRiseVariant のサイズを抑えたいがための苦肉の策。こんなことをしな
 い方が速いかもしれないし、こうした方が速いかもしれない。 
 
-tRisseVariant はパフォーマンスの関係上、IL32 システムでは 3 * 32bit, LP64 シス
+tRisseVariant はパフォーマンスの関係上、ILP32 システムでは 3 * 32bit, LP64 シス
 テムでは 2 * 64bit に収まるようにすること。
 */
 //---------------------------------------------------------------------------
@@ -101,12 +101,16 @@ protected:
 
 	public:
 		//! @brief string オブジェクトへの参照を得る
-		const tRisseString & GetValue() const
+		operator const tRisseString & () const
 		{ return *reinterpret_cast<const tRisseString*>(&Value); }
 
 		//! @brief string オブジェクトへの参照を得る
-		tRisseString & GetValue()
+		operator tRisseString & ()
 		{ return *reinterpret_cast<tRisseString*>(&Value); }
+
+		// ! @brief string オブジェクトの代入演算子
+		void operator = (const tRisseString & ref)
+		{  *reinterpret_cast<tRisseString*>(&Value) = ref; }
 	};
 
 	//! @brief object ストレージ型
@@ -122,12 +126,16 @@ protected:
 
 	public:
 		//! @brief object オブジェクトへの参照を得る
-		const tRisseObject & GetValue() const
+		operator const tRisseObject & () const
 		{ return *reinterpret_cast<const tRisseObject*>(&Value); }
 
 		//! @brief object オブジェクトへの参照を得る
-		tRisseObject & GetValue()
+		operator tRisseObject & ()
 		{ return *reinterpret_cast<tRisseObject*>(&Value); }
+
+		// ! @brief object オブジェクトの代入演算子
+		void operator = (const tRisseObject & ref)
+		{  *reinterpret_cast<tRisseObject*>(&Value) = ref; }
 	};
 
 	//! @brief octet ストレージ型
@@ -142,13 +150,17 @@ protected:
 		};
 
 	public:
-		//! @brief octet オブジェクトへの参照を得る
-		const tRisseOctet & GetValue() const
+		//! @brief octec オブジェクトへの参照を得る
+		operator const tRisseOctet & () const
 		{ return *reinterpret_cast<const tRisseOctet*>(&Value); }
 
-		//! @brief octet オブジェクトへの参照を得る
-		tRisseOctet & GetValue()
+		//! @brief octec オブジェクトへの参照を得る
+		operator tRisseOctet & ()
 		{ return *reinterpret_cast<tRisseOctet*>(&Value); }
+
+		// ! @brief octec オブジェクトの代入演算子
+		void operator = (const tRisseOctet & ref)
+		{  *reinterpret_cast<tRisseOctet*>(&Value) = ref; }
 	};
 
 	//! @brief 各バリアントの内部型の union
@@ -202,7 +214,7 @@ public: //コンストラクタ
 	tRisseVariant(const tRisseString & ref)
 	{
 		// Type の設定は必要なし
-		String.GetValue() = ref;
+		String = ref;
 	}
 
 	//! @brief		コンストラクタ(object型を作成)
@@ -210,7 +222,7 @@ public: //コンストラクタ
 	tRisseVariant(const tRisseObject & ref)
 	{
 		// Type の設定は必要なし
-		Object.GetValue() = ref;
+		Object = ref;
 	}
 
 	//! @brief		コンストラクタ(octet型を作成)
@@ -218,7 +230,7 @@ public: //コンストラクタ
 	tRisseVariant(const tRisseOctet & ref)
 	{
 		// Type の設定は必要なし
-		Octet.GetValue() = ref;
+		Octet = ref;
 	}
 
 	//! @brief		コンストラクタ(integer型を作成)

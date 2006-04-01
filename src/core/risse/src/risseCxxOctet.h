@@ -162,13 +162,13 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief	オクテット用ポインタ
+//! @brief	オクテット用データ
 //! @note
 //! ポインタの最下位の2ビットが常に 10 なのは、このポインタが Octet列であることを
 //! 表している。ポインタは常に少なくとも 32bit 境界に配置されるため、最下位の２ビットは
 //! オブジェクトのタイプを表すのに利用されている。tRisseVariantを参照。
 //---------------------------------------------------------------------------
-class tRisseOctetPointer : public gc
+class tRisseOctetData : public gc
 {
 	tRisseOctetBlock * Block; //!< ブロックへのポインタ (最下位の2ビットは常に10なので注意)
 							//!< アクセス時は必ず GetBlock, SetBlock を用いること
@@ -186,7 +186,7 @@ protected: // Block pointer operation
 //---------------------------------------------------------------------------
 //! @brief	オクテット列
 //---------------------------------------------------------------------------
-class tRisseOctet : protected tRisseOctetPointer
+class tRisseOctet : protected tRisseOctetData
 {
 public:
 	//! @brief デフォルトコンストラクタ

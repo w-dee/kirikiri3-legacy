@@ -81,44 +81,74 @@ protected:
 		double Value; //!< 値
 	};
 
-	//! @beief bool ストレージ型
+	//! @brief bool ストレージ型
 	struct tBool
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 3 固定
 		bool Value; //!< 値
 	};
 
-	//! @beief string ストレージ型
+	//! @brief string ストレージ型
 	struct tString
 	{
+	private:
 		//! @brief Type と Value の共用体
 		union
 		{
 			risse_ptruint Type; //!< バリアントタイプ: (Type & 0x03) == 0
-			tRisseString Value; //!< 値
+			tRisseStringData Value; //!< 値 (実際には tRisseString に GetValue() で変換して使う)
 		};
+
+	public:
+		//! @brief string オブジェクトへの参照を得る
+		const tRisseString & GetValue() const
+		{ return *reinterpret_cast<const tRisseString*>(&Value); }
+
+		//! @brief string オブジェクトへの参照を得る
+		tRisseString & GetValue()
+		{ return *reinterpret_cast<tRisseString*>(&Value); }
 	};
 
-	//! @beief object ストレージ型
+	//! @brief object ストレージ型
 	struct tObject
 	{
+	private:
 		//! @brief Type と Value の共用体
 		union
 		{
 			risse_ptruint Type; //!< バリアントタイプ: (Type & 0x03) == 1
-			tRisseObject Value; //!< 値
+			tRisseObjectData Value; //!< 値 (実際には tRisseObject に GetValue() で変換して使う)
 		};
+
+	public:
+		//! @brief object オブジェクトへの参照を得る
+		const tRisseObject & GetValue() const
+		{ return *reinterpret_cast<const tRisseObject*>(&Value); }
+
+		//! @brief object オブジェクトへの参照を得る
+		tRisseObject & GetValue()
+		{ return *reinterpret_cast<tRisseObject*>(&Value); }
 	};
 
-	//! @beief octet ストレージ型
+	//! @brief octet ストレージ型
 	struct tOctet
 	{
+	private:
 		//! @brief Type と Value の共用体
 		union
 		{
 			risse_ptruint Type; //!< バリアントタイプ: (Type & 0x03) == 2
-			tRisseOctet Value; //!< 値
+			tRisseOctetData Value; //!< 値 (実際には tRisseOctet に GetValue() で変換して使う)
 		};
+
+	public:
+		//! @brief octet オブジェクトへの参照を得る
+		const tRisseOctet & GetValue() const
+		{ return *reinterpret_cast<const tRisseOctet*>(&Value); }
+
+		//! @brief octet オブジェクトへの参照を得る
+		tRisseOctet & GetValue()
+		{ return *reinterpret_cast<tRisseOctet*>(&Value); }
 	};
 
 	//! @brief 各バリアントの内部型の union
@@ -152,7 +182,7 @@ public:
 	//! @return バリアントのタイプ
 	tType GetType() const
 	{
-		return (Type & 3) + ( (Type >= 4) << 2 );
+		return static_cast<tType>((Type & 3) + ( (Type >= 4) << 2 ));
 
 		// 上記の行は以下の2行と同じ
 		//	if(Type >= 4) return static_cast<tType>(Type & 3) + 4;
@@ -172,7 +202,7 @@ public: //コンストラクタ
 	tRisseVariant(const tRisseString & ref)
 	{
 		// Type の設定は必要なし
-		String = ref;
+		String.GetValue() = ref;
 	}
 
 	//! @brief		コンストラクタ(object型を作成)
@@ -180,7 +210,7 @@ public: //コンストラクタ
 	tRisseVariant(const tRisseObject & ref)
 	{
 		// Type の設定は必要なし
-		Object = ref;
+		Object.GetValue() = ref;
 	}
 
 	//! @brief		コンストラクタ(octet型を作成)
@@ -188,7 +218,7 @@ public: //コンストラクタ
 	tRisseVariant(const tRisseOctet & ref)
 	{
 		// Type の設定は必要なし
-		Octet = ref;
+		Octet.GetValue() = ref;
 	}
 
 	//! @brief		コンストラクタ(integer型を作成)
@@ -220,6 +250,6 @@ public: //コンストラクタ
 
 
 //---------------------------------------------------------------------------
-
+} // namespace Risse
 #endif
 

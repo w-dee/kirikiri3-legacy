@@ -22,13 +22,13 @@ namespace Risse
 {
 typedef void * tRisseObjectImpl;
 //---------------------------------------------------------------------------
-//! @brief	オブジェクト用ポインタ
+//! @brief	オブジェクト用データ
 //! @note
 //! ポインタの最下位の2ビットが常に 01 なのは、このポインタが オブジェクトであることを
 //! 表している。ポインタは常に少なくとも 32bit 境界に配置されるため、最下位の２ビットは
 //! オブジェクトのタイプを表すのに利用されている。tRisseVariantを参照。
 //---------------------------------------------------------------------------
-class tRisseObjectPointer : public gc
+class tRisseObjectData : public gc
 {
 	tRisseObjectImpl * Impl; //!< ブロックへのポインタ (最下位の2ビットは常に10なので注意)
 							//!< アクセス時は必ず GetBlock, SetBlock を用いること
@@ -48,7 +48,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-class tRisseObjectBlock : public tRisseObjectPointer
+class tRisseObjectBlock : public tRisseObjectData
 {
 public:
 	// デフォルトコンストラクタ

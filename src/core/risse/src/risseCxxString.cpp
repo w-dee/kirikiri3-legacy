@@ -166,7 +166,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief -1, 0 が入っている配列(空のバッファを表す)
 //---------------------------------------------------------------------------
-risse_char tRisseStringBlock::EmptyBuffer[3] = { tRisseStringBlock::MightBeShared, 0, 0 };
+risse_char tRisseStringData::EmptyBuffer[3] = { tRisseStringBlock::MightBeShared, 0, 0 };
 //---------------------------------------------------------------------------
 
 

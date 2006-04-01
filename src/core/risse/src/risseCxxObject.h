@@ -42,7 +42,7 @@ protected: // pointer operation
 
 public:
 	//! @brief null ポインタ。オブジェクトが null を表す場合は、この値をとる。
-	static const tRisseObjectImpl * NullPtr = reinterpret_cast<tRisseObjectImpl*>((risse_ptruint)0x10);
+	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObjectImpl*>((risse_ptruint)0x10))
 };
 //---------------------------------------------------------------------------
 
@@ -52,9 +52,9 @@ class tRisseObjectBlock : public tRisseObjectPointer
 {
 public:
 	// デフォルトコンストラクタ
-	tRisseObjectPointer()
+	tRisseObjectBlock()
 	{
-		SetImpl(NullPtr);
+		SetImpl(RISSE_OBJECT_NULL_PTR);
 	}
 };
 //---------------------------------------------------------------------------

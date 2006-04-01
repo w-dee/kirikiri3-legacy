@@ -190,15 +190,11 @@ struct tRissePointerSizedInteger<4>
 	typedef risse_int32 type;
 	typedef risse_uint32 utype;
 };
-struct tRissePointerSizedIntegerSelected
-	: public tRissePointerSizedInteger<sizeof(void*) >
-{
-};
 
 //! @brief risse_ptrint は、ポインタと同じサイズを持つことが保証されている符号付き整数型
-typedef tRissePointerSizedIntegerSelected::type risse_ptrint;
-//! @brief risse_ptrint は、ポインタと同じサイズを持つことが保証されている符号なし整数型
-typedef tRissePointerSizedIntegerSelected::utype risse_ptruint;
+typedef tRissePointerSizedInteger<sizeof(void*)>::type risse_ptrint;
+//! @brief risse_ptruint は、ポインタと同じサイズを持つことが保証されている符号なし整数型
+typedef tRissePointerSizedInteger<sizeof(void*)>::utype risse_ptruint;
 
 
 

@@ -25,6 +25,8 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 以下の説明ではコードポイントを「文字」と表記する。
 
+risse_char は 32bit サイズであることが求められる。
+
 ■ 構造
 
 	tRisseStringBlock は以下の二つのメンバを持っている。
@@ -39,16 +41,19 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 ■ バッファ
 
-	バッファは 最低でも (Length + 2) * sizeof(risse_char) + sizeof(risse_size)
+	バッファは 最低でも (Length + 3) * sizeof(risse_char) + sizeof(risse_size)
 	を持つ。
 	tRisseStringBlock が任意の文字列を元に作成される場合、
-	(Length + 2) * sizeof(risse_char) + sizeof(size_t) の長さのバッファがま
+	(Length + 3) * sizeof(risse_char) + sizeof(size_t) の長さのバッファがま
 	ず確保され、文字列中の各文字は以下のように配置される。
 
-	capacity \0 文字0 文字1 文字3 .... \0
+	capacity \0 文字0 文字1 文字3 .... \0 hint
+	              ↑
+                Buffer
 
 	このように、最初は capacity としてバッファに実際に確保されている長さが
-	入り、それ以降は 各 CP の両端に \0 がついたバッファとなる。
+	入り、それ以降は 各 CP の両端に \0 がついたバッファ、最後にこの文字列の
+	hint が続く。
 	capacity は、バッファの長さがぴったりであれば Length と同じになる。
 
 	tRisseStringBlock::Buffer は、最初の capacity や \0 ではなく、その次の
@@ -71,7 +76,7 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 	tRisseStringBlock a が以下のバッファを持っている場合、
 
-	4 \0 文字0 文字1 文字2 文字3 \0
+	4 \0 文字0 文字1 文字2 文字3 \0 hint
 	    ↑
 	   Buffer
 	Length = 4
@@ -79,7 +84,7 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 	文字1 ～ 文字2 の２文字を表す tRisseStringBlock b は以下のように表すこ
 	とができる。
 
-	4 -1 文字0 文字1 文字2 文字3 \0
+	4 -1 文字0 文字1 文字2 文字3 \0 hint
 	          ↑
 	        Buffer
 	Length = 2
@@ -120,9 +125,10 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 ■ Independ
 
-	Independ メソッドは、文字列がそのバッファを共有している可能性がある場合、
-	新たにバッファを確保し、内容をコピーする。これにより、バッファに何か変
-	更を書き込んでも、他の文字列に影響が及ばないようにすることができる。
+	tRisseStringBlock::Independ() メソッドは、文字列がそのバッファを共有
+	している可能性がある場合、新たにバッファを確保し、内容をコピーする。
+	これにより、バッファに何か変更を書き込んでも、他の文字列に影響が及ばない
+	ようにすることができる。
 
 	Independ は新たに確保したバッファの先頭は \0 にするが、元のバッファの
 	内容には手を加えない。元のバッファの内容は、さらに他の文字列から共有
@@ -131,14 +137,26 @@ Risse 文字列は tRisseStringBlock クラスで表される。
 
 ■ c_str()
 
-	c_str() は、多くの C 言語系 API が期待するような、NULL 終端文字列を返す。
-	文字列が他の文字列の部分文字列を表している場合、文字列の最後が \0 である
-	保証はないが、そのような場合は、c_str() は新たにバッファを確保し、最後が
-	\0 で終了しているバッファを作り、それを返す。
+	tRisseStringBlock::c_str() は、多くの C 言語系 API が期待するような、
+	NULL 終端文字列を返す。文字列が他の文字列の部分文字列を表している場合、
+	文字列の最後が \0 である保証はないが、そのような場合は、c_str() は新たに
+	バッファを確保し、最後が \0 で終了しているバッファを作り、それを返す。
 
 ■ バッファの解放
 
 	参照されなくなったバッファは、GC により自動的に回収される。
+
+■ ヒント
+
+	文字列バッファ中の hint は、この文字列の 32bit ハッシュを表す領域である
+	が、常に正しいハッシュを表しているとは限らない。ここが 0 の場合はハッシュ
+	が無効であるか、まだ計算されていないことを表し、非 0 の場合はハッシュが
+	入っていると考えることができるが、正しいハッシュが入っている保証はない。
+	あくまでハッシュ表検索時の「ヒント」として扱うべきである。
+
+	tRisseStringBlock::GetHint() は、このヒント領域へのポインタを返す。
+	文字列が部分共有されている場合など、このヒント領域が存在しない場合は
+	このメソッドは NULL を返す。その場合はヒントは利用できない。
 
 */
 
@@ -148,7 +166,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief -1, 0 が入っている配列(空のバッファを表す)
 //---------------------------------------------------------------------------
-risse_char tRisseStringBlock::EmptyBuffer[2] = { tRisseStringBlock::MightBeShared, 0 };
+risse_char tRisseStringBlock::EmptyBuffer[3] = { tRisseStringBlock::MightBeShared, 0, 0 };
 //---------------------------------------------------------------------------
 
 
@@ -194,7 +212,7 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 	else
 	{
 		Buffer = AllocateInternalBuffer(Length);
-		Buffer[n] = 0;
+		Buffer[n] = Buffer[n+1] = 0; // null終端と hint をクリア
 		memcpy(Buffer, ref, sizeof(risse_char) * n);
 	}
 }
@@ -215,6 +233,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 	{
 		Buffer = AllocateInternalBuffer(Length);
 		Risse_strcpy(Buffer, ref);
+		Buffer[Length] = Buffer[Length+1] = 0; // null終端と hint をクリア
 	}
 	return *this;
 }
@@ -250,7 +269,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 //		; /////////////////////////////////////////// TODO: 例外を投げる
 	Buffer = AllocateInternalBuffer(Length);
 	RisseUtf8ToRisseCharString(ref, Buffer);
-	Buffer[Length] = 0;
+	Buffer[Length] = Buffer[Length + 1] = 0; // null終端と hint をクリア
 	return *this;
 }
 //---------------------------------------------------------------------------
@@ -298,9 +317,9 @@ tRisseStringBlock & tRisseStringBlock::operator += (const tRisseStringBlock & re
 		memcpy(Buffer + Length, ref.Buffer, ref.Length * sizeof(risse_char));
 	}
 
-	// null 終端を設定する
+	// null 終端と hint=0 を設定する
 	Length = newlength;
-	Buffer[newlength] = 0;
+	Buffer[newlength] = Buffer[newlength + 1] = 0;
 
 	return *this;
 }
@@ -335,13 +354,13 @@ tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref)
 //! @return		割り当てられたバッファ
 //! @note		実際には (n+2)*sizeof(risse_char) + sizeof(risse_size) が割り当
 //! てられ、2番目の文字を指すポインタが帰る。共有可能性フラグはクリアされ、
-//! 容量も書き込まれるが、null終端は書き込まれないので注意。
+//! 容量も書き込まれるが、null終端とヒントは書き込まれないので注意。
 //---------------------------------------------------------------------------
 risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	risse_size n, risse_char *prevbuf)
 {
 	// バッファを確保
-	size_t newbytes = sizeof(risse_size) + (n + 2)*sizeof(risse_char);
+	size_t newbytes = sizeof(risse_size) + (n + 3)*sizeof(risse_char);
 	void *ptr;
 	if(!prevbuf)
 	{
@@ -379,7 +398,7 @@ risse_char * tRisseStringBlock::InternalIndepend() const
 {
 	risse_char * newbuf = AllocateInternalBuffer(Length);
 	memcpy(newbuf, Buffer, sizeof(risse_char) * Length);
-	newbuf[Length] = 0;
+	newbuf[Length] = newbuf[Length + 1] = 0; // null終端とhintをクリア
 	return Buffer = newbuf;
 }
 //---------------------------------------------------------------------------

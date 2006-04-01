@@ -34,8 +34,8 @@ class tRisseStringBlock : public gc
 	const static risse_char MightBeShared  = static_cast<risse_char>(-1L);
 		//!< 共有可能性フラグとして Buffer[-1] に設定する値
 
-	static risse_char EmptyBuffer[2];
-		//!< -1, 0 が入っている配列(空のバッファを表す)
+	static risse_char EmptyBuffer[3];
+		//!< -1, 0, 0 が入っている配列(空のバッファを表す)
 	#define RISSE_STRING_EMPTY_BUFFER (EmptyBuffer+1)
 
 public:
@@ -136,7 +136,7 @@ public: // object property
 		Independ();
 		Length = n;
 		if(n)
-			Buffer[n] = 0;
+			Buffer[n] = Buffer[n+1] = 0; // null終端と hint をクリア
 		else
 			Buffer = RISSE_STRING_EMPTY_BUFFER; // Buffer を解放
 	}
@@ -234,7 +234,7 @@ public: // pointer
 	risse_char * Allocate(risse_size n)
 	{
 		if(n)
-			Buffer = AllocateInternalBuffer(n), Buffer[n] = 0;
+			Buffer = AllocateInternalBuffer(n), Buffer[n] = Buffer[n+1] = 0;
 		else
 			Buffer = RISSE_STRING_EMPTY_BUFFER;
 		Length = n;
@@ -246,6 +246,7 @@ public: // pointer
 	{
 		if((Length = Risse_strlen(Buffer)) == 0)
 			Buffer = RISSE_STRING_EMPTY_BUFFER;
+		Buffer[Length + 1] = 0; // hint をクリア
 	}
 
 	//! @brief C 言語スタイルのポインタを得る

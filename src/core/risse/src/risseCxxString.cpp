@@ -352,7 +352,7 @@ tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref)
 //! @param		n	コードポイント数
 //! @param		prevbuf	以前のバッファ(バッファを再確保する場合のみ;prevbuf[-1] は 0 =非共有であること)
 //! @return		割り当てられたバッファ
-//! @note		実際には (n+2)*sizeof(risse_char) + sizeof(risse_size) が割り当
+//! @note		実際には (n+3)*sizeof(risse_char) + sizeof(risse_size) が割り当
 //! てられ、2番目の文字を指すポインタが帰る。共有可能性フラグはクリアされ、
 //! 容量も書き込まれるが、null終端とヒントは書き込まれないので注意。
 //---------------------------------------------------------------------------

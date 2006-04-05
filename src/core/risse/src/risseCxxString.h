@@ -110,6 +110,8 @@ public:
 
 	tRisseStringBlock & operator = (const risse_char * ref);
 
+	tRisseStringBlock & operator = (const risse_char ref);
+
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	tRisseStringBlock & operator = (const wchar_t *ref);
 #endif
@@ -196,8 +198,30 @@ public: // comparison
 		{ return ! (*this == ref); }
 
 public: // operators
-	tRisseStringBlock & operator += (const tRisseStringBlock & ref);
-	tRisseStringBlock operator +  (const tRisseStringBlock & ref) const;
+	void Append(const risse_char * buffer, risse_size length);
+
+	//! @brief		文字列の連結
+	//! @param		ref		連結する文字列
+	//! @return		このオブジェクトへの参照
+	tRisseStringBlock & operator += (const tRisseStringBlock & ref)
+	{
+		if(Length == 0) { *this = ref; return *this; }
+		Append(ref.Buffer, ref.Length);
+		return *this;
+	}
+
+	//! @brief		文字の連結
+	//! @param		ref		連結する文字
+	//! @return		このオブジェクトへの参照
+	tRisseStringBlock & operator += (risse_char ref)
+	{
+		if(ref == 0) { return *this; } // やることなし
+		if(Length == 0) { *this = ref; return *this; }
+		Append(&ref, 1); // 文字を追加
+		return *this;
+	}
+
+	tRisseStringBlock operator + (const tRisseStringBlock & ref) const;
 
 	//! @brief [] 演算子
 	//! @param		n		位置
@@ -292,6 +316,18 @@ public: // pointer
 		if(Buffer[-1]) // 共有可能性フラグが立っている？
 			return InternalIndepend();
 		return Buffer;
+	}
+
+	//! @brief	文字列バッファを文字列と同じサイズにする
+	//! @note	Append や += 演算子などは、後のサイズの増加に備えて内部バッファを
+	//!			余分に取るが、その余分を切り捨てる。すでにぴったりなサイズ
+	//!			だった場合はなにもしない。また、共有中の場合は共有を断ち切る。
+	void Fit() const
+	{
+		if(Buffer[-1]) // 共有可能性フラグが立っている？
+			InternalIndepend();
+		if(GetBufferCapacity(Buffer) != Length) // 長さがぴったりではない
+			InternalIndepend();
 	}
 
 private:

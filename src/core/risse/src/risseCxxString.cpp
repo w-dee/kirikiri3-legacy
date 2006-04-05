@@ -222,6 +222,7 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 //---------------------------------------------------------------------------
 //! @brief		代入演算子(risse_char * から)
 //! @param		ref		元の文字列
+//! @return		このオブジェクトへの参照
 //---------------------------------------------------------------------------
 tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 {
@@ -240,10 +241,35 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		代入演算子(risse_char から)
+//! @param		ref		元の文字列
+//! @return		このオブジェクトへの参照
+//---------------------------------------------------------------------------
+tRisseStringBlock & tRisseStringBlock::operator = (const risse_char ref)
+{
+	if(ref == 0)
+	{
+		Length = 0;
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
+	}
+	else
+	{
+		Length = 1;
+		Buffer = AllocateInternalBuffer(1);
+		Buffer[0] = ref;
+		Buffer[1] = Buffer[1+1] = 0; // null終端と hint をクリア
+	}
+	return *this;
+}
+//---------------------------------------------------------------------------
+
+
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 //---------------------------------------------------------------------------
 //! @brief		代入演算子(wchar_t * から)
 //! @param		ref		元の文字列
+//! @return		このオブジェクトへの参照
 //---------------------------------------------------------------------------
 tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
 {
@@ -261,6 +287,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
 //---------------------------------------------------------------------------
 //! @brief		代入演算子(char * から)
 //! @param		ref		元の文字列
+//! @return		このオブジェクトへの参照
 //---------------------------------------------------------------------------
 tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 {
@@ -276,16 +303,15 @@ tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列の連結
-//! @param		ref		連結する文字列
-//! @return		このオブジェクト
+//! @brief		文字列の追加
+//! @param		buffer		追加する文字列 (length中には \0 が無いこと)
+//! @param		length		追加する文字列の長さ
 //---------------------------------------------------------------------------
-tRisseStringBlock & tRisseStringBlock::operator += (const tRisseStringBlock & ref)
+void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
 {
-	if(ref.Length == 0) return *this; // 追加するものなし
-	if(Length == 0) return *this = ref; // 単純なコピーでよい
+	if(length == 0) return; // 追加するものなし
 
-	risse_size newlength = Length + ref.Length;
+	risse_size newlength = Length + length;
 
 	if(Buffer[-1])
 	{
@@ -293,7 +319,7 @@ tRisseStringBlock & tRisseStringBlock::operator += (const tRisseStringBlock & re
 		// 新しく領域を確保し、そこにコピーする
 		risse_char * newbuf = AllocateInternalBuffer(newlength);
 		memcpy(newbuf, Buffer, Length * sizeof(risse_char));
-		memcpy(newbuf + Length, ref.Buffer, ref.Length * sizeof(risse_char));
+		memcpy(newbuf + Length, buffer, length * sizeof(risse_char));
 		Buffer = newbuf;
 	}
 	else
@@ -313,15 +339,13 @@ tRisseStringBlock & tRisseStringBlock::operator += (const tRisseStringBlock & re
 			Buffer = AllocateInternalBuffer(newcapacity, Buffer);
 		}
 
-		// 現在保持している文字列の直後に ref の Buffer をコピーする
-		memcpy(Buffer + Length, ref.Buffer, ref.Length * sizeof(risse_char));
+		// 現在保持している文字列の直後に buffer をコピーする
+		memcpy(Buffer + Length, buffer, length * sizeof(risse_char));
 	}
 
 	// null 終端と hint=0 を設定する
 	Length = newlength;
 	Buffer[newlength] = Buffer[newlength + 1] = 0;
-
-	return *this;
 }
 //---------------------------------------------------------------------------
 

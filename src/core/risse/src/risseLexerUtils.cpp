@@ -8,8 +8,14 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief Risse レキシカル・アナライザ(字句解析器)の実装
+//! @brief Risse レキシカル・アナライザ(字句解析器)向けのユーティリティ関数群
 //---------------------------------------------------------------------------
+/*! @note
+	ここでは、Risse の lexer に限らず、他の lexer でもおおよそ必要になるであろう、
+	文字列の解析、数値の解析などの関数群を実装する。
+*/
+
+
 #include "prec.h"
 
 #include <math.h>
@@ -25,7 +31,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(31558,6146,58648,17904,52124,56524,47688,27297);
+RISSE_DEFINE_SOURCE_ID();
 
 
 //---------------------------------------------------------------------------
@@ -33,7 +39,7 @@ RISSE_DEFINE_SOURCE_ID(31558,6146,58648,17904,52124,56524,47688,27297);
 //! @param		ptr		解析ポインタ
 //! @return		スクリプトが継続するかどうか
 //---------------------------------------------------------------------------
-bool tRisseLexer::SkipSpace(const risse_char * & ptr)
+bool tRisseLexerUtility::SkipSpace(const risse_char * & ptr)
 {
 	while(*ptr && Risse_iswspace_nc(*ptr)) ptr ++;
 	return *ptr;
@@ -46,7 +52,7 @@ bool tRisseLexer::SkipSpace(const risse_char * & ptr)
 //! @param		ch	文字
 //! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
-risse_int tRisseLexer::HexNum(risse_char ch)
+risse_int tRisseLexerUtility::HexNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('a') && ch<=RISSE_WC('f')) return ch-RISSE_WC('a')+10;
 	if(ch>=RISSE_WC('A') && ch<=RISSE_WC('F')) return ch-RISSE_WC('A')+10;
@@ -61,7 +67,7 @@ risse_int tRisseLexer::HexNum(risse_char ch)
 //! @param		ch	文字
 //! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
-risse_int tRisseLexer::OctNum(risse_char ch)
+risse_int tRisseLexerUtility::OctNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('0') && ch<=RISSE_WC('7')) return ch-RISSE_WC('0');
 	return -1;
@@ -74,7 +80,7 @@ risse_int tRisseLexer::OctNum(risse_char ch)
 //! @param		ch	文字
 //! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
-risse_int tRisseLexer::DecNum(risse_char ch)
+risse_int tRisseLexerUtility::DecNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('0') && ch<=RISSE_WC('9')) return ch-RISSE_WC('0');
 	return -1;
@@ -87,7 +93,7 @@ risse_int tRisseLexer::DecNum(risse_char ch)
 //! @param		ch	文字
 //! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
-risse_int tRisseLexer::BinNum(risse_char ch) throw()
+risse_int tRisseLexerUtility::BinNum(risse_char ch) throw()
 {
 	if(ch==RISSE_WC('0')) return 0;
 	if(ch==RISSE_WC('1')) return 1;
@@ -102,7 +108,7 @@ risse_int tRisseLexer::BinNum(risse_char ch) throw()
 //! @param		ch	文字
 //! @return		文字の表すコード
 //---------------------------------------------------------------------------
-risse_int tRisseLexer::UnescapeBackSlash(risse_char ch)
+risse_int tRisseLexerUtility::UnescapeBackSlash(risse_char ch)
 {
 	// convert "\?"
 	// ch must indicate "?"
@@ -126,7 +132,7 @@ risse_int tRisseLexer::UnescapeBackSlash(risse_char ch)
 //! @param		ptr		解析ポインタ
 //! @return		スキップした結果どうなったか
 //---------------------------------------------------------------------------
-tRisseLexer::tSkipCommentResult tRisseLexer::RisseSkipComment(const risse_char * & ptr)
+tRisseLexerUtility::tSkipCommentResult tRisseLexerUtility::SkipComment(const risse_char * & ptr)
 {
 	if(*ptr[0] != RISSE_WC('/')) return scrNotComment;
 
@@ -180,28 +186,29 @@ tRisseLexer::tSkipCommentResult tRisseLexer::RisseSkipComment(const risse_char *
 
 
 //---------------------------------------------------------------------------
-//! @brief		Ptr にある文字列を別の文字列と比較する
-//! @param		wrd		比較する文字列
+//! @brief		ptr にある文字列を別の文字列と比較する
+//! @param		ptr		比較する文字列
+//! @param		wrd		比較する別の文字列
 //! @param		isword	単語単位の比較を行う場合に真
 //! @return		単語が一致したかどうか
 //---------------------------------------------------------------------------
-bool tRisseLexer::StringMatch(const risse_char *wrd, bool isword)
+bool tRisseLexerUtility::StringMatch(const risse_char * & ptr, const risse_char *wrd, bool isword)
 {
 	// compare string with a script starting from sc and wrd.
 	// word matching is processed if isword is true.
-	const risse_char *save = Ptr;
-	while(*wrd && *Ptr)
+	const risse_char *save = ptr;
+	while(*wrd && *ptr)
 	{
-		if(*Ptr != *wrd) break;
-		++Ptr;
+		if(*ptr != *wrd) break;
+		++ptr;
 		wrd++;
 	}
 
-	if(*wrd) { Ptr=save; return false; }
+	if(*wrd) { ptr=save; return false; }
 	if(isword)
 	{
-		if(Risse_iswalpha_nc(*Ptr) || *Ptr == RISSE_WC('_'))
-			{ Ptr=save; return false; }
+		if(Risse_iswalpha_nc(*ptr) || *ptr == RISSE_WC('_'))
+			{ ptr=save; return false; }
 	}
 	return true;
 }
@@ -209,14 +216,17 @@ bool tRisseLexer::StringMatch(const risse_char *wrd, bool isword)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列を解析する(内部関数)
+//! @brief		文字列を解析する
+//! @param		ptr		解析開始位置
 //! @param		val		解析した文字列を格納する先
 //! @param		delim	デリミタ ( '\'' か '"' )
 //! @param		embexpmode	埋め込み式モードかどうか (@つき文字列リテラルかどうか)
 //! @return		内部ステータス
 //---------------------------------------------------------------------------
-tRisseLexer::tInternalParseStringResult
-	tRisseLexer::InternalParseString(tRisseString &val,
+tRisseLexerUtility::tInternalParseStringResult
+	tRisseLexerUtility::ParseString(
+		const risse_char * & ptr, 
+		tRisseString &val,
 		risse_char delim, bool embexpmode)
 {
 	// delim1 must be '\'' or '"'
@@ -226,32 +236,32 @@ tRisseLexer::tInternalParseStringResult
 
 	tInternalParseStringResult status = psrNone;
 
-	while(*Ptr)
+	while(*ptr)
 	{
-		if(*Ptr == RISSE_WC('\\'))
+		if(*ptr == RISSE_WC('\\'))
 		{
 			// \ 記号によるエスケープ
-			if(!*(++Ptr)) break;
-			if(*Ptr == RISSE_WC('x') || *Ptr == RISSE_WC('X'))
+			if(!*(++ptr)) break;
+			if(*ptr == RISSE_WC('x') || *ptr == RISSE_WC('X'))
 			{
 				// hex
 				// starts with a "\x", be parsed while characters are
 				// recognized as hex-characters, but limited of size of risse_char.
 				// 現状の Risse では risse_char は必ず 32bit なので
 				// \x のあとは最大8桁を読み込む。
-				if(!*(++Ptr)) break;
+				if(!*(++ptr)) break;
 				risse_int num;
 				risse_char code = 0;
 				risse_int count = 0;
-				while((num = RisseHexNum(*Ptr)) != -1 &&
+				while((num = RisseHexNum(*ptr)) != -1 &&
 					count < (int)(sizeof(risse_char)*2))
 				{
 					code <<= 4;
 					code += num;
 					count ++;
-					if(!*(++Ptr)) break;
+					if(!*(++ptr)) break;
 				}
-				if(*Ptr == 0) break;
+				if(*ptr == 0) break;
 
 				// risse_char は UTF-32 を想定しているが、最上位
 				// ビットは使用できない (エラー状態を表す用途に使われる
@@ -261,29 +271,29 @@ tRisseLexer::tInternalParseStringResult
 
 				str += (risse_char)code;
 			}
-			else if(*Ptr == RISSE_WC('0'))
+			else if(*ptr == RISSE_WC('0'))
 			{
 				// octal
-				if(!*(++Ptr)) break;
+				if(!*(++ptr)) break;
 
 				risse_int num;
 				risse_int code=0;
-				while((num = RisseOctNum(*Ptr))!=-1)
+				while((num = RisseOctNum(*ptr))!=-1)
 				{
 					code*=8;
 					code+=num;
-					if(!*(++Ptr)) break;
+					if(!*(++ptr)) break;
 				}
-				if(*Ptr == 0) break;
+				if(*ptr == 0) break;
 				str += (risse_char)code;
 			}
 			else
 			{
-				str += (risse_char)RisseUnescapeBackSlash(*Ptr);
-				if(!*(++Ptr)) break;
+				str += (risse_char)RisseUnescapeBackSlash(*ptr);
+				if(!*(++ptr)) break;
 			}
 		}
-		else if(*Ptr == delim)
+		else if(*ptr == delim)
 		{
 			// string delimiters
 			if(!RisseNext(ptr))
@@ -292,13 +302,13 @@ tRisseLexer::tInternalParseStringResult
 				break;
 			}
 
-			const risse_char *p = Ptr;
+			const risse_char *p = ptr;
 			RisseSkipSpace(&p);
 			if(*p == delim)
 			{
 				// sequence of 'A' 'B' will be combined as 'AB'
-				Ptr = p;
-				RisseNext(ptr);
+				ptr = p;
+				ptr++;
 			}
 			else
 			{
@@ -306,36 +316,36 @@ tRisseLexer::tInternalParseStringResult
 				break;
 			}
 		}
-		else if(embexpmode && *Ptr == RISSE_WC('&'))
+		else if(embexpmode && *ptr == RISSE_WC('&'))
 		{
 			// '&'
-			if(!RisseNext(ptr)) break;
+			if(!*(++ptr)) break;
 			status = psrAmpersand;
 			break;
 		}
-		else if(embexpmode && *Ptr == RISSE_WC('$'))
+		else if(embexpmode && *ptr == RISSE_WC('$'))
 		{
 			// '$'
 			// '{' must be placed immediately after '$'
-			const risse_char *p = Ptr;
-			if(!RisseNext(ptr)) break;
-			if(*Ptr == RISSE_WC('{'))
+			const risse_char *p = ptr;
+			if(!*(++ptr)) break;
+			if(*ptr == RISSE_WC('{'))
 			{
-				if(!RisseNext(ptr)) break;
+				if(!*(++ptr)) break;
 				status = psrDollar;
 				break;
 			}
 			else
 			{
-				Ptr = p;
-				str += *Ptr;
-				RisseNext(ptr);
+				ptr = p;
+				str += *ptr;
+				++ptr;
 			}
 		}
 		else
 		{
-			str += *Ptr;
-			RisseNext(ptr);
+			str += *ptr;
+			++ptr;
 		}
 	}
 
@@ -355,10 +365,11 @@ tRisseLexer::tInternalParseStringResult
 
 //---------------------------------------------------------------------------
 //! @brief		現在の解析位置にある文字列を解析する
+//! @param		ptr		解析開始位置 ('\'' or '"' を指していないとならない)
 //! @param		val		値の格納先
 //! @return		値の解析に成功したかどうか
 //---------------------------------------------------------------------------
-bool tRisseLexer::ParseString(tRisseString &val)
+bool tRisseLexerUtility::ParseString(const risse_char * & ptr, (tRisseString &val)
 {
 	// Ptr は '\'' or '"' を指していないとならない
 
@@ -366,7 +377,7 @@ bool tRisseLexer::ParseString(tRisseString &val)
 
 	Ptr ++;
 
-	return RisseInternalParseString(val, ptr, delimiter, false) == psrDelimiter;
+	return ParseString(ptr, val, ptr, delimiter, false) == psrDelimiter;
 }
 //---------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 
 #include "prec.h"
 #include "risseCxxString.h"
+#include "risseVariant.h"
 
 
 RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
@@ -72,6 +73,8 @@ int Application::OnRun()
 	wxPrintf(wxT("str2 : %s\n"), str2.AsWxString().c_str());
 	wxPrintf(wxT("str3 : %s\n"), str3.AsWxString().c_str());
 
+	tRisseVariant v;
+	v.prtsizes();
 	return 0;
 }
 //---------------------------------------------------------------------------

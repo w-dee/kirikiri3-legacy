@@ -294,33 +294,31 @@ public: // コンストラクタ/代入演算子
 
 public: // 演算子
 
-	tRisseVariantBlock operator +(const tRisseVariantBlock & ref) const // incomplete
-	{
-		if(GetType() == vtString && ref.GetType() == vtString)
-		{
-			return tRisseVariantBlock(AsString() + AsString());
-		}
-		printf("fail: %d\n", sizeof(tRisseVariantBlock));
-		return tRisseVariantBlock();
-	}
-
-	tRisseVariantBlock operator -() const // incomplete
+	//-----------------------------------------------------------------------
+	//! @brief 単項 - 演算子		uminus
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock operator -() const
 	{
 		switch(GetType())
 		{
-		case vtVoid:	return (risse_int64)0;					break; // -void => 0
-		case vtInteger:	return -AsInteger();					break;
-		case vtReal:	return -AsReal();						break;
-		case vtBool:	return (risse_int64)(AsBool()?-1:0);	break;
-/*
-		not yet
-		case vtString:		*this = 		break;
-		case vtObject:		*this = ref.AsObject();		break;
-		case vtOctet:		*this = ref.AsOctet();		break;
-*/
+		case vtVoid:	return Void_uminus();
+		case vtInteger:	return Integer_uminus();
+		case vtReal:	return Real_uminus();
+		case vtBool:	return Bool_uminus();
+		case vtString:	return String_uminus();
+		case vtObject:	return Object_uminus();
+		case vtOctet:	return Octet_uminus();
 		}
-		return tRisseVariantBlock();
 	}
+
+	tRisseVariantBlock Void_uminus() const { return risse_int64(0); }
+	tRisseVariantBlock Integer_uminus() const { return -AsInteger(); }
+	tRisseVariantBlock Real_uminus() const { return -AsReal(); }
+	tRisseVariantBlock Bool_uminus() const { return (risse_int64)(AsBool()?-1:0); }
+	tRisseVariantBlock String_uminus() const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock Object_uminus() const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock Octet_uminus() const { return tRisseVariantBlock(); /* incomplete */ }
+
 
 public:
 	void prtsizes()

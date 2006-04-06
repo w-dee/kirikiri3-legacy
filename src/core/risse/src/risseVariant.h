@@ -301,23 +301,23 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	return Void_uminus();
-		case vtInteger:	return Integer_uminus();
-		case vtReal:	return Real_uminus();
-		case vtBool:	return Bool_uminus();
-		case vtString:	return String_uminus();
-		case vtObject:	return Object_uminus();
-		case vtOctet:	return Octet_uminus();
+		case vtVoid:	return uminus_Void();
+		case vtInteger:	return uminus_Integer();
+		case vtReal:	return uminus_Real();
+		case vtBool:	return uminus_Bool();
+		case vtString:	return uminus_String();
+		case vtObject:	return uminus_Object();
+		case vtOctet:	return uminus_Octet();
 		}
 	}
 
-	tRisseVariantBlock Void_uminus() const { return risse_int64(0); }
-	tRisseVariantBlock Integer_uminus() const { return -AsInteger(); }
-	tRisseVariantBlock Real_uminus() const { return -AsReal(); }
-	tRisseVariantBlock Bool_uminus() const { return (risse_int64)(AsBool()?-1:0); }
-	tRisseVariantBlock String_uminus() const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock Object_uminus() const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock Octet_uminus() const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock uminus_Void() 	const { return risse_int64(0); }
+	tRisseVariantBlock uminus_Integer()	const { return -AsInteger(); }
+	tRisseVariantBlock uminus_Real()	const { return -AsReal(); }
+	tRisseVariantBlock uminus_Bool()	const { return (risse_int64)(AsBool()?-1:0); }
+	tRisseVariantBlock uminus_String()	const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock uminus_Object()	const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock uminus_Octet()	const { return tRisseVariantBlock(); /* incomplete */ }
 
 
 public:

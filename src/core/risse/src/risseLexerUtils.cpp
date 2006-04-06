@@ -17,17 +17,8 @@
 
 
 #include "prec.h"
+#include "risseLexerUtils.h"
 
-#include <math.h>
-#include "risseInterCodeGen.h"
-#include "risse.tab.h"
-#include "risseLex.h"
-#include "risseVariant.h"
-#include "risseError.h"
-#include "risseCompileControl.h"
-#include "risseScriptBlock.h"
-#include "risseObject.h"
-#include "risseMath.h"
 
 namespace Risse
 {
@@ -132,7 +123,8 @@ risse_int tRisseLexerUtility::UnescapeBackSlash(risse_char ch)
 //! @param		ptr		解析ポインタ
 //! @return		スキップした結果どうなったか
 //---------------------------------------------------------------------------
-tRisseLexerUtility::tSkipCommentResult tRisseLexerUtility::SkipComment(const risse_char * & ptr)
+tRisseLexerUtility::tSkipCommentResult
+	tRisseLexerUtility::SkipComment(const risse_char * & ptr)
 {
 	if(*ptr[0] != RISSE_WC('/')) return scrNotComment;
 
@@ -384,10 +376,17 @@ bool tRisseLexerUtility::ParseString(const risse_char * & ptr, (tRisseString &va
 
 
 //---------------------------------------------------------------------------
-// RisseParseNumber
+//! @brief		数値として認識できるだけの文字列を ptr から切り出す
+//! @param		ptr		解析開始位置(切り出し後は切り出した後まで移動している)
+//! @param		validdigits	数値に使う文字集合を判定する関数
+//! @param		expmark	指数表記に使われる文字(2文字まで)
+//! @param		isreal	実数を切り出したときに真に設定される(整数の場合は偽)
+//! @return		切り出した文字列(切り出しに失敗した場合、空文字列が帰る)
 //---------------------------------------------------------------------------
-static tRisseString RisseExtractNumber(risse_int (*validdigits)(risse_char ch),
-	const risse_char *expmark, const risse_char **ptr, bool &isreal)
+static tRisseString tRisseLexerUtility::ExtractNumber(
+	const risse_char * & ptr,
+	risse_int (*validdigits)(risse_char ch),
+	const risse_char *expmark, bool &isreal)
 {
 	tRisseString tmp;
 
@@ -395,33 +394,33 @@ static tRisseString RisseExtractNumber(risse_int (*validdigits)(risse_char ch),
 	bool exp_found = false;
 	while(true)
 	{
-		if(validdigits(**ptr) != -1)
+		if(validdigits(*ptr) != -1)
 		{
-			tmp += **ptr;
-			if(!RisseNext(ptr)) break;
+			tmp += *ptr;
+			if(!*(++ptr)) break;
 		}
-		else if(**ptr == RISSE_WC('.') && !point_found && !exp_found)
+		else if(*ptr == RISSE_WC('.') && !point_found && !exp_found)
 		{
 			point_found = true;
-			tmp += **ptr;
-			if(!RisseNext(ptr)) break;
+			tmp += *ptr;
+			if(!*(++ptr)) break;
 		}
-		else if((**ptr == expmark[0] || **ptr == expmark[1]) && !exp_found)
+		else if((*ptr == expmark[0] || *ptr == expmark[1]) && !exp_found)
 		{
 			exp_found = true;
-			tmp += **ptr;
-			if(!RisseNext(ptr)) break;
+			tmp += *ptr;
+			if(!*(++ptr)) break;
 			if(!RisseSkipSpace(ptr)) break;
-			if(**ptr == RISSE_WC('+'))
+			if(*ptr == RISSE_WC('+'))
 			{
-				tmp += **ptr;
-				if(!RisseNext(ptr)) break;
+				tmp += *ptr;
+				if(!*(++ptr)) break;
 				if(!RisseSkipSpace(ptr)) break;
 			}
-			else if(**ptr == RISSE_WC('-'))
+			else if(*ptr == RISSE_WC('-'))
 			{
-				tmp += **ptr;
-				if(!RisseNext(ptr)) break;
+				tmp += *ptr;
+				if(!*(++ptr)) break;
 				if(!RisseSkipSpace(ptr)) break;
 			}
 		}
@@ -435,15 +434,26 @@ static tRisseString RisseExtractNumber(risse_int (*validdigits)(risse_char ch),
 
 	return tmp;
 }
+//---------------------------------------------------------------------------
 
-static bool RisseParseNonDecimalReal(tRisseVariant &val, const risse_char **ptr,
+
+//---------------------------------------------------------------------------
+//! @brief		10進以外の実数表現(0xabfp3, 0b10001p2など)を数値に変換する
+//! @param		ptr		解析開始位置
+//! @param		val		結果の格納先
+//! @param		validdigits	数値に使う文字集合を判定する関数
+//! @param		basebits	基数
+//! @return		変換に成功したかどうか
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::RisseParseNonDecimalReal(
+	const risse_char * ptr, risse_real &val,
 	risse_int (*validdigits)(risse_char ch), risse_int basebits)
 {
 	// parse non-decimal(hexiadecimal, octal or binary) floating-point number.
 	// this routine heavily depends on IEEE double floating-point number expression.
 
-	risse_uint64 main = RISSE_UI64_VAL(0); // significand
-	risse_int exp = 0; // 2^n exponental
+	risse_uint64 main = RISSE_UI64_VAL(0); // significand(有効数字)
+	risse_int exp = 0; // 2^n exponental (指数)
 	risse_int numsignif = 0; // significand bit count (including leading left-most '1') in "main"
 	bool pointpassed = false;
 
@@ -451,27 +461,27 @@ static bool RisseParseNonDecimalReal(tRisseVariant &val, const risse_char **ptr,
 	// scan input
 	while(true)
 	{
-		if(**ptr == RISSE_WC('.'))
+		if(*ptr == RISSE_WC('.'))
 		{
 			pointpassed = true;
 		}
-		else if(**ptr == RISSE_WC('p') || **ptr == RISSE_WC('P'))
+		else if(*ptr == RISSE_WC('p') || *ptr == RISSE_WC('P'))
 		{
-			if(!RisseNext(ptr)) break;
+			if(!*(++ptr)) break;
 			if(!RisseSkipSpace(ptr)) break;
 
 			bool biassign = false;
-			if(**ptr == RISSE_WC('+'))
+			if(*ptr == RISSE_WC('+'))
 			{
 				biassign = false;
-				if(!RisseNext(ptr)) break;
+				if(!*(++ptr)) break;
 				if(!RisseSkipSpace(ptr)) break;
 			}
 
-			if(**ptr == RISSE_WC('-'))
+			if(*ptr == RISSE_WC('-'))
 			{
 				biassign = true;
-				if(!RisseNext(ptr)) break;
+				if(!*(++ptr)) break;
 				if(!RisseSkipSpace(ptr)) break;
 			}
 
@@ -479,8 +489,8 @@ static bool RisseParseNonDecimalReal(tRisseVariant &val, const risse_char **ptr,
 			while(true)
 			{
 				bias *= 10;
-				bias += RisseDecNum(**ptr);
-				if(!RisseNext(ptr)) break;
+				bias += RisseDecNum(*ptr);
+				if(!*(++ptr)) break;
 			}
 			if(biassign) bias = -bias;
 			exp += bias;
@@ -488,7 +498,7 @@ static bool RisseParseNonDecimalReal(tRisseVariant &val, const risse_char **ptr,
 		}
 		else
 		{
-			risse_int n = validdigits(**ptr);
+			risse_int n = validdigits(*ptr);
 			if(numsignif == 0)
 			{
 				// find msb flaged bit
@@ -528,7 +538,7 @@ static bool RisseParseNonDecimalReal(tRisseVariant &val, const risse_char **ptr,
 				if(!pointpassed) exp += basebits;
 			}
 		}
-		if(!RisseNext(ptr)) break;
+		if(!*(++ptr)) break;
 	}
 
 	main >>= (64 - 1 - RISSE_IEEE_D_SIGNIFICAND_BITS);
@@ -562,15 +572,25 @@ static bool RisseParseNonDecimalReal(tRisseVariant &val, const risse_char **ptr,
 
 	// compose IEEE double
 	risse_real d;
-	*(risse_uint64*)&d =
+	*reinterpret_cast<risse_uint64*>(&d) =
 		RISSE_IEEE_D_MAKE_SIGN(0) |
 		RISSE_IEEE_D_MAKE_EXP(exp) |
 		RISSE_IEEE_D_MAKE_SIGNIFICAND(main);
 	val = d;
 	return true;
 }
+//---------------------------------------------------------------------------
 
-static bool RisseParseNonDecimalInteger(tRisseVariant &val, const risse_char **ptr,
+
+//---------------------------------------------------------------------------
+//! @brief		10進以外の整数表現(0xabf, 0b10001など)を数値に変換する
+//! @param		ptr		解析開始位置
+//! @param		val		結果の格納先
+//! @param		validdigits	数値に使う文字集合を判定する関数
+//! @param		basebits	基数
+//! @return		変換に成功したかどうか
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int64 &val, 
 	risse_int (*validdigits)(risse_char ch), risse_int basebits)
 {
 	risse_int64 v = 0;
@@ -583,8 +603,18 @@ static bool RisseParseNonDecimalInteger(tRisseVariant &val, const risse_char **p
 	val = (tTVInteger)v;
 	return true;
 }
+//---------------------------------------------------------------------------
 
-static bool RisseParseNonDecimalNumber(tRisseVariant &val, const risse_char **ptr,
+
+//---------------------------------------------------------------------------
+//! @brief		10進以外の数値表現を数値に変換する
+//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
+//! @param		val		結果の格納先
+//! @param		validdigits	数値に使う文字集合を判定する関数
+//! @param		basebits	基数
+//! @return		変換に成功したかどうか
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::ParseNonDecimalNumber(const risse_char * & ptr, tRisseVariant &val,
 	risse_int (*validdigits)(risse_char ch), risse_int base)
 {
 	bool isreal = false;
@@ -593,35 +623,68 @@ static bool RisseParseNonDecimalNumber(tRisseVariant &val, const risse_char **pt
 	if(tmp.IsEmpty()) return false;
 
 	const risse_char *p = tmp.c_str();
-	const risse_char **pp = &p;
 
 	if(isreal)
-		return RisseParseNonDecimalReal(val, pp, validdigits, base);
+	{
+		risse_real r;
+		bool ret = RisseParseNonDecimalReal(p, r, validdigits, base);
+		if(ret) val = r;
+		return ret;
+	}
 	else
-		return RisseParseNonDecimalInteger(val, pp, validdigits, base);
+	{
+		risse_int64 r;
+		bool ret = RisseParseNonDecimalInteger(p, r, validdigits, base);
+		if(ret) val = r;
+		return ret;
+	}
 }
+//---------------------------------------------------------------------------
 
-static bool RisseParseDecimalReal(tRisseVariant &val, const risse_char **pp)
+
+//---------------------------------------------------------------------------
+//! @brief		10進実数を数値に変換する
+//! @param		ptr		解析開始位置
+//! @param		val		結果の格納先
+//! @return		変換に成功したかどうか
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::ParseDecimalReal(const risse_char * ptr, risse_real &val)
 {
-	val = (tTVReal)Risse_strtod(*pp, NULL);
+	val = static_cast<risse_real>(Risse_strtod(ptr, NULL));
 	return true;
 }
+//---------------------------------------------------------------------------
 
-static bool RisseParseDecimalInteger(tRisseVariant &val, const risse_char **pp)
+
+//---------------------------------------------------------------------------
+//! @brief		10進整数を数値に変換する
+//! @param		ptr		解析開始位置
+//! @param		val		結果の格納先
+//! @return		変換に成功したかどうか
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::ParseDecimalInteger(const risse_char * ptr, risse_int64 &val)
 {
 	int n;
 	risse_int64 num = 0;
-	while((n = RisseDecNum(**pp)) != -1)
+	while((n = RisseDecNum(*ptr)) != -1)
 	{
 		num *= 10;
 		num += n;
-		if(!RisseNext(pp)) break;
+		if(!*(++ptr)) break;
 	}
-	val = (tTVInteger)num;
+	val = num;
 	return true;
 }
+//---------------------------------------------------------------------------
 
-static bool RisseParseNumber2(tRisseVariant &val, const risse_char **ptr)
+
+//---------------------------------------------------------------------------
+//! @brief		数値変換用内部関数
+//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
+//! @param 		val		結果格納先
+//! @return		解析に成功したかどうか
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::ParseNumber2(const risse_char * & ptr, tRisseVariant &val)
 {
 	// stage 2
 
@@ -639,7 +702,7 @@ static bool RisseParseNumber2(tRisseVariant &val, const risse_char **ptr)
 	{
 		// Not a Number
 		risse_real d;
-		*(risse_uint64*)&d = RISSE_IEEE_D_P_NaN;
+		*reinterpret_cast<risse_uint64*>(&d) = RISSE_IEEE_D_P_NaN;
 		val = d;
 		return true;
 	}
@@ -647,48 +710,48 @@ static bool RisseParseNumber2(tRisseVariant &val, const risse_char **ptr)
 	{
 		// positive inifinity
 		risse_real d;
-		*(risse_uint64*)&d = RISSE_IEEE_D_P_INF;
+		*reinterpret_cast<risse_uint64*>(&d) = RISSE_IEEE_D_P_INF;
 		val = d;
 		return true;
 	}
 
-	const risse_char *ptr_save = *ptr;
+	const risse_char *ptr_save = ptr;
 
-	if(**ptr == RISSE_WC('0'))
+	if(*ptr == RISSE_WC('0'))
 	{
-		if(!RisseNext(ptr))
+		if(!*(++ptr))
 		{
-			val = (tTVInteger) 0;
+			val = static_cast<risse_int64>(0);
 			return true;
 		}
 
-		risse_char mark = **ptr;
+		risse_char mark = *ptr;
 
 		if(mark == RISSE_WC('X') || mark == RISSE_WC('x'))
 		{
 			// hexadecimal
-			if(!RisseNext(ptr)) return false;
-			return RisseParseNonDecimalNumber(val, ptr, RisseHexNum, 4);
+			if(!*(++ptr)) return false;
+			return ParseNonDecimalNumber(ptr, val, RisseHexNum, 4);
 		}
 
 		if(mark == RISSE_WC('B') || mark == RISSE_WC('b'))
 		{
 			// binary
-			if(!RisseNext(ptr)) return false;
-			return RisseParseNonDecimalNumber(val, ptr, RisseBinNum, 1);
+			if(!*(++ptr)) return false;
+			return ParseNonDecimalNumber(ptr, val, RisseBinNum, 1);
 		}
 
 		if(mark == RISSE_WC('.'))
 		{
 			// decimal point
-			*ptr = ptr_save;
+			ptr = ptr_save;
 			goto decimal;
 		}
 
 		if(mark == RISSE_WC('E') || mark == RISSE_WC('e'))
 		{
 			// exp
-			*ptr = ptr_save;
+			ptr = ptr_save;
 			goto decimal;
 		}
 
@@ -699,14 +762,14 @@ static bool RisseParseNumber2(tRisseVariant &val, const risse_char **ptr)
 		}
 
 		// octal
-		*ptr = ptr_save;
-		return RisseParseNonDecimalNumber(val, ptr, RisseOctNum, 3);
+		ptr = ptr_save;
+		return ParseNonDecimalNumber(ptr, val, RisseOctNum, 3);
 	}
 
 	// integer decimal or real decimal
 decimal:
 	bool isreal = false;
-	tRisseString tmp(RisseExtractNumber(RisseDecNum, RISSE_WS("Ee"), ptr, isreal));
+	tRisseString tmp(ExtractNumber(ptr, RisseDecNum, RISSE_WS("Ee"), isreal));
 
 	if(tmp.IsEmpty()) return false;
 
@@ -714,33 +777,39 @@ decimal:
 	const risse_char **pp = &p;
 
 	if(isreal)
-		return RisseParseDecimalReal(val, pp);
+		return ParseDecimalReal(val, pp);
 	else
-		return RisseParseDecimalInteger(val, pp);
+		return ParseDecimalInteger(val, pp);
 }
+//---------------------------------------------------------------------------
 
 
-bool RisseParseNumber(tRisseVariant &val, const risse_char **ptr)
+//---------------------------------------------------------------------------
+//! @brief		文字列を数値に変換する
+//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
+//! @param 		val		結果格納先
+//! @return		解析に成功したかどうか
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::ParseNumber(const risse_char * & ptr, tRisseVariant &val)
 {
-	// parse a number pointed by (*ptr)
-	RisseSetFPUE();
+	// parse a number pointed by ptr
 
 	bool sign = false; // true if negative
 
-	if(**ptr == RISSE_WC('+'))
+	if(*ptr == RISSE_WC('+'))
 	{
 		sign = false;
-		if(!RisseNext(ptr)) return false;
+		if(!*(++ptr)) return false;
 		if(!RisseSkipSpace(ptr)) return false;
 	}
-	else if(**ptr == RISSE_WC('-'))
+	else if(*ptr == RISSE_WC('-'))
 	{
 		sign = true;
-		if(!RisseNext(ptr)) return false;
+		if(!*(++ptr)) return false;
 		if(!RisseSkipSpace(ptr)) return false;
 	}
 
-	if(RisseParseNumber2(val, ptr))
+	if(ParseNumber2(val, ptr))
 	{
 		if(sign) val = -val;
 		return true;
@@ -751,6 +820,7 @@ bool RisseParseNumber(tRisseVariant &val, const risse_char **ptr)
 
 //---------------------------------------------------------------------------
 
+#if 0
 
 //---------------------------------------------------------------------------
 // RisseParseOctet
@@ -1019,14 +1089,9 @@ static void RisseInitReservedWordsHashTable()
 	RISSE_REG_RES_WORD("void", T_VOID);
 	RISSE_REG_RES_WORD("var", T_VAR);
 	RISSE_REG_RES_WORD("while", T_WHILE);
-#ifndef RISSE_NaN_and_Infinity_ARE_NOT_RESERVED_WORD
 	RISSE_REG_RES_WORD("NaN", T_NAN);
 	RISSE_REG_RES_WORD("Infinity", T_INFINITY);
-#endif
-#ifndef RISSE_WITH_IS_NOT_RESERVED_WORD
 	RISSE_REG_RES_WORD("with", T_WITH);
-#endif
-
 }
 //---------------------------------------------------------------------------
 
@@ -1951,7 +2016,7 @@ void tRisseLexicalAnalyzer::SetNextIsBareWord(void)
 	BareWord = true;
 }
 //---------------------------------------------------------------------------
-
+#endif
 
 } // namespace Risse
 

@@ -20,8 +20,10 @@
 	#include <wx/intl.h>
 #endif
 
+#ifdef __cplusplus
 namespace Risse
 {
+#endif
 
 #if defined(_WX_DEFS_H_)
 /* Use wxWidgets definitions */
@@ -105,10 +107,6 @@ namespace Risse
 
 
 typedef risse_int32 risse_error;
-
-typedef risse_int64 tTVInteger;
-typedef risse_real tTVReal;
-
 
 /* IEEE double manipulation support
  (Risse requires IEEE double(64-bit float) native support on machine or C++ compiler) */
@@ -200,7 +198,9 @@ typedef tRissePointerSizedInteger<sizeof(void*)>::utype risse_ptruint;
 
 #endif
 
+#ifdef __cplusplus
 } /* namespace Risse */
+#endif
 
 #endif
 

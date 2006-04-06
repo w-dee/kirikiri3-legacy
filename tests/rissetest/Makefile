@@ -13,7 +13,7 @@ BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
 DEP_LIBS=BOOST WX GC COMMON
 
 # リンカに渡すフラグ
-LDFLAGS = -g $(CONSOLE_LDFLAGS)
+LDFLAGS += -g $(CONSOLE_LDFLAGS)
 
 #----------------------------#
 

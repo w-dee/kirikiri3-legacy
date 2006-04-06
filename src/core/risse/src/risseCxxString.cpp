@@ -14,8 +14,6 @@
 
 #include "risseCxxString.h"
 
-RISSE_DEFINE_SOURCE_ID(45632,47818,10920,18335,63117,13582,59145,24628);
-
 /*! @note
 Risse 文字列について
 
@@ -162,6 +160,8 @@ risse_char は 32bit サイズであることが求められる。
 
 namespace Risse
 {
+RISSE_DEFINE_SOURCE_ID(45632,47818,10920,18335,63117,13582,59145,24628);
+
 
 //---------------------------------------------------------------------------
 //! @brief -1, 0 が入っている配列(空のバッファを表す)
@@ -233,7 +233,9 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 	else
 	{
 		Buffer = AllocateInternalBuffer(Length);
-		Risse_strcpy(Buffer, ref);
+		memcpy(Buffer, ref, sizeof(risse_char));
+			// サイズがわかっているならば memcpy の方が若干早い
+//		Risse_strcpy(Buffer, ref);
 		Buffer[Length] = Buffer[Length+1] = 0; // null終端と hint をクリア
 	}
 	return *this;

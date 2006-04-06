@@ -15,7 +15,6 @@
 #include "risseCharUtils.h"
 #include "risseCxxOctet.h"
 
-RISSE_DEFINE_SOURCE_ID(22894,62791,44554,18883,55951,15622,1807,62704);
 
 /*! @note
 Risse オクテット列について
@@ -26,6 +25,7 @@ Risse オクテット列は tRisseOctetBlock クラスで表される。
 
 namespace Risse
 {
+RISSE_DEFINE_SOURCE_ID(22894,62791,44554,18883,55951,15622,1807,62704);
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ(const risse_uint8 *から)

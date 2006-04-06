@@ -235,9 +235,7 @@ void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len)
 //---------------------------------------------------------------------------
 void Risse_strcpy(risse_char *d, const risse_char *s)
 {
-	risse_char ch;
-	while((ch=*s)!=0) *(d++) = ch, s++;
-	*d = 0;
+	while((*(d++) = *(s++)) != 0)   ;
 }
 //---------------------------------------------------------------------------
 
@@ -250,7 +248,8 @@ void Risse_strcpy(risse_char *d, const risse_char *s)
 risse_size Risse_strlen(const risse_char *d)
 {
 	const risse_char *p = d;
-	while(*d) d++;
+	if(!*d) return 0;
+	while(*(++d) != 0)   ;
 	return d-p;
 }
 //---------------------------------------------------------------------------

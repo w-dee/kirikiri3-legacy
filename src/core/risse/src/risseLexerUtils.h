@@ -50,9 +50,30 @@ public: // public static members
 	static tParseStringResult
 		ParseString(const risse_char * & ptr, tRisseString &val,
 			risse_char delim, bool embexpmode);
+
 	static bool ParseString(const risse_char * & ptr, tRisseString &val);
 
+	static tRisseString ExtractNumber(
+		const risse_char * & ptr,
+		risse_int (*validdigits)(risse_char ch),
+		const risse_char *expmark,  bool &isreal);
 
+	static bool ParseNonDecimalReal(const risse_char * ptr, risse_real &val,
+		risse_int (*validdigits)(risse_char ch), risse_int basebits);
+
+	static bool ParseNonDecimalInteger(const risse_char * ptr, risse_int64 &val, 
+		risse_int (*validdigits)(risse_char ch), risse_int basebits);
+
+	static bool ParseNonDecimalNumber(const risse_char * & ptr, tRisseVariant &val,
+	risse_int (*validdigits)(risse_char ch), risse_int base);
+
+	static bool ParseDecimalReal(const risse_char *ptr, risse_real &val);
+
+private:
+	static bool ParseNumber2(const risse_char * & ptr, tRisseVariant &val);
+
+public: // public static members
+	static bool ParseNumber(const risse_char * & ptr, tRisseVariant &val);
 };
 
 //---------------------------------------------------------------------------

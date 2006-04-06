@@ -21,7 +21,7 @@ default: $(BIN)
 
 #----------------------------#
 
-CXXFLAGS = \
+CXXFLAGS += \
 	-DRISSE_NO_REGEXP \
 	-DRISSE_SUPPORT_WX
 

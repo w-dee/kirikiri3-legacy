@@ -10,7 +10,12 @@
 //! @file
 //! @brief Risse レキシカル・アナライザ(字句解析器)向けのユーティリティ関数群
 //---------------------------------------------------------------------------
-#include "prec.h"
+#ifndef risseLexerUtilsH
+#define risseLexerUtilsH
+
+#include "risseTypes.h"
+#include "risseCxxString.h"
+#include "risseVariant.h"
 
 namespace Risse
 {
@@ -32,7 +37,7 @@ public: // public static members
 		scrNotComment	//!< 実はコメントではなかった
 	};
 
-	static tRisseSkipCommentResult SkipComment(const risse_char * & ptr);
+	static tSkipCommentResult SkipComment(const risse_char * & ptr);
 	static bool SkipSpace(const risse_char * & ptr);
 
 
@@ -65,9 +70,11 @@ public: // public static members
 		risse_int (*validdigits)(risse_char ch), risse_int basebits);
 
 	static bool ParseNonDecimalNumber(const risse_char * & ptr, tRisseVariant &val,
-	risse_int (*validdigits)(risse_char ch), risse_int base);
+		risse_int (*validdigits)(risse_char ch), risse_int base);
 
 	static bool ParseDecimalReal(const risse_char *ptr, risse_real &val);
+
+	static bool ParseDecimalInteger(const risse_char * ptr, risse_int64 &val);
 
 private:
 	static bool ParseNumber2(const risse_char * & ptr, tRisseVariant &val);
@@ -79,4 +86,5 @@ public: // public static members
 //---------------------------------------------------------------------------
 } // namespace Risse
 
+#endif
 

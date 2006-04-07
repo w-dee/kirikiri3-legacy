@@ -96,6 +96,15 @@ public:
 		*this = ref;
 	}
 
+	tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1);
+	tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
+					const tRisseStringBlock *r2);
+	tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
+					const tRisseStringBlock *r2, const tRisseStringBlock *r3);
+	tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
+					const tRisseStringBlock *r2, const tRisseStringBlock *r3,
+					const tRisseStringBlock *r4);
+
 	//! @brief	代入演算子
 	//! @param	ref	コピー元オブジェクト
 	//! @return	このオブジェクトへの参照
@@ -135,111 +144,6 @@ public:
 		return tRisseStringBlock(Buffer, Length);
 	}
 
-public: // object property
-	//! @brief 文字列の長さを得る
-	//! @return	文字列の長さ(コードポイント単位) (\0 は含まれない)
-	risse_size GetLength() const { return Length; }
-
-	//! @brief 文字列の長さを設定する(切りつめのみ可)
-	//! @param	n 新しい長さ(コードポイント単位)
-	void SetLength(risse_size n)
-	{
-		RISSE_ASSERT(n <= Length);
-		Independ();
-		Length = n;
-		if(n)
-			Buffer[n] = Buffer[n+1] = 0; // null終端と hint をクリア
-		else
-			Buffer = RISSE_STRING_EMPTY_BUFFER; // Buffer を解放
-	}
-
-public: // comparison
-	//! @brief < 演算子
-	//! @param	ref		比較するオブジェクト
-	//! @return	*this<refかどうか
-	bool operator <  (const tRisseStringBlock & ref) const
-	{
-		return Risse_strcmp(Buffer, ref.Buffer) < 0;
-	}
-
-	//! @brief > 演算子
-	//! @param	ref		比較するオブジェクト
-	//! @return	*this>refかどうか
-	bool operator >  (const tRisseStringBlock & ref) const
-		{ return ref < *this; }
-
-	//! @brief <= 演算子
-	//! @param	ref		比較するオブジェクト
-	//! @return	*this<=refかどうか
-	bool operator <= (const tRisseStringBlock & ref) const
-		{ return ! (*this > ref); }
-
-	//! @brief >= 演算子
-	//! @param	ref		比較するオブジェクト
-	//! @return	*this>=refかどうか
-	bool operator >= (const tRisseStringBlock & ref) const
-		{ return ! (*this < ref); }
-
-	//! @brief 同一比較
-	//! @param	ref		比較するオブジェクト
-	//! @return	*this==refかどうか
-	bool operator == (const tRisseStringBlock & ref) const
-	{
-		if(this == &ref) return true; // 同じポインタ
-		if(Length != ref.Length) return false; // 違う長さ
-		if(Buffer == ref.Buffer) return true; // 同じバッファ
-		return !Risse_strcmp(Buffer, ref.Buffer);
-	}
-
-	//! @brief 不一致判定
-	//! @param	ref		比較するオブジェクト
-	//! @return	*this!=refかどうか
-	bool operator != (const tRisseStringBlock & ref) const
-		{ return ! (*this == ref); }
-
-public: // operators
-	void Append(const risse_char * buffer, risse_size length);
-
-	//! @brief		文字列の連結
-	//! @param		ref		連結する文字列
-	//! @return		このオブジェクトへの参照
-	tRisseStringBlock & operator += (const tRisseStringBlock & ref)
-	{
-		if(Length == 0) { *this = ref; return *this; }
-		Append(ref.Buffer, ref.Length);
-		return *this;
-	}
-
-	//! @brief		文字の連結
-	//! @param		ref		連結する文字
-	//! @return		このオブジェクトへの参照
-	tRisseStringBlock & operator += (risse_char ref)
-	{
-		if(ref == 0) { return *this; } // やることなし
-		if(Length == 0) { *this = ref; return *this; }
-		Append(&ref, 1); // 文字を追加
-		return *this;
-	}
-
-	tRisseStringBlock operator + (const tRisseStringBlock & ref) const;
-
-	//! @brief [] 演算子
-	//! @param		n		位置
-	//! @return		nの位置にあるコード
-	risse_char operator [] (risse_size n) const
-	{
-		RISSE_ASSERT(n < Length);
-		return Buffer[n];
-	}
-
-public: // conversion
-
-#ifdef RISSE_SUPPORT_WX
-	wxString AsWxString() const
-		{ return RisseCharToWxString(Buffer, Length); }
-	operator wxString() const
-		{ return AsWxString(); }
-#endif
 
 private: // buffer management
 	static risse_char * AllocateInternalBuffer(risse_size n, risse_char *prevbuf = NULL);
@@ -384,6 +288,119 @@ public: // hint/hash
 	}
 
 	risse_uint32 GetHash() const;
+
+public: // object property
+	//! @brief 文字列の長さを得る
+	//! @return	文字列の長さ(コードポイント単位) (\0 は含まれない)
+	risse_size GetLength() const { return Length; }
+
+	//! @brief 文字列の長さを設定する(切りつめのみ可)
+	//! @param	n 新しい長さ(コードポイント単位)
+	void SetLength(risse_size n)
+	{
+		RISSE_ASSERT(n <= Length);
+		Independ();
+		Length = n;
+		if(n)
+			Buffer[n] = Buffer[n+1] = 0; // null終端と hint をクリア
+		else
+			Buffer = RISSE_STRING_EMPTY_BUFFER; // Buffer を解放
+	}
+
+	//! @brief 文字列が空かどうかを得る @return 文字列が空かどうか
+	bool IsEmpty() const { return Length == 0; }
+
+public: // comparison
+	//! @brief < 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this<refかどうか
+	bool operator <  (const tRisseStringBlock & ref) const
+	{
+		return Risse_strcmp(Buffer, ref.Buffer) < 0;
+	}
+
+	//! @brief > 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this>refかどうか
+	bool operator >  (const tRisseStringBlock & ref) const
+		{ return ref < *this; }
+
+	//! @brief <= 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this<=refかどうか
+	bool operator <= (const tRisseStringBlock & ref) const
+		{ return ! (*this > ref); }
+
+	//! @brief >= 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this>=refかどうか
+	bool operator >= (const tRisseStringBlock & ref) const
+		{ return ! (*this < ref); }
+
+	//! @brief 同一比較
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this==refかどうか
+	bool operator == (const tRisseStringBlock & ref) const
+	{
+		if(this == &ref) return true; // 同じポインタ
+		if(Length != ref.Length) return false; // 違う長さ
+		if(Buffer == ref.Buffer) return true; // 同じバッファ
+		return !Risse_strcmp(Buffer, ref.Buffer);
+	}
+
+	//! @brief 不一致判定
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this!=refかどうか
+	bool operator != (const tRisseStringBlock & ref) const
+		{ return ! (*this == ref); }
+
+public: // operators
+	void Append(const risse_char * buffer, risse_size length);
+
+	//! @brief		文字列の連結
+	//! @param		ref		連結する文字列
+	//! @return		このオブジェクトへの参照
+	tRisseStringBlock & operator += (const tRisseStringBlock & ref)
+	{
+		if(Length == 0) { *this = ref; return *this; }
+		Append(ref.Buffer, ref.Length);
+		return *this;
+	}
+
+	//! @brief		文字の連結
+	//! @param		ref		連結する文字
+	//! @return		このオブジェクトへの参照
+	tRisseStringBlock & operator += (risse_char ref)
+	{
+		if(ref == 0) { return *this; } // やることなし
+		if(Length == 0) { *this = ref; return *this; }
+		Append(&ref, 1); // 文字を追加
+		return *this;
+	}
+
+	tRisseStringBlock operator + (const tRisseStringBlock & ref) const;
+
+	//! @brief [] 演算子
+	//! @param		n		位置
+	//! @return		nの位置にあるコード
+	risse_char operator [] (risse_size n) const
+	{
+		RISSE_ASSERT(n < Length);
+		return Buffer[n];
+	}
+
+public: // conversion
+
+#ifdef RISSE_SUPPORT_WX
+	wxString AsWxString() const
+		{ return RisseCharToWxString(Buffer, Length); }
+	operator wxString() const
+		{ return AsWxString(); }
+#endif
+
+public: // other utilities
+	tRisseString Replace(const tRisseString &old_str,
+		const tRisseString &new_str, bool replace_all = true);
 };
 //---------------------------------------------------------------------------
 

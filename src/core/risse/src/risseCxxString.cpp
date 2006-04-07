@@ -218,6 +218,63 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 }
 //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ(メッセージのビルド)
+//! @param		msg		メッセージ
+//! @param		r1		メッセージ中の '%1' と置き換わる文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1)
+{
+	*this = msg.replace(r1);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ(メッセージのビルド)
+//! @param		msg		メッセージ
+//! @param		r1		メッセージ中の '%1' と置き換わる文字列
+//! @param		r2		メッセージ中の '%2' と置き換わる文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
+				const tRisseStringBlock *r2)
+{
+	*this = msg.replace(r1).replace(r2);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ(メッセージのビルド)
+//! @param		msg		メッセージ
+//! @param		r1		メッセージ中の '%1' と置き換わる文字列
+//! @param		r2		メッセージ中の '%2' と置き換わる文字列
+//! @param		r3		メッセージ中の '%3' と置き換わる文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
+				const tRisseStringBlock *r2, const tRisseStringBlock *r3)
+{
+	*this = msg.replace(r1).replace(r2).replace(r3);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ(メッセージのビルド)
+//! @param		msg		メッセージ
+//! @param		r1		メッセージ中の '%1' と置き換わる文字列
+//! @param		r2		メッセージ中の '%2' と置き換わる文字列
+//! @param		r3		メッセージ中の '%3' と置き換わる文字列
+//! @param		r4		メッセージ中の '%4' と置き換わる文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
+					const tRisseStringBlock *r2, const tRisseStringBlock *r3,
+					const tRisseStringBlock *r4)
+{
+	*this = msg.replace(r1).replace(r2).replace(r3).replace(r4);
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 //! @brief		代入演算子(risse_char * から)
@@ -303,74 +360,6 @@ tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 }
 //---------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
-//! @brief		文字列の追加
-//! @param		buffer		追加する文字列 (length中には \0 が無いこと)
-//! @param		length		追加する文字列の長さ
-//---------------------------------------------------------------------------
-void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
-{
-	if(length == 0) return; // 追加するものなし
-
-	risse_size newlength = Length + length;
-
-	if(Buffer[-1])
-	{
-		// 共有可能性フラグが立っている
-		// 新しく領域を確保し、そこにコピーする
-		risse_char * newbuf = AllocateInternalBuffer(newlength);
-		memcpy(newbuf, Buffer, Length * sizeof(risse_char));
-		memcpy(newbuf + Length, buffer, length * sizeof(risse_char));
-		Buffer = newbuf;
-	}
-	else
-	{
-		// 共有可能性フラグは立っていない
-		// 現在の領域を拡張する必要がある？
-		if(GetBufferCapacity(Buffer) < newlength)
-		{
-			// 容量が足りないので拡張する必要あり
-			// 適当に新規確保の容量を計算
-			risse_size newcapacity;
-			if(newlength < 16*1024)
-				newcapacity = newlength * 2;
-			else
-				newcapacity = newlength + 16*1024;
-			// バッファを再確保
-			Buffer = AllocateInternalBuffer(newcapacity, Buffer);
-		}
-
-		// 現在保持している文字列の直後に buffer をコピーする
-		memcpy(Buffer + Length, buffer, length * sizeof(risse_char));
-	}
-
-	// null 終端と hint=0 を設定する
-	Length = newlength;
-	Buffer[newlength] = Buffer[newlength + 1] = 0;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		文字列の連結
-//! @param		ref		連結する文字列
-//! @return		新しく連結された文字列
-//---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref) const
-{
-	if(Length == 0) return ref;
-	if(ref.Length == 0) return *this;
-
-	tRisseStringBlock newblock;
-	risse_size newsize = Length + ref.Length;
-	newblock.Allocate(newsize);
-	memcpy(newblock.Buffer, Buffer, Length * sizeof(risse_char));
-	memcpy(newblock.Buffer + Length, ref.Buffer, ref.Length * sizeof(risse_char));
-
-	return newblock;
-}
-//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -458,5 +447,111 @@ risse_uint32 tRisseStringBlock::GetHash() const
 //---------------------------------------------------------------------------
 
 
+
+//---------------------------------------------------------------------------
+//! @brief		文字列の追加
+//! @param		buffer		追加する文字列 (length中には \0 が無いこと)
+//! @param		length		追加する文字列の長さ
+//---------------------------------------------------------------------------
+void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
+{
+	if(length == 0) return; // 追加するものなし
+
+	risse_size newlength = Length + length;
+
+	if(Buffer[-1])
+	{
+		// 共有可能性フラグが立っている
+		// 新しく領域を確保し、そこにコピーする
+		risse_char * newbuf = AllocateInternalBuffer(newlength);
+		memcpy(newbuf, Buffer, Length * sizeof(risse_char));
+		memcpy(newbuf + Length, buffer, length * sizeof(risse_char));
+		Buffer = newbuf;
+	}
+	else
+	{
+		// 共有可能性フラグは立っていない
+		// 現在の領域を拡張する必要がある？
+		if(GetBufferCapacity(Buffer) < newlength)
+		{
+			// 容量が足りないので拡張する必要あり
+			// 適当に新規確保の容量を計算
+			risse_size newcapacity;
+			if(newlength < 16*1024)
+				newcapacity = newlength * 2;
+			else
+				newcapacity = newlength + 16*1024;
+			// バッファを再確保
+			Buffer = AllocateInternalBuffer(newcapacity, Buffer);
+		}
+
+		// 現在保持している文字列の直後に buffer をコピーする
+		memcpy(Buffer + Length, buffer, length * sizeof(risse_char));
+	}
+
+	// null 終端と hint=0 を設定する
+	Length = newlength;
+	Buffer[newlength] = Buffer[newlength + 1] = 0;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		文字列の連結
+//! @param		ref		連結する文字列
+//! @return		新しく連結された文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref) const
+{
+	if(Length == 0) return ref;
+	if(ref.Length == 0) return *this;
+
+	tRisseStringBlock newblock;
+	risse_size newsize = Length + ref.Length;
+	newblock.Allocate(newsize);
+	memcpy(newblock.Buffer, Buffer, Length * sizeof(risse_char));
+	memcpy(newblock.Buffer + Length, ref.Buffer, ref.Length * sizeof(risse_char));
+
+	return newblock;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		文字列の置き換え
+//! @param		old_str			置き換え元の文字列
+//! @param		new_str			置き換え先の文字列
+//! @parma		replace_all		すべての一致を置き換えるかどうか
+//! @return		置き換えられた文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::Replace(const tRisseString &old_str,
+		const tRisseString &new_str, bool replace_all)
+{
+	tRisseStringBlock ret;
+	const risse_char this_c_str = c_str();
+	const risse_char old_c_str = old_str.c_str();
+	const risse_char new_c_str = new_str.c_str();
+	const risse_char * lp = this_c_str;
+	for(;;)
+	{
+		const risse_char *p;
+		p = Risse_strstr(lp, old_c_str);
+		if(p)
+		{
+			ret.Append(lp, p - lp);
+			ret.Append(new_c_str, new_str.GetLength());
+			if(!replace_all) break;
+			lp = p + old_str.GetLength();
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	ret.Append(lp, GetLength() - (lp - this_c_str()));
+
+	return ret;
+}
 //---------------------------------------------------------------------------
 } // namespace Risse

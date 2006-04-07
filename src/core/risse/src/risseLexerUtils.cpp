@@ -22,7 +22,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID();
+RISSE_DEFINE_SOURCE_ID(49805,54699,17434,18495,59306,19776,3233,9707);
 
 
 //---------------------------------------------------------------------------
@@ -84,7 +84,7 @@ risse_int tRisseLexerUtility::DecNum(risse_char ch)
 //! @param		ch	文字
 //! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
-risse_int tRisseLexerUtility::BinNum(risse_char ch) throw()
+risse_int tRisseLexerUtility::BinNum(risse_char ch)
 {
 	if(ch==RISSE_WC('0')) return 0;
 	if(ch==RISSE_WC('1')) return 1;
@@ -126,20 +126,20 @@ risse_int tRisseLexerUtility::UnescapeBackSlash(risse_char ch)
 tRisseLexerUtility::tSkipCommentResult
 	tRisseLexerUtility::SkipComment(const risse_char * & ptr)
 {
-	if(*ptr[0] != RISSE_WC('/')) return scrNotComment;
+	if(ptr[0] != RISSE_WC('/')) return scrNotComment;
 
-	if(*ptr[1] == RISSE_WC('/'))
+	if(ptr[1] == RISSE_WC('/'))
 	{
 		// line comment; skip to newline
 		while(*ptr != RISSE_WC('\n') && *ptr) ;
 		if(*ptr ==0) return scrEnded;
 		*ptr++;
-		RisseSkipSpace(ptr);
+		SkipSpace(ptr);
 		if(*ptr ==0) return scrEnded;
 
 		return scrContinue;
 	}
-	else if(*ptr[1] == RISSE_WC('*'))
+	else if(ptr[1] == RISSE_WC('*'))
 	{
 		// block comment; skip to the next '*' '/'
 		// and we must allow nesting of the comment.
@@ -166,7 +166,7 @@ tRisseLexerUtility::tSkipCommentResult
 			if(!*(++ptr)) Risse_eRisseError(RisseUnclosedComment);
 		}
 		if(*ptr ==0) return scrEnded;
-		RisseSkipSpace(ptr);
+		SkipSpace(ptr);
 		if(*ptr ==0) return scrEnded;
 
 		return scrContinue;
@@ -215,7 +215,7 @@ bool tRisseLexerUtility::StringMatch(const risse_char * & ptr, const risse_char 
 //! @param		embexpmode	埋め込み式モードかどうか (@つき文字列リテラルかどうか)
 //! @return		内部ステータス
 //---------------------------------------------------------------------------
-tRisseLexerUtility::tInternalParseStringResult
+tRisseLexerUtility::tParseStringResult
 	tRisseLexerUtility::ParseString(
 		const risse_char * & ptr, 
 		tRisseString &val,
@@ -226,7 +226,7 @@ tRisseLexerUtility::tInternalParseStringResult
 
 	tRisseString str;
 
-	tInternalParseStringResult status = psrNone;
+	tParseStringResult status = psrNone;
 
 	while(*ptr)
 	{
@@ -245,7 +245,7 @@ tRisseLexerUtility::tInternalParseStringResult
 				risse_int num;
 				risse_char code = 0;
 				risse_int count = 0;
-				while((num = RisseHexNum(*ptr)) != -1 &&
+				while((num = HexNum(*ptr)) != -1 &&
 					count < (int)(sizeof(risse_char)*2))
 				{
 					code <<= 4;
@@ -270,7 +270,7 @@ tRisseLexerUtility::tInternalParseStringResult
 
 				risse_int num;
 				risse_int code=0;
-				while((num = RisseOctNum(*ptr))!=-1)
+				while((num = OctNum(*ptr))!=-1)
 				{
 					code*=8;
 					code+=num;
@@ -295,7 +295,7 @@ tRisseLexerUtility::tInternalParseStringResult
 			}
 
 			const risse_char *p = ptr;
-			RisseSkipSpace(&p);
+			SkipSpace(p);
 			if(*p == delim)
 			{
 				// sequence of 'A' 'B' will be combined as 'AB'
@@ -347,7 +347,7 @@ tRisseLexerUtility::tInternalParseStringResult
 		Risse_eRisseError(RisseStringParseError);
 	}
 
-	str.FixLen();
+	str.Fit();
 	val = str;
 
 	return status;
@@ -361,15 +361,15 @@ tRisseLexerUtility::tInternalParseStringResult
 //! @param		val		値の格納先
 //! @return		値の解析に成功したかどうか
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseString(const risse_char * & ptr, (tRisseString &val)
+bool tRisseLexerUtility::ParseString(const risse_char * & ptr, tRisseString &val)
 {
 	// Ptr は '\'' or '"' を指していないとならない
 
-	risse_char delimiter = *Ptr;
+	risse_char delimiter = *ptr;
 
-	Ptr ++;
+	ptr ++;
 
-	return ParseString(ptr, val, ptr, delimiter, false) == psrDelimiter;
+	return ParseString(ptr, val, delimiter, false) == psrDelimiter;
 }
 //---------------------------------------------------------------------------
 
@@ -383,7 +383,7 @@ bool tRisseLexerUtility::ParseString(const risse_char * & ptr, (tRisseString &va
 //! @param		isreal	実数を切り出したときに真に設定される(整数の場合は偽)
 //! @return		切り出した文字列(切り出しに失敗した場合、空文字列が帰る)
 //---------------------------------------------------------------------------
-static tRisseString tRisseLexerUtility::ExtractNumber(
+tRisseString tRisseLexerUtility::ExtractNumber(
 	const risse_char * & ptr,
 	risse_int (*validdigits)(risse_char ch),
 	const risse_char *expmark, bool &isreal)
@@ -410,18 +410,18 @@ static tRisseString tRisseLexerUtility::ExtractNumber(
 			exp_found = true;
 			tmp += *ptr;
 			if(!*(++ptr)) break;
-			if(!RisseSkipSpace(ptr)) break;
+			if(!SkipSpace(ptr)) break;
 			if(*ptr == RISSE_WC('+'))
 			{
 				tmp += *ptr;
 				if(!*(++ptr)) break;
-				if(!RisseSkipSpace(ptr)) break;
+				if(!SkipSpace(ptr)) break;
 			}
 			else if(*ptr == RISSE_WC('-'))
 			{
 				tmp += *ptr;
 				if(!*(++ptr)) break;
-				if(!RisseSkipSpace(ptr)) break;
+				if(!SkipSpace(ptr)) break;
 			}
 		}
 		else
@@ -445,7 +445,7 @@ static tRisseString tRisseLexerUtility::ExtractNumber(
 //! @param		basebits	基数
 //! @return		変換に成功したかどうか
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::RisseParseNonDecimalReal(
+bool tRisseLexerUtility::ParseNonDecimalReal(
 	const risse_char * ptr, risse_real &val,
 	risse_int (*validdigits)(risse_char ch), risse_int basebits)
 {
@@ -468,28 +468,28 @@ bool tRisseLexerUtility::RisseParseNonDecimalReal(
 		else if(*ptr == RISSE_WC('p') || *ptr == RISSE_WC('P'))
 		{
 			if(!*(++ptr)) break;
-			if(!RisseSkipSpace(ptr)) break;
+			if(!SkipSpace(ptr)) break;
 
 			bool biassign = false;
 			if(*ptr == RISSE_WC('+'))
 			{
 				biassign = false;
 				if(!*(++ptr)) break;
-				if(!RisseSkipSpace(ptr)) break;
+				if(!SkipSpace(ptr)) break;
 			}
 
 			if(*ptr == RISSE_WC('-'))
 			{
 				biassign = true;
 				if(!*(++ptr)) break;
-				if(!RisseSkipSpace(ptr)) break;
+				if(!SkipSpace(ptr)) break;
 			}
 
 			risse_int bias = 0;
 			while(true)
 			{
 				bias *= 10;
-				bias += RisseDecNum(*ptr);
+				bias += DecNum(*ptr);
 				if(!*(++ptr)) break;
 			}
 			if(biassign) bias = -bias;
@@ -546,7 +546,7 @@ bool tRisseLexerUtility::RisseParseNonDecimalReal(
 	if(main == 0)
 	{
 		// zero
-		val = (tTVReal)0.0;
+		val = (risse_real)0.0;
 		return true;
 	}
 
@@ -556,7 +556,7 @@ bool tRisseLexerUtility::RisseParseNonDecimalReal(
 	{
 		// denormal
 		// treat as zero
-		val = (tTVReal)0.0;
+		val = (risse_real)0.0;
 		return true;
 	}
 
@@ -597,10 +597,10 @@ bool tRisseLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int
 	while(true)
 	{
 		v <<= basebits;
-		v += validdigits(**ptr);
-		if(!RisseNext(ptr)) break;
+		v += validdigits(*ptr);
+		if(!*(++ptr)) break;
 	}
-	val = (tTVInteger)v;
+	val = (risse_int64)v;
 	return true;
 }
 //---------------------------------------------------------------------------
@@ -618,7 +618,7 @@ bool tRisseLexerUtility::ParseNonDecimalNumber(const risse_char * & ptr, tRisseV
 	risse_int (*validdigits)(risse_char ch), risse_int base)
 {
 	bool isreal = false;
-	tRisseString tmp(RisseExtractNumber(validdigits, RISSE_WS("Pp"), ptr, isreal));
+	tRisseString tmp(ExtractNumber(ptr, validdigits, RISSE_WS("Pp"), isreal));
 
 	if(tmp.IsEmpty()) return false;
 
@@ -627,14 +627,14 @@ bool tRisseLexerUtility::ParseNonDecimalNumber(const risse_char * & ptr, tRisseV
 	if(isreal)
 	{
 		risse_real r;
-		bool ret = RisseParseNonDecimalReal(p, r, validdigits, base);
+		bool ret = ParseNonDecimalReal(p, r, validdigits, base);
 		if(ret) val = r;
 		return ret;
 	}
 	else
 	{
 		risse_int64 r;
-		bool ret = RisseParseNonDecimalInteger(p, r, validdigits, base);
+		bool ret = ParseNonDecimalInteger(p, r, validdigits, base);
 		if(ret) val = r;
 		return ret;
 	}
@@ -666,7 +666,7 @@ bool tRisseLexerUtility::ParseDecimalInteger(const risse_char * ptr, risse_int64
 {
 	int n;
 	risse_int64 num = 0;
-	while((n = RisseDecNum(*ptr)) != -1)
+	while((n = DecNum(*ptr)) != -1)
 	{
 		num *= 10;
 		num += n;
@@ -688,17 +688,17 @@ bool tRisseLexerUtility::ParseNumber2(const risse_char * & ptr, tRisseVariant &v
 {
 	// stage 2
 
-	if(RisseStringMatch(ptr, RISSE_WS("true"), true))
+	if(StringMatch(ptr, RISSE_WS("true"), true))
 	{
-		val = (tTVInteger)true;
+		val = (risse_int64)true;
 		return true;
 	}
-	if(RisseStringMatch(ptr, RISSE_WS("false"), true))
+	if(StringMatch(ptr, RISSE_WS("false"), true))
 	{
-		val = (tTVInteger)false;
+		val = (risse_int64)false;
 		return true;
 	}
-	if(RisseStringMatch(ptr, RISSE_WS("NaN"), true))
+	if(StringMatch(ptr, RISSE_WS("NaN"), true))
 	{
 		// Not a Number
 		risse_real d;
@@ -706,7 +706,7 @@ bool tRisseLexerUtility::ParseNumber2(const risse_char * & ptr, tRisseVariant &v
 		val = d;
 		return true;
 	}
-	if(RisseStringMatch(ptr, RISSE_WS("Infinity"), true))
+	if(StringMatch(ptr, RISSE_WS("Infinity"), true))
 	{
 		// positive inifinity
 		risse_real d;
@@ -731,14 +731,14 @@ bool tRisseLexerUtility::ParseNumber2(const risse_char * & ptr, tRisseVariant &v
 		{
 			// hexadecimal
 			if(!*(++ptr)) return false;
-			return ParseNonDecimalNumber(ptr, val, RisseHexNum, 4);
+			return ParseNonDecimalNumber(ptr, val, HexNum, 4);
 		}
 
 		if(mark == RISSE_WC('B') || mark == RISSE_WC('b'))
 		{
 			// binary
 			if(!*(++ptr)) return false;
-			return ParseNonDecimalNumber(ptr, val, RisseBinNum, 1);
+			return ParseNonDecimalNumber(ptr, val, BinNum, 1);
 		}
 
 		if(mark == RISSE_WC('.'))
@@ -763,23 +763,32 @@ bool tRisseLexerUtility::ParseNumber2(const risse_char * & ptr, tRisseVariant &v
 
 		// octal
 		ptr = ptr_save;
-		return ParseNonDecimalNumber(ptr, val, RisseOctNum, 3);
+		return ParseNonDecimalNumber(ptr, val, OctNum, 3);
 	}
 
 	// integer decimal or real decimal
 decimal:
 	bool isreal = false;
-	tRisseString tmp(ExtractNumber(ptr, RisseDecNum, RISSE_WS("Ee"), isreal));
+	tRisseString tmp(ExtractNumber(ptr, DecNum, RISSE_WS("Ee"), isreal));
 
 	if(tmp.IsEmpty()) return false;
 
 	const risse_char *p = tmp.c_str();
-	const risse_char **pp = &p;
 
 	if(isreal)
-		return ParseDecimalReal(val, pp);
+	{
+		risse_real r;
+		bool ret = ParseDecimalReal(p, r);
+		if(ret) val = r;
+		return ret;
+	}
 	else
-		return ParseDecimalInteger(val, pp);
+	{
+		risse_int64 r;
+		bool ret = ParseDecimalInteger(p, r);
+		if(ret) val = r;
+		return ret;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -800,16 +809,16 @@ bool tRisseLexerUtility::ParseNumber(const risse_char * & ptr, tRisseVariant &va
 	{
 		sign = false;
 		if(!*(++ptr)) return false;
-		if(!RisseSkipSpace(ptr)) return false;
+		if(!SkipSpace(ptr)) return false;
 	}
 	else if(*ptr == RISSE_WC('-'))
 	{
 		sign = true;
 		if(!*(++ptr)) return false;
-		if(!RisseSkipSpace(ptr)) return false;
+		if(!SkipSpace(ptr)) return false;
 	}
 
-	if(ParseNumber2(val, ptr))
+	if(ParseNumber2(ptr, val))
 	{
 		if(sign) val = -val;
 		return true;
@@ -876,7 +885,7 @@ static bool RisseParseOctet(tRisseVariant &val, const risse_char **ptr)
 		}
 
 		risse_char ch = *(*ptr);
-		risse_int n = RisseHexNum(ch);
+		risse_int n = HexNum(ch);
 		if(n != -1)
 		{
 			if(leading)
@@ -1026,7 +1035,7 @@ void RisseReservedWordsHashRelease()
 //---------------------------------------------------------------------------
 static void RisseRegisterReservedWordsHash(const risse_char *word, risse_int num)
 {
-	tRisseVariant val((tTVInteger)num);
+	tRisseVariant val((risse_int64)num);
 	RisseReservedWordHash->PropSet(RISSE_MEMBERENSURE, word, NULL, &val,
 		RisseReservedWordHash);
 }
@@ -1200,7 +1209,7 @@ tRisseSkipCommentResult tRisseLexicalAnalyzer::SkipUntil_endif()
 				if(IfLevel == exl)
 				{
 					// skip ended
-					RisseSkipSpace(&Current);
+					SkipSpace(&Current);
 					if(!*Current) return scrEnded;
 					return scrContinue;
 				}
@@ -1213,7 +1222,7 @@ tRisseSkipCommentResult tRisseLexicalAnalyzer::SkipUntil_endif()
 			if(skipp)
 			{
 				// skip parenthesises
-				if(!RisseSkipSpace(&Current))
+				if(!SkipSpace(&Current))
 					Risse_eRisseCompileError(RissePPError, Block, Current-Script);
 
 				if(*Current!=RISSE_WC('('))
@@ -1255,7 +1264,7 @@ tRisseSkipCommentResult tRisseLexicalAnalyzer::ProcessPPStatement()
 		// set statement
 		Block->NotifyUsingPreProcessor();
 		Current+=3;
-		if(!RisseSkipSpace(&Current))
+		if(!SkipSpace(&Current))
 			Risse_eRisseCompileError(RissePPError, Block, Current-Script);
 
 		if(*Current!=RISSE_WC('('))
@@ -1283,7 +1292,7 @@ tRisseSkipCommentResult tRisseLexicalAnalyzer::ProcessPPStatement()
 			Risse_eRisseCompileError(RissePPError, Block, Current-Script);
 		}
 
-		RisseSkipSpace(&Current);
+		SkipSpace(&Current);
 		if(!*Current) return scrEnded;
 
 		return scrContinue;
@@ -1295,7 +1304,7 @@ tRisseSkipCommentResult tRisseLexicalAnalyzer::ProcessPPStatement()
 
 		Block->NotifyUsingPreProcessor();
 		Current += 2;
-		if(!RisseSkipSpace(&Current))
+		if(!SkipSpace(&Current))
 			Risse_eRisseCompileError(RissePPError, Block, Current-Script);
 
 		if(*Current!=RISSE_WC('('))
@@ -1329,7 +1338,7 @@ tRisseSkipCommentResult tRisseLexicalAnalyzer::ProcessPPStatement()
 
 		IfLevel ++;
 
-		RisseSkipSpace(&Current);
+		SkipSpace(&Current);
 		if(!*Current) return scrEnded;
 		return scrContinue;
 	}
@@ -1342,7 +1351,7 @@ tRisseSkipCommentResult tRisseLexicalAnalyzer::ProcessPPStatement()
 		if(IfLevel < 0)
 			Risse_eRisseCompileError(RissePPError, Block, Current-Script);
 
-		RisseSkipSpace(&Current);
+		SkipSpace(&Current);
 		if(!*Current) return scrEnded;
 		return scrContinue;
 	}
@@ -1352,13 +1361,13 @@ tRisseSkipCommentResult tRisseLexicalAnalyzer::ProcessPPStatement()
 }
 //---------------------------------------------------------------------------
 #define RISSE_MATCH_W(word, code) \
-	if(RisseStringMatch(&Current, RISSE_WS(word), true)) return (code)
+	if(StringMatch(&Current, RISSE_WS(word), true)) return (code)
 #define RISSE_MATCH_S(word, code) \
-	if(RisseStringMatch(&Current, RISSE_WS(word), false)) return (code)
+	if(StringMatch(&Current, RISSE_WS(word), false)) return (code)
 #define RISSE_MATCH_W_V(word, code, val) \
-	if(RisseStringMatch(&Current, RISSE_WS(word), true)) { n=PutValue(val); return (code); }
+	if(StringMatch(&Current, RISSE_WS(word), true)) { n=PutValue(val); return (code); }
 #define RISSE_MATCH_S_V(word, code, val) \
-	if(RisseStringMatch(&Current, RISSE_WS(word), false)) { n=PutValue(val); return (code); }
+	if(StringMatch(&Current, RISSE_WS(word), false)) { n=PutValue(val); return (code); }
 #define RISSE_1CHAR(code) \
 	RisseNext(&Current); return (code)
 risse_int tRisseLexicalAnalyzer::GetToken(risse_int &n)
@@ -1551,7 +1560,7 @@ re_match:
 	  {
 		const risse_char *org = Current;
 		if(!RisseNext(&Current)) return 0;
-		if(!RisseSkipSpace(&Current)) return 0;
+		if(!SkipSpace(&Current)) return 0;
 		if(*Current == RISSE_WC('\'') || *Current == RISSE_WC('\"'))
 		{
 			tEmbeddableExpressionData data;
@@ -1830,7 +1839,7 @@ risse_int tRisseLexicalAnalyzer::GetNext(risse_int &value)
 			if(!EmbeddableExpressionDataStack.size())
 			{
 				// normal mode
-				RisseSkipSpace(&Current);
+				SkipSpace(&Current);
 				const risse_char *org = Current;
 				n = GetToken(value);
 				PrevPos = org - Script;
@@ -1931,7 +1940,7 @@ risse_int tRisseLexicalAnalyzer::GetNext(risse_int &value)
 
 				case evsNextIsExpression:
 				  {
-					RisseSkipSpace(&Current);
+					SkipSpace(&Current);
 					const risse_char *org = Current;
 					n = GetToken(value);
 					PrevPos = org - Script;

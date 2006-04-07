@@ -34,6 +34,7 @@ CPPFILES =  src/risseCharUtils.cpp            \
 			src/risseCxxObject.cpp            \
 			src/risseCxxOctet.cpp             \
 			src/risseCxxString.cpp            \
+			src/risseLexerUtils.cpp           \
 			src/risseUtils.cpp                \
 			src/risseVariant.cpp              
 

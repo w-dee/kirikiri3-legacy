@@ -309,6 +309,7 @@ public: // 演算子
 		case vtObject:	return uminus_Object();
 		case vtOctet:	return uminus_Octet();
 		}
+		return tRisseVariantBlock();
 	}
 
 	tRisseVariantBlock uminus_Void() 	const { return risse_int64(0); }

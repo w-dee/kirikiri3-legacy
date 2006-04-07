@@ -14,9 +14,10 @@
 #ifndef risseExceptionH
 #define risseExceptionH
 
-#include "risse.h"
-#include "risseVariant.h"
-#include "risseString.h"
+#include "risseCharUtils.h"
+#include "risseTypes.h"
+#include "risseAssert.h"
+#include "risseCxxString.h"
 #include "gc_cpp.h"
 
 namespace Risse
@@ -205,7 +206,7 @@ private:
 	tRisseString Message; //!< 例外メッセージ
 
 public:
-	void Throw(const tRisseString & msg);
+	static void Throw(const tRisseString & msg);
 };
 //---------------------------------------------------------------------------
 
@@ -220,15 +221,15 @@ class eRisseScriptError : public eRisseError
 	risse_size Position; //!< 例外が発生したコードポイント位置
 
 public:
-	tRiessScriptBlock * GetScriptBlock() const { return Block; } //!< スクリプトブロックを得る
-	risse_int GetPosition() const { return Position; } //!< コードポイント位置を得る
+	tRisseScriptBlock * GetScriptBlock() const { return Block; } //!< スクリプトブロックを得る
+	risse_size GetPosition() const { return Position; } //!< コードポイント位置を得る
 
 	//! @brief		コンストラクタ
 	//! @param		Msg		例外メッセージ
 	//! @param		block	例外の発生したスクリプトブロック
 	//! @param		pos		例外の発生した位置
 	eRisseScriptError(const tRisseString &  msg,
-		tRisseScriptBlock *block, risse_size pos)
+		tRisseScriptBlock *block, risse_size pos):
 			eRisseError(msg), Block(block), Position(pos) {;}
 
 	//! @brief		コピーコンストラクタ
@@ -256,8 +257,7 @@ public:
 	eRisseCompileError(const eRisseCompileError &ref) : eRisseScriptError(ref) {;}
 
 public:
-	void Throw(const tRisseString & msg, tRisseScriptBlock *block, risse_size pos);
-
+	static void Throw(const tRisseString & msg, tRisseScriptBlock *block, risse_size pos);
 };
 //---------------------------------------------------------------------------
 
@@ -366,7 +366,6 @@ void RisseThrowFrom_risse_error(risse_error hr, const risse_char *name = NULL);
 //---------------------------------------------------------------------------
 } // namespace Risse
 //---------------------------------------------------------------------------
-#endif // #ifndef RISSE_DECL_MESSAGE_BODY
 
 
 #endif
@@ -376,7 +375,7 @@ void RisseThrowFrom_risse_error(risse_error hr, const risse_char *name = NULL);
 //---------------------------------------------------------------------------
 
 
-#endif // #ifndef risseErrorH
+#endif // #ifndef risseExceptionH
 
 
 

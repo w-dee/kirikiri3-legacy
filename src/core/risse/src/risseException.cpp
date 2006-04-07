@@ -9,12 +9,8 @@
 //---------------------------------------------------------------------------
 //! @brief Risse 例外処理
 //---------------------------------------------------------------------------
-#include "risseCommHead.h"
-
-
-#include "risseScriptBlock.h"
-#include "risseError.h"
-#include "risse.h"
+#include "prec.h"
+#include "risseException.h"
 
 #define RISSE_MAX_TRACE_TEXT_LEN 1500
 
@@ -26,9 +22,10 @@ RISSE_DEFINE_SOURCE_ID(31394,1220,40741,19179,55968,19738,1342,5195);
 //---------------------------------------------------------------------------
 //! @brief		例外メッセージを得る
 //---------------------------------------------------------------------------
-virtual const tRisseString & eRisse::GetMessageString() const
+const tRisseString & eRisse::GetMessageString() const
 {
-	return TJS_WS_TR("No named exception");
+	static tRisseString nonamed_exception("No named exception");
+	return nonamed_exception;
 }
 //---------------------------------------------------------------------------
 
@@ -37,7 +34,7 @@ virtual const tRisseString & eRisse::GetMessageString() const
 //! @brief		例外を投げる
 //! @param		msg		メッセージ
 //---------------------------------------------------------------------------
-void eRisseError::eRisseErrorThrow(const tRisseString & msg)
+void eRisseError::Throw(const tRisseString & msg)
 {
 	// 例外メッセージを投げる
 	throw eRisseError(msg);
@@ -309,3 +306,5 @@ void RisseThrowFrom_risse_error(risse_error hr, const risse_char *name)
 
 
 #endif
+
+} // namespace Risse

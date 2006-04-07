@@ -18,6 +18,7 @@
 
 #include "prec.h"
 #include "risseLexerUtils.h"
+#include "risseException.h"
 
 
 namespace Risse
@@ -144,7 +145,7 @@ tRisseLexerUtility::tSkipCommentResult
 		// block comment; skip to the next '*' '/'
 		// and we must allow nesting of the comment.
 		ptr += 2;
-		if(*ptr == 0) Risse_eRisseError(RisseUnclosedComment);
+		if(*ptr == 0) eRisseError::Throw(RISSE_WS_TR("Unclosed comment found"));
 		risse_int level = 0;
 		for(;;)
 		{
@@ -163,7 +164,7 @@ tRisseLexerUtility::tSkipCommentResult
 				}
 				level --;
 			}
-			if(!*(++ptr)) Risse_eRisseError(RisseUnclosedComment);
+			if(!*(++ptr)) eRisseError::Throw(RISSE_WS_TR("Unclosed comment found"));
 		}
 		if(*ptr ==0) return scrEnded;
 		SkipSpace(ptr);
@@ -259,7 +260,7 @@ tRisseLexerUtility::tParseStringResult
 				// ビットは使用できない (エラー状態を表す用途に使われる
 				// 可能性があるため )
 				if(code & (1 << (sizeof(risse_char)*8 - 1)))
-					Risse_eRisseError(RisseStringParseError);
+					eRisseError::Throw(RISSE_WS_TR("UTF-32 code out of range"));
 
 				str += (risse_char)code;
 			}
@@ -281,14 +282,14 @@ tRisseLexerUtility::tParseStringResult
 			}
 			else
 			{
-				str += (risse_char)RisseUnescapeBackSlash(*ptr);
+				str += (risse_char)UnescapeBackSlash(*ptr);
 				if(!*(++ptr)) break;
 			}
 		}
 		else if(*ptr == delim)
 		{
 			// string delimiters
-			if(!RisseNext(ptr))
+			if(!*(++ptr))
 			{
 				status = psrDelimiter;
 				break;
@@ -344,7 +345,7 @@ tRisseLexerUtility::tParseStringResult
 	if(status == psrNone)
 	{
 		// error
-		Risse_eRisseError(RisseStringParseError);
+		eRisseError::Throw(RISSE_WS_TR("Unclosed string literal"));
 	}
 
 	str.Fit();

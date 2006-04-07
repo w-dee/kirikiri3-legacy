@@ -223,9 +223,9 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 //! @param		msg		メッセージ
 //! @param		r1		メッセージ中の '%1' と置き換わる文字列
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1)
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1)
 {
-	*this = msg.replace(r1);
+	*this = msg.Replace(RISSE_WS("%1"), r1);
 }
 //---------------------------------------------------------------------------
 
@@ -236,10 +236,10 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseS
 //! @param		r1		メッセージ中の '%1' と置き換わる文字列
 //! @param		r2		メッセージ中の '%2' と置き換わる文字列
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
-				const tRisseStringBlock *r2)
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+				const tRisseStringBlock &r2)
 {
-	*this = msg.replace(r1).replace(r2);
+	*this = msg.Replace(RISSE_WS("%1"), r1).Replace(RISSE_WS("%2"), r2);
 }
 //---------------------------------------------------------------------------
 
@@ -251,10 +251,11 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseS
 //! @param		r2		メッセージ中の '%2' と置き換わる文字列
 //! @param		r3		メッセージ中の '%3' と置き換わる文字列
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
-				const tRisseStringBlock *r2, const tRisseStringBlock *r3)
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+				const tRisseStringBlock &r2, const tRisseStringBlock &r3)
 {
-	*this = msg.replace(r1).replace(r2).replace(r3);
+	*this = msg.Replace(RISSE_WS("%1"), r1).Replace(RISSE_WS("%2"), r2).
+				Replace(RISSE_WS("%3"), r3);
 }
 //---------------------------------------------------------------------------
 
@@ -267,11 +268,12 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseS
 //! @param		r3		メッセージ中の '%3' と置き換わる文字列
 //! @param		r4		メッセージ中の '%4' と置き換わる文字列
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
-					const tRisseStringBlock *r2, const tRisseStringBlock *r3,
-					const tRisseStringBlock *r4)
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+					const tRisseStringBlock &r2, const tRisseStringBlock &r3,
+					const tRisseStringBlock &r4)
 {
-	*this = msg.replace(r1).replace(r2).replace(r3).replace(r4);
+	*this = msg.Replace(RISSE_WS("%1"), r1).Replace(RISSE_WS("%2"), r2).
+				Replace(RISSE_WS("%3"), r3).Replace(RISSE_WS("%4"), r4);
 }
 //---------------------------------------------------------------------------
 
@@ -524,13 +526,13 @@ tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref)
 //! @parma		replace_all		すべての一致を置き換えるかどうか
 //! @return		置き換えられた文字列
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::Replace(const tRisseString &old_str,
-		const tRisseString &new_str, bool replace_all)
+tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
+		const tRisseStringBlock &new_str, bool replace_all) const
 {
 	tRisseStringBlock ret;
-	const risse_char this_c_str = c_str();
-	const risse_char old_c_str = old_str.c_str();
-	const risse_char new_c_str = new_str.c_str();
+	const risse_char * this_c_str = c_str();
+	const risse_char * old_c_str = old_str.c_str();
+	const risse_char * new_c_str = new_str.c_str();
 	const risse_char * lp = this_c_str;
 	for(;;)
 	{
@@ -549,7 +551,7 @@ tRisseStringBlock tRisseStringBlock::Replace(const tRisseString &old_str,
 		}
 	}
 
-	ret.Append(lp, GetLength() - (lp - this_c_str()));
+	ret.Append(lp, GetLength() - (lp - this_c_str));
 
 	return ret;
 }

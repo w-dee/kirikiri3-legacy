@@ -96,14 +96,14 @@ public:
 		*this = ref;
 	}
 
-	tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1);
-	tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
-					const tRisseStringBlock *r2);
-	tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
-					const tRisseStringBlock *r2, const tRisseStringBlock *r3);
-	tRisseStringBlock(const tRisseStringBlock *msg, const tRisseStringBlock *r1,
-					const tRisseStringBlock *r2, const tRisseStringBlock *r3,
-					const tRisseStringBlock *r4);
+	tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1);
+	tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+					const tRisseStringBlock &r2);
+	tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+					const tRisseStringBlock &r2, const tRisseStringBlock &r3);
+	tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+					const tRisseStringBlock &r2, const tRisseStringBlock &r3,
+					const tRisseStringBlock &r4);
 
 	//! @brief	代入演算子
 	//! @param	ref	コピー元オブジェクト
@@ -399,8 +399,8 @@ public: // conversion
 #endif
 
 public: // other utilities
-	tRisseString Replace(const tRisseString &old_str,
-		const tRisseString &new_str, bool replace_all = true);
+	tRisseStringBlock Replace(const tRisseStringBlock &old_str,
+		const tRisseStringBlock &new_str, bool replace_all = true) const;
 };
 //---------------------------------------------------------------------------
 

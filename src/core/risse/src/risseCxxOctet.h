@@ -122,7 +122,18 @@ public: // comparison
 		{ return ! (*this == ref); }
 
 public: // operators
+	void Append(const risse_uint8 * buffer, risse_size length);
 	tRisseOctetBlock & operator += (const tRisseOctetBlock & ref);
+
+	//! @brief		１バイトの追加
+	//! @param		one_byte	追加するバイト
+	//! @return		このオブジェクト
+	tRisseOctetBlock & operator += (risse_uint8 one_byte)
+	{
+		Append(&one_byte, 1);
+		return *this;
+	}
+
 	tRisseOctetBlock operator + (const tRisseOctetBlock & ref) const;
 	void Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & ref) const;
 
@@ -153,6 +164,18 @@ public: // pointer
 			return InternalIndepend();
 		return Buffer;
 	}
+
+	//! @brief バッファの長さを実際の長さに合わせる
+	//! @note
+	//! += 演算子などは、バッファの容量増加に備え、バッファの確保容量を
+	//! 実際のサイズよりも多めにとるが、このメソッドはその容量を長さぴったりに
+	//! し、メモリを節約する。
+	void Fit() const
+	{
+		if(Capacity != Length)
+			InternalIndepend();
+	}
+
 
 private:
 	risse_uint8 * InternalIndepend() const;
@@ -195,12 +218,18 @@ public:
 		SetBlock(new tRisseOctetBlock());
 	}
 
-
+	//! @brief		コンストラクタ(const risse_uint8 *から)
+	//! @param		buf		入力バッファ
+	//! @param		length	長さ
 	tRisseOctet(const risse_uint8 * buf, risse_size length)
 	{
 		SetBlock(new tRisseOctetBlock(buf, length));
 	}
 
+	//! @brief 部分オクテット列を作るためのコンストラクタ
+	//! @param ref		コピー元オブジェクト
+	//! @param offset	切り出す開始位置
+	//! @param length	切り出す長さ
 	tRisseOctet(const tRisseOctet & ref,
 			risse_size offset, risse_size length)
 	{
@@ -264,11 +293,35 @@ public: // comparison
 		{ return ! (*this == ref); }
 
 public: // operators
+	//! @brief		オクテット列の連結(risse_uint8 と length から)
+	//! @param		buffer		連結するオクテット列
+	//! @param		length 		連結するオクテット列の長さ
+	void Append(const risse_uint8 * buffer, risse_size length)
+	{
+		GetBlock()->Append(buffer, length);
+	}
+
+	//! @brief		オクテット列の追加
+	//! @param		ref		追加するオクテット列
+	//! @return		このオブジェクト
 	tRisseOctet & operator += (const tRisseOctet & ref)
 	{
 		*GetBlock() += *ref.GetBlock();
 		return *this;
 	}
+
+	//! @brief		１バイトの追加
+	//! @param		one_byte	追加するバイト
+	//! @return		このオブジェクト
+	tRisseOctet & operator += (risse_uint8 one_byte)
+	{
+		*GetBlock() += one_byte;
+		return *this;
+	}
+
+	//! @brief		オクテット列の連結
+	//! @param		ref		連結するオクテット列
+	//! @return		新しく連結されたオクテット列
 	tRisseOctet operator + (const tRisseOctet & ref) const
 	{
 		tRisseOctet ret;
@@ -293,6 +346,17 @@ public: // pointer
 	{
 		return GetBlock()->Independ();
 	}
+
+	//! @brief バッファの長さを実際の長さに合わせる
+	//! @note
+	//! += 演算子などは、バッファの容量増加に備え、バッファの確保容量を
+	//! 実際のサイズよりも多めにとるが、このメソッドはその容量を長さぴったりに
+	//! し、メモリを節約する。
+	void Fit() const
+	{
+		GetBlock()->Fit();
+	}
+
 };
 //---------------------------------------------------------------------------
 

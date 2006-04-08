@@ -830,65 +830,60 @@ bool tRisseLexerUtility::ParseNumber(const risse_char * & ptr, tRisseVariant &va
 
 //---------------------------------------------------------------------------
 
-#if 0
 
 //---------------------------------------------------------------------------
-// RisseParseOctet
+//! @brief		オクテット列を解釈する
+//! @param		ptr		解析開始位置 '<%' を示していること(解析終了後は終了点にまで移動している)
+//! @param 		val		結果格納先
+//! @return		解析に成功したかどうか
 //---------------------------------------------------------------------------
-static bool RisseParseOctet(tRisseVariant &val, const risse_char **ptr)
+bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 {
 	// parse a octet literal;
 	// syntax is:
 	// <% xx xx xx xx xx xx ... %>
 	// where xx is hexadecimal 8bit(octet) binary representation.
-	RisseNext(ptr);
-	RisseNext(ptr);   // skip <%
-
-	risse_uint8 *buf = NULL;
-	risse_uint buflen = 0;
+	ptr += 2; // skip <%
 
 	bool leading = true;
 	risse_uint8 cur = 0;
 
-	for(;*(*ptr);)
+	tRisseOctet ret;
+
+	for(;*ptr;)
 	{
-		switch(RisseSkipComment(ptr))
+		// コメントをスキップ
+		switch(SkipComment(ptr))
 		{
 		case scrEnded:
-			Risse_eRisseError(RisseStringParseError);
+			eRisseError::Throw(RISSE_WS_TR("Unclosed octet literal"));
 		case scrContinue:
 		case scrNotComment:
 			;
 		}
 
+		// 次の一文字へのポインタを得る
+		const risse_char *next = ptr;
+		next ++;
 
-		const risse_char *next = *ptr;
-		RisseNext(&next);
-		if(*(*ptr) == RISSE_WC('%') && *next == RISSE_WC('>'))
+		// リテラルの終了？
+		if(ptr[0] == RISSE_WC('%') && ptr[1] == RISSE_WC('>'))
 		{
-			*ptr = next;
-			RisseNext(ptr);
+			ptr = next;
+			ptr ++;
 
-			// literal ended
-
-			if(!leading)
-			{
-				buf = (risse_uint8*)Risse_realloc(buf, buflen+1);
-				if(!buf)
-					throw eRisseError(ttstr(RisseInsufficientMem));
-				buf[buflen] = cur;
-				buflen++;
-			}
-
-			val = tRisseVariant(buf, buflen); // create octet variant
-			if(buf) Risse_free(buf);
+			// オクテット列リテラルが終了した
+			if(!leading) ret += cur;
+			ret.Fit();
 			return true;
 		}
 
-		risse_char ch = *(*ptr);
+		// １６進数を数値に変換
+		risse_char ch = *ptr;
 		risse_int n = HexNum(ch);
 		if(n != -1)
 		{
+			// 変換に成功
 			if(leading)
 			{
 				cur = (risse_uint8)(n);
@@ -899,39 +894,36 @@ static bool RisseParseOctet(tRisseVariant &val, const risse_char **ptr)
 				cur <<= 4;
 				cur += n;
 
-				// store cur
-				buf = (risse_uint8*)Risse_realloc(buf, buflen+1);
-				if(!buf)
-					throw eRisseError(ttstr(RisseInsufficientMem));
-				buf[buflen] = cur;
-				buflen++;
+				ret += cur;
 
 				leading = true;
 			}
 		}
-
-		if(!leading && ch == RISSE_WC(','))
+		else
 		{
-			buf = (risse_uint8*)Risse_realloc(buf, buflen+1);
-			if(!buf)
-				Risse_eRisseError(RisseInsufficientMem);
-			buf[buflen] = cur;
-			buflen++;
+			// 変換に失敗した文字は単に無視する
+			;
+		}
+
+		// カンマまたはスペースの場合は次に進める
+		if(!leading && (ch == RISSE_WC(',') || ch == RISSE_WC(' ')))
+		{
+			ret += cur;
 
 			leading = true;
 		}
 
-		*ptr = next;
+		ptr = next;
 	}
 
 	// error
-	Risse_eRisseError(RisseStringParseError);
+	eRisseError::Throw(RISSE_WS_TR("Unclosed octet literal"));
 
 	return false;
 }
 //---------------------------------------------------------------------------
 
-
+#if 0
 //---------------------------------------------------------------------------
 // RisseParseRegExp
 //---------------------------------------------------------------------------

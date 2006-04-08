@@ -81,6 +81,8 @@ private:
 
 public: // public static members
 	static bool ParseNumber(const risse_char * & ptr, tRisseVariant &val);
+
+	static bool ParseOctet(const risse_char * & ptr, tRisseOctet &val);
 };
 
 //---------------------------------------------------------------------------

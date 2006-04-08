@@ -74,16 +74,15 @@ tRisseOctetBlock::tRisseOctetBlock(const tRisseOctetBlock & ref,
 
 
 //---------------------------------------------------------------------------
-//! @brief		オクテット列の連結
-//! @param		ref		連結するオクテット列
-//! @return		このオブジェクト
+//! @brief		オクテット列の連結(risse_uint8 と length から)
+//! @param		buffer		連結するオクテット列
+//! @param		length 		連結するオクテット列の長さ
 //---------------------------------------------------------------------------
-tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
+void tRisseOctetBlock::Append(const risse_uint8 * buffer, risse_size length)
 {
-	if(ref.Length == 0) return *this; // 追加するものなし
-	if(Length == 0) return *this = ref; // 単純なコピーでよい
+	if(length == 0) return; // 追加するものなし
 
-	risse_size newlength = Length + ref.Length;
+	risse_size newlength = Length + length;
 
 	if(Capacity == 0)
 	{
@@ -92,7 +91,7 @@ tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
 		risse_uint8 * newbuf = AllocateInternalBuffer(newlength);
 		Capacity = newlength;
 		memcpy(newbuf, Buffer, Length);
-		memcpy(newbuf + Length, ref.Buffer, ref.Length);
+		memcpy(newbuf + Length, buffer, length);
 		Buffer = newbuf;
 	}
 	else
@@ -113,10 +112,22 @@ tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
 			Capacity = newcapacity;
 		}
 
-		// 現在保持しているオクテット列の直後に ref の Buffer をコピーする
-		memcpy(Buffer + Length, ref.Buffer, ref.Length);
+		// 現在保持しているオクテット列の直後に buffer をコピーする
+		memcpy(Buffer + Length, buffer, length);
 	}
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		オクテット列の追加
+//! @param		ref		追加するオクテット列
+//! @return		このオブジェクト
+//---------------------------------------------------------------------------
+tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
+{
+	if(Length == 0) return *this = ref; // 単純なコピーでよい
+	Append(ref.Buffer, ref.Length);
 	return *this;
 }
 //---------------------------------------------------------------------------

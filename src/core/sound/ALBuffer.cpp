@@ -21,10 +21,6 @@ RISSE_DEFINE_SOURCE_ID(24518,55437,60218,19380,17845,8848,1743,50558);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		filter 入力フィルタ
-//! @param		streaming	ストリーミング再生を行うかどうか
-//---------------------------------------------------------------------------
 tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool streaming)
 {
 	// フィールドの初期化
@@ -87,8 +83,6 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool str
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaALBuffer::~tRisaALBuffer()
 {
 	tRisaCriticalSection::tLocker lock(CS);
@@ -97,8 +91,6 @@ tRisaALBuffer::~tRisaALBuffer()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		バッファに関するオブジェクトの解放などのクリーンアップ処理
 //---------------------------------------------------------------------------
 void tRisaALBuffer::Clear()
 {
@@ -115,8 +107,6 @@ void tRisaALBuffer::Clear()
 
 
 //---------------------------------------------------------------------------
-//! @brief		一時的に割り当てられたバッファの解放
-//---------------------------------------------------------------------------
 void tRisaALBuffer::FreeTempBuffers()
 {
 	free(RenderBuffer), RenderBuffer = NULL;
@@ -127,12 +117,6 @@ void tRisaALBuffer::FreeTempBuffers()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		OpenALバッファにデータを詰める
-//! @param		buffer		対象とする OpenAL バッファ
-//! @param		samples		最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
-//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
-//! @return		バッファにデータが入ったら真
 //---------------------------------------------------------------------------
 bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 	tRisaWaveSegmentQueue & segmentqueue)
@@ -297,8 +281,6 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 
 
 //---------------------------------------------------------------------------
-//! @brief		フリーになったバッファを FreeBuffers に push する
-//---------------------------------------------------------------------------
 void tRisaALBuffer::PushFreeBuffer(ALuint buffer)
 {
 	tRisaCriticalSection::tLocker lock(CS);
@@ -309,9 +291,6 @@ void tRisaALBuffer::PushFreeBuffer(ALuint buffer)
 
 
 //---------------------------------------------------------------------------
-//! @brief		フリーのバッファがあるかどうかを返す
-//! @return 	フリーのバッファがあるかどうか
-//---------------------------------------------------------------------------
 bool tRisaALBuffer::HasFreeBuffer()
 {
 	tRisaCriticalSection::tLocker lock(CS);
@@ -321,11 +300,6 @@ bool tRisaALBuffer::HasFreeBuffer()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		空きバッファにデータをfillして返す
-//! @param		buffer バッファ番号を格納する変数
-//! @param		segmentqueue セグメントキュー
-//! @return		fill に成功したか
 //---------------------------------------------------------------------------
 bool tRisaALBuffer::PopFilledBuffer(ALuint & buffer, tRisaWaveSegmentQueue & segmentqueue)
 {
@@ -350,8 +324,6 @@ bool tRisaALBuffer::PopFilledBuffer(ALuint & buffer, tRisaWaveSegmentQueue & seg
 
 
 //---------------------------------------------------------------------------
-//! @brief		全てのバッファを解放する
-//---------------------------------------------------------------------------
 void tRisaALBuffer::FreeAllBuffers()
 {
 	tRisaCriticalSection::tLocker lock(CS);
@@ -363,8 +335,6 @@ void tRisaALBuffer::FreeAllBuffers()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		OpenALバッファにサウンドをデコードしてコピーする
 //---------------------------------------------------------------------------
 void tRisaALBuffer::Load()
 {

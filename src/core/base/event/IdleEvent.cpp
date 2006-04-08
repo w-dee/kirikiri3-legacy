@@ -16,25 +16,7 @@
 RISSE_DEFINE_SOURCE_ID(58504,55707,27606,20246,35200,16274,28002,46284);
 
 
-/*! @note
-	アイドルイベントは、アプリケーションで他に処理すべきイベントが無くなった
-	場合に発生するイベントである (実際のところこれは嘘で、wxWidgets の Idle
-	イベント時に確かに発生するイベントではあるが、Risa のイベントシステムの
-	キュー上にイベントが残っていても、一回で処理すべきイベントの処理が終われば
-	呼び出される)。
-	アイドルイベントの戻り値を真にすると連続してアイドルイベントが発生するように
-	なる (吉里吉里２における Continous Event と同等)。
 
-	コンパクトイベントは、アプリケーションのウィンドウが非アクティブになったり
-	アプリケーションが非アクティブになったり、あるいは５秒おきに発生するイベン
-	ト。なにか未処理の終了処理があればそれを終了させたり、ガベージコレクション
-	を実行したりする。
-*/
-
-
-//---------------------------------------------------------------------------
-//! @brief		アイドルイベントの配信先を登録する
-//! @param		item		配信先
 //---------------------------------------------------------------------------
 void tRisaIdleEventManager::Register(tRisaIdleEventDestination * item)
 {
@@ -44,9 +26,6 @@ void tRisaIdleEventManager::Register(tRisaIdleEventDestination * item)
 
 
 //---------------------------------------------------------------------------
-//! @brief		アイドルイベントの配信先の登録を解除する
-//! @param		item		配信先
-//---------------------------------------------------------------------------
 void tRisaIdleEventManager::Unregister(tRisaIdleEventDestination * item)
 {
 	Destinations.remove(item);
@@ -54,10 +33,6 @@ void tRisaIdleEventManager::Unregister(tRisaIdleEventDestination * item)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		アイドルイベントを配信する
-//! @param		mastertick		このイベントが配信される際の TickCount
-//! @return		まだアイドルイベントが必要かどうか
 //---------------------------------------------------------------------------
 bool tRisaIdleEventManager::Deliver(risse_uint64 mastertick)
 {
@@ -94,8 +69,6 @@ bool tRisaIdleEventManager::Deliver(risse_uint64 mastertick)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaIdleEventDestination::tRisaIdleEventDestination()
 {
 	Receiving = false;
@@ -104,8 +77,6 @@ tRisaIdleEventDestination::tRisaIdleEventDestination()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaIdleEventDestination::~tRisaIdleEventDestination()
 {
 	if(Receiving) depends_on<tRisaIdleEventManager>::locked_instance()->Unregister(this);
@@ -113,8 +84,6 @@ tRisaIdleEventDestination::~tRisaIdleEventDestination()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		アイドルイベントの受信を開始する
 //---------------------------------------------------------------------------
 void tRisaIdleEventDestination::StartReceiveIdle()
 {
@@ -127,8 +96,6 @@ void tRisaIdleEventDestination::StartReceiveIdle()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		アイドルイベントの受信を停止する
 //---------------------------------------------------------------------------
 void tRisaIdleEventDestination::EndReceiveIdle()
 {
@@ -172,8 +139,6 @@ void tRisaIdleEventDestination::EndReceiveIdle()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaCompactEventManager::tRisaCompactEventManager()
 {
 	wxTimer::Start(5000); // 5秒周期のタイマーをスタートする
@@ -181,9 +146,6 @@ tRisaCompactEventManager::tRisaCompactEventManager()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンパクトイベントの配信先を登録する
-//! @param		item		配信先
 //---------------------------------------------------------------------------
 void tRisaCompactEventManager::Register(tRisaCompactEventDestination * item)
 {
@@ -193,9 +155,6 @@ void tRisaCompactEventManager::Register(tRisaCompactEventDestination * item)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンパクトイベントの配信先の登録を解除する
-//! @param		item		配信先
-//---------------------------------------------------------------------------
 void tRisaCompactEventManager::Unregister(tRisaCompactEventDestination * item)
 {
 	Destinations.remove(item);
@@ -203,9 +162,6 @@ void tRisaCompactEventManager::Unregister(tRisaCompactEventDestination * item)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンパクトイベントを配信する
-//! @param		level		レベル
 //---------------------------------------------------------------------------
 void tRisaCompactEventManager::Deliver(tCompactLevel level)
 {
@@ -217,8 +173,6 @@ void tRisaCompactEventManager::Deliver(tCompactLevel level)
 
 
 //---------------------------------------------------------------------------
-//! @brief		タイマー周期が来た時
-//---------------------------------------------------------------------------
 void tRisaCompactEventManager::Notify()
 {
 	Deliver(clSlowBeat);
@@ -227,8 +181,6 @@ void tRisaCompactEventManager::Notify()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ウィンドウが非アクティブになった場合
-//---------------------------------------------------------------------------
 void tRisaCompactEventManager::OnDeactivate()
 {
 	Deliver(clDeactivate);
@@ -236,8 +188,6 @@ void tRisaCompactEventManager::OnDeactivate()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		アプリケーションが非アクティブになった場合
 //---------------------------------------------------------------------------
 void tRisaCompactEventManager::OnDeactivateApp()
 {

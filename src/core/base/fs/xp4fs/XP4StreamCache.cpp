@@ -22,8 +22,6 @@ RISSE_DEFINE_SOURCE_ID(49404,13781,19467,19024,25758,42474,10136,44880);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaXP4StreamCache::tRisaXP4StreamCache()
 {
 	// 変数を初期化
@@ -39,8 +37,6 @@ tRisaXP4StreamCache::tRisaXP4StreamCache()
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaXP4StreamCache::~tRisaXP4StreamCache()
 {
 	ReleaseAll(); // すべてを解放
@@ -48,11 +44,6 @@ tRisaXP4StreamCache::~tRisaXP4StreamCache()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ストリームを取得する
-//! @param		pointer アーカイブインスタンスへのポインタ (識別に用いられる)
-//! @param		name アーカイブファイル名
-//! @return		ストリーム
 //---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const ttstr & name)
 {
@@ -79,10 +70,6 @@ tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const ttstr 
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ストリームを解放する
-//! @param		pointer アーカイブインスタンスへのポインタ
-//! @param		stream ストリーム
 //---------------------------------------------------------------------------
 void tRisaXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * stream)
 {
@@ -125,9 +112,6 @@ void tRisaXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * str
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定されたポインタを持つストリームをすべて解放する
-//! @param		pointer アーカイブインスタンスへのポインタ
-//---------------------------------------------------------------------------
 void tRisaXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
@@ -146,8 +130,6 @@ void tRisaXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		すべてのストリームを解放する
 //---------------------------------------------------------------------------
 void tRisaXP4StreamCache::ReleaseAll()
 {

@@ -19,8 +19,6 @@ RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaRisseScriptEngine::tRisaRisseScriptEngine()
 {
 	Engine = new tRisse();
@@ -28,8 +26,6 @@ tRisaRisseScriptEngine::tRisaRisseScriptEngine()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		デストラクタ
 //---------------------------------------------------------------------------
 tRisaRisseScriptEngine::~tRisaRisseScriptEngine()
 {
@@ -47,8 +43,6 @@ tRisaRisseScriptEngine::~tRisaRisseScriptEngine()
 
 
 //---------------------------------------------------------------------------
-//! @brief		シャットダウン
-//---------------------------------------------------------------------------
 void tRisaRisseScriptEngine::Shutdown()
 {
 	if(Engine)
@@ -61,10 +55,6 @@ void tRisaRisseScriptEngine::Shutdown()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		グローバルにオブジェクトを登録する
-//! @param		name    オブジェクトにつけたい名前
-//! @param		object  その名前で登録したいオブジェクト
 //---------------------------------------------------------------------------
 void tRisaRisseScriptEngine::RegisterGlobalObject(const risse_char *name,
 	iRisseDispatch2 * object)
@@ -80,9 +70,6 @@ void tRisaRisseScriptEngine::RegisterGlobalObject(const risse_char *name,
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		式を評価して結果をコンソールに表示する
-//! @param		expression 式
 //---------------------------------------------------------------------------
 void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const ttstr & expression)
 {
@@ -116,13 +103,6 @@ void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const ttstr &
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		スクリプトブロックを実行する
-//! @param		script		スクリプト
-//! @param		result		実行結果を受け取るtRisseVariant型オブジェクトへのポインタ(要らない場合はNULLを)
-//! @param		context		実行を行うコンテキスト(globalで動かしたい場合はNULL)
-//! @param		name		スクリプトブロック名
-//! @param		lineofs		このスクリプトブロックの(オリジナルのファイル全体に対する)開始行
 //---------------------------------------------------------------------------
 void tRisaRisseScriptEngine::ExecuteScript(
 		const ttstr &script, tRisseVariant *result,

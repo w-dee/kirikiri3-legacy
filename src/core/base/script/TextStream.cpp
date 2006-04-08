@@ -417,8 +417,6 @@ void tRisaTextWriteStream::Write(const ttstr & targ)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaTextStreamRegisterer::tRisaTextStreamRegisterer()
 {
 	RisseCreateTextStreamForRead = CreateForRead;
@@ -427,8 +425,6 @@ tRisaTextStreamRegisterer::tRisaTextStreamRegisterer()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		デストラクタ
 //---------------------------------------------------------------------------
 tRisaTextStreamRegisterer::~tRisaTextStreamRegisterer()
 {
@@ -439,8 +435,6 @@ tRisaTextStreamRegisterer::~tRisaTextStreamRegisterer()
 
 
 //---------------------------------------------------------------------------
-//! @brief		読み込み用テキストストリームを作成して返す
-//---------------------------------------------------------------------------
 iRisseTextReadStream * tRisaTextStreamRegisterer::CreateForRead(const tRisseString &name,
 		const tRisseString &modestr)
 {
@@ -449,8 +443,6 @@ iRisseTextReadStream * tRisaTextStreamRegisterer::CreateForRead(const tRisseStri
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		書き込み用テキストストリームを作成して返す
 //---------------------------------------------------------------------------
 iRisseTextWriteStream * tRisaTextStreamRegisterer::CreateForWrite(const tRisseString &name,
 		const tRisseString &modestr)

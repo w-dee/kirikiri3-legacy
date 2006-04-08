@@ -19,8 +19,6 @@
 RISSE_DEFINE_SOURCE_ID(17086,16655,38940,19271,28579,15284,53763,63856);
 
 //---------------------------------------------------------------------------
-//! @brief	 	コンストラクタ
-//---------------------------------------------------------------------------
 tRisaWaveDecoderFactoryManager::tRisaWaveDecoderFactoryManager()
 {
 }
@@ -28,18 +26,12 @@ tRisaWaveDecoderFactoryManager::tRisaWaveDecoderFactoryManager()
 
 
 //---------------------------------------------------------------------------
-//! @brief	 	デストラクタ
-//---------------------------------------------------------------------------
 tRisaWaveDecoderFactoryManager::~tRisaWaveDecoderFactoryManager()
 {
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief	 	ファクトリを登録する
-//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
-//! @param		factory		ファクトリ
 //---------------------------------------------------------------------------
 void tRisaWaveDecoderFactoryManager::Register(const ttstr & extension,
 	boost::shared_ptr<tRisaWaveDecoderFactory> factory)
@@ -52,9 +44,6 @@ void tRisaWaveDecoderFactoryManager::Register(const ttstr & extension,
 
 
 //---------------------------------------------------------------------------
-//! @brief	 	ファクトリの登録を解除する
-//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
-//---------------------------------------------------------------------------
 void tRisaWaveDecoderFactoryManager::Unregister(const ttstr & extension)
 {
 	Map.erase(extension);
@@ -62,10 +51,6 @@ void tRisaWaveDecoderFactoryManager::Unregister(const ttstr & extension)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief	 	デコーダを作成する
-//! @param		filename ファイル名
-//! @return		作成されたデコーダの shared_ptr
 //---------------------------------------------------------------------------
 boost::shared_ptr<tRisaWaveDecoder>
 	tRisaWaveDecoderFactoryManager::Create(const ttstr & filename)

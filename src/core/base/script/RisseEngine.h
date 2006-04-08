@@ -25,16 +25,34 @@ class tRisaRisseScriptEngine : public singleton_base<tRisaRisseScriptEngine>
 	tRisse *Engine;
 
 public:
+	//! @brief		コンストラクタ
 	tRisaRisseScriptEngine();
+
+	//! @brief		デストラクタ
 	~tRisaRisseScriptEngine();
 
+	//! @brief		シャットダウン
 	void Shutdown();
 
 	tRisse * GetEngineNoAddRef() { return Engine; } //!< スクリプトエンジンを返す
 	iRisseDispatch2 * GetGlobalNoAddRef()
 		{ if(!Engine) return NULL; return Engine->GetGlobalNoAddRef(); } //!< スクリプトエンジンを返す
+
+	//! @brief		グローバルにオブジェクトを登録する
+	//! @param		name    オブジェクトにつけたい名前
+	//! @param		object  その名前で登録したいオブジェクト
 	void RegisterGlobalObject(const risse_char *name, iRisseDispatch2 * object);
+
+	//! @brief		式を評価して結果をコンソールに表示する
+	//! @param		expression 式
 	void EvalExpresisonAndPrintResultToConsole(const ttstr & expression);
+
+	//! @brief		スクリプトブロックを実行する
+	//! @param		script		スクリプト
+	//! @param		result		実行結果を受け取るtRisseVariant型オブジェクトへのポインタ(要らない場合はNULLを)
+	//! @param		context		実行を行うコンテキスト(globalで動かしたい場合はNULL)
+	//! @param		name		スクリプトブロック名
+	//! @param		lineofs		このスクリプトブロックの(オリジナルのファイル全体に対する)開始行
 	void ExecuteScript(const ttstr &script, tRisseVariant *result = NULL,
 		iRisseDispatch2 *context = NULL,
 		const ttstr *name = NULL, risse_int lineofs = 0);

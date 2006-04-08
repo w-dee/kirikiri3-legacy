@@ -24,11 +24,6 @@ RISSE_DEFINE_SOURCE_ID(9282,1527,60023,18507,43687,60046,2141,35691);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		ptr tRisaArchive インスタンスへのスマートポインタ
-//! @param		idx アーカイブ内でのファイルのインデックス
-//! @param		flags アクセスフラグ
-//---------------------------------------------------------------------------
 tRisaXP4ArchiveStream::tRisaXP4ArchiveStream(
 			boost::shared_ptr<tRisaXP4Archive> ptr,
 			risse_size idx, risse_uint32 flags)
@@ -49,8 +44,6 @@ tRisaXP4ArchiveStream::tRisaXP4ArchiveStream(
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaXP4ArchiveStream::~tRisaXP4ArchiveStream()
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -60,8 +53,6 @@ tRisaXP4ArchiveStream::~tRisaXP4ArchiveStream()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		現在のセグメントが開かれていることを確実にする
 //---------------------------------------------------------------------------
 void tRisaXP4ArchiveStream::EnsureSegment()
 {
@@ -101,10 +92,6 @@ void tRisaXP4ArchiveStream::EnsureSegment()
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定位置にシークする
-//! @param		pos シーク先の位置
-//! @note		この関数は内部状態を変えるだけであり、実際にセグメントを開くなどはしない
-//---------------------------------------------------------------------------
 void tRisaXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
 {
 	// open segment at 'pos' and seek
@@ -137,8 +124,6 @@ void tRisaXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
 
 
 //---------------------------------------------------------------------------
-//! @brief		次のセグメントを開く
-//---------------------------------------------------------------------------
 bool tRisaXP4ArchiveStream::OpenNextSegment()
 {
 	// open next segment
@@ -155,11 +140,6 @@ bool tRisaXP4ArchiveStream::OpenNextSegment()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		シーク
-//! @param		offset 移動オフセット
-//! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
-//! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
 risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 {
@@ -197,11 +177,6 @@ risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		読み込み
-//! @param		buffer 読み込み先バッファ
-//! @param		read_size 読み込むバイト数
-//! @return		実際に読み込まれたバイト数
 //---------------------------------------------------------------------------
 risse_uint tRisaXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 {
@@ -248,11 +223,6 @@ risse_uint tRisaXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 
 
 //---------------------------------------------------------------------------
-//! @brief		書き込み
-//! @param		buffer 書き込むバッファ
-//! @param		read_size 書き込みたいバイト数
-//! @return		実際に書き込まれたバイト数
-//---------------------------------------------------------------------------
 risse_uint tRisaXP4ArchiveStream::Write(const void *buffer, risse_size write_size)
 {
 	eRisaException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
@@ -262,8 +232,6 @@ risse_uint tRisaXP4ArchiveStream::Write(const void *buffer, risse_size write_siz
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルの終わりを現在のポインタに設定する
-//---------------------------------------------------------------------------
 void tRisaXP4ArchiveStream::SetEndOfFile()
 {
 	eRisaException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
@@ -271,9 +239,6 @@ void tRisaXP4ArchiveStream::SetEndOfFile()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		サイズを得る
-//! @return		このストリームのサイズ
 //---------------------------------------------------------------------------
 risse_uint64 tRisaXP4ArchiveStream::GetSize()
 {

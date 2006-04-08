@@ -24,13 +24,19 @@
 //---------------------------------------------------------------------------
 class tRisaTextStreamRegisterer : public singleton_base<tRisaTextStreamRegisterer>, protected depends_on<tRisaRisseScriptEngine>
 {
+	//! @brief		読み込み用テキストストリームを作成して返す
 	static iRisseTextReadStream * CreateForRead(const tRisseString &name,
 		const tRisseString &modestr);
+
+	//! @brief		書き込み用テキストストリームを作成して返す
 	static iRisseTextWriteStream * CreateForWrite(const tRisseString &name,
 		const tRisseString &modestr);
 
 public:
+	//! @brief		コンストラクタ
 	tRisaTextStreamRegisterer();
+
+	//! @brief		デストラクタ
 	~tRisaTextStreamRegisterer();
 };
 //---------------------------------------------------------------------------

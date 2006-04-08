@@ -18,9 +18,6 @@
 RISSE_DEFINE_SOURCE_ID(35549,59301,21418,20212,56467,33012,49239,37291);
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		desired_output_type    サブクラスが望む PCM 形式
-//---------------------------------------------------------------------------
 tRisaBasicWaveFilter::tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_type)
 {
 	QueuedData = NULL;
@@ -35,8 +32,6 @@ tRisaBasicWaveFilter::tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_t
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaBasicWaveFilter::~tRisaBasicWaveFilter()
 {
 	if(ConvertBuffer) free(ConvertBuffer);
@@ -46,8 +41,6 @@ tRisaBasicWaveFilter::~tRisaBasicWaveFilter()
 
 
 //---------------------------------------------------------------------------
-//! @brief		フィルタをリセットする際に呼ばれる
-//---------------------------------------------------------------------------
 void tRisaBasicWaveFilter::Reset()
 {
 	InputChanged();
@@ -56,9 +49,6 @@ void tRisaBasicWaveFilter::Reset()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		フィルタの入力を設定する
-//! @param		input  入力となるフィルタ
 //---------------------------------------------------------------------------
 void tRisaBasicWaveFilter::SetInput(boost::shared_ptr<tRisaWaveFilter> input)
 {
@@ -78,13 +68,6 @@ void tRisaBasicWaveFilter::SetInput(boost::shared_ptr<tRisaWaveFilter> input)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		デコードを行う
-//! @param		dest		デコード結果を格納するバッファ
-//! @param		samples		デコードを行いたいサンプル数
-//! @param		written		実際にデコード出来たサンプル数
-//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
-//! @return		まだデコードすべきデータが残っているかどうか
 //---------------------------------------------------------------------------
 bool tRisaBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &written,
 	tRisaWaveSegmentQueue & segmentqueue)
@@ -128,9 +111,6 @@ bool tRisaBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &wr
 
 
 //---------------------------------------------------------------------------
-//! @brief		PCM形式を返す
-//! @return		PCM形式への参照
-//---------------------------------------------------------------------------
 const tRisaWaveFormat & tRisaBasicWaveFilter::GetFormat()
 {
 	if(!Input)
@@ -140,10 +120,6 @@ const tRisaWaveFormat & tRisaBasicWaveFilter::GetFormat()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		出力キューを準備する
-//! @param		numsamplegranules  準備したいサンプルグラニュール数
-//! @return		出力バッファ
 //---------------------------------------------------------------------------
 void * tRisaBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 {
@@ -174,10 +150,6 @@ void * tRisaBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 
 
 //---------------------------------------------------------------------------
-//! @brief		出力キューにデータをおく
-//! @param		numsamplegranules	サンプル数
-//! @param		segmentqueue	再生セグメントキュー情報
-//---------------------------------------------------------------------------
 void tRisaBasicWaveFilter::Queue(risse_uint numsamplegranules,
 		const tRisaWaveSegmentQueue & segmentqueue)
 {
@@ -189,14 +161,6 @@ void tRisaBasicWaveFilter::Queue(risse_uint numsamplegranules,
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたバッファに入力フィルタから情報を読み出し、書き込む
-//! @param		dest				書き込みたいバッファ
-//! @param		numsamplegranules	欲しいサンプルグラニュール数
-//! @param		desired_type		欲しいPCM形式
-//! @param		fill_silence		欲しいサンプルグラニュール数に入力が満たないとき、残りを無音で埋めるかどうか
-//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
-//! @return		実際に書き込まれたサンプルグラニュール数
 //---------------------------------------------------------------------------
 risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 	tRisaPCMTypes::tType desired_type, 

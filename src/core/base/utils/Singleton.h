@@ -190,13 +190,32 @@ class singleton_manager
 	static unsigned int ref_count; //!< リファレンスカウンタ
 
 public:
+	//! @brief		シングルトン情報を登録する
 	static void register_info(const register_info_t & info);
+
+	//! @brief		手動起動を表すシングルトンの情報を登録する
 	static void register_manual_start(handler_t func);
+
+	//! @brief		disconnect 関数を登録する
 	static void register_disconnector(handler_t func);
+
+	//! @brief		シングルトン情報の登録を解除する
 	static void unregister_info();
 
+	//! @brief		全てのシングルトンを初期化する
+	//! @note		この間に発生した例外は呼び出し元で捕捉できる
 	static void init_all();
+
+	//! @brief		全てのシングルトンへの参照を切る
+	//! @note		これによりすべてのシングルトンが消滅する保証はない。
+	//!				他の場所でこのシングルトンオブジェクトへの参照が残っていた場合は
+	//!				その参照が無くなるまでそのシングルトンオブジェクトおよびそれが
+	//!				依存しているシングルトンオブジェクトは消滅しないままとなる。
+	//!				disconnect関数の呼び出しは、register_disconnector を呼び出した順とは
+	//!				逆順となる。
 	static void disconnect_all();
+
+	//! @brief		削除されずに残っているオブジェクトを標準エラー出力に表示する
 	static void report_alive_objects();
 };
 //---------------------------------------------------------------------------

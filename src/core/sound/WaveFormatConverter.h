@@ -21,6 +21,13 @@
 class tRisaWaveFormatConverter
 {
 public:
+	//! @brief		PCM形式の変換を行う
+	//! @param		outformat		出力フォーマット
+	//! @param		outdata			出力フォーマットを書き出すバッファ
+	//! @param		informat		入力フォーマット
+	//! @param		indata			入力データ
+	//! @param		channels		チャンネル数
+	//! @param		numsamples		処理を行うサンプルグラニュール数
 	static void Convert(
 		tRisaPCMTypes::tType outformat, void * outdata,
 		tRisaPCMTypes::tType informat, const void * indata,

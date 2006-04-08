@@ -22,8 +22,6 @@ RISSE_DEFINE_SOURCE_ID(9133,5164,36031,18883,4749,40441,40379,56790);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaXP4FS::tRisaXP4FS(const ttstr & name)
 {
 	// まず、nameで示されたディレクトリにあるすべてのパッチアーカイブを列挙する
@@ -146,19 +144,12 @@ tRisaXP4FS::tRisaXP4FS(const ttstr & name)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaXP4FS::~tRisaXP4FS()
 {
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ファイル一覧を取得する
-//! @param		dirname ディレクトリ名
-//! @param		callback コールバックオブジェクト
-//! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tRisaXP4FS::GetFileListAt(const ttstr & dirname,
 	tRisaFileSystemIterationCallback * callback)
@@ -209,10 +200,6 @@ size_t tRisaXP4FS::GetFileListAt(const ttstr & dirname,
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルが存在するかどうかを得る
-//! @param		filename ファイル名
-//! @return		ファイルが存在する場合真
-//---------------------------------------------------------------------------
 bool tRisaXP4FS::FileExists(const ttstr & filename)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -224,10 +211,6 @@ bool tRisaXP4FS::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ディレクトリが存在するかどうかを得る
-//! @param		dirname ディレクトリ名
-//! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
 bool tRisaXP4FS::DirectoryExists(const ttstr & dirname)
 {
@@ -243,9 +226,6 @@ bool tRisaXP4FS::DirectoryExists(const ttstr & dirname)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルを削除する
-//! @param		filename ファイル名
-//---------------------------------------------------------------------------
 void tRisaXP4FS::RemoveFile(const ttstr & filename)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
@@ -253,10 +233,6 @@ void tRisaXP4FS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ディレクトリを削除する
-//! @param		dirname ディレクトリ名
-//! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tRisaXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
@@ -266,10 +242,6 @@ void tRisaXP4FS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ディレクトリを作成する
-//! @param		dirname ディレクトリ名
-//! @param		recursive 再帰的にディレクトリを作成するかどうか
-//---------------------------------------------------------------------------
 void tRisaXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
@@ -277,10 +249,6 @@ void tRisaXP4FS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたファイルの stat を得る
-//! @param		filename ファイル名
-//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tRisaXP4FS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
@@ -295,11 +263,6 @@ void tRisaXP4FS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたファイルのストリームを得る
-//! @param		filename ファイル名
-//! @param		flags フラグ
-//! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaXP4FS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
@@ -322,10 +285,6 @@ tRisseBinaryStream * tRisaXP4FS::CreateStream(const ttstr & filename, risse_uint
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		name ファイル名で始まる最初の FileItems内のインデックスを得る
-//! @param		name 名前
-//! @return		FileItems内のインデックス (見つからなかった場合は (risse_size)-1 が返る)
 //---------------------------------------------------------------------------
 risse_size tRisaXP4FS::GetFileItemStartIndex(const ttstr & name)
 {
@@ -362,11 +321,6 @@ risse_size tRisaXP4FS::GetFileItemStartIndex(const ttstr & name)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		name に対応する FileItems内のインデックスを得る
-//! @param		name 名前
-//! @return		FileItems内のインデックス (見つからなかった場合は (risse_size)-1 が返る)
-//! @note		GetFileItemStartIndex と違い、その名前とぴったり一致しない限りは見つからないとみなす
 //---------------------------------------------------------------------------
 risse_size tRisaXP4FS::GetFileItemIndex(const ttstr & name)
 {

@@ -19,12 +19,6 @@ RISSE_DEFINE_SOURCE_ID(47081,32049,45767,18248,53175,52305,56890,58573);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(メモリ上のデータを展開する場合)
-//! @param		method 圧縮メソッド
-//! @param		indata 入力データ
-//! @param		insize 入力データのサイズ
-//! @param		uncomp_size 入力データを展開した際のサイズ
-//---------------------------------------------------------------------------
 tRisaDecompressedHolder::tRisaDecompressedHolder(tRisaDecompressedHolder::tMethod method,
 		const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size)
@@ -38,12 +32,6 @@ tRisaDecompressedHolder::tRisaDecompressedHolder(tRisaDecompressedHolder::tMetho
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ(ストリーム上のデータを展開する場合)
-//! @param		method 圧縮メソッド
-//! @param		indata 入力ストリーム
-//! @param		insize 入力データのサイズ
-//! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
 tRisaDecompressedHolder::tRisaDecompressedHolder(tMethod method,
 		tRisseBinaryStream * instream, risse_size insize, 
@@ -72,8 +60,6 @@ tRisaDecompressedHolder::tRisaDecompressedHolder(tMethod method,
 
 
 //---------------------------------------------------------------------------
-//!@brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaDecompressedHolder::~tRisaDecompressedHolder()
 {
 	delete [] Data;
@@ -81,12 +67,6 @@ tRisaDecompressedHolder::~tRisaDecompressedHolder()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		メモリ上のデータを展開する
-//! @param		method 圧縮メソッド
-//! @param		indata 入力データ
-//! @param		insize 入力データのサイズ
-//! @param		uncomp_size 入力データを展開した際のサイズ
 //---------------------------------------------------------------------------
 void tRisaDecompressedHolder::Decompress(tRisaDecompressedHolder::tMethod method, const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size)

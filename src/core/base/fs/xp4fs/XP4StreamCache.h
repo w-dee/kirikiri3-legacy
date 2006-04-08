@@ -36,14 +36,32 @@ class tRisaXP4StreamCache : public singleton_base<tRisaXP4StreamCache>
 	} Pool[MAX_ITEM];
 
 public:
+	//! @brief		コンストラクタ
 	tRisaXP4StreamCache();
+
+	//! @brief		デストラクタ
 	~tRisaXP4StreamCache();
 
 public:
+	//! @brief		ストリームを取得する
+	//! @param		pointer アーカイブインスタンスへのポインタ (識別に用いられる)
+	//! @param		name アーカイブファイル名
+	//! @return		ストリーム
 	tRisseBinaryStream * GetStream(void * pointer, const ttstr & name);
+
+	//! @brief		ストリームを解放する
+	//! @param		pointer アーカイブインスタンスへのポインタ
+	//! @param		stream ストリーム
 	void ReleaseStream(void * pointer, tRisseBinaryStream * stream);
+
+	//! @brief		指定されたポインタを持つストリームをすべて解放する
+	//! @param		pointer アーカイブインスタンスへのポインタ
 	void ReleaseStreamByPointer(void * pointer);
+
+	//! @brief		すべてのストリームを解放する
 	void ReleaseAll();
+
+	//! @brief		内容をクリアする
 	void Clear() { ReleaseAll(); }
 };
 //---------------------------------------------------------------------------

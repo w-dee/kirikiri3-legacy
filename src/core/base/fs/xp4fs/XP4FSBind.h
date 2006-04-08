@@ -24,10 +24,14 @@
 class tRisseNI_XP4FS : public tRisseNI_BaseFileSystem
 {
 public:
+	//! @brief		コンストラクタ
 	tRisseNI_XP4FS();
 
+	//! @brief		Risse コンストラクタ
 	risse_error Construct(risse_int numparams,
 		tRisseVariant **param, iRisseDispatch2 *risse_obj);
+
+	//! @brief		Risse 無効化関数
 	void Invalidate();
 
 	tRisaXP4FS * GetFileSystem() 
@@ -47,11 +51,15 @@ private:
 class tRisseNC_XP4FS : public tRisseNativeClass
 {
 public:
+	//! @brief		コンストラクタ
 	tRisseNC_XP4FS();
 
+	//! @brief		XP4FS クラスID
 	static risse_uint32 ClassID;
 
 private:
+	//! @brief		ネイティブインスタンスを作成して返す
+	//! @return		ネイティブインスタンス
 	tRisseNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
@@ -72,6 +80,7 @@ class tRisaXP4FSRegisterer :
 	protected depends_on<tRisaFileSystemRegisterer>
 {
 public:
+	//! @brief		コンストラクタ
 	tRisaXP4FSRegisterer();
 };
 //---------------------------------------------------------------------------

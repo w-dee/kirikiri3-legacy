@@ -70,39 +70,95 @@ public:
 	};
 
 public:
+	//! @brief		コンストラクタ
+	//! @param		framesize		フレームサイズ(2の累乗, 16～)
+	//! @param		oversamp		オーバーサンプリング係数(2の累乗, 2～)
+	//! @param		frequency		入力PCMのサンプリングレート
+	//! @param		channels		入力PCMのチャンネル数
+	//! @note		音楽用ではframesize=4096,oversamp=16ぐらいがよく、
+	//! @note		ボイス用ではframesize=128,oversamp=4ぐらいがよい。
 	tRisaPhaseVocoderDSP(unsigned int framesize, unsigned int oversamp,
 					unsigned int frequency, unsigned int channels);
+
+	//! @brief		デストラクタ
 	~tRisaPhaseVocoderDSP();
 
 	float GetTimeScale() const { return TimeScale; } //!< 時間軸方向のスケールを得る
+
+	//! @brief		時間軸方向のスケールを設定する
+	//! @param		v     スケール
 	void SetTimeScale(float v);
 
 	float GetFrequencyScale() const { return FrequencyScale; } //!< 周波数軸方向のスケールを得る
+
+	//! @brief		周波数軸方向のスケールを設定する
+	//! @param		v     スケール
 	void SetFrequencyScale(float v);
 
 	unsigned int GetInputHopSize() const { return InputHopSize; } //!< InputHopSizeを得る
 	unsigned int GetOutputHopSize() const { return OutputHopSize; } //!< OutputHopSize を得る
 
 private:
+	//! @brief		クリア
 	void Clear();
 
 public:
+	//! @brief		入力バッファの空きサンプルグラニュール数を得る
+	//! @return		入力バッファの空きサンプルグラニュール数
 	size_t GetInputFreeSize();
+
+	//! @brief		入力バッファの書き込みポインタを得る
+	//! @param		numsamplegranules 書き込みたいサンプルグラニュール数
+	//! @param		p1		ブロック1の先頭へのポインタを格納するための変数
+	//! @param		p1size	p1の表すブロックのサンプルグラニュール数
+	//! @param		p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
+	//! @param		p2size	p2の表すブロックのサンプルグラニュール数(0があり得る)
+	//! @return		空き容量が足りなければ偽、空き容量が足り、ポインタが返されれば真
+	//! @note		p1 と p2 のように２つのポインタとそのサイズが返されるのは、
+	//!				このバッファが実際はリングバッファで、リングバッファ内部のリニアなバッファ
+	//!				の終端をまたぐ可能性があるため。またがない場合はp2はNULLになるが、またぐ
+	//!				場合は p1 のあとに p2 に続けて書き込まなければならない。
 	bool GetInputBuffer(size_t numsamplegranules,
 		float * & p1, size_t & p1size,
 		float * & p2, size_t & p2size);
 
+	//! @brief		出力バッファの準備済みサンプルグラニュール数を得る
+	//! @return		出力バッファの準備済みサンプルグラニュール数
 	size_t GetOutputReadySize();
+
+	//! @brief		出力バッファの読み込みポインタを得る
+	//! @param		numsamplegranules 読み込みたいサンプルグラニュール数
+	//! @param		p1		ブロック1の先頭へのポインタを格納するための変数
+	//! @param		p1size	p1の表すブロックのサンプルグラニュール数
+	//! @param		p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
+	//! @param		p2size	p2の表すブロックのサンプルグラニュール数(0があり得る)
+	//! @return		準備されたサンプルが足りなければ偽、サンプルが足り、ポインタが返されれば真
+	//! @note		p1 と p2 のように２つのポインタとそのサイズが返されるのは、
+	//!				このバッファが実際はリングバッファで、リングバッファ内部のリニアなバッファ
+	//!				の終端をまたぐ可能性があるため。またがない場合はp2はNULLになるが、またぐ
+	//!				場合は p1 のあとに p2 を続けて読み出さなければならない。
 	bool GetOutputBuffer(size_t numsamplegranules,
 		const float * & p1, size_t & p1size,
 		const float * & p2, size_t & p2size);
 
+	//! @brief		処理を1ステップ行う
+	//! @return		処理結果を表すenum
 	tStatus Process();
 
 private:
+	//! @brief		インターリーブを解除し、窓関数を掛けながら転送
+	//! @param		dest 転送先
+	//! @param		src  転送元(チャンネルごとにインターリーブされている)
+	//! @param		win  窓関数
+	//! @param		len  転送するサンプルグラニュール数
 	void Deinterleave(float * dest, const float * src,
 					float * win, size_t len);
 
+	//! @brief		窓関数を掛けながら、インターリーブをしながら加算転送
+	//! @param		dest 転送先(チャンネルごとにインターリーブする)
+	//! @param		src  転送元
+	//! @param		win  窓関数
+	//! @param		len  転送するサンプルグラニュール数
 	void Interleave(float * dest, const float * src,
 					float * win, size_t len);
 

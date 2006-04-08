@@ -18,8 +18,6 @@ RISSE_DEFINE_SOURCE_ID(41279,59678,37773,16849,57737,10358,8969,57779);
 
 
 //---------------------------------------------------------------------------
-//! @brief		内容をクリアする
-//---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Clear()
 {
 	Events.clear();
@@ -29,9 +27,6 @@ void tRisaWaveSegmentQueue::Clear()
 
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaWaveSegmentQueueをエンキューする
-//! @param		queue		エンキューしたいtRisaWaveSegmentQueueオブジェクト
-//---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveSegmentQueue & queue)
 {
 	Enqueue(queue.Events); // events をエンキュー(こっちを先にしないとだめ)
@@ -40,9 +35,6 @@ void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveSegmentQueue & queue)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		tRisaWaveSegmentをエンキューする
-//! @param		queue		エンキューしたいtRisaWaveSegmentオブジェクト
 //---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveSegment & segment)
 {
@@ -72,10 +64,6 @@ void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveSegment & segment)
 
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaWaveEventをエンキューする
-//! @param		queue		エンキューしたいtRisaWaveEventオブジェクト
-//! @note		Offset は修正されないので注意
-//---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveEvent & event)
 {
 	Events.push_back(event);
@@ -83,9 +71,6 @@ void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveEvent & event)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		tRisaWaveSegmentの配列をエンキューする
-//! @param		queue		エンキューしたい std::dequeue<tRisaWaveSegment>オブジェクト
 //---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveSegment> & segments)
 {
@@ -97,9 +82,6 @@ void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveSegment> & segment
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		tRisaWaveEventの配列をエンキューする
-//! @param		queue		エンキューしたい std::dequeue<tRisaWaveEvent>オブジェクト
 //---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveEvent> & events)
 {
@@ -118,10 +100,6 @@ void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveEvent> & events)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		先頭から指定長さ分をデキューする
-//! @param		dest		格納先キュー(内容はクリアされる)
-//! @param		length		切り出す長さ(サンプルグラニュール単位)
 //---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 length)
 {
@@ -191,9 +169,6 @@ void tRisaWaveSegmentQueue::Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 le
 
 
 //---------------------------------------------------------------------------
-//! @brief		このキューの全体の長さを得る
-//! @return		このキューの長さ (サンプルグラニュール単位)
-//---------------------------------------------------------------------------
 risse_int64 tRisaWaveSegmentQueue::GetFilteredLength() const
 {
 	// キューの長さは すべての Segments のFilteredLengthの合計
@@ -207,10 +182,6 @@ risse_int64 tRisaWaveSegmentQueue::GetFilteredLength() const
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		このキューの長さを変化させる
-//! @param		new_total_filtered_length 新しいキューの長さ (サンプルグラニュール単位)
-//! @note		キュー中のSegments などの長さや Eventsの位置は線形補間される
 //---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_filtered_length)
 {
@@ -264,10 +235,6 @@ void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_filtered_length)
 
 
 //---------------------------------------------------------------------------
-//! @brief		フィルタされた位置からデコード位置へ変換を行う
-//! @param		pos フィルタされた位置
-//! @note		デコード位置
-//---------------------------------------------------------------------------
 risse_int64 tRisaWaveSegmentQueue::FilteredPositionToDecodePosition(risse_int64 pos) const
 {
 	// Segments の修正
@@ -296,8 +263,6 @@ risse_int64 tRisaWaveSegmentQueue::FilteredPositionToDecodePosition(risse_int64 
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		内容を標準エラー出力にダンプする(デバッグ用)
 //---------------------------------------------------------------------------
 void tRisaWaveSegmentQueue::Dump() const
 {

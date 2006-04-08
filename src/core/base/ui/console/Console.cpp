@@ -396,8 +396,6 @@ void tRisaLogViewerStatusBar::OnSize(wxSizeEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントテーブルの定義
-//---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRisaConsoleFrame, tRisaUIFrame)
 	EVT_TOOL(ID_Event,				tRisaConsoleFrame::OnEventTool)
 	EVT_UPDATE_UI(wxID_ANY,			tRisaConsoleFrame::OnUpdateUI)
@@ -405,8 +403,6 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaConsoleFrame::tRisaConsoleFrame() :
 	tRisaUIFrame(wxT("ui/console"), _("Console"))
@@ -435,8 +431,6 @@ tRisaConsoleFrame::tRisaConsoleFrame() :
 
 
 //---------------------------------------------------------------------------
-//! @brief		ログビューアにフォーカスを合わせる
-//---------------------------------------------------------------------------
 void tRisaConsoleFrame::SetFocusToLogViewer()
 {
 	ScrollView->SetFocus();
@@ -444,10 +438,6 @@ void tRisaConsoleFrame::SetFocusToLogViewer()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		テキストコントロールにフォーカスを合わせる
-//! @param		insert_code		テキストコントロールにフォーカスを合わせた際に
-//!								押されたキー (必要ならばこれを挿入する)
 //---------------------------------------------------------------------------
 void tRisaConsoleFrame::SetFocusToTextCtrl(int insert_code)
 {
@@ -457,9 +447,6 @@ void tRisaConsoleFrame::SetFocusToTextCtrl(int insert_code)
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Event" ボタンが押された
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
 void tRisaConsoleFrame::OnEventTool(wxCommandEvent & event)
 {
 	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
@@ -468,9 +455,6 @@ void tRisaConsoleFrame::OnEventTool(wxCommandEvent & event)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		UI アップデートイベントが発生したとき
-//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void tRisaConsoleFrame::OnUpdateUI(wxUpdateUIEvent & event)
 {

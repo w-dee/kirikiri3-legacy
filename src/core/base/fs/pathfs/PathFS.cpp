@@ -22,8 +22,6 @@ RISSE_DEFINE_SOURCE_ID(65407,38273,27682,16596,13498,36425,59585,4169);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaPathFS::tRisaPathFS()
 {
 	NeedRebuild = true;
@@ -32,19 +30,12 @@ tRisaPathFS::tRisaPathFS()
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaPathFS::~tRisaPathFS()
 {
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ファイル一覧を取得する
-//! @param		dirname ディレクトリ名
-//! @param		callback コールバックオブジェクト
-//! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tRisaPathFS::GetFileListAt(const ttstr & dirname,
 	tRisaFileSystemIterationCallback * callback)
@@ -71,10 +62,6 @@ size_t tRisaPathFS::GetFileListAt(const ttstr & dirname,
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルが存在するかどうかを得る
-//! @param		filename ファイル名
-//! @return		ファイルが存在する場合真
-//---------------------------------------------------------------------------
 bool tRisaPathFS::FileExists(const ttstr & filename)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -91,10 +78,6 @@ bool tRisaPathFS::FileExists(const ttstr & filename)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ディレクトリが存在するかどうかを得る
-//! @param		dirname ディレクトリ名
-//! @return		ディレクトリが存在する場合真
-//---------------------------------------------------------------------------
 bool tRisaPathFS::DirectoryExists(const ttstr & dirname)
 {
 	// PathFS にはサブディレクトリは存在しない
@@ -106,9 +89,6 @@ bool tRisaPathFS::DirectoryExists(const ttstr & dirname)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルを削除する
-//! @param		filename ファイル名
-//---------------------------------------------------------------------------
 void tRisaPathFS::RemoveFile(const ttstr & filename)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
@@ -116,10 +96,6 @@ void tRisaPathFS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ディレクトリを削除する
-//! @param		dirname ディレクトリ名
-//! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tRisaPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
@@ -129,10 +105,6 @@ void tRisaPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ディレクトリを作成する
-//! @param		dirname ディレクトリ名
-//! @param		recursive 再帰的にディレクトリを作成するかどうか
-//---------------------------------------------------------------------------
 void tRisaPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
@@ -140,10 +112,6 @@ void tRisaPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたファイルの stat を得る
-//! @param		filename ファイル名
-//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tRisaPathFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
@@ -167,11 +135,6 @@ void tRisaPathFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定されたファイルのストリームを得る
-//! @param		filename ファイル名
-//! @param		flags フラグ
-//! @return		ストリームオブジェクト
-//---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaPathFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -194,10 +157,6 @@ tRisseBinaryStream * tRisaPathFS::CreateStream(const ttstr & filename, risse_uin
 
 
 //---------------------------------------------------------------------------
-//! @brief		パスにディレクトリを追加する
-//! @brief		name: 名前
-//! @brief		recursive: 再帰的に名前を検索するかどうか
-//---------------------------------------------------------------------------
 void tRisaPathFS::Add(const ttstr & name, bool recursive)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -218,9 +177,6 @@ void tRisaPathFS::Add(const ttstr & name, bool recursive)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		パスからディレクトリを削除する
-//! @param		name 名前
 //---------------------------------------------------------------------------
 void tRisaPathFS::Remove(const ttstr & name)
 {
@@ -243,8 +199,6 @@ void tRisaPathFS::Remove(const ttstr & name)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ファイルシステム中のファイル名と実際のファイル名の対応表を作り直す
 //---------------------------------------------------------------------------
 void tRisaPathFS::Ensure()
 {

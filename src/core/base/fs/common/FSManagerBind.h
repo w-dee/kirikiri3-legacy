@@ -36,12 +36,17 @@ private:
 	iRisseDispatch2 * Owner; //!< このインスタンスを保持している Risse オブジェクト(AddRefしないこと)
 
 public:
+	//! @brief		コンストラクタ
+	//! @param		filesystem  ファイルシステムオブジェクト
+	//! @param		owner       このインスタンスを保持している Risse オブジェクト
 	tRisseNI_FileSystemNativeInstance(
 		boost::shared_ptr<tRisaFileSystem> filesystem,
 		iRisseDispatch2 * owner);
 
+	//! @brief		Risse 無効化関数
 	void Invalidate();
 
+	//! @brief		ファイルシステムをオブジェクトを得る
 	boost::shared_ptr<tRisaFileSystem> GetFileSystem() { return FileSystem; }
 
 private:
@@ -56,13 +61,20 @@ private:
 class tRisseNI_BaseFileSystem : public tRisseNativeInstance
 {
 public:
+	//! @brief		コンストラクタ
 	tRisseNI_BaseFileSystem();
 
+	//! @brief		Risse 無効化関数
 	void Invalidate();
 
+	//! @brief		ファイルシステムをオブジェクトを得る
 	boost::shared_ptr<tRisaFileSystem> & GetFileSystem() { return FileSystem; }
 
 protected:
+	//! @brief		tRisseNI_FileSystemNativeInstance をファイルシステムから構築し、
+	//!             オブジェクトに登録する
+	//! @param		risse_obj		登録先Risseオブジェクト
+	//! @param		fs_obj		ファイルシステムオブジェクト
 	void RegisterFileSystemNativeInstance(iRisseDispatch2 * risse_obj,
 		tRisaFileSystem * filesystem);
 
@@ -82,8 +94,10 @@ private:
 class tRisseNC_FileSystem : public tRisseNativeClass
 {
 public:
+	//! @brief   コンストラクタ
 	tRisseNC_FileSystem();
 
+	//! @brief   FileSystemクラスID
 	static risse_uint32 ClassID;
 };
 //---------------------------------------------------------------------------
@@ -106,9 +120,15 @@ class tRisaFileSystemRegisterer :
 	iRisseDispatch2 * FileSystemClass;
 
 public:
+	//! @brief		コンストラクタ
 	tRisaFileSystemRegisterer();
+
+	//! @brief		デストラクタ
 	~tRisaFileSystemRegisterer();
 
+	//! @brief		ファイルシステムにクラスオブジェクトを登録する
+	//! @param		name    クラス名
+	//! @param		object  クラスオブジェクト
 	void RegisterClassObject(const risse_char *name, iRisseDispatch2 * object);
 };
 //---------------------------------------------------------------------------

@@ -35,27 +35,55 @@ class tRisaPhaseVocoder : public tRisaBasicWaveFilter
 	tRisaWaveSegmentQueue SegmentQueue;
 
 public:
+	//! @brief		コンストラクタ
 	tRisaPhaseVocoder();
+
+	//! @brief		デストラクタ
 	~tRisaPhaseVocoder();
 
+	//! @brief		FFTフレームサイズを得る
+	//! @return		FFTフレームサイズ
 	int GetFrameSize() const;
+
+	//! @brief		FFTフレームサイズを設定する
+	//! @param		v FFTフレームサイズ
 	void SetFrameSize(int v);
 
+	//! @brief		オーバーサンプリング係数を得る
+	//! @return		オーバーサンプリング係数
 	int GetOverSampling() const;
+
+	//! @brief		オーバーサンプリング係数を設定する
+	//! @param		v オーバーサンプリング係数
 	void SetOverSampling(int v);
 
+	//! @brief		時間軸方向のスケールを得る
+	//! @return		時間軸方向のスケール
 	float GetTimeScale() const;
+
+	//! @brief		時間軸方向のスケールを設定する
+	//! @param		v 時間軸方向のスケール
 	void SetTimeScale(float v);
 
+	//! @brief		周波数軸方向のスケールを得る
+	//! @return		周波数軸方向のスケール
 	float GetFrequencyScale() const;
+
+	//! @brief		周波数軸方向のスケールを設定する
+	//! @param		v 周波数軸方向のスケール
 	void SetFrequencyScale(float v);
 
 private:
+	//! @brief		内容のクリア
 	void Clear();
 
+	//! @brief		DSPオブジェクトを作り直す
 	void RebuildDSP();
 
+	//! @brief		入力となるフィルタが変わったとき、あるいはリセットされるとき
 	void InputChanged();
+
+	//! @brief		フィルタ動作を行うとき
 	void Filter();
 
 };

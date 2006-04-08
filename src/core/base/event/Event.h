@@ -18,6 +18,53 @@
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
 
+/* @note
+Risa のイベントシステムについて
+
+■ 用語
+
+・発生元 (event source)
+  イベントを発生させる物
+
+・配信先 (event destination)
+  イベントを配信する先
+
+
+■ イベントの種類
+
+・同期イベント
+  発生源から直接呼び出されるイベント。
+
+・非同期イベント
+  発生源が一度イベントシステムにイベントをポストし、イベントシステムが非同期に
+  (あとで)そのイベントを配信先に届ける。
+
+・ペイントイベント
+  ウィンドウの再描画時に発生するイベント。基本的に非同期イベント。
+
+
+■ 非同期イベントの優先度
+
+・排他的イベント (exclusive event)
+  ほかの非同期イベントよりも優先して配信されるイベント。
+
+・通常イベント
+
+・ペイントイベント
+
+・低優先度イベント (low priority event)
+  ほかの非同期イベントをすべて処理し終わってから配信されるイベント。
+
+■ 非同期イベントの属性
+
+・破棄可能イベント (discardable event)
+  システムの負荷などによっては廃棄してもかまわないようなイベント。
+
+・シングルイベント (single event)
+  同じイベント名、優先度、同じ発生元のイベントがすでにキューにあれば(まだ配信さ
+  れていなければ)キューには入らないイベント。
+
+*/
 
 
 class tRisaEventInfo;
@@ -117,20 +164,53 @@ private:
 	bool HasPendingEvents; //!< post してから処理されていないイベントが存在する場合に真
 
 public:
+	//! @brief		コンストラクタ
 	tRisaEventSystem();
+
+	//! @brief		デストラクタ
 	~tRisaEventSystem();
 
 private:
-	void DiscardQueue(tQueue & queue);
+	//! @brief		指定された優先度のキューの中のイベントを配信する
+	//! @param		prio		優先度
+	//! @note		prio!=tRisaEventInfo::epExclusiveの場合、epExclusiveのイベントが
+	//!				ポストされたり、CanDeliverEvents が偽になった場合は即座に戻る。
 	void DeliverQueue(tRisaEventInfo::tPriority prio, risse_uint64 mastertick);
+
+	//! @brief		すべてのイベントを配信する
+	//! @param		mastertick	マスタ・ティックカウント
 	void DeliverEvents(risse_uint64 mastertick);
 
+	//! @brief		指定キュー中のイベントをすべて破棄する
+	//! @param		queue		キュー
+	void DiscardQueue(tQueue & queue);
+
 public:
+	//! @brief		イベントの配信処理を行う
+	//! @param		mastertick	マスタ・ティックカウント
+	//! @return		まだ処理すべきイベントがあるかどうか
+	//! @note		wxApp::ProcessIdle から呼ばれる
 	bool ProcessEvents(risse_uint64 mastertick);
+
+	//! @brief		イベントをポストする
+	//! @param		event		イベント
+	//! @param		type		イベントタイプ
 	void PostEvent(tRisaEventInfo * event, tEventType type = etDefault);
+
+
+	//! @brief		指定されたイベントがすでにキューに入っている数を数える
+	//! @param		id			イベントID
+	//! @param		source		イベント発生元
+	//! @param		prio		優先度
+	//! @param		limit		数え上げる最大値(0=全部数える)
+	//! @return		name と source と prio が一致するイベントがすでにキューにあるかどうか
 	size_t CountEventsInQueue(int id,
 		void * source, tRisaEventInfo::tPriority prio, size_t limit = 1);
+
+	//! @brief		イベントをキャンセルする
+	//! @param		source		キャンセルしたいイベントの発生元
 	void CancelEvents(void * source);
+
 	bool GetCanDeliverEvents() const { return CanDeliverEvents; } //!< イベントを配信可能かどうかを返す
 	void SetCanDeliverEvents(bool b) { CanDeliverEvents = b; } //!< イベントを配信可能かどうかを設定する
 };

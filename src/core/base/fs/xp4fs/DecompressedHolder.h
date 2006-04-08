@@ -35,16 +35,34 @@ public:
 		dhmZLib // zlib 圧縮
 	};
 
+	//! @brief		コンストラクタ(メモリ上のデータを展開する場合)
+	//! @param		method 圧縮メソッド
+	//! @param		indata 入力データ
+	//! @param		insize 入力データのサイズ
+	//! @param		uncomp_size 入力データを展開した際のサイズ
 	tRisaDecompressedHolder(tMethod method, const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size);
+
+	//! @brief		コンストラクタ(ストリーム上のデータを展開する場合)
+	//! @param		method 圧縮メソッド
+	//! @param		indata 入力ストリーム
+	//! @param		insize 入力データのサイズ
+	//! @param		uncomp_size 入力データを展開した際のサイズ
 	tRisaDecompressedHolder(tMethod method, tRisseBinaryStream * instream, risse_size insize, 
 		risse_size uncomp_size);
+
+	//!@brief		デストラクタ
 	~tRisaDecompressedHolder();
 
 	risse_size GetSize() const { return Size; } //!< サイズを返す
 	risse_uint8 * GetData() const { return Data; } //!< データブロックを返す
 
 private:
+	//! @brief		メモリ上のデータを展開する
+	//! @param		method 圧縮メソッド
+	//! @param		indata 入力データ
+	//! @param		insize 入力データのサイズ
+	//! @param		uncomp_size 入力データを展開した際のサイズ
 	void Decompress(tMethod method, const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size);
 };

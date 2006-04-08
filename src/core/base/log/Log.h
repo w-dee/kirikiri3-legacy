@@ -61,20 +61,39 @@ private:
 	bool LogSending; //!< レシーバにログを送っている最中に真
 
 public:
+	//! @brief		コンストラクタ
 	tRisaLogger();
+
+	//! @brief		デストラクタ
 	~tRisaLogger();
 
 public:
 	const tRisaRingBuffer<tItem> & GetBuffer() const 
 		{ return Buffer; } //!< Buffer への参照を得る
 
+	//! @brief		PreserveBuffer の内容を指定のtRisaLogReceiverに送る
+	//! @param		target		ログの送り先となるレシーバオブジェクト
 	void SendPreservedLogs(tRisaLogReceiver *target);
+
+	//! @brief		指定行分のログを指定のtRisaLogReceiverに送る
+	//! @param		target		ログの送り先となるレシーバオブジェクト
+	//! @param		maxitems	送るログの最大行数 (これよりもtRisaLoggerが保持している
+	//!							ログのサイズが大きい場合は、最後の maxitems 個が送られる)
 	void SendLogs(tRisaLogReceiver *target, size_t maxitems = static_cast<size_t>(-1L));
 
+	//! @brief		ログを受信するための tRisaLogReceiver を登録する
+	//! @param		receiver	レシーバオブジェクト
 	void RegisterReceiver(tRisaLogReceiver * receiver);
+
+	//! @brief		ログを受信するための tRisaLogReceiver の登録を解除する
+	//! @param		receiver	レシーバオブジェクト
 	void UnregisterReceiver(tRisaLogReceiver * receiver);
 
 private:
+	//! @brief		ログを記録する
+	//! @param		content		ログの内容
+	//! @param		level		ログレベル
+	//! @param		linkinfo	リンク情報
 	void InternalLog(const ttstr & content, tLevel level = llInfo,
 		const ttstr & linkinfo = RisseEmptyString);
 
@@ -125,11 +144,15 @@ class tRisaWxLogProxy :
 	wxLog * OldLog; //!< このオブジェクトが作成される前に存在していたActiveなログ
 
 public:
+	//! @brief		コンストラクタ
 	tRisaWxLogProxy();
+
+	//! @brief		コンストラクタ
 	~tRisaWxLogProxy();
 
 protected:
-	// implement sink function
+	//! @brief		ログを行う
+	//! @note		wxWidgets の wxLog クラスの説明を参照のこと
 	virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
 
 	DECLARE_NO_COPY_CLASS(tRisaWxLogProxy)

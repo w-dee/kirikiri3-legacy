@@ -27,9 +27,15 @@ class tRisaSystemRegisterer :
 	iRisseDispatch2 * SystemClass;
 
 public:
+	//! @brief		コンストラクタ
 	tRisaSystemRegisterer();
+
+	//! @brief デストラクタ
 	~tRisaSystemRegisterer();
 
+	//! @brief		System.exceptionHandler を得る
+	//! @param		dest		exceptionHandler を格納するクロージャ
+	//! @return		正常な exceptionHandler を得られれば真、得られなければ偽
 	bool GetExceptionHandlerObject(tRisseVariantClosure & dest);
 };
 //---------------------------------------------------------------------------

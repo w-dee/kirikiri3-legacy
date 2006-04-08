@@ -71,16 +71,26 @@ private:
 
 
 public:
+	//! @brief		コンストラクタ
 	tRisaOpenAL();
+
+	//! @brief		デストラクタ
 	~tRisaOpenAL();
 
 private:
+	//! @brief		クリーンアップ処理
 	void Clear();
 
 public:
+	//! @brief		現在のエラーに対応する例外を投げる
+	//! @param		message メッセージ
+	//! @note		エラーが何も発生していない場合は何もしない
 	void ThrowIfError(const risse_char * message);
+
+	//! @brief		OpenAL のエラー状態をクリアする
 	void ClearErrorState();
-	tRisaCriticalSection & GetCS() { return CS; }
+
+	tRisaCriticalSection & GetCS() { return CS; } //!< このオブジェクトを保護しているCSを得る
 };
 //---------------------------------------------------------------------------
 #endif

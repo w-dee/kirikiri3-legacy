@@ -708,8 +708,6 @@ void tRisaScriptEditorStatusBar::OnSize(wxSizeEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントテーブルの定義
-//---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRisaScriptEditorFrame, tRisaUIFrame)
 EVT_MENU(ID_Command_Execute,			tRisaScriptEditorFrame::OnCommandExecute)
 EVT_BUTTON(ID_Command_Execute,			tRisaScriptEditorFrame::OnCommandExecute)
@@ -718,8 +716,6 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaScriptEditorFrame::tRisaScriptEditorFrame() :
 	tRisaUIFrame(wxT("ui/editor"), _("Script Editor"))
@@ -734,9 +730,6 @@ tRisaScriptEditorFrame::tRisaScriptEditorFrame() :
 
 
 //---------------------------------------------------------------------------
-//! @brief		編集内容を設定する
-//! @param		content		編集内容
-//---------------------------------------------------------------------------
 void tRisaScriptEditorFrame::SetContent(const wxString & content)
 {
 	TextCtrl->SetValue(content);
@@ -744,9 +737,6 @@ void tRisaScriptEditorFrame::SetContent(const wxString & content)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		書き込み禁止かどうかを設定する
-//! @param		b		書き込み禁止かどうか
 //---------------------------------------------------------------------------
 void tRisaScriptEditorFrame::SetReadOnly(bool b)
 {
@@ -756,9 +746,6 @@ void tRisaScriptEditorFrame::SetReadOnly(bool b)
 
 
 //---------------------------------------------------------------------------
-//! @brief		キャレットを指定行に移動する
-//! @param		pos		論理行
-//---------------------------------------------------------------------------
 void tRisaScriptEditorFrame::SetLinePosition(unsigned long pos)
 {
 	TextCtrl->GoToLine(pos);
@@ -766,9 +753,6 @@ void tRisaScriptEditorFrame::SetLinePosition(unsigned long pos)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ステータスバーの文字列を設定する
-//! @param		status	ステータスバーに表示したい文字列
 //---------------------------------------------------------------------------
 void tRisaScriptEditorFrame::SetStatusString(const wxString & status)
 {
@@ -778,9 +762,6 @@ void tRisaScriptEditorFrame::SetStatusString(const wxString & status)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「実行」メニューや実行ボタンが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
 void tRisaScriptEditorFrame::OnCommandExecute(wxCommandEvent & event)
 {
 	TextCtrl->Execute();
@@ -788,9 +769,6 @@ void tRisaScriptEditorFrame::OnCommandExecute(wxCommandEvent & event)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		TextCtrl の UI アップデートイベントが発生したとき
-//! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
 void tRisaScriptEditorFrame::OnTextCtrlUpdateUI(wxUpdateUIEvent & event)
 {

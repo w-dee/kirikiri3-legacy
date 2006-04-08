@@ -75,8 +75,6 @@ static void RisaCrossFadeBlend(void *dest, void *src1, void *src2,
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaWaveLoopManager::tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> decoder)
 {
 	Position = 0;
@@ -100,8 +98,6 @@ tRisaWaveLoopManager::tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> d
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaWaveLoopManager::~tRisaWaveLoopManager()
 {
 	ClearCrossFadeInformation();
@@ -110,9 +106,6 @@ tRisaWaveLoopManager::~tRisaWaveLoopManager()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		デコーダを設定する
-//! @param		decoder		デコーダ
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decoder)
 {
@@ -124,10 +117,6 @@ void tRisaWaveLoopManager::SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decode
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定インデックスのフラグを得る
-//! @param		index    フラグのインデックス
-//! @return		そのインデックスに対応するフラグの値
-//---------------------------------------------------------------------------
 int tRisaWaveLoopManager::GetFlag(risse_int index)
 {
 	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
@@ -136,10 +125,6 @@ int tRisaWaveLoopManager::GetFlag(risse_int index)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		フラグをすべて一気にコピーする
-//! @param		dest		コピー先
-//! @note		この関数を呼ぶと FlagsModifiedByLabelExpression は偽にリセットされる
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::CopyFlags(risse_int *dest)
 {
@@ -152,10 +137,6 @@ void tRisaWaveLoopManager::CopyFlags(risse_int *dest)
 
 
 //---------------------------------------------------------------------------
-//! @brief		フラグがラベル式によって変更されたかどうかが返される
-//! @return		フラグがラベル式によって変更されたかどうか
-//! @note		このフラグは CopyFlags により偽にリセットされる
-//---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetFlagsModifiedByLabelExpression()
 {
 	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
@@ -164,10 +145,6 @@ bool tRisaWaveLoopManager::GetFlagsModifiedByLabelExpression()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定インデックスのフラグを設定する
-//! @param		index		フラグのインデックス
-//! @param		f			フラグの値
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetFlag(risse_int index, risse_int f)
 {
@@ -180,8 +157,6 @@ void tRisaWaveLoopManager::SetFlag(risse_int index, risse_int f)
 
 
 //---------------------------------------------------------------------------
-//! @brief		フラグをすべて 0 にする
-//---------------------------------------------------------------------------
 void tRisaWaveLoopManager::ClearFlags()
 {
 	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
@@ -190,8 +165,6 @@ void tRisaWaveLoopManager::ClearFlags()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		リンクやラベルをすべてクリアする
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::ClearLinksAndLabels()
 {
@@ -206,9 +179,6 @@ void tRisaWaveLoopManager::ClearLinksAndLabels()
 
 
 //---------------------------------------------------------------------------
-//! @brief		リンクの配列を得る
-//! @return		リンクの配列への参照
-//---------------------------------------------------------------------------
 const std::vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
 {
 	volatile tRisaCriticalSection::tLocker
@@ -218,9 +188,6 @@ const std::vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ラベルの配列を得る
-//! @return		ラベルの配列への参照
 //---------------------------------------------------------------------------
 const std::vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
 {
@@ -232,9 +199,6 @@ const std::vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		リンクの配列を設定する
-//! @param		links		設定したい配列
-//---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetLinks(const std::vector<tRisaWaveLoopLink> & links)
 {
 	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
@@ -244,9 +208,6 @@ void tRisaWaveLoopManager::SetLinks(const std::vector<tRisaWaveLoopLink> & links
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ラベルの配列を設定する
-//! @param		links		設定したい配列
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetLabels(const std::vector<tRisaWaveLabel> & labels)
 {
@@ -258,9 +219,6 @@ void tRisaWaveLoopManager::SetLabels(const std::vector<tRisaWaveLabel> & labels)
 
 
 //---------------------------------------------------------------------------
-//! @brief		リンクを無視しながら再生しているかどうかを返す
-//! @return		リンクを無視しながら再生しているかどうか
-//---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetIgnoreLinks() const
 {
 	volatile tRisaCriticalSection::tLocker
@@ -271,9 +229,6 @@ bool tRisaWaveLoopManager::GetIgnoreLinks() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		リンクを無視しながら再生しているかどうかを設定する
-//! @param		b		リンクを蒸ししながら再生するかどうか
-//---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetIgnoreLinks(bool b)
 {
 	volatile tRisaCriticalSection::tLocker CS(DataCS);
@@ -282,9 +237,6 @@ void tRisaWaveLoopManager::SetIgnoreLinks(bool b)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		現在のデコード位置を得る
-//! @return		現在のデコード位置
 //---------------------------------------------------------------------------
 risse_int64 tRisaWaveLoopManager::GetPosition() const
 {
@@ -297,9 +249,6 @@ risse_int64 tRisaWaveLoopManager::GetPosition() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		現在のデコード位置を設定する
-//! @param		pos		現在のデコード位置
-//---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SetPosition(risse_int64 pos)
 {
 	volatile tRisaCriticalSection::tLocker CS(DataCS);
@@ -310,13 +259,6 @@ void tRisaWaveLoopManager::SetPosition(risse_int64 pos)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		デコードを行う
-//! @param		dest		デコード結果を格納するバッファ
-//! @param		samples		デコードを行いたいサンプル数
-//! @param		written		実際にデコード出来たサンプル数
-//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
-//! @return		まだデコードすべきデータが残っているかどうか
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &written,
 		tRisaWaveSegmentQueue & segmentqueue)
@@ -564,9 +506,6 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 
 //---------------------------------------------------------------------------
-//! @brief		PCMフォーマットを提案する
-//! @param		format   PCMフォーマット
-//---------------------------------------------------------------------------
 void tRisaWaveLoopManager::SuggestFormat(const tRisaWaveFormat & format)
 {
 	// PCM 形式の変更は、最初に Render が呼ばれるよりも前でなければならない
@@ -579,9 +518,6 @@ void tRisaWaveLoopManager::SuggestFormat(const tRisaWaveFormat & format)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		PCM形式を返す
-//! @return		PCM形式への参照
 //---------------------------------------------------------------------------
 const tRisaWaveFormat & tRisaWaveLoopManager::GetFormat()
 {
@@ -596,12 +532,6 @@ const tRisaWaveFormat & tRisaWaveLoopManager::GetFormat()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定位置以降で、指定位置にもっとも近いリンクの始点を探す
-//! @param		current		検索開始位置
-//! @param		link		見つかったリンクを書き込む先
-//! @param		ignore_conditions	リンク条件を無視して検索を行うかどうか
-//! @return		リンクが見つかれば真、見つからなければ偽
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetNearestLink(risse_int64 current,
 		tRisaWaveLoopLink & link, bool ignore_conditions)
@@ -703,11 +633,6 @@ bool tRisaWaveLoopManager::GetNearestLink(risse_int64 current,
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定位置以降で指定位置未満の中のイベント(ラベル)を取得する
-//! @param		from		検索開始位置
-//! @param		to			検索終了位置
-//! @param		events		結果を格納する配列
-//---------------------------------------------------------------------------
 void tRisaWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
 		std::deque<tRisaWaveEvent> & events)
 {
@@ -760,14 +685,6 @@ void tRisaWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
 
 
 //---------------------------------------------------------------------------
-//! @brief		クロスフェードを行う
-//! @param		dest		結果格納先
-//! @param		src1		ソース1 (消えていく方)
-//! @param		src2		ソース2 (入ってくる方)
-//! @param		ratiostart	ブレンド率の開始値(%)
-//! @param		ratioend	ブレンド率の終了値(%)
-//! @param		samples		この関数の呼び出しで処理すべきサンプル数
-//---------------------------------------------------------------------------
 void tRisaWaveLoopManager::DoCrossFade(void *dest, void *src1,
 	void *src2, risse_int samples, risse_int ratiostart, risse_int ratioend)
 {
@@ -805,8 +722,6 @@ void tRisaWaveLoopManager::DoCrossFade(void *dest, void *src1,
 
 
 //---------------------------------------------------------------------------
-//! @brief		内部にキャッシュされているクロスフェードの情報をクリアする
-//---------------------------------------------------------------------------
 void tRisaWaveLoopManager::ClearCrossFadeInformation()
 {
 	if(CrossFadeSamples) delete [] CrossFadeSamples, CrossFadeSamples = NULL;
@@ -814,14 +729,6 @@ void tRisaWaveLoopManager::ClearCrossFadeInformation()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ラベル式を解析する
-//! @param		label		ラベル式
-//! @param		ope			演算子
-//! @param		lv			左辺値
-//! @param		rv			右辺値
-//! @param		is_rv_indirect	右辺値が間接参照の場合は真、そうでない場合は偽が格納される
-//! @param		解析に成功すれば真、式が間違っているなどで失敗したら偽
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetLabelExpression(const tRisaLabelStringType &label,
 	tRisaWaveLoopManager::tExpressionToken * ope,
@@ -902,10 +809,6 @@ bool tRisaWaveLoopManager::GetLabelExpression(const tRisaLabelStringType &label,
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラベル式を評価する
-//! @param		label		ラベル
-//! @return		評価に成功すれば真、失敗すれば偽
-//---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::EvalLabelExpression(const tRisaLabelStringType &label)
 {
 	// eval expression specified by 'label'
@@ -958,11 +861,6 @@ bool tRisaWaveLoopManager::EvalLabelExpression(const tRisaLabelStringType &label
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラベル式のトークンを切り出して返す
-//! @param		p		切り出し開始位置
-//! @param		value	トークンの値を格納する変数へのアドレス
-//! @return		トークンのタイプ
-//---------------------------------------------------------------------------
 tRisaWaveLoopManager::tExpressionToken
 	tRisaWaveLoopManager::GetExpressionToken(const tRisaLabelCharType *  & p, risse_int * value)
 {
@@ -1013,11 +911,6 @@ tRisaWaveLoopManager::tExpressionToken
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラベル式から整数値を得る
-//! @param		s		解析開始位置
-//! @param		v		値を格納する変数
-//! @return		解析に成功すれば真
-//---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetLabelCharInt(const tRisaLabelCharType *s, risse_int &v)
 {
 	// convert string to integer
@@ -1046,11 +939,6 @@ bool tRisaWaveLoopManager::GetLabelCharInt(const tRisaLabelCharType *s, risse_in
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列から整数値を得る
-//! @param		s		解析開始位置
-//! @param		v		値を格納する変数
-//! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetInt(char *s, risse_int &v)
 {
@@ -1081,11 +969,6 @@ bool tRisaWaveLoopManager::GetInt(char *s, risse_int &v)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列から64bit整数値を得る
-//! @param		s		解析開始位置
-//! @param		v		値を格納する変数
-//! @return		解析に成功すれば真
-//---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetInt64(char *s, risse_int64 &v)
 {
 	// convert string to integer
@@ -1115,11 +998,6 @@ bool tRisaWaveLoopManager::GetInt64(char *s, risse_int64 &v)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列から真偽値を得る
-//! @param		s		解析開始位置
-//! @param		v		値を格納する変数
-//! @return		解析に成功すれば真
-//---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetBool(char *s, bool &v)
 {
 	// convert string to boolean
@@ -1132,11 +1010,6 @@ bool tRisaWaveLoopManager::GetBool(char *s, bool &v)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列からリンク条件を得る
-//! @param		s		解析開始位置
-//! @param		v		値を格納する変数
-//! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetCondition(char *s, tRisaWaveLoopLink::tLinkCondition &v)
 {
@@ -1153,11 +1026,6 @@ bool tRisaWaveLoopManager::GetCondition(char *s, tRisaWaveLoopLink::tLinkConditi
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列リテラルを取得する
-//! @param		s		解析開始位置
-//! @param		v		値を格納する変数
-//! @return		解析に成功すれば真
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 {
@@ -1194,14 +1062,6 @@ bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		name=value の形式になっている name と value を取得する
-//! @param		p		解析開始位置
-//! @param		name	name の部分の最初を表すポインタ
-//! @param		value   value の部分の最初を表すポインタ
-//! @return		解析に成功すれば真
-//! @note		このメソッドは、name および value が終了する位置に \0 を書き込む。
-//!				つまり、p を破壊する。
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)
 {
@@ -1276,11 +1136,6 @@ bool tRisaWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)
 
 
 //---------------------------------------------------------------------------
-//! @brief		リンク情報を文字列から読み取る
-//! @param		p		読み取り開始位置
-//! @param		link	情報格納先クラス
-//! @return		読み取りに成功すれば真
-//---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::ReadLinkInformation(char * & p, tRisaWaveLoopLink &link)
 {
 	// read link information from 'p'.
@@ -1337,11 +1192,6 @@ bool tRisaWaveLoopManager::ReadLinkInformation(char * & p, tRisaWaveLoopLink &li
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラベル情報を文字列から読み取る
-//! @param		p		読み取り開始位置
-//! @param		link	情報格納先クラス
-//! @return		読み取りに成功すれば真
-//---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::ReadLabelInformation(char * & p, tRisaWaveLabel &label)
 {
 	// read label information from 'p'.
@@ -1389,10 +1239,6 @@ bool tRisaWaveLoopManager::ReadLabelInformation(char * & p, tRisaWaveLabel &labe
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		リンク情報やラベル情報を文字列から読み取る
-//! @param		p		読み取り開始位置
-//! @return		読み取りに成功すれば真
 //---------------------------------------------------------------------------
 bool tRisaWaveLoopManager::ReadInformation(char * p)
 {

@@ -93,12 +93,24 @@ class tRisaWaveDecoderFactoryManager : public singleton_base<tRisaWaveDecoderFac
 	tMap Map; //!< 拡張子→ファクトリのマップ
 
 public:
+	//! @brief	 	コンストラクタ
 	tRisaWaveDecoderFactoryManager();
+
+	//! @brief	 	デストラクタ
 	~tRisaWaveDecoderFactoryManager();
 
+	//! @brief	 	ファクトリを登録する
+	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
+	//! @param		factory		ファクトリ
 	void Register(const ttstr & extension, boost::shared_ptr<tRisaWaveDecoderFactory> factory);
+
+	//! @brief	 	ファクトリの登録を解除する
+	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
 	void Unregister(const ttstr & extension);
 
+	//! @brief	 	デコーダを作成する
+	//! @param		filename ファイル名
+	//! @return		作成されたデコーダの shared_ptr
 	boost::shared_ptr<tRisaWaveDecoder> Create(const ttstr & filename);
 };
 //---------------------------------------------------------------------------

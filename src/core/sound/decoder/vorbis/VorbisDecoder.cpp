@@ -22,9 +22,6 @@ RISSE_DEFINE_SOURCE_ID(11001,39824,8006,19566,26243,29715,33801,62487);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		filename   ファイル名
-//---------------------------------------------------------------------------
 tRisaOggVorbisDecoder::tRisaOggVorbisDecoder(const ttstr & filename)
 {
 	CurrentSection = -1;
@@ -46,9 +43,6 @@ tRisaOggVorbisDecoder::tRisaOggVorbisDecoder(const ttstr & filename)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//! @param		filename   ファイル名
-//---------------------------------------------------------------------------
 tRisaOggVorbisDecoder::~tRisaOggVorbisDecoder()
 {
 	ov_clear(&InputFile);
@@ -57,9 +51,6 @@ tRisaOggVorbisDecoder::~tRisaOggVorbisDecoder()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		PCMフォーマットを提案する
-//! @param		format   PCMフォーマット
 //---------------------------------------------------------------------------
 void tRisaOggVorbisDecoder::SuggestFormat(const tRisaWaveFormat & format)
 {
@@ -71,9 +62,6 @@ void tRisaOggVorbisDecoder::SuggestFormat(const tRisaWaveFormat & format)
 
 
 //---------------------------------------------------------------------------
-//! @brief		サウンド情報を得る
-//! @param		fileinfo   情報を格納するための構造体
-//---------------------------------------------------------------------------
 void tRisaOggVorbisDecoder::GetFormat(tRisaWaveFileInfo & fileinfo)
 {
 	fileinfo = FileInfo;
@@ -81,15 +69,6 @@ void tRisaOggVorbisDecoder::GetFormat(tRisaWaveFileInfo & fileinfo)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		サウンドをレンダリングする
-//! @param		buf					データ格納先バッファ
-//! @param		bufsamplelen		バッファのサンプル数(サンプルグラニュール単位)
-//! @param		rendered			実際にレンダリングが行われたサンプル数
-//! @return		サウンドの最後に達すると偽、それ以外は真
-//! @note		rendered != bufsamplelen の場合はサウンドの最後に達したことを
-//!				示さない。返値が偽になったかどうかでサウンドの最後に達したかどうかを
-//!				判断すること。
 //---------------------------------------------------------------------------
 bool tRisaOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
 {
@@ -167,10 +146,6 @@ bool tRisaOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uin
 
 
 //---------------------------------------------------------------------------
-//! @brief		デコード位置を変更する
-//! @param		samplepos		変更したい位置
-//! @return		デコード位置の変更に成功すると真
-//---------------------------------------------------------------------------
 bool tRisaOggVorbisDecoder::SetPosition(risse_uint64 samplepos)
 {
 	if(0 != ov_pcm_seek(&InputFile, samplepos))
@@ -180,9 +155,6 @@ bool tRisaOggVorbisDecoder::SetPosition(risse_uint64 samplepos)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		サウンドを開く
-//! @return		開くことに成功すれば真
 //---------------------------------------------------------------------------
 bool tRisaOggVorbisDecoder::Open()
 {
@@ -232,8 +204,6 @@ bool tRisaOggVorbisDecoder::Open()
 
 
 //---------------------------------------------------------------------------
-//! @brief		読み込み関数
-//---------------------------------------------------------------------------
 size_t tRisaOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
 	// read function (wrapper for tRisseBinaryStream)
@@ -247,8 +217,6 @@ size_t tRisaOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, vo
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		シーク関数
 //---------------------------------------------------------------------------
 int tRisaOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int whence)
 {
@@ -286,8 +254,6 @@ int tRisaOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int w
 
 
 //---------------------------------------------------------------------------
-//! @brief		クローズ関数
-//---------------------------------------------------------------------------
 int tRisaOggVorbisDecoder::close_func(void *datasource)
 {
 	// close function (wrapper for tRisseBinaryStream)
@@ -299,8 +265,6 @@ int tRisaOggVorbisDecoder::close_func(void *datasource)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		tell関数
 //---------------------------------------------------------------------------
 long tRisaOggVorbisDecoder::tell_func(void *datasource)
 {

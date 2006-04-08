@@ -31,8 +31,6 @@ RISSE_DEFINE_SOURCE_ID(57835,14019,1274,20023,25994,43742,64617,60148);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaFileSystemManager::tRisaFileSystemManager()
 {
 	// カレントディレクトリを / に設定
@@ -41,8 +39,6 @@ tRisaFileSystemManager::tRisaFileSystemManager()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		デストラクタ
 //---------------------------------------------------------------------------
 tRisaFileSystemManager::~tRisaFileSystemManager()
 {
@@ -78,11 +74,6 @@ tRisaFileSystemManager::~tRisaFileSystemManager()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ファイルシステムをマウントする
-//! @param		point マウントポイント
-//! @param		fs_risseobj ファイルシステムオブジェクトを表すRisseオブジェクト
-//! @note		メインスレッド以外から呼び出さないこと
 //---------------------------------------------------------------------------
 void tRisaFileSystemManager::Mount(const ttstr & point,
 	iRisseDispatch2 * fs_risseobj)
@@ -123,10 +114,6 @@ void tRisaFileSystemManager::Mount(const ttstr & point,
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルシステムをアンマウントする
-//! @param		point マウントポイント
-//! @note		メインスレッド以外から呼び出さないこと
-//---------------------------------------------------------------------------
 void tRisaFileSystemManager::Unmount(const ttstr & point)
 {
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
@@ -160,10 +147,6 @@ void tRisaFileSystemManager::Unmount(const ttstr & point)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルシステムをアンマウントする
-//! @param		fs_risseobj アンマウントしたいファイルシステムを表すRisseオブジェクト
-//! @note		メインスレッド以外から呼び出さないこと
-//---------------------------------------------------------------------------
 void tRisaFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -187,10 +170,6 @@ void tRisaFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		パスを正規化する
-//! @param		path 正規化したいパス
-//! @return		正規化されたパス
 //---------------------------------------------------------------------------
 ttstr tRisaFileSystemManager::NormalizePath(const ttstr & path)
 {
@@ -265,12 +244,6 @@ ttstr tRisaFileSystemManager::NormalizePath(const ttstr & path)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイル一覧を取得する
-//! @param		dirname ディレクトリ名
-//! @param		callback コールバックオブジェクト
-//! @param		recursive 再帰的にファイル一覧を得るかどうか
-//! @return		取得できたファイル数
-//---------------------------------------------------------------------------
 size_t tRisaFileSystemManager::GetFileListAt(const ttstr & dirname,
 	tRisaFileSystemIterationCallback * callback, bool recursive)
 {
@@ -335,10 +308,6 @@ size_t tRisaFileSystemManager::GetFileListAt(const ttstr & dirname,
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルが存在するかどうかを得る
-//! @param		filename ファイル名
-//! @return		ファイルが存在する場合真
-//---------------------------------------------------------------------------
 bool tRisaFileSystemManager::FileExists(const ttstr & filename)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -361,10 +330,6 @@ bool tRisaFileSystemManager::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ディレクトリが存在するかどうかを得る
-//! @param		dirname ディレクトリ名
-//! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
 bool tRisaFileSystemManager::DirectoryExists(const ttstr & dirname)
 {
@@ -389,9 +354,6 @@ bool tRisaFileSystemManager::DirectoryExists(const ttstr & dirname)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルを削除する
-//! @param		filename ファイル名
-//---------------------------------------------------------------------------
 void tRisaFileSystemManager::RemoveFile(const ttstr & filename)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -413,10 +375,6 @@ void tRisaFileSystemManager::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ディレクトリを削除する
-//! @param		dirname ディレクトリ名
-//! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tRisaFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
@@ -440,10 +398,6 @@ void tRisaFileSystemManager::RemoveDirectory(const ttstr & dirname, bool recursi
 
 
 //---------------------------------------------------------------------------
-//! @brief		ディレクトリを作成する
-//! @param		dirname ディレクトリ名
-//! @param		recursive 再帰的にディレクトリを作成するかどうか
-//---------------------------------------------------------------------------
 void tRisaFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursive)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -466,10 +420,6 @@ void tRisaFileSystemManager::CreateDirectory(const ttstr & dirname, bool recursi
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定されたファイルの stat を得る
-//! @param		filename ファイル名
-//! @param		struc stat 結果の出力先
-//---------------------------------------------------------------------------
 void tRisaFileSystemManager::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -491,11 +441,6 @@ void tRisaFileSystemManager::Stat(const ttstr & filename, tRisaStatStruc & struc
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたファイルのストリームを得る
-//! @param		filename ファイル名
-//! @param		flags フラグ
-//! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaFileSystemManager::CreateStream(const ttstr & filename,
 	risse_uint32 flags)
@@ -529,11 +474,6 @@ tRisseBinaryStream * tRisaFileSystemManager::CreateStream(const ttstr & filename
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイル一覧を取得する(内部関数)
-//! @param		dirname ディレクトリ名(正規化されているべきこと)
-//! @param		callback コールバック先
-//! @callback	コールバックオブジェクト
-//---------------------------------------------------------------------------
 size_t tRisaFileSystemManager::InternalGetFileListAt(
 	const ttstr & dirname,
 	tRisaFileSystemIterationCallback * callback)
@@ -558,13 +498,6 @@ size_t tRisaFileSystemManager::InternalGetFileListAt(
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定された正規フルパスに対応するファイルシステムを得る
-//! @param		fullpath 正規フルパス
-//! @param		fspath ファイルシステム内におけるパス(興味がない場合はNULL可、最初の / は含まれない)
-//! @return		ファイルシステムインスタンス
-//! @note		このメソッドはスレッド保護されていないため、このメソッドを呼ぶ場合は
-//!				CriticalSection 内で呼ぶこと！
 //---------------------------------------------------------------------------
 boost::shared_ptr<tRisaFileSystem> tRisaFileSystemManager::GetFileSystemAt(
 					const ttstr & fullpath, ttstr * fspath)
@@ -625,10 +558,6 @@ boost::shared_ptr<tRisaFileSystem> tRisaFileSystemManager::GetFileSystemAt(
 
 
 //---------------------------------------------------------------------------
-//! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる
-//! @param		filename  マウントポイント
-//! @note		この関数は例外を発生させるため呼び出し元には戻らない
-//---------------------------------------------------------------------------
 void tRisaFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 {
 	eRisaException::Throw(
@@ -638,8 +567,6 @@ void tRisaFileSystemManager::ThrowNoFileSystemError(const ttstr & filename)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「そのようなファイルやディレクトリは無い」例外を発生させる
-//---------------------------------------------------------------------------
 void tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 {
 	eRisaException::Throw(
@@ -648,12 +575,6 @@ void tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		パス名を拡張子より前と拡張子に分離する ( /path/to/file.ext を /path/to/file と .ext に分離する )
-//! @param		in 入力パス名
-//! @param		other [out] 拡張子より前の部分へポインタ(興味ない場合はNULL可)
-//! @param		name [out] 拡張子へのポインタ(興味ない場合はNULL可)  拡張子には .(ドット) を含む。拡張子がない場合は空文字列になる
-//! @note		in と そのほかのパラメータに同じ文字列を指定しないこと
 //---------------------------------------------------------------------------
 void tRisaFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, ttstr * ext)
 {
@@ -688,12 +609,6 @@ void tRisaFileSystemManager::SplitExtension(const ttstr & in, ttstr * other, tts
 
 
 //---------------------------------------------------------------------------
-//! @brief		パス名をパスと名前に分離する ( /path/to/file を /path/to と file に分離する )
-//! @param		in 入力パス名
-//! @param		path [out] パスへのポインタ(興味ない場合はNULL可)
-//! @param		name [out] 名前へのポインタ(興味ない場合はNULL可)
-//! @note		in と そのほかのパラメータに同じ文字列を指定しないこと
-//---------------------------------------------------------------------------
 void tRisaFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, ttstr * name)
 {
 	const risse_char * p = in.c_str() + in.GetLen();
@@ -709,9 +624,6 @@ void tRisaFileSystemManager::SplitPathAndName(const ttstr & in, ttstr * path, tt
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		パス名の最後のパスデリミタ ('/') を取り去る ( /path/is/here/ を /path/is/here にする )
-//! @param		path パス
 //---------------------------------------------------------------------------
 void tRisaFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 {
@@ -729,10 +641,6 @@ void tRisaFileSystemManager::TrimLastPathDelimiter(ttstr & path)
 
 
 //---------------------------------------------------------------------------
-//! @brief		拡張子を切り落とす
-//! @param		in 処理したいファイル名
-//! @return		拡張子が取り落とされたファイル名
-//---------------------------------------------------------------------------
 ttstr tRisaFileSystemManager::ChopExtension(const ttstr & in)
 {
 	ttstr ret;
@@ -742,10 +650,6 @@ ttstr tRisaFileSystemManager::ChopExtension(const ttstr & in)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		拡張子を取り出す
-//! @param		in 処理したいファイル名
-//! @return		拡張子(ドットも含む; 拡張子が無い場合は空文字)
 //---------------------------------------------------------------------------
 ttstr tRisaFileSystemManager::ExtractExtension(const ttstr & in)
 {
@@ -757,10 +661,6 @@ ttstr tRisaFileSystemManager::ExtractExtension(const ttstr & in)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイル名を返す (パスの部分を含まない)
-//! @param		in 処理したいファイル名
-//! @return		ファイル名
-//---------------------------------------------------------------------------
 ttstr tRisaFileSystemManager::ExtractName(const ttstr & in)
 {
 	ttstr ret;
@@ -770,10 +670,6 @@ ttstr tRisaFileSystemManager::ExtractName(const ttstr & in)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ファイル名のパス名を返す
-//! @param		in 処理したいファイル名
-//! @return		パス名
 //---------------------------------------------------------------------------
 ttstr tRisaFileSystemManager::ExtractPath(const ttstr & in)
 {
@@ -785,9 +681,6 @@ ttstr tRisaFileSystemManager::ExtractPath(const ttstr & in)
 
 
 //---------------------------------------------------------------------------
-//! @brief		現在の作業ディレクトリを得る
-//! @return		作業ディレクトリ
-//---------------------------------------------------------------------------
 const ttstr & tRisaFileSystemManager::GetCurrentDirectory()
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -797,10 +690,6 @@ const ttstr & tRisaFileSystemManager::GetCurrentDirectory()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		作業ディレクトリを設定する
-//! @param		dir   作業ディレクトリ
-//! @note		実際にそのディレクトリが存在するかどうかのチェックは行わない
 //---------------------------------------------------------------------------
 void tRisaFileSystemManager::SetCurrentDirectory(const ttstr &dir)
 {

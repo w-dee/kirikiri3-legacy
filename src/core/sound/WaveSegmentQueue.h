@@ -72,18 +72,50 @@ class tRisaWaveSegmentQueue
 	std::deque<tRisaWaveEvent> Events; //!< イベントの配列
 
 public:
+	//! @brief		内容をクリアする
 	void Clear();
+
+	//! @brief		tRisaWaveSegmentQueueをエンキューする
+	//! @param		queue		エンキューしたいtRisaWaveSegmentQueueオブジェクト
 	void Enqueue(const tRisaWaveSegmentQueue & queue);
+
+	//! @brief		tRisaWaveSegmentをエンキューする
+	//! @param		queue		エンキューしたいtRisaWaveSegmentオブジェクト
 	void Enqueue(const tRisaWaveSegment & segment);
+
+	//! @brief		tRisaWaveEventをエンキューする
+	//! @param		queue		エンキューしたいtRisaWaveEventオブジェクト
+	//! @note		Offset は修正されないので注意
 	void Enqueue(const tRisaWaveEvent & event);
+
+	//! @brief		tRisaWaveSegmentの配列をエンキューする
+	//! @param		queue		エンキューしたい std::dequeue<tRisaWaveSegment>オブジェクト
 	void Enqueue(const std::deque<tRisaWaveSegment> & segments);
+
+	//! @brief		tRisaWaveEventの配列をエンキューする
+	//! @param		queue		エンキューしたい std::dequeue<tRisaWaveEvent>オブジェクト
 	void Enqueue(const std::deque<tRisaWaveEvent> & events);
+
+	//! @brief		先頭から指定長さ分をデキューする
+	//! @param		dest		格納先キュー(内容はクリアされる)
+	//! @param		length		切り出す長さ(サンプルグラニュール単位)
 	void Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 length);
+
+	//! @brief		このキューの全体の長さを得る
+	//! @return		このキューの長さ (サンプルグラニュール単位)
 	risse_int64 GetFilteredLength() const;
+
+	//! @brief		このキューの長さを変化させる
+	//! @param		new_total_filtered_length 新しいキューの長さ (サンプルグラニュール単位)
+	//! @note		キュー中のSegments などの長さや Eventsの位置は線形補間される
 	void Scale(risse_int64 new_total_length);
 
+	//! @brief		フィルタされた位置からデコード位置へ変換を行う
+	//! @param		pos フィルタされた位置
+	//! @note		デコード位置
 	risse_int64 FilteredPositionToDecodePosition(risse_int64 pos) const;
 
+	//! @brief		内容を標準エラー出力にダンプする(デバッグ用)
 	void Dump() const;
 };
 //---------------------------------------------------------------------------

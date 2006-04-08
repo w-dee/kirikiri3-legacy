@@ -29,11 +29,17 @@ class tRisaReverb : public tRisaBasicWaveFilter
 	float * Buffer;
 
 public:
+	//! @brief		コンストラクタ
 	tRisaReverb();
+
+	//! @brief		デストラクタ
 	~tRisaReverb();
 
 private:
+	//! @brief		入力となるフィルタが変わったとき、あるいはリセットされるとき
 	void InputChanged();
+
+	//! @brief		フィルタ動作を行うとき
 	void Filter();
 };
 //---------------------------------------------------------------------------

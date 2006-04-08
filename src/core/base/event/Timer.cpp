@@ -15,23 +15,7 @@
 
 RISSE_DEFINE_SOURCE_ID(3263,62535,57591,17893,921,30607,15180,25430);
 
-/*! @note
 
-	OS の提供する「普通の」タイマーはだいたい分解能が低く、使い物にならない
-	(例: Windowsでは分解能は50msが限度)。
-	分解能の高いタイマーを汎用的にどのように実現するかは難しいところであるが、
-	ここではタイミングを制御するスレッドを一つ作成し、そのスレッド内でセマフォ
-	待ちがタイムアウトするのと、tRisaTickCount クラスからのティックカウントを
-	リファレンスとしてタイマーを実現する。
-	これはおおよそOSのコンテキストスイッチの精度に依存するが、10ms程度の
-	分解能を提供できるはずである。
-	精度については TickCount.cpp の説明も参照のこと。
-
-*/
-
-
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaTimerScheduler::tRisaTimerScheduler()
 {
@@ -47,8 +31,6 @@ tRisaTimerScheduler::tRisaTimerScheduler()
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaTimerScheduler::~tRisaTimerScheduler()
 {
 	// スレッドの削除
@@ -58,10 +40,6 @@ tRisaTimerScheduler::~tRisaTimerScheduler()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		consumerを登録する
-//! @param		consumer コールバックを発生させるコンシューマオブジェクト
-//! @note		すでにそのconsumerが登録されてるかどうかなどはチェックしない
 //---------------------------------------------------------------------------
 void tRisaTimerScheduler::Register(tRisaTimerConsumer * consumer)
 {
@@ -73,10 +51,6 @@ void tRisaTimerScheduler::Register(tRisaTimerConsumer * consumer)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		consumerの登録を解除する
-//! @param		consumer コールバックを発生させるコンシューマオブジェクト
-//! @note		そのconsumerが見つからない場合は何もしない
 //---------------------------------------------------------------------------
 void tRisaTimerScheduler::Unregister(tRisaTimerConsumer * consumer)
 {
@@ -93,8 +67,6 @@ void tRisaTimerScheduler::Unregister(tRisaTimerConsumer * consumer)
 
 
 //---------------------------------------------------------------------------
-//! @brief		スケジュールをやり直す
-//---------------------------------------------------------------------------
 void tRisaTimerScheduler::Reschedule()
 {
 	NearestInfoValid = false; // NearestInfo をもう一度検索するように
@@ -103,8 +75,6 @@ void tRisaTimerScheduler::Reschedule()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		もっとも近い位置にあるTickをもつConsumerを探す
 //---------------------------------------------------------------------------
 void tRisaTimerScheduler::GetNearestInfo()
 {
@@ -135,9 +105,6 @@ void tRisaTimerScheduler::GetNearestInfo()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		スレッドのエントリーポイント
-//! @return		スレッドの終了コード
 //---------------------------------------------------------------------------
 void tRisaTimerScheduler::Execute()
 {
@@ -212,8 +179,6 @@ void tRisaTimerScheduler::Execute()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaTimerConsumer::tRisaTimerConsumer(tRisaTimerScheduler * owner) : Owner(owner)
 {
 	// フィールドの初期化
@@ -226,8 +191,6 @@ tRisaTimerConsumer::tRisaTimerConsumer(tRisaTimerScheduler * owner) : Owner(owne
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaTimerConsumer::~tRisaTimerConsumer()
 {
 	// スケジューラからコンシューマを削除
@@ -236,13 +199,6 @@ tRisaTimerConsumer::~tRisaTimerConsumer()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		次にOnPeriodをコールバックすべき絶対tickを設定する
-//! @param		nexttick 絶対TickCount (呼んで欲しくない場合はtRisaTickCount::InvalidTickCount)
-//! @note		nexttick が現在あるいはすでに過去だった場合は即座に OnPeriodが呼ばれる。
-//! @note		ここでいう「絶対TickCount」とは tRisaTickCount が返すようなTickCountのことである。
-//!				たとえば5秒後にOnPeriodを呼びたいならば、
-//!				SetNextTick(tRisaTickCount::instance()->Get() + 5000) とする。
 //---------------------------------------------------------------------------
 void tRisaTimerConsumer::SetNextTick(risse_uint64 nexttick)
 {
@@ -278,8 +234,6 @@ void tRisaTimerConsumer::SetNextTick(risse_uint64 nexttick)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaEventTimerConsumer::tRisaEventTimerConsumer() :
 		tRisaTimerConsumer(tRisaEventTimerScheduler::instance().get())
 {
@@ -293,17 +247,12 @@ tRisaEventTimerConsumer::tRisaEventTimerConsumer() :
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaEventTimerConsumer::~tRisaEventTimerConsumer()
 {
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		有効か無効かを設定する
-//! @param		enabled 有効か無効か
 //---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::SetEnabled(bool enabled)
 {
@@ -320,9 +269,6 @@ void tRisaEventTimerConsumer::SetEnabled(bool enabled)
 
 
 //---------------------------------------------------------------------------
-//! @brief		タイマー周期を設定する
-//! @param		interval タイマー周期
-//---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::SetInterval(risse_uint64 interval)
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
@@ -337,8 +283,6 @@ void tRisaEventTimerConsumer::SetInterval(risse_uint64 interval)
 
 
 //---------------------------------------------------------------------------
-//! @brief		タイマーをリセットする
-//---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::Reset()
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
@@ -349,8 +293,6 @@ void tRisaEventTimerConsumer::Reset()
 
 
 //---------------------------------------------------------------------------
-//! @brief		容量を設定する
-//---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::SetCapacity(size_t capa)
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
@@ -360,8 +302,6 @@ void tRisaEventTimerConsumer::SetCapacity(size_t capa)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		タイマー周期をリセットする
 //---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::ResetInterval()
 {
@@ -385,10 +325,6 @@ void tRisaEventTimerConsumer::ResetInterval()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたTickCountに達したときに呼び出される
-//! @param	scheduled_tick GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
-//! @param	current_tick この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
 //---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick)
 {
@@ -421,9 +357,6 @@ void tRisaEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief	イベントが配信されるとき
-//! @param	info イベント情報
 //---------------------------------------------------------------------------
 void tRisaEventTimerConsumer::OnEvent(tRisaEventInfo * info)
 {

@@ -70,12 +70,28 @@ private:
 	tHashTable HashTable; //!< ハッシュテーブル
 
 public:
+	//! @brief		コンストラクタ
 	tRisaXP4SegmentCache();
+
+	//! @brief		デストラクタ
 	~tRisaXP4SegmentCache();
 
 public:
+	//! @brief		キャッシュの上限に達していないかどうかをチェックし、はみ出た分を削除
 	void CheckLimit();
+
+	//! @brief		キャッシュをすべてクリアする
 	void Clear();
+
+	//! @brief		キャッシュを検索する(無ければアイテムを作成して返す)
+	//! @param		pointer アーカイブインスタンスへのポインタ
+	//! @param		storage_index storage index in archive
+	//! @param		segment_index segment index in storage
+	//! @param		instream キャッシュ中に無かった場合に読みに行くストリーム
+	//! @param		dataofs キャッシュ中に無かった場合に読みに行くストリーム中のデータブロックのオフセット
+	//! @param		insize キャッシュ中に無かった場合に読みに行くバイト数
+	//! @param		uncomp_size キャッシュ中に無かった場合に読みに行ったデータを展開したら何バイトになるか
+	//! @return		展開されたデータブロック
 	tDataBlock
 		Find(void * pointer, risse_size storage_index, risse_size segment_index,
 			tRisseBinaryStream * instream, risse_uint64 dataofs, risse_size insize,

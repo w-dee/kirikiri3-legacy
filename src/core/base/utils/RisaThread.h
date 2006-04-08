@@ -12,6 +12,49 @@
 //---------------------------------------------------------------------------
 #ifndef _RISATHREAD_H
 #define _RISATHREAD_H
+/*! @note
+
+Risa は wxWidgets と boost という２つのライブラリのスレッド実装の恩恵を
+受けられる状態にあるが、それぞれは微妙に Risa の要求からはずれている。
+
+ここでは、スレッド関連の実装の比較を行う。
+
+以下の「問題あり」「問題なし」は、Risa の用途で問題があるか無いかということ
+であり、それぞれの実装が単純に「ダメか」「良いか」ということを言っているの
+ではない。
+
+■ スレッドの実装
+
+	- wxThread						問題あり
+	- boost::thread					問題あり
+
+	wxThread は設計上の問題があり、Risaの用途では使うことができない
+	( Wait()やDelete()でメッセージループを動かしてしまう)
+
+	boost::thread はスレッドの優先順位を指定できない。
+
+	ここでは、wxThread の Wait() や Delete() でメッセージループを動かして
+	しまうといった問題に対し、wxThread をベースに Wait の動作を独自に実装
+	することで解決を図る。
+
+
+■ CriticalSection の実装
+
+	- wxCriticalSection				問題あり
+	- boost::recursive_mutex		とくに問題なし
+	- tRisseCiriticalSection		問題なし
+
+	wxCriticalSection は、再帰的な(再入可能な)クリティカルセクションを実現できる
+	保証がない。boost::recursive_mutex はその名の通り再入可能な mutex だが、
+	たとえば Windows の提供する CriticalSection よりは効率が悪い。
+	tRisseCiriticalSection は、プラットフォームネイティブなクリティカルセクショ
+	ンを利用できる場合は利用するようになっているのでもっとも効率がよい。
+
+	ここでは、tRisseCriticalSection を typedef したものを tRisaCriticalSection
+	として用いて使うこととする。
+*/
+
+
 
 #include <wx/thread.h>
 #include "risse/include/risseUtils.h"
@@ -42,17 +85,25 @@ class tRisaThread
 	wxString Name; //!< スレッドの名前
 
 public:
+	//! @brief		コンストラクタ
 	tRisaThread(wxString name = wxT("unknown"));
+
+	//! @brief		デストラクタ
 	virtual ~tRisaThread();
 
-	const wxChar * GetName() const { return Name.c_str(); }
+	const wxChar * GetName() const { return Name.c_str(); } //!< スレッドの名前を得る
 
-	void Run(); // オーバーライド
-	void Wait(); // オーバーライド
+	//! @brief		スレッドの実行を開始する
+	void Run();
+
+	//! @brief		スレッドが終了するまで待つ
+	void Wait();
 
 	void Terminate() { Set_Terminated(true); } //!< スレッドに終了を通知する
 
 protected:
+	//! @brief		スレッドが終了すべきかどうかを得る
+	//! @return		スレッドが終了すべきであれば真
 	volatile bool ShouldTerminate();
 
 	//! @brief		スレッドのメイン関数(サブクラスで実装する)

@@ -48,23 +48,49 @@ private:
 	size_t ConvertBufferSize; //!< RenderBuffer に割り当てられたサイズ(バイト単位)
 
 public:
+	//! @brief		コンストラクタ
+	//! @param		filter 入力フィルタ
+	//! @param		streaming	ストリーミング再生を行うかどうか
 	tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> Filter, bool streaming);
+
+	//! @brief		デストラクタ
 	~tRisaALBuffer();
 
 	boost::shared_ptr<tRisaWaveFilter> & GetFilter() { return Filter; } //!< 入力フィルタを得る
 
 private:
+	//! @brief		バッファに関するオブジェクトの解放などのクリーンアップ処理
 	void Clear();
+
+	//! @brief		一時的に割り当てられたバッファの解放
 	void FreeTempBuffers();
 
+	//! @brief		OpenALバッファにデータを詰める
+	//! @param		buffer		対象とする OpenAL バッファ
+	//! @param		samples		最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
+	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
+	//! @return		バッファにデータが入ったら真
 	bool FillALBuffer(ALuint buffer, risse_uint samples,
 		tRisaWaveSegmentQueue & segmentqueue);
 
 public:
+	//! @brief		フリーになったバッファを FreeBuffers に push する
 	void PushFreeBuffer(ALuint buffer);
+
+	//! @brief		フリーのバッファがあるかどうかを返す
+	//! @return 	フリーのバッファがあるかどうか
 	bool HasFreeBuffer();
+
+	//! @brief		空きバッファにデータをfillして返す
+	//! @param		buffer バッファ番号を格納する変数
+	//! @param		segmentqueue セグメントキュー
+	//! @return		fill に成功したか
 	bool PopFilledBuffer(ALuint & buffer, tRisaWaveSegmentQueue & segmentqueue);
+
+	//! @brief		全てのバッファを解放する
 	void FreeAllBuffers();
+
+	//! @brief		OpenALバッファにサウンドをデコードしてコピーする
 	void Load();
 
 	bool GetStreaming() const { return Streaming; }

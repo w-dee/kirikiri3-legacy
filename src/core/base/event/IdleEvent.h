@@ -13,6 +13,23 @@
 #ifndef _IDLEEVENT_H
 #define _IDLEEVENT_H
 
+/*! @note
+	アイドルイベントは、アプリケーションで他に処理すべきイベントが無くなった
+	場合に発生するイベントである (実際のところこれは嘘で、wxWidgets の Idle
+	イベント時に確かに発生するイベントではあるが、Risa のイベントシステムの
+	キュー上にイベントが残っていても、一回で処理すべきイベントの処理が終われば
+	呼び出される)。
+	アイドルイベントの戻り値を真にすると連続してアイドルイベントが発生するように
+	なる (吉里吉里２における Continous Event と同等)。
+
+	コンパクトイベントは、アプリケーションのウィンドウが非アクティブになったり
+	アプリケーションが非アクティブになったり、あるいは５秒おきに発生するイベン
+	ト。なにか未処理の終了処理があればそれを終了させたり、ガベージコレクション
+	を実行したりする。
+*/
+
+
+
 #include "base/event/Event.h"
 #include "base/utils/Singleton.h"
 #include "base/utils/PointerList.h"
@@ -29,10 +46,18 @@ class tRisaIdleEventManager : public singleton_base<tRisaIdleEventManager>
 	pointer_list<tRisaIdleEventDestination> Destinations; //!< イベントの配信先
 
 protected:
+	//! @brief		アイドルイベントの配信先を登録する
+	//! @param		item		配信先
 	void Register(tRisaIdleEventDestination * item);
+
+	//! @brief		アイドルイベントの配信先の登録を解除する
+	//! @param		item		配信先
 	void Unregister(tRisaIdleEventDestination * item);
 
 public:
+	//! @brief		アイドルイベントを配信する
+	//! @param		mastertick		このイベントが配信される際の TickCount (マスタ・ティック)
+	//! @return		まだアイドルイベントが必要かどうか
 	bool Deliver(risse_uint64 mastertick);
 };
 //---------------------------------------------------------------------------
@@ -47,9 +72,16 @@ class tRisaIdleEventDestination : protected depends_on<tRisaIdleEventManager>
 	bool Receiving; //!< イベント配信が有効かどうか
 
 public:
+	//! @brief		コンストラクタ
 	tRisaIdleEventDestination();
+
+	//! @brief		デストラクタ
 	virtual ~tRisaIdleEventDestination();
+
+	//! @brief		アイドルイベントの受信を開始する
 	void StartReceiveIdle();
+
+	//! @brief		アイドルイベントの受信を停止する
 	void EndReceiveIdle();
 
 public:
@@ -90,17 +122,30 @@ class tRisaCompactEventManager : public singleton_base<tRisaCompactEventManager>
 	pointer_list<tRisaCompactEventDestination> Destinations; //!< イベントの配信先
 
 public:
+	//! @brief		コンストラクタ
 	tRisaCompactEventManager();
 
 protected:
+	//! @brief		コンパクトイベントの配信先を登録する
+	//! @param		item		配信先
 	void Register(tRisaCompactEventDestination * item);
+
+	//! @brief		コンパクトイベントの配信先の登録を解除する
+	//! @param		item		配信先
 	void Unregister(tRisaCompactEventDestination * item);
 
+	//! @brief		コンパクトイベントを配信する
+	//! @param		level		レベル
 	void Deliver(tCompactLevel level);
+
+	//! @brief		タイマー周期が来た時(wxTimer::Notify 実装)
 	void Notify(); // wxTimer::Notify
 
 public:
+	//! @brief		ウィンドウが非アクティブになった場合
 	void OnDeactivate();
+
+	//! @brief		アプリケーションが非アクティブになった場合
 	void OnDeactivateApp();
 };
 //---------------------------------------------------------------------------

@@ -22,8 +22,6 @@ RISSE_DEFINE_SOURCE_ID(49572,65271,56057,18682,27296,33314,20965,8152);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaOSNativeStream::tRisaOSNativeStream(const wxString & filename, risse_uint32 flags)
 {
 	// モードを決定する
@@ -53,19 +51,12 @@ tRisaOSNativeStream::tRisaOSNativeStream(const wxString & filename, risse_uint32
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaOSNativeStream::~tRisaOSNativeStream()
 {
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		シーク
-//! @param		offset 移動オフセット
-//! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
-//! @return		移動後のファイルポインタ
 //---------------------------------------------------------------------------
 risse_uint64 tRisaOSNativeStream::Seek(risse_int64 offset, risse_int whence)
 {
@@ -88,11 +79,6 @@ risse_uint64 tRisaOSNativeStream::Seek(risse_int64 offset, risse_int whence)
 
 
 //---------------------------------------------------------------------------
-//! @brief		読み込み
-//! @param		buffer 読み込み先バッファ
-//! @param		read_size 読み込むバイト数
-//! @return		実際に読み込まれたバイト数
-//---------------------------------------------------------------------------
 risse_size tRisaOSNativeStream::Read(void *buffer, risse_size read_size)
 {
 	return File.Read(buffer, read_size);
@@ -100,11 +86,6 @@ risse_size tRisaOSNativeStream::Read(void *buffer, risse_size read_size)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		書き込み
-//! @param		buffer 書き込むバッファ
-//! @param		read_size 書き込みたいバイト数
-//! @return		実際に書き込まれたバイト数
 //---------------------------------------------------------------------------
 risse_size tRisaOSNativeStream::Write(const void *buffer, risse_size write_size)
 {
@@ -114,8 +95,6 @@ risse_size tRisaOSNativeStream::Write(const void *buffer, risse_size write_size)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルの終わりを現在のポインタに設定する
-//---------------------------------------------------------------------------
 void tRisaOSNativeStream::SetEndOfFile()
 {
 	// TODO: implement this 
@@ -124,9 +103,6 @@ void tRisaOSNativeStream::SetEndOfFile()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		サイズを得る
-//! @return		このストリームのサイズ
 //---------------------------------------------------------------------------
 risse_uint64 tRisaOSNativeStream::GetSize()
 {
@@ -145,8 +121,6 @@ risse_uint64 tRisaOSNativeStream::GetSize()
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ
 //---------------------------------------------------------------------------
 tRisaOSFS::tRisaOSFS(const ttstr & basedir, bool checkcase) : 
 	BaseDirectory(basedir.AsWxString()), CheckCase(checkcase)
@@ -171,19 +145,12 @@ tRisaOSFS::tRisaOSFS(const ttstr & basedir, bool checkcase) :
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaOSFS::~tRisaOSFS()
 {
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ファイル一覧を取得する
-//! @param		dirname ディレクトリ名
-//! @param		callback コールバックオブジェクト
-//! @return		取得できたファイル数
 //---------------------------------------------------------------------------
 size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
 	tRisaFileSystemIterationCallback * callback)
@@ -242,10 +209,6 @@ size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルが存在するかどうかを得る
-//! @param		filename ファイル名
-//! @return		ファイルが存在する場合真
-//---------------------------------------------------------------------------
 bool tRisaOSFS::FileExists(const ttstr & filename)
 {
 	wxString wxfilename(filename.AsWxString());
@@ -261,10 +224,6 @@ bool tRisaOSFS::FileExists(const ttstr & filename)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ディレクトリが存在するかどうかを得る
-//! @param		dirname ディレクトリ名
-//! @return		ディレクトリが存在する場合真
 //---------------------------------------------------------------------------
 bool tRisaOSFS::DirectoryExists(const ttstr & dirname)
 {
@@ -282,9 +241,6 @@ bool tRisaOSFS::DirectoryExists(const ttstr & dirname)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルを削除する
-//! @param		filename ファイル名
-//---------------------------------------------------------------------------
 void tRisaOSFS::RemoveFile(const ttstr & filename)
 {
 	wxString wxfilename(filename.AsWxString());
@@ -301,10 +257,6 @@ void tRisaOSFS::RemoveFile(const ttstr & filename)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ディレクトリを削除する
-//! @param		dirname ディレクトリ名
-//! @param		recursive 再帰的にディレクトリを削除するかどうか
 //---------------------------------------------------------------------------
 void tRisaOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 {
@@ -327,10 +279,6 @@ void tRisaOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ディレクトリを作成する
-//! @param		dirname ディレクトリ名
-//! @param		recursive 再帰的にディレクトリを作成するかどうか
-//---------------------------------------------------------------------------
 void tRisaOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 {
 	wxString wxdirname(dirname.AsWxString());
@@ -347,10 +295,6 @@ void tRisaOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたファイルの stat を得る
-//! @param		filename ファイル名
-//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tRisaOSFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 {
@@ -382,11 +326,6 @@ void tRisaOSFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定されたファイルのストリームを得る
-//! @param		filename ファイル名
-//! @param		flags フラグ
-//! @return		ストリームオブジェクト
-//---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaOSFS::CreateStream(const ttstr & filename, risse_uint32 flags)
 {
 	wxString wxfilename(filename.AsWxString());
@@ -402,10 +341,6 @@ tRisseBinaryStream * tRisaOSFS::CreateStream(const ttstr & filename, risse_uint3
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		path中に含まれる'/'を、OSネイティブなパス区切り記号に変更する
-//! @param		path パス名
-//! @return		OSネイティブなパス区切りに変更された後のパス名
 //---------------------------------------------------------------------------
 wxString tRisaOSFS::ConvertToNativePathDelimiter(const wxString & path)
 {
@@ -424,12 +359,6 @@ wxString tRisaOSFS::ConvertToNativePathDelimiter(const wxString & path)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		path中のディレクトリ名やファイル名の大文字や小文字がファイルシステム上のそれと一致するかどうかを調べる
-//! @param		path_to_check パス名(フルパスであること)
-//! @param		raise 一致しなかった場合に例外を発生するかどうか
-//! @return		一致した場合に真、しなかった場合に偽
-//! @note		ファイルが「見つからない」場合は真が帰るので注意
 //---------------------------------------------------------------------------
 bool tRisaOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 {

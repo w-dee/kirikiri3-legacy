@@ -18,11 +18,11 @@
 #include "base/event/Event.h"
 
 
+class tRisaLogScrollView;
+class tRisaLogViewerStatusBar;
 //---------------------------------------------------------------------------
 //! @brief		コンソールのフレーム
 //---------------------------------------------------------------------------
-class tRisaLogScrollView;
-class tRisaLogViewerStatusBar;
 class tRisaConsoleFrame : public tRisaUIFrame,
 						depends_on<tRisaEventSystem>
 {
@@ -32,18 +32,30 @@ class tRisaConsoleFrame : public tRisaUIFrame,
 		ID_Event
 	};
 public:
+	//! @brief		コンストラクタ
 	tRisaConsoleFrame();
 
+	//! @brief		ログビューアにフォーカスを合わせる
 	void SetFocusToLogViewer();
+
+	//! @brief		テキストコントロールにフォーカスを合わせる
+	//! @param		insert_code		テキストコントロールにフォーカスを合わせた際に
+	//!								押されたキー (必要ならばこれを挿入する)
 	void SetFocusToTextCtrl(int insert_code = 0);
 
 private:
-	tRisaLogScrollView *ScrollView;
-	tRisaLogViewerStatusBar *StatusBar;
+	tRisaLogScrollView *ScrollView; //!< スクロールエリア
+	tRisaLogViewerStatusBar *StatusBar; //!< ステータスバー
 
+	//! @brief		"Event" ボタンが押された
+	//! @param		event イベントオブジェクト
 	void OnEventTool(wxCommandEvent & event);
+
+	//! @brief		UI アップデートイベントが発生したとき
+	//! @param		event イベントオブジェクト
 	void OnUpdateUI(wxUpdateUIEvent & event);
 
+	//! @brief		イベントテーブルの定義
 	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------

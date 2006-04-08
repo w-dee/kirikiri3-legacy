@@ -41,30 +41,59 @@ protected:
 	tRisaWaveSegmentQueue SegmentQueue; //!< キューに入っているセグメント
 
 public:
+	//! @brief		コンストラクタ
+	//! @param		desired_output_type    サブクラスが望む PCM 形式
 	tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_type);
+
+	//! @brief		デストラクタ
 	~tRisaBasicWaveFilter();
 
+	//! @brief		フィルタをリセットする際に呼ばれる
 	void Reset();
+
+	//! @brief		フィルタの入力を設定する
+	//! @param		input  入力となるフィルタ
 	void SetInput(boost::shared_ptr<tRisaWaveFilter> input);
+
 	void SuggestFormat(const tRisaWaveFormat & format) {;}
 		//!< @note ここではなにもしない。必要ならばサブクラスで実装すること。
+
+	//! @brief		デコードを行う
+	//! @param		dest		デコード結果を格納するバッファ
+	//! @param		samples		デコードを行いたいサンプル数
+	//! @param		written		実際にデコード出来たサンプル数
+	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
+	//! @return		まだデコードすべきデータが残っているかどうか
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
 		tRisaWaveSegmentQueue & segmentqueue);
+
+	//! @brief		PCM形式を返す
+	//! @return		PCM形式への参照
 	const tRisaWaveFormat & GetFormat();
 
 protected:
 
+	//! @brief		出力キューを準備する
+	//! @param		numsamplegranules  準備したいサンプルグラニュール数
+	//! @return		出力バッファ
 	void * PrepareQueue(risse_uint numsamplegranules);
-		// キューを準備する
+
+	//! @brief		出力キューにデータをおく
+	//! @param		numsamplegranules	サンプル数
+	//! @param		segmentqueue	再生セグメントキュー情報
 	void Queue(risse_uint numsamplegranules,
 		const tRisaWaveSegmentQueue & segmentqueue);
-		// 出力キューにデータをおく
 
+	//! @brief		指定されたバッファに入力フィルタから情報を読み出し、書き込む
+	//! @param		dest				書き込みたいバッファ
+	//! @param		numsamplegranules	欲しいサンプルグラニュール数
+	//! @param		desired_type		欲しいPCM形式
+	//! @param		fill_silence		欲しいサンプルグラニュール数に入力が満たないとき、残りを無音で埋めるかどうか
+	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
+	//! @return		実際に書き込まれたサンプルグラニュール数
 	risse_uint Fill(void * dest, risse_uint numsamplegranules, tRisaPCMTypes::tType desired_type,
 		bool fill_silence,
 		tRisaWaveSegmentQueue & segmentqueue);
-		// dest に最低でも numsamplegranules のサンプルグラニュールを書き込む
-		// 実際に書き込まれたサンプル数が返る
 
 
 

@@ -42,13 +42,22 @@ class tRisaWaveWatchThread :
 	std::vector<tRisaALSource*> Sources; //!< Source の配列
 
 public:
+	//! @brief		コンストラクタ
 	tRisaWaveWatchThread();
+
+	//! @brief		デストラクタ
 	~tRisaWaveWatchThread();
 
+	//! @brief		ソースを登録する
+	//! @param		source ソース
 	void RegisterSource(tRisaALSource * source);
+
+	//! @brief		ソースの登録を解除する
+	//! @param		source ソース
 	void UnregisterSource(tRisaALSource * source);
 
 protected:
+	//! @brief		スレッドのエントリーポイント
 	void Execute(void);
 };
 //---------------------------------------------------------------------------
@@ -113,38 +122,77 @@ private:
 	std::deque<tRisaWaveSegmentQueue> SegmentQueues; //!< セグメントキューの配列
 
 public:
+	//! @brief		コンストラクタ
+	//! @param		buffer		OpenAL バッファを管理する tRisaALBuffer インスタンス
 	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer,
 		boost::shared_ptr<tRisaWaveLoopManager> loopmanager = boost::shared_ptr<tRisaWaveLoopManager>());
+
+	//! @brief		コンストラクタ(ほかのtRisaALSourceとバッファを共有する場合)
+	//! @param		ref		コピー元ソース
 	tRisaALSource(const tRisaALSource * ref);
+
+	//! @brief		デストラクタ
 	virtual ~tRisaALSource();
 
 private:
+	//! @brief		オブジェクトを初期化する
+	//! @param		buffer		OpenAL バッファを管理する tRisaALBuffer インスタンス
 	void Init(boost::shared_ptr<tRisaALBuffer> buffer);
 
 public:
 	ALuint GetSource() const { return Source; } //!< Source を得る
 
 private:
+	//! @brief		バッファに関するオブジェクトの解放などのクリーンアップ処理
 	void Clear();
 
 private: //---- queue/buffer management
+	//! @brief		バッファのデータを埋める
 	void FillBuffer();
+
+	//! @brief		すべてのバッファをアンキューする
 	void UnqueueAllBuffers();
+
+	//! @brief		バッファをソースにキューする
+	//! @note		キューできない場合は何もしない
 	void QueueBuffer();
 
 private:
+	//! @brief		監視用コールバック(tRisaWaveWatchThreadから約50msごとに呼ばれる)
 	void WatchCallback();
 
+	//! @brief		前回とステータスが変わっていたら OnStatusChanged を呼ぶ
+	//! @note		必ずメインスレッドから呼び出すこと
 	void CallStatusChanged();
 
 protected:
+	//! @brief		イベントが発生したとき
+	//! @param		info  イベント情報
 	void OnEvent(tRisaEventInfo * info);
 
 public:
+	//! @brief		再生の開始
 	void Play();
+
+	//! @brief		再生の停止
+	//! @note		このメソッドはメディアの巻き戻しを行わない(ソースはそこら辺を
+	//!				管理しているループマネージャがどこにあるかを知らないので)
+	//!				巻き戻しの処理は現在tRisaSound内で行われている
 	void Stop();
+
+	//! @brief		再生の一時停止
 	void Pause();
+
+	//! @brief		再生位置を得る
+	//! @return		再生位置   (デコーダ出力時におけるサンプルグラニュール数単位)
+	//! @note		返される値は、デコーダ上(つまり元のメディア上での)サンプルグラニュール数
+	//!				単位となる。これは、フィルタとして時間の拡縮を行うようなフィルタが
+	//!				挟まっていた場合は、実際に再生されたサンプルグラニュール数とは
+	//!				異なる場合があるということである。
 	risse_uint64 GetPosition();
+
+	//! @brief		再生位置を設定する
+	//! @param		pos  再生位置 (デコーダ出力におけるサンプルグラニュール数単位)
 	void SetPosition(risse_uint64 pos);
 
 public:

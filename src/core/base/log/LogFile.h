@@ -13,6 +13,16 @@
 #ifndef _LOGFILE_H
 #define _LOGFILE_H
 
+
+/*!
+@brief
+	tRisaLogFile はシングルトンオブジェクトとしてシステム内に常駐するが、
+	実際にファイルにログを採るようになるのは Begin メソッドを呼んだあとだけ
+	となる。
+*/
+
+
+
 #include "risse/include/risse.h"
 #include "base/utils/Singleton.h"
 #include "base/log/Log.h"
@@ -51,14 +61,23 @@ public:
 	wxFile LogFile; //!< ログファイル
 
 public:
+	//! @brief		コンストラクタ
 	tRisaLogFile();
+
+	//! @brief		デストラクタ
 	~tRisaLogFile();
 
 private:
+	//! @brief		行を一行出力する
+	//! @param		str  行 (EOLはこのメソッドが自動的に出力する)
 	void OutputOneLine(const ttstr & str);
+
+	//! @brief		ログが追加されるとき
+	//! @param		item  ログアイテム
 	void OnLog(const tRisaLogger::tItem & item);
 
 public:
+	//! @brief		ログのファイルへの記録を開始する
 	void Begin();
 };
 //---------------------------------------------------------------------------

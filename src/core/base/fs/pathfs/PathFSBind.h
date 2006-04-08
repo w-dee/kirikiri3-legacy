@@ -23,10 +23,14 @@
 class tRisseNI_PathFS : public tRisseNI_BaseFileSystem
 {
 public:
+	//! @brief		コンストラクタ
 	tRisseNI_PathFS();
 
+	//! @brief		Risse コンストラクタ
 	risse_error Construct(risse_int numparams,
 		tRisseVariant **param, iRisseDispatch2 *risse_obj);
+
+	//! @brief		Risse 無効化関数
 	void Invalidate();
 
 	tRisaPathFS * GetFileSystem() 
@@ -46,11 +50,15 @@ private:
 class tRisseNC_PathFS : public tRisseNativeClass
 {
 public:
+	//! @brief		コンストラクタ
 	tRisseNC_PathFS();
 
+	//! @brief		PathFS クラスID
 	static risse_uint32 ClassID;
 
 private:
+	//! @brief		ネイティブインスタンスを作成して返す
+	//! @return		ネイティブインスタンス
 	tRisseNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
@@ -69,6 +77,7 @@ class tRisaPathFSRegisterer :
 	protected depends_on<tRisaFileSystemRegisterer>
 {
 public:
+	//! @brief		コンストラクタ
 	tRisaPathFSRegisterer();
 };
 //---------------------------------------------------------------------------

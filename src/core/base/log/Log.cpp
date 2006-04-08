@@ -18,8 +18,6 @@ RISSE_DEFINE_SOURCE_ID(53503,8125,25269,17586,20367,40881,26023,16793);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaLogger::tRisaLogger() : Buffer(MaxLogItems)
 {
 	LogSending = false;
@@ -28,17 +26,12 @@ tRisaLogger::tRisaLogger() : Buffer(MaxLogItems)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaLogger::~tRisaLogger()
 {
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		PreserveBuffer の内容を指定のtRisaLogReceiverに送る
-//! @param		target		ログの送り先となるレシーバオブジェクト
 //---------------------------------------------------------------------------
 void tRisaLogger::SendPreservedLogs(tRisaLogReceiver *target)
 {
@@ -68,11 +61,6 @@ void tRisaLogger::SendPreservedLogs(tRisaLogReceiver *target)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定行分のログを指定のtRisaLogReceiverに送る
-//! @param		target		ログの送り先となるレシーバオブジェクト
-//! @param		maxitems	送るログの最大行数 (これよりもtRisaLoggerが保持している
-//!							ログのサイズが大きい場合は、最後の maxitems 個が送られる)
 //---------------------------------------------------------------------------
 void tRisaLogger::SendLogs(tRisaLogReceiver *target, size_t maxitems)
 {
@@ -109,9 +97,6 @@ void tRisaLogger::SendLogs(tRisaLogReceiver *target, size_t maxitems)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ログを受信するための tRisaLogReceiver を登録する
-//! @param		receiver	レシーバオブジェクト
-//---------------------------------------------------------------------------
 void tRisaLogger::RegisterReceiver(tRisaLogReceiver * receiver)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -122,9 +107,6 @@ void tRisaLogger::RegisterReceiver(tRisaLogReceiver * receiver)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ログを受信するための tRisaLogReceiver の登録を解除する
-//! @param		receiver	レシーバオブジェクト
 //---------------------------------------------------------------------------
 void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 {
@@ -138,11 +120,6 @@ void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ログを記録する
-//! @param		content		ログの内容
-//! @param		level		ログレベル
-//! @param		linkinfo	リンク情報
 //---------------------------------------------------------------------------
 void tRisaLogger::InternalLog(const ttstr & content,
 	tRisaLogger::tLevel level,
@@ -244,8 +221,6 @@ void tRisaLogger::InternalLog(const ttstr & content,
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaWxLogProxy::tRisaWxLogProxy()
 {
 	OldLog = wxLog::SetActiveTarget(this);
@@ -254,8 +229,6 @@ tRisaWxLogProxy::tRisaWxLogProxy()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaWxLogProxy::~tRisaWxLogProxy()
 {
 	wxLog::SetActiveTarget(OldLog);
@@ -263,9 +236,6 @@ tRisaWxLogProxy::~tRisaWxLogProxy()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ログを行う
-//! @note		wxWidgets の wxLog クラスの説明を参照のこと
 //---------------------------------------------------------------------------
 void tRisaWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 {

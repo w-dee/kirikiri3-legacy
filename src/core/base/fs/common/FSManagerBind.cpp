@@ -24,10 +24,6 @@ RISSE_DEFINE_SOURCE_ID(57103,491,17401,17369,5283,30429,30396,3005);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		filesystem  ファイルシステムオブジェクト
-//! @param		owner       このインスタンスを保持している Risse オブジェクト
-//---------------------------------------------------------------------------
 tRisseNI_FileSystemNativeInstance::tRisseNI_FileSystemNativeInstance(
 					boost::shared_ptr<tRisaFileSystem> filesystem,
 					iRisseDispatch2 * owner) :
@@ -38,8 +34,6 @@ tRisseNI_FileSystemNativeInstance::tRisseNI_FileSystemNativeInstance(
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
 void tRisseNI_FileSystemNativeInstance::Invalidate()
 {
@@ -64,16 +58,12 @@ void tRisseNI_FileSystemNativeInstance::Invalidate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisseNI_BaseFileSystem::tRisseNI_BaseFileSystem()
 {
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
 void tRisseNI_BaseFileSystem::Invalidate()
 {
@@ -83,11 +73,6 @@ void tRisseNI_BaseFileSystem::Invalidate()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		tRisseNI_FileSystemNativeInstance をファイルシステムから構築し、
-//!             オブジェクトに登録する
-//! @param		risse_obj		登録先Risseオブジェクト
-//! @param		fs_obj		ファイルシステムオブジェクト
 //---------------------------------------------------------------------------
 void tRisseNI_BaseFileSystem::RegisterFileSystemNativeInstance(
 		iRisseDispatch2 * risse_obj,
@@ -118,14 +103,10 @@ void tRisseNI_BaseFileSystem::RegisterFileSystemNativeInstance(
 
 
 //---------------------------------------------------------------------------
-//! @brief   FileSystemクラスID
-//---------------------------------------------------------------------------
 risse_uint32 tRisseNC_FileSystem::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief   コンストラクタ
 //---------------------------------------------------------------------------
 tRisseNC_FileSystem::tRisseNC_FileSystem() :
 	tRisseNativeClass(RISSE_WS("FileSystem"))
@@ -355,8 +336,6 @@ RISSE_END_NATIVE_PROP_DECL(cwd)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaFileSystemRegisterer::tRisaFileSystemRegisterer()
 {
 	FileSystemClass = new tRisseNC_FileSystem();
@@ -374,8 +353,6 @@ tRisaFileSystemRegisterer::tRisaFileSystemRegisterer()
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaFileSystemRegisterer::~tRisaFileSystemRegisterer()
 {
 	FileSystemClass->Release();
@@ -383,10 +360,6 @@ tRisaFileSystemRegisterer::~tRisaFileSystemRegisterer()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ファイルシステムにクラスオブジェクトを登録する
-//! @param		name    クラス名
-//! @param		object  クラスオブジェクト
 //---------------------------------------------------------------------------
 void tRisaFileSystemRegisterer::RegisterClassObject(const risse_char *name,
 											iRisseDispatch2 * object)

@@ -99,8 +99,6 @@ RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/System)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
 tRisaSystemRegisterer::tRisaSystemRegisterer()
 {
 	SystemClass =  new tRisseNC_System();
@@ -119,8 +117,6 @@ tRisaSystemRegisterer::tRisaSystemRegisterer()
 
 
 //---------------------------------------------------------------------------
-//! @brief デストラクタ
-//---------------------------------------------------------------------------
 tRisaSystemRegisterer::~tRisaSystemRegisterer()
 {
 	SystemClass->Release();
@@ -128,10 +124,6 @@ tRisaSystemRegisterer::~tRisaSystemRegisterer()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		System.exceptionHandler を得る
-//! @param		dest		exceptionHandler を格納するクロージャ
-//! @return		正常な exceptionHandler を得られれば真、得られなければ偽
 //---------------------------------------------------------------------------
 bool tRisaSystemRegisterer::GetExceptionHandlerObject(tRisseVariantClosure & dest)
 {

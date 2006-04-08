@@ -98,13 +98,6 @@ static bool RisaFindChunk(const unsigned char * chunkname,
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		owner tRisaXP4Archive インスタンスへのポインタ
-//! @param		meta 入力メタデータ
-//! @param		metasize 入力メタデータのサイズ
-//! @param		inarchivename このアーカイブアイテムの名前を格納する先
-//! @param		deleted ファイルが削除されている時に真に設定される
-//---------------------------------------------------------------------------
 tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta,
 	size_t metasize, ttstr & inarchivename, bool &deleted)
 {
@@ -209,10 +202,6 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		filename アーカイブファイル名
-//! @param		callback ファイル名とアーカイブ内インデックスの対応をpushするコールバック
 //---------------------------------------------------------------------------
 tRisaXP4Archive::tRisaXP4Archive(const ttstr & filename, iMapCallback & callback)
 {
@@ -360,8 +349,6 @@ tRisaXP4Archive::tRisaXP4Archive(const ttstr & filename, iMapCallback & callback
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
 tRisaXP4Archive::~tRisaXP4Archive()
 {
 	// キャッシュをクリアする
@@ -373,10 +360,6 @@ tRisaXP4Archive::~tRisaXP4Archive()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたファイルの stat を得る
-//! @param		idx ファイルのインデックス
-//! @param		struc stat 結果の出力先
 //---------------------------------------------------------------------------
 void tRisaXP4Archive::Stat(risse_size idx, tRisaStatStruc & struc)
 {
@@ -390,12 +373,6 @@ void tRisaXP4Archive::Stat(risse_size idx, tRisaStatStruc & struc)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		指定されたファイルのストリームを得る
-//! @param		スマートポインタ (ストリームに渡す)
-//! @param		idx ファイルのインデックス
-//! @param		flags フラグ
-//! @return		ストリームオブジェクト
 //---------------------------------------------------------------------------
 tRisseBinaryStream * tRisaXP4Archive::CreateStream(
 			boost::shared_ptr<tRisaXP4Archive> ptr,

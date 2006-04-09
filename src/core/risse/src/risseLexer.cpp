@@ -29,10 +29,6 @@ RISSE_DEFINE_SOURCE_ID(31558,6146,58648,17904,52124,56524,47688,27297);
 
 
 //---------------------------------------------------------------------------
-//! @brief		ホワイトスペースのスキップ
-//! @param		ptr		解析ポインタ
-//! @return		スクリプトが継続するかどうか
-//---------------------------------------------------------------------------
 bool tRisseLexer::SkipSpace(const risse_char * & ptr)
 {
 	while(*ptr && Risse_iswspace_nc(*ptr)) ptr ++;
@@ -41,10 +37,6 @@ bool tRisseLexer::SkipSpace(const risse_char * & ptr)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		16進数文字1桁を数値に
-//! @param		ch	文字
-//! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
 risse_int tRisseLexer::HexNum(risse_char ch)
 {
@@ -57,10 +49,6 @@ risse_int tRisseLexer::HexNum(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-//! @brief		8進数文字1桁を数値に
-//! @param		ch	文字
-//! @return		文字の表す数値 (-1:解析不能)
-//---------------------------------------------------------------------------
 risse_int tRisseLexer::OctNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('0') && ch<=RISSE_WC('7')) return ch-RISSE_WC('0');
@@ -70,10 +58,6 @@ risse_int tRisseLexer::OctNum(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-//! @brief		10進数文字1桁を数値に
-//! @param		ch	文字
-//! @return		文字の表す数値 (-1:解析不能)
-//---------------------------------------------------------------------------
 risse_int tRisseLexer::DecNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('0') && ch<=RISSE_WC('9')) return ch-RISSE_WC('0');
@@ -82,10 +66,6 @@ risse_int tRisseLexer::DecNum(risse_char ch)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		2進数文字1桁を数値に
-//! @param		ch	文字
-//! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
 risse_int tRisseLexer::BinNum(risse_char ch) throw()
 {
@@ -97,10 +77,6 @@ risse_int tRisseLexer::BinNum(risse_char ch) throw()
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		バックスラッシュエスケープの値を得る
-//! @param		ch	文字
-//! @return		文字の表すコード
 //---------------------------------------------------------------------------
 risse_int tRisseLexer::UnescapeBackSlash(risse_char ch)
 {
@@ -121,10 +97,6 @@ risse_int tRisseLexer::UnescapeBackSlash(risse_char ch)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コメントのスキップ
-//! @param		ptr		解析ポインタ
-//! @return		スキップした結果どうなったか
 //---------------------------------------------------------------------------
 tRisseLexer::tSkipCommentResult tRisseLexer::RisseSkipComment(const risse_char * & ptr)
 {
@@ -180,11 +152,6 @@ tRisseLexer::tSkipCommentResult tRisseLexer::RisseSkipComment(const risse_char *
 
 
 //---------------------------------------------------------------------------
-//! @brief		Ptr にある文字列を別の文字列と比較する
-//! @param		wrd		比較する文字列
-//! @param		isword	単語単位の比較を行う場合に真
-//! @return		単語が一致したかどうか
-//---------------------------------------------------------------------------
 bool tRisseLexer::StringMatch(const risse_char *wrd, bool isword)
 {
 	// compare string with a script starting from sc and wrd.
@@ -208,12 +175,6 @@ bool tRisseLexer::StringMatch(const risse_char *wrd, bool isword)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列を解析する(内部関数)
-//! @param		val		解析した文字列を格納する先
-//! @param		delim	デリミタ ( '\'' か '"' )
-//! @param		embexpmode	埋め込み式モードかどうか (@つき文字列リテラルかどうか)
-//! @return		内部ステータス
 //---------------------------------------------------------------------------
 tRisseLexer::tInternalParseStringResult
 	tRisseLexer::InternalParseString(tRisseString &val,

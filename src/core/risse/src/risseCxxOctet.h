@@ -14,6 +14,12 @@
 #ifndef risseCxxOctetH
 #define risseCxxOctetH
 
+/*! @note
+Risse オクテット列について
+
+Risse オクテット列は tRisseOctetBlock クラスで表される。
+
+*/
 
 #include "risseTypes.h"
 #include "risseAssert.h"
@@ -40,8 +46,15 @@ public:
 	}
 
 
+	//! @brief		コンストラクタ(const risse_uint8 *から)
+	//! @param		buf		入力バッファ
+	//! @param		length	長さ
 	tRisseOctetBlock(const risse_uint8 * buf, risse_size length);
 
+	//! @brief 部分オクテット列を作るためのコンストラクタ
+	//! @param ref		コピー元オブジェクト
+	//! @param offset	切り出す開始位置
+	//! @param length	切り出す長さ
 	tRisseOctetBlock(const tRisseOctetBlock & ref,
 			risse_size offset, risse_size length);
 
@@ -122,7 +135,14 @@ public: // comparison
 		{ return ! (*this == ref); }
 
 public: // operators
+	//! @brief		オクテット列の連結(risse_uint8 と length から)
+	//! @param		buffer		連結するオクテット列
+	//! @param		length 		連結するオクテット列の長さ
 	void Append(const risse_uint8 * buffer, risse_size length);
+
+	//! @brief		オクテット列の追加
+	//! @param		ref		追加するオクテット列
+	//! @return		このオブジェクト
 	tRisseOctetBlock & operator += (const tRisseOctetBlock & ref);
 
 	//! @brief		１バイトの追加
@@ -134,7 +154,14 @@ public: // operators
 		return *this;
 	}
 
+	//! @brief		オクテット列の連結
+	//! @param		ref		連結するオクテット列
+	//! @return		新しく連結されたオクテット列
 	tRisseOctetBlock operator + (const tRisseOctetBlock & ref) const;
+
+	//! @brief		オクテット列の連結
+	//! @param		dest	連結されたオクテット列が格納される先(*this + ref がここに入る)
+	//! @param		ref		連結するオクテット列
 	void Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & ref) const;
 
 	//! @brief [] 演算子
@@ -178,6 +205,8 @@ public: // pointer
 
 
 private:
+	//! @brief		オクテット列バッファをコピーし、独立させる
+	//! @return		内部バッファ
 	risse_uint8 * InternalIndepend() const;
 
 };

@@ -21,8 +21,6 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(1411,29360,55440,18029,27323,38271,59690,56185);
 
 //---------------------------------------------------------------------------
-//! @brief		risse_char 版 atoi
-//---------------------------------------------------------------------------
 risse_int Risse_atoi(const risse_char *s)
 {
 	int r = 0;
@@ -50,12 +48,6 @@ risse_int Risse_atoi(const risse_char *s)
 
 
 //---------------------------------------------------------------------------
-//! @brief		risse_int を risse_char 文字列に変換する
-//! @param		value     変換したい値
-//! @param		string    出力先文字列バッファ
-//! @return		string パラメータで指定した出力先文字列バッファがそのまま帰る
-//! @note		string には十分な余裕があることが前提
-//---------------------------------------------------------------------------
 risse_char * Risse_int_to_str(risse_int value, risse_char *string)
 {
 	risse_char *ostring = string;
@@ -82,13 +74,7 @@ risse_char * Risse_int_to_str(risse_int value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-//! @brief		risse_int64 を risse_char 文字列に変換する
-//! @param		value     変換したい値
-//! @param		string    出力先文字列バッファ
-//! @return		string パラメータで指定した出力先文字列バッファがそのまま帰る
-//! @note		string には十分な余裕があることが前提
-//---------------------------------------------------------------------------
-risse_char * Risse_tTVInt_to_str(risse_int64 value, risse_char *string)
+risse_char * Risse_int64_to_str(risse_int64 value, risse_char *string)
 {
 	if((risse_uint64)value == RISSE_UI64_VAL(0x8000000000000000))
 	{
@@ -121,12 +107,6 @@ risse_char * Risse_tTVInt_to_str(risse_int64 value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-//! @brief		risse_real を risse_char 文字列に変換する
-//! @param		value     変換したい値
-//! @param		string    出力先文字列バッファ
-//! @return		string パラメータで指定した出力先文字列バッファがそのまま帰る
-//! @note		string には十分な余裕があることが前提
-//---------------------------------------------------------------------------
 risse_char * Risse_tTVReal_to_str(risse_real value, risse_char *string)
 {
 	// 実数を文字列に変換する処理は実は結構難しい
@@ -154,12 +134,6 @@ risse_char * Risse_tTVReal_to_str(risse_real value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ポインタを risse_char 文字列に変換する
-//! @param		value     変換したい値
-//! @param		string    出力先文字列バッファ
-//! @return		string パラメータで指定した出力先文字列バッファがそのまま帰る
-//! @note		string には十分な余裕があることが前提
-//---------------------------------------------------------------------------
 risse_char * Risse_pointer_to_str(const void *value, risse_char *string)
 {
 #ifdef Risse_snprintf
@@ -183,12 +157,6 @@ risse_char * Risse_pointer_to_str(const void *value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列のASCII英字の大文字・小文字同一視比較
-//! @param		s1     値1
-//! @param		s2     値2
-//! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
-//! @note		この関数は ASCII 英字のみを同一視比較する
-//---------------------------------------------------------------------------
 risse_int Risse_straicmp(const risse_char *s1, const risse_char *s2)
 {
 	for(;;)
@@ -208,16 +176,6 @@ risse_int Risse_straicmp(const risse_char *s1, const risse_char *s2)
 
 
 //---------------------------------------------------------------------------
-//! @brief		最大で指定コードポイント数分だけ文字列をコピー
-//! @param		d    格納先バッファ
-//! @param		s    コピー元バッファ
-//! @param		len  コピーする最大コードポイント数
-//! @note		この関数は strncpy と違い、指定コードポイント数分コピーした後、
-//!				最大文字数に達していてもいなくても、d の最後に \0 を追加する。
-//!				つまり、d は最低、len + 1 コードポイントの領域が確保されて
-//!				いなければならない。また、s が len に達していない場合、
-//!				d の残りは null では埋められない。
-//---------------------------------------------------------------------------
 void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len)
 {
 	risse_char ch;
@@ -229,10 +187,6 @@ void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列コピー
-//! @param		d    格納先バッファ
-//! @param		s    コピー元バッファ
-//---------------------------------------------------------------------------
 void Risse_strcpy(risse_char *d, const risse_char *s)
 {
 	while((*(d++) = *(s++)) != 0)   ;
@@ -240,10 +194,6 @@ void Risse_strcpy(risse_char *d, const risse_char *s)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列の長さを得る
-//! @param		d    文字列
-//! @return		文字列長
 //---------------------------------------------------------------------------
 risse_size Risse_strlen(const risse_char *d)
 {
@@ -257,11 +207,6 @@ risse_size Risse_strlen(const risse_char *d)
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 
-//---------------------------------------------------------------------------
-//! @brief		文字列を比較する
-//! @param		s1   文字列その1
-//! @param		s2   文字列その2
-//! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
 //---------------------------------------------------------------------------
 int Risse_strcmp(const risse_char *s1, const risse_char *s2)
 {
@@ -280,12 +225,6 @@ int Risse_strcmp(const risse_char *s1, const risse_char *s2)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列を最大でnコードポイントまで比較する
-//! @param		s1   文字列その1
-//! @param		s2   文字列その2
-//! @param		n    最大コードポイント数
-//! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
 //---------------------------------------------------------------------------
 int Risse_strncmp(const risse_char *s1, const risse_char *s2, risse_size n)
 {
@@ -306,13 +245,6 @@ int Risse_strncmp(const risse_char *s1, const risse_char *s2, risse_size n)
 
 
 //---------------------------------------------------------------------------
-//! @brief		最大で指定コードポイント数分だけ文字列をコピー
-//! @param		d    格納先バッファ
-//! @param		s    コピー元バッファ
-//! @param		len  コピーする最大コードポイント数
-//! @return		d が返る
-//! @note		動作については strncpy と同じ
-//---------------------------------------------------------------------------
 risse_char *Risse_strncpy(risse_char *d, const risse_char *s, risse_size len)
 {
 	risse_char * pd = d;
@@ -331,12 +263,6 @@ risse_char *Risse_strncpy(risse_char *d, const risse_char *s, risse_size len)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列の連結
-//! @param		d    格納先バッファ
-//! @param		s    コピー元バッファ
-//! @return		d が返る
-//! @note		動作については strcat と同じ
-//---------------------------------------------------------------------------
 risse_char *Risse_strcat(risse_char *d, const risse_char *s)
 {
 	risse_char * pd = d;
@@ -347,11 +273,6 @@ risse_char *Risse_strcat(risse_char *d, const risse_char *s)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列中の部分文字列の検索
-//! @param		s1 検索対象文字列(target)
-//! @param		s2 検索する文字列(substring)
-//! @return		s1 中の見つかった位置。見つからなかった場合は NULL
 //---------------------------------------------------------------------------
 risse_char *Risse_strstr(const risse_char *s1, const risse_char *s2)
 {
@@ -372,11 +293,6 @@ risse_char *Risse_strstr(const risse_char *s1, const risse_char *s2)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列中のコードポイントの検索
-//! @param		s  検索対象文字列(target)
-//! @param		c  検索するコードポイント
-//! @return		s  中の見つかった位置。見つからなかった場合は NULL
-//---------------------------------------------------------------------------
 risse_char *Risse_strchr(const risse_char *s, int c)
 {
 	while(*s)
@@ -389,11 +305,6 @@ risse_char *Risse_strchr(const risse_char *s, int c)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		数値を表す文字列をdoubleに変換
-//! @param		nptr    文字列
-//! @param		endptr  数値を表す文字列の次の文字を表すポインタがここに格納される (NULL可)
-//! @return		変換された数値
 //---------------------------------------------------------------------------
 double Risse_strtod(const risse_char *nptr, risse_char **endptr)
 {
@@ -413,11 +324,6 @@ double Risse_strtod(const risse_char *nptr, risse_char **endptr)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		UTF16文字列をrisse_char(UTF-32文字列) に変換
-//! @param		out 出力文字列 (最低でもinと同じ要素数を持つこと) null終端は書き込まれる
-//! @param		in  入力文字列
-//! @return		出力バッファのサイズ (null終端を含まず, risse_char単位)
 //---------------------------------------------------------------------------
 risse_size RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in)
 {
@@ -447,12 +353,6 @@ risse_size RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		risse_char(UTF-32文字列) をUTF16文字列に変換
-//! @param		out 出力文字列(NULL可)  null終端は書き込まれる
-//! @param		in  入力文字列
-//! @param		in_len 入力文字列のサイズ (-1L の場合は自動判定)
-//! @return		出力バッファのサイズ (null終端を含まず, risse_uint16単位)
 //---------------------------------------------------------------------------
 risse_size RisseConvertRisseCharToUTF16String(risse_uint16 * out,
 	const risse_char * in, risse_size in_len)
@@ -642,11 +542,6 @@ static bool inline RisseUtf8ToRisseChar(const char * & in, risse_char *out)
 
 
 //---------------------------------------------------------------------------
-//! @brief		UTF-8 文字列を risse_char 文字列に変換する
-//! @param		in   入力 UTF-8 文字列
-//! @param		out  出力 risse_char 文字列 (NULL可)
-//! @return		変換後の risse_char のコードポイント数 (null-terminatorを含まず)
-//---------------------------------------------------------------------------
 risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out)
 {
 	// convert input utf-8 string to output wide string
@@ -672,11 +567,6 @@ risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		risse_char 文字列を UTF-8 文字列に変換する
-//! @param		in   入力 risse_char 文字列
-//! @param		out  出力 UTF-8 文字列 (NULL可)
-//! @return		変換後の UTF-8 のバイト数 (null-terminatorを含まず)
 //---------------------------------------------------------------------------
 risse_size RisseRisseCharToUtf8String(const risse_char * in, char * out)
 {
@@ -710,11 +600,6 @@ risse_size RisseRisseCharToUtf8String(const risse_char * in, char * out)
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		risse_char 型の文字列を wxString に変換する
-//! @param		str  risse_char*型の文字列
-//! @param		len  文字列の長さ(コードポイント単位) -1 = 自動判別
-//! @return		wxString型の文字列
 //---------------------------------------------------------------------------
 wxString RisseCharToWxString(const risse_char * str, risse_size len)
 {
@@ -751,8 +636,6 @@ wxString RisseCharToWxString(const risse_char * str, risse_size len)
 
 #ifdef RISSE_CHARUTILS_DEBUG
 #include <stdio.h>
-//---------------------------------------------------------------------------
-//! @brief		一行中に複数の RISSE_WS を使用した場合に例外を送出する関数
 //---------------------------------------------------------------------------
 void RisseThrowWSAssertionFailure(const wchar_t * source, risse_int line)
 {

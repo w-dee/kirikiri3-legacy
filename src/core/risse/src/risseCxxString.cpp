@@ -14,149 +14,7 @@
 
 #include "risseCxxString.h"
 
-/*! @note
-Risse 文字列について
 
-Risse 文字列は tRisseStringBlock クラスで表される。
-このクラスは、risse_char * 型の文字列を保持する。この文字列は \0 を含むこ
-とはできない。
-
-以下の説明ではコードポイントを「文字」と表記する。
-
-risse_char は 32bit サイズであることが求められる。
-
-■ 構造
-
-	tRisseStringBlock は以下の二つのメンバを持っている。
-
-	risse_char  *	Buffer;	// 文字列バッファ
-	risse_size		Length;	// 文字列長 (最後の \0 は含めない)
-
-	tRisseStringBlock はこの二つのメンバを用い、「Bufferから始まるLength分の
-	長さを持つ文字列」を表す。
-	長さのない (空の) 文字列の場合、Buffer には NULL が入り、Length は 0 になる。
-
-
-■ バッファ
-
-	バッファは 最低でも (Length + 3) * sizeof(risse_char) + sizeof(risse_size)
-	を持つ。
-	tRisseStringBlock が任意の文字列を元に作成される場合、
-	(Length + 3) * sizeof(risse_char) + sizeof(size_t) の長さのバッファがま
-	ず確保され、文字列中の各文字は以下のように配置される。
-
-	capacity \0 文字0 文字1 文字3 .... \0 hint
-	              ↑
-                Buffer
-
-	このように、最初は capacity としてバッファに実際に確保されている長さが
-	入り、それ以降は 各 CP の両端に \0 がついたバッファ、最後にこの文字列の
-	hint が続く。
-	capacity は、バッファの長さがぴったりであれば Length と同じになる。
-
-	tRisseStringBlock::Buffer は、最初の capacity や \0 ではなく、その次の
-	文字0(つまり文字列の先頭) を指すようになる。
-
-	cpacity の次の \0 は、 Buffer が他の tRisseStringBlock と共有されている
-	場合に \0 ではなくなる。最後の \0 は、終端が \0 であることを期待してい
-	る C 言語系の関数に渡す際に NULL終端 を表す。
-
-■ バッファの共有
-
-	tRisseStringBlock のコピーコンストラクタや代入演算子は、バッファの中身は
-	コピーせず、Buffer と Length だけをコピーする。この際、バッファがすでに
-	共有されたことを表すため、Buffer[-1] が \0 でなければ、Buffer[-1] に
-	-1 を代入する。これはバッファが共有されている可能性を表す。
-
-■ 部分文字列の共有
-
-	tRisseStringBlock は、他の文字列の一部を指し示すことができる。
-
-	tRisseStringBlock a が以下のバッファを持っている場合、
-
-	4 \0 文字0 文字1 文字2 文字3 \0 hint
-	    ↑
-	   Buffer
-	Length = 4
-
-	文字1 ～ 文字2 の２文字を表す tRisseStringBlock b は以下のように表すこ
-	とができる。
-
-	4 -1 文字0 文字1 文字2 文字3 \0 hint
-	          ↑
-	        Buffer
-	Length = 2
-
-	この場合もバッファの共有と同じく、バッファの先頭の \0 が -1 に書き換えら
-	れ、バッファが共有されていることを表す。
-
-■ バッファの共有の判定
-
-	tRisseStringBlock が他の tRisseStringBlock とバッファを共有している可能
-	性があるかどうかを判断するには、Buffer[-1] が \0 でないかどうかを見れば
-	よい。Buffer[-1] が 非 \0 であれはバッファは共有されている可能性がある。
-
-	tRisseStringBlock は文字列を共有する場合、Buffer[-1] が非 \0 の場合に
-	 -1 を代入するが、これによりバッファが共有されている可能性を表す。
-
-	tRisseStringBlock は部分文字列を共有する場合、母文字列は Buffer[-1] が
-	非 \0の場合に -1 を代入するし、部分文字列は Buffer[-1] は必然的に \0 に
-	なる。これは、部分文字列が母文字列の先頭から共有しているならば、Buffer[-1]
-	は母文字列と同じ -1 になるし、部分文字列が母文字列の途中から共有している
-	ならば、Buffer[-1] は直前の文字を表し、tRisseStringBlock は文字列中に
-	\0 を含むことはないから、これは非 \0 となる。
-
-	これらは共有の可能性を表すだけである。可能性があっても実際は共有されてい
-	ない場合があり得る。
-
-■ バッファの容量と実際の Length
-
-	+= 演算子などで Length が長くなり、バッファが拡張される際、バッファは実
-	際に必要な容量よりもすこし多めに確保され、次の拡張時にバッファを再度確保
-	しなくても済むようになる。
-	この際、実際にバッファが格納可能な CP 数を表すのが、バッファの先頭に
-	size_t 型で確保されている領域である。
-	ここの領域は、Buffer[-1] が 0 のとき (共有している可能性がない場合)に
-	のみ有効な値を保持していると考えるべきである。実際のところ、Buffer[-1] が
-	0 でない場合は += のようなバッファの内容を破壊する操作では直前に
-	バッファの内容のコピーが行われるため、この領域が参照されることはない。
-
-■ Independ
-
-	tRisseStringBlock::Independ() メソッドは、文字列がそのバッファを共有
-	している可能性がある場合、新たにバッファを確保し、内容をコピーする。
-	これにより、バッファに何か変更を書き込んでも、他の文字列に影響が及ばない
-	ようにすることができる。
-
-	Independ は新たに確保したバッファの先頭は \0 にするが、元のバッファの
-	内容には手を加えない。元のバッファの内容は、さらに他の文字列から共有
-	されている可能性があるが、実際に共有されているのか、あるいはされていな
-	いのかは、tRisseStringBlock が持っている情報からは判定できないからである。
-
-■ c_str()
-
-	tRisseStringBlock::c_str() は、多くの C 言語系 API が期待するような、
-	NULL 終端文字列を返す。文字列が他の文字列の部分文字列を表している場合、
-	文字列の最後が \0 である保証はないが、そのような場合は、c_str() は新たに
-	バッファを確保し、最後が \0 で終了しているバッファを作り、それを返す。
-
-■ バッファの解放
-
-	参照されなくなったバッファは、GC により自動的に回収される。
-
-■ ヒント
-
-	文字列バッファ中の hint は、この文字列の 32bit ハッシュを表す領域である
-	が、常に正しいハッシュを表しているとは限らない。ここが 0 の場合はハッシュ
-	が無効であるか、まだ計算されていないことを表し、非 0 の場合はハッシュが
-	入っていると考えることができるが、正しいハッシュが入っている保証はない。
-	あくまでハッシュ表検索時の「ヒント」として扱うべきである。
-
-	tRisseStringBlock::GetHint() は、このヒント領域へのポインタを返す。
-	文字列が部分共有されている場合など、このヒント領域が存在しない場合は
-	このメソッドは NULL を返す。その場合はヒントは利用できない。
-
-*/
 
 namespace Risse
 {
@@ -164,17 +22,10 @@ RISSE_DEFINE_SOURCE_ID(45632,47818,10920,18335,63117,13582,59145,24628);
 
 
 //---------------------------------------------------------------------------
-//! @brief -1, 0 が入っている配列(空のバッファを表す)
-//---------------------------------------------------------------------------
 risse_char tRisseStringData::EmptyBuffer[3] = { tRisseStringBlock::MightBeShared, 0, 0 };
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief 部分文字列を作るためのコンストラクタ
-//! @param ref		コピー元オブジェクト
-//! @param offset	切り出す開始位置
-//! @param length	切り出す長さ
 //---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock & ref,
 	risse_size offset, risse_size length)
@@ -197,11 +48,6 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock & ref,
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(risse_char * から、コードポイント数制限付き)
-//! @param		ref		元の文字列
-//! @param		n		コードポイント数
-//! @note		[ref, ref+n) の範囲には \0 がないこと
-//---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 {
 	Length = n;
@@ -219,10 +65,6 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(メッセージのビルド)
-//! @param		msg		メッセージ
-//! @param		r1		メッセージ中の '%1' と置き換わる文字列
-//---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1)
 {
 	*this = msg.Replace(RISSE_WS("%1"), r1);
@@ -230,11 +72,6 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ(メッセージのビルド)
-//! @param		msg		メッセージ
-//! @param		r1		メッセージ中の '%1' と置き換わる文字列
-//! @param		r2		メッセージ中の '%2' と置き換わる文字列
 //---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
 				const tRisseStringBlock &r2)
@@ -244,12 +81,6 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ(メッセージのビルド)
-//! @param		msg		メッセージ
-//! @param		r1		メッセージ中の '%1' と置き換わる文字列
-//! @param		r2		メッセージ中の '%2' と置き換わる文字列
-//! @param		r3		メッセージ中の '%3' と置き換わる文字列
 //---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
 				const tRisseStringBlock &r2, const tRisseStringBlock &r3)
@@ -261,13 +92,6 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(メッセージのビルド)
-//! @param		msg		メッセージ
-//! @param		r1		メッセージ中の '%1' と置き換わる文字列
-//! @param		r2		メッセージ中の '%2' と置き換わる文字列
-//! @param		r3		メッセージ中の '%3' と置き換わる文字列
-//! @param		r4		メッセージ中の '%4' と置き換わる文字列
-//---------------------------------------------------------------------------
 tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
 					const tRisseStringBlock &r2, const tRisseStringBlock &r3,
 					const tRisseStringBlock &r4)
@@ -278,10 +102,6 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		代入演算子(risse_char * から)
-//! @param		ref		元の文字列
-//! @return		このオブジェクトへの参照
 //---------------------------------------------------------------------------
 tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 {
@@ -302,10 +122,6 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		代入演算子(risse_char から)
-//! @param		ref		元の文字列
-//! @return		このオブジェクトへの参照
 //---------------------------------------------------------------------------
 tRisseStringBlock & tRisseStringBlock::operator = (const risse_char ref)
 {
@@ -328,10 +144,6 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char ref)
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 //---------------------------------------------------------------------------
-//! @brief		代入演算子(wchar_t * から)
-//! @param		ref		元の文字列
-//! @return		このオブジェクトへの参照
-//---------------------------------------------------------------------------
 tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
 {
 	risse_size org_len = wcslen(str);
@@ -345,10 +157,6 @@ tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
 #endif
 
 
-//---------------------------------------------------------------------------
-//! @brief		代入演算子(char * から)
-//! @param		ref		元の文字列
-//! @return		このオブジェクトへの参照
 //---------------------------------------------------------------------------
 tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 {
@@ -364,14 +172,6 @@ tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		n個のコードポイントからなるバッファを割り当てる
-//! @param		n	コードポイント数
-//! @param		prevbuf	以前のバッファ(バッファを再確保する場合のみ;prevbuf[-1] は 0 =非共有であること)
-//! @return		割り当てられたバッファ
-//! @note		実際には (n+3)*sizeof(risse_char) + sizeof(risse_size) が割り当
-//! てられ、2番目の文字を指すポインタが帰る。共有可能性フラグはクリアされ、
-//! 容量も書き込まれるが、null終端とヒントは書き込まれないので注意。
 //---------------------------------------------------------------------------
 risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	risse_size n, risse_char *prevbuf)
@@ -408,9 +208,6 @@ risse_char * tRisseStringBlock::AllocateInternalBuffer(
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列バッファをコピーし、独立させる
-//! @return		内部バッファ
-//---------------------------------------------------------------------------
 risse_char * tRisseStringBlock::InternalIndepend() const
 {
 	risse_char * newbuf = AllocateInternalBuffer(Length);
@@ -421,9 +218,6 @@ risse_char * tRisseStringBlock::InternalIndepend() const
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief 文字列のハッシュを計算して返す
-//! @return ハッシュ値
 //---------------------------------------------------------------------------
 risse_uint32 tRisseStringBlock::GetHash() const
 {
@@ -450,10 +244,6 @@ risse_uint32 tRisseStringBlock::GetHash() const
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列の追加
-//! @param		buffer		追加する文字列 (length中には \0 が無いこと)
-//! @param		length		追加する文字列の長さ
 //---------------------------------------------------------------------------
 void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
 {
@@ -499,10 +289,6 @@ void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列の連結
-//! @param		ref		連結する文字列
-//! @return		新しく連結された文字列
-//---------------------------------------------------------------------------
 tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref) const
 {
 	if(Length == 0) return ref;
@@ -519,12 +305,6 @@ tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列の置き換え
-//! @param		old_str			置き換え元の文字列
-//! @param		new_str			置き換え先の文字列
-//! @parma		replace_all		すべての一致を置き換えるかどうか
-//! @return		置き換えられた文字列
 //---------------------------------------------------------------------------
 tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
 		const tRisseStringBlock &new_str, bool replace_all) const

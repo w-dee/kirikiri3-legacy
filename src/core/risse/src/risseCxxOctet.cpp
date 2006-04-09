@@ -15,22 +15,10 @@
 #include "risseCharUtils.h"
 #include "risseCxxOctet.h"
 
-
-/*! @note
-Risse オクテット列について
-
-Risse オクテット列は tRisseOctetBlock クラスで表される。
-
-*/
-
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(22894,62791,44554,18883,55951,15622,1807,62704);
 
-//---------------------------------------------------------------------------
-//! @brief		コンストラクタ(const risse_uint8 *から)
-//! @param		buf		入力バッファ
-//! @param		length	長さ
 //---------------------------------------------------------------------------
 tRisseOctetBlock::tRisseOctetBlock(const risse_uint8 * buf, risse_size length)
 {
@@ -48,11 +36,6 @@ tRisseOctetBlock::tRisseOctetBlock(const risse_uint8 * buf, risse_size length)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief 部分オクテット列を作るためのコンストラクタ
-//! @param ref		コピー元オブジェクト
-//! @param offset	切り出す開始位置
-//! @param length	切り出す長さ
 //---------------------------------------------------------------------------
 tRisseOctetBlock::tRisseOctetBlock(const tRisseOctetBlock & ref,
 	risse_size offset, risse_size length)
@@ -73,10 +56,6 @@ tRisseOctetBlock::tRisseOctetBlock(const tRisseOctetBlock & ref,
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		オクテット列の連結(risse_uint8 と length から)
-//! @param		buffer		連結するオクテット列
-//! @param		length 		連結するオクテット列の長さ
 //---------------------------------------------------------------------------
 void tRisseOctetBlock::Append(const risse_uint8 * buffer, risse_size length)
 {
@@ -120,10 +99,6 @@ void tRisseOctetBlock::Append(const risse_uint8 * buffer, risse_size length)
 
 
 //---------------------------------------------------------------------------
-//! @brief		オクテット列の追加
-//! @param		ref		追加するオクテット列
-//! @return		このオブジェクト
-//---------------------------------------------------------------------------
 tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
 {
 	if(Length == 0) return *this = ref; // 単純なコピーでよい
@@ -134,10 +109,6 @@ tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
 
 
 //---------------------------------------------------------------------------
-//! @brief		オクテット列の連結
-//! @param		ref		連結するオクテット列
-//! @return		新しく連結されたオクテット列
-//---------------------------------------------------------------------------
 tRisseOctetBlock tRisseOctetBlock::operator + (const tRisseOctetBlock & ref) const
 {
 	tRisseOctetBlock block;
@@ -147,10 +118,6 @@ tRisseOctetBlock tRisseOctetBlock::operator + (const tRisseOctetBlock & ref) con
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		オクテット列の連結
-//! @param		dest	連結されたオクテット列が格納される先(*this + ref がここに入る)
-//! @param		ref		連結するオクテット列
 //---------------------------------------------------------------------------
 void tRisseOctetBlock::Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & ref) const
 {
@@ -165,9 +132,6 @@ void tRisseOctetBlock::Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & 
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		オクテット列バッファをコピーし、独立させる
-//! @return		内部バッファ
 //---------------------------------------------------------------------------
 risse_uint8 * tRisseOctetBlock::InternalIndepend() const
 {

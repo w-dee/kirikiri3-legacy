@@ -181,6 +181,8 @@ public:
 	//! @brief		デストラクタ
 	virtual ~eRisse() {;}
 
+	//! @brief		例外メッセージを得る
+	//! @return		例外メッセージ
 	virtual const tRisseString & GetMessageString() const;
 };
 //---------------------------------------------------------------------------
@@ -206,6 +208,8 @@ private:
 	tRisseString Message; //!< 例外メッセージ
 
 public:
+	//! @brief		例外を投げる
+	//! @param		msg		メッセージ
 	static void Throw(const tRisseString & msg);
 };
 //---------------------------------------------------------------------------
@@ -257,6 +261,10 @@ public:
 	eRisseCompileError(const eRisseCompileError &ref) : eRisseScriptError(ref) {;}
 
 public:
+	//! @brief		例外を投げる
+	//! @param		msg		例外メッセージ
+	//! @param		block	例外の発生したスクリプトブロック
+	//! @param		pos		例外の発生した位置
 	static void Throw(const tRisseString & msg, tRisseScriptBlock *block, risse_size pos);
 };
 //---------------------------------------------------------------------------

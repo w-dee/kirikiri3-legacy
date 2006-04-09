@@ -27,10 +27,6 @@ RISSE_DEFINE_SOURCE_ID(49805,54699,17434,18495,59306,19776,3233,9707);
 
 
 //---------------------------------------------------------------------------
-//! @brief		ホワイトスペースのスキップ
-//! @param		ptr		解析ポインタ
-//! @return		スクリプトが継続するかどうか
-//---------------------------------------------------------------------------
 bool tRisseLexerUtility::SkipSpace(const risse_char * & ptr)
 {
 	while(*ptr && Risse_iswspace_nc(*ptr)) ptr ++;
@@ -39,10 +35,6 @@ bool tRisseLexerUtility::SkipSpace(const risse_char * & ptr)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		16進数文字1桁を数値に
-//! @param		ch	文字
-//! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
 risse_int tRisseLexerUtility::HexNum(risse_char ch)
 {
@@ -55,10 +47,6 @@ risse_int tRisseLexerUtility::HexNum(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-//! @brief		8進数文字1桁を数値に
-//! @param		ch	文字
-//! @return		文字の表す数値 (-1:解析不能)
-//---------------------------------------------------------------------------
 risse_int tRisseLexerUtility::OctNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('0') && ch<=RISSE_WC('7')) return ch-RISSE_WC('0');
@@ -68,10 +56,6 @@ risse_int tRisseLexerUtility::OctNum(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-//! @brief		10進数文字1桁を数値に
-//! @param		ch	文字
-//! @return		文字の表す数値 (-1:解析不能)
-//---------------------------------------------------------------------------
 risse_int tRisseLexerUtility::DecNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('0') && ch<=RISSE_WC('9')) return ch-RISSE_WC('0');
@@ -80,10 +64,6 @@ risse_int tRisseLexerUtility::DecNum(risse_char ch)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		2進数文字1桁を数値に
-//! @param		ch	文字
-//! @return		文字の表す数値 (-1:解析不能)
 //---------------------------------------------------------------------------
 risse_int tRisseLexerUtility::BinNum(risse_char ch)
 {
@@ -95,10 +75,6 @@ risse_int tRisseLexerUtility::BinNum(risse_char ch)
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		バックスラッシュエスケープの値を得る
-//! @param		ch	文字
-//! @return		文字の表すコード
 //---------------------------------------------------------------------------
 risse_int tRisseLexerUtility::UnescapeBackSlash(risse_char ch)
 {
@@ -119,10 +95,6 @@ risse_int tRisseLexerUtility::UnescapeBackSlash(risse_char ch)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		コメントのスキップ
-//! @param		ptr		解析ポインタ
-//! @return		スキップした結果どうなったか
 //---------------------------------------------------------------------------
 tRisseLexerUtility::tSkipCommentResult
 	tRisseLexerUtility::SkipComment(const risse_char * & ptr)
@@ -179,12 +151,6 @@ tRisseLexerUtility::tSkipCommentResult
 
 
 //---------------------------------------------------------------------------
-//! @brief		ptr にある文字列を別の文字列と比較する
-//! @param		ptr		比較する文字列
-//! @param		wrd		比較する別の文字列
-//! @param		isword	単語単位の比較を行う場合に真
-//! @return		単語が一致したかどうか
-//---------------------------------------------------------------------------
 bool tRisseLexerUtility::StringMatch(const risse_char * & ptr, const risse_char *wrd, bool isword)
 {
 	// compare string with a script starting from sc and wrd.
@@ -208,13 +174,6 @@ bool tRisseLexerUtility::StringMatch(const risse_char * & ptr, const risse_char 
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		文字列を解析する
-//! @param		ptr		解析開始位置
-//! @param		val		解析した文字列を格納する先
-//! @param		delim	デリミタ ( '\'' か '"' )
-//! @param		embexpmode	埋め込み式モードかどうか (@つき文字列リテラルかどうか)
-//! @return		内部ステータス
 //---------------------------------------------------------------------------
 tRisseLexerUtility::tParseStringResult
 	tRisseLexerUtility::ParseString(
@@ -357,11 +316,6 @@ tRisseLexerUtility::tParseStringResult
 
 
 //---------------------------------------------------------------------------
-//! @brief		現在の解析位置にある文字列を解析する
-//! @param		ptr		解析開始位置 ('\'' or '"' を指していないとならない)
-//! @param		val		値の格納先
-//! @return		値の解析に成功したかどうか
-//---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseString(const risse_char * & ptr, tRisseString &val)
 {
 	// Ptr は '\'' or '"' を指していないとならない
@@ -376,13 +330,6 @@ bool tRisseLexerUtility::ParseString(const risse_char * & ptr, tRisseString &val
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		数値として認識できるだけの文字列を ptr から切り出す
-//! @param		ptr		解析開始位置(切り出し後は切り出した後まで移動している)
-//! @param		validdigits	数値に使う文字集合を判定する関数
-//! @param		expmark	指数表記に使われる文字(2文字まで)
-//! @param		isreal	実数を切り出したときに真に設定される(整数の場合は偽)
-//! @return		切り出した文字列(切り出しに失敗した場合、空文字列が帰る)
 //---------------------------------------------------------------------------
 tRisseString tRisseLexerUtility::ExtractNumber(
 	const risse_char * & ptr,
@@ -438,13 +385,6 @@ tRisseString tRisseLexerUtility::ExtractNumber(
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		10進以外の実数表現(0xabfp3, 0b10001p2など)を数値に変換する
-//! @param		ptr		解析開始位置
-//! @param		val		結果の格納先
-//! @param		validdigits	数値に使う文字集合を判定する関数
-//! @param		basebits	基数
-//! @return		変換に成功したかどうか
 //---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseNonDecimalReal(
 	const risse_char * ptr, risse_real &val,
@@ -584,13 +524,6 @@ bool tRisseLexerUtility::ParseNonDecimalReal(
 
 
 //---------------------------------------------------------------------------
-//! @brief		10進以外の整数表現(0xabf, 0b10001など)を数値に変換する
-//! @param		ptr		解析開始位置
-//! @param		val		結果の格納先
-//! @param		validdigits	数値に使う文字集合を判定する関数
-//! @param		basebits	基数
-//! @return		変換に成功したかどうか
-//---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int64 &val, 
 	risse_int (*validdigits)(risse_char ch), risse_int basebits)
 {
@@ -607,13 +540,6 @@ bool tRisseLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		10進以外の数値表現を数値に変換する
-//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
-//! @param		val		結果の格納先
-//! @param		validdigits	数値に使う文字集合を判定する関数
-//! @param		basebits	基数
-//! @return		変換に成功したかどうか
 //---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseNonDecimalNumber(const risse_char * & ptr, tRisseVariant &val,
 	risse_int (*validdigits)(risse_char ch), risse_int base)
@@ -644,11 +570,6 @@ bool tRisseLexerUtility::ParseNonDecimalNumber(const risse_char * & ptr, tRisseV
 
 
 //---------------------------------------------------------------------------
-//! @brief		10進実数を数値に変換する
-//! @param		ptr		解析開始位置
-//! @param		val		結果の格納先
-//! @return		変換に成功したかどうか
-//---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseDecimalReal(const risse_char * ptr, risse_real &val)
 {
 	val = static_cast<risse_real>(Risse_strtod(ptr, NULL));
@@ -657,11 +578,6 @@ bool tRisseLexerUtility::ParseDecimalReal(const risse_char * ptr, risse_real &va
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		10進整数を数値に変換する
-//! @param		ptr		解析開始位置
-//! @param		val		結果の格納先
-//! @return		変換に成功したかどうか
 //---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseDecimalInteger(const risse_char * ptr, risse_int64 &val)
 {
@@ -679,11 +595,6 @@ bool tRisseLexerUtility::ParseDecimalInteger(const risse_char * ptr, risse_int64
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		数値変換用内部関数
-//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
-//! @param 		val		結果格納先
-//! @return		解析に成功したかどうか
 //---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseNumber2(const risse_char * & ptr, tRisseVariant &val)
 {
@@ -795,11 +706,6 @@ decimal:
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字列を数値に変換する
-//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
-//! @param 		val		結果格納先
-//! @return		解析に成功したかどうか
-//---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseNumber(const risse_char * & ptr, tRisseVariant &val)
 {
 	// parse a number pointed by ptr
@@ -831,11 +737,6 @@ bool tRisseLexerUtility::ParseNumber(const risse_char * & ptr, tRisseVariant &va
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		オクテット列を解釈する
-//! @param		ptr		解析開始位置 '<%' を示していること(解析終了後は終了点にまで移動している)
-//! @param 		val		結果格納先
-//! @return		解析に成功したかどうか
 //---------------------------------------------------------------------------
 bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 {

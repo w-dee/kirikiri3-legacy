@@ -18,10 +18,29 @@ namespace Risse
 class tRisseLexer
 {
 public: // public static members
+	//! @brief		16進数文字1桁を数値に
+	//! @param		ch	文字
+	//! @return		文字の表す数値 (-1:解析不能)
 	static risse_int HexNum(risse_char ch);
+
+	//! @brief		8進数文字1桁を数値に
+	//! @param		ch	文字
+	//! @return		文字の表す数値 (-1:解析不能)
 	static risse_int OctNum(risse_char ch);
+
+	//! @brief		10進数文字1桁を数値に
+	//! @param		ch	文字
+	//! @return		文字の表す数値 (-1:解析不能)
 	static risse_int DecNum(risse_char ch);
+
+	//! @brief		2進数文字1桁を数値に
+	//! @param		ch	文字
+	//! @return		文字の表す数値 (-1:解析不能)
 	static risse_int BinNum(risse_char ch);
+
+	//! @brief		バックスラッシュエスケープの値を得る
+	//! @param		ch	文字
+	//! @return		文字の表すコード
 	static risse_int UnescapeBackSlash(risse_char ch);
 
 	//! @brief	コメントをスキップしようとした際の状態
@@ -32,11 +51,22 @@ public: // public static members
 		scrNotComment	//!< 実はコメントではなかった
 	};
 
+	//! @brief		コメントのスキップ
+	//! @param		ptr		解析ポインタ
+	//! @return		スキップした結果どうなったか
 	static tRisseSkipCommentResult SkipComment(const risse_char * & ptr);
+
+	//! @brief		ホワイトスペースのスキップ
+	//! @param		ptr		解析ポインタ
+	//! @return		スクリプトが継続するかどうか
 	static bool SkipSpace(const risse_char * & ptr);
 
 
 private:
+	//! @brief		Ptr にある文字列を別の文字列と比較する
+	//! @param		wrd		比較する文字列
+	//! @param		isword	単語単位の比較を行う場合に真
+	//! @return		単語が一致したかどうか
 	bool StringMatch(const risse_char *wrd, bool isword);
 
 	//! @brief InternalParseString の戻り値
@@ -48,9 +78,15 @@ private:
 		psrDollar
 	};
 
+	//! @brief		文字列を解析する(内部関数)
+	//! @param		val		解析した文字列を格納する先
+	//! @param		delim	デリミタ ( '\'' か '"' )
+	//! @param		embexpmode	埋め込み式モードかどうか (@つき文字列リテラルかどうか)
+	//! @return		内部ステータス
 	tInternalParseStringResult
 		InternalParseString(tRisseString &val,
 			risse_char delim, bool embexpmode);
+		
 	bool RisseParseString(tRisseString &val);
 
 public:

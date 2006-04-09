@@ -20,8 +20,6 @@ RISSE_DEFINE_SOURCE_ID(31394,1220,40741,19179,55968,19738,1342,5195);
 
 
 //---------------------------------------------------------------------------
-//! @brief		例外メッセージを得る
-//---------------------------------------------------------------------------
 const tRisseString & eRisse::GetMessageString() const
 {
 	static tRisseString nonamed_exception("No named exception");
@@ -31,9 +29,6 @@ const tRisseString & eRisse::GetMessageString() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		例外を投げる
-//! @param		msg		メッセージ
-//---------------------------------------------------------------------------
 void eRisseError::Throw(const tRisseString & msg)
 {
 	// 例外メッセージを投げる
@@ -42,11 +37,6 @@ void eRisseError::Throw(const tRisseString & msg)
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		例外を投げる
-//! @param		msg		例外メッセージ
-//! @param		block	例外の発生したスクリプトブロック
-//! @param		pos		例外の発生した位置
 //---------------------------------------------------------------------------
 void eRisseCompileError::Throw(const tRisseString & msg,
 						tRisseScriptBlock *block, risse_size pos)

@@ -824,79 +824,70 @@ bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 }
 //---------------------------------------------------------------------------
 
-#if 0
 //---------------------------------------------------------------------------
-// RisseParseRegExp
-//---------------------------------------------------------------------------
-static bool RisseParseRegExp(tRisseVariant &pat, const risse_char **ptr)
+static bool ParseRegExp(const risse_char * & ptr, tRisseString &pat, tRisseString &flags)
 {
 	// parse a regular expression pointed by 'ptr'.
 	// this is essencially the same as string parsing, except for
 	// not to decode escaped characters by '\\'.
 	// the regexp must be terminated by the delimiter '/', not succeeded by '\\'.
 
-	// this returns an internal representation: '//flag/pattern' that can be parsed by
-	// RegExp._compile
-
-//	if(!RisseNext((*ptr))) Risse_eRisseError(RisseStringParseError);
-
 	bool ok = false;
 	bool lastbackslash = false;
-	ttstr str;
+	tRisseString str;
+	tRisseString flg;
 
-	for(;*(*ptr);)
+	for(;*ptr;)
 	{
-		if(*(*ptr)==RISSE_WC('\\'))
+		if(*ptr == RISSE_WC('\\'))
 		{
-			str+=*(*ptr);
+			str += *ptr;
 			if(lastbackslash)
 				lastbackslash = false;
 			else
 				lastbackslash = true;
 		}
-		else if(*(*ptr)==RISSE_WC('/') && !lastbackslash)
+		else if(*ptr == RISSE_WC('/') && !lastbackslash)
 		{
-			// string delimiters
-//			lastbackslash = false;
-
-			if(!RisseNext(ptr))
+			// regexp delimiters
+			if(!*(++ptr))
 			{
 				ok = true;
 				break;
 			}
 
 			// flags can be here
-			ttstr flag;
-			while(*(*ptr) >= RISSE_WC('a') && *(*ptr) <= RISSE_WC('z'))
+			while(*ptr >= RISSE_WC('a') && *ptr <= RISSE_WC('z'))
 			{
-				flag += *(*ptr);
-				if(!RisseNext(ptr)) break;
+				flg += *ptr;
+				if(!*(++ptr)) break;
 			}
-			str = RISSE_WS1("//")+ flag + RISSE_WS2("/") + str;
 			ok = true;
 			break;
 		}
 		else
 		{
 			lastbackslash = false;
-			str+=*(*ptr);
+			str += *ptr;
 		}
-		RisseNext(ptr);
+		++ptr;
 	}
 
 	if(!ok)
 	{
 		// error
-		Risse_eRisseError(RisseStringParseError);
+		eRisseError::Throw("Unclosed regular expression literal");
 	}
 
 	pat = str;
+	flags = flg;
 
 	return true;
 }
 
 //---------------------------------------------------------------------------
 
+#if 0
 
 
 //---------------------------------------------------------------------------

@@ -92,7 +92,7 @@ public: // public static members
 		ParseString(const risse_char * & ptr, tRisseString &val,
 			risse_char delim, bool embexpmode);
 
-	//! @brief		現在の解析位置にある文字列を解析する
+	//! @brief		現在の解析位置にある文字列リテラルを解析する
 	//! @param		ptr		解析開始位置 ('\'' or '"' を指していないとならない)
 	//! @param		val		値の格納先
 	//! @return		値の解析に成功したかどうか
@@ -167,6 +167,14 @@ public: // public static members
 	//! @param 		val		結果格納先
 	//! @return		解析に成功したかどうか
 	static bool ParseOctet(const risse_char * & ptr, tRisseOctet &val);
+
+	//! @brief		正規表現リテラルを解析する
+	//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
+	//! @param		pat		パターンの格納先
+	//! @param		flags	フラグの格納先
+	//! @return		解析に成功したかどうか
+	static bool ParseRegExp(const risse_char * & ptr, tRisseString &pat, tRisseString &flags);
+
 };
 
 //---------------------------------------------------------------------------

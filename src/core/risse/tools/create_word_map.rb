@@ -15,7 +15,7 @@ def node_last(level, word, is_default)
 	ret << indent
 
 	if word[:match_word] == 'true' then
-		ret << "if(!Risse_iswalnum(p[#{level}])) "
+		ret << "if(!Risse_iswalnum_nc(p[#{level}])) "
 	end
 
 	if(is_default)
@@ -128,7 +128,7 @@ def gen(level, words, is_default)
 	# $cut_unmatched_word のとき
 	if $cut_unmatched_word != nil && level == 0 then
 		ret << "#{indent}default:\n"
-		ret << "#{indent} if(Risse_iswalpha[p[0]]) { p++; goto cut_word; }\n"
+		ret << "#{indent} if(Risse_iswalpha_nc(p[0])) { p++; goto cut_word; }\n"
 	end
 
 	# switch 文の終わりを生成
@@ -177,7 +177,7 @@ end
 # プロローグを書き出す
 
 print <<EOS
-int #{ARGV[1]}(const risse_char * & ptr, tRisseVariant &value)
+static int #{ARGV[1]}(const risse_char * & ptr, tRisseVariant &value)
 {
  const risse_char * p = ptr;
 
@@ -196,7 +196,7 @@ EOS
 if $cut_unmatched_word != nil then
 	print <<-EOS
 cut_word:
- while(Risse_iswalnum[p]) p++;
+ while(Risse_iswalnum_nc(*p)) p++;
  ptr = p;
  return #{$cut_unmatched_word};
 	EOS

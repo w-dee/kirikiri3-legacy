@@ -29,21 +29,29 @@ CPPFLAGS = $(CXXFLAGS)
 
 #----------------------------#
 
-CPPFILES =  src/risseCharUtils.cpp            \
-			src/risseConfig.cpp               \
-			src/risseCxxObject.cpp            \
-			src/risseCxxOctet.cpp             \
-			src/risseCxxString.cpp            \
-			src/risseException.cpp            \
-			src/risseLexerUtils.cpp           \
-			src/risseUtils.cpp                \
-			src/risseVariant.cpp              
+CPPFILES =  src/risseCharUtils.cpp             \
+			src/risseConfig.cpp                \
+			src/risseCxxObject.cpp             \
+			src/risseCxxOctet.cpp              \
+			src/risseCxxString.cpp             \
+			src/risseException.cpp             \
+			src/risseLexerUtils.cpp            \
+			src/risseScriptBlock.cpp           \
+			src/risseUtils.cpp                 \
+			src/risseVariant.cpp               \
+			src/risse_parser/risseLexer.cpp    
 
 OBJS = $(CPPFILES:.cpp=.o)
 
 PREC_H_NAME = src/prec.h
 
-INCLUDES = -Iinclude
+INCLUDES = -I.
+
+src/risse_parser/risseLexerMap.inc: \
+		src/risse_parser/words.txt \
+		tools/create_word_map.rb
+	ruby tools/create_word_map.rb src/risse_parser/words.txt RisseMapToken > \
+		src/risse_parser/risseLexerMap.inc
 
 #----------------------------#
 

@@ -118,9 +118,6 @@ void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 }
 //---------------------------------------------------------------------------
 
-
-#endif
-
 } // namespace Risse
 
 

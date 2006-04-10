@@ -1,0 +1,132 @@
+# Risse の Lexer 用の単語帳
+
+# 先頭から順に
+#  トークン   トークンID   値    単語マッチ?    大文字小文字を無視?
+
+# 記号類
+
+>               T_GT                     - false false
+=               T_EQUAL                  - false false
+!               T_EXCRAMATION            - false false
+&               T_AMPERSAND              - false false
+|               T_VERTLINE               - false false
+.               T_DOT                    - false false
++               T_PLUS                   - false false
+-               T_MINUS                  - false false
+*               T_ASTERISK               - false false
+/               T_SLASH                  - false false
+\               T_BACKSLASH              - false false
+%               T_PERCENT                - false false
+^               T_CHEVRON                - false false
+[               T_LBRACKET               - false false
+]               T_RBRACKET               - false false
+(               T_LPARENTHESIS           - false false
+)               T_RPARENTHESIS           - false false
+~               T_TILDE                  - false false
+?               T_QUESTION               - false false
+:               T_COLON                  - false false
+,               T_COMMA                  - false false
+;               T_SEMICOLON              - false false
+{               T_LBRACE                 - false false
+}               T_RBRACE                 - false false
+#               T_SHARP                  - false false
+$               T_DOLLAR                 - false false
+'               T_BEGIN_STRING_LITERAL   - false false
+"               T_BEGIN_STRING_LITERAL   - false false
+@               T_BEGIN_MACRO            - false false
+>>>=            T_RBITSHIFTEQUAL         - false false
+>>>             T_RBITSHIFT              - false false
+>>=             T_RARITHSHIFTEQUAL       - false false
+>>              T_RARITHSHIFT            - false false
+>=              T_GTOREQUAL              - false false
+<               T_LT                     - false false
+<<=             T_LARITHSHIFTEQUAL       - false false
+<->             T_SWAP                   - false false
+<=              T_LTOREQUAL              - false false
+<<              T_LARITHSHIFT            - false false
+<%              T_BEGIN_OCTET_LITERAL    - false false
+===             T_DISCEQUAL              - false false
+==              T_EQUALEQUAL             - false false
+=>              T_COMMA                  - false false
+!==             T_DISCNOTEQUAL           - false false
+!=              T_NOTEQUAL               - false false
+&&=             T_LOGICALANDEQUAL        - false false
+&&              T_LOGICALAND             - false false
+&=              T_AMPERSANDEQUAL         - false false
+||=             T_LOGICALOREQUAL         - false false
+||              T_LOGICALOR              - false false
+|=              T_VERTLINEEQUAL          - false false
+...             T_OMIT                   - false false
+++              T_INCREMENT              - false false
++=              T_PLUSEQUAL              - false false
+-=              T_MINUSEQUAL             - false false
+--              T_DECREMENT              - false false
+*=              T_ASTERISKEQUAL          - false false
+/=              T_SLASHEQUAL             - false false
+/*              T_BEGIN_COMMENT          - false false
+\=              T_BACKSLASHEQUAL         - false false
+%=              T_PERCENTEQUAL           - false false
+^=              T_CHEVRONEQUAL           - false false
+
+
+
+# 文字類
+break               T_BREAK                  - true false
+continue            T_CONTINUE               - true false
+const               T_CONST                  - true false
+catch               T_CATCH                  - true false
+class               T_CLASS                  - true false
+case                T_CASE                   - true false
+debugger            T_DEBUGGER               - true false
+default             T_DEFAULT                - true false
+delete              T_DELETE                 - true false
+do                  T_DO                     - true false
+extends             T_EXTENDS                - true false
+export              T_EXPORT                 - true false
+enum                T_ENUM                   - true false
+else                T_ELSE                   - true false
+function            T_FUNCTION               - true false
+finally             T_FINALLY                - true false
+final               T_FINAL                  - true false
+false               T_FALSE                  - true false
+for                 T_FOR                    - true false
+global              T_GLOBAL                 - true false
+getter              T_GETTER                 - true false
+goto                T_GOTO                   - true false
+incontextof         T_INCONTEXTOF            - true false
+invalidate          T_INVALIDATE             - true false
+instanceof          T_INSTANCEOF             - true false
+isvalid             T_ISVALID                - true false
+import              T_IMPORT                 - true false
+int                 T_INT                    - true false
+in                  T_IN                     - true false
+if                  T_IF                     - true false
+null                T_NULL                   - true false
+new                 T_NEW                    - true false
+octet               T_OCTET                  - true false
+protected           T_PROTECTED              - true false
+property            T_PROPERTY               - true false
+private             T_PRIVATE                - true false
+public              T_PUBLIC                 - true false
+return              T_RETURN                 - true false
+real                T_REAL                   - true false
+synchronized        T_SYNCHRONIZED           - true false
+switch              T_SWITCH                 - true false
+static              T_STATIC                 - true false
+setter              T_SETTER                 - true false
+string              T_STRING                 - true false
+super               T_SUPER                  - true false
+typeof              T_TYPEOF                 - true false
+throw               T_THROW                  - true false
+this                T_THIS                   - true false
+true                T_TRUE                   - true false
+try                 T_TRY                    - true false
+void                T_VOID                   - true false
+var                 T_VAR                    - true false
+while               T_WHILE                  - true false
+NaN                 T_NAN                    - true false
+Infinity            T_INFINITY               - true false
+with                T_WITH                   - true false
+
+# 単語切り出し
+---*---             T_SYMBOL                 - -    -

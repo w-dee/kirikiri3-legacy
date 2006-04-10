@@ -38,7 +38,7 @@ def node_last(level, word, is_default)
 end
 
 # マップを書き出す
-def gen(level, words, is_default)
+def gen(level, words, history, is_default)
 
 	ret = ''
 
@@ -97,7 +97,7 @@ def gen(level, words, is_default)
 	content_map = {}
 	group.each do |char, items|
 		# 再帰
-		content_map[char] = gen(level + 1, items, char == '' ? true : false)
+		content_map[char] = gen(level + 1, items, history + char, char == '' ? true : false)
 	end
 
 	# content_map を内容が同じものをまとめる
@@ -134,7 +134,11 @@ def gen(level, words, is_default)
 	# switch 文の終わりを生成
 	ret << "#{indent}}\n"
 
-	return ret
+	if $cut_unmatched_word != nil && history =~ /^[A-Za-z_][A-Za-z0-9_]*$/ then
+		ret << "#{indent}goto cut_word;\n"
+	end
+
+	ret
 end
 
 
@@ -185,7 +189,7 @@ EOS
 
 # ルート要素に従って再帰
 
-print gen(0, words, false)
+print gen(0, words, '', false)
 
 # エピローグを書き出す
 

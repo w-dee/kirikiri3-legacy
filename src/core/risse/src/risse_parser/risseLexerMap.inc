@@ -4,61 +4,61 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
 
  switch(p[0]) {
  case '@':
-  ptr += 1;
-  { return T_BEGIN_MACRO; }
+  p += 1;
+  { ptr = p; return T_BEGIN_MACRO; }
  case '"':
  case '\'':
-  ptr += 1;
-  { return T_BEGIN_STRING_LITERAL; }
+  p += 1;
+  { ptr = p; return T_BEGIN_STRING_LITERAL; }
  case ':':
-  ptr += 1;
-  { return T_COLON; }
+  p += 1;
+  { ptr = p; return T_COLON; }
  case ',':
-  ptr += 1;
-  { return T_COMMA; }
+  p += 1;
+  { ptr = p; return T_COMMA; }
  case '$':
-  ptr += 1;
-  { return T_DOLLAR; }
+  p += 1;
+  { ptr = p; return T_DOLLAR; }
  case '{':
-  ptr += 1;
-  { return T_LBRACE; }
+  p += 1;
+  { ptr = p; return T_LBRACE; }
  case '[':
-  ptr += 1;
-  { return T_LBRACKET; }
+  p += 1;
+  { ptr = p; return T_LBRACKET; }
  case '(':
-  ptr += 1;
-  { return T_LPARENTHESIS; }
+  p += 1;
+  { ptr = p; return T_LPARENTHESIS; }
  case '?':
-  ptr += 1;
-  { return T_QUESTION; }
+  p += 1;
+  { ptr = p; return T_QUESTION; }
  case '}':
-  ptr += 1;
-  { return T_RBRACE; }
+  p += 1;
+  { ptr = p; return T_RBRACE; }
  case ']':
-  ptr += 1;
-  { return T_RBRACKET; }
+  p += 1;
+  { ptr = p; return T_RBRACKET; }
  case ')':
-  ptr += 1;
-  { return T_RPARENTHESIS; }
+  p += 1;
+  { ptr = p; return T_RPARENTHESIS; }
  case ';':
-  ptr += 1;
-  { return T_SEMICOLON; }
+  p += 1;
+  { ptr = p; return T_SEMICOLON; }
  case '~':
-  ptr += 1;
-  { return T_TILDE; }
+  p += 1;
+  { ptr = p; return T_TILDE; }
  case 'N':
   switch(p[1]) {
   case 'a':
    switch(p[2]) {
    case 'N':
-    ptr += 3;
-    if(!Risse_iswalnum_nc(p[3])) { return T_NAN; }
+    p += 3;
+    if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_NAN; }
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'f':
   switch(p[1]) {
@@ -69,17 +69,17 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     case 's':
      switch(p[4]) {
      case 'e':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_FALSE; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_FALSE; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'i':
    switch(p[2]) {
@@ -90,29 +90,29 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'l':
       switch(p[5]) {
       default:
-       ptr += 5;
-       if(!Risse_iswalnum_nc(p[6])) { return T_FINAL; }
+       p += 5;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_FINAL; }
        goto cut_word;
       case 'l':
        switch(p[6]) {
        case 'y':
-        ptr += 7;
-        if(!Risse_iswalnum_nc(p[7])) { return T_FINALLY; }
+        p += 7;
+        if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_FINALLY; }
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'u':
    switch(p[2]) {
@@ -127,38 +127,38 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
        case 'o':
         switch(p[7]) {
         case 'n':
-         ptr += 8;
-         if(!Risse_iswalnum_nc(p[8])) { return T_FUNCTION; }
+         p += 8;
+         if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_FUNCTION; }
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'o':
    switch(p[2]) {
    case 'r':
-    ptr += 3;
-    if(!Risse_iswalnum_nc(p[3])) { return T_FOR; }
+    p += 3;
+    if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_FOR; }
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'o':
   switch(p[1]) {
@@ -169,20 +169,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     case 'e':
      switch(p[4]) {
      case 't':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_OCTET; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_OCTET; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'r':
   switch(p[1]) {
@@ -191,11 +191,11 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
    case 'a':
     switch(p[3]) {
     case 'l':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_REAL; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_REAL; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 't':
     switch(p[3]) {
@@ -204,29 +204,29 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'r':
       switch(p[5]) {
       case 'n':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_RETURN; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_RETURN; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'i':
   switch(p[1]) {
   case 'f':
-   ptr += 2;
-   if(!Risse_iswalnum_nc(p[2])) { return T_IF; }
+   p += 2;
+   if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_IF; }
    goto cut_word;
   case 'm':
    switch(p[2]) {
@@ -237,20 +237,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'r':
       switch(p[5]) {
       case 't':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_IMPORT; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_IMPORT; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 's':
    switch(p[2]) {
@@ -263,33 +263,33 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
       case 'i':
        switch(p[6]) {
        case 'd':
-        ptr += 7;
-        if(!Risse_iswalnum_nc(p[7])) { return T_ISVALID; }
+        p += 7;
+        if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_ISVALID; }
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'n':
    switch(p[2]) {
    default:
-    ptr += 2;
-    if(!Risse_iswalnum_nc(p[3])) { return T_IN; }
+    p += 2;
+    if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_IN; }
     goto cut_word;
    case 't':
-    ptr += 3;
-    if(!Risse_iswalnum_nc(p[3])) { return T_INT; }
+    p += 3;
+    if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_INT; }
     goto cut_word;
    case 'v':
     switch(p[3]) {
@@ -306,29 +306,29 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
          case 't':
           switch(p[9]) {
           case 'e':
-           ptr += 10;
-           if(!Risse_iswalnum_nc(p[10])) { return T_INVALIDATE; }
+           p += 10;
+           if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_INVALIDATE; }
            goto cut_word;
           }
-          ptr += 9;
+          p += 9;
           goto cut_word;
          }
-         ptr += 8;
+         p += 8;
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 'c':
     switch(p[3]) {
@@ -347,32 +347,32 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
           case 'o':
            switch(p[10]) {
            case 'f':
-            ptr += 11;
-            if(!Risse_iswalnum_nc(p[11])) { return T_INCONTEXTOF; }
+            p += 11;
+            if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_INCONTEXTOF; }
             goto cut_word;
            }
-           ptr += 10;
+           p += 10;
            goto cut_word;
           }
-          ptr += 9;
+          p += 9;
           goto cut_word;
          }
-         ptr += 8;
+         p += 8;
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 's':
     switch(p[3]) {
@@ -389,35 +389,35 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
          case 'o':
           switch(p[9]) {
           case 'f':
-           ptr += 10;
-           if(!Risse_iswalnum_nc(p[10])) { return T_INSTANCEOF; }
+           p += 10;
+           if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_INSTANCEOF; }
            goto cut_word;
           }
-          ptr += 9;
+          p += 9;
           goto cut_word;
          }
-         ptr += 8;
+         p += 8;
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'w':
   switch(p[1]) {
@@ -428,34 +428,34 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     case 'l':
      switch(p[4]) {
      case 'e':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_WHILE; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_WHILE; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'i':
    switch(p[2]) {
    case 't':
     switch(p[3]) {
     case 'h':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_WITH; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_WITH; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'c':
   switch(p[1]) {
@@ -466,17 +466,17 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     case 's':
      switch(p[4]) {
      case 's':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_CLASS; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_CLASS; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'o':
    switch(p[2]) {
@@ -491,35 +491,35 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
        case 'u':
         switch(p[7]) {
         case 'e':
-         ptr += 8;
-         if(!Risse_iswalnum_nc(p[8])) { return T_CONTINUE; }
+         p += 8;
+         if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_CONTINUE; }
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     case 's':
      switch(p[4]) {
      case 't':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_CONST; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_CONST; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'a':
    switch(p[2]) {
@@ -528,29 +528,29 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     case 'c':
      switch(p[4]) {
      case 'h':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_CATCH; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_CATCH; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 's':
     switch(p[3]) {
     case 'e':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_CASE; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_CASE; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'g':
   switch(p[1]) {
@@ -563,34 +563,34 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'a':
       switch(p[5]) {
       case 'l':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_GLOBAL; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_GLOBAL; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'o':
    switch(p[2]) {
    case 't':
     switch(p[3]) {
     case 'o':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_GOTO; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_GOTO; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'e':
    switch(p[2]) {
@@ -601,23 +601,23 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'e':
       switch(p[5]) {
       case 'r':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_GETTER; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_GETTER; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'e':
   switch(p[1]) {
@@ -626,14 +626,14 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
    case 's':
     switch(p[3]) {
     case 'e':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_ELSE; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_ELSE; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'x':
    switch(p[2]) {
@@ -646,20 +646,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
       case 'd':
        switch(p[6]) {
        case 's':
-        ptr += 7;
-        if(!Risse_iswalnum_nc(p[7])) { return T_EXTENDS; }
+        p += 7;
+        if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_EXTENDS; }
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 'p':
     switch(p[3]) {
@@ -668,37 +668,37 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'r':
       switch(p[5]) {
       case 't':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_EXPORT; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_EXPORT; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'n':
    switch(p[2]) {
    case 'u':
     switch(p[3]) {
     case 'm':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_ENUM; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_ENUM; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'I':
   switch(p[1]) {
@@ -715,35 +715,35 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
        case 't':
         switch(p[7]) {
         case 'y':
-         ptr += 8;
-         if(!Risse_iswalnum_nc(p[8])) { return T_INFINITY; }
+         p += 8;
+         if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_INFINITY; }
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'd':
   switch(p[1]) {
   case 'o':
-   ptr += 2;
-   if(!Risse_iswalnum_nc(p[2])) { return T_DO; }
+   p += 2;
+   if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_DO; }
    goto cut_word;
   case 'e':
    switch(p[2]) {
@@ -756,20 +756,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
       case 'l':
        switch(p[6]) {
        case 't':
-        ptr += 7;
-        if(!Risse_iswalnum_nc(p[7])) { return T_DEFAULT; }
+        p += 7;
+        if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_DEFAULT; }
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 'l':
     switch(p[3]) {
@@ -778,17 +778,17 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 't':
       switch(p[5]) {
       case 'e':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_DELETE; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_DELETE; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 'b':
     switch(p[3]) {
@@ -801,29 +801,29 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
        case 'e':
         switch(p[7]) {
         case 'r':
-         ptr += 8;
-         if(!Risse_iswalnum_nc(p[8])) { return T_DEBUGGER; }
+         p += 8;
+         if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_DEBUGGER; }
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'v':
   switch(p[1]) {
@@ -832,26 +832,26 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
    case 'i':
     switch(p[3]) {
     case 'd':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_VOID; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_VOID; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'a':
    switch(p[2]) {
    case 'r':
-    ptr += 3;
-    if(!Risse_iswalnum_nc(p[3])) { return T_VAR; }
+    p += 3;
+    if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_VAR; }
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'b':
   switch(p[1]) {
@@ -862,20 +862,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     case 'a':
      switch(p[4]) {
      case 'k':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_BREAK; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_BREAK; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'p':
   switch(p[1]) {
@@ -888,20 +888,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'i':
       switch(p[5]) {
       case 'c':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_PUBLIC; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_PUBLIC; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'r':
    switch(p[2]) {
@@ -918,23 +918,23 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
         case 'e':
          switch(p[8]) {
          case 'd':
-          ptr += 9;
-          if(!Risse_iswalnum_nc(p[9])) { return T_PROTECTED; }
+          p += 9;
+          if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_PROTECTED; }
           goto cut_word;
          }
-         ptr += 8;
+         p += 8;
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     case 'p':
      switch(p[4]) {
@@ -945,23 +945,23 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
        case 't':
         switch(p[7]) {
         case 'y':
-         ptr += 8;
-         if(!Risse_iswalnum_nc(p[8])) { return T_PROPERTY; }
+         p += 8;
+         if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_PROPERTY; }
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 'i':
     switch(p[3]) {
@@ -972,26 +972,26 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
       case 't':
        switch(p[6]) {
        case 'e':
-        ptr += 7;
-        if(!Risse_iswalnum_nc(p[7])) { return T_PRIVATE; }
+        p += 7;
+        if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_PRIVATE; }
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 'n':
   switch(p[1]) {
@@ -1000,26 +1000,26 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
    case 'l':
     switch(p[3]) {
     case 'l':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_NULL; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_NULL; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'e':
    switch(p[2]) {
    case 'w':
-    ptr += 3;
-    if(!Risse_iswalnum_nc(p[3])) { return T_NEW; }
+    p += 3;
+    if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_NEW; }
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 's':
   switch(p[1]) {
@@ -1032,20 +1032,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'c':
       switch(p[5]) {
       case 'h':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_SWITCH; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_SWITCH; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'y':
    switch(p[2]) {
@@ -1068,38 +1068,38 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
            case 'e':
             switch(p[11]) {
             case 'd':
-             ptr += 12;
-             if(!Risse_iswalnum_nc(p[12])) { return T_SYNCHRONIZED; }
+             p += 12;
+             if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_SYNCHRONIZED; }
              goto cut_word;
             }
-            ptr += 11;
+            p += 11;
             goto cut_word;
            }
-           ptr += 10;
+           p += 10;
            goto cut_word;
           }
-          ptr += 9;
+          p += 9;
           goto cut_word;
          }
-         ptr += 8;
+         p += 8;
          goto cut_word;
         }
-        ptr += 7;
+        p += 7;
         goto cut_word;
        }
-       ptr += 6;
+       p += 6;
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'u':
    switch(p[2]) {
@@ -1108,17 +1108,17 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     case 'e':
      switch(p[4]) {
      case 'r':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_SUPER; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_SUPER; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 't':
    switch(p[2]) {
@@ -1129,17 +1129,17 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'n':
       switch(p[5]) {
       case 'g':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_STRING; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_STRING; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 'a':
     switch(p[3]) {
@@ -1148,20 +1148,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'i':
       switch(p[5]) {
       case 'c':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_STATIC; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_STATIC; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'e':
    switch(p[2]) {
@@ -1172,23 +1172,23 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'e':
       switch(p[5]) {
       case 'r':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_SETTER; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_SETTER; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case 't':
   switch(p[1]) {
@@ -1201,20 +1201,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      case 'o':
       switch(p[5]) {
       case 'f':
-       ptr += 6;
-       if(!Risse_iswalnum_nc(p[6])) { return T_TYPEOF; }
+       p += 6;
+       if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_TYPEOF; }
        goto cut_word;
       }
-      ptr += 5;
+      p += 5;
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'h':
    switch(p[2]) {
@@ -1223,253 +1223,253 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     case 'o':
      switch(p[4]) {
      case 'w':
-      ptr += 5;
-      if(!Risse_iswalnum_nc(p[5])) { return T_THROW; }
+      p += 5;
+      if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_THROW; }
       goto cut_word;
      }
-     ptr += 4;
+     p += 4;
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    case 'i':
     switch(p[3]) {
     case 's':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_THIS; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_THIS; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   case 'r':
    switch(p[2]) {
    case 'y':
-    ptr += 3;
-    if(!Risse_iswalnum_nc(p[3])) { return T_TRY; }
+    p += 3;
+    if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_TRY; }
     goto cut_word;
    case 'u':
     switch(p[3]) {
     case 'e':
-     ptr += 4;
-     if(!Risse_iswalnum_nc(p[4])) { return T_TRUE; }
+     p += 4;
+     if(!Risse_iswalnum_nc(*p)) { ptr = p; return T_TRUE; }
      goto cut_word;
     }
-    ptr += 3;
+    p += 3;
     goto cut_word;
    }
-   ptr += 2;
+   p += 2;
    goto cut_word;
   }
-  ptr += 1;
+  p += 1;
   goto cut_word;
  case '&':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_AMPERSAND; }
+   p += 1;
+   { ptr = p; return T_AMPERSAND; }
   case '=':
-   ptr += 2;
-   { return T_AMPERSANDEQUAL; }
+   p += 2;
+   { ptr = p; return T_AMPERSANDEQUAL; }
   case '&':
    switch(p[2]) {
    default:
-    ptr += 2;
-    { return T_LOGICALAND; }
+    p += 2;
+    { ptr = p; return T_LOGICALAND; }
    case '=':
-    ptr += 3;
-    { return T_LOGICALANDEQUAL; }
+    p += 3;
+    { ptr = p; return T_LOGICALANDEQUAL; }
    }
   }
  case '*':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_ASTERISK; }
+   p += 1;
+   { ptr = p; return T_ASTERISK; }
   case '=':
-   ptr += 2;
-   { return T_ASTERISKEQUAL; }
+   p += 2;
+   { ptr = p; return T_ASTERISKEQUAL; }
   }
  case '\\':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_BACKSLASH; }
+   p += 1;
+   { ptr = p; return T_BACKSLASH; }
   case '=':
-   ptr += 2;
-   { return T_BACKSLASHEQUAL; }
+   p += 2;
+   { ptr = p; return T_BACKSLASHEQUAL; }
   }
  case '^':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_CHEVRON; }
+   p += 1;
+   { ptr = p; return T_CHEVRON; }
   case '=':
-   ptr += 2;
-   { return T_CHEVRONEQUAL; }
+   p += 2;
+   { ptr = p; return T_CHEVRONEQUAL; }
   }
  case '.':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_DOT; }
+   p += 1;
+   { ptr = p; return T_DOT; }
   case '.':
    switch(p[2]) {
    case '.':
-    ptr += 3;
-    { return T_OMIT; }
+    p += 3;
+    { ptr = p; return T_OMIT; }
    }
   }
  case '=':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_EQUAL; }
+   p += 1;
+   { ptr = p; return T_EQUAL; }
   case '>':
-   ptr += 2;
-   { return T_COMMA; }
+   p += 2;
+   { ptr = p; return T_COMMA; }
   case '=':
    switch(p[2]) {
    default:
-    ptr += 2;
-    { return T_EQUALEQUAL; }
+    p += 2;
+    { ptr = p; return T_EQUALEQUAL; }
    case '=':
-    ptr += 3;
-    { return T_DISCEQUAL; }
+    p += 3;
+    { ptr = p; return T_DISCEQUAL; }
    }
   }
  case '!':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_EXCRAMATION; }
+   p += 1;
+   { ptr = p; return T_EXCRAMATION; }
   case '=':
    switch(p[2]) {
    default:
-    ptr += 2;
-    { return T_NOTEQUAL; }
+    p += 2;
+    { ptr = p; return T_NOTEQUAL; }
    case '=':
-    ptr += 3;
-    { return T_DISCNOTEQUAL; }
+    p += 3;
+    { ptr = p; return T_DISCNOTEQUAL; }
    }
   }
  case '>':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_GT; }
+   p += 1;
+   { ptr = p; return T_GT; }
   case '=':
-   ptr += 2;
-   { return T_GTOREQUAL; }
+   p += 2;
+   { ptr = p; return T_GTOREQUAL; }
   case '>':
    switch(p[2]) {
    default:
-    ptr += 2;
-    { return T_RARITHSHIFT; }
+    p += 2;
+    { ptr = p; return T_RARITHSHIFT; }
    case '=':
-    ptr += 3;
-    { return T_RARITHSHIFTEQUAL; }
+    p += 3;
+    { ptr = p; return T_RARITHSHIFTEQUAL; }
    case '>':
     switch(p[3]) {
     default:
-     ptr += 3;
-     { return T_RBITSHIFT; }
+     p += 3;
+     { ptr = p; return T_RBITSHIFT; }
     case '=':
-     ptr += 4;
-     { return T_RBITSHIFTEQUAL; }
+     p += 4;
+     { ptr = p; return T_RBITSHIFTEQUAL; }
     }
    }
   }
  case '<':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_LT; }
+   p += 1;
+   { ptr = p; return T_LT; }
   case '%':
-   ptr += 2;
-   { return T_BEGIN_OCTET_LITERAL; }
+   p += 2;
+   { ptr = p; return T_BEGIN_OCTET_LITERAL; }
   case '=':
-   ptr += 2;
-   { return T_LTOREQUAL; }
+   p += 2;
+   { ptr = p; return T_LTOREQUAL; }
   case '-':
    switch(p[2]) {
    case '>':
-    ptr += 3;
-    { return T_SWAP; }
+    p += 3;
+    { ptr = p; return T_SWAP; }
    }
   case '<':
    switch(p[2]) {
    default:
-    ptr += 2;
-    { return T_LARITHSHIFT; }
+    p += 2;
+    { ptr = p; return T_LARITHSHIFT; }
    case '=':
-    ptr += 3;
-    { return T_LARITHSHIFTEQUAL; }
+    p += 3;
+    { ptr = p; return T_LARITHSHIFTEQUAL; }
    }
   }
  case '-':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_MINUS; }
+   p += 1;
+   { ptr = p; return T_MINUS; }
   case '-':
-   ptr += 2;
-   { return T_DECREMENT; }
+   p += 2;
+   { ptr = p; return T_DECREMENT; }
   case '=':
-   ptr += 2;
-   { return T_MINUSEQUAL; }
+   p += 2;
+   { ptr = p; return T_MINUSEQUAL; }
   }
  case '%':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_PERCENT; }
+   p += 1;
+   { ptr = p; return T_PERCENT; }
   case '=':
-   ptr += 2;
-   { return T_PERCENTEQUAL; }
+   p += 2;
+   { ptr = p; return T_PERCENTEQUAL; }
   }
  case '+':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_PLUS; }
+   p += 1;
+   { ptr = p; return T_PLUS; }
   case '+':
-   ptr += 2;
-   { return T_INCREMENT; }
+   p += 2;
+   { ptr = p; return T_INCREMENT; }
   case '=':
-   ptr += 2;
-   { return T_PLUSEQUAL; }
+   p += 2;
+   { ptr = p; return T_PLUSEQUAL; }
   }
  case '/':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_SLASH; }
+   p += 1;
+   { ptr = p; return T_SLASH; }
   case '*':
-   ptr += 2;
-   { return T_BEGIN_COMMENT; }
+   p += 2;
+   { ptr = p; return T_BEGIN_COMMENT; }
   case '=':
-   ptr += 2;
-   { return T_SLASHEQUAL; }
+   p += 2;
+   { ptr = p; return T_SLASHEQUAL; }
   }
  case '|':
   switch(p[1]) {
   default:
-   ptr += 1;
-   { return T_VERTLINE; }
+   p += 1;
+   { ptr = p; return T_VERTLINE; }
   case '=':
-   ptr += 2;
-   { return T_VERTLINEEQUAL; }
+   p += 2;
+   { ptr = p; return T_VERTLINEEQUAL; }
   case '|':
    switch(p[2]) {
    default:
-    ptr += 2;
-    { return T_LOGICALOR; }
+    p += 2;
+    { ptr = p; return T_LOGICALOR; }
    case '=':
-    ptr += 3;
-    { return T_LOGICALOREQUAL; }
+    p += 3;
+    { ptr = p; return T_LOGICALOREQUAL; }
    }
   }
  default:

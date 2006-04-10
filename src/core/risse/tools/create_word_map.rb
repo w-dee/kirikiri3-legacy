@@ -14,15 +14,19 @@ def node_last(level, word, is_default)
 	# 結果文字列を生成
 	ret << indent
 
+	if(is_default)
+		ret << "ptr += #{level-1};\n"
+	else
+		ret << "ptr += #{level};\n"
+	end
+
+	ret << indent
+
 	if word[:match_word] == 'true' then
 		ret << "if(!Risse_iswalnum_nc(p[#{level}])) "
 	end
 
-	if(is_default)
-		ret << "{ ptr += #{level-1}; "
-	else
-		ret << "{ ptr += #{level}; "
-	end
+	ret << "{ "
 
 	if word[:value] != '-' then
 		ret << "value = #{word[:value]}; "
@@ -135,6 +139,7 @@ def gen(level, words, history, is_default)
 	ret << "#{indent}}\n"
 
 	if $cut_unmatched_word != nil && history =~ /^[A-Za-z_][A-Za-z0-9_]*$/ then
+		ret << "#{indent}ptr += #{level};\n"
 		ret << "#{indent}goto cut_word;\n"
 	end
 

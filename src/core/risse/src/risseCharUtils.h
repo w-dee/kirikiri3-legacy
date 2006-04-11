@@ -93,10 +93,10 @@ risse_size RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint
 //! @brief		risse_char(UTF-32文字列) をUTF16文字列に変換
 //! @param		out 出力文字列(NULL可)  null終端は書き込まれる
 //! @param		in  入力文字列
-//! @param		in_len 入力文字列のサイズ (-1L の場合は自動判定)
+//! @param		in_len 入力文字列のサイズ (risse_size_max の場合は自動判定)
 //! @return		出力バッファのサイズ (null終端を含まず, risse_uint16単位)
 risse_size RisseConvertRisseCharToUTF16String(risse_uint16 * out, const risse_char * in,
-						risse_size in_len = static_cast<risse_size>(-1L));
+						risse_size in_len = risse_size_max);
 
 //! @brief		UTF-8 文字列を risse_char 文字列に変換する
 //! @param		in   入力 UTF-8 文字列
@@ -170,9 +170,9 @@ risse_size RisseRisseCharToUtf8String(const risse_char *in, char * out);
 
 //! @brief		risse_char 型の文字列を wxString に変換する
 //! @param		str  risse_char*型の文字列
-//! @param		len  文字列の長さ(コードポイント単位) -1 = 自動判別
+//! @param		len  文字列の長さ(コードポイント単位) risse_size_max = 自動判別
 //! @return		wxString型の文字列
-wxString RisseCharToWxString(const risse_char * str, risse_size length = static_cast<risse_size>(-1L));
+wxString RisseCharToWxString(const risse_char * str, risse_size length = risse_size_max);
 #endif
 
 

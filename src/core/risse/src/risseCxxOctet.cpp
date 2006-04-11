@@ -143,4 +143,60 @@ risse_uint8 * tRisseOctetBlock::InternalIndepend() const
 	return Buffer;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseOctetBlock::ToTokenString(risse_size maxlen) const
+{
+	tRisseString ret;
+
+	// 変換するオクテット長を計算
+	risse_size max_octet_len;
+
+	if(risse_size_max < 8)
+		max_octet_len = 1; // 最低でも 1 オクテット
+	else
+		max_octet_len = (maxlen - 5) / 3;
+
+	if(Length < max_octet_len) max_octet_len = Length;
+
+	// 戻りバッファを確保
+	risse_char * p = ret.Allocate(max_octet_len * 3 + 5 + 1); // 省略記号を含む場合があるので注意
+
+	// バッファに内容を書き込む
+	p[0] = RISSE_WC('<'); p[1] = RISSE_WC('%'); p[2] = RISSE_WC(' ');
+	risse_size i;
+	i = 3;
+	const risse_uint8 * src = Buffer;
+
+	risse_size remain = max_octet_len;
+	while(remain --)
+	{
+		static const char hex[] = "0123456789abcdef";
+		p[i]   = hex[*src >> 4];
+		p[i+1] = hex[*src & 15];
+		p[i+2] = RISSE_WC(' ');
+		i += 3;
+	}
+
+	if(max_octet_len < Length)
+	{
+		p[i+0] = RISSE_WC('.'); p[i+1] = RISSE_WC('.'); p[i+2] = RISSE_WC('.');
+		i += 3;
+	}
+	else
+	{
+		p[i  ] = RISSE_WC('%'); p[i+1] = RISSE_WC('>');
+		i += 2;
+	}
+
+	// 戻り文字列の長さを調整
+	ret.SetLength(i);
+
+	// 帰る
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
 } // namespace Risse

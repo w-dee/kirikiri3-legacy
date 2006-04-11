@@ -431,6 +431,14 @@ private:
 	//! @return		内部バッファ
 	risse_char * InternalIndepend() const;
 
+public:
+	//! @brief		内部バッファのサイズを予約する
+	//! @param		capacity  容量
+	//! @note		内部バッファを最低でも capacity で指定された
+	//!				コードポイント数にする。すでに内部バッファが
+	//!				指定された容量分だけある場合は何もしない。
+	void Reserve(risse_size capacity) const;
+
 public: // hint/hash
 	//! @brief	ヒントへのポインタを得る
 	//! @return ヒントへのポインタ
@@ -608,6 +616,23 @@ public: // other utilities
 	//! @return		置き換えられた文字列
 	tRisseStringBlock Replace(const tRisseStringBlock &old_str,
 		const tRisseStringBlock &new_str, bool replace_all = true) const;
+
+	//! @brief		文字列リテラルとして解釈できるようなエスケープを行う
+	//! @param		maxlen		返値文字列のおおよその最大コードポイント数(risse_size_maxの場合は無制限)
+	//! @param		quote		両端を "" で囲むかどうか
+	//! @return		エスケープされた文字列
+	//! @note		返値の両端にクオート ( "" ) は付かない。つけたい場合は
+	//!				自分でつけるか ToTokenString を使うこと。
+	//!				返値 は maxlen 付近で切られるが、maxlen ぴったりである保証はない。
+	//!				maxlen 付近で切られた場合の省略記号 '...' は、quote が true の場合のみ付く。
+	tRisseStringBlock Escape(risse_size maxlen = risse_size_max, bool quote = false) const;
+
+	//! @brief		値を再パース可能な文字列に変換する
+	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は 
+	//!							省略記号 '...' が付く(risse_size_maxの場合は無制限)
+	//! @return		再パース可能な文字列
+	tRisseStringBlock ToTokenString(risse_size maxlen = risse_size_max) const
+	{ return Escape(maxlen, true); }
 };
 //---------------------------------------------------------------------------
 

@@ -23,6 +23,7 @@ Risse オクテット列は tRisseOctetBlock クラスで表される。
 
 #include "risseTypes.h"
 #include "risseAssert.h"
+#include "risseCxxString.h"
 #include "gc_cpp.h"
 
 
@@ -208,6 +209,13 @@ private:
 	//! @brief		オクテット列バッファをコピーし、独立させる
 	//! @return		内部バッファ
 	risse_uint8 * InternalIndepend() const;
+
+public: // utilities
+	//! @brief		値を再パース可能な文字列に変換する
+	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は 
+	//!							省略記号 '...' が付く(risse_size_maxの場合は無制限)
+	//! @return		再パース可能な文字列
+	tRisseString ToTokenString(risse_size maxlen = risse_size_max) const;
 
 };
 //---------------------------------------------------------------------------

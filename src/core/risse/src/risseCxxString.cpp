@@ -161,7 +161,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
 tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 {
 	Length = RisseUtf8ToRisseCharString(ref, NULL); // コードポイント数を得る
-//	if(Length == static_cast<risse_size>(-1L))
+//	if(Length == risse_size_max)
 //		; /////////////////////////////////////////// TODO: 例外を投げる
 	Buffer = AllocateInternalBuffer(Length);
 	RisseUtf8ToRisseCharString(ref, Buffer);
@@ -214,6 +214,41 @@ risse_char * tRisseStringBlock::InternalIndepend() const
 	memcpy(newbuf, Buffer, sizeof(risse_char) * Length);
 	newbuf[Length] = newbuf[Length + 1] = 0; // null終端とhintをクリア
 	return Buffer = newbuf;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseStringBlock::Reserve(risse_size capacity) const
+{
+	if(capacity < Length) return; // 長さが容量より長い
+
+	if(Buffer[-1])
+	{
+		// 共有可能性フラグが立っている
+		// 新しく領域を確保し、そこにコピーする
+		risse_char * newbuf = AllocateInternalBuffer(capacity);
+		memcpy(newbuf, Buffer, Length * sizeof(risse_char));
+		Buffer = newbuf;
+
+		// null 終端と hint=0 を設定する
+		Buffer[Length] = Buffer[Length + 1] = 0;
+	}
+	else
+	{
+		// 共有可能性フラグは立っていない
+		// 現在の領域を拡張する必要がある？
+		if(GetBufferCapacity(Buffer) < capacity)
+		{
+			// 容量が足りないので拡張する必要あり
+			// 適当に新規確保の容量を計算
+			// バッファを再確保
+			Buffer = AllocateInternalBuffer(capacity, Buffer);
+
+			// null 終端と hint=0 を設定する
+			Buffer[Length] = Buffer[Length + 1] = 0;
+		}
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -309,7 +344,14 @@ tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref)
 tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
 		const tRisseStringBlock &new_str, bool replace_all) const
 {
+	// 長さチェック
+	if(GetLength() < old_str.GetLength()) return *this; // 置き換えられない
+
+	// old_str が最低1個分 new_str に変わると期待してバッファをあらかじめ確保
 	tRisseStringBlock ret;
+	ret.Reserve(GetLength() - old_str.GetLength() + new_str.GetLength());
+
+	// 置き換え
 	const risse_char * this_c_str = c_str();
 	const risse_char * old_c_str = old_str.c_str();
 	const risse_char * new_c_str = new_str.c_str();
@@ -336,4 +378,86 @@ tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
 	return ret;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
+{
+	const risse_char * hexchars = RISSE_WS("0123456789ABCDEF");
+	tRisseStringBlock ret;
+
+	ret.Reserve((maxlen > Length ? Length : maxlen) + 4 + (quote?2:0));
+		// 最低でも今の文字列長にはなる (+4=余裕)
+
+	// エスケープを行う。
+	// \x01 のようなエスケープの後に 'a' のような、16進数の一部として間違
+	// われるような文字が続く場合は、その 'a' も \x の形でエスケープする。
+	// (その状態の制御を行っている変数が hexflag)
+	const risse_char * p = Buffer;
+	bool hexflag = false;
+	if(quote) ret += RISSE_WS("\"");
+	for(risse_size i = 0; i < Length; i++)
+	{
+		if(ret.GetLength() >= maxlen)
+		{
+			// 最大長に達した
+			if(quote) ret += RISSE_WS(" ...");
+			return ret;  //--------------------------------------------- return
+		}
+
+		switch(p[i])
+		{
+		case 0x07: ret += RISSE_WS("\\a"); hexflag = false; continue;
+		case 0x08: ret += RISSE_WS("\\b"); hexflag = false; continue;
+		case 0x0c: ret += RISSE_WS("\\f"); hexflag = false; continue;
+		case 0x0a: ret += RISSE_WS("\\n"); hexflag = false; continue;
+		case 0x0d: ret += RISSE_WS("\\r"); hexflag = false; continue;
+		case 0x09: ret += RISSE_WS("\\t"); hexflag = false; continue;
+		case 0x0b: ret += RISSE_WS("\\v"); hexflag = false; continue;
+		case RISSE_WC('\\'): ret += RISSE_WS("\\\\"); hexflag = false; continue;
+		case RISSE_WC('\''): ret += RISSE_WS("\\\'"); hexflag = false; continue;
+		case RISSE_WC('\"'): ret += RISSE_WS("\\\""); hexflag = false; continue;
+		default:
+			if(hexflag)
+			{
+				if(p[0] >= RISSE_WC('a') && p[0] <= RISSE_WC('f') ||
+					p[0] >= RISSE_WC('A') && p[0] <= RISSE_WC('F') ||
+						p[0] >= RISSE_WC('0') && p[0] <= RISSE_WC('9') )
+				{
+					risse_char buf[5];
+					buf[0] = RISSE_WC('\\');
+					buf[1] = RISSE_WC('x');
+					buf[2] = hexchars[ (p[0] >> 4)  & 0x0f];
+					buf[3] = hexchars[ (p[0]     )  & 0x0f];
+					buf[4] = 0;
+					hexflag = true;
+					ret += buf;
+					continue;
+				}
+			}
+
+			if(p[0] < 0x20)
+			{
+				risse_char buf[5];
+				buf[0] = RISSE_WC('\\');
+				buf[1] = RISSE_WC('x');
+				buf[2] = hexchars[ (p[0] >> 4)  & 0x0f];
+				buf[3] = hexchars[ (p[0]     )  & 0x0f];
+				buf[4] = 0;
+				hexflag = true;
+				ret += buf;
+			}
+			else
+			{
+				ret += p[0];
+				hexflag = false;
+			}
+		}
+	}
+	if(quote) ret += RISSE_WS("\"");
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
 } // namespace Risse

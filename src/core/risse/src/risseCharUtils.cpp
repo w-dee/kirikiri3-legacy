@@ -552,13 +552,13 @@ risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out)
 		if(out)
 		{
 			if(!RisseUtf8ToRisseChar(in, &c))
-				return static_cast<risse_size>(-1L); // invalid character found
+				return risse_size_max; // invalid character found
 			*out++ = c;
 		}
 		else
 		{
 			if(!RisseUtf8ToRisseChar(in, NULL))
-				return static_cast<risse_size>(-1L); // invalid character found
+				return risse_size_max; // invalid character found
 		}
 		count ++;
 	}
@@ -589,7 +589,7 @@ risse_size RisseRisseCharToUtf8String(const risse_char * in, char * out)
 					RisseRisseCharToUtf8.
 				*/
 		}
-		if(n == -1) return static_cast<risse_size>(-1L); // invalid character found
+		if(n == -1) return risse_size_max; // invalid character found
 		count += n;
 		in++;
 	}
@@ -612,19 +612,19 @@ wxString RisseCharToWxString(const risse_char * str, risse_size len)
 	risse_size converted_size =
 		RisseConvertRisseCharToUTF16String(NULL, str, len); // lenは-1になりうるので注意
 
-	if(converted_size == static_cast<risse_size>(-1L))
+	if(converted_size == risse_size_max)
 		return wxString(); // failed to convert
 
 	// 変換後の文字列を一時的に格納するバッファを確保
 	wchar_t *buf = new (PointerFreeGC) wchar_t[converted_size + 1];
 	if(RisseConvertRisseCharToUTF16String(
 			reinterpret_cast<risse_uint16*>(buf), str, len)
-					== static_cast<risse_size>(-1))
+					== risse_size_max)
 		return wxString();
 
 	return wxString(buf);
 #else
-	return wxString(str, (len == static_cast<risse_size>(-1L)) ? wxSTRING_MAXLEN:len);
+	return wxString(str, (len == risse_size_max) ? wxSTRING_MAXLEN:len);
 #endif
 }
 //---------------------------------------------------------------------------

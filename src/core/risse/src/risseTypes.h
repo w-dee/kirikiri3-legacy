@@ -106,6 +106,11 @@ namespace Risse
 #endif
 
 
+//! @brief risse_size の最大値
+//! @note この式は ( 1 << sizeof(risse_size)*8 ) - 1  と意味的には同じだが
+//! 途中でオーバーフローしないようになっている
+static const risse_size risse_size_max = ((((1UL << ((sizeof(risse_size) * 8) -1))-1)<<1)+1);
+
 typedef risse_int32 risse_error;
 
 /* IEEE double manipulation support

@@ -24,9 +24,14 @@ class tRisseLexerUtility
 {
 public: // public static members
 	//! @brief		ホワイトスペースのスキップ
-	//! @param		ptr		解析ポインタ
+	//! @param		ptr		解析ポインタ (実行後、ホワイトスペースの直後にまで移動する)
 	//! @return		スクリプトが継続するかどうか
 	static bool SkipSpace(const risse_char * & ptr);
+
+	//! @brief		改行までスキップ
+	//! @param		ptr		解析ポインタ (実行後、改行の直後にまで移動する)
+	//! @return		スクリプトが継続するかどうか
+	static bool SkipToLineEnd(const risse_char * & ptr);
 
 	//! @brief		16進数文字1桁を数値に
 	//! @param		ch	文字

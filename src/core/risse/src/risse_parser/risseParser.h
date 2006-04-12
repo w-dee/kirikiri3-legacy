@@ -32,7 +32,7 @@ static const char * RisseLexerTokenString[] = {
 #else
 enum tRisseLexerToken {
 #endif
-RISSE_DEFINE_TOKEN(T_EOF                   ),
+RISSE_DEFINE_TOKEN(T_NONE                  ),
 RISSE_DEFINE_TOKEN(T_GT                    ),
 RISSE_DEFINE_TOKEN(T_EQUAL                 ),
 RISSE_DEFINE_TOKEN(T_EXCRAMATION           ),

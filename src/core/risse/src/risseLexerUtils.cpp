@@ -30,7 +30,25 @@ RISSE_DEFINE_SOURCE_ID(49805,54699,17434,18495,59306,19776,3233,9707);
 bool tRisseLexerUtility::SkipSpace(const risse_char * & ptr)
 {
 	while(*ptr && Risse_iswspace_nc(*ptr)) ptr ++;
-	return *ptr;
+	return *ptr != 0;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::SkipToLineEnd(const risse_char * & ptr)
+{
+	while(*ptr != RISSE_WC('\r') && *ptr != RISSE_WC('\n') && *ptr) ptr++;
+	if(*ptr == 0) return false;
+
+	if(ptr[0] == RISSE_WC('\r') && ptr[1] == RISSE_WC('\n'))
+		ptr += 2; // CR LF
+	else
+		ptr ++; // CR のみ あるいは LF のみ
+
+	if(*ptr == 0) return false;
+
+	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -104,9 +122,7 @@ tRisseLexerUtility::tSkipCommentResult
 	if(ptr[1] == RISSE_WC('/'))
 	{
 		// line comment; skip to newline
-		while(*ptr != RISSE_WC('\n') && *ptr) ;
-		if(*ptr ==0) return scrEnded;
-		*ptr++;
+		if(!SkipToLineEnd(ptr)) return scrEnded;
 		SkipSpace(ptr);
 		if(*ptr ==0) return scrEnded;
 

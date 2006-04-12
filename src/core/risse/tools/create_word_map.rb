@@ -153,7 +153,7 @@ end
 words = []
 
 File.open(ARGV[0]).readlines.each do |line|
-	line.gsub!(/^.*?(\#.*)/, '')
+	line.gsub!(/^.*?(#####.*)/, '')
 	if line =~ /^\s*(.+?)\s+(.+?)\s+(.+?)\s+(.+?)\s+(.+?)\s*$/ then
 		token = $1
 		id = $2

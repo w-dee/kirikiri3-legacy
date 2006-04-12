@@ -14,6 +14,7 @@
 
 #include "../risseLexerUtils.h"
 #include "risseLexer.h"
+#include "risseParser.h"
 
 namespace Risse
 {
@@ -22,14 +23,23 @@ RISSE_DEFINE_SOURCE_ID(26774,17704,8265,19906,55701,8958,30467,4610);
 // マッパーを include
 #include "risseLexerMap.inc"
 
+
 //---------------------------------------------------------------------------
-int tRisseLexer::GetToken()
+tRisseLexer::tRisseLexer(const tRisseString & script)
 {
-	tRisseVariant val;
+	// フィールドを初期化
+	Script = script;
+	Ptr = Script.c_str();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tRisseLexer::GetToken(tRisseVariant & val)
+{
+	if(!SkipSpace(Ptr)) return -1;
 	return RisseMapToken(Ptr, val);
 }
-
-
 //---------------------------------------------------------------------------
 
 

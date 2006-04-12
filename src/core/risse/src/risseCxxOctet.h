@@ -212,11 +212,15 @@ private:
 
 public: // utilities
 	//! @brief		値を再パース可能な文字列に変換する
+	//! @return		再パース可能な文字列
+	tRisseString AsTokenString() const
+	{ return AsHumanReadable(risse_size_max); }
+
+	//! @brief		値を人間が読み取り可能な文字列に変換する
 	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は 
 	//!							省略記号 '...' が付く(risse_size_maxの場合は無制限)
-	//! @return		再パース可能な文字列
-	tRisseString ToTokenString(risse_size maxlen = risse_size_max) const;
-
+	//! @return		人間が読み取り可能な文字列
+	tRisseStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const;
 };
 //---------------------------------------------------------------------------
 
@@ -393,6 +397,19 @@ public: // pointer
 	{
 		GetBlock()->Fit();
 	}
+
+public: // utilities
+	//! @brief		値を再パース可能な文字列に変換する
+	//! @return		再パース可能な文字列
+	tRisseString AsTokenString() const
+	{ return GetBlock()->AsTokenString(); }
+
+	//! @brief		値を人間が読み取り可能な文字列に変換する
+	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は 
+	//!							省略記号 '...' が付く(risse_size_maxの場合は無制限)
+	//! @return		人間が読み取り可能な文字列
+	tRisseStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
+	{ return GetBlock()->AsHumanReadable(maxlen); }
 
 };
 //---------------------------------------------------------------------------

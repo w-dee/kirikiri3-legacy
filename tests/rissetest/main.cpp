@@ -3,6 +3,13 @@
 #include "prec.h"
 #include "risseCxxString.h"
 #include "risseVariant.h"
+#include "gc_cpp.h"
+#include <wx/file.h>
+
+
+
+#include "risse_parser/risseParser.h"
+#include "risse_parser/risseScriptBlock.h"
 
 
 RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
@@ -60,21 +67,27 @@ bool Application::OnInit()
 //---------------------------------------------------------------------------
 int Application::OnRun()
 {
-	tRisseStringBlock str1("hoge");
-	tRisseStringBlock str2(str1);
-	str1 = "hage";
-	tRisseStringBlock str3(str1, 1, 2);
-//	str1 = "moge";
+	if(argc < 2)
+	{
+		fprintf(stderr, "Specify a file name to read.\n");
+		return 0;
+	}
 
-	for(int i = 0; i < 10; i++)
-		str1 += str2;
+	// 入力ファイルを開く
+	wxFile file;
+	if(file.Open(argv[1]))
+	{
+		// 内容を読み込む
+		size_t length = file.Length();
+		char *buf = new (PointerFreeGC) char [length + 1];
+		file.Read(buf, length);
+		buf[length] = 0;
 
-	wxPrintf(wxT("str1 : %s\n"), str1.AsWxString().c_str());
-	wxPrintf(wxT("str2 : %s\n"), str2.AsWxString().c_str());
-	wxPrintf(wxT("str3 : %s\n"), str3.AsWxString().c_str());
+		// 内容を評価する
+		tRisseScriptBlock block((tRisseString)(buf));
+		block.Evaluate();
+	}
 
-	tRisseVariant v;
-	v.prtsizes();
 	return 0;
 }
 //---------------------------------------------------------------------------

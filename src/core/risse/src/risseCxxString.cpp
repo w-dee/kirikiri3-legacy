@@ -384,10 +384,11 @@ tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
 tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 {
 	const risse_char * hexchars = RISSE_WS("0123456789ABCDEF");
-	tRisseStringBlock ret;
 
+	// 返値用のバッファを確保
+	tRisseStringBlock ret;
 	ret.Reserve((maxlen > Length ? Length : maxlen) + 4 + (quote?2:0));
-		// 最低でも今の文字列長にはなる (+4=余裕)
+		// 最低でも今の文字列長以上にはなる (+4=余裕)
 
 	// エスケープを行う。
 	// \x01 のようなエスケープの後に 'a' のような、16進数の一部として間違
@@ -395,28 +396,28 @@ tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 	// (その状態の制御を行っている変数が hexflag)
 	const risse_char * p = Buffer;
 	bool hexflag = false;
-	if(quote) ret += RISSE_WS("\"");
+	if(quote) ret += RISSE_WC('"');
 	for(risse_size i = 0; i < Length; i++)
 	{
 		if(ret.GetLength() >= maxlen)
 		{
 			// 最大長に達した
-			if(quote) ret += RISSE_WS(" ...");
+			if(quote) ret.Append(RISSE_WS(" ..."), 4);
 			return ret;  //--------------------------------------------- return
 		}
 
 		switch(p[i])
 		{
-		case 0x07: ret += RISSE_WS("\\a"); hexflag = false; continue;
-		case 0x08: ret += RISSE_WS("\\b"); hexflag = false; continue;
-		case 0x0c: ret += RISSE_WS("\\f"); hexflag = false; continue;
-		case 0x0a: ret += RISSE_WS("\\n"); hexflag = false; continue;
-		case 0x0d: ret += RISSE_WS("\\r"); hexflag = false; continue;
-		case 0x09: ret += RISSE_WS("\\t"); hexflag = false; continue;
-		case 0x0b: ret += RISSE_WS("\\v"); hexflag = false; continue;
-		case RISSE_WC('\\'): ret += RISSE_WS("\\\\"); hexflag = false; continue;
-		case RISSE_WC('\''): ret += RISSE_WS("\\\'"); hexflag = false; continue;
-		case RISSE_WC('\"'): ret += RISSE_WS("\\\""); hexflag = false; continue;
+		case 0x07: ret.Append(RISSE_WS("\\a"), 2); hexflag = false; continue;
+		case 0x08: ret.Append(RISSE_WS("\\b"), 2); hexflag = false; continue;
+		case 0x0c: ret.Append(RISSE_WS("\\f"), 2); hexflag = false; continue;
+		case 0x0a: ret.Append(RISSE_WS("\\n"), 2); hexflag = false; continue;
+		case 0x0d: ret.Append(RISSE_WS("\\r"), 2); hexflag = false; continue;
+		case 0x09: ret.Append(RISSE_WS("\\t"), 2); hexflag = false; continue;
+		case 0x0b: ret.Append(RISSE_WS("\\v"), 2); hexflag = false; continue;
+		case RISSE_WC('\\'): ret.Append(RISSE_WS("\\\\"), 2); hexflag = false; continue;
+		case RISSE_WC('\''): ret.Append(RISSE_WS("\\\'"), 2); hexflag = false; continue;
+		case RISSE_WC('\"'): ret.Append(RISSE_WS("\\\""), 2); hexflag = false; continue;
 		default:
 			if(hexflag)
 			{
@@ -424,28 +425,27 @@ tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 					p[0] >= RISSE_WC('A') && p[0] <= RISSE_WC('F') ||
 						p[0] >= RISSE_WC('0') && p[0] <= RISSE_WC('9') )
 				{
-					risse_char buf[5];
+					risse_char buf[4];
 					buf[0] = RISSE_WC('\\');
 					buf[1] = RISSE_WC('x');
 					buf[2] = hexchars[ (p[0] >> 4)  & 0x0f];
 					buf[3] = hexchars[ (p[0]     )  & 0x0f];
-					buf[4] = 0;
 					hexflag = true;
-					ret += buf;
+					ret.Append(buf, 4);
 					continue;
 				}
 			}
 
 			if(p[0] < 0x20)
 			{
-				risse_char buf[5];
+				risse_char buf[4];
 				buf[0] = RISSE_WC('\\');
 				buf[1] = RISSE_WC('x');
 				buf[2] = hexchars[ (p[0] >> 4)  & 0x0f];
 				buf[3] = hexchars[ (p[0]     )  & 0x0f];
 				buf[4] = 0;
 				hexflag = true;
-				ret += buf;
+				ret.Append(buf, 4);
 			}
 			else
 			{
@@ -454,7 +454,7 @@ tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 			}
 		}
 	}
-	if(quote) ret += RISSE_WS("\"");
+	if(quote) ret += RISSE_WC('"');
 	return ret;
 }
 //---------------------------------------------------------------------------

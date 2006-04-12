@@ -107,7 +107,7 @@ risse_char * Risse_int64_to_str(risse_int64 value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-risse_char * Risse_tTVReal_to_str(risse_real value, risse_char *string)
+risse_char * Risse_real_to_str(risse_real value, risse_char *string)
 {
 	// 実数を文字列に変換する処理は実は結構難しい
 	// なので、とりあえず snprintf を使うことにする。

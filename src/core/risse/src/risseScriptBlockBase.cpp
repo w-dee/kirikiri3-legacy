@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 
 #include "prec.h"
-#include "risseScriptBlock.h"
+#include "risseScriptBlockBase.h"
 #include "risseException.h"
 
 

@@ -146,7 +146,7 @@ risse_uint8 * tRisseOctetBlock::InternalIndepend() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseOctetBlock::ToTokenString(risse_size maxlen) const
+tRisseString tRisseOctetBlock::AsHumanReadable(risse_size maxlen) const
 {
 	tRisseString ret;
 

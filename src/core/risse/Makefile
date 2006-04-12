@@ -29,17 +29,18 @@ CPPFLAGS = $(CXXFLAGS)
 
 #----------------------------#
 
-CPPFILES =  src/risseCharUtils.cpp             \
-			src/risseConfig.cpp                \
-			src/risseCxxObject.cpp             \
-			src/risseCxxOctet.cpp              \
-			src/risseCxxString.cpp             \
-			src/risseException.cpp             \
-			src/risseLexerUtils.cpp            \
-			src/risseScriptBlock.cpp           \
-			src/risseUtils.cpp                 \
-			src/risseVariant.cpp               \
-			src/risse_parser/risseLexer.cpp    
+CPPFILES =  src/risseCharUtils.cpp                   \
+			src/risseConfig.cpp                      \
+			src/risseCxxObject.cpp                   \
+			src/risseCxxOctet.cpp                    \
+			src/risseCxxString.cpp                   \
+			src/risseException.cpp                   \
+			src/risseLexerUtils.cpp                  \
+			src/risseScriptBlockBase.cpp             \
+			src/risseUtils.cpp                       \
+			src/risseVariant.cpp                     \
+			src/risse_parser/risseLexer.cpp          \
+			src/risse_parser/risseScriptBlock.cpp    
 
 OBJS = $(CPPFILES:.cpp=.o)
 

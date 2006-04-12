@@ -825,7 +825,7 @@ bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-static bool ParseRegExp(const risse_char * & ptr, tRisseString &pat, tRisseString &flags)
+bool tRisseLexerUtility::ParseRegExp(const risse_char * & ptr, tRisseString &pat, tRisseString &flags)
 {
 	// parse a regular expression pointed by 'ptr'.
 	// this is essencially the same as string parsing, except for

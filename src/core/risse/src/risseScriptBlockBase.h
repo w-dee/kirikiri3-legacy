@@ -10,8 +10,8 @@
 //! @file
 //! @brief スクリプトブロック管理
 //---------------------------------------------------------------------------
-#ifndef risseScriptBlockH
-#define risseScriptBlockH
+#ifndef risseScriptBlockBaseH
+#define risseScriptBlockBaseH
 
 #include "risseTypes.h"
 #include "risseCxxString.h"
@@ -26,7 +26,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 class tRisseScriptBlockBase : public gc
 {
-protected:
+private:
 	tRisseString Script; //!< スクリプトの内容
 	risse_size LineOffset; //!< スクリプトの行オフセット (ドキュメント埋め込みスクリプト用)
 	mutable risse_size * LinesToPosition; //!< 各行の先頭に対応するコードポイント位置の配列
@@ -55,6 +55,14 @@ public:
 	//! @param		line		行位置(0～; 興味がない場合はnull可)
 	//! @param		col			桁位置(0～; 興味がない場合はnull可)
 	void PositionToLineAndColumn(risse_size pos, risse_size *line, risse_size *col) const;
+
+public:
+	//! @brief		スクリプトを評価する
+	//! @param		result			実行の結果(NULL可)
+	//! @param		is_expression	式評価モードかどうか
+	//! @note		もしスクリプトがコンパイルが必要な場合、
+	//!				Evaluate は評価に先立って Compile() を呼び、コンパイルを行う。
+	virtual void Evaluate(tRisseVariant * result = NULL, bool is_expression = false) = 0;
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

@@ -1,9 +1,10 @@
-# Risse の Lexer 用の単語帳
+##### Risse の Lexer 用の単語帳
+##### 5個の '#' より後はコメントとして見なされる
 
-# 先頭から順に
-#  トークン   トークンID   値    単語マッチ?    大文字小文字を無視?
+##### 先頭から順に
+#####  トークン   トークンID   値    単語マッチ?    大文字小文字を無視?
 
-# 記号類
+##### 記号類
 
 >               T_GT                     - false false
 =               T_EQUAL                  - false false
@@ -64,13 +65,14 @@ $               T_DOLLAR                 - false false
 *=              T_ASTERISKEQUAL          - false false
 /=              T_SLASHEQUAL             - false false
 /*              T_BEGIN_COMMENT          - false false
+//              T_BEGIN_COMMENT          - false false
 \=              T_BACKSLASHEQUAL         - false false
 %=              T_PERCENTEQUAL           - false false
 ^=              T_CHEVRONEQUAL           - false false
 
 
 
-# 文字類
+##### 文字類
 break               T_BREAK                  - true false
 continue            T_CONTINUE               - true false
 const               T_CONST                  - true false
@@ -128,5 +130,5 @@ NaN                 T_NAN                    - true false
 Infinity            T_INFINITY               - true false
 with                T_WITH                   - true false
 
-# 単語切り出し
+##### 単語切り出し
 ---*---             T_SYMBOL                 - -    -

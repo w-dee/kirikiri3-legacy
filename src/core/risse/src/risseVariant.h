@@ -301,27 +301,62 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	return uminus_Void();
-		case vtInteger:	return uminus_Integer();
-		case vtReal:	return uminus_Real();
-		case vtBool:	return uminus_Bool();
-		case vtString:	return uminus_String();
-		case vtObject:	return uminus_Object();
-		case vtOctet:	return uminus_Octet();
+		case vtVoid:	return uminus_Void     ();
+		case vtInteger:	return uminus_Integer  ();
+		case vtReal:	return uminus_Real     ();
+		case vtBool:	return uminus_Bool     ();
+		case vtString:	return uminus_String   ();
+		case vtObject:	return uminus_Object   ();
+		case vtOctet:	return uminus_Octet    ();
 		}
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock uminus_Void() 	const { return risse_int64(0); }
-	tRisseVariantBlock uminus_Integer()	const { return -AsInteger(); }
-	tRisseVariantBlock uminus_Real()	const { return -AsReal(); }
-	tRisseVariantBlock uminus_Bool()	const { return (risse_int64)(AsBool()?-1:0); }
-	tRisseVariantBlock uminus_String()	const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock uminus_Object()	const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock uminus_Octet()	const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock uminus_Void     () const { return risse_int64(0); }
+	tRisseVariantBlock uminus_Integer  () const { return -AsInteger(); }
+	tRisseVariantBlock uminus_Real     () const { return -AsReal(); }
+	tRisseVariantBlock uminus_Bool     () const { return (risse_int64)(AsBool()?-1:0); }
+	tRisseVariantBlock uminus_String   () const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock uminus_Object   () const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock uminus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
 
 
-public:
+public: // ユーティリティ
+	//-----------------------------------------------------------------------
+	//! @brief		人間が可読な形式に変換
+	//! @param		maxlen		出力最大コードポイント数(目安)<br>
+	//!							あくまで目安。無視されたり、ぴったりのコード
+	//!							ポイント数にならなかったりする。risse_size_max
+	//!							を指定すると制限なし
+	//! @return		人間が可読な文字列
+	//-----------------------------------------------------------------------
+	tRisseString AsHumanReadable(risse_size maxlen = risse_size_max) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return AsHumanReadable_Void     (maxlen);
+		case vtInteger:	return AsHumanReadable_Integer  (maxlen);
+		case vtReal:	return AsHumanReadable_Real     (maxlen);
+		case vtBool:	return AsHumanReadable_Bool     (maxlen);
+		case vtString:	return AsHumanReadable_String   (maxlen);
+		case vtObject:	return AsHumanReadable_Object   (maxlen);
+		case vtOctet:	return AsHumanReadable_Octet    (maxlen);
+		}
+		return tRisseString();
+	}
+
+	tRisseString AsHumanReadable_Void     (risse_size maxlen) const;
+	tRisseString AsHumanReadable_Integer  (risse_size maxlen) const;
+	tRisseString AsHumanReadable_Real     (risse_size maxlen) const;
+	tRisseString AsHumanReadable_Bool     (risse_size maxlen) const;
+	tRisseString AsHumanReadable_String   (risse_size maxlen) const
+					{ return AsString().AsHumanReadable(maxlen); }
+	tRisseString AsHumanReadable_Object   (risse_size maxlen) const
+					{ return tRisseString(); /* incomplete */ }
+	tRisseString AsHumanReadable_Octet    (risse_size maxlen) const
+					{ return AsOctet().AsHumanReadable(maxlen); }
+
+	//! @brief		デバッグ用各種構造体サイズ表示
 	void prtsizes()
 	{
 		printf("tRisseVariantBlock: %d\n", sizeof(tRisseVariantBlock));

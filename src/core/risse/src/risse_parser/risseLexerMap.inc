@@ -43,6 +43,9 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
  case ';':
   p += 1;
   { ptr = p; return T_SEMICOLON; }
+ case '#':
+  p += 1;
+  { ptr = p; return T_SHARP; }
  case '~':
   p += 1;
   { ptr = p; return T_TILDE; }
@@ -1447,6 +1450,7 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
   default:
    p += 1;
    { ptr = p; return T_SLASH; }
+  case '/':
   case '*':
    p += 2;
    { ptr = p; return T_BEGIN_COMMENT; }

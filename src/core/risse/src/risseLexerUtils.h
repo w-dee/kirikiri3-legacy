@@ -84,11 +84,11 @@ public: // public static members
 		psrNone, //!< (エラー)
 		psrDelimiter, //!< デリミタにぶつかった
 		psrAmpersand, //!< & にぶつかった ( &式; 形式の埋め込み )
-		psrDollar
+		psrDollar  //!< $ にぶつかった ( ${ } 形式の埋め込み )
 	};
 
 	//! @brief		文字列を解析する
-	//! @param		ptr		解析開始位置
+	//! @param		ptr		解析開始位置 (通常、開始デリミタの直後)
 	//! @param		val		解析した文字列を格納する先
 	//! @param		delim	デリミタ ( '\'' か '"' )
 	//! @param		embexpmode	埋め込み式モードかどうか (@つき文字列リテラルかどうか)

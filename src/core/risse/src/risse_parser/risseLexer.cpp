@@ -69,9 +69,24 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 			{
 			case scrEnded: // スクリプトが終わった
 				token = -1; // EOF
+				break;
 			case scrContinue: // スクリプトはまだ続く
 			case scrNotComment: // コメントではなかった(あり得ない)
 				token = T_NONE;
+				break;
+			}
+			break;
+
+		case T_BEGIN_STRING_LITERAL: // 文字列リテラルの開始
+			switch(tParseStringResult(Ptr, val, *Ptr, false))
+			{
+			case psrNone:
+				break;
+			case psrDelimiter:
+				break;
+			case psrAmpersand:
+			case psrDollar:
+				break;
 			}
 			break;
 

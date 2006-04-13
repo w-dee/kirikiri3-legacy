@@ -64,6 +64,13 @@ void tRisseScriptBlock::Compile(bool need_result, bool is_expression)
 		}
 		if(token == -1) break; // トークンの最後
 		printf("%s ", RisseLexerTokenString[token]);
+		switch(token)
+		{
+		case T_CONSTVAL:
+			tRisseString str = val.AsHumanReadable();
+			wxPrintf(wxT("[%s] "), str.AsWxString().c_str());
+			break;
+		}
 	}
 }
 //---------------------------------------------------------------------------

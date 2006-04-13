@@ -150,7 +150,9 @@ tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
 	Buffer = AllocateInternalBuffer(org_len);
 	risse_size new_len = RisseConvertUTF16ToRisseCharString(Buffer,
 		reinterpret_cast<const risse_uint16 *>(str)); // UTF16 を UTF32 に変換
-	SetLength(new_len);
+	if(new_len)
+		Buffer[new_len] = Buffer[new_len+1] = 0; // null終端と hint をクリア
+	Length = new_len;
 	return *this;
 }
 //---------------------------------------------------------------------------
@@ -421,35 +423,35 @@ tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 		default:
 			if(hexflag)
 			{
-				if(p[0] >= RISSE_WC('a') && p[0] <= RISSE_WC('f') ||
-					p[0] >= RISSE_WC('A') && p[0] <= RISSE_WC('F') ||
-						p[0] >= RISSE_WC('0') && p[0] <= RISSE_WC('9') )
+				if(p[i] >= RISSE_WC('a') && p[i] <= RISSE_WC('f') ||
+					p[i] >= RISSE_WC('A') && p[i] <= RISSE_WC('F') ||
+						p[i] >= RISSE_WC('0') && p[i] <= RISSE_WC('9') )
 				{
 					risse_char buf[4];
 					buf[0] = RISSE_WC('\\');
 					buf[1] = RISSE_WC('x');
-					buf[2] = hexchars[ (p[0] >> 4)  & 0x0f];
-					buf[3] = hexchars[ (p[0]     )  & 0x0f];
+					buf[2] = hexchars[ (p[i] >> 4)  & 0x0f];
+					buf[3] = hexchars[ (p[i]     )  & 0x0f];
 					hexflag = true;
 					ret.Append(buf, 4);
 					continue;
 				}
 			}
 
-			if(p[0] < 0x20)
+			if(p[i] < 0x20)
 			{
 				risse_char buf[4];
 				buf[0] = RISSE_WC('\\');
 				buf[1] = RISSE_WC('x');
-				buf[2] = hexchars[ (p[0] >> 4)  & 0x0f];
-				buf[3] = hexchars[ (p[0]     )  & 0x0f];
+				buf[2] = hexchars[ (p[i] >> 4)  & 0x0f];
+				buf[3] = hexchars[ (p[i]     )  & 0x0f];
 				buf[4] = 0;
 				hexflag = true;
 				ret.Append(buf, 4);
 			}
 			else
 			{
-				ret += p[0];
+				ret += p[i];
 				hexflag = false;
 			}
 		}

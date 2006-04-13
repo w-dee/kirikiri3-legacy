@@ -234,7 +234,7 @@ tRisseLexerUtility::tParseStringResult
 				// risse_char は UTF-32 を想定しているが、最上位
 				// ビットは使用できない (エラー状態を表す用途に使われる
 				// 可能性があるため )
-				if(code & (1 << (sizeof(risse_char)*8 - 1)))
+				if(code == 0 || (code & (1 << (sizeof(risse_char)*8 - 1))))
 					eRisseError::Throw(RISSE_WS_TR("UTF-32 code out of range"));
 
 				str += (risse_char)code;
@@ -253,6 +253,13 @@ tRisseLexerUtility::tParseStringResult
 					if(!*(++ptr)) break;
 				}
 				if(*ptr == 0) break;
+
+				// risse_char は UTF-32 を想定しているが、最上位
+				// ビットは使用できない (エラー状態を表す用途に使われる
+				// 可能性があるため )
+				if(code == 0 || (code & (1 << (sizeof(risse_char)*8 - 1))))
+					eRisseError::Throw(RISSE_WS_TR("UTF-32 code out of range"));
+
 				str += (risse_char)code;
 			}
 			else
@@ -312,8 +319,22 @@ tRisseLexerUtility::tParseStringResult
 		}
 		else
 		{
-			str += *ptr;
-			++ptr;
+			if(*ptr == RISSE_WC('\r') || *ptr == RISSE_WC('\n'))
+			{
+				// 入力スクリプトの改行コードは様々な物が考えられるが、
+				// ここでは \n に統一する
+				if(ptr[0] == RISSE_WC('\r') && ptr[1] == RISSE_WC('\n'))
+					ptr += 2; // CR LF 改行
+				else
+					++ptr;
+
+				str += RISSE_WC('\n');
+			}
+			else
+			{
+				str += *ptr;
+				++ptr;
+			}
 		}
 	}
 

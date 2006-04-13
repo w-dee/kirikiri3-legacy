@@ -63,32 +63,39 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		switch(token)
 		{
 		case T_BEGIN_COMMENT: // コメントの開始
-			// コメントをスキップする
-			Ptr = ptr_start;
-			switch(SkipComment(Ptr))
 			{
-			case scrEnded: // スクリプトが終わった
-				token = -1; // EOF
-				break;
-			case scrContinue: // スクリプトはまだ続く
-			case scrNotComment: // コメントではなかった(あり得ない)
-				token = T_NONE;
+				// コメントをスキップする
+				Ptr = ptr_start;
+				switch(SkipComment(Ptr))
+				{
+				case scrEnded: // スクリプトが終わった
+					token = -1; // EOF
+					break;
+				case scrContinue: // スクリプトはまだ続く
+				case scrNotComment: // コメントではなかった(あり得ない)
+					token = T_NONE;
+					break;
+				}
 				break;
 			}
-			break;
 
 		case T_BEGIN_STRING_LITERAL: // 文字列リテラルの開始
-			switch(tParseStringResult(Ptr, val, *Ptr, false))
 			{
-			case psrNone:
-				break;
-			case psrDelimiter:
-				break;
-			case psrAmpersand:
-			case psrDollar:
+				tRisseString str;
+				switch(ParseString(Ptr, str, *ptr_start, false))
+				{
+				case psrNone:
+					break;
+				case psrDelimiter:
+					token = T_CONSTVAL;
+					break;
+				case psrAmpersand:
+				case psrDollar:
+					break;
+				}
+				val = str;
 				break;
 			}
-			break;
 
 		default:
 			break;

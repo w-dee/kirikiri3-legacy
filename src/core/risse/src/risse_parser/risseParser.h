@@ -149,6 +149,7 @@ RISSE_DEFINE_TOKEN(T_WHILE                 ),
 RISSE_DEFINE_TOKEN(T_NAN                   ),
 RISSE_DEFINE_TOKEN(T_INFINITY              ),
 RISSE_DEFINE_TOKEN(T_WITH                  ),
+RISSE_DEFINE_TOKEN(T_BEGIN_NUMBER          ),
 RISSE_DEFINE_TOKEN(T_SYMBOL                ),
 RISSE_DEFINE_TOKEN(T_CONSTVAL              ),
 };

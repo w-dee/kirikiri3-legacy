@@ -6,6 +6,18 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
  case '@':
   p += 1;
   { ptr = p; return T_BEGIN_MACRO; }
+ case '0':
+ case '1':
+ case '2':
+ case '3':
+ case '4':
+ case '5':
+ case '6':
+ case '7':
+ case '8':
+ case '9':
+  p += 1;
+  { ptr = p; return T_BEGIN_NUMBER; }
  case '"':
  case '\'':
   p += 1;
@@ -1450,8 +1462,8 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
   default:
    p += 1;
    { ptr = p; return T_SLASH; }
-  case '/':
   case '*':
+  case '/':
    p += 2;
    { ptr = p; return T_BEGIN_COMMENT; }
   case '=':

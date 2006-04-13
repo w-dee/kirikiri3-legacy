@@ -13,6 +13,7 @@
 #include "../prec.h"
 
 #include "../risseLexerUtils.h"
+#include "../risseException.h"
 #include "risseLexer.h"
 #include "risseParser.h"
 
@@ -94,6 +95,15 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 					break;
 				}
 				val = str;
+				break;
+			}
+
+		case T_BEGIN_NUMBER: // 数値リテラルの開始
+			{
+				Ptr = ptr_start;
+				if(!ParseNumber(Ptr, val))
+					eRisseError::Throw(RISSE_WS_TR("Invalid number literal"));
+				token = T_CONSTVAL;
 				break;
 			}
 

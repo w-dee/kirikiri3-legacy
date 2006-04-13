@@ -91,6 +91,7 @@ risse_char * Risse_int64_to_str(risse_int64 value, risse_char *string)
 
 	risse_char *p = buf;
 
+	// 桁数がわからないので、逆順に書き出してから正順に並び替える
 	do
 	{
 		*(p++) = (value % 10) + RISSE_WC('0');

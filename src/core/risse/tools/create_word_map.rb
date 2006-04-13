@@ -117,7 +117,7 @@ def gen(level, words, history, is_default)
 	# 結果文字列の作成
 	content_map_rev.keys.sort.each do |item|
 		chars = content_map_rev[item]
-		chars.each do |char|
+		chars.sort.each do |char|
 			char = '\\\\' if char == '\\'
 			char = '\\\'' if char == '\''
 			if char != '' then

@@ -112,7 +112,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 	else
 	{
 		Buffer = AllocateInternalBuffer(Length);
-		memcpy(Buffer, ref, sizeof(risse_char));
+		memcpy(Buffer, ref, Length * sizeof(risse_char));
 			// サイズがわかっているならば memcpy の方が若干早い
 //		Risse_strcpy(Buffer, ref);
 		Buffer[Length] = Buffer[Length+1] = 0; // null終端と hint をクリア

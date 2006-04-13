@@ -130,5 +130,20 @@ NaN                 T_NAN                    - true false
 Infinity            T_INFINITY               - true false
 with                T_WITH                   - true false
 
+##### 数値
+0                   T_BEGIN_NUMBER           - false false
+1                   T_BEGIN_NUMBER           - false false
+2                   T_BEGIN_NUMBER           - false false
+3                   T_BEGIN_NUMBER           - false false
+4                   T_BEGIN_NUMBER           - false false
+5                   T_BEGIN_NUMBER           - false false
+6                   T_BEGIN_NUMBER           - false false
+7                   T_BEGIN_NUMBER           - false false
+8                   T_BEGIN_NUMBER           - false false
+9                   T_BEGIN_NUMBER           - false false
+
 ##### 単語切り出し
 ---*---             T_SYMBOL                 - -    -
+
+
+

@@ -34,7 +34,7 @@
 
 #include <gc.h>
 #include <gc_cpp.h>
-
+#include <gc_allocator.h>
 
 #endif
 //---------------------------------------------------------------------------

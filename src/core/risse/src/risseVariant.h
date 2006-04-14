@@ -12,7 +12,7 @@
 #ifndef risseVariantH
 #define risseVariantH
 
-#include "gc_cpp.h"
+#include "risseGC.h"
 #include "risseCharUtils.h"
 #include "risseTypes.h"
 #include "risseAssert.h"
@@ -60,7 +60,7 @@ tRisseVariant はパフォーマンスの関係上、ILP32 システムでは 3 
 テムでは 2 * 64bit に収まるようにすること。
 */
 //---------------------------------------------------------------------------
-class tRisseVariantBlock : public gc
+class tRisseVariantBlock : public tRisseCollectee
 {
 protected:
 

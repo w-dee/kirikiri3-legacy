@@ -17,14 +17,14 @@
 #include "risseCxxString.h"
 #include "risseVariant.h"
 #include "risseAssert.h"
-#include "gc_cpp.h"
+#include "risseGC.h"
 
 namespace Risse
 {
 //---------------------------------------------------------------------------
 //! @brief		スクリプトブロックの基底クラス
 //---------------------------------------------------------------------------
-class tRisseScriptBlockBase : public gc
+class tRisseScriptBlockBase : public tRisseCollectee
 {
 private:
 	tRisseString Script; //!< スクリプトの内容

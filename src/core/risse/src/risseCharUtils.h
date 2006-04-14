@@ -229,14 +229,14 @@ static bool inline Risse_iswalpha_nc(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-//! @brief		アルファベットあるいは数字かの判定
+//! @brief		"単語" に使える文字かどうか
 //! @param		ch		文字
 //! @return		アルファベットの時に真
 //! @note		ここでは 0x80 以上の文字はすべてアルファベットと同じ扱いとする
 //---------------------------------------------------------------------------
-static bool inline Risse_iswalnum_nc(risse_char ch)
+static bool inline Risse_iswordcha_nc(risse_char ch)
 {
-	return Risse_iswdigit_nc(ch) || Risse_iswalpha_nc(ch);
+	return Risse_iswdigit_nc(ch) || Risse_iswalpha_nc(ch) || ch == '_';
 }
 //---------------------------------------------------------------------------
 

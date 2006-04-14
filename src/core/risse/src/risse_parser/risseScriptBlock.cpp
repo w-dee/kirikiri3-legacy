@@ -66,6 +66,7 @@ void tRisseScriptBlock::Compile(bool need_result, bool is_expression)
 		printf("%s ", RisseLexerTokenString[token]);
 		switch(token)
 		{
+		case T_SYMBOL:
 		case T_CONSTVAL:
 			tRisseString str = val.AsHumanReadable();
 			wxPrintf(wxT("[%s] "), str.AsWxString().c_str());

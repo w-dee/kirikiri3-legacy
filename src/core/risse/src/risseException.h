@@ -18,7 +18,7 @@
 #include "risseTypes.h"
 #include "risseAssert.h"
 #include "risseCxxString.h"
-#include "gc_cpp.h"
+#include "risseGC.h"
 
 namespace Risse
 {
@@ -166,7 +166,7 @@ extern void RisseGetExceptionObject(tRisse *risse, tRisseVariant *res, tRisseVar
 //---------------------------------------------------------------------------
 //! @brief		Risseの例外の基本クラス
 //---------------------------------------------------------------------------
-class eRisse : public gc
+class eRisse : public tRisseCollectee
 {
 public:
 	//! @brief		デフォルトコンストラクタ

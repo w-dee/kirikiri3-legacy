@@ -161,7 +161,7 @@ risse_char は 32bit サイズであることが求められる。
 #include "risseCharUtils.h"
 #include "risseTypes.h"
 #include "risseAssert.h"
-#include "gc_cpp.h"
+#include "risseGC.h"
 
 
 namespace Risse
@@ -169,7 +169,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief	文字列用データ
 //---------------------------------------------------------------------------
-class tRisseStringData : public gc
+class tRisseStringData : public tRisseCollectee
 {
 protected:
 	mutable risse_char  *	Buffer;	//!< 文字列バッファ

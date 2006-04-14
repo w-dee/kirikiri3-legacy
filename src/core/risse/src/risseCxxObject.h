@@ -15,7 +15,7 @@
 #include "risseCharUtils.h"
 #include "risseTypes.h"
 #include "risseAssert.h"
-#include "gc_cpp.h"
+#include "risseGC.h"
 
 
 namespace Risse
@@ -28,7 +28,7 @@ typedef void * tRisseObjectImpl;
 //! 表している。ポインタは常に少なくとも 32bit 境界に配置されるため、最下位の２ビットは
 //! オブジェクトのタイプを表すのに利用されている。tRisseVariantを参照。
 //---------------------------------------------------------------------------
-class tRisseObjectData : public gc
+class tRisseObjectData : public tRisseCollectee
 {
 	tRisseObjectImpl * Impl; //!< ブロックへのポインタ (最下位の2ビットは常に10なので注意)
 							//!< アクセス時は必ず GetBlock, SetBlock を用いること

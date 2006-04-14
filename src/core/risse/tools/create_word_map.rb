@@ -23,7 +23,7 @@ def node_last(level, word, is_default)
 	ret << indent
 
 	if word[:match_word] == 'true' then
-		ret << "if(!Risse_iswalnum_nc(*p)) "
+		ret << "if(!Risse_iswordcha_nc(*p)) "
 	end
 
 	ret << "{ ptr = p; "
@@ -205,7 +205,7 @@ EOS
 if $cut_unmatched_word != nil then
 	print <<-EOS
 cut_word:
- while(Risse_iswalnum_nc(*p)) p++;
+ while(Risse_iswordcha_nc(*p)) p++;
  ptr = p;
  return #{$cut_unmatched_word};
 	EOS

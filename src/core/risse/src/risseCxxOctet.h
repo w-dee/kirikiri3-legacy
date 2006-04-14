@@ -24,7 +24,7 @@ Risse オクテット列は tRisseOctetBlock クラスで表される。
 #include "risseTypes.h"
 #include "risseAssert.h"
 #include "risseCxxString.h"
-#include "gc_cpp.h"
+#include "risseGC.h"
 
 
 namespace Risse
@@ -32,7 +32,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief	オクテット列ブロック
 //---------------------------------------------------------------------------
-class tRisseOctetBlock : public gc
+class tRisseOctetBlock : public tRisseCollectee
 {
 	mutable risse_uint8  *	Buffer;	//!< オクテット列バッファ (NULL = 0オクテット長)
 	mutable risse_size Capacity; //!< 確保容量 ( 0 = バッファ共有中 )
@@ -232,7 +232,7 @@ public: // utilities
 //! 表している。ポインタは常に少なくとも 32bit 境界に配置されるため、最下位の２ビットは
 //! オブジェクトのタイプを表すのに利用されている。tRisseVariantを参照。
 //---------------------------------------------------------------------------
-class tRisseOctetData : public gc
+class tRisseOctetData : public tRisseCollectee
 {
 	tRisseOctetBlock * Block; //!< ブロックへのポインタ (最下位の2ビットは常に10なので注意)
 							//!< アクセス時は必ず GetBlock, SetBlock を用いること
@@ -249,6 +249,7 @@ protected: // Block pointer operation
 
 //---------------------------------------------------------------------------
 //! @brief	オクテット列
+//! @note	全体的に高速化の必要がある
 //---------------------------------------------------------------------------
 class tRisseOctet : protected tRisseOctetData
 {
@@ -289,7 +290,7 @@ public:
 	//! @return	このオブジェクトへの参照
 	tRisseOctet & operator = (const tRisseOctet & ref)
 	{
-		*GetBlock() = *ref.GetBlock();
+		SetBlock(new tRisseOctetBlock(*ref.GetBlock()));
 		return *this;
 	}
 

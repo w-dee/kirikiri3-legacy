@@ -94,6 +94,8 @@ void tRisseOctetBlock::Append(const risse_uint8 * buffer, risse_size length)
 		// 現在保持しているオクテット列の直後に buffer をコピーする
 		memcpy(Buffer + Length, buffer, length);
 	}
+
+	Length = newlength;
 }
 //---------------------------------------------------------------------------
 
@@ -177,6 +179,7 @@ tRisseString tRisseOctetBlock::AsHumanReadable(risse_size maxlen) const
 		p[i+1] = hex[*src & 15];
 		p[i+2] = RISSE_WC(' ');
 		i += 3;
+		src ++;
 	}
 
 	if(max_octet_len < Length)

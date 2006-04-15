@@ -40,7 +40,8 @@ CPPFILES =  src/risseCharUtils.cpp                   \
 			src/risseUtils.cpp                       \
 			src/risseVariant.cpp                     \
 			src/risse_parser/risseLexer.cpp          \
-			src/risse_parser/risseScriptBlock.cpp    
+			src/risse_parser/risseScriptBlock.cpp    \
+			src/risse_parser/risseParser.cpp         
 
 OBJS = $(CPPFILES:.cpp=.o)
 
@@ -48,11 +49,22 @@ PREC_H_NAME = src/prec.h
 
 INCLUDES = -I.
 
+# risseLexerMap.inc のコンパイル
+
 src/risse_parser/risseLexerMap.inc: \
 		src/risse_parser/words.txt \
-		tools/create_word_map.rb
+		tools/create_word_map.rb Makefile
 	ruby tools/create_word_map.rb src/risse_parser/words.txt RisseMapToken > \
 		src/risse_parser/risseLexerMap.inc
+
+# risseParser.cpp と risseParser.h のコンパイル
+
+src/risse_parser/risseParser.cpp src/risse_parser/risseParser.h: \
+		src/risse_parser/risse.y Makefile
+	(set -e ;\
+		cd src/risse_parser ;\
+		bison -dv -p risse_ risse.y ;\
+	)
 
 #----------------------------#
 

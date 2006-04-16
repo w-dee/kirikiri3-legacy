@@ -112,8 +112,8 @@ private: // storage
 	static risse_uint8 * AllocateInternalBuffer(risse_size n, risse_uint8 * prevbuf = NULL)
 	{
 		return prevbuf ?
-			reinterpret_cast<risse_uint8*>(GC_realloc(prevbuf, n)):
-			reinterpret_cast<risse_uint8*>(GC_malloc_atomic(n));
+			reinterpret_cast<risse_uint8*>(RisseReallocCollectee(prevbuf, n)):
+			reinterpret_cast<risse_uint8*>(RisseMallocAtomicCollectee(n));
 	}
 
 public: // comparison

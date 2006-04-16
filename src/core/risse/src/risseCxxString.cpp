@@ -183,13 +183,13 @@ risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	void *ptr;
 	if(!prevbuf)
 	{
-		ptr = GC_malloc_atomic(newbytes);
+		ptr = RisseMallocAtomicCollectee(newbytes);
 	}
 	else
 	{
 		char * buffer_head = reinterpret_cast<char *>(prevbuf) -
 			 ( sizeof(risse_char) + sizeof(risse_size) );
-		ptr = GC_realloc(buffer_head, newbytes);
+		ptr = RisseReallocCollectee(buffer_head, newbytes);
 	}
 
 	// ２番目の文字を指すポインタを獲る

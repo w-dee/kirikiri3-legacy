@@ -63,7 +63,7 @@ src/risse_parser/risseParser.cpp src/risse_parser/risseParser.h: \
 		src/risse_parser/risse.y Makefile
 	(set -e ;\
 		cd src/risse_parser ;\
-		bison -dv -p risse_ --name-prefix=risse risse.y ;\
+		bison -dv --name-prefix=risse risse.y ;\
 		cat risse.tab.c | \
 			sed -e "s/risse.tab.h/risseParser.h/" -e "s/risse.tab.c/risseParser.cpp/" \
 				>  risseParser.cpp ;\

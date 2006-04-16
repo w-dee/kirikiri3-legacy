@@ -14,6 +14,14 @@
 
 #define YYERROR_VERBOSE 1
 
+/* メモリ確保は Risse のインターフェースを使うように */
+#define YYMALLOC	RisseMallocCollectee
+#define YYFREE		RisseFreeCollectee
+
+/* 名前空間を Risse に */
+namespace Risse
+{
+
 %}
 
 /* 再入可能なパーサを出力 */
@@ -687,3 +695,6 @@ dic_dummy_elm_opt
 
 
 %%
+
+} // namespace Risse
+

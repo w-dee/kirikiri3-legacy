@@ -167,11 +167,30 @@
 
 
 %type <np>
-	expr comma_expr assign_expr cond_expr logical_or_expr
-	logical_and_expr inclusive_or_expr exclusive_or_expr and_expr identical_expr
-	compare_expr shift_expr add_sub_expr mul_div_expr mul_div_expr_and_asterisk
-	unary_expr incontextof_expr priority_expr factor_expr call_arg call_arg_list
-	func_expr_def func_call_expr expr_no_comma inline_array array_elm inline_dic dic_elm
+	expr expr_with_comma factor_expr call_arg call_arg_list
+	func_expr_def func_call_expr inline_array array_elm inline_dic dic_elm
+
+/* 演算子の優先順位 */
+%right		<np>	"if"
+%left		<np>	","
+%right		<np>	"=" "&=" "|=" "^=" "-=" "+=" "%=" "/=" "\\=" "*="
+					"||=" "&&=" ">>=" "<<=" ">>>="
+%nonassoc	<np>	"<->"
+%right		<np>	"?" ":"
+%left		<np>	"||"
+%left		<np>	"&&"
+%left		<np>	"|"
+%left		<np>	"^"
+%left		<np>	"&"
+%left		<np>	"!=" "==" "!==" "==="
+%left		<np>	"<" ">" "<=" ">="
+%left		<np>	">>" "<<" ">>>"
+%left		<np>	"+" "-"
+%left		<np>	"%" "/" "\\" "*"
+%right		<np>	"!" "~" "--" "++" "new" "delete" "typeof" "#" "$" T_UNARY
+%nonassoc	<np>	"incontextof" T_POSTUNARY
+%left		<np>	"(" ")" "[" "]" "."
+
 
 %%
 
@@ -206,7 +225,7 @@ block_or_statement
 /* a statement */
 statement
 	: ";"
-	| expr ";"								{ /*cc->CreateExprCode($1);*/ }
+	| expr_with_comma ";"					{ /*cc->CreateExprCode($1);*/ }
 	| if
 	| if_else
 	| while
@@ -316,7 +335,7 @@ variable_id_list
 variable_id
 	: T_SYMBOL								{ /*cc->AddLocalVariable(
 												lx->GetString($1)); */ }
-	| T_SYMBOL "=" expr_no_comma			{ /*cc->InitLocalVariable(
+	| T_SYMBOL "=" expr						{ /*cc->InitLocalVariable(
 											  lx->GetString($1), $3); */ }
 ;
 
@@ -366,7 +385,7 @@ func_decl_arg_at_least_one
 func_decl_arg
 	: T_SYMBOL								{ /*cc->AddFunctionDeclArg(
 												lx->GetString($1), NULL); */ }
-	| T_SYMBOL "=" expr_no_comma			{ /*cc->AddFunctionDeclArg(
+	| T_SYMBOL "=" expr						{ /*cc->AddFunctionDeclArg(
 												lx->GetString($1), $3); */ }
 ;
 
@@ -436,8 +455,8 @@ class_def
 
 class_extender
 	:
-	| "extends" expr_no_comma				{ /*cc->CreateExtendsExprCode($2, true);*/ }
-	| "extends" expr_no_comma ","			{ /*cc->CreateExtendsExprCode($2, false);*/ }
+	| "extends" expr						{ /*cc->CreateExtendsExprCode($2, true);*/ }
+	| "extends" expr ","					{ /*cc->CreateExtendsExprCode($2, false);*/ }
 	  extends_list
 ;
 
@@ -447,7 +466,7 @@ extends_list
 ;
 
 extends_name
-	: expr_no_comma							{ /*cc->CreateExtendsExprCode($1, false);*/ }
+	: expr									{ /*cc->CreateExtendsExprCode($1, false);*/ }
 ;
 
 /* a return statement */
@@ -497,171 +516,77 @@ throw
 	: "throw" expr ";"						{ /*cc->ProcessThrowCode($2);*/ }
 ;
 
-/* an expression */
-expr_no_comma
-	: assign_expr								{ /*$$ = $1;*/ }
+/* 式 */
+/* カンマとそれ以下の優先順位の式を含む場合はこちらを使う */
+expr_with_comma
+	: expr_with_comma "if" expr_with_comma				{ ; }
+	| expr_with_comma ","  expr_with_comma				{ ; }
+	| expr												{ $$ = $1; }
 ;
 
+/*
+	expr_no_comma は、関数への引数リストなど、式中にカンマがあると、リストの
+	区切り記号と区別が付かない場合はこちらを使う
+*/
 expr
-	: comma_expr								{ /*$$ = $1;*/ }
-	| comma_expr "if" expr						{ /*$$ = cc->MakeNP2(T_IF, $1, $3);*/ }
+	: expr "=" expr							{ /*$$ = cc->MakeNP2(T_EQUAL, $1, $3);*/ }
+	| expr "&=" expr						{ /*$$ = cc->MakeNP2(T_AMPERSANDEQUAL, $1, $3);*/ }
+	| expr "|=" expr						{ /*$$ = cc->MakeNP2(T_VERTLINEEQUAL, $1, $3);*/ }
+	| expr "^=" expr						{ /*$$ = cc->MakeNP2(T_CHEVRONEQUAL, $1, $3);*/ }
+	| expr "-=" expr						{ /*$$ = cc->MakeNP2(T_MINUSEQUAL, $1, $3);*/ }
+	| expr "+=" expr						{ /*$$ = cc->MakeNP2(T_PLUSEQUAL, $1, $3);*/ }
+	| expr "%=" expr						{ /*$$ = cc->MakeNP2(T_PERCENTEQUAL, $1, $3);*/ }
+	| expr "/=" expr						{ /*$$ = cc->MakeNP2(T_SLASHEQUAL, $1, $3);*/ }
+	| expr "\\=" expr						{ /*$$ = cc->MakeNP2(T_BACKSLASHEQUAL, $1, $3);*/ }
+	| expr "*=" expr						{ /*$$ = cc->MakeNP2(T_ASTERISKEQUAL, $1, $3);*/ }
+	| expr "||=" expr						{ /*$$ = cc->MakeNP2(T_LOGICALOREQUAL, $1, $3);*/ }
+	| expr "&&=" expr						{ /*$$ = cc->MakeNP2(T_LOGICALANDEQUAL, $1, $3);*/ }
+	| expr ">>=" expr						{ /*$$ = cc->MakeNP2(T_RARITHSHIFTEQUAL, $1, $3);*/ }
+	| expr "<<=" expr						{ /*$$ = cc->MakeNP2(T_LARITHSHIFTEQUAL, $1, $3);*/ }
+	| expr ">>>=" expr						{ /*$$ = cc->MakeNP2(T_RBITSHIFTEQUAL, $1, $3);*/ }
+	| expr "<->" expr						{ /*$$ = cc->MakeNP2(T_SWAP, $1, $3);*/ }
+	| expr "?" expr ":" expr				{ ; }
+	| expr "||" expr						{ ; }
+	| expr "&&" expr						{ ; }
+	| expr "|" expr							{ ; }
+	| expr "^" expr							{ ; }
+	| expr "&" expr							{ ; }
+	| expr "!=" expr						{ ; }
+	| expr "==" expr						{ ; }
+	| expr "!==" expr						{ ; }
+	| expr "===" expr						{ ; }
+	| expr "<" expr							{ ; }
+	| expr ">" expr							{ ; }
+	| expr "<=" expr						{ ; }
+	| expr ">=" expr						{ ; }
+	| expr ">>" expr						{ ; }
+	| expr "<<" expr						{ ; }
+	| expr ">>>" expr						{ ; }
+	| expr "+" expr							{ ; }
+	| expr "-" expr							{ ; }
+	| expr "%" expr							{ ; }
+	| expr "/" expr							{ ; }
+	| expr "\\" expr						{ ; }
+	| expr "*" expr							{ ; }
+	| "!" expr								{ ; }
+	| "~" expr								{ ; }
+	| "--" expr								{ ; }
+	| "++" expr								{ ; }
+	| "new" expr							{ /* $1 が関数呼び出しであることを確認する必要あり*/ }
+	| "delete" expr							{ ; }
+	| "typeof" expr							{ ; }
+	| "+" expr %prec T_UNARY				{ ; }
+	| "-" expr %prec T_UNARY				{ ; }
+	| expr "incontextof" expr				{ ; }
+	| expr "--" %prec T_POSTUNARY			{ ; }
+	| expr "++" %prec T_POSTUNARY			{ ; }
+	| func_call_expr						{ ; }
+	| "(" expr ")"							{ ; }
+	| expr "[" expr "]"						{ ; }
+	| expr "." expr							{ ; }
+	| factor_expr							{ ; }
 ;
 
-
-comma_expr
-	: assign_expr								{ /*$$ = $1;*/ }
-	| comma_expr "," assign_expr				{ /*$$ = cc->MakeNP2(T_COMMA, $1, $3);*/ }
-;
-
-
-assign_expr
-	: cond_expr									{ /*$$ = $1;*/ }
-	| cond_expr "<->" assign_expr				{ /*$$ = cc->MakeNP2(T_SWAP, $1, $3);*/ }
-	| cond_expr "=" assign_expr					{ /*$$ = cc->MakeNP2(T_EQUAL, $1, $3);*/ }
-	| cond_expr "&=" assign_expr				{ /*$$ = cc->MakeNP2(T_AMPERSANDEQUAL, $1, $3);*/ }
-	| cond_expr "|=" assign_expr				{ /*$$ = cc->MakeNP2(T_VERTLINEEQUAL, $1, $3);*/ }
-	| cond_expr "^=" assign_expr				{ /*$$ = cc->MakeNP2(T_CHEVRONEQUAL, $1, $3);*/ }
-	| cond_expr "-=" assign_expr				{ /*$$ = cc->MakeNP2(T_MINUSEQUAL, $1, $3);*/ }
-	| cond_expr "+=" assign_expr				{ /*$$ = cc->MakeNP2(T_PLUSEQUAL, $1, $3);*/ }
-	| cond_expr "%=" assign_expr				{ /*$$ = cc->MakeNP2(T_PERCENTEQUAL, $1, $3);*/ }
-	| cond_expr "/=" assign_expr				{ /*$$ = cc->MakeNP2(T_SLASHEQUAL, $1, $3);*/ }
-	| cond_expr "\\=" assign_expr				{ /*$$ = cc->MakeNP2(T_BACKSLASHEQUAL, $1, $3);*/ }
-	| cond_expr "*=" assign_expr				{ /*$$ = cc->MakeNP2(T_ASTERISKEQUAL, $1, $3);*/ }
-	| cond_expr "||=" assign_expr				{ /*$$ = cc->MakeNP2(T_LOGICALOREQUAL, $1, $3);*/ }
-	| cond_expr "&&=" assign_expr				{ /*$$ = cc->MakeNP2(T_LOGICALANDEQUAL, $1, $3);*/ }
-	| cond_expr ">>=" assign_expr				{ /*$$ = cc->MakeNP2(T_RARITHSHIFTEQUAL, $1, $3);*/ }
-	| cond_expr "<<=" assign_expr				{ /*$$ = cc->MakeNP2(T_LARITHSHIFTEQUAL, $1, $3);*/ }
-	| cond_expr ">>>=" assign_expr				{ /*$$ = cc->MakeNP2(T_RBITSHIFTEQUAL, $1, $3);*/ }
-;
-
-
-cond_expr
-	: logical_or_expr							{ /*$$ = $1;*/ }
-	| logical_or_expr "?"
-		cond_expr ":"
-		cond_expr								{ /*$$ = cc->MakeNP3(T_QUESTION, $1, $3, $5);*/ }
-;
-
-
-
-logical_or_expr
-	: logical_and_expr							{ /*$$ = $1;*/ }
-	| logical_or_expr "||" logical_and_expr		{ /*$$ = cc->MakeNP2(T_LOGICALOR, $1, $3);*/ }
-;
-
-logical_and_expr
-	: inclusive_or_expr							{ /*$$ = $1;*/ }
-	| logical_and_expr "&&"
-	  inclusive_or_expr							{ /*$$ = cc->MakeNP2(T_LOGICALAND, $1, $3);*/ }
-;
-
-inclusive_or_expr
-	: exclusive_or_expr							{ /*$$ = $1;*/ }
-	| inclusive_or_expr "|" exclusive_or_expr	{ /*$$ = cc->MakeNP2(T_VERTLINE, $1, $3);*/ }
-;
-
-exclusive_or_expr
-	: and_expr									{ /*$$ = $1;*/ }
-	| exclusive_or_expr "^" and_expr			{ /*$$ = cc->MakeNP2(T_CHEVRON, $1, $3);*/ }
-;
-
-and_expr
-	: identical_expr							{ /*$$ = $1;*/ }
-	| and_expr "&" identical_expr				{ /*$$ = cc->MakeNP2(T_AMPERSAND, $1, $3);*/ }
-;
-
-identical_expr
-	: compare_expr								{ /*$$ = $1;*/ }
-	| identical_expr "!=" compare_expr			{ /*$$ = cc->MakeNP2(T_NOTEQUAL, $1, $3);*/ }
-	| identical_expr "==" compare_expr			{ /*$$ = cc->MakeNP2(T_EQUALEQUAL, $1, $3);*/ }
-	| identical_expr "!==" compare_expr			{ /*$$ = cc->MakeNP2(T_DISCNOTEQUAL, $1, $3);*/ }
-	| identical_expr "===" compare_expr			{ /*$$ = cc->MakeNP2(T_DISCEQUAL, $1, $3);*/ }
-;
-
-compare_expr
-	: shift_expr								{ /*$$ = $1;*/ }
-	| compare_expr "<" shift_expr				{ /*$$ = cc->MakeNP2(T_LT, $1, $3);*/ }
-	| compare_expr ">" shift_expr				{ /*$$ = cc->MakeNP2(T_GT, $1, $3);*/ }
-	| compare_expr "<=" shift_expr				{ /*$$ = cc->MakeNP2(T_LTOREQUAL, $1, $3);*/ }
-	| compare_expr ">=" shift_expr				{ /*$$ = cc->MakeNP2(T_GTOREQUAL, $1, $3);*/ }
-;
-
-shift_expr
-	: add_sub_expr								{ /*$$ = $1;*/ }
-	| shift_expr ">>" add_sub_expr				{ /*$$ = cc->MakeNP2(T_RARITHSHIFT, $1, $3);*/ }
-	| shift_expr "<<" add_sub_expr				{ /*$$ = cc->MakeNP2(T_LARITHSHIFT, $1, $3);*/ }
-	| shift_expr ">>>" add_sub_expr				{ /*$$ = cc->MakeNP2(T_RBITSHIFT, $1, $3);*/ }
-;
-
-
-add_sub_expr
-	: mul_div_expr								{ /*$$ = $1;*/ }
-	| add_sub_expr "+" mul_div_expr				{ /*$$ = cc->MakeNP2(T_PLUS, $1, $3);*/ }
-	| add_sub_expr "-" mul_div_expr				{ /*$$ = cc->MakeNP2(T_MINUS, $1, $3);*/ }
-;
-
-mul_div_expr
-	: unary_expr								{ /*$$ = $1;*/ }
-	| mul_div_expr "%" unary_expr				{ /*$$ = cc->MakeNP2(T_PERCENT, $1, $3);*/ }
-	| mul_div_expr "/" unary_expr				{ /*$$ = cc->MakeNP2(T_SLASH, $1, $3);*/ }
-	| mul_div_expr "\\" unary_expr				{ /*$$ = cc->MakeNP2(T_BACKSLASH, $1, $3);*/ }
-	| mul_div_expr_and_asterisk unary_expr		{ /*$$ = cc->MakeNP2(T_ASTERISK, $1, $2);*/ }
-;
-
-mul_div_expr_and_asterisk
-	: mul_div_expr "*"							{ /*$$ = $1;*/ }
-;
-
-unary_expr
-	: incontextof_expr							{ /*$$ = $1;*/ }
-	| "!" unary_expr							{ /*$$ = cc->MakeNP1(T_EXCRAMATION, $2);*/ }
-	| "~" unary_expr							{ /*$$ = cc->MakeNP1(T_TILDE, $2);*/ }
-	| "--" unary_expr							{ /*$$ = cc->MakeNP1(T_DECREMENT, $2);*/ }
-	| "++" unary_expr							{ /*$$ = cc->MakeNP1(T_INCREMENT, $2);*/ }
-	| "new" func_call_expr						{ /*$$ = $2; $$->SetOpecode(T_NEW);*/ }
-	| "invalidate" unary_expr					{ /*$$ = cc->MakeNP1(T_INVALIDATE, $2);*/ }
-	| "isvalid" unary_expr						{ /*$$ = cc->MakeNP1(T_ISVALID, $2);*/ }
-	| incontextof_expr "isvalid"				{ /*$$ = cc->MakeNP1(T_ISVALID, $1);*/ }
-	| "delete" unary_expr						{ /*$$ = cc->MakeNP1(T_DELETE, $2);*/ }
-	| "typeof" unary_expr						{ /*$$ = cc->MakeNP1(T_TYPEOF, $2);*/ }
-	| "#" unary_expr							{ /*$$ = cc->MakeNP1(T_SHARP, $2);*/ }
-	| "$" unary_expr							{ /*$$ = cc->MakeNP1(T_DOLLAR, $2);*/ }
-	| "+" unary_expr							{ /*$$ = cc->MakeNP1(T_UPLUS, $2);*/ }
-	| "-" unary_expr							{ /*$$ = cc->MakeNP1(T_UMINUS, $2);*/ }
-	| "&" unary_expr							{ /*$$ = cc->MakeNP1(T_IGNOREPROP, $2);*/ }
-	| "*" unary_expr							{ /*$$ = cc->MakeNP1(T_PROPACCESS, $2);*/ }
-	| incontextof_expr "instanceof" unary_expr	{ /*$$ = cc->MakeNP2(T_INSTANCEOF, $1, $3);*/ }
-	| "(" "int" ")" unary_expr					{ /*$$ = cc->MakeNP1(T_INT, $4);*/ }
-	| "int" unary_expr							{ /*$$ = cc->MakeNP1(T_INT, $2);*/ }
-	| "(" "real" ")" unary_expr					{ /*$$ = cc->MakeNP1(T_REAL, $4);*/ }
-	| "real" unary_expr							{ /*$$ = cc->MakeNP1(T_REAL, $2);*/ }
-	| "(" "string" ")" unary_expr				{ /*$$ = cc->MakeNP1(T_STRING, $4);*/ }
-	| "string" unary_expr						{ /*$$ = cc->MakeNP1(T_STRING, $2);*/ }
-;
-
-incontextof_expr
-	: priority_expr								{ /*$$ = $1;*/ }
-	| priority_expr "incontextof"
-		incontextof_expr						{ /*$$ = cc->MakeNP2(T_INCONTEXTOF, $1, $3);*/ }
-;
-
-priority_expr
-	: factor_expr								{ /*$$ = $1;*/ }
-	| "(" expr ")"								{ /*$$ = $2;*/ }
-	| priority_expr "[" expr "]"				{ /*$$ = cc->MakeNP2(T_LBRACKET, $1, $3);*/ }
-	| func_call_expr							{ /*$$ = $1;*/ }
-	| priority_expr "."							{ /*lx->SetNextIsBareWord();*/ }
-	  T_SYMBOL									{ /*tRisseExprNode * node = cc->MakeNP0(T_CONSTVAL);
-												  node->SetValue(lx->GetValue($4));
-												  $$ = cc->MakeNP2(T_DOT, $1, node);*/ }
-	| priority_expr "++"						{ /*$$ = cc->MakeNP1(T_POSTINCREMENT, $1);*/ }
-	| priority_expr "--"						{ /*$$ = cc->MakeNP1(T_POSTDECREMENT, $1);*/ }
-	| priority_expr	"!"							{ /*$$ = cc->MakeNP1(T_EVAL, $1);*/ }
-	| "."										{ /*lx->SetNextIsBareWord();*/ }
-	  T_SYMBOL								    { /*tRisseExprNode * node = cc->MakeNP0(T_CONSTVAL);
-												  node->SetValue(lx->GetValue($3));
-												  $$ = cc->MakeNP1(T_WITHDOT, node);*/ }
-;
 
 
 factor_expr
@@ -688,7 +613,7 @@ factor_expr
 
 /* an expression for function call */
 func_call_expr
-	: priority_expr "(" call_arg_list ")"		{ /*$$ = cc->MakeNP2(T_LPARENTHESIS, $1, $3);*/ }
+	: expr "(" call_arg_list ")"				{ /*$$ = cc->MakeNP2(T_LPARENTHESIS, $1, $3);*/ }
 ;
 
 /* argument(s) for function call */
@@ -701,8 +626,8 @@ call_arg_list
 call_arg
 	: /* empty */						{ /*$$ = NULL;*/ }
 	| "*"								{ /*$$ = cc->MakeNP1(T_EXPANDARG, NULL);*/ }
-	| mul_div_expr_and_asterisk			{ /*$$ = cc->MakeNP1(T_EXPANDARG, $1);*/ }
-	| expr_no_comma						{ /*$$ = $1;*/ }
+	| "*" expr							{ /*$$ = cc->MakeNP1(T_EXPANDARG, $1);*/ }
+	| expr								{ /*$$ = $1;*/ }
 ;
 
 
@@ -724,7 +649,7 @@ array_elm_list
 /* an inline array's element */
 array_elm
 	: /* empty */						{ /*$$ = cc->MakeNP1(T_ARRAYARG, NULL);*/ }
-	| expr_no_comma						{ /*$$ = cc->MakeNP1(T_ARRAYARG, $1);*/ }
+	| expr								{ /*$$ = cc->MakeNP1(T_ARRAYARG, $1);*/ }
 ;
 
 /* an inline dictionary */
@@ -747,8 +672,8 @@ dic_elm_list
 
 /* an inline dictionary's element */
 dic_elm
-	: expr_no_comma "," expr_no_comma	{ /*$$ = cc->MakeNP2(T_DICELM, $1, $3);*/ }
-	| T_SYMBOL ":" expr_no_comma		{ /*tRisseVariant val(lx->GetString($1));
+	: expr "," expr						{ /*$$ = cc->MakeNP2(T_DICELM, $1, $3);*/ }
+	| T_SYMBOL ":" expr					{ /*tRisseVariant val(lx->GetString($1));
 										  tRisseExprNode *node0 = cc->MakeNP0(T_CONSTVAL);
 										  node0->SetValue(val);
 										  $$ = cc->MakeNP2(T_DICELM, node0, $3);*/ }

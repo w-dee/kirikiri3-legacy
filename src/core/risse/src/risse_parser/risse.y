@@ -12,15 +12,42 @@
 /* risse.y */
 /* Risse bison input file */
 
+#include <stdio.h>
+#include <string.h>
+#include "../risseTypes.h"
+#include "../risseGC.h"
+#include "risseParser.h"
+
+/* エラーの詳細出力 */
 #define YYERROR_VERBOSE 1
+
+/* yyparse に渡すパラメータ */
+#define YYPARSE_PARAM	pr
+
+/* yylex に渡すパラメータ */
+#define YYLEX_PARAM pr
 
 /* メモリ確保は Risse のインターフェースを使うように */
 #define YYMALLOC	RisseMallocCollectee
 #define YYFREE		RisseFreeCollectee
 
+/* パーサへのアクセス */
+#define PR (reinterpret_cast<tRisseParser*>(pr))
+
+
 /* 名前空間を Risse に */
 namespace Risse
 {
+RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
+
+/* yylex のプロトタイプ */
+int yylex(YYSTYPE * value, void *pr);
+
+/* yyerror のプロトタイプ */
+int raise_yyerror(char * msg, void *pr);
+
+/* yyerror のリダイレクト */
+#define risseerror(X) raise_yyerror(X, pr);
 
 %}
 
@@ -32,12 +59,13 @@ namespace Risse
 
 /* union 定義 */
 %union{
-	risse_int			num;
-	tRisseExprNode *		np;
+	tRisseVariant * value;
+	tRisseASTNode * np;
 }
 
 /* トークン定義 */
 %token
+	T_NONE
 	T_COMMA					","
 	T_EQUAL					"="
 	T_AMPERSANDEQUAL		"&="
@@ -114,6 +142,7 @@ namespace Risse
 	T_PRIVATE				"private"
 	T_PUBLIC				"public"
 	T_PROTECTED				"protected"
+	T_FINAL					"final"
 	T_STATIC				"static"
 	T_RETURN				"return"
 	T_BREAK					"break"
@@ -151,27 +180,22 @@ namespace Risse
 	T_NAN					"NaN"
 	T_INFINITY				"Infinity"
 
-	T_UPLUS
-	T_UMINUS
-	T_EVAL
-	T_SYMBOL
-	T_POSTDECREMENT
-	T_POSTINCREMENT
-	T_IGNOREPROP
-	T_PROPACCESS
-	T_ARG
-	T_EXPANDARG
-	T_INLINEARRAY
-	T_ARRAYARG
-	T_INLINEDIC
-	T_DICELM
-	T_REGEXP
-	T_WITHDOT
+	T_BEGIN_NUMBER
+	T_BEGIN_STRING_LITERAL
+	T_BEGIN_MACRO
+	T_BEGIN_EMSTRING_LITERAL
+	T_BEGIN_OCTET_LITERAL
+	T_BEGIN_COMMENT
+	T_EMSTRING_AMPERSAND_D
+	T_EMSTRING_AMPERSAND_S
+	T_EMSTRING_DOLLAR_D
+	T_EMSTRING_DOLLAR_S
 
 
-%token <num>		T_CONSTVAL
-%token <num>		T_SYMBOL
-%token <num>		T_REGEXP
+
+%token <value>		T_CONSTVAL
+%token <value>		T_SYMBOL
+%token <value>		T_REGEXP
 
 
 %type <np>
@@ -210,9 +234,8 @@ program
 
 /* global definitions */
 global_list
-	:										{ /*sb->PushContextStack(RISSE_WS("global"),
-												ctTopLevel);*/ }
-	  def_list								{ /*sb->PopContextStack();*/ }
+	:										{ PR->PushContext(actTopLevel, RISSE_WS("top level")); }
+	  def_list								{ PR->PopContext(); }
 ;
 
 /* definition list */
@@ -696,5 +719,65 @@ dic_dummy_elm_opt
 
 %%
 
+//---------------------------------------------------------------------------
+int yylex(YYSTYPE * value, void *pr)
+{
+	value->value = new tRisseVariant();
+	return PR->GetToken(*(value->value));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseParser::tRisseParser(tRisseLexer * lexer)
+{
+	Root = NULL;
+	CurrentContext = NULL;
+	Lexer = lexer;
+
+	yyparse(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseParser::PushContext(tRisseASTContextType ctype, const tRisseString & name)
+{
+	if(!Root)
+	{
+		// 最初のコンテキスト
+		RISSE_ASSERT(CurrentContext == NULL && ctype == actTopLevel);
+	}
+
+	tRisseASTNode_Context * newcontext =
+		new tRisseASTNode_Context(GetCurrentLexerPosition(), ctype, name);
+
+	if(!Root)
+	{
+		// 最初のコンテキスト
+		CurrentContext = newcontext;
+		Root = CurrentContext;
+	}
+	else
+	{
+		// 入れ子のコンテキスト
+		CurrentContext->AddChild(newcontext);
+		CurrentContext = newcontext;
+	}
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+void tRisseParser::PopContext()
+{
+	CurrentContext = reinterpret_cast<tRisseASTNode_Context*>(CurrentContext->GetParent());
+}
+//---------------------------------------------------------------------------
+
+
+
 } // namespace Risse
+
+
+
 

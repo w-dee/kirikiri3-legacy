@@ -57,21 +57,19 @@ src/risse_parser/risseLexerMap.inc: \
 	ruby tools/create_word_map.rb src/risse_parser/words.txt RisseMapToken > \
 		src/risse_parser/risseLexerMap.inc
 
-# risseParser.cpp と risseParser.h のコンパイル
+# risseParser.cpp と risseParser.inc のコンパイル
 
-src/risse_parser/risseParser.cpp src/risse_parser/risseParser.h: \
+src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 		src/risse_parser/risse.y Makefile
 	(set -e ;\
 		cd src/risse_parser ;\
 		bison -dv --name-prefix=risse risse.y ;\
 		cat risse.tab.c | \
-			sed -e "s/risse.tab.h/risseParser.h/" -e "s/risse.tab.c/risseParser.cpp/" \
+			sed -e "s/risse.tab.h/risseParser.inc/" -e "s/risse.tab.c/risseParser.cpp/" \
 				>  risseParser.cpp ;\
-		echo "namespace Risse {" > risseParser.h ;\
 		cat risse.tab.h | \
-			sed -e "s/risse.tab.h/risseParser.h/" -e "s/risse.tab.c/risseParser.cpp/" \
-				>  risseParser.h ;\
-		echo "}" >> risseParser.h ;\
+			sed -e "s/risse.tab.h/risseParser.inc/" -e "s/risse.tab.c/risseParser.cpp/" \
+				>  risseParser.inc ;\
 		rm risse.tab.c risse.tab.h ;\
 	)
 

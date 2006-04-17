@@ -23,7 +23,8 @@ namespace Risse
 class tRisseLexer : public tRisseLexerUtility, public tRisseCollectee
 {
 	tRisseString Script; //!< スクリプト
-	const risse_char * Ptr; //!< 解析ポインタ
+	const risse_char * Ptr; //!< 解析ポインタの現在位置
+	const risse_char * PtrOrigin; //!< 解析ポインタの先頭
 
 	//! @brief		トークンIDと値の組
 	struct tTokenIdAndValue
@@ -47,6 +48,10 @@ public:
 	//! @param		val		トークンの値の格納先
 	//! @return		トークンID
 	int GetToken(tRisseVariant & val);
+
+	//! @brief		現在の解析位置を得る
+	//! @return		現在の解析位置
+	risse_size GetPosition() const { return Ptr - PtrOrigin; }
 
 	//! @brief		次のトークン読み込みで「埋め込み可能な」文字列の解析を再開する
 	//! @param		delimiter		文字列の終了デリミタ

@@ -63,6 +63,7 @@ void tRisseScriptBlock::Compile(bool need_result, bool is_expression)
 			break;
 		}
 		if(token == -1) break; // トークンの最後
+/*
 		printf("%s ", RisseLexerTokenString[token]);
 		switch(token)
 		{
@@ -72,6 +73,7 @@ void tRisseScriptBlock::Compile(bool need_result, bool is_expression)
 			wxPrintf(wxT("[%s] "), str.AsWxString().c_str());
 			break;
 		}
+*/
 	}
 }
 //---------------------------------------------------------------------------

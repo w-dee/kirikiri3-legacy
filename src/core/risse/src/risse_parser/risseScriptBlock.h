@@ -14,7 +14,6 @@
 #define RisseScriptBlockH
 
 #include "../risseScriptBlockBase.h"
-#include "risseParser.h"
 
 namespace Risse
 {

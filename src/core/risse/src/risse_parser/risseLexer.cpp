@@ -32,6 +32,7 @@ tRisseLexer::tRisseLexer(const tRisseString & script)
 	ContinueEmbeddableString = 0;
 	Script = script;
 	Ptr = NULL;
+	PtrOrigin = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -46,7 +47,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 	{
 		// 初回
 		// Ptr にスクリプト文字列へのポインタを代入
-		Ptr = Script.c_str();
+		Ptr = PtrOrigin = Script.c_str();
 
 		// Ptr の先頭は #! で始まっているか (UN*Xにおけるインタプリタに対応)
 		if(Ptr[0] == RISSE_WC('#') && Ptr[1] == RISSE_WC('!'))

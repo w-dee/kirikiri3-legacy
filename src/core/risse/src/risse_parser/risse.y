@@ -31,9 +31,11 @@
 #define YYMALLOC	RisseMallocCollectee
 #define YYFREE		RisseFreeCollectee
 
-/* パーサへのアクセス */
+/*! パーサへのアクセス */
 #define PR (reinterpret_cast<tRisseParser*>(pr))
 
+/*! 字句解析器の現在の解析位置 */
+#define LP (PR->GetCurrentLexerPosition())
 
 /* 名前空間を Risse に */
 namespace Risse
@@ -242,9 +244,9 @@ global_list
 def_list
 	:
 	| def_list block_or_statement
-	| def_list error ";"					{ /*if(sb->CompileErrorCount>20)
+	| def_list error ";"					{ if(yynerrs > 20)
 												YYABORT;
-											  else */yyerrok; }
+											  else yyerrok; }
 ;
 
 /* a block or a single statement */
@@ -256,7 +258,7 @@ block_or_statement
 /* a statement */
 statement
 	: ";"
-	| expr_with_comma ";"					{ /*cc->CreateExprCode($1);*/ }
+	| expr_with_comma ";"					{ PR->AddNode(new tRisseASTNode_ExprStmt(LP, $1)); }
 	| if
 	| if_else
 	| while
@@ -550,9 +552,9 @@ throw
 /* 式 */
 /* カンマとそれ以下の優先順位の式を含む場合はこちらを使う */
 expr_with_comma
-	: expr_with_comma "if" expr_with_comma				{ ; }
-	| expr_with_comma ","  expr_with_comma				{ ; }
-	| expr												{ $$ = $1; }
+	: expr_with_comma "if" expr_with_comma	{ $$ = new tRisseASTNode_Binary(LP, abtIf,			$1, $3); }
+	| expr_with_comma ","  expr_with_comma	{ $$ = new tRisseASTNode_Binary(LP, abtComma,		$1, $3); }
+	| expr
 ;
 
 /*
@@ -729,6 +731,14 @@ int yylex(YYSTYPE * value, void *pr)
 
 
 //---------------------------------------------------------------------------
+int raise_yyerror(char * msg, void *pr)
+{
+	eRisseError::Throw(msg);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseParser::tRisseParser(tRisseLexer * lexer)
 {
 	Root = NULL;
@@ -767,12 +777,24 @@ void tRisseParser::PushContext(tRisseASTContextType ctype, const tRisseString & 
 }
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
 void tRisseParser::PopContext()
 {
 	CurrentContext = reinterpret_cast<tRisseASTNode_Context*>(CurrentContext->GetParent());
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseParser::AddNode(tRisseASTNode * node)
+{
+	RISSE_ASSERT(CurrentContext != NULL);
+
+	CurrentContext->AddChild(node);
+}
+//---------------------------------------------------------------------------
+
 
 
 

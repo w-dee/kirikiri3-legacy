@@ -50,31 +50,14 @@ namespace Risse {
 void tRisseScriptBlock::Compile(bool need_result, bool is_expression)
 {
 	// Lexer を準備する
-	tRisseLexer lexer(GetScript());
+	tRisseLexer *lexer = new tRisseLexer(GetScript());
 
-	// -- test
-	for(;;)
-	{
-		tRisseVariant val;
-		int token = lexer.GetToken(val);
-		if(token == 0)
-		{
-			printf("Unknown token");
-			break;
-		}
-		if(token == -1) break; // トークンの最後
-/*
-		printf("%s ", RisseLexerTokenString[token]);
-		switch(token)
-		{
-		case T_SYMBOL:
-		case T_CONSTVAL:
-			tRisseString str = val.AsHumanReadable();
-			wxPrintf(wxT("[%s] "), str.AsWxString().c_str());
-			break;
-		}
-*/
-	}
+	// Parser を準備する
+	// パースする
+	tRisseParser *parser = new tRisseParser(lexer);
+
+	// (テスト) ダンプを行う
+	parser->GetRoot()->Dump();
 }
 //---------------------------------------------------------------------------
 

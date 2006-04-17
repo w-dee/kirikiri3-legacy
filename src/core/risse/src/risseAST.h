@@ -20,127 +20,149 @@
 
 namespace Risse
 {
+
+/*
+	#undef risseASTH
+	してから #define RISSE_AST_DEFINE_NAMES
+	してこのファイルをもう一度 include すると、各 enum に
+	対応した文字列の表を得ることができる。
+*/
+
+
+#ifndef RISSE_AST_DEFINE_NAMES
+	#define RISSE_AST_ENUM_DEF(X) enum tRisseAST##X {
+	#define RISSE_AST_ENUM_ITEM(PREFIX, X) PREFIX##X,
+	#define RISSE_AST_ENUM_END };
+#else
+	#define RISSE_AST_ENUM_DEF(X) static const char * RisseAST##X##Names[] = {
+	#define RISSE_AST_ENUM_ITEM(PREFIX, X) #X,
+	#define RISSE_AST_ENUM_END };
+#endif
+
 //---------------------------------------------------------------------------
 //! @brief	ASTノードのタイプ
 //---------------------------------------------------------------------------
-enum tRisseASTNodeType
-{
-	antContext,			//!< コンテキスト
-
-	antExprStmt,		//!< 式のみのステートメント
-
-	antFactor,			//!< 項
-	antUnary,			//!< 単項演算子
-	antBinary,			//!< 二項演算子
-	antTrinary,			//!< 三項演算子
-};
+RISSE_AST_ENUM_DEF(NodeType)
+	RISSE_AST_ENUM_ITEM(ant, Context		)		//!< コンテキスト
+	RISSE_AST_ENUM_ITEM(ant, ExprStmt		)		//!< 式のみのステートメント
+	RISSE_AST_ENUM_ITEM(ant, Factor			)		//!< 項
+	RISSE_AST_ENUM_ITEM(ant, Unary			)		//!< 単項演算子
+	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
+	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
+RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief	コンテキストのタイプ
 //---------------------------------------------------------------------------
-enum tRisseASTContextType
-{
-	actTopLevel,		//!< トップレベル
-	actClass,			//!< クラス
-	actFunc				//!< 関数
-};
+RISSE_AST_ENUM_DEF(ContextType)
+	RISSE_AST_ENUM_ITEM(act, TopLevel		)		//!< トップレベル
+	RISSE_AST_ENUM_ITEM(act, Class			)		//!< クラス
+	RISSE_AST_ENUM_ITEM(act, Func			)		//!< 関数
+RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief	項のタイプ
 //---------------------------------------------------------------------------
-enum tRisseASTFactorType
-{
-	aftConstant,		//!< 定数
-	aftSymbol,			//!< シンボル
-	aftThis,			//!< "this"
-	aftSuper,			//!< "super"
-	aftGlobal,			//!< "global"
-};
+RISSE_AST_ENUM_DEF(FactorType)
+	RISSE_AST_ENUM_ITEM(aft, Constant		)		//!< 定数
+	RISSE_AST_ENUM_ITEM(aft, Symbol			)		//!< シンボル
+	RISSE_AST_ENUM_ITEM(aft, This			)		//!< "this"
+	RISSE_AST_ENUM_ITEM(aft, Super			)		//!< "super"
+	RISSE_AST_ENUM_ITEM(aft, Global			)		//!< "global"
+RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief	単項演算子のタイプ
 //---------------------------------------------------------------------------
-enum tRisseASTUnaryType
-{
-	autLogNot,			//!< "!" logical not
-	autBitNot,			//!< "~" bit not
-	autPreDec,			//!< "--" pre-positioned decrement
-	autPreInc,			//!< "++" pre-positioned increment
-	autPostDec,			//!< "--" post-positioned decrement
-	autPostInc,			//!< "++" post-positioned increment
-	autNew,				//!< "new" (its child must be a function call node)
-	autDelete,			//!< "delete"
-	autPlus,			//!< "+"
-	autMinus,			//!< "-"
-};
+RISSE_AST_ENUM_DEF(UnaryType)
+	RISSE_AST_ENUM_ITEM(aut, LogNot			)		//!< "!" logical not
+	RISSE_AST_ENUM_ITEM(aut, BitNot			)		//!< "~" bit not
+	RISSE_AST_ENUM_ITEM(aut, PreDec			)		//!< "--" pre-positioned decrement
+	RISSE_AST_ENUM_ITEM(aut, PreInc			)		//!< "++" pre-positioned increment
+	RISSE_AST_ENUM_ITEM(aut, PostDec		)		//!< "--" post-positioned decrement
+	RISSE_AST_ENUM_ITEM(aut, PostInc		)		//!< "++" post-positioned increment
+	RISSE_AST_ENUM_ITEM(aut, New			)		//!< "new" (its child must be a function call node)
+	RISSE_AST_ENUM_ITEM(aut, Delete			)		//!< "delete"
+	RISSE_AST_ENUM_ITEM(aut, Plus			)		//!< "+"
+	RISSE_AST_ENUM_ITEM(aut, Minus			)		//!< "-"
+RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief	二項演算子のタイプ
 //---------------------------------------------------------------------------
-enum tRisseASTBinaryType
-{
-	abtIf,				//!< if
-	abtComma,			//!< ,
-	abtAssign,			//!< =
-	abtBitAndAssign,	//!< &=
-	abtBitOrAssign,		//!< |=
-	abtBitXorAssign,	//!< ^=
-	abtSubAssign,		//!< -=
-	abtAddAssign,		//!< +=
-	abtModAssign,		//!< %=
-	abtDivAssign,		//!< /=
-	abtIdivAssign,		//!< \=
-	abtMulAssign,		//!< *=
-	abtLogOrAssign,		//!< ||=
-	abtLogAndAssign,	//!< &&=
-	abtRBitShiftAssign,	//!< >>>=
-	abtLShiftAssign,	//!< <<=
-	abtRShiftAssign,	//!< >>=
-	abtLogOr,			//!< ||
-	abtLogAnd,			//!< &&
-	abtBitOr,			//!< |
-	abtBitXor,			//!< ^
-	abtBitAnd,			//!< &
-	abtNotEqual,		//!< !=
-	abtEqual,			//!< ==
-	abtDiscNotEqual,	//!< !==
-	abtDiscEqual,		//!< ===
-	abtSwap,			//!< <->
-	abtLesser,			//!< <
-	abtGreater,			//!< >
-	abtLesserOrEqual,	//!< <=
-	abtGreaterOrEqual,	//!< >=
-	abtRBitShift,		//!< >>>
-	abtLShift,			//!< <<
-	abtRShift,			//!< >>
-	abtMod,				//!< %
-	abtDiv,				//!< /
-	abtIdiv,			//!< \ (integer div)
-	abtMul,				//!< *
-	abtAdd,				//!< +
-	abtSub,				//!< -
-	abtDirectSel,		//!< .
-	abtIndirectSel,		//!< [ ]
-	abtIncontextOf,		//!< incontextof
-};
+RISSE_AST_ENUM_DEF(BinaryType)
+	RISSE_AST_ENUM_ITEM(abt, If				)		//!< if
+	RISSE_AST_ENUM_ITEM(abt, Comma			)		//!< 
+	RISSE_AST_ENUM_ITEM(abt, Assign			)		//!< =
+	RISSE_AST_ENUM_ITEM(abt, BitAndAssign	)		//!< &=
+	RISSE_AST_ENUM_ITEM(abt, BitOrAssign	)		//!< |=
+	RISSE_AST_ENUM_ITEM(abt, BitXorAssign	)		//!< ^=
+	RISSE_AST_ENUM_ITEM(abt, SubAssign		)		//!< -=
+	RISSE_AST_ENUM_ITEM(abt, AddAssign		)		//!< +=
+	RISSE_AST_ENUM_ITEM(abt, ModAssign		)		//!< %=
+	RISSE_AST_ENUM_ITEM(abt, DivAssign		)		//!< /=
+	RISSE_AST_ENUM_ITEM(abt, IdivAssign		)		//!< \=
+	RISSE_AST_ENUM_ITEM(abt, MulAssign		)		//!< *=
+	RISSE_AST_ENUM_ITEM(abt, LogOrAssign	)		//!< ||=
+	RISSE_AST_ENUM_ITEM(abt, LogAndAssign	)		//!< &&=
+	RISSE_AST_ENUM_ITEM(abt, RBitShiftAssign)		//!< >>>=
+	RISSE_AST_ENUM_ITEM(abt, LShiftAssign	)		//!< <<=
+	RISSE_AST_ENUM_ITEM(abt, RShiftAssign	)		//!< >>=
+	RISSE_AST_ENUM_ITEM(abt, LogOr			)		//!< ||
+	RISSE_AST_ENUM_ITEM(abt, LogAnd			)		//!< &&
+	RISSE_AST_ENUM_ITEM(abt, BitOr			)		//!< |
+	RISSE_AST_ENUM_ITEM(abt, BitXor			)		//!< ^
+	RISSE_AST_ENUM_ITEM(abt, BitAnd			)		//!< &
+	RISSE_AST_ENUM_ITEM(abt, NotEqual		)		//!< !=
+	RISSE_AST_ENUM_ITEM(abt, Equal			)		//!< ==
+	RISSE_AST_ENUM_ITEM(abt, DiscNotEqual	)		//!< !==
+	RISSE_AST_ENUM_ITEM(abt, DiscEqual		)		//!< ===
+	RISSE_AST_ENUM_ITEM(abt, Swap			)		//!< <->
+	RISSE_AST_ENUM_ITEM(abt, Lesser			)		//!< <
+	RISSE_AST_ENUM_ITEM(abt, Greater		)		//!< >
+	RISSE_AST_ENUM_ITEM(abt, LesserOrEqual	)		//!< <=
+	RISSE_AST_ENUM_ITEM(abt, GreaterOrEqual	)		//!< >=
+	RISSE_AST_ENUM_ITEM(abt, RBitShift		)		//!< >>>
+	RISSE_AST_ENUM_ITEM(abt, LShift			)		//!< <<
+	RISSE_AST_ENUM_ITEM(abt, RShift			)		//!< >>
+	RISSE_AST_ENUM_ITEM(abt, Mod			)		//!< %
+	RISSE_AST_ENUM_ITEM(abt, Div			)		//!< /
+	RISSE_AST_ENUM_ITEM(abt, Idiv			)		//!< \ (integer div)
+	RISSE_AST_ENUM_ITEM(abt, Mul			)		//!< *
+	RISSE_AST_ENUM_ITEM(abt, Add			)		//!< +
+	RISSE_AST_ENUM_ITEM(abt, Sub			)		//!< -
+	RISSE_AST_ENUM_ITEM(abt, DirectSel		)		//!< .
+	RISSE_AST_ENUM_ITEM(abt, IndirectSel	)		//!< [ ]
+	RISSE_AST_ENUM_ITEM(abt, IncontextOf	)		//!< incontextof
+RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief	三項演算子のタイプ
 //---------------------------------------------------------------------------
-enum tRisseASTTrinaryType
-{
-	attCondition,		//!< ? :
-};
+RISSE_AST_ENUM_DEF(TrinaryType)
+	RISSE_AST_ENUM_ITEM(att, Condition		)		//!< ? :
+RISSE_AST_ENUM_END
+//---------------------------------------------------------------------------
+
+
+#ifndef RISSE_AST_DEFINE_NAMES
+
+
+class tRisseASTNode;
+//---------------------------------------------------------------------------
+//! @brief	ASTノードの配列
+//---------------------------------------------------------------------------
+typedef gc_vector<tRisseASTNode *> tRisseASTArray;
 //---------------------------------------------------------------------------
 
 
@@ -160,26 +182,37 @@ protected:
 	tRisseASTNode(risse_size position, tRisseASTNodeType type) :
 		Position(position), Type(type), Parent(NULL) {;}
 
+	//! @brief		デストラクタ
+	//! @note		このデストラクタは呼ばれない
+	virtual ~tRisseASTNode() {;}
+
 public:
 	//! @brief		親ノードを設定する
 	//! @param		parent		親ノード
 	void SetParent(tRisseASTNode * parent) { Parent = parent; }
 
-	//! @brief		親ノードを得るする
+	//! @brief		親ノードを得る
 	//! @return		親ノード
 	tRisseASTNode * GetParent() const { return Parent; }
 
 	//! @brief		ノードタイプを得る
 	//! @return		ノードタイプ
 	tRisseASTNodeType GetType() const { return Type; }
+
+	//! @brief		標準出力へのダンプを行う
+	//! @param		level		再帰レベル
+	void Dump(risse_int level = 0);
+
+protected:
+
+	//! @brief		ダンプ時のこのノードのコメントを得る(下位クラスで実装すること)
+	//! @return		ダンプ時のこのノードのコメント
+	virtual tRisseString & GetDumpComment() = 0;
+
+	//! @brief		ダンプ時に表示する子ノードを得る(下位クラスで実装すること)
+	//! @param		children		子ノードを格納する先
+	virtual void GetDumpChildren(tRisseASTArray & children) = 0;
 };
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief	ASTノードの配列
-//---------------------------------------------------------------------------
-typedef gc_vector<tRisseASTNode *> tRisseASTArray;
 //---------------------------------------------------------------------------
 
 
@@ -210,7 +243,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	コンテキストのASTノード
+//! @brief	コンテキストのASTノード(type=antContext)
 //---------------------------------------------------------------------------
 class tRisseASTNode_Context : public tRisseASTNode_List
 {
@@ -238,6 +271,26 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief	式ステートメントASTノード(type=antExprStmt)
+//---------------------------------------------------------------------------
+class tRisseASTNode_ExprStmt : public tRisseASTNode
+{
+	tRisseASTNode * Expression; //!< 式ノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position		ソースコード上の位置
+	//! @brief		expression		式ノード
+	tRisseASTNode_ExprStmt(risse_size position, tRisseASTNode * expression) :
+		tRisseASTNode(position, antExprStmt) {;}
+
+	//! @brief		式ノードを得る
+	tRisseASTNode * GetExpression() const { return Expression; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	項ASTノード(type=antFactor)
 //---------------------------------------------------------------------------
 class tRisseASTNode_Factor : public tRisseASTNode
@@ -247,7 +300,7 @@ class tRisseASTNode_Factor : public tRisseASTNode
 
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
 	//! @param		type			項のタイプ
 	//! @param		value			項の値
 	tRisseASTNode_Factor(risse_size position, tRisseASTFactorType factor_type,
@@ -271,7 +324,7 @@ class tRisseASTNode_Unary : public tRisseASTNode
 
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
 	//! @param		unary_type		単項演算子のタイプ
 	//! @param		child			子ノード
 	tRisseASTNode_Unary(risse_size position, tRisseASTUnaryType unary_type,
@@ -303,7 +356,7 @@ class tRisseASTNode_Binary : public tRisseASTNode
 
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
 	//! @param		binary_type		二項演算子のタイプ
 	//! @param		child1			子ノード1
 	//! @param		child2			子ノード2
@@ -343,7 +396,7 @@ class tRisseASTNode_Trinary : public tRisseASTNode
 
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
 	//! @param		trinary_type	三項演算子のタイプ
 	//! @param		child1			子ノード1
 	//! @param		child2			子ノード2
@@ -376,6 +429,7 @@ public:
 };
 //---------------------------------------------------------------------------
 
+#endif // #ifndef RISSE_AST_DEFINE_NAMES
 
 
 //---------------------------------------------------------------------------

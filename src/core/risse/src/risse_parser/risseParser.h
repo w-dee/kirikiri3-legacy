@@ -52,8 +52,12 @@ public:
 	//! @param		ctype		コンテキストタイプ
 	void PushContext(tRisseASTContextType ctype, const tRisseString & name);
 
-	//! @brief	コンテキストをpopする
+	//! @brief		コンテキストをpopする
 	void PopContext();
+
+	//! @brief		ノードを現在のコンテキストに追加する
+	//! @param		node		ノード
+	void AddNode(tRisseASTNode * node);
 
 	//! @brief		現在のコンテキストを得る
 	//! @return		現在のコンテキスト

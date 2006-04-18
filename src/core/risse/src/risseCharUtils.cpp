@@ -599,8 +599,38 @@ risse_size RisseRisseCharToUtf8String(const risse_char * in, char * out)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void RisseFPrint(FILE * output, const risse_char * str)
+{
+	if(!str) return;
+	if(str[0] == 0) return;
+
+#ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
+	// 変換後の文字列長を取得
+	risse_size converted_size =
+		RisseConvertRisseCharToUTF16String(NULL, str, risse_size_max);
+
+	if(converted_size == risse_size_max) return;
+
+	// 変換後の文字列を一時的に格納するバッファを確保
+	wchar_t *buf = new (PointerFreeGC) wchar_t[converted_size + 1];
+
+	// 変換
+	if(RisseConvertRisseCharToUTF16String(
+			reinterpret_cast<risse_uint16*>(buf), str, risse_size_max)
+					== risse_size_max)
+		return;
+
+	// 出力
+	fwprintf(output, L"%s", buf);
+#else
+	fwprintf(output, L"%s", str);
+#endif
+}
+//---------------------------------------------------------------------------
 
 
+#ifdef RISSE_SUPPORT_WX
 //---------------------------------------------------------------------------
 wxString RisseCharToWxString(const risse_char * str, risse_size len)
 {
@@ -618,6 +648,8 @@ wxString RisseCharToWxString(const risse_char * str, risse_size len)
 
 	// 変換後の文字列を一時的に格納するバッファを確保
 	wchar_t *buf = new (PointerFreeGC) wchar_t[converted_size + 1];
+
+	// 変換
 	if(RisseConvertRisseCharToUTF16String(
 			reinterpret_cast<risse_uint16*>(buf), str, len)
 					== risse_size_max)
@@ -629,6 +661,7 @@ wxString RisseCharToWxString(const risse_char * str, risse_size len)
 #endif
 }
 //---------------------------------------------------------------------------
+#endif
 
 
 

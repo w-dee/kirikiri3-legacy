@@ -16,6 +16,7 @@
 #include <string.h>
 #include "../risseTypes.h"
 #include "../risseGC.h"
+#include "../risseException.h"
 #include "risseParser.h"
 
 /* エラーの詳細出力 */
@@ -734,6 +735,7 @@ int yylex(YYSTYPE * value, void *pr)
 int raise_yyerror(char * msg, void *pr)
 {
 	eRisseError::Throw(msg);
+	return 0;
 }
 //---------------------------------------------------------------------------
 

@@ -166,6 +166,12 @@ risse_size RisseRisseCharToUtf8String(const risse_char *in, char * out);
 	#define Risse_strtod			wcstod
 #endif
 
+//! @brief		指定された文字列を FILE ストリームに出力する
+//! @param		output	出力先のストリーム
+//! @param		str		文字列
+void RisseFPrint(FILE * output, const risse_char * str);
+
+
 #ifdef RISSE_SUPPORT_WX
 
 //! @brief		risse_char 型の文字列を wxString に変換する

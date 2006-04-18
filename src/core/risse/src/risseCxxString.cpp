@@ -383,6 +383,31 @@ tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
 
 
 //---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::Times(risse_size count)
+{
+	tRisseStringBlock ret;
+
+	// バッファを確保
+	risse_size target_length = count * Length;
+	risse_char * buffer = ret.Allocate(target_length);
+
+	// 繰り返しを生成する
+	if(target_length > 0)
+	{
+		for(risse_size i = 0; i < count; i++)
+		{
+			memcpy(buffer, Buffer, sizeof(risse_char) * Length);
+			buffer += Length;
+		}
+	}
+
+	// 戻る
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 {
 	const risse_char * hexchars = RISSE_WS("0123456789ABCDEF");

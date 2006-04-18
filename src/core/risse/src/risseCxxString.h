@@ -617,6 +617,11 @@ public: // other utilities
 	tRisseStringBlock Replace(const tRisseStringBlock &old_str,
 		const tRisseStringBlock &new_str, bool replace_all = true) const;
 
+	//! @brief		文字列の繰り返しを生成して返す
+	//! @param		count 繰り返し回数
+	//! @return		繰り返された文字列
+	tRisseStringBlock Times(risse_size count);
+
 	//! @brief		文字列リテラルとして解釈できるようなエスケープを行う
 	//! @param		maxlen		返値文字列のおおよその最大コードポイント数(risse_size_maxの場合は無制限)
 	//! @param		quote		両端を "" で囲むかどうか

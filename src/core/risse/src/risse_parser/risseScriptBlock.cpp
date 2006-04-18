@@ -57,7 +57,9 @@ void tRisseScriptBlock::Compile(bool need_result, bool is_expression)
 	tRisseParser *parser = new tRisseParser(lexer);
 
 	// (テスト) ダンプを行う
-	parser->GetRoot()->Dump();
+	tRisseString str;
+	parser->GetRoot()->Dump(str);
+	RisseFPrint(stdout, str.c_str());
 }
 //---------------------------------------------------------------------------
 

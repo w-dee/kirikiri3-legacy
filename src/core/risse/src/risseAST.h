@@ -199,19 +199,30 @@ public:
 	//! @return		ノードタイプ
 	tRisseASTNodeType GetType() const { return Type; }
 
-	//! @brief		標準出力へのダンプを行う
+	//! @brief		ダンプを行う
+	//! @param		result		ダンプされた文字列
 	//! @param		level		再帰レベル
-	void Dump(risse_int level = 0);
+	void Dump(tRisseString & result, risse_int level = 0);
 
 protected:
 
 	//! @brief		ダンプ時のこのノードのコメントを得る(下位クラスで実装すること)
 	//! @return		ダンプ時のこのノードのコメント
-	virtual tRisseString & GetDumpComment() = 0;
+	virtual tRisseString GetDumpComment() = 0;
 
 	//! @brief		ダンプ時に表示する子ノードを得る(下位クラスで実装すること)
-	//! @param		children		子ノードを格納する先
-	virtual void GetDumpChildren(tRisseASTArray & children) = 0;
+	//! @param		result		ダンプされた文字列
+	//! @param		level		再帰レベル
+	//! @note		下位クラスでは AddDumpChild を呼び、子を登録すること。
+	virtual void GetDumpChildren(tRisseString & result, risse_int level) = 0;
+
+	//! @brief		ダンプ時に表示する子ノードを登録する(下位クラスから呼ぶこと)
+	//! @param		result		ダンプされた文字列(GetDumpChildrenの引数をそのまま渡すこと)
+	//! @param		level		再帰レベル(GetDumpChildrenの引数をそのまま渡すこと)
+	//! @param		name		表示名
+	//! @param		child		子ノード
+	void AddDumpChild(tRisseString & result, risse_int level,
+		const tRisseString & name, tRisseASTNode * child);
 };
 //---------------------------------------------------------------------------
 
@@ -238,6 +249,11 @@ public:
 	//! @brief		配列に子ノードを追加する
 	//! @param		node		追加したいノード
 	void AddChild(tRisseASTNode * node) { Array.push_back(node); node->SetParent(this); }
+
+	//! @brief		ダンプ時に表示する子ノードを得る
+	//! @param		result		ダンプされた文字列
+	//! @param		level		再帰レベル
+	void GetDumpChildren(tRisseString & result, risse_int level);
 };
 //---------------------------------------------------------------------------
 
@@ -266,6 +282,10 @@ public:
 	//! @brief		名前(説明用)を得る
 	//! @return		名前(説明用)
 	const tRisseString & GetName() const { return Name; }
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment();
 };
 //---------------------------------------------------------------------------
 
@@ -286,6 +306,18 @@ public:
 
 	//! @brief		式ノードを得る
 	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		ダンプ時に表示する子ノードを得る
+	//! @param		result		ダンプされた文字列
+	//! @param		level		再帰レベル
+	void GetDumpChildren(tRisseString & result, risse_int level);
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment()
+	{
+		return tRisseString(); // 空
+	}
 };
 //---------------------------------------------------------------------------
 
@@ -310,6 +342,18 @@ public:
 	//! @brief		項のタイプを得る
 	//! @return		項のタイプ
 	tRisseASTFactorType GetFactorType() const { return FactorType; }
+
+	//! @brief		ダンプ時に表示する子ノードを得る
+	//! @param		result		ダンプされた文字列
+	//! @param		level		再帰レベル
+	void GetDumpChildren(tRisseString & result, risse_int level)
+	{
+		// なにもない
+	}
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment();
 };
 //---------------------------------------------------------------------------
 
@@ -341,6 +385,15 @@ public:
 	//! @brief		子ノードを得る
 	//! @return		子ノード
 	tRisseASTNode * GetChild() const { return Child; }
+
+	//! @brief		ダンプ時に表示する子ノードを得る
+	//! @param		result		ダンプされた文字列
+	//! @param		level		再帰レベル
+	void GetDumpChildren(tRisseString & result, risse_int level);
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment();
 };
 //---------------------------------------------------------------------------
 
@@ -380,6 +433,15 @@ public:
 	//! @brief		子ノード2を得る
 	//! @return		子ノード2
 	tRisseASTNode * GetChild2() const { return Child2; }
+
+	//! @brief		ダンプ時に表示する子ノードを得る
+	//! @param		result		ダンプされた文字列
+	//! @param		level		再帰レベル
+	void GetDumpChildren(tRisseString & result, risse_int level);
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment();
 };
 //---------------------------------------------------------------------------
 
@@ -426,6 +488,15 @@ public:
 	//! @brief		子ノード3を得る
 	//! @return		子ノード3
 	tRisseASTNode * GetChild3() const { return Child3; }
+
+	//! @brief		ダンプ時に表示する子ノードを得る
+	//! @param		result		ダンプされた文字列
+	//! @param		level		再帰レベル
+	void GetDumpChildren(tRisseString & result, risse_int level);
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment();
 };
 //---------------------------------------------------------------------------
 

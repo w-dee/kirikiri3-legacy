@@ -45,7 +45,9 @@ namespace Risse
 // #define RISSE_MSG_EMPTY
 // #define RISSE_DEBUG_TRACE
 // #define RISSE_JP_LOCALIZED
-// #define RISSE_TEXT_OUT_CRLF
+#if _WIN32
+ #define RISSE_TEXT_OUT_CRLF
+#endif
 // #define RISSE_WITH_IS_NOT_RESERVED_WORD
 
 

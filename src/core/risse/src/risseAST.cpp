@@ -46,24 +46,23 @@ void tRisseASTNode::Dump(tRisseString & result, risse_int level)
 #else
 	result += RISSE_WS("\n");
 #endif
+
+	level ++;
+
 	risse_size child_count = GetChildCount();
 	for(risse_size i = 0; i < child_count; i++)
 	{
 		result += tRisseString(RISSE_WS(" ")).Times(level) + GetChildNameAt(i);
+		result += RISSE_WC(':');
 		tRisseASTNode * child = GetChildAt(i);
 		if(child)
-		{
-			result += RISSE_WC(' ');
 			child->Dump(result, level);
-		}
 		else
-		{
 		#ifdef RISSE_TEXT_OUT_CRLF
-			result += RISSE_WS("\r\n");
+			result += RISSE_WS("(null)\r\n");
 		#else
-			result += RISSE_WS("\n");
+			result += RISSE_WS("(null)\n");
 		#endif
-		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -138,10 +137,10 @@ tRisseString tRisseASTNode_Binary::GetChildNameAt(risse_size index) const
 	switch(index)
 	{
 	case 0:
-		return RISSE_WS("child1");
+		return RISSE_WS("child0");
 		break;
 	case 1:
-		return RISSE_WS("child2");
+		return RISSE_WS("child1");
 		break;
 	}
 	return tRisseString();
@@ -163,13 +162,13 @@ tRisseString tRisseASTNode_Trinary::GetChildNameAt(risse_size index) const
 	switch(index)
 	{
 	case 0:
-		return RISSE_WS("child1");
+		return RISSE_WS("child0");
 		break;
 	case 1:
-		return RISSE_WS("child2");
+		return RISSE_WS("child1");
 		break;
 	case 2:
-		return RISSE_WS("child3");
+		return RISSE_WS("child2");
 		break;
 	}
 	return tRisseString();

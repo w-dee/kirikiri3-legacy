@@ -10,6 +10,7 @@
 
 #include "risse_parser/risseParser.h"
 #include "risse_parser/risseScriptBlock.h"
+#include "risseException.h"
 
 
 RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
@@ -84,8 +85,15 @@ int Application::OnRun()
 		buf[length] = 0;
 
 		// 内容を評価する
-		tRisseScriptBlock block((tRisseString)(buf));
-		block.Evaluate();
+		try
+		{
+			tRisseScriptBlock block((tRisseString)(buf));
+			block.Evaluate();
+		}
+		catch(const eRisse & e)
+		{
+			wxFprintf(stderr, wxT("error: %s\n"), e.GetMessageString().AsWxString().c_str());
+		}
 	}
 
 	return 0;

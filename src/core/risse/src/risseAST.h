@@ -334,7 +334,7 @@ public:
 	//! @brief		position		ソースコード上の位置
 	//! @brief		expression		式ノード
 	tRisseASTNode_ExprStmt(risse_size position, tRisseASTNode * expression) :
-		tRisseASTNode(position, antExprStmt) {;}
+		tRisseASTNode(position, antExprStmt), Expression(expression){;}
 
 	//! @brief		式ノードを得る
 	tRisseASTNode * GetExpression() const { return Expression; }

@@ -29,7 +29,8 @@ CPPFLAGS = $(CXXFLAGS)
 
 #----------------------------#
 
-CPPFILES =  src/risseCharUtils.cpp                   \
+CPPFILES =  src/risseAST.cpp                         \
+			src/risseCharUtils.cpp                   \
 			src/risseConfig.cpp                      \
 			src/risseCxxObject.cpp                   \
 			src/risseCxxOctet.cpp                    \

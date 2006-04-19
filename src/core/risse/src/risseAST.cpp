@@ -46,40 +46,44 @@ void tRisseASTNode::Dump(tRisseString & result, risse_int level)
 #else
 	result += RISSE_WS("\n");
 #endif
-	GetDumpChildren();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseASTNode::AddDumpChild(tRisseString & result, risse_int level,
-		const tRisseString & name, tRisseASTNode * child)
-{
-	level ++;
-	result += tRisseString(RISSE_WS(" ")).Times(level) + name + RISSE_WS(" ");
-	child->Dump(result, level); // 再帰
-}
-//---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
-void tRisseASTNode_List::GetDumpChildren(tRisseString & result, risse_int level)
-{
-	risse_size count = 0;
-	for(gc_vector<tRisseASTNode *>::iterator i = Array.begin();
-		i != Array.end(); i++, count ++)
+	risse_size child_count = GetChildCount();
+	for(risse_size i = 0; i < child_count; i++)
 	{
-		risse_char buf[40];
-		AddDumpChild(result, level,
-			tRisseString(RISSE_WS("node")) + Risse_int64_to_str(count), *i);
+		result += tRisseString(RISSE_WS(" ")).Times(level) + GetChildNameAt(i);
+		tRisseASTNode * child = GetChildAt(i);
+		if(child)
+		{
+			result += RISSE_WC(' ');
+			child->Dump(result, level);
+		}
+		else
+		{
+		#ifdef RISSE_TEXT_OUT_CRLF
+			result += RISSE_WS("\r\n");
+		#else
+			result += RISSE_WS("\n");
+		#endif
+		}
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Context::GetDumpComment()
+tRisseString tRisseASTNode_List::GetChildNameAt(risse_size index) const
+{
+	if(index < Array.size())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("node")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Context::GetDumpComment() const
 {
 	return RisseASTContextTypeNames[ContextType];
 }
@@ -87,16 +91,17 @@ tRisseString tRisseASTNode_Context::GetDumpComment()
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_ExprStmt::GetDumpChildren(tRisseString & result, risse_int level)
+tRisseString tRisseASTNode_ExprStmt::GetChildNameAt(risse_size index) const
 {
-	AddDumpChild(result, level,
-		tRisseString(RISSE_WS("expression")), Expression);
+	if(index == 0)
+		return RISSE_WS("expression");
+	return tRisseString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Factor::GetDumpComment()
+tRisseString tRisseASTNode_Factor::GetDumpComment() const
 {
 	tRisseString ret = RisseASTFactorTypeNames[FactorType];
 	if(FactorType == aftConstant)
@@ -104,21 +109,23 @@ tRisseString tRisseASTNode_Factor::GetDumpComment()
 		ret += RISSE_WS(" ");
 		ret += Value.AsHumanReadable();
 	}
+	return ret;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_Unary::GetDumpChildren(tRisseString & result, risse_int level)
+tRisseString tRisseASTNode_Unary::GetChildNameAt(risse_size index) const
 {
-	AddDumpChild(result, level,
-		tRisseString(RISSE_WS("child")), Child);
+	if(index == 0)
+		return RISSE_WS("child");
+	return tRisseString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Unary::GetDumpComment()
+tRisseString tRisseASTNode_Unary::GetDumpComment() const
 {
 	return RisseASTUnaryTypeNames[UnaryType];
 }
@@ -126,18 +133,24 @@ tRisseString tRisseASTNode_Unary::GetDumpComment()
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_Binary::GetDumpChildren(tRisseString & result, risse_int level)
+tRisseString tRisseASTNode_Binary::GetChildNameAt(risse_size index) const
 {
-	AddDumpChild(result, level,
-		tRisseString(RISSE_WS("child1")), Child1);
-	AddDumpChild(result, level,
-		tRisseString(RISSE_WS("child2")), Child2);
+	switch(index)
+	{
+	case 0:
+		return RISSE_WS("child1");
+		break;
+	case 1:
+		return RISSE_WS("child2");
+		break;
+	}
+	return tRisseString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Binary::GetDumpComment()
+tRisseString tRisseASTNode_Binary::GetDumpComment() const
 {
 	return RisseASTBinaryTypeNames[BinaryType];
 }
@@ -145,20 +158,27 @@ tRisseString tRisseASTNode_Binary::GetDumpComment()
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_Trinary::GetDumpChildren(tRisseString & result, risse_int level)
+tRisseString tRisseASTNode_Trinary::GetChildNameAt(risse_size index) const
 {
-	AddDumpChild(result, level,
-		tRisseString(RISSE_WS("child1")), Child1);
-	AddDumpChild(result, level,
-		tRisseString(RISSE_WS("child2")), Child2);
-	AddDumpChild(result, level,
-		tRisseString(RISSE_WS("child3")), Child3);
+	switch(index)
+	{
+	case 0:
+		return RISSE_WS("child1");
+		break;
+	case 1:
+		return RISSE_WS("child2");
+		break;
+	case 2:
+		return RISSE_WS("child3");
+		break;
+	}
+	return tRisseString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Trinary::GetDumpComment()
+tRisseString tRisseASTNode_Trinary::GetDumpComment() const
 {
 	return RisseASTTrinaryTypeNames[TrinaryType];
 }

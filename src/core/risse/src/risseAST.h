@@ -28,6 +28,18 @@ namespace Risse
 	対応した文字列の表を得ることができる。
 */
 
+#ifdef RISSE_AST_ENUM_DEF
+	#undef RISSE_AST_ENUM_DEF
+#endif
+
+#ifdef RISSE_AST_ENUM_ITEM
+	#undef RISSE_AST_ENUM_ITEM
+#endif
+
+#ifdef RISSE_AST_ENUM_END
+	#undef RISSE_AST_ENUM_END
+#endif
+
 
 #ifndef RISSE_AST_DEFINE_NAMES
 	#define RISSE_AST_ENUM_DEF(X) enum tRisseAST##X {
@@ -199,6 +211,23 @@ public:
 	//! @return		ノードタイプ
 	tRisseASTNodeType GetType() const { return Type; }
 
+public:
+	//! @brief		子ノードの個数を得る(下位クラスで実装すること)
+	//! @return		子ノードの個数
+	virtual risse_size GetChildCount() const = 0;
+
+	//! @brief		指定されたインデックスの子ノードを得る(下位クラスで実装すること)
+	//! @param		index		インデックス
+	//! @return		子ノード
+	virtual tRisseASTNode * GetChildAt(risse_size index) const = 0;
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る(下位クラスで実装すること)
+	//! @param		index		インデックス
+	//! @return		名前
+	virtual tRisseString GetChildNameAt(risse_size index) const = 0;
+
+public:
+
 	//! @brief		ダンプを行う
 	//! @param		result		ダンプされた文字列
 	//! @param		level		再帰レベル
@@ -208,21 +237,7 @@ protected:
 
 	//! @brief		ダンプ時のこのノードのコメントを得る(下位クラスで実装すること)
 	//! @return		ダンプ時のこのノードのコメント
-	virtual tRisseString GetDumpComment() = 0;
-
-	//! @brief		ダンプ時に表示する子ノードを得る(下位クラスで実装すること)
-	//! @param		result		ダンプされた文字列
-	//! @param		level		再帰レベル
-	//! @note		下位クラスでは AddDumpChild を呼び、子を登録すること。
-	virtual void GetDumpChildren(tRisseString & result, risse_int level) = 0;
-
-	//! @brief		ダンプ時に表示する子ノードを登録する(下位クラスから呼ぶこと)
-	//! @param		result		ダンプされた文字列(GetDumpChildrenの引数をそのまま渡すこと)
-	//! @param		level		再帰レベル(GetDumpChildrenの引数をそのまま渡すこと)
-	//! @param		name		表示名
-	//! @param		child		子ノード
-	void AddDumpChild(tRisseString & result, risse_int level,
-		const tRisseString & name, tRisseASTNode * child);
+	virtual tRisseString GetDumpComment() const = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -250,10 +265,27 @@ public:
 	//! @param		node		追加したいノード
 	void AddChild(tRisseASTNode * node) { Array.push_back(node); node->SetParent(this); }
 
-	//! @brief		ダンプ時に表示する子ノードを得る
-	//! @param		result		ダンプされた文字列
-	//! @param		level		再帰レベル
-	void GetDumpChildren(tRisseString & result, risse_int level);
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return Array.size();
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index < Array.size())
+			return Array[index];
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
 };
 //---------------------------------------------------------------------------
 
@@ -285,7 +317,7 @@ public:
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment();
+	tRisseString GetDumpComment() const;
 };
 //---------------------------------------------------------------------------
 
@@ -307,14 +339,29 @@ public:
 	//! @brief		式ノードを得る
 	tRisseASTNode * GetExpression() const { return Expression; }
 
-	//! @brief		ダンプ時に表示する子ノードを得る
-	//! @param		result		ダンプされた文字列
-	//! @param		level		再帰レベル
-	void GetDumpChildren(tRisseString & result, risse_int level);
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Expression; else return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment()
+	tRisseString GetDumpComment() const
 	{
 		return tRisseString(); // 空
 	}
@@ -343,17 +390,32 @@ public:
 	//! @return		項のタイプ
 	tRisseASTFactorType GetFactorType() const { return FactorType; }
 
-	//! @brief		ダンプ時に表示する子ノードを得る
-	//! @param		result		ダンプされた文字列
-	//! @param		level		再帰レベル
-	void GetDumpChildren(tRisseString & result, risse_int level)
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
 	{
-		// なにもない
+		return 0; // 子はない
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		return NULL; // 子はない
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const
+	{
+		return tRisseString(); // 子はない
 	}
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment();
+	tRisseString GetDumpComment() const;
 };
 //---------------------------------------------------------------------------
 
@@ -386,14 +448,29 @@ public:
 	//! @return		子ノード
 	tRisseASTNode * GetChild() const { return Child; }
 
-	//! @brief		ダンプ時に表示する子ノードを得る
-	//! @param		result		ダンプされた文字列
-	//! @param		level		再帰レベル
-	void GetDumpChildren(tRisseString & result, risse_int level);
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Child; else return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment();
+	tRisseString GetDumpComment() const;
 };
 //---------------------------------------------------------------------------
 
@@ -434,14 +511,34 @@ public:
 	//! @return		子ノード2
 	tRisseASTNode * GetChild2() const { return Child2; }
 
-	//! @brief		ダンプ時に表示する子ノードを得る
-	//! @param		result		ダンプされた文字列
-	//! @param		level		再帰レベル
-	void GetDumpChildren(tRisseString & result, risse_int level);
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Child1;
+		case 1: return Child2;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment();
+	tRisseString GetDumpComment() const;
 };
 //---------------------------------------------------------------------------
 
@@ -489,14 +586,35 @@ public:
 	//! @return		子ノード3
 	tRisseASTNode * GetChild3() const { return Child3; }
 
-	//! @brief		ダンプ時に表示する子ノードを得る
-	//! @param		result		ダンプされた文字列
-	//! @param		level		再帰レベル
-	void GetDumpChildren(tRisseString & result, risse_int level);
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 3;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Child1;
+		case 1: return Child2;
+		case 2: return Child3;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment();
+	tRisseString GetDumpComment() const;
 };
 //---------------------------------------------------------------------------
 

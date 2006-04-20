@@ -44,6 +44,12 @@
 #endif
 #define N(XXXX) tRisseASTNode_##XXXX
 
+/* tRisseASTNode_XXXX へのキャスト */
+#ifdef C
+ #undef C
+#endif
+#define C(XXXX, EXP) ((tRisseASTNode_##XXXX*)(EXP))
+
 /* 名前空間を Risse に */
 namespace Risse
 {
@@ -548,8 +554,7 @@ try
 ;
 
 catch
-	: "catch"								{ /*cc->EnterCatchCode(NULL);*/ }
-	| "catch" "(" ")"						{ /*cc->EnterCatchCode(NULL);*/ }
+	: "catch" "(" ")"						{ /*cc->EnterCatchCode(NULL);*/ }
 	| "catch" "(" T_SYMBOL ")"				{ /*cc->EnterCatchCode(
 												lx->GetString($3));*/ }
 ;
@@ -615,7 +620,7 @@ expr
 	| "~" expr						{ $$ = new N(Unary)(LP, autBitNot			,$2); }
 	| "--" expr						{ $$ = new N(Unary)(LP, autPreDec			,$2); }
 	| "++" expr						{ $$ = new N(Unary)(LP, autPreInc			,$2); }
-	| "new" expr					{ /* $1 が関数呼び出しであることを確認する必要あり*/ }
+	| "new" expr					{ $$ = new N(Unary)(LP, autNew				,$2); }
 	| "delete" expr					{ $$ = new N(Unary)(LP, autDelete			,$2); }
 	| "typeof" expr					{ ; }
 	| "+" expr %prec T_UNARY		{ $$ = new N(Unary)(LP, autPlus				,$2); }
@@ -652,21 +657,24 @@ factor_expr
 
 /* an expression for function call */
 func_call_expr
-	: expr "(" call_arg_list ")"				{ /*$$ = cc->MakeNP2(T_LPARENTHESIS, $1, $3);*/ }
+	: expr "(" call_arg_list ")"		{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
+	| expr "(" "..." ")"				{ $$ = new N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
+	| expr "(" ")"						{ $$ = new N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }
+		/* このルールは "(" と ")" の間で下記の 「call_arg が empty」 のルールと
+		  シフト・還元競合を起こす(こちらが優先される) */
 ;
 
 /* argument(s) for function call */
 call_arg_list
-	: "..."								{ /*$$ = cc->MakeNP0(T_OMIT);*/ }
-	| call_arg							{ /*$$ = cc->MakeNP1(T_ARG, $1);*/ }
-	| call_arg_list "," call_arg		{ /*$$ = cc->MakeNP2(T_ARG, $3, $1);*/ }
+	: call_arg							{ $$ = new N(FuncCall)(LP, false); C(FuncCall, $$)->AddChild($1); }
+	| call_arg_list "," call_arg		{ C(FuncCall, $1)->AddChild($3); }
 ;
 
 call_arg
-	: /* empty */						{ /*$$ = NULL;*/ }
-	| "*"								{ /*$$ = cc->MakeNP1(T_EXPANDARG, NULL);*/ }
-	| "*" expr							{ /*$$ = cc->MakeNP1(T_EXPANDARG, $1);*/ }
-	| expr								{ /*$$ = $1;*/ }
+	: /* empty */						{ $$ = NULL; }
+	| "*"								{ $$ = new N(FuncArg)(LP, NULL, true); }
+	| expr "*" 							{ $$ = new N(FuncArg)(LP, $1, true); }
+	| expr								{ $$ = new N(FuncArg)(LP, $1, false); }
 ;
 
 

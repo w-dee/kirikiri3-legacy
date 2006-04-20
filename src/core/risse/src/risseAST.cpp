@@ -82,6 +82,52 @@ tRisseString tRisseASTNode_List::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncCall::GetChildNameAt(risse_size index) const
+{
+	if(index == 0) return RISSE_WS("function");
+	index --;
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("argument")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncCall::GetDumpComment() const
+{
+	tRisseString ret;
+	if(CreateNew) ret += RISSE_WS("create_new");
+	if(Omit) { if(!ret.IsEmpty()) ret += RISSE_WC(' '); ret += RISSE_WS("omit_arg"); }
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncArg::GetChildNameAt(risse_size index) const
+{
+	if(index == 0)
+		return RISSE_WS("expression");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncArg::GetDumpComment() const
+{
+	if(Expand)
+		return RISSE_WS("expand");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_Context::GetDumpComment() const
 {
 	return RisseASTContextTypeNames[ContextType];

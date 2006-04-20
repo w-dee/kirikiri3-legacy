@@ -61,6 +61,8 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Unary			)		//!< 単項演算子
 	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
+	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
+	RISSE_AST_ENUM_ITEM(ant, FuncArg		)		//!< 関数の引数
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -263,7 +265,7 @@ public:
 
 	//! @brief		配列に子ノードを追加する
 	//! @param		node		追加したいノード
-	void AddChild(tRisseASTNode * node) { Array.push_back(node); node->SetParent(this); }
+	void AddChild(tRisseASTNode * node) { Array.push_back(node); if(node) node->SetParent(this); }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
@@ -323,6 +325,127 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief	関数呼び出しのASTノード(type=antFuncCall)
+//! @note	new 演算子つきの関数呼び出しはオブジェクト生成とみなし、
+//!			関数呼び出し用ASTノードと共用する(GetCreateNewで調べる)
+//---------------------------------------------------------------------------
+class tRisseASTNode_FuncCall : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+	tRisseASTNode * Expression; //!< 関数を表す式ノード
+	bool CreateNew; //!< new による関数呼び出しかどうか
+	bool Omit; //!< 引数省略かどうか
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		omit			引数省略かどうか
+	tRisseASTNode_FuncCall(risse_size position, bool omit) :
+		tRisseASTNode_List(position, antFuncCall), Omit(omit)
+	{
+		Expression = NULL;
+	}
+
+	//! @brief		式ノードを設定する
+	//! @param		node		式ノード
+	void SetExpression(tRisseASTNode * node)
+		{ Expression = node; Expression->SetParent(this); }
+
+	//! @brief		式ノードを得る
+	//! @return		式ノード
+	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		new による関数呼び出しかどうかを設定する
+	//! @param		b	new による関数呼び出しかどうか
+	void SetCreateNew(bool b = true) { CreateNew = b; }
+
+	//! @brief		new による関数呼び出しかどうかを得る
+	//! @return		b	new による関数呼び出しかどうか
+	bool GetCreateNew() const { return CreateNew; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return inherited::GetChildCount() + 1; // +1 = Expression
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Expression;
+		return inherited::GetChildAt(index - 1);
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	関数の引数を表すノード(type=antFuncArg)
+//---------------------------------------------------------------------------
+class tRisseASTNode_FuncArg : public tRisseASTNode
+{
+	tRisseASTNode * Expression; //!< 引数を表す式ノード(NULL = デフォルト引数)
+	bool Expand; //!< 配列の引数への展開を行うかどうか
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @brief		expression		引数を表す式ノード
+	//! @brief		expand			配列の引数への展開を行うかどうか
+	tRisseASTNode_FuncArg(risse_size position, tRisseASTNode * expression, bool expand) :
+		tRisseASTNode(position, antFuncArg), Expression(expression), Expand(expand)
+	{
+		if(Expression) Expression->SetParent(this);
+	}
+
+	//! @brief		式ノードを得る
+	//! @return		式ノード
+	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		配列の引数への展開を行うかどうかを得る
+	//! @return		配列の引数への展開を行うかどうか
+	bool GetExpand() const { return Expand; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Expression; else return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	式ステートメントASTノード(type=antExprStmt)
 //---------------------------------------------------------------------------
 class tRisseASTNode_ExprStmt : public tRisseASTNode
@@ -337,6 +460,7 @@ public:
 		tRisseASTNode(position, antExprStmt), Expression(expression){;}
 
 	//! @brief		式ノードを得る
+	//! @return		式ノード
 	tRisseASTNode * GetExpression() const { return Expression; }
 
 	//! @brief		子ノードの個数を得る

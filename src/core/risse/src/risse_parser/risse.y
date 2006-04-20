@@ -38,6 +38,12 @@
 /*! 字句解析器の現在の解析位置 */
 #define LP (PR->GetCurrentLexerPosition())
 
+/* tRisseASTNode_XXXX の省略形 */
+#ifdef N
+ #undef N
+#endif
+#define N(XXXX) tRisseASTNode_##XXXX
+
 /* 名前空間を Risse に */
 namespace Risse
 {
@@ -53,6 +59,8 @@ int raise_yyerror(char * msg, void *pr);
 #define risseerror(X) raise_yyerror(X, pr);
 
 %}
+
+/*###########################################################################*/
 
 /* 再入可能なパーサを出力 */
 %pure_parser
@@ -228,6 +236,7 @@ int raise_yyerror(char * msg, void *pr);
 
 
 %%
+/*###########################################################################*/
 
 
 /* the program */
@@ -259,7 +268,7 @@ block_or_statement
 /* a statement */
 statement
 	: ";"
-	| expr_with_comma ";"					{ PR->AddNode(new tRisseASTNode_ExprStmt(LP, $1)); }
+	| expr_with_comma ";"					{ PR->AddNode(new N(ExprStmt)(LP, $1)); }
 	| if
 	| if_else
 	| while
@@ -553,8 +562,8 @@ throw
 /* 式 */
 /* カンマとそれ以下の優先順位の式を含む場合はこちらを使う */
 expr_with_comma
-	: expr_with_comma "if" expr_with_comma	{ $$ = new tRisseASTNode_Binary(LP, abtIf			,$1, $3); }
-	| expr_with_comma ","  expr_with_comma	{ $$ = new tRisseASTNode_Binary(LP, abtComma		,$1, $3); }
+	: expr_with_comma "if" expr_with_comma	{ $$ = new N(Binary)(LP, abtIf			,$3, $1);/*順番に注意*/ }
+	| expr_with_comma ","  expr_with_comma	{ $$ = new N(Binary)(LP, abtComma		,$1, $3); }
 	| expr
 ;
 
@@ -563,84 +572,81 @@ expr_with_comma
 	区切り記号と区別が付かない場合はこちらを使う
 */
 expr
-	: expr "=" expr							{ $$ = new tRisseASTNode_Binary(LP, abtAssign			,$1, $3); }
-	| expr "&=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtBitAndAssign		,$1, $3); }
-	| expr "|=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtBitOrAssign		,$1, $3); }
-	| expr "^=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtBitXorAssign		,$1, $3); }
-	| expr "-=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtSubAssign		,$1, $3); }
-	| expr "+=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtAddAssign		,$1, $3); }
-	| expr "%=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtModAssign		,$1, $3); }
-	| expr "/=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtDivAssign		,$1, $3); }
-	| expr "\\=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtIdivAssign		,$1, $3); }
-	| expr "*=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtMulAssign		,$1, $3); }
-	| expr "||=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtLogOrAssign		,$1, $3); }
-	| expr "&&=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtLogAndAssign		,$1, $3); }
-	| expr ">>=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtRShiftAssign		,$1, $3); }
-	| expr "<<=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtLShiftAssign		,$1, $3); }
-	| expr ">>>=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtRBitShiftAssign	,$1, $3); }
-	| expr "<->" expr						{ $$ = new tRisseASTNode_Binary(LP, abtSwap				,$1, $3); }
-	| expr "?" expr ":" expr				{ $$ = new tRisseASTNode_Trinary(LP, attCondition, $1, $3, $5);   }
-	| expr "||" expr						{ $$ = new tRisseASTNode_Binary(LP, abtLogOr			,$1, $3); }
-	| expr "&&" expr						{ $$ = new tRisseASTNode_Binary(LP, abtLogAnd			,$1, $3); }
-	| expr "|" expr							{ $$ = new tRisseASTNode_Binary(LP, abtBitOr			,$1, $3); }
-	| expr "^" expr							{ $$ = new tRisseASTNode_Binary(LP, abtBitXor			,$1, $3); }
-	| expr "&" expr							{ $$ = new tRisseASTNode_Binary(LP, abtBitAnd			,$1, $3); }
-	| expr "!=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtNotEqual			,$1, $3); }
-	| expr "==" expr						{ $$ = new tRisseASTNode_Binary(LP, abtEqual			,$1, $3); }
-	| expr "!==" expr						{ $$ = new tRisseASTNode_Binary(LP, abtDiscNotEqual		,$1, $3); }
-	| expr "===" expr						{ $$ = new tRisseASTNode_Binary(LP, abtDiscEqual		,$1, $3); }
-	| expr "<" expr							{ $$ = new tRisseASTNode_Binary(LP, abtLesser			,$1, $3); }
-	| expr ">" expr							{ $$ = new tRisseASTNode_Binary(LP, abtGreater			,$1, $3); }
-	| expr "<=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtLesserOrEqual	,$1, $3); }
-	| expr ">=" expr						{ $$ = new tRisseASTNode_Binary(LP, abtGreaterOrEqual	,$1, $3); }
-	| expr ">>" expr						{ $$ = new tRisseASTNode_Binary(LP, abtLShift			,$1, $3); }
-	| expr "<<" expr						{ $$ = new tRisseASTNode_Binary(LP, abtRShift			,$1, $3); }
-	| expr ">>>" expr						{ $$ = new tRisseASTNode_Binary(LP, abtRBitShift		,$1, $3); }
-	| expr "+" expr							{ $$ = new tRisseASTNode_Binary(LP, abtAdd				,$1, $3); }
-	| expr "-" expr							{ $$ = new tRisseASTNode_Binary(LP, abtSub				,$1, $3); }
-	| expr "%" expr							{ $$ = new tRisseASTNode_Binary(LP, abtMod				,$1, $3); }
-	| expr "/" expr							{ $$ = new tRisseASTNode_Binary(LP, abtDiv				,$1, $3); }
-	| expr "\\" expr						{ $$ = new tRisseASTNode_Binary(LP, abtIdiv				,$1, $3); }
-	| expr "*" expr							{ $$ = new tRisseASTNode_Binary(LP, abtMul				,$1, $3); }
-	| "!" expr								{ ; }
-	| "~" expr								{ ; }
-	| "--" expr								{ ; }
-	| "++" expr								{ ; }
-	| "new" expr							{ /* $1 が関数呼び出しであることを確認する必要あり*/ }
-	| "delete" expr							{ ; }
-	| "typeof" expr							{ ; }
-	| "+" expr %prec T_UNARY				{ ; }
-	| "-" expr %prec T_UNARY				{ ; }
-	| expr "incontextof" expr				{ ; }
-	| expr "--" %prec T_POSTUNARY			{ ; }
-	| expr "++" %prec T_POSTUNARY			{ ; }
-	| func_call_expr						{ ; }
-	| "(" expr ")"							{ $$ = $2; }
-	| expr "[" expr "]"						{ ; }
-	| expr "." expr							{ ; }
-	| factor_expr							{ ; }
+	: expr "=" expr					{ $$ = new N(Binary)(LP, abtAssign			,$1, $3); }
+	| expr "&=" expr				{ $$ = new N(Binary)(LP, abtBitAndAssign	,$1, $3); }
+	| expr "|=" expr				{ $$ = new N(Binary)(LP, abtBitOrAssign		,$1, $3); }
+	| expr "^=" expr				{ $$ = new N(Binary)(LP, abtBitXorAssign	,$1, $3); }
+	| expr "-=" expr				{ $$ = new N(Binary)(LP, abtSubAssign		,$1, $3); }
+	| expr "+=" expr				{ $$ = new N(Binary)(LP, abtAddAssign		,$1, $3); }
+	| expr "%=" expr				{ $$ = new N(Binary)(LP, abtModAssign		,$1, $3); }
+	| expr "/=" expr				{ $$ = new N(Binary)(LP, abtDivAssign		,$1, $3); }
+	| expr "\\=" expr				{ $$ = new N(Binary)(LP, abtIdivAssign		,$1, $3); }
+	| expr "*=" expr				{ $$ = new N(Binary)(LP, abtMulAssign		,$1, $3); }
+	| expr "||=" expr				{ $$ = new N(Binary)(LP, abtLogOrAssign		,$1, $3); }
+	| expr "&&=" expr				{ $$ = new N(Binary)(LP, abtLogAndAssign	,$1, $3); }
+	| expr ">>=" expr				{ $$ = new N(Binary)(LP, abtRShiftAssign	,$1, $3); }
+	| expr "<<=" expr				{ $$ = new N(Binary)(LP, abtLShiftAssign	,$1, $3); }
+	| expr ">>>=" expr				{ $$ = new N(Binary)(LP, abtRBitShiftAssign	,$1, $3); }
+	| expr "<->" expr				{ $$ = new N(Binary)(LP, abtSwap			,$1, $3); }
+	| expr "?" expr ":" expr		{ $$ = new N(Trinary)(LP, attCondition 		,$1, $3, $5); }
+	| expr "||" expr				{ $$ = new N(Binary)(LP, abtLogOr			,$1, $3); }
+	| expr "&&" expr				{ $$ = new N(Binary)(LP, abtLogAnd			,$1, $3); }
+	| expr "|" expr					{ $$ = new N(Binary)(LP, abtBitOr			,$1, $3); }
+	| expr "^" expr					{ $$ = new N(Binary)(LP, abtBitXor			,$1, $3); }
+	| expr "&" expr					{ $$ = new N(Binary)(LP, abtBitAnd			,$1, $3); }
+	| expr "!=" expr				{ $$ = new N(Binary)(LP, abtNotEqual		,$1, $3); }
+	| expr "==" expr				{ $$ = new N(Binary)(LP, abtEqual			,$1, $3); }
+	| expr "!==" expr				{ $$ = new N(Binary)(LP, abtDiscNotEqual	,$1, $3); }
+	| expr "===" expr				{ $$ = new N(Binary)(LP, abtDiscEqual		,$1, $3); }
+	| expr "<" expr					{ $$ = new N(Binary)(LP, abtLesser			,$1, $3); }
+	| expr ">" expr					{ $$ = new N(Binary)(LP, abtGreater			,$1, $3); }
+	| expr "<=" expr				{ $$ = new N(Binary)(LP, abtLesserOrEqual	,$1, $3); }
+	| expr ">=" expr				{ $$ = new N(Binary)(LP, abtGreaterOrEqual	,$1, $3); }
+	| expr ">>" expr				{ $$ = new N(Binary)(LP, abtLShift			,$1, $3); }
+	| expr "<<" expr				{ $$ = new N(Binary)(LP, abtRShift			,$1, $3); }
+	| expr ">>>" expr				{ $$ = new N(Binary)(LP, abtRBitShift		,$1, $3); }
+	| expr "+" expr					{ $$ = new N(Binary)(LP, abtAdd				,$1, $3); }
+	| expr "-" expr					{ $$ = new N(Binary)(LP, abtSub				,$1, $3); }
+	| expr "%" expr					{ $$ = new N(Binary)(LP, abtMod				,$1, $3); }
+	| expr "/" expr					{ $$ = new N(Binary)(LP, abtDiv				,$1, $3); }
+	| expr "\\" expr				{ $$ = new N(Binary)(LP, abtIdiv			,$1, $3); }
+	| expr "*" expr					{ $$ = new N(Binary)(LP, abtMul				,$1, $3); }
+	| "!" expr						{ $$ = new N(Unary)(LP, autLogNot			,$2); }
+	| "~" expr						{ $$ = new N(Unary)(LP, autBitNot			,$2); }
+	| "--" expr						{ $$ = new N(Unary)(LP, autPreDec			,$2); }
+	| "++" expr						{ $$ = new N(Unary)(LP, autPreInc			,$2); }
+	| "new" expr					{ /* $1 が関数呼び出しであることを確認する必要あり*/ }
+	| "delete" expr					{ $$ = new N(Unary)(LP, autDelete			,$2); }
+	| "typeof" expr					{ ; }
+	| "+" expr %prec T_UNARY		{ $$ = new N(Unary)(LP, autPlus				,$2); }
+	| "-" expr %prec T_UNARY		{ $$ = new N(Unary)(LP, autMinus			,$2); }
+	| expr "incontextof" expr		{ ; }
+	| expr "--" %prec T_POSTUNARY	{ $$ = new N(Unary)(LP, autPostDec			,$1); }
+	| expr "++" %prec T_POSTUNARY	{ $$ = new N(Unary)(LP, autPostInc			,$1); }
+	| func_call_expr				{ ; }
+	| "(" expr ")"					{ $$ = $2; }
+	| expr "[" expr "]"				{ $$ = new N(Binary)(LP, abtIndirectSel		,$1, $3); }
+	| expr "." expr					{ $$ = new N(Binary)(LP, abtDirectSel		,$1, $3); }
+	| factor_expr
 ;
 
 
 
 factor_expr
-	: T_CONSTVAL								{ $$ = new tRisseASTNode_Factor(LP, aftConstant, *$1); }
-	| T_SYMBOL									{ /*$$ = cc->MakeNP0(T_SYMBOL);
-												  $$->SetValue(tRisseVariant(
-													lx->GetString($1)));*/ }
-	| "this"									{ /*$$ = cc->MakeNP0(T_THIS);*/ }
-	| "super"									{ /*$$ = cc->MakeNP0(T_SUPER);*/ }
-	| func_expr_def								{ /*$$ = $1;*/ }
-	| "global"									{ /*$$ = cc->MakeNP0(T_GLOBAL);*/ }
-	| "void"									{ /*$$ = cc->MakeNP0(T_VOID);*/ }
-	| inline_array								{ /*$$ = $1;*/ }
-	| inline_dic								{ /*$$ = $1;*/ }
-	| "/="										{ /*lx->SetStartOfRegExp();*/ }
-	  T_REGEXP									{ /*$$ = cc->MakeNP0(T_REGEXP);
-												  $$->SetValue(lx->GetValue($3));*/ }
-	| "/"										{ /*lx->SetStartOfRegExp();*/ }
-	  T_REGEXP									{ /*$$ = cc->MakeNP0(T_REGEXP);
-												  $$->SetValue(lx->GetValue($3));*/ }
+	: T_CONSTVAL					{ $$ = new N(Factor)(LP, aftConstant, *$1); }
+	| T_SYMBOL						{ $$ = new N(Factor)(LP, aftSymbol, *$1); }
+	| "this"						{ $$ = new N(Factor)(LP, aftThis);  }
+	| "super"						{ $$ = new N(Factor)(LP, aftSuper);  }
+	| func_expr_def					{ /*$$ = $1;*/ }
+	| "global"						{ $$ = new N(Factor)(LP, aftGlobal); }
+	| inline_array					{ /*$$ = $1;*/ }
+	| inline_dic					{ /*$$ = $1;*/ }
+	| "/="							{ /*lx->SetStartOfRegExp();*/ }
+	  T_REGEXP						{ /*$$ = cc->MakeNP0(T_REGEXP);
+									  $$->SetValue(lx->GetValue($3));*/ }
+	| "/"							{ /*lx->SetStartOfRegExp();*/ }
+	  T_REGEXP						{ /*$$ = cc->MakeNP0(T_REGEXP);
+									  $$->SetValue(lx->GetValue($3));*/ }
 ;
 
 
@@ -718,6 +724,7 @@ dic_dummy_elm_opt
 	| ","
 ;
 
+/*###########################################################################*/
 
 %%
 

@@ -227,33 +227,6 @@ void RisseAlignedDealloc(void *ptr)
 
 
 
-//---------------------------------------------------------------------------
-// floating-point class checker
-//---------------------------------------------------------------------------
-risse_uint32 RisseGetFPClass(risse_real r)
-{
-	risse_uint64 *ui64 = (risse_uint64*)&r;
-
-	if(RISSE_IEEE_D_IS_NaN(*ui64))
-	{
-		if(RISSE_IEEE_D_SIGN_MASK & *ui64)
-			return RISSE_FC_CLASS_NAN | RISSE_FC_SIGN_MASK;
-		else
-			return RISSE_FC_CLASS_NAN;
-	}
-	if(RISSE_IEEE_D_IS_INF(*ui64))
-	{
-		if(RISSE_IEEE_D_SIGN_MASK & *ui64)
-			return RISSE_FC_CLASS_INF | RISSE_FC_SIGN_MASK;
-		else
-			return RISSE_FC_CLASS_INF;
-	}
-	if(RISSE_IEEE_D_SIGN_MASK & *ui64)
-		return RISSE_FC_CLASS_NORMAL | RISSE_FC_SIGN_MASK;
-	else
-		return RISSE_FC_CLASS_NORMAL;
-}
-//---------------------------------------------------------------------------
 
 }
 

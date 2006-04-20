@@ -175,6 +175,46 @@ s = sign,  negative if this is 1, otherwise positive.
 #ifdef __cplusplus
 	// C++ only
 
+//---------------------------------------------------------------------------
+// floating-point class checker
+//---------------------------------------------------------------------------
+#define RISSE_FC_CLASS_MASK 7 //!< クラスマスク
+#define RISSE_FC_SIGN_MASK 8 //!< サインマスク
+
+#define RISSE_FC_CLASS_NORMAL 0 //!< 普通の数
+#define RISSE_FC_CLASS_NAN 1 //!< Not a Number (非数)
+#define RISSE_FC_CLASS_INF 2 //!< Infinity (無限大)
+
+#define RISSE_FC_IS_NORMAL(x)  (((x)&RISSE_FC_CLASS_MASK) == RISSE_FC_CLASS_NORMAL) //!< 普通の数？
+#define RISSE_FC_IS_NAN(x)  (((x)&RISSE_FC_CLASS_MASK) == RISSE_FC_CLASS_NAN) //!< 非数?
+#define RISSE_FC_IS_INF(x)  (((x)&RISSE_FC_CLASS_MASK) == RISSE_FC_CLASS_INF) //!< 無限大?
+
+#define RISSE_FC_IS_NEGATIVE(x) ((bool)((x) & RISSE_FC_SIGN_MASK)) //!< 負?
+#define RISSE_FC_IS_POSITIVE(x) (!RISSE_FC_IS_NEGATIVE(x)) //!< 正?
+
+
+//! @brief	浮動小数点数のクラスを得る
+//! @param	r	調べたい値
+//! @return	クラス
+risse_uint32 RisseGetFPClass(risse_real r);
+
+
+//! @brief		正の quiet 型 NaN の値を得る
+//! @return		正の quiet 型 NaN
+static inline risse_real RisseGetNaN()
+{
+	risse_uint64 tmp = RISSE_IEEE_D_P_NaN;
+	return *reinterpret_cast<risse_real*>(&tmp);
+}
+
+//! @brief		正の無限大 の値を得る
+//! @return		正の無限大
+static inline risse_real RisseGetInf()
+{
+	risse_uint64 tmp = RISSE_IEEE_D_P_INF;
+	return *reinterpret_cast<risse_real*>(&tmp);
+}
+
 template <int size>
 struct tRissePointerSizedInteger
 {

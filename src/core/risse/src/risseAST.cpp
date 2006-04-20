@@ -103,7 +103,7 @@ tRisseString tRisseASTNode_ExprStmt::GetChildNameAt(risse_size index) const
 tRisseString tRisseASTNode_Factor::GetDumpComment() const
 {
 	tRisseString ret = RisseASTFactorTypeNames[FactorType];
-	if(FactorType == aftConstant)
+	if(FactorType == aftConstant || FactorType == aftSymbol)
 	{
 		ret += RISSE_WS(" ");
 		ret += Value.AsHumanReadable();

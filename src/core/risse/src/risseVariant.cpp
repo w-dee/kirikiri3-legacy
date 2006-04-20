@@ -40,6 +40,27 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Integer  (risse_size maxlen) co
 //---------------------------------------------------------------------------
 tRisseString tRisseVariantBlock::AsHumanReadable_Real     (risse_size maxlen) const
 {
+	risse_int32 cls = RisseGetFPClass(AsReal());
+
+	if(RISSE_FC_IS_NAN(cls))
+	{
+		return RISSE_WS("NaN");
+	}
+	if(RISSE_FC_IS_INF(cls))
+	{
+		if(RISSE_FC_IS_NEGATIVE(cls))
+			return RISSE_WS("-Infinity");
+		else
+			return RISSE_WS("+Infinity");
+	}
+	if(AsReal() == 0.0)
+	{
+		if(RISSE_FC_IS_NEGATIVE(cls))
+			return RISSE_WS("-0.0");
+		else
+			return RISSE_WS("+0.0");
+	}
+
 	risse_char buf[25];
 	Risse_real_to_str(AsReal(), buf);
 	return buf;

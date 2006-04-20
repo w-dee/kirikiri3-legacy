@@ -38,6 +38,7 @@ CPPFILES =  src/risseAST.cpp                         \
 			src/risseException.cpp                   \
 			src/risseLexerUtils.cpp                  \
 			src/risseScriptBlockBase.cpp             \
+			src/risseTypes.cpp                       \
 			src/risseUtils.cpp                       \
 			src/risseVariant.cpp                     \
 			src/risse_parser/risseLexer.cpp          \

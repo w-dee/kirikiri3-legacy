@@ -199,30 +199,6 @@ public:
 void *RisseAlignedAlloc(risse_uint bytes, risse_uint align_bits);
 void RisseAlignedDealloc(void *ptr);
 //---------------------------------------------------------------------------
-
-/*[*/
-//---------------------------------------------------------------------------
-// floating-point class checker
-//---------------------------------------------------------------------------
-// constants used in RisseGetFPClass
-#define RISSE_FC_CLASS_MASK 7
-#define RISSE_FC_SIGN_MASK 8
-
-#define RISSE_FC_CLASS_NORMAL 0
-#define RISSE_FC_CLASS_NAN 1
-#define RISSE_FC_CLASS_INF 2
-
-#define RISSE_FC_IS_NORMAL(x)  (((x)&RISSE_FC_CLASS_MASK) == RISSE_FC_CLASS_NORMAL)
-#define RISSE_FC_IS_NAN(x)  (((x)&RISSE_FC_CLASS_MASK) == RISSE_FC_CLASS_NAN)
-#define RISSE_FC_IS_INF(x)  (((x)&RISSE_FC_CLASS_MASK) == RISSE_FC_CLASS_INF)
-
-#define RISSE_FC_IS_NEGATIVE(x) ((bool)((x) & RISSE_FC_SIGN_MASK))
-#define RISSE_FC_IS_POSITIVE(x) (!RISSE_FC_IS_NEGATIVE(x))
-
-
-/*]*/
-risse_uint32 RisseGetFPClass(risse_real r);
-//---------------------------------------------------------------------------
 }
 
 #endif

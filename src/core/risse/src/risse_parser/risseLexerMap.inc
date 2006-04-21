@@ -1351,7 +1351,7 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
    { ptr = p; return T_EQUAL; }
   case '>':
    p += 2;
-   { ptr = p; return T_COMMA; }
+   { ptr = p; return T_DEFINE; }
   case '=':
    switch(p[2]) {
    default:

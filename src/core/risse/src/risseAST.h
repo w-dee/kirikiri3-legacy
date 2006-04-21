@@ -63,6 +63,9 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
 	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
 	RISSE_AST_ENUM_ITEM(ant, FuncArg		)		//!< 関数の引数
+	RISSE_AST_ENUM_ITEM(ant, Array			)		//!< インライン配列
+	RISSE_AST_ENUM_ITEM(ant, Dict			)		//!< インライン配列
+	RISSE_AST_ENUM_ITEM(ant, DictPair		)		//!< インライン配列
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -561,7 +564,7 @@ public:
 			tRisseASTNode * child) :
 		tRisseASTNode(position, antUnary), UnaryType(unary_type), Child(child)
 	{
-		Child->SetParent(this);
+		if(Child) Child->SetParent(this);
 	}
 
 	//! @brief		単項演算子のタイプを得る
@@ -619,8 +622,8 @@ public:
 		tRisseASTNode(position, antBinary), BinaryType(binary_type),
 			Child1(child1), Child2(child2)
 	{
-		Child1->SetParent(this);
-		Child2->SetParent(this);
+		if(Child1) Child1->SetParent(this);
+		if(Child2) Child2->SetParent(this);
 	}
 
 	//! @brief		二項演算子のタイプを得る
@@ -689,9 +692,9 @@ public:
 		tRisseASTNode(position, antTrinary), TrinaryType(trinary_type),
 			Child1(child1), Child2(child2), Child3(child3)
 	{
-		Child1->SetParent(this);
-		Child2->SetParent(this);
-		Child3->SetParent(this);
+		if(Child1) Child1->SetParent(this);
+		if(Child2) Child2->SetParent(this);
+		if(Child3) Child3->SetParent(this);
 	}
 
 	//! @brief		三項演算子のタイプを得る
@@ -741,6 +744,122 @@ public:
 	tRisseString GetDumpComment() const;
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	インライン配列ノード(type=antArray)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Array : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
+	tRisseASTNode_Array(risse_size position) :
+		tRisseASTNode_List(position, antArray) {;}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return tRisseString(); }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	インライン辞書配列ノード(type=antDict)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Dict : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
+	tRisseASTNode_Dict(risse_size position) :
+		tRisseASTNode_List(position, antDict) {;}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return tRisseString(); }
+};
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+//! @brief	インライン辞書の子ノード(type=antDictPair)
+//---------------------------------------------------------------------------
+class tRisseASTNode_DictPair : public tRisseASTNode
+{
+	tRisseASTNode * Name; //!< 名前ノード
+	tRisseASTNode * Value; //!< 値ノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		name			名前ノード
+	//! @param		value			値ノード
+	tRisseASTNode_DictPair(risse_size position,
+		tRisseASTNode * name, tRisseASTNode * value) :
+		tRisseASTNode(position, antDictPair),
+			Name(name), Value(value)
+	{
+		if(Name) Name->SetParent(this);
+		if(Value) Value->SetParent(this);
+	}
+
+	//! @brief		名前ノードを得る
+	//! @return		名前ノード
+	tRisseASTNode * GetName() const { return Name; }
+
+	//! @brief		値ノードを得る
+	//! @return		値ノード
+	tRisseASTNode * GetValue() const { return Value; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Name;
+		case 1: return Value;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return tRisseString(); }
+};
+//---------------------------------------------------------------------------
+
+
+
 
 #endif // #ifndef RISSE_AST_DEFINE_NAMES
 

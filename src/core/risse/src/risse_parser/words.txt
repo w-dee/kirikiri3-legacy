@@ -50,7 +50,7 @@ $               T_DOLLAR                 - false false
 <%              T_BEGIN_OCTET_LITERAL    - false false
 ===             T_DISCEQUAL              - false false
 ==              T_EQUALEQUAL             - false false
-=>              T_COMMA                  - false false
+=>              T_DEFINE                 - false false
 !==             T_DISCNOTEQUAL           - false false
 !=              T_NOTEQUAL               - false false
 &&=             T_LOGICALANDEQUAL        - false false

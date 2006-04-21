@@ -231,4 +231,45 @@ tRisseString tRisseASTNode_Trinary::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Array::GetChildNameAt(risse_size index) const
+{
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("item")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Dict::GetChildNameAt(risse_size index) const
+{
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("item")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_DictPair::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0:
+		return RISSE_WS("name");
+		break;
+	case 1:
+		return RISSE_WS("value");
+		break;
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
 } // namespace Risse

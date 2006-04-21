@@ -83,6 +83,7 @@ int raise_yyerror(char * msg, void *pr);
 /* トークン定義 */
 %token
 	T_NONE
+	T_DEFINE				"=>"
 	T_COMMA					","
 	T_EQUAL					"="
 	T_AMPERSANDEQUAL		"&="
@@ -217,7 +218,8 @@ int raise_yyerror(char * msg, void *pr);
 
 %type <np>
 	expr expr_with_comma factor_expr call_arg call_arg_list
-	func_expr_def func_call_expr inline_array array_elm inline_dic dic_elm
+	func_expr_def func_call_expr inline_array array_elm_list
+	inline_dic dic_elm dic_elm_list
 
 /* 演算子の優先順位 */
 %right		<np>	"if"
@@ -305,7 +307,7 @@ block
 /* a while loop */
 while
 	: "while"								{ /*cc->EnterWhileCode(false);*/ }
-	  "(" expr ")"							{ /*cc->CreateWhileExprCode($4, false);*/ }
+	  "(" expr_with_comma ")"							{ /*cc->CreateWhileExprCode($4, false);*/ }
 	  block_or_statement					{ /*cc->ExitWhileCode(false);*/ }
 ;
 
@@ -314,14 +316,14 @@ do_while
 	: "do"									{ /*cc->EnterWhileCode(true); */ }
 	  block_or_statement
 	  "while"
-	  "(" expr ")"							{ /*cc->CreateWhileExprCode($6, true); */ }
+	  "(" expr_with_comma ")"							{ /*cc->CreateWhileExprCode($6, true); */ }
 	  ";"									{ /*cc->ExitWhileCode(true); */ }
 ;
 
 /* an if statement */
 if
 	: "if" "("								{ /*cc->EnterIfCode(); */ }
-	  expr									{ /*cc->CreateIfExprCode($4); */ }
+	  expr_with_comma									{ /*cc->CreateIfExprCode($4); */ }
 	  ")" block_or_statement				{ /*cc->ExitIfCode(); */ }
 ;
 
@@ -346,20 +348,20 @@ for_first_clause
 	: /* empty */							{ /*cc->EnterForCode(false); */ }
 	|										{ /*cc->EnterForCode(true); */ }
 	  variable_def_inner
-	| expr									{ /*cc->EnterForCode(false);
+	| expr_with_comma									{ /*cc->EnterForCode(false);
 											  cc->CreateExprCode($1); */ }
 ;
 
 /* the second clause of a for statement */
 for_second_clause
 	: /* empty */							{ /*cc->CreateForExprCode(NULL); */ }
-	| expr									{ /*cc->CreateForExprCode($1); */ }
+	| expr_with_comma									{ /*cc->CreateForExprCode($1); */ }
 ;
 
 /* the third clause of a for statement */
 for_third_clause
 	: /* empty */							{ /*cc->SetForThirdExprCode(NULL); */ }
-	| expr									{ /*cc->SetForThirdExprCode($1); */ }
+	| expr_with_comma									{ /*cc->SetForThirdExprCode($1); */ }
 ;
 
 /* variable definition */
@@ -521,21 +523,21 @@ extends_name
 /* a return statement */
 return
 	: "return" ";"							{ /*cc->ReturnFromFunc(NULL);*/ }
-	| "return" expr ";"						{ /*cc->ReturnFromFunc($2);*/ }
+	| "return" expr_with_comma ";"						{ /*cc->ReturnFromFunc($2);*/ }
 ;
 
 
 /* a switch statement */
 switch
 	: "switch" "("
-	  expr ")"								{ /*cc->EnterSwitchCode($3);*/ }
+	  expr_with_comma ")"								{ /*cc->EnterSwitchCode($3);*/ }
 	  block									{ /*cc->ExitSwitchCode();*/ }
 ;
 
 /* a with statement */
 with
 	: "with" "("
-	  expr ")"								{ /*cc->EnterWithCode($3);*/ }
+	  expr_with_comma ")"								{ /*cc->EnterWithCode($3);*/ }
 	  block_or_statement					{ /*cc->ExitWithCode();*/ }
 ;
 
@@ -561,7 +563,7 @@ catch
 
 /* a throw statement */
 throw
-	: "throw" expr ";"						{ /*cc->ProcessThrowCode($2);*/ }
+	: "throw" expr_with_comma ";"						{ /*cc->ProcessThrowCode($2);*/ }
 ;
 
 /* 式 */
@@ -629,7 +631,7 @@ expr
 	| expr "--" %prec T_POSTUNARY	{ $$ = new N(Unary)(LP, autPostDec			,$1); }
 	| expr "++" %prec T_POSTUNARY	{ $$ = new N(Unary)(LP, autPostInc			,$1); }
 	| func_call_expr				{ ; }
-	| "(" expr ")"					{ $$ = $2; }
+	| "(" expr_with_comma ")"		{ $$ = $2; }
 	| expr "[" expr "]"				{ $$ = new N(Binary)(LP, abtIndirectSel		,$1, $3); }
 	| expr "." expr					{ $$ = new N(Binary)(LP, abtDirectSel		,$1, $3); }
 	| factor_expr
@@ -644,8 +646,8 @@ factor_expr
 	| "super"						{ $$ = new N(Factor)(LP, aftSuper);  }
 	| func_expr_def					{ /*$$ = $1;*/ }
 	| "global"						{ $$ = new N(Factor)(LP, aftGlobal); }
-	| inline_array					{ /*$$ = $1;*/ }
-	| inline_dic					{ /*$$ = $1;*/ }
+	| inline_array
+	| inline_dic
 	| "/="							{ /*lx->SetStartOfRegExp();*/ }
 	  T_REGEXP						{ /*$$ = cc->MakeNP0(T_REGEXP);
 									  $$->SetValue(lx->GetValue($3));*/ }
@@ -680,54 +682,44 @@ call_arg
 
 /* an inline array object */
 inline_array
-	: "[" 								{ /*tRisseExprNode *node =
-										  cc->MakeNP0(T_INLINEARRAY);
-										  cc->PushCurrentNode(node);*/ }
+	: "["
 	  array_elm_list
-	  "]"								{ /*$$ = cn; cc->PopCurrentNode();*/ }
+	  dummy_elm_opt
+	  "]"								{ $$ = $2; }
 ;
 
 /* an inline array's element list */
 array_elm_list
-	: array_elm							{ /*cn->Add($1);*/ }
-	| array_elm_list "," array_elm		{ /*cn->Add($3);*/ }
-;
-
-/* an inline array's element */
-array_elm
-	: /* empty */						{ /*$$ = cc->MakeNP1(T_ARRAYARG, NULL);*/ }
-	| expr								{ /*$$ = cc->MakeNP1(T_ARRAYARG, $1);*/ }
+	: /* empty */						{ $$ = new N(Array)(LP); }
+	| expr								{ $$ = new N(Array)(LP); C(Array, $$)->AddChild($1); }
+	| array_elm_list "," expr			{ $$ = $1; C(Array, $$)->AddChild($3); }
 ;
 
 /* an inline dictionary */
 inline_dic
-	: "%" "["							{ /*tRisseExprNode *node =
-										  cc->MakeNP0(T_INLINEDIC);
-										  cc->PushCurrentNode(node);*/ }
+	: "%" "["
 	  dic_elm_list
-	  dic_dummy_elm_opt
-	  "]"								{ /*$$ = cn; cc->PopCurrentNode();*/ }
+	  dummy_elm_opt
+	  "]"								{ $$ = $3; }
 ;
 
 
 /* an inline dictionary's element list */
 dic_elm_list
-    : /* empty */
-	| dic_elm							{ /*cn->Add($1);*/ }
-	| dic_elm_list "," dic_elm			{ /*cn->Add($3);*/ }
+    : /* empty */						{ $$ = new N(Dict)(LP); }
+	| dic_elm							{ $$ = new N(Dict)(LP); C(Dict, $$)->AddChild($1); }
+	| dic_elm_list "," dic_elm			{ $$ = $1; C(Dict, $$)->AddChild($3); }
 ;
 
 /* an inline dictionary's element */
 dic_elm
-	: expr "," expr						{ /*$$ = cc->MakeNP2(T_DICELM, $1, $3);*/ }
-	| T_SYMBOL ":" expr					{ /*tRisseVariant val(lx->GetString($1));
-										  tRisseExprNode *node0 = cc->MakeNP0(T_CONSTVAL);
-										  node0->SetValue(val);
-										  $$ = cc->MakeNP2(T_DICELM, node0, $3);*/ }
+	: expr "=>" expr					{ $$ = new N(DictPair)(LP, $1, $3); }
+	| T_SYMBOL ":" expr					{ $$ = new N(DictPair)(LP,
+										  new N(Factor)(LP, aftConstant, *$1), $3); }
 ;
 
 /* a dummy element at the tail of inline dictionary elements */
-dic_dummy_elm_opt
+dummy_elm_opt
 	: /* empty */
 	| ","
 ;

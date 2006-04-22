@@ -48,7 +48,7 @@
 #ifdef C
  #undef C
 #endif
-#define C(XXXX, EXP) ((tRisseASTNode_##XXXX*)(EXP))
+#define C(XXXX, EXP) (reinterpret_cast<tRisseASTNode_##XXXX*>(EXP))
 
 /* 名前空間を Risse に */
 namespace Risse
@@ -220,6 +220,11 @@ int raise_yyerror(char * msg, void *pr);
 	expr expr_with_comma factor_expr call_arg call_arg_list
 	func_expr_def func_call_expr inline_array array_elm_list
 	inline_dic dic_elm dic_elm_list
+	if if_else
+	block block_or_statement statement
+	while do_while for variable_def variable_def_inner func_def property_def
+	class_def return switch with case try throw
+
 
 /* 演算子の優先順位 */
 %right		<np>	"if"
@@ -261,7 +266,7 @@ global_list
 /* definition list */
 def_list
 	:
-	| def_list block_or_statement
+	| def_list block_or_statement			{ if($2) PR->AddNode($2); }
 	| def_list error ";"					{ if(yynerrs > 20)
 												YYABORT;
 											  else yyerrok; }
@@ -275,8 +280,8 @@ block_or_statement
 
 /* a statement */
 statement
-	: ";"
-	| expr_with_comma ";"					{ PR->AddNode(new N(ExprStmt)(LP, $1)); }
+	: ";"									{ $$ = NULL; }
+	| expr_with_comma ";"					{ $$ = new N(ExprStmt)(LP, $1); }
 	| if
 	| if_else
 	| while
@@ -322,15 +327,16 @@ do_while
 
 /* an if statement */
 if
-	: "if" "("								{ /*cc->EnterIfCode(); */ }
-	  expr_with_comma									{ /*cc->CreateIfExprCode($4); */ }
-	  ")" block_or_statement				{ /*cc->ExitIfCode(); */ }
+	: "if" "("
+	  expr_with_comma
+	  ")" block_or_statement				{ $$ = new N(If)(LP, $3, $5); }
 ;
 
 /* an if-else statement */
+/* この規則は上記の if とシフト・還元競合を起こす */
 if_else
-	: if "else"								{ /*cc->EnterElseCode(); */ }
-	  block_or_statement					{ /*cc->ExitElseCode(); */ }
+	: if "else"
+	  block_or_statement					{ $$ = $1; C(If, $$)->SetFalse($3); }
 ;
 
 /* a for loop */
@@ -370,8 +376,8 @@ variable_def
 ;
 
 variable_def_inner
-	: "var" variable_id_list
-	| "const" variable_id_list
+	: "var" variable_id_list				{ ; }
+	| "const" variable_id_list				{ ; }
 		/* const: note that current version does not
 		   actually disallow re-assigning new value */
 ;

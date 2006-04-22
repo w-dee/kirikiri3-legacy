@@ -64,8 +64,9 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
 	RISSE_AST_ENUM_ITEM(ant, FuncArg		)		//!< 関数の引数
 	RISSE_AST_ENUM_ITEM(ant, Array			)		//!< インライン配列
-	RISSE_AST_ENUM_ITEM(ant, Dict			)		//!< インライン配列
-	RISSE_AST_ENUM_ITEM(ant, DictPair		)		//!< インライン配列
+	RISSE_AST_ENUM_ITEM(ant, Dict			)		//!< インライン辞書配列
+	RISSE_AST_ENUM_ITEM(ant, DictPair		)		//!< インライン辞書配列の名前と値
+	RISSE_AST_ENUM_ITEM(ant, If				)		//!< if (とelse)
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -797,6 +798,7 @@ public:
 };
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
 //! @brief	インライン辞書の子ノード(type=antDictPair)
 //---------------------------------------------------------------------------
@@ -843,6 +845,83 @@ public:
 		{
 		case 0: return Name;
 		case 1: return Value;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return tRisseString(); }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	if (とelse)(type=antIf)
+//---------------------------------------------------------------------------
+class tRisseASTNode_If : public tRisseASTNode
+{
+	tRisseASTNode * Expression; //!< 条件式
+	tRisseASTNode * True; //!< 条件が真の時に実行するノード
+	tRisseASTNode * False; //!< 条件が偽の時に実行するノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		expression		条件式
+	//! @param		true			条件が真の時に実行するノード
+	tRisseASTNode_If(risse_size position, tRisseASTNode * expression,
+		tRisseASTNode * truenode) :
+		tRisseASTNode(position, antIf),
+			Expression(expression), True(truenode)
+	{
+		if(Expression) Expression->SetParent(this);
+		if(True) True->SetParent(this);
+		False = NULL;
+	}
+
+	//! @brief		条件式ノードを得る
+	//! @return		条件式ノード
+	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		条件が真の時に実行するノードを得る
+	//! @return		条件が真の時に実行するノード
+	tRisseASTNode * GetTrue() const { return True; }
+
+	//! @brief		条件が偽の時に実行するノードを得る
+	//! @return		条件が偽の時に実行するノード
+	tRisseASTNode * GetFalse() const { return False; }
+
+	//! @brief		条件が偽の時に実行するノードを設定する
+	//! @param		falsenode	条件が偽の時に実行するノード
+	void SetFalse(tRisseASTNode * falsenode)
+	{
+		False = falsenode;
+		if(False) False->SetParent(this);
+	}
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 3;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Expression;
+		case 1: return True;
+		case 2: return False;
 		}
 		return NULL;
 	}

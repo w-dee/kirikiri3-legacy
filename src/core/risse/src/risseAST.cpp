@@ -272,4 +272,24 @@ tRisseString tRisseASTNode_DictPair::GetChildNameAt(risse_size index) const
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_If::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0:
+		return RISSE_WS("expression");
+		break;
+	case 1:
+		return RISSE_WS("true");
+		break;
+	case 2:
+		return RISSE_WS("false");
+		break;
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
 } // namespace Risse

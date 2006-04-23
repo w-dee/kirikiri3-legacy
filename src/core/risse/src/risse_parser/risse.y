@@ -223,7 +223,8 @@ int raise_yyerror(char * msg, void *pr);
 	inline_dic dic_elm dic_elm_list
 	if if_else
 	block block_or_statement statement
-	while do_while for
+	while do_while
+	for for_first_clause for_second_clause for_third_clause
 	variable_def variable_def_inner variable_id variable_id_list
 	func_def property_def
 	class_def return switch with case try throw
@@ -357,29 +358,27 @@ for
 	  for_first_clause ";"
 	  for_second_clause ";"
 	  for_third_clause ")"
-	  block_or_statement					{ /*cc->ExitForCode(); */ }
+	  block_or_statement					{ $$ = new N(For)(LP, $3, $5, $7, $9); }
 ;
 
 
 /* the first clause of a for statement */
 for_first_clause
-	: /* empty */							{ /*cc->EnterForCode(false); */ }
-	|										{ /*cc->EnterForCode(true); */ }
-	  variable_def_inner
-	| expr_with_comma									{ /*cc->EnterForCode(false);
-											  cc->CreateExprCode($1); */ }
+	: /* empty */							{ $$ = NULL; }
+	| variable_def_inner
+	| expr_with_comma
 ;
 
 /* the second clause of a for statement */
 for_second_clause
-	: /* empty */							{ /*cc->CreateForExprCode(NULL); */ }
-	| expr_with_comma									{ /*cc->CreateForExprCode($1); */ }
+	: /* empty */							{ $$ = NULL; }
+	| expr_with_comma
 ;
 
 /* the third clause of a for statement */
 for_third_clause
-	: /* empty */							{ /*cc->SetForThirdExprCode(NULL); */ }
-	| expr_with_comma									{ /*cc->SetForThirdExprCode($1); */ }
+	: /* empty */							{ $$ = NULL; }
+	| expr_with_comma
 ;
 
 /* variable definition */

@@ -182,12 +182,8 @@ tRisseString tRisseASTNode_Binary::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0:
-		return RISSE_WS("child0");
-		break;
-	case 1:
-		return RISSE_WS("child1");
-		break;
+	case 0: return RISSE_WS("child0");
+	case 1: return RISSE_WS("child1");
 	}
 	return tRisseString();
 }
@@ -207,15 +203,9 @@ tRisseString tRisseASTNode_Trinary::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0:
-		return RISSE_WS("child0");
-		break;
-	case 1:
-		return RISSE_WS("child1");
-		break;
-	case 2:
-		return RISSE_WS("child2");
-		break;
+	case 0: return RISSE_WS("child0");
+	case 1: return RISSE_WS("child1");
+	case 2: return RISSE_WS("child2");
 	}
 	return tRisseString();
 }
@@ -261,12 +251,8 @@ tRisseString tRisseASTNode_DictPair::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0:
-		return RISSE_WS("name");
-		break;
-	case 1:
-		return RISSE_WS("value");
-		break;
+	case 0: return RISSE_WS("name");
+	case 1: return RISSE_WS("value");
 	}
 	return tRisseString();
 }
@@ -278,15 +264,9 @@ tRisseString tRisseASTNode_If::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0:
-		return RISSE_WS("expression");
-		break;
-	case 1:
-		return RISSE_WS("true");
-		break;
-	case 2:
-		return RISSE_WS("false");
-		break;
+	case 0: return RISSE_WS("condition");
+	case 1: return RISSE_WS("true");
+	case 2: return RISSE_WS("false");
 	}
 	return tRisseString();
 }
@@ -298,12 +278,8 @@ tRisseString tRisseASTNode_While::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0:
-		return RISSE_WS("expression");
-		break;
-	case 1:
-		return RISSE_WS("body");
-		break;
+	case 0: return RISSE_WS("condition");
+	case 1: return RISSE_WS("body");
 	}
 	return tRisseString();
 }
@@ -315,6 +291,21 @@ tRisseString tRisseASTNode_While::GetDumpComment() const
 {
 	if(SkipFirstCheck)
 		return RISSE_WS("SkipFirstCheck");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_For::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0: return RISSE_WS("initializer");
+	case 1: return RISSE_WS("condition");
+	case 2: return RISSE_WS("iterator");
+	case 3: return RISSE_WS("body");
+	}
 	return tRisseString();
 }
 //---------------------------------------------------------------------------
@@ -348,9 +339,7 @@ tRisseString tRisseASTNode_VarPair::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0:
-		return RISSE_WS("initial");
-		break;
+	case 0: return RISSE_WS("initializer");
 	}
 	return tRisseString();
 }

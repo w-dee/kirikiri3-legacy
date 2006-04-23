@@ -68,6 +68,7 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, DictPair		)		//!< インライン辞書配列の名前と値
 	RISSE_AST_ENUM_ITEM(ant, If				)		//!< if (とelse)
 	RISSE_AST_ENUM_ITEM(ant, While			)		//!< while と do ～ while
+	RISSE_AST_ENUM_ITEM(ant, For			)		//!< for
 	RISSE_AST_ENUM_ITEM(ant, Var			)		//!< 変数宣言
 	RISSE_AST_ENUM_ITEM(ant, VarPair		)		//!< 変数宣言の変数名と初期値
 RISSE_AST_ENUM_END
@@ -868,28 +869,28 @@ public:
 //---------------------------------------------------------------------------
 class tRisseASTNode_If : public tRisseASTNode
 {
-	tRisseASTNode * Expression; //!< 条件式
+	tRisseASTNode * Condition; //!< 条件式
 	tRisseASTNode * True; //!< 条件が真の時に実行するノード
 	tRisseASTNode * False; //!< 条件が偽の時に実行するノード
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	//! @param		expression		条件式
+	//! @param		condition		条件式
 	//! @param		true			条件が真の時に実行するノード
-	tRisseASTNode_If(risse_size position, tRisseASTNode * expression,
+	tRisseASTNode_If(risse_size position, tRisseASTNode * condition,
 		tRisseASTNode * truenode) :
 		tRisseASTNode(position, antIf),
-			Expression(expression), True(truenode)
+			Condition(condition), True(truenode)
 	{
-		if(Expression) Expression->SetParent(this);
+		if(Condition) Condition->SetParent(this);
 		if(True) True->SetParent(this);
 		False = NULL;
 	}
 
 	//! @brief		条件式ノードを得る
 	//! @return		条件式ノード
-	tRisseASTNode * GetExpression() const { return Expression; }
+	tRisseASTNode * GetCondition() const { return Condition; }
 
 	//! @brief		条件が真の時に実行するノードを得る
 	//! @return		条件が真の時に実行するノード
@@ -921,7 +922,7 @@ public:
 	{
 		switch(index)
 		{
-		case 0: return Expression;
+		case 0: return Condition;
 		case 1: return True;
 		case 2: return False;
 		}
@@ -945,28 +946,28 @@ public:
 //---------------------------------------------------------------------------
 class tRisseASTNode_While : public tRisseASTNode
 {
-	tRisseASTNode * Expression; //!< 条件式ノード
+	tRisseASTNode * Condition; //!< 条件式ノード
 	tRisseASTNode * Body; //!< 条件が真の間実行するノード
 	bool SkipFirstCheck; //!< 最初の式チェックを省略するかどうか (do～whileかどうか)
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	//! @param		expression		条件式ノード
+	//! @param		condition		条件式ノード
 	//! @param		body			条件が真の間実行するノード
 	//! @param		skipfirstcheck	最初の式チェックを省略するかどうか (do～whileかどうか)
 	tRisseASTNode_While(risse_size position,
-		tRisseASTNode * expression, tRisseASTNode * body, bool skipfirstcheck) :
+		tRisseASTNode * condition, tRisseASTNode * body, bool skipfirstcheck) :
 		tRisseASTNode(position, antWhile),
-			Expression(expression), Body(body), SkipFirstCheck(skipfirstcheck)
+			Condition(condition), Body(body), SkipFirstCheck(skipfirstcheck)
 	{
-		if(Expression) Expression->SetParent(this);
+		if(Condition) Condition->SetParent(this);
 		if(Body) Body->SetParent(this);
 	}
 
 	//! @brief		条件式ノードを得る
 	//! @return		条件式ノード
-	tRisseASTNode * GetExpression() const { return Expression; }
+	tRisseASTNode * GetCondition() const { return Condition; }
 
 	//! @brief		条件が真の間実行するノードを得る
 	//! @return		条件が真の間実行するノード
@@ -986,7 +987,7 @@ public:
 	{
 		switch(index)
 		{
-		case 0: return Expression;
+		case 0: return Condition;
 		case 1: return Body;
 		}
 		return NULL;
@@ -1000,6 +1001,86 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	for文のノード(type=antFor)
+//---------------------------------------------------------------------------
+class tRisseASTNode_For : public tRisseASTNode
+{
+	tRisseASTNode * Initializer; //!< 初期化ノード(第1節)
+	tRisseASTNode * Condition; //!< 継続条件ノード(第2節)
+	tRisseASTNode * Iterator; //!< 増分処理ノード(第3節)
+	tRisseASTNode * Body; //!< 条件が真の間実行するノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		initializer		初期化ノード
+	//! @param		condition		継続条件ノード
+	//! @param		iterator		増分処理ノード
+	//! @param		body			条件が真の間実行するノード
+	tRisseASTNode_For(risse_size position,
+		tRisseASTNode * initializer, tRisseASTNode * condition, tRisseASTNode * iterator,
+		tRisseASTNode * body) :
+		tRisseASTNode(position, antFor),
+			Initializer(initializer), Condition(condition), Iterator(iterator),
+			Body(body)
+	{
+		if(Initializer) Initializer->SetParent(this);
+		if(Condition) Condition->SetParent(this);
+		if(Iterator) Iterator->SetParent(this);
+		if(Body) Body->SetParent(this);
+	}
+
+	//! @brief		初期化ノードを得る
+	//! @return		初期化ノード
+	tRisseASTNode * GetInitializer() const { return Initializer; }
+
+	//! @brief		継続条件ノードを得る
+	//! @return		継続条件ノード
+	tRisseASTNode * GetCondition() const { return Condition; }
+
+	//! @brief		増分処理ノードを得る
+	//! @return		増分処理ノード
+	tRisseASTNode * GetIterator() const { return Iterator; }
+
+	//! @brief		条件が真の間実行するノードを得る
+	//! @return		条件が真の間実行するノード
+	tRisseASTNode * GetBody() const { return Body; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 4;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Initializer;
+		case 1: return Condition;
+		case 2: return Iterator;
+		case 3: return Body;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return tRisseString(); }
 };
 //---------------------------------------------------------------------------
 
@@ -1050,19 +1131,19 @@ public:
 class tRisseASTNode_VarPair : public tRisseASTNode
 {
 	tRisseString Name; //!< 名前
-	tRisseASTNode * Initial; //!< 初期値ノード
+	tRisseASTNode * Initializer; //!< 初期値ノード
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
 	//! @param		name			名前
-	//! @param		initial			初期値ノード
+	//! @param		initializer			初期値ノード
 	tRisseASTNode_VarPair(risse_size position,
-		const tRisseString & name, tRisseASTNode * initial) :
+		const tRisseString & name, tRisseASTNode * initializer) :
 		tRisseASTNode(position, antVarPair),
-			Name(name), Initial(initial)
+			Name(name), Initializer(initializer)
 	{
-		if(Initial) Initial->SetParent(this);
+		if(Initializer) Initializer->SetParent(this);
 	}
 
 	//! @brief		名前を得る
@@ -1071,7 +1152,7 @@ public:
 
 	//! @brief		初期値ノードを得る
 	//! @return		初期値ノード
-	tRisseASTNode * GetInitial() const { return Initial; }
+	tRisseASTNode * GetInitializer() const { return Initializer; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
@@ -1087,7 +1168,7 @@ public:
 	{
 		switch(index)
 		{
-		case 0: return Initial;
+		case 0: return Initializer;
 		}
 		return NULL;
 	}

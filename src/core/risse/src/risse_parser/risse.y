@@ -307,9 +307,9 @@ statement
 	| while
 	| do_while
 	| for
-	| "break" ";"							{ /*cc->DoBreak();*/ }
-	| "continue" ";"						{ /*cc->DoContinue();*/ }
-	| "debugger" ";"						{ /*cc->DoDebugger();*/ }
+	| "break" ";"							{ $$ = new N(Break)(LP); }
+	| "continue" ";"						{ $$ = new N(Continue)(LP); }
+	| "debugger" ";"						{ $$ = new N(Debugger)(LP); }
 	| variable_def
 	| func_def
 	| property_def

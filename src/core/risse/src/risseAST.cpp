@@ -69,6 +69,14 @@ void tRisseASTNode::Dump(tRisseString & result, risse_int level)
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseASTNode_OneExpression::GetChildNameAt(risse_size index) const
+{
+	if(index == 0) return RISSE_WS("expression"); else return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_List::GetChildNameAt(risse_size index) const
 {
 	if(index < Array.size())
@@ -131,16 +139,6 @@ tRisseString tRisseASTNode_FuncArg::GetDumpComment() const
 tRisseString tRisseASTNode_Context::GetDumpComment() const
 {
 	return RisseASTContextTypeNames[ContextType];
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_ExprStmt::GetChildNameAt(risse_size index) const
-{
-	if(index == 0)
-		return RISSE_WS("expression");
-	return tRisseString();
 }
 //---------------------------------------------------------------------------
 
@@ -344,28 +342,5 @@ tRisseString tRisseASTNode_VarPair::GetChildNameAt(risse_size index) const
 	return tRisseString();
 }
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Return::GetChildNameAt(risse_size index) const
-{
-	if(index == 0)
-		return RISSE_WS("expression");
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Throw::GetChildNameAt(risse_size index) const
-{
-	if(index == 0)
-		return RISSE_WS("expression");
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-
 
 } // namespace Risse

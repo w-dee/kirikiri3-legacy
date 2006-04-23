@@ -292,4 +292,71 @@ tRisseString tRisseASTNode_If::GetChildNameAt(risse_size index) const
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_While::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0:
+		return RISSE_WS("expression");
+		break;
+	case 1:
+		return RISSE_WS("body");
+		break;
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_While::GetDumpComment() const
+{
+	if(SkipFirstCheck)
+		return RISSE_WS("SkipFirstCheck");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Var::GetChildNameAt(risse_size index) const
+{
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("item")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Var::GetDumpComment() const
+{
+	if(IsConstant)
+		return RISSE_WS("Constant");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_VarPair::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0:
+		return RISSE_WS("initial");
+		break;
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+
+
 } // namespace Risse

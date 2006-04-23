@@ -322,6 +322,34 @@ public: // 演算子
 	tRisseVariantBlock uminus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
 
 
+public: // キャスト
+	//-----------------------------------------------------------------------
+	//! @brief		文字列に変換
+	//! @return		文字列
+	//-----------------------------------------------------------------------
+	operator tRisseString() const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return CastToString_Void     ();
+		case vtInteger:	return CastToString_Integer  ();
+		case vtReal:	return CastToString_Real     ();
+		case vtBool:	return CastToString_Bool     ();
+		case vtString:	return CastToString_String   ();
+		case vtObject:	return CastToString_Object   ();
+		case vtOctet:	return CastToString_Octet    ();
+		}
+		return tRisseString();
+	}
+
+	tRisseString CastToString_Void     () const { return tRisseString(); }
+	tRisseString CastToString_Integer  () const;
+	tRisseString CastToString_Real     () const;
+	tRisseString CastToString_Bool     () const;
+	tRisseString CastToString_String   () const { return AsString(); }
+	tRisseString CastToString_Object   () const { return tRisseString(); /* incomplete */ }
+	tRisseString CastToString_Octet    () const{ return AsOctet().AsHumanReadable();  }
+
 public: // ユーティリティ
 	//-----------------------------------------------------------------------
 	//! @brief		人間が可読な形式に変換
@@ -347,9 +375,12 @@ public: // ユーティリティ
 	}
 
 	tRisseString AsHumanReadable_Void     (risse_size maxlen) const;
-	tRisseString AsHumanReadable_Integer  (risse_size maxlen) const;
-	tRisseString AsHumanReadable_Real     (risse_size maxlen) const;
-	tRisseString AsHumanReadable_Bool     (risse_size maxlen) const;
+	tRisseString AsHumanReadable_Integer  (risse_size maxlen) const
+					{ return CastToString_Integer(); }
+	tRisseString AsHumanReadable_Real     (risse_size maxlen) const
+					{ return CastToString_Real(); }
+	tRisseString AsHumanReadable_Bool     (risse_size maxlen) const
+					{ return CastToString_Bool(); }
 	tRisseString AsHumanReadable_String   (risse_size maxlen) const
 					{ return AsString().AsHumanReadable(maxlen); }
 	tRisseString AsHumanReadable_Object   (risse_size maxlen) const

@@ -67,10 +67,14 @@ src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 		cd src/risse_parser ;\
 		bison -dv --name-prefix=risse risse.y ;\
 		cat risse.tab.c | \
-			sed -e "s/risse.tab.h/risseParser.inc/" -e "s/risse.tab.c/risseParser.cpp/" \
+			sed -e "s|risse.tab.h|$(shell pwd)/src/risse_parser/risseParser.inc|" \
+				-e "s|risse.tab.c|$(shell pwd)/src/risse_parser/risseParser.cpp|" \
+				-e "s|risse\.y|$(shell pwd)/src/risse_parser/risse.y|" \
 				>  risseParser.cpp ;\
 		cat risse.tab.h | \
-			sed -e "s/risse.tab.h/risseParser.inc/" -e "s/risse.tab.c/risseParser.cpp/" \
+			sed -e "s|risse.tab.h|$(shell pwd)/src/risse_parser/risseParser.inc|" \
+				-e "s|risse.tab.c|$(shell pwd)/src/risse_parser/risseParser.cpp|" \
+				-e "s|risse\.y|$(shell pwd)/src/risse_parser/risse.y|" \
 				>  risseParser.inc ;\
 		rm risse.tab.c risse.tab.h ;\
 	)

@@ -67,6 +67,9 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Dict			)		//!< インライン辞書配列
 	RISSE_AST_ENUM_ITEM(ant, DictPair		)		//!< インライン辞書配列の名前と値
 	RISSE_AST_ENUM_ITEM(ant, If				)		//!< if (とelse)
+	RISSE_AST_ENUM_ITEM(ant, While			)		//!< while と do ～ while
+	RISSE_AST_ENUM_ITEM(ant, Var			)		//!< 変数宣言
+	RISSE_AST_ENUM_ITEM(ant, VarPair		)		//!< 変数宣言の変数名と初期値
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -758,7 +761,6 @@ class tRisseASTNode_Array : public tRisseASTNode_List
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	//! @param		position		ソースコード上の位置
 	tRisseASTNode_Array(risse_size position) :
 		tRisseASTNode_List(position, antArray) {;}
 
@@ -783,7 +785,6 @@ class tRisseASTNode_Dict : public tRisseASTNode_List
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
 	//! @param		position		ソースコード上の位置
 	tRisseASTNode_Dict(risse_size position) :
 		tRisseASTNode_List(position, antDict) {;}
@@ -935,6 +936,170 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	while文のノード(type=antWhile)
+//---------------------------------------------------------------------------
+class tRisseASTNode_While : public tRisseASTNode
+{
+	tRisseASTNode * Expression; //!< 条件式ノード
+	tRisseASTNode * Body; //!< 条件が真の間実行するノード
+	bool SkipFirstCheck; //!< 最初の式チェックを省略するかどうか (do～whileかどうか)
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		expression		条件式ノード
+	//! @param		body			条件が真の間実行するノード
+	//! @param		skipfirstcheck	最初の式チェックを省略するかどうか (do～whileかどうか)
+	tRisseASTNode_While(risse_size position,
+		tRisseASTNode * expression, tRisseASTNode * body, bool skipfirstcheck) :
+		tRisseASTNode(position, antWhile),
+			Expression(expression), Body(body), SkipFirstCheck(skipfirstcheck)
+	{
+		if(Expression) Expression->SetParent(this);
+		if(Body) Body->SetParent(this);
+	}
+
+	//! @brief		条件式ノードを得る
+	//! @return		条件式ノード
+	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		条件が真の間実行するノードを得る
+	//! @return		条件が真の間実行するノード
+	tRisseASTNode * GetBody() const { return Body; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Expression;
+		case 1: return Body;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	変数宣言ノード(type=antVar)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Var : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+	bool IsConstant; //!< 定数宣言の場合に真
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	tRisseASTNode_Var(risse_size position) :
+		tRisseASTNode_List(position, antVar)
+	{
+		IsConstant = false;
+	}
+
+	//! @brief		定数宣言かどうかを得る
+	//! @return		定数宣言かどうか
+	bool GetIsConstant() const { return IsConstant; }
+
+	//! @brief		定数宣言かどうかを設定する
+	//! @param		is_constant	定数宣言かどうか
+	void SetIsConstant(bool is_constant)
+	{
+		IsConstant = is_constant;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	変数宣言の名前と初期値のノード(type=antVarPair)
+//---------------------------------------------------------------------------
+class tRisseASTNode_VarPair : public tRisseASTNode
+{
+	tRisseString Name; //!< 名前
+	tRisseASTNode * Initial; //!< 初期値ノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		name			名前
+	//! @param		initial			初期値ノード
+	tRisseASTNode_VarPair(risse_size position,
+		const tRisseString & name, tRisseASTNode * initial) :
+		tRisseASTNode(position, antVarPair),
+			Name(name), Initial(initial)
+	{
+		if(Initial) Initial->SetParent(this);
+	}
+
+	//! @brief		名前を得る
+	//! @return		名前
+	const tRisseString & GetName() const { return Name; }
+
+	//! @brief		初期値ノードを得る
+	//! @return		初期値ノード
+	tRisseASTNode * GetInitial() const { return Initial; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Initial;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return Name; }
 };
 //---------------------------------------------------------------------------
 

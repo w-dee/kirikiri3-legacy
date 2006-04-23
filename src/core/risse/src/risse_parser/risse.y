@@ -223,7 +223,9 @@ int raise_yyerror(char * msg, void *pr);
 	inline_dic dic_elm dic_elm_list
 	if if_else
 	block block_or_statement statement
-	while do_while for variable_def variable_def_inner func_def property_def
+	while do_while for
+	variable_def variable_def_inner variable_id variable_id_list
+	func_def property_def
 	class_def return switch with case try throw
 
 
@@ -321,18 +323,18 @@ statement
 
 /* a while loop */
 while
-	: "while"								{ /*cc->EnterWhileCode(false);*/ }
-	  "(" expr_with_comma ")"							{ /*cc->CreateWhileExprCode($4, false);*/ }
-	  block_or_statement					{ /*cc->ExitWhileCode(false);*/ }
+	: "while"
+	  "(" expr ")"
+	  block_or_statement					{ $$ = new N(While)(LP, $3, $5, false); }
 ;
 
 /* a do-while loop */
 do_while
-	: "do"									{ /*cc->EnterWhileCode(true); */ }
+	: "do"
 	  block_or_statement
 	  "while"
-	  "(" expr_with_comma ")"							{ /*cc->CreateWhileExprCode($6, true); */ }
-	  ";"									{ /*cc->ExitWhileCode(true); */ }
+	  "(" expr ")"
+	  ";"									{ $$ = new N(While)(LP, $5, $2, true); }
 ;
 
 /* an if statement */
@@ -382,28 +384,26 @@ for_third_clause
 
 /* variable definition */
 variable_def
-	: variable_def_inner ";"
+	: variable_def_inner ";"				{ $$ = $1; }
 ;
 
 variable_def_inner
-	: "var" variable_id_list				{ ; }
-	| "const" variable_id_list				{ ; }
+	: "var" variable_id_list				{ $$ = $2; C(Var, $$)->SetIsConstant(false); }
+	| "const" variable_id_list				{ $$ = $2; C(Var, $$)->SetIsConstant(true); }
 		/* const: note that current version does not
 		   actually disallow re-assigning new value */
 ;
 
 /* list for the variable definition */
 variable_id_list
-	: variable_id
-	| variable_id_list "," variable_id
+	: variable_id							{ $$ = new N(Var)(LP); C(Var, $$)->AddChild($1); }
+	| variable_id_list "," variable_id		{ $$ = $1;             C(Var, $$)->AddChild($3); }
 ;
 
 /* a variable id and an optional initializer expression */
 variable_id
-	: T_SYMBOL								{ /*cc->AddLocalVariable(
-												lx->GetString($1)); */ }
-	| T_SYMBOL "=" expr						{ /*cc->InitLocalVariable(
-											  lx->GetString($1), $3); */ }
+	: T_SYMBOL								{ $$ = new N(VarPair)(LP, *$1, NULL); }
+	| T_SYMBOL "=" expr						{ $$ = new N(VarPair)(LP, *$1, $3); }
 ;
 
 /* a function definition */

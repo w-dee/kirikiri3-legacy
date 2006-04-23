@@ -28,7 +28,7 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Void     (risse_size maxlen) co
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseVariantBlock::AsHumanReadable_Integer  (risse_size maxlen) const
+tRisseString tRisseVariantBlock::CastToString_Integer  () const
 {
 	risse_char buf[40];
 	Risse_int64_to_str(AsInteger(), buf);
@@ -38,7 +38,7 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Integer  (risse_size maxlen) co
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseVariantBlock::AsHumanReadable_Real     (risse_size maxlen) const
+tRisseString tRisseVariantBlock::CastToString_Real     () const
 {
 	risse_int32 cls = RisseGetFPClass(AsReal());
 
@@ -69,7 +69,7 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Real     (risse_size maxlen) co
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseVariantBlock::AsHumanReadable_Bool     (risse_size maxlen) const
+tRisseString tRisseVariantBlock::CastToString_Bool     () const
 {
 	return AsBool()?
 		RISSE_WS("true"):

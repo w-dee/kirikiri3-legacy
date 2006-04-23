@@ -537,8 +537,8 @@ extends_name
 
 /* a return statement */
 return
-	: "return" ";"							{ /*cc->ReturnFromFunc(NULL);*/ }
-	| "return" expr_with_comma ";"						{ /*cc->ReturnFromFunc($2);*/ }
+	: "return" ";"							{ $$ = new N(Return)(LP, NULL); }
+	| "return" expr_with_comma ";"			{ $$ = new N(Return)(LP, $2); }
 ;
 
 
@@ -578,7 +578,7 @@ catch
 
 /* a throw statement */
 throw
-	: "throw" expr_with_comma ";"						{ /*cc->ProcessThrowCode($2);*/ }
+	: "throw" expr_with_comma ";"			{ $$ = new N(Throw)(LP, $2); }
 ;
 
 /* 式 */

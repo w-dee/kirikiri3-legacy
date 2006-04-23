@@ -71,6 +71,8 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, For			)		//!< for
 	RISSE_AST_ENUM_ITEM(ant, Var			)		//!< 変数宣言
 	RISSE_AST_ENUM_ITEM(ant, VarPair		)		//!< 変数宣言の変数名と初期値
+	RISSE_AST_ENUM_ITEM(ant, Return			)		//!< return
+	RISSE_AST_ENUM_ITEM(ant, Throw			)		//!< throw
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -466,7 +468,10 @@ public:
 	//! @brief		position		ソースコード上の位置
 	//! @brief		expression		式ノード
 	tRisseASTNode_ExprStmt(risse_size position, tRisseASTNode * expression) :
-		tRisseASTNode(position, antExprStmt), Expression(expression){;}
+		tRisseASTNode(position, antExprStmt), Expression(expression)
+	{
+		if(Expression) Expression->SetParent(this);
+	}
 
 	//! @brief		式ノードを得る
 	//! @return		式ノード
@@ -1183,6 +1188,103 @@ public:
 	tRisseString GetDumpComment() const { return Name; }
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	returnノード(type=antReturn)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Return : public tRisseASTNode
+{
+	tRisseASTNode * Expression; //!< 式ノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position		ソースコード上の位置
+	//! @brief		expression		式ノード
+	tRisseASTNode_Return(risse_size position, tRisseASTNode * expression) :
+		tRisseASTNode(position, antReturn), Expression(expression){;}
+
+	//! @brief		式ノードを得る
+	//! @return		式ノード
+	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Expression; else return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const
+	{
+		return tRisseString(); // 空
+	}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	throwノード(type=antThrow)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Throw : public tRisseASTNode
+{
+	tRisseASTNode * Expression; //!< 式ノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position		ソースコード上の位置
+	//! @brief		expression		式ノード
+	tRisseASTNode_Throw(risse_size position, tRisseASTNode * expression) :
+		tRisseASTNode(position, antThrow), Expression(expression){;}
+
+	//! @brief		式ノードを得る
+	//! @return		式ノード
+	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Expression; else return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const
+	{
+		return tRisseString(); // 空
+	}
+};
+//---------------------------------------------------------------------------
+
 
 
 

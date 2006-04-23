@@ -217,6 +217,7 @@ int raise_yyerror(char * msg, void *pr);
 
 
 %type <np>
+	toplevel_def_list def_list
 	expr expr_with_comma factor_expr call_arg call_arg_list
 	func_expr_def func_call_expr inline_array array_elm_list
 	inline_dic dic_elm dic_elm_list
@@ -254,23 +255,39 @@ int raise_yyerror(char * msg, void *pr);
 
 /* the program */
 program
-	: global_list
+	: toplevel_list
 ;
 
-/* global definitions */
-global_list
-	:										{ PR->PushContext(actTopLevel, RISSE_WS("top level")); }
-	  def_list								{ PR->PopContext(); }
+/* toplevel definitions */
+toplevel_list
+	: toplevel_def_list						{ PR->SetRootNode(C(Context, $1)); }
 ;
 
-/* definition list */
+/* toplevel definition list */
+toplevel_def_list
+	:										{ $$ = new N(Context)(LP, actTopLevel, RISSE_WS("TopLevel")); }
+	| toplevel_def_list block_or_statement	{ $$ = $1; if($2) C(Context, $$)->AddChild($2); }
+	| toplevel_def_list error ";"			{ if(yynerrs > 20)
+												YYABORT;
+											  else yyerrok; }
+;
+
+/* definition list of a block */
 def_list
-	:
-	| def_list block_or_statement			{ if($2) PR->AddNode($2); }
+	: 										{ $$ = new N(Context)(LP, actBlock, RISSE_WS("Block"));  }
+	| def_list block_or_statement			{ $$ = $1; if($2) C(Context, $$)->AddChild($2); }
 	| def_list error ";"					{ if(yynerrs > 20)
 												YYABORT;
 											  else yyerrok; }
 ;
+
+/* a block */
+block
+	: "{"
+	  def_list
+	  "}"									{ $$ = $2; }
+;
+
 
 /* a block or a single statement */
 block_or_statement
@@ -300,13 +317,6 @@ statement
 	| case
 	| try
 	| throw
-;
-
-/* a block */
-block
-	: "{"									{ /*cc->EnterBlock();*/ }
-	  def_list
-	  "}"									{ /*cc->ExitBlock();*/ }
 ;
 
 /* a while loop */
@@ -756,7 +766,6 @@ int raise_yyerror(char * msg, void *pr)
 tRisseParser::tRisseParser(tRisseLexer * lexer)
 {
 	Root = NULL;
-	CurrentContext = NULL;
 	Lexer = lexer;
 
 	yyparse(this);
@@ -765,51 +774,11 @@ tRisseParser::tRisseParser(tRisseLexer * lexer)
 
 
 //---------------------------------------------------------------------------
-void tRisseParser::PushContext(tRisseASTContextType ctype, const tRisseString & name)
+void tRisseParser::SetRootNode(tRisseASTNode * root)
 {
-	if(!Root)
-	{
-		// 最初のコンテキスト
-		RISSE_ASSERT(CurrentContext == NULL && ctype == actTopLevel);
-	}
-
-	tRisseASTNode_Context * newcontext =
-		new tRisseASTNode_Context(GetCurrentLexerPosition(), ctype, name);
-
-	if(!Root)
-	{
-		// 最初のコンテキスト
-		CurrentContext = newcontext;
-		Root = CurrentContext;
-	}
-	else
-	{
-		// 入れ子のコンテキスト
-		CurrentContext->AddChild(newcontext);
-		CurrentContext = newcontext;
-	}
+	Root = root;
 }
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseParser::PopContext()
-{
-	CurrentContext = reinterpret_cast<tRisseASTNode_Context*>(CurrentContext->GetParent());
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseParser::AddNode(tRisseASTNode * node)
-{
-	RISSE_ASSERT(CurrentContext != NULL);
-
-	CurrentContext->AddChild(node);
-}
-//---------------------------------------------------------------------------
-
-
 
 
 } // namespace Risse

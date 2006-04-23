@@ -29,7 +29,6 @@ namespace Risse {
 class tRisseParser : public tRisseCollectee
 {
 	tRisseASTNode * Root; //!< ルートノード
-	tRisseASTNode_Context * CurrentContext; //!< 現在のコンテキスト
 	tRisseLexer * Lexer; //!< 字句解析器
 
 public:
@@ -47,21 +46,9 @@ public:
 	//! @return		現在の字句解析位置
 	risse_size GetCurrentLexerPosition() const { return Lexer->GetPosition(); }
 
-	//! @brief		コンテキストを作成し、push する
-	//! @param		name		コンテキスト名
-	//! @param		ctype		コンテキストタイプ
-	void PushContext(tRisseASTContextType ctype, const tRisseString & name);
-
-	//! @brief		コンテキストをpopする
-	void PopContext();
-
-	//! @brief		ノードを現在のコンテキストに追加する
-	//! @param		node		ノード
-	void AddNode(tRisseASTNode * node);
-
-	//! @brief		現在のコンテキストを得る
-	//! @return		現在のコンテキスト
-	tRisseASTNode_Context * GetCurrentContext() const { return CurrentContext; }
+	//! @brief		ルートノードを設定する
+	//! @param		root		ルートノード
+	void SetRootNode(tRisseASTNode * root);
 
 	//! @brief		ルートノードを得る
 	//! @return		ルートノード

@@ -76,6 +76,7 @@ RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(ContextType)
 	RISSE_AST_ENUM_ITEM(act, TopLevel		)		//!< トップレベル
+	RISSE_AST_ENUM_ITEM(act, Block			)		//!< ブロック
 	RISSE_AST_ENUM_ITEM(act, Class			)		//!< クラス
 	RISSE_AST_ENUM_ITEM(act, Func			)		//!< 関数
 RISSE_AST_ENUM_END

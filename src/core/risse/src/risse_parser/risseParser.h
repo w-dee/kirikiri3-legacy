@@ -42,9 +42,9 @@ public:
 	//! @return		トークンID
 	int GetToken(tRisseVariant & value) { return Lexer->GetToken(value); }
 
-	//! @brief		現在の字句解析位置を得る
-	//! @return		現在の字句解析位置
-	risse_size GetCurrentLexerPosition() const { return Lexer->GetPosition(); }
+	//! @brief		Lexerを得る
+	//! @return		Lexer
+	tRisseLexer * GetLexer() const { return Lexer; }
 
 	//! @brief		ルートノードを設定する
 	//! @param		root		ルートノード

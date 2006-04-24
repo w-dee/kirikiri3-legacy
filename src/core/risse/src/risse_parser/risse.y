@@ -35,8 +35,11 @@
 /*! パーサへのアクセス */
 #define PR (reinterpret_cast<tRisseParser*>(pr))
 
+/*! 字句解析器 */
+#define LX (PR->GetLexer())
+
 /*! 字句解析器の現在の解析位置 */
-#define LP (PR->GetCurrentLexerPosition())
+#define LP (LX->GetPosition())
 
 /* tRisseASTNode_XXXX の省略形 */
 #ifdef N
@@ -63,6 +66,39 @@ int raise_yyerror(char * msg, void *pr);
 
 /* yyerror のリダイレクト */
 #define risseerror(X) raise_yyerror(X, pr);
+
+
+/*!
+	@brief	文字列リテラルと式を連結するノードを返す
+	@param	lp			lexer 解析位置
+	@param	conststr	文字列リテラル
+	@param	node		式ノード
+	@return	連結を表すノード
+*/
+static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
+		const tRisseVariant & conststr, tRisseASTNode * node)
+{
+	if(((tRisseString)(conststr)).IsEmpty())
+		return node; // 文字列リテラルが空文字列
+	return new N(Binary)(lp, abtAdd, new N(Factor)(lp, aftConstant, conststr), node);
+}
+
+
+/*!
+	@brief	文字列リテラルと式を連結するノードを返す
+	@param	lp			lexer 解析位置
+	@param	conststr	文字列リテラル
+	@param	node		式ノード
+	@return	連結を表すノード
+*/
+static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
+		tRisseASTNode * node, const tRisseVariant & conststr)
+{
+	if(((tRisseString)(conststr)).IsEmpty())
+		return node; // 文字列リテラルが空文字列
+	return new N(Binary)(lp, abtAdd, node, new N(Factor)(lp, aftConstant, conststr));
+}
+
 
 %}
 
@@ -212,6 +248,8 @@ int raise_yyerror(char * msg, void *pr);
 
 
 %token <value>		T_CONSTVAL
+%token <value>		T_EMSTRING_AMPERSAND_D T_EMSTRING_AMPERSAND_S
+%token <value>		T_EMSTRING_DOLLAR_D T_EMSTRING_DOLLAR_S
 %token <value>		T_SYMBOL
 %token <value>		T_REGEXP
 
@@ -228,6 +266,9 @@ int raise_yyerror(char * msg, void *pr);
 	variable_def variable_def_inner variable_id variable_id_list
 	func_def property_def
 	class_def return switch with case try throw
+	embeddable_string
+	embeddable_string_d embeddable_string_d_unit
+	embeddable_string_s embeddable_string_s_unit
 
 
 /* 演算子の優先順位 */
@@ -320,6 +361,7 @@ statement
 	| case
 	| try
 	| throw
+	| T_SYMBOL ":"							{ ; }
 ;
 
 /* a while loop */
@@ -669,6 +711,7 @@ factor_expr
 	| "/"							{ /*lx->SetStartOfRegExp();*/ }
 	  T_REGEXP						{ /*$$ = cc->MakeNP0(T_REGEXP);
 									  $$->SetValue(lx->GetValue($3));*/ }
+	| embeddable_string
 ;
 
 
@@ -737,6 +780,52 @@ dic_elm
 dummy_elm_opt
 	: /* empty */
 	| ","
+;
+
+/* 埋め込み可能な文字列リテラル */
+/*
+   埋め込み可能な文字列リテラルは @ に続くシングルクオーテーションまたは
+   ダブルクオーテーションで囲まれた文字列リテラルであり、中に ${式} あるいは
+   &式; の形式での式の埋め込みができる (実行時に展開される) */
+/*
+   ダブルクオーテーションで始まった文字列リテラルはダブルクオーテーションで
+   終了する必要があり、シングルクオーテーションにおいても同様だが、
+   クオーテーションの種類についてはここでは文脈を分けることで対処する。
+*/
+/*
+   ${ で始まる埋め込み式は }  で終わるため、parser は式と '}' が来たその直後に
+   Lexer に対して埋め込み可能な文字列リテラルの再開を告げる
+   (&式; 形式についても同様)。Lexer はこれを受け、再び文字列リテラルの解析モードに入る。
+*/
+embeddable_string
+	: embeddable_string_d T_CONSTVAL { $$ = RisseAddExprConstStr(LP, $1, *$2); }
+	| embeddable_string_s T_CONSTVAL { $$ = RisseAddExprConstStr(LP, $1, *$2); }
+;
+
+/* 埋め込み可能な文字列リテラル(ダブルクオーテーション) */
+embeddable_string_d
+	: embeddable_string_d_unit
+	| embeddable_string_d embeddable_string_d_unit	{ $$ = new N(Binary)(LP, abtAdd, $1, $2); }
+;
+
+embeddable_string_d_unit
+	: T_EMSTRING_AMPERSAND_D expr_with_comma ";" { $$ = RisseAddExprConstStr(LP, *$1, $2);
+													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
+	| T_EMSTRING_DOLLAR_D    expr_with_comma "}" { $$ = RisseAddExprConstStr(LP, *$1, $2);
+													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
+;
+
+/* 埋め込み可能な文字列リテラル(シングルクオーテーション) */
+embeddable_string_s
+	: embeddable_string_s_unit
+	| embeddable_string_s embeddable_string_s_unit	{ $$ = new N(Binary)(LP, abtAdd, $1, $2); }
+;
+
+embeddable_string_s_unit
+	: T_EMSTRING_AMPERSAND_S expr_with_comma ";" { $$ = RisseAddExprConstStr(LP, *$1, $2);
+													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
+	| T_EMSTRING_DOLLAR_S    expr_with_comma "}" { $$ = RisseAddExprConstStr(LP, *$1, $2);
+													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
 ;
 
 /*###########################################################################*/

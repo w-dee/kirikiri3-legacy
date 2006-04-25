@@ -343,4 +343,28 @@ tRisseString tRisseASTNode_VarPair::GetChildNameAt(risse_size index) const
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_With_Switch::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0: return RISSE_WS("object");
+	case 1: return RISSE_WS("body");
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Case::GetDumpComment() const
+{
+	if(GetExpression() == NULL) return RISSE_WS("default");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+
 } // namespace Risse

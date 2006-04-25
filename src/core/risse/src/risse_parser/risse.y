@@ -265,7 +265,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	for for_first_clause for_second_clause for_third_clause
 	variable_def variable_def_inner variable_id variable_id_list
 	func_def property_def
-	class_def return switch with case try throw
+	class_def return switch with label try throw
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
 	embeddable_string_s embeddable_string_s_unit
@@ -358,10 +358,9 @@ statement
 	| return
 	| switch
 	| with
-	| case
 	| try
 	| throw
-	| T_SYMBOL ":"							{ ; }
+	| label
 ;
 
 /* a while loop */
@@ -587,21 +586,22 @@ return
 /* a switch statement */
 switch
 	: "switch" "("
-	  expr_with_comma ")"								{ /*cc->EnterSwitchCode($3);*/ }
-	  block									{ /*cc->ExitSwitchCode();*/ }
+	  expr_with_comma ")"
+	  block									{ $$ = new N(Switch)(LP, $3, $5); }
 ;
 
 /* a with statement */
 with
 	: "with" "("
-	  expr_with_comma ")"								{ /*cc->EnterWithCode($3);*/ }
-	  block_or_statement					{ /*cc->ExitWithCode();*/ }
+	  expr_with_comma ")"
+	  block_or_statement					{ $$ = new N(With)(LP, $3, $5); }
 ;
 
-/* case: */
-case
-	: "case" expr ":"						{ /*cc->ProcessCaseCode($2);*/ }
-	| "default" ":"							{ /*cc->ProcessCaseCode(NULL);*/ }
+/* label or case: */
+label
+	: "case" expr ":"						{ $$ = new N(Case)(LP, $2); }
+	| "default" ":"							{ $$ = new N(Case)(LP, NULL); }
+	| T_SYMBOL ":"							{ $$ = new N(Label)(LP, *$1); }
 ;
 
 /* a structured exception handling */

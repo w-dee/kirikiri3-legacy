@@ -76,6 +76,10 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Break			)		//!< break
 	RISSE_AST_ENUM_ITEM(ant, Continue		)		//!< continue
 	RISSE_AST_ENUM_ITEM(ant, Debugger		)		//!< debugger
+	RISSE_AST_ENUM_ITEM(ant, With			)		//!< with
+	RISSE_AST_ENUM_ITEM(ant, Switch			)		//!< switch
+	RISSE_AST_ENUM_ITEM(ant, Label			)		//!< ラベル
+	RISSE_AST_ENUM_ITEM(ant, Case			)		//!< case / default
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -1299,7 +1303,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	break文ノード(type=antContinue)
+//! @brief	continue文ノード(type=antContinue)
 //---------------------------------------------------------------------------
 class tRisseASTNode_Continue : public tRisseASTNode_NoChildren
 {
@@ -1313,7 +1317,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	break文ノード(type=antDebugger)
+//! @brief	debugger文ノード(type=antDebugger)
 //---------------------------------------------------------------------------
 class tRisseASTNode_Debugger : public tRisseASTNode_NoChildren
 {
@@ -1324,6 +1328,149 @@ public:
 		tRisseASTNode_NoChildren(position, antDebugger) {;}
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	with文とswitch文の基本クラス
+//---------------------------------------------------------------------------
+class tRisseASTNode_With_Switch : public tRisseASTNode
+{
+	tRisseASTNode * Object; //!< オブジェクトノード
+	tRisseASTNode * Body; //!< ブロックまたは文のノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		type			ノードタイプ
+	//! @param		object			オブジェクトノード
+	//! @param		body			ブロックまたは文のノード
+	tRisseASTNode_With_Switch(risse_size position,
+		tRisseASTNodeType type,
+		tRisseASTNode * object, tRisseASTNode * body) :
+		tRisseASTNode(position, type),
+			Object(object), Body(body)
+	{
+		if(Object) Object->SetParent(this);
+		if(Body) Body->SetParent(this);
+	}
+
+	//! @brief		オブジェクトノードを得る
+	//! @return		オブジェクトノード
+	tRisseASTNode * GetObject() const { return Object; }
+
+	//! @brief		ブロックまたは文のノードを得る
+	//! @return		ブロックまたは文のノード
+	tRisseASTNode * GetBody() const { return Body; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Object;
+		case 1: return Body;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return tRisseString(); }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	with文ノード(type=antWith)
+//---------------------------------------------------------------------------
+class tRisseASTNode_With : public tRisseASTNode_With_Switch
+{
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		object			オブジェクトノード
+	//! @param		body			ブロックまたは文のノード
+	tRisseASTNode_With(risse_size position,
+		tRisseASTNode * object, tRisseASTNode * body) :
+		tRisseASTNode_With_Switch(position, antWith, object, body) {;}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	switch文ノード(type=antSwitch)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Switch : public tRisseASTNode_With_Switch
+{
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		object			オブジェクトノード
+	//! @param		body			ブロックまたは文のノード
+	tRisseASTNode_Switch(risse_size position,
+		tRisseASTNode * object, tRisseASTNode * body) :
+		tRisseASTNode_With_Switch(position, antSwitch, object, body) {;}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	ラベルノード(type=antLabel)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Label : public tRisseASTNode_NoChildren
+{
+	tRisseString Name; //!< ラベル名
+
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position		ソースコード上の位置
+	//! @param		name			ラベル名
+	tRisseASTNode_Label(risse_size position, const tRisseString & name) :
+		tRisseASTNode_NoChildren(position, antLabel), Name(name) {;}
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const
+	{
+		return Name.AsHumanReadable();
+	}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	case  / default ノード(type=antCase)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Case : public tRisseASTNode_OneExpression
+{
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position		ソースコード上の位置
+	//! @param		expression		式ノード
+	tRisseASTNode_Case(risse_size position, tRisseASTNode * expression) :
+		tRisseASTNode_OneExpression(position, antCase, expression) {;}
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
 
 
 

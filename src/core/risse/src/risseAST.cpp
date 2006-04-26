@@ -104,7 +104,7 @@ tRisseString tRisseASTNode_FuncCall::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncArg::GetChildNameAt(risse_size index) const
+tRisseString tRisseASTNode_FuncCallArg::GetChildNameAt(risse_size index) const
 {
 	if(index == 0)
 		return RISSE_WS("expression");
@@ -114,7 +114,7 @@ tRisseString tRisseASTNode_FuncArg::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncArg::GetDumpComment() const
+tRisseString tRisseASTNode_FuncCallArg::GetDumpComment() const
 {
 	if(Expand)
 		return RISSE_WS("expand");
@@ -389,6 +389,51 @@ tRisseString tRisseASTNode_Catch::GetDumpComment() const
 	return tRisseString(RISSE_WS("variable=")) + Name.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncDecl::GetChildNameAt(risse_size index) const
+{
+	if(index == inherited::GetChildCount()) return RISSE_WS("body");
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("argument")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncDecl::GetDumpComment() const
+{
+	if(Name.IsEmpty()) return RISSE_WS("anonymous");
+	return Name.AsHumanReadable();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncDeclArg::GetChildNameAt(risse_size index) const
+{
+	if(index == 0)
+		return RISSE_WS("initializer");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncDeclArg::GetDumpComment() const
+{
+	tRisseString ret = Name.AsHumanReadable();
+	if(Collapse)
+		ret += RISSE_WS(", collapse");
+	return ret;
+}
+//---------------------------------------------------------------------------
+
 
 
 } // namespace Risse

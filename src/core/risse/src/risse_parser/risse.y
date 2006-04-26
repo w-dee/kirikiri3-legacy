@@ -264,7 +264,9 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	while do_while
 	for for_first_clause for_second_clause for_third_clause
 	variable_def variable_def_inner variable_id variable_id_list
-	func_def property_def
+	func_def func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
+	func_decl_arg func_decl_arg_collapse
+	property_def
 	class_def return switch with label try throw catch catch_list catch_or_finally
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
@@ -448,59 +450,48 @@ variable_id
 
 /* a function definition */
 func_def
-	: "function" T_SYMBOL					{ /*sb->PushContextStack(
-												lx->GetString($2),
-											  ctFunction);
-											  cc->EnterBlock();*/ }
+	: "function" T_SYMBOL
 	  func_decl_arg_opt
-	  block									{ /*cc->ExitBlock(); sb->PopContextStack(); */ }
+	  block									{ $$ = $3; C(FuncDecl, $$)->SetName(*$2);
+	  										  C(FuncDecl, $$)->SetBody($4); }
 ;
 
 /* a function expression definition */
 func_expr_def
-	: "function"							{ /*sb->PushContextStack(
-												RISSE_WS("(anonymous)"),
-											  ctExprFunction);
-											  cc->EnterBlock(); */ }
+	: "function"
 	  func_decl_arg_opt
-	  block									{ /*cc->ExitBlock();
-											  tRisseVariant v(cc);
-											  sb->PopContextStack();
-											  $$ = cc->MakeNP0(T_CONSTVAL);
-											  $$->SetValue(v); */ }
+	  block									{ $$ = $2; C(FuncDecl, $$)->SetBody($3); }
 ;
 
 /* the argument definition of a function definition */
 func_decl_arg_opt
-	: /* empty */
-	| "(" func_decl_arg_collapse ")"
-	| "(" func_decl_arg_list ")"
-	| "(" func_decl_arg_at_least_one "," func_decl_arg_collapse ")"
+	: /* empty */							{ $$ = new N(FuncDecl)(LP); }
+	| "(" func_decl_arg_collapse ")"		{ $$ = $2; }
+	| "(" func_decl_arg_list ")"			{ $$ = $2; }
+	| "(" func_decl_arg_at_least_one ","
+	  func_decl_arg_collapse ")"			{ $$ = $2; C(FuncDecl, $$)->AddChild($4); }
 ;
 
 /* the argument list */
 func_decl_arg_list
-	: /* empty */
+	: /* empty */							{ $$ = new N(FuncDecl)(LP); }
 	| func_decl_arg_at_least_one
 ;
 
 func_decl_arg_at_least_one
-	: func_decl_arg
-	| func_decl_arg_at_least_one "," func_decl_arg
+	: func_decl_arg							{ $$ = new N(FuncDecl)(LP); C(FuncDecl, $$)->AddChild($1); }
+	| func_decl_arg_at_least_one ","
+	  func_decl_arg							{ $$ =$1; C(FuncDecl, $$)->AddChild($3); }
 ;
 
 func_decl_arg
-	: T_SYMBOL								{ /*cc->AddFunctionDeclArg(
-												lx->GetString($1), NULL); */ }
-	| T_SYMBOL "=" expr						{ /*cc->AddFunctionDeclArg(
-												lx->GetString($1), $3); */ }
+	: T_SYMBOL								{ $$ = new N(FuncDeclArg)(LP, *$1, NULL, false); }
+	| T_SYMBOL "=" expr						{ $$ = new N(FuncDeclArg)(LP, *$1, $3, false); }
 ;
 
 func_decl_arg_collapse
-	: "*"									{ /*cc->AddFunctionDeclArgCollapse(
-												NULL); */ }
-	| T_SYMBOL "*"							{ /*cc->AddFunctionDeclArgCollapse(
-												lx->GetString($1)); */ }
+	: "*"									{ $$ = new N(FuncDeclArg)(LP, tRisseString(), NULL, true); }
+	| T_SYMBOL "*"							{ $$ = new N(FuncDeclArg)(LP, *$1, NULL, true); }
 /*
 	These are currently not supported
 	| T_SYMBOL "*" "=" inline_array			{ ; }
@@ -621,7 +612,7 @@ catch_or_finally
 
 catch_list
 	: catch										{ $$ = new N(Try)(LP); C(Try, $$)->AddChild($1); }
-	| catch_list catch							{ C(Try, $1)->AddChild($2); }
+	| catch_list catch							{ $$ = $1; C(Try, $1)->AddChild($2); }
 ;
 
 catch
@@ -752,9 +743,9 @@ call_arg_list
 
 call_arg
 	: /* empty */						{ $$ = NULL; }
-	| "*"								{ $$ = new N(FuncArg)(LP, NULL, true); }
-	| expr "*" 							{ $$ = new N(FuncArg)(LP, $1, true); }
-	| expr								{ $$ = new N(FuncArg)(LP, $1, false); }
+	| "*"								{ $$ = new N(FuncCallArg)(LP, NULL, true); }
+	| expr "*" 							{ $$ = new N(FuncCallArg)(LP, $1, true); }
+	| expr								{ $$ = new N(FuncCallArg)(LP, $1, false); }
 ;
 
 

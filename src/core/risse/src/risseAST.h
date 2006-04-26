@@ -62,7 +62,7 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
 	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
-	RISSE_AST_ENUM_ITEM(ant, FuncArg		)		//!< 関数の引数
+	RISSE_AST_ENUM_ITEM(ant, FuncCallArg	)		//!< 関数呼び出しの引数
 	RISSE_AST_ENUM_ITEM(ant, Array			)		//!< インライン配列
 	RISSE_AST_ENUM_ITEM(ant, Dict			)		//!< インライン辞書配列
 	RISSE_AST_ENUM_ITEM(ant, DictPair		)		//!< インライン辞書配列の名前と値
@@ -82,6 +82,8 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Case			)		//!< case / default
 	RISSE_AST_ENUM_ITEM(ant, Try			)		//!< try
 	RISSE_AST_ENUM_ITEM(ant, Catch			)		//!< catch
+	RISSE_AST_ENUM_ITEM(ant, FuncDecl		)		//!< 関数呼び出し
+	RISSE_AST_ENUM_ITEM(ant, FuncDeclArg	)		//!< 関数呼び出しの引数
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -92,8 +94,6 @@ RISSE_AST_ENUM_END
 RISSE_AST_ENUM_DEF(ContextType)
 	RISSE_AST_ENUM_ITEM(act, TopLevel		)		//!< トップレベル
 	RISSE_AST_ENUM_ITEM(act, Block			)		//!< ブロック
-	RISSE_AST_ENUM_ITEM(act, Class			)		//!< クラス
-	RISSE_AST_ENUM_ITEM(act, Func			)		//!< 関数
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -477,7 +477,7 @@ public:
 	void SetCreateNew(bool b = true) { CreateNew = b; }
 
 	//! @brief		new による関数呼び出しかどうかを得る
-	//! @return		b	new による関数呼び出しかどうか
+	//! @return		new による関数呼び出しかどうか
 	bool GetCreateNew() const { return CreateNew; }
 
 	//! @brief		子ノードの個数を得る
@@ -509,9 +509,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	関数の引数を表すノード(type=antFuncArg)
+//! @brief	関数の引数を表すノード(type=antFuncCallArg)
 //---------------------------------------------------------------------------
-class tRisseASTNode_FuncArg : public tRisseASTNode
+class tRisseASTNode_FuncCallArg : public tRisseASTNode
 {
 	tRisseASTNode * Expression; //!< 引数を表す式ノード(NULL = デフォルト引数)
 	bool Expand; //!< 配列の引数への展開を行うかどうか
@@ -519,10 +519,10 @@ class tRisseASTNode_FuncArg : public tRisseASTNode
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	//! @brief		expression		引数を表す式ノード
-	//! @brief		expand			配列の引数への展開を行うかどうか
-	tRisseASTNode_FuncArg(risse_size position, tRisseASTNode * expression, bool expand) :
-		tRisseASTNode(position, antFuncArg), Expression(expression), Expand(expand)
+	//! @param		expression		引数を表す式ノード
+	//! @param		expand			配列の引数への展開を行うかどうか
+	tRisseASTNode_FuncCallArg(risse_size position, tRisseASTNode * expression, bool expand) :
+		tRisseASTNode(position, antFuncCallArg), Expression(expression), Expand(expand)
 	{
 		if(Expression) Expression->SetParent(this);
 	}
@@ -1267,8 +1267,8 @@ class tRisseASTNode_Return : public tRisseASTNode_OneExpression
 {
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
-	//! @brief		expression		式ノード
+	//! @param		position		ソースコード上の位置
+	//! @param		expression		式ノード
 	tRisseASTNode_Return(risse_size position, tRisseASTNode * expression) :
 		tRisseASTNode_OneExpression(position, antReturn, expression) {;}
 };
@@ -1282,8 +1282,8 @@ class tRisseASTNode_Throw : public tRisseASTNode_OneExpression
 {
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
-	//! @brief		expression		式ノード
+	//! @param		position		ソースコード上の位置
+	//! @param		expression		式ノード
 	tRisseASTNode_Throw(risse_size position, tRisseASTNode * expression) :
 		tRisseASTNode_OneExpression(position, antThrow, expression) {;}
 };
@@ -1297,7 +1297,7 @@ class tRisseASTNode_Break : public tRisseASTNode_NoChildren
 {
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
 	tRisseASTNode_Break(risse_size position) :
 		tRisseASTNode_NoChildren(position, antBreak) {;}
 };
@@ -1311,7 +1311,7 @@ class tRisseASTNode_Continue : public tRisseASTNode_NoChildren
 {
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
 	tRisseASTNode_Continue(risse_size position) :
 		tRisseASTNode_NoChildren(position, antContinue) {;}
 };
@@ -1325,7 +1325,7 @@ class tRisseASTNode_Debugger : public tRisseASTNode_NoChildren
 {
 public:
 	//! @brief		コンストラクタ
-	//! @brief		position		ソースコード上の位置
+	//! @param		position		ソースコード上の位置
 	tRisseASTNode_Debugger(risse_size position) :
 		tRisseASTNode_NoChildren(position, antDebugger) {;}
 };
@@ -1599,6 +1599,131 @@ public:
 		case 1: return Body;
 		}
 		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	関数宣言のASTノード(type=antFuncDecl)
+//---------------------------------------------------------------------------
+class tRisseASTNode_FuncDecl : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+	tRisseASTNode * Body; //!< 関数ボディ
+	tRisseString Name; //!< 関数名
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	tRisseASTNode_FuncDecl(risse_size position) :
+		tRisseASTNode_List(position, antFuncDecl)
+	{
+		Body = NULL;
+	}
+
+	//! @brief		関数ボディを設定する
+	//! @param		node		関数ボディ
+	void SetBody(tRisseASTNode * node)
+		{ Body = node; Body->SetParent(this); }
+
+	//! @brief		関数ボディを得る
+	//! @return		関数ボディ
+	tRisseASTNode * GetBody() const { return Body; }
+
+	//! @brief		関数名を設定する
+	//! @param		name	関数名
+	void SetName(const tRisseString & name) { Name = name; }
+
+	//! @brief		関数名を得る
+	//! @return		関数名
+	tRisseString GetName() const { return Name; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return inherited::GetChildCount() + 1; // +1 = Body
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == inherited::GetChildCount()) return Body;
+		return inherited::GetChildAt(index);
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	関数の引数を表すノード(type=antFuncDeclArg)
+//---------------------------------------------------------------------------
+class tRisseASTNode_FuncDeclArg : public tRisseASTNode
+{
+	tRisseString Name; //!< 引数名
+	tRisseASTNode * Initializer; //!< 初期値を表すノード(NULL = 初期値無し)
+	bool Collapse; //!< 引数の配列への圧縮を行うかどうか
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		name			引数名
+	//! @param		initializer		初期値を表すノード
+	//! @param		collapse		引数の配列への圧縮を行うかどうか
+	tRisseASTNode_FuncDeclArg(risse_size position, const tRisseString & name,
+		tRisseASTNode * initializer, bool collapse) :
+		tRisseASTNode(position, antFuncDeclArg), Name(name),
+		Initializer(initializer), Collapse(collapse)
+	{
+		if(Initializer) Initializer->SetParent(this);
+	}
+
+	//! @brief		初期値を表すノード(を得る
+	//! @return		初期値を表すノード(
+	tRisseASTNode * GetInitializer() const { return Initializer; }
+
+	//! @brief		引数の配列への圧縮を行うかどうかを得る
+	//! @return		引数の配列への圧縮を行うかどうか
+	bool GetCollapse() const { return Collapse; }
+
+	//! @brief		引数名を得る
+	//! @return		引数名
+	tRisseString GetName() const { return Name; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Initializer; else return NULL;
 	}
 
 	//! @brief		指定されたインデックスの子ノードの名前を得る

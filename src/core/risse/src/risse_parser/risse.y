@@ -41,11 +41,11 @@
 /*! 字句解析器の現在の解析位置 */
 #define LP (LX->GetPosition())
 
-/* tRisseASTNode_XXXX の省略形 */
+/* new tRisseASTNode_XXXX の省略形 */
 #ifdef N
  #undef N
 #endif
-#define N(XXXX) tRisseASTNode_##XXXX
+#define N(XXXX) new tRisseASTNode_##XXXX
 
 /* tRisseASTNode_XXXX へのキャスト */
 #ifdef C
@@ -80,7 +80,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 {
 	if(((tRisseString)(conststr)).IsEmpty())
 		return node; // 文字列リテラルが空文字列
-	return new N(Binary)(lp, abtAdd, new N(Factor)(lp, aftConstant, conststr), node);
+	return N(Binary)(lp, abtAdd, N(Factor)(lp, aftConstant, conststr), node);
 }
 
 
@@ -96,7 +96,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 {
 	if(((tRisseString)(conststr)).IsEmpty())
 		return node; // 文字列リテラルが空文字列
-	return new N(Binary)(lp, abtAdd, node, new N(Factor)(lp, aftConstant, conststr));
+	return N(Binary)(lp, abtAdd, node, N(Factor)(lp, aftConstant, conststr));
 }
 
 
@@ -311,7 +311,7 @@ toplevel_list
 
 /* toplevel definition list */
 toplevel_def_list
-	:										{ $$ = new N(Context)(LP, actTopLevel, RISSE_WS("TopLevel")); }
+	:										{ $$ = N(Context)(LP, actTopLevel, RISSE_WS("TopLevel")); }
 	| toplevel_def_list block_or_statement	{ $$ = $1; if($2) C(Context, $$)->AddChild($2); }
 	| toplevel_def_list error ";"			{ if(yynerrs > 20)
 												YYABORT;
@@ -320,7 +320,7 @@ toplevel_def_list
 
 /* definition list of a block */
 def_list
-	: 										{ $$ = new N(Context)(LP, actBlock, RISSE_WS("Block"));  }
+	: 										{ $$ = N(Context)(LP, actBlock, RISSE_WS("Block"));  }
 	| def_list block_or_statement			{ $$ = $1; if($2) C(Context, $$)->AddChild($2); }
 	| def_list error ";"					{ if(yynerrs > 20)
 												YYABORT;
@@ -344,15 +344,15 @@ block_or_statement
 /* a statement */
 statement
 	: ";"									{ $$ = NULL; }
-	| expr_with_comma ";"					{ $$ = new N(ExprStmt)(LP, $1); }
+	| expr_with_comma ";"					{ $$ = N(ExprStmt)(LP, $1); }
 	| if
 	| if_else
 	| while
 	| do_while
 	| for
-	| "break" ";"							{ $$ = new N(Break)(LP); }
-	| "continue" ";"						{ $$ = new N(Continue)(LP); }
-	| "debugger" ";"						{ $$ = new N(Debugger)(LP); }
+	| "break" ";"							{ $$ = N(Break)(LP); }
+	| "continue" ";"						{ $$ = N(Continue)(LP); }
+	| "debugger" ";"						{ $$ = N(Debugger)(LP); }
 	| variable_def
 	| func_def
 	| property_def
@@ -369,7 +369,7 @@ statement
 while
 	: "while"
 	  "(" expr ")"
-	  block_or_statement					{ $$ = new N(While)(LP, $3, $5, false); }
+	  block_or_statement					{ $$ = N(While)(LP, $3, $5, false); }
 ;
 
 /* a do-while loop */
@@ -378,14 +378,14 @@ do_while
 	  block_or_statement
 	  "while"
 	  "(" expr ")"
-	  ";"									{ $$ = new N(While)(LP, $5, $2, true); }
+	  ";"									{ $$ = N(While)(LP, $5, $2, true); }
 ;
 
 /* an if statement */
 if
 	: "if" "("
 	  expr_with_comma
-	  ")" block_or_statement				{ $$ = new N(If)(LP, $3, $5); }
+	  ")" block_or_statement				{ $$ = N(If)(LP, $3, $5); }
 ;
 
 /* an if-else statement */
@@ -401,7 +401,7 @@ for
 	  for_first_clause ";"
 	  for_second_clause ";"
 	  for_third_clause ")"
-	  block_or_statement					{ $$ = new N(For)(LP, $3, $5, $7, $9); }
+	  block_or_statement					{ $$ = N(For)(LP, $3, $5, $7, $9); }
 ;
 
 
@@ -438,14 +438,14 @@ variable_def_inner
 
 /* list for the variable definition */
 variable_id_list
-	: variable_id							{ $$ = new N(Var)(LP); C(Var, $$)->AddChild($1); }
+	: variable_id							{ $$ = N(Var)(LP); C(Var, $$)->AddChild($1); }
 	| variable_id_list "," variable_id		{ $$ = $1;             C(Var, $$)->AddChild($3); }
 ;
 
 /* a variable id and an optional initializer expression */
 variable_id
-	: T_SYMBOL								{ $$ = new N(VarPair)(LP, *$1, NULL); }
-	| T_SYMBOL "=" expr						{ $$ = new N(VarPair)(LP, *$1, $3); }
+	: T_SYMBOL								{ $$ = N(VarPair)(LP, *$1, NULL); }
+	| T_SYMBOL "=" expr						{ $$ = N(VarPair)(LP, *$1, $3); }
 ;
 
 /* a function definition */
@@ -465,7 +465,7 @@ func_expr_def
 
 /* the argument definition of a function definition */
 func_decl_arg_opt
-	: /* empty */							{ $$ = new N(FuncDecl)(LP); }
+	: /* empty */							{ $$ = N(FuncDecl)(LP); }
 	| "(" func_decl_arg_collapse ")"		{ $$ = $2; }
 	| "(" func_decl_arg_list ")"			{ $$ = $2; }
 	| "(" func_decl_arg_at_least_one ","
@@ -474,24 +474,24 @@ func_decl_arg_opt
 
 /* the argument list */
 func_decl_arg_list
-	: /* empty */							{ $$ = new N(FuncDecl)(LP); }
+	: /* empty */							{ $$ = N(FuncDecl)(LP); }
 	| func_decl_arg_at_least_one
 ;
 
 func_decl_arg_at_least_one
-	: func_decl_arg							{ $$ = new N(FuncDecl)(LP); C(FuncDecl, $$)->AddChild($1); }
+	: func_decl_arg							{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->AddChild($1); }
 	| func_decl_arg_at_least_one ","
 	  func_decl_arg							{ $$ =$1; C(FuncDecl, $$)->AddChild($3); }
 ;
 
 func_decl_arg
-	: T_SYMBOL								{ $$ = new N(FuncDeclArg)(LP, *$1, NULL, false); }
-	| T_SYMBOL "=" expr						{ $$ = new N(FuncDeclArg)(LP, *$1, $3, false); }
+	: T_SYMBOL								{ $$ = N(FuncDeclArg)(LP, *$1, NULL, false); }
+	| T_SYMBOL "=" expr						{ $$ = N(FuncDeclArg)(LP, *$1, $3, false); }
 ;
 
 func_decl_arg_collapse
-	: "*"									{ $$ = new N(FuncDeclArg)(LP, tRisseString(), NULL, true); }
-	| T_SYMBOL "*"							{ $$ = new N(FuncDeclArg)(LP, *$1, NULL, true); }
+	: "*"									{ $$ = N(FuncDeclArg)(LP, tRisseString(), NULL, true); }
+	| T_SYMBOL "*"							{ $$ = N(FuncDeclArg)(LP, *$1, NULL, true); }
 /*
 	These are currently not supported
 	| T_SYMBOL "*" "=" inline_array			{ ; }
@@ -569,8 +569,8 @@ extends_name
 
 /* a return statement */
 return
-	: "return" ";"							{ $$ = new N(Return)(LP, NULL); }
-	| "return" expr_with_comma ";"			{ $$ = new N(Return)(LP, $2); }
+	: "return" ";"							{ $$ = N(Return)(LP, NULL); }
+	| "return" expr_with_comma ";"			{ $$ = N(Return)(LP, $2); }
 ;
 
 
@@ -578,21 +578,21 @@ return
 switch
 	: "switch" "("
 	  expr_with_comma ")"
-	  block									{ $$ = new N(Switch)(LP, $3, $5); }
+	  block									{ $$ = N(Switch)(LP, $3, $5); }
 ;
 
 /* a with statement */
 with
 	: "with" "("
 	  expr_with_comma ")"
-	  block_or_statement					{ $$ = new N(With)(LP, $3, $5); }
+	  block_or_statement					{ $$ = N(With)(LP, $3, $5); }
 ;
 
 /* label or case: */
 label
-	: "case" expr ":"						{ $$ = new N(Case)(LP, $2); }
-	| "default" ":"							{ $$ = new N(Case)(LP, NULL); }
-	| T_SYMBOL ":"							{ $$ = new N(Label)(LP, *$1); }
+	: "case" expr ":"						{ $$ = N(Case)(LP, $2); }
+	| "default" ":"							{ $$ = N(Case)(LP, NULL); }
+	| T_SYMBOL ":"							{ $$ = N(Label)(LP, *$1); }
 ;
 
 /* a structured exception handling */
@@ -606,24 +606,24 @@ try
 catch_or_finally
 	: catch_list
 	| catch_list "finally" block_or_statement	{ $$ = $1; C(Try, $$)->SetFinally($3); }
-	| "finally" block_or_statement				{ $$ = new N(Try)(LP); C(Try, $$)->SetFinally($2); }
+	| "finally" block_or_statement				{ $$ = N(Try)(LP); C(Try, $$)->SetFinally($2); }
 	/* この構文はシフト・還元競合を 2 つ起こすが、問題ない */
 ;
 
 catch_list
-	: catch										{ $$ = new N(Try)(LP); C(Try, $$)->AddChild($1); }
+	: catch										{ $$ = N(Try)(LP); C(Try, $$)->AddChild($1); }
 	| catch_list catch							{ $$ = $1; C(Try, $1)->AddChild($2); }
 ;
 
 catch
-	: "catch" "(" ")" block_or_statement		{ $$ = new N(Catch)(
+	: "catch" "(" ")" block_or_statement		{ $$ = N(Catch)(
 												  		LP, tRisseString(), NULL, $4); }
 	| "catch" "(" T_SYMBOL ")"
-		block_or_statement						{ $$ = new N(Catch)(LP, *$3, NULL, $5); }
+		block_or_statement						{ $$ = N(Catch)(LP, *$3, NULL, $5); }
 	| "catch" "(" T_SYMBOL "if" expr ")"
-		block_or_statement						{ $$ = new N(Catch)(LP, *$3, $5, $7); }
+		block_or_statement						{ $$ = N(Catch)(LP, *$3, $5, $7); }
 	| "catch" "(" "if" expr ")"
-		block_or_statement						{ $$ = new N(Catch)(
+		block_or_statement						{ $$ = N(Catch)(
 												  		LP, tRisseString(), $4, $6); }
 ;
 
@@ -631,14 +631,14 @@ catch
 
 /* a throw statement */
 throw
-	: "throw" expr_with_comma ";"			{ $$ = new N(Throw)(LP, $2); }
+	: "throw" expr_with_comma ";"			{ $$ = N(Throw)(LP, $2); }
 ;
 
 /* 式 */
 /* カンマとそれ以下の優先順位の式を含む場合はこちらを使う */
 expr_with_comma
-	: expr_with_comma "if" expr_with_comma	{ $$ = new N(Binary)(LP, abtIf			,$3, $1);/*順番に注意*/ }
-	| expr_with_comma ","  expr_with_comma	{ $$ = new N(Binary)(LP, abtComma		,$1, $3); }
+	: expr_with_comma "if" expr_with_comma	{ $$ = N(Binary)(LP, abtIf			,$3, $1);/*順番に注意*/ }
+	| expr_with_comma ","  expr_with_comma	{ $$ = N(Binary)(LP, abtComma		,$1, $3); }
 	| expr
 ;
 
@@ -647,73 +647,73 @@ expr_with_comma
 	区切り記号と区別が付かない場合はこちらを使う
 */
 expr
-	: expr "=" expr					{ $$ = new N(Binary)(LP, abtAssign			,$1, $3); }
-	| expr "&=" expr				{ $$ = new N(Binary)(LP, abtBitAndAssign	,$1, $3); }
-	| expr "|=" expr				{ $$ = new N(Binary)(LP, abtBitOrAssign		,$1, $3); }
-	| expr "^=" expr				{ $$ = new N(Binary)(LP, abtBitXorAssign	,$1, $3); }
-	| expr "-=" expr				{ $$ = new N(Binary)(LP, abtSubAssign		,$1, $3); }
-	| expr "+=" expr				{ $$ = new N(Binary)(LP, abtAddAssign		,$1, $3); }
-	| expr "%=" expr				{ $$ = new N(Binary)(LP, abtModAssign		,$1, $3); }
-	| expr "/=" expr				{ $$ = new N(Binary)(LP, abtDivAssign		,$1, $3); }
-	| expr "\\=" expr				{ $$ = new N(Binary)(LP, abtIdivAssign		,$1, $3); }
-	| expr "*=" expr				{ $$ = new N(Binary)(LP, abtMulAssign		,$1, $3); }
-	| expr "||=" expr				{ $$ = new N(Binary)(LP, abtLogOrAssign		,$1, $3); }
-	| expr "&&=" expr				{ $$ = new N(Binary)(LP, abtLogAndAssign	,$1, $3); }
-	| expr ">>=" expr				{ $$ = new N(Binary)(LP, abtRShiftAssign	,$1, $3); }
-	| expr "<<=" expr				{ $$ = new N(Binary)(LP, abtLShiftAssign	,$1, $3); }
-	| expr ">>>=" expr				{ $$ = new N(Binary)(LP, abtRBitShiftAssign	,$1, $3); }
-	| expr "<->" expr				{ $$ = new N(Binary)(LP, abtSwap			,$1, $3); }
-	| expr "?" expr ":" expr		{ $$ = new N(Trinary)(LP, attCondition 		,$1, $3, $5); }
-	| expr "||" expr				{ $$ = new N(Binary)(LP, abtLogOr			,$1, $3); }
-	| expr "&&" expr				{ $$ = new N(Binary)(LP, abtLogAnd			,$1, $3); }
-	| expr "|" expr					{ $$ = new N(Binary)(LP, abtBitOr			,$1, $3); }
-	| expr "^" expr					{ $$ = new N(Binary)(LP, abtBitXor			,$1, $3); }
-	| expr "&" expr					{ $$ = new N(Binary)(LP, abtBitAnd			,$1, $3); }
-	| expr "!=" expr				{ $$ = new N(Binary)(LP, abtNotEqual		,$1, $3); }
-	| expr "==" expr				{ $$ = new N(Binary)(LP, abtEqual			,$1, $3); }
-	| expr "!==" expr				{ $$ = new N(Binary)(LP, abtDiscNotEqual	,$1, $3); }
-	| expr "===" expr				{ $$ = new N(Binary)(LP, abtDiscEqual		,$1, $3); }
-	| expr "<" expr					{ $$ = new N(Binary)(LP, abtLesser			,$1, $3); }
-	| expr ">" expr					{ $$ = new N(Binary)(LP, abtGreater			,$1, $3); }
-	| expr "<=" expr				{ $$ = new N(Binary)(LP, abtLesserOrEqual	,$1, $3); }
-	| expr ">=" expr				{ $$ = new N(Binary)(LP, abtGreaterOrEqual	,$1, $3); }
-	| expr ">>" expr				{ $$ = new N(Binary)(LP, abtLShift			,$1, $3); }
-	| expr "<<" expr				{ $$ = new N(Binary)(LP, abtRShift			,$1, $3); }
-	| expr ">>>" expr				{ $$ = new N(Binary)(LP, abtRBitShift		,$1, $3); }
-	| expr "+" expr					{ $$ = new N(Binary)(LP, abtAdd				,$1, $3); }
-	| expr "-" expr					{ $$ = new N(Binary)(LP, abtSub				,$1, $3); }
-	| expr "%" expr					{ $$ = new N(Binary)(LP, abtMod				,$1, $3); }
-	| expr "/" expr					{ $$ = new N(Binary)(LP, abtDiv				,$1, $3); }
-	| expr "\\" expr				{ $$ = new N(Binary)(LP, abtIdiv			,$1, $3); }
-	| expr "*" expr					{ $$ = new N(Binary)(LP, abtMul				,$1, $3); }
-	| "!" expr						{ $$ = new N(Unary)(LP, autLogNot			,$2); }
-	| "~" expr						{ $$ = new N(Unary)(LP, autBitNot			,$2); }
-	| "--" expr						{ $$ = new N(Unary)(LP, autPreDec			,$2); }
-	| "++" expr						{ $$ = new N(Unary)(LP, autPreInc			,$2); }
-	| "new" expr					{ $$ = new N(Unary)(LP, autNew				,$2); }
-	| "delete" expr					{ $$ = new N(Unary)(LP, autDelete			,$2); }
+	: expr "=" expr					{ $$ = N(Binary)(LP, abtAssign			,$1, $3); }
+	| expr "&=" expr				{ $$ = N(Binary)(LP, abtBitAndAssign	,$1, $3); }
+	| expr "|=" expr				{ $$ = N(Binary)(LP, abtBitOrAssign		,$1, $3); }
+	| expr "^=" expr				{ $$ = N(Binary)(LP, abtBitXorAssign	,$1, $3); }
+	| expr "-=" expr				{ $$ = N(Binary)(LP, abtSubAssign		,$1, $3); }
+	| expr "+=" expr				{ $$ = N(Binary)(LP, abtAddAssign		,$1, $3); }
+	| expr "%=" expr				{ $$ = N(Binary)(LP, abtModAssign		,$1, $3); }
+	| expr "/=" expr				{ $$ = N(Binary)(LP, abtDivAssign		,$1, $3); }
+	| expr "\\=" expr				{ $$ = N(Binary)(LP, abtIdivAssign		,$1, $3); }
+	| expr "*=" expr				{ $$ = N(Binary)(LP, abtMulAssign		,$1, $3); }
+	| expr "||=" expr				{ $$ = N(Binary)(LP, abtLogOrAssign		,$1, $3); }
+	| expr "&&=" expr				{ $$ = N(Binary)(LP, abtLogAndAssign	,$1, $3); }
+	| expr ">>=" expr				{ $$ = N(Binary)(LP, abtRShiftAssign	,$1, $3); }
+	| expr "<<=" expr				{ $$ = N(Binary)(LP, abtLShiftAssign	,$1, $3); }
+	| expr ">>>=" expr				{ $$ = N(Binary)(LP, abtRBitShiftAssign	,$1, $3); }
+	| expr "<->" expr				{ $$ = N(Binary)(LP, abtSwap			,$1, $3); }
+	| expr "?" expr ":" expr		{ $$ = N(Trinary)(LP, attCondition 		,$1, $3, $5); }
+	| expr "||" expr				{ $$ = N(Binary)(LP, abtLogOr			,$1, $3); }
+	| expr "&&" expr				{ $$ = N(Binary)(LP, abtLogAnd			,$1, $3); }
+	| expr "|" expr					{ $$ = N(Binary)(LP, abtBitOr			,$1, $3); }
+	| expr "^" expr					{ $$ = N(Binary)(LP, abtBitXor			,$1, $3); }
+	| expr "&" expr					{ $$ = N(Binary)(LP, abtBitAnd			,$1, $3); }
+	| expr "!=" expr				{ $$ = N(Binary)(LP, abtNotEqual		,$1, $3); }
+	| expr "==" expr				{ $$ = N(Binary)(LP, abtEqual			,$1, $3); }
+	| expr "!==" expr				{ $$ = N(Binary)(LP, abtDiscNotEqual	,$1, $3); }
+	| expr "===" expr				{ $$ = N(Binary)(LP, abtDiscEqual		,$1, $3); }
+	| expr "<" expr					{ $$ = N(Binary)(LP, abtLesser			,$1, $3); }
+	| expr ">" expr					{ $$ = N(Binary)(LP, abtGreater			,$1, $3); }
+	| expr "<=" expr				{ $$ = N(Binary)(LP, abtLesserOrEqual	,$1, $3); }
+	| expr ">=" expr				{ $$ = N(Binary)(LP, abtGreaterOrEqual	,$1, $3); }
+	| expr ">>" expr				{ $$ = N(Binary)(LP, abtLShift			,$1, $3); }
+	| expr "<<" expr				{ $$ = N(Binary)(LP, abtRShift			,$1, $3); }
+	| expr ">>>" expr				{ $$ = N(Binary)(LP, abtRBitShift		,$1, $3); }
+	| expr "+" expr					{ $$ = N(Binary)(LP, abtAdd				,$1, $3); }
+	| expr "-" expr					{ $$ = N(Binary)(LP, abtSub				,$1, $3); }
+	| expr "%" expr					{ $$ = N(Binary)(LP, abtMod				,$1, $3); }
+	| expr "/" expr					{ $$ = N(Binary)(LP, abtDiv				,$1, $3); }
+	| expr "\\" expr				{ $$ = N(Binary)(LP, abtIdiv			,$1, $3); }
+	| expr "*" expr					{ $$ = N(Binary)(LP, abtMul				,$1, $3); }
+	| "!" expr						{ $$ = N(Unary)(LP, autLogNot			,$2); }
+	| "~" expr						{ $$ = N(Unary)(LP, autBitNot			,$2); }
+	| "--" expr						{ $$ = N(Unary)(LP, autPreDec			,$2); }
+	| "++" expr						{ $$ = N(Unary)(LP, autPreInc			,$2); }
+	| "new" expr					{ $$ = N(Unary)(LP, autNew				,$2); }
+	| "delete" expr					{ $$ = N(Unary)(LP, autDelete			,$2); }
 	| "typeof" expr					{ ; }
-	| "+" expr %prec T_UNARY		{ $$ = new N(Unary)(LP, autPlus				,$2); }
-	| "-" expr %prec T_UNARY		{ $$ = new N(Unary)(LP, autMinus			,$2); }
+	| "+" expr %prec T_UNARY		{ $$ = N(Unary)(LP, autPlus				,$2); }
+	| "-" expr %prec T_UNARY		{ $$ = N(Unary)(LP, autMinus			,$2); }
 	| expr "incontextof" expr		{ ; }
-	| expr "--" %prec T_POSTUNARY	{ $$ = new N(Unary)(LP, autPostDec			,$1); }
-	| expr "++" %prec T_POSTUNARY	{ $$ = new N(Unary)(LP, autPostInc			,$1); }
+	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostDec			,$1); }
+	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
 	| func_call_expr				{ ; }
 	| "(" expr_with_comma ")"		{ $$ = $2; }
-	| expr "[" expr "]"				{ $$ = new N(Binary)(LP, abtIndirectSel		,$1, $3); }
-	| expr "." expr					{ $$ = new N(Binary)(LP, abtDirectSel		,$1, $3); }
+	| expr "[" expr "]"				{ $$ = N(Binary)(LP, abtIndirectSel		,$1, $3); }
+	| expr "." expr					{ $$ = N(Binary)(LP, abtDirectSel		,$1, $3); }
 	| factor_expr
 ;
 
 
 
 factor_expr
-	: T_CONSTVAL					{ $$ = new N(Factor)(LP, aftConstant, *$1); }
-	| T_SYMBOL						{ $$ = new N(Factor)(LP, aftSymbol, *$1); }
-	| "this"						{ $$ = new N(Factor)(LP, aftThis);  }
-	| "super"						{ $$ = new N(Factor)(LP, aftSuper);  }
+	: T_CONSTVAL					{ $$ = N(Factor)(LP, aftConstant, *$1); }
+	| T_SYMBOL						{ $$ = N(Factor)(LP, aftSymbol, *$1); }
+	| "this"						{ $$ = N(Factor)(LP, aftThis);  }
+	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
 	| func_expr_def					{ /*$$ = $1;*/ }
-	| "global"						{ $$ = new N(Factor)(LP, aftGlobal); }
+	| "global"						{ $$ = N(Factor)(LP, aftGlobal); }
 	| inline_array
 	| inline_dic
 	| "/="							{ /*lx->SetStartOfRegExp();*/ }
@@ -729,23 +729,23 @@ factor_expr
 /* an expression for function call */
 func_call_expr
 	: expr "(" call_arg_list ")"		{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
-	| expr "(" "..." ")"				{ $$ = new N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
-	| expr "(" ")"						{ $$ = new N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }
+	| expr "(" "..." ")"				{ $$ = N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
+	| expr "(" ")"						{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }
 		/* このルールは "(" と ")" の間で下記の 「call_arg が empty」 のルールと
 		  シフト・還元競合を起こす(こちらが優先される) */
 ;
 
 /* argument(s) for function call */
 call_arg_list
-	: call_arg							{ $$ = new N(FuncCall)(LP, false); C(FuncCall, $$)->AddChild($1); }
+	: call_arg							{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->AddChild($1); }
 	| call_arg_list "," call_arg		{ C(FuncCall, $1)->AddChild($3); }
 ;
 
 call_arg
 	: /* empty */						{ $$ = NULL; }
-	| "*"								{ $$ = new N(FuncCallArg)(LP, NULL, true); }
-	| expr "*" 							{ $$ = new N(FuncCallArg)(LP, $1, true); }
-	| expr								{ $$ = new N(FuncCallArg)(LP, $1, false); }
+	| "*"								{ $$ = N(FuncCallArg)(LP, NULL, true); }
+	| expr "*" 							{ $$ = N(FuncCallArg)(LP, $1, true); }
+	| expr								{ $$ = N(FuncCallArg)(LP, $1, false); }
 ;
 
 
@@ -759,8 +759,8 @@ inline_array
 
 /* an inline array's element list */
 array_elm_list
-	: /* empty */						{ $$ = new N(Array)(LP); }
-	| expr								{ $$ = new N(Array)(LP); C(Array, $$)->AddChild($1); }
+	: /* empty */						{ $$ = N(Array)(LP); }
+	| expr								{ $$ = N(Array)(LP); C(Array, $$)->AddChild($1); }
 	| array_elm_list "," expr			{ $$ = $1; C(Array, $$)->AddChild($3); }
 ;
 
@@ -775,16 +775,16 @@ inline_dic
 
 /* an inline dictionary's element list */
 dic_elm_list
-    : /* empty */						{ $$ = new N(Dict)(LP); }
-	| dic_elm							{ $$ = new N(Dict)(LP); C(Dict, $$)->AddChild($1); }
+    : /* empty */						{ $$ = N(Dict)(LP); }
+	| dic_elm							{ $$ = N(Dict)(LP); C(Dict, $$)->AddChild($1); }
 	| dic_elm_list "," dic_elm			{ $$ = $1; C(Dict, $$)->AddChild($3); }
 ;
 
 /* an inline dictionary's element */
 dic_elm
-	: expr "=>" expr					{ $$ = new N(DictPair)(LP, $1, $3); }
-	| T_SYMBOL ":" expr					{ $$ = new N(DictPair)(LP,
-										  new N(Factor)(LP, aftConstant, *$1), $3); }
+	: expr "=>" expr					{ $$ = N(DictPair)(LP, $1, $3); }
+	| T_SYMBOL ":" expr					{ $$ = N(DictPair)(LP,
+										  N(Factor)(LP, aftConstant, *$1), $3); }
 ;
 
 /* a dummy element at the tail of inline dictionary elements */
@@ -816,7 +816,7 @@ embeddable_string
 /* 埋め込み可能な文字列リテラル(ダブルクオーテーション) */
 embeddable_string_d
 	: embeddable_string_d_unit
-	| embeddable_string_d embeddable_string_d_unit	{ $$ = new N(Binary)(LP, abtAdd, $1, $2); }
+	| embeddable_string_d embeddable_string_d_unit	{ $$ = N(Binary)(LP, abtAdd, $1, $2); }
 ;
 
 embeddable_string_d_unit
@@ -829,7 +829,7 @@ embeddable_string_d_unit
 /* 埋め込み可能な文字列リテラル(シングルクオーテーション) */
 embeddable_string_s
 	: embeddable_string_s_unit
-	| embeddable_string_s embeddable_string_s_unit	{ $$ = new N(Binary)(LP, abtAdd, $1, $2); }
+	| embeddable_string_s embeddable_string_s_unit	{ $$ = N(Binary)(LP, abtAdd, $1, $2); }
 ;
 
 embeddable_string_s_unit

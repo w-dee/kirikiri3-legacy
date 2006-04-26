@@ -13,18 +13,6 @@
 #include "prec.h"
 #include "risseAST.h"
 
-/*
-ダンプ出力例
-
-Context (TopLevel)
-　ExprStmt
-　　Binary (Assign)
-　　　Factor (Symbol)
-　　　Binary (Add)
-　　　　Factor (Symbol)
-　　　　Factor (Constant, value=5)
-*/
-
 // 名前表の読み込み
 #undef risseASTH
 #define RISSE_AST_DEFINE_NAMES
@@ -365,6 +353,42 @@ tRisseString tRisseASTNode_Case::GetDumpComment() const
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Try::GetChildNameAt(risse_size index) const
+{
+	if(index == 0) return RISSE_WS("body");
+	if(index == inherited::GetChildCount() + 1) return RISSE_WS("finally");
+	index --;
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("catch")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Catch::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0: return RISSE_WS("condition");
+	case 1: return RISSE_WS("body");
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Catch::GetDumpComment() const
+{
+	return tRisseString(RISSE_WS("variable=")) + Name.AsHumanReadable();
+}
+//---------------------------------------------------------------------------
 
 
 } // namespace Risse

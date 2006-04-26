@@ -107,8 +107,8 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 /* 再入可能なパーサを出力 */
 %pure_parser
 
-/* シフト・還元競合は２つある */
-%expect 2
+/* シフト・還元競合は4つある */
+%expect 4
 
 /* union 定義 */
 %union{
@@ -265,7 +265,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	for for_first_clause for_second_clause for_third_clause
 	variable_def variable_def_inner variable_id variable_id_list
 	func_def property_def
-	class_def return switch with label try throw
+	class_def return switch with label try throw catch catch_list catch_or_finally
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
 	embeddable_string_s embeddable_string_s_unit
@@ -605,18 +605,38 @@ label
 ;
 
 /* a structured exception handling */
+
 try
-	: "try"									{ /*cc->EnterTryCode();*/ }
+	: "try"
 	  block_or_statement
-	  catch
-	  block_or_statement					{ /*cc->ExitTryCode();*/ }
+	  catch_or_finally							{ $$ = $3; C(Try, $$)->SetBody($2); }
+;
+
+catch_or_finally
+	: catch_list
+	| catch_list "finally" block_or_statement	{ $$ = $1; C(Try, $$)->SetFinally($3); }
+	| "finally" block_or_statement				{ $$ = new N(Try)(LP); C(Try, $$)->SetFinally($2); }
+	/* この構文はシフト・還元競合を 2 つ起こすが、問題ない */
+;
+
+catch_list
+	: catch										{ $$ = new N(Try)(LP); C(Try, $$)->AddChild($1); }
+	| catch_list catch							{ C(Try, $1)->AddChild($2); }
 ;
 
 catch
-	: "catch" "(" ")"						{ /*cc->EnterCatchCode(NULL);*/ }
-	| "catch" "(" T_SYMBOL ")"				{ /*cc->EnterCatchCode(
-												lx->GetString($3));*/ }
+	: "catch" "(" ")" block_or_statement		{ $$ = new N(Catch)(
+												  		LP, tRisseString(), NULL, $4); }
+	| "catch" "(" T_SYMBOL ")"
+		block_or_statement						{ $$ = new N(Catch)(LP, *$3, NULL, $5); }
+	| "catch" "(" T_SYMBOL "if" expr ")"
+		block_or_statement						{ $$ = new N(Catch)(LP, *$3, $5, $7); }
+	| "catch" "(" "if" expr ")"
+		block_or_statement						{ $$ = new N(Catch)(
+												  		LP, tRisseString(), $4, $6); }
 ;
+
+
 
 /* a throw statement */
 throw

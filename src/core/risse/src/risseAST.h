@@ -80,6 +80,8 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Switch			)		//!< switch
 	RISSE_AST_ENUM_ITEM(ant, Label			)		//!< ラベル
 	RISSE_AST_ENUM_ITEM(ant, Case			)		//!< case / default
+	RISSE_AST_ENUM_ITEM(ant, Try			)		//!< try
+	RISSE_AST_ENUM_ITEM(ant, Catch			)		//!< catch
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -1471,6 +1473,144 @@ public:
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief	tryノード(type=antTry)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Try : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+	tRisseASTNode *Body; //!< tryブロック
+	tRisseASTNode *Finally; //!< finallyブロック
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	tRisseASTNode_Try(risse_size position) :
+		tRisseASTNode_List(position, antTry)
+	{
+		Body = NULL;
+		Finally = NULL;
+	}
+
+	//! @brief		tryブロックを得る
+	//! @return		tryブロック
+	bool GetBody() const { return Body; }
+
+	//! @brief		tryブロックを設定する
+	//! @param		body	tryブロック
+	void SetBody(tRisseASTNode * body)
+	{
+		Body = body;
+		if(Body) Body->SetParent(this);
+	}
+
+	//! @brief		finallyブロックを得る
+	//! @return		finallyブロック
+	bool GetFinally() const { return Finally; }
+
+	//! @brief		finallyブロックを設定する
+	//! @param		finallyblock	finallyブロック
+	void SetFinally(tRisseASTNode * finallyblock)
+	{
+		Finally = finallyblock;
+		if(Finally) Finally->SetParent(this);
+	}
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return inherited::GetChildCount() + 2; // +1 = Body+Finally
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Body;
+		if(index == inherited::GetChildCount() + 1) return Finally;
+		return inherited::GetChildAt(index - 1);
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return tRisseString(); }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	catch ノード (type=antCatch)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Catch : public tRisseASTNode
+{
+	tRisseString Name; //!< 変数名(空 = 変数を受け取らない)
+	tRisseASTNode * Condition; //!< 条件ノード (NULL = 無条件)
+	tRisseASTNode * Body; //!< catch のbodyノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		name			変数名
+	//! @param		condition		条件ノード
+	//! @param		body			body ノード
+	tRisseASTNode_Catch(risse_size position,
+		const tRisseString & name, tRisseASTNode * condition, tRisseASTNode * body) :
+		tRisseASTNode(position, antCatch),
+			Name(name), Condition(condition), Body(body)
+	{
+		if(Condition) Condition->SetParent(this);
+		if(Body) Body->SetParent(this);
+	}
+
+	//! @brief		名前を得る
+	//! @return		名前
+	const tRisseString & GetName() const { return Name; }
+
+	//! @brief		条件ノードを得る
+	//! @return		条件ノード
+	tRisseASTNode * GetCondition() const { return Condition; }
+
+	//! @brief		body ノードを得る
+	//! @return		body ノード
+	tRisseASTNode * GetBody() const { return Body; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Condition;
+		case 1: return Body;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
 
 
 

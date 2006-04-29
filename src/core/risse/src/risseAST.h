@@ -61,6 +61,7 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Unary			)		//!< 単項演算子
 	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
+	RISSE_AST_ENUM_ITEM(ant, CastAttr		)		//!< 属性のキャスト
 	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
 	RISSE_AST_ENUM_ITEM(ant, FuncCallArg	)		//!< 関数呼び出しの引数
 	RISSE_AST_ENUM_ITEM(ant, Array			)		//!< インライン配列
@@ -69,8 +70,8 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, If				)		//!< if (とelse)
 	RISSE_AST_ENUM_ITEM(ant, While			)		//!< while と do ～ while
 	RISSE_AST_ENUM_ITEM(ant, For			)		//!< for
-	RISSE_AST_ENUM_ITEM(ant, Var			)		//!< 変数宣言
-	RISSE_AST_ENUM_ITEM(ant, VarPair		)		//!< 変数宣言の変数名と初期値
+	RISSE_AST_ENUM_ITEM(ant, VarDecl		)		//!< 変数宣言
+	RISSE_AST_ENUM_ITEM(ant, VarDeclPair	)		//!< 変数宣言の変数名と初期値
 	RISSE_AST_ENUM_ITEM(ant, Return			)		//!< return
 	RISSE_AST_ENUM_ITEM(ant, Throw			)		//!< throw
 	RISSE_AST_ENUM_ITEM(ant, Break			)		//!< break
@@ -437,6 +438,31 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	アクセス時の属性キャスト(type=antCastAttr)
+//---------------------------------------------------------------------------
+class tRisseASTNode_CastAttr : public tRisseASTNode_OneExpression
+{
+	tRisseMemberAttribute Attribute; //!< 属性
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position		ソースコード上の位置
+	//! @param		attribute		属性
+	//! @param		expression		式ノード
+	tRisseASTNode_CastAttr(risse_size position, tRisseMemberAttribute attribute,
+		tRisseASTNode * expression) :
+		tRisseASTNode_OneExpression(position, antCastAttr, expression)
+	{
+		Attribute = attribute;
+	}
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return Attribute.AsString(); }
 };
 //---------------------------------------------------------------------------
 
@@ -1161,32 +1187,36 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	変数宣言ノード(type=antVar)
+//! @brief	変数宣言ノード(type=antVarDecl)
 //---------------------------------------------------------------------------
-class tRisseASTNode_Var : public tRisseASTNode_List
+class tRisseASTNode_VarDecl : public tRisseASTNode_List
 {
 	typedef tRisseASTNode_List inherited;
-	bool IsConstant; //!< 定数宣言の場合に真
+	tRisseMemberAttribute Attribute; //!< 属性
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	tRisseASTNode_Var(risse_size position) :
-		tRisseASTNode_List(position, antVar)
-	{
-		IsConstant = false;
-	}
-
-	//! @brief		定数宣言かどうかを得る
-	//! @return		定数宣言かどうか
-	bool GetIsConstant() const { return IsConstant; }
+	tRisseASTNode_VarDecl(risse_size position) :
+		tRisseASTNode_List(position, antVarDecl) {;}
 
 	//! @brief		定数宣言かどうかを設定する
 	//! @param		is_constant	定数宣言かどうか
 	void SetIsConstant(bool is_constant)
 	{
-		IsConstant = is_constant;
+		if(is_constant)
+			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::pcConst));
+		else
+			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::pcVar));
 	}
+
+	//! @brief		属性を設定する
+	//! @param		attrib	属性
+	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+
+	//! @brief		属性を設定する
+	//! @return		属性
+	tRisseMemberAttribute GetAttribute() const { return Attribute; }
 
 	//! @brief		指定されたインデックスの子ノードの名前を得る
 	//! @param		index		インデックス
@@ -1195,15 +1225,15 @@ public:
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const;
+	tRisseString GetDumpComment() const { return Attribute.AsString(); }
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief	変数宣言の名前と初期値のノード(type=antVarPair)
+//! @brief	変数宣言の名前と初期値のノード(type=antVarDeclPair)
 //---------------------------------------------------------------------------
-class tRisseASTNode_VarPair : public tRisseASTNode
+class tRisseASTNode_VarDeclPair : public tRisseASTNode
 {
 	tRisseString Name; //!< 名前
 	tRisseASTNode * Initializer; //!< 初期値ノード
@@ -1213,9 +1243,9 @@ public:
 	//! @param		position		ソースコード上の位置
 	//! @param		name			名前
 	//! @param		initializer			初期値ノード
-	tRisseASTNode_VarPair(risse_size position,
+	tRisseASTNode_VarDeclPair(risse_size position,
 		const tRisseString & name, tRisseASTNode * initializer) :
-		tRisseASTNode(position, antVarPair),
+		tRisseASTNode(position, antVarDeclPair),
 			Name(name), Initializer(initializer)
 	{
 		if(Initializer) Initializer->SetParent(this);
@@ -1621,6 +1651,7 @@ class tRisseASTNode_FuncDecl : public tRisseASTNode_List
 	typedef tRisseASTNode_List inherited;
 	tRisseASTNode * Body; //!< 関数ボディ
 	tRisseString Name; //!< 関数名
+	tRisseMemberAttribute Attribute; //!< 属性
 
 public:
 	//! @brief		コンストラクタ
@@ -1647,6 +1678,14 @@ public:
 	//! @brief		関数名を得る
 	//! @return		関数名
 	tRisseString GetName() const { return Name; }
+
+	//! @brief		属性を設定する
+	//! @param		attrib	属性
+	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+
+	//! @brief		属性を設定する
+	//! @return		属性
+	tRisseMemberAttribute GetAttribute() const { return Attribute; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数

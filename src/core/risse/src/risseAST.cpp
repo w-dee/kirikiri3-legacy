@@ -298,7 +298,7 @@ tRisseString tRisseASTNode_For::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Var::GetChildNameAt(risse_size index) const
+tRisseString tRisseASTNode_VarDecl::GetChildNameAt(risse_size index) const
 {
 	if(index < inherited::GetChildCount())
 	{
@@ -311,17 +311,7 @@ tRisseString tRisseASTNode_Var::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Var::GetDumpComment() const
-{
-	if(IsConstant)
-		return RISSE_WS("Constant");
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_VarPair::GetChildNameAt(risse_size index) const
+tRisseString tRisseASTNode_VarDeclPair::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
@@ -408,8 +398,10 @@ tRisseString tRisseASTNode_FuncDecl::GetChildNameAt(risse_size index) const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_FuncDecl::GetDumpComment() const
 {
-	if(Name.IsEmpty()) return RISSE_WS("anonymous");
-	return Name.AsHumanReadable();
+	tRisseString attrib = Attribute.AsString();
+	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
+	if(Name.IsEmpty()) return attrib + RISSE_WS("anonymous");
+	return attrib + Name.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 

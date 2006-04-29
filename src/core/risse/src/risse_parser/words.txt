@@ -125,6 +125,17 @@ try                 T_TRY          - true false
 var                 T_VAR          - true false
 while               T_WHILE        - true false
 with                T_WITH         - true false
+as                  T_AS           - true false
+use                 T_USE          - true false
+abstract            T_ABSTRACT     - true false
+implements          T_IMPLEMENTS   - true false
+interface           T_INTERFACE    - true false
+native              T_NATIVE       - true false
+throws              T_THROWS       - true false
+transient           T_TRANSIENT    - true false
+volatile            T_VOLATILE     - true false
+enumerable          T_ENUMERABLE   - true false
+hidden              T_HIDDEN       - true false
 
 ##### 定数
 void                T_CONSTVAL     tRisseVariant()    true false

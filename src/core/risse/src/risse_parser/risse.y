@@ -17,6 +17,7 @@
 #include "../risseTypes.h"
 #include "../risseGC.h"
 #include "../risseException.h"
+#include "../risseCxxObject.h"
 #include "risseParser.h"
 
 /* エラーの詳細出力 */
@@ -114,6 +115,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %union{
 	tRisseVariant * value;
 	tRisseASTNode * np;
+	tRisseMemberAttribute * attr;
 }
 
 /* トークン定義 */
@@ -226,6 +228,17 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	T_REAL					"real"
 	T_STRING				"string"
 	T_OCTET					"octet"
+	T_AS					"as"
+	T_USE					"use"
+	T_ABSTRACT				"abstract"
+	T_IMPLEMENTS			"implements"
+	T_INTERFACE				"interface"
+	T_NATIVE				"native"
+	T_THROWS				"throws"
+	T_TRANSIENT				"transient"
+	T_VOLATILE				"volatile"
+	T_ENUMERABLE			"enumerable"
+	T_HIDDEN				"hidden"
 
 	T_FALSE					"false"
 	T_NULL					"null"
@@ -253,6 +266,9 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %token <value>		T_SYMBOL
 %token <value>		T_REGEXP
 
+%type <attr>		member_attr_list member_attr member_attr_list_non_prop
+					member_attr_non_prop member_attr_prop
+
 
 %type <np>
 	toplevel_def_list def_list
@@ -263,6 +279,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	block block_or_statement statement
 	while do_while
 	for for_first_clause for_second_clause for_third_clause
+	definition
 	variable_def variable_def_inner variable_id variable_id_list
 	func_def func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
 	func_decl_arg func_decl_arg_collapse
@@ -353,10 +370,7 @@ statement
 	| "break" ";"							{ $$ = N(Break)(LP); }
 	| "continue" ";"						{ $$ = N(Continue)(LP); }
 	| "debugger" ";"						{ $$ = N(Debugger)(LP); }
-	| variable_def
-	| func_def
-	| property_def
-	| class_def
+	| definition
 	| return
 	| switch
 	| with
@@ -424,28 +438,42 @@ for_third_clause
 	| expr_with_comma
 ;
 
+/* definitions */
+definition
+	: member_attr_list_non_prop
+	  variable_def							{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
+	| variable_def
+	| member_attr_list_non_prop
+	  func_def								{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
+	| func_def
+	| member_attr_list_non_prop
+	  property_def						{;}
+	| property_def
+	| member_attr_list_non_prop
+	  class_def						{;}
+	| class_def
+;
+
 /* variable definition */
 variable_def
 	: variable_def_inner ";"				{ $$ = $1; }
 ;
 
 variable_def_inner
-	: "var" variable_id_list				{ $$ = $2; C(Var, $$)->SetIsConstant(false); }
-	| "const" variable_id_list				{ $$ = $2; C(Var, $$)->SetIsConstant(true); }
-		/* const: note that current version does not
-		   actually disallow re-assigning new value */
+	: "var" variable_id_list				{ $$ = $2; C(VarDecl, $$)->SetIsConstant(false); }
+	| "const" variable_id_list				{ $$ = $2; C(VarDecl, $$)->SetIsConstant(true); }
 ;
 
 /* list for the variable definition */
 variable_id_list
-	: variable_id							{ $$ = N(Var)(LP); C(Var, $$)->AddChild($1); }
-	| variable_id_list "," variable_id		{ $$ = $1;             C(Var, $$)->AddChild($3); }
+	: variable_id							{ $$ = N(VarDecl)(LP); C(VarDecl, $$)->AddChild($1); }
+	| variable_id_list "," variable_id		{ $$ = $1;             C(VarDecl, $$)->AddChild($3); }
 ;
 
 /* a variable id and an optional initializer expression */
 variable_id
-	: T_SYMBOL								{ $$ = N(VarPair)(LP, *$1, NULL); }
-	| T_SYMBOL "=" expr						{ $$ = N(VarPair)(LP, *$1, $3); }
+	: T_SYMBOL								{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
+	| T_SYMBOL "=" expr						{ $$ = N(VarDeclPair)(LP, *$1, $3); }
 ;
 
 /* a function definition */
@@ -634,6 +662,48 @@ throw
 	: "throw" expr_with_comma ";"			{ $$ = N(Throw)(LP, $2); }
 ;
 
+/* member attributes */
+member_attr_list
+	: member_attr							{ $$ = new tRisseMemberAttribute(*$1); }
+	| member_attr_list member_attr			{ $$ = $1;
+											  if($1->Overwrite(*$2))
+											  { yyerror("duplicated attribute specifier");
+											    YYERROR; }
+											}
+;
+
+member_attr_list_non_prop
+	: member_attr_non_prop					{ $$ = new tRisseMemberAttribute(*$1); }
+	| member_attr_list_non_prop
+	  member_attr_non_prop					{ $$ = $1;
+											  if($1->Overwrite(*$2))
+											  { yyerror("duplicated attribute specifier");
+											    YYERROR; }
+											}
+;
+
+member_attr
+	: member_attr_non_prop
+	| member_attr_prop
+;
+
+member_attr_non_prop
+	: "public"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::acPublic); }
+	| "internal"							{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::acInternal); }
+	| "private"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::acPrivate); }
+	| "enumerable"							{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::vcEnumerable); }
+	| "hidden"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::vcHidden); }
+	| "static"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::ocStatic); }
+	| "final"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::ocFinal); }
+	| "virtual"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual); }
+;
+
+member_attr_prop
+	: "property"							{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcProperty); }
+	| "const"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcConst); }
+	| "var"									{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcVar); }
+;
+
 /* 式 */
 /* カンマとそれ以下の優先順位の式を含む場合はこちらを使う */
 expr_with_comma
@@ -700,6 +770,8 @@ expr
 	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
 	| func_call_expr				{ ; }
 	| "(" expr_with_comma ")"		{ $$ = $2; }
+	| "(" member_attr_list ")" expr
+	  %prec T_UNARY					{ $$ = N(CastAttr)(LP, *$2, $4); }
 	| expr "[" expr "]"				{ $$ = N(Binary)(LP, abtIndirectSel		,$1, $3); }
 	| expr "." expr					{ $$ = N(Binary)(LP, abtDirectSel		,$1, $3); }
 	| factor_expr

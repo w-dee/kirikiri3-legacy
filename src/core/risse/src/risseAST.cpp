@@ -135,7 +135,7 @@ tRisseString tRisseASTNode_Context::GetDumpComment() const
 tRisseString tRisseASTNode_Factor::GetDumpComment() const
 {
 	tRisseString ret = RisseASTFactorTypeNames[FactorType];
-	if(FactorType == aftConstant || FactorType == aftSymbol)
+	if(FactorType == aftConstant || FactorType == aftId)
 	{
 		ret += RISSE_WS(" ");
 		ret += Value.AsHumanReadable();

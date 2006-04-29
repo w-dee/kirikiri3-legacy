@@ -1786,5 +1786,5 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
 cut_word:
  while(Risse_iswordcha_nc(*p)) p++;
  ptr = p;
- return T_SYMBOL;
+ return T_ID;
 }

@@ -157,7 +157,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 				break;
 			}
 
-		case T_SYMBOL: // 記号(識別子)
+		case T_ID: // 識別子
 			{
 				// ptr_start から Ptr までの範囲が記号である
 				val = tRisseString(ptr_start, Ptr - ptr_start);

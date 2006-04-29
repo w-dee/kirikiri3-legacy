@@ -263,7 +263,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %token <value>		T_CONSTVAL
 %token <value>		T_EMSTRING_AMPERSAND_D T_EMSTRING_AMPERSAND_S
 %token <value>		T_EMSTRING_DOLLAR_D T_EMSTRING_DOLLAR_S
-%token <value>		T_SYMBOL
+%token <value>		T_ID
 %token <value>		T_REGEXP
 
 %type <attr>		member_attr_list member_attr member_attr_list_non_prop
@@ -309,7 +309,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %left		<np>	"%" "/" "\\" "*"
 %right		<np>	"!" "~" "--" "++" "new" "delete" "typeof" "#" "$" T_UNARY
 %nonassoc	<np>	"incontextof" T_POSTUNARY
-%left		<np>	"(" ")" "[" "]" "."
+%left		<np>	"(" ")" "[" "]" "." T_FUNCCALL
 
 
 %%
@@ -472,13 +472,13 @@ variable_id_list
 
 /* a variable id and an optional initializer expression */
 variable_id
-	: T_SYMBOL								{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
-	| T_SYMBOL "=" expr						{ $$ = N(VarDeclPair)(LP, *$1, $3); }
+	: T_ID									{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
+	| T_ID "=" expr							{ $$ = N(VarDeclPair)(LP, *$1, $3); }
 ;
 
 /* a function definition */
 func_def
-	: "function" T_SYMBOL
+	: "function" T_ID
 	  func_decl_arg_opt
 	  block									{ $$ = $3; C(FuncDecl, $$)->SetName(*$2);
 	  										  C(FuncDecl, $$)->SetBody($4); }
@@ -513,23 +513,23 @@ func_decl_arg_at_least_one
 ;
 
 func_decl_arg
-	: T_SYMBOL								{ $$ = N(FuncDeclArg)(LP, *$1, NULL, false); }
-	| T_SYMBOL "=" expr						{ $$ = N(FuncDeclArg)(LP, *$1, $3, false); }
+	: T_ID									{ $$ = N(FuncDeclArg)(LP, *$1, NULL, false); }
+	| T_ID "=" expr							{ $$ = N(FuncDeclArg)(LP, *$1, $3, false); }
 ;
 
 func_decl_arg_collapse
 	: "*"									{ $$ = N(FuncDeclArg)(LP, tRisseString(), NULL, true); }
-	| T_SYMBOL "*"							{ $$ = N(FuncDeclArg)(LP, *$1, NULL, true); }
+	| T_ID "*"								{ $$ = N(FuncDeclArg)(LP, *$1, NULL, true); }
 /*
 	These are currently not supported
-	| T_SYMBOL "*" "=" inline_array			{ ; }
-	| T_SYMBOL "*=" inline_array			{ ; }
+	| T_ID "*" "=" inline_array			{ ; }
+	| T_ID "*=" inline_array			{ ; }
 */
 ;
 
 /* a property handler definition */
 property_def
-	: "property" T_SYMBOL
+	: "property" T_ID
 	  "{"									{ /*sb->PushContextStack(
 												lx->GetString($2),
 												ctProperty);*/ }
@@ -545,7 +545,7 @@ property_handler_def_list
 ;
 
 property_handler_setter
-	: "setter" "(" T_SYMBOL ")"				{ /*sb->PushContextStack(
+	: "setter" "(" T_ID ")"					{ /*sb->PushContextStack(
 												RISSE_WS("(setter)"),
 												ctPropertySetter);
 											  cc->EnterBlock();
@@ -572,7 +572,7 @@ property_getter_handler_head
 
 /* a class definition */
 class_def
-	: "class" T_SYMBOL						{ /*sb->PushContextStack(
+	: "class" T_ID							{ /*sb->PushContextStack(
 												lx->GetString($2),
 												ctClass);*/ }
 	  class_extender
@@ -620,7 +620,7 @@ with
 label
 	: "case" expr ":"						{ $$ = N(Case)(LP, $2); }
 	| "default" ":"							{ $$ = N(Case)(LP, NULL); }
-	| T_SYMBOL ":"							{ $$ = N(Label)(LP, *$1); }
+	| T_ID ":"								{ $$ = N(Label)(LP, *$1); }
 ;
 
 /* a structured exception handling */
@@ -646,9 +646,9 @@ catch_list
 catch
 	: "catch" "(" ")" block_or_statement		{ $$ = N(Catch)(
 												  		LP, tRisseString(), NULL, $4); }
-	| "catch" "(" T_SYMBOL ")"
+	| "catch" "(" T_ID ")"
 		block_or_statement						{ $$ = N(Catch)(LP, *$3, NULL, $5); }
-	| "catch" "(" T_SYMBOL "if" expr ")"
+	| "catch" "(" T_ID "if" expr ")"
 		block_or_statement						{ $$ = N(Catch)(LP, *$3, $5, $7); }
 	| "catch" "(" "if" expr ")"
 		block_or_statement						{ $$ = N(Catch)(
@@ -770,18 +770,18 @@ expr
 	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
 	| func_call_expr				{ ; }
 	| "(" expr_with_comma ")"		{ $$ = $2; }
-	| "(" member_attr_list ")" expr
-	  %prec T_UNARY					{ $$ = N(CastAttr)(LP, *$2, $4); }
 	| expr "[" expr "]"				{ $$ = N(Binary)(LP, abtIndirectSel		,$1, $3); }
-	| expr "." expr					{ $$ = N(Binary)(LP, abtDirectSel		,$1, $3); }
+	| expr "." T_ID					{ $$ = N(Binary)(LP, abtDirectSel		,
+									                 $1, N(Factor)(LP, aftConstant, *$3)); }
+	| expr "." "(" expr ")"			{ $$ = N(Binary)(LP, abtDirectSel		,$1, $4); }
+	| expr "<" member_attr_list ">"
+	  %prec T_FUNCCALL				{ $$ = N(CastAttr)(LP, *$3, $1); }
 	| factor_expr
 ;
 
-
-
 factor_expr
 	: T_CONSTVAL					{ $$ = N(Factor)(LP, aftConstant, *$1); }
-	| T_SYMBOL						{ $$ = N(Factor)(LP, aftSymbol, *$1); }
+	| T_ID							{ $$ = N(Factor)(LP, aftId, *$1); }
 	| "this"						{ $$ = N(Factor)(LP, aftThis);  }
 	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
 	| func_expr_def					{ /*$$ = $1;*/ }
@@ -855,7 +855,7 @@ dic_elm_list
 /* an inline dictionary's element */
 dic_elm
 	: expr "=>" expr					{ $$ = N(DictPair)(LP, $1, $3); }
-	| T_SYMBOL ":" expr					{ $$ = N(DictPair)(LP,
+	| T_ID ":" expr						{ $$ = N(DictPair)(LP,
 										  N(Factor)(LP, aftConstant, *$1), $3); }
 ;
 

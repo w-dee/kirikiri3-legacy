@@ -158,7 +158,7 @@ Infinity            T_CONSTVAL     RisseGetInf()      true false
 9                   T_BEGIN_NUMBER           - false false
 
 ##### 単語切り出し
----*---             T_SYMBOL                 - -    -
+---*---             T_ID                 - -    -
 
 
 

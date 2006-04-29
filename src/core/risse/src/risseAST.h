@@ -104,7 +104,7 @@ RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(FactorType)
 	RISSE_AST_ENUM_ITEM(aft, Constant		)		//!< 定数
-	RISSE_AST_ENUM_ITEM(aft, Symbol			)		//!< シンボル
+	RISSE_AST_ENUM_ITEM(aft, Id				)		//!< 識別子
 	RISSE_AST_ENUM_ITEM(aft, This			)		//!< "this"
 	RISSE_AST_ENUM_ITEM(aft, Super			)		//!< "super"
 	RISSE_AST_ENUM_ITEM(aft, Global			)		//!< "global"

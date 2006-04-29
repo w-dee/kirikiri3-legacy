@@ -198,6 +198,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	T_PRIVATE				"private"
 	T_PUBLIC				"public"
 	T_PROTECTED				"protected"
+	T_INTERNAL				"internal"
 	T_FINAL					"final"
 	T_STATIC				"static"
 	T_RETURN				"return"
@@ -283,7 +284,8 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	variable_def variable_def_inner variable_id variable_id_list
 	func_def func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
 	func_decl_arg func_decl_arg_collapse
-	property_def
+	property_def property_handler_def_list
+	property_handler_getter property_handler_setter
 	class_def return switch with label try throw catch catch_list catch_or_finally
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
@@ -447,10 +449,10 @@ definition
 	  func_def								{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
 	| func_def
 	| member_attr_list_non_prop
-	  property_def						{;}
+	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
 	| property_def
 	| member_attr_list_non_prop
-	  class_def						{;}
+	  class_def								{;}
 	| class_def
 ;
 
@@ -530,38 +532,37 @@ func_decl_arg_collapse
 /* a property handler definition */
 property_def
 	: "property" T_ID
-	  "{"									{ /*sb->PushContextStack(
-												lx->GetString($2),
-												ctProperty);*/ }
+	  "{"
 	  property_handler_def_list
-	  "}"									{ /*sb->PopContextStack();*/ }
+	  "}"									{ $$ = $4; C(PropDecl, $$)->SetName(*$2); }
 ;
 
 property_handler_def_list
 	: property_handler_setter
 	| property_handler_getter
-	| property_handler_setter property_handler_getter
-	| property_handler_getter property_handler_setter
+	| property_handler_setter
+	  property_handler_getter				{ $$ = $1; C(PropDecl, $$)->
+											  SetGetter(C(PropDecl, $2)->GetGetter()); }
+	| property_handler_getter
+	  property_handler_setter				{ $$ = $1;
+											  C(PropDecl, $$)->
+												SetSetter(C(PropDecl, $2)->GetSetter());
+											  C(PropDecl, $$)->
+												SetSetterArgumentName(C(PropDecl, $2)->
+															GetSetterArgumentName()); }
 ;
 
 property_handler_setter
-	: "setter" "(" T_ID ")"					{ /*sb->PushContextStack(
-												RISSE_WS("(setter)"),
-												ctPropertySetter);
-											  cc->EnterBlock();
-											  cc->SetPropertyDeclArg(
-												lx->GetString($3));*/ }
-	  block									{ /*cc->ExitBlock();
-											  sb->PopContextStack();*/ }
+	: "setter" "(" T_ID ")"
+	  block									{ $$ = N(PropDecl)(LP);
+											  C(PropDecl, $$)->SetSetter($5);
+											  C(PropDecl, $$)->SetSetterArgumentName(*$3); }
 ;
 
 property_handler_getter
-	: property_getter_handler_head			{ /*sb->PushContextStack(
-												RISSE_WS("(getter)"),
-												ctPropertyGetter);
-											  cc->EnterBlock();*/ }
-	  block									{ /*cc->ExitBlock();
-											  sb->PopContextStack();*/ }
+	: property_getter_handler_head
+	  block									{ $$ = N(PropDecl)(LP);
+											  C(PropDecl, $$)->SetGetter($2); }
 ;
 
 property_getter_handler_head

@@ -83,8 +83,9 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Case			)		//!< case / default
 	RISSE_AST_ENUM_ITEM(ant, Try			)		//!< try
 	RISSE_AST_ENUM_ITEM(ant, Catch			)		//!< catch
-	RISSE_AST_ENUM_ITEM(ant, FuncDecl		)		//!< 関数呼び出し
-	RISSE_AST_ENUM_ITEM(ant, FuncDeclArg	)		//!< 関数呼び出しの引数
+	RISSE_AST_ENUM_ITEM(ant, FuncDecl		)		//!< 関数宣言
+	RISSE_AST_ENUM_ITEM(ant, FuncDeclArg	)		//!< 関数宣言の引数
+	RISSE_AST_ENUM_ITEM(ant, PropDecl		)		//!< プロパティ宣言
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -1777,6 +1778,106 @@ public:
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief	プロパティ宣言のASTノード(type=antPropDecl)
+//---------------------------------------------------------------------------
+class tRisseASTNode_PropDecl : public tRisseASTNode
+{
+	tRisseASTNode * Setter; //!< セッタ
+	tRisseString SetterArgumentName; //!< セッタの引数の名前
+	tRisseASTNode * Getter; //!< ゲッタ
+	tRisseMemberAttribute Attribute; //!< 属性
+	tRisseString Name; //!< プロパティ名
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	tRisseASTNode_PropDecl(risse_size position) :
+		tRisseASTNode(position, antPropDecl)
+	{
+		Setter = Getter = NULL;
+	}
+
+	//! @brief		セッタを設定する
+	//! @param		node		セッタ
+	void SetSetter(tRisseASTNode * node)
+	{
+		Setter = node; if(Setter) Setter->SetParent(this);
+	}
+
+	//! @brief		セッタを得る
+	//! @return		セッタ
+	tRisseASTNode * GetSetter(void) const
+	{
+		return Setter;
+	}
+
+	//! @brief		セッタの引数の名前を設定する
+	//! @param		name	セッタの引数の名前
+	void SetSetterArgumentName(const tRisseString & name) { SetterArgumentName = name; }
+
+	//! @brief		セッタの引数の名前を得る
+	//! @return		セッタの引数の名前
+	tRisseString GetSetterArgumentName() const { return SetterArgumentName; }
+
+	//! @brief		ゲッタを設定する
+	//! @param		node		ゲッタ
+	void SetGetter(tRisseASTNode * node)
+	{
+		Getter = node; if(Getter) Getter->SetParent(this);
+	}
+
+	//! @brief		ゲッタを得る
+	//! @return		ゲッタ
+	tRisseASTNode * GetGetter(void) const
+	{
+		return Getter;
+	}
+
+	//! @brief		プロパティ名を設定する
+	//! @param		name	プロパティ名
+	void SetName(const tRisseString & name) { Name = name; }
+
+	//! @brief		プロパティ名を得る
+	//! @return		プロパティ名
+	tRisseString GetName() const { return Name; }
+
+
+	//! @brief		属性を設定する
+	//! @param		attrib	属性
+	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+
+	//! @brief		属性を設定する
+	//! @return		属性
+	tRisseMemberAttribute GetAttribute() const { return Attribute; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Setter;
+		if(index == 1) return Getter;
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
 
 
 #endif // #ifndef RISSE_AST_DEFINE_NAMES

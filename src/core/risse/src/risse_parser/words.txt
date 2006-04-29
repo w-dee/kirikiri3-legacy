@@ -102,6 +102,7 @@ instanceof          T_INSTANCEOF   - true false
 isvalid             T_ISVALID      - true false
 import              T_IMPORT       - true false
 int                 T_INT          - true false
+internal            T_INTERNAL     - true false
 in                  T_IN           - true false
 if                  T_IF           - true false
 new                 T_NEW          - true false

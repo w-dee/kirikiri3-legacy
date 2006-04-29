@@ -427,5 +427,28 @@ tRisseString tRisseASTNode_FuncDeclArg::GetDumpComment() const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_PropDecl::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0: return tRisseString(RISSE_WS("setter(argument=")) +
+			SetterArgumentName.AsHumanReadable() + RISSE_WS(")");
+	case 1: return RISSE_WS("getter");
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_PropDecl::GetDumpComment() const
+{
+	tRisseString attrib = Attribute.AsString();
+	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
+	return attrib + Name.AsHumanReadable();
+}
+//---------------------------------------------------------------------------
+
 
 } // namespace Risse

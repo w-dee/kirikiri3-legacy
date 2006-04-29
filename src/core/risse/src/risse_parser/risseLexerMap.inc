@@ -1794,7 +1794,7 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
    }
   }
  default:
-  if(Risse_iswalpha_nc(p[0])) { p++; goto cut_word; }
+  if(Risse_iswordcha_nc(p[0])) { p++; goto cut_word; }
  }
  return 0;
 cut_word:

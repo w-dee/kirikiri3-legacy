@@ -132,7 +132,7 @@ def gen(level, words, history, is_default)
 	# $cut_unmatched_word のとき
 	if $cut_unmatched_word != nil && level == 0 then
 		ret << "#{indent}default:\n"
-		ret << "#{indent} if(Risse_iswalpha_nc(p[0])) { p++; goto cut_word; }\n"
+		ret << "#{indent} if(Risse_iswordcha_nc(p[0])) { p++; goto cut_word; }\n"
 	end
 
 	# switch 文の終わりを生成

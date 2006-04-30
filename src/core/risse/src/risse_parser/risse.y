@@ -286,7 +286,8 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	func_decl_arg func_decl_arg_collapse
 	property_def property_expr_def property_handler_def_list
 	property_handler_getter property_handler_setter
-	class_def return switch with label try throw catch catch_list catch_or_finally
+	class_def class_expr_def class_extender class_extends_list
+	return switch with label try throw catch catch_list catch_or_finally
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
 	embeddable_string_s embeddable_string_s_unit
@@ -550,27 +551,10 @@ throw
 	: "throw" expr_with_comma ";"			{ $$ = N(Throw)(LP, $2); }
 ;
 
-
 /*---------------------------------------------------------------------------
-  context definition
+  function definition
   ---------------------------------------------------------------------------*/
 
-
-/* definitions */
-definition
-	: member_attr_list_non_prop
-	  variable_def							{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
-	| variable_def
-	| member_attr_list_non_prop
-	  func_def								{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
-	| func_def
-	| member_attr_list_non_prop
-	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
-	| property_def
-	| member_attr_list_non_prop
-	  class_def								{;}
-	| class_def
-;
 
 /* a function definition */
 func_def
@@ -623,6 +607,10 @@ func_decl_arg_collapse
 */
 ;
 
+/*---------------------------------------------------------------------------
+  property definition
+  ---------------------------------------------------------------------------*/
+
 /* a property handler definition */
 property_def
 	: "property" T_ID
@@ -672,35 +660,58 @@ property_getter_handler_head
 	| "getter"
 ;
 
+/*---------------------------------------------------------------------------
+  class definition
+  ---------------------------------------------------------------------------*/
 
 /* a class definition */
 class_def
-	: "class" T_ID							{ /*sb->PushContextStack(
-												lx->GetString($2),
-												ctClass);*/ }
+	: "class" T_ID
 	  class_extender
-	  block									{ /*sb->PopContextStack();*/ }
+	  block									{ $$ = $3;
+											  C(ClassDecl, $$)->SetBody($4);
+											  C(ClassDecl, $$)->SetName(*$2); }
+;
+
+class_expr_def
+	: "class"
+	  class_extender
+	  block									{ $$ = $2;
+											  C(ClassDecl, $$)->SetBody($3); }
 ;
 
 class_extender
-	:
-	| "extends" expr						{ /*cc->CreateExtendsExprCode($2, true);*/ }
-	| "extends" expr ","					{ /*cc->CreateExtendsExprCode($2, false);*/ }
-	  extends_list
+	:										{ $$ = N(ClassDecl)(LP); }
+	| "extends" class_extends_list			{ $$ = $2; }
 ;
 
-extends_list
-	: extends_name
-	| extends_list "," extends_name
+class_extends_list
+	: expr									{ $$ = N(ClassDecl)(LP);
+											  C(ClassDecl, $$)->AddChild($1); }
+	| class_extends_list "," expr			{ $$ = $1; C(ClassDecl, $$)->AddChild($3); }
 ;
 
-extends_name
-	: expr									{ /*cc->CreateExtendsExprCode($1, false);*/ }
-;
 
 /*---------------------------------------------------------------------------
   member attribute
   ---------------------------------------------------------------------------*/
+
+/* definitions */
+definition
+	: member_attr_list_non_prop
+	  variable_def							{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
+	| variable_def
+	| member_attr_list_non_prop
+	  func_def								{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
+	| func_def
+	| member_attr_list_non_prop
+	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
+	| property_def
+	| member_attr_list_non_prop
+	  class_def								{ $$ = $2; C(ClassDecl, $$)->SetAttribute(*$1); }
+	| class_def
+;
+
 
 /* member attributes */
 member_attr_list
@@ -832,6 +843,7 @@ factor_expr
 	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
 	| func_expr_def
 	| property_expr_def
+	| class_expr_def
 	| "global"						{ $$ = N(Factor)(LP, aftGlobal); }
 	| inline_array
 	| inline_dic

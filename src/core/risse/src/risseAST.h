@@ -86,6 +86,7 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, FuncDecl		)		//!< 関数宣言
 	RISSE_AST_ENUM_ITEM(ant, FuncDeclArg	)		//!< 関数宣言の引数
 	RISSE_AST_ENUM_ITEM(ant, PropDecl		)		//!< プロパティ宣言
+	RISSE_AST_ENUM_ITEM(ant, ClassDecl		)		//!< クラス宣言
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -1879,6 +1880,77 @@ public:
 };
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief	クラス宣言のASTノード(type=antClassDecl)
+//---------------------------------------------------------------------------
+class tRisseASTNode_ClassDecl : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+	tRisseASTNode * Body; //!< クラス宣言ボディ
+	tRisseString Name; //!< クラス名
+	tRisseMemberAttribute Attribute; //!< 属性
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	tRisseASTNode_ClassDecl(risse_size position) :
+		tRisseASTNode_List(position, antClassDecl)
+	{
+		Body = NULL;
+	}
+
+	//! @brief		クラスボディを設定する
+	//! @param		node		クラスボディ
+	void SetBody(tRisseASTNode * node)
+		{ Body = node; Body->SetParent(this); }
+
+	//! @brief		クラスボディを得る
+	//! @return		クラスボディ
+	tRisseASTNode * GetBody() const { return Body; }
+
+	//! @brief		クラス名を設定する
+	//! @param		name	クラス名
+	void SetName(const tRisseString & name) { Name = name; }
+
+	//! @brief		クラス名を得る
+	//! @return		クラス名
+	tRisseString GetName() const { return Name; }
+
+	//! @brief		属性を設定する
+	//! @param		attrib	属性
+	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+
+	//! @brief		属性を設定する
+	//! @return		属性
+	tRisseMemberAttribute GetAttribute() const { return Attribute; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return inherited::GetChildCount() + 1; // +1 = Body
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == inherited::GetChildCount()) return Body;
+		return inherited::GetChildAt(index);
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+};
+//---------------------------------------------------------------------------
 
 #endif // #ifndef RISSE_AST_DEFINE_NAMES
 

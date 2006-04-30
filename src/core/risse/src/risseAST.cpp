@@ -452,4 +452,31 @@ tRisseString tRisseASTNode_PropDecl::GetDumpComment() const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_ClassDecl::GetChildNameAt(risse_size index) const
+{
+	if(index == inherited::GetChildCount()) return RISSE_WS("body");
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("super")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
+{
+	tRisseString attrib = Attribute.AsString();
+	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
+	if(Name.IsEmpty()) return attrib + RISSE_WS("anonymous");
+	return attrib + Name.AsHumanReadable();
+}
+//---------------------------------------------------------------------------
+
+
+
+
 } // namespace Risse

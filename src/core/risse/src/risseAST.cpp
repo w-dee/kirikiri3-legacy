@@ -124,6 +124,15 @@ tRisseString tRisseASTNode_FuncCallArg::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseASTNode_RegExp::GetDumpComment() const
+{
+	return tRisseString(RISSE_WS("pattern=")) + Pattern.AsHumanReadable() +
+		RISSE_WS(", flags=") + Flags.AsHumanReadable();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_Context::GetDumpComment() const
 {
 	return RisseASTContextTypeNames[ContextType];

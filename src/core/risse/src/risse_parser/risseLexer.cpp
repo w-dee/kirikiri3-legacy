@@ -29,10 +29,12 @@ RISSE_DEFINE_SOURCE_ID(26774,17704,8265,19906,55701,8958,30467,4610);
 tRisseLexer::tRisseLexer(const tRisseString & script)
 {
 	// フィールドを初期化
+	NextIsRegularExpression = false;
 	ContinueEmbeddableString = 0;
 	Script = script;
 	Ptr = NULL;
 	PtrOrigin = NULL;
+	PtrPrevious = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -47,7 +49,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 	{
 		// 初回
 		// Ptr にスクリプト文字列へのポインタを代入
-		Ptr = PtrOrigin = Script.c_str();
+		Ptr = PtrOrigin = PtrPrevious = Script.c_str();
 
 		// Ptr の先頭は #! で始まっているか (UN*Xにおけるインタプリタに対応)
 		if(Ptr[0] == RISSE_WC('#') && Ptr[1] == RISSE_WC('!'))
@@ -62,6 +64,26 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		val = value.Value;
 		TokenFIFO.pop_front();
 		return id;
+	}
+
+	// NextIsRegularExpression ?
+	if(NextIsRegularExpression)
+	{
+		NextIsRegularExpression = false;
+		// 次のトークン読み込みで正規表現パターンを解析する
+		// パーサは、/= や / を見つけ、それが２項演算子で無い場合に
+		// SetNextIsRegularExpression() を呼び、それが
+		// 正規表現パターンであることをlexerに伝える。
+		// lexer はすでに /= や / を返したあとなので
+		// 前の位置にもどり、正規表現パターンの解析を行う。
+		Ptr = PtrPrevious; // 前の解析位置に戻す
+		tRisseString pat, flags;
+		if(!ParseRegExp(Ptr, pat, flags)) return 0;
+		// 一回には一回のトークンしか返すことができないので
+		// 最初にパターンを送り、次にフラグを送る
+		TokenFIFO.push_back(tTokenIdAndValue(T_REGEXP_FLAGS, flags));
+		val = pat;
+		return T_REGEXP;
 	}
 
 	// ContinueEmbeddableString ?
@@ -80,7 +102,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		if(!SkipSpace(Ptr)) { id = -1; break; } // EOF
 
 		// 現在位置にあるトークンを解析
-		const risse_char * ptr_start = Ptr;
+		const risse_char * ptr_start = PtrPrevious = Ptr;
 
 		id = RisseMapToken(Ptr, val);
 

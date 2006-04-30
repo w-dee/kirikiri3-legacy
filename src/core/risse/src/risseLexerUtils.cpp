@@ -883,6 +883,9 @@ bool tRisseLexerUtility::ParseRegExp(const risse_char * & ptr, tRisseString &pat
 	tRisseString str;
 	tRisseString flg;
 
+	risse_char delimiter = *ptr; // デリミタを読む
+	if(!*(++ptr)) return false;
+
 	for(;*ptr;)
 	{
 		if(*ptr == RISSE_WC('\\'))
@@ -893,7 +896,7 @@ bool tRisseLexerUtility::ParseRegExp(const risse_char * & ptr, tRisseString &pat
 			else
 				lastbackslash = true;
 		}
-		else if(*ptr == RISSE_WC('/') && !lastbackslash)
+		else if(*ptr == delimiter && !lastbackslash)
 		{
 			// regexp delimiters
 			if(!*(++ptr))

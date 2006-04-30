@@ -265,7 +265,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %token <value>		T_EMSTRING_AMPERSAND_D T_EMSTRING_AMPERSAND_S
 %token <value>		T_EMSTRING_DOLLAR_D T_EMSTRING_DOLLAR_S
 %token <value>		T_ID
-%token <value>		T_REGEXP
+%token <value>		T_REGEXP T_REGEXP_FLAGS
 
 %type <attr>		member_attr_list member_attr member_attr_list_non_prop
 					member_attr_non_prop member_attr_prop
@@ -288,6 +288,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	property_handler_getter property_handler_setter
 	class_def class_expr_def class_extender class_extends_list
 	return switch with label try throw catch catch_list catch_or_finally
+	regexp
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
 	embeddable_string_s embeddable_string_s_unit
@@ -847,12 +848,10 @@ factor_expr
 	| "global"						{ $$ = N(Factor)(LP, aftGlobal); }
 	| inline_array
 	| inline_dic
-	| "/="							{ /*lx->SetStartOfRegExp();*/ }
-	  T_REGEXP						{ /*$$ = cc->MakeNP0(T_REGEXP);
-									  $$->SetValue(lx->GetValue($3));*/ }
-	| "/"							{ /*lx->SetStartOfRegExp();*/ }
-	  T_REGEXP						{ /*$$ = cc->MakeNP0(T_REGEXP);
-									  $$->SetValue(lx->GetValue($3));*/ }
+	| "/="							{ LX->SetNextIsRegularExpression(); }
+	  regexp						{ $$ = $3; }
+	| "/"							{ LX->SetNextIsRegularExpression(); }
+	  regexp						{ $$ = $3; }
 	| embeddable_string
 ;
 
@@ -877,6 +876,11 @@ call_arg
 	| "*"								{ $$ = N(FuncCallArg)(LP, NULL, true); }
 	| expr "*" 							{ $$ = N(FuncCallArg)(LP, $1, true); }
 	| expr								{ $$ = N(FuncCallArg)(LP, $1, false); }
+;
+
+/* regular expression */
+regexp
+	: T_REGEXP T_REGEXP_FLAGS			{ $$ = N(RegExp)(LP, *$1, *$2); }
 ;
 
 /*---------------------------------------------------------------------------

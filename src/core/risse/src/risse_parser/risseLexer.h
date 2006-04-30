@@ -25,12 +25,19 @@ class tRisseLexer : public tRisseLexerUtility, public tRisseCollectee
 	tRisseString Script; //!< スクリプト
 	const risse_char * Ptr; //!< 解析ポインタの現在位置
 	const risse_char * PtrOrigin; //!< 解析ポインタの先頭
+	const risse_char * PtrPrevious; //!< 前回返したトークンの先頭位置
 
 	//! @brief		トークンIDと値の組
 	struct tTokenIdAndValue
 	{
 		int				Id;		//!< ID
 		tRisseVariant	Value;	//!< 値
+
+		//! @brief		コンストラクタ
+		//! @param		id		Id
+		//! @param		value	値
+		tTokenIdAndValue(int id, const tRisseVariant & value)
+			{ Id = id; Value = value; }
 	};
 
 	gc_deque<tTokenIdAndValue> TokenFIFO; //!< トークン用の FIFO バッファ (先読みを行う場合に使う)
@@ -38,6 +45,8 @@ class tRisseLexer : public tRisseLexerUtility, public tRisseCollectee
 	risse_char ContinueEmbeddableString;
 		//!< 「埋め込み可能な」文字列の解析を次のトークン読み込み
 		//!   で再開するかどうか(0=しない、'\'' または '"' =デリミタ)
+
+	bool NextIsRegularExpression; //!< 次の解析は正規表現パターン
 
 public:
 	//! @brief		コンストラクタ
@@ -56,6 +65,9 @@ public:
 	//! @brief		次のトークン読み込みで「埋め込み可能な」文字列の解析を再開する
 	//! @param		delimiter		文字列の終了デリミタ
 	void SetContinueEmbeddableString(risse_char delimiter) { ContinueEmbeddableString = delimiter; }
+
+	//! @brief		次のトークン読み込みで正規表現パターンを解析する
+	void SetNextIsRegularExpression() { NextIsRegularExpression = true; }
 
 private:
 	//! @brief		埋め込み可能な文字列リテラルの解析

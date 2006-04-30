@@ -446,6 +446,7 @@ tRisseString tRisseASTNode_PropDecl::GetDumpComment() const
 {
 	tRisseString attrib = Attribute.AsString();
 	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
+	if(Name.IsEmpty()) return attrib + RISSE_WS("anonymous");
 	return attrib + Name.AsHumanReadable();
 }
 //---------------------------------------------------------------------------

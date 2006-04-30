@@ -284,7 +284,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	variable_def variable_def_inner variable_id variable_id_list
 	func_def func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
 	func_decl_arg func_decl_arg_collapse
-	property_def property_handler_def_list
+	property_def property_expr_def property_handler_def_list
 	property_handler_getter property_handler_setter
 	class_def return switch with label try throw catch catch_list catch_or_finally
 	embeddable_string
@@ -631,6 +631,14 @@ property_def
 	  "}"									{ $$ = $4; C(PropDecl, $$)->SetName(*$2); }
 ;
 
+/* a property expression definition */
+property_expr_def
+	: "property"
+	  "{"
+	  property_handler_def_list
+	  "}"									{ $$ = $3; }
+;
+
 property_handler_def_list
 	: property_handler_setter
 	| property_handler_getter
@@ -822,7 +830,8 @@ factor_expr
 	| T_ID							{ $$ = N(Factor)(LP, aftId, *$1); }
 	| "this"						{ $$ = N(Factor)(LP, aftThis);  }
 	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
-	| func_expr_def					{ /*$$ = $1;*/ }
+	| func_expr_def
+	| property_expr_def
 	| "global"						{ $$ = N(Factor)(LP, aftGlobal); }
 	| inline_array
 	| inline_dic

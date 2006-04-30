@@ -372,14 +372,18 @@ statement
 	| "break" ";"							{ $$ = N(Break)(LP); }
 	| "continue" ";"						{ $$ = N(Continue)(LP); }
 	| "debugger" ";"						{ $$ = N(Debugger)(LP); }
-	| definition
 	| return
 	| switch
 	| with
 	| try
 	| throw
 	| label
+	| definition
 ;
+
+/*---------------------------------------------------------------------------
+  iteration
+  ---------------------------------------------------------------------------*/
 
 /* a while loop */
 while
@@ -395,20 +399,6 @@ do_while
 	  "while"
 	  "(" expr ")"
 	  ";"									{ $$ = N(While)(LP, $5, $2, true); }
-;
-
-/* an if statement */
-if
-	: "if" "("
-	  expr_with_comma
-	  ")" block_or_statement				{ $$ = N(If)(LP, $3, $5); }
-;
-
-/* an if-else statement */
-/* この規則は上記の if とシフト・還元競合を起こす */
-if_else
-	: if "else"
-	  block_or_statement					{ $$ = $1; C(If, $$)->SetFalse($3); }
 ;
 
 /* a for loop */
@@ -440,21 +430,60 @@ for_third_clause
 	| expr_with_comma
 ;
 
-/* definitions */
-definition
-	: member_attr_list_non_prop
-	  variable_def							{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
-	| variable_def
-	| member_attr_list_non_prop
-	  func_def								{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
-	| func_def
-	| member_attr_list_non_prop
-	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
-	| property_def
-	| member_attr_list_non_prop
-	  class_def								{;}
-	| class_def
+/*---------------------------------------------------------------------------
+  flow control
+  ---------------------------------------------------------------------------*/
+
+/* a switch statement */
+switch
+	: "switch" "("
+	  expr_with_comma ")"
+	  block									{ $$ = N(Switch)(LP, $3, $5); }
 ;
+
+/* an if statement */
+if
+	: "if" "("
+	  expr_with_comma
+	  ")" block_or_statement				{ $$ = N(If)(LP, $3, $5); }
+;
+
+/* an if-else statement */
+/* この規則は上記の if とシフト・還元競合を起こす */
+if_else
+	: if "else"
+	  block_or_statement					{ $$ = $1; C(If, $$)->SetFalse($3); }
+;
+
+/* a return statement */
+return
+	: "return" ";"							{ $$ = N(Return)(LP, NULL); }
+	| "return" expr_with_comma ";"			{ $$ = N(Return)(LP, $2); }
+;
+
+/* label or case: */
+label
+	: "case" expr ":"						{ $$ = N(Case)(LP, $2); }
+	| "default" ":"							{ $$ = N(Case)(LP, NULL); }
+	| T_ID ":"								{ $$ = N(Label)(LP, *$1); }
+;
+
+
+/*---------------------------------------------------------------------------
+  syntax sugar
+  ---------------------------------------------------------------------------*/
+
+/* a with statement */
+with
+	: "with" "("
+	  expr_with_comma ")"
+	  block_or_statement					{ $$ = N(With)(LP, $3, $5); }
+;
+
+
+/*---------------------------------------------------------------------------
+  variable definition
+  ---------------------------------------------------------------------------*/
 
 /* variable definition */
 variable_def
@@ -476,6 +505,71 @@ variable_id_list
 variable_id
 	: T_ID									{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
 	| T_ID "=" expr							{ $$ = N(VarDeclPair)(LP, *$1, $3); }
+;
+
+/*---------------------------------------------------------------------------
+  structured exception handling
+  ---------------------------------------------------------------------------*/
+
+
+/* a structured exception handling */
+
+try
+	: "try"
+	  block_or_statement
+	  catch_or_finally							{ $$ = $3; C(Try, $$)->SetBody($2); }
+;
+
+catch_or_finally
+	: catch_list
+	| catch_list "finally" block_or_statement	{ $$ = $1; C(Try, $$)->SetFinally($3); }
+	| "finally" block_or_statement				{ $$ = N(Try)(LP); C(Try, $$)->SetFinally($2); }
+	/* この構文はシフト・還元競合を 2 つ起こすが、問題ない */
+;
+
+catch_list
+	: catch										{ $$ = N(Try)(LP); C(Try, $$)->AddChild($1); }
+	| catch_list catch							{ $$ = $1; C(Try, $1)->AddChild($2); }
+;
+
+catch
+	: "catch" "(" ")" block_or_statement		{ $$ = N(Catch)(
+												  		LP, tRisseString(), NULL, $4); }
+	| "catch" "(" T_ID ")"
+		block_or_statement						{ $$ = N(Catch)(LP, *$3, NULL, $5); }
+	| "catch" "(" T_ID "if" expr ")"
+		block_or_statement						{ $$ = N(Catch)(LP, *$3, $5, $7); }
+	| "catch" "(" "if" expr ")"
+		block_or_statement						{ $$ = N(Catch)(
+												  		LP, tRisseString(), $4, $6); }
+;
+
+
+/* a throw statement */
+throw
+	: "throw" expr_with_comma ";"			{ $$ = N(Throw)(LP, $2); }
+;
+
+
+/*---------------------------------------------------------------------------
+  context definition
+  ---------------------------------------------------------------------------*/
+
+
+/* definitions */
+definition
+	: member_attr_list_non_prop
+	  variable_def							{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
+	| variable_def
+	| member_attr_list_non_prop
+	  func_def								{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
+	| func_def
+	| member_attr_list_non_prop
+	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
+	| property_def
+	| member_attr_list_non_prop
+	  class_def								{;}
+	| class_def
 ;
 
 /* a function definition */
@@ -596,72 +690,9 @@ extends_name
 	: expr									{ /*cc->CreateExtendsExprCode($1, false);*/ }
 ;
 
-/* a return statement */
-return
-	: "return" ";"							{ $$ = N(Return)(LP, NULL); }
-	| "return" expr_with_comma ";"			{ $$ = N(Return)(LP, $2); }
-;
-
-
-/* a switch statement */
-switch
-	: "switch" "("
-	  expr_with_comma ")"
-	  block									{ $$ = N(Switch)(LP, $3, $5); }
-;
-
-/* a with statement */
-with
-	: "with" "("
-	  expr_with_comma ")"
-	  block_or_statement					{ $$ = N(With)(LP, $3, $5); }
-;
-
-/* label or case: */
-label
-	: "case" expr ":"						{ $$ = N(Case)(LP, $2); }
-	| "default" ":"							{ $$ = N(Case)(LP, NULL); }
-	| T_ID ":"								{ $$ = N(Label)(LP, *$1); }
-;
-
-/* a structured exception handling */
-
-try
-	: "try"
-	  block_or_statement
-	  catch_or_finally							{ $$ = $3; C(Try, $$)->SetBody($2); }
-;
-
-catch_or_finally
-	: catch_list
-	| catch_list "finally" block_or_statement	{ $$ = $1; C(Try, $$)->SetFinally($3); }
-	| "finally" block_or_statement				{ $$ = N(Try)(LP); C(Try, $$)->SetFinally($2); }
-	/* この構文はシフト・還元競合を 2 つ起こすが、問題ない */
-;
-
-catch_list
-	: catch										{ $$ = N(Try)(LP); C(Try, $$)->AddChild($1); }
-	| catch_list catch							{ $$ = $1; C(Try, $1)->AddChild($2); }
-;
-
-catch
-	: "catch" "(" ")" block_or_statement		{ $$ = N(Catch)(
-												  		LP, tRisseString(), NULL, $4); }
-	| "catch" "(" T_ID ")"
-		block_or_statement						{ $$ = N(Catch)(LP, *$3, NULL, $5); }
-	| "catch" "(" T_ID "if" expr ")"
-		block_or_statement						{ $$ = N(Catch)(LP, *$3, $5, $7); }
-	| "catch" "(" "if" expr ")"
-		block_or_statement						{ $$ = N(Catch)(
-												  		LP, tRisseString(), $4, $6); }
-;
-
-
-
-/* a throw statement */
-throw
-	: "throw" expr_with_comma ";"			{ $$ = N(Throw)(LP, $2); }
-;
+/*---------------------------------------------------------------------------
+  member attribute
+  ---------------------------------------------------------------------------*/
 
 /* member attributes */
 member_attr_list
@@ -704,6 +735,12 @@ member_attr_prop
 	| "const"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcConst); }
 	| "var"									{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcVar); }
 ;
+
+
+/*---------------------------------------------------------------------------
+  expression
+  ---------------------------------------------------------------------------*/
+
 
 /* 式 */
 /* カンマとそれ以下の優先順位の式を含む場合はこちらを使う */
@@ -821,6 +858,9 @@ call_arg
 	| expr								{ $$ = N(FuncCallArg)(LP, $1, false); }
 ;
 
+/*---------------------------------------------------------------------------
+  dictionary / array expression
+  ---------------------------------------------------------------------------*/
 
 /* an inline array object */
 inline_array
@@ -865,6 +905,13 @@ dummy_elm_opt
 	: /* empty */
 	| ","
 ;
+
+/*---------------------------------------------------------------------------
+  embeddable string literal
+  ---------------------------------------------------------------------------*/
+
+
+
 
 /* 埋め込み可能な文字列リテラル */
 /*

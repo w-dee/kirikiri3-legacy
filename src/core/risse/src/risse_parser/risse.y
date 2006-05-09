@@ -274,7 +274,8 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %type <np>
 	toplevel_def_list def_list
 	expr expr_with_comma factor_expr call_arg call_arg_list
-	func_expr_def func_call_expr inline_array array_elm_list
+	func_expr_def func_call_expr func_call_expr_body
+	inline_array array_elm_list
 	inline_dic dic_elm dic_elm_list
 	if if_else
 	block block_or_statement statement
@@ -858,6 +859,12 @@ factor_expr
 
 /* an expression for function call */
 func_call_expr
+	: func_call_expr_body
+	| func_call_expr_body func_expr_def	{ $$ = $1;
+										  C(FuncCall, $$)->AddChild(N(FuncCallArg(LP, $2, false))); }
+;
+
+func_call_expr_body
 	: expr "(" call_arg_list ")"		{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
 	| expr "(" "..." ")"				{ $$ = N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
 	| expr "(" ")"						{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }

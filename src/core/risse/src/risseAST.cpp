@@ -22,6 +22,12 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(29091,1243,20617,17999,61570,21800,19479,2186);
 
+
+/*
+	ここから AST のダンプに関わる部分
+	(後ろのほうに SSA 形式の生成に関わる部分がある)
+*/
+
 //---------------------------------------------------------------------------
 void tRisseASTNode::Dump(tRisseString & result, risse_int level)
 {
@@ -487,5 +493,94 @@ tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/*
+	ここから SSA 形式の生成に関わる部分
+*/
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Context::GenerateSSA(
+						tRisseScriptBlockBase * sb, tRisseSSAForm *gen) const
+{
+	// ContextType がトップレベルの場合は、SSA 生成においては、おおかたこのノードが
+	// 一番最初に呼ばれることになる。
+
+	// ローカル変数スコープの生成  - コンテキストの種類に従って分岐
+	switch(ContextType)
+	{
+	case actTopLevel: // トップレベル
+		break; // 何もしない
+	case actBlock: // ブロック
+		gen->GetLocalNamespace()->Push(); // スコープを push
+		break;
+	}
+
+	// すべての子ノードに再帰する
+	for(risse_size i = 0; i < GetChildCount(); i++)
+		GetChildAt(i)->GenerateSSA(sb, gen);
+
+	// ローカル変数スコープの消滅  - コンテキストの種類に従って分岐
+	switch(ContextType)
+	{
+	case actTopLevel: // トップレベル
+		break; // 何もしない
+	case actBlock: // ブロック
+		gen->GetLocalNamespace()->Pop(); // スコープを pop
+		break;
+	}
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_ExprStmt::GenerateSSA(
+						tRisseScriptBlockBase * sb, tRisseSSAForm *gen) const
+{
+	// このノードは式を保持しているだけなので子ノードに処理をさせるだけ
+	GetChildAt(0)->GenerateSSA(sb, gen);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Factor::GenerateSSA(
+						tRisseScriptBlockBase * sb, tRisseSSAForm *gen) const
+{
+	// "項"
+	switch(FactorType)
+	{
+	case aftConstant:	// 定数
+	case aftId:			// 識別子
+	case aftThis:		// "this"
+	case aftSuper:		// "super"
+	case aftGlobal:		// "global"
+	}
+}
+//---------------------------------------------------------------------------
 
 } // namespace Risse

@@ -19,6 +19,8 @@
 #include <gc_allocator.h>
 #include <vector>
 #include <deque>
+#include <list>
+#include <map>
 
 /*! @note
 	現状、Risse は Boehm GC を用いている。
@@ -31,13 +33,23 @@ namespace Risse
 typedef	gc			tRisseCollectee; //!< コレクタの対象となるクラスの基本クラス
 typedef	gc_cleanup	tRisseDestructee; //!< コレクタの対象かつデストラクタが呼ばれるクラスの基本クラス
 
+// http://www.al.cs.kobe-u.ac.jp/~inamoto/unix-tools/useful/programming/gc/x272.html
+
 //! @brief	vector の gc 版
 template <class T>
 class gc_vector : public std::vector<T, gc_allocator<T> >, public gc { };
 
+//! @brief	list の gc 板
+template <class T>
+class gc_list : public std::list<T, gc_allocator<T> >, public gc { };
+
 //! @brief	deque の gc 版
 template <class T>
 class gc_deque : public std::deque<T, gc_allocator<T> >, public gc { };
+
+//! @brief	map の gc 版
+template <class T1, class T2>
+class gc_map : public std::map<T1, T2, std::less<T1>, gc_allocator<std::pair<T1, T2> > >, public gc { };
 
 
 //---------------------------------------------------------------------------

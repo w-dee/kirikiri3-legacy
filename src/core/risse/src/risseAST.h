@@ -17,6 +17,12 @@
 #include "risseGC.h"
 #include "risseVariant.h"
 
+/*
+	このモジュールでは、AST のデータ型を定義するだけではなく、AST から SSA形式
+	へ変換を行うための機構も担う。
+	SSA 形式のデータ形式などの定義は risseCodeGen.h にある。
+*/
+
 
 namespace Risse
 {
@@ -195,7 +201,8 @@ RISSE_AST_ENUM_END
 
 #ifndef RISSE_AST_DEFINE_NAMES
 
-
+class tRisseScriptBlockBase;
+class tRisseSSAForm;
 class tRisseASTNode;
 //---------------------------------------------------------------------------
 //! @brief	ASTノードの配列
@@ -253,17 +260,23 @@ public:
 	virtual tRisseString GetChildNameAt(risse_size index) const = 0;
 
 public:
-
 	//! @brief		ダンプを行う
 	//! @param		result		ダンプされた文字列
 	//! @param		level		再帰レベル
 	void Dump(tRisseString & result, risse_int level = 0);
 
 protected:
-
 	//! @brief		ダンプ時のこのノードのコメントを得る(下位クラスで実装すること)
 	//! @return		ダンプ時のこのノードのコメント
 	virtual tRisseString GetDumpComment() const = 0;
+
+public:
+	//! @brief		SSA 形式の表現を生成する(下位クラスで実装すること)
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		gen		SSA 形式ジェネレータクラス
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	virtual tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *gen) const = 0;
+
 };
 //---------------------------------------------------------------------------
 
@@ -441,6 +454,12 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		gen		SSA 形式ジェネレータクラス
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *gen) const;
 };
 //---------------------------------------------------------------------------
 
@@ -635,6 +654,12 @@ public:
 	//! @brief		expression		式ノード
 	tRisseASTNode_ExprStmt(risse_size position, tRisseASTNode * expression) :
 		tRisseASTNode_OneExpression(position, antExprStmt, expression) {;}
+
+	//! @brief		SSA 形式の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		gen		SSA 形式ジェネレータクラス
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *gen) const;
 };
 //---------------------------------------------------------------------------
 
@@ -686,6 +711,12 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		gen		SSA 形式ジェネレータクラス
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *gen) const;
 };
 //---------------------------------------------------------------------------
 

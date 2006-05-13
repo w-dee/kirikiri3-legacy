@@ -210,30 +210,39 @@ tRisseString tRisseSSAStatement::Dump() const
 			if(Declared)
 				ret += Declared->Dump() + RISSE_WS(" = "); // この文で宣言された変数がある
 
-			// 使用している引数の最初の引数はメッセージの送り先なので
-			// オペレーションコードよりも前に置く
-			if(Used.size() != 0)
-				ret += (*Used.begin())->Dump() + RISSE_WC('.');
-
-			// オペレーションコード
-			ret += tRisseString(RisseOpCodeNames[Code]);
-
-			// 使用している引数
-			if(Used.size() >= 2)
+			if(Code == ocAssign)
 			{
-				tRisseString used;
-				for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin() + 1;
-						i != Used.end(); i++)
-				{
-					if(!used.IsEmpty()) used += RISSE_WS(", ");
-					used += (*i)->Dump();
-				}
-				ret += RISSE_WS("(") + used +
-								RISSE_WS(")");
+				// 単純代入
+				RISSE_ASSERT(Used.size() == 1);
+				ret += (*Used.begin())->Dump();
 			}
 			else
 			{
-				ret += RISSE_WS("()");
+				// 使用している引数の最初の引数はメッセージの送り先なので
+				// オペレーションコードよりも前に置く
+				if(Used.size() != 0)
+					ret += (*Used.begin())->Dump() + RISSE_WC('.');
+
+				// オペレーションコード
+				ret += tRisseString(RisseOpCodeNames[Code]);
+
+				// 使用している引数
+				if(Used.size() >= 2)
+				{
+					tRisseString used;
+					for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin() + 1;
+							i != Used.end(); i++)
+					{
+						if(!used.IsEmpty()) used += RISSE_WS(", ");
+						used += (*i)->Dump();
+					}
+					ret += RISSE_WS("(") + used +
+									RISSE_WS(")");
+				}
+				else
+				{
+					ret += RISSE_WS("()");
+				}
 			}
 
 			// 変数の宣言に関してコメントがあればそれを追加

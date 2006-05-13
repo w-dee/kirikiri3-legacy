@@ -713,6 +713,10 @@ public:
 	//! @return		項のタイプ
 	tRisseASTFactorType GetFactorType() const { return FactorType; }
 
+	//! @brief		値を得る
+	//! @return		値
+	const tRisseVariant & GetValue() const { return Value; }
+
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
@@ -879,7 +883,7 @@ public:
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
 };
 //---------------------------------------------------------------------------
 
@@ -1380,7 +1384,7 @@ public:
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
 };
 //---------------------------------------------------------------------------
 
@@ -1446,7 +1450,7 @@ public:
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
 };
 //---------------------------------------------------------------------------
 

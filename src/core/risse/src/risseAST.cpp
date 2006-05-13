@@ -580,10 +580,18 @@ tRisseSSAVariable * tRisseASTNode_Factor::GenerateSSA(
 
 	case aftId:			// 識別子
 		{
-			/*
-				not yet done
-			*/
-			return NULL;
+			tRisseString var_name = Value; // 変数名
+			tRisseSSAVariable * var = form->GetLocalNamespace()->Find(var_name);
+			if(!var)
+			{
+				// ローカル変数に見つからない /// XXXXXX
+				return NULL;
+			}
+			else
+			{
+				// ローカル変数に見つかった
+				return var;
+			}
 		}
 	case aftThis:		// "this"
 		{
@@ -642,10 +650,10 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 	// 単項演算子
 	switch(UnaryType)
 	{
-	case autLogNot:	//!< "!" logical not
-	case autBitNot:	//!< "~" bit not
-	case autPlus:	//!< "+"
-	case autMinus:	//!< "-"
+	case autLogNot:	// "!" logical not
+	case autBitNot:	// "~" bit not
+	case autPlus:	// "+"
+	case autMinus:	// "-"
 		{
 			// オペコードを決定
 			tRisseOpCode oc;
@@ -677,8 +685,8 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 			return var;
 		}
 
-	case autPreDec:		//!< "--" pre-positioned decrement
-	case autPreInc:		//!< "++" pre-positioned increment
+	case autPreDec:		// "--" pre-positioned decrement
+	case autPreInc:		// "++" pre-positioned increment
 		{
 			// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
 			// 減算するものとして扱われる
@@ -700,14 +708,154 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 			return var;
 		}
 
-	case autPostDec:	//!< "--" post-positioned decrement
-	case autPostInc:	//!< "++" post-positioned increment
-	case autDelete:		//!< "delete"
+	case autPostDec:	// "--" post-positioned decrement
+	case autPostInc:	// "++" post-positioned increment
+	case autDelete:		// "delete"
 		;
 	}
 	return NULL;
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
+						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+{
+	// 演算子のタイプに従って分岐
+	switch(BinaryType)
+	{
+	case abtAssign:				// =
+		{
+			// 単純代入
+			// 右辺の値を得る
+			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
+			// 左辺のタイプをチェック
+			if(Child1->GetType() == antFactor)
+			{
+				// 項
+				tRisseASTNode_Factor * lhs =
+					reinterpret_cast<tRisseASTNode_Factor *>(Child1);
+				tRisseString var_name = lhs->GetValue(); // 変数名
+				tRisseSSAVariable * dest_var = form->GetLocalNamespace()->Find(var_name);
+				if(!dest_var)
+				{
+					// ローカル変数に見つからない /// XXXXXX
+					return NULL;
+				}
+				else
+				{
+					// ローカル変数に見つかった;ローカル変数に上書きする
+					// 文の作成
+					tRisseSSAStatement * stmt =
+						new tRisseSSAStatement(form, GetPosition(), ocAssign);
+					stmt->AddUsed(rhs_var); // この文の使用リストに変数を加える
+					// 変数の作成
+					tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt, var_name);
+					// 文の追加
+					form->GetCurrentBlock()->AddStatement(stmt);
+					// 変数の登録
+					form->GetLocalNamespace()->Add(var_name, var);
+					// var を返す
+					return var;
+				}
+			}
+			return NULL;
+		}
+
+	case abtIf:					// if
+	case abtComma:				// 
+	case abtBitAndAssign:		// &=
+	case abtBitOrAssign:		// |=
+	case abtBitXorAssign:		// ^=
+	case abtSubAssign:			// -=
+	case abtAddAssign:			// +=
+	case abtModAssign:			// %=
+	case abtDivAssign:			// /=
+	case abtIdivAssign:			// \=
+	case abtMulAssign:			// *=
+	case abtLogOrAssign:		// ||=
+	case abtLogAndAssign:		// &&=
+	case abtRBitShiftAssign:	// >>>=
+	case abtLShiftAssign:		// <<=
+	case abtRShiftAssign:		// >>=
+	case abtLogOr:				// ||
+	case abtLogAnd:				// &&
+	case abtBitOr:				// |
+	case abtBitXor:				// ^
+	case abtBitAnd:				// &
+	case abtNotEqual:			// !=
+	case abtEqual:				// ==
+	case abtDiscNotEqual:		// !==
+	case abtDiscEqual:			// ===
+	case abtSwap:				// <->
+	case abtLesser:				// <
+	case abtGreater:			// >
+	case abtLesserOrEqual:		// <=
+	case abtGreaterOrEqual:		// >=
+	case abtRBitShift:			// >>>
+	case abtLShift:				// <<
+	case abtRShift:				// >>
+	case abtMod:				// %
+	case abtDiv:				// /
+	case abtIdiv:				// \ (integer div)
+	case abtMul:				// *
+	case abtAdd:				// +
+	case abtSub:				// -
+	case abtDirectSel:			// .
+	case abtIndirectSel:		// [ ]
+	case abtIncontextOf:		// incontextof
+
+	default:
+		return NULL;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_VarDecl::GenerateSSA(
+						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+{
+	// 変数宣言
+	// 子に再帰する
+	for(risse_size i = 0; i < GetChildCount(); i++)
+		GetChildAt(i)->GenerateSSA(sb, form);
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_VarDeclPair::GenerateSSA(
+						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+{
+	tRisseSSAVariable * init_var;
+	if(Initializer)
+	{
+		// 初期化値がある
+		init_var = Initializer->GenerateSSA(sb, form);
+	}
+	else
+	{
+		// 定数値の作成
+		init_var = form->GetCurrentBlock()->AddConstantValueStatement(
+					GetPosition(), tRisseVariant());
+	}
+	// 文の作成
+	tRisseSSAStatement * stmt =
+		new tRisseSSAStatement(form, GetPosition(), ocAssign);
+	stmt->AddUsed(init_var); // この文の使用リストに変数を加える
+	// 変数の作成
+	tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt, Name);
+	// 文の追加
+	form->GetCurrentBlock()->AddStatement(stmt);
+	// 変数の登録
+	form->GetLocalNamespace()->Add(Name, var);
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
 
 } // namespace Risse

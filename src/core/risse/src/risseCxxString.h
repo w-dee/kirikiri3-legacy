@@ -605,6 +605,10 @@ public: // operators
 		return *this + tmp;
 	}
 
+	// + 演算子 (risse_char * と tRisseStringBlockの連結) を friend に
+	// (定義と実装は下の方)
+	friend tRisseStringBlock operator +(const risse_char *lhs, const tRisseStringBlock &rhs);
+
 	//! @brief [] 演算子
 	//! @param		n		位置
 	//! @return		nの位置にあるコード
@@ -662,6 +666,15 @@ public: // other utilities
 };
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		文字列の
+//! @param		lhs		連結する文字列(左側)
+//! @param		rhs		連結する文字列(右側)
+//! @return		新しく連結された文字列
+//---------------------------------------------------------------------------
+tRisseStringBlock operator +(const risse_char *lhs, const tRisseStringBlock &rhs);
+//---------------------------------------------------------------------------
 
 typedef tRisseStringBlock tRisseString; //!< いまのところ tRisseString は tRisseStringBlock と同じ
 

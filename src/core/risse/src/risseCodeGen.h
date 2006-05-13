@@ -74,7 +74,8 @@ class tRisseSSAForm;
 class tRisseSSAVariable : public tRisseCollectee
 {
 	tRisseSSAForm * Form; //!< この変数が属している SSA 形式インスタンス
-	tRisseString Name; //!< 変数名
+	tRisseString Name; //!< 変数名(バージョン付き)
+	tRisseString OriginalName; //!< 変数名 (元の名前)
 	tRisseSSAStatement * Declared; //!< この変数が定義された文
 	gc_vector<tRisseSSAStatement*> Used; //!< この変数が使用されている文のリスト
 
@@ -85,7 +86,7 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		form	この変数が属する SSA 形式インスタンス
 	//! @param		stmt	この変数が定義された文
-	//! @param		name	変数名 (実際にはこれがprefixになり、通し番号が後に続く)
+	//! @param		name	変数名 (実際にはこれがprefixになり、通し番号が後に続のがNameに入る)
 	//						一時変数については空文字列を渡すこと
 	tRisseSSAVariable(tRisseSSAForm * form, tRisseSSAStatement *stmt = NULL,
 						const tRisseString & name = tRisseString());
@@ -97,6 +98,10 @@ public:
 	//! @brief		この変数の名前を返す
 	//! @return		変数の名前 (バージョン付き)
 	const tRisseString GetName() const { return Name; }
+
+	//! @brief		この変数のオリジナルの名前を返す
+	//! @return		変数のオリジナルの名前
+	const tRisseString GetOriginalName() const { return OriginalName; }
 
 	//! @brief		この変数が定義された文を設定する
 	//! @param		declared	この変数が定義された文
@@ -140,6 +145,9 @@ public:
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
+
+	//! @brief		この変数の型や定数に関するコメントを得る
+	tRisseString GetTypeComment() const;
 };
 //---------------------------------------------------------------------------
 

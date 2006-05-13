@@ -116,6 +116,7 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 {
 	// フィールドの初期化
 	Form = form;
+	OriginalName = name;
 	Declared = stmt;
 	Value = NULL;
 	ValueType = tRisseVariant::vtVoid;
@@ -134,12 +135,12 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 	if(name.IsEmpty())
 	{
 		// 一時変数
-		Name = tRisseString(RISSE_WS(".tmp.")) + uniq;
+		Name = tRisseString(RISSE_WS("@tmp_")) + uniq;
 	}
 	else
 	{
 		// 普通の変数
-		Name = name + RISSE_WC('.') + uniq;
+		Name = name + RISSE_WC('_') + uniq;
 	}
 }
 //---------------------------------------------------------------------------
@@ -148,23 +149,29 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 //---------------------------------------------------------------------------
 tRisseString tRisseSSAVariable::Dump() const
 {
-	tRisseString ret = Name;
+	return Name;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSSAVariable::GetTypeComment() const
+{
 	if(Value)
 	{
 		// 定数である
-		ret += tRisseString(RISSE_WS("[=")) +
-			Value->AsHumanReadable() + RISSE_WS("]");
+		return tRisseString(RISSE_WS("constant ")) +
+			Value->AsHumanReadable();
 	}
 	else if(ValueType != tRisseVariant::vtVoid)
 	{
 		// 型が決まっている
-		ret += tRisseString(RISSE_WS("(=")) +
-			tRisseVariant::GetTypeString(ValueType) + RISSE_WS(")");
+		return tRisseString(RISSE_WS("always type ")) +
+			tRisseVariant::GetTypeString(ValueType);
 	}
-	return ret;
+	else return tRisseString();
 }
 //---------------------------------------------------------------------------
-
 
 
 
@@ -198,19 +205,39 @@ tRisseString tRisseSSAStatement::Dump() const
 	default:
 		{
 			tRisseString ret;
+
 			// 変数の宣言
 			if(Declared)
 				ret += Declared->Dump() + RISSE_WS(" = "); // この文で宣言された変数がある
+
+			// 使用している引数の最初の引数はメッセージの送り先なので
+			// オペレーションコードよりも前に置く
+			if(Used.size() != 0)
+				ret += (*Used.begin())->Dump() + RISSE_WC('.');
+
 			// オペレーションコード
 			ret += tRisseString(RisseOpCodeNames[Code]);
 			ret += RISSE_WC(' ');
+
 			// 使用している引数
-			tRisseString used;
-			for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
-					i != Used.end(); i++)
+			if(Used.size() >= 2)
 			{
-				if(!used.IsEmpty()) used += RISSE_WS(", ");
-				used += (*i)->Dump();
+				tRisseString used;
+				for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin() + 1;
+						i != Used.end(); i++)
+				{
+					if(!used.IsEmpty()) used += RISSE_WS(", ");
+					used += (*i)->Dump();
+				}
+				ret += used;
+			}
+
+			// 変数の宣言に関してコメントがあればそれを追加
+			if(Declared)
+			{
+				tRisseString comment = Declared->GetTypeComment();
+				if(!comment.IsEmpty())
+					ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 			}
 			return ret;
 		}
@@ -257,7 +284,7 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode 
 {
 	ScriptBlock = scriptblock;
 	Root = root;
-	UniqueNumber = 1;
+	UniqueNumber = 0;
 	LocalNamespace = new tRisseLocalNamespace();
 	EntryBlock = NULL;
 	CurrentBlock = NULL;

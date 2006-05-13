@@ -124,11 +124,13 @@ void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 void tRisseScriptBlockBase::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
 {
 	// (テスト) ASTのダンプを行う
+	RisseFPrint(stdout, RISSE_WS("---------- AST ----------\n"));
 	tRisseString str;
 	root->Dump(str);
 	RisseFPrint(stdout, str.c_str());
 
 	// (テスト)
+	RisseFPrint(stdout, RISSE_WS("---------- SSA form ----------\n"));
 	tRisseSSAForm * form = new tRisseSSAForm(this, root);
 	form->Generate();
 	str = form->Dump();

@@ -506,4 +506,23 @@ tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock operator +(const risse_char *lhs, const tRisseStringBlock &rhs)
+{
+	risse_size lhs_length = Risse_strlen(lhs);
+	if(lhs == NULL) return rhs;
+	if(lhs_length == 0) return rhs;
+
+	tRisseStringBlock newblock;
+	risse_size newsize = lhs_length + rhs.Length;
+	newblock.Allocate(newsize);
+	memcpy(newblock.Buffer, lhs, lhs_length * sizeof(risse_char));
+	memcpy(newblock.Buffer + lhs_length, rhs.Buffer, rhs.Length * sizeof(risse_char));
+
+	return newblock;
+}
+//---------------------------------------------------------------------------
+
 } // namespace Risse

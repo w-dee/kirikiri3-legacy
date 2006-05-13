@@ -819,7 +819,12 @@ expr
 	| "~" expr						{ $$ = N(Unary)(LP, autBitNot			,$2); }
 	| "--" expr						{ $$ = N(Unary)(LP, autPreDec			,$2); }
 	| "++" expr						{ $$ = N(Unary)(LP, autPreInc			,$2); }
-	| "new" expr					{ $$ = N(Unary)(LP, autNew				,$2); }
+	| "new" expr					{ $$ = $2;
+									  /* new の子ノードは必ず関数呼び出し式である必要がある */
+									  if($$->GetType() != antFuncCall)
+									  { yyerror("expected func_call_expr after new");
+											    YYERROR; }
+									  C(FuncCall, $$)->SetCreateNew(); }
 	| "delete" expr					{ $$ = N(Unary)(LP, autDelete			,$2); }
 	| "typeof" expr					{ ; }
 	| "+" expr %prec T_UNARY		{ $$ = N(Unary)(LP, autPlus				,$2); }

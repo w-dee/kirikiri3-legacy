@@ -34,12 +34,6 @@ public:
 	//! @note		もしスクリプトがコンパイルが必要な場合、
 	//!				Evaluate は評価に先立って Compile() を呼び、コンパイルを行う。
 	virtual void Evaluate(tRisseVariant * result = NULL, bool is_expression = false);
-
-private:
-	//! @brief		コンパイルを行う
-	//! @param		need_result		評価時に結果が必要かどうか
-	//! @param		is_expression	式評価モードかどうか
-	void Compile(bool need_result, bool is_expression);
 };
 //---------------------------------------------------------------------------
 

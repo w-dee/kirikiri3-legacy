@@ -10,16 +10,19 @@
 //! @file
 //! @brief オペレーションコード定義
 //---------------------------------------------------------------------------
-#ifndef risseOpeCodesH
-#define risseOpeCodesH
+#ifndef risseOpCodesH
+#define risseOpCodesH
 
-#include "risseGC.h"
-#include "risseCharUtils.h"
 #include "risseTypes.h"
+#include "risseCharUtils.h"
 //---------------------------------------------------------------------------
 
+namespace Risse
+{
+extern const char * RisseOpCodeNames[];
+
 /*
-	#undef risseOpeCodesH
+	#undef risseOpCodesH
 	してから #define RISSE_OC_DEFINE_NAMES
 	してこのファイルをもう一度 include すると、各 enum に
 	対応した文字列の表を得ることができる。
@@ -39,11 +42,11 @@
 
 
 #ifndef RISSE_OC_DEFINE_NAMES
-	#define RISSE_OC_ENUM_DEF() enum tRisseOpCodeType {
+	#define RISSE_OC_ENUM_DEF() enum tRisseOpCode {
 	#define RISSE_OC_ENUM_ITEM(X) oc##X,
 	#define RISSE_OC_ENUM_END };
 #else
-	#define RISSE_OC_ENUM_DEF() static const char * RisseOpCodesNames[] = {
+	#define RISSE_OC_ENUM_DEF() const char * RisseOpCodeNames[] = {
 	#define RISSE_OC_ENUM_ITEM(X) #X,
 	#define RISSE_OC_ENUM_END };
 #endif
@@ -51,8 +54,15 @@
 
 //---------------------------------------------------------------------------
 RISSE_OC_ENUM_DEF()
+// なにもしない
+	RISSE_OC_ENUM_ITEM(NoOperation		)		//!< なにもしない
+
 // 代入
 	RISSE_OC_ENUM_ITEM(Assign			)		//!< = (ローカル変数の代入)
+	RISSE_OC_ENUM_ITEM(AssignConstant	)		//!< = 定数の代入
+	RISSE_OC_ENUM_ITEM(AssignThis		)		//!< = thisの代入
+	RISSE_OC_ENUM_ITEM(AssignSuper		)		//!< = superの代入
+	RISSE_OC_ENUM_ITEM(AssignGlobal		)		//!< = globalの代入
 
 // 可変引数
 	RISSE_OC_ENUM_ITEM(FuncCall			)		//!< function call

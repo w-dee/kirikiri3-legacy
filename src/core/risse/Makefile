@@ -31,12 +31,14 @@ CPPFLAGS = $(CXXFLAGS)
 
 CPPFILES =  src/risseAST.cpp                         \
 			src/risseCharUtils.cpp                   \
+			src/risseCodeGen.cpp                     \
 			src/risseConfig.cpp                      \
 			src/risseCxxObject.cpp                   \
 			src/risseCxxOctet.cpp                    \
 			src/risseCxxString.cpp                   \
 			src/risseException.cpp                   \
 			src/risseLexerUtils.cpp                  \
+			src/risseOpCodes.cpp                     \
 			src/risseScriptBlockBase.cpp             \
 			src/risseTypes.cpp                       \
 			src/risseUtils.cpp                       \

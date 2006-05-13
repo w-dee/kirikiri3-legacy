@@ -14,6 +14,7 @@
 
 #include "risseScriptBlock.h"
 #include "risseLexer.h"
+#include "risseParser.h"
 
 namespace Risse
 {
@@ -33,22 +34,7 @@ void tRisseScriptBlock::Evaluate(tRisseVariant * result, bool is_expression)
 {
 	// まず、コンパイルを行う
 	// (TODO: スクリプトブロックのキャッシュ対策)
-	Compile(result != NULL, is_expression);
-}
-//---------------------------------------------------------------------------
 
-
-}
-#define RISSE_DEFINE_TOKEN_STRING
-#undef RisseParserH
-#include "risseParser.h" // テスト用
-namespace Risse {
-
-
-
-//---------------------------------------------------------------------------
-void tRisseScriptBlock::Compile(bool need_result, bool is_expression)
-{
 	// Lexer を準備する
 	tRisseLexer *lexer = new tRisseLexer(GetScript());
 
@@ -56,10 +42,8 @@ void tRisseScriptBlock::Compile(bool need_result, bool is_expression)
 	// パースする
 	tRisseParser *parser = new tRisseParser(lexer);
 
-	// (テスト) ダンプを行う
-	tRisseString str;
-	parser->GetRoot()->Dump(str);
-	RisseFPrint(stdout, str.c_str());
+	// コンパイルする
+	Compile(parser->GetRoot(), result != NULL, is_expression);
 }
 //---------------------------------------------------------------------------
 

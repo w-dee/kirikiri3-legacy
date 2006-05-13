@@ -17,7 +17,7 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID();
+RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 
 //---------------------------------------------------------------------------
 tRisseLocalNamespace::tRisseLocalNamespace()
@@ -64,11 +64,11 @@ void tRisseLocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * wh
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseLocalNamespace::Find(const tRisseString & name)
+tRisseSSAVariable * tRisseLocalNamespace::Find(const tRisseString & name) const
 {
 	// Scopes を頭から見ていき、最初に見つかった変数を返す
 	// (スコープによる変数の可視・不可視のルールに従う)
-	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
+	for(tScopes::const_reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
 	{
 		tMap::iterator i = (*ri)->find(name);
 		if(i != (*ri)->end())
@@ -111,19 +111,21 @@ bool tRisseLocalNamespace::Delete(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
-	const tRisseVariant & name = tRisseVariant())
+tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form, 
+	tRisseSSAStatement *stmt, const tRisseString & name)
 {
 	// フィールドの初期化
 	Form = form;
-	Declared = NULL;
+	Declared = stmt;
 	Value = NULL;
 	ValueType = tRisseVariant::vtVoid;
 
+	// この変数が定義された文の登録
+	if(Declared) Declared->SetDeclared(this);
+
 	// 名前を生成する
-	// 名前は一時変数は . で始める。
-	// そのあと、name 引数で渡された変数名が続き (一時変数の場合は "tmp")、
-	// ドットに続いて通し番号がつく。
+	// 名前の後にはドットに続いて通し番号がつく。
+	// 一時変数の場合は名前として ".tmp" が用いられる
 
 	// 通し番号の準備
 	risse_char uniq[40];
@@ -143,6 +145,26 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tRisseString tRisseSSAVariable::Dump() const
+{
+	tRisseString ret = Name;
+	if(Value)
+	{
+		// 定数である
+		ret += tRisseString(RISSE_WS("[=")) +
+			Value->AsHumanReadable() + RISSE_WS("]");
+	}
+	else if(ValueType != tRisseVariant::vtVoid)
+	{
+		// 型が決まっている
+		ret += tRisseString(RISSE_WS("(=")) +
+			tRisseVariant::GetTypeString(ValueType) + RISSE_WS(")");
+	}
+	return ret;
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -151,11 +173,92 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 
 
 //---------------------------------------------------------------------------
-tRisseSSAForm::tRisseSSAForm(tRisseASTNode * root)
+tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
+	risse_size position, tRisseOpCode code)
 {
-	UniqueNumber = 1;
+	// フィールドの初期化
+	Form = form;
+	Position = position;
+	Code = code;
+	Block = NULL;
+	Pred = NULL;
+	Succ = NULL;
+	Declared = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSSAStatement::Dump() const
+{
+	switch(Code)
+	{
+	case ocNoOperation:			//!< なにもしない
+		return RISSE_WS("nop");
+	default:
+		{
+			tRisseString ret;
+			// 変数の宣言
+			if(Declared)
+				ret += Declared->Dump() + RISSE_WS(" = "); // この文で宣言された変数がある
+			// オペレーションコード
+			ret += tRisseString(RisseOpCodeNames[Code]);
+			ret += RISSE_WC(' ');
+			// 使用している引数
+			tRisseString used;
+			for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+					i != Used.end(); i++)
+			{
+				if(!used.IsEmpty()) used += RISSE_WS(", ");
+				used += (*i)->Dump();
+			}
+			return ret;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSSABlock::Dump() const
+{
+	if(!FirstStatement)
+	{
+		// 一つも文を含んでいない？？
+		return RISSE_WS("This SSA block does not contain any statements\n");
+	}
+
+	tRisseString ret;
+	tRisseSSAStatement * stmt = FirstStatement;
+	do 
+	{
+		ret += stmt->Dump() + RISSE_WS("\n");
+		stmt = stmt->GetSucc();
+	} while(stmt != NULL);
+
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode * root)
+{
+	ScriptBlock = scriptblock;
 	Root = root;
-	LocalNamespace = new tRisseLocalNameSpace();
+	UniqueNumber = 1;
+	LocalNamespace = new tRisseLocalNamespace();
 	EntryBlock = NULL;
 	CurrentBlock = NULL;
 }
@@ -172,9 +275,19 @@ void tRisseSSAForm::Generate()
 	CurrentBlock = EntryBlock;
 
 	// ルートノードを処理する
-	Root->GenerateSSA(this);
+	Root->GenerateSSA(ScriptBlock, this);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSSAForm::Dump() const
+{
+	// この form から到達可能なブロックをすべてダンプする
+	return EntryBlock->Dump();
+}
+//---------------------------------------------------------------------------
+
 
 
 

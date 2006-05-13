@@ -326,7 +326,7 @@ void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref) const
+tRisseStringBlock tRisseStringBlock::operator + (const tRisseStringBlock & ref) const
 {
 	if(Length == 0) return ref;
 	if(ref.Length == 0) return *this;
@@ -336,6 +336,25 @@ tRisseStringBlock tRisseStringBlock::operator +  (const tRisseStringBlock & ref)
 	newblock.Allocate(newsize);
 	memcpy(newblock.Buffer, Buffer, Length * sizeof(risse_char));
 	memcpy(newblock.Buffer + Length, ref.Buffer, ref.Length * sizeof(risse_char));
+
+	return newblock;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::operator + (const risse_char * ref) const
+{
+	if(Length == 0) return ref;
+	if(ref == NULL) return *this;
+	risse_size ref_length = Risse_strlen(ref);
+	if(ref_length == 0) return *this;
+
+	tRisseStringBlock newblock;
+	risse_size newsize = Length + ref_length;
+	newblock.Allocate(newsize);
+	memcpy(newblock.Buffer, Buffer, Length * sizeof(risse_char));
+	memcpy(newblock.Buffer + Length, ref, ref_length * sizeof(risse_char));
 
 	return newblock;
 }

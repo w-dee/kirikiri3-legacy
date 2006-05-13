@@ -14,6 +14,7 @@
 #include "prec.h"
 #include "risseScriptBlockBase.h"
 #include "risseException.h"
+#include "risseCodeGen.h"
 
 
 namespace Risse
@@ -115,6 +116,23 @@ void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 		else
 			s = m;
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseScriptBlockBase::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
+{
+	// (テスト) ASTのダンプを行う
+	tRisseString str;
+	root->Dump(str);
+	RisseFPrint(stdout, str.c_str());
+
+	// (テスト)
+	tRisseSSAForm * form = new tRisseSSAForm(this, root);
+	form->Generate();
+	str = form->Dump();
+	RisseFPrint(stdout, str.c_str());
 }
 //---------------------------------------------------------------------------
 

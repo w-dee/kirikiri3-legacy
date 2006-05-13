@@ -154,7 +154,7 @@ public:
 		vtVoid			= 0,
 		vtInteger		= 1,
 		vtReal			= 2,
-		vtBool			= 3,
+		vtBoolean		= 3,
 		vtString		= 4 + 0,
 		vtObject		= 4 + 1,
 		vtOctet			= 4 + 2,
@@ -171,6 +171,16 @@ public:
 		//	if(Type >= 4) return static_cast<tType>((Type & 3) + 4);
 		//	return static_cast<tType>(Type);
 	}
+
+	//! @brief		バリアントのタイプを文字列化する
+	//! @param		type タイプ
+	//! @return		型を表す文字列
+	static const risse_char * GetTypeString(tType type);
+
+	//! @brief		バリアントのタイプを文字列化する
+	//! @param		type タイプ
+	//! @return		型を表す文字列
+	const risse_char * GetTypeString() const { return GetTypeString(GetType()); }
 
 public: // コンストラクタ/代入演算子
 
@@ -189,7 +199,7 @@ public: // コンストラクタ/代入演算子
 		case vtVoid:		Type = vtVoid;				break;
 		case vtInteger:		*this = ref.AsInteger();	break;
 		case vtReal:		*this = ref.AsReal();		break;
-		case vtBool:		*this = ref.AsBool();		break;
+		case vtBoolean:		*this = ref.AsBool();		break;
 		case vtString:		*this = ref.AsString();		break;
 		case vtObject:		*this = ref.AsObject();		break;
 		case vtOctet:		*this = ref.AsOctet();		break;
@@ -239,7 +249,7 @@ public: // コンストラクタ/代入演算子
 	//! @param		ref		元となる真偽値
 	tRisseVariantBlock & operator = (const bool ref)
 	{
-		Type = vtBool;
+		Type = vtBoolean;
 		AsBool() = ref;
 		return *this;
 	}
@@ -305,7 +315,7 @@ public: // 演算子
 		case vtVoid:	return uminus_Void     ();
 		case vtInteger:	return uminus_Integer  ();
 		case vtReal:	return uminus_Real     ();
-		case vtBool:	return uminus_Bool     ();
+		case vtBoolean:	return uminus_Bool     ();
 		case vtString:	return uminus_String   ();
 		case vtObject:	return uminus_Object   ();
 		case vtOctet:	return uminus_Octet    ();
@@ -334,7 +344,7 @@ public: // キャスト
 		case vtVoid:	return CastToString_Void     ();
 		case vtInteger:	return CastToString_Integer  ();
 		case vtReal:	return CastToString_Real     ();
-		case vtBool:	return CastToString_Bool     ();
+		case vtBoolean:	return CastToString_Bool     ();
 		case vtString:	return CastToString_String   ();
 		case vtObject:	return CastToString_Object   ();
 		case vtOctet:	return CastToString_Octet    ();
@@ -366,7 +376,7 @@ public: // ユーティリティ
 		case vtVoid:	return AsHumanReadable_Void     (maxlen);
 		case vtInteger:	return AsHumanReadable_Integer  (maxlen);
 		case vtReal:	return AsHumanReadable_Real     (maxlen);
-		case vtBool:	return AsHumanReadable_Bool     (maxlen);
+		case vtBoolean:	return AsHumanReadable_Bool     (maxlen);
 		case vtString:	return AsHumanReadable_String   (maxlen);
 		case vtObject:	return AsHumanReadable_Object   (maxlen);
 		case vtOctet:	return AsHumanReadable_Octet    (maxlen);

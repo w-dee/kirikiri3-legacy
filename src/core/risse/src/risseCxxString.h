@@ -590,6 +590,21 @@ public: // operators
 	//! @return		新しく連結された文字列
 	tRisseStringBlock operator + (const tRisseStringBlock & ref) const;
 
+	//! @brief		文字列の連結
+	//! @param		ref		連結する文字列
+	//! @return		新しく連結された文字列
+	tRisseStringBlock operator + (const risse_char * ref) const;
+
+	//! @brief		文字の連結
+	//! @param		ref		連結する文字
+	//! @return		新しく連結された文字列
+	tRisseStringBlock operator + (const risse_char ref) const
+	{
+		risse_char tmp[2];
+		tmp[0] = ref; tmp[1] = 0;
+		return *this + tmp;
+	}
+
 	//! @brief [] 演算子
 	//! @param		n		位置
 	//! @return		nの位置にあるコード

@@ -19,6 +19,29 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 
+
+
+
+
+//---------------------------------------------------------------------------
+const risse_char * tRisseVariantBlock::GetTypeString(tType type)
+{
+	switch(type)
+	{
+	case vtVoid:		return RISSE_WS("void");
+	case vtInteger:		return RISSE_WS("integer");
+	case vtReal:		return RISSE_WS("real");
+	case vtBoolean:		return RISSE_WS("bool");
+	case vtString:		return RISSE_WS("string");
+	case vtObject:		return RISSE_WS("object");
+	case vtOctet:		return RISSE_WS("octet");
+	}
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+
 //---------------------------------------------------------------------------
 tRisseString tRisseVariantBlock::AsHumanReadable_Void     (risse_size maxlen) const
 {

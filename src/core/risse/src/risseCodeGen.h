@@ -247,6 +247,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisseSSABlock : public tRisseCollectee
 {
+	tRisseSSAForm * Form; //!< このブロックを保持する SSA 形式インスタンス
 	gc_vector<tRisseSSABlock *> Pred; //!< 直前のブロックのリスト
 	gc_vector<tRisseSSABlock *> Succ; //!< 直後のブロックのリスト
 	tRisseSSAStatement * FirstStatement; //!< 文のリストの先頭
@@ -254,8 +255,10 @@ class tRisseSSABlock : public tRisseCollectee
 
 public:
 	//! @brief		コンストラクタ
-	tRisseSSABlock()
+	//! @param		form		このブロックを保持する SSA 形式インスタンス
+	tRisseSSABlock(tRisseSSAForm * form)
 	{
+		Form = form;
 		FirstStatement = LastStatement = NULL;
 	}
 
@@ -276,6 +279,14 @@ public:
 			LastStatement = stmt;
 		}
 	}
+
+	//! @brief		定数値を得る文を追加する
+	//! @param		pos		スクリプト上の位置
+	//! @param		val		定数
+	//! @return		定数値を表す一時変数
+	//! @note		このメソッドは、定数値を一時変数に代入する
+	//!				文を生成し、その一時変数を返す
+	tRisseSSAVariable * AddConstantValueStatement(risse_size pos, const tRisseVariant & val);
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列

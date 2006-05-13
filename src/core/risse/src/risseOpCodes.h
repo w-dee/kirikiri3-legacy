@@ -19,7 +19,9 @@
 
 namespace Risse
 {
+//! @brief オペーレーションコードの名前の配列
 extern const char * RisseOpCodeNames[];
+
 
 /*
 	#undef risseOpCodesH
@@ -41,13 +43,13 @@ extern const char * RisseOpCodeNames[];
 #endif
 
 
-#ifndef RISSE_OC_DEFINE_NAMES
-	#define RISSE_OC_ENUM_DEF() enum tRisseOpCode {
-	#define RISSE_OC_ENUM_ITEM(X) oc##X,
-	#define RISSE_OC_ENUM_END };
-#else
+#ifdef RISSE_OC_DEFINE_NAMES
 	#define RISSE_OC_ENUM_DEF() const char * RisseOpCodeNames[] = {
 	#define RISSE_OC_ENUM_ITEM(X) #X,
+	#define RISSE_OC_ENUM_END };
+#else
+	#define RISSE_OC_ENUM_DEF() enum tRisseOpCode {
+	#define RISSE_OC_ENUM_ITEM(X) oc##X,
 	#define RISSE_OC_ENUM_END };
 #endif
 
@@ -71,8 +73,8 @@ RISSE_OC_ENUM_DEF()
 // 引数なし
 	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not
 	RISSE_OC_ENUM_ITEM(BitNot			)		//!< "~" bit not
-	RISSE_OC_ENUM_ITEM(Dec				)		//!< "--" decrement
-	RISSE_OC_ENUM_ITEM(Inc				)		//!< "++" increment
+//	RISSE_OC_ENUM_ITEM(Dec				)		//!< "--" decrement
+//	RISSE_OC_ENUM_ITEM(Inc				)		//!< "++" increment
 	RISSE_OC_ENUM_ITEM(Plus				)		//!< "+"
 	RISSE_OC_ENUM_ITEM(Minus			)		//!< "-"
 

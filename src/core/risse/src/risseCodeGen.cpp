@@ -217,7 +217,6 @@ tRisseString tRisseSSAStatement::Dump() const
 
 			// オペレーションコード
 			ret += tRisseString(RisseOpCodeNames[Code]);
-			ret += RISSE_WC(' ');
 
 			// 使用している引数
 			if(Used.size() >= 2)
@@ -229,7 +228,12 @@ tRisseString tRisseSSAStatement::Dump() const
 					if(!used.IsEmpty()) used += RISSE_WS(", ");
 					used += (*i)->Dump();
 				}
-				ret += used;
+				ret += RISSE_WS("(") + used +
+								RISSE_WS(")");
+			}
+			else
+			{
+				ret += RISSE_WS("()");
 			}
 
 			// 変数の宣言に関してコメントがあればそれを追加
@@ -249,6 +253,25 @@ tRisseString tRisseSSAStatement::Dump() const
 
 
 
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseSSABlock::AddConstantValueStatement(
+										risse_size pos,
+										const tRisseVariant & val)
+{
+	// 文の作成
+	tRisseSSAStatement * stmt =
+		new tRisseSSAStatement(Form, pos, ocAssignConstant);
+	// 変数の作成
+	tRisseSSAVariable * var = new tRisseSSAVariable(Form, stmt);
+	var->SetValue(new tRisseVariant(val));
+	// 文の追加
+	AddStatement(stmt);
+	// 戻る
+	return var;
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -298,7 +321,7 @@ void tRisseSSAForm::Generate()
 	// AST をたどり、それに対応する SSA 形式を作成する
 
 	// エントリー位置のブロックを生成する
-	EntryBlock = new tRisseSSABlock();
+	EntryBlock = new tRisseSSABlock(this);
 	CurrentBlock = EntryBlock;
 
 	// ルートノードを処理する

@@ -576,18 +576,8 @@ tRisseSSAVariable * tRisseASTNode_Factor::GenerateSSA(
 	switch(FactorType)
 	{
 	case aftConstant:	// 定数
-		{
-			// 文の作成
-			tRisseSSAStatement * stmt =
-				new tRisseSSAStatement(form, GetPosition(), ocAssignConstant);
-			// 変数の作成
-			tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
-			var->SetValue(new tRisseVariant(Value));
-			// 文の追加
-			form->GetCurrentBlock()->AddStatement(stmt);
-			// 戻る
-			return var;
-		}
+			return form->GetCurrentBlock()->AddConstantValueStatement(GetPosition(), Value);
+
 	case aftId:			// 識別子
 		{
 			/*
@@ -652,28 +642,67 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 	// 単項演算子
 	switch(UnaryType)
 	{
-	case autLogNot:		//!< "!" logical not
+	case autLogNot:	//!< "!" logical not
+	case autBitNot:	//!< "~" bit not
+	case autPlus:	//!< "+"
+	case autMinus:	//!< "-"
 		{
+			// オペコードを決定
+			tRisseOpCode oc;
+			switch(UnaryType)
+			{
+			case autLogNot:	oc = ocLogNot;	break;
+			case autBitNot:	oc = ocBitNot;	break;
+			case autPlus:	oc = ocPlus;	break;
+			case autMinus:	oc = ocMinus;	break;
+			default: oc = ocNoOperation;
+			}
 			// 文の作成
 			tRisseSSAStatement * stmt =
-				new tRisseSSAStatement(form, GetPosition(), ocLogNot);
+				new tRisseSSAStatement(form, GetPosition(), oc);
 			stmt->AddUsed(child_var); // この文の使用リストに変数を加える
 			// 変数の作成
 			tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
-			var->SetValueType(tRisseVariant::vtBoolean); // 結果は常に vtBoolean
+		//	var->SetValueType(tRisseVariant::vtBoolean); // 結果は常に vtBoolean
+
+			//////////////////////////////////////////////////////////////////////////////////////////
+			// 演算子のオーバーロードによっては ! 演算子は boolean を返さない可能性がある
+			// この仕様は後に変更の可能性アリ (! 演算子をオーバーロードできないようにする可能性がある)
+			// 他の ~ や + などの演算子についてもそうなる可能性がある
+			//////////////////////////////////////////////////////////////////////////////////////////
+
 			// 文の追加
 			form->GetCurrentBlock()->AddStatement(stmt);
 			// 戻る
 			return var;
 		}
-	case autBitNot:		//!< "~" bit not
+
 	case autPreDec:		//!< "--" pre-positioned decrement
 	case autPreInc:		//!< "++" pre-positioned increment
+		{
+			// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
+			// 減算するものとして扱われる
+			// (実際にそれを inc や dec の VM 命令にするのは CG や optimizer の
+			//  仕事)
+			tRisseSSAVariable * one_var =
+				form->GetCurrentBlock()->AddConstantValueStatement(
+						GetPosition(), tRisseVariant((risse_int64)1));
+			tRisseSSAStatement * stmt =
+				new tRisseSSAStatement(form, GetPosition(),
+					UnaryType == autPreDec ? ocSub:ocAdd);
+			stmt->AddUsed(child_var); // この文の使用リストに変数を加える
+			stmt->AddUsed(one_var); // この文の使用リストに変数を加える
+			// 変数の作成
+			tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
+			// 文の追加
+			form->GetCurrentBlock()->AddStatement(stmt);
+			// 戻る
+			return var;
+		}
+
 	case autPostDec:	//!< "--" post-positioned decrement
 	case autPostInc:	//!< "++" post-positioned increment
 	case autDelete:		//!< "delete"
-	case autPlus:		//!< "+"
-	case autMinus:		//!< "-"
 		;
 	}
 	return NULL;

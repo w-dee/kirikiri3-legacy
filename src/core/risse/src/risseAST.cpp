@@ -614,37 +614,46 @@ tRisseSSAVariable * tRisseASTNode_Factor::GenerateSSA(
 			// 文の作成
 			tRisseSSAStatement * stmt =
 				new tRisseSSAStatement(form, GetPosition(), ocAssignThis);
-			// 変数の作成
-			tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
-			// 文の追加
+
+			// 戻りの変数の作成
+			tRisseSSAVariable * ret_var = new tRisseSSAVariable(form, stmt);
+
+			// 文のSSAブロックへの追加
 			form->GetCurrentBlock()->AddStatement(stmt);
+
 			// 戻る
-			return var;
+			return ret_var;
 		}
 	case aftSuper:		// "super"
 		{
 			// 文の作成
 			tRisseSSAStatement * stmt =
 				new tRisseSSAStatement(form, GetPosition(), ocAssignSuper);
-			// 変数の作成
-			tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
-			// 文の追加
+
+			// 戻りの変数の作成
+			tRisseSSAVariable * ret_var = new tRisseSSAVariable(form, stmt);
+
+			// 文のSSAブロックへの追加
 			form->GetCurrentBlock()->AddStatement(stmt);
+
 			// 戻る
-			return var;
+			return ret_var;
 		}
 	case aftGlobal:		// "global"
 		{
 			// 文の作成
 			tRisseSSAStatement * stmt =
 				new tRisseSSAStatement(form, GetPosition(), ocAssignGlobal);
-			// 変数の作成
-			tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
-			var->SetValueType(tRisseVariant::vtObject); // global オブジェクトは常に vtObject
-			// 文の追加
+
+			// 戻りの変数の作成
+			tRisseSSAVariable * ret_var = new tRisseSSAVariable(form, stmt);
+			ret_var->SetValueType(tRisseVariant::vtObject); // global オブジェクトは常に vtObject
+
+			// 文のSSAブロックへの追加
 			form->GetCurrentBlock()->AddStatement(stmt);
+
 			// 戻る
-			return var;
+			return ret_var;
 		}
 	}
 	return NULL;
@@ -690,11 +699,14 @@ void tRisseASTNode_Id::GenerateWriteSSA(tRisseScriptBlockBase * sb,
 		tRisseSSAStatement * stmt =
 			new tRisseSSAStatement(form, GetPosition(), ocAssign);
 		stmt->AddUsed(var); // この文の使用リストに変数を加える
+
 		// 変数の作成
 		tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt, Name);
-		// 文の追加
+
+		// 文のSSAブロックへの追加
 		form->GetCurrentBlock()->AddStatement(stmt);
-		// 変数の登録
+
+		// 変数のローカル名前空間への登録(上書き)
 		form->GetLocalNamespace()->Add(Name, var);
 	}
 }
@@ -734,9 +746,10 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 			tRisseSSAStatement * stmt =
 				new tRisseSSAStatement(form, GetPosition(), oc);
 			stmt->AddUsed(child_var); // この文の使用リストに変数を加える
-			// 変数の作成
-			tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
-		//	var->SetValueType(tRisseVariant::vtBoolean); // 結果は常に vtBoolean
+
+			// 戻りの変数の作成
+			tRisseSSAVariable * ret_var = new tRisseSSAVariable(form, stmt);
+		//	ret_var->SetValueType(tRisseVariant::vtBoolean); // 結果は常に vtBoolean
 
 			//////////////////////////////////////////////////////////////////////////////////////////
 			// 演算子のオーバーロードによっては ! 演算子は boolean を返さない可能性がある
@@ -744,10 +757,11 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 			// 他の ~ や + などの演算子についてもそうなる可能性がある
 			//////////////////////////////////////////////////////////////////////////////////////////
 
-			// 文の追加
+			// 文のSSAブロックへの追加
 			form->GetCurrentBlock()->AddStatement(stmt);
+
 			// 戻る
-			return var;
+			return ret_var;
 		}
 
 	case autPreDec:		// "--" pre-positioned decrement
@@ -784,6 +798,7 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 				// 識別子
 				// 子の計算結果を得る
 				tRisseSSAVariable * child_var = Child->GenerateSSA(sb, form);
+
 				// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
 				// 減算するものとして扱われる
 				// (実際にそれを inc や dec の VM 命令にするのは CG や optimizer の仕事)
@@ -791,25 +806,52 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 				tRisseSSAVariable * one_var =
 					form->GetCurrentBlock()->AddConstantValueStatement(
 							GetPosition(), tRisseVariant((risse_int64)1));
+
 				// 定数 1 を加算/減算する文を生成
 				tRisseSSAStatement * stmt =
 					new tRisseSSAStatement(form, GetPosition(), code);
 				stmt->AddUsed(child_var); // この文の使用リストに変数を加える
 				stmt->AddUsed(one_var); // この文の使用リストに変数を加える
-				// 変数の作成
-				tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
-				// 文の追加
+
+				// 戻りの変数の作成
+				tRisseSSAVariable * processed_var = new tRisseSSAVariable(form, stmt);
+
+				// 文のSSAブロックへの追加
 				form->GetCurrentBlock()->AddStatement(stmt);
+
 				// その結果を識別子に書き込む文を生成
 				reinterpret_cast<tRisseASTNode_Id*>(Child)->
-							GenerateWriteSSA(sb, form, var);
+							GenerateWriteSSA(sb, form, processed_var);
+
 				// 戻る
 				// 前置の場合は計算後の値を、後置の場合は計算前の値を返す
-				return is_prepositioned ? var : child_var;
+				return is_prepositioned ? processed_var : child_var;
+			}
+			else if(Child->GetType() == antMemberSel)
+			{
+				// メンバ選択演算子
+				// メンバ選択演算子を介しての操作は、ocInc あるいは
+				// ocDec のオペレーションを呼び出すものとして実装する
+				tRisseSSAVariable * child_var = Child->GenerateSSA(sb, form);
+
+				// inc あるいは dec のコードを生成
+				tRisseSSAStatement * stmt =
+					new tRisseSSAStatement(form, GetPosition(), code == ocSub ? ocDec : ocInc);
+				stmt->AddUsed(child_var); // この文の使用リストに変数を加える
+
+				// 戻りの変数の作成
+				tRisseSSAVariable * processed_var = new tRisseSSAVariable(form, stmt);
+
+				// 文のSSAブロックへの追加
+				form->GetCurrentBlock()->AddStatement(stmt);
+
+				// 戻る
+				// 前置の場合は計算後の値を、後置の場合は計算前の値を返す
+				return is_prepositioned ? processed_var : child_var;
 			}
 			else
 			{
-				//
+				// エラー
 			}
 		}
 
@@ -839,6 +881,16 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 				// 識別子
 				reinterpret_cast<tRisseASTNode_Id*>(Child1)->
 							GenerateWriteSSA(sb, form, rhs_var);
+			}
+			else if(Child1->GetType() == antMemberSel)
+			{
+				// メンバ選択演算子
+				reinterpret_cast<tRisseASTNode_MemberSel*>(Child1)->
+							GenerateWriteSSA(sb, form, rhs_var);
+			}
+			else
+			{
+				// エラー
 			}
 			return rhs_var; // 右辺値を返す
 		}
@@ -882,8 +934,6 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 	case abtMul:				// *
 	case abtAdd:				// +
 	case abtSub:				// -
-	case abtDirectSel:			// .
-	case abtIndirectSel:		// [ ]
 	case abtIncontextOf:		// incontextof
 
 	default:
@@ -895,9 +945,55 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_MemberSel::GenerateSSA(
-	tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
 {
-	return NULL;
+	// メンバ選択演算子
+
+	// オブジェクトの式の値を得る
+	tRisseSSAVariable * object_var = Object->GenerateSSA(sb, form);
+
+	// メンバ名の式の値を得る
+	tRisseSSAVariable * membername_var = MemberName->GenerateSSA(sb, form);
+
+	// 文の作成
+	tRisseSSAStatement * stmt =
+		new tRisseSSAStatement(form, GetPosition(), IsDirect?ocDirectGet:ocIndirectGet);
+	stmt->AddUsed(object_var); // 使用リストに追加
+	stmt->AddUsed(membername_var); // 使用リストに追加
+
+	// 戻りの変数の作成
+	tRisseSSAVariable * ret_var = new tRisseSSAVariable(form, stmt);
+
+	// 文のSSAブロックへの追加
+	form->GetCurrentBlock()->AddStatement(stmt);
+
+	// 戻りの変数を返す
+	return ret_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseASTNode_MemberSel::GenerateWriteSSA(
+	tRisseScriptBlockBase * sb, tRisseSSAForm *form, tRisseSSAVariable * var) const
+{
+	// メンバ選択演算子への値の書き込み
+
+	// オブジェクトの式の値を得る
+	tRisseSSAVariable * object_var = Object->GenerateSSA(sb, form);
+
+	// メンバ名の式の値を得る
+	tRisseSSAVariable * membername_var = MemberName->GenerateSSA(sb, form);
+
+	// 文の作成
+	tRisseSSAStatement * stmt =
+		new tRisseSSAStatement(form, GetPosition(), IsDirect?ocDirectSet:ocIndirectSet);
+	stmt->AddUsed(object_var); // 使用リストに追加
+	stmt->AddUsed(membername_var); // 使用リストに追加
+	stmt->AddUsed(var); // 使用リストに追加
+
+	// 文のSSAブロックへの追加
+	form->GetCurrentBlock()->AddStatement(stmt);
 }
 //---------------------------------------------------------------------------
 
@@ -932,16 +1028,21 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::GenerateSSA(
 		init_var = form->GetCurrentBlock()->AddConstantValueStatement(
 					GetPosition(), tRisseVariant());
 	}
+
 	// 文の作成
 	tRisseSSAStatement * stmt =
 		new tRisseSSAStatement(form, GetPosition(), ocAssign);
 	stmt->AddUsed(init_var); // この文の使用リストに変数を加える
+
 	// 変数の作成
 	tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt, Name);
-	// 文の追加
+
+	// 文のSSAブロックへの追加
 	form->GetCurrentBlock()->AddStatement(stmt);
-	// 変数の登録
+
+	// 変数のローカル名前空間への登録
 	form->GetLocalNamespace()->Add(Name, var);
+
 	// このノードは答えを返さない
 	return NULL;
 }

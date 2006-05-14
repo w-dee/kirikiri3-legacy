@@ -73,8 +73,8 @@ RISSE_OC_ENUM_DEF()
 // 引数なし
 	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not
 	RISSE_OC_ENUM_ITEM(BitNot			)		//!< "~" bit not
-//	RISSE_OC_ENUM_ITEM(Dec				)		//!< "--" decrement
-//	RISSE_OC_ENUM_ITEM(Inc				)		//!< "++" increment
+	RISSE_OC_ENUM_ITEM(Dec				)		//!< "--" decrement
+	RISSE_OC_ENUM_ITEM(Inc				)		//!< "++" increment
 	RISSE_OC_ENUM_ITEM(Plus				)		//!< "+"
 	RISSE_OC_ENUM_ITEM(Minus			)		//!< "-"
 

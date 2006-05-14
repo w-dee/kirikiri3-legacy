@@ -183,8 +183,6 @@ RISSE_AST_ENUM_DEF(BinaryType)
 	RISSE_AST_ENUM_ITEM(abt, Mul			)		//!< *
 	RISSE_AST_ENUM_ITEM(abt, Add			)		//!< +
 	RISSE_AST_ENUM_ITEM(abt, Sub			)		//!< -
-	RISSE_AST_ENUM_ITEM(abt, DirectSel		)		//!< .
-	RISSE_AST_ENUM_ITEM(abt, IndirectSel	)		//!< [ ]
 	RISSE_AST_ENUM_ITEM(abt, IncontextOf	)		//!< incontextof
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
@@ -805,7 +803,7 @@ public:
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
 
-	//! @brief		識別子への書き込みを表す SSA 形式の表現を生成する
+	//! @brief		書き込みを表す SSA 形式の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
@@ -1101,6 +1099,12 @@ public:
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+
+	//! @brief		書き込みを表す SSA 形式の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
+	void GenerateWriteSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form, tRisseSSAVariable * var) const;
 };
 //---------------------------------------------------------------------------
 

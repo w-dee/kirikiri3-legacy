@@ -844,8 +844,8 @@ expr
 ;
 
 factor_expr
-	: T_CONSTVAL					{ $$ = N(Factor)(LP, aftConstant, *$1); }
-	| T_ID							{ $$ = N(Factor)(LP, aftId, *$1); }
+	: T_ID							{ $$ = N(Id)(LP, *$1); }
+	| T_CONSTVAL					{ $$ = N(Factor)(LP, aftConstant, *$1); }
 	| "this"						{ $$ = N(Factor)(LP, aftThis);  }
 	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
 	| func_expr_def

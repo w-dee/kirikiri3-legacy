@@ -64,6 +64,7 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Context		)		//!< コンテキスト
 	RISSE_AST_ENUM_ITEM(ant, ExprStmt		)		//!< 式のみのステートメント
 	RISSE_AST_ENUM_ITEM(ant, Factor			)		//!< 項
+	RISSE_AST_ENUM_ITEM(ant, Id				)		//!< 識別子
 	RISSE_AST_ENUM_ITEM(ant, Unary			)		//!< 単項演算子
 	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
@@ -113,7 +114,6 @@ RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(FactorType)
 	RISSE_AST_ENUM_ITEM(aft, Constant		)		//!< 定数
-	RISSE_AST_ENUM_ITEM(aft, Id				)		//!< 識別子
 	RISSE_AST_ENUM_ITEM(aft, This			)		//!< "this"
 	RISSE_AST_ENUM_ITEM(aft, Super			)		//!< "super"
 	RISSE_AST_ENUM_ITEM(aft, Global			)		//!< "global"
@@ -716,6 +716,60 @@ public:
 	//! @brief		値を得る
 	//! @return		値
 	const tRisseVariant & GetValue() const { return Value; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 0; // 子はない
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		return NULL; // 子はない
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const
+	{
+		return tRisseString(); // 子はない
+	}
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	識別子ASTノード(type=antId)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Id : public tRisseASTNode
+{
+	tRisseString Name; //!< 識別子名
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		name			識別子名
+	tRisseASTNode_Id(risse_size position, const tRisseString & name) :
+		tRisseASTNode(position, antId), Name(name) {;}
+
+	//! @brief		識別子名を得る
+	//! @return		識別子名
+	const tRisseString & GetName() const { return Name; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数

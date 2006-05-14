@@ -151,12 +151,20 @@ tRisseString tRisseASTNode_Context::GetDumpComment() const
 tRisseString tRisseASTNode_Factor::GetDumpComment() const
 {
 	tRisseString ret = RisseASTFactorTypeNames[FactorType];
-	if(FactorType == aftConstant || FactorType == aftId)
+	if(FactorType == aftConstant)
 	{
 		ret += RISSE_WS(" ");
 		ret += Value.AsHumanReadable();
 	}
 	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Id::GetDumpComment() const
+{
+	return Name.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 
@@ -578,21 +586,6 @@ tRisseSSAVariable * tRisseASTNode_Factor::GenerateSSA(
 	case aftConstant:	// 定数
 			return form->GetCurrentBlock()->AddConstantValueStatement(GetPosition(), Value);
 
-	case aftId:			// 識別子
-		{
-			tRisseString var_name = Value; // 変数名
-			tRisseSSAVariable * var = form->GetLocalNamespace()->Find(var_name);
-			if(!var)
-			{
-				// ローカル変数に見つからない /// XXXXXX
-				return NULL;
-			}
-			else
-			{
-				// ローカル変数に見つかった
-				return var;
-			}
-		}
 	case aftThis:		// "this"
 		{
 			// 文の作成
@@ -632,6 +625,26 @@ tRisseSSAVariable * tRisseASTNode_Factor::GenerateSSA(
 		}
 	}
 	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Id::GenerateSSA(
+						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+{
+	// 識別子
+	tRisseSSAVariable * var = form->GetLocalNamespace()->Find(Name);
+	if(!var)
+	{
+		// ローカル変数に見つからない /// XXXXXX
+		return NULL;
+	}
+	else
+	{
+		// ローカル変数に見つかった
+		return var;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -731,12 +744,12 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 			// 右辺の値を得る
 			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
 			// 左辺のタイプをチェック
-			if(Child1->GetType() == antFactor)
+			if(Child1->GetType() == antId)
 			{
-				// 項
-				tRisseASTNode_Factor * lhs =
-					reinterpret_cast<tRisseASTNode_Factor *>(Child1);
-				tRisseString var_name = lhs->GetValue(); // 変数名
+				// 識別子
+				tRisseASTNode_Id * lhs =
+					reinterpret_cast<tRisseASTNode_Id *>(Child1);
+				tRisseString var_name = lhs->GetName(); // 変数名
 				tRisseSSAVariable * dest_var = form->GetLocalNamespace()->Find(var_name);
 				if(!dest_var)
 				{

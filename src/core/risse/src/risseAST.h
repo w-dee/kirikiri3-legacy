@@ -803,6 +803,12 @@ public:
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+
+	//! @brief		識別子への書き込みを表す SSA 形式の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
+	void GenerateWriteSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form, tRisseSSAVariable * var) const;
 };
 //---------------------------------------------------------------------------
 

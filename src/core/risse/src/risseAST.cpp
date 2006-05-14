@@ -650,15 +650,38 @@ tRisseSSAVariable * tRisseASTNode_Id::GenerateSSA(
 
 
 //---------------------------------------------------------------------------
+void tRisseASTNode_Id::GenerateWriteSSA(tRisseScriptBlockBase * sb,
+						tRisseSSAForm *form, tRisseSSAVariable * var) const
+{
+	// 識別子
+	tRisseSSAVariable * dest_var = form->GetLocalNamespace()->Find(Name);
+	if(!dest_var)
+	{
+		// ローカル変数に見つからない /// XXXXXX
+		;
+	}
+	else
+	{
+		// ローカル変数に見つかった;ローカル変数に上書きする
+		// 文の作成
+		tRisseSSAStatement * stmt =
+			new tRisseSSAStatement(form, GetPosition(), ocAssign);
+		stmt->AddUsed(var); // この文の使用リストに変数を加える
+		// 変数の作成
+		tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt, Name);
+		// 文の追加
+		form->GetCurrentBlock()->AddStatement(stmt);
+		// 変数の登録
+		form->GetLocalNamespace()->Add(Name, var);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
 {
-	// 子の計算結果を得る
-	tRisseSSAVariable * child_var = Child->GenerateSSA(sb, form);
-	if(!child_var)
-	{
-		// エラー
-	}
 
 	// 単項演算子
 	switch(UnaryType)
@@ -668,6 +691,12 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 	case autPlus:	// "+"
 	case autMinus:	// "-"
 		{
+			// 子の計算結果を得る
+			tRisseSSAVariable * child_var = Child->GenerateSSA(sb, form);
+			if(!child_var)
+			{
+				// エラー
+			}
 			// オペコードを決定
 			tRisseOpCode oc;
 			switch(UnaryType)
@@ -700,29 +729,67 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 
 	case autPreDec:		// "--" pre-positioned decrement
 	case autPreInc:		// "++" pre-positioned increment
-		{
-			// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
-			// 減算するものとして扱われる
-			// (実際にそれを inc や dec の VM 命令にするのは CG や optimizer の
-			//  仕事)
-			tRisseSSAVariable * one_var =
-				form->GetCurrentBlock()->AddConstantValueStatement(
-						GetPosition(), tRisseVariant((risse_int64)1));
-			tRisseSSAStatement * stmt =
-				new tRisseSSAStatement(form, GetPosition(),
-					UnaryType == autPreDec ? ocSub:ocAdd);
-			stmt->AddUsed(child_var); // この文の使用リストに変数を加える
-			stmt->AddUsed(one_var); // この文の使用リストに変数を加える
-			// 変数の作成
-			tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
-			// 文の追加
-			form->GetCurrentBlock()->AddStatement(stmt);
-			// 戻る
-			return var;
-		}
-
 	case autPostDec:	// "--" post-positioned decrement
 	case autPostInc:	// "++" post-positioned increment
+		{
+			// オペレーションコードと前置、後置を得る
+			bool is_prepositioned; // 前置？
+			tRisseOpCode code; // オペレーションコード
+			switch(UnaryType)
+			{
+			case autPreDec:
+				is_prepositioned = true;  code = ocSub;
+				break;
+			case autPreInc:
+				is_prepositioned = true;  code = ocAdd;
+				break;
+			case autPostDec:
+				is_prepositioned = false; code = ocSub;
+				break;
+			case autPostInc:
+				is_prepositioned = false; code = ocAdd;
+				break;
+			default:
+				// ここには来ないがこれを書いておかないと
+				// コンパイラが文句をたれるので
+				is_prepositioned = false; code = ocNoOperation;
+				break;
+			}
+			// 子のタイプをチェック
+			if(Child->GetType() == antId)
+			{
+				// 識別子
+				// 子の計算結果を得る
+				tRisseSSAVariable * child_var = Child->GenerateSSA(sb, form);
+				// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
+				// 減算するものとして扱われる
+				// (実際にそれを inc や dec の VM 命令にするのは CG や optimizer の仕事)
+				// 定数 1 を生成
+				tRisseSSAVariable * one_var =
+					form->GetCurrentBlock()->AddConstantValueStatement(
+							GetPosition(), tRisseVariant((risse_int64)1));
+				// 定数 1 を加算/減算する文を生成
+				tRisseSSAStatement * stmt =
+					new tRisseSSAStatement(form, GetPosition(), code);
+				stmt->AddUsed(child_var); // この文の使用リストに変数を加える
+				stmt->AddUsed(one_var); // この文の使用リストに変数を加える
+				// 変数の作成
+				tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt);
+				// 文の追加
+				form->GetCurrentBlock()->AddStatement(stmt);
+				// その結果を識別子に書き込む文を生成
+				reinterpret_cast<tRisseASTNode_Id*>(Child)->
+							GenerateWriteSSA(sb, form, var);
+				// 戻る
+				// 前置の場合は計算後の値を、後置の場合は計算前の値を返す
+				return is_prepositioned ? var : child_var;
+			}
+			else
+			{
+				//
+			}
+		}
+
 	case autDelete:		// "delete"
 		;
 	}
@@ -747,33 +814,10 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 			if(Child1->GetType() == antId)
 			{
 				// 識別子
-				tRisseASTNode_Id * lhs =
-					reinterpret_cast<tRisseASTNode_Id *>(Child1);
-				tRisseString var_name = lhs->GetName(); // 変数名
-				tRisseSSAVariable * dest_var = form->GetLocalNamespace()->Find(var_name);
-				if(!dest_var)
-				{
-					// ローカル変数に見つからない /// XXXXXX
-					return NULL;
-				}
-				else
-				{
-					// ローカル変数に見つかった;ローカル変数に上書きする
-					// 文の作成
-					tRisseSSAStatement * stmt =
-						new tRisseSSAStatement(form, GetPosition(), ocAssign);
-					stmt->AddUsed(rhs_var); // この文の使用リストに変数を加える
-					// 変数の作成
-					tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt, var_name);
-					// 文の追加
-					form->GetCurrentBlock()->AddStatement(stmt);
-					// 変数の登録
-					form->GetLocalNamespace()->Add(var_name, var);
-					// var を返す
-					return var;
-				}
+				reinterpret_cast<tRisseASTNode_Id*>(Child1)->
+							GenerateWriteSSA(sb, form, rhs_var);
 			}
-			return NULL;
+			return rhs_var; // 右辺値を返す
 		}
 
 	case abtIf:					// if

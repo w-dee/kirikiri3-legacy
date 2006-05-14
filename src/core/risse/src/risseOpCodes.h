@@ -73,12 +73,12 @@ RISSE_OC_ENUM_DEF()
 // 引数なし
 	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not
 	RISSE_OC_ENUM_ITEM(BitNot			)		//!< "~" bit not
-	RISSE_OC_ENUM_ITEM(Dec				)		//!< "--" decrement
-	RISSE_OC_ENUM_ITEM(Inc				)		//!< "++" increment
+	RISSE_OC_ENUM_ITEM(DecAssign		)		//!< "--" decrement
+	RISSE_OC_ENUM_ITEM(IncAssign		)		//!< "++" increment
 	RISSE_OC_ENUM_ITEM(Plus				)		//!< "+"
 	RISSE_OC_ENUM_ITEM(Minus			)		//!< "-"
 
-// 引数一つ
+// 引数1つ
 	RISSE_OC_ENUM_ITEM(LogOr			)		//!< ||
 	RISSE_OC_ENUM_ITEM(LogAnd			)		//!< &&
 	RISSE_OC_ENUM_ITEM(BitOr			)		//!< |
@@ -103,14 +103,31 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(Sub				)		//!< -
 	RISSE_OC_ENUM_ITEM(IncontextOf		)		//!< incontextof
 
-	RISSE_OC_ENUM_ITEM(DirectGet		)		//!< get .
-	RISSE_OC_ENUM_ITEM(IndirectGet		)		//!< get [ ]
+	RISSE_OC_ENUM_ITEM(DGet				)		//!< get .  
+	RISSE_OC_ENUM_ITEM(IGet				)		//!< get [ ]
 
-	RISSE_OC_ENUM_ITEM(DirectSet		)		//!< set .
-	RISSE_OC_ENUM_ITEM(IndirectSet		)		//!< set [ ]
+	RISSE_OC_ENUM_ITEM(BitAndAssign		)		//!< &=
+	RISSE_OC_ENUM_ITEM(BitOrAssign		)		//!< |=
+	RISSE_OC_ENUM_ITEM(BitXorAssign		)		//!< ^=
+	RISSE_OC_ENUM_ITEM(SubAssign		)		//!< -=
+	RISSE_OC_ENUM_ITEM(AddAssign		)		//!< +=
+	RISSE_OC_ENUM_ITEM(ModAssign		)		//!< %=
+	RISSE_OC_ENUM_ITEM(DivAssign		)		//!< /=
+	RISSE_OC_ENUM_ITEM(IdivAssign		)		//!< \=
+	RISSE_OC_ENUM_ITEM(MulAssign		)		//!< *=
+	RISSE_OC_ENUM_ITEM(LogOrAssign		)		//!< ||=
+	RISSE_OC_ENUM_ITEM(LogAndAssign		)		//!< &&=
+	RISSE_OC_ENUM_ITEM(RBitShiftAssign	)		//!< >>>=
+	RISSE_OC_ENUM_ITEM(LShiftAssign		)		//!< <<=
+	RISSE_OC_ENUM_ITEM(RShiftAssign		)		//!< >>=
 
-	RISSE_OC_ENUM_ITEM(DirectDelete		)		//!< delete .
-	RISSE_OC_ENUM_ITEM(IndirectDelete	)		//!< delete [ ]
+
+	RISSE_OC_ENUM_ITEM(DDelete			)		//!< delete .
+	RISSE_OC_ENUM_ITEM(IDelete			)		//!< delete [ ]
+
+// 引数2つ
+	RISSE_OC_ENUM_ITEM(DSet				)		//!< set .
+	RISSE_OC_ENUM_ITEM(ISet				)		//!< set [ ]
 
 RISSE_OC_ENUM_END
 //---------------------------------------------------------------------------

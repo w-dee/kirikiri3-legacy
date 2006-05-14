@@ -144,7 +144,7 @@ RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(BinaryType)
 	RISSE_AST_ENUM_ITEM(abt, If				)		//!< if
-	RISSE_AST_ENUM_ITEM(abt, Comma			)		//!< 
+	RISSE_AST_ENUM_ITEM(abt, Comma			)		//!< ,
 	RISSE_AST_ENUM_ITEM(abt, Assign			)		//!< =
 	RISSE_AST_ENUM_ITEM(abt, BitAndAssign	)		//!< &=
 	RISSE_AST_ENUM_ITEM(abt, BitOrAssign	)		//!< |=

@@ -834,10 +834,9 @@ expr
 	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
 	| func_call_expr				{ ; }
 	| "(" expr_with_comma ")"		{ $$ = $2; }
-	| expr "[" expr "]"				{ $$ = N(Binary)(LP, abtIndirectSel		,$1, $3); }
-	| expr "." T_ID					{ $$ = N(Binary)(LP, abtDirectSel		,
-									                 $1, N(Factor)(LP, aftConstant, *$3)); }
-	| expr "." "(" expr ")"			{ $$ = N(Binary)(LP, abtDirectSel		,$1, $4); }
+	| expr "[" expr "]"				{ $$ = N(MemberSel)(LP, $1, $3, false); }
+	| expr "." T_ID					{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), true); }
+	| expr "." "(" expr ")"			{ $$ = N(MemberSel)(LP, $1, $4, true); }
 	| expr "<" member_attr_list ">"
 	  %prec T_FUNCCALL				{ $$ = N(CastAttr)(LP, *$3, $1); }
 	| factor_expr

@@ -231,6 +231,29 @@ tRisseString tRisseASTNode_Trinary::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseASTNode_MemberSel::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0: return RISSE_WS("object");
+	case 1: return RISSE_WS("membername");
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_MemberSel::GetDumpComment() const
+{
+	return IsDirect ?
+		RISSE_WS("direct"):
+		RISSE_WS("indirect");
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_Array::GetChildNameAt(risse_size index) const
 {
 	if(index < inherited::GetChildCount())
@@ -866,6 +889,15 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 	default:
 		return NULL;
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_MemberSel::GenerateSSA(
+	tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+{
+	return NULL;
 }
 //---------------------------------------------------------------------------
 

@@ -68,6 +68,7 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Unary			)		//!< 単項演算子
 	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
+	RISSE_AST_ENUM_ITEM(ant, MemberSel		)		//!< メンバ選択演算子
 	RISSE_AST_ENUM_ITEM(ant, CastAttr		)		//!< 属性のキャスト
 	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
 	RISSE_AST_ENUM_ITEM(ant, FuncCallArg	)		//!< 関数呼び出しの引数
@@ -1026,6 +1027,80 @@ public:
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	メンバ選択ノード(type=antMemberSel)
+//---------------------------------------------------------------------------
+class tRisseASTNode_MemberSel : public tRisseASTNode
+{
+	tRisseASTNode * Object; //!< オブジェクトノード
+	tRisseASTNode * MemberName; //!< メンバ名ノード
+	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		object			オブジェクトノード
+	//! @param		membername		メンバ名ノード
+	//! @param		is_direct		直接参照演算子 ('.' 演算子) かどうか
+	tRisseASTNode_MemberSel(risse_size position,
+			tRisseASTNode * object, tRisseASTNode * membername, bool is_direct) :
+		tRisseASTNode(position, antMemberSel),
+			Object(object), MemberName(membername), IsDirect(is_direct)
+	{
+		if(Object) Object->SetParent(this);
+		if(MemberName) MemberName->SetParent(this);
+	}
+
+	//! @brief		オブジェクトノードを得る
+	//! @return		オブジェクトノード
+	tRisseASTNode * GetObject() const { return Object; }
+
+	//! @brief		メンバ名ノードを得る
+	//! @return		メンバ名ノード
+	tRisseASTNode * GetMemberName() const { return MemberName; }
+
+	//! @brief		直接参照演算子 ('.' 演算子) かどうかを得る
+	//! @return		直接参照演算子 ('.' 演算子) かどうか
+	bool GetIsDirect() const { return IsDirect; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Object;
+		case 1: return MemberName;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
 };
 //---------------------------------------------------------------------------
 

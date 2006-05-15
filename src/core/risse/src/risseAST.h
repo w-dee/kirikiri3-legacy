@@ -274,11 +274,56 @@ protected:
 	virtual tRisseString GetDumpComment() const = 0;
 
 public:
-	//! @brief		SSA 形式の表現を生成する(下位クラスで実装すること)
+	//! @brief		SSA 形式の読み書き用の表現の準備を行う(必要に応じて下位クラスで実装すること)
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @return		書き込みを行うための情報が入った構造体へのポインタ
+	virtual void * PrepareSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+		{ return NULL; }
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する(必要に応じて下位クラスで実装すること)
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
+				{ return NULL; }
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	virtual tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const = 0;
+	//! @note		ここでは「読み込み用」と言っているが、書き込みではないすべての操作を意味する。
+	//!				(たとえば if 文などもこのメソッドで SSA 形式に変換できる)
+	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+	{
+	 	return DoReadSSA(sb, form, PrepareSSA(sb, form));
+	}
+
+	//! @brief		SSA 形式の書き込み用の表現を生成する(必要に応じて下位クラスで実装すること)
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
+	//! @return		このノードが値の書き込みをサポートしているかどうか
+	virtual bool DoWriteSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param,
+			tRisseSSAVariable * value) const { return false; }
+
+	//! @param		SSA 形式の書き込み用の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
+	void GenerateWriteSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form,
+			tRisseSSAVariable * value) const
+	{
+		if(!DoWriteSSA(sb, form, PrepareSSA(sb, form), value))
+		{
+			// TODO: ここでエラー
+		}
+	}
 
 };
 //---------------------------------------------------------------------------
@@ -458,11 +503,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 
@@ -488,12 +535,6 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return Attribute.AsString(); }
-
-	//! @brief		SSA 形式の表現を生成する
-	//! @param		sb		スクリプトブロッククラス
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
 };
 //---------------------------------------------------------------------------
 
@@ -562,11 +603,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -622,11 +665,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -661,11 +706,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -682,11 +729,13 @@ public:
 	tRisseASTNode_ExprStmt(risse_size position, tRisseASTNode * expression) :
 		tRisseASTNode_OneExpression(position, antExprStmt, expression) {;}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 
@@ -743,11 +792,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 
@@ -759,6 +810,15 @@ class tRisseASTNode_MemberSel;
 class tRisseASTNode_Id : public tRisseASTNode
 {
 	tRisseString Name; //!< 識別子名
+
+	//! @brief		PrepareSSA で返す構造体
+	struct tPrepareSSA
+	{
+		bool IsLocal; //!< ローカル変数への書き込み
+		const tRisseASTNode_MemberSel * MemberSel; //!< ローカル変数ではなかったときに生成された tRisseASTNode_MemberSel のインスタンス
+		void * MemberSelParam; //!< tRisseASTNode_MemberSel::PrepareSSA() が生成した情報
+		tRisseSSAVariable * Var; //!< 検索の結果見つかった変数
+	};
 
 public:
 	//! @brief		コンストラクタ
@@ -798,17 +858,28 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 
-	//! @brief		書き込みを表す SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み書き用の表現の準備を行う
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @return		書き込みを行うための情報が入った構造体へのポインタ
+	void * PrepareSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+
+	//! @brief		SSA 形式の書き込み用の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
-	void GenerateWriteSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form, tRisseSSAVariable * var) const;
+	bool DoWriteSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param,
+			tRisseSSAVariable * value) const;
 
 	//! @brief		この識別子がローカル名前空間に存在するかどうかを返す
 	//! @param		form	SSA 形式ジェネレータクラス
@@ -817,7 +888,12 @@ public:
 
 	//! @brief		この識別子を this 内にアクセスする AST ノードを作成して返す
 	//! @return		この識別子を this 内にアクセスする AST ノード
-	tRisseASTNode_MemberSel * CreateAccessNodeOnThis() const;
+	const tRisseASTNode_MemberSel * CreateAccessNodeOnThis() const;
+
+	//! @brief		この識別子へアクセスするための AST ノードを返す
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @return		この識別子へアクセスするための AST ノード
+	const tRisseASTNode * GetAccessNode(tRisseSSAForm * form) const;
 };
 //---------------------------------------------------------------------------
 
@@ -874,11 +950,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 
@@ -948,11 +1026,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 
@@ -1030,11 +1110,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1047,6 +1129,13 @@ class tRisseASTNode_MemberSel : public tRisseASTNode
 	tRisseASTNode * Object; //!< オブジェクトノード
 	tRisseASTNode * MemberName; //!< メンバ名ノード
 	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
+
+	//! @brief		PrepareSSA で返す構造体
+	struct tPrepareSSA
+	{
+		tRisseSSAVariable * ObjectVar; //!< オブジェクトの式の値
+		tRisseSSAVariable * MemberNameVar; //!< メンバ名を表す式の値
+	};
 
 public:
 	//! @brief		コンストラクタ
@@ -1104,17 +1193,28 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 
-	//! @brief		書き込みを表す SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み書き用の表現の準備を行う
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @return		書き込みを行うための情報が入った構造体へのポインタ
+	void * PrepareSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+
+	//! @brief		SSA 形式の書き込み用の表現を生成する
+	//! @param		sb		スクリプトブロッククラス
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
-	void GenerateWriteSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form, tRisseSSAVariable * var) const;
+	bool DoWriteSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param,
+			tRisseSSAVariable * value) const;
 };
 //---------------------------------------------------------------------------
 
@@ -1141,11 +1241,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1172,11 +1274,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1240,11 +1344,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1323,11 +1429,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1393,11 +1501,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1479,11 +1589,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1529,11 +1641,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return Attribute.AsString(); }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 
@@ -1595,11 +1709,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return Name; }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const;
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 
@@ -1616,11 +1732,13 @@ public:
 	tRisseASTNode_Return(risse_size position, tRisseASTNode * expression) :
 		tRisseASTNode_OneExpression(position, antReturn, expression) {;}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1637,11 +1755,13 @@ public:
 	tRisseASTNode_Throw(risse_size position, tRisseASTNode * expression) :
 		tRisseASTNode_OneExpression(position, antThrow, expression) {;}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1657,11 +1777,13 @@ public:
 	tRisseASTNode_Break(risse_size position) :
 		tRisseASTNode_NoChildren(position, antBreak) {;}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1677,11 +1799,13 @@ public:
 	tRisseASTNode_Continue(risse_size position) :
 		tRisseASTNode_NoChildren(position, antContinue) {;}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1697,11 +1821,13 @@ public:
 	tRisseASTNode_Debugger(risse_size position) :
 		tRisseASTNode_NoChildren(position, antDebugger) {;}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1767,11 +1893,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1790,11 +1918,13 @@ public:
 		tRisseASTNode * object, tRisseASTNode * body) :
 		tRisseASTNode_With_Switch(position, antWith, object, body) {;}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1813,11 +1943,13 @@ public:
 		tRisseASTNode * object, tRisseASTNode * body) :
 		tRisseASTNode_With_Switch(position, antSwitch, object, body) {;}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1843,11 +1975,13 @@ public:
 		return Name.AsHumanReadable();
 	}
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1868,11 +2002,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -1946,11 +2082,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -2020,11 +2158,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -2098,11 +2238,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -2166,11 +2308,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -2274,11 +2418,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -2352,11 +2498,13 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
 
-	//! @brief		SSA 形式の表現を生成する
+	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		sb		スクリプトブロッククラス
 	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * GenerateSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const {return NULL;}
+	virtual tRisseSSAVariable * DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 

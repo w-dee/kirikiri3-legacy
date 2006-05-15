@@ -550,8 +550,8 @@ tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Context::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	// ContextType がトップレベルの場合は、SSA 生成においては、おおかたこのノードが
 	// 一番最初に呼ばれることになる。
@@ -587,8 +587,8 @@ tRisseSSAVariable * tRisseASTNode_Context::GenerateSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_ExprStmt::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+tRisseSSAVariable * tRisseASTNode_ExprStmt::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	// このノードは式を保持しているだけなので子ノードに処理をさせるだけ
 	GetChildAt(0)->GenerateSSA(sb, form);
@@ -600,8 +600,8 @@ tRisseSSAVariable * tRisseASTNode_ExprStmt::GenerateSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Factor::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	// "項"
 	switch(FactorType)
@@ -662,43 +662,68 @@ tRisseSSAVariable * tRisseASTNode_Factor::GenerateSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Id::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+void * tRisseASTNode_Id::PrepareSSA(
+					tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
 {
+	tPrepareSSA * pws = new tPrepareSSA;
+
+	tRisseSSAVariable * dest_var = form->GetLocalNamespace()->Find(Name);
+	if(!dest_var)
+	{
+		// ローカル変数に見つからない
+		pws->IsLocal = false;
+		pws->MemberSel = CreateAccessNodeOnThis();
+		pws->MemberSelParam = pws->MemberSel->PrepareSSA(sb, form);
+	}
+	else
+	{
+		// ローカル変数に見つかった
+		pws->IsLocal = true;
+		pws->Var = dest_var;
+	}
+
+	return pws;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Id::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
+{
+	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
+
 	// 識別子
-	tRisseSSAVariable * var = form->GetLocalNamespace()->Find(Name);
-	if(!var)
+	if(!pws->IsLocal)
 	{
 		// ローカル変数に見つからない
 		// ローカル変数に見つからない場合は、this へのアクセスを行う物として
 		// 置き換えて処理を行う
 
 		// this 上のメンバをアクセスするためだけに新規に作成した AST ノードに処理をさせる
-		return CreateAccessNodeOnThis()->GenerateSSA(sb, form);
+		return pws->MemberSel->DoReadSSA(sb, form, pws->MemberSelParam);
 	}
 	else
 	{
 		// ローカル変数に見つかった
-		return var;
+		return pws->Var;
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_Id::GenerateWriteSSA(tRisseScriptBlockBase * sb,
-						tRisseSSAForm *form, tRisseSSAVariable * var) const
+bool tRisseASTNode_Id::DoWriteSSA(
+		tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param,
+		tRisseSSAVariable * value) const
 {
-	// 識別子
-	tRisseSSAVariable * dest_var = form->GetLocalNamespace()->Find(Name);
-	if(!dest_var)
-	{
-		// ローカル変数に見つからない /// XXXXXX
-		// ローカル変数に見つからない場合は、this へのアクセスを行う物として
-		// 置き換えて処理を行う
+	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
-		// this 上のメンバをアクセスするためだけに新規に作成した AST ノードに処理をさせる
-		return CreateAccessNodeOnThis()->GenerateWriteSSA(sb, form, var);
+	if(!pws->IsLocal)
+	{
+		// ローカル変数には見つからなかった
+		// tRisseASTNode_MemberSel::DoWriteSSA を呼ぶ
+		pws->MemberSel->DoWriteSSA(sb, form, pws->MemberSelParam, value);
 	}
 	else
 	{
@@ -706,7 +731,7 @@ void tRisseASTNode_Id::GenerateWriteSSA(tRisseScriptBlockBase * sb,
 		// 文の作成
 		tRisseSSAStatement * stmt =
 			new tRisseSSAStatement(form, GetPosition(), ocAssign);
-		stmt->AddUsed(var); // この文の使用リストに変数を加える
+		stmt->AddUsed(value); // この文の使用リストに変数を加える
 
 		// 変数の作成
 		tRisseSSAVariable * var = new tRisseSSAVariable(form, stmt, Name);
@@ -717,6 +742,7 @@ void tRisseASTNode_Id::GenerateWriteSSA(tRisseScriptBlockBase * sb,
 		// 変数のローカル名前空間への登録(上書き)
 		form->GetLocalNamespace()->Add(Name, var);
 	}
+	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -730,7 +756,7 @@ bool tRisseASTNode_Id::ExistInLocalNamespace(tRisseSSAForm * form) const
 
 
 //---------------------------------------------------------------------------
-tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
+const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
 {
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
@@ -741,8 +767,18 @@ tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+const tRisseASTNode * tRisseASTNode_Id::GetAccessNode(tRisseSSAForm * form) const
+{
+	if(ExistInLocalNamespace(form)) return this; // ローカル名前空間に存在する
+	const tRisseASTNode * node = CreateAccessNodeOnThis();
+	return node; // 存在しないので this 上へのアクセスを行う
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 
 	// 単項演算子
@@ -821,18 +857,9 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 			}
 
 			// Id の存在をチェック
-			tRisseASTNode * child = Child;
+			const tRisseASTNode * child = Child;
 			if(child->GetType() == antId)
-			{
-				// もし、子ノードが antId で、それがローカル変数に
-				// 見つからない場合は、this へのアクセスに置き換えて処理を行う。
-				tRisseASTNode_Id * id_node = reinterpret_cast<tRisseASTNode_Id *>(child);
-				if(!id_node->ExistInLocalNamespace(form))
-				{
-					// 新しく AST ノードを生成
-					child = id_node->CreateAccessNodeOnThis();
-				}
-			}
+				child = reinterpret_cast<const tRisseASTNode_Id *>(child)->GetAccessNode(form);
 
 			// 子のタイプをチェック
 			if(child->GetType() == antId)
@@ -862,7 +889,7 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 				form->GetCurrentBlock()->AddStatement(stmt);
 
 				// その結果を識別子に書き込む文を生成
-				reinterpret_cast<tRisseASTNode_Id*>(child)->
+				reinterpret_cast<const tRisseASTNode_Id*>(child)->
 							GenerateWriteSSA(sb, form, processed_var);
 
 				// 戻る
@@ -907,8 +934,8 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	// 演算子のタイプに従って分岐
 	switch(BinaryType)
@@ -918,23 +945,10 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 			// 単純代入
 			// 右辺の値を得る
 			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
-			// 左辺のタイプをチェック
-			if(Child1->GetType() == antId)
-			{
-				// 識別子
-				reinterpret_cast<tRisseASTNode_Id*>(Child1)->
-							GenerateWriteSSA(sb, form, rhs_var);
-			}
-			else if(Child1->GetType() == antMemberSel)
-			{
-				// メンバ選択演算子
-				reinterpret_cast<tRisseASTNode_MemberSel*>(Child1)->
-							GenerateWriteSSA(sb, form, rhs_var);
-			}
-			else
-			{
-				// エラー
-			}
+
+			// 左辺に書き込む
+			Child1->GenerateWriteSSA(sb, form, rhs_var);
+
 			return rhs_var; // 右辺値を返す
 		}
 
@@ -959,18 +973,9 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
 
 			// Id の存在をチェック
-			tRisseASTNode * child = Child1;
+			const tRisseASTNode * child = Child1;
 			if(child->GetType() == antId)
-			{
-				// もし、子ノードが antId で、それがローカル変数に
-				// 見つからない場合は、this へのアクセスに置き換えて処理を行う。
-				tRisseASTNode_Id * id_node = reinterpret_cast<tRisseASTNode_Id *>(child);
-				if(!id_node->ExistInLocalNamespace(form))
-				{
-					// 新しく AST ノードを生成
-					child = id_node->CreateAccessNodeOnThis();
-				}
-			}
+				child = reinterpret_cast<const tRisseASTNode_Id *>(child)->GetAccessNode(form);
 
 			// 左辺のタイプをチェック
 			if(child->GetType() == antId)
@@ -1021,7 +1026,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 				form->GetCurrentBlock()->AddStatement(stmt);
 
 				// その結果を識別子に書き込む文を生成
-				reinterpret_cast<tRisseASTNode_Id*>(child)->
+				reinterpret_cast<const tRisseASTNode_Id*>(child)->
 							GenerateWriteSSA(sb, form, ret_var);
 
 				// 戻る
@@ -1083,6 +1088,34 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 			}
 		}
 
+	case abtSwap:				// <->
+		{
+			// 交換演算子
+
+			// これはちょっと厄介。
+			// a.b <-> c.d と記述された場合、a と c 、 b と d
+			// は１回のみの評価としたいので、先に評価を行わなければならない。
+
+			// 評価の準備を行う
+			void * lhs_param = Child1->PrepareSSA(sb, form);
+			void * rhs_param = Child2->PrepareSSA(sb, form);
+
+			// 左辺の値を取得
+			tRisseSSAVariable * lhs_var = Child1->DoReadSSA(sb, form, lhs_param);
+
+			// 右辺の値を取得
+			tRisseSSAVariable * rhs_var = Child2->DoReadSSA(sb, form, rhs_param);
+
+			// 右辺の値を左辺に代入
+			Child1->DoWriteSSA(sb, form, lhs_param, rhs_var);
+
+			// 左辺の値を右辺に代入
+			Child2->DoWriteSSA(sb, form, rhs_param, lhs_var);
+
+			// このノードは答えを返さない
+			return NULL;
+		}
+
 	case abtComma:				// ,
 		return NULL;
 
@@ -1091,8 +1124,6 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 	case abtLogAnd:				// &&
 		return NULL;
 
-	case abtSwap:				// <->
-		return NULL;
 
 	case abtBitOr:				// |
 	case abtBitXor:				// ^
@@ -1179,22 +1210,31 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_MemberSel::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+void * tRisseASTNode_MemberSel::PrepareSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+{
+	tPrepareSSA * pws = new tPrepareSSA;
+	// オブジェクトの式の値を得る
+	pws->ObjectVar = Object->GenerateSSA(sb, form);
+	// メンバ名の式の値を得る
+	pws->MemberNameVar = MemberName->GenerateSSA(sb, form);
+
+	return pws;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_MemberSel::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	// メンバ選択演算子
-
-	// オブジェクトの式の値を得る
-	tRisseSSAVariable * object_var = Object->GenerateSSA(sb, form);
-
-	// メンバ名の式の値を得る
-	tRisseSSAVariable * membername_var = MemberName->GenerateSSA(sb, form);
+	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
 	// 文の作成
 	tRisseSSAStatement * stmt =
 		new tRisseSSAStatement(form, GetPosition(), IsDirect?ocDGet:ocIGet);
-	stmt->AddUsed(object_var); // 使用リストに追加
-	stmt->AddUsed(membername_var); // 使用リストに追加
+	stmt->AddUsed(pws->ObjectVar); // 使用リストに追加
+	stmt->AddUsed(pws->MemberNameVar); // 使用リストに追加
 
 	// 戻りの変数の作成
 	tRisseSSAVariable * ret_var = new tRisseSSAVariable(form, stmt);
@@ -1209,33 +1249,30 @@ tRisseSSAVariable * tRisseASTNode_MemberSel::GenerateSSA(
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_MemberSel::GenerateWriteSSA(
-	tRisseScriptBlockBase * sb, tRisseSSAForm *form, tRisseSSAVariable * var) const
+bool tRisseASTNode_MemberSel::DoWriteSSA(
+		tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param,
+		tRisseSSAVariable * value) const
 {
-	// メンバ選択演算子への値の書き込み
-
-	// オブジェクトの式の値を得る
-	tRisseSSAVariable * object_var = Object->GenerateSSA(sb, form);
-
-	// メンバ名の式の値を得る
-	tRisseSSAVariable * membername_var = MemberName->GenerateSSA(sb, form);
+	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
 	// 文の作成
 	tRisseSSAStatement * stmt =
 		new tRisseSSAStatement(form, GetPosition(), IsDirect?ocDSet:ocISet);
-	stmt->AddUsed(object_var); // 使用リストに追加
-	stmt->AddUsed(membername_var); // 使用リストに追加
-	stmt->AddUsed(var); // 使用リストに追加
+	stmt->AddUsed(pws->ObjectVar); // 使用リストに追加
+	stmt->AddUsed(pws->MemberNameVar); // 使用リストに追加
+	stmt->AddUsed(value); // 使用リストに追加
 
 	// 文のSSAブロックへの追加
 	form->GetCurrentBlock()->AddStatement(stmt);
+
+	return true;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_VarDecl::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	// 変数宣言
 	// 子に再帰する
@@ -1248,8 +1285,8 @@ tRisseSSAVariable * tRisseASTNode_VarDecl::GenerateSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_VarDeclPair::GenerateSSA(
-						tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	tRisseSSAVariable * init_var;
 	if(Initializer)

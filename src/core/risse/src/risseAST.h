@@ -752,6 +752,7 @@ public:
 //---------------------------------------------------------------------------
 
 
+class tRisseASTNode_MemberSel;
 //---------------------------------------------------------------------------
 //! @brief	識別子ASTノード(type=antId)
 //---------------------------------------------------------------------------
@@ -808,6 +809,15 @@ public:
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	void GenerateWriteSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form, tRisseSSAVariable * var) const;
+
+	//! @brief		この識別子がローカル名前空間に存在するかどうかを返す
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @return		この識別子がローカル名前空間に存在するかどうか
+	bool ExistInLocalNamespace(tRisseSSAForm * form) const;
+
+	//! @brief		この識別子を this 内にアクセスする AST ノードを作成して返す
+	//! @return		この識別子を this 内にアクセスする AST ノード
+	tRisseASTNode_MemberSel * CreateAccessNodeOnThis() const;
 };
 //---------------------------------------------------------------------------
 

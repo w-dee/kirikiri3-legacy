@@ -669,8 +669,12 @@ tRisseSSAVariable * tRisseASTNode_Id::GenerateSSA(
 	tRisseSSAVariable * var = form->GetLocalNamespace()->Find(Name);
 	if(!var)
 	{
-		// ローカル変数に見つからない /// XXXXXX
-		return NULL;
+		// ローカル変数に見つからない
+		// ローカル変数に見つからない場合は、this へのアクセスを行う物として
+		// 置き換えて処理を行う
+
+		// this 上のメンバをアクセスするためだけに新規に作成した AST ノードに処理をさせる
+		return CreateAccessNodeOnThis()->GenerateSSA(sb, form);
 	}
 	else
 	{
@@ -690,7 +694,11 @@ void tRisseASTNode_Id::GenerateWriteSSA(tRisseScriptBlockBase * sb,
 	if(!dest_var)
 	{
 		// ローカル変数に見つからない /// XXXXXX
-		;
+		// ローカル変数に見つからない場合は、this へのアクセスを行う物として
+		// 置き換えて処理を行う
+
+		// this 上のメンバをアクセスするためだけに新規に作成した AST ノードに処理をさせる
+		return CreateAccessNodeOnThis()->GenerateWriteSSA(sb, form, var);
 	}
 	else
 	{
@@ -709,6 +717,25 @@ void tRisseASTNode_Id::GenerateWriteSSA(tRisseScriptBlockBase * sb,
 		// 変数のローカル名前空間への登録(上書き)
 		form->GetLocalNamespace()->Add(Name, var);
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseASTNode_Id::ExistInLocalNamespace(tRisseSSAForm * form) const
+{
+	return form->GetLocalNamespace()->Find(Name) != NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
+{
+	return
+		new tRisseASTNode_MemberSel(GetPosition(),
+		new tRisseASTNode_Factor(GetPosition(), aftThis),
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), true);
 }
 //---------------------------------------------------------------------------
 
@@ -792,12 +819,27 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 				is_prepositioned = false; code = ocNoOperation;
 				break;
 			}
+
+			// Id の存在をチェック
+			tRisseASTNode * child = Child;
+			if(child->GetType() == antId)
+			{
+				// もし、子ノードが antId で、それがローカル変数に
+				// 見つからない場合は、this へのアクセスに置き換えて処理を行う。
+				tRisseASTNode_Id * id_node = reinterpret_cast<tRisseASTNode_Id *>(child);
+				if(!id_node->ExistInLocalNamespace(form))
+				{
+					// 新しく AST ノードを生成
+					child = id_node->CreateAccessNodeOnThis();
+				}
+			}
+
 			// 子のタイプをチェック
-			if(Child->GetType() == antId)
+			if(child->GetType() == antId)
 			{
 				// 識別子
 				// 子の計算結果を得る
-				tRisseSSAVariable * child_var = Child->GenerateSSA(sb, form);
+				tRisseSSAVariable * child_var = child->GenerateSSA(sb, form);
 
 				// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
 				// 減算するものとして扱われる
@@ -820,19 +862,19 @@ tRisseSSAVariable * tRisseASTNode_Unary::GenerateSSA(
 				form->GetCurrentBlock()->AddStatement(stmt);
 
 				// その結果を識別子に書き込む文を生成
-				reinterpret_cast<tRisseASTNode_Id*>(Child)->
+				reinterpret_cast<tRisseASTNode_Id*>(child)->
 							GenerateWriteSSA(sb, form, processed_var);
 
 				// 戻る
 				// 前置の場合は計算後の値を、後置の場合は計算前の値を返す
 				return is_prepositioned ? processed_var : child_var;
 			}
-			else if(Child->GetType() == antMemberSel)
+			else if(child->GetType() == antMemberSel)
 			{
 				// メンバ選択演算子
 				// メンバ選択演算子を介しての操作は、ocIncAssign あるいは
 				// ocDecAssign のオペレーションを呼び出すものとして実装する
-				tRisseSSAVariable * child_var = Child->GenerateSSA(sb, form);
+				tRisseSSAVariable * child_var = child->GenerateSSA(sb, form);
 
 				// inc あるいは dec のコードを生成
 				tRisseSSAStatement * stmt =
@@ -916,8 +958,22 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 			// 右辺の値を得る
 			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
 
+			// Id の存在をチェック
+			tRisseASTNode * child = Child1;
+			if(child->GetType() == antId)
+			{
+				// もし、子ノードが antId で、それがローカル変数に
+				// 見つからない場合は、this へのアクセスに置き換えて処理を行う。
+				tRisseASTNode_Id * id_node = reinterpret_cast<tRisseASTNode_Id *>(child);
+				if(!id_node->ExistInLocalNamespace(form))
+				{
+					// 新しく AST ノードを生成
+					child = id_node->CreateAccessNodeOnThis();
+				}
+			}
+
 			// 左辺のタイプをチェック
-			if(Child1->GetType() == antId)
+			if(child->GetType() == antId)
 			{
 				// 識別子
 
@@ -950,7 +1006,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 				// SSA 形式に展開を行う。
 
 				// 識別子の内容を得る
-				tRisseSSAVariable * lhs_var = Child1->GenerateSSA(sb, form);
+				tRisseSSAVariable * lhs_var = child->GenerateSSA(sb, form);
 
 				// 演算を行う文を生成
 				tRisseSSAStatement * stmt =
@@ -965,13 +1021,13 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 				form->GetCurrentBlock()->AddStatement(stmt);
 
 				// その結果を識別子に書き込む文を生成
-				reinterpret_cast<tRisseASTNode_Id*>(Child1)->
+				reinterpret_cast<tRisseASTNode_Id*>(child)->
 							GenerateWriteSSA(sb, form, ret_var);
 
 				// 戻る
 				return ret_var;
 			}
-			else if(Child1->GetType() == antMemberSel)
+			else if(child->GetType() == antMemberSel)
 			{
 				// メンバ選択演算子
 				// メンバ選択演算子を介しての操作は、ocXXXXAssign のオペーレーションを
@@ -1003,7 +1059,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 				}
 
 				// 左辺の値を得る
-				tRisseSSAVariable * lhs_var = Child1->GenerateSSA(sb, form);
+				tRisseSSAVariable * lhs_var = child->GenerateSSA(sb, form);
 
 				// inc あるいは dec のコードを生成
 				tRisseSSAStatement * stmt =
@@ -1027,10 +1083,17 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 			}
 		}
 
-	case abtIf:					// if
 	case abtComma:				// ,
+		return NULL;
+
+	case abtIf:					// if
 	case abtLogOr:				// ||
 	case abtLogAnd:				// &&
+		return NULL;
+
+	case abtSwap:				// <->
+		return NULL;
+
 	case abtBitOr:				// |
 	case abtBitXor:				// ^
 	case abtBitAnd:				// &
@@ -1038,7 +1101,6 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 	case abtEqual:				// ==
 	case abtDiscNotEqual:		// !==
 	case abtDiscEqual:			// ===
-	case abtSwap:				// <->
 	case abtLesser:				// <
 	case abtGreater:			// >
 	case abtLesserOrEqual:		// <=
@@ -1053,6 +1115,61 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateSSA(
 	case abtAdd:				// +
 	case abtSub:				// -
 	case abtIncontextOf:		// incontextof
+		{
+			// 普通の２項演算子
+
+			// オペレーションコードを得る
+			tRisseOpCode code; // オペレーションコード
+			switch(BinaryType)
+			{
+			case abtBitOr:				code = ocBitOr;				break; // |
+			case abtBitXor:				code = ocBitXor;			break; // ^
+			case abtBitAnd:				code = ocBitAnd;			break; // &
+			case abtNotEqual:			code = ocNotEqual;			break; // !=
+			case abtEqual:				code = ocEqual;				break; // ==
+			case abtDiscNotEqual:		code = ocDiscNotEqual;		break; // !==
+			case abtDiscEqual:			code = ocDiscEqual;			break; // ===
+			case abtLesser:				code = ocLesser;			break; // <
+			case abtGreater:			code = ocGreater;			break; // >
+			case abtLesserOrEqual:		code = ocLesserOrEqual;		break; // <=
+			case abtGreaterOrEqual:		code = ocGreaterOrEqual;	break; // >=
+			case abtRBitShift:			code = ocRBitShift;			break; // >>>
+			case abtLShift:				code = ocLShift;			break; // <<
+			case abtRShift:				code = ocRShift;			break; // >>
+			case abtMod:				code = ocMod;				break; // %
+			case abtDiv:				code = ocDiv;				break; // /
+			case abtIdiv:				code = ocIdiv;				break; // \ (integer div)
+			case abtMul:				code = ocMul;				break; // *
+			case abtAdd:				code = ocAdd;				break; // +
+			case abtSub:				code = ocSub;				break; // -
+			case abtIncontextOf:		code = ocIncontextOf;		break; // incontextof
+			default:
+				// ここには来ないがこれを書いておかないと
+				// コンパイラが文句をたれるので
+				code = ocNoOperation;
+				break;
+			}
+
+			// 左辺の値を得る
+			tRisseSSAVariable * lhs_var = Child1->GenerateSSA(sb, form);
+			// 右辺の値を得る
+			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
+
+			// 演算を行う文を生成
+			tRisseSSAStatement * stmt =
+				new tRisseSSAStatement(form, GetPosition(), code);
+			stmt->AddUsed(lhs_var); // この文の使用リストに変数を加える
+			stmt->AddUsed(rhs_var); // この文の使用リストに変数を加える
+
+			// 戻りの変数の作成
+			tRisseSSAVariable * ret_var = new tRisseSSAVariable(form, stmt);
+
+			// 文のSSAブロックへの追加
+			form->GetCurrentBlock()->AddStatement(stmt);
+
+			// 戻る
+			return ret_var;
+		}
 
 	default:
 		return NULL;

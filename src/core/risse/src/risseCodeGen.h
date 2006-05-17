@@ -42,6 +42,9 @@ public:
 	//! @brief		コンストラクタ
 	tRisseLocalNamespace();
 
+	//! @brief		コピーコンストラクタ
+	tRisseLocalNamespace(const tRisseLocalNamespace &ref);
+
 	//! @brief		名前空間を push する
 	void Push();
 
@@ -55,15 +58,33 @@ public:
 
 	//! @brief		変数を探す
 	//! @param		name		変数名
-	//! @return		その変数を表す SSA 変数表現 (NULL = みつからない)
-	tRisseSSAVariable * Find(const tRisseString & name) const;
+	//! @param		var 		その変数を表す SSA 変数表現 を格納する先(NULL = イラナイ)
+	//! @return		変数が見つかったかどうか
+	bool Find(const tRisseString & name, tRisseSSAVariable ** var = NULL) const;
 
 	//! @brief		変数を削除する
 	//! @param		name		変数名
 	//! @return		変数の削除に成功したかどうか
 	bool Delete(const tRisseString & name);
+
+	//! @brief		必要ならばφ関数を作成する
+	//! @param		form	φ関数を生成するための SSA 形式インスタンス
+	//! @param		pos		スクリプト上の位置
+	//! @param		name	変数名
+	//! @return		見つかった変数、あるいはφ関数の戻り値 (NULL=ローカル変数に見つからなかった)
+	tRisseSSAVariable * MakePhiFunction(tRisseSSAForm * form, risse_size pos, const tRisseString & name);
+
+	//! @brief		変数をすべて「φ関数を参照のこと」としてマークする
+	//! @note		このメソッドは、Scopes のすべてのマップの値を
+	//!				NULL に設定する(NULL=変数は存在しているがφ関数を作成する必要がある
+	//!				という意味)
+	void MarkToCreatePhi();
 };
 //---------------------------------------------------------------------------
+
+
+
+
 
 
 class tRisseSSAStatement;
@@ -161,12 +182,19 @@ class tRisseSSAStatement : public tRisseCollectee
 	tRisseSSAForm * Form; //!< この変数が属している SSA 形式インスタンス
 	risse_size Position; //!< ソースコード上の位置 (コードポイント数オフセット)
 	tRisseOpCode Code; //!< オペレーションコード
-	tRisseSSABlock * Block; //!< この文が含まれているブロック
+	tRisseSSABlock * Block; //!< この文が含まれている基本ブロック
 	tRisseSSAStatement * Pred; //!< 直前の文
 	tRisseSSAStatement * Succ; //!< 直後の文
 
 	tRisseSSAVariable * Declared; //!< この文で定義された変数
 	gc_vector<tRisseSSAVariable*> Used; //!< この文で使用されている変数のリスト
+
+	union
+	{
+		tRisseSSABlock * TrueBranch; //!< 分岐のジャンプ先(条件が真のとき)
+		tRisseSSABlock * JumpTarget; //!< 単純ジャンプのジャンプ先
+	};
+	tRisseSSABlock * FalseBranch; //!< 分岐のジャンプ先(条件が偽のとき)
 
 public:
 	//! @brief		コンストラクタ
@@ -183,12 +211,12 @@ public:
 	//! @return		ソースコード上の位置
 	risse_size GetPosition() const { return Position; }
 
-	//! @brief		この文が含まれているブロックを設定する
-	//! @param		block この文が含まれているブロック
+	//! @brief		この文が含まれている基本ブロックを設定する
+	//! @param		block この文が含まれている基本ブロック
 	void SetBlock(tRisseSSABlock * block) { Block = block; }
 
-	//! @brief		この文が含まれているブロックを取得する
-	//! @return		この文が含まれているブロック
+	//! @brief		この文が含まれている基本ブロックを取得する
+	//! @return		この文が含まれている基本ブロック
 	tRisseSSABlock * GetBlock() const { return Block; }
 
 	//! @brief		直前の文を設定する
@@ -235,6 +263,30 @@ public:
 		Used.push_back(var);
 	}
 
+	//! @brief		分岐のジャンプ先(条件が真のとき)を設定する
+	//! @param		type	分岐のジャンプ先(条件が真のとき)
+	void SetTrueBranch(tRisseSSABlock * block) { TrueBranch = block; }
+
+	//! @brief		分岐のジャンプ先(条件が真のとき)を取得する
+	//! @return		分岐のジャンプ先(条件が真のとき)
+	tRisseSSABlock * GetTrueBranch() const { return TrueBranch; }
+
+	//! @brief		単純ジャンプのジャンプ先を設定する
+	//! @param		type	単純ジャンプのジャンプ先
+	void SetJumpTarget(tRisseSSABlock * block) { JumpTarget = block; }
+
+	//! @brief		単純ジャンプのジャンプ先を取得する
+	//! @return		単純ジャンプのジャンプ先
+	tRisseSSABlock * GetJumpTarget() const { return JumpTarget; }
+
+	//! @brief		分岐のジャンプ先(条件が偽のとき)を設定する
+	//! @param		type	分岐のジャンプ先(条件が偽のとき)
+	void SetFalseBranch(tRisseSSABlock * block) { FalseBranch = block; }
+
+	//! @brief		分岐のジャンプ先(条件が偽のとき)を取得する
+	//! @return		分岐のジャンプ先(条件が偽のとき)
+	tRisseSSABlock * GetFalseBranch() const { return FalseBranch; }
+
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
@@ -243,24 +295,29 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	SSA形式における「ブロック」
+//! @brief	SSA形式における「基本ブロック」
 //---------------------------------------------------------------------------
 class tRisseSSABlock : public tRisseCollectee
 {
-	tRisseSSAForm * Form; //!< このブロックを保持する SSA 形式インスタンス
-	gc_vector<tRisseSSABlock *> Pred; //!< 直前のブロックのリスト
-	gc_vector<tRisseSSABlock *> Succ; //!< 直後のブロックのリスト
+	tRisseSSAForm * Form; //!< この基本ブロックを保持する SSA 形式インスタンス
+	tRisseString Name; //!< 基本ブロック名(人間が読みやすい名前)
+	gc_vector<tRisseSSABlock *> Pred; //!< 直前の基本ブロックのリスト
+	gc_vector<tRisseSSABlock *> Succ; //!< 直後の基本ブロックのリスト
 	tRisseSSAStatement * FirstStatement; //!< 文のリストの先頭
 	tRisseSSAStatement * LastStatement; //!< 文のリストの最後
+	tRisseLocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
+	mutable bool InDump; //!< ダンプ中かどうか
+	mutable bool Dumped; //!< ダンプが行われたかどうか
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		form		このブロックを保持する SSA 形式インスタンス
-	tRisseSSABlock(tRisseSSAForm * form)
-	{
-		Form = form;
-		FirstStatement = LastStatement = NULL;
-	}
+	//! @param		form		この基本ブロックを保持する SSA 形式インスタンス
+	//! @param		name		この基本ブロックの名前(実際にはこれに _ が続き連番がつく)
+	tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name);
+
+	//! @brief		基本ブロック名を得る
+	//! @return		基本ブロック名
+	tRisseString GetName() const { return Name; }
 
 	//! @brief		文を追加する
 	//! @param		stmt	文
@@ -280,6 +337,22 @@ public:
 		}
 	}
 
+	//! @brief		φ関数を追加する
+	//! @param		pos		スクリプト上の位置
+	//! @param		name	変数名
+	//! @param		var		このφ関数の戻り値を表す変数
+	void AddPhiFunction(risse_size pos, const tRisseString & name, tRisseSSAVariable *& var);
+
+	//! @brief		直前の基本ブロックを追加する
+	//! @param		block	基本ブロック
+	//! @note		このメソッドは、block->AddSucc(this) を呼び出し、
+	//!				block の直後ブロックを設定する
+	void AddPred(tRisseSSABlock * block);
+
+	//! @brief		直後の基本ブロックを追加する
+	//! @param		block	基本ブロック
+	void AddSucc(tRisseSSABlock * block);
+
 	//! @brief		定数値を得る文を追加する
 	//! @param		pos		スクリプト上の位置
 	//! @param		val		定数
@@ -287,6 +360,13 @@ public:
 	//! @note		このメソッドは、定数値を一時変数に代入する
 	//!				文を生成し、その一時変数を返す
 	tRisseSSAVariable * AddConstantValueStatement(risse_size pos, const tRisseVariant & val);
+
+	//! @brief		ローカル名前空間のスナップショットを作成する
+	//! @param		ref		参照元ローカル名前空間
+	void TakeLocalNamespaceSnapshot(tRisseLocalNamespace * ref);
+
+	//! @brief		「ダンプが行われた」フラグをクリアする
+	void ClearDumpFlags() const;
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
@@ -304,8 +384,8 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseASTNode * Root; //!< このコードジェネレータが生成すべきコードのASTルートノード
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseLocalNamespace * LocalNamespace; //!< ローカル名前空間
-	tRisseSSABlock * EntryBlock; //!< エントリーSSAブロック
-	tRisseSSABlock * CurrentBlock; //!< 現在変換中のブロック
+	tRisseSSABlock * EntryBlock; //!< エントリーSSA基本ブロック
+	tRisseSSABlock * CurrentBlock; //!< 現在変換中の基本ブロック
 
 public:
 	//! @brief		コンストラクタ
@@ -319,8 +399,15 @@ public:
 	//! @brief		ローカル名前空間を得る
 	tRisseLocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
 
-	//! @brief		現在変換中のブロックを得る
+	//! @brief		現在変換中の基本ブロックを得る
 	tRisseSSABlock * GetCurrentBlock() const { return CurrentBlock; }
+
+	//! @brief		新しい基本ブロックを作成する
+	//! @param		name	基本ブロック名プリフィックス
+	//! @param		pred	直前の基本ブロック
+	//!						(NULLの場合は現在の基本ブロックが直前の基本ブロックであると見なされる)
+	//! @return		新しく作成された基本ブロック
+	tRisseSSABlock * CreateNewBlock(const tRisseString & name, tRisseSSABlock * pred = NULL);
 
 	//! @brief		ユニークな番号を得る
 	risse_int GetUniqueNumber()

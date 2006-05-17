@@ -667,7 +667,8 @@ void * tRisseASTNode_Id::PrepareSSA(
 {
 	tPrepareSSA * pws = new tPrepareSSA;
 
-	tRisseSSAVariable * dest_var = form->GetLocalNamespace()->Find(Name);
+	tRisseSSAVariable * dest_var =
+		form->GetLocalNamespace()->MakePhiFunction(form, GetPosition(), Name);
 	if(!dest_var)
 	{
 		// ローカル変数に見つからない
@@ -748,14 +749,6 @@ bool tRisseASTNode_Id::DoWriteSSA(
 
 
 //---------------------------------------------------------------------------
-bool tRisseASTNode_Id::ExistInLocalNamespace(tRisseSSAForm * form) const
-{
-	return form->GetLocalNamespace()->Find(Name) != NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
 {
 	return
@@ -769,7 +762,8 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
 //---------------------------------------------------------------------------
 const tRisseASTNode * tRisseASTNode_Id::GetAccessNode(tRisseSSAForm * form) const
 {
-	if(ExistInLocalNamespace(form)) return this; // ローカル名前空間に存在する
+	if(form->GetLocalNamespace()->MakePhiFunction(form, GetPosition(), Name))
+		return this; // ローカル名前空間に存在する
 	const tRisseASTNode * node = CreateAccessNodeOnThis();
 	return node; // 存在しないので this 上へのアクセスを行う
 }
@@ -1117,7 +1111,8 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 		}
 
 	case abtComma:				// ,
-		return NULL;
+		Child1->GenerateSSA(sb, form); // 左辺値は捨てる
+		return Child2->GenerateSSA(sb, form); // 右辺値を返す
 
 	case abtIf:					// if
 	case abtLogOr:				// ||
@@ -1266,6 +1261,48 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 	form->GetCurrentBlock()->AddStatement(stmt);
 
 	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
+{
+	// 条件式の結果を得る
+	tRisseSSAVariable * cond_var = Condition->GenerateSSA(sb, form);
+
+	// 分岐文を作成
+	tRisseSSAStatement * branch_stmt =
+		new tRisseSSAStatement(form, GetPosition(), ocBranch);
+	branch_stmt->AddUsed(cond_var); // 使用リストに追加
+	form->GetCurrentBlock()->AddStatement(branch_stmt); // ブロックに追加
+
+	// 新しいブロックを作成(真の場合)
+	tRisseSSABlock * block_before_if_stmt = form->GetCurrentBlock();
+	tRisseSSABlock * true_block = form->CreateNewBlock(RISSE_WS("if_true"));
+
+	// 真の場合に実行する内容を作成
+	True->GenerateSSA(sb, form);
+
+	// ジャンプ文を作成
+	tRisseSSAStatement * true_exit_jump_stmt =
+		new tRisseSSAStatement(form, GetPosition(), ocJump);
+	form->GetCurrentBlock()->AddStatement(true_exit_jump_stmt); // ブロックに追加
+
+	// 新しいブロックを作成
+	tRisseSSABlock * block_after_if_stmt =
+		form->CreateNewBlock(RISSE_WS("if_exit"), block_before_if_stmt);
+
+	block_after_if_stmt->AddPred(true_block);
+
+	// 分岐/ジャンプ文のジャンプ先を設定
+	branch_stmt->SetTrueBranch(true_block);
+	branch_stmt->SetFalseBranch(block_after_if_stmt);
+	true_exit_jump_stmt->SetJumpTarget(block_after_if_stmt);
+
+	// このノードは答えを返さない
+	return NULL;
 }
 //---------------------------------------------------------------------------
 

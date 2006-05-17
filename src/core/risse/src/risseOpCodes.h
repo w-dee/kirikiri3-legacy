@@ -69,6 +69,11 @@ RISSE_OC_ENUM_DEF()
 // 可変引数
 	RISSE_OC_ENUM_ITEM(FuncCall			)		//!< function call
 	RISSE_OC_ENUM_ITEM(New				)		//!< "new"
+	RISSE_OC_ENUM_ITEM(Phi				)		//!< φ関数
+
+// ジャンプ/分岐
+	RISSE_OC_ENUM_ITEM(Jump				)		//!< 単純なジャンプ
+	RISSE_OC_ENUM_ITEM(Branch			)		//!< 分岐
 
 // 引数なし
 	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not

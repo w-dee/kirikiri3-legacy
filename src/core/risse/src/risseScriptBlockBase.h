@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risse [‚è‚¹]
+	Risse [ã‚Šã›]
 	 stands for "Risse Is a Sweet Script Engine"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief ƒXƒNƒŠƒvƒgƒuƒƒbƒNŠÇ—
+//! @brief ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒ–ãƒ­ãƒƒã‚¯ç®¡ç†
 //---------------------------------------------------------------------------
 #ifndef risseScriptBlockBaseH
 #define risseScriptBlockBaseH
@@ -23,59 +23,59 @@ namespace Risse
 {
 class tRisseASTNode;
 //---------------------------------------------------------------------------
-//! @brief		ƒXƒNƒŠƒvƒgƒuƒƒbƒN‚ÌŠî’êƒNƒ‰ƒX
+//! @brief		ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒ–ãƒ­ãƒƒã‚¯ã®åŸºåº•ã‚¯ãƒ©ã‚¹
 //---------------------------------------------------------------------------
 class tRisseScriptBlockBase : public tRisseCollectee
 {
 private:
-	tRisseString Script; //!< ƒXƒNƒŠƒvƒg‚Ì“à—e
-	tRisseString Name; //!< ƒXƒNƒŠƒvƒgƒuƒƒbƒN‚Ì–¼Ì(‚½‚¢‚Ä‚¢‚Íƒtƒ@ƒCƒ‹–¼)
-	risse_size LineOffset; //!< ƒXƒNƒŠƒvƒg‚ÌsƒIƒtƒZƒbƒg (ƒhƒLƒ…ƒƒ“ƒg–„‚ß‚İƒXƒNƒŠƒvƒg—p)
-	mutable risse_size * LinesToPosition; //!< Šes‚Ìæ“ª‚É‘Î‰‚·‚éƒR[ƒhƒ|ƒCƒ“ƒgˆÊ’u‚Ì”z—ñ
-	mutable risse_size LineCount; //!< ƒXƒNƒŠƒvƒg‚Ìs”
+	tRisseString Script; //!< ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®å†…å®¹
+	tRisseString Name; //!< ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒ–ãƒ­ãƒƒã‚¯ã®åç§°(ãŸã„ã¦ã„ã¯ãƒ•ã‚¡ã‚¤ãƒ«å)
+	risse_size LineOffset; //!< ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®è¡Œã‚ªãƒ•ã‚»ãƒƒãƒˆ (ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆåŸ‹ã‚è¾¼ã¿ã‚¹ã‚¯ãƒªãƒ—ãƒˆç”¨)
+	mutable risse_size * LinesToPosition; //!< å„è¡Œã®å…ˆé ­ã«å¯¾å¿œã™ã‚‹ã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒ³ãƒˆä½ç½®ã®é…åˆ—
+	mutable risse_size LineCount; //!< ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®è¡Œæ•°
 
 protected:
-	//! @brief		ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-	//! @param		script		ƒXƒNƒŠƒvƒg‚Ì“à—e
-	//! @param		name		ƒXƒNƒŠƒvƒgƒuƒƒbƒN‚Ì–¼Ì
-	//! @param		lineofs		sƒIƒtƒZƒbƒg(ƒhƒLƒ…ƒƒ“ƒg–„‚ß‚İƒXƒNƒŠƒvƒg—p‚ÉA
-	//!							ƒXƒNƒŠƒvƒg‚ÌƒIƒtƒZƒbƒg‚ğ‹L˜^‚Å‚«‚é)
+	//! @brief		ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	//! @param		script		ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®å†…å®¹
+	//! @param		name		ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒ–ãƒ­ãƒƒã‚¯ã®åç§°
+	//! @param		lineofs		è¡Œã‚ªãƒ•ã‚»ãƒƒãƒˆ(ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆåŸ‹ã‚è¾¼ã¿ã‚¹ã‚¯ãƒªãƒ—ãƒˆç”¨ã«ã€
+	//!							ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’è¨˜éŒ²ã§ãã‚‹)
 	tRisseScriptBlockBase(const tRisseString & script, const tRisseString & name,
 							risse_size lineofs = 0);
 
-	//! @brief		LinesToPosition ‚Ì“à—e‚ğì¬‚·‚é
+	//! @brief		LinesToPosition ã®å†…å®¹ã‚’ä½œæˆã™ã‚‹
 	void CreateLinesToPositionArary() const;
 
-	//! @brief		LinesToPosition ‚Ì“à—e‚ªì¬‚³‚ê‚Ä‚¢‚È‚¯‚ê‚Îì¬‚·‚é
+	//! @brief		LinesToPosition ã®å†…å®¹ãŒä½œæˆã•ã‚Œã¦ã„ãªã‘ã‚Œã°ä½œæˆã™ã‚‹
 	void EnsureLinesToPositionArary() const
 	{ if(!LinesToPosition) CreateLinesToPositionArary(); }
 
 public:
-	//! @brief		ƒXƒNƒŠƒvƒg‚Ì“à—e‚ğ“¾‚é	@return ƒXƒNƒŠƒvƒg‚Ì“à—e
+	//! @brief		ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®å†…å®¹ã‚’å¾—ã‚‹	@return ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®å†…å®¹
 	const tRisseString & GetScript() const { return Script; }
 
-	//! @brief		ƒXƒNƒŠƒvƒgƒuƒƒbƒN‚Ì–¼Ì‚ğ“¾‚é	@return ƒXƒNƒŠƒvƒgƒuƒƒbƒN‚Ì–¼Ì
+	//! @brief		ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒ–ãƒ­ãƒƒã‚¯ã®åç§°ã‚’å¾—ã‚‹	@return ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒ–ãƒ­ãƒƒã‚¯ã®åç§°
 	const tRisseString & GetName() const { return Name; }
 
-	//! @brief		ƒXƒNƒŠƒvƒg‚ÌƒR[ƒhƒ|ƒCƒ“ƒgˆÊ’u‚©‚çs/Œ…ˆÊ’u‚Ö‚Ì•ÏŠ·‚ğs‚¤
-	//! @param		pos			ƒR[ƒhƒ|ƒCƒ“ƒgˆÊ’u
-	//! @param		line		sˆÊ’u(0`; ‹»–¡‚ª‚È‚¢ê‡‚Ínull‰Â)
-	//! @param		col			Œ…ˆÊ’u(0`; ‹»–¡‚ª‚È‚¢ê‡‚Ínull‰Â)
+	//! @brief		ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®ã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒ³ãƒˆä½ç½®ã‹ã‚‰è¡Œ/æ¡ä½ç½®ã¸ã®å¤‰æ›ã‚’è¡Œã†
+	//! @param		pos			ã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒ³ãƒˆä½ç½®
+	//! @param		line		è¡Œä½ç½®(0ï½; èˆˆå‘³ãŒãªã„å ´åˆã¯nullå¯)
+	//! @param		col			æ¡ä½ç½®(0ï½; èˆˆå‘³ãŒãªã„å ´åˆã¯nullå¯)
 	void PositionToLineAndColumn(risse_size pos, risse_size *line, risse_size *col) const;
 
 public:
-	//! @brief		ƒXƒNƒŠƒvƒg‚ğ•]‰¿‚·‚é
-	//! @param		result			Às‚ÌŒ‹‰Ê(NULL‰Â)
-	//! @param		is_expression	®•]‰¿ƒ‚[ƒh‚©‚Ç‚¤‚©
-	//! @note		‚à‚µƒXƒNƒŠƒvƒg‚ªƒRƒ“ƒpƒCƒ‹‚ª•K—v‚Èê‡A
-	//!				Evaluate ‚Í•]‰¿‚Éæ—§‚Á‚Ä Compile() ‚ğŒÄ‚ÑAƒRƒ“ƒpƒCƒ‹‚ğs‚¤B
+	//! @brief		ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‚’è©•ä¾¡ã™ã‚‹
+	//! @param		result			å®Ÿè¡Œã®çµæœ(NULLå¯)
+	//! @param		is_expression	å¼è©•ä¾¡ãƒ¢ãƒ¼ãƒ‰ã‹ã©ã†ã‹
+	//! @note		ã‚‚ã—ã‚¹ã‚¯ãƒªãƒ—ãƒˆãŒã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ãŒå¿…è¦ãªå ´åˆã€
+	//!				Evaluate ã¯è©•ä¾¡ã«å…ˆç«‹ã£ã¦ Compile() ã‚’å‘¼ã³ã€ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‚’è¡Œã†ã€‚
 	virtual void Evaluate(tRisseVariant * result = NULL, bool is_expression = false) = 0;
 
 protected:
-	//! @brief		AST‚ğŒ³‚ÉƒRƒ“ƒpƒCƒ‹‚ğs‚¤
-	//! @param		root		ƒ‹[ƒgASTƒm[ƒh
-	//! @param		need_result		•]‰¿‚ÉŒ‹‰Ê‚ª•K—v‚©‚Ç‚¤‚©
-	//! @param		is_expression	®•]‰¿ƒ‚[ƒh‚©‚Ç‚¤‚©
+	//! @brief		ASTã‚’å…ƒã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‚’è¡Œã†
+	//! @param		root		ãƒ«ãƒ¼ãƒˆASTãƒãƒ¼ãƒ‰
+	//! @param		need_result		è©•ä¾¡æ™‚ã«çµæœãŒå¿…è¦ã‹ã©ã†ã‹
+	//! @param		is_expression	å¼è©•ä¾¡ãƒ¢ãƒ¼ãƒ‰ã‹ã©ã†ã‹
 	void Compile(tRisseASTNode * root, bool need_result, bool is_expression);
 
 };

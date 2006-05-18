@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risse [‚è‚¹]
+	Risse [ã‚Šã›]
 	 stands for "Risse Is a Sweet Script Engine"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief ƒXƒNƒŠƒvƒgƒuƒƒbƒNŠÇ—
+//! @brief ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒ–ãƒ­ãƒƒã‚¯ç®¡ç†
 //---------------------------------------------------------------------------
 
 #include "prec.h"
@@ -26,7 +26,7 @@ RISSE_DEFINE_SOURCE_ID(10462,6972,23868,17748,24487,5141,43296,28534);
 tRisseScriptBlockBase::tRisseScriptBlockBase(const tRisseString & script,
 						const tRisseString & name, risse_size lineofs)
 {
-	// ƒtƒB[ƒ‹ƒh‚Ì‰Šú‰»
+	// ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã®åˆæœŸåŒ–
 	LinesToPosition = NULL;
 	Script = script;
 	Name = name;
@@ -38,7 +38,7 @@ tRisseScriptBlockBase::tRisseScriptBlockBase(const tRisseString & script,
 //---------------------------------------------------------------------------
 void tRisseScriptBlockBase::CreateLinesToPositionArary() const
 {
-	// ‚Ü‚¸A‘S‘Ì‚Ìs”‚ğ”‚¦‚é
+	// ã¾ãšã€å…¨ä½“ã®è¡Œæ•°ã‚’æ•°ãˆã‚‹
 	LineCount = 0;
 
 	const risse_char *script = Script.c_str();
@@ -64,10 +64,10 @@ void tRisseScriptBlockBase::CreateLinesToPositionArary() const
 		LineCount ++;
 	}
 
-	// ƒƒ‚ƒŠ‚ğŠm•Û
+	// ãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿
 	LinesToPosition = new (PointerFreeGC) risse_size[LineCount];
 
-	// Šes‚Ìæ“ª‚ÌƒR[ƒhƒ|ƒCƒ“ƒgˆÊ’u‚ğ”z—ñ‚É“ü‚ê‚Ä‚¢‚­
+	// å„è¡Œã®å…ˆé ­ã®ã‚³ãƒ¼ãƒ‰ãƒã‚¤ãƒ³ãƒˆä½ç½®ã‚’é…åˆ—ã«å…¥ã‚Œã¦ã„ã
 	ls = script;
 	p = ls;
 	risse_size i = 0;
@@ -98,17 +98,17 @@ void tRisseScriptBlockBase::CreateLinesToPositionArary() const
 void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 						risse_size *line, risse_size *col) const
 {
-	// LinesToPosition ”z—ñ‚ªì‚ç‚ê‚Ä‚¢‚È‚¯‚ê‚Îì‚é
+	// LinesToPosition é…åˆ—ãŒä½œã‚‰ã‚Œã¦ã„ãªã‘ã‚Œã°ä½œã‚‹
 	EnsureLinesToPositionArary();
 
-	// –Ú“I‚ÌˆÊ’u‚ğ binary search ‚Å’T‚·
+	// ç›®çš„ã®ä½ç½®ã‚’ binary search ã§æ¢ã™
 	risse_size s = 0;
 	risse_size e = LineCount;
 	while(true)
 	{
 		if(e-s <= 1)
 		{
-			if(line) *line = s + LineOffset; // LineOffset‚ª‰ÁZ‚³‚ê‚é
+			if(line) *line = s + LineOffset; // LineOffsetãŒåŠ ç®—ã•ã‚Œã‚‹
 			if(col) *col = pos - LinesToPosition[s];
 			return;
 		}
@@ -125,13 +125,13 @@ void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 //---------------------------------------------------------------------------
 void tRisseScriptBlockBase::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
 {
-	// (ƒeƒXƒg) AST‚Ìƒ_ƒ“ƒv‚ğs‚¤
+	// (ãƒ†ã‚¹ãƒˆ) ASTã®ãƒ€ãƒ³ãƒ—ã‚’è¡Œã†
 	RisseFPrint(stdout, RISSE_WS("---------- AST ----------\n"));
 	tRisseString str;
 	root->Dump(str);
 	RisseFPrint(stdout, str.c_str());
 
-	// (ƒeƒXƒg)
+	// (ãƒ†ã‚¹ãƒˆ)
 	RisseFPrint(stdout, RISSE_WS("---------- SSA form ----------\n"));
 	tRisseSSAForm * form = new tRisseSSAForm(this, root);
 	form->Generate();

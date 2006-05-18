@@ -24,9 +24,11 @@ class tRisseScriptBlock : public tRisseScriptBlockBase
 public:
 	//! @brief		コンストラクタ
 	//! @param		script		スクリプトの内容
+	//! @param		name		スクリプトブロックの名称
 	//! @param		lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
 	//!							スクリプトのオフセットを記録できる)
-	tRisseScriptBlock(const tRisseString & script, risse_size lineofs = 0);
+	tRisseScriptBlock(const tRisseString & script,
+						const tRisseString & name, risse_size lineofs = 0);
 
 	//! @brief		スクリプトを評価する
 	//! @param		result			実行の結果(NULL可)

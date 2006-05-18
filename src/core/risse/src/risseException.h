@@ -216,17 +216,17 @@ public:
 //---------------------------------------------------------------------------
 
 
-class tRisseScriptBlock;
+class tRisseScriptBlockBase;
 //---------------------------------------------------------------------------
 //! @brief		スクリプトエラーの基本クラス
 //---------------------------------------------------------------------------
 class eRisseScriptError : public eRisseError
 {
-	tRisseScriptBlock * Block; //!< スクリプトブロック
+	tRisseScriptBlockBase * Block; //!< スクリプトブロック
 	risse_size Position; //!< 例外が発生したコードポイント位置
 
 public:
-	tRisseScriptBlock * GetScriptBlock() const { return Block; } //!< スクリプトブロックを得る
+	tRisseScriptBlockBase * GetScriptBlock() const { return Block; } //!< スクリプトブロックを得る
 	risse_size GetPosition() const { return Position; } //!< コードポイント位置を得る
 
 	//! @brief		コンストラクタ
@@ -234,12 +234,21 @@ public:
 	//! @param		block	例外の発生したスクリプトブロック
 	//! @param		pos		例外の発生した位置
 	eRisseScriptError(const tRisseString &  msg,
-		tRisseScriptBlock *block, risse_size pos):
-			eRisseError(msg), Block(block), Position(pos) {;}
+		tRisseScriptBlockBase *block, risse_size pos):
+			eRisseError(BuildMessage(msg, block, pos)), Block(block), Position(pos) {;}
 
 	//! @brief		コピーコンストラクタ
 	eRisseScriptError(const eRisseScriptError &ref) :
 		eRisseError(ref), Block(ref.Block), Position(ref.Position) {;}
+
+	//! @brief		"error at script.rs line 2" の "at XXXX line YYYY" を付け足した
+	//!				メッセージを生成して返す
+	//! @param		msgbase		メッセージ本体
+	//! @param		block		スクリプトブロック
+	//! @param		pos			スクリプト上の位置
+	//! @return		組み立てられたメッセージ
+	static tRisseString BuildMessage(const tRisseString & msgbase,
+		tRisseScriptBlockBase *block, risse_size pos);
 };
 //---------------------------------------------------------------------------
 
@@ -255,7 +264,7 @@ public:
 	//! @param		block	例外の発生したスクリプトブロック
 	//! @param		pos		例外の発生した位置
 	eRisseCompileError(const tRisseString &  msg,
-		tRisseScriptBlock *block, risse_size pos) :
+		tRisseScriptBlockBase *block, risse_size pos) :
 		eRisseScriptError(msg, block, pos) {;}
 
 	//! @brief		コピーコンストラクタ
@@ -266,7 +275,8 @@ public:
 	//! @param		msg		例外メッセージ
 	//! @param		block	例外の発生したスクリプトブロック
 	//! @param		pos		例外の発生した位置
-	static void Throw(const tRisseString & msg, tRisseScriptBlock *block, risse_size pos);
+	static void Throw(const tRisseString & msg,
+			tRisseScriptBlockBase *block, risse_size pos);
 };
 //---------------------------------------------------------------------------
 

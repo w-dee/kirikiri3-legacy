@@ -23,20 +23,27 @@ namespace Risse {
 #include "risseParser.inc"
 
 
+class tRisseScriptBlock;
 //---------------------------------------------------------------------------
 //! @brief		Risse パーサクラス
 //---------------------------------------------------------------------------
 class tRisseParser : public tRisseCollectee
 {
+	tRisseScriptBlock * ScriptBlock; //!< スクリプトブロック
 	tRisseASTNode * Root; //!< ルートノード
 	tRisseLexer * Lexer; //!< 字句解析器
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		sb			スクリプトブロック
 	//! @param		lexer		字句解析器へのポインタ
-	tRisseParser(tRisseLexer * lexer);
+	tRisseParser(tRisseScriptBlock * sb, tRisseLexer * lexer);
 
 public:
+	//! @brief		スクリプトブロックを得る
+	//! @return		スクリプトブロック
+	tRisseScriptBlock * GetScriptBlock() const { return ScriptBlock; }
+
 	//! @brief		字句解析を一つ進める
 	//! @param		トークンの値を格納する先
 	//! @return		トークンID

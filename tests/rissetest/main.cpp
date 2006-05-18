@@ -87,7 +87,7 @@ int Application::OnRun()
 		// 内容を評価する
 		try
 		{
-			tRisseScriptBlock block((tRisseString)(buf));
+			tRisseScriptBlock block((tRisseString)(buf), argv[1]);
 			block.Evaluate();
 		}
 		catch(const eRisse & e)

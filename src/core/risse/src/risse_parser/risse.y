@@ -19,6 +19,7 @@
 #include "../risseException.h"
 #include "../risseCxxObject.h"
 #include "risseParser.h"
+#include "risseScriptBlock.h"
 
 /* エラーの詳細出力 */
 #define YYERROR_VERBOSE 1
@@ -1011,15 +1012,16 @@ int yylex(YYSTYPE * value, void *pr)
 //---------------------------------------------------------------------------
 int raise_yyerror(char * msg, void *pr)
 {
-	eRisseError::Throw(msg);
+	eRisseCompileError::Throw(tRisseString(msg), PR->GetScriptBlock(), LP);
 	return 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseParser::tRisseParser(tRisseLexer * lexer)
+tRisseParser::tRisseParser(tRisseScriptBlock * sb, tRisseLexer * lexer)
 {
+	ScriptBlock = sb;
 	Root = NULL;
 	Lexer = lexer;
 

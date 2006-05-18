@@ -29,6 +29,7 @@ class tRisseScriptBlockBase : public tRisseCollectee
 {
 private:
 	tRisseString Script; //!< スクリプトの内容
+	tRisseString Name; //!< スクリプトブロックの名称(たいていはファイル名)
 	risse_size LineOffset; //!< スクリプトの行オフセット (ドキュメント埋め込みスクリプト用)
 	mutable risse_size * LinesToPosition; //!< 各行の先頭に対応するコードポイント位置の配列
 	mutable risse_size LineCount; //!< スクリプトの行数
@@ -36,9 +37,11 @@ private:
 protected:
 	//! @brief		コンストラクタ
 	//! @param		script		スクリプトの内容
+	//! @param		name		スクリプトブロックの名称
 	//! @param		lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
 	//!							スクリプトのオフセットを記録できる)
-	tRisseScriptBlockBase(const tRisseString & script, risse_size lineofs = 0);
+	tRisseScriptBlockBase(const tRisseString & script, const tRisseString & name,
+							risse_size lineofs = 0);
 
 	//! @brief		LinesToPosition の内容を作成する
 	void CreateLinesToPositionArary() const;
@@ -48,8 +51,11 @@ protected:
 	{ if(!LinesToPosition) CreateLinesToPositionArary(); }
 
 public:
-	//! @brief		スクリプトの内容を得る
+	//! @brief		スクリプトの内容を得る	@return スクリプトの内容
 	const tRisseString & GetScript() const { return Script; }
+
+	//! @brief		スクリプトブロックの名称を得る	@return スクリプトブロックの名称
+	const tRisseString & GetName() const { return Name; }
 
 	//! @brief		スクリプトのコードポイント位置から行/桁位置への変換を行う
 	//! @param		pos			コードポイント位置

@@ -76,7 +76,9 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
 				const tRisseStringBlock &r2)
 {
-	*this = msg.Replace(RISSE_WS("%1"), r1).Replace(RISSE_WS("%2"), r2);
+	*this = msg.
+			Replace(RISSE_WS("%1"), r1).
+			Replace(RISSE_WS("%2"), r2);
 }
 //---------------------------------------------------------------------------
 
@@ -85,8 +87,10 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
 				const tRisseStringBlock &r2, const tRisseStringBlock &r3)
 {
-	*this = msg.Replace(RISSE_WS("%1"), r1).Replace(RISSE_WS("%2"), r2).
-				Replace(RISSE_WS("%3"), r3);
+	*this = msg.
+			Replace(RISSE_WS("%1"), r1).
+			Replace(RISSE_WS("%2"), r2).
+			Replace(RISSE_WS("%3"), r3);
 }
 //---------------------------------------------------------------------------
 
@@ -96,8 +100,11 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 					const tRisseStringBlock &r2, const tRisseStringBlock &r3,
 					const tRisseStringBlock &r4)
 {
-	*this = msg.Replace(RISSE_WS("%1"), r1).Replace(RISSE_WS("%2"), r2).
-				Replace(RISSE_WS("%3"), r3).Replace(RISSE_WS("%4"), r4);
+	*this = msg.
+			Replace(RISSE_WS("%1"), r1).
+			Replace(RISSE_WS("%2"), r2).
+			Replace(RISSE_WS("%3"), r3).
+			Replace(RISSE_WS("%4"), r4);
 }
 //---------------------------------------------------------------------------
 

@@ -23,11 +23,13 @@ RISSE_DEFINE_SOURCE_ID(10462,6972,23868,17748,24487,5141,43296,28534);
 
 
 //---------------------------------------------------------------------------
-tRisseScriptBlockBase::tRisseScriptBlockBase(const tRisseString & script, risse_size lineofs)
+tRisseScriptBlockBase::tRisseScriptBlockBase(const tRisseString & script,
+						const tRisseString & name, risse_size lineofs)
 {
 	// フィールドの初期化
 	LinesToPosition = NULL;
 	Script = script;
+	Name = name;
 	LineOffset = lineofs;
 }
 //---------------------------------------------------------------------------

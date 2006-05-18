@@ -12,6 +12,8 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "risseException.h"
+#include "risseScriptBlockBase.h"
+#include "risseCharUtils.h"
 
 #define RISSE_MAX_TRACE_TEXT_LEN 1500
 
@@ -39,8 +41,21 @@ void eRisseError::Throw(const tRisseString & msg)
 
 
 //---------------------------------------------------------------------------
+tRisseString eRisseScriptError::BuildMessage(const tRisseString & msgbase,
+		tRisseScriptBlockBase *block, risse_size pos)
+{
+	risse_size ln;
+	block->PositionToLineAndColumn(pos, &ln, NULL); // コードポイント位置->行
+	risse_char tmp[40];
+	Risse_int64_to_str((risse_int64)(ln+1), tmp); // 行は 0ベースなので +1 する
+	return tRisseString(RISSE_WS_TR("%1 at %2 line %3"), msgbase, block->GetName(), tmp);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void eRisseCompileError::Throw(const tRisseString & msg,
-						tRisseScriptBlock *block, risse_size pos)
+						tRisseScriptBlockBase *block, risse_size pos)
 {
 	// 例外メッセージを投げる
 	throw eRisseCompileError(msg, block, pos);
@@ -86,7 +101,7 @@ void RisseGetExceptionObject(tRisse *risse, tRisseVariant *res, tRisseVariant &m
 //---------------------------------------------------------------------------
 // eRisseScriptException
 //---------------------------------------------------------------------------
-eRisseScriptError::tScriptBlockHolder::tScriptBlockHolder(tRisseScriptBlock *block)
+eRisseScriptError::tScriptBlockHolder::tScriptBlockHolder(tRisseScriptBlockBase *block)
 {
 	Block = block;
 	Block->AddRef();
@@ -105,7 +120,7 @@ eRisseScriptError::tScriptBlockHolder::tScriptBlockHolder(
 }
 //---------------------------------------------------------------------------
 eRisseScriptError::eRisseScriptError(const tRisseString &  Msg,
-	tRisseScriptBlock *block, risse_int pos) :
+	tRisseScriptBlockBase *block, risse_int pos) :
 		eRisseError(Msg), Block(block), Position(pos)
 {
 }
@@ -121,7 +136,7 @@ const risse_char * eRisseScriptError::GetBlockName() const
 	return name ? name : RISSE_WS("");
 }
 //---------------------------------------------------------------------------
-bool eRisseScriptError::AddTrace(tRisseScriptBlock *block, risse_int srcpos)
+bool eRisseScriptError::AddTrace(tRisseScriptBlockBase *block, risse_int srcpos)
 {
 	risse_int len = Trace.GetLen();
 	if(len >= RISSE_MAX_TRACE_TEXT_LEN) return false;
@@ -160,7 +175,7 @@ bool eRisseScriptError::AddTrace(const tRisseString & data)
 // throw helper functions
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-static void RisseReportExceptionSource(const tRisseString &msg, tRisseScriptBlock *block,
+static void RisseReportExceptionSource(const tRisseString &msg, tRisseScriptBlockBase *block,
 	risse_int srcpos)
 {
 	tRisse *risse = block->GetRisse();
@@ -184,13 +199,13 @@ void Risse_eRisseError(const risse_char* msg) { throw eRisseError(msg); }
 void Risse_eRisseVariantError(const tRisseString & msg) { throw eRisseVariantError(msg); }
 void Risse_eRisseVariantError(const risse_char * msg) { throw eRisseVariantError(msg); }
 //---------------------------------------------------------------------------
-void Risse_eRisseScriptError(const tRisseString &msg, tRisseScriptBlock *block, risse_int srcpos)
+void Risse_eRisseScriptError(const tRisseString &msg, tRisseScriptBlockBase *block, risse_int srcpos)
 {
 	RisseReportExceptionSource(msg, block, srcpos);
 	throw eRisseScriptError(msg, block, srcpos);
 }
 //---------------------------------------------------------------------------
-void Risse_eRisseScriptError(const risse_char *msg, tRisseScriptBlock *block, risse_int srcpos)
+void Risse_eRisseScriptError(const risse_char *msg, tRisseScriptBlockBase *block, risse_int srcpos)
 {
 	RisseReportExceptionSource(msg, block, srcpos);
 	throw eRisseScriptError(msg, block, srcpos);
@@ -208,14 +223,14 @@ void Risse_eRisseScriptError(const risse_char *msg, tRisseInterCodeContext *cont
 	throw eRisseScriptError(msg, context->GetBlock(), context->CodePosToSrcPos(codepos));
 }
 //---------------------------------------------------------------------------
-void Risse_eRisseScriptException(const tRisseString &msg, tRisseScriptBlock *block,
+void Risse_eRisseScriptException(const tRisseString &msg, tRisseScriptBlockBase *block,
 	risse_int srcpos, tRisseVariant &val)
 {
 	RisseReportExceptionSource(msg, block, srcpos);
 	throw eRisseScriptException(msg, block, srcpos, val);
 }
 //---------------------------------------------------------------------------
-void Risse_eRisseScriptException(const risse_char *msg, tRisseScriptBlock *block,
+void Risse_eRisseScriptException(const risse_char *msg, tRisseScriptBlockBase *block,
 	risse_int srcpos, tRisseVariant &val)
 {
 	RisseReportExceptionSource(msg, block, srcpos);
@@ -236,13 +251,13 @@ void Risse_eRisseScriptException(const risse_char *msg, tRisseInterCodeContext *
 	throw eRisseScriptException(msg, context->GetBlock(), context->CodePosToSrcPos(codepos), val);
 }
 //---------------------------------------------------------------------------
-void Risse_eRisseCompileError(const tRisseString & msg, tRisseScriptBlock *block, risse_int srcpos)
+void Risse_eRisseCompileError(const tRisseString & msg, tRisseScriptBlockBase *block, risse_int srcpos)
 {
 	RisseReportExceptionSource(msg, block, srcpos);
 	throw eRisseCompileError(msg, block, srcpos);
 }
 //---------------------------------------------------------------------------
-void Risse_eRisseCompileError(const risse_char *msg, tRisseScriptBlock *block, risse_int srcpos)
+void Risse_eRisseCompileError(const risse_char *msg, tRisseScriptBlockBase *block, risse_int srcpos)
 {
 	RisseReportExceptionSource(msg, block, srcpos);
 	throw eRisseCompileError(msg, block, srcpos);

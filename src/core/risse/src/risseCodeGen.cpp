@@ -513,7 +513,6 @@ tRisseString tRisseSSABlock::Dump() const
 {
 	tRisseString ret;
 
-	InDump = true; // 再入しないように
 	Dumped = true; // ２回以上ダンプしないように
 
 	// ラベル名と直前のブロックを列挙
@@ -530,33 +529,57 @@ tRisseString tRisseSSABlock::Dump() const
 	}
 	ret += RISSE_WS("\n");
 
+	if(!FirstStatement)
+	{
+		// 一つも文を含んでいない？？
+		ret += RISSE_WS("This SSA basic block does not contain any statements\n\n");
+	}
+	else
+	{
+		// すべての文をダンプ
+		tRisseSSAStatement * stmt = FirstStatement;
+		do 
+		{
+			ret += stmt->Dump() + RISSE_WS("\n");
+			stmt = stmt->GetSucc();
+		} while(stmt != NULL);
+
+		ret += RISSE_WS("\n");
+	}
+
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSSABlock::DumpChildren() const
+{
+	tRisseString ret;
+
+	InDump = true; // 再入しないように
 	try
 	{
-		if(!FirstStatement)
-		{
-			// 一つも文を含んでいない？？
-			ret += RISSE_WS("This SSA basic block does not contain any statements\n\n");
-		}
-		else
-		{
-			// すべての文をダンプ
-			tRisseSSAStatement * stmt = FirstStatement;
-			do 
-			{
-				ret += stmt->Dump() + RISSE_WS("\n");
-				stmt = stmt->GetSucc();
-			} while(stmt != NULL);
-
-			ret += RISSE_WS("\n");
-		}
+		gc_vector<tRisseSSABlock *> vec;
 
 		// 直後のブロックをダンプ
 		for(gc_vector<tRisseSSABlock *>::const_iterator i = Succ.begin();
 										i != Succ.end(); i ++)
 		{
 			if(!(*i)->InDump && !(*i)->Dumped)
+			{
+				vec.push_back(*i); // いったん vec に入れる
 				ret += (*i)->Dump();
+			}
 		}
+
+		// 直後のブロックを再帰
+		for(gc_vector<tRisseSSABlock *>::const_iterator i = vec.begin();
+										i != vec.end(); i ++)
+		{
+			ret += (*i)->DumpChildren();
+		}
+
 	}
 	catch(...)
 	{
@@ -568,9 +591,6 @@ tRisseString tRisseSSABlock::Dump() const
 	return ret;
 }
 //---------------------------------------------------------------------------
-
-
-
 
 
 
@@ -630,7 +650,7 @@ tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name, tRisse
 tRisseString tRisseSSAForm::Dump() const
 {
 	// この form から到達可能な基本ブロックをすべてダンプする
-	return EntryBlock->Dump();
+	return EntryBlock->Dump() + EntryBlock->DumpChildren();
 }
 //---------------------------------------------------------------------------
 

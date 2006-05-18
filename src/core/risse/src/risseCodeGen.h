@@ -378,6 +378,10 @@ public:
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
+
+	//! @brief		子に対してダンプを行う
+	//! @return		ダンプ文字列
+	tRisseString DumpChildren() const;
 };
 //---------------------------------------------------------------------------
 

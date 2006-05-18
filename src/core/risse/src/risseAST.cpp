@@ -568,7 +568,7 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 
 	// すべての子ノードに再帰する
 	for(risse_size i = 0; i < GetChildCount(); i++)
-		GetChildAt(i)->GenerateSSA(sb, form);
+		GetChildAt(i)->GenerateReadSSA(sb, form);
 
 	// ローカル変数スコープの消滅  - コンテキストの種類に従って分岐
 	switch(ContextType)
@@ -591,7 +591,7 @@ tRisseSSAVariable * tRisseASTNode_ExprStmt::DoReadSSA(
 			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	// このノードは式を保持しているだけなので子ノードに処理をさせるだけ
-	GetChildAt(0)->GenerateSSA(sb, form);
+	GetChildAt(0)->GenerateReadSSA(sb, form);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -663,18 +663,33 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 
 //---------------------------------------------------------------------------
 void * tRisseASTNode_Id::PrepareSSA(
-					tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+			tRisseScriptBlockBase * sb, tRisseSSAForm *form,
+					tRisseASTNode_Id::tPrepareMode mode) const
 {
 	tPrepareSSA * pws = new tPrepareSSA;
 
-	tRisseSSAVariable * dest_var =
-		form->GetLocalNamespace()->MakePhiFunction(form, GetPosition(), Name);
-	if(!dest_var)
+	tRisseSSAVariable * dest_var;
+
+	bool local_var_found; // ローカル変数が見つかったかどうか
+
+	if(mode == pmRead || mode == pmReadWrite)
+	{
+		// 読み込みの場合は書き込みの場合と異なりφ関数の作成が必要
+		dest_var = form->GetLocalNamespace()->MakePhiFunction(GetPosition(), Name);
+		local_var_found = dest_var != NULL;
+	}
+	else
+	{
+		dest_var = NULL;
+		local_var_found = form->GetLocalNamespace()->Find(Name, &dest_var);
+	}
+
+	if(!local_var_found)
 	{
 		// ローカル変数に見つからない
 		pws->IsLocal = false;
 		pws->MemberSel = CreateAccessNodeOnThis();
-		pws->MemberSelParam = pws->MemberSel->PrepareSSA(sb, form);
+		pws->MemberSelParam = pws->MemberSel->PrepareSSA(sb, form, mode);
 	}
 	else
 	{
@@ -762,7 +777,7 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
 //---------------------------------------------------------------------------
 const tRisseASTNode * tRisseASTNode_Id::GetAccessNode(tRisseSSAForm * form) const
 {
-	if(form->GetLocalNamespace()->MakePhiFunction(form, GetPosition(), Name))
+	if(form->GetLocalNamespace()->MakePhiFunction(GetPosition(), Name))
 		return this; // ローカル名前空間に存在する
 	const tRisseASTNode * node = CreateAccessNodeOnThis();
 	return node; // 存在しないので this 上へのアクセスを行う
@@ -784,7 +799,7 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 	case autMinus:	// "-"
 		{
 			// 子の計算結果を得る
-			tRisseSSAVariable * child_var = Child->GenerateSSA(sb, form);
+			tRisseSSAVariable * child_var = Child->GenerateReadSSA(sb, form);
 			if(!child_var)
 			{
 				// エラー
@@ -860,7 +875,7 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 			{
 				// 識別子
 				// 子の計算結果を得る
-				tRisseSSAVariable * child_var = child->GenerateSSA(sb, form);
+				tRisseSSAVariable * child_var = child->GenerateReadSSA(sb, form);
 
 				// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
 				// 減算するものとして扱われる
@@ -895,7 +910,7 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 				// メンバ選択演算子
 				// メンバ選択演算子を介しての操作は、ocIncAssign あるいは
 				// ocDecAssign のオペレーションを呼び出すものとして実装する
-				tRisseSSAVariable * child_var = child->GenerateSSA(sb, form);
+				tRisseSSAVariable * child_var = child->GenerateReadSSA(sb, form);
 
 				// inc あるいは dec のコードを生成
 				tRisseSSAStatement * stmt =
@@ -938,7 +953,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 		{
 			// 単純代入
 			// 右辺の値を得る
-			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
+			tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(sb, form);
 
 			// 左辺に書き込む
 			Child1->GenerateWriteSSA(sb, form, rhs_var);
@@ -964,7 +979,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			// 複合代入演算子
 
 			// 右辺の値を得る
-			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
+			tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(sb, form);
 
 			// Id の存在をチェック
 			const tRisseASTNode * child = Child1;
@@ -1005,7 +1020,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 				// SSA 形式に展開を行う。
 
 				// 識別子の内容を得る
-				tRisseSSAVariable * lhs_var = child->GenerateSSA(sb, form);
+				tRisseSSAVariable * lhs_var = child->GenerateReadSSA(sb, form);
 
 				// 演算を行う文を生成
 				tRisseSSAStatement * stmt =
@@ -1058,7 +1073,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 				}
 
 				// 左辺の値を得る
-				tRisseSSAVariable * lhs_var = child->GenerateSSA(sb, form);
+				tRisseSSAVariable * lhs_var = child->GenerateReadSSA(sb, form);
 
 				// inc あるいは dec のコードを生成
 				tRisseSSAStatement * stmt =
@@ -1091,8 +1106,8 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			// は１回のみの評価としたいので、先に評価を行わなければならない。
 
 			// 評価の準備を行う
-			void * lhs_param = Child1->PrepareSSA(sb, form);
-			void * rhs_param = Child2->PrepareSSA(sb, form);
+			void * lhs_param = Child1->PrepareSSA(sb, form, pmReadWrite);
+			void * rhs_param = Child2->PrepareSSA(sb, form, pmReadWrite);
 
 			// 左辺の値を取得
 			tRisseSSAVariable * lhs_var = Child1->DoReadSSA(sb, form, lhs_param);
@@ -1111,8 +1126,8 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 		}
 
 	case abtComma:				// ,
-		Child1->GenerateSSA(sb, form); // 左辺値は捨てる
-		return Child2->GenerateSSA(sb, form); // 右辺値を返す
+		Child1->GenerateReadSSA(sb, form); // 左辺値は捨てる
+		return Child2->GenerateReadSSA(sb, form); // 右辺値を返す
 
 	case abtIf:					// if
 	case abtLogOr:				// ||
@@ -1177,9 +1192,9 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			}
 
 			// 左辺の値を得る
-			tRisseSSAVariable * lhs_var = Child1->GenerateSSA(sb, form);
+			tRisseSSAVariable * lhs_var = Child1->GenerateReadSSA(sb, form);
 			// 右辺の値を得る
-			tRisseSSAVariable * rhs_var = Child2->GenerateSSA(sb, form);
+			tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(sb, form);
 
 			// 演算を行う文を生成
 			tRisseSSAStatement * stmt =
@@ -1205,13 +1220,15 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-void * tRisseASTNode_MemberSel::PrepareSSA(tRisseScriptBlockBase * sb, tRisseSSAForm *form) const
+void * tRisseASTNode_MemberSel::PrepareSSA(
+		tRisseScriptBlockBase * sb, tRisseSSAForm *form,
+			tRisseASTNode_MemberSel::tPrepareMode mode) const
 {
 	tPrepareSSA * pws = new tPrepareSSA;
 	// オブジェクトの式の値を得る
-	pws->ObjectVar = Object->GenerateSSA(sb, form);
+	pws->ObjectVar = Object->GenerateReadSSA(sb, form);
 	// メンバ名の式の値を得る
-	pws->MemberNameVar = MemberName->GenerateSSA(sb, form);
+	pws->MemberNameVar = MemberName->GenerateReadSSA(sb, form);
 
 	return pws;
 }
@@ -1270,7 +1287,7 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 			tRisseScriptBlockBase * sb, tRisseSSAForm *form, void * param) const
 {
 	// 条件式の結果を得る
-	tRisseSSAVariable * cond_var = Condition->GenerateSSA(sb, form);
+	tRisseSSAVariable * cond_var = Condition->GenerateReadSSA(sb, form);
 
 	// 分岐文を作成
 	tRisseSSAStatement * branch_stmt =
@@ -1279,27 +1296,56 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 	form->GetCurrentBlock()->AddStatement(branch_stmt); // ブロックに追加
 
 	// 新しいブロックを作成(真の場合)
-	tRisseSSABlock * block_before_if_stmt = form->GetCurrentBlock();
+	tRisseSSABlock * if_entry_block = form->GetCurrentBlock();
 	tRisseSSABlock * true_block = form->CreateNewBlock(RISSE_WS("if_true"));
 
 	// 真の場合に実行する内容を作成
-	True->GenerateSSA(sb, form);
+	True->GenerateReadSSA(sb, form);
+	tRisseSSABlock * true_last_block = form->GetCurrentBlock();
 
 	// ジャンプ文を作成
 	tRisseSSAStatement * true_exit_jump_stmt =
 		new tRisseSSAStatement(form, GetPosition(), ocJump);
-	form->GetCurrentBlock()->AddStatement(true_exit_jump_stmt); // ブロックに追加
+	true_last_block->AddStatement(true_exit_jump_stmt); // ブロックに追加
 
-	// 新しいブロックを作成
-	tRisseSSABlock * block_after_if_stmt =
-		form->CreateNewBlock(RISSE_WS("if_exit"), block_before_if_stmt);
+	// 偽の場合に実行するノードがある場合のみ
+	tRisseSSABlock * false_last_block = NULL;
+	tRisseSSABlock * false_block = NULL;
+	tRisseSSAStatement * false_exit_jump_stmt = NULL;
+	if(False)
+	{
+		// 新しいブロックを作成(偽の場合)
+		false_block = form->CreateNewBlock(RISSE_WS("if_false"), if_entry_block);
 
-	block_after_if_stmt->AddPred(true_block);
+		// 偽の場合に実行する内容を作成
+		False->GenerateReadSSA(sb, form);
+		false_last_block = form->GetCurrentBlock();
+
+		// ジャンプ文を作成
+		false_exit_jump_stmt = new tRisseSSAStatement(form, GetPosition(), ocJump);
+		false_last_block->AddStatement(false_exit_jump_stmt); // ブロックに追加
+	}
+
+	// 新しいブロックを作成(if文からの脱出)
+	tRisseSSABlock * if_exit_block;
+	if(False)
+	{
+		// if～else の場合は、if_exit の直前のブロックは true ブロックと false ブロック
+		if_exit_block = form->CreateNewBlock(RISSE_WS("if_exit"), true_last_block);
+		if_exit_block->AddPred(false_last_block);
+	}
+	else
+	{
+		// if の場合は、if_exit の直前のブロックは if の直前ブロックと true ブロック
+		if_exit_block = form->CreateNewBlock(RISSE_WS("if_exit"), if_entry_block);
+		if_exit_block->AddPred(true_last_block);
+	}
 
 	// 分岐/ジャンプ文のジャンプ先を設定
 	branch_stmt->SetTrueBranch(true_block);
-	branch_stmt->SetFalseBranch(block_after_if_stmt);
-	true_exit_jump_stmt->SetJumpTarget(block_after_if_stmt);
+	branch_stmt->SetFalseBranch(false_block ? false_block : if_exit_block);
+	true_exit_jump_stmt->SetJumpTarget(if_exit_block);
+	if(false_exit_jump_stmt) false_exit_jump_stmt->SetJumpTarget(if_exit_block);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -1314,7 +1360,7 @@ tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
 	// 変数宣言
 	// 子に再帰する
 	for(risse_size i = 0; i < GetChildCount(); i++)
-		GetChildAt(i)->GenerateSSA(sb, form);
+		GetChildAt(i)->GenerateReadSSA(sb, form);
 	// このノードは答えを返さない
 	return NULL;
 }
@@ -1329,7 +1375,7 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 	if(Initializer)
 	{
 		// 初期化値がある
-		init_var = Initializer->GenerateSSA(sb, form);
+		init_var = Initializer->GenerateReadSSA(sb, form);
 	}
 	else
 	{

@@ -22,6 +22,7 @@ RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 //---------------------------------------------------------------------------
 tRisseLocalNamespace::tRisseLocalNamespace()
 {
+	Block = NULL;
 	Push(); // 最初の名前空間を push しておく
 }
 //---------------------------------------------------------------------------
@@ -30,6 +31,7 @@ tRisseLocalNamespace::tRisseLocalNamespace()
 //---------------------------------------------------------------------------
 tRisseLocalNamespace::tRisseLocalNamespace(const tRisseLocalNamespace &ref)
 {
+	Block = ref.Block;
 	Scopes.reserve(ref.Scopes.size());
 	for(gc_vector<tMap *>::const_iterator i = ref.Scopes.begin();
 		i != ref.Scopes.end(); i++)
@@ -119,8 +121,9 @@ bool tRisseLocalNamespace::Delete(const tRisseString & name)
 
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseLocalNamespace::MakePhiFunction(
-						tRisseSSAForm * form, risse_size pos, const tRisseString & name)
+						risse_size pos, const tRisseString & name)
 {
+	RISSE_ASSERT(Block != NULL);
 	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
 	{
 		tMap::iterator i = (*ri)->find(name);
@@ -129,7 +132,7 @@ tRisseSSAVariable * tRisseLocalNamespace::MakePhiFunction(
 			// 見つかった
 			if(i->second != NULL) return i->second; // 見つかったがφ関数を作成する必要はない
 			// 見つかったがφ関数を作成する必要がある
-			form->GetCurrentBlock()->AddPhiFunction(pos, name, i->second);
+			Block->AddPhiFunction(pos, name, i->second);
 			return i->second;
 		}
 	}
@@ -279,7 +282,7 @@ tRisseString tRisseSSAStatement::Dump() const
 	case ocJump:
 		{
 			RISSE_ASSERT(JumpTarget != NULL);
-			return RISSE_WS("goto ") + JumpTarget->GetName();
+			return RISSE_WS("goto *") + JumpTarget->GetName();
 		}
 
 	case ocBranch:
@@ -289,8 +292,8 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(Used.size() == 1);
 			return
 					RISSE_WS("if ") + (*Used.begin())->Dump() + 
-					RISSE_WS(" then ") + TrueBranch->GetName() +
-					RISSE_WS(" else ") + FalseBranch->GetName();
+					RISSE_WS(" then *") + TrueBranch->GetName() +
+					RISSE_WS(" else *") + FalseBranch->GetName();
 		}
 
 	default:
@@ -409,7 +412,7 @@ void tRisseSSABlock::AddPhiFunction(risse_size pos, const tRisseString & name,
 	{
 		RISSE_ASSERT((*i)->LocalNamespace != NULL);
 		tRisseSSAVariable * found_var =
-			(*i)->LocalNamespace->MakePhiFunction(Form, pos, var->GetOriginalName());
+			(*i)->LocalNamespace->MakePhiFunction(pos, var->GetOriginalName());
 		if(!found_var)
 		{
 			// エラー
@@ -440,7 +443,7 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 		tRisseSSAVariable * decl_var = stmt->GetDeclared();
 
 		tRisseSSAVariable * var =
-			block->LocalNamespace->MakePhiFunction(Form, stmt->GetPosition(), decl_var->GetOriginalName());
+			block->LocalNamespace->MakePhiFunction(stmt->GetPosition(), decl_var->GetOriginalName());
 		if(!var)
 		{
 			// エラー
@@ -484,6 +487,7 @@ tRisseSSAVariable * tRisseSSABlock::AddConstantValueStatement(
 void tRisseSSABlock::TakeLocalNamespaceSnapshot(tRisseLocalNamespace * ref)
 {
 	LocalNamespace = new tRisseLocalNamespace(*ref);
+	LocalNamespace->SetBlock(this);
 }
 //---------------------------------------------------------------------------
 
@@ -509,10 +513,22 @@ tRisseString tRisseSSABlock::Dump() const
 {
 	tRisseString ret;
 
-	ret += Name + RISSE_WS(":\n");
-
 	InDump = true; // 再入しないように
 	Dumped = true; // ２回以上ダンプしないように
+
+	// ラベル名と直前のブロックを列挙
+	ret +=  + RISSE_WS("*") + Name;
+	if(Pred.size() != 0)
+	{
+		ret += RISSE_WS(" // pred: ");
+		for(gc_vector<tRisseSSABlock *>::const_iterator i = Pred.begin();
+										i != Pred.end(); i ++)
+		{
+			if(i != Pred.begin()) ret += RISSE_WS(", ");
+			ret += RISSE_WS("*") + (*i)->GetName();
+		}
+	}
+	ret += RISSE_WS("\n");
 
 	try
 	{
@@ -580,10 +596,11 @@ void tRisseSSAForm::Generate()
 
 	// エントリー位置の基本ブロックを生成する
 	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"));
+	LocalNamespace->SetBlock(EntryBlock);
 	CurrentBlock = EntryBlock;
 
 	// ルートノードを処理する
-	Root->GenerateSSA(ScriptBlock, this);
+	Root->GenerateReadSSA(ScriptBlock, this);
 }
 //---------------------------------------------------------------------------
 
@@ -600,6 +617,7 @@ tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name, tRisse
 	// 新しい基本ブロックを作成する
 	tRisseSSABlock * new_block = new tRisseSSABlock(this, name);
 	new_block->AddPred(pred?pred:CurrentBlock);
+	LocalNamespace->SetBlock(new_block);
 
 	// 新しい「現在の」基本ブロックを設定し、それを返す
 	CurrentBlock = new_block;

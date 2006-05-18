@@ -28,12 +28,14 @@
 //---------------------------------------------------------------------------
 namespace Risse
 {
+class tRisseSSABlock;
 class tRisseSSAVariable;
 //---------------------------------------------------------------------------
 //! @brief	ローカル変数用の名前空間管理クラス
 //---------------------------------------------------------------------------
 class tRisseLocalNamespace : public tRisseCollectee
 {
+	tRisseSSABlock * Block; //!< この名前空間に結びつけられている基本ブロック
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tMap; //!< マップの typedef
 	typedef gc_vector<tMap *> tScopes; //!< スコープの typedefs
 	tScopes Scopes; //!< 名前空間のスコープ
@@ -44,6 +46,10 @@ public:
 
 	//! @brief		コピーコンストラクタ
 	tRisseLocalNamespace(const tRisseLocalNamespace &ref);
+
+	//! @brief		この名前空間に結びつけられる基本ブロックを設定する
+	//! @param		block	この名前空間に結びつけられる基本ブロック
+	void SetBlock(tRisseSSABlock * block) { Block = block; }
 
 	//! @brief		名前空間を push する
 	void Push();
@@ -58,8 +64,9 @@ public:
 
 	//! @brief		変数を探す
 	//! @param		name		変数名
-	//! @param		var 		その変数を表す SSA 変数表現 を格納する先(NULL = イラナイ)
+	//! @param		var 		その変数を表す SSA 変数表現 を格納する先(NULL = 要らない)
 	//! @return		変数が見つかったかどうか
+	//! @note		変数が見つからなかった場合は *var にはなにも書き込まれない
 	bool Find(const tRisseString & name, tRisseSSAVariable ** var = NULL) const;
 
 	//! @brief		変数を削除する
@@ -72,7 +79,7 @@ public:
 	//! @param		pos		スクリプト上の位置
 	//! @param		name	変数名
 	//! @return		見つかった変数、あるいはφ関数の戻り値 (NULL=ローカル変数に見つからなかった)
-	tRisseSSAVariable * MakePhiFunction(tRisseSSAForm * form, risse_size pos, const tRisseString & name);
+	tRisseSSAVariable * MakePhiFunction(risse_size pos, const tRisseString & name);
 
 	//! @brief		変数をすべて「φ関数を参照のこと」としてマークする
 	//! @note		このメソッドは、Scopes のすべてのマップの値を

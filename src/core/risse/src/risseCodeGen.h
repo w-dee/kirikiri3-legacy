@@ -114,7 +114,8 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		form	この変数が属する SSA 形式インスタンス
 	//! @param		stmt	この変数が定義された文
-	//! @param		name	変数名 (実際にはこれがprefixになり、通し番号が後に続のがNameに入る)
+	//! @param		name	変数名 (実際にはこれがprefixになり、
+	//!						通し番号が後に続いたものがNameに入る)
 	//						一時変数については空文字列を渡すこと
 	tRisseSSAVariable(tRisseSSAForm * form, tRisseSSAStatement *stmt = NULL,
 						const tRisseString & name = tRisseString());
@@ -122,6 +123,12 @@ public:
 	//! @brief		この変数が属している SSA 形式インスタンスを取得する
 	//! @return		この変数が属している SSA 形式インスタンス
 	tRisseSSAForm * GetForm() const { return Form; }
+
+	//! @brief		この変数の名前を設定する
+	//! @return		変数名 (実際にはこれがprefixになり、
+	//!						通し番号が後に続いたものがNameに入る)
+	//						一時変数については空文字列を渡すこと
+	void SetName(const tRisseString & name);
 
 	//! @brief		この変数の名前を返す
 	//! @return		変数の名前 (バージョン付き)
@@ -360,14 +367,6 @@ public:
 	//! @param		block	基本ブロック
 	void AddSucc(tRisseSSABlock * block);
 
-	//! @brief		定数値を得る文を追加する
-	//! @param		pos		スクリプト上の位置
-	//! @param		val		定数
-	//! @return		定数値を表す一時変数
-	//! @note		このメソッドは、定数値を一時変数に代入する
-	//!				文を生成し、その一時変数を返す
-	tRisseSSAVariable * AddConstantValueStatement(risse_size pos, const tRisseVariant & val);
-
 	//! @brief		ローカル名前空間のスナップショットを作成する
 	//! @param		ref		参照元ローカル名前空間
 	void TakeLocalNamespaceSnapshot(tRisseLocalNamespace * ref);
@@ -419,6 +418,46 @@ public:
 	//!						(NULLの場合は現在の基本ブロックが直前の基本ブロックであると見なされる)
 	//! @return		新しく作成された基本ブロック
 	tRisseSSABlock * CreateNewBlock(const tRisseString & name, tRisseSSABlock * pred = NULL);
+
+	//! @brief		現在の基本ブロックに定数値を得る文を追加する
+	//! @param		pos		スクリプト上の位置
+	//! @param		val		定数
+	//! @return		定数値を表す一時変数
+	//! @note		このメソッドは、定数値を一時変数に代入する
+	//!				文を生成し、その一時変数を返す
+	tRisseSSAVariable * AddConstantValueStatement(risse_size pos, const tRisseVariant & val);
+
+	//! @brief		現在の基本ブロックに文を追加する
+	//! @param		pos		スクリプト上の位置
+	//! @param		code	オペレーションコード
+	//! @param		ret_var	この文で変数を定義する場合はtRisseSSAVariable *へのポインタを渡す
+	//!						(変数を定義したくない場合はNULLを渡す)
+	//! @param		using1	この文で使用する変数その1(NULL=使用しない)
+	//! @param		using2	この文で使用する変数その2(NULL=使用しない)
+	//! @param		using3	この文で使用する変数その3(NULL=使用しない)
+	//! @return		新しく追加された文
+	tRisseSSAStatement * AddStatement(risse_size pos, tRisseOpCode code,
+		tRisseSSAVariable ** ret_var,
+			tRisseSSAVariable *using1 = NULL,
+			tRisseSSAVariable *using2 = NULL,
+			tRisseSSAVariable *using3 = NULL);
+
+	//! @brief		現在の基本ブロックに文を追加し、定義された変数を返す
+	//! @param		pos		スクリプト上の位置
+	//! @param		code	オペレーションコード
+	//! @param		using1	この文で使用する変数その1(NULL=使用しない)
+	//! @param		using2	この文で使用する変数その2(NULL=使用しない)
+	//! @param		using3	この文で使用する変数その3(NULL=使用しない)
+	//! @return		定義された変数
+	tRisseSSAVariable * AddStatement(risse_size pos, tRisseOpCode code,
+			tRisseSSAVariable *using1 = NULL, 
+			tRisseSSAVariable *using2 = NULL, 
+			tRisseSSAVariable *using3 = NULL)
+	{
+		tRisseSSAVariable * ret_var = NULL;
+		AddStatement(pos, code, &ret_var, using1, using2, using3);
+		return ret_var;
+	}
 
 	//! @brief		ユニークな番号を得る
 	risse_int GetUniqueNumber()

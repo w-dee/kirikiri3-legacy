@@ -166,7 +166,6 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 {
 	// フィールドの初期化
 	Form = form;
-	OriginalName = name;
 	Declared = stmt;
 	Value = NULL;
 	ValueType = tRisseVariant::vtVoid;
@@ -174,13 +173,23 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 	// この変数が定義された文の登録
 	if(Declared) Declared->SetDeclared(this);
 
+	// 名前を設定する
+	SetName(name);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAVariable::SetName(const tRisseString & name)
+{
 	// 名前を生成する
 	// 名前の後にはドットに続いて通し番号がつく。
 	// 一時変数の場合は名前として ".tmp" が用いられる
+	OriginalName = name;
 
 	// 通し番号の準備
 	risse_char uniq[40];
-	Risse_int_to_str(form->GetUniqueNumber(), uniq);
+	Risse_int_to_str(Form->GetUniqueNumber(), uniq);
 
 	if(name.IsEmpty())
 	{
@@ -465,25 +474,6 @@ void tRisseSSABlock::AddSucc(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseSSABlock::AddConstantValueStatement(
-										risse_size pos,
-										const tRisseVariant & val)
-{
-	// 文の作成
-	tRisseSSAStatement * stmt =
-		new tRisseSSAStatement(Form, pos, ocAssignConstant);
-	// 変数の作成
-	tRisseSSAVariable * var = new tRisseSSAVariable(Form, stmt);
-	var->SetValue(new tRisseVariant(val));
-	// 文の追加
-	AddStatement(stmt);
-	// 戻る
-	return var;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tRisseSSABlock::TakeLocalNamespaceSnapshot(tRisseLocalNamespace * ref)
 {
 	LocalNamespace = new tRisseLocalNamespace(*ref);
@@ -620,7 +610,7 @@ void tRisseSSAForm::Generate()
 	CurrentBlock = EntryBlock;
 
 	// ルートノードを処理する
-	Root->GenerateReadSSA(ScriptBlock, this);
+	Root->GenerateReadSSA(this);
 }
 //---------------------------------------------------------------------------
 
@@ -642,6 +632,56 @@ tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name, tRisse
 	// 新しい「現在の」基本ブロックを設定し、それを返す
 	CurrentBlock = new_block;
 	return CurrentBlock;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseSSAForm::AddConstantValueStatement(
+										risse_size pos,
+										const tRisseVariant & val)
+{
+	// 文の作成
+	tRisseSSAStatement * stmt =
+		new tRisseSSAStatement(this, pos, ocAssignConstant);
+	// 変数の作成
+	tRisseSSAVariable * var = new tRisseSSAVariable(this, stmt);
+	var->SetValue(new tRisseVariant(val));
+	// 文の追加
+	CurrentBlock->AddStatement(stmt);
+	// 戻る
+	return var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode code,
+		tRisseSSAVariable ** ret_var,
+			tRisseSSAVariable *using1,
+			tRisseSSAVariable *using2,
+			tRisseSSAVariable *using3)
+{
+	// 文の作成
+	tRisseSSAStatement * stmt =
+		new tRisseSSAStatement(this, pos, code);
+
+	if(ret_var)
+	{
+		// 戻りの変数の作成
+		*ret_var = new tRisseSSAVariable(this, stmt);
+	}
+
+	// 文のSSAブロックへの追加
+	GetCurrentBlock()->AddStatement(stmt);
+
+	// 文に変数の使用を追加
+	if(using1) stmt->AddUsed(using1);
+	if(using2) stmt->AddUsed(using2);
+	if(using3) stmt->AddUsed(using3);
+
+	// 文を返す
+	return stmt;
 }
 //---------------------------------------------------------------------------
 

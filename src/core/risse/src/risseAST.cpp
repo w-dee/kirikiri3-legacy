@@ -818,59 +818,29 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 				break;
 			}
 
-			// Id の存在をチェック
-			const tRisseASTNode * child = Child;
-			if(child->GetType() == antId)
-				child = reinterpret_cast<const tRisseASTNode_Id *>(child)->GetAccessNode(form);
+			// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
+			// 減算するものとして扱われる
+			// (実際にそれを inc や dec の VM 命令にするのは CG や optimizer の仕事)
+			// 定数 1 を生成
+			tRisseSSAVariable * one_var =
+				form->AddConstantValueStatement(
+						GetPosition(), tRisseVariant((risse_int64)1));
 
-			// 子のタイプをチェック
-			if(child->GetType() == antId)
-			{
-				// 識別子
-				// 子の計算結果を得る
-				tRisseSSAVariable * child_var = child->GenerateReadSSA(form);
+			// 子ノードを準備
+			void * child_param = Child->PrepareSSA(form, pmReadWrite);
 
-				// インクリメント、デクリメント演算子は、整数値 1 を加算あるいは
-				// 減算するものとして扱われる
-				// (実際にそれを inc や dec の VM 命令にするのは CG や optimizer の仕事)
-				// 定数 1 を生成
-				tRisseSSAVariable * one_var =
-					form->AddConstantValueStatement(
-							GetPosition(), tRisseVariant((risse_int64)1));
+			// 子ノードの値を取得
+			tRisseSSAVariable * child_var = Child->DoReadSSA(form, child_param);
 
-				// 定数 1 を加算/減算する文を生成
-				tRisseSSAVariable * processed_var = NULL;
-				form->AddStatement(GetPosition(), code, &processed_var, child_var, one_var);
+			// 演算を行う文を生成
+			tRisseSSAVariable * processed_var = NULL;
+			form->AddStatement(GetPosition(), code, &processed_var, child_var, one_var);
 
-				// その結果を識別子に書き込む文を生成
-				reinterpret_cast<const tRisseASTNode_Id*>(child)->
-							GenerateWriteSSA(form, processed_var);
+			// その結果を識別子に書き込む文を生成
+			Child->DoWriteSSA(form, child_param, processed_var);
 
-				// 戻る
-				// 前置の場合は計算後の値を、後置の場合は計算前の値を返す
-				return is_prepositioned ? processed_var : child_var;
-			}
-			else if(child->GetType() == antMemberSel)
-			{
-				// メンバ選択演算子
-				// メンバ選択演算子を介しての操作は、ocIncAssign あるいは
-				// ocDecAssign のオペレーションを呼び出すものとして実装する
-				tRisseSSAVariable * child_var = child->GenerateReadSSA(form);
-
-				// inc あるいは dec のコードを生成
-				tRisseSSAVariable * processed_var = NULL;
-				form->AddStatement(GetPosition(),
-							code == ocSub ? ocDecAssign : ocIncAssign,
-							&processed_var, child_var);
-
-				// 戻る
-				// 前置の場合は計算後の値を、後置の場合は計算前の値を返す
-				return is_prepositioned ? processed_var : child_var;
-			}
-			else
-			{
-				// エラー
-			}
+			// 演算結果を返す
+			return is_prepositioned ? processed_var : child_var;
 		}
 
 	case autDelete:		// "delete"
@@ -916,107 +886,50 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 	case abtRShiftAssign:		// >>=
 		{
 			// 複合代入演算子
+			// オペレーションコードを得る
+			tRisseOpCode code; // オペレーションコード
+			switch(BinaryType)
+			{
+			case abtBitAndAssign:		code = ocBitAnd;		break; // &=
+			case abtBitOrAssign:		code = ocBitOr;			break; // |=
+			case abtBitXorAssign:		code = ocBitXor;		break; // ^=
+			case abtSubAssign:			code = ocSub;			break; // -=
+			case abtAddAssign:			code = ocAdd;			break; // +=
+			case abtModAssign:			code = ocMod;			break; // %=
+			case abtDivAssign:			code = ocDiv;			break; // /=
+			case abtIdivAssign:			code = ocIdiv;			break; // \=
+			case abtMulAssign:			code = ocMul;			break; // *=
+			case abtLogOrAssign:		code = ocLogOr;			break; // ||=
+			case abtLogAndAssign:		code = ocLogAnd;		break; // &&=
+			case abtRBitShiftAssign:	code = ocRBitShift;		break; // >>>=
+			case abtLShiftAssign:		code = ocLShift;		break; // <<=
+			case abtRShiftAssign:		code = ocRShift;		break; // >>=
+			default:
+				// ここには来ないがこれを書いておかないと
+				// コンパイラが文句をたれるので
+				code = ocNoOperation;
+				break;
+			}
+
 
 			// 右辺の値を得る
 			tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
 
-			// Id の存在をチェック
-			const tRisseASTNode * child = Child1;
-			if(child->GetType() == antId)
-				child = reinterpret_cast<const tRisseASTNode_Id *>(child)->GetAccessNode(form);
+			// 左辺を準備
+			void * lhs_param = Child1->PrepareSSA(form, pmReadWrite);
 
-			// 左辺のタイプをチェック
-			if(child->GetType() == antId)
-			{
-				// 識別子
+			// 左辺の値を取得
+			tRisseSSAVariable * lhs_var = Child1->DoReadSSA(form, lhs_param);
 
-				// オペレーションコードを得る
-				tRisseOpCode code; // オペレーションコード
-				switch(BinaryType)
-				{
-				case abtBitAndAssign:		code = ocBitAnd;		break; // &=
-				case abtBitOrAssign:		code = ocBitOr;			break; // |=
-				case abtBitXorAssign:		code = ocBitXor;		break; // ^=
-				case abtSubAssign:			code = ocSub;			break; // -=
-				case abtAddAssign:			code = ocAdd;			break; // +=
-				case abtModAssign:			code = ocMod;			break; // %=
-				case abtDivAssign:			code = ocDiv;			break; // /=
-				case abtIdivAssign:			code = ocIdiv;			break; // \=
-				case abtMulAssign:			code = ocMul;			break; // *=
-				case abtLogOrAssign:		code = ocLogOr;			break; // ||=
-				case abtLogAndAssign:		code = ocLogAnd;		break; // &&=
-				case abtRBitShiftAssign:	code = ocRBitShift;		break; // >>>=
-				case abtLShiftAssign:		code = ocLShift;		break; // <<=
-				case abtRShiftAssign:		code = ocRShift;		break; // >>=
-				default:
-					// ここには来ないがこれを書いておかないと
-					// コンパイラが文句をたれるので
-					code = ocNoOperation;
-					break;
-				}
+			// 演算を行う文を生成
+			tRisseSSAVariable * ret_var = NULL;
+			form->AddStatement(GetPosition(), code, &ret_var, lhs_var, rhs_var);
 
-				// 識別子の場合は、たとえば a &= b ならば a.1 = a.0 & b のような
-				// SSA 形式に展開を行う。
+			// その結果を識別子に書き込む文を生成
+			Child1->DoWriteSSA(form, lhs_param, ret_var);
 
-				// 識別子の内容を得る
-				tRisseSSAVariable * lhs_var = child->GenerateReadSSA(form);
-
-				// 演算を行う文を生成
-				tRisseSSAVariable * ret_var = NULL;
-				form->AddStatement(GetPosition(), code, &ret_var, lhs_var, rhs_var);
-
-				// その結果を識別子に書き込む文を生成
-				reinterpret_cast<const tRisseASTNode_Id*>(child)->
-							GenerateWriteSSA(form, ret_var);
-
-				// 戻る
-				return ret_var;
-			}
-			else if(child->GetType() == antMemberSel)
-			{
-				// メンバ選択演算子
-				// メンバ選択演算子を介しての操作は、ocXXXXAssign のオペーレーションを
-				// 呼び出すものとして実装する
-
-				// オペレーションコードを得る
-				tRisseOpCode code; // オペレーションコード
-				switch(BinaryType)
-				{
-				case abtBitAndAssign:		code = ocBitAndAssign;		break; // &=
-				case abtBitOrAssign:		code = ocBitOrAssign;		break; // |=
-				case abtBitXorAssign:		code = ocBitXorAssign;		break; // ^=
-				case abtSubAssign:			code = ocSubAssign;			break; // -=
-				case abtAddAssign:			code = ocAddAssign;			break; // +=
-				case abtModAssign:			code = ocModAssign;			break; // %=
-				case abtDivAssign:			code = ocDivAssign;			break; // /=
-				case abtIdivAssign:			code = ocIdivAssign;		break; // \=
-				case abtMulAssign:			code = ocMulAssign;			break; // *=
-				case abtLogOrAssign:		code = ocLogOrAssign;		break; // ||=
-				case abtLogAndAssign:		code = ocLogAndAssign;		break; // &&=
-				case abtRBitShiftAssign:	code = ocRBitShiftAssign;	break; // >>>=
-				case abtLShiftAssign:		code = ocLShiftAssign;		break; // <<=
-				case abtRShiftAssign:		code = ocRShiftAssign;		break; // >>=
-				default:
-					// ここには来ないがこれを書いておかないと
-					// コンパイラが文句をたれるので
-					code = ocNoOperation;
-					break;
-				}
-
-				// 左辺の値を得る
-				tRisseSSAVariable * lhs_var = child->GenerateReadSSA(form);
-
-				// 操作を行うコードを生成
-				tRisseSSAVariable * ret_var = NULL;
-				form->AddStatement(GetPosition(), code, &ret_var, lhs_var, rhs_var);
-
-				// 戻る
-				return ret_var;
-			}
-			else
-			{
-				// エラー
-			}
+			// 演算結果を返す
+			return ret_var;
 		}
 
 	case abtSwap:				// <->

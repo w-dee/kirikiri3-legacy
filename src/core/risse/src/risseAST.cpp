@@ -561,7 +561,7 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 	{
 	case actTopLevel: // トップレベル
 		break; // 何もしない
-	case actBlock: // ブロック
+	case actBlock: // 基本ブロック
 		form->GetLocalNamespace()->Push(); // スコープを push
 		break;
 	}
@@ -575,7 +575,7 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 	{
 	case actTopLevel: // トップレベル
 		break; // 何もしない
-	case actBlock: // ブロック
+	case actBlock: // 基本ブロック
 		form->GetLocalNamespace()->Pop(); // スコープを pop
 		break;
 	}
@@ -1105,9 +1105,9 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 	tRisseSSAStatement * branch_stmt =
 		new tRisseSSAStatement(form, GetPosition(), ocBranch);
 	branch_stmt->AddUsed(cond_var); // 使用リストに追加
-	form->GetCurrentBlock()->AddStatement(branch_stmt); // ブロックに追加
+	form->GetCurrentBlock()->AddStatement(branch_stmt); // 基本ブロックに追加
 
-	// 新しいブロックを作成(真の場合)
+	// 新しい基本ブロックを作成(真の場合)
 	tRisseSSABlock * if_entry_block = form->GetCurrentBlock();
 	tRisseSSABlock * true_block = form->CreateNewBlock(RISSE_WS("if_true"));
 
@@ -1118,7 +1118,7 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 	// ジャンプ文を作成
 	tRisseSSAStatement * true_exit_jump_stmt =
 		new tRisseSSAStatement(form, GetPosition(), ocJump);
-	true_last_block->AddStatement(true_exit_jump_stmt); // ブロックに追加
+	true_last_block->AddStatement(true_exit_jump_stmt); // 基本ブロックに追加
 
 	// 偽の場合に実行するノードがある場合のみ
 	tRisseSSABlock * false_last_block = NULL;
@@ -1126,7 +1126,7 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 	tRisseSSAStatement * false_exit_jump_stmt = NULL;
 	if(False)
 	{
-		// 新しいブロックを作成(偽の場合)
+		// 新しい基本ブロックを作成(偽の場合)
 		false_block = form->CreateNewBlock(RISSE_WS("if_false"), if_entry_block);
 
 		// 偽の場合に実行する内容を作成
@@ -1135,20 +1135,20 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 
 		// ジャンプ文を作成
 		false_exit_jump_stmt = new tRisseSSAStatement(form, GetPosition(), ocJump);
-		false_last_block->AddStatement(false_exit_jump_stmt); // ブロックに追加
+		false_last_block->AddStatement(false_exit_jump_stmt); // 基本ブロックに追加
 	}
 
-	// 新しいブロックを作成(if文からの脱出)
+	// 新しい基本ブロックを作成(if文からの脱出)
 	tRisseSSABlock * if_exit_block;
 	if(False)
 	{
-		// if～else の場合は、if_exit の直前のブロックは true ブロックと false ブロック
+		// if～else の場合は、if_exit の直前の基本ブロックは true 基本ブロックと false 基本ブロック
 		if_exit_block = form->CreateNewBlock(RISSE_WS("if_exit"), true_last_block);
 		if_exit_block->AddPred(false_last_block);
 	}
 	else
 	{
-		// if の場合は、if_exit の直前のブロックは if の直前ブロックと true ブロック
+		// if の場合は、if_exit の直前の基本ブロックは if の直前基本ブロックと true 基本ブロック
 		if_exit_block = form->CreateNewBlock(RISSE_WS("if_exit"), if_entry_block);
 		if_exit_block->AddPred(true_last_block);
 	}
@@ -1158,6 +1158,63 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 	branch_stmt->SetFalseBranch(false_block ? false_block : if_exit_block);
 	true_exit_jump_stmt->SetJumpTarget(if_exit_block);
 	if(false_exit_jump_stmt) false_exit_jump_stmt->SetJumpTarget(if_exit_block);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	if(!SkipFirstCheck)
+	{
+		// while ループ (非 do ～ while)
+
+		// 条件式にジャンプするための文を作成
+		tRisseSSABlock * entry_block = form->GetCurrentBlock();
+		tRisseSSAStatement * entry_jump_stmt =
+			new tRisseSSAStatement(form, GetPosition(), ocJump);
+		entry_block->AddStatement(entry_jump_stmt); // 基本ブロックに追加
+
+		// 条件式を格納する基本ブロックを作成
+		tRisseSSABlock * while_cond_block =
+			form->CreateNewBlock(RISSE_WS("while_cond"), entry_block);
+		entry_jump_stmt->SetJumpTarget(while_cond_block);
+
+		// 条件式の結果を得る
+		tRisseSSAVariable * cond_var = Condition->GenerateReadSSA(form);
+
+		// 分岐文を作成
+		tRisseSSABlock * while_cond_last_block = form->GetCurrentBlock();
+		tRisseSSAStatement * branch_stmt =
+			new tRisseSSAStatement(form, GetPosition(), ocBranch);
+		branch_stmt->AddUsed(cond_var); // 使用リストに追加
+		while_cond_last_block->AddStatement(branch_stmt); // 基本ブロックに追加
+
+		// 新しい基本ブロックを作成(条件式が真の場合)
+		tRisseSSABlock * while_body_block = form->CreateNewBlock(RISSE_WS("while_body"));
+
+		// while 文の body を生成
+		Body->GenerateReadSSA(form);
+		tRisseSSABlock * while_body_last_block = form->GetCurrentBlock();
+
+		// ジャンプ文を作成
+		tRisseSSAStatement * while_body_jump_stmt =
+			new tRisseSSAStatement(form, GetPosition(), ocJump);
+		while_body_last_block->AddStatement(while_body_jump_stmt); // 基本ブロックに追加
+
+		// 新しい基本ブロックを作成(while文からの脱出)
+		tRisseSSABlock * while_exit_block =
+			form->CreateNewBlock(RISSE_WS("while_exit"), while_cond_last_block);
+
+		// 分岐/ジャンプ文のジャンプ先を設定
+		while_body_jump_stmt->SetJumpTarget(while_cond_block);
+		while_cond_block->AddPred(while_body_last_block);
+		branch_stmt->SetTrueBranch(while_body_block);
+		branch_stmt->SetFalseBranch(while_exit_block);
+	}
 
 	// このノードは答えを返さない
 	return NULL;

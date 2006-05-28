@@ -1047,6 +1047,74 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Trinary::DoReadSSA(
+			tRisseSSAForm *form, void * param) const
+{
+	// 今のところ３項演算子は ? : 演算子だけ
+	// この処理は if ～ else の処理によく似ている。
+	// if ～ else と異なる処理には *** つきのコメントを書いた
+	RISSE_ASSERT(TrinaryType == attCondition);
+
+	// 条件式の結果を得る
+	tRisseSSAVariable * cond_var = Child1->GenerateReadSSA(form);
+
+	// 分岐文を作成
+	tRisseSSAStatement * branch_stmt =
+		new tRisseSSAStatement(form, GetPosition(), ocBranch);
+	branch_stmt->AddUsed(cond_var); // 使用リストに追加
+	form->GetCurrentBlock()->AddStatement(branch_stmt); // 基本ブロックに追加
+
+	// 新しい基本ブロックを作成(真の場合)
+	tRisseSSABlock * cond_entry_block = form->GetCurrentBlock();
+	tRisseSSABlock * true_block = form->CreateNewBlock(RISSE_WS("cond_true"));
+
+	// 真の場合に実行する内容を作成(*** ifと違い、演算結果を保存する)
+	tRisseSSAVariable * true_var = Child2->GenerateReadSSA(form);
+	tRisseSSABlock * true_last_block = form->GetCurrentBlock();
+
+	// ジャンプ文を作成
+	tRisseSSAStatement * true_exit_jump_stmt =
+		new tRisseSSAStatement(form, GetPosition(), ocJump);
+	true_last_block->AddStatement(true_exit_jump_stmt); // 基本ブロックに追加
+
+	// 新しい基本ブロックを作成(偽の場合)
+	tRisseSSABlock * false_block = form->CreateNewBlock(RISSE_WS("cond_false"), cond_entry_block);
+
+	// 偽の場合に実行する内容を作成(*** ifと違い、演算結果を保存する)
+	tRisseSSAVariable * false_var = Child3->GenerateReadSSA(form);
+	tRisseSSABlock * false_last_block = form->GetCurrentBlock();
+
+	// ジャンプ文を作成
+	tRisseSSAStatement * false_exit_jump_stmt = new tRisseSSAStatement(form, GetPosition(), ocJump);
+	false_last_block->AddStatement(false_exit_jump_stmt); // 基本ブロックに追加
+
+
+	// 新しい基本ブロックを作成(? : 演算子からの脱出)
+	tRisseSSABlock * cond_exit_block;
+
+	// cond_exit の直前の基本ブロックは true 基本ブロックと false 基本ブロック
+	//  (*** ifと違い、必ず偽の場合に実行するノードがある)
+	cond_exit_block = form->CreateNewBlock(RISSE_WS("cond_exit"), true_last_block);
+	cond_exit_block->AddPred(false_last_block);
+
+	// 分岐/ジャンプ文のジャンプ先を設定
+	branch_stmt->SetTrueBranch(true_block);
+	branch_stmt->SetFalseBranch(false_block ? false_block : cond_exit_block);
+	true_exit_jump_stmt->SetJumpTarget(cond_exit_block);
+	false_exit_jump_stmt->SetJumpTarget(cond_exit_block);
+
+	// このノードが返すφ関数を作成
+	// このφ関数の引数は ローカル変数だったり一時変数だったりする
+	tRisseSSAVariable * ret_var = NULL;
+	form->AddStatement(GetPosition(), ocPhi, &ret_var, true_var, false_var);
+
+	// 結果を返す
+	return ret_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void * tRisseASTNode_MemberSel::PrepareSSA(
 		tRisseSSAForm *form, tRisseASTNode_MemberSel::tPrepareMode mode) const
 {

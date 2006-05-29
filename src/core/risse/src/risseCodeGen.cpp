@@ -256,6 +256,33 @@ tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAStatement::SetTrueBranch(tRisseSSABlock * block)
+{
+	TrueBranch = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::SetJumpTarget(tRisseSSABlock * block)
+{
+	JumpTarget = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::SetFalseBranch(tRisseSSABlock * block)
+{
+	FalseBranch = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseSSAStatement::Dump() const
 {
 	switch(Code)
@@ -626,7 +653,9 @@ tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name, tRisse
 
 	// 新しい基本ブロックを作成する
 	tRisseSSABlock * new_block = new tRisseSSABlock(this, name);
-	new_block->AddPred(pred?pred:CurrentBlock);
+
+	if(pred) new_block->AddPred(pred);
+
 	LocalNamespace->SetBlock(new_block);
 
 	// 新しい「現在の」基本ブロックを設定し、それを返す

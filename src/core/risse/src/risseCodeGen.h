@@ -279,7 +279,8 @@ public:
 
 	//! @brief		分岐のジャンプ先(条件が真のとき)を設定する
 	//! @param		type	分岐のジャンプ先(条件が真のとき)
-	void SetTrueBranch(tRisseSSABlock * block) { TrueBranch = block; }
+	//! @note		block の直前基本ブロックとして Block を追加するので注意
+	void SetTrueBranch(tRisseSSABlock * block);
 
 	//! @brief		分岐のジャンプ先(条件が真のとき)を取得する
 	//! @return		分岐のジャンプ先(条件が真のとき)
@@ -287,7 +288,8 @@ public:
 
 	//! @brief		単純ジャンプのジャンプ先を設定する
 	//! @param		type	単純ジャンプのジャンプ先
-	void SetJumpTarget(tRisseSSABlock * block) { JumpTarget = block; }
+	//! @note		block の直前基本ブロックとして Block を追加するので注意
+	void SetJumpTarget(tRisseSSABlock * block);
 
 	//! @brief		単純ジャンプのジャンプ先を取得する
 	//! @return		単純ジャンプのジャンプ先
@@ -295,7 +297,8 @@ public:
 
 	//! @brief		分岐のジャンプ先(条件が偽のとき)を設定する
 	//! @param		type	分岐のジャンプ先(条件が偽のとき)
-	void SetFalseBranch(tRisseSSABlock * block) { FalseBranch = block; }
+	//! @note		block の直前基本ブロックとして Block を追加するので注意
+	void SetFalseBranch(tRisseSSABlock * block);
 
 	//! @brief		分岐のジャンプ先(条件が偽のとき)を取得する
 	//! @return		分岐のジャンプ先(条件が偽のとき)
@@ -349,6 +352,7 @@ public:
 			stmt->SetPred(LastStatement);
 			LastStatement = stmt;
 		}
+		stmt->SetBlock(this);
 	}
 
 	//! @brief		φ関数を追加する
@@ -415,7 +419,7 @@ public:
 	//! @brief		新しい基本ブロックを作成する
 	//! @param		name	基本ブロック名プリフィックス
 	//! @param		pred	直前の基本ブロック
-	//!						(NULLの場合は現在の基本ブロックが直前の基本ブロックであると見なされる)
+	//!						(NULLの場合は直前の基本ブロックは設定されない)
 	//! @return		新しく作成された基本ブロック
 	tRisseSSABlock * CreateNewBlock(const tRisseString & name, tRisseSSABlock * pred = NULL);
 

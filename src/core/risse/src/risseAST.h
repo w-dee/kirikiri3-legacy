@@ -1403,6 +1403,25 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
+	//! @brief		SSA 形式の読み込み用の表現を生成する(このクラスと ? : 演算子で使われる)
+	//! @param		form		SSA 形式ジェネレータクラス
+	//! @param		pos			ソースコード上の位置
+	//! @param		basenamse	ブロックの名前のprefixにする基本名
+	//! @param		condition	条件式ノード
+	//! @param		truenode	条件が真の時に実行するノード
+	//! @param		falsenode	条件が偽の時に実行するノード
+	//! @param		needresult	結果が必要かどうか (  ? : 演算子では真を指定する )
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	static tRisseSSAVariable * InternalDoReadSSA(
+		tRisseSSAForm *form,
+		risse_size pos,
+		const tRisseString &basename,
+		tRisseASTNode * condition,
+		tRisseASTNode * truenode,
+		tRisseASTNode * falsenode,
+		bool needresult
+		);
+
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		param	PrepareSSA() の戻り値

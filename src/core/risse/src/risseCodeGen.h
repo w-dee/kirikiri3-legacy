@@ -449,7 +449,7 @@ public:
 	//! @param		using2	この文で使用する変数その2(NULL=使用しない)
 	//! @param		using3	この文で使用する変数その3(NULL=使用しない)
 	//! @return		定義された変数
-	tRisseSSAVariable * AddStatement(risse_size pos, tRisseOpCode code,
+	tRisseSSAVariable * AddVariableWithStatement(risse_size pos, tRisseOpCode code,
 			tRisseSSAVariable *using1 = NULL, 
 			tRisseSSAVariable *using2 = NULL, 
 			tRisseSSAVariable *using3 = NULL)

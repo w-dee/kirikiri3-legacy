@@ -1123,12 +1123,12 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 		form->AddStatement(pos, ocBranch, NULL, cond_var);
 
 	// 新しい基本ブロックを作成(真の場合)
-	tRisseSSABlock * if_entry_block = form->GetCurrentBlock();
+	form->GetCurrentBlock();
 	tRisseSSABlock * true_block = form->CreateNewBlock(basename + RISSE_WS("_true"));
 
 	// 真の場合に実行する内容を作成
 	tRisseSSAVariable * true_var = truenode->GenerateReadSSA(form);
-	tRisseSSABlock * true_last_block = form->GetCurrentBlock();
+	form->GetCurrentBlock();
 
 	// ジャンプ文を作成
 	tRisseSSAStatement * true_exit_jump_stmt =
@@ -1193,7 +1193,7 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	// while ループ または do ～ while ループ
 
 	// 条件式または body にジャンプするための文を作成
-	tRisseSSABlock * entry_block = form->GetCurrentBlock();
+	form->GetCurrentBlock();
 	tRisseSSAStatement * entry_jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
@@ -1205,7 +1205,7 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	tRisseSSAVariable * cond_var = Condition->GenerateReadSSA(form);
 
 	// 分岐文を作成
-	tRisseSSABlock * while_cond_last_block = form->GetCurrentBlock();
+	form->GetCurrentBlock();
 	tRisseSSAStatement * branch_stmt =
 		form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
 
@@ -1215,7 +1215,7 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 
 	// while 文の body を生成
 	Body->GenerateReadSSA(form);
-	tRisseSSABlock * while_body_last_block = form->GetCurrentBlock();
+	form->GetCurrentBlock();
 
 	// ジャンプ文を作成
 	tRisseSSAStatement * while_body_jump_stmt =
@@ -1230,6 +1230,87 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	while_body_jump_stmt->SetJumpTarget(while_cond_block);
 	branch_stmt->SetTrueBranch(while_body_block);
 	branch_stmt->SetFalseBranch(while_exit_block);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// for ループ
+	// for ループの第１節ではローカル変数を宣言する可能性があるので
+	// スコープを作っておく
+	form->GetLocalNamespace()->Push(); // スコープを push
+
+	// 初期化ノードを生成する
+	if(Initializer) Initializer->GenerateReadSSA(form);
+
+
+	// 条件式にジャンプするための文を作成
+	form->GetCurrentBlock();
+	tRisseSSAStatement * entry_jump_stmt =
+		form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 条件式を格納する基本ブロックを作成
+	tRisseSSABlock * for_cond_block =
+		form->CreateNewBlock(RISSE_WS("for_cond"));
+
+	// 条件式の結果を得る (条件式が省略されている場合は常に真であると見なす)
+	tRisseSSAVariable * cond_var = NULL;
+	if(Condition)
+		cond_var = Condition->GenerateReadSSA(form);
+	else
+		cond_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant(true));
+
+	// 分岐文を作成
+	form->GetCurrentBlock();
+	tRisseSSAStatement * branch_stmt =
+		form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
+
+	// 新しい基本ブロックを作成(条件式が真の場合)
+	tRisseSSABlock * for_body_block =
+		form->CreateNewBlock(RISSE_WS("for_body"));
+
+	// for 文の body を生成
+	Body->GenerateReadSSA(form);
+	form->GetCurrentBlock();
+
+	// ジャンプ文を作成
+	tRisseSSAStatement * for_body_jump_stmt =
+		form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 新しい基本ブロックを作成(イテレータのため)
+	tRisseSSABlock * for_iter_block = NULL;
+	tRisseSSAStatement * for_iter_jump_stmt = NULL;
+	if(Iterator)
+	{
+		for_iter_block =
+			form->CreateNewBlock(RISSE_WS("for_iter"));
+
+		// イテレータの内容を生成
+		Iterator->GenerateReadSSA(form);
+
+		// ジャンプ文を作成
+		for_iter_jump_stmt =
+			form->AddStatement(GetPosition(), ocJump, NULL);
+	}
+
+	// 新しい基本ブロックを作成(for文からの脱出)
+	tRisseSSABlock * for_exit_block =
+		form->CreateNewBlock(RISSE_WS("for_exit"));
+
+	// 分岐/ジャンプ文のジャンプ先を設定
+	entry_jump_stmt->SetJumpTarget(for_cond_block);
+	for_body_jump_stmt->SetJumpTarget(for_iter_block ? for_iter_block : for_cond_block);
+	if(for_iter_jump_stmt) for_iter_jump_stmt->SetJumpTarget(for_cond_block);
+	branch_stmt->SetTrueBranch(for_body_block);
+	branch_stmt->SetFalseBranch(for_exit_block);
+
+	// スコープを pop
+	form->GetLocalNamespace()->Pop(); // スコープを pop
 
 	// このノードは答えを返さない
 	return NULL;

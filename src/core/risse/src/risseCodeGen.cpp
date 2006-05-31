@@ -59,39 +59,58 @@ void tRisseLocalNamespace::Pop()
 
 
 //---------------------------------------------------------------------------
-void tRisseLocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * where)
+risse_size tRisseLocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * where)
 {
-	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
-	{
-		tMap::iterator i = (*ri)->find(name);
-		if(i != (*ri)->end())
-		{
-			// 見つかった
-			i->second = where; // 上書き
-			return;
-		}
-	}
-
-	// 見つからなかったので、一番深いレベルのスコープに追加する
+	// 一番深いレベルのスコープに追加する
 	Scopes.back()->insert(std::pair<tRisseString, tRisseSSAVariable *>(name, where));
+
+	return Scopes.size() - 1;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tRisseLocalNamespace::Find(const tRisseString & name, tRisseSSAVariable ** var) const
+risse_size tRisseLocalNamespace::Update(const tRisseString & name, tRisseSSAVariable * where)
+{
+	// 名前空間を探す
+	RISSE_ASSERT(Scopes.size() > 0);
+	for(risse_size slevel = Scopes.size() - 1; ; slevel --)
+	{
+		tMap::iterator i = Scopes[slevel]->find(name);
+		if(i != Scopes[slevel]->end())
+		{
+			// 見つかった
+			i->second = where; // 上書き
+			return slevel;
+		}
+
+		if(slevel == 0) break; // ループを抜ける
+	}
+
+	return risse_size_max; // 見つからない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseLocalNamespace::Find(const tRisseString & name,
+	tRisseSSAVariable ** var, risse_size max_slevel) const
 {
 	// Scopes を頭から見ていき、最初に見つかった変数を返す
 	// (スコープによる変数の可視・不可視のルールに従う)
-	for(tScopes::const_reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
+	RISSE_ASSERT(Scopes.size() > 0);
+	if(max_slevel > Scopes.size() - 1) max_slevel = Scopes.size() - 1;
+	for(risse_size slevel = max_slevel; ; slevel --)
 	{
-		tMap::iterator i = (*ri)->find(name);
-		if(i != (*ri)->end())
+		tMap::iterator i = Scopes[slevel]->find(name);
+		if(i != Scopes[slevel]->end())
 		{
 			// 見つかった
 			if(var) *var = i->second;
 			return true;
 		}
+
+		if(slevel == 0) break; // ループを抜ける
 	}
 	// 見つからなかった
 	return false;
@@ -121,20 +140,23 @@ bool tRisseLocalNamespace::Delete(const tRisseString & name)
 
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseLocalNamespace::MakePhiFunction(
-						risse_size pos, const tRisseString & name)
+					risse_size pos, const tRisseString & name, risse_size max_slevel)
 {
-	RISSE_ASSERT(Block != NULL);
-	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
+	RISSE_ASSERT(Scopes.size() > 0);
+	if(max_slevel > Scopes.size() - 1) max_slevel = Scopes.size() - 1;
+	for(risse_size slevel = max_slevel; ; slevel --)
 	{
-		tMap::iterator i = (*ri)->find(name);
-		if(i != (*ri)->end())
+		tMap::iterator i = Scopes[slevel]->find(name);
+		if(i != Scopes[slevel]->end())
 		{
 			// 見つかった
 			if(i->second != NULL) return i->second; // 見つかったがφ関数を作成する必要はない
 			// 見つかったがφ関数を作成する必要がある
-			Block->AddPhiFunction(pos, name, i->second);
+			Block->AddPhiFunction(pos, name, slevel, i->second);
 			return i->second;
 		}
+
+		if(slevel == 0) break; // ループを抜ける
 	}
 
 	// 見つからなかった
@@ -162,7 +184,7 @@ void tRisseLocalNamespace::MarkToCreatePhi()
 
 //---------------------------------------------------------------------------
 tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form, 
-	tRisseSSAStatement *stmt, const tRisseString & name)
+	tRisseSSAStatement *stmt, const tRisseString & name, risse_size slevel)
 {
 	// フィールドの初期化
 	Form = form;
@@ -173,14 +195,15 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 	// この変数が定義された文の登録
 	if(Declared) Declared->SetDeclared(this);
 
-	// 名前を設定する
-	SetName(name);
+	// 名前とスコープレベルを設定する
+	SetNameAndScopeLevel(name, slevel);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariable::SetName(const tRisseString & name)
+void tRisseSSAVariable::SetNameAndScopeLevel(const tRisseString & name,
+	risse_size slevel)
 {
 	// 名前を生成する
 	// 名前の後にはドットに続いて通し番号がつく。
@@ -193,13 +216,19 @@ void tRisseSSAVariable::SetName(const tRisseString & name)
 
 	if(name.IsEmpty())
 	{
+		// 名前が空の場合は slevel == risse_size_max である必要がある
+		RISSE_ASSERT(slevel == risse_size_max);
 		// 一時変数
 		Name = tRisseString(RISSE_WS("@tmp_")) + uniq;
 	}
 	else
 	{
+		// 名前が空でない場合は slevel != risse_size_max である必要がある
+		RISSE_ASSERT(slevel != risse_size_max);
 		// 普通の変数
-		Name = name + RISSE_WC('_') + uniq;
+		Name = name + RISSE_WC('_') + uniq + RISSE_WC('@');
+		Risse_int_to_str((int)slevel, uniq);
+		Name += uniq;
 	}
 }
 //---------------------------------------------------------------------------
@@ -416,7 +445,7 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
 
 //---------------------------------------------------------------------------
 void tRisseSSABlock::AddPhiFunction(risse_size pos, const tRisseString & name,
-	tRisseSSAVariable *& var)
+	risse_size max_slevel, tRisseSSAVariable *& var)
 {
 	// φ関数を追加する
 	tRisseSSAStatement * stmt = new tRisseSSAStatement(Form, pos, ocPhi);
@@ -425,7 +454,7 @@ void tRisseSSABlock::AddPhiFunction(risse_size pos, const tRisseString & name,
 	// この AddPhiFunction メソッドを呼び出す tRisseLocalNamespace::MakePhiFunction
 	// は、見つかった変数のmap のsecondをvar引数に渡してくる。このため、
 	// var に代入した時点でこの変数の新しいSSA変数が可視になる。
-	var = new tRisseSSAVariable(Form, stmt, name);
+	var = new tRisseSSAVariable(Form, stmt, name, max_slevel);
 
 	// φ関数は必ずブロックの先頭に追加される
 	if(!FirstStatement)
@@ -448,7 +477,7 @@ void tRisseSSABlock::AddPhiFunction(risse_size pos, const tRisseString & name,
 	{
 		RISSE_ASSERT((*i)->LocalNamespace != NULL);
 		tRisseSSAVariable * found_var =
-			(*i)->LocalNamespace->MakePhiFunction(pos, var->GetOriginalName());
+			(*i)->LocalNamespace->MakePhiFunction(pos, var->GetOriginalName(), max_slevel);
 		if(!found_var)
 		{
 			// エラー

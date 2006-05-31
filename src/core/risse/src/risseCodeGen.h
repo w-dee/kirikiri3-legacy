@@ -57,17 +57,26 @@ public:
 	//! @brief		名前空間を pop する
 	void Pop();
 
-	//! @brief		変数を定義・更新する
+	//! @brief		変数を定義する
 	//! @param		name		変数名
 	//! @param		where		その変数を表す SSA 変数表現
-	void Add(const tRisseString & name, tRisseSSAVariable * where);
+	//! @return		この変数のスコープレベル
+	risse_size Add(const tRisseString & name, tRisseSSAVariable * where);
+
+	//! @brief		変数を更新する
+	//! @param		name		変数名
+	//! @param		where		その変数を表す SSA 変数表現
+	//! @return		この変数のスコープレベル
+	risse_size Update(const tRisseString & name, tRisseSSAVariable * where);
 
 	//! @brief		変数を探す
 	//! @param		name		変数名
 	//! @param		var 		その変数を表す SSA 変数表現 を格納する先(NULL = 要らない)
+	//! @param		max_slevel	検索するスコープレベルの最大値 (これより深いスコープは検索しない)
 	//! @return		変数が見つかったかどうか
 	//! @note		変数が見つからなかった場合は *var にはなにも書き込まれない
-	bool Find(const tRisseString & name, tRisseSSAVariable ** var = NULL) const;
+	bool Find(const tRisseString & name, tRisseSSAVariable ** var = NULL,
+		risse_size max_slevel = risse_size_max) const;
 
 	//! @brief		変数を削除する
 	//! @param		name		変数名
@@ -78,8 +87,10 @@ public:
 	//! @param		form	φ関数を生成するための SSA 形式インスタンス
 	//! @param		pos		スクリプト上の位置
 	//! @param		name	変数名
+	//! @param		max_slevel	検索するスコープレベルの最大値 (これより深いスコープは検索しない)
 	//! @return		見つかった変数、あるいはφ関数の戻り値 (NULL=ローカル変数に見つからなかった)
-	tRisseSSAVariable * MakePhiFunction(risse_size pos, const tRisseString & name);
+	tRisseSSAVariable * MakePhiFunction(risse_size pos, const tRisseString & name,
+		risse_size max_slevel = risse_size_max);
 
 	//! @brief		変数をすべて「φ関数を参照のこと」としてマークする
 	//! @note		このメソッドは、Scopes のすべてのマップの値を
@@ -104,6 +115,7 @@ class tRisseSSAVariable : public tRisseCollectee
 	tRisseSSAForm * Form; //!< この変数が属している SSA 形式インスタンス
 	tRisseString Name; //!< 変数名(バージョン付き)
 	tRisseString OriginalName; //!< 変数名 (元の名前)
+	risse_size ScopeLevel; //!< この変数が宣言されたスコープレベル
 	tRisseSSAStatement * Declared; //!< この変数が定義された文
 	gc_vector<tRisseSSAStatement*> Used; //!< この変数が使用されている文のリスト
 
@@ -116,19 +128,21 @@ public:
 	//! @param		stmt	この変数が定義された文
 	//! @param		name	変数名 (実際にはこれがprefixになり、
 	//!						通し番号が後に続いたものがNameに入る)
-	//						一時変数については空文字列を渡すこと
+	//!						一時変数については空文字列を渡すこと
+	//!	@param		slevel	この変数が宣言されたスコープレベル
 	tRisseSSAVariable(tRisseSSAForm * form, tRisseSSAStatement *stmt = NULL,
-						const tRisseString & name = tRisseString());
+						const tRisseString & name = tRisseString(), risse_size slevel = risse_size_max);
 
 	//! @brief		この変数が属している SSA 形式インスタンスを取得する
 	//! @return		この変数が属している SSA 形式インスタンス
 	tRisseSSAForm * GetForm() const { return Form; }
 
-	//! @brief		この変数の名前を設定する
-	//! @return		変数名 (実際にはこれがprefixになり、
+	//! @brief		この変数の名前とスコープレベルを設定する
+	//! @param		name	変数名 (実際にはこれがprefixになり、
 	//!						通し番号が後に続いたものがNameに入る)
 	//						一時変数については空文字列を渡すこと
-	void SetName(const tRisseString & name);
+	//! @param		slevel		スコープレベル
+	void SetNameAndScopeLevel(const tRisseString & name, risse_size slevel);
 
 	//! @brief		この変数の名前を返す
 	//! @return		変数の名前 (バージョン付き)
@@ -137,6 +151,10 @@ public:
 	//! @brief		この変数のオリジナルの名前を返す
 	//! @return		変数のオリジナルの名前
 	const tRisseString GetOriginalName() const { return OriginalName; }
+
+	//! @brief		スコープレベルを得る
+	//! @return		スコープレベル
+	risse_size GetScopeLevel() const { return ScopeLevel; }
 
 	//! @brief		この変数が定義された文を設定する
 	//! @param		declared	この変数が定義された文
@@ -356,10 +374,12 @@ public:
 	}
 
 	//! @brief		φ関数を追加する
-	//! @param		pos		スクリプト上の位置
-	//! @param		name	変数名
-	//! @param		var		このφ関数の戻り値を表す変数
-	void AddPhiFunction(risse_size pos, const tRisseString & name, tRisseSSAVariable *& var);
+	//! @param		pos			スクリプト上の位置
+	//! @param		name		変数名
+	//! @param		max_slevel	検索するスコープレベルの最大値 (これより深いスコープは検索しない)
+	//! @param		var			このφ関数の戻り値を表す変数
+	void AddPhiFunction(risse_size pos, const tRisseString & name,
+		risse_size max_slevel, tRisseSSAVariable *& var);
 
 	//! @brief		直前の基本ブロックを追加する
 	//! @param		block	基本ブロック

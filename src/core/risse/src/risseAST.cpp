@@ -712,11 +712,11 @@ bool tRisseASTNode_Id::DoWriteSSA(
 		tRisseSSAVariable * ret_var = NULL;
 		form->AddStatement(GetPosition(), ocAssign, &ret_var, value);
 
-		// 変数に名前を設定
-		ret_var->SetName(Name);
+		// ローカル名前空間の更新
+		risse_size slevel = form->GetLocalNamespace()->Update(Name, ret_var);
 
-		// 変数のローカル名前空間への登録(上書き)
-		form->GetLocalNamespace()->Add(Name, ret_var);
+		// 変数に名前とスコープレベルを設定
+		ret_var->SetNameAndScopeLevel(Name, slevel);
 	}
 	return true;
 }
@@ -1353,8 +1353,10 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 	form->AddStatement(GetPosition(), ocAssign, &var, init_var);
 
 	// 変数のローカル名前空間への登録
-	var->SetName(Name);
-	form->GetLocalNamespace()->Add(Name, var);
+	risse_size slevel = form->GetLocalNamespace()->Add(Name, var);
+
+	// 変数に名前とスコープレベルを設定
+	var->SetNameAndScopeLevel(Name, slevel);
 
 	// このノードは答えを返さない
 	return NULL;

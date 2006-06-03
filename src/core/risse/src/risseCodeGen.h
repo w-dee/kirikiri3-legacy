@@ -36,8 +36,18 @@ class tRisseSSAVariable;
 class tRisseSSALocalNamespace : public tRisseCollectee
 {
 	tRisseSSABlock * Block; //!< この名前空間に結びつけられている基本ブロック
-	typedef gc_map<tRisseString, tRisseSSAVariable *> tMap; //!< マップの typedef
-	typedef gc_vector<tMap *> tScopes; //!< スコープの typedefs
+	typedef gc_map<tRisseString, tRisseSSAVariable *> tVariableMap;
+		//!< 変数名(番号付き)→変数オブジェクトのマップのtypedef
+	typedef gc_map<tRisseString, tRisseString> tAliasMap;
+		//!< 変数名(番号なし)→変数名(番号付き)のマップのtypedef
+
+	//! @brief		名前空間の一つのスコープを表す構造体
+	struct tScope
+	{
+		tVariableMap VariableMap; //!< 変数名(番号付き)→変数オブジェクトのマップ
+		tAliasMap AliasMap; //!< 変数名(番号なし)→変数名(番号付き)のマップ
+	};
+	typedef gc_vector<tScope *> tScopes; //!< スコープの typedefs
 	tScopes Scopes; //!< 名前空間のスコープ
 
 public:
@@ -46,6 +56,12 @@ public:
 
 	//! @brief		コピーコンストラクタ
 	tRisseSSALocalNamespace(const tRisseSSALocalNamespace &ref);
+
+	//! @brief		番号 付き変数名を得る
+	//! @param		name		変数名
+	//! @param		num			番号
+	//! @return		"name#num" 形式の文字列
+	static tRisseString GetNumberedName(const tRisseString & name, risse_int num);
 
 	//! @brief		この名前空間に結びつけられる基本ブロックを設定する
 	//! @param		block	この名前空間に結びつけられる基本ブロック
@@ -60,37 +76,35 @@ public:
 	//! @brief		変数を定義する
 	//! @param		name		変数名
 	//! @param		where		その変数を表す SSA 変数表現
-	//! @return		この変数のスコープレベル
-	risse_size Add(const tRisseString & name, tRisseSSAVariable * where);
+	void Add(const tRisseString & name, tRisseSSAVariable * where);
 
 	//! @brief		変数を更新する
 	//! @param		name		変数名
 	//! @param		where		その変数を表す SSA 変数表現
-	//! @return		この変数のスコープレベル
-	risse_size Update(const tRisseString & name, tRisseSSAVariable * where);
+	void Update(const tRisseString & name, tRisseSSAVariable * where);
 
 	//! @brief		変数を探す
 	//! @param		name		変数名
 	//! @param		var 		その変数を表す SSA 変数表現 を格納する先(NULL = 要らない)
-	//! @param		max_slevel	検索するスコープレベルの最大値 (これより深いスコープは検索しない)
 	//! @return		変数が見つかったかどうか
-	//! @note		変数が見つからなかった場合は *var にはなにも書き込まれない
-	bool Find(const tRisseString & name, tRisseSSAVariable ** var = NULL,
-		risse_size max_slevel = risse_size_max) const;
+	//! @note		変数が見つからなかった場合は *var にはなにも書き込まれない.
+	//!				name は番号なしの変数名であると見なされる
+	bool Find(const tRisseString & name, tRisseSSAVariable ** var = NULL) const;
 
 	//! @brief		変数を削除する
 	//! @param		name		変数名
 	//! @return		変数の削除に成功したかどうか
+	//!	@note		name は番号なしの変数名であると見なされる
 	bool Delete(const tRisseString & name);
 
 	//! @brief		必要ならばφ関数を作成する
 	//! @param		form	φ関数を生成するための SSA 形式インスタンス
 	//! @param		pos		スクリプト上の位置
 	//! @param		name	変数名
-	//! @param		max_slevel	検索するスコープレベルの最大値 (これより深いスコープは検索しない)
+	//! @param		n_name	番号付き変数名
 	//! @return		見つかった変数、あるいはφ関数の戻り値 (NULL=ローカル変数に見つからなかった)
-	tRisseSSAVariable * MakePhiFunction(risse_size pos, const tRisseString & name,
-		risse_size max_slevel = risse_size_max);
+	tRisseSSAVariable * MakePhiFunction(risse_size pos,
+		const tRisseString & name, const tRisseString & n_name = tRisseString());
 
 	//! @brief		変数をすべて「φ関数を参照のこと」としてマークする
 	//! @note		このメソッドは、Scopes のすべてのマップの値を
@@ -113,9 +127,9 @@ class tRisseSSAForm;
 class tRisseSSAVariable : public tRisseCollectee
 {
 	tRisseSSAForm * Form; //!< この変数が属している SSA 形式インスタンス
-	tRisseString Name; //!< 変数名(バージョン付き)
-	tRisseString OriginalName; //!< 変数名 (元の名前)
-	risse_size ScopeLevel; //!< この変数が宣言されたスコープレベル
+	tRisseString Name; //!< 変数名(バージョンなし, 番号なし)
+	tRisseString NumberedName; //!< 変数名(バージョンなし、番号つき)
+	risse_int Version; //!< 変数のバージョン
 	tRisseSSAStatement * Declared; //!< この変数が定義された文
 	gc_vector<tRisseSSAStatement*> Used; //!< この変数が使用されている文のリスト
 
@@ -126,35 +140,35 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		form	この変数が属する SSA 形式インスタンス
 	//! @param		stmt	この変数が定義された文
-	//! @param		name	変数名 (実際にはこれがprefixになり、
-	//!						通し番号が後に続いたものがNameに入る)
+	//! @param		name	変数名
 	//!						一時変数については空文字列を渡すこと
-	//!	@param		slevel	この変数が宣言されたスコープレベル
 	tRisseSSAVariable(tRisseSSAForm * form, tRisseSSAStatement *stmt = NULL,
-						const tRisseString & name = tRisseString(), risse_size slevel = risse_size_max);
+						const tRisseString & name = tRisseString());
 
 	//! @brief		この変数が属している SSA 形式インスタンスを取得する
 	//! @return		この変数が属している SSA 形式インスタンス
 	tRisseSSAForm * GetForm() const { return Form; }
 
-	//! @brief		この変数の名前とスコープレベルを設定する
-	//! @param		name	変数名 (実際にはこれがprefixになり、
-	//!						通し番号が後に続いたものがNameに入る)
-	//						一時変数については空文字列を渡すこと
-	//! @param		slevel		スコープレベル
-	void SetNameAndScopeLevel(const tRisseString & name, risse_size slevel);
+	//! @brief		この変数の名前を設定する
+	//! @param		name		変数名
+	//! @note		変数名を設定するたびに Version はユニークな値になる
+	void SetName(const tRisseString & name);
 
 	//! @brief		この変数の名前を返す
-	//! @return		変数の名前 (バージョン付き)
-	const tRisseString GetName() const { return Name; }
+	//! @return		変数の名前
+	const tRisseString & GetName() const { return Name; }
 
-	//! @brief		この変数のオリジナルの名前を返す
-	//! @return		変数のオリジナルの名前
-	const tRisseString GetOriginalName() const { return OriginalName; }
+	//! @brief		この変数の番号付きの名前を設定する
+	//! @param		n_name		この変数の番号付きの名前
+	void SetNumberedName(const tRisseString & n_name) { NumberedName = n_name; }
 
-	//! @brief		スコープレベルを得る
-	//! @return		スコープレベル
-	risse_size GetScopeLevel() const { return ScopeLevel; }
+	//! @brief		この変数の番号付きの名前を返す
+	//! @return		この変数の番号付きの名前
+	const tRisseString & GetNumberedName() const { return NumberedName; }
+
+	//! @brief		この変数の修飾名を返す
+	//! @return		変数の修飾名
+	tRisseString GetQualifiedName() const;
 
 	//! @brief		この変数が定義された文を設定する
 	//! @param		declared	この変数が定義された文
@@ -350,6 +364,10 @@ public:
 	//! @param		name		この基本ブロックの名前(実際にはこれに _ が続き連番がつく)
 	tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name);
 
+	//! @brief		この基本ブロックが属している SSA 形式インスタンスを取得する
+	//! @return		この基本ブロックが属している SSA 形式インスタンス
+	tRisseSSAForm * GetForm() const { return Form; }
+
 	//! @brief		基本ブロック名を得る
 	//! @return		基本ブロック名
 	tRisseString GetName() const { return Name; }
@@ -375,11 +393,11 @@ public:
 
 	//! @brief		φ関数を追加する
 	//! @param		pos			スクリプト上の位置
-	//! @param		name		変数名
-	//! @param		max_slevel	検索するスコープレベルの最大値 (これより深いスコープは検索しない)
-	//! @param		var			このφ関数の戻り値を表す変数
+	//! @param		name		変数名(オリジナルの名前)
+	//! @param		n_name		変数名(番号付き, バージョン無し)
+	//! @param		decl_var	このφ関数の戻り値を表す変数
 	void AddPhiFunction(risse_size pos, const tRisseString & name,
-		risse_size max_slevel, tRisseSSAVariable *& var);
+		const tRisseString & n_name, tRisseSSAVariable *& decl_var);
 
 	//! @brief		直前の基本ブロックを追加する
 	//! @param		block	基本ブロック

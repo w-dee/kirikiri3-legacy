@@ -22,9 +22,9 @@ end
 
 blocks = []
 block = nil
-label_pat = /^\*([.@\w]+)/
-branch_pat = /^if\s+([.@\w]+)\s+then\s+\*([.@\w]+)\s+else\s+\*([.@\w]+)/
-goto_pat = /^goto\s+\*([.@\w]+)/
+label_pat = /^\*([.@#\w]+)/
+branch_pat = /^if\s+([.@#\w]+)\s+then\s+\*([.@#\w]+)\s+else\s+\*([.@#\w]+)/
+goto_pat = /^goto\s+\*([.@#\w]+)/
 
 STDIN.readlines.each do |line|
 	line = line.chomp

@@ -549,7 +549,14 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 			block->LocalNamespace->MakePhiFunction(stmt->GetPosition(), decl_var->GetOriginalName());
 		if(!var)
 		{
-			// エラー
+			// 変数が見つからない
+			// エラーにする
+			// TODO: もっと親切なエラーメッセージ
+			eRisseCompileError::Throw(
+				tRisseString(
+					RISSE_WS_TR("local variable '%1' is from out of scope"),
+					decl_var->GetOriginalName()),
+					Form->GetScriptBlock(), stmt->GetPosition());
 		}
 		stmt->AddUsed(var);
 

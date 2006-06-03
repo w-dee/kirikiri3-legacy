@@ -33,7 +33,7 @@ class tRisseSSAVariable;
 //---------------------------------------------------------------------------
 //! @brief	ローカル変数用の名前空間管理クラス
 //---------------------------------------------------------------------------
-class tRisseLocalNamespace : public tRisseCollectee
+class tRisseSSALocalNamespace : public tRisseCollectee
 {
 	tRisseSSABlock * Block; //!< この名前空間に結びつけられている基本ブロック
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tMap; //!< マップの typedef
@@ -42,10 +42,10 @@ class tRisseLocalNamespace : public tRisseCollectee
 
 public:
 	//! @brief		コンストラクタ
-	tRisseLocalNamespace();
+	tRisseSSALocalNamespace();
 
 	//! @brief		コピーコンストラクタ
-	tRisseLocalNamespace(const tRisseLocalNamespace &ref);
+	tRisseSSALocalNamespace(const tRisseSSALocalNamespace &ref);
 
 	//! @brief		この名前空間に結びつけられる基本ブロックを設定する
 	//! @param		block	この名前空間に結びつけられる基本ブロック
@@ -340,7 +340,7 @@ class tRisseSSABlock : public tRisseCollectee
 	gc_vector<tRisseSSABlock *> Succ; //!< 直後の基本ブロックのリスト
 	tRisseSSAStatement * FirstStatement; //!< 文のリストの先頭
 	tRisseSSAStatement * LastStatement; //!< 文のリストの最後
-	tRisseLocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
+	tRisseSSALocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
 	mutable bool InDump; //!< ダンプ中かどうか
 	mutable bool Dumped; //!< ダンプが行われたかどうか
 
@@ -393,7 +393,7 @@ public:
 
 	//! @brief		ローカル名前空間のスナップショットを作成する
 	//! @param		ref		参照元ローカル名前空間
-	void TakeLocalNamespaceSnapshot(tRisseLocalNamespace * ref);
+	void TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref);
 
 	//! @brief		「ダンプが行われた」フラグをクリアする
 	void ClearDumpFlags() const;
@@ -410,6 +410,63 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief	ラベルマップを表すクラス
+//---------------------------------------------------------------------------
+class tRisseSSALabelMap
+{
+	// TODO: 親コンテキストのラベルマップの継承
+	tRisseSSAForm * Form; //!< このラベルマップを保持する SSA 形式インスタンス
+
+	//! @brief		バインドがまだされていないラベルへのジャンプ
+	struct tPendingLabelJump
+	{
+		tRisseSSABlock * Block; //!< そのジャンプを含む基本ブロック
+		risse_size Position; //!< ジャンプのあるスクリプト上の位置
+		tRisseString LabelName; //!< ラベル名
+
+		tPendingLabelJump(tRisseSSABlock * block, risse_size pos,
+			const tRisseString & labelname)
+		{
+			Block = block;
+			Position = pos;
+			LabelName = labelname;
+		}
+	};
+
+	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
+		//!< ラベルのマップのtypedef
+	typedef gc_vector<tPendingLabelJump> tPendingLabelJumps;
+		//!< バインドがまだされていないラベルへのジャンプのリストのtypedef
+
+	tLabelMap LabelMap; //!< ラベルのマップ
+	tPendingLabelJumps PendingLabelJumps; //!< バインドがまだされていないラベルへのジャンプのリスト
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		form		このラベルマップを保持する SSA 形式インスタンス
+	tRisseSSALabelMap(tRisseSSAForm *form) { Form = form;}
+
+	//! @brief		ラベルマップを追加する
+	//! @param		labelname		ラベル名
+	//! @param		block			基本ブロック
+	//! @param		pos				基本ブロックのあるスクリプト上の位置
+	//! @note		すでに同じ名前のラベルが存在していた場合は例外が発生する
+	void AddMap(const tRisseString &labelname, tRisseSSABlock * block, risse_size pos);
+
+	//! @brief		未バインドのラベルジャンプを追加する
+	//! @param		block			そのジャンプを含む基本ブロック
+	//! @param		pos				ジャンプのあるスクリプト上の位置
+	//! @param		labelname		ラベル名
+	void AddPendingLabelJump(tRisseSSABlock * block, risse_size pos,
+			const tRisseString & labelname);
+
+	//! @brief		未バインドのラベルジャンプをすべて解決する
+	void BindAll();
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	SSA形式を表すクラス
 //---------------------------------------------------------------------------
 class tRisseSSAForm : public tRisseCollectee
@@ -417,7 +474,8 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseScriptBlockBase * ScriptBlock; //!< この SSA 形式が含まれるスクリプトブロック
 	tRisseASTNode * Root; //!< このコードジェネレータが生成すべきコードのASTルートノード
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
-	tRisseLocalNamespace * LocalNamespace; //!< ローカル名前空間
+	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
+	tRisseSSALabelMap * LabelMap; //!< ラベルマップ
 	tRisseSSABlock * EntryBlock; //!< エントリーSSA基本ブロック
 	tRisseSSABlock * CurrentBlock; //!< 現在変換中の基本ブロック
 
@@ -430,10 +488,20 @@ public:
 	//! @brief		AST を SSA 形式に変換する
 	void Generate();
 
+	//! @brief		スクリプトブロックを得る
+	//! @return		スクリプトブロック
+	tRisseScriptBlockBase * GetScriptBlock() const { return ScriptBlock; }
+
 	//! @brief		ローカル名前空間を得る
-	tRisseLocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
+	//! @return		ローカル名前空間
+	tRisseSSALocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
+
+	//! @brief		ラベルマップを得る
+	//! @return		ラベルマップ
+	tRisseSSALabelMap * GetLabelMap() const { return LabelMap; }
 
 	//! @brief		現在変換中の基本ブロックを得る
+	//! @return		現在変換中の基本ブロック
 	tRisseSSABlock * GetCurrentBlock() const { return CurrentBlock; }
 
 	//! @brief		新しい基本ブロックを作成する

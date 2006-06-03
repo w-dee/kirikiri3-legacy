@@ -1363,4 +1363,46 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Label::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// ジャンプ文を作成
+	tRisseSSAStatement * jump_stmt =
+		form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 新しい基本ブロックを作成
+	tRisseSSABlock * label_block =
+		form->CreateNewBlock(Name);
+
+	// ジャンプ文のジャンプ先を設定
+	jump_stmt->SetJumpTarget(label_block);
+
+	// form に登録
+	form->GetLabelMap()->AddMap(Name, label_block, GetPosition());
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Goto::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// 現在の基本ブロックを取得
+	tRisseSSABlock * cur_block = form->GetCurrentBlock();
+
+	// 新しい基本ブロックを作成 (この基本ブロックには到達しない)
+	form->CreateNewBlock(RISSE_WS("disconnected_by_goto"));
+
+	// form に登録
+	form->GetLabelMap()->AddPendingLabelJump(cur_block, GetPosition(), Name);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
 } // namespace Risse

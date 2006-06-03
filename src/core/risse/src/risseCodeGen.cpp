@@ -13,6 +13,7 @@
 #include "prec.h"
 
 #include "risseCodeGen.h"
+#include "risseException.h"
 
 
 namespace Risse
@@ -20,7 +21,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 
 //---------------------------------------------------------------------------
-tRisseLocalNamespace::tRisseLocalNamespace()
+tRisseSSALocalNamespace::tRisseSSALocalNamespace()
 {
 	Block = NULL;
 	Push(); // 最初の名前空間を push しておく
@@ -29,7 +30,7 @@ tRisseLocalNamespace::tRisseLocalNamespace()
 
 
 //---------------------------------------------------------------------------
-tRisseLocalNamespace::tRisseLocalNamespace(const tRisseLocalNamespace &ref)
+tRisseSSALocalNamespace::tRisseSSALocalNamespace(const tRisseSSALocalNamespace &ref)
 {
 	Block = ref.Block;
 	Scopes.reserve(ref.Scopes.size());
@@ -43,7 +44,7 @@ tRisseLocalNamespace::tRisseLocalNamespace(const tRisseLocalNamespace &ref)
 
 
 //---------------------------------------------------------------------------
-void tRisseLocalNamespace::Push()
+void tRisseSSALocalNamespace::Push()
 {
 	Scopes.push_back(new tMap());
 }
@@ -51,7 +52,7 @@ void tRisseLocalNamespace::Push()
 
 
 //---------------------------------------------------------------------------
-void tRisseLocalNamespace::Pop()
+void tRisseSSALocalNamespace::Pop()
 {
 	Scopes.pop_back();
 }
@@ -59,7 +60,7 @@ void tRisseLocalNamespace::Pop()
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseLocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * where)
+risse_size tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * where)
 {
 	// 一番深いレベルのスコープに追加する
 	Scopes.back()->insert(std::pair<tRisseString, tRisseSSAVariable *>(name, where));
@@ -70,7 +71,7 @@ risse_size tRisseLocalNamespace::Add(const tRisseString & name, tRisseSSAVariabl
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseLocalNamespace::Update(const tRisseString & name, tRisseSSAVariable * where)
+risse_size tRisseSSALocalNamespace::Update(const tRisseString & name, tRisseSSAVariable * where)
 {
 	// 名前空間を探す
 	RISSE_ASSERT(Scopes.size() > 0);
@@ -93,7 +94,7 @@ risse_size tRisseLocalNamespace::Update(const tRisseString & name, tRisseSSAVari
 
 
 //---------------------------------------------------------------------------
-bool tRisseLocalNamespace::Find(const tRisseString & name,
+bool tRisseSSALocalNamespace::Find(const tRisseString & name,
 	tRisseSSAVariable ** var, risse_size max_slevel) const
 {
 	// Scopes を頭から見ていき、最初に見つかった変数を返す
@@ -119,7 +120,7 @@ bool tRisseLocalNamespace::Find(const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
-bool tRisseLocalNamespace::Delete(const tRisseString & name)
+bool tRisseSSALocalNamespace::Delete(const tRisseString & name)
 {
 	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
 	{
@@ -139,7 +140,7 @@ bool tRisseLocalNamespace::Delete(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseLocalNamespace::MakePhiFunction(
+tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
 					risse_size pos, const tRisseString & name, risse_size max_slevel)
 {
 	RISSE_ASSERT(Scopes.size() > 0);
@@ -166,7 +167,7 @@ tRisseSSAVariable * tRisseLocalNamespace::MakePhiFunction(
 
 
 //---------------------------------------------------------------------------
-void tRisseLocalNamespace::MarkToCreatePhi()
+void tRisseSSALocalNamespace::MarkToCreatePhi()
 {
 	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
 	{
@@ -175,6 +176,19 @@ void tRisseLocalNamespace::MarkToCreatePhi()
 	}
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -260,6 +274,18 @@ tRisseString tRisseSSAVariable::GetTypeComment() const
 	else return tRisseString();
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -426,6 +452,18 @@ tRisseString tRisseSSAStatement::Dump() const
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
 {
@@ -451,7 +489,7 @@ void tRisseSSABlock::AddPhiFunction(risse_size pos, const tRisseString & name,
 	tRisseSSAStatement * stmt = new tRisseSSAStatement(Form, pos, ocPhi);
 
 	// 戻りの変数を作成する
-	// この AddPhiFunction メソッドを呼び出す tRisseLocalNamespace::MakePhiFunction
+	// この AddPhiFunction メソッドを呼び出す tRisseSSALocalNamespace::MakePhiFunction()
 	// は、見つかった変数のmap のsecondをvar引数に渡してくる。このため、
 	// var に代入した時点でこの変数の新しいSSA変数が可視になる。
 	var = new tRisseSSAVariable(Form, stmt, name, max_slevel);
@@ -530,9 +568,9 @@ void tRisseSSABlock::AddSucc(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::TakeLocalNamespaceSnapshot(tRisseLocalNamespace * ref)
+void tRisseSSABlock::TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref)
 {
-	LocalNamespace = new tRisseLocalNamespace(*ref);
+	LocalNamespace = new tRisseSSALocalNamespace(*ref);
 	LocalNamespace->SetBlock(this);
 }
 //---------------------------------------------------------------------------
@@ -642,13 +680,96 @@ tRisseString tRisseSSABlock::DumpChildren() const
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tRisseSSALabelMap::AddMap(const tRisseString &labelname, tRisseSSABlock * block, risse_size pos)
+{
+	tLabelMap::iterator i = LabelMap.find(labelname);
+	if(i != LabelMap.end())
+	{
+		// すでにラベルがある
+		eRisseCompileError::Throw(
+			tRisseString(RISSE_WS_TR("label '%1' is already defined"), labelname),
+				Form->GetScriptBlock(), pos);
+	}
+
+	LabelMap.insert(std::pair<tRisseString, tRisseSSABlock *>(labelname, block));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSALabelMap::AddPendingLabelJump(tRisseSSABlock * block, risse_size pos,
+		const tRisseString & labelname)
+{
+	PendingLabelJumps.push_back(tPendingLabelJump(block, pos, labelname));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSALabelMap::BindAll()
+{
+	for(tPendingLabelJumps::iterator i = PendingLabelJumps.begin();
+		i != PendingLabelJumps.end(); i++)
+	{
+		// それぞれの i について、その基本ブロックの最後にジャンプ文を生成する
+
+		// ジャンプ先を検索
+		tLabelMap::iterator label_pair = LabelMap.find(i->LabelName);
+		if(label_pair == LabelMap.end())
+			eRisseCompileError::Throw(
+				tRisseString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
+					Form->GetScriptBlock(), i->Position);
+
+		// ジャンプ文を生成
+		tRisseSSAStatement * stmt = new tRisseSSAStatement(Form, i->Position, ocJump);
+		i->Block->AddStatement(stmt);
+		stmt->SetJumpTarget(label_pair->second);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode * root)
 {
 	ScriptBlock = scriptblock;
 	Root = root;
 	UniqueNumber = 0;
-	LocalNamespace = new tRisseLocalNamespace();
+	LocalNamespace = new tRisseSSALocalNamespace();
+	LabelMap = new tRisseSSALabelMap(this);
 	EntryBlock = NULL;
 	CurrentBlock = NULL;
 }
@@ -667,6 +788,9 @@ void tRisseSSAForm::Generate()
 
 	// ルートノードを処理する
 	Root->GenerateReadSSA(this);
+
+	// 未バインドのラベルジャンプをすべて解決
+	LabelMap->BindAll();
 }
 //---------------------------------------------------------------------------
 

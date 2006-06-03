@@ -289,7 +289,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	property_def property_expr_def property_handler_def_list
 	property_handler_getter property_handler_setter
 	class_def class_expr_def class_extender class_extends_list
-	return switch with label try throw catch catch_list catch_or_finally
+	return switch with label goto try throw catch catch_list catch_or_finally
 	regexp
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
@@ -382,6 +382,7 @@ statement
 	| try
 	| throw
 	| label
+	| goto
 	| definition
 ;
 
@@ -472,6 +473,10 @@ label
 	| T_ID ":"								{ $$ = N(Label)(LP, *$1); }
 ;
 
+/* goto */
+goto
+	: "goto" T_ID ";"						{ $$ = N(Goto)(LP, *$2); }
+;
 
 /*---------------------------------------------------------------------------
   syntax sugar

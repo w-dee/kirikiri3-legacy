@@ -87,8 +87,9 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Continue		)		//!< continue
 	RISSE_AST_ENUM_ITEM(ant, Debugger		)		//!< debugger
 	RISSE_AST_ENUM_ITEM(ant, With			)		//!< with
-	RISSE_AST_ENUM_ITEM(ant, Switch			)		//!< switch
 	RISSE_AST_ENUM_ITEM(ant, Label			)		//!< ラベル
+	RISSE_AST_ENUM_ITEM(ant, Goto			)		//!< goto
+	RISSE_AST_ENUM_ITEM(ant, Switch			)		//!< switch
 	RISSE_AST_ENUM_ITEM(ant, Case			)		//!< case / default
 	RISSE_AST_ENUM_ITEM(ant, Try			)		//!< try
 	RISSE_AST_ENUM_ITEM(ant, Catch			)		//!< catch
@@ -1946,7 +1947,37 @@ public:
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	goto ノード(type=antGoto)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Goto : public tRisseASTNode_NoChildren
+{
+	tRisseString Name; //!< ジャンプ先ラベル名
+
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position		ソースコード上の位置
+	//! @param		name			ジャンプ先ラベル名
+	tRisseASTNode_Goto(risse_size position, const tRisseString & name) :
+		tRisseASTNode_NoChildren(position, antGoto), Name(name) {;}
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const
+	{
+		return Name.AsHumanReadable();
+	}
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 

@@ -485,6 +485,60 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief	switch 文に関する情報を表すクラス
+//---------------------------------------------------------------------------
+class tRisseSwitchInfo : public tRisseCollectee
+{
+	tRisseSSAVariable * Reference; //!< 参照変数 ( switch の次のカッコの中の値 )
+	tRisseSSABlock * LastBlock; //!< 最後のジャンプまたは分岐文を含む基本ブロック
+	tRisseSSAStatement * LastStatement; //!< 最後のジャンプまたは分岐文
+	tRisseSSABlock * DefaultBlock; //!< default 文のあるブロック
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		node			SwitchのASTノード
+	//! @param		reference		参照変数
+	tRisseSwitchInfo(tRisseSSAVariable * reference)
+	{
+		Reference = reference;
+		LastBlock = NULL;
+		LastStatement = NULL;
+		DefaultBlock = NULL;
+	}
+
+	//! @brief		参照変数を得る
+	//! @return		参照変数
+	tRisseSSAVariable * GetReference() const { return Reference; }
+
+	//! @brief		最後のジャンプまたは分岐文を含む基本ブロックを得る
+	//! @return		最後のジャンプまたは分岐文を含む基本ブロック
+	tRisseSSABlock * GetLastBlock() const { return LastBlock; }
+
+	//! @brief		最後のジャンプまたは分岐文を含む基本ブロックを設定する
+	//! @param		block		最後のジャンプまたは分岐文を含む基本ブロック
+	void SetLastBlock(tRisseSSABlock * block) { LastBlock = block; }
+
+	//! @brief		最後のジャンプまたは分岐文を得る
+	//! @return		最後のジャンプまたは分岐文
+	tRisseSSAStatement * GetLastStatement() const { return LastStatement; }
+
+	//! @brief		最後のジャンプまたは分岐文を含む基本ブロックを設定する
+	//! @param		stmt		最後のジャンプまたは分岐文
+	void SetLastStatement(tRisseSSAStatement * stmt) { LastStatement = stmt; }
+
+	//! @brief		default 文のあるブロックを得る
+	//! @return		default 文のあるブロック
+	tRisseSSABlock * GetDefaultBlock() const { return DefaultBlock; }
+
+	//! @brief		default 文のあるブロックを設定する
+	//! @param		block		default 文のあるブロック
+	void SetDefaultBlock(tRisseSSABlock * block) { DefaultBlock = block; }
+
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	SSA形式を表すクラス
 //---------------------------------------------------------------------------
 class tRisseSSAForm : public tRisseCollectee
@@ -496,6 +550,8 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseSSALabelMap * LabelMap; //!< ラベルマップ
 	tRisseSSABlock * EntryBlock; //!< エントリーSSA基本ブロック
 	tRisseSSABlock * CurrentBlock; //!< 現在変換中の基本ブロック
+
+	tRisseSwitchInfo * CurrentSwitchInfo; //!< 現在の switch に関する情報
 
 public:
 	//! @brief		コンストラクタ
@@ -521,6 +577,20 @@ public:
 	//! @brief		現在変換中の基本ブロックを得る
 	//! @return		現在変換中の基本ブロック
 	tRisseSSABlock * GetCurrentBlock() const { return CurrentBlock; }
+
+	//! @brief		現在の switch に関する情報を得る
+	//! @return		現在の switch に関する情報
+	tRisseSwitchInfo * GetCurrentSwitchInfo() const { return CurrentSwitchInfo; }
+
+	//! @brief		現在の switch に関する情報を設定する
+	//! @param		info		現在の switch に関する情報
+	//! @return		設定前の switch に関する情報
+	tRisseSwitchInfo * SetCurrentSwitchInfo(tRisseSwitchInfo * info)
+	{
+		tRisseSwitchInfo * prev = CurrentSwitchInfo;
+		CurrentSwitchInfo = info;
+		return prev;
+	}
 
 	//! @brief		新しい基本ブロックを作成する
 	//! @param		name	基本ブロック名プリフィックス

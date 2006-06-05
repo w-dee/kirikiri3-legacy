@@ -851,6 +851,7 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode 
 	LabelMap = new tRisseSSALabelMap(this);
 	EntryBlock = NULL;
 	CurrentBlock = NULL;
+	CurrentSwitchInfo = NULL;
 }
 //---------------------------------------------------------------------------
 

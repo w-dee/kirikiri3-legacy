@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "risseAST.h"
 #include "risseCodeGen.h"
+#include "risseException.h"
 
 // 名前表の読み込み
 #undef risseASTH
@@ -1398,5 +1399,123 @@ tRisseSSAVariable * tRisseASTNode_Goto::DoReadSSA(tRisseSSAForm *form, void * pa
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// 基準式を生成する
+	tRisseSSAVariable * ref = Object->GenerateReadSSA(form);
+
+	// switch に関する情報を生成
+	tRisseSwitchInfo * info = new tRisseSwitchInfo(ref);
+
+	// switch に関する情報を form に設定
+	tRisseSwitchInfo * old_info = form->SetCurrentSwitchInfo(info);
+
+	// ジャンプ文を作成
+	info->SetLastBlock(form->GetCurrentBlock());
+	info->SetLastStatement(form->AddStatement(GetPosition(), ocJump, NULL));
+
+	// 新しい基本ブロックを作成
+	form->CreateNewBlock("disconnected_by_switch");
+
+	// ブロックの内容を生成
+	Body->GenerateReadSSA(form);
+
+	// ジャンプ文を作成
+	tRisseSSAStatement * jump_stmt =
+		form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 新しい基本ブロックを作成(switch文からの脱出)
+	tRisseSSABlock * exit_switch_block =
+		form->CreateNewBlock(RISSE_WS("switch_exit"));
+	jump_stmt->SetJumpTarget(exit_switch_block);
+
+	// default / 最後のジャンプの処理
+	tRisseSSABlock * last_stmt =
+		info->GetDefaultBlock() ? info->GetDefaultBlock() : exit_switch_block;
+	if(info->GetLastStatement()->GetCode() == ocJump)
+		info->GetLastStatement()->SetJumpTarget(last_stmt); // ジャンプ
+	else
+		info->GetLastStatement()->SetFalseBranch(last_stmt); // 分岐
+
+	// switch に関する情報を元に戻す
+	form->SetCurrentSwitchInfo(old_info);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// switch 文の中？
+	tRisseSwitchInfo * info = form->GetCurrentSwitchInfo();
+	if(info == NULL)
+		eRisseCompileError::Throw(
+			tRisseString(Expression ?
+				RISSE_WS_TR("cannot place 'case' out of switch") :
+				RISSE_WS_TR("cannot 'default' out of switch")),
+				form->GetScriptBlock(), GetPosition());
+
+	// ジャンプ文を作成
+	tRisseSSAStatement * jump_stmt =
+		form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 新しい基本ブロックを作成(ここに条件判断式などが入る)
+	tRisseSSABlock * case_block =
+		form->CreateNewBlock(Expression ?
+			RISSE_WS("switch_case") :
+			RISSE_WS("switch_default"));
+
+	if(Expression)
+	{
+		// case
+
+		// ジャンプ文のジャンプ先を設定
+		if(info->GetLastStatement()->GetCode() == ocJump)
+			info->GetLastStatement()->SetJumpTarget(case_block); // ジャンプ
+		else
+			info->GetLastStatement()->SetFalseBranch(case_block); // 分岐
+		jump_stmt->SetJumpTarget(case_block);
+
+		// 条件判断文を作成
+		tRisseSSAVariable * targ_var = Expression->GenerateReadSSA(form);
+		tRisseSSAVariable * comp_res = NULL;
+		form->AddStatement(GetPosition(), ocDiscEqual, &comp_res,
+			info->GetReference(), targ_var);
+
+		// 分岐文を作成
+		tRisseSSAStatement * branch_stmt =
+			form->AddStatement(GetPosition(), ocBranch, NULL, comp_res);
+		info->SetLastBlock(form->GetCurrentBlock());
+		info->SetLastStatement(branch_stmt);
+
+		// 新しい基本ブロックを作成(ここに内容が入る)
+		tRisseSSABlock * case_body_block =
+			form->CreateNewBlock(RISSE_WS("switch_case_body"));
+		branch_stmt->SetTrueBranch(case_body_block);
+	}
+	else
+	{
+		// default
+
+		// default 文のあるブロックを登録する
+		if(info->GetDefaultBlock() != NULL)
+			eRisseCompileError::Throw(
+				tRisseString(RISSE_WS_TR("cannot place multiple 'default' in a switch")),
+				form->GetScriptBlock(), GetPosition());
+		info->SetDefaultBlock(case_block);
+
+		jump_stmt->SetJumpTarget(case_block);
+	}
+
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
 
 } // namespace Risse

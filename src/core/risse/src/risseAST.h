@@ -388,6 +388,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisseASTNode_OneExpression : public tRisseASTNode
 {
+protected:
 	tRisseASTNode * Expression; //!< 式ノード
 
 public:
@@ -1811,6 +1812,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisseASTNode_With_Switch : public tRisseASTNode
 {
+protected:
 	tRisseASTNode * Object; //!< オブジェクトノード
 	tRisseASTNode * Body; //!< ブロックまたは文のノード
 
@@ -1900,29 +1902,6 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	switch文ノード(type=antSwitch)
-//---------------------------------------------------------------------------
-class tRisseASTNode_Switch : public tRisseASTNode_With_Switch
-{
-public:
-	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
-	//! @param		object			オブジェクトノード
-	//! @param		body			ブロックまたは文のノード
-	tRisseASTNode_Switch(risse_size position,
-		tRisseASTNode * object, tRisseASTNode * body) :
-		tRisseASTNode_With_Switch(position, antSwitch, object, body) {;}
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 //! @brief	ラベルノード(type=antLabel)
 //---------------------------------------------------------------------------
 class tRisseASTNode_Label : public tRisseASTNode_NoChildren
@@ -1983,6 +1962,29 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief	switch文ノード(type=antSwitch)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Switch : public tRisseASTNode_With_Switch
+{
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		object			オブジェクトノード
+	//! @param		body			ブロックまたは文のノード
+	tRisseASTNode_Switch(risse_size position,
+		tRisseASTNode * object, tRisseASTNode * body) :
+		tRisseASTNode_With_Switch(position, antSwitch, object, body) {;}
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	case  / default ノード(type=antCase)
 //---------------------------------------------------------------------------
 class tRisseASTNode_Case : public tRisseASTNode_OneExpression
@@ -2002,7 +2004,7 @@ public:
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 

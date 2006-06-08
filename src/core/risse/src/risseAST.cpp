@@ -1190,6 +1190,18 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 {
 	// while ループ または do ～ while ループ
 
+	// break に関する情報を生成
+	tRisseBreakInfo * break_info = new tRisseBreakInfo();
+
+	// break に関する情報を form に設定
+	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
+
+	// continue に関する情報を生成
+	tRisseContinueInfo * continue_info = new tRisseContinueInfo();
+
+	// continue に関する情報を form に設定
+	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
+
 	// 条件式または body にジャンプするための文を作成
 	form->GetCurrentBlock();
 	tRisseSSAStatement * entry_jump_stmt =
@@ -1229,6 +1241,18 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	branch_stmt->SetTrueBranch(while_body_block);
 	branch_stmt->SetFalseBranch(while_exit_block);
 
+	// break の処理
+	break_info->BindAll(while_exit_block);
+
+	// continue の処理
+	continue_info->BindAll(while_cond_block);
+
+	// break に関する情報を元に戻す
+	form->SetCurrentBreakInfo(old_break_info);
+
+	// continue に関する情報を元に戻す
+	form->SetCurrentContinueInfo(old_continue_info);
+
 	// このノードは答えを返さない
 	return NULL;
 }
@@ -1255,6 +1279,18 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 	// 条件式を格納する基本ブロックを作成
 	tRisseSSABlock * for_cond_block =
 		form->CreateNewBlock(RISSE_WS("for_cond"));
+
+	// break に関する情報を生成
+	tRisseBreakInfo * break_info = new tRisseBreakInfo();
+
+	// break に関する情報を form に設定
+	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
+
+	// continue に関する情報を生成
+	tRisseContinueInfo * continue_info = new tRisseContinueInfo();
+
+	// continue に関する情報を form に設定
+	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
 
 	// 条件式の結果を得る (条件式が省略されている場合は常に真であると見なす)
 	tRisseSSAVariable * cond_var = NULL;
@@ -1307,6 +1343,18 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 	branch_stmt->SetTrueBranch(for_body_block);
 	branch_stmt->SetFalseBranch(for_exit_block);
 
+	// break の処理
+	break_info->BindAll(for_exit_block);
+
+	// continue の処理
+	continue_info->BindAll(for_iter_block ? for_iter_block : for_cond_block);
+
+	// break に関する情報を元に戻す
+	form->SetCurrentBreakInfo(old_break_info);
+
+	// continue に関する情報を元に戻す
+	form->SetCurrentContinueInfo(old_continue_info);
+
 	// スコープを pop
 	form->GetLocalNamespace()->Pop(); // スコープを pop
 
@@ -1352,6 +1400,58 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 
 	// 変数のローカル名前空間への登録
 	form->GetLocalNamespace()->Add(Name, var);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
+									tRisseSSAForm *form, void * param) const
+{
+	// break 文をサポートする構文の中？
+	tRisseBreakInfo * info = form->GetCurrentBreakInfo();
+	if(info == NULL)
+		eRisseCompileError::Throw(
+			tRisseString(RISSE_WS_TR("cannot place 'break' here")),
+				form->GetScriptBlock(), GetPosition());
+
+	// ジャンプ文を作成
+	tRisseSSAStatement *jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 新しい基本ブロックを作成
+	form->CreateNewBlock("disconnected_by_break");
+
+	// ジャンプ文を info に登録
+	info->AddJump(jump_stmt);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Continue::DoReadSSA(
+									tRisseSSAForm *form, void * param) const
+{
+	// continue 文をサポートする構文の中？
+	tRisseContinueInfo * info = form->GetCurrentContinueInfo();
+	if(info == NULL)
+		eRisseCompileError::Throw(
+			tRisseString(RISSE_WS_TR("cannot place 'continue' here")),
+				form->GetScriptBlock(), GetPosition());
+
+	// ジャンプ文を作成
+	tRisseSSAStatement *jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 新しい基本ブロックを作成
+	form->CreateNewBlock("disconnected_by_continue");
+
+	// ジャンプ文を info に登録
+	info->AddJump(jump_stmt);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -1407,14 +1507,20 @@ tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * 
 	tRisseSSAVariable * ref = Object->GenerateReadSSA(form);
 
 	// switch に関する情報を生成
-	tRisseSwitchInfo * info = new tRisseSwitchInfo(ref);
+	tRisseSwitchInfo * switch_info = new tRisseSwitchInfo(ref);
 
 	// switch に関する情報を form に設定
-	tRisseSwitchInfo * old_info = form->SetCurrentSwitchInfo(info);
+	tRisseSwitchInfo * old_switch_info = form->SetCurrentSwitchInfo(switch_info);
+
+	// break に関する情報を生成
+	tRisseBreakInfo * break_info = new tRisseBreakInfo();
+
+	// break に関する情報を form に設定
+	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
 
 	// ジャンプ文を作成
-	info->SetLastBlock(form->GetCurrentBlock());
-	info->SetLastStatement(form->AddStatement(GetPosition(), ocJump, NULL));
+	switch_info->SetLastBlock(form->GetCurrentBlock());
+	switch_info->SetLastStatement(form->AddStatement(GetPosition(), ocJump, NULL));
 
 	// 新しい基本ブロックを作成
 	form->CreateNewBlock("disconnected_by_switch");
@@ -1432,15 +1538,21 @@ tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * 
 	jump_stmt->SetJumpTarget(exit_switch_block);
 
 	// default / 最後のジャンプの処理
-	tRisseSSABlock * last_stmt =
-		info->GetDefaultBlock() ? info->GetDefaultBlock() : exit_switch_block;
-	if(info->GetLastStatement()->GetCode() == ocJump)
-		info->GetLastStatement()->SetJumpTarget(last_stmt); // ジャンプ
+	tRisseSSABlock * last_block =
+		switch_info->GetDefaultBlock() ? switch_info->GetDefaultBlock() : exit_switch_block;
+	if(switch_info->GetLastStatement()->GetCode() == ocJump)
+		switch_info->GetLastStatement()->SetJumpTarget(last_block); // ジャンプ
 	else
-		info->GetLastStatement()->SetFalseBranch(last_stmt); // 分岐
+		switch_info->GetLastStatement()->SetFalseBranch(last_block); // 分岐
+
+	// break の処理
+	break_info->BindAll(last_block);
 
 	// switch に関する情報を元に戻す
-	form->SetCurrentSwitchInfo(old_info);
+	form->SetCurrentSwitchInfo(old_switch_info);
+
+	// break に関する情報を元に戻す
+	form->SetCurrentBreakInfo(old_break_info);
 
 	// このノードは答えを返さない
 	return NULL;

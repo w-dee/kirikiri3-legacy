@@ -831,6 +831,30 @@ void tRisseSSALabelMap::BindAll()
 
 
 
+//---------------------------------------------------------------------------
+void tRisseBreakInfo::AddJump(tRisseSSAStatement * jump_stmt)
+{
+	PendingJumps.push_back(jump_stmt);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
+{
+	for(tPendingJumps::iterator i = PendingJumps.begin(); i != PendingJumps.end(); i++)
+	{
+		// それぞれの i について、ジャンプ文のジャンプ先を設定する
+		(*i)->SetJumpTarget(target);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 
@@ -852,6 +876,8 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode 
 	EntryBlock = NULL;
 	CurrentBlock = NULL;
 	CurrentSwitchInfo = NULL;
+	CurrentBreakInfo = NULL;
+	CurrentContinueInfo = NULL;
 }
 //---------------------------------------------------------------------------
 

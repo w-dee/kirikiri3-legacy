@@ -485,6 +485,31 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief	break あるいは continue の情報
+//---------------------------------------------------------------------------
+class tRisseBreakInfo : public tRisseCollectee
+{
+	typedef gc_vector<tRisseSSAStatement *> tPendingJumps;
+	tPendingJumps PendingJumps;
+
+public:
+	//! @brief		コンストラクタ
+	tRisseBreakInfo() {;}
+
+	//! @brief		未バインドのジャンプを追加する
+	//! @param		jump_stmt		ジャンプ文
+	void AddJump(tRisseSSAStatement * jump_stmt);
+
+	//! @brief		未バインドのジャンプをすべて解決する
+	//! @param		target		ターゲットのブロック
+	void BindAll(tRisseSSABlock * target);
+};
+//---------------------------------------------------------------------------
+typedef tRisseBreakInfo tRisseContinueInfo;
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	switch 文に関する情報を表すクラス
 //---------------------------------------------------------------------------
 class tRisseSwitchInfo : public tRisseCollectee
@@ -552,6 +577,8 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseSSABlock * CurrentBlock; //!< 現在変換中の基本ブロック
 
 	tRisseSwitchInfo * CurrentSwitchInfo; //!< 現在の switch に関する情報
+	tRisseBreakInfo * CurrentBreakInfo; //!< 現在の break に関する情報
+	tRisseContinueInfo * CurrentContinueInfo; //!< 現在の continue に関する情報
 
 public:
 	//! @brief		コンストラクタ
@@ -589,6 +616,34 @@ public:
 	{
 		tRisseSwitchInfo * prev = CurrentSwitchInfo;
 		CurrentSwitchInfo = info;
+		return prev;
+	}
+
+	//! @brief		現在の break に関する情報を得る
+	//! @return		現在の break に関する情報
+	tRisseBreakInfo * GetCurrentBreakInfo() const { return CurrentBreakInfo; }
+
+	//! @brief		現在の break に関する情報を設定する
+	//! @param		info		現在の break に関する情報
+	//! @return		設定前の break に関する情報
+	tRisseBreakInfo * SetCurrentBreakInfo(tRisseBreakInfo * info)
+	{
+		tRisseBreakInfo * prev = CurrentBreakInfo;
+		CurrentBreakInfo = info;
+		return prev;
+	}
+
+	//! @brief		現在の continue に関する情報を得る
+	//! @return		現在の continue に関する情報
+	tRisseContinueInfo * GetCurrentContinueInfo() const { return CurrentContinueInfo; }
+
+	//! @brief		現在の continue に関する情報を設定する
+	//! @param		info		現在の continue に関する情報
+	//! @return		設定前の continue に関する情報
+	tRisseContinueInfo * SetCurrentContinueInfo(tRisseContinueInfo * info)
+	{
+		tRisseContinueInfo * prev = CurrentContinueInfo;
+		CurrentContinueInfo = info;
 		return prev;
 	}
 

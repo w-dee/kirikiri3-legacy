@@ -62,16 +62,18 @@ namespace Risse
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Context		)		//!< コンテキスト
+	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
+	RISSE_AST_ENUM_ITEM(ant, FuncCallArg	)		//!< 関数呼び出しの引数
 	RISSE_AST_ENUM_ITEM(ant, ExprStmt		)		//!< 式のみのステートメント
 	RISSE_AST_ENUM_ITEM(ant, Factor			)		//!< 項
+	RISSE_AST_ENUM_ITEM(ant, VarDecl		)		//!< 変数宣言
+	RISSE_AST_ENUM_ITEM(ant, VarDeclPair	)		//!< 変数宣言の変数名と初期値
+	RISSE_AST_ENUM_ITEM(ant, MemberSel		)		//!< メンバ選択演算子
 	RISSE_AST_ENUM_ITEM(ant, Id				)		//!< 識別子
 	RISSE_AST_ENUM_ITEM(ant, Unary			)		//!< 単項演算子
 	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
-	RISSE_AST_ENUM_ITEM(ant, MemberSel		)		//!< メンバ選択演算子
 	RISSE_AST_ENUM_ITEM(ant, CastAttr		)		//!< 属性のキャスト
-	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
-	RISSE_AST_ENUM_ITEM(ant, FuncCallArg	)		//!< 関数呼び出しの引数
 	RISSE_AST_ENUM_ITEM(ant, RegExp			)		//!< 正規表現パターン
 	RISSE_AST_ENUM_ITEM(ant, Array			)		//!< インライン配列
 	RISSE_AST_ENUM_ITEM(ant, Dict			)		//!< インライン辞書配列
@@ -79,8 +81,6 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, If				)		//!< if (とelse)
 	RISSE_AST_ENUM_ITEM(ant, While			)		//!< while と do ～ while
 	RISSE_AST_ENUM_ITEM(ant, For			)		//!< for
-	RISSE_AST_ENUM_ITEM(ant, VarDecl		)		//!< 変数宣言
-	RISSE_AST_ENUM_ITEM(ant, VarDeclPair	)		//!< 変数宣言の変数名と初期値
 	RISSE_AST_ENUM_ITEM(ant, Return			)		//!< return
 	RISSE_AST_ENUM_ITEM(ant, Throw			)		//!< throw
 	RISSE_AST_ENUM_ITEM(ant, Break			)		//!< break
@@ -798,7 +798,216 @@ public:
 //---------------------------------------------------------------------------
 
 
-class tRisseASTNode_MemberSel;
+//---------------------------------------------------------------------------
+//! @brief	変数宣言ノード(type=antVarDecl)
+//---------------------------------------------------------------------------
+class tRisseASTNode_VarDecl : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+	tRisseMemberAttribute Attribute; //!< 属性
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	tRisseASTNode_VarDecl(risse_size position) :
+		tRisseASTNode_List(position, antVarDecl) {;}
+
+	//! @brief		定数宣言かどうかを設定する
+	//! @param		is_constant	定数宣言かどうか
+	void SetIsConstant(bool is_constant)
+	{
+		if(is_constant)
+			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::pcConst));
+		else
+			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::pcVar));
+	}
+
+	//! @brief		属性を設定する
+	//! @param		attrib	属性
+	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+
+	//! @brief		属性を設定する
+	//! @return		属性
+	tRisseMemberAttribute GetAttribute() const { return Attribute; }
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return Attribute.AsString(); }
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	変数宣言の名前と初期値のノード(type=antVarDeclPair)
+//---------------------------------------------------------------------------
+class tRisseASTNode_VarDeclPair : public tRisseASTNode
+{
+	tRisseString Name; //!< 名前
+	tRisseASTNode * Initializer; //!< 初期値ノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		name			名前
+	//! @param		initializer			初期値ノード
+	tRisseASTNode_VarDeclPair(risse_size position,
+		const tRisseString & name, tRisseASTNode * initializer) :
+		tRisseASTNode(position, antVarDeclPair),
+			Name(name), Initializer(initializer)
+	{
+		if(Initializer) Initializer->SetParent(this);
+	}
+
+	//! @brief		名前を得る
+	//! @return		名前
+	const tRisseString & GetName() const { return Name; }
+
+	//! @brief		初期値ノードを得る
+	//! @return		初期値ノード
+	tRisseASTNode * GetInitializer() const { return Initializer; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Initializer;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const { return Name; }
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	メンバ選択ノード(type=antMemberSel)
+//---------------------------------------------------------------------------
+class tRisseASTNode_MemberSel : public tRisseASTNode
+{
+	tRisseASTNode * Object; //!< オブジェクトノード
+	tRisseASTNode * MemberName; //!< メンバ名ノード
+	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
+
+	//! @brief		PrepareSSA() で返す構造体
+	struct tPrepareSSA
+	{
+		tRisseSSAVariable * ObjectVar; //!< オブジェクトの式の値
+		tRisseSSAVariable * MemberNameVar; //!< メンバ名を表す式の値
+	};
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		object			オブジェクトノード
+	//! @param		membername		メンバ名ノード
+	//! @param		is_direct		直接参照演算子 ('.' 演算子) かどうか
+	tRisseASTNode_MemberSel(risse_size position,
+			tRisseASTNode * object, tRisseASTNode * membername, bool is_direct) :
+		tRisseASTNode(position, antMemberSel),
+			Object(object), MemberName(membername), IsDirect(is_direct)
+	{
+		if(Object) Object->SetParent(this);
+		if(MemberName) MemberName->SetParent(this);
+	}
+
+	//! @brief		オブジェクトノードを得る
+	//! @return		オブジェクトノード
+	tRisseASTNode * GetObject() const { return Object; }
+
+	//! @brief		メンバ名ノードを得る
+	//! @return		メンバ名ノード
+	tRisseASTNode * GetMemberName() const { return MemberName; }
+
+	//! @brief		直接参照演算子 ('.' 演算子) かどうかを得る
+	//! @return		直接参照演算子 ('.' 演算子) かどうか
+	bool GetIsDirect() const { return IsDirect; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Object;
+		case 1: return MemberName;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
+	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
+	virtual void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const;
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+	//! @brief		SSA 形式の書き込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
+	bool DoWriteSSA(tRisseSSAForm *form, void * param,
+			tRisseSSAVariable * value) const;
+};
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 //! @brief	識別子ASTノード(type=antId)
 //---------------------------------------------------------------------------
@@ -1103,100 +1312,6 @@ public:
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief	メンバ選択ノード(type=antMemberSel)
-//---------------------------------------------------------------------------
-class tRisseASTNode_MemberSel : public tRisseASTNode
-{
-	tRisseASTNode * Object; //!< オブジェクトノード
-	tRisseASTNode * MemberName; //!< メンバ名ノード
-	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
-
-	//! @brief		PrepareSSA() で返す構造体
-	struct tPrepareSSA
-	{
-		tRisseSSAVariable * ObjectVar; //!< オブジェクトの式の値
-		tRisseSSAVariable * MemberNameVar; //!< メンバ名を表す式の値
-	};
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
-	//! @param		object			オブジェクトノード
-	//! @param		membername		メンバ名ノード
-	//! @param		is_direct		直接参照演算子 ('.' 演算子) かどうか
-	tRisseASTNode_MemberSel(risse_size position,
-			tRisseASTNode * object, tRisseASTNode * membername, bool is_direct) :
-		tRisseASTNode(position, antMemberSel),
-			Object(object), MemberName(membername), IsDirect(is_direct)
-	{
-		if(Object) Object->SetParent(this);
-		if(MemberName) MemberName->SetParent(this);
-	}
-
-	//! @brief		オブジェクトノードを得る
-	//! @return		オブジェクトノード
-	tRisseASTNode * GetObject() const { return Object; }
-
-	//! @brief		メンバ名ノードを得る
-	//! @return		メンバ名ノード
-	tRisseASTNode * GetMemberName() const { return MemberName; }
-
-	//! @brief		直接参照演算子 ('.' 演算子) かどうかを得る
-	//! @return		直接参照演算子 ('.' 演算子) かどうか
-	bool GetIsDirect() const { return IsDirect; }
-
-	//! @brief		子ノードの個数を得る
-	//! @return		子ノードの個数
-	risse_size GetChildCount() const
-	{
-		return 2;
-	}
-
-	//! @brief		指定されたインデックスの子ノードを得る
-	//! @param		index		インデックス
-	//! @return		子ノード
-	tRisseASTNode * GetChildAt(risse_size index) const
-	{
-		switch(index)
-		{
-		case 0: return Object;
-		case 1: return MemberName;
-		}
-		return NULL;
-	}
-
-	//! @brief		指定されたインデックスの子ノードの名前を得る
-	//! @param		index		インデックス
-	//! @return		名前
-	tRisseString GetChildNameAt(risse_size index) const;
-
-	//! @brief		ダンプ時のこのノードのコメントを得る
-	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const;
-
-	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
-	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
-	virtual void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const;
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
-
-	//! @brief		SSA 形式の書き込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
-	bool DoWriteSSA(tRisseSSAForm *form, void * param,
-			tRisseSSAVariable * value) const;
 };
 //---------------------------------------------------------------------------
 
@@ -1579,122 +1694,6 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief	変数宣言ノード(type=antVarDecl)
-//---------------------------------------------------------------------------
-class tRisseASTNode_VarDecl : public tRisseASTNode_List
-{
-	typedef tRisseASTNode_List inherited;
-	tRisseMemberAttribute Attribute; //!< 属性
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
-	tRisseASTNode_VarDecl(risse_size position) :
-		tRisseASTNode_List(position, antVarDecl) {;}
-
-	//! @brief		定数宣言かどうかを設定する
-	//! @param		is_constant	定数宣言かどうか
-	void SetIsConstant(bool is_constant)
-	{
-		if(is_constant)
-			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::pcConst));
-		else
-			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::pcVar));
-	}
-
-	//! @brief		属性を設定する
-	//! @param		attrib	属性
-	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
-
-	//! @brief		属性を設定する
-	//! @return		属性
-	tRisseMemberAttribute GetAttribute() const { return Attribute; }
-
-	//! @brief		指定されたインデックスの子ノードの名前を得る
-	//! @param		index		インデックス
-	//! @return		名前
-	tRisseString GetChildNameAt(risse_size index) const;
-
-	//! @brief		ダンプ時のこのノードのコメントを得る
-	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const { return Attribute.AsString(); }
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief	変数宣言の名前と初期値のノード(type=antVarDeclPair)
-//---------------------------------------------------------------------------
-class tRisseASTNode_VarDeclPair : public tRisseASTNode
-{
-	tRisseString Name; //!< 名前
-	tRisseASTNode * Initializer; //!< 初期値ノード
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
-	//! @param		name			名前
-	//! @param		initializer			初期値ノード
-	tRisseASTNode_VarDeclPair(risse_size position,
-		const tRisseString & name, tRisseASTNode * initializer) :
-		tRisseASTNode(position, antVarDeclPair),
-			Name(name), Initializer(initializer)
-	{
-		if(Initializer) Initializer->SetParent(this);
-	}
-
-	//! @brief		名前を得る
-	//! @return		名前
-	const tRisseString & GetName() const { return Name; }
-
-	//! @brief		初期値ノードを得る
-	//! @return		初期値ノード
-	tRisseASTNode * GetInitializer() const { return Initializer; }
-
-	//! @brief		子ノードの個数を得る
-	//! @return		子ノードの個数
-	risse_size GetChildCount() const
-	{
-		return 1;
-	}
-
-	//! @brief		指定されたインデックスの子ノードを得る
-	//! @param		index		インデックス
-	//! @return		子ノード
-	tRisseASTNode * GetChildAt(risse_size index) const
-	{
-		switch(index)
-		{
-		case 0: return Initializer;
-		}
-		return NULL;
-	}
-
-	//! @brief		指定されたインデックスの子ノードの名前を得る
-	//! @param		index		インデックス
-	//! @return		名前
-	tRisseString GetChildNameAt(risse_size index) const;
-
-	//! @brief		ダンプ時のこのノードのコメントを得る
-	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const { return Name; }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式ジェネレータクラス

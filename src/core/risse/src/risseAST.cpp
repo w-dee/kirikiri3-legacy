@@ -65,14 +65,6 @@ void tRisseASTNode::Dump(tRisseString & result, risse_int level)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_OneExpression::GetChildNameAt(risse_size index) const
-{
-	if(index == 0) return RISSE_WS("expression"); else return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_List::GetChildNameAt(risse_size index) const
 {
 	if(index < Array.size())
@@ -81,6 +73,14 @@ tRisseString tRisseASTNode_List::GetChildNameAt(risse_size index) const
 		return tRisseString(RISSE_WS("node")) + Risse_int64_to_str(index, buf);
 	}
 	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_OneExpression::GetChildNameAt(risse_size index) const
+{
+	if(index == 0) return RISSE_WS("expression"); else return tRisseString();
 }
 //---------------------------------------------------------------------------
 
@@ -132,18 +132,18 @@ tRisseString tRisseASTNode_FuncCallArg::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_RegExp::GetDumpComment() const
+tRisseString tRisseASTNode_Context::GetDumpComment() const
 {
-	return tRisseString(RISSE_WS("pattern=")) + Pattern.AsHumanReadable() +
-		RISSE_WS(", flags=") + Flags.AsHumanReadable();
+	return RisseASTContextTypeNames[ContextType];
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Context::GetDumpComment() const
+tRisseString tRisseASTNode_RegExp::GetDumpComment() const
 {
-	return RisseASTContextTypeNames[ContextType];
+	return tRisseString(RISSE_WS("pattern=")) + Pattern.AsHumanReadable() +
+		RISSE_WS(", flags=") + Flags.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 
@@ -166,6 +166,62 @@ tRisseString tRisseASTNode_Factor::GetDumpComment() const
 tRisseString tRisseASTNode_Id::GetDumpComment() const
 {
 	return Name.AsHumanReadable();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_Trinary::GetDumpComment() const
+{
+	return RisseASTTrinaryTypeNames[TrinaryType];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_VarDecl::GetChildNameAt(risse_size index) const
+{
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("item")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_VarDeclPair::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0: return RISSE_WS("initializer");
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_MemberSel::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0: return RISSE_WS("object");
+	case 1: return RISSE_WS("membername");
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_MemberSel::GetDumpComment() const
+{
+	return IsDirect ?
+		RISSE_WS("direct"):
+		RISSE_WS("indirect");
 }
 //---------------------------------------------------------------------------
 
@@ -219,37 +275,6 @@ tRisseString tRisseASTNode_Trinary::GetChildNameAt(risse_size index) const
 	case 2: return RISSE_WS("child2");
 	}
 	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Trinary::GetDumpComment() const
-{
-	return RisseASTTrinaryTypeNames[TrinaryType];
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_MemberSel::GetChildNameAt(risse_size index) const
-{
-	switch(index)
-	{
-	case 0: return RISSE_WS("object");
-	case 1: return RISSE_WS("membername");
-	}
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_MemberSel::GetDumpComment() const
-{
-	return IsDirect ?
-		RISSE_WS("direct"):
-		RISSE_WS("indirect");
 }
 //---------------------------------------------------------------------------
 
@@ -339,31 +364,6 @@ tRisseString tRisseASTNode_For::GetChildNameAt(risse_size index) const
 	case 1: return RISSE_WS("condition");
 	case 2: return RISSE_WS("iterator");
 	case 3: return RISSE_WS("body");
-	}
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_VarDecl::GetChildNameAt(risse_size index) const
-{
-	if(index < inherited::GetChildCount())
-	{
-		risse_char buf[40];
-		return tRisseString(RISSE_WS("item")) + Risse_int64_to_str(index, buf);
-	}
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_VarDeclPair::GetChildNameAt(risse_size index) const
-{
-	switch(index)
-	{
-	case 0: return RISSE_WS("initializer");
 	}
 	return tRisseString();
 }
@@ -721,6 +721,97 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 			return form->AddVariableWithStatement(GetPosition(), ocAssignGlobal);
 	}
 	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
+			tRisseSSAForm *form, void * param) const
+{
+	// 変数宣言
+	// 子に再帰する
+	for(risse_size i = 0; i < GetChildCount(); i++)
+		GetChildAt(i)->GenerateReadSSA(form);
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
+			tRisseSSAForm *form, void * param) const
+{
+	tRisseSSAVariable * init_var;
+	if(Initializer)
+	{
+		// 初期化値がある
+		init_var = Initializer->GenerateReadSSA(form);
+	}
+	else
+	{
+		// void の定数値の作成
+		init_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+	}
+
+	// 文の作成
+	tRisseSSAVariable * var = NULL;
+	form->AddStatement(GetPosition(), ocAssign, &var, init_var);
+
+	// 変数のローカル名前空間への登録
+	form->GetLocalNamespace()->Add(Name, var);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void * tRisseASTNode_MemberSel::PrepareSSA(
+		tRisseSSAForm *form, tRisseASTNode_MemberSel::tPrepareMode mode) const
+{
+	tPrepareSSA * pws = new tPrepareSSA;
+	// オブジェクトの式の値を得る
+	pws->ObjectVar = Object->GenerateReadSSA(form);
+	// メンバ名の式の値を得る
+	pws->MemberNameVar = MemberName->GenerateReadSSA(form);
+
+	return pws;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_MemberSel::DoReadSSA(
+			tRisseSSAForm *form, void * param) const
+{
+	// メンバ選択演算子
+	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
+
+	// 文の作成
+	tRisseSSAVariable * ret_var = NULL;
+	form->AddStatement(GetPosition(), IsDirect?ocDGet:ocIGet, &ret_var,
+							pws->ObjectVar, pws->MemberNameVar);
+
+	// 戻りの変数を返す
+	return ret_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseASTNode_MemberSel::DoWriteSSA(
+		tRisseSSAForm *form, void * param, tRisseSSAVariable * value) const
+{
+	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
+
+	// 文の作成
+	form->AddStatement(GetPosition(), IsDirect?ocDSet:ocISet, NULL,
+							pws->ObjectVar, pws->MemberNameVar, value);
+
+	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -1146,57 +1237,9 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 tRisseSSAVariable * tRisseASTNode_Trinary::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
+	RISSE_ASSERT(TrinaryType == attCondition);
 	return tRisseASTNode_If::InternalDoReadSSA(form, GetPosition(),
 		RISSE_WS("cond"), Child1, Child2, Child3, true);
-
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void * tRisseASTNode_MemberSel::PrepareSSA(
-		tRisseSSAForm *form, tRisseASTNode_MemberSel::tPrepareMode mode) const
-{
-	tPrepareSSA * pws = new tPrepareSSA;
-	// オブジェクトの式の値を得る
-	pws->ObjectVar = Object->GenerateReadSSA(form);
-	// メンバ名の式の値を得る
-	pws->MemberNameVar = MemberName->GenerateReadSSA(form);
-
-	return pws;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_MemberSel::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
-{
-	// メンバ選択演算子
-	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
-
-	// 文の作成
-	tRisseSSAVariable * ret_var = NULL;
-	form->AddStatement(GetPosition(), IsDirect?ocDGet:ocIGet, &ret_var,
-							pws->ObjectVar, pws->MemberNameVar);
-
-	// 戻りの変数を返す
-	return ret_var;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tRisseASTNode_MemberSel::DoWriteSSA(
-		tRisseSSAForm *form, void * param, tRisseSSAVariable * value) const
-{
-	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
-
-	// 文の作成
-	form->AddStatement(GetPosition(), IsDirect?ocDSet:ocISet, NULL,
-							pws->ObjectVar, pws->MemberNameVar, value);
-
-	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -1455,49 +1498,6 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 
 	// スコープを pop
 	form->GetLocalNamespace()->Pop(); // スコープを pop
-
-	// このノードは答えを返さない
-	return NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
-{
-	// 変数宣言
-	// 子に再帰する
-	for(risse_size i = 0; i < GetChildCount(); i++)
-		GetChildAt(i)->GenerateReadSSA(form);
-	// このノードは答えを返さない
-	return NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
-{
-	tRisseSSAVariable * init_var;
-	if(Initializer)
-	{
-		// 初期化値がある
-		init_var = Initializer->GenerateReadSSA(form);
-	}
-	else
-	{
-		// void の定数値の作成
-		init_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
-	}
-
-	// 文の作成
-	tRisseSSAVariable * var = NULL;
-	form->AddStatement(GetPosition(), ocAssign, &var, init_var);
-
-	// 変数のローカル名前空間への登録
-	form->GetLocalNamespace()->Add(Name, var);
 
 	// このノードは答えを返さない
 	return NULL;

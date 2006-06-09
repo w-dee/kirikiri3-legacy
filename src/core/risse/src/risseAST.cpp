@@ -588,6 +588,104 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
+							tRisseSSAForm *form, void * param) const
+{
+	// 関数を表す式を得る
+	tRisseSSAVariable * func_var = Expression->GenerateReadSSA(form);
+
+	// 引数の列挙用配列
+	gc_vector<tRisseSSAVariable *> arg_vec;
+	arg_vec.reserve(inherited::GetChildCount());
+
+	// ... が指定されていなければ引数を処理
+	risse_uint32 exp_flag = 0; // 展開フラグ
+	if(!Omit)
+	{
+		// 引数を処理する
+		risse_uint32 exp_flag_bit = 1; // 展開フラグ用ビット
+		for(risse_size i = 0; i < inherited::GetChildCount(); i++, exp_flag_bit <<= 1)
+		{
+			if(exp_flag_bit == 0)
+			{
+				// 現状、関数の引数に列挙できる数は32個までとなっている
+				// ので、それを超えるとエラーになる
+				eRisseCompileError::Throw(
+					tRisseString(RISSE_WS_TR("Too many function arguments")),
+						form->GetScriptBlock(), GetPosition());
+			}
+
+			tRisseASTNode_FuncCallArg * arg =
+				reinterpret_cast<tRisseASTNode_FuncCallArg *>(
+												inherited::GetChildAt(i));
+			if(arg)
+			{
+				// 引数が省略されていない
+				tRisseSSAVariable * arg_var;
+
+				if(arg->GetExpression())
+				{
+					// 式がある
+					if(arg->GetExpand()) exp_flag |= exp_flag_bit; // 展開
+
+					// 引数のコードを生成
+					arg_var = arg->GetExpression()->GenerateReadSSA(form);
+				}
+				else
+				{
+					// 式がない
+					// この場合は別に引数が省略されているのではなくて
+					// * だけがそこに指定されている場合
+					// (無名の引数配列を意味する)
+					RISSE_ASSERT(arg->GetExpand() != false); // arg->GetExpand() は真のはず
+					arg_var = form->GetFunctionCollapseArgumentVariable();
+					if(!arg_var)
+					{
+						// 関数宣言の引数に無名の * が無い
+						eRisseCompileError::Throw(
+							tRisseString(
+							RISSE_WS_TR("No anonymous collapsed arguments defined in this method")),
+								form->GetScriptBlock(), GetPosition());
+					}
+				}
+
+				// 関数呼び出し文の Used に追加するために配列に追加
+				arg_vec.push_back(arg_var);
+			}
+			else
+			{
+				// 引数が省略されているので void を追加する
+				tRisseSSAVariable * void_var =
+					form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+
+				// 関数呼び出し文の Used に追加するために配列に追加
+				arg_vec.push_back(void_var);
+			}
+		}
+	}
+
+	// 関数呼び出しの文を生成する
+	tRisseSSAVariable * returned_var = NULL;
+	tRisseSSAStatement * call_stmt =
+		form->AddStatement(GetPosition(), CreateNew ? ocNew : ocFuncCall,
+					&returned_var, func_var);
+
+	call_stmt->SetFuncArgOmitted(Omit);
+	call_stmt->SetFuncExpandFlags(exp_flag);
+
+	for(gc_vector<tRisseSSAVariable *>::iterator i = arg_vec.begin();
+		i != arg_vec.end(); i++)
+	{
+		call_stmt->AddUsed(*i);
+	}
+
+	// 関数の戻り値を返す
+	return returned_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_ExprStmt::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {

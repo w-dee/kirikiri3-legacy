@@ -367,6 +367,9 @@ tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
 	Succ = NULL;
 	Declared = NULL;
 	TrueBranch = FalseBranch = NULL;
+	JumpTarget = NULL;
+	FuncExpandFlags = 0;
+	FuncArgOmitted = false;
 }
 //---------------------------------------------------------------------------
 
@@ -405,6 +408,7 @@ tRisseString tRisseSSAStatement::Dump() const
 	{
 	case ocNoOperation:			// なにもしない
 		return RISSE_WS("nop");
+
 	case ocPhi:		// φ関数
 		{
 			tRisseString ret;
@@ -464,6 +468,9 @@ tRisseString tRisseSSAStatement::Dump() const
 			}
 			else
 			{
+				// 関数呼び出しの類？
+				bool is_funccall = (Code == ocFuncCall || Code == ocNew);
+
 				// 使用している引数の最初の引数はメッセージの送り先なので
 				// オペレーションコードよりも前に置く
 				if(Used.size() != 0)
@@ -473,20 +480,30 @@ tRisseString tRisseSSAStatement::Dump() const
 				ret += tRisseString(RisseOpCodeNames[Code]);
 
 				// 使用している引数
-				if(Used.size() >= 2)
+				if(is_funccall && FuncArgOmitted)
 				{
+					// 関数呼び出しかnew
+					ret += RISSE_WS("(...)");
+				}
+				else if(Used.size() >= 2)
+				{
+					// 引数がある
 					tRisseString used;
+					risse_int arg_index = 0;
 					for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin() + 1;
-							i != Used.end(); i++)
+							i != Used.end(); i++, arg_index++)
 					{
 						if(!used.IsEmpty()) used += RISSE_WS(", ");
 						used += (*i)->Dump();
+						if(is_funccall && (FuncExpandFlags & (1<<arg_index)))
+							used += RISSE_WC('*'); // 展開フラグ
 					}
 					ret += RISSE_WS("(") + used +
 									RISSE_WS(")");
 				}
 				else
 				{
+					// 引数が無い
 					ret += RISSE_WS("()");
 				}
 			}
@@ -878,6 +895,7 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode 
 	CurrentSwitchInfo = NULL;
 	CurrentBreakInfo = NULL;
 	CurrentContinueInfo = NULL;
+	FunctionCollapseArgumentVariable = NULL;
 }
 //---------------------------------------------------------------------------
 

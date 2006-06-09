@@ -239,8 +239,13 @@ class tRisseSSAStatement : public tRisseCollectee
 	{
 		tRisseSSABlock * TrueBranch; //!< 分岐のジャンプ先(条件が真のとき)
 		tRisseSSABlock * JumpTarget; //!< 単純ジャンプのジャンプ先
+		risse_uint32 FuncExpandFlags; //!< ocFuncCall/ocNew; 配列展開のビットマスク(1=配列を展開する)
 	};
-	tRisseSSABlock * FalseBranch; //!< 分岐のジャンプ先(条件が偽のとき)
+	union
+	{
+		tRisseSSABlock * FalseBranch; //!< 分岐のジャンプ先(条件が偽のとき)
+		bool FuncArgOmitted; //!< 引数が省略 ( ... ) されたかどうか
+	};
 
 public:
 	//! @brief		コンストラクタ
@@ -335,6 +340,23 @@ public:
 	//! @brief		分岐のジャンプ先(条件が偽のとき)を取得する
 	//! @return		分岐のジャンプ先(条件が偽のとき)
 	tRisseSSABlock * GetFalseBranch() const { return FalseBranch; }
+
+
+	//! @brief		配列展開のビットマスクを設定する
+	//! @param		flags		配列展開のビットマスク
+	void SetFuncExpandFlags(risse_uint32 flags) { FuncExpandFlags = flags; }
+
+	//! @brief		配列展開のビットマスクを取得する
+	//! @return		配列展開のビットマスク
+	risse_uint32 GetFuncExpandFlags() const { return FuncExpandFlags; }
+
+	//! @brief		引数が省略されたかどうかを設定する
+	//! @param		omitted		引数が省略されたかどうか
+	void SetFuncArgOmitted(bool omitted) { FuncArgOmitted = omitted; }
+
+	//! @brief		引数が省略されたかどうかを取得する
+	//! @return		引数が省略されたかどうか
+	bool GetFuncArgOmitted() const { return FuncArgOmitted; }
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
@@ -580,6 +602,8 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseBreakInfo * CurrentBreakInfo; //!< 現在の break に関する情報
 	tRisseContinueInfo * CurrentContinueInfo; //!< 現在の continue に関する情報
 
+	tRisseSSAVariable * FunctionCollapseArgumentVariable; //!< 関数引数の無名の * を保持している変数
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		scriptblock		この SSA 形式が含まれるスクリプトブロック
@@ -646,6 +670,11 @@ public:
 		CurrentContinueInfo = info;
 		return prev;
 	}
+
+	//! @brief		関数引数の無名の * を保持している変数を得る
+	//! @return		関数引数の無名の * を保持している変数
+	tRisseSSAVariable * GetFunctionCollapseArgumentVariable() const
+		{ return FunctionCollapseArgumentVariable; }
 
 	//! @brief		新しい基本ブロックを作成する
 	//! @param		name	基本ブロック名プリフィックス

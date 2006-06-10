@@ -1390,7 +1390,9 @@ tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * p
 bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 		tRisseSSAVariable * value) const
 {
-/*
+	// インライン配列への書き込み
+	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
+
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
 		tRisseASTNode * child = GetChildAt(i);
@@ -1406,17 +1408,21 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 
 			// 要素の値を配列から得る
 			tRisseSSAVariable * elm_var = NULL;
-			form->AddStatement(GetPosition(), ocIGet, &elm_var,
-									array_var, index_var);
+			form->AddStatement(GetPosition(), ocIGet, &elm_var, value, index_var);
 
 			// 各要素に対する代入文を生成
-			if(!child->DoWriteSSA(form, data->Elements[i]))
+			if(!child->DoWriteSSA(form, data->Elements[i], elm_var))
 			{
-				
+				// 書き込みに失敗
+				risse_char i_str[40];
+				Risse_int_to_str(i, i_str);
+				eRisseCompileError::Throw(
+					tRisseString(
+					RISSE_WS_TR("Writable expression required at array index %1"), i_str),
+						form->GetScriptBlock(), GetPosition());
 			}
 		}
 	}
-*/
 	return true;
 }
 //---------------------------------------------------------------------------

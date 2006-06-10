@@ -276,7 +276,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	toplevel_def_list def_list
 	expr expr_with_comma factor_expr call_arg call_arg_list
 	func_expr_def func_call_expr func_call_expr_body
-	inline_array array_elm_list
+	inline_array array_elm_list array_elm
 	inline_dic dic_elm dic_elm_list
 	if if_else
 	block block_or_statement statement
@@ -908,15 +908,19 @@ regexp
 inline_array
 	: "["
 	  array_elm_list
-	  dummy_elm_opt
-	  "]"								{ $$ = $2; }
+	  "]"								{ $$ = $2; C(Array, $$)->Strip(); }
 ;
 
 /* an inline array's element list */
 array_elm_list
-	: /* empty */						{ $$ = N(Array)(LP); }
-	| expr								{ $$ = N(Array)(LP); C(Array, $$)->AddChild($1); }
-	| array_elm_list "," expr			{ $$ = $1; C(Array, $$)->AddChild($3); }
+	: array_elm							{ $$ = N(Array)(LP); if($1) C(Array, $$)->AddChild($1); }
+	| array_elm_list "," array_elm		{ $$ = $1; C(Array, $$)->AddChild($3); }
+;
+
+/* an inline array's element */
+array_elm
+	: /* empty */						{ $$ = NULL; }
+	| expr
 ;
 
 /* an inline dictionary */

@@ -65,6 +65,8 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(AssignThis		)		//!< = thisの代入
 	RISSE_OC_ENUM_ITEM(AssignSuper		)		//!< = superの代入
 	RISSE_OC_ENUM_ITEM(AssignGlobal		)		//!< = globalの代入
+	RISSE_OC_ENUM_ITEM(AssignNewArray	)		//!< = 新しい配列オブジェクトの代入
+	RISSE_OC_ENUM_ITEM(AssignNewDict	)		//!< = 新しい辞書配列オブジェクトの代入
 
 // 可変引数
 	RISSE_OC_ENUM_ITEM(FuncCall			)		//!< function call

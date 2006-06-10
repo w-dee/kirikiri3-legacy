@@ -358,6 +358,19 @@ public:
 	//! @param		node		追加したいノード
 	void AddChild(tRisseASTNode * node) { Array.push_back(node); if(node) node->SetParent(this); }
 
+	//! @brief		最後の子ノードを削除する
+	void PopChild()
+	{
+		Array.pop_back();
+	}
+
+	//! @brief		最後の子ノードを返す
+	//! @return		最後の子ノード
+	tRisseASTNode * GetLastChild() const
+	{
+		return Array.back();
+	}
+
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
@@ -1323,11 +1336,20 @@ class tRisseASTNode_Array : public tRisseASTNode_List
 {
 	typedef tRisseASTNode_List inherited;
 
+	//! @brief		PrepareSSA() で返す構造体
+	struct tPrepareSSA
+	{
+		gc_vector<void *> Elements;
+	};
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
 	tRisseASTNode_Array(risse_size position) :
 		tRisseASTNode_List(position, antArray) {;}
+
+	//! @brief		配列の最後の null を削除する
+	void Strip();
 
 	//! @brief		指定されたインデックスの子ノードの名前を得る
 	//! @param		index		インデックス
@@ -1338,11 +1360,24 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
+	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
+	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
+	void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const;
+
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+	//! @brief		SSA 形式の書き込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
+	bool DoWriteSSA(tRisseSSAForm *form, void * param,
+			tRisseSSAVariable * value) const;
 };
 //---------------------------------------------------------------------------
 

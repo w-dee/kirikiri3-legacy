@@ -280,6 +280,14 @@ tRisseString tRisseASTNode_Trinary::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
+void tRisseASTNode_Array::Strip()
+{
+	while(GetChildCount() > 0 && GetLastChild() == NULL) PopChild();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_Array::GetChildNameAt(risse_size index) const
 {
 	if(index < inherited::GetChildCount())
@@ -718,7 +726,10 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 
 	case aftGlobal:		// "global"
 			// 文を作成して戻る
-			return form->AddVariableWithStatement(GetPosition(), ocAssignGlobal);
+			tRisseSSAVariable * ret_var =
+				form->AddVariableWithStatement(GetPosition(), ocAssignGlobal);
+			ret_var->SetValueType(tRisseVariant::vtObject); // 結果は常に vtObject
+			return ret_var;
 	}
 	return NULL;
 }
@@ -1240,6 +1251,86 @@ tRisseSSAVariable * tRisseASTNode_Trinary::DoReadSSA(
 	RISSE_ASSERT(TrinaryType == attCondition);
 	return tRisseASTNode_If::InternalDoReadSSA(form, GetPosition(),
 		RISSE_WS("cond"), Child1, Child2, Child3, true);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void * tRisseASTNode_Array::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const
+{
+	// 配列の要素それぞれに対してprepareを行う
+	tPrepareSSA * data = new tPrepareSSA();
+	data->Elements.reserve(GetChildCount());
+
+	for(risse_size i = 0; i < GetChildCount(); i++)
+	{
+		tRisseASTNode * child = GetChildAt(i);
+		if(child)
+			data->Elements.push_back(child->PrepareSSA(form, mode));
+		else
+			data->Elements.push_back(NULL);
+	}
+
+	return data;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// インライン配列からの読み出し (配列オブジェクトを作成し、初期化して返す)
+	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
+
+	// 配列オブジェクトを作成
+	tRisseSSAVariable * array_var = NULL;
+	form->AddStatement(GetPosition(), ocAssignNewArray, &array_var);
+	array_var->SetValueType(tRisseVariant::vtObject); // 結果は常に variant
+
+	// 配列の reserve メソッドを呼び出し、配列数を予約する
+	if(GetChildCount() != 0)
+	{
+		tRisseSSAVariable * element_count_var =
+			form->AddConstantValueStatement(GetPosition(), (risse_int64)GetChildCount());
+		array_var->GenerateFuncCall(GetPosition(), RISSE_WS("reserve"), element_count_var);
+	}
+
+	// 各配列の要素となる変数を作成しつつ、配列に設定していく
+	for(risse_size i = 0; i < GetChildCount(); i++)
+	{
+		// インデックス
+		tRisseSSAVariable * index_var =
+			form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
+
+		// 内容
+		tRisseSSAVariable * element_var;
+		tRisseASTNode * child = GetChildAt(i);
+		if(child)
+		{
+			element_var = child->DoReadSSA(form, data->Elements[i]);
+		}
+		else
+		{
+			element_var =
+				form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+		}
+
+		// 代入文を生成
+		form->AddStatement(GetPosition(), ocISet, NULL,
+								array_var, index_var, element_var);
+	}
+
+	// 配列を返す
+	return array_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
+		tRisseSSAVariable * value) const
+{
+	return false;
 }
 //---------------------------------------------------------------------------
 

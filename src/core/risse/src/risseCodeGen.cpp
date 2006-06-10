@@ -310,6 +310,31 @@ tRisseString tRisseSSAVariable::GetQualifiedName() const
 
 
 //---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tRisseString & name,
+			tRisseSSAVariable * param1,
+			tRisseSSAVariable * param2,
+			tRisseSSAVariable * param3)
+{
+	// メソッド名を置く
+	tRisseSSAVariable * method_name_var =
+		Form->AddConstantValueStatement(pos, name);
+
+	// メソッドオブジェクトを得る
+	tRisseSSAVariable * func_var = NULL;
+	Form->AddStatement(pos, ocDGet, &func_var,
+							this, method_name_var);
+
+	// 関数呼び出し文を生成する
+	tRisseSSAVariable * ret_var = NULL;
+	Form->AddStatement(pos, ocFuncCall, &ret_var, func_var, param1, param2, param3);
+
+	// 戻る
+	return ret_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseSSAVariable::Dump() const
 {
 	return GetQualifiedName();
@@ -966,7 +991,9 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 		tRisseSSAVariable ** ret_var,
 			tRisseSSAVariable *using1,
 			tRisseSSAVariable *using2,
-			tRisseSSAVariable *using3)
+			tRisseSSAVariable *using3,
+			tRisseSSAVariable *using4
+			)
 {
 	// 文の作成
 	tRisseSSAStatement * stmt =
@@ -985,6 +1012,7 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 	if(using1) stmt->AddUsed(using1);
 	if(using2) stmt->AddUsed(using2);
 	if(using3) stmt->AddUsed(using3);
+	if(using4) stmt->AddUsed(using4);
 
 	// 文を返す
 	return stmt;

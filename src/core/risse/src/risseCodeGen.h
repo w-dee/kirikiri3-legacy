@@ -209,6 +209,18 @@ public:
 	//! @return		この変数がとりうる型
 	tRisseVariant::tType GetValueType() const { return ValueType; }
 
+	//! @brief		この変数のメソッド(固定名)を呼び出すSSA形式を生成する
+	//! @param		pos		ソースコード上の位置
+	//! @param		name	メソッド名
+	//! @param		param1	引数1
+	//! @param		param2	引数2
+	//! @param		param3	引数3
+	//! @return		関数の戻り値
+	tRisseSSAVariable * GenerateFuncCall(risse_size pos, const tRisseString & name,
+				tRisseSSAVariable * param1 = NULL,
+				tRisseSSAVariable * param2 = NULL,
+				tRisseSSAVariable * param3 = NULL);
+
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
@@ -699,12 +711,15 @@ public:
 	//! @param		using1	この文で使用する変数その1(NULL=使用しない)
 	//! @param		using2	この文で使用する変数その2(NULL=使用しない)
 	//! @param		using3	この文で使用する変数その3(NULL=使用しない)
+	//! @param		using4	この文で使用する変数その4(NULL=使用しない)
 	//! @return		新しく追加された文
 	tRisseSSAStatement * AddStatement(risse_size pos, tRisseOpCode code,
 		tRisseSSAVariable ** ret_var,
 			tRisseSSAVariable *using1 = NULL,
 			tRisseSSAVariable *using2 = NULL,
-			tRisseSSAVariable *using3 = NULL);
+			tRisseSSAVariable *using3 = NULL,
+			tRisseSSAVariable *using4 = NULL
+			);
 
 	//! @brief		現在の基本ブロックに文を追加し、定義された変数を返す
 	//! @param		pos		スクリプト上の位置
@@ -712,14 +727,16 @@ public:
 	//! @param		using1	この文で使用する変数その1(NULL=使用しない)
 	//! @param		using2	この文で使用する変数その2(NULL=使用しない)
 	//! @param		using3	この文で使用する変数その3(NULL=使用しない)
+	//! @param		using4	この文で使用する変数その4(NULL=使用しない)
 	//! @return		定義された変数
 	tRisseSSAVariable * AddVariableWithStatement(risse_size pos, tRisseOpCode code,
 			tRisseSSAVariable *using1 = NULL, 
 			tRisseSSAVariable *using2 = NULL, 
-			tRisseSSAVariable *using3 = NULL)
+			tRisseSSAVariable *using3 = NULL,
+			tRisseSSAVariable *using4 = NULL)
 	{
 		tRisseSSAVariable * ret_var = NULL;
-		AddStatement(pos, code, &ret_var, using1, using2, using3);
+		AddStatement(pos, code, &ret_var, using1, using2, using3, using4);
 		return ret_var;
 	}
 

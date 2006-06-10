@@ -558,6 +558,13 @@ tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
 
 
 
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
@@ -1035,7 +1042,13 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 			form->AddStatement(GetPosition(), code, &processed_var, child_var, one_var);
 
 			// その結果を識別子に書き込む文を生成
-			Child->DoWriteSSA(form, child_param, processed_var);
+			if(!Child->DoWriteSSA(form, child_param, processed_var))
+			{
+				eRisseCompileError::Throw(
+					tRisseString(
+					RISSE_WS_TR("Writable expression required against increment/decrement oprator")),
+						form->GetScriptBlock(), GetPosition());
+			}
 
 			// 演算結果を返す
 			return is_prepositioned ? processed_var : child_var;
@@ -1063,7 +1076,12 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
 
 			// 左辺に書き込む
-			Child1->GenerateWriteSSA(form, rhs_var);
+			if(!Child1->GenerateWriteSSA(form, rhs_var))
+			{
+				eRisseCompileError::Throw(
+					tRisseString(RISSE_WS_TR("Writable expression required at left side of '='")),
+						form->GetScriptBlock(), GetPosition());
+			}
 
 			return rhs_var; // 右辺値を返す
 		}
@@ -1124,7 +1142,14 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			form->AddStatement(GetPosition(), code, &ret_var, lhs_var, rhs_var);
 
 			// その結果を識別子に書き込む文を生成
-			Child1->DoWriteSSA(form, lhs_param, ret_var);
+			if(!Child1->DoWriteSSA(form, lhs_param, ret_var))
+			{
+				eRisseCompileError::Throw(
+					tRisseString(
+	RISSE_WS_TR("Writable expression required at left side of compound assignment operator")),
+						form->GetScriptBlock(), GetPosition());
+
+			}
 
 			// 演算結果を返す
 			return ret_var;
@@ -1149,10 +1174,22 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			tRisseSSAVariable * rhs_var = Child2->DoReadSSA(form, rhs_param);
 
 			// 右辺の値を左辺に代入
-			Child1->DoWriteSSA(form, lhs_param, rhs_var);
+			if(!Child1->DoWriteSSA(form, lhs_param, rhs_var))
+			{
+				eRisseCompileError::Throw(
+					tRisseString(
+					RISSE_WS_TR("Writable expression required at left side of '<->'")),
+						form->GetScriptBlock(), GetPosition());
+			}
 
 			// 左辺の値を右辺に代入
-			Child2->DoWriteSSA(form, rhs_param, lhs_var);
+			if(!Child2->DoWriteSSA(form, rhs_param, lhs_var))
+			{
+				eRisseCompileError::Throw(
+					tRisseString(
+					RISSE_WS_TR("Writable expression required at right side of '<->'")),
+						form->GetScriptBlock(), GetPosition());
+			}
 
 			// このノードは答えを返さない
 			return NULL;
@@ -1258,17 +1295,40 @@ tRisseSSAVariable * tRisseASTNode_Trinary::DoReadSSA(
 //---------------------------------------------------------------------------
 void * tRisseASTNode_Array::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const
 {
+	// この数値を超える量の インデックス用数値定数はここでは作成しない
+	// (大量のインデックス用定数が変数領域を埋め尽くすのを避けるため)
+	const risse_size max_prepare_index = 4; 
+
 	// 配列の要素それぞれに対してprepareを行う
 	tPrepareSSA * data = new tPrepareSSA();
 	data->Elements.reserve(GetChildCount());
+	data->Indices.reserve(std::max(max_prepare_index, GetChildCount()));
 
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
+		// 各要素の準備
 		tRisseASTNode * child = GetChildAt(i);
 		if(child)
 			data->Elements.push_back(child->PrepareSSA(form, mode));
 		else
 			data->Elements.push_back(NULL);
+
+		// インデックスの準備
+		if(mode == pmWrite && !child)
+		{
+			// 書き込みモードかつchildが NULL の場合はインデックスを準備する必要はない
+			data->Indices.push_back(NULL);
+		}
+		else
+		{
+			if(i < max_prepare_index)
+			{
+				tRisseSSAVariable * index_var =
+					form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
+
+				data->Indices.push_back(index_var);
+			}
+		}
 	}
 
 	return data;
@@ -1298,22 +1358,22 @@ tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * p
 	// 各配列の要素となる変数を作成しつつ、配列に設定していく
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
-		// インデックス
-		tRisseSSAVariable * index_var =
-			form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
-
 		// 内容
 		tRisseSSAVariable * element_var;
 		tRisseASTNode * child = GetChildAt(i);
 		if(child)
-		{
 			element_var = child->DoReadSSA(form, data->Elements[i]);
-		}
 		else
-		{
 			element_var =
 				form->AddConstantValueStatement(GetPosition(), tRisseVariant());
-		}
+
+		// インデックス用数値定数
+		tRisseSSAVariable * index_var;
+		if(i < data->Indices.size())
+			index_var = data->Indices[i]; // あらかじめインデックス用定数が用意されている
+		else
+			index_var =
+				form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
 
 		// 代入文を生成
 		form->AddStatement(GetPosition(), ocISet, NULL,
@@ -1330,7 +1390,34 @@ tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * p
 bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 		tRisseSSAVariable * value) const
 {
-	return false;
+/*
+	for(risse_size i = 0; i < GetChildCount(); i++)
+	{
+		tRisseASTNode * child = GetChildAt(i);
+		if(child)
+		{
+			// インデックス用数値定数
+			tRisseSSAVariable * index_var;
+			if(i < data->Indices.size())
+				index_var = data->Indices[i]; // あらかじめインデックス用定数が用意されている
+			else
+				index_var =
+					form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
+
+			// 要素の値を配列から得る
+			tRisseSSAVariable * elm_var = NULL;
+			form->AddStatement(GetPosition(), ocIGet, &elm_var,
+									array_var, index_var);
+
+			// 各要素に対する代入文を生成
+			if(!child->DoWriteSSA(form, data->Elements[i]))
+			{
+				
+			}
+		}
+	}
+*/
+	return true;
 }
 //---------------------------------------------------------------------------
 

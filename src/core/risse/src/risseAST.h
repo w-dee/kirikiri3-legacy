@@ -322,15 +322,10 @@ public:
 	//! @param		SSA 形式の書き込み用の表現を生成する
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
-	void GenerateWriteSSA(tRisseSSAForm *form,
+	//! @return		書き込みが成功したかどうか
+	bool GenerateWriteSSA(tRisseSSAForm *form,
 			tRisseSSAVariable * value) const
-	{
-		if(!DoWriteSSA(form, PrepareSSA(form, pmWrite), value))
-		{
-			// TODO: ここでエラー
-		}
-	}
-
+	{  return DoWriteSSA(form, PrepareSSA(form, pmWrite), value); }
 };
 //---------------------------------------------------------------------------
 
@@ -1339,7 +1334,8 @@ class tRisseASTNode_Array : public tRisseASTNode_List
 	//! @brief		PrepareSSA() で返す構造体
 	struct tPrepareSSA
 	{
-		gc_vector<void *> Elements;
+		gc_vector<void *> Elements; //!< 各要素の準備用データ
+		gc_vector<tRisseSSAVariable *> Indices; //!< 各インデックスを表す数値定数
 	};
 
 public:

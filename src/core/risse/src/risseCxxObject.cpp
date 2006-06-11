@@ -76,7 +76,7 @@ tRisseString tRisseMemberAttribute::AsString() const
 			default: ;
 		}
 	}
-	if(Override != acNone)
+	if(Override != ocNone)
 	{
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
 		switch(Override)
@@ -87,7 +87,7 @@ tRisseString tRisseMemberAttribute::AsString() const
 			default: ;
 		}
 	}
-	if(Property != acNone)
+	if(Property != pcNone)
 	{
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
 		switch(Property)

@@ -460,6 +460,23 @@ tRisseString tRisseSSAStatement::Dump() const
 			return ret;
 		}
 
+	case ocAssignNewRegExp: // 新しい正規表現オブジェクト
+		{
+			tRisseString ret;
+			RISSE_ASSERT(Used.size() == 2);
+			ret += Declared->Dump() + RISSE_WS(" = AssignNewRegExp(");
+
+			ret +=	Used[0]->Dump() + RISSE_WS(", ") +
+					Used[1]->Dump() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
 	case ocJump:
 		{
 			RISSE_ASSERT(JumpTarget != NULL);

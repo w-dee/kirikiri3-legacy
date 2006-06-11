@@ -74,10 +74,10 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
 	RISSE_AST_ENUM_ITEM(ant, CastAttr		)		//!< 属性のキャスト
-	RISSE_AST_ENUM_ITEM(ant, RegExp			)		//!< 正規表現パターン
 	RISSE_AST_ENUM_ITEM(ant, Array			)		//!< インライン配列
 	RISSE_AST_ENUM_ITEM(ant, Dict			)		//!< インライン辞書配列
 	RISSE_AST_ENUM_ITEM(ant, DictPair		)		//!< インライン辞書配列の名前と値
+	RISSE_AST_ENUM_ITEM(ant, RegExp			)		//!< 正規表現パターン
 	RISSE_AST_ENUM_ITEM(ant, If				)		//!< if (とelse)
 	RISSE_AST_ENUM_ITEM(ant, While			)		//!< while と do ～ while
 	RISSE_AST_ENUM_ITEM(ant, For			)		//!< for
@@ -671,45 +671,6 @@ public:
 	//! @param		index		インデックス
 	//! @return		名前
 	tRisseString GetChildNameAt(risse_size index) const;
-
-	//! @brief		ダンプ時のこのノードのコメントを得る
-	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const;
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief	正規表現パターンASTノード(type=antRegExp)
-//---------------------------------------------------------------------------
-class tRisseASTNode_RegExp : public tRisseASTNode_NoChildren
-{
-	tRisseString Pattern; //!< 正規表現パターン
-	tRisseString Flags; //!< 正規表現フラグ
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
-	//! @param		pattern			正規表現パターン
-	//! @param		flags			正規表現フラグ
-	tRisseASTNode_RegExp(risse_size position,
-		const tRisseString & pattern, const tRisseString & flags) :
-		tRisseASTNode_NoChildren(position, antRegExp), Pattern(pattern), Flags(flags)
-	{;}
-
-	//! @brief		正規表現パターンを得る
-	//! @return		正規表現パターン
-	const tRisseString & GetPattern() const { return Pattern; }
-
-	//! @brief		正規表現フラグを得る
-	//! @return		正規表現フラグ
-	const tRisseString & GetFlags() const { return Flags; }
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
@@ -1498,6 +1459,45 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief	正規表現パターンASTノード(type=antRegExp)
+//---------------------------------------------------------------------------
+class tRisseASTNode_RegExp : public tRisseASTNode_NoChildren
+{
+	tRisseString Pattern; //!< 正規表現パターン
+	tRisseString Flags; //!< 正規表現フラグ
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		pattern			正規表現パターン
+	//! @param		flags			正規表現フラグ
+	tRisseASTNode_RegExp(risse_size position,
+		const tRisseString & pattern, const tRisseString & flags) :
+		tRisseASTNode_NoChildren(position, antRegExp), Pattern(pattern), Flags(flags)
+	{;}
+
+	//! @brief		正規表現パターンを得る
+	//! @return		正規表現パターン
+	const tRisseString & GetPattern() const { return Pattern; }
+
+	//! @brief		正規表現フラグを得る
+	//! @return		正規表現フラグ
+	const tRisseString & GetFlags() const { return Flags; }
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	if (とelse)(type=antIf)
 //---------------------------------------------------------------------------
 class tRisseASTNode_If : public tRisseASTNode
@@ -1918,12 +1918,6 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 

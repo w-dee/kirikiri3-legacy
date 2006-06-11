@@ -140,15 +140,6 @@ tRisseString tRisseASTNode_Context::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_RegExp::GetDumpComment() const
-{
-	return tRisseString(RISSE_WS("pattern=")) + Pattern.AsHumanReadable() +
-		RISSE_WS(", flags=") + Flags.AsHumanReadable();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_Factor::GetDumpComment() const
 {
 	tRisseString ret = RisseASTFactorTypeNames[FactorType];
@@ -322,6 +313,15 @@ tRisseString tRisseASTNode_DictPair::GetChildNameAt(risse_size index) const
 	case 1: return RISSE_WS("value");
 	}
 	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_RegExp::GetDumpComment() const
+{
+	return tRisseString(RISSE_WS("pattern=")) + Pattern.AsHumanReadable() +
+		RISSE_WS(", flags=") + Flags.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 
@@ -1534,6 +1534,24 @@ bool tRisseASTNode_Dict::DoWriteSSA(tRisseSSAForm *form, void * param,
 		}
 	}
 	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_RegExp::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// 文字列定数を作成
+	tRisseSSAVariable * pattern_var =
+			form->AddConstantValueStatement(GetPosition(), Pattern);
+	tRisseSSAVariable * flags_var =
+			form->AddConstantValueStatement(GetPosition(), Flags);
+	// 正規表現オブジェクトを作成する文を生成してその結果を返す
+	tRisseSSAVariable * regexp_var = NULL;
+	form->AddStatement(GetPosition(), ocAssignNewRegExp, &regexp_var,
+		pattern_var, flags_var);
+	regexp_var->SetValueType(tRisseVariant::vtObject); // 結果は常に object
+	return regexp_var;
 }
 //---------------------------------------------------------------------------
 

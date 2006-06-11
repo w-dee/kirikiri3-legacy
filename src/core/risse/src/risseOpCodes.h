@@ -67,6 +67,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(AssignGlobal		)		//!< = globalの代入
 	RISSE_OC_ENUM_ITEM(AssignNewArray	)		//!< = 新しい配列オブジェクトの代入
 	RISSE_OC_ENUM_ITEM(AssignNewDict	)		//!< = 新しい辞書配列オブジェクトの代入
+	RISSE_OC_ENUM_ITEM(AssignNewRegExp	)		//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
 
 // 可変引数
 	RISSE_OC_ENUM_ITEM(FuncCall			)		//!< function call
@@ -77,7 +78,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(Jump				)		//!< 単純なジャンプ
 	RISSE_OC_ENUM_ITEM(Branch			)		//!< 分岐
 
-// 引数なし
+// 引数1+なし
 	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not
 	RISSE_OC_ENUM_ITEM(BitNot			)		//!< "~" bit not
 	RISSE_OC_ENUM_ITEM(DecAssign		)		//!< "--" decrement
@@ -85,7 +86,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(Plus				)		//!< "+"
 	RISSE_OC_ENUM_ITEM(Minus			)		//!< "-"
 
-// 引数1つ
+// 引数1+1つ
 	RISSE_OC_ENUM_ITEM(LogOr			)		//!< ||
 	RISSE_OC_ENUM_ITEM(LogAnd			)		//!< &&
 	RISSE_OC_ENUM_ITEM(BitOr			)		//!< |
@@ -132,7 +133,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(DDelete			)		//!< delete .
 	RISSE_OC_ENUM_ITEM(IDelete			)		//!< delete [ ]
 
-// 引数2つ
+// 引数1+2つ
 	RISSE_OC_ENUM_ITEM(DSet				)		//!< set .
 	RISSE_OC_ENUM_ITEM(ISet				)		//!< set [ ]
 

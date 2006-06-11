@@ -1385,6 +1385,13 @@ class tRisseASTNode_Dict : public tRisseASTNode_List
 {
 	typedef tRisseASTNode_List inherited;
 
+	//! @brief		PrepareSSA() で返す構造体
+	struct tPrepareSSA
+	{
+		gc_vector<void *> Names; //!< 各要素の「名前」の準備用データ
+		gc_vector<void *> Values; //!< 各要素の「値」の準備用データ
+	};
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
@@ -1400,11 +1407,24 @@ public:
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
+	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
+	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
+	void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const;
+
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+	//! @brief		SSA 形式の書き込み用の表現を生成する
+	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
+	bool DoWriteSSA(tRisseSSAForm *form, void * param,
+			tRisseSSAVariable * value) const;
 };
 //---------------------------------------------------------------------------
 

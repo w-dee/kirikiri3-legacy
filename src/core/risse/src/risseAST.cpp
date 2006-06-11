@@ -630,6 +630,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 						form->GetScriptBlock(), GetPosition());
 			}
 
+			RISSE_ASSERT(inherited::GetChildAt(i)->GetType() == antFuncCallArg);
 			tRisseASTNode_FuncCallArg * arg =
 				reinterpret_cast<tRisseASTNode_FuncCallArg *>(
 												inherited::GetChildAt(i));
@@ -1345,7 +1346,7 @@ tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * p
 	// 配列オブジェクトを作成
 	tRisseSSAVariable * array_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewArray, &array_var);
-	array_var->SetValueType(tRisseVariant::vtObject); // 結果は常に variant
+	array_var->SetValueType(tRisseVariant::vtObject); // 結果は常に object
 
 	// 配列の reserve メソッドを呼び出し、配列数を予約する
 	if(GetChildCount() != 0)
@@ -1356,6 +1357,7 @@ tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * p
 	}
 
 	// 各配列の要素となる変数を作成しつつ、配列に設定していく
+	RISSE_ASSERT(data->Elements.size() == GetChildCount());
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
 		// 内容
@@ -1393,6 +1395,7 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 	// インライン配列への書き込み
 	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
 
+	RISSE_ASSERT(data->Elements.size() == GetChildCount());
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
 		tRisseASTNode * child = GetChildAt(i);
@@ -1421,6 +1424,113 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 					RISSE_WS_TR("Writable expression required at array index %1"), i_str),
 						form->GetScriptBlock(), GetPosition());
 			}
+		}
+	}
+	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void * tRisseASTNode_Dict::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const
+{
+	// 辞書配列用の名前と値を準備
+	tPrepareSSA * data = new tPrepareSSA();
+	data->Names.reserve(GetChildCount());
+	data->Values.reserve(GetChildCount());
+
+	// 各要素に対して ...
+	for(risse_size i = 0; i < GetChildCount(); i++)
+	{
+		RISSE_ASSERT(inherited::GetChildAt(i)->GetType() == antDictPair);
+		tRisseASTNode_DictPair * pair_node =
+			reinterpret_cast<tRisseASTNode_DictPair*>(GetChildAt(i));
+
+		// 名前と値を準備
+		void * name_prep_data = pair_node->GetName()->PrepareSSA(form, pmRead);
+													// 名前は常に読み込み扱い
+		void * value_prep_data = pair_node->GetValue()->PrepareSSA(form, mode);
+
+		data->Names.push_back(name_prep_data);
+		data->Values.push_back(value_prep_data);
+	}
+	return data;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Dict::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// インライン辞書配列からの読み出し (辞書配列オブジェクトを作成し、初期化して返す)
+	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
+
+	// 辞書配列オブジェクトを作成
+	tRisseSSAVariable * dict_var = NULL;
+	form->AddStatement(GetPosition(), ocAssignNewDict, &dict_var);
+	dict_var->SetValueType(tRisseVariant::vtObject); // 結果は常に object
+
+	RISSE_ASSERT(data->Names.size() == GetChildCount());
+	RISSE_ASSERT(data->Values.size() == GetChildCount());
+
+	// 各要素に対して ...
+	for(risse_size i = 0; i < GetChildCount(); i++)
+	{
+		tRisseASTNode_DictPair * pair_node =
+			reinterpret_cast<tRisseASTNode_DictPair*>(GetChildAt(i));
+
+		// 名前の値を得る
+		tRisseSSAVariable * name_var =
+			pair_node->GetName()->DoReadSSA(form, data->Names[i]);
+
+		// 値の値を得る
+		tRisseSSAVariable * value_var =
+			pair_node->GetValue()->DoReadSSA(form, data->Values[i]);
+
+		// 代入文を生成
+		form->AddStatement(GetPosition(), ocISet, NULL,
+								dict_var, name_var, value_var);
+	}
+	return dict_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseASTNode_Dict::DoWriteSSA(tRisseSSAForm *form, void * param,
+		tRisseSSAVariable * value) const
+{
+	// インライン辞書配列への書き込み (右辺値を辞書配列と見なし、値を設定する)
+	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
+
+	RISSE_ASSERT(data->Names.size() == GetChildCount());
+	RISSE_ASSERT(data->Values.size() == GetChildCount());
+
+	// 各要素に対して ...
+	for(risse_size i = 0; i < GetChildCount(); i++)
+	{
+		tRisseASTNode_DictPair * pair_node =
+			reinterpret_cast<tRisseASTNode_DictPair*>(GetChildAt(i));
+
+		// 名前の値を得る
+		tRisseSSAVariable * name_var =
+			pair_node->GetName()->DoReadSSA(form, data->Names[i]);
+
+		// その名前に対する値を得る
+		tRisseSSAVariable * value_var = NULL;
+		form->AddStatement(GetPosition(), ocIGet, &value_var,
+								value, name_var);
+
+		// 値を設定する
+		if(!pair_node->GetValue()->DoWriteSSA(form, data->Values[i], value_var))
+		{
+			// 書き込みに失敗
+			risse_char i_str[40];
+			Risse_int_to_str(i, i_str);
+			eRisseCompileError::Throw(
+				tRisseString(
+				RISSE_WS_TR("Writable expression required at value of dictionary element index %1"), i_str),
+					form->GetScriptBlock(), GetPosition());
 		}
 	}
 	return true;

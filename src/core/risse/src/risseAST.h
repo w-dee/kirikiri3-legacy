@@ -987,11 +987,10 @@ class tRisseASTNode_Id : public tRisseASTNode
 	//! @brief		PrepareSSA() で返す構造体
 	struct tPrepareSSA
 	{
-		bool IsLocal; //!< ローカル変数への書き込み
 		const tRisseASTNode_MemberSel * MemberSel;
 			//!< ローカル変数ではなかったときに生成された tRisseASTNode_MemberSel のインスタンス
+			//!< ローカル変数の場合は NULL
 		void * MemberSelParam; //!< tRisseASTNode_MemberSel::PrepareSSA() が生成した情報
-		tRisseSSAVariable * Var; //!< 検索の結果見つかった変数
 	};
 
 public:
@@ -1059,11 +1058,6 @@ public:
 	//! @brief		この識別子を this 内にアクセスする AST ノードを作成して返す
 	//! @return		この識別子を this 内にアクセスする AST ノード
 	const tRisseASTNode_MemberSel * CreateAccessNodeOnThis() const;
-
-	//! @brief		この識別子へアクセスするための AST ノードを返す
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @return		この識別子へアクセスするための AST ノード
-	const tRisseASTNode * GetAccessNode(tRisseSSAForm * form) const;
 };
 //---------------------------------------------------------------------------
 

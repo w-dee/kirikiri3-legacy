@@ -100,40 +100,6 @@ void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable *
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::Update(const tRisseString & name, tRisseSSAVariable * where)
-{
-	RISSE_ASSERT(where != NULL);
-
-	// 名前空間を探す
-	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
-	{
-		tAliasMap::iterator i = (*ri)->AliasMap.find(name);
-		if(i != (*ri)->AliasMap.end())
-		{
-			// 見つかった
-			tRisseString n_name = i->second; // 番号付き変数名
-
-			// 同じスコープ内に番号付きの名前があるはず
-			tVariableMap::iterator vi = (*ri)->VariableMap.find(n_name);
-			RISSE_ASSERT(vi != (*ri)->VariableMap.end()); // 同じスコープ内にあるよね
-
-			vi->second = where; // 上書き
-
-			// 番号付きの名前を where に設定する
-			where->SetName(name);
-			where->SetNumberedName(n_name);
-
-			return; // 戻る
-		}
-	}
-
-	// 見つからない
-	RISSE_ASSERT(!"variable not found in tRisseSSALocalNamespace::Update");
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 bool tRisseSSALocalNamespace::Find(const tRisseString & name,
 	tRisseSSAVariable ** var) const
 {
@@ -158,6 +124,15 @@ bool tRisseSSALocalNamespace::Find(const tRisseString & name,
 	}
 	// 見つからなかった
 	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseSSALocalNamespace::IsAvailable(const tRisseString & name) const
+{
+	return Find(name);
+	// TODO: 「チェーンされた」名前空間の検索
 }
 //---------------------------------------------------------------------------
 
@@ -235,6 +210,61 @@ void tRisseSSALocalNamespace::MarkToCreatePhi()
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
+							risse_size pos, const tRisseString & name)
+{
+	tRisseSSAVariable * ret = MakePhiFunction(pos, name);
+	if(!ret)
+	{
+		// チェーンされた名前空間を探す
+	}
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
+					const tRisseString & name, tRisseSSAVariable * value)
+{
+	// ローカル変数に上書きする
+	RISSE_ASSERT(value != NULL);
+
+	// 名前空間を探す
+	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
+	{
+		tAliasMap::iterator i = (*ri)->AliasMap.find(name);
+		if(i != (*ri)->AliasMap.end())
+		{
+			// 見つかった
+			tRisseString n_name = i->second; // 番号付き変数名
+
+			// 同じスコープ内に番号付きの名前があるはず
+			tVariableMap::iterator vi = (*ri)->VariableMap.find(n_name);
+			RISSE_ASSERT(vi != (*ri)->VariableMap.end()); // 同じスコープ内にあるよね
+
+			// 文の作成
+			tRisseSSAVariable * ret_var = NULL;
+			form->AddStatement(pos, ocAssign, &ret_var, value);
+
+			// 変数の上書き
+			vi->second = ret_var; // 上書き
+
+			// 番号付きの名前を ret_var に設定する
+			ret_var->SetName(name);
+			ret_var->SetNumberedName(n_name);
+
+			return true; // 戻る
+		}
+	}
+
+	// 見つからない
+	// チェーンされた名前空間に書き込む
+	return false;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -1033,6 +1063,13 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 
 	// 文を返す
 	return stmt;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node)
+{
 }
 //---------------------------------------------------------------------------
 

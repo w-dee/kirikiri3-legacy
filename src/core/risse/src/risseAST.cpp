@@ -789,7 +789,7 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 
 //---------------------------------------------------------------------------
 void * tRisseASTNode_MemberSel::PrepareSSA(
-		tRisseSSAForm *form, tRisseASTNode_MemberSel::tPrepareMode mode) const
+		tRisseSSAForm *form, tPrepareMode mode) const
 {
 	tPrepareSSA * pws = new tPrepareSSA;
 	// オブジェクトの式の値を得る
@@ -837,38 +837,24 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 
 //---------------------------------------------------------------------------
 void * tRisseASTNode_Id::PrepareSSA(
-			tRisseSSAForm *form, tRisseASTNode_Id::tPrepareMode mode) const
+			tRisseSSAForm *form, tPrepareMode mode) const
 {
 	tPrepareSSA * pws = new tPrepareSSA;
 
-	tRisseSSAVariable * dest_var;
+	bool need_access_this; // this 上のメンバにアクセスする必要があるかどうか
+	need_access_this = !form->GetLocalNamespace()->IsAvailable(Name);
 
-	bool local_var_found; // ローカル変数が見つかったかどうか
-
-	if(mode == pmRead || mode == pmReadWrite)
+	if(need_access_this)
 	{
-		// 読み込みの場合は書き込みの場合と異なりφ関数の作成が必要
-		dest_var = form->GetLocalNamespace()->MakePhiFunction(GetPosition(), Name);
-		local_var_found = dest_var != NULL;
-	}
-	else
-	{
-		dest_var = NULL;
-		local_var_found = form->GetLocalNamespace()->Find(Name, &dest_var);
-	}
-
-	if(!local_var_found)
-	{
-		// ローカル変数に見つからない
-		pws->IsLocal = false;
+		// this 上のメンバにアクセスする必要がある
 		pws->MemberSel = CreateAccessNodeOnThis();
 		pws->MemberSelParam = pws->MemberSel->PrepareSSA(form, mode);
 	}
 	else
 	{
 		// ローカル変数に見つかった
-		pws->IsLocal = true;
-		pws->Var = dest_var;
+		pws->MemberSel = NULL;
+		pws->MemberSelParam = NULL;
 	}
 
 	return pws;
@@ -880,10 +866,12 @@ void * tRisseASTNode_Id::PrepareSSA(
 tRisseSSAVariable * tRisseASTNode_Id::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
+	// PrepareSSA と このメソッドの間でローカル変数の状態が変わると意図した
+	// 動作をしない可能性があるので注意
 	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
 	// 識別子
-	if(!pws->IsLocal)
+	if(pws->MemberSel)
 	{
 		// ローカル変数に見つからない
 		// ローカル変数に見つからない場合は、this へのアクセスを行う物として
@@ -895,7 +883,7 @@ tRisseSSAVariable * tRisseASTNode_Id::DoReadSSA(
 	else
 	{
 		// ローカル変数に見つかった
-		return pws->Var;
+		return form->GetLocalNamespace()->Read(form, GetPosition(), Name);
 	}
 }
 //---------------------------------------------------------------------------
@@ -906,25 +894,24 @@ bool tRisseASTNode_Id::DoWriteSSA(
 		tRisseSSAForm *form, void * param,
 		tRisseSSAVariable * value) const
 {
+	// PrepareSSA と このメソッドの間でローカル変数の状態が変わると意図した
+	// 動作をしない可能性があるので注意
 	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
-	if(!pws->IsLocal)
+	if(pws->MemberSel)
 	{
 		// ローカル変数には見つからなかった
 		// tRisseASTNode_MemberSel::DoWriteSSA を呼ぶ
 		pws->MemberSel->DoWriteSSA(form, pws->MemberSelParam, value);
+		return true;
 	}
 	else
 	{
 		// ローカル変数に見つかった;ローカル変数に上書きする
-		// 文の作成
-		tRisseSSAVariable * ret_var = NULL;
-		form->AddStatement(GetPosition(), ocAssign, &ret_var, value);
-
-		// ローカル名前空間の更新
-		form->GetLocalNamespace()->Update(Name, ret_var);
+		bool result = form->GetLocalNamespace()->Write(form, GetPosition(), Name, value);
+		RISSE_ASSERT(result == true);
+		return result;
 	}
-	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -936,17 +923,6 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
 		new tRisseASTNode_MemberSel(GetPosition(),
 		new tRisseASTNode_Factor(GetPosition(), aftThis),
 		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), true);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-const tRisseASTNode * tRisseASTNode_Id::GetAccessNode(tRisseSSAForm * form) const
-{
-	if(form->GetLocalNamespace()->MakePhiFunction(GetPosition(), Name))
-		return this; // ローカル名前空間に存在する
-	const tRisseASTNode * node = CreateAccessNodeOnThis();
-	return node; // 存在しないので this 上へのアクセスを行う
 }
 //---------------------------------------------------------------------------
 

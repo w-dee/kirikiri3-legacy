@@ -78,18 +78,21 @@ public:
 	//! @param		where		その変数を表す SSA 変数表現
 	void Add(const tRisseString & name, tRisseSSAVariable * where);
 
-	//! @brief		変数を更新する
-	//! @param		name		変数名
-	//! @param		where		その変数を表す SSA 変数表現
-	void Update(const tRisseString & name, tRisseSSAVariable * where);
-
 	//! @brief		変数を探す
 	//! @param		name		変数名
 	//! @param		var 		その変数を表す SSA 変数表現 を格納する先(NULL = 要らない)
 	//! @return		変数が見つかったかどうか
 	//! @note		変数が見つからなかった場合は *var にはなにも書き込まれない.
-	//!				name は番号なしの変数名であると見なされる
+	//!				name は番号なしの変数名であると見なされる.
 	bool Find(const tRisseString & name, tRisseSSAVariable ** var = NULL) const;
+
+	//! @brief		変数が存在するかどうかを調べる
+	//! @param		name		変数名
+	//! @return		変数が見つかったかどうか
+	//!				name は番号なしの変数名であると見なされる.
+	//!				このメソッドは「チェーンされた」名前空間も検索し、そこに変数があるならば
+	//!				真を返す
+	bool IsAvailable(const tRisseString & name) const;
 
 	//! @brief		変数を削除する
 	//! @param		name		変数名
@@ -98,7 +101,6 @@ public:
 	bool Delete(const tRisseString & name);
 
 	//! @brief		必要ならばφ関数を作成する
-	//! @param		form	φ関数を生成するための SSA 形式インスタンス
 	//! @param		pos		スクリプト上の位置
 	//! @param		name	変数名
 	//! @param		n_name	番号付き変数名
@@ -111,6 +113,26 @@ public:
 	//!				NULL に設定する(NULL=変数は存在しているがφ関数を作成する必要がある
 	//!				という意味)
 	void MarkToCreatePhi();
+
+	//! @brief		変数に読み込みのためにアクセスをする(必要ならばφ関数などが作成される)
+	//! @param		form	SSA形式インスタンス
+	//! @param		pos		スクリプト上の位置
+	//! @param		name	変数名
+	//! @return		見つかった変数、あるいはφ関数の戻り値など (NULL=ローカル変数に見つからなかった)
+	//! @note		このメソッドは、「チェーンされた」名前空間も検索し、そこに変数があるならば
+	//!				チェーンされた名前空間へアクセスするための文を作成する
+	tRisseSSAVariable * Read(tRisseSSAForm * form, risse_size pos, const tRisseString & name);
+
+	//! @brief		変数に書き込みのためにアクセスをする(必要ならばφ関数などが作成される)
+	//! @param		form	SSA形式インスタンス
+	//! @param		pos		スクリプト上の位置
+	//! @param		name	変数名
+	//! @param		value	書き込む値を保持しているSSA変数
+	//! @return		書き込み成功したか(変数が見つからないなど、書き込みに失敗した場合は偽)
+	//! @note		このメソッドは、「チェーンされた」名前空間も検索し、そこに変数があるならば
+	//!				チェーンされた名前空間へアクセスするための文を作成する
+	bool Write(tRisseSSAForm * form, risse_size pos, const tRisseString & name,
+				tRisseSSAVariable * value);
 };
 //---------------------------------------------------------------------------
 
@@ -739,6 +761,11 @@ public:
 		AddStatement(pos, code, &ret_var, using1, using2, using3, using4);
 		return ret_var;
 	}
+
+	//! @brief		新しい遅延評価ブロックを作成する
+	//! @param		node		遅延評価ブロックのルートノード
+	//! @return		その遅延評価ブロックを表すSSA変数
+	tRisseSSAVariable * CreateLazyBlock(tRisseASTNode * node);
 
 	//! @brief		ユニークな番号を得る
 	risse_int GetUniqueNumber()

@@ -366,7 +366,7 @@ block_or_statement
 
 /* a statement */
 statement
-	: ";"									{ $$ = NULL; }
+	: ";"									{ $$ = N(ExprStmt)(LP, NULL); }
 	| expr_with_comma ";"					{ $$ = N(ExprStmt)(LP, $1); }
 	| if
 	| if_else

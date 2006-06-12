@@ -706,7 +706,9 @@ tRisseSSAVariable * tRisseASTNode_ExprStmt::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
 	// このノードは式を保持しているだけなので子ノードに処理をさせるだけ
-	GetChildAt(0)->GenerateReadSSA(form);
+	// ただし、node は NULL の可能性がある(空文の場合)
+	tRisseASTNode * node = GetChildAt(0);
+	if(node) node->GenerateReadSSA(form);
 
 	// このノードは答えを返さない
 	return NULL;

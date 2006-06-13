@@ -626,6 +626,7 @@ class tRisseSSAForm : public tRisseCollectee
 {
 	tRisseScriptBlockBase * ScriptBlock; //!< この SSA 形式が含まれるスクリプトブロック
 	tRisseASTNode * Root; //!< このコードジェネレータが生成すべきコードのASTルートノード
+	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
 	tRisseSSALabelMap * LabelMap; //!< ラベルマップ
@@ -642,7 +643,9 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		scriptblock		この SSA 形式が含まれるスクリプトブロック
 	//! @param		root			ASTのルートノード
-	tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode * root);
+	//! @param		name			このSSA形式インスタンスの名前
+	tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode * root,
+		const tRisseString & name);
 
 	//! @brief		AST を SSA 形式に変換する
 	void Generate();
@@ -650,6 +653,10 @@ public:
 	//! @brief		スクリプトブロックを得る
 	//! @return		スクリプトブロック
 	tRisseScriptBlockBase * GetScriptBlock() const { return ScriptBlock; }
+
+	//! @brief		このSSA形式インスタンスの名前を得る
+	//! @return		このSSA形式インスタンスの名前
+	const tRisseString & GetName() const { return Name; }
 
 	//! @brief		ローカル名前空間を得る
 	//! @return		ローカル名前空間

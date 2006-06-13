@@ -14,6 +14,7 @@
 
 #include "risseCodeGen.h"
 #include "risseException.h"
+#include "risseScriptBlockBase.h"
 
 
 namespace Risse
@@ -955,10 +956,12 @@ void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode * root)
+tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock,
+	tRisseASTNode * root, const tRisseString & name)
 {
 	ScriptBlock = scriptblock;
 	Root = root;
+	Name = name;
 	UniqueNumber = 0;
 	LocalNamespace = new tRisseSSALocalNamespace();
 	LabelMap = new tRisseSSALabelMap(this);
@@ -968,6 +971,9 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode 
 	CurrentBreakInfo = NULL;
 	CurrentContinueInfo = NULL;
 	FunctionCollapseArgumentVariable = NULL;
+
+	// scriptblock に自身を登録する
+	scriptblock->AddSSAForm(this);
 }
 //---------------------------------------------------------------------------
 

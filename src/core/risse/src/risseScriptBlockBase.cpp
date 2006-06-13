@@ -132,13 +132,29 @@ void tRisseScriptBlockBase::Compile(tRisseASTNode * root, bool need_result, bool
 	RisseFPrint(stdout, str.c_str());
 
 	// (テスト)
-	RisseFPrint(stdout, RISSE_WS("---------- SSA form ----------\n"));
-	tRisseSSAForm * form = new tRisseSSAForm(this, root);
+	tRisseSSAForm * form = new tRisseSSAForm(this, root, RISSE_WS("root"));
 	form->Generate();
-	str = form->Dump();
-	RisseFPrint(stdout, str.c_str());
+
+	// SSA 形式のダンプ
+	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+		i != SSAForms.end(); i++)
+	{
+		RisseFPrint(stdout,(	RISSE_WS("---------- SSA (") + (*i)->GetName() +
+								RISSE_WS(") ----------\n")).c_str());
+		str = (*i)->Dump();
+		RisseFPrint(stdout, str.c_str());
+	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseScriptBlockBase::AddSSAForm(tRisseSSAForm * ssaform)
+{
+	SSAForms.push_back(ssaform);
+}
+//---------------------------------------------------------------------------
+
 
 } // namespace Risse
 

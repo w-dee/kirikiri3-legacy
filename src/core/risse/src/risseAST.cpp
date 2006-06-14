@@ -1796,6 +1796,61 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 
 
 //---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Return::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	tRisseSSAVariable * var;
+	if(Expression)
+	{
+		// 戻りとなる値を作成する
+		var = Expression->GenerateReadSSA(form);
+	}
+	else
+	{
+		// 戻りとなる値は void
+		var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+	}
+
+	// return 文を作成
+	form->AddStatement(GetPosition(), ocReturn, NULL, var);
+
+	// 新しい基本ブロックを作成(ただしここには到達しない)
+	form->CreateNewBlock("disconnected_by_return");
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Throw::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	tRisseSSAVariable * var;
+	if(Expression)
+	{
+		// 戻りとなる値を作成する
+		var = Expression->GenerateReadSSA(form);
+	}
+	else
+	{
+		// 戻りとなる値は catch ブロックが受け取った値
+		// TODO: catchブロックが受け取った値を投げる
+		var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+	}
+
+	// return 文を作成
+	form->AddStatement(GetPosition(), ocThrow, NULL, var);
+
+	// 新しい基本ブロックを作成(ただしここには到達しない)
+	form->CreateNewBlock("disconnected_by_throw");
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 									tRisseSSAForm *form, void * param) const
 {
@@ -1881,6 +1936,18 @@ tRisseSSAVariable * tRisseASTNode_Goto::DoReadSSA(tRisseSSAForm *form, void * pa
 
 	// form に登録
 	form->GetLabelMap()->AddPendingLabelJump(cur_block, GetPosition(), Name);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Debugger::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// 文を作成
+	form->AddStatement(GetPosition(), ocDebugger, NULL);
 
 	// このノードは答えを返さない
 	return NULL;

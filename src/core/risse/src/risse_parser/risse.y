@@ -557,6 +557,7 @@ catch
 /* a throw statement */
 throw
 	: "throw" expr_with_comma ";"			{ $$ = N(Throw)(LP, $2); }
+	| "throw" ";"							{ $$ = N(Throw)(LP, NULL); }
 ;
 
 /*---------------------------------------------------------------------------

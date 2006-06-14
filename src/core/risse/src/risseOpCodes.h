@@ -74,9 +74,12 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(New				)		//!< "new"
 	RISSE_OC_ENUM_ITEM(Phi				)		//!< φ関数
 
-// ジャンプ/分岐
+// ジャンプ/分岐/制御/補助
 	RISSE_OC_ENUM_ITEM(Jump				)		//!< 単純なジャンプ
 	RISSE_OC_ENUM_ITEM(Branch			)		//!< 分岐
+	RISSE_OC_ENUM_ITEM(Debugger			)		//!< debugger ステートメント
+	RISSE_OC_ENUM_ITEM(Throw			)		//!< throw ステートメント
+	RISSE_OC_ENUM_ITEM(Return			)		//!< return ステートメント
 
 // 引数1+なし
 	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not

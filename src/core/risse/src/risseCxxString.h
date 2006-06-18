@@ -627,6 +627,22 @@ public: // conversion
 		{ return AsWxString(); }
 #endif
 
+	//! @brief		数値を文字列に変換(整数から)
+	//! @param		v		値
+	//! @return		このオブジェクトへの参照
+	//! @note		このクラスにはrisse_charがint型と見誤りやすいという理由で
+	//!				整数型からの直接の構築や整数型の代入は定義されていない。
+	//!				整数型から文字列への変換はこのメソッドを使うと楽。
+	static tRisseStringBlock AsString(risse_int v);
+
+	//! @brief		数値を文字列に変換(64bit整数から)
+	//! @param		v		値
+	//! @return		このオブジェクトへの参照
+	//! @note		このクラスにはrisse_charがint型と見誤りやすいという理由で
+	//!				整数型からの直接の構築や整数型の代入は定義されていない。
+	//!				整数型から文字列への変換はこのメソッドを使うと楽。
+	static tRisseStringBlock AsString(risse_int64 v);
+
 public: // other utilities
 	//! @brief		文字列の置き換え
 	//! @param		old_str			置き換え元の文字列

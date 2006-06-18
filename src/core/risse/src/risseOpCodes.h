@@ -80,6 +80,11 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(Debugger			)		//!< debugger ステートメント
 	RISSE_OC_ENUM_ITEM(Throw			)		//!< throw ステートメント
 	RISSE_OC_ENUM_ITEM(Return			)		//!< return ステートメント
+	RISSE_OC_ENUM_ITEM(DefineLazyBlock	)		//!< 遅延評価ブロックの定義
+
+// 名前空間
+	RISSE_OC_ENUM_ITEM(ParentWrite		)		//!< 親名前空間への書き込み
+	RISSE_OC_ENUM_ITEM(ParentRead		)		//!< 親名前空間からの読み込み
 
 // 引数1+なし
 	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not

@@ -2085,4 +2085,17 @@ tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * pa
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// try ブロックの中身を 遅延評価ブロックとして実行する
+	tRisseSSAVariable * var = form->CreateLazyBlock(Body);
+	var->GenerateFuncCall(GetPosition(), tRisseString());
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
 } // namespace Risse

@@ -21,10 +21,64 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 
+
+
+
+//---------------------------------------------------------------------------
+bool tRisseSSAFlatNamespace::Find(const tRisseString & name) const
+{
+	return Map.find(name) != Map.end();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseSSAFlatNamespace::FindAndSetUsed(const tRisseString & name, bool write)
+{
+	tMap::iterator i = Map.find(name);
+	if(i != Map.end())
+	{
+		if(write)
+			i->second.Write = true;
+		else
+			i->second.Read = true;
+		return true;
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAFlatNamespace::Add(const tRisseString & name)
+{
+	Map.insert(std::pair<tRisseString, tInfo>(name, tInfo())); // 新規に挿入
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tRisseSSALocalNamespace::tRisseSSALocalNamespace()
 {
 	Block = NULL;
+	Chained = NULL;
 	Push(); // 最初の名前空間を push しておく
 }
 //---------------------------------------------------------------------------
@@ -34,6 +88,7 @@ tRisseSSALocalNamespace::tRisseSSALocalNamespace()
 tRisseSSALocalNamespace::tRisseSSALocalNamespace(const tRisseSSALocalNamespace &ref)
 {
 	Block = ref.Block;
+	Chained = ref.Chained;
 	Scopes.reserve(ref.Scopes.size());
 	for(tScopes::const_iterator i = ref.Scopes.begin();
 		i != ref.Scopes.end(); i++)
@@ -49,10 +104,7 @@ tRisseString tRisseSSALocalNamespace::GetNumberedName(
 				const tRisseString & name, risse_int num)
 {
 	// num を文字列化
-	risse_char num_str[40];
-	Risse_int_to_str(num, num_str);
-
-	return name + RISSE_WC('#') + num_str;
+	return name + RISSE_WC('#') + tRisseString::AsString(num);
 }
 //---------------------------------------------------------------------------
 
@@ -132,8 +184,13 @@ bool tRisseSSALocalNamespace::Find(const tRisseString & name,
 //---------------------------------------------------------------------------
 bool tRisseSSALocalNamespace::IsAvailable(const tRisseString & name) const
 {
-	return Find(name);
-	// TODO: 「チェーンされた」名前空間の検索
+	if(Find(name)) return true;
+
+	//「チェーンされた」名前空間も探す
+	if(Chained) return Chained->Find(name);
+
+	// 見つからなかった
+	return false;
 }
 //---------------------------------------------------------------------------
 
@@ -217,9 +274,17 @@ tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
 							risse_size pos, const tRisseString & name)
 {
 	tRisseSSAVariable * ret = MakePhiFunction(pos, name);
-	if(!ret)
+	if(!ret && Chained)
 	{
 		// チェーンされた名前空間を探す
+		bool found = Chained->FindAndSetUsed(name, false);
+		if(found)
+		{
+			// 見つかった
+			// チェーンされた名前空間から読み込むための文を生成
+			tRisseSSAStatement *stmt = form->AddStatement(pos, ocParentRead, &ret);
+			stmt->SetName(name);
+		}
 	}
 	return ret;
 }
@@ -263,9 +328,52 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 
 	// 見つからない
 	// チェーンされた名前空間に書き込む
+	if(Chained)
+	{
+		bool found = Chained->FindAndSetUsed(name, true);
+		if(found)
+		{
+			// 見つかった
+			// チェーンされた名前空間に書き込むための文を生成
+			tRisseSSAStatement *stmt = form->AddStatement(pos, ocParentWrite, NULL, value);
+			stmt->SetName(name);
+			return true; // 戻る
+		}
+	}
+
 	return false;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAFlatNamespace * tRisseSSALocalNamespace::CreateFlatNamespace() const
+{
+	tRisseSSAFlatNamespace * ns;
+
+	if(Chained)
+	{
+		// もしチェーンされた名前空間があればそれをコピーする
+		ns = new tRisseSSAFlatNamespace(*Chained);
+	}
+	else
+	{
+		// チェーンされた名前空間がないので新規に作成
+		ns = new tRisseSSAFlatNamespace();
+	}
+
+	// 名前空間を順にイテレーションして ns に追加
+	for(tScopes::const_iterator si = Scopes.begin(); si != Scopes.end(); si++)
+	{
+		for(tAliasMap::iterator i = (*si)->AliasMap.begin();
+				i != (*si)->AliasMap.end(); i++)
+			ns->Add(i->first);
+	}
+
+	return ns;
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -319,14 +427,10 @@ void tRisseSSAVariable::SetName(const tRisseString & name)
 //---------------------------------------------------------------------------
 tRisseString tRisseSSAVariable::GetQualifiedName() const
 {
-	// Version を文字列化
-	risse_char uniq[40];
-	Risse_int_to_str(Version, uniq);
-
 	if(Name.IsEmpty())
 	{
 		// 一時変数の場合は _tmp@ の次にバージョン文字列
-		return tRisseString(RISSE_WS("_tmp@")) + uniq;
+		return tRisseString(RISSE_WS("_tmp@")) + tRisseString::AsString(Version);
 	}
 	else
 	{
@@ -334,7 +438,7 @@ tRisseString tRisseSSAVariable::GetQualifiedName() const
 		tRisseString n;
 		if(!NumberedName.IsEmpty()) n = NumberedName; else n = Name;
 		// 普通の変数の場合は 変数名@バージョン文字列
-		return n + RISSE_WC('@') + uniq;
+		return n + RISSE_WC('@') + tRisseString::AsString(Version);
 	}
 }
 //---------------------------------------------------------------------------
@@ -346,18 +450,31 @@ tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tR
 			tRisseSSAVariable * param2,
 			tRisseSSAVariable * param3)
 {
-	// メソッド名を置く
-	tRisseSSAVariable * method_name_var =
-		Form->AddConstantValueStatement(pos, name);
-
-	// メソッドオブジェクトを得る
 	tRisseSSAVariable * func_var = NULL;
-	Form->AddStatement(pos, ocDGet, &func_var,
-							this, method_name_var);
+
+	if(!name.IsEmpty())
+	{
+		// 関数名が指定されている場合
+
+		// メソッド名を置く
+		tRisseSSAVariable * method_name_var =
+			Form->AddConstantValueStatement(pos, name);
+
+		// メソッドオブジェクトを得る
+		Form->AddStatement(pos, ocDGet, &func_var,
+								this, method_name_var);
+	}
+	else
+	{
+		func_var = this;
+	}
 
 	// 関数呼び出し文を生成する
 	tRisseSSAVariable * ret_var = NULL;
-	Form->AddStatement(pos, ocFuncCall, &ret_var, func_var, param1, param2, param3);
+	tRisseSSAStatement * call_stmt =
+		Form->AddStatement(pos, ocFuncCall, &ret_var, func_var, param1, param2, param3);
+	call_stmt->SetFuncArgOmitted(false);
+	call_stmt->SetFuncExpandFlags(0);
 
 	// 戻る
 	return ret_var;
@@ -458,6 +575,25 @@ void tRisseSSAStatement::SetFalseBranch(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAStatement::SetName(const tRisseString & name)
+{
+	RISSE_ASSERT(Code == ocParentWrite || Code == ocParentWrite);
+	Name = new tRisseString(name);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+const tRisseString & tRisseSSAStatement::GetName() const
+{
+	RISSE_ASSERT(Code == ocParentWrite || Code == ocParentWrite);
+	RISSE_ASSERT(Name != NULL);
+	return *Name;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseSSAStatement::Dump() const
 {
 	switch(Code)
@@ -523,6 +659,33 @@ tRisseString tRisseSSAStatement::Dump() const
 					RISSE_WS("if ") + (*Used.begin())->Dump() + 
 					RISSE_WS(" then *") + TrueBranch->GetName() +
 					RISSE_WS(" else *") + FalseBranch->GetName();
+		}
+
+	case ocParentWrite: // 親名前空間への書き込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Used.size() == 1);
+			return (*Used.begin())->Dump()  + RISSE_WS(".ParentWrite(") + Name->AsHumanReadable() +
+					RISSE_WS(")");
+		}
+
+	case ocParentRead: // 親名前空間からの読み込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Declared != NULL);
+
+			tRisseString ret;
+			RISSE_ASSERT(Used.size() == 2);
+			ret += Declared->Dump() + RISSE_WS(" = ParentRead(");
+
+			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
 		}
 
 	default:
@@ -624,10 +787,7 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
 	InDump = Dumped = false;
 
 	// 通し番号の準備
-	risse_char uniq[40];
-	Risse_int_to_str(form->GetUniqueNumber(), uniq);
-
-	Name = name + RISSE_WC('_') + uniq;
+	Name = name + RISSE_WC('_') + tRisseString::AsString(form->GetUniqueNumber());
 }
 //---------------------------------------------------------------------------
 
@@ -960,6 +1120,7 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock,
 	tRisseASTNode * root, const tRisseString & name)
 {
 	ScriptBlock = scriptblock;
+	Parent = NULL;
 	Root = root;
 	Name = name;
 	UniqueNumber = 0;
@@ -974,6 +1135,17 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock,
 
 	// scriptblock に自身を登録する
 	scriptblock->AddSSAForm(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::SetParent(tRisseSSAForm * form)
+{
+	Parent = form;
+
+	// ローカル名前空間の「チェーン」につなぐ
+	LocalNamespace->SetChained(form->LocalNamespace->CreateFlatNamespace());
 }
 //---------------------------------------------------------------------------
 
@@ -1076,6 +1248,22 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node)
 {
+	// 遅延評価ブロックの名称を決める
+	tRisseString block_name = RISSE_WS("lazy block ") + tRisseString::AsString(GetUniqueNumber());
+
+	// 遅延評価ブロックを生成して内容をコンパイルする
+	tRisseSSAForm *newform =
+		new tRisseSSAForm(ScriptBlock, node, block_name);
+	newform->SetParent(this);
+
+	newform->Generate();
+
+	// 遅延評価ブロックを生成する文を追加する
+	tRisseSSAVariable * ret_var = NULL;
+	AddStatement(node->GetPosition(), ocDefineLazyBlock, &ret_var);
+	ret_var->SetName(block_name);
+
+	return ret_var;
 }
 //---------------------------------------------------------------------------
 

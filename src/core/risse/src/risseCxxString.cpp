@@ -180,7 +180,6 @@ tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 //---------------------------------------------------------------------------
 
 
-
 //---------------------------------------------------------------------------
 risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	risse_size n, risse_char *prevbuf)
@@ -364,6 +363,26 @@ tRisseStringBlock tRisseStringBlock::operator + (const risse_char * ref) const
 	memcpy(newblock.Buffer + Length, ref, ref_length * sizeof(risse_char));
 
 	return newblock;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::AsString(risse_int v)
+{
+	risse_char num_str[40];
+	Risse_int_to_str(v, num_str);
+	return tRisseStringBlock(num_str);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::AsString(risse_int64 v)
+{
+	risse_char num_str[40];
+	Risse_int64_to_str(v, num_str);
+	return tRisseStringBlock(num_str);
 }
 //---------------------------------------------------------------------------
 

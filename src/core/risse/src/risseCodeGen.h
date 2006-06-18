@@ -30,12 +30,52 @@ namespace Risse
 {
 class tRisseSSABlock;
 class tRisseSSAVariable;
+
 //---------------------------------------------------------------------------
-//! @brief	ローカル変数用の名前空間管理クラス
+//! @brief	ローカル変数用のフラットな名前空間管理クラス
+//---------------------------------------------------------------------------
+class tRisseSSAFlatNamespace : public tRisseCollectee
+{
+	//! @brief		名前に関する情報
+	struct tInfo
+	{
+		tInfo() { Read = false; Write = false; } //!< コンストラクタ
+		bool Read;		//!< この変数に対する読み込みが発生したかどうか(使用フラグ)
+		bool Write;		//!< この変数に対する書き込みが発生したかどうか(使用フラグ)
+	};
+	typedef gc_map<tRisseString, tInfo> tMap; //!< 変数名(番号なし)→情報のマップのtypedef
+
+	tMap Map; //!< 変数名(番号なし)→情報のマップ
+
+public:
+	//! @brief		コンストラクタ
+	tRisseSSAFlatNamespace() {;}
+
+	//! @brief		変数が存在するかどうかを調べる
+	//! @param		name		変数名(番号なし)
+	//! @return		変数が存在する場合真、存在しない場合偽
+	bool Find(const tRisseString & name) const;
+
+	//! @brief		変数が存在するかどうかを調べ、存在すれば使用フラグを真に設定する
+	//! @param		name		変数名(番号なし)
+	//! @param		write		その変数に対するアクセスが書き込みか(真)、読み込みか(偽)
+	//! @return		変数が存在する場合真、存在しない場合偽
+	bool FindAndSetUsed(const tRisseString & name, bool write);
+
+	//! @brief		変数を追加する
+	//! @param		name		変数名(番号なし)
+	void Add(const tRisseString & name);
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	ローカル変数用の階層化された名前空間管理クラス
 //---------------------------------------------------------------------------
 class tRisseSSALocalNamespace : public tRisseCollectee
 {
 	tRisseSSABlock * Block; //!< この名前空間に結びつけられている基本ブロック
+	tRisseSSAFlatNamespace * Chained; //!< チェーンされた名前空間
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tVariableMap;
 		//!< 変数名(番号付き)→変数オブジェクトのマップのtypedef
 	typedef gc_map<tRisseString, tRisseString> tAliasMap;
@@ -56,6 +96,10 @@ public:
 
 	//! @brief		コピーコンストラクタ
 	tRisseSSALocalNamespace(const tRisseSSALocalNamespace &ref);
+
+	//! @brief		チェーンされた名前空間を設定する
+	//! @param		ns		チェーンされた名前空間
+	void SetChained(tRisseSSAFlatNamespace * ns) { Chained = ns; }
 
 	//! @brief		番号 付き変数名を得る
 	//! @param		name		変数名
@@ -133,6 +177,13 @@ public:
 	//!				チェーンされた名前空間へアクセスするための文を作成する
 	bool Write(tRisseSSAForm * form, risse_size pos, const tRisseString & name,
 				tRisseSSAVariable * value);
+
+	//! @brief		tRisseSSAFlatNamespace のインスタンスを作成して返す
+	//! @return		tRisseSSAFlatNamespace のインスタンス
+	//! @note		このメソッドはすべてのメソッドを「フラットな」アクセスが可能
+	//!				なように再構成してtRisseSSAFlatNamespaceのインスタンスを作成し
+	//!				返す
+	tRisseSSAFlatNamespace * CreateFlatNamespace() const;
 };
 //---------------------------------------------------------------------------
 
@@ -274,6 +325,7 @@ class tRisseSSAStatement : public tRisseCollectee
 		tRisseSSABlock * TrueBranch; //!< 分岐のジャンプ先(条件が真のとき)
 		tRisseSSABlock * JumpTarget; //!< 単純ジャンプのジャンプ先
 		risse_uint32 FuncExpandFlags; //!< ocFuncCall/ocNew; 配列展開のビットマスク(1=配列を展開する)
+		tRisseString * Name; //!< 名前
 	};
 	union
 	{
@@ -391,6 +443,14 @@ public:
 	//! @brief		引数が省略されたかどうかを取得する
 	//! @return		引数が省略されたかどうか
 	bool GetFuncArgOmitted() const { return FuncArgOmitted; }
+
+	//! @brief		名前を設定する
+	//! @param		name		名前
+	void SetName(const tRisseString & name);
+
+	//! @brief		名前を取得する
+	//! @return		名前
+	const tRisseString & GetName() const;
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
@@ -625,6 +685,7 @@ public:
 class tRisseSSAForm : public tRisseCollectee
 {
 	tRisseScriptBlockBase * ScriptBlock; //!< この SSA 形式が含まれるスクリプトブロック
+	tRisseSSAForm * Parent; //!< この SSA 形式インスタンスの親インスタンス
 	tRisseASTNode * Root; //!< このコードジェネレータが生成すべきコードのASTルートノード
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
@@ -646,6 +707,10 @@ public:
 	//! @param		name			このSSA形式インスタンスの名前
 	tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode * root,
 		const tRisseString & name);
+
+	//! @brief		この SSA 形式インスタンスの親インスタンスを設定する
+	//! @param		form		この SSA 形式インスタンスの親インスタンス
+	void SetParent(tRisseSSAForm * form);
 
 	//! @brief		AST を SSA 形式に変換する
 	void Generate();

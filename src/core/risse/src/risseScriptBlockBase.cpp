@@ -125,33 +125,9 @@ void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 //---------------------------------------------------------------------------
 void tRisseScriptBlockBase::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
 {
-	// (テスト) ASTのダンプを行う
-	RisseFPrint(stdout, RISSE_WS("---------- AST ----------\n"));
-	tRisseString str;
-	root->Dump(str);
-	RisseFPrint(stdout, str.c_str());
-
-	// (テスト)
-	tRisseSSAForm * form = new tRisseSSAForm(this, root, RISSE_WS("root"));
-	form->Generate();
-
-	// SSA 形式のダンプ
-	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
-		i != SSAForms.end(); i++)
-	{
-		RisseFPrint(stdout,(	RISSE_WS("---------- SSA (") + (*i)->GetName() +
-								RISSE_WS(") ----------\n")).c_str());
-		str = (*i)->Dump();
-		RisseFPrint(stdout, str.c_str());
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseScriptBlockBase::AddSSAForm(tRisseSSAForm * ssaform)
-{
-	SSAForms.push_back(ssaform);
+	// コンパイラオブジェクトを作成してコンパイルを行う
+	tRisseCompiler * compiler = new tRisseCompiler(this);
+	compiler->Compile(root, need_result, is_expression);
 }
 //---------------------------------------------------------------------------
 

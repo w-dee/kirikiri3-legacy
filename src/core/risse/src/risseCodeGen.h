@@ -694,12 +694,13 @@ public:
 //---------------------------------------------------------------------------
 
 
+class tRisseCompiler;
 //---------------------------------------------------------------------------
 //! @brief	SSA形式を表すクラス
 //---------------------------------------------------------------------------
 class tRisseSSAForm : public tRisseCollectee
 {
-	tRisseScriptBlockBase * ScriptBlock; //!< この SSA 形式が含まれるスクリプトブロック
+	tRisseCompiler * Compiler; //!< この SSA 形式が含まれるコンパイラインスタンス
 	tRisseSSAForm * Parent; //!< この SSA 形式インスタンスの親インスタンス
 	tRisseASTNode * Root; //!< このコードジェネレータが生成すべきコードのASTルートノード
 	tRisseString Name; //!< このSSA形式インスタンスの名前
@@ -717,10 +718,10 @@ class tRisseSSAForm : public tRisseCollectee
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		scriptblock		この SSA 形式が含まれるスクリプトブロック
+	//! @param		compiler		この SSA 形式が含まれるコンパイラインスタンス
 	//! @param		root			ASTのルートノード
 	//! @param		name			このSSA形式インスタンスの名前
-	tRisseSSAForm(tRisseScriptBlockBase * scriptblock, tRisseASTNode * root,
+	tRisseSSAForm(tRisseCompiler * compiler, tRisseASTNode * root,
 		const tRisseString & name);
 
 	//! @brief		この SSA 形式インスタンスの親インスタンスを設定する
@@ -730,9 +731,13 @@ public:
 	//! @brief		AST を SSA 形式に変換する
 	void Generate();
 
-	//! @brief		スクリプトブロックを得る
-	//! @return		スクリプトブロック
-	tRisseScriptBlockBase * GetScriptBlock() const { return ScriptBlock; }
+	//! @brief		コンパイラインスタンスを得る
+	//! @return		コンパイラインスタンス
+	tRisseCompiler * GetCompiler() const { return Compiler; }
+
+	//! @brief		スクリプトブロックインスタンスを得る
+	//! @return		スクリプトブロックインスタンス
+	tRisseScriptBlockBase * GetScriptBlock() const;
 
 	//! @brief		このSSA形式インスタンスの名前を得る
 	//! @return		このSSA形式インスタンスの名前
@@ -891,7 +896,35 @@ public:
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		コンパイラクラス
+//---------------------------------------------------------------------------
+class tRisseCompiler : public tRisseCollectee
+{
+	tRisseScriptBlockBase * ScriptBlock; //!< このコンパイラを保有しているスクリプトブロック
+	gc_vector<tRisseSSAForm *> SSAForms; //!< このブロックが保持している SSA 形式インスタンスのリスト
 
+public:
+	//! @brief		コンストラクタ
+	//! @paramo		scriptblock		スクリプトブロックインスタンス
+	tRisseCompiler(tRisseScriptBlockBase * scriptblock) { ScriptBlock = scriptblock; }
+
+	//! @brief		スクリプトブロックインスタンスを得る
+	//! @return		スクリプトブロックインスタンス
+	tRisseScriptBlockBase * GetScriptBlock() const { return ScriptBlock; }
+
+	//! @brief		ASTを元にコンパイルを行う
+	//! @param		root		ルートASTノード
+	//! @param		need_result		評価時に結果が必要かどうか
+	//! @param		is_expression	式評価モードかどうか
+	void Compile(tRisseASTNode * root, bool need_result, bool is_expression);
+
+	//! @brief		SSA形式インスタンスを追加する
+	//! @param		ssaform		SSA形式インスタンス
+	void AddSSAForm(tRisseSSAForm * ssaform);
+
+
+};
 //---------------------------------------------------------------------------
 
 

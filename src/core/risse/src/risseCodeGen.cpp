@@ -1200,10 +1200,10 @@ void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock,
+tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	tRisseASTNode * root, const tRisseString & name)
 {
-	ScriptBlock = scriptblock;
+	Compiler = compiler;
 	Parent = NULL;
 	Root = root;
 	Name = name;
@@ -1217,8 +1217,8 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock,
 	CurrentContinueInfo = NULL;
 	FunctionCollapseArgumentVariable = NULL;
 
-	// scriptblock に自身を登録する
-	scriptblock->AddSSAForm(this);
+	// compiler に自身を登録する
+	compiler->AddSSAForm(this);
 }
 //---------------------------------------------------------------------------
 
@@ -1246,6 +1246,14 @@ void tRisseSSAForm::Generate()
 
 	// 未バインドのラベルジャンプをすべて解決
 	LabelMap->BindAll();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseScriptBlockBase * tRisseSSAForm::GetScriptBlock() const
+{
+	return Compiler->GetScriptBlock();
 }
 //---------------------------------------------------------------------------
 
@@ -1334,7 +1342,7 @@ void * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node, tRisseSSAVariable *&
 
 	// 遅延評価ブロックを生成して内容をコンパイルする
 	tRisseSSAForm *newform =
-		new tRisseSSAForm(ScriptBlock, node, block_name);
+		new tRisseSSAForm(Compiler, node, block_name);
 	newform->SetParent(this);
 
 	// ローカル名前空間の「チェーン」につなぐ
@@ -1382,6 +1390,61 @@ tRisseString tRisseSSAForm::Dump() const
 	return EntryBlock->Dump() + EntryBlock->DumpChildren();
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
+{
+	// (テスト) ASTのダンプを行う
+	RisseFPrint(stdout, RISSE_WS("---------- AST ----------\n"));
+	tRisseString str;
+	root->Dump(str);
+	RisseFPrint(stdout, str.c_str());
+
+	// (テスト)
+	tRisseSSAForm * form = new tRisseSSAForm(this, root, RISSE_WS("root"));
+	form->Generate();
+
+	// SSA 形式のダンプ
+	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+		i != SSAForms.end(); i++)
+	{
+		RisseFPrint(stdout,(	RISSE_WS("---------- SSA (") + (*i)->GetName() +
+								RISSE_WS(") ----------\n")).c_str());
+		str = (*i)->Dump();
+		RisseFPrint(stdout, str.c_str());
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompiler::AddSSAForm(tRisseSSAForm * ssaform)
+{
+	SSAForms.push_back(ssaform);
+}
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 

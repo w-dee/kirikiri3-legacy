@@ -22,7 +22,6 @@
 namespace Risse
 {
 class tRisseASTNode;
-class tRisseSSAForm;
 //---------------------------------------------------------------------------
 //! @brief		スクリプトブロックの基底クラス
 //---------------------------------------------------------------------------
@@ -68,21 +67,6 @@ public:
 	//! @param		col			桁位置(0～; 興味がない場合はnull可)
 	void PositionToLineAndColumn(risse_size pos, risse_size *line, risse_size *col) const;
 
-public:
-	//! @brief		スクリプトを評価する
-	//! @param		result			実行の結果(NULL可)
-	//! @param		is_expression	式評価モードかどうか
-	//! @note		もしスクリプトがコンパイルが必要な場合、
-	//!				Evaluate は評価に先立って Compile() を呼び、コンパイルを行う。
-	virtual void Evaluate(tRisseVariant * result = NULL, bool is_expression = false) = 0;
-
-
-	//=======================================================================
-	// ここから下はコンパイルに関連したもの
-	// (もしかしたらこのクラスからは分離するかも)
-	// (ここのクラスの宣言直前の forward declaration にも注意)
-	gc_vector<tRisseSSAForm *> SSAForms; // このブロックが保持している SSA 形式インスタンスのリスト
-
 protected:
 	//! @brief		ASTを元にコンパイルを行う
 	//! @param		root		ルートASTノード
@@ -90,10 +74,14 @@ protected:
 	//! @param		is_expression	式評価モードかどうか
 	void Compile(tRisseASTNode * root, bool need_result, bool is_expression);
 
+
 public:
-	//! @brief		SSA形式インスタンスを追加する
-	//! @param		ssaform		SSA形式インスタンス
-	void AddSSAForm(tRisseSSAForm * ssaform);
+	//! @brief		スクリプトを評価する
+	//! @param		result			実行の結果(NULL可)
+	//! @param		is_expression	式評価モードかどうか
+	//! @note		もしスクリプトがコンパイルが必要な場合、
+	//!				Evaluate は評価に先立って Compile() を呼び、コンパイルを行う。
+	virtual void Evaluate(tRisseVariant * result = NULL, bool is_expression = false) = 0;
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

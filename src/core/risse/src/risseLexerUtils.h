@@ -28,6 +28,24 @@ public: // public static members
 	//! @return		スクリプトが継続するかどうか
 	static bool SkipSpace(const risse_char * & ptr);
 
+	//! @brief		ホワイトスペースのスキップ(ただし改行はスキップしない)
+	//! @param		ptr		解析ポインタ (実行後、改行以外のホワイトスペースの直後にまで移動する)
+	//! @return		スクリプトが継続するかどうか
+	static bool SkipSpaceExceptForNewLine(const risse_char * & ptr);
+
+	//! @brief		chが改行文字の場合に真を返す
+	//! @return		chが改行文字かどうか
+	static bool IsNewLineChar(const risse_char ch)
+	{
+		return ch == RISSE_WC('\r') || ch == RISSE_WC('\n');
+	}
+
+	//! @brief		改行文字を一つ読み飛ばす
+	//! @param		ptr		解析ポインタ (実行後、改行文字をの直後にまで移動する)
+	//! @return		スクリプトが継続するかどうか
+	//! @note		ptr は改行文字を指していなければならない
+	static bool StepNewLineChar(const risse_char * & ptr);
+
 	//! @brief		改行までスキップ
 	//! @param		ptr		解析ポインタ (実行後、改行の直後にまで移動する)
 	//! @return		スクリプトが継続するかどうか

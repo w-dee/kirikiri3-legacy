@@ -36,11 +36,18 @@ bool tRisseLexerUtility::SkipSpace(const risse_char * & ptr)
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::SkipToLineEnd(const risse_char * & ptr)
+bool tRisseLexerUtility::SkipSpaceExceptForNewLine(const risse_char * & ptr)
 {
-	while(*ptr != RISSE_WC('\r') && *ptr != RISSE_WC('\n') && *ptr) ptr++;
-	if(*ptr == 0) return false;
+	while(*ptr && Risse_iswspace_nc(*ptr) &&
+		!IsNewLineChar(*ptr)) ptr ++;
+	return *ptr != 0;
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::StepNewLineChar(const risse_char * & ptr)
+{
 	if(ptr[0] == RISSE_WC('\r') && ptr[1] == RISSE_WC('\n'))
 		ptr += 2; // CR LF
 	else
@@ -49,6 +56,16 @@ bool tRisseLexerUtility::SkipToLineEnd(const risse_char * & ptr)
 	if(*ptr == 0) return false;
 
 	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::SkipToLineEnd(const risse_char * & ptr)
+{
+	while(*ptr && !IsNewLineChar(*ptr)) ptr++;
+	if(*ptr == 0) return false;
+	return StepNewLineChar(ptr);
 }
 //---------------------------------------------------------------------------
 

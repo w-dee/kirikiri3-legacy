@@ -2089,9 +2089,15 @@ tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * pa
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
-	// try ブロックの中身を 遅延評価ブロックとして実行する
-	tRisseSSAVariable * var = form->CreateLazyBlock(Body);
-	var->GenerateFuncCall(GetPosition(), tRisseString());
+	// try ブロックの中身を 遅延評価ブロックとして評価する
+	tRisseSSAVariable * lazyblock_var = NULL;
+	void * lazy_param = form->CreateLazyBlock(Body, lazyblock_var);
+
+	// 遅延評価ブロックを実行するためのfunccall文を作成
+	lazyblock_var->GenerateFuncCall(GetPosition(), tRisseString());
+
+	// 遅延評価ブロックをクリーンアップ
+	form->CleanupLazyBlock(lazy_param);
 
 	// このノードは答えを返さない
 	return NULL;

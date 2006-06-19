@@ -85,6 +85,8 @@ RISSE_OC_ENUM_DEF()
 // 名前空間
 	RISSE_OC_ENUM_ITEM(ParentWrite		)		//!< 親名前空間への書き込み
 	RISSE_OC_ENUM_ITEM(ParentRead		)		//!< 親名前空間からの読み込み
+	RISSE_OC_ENUM_ITEM(ChildWrite		)		//!< 子名前空間への書き込み
+	RISSE_OC_ENUM_ITEM(ChildRead		)		//!< 子名前空間からの読み込み
 
 // 引数1+なし
 	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not

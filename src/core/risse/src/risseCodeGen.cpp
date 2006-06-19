@@ -57,6 +57,41 @@ void tRisseSSAFlatNamespace::Add(const tRisseString & name)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseSSAFlatNamespace::GenerateChildRead(tRisseSSAForm * form, risse_size pos,
+		tRisseSSAVariable* block_var)
+{
+	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
+	{
+		if(i->second.Read)
+		{
+			// 読み込みが発生している
+			tRisseSSAVariable * var =
+				form->GetLocalNamespace()->Read(form, pos, i->first);
+			form->AddStatement(pos, ocChildWrite, NULL, block_var, var)->SetName(i->first);
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAFlatNamespace::GenerateChildWrite(tRisseSSAForm * form, risse_size pos,
+		tRisseSSAVariable* block_var)
+{
+	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
+	{
+		if(i->second.Write)
+		{
+			// 書き込みが発生している
+			tRisseSSAVariable * var = NULL;
+			form->AddStatement(pos, ocChildRead, &var, block_var)->SetName(i->first);
+			form->GetLocalNamespace()->Write(form, pos, i->first, var);
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -577,7 +612,9 @@ void tRisseSSAStatement::SetFalseBranch(tRisseSSABlock * block)
 //---------------------------------------------------------------------------
 void tRisseSSAStatement::SetName(const tRisseString & name)
 {
-	RISSE_ASSERT(Code == ocParentWrite || Code == ocParentWrite);
+	RISSE_ASSERT(
+			Code == ocParentRead || Code == ocParentWrite ||
+			Code == ocChildRead || Code == ocChildWrite || Code == ocDefineLazyBlock);
 	Name = new tRisseString(name);
 }
 //---------------------------------------------------------------------------
@@ -586,7 +623,9 @@ void tRisseSSAStatement::SetName(const tRisseString & name)
 //---------------------------------------------------------------------------
 const tRisseString & tRisseSSAStatement::GetName() const
 {
-	RISSE_ASSERT(Code == ocParentWrite || Code == ocParentWrite);
+	RISSE_ASSERT(
+			Code == ocParentRead || Code == ocParentWrite ||
+			Code == ocChildRead || Code == ocChildWrite || Code == ocDefineLazyBlock);
 	RISSE_ASSERT(Name != NULL);
 	return *Name;
 }
@@ -661,6 +700,24 @@ tRisseString tRisseSSAStatement::Dump() const
 					RISSE_WS(" else *") + FalseBranch->GetName();
 		}
 
+	case ocDefineLazyBlock: // 遅延評価ブロックの定義
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Declared != NULL);
+
+			tRisseString ret;
+			ret += Declared->Dump() + RISSE_WS(" = DefineLazyBlock(");
+
+			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
 	case ocParentWrite: // 親名前空間への書き込み
 		{
 			RISSE_ASSERT(Name != NULL);
@@ -675,9 +732,36 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(Declared != NULL);
 
 			tRisseString ret;
-			RISSE_ASSERT(Used.size() == 2);
 			ret += Declared->Dump() + RISSE_WS(" = ParentRead(");
 
+			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocChildWrite: // 子名前空間への書き込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Used.size() == 2);
+			return Used[0]->Dump()  + RISSE_WS(".ChildWrite(") +
+					Name->AsHumanReadable() + RISSE_WS(", ") + Used[1]->Dump() +
+					RISSE_WS(")");
+		}
+
+	case ocChildRead: // 子名前空間からの読み込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Declared != NULL);
+			RISSE_ASSERT(Used.size() == 1);
+
+			tRisseString ret;
+			ret += Declared->Dump() + RISSE_WS(" = ") + Used[0]->Dump();
+			ret += RISSE_WS(".ChildRead(");
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
 			// 変数のコメントを追加
@@ -1143,9 +1227,6 @@ tRisseSSAForm::tRisseSSAForm(tRisseScriptBlockBase * scriptblock,
 void tRisseSSAForm::SetParent(tRisseSSAForm * form)
 {
 	Parent = form;
-
-	// ローカル名前空間の「チェーン」につなぐ
-	LocalNamespace->SetChained(form->LocalNamespace->CreateFlatNamespace());
 }
 //---------------------------------------------------------------------------
 
@@ -1246,7 +1327,7 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node)
+void * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node, tRisseSSAVariable *& block_var)
 {
 	// 遅延評価ブロックの名称を決める
 	tRisseString block_name = RISSE_WS("lazy block ") + tRisseString::AsString(GetUniqueNumber());
@@ -1256,14 +1337,40 @@ tRisseSSAVariable * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node)
 		new tRisseSSAForm(ScriptBlock, node, block_name);
 	newform->SetParent(this);
 
+	// ローカル名前空間の「チェーン」につなぐ
+	tRisseSSAFlatNamespace * chain = LocalNamespace->CreateFlatNamespace();
+	newform->LocalNamespace->SetChained(chain);
+
+	// 内容を生成
 	newform->Generate();
 
-	// 遅延評価ブロックを生成する文を追加する
-	tRisseSSAVariable * ret_var = NULL;
-	AddStatement(node->GetPosition(), ocDefineLazyBlock, &ret_var);
-	ret_var->SetName(block_name);
 
-	return ret_var;
+	// 遅延評価ブロックを生成する文を追加する
+	tRisseSSAStatement * lazy_stmt =
+		AddStatement(node->GetPosition(), ocDefineLazyBlock, &block_var);
+	lazy_stmt->SetName(block_name);
+
+	// 遅延評価ブロックで読み込みが起こった変数を処理する
+	chain->GenerateChildRead(this, node->GetPosition(), block_var);
+
+	// 情報を返す
+	tLazyBlockParam * param = new tLazyBlockParam();
+	param->Chain = chain;
+	param->Position = node->GetPosition();
+	param->BlockVariable = block_var;
+	return reinterpret_cast<void *>(param);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::CleanupLazyBlock(void * param)
+{
+	// param はtLazyBlockParam を表している
+	tLazyBlockParam * info_param = reinterpret_cast<tLazyBlockParam *>(param);
+
+	// 遅延評価ブロックで書き込みが起こった変数を処理する
+	info_param->Chain->GenerateChildWrite(this, info_param->Position, info_param->BlockVariable);
 }
 //---------------------------------------------------------------------------
 

@@ -30,7 +30,7 @@ namespace Risse
 {
 class tRisseSSABlock;
 class tRisseSSAVariable;
-
+class tRisseSSAForm;
 //---------------------------------------------------------------------------
 //! @brief	ローカル変数用のフラットな名前空間管理クラス
 //---------------------------------------------------------------------------
@@ -65,6 +65,21 @@ public:
 	//! @brief		変数を追加する
 	//! @param		name		変数名(番号なし)
 	void Add(const tRisseString & name);
+
+	//! @param		遅延評価ブロック中で「読み込み」が発生した変数に対して読み込みを行う文を作成する
+	//! @param		form		SSA形式インスタンス
+	//! @param		pos			スクリプト上の位置
+	//! @param		block_var	遅延評価ブロックを表す変数
+	void GenerateChildRead(tRisseSSAForm * form, risse_size pos,
+		tRisseSSAVariable* block_var);
+
+	//! @param		遅延評価ブロック中で「書き込み」が発生した変数に対して読み込みを行う文を作成する
+	//! @param		form		SSA形式インスタンス
+	//! @param		pos			スクリプト上の位置
+	//! @param		block_var	遅延評価ブロックを表す変数
+	void GenerateChildWrite(tRisseSSAForm * form, risse_size pos,
+		tRisseSSAVariable* block_var);
+
 };
 //---------------------------------------------------------------------------
 
@@ -834,10 +849,29 @@ public:
 		return ret_var;
 	}
 
+
+protected:
+	//! @brief	CreateLazyBlock で返される情報の構造体
+	struct tLazyBlockParam
+	{
+		tRisseSSAFlatNamespace * Chain; //!< スコープチェーン
+		risse_size Position; //!< スクリプト上の位置
+		tRisseSSAVariable *BlockVariable; //!< 遅延評価ブロックを表す変数
+	};
+public:
 	//! @brief		新しい遅延評価ブロックを作成する
 	//! @param		node		遅延評価ブロックのルートノード
-	//! @return		その遅延評価ブロックを表すSSA変数
-	tRisseSSAVariable * CreateLazyBlock(tRisseASTNode * node);
+	//! @param		block_var	その遅延評価ブロックを表すSSA変数を格納する先
+	//! @return		CleanupLazyBlock() に渡すべき情報
+	//! @note		このメソッドは遅延評価ブロックを作成してその遅延評価ブロックを
+	//!				表す変数を返す。この変数はメソッドオブジェクトなので、呼び出して
+	//!				使う。使い終わったら CreateLazyBlock() メソッドの戻り値を
+	//!				CleanupLazyBlock() メソッドに渡して呼び出すこと。
+	void * CreateLazyBlock(tRisseASTNode * node, tRisseSSAVariable *& block_var);
+
+	//! @brief		遅延評価ブロックのクリーンアップ処理を行う
+	//! @param		param	CreateLazyBlock() の戻り値
+	void CleanupLazyBlock(void * param);
 
 	//! @brief		ユニークな番号を得る
 	risse_int GetUniqueNumber()

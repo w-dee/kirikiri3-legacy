@@ -486,8 +486,8 @@ class tRisseSSABlock : public tRisseCollectee
 	tRisseSSAStatement * FirstStatement; //!< 文のリストの先頭
 	tRisseSSAStatement * LastStatement; //!< 文のリストの最後
 	tRisseSSALocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
-	mutable bool InDump; //!< ダンプ中かどうか
-	mutable bool Dumped; //!< ダンプが行われたかどうか
+	mutable bool Mark; //!< マークが行われたかどうか
+	mutable bool Traversing; //!< トラバース中かどうか
 
 public:
 	//! @brief		コンストラクタ
@@ -544,16 +544,23 @@ public:
 	//! @param		ref		参照元ローカル名前空間
 	void TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref);
 
-	//! @brief		「ダンプが行われた」フラグをクリアする
-	void ClearDumpFlags() const;
+	//! @brief		「マーク」フラグをクリアする
+	void ClearMark() const;
+
+	//! @brief		「マーク」フラグを設定する
+	//! @param		m		マークを設定するか(真)、クリアするか(偽)
+	void SetMark(bool m = true) { Mark = m; }
+
+	//! @brief		「マーク」を取得する
+	bool GetMark() const { return Mark; }
+
+	//! @brief		この基本ブロックを起点にして基本ブロックをたどり、そのリストを得る
+	//! @param		blocks		基本ブロックのリストの格納先
+	void Traverse(gc_vector<tRisseSSABlock *> & blocks) const;
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
-
-	//! @brief		子に対してダンプを行う
-	//! @return		ダンプ文字列
-	tRisseString DumpChildren() const;
 };
 //---------------------------------------------------------------------------
 

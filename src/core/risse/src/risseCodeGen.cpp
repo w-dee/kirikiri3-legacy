@@ -868,7 +868,8 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
 	Form = form;
 	FirstStatement = LastStatement = NULL;
 	LocalNamespace = NULL;
-	InDump = Dumped = false;
+	Mark = false;
+	Traversing = false;
 
 	// 通し番号の準備
 	Name = name + RISSE_WC('_') + tRisseString::AsString(form->GetUniqueNumber());
@@ -990,17 +991,50 @@ void tRisseSSABlock::TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::ClearDumpFlags() const
+void tRisseSSABlock::ClearMark() const
 {
-	InDump = true;
-	Dumped = false;
-	for(gc_vector<tRisseSSABlock *>::const_iterator i = Succ.begin();
-									i != Succ.end(); i ++)
+	gc_vector<tRisseSSABlock *> blocks;
+	Traverse(blocks);
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->SetMark(false);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::Traverse(gc_vector<tRisseSSABlock *> & blocks) const
+{
+	risse_size new_start = 0;
+	risse_size new_count = 1;
+	// 自分自身を blocks に追加
+	blocks.push_back(const_cast<tRisseSSABlock*>(this));
+	Traversing = true;
+
+	// new_count が 0 で無い限り繰り返す(幅優先探索)
+	while(new_count != 0)
 	{
-		if(!(*i)->InDump)
-			(*i)->ClearDumpFlags();
+		risse_size start = blocks.size();
+		// [new_start, new_start + new_count) の直後基本ブロックを追加する
+		for(risse_size n = new_start; n < new_start + new_count; n++)
+		{
+			blocks.reserve(blocks.size() + blocks[n]->Succ.size());
+			for(gc_vector<tRisseSSABlock *>::iterator
+				i = blocks[n]->Succ.begin(); i != blocks[n]->Succ.end(); i++)
+			{
+				if(!(*i)->Traversing)
+				{
+					(*i)->Traversing = true; // 二度と追加しないように
+					blocks.push_back(*i);
+				}
+			}
+		}
+		new_start = start;
+		new_count = blocks.size() - new_start;
 	}
-	InDump = false;
+
+	// Traversing フラグを倒す
+	for(gc_vector<tRisseSSABlock *>::iterator
+		i = blocks.begin(); i != blocks.end(); i++) (*i)->Traversing = false;
 }
 //---------------------------------------------------------------------------
 
@@ -1009,8 +1043,6 @@ void tRisseSSABlock::ClearDumpFlags() const
 tRisseString tRisseSSABlock::Dump() const
 {
 	tRisseString ret;
-
-	Dumped = true; // ２回以上ダンプしないように
 
 	// ラベル名と直前のブロックを列挙
 	ret +=  + RISSE_WS("*") + Name;
@@ -1049,45 +1081,6 @@ tRisseString tRisseSSABlock::Dump() const
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-tRisseString tRisseSSABlock::DumpChildren() const
-{
-	tRisseString ret;
-
-	InDump = true; // 再入しないように
-	try
-	{
-		gc_vector<tRisseSSABlock *> vec;
-
-		// 直後のブロックをダンプ
-		for(gc_vector<tRisseSSABlock *>::const_iterator i = Succ.begin();
-										i != Succ.end(); i ++)
-		{
-			if(!(*i)->InDump && !(*i)->Dumped)
-			{
-				vec.push_back(*i); // いったん vec に入れる
-				ret += (*i)->Dump();
-			}
-		}
-
-		// 直後のブロックを再帰
-		for(gc_vector<tRisseSSABlock *>::const_iterator i = vec.begin();
-										i != vec.end(); i ++)
-		{
-			ret += (*i)->DumpChildren();
-		}
-
-	}
-	catch(...)
-	{
-		InDump = false;
-		throw;
-	}
-	InDump = false;
-
-	return ret;
-}
-//---------------------------------------------------------------------------
 
 
 
@@ -1386,11 +1379,16 @@ void tRisseSSAForm::CleanupLazyBlock(void * param)
 //---------------------------------------------------------------------------
 tRisseString tRisseSSAForm::Dump() const
 {
-	// この form から到達可能な基本ブロックをすべてダンプする
-	return EntryBlock->Dump() + EntryBlock->DumpChildren();
+	// この form の EntryBlock から到達可能な基本ブロックをすべてダンプする
+	gc_vector<tRisseSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+	tRisseString ret;
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		ret += (*i)->Dump();
+
+	return ret;
 }
 //---------------------------------------------------------------------------
-
 
 
 

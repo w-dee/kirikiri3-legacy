@@ -480,6 +480,16 @@ tRisseString tRisseSSAVariable::GetQualifiedName() const
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAVariable::DeleteUsed(tRisseSSAStatement * stmt)
+{
+	gc_vector<tRisseSSAStatement*>::iterator it =
+		std::find(Used.begin(), Used.end(), stmt);
+	if(it != Used.end()) Used.erase(it);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tRisseString & name,
 			tRisseSSAVariable * param1,
 			tRisseSSAVariable * param2,
@@ -578,6 +588,26 @@ tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
 	JumpTarget = NULL;
 	FuncExpandFlags = 0;
 	FuncArgOmitted = false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::AddUsed(tRisseSSAVariable * var)
+{
+	var->AddUsed(this);
+	Used.push_back(var);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::DeleteUsed(risse_size index)
+{
+	RISSE_ASSERT(Used.size() > 0); // いまのところは。
+	tRisseSSAVariable * var = Used[index];
+	Used.erase(Used.begin() + index);
+	var->DeleteUsed(this);
 }
 //---------------------------------------------------------------------------
 
@@ -974,6 +1004,48 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
+void tRisseSSABlock::DeletePred(risse_size index)
+{
+	// 直前の基本ブロックを削除する
+	RISSE_ASSERT(Pred.size() > 0);
+	Pred.erase(Pred.begin() + index);
+
+	// 既存のφ関数からも削除する
+	tRisseSSAStatement *stmt = FirstStatement;
+	while(stmt)
+	{
+		if(stmt->GetCode() != ocPhi) break;
+
+		stmt->DeleteUsed(index);
+			// φ関数の Used の順番は Pred の順番と同じなので index を
+			// そのまま DeleteUsed() に渡す
+
+		stmt = stmt->GetSucc();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::DeleteUnmarkedPred()
+{
+	// Pred は削除の効率を考え、逆順に見ていく
+	if(Pred.size() > 0)
+	{
+		risse_size i = Pred.size() - 1;
+		while(true)
+		{
+			if(!Pred[i]->Mark) DeletePred(i);
+
+			if(i == 0) break;
+			i--;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSABlock::AddSucc(tRisseSSABlock * block)
 {
 	Succ.push_back(block);
@@ -1239,6 +1311,9 @@ void tRisseSSAForm::Generate()
 
 	// 未バインドのラベルジャンプをすべて解決
 	LabelMap->BindAll();
+
+	// 到達しない基本ブロックからのパスを削除
+	LeapDeadBlocks();
 }
 //---------------------------------------------------------------------------
 
@@ -1391,6 +1466,24 @@ tRisseString tRisseSSAForm::Dump() const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseSSAForm::LeapDeadBlocks()
+{
+	// EntryBlock から到達可能なすべての基本ブロックのマークを解除する
+	EntryBlock->ClearMark();
+
+	// EntryBlock から到達可能なすべての基本ブロックをマークする
+	gc_vector<tRisseSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->SetMark();
+
+	// EntryBlock から到達可能なすべての基本ブロックのうち、
+	// 到達できないブロックが Pred にあれば削除する
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->DeleteUnmarkedPred();
+}
+//---------------------------------------------------------------------------
 
 
 

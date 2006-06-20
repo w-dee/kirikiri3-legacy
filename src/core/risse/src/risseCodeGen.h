@@ -273,6 +273,10 @@ public:
 		Used.push_back(stmt);
 	}
 
+	//! @brief		この変数が使用されている文を削除する
+	//! @param		stmt	この変数が使用されている文
+	void DeleteUsed(tRisseSSAStatement * stmt);
+
 	//! @brief		この変数がとりうる値を設定する
 	//! @param		value		この変数がとりうる値
 	//! @note		ValueType も、この value にあわせて設定される
@@ -409,11 +413,12 @@ public:
 	//! @brief		この文で使用されている変数のリストに変数を追加する
 	//! @param		var		変数
 	//! @note		SetDeclared() と違い、このメソッドはvar->AddUsed(this)を呼び出す
-	void AddUsed(tRisseSSAVariable * var)
-	{
-		var->AddUsed(this);
-		Used.push_back(var);
-	}
+	void AddUsed(tRisseSSAVariable * var);
+
+	//! @brief		この文で使用されている変数のリストから変数を削除する
+	//! @param		index	インデックス
+	//! @note		このメソッドは、削除される変数の DeleteUsed(this) を呼び出す
+	void DeleteUsed(risse_size index);
 
 	//! @brief		分岐のジャンプ先(条件が真のとき)を設定する
 	//! @param		type	分岐のジャンプ先(条件が真のとき)
@@ -535,6 +540,15 @@ public:
 	//! @note		このメソッドは、block->AddSucc(this) を呼び出し、
 	//!				block の直後ブロックを設定する
 	void AddPred(tRisseSSABlock * block);
+
+	//! @brief		直前の基本ブロックを削除する
+	//! @param		index		基本ブロックのインデックス(0～)
+	//! @note		このメソッドは AddPred() と異なり、削除されようとする
+	//!				基本ブロックの直後ブロックの情報は書き換えない
+	void DeletePred(risse_size index);
+
+	//! @param		マークの付いていないPredがあれば削除する
+	void DeleteUnmarkedPred();
 
 	//! @brief		直後の基本ブロックを追加する
 	//! @param		block	基本ブロック
@@ -899,6 +913,11 @@ public:
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
+
+//----
+public:
+	//! @brief		到達しない基本ブロックを削除する
+	void LeapDeadBlocks();
 };
 //---------------------------------------------------------------------------
 

@@ -1162,6 +1162,7 @@ void tRisseSSABlock::AnalyzeVariableLiveness()
 	// すべてのマークされていない変数に対して生存区間解析を行う
 
 	// すべての文を検査し、それぞれの文で使用されている「変数」について解析を行う
+	// 「文」につく「マーク」は 文のポインタそのもの
 	tRisseSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt;
@@ -1170,10 +1171,10 @@ void tRisseSSABlock::AnalyzeVariableLiveness()
 		const gc_vector<tRisseSSAVariable *> & used = stmt->GetUsed();
 		for(risse_size s = 0; s < used.size(); s++)
 		{
-			if(used[s]->GetMark() != this)
+			if(used[s]->GetMark() != stmt)
 			{
 				Form->AnalyzeVariableLiveness(used[s]);
-				used[s]->SetMark(this);
+				used[s]->SetMark(stmt);
 			}
 		}
 	}
@@ -1630,8 +1631,6 @@ void tRisseSSAForm::AnalyzeVariableLiveness(tRisseSSAVariable * var)
 	// それぞれの 変数の使用位置について、変数の宣言か、この変数が使用されていると
 	// マークされている箇所にまで逆順にブロックをたどる
 	// (すでにたどったブロックはたどらない)
-
-const risse_char * vname = var->GetQualifiedName().c_str();
 
 	// この変数が宣言されている文
 	tRisseSSAStatement * decl_stmt = var->GetDeclared();

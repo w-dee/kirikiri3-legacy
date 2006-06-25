@@ -223,6 +223,7 @@ class tRisseSSAVariable : public tRisseCollectee
 
 	const tRisseVariant *Value; //!< この変数がとりうる値(NULL=決まった値がない)
 	tRisseVariant::tType ValueType; //!< この変数がとりうる型(void = どんな型でも取りうる)
+	void * Mark; //!< マーク
 
 public:
 	//! @brief		コンストラクタ
@@ -277,6 +278,9 @@ public:
 	//! @param		stmt	この変数が使用されている文
 	void DeleteUsed(tRisseSSAStatement * stmt);
 
+	//! @brief		この変数で使用されている文のリストを得る
+	const gc_vector<tRisseSSAStatement *> & GetUsed() const { return Used; }
+
 	//! @brief		この変数がとりうる値を設定する
 	//! @param		value		この変数がとりうる値
 	//! @note		ValueType も、この value にあわせて設定される
@@ -312,6 +316,13 @@ public:
 				tRisseSSAVariable * param1 = NULL,
 				tRisseSSAVariable * param2 = NULL,
 				tRisseSSAVariable * param3 = NULL);
+
+	//! @brief		「マーク」フラグを設定する
+	//! @param		m		マーク
+	void SetMark(void * m = reinterpret_cast<void*>(-1)) { Mark = m; }
+
+	//! @brief		「マーク」を取得する
+	void * GetMark() const { return Mark; }
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
@@ -420,6 +431,9 @@ public:
 	//! @note		このメソッドは、削除される変数の DeleteUsed(this) を呼び出す
 	void DeleteUsed(risse_size index);
 
+	//! @brief		この文で使用されている変数のリストを得る
+	const gc_vector<tRisseSSAVariable *> & GetUsed() const { return Used; }
+
 	//! @brief		分岐のジャンプ先(条件が真のとき)を設定する
 	//! @param		type	分岐のジャンプ先(条件が真のとき)
 	//! @note		block の直前基本ブロックとして Block を追加するので注意
@@ -491,7 +505,11 @@ class tRisseSSABlock : public tRisseCollectee
 	tRisseSSAStatement * FirstStatement; //!< 文のリストの先頭
 	tRisseSSAStatement * LastStatement; //!< 文のリストの最後
 	tRisseSSALocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
-	mutable bool Mark; //!< マークが行われたかどうか
+
+	typedef gc_map<tRisseSSAVariable *, void *> tLiveVariableMap; //!< 生存している変数のリスト
+	tLiveVariableMap * LiveIn; //!< このブロックの開始時点で生存している変数のリスト
+	tLiveVariableMap * LiveOut; //!< このブロックの終了時点で生存している変数のリスト
+	mutable void * Mark; //!< マーク
 	mutable bool Traversing; //!< トラバース中かどうか
 
 public:
@@ -547,30 +565,58 @@ public:
 	//!				基本ブロックの直後ブロックの情報は書き換えない
 	void DeletePred(risse_size index);
 
-	//! @param		マークの付いていないPredがあれば削除する
-	void DeleteUnmarkedPred();
-
 	//! @brief		直後の基本ブロックを追加する
 	//! @param		block	基本ブロック
 	void AddSucc(tRisseSSABlock * block);
+
+	//! @brief		直前の基本ブロックのリストを取得する
+	//! @return		直前の基本ブロックのリスト
+	const gc_vector<tRisseSSABlock *> & GetPred() const { return Pred; }
+
+	//! @brief		直後の基本ブロックのリストを取得する
+	//! @return		直後の基本ブロックのリスト
+	const gc_vector<tRisseSSABlock *> & GetSucc() const { return Succ; }
+
+	//! @param		マークの付いていないPredがあれば削除する
+	void DeleteUnmarkedPred();
 
 	//! @brief		ローカル名前空間のスナップショットを作成する
 	//! @param		ref		参照元ローカル名前空間
 	void TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref);
 
+	//! @brief		LiveIn/Outに変数を追加する
+	//! @param		var		追加する変数
+	//! @param		out		真の場合 LiveOut を対象にし、偽の場合 LiveIn を対象にする
+	void AddLiveness(tRisseSSAVariable * var, bool out = true);
+
+	//! @brief		LiveIn/Outに変数があるかどうかを得る
+	//! @param		var		探す変数
+	//! @param		out		真の場合 LiveOut を対象にし、偽の場合 LiveIn を対象にする
+	//! @return		変数が見つかれば真
+	bool GetLiveness(tRisseSSAVariable * var, bool out = true);
+
 	//! @brief		「マーク」フラグをクリアする
 	void ClearMark() const;
 
 	//! @brief		「マーク」フラグを設定する
-	//! @param		m		マークを設定するか(真)、クリアするか(偽)
-	void SetMark(bool m = true) { Mark = m; }
+	//! @param		m		マーク
+	void SetMark(void * m = reinterpret_cast<void*>(-1)) { Mark = m; }
 
 	//! @brief		「マーク」を取得する
-	bool GetMark() const { return Mark; }
+	void * GetMark() const { return Mark; }
 
 	//! @brief		この基本ブロックを起点にして基本ブロックをたどり、そのリストを得る
 	//! @param		blocks		基本ブロックのリストの格納先
 	void Traverse(gc_vector<tRisseSSABlock *> & blocks) const;
+
+	//! @brief		LiveIn と LiveOut を作成する
+	void CreateLiveInAndLiveOut();
+
+	//! @brief		変数の生存区間を解析する
+	void AnalyzeVariableLiveness();
+
+	//! @brief		φ関数を削除する
+	void RemovePhiStatements();
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
@@ -918,6 +964,17 @@ public:
 public:
 	//! @brief		到達しない基本ブロックを削除する
 	void LeapDeadBlocks();
+
+	//! @brief		変数の生存区間を解析する(すべての変数に対して)
+	void AnalyzeVariableLiveness();
+
+	//! @brief		変数の生存区間を解析する(個別の変数に対して)
+	//! @param		var		変数
+	void AnalyzeVariableLiveness(tRisseSSAVariable * var);
+
+	//! @brief		φ関数を削除する
+	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
+	void RemovePhiStatements();
 };
 //---------------------------------------------------------------------------
 

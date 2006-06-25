@@ -52,7 +52,7 @@ bool tRisseSSAFlatNamespace::FindAndSetUsed(const tRisseString & name, bool writ
 //---------------------------------------------------------------------------
 void tRisseSSAFlatNamespace::Add(const tRisseString & name)
 {
-	Map.insert(std::pair<tRisseString, tInfo>(name, tInfo())); // 新規に挿入
+	Map.insert(tMap::value_type(name, tInfo())); // 新規に挿入
 }
 //---------------------------------------------------------------------------
 
@@ -175,10 +175,10 @@ void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable *
 		i->second = n_name; // 上書き
 	else
 		Scopes.back()->AliasMap.insert(
-			std::pair<tRisseString, tRisseString>(name, n_name)); // 新規に挿入
+			tAliasMap::value_type(name, n_name)); // 新規に挿入
 
 	// 番号付きの名前を登録する
-	Scopes.back()->VariableMap.insert(std::pair<tRisseString, tRisseSSAVariable *>(n_name, where));
+	Scopes.back()->VariableMap.insert(tVariableMap::value_type(n_name, where));
 
 	// 名前と番号付きの名前を where に設定する
 	where->SetName(name);
@@ -437,6 +437,7 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 	Declared = stmt;
 	Value = NULL;
 	ValueType = tRisseVariant::vtVoid;
+	Mark = NULL;
 
 	// この変数が定義された文の登録
 	if(Declared) Declared->SetDeclared(this);
@@ -898,8 +899,9 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
 	Form = form;
 	FirstStatement = LastStatement = NULL;
 	LocalNamespace = NULL;
-	Mark = false;
+	Mark = NULL;
 	Traversing = false;
+	LiveIn = LiveOut = NULL;
 
 	// 通し番号の準備
 	Name = name + RISSE_WC('_') + tRisseString::AsString(form->GetUniqueNumber());
@@ -934,6 +936,7 @@ void tRisseSSABlock::AddPhiFunction(risse_size pos,
 		stmt->SetSucc(FirstStatement);
 		FirstStatement = stmt;
 	}
+	stmt->SetBlock(this);
 
 	// 関数の引数を調べる
 	// 関数の引数は、直前のブロックのローカル名前空間のスナップショットから
@@ -1027,6 +1030,14 @@ void tRisseSSABlock::DeletePred(risse_size index)
 
 
 //---------------------------------------------------------------------------
+void tRisseSSABlock::AddSucc(tRisseSSABlock * block)
+{
+	Succ.push_back(block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSABlock::DeleteUnmarkedPred()
 {
 	// Pred は削除の効率を考え、逆順に見ていく
@@ -1046,18 +1057,30 @@ void tRisseSSABlock::DeleteUnmarkedPred()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AddSucc(tRisseSSABlock * block)
+void tRisseSSABlock::TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref)
 {
-	Succ.push_back(block);
+	LocalNamespace = new tRisseSSALocalNamespace(*ref);
+	LocalNamespace->SetBlock(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref)
+void tRisseSSABlock::AddLiveness(tRisseSSAVariable * var, bool out)
 {
-	LocalNamespace = new tRisseSSALocalNamespace(*ref);
-	LocalNamespace->SetBlock(this);
+	tLiveVariableMap * map = out ? LiveOut : LiveIn;
+	RISSE_ASSERT(map != NULL);
+	map->insert(tLiveVariableMap::value_type(var, NULL));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseSSABlock::GetLiveness(tRisseSSAVariable * var, bool out)
+{
+	tLiveVariableMap * map = out ? LiveOut : LiveIn;
+	RISSE_ASSERT(map != NULL);
+	return map->find(var) != map->end();
 }
 //---------------------------------------------------------------------------
 
@@ -1068,7 +1091,7 @@ void tRisseSSABlock::ClearMark() const
 	gc_vector<tRisseSSABlock *> blocks;
 	Traverse(blocks);
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->SetMark(false);
+		(*i)->SetMark(NULL);
 }
 //---------------------------------------------------------------------------
 
@@ -1112,6 +1135,73 @@ void tRisseSSABlock::Traverse(gc_vector<tRisseSSABlock *> & blocks) const
 
 
 //---------------------------------------------------------------------------
+void tRisseSSABlock::CreateLiveInAndLiveOut()
+{
+	// Pred と Succ の間に LiveIn と LiveOut を作成する
+	// 接続されている二つのブロックの接続点の LiveOut と LiveIn は
+	// 同じオブジェクトになる
+
+	// すべての Pred の LiveOut に設定を行う
+	if(!LiveIn) LiveIn = new tLiveVariableMap();
+	for(gc_vector<tRisseSSABlock *>::iterator i = Pred.begin();
+			i != Pred.end(); i++)
+		(*i)->LiveOut = LiveIn;
+
+	// すべての Succ の LiveIn に設定を行う
+	if(!LiveOut) LiveOut = new tLiveVariableMap();
+	for(gc_vector<tRisseSSABlock *>::iterator i = Succ.begin();
+			i != Succ.end(); i++)
+		(*i)->LiveIn = LiveOut;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::AnalyzeVariableLiveness()
+{
+	// すべてのマークされていない変数に対して生存区間解析を行う
+
+	// すべての文を検査し、それぞれの文で使用されている「変数」について解析を行う
+	tRisseSSAStatement *stmt;
+	for(stmt = FirstStatement;
+		stmt;
+		stmt = stmt->GetSucc())
+	{
+		const gc_vector<tRisseSSAVariable *> & used = stmt->GetUsed();
+		for(risse_size s = 0; s < used.size(); s++)
+		{
+			if(used[s]->GetMark() != this)
+			{
+				Form->AnalyzeVariableLiveness(used[s]);
+				used[s]->SetMark(this);
+			}
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::RemovePhiStatements()
+{
+	// すべてのφ関数について処理
+	tRisseSSAStatement *stmt;
+	for(stmt = FirstStatement;
+		stmt && stmt->GetCode() == ocPhi;
+		stmt = stmt->GetSucc())
+	{
+		// このφ関数で宣言された変数の有効範囲と、φ関数の引数の有効範囲が
+		// このブロック内で重なっていた場合は、重ならないようにするために
+		// 代入文の生成が必要になるため、判定を行う。
+
+		// まず、引数それぞれの宣言位置がこのブロック内の場合を探す
+		// ??? φ関数の引数の生存範囲がブロックを超えていたら？
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseSSABlock::Dump() const
 {
 	tRisseString ret;
@@ -1130,10 +1220,23 @@ tRisseString tRisseSSABlock::Dump() const
 	}
 	ret += RISSE_WS("\n");
 
+	// LiveIn を列挙
+	if(LiveIn && LiveIn->size() > 0)
+	{
+		ret += RISSE_WS("// LiveIn: ");
+		for(tLiveVariableMap::iterator i = LiveIn->begin(); i != LiveIn->end(); i++)
+		{
+			if(i != LiveIn->begin()) ret += RISSE_WS(", ");
+			ret += i->first->GetQualifiedName();
+		}
+		ret += RISSE_WS("\n");
+	}
+
+	// 文を列挙
 	if(!FirstStatement)
 	{
 		// 一つも文を含んでいない？？
-		ret += RISSE_WS("This SSA basic block does not contain any statements\n\n");
+		ret += RISSE_WS("This SSA basic block does not contain any statements\n");
 	}
 	else
 	{
@@ -1144,11 +1247,21 @@ tRisseString tRisseSSABlock::Dump() const
 			ret += stmt->Dump() + RISSE_WS("\n");
 			stmt = stmt->GetSucc();
 		} while(stmt != NULL);
+	}
 
+	// LiveOut を列挙
+	if(LiveOut && LiveOut->size() > 0)
+	{
+		ret += RISSE_WS("// LiveOut: ");
+		for(tLiveVariableMap::iterator i = LiveOut->begin(); i != LiveOut->end(); i++)
+		{
+			if(i != LiveOut->begin()) ret += RISSE_WS(", ");
+			ret += i->first->GetQualifiedName();
+		}
 		ret += RISSE_WS("\n");
 	}
 
-	return ret;
+	return ret + RISSE_WS("\n");
 }
 //---------------------------------------------------------------------------
 
@@ -1181,7 +1294,7 @@ void tRisseSSALabelMap::AddMap(const tRisseString &labelname, tRisseSSABlock * b
 				Form->GetScriptBlock(), pos);
 	}
 
-	LabelMap.insert(std::pair<tRisseString, tRisseSSABlock *>(labelname, block));
+	LabelMap.insert(tLabelMap::value_type(labelname, block));
 }
 //---------------------------------------------------------------------------
 
@@ -1314,6 +1427,9 @@ void tRisseSSAForm::Generate()
 
 	// 到達しない基本ブロックからのパスを削除
 	LeapDeadBlocks();
+
+	// 変数の有効範囲を解析
+	AnalyzeVariableLiveness();
 }
 //---------------------------------------------------------------------------
 
@@ -1470,11 +1586,13 @@ tRisseString tRisseSSAForm::Dump() const
 void tRisseSSAForm::LeapDeadBlocks()
 {
 	// EntryBlock から到達可能なすべての基本ブロックのマークを解除する
-	EntryBlock->ClearMark();
-
-	// EntryBlock から到達可能なすべての基本ブロックをマークする
+	// TODO: 正確な動作は「(到達可能である・なしに関わらず)すべての基本ブロックのマークを解除する」
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->SetMark(NULL);
+
+	// EntryBlock から到達可能なすべての基本ブロックをマークする
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->SetMark();
 
@@ -1485,6 +1603,112 @@ void tRisseSSAForm::LeapDeadBlocks()
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AnalyzeVariableLiveness()
+{
+	// EntryBlock から到達可能なすべての基本ブロックを得る
+	gc_vector<tRisseSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->SetMark(NULL);
+
+	// LiveIn と LiveOut を作成する
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->CreateLiveInAndLiveOut();
+
+	// それぞれのブロック内にある変数に対して生存区間解析を行う
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->AnalyzeVariableLiveness();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AnalyzeVariableLiveness(tRisseSSAVariable * var)
+{
+	// それぞれの 変数の使用位置について、変数の宣言か、この変数が使用されていると
+	// マークされている箇所にまで逆順にブロックをたどる
+	// (すでにたどったブロックはたどらない)
+
+const risse_char * vname = var->GetQualifiedName().c_str();
+
+	// この変数が宣言されている文
+	tRisseSSAStatement * decl_stmt = var->GetDeclared();
+
+	// この変数が宣言されているブロック
+	tRisseSSABlock * decl_block = decl_stmt->GetBlock();
+
+	// この変数が使用されているそれぞれの文について
+	const gc_vector<tRisseSSAStatement *> & used = var->GetUsed();
+	for(gc_vector<tRisseSSAStatement *>::const_iterator si = used.begin();
+		si != used.end(); si++)
+	{
+		// この文のブロックは
+		tRisseSSABlock * used_block = (*si)->GetBlock();
+		RISSE_ASSERT(used_block != NULL);
+
+		// ブロックを逆順にたどる
+		// 終了条件は
+		// ・たどるべきブロックがなくなった場合 -> あり得ない
+		// ・変数の宣言されたブロックにたどり着いた場合
+		// ・すでにこの変数が使用されているとマークされているブロックにたどり着いた場合
+
+		gc_vector<tRisseSSABlock *> Stack;
+		Stack.push_back(used_block); // 初期ノードを入れる
+		do
+		{
+			bool stop = false;
+
+			// スタックから値を取り出す
+			tRisseSSABlock * quest_block = Stack.back();
+			Stack.pop_back();
+
+			// 変数が宣言されているブロックにたどり着いた場合は、そこでこのノード
+			// の先をたどるのは辞める
+			if(quest_block == decl_block)
+				stop = true;
+
+			// quest_block の LiveOut または LiveIn にこの変数が追加されているか
+			// 追加されているならば そこでこのノード
+			// の先をたどるのは辞める
+			if(!stop &&(
+					quest_block->GetLiveness(var, true) ||
+					quest_block->GetLiveness(var, true)))
+				stop = true;
+
+			if(!stop)
+			{
+				// この時点で quest_block では
+				// 変数が宣言されていない→これよりも前のブロックで変数が宣言されている
+				// →このブロックとpredの間では変数は生存している
+				// つまり、LiveIn に変数を追加する
+				quest_block->AddLiveness(var, false);
+
+				// スタックに quest_block のpred を追加する
+				for(gc_vector<tRisseSSABlock *>::const_iterator i = quest_block->GetPred().begin();
+					i != quest_block->GetPred().end(); i++)
+					Stack.push_back(*i);
+			}
+		} while(Stack.size() > 0);
+
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::RemovePhiStatements()
+{
+	// 基本ブロックのリストを取得
+	gc_vector<tRisseSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// それぞれのブロックにつき処理
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->RemovePhiStatements();
+}
+//---------------------------------------------------------------------------
 
 
 

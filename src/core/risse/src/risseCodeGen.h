@@ -557,6 +557,10 @@ public:
 	//! @param		point		挿入する場所
 	void InsertStatement(tRisseSSAStatement * stmt, tStatementInsertPoint point);
 
+	//! @brief		文を削除する
+	//! @param		stmt		削除する文
+	void DeleteStatement(tRisseSSAStatement * stmt);
+
 	//! @brief		φ関数を追加する
 	//! @param		pos			スクリプト上の位置
 	//! @param		name		変数名(オリジナルの名前)
@@ -635,6 +639,7 @@ public:
 	void AnalyzeVariableLiveness();
 
 	//! @brief		φ関数を削除する
+	//! @note		このメソッド実行後はSSA形式としての性質は保てなくなる。
 	void RemovePhiStatements();
 
 	//! @brief		ダンプを行う

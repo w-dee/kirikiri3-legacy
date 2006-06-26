@@ -961,6 +961,19 @@ void tRisseSSABlock::InsertStatement(tRisseSSAStatement * stmt, tStatementInsert
 
 
 //---------------------------------------------------------------------------
+void tRisseSSABlock::DeleteStatement(tRisseSSAStatement * stmt)
+{
+	tRisseSSAStatement * stmt_pred = stmt->GetPred();
+	tRisseSSAStatement * stmt_succ = stmt->GetSucc();
+	if(stmt_pred) stmt_pred->SetSucc(stmt_succ);
+	if(stmt_pred == NULL) FirstStatement = stmt_succ;
+	if(stmt_succ) stmt_succ->SetPred(stmt_pred);
+	if(stmt_succ == NULL) LastStatement = stmt_pred;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSABlock::AddPhiFunction(risse_size pos,
 	const tRisseString & name, const tRisseString & n_name, tRisseSSAVariable *& decl_var)
 {
@@ -1228,7 +1241,7 @@ void tRisseSSABlock::RemovePhiStatements()
 	tRisseSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt && stmt->GetCode() == ocPhi;
-		stmt = stmt->GetSucc())
+		stmt = FirstStatement)
 	{
 		// φ関数を削除する処理は簡単にはそれぞれの pred ブロックの分岐の
 		// 最後に代入文を生成し、φ関数を削除する。
@@ -1243,6 +1256,9 @@ void tRisseSSABlock::RemovePhiStatements()
 		// 変になる。この場合は phi 変数の戻り値をいったん一時変数にとるような
 		// 文を挿入することで生存範囲の干渉を避ける。
 
+		// stmt の used の配列
+		const gc_vector<tRisseSSAVariable *> phi_used = stmt->GetUsed();
+
 		// pred をたどる
 		bool var_used = false;
 		for(gc_vector<tRisseSSABlock *>::iterator i = Pred.begin();
@@ -1255,10 +1271,24 @@ void tRisseSSABlock::RemovePhiStatements()
 
 		if(var_used)
 		{
-			// 変数が使われている
+			// TODO: 変数の干渉が見つかった場合の処理
+			RisseFPrint(stderr, tRisseString(RISSE_WS("variable interference found at block %1\n"), Dump()).c_str());
+			RISSE_ASSERT("variable interference found");
 		}
 
 		// 各 pred の分岐文の直前に 代入文を生成する
+		for(risse_size index = 0; index < Pred.size(); index ++)
+		{
+			tRisseSSAStatement * new_stmt =
+				new tRisseSSAStatement(Form, stmt->GetPosition(), ocAssign);
+			new_stmt->AddUsed(const_cast<tRisseSSAVariable*>(phi_used[index]));
+			new_stmt->SetDeclared(stmt->GetDeclared());
+
+			Pred[index]->InsertStatement(new_stmt, sipBeforeBranch);
+		}
+
+		// φ関数を除去
+		DeleteStatement(stmt);
 	}
 }
 //---------------------------------------------------------------------------
@@ -1493,6 +1523,9 @@ void tRisseSSAForm::Generate()
 
 	// 変数の有効範囲を解析
 	AnalyzeVariableLiveness();
+
+	// φ関数を除去
+	RemovePhiStatements();
 }
 //---------------------------------------------------------------------------
 

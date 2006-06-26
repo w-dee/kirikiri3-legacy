@@ -217,6 +217,8 @@ tRisseLexerUtility::tParseStringResult
 	// delim1 must be '\'' or '"'
 	// delim2 must be '&' or '\0'
 
+	// TODO: 改行がリテラル中にあった場合はソースの改行コードにかかわらず常に \n とするように
+
 	tRisseString str;
 
 	tParseStringResult status = psrNone;
@@ -894,6 +896,7 @@ bool tRisseLexerUtility::ParseRegExp(const risse_char * & ptr, tRisseString &pat
 	// this is essencially the same as string parsing, except for
 	// not to decode escaped characters by '\\'.
 	// the regexp must be terminated by the delimiter '/', not succeeded by '\\'.
+	// TODO: 改行がリテラル中にあった場合はソースの改行コードにかかわらず常に \n とするように
 
 	bool ok = false;
 	bool lastbackslash = false;

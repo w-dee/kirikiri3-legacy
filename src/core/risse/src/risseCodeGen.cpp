@@ -910,6 +910,57 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
+void tRisseSSABlock::InsertStatement(tRisseSSAStatement * stmt, tStatementInsertPoint point)
+{
+	tRisseSSAStatement * cs = NULL;
+	switch(point)
+	{
+	case sipHead:
+		cs = FirstStatement;
+		break;
+
+	case sipAfterPhi:
+		for(cs = FirstStatement;
+			cs != NULL && cs->GetCode() == ocPhi;
+			cs = cs->GetSucc()) ; /* ←空文 */
+		break;
+
+	case sipBeforeBranch:
+		{
+			tRisseSSAStatement * i;
+			cs = NULL;
+			for(i = LastStatement; i != NULL; i = i->GetPred())
+			{
+				if(i->IsBranchStatement())
+					cs = i;
+				else
+					break;
+			}
+			// 分岐文が見つからなかった場合は cs = NULL (つまり最後に追加)
+		}
+		break;
+
+	case sipTail:
+		cs = NULL;
+		break;
+	}
+
+	// この時点で cs は挿入したい文の直後の文
+	// cs==NULLの場合は最後に追加
+	tRisseSSAStatement * cs_pred = cs ? cs->GetPred() : LastStatement;
+	if(cs_pred)	cs_pred->SetSucc(stmt);
+	if(cs)		cs->SetPred(stmt);
+	stmt->SetPred(cs_pred);
+	if(cs_pred == NULL) FirstStatement = stmt;
+	stmt->SetSucc(cs);
+	if(cs == NULL) LastStatement = stmt;
+
+	stmt->SetBlock(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSABlock::AddPhiFunction(risse_size pos,
 	const tRisseString & name, const tRisseString & n_name, tRisseSSAVariable *& decl_var)
 {
@@ -924,19 +975,7 @@ void tRisseSSABlock::AddPhiFunction(risse_size pos,
 	decl_var->SetNumberedName(n_name);
 
 	// φ関数は必ずブロックの先頭に追加される
-	if(!FirstStatement)
-	{
-		// 最初の文
-		FirstStatement = LastStatement = stmt;
-	}
-	else
-	{
-		// ２つ目以降の文
-		FirstStatement->SetPred(stmt);
-		stmt->SetSucc(FirstStatement);
-		FirstStatement = stmt;
-	}
-	stmt->SetBlock(this);
+	InsertStatement(stmt, sipHead);
 
 	// 関数の引数を調べる
 	// 関数の引数は、直前のブロックのローカル名前空間のスナップショットから
@@ -1191,12 +1230,35 @@ void tRisseSSABlock::RemovePhiStatements()
 		stmt && stmt->GetCode() == ocPhi;
 		stmt = stmt->GetSucc())
 	{
-		// このφ関数で宣言された変数の有効範囲と、φ関数の引数の有効範囲が
-		// このブロック内で重なっていた場合は、重ならないようにするために
-		// 代入文の生成が必要になるため、判定を行う。
+		// φ関数を削除する処理は簡単にはそれぞれの pred ブロックの分岐の
+		// 最後に代入文を生成し、φ関数を削除する。
+		// ただし、この代入文の挿入によって変数が上書きされてしまう場合が
+		// ある(lost copy problem)ため、変数の有効範囲の解析を行う
 
-		// まず、引数それぞれの宣言位置がこのブロック内の場合を探す
-		// ??? φ関数の引数の生存範囲がブロックを超えていたら？
+		// TODO: 変数の併合(coalescing)
+
+		// 代入文を生成するに先立ち、代入文を生成することにより変数が上書き
+		// されないことを確認する。具体的には、代入文を生成する場所で
+		// 代入先変数が生存していれば、そこに代入文を生成してしまうと
+		// 変になる。この場合は phi 変数の戻り値をいったん一時変数にとるような
+		// 文を挿入することで生存範囲の干渉を避ける。
+
+		// pred をたどる
+		bool var_used = false;
+		for(gc_vector<tRisseSSABlock *>::iterator i = Pred.begin();
+			i != Pred.end(); i++)
+		{
+			// pred の最後で stmt->GetDeclared() が存在しているかどうかを調べる
+			if((*i)->GetLiveness(stmt->GetDeclared()))
+				{ var_used = true; break; }
+		}
+
+		if(var_used)
+		{
+			// 変数が使われている
+		}
+
+		// 各 pred の分岐文の直前に 代入文を生成する
 	}
 }
 //---------------------------------------------------------------------------

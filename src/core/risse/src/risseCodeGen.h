@@ -417,6 +417,11 @@ public:
 	//! @return		オペレーションコード
 	tRisseOpCode GetCode() const { return Code; }
 
+	//! @brief		この文が分岐文かどうかを返す
+	//! @return		この文が分岐文かどうか
+	bool IsBranchStatement() const {
+		return Code == ocBranch || Code == ocJump; }
+
 	//! @brief		この文で定義された変数を設定する
 	//! @param		declared	この文で定義された変数
 	void SetDeclared(tRisseSSAVariable * declared)
@@ -533,24 +538,24 @@ public:
 	//! @return		基本ブロック名
 	tRisseString GetName() const { return Name; }
 
+	//! @brief		InsertStatement() メソッドでの関数挿入位置
+	enum tStatementInsertPoint
+	{
+		sipHead,			//!< 先頭
+		sipAfterPhi,		//!< φ関数の直後
+		sipBeforeBranch,	//!< 分岐/ジャンプ文の直前
+		sipTail				//!< 最後
+	};
+
 	//! @brief		文を追加する
 	//! @param		stmt	文
 	void AddStatement(tRisseSSAStatement * stmt)
-	{
-		if(!FirstStatement)
-		{
-			// 最初の文
-			FirstStatement = LastStatement = stmt;
-		}
-		else
-		{
-			// ２つ目以降の文
-			LastStatement->SetSucc(stmt);
-			stmt->SetPred(LastStatement);
-			LastStatement = stmt;
-		}
-		stmt->SetBlock(this);
-	}
+	{ InsertStatement(stmt, sipTail); }
+
+	//! @brief		文を挿入する
+	//! @param		stmt		挿入する文
+	//! @param		point		挿入する場所
+	void InsertStatement(tRisseSSAStatement * stmt, tStatementInsertPoint point);
 
 	//! @brief		φ関数を追加する
 	//! @param		pos			スクリプト上の位置

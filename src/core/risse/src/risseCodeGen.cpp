@@ -1259,13 +1259,17 @@ void tRisseSSABlock::RemovePhiStatements()
 		// stmt の used の配列
 		const gc_vector<tRisseSSAVariable *> phi_used = stmt->GetUsed();
 
+		// stmt で宣言された変数
+		tRisseSSAVariable * stmt_decld = stmt->GetDeclared();
+
+
 		// pred をたどる
 		bool var_used = false;
 		for(gc_vector<tRisseSSABlock *>::iterator i = Pred.begin();
 			i != Pred.end(); i++)
 		{
-			// pred の最後で stmt->GetDeclared() が存在しているかどうかを調べる
-			if((*i)->GetLiveness(stmt->GetDeclared()))
+			// pred の最後で stmt_decld が存在しているかどうかを調べる
+			if((*i)->GetLiveness(stmt_decld))
 				{ var_used = true; break; }
 		}
 
@@ -1282,9 +1286,12 @@ void tRisseSSABlock::RemovePhiStatements()
 			tRisseSSAStatement * new_stmt =
 				new tRisseSSAStatement(Form, stmt->GetPosition(), ocAssign);
 			new_stmt->AddUsed(const_cast<tRisseSSAVariable*>(phi_used[index]));
-			new_stmt->SetDeclared(stmt->GetDeclared());
+			new_stmt->SetDeclared(stmt_decld);
 
 			Pred[index]->InsertStatement(new_stmt, sipBeforeBranch);
+
+			// LiveOut にも stmt_decld を追加する
+			Pred[index]->AddLiveness(stmt_decld);
 		}
 
 		// φ関数を除去

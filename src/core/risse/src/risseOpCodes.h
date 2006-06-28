@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief オペレーションコード定義
+//! @brief オペレーションコード/VM命令定義
 //---------------------------------------------------------------------------
 #ifndef risseOpCodesH
 #define risseOpCodesH
@@ -149,6 +149,89 @@ RISSE_OC_ENUM_DEF()
 
 RISSE_OC_ENUM_END
 //---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		VMコード用イテレータ
+//---------------------------------------------------------------------------
+class tRisseVMCodeIterator : public tRisseCollectee
+{
+	const risse_uint32 *CodePointer; //!< コードへのポインタ
+	risse_size Address; //!< 論理アドレス(risse_size_maxの場合は論理アドレス指定無し)
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		codepointer	コードへのポインタ
+	//! @param		address		論理アドレス
+	tRisseVMCodeIterator(const risse_uint32 *codepointer, risse_size address = risse_size_max)
+	{
+		CodePointer = codepointer;
+		Address = address;
+	}
+
+	//! @brief		コピーコンストラクタ
+	//! @param		ref			コピーもとオブジェクト
+	tRisseVMCodeIterator(const tRisseVMCodeIterator & ref)
+	{
+		CodePointer = ref.CodePointer;
+		Address = ref.Address;
+	}
+
+	//! @brief		コードポインタの代入
+	//! @param		codepointer	コードポインタ
+	//! @return		このオブジェクトへの参照
+	//! @note		論理アドレスは「指定無し」にリセットされる。
+	//!				論理アドレスもともに指定したい場合は SetCodePointer() を使うこと
+	tRisseVMCodeIterator & operator = (const risse_uint32 *codepointer)
+	{
+		CodePointer = codepointer;
+		Address = risse_size_max;
+		return *this;
+	}
+
+	//! @brief		コードポインタへの変換
+	operator const risse_uint32 *() const { return CodePointer; }
+
+	//! @brief		コードポインタを設定する
+	//! @param		codepointer	コードへのポインタ
+	//! @param		address		論理アドレス
+	void SetCodePointer(const risse_uint32 *codepointer, risse_size address = risse_size_max)
+	{
+		CodePointer = codepointer;
+		Address = address;
+	}
+
+	//! @brief		コードポインタを取得する
+	//! @return		コードポインタ
+	const risse_uint32 * GetCodePointer() const { return CodePointer; }
+
+	//! @brief		論理アドレスを設定する
+	//! @param		address		論理アドレス
+	void SetAddress(risse_size address) { Address = address; }
+
+	//! @brief		論理アドレスを取得する
+	risse_size GetAddress() const { return Address; }
+
+	//! @brief		前置インクリメント演算子
+	void operator ++()
+	{
+		CodePointer += size;
+		if(Address != risse_size_max) Address += size;
+	}
+
+	//! @brief		このイテレータの示す命令のサイズをVMワード単位で得る
+	//! @return		命令のサイズ
+	void GetInsnSize() const;
+
+	//! @brief		このイテレータの示す命令をダンプ(逆アセンブル)する
+	//! @return		ダンプ結果
+	tRisseString Dump() const;
+};
+//---------------------------------------------------------------------------
+
 } // namespace Risse
 #endif
 

@@ -24,15 +24,45 @@ RISSE_DEFINE_SOURCE_ID(2759,19905,41807,16730,27783,55397,28774,14847);
 // (ヘッダファイル中でもう一度 namespace Risse に入って
 // しまうので、ここは namespace Risse 外に置く)
 #undef risseOpCodesH
-#define RISSE_OC_DEFINE_NAMES
+#define RISSE_OC_DEFINE_INFO
 #include "risseOpCodes.h"
 
 
 
+namespace Risse
+{
 
 //---------------------------------------------------------------------------
-void tRisseVMCodeIterator::GetInsnSize() const
+risse_size tRisseVMCodeIterator::GetInsnSize() const
 {
+	// 命令コード
+	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+
+	// RisseVMInsnInfo 内の該当するエントリ
+	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];
+
+	// enty.Flags をスキャン
+	risse_size insn_size = 1; // 1 = 命令コードの分
+	for(int i = 0; i < RisseMaxVMInsnOperand; i++)
+	{
+		switch(entry.Flags[i])
+		{
+		case tRisseVMInsnInfo::vifVoid:
+			break;
+
+		case tRisseVMInsnInfo::vifNumber:
+			insn_size += CodePointer[i+1]; // 追加のワード数はここに書いてある
+			break;
+
+		case tRisseVMInsnInfo::vifConstant:
+		case tRisseVMInsnInfo::vifRegister:
+		case tRisseVMInsnInfo::vifAddress:
+		case tRisseVMInsnInfo::vifSomething:
+			insn_size ++;
+			break;
+		}
+	}
+	return insn_size;
 }
 //---------------------------------------------------------------------------
 
@@ -40,5 +70,59 @@ void tRisseVMCodeIterator::GetInsnSize() const
 //---------------------------------------------------------------------------
 tRisseString tRisseVMCodeIterator::Dump() const
 {
+	// 命令コード
+	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+
+	// RisseVMInsnInfo 内の該当するエントリ
+	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];
+
+	// 命令名部分
+	tRisseString ret(entry.Mnemonic);
+	ret += RISSE_WC(' ');
+
+	// 命令ごとに分岐
+	switch(insn_code)
+	{
+	case ocFuncCall:
+	case ocNew:
+	case ocFuncCallBlock:
+		break;
+
+	default:
+		// それ以外の命令コードの処理は形式されているのでそれに従う
+		for(int i = 0; i < RisseMaxVMInsnOperand; i++)
+		{
+			if(i != 0) ret += RISSE_WS(", ");
+			switch(entry.Flags[i])
+			{
+			case tRisseVMInsnInfo::vifVoid:
+				break;
+
+			case tRisseVMInsnInfo::vifNumber:
+			case tRisseVMInsnInfo::vifSomething:
+				RISSE_ASSERT(!"not acceptable operand type");
+				break;
+
+
+			case tRisseVMInsnInfo::vifConstant:
+				ret += RISSE_WS("*") + tRisseString::AsString((int)CodePointer[i+1]);
+				break;
+
+			case tRisseVMInsnInfo::vifRegister:
+				ret += RISSE_WS("%") + tRisseString::AsString((int)CodePointer[i+1]);
+				break;
+
+			case tRisseVMInsnInfo::vifAddress:
+				{
+					char address[22];
+					sprintf(address, "%05x", (int)CodePointer[i+1]);
+					ret += RISSE_WS("0x") + tRisseString(address);
+				}
+				break;
+			}
+		}
+	}
+	return ret;
 }
 //---------------------------------------------------------------------------
+} // namespace Risse

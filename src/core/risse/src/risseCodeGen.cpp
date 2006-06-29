@@ -828,7 +828,7 @@ tRisseString tRisseSSAStatement::Dump() const
 					ret += (*Used.begin())->Dump() + RISSE_WC('.');
 
 				// オペレーションコード
-				ret += tRisseString(RisseOpCodeNames[Code]);
+				ret += tRisseString(RisseVMInsnInfo[Code].Name);
 
 				// 使用している引数
 				if(is_funccall && FuncArgOmitted)

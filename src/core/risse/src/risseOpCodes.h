@@ -15,17 +15,98 @@
 
 #include "risseTypes.h"
 #include "risseCharUtils.h"
+#include "risseGC.h"
+#include "risseCxxString.h"
 //---------------------------------------------------------------------------
 
 namespace Risse
 {
+#ifndef RISSE_OC_DEFINE_INFO
+
+//---------------------------------------------------------------------------
+// 各種定数
+//---------------------------------------------------------------------------
+static const int RisseMaxVMInsnOperand = 5;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		VM命令の情報を表す構造体
+//---------------------------------------------------------------------------
+struct tRisseVMInsnInfo
+{
+	//! @brief		tRisseVMInsnInfoで使用されるフラグ
+	enum tInsnFlag
+	{
+		vifVoid =0, 	//!< V このオペランドは存在しない
+		vifRegister,	//!< R このオペランドはレジスタを表している
+		vifConstant,	//!< C このオペランドは定数を表している
+		vifNumber,		//!< N このオペランドは(すべての必須オペランドが終了し
+						//!<   た後に続く)追加オペランドの個数を表している
+		vifAddress,		//!< A このオペランドはアドレスを表している
+		vifSomething,	//!< S このオペランドはその他の何かを表している
+	};
+
+	const char * Name;								//!< 命令名
+	const char * Mnemonic;							//!< ニーモニック
+	tInsnFlag Flags[RisseMaxVMInsnOperand];	//!< オペランドnに対するフラグ
+};
+//---------------------------------------------------------------------------
+#endif //#ifndef RISSE_OC_DEFINE_INFO
+#ifdef RISSE_OC_DEFINE_INFO
+	#ifdef R
+		#undef R
+	#endif
+	#define		R		tRisseVMInsnInfo::vifRegister
+	#ifdef C
+		#undef C
+	#endif
+	#define		C		tRisseVMInsnInfo::vifConstant
+	#ifdef N
+		#undef N
+	#endif
+	#define		N		tRisseVMInsnInfo::vifNumber
+	#ifdef A
+		#undef A
+	#endif
+	#define		A		tRisseVMInsnInfo::vifAddress
+	#ifdef S
+		#undef S
+	#endif
+	#define		S		tRisseVMInsnInfo::vifSomething
+	#ifdef P
+		#undef P
+	#endif
+	#define P(a,b,c,d,e) {\
+		(tRisseVMInsnInfo::tInsnFlag)(a),\
+		(tRisseVMInsnInfo::tInsnFlag)(b),\
+		(tRisseVMInsnInfo::tInsnFlag)(c),\
+		(tRisseVMInsnInfo::tInsnFlag)(d),\
+		(tRisseVMInsnInfo::tInsnFlag)(e) }
+#endif
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
 //! @brief オペーレーションコードの名前の配列
-extern const char * RisseOpCodeNames[];
+//---------------------------------------------------------------------------
+extern const tRisseVMInsnInfo RisseVMInsnInfo[];
+//---------------------------------------------------------------------------
 
 
+
+
+
+//---------------------------------------------------------------------------
 /*
 	#undef risseOpCodesH
-	してから #define RISSE_OC_DEFINE_NAMES
+	してから #define RISSE_OC_DEFINE_INFO
 	してこのファイルをもう一度 include すると、各 enum に
 	対応した文字列の表を得ることができる。
 */
@@ -43,109 +124,113 @@ extern const char * RisseOpCodeNames[];
 #endif
 
 
-#ifdef RISSE_OC_DEFINE_NAMES
-	#define RISSE_OC_ENUM_DEF() const char * RisseOpCodeNames[] = {
-	#define RISSE_OC_ENUM_ITEM(X) #X,
+#ifdef RISSE_OC_DEFINE_INFO
+	#define RISSE_OC_ENUM_DEF() const tRisseVMInsnInfo RisseVMInsnInfo[] = {
+	#define RISSE_OC_ENUM_ITEM(X,Y,Z) {#X,#Y,Z},
 	#define RISSE_OC_ENUM_END };
+
 #else
 	#define RISSE_OC_ENUM_DEF() enum tRisseOpCode {
-	#define RISSE_OC_ENUM_ITEM(X) oc##X,
+	#define RISSE_OC_ENUM_ITEM(X,Y,Z) oc##X,
 	#define RISSE_OC_ENUM_END };
 #endif
 
 
 //---------------------------------------------------------------------------
 RISSE_OC_ENUM_DEF()
+//						LongId			Mnemonic	 O1O2O3O4O5 operands
+
 // なにもしない
-	RISSE_OC_ENUM_ITEM(NoOperation		)		//!< なにもしない
+	RISSE_OC_ENUM_ITEM(NoOperation		, nop		,P(0,0,0,0,0))//!< なにもしない
 
 // 代入
-	RISSE_OC_ENUM_ITEM(Assign			)		//!< = (ローカル変数の代入)
-	RISSE_OC_ENUM_ITEM(AssignConstant	)		//!< = 定数の代入
-	RISSE_OC_ENUM_ITEM(AssignThis		)		//!< = thisの代入
-	RISSE_OC_ENUM_ITEM(AssignSuper		)		//!< = superの代入
-	RISSE_OC_ENUM_ITEM(AssignGlobal		)		//!< = globalの代入
-	RISSE_OC_ENUM_ITEM(AssignNewArray	)		//!< = 新しい配列オブジェクトの代入
-	RISSE_OC_ENUM_ITEM(AssignNewDict	)		//!< = 新しい辞書配列オブジェクトの代入
-	RISSE_OC_ENUM_ITEM(AssignNewRegExp	)		//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+	RISSE_OC_ENUM_ITEM(Assign			, cp		,P(R,R,0,0,0))//!< = (ローカル変数の代入)
+	RISSE_OC_ENUM_ITEM(AssignConstant	, const		,P(R,C,0,0,0))//!< = 定数の代入
+	RISSE_OC_ENUM_ITEM(AssignThis		, this		,P(R,0,0,0,0))//!< = thisの代入
+	RISSE_OC_ENUM_ITEM(AssignSuper		, super		,P(R,0,0,0,0))//!< = superの代入
+	RISSE_OC_ENUM_ITEM(AssignGlobal		, global	,P(R,0,0,0,0))//!< = globalの代入
+	RISSE_OC_ENUM_ITEM(AssignNewArray	, array		,P(R,0,0,0,0))//!< = 新しい配列オブジェクトの代入
+	RISSE_OC_ENUM_ITEM(AssignNewDict	, dict		,P(R,0,0,0,0))//!< = 新しい辞書配列オブジェクトの代入
+	RISSE_OC_ENUM_ITEM(AssignNewRegExp	, regexp	,P(R,0,0,0,0))//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
 
-// 可変引数
-	RISSE_OC_ENUM_ITEM(FuncCall			)		//!< function call
-	RISSE_OC_ENUM_ITEM(New				)		//!< "new"
-	RISSE_OC_ENUM_ITEM(Phi				)		//!< φ関数
+	RISSE_OC_ENUM_ITEM(FuncCall			, call		,P(R,S,N,0,0))//!< function call
+	RISSE_OC_ENUM_ITEM(New				, new		,P(R,S,N,0,0))//!< "new"
+	RISSE_OC_ENUM_ITEM(FuncCallBlock	, callb		,P(R,S,N,N,0))//!< function call with lazyblock
 
 // ジャンプ/分岐/制御/補助
-	RISSE_OC_ENUM_ITEM(Jump				)		//!< 単純なジャンプ
-	RISSE_OC_ENUM_ITEM(Branch			)		//!< 分岐
-	RISSE_OC_ENUM_ITEM(Debugger			)		//!< debugger ステートメント
-	RISSE_OC_ENUM_ITEM(Throw			)		//!< throw ステートメント
-	RISSE_OC_ENUM_ITEM(Return			)		//!< return ステートメント
-	RISSE_OC_ENUM_ITEM(DefineLazyBlock	)		//!< 遅延評価ブロックの定義
-
-// 名前空間
-	RISSE_OC_ENUM_ITEM(ParentWrite		)		//!< 親名前空間への書き込み
-	RISSE_OC_ENUM_ITEM(ParentRead		)		//!< 親名前空間からの読み込み
-	RISSE_OC_ENUM_ITEM(ChildWrite		)		//!< 子名前空間への書き込み
-	RISSE_OC_ENUM_ITEM(ChildRead		)		//!< 子名前空間からの読み込み
+	RISSE_OC_ENUM_ITEM(Jump				, jump		,P(A,0,0,0,0))//!< 単純なジャンプ
+	RISSE_OC_ENUM_ITEM(Branch			, branch	,P(R,A,A,0,0))//!< 分岐
+	RISSE_OC_ENUM_ITEM(Debugger			, dbg		,P(0,0,0,0,0))//!< debugger ステートメント
+	RISSE_OC_ENUM_ITEM(Throw			, throw		,P(R,0,0,0,0))//!< throw ステートメント
+	RISSE_OC_ENUM_ITEM(Return			, ret		,P(R,0,0,0,0))//!< return ステートメント
 
 // 引数1+なし
-	RISSE_OC_ENUM_ITEM(LogNot			)		//!< "!" logical not
-	RISSE_OC_ENUM_ITEM(BitNot			)		//!< "~" bit not
-	RISSE_OC_ENUM_ITEM(DecAssign		)		//!< "--" decrement
-	RISSE_OC_ENUM_ITEM(IncAssign		)		//!< "++" increment
-	RISSE_OC_ENUM_ITEM(Plus				)		//!< "+"
-	RISSE_OC_ENUM_ITEM(Minus			)		//!< "-"
+	RISSE_OC_ENUM_ITEM(LogNot			, lnot		,P(R,R,0,0,0))//!< "!" logical not
+	RISSE_OC_ENUM_ITEM(BitNot			, bnot		,P(R,R,0,0,0))//!< "~" bit not
+	RISSE_OC_ENUM_ITEM(DecAssign		, ERR		,P(0,0,0,0,0))//!< "--" decrement
+	RISSE_OC_ENUM_ITEM(IncAssign		, ERR		,P(0,0,0,0,0))//!< "++" increment
+	RISSE_OC_ENUM_ITEM(Plus				, plus		,P(R,R,0,0,0))//!< "+"
+	RISSE_OC_ENUM_ITEM(Minus			, minus		,P(R,R,0,0,0))//!< "-"
 
 // 引数1+1つ
-	RISSE_OC_ENUM_ITEM(LogOr			)		//!< ||
-	RISSE_OC_ENUM_ITEM(LogAnd			)		//!< &&
-	RISSE_OC_ENUM_ITEM(BitOr			)		//!< |
-	RISSE_OC_ENUM_ITEM(BitXor			)		//!< ^
-	RISSE_OC_ENUM_ITEM(BitAnd			)		//!< &
-	RISSE_OC_ENUM_ITEM(NotEqual			)		//!< !=
-	RISSE_OC_ENUM_ITEM(Equal			)		//!< ==
-	RISSE_OC_ENUM_ITEM(DiscNotEqual		)		//!< !==
-	RISSE_OC_ENUM_ITEM(DiscEqual		)		//!< ===
-	RISSE_OC_ENUM_ITEM(Lesser			)		//!< <
-	RISSE_OC_ENUM_ITEM(Greater			)		//!< >
-	RISSE_OC_ENUM_ITEM(LesserOrEqual	)		//!< <=
-	RISSE_OC_ENUM_ITEM(GreaterOrEqual	)		//!< >=
-	RISSE_OC_ENUM_ITEM(RBitShift		)		//!< >>>
-	RISSE_OC_ENUM_ITEM(LShift			)		//!< <<
-	RISSE_OC_ENUM_ITEM(RShift			)		//!< >>
-	RISSE_OC_ENUM_ITEM(Mod				)		//!< %
-	RISSE_OC_ENUM_ITEM(Div				)		//!< /
-	RISSE_OC_ENUM_ITEM(Idiv				)		//!< \ (integer div)
-	RISSE_OC_ENUM_ITEM(Mul				)		//!< *
-	RISSE_OC_ENUM_ITEM(Add				)		//!< +
-	RISSE_OC_ENUM_ITEM(Sub				)		//!< -
-	RISSE_OC_ENUM_ITEM(IncontextOf		)		//!< incontextof
+	RISSE_OC_ENUM_ITEM(LogOr			, lor		,P(R,R,R,0,0))//!< ||
+	RISSE_OC_ENUM_ITEM(LogAnd			, land		,P(R,R,R,0,0))//!< &&
+	RISSE_OC_ENUM_ITEM(BitOr			, bor		,P(R,R,R,0,0))//!< |
+	RISSE_OC_ENUM_ITEM(BitXor			, bxor		,P(R,R,R,0,0))//!< ^
+	RISSE_OC_ENUM_ITEM(BitAnd			, band		,P(R,R,R,0,0))//!< &
+	RISSE_OC_ENUM_ITEM(NotEqual			, ne		,P(R,R,R,0,0))//!< !=
+	RISSE_OC_ENUM_ITEM(Equal			, eq		,P(R,R,R,0,0))//!< ==
+	RISSE_OC_ENUM_ITEM(DiscNotEqual		, dne		,P(R,R,R,0,0))//!< !==
+	RISSE_OC_ENUM_ITEM(DiscEqual		, deq		,P(R,R,R,0,0))//!< ===
+	RISSE_OC_ENUM_ITEM(Lesser			, lt		,P(R,R,R,0,0))//!< <
+	RISSE_OC_ENUM_ITEM(Greater			, gt		,P(R,R,R,0,0))//!< >
+	RISSE_OC_ENUM_ITEM(LesserOrEqual	, lte		,P(R,R,R,0,0))//!< <=
+	RISSE_OC_ENUM_ITEM(GreaterOrEqual	, gte		,P(R,R,R,0,0))//!< >=
+	RISSE_OC_ENUM_ITEM(RBitShift		, rbs		,P(R,R,R,0,0))//!< >>>
+	RISSE_OC_ENUM_ITEM(LShift			, ls		,P(R,R,R,0,0))//!< <<
+	RISSE_OC_ENUM_ITEM(RShift			, rs		,P(R,R,R,0,0))//!< >>
+	RISSE_OC_ENUM_ITEM(Mod				, mod		,P(R,R,R,0,0))//!< %
+	RISSE_OC_ENUM_ITEM(Div				, div		,P(R,R,R,0,0))//!< /
+	RISSE_OC_ENUM_ITEM(Idiv				, idiv		,P(R,R,R,0,0))//!< \ (integer div)
+	RISSE_OC_ENUM_ITEM(Mul				, mul		,P(R,R,R,0,0))//!< *
+	RISSE_OC_ENUM_ITEM(Add				, add		,P(R,R,R,0,0))//!< +
+	RISSE_OC_ENUM_ITEM(Sub				, sub		,P(R,R,R,0,0))//!< -
+	RISSE_OC_ENUM_ITEM(IncontextOf		, chgc		,P(R,R,R,0,0))//!< incontextof
 
-	RISSE_OC_ENUM_ITEM(DGet				)		//!< get .  
-	RISSE_OC_ENUM_ITEM(IGet				)		//!< get [ ]
+	RISSE_OC_ENUM_ITEM(DGet				, dget		,P(R,R,R,0,0))//!< get .  
+	RISSE_OC_ENUM_ITEM(IGet				, iget		,P(R,R,R,0,0))//!< get [ ]
 
-	RISSE_OC_ENUM_ITEM(BitAndAssign		)		//!< &=
-	RISSE_OC_ENUM_ITEM(BitOrAssign		)		//!< |=
-	RISSE_OC_ENUM_ITEM(BitXorAssign		)		//!< ^=
-	RISSE_OC_ENUM_ITEM(SubAssign		)		//!< -=
-	RISSE_OC_ENUM_ITEM(AddAssign		)		//!< +=
-	RISSE_OC_ENUM_ITEM(ModAssign		)		//!< %=
-	RISSE_OC_ENUM_ITEM(DivAssign		)		//!< /=
-	RISSE_OC_ENUM_ITEM(IdivAssign		)		//!< \=
-	RISSE_OC_ENUM_ITEM(MulAssign		)		//!< *=
-	RISSE_OC_ENUM_ITEM(LogOrAssign		)		//!< ||=
-	RISSE_OC_ENUM_ITEM(LogAndAssign		)		//!< &&=
-	RISSE_OC_ENUM_ITEM(RBitShiftAssign	)		//!< >>>=
-	RISSE_OC_ENUM_ITEM(LShiftAssign		)		//!< <<=
-	RISSE_OC_ENUM_ITEM(RShiftAssign		)		//!< >>=
+	RISSE_OC_ENUM_ITEM(BitAndAssign		, ERR		,P(0,0,0,0,0))//!< &=
+	RISSE_OC_ENUM_ITEM(BitOrAssign		, ERR		,P(0,0,0,0,0))//!< |=
+	RISSE_OC_ENUM_ITEM(BitXorAssign		, ERR		,P(0,0,0,0,0))//!< ^=
+	RISSE_OC_ENUM_ITEM(SubAssign		, ERR		,P(0,0,0,0,0))//!< -=
+	RISSE_OC_ENUM_ITEM(AddAssign		, ERR		,P(0,0,0,0,0))//!< +=
+	RISSE_OC_ENUM_ITEM(ModAssign		, ERR		,P(0,0,0,0,0))//!< %=
+	RISSE_OC_ENUM_ITEM(DivAssign		, ERR		,P(0,0,0,0,0))//!< /=
+	RISSE_OC_ENUM_ITEM(IdivAssign		, ERR		,P(0,0,0,0,0))//!< \=
+	RISSE_OC_ENUM_ITEM(MulAssign		, ERR		,P(0,0,0,0,0))//!< *=
+	RISSE_OC_ENUM_ITEM(LogOrAssign		, ERR		,P(0,0,0,0,0))//!< ||=
+	RISSE_OC_ENUM_ITEM(LogAndAssign		, ERR		,P(0,0,0,0,0))//!< &&=
+	RISSE_OC_ENUM_ITEM(RBitShiftAssign	, ERR		,P(0,0,0,0,0))//!< >>>=
+	RISSE_OC_ENUM_ITEM(LShiftAssign		, ERR		,P(0,0,0,0,0))//!< <<=
+	RISSE_OC_ENUM_ITEM(RShiftAssign		, ERR		,P(0,0,0,0,0))//!< >>=
 
 
-	RISSE_OC_ENUM_ITEM(DDelete			)		//!< delete .
-	RISSE_OC_ENUM_ITEM(IDelete			)		//!< delete [ ]
+	RISSE_OC_ENUM_ITEM(DDelete			, ddel		,P(R,R,R,0,0))//!< delete .
+	RISSE_OC_ENUM_ITEM(IDelete			, idel		,P(R,R,R,0,0))//!< delete [ ]
 
 // 引数1+2つ
-	RISSE_OC_ENUM_ITEM(DSet				)		//!< set .
-	RISSE_OC_ENUM_ITEM(ISet				)		//!< set [ ]
+	RISSE_OC_ENUM_ITEM(DSet				, dset		,P(R,R,R,0,0))//!< set .
+	RISSE_OC_ENUM_ITEM(ISet				, iset		,P(R,R,R,0,0))//!< set [ ]
+
+
+// SSA形式特有
+	RISSE_OC_ENUM_ITEM(Phi				, ERR		,P(0,0,0,0,0))//!< φ関数
+	RISSE_OC_ENUM_ITEM(DefineLazyBlock	, ERR		,P(0,0,0,0,0))//!< 遅延評価ブロックの定義
+	RISSE_OC_ENUM_ITEM(ParentWrite		, ERR		,P(0,0,0,0,0))//!< 親名前空間への書き込み
+	RISSE_OC_ENUM_ITEM(ParentRead		, ERR		,P(0,0,0,0,0))//!< 親名前空間からの読み込み
+	RISSE_OC_ENUM_ITEM(ChildWrite		, ERR		,P(0,0,0,0,0))//!< 子名前空間への書き込み
+	RISSE_OC_ENUM_ITEM(ChildRead		, ERR		,P(0,0,0,0,0))//!< 子名前空間からの読み込み
 
 RISSE_OC_ENUM_END
 //---------------------------------------------------------------------------
@@ -153,7 +238,7 @@ RISSE_OC_ENUM_END
 
 
 
-
+#ifndef RISSE_OC_DEFINE_INFO
 //---------------------------------------------------------------------------
 //! @brief		VMコード用イテレータ
 //---------------------------------------------------------------------------
@@ -218,19 +303,21 @@ public:
 	//! @brief		前置インクリメント演算子
 	void operator ++()
 	{
+		risse_size size = GetInsnSize();
 		CodePointer += size;
 		if(Address != risse_size_max) Address += size;
 	}
 
 	//! @brief		このイテレータの示す命令のサイズをVMワード単位で得る
 	//! @return		命令のサイズ
-	void GetInsnSize() const;
+	risse_size GetInsnSize() const;
 
 	//! @brief		このイテレータの示す命令をダンプ(逆アセンブル)する
 	//! @return		ダンプ結果
 	tRisseString Dump() const;
 };
 //---------------------------------------------------------------------------
+#endif //#ifndef RISSE_OC_DEFINE_INFO
 
 } // namespace Risse
 #endif

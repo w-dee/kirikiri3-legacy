@@ -17,6 +17,7 @@
 #include "risseCharUtils.h"
 #include "risseGC.h"
 #include "risseCxxString.h"
+#include "risseVariant.h"
 //---------------------------------------------------------------------------
 
 namespace Risse
@@ -199,6 +200,8 @@ RISSE_OC_ENUM_DEF()
 
 	RISSE_OC_ENUM_ITEM(DGet				, dget		,P(R,R,R,0,0))//!< get .  
 	RISSE_OC_ENUM_ITEM(IGet				, iget		,P(R,R,R,0,0))//!< get [ ]
+	RISSE_OC_ENUM_ITEM(DDelete			, ddel		,P(R,R,R,0,0))//!< delete .
+	RISSE_OC_ENUM_ITEM(IDelete			, idel		,P(R,R,R,0,0))//!< delete [ ]
 
 	RISSE_OC_ENUM_ITEM(BitAndAssign		, ERR		,P(0,0,0,0,0))//!< &=
 	RISSE_OC_ENUM_ITEM(BitOrAssign		, ERR		,P(0,0,0,0,0))//!< |=
@@ -216,8 +219,6 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(RShiftAssign		, ERR		,P(0,0,0,0,0))//!< >>=
 
 
-	RISSE_OC_ENUM_ITEM(DDelete			, ddel		,P(R,R,R,0,0))//!< delete .
-	RISSE_OC_ENUM_ITEM(IDelete			, idel		,P(R,R,R,0,0))//!< delete [ ]
 
 // 引数1+2つ
 	RISSE_OC_ENUM_ITEM(DSet				, dset		,P(R,R,R,0,0))//!< set .
@@ -315,6 +316,11 @@ public:
 	//! @brief		このイテレータの示す命令をダンプ(逆アセンブル)する
 	//! @return		ダンプ結果
 	tRisseString Dump() const;
+
+	//! @brief		このイテレータの示す命令をコメント付きでダンプ(逆アセンブル)する
+	//! @param		consts		定数領域(コメントを表示するために必要)
+	//! @return		ダンプ結果
+	tRisseString Dump(const tRisseVariant * consts) const;
 };
 //---------------------------------------------------------------------------
 #endif //#ifndef RISSE_OC_DEFINE_INFO

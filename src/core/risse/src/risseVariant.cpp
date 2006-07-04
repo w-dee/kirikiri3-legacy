@@ -31,7 +31,7 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 	case vtVoid:		return RISSE_WS("void");
 	case vtInteger:		return RISSE_WS("integer");
 	case vtReal:		return RISSE_WS("real");
-	case vtBoolean:		return RISSE_WS("boolean");
+	case vtBool:		return RISSE_WS("bool");
 	case vtString:		return RISSE_WS("string");
 	case vtObject:		return RISSE_WS("object");
 	case vtOctet:		return RISSE_WS("octet");

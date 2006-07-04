@@ -89,9 +89,10 @@ tRisseString tRisseVMCodeIterator::Dump() const
 		break;
 
 	default:
-		// それ以外の命令コードの処理は形式されているのでそれに従う
+		// それ以外の命令コードの処理は形式化されているのでそれに従う
 		for(int i = 0; i < RisseMaxVMInsnOperand; i++)
 		{
+			if(entry.Flags[i] == tRisseVMInsnInfo::vifVoid) break;
 			if(i != 0) ret += RISSE_WS(", ");
 			switch(entry.Flags[i])
 			{
@@ -115,8 +116,8 @@ tRisseString tRisseVMCodeIterator::Dump() const
 			case tRisseVMInsnInfo::vifAddress:
 				{
 					char address[22];
-					sprintf(address, "%05x", (int)CodePointer[i+1]);
-					ret += RISSE_WS("0x") + tRisseString(address);
+					sprintf(address, "%05d", (int)CodePointer[i+1]);
+					ret += tRisseString(address);
 				}
 				break;
 			}
@@ -125,4 +126,33 @@ tRisseString tRisseVMCodeIterator::Dump() const
 	return ret;
 }
 //---------------------------------------------------------------------------
+tRisseString tRisseVMCodeIterator::Dump(const tRisseVariant * consts) const
+{
+	tRisseString ret(Dump());
+
+	// 命令中の定数領域についてコメントを追加する
+	// 命令コード
+	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+
+	// RisseVMInsnInfo 内の該当するエントリ
+	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];
+
+	// 定数領域を示しているオペランドを探す
+	bool first = true;
+	for(int i = 0; i < RisseMaxVMInsnOperand; i++)
+	{
+		if(entry.Flags[i] == tRisseVMInsnInfo::vifConstant)
+		{
+			if(first)
+				ret += RISSE_WS(" // ");
+			else
+				ret += RISSE_WS(", ");
+			ret += RISSE_WS("*") + tRisseString::AsString((int)CodePointer[i+1]) + 
+				RISSE_WS("=") + consts[CodePointer[i+1]].AsHumanReadable(100);
+		}
+	}
+	return ret;
+}
+//---------------------------------------------------------------------------
+
 } // namespace Risse

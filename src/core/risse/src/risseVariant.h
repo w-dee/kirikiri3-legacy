@@ -154,7 +154,7 @@ public:
 		vtVoid			= 0,
 		vtInteger		= 1,
 		vtReal			= 2,
-		vtBoolean		= 3,
+		vtBool			= 3,
 		vtString		= 4 + 0,
 		vtObject		= 4 + 1,
 		vtOctet			= 4 + 2,
@@ -199,7 +199,7 @@ public: // コンストラクタ/代入演算子
 		case vtVoid:		Type = vtVoid;				break;
 		case vtInteger:		*this = ref.AsInteger();	break;
 		case vtReal:		*this = ref.AsReal();		break;
-		case vtBoolean:		*this = ref.AsBool();		break;
+		case vtBool:		*this = ref.AsBool();		break;
 		case vtString:		*this = ref.AsString();		break;
 		case vtObject:		*this = ref.AsObject();		break;
 		case vtOctet:		*this = ref.AsOctet();		break;
@@ -249,7 +249,7 @@ public: // コンストラクタ/代入演算子
 	//! @param		ref		元となる真偽値
 	tRisseVariantBlock & operator = (const bool ref)
 	{
-		Type = vtBoolean;
+		Type = vtBool;
 		AsBool() = ref;
 		return *this;
 	}
@@ -306,7 +306,8 @@ public: // コンストラクタ/代入演算子
 public: // 演算子
 
 	//-----------------------------------------------------------------------
-	//! @brief 単項 - 演算子		uminus
+	//! @brief		単項 - 演算子		uminus
+	//! @return		演算結果(通常、符号が反転した物)
 	//-----------------------------------------------------------------------
 	tRisseVariantBlock operator -() const
 	{
@@ -315,7 +316,7 @@ public: // 演算子
 		case vtVoid:	return uminus_Void     ();
 		case vtInteger:	return uminus_Integer  ();
 		case vtReal:	return uminus_Real     ();
-		case vtBoolean:	return uminus_Bool     ();
+		case vtBool:	return uminus_Bool     ();
 		case vtString:	return uminus_String   ();
 		case vtObject:	return uminus_Object   ();
 		case vtOctet:	return uminus_Octet    ();
@@ -331,6 +332,41 @@ public: // 演算子
 	tRisseVariantBlock uminus_Object   () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock uminus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
 
+	//-----------------------------------------------------------------------
+	//! @brief		識別 === 演算子		discequal
+	//! @param		rhs			右辺
+	//! @return		識別の結果、同一ならば真、そうでなければ偽
+	//-----------------------------------------------------------------------
+	bool discequal(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return disceq_Void     (rhs);
+		case vtInteger:	return disceq_Integer  (rhs);
+		case vtReal:	return disceq_Real     (rhs);
+		case vtBool:	return disceq_Bool     (rhs);
+		case vtString:	return disceq_String   (rhs);
+		case vtObject:	return disceq_Object   (rhs);
+		case vtOctet:	return disceq_Octet    (rhs);
+		}
+		return false;
+	}
+
+	bool disceq_Void     (const tRisseVariantBlock & rhs) const
+			{ return rhs.GetType() == vtVoid; }
+	bool disceq_Integer  (const tRisseVariantBlock & rhs) const
+			{ return rhs.GetType() == vtInteger && rhs.AsInteger() == AsInteger(); }
+	bool disceq_Real     (const tRisseVariantBlock & rhs) const
+			{ return rhs.GetType() == vtReal && rhs.AsReal() == AsReal(); }
+	bool disceq_Bool     (const tRisseVariantBlock & rhs) const
+			{ return rhs.GetType() == vtBool && rhs.AsBool() == AsBool(); }
+	bool disceq_String   (const tRisseVariantBlock & rhs) const
+			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); /* incomplete */ }
+	bool disceq_Object   (const tRisseVariantBlock & rhs) const
+			{ return false; /* incomplete */ }
+	bool disceq_Octet    (const tRisseVariantBlock & rhs) const
+			{ return false; /* incomplete */ }
+
 
 public: // キャスト
 	//-----------------------------------------------------------------------
@@ -344,7 +380,7 @@ public: // キャスト
 		case vtVoid:	return CastToString_Void     ();
 		case vtInteger:	return CastToString_Integer  ();
 		case vtReal:	return CastToString_Real     ();
-		case vtBoolean:	return CastToString_Bool     ();
+		case vtBool:	return CastToString_Bool     ();
 		case vtString:	return CastToString_String   ();
 		case vtObject:	return CastToString_Object   ();
 		case vtOctet:	return CastToString_Octet    ();
@@ -376,7 +412,7 @@ public: // ユーティリティ
 		case vtVoid:	return AsHumanReadable_Void     (maxlen);
 		case vtInteger:	return AsHumanReadable_Integer  (maxlen);
 		case vtReal:	return AsHumanReadable_Real     (maxlen);
-		case vtBoolean:	return AsHumanReadable_Bool     (maxlen);
+		case vtBool:	return AsHumanReadable_Bool     (maxlen);
 		case vtString:	return AsHumanReadable_String   (maxlen);
 		case vtObject:	return AsHumanReadable_Object   (maxlen);
 		case vtOctet:	return AsHumanReadable_Octet    (maxlen);

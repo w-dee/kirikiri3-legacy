@@ -31,6 +31,7 @@ CPPFLAGS = $(CXXFLAGS)
 
 CPPFILES =  src/risseAST.cpp                         \
 			src/risseCharUtils.cpp                   \
+			src/risseCodeBlock.cpp                   \
 			src/risseCodeGen.cpp                     \
 			src/risseConfig.cpp                      \
 			src/risseCxxObject.cpp                   \

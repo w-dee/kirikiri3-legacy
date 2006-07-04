@@ -31,6 +31,8 @@ namespace Risse
 class tRisseSSABlock;
 class tRisseSSAVariable;
 class tRisseSSAForm;
+class tRisseCodeBlock;
+class tRisseCodeGenerator;
 //---------------------------------------------------------------------------
 //! @brief	ローカル変数用のフラットな名前空間管理クラス
 //---------------------------------------------------------------------------
@@ -498,6 +500,10 @@ public:
 	//! @return		名前
 	const tRisseString & GetName() const;
 
+	//! @brief		バイトコードを生成する
+	//! @param		gen		バイトコードジェネレータ
+	void GenerateCode(tRisseCodeGenerator * gen) const;
+
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
@@ -518,7 +524,9 @@ class tRisseSSABlock : public tRisseCollectee
 	tRisseSSAStatement * LastStatement; //!< 文のリストの最後
 	tRisseSSALocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
 
-	typedef gc_map<tRisseSSAVariable *, void *> tLiveVariableMap; //!< 生存している変数のリスト
+public:
+	typedef gc_map<const tRisseSSAVariable *, void *> tLiveVariableMap; //!< 生存している変数のリスト
+private:
 	tLiveVariableMap * LiveIn; //!< このブロックの開始時点で生存している変数のリスト
 	tLiveVariableMap * LiveOut; //!< このブロックの終了時点で生存している変数のリスト
 	mutable void * Mark; //!< マーク
@@ -603,13 +611,13 @@ public:
 	//! @brief		LiveIn/Outに変数を追加する
 	//! @param		var		追加する変数
 	//! @param		out		真の場合 LiveOut を対象にし、偽の場合 LiveIn を対象にする
-	void AddLiveness(tRisseSSAVariable * var, bool out = true);
+	void AddLiveness(const tRisseSSAVariable * var, bool out = true);
 
 	//! @brief		LiveIn/Outに変数があるかどうかを得る
 	//! @param		var		探す変数
 	//! @param		out		真の場合 LiveOut を対象にし、偽の場合 LiveIn を対象にする
 	//! @return		変数が見つかれば真
-	bool GetLiveness(tRisseSSAVariable * var, bool out = true);
+	bool GetLiveness(const tRisseSSAVariable * var, bool out = true) const;
 
 	//! @brief		「マーク」フラグをクリアする
 	void ClearMark() const;
@@ -641,6 +649,10 @@ public:
 	//! @brief		φ関数を削除する
 	//! @note		このメソッド実行後はSSA形式としての性質は保てなくなる。
 	void RemovePhiStatements();
+
+	//! @brief		バイトコードを生成する
+	//! @param		gen		バイトコードジェネレータ
+	void GenerateCode(tRisseCodeGenerator * gen) const;
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
@@ -999,6 +1011,172 @@ public:
 	//! @brief		φ関数を削除する
 	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
 	void RemovePhiStatements();
+
+	//! @brief		バイトコードを生成する
+	//! @param		gen		バイトコードジェネレータ
+	void GenerateCode(tRisseCodeGenerator * gen) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コードジェネレータクラス
+//---------------------------------------------------------------------------
+class tRisseCodeGenerator : public tRisseCollectee
+{
+	static const risse_size MaxConstSearch = 5; // 定数領域で同じ値を探す最大値
+
+	gc_vector<risse_uint32> Code; //!< コード
+	gc_vector<tRisseVariant> Consts; //!< 定数領域
+	gc_vector<risse_size> RegFreeMap; // 空きレジスタの配列
+	risse_size NumUsedRegs; // 使用中のレジスタの数
+	risse_size MaxNumUsedRegs; // 使用中のレジスタの最大数
+	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
+		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
+	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
+	gc_vector<std::pair<const tRisseSSABlock *, risse_size> > PendingBlockJumps;
+			//!< 未解決のジャンプとその基本ブロックのリスト
+	typedef gc_map<const tRisseSSABlock *, risse_size> tBlockMap;
+			//!< 基本ブロックとそれが対応するアドレスの typedef
+	tBlockMap BlockMap; //!< 変数とそれに対応するレジスタ番号のマップ
+
+public:
+	//! @brief		コンストラクタ
+	tRisseCodeGenerator();
+
+public:
+	//! @brief	コード配列を得る @return コード配列
+	const gc_vector<risse_uint32> & GetCode() const { return Code; }
+
+	//! @brief	定数領域の配列を得る @return 定数領域の配列
+	const gc_vector<tRisseVariant> & GetConsts() const { return Consts; }
+
+	//! @brief	使用中のレジスタの最大数を得る @return 使用中のレジスタの最大数
+	risse_size GetMaxNumUsedRegs() const { return MaxNumUsedRegs; }
+
+protected:
+	//! @param		コードを1ワード分置く
+	//! @param		r コード
+	void PutWord(risse_uint32 r) { Code.push_back(r); }
+
+public:
+	//! @brief		基本ブロックとアドレスのマップを追加する
+	//! @param		block		基本ブロック
+	//! @note		アドレスとしては現在の命令書き込み位置が用いられる
+	void AddBlockMap(const tRisseSSABlock * block);
+
+protected:
+	//! @brief		未解決のジャンプとその基本ブロックを追加する
+	//! @param		block		基本ブロック
+	//! @note		アドレスとしては現在の命令書き込み位置が用いられる
+	void AddPendingBlockJump(const tRisseSSABlock * block);
+
+	//! @brief		定数領域から値を見つけ、その値を返す
+	//! @param		value		定数値
+	//! @return		その定数のインデックス
+	risse_size FindConst(const tRisseVariant & value);
+
+public:
+	//--------------------------------------------------------
+	// コード生成用関数群
+	// コードの種類別に関数を用意するのは無駄にみえるが、バイトコードのための
+	// 知識をこのクラス内で囲っておくために必要
+
+	//! @brief		Nopを置く
+	void PutNoOperation();
+
+	//! @brief		Assignコードを置く
+	//! @param		dest	変数コピー先変数
+	//! @param		src		変数コピー元変数
+	void PutAssign(const tRisseSSAVariable * dest, const tRisseSSAVariable * src);
+
+	//! @brief		AssignConstantコードを置く
+	//! @param		dest	変数コピー先変数
+	//! @param		value	値
+	void PutAssign(const tRisseSSAVariable * dest, const tRisseVariant & value);
+
+	//! @brief		オブジェクトを Assign するコードを置く(AssignThis, AssignSuper等)
+	//! @param		dest	変数コピー先変数
+	//! @param		code	オペレーションコード
+	void PutAssign(const tRisseSSAVariable * dest, tRisseOpCode code);
+
+	//! @brief		FuncCall あるいは New コードを置く
+	//! @param		dest	関数結果格納先
+	//! @param		is_new	newか(真), 関数呼び出しか(偽)
+	//! @param		omit	引数省略かどうか
+	//! @param		expbit	それぞれの引数が展開を行うかどうかを表すビット列
+	//! @param		args	引数
+	//! @param		blocks	遅延評価ブロック
+	void PutFunctionCall(const tRisseSSAVariable * dest,
+		bool is_new, bool omit, risse_uint32 expbit,
+		const gc_vector<tRisseString> & args,
+		const gc_vector<tRisseString> & blocks	);
+
+	//! @brief		Jump コードを置く
+	//! @param		target	ジャンプ先基本ブロック
+	void PutJump(const tRisseSSABlock * target);
+
+	//! @brief		Branch コードを置く
+	//! @param		ref		調べる変数
+	//! @param		truetarget	真の時にジャンプする先
+	//! @param		falsetarget	偽の時にジャンプする先
+	void PutBranch(const tRisseSSAVariable * ref,
+		const tRisseSSABlock * truetarget, const tRisseSSABlock * falsetarget);
+
+	//! @brief		Debugger コードを置く
+	void PutDebugger();
+
+	//! @brief		Throw コードを置く
+	//! @param		throwee		投げる例外オブジェクトが入っている変数
+	void PutThrow(const tRisseSSAVariable * throwee);
+
+	//! @brief		Return コードを置く
+	//! @param		value		返す値が入っている変数
+	void PutReturn(const tRisseSSAVariable * value);
+
+	//! @brief		dest = op(arg1) 系コードを置く
+	//! @param		op		オペレーションコード
+	//! @param		dest	結果を格納する変数
+	//! @param		arg1	パラメータ
+	void PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * arg1);
+
+	//! @brief		dest = op(arg1, arg2) 系コードを置く
+	//! @param		op		オペレーションコード
+	//! @param		dest	結果を格納する変数
+	//! @param		arg1	パラメータ1
+	//! @param		arg2	パラメータ2
+	void PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * arg1, const tRisseSSAVariable * arg2);
+
+	//! @brief		dest = op(arg1, arg2, arg3) 系コードを置く
+	//! @param		op		オペレーションコード
+	//! @param		dest	結果を格納する変数
+	//! @param		arg1	パラメータ1
+	//! @param		arg2	パラメータ2
+	//! @param		arg3	パラメータ3
+	void PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * arg1, const tRisseSSAVariable * arg2, const tRisseSSAVariable * arg3);
+
+	//! @brief		DSetとISetのコードを置く
+	//! @param		op		オペレーションコード
+	//! @param		obj		オブジェクトを表す変数
+	//! @param		name	メンバ名を表す変数
+	//! @param		value	格納する変数
+	void PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
+		const tRisseSSAVariable * name, const tRisseSSAVariable * value);
+
+
+	//! @brief		レジスタのマップを変数で探す
+	//! @param		var			変数
+	risse_size FindRegMap(const tRisseSSAVariable * var);
+
+	//! @brief		基本ブロックのLiveOutにないレジスタをすべて開放する
+	//! @param		block		基本ブロック
+	void FreeUnusedRegisters(const tRisseSSABlock *block);
+
+	//! @brief		コードを確定する(未解決のジャンプなどを解決する)
+	void FixCode();
 };
 //---------------------------------------------------------------------------
 

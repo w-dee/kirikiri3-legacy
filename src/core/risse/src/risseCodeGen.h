@@ -1102,15 +1102,17 @@ public:
 
 	//! @brief		FuncCall あるいは New コードを置く
 	//! @param		dest	関数結果格納先
+	//! @param		func	関数を表す変数
 	//! @param		is_new	newか(真), 関数呼び出しか(偽)
 	//! @param		omit	引数省略かどうか
 	//! @param		expbit	それぞれの引数が展開を行うかどうかを表すビット列
 	//! @param		args	引数
 	//! @param		blocks	遅延評価ブロック
 	void PutFunctionCall(const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * func,
 		bool is_new, bool omit, risse_uint32 expbit,
-		const gc_vector<tRisseString> & args,
-		const gc_vector<tRisseString> & blocks	);
+		const gc_vector<const tRisseSSAVariable *> & args,
+		const gc_vector<const tRisseSSAVariable *> & blocks);
 
 	//! @brief		Jump コードを置く
 	//! @param		target	ジャンプ先基本ブロック

@@ -37,6 +37,7 @@ risse_size tRisseVMCodeIterator::GetInsnSize() const
 {
 	// 命令コード
 	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+	RISSE_ASSERT(insn_code < ocVMCodeLast);
 
 	// RisseVMInsnInfo 内の該当するエントリ
 	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];
@@ -51,7 +52,7 @@ risse_size tRisseVMCodeIterator::GetInsnSize() const
 			break;
 
 		case tRisseVMInsnInfo::vifNumber:
-			insn_size += CodePointer[i+1]; // 追加のワード数はここに書いてある
+			insn_size += 1 + CodePointer[i+1]; // 追加のワード数はここに書いてある
 			break;
 
 		case tRisseVMInsnInfo::vifConstant:
@@ -72,6 +73,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 {
 	// 命令コード
 	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+	RISSE_ASSERT(insn_code < ocVMCodeLast);
 
 	// RisseVMInsnInfo 内の該当するエントリ
 	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];
@@ -80,49 +82,110 @@ tRisseString tRisseVMCodeIterator::Dump() const
 	tRisseString ret(entry.Mnemonic);
 	ret += RISSE_WC(' ');
 
-	// 命令ごとに分岐
+	// 命令コードの処理はある程度形式化されているのでそれに従う
+	for(int i = 0; i < RisseMaxVMInsnOperand; i++)
+	{
+		if(entry.Flags[i] == tRisseVMInsnInfo::vifVoid) break;
+		switch(entry.Flags[i])
+		{
+		case tRisseVMInsnInfo::vifVoid:
+			break;
+
+		case tRisseVMInsnInfo::vifNumber:
+		case tRisseVMInsnInfo::vifSomething:
+			// nothing to do; simplly skip
+			break;
+
+		case tRisseVMInsnInfo::vifConstant:
+			if(i != 0) ret += RISSE_WS(", ");
+			ret += RISSE_WS("*") + tRisseString::AsString((int)CodePointer[i+1]);
+			break;
+
+		case tRisseVMInsnInfo::vifRegister:
+			if(i != 0) ret += RISSE_WS(", ");
+			ret += RISSE_WS("%") + tRisseString::AsString((int)CodePointer[i+1]);
+			break;
+
+		case tRisseVMInsnInfo::vifAddress:
+			{
+				if(i != 0) ret += RISSE_WS(", ");
+				char address[22];
+				sprintf(address, "%05d", (int)CodePointer[i+1]);
+				ret += tRisseString(address);
+			}
+			break;
+		}
+	}
+
+	// 関数呼び出し系はオペランド数が可変なので特別に処理をする
 	switch(insn_code)
 	{
 	case ocFuncCall:
 	case ocNew:
 	case ocFuncCallBlock:
+		{
+			// 最初の S (これがフラグのはず) と 最初の N (これが関数への引数の数のはず) と
+			// 次の N (ないかもしれない; これがブロックの数のはず) と
+			// 最初の 0 (これが引数の始まりのはず) を探す
+			int i;
+			risse_uint32 flags = 0;
+			risse_uint32 num_args = 0;
+			risse_uint32 num_blocks = 0;
+			bool args_found = false;
+			for(i = 0; i < RisseMaxVMInsnOperand; i++)
+			{
+				switch(entry.Flags[i])
+				{
+				case tRisseVMInsnInfo::vifNumber:
+					if(!args_found)
+					{
+						args_found = true;
+						num_args = CodePointer[i+1];
+					}
+					else
+					{
+						num_blocks = CodePointer[i+1];
+					}
+					break;
+				case tRisseVMInsnInfo::vifSomething:
+					flags = CodePointer[i+1]; // フラグ
+					break;
+				case tRisseVMInsnInfo::vifVoid:
+					break;
+				default: ;
+				}
+				if(entry.Flags[i] == tRisseVMInsnInfo::vifVoid) break;
+			}
+			int arg_start = i;
+			// 引数を列挙
+			ret += RISSE_WC('(');
+			for(risse_uint32 n = 0; n < num_args; n++)
+			{
+				if(n != 0) ret += RISSE_WS(", ");
+				ret += RISSE_WS("%") +
+					tRisseString::AsString((int)CodePointer[arg_start + n +1]);
+				if(flags & (1 << n)) ret += RISSE_WC('*'); // 引数展開の場合
+			}
+			ret += RISSE_WC(')');
+			// ブロックを列挙
+			if(num_blocks != 0)
+			{
+				ret += RISSE_WC(' ');
+				for(risse_uint32 n = 0; n < num_args; n++)
+				{
+					if(n != 0) ret += RISSE_WS(", ");
+					ret += RISSE_WS("%") +
+						tRisseString::AsString((int)CodePointer[arg_start + num_args + n +1]);
+				}
+			}
+		}
+
 		break;
 
 	default:
-		// それ以外の命令コードの処理は形式化されているのでそれに従う
-		for(int i = 0; i < RisseMaxVMInsnOperand; i++)
-		{
-			if(entry.Flags[i] == tRisseVMInsnInfo::vifVoid) break;
-			if(i != 0) ret += RISSE_WS(", ");
-			switch(entry.Flags[i])
-			{
-			case tRisseVMInsnInfo::vifVoid:
-				break;
-
-			case tRisseVMInsnInfo::vifNumber:
-			case tRisseVMInsnInfo::vifSomething:
-				RISSE_ASSERT(!"not acceptable operand type");
-				break;
-
-
-			case tRisseVMInsnInfo::vifConstant:
-				ret += RISSE_WS("*") + tRisseString::AsString((int)CodePointer[i+1]);
-				break;
-
-			case tRisseVMInsnInfo::vifRegister:
-				ret += RISSE_WS("%") + tRisseString::AsString((int)CodePointer[i+1]);
-				break;
-
-			case tRisseVMInsnInfo::vifAddress:
-				{
-					char address[22];
-					sprintf(address, "%05d", (int)CodePointer[i+1]);
-					ret += tRisseString(address);
-				}
-				break;
-			}
-		}
+		;
 	}
+
 	return ret;
 }
 //---------------------------------------------------------------------------
@@ -133,6 +196,7 @@ tRisseString tRisseVMCodeIterator::Dump(const tRisseVariant * consts) const
 	// 命令中の定数領域についてコメントを追加する
 	// 命令コード
 	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+	RISSE_ASSERT(insn_code < ocVMCodeLast);
 
 	// RisseVMInsnInfo 内の該当するエントリ
 	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];

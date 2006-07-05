@@ -27,7 +27,10 @@ namespace Risse
 //---------------------------------------------------------------------------
 // 各種定数
 //---------------------------------------------------------------------------
-static const int RisseMaxVMInsnOperand = 5;
+static const int RisseMaxVMInsnOperand = 6;
+	//!< 命令のオペランドの最大数(ただし可変オペランド部分をのぞく)
+static const risse_uint32 RisseFuncCallFlag_Omitted = 0x80000000L;
+	//!< call などのフラグの定数 - 関数呼び出しは ... を伴っているか (引数省略されているか)
 //---------------------------------------------------------------------------
 
 
@@ -82,12 +85,13 @@ struct tRisseVMInsnInfo
 	#ifdef P
 		#undef P
 	#endif
-	#define P(a,b,c,d,e) {\
+	#define P(a,b,c,d,e,f) {\
 		(tRisseVMInsnInfo::tInsnFlag)(a),\
 		(tRisseVMInsnInfo::tInsnFlag)(b),\
 		(tRisseVMInsnInfo::tInsnFlag)(c),\
 		(tRisseVMInsnInfo::tInsnFlag)(d),\
-		(tRisseVMInsnInfo::tInsnFlag)(e) }
+		(tRisseVMInsnInfo::tInsnFlag)(e),\
+		(tRisseVMInsnInfo::tInsnFlag)(f) }
 #endif
 //---------------------------------------------------------------------------
 
@@ -139,100 +143,103 @@ extern const tRisseVMInsnInfo RisseVMInsnInfo[];
 
 //---------------------------------------------------------------------------
 RISSE_OC_ENUM_DEF()
-//						LongId			Mnemonic	 O1O2O3O4O5 operands
+//						LongId			Mnemonic  O1O2O3O4O5O6 operands
 
 // なにもしない
-	RISSE_OC_ENUM_ITEM(NoOperation		, nop		,P(0,0,0,0,0))//!< なにもしない
+	RISSE_OC_ENUM_ITEM(NoOperation		,nop	,P(0,0,0,0,0,0))//!< なにもしない
 
 // 代入
-	RISSE_OC_ENUM_ITEM(Assign			, cp		,P(R,R,0,0,0))//!< = (ローカル変数の代入)
-	RISSE_OC_ENUM_ITEM(AssignConstant	, const		,P(R,C,0,0,0))//!< = 定数の代入
-	RISSE_OC_ENUM_ITEM(AssignThis		, this		,P(R,0,0,0,0))//!< = thisの代入
-	RISSE_OC_ENUM_ITEM(AssignSuper		, super		,P(R,0,0,0,0))//!< = superの代入
-	RISSE_OC_ENUM_ITEM(AssignGlobal		, global	,P(R,0,0,0,0))//!< = globalの代入
-	RISSE_OC_ENUM_ITEM(AssignNewArray	, array		,P(R,0,0,0,0))//!< = 新しい配列オブジェクトの代入
-	RISSE_OC_ENUM_ITEM(AssignNewDict	, dict		,P(R,0,0,0,0))//!< = 新しい辞書配列オブジェクトの代入
-	RISSE_OC_ENUM_ITEM(AssignNewRegExp	, regexp	,P(R,0,0,0,0))//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+	RISSE_OC_ENUM_ITEM(Assign			,cp		,P(R,R,0,0,0,0))//!< = (ローカル変数の代入)
+	RISSE_OC_ENUM_ITEM(AssignConstant	,const	,P(R,C,0,0,0,0))//!< = 定数の代入
+	RISSE_OC_ENUM_ITEM(AssignThis		,this	,P(R,0,0,0,0,0))//!< = thisの代入
+	RISSE_OC_ENUM_ITEM(AssignSuper		,super	,P(R,0,0,0,0,0))//!< = superの代入
+	RISSE_OC_ENUM_ITEM(AssignGlobal		,global	,P(R,0,0,0,0,0))//!< = globalの代入
+	RISSE_OC_ENUM_ITEM(AssignNewArray	,array	,P(R,0,0,0,0,0))//!< = 新しい配列オブジェクトの代入
+	RISSE_OC_ENUM_ITEM(AssignNewDict	,dict	,P(R,0,0,0,0,0))//!< = 新しい辞書配列オブジェクトの代入
+	RISSE_OC_ENUM_ITEM(AssignNewRegExp	,regexp	,P(R,0,0,0,0,0))//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
 
-	RISSE_OC_ENUM_ITEM(FuncCall			, call		,P(R,S,N,0,0))//!< function call
-	RISSE_OC_ENUM_ITEM(New				, new		,P(R,S,N,0,0))//!< "new"
-	RISSE_OC_ENUM_ITEM(FuncCallBlock	, callb		,P(R,S,N,N,0))//!< function call with lazyblock
+	RISSE_OC_ENUM_ITEM(FuncCall			,call	,P(R,R,S,N,0,0))//!< function call
+	RISSE_OC_ENUM_ITEM(New				,new	,P(R,R,S,N,0,0))//!< "new"
+	RISSE_OC_ENUM_ITEM(FuncCallBlock	,callb	,P(R,R,S,N,N,0))//!< function call with lazyblock
 
 // ジャンプ/分岐/制御/補助
-	RISSE_OC_ENUM_ITEM(Jump				, jump		,P(A,0,0,0,0))//!< 単純なジャンプ
-	RISSE_OC_ENUM_ITEM(Branch			, branch	,P(R,A,A,0,0))//!< 分岐
-	RISSE_OC_ENUM_ITEM(Debugger			, dbg		,P(0,0,0,0,0))//!< debugger ステートメント
-	RISSE_OC_ENUM_ITEM(Throw			, throw		,P(R,0,0,0,0))//!< throw ステートメント
-	RISSE_OC_ENUM_ITEM(Return			, ret		,P(R,0,0,0,0))//!< return ステートメント
+	RISSE_OC_ENUM_ITEM(Jump				,jump	,P(A,0,0,0,0,0))//!< 単純なジャンプ
+	RISSE_OC_ENUM_ITEM(Branch			,branch	,P(R,A,A,0,0,0))//!< 分岐
+	RISSE_OC_ENUM_ITEM(Debugger			,dbg	,P(0,0,0,0,0,0))//!< debugger ステートメント
+	RISSE_OC_ENUM_ITEM(Throw			,throw	,P(R,0,0,0,0,0))//!< throw ステートメント
+	RISSE_OC_ENUM_ITEM(Return			,ret	,P(R,0,0,0,0,0))//!< return ステートメント
 
 // 引数1+なし
-	RISSE_OC_ENUM_ITEM(LogNot			, lnot		,P(R,R,0,0,0))//!< "!" logical not
-	RISSE_OC_ENUM_ITEM(BitNot			, bnot		,P(R,R,0,0,0))//!< "~" bit not
-	RISSE_OC_ENUM_ITEM(DecAssign		, ERR		,P(0,0,0,0,0))//!< "--" decrement
-	RISSE_OC_ENUM_ITEM(IncAssign		, ERR		,P(0,0,0,0,0))//!< "++" increment
-	RISSE_OC_ENUM_ITEM(Plus				, plus		,P(R,R,0,0,0))//!< "+"
-	RISSE_OC_ENUM_ITEM(Minus			, minus		,P(R,R,0,0,0))//!< "-"
+	RISSE_OC_ENUM_ITEM(LogNot			,lnot	,P(R,R,0,0,0,0))//!< "!" logical not
+	RISSE_OC_ENUM_ITEM(BitNot			,bnot	,P(R,R,0,0,0,0))//!< "~" bit not
+	RISSE_OC_ENUM_ITEM(DecAssign		,ERR	,P(0,0,0,0,0,0))//!< "--" decrement
+	RISSE_OC_ENUM_ITEM(IncAssign		,ERR	,P(0,0,0,0,0,0))//!< "++" increment
+	RISSE_OC_ENUM_ITEM(Plus				,plus	,P(R,R,0,0,0,0))//!< "+"
+	RISSE_OC_ENUM_ITEM(Minus			,minus	,P(R,R,0,0,0,0))//!< "-"
 
 // 引数1+1つ
-	RISSE_OC_ENUM_ITEM(LogOr			, lor		,P(R,R,R,0,0))//!< ||
-	RISSE_OC_ENUM_ITEM(LogAnd			, land		,P(R,R,R,0,0))//!< &&
-	RISSE_OC_ENUM_ITEM(BitOr			, bor		,P(R,R,R,0,0))//!< |
-	RISSE_OC_ENUM_ITEM(BitXor			, bxor		,P(R,R,R,0,0))//!< ^
-	RISSE_OC_ENUM_ITEM(BitAnd			, band		,P(R,R,R,0,0))//!< &
-	RISSE_OC_ENUM_ITEM(NotEqual			, ne		,P(R,R,R,0,0))//!< !=
-	RISSE_OC_ENUM_ITEM(Equal			, eq		,P(R,R,R,0,0))//!< ==
-	RISSE_OC_ENUM_ITEM(DiscNotEqual		, dne		,P(R,R,R,0,0))//!< !==
-	RISSE_OC_ENUM_ITEM(DiscEqual		, deq		,P(R,R,R,0,0))//!< ===
-	RISSE_OC_ENUM_ITEM(Lesser			, lt		,P(R,R,R,0,0))//!< <
-	RISSE_OC_ENUM_ITEM(Greater			, gt		,P(R,R,R,0,0))//!< >
-	RISSE_OC_ENUM_ITEM(LesserOrEqual	, lte		,P(R,R,R,0,0))//!< <=
-	RISSE_OC_ENUM_ITEM(GreaterOrEqual	, gte		,P(R,R,R,0,0))//!< >=
-	RISSE_OC_ENUM_ITEM(RBitShift		, rbs		,P(R,R,R,0,0))//!< >>>
-	RISSE_OC_ENUM_ITEM(LShift			, ls		,P(R,R,R,0,0))//!< <<
-	RISSE_OC_ENUM_ITEM(RShift			, rs		,P(R,R,R,0,0))//!< >>
-	RISSE_OC_ENUM_ITEM(Mod				, mod		,P(R,R,R,0,0))//!< %
-	RISSE_OC_ENUM_ITEM(Div				, div		,P(R,R,R,0,0))//!< /
-	RISSE_OC_ENUM_ITEM(Idiv				, idiv		,P(R,R,R,0,0))//!< \ (integer div)
-	RISSE_OC_ENUM_ITEM(Mul				, mul		,P(R,R,R,0,0))//!< *
-	RISSE_OC_ENUM_ITEM(Add				, add		,P(R,R,R,0,0))//!< +
-	RISSE_OC_ENUM_ITEM(Sub				, sub		,P(R,R,R,0,0))//!< -
-	RISSE_OC_ENUM_ITEM(IncontextOf		, chgc		,P(R,R,R,0,0))//!< incontextof
+	RISSE_OC_ENUM_ITEM(LogOr			,lor	,P(R,R,R,0,0,0))//!< ||
+	RISSE_OC_ENUM_ITEM(LogAnd			,land	,P(R,R,R,0,0,0))//!< &&
+	RISSE_OC_ENUM_ITEM(BitOr			,bor	,P(R,R,R,0,0,0))//!< |
+	RISSE_OC_ENUM_ITEM(BitXor			,bxor	,P(R,R,R,0,0,0))//!< ^
+	RISSE_OC_ENUM_ITEM(BitAnd			,band	,P(R,R,R,0,0,0))//!< &
+	RISSE_OC_ENUM_ITEM(NotEqual			,ne		,P(R,R,R,0,0,0))//!< !=
+	RISSE_OC_ENUM_ITEM(Equal			,eq		,P(R,R,R,0,0,0))//!< ==
+	RISSE_OC_ENUM_ITEM(DiscNotEqual		,dne	,P(R,R,R,0,0,0))//!< !==
+	RISSE_OC_ENUM_ITEM(DiscEqual		,deq	,P(R,R,R,0,0,0))//!< ===
+	RISSE_OC_ENUM_ITEM(Lesser			,lt		,P(R,R,R,0,0,0))//!< <
+	RISSE_OC_ENUM_ITEM(Greater			,gt		,P(R,R,R,0,0,0))//!< >
+	RISSE_OC_ENUM_ITEM(LesserOrEqual	,lte	,P(R,R,R,0,0,0))//!< <=
+	RISSE_OC_ENUM_ITEM(GreaterOrEqual	,gte	,P(R,R,R,0,0,0))//!< >=
+	RISSE_OC_ENUM_ITEM(RBitShift		,rbs	,P(R,R,R,0,0,0))//!< >>>
+	RISSE_OC_ENUM_ITEM(LShift			,ls		,P(R,R,R,0,0,0))//!< <<
+	RISSE_OC_ENUM_ITEM(RShift			,rs		,P(R,R,R,0,0,0))//!< >>
+	RISSE_OC_ENUM_ITEM(Mod				,mod	,P(R,R,R,0,0,0))//!< %
+	RISSE_OC_ENUM_ITEM(Div				,div	,P(R,R,R,0,0,0))//!< /
+	RISSE_OC_ENUM_ITEM(Idiv				,idiv	,P(R,R,R,0,0,0))//!< \ (integer div)
+	RISSE_OC_ENUM_ITEM(Mul				,mul	,P(R,R,R,0,0,0))//!< *
+	RISSE_OC_ENUM_ITEM(Add				,add	,P(R,R,R,0,0,0))//!< +
+	RISSE_OC_ENUM_ITEM(Sub				,sub	,P(R,R,R,0,0,0))//!< -
+	RISSE_OC_ENUM_ITEM(IncontextOf		,chgc	,P(R,R,R,0,0,0))//!< incontextof
 
-	RISSE_OC_ENUM_ITEM(DGet				, dget		,P(R,R,R,0,0))//!< get .  
-	RISSE_OC_ENUM_ITEM(IGet				, iget		,P(R,R,R,0,0))//!< get [ ]
-	RISSE_OC_ENUM_ITEM(DDelete			, ddel		,P(R,R,R,0,0))//!< delete .
-	RISSE_OC_ENUM_ITEM(IDelete			, idel		,P(R,R,R,0,0))//!< delete [ ]
+	RISSE_OC_ENUM_ITEM(DGet				,dget	,P(R,R,R,0,0,0))//!< get .  
+	RISSE_OC_ENUM_ITEM(IGet				,iget	,P(R,R,R,0,0,0))//!< get [ ]
+	RISSE_OC_ENUM_ITEM(DDelete			,ddel	,P(R,R,R,0,0,0))//!< delete .
+	RISSE_OC_ENUM_ITEM(IDelete			,idel	,P(R,R,R,0,0,0))//!< delete [ ]
 
-	RISSE_OC_ENUM_ITEM(BitAndAssign		, ERR		,P(0,0,0,0,0))//!< &=
-	RISSE_OC_ENUM_ITEM(BitOrAssign		, ERR		,P(0,0,0,0,0))//!< |=
-	RISSE_OC_ENUM_ITEM(BitXorAssign		, ERR		,P(0,0,0,0,0))//!< ^=
-	RISSE_OC_ENUM_ITEM(SubAssign		, ERR		,P(0,0,0,0,0))//!< -=
-	RISSE_OC_ENUM_ITEM(AddAssign		, ERR		,P(0,0,0,0,0))//!< +=
-	RISSE_OC_ENUM_ITEM(ModAssign		, ERR		,P(0,0,0,0,0))//!< %=
-	RISSE_OC_ENUM_ITEM(DivAssign		, ERR		,P(0,0,0,0,0))//!< /=
-	RISSE_OC_ENUM_ITEM(IdivAssign		, ERR		,P(0,0,0,0,0))//!< \=
-	RISSE_OC_ENUM_ITEM(MulAssign		, ERR		,P(0,0,0,0,0))//!< *=
-	RISSE_OC_ENUM_ITEM(LogOrAssign		, ERR		,P(0,0,0,0,0))//!< ||=
-	RISSE_OC_ENUM_ITEM(LogAndAssign		, ERR		,P(0,0,0,0,0))//!< &&=
-	RISSE_OC_ENUM_ITEM(RBitShiftAssign	, ERR		,P(0,0,0,0,0))//!< >>>=
-	RISSE_OC_ENUM_ITEM(LShiftAssign		, ERR		,P(0,0,0,0,0))//!< <<=
-	RISSE_OC_ENUM_ITEM(RShiftAssign		, ERR		,P(0,0,0,0,0))//!< >>=
+	RISSE_OC_ENUM_ITEM(BitAndAssign		,ERR	,P(0,0,0,0,0,0))//!< &=
+	RISSE_OC_ENUM_ITEM(BitOrAssign		,ERR	,P(0,0,0,0,0,0))//!< |=
+	RISSE_OC_ENUM_ITEM(BitXorAssign		,ERR	,P(0,0,0,0,0,0))//!< ^=
+	RISSE_OC_ENUM_ITEM(SubAssign		,ERR	,P(0,0,0,0,0,0))//!< -=
+	RISSE_OC_ENUM_ITEM(AddAssign		,ERR	,P(0,0,0,0,0,0))//!< +=
+	RISSE_OC_ENUM_ITEM(ModAssign		,ERR	,P(0,0,0,0,0,0))//!< %=
+	RISSE_OC_ENUM_ITEM(DivAssign		,ERR	,P(0,0,0,0,0,0))//!< /=
+	RISSE_OC_ENUM_ITEM(IdivAssign		,ERR	,P(0,0,0,0,0,0))//!< \=
+	RISSE_OC_ENUM_ITEM(MulAssign		,ERR	,P(0,0,0,0,0,0))//!< *=
+	RISSE_OC_ENUM_ITEM(LogOrAssign		,ERR	,P(0,0,0,0,0,0))//!< ||=
+	RISSE_OC_ENUM_ITEM(LogAndAssign		,ERR	,P(0,0,0,0,0,0))//!< &&=
+	RISSE_OC_ENUM_ITEM(RBitShiftAssign	,ERR	,P(0,0,0,0,0,0))//!< >>>=
+	RISSE_OC_ENUM_ITEM(LShiftAssign		,ERR	,P(0,0,0,0,0,0))//!< <<=
+	RISSE_OC_ENUM_ITEM(RShiftAssign		,ERR	,P(0,0,0,0,0,0))//!< >>=
 
+// VM コードの最後
+	RISSE_OC_ENUM_ITEM(VMCodeLast		,ERR	,P(0,0,0,0,0,0))//!< VMオペコードの最後
 
 
 // 引数1+2つ
-	RISSE_OC_ENUM_ITEM(DSet				, dset		,P(R,R,R,0,0))//!< set .
-	RISSE_OC_ENUM_ITEM(ISet				, iset		,P(R,R,R,0,0))//!< set [ ]
+	RISSE_OC_ENUM_ITEM(DSet				,dset	,P(R,R,R,0,0,0))//!< set .
+	RISSE_OC_ENUM_ITEM(ISet				,iset	,P(R,R,R,0,0,0))//!< set [ ]
 
 
 // SSA形式特有
-	RISSE_OC_ENUM_ITEM(Phi				, ERR		,P(0,0,0,0,0))//!< φ関数
-	RISSE_OC_ENUM_ITEM(DefineLazyBlock	, ERR		,P(0,0,0,0,0))//!< 遅延評価ブロックの定義
-	RISSE_OC_ENUM_ITEM(ParentWrite		, ERR		,P(0,0,0,0,0))//!< 親名前空間への書き込み
-	RISSE_OC_ENUM_ITEM(ParentRead		, ERR		,P(0,0,0,0,0))//!< 親名前空間からの読み込み
-	RISSE_OC_ENUM_ITEM(ChildWrite		, ERR		,P(0,0,0,0,0))//!< 子名前空間への書き込み
-	RISSE_OC_ENUM_ITEM(ChildRead		, ERR		,P(0,0,0,0,0))//!< 子名前空間からの読み込み
+	RISSE_OC_ENUM_ITEM(Phi				,ERR	,P(0,0,0,0,0,0))//!< φ関数
+	RISSE_OC_ENUM_ITEM(DefineLazyBlock	,ERR	,P(0,0,0,0,0,0))//!< 遅延評価ブロックの定義
+	RISSE_OC_ENUM_ITEM(ParentWrite		,ERR	,P(0,0,0,0,0,0))//!< 親名前空間への書き込み
+	RISSE_OC_ENUM_ITEM(ParentRead		,ERR	,P(0,0,0,0,0,0))//!< 親名前空間からの読み込み
+	RISSE_OC_ENUM_ITEM(ChildWrite		,ERR	,P(0,0,0,0,0,0))//!< 子名前空間への書き込み
+	RISSE_OC_ENUM_ITEM(ChildRead		,ERR	,P(0,0,0,0,0,0))//!< 子名前空間からの読み込み
 
+	RISSE_OC_ENUM_ITEM(OpCodeLast		,ERR	,P(0,0,0,0,0,0))//!< オペコードの最後
 RISSE_OC_ENUM_END
 //---------------------------------------------------------------------------
 

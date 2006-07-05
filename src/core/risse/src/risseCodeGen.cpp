@@ -698,7 +698,18 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocFuncCall:
 	case ocNew:
 	case ocFuncCallBlock:
-		/* not yet */
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() >= 1);
+
+		{
+			gc_vector<const tRisseSSAVariable *> args, blocks;
+			// TODO: ブロックの引き渡し
+
+			for(risse_size i = /*注意*/1; i < Used.size(); i++)
+				args.push_back(Used[i]);
+			gen->PutFunctionCall(Declared, Used[0], Code == ocNew, FuncArgOmitted,
+						FuncExpandFlags, args, blocks);
+		}
 		break;
 
 	case ocJump:
@@ -2071,11 +2082,38 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, tRisseOpCode
 
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * func,
 		bool is_new, bool omit, risse_uint32 expbit,
-		const gc_vector<tRisseString> & args,
-		const gc_vector<tRisseString> & blocks	)
+		const gc_vector<const tRisseSSAVariable *> & args,
+		const gc_vector<const tRisseSSAVariable *> & blocks)
 {
-	
+	RISSE_ASSERT(!(is_new && blocks.size() != 0)); // ブロック付き new はない
+	RISSE_ASSERT(!(omit && args.size() != 0)); // omit なのに引数があるということはない
+
+	tRisseOpCode code;
+	if(is_new)
+		code = ocNew;
+	else
+		code = blocks.size() != 0 ? ocFuncCallBlock : ocFuncCall;
+
+	PutWord(static_cast<risse_uint32>(code));
+	PutWord(FindRegMap(dest));
+	PutWord(FindRegMap(func));
+
+	if(omit) expbit |= RisseFuncCallFlag_Omitted;
+	PutWord(expbit); // フラグ
+
+	PutWord(static_cast<risse_uint32>(args.size()));
+	if(blocks.size() != 0) PutWord(static_cast<risse_uint32>(blocks.size()));
+
+	// 引数をput
+	for(gc_vector<const tRisseSSAVariable *>::const_iterator i = args.begin();
+		i != args.end(); i++)
+		PutWord(FindRegMap(*i));
+	// ブロックをput
+	for(gc_vector<const tRisseSSAVariable *>::const_iterator i = blocks.begin();
+		i != blocks.end(); i++)
+		PutWord(FindRegMap(*i));
 }
 //---------------------------------------------------------------------------
 

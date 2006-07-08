@@ -370,6 +370,8 @@ class tRisseSSAStatement : public tRisseCollectee
 	{
 		tRisseSSABlock * FalseBranch; //!< 分岐のジャンプ先(条件が偽のとき)
 		bool FuncArgOmitted; //!< 引数が省略 ( ... ) されたかどうか
+		tRisseSSAForm * DefinedForm;	//!< この文で宣言された遅延評価ブロックの
+										//!< SSA形式インスタンス(ocDefineLazyBlock)
 	};
 
 public:
@@ -499,6 +501,14 @@ public:
 	//! @brief		名前を取得する
 	//! @return		名前
 	const tRisseString & GetName() const;
+
+	//! @brief		この文で宣言された遅延評価ブロックのSSA形式インスタンスを設定する
+	//! @param		form		この文で宣言された遅延評価ブロックのSSA形式インスタンス
+	void SetDefinedForm(tRisseSSAForm *form) { DefinedForm = form; }
+
+	//! @brief		この文で宣言された遅延評価ブロックのSSA形式インスタンスを取得する
+	//! @return		この文で宣言された遅延評価ブロックのSSA形式インスタンス
+	tRisseSSAForm * GetDefinedForm() const { return DefinedForm; }
 
 	//! @brief		バイトコードを生成する
 	//! @param		gen		バイトコードジェネレータ
@@ -805,6 +815,7 @@ class tRisseSSAForm : public tRisseCollectee
 {
 	tRisseCompiler * Compiler; //!< この SSA 形式が含まれるコンパイラインスタンス
 	tRisseSSAForm * Parent; //!< この SSA 形式インスタンスの親インスタンス
+	gc_vector<tRisseSSAForm *> Children; //!< この SSA形式インスタンスの子インスタンスの配列
 	tRisseASTNode * Root; //!< このコードジェネレータが生成すべきコードのASTルートノード
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
@@ -818,6 +829,8 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseContinueInfo * CurrentContinueInfo; //!< 現在の continue に関する情報
 
 	tRisseSSAVariable * FunctionCollapseArgumentVariable; //!< 関数引数の無名の * を保持している変数
+
+	tRisseCodeGenerator * CodeGenerator; //!< バイトコードジェネレータのインスタンス
 
 public:
 	//! @brief		コンストラクタ
@@ -1012,9 +1025,15 @@ public:
 	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
 	void RemovePhiStatements();
 
+	//! @brief		バイトコードジェネレータのインスタンスを生成する
+	void EnsureCodeGenerator();
+
+	//! @brief		バイトコードジェネレータを得る
+	//! @return		バイトコードジェネレータ
+	tRisseCodeGenerator * GetCodeGenerator() const { return CodeGenerator; }
+
 	//! @brief		バイトコードを生成する
-	//! @param		gen		バイトコードジェネレータ
-	void GenerateCode(tRisseCodeGenerator * gen) const;
+	void GenerateCode() const;
 };
 //---------------------------------------------------------------------------
 
@@ -1026,13 +1045,19 @@ class tRisseCodeGenerator : public tRisseCollectee
 {
 	static const risse_size MaxConstSearch = 5; // 定数領域で同じ値を探す最大値
 
+	tRisseCodeGenerator * Parent; //!< 親のコードジェネレータ空間
+	risse_size RegisterBase; //!< レジスタの基本値
+
 	gc_vector<risse_uint32> Code; //!< コード
 	gc_vector<tRisseVariant> Consts; //!< 定数領域
 	gc_vector<risse_size> RegFreeMap; // 空きレジスタの配列
 	risse_size NumUsedRegs; // 使用中のレジスタの数
 	risse_size MaxNumUsedRegs; // 使用中のレジスタの最大数
+	typedef gc_map<tRisseString, risse_size> tRegNameMap;
+		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
 	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
+	tRegNameMap RegNameMap; //!< 変数名とそれに対応するレジスタ番号のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	gc_vector<std::pair<const tRisseSSABlock *, risse_size> > PendingBlockJumps;
 			//!< 未解決のジャンプとその基本ブロックのリスト
@@ -1042,9 +1067,21 @@ class tRisseCodeGenerator : public tRisseCollectee
 
 public:
 	//! @brief		コンストラクタ
-	tRisseCodeGenerator();
+	//! @param		parent			親コードジェネレータ
+	//! @param		register_base	レジスタの基本値
+	tRisseCodeGenerator(tRisseCodeGenerator * parent = NULL);
 
 public:
+
+	//! @brief	レジスタの基本値を得る @return レジスタの基本値
+	risse_size GetRegisterBase() const { return RegisterBase; }
+
+	//! @brief	レジスタの基本値を設定する @param base レジスタの基本値
+	void SetRegisterBase(risse_size base) { RegisterBase = base; }
+
+	//! @brief	レジスタの基本値を設定する(親コードジェネレータから値を得る
+	void SetRegisterBase();
+
 	//! @brief	コード配列を得る @return コード配列
 	const gc_vector<risse_uint32> & GetCode() const { return Code; }
 
@@ -1172,6 +1209,15 @@ public:
 	//! @brief		レジスタのマップを変数で探す
 	//! @param		var			変数
 	risse_size FindRegMap(const tRisseSSAVariable * var);
+
+	//! @brief		レジスタのマップを変数名で探す
+	//! @param		name			変数名
+	risse_size FindRegNameMap(const tRisseString & name);
+
+	//! @brief		レジスタのマップに変数名とレジスタを追加する
+	//! @param		name			変数名
+	//! @param		reg				レジスタ
+	void AddRegNameMap(const tRisseString & name, risse_size reg);
 
 	//! @brief		基本ブロックのLiveOutにないレジスタをすべて開放する
 	//! @param		block		基本ブロック

@@ -786,6 +786,32 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutSet(Code, Used[0], Used[1], Used[2]);
 		break;
 
+	case ocDefineLazyBlock:
+/*
+		{
+			tRisseSSAForm * child_form = DefinedForm;
+			RISSE_ASSERT(child_form != NULL);
+			RISSE_ASSERT(Declared != NULL);
+			// Declared で使用している文のうち、ocChildWriteしてる物を探し、
+			// それに従って子SSA形式インスタンスのバイトコード
+			// ジェネレータにマップを作成する
+			const gc_vector<tRisseSSAStatement *> & child_access_stmts =
+				Declared.GetUsed();
+			for(gc_vector<tRisseSSAStatement *>::const_iterator i =
+				child_access_stmts.begin(); i != child_access_stmts().end(); i++)
+			{
+				switch((*i)->Code)
+				{
+				case ocChildWrite:
+				case ocChildRead:
+					
+				default: ;
+				}
+			}
+		}
+*/
+		break;
+
 	default:
 		RISSE_ASSERT(!"not acceptable SSA operation code");
 		break;
@@ -1646,6 +1672,7 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	CurrentBreakInfo = NULL;
 	CurrentContinueInfo = NULL;
 	FunctionCollapseArgumentVariable = NULL;
+	CodeGenerator = NULL;
 
 	// compiler に自身を登録する
 	compiler->AddSSAForm(this);
@@ -1783,6 +1810,7 @@ void * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node, tRisseSSAVariable *&
 	tRisseSSAForm *newform =
 		new tRisseSSAForm(Compiler, node, block_name);
 	newform->SetParent(this);
+	Children.push_back(newform);
 
 	// ローカル名前空間の「チェーン」につなぐ
 	tRisseSSAFlatNamespace * chain = LocalNamespace->CreateFlatNamespace();
@@ -1796,6 +1824,7 @@ void * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node, tRisseSSAVariable *&
 	tRisseSSAStatement * lazy_stmt =
 		AddStatement(node->GetPosition(), ocDefineLazyBlock, &block_var);
 	lazy_stmt->SetName(block_name);
+	lazy_stmt->SetDefinedForm(newform);
 
 	// 遅延評価ブロックで読み込みが起こった変数を処理する
 	chain->GenerateChildRead(this, node->GetPosition(), block_var);
@@ -1965,9 +1994,19 @@ void tRisseSSAForm::RemovePhiStatements()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::GenerateCode(tRisseCodeGenerator * gen) const
+void tRisseSSAForm::EnsureCodeGenerator()
 {
-	// 子SSA形式インスタンスを含め、バイトコードを生成する
+	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
+	if(!CodeGenerator) CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::GenerateCode() const
+{
+	// バイトコードを生成する
+	RISSE_ASSERT(CodeGenerator != NULL);
 
 	// EntryBlock から到達可能なすべての基本ブロックを得る
 	gc_vector<tRisseSSABlock *> blocks;
@@ -1975,10 +2014,23 @@ void tRisseSSAForm::GenerateCode(tRisseCodeGenerator * gen) const
 
 	// すべての基本ブロックに対してコード生成を行わせる
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->GenerateCode(gen);
+		(*i)->GenerateCode(CodeGenerator);
 
 	// コードを確定する
-	gen->FixCode();
+	CodeGenerator->FixCode();
+
+	// この時点で CodeGenerator は、この SSA 形式から生成されたコードが
+	// どれほどのスタック領域を喰うのかを知っている。
+	// 子 SSA 形式から生成されたコードは親 SSA 形式から生成されたコードの
+	// スタック領域を破壊しないようにレジスタを配置する必要がある。
+	// すべての子SSA形式に対してバイトコード生成を行わせる
+	for(gc_vector<tRisseSSAForm *>::const_iterator i = Children.begin();
+		i != Children.end(); i++)
+	{
+		RISSE_ASSERT((*i)->CodeGenerator != NULL);
+		(*i)->CodeGenerator->SetRegisterBase();
+		(*i)->GenerateCode();
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1996,10 +2048,24 @@ void tRisseSSAForm::GenerateCode(tRisseCodeGenerator * gen) const
 
 
 //---------------------------------------------------------------------------
-tRisseCodeGenerator::tRisseCodeGenerator()
+tRisseCodeGenerator::tRisseCodeGenerator(
+	tRisseCodeGenerator * parent)
 {
+	Parent = parent;
+	RegisterBase = 0;
 	NumUsedRegs = 0;
 	MaxNumUsedRegs = 0;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::SetRegisterBase()
+{
+	if(Parent)
+		RegisterBase = Parent->RegisterBase + Parent->MaxNumUsedRegs;
+	else
+		RegisterBase = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -2249,7 +2315,7 @@ risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
 	if(f != RegMap.end())
 	{
 		 // 変数が見つかった
-		 return f->second;
+		 return RegisterBase + f->second;
 	}
 
 	// 変数がないので空きレジスタを探す
@@ -2271,7 +2337,32 @@ risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
 
 	RegMap.insert(tRegMap::value_type(var, assigned_reg)); // RegMapに登録
 
-	return assigned_reg;
+	return RegisterBase + assigned_reg;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::FindRegNameMap(const tRisseString & name)
+{
+	tRegNameMap::iterator f = RegNameMap.find(name);
+
+	RISSE_ASSERT(!(Parent == NULL && f == RegNameMap.end()));
+
+	if(f == RegNameMap.end() && Parent != NULL)
+	{
+		// 自分にない場合、親を見る
+		return Parent->FindRegNameMap(name);
+	}
+	return f->second;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::AddRegNameMap(const tRisseString & name, risse_size reg)
+{
+	RegNameMap.insert(tRegNameMap::value_type(name, reg));
 }
 //---------------------------------------------------------------------------
 
@@ -2350,20 +2441,22 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 		str = (*i)->Dump();
 		RisseFPrint(stdout, str.c_str());
 	}
+/*
+	// VMコードの生成
+	SSAForms.front()->EnsureCodeGenerator();
+	SSAForms.front()->GenerateCode();
 
-	// SSA 形式のダンプ
+	// VMコードのダンプ
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 	{
 		RisseFPrint(stdout,(	RISSE_WS("---------- VM (") + (*i)->GetName() +
 								RISSE_WS(") ----------\n")).c_str());
-
-		tRisseCodeGenerator *gen = new tRisseCodeGenerator();
-		(*i)->GenerateCode(gen);
-		tRisseCodeBlock * cb = new tRisseCodeBlock(gen);
+		tRisseCodeBlock * cb = new tRisseCodeBlock((*i)->GetCodeGenerator());
 		str = cb->Dump();
 		RisseFPrint(stdout, str.c_str());
 	}
+*/
 }
 //---------------------------------------------------------------------------
 

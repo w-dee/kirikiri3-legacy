@@ -141,11 +141,14 @@ public:
 
 	//! @brief		変数を探す
 	//! @param		name		変数名
+	//! @param		is_num		name は番号付きの名前か(真)、なしのなまえか(偽)
+	//! @param		n_name		is_num が偽の場合、番号付きの名前が欲しい場合はここにそれを受け取る
+	//!							変数を指定する
 	//! @param		var 		その変数を表す SSA 変数表現 を格納する先(NULL = 要らない)
 	//! @return		変数が見つかったかどうか
 	//! @note		変数が見つからなかった場合は *var にはなにも書き込まれない.
 	//!				name は番号なしの変数名であると見なされる.
-	bool Find(const tRisseString & name, tRisseSSAVariable ** var = NULL) const;
+	bool Find(const tRisseString & name, bool is_num = false, tRisseString *n_name = NULL, tRisseSSAVariable *** var = NULL) const;
 
 	//! @brief		変数が存在するかどうかを調べる
 	//! @param		name		変数名
@@ -165,8 +168,18 @@ public:
 	//! @param		pos		スクリプト上の位置
 	//! @param		name	変数名
 	//! @param		n_name	番号付き変数名
-	//! @return		見つかった変数、あるいはφ関数の戻り値 (NULL=ローカル変数に見つからなかった)
+	//! @return		見つかった変数、あるいはφ関数の戻り値へのポインタ
+	//!				(NULL=ローカル変数に見つからなかった)
 	tRisseSSAVariable * MakePhiFunction(risse_size pos,
+		const tRisseString & name, const tRisseString & n_name = tRisseString());
+
+	//! @brief		必要ならばφ関数を作成する
+	//! @param		pos		スクリプト上の位置
+	//! @param		name	変数名
+	//! @param		n_name	番号付き変数名
+	//! @return		見つかった変数、あるいはφ関数の戻り値へのポインタ
+	//!				(NULL=ローカル変数に見つからなかった)
+	tRisseSSAVariable * AddPhiFunctionForBlock(risse_size pos,
 		const tRisseString & name, const tRisseString & n_name = tRisseString());
 
 	//! @brief		変数をすべて「φ関数を参照のこと」としてマークする
@@ -579,13 +592,30 @@ public:
 	//! @param		stmt		削除する文
 	void DeleteStatement(tRisseSSAStatement * stmt);
 
-	//! @brief		φ関数を追加する
+	//! @brief		ブロックをまたがってφ関数を追加する
 	//! @param		pos			スクリプト上の位置
 	//! @param		name		変数名(オリジナルの名前)
 	//! @param		n_name		変数名(番号付き, バージョン無し)
-	//! @param		decl_var	このφ関数の戻り値を表す変数
-	void AddPhiFunction(risse_size pos, const tRisseString & name,
-		const tRisseString & n_name, tRisseSSAVariable *& decl_var);
+	//! @param		var			φ関数の戻り値を書き込む先
+	//! @note		var は 名前空間の 名前 - 変数のペアのうちの「変数」部分を
+	//!				指す参照を渡すこと。内部で再度名前空間を参照する前に
+	//!				名前空間の該当ペアには値が書き込まれなければならないため。
+	void AddPhiFunctionToBlocks(risse_size pos, const tRisseString & name,
+		const tRisseString & n_name, tRisseSSAVariable *& var);
+
+private:
+	//! @brief		φ関数を追加し、Pred を stack に追加する
+	//! @param		pos			スクリプト上の位置
+	//! @param		name		変数名(オリジナルの名前)
+	//! @param		n_name		変数名(番号付き, バージョン無し)
+	//! @param		block_stack	ブロックスタック
+	//! @param		phi_stmt_stack	φ関数スタック
+	//! @return		φ関数の戻り値
+	tRisseSSAVariable * AddPhiFunction(risse_size pos, const tRisseString & name,
+		const tRisseString & n_name,
+			gc_vector<tRisseSSABlock *> & block_stack,
+			gc_vector<tRisseSSAStatement *> & phi_stmt_stack);
+public:
 
 	//! @brief		直前の基本ブロックを追加する
 	//! @param		block	基本ブロック
@@ -617,6 +647,10 @@ public:
 	//! @brief		ローカル名前空間のスナップショットを作成する
 	//! @param		ref		参照元ローカル名前空間
 	void TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref);
+
+	//! @brief		ローカル名前空間のスナップショットを得る
+	//! @return		ローカル名前空間のスナップショット
+	tRisseSSALocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
 
 	//! @brief		LiveIn/Outに変数を追加する
 	//! @param		var		追加する変数

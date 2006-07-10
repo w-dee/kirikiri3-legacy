@@ -163,8 +163,6 @@ void tRisseSSALocalNamespace::Pop()
 //---------------------------------------------------------------------------
 void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * where)
 {
-	RISSE_ASSERT(where != NULL);
-
 	// 番号を決める
 	risse_int num = Block->GetForm()->GetUniqueNumber();
 	tRisseString n_name = GetNumberedName(name, num);
@@ -181,32 +179,45 @@ void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable *
 	Scopes.back()->VariableMap.insert(tVariableMap::value_type(n_name, where));
 
 	// 名前と番号付きの名前を where に設定する
-	where->SetName(name);
-	where->SetNumberedName(n_name);
+	if(where)
+	{
+		where->SetName(name);
+		where->SetNumberedName(n_name);
+	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 bool tRisseSSALocalNamespace::Find(const tRisseString & name,
-	tRisseSSAVariable ** var) const
+	bool is_num, tRisseString *n_name,
+	tRisseSSAVariable *** var) const
 {
 	// Scopes を頭から見ていき、最初に見つかった変数を返す
 	// (スコープによる変数の可視・不可視のルールに従う)
 	for(tScopes::const_reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
 	{
-		tAliasMap::iterator i = (*ri)->AliasMap.find(name);
-		if(i != (*ri)->AliasMap.end())
+		tRisseString name_to_find;
+		if(!is_num)
+		{
+			// 番号付きの名前が分からない場合はエイリアスを検索する
+			tAliasMap::iterator i = (*ri)->AliasMap.find(name);
+			if(i == (*ri)->AliasMap.end()) continue; // 見つからなかった
+
+			name_to_find = i->second;
+
+			if(n_name) *n_name = i->second;
+		}
+		else
+		{
+			name_to_find = name;
+		}
+
+		tVariableMap::iterator vi = (*ri)->VariableMap.find(name_to_find);
+		if(vi != (*ri)->VariableMap.end())
 		{
 			// 見つかった
-			tRisseString n_name = i->second; // 番号付き変数名
-
-			// 同じスコープ内に番号付きの名前があるはず
-			tVariableMap::iterator vi = (*ri)->VariableMap.find(n_name);
-			RISSE_ASSERT(vi != (*ri)->VariableMap.end()); // 同じスコープ内にあるよね
-
-			if(var) *var = vi->second;
-
+			if(var) *var = &(vi->second);
 			return true;
 		}
 	}
@@ -257,36 +268,26 @@ bool tRisseSSALocalNamespace::Delete(const tRisseString & name)
 tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
 					risse_size pos, const tRisseString & name, const tRisseString & n_name)
 {
-	// ここで渡される name は 
-	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
+	tRisseSSAVariable ** var = NULL;
+	tRisseString n_name_found;
+	bool found;
+	if(n_name.IsEmpty())
 	{
-		tRisseString name_to_find;
-		if(n_name.IsEmpty())
-		{
-			// 番号付きの名前が分からない場合はエイリアスを検索する
-			tAliasMap::iterator i = (*ri)->AliasMap.find(name);
-			if(i == (*ri)->AliasMap.end()) continue; // 見つからなかった
-
-			name_to_find = i->second;
-		}
-		else
-		{
-			name_to_find = n_name;
-		}
-
-		tVariableMap::iterator vi = (*ri)->VariableMap.find(name_to_find);
-		if(vi != (*ri)->VariableMap.end())
-		{
-			// 見つかった
-			if(vi->second != NULL) return vi->second; // 見つかったがφ関数を作成する必要はない
-			// 見つかったがφ関数を作成する必要がある
-			Block->AddPhiFunction(pos, name, name_to_find, vi->second);
-			return vi->second;
-		}
+		found = Find(name, false, &n_name_found, &var);
+	}
+	else
+	{
+		n_name_found = n_name;
+		found = Find(n_name, true, &n_name_found, &var);
 	}
 
-	// 見つからなかった
-	return NULL;
+	if(!found) return NULL; // 見つからなかった
+	if(*var != NULL) return *var; // 見つかった、かつφ関数の作成の必要はない
+
+	// 見つかったがφ関数を作成する必要がある場合
+	Block->AddPhiFunctionToBlocks(pos, name, n_name_found, *var);
+
+	return *var;
 }
 //---------------------------------------------------------------------------
 
@@ -309,6 +310,15 @@ tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
 							risse_size pos, const tRisseString & name)
 {
 	tRisseSSAVariable * ret = MakePhiFunction(pos, name);
+	if(ret)
+	{
+		// 文の作成
+		tRisseSSAVariable * ret_var = NULL;
+		tRisseSSAStatement *stmt = form->AddStatement(pos, ocRead, &ret_var, ret);
+		stmt->SetName(ret->GetNumberedName());
+		ret = ret_var;
+	}
+	else
 	if(!ret && Chained)
 	{
 		// チェーンされた名前空間を探す
@@ -348,7 +358,8 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 
 			// 文の作成
 			tRisseSSAVariable * ret_var = NULL;
-			form->AddStatement(pos, ocAssign, &ret_var, value);
+			tRisseSSAStatement *stmt = form->AddStatement(pos, ocWrite, &ret_var, value);
+			stmt->SetName(n_name);
 
 			// 変数の上書き
 			vi->second = ret_var; // 上書き
@@ -645,7 +656,9 @@ void tRisseSSAStatement::SetName(const tRisseString & name)
 {
 	RISSE_ASSERT(
 			Code == ocParentRead || Code == ocParentWrite ||
-			Code == ocChildRead || Code == ocChildWrite || Code == ocDefineLazyBlock);
+			Code == ocChildRead || Code == ocChildWrite ||
+			Code == ocRead || Code == ocWrite ||
+			Code == ocDefineLazyBlock);
 	Name = new tRisseString(name);
 }
 //---------------------------------------------------------------------------
@@ -656,7 +669,9 @@ const tRisseString & tRisseSSAStatement::GetName() const
 {
 	RISSE_ASSERT(
 			Code == ocParentRead || Code == ocParentWrite ||
-			Code == ocChildRead || Code == ocChildWrite || Code == ocDefineLazyBlock);
+			Code == ocChildRead || Code == ocChildWrite ||
+			Code == ocRead || Code == ocWrite ||
+			Code == ocDefineLazyBlock);
 	RISSE_ASSERT(Name != NULL);
 	return *Name;
 }
@@ -968,11 +983,18 @@ tRisseString tRisseSSAStatement::Dump() const
 			if(Declared)
 				ret += Declared->Dump() + RISSE_WS(" = "); // この文で宣言された変数がある
 
-			if(Code == ocAssign)
+			if(Code == ocAssign || Code == ocRead || Code == ocWrite)
 			{
-				// 単純代入
+				// 単純代入/共有変数の読み書き
 				RISSE_ASSERT(Used.size() == 1);
 				ret += (*Used.begin())->Dump();
+
+				if(Code == ocRead)
+					ret += RISSE_WS(" (read from ") + Name->AsHumanReadable()
+						+ RISSE_WS(")");
+				else if(Code == ocWrite)
+					ret += RISSE_WS(" (write to ") + Name->AsHumanReadable()
+						+ RISSE_WS(")");
 			}
 			else
 			{
@@ -1131,33 +1153,32 @@ void tRisseSSABlock::DeleteStatement(tRisseSSAStatement * stmt)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AddPhiFunction(risse_size pos,
-	const tRisseString & name, const tRisseString & n_name, tRisseSSAVariable *& decl_var)
+void tRisseSSABlock::AddPhiFunctionToBlocks(
+	risse_size pos, const tRisseString & name,
+	const tRisseString & n_name, tRisseSSAVariable *& last_phi_var)
 {
+	// 見つかったがφ関数を作成する必要がある場合
+	gc_vector<tRisseSSABlock *> block_stack;
+	gc_vector<tRisseSSAStatement *> phi_stmt_stack;
+
 	// φ関数を追加する
-	tRisseSSAStatement * stmt = new tRisseSSAStatement(Form, pos, ocPhi);
+	last_phi_var =
+		AddPhiFunction(pos, name, n_name, block_stack, phi_stmt_stack);
 
-	// 戻りの変数を作成する
-	// この AddPhiFunction メソッドを呼び出す tRisseSSALocalNamespace::MakePhiFunction()
-	// は、見つかった変数のmap のsecondをvar引数に渡してくる。このため、
-	// decl_var に代入した時点でこの変数の新しいSSA変数が可視になる。
-	decl_var = new tRisseSSAVariable(Form, stmt, name);
-	decl_var->SetNumberedName(n_name);
-
-	// φ関数は必ずブロックの先頭に追加される
-	InsertStatement(stmt, sipHead);
-
-	// 関数の引数を調べる
-	// 関数の引数は、直前のブロックのローカル名前空間のスナップショットから
-	// 変数名を探すことで得る
-	for(gc_vector<tRisseSSABlock *>::iterator i = Pred.begin(); i != Pred.end(); i ++)
+	while(block_stack.size() > 0)
 	{
-		RISSE_ASSERT((*i)->LocalNamespace != NULL);
+		// スタックからpop
+		tRisseSSABlock * quest_block = block_stack.back();
+		block_stack.pop_back();
+		tRisseSSAStatement * quest_phi_stmt = phi_stmt_stack.back();
+		phi_stmt_stack.pop_back();
 
-		tRisseSSAVariable * found_var =
-			(*i)->LocalNamespace->MakePhiFunction(pos,
-					decl_var->GetName(), decl_var->GetNumberedName());
-		if(!found_var)
+		// quest_block の LocalNamespace から変数を検索
+		tRisseSSAVariable **var = NULL;
+		RISSE_ASSERT(quest_block->LocalNamespace);
+		bool found = quest_block->LocalNamespace->Find(n_name, true, NULL, &var);
+
+		if(!found)
 		{
 			// 変数が見つからない
 			// エラーにする
@@ -1165,11 +1186,46 @@ void tRisseSSABlock::AddPhiFunction(risse_size pos,
 			eRisseCompileError::Throw(
 				tRisseString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
-					decl_var->GetName()),
-					Form->GetScriptBlock(), stmt->GetPosition());
+					name),
+					quest_block->Form->GetScriptBlock(), quest_phi_stmt->GetPosition());
 		}
-		stmt->AddUsed(found_var);
+
+		if(*var == NULL)
+			*var = quest_block->AddPhiFunction(pos, name, n_name, block_stack, phi_stmt_stack);
+				// ↑見つかったがφ関数を作成する必要がある場合
+
+		// phi 関数の文に変数を追加
+		quest_phi_stmt->AddUsed(*var); 
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseSSABlock::AddPhiFunction(
+		risse_size pos, const tRisseString & name,
+		const tRisseString & n_name,
+			gc_vector<tRisseSSABlock *> & block_stack,
+			gc_vector<tRisseSSAStatement *> & phi_stmt_stack)
+{
+	tRisseSSAVariable *ret_var;
+	// φ関数を追加する
+	tRisseSSAStatement * phi_stmt = new tRisseSSAStatement(Form, pos, ocPhi);
+	// 戻りの変数を作成し、*var に入れる
+	ret_var = new tRisseSSAVariable(Form, phi_stmt, name);
+	ret_var->SetNumberedName(n_name);
+	// φ関数は必ずブロックの先頭に追加される
+	InsertStatement(phi_stmt, tRisseSSABlock::sipHead);
+
+	// pred に対して再帰するためにスタックにPredを積む
+	for(gc_vector<tRisseSSABlock *>::reverse_iterator i = Pred.rbegin();
+			i != Pred.rend(); i ++)
+	{
+		block_stack.push_back(*i);
+		phi_stmt_stack.push_back(phi_stmt);
+	}
+
+	return ret_var;
 }
 //---------------------------------------------------------------------------
 
@@ -1709,9 +1765,10 @@ void tRisseSSAForm::Generate()
 
 	// 変数の有効範囲を解析
 	AnalyzeVariableLiveness();
-
+/*
 	// φ関数を除去
 	RemovePhiStatements();
+*/
 }
 //---------------------------------------------------------------------------
 

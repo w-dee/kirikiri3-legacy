@@ -776,13 +776,18 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 		init_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
 	}
 
+	// 変数のローカル名前空間への登録
+	form->GetLocalNamespace()->Add(Name, NULL);
+
+	// ローカル変数への書き込み
+	form->GetLocalNamespace()->Write(form, GetPosition(), Name, init_var);
+/*
 	// 文の作成
 	tRisseSSAVariable * var = NULL;
-	form->AddStatement(GetPosition(), ocAssign, &var, init_var);
+	tRisseSSAStatement * stmt = form->AddStatement(GetPosition(), ocWrite, &var, init_var);
 
-	// 変数のローカル名前空間への登録
-	form->GetLocalNamespace()->Add(Name, var);
-
+	stmt->SetName(Name);
+*/
 	// このノードは答えを返さない
 	return NULL;
 }

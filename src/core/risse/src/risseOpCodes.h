@@ -238,6 +238,8 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(ParentRead		,ERR	,P(0,0,0,0,0,0))//!< 親名前空間からの読み込み
 	RISSE_OC_ENUM_ITEM(ChildWrite		,ERR	,P(0,0,0,0,0,0))//!< 子名前空間への書き込み
 	RISSE_OC_ENUM_ITEM(ChildRead		,ERR	,P(0,0,0,0,0,0))//!< 子名前空間からの読み込み
+	RISSE_OC_ENUM_ITEM(Write			,ERR	,P(0,0,0,0,0,0))//!< 共有空間への書き込み
+	RISSE_OC_ENUM_ITEM(Read				,ERR	,P(0,0,0,0,0,0))//!< 共有空間からの読み込み
 
 	RISSE_OC_ENUM_ITEM(OpCodeLast		,ERR	,P(0,0,0,0,0,0))//!< オペコードの最後
 RISSE_OC_ENUM_END

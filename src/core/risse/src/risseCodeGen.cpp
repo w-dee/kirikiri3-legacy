@@ -34,9 +34,6 @@ void tRisseSSAVariableAccessMap::SetUsed(const tRisseString & name, bool write)
 		i->second.Write = true;
 	else
 		i->second.Read = true;
-
-wxFprintf(stderr, wxT("inserting %s into %p (read:%d, write:%d)\n"), name.AsWxString().c_str(),
-		this, (int)!write, (int)write);
 }
 //---------------------------------------------------------------------------
 
@@ -47,7 +44,6 @@ void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_s
 {
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
-wxFprintf(stderr, wxT("inspecting read on %p, for %s\n"), this, i->first.AsWxString().c_str());
 		if(i->second.Read)
 		{
 			// 読み込みが発生している
@@ -64,7 +60,6 @@ wxFprintf(stderr, wxT("inspecting read on %p, for %s\n"), this, i->first.AsWxStr
 void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_size pos,
 		tRisseSSAVariable* block_var)
 {
-wxFprintf(stderr, wxT("generating write on %p\n"), this);
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
 		if(i->second.Write)
@@ -2068,6 +2063,20 @@ void tRisseSSAForm::CleanupLazyBlock(void * param)
 	if(access_map)
 		access_map->GenerateChildWrite(
 			this, info_param->Position, info_param->BlockVariable);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_int tRisseSSAForm::GetUniqueNumber()
+{
+	if(Parent) return Parent->GetUniqueNumber(); // 親がある場合は親のを使う
+	UniqueNumber++;
+	// int のサイズにもよるが、32bit integer では 2^30 ぐらいで元に戻る
+	// もちろんこれはそれほど変数が使われることは無いだろうという推測の元なので
+	// 周回が起こったらここで例外を吐いて止まってしまった方がいいかもしれない
+	if(UniqueNumber >= 1 << (sizeof(risse_int) * 8 - 2)) UniqueNumber = 0;
+	return UniqueNumber;
 }
 //---------------------------------------------------------------------------
 

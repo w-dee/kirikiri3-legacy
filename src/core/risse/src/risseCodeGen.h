@@ -1064,15 +1064,8 @@ public:
 	void CleanupLazyBlock(void * param);
 
 	//! @brief		ユニークな番号を得る
-	risse_int GetUniqueNumber()
-	{
-		UniqueNumber++;
-		// int のサイズにもよるが、32bit integer では 2^30 ぐらいで元に戻る
-		// もちろんこれはそれほど変数が使われることは無いだろうという推測の元なので
-		// 周回が起こったらここで例外を吐いて止まってしまった方がいいかもしれない
-		if(UniqueNumber >= 1 << (sizeof(risse_int) * 8 - 2)) UniqueNumber = 0;
-		return UniqueNumber;
-	}
+	//! @return		ユニークな番号
+	risse_int GetUniqueNumber();
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列

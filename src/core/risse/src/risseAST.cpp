@@ -781,13 +781,7 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 
 	// ローカル変数への書き込み
 	form->GetLocalNamespace()->Write(form, GetPosition(), Name, init_var);
-/*
-	// 文の作成
-	tRisseSSAVariable * var = NULL;
-	tRisseSSAStatement * stmt = form->AddStatement(GetPosition(), ocWrite, &var, init_var);
 
-	stmt->SetName(Name);
-*/
 	// このノードは答えを返さない
 	return NULL;
 }
@@ -2096,7 +2090,7 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 {
 	// try ブロックの中身を 遅延評価ブロックとして評価する
 	tRisseSSAVariable * lazyblock_var = NULL;
-	void * lazy_param = form->CreateLazyBlock(Body, lazyblock_var);
+	void * lazy_param = form->CreateLazyBlock(Body, false, lazyblock_var);
 
 	// 遅延評価ブロックを実行するためのfunccall文を作成
 	lazyblock_var->GenerateFuncCall(GetPosition(), tRisseString());

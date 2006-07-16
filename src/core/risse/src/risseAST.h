@@ -893,7 +893,7 @@ class tRisseASTNode_MemberSel : public tRisseASTNode
 	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
 
 	//! @brief		PrepareSSA() で返す構造体
-	struct tPrepareSSA
+	struct tPrepareSSA : public tRisseCollectee
 	{
 		tRisseSSAVariable * ObjectVar; //!< オブジェクトの式の値
 		tRisseSSAVariable * MemberNameVar; //!< メンバ名を表す式の値
@@ -985,7 +985,7 @@ class tRisseASTNode_Id : public tRisseASTNode
 	tRisseString Name; //!< 識別子名
 
 	//! @brief		PrepareSSA() で返す構造体
-	struct tPrepareSSA
+	struct tPrepareSSA : public tRisseCollectee
 	{
 		const tRisseASTNode_MemberSel * MemberSel;
 			//!< ローカル変数ではなかったときに生成された tRisseASTNode_MemberSel のインスタンス
@@ -1287,7 +1287,7 @@ class tRisseASTNode_Array : public tRisseASTNode_List
 	typedef tRisseASTNode_List inherited;
 
 	//! @brief		PrepareSSA() で返す構造体
-	struct tPrepareSSA
+	struct tPrepareSSA : public tRisseCollectee
 	{
 		gc_vector<void *> Elements; //!< 各要素の準備用データ
 		gc_vector<tRisseSSAVariable *> Indices; //!< 各インデックスを表す数値定数
@@ -1341,7 +1341,7 @@ class tRisseASTNode_Dict : public tRisseASTNode_List
 	typedef tRisseASTNode_List inherited;
 
 	//! @brief		PrepareSSA() で返す構造体
-	struct tPrepareSSA
+	struct tPrepareSSA : public tRisseCollectee
 	{
 		gc_vector<void *> Names; //!< 各要素の「名前」の準備用データ
 		gc_vector<void *> Values; //!< 各要素の「値」の準備用データ

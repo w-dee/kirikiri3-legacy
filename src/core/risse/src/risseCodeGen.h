@@ -34,12 +34,12 @@ class tRisseSSAForm;
 class tRisseCodeBlock;
 class tRisseCodeGenerator;
 //---------------------------------------------------------------------------
-//! @brief	ローカル変数用のフラットな名前空間管理クラス
+//! @brief	ローカル変数にアクセスがあったかどうかを記録するためのマップクラス
 //---------------------------------------------------------------------------
-class tRisseSSAFlatNamespace : public tRisseCollectee
+class tRisseSSAVariableAccessMap : public tRisseCollectee
 {
 	//! @brief		名前に関する情報
-	struct tInfo
+	struct tInfo : public tRisseCollectee
 	{
 		tInfo() { Read = false; Write = false; } //!< コンストラクタ
 		bool Read;		//!< この変数に対する読み込みが発生したかどうか(使用フラグ)
@@ -51,22 +51,12 @@ class tRisseSSAFlatNamespace : public tRisseCollectee
 
 public:
 	//! @brief		コンストラクタ
-	tRisseSSAFlatNamespace() {;}
+	tRisseSSAVariableAccessMap() {;}
 
-	//! @brief		変数が存在するかどうかを調べる
-	//! @param		name		変数名(番号なし)
-	//! @return		変数が存在する場合真、存在しない場合偽
-	bool Find(const tRisseString & name) const;
-
-	//! @brief		変数が存在するかどうかを調べ、存在すれば使用フラグを真に設定する
+	//! @brief		アクセスマップに追加する
 	//! @param		name		変数名(番号なし)
 	//! @param		write		その変数に対するアクセスが書き込みか(真)、読み込みか(偽)
-	//! @return		変数が存在する場合真、存在しない場合偽
-	bool FindAndSetUsed(const tRisseString & name, bool write);
-
-	//! @brief		変数を追加する
-	//! @param		name		変数名(番号なし)
-	void Add(const tRisseString & name);
+	void SetUsed(const tRisseString & name, bool write);
 
 	//! @param		遅延評価ブロック中で「読み込み」が発生した変数に対して読み込みを行う文を作成する
 	//! @param		form		SSA形式インスタンス
@@ -92,14 +82,19 @@ public:
 class tRisseSSALocalNamespace : public tRisseCollectee
 {
 	tRisseSSABlock * Block; //!< この名前空間に結びつけられている基本ブロック
-	tRisseSSAFlatNamespace * Chained; //!< チェーンされた名前空間
+	tRisseSSAVariableAccessMap * AccessMap;
+		//!< この名前空間内に見つからなかった読み込みあるいは書き込みをチェックするためのマップ
+		//!< この名前空間内に見つからなかった変数は親名前空間内で検索される。見つかった場合は
+		//!< AccessMapが NULL の場合は、親名前空間内で pin されるが、
+		//!< AccessMapが非 NULL の場合はピンされずに AccessMap にマッピングが追加される
+	tRisseSSALocalNamespace * Parent; //!< チェーンされた親名前空間
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tVariableMap;
 		//!< 変数名(番号付き)→変数オブジェクトのマップのtypedef
 	typedef gc_map<tRisseString, tRisseString> tAliasMap;
 		//!< 変数名(番号なし)→変数名(番号付き)のマップのtypedef
 
 	//! @brief		名前空間の一つのスコープを表す構造体
-	struct tScope
+	struct tScope : public tRisseCollectee
 	{
 		tVariableMap VariableMap; //!< 変数名(番号付き)→変数オブジェクトのマップ
 		tAliasMap AliasMap; //!< 変数名(番号なし)→変数名(番号付き)のマップ
@@ -114,9 +109,9 @@ public:
 	//! @brief		コピーコンストラクタ
 	tRisseSSALocalNamespace(const tRisseSSALocalNamespace &ref);
 
-	//! @brief		チェーンされた名前空間を設定する
-	//! @param		ns		チェーンされた名前空間
-	void SetChained(tRisseSSAFlatNamespace * ns) { Chained = ns; }
+	//! @brief		チェーンされた親名前空間を設定する
+	//! @param		parent		チェーンされた親名前空間
+	void SetParent(tRisseSSALocalNamespace * parent) { Parent = parent; }
 
 	//! @brief		番号 付き変数名を得る
 	//! @param		name		変数名
@@ -188,7 +183,7 @@ public:
 	//!				という意味)
 	void MarkToCreatePhi();
 
-	//! @brief		変数に読み込みのためにアクセスをする(必要ならばφ関数などが作成される)
+	//! @brief		変数に読み込みのためのアクセスをする(必要ならばφ関数などが作成される)
 	//! @param		form	SSA形式インスタンス
 	//! @param		pos		スクリプト上の位置
 	//! @param		name	変数名
@@ -197,7 +192,7 @@ public:
 	//!				チェーンされた名前空間へアクセスするための文を作成する
 	tRisseSSAVariable * Read(tRisseSSAForm * form, risse_size pos, const tRisseString & name);
 
-	//! @brief		変数に書き込みのためにアクセスをする(必要ならばφ関数などが作成される)
+	//! @brief		変数に書き込みのためのアクセスをする(必要ならばφ関数などが作成される)
 	//! @param		form	SSA形式インスタンス
 	//! @param		pos		スクリプト上の位置
 	//! @param		name	変数名
@@ -208,12 +203,23 @@ public:
 	bool Write(tRisseSSAForm * form, risse_size pos, const tRisseString & name,
 				tRisseSSAVariable * value);
 
-	//! @brief		tRisseSSAFlatNamespace のインスタンスを作成して返す
-	//! @return		tRisseSSAFlatNamespace のインスタンス
-	//! @note		このメソッドはすべてのメソッドを「フラットな」アクセスが可能
-	//!				なように再構成してtRisseSSAFlatNamespaceのインスタンスを作成し
-	//!				返す
-	tRisseSSAFlatNamespace * CreateFlatNamespace() const;
+	//! @brief		子名前空間から呼ばれ、変数に読み込み/書き込みのためのアクセスをする
+	//! @param		name		変数名
+	//! @param		access		読み(偽)か書き(真)か
+	//! @param		should_pin	見つかった変数を「ピン」すべきかどうか
+	//! @param		child		子名前空間
+	//! @param		ret_n_name	見つかった番号付き変数名を格納する先 (NULL = いらない)
+	//! @return		変数が見つかったかどうか
+	bool AccessFromChild(const tRisseString & name, bool access,
+		bool should_pin, tRisseSSALocalNamespace * child,
+		tRisseString * ret_n_name = NULL);
+
+	//! @brief		AccessMap を作成する (すでに存在する場合でも新規に作成する)
+	//! @return		新しく作成した AcecssMap
+	tRisseSSAVariableAccessMap * CreateAccessMap();
+
+	//! @brief		AccessMap を取得する @return AcecssMap
+	tRisseSSAVariableAccessMap * GetAccessMap() const { return AccessMap; }
 };
 //---------------------------------------------------------------------------
 
@@ -460,6 +466,9 @@ public:
 	//! @note		このメソッドは、削除される変数の DeleteUsed(this) を呼び出す
 	void DeleteUsed(risse_size index);
 
+	//! @brief		この文の使用変数リストをすべて解放する
+	void DeleteUsed();
+
 	//! @brief		この文で使用されている変数のリストを得る
 	const gc_vector<tRisseSSAVariable *> & GetUsed() const { return Used; }
 
@@ -592,6 +601,11 @@ public:
 	//! @param		stmt		削除する文
 	void DeleteStatement(tRisseSSAStatement * stmt);
 
+	//! @brief		文を置き換える
+	//! @param		old_stmt		置き換えられる古い文
+	//! @param		new_stmt		新しくそこに配置される文
+	void ReplaceStatement(tRisseSSAStatement * old_stmt, tRisseSSAStatement * new_stmt);
+
 	//! @brief		ブロックをまたがってφ関数を追加する
 	//! @param		pos			スクリプト上の位置
 	//! @param		name		変数名(オリジナルの名前)
@@ -684,6 +698,9 @@ public:
 	//! @param		blocks		基本ブロックのリストの格納先
 	void Traverse(gc_vector<tRisseSSABlock *> & blocks) const;
 
+	//! @brief		ピンの刺さった変数へのアクセスを別形式の文に変換
+	void ConvertPinnedVariableAccess();
+
 	//! @brief		LiveIn と LiveOut を作成する
 	void CreateLiveInAndLiveOut();
 
@@ -708,13 +725,13 @@ public:
 //---------------------------------------------------------------------------
 //! @brief	ラベルマップを表すクラス
 //---------------------------------------------------------------------------
-class tRisseSSALabelMap
+class tRisseSSALabelMap : public tRisseCollectee
 {
 	// TODO: 親コンテキストのラベルマップの継承
 	tRisseSSAForm * Form; //!< このラベルマップを保持する SSA 形式インスタンス
 
 	//! @brief		バインドがまだされていないラベルへのジャンプ
-	struct tPendingLabelJump
+	struct tPendingLabelJump : public tRisseCollectee
 	{
 		tRisseSSABlock * Block; //!< そのジャンプを含む基本ブロック
 		risse_size Position; //!< ジャンプのあるスクリプト上の位置
@@ -850,6 +867,9 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseCompiler * Compiler; //!< この SSA 形式が含まれるコンパイラインスタンス
 	tRisseSSAForm * Parent; //!< この SSA 形式インスタンスの親インスタンス
 	gc_vector<tRisseSSAForm *> Children; //!< この SSA形式インスタンスの子インスタンスの配列
+	typedef gc_map<tRisseString, tRisseSSAVariable *> tPinnedVariableMap;
+		//!< 「ピン」されている変数のマップのtypedef (tPinnedVariableMap::value_type::second は常に null)
+	tPinnedVariableMap PinnedVariableMap; //!< 「ピン」されている変数のマップ
 	tRisseASTNode * Root; //!< このコードジェネレータが生成すべきコードのASTルートノード
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
@@ -1004,25 +1024,40 @@ public:
 		return ret_var;
 	}
 
+	//! @param		変数を「ピン」する
+	//! @param		name		変数名(番号付き)
+	void PinVariable(const tRisseString & name);
+
+	//! @param		変数が「ピン」されているかを得る
+	//! @param		name		変数名(番号付き)
+	//! @return		ピンされているかどうか
+	bool GetPinned(const tRisseString & name);
 
 protected:
 	//! @brief	CreateLazyBlock で返される情報の構造体
-	struct tLazyBlockParam
+	struct tLazyBlockParam : public tRisseCollectee
 	{
-		tRisseSSAFlatNamespace * Chain; //!< スコープチェーン
+		tRisseSSAForm * NewForm; //!< 新しいSSA形式インスタンス(遅延評価ブロックを表す)
 		risse_size Position; //!< スクリプト上の位置
 		tRisseSSAVariable *BlockVariable; //!< 遅延評価ブロックを表す変数
+		tRisseSSAVariableAccessMap * AccessMap;
 	};
 public:
 	//! @brief		新しい遅延評価ブロックを作成する
 	//! @param		node		遅延評価ブロックのルートノード
+	//! @param		pinvars		遅延評価ブロックからブロック外の変数を参照された場合に
+	//!							その参照された変数をスタックフレームに固定(pin)するかどうか。
+	//!							変数を固定することにより、遅延評価ブロックを、そのブロックが定義
+	//!							された位置以外から呼び出しても安全に変数にアクセスできるように
+	//!							なる ( function 内 function でレキシカルクロージャを使用するとき
+	//!							などに有効 )
 	//! @param		block_var	その遅延評価ブロックを表すSSA変数を格納する先
 	//! @return		CleanupLazyBlock() に渡すべき情報
 	//! @note		このメソッドは遅延評価ブロックを作成してその遅延評価ブロックを
 	//!				表す変数を返す。この変数はメソッドオブジェクトなので、呼び出して
 	//!				使う。使い終わったら CreateLazyBlock() メソッドの戻り値を
 	//!				CleanupLazyBlock() メソッドに渡して呼び出すこと。
-	void * CreateLazyBlock(tRisseASTNode * node, tRisseSSAVariable *& block_var);
+	void * CreateLazyBlock(tRisseASTNode * node, bool pinvars, tRisseSSAVariable *& block_var);
 
 	//! @brief		遅延評価ブロックのクリーンアップ処理を行う
 	//! @param		param	CreateLazyBlock() の戻り値
@@ -1047,6 +1082,9 @@ public:
 public:
 	//! @brief		到達しない基本ブロックを削除する
 	void LeapDeadBlocks();
+
+	//! @brief		ピンの刺さった変数へのアクセスを別形式の文に変換
+	void ConvertPinnedVariableAccess();
 
 	//! @brief		変数の生存区間を解析する(すべての変数に対して)
 	void AnalyzeVariableLiveness();

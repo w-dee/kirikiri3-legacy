@@ -25,44 +25,29 @@ RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 
 
 //---------------------------------------------------------------------------
-bool tRisseSSAFlatNamespace::Find(const tRisseString & name) const
-{
-	return Map.find(name) != Map.end();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tRisseSSAFlatNamespace::FindAndSetUsed(const tRisseString & name, bool write)
+void tRisseSSAVariableAccessMap::SetUsed(const tRisseString & name, bool write)
 {
 	tMap::iterator i = Map.find(name);
-	if(i != Map.end())
-	{
-		if(write)
-			i->second.Write = true;
-		else
-			i->second.Read = true;
-		return true;
-	}
-	return false;
+	if(i == Map.end()) i = Map.insert(tMap::value_type(name, tInfo())).first;
+
+	if(write)
+		i->second.Write = true;
+	else
+		i->second.Read = true;
+
+wxFprintf(stderr, wxT("inserting %s into %p (read:%d, write:%d)\n"), name.AsWxString().c_str(),
+		this, (int)!write, (int)write);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAFlatNamespace::Add(const tRisseString & name)
-{
-	Map.insert(tMap::value_type(name, tInfo())); // 新規に挿入
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseSSAFlatNamespace::GenerateChildRead(tRisseSSAForm * form, risse_size pos,
+void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_size pos,
 		tRisseSSAVariable* block_var)
 {
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
+wxFprintf(stderr, wxT("inspecting read on %p, for %s\n"), this, i->first.AsWxString().c_str());
 		if(i->second.Read)
 		{
 			// 読み込みが発生している
@@ -76,9 +61,10 @@ void tRisseSSAFlatNamespace::GenerateChildRead(tRisseSSAForm * form, risse_size 
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAFlatNamespace::GenerateChildWrite(tRisseSSAForm * form, risse_size pos,
+void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_size pos,
 		tRisseSSAVariable* block_var)
 {
+wxFprintf(stderr, wxT("generating write on %p\n"), this);
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
 		if(i->second.Write)
@@ -113,7 +99,8 @@ void tRisseSSAFlatNamespace::GenerateChildWrite(tRisseSSAForm * form, risse_size
 tRisseSSALocalNamespace::tRisseSSALocalNamespace()
 {
 	Block = NULL;
-	Chained = NULL;
+	AccessMap = NULL;
+	Parent = NULL;
 	Push(); // 最初の名前空間を push しておく
 }
 //---------------------------------------------------------------------------
@@ -123,7 +110,8 @@ tRisseSSALocalNamespace::tRisseSSALocalNamespace()
 tRisseSSALocalNamespace::tRisseSSALocalNamespace(const tRisseSSALocalNamespace &ref)
 {
 	Block = ref.Block;
-	Chained = ref.Chained;
+	AccessMap = ref.AccessMap;
+	Parent = ref.Parent;
 	Scopes.reserve(ref.Scopes.size());
 	for(tScopes::const_iterator i = ref.Scopes.begin();
 		i != ref.Scopes.end(); i++)
@@ -233,7 +221,7 @@ bool tRisseSSALocalNamespace::IsAvailable(const tRisseString & name) const
 	if(Find(name)) return true;
 
 	//「チェーンされた」名前空間も探す
-	if(Chained) return Chained->Find(name);
+	if(Parent) return Parent->Find(name);
 
 	// 見つからなかった
 	return false;
@@ -314,24 +302,34 @@ tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
 	{
 		// 文の作成
 		tRisseSSAVariable * ret_var = NULL;
-		tRisseSSAStatement *stmt = form->AddStatement(pos, ocRead, &ret_var, ret);
+		tRisseSSAStatement *stmt = form->AddStatement(pos, ocReadVar, &ret_var, ret);
 		stmt->SetName(ret->GetNumberedName());
 		ret = ret_var;
+		return ret;
 	}
 	else
-	if(!ret && Chained)
 	{
-		// チェーンされた名前空間を探す
-		bool found = Chained->FindAndSetUsed(name, false);
-		if(found)
+		// 見つからないので親名前空間を見る
+		if(Parent)
 		{
-			// 見つかった
-			// チェーンされた名前空間から読み込むための文を生成
-			tRisseSSAStatement *stmt = form->AddStatement(pos, ocParentRead, &ret);
-			stmt->SetName(name);
+			// AccessMap が NULL の場合は親名前空間内でpinする
+			tRisseString n_name;
+			if(Parent->AccessFromChild(name, false, AccessMap == NULL, this, &n_name))
+			{
+				// この時点でn_name は番号付きの名前になっている
+				// 共有変数領域からの読み込み文または
+				// 親名前空間からの読み込み文を生成する
+				tRisseSSAVariable * ret_var = NULL;
+				tRisseSSAStatement *stmt = form->AddStatement(pos,
+								AccessMap == NULL ? ocRead : ocParentRead, &ret_var);
+				stmt->SetName(AccessMap == NULL ? n_name : name);
+				ret = ret_var;
+				return ret;
+			}
 		}
+
+		return NULL;
 	}
-	return ret;
 }
 //---------------------------------------------------------------------------
 
@@ -358,7 +356,7 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 
 			// 文の作成
 			tRisseSSAVariable * ret_var = NULL;
-			tRisseSSAStatement *stmt = form->AddStatement(pos, ocWrite, &ret_var, value);
+			tRisseSSAStatement *stmt = form->AddStatement(pos, ocWriteVar, &ret_var, value);
 			stmt->SetName(n_name);
 
 			// 変数の上書き
@@ -372,18 +370,21 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 		}
 	}
 
-	// 見つからない
-	// チェーンされた名前空間に書き込む
-	if(Chained)
+	// 見つからないので親名前空間を見る
+	// AccessMap が NULL の場合は親名前空間内でpinする
+	if(Parent)
 	{
-		bool found = Chained->FindAndSetUsed(name, true);
-		if(found)
+		tRisseString n_name;
+		if(Parent->AccessFromChild(name, true, AccessMap == NULL, this, &n_name))
 		{
-			// 見つかった
-			// チェーンされた名前空間に書き込むための文を生成
-			tRisseSSAStatement *stmt = form->AddStatement(pos, ocParentWrite, NULL, value);
-			stmt->SetName(name);
-			return true; // 戻る
+			// 親名前空間で見つかった
+			// この時点でn_name は番号付きの名前になっている
+			// 共有変数領域への書き込み文または
+			// 親名前空間への書き込み文を生成する
+			tRisseSSAStatement *stmt = form->AddStatement(pos,
+							AccessMap == NULL ? ocWrite : ocParentWrite, NULL, value);
+			stmt->SetName(AccessMap == NULL ? n_name : name);
+			return true;
 		}
 	}
 
@@ -393,34 +394,44 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 
 
 //---------------------------------------------------------------------------
-tRisseSSAFlatNamespace * tRisseSSALocalNamespace::CreateFlatNamespace() const
+bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
+	bool access, bool should_pin, tRisseSSALocalNamespace * child, 
+	tRisseString * ret_n_name)
 {
-	tRisseSSAFlatNamespace * ns;
-
-	if(Chained)
+	tRisseString n_name;
+	if(Find(name, false, &n_name))
 	{
-		// もしチェーンされた名前空間があればそれをコピーする
-		ns = new tRisseSSAFlatNamespace(*Chained);
+		// 変数が見つかった
+		if(ret_n_name) *ret_n_name = n_name;
+		if(should_pin) Block->GetForm()->PinVariable(n_name);
+
+		// 子のAccessMap に記録 (AccessMap に記録するのは「番号なし」の名前
+		if(child->AccessMap) child->AccessMap->SetUsed(name, access);
+
+		return true;
 	}
 	else
 	{
-		// チェーンされた名前空間がないので新規に作成
-		ns = new tRisseSSAFlatNamespace();
-	}
+		// 変数が見つからなかった
+		if(!Parent) return false; // 親名前空間がない
 
-	// 名前空間を順にイテレーションして ns に追加
-	for(tScopes::const_iterator si = Scopes.begin(); si != Scopes.end(); si++)
-	{
-		for(tAliasMap::iterator i = (*si)->AliasMap.begin();
-				i != (*si)->AliasMap.end(); i++)
-			ns->Add(i->first);
-	}
+		// この名前空間で AccessMap がないということは親空間でピンしなければならないと言うこと
+		should_pin = should_pin || AccessMap == NULL;
 
-	return ns;
+		// 親名前空間内で探す
+		return Parent->AccessFromChild(name, access, should_pin, this, ret_n_name);
+	}
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tRisseSSAVariableAccessMap * tRisseSSALocalNamespace::CreateAccessMap()
+{
+	AccessMap = new tRisseSSAVariableAccessMap();
+	return AccessMap;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -616,10 +627,24 @@ void tRisseSSAStatement::AddUsed(tRisseSSAVariable * var)
 //---------------------------------------------------------------------------
 void tRisseSSAStatement::DeleteUsed(risse_size index)
 {
-	RISSE_ASSERT(Used.size() > 0); // いまのところは。
+	RISSE_ASSERT(Used.size() > index);
 	tRisseSSAVariable * var = Used[index];
 	Used.erase(Used.begin() + index);
 	var->DeleteUsed(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::DeleteUsed()
+{
+	risse_size i = Used.size();
+	while(i > 0)
+	{
+		i--;
+
+		DeleteUsed(i);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -657,6 +682,7 @@ void tRisseSSAStatement::SetName(const tRisseString & name)
 	RISSE_ASSERT(
 			Code == ocParentRead || Code == ocParentWrite ||
 			Code == ocChildRead || Code == ocChildWrite ||
+			Code == ocReadVar || Code == ocWriteVar ||
 			Code == ocRead || Code == ocWrite ||
 			Code == ocDefineLazyBlock);
 	Name = new tRisseString(name);
@@ -670,6 +696,7 @@ const tRisseString & tRisseSSAStatement::GetName() const
 	RISSE_ASSERT(
 			Code == ocParentRead || Code == ocParentWrite ||
 			Code == ocChildRead || Code == ocChildWrite ||
+			Code == ocReadVar || Code == ocWriteVar ||
 			Code == ocRead || Code == ocWrite ||
 			Code == ocDefineLazyBlock);
 	RISSE_ASSERT(Name != NULL);
@@ -975,6 +1002,34 @@ tRisseString tRisseSSAStatement::Dump() const
 			return ret;
 		}
 
+	case ocWrite: // 共有変数領域への書き込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Used.size() == 1);
+			return Used[0]->Dump() + RISSE_WS(".Write(") +
+					Name->AsHumanReadable() +
+					RISSE_WS(")");
+		}
+
+	case ocRead: // 共有変数領域からの読み込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Declared != NULL);
+			RISSE_ASSERT(Used.size() == 0);
+
+			tRisseString ret;
+			ret += Declared->Dump() + RISSE_WS(" = ");
+			ret += RISSE_WS("Read(");
+			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
 	default:
 		{
 			tRisseString ret;
@@ -983,16 +1038,16 @@ tRisseString tRisseSSAStatement::Dump() const
 			if(Declared)
 				ret += Declared->Dump() + RISSE_WS(" = "); // この文で宣言された変数がある
 
-			if(Code == ocAssign || Code == ocRead || Code == ocWrite)
+			if(Code == ocAssign || Code == ocReadVar || Code == ocWriteVar)
 			{
 				// 単純代入/共有変数の読み書き
 				RISSE_ASSERT(Used.size() == 1);
 				ret += (*Used.begin())->Dump();
 
-				if(Code == ocRead)
+				if(Code == ocReadVar)
 					ret += RISSE_WS(" (read from ") + Name->AsHumanReadable()
 						+ RISSE_WS(")");
-				else if(Code == ocWrite)
+				else if(Code == ocWriteVar)
 					ret += RISSE_WS(" (write to ") + Name->AsHumanReadable()
 						+ RISSE_WS(")");
 			}
@@ -1148,6 +1203,24 @@ void tRisseSSABlock::DeleteStatement(tRisseSSAStatement * stmt)
 	if(stmt_pred == NULL) FirstStatement = stmt_succ;
 	if(stmt_succ) stmt_succ->SetPred(stmt_pred);
 	if(stmt_succ == NULL) LastStatement = stmt_pred;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::ReplaceStatement(tRisseSSAStatement * old_stmt,
+	tRisseSSAStatement * new_stmt)
+{
+	RISSE_ASSERT(old_stmt->GetBlock() == this);
+	if(FirstStatement == old_stmt) FirstStatement = new_stmt;
+	if(LastStatement == old_stmt) LastStatement = new_stmt;
+	tRisseSSAStatement * pred = old_stmt->GetPred();
+	tRisseSSAStatement * succ = old_stmt->GetSucc();
+	new_stmt->SetPred(pred);
+	new_stmt->SetSucc(succ);
+	if(pred) pred->SetSucc(new_stmt);
+	if(succ) succ->SetPred(new_stmt);
+	new_stmt->SetBlock(this);
 }
 //---------------------------------------------------------------------------
 
@@ -1400,6 +1473,68 @@ void tRisseSSABlock::Traverse(gc_vector<tRisseSSABlock *> & blocks) const
 
 
 //---------------------------------------------------------------------------
+void tRisseSSABlock::ConvertPinnedVariableAccess()
+{
+	// すべての文について
+	tRisseSSAStatement *stmt;
+	for(stmt = FirstStatement;
+		stmt;
+		stmt = stmt->GetSucc())
+	{
+		// ocReadVar と ocWriteVar を探し、ピンされていなければ普通の
+		// ocAssign に、ピンされていれば ocRead と ocWrite にそれぞれ変換する
+		tRisseOpCode code = stmt->GetCode();
+		if(code == ocReadVar)
+		{
+			if(Form->GetPinned(stmt->GetName()))
+			{
+				tRisseSSAStatement *new_stmt = new
+					tRisseSSAStatement(Form, stmt->GetPosition(), ocRead);
+				new_stmt->SetName(stmt->GetName());
+				new_stmt->SetDeclared(stmt->GetDeclared());
+				// stmt は消えるため、stmt の Used をすべて解放しなければならない
+				stmt->DeleteUsed();
+				// 文を置き換える
+				ReplaceStatement(stmt, new_stmt);
+			}
+			else
+			{
+				// ocAssign に置き換える
+				stmt->SetCode(ocAssign);
+			}
+		}
+		else if(code == ocWriteVar)
+		{
+			if(Form->GetPinned(stmt->GetName()))
+			{
+				tRisseSSAStatement *new_stmt = new
+					tRisseSSAStatement(Form, stmt->GetPosition(), ocWrite);
+				new_stmt->SetName(stmt->GetName());
+				new_stmt->AddUsed(stmt->GetUsed()[0]);
+				// stmt は消えるため、stmt の Used をすべて解放しなければならない
+				stmt->DeleteUsed();
+				// stmt->Declared で宣言された変数は以降使われることはないはず
+				// だが一応クリアしておく
+				stmt->SetDeclared(NULL);
+				// 文を置き換える
+				ReplaceStatement(stmt, new_stmt);
+			}
+			else
+			{
+				// ocAssign に置き換える
+				stmt->SetCode(ocAssign);
+			}
+		}
+
+		// この時点でnew_stmt と stmt の Succ は同じはずなので
+		// stmt が new_stmt に取って代わられても このループの
+		// イテレーション (stmt->GetSucc()) は正常に働くはず
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSABlock::CreateLiveInAndLiveOut()
 {
 	// Pred と Succ の間に LiveIn と LiveOut を作成する
@@ -1474,7 +1609,6 @@ void tRisseSSABlock::RemovePhiStatements()
 
 		// stmt で宣言された変数
 		tRisseSSAVariable * stmt_decld = stmt->GetDeclared();
-
 
 		// pred をたどる
 		bool var_used = false;
@@ -1763,6 +1897,9 @@ void tRisseSSAForm::Generate()
 	// 到達しない基本ブロックからのパスを削除
 	LeapDeadBlocks();
 
+	// ピンの刺さった変数へのアクセスを別形式の文に変換
+	ConvertPinnedVariableAccess();
+
 	// 変数の有効範囲を解析
 	AnalyzeVariableLiveness();
 /*
@@ -1858,24 +1995,47 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 
 
 //---------------------------------------------------------------------------
-void * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node, tRisseSSAVariable *& block_var)
+void tRisseSSAForm::PinVariable(const tRisseString & name)
+{
+	PinnedVariableMap.insert(tPinnedVariableMap::value_type(name, NULL));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseSSAForm::GetPinned(const tRisseString & name)
+{
+	return PinnedVariableMap.find(name) != PinnedVariableMap.end();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node, bool pinvars,
+											tRisseSSAVariable *& block_var)
 {
 	// 遅延評価ブロックの名称を決める
 	tRisseString block_name = RISSE_WS("lazy block ") + tRisseString::AsString(GetUniqueNumber());
 
-	// 遅延評価ブロックを生成して内容をコンパイルする
+	// 遅延評価ブロックを生成
 	tRisseSSAForm *newform =
 		new tRisseSSAForm(Compiler, node, block_name);
 	newform->SetParent(this);
 	Children.push_back(newform);
 
-	// ローカル名前空間の「チェーン」につなぐ
-	tRisseSSAFlatNamespace * chain = LocalNamespace->CreateFlatNamespace();
-	newform->LocalNamespace->SetChained(chain);
+	// ローカル名前空間の親子関係を設定
+	newform->LocalNamespace->SetParent(LocalNamespace);
+
+	tRisseSSAVariableAccessMap * access_map = NULL;
+	if(!pinvars)
+	{
+		// 変数を固定しない場合はAccessMapをnewformの名前空間に作成する
+		// (AccessMapはどの変数にアクセスがあったかを記録する)
+		access_map = newform->LocalNamespace->CreateAccessMap();
+	}
 
 	// 内容を生成
 	newform->Generate();
-
 
 	// 遅延評価ブロックを生成する文を追加する
 	tRisseSSAStatement * lazy_stmt =
@@ -1884,13 +2044,14 @@ void * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node, tRisseSSAVariable *&
 	lazy_stmt->SetDefinedForm(newform);
 
 	// 遅延評価ブロックで読み込みが起こった変数を処理する
-	chain->GenerateChildRead(this, node->GetPosition(), block_var);
+	if(access_map) access_map->GenerateChildRead(this, node->GetPosition(), block_var);
 
 	// 情報を返す
 	tLazyBlockParam * param = new tLazyBlockParam();
-	param->Chain = chain;
+	param->NewForm = newform;
 	param->Position = node->GetPosition();
 	param->BlockVariable = block_var;
+	param->AccessMap = access_map;
 	return reinterpret_cast<void *>(param);
 }
 //---------------------------------------------------------------------------
@@ -1903,7 +2064,10 @@ void tRisseSSAForm::CleanupLazyBlock(void * param)
 	tLazyBlockParam * info_param = reinterpret_cast<tLazyBlockParam *>(param);
 
 	// 遅延評価ブロックで書き込みが起こった変数を処理する
-	info_param->Chain->GenerateChildWrite(this, info_param->Position, info_param->BlockVariable);
+	tRisseSSAVariableAccessMap * access_map = info_param->AccessMap;
+	if(access_map)
+		access_map->GenerateChildWrite(
+			this, info_param->Position, info_param->BlockVariable);
 }
 //---------------------------------------------------------------------------
 
@@ -1946,9 +2110,23 @@ void tRisseSSAForm::LeapDeadBlocks()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AnalyzeVariableLiveness()
+void tRisseSSAForm::ConvertPinnedVariableAccess()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得る
+	gc_vector<tRisseSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// すべてのブロックに対して処理を行う
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->ConvertPinnedVariableAccess();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AnalyzeVariableLiveness()
+{
+	// EntryBlock から到達可能なすべての基本ブロックを得て、マークをクリアする
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)

@@ -1118,11 +1118,11 @@ class tRisseCodeGenerator : public tRisseCollectee
 	gc_vector<risse_size> RegFreeMap; // 空きレジスタの配列
 	risse_size NumUsedRegs; // 使用中のレジスタの数
 	risse_size MaxNumUsedRegs; // 使用中のレジスタの最大数
-	typedef gc_map<tRisseString, risse_size> tRegNameMap;
-		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
+	typedef gc_map<tRisseString, risse_size> tPinnedRegNameMap;
+		//!< pinされた変数の変数名とそれに対応するレジスタ番号のマップのtypedef
 	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
-	tRegNameMap RegNameMap; //!< 変数名とそれに対応するレジスタ番号のマップ
+	tPinnedRegNameMap PinnedRegNameMap; //!< pinされた変数の変数名とそれに対応するレジスタ番号のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	gc_vector<std::pair<const tRisseSSABlock *, risse_size> > PendingBlockJumps;
 			//!< 未解決のジャンプとその基本ブロックのリスト
@@ -1141,10 +1141,7 @@ public:
 	//! @brief	レジスタの基本値を得る @return レジスタの基本値
 	risse_size GetRegisterBase() const { return RegisterBase; }
 
-	//! @brief	レジスタの基本値を設定する @param base レジスタの基本値
-	void SetRegisterBase(risse_size base) { RegisterBase = base; }
-
-	//! @brief	レジスタの基本値を設定する(親コードジェネレータから値を得る
+	//! @brief	レジスタの基本値を設定する(親コードジェネレータから値を得る)
 	void SetRegisterBase();
 
 	//! @brief	コード配列を得る @return コード配列
@@ -1167,7 +1164,6 @@ public:
 	//! @note		アドレスとしては現在の命令書き込み位置が用いられる
 	void AddBlockMap(const tRisseSSABlock * block);
 
-protected:
 	//! @brief		未解決のジャンプとその基本ブロックを追加する
 	//! @param		block		基本ブロック
 	//! @note		アドレスとしては現在の命令書き込み位置が用いられる
@@ -1177,6 +1173,33 @@ protected:
 	//! @param		value		定数値
 	//! @return		その定数のインデックス
 	risse_size FindConst(const tRisseVariant & value);
+
+	//! @brief		レジスタのマップを変数で探す
+	//! @param		var			変数
+	//! @note		varがマップ内に見つからなかったときはレジスタを割り当て
+	//!				そのレジスタを返す
+	risse_size FindRegMap(const tRisseSSAVariable * var);
+
+	//! @brief		pinされたレジスタのマップを変数名で探す
+	//! @param		name			変数名
+	//! @note		nameがマップ内に見つからなかった場合は(デバッグモード時は)
+	//!				ASSERTに失敗となる
+	risse_size FindPinnedRegNameMap(const tRisseString & name);
+
+	//! @brief		pinされたレジスタのマップに変数名とレジスタを追加する
+	//! @param		name			変数名
+	//! @note		このメソッドは RegisterBase をインクリメントする。
+	//! 			すべてのpinされたレジスタを登録し終わってからFindRegMapを呼ぶこと。
+	//!				(pinされたレジスタのレジスタ番号は自動的に採番されるが、これは
+	//!				FindRegMapで追加されるレジスタ番号よりも低位に位置する必要があるため)
+	void AddPinnedRegNameMap(const tRisseString & name);
+
+	//! @brief		基本ブロックのLiveOutにないレジスタをすべて開放する
+	//! @param		block		基本ブロック
+	void FreeUnusedRegisters(const tRisseSSABlock *block);
+
+	//! @brief		コードを確定する(未解決のジャンプなどを解決する)
+	void FixCode();
 
 public:
 	//--------------------------------------------------------
@@ -1191,6 +1214,16 @@ public:
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数
 	void PutAssign(const tRisseSSAVariable * dest, const tRisseSSAVariable * src);
+
+	//! @brief		Assignコードを置く
+	//! @param		dest	変数コピー先変数
+	//! @param		src		変数コピー元変数
+	void PutAssign(const tRisseString & dest, const tRisseSSAVariable * src);
+
+	//! @brief		Assignコードを置く
+	//! @param		dest	変数コピー先変数
+	//! @param		src		変数コピー元変数
+	void PutAssign(const tRisseSSAVariable * dest, const tRisseString & src);
 
 	//! @brief		AssignConstantコードを置く
 	//! @param		dest	変数コピー先変数
@@ -1269,27 +1302,6 @@ public:
 	//! @param		value	格納する変数
 	void PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 		const tRisseSSAVariable * name, const tRisseSSAVariable * value);
-
-
-	//! @brief		レジスタのマップを変数で探す
-	//! @param		var			変数
-	risse_size FindRegMap(const tRisseSSAVariable * var);
-
-	//! @brief		レジスタのマップを変数名で探す
-	//! @param		name			変数名
-	risse_size FindRegNameMap(const tRisseString & name);
-
-	//! @brief		レジスタのマップに変数名とレジスタを追加する
-	//! @param		name			変数名
-	//! @param		reg				レジスタ
-	void AddRegNameMap(const tRisseString & name, risse_size reg);
-
-	//! @brief		基本ブロックのLiveOutにないレジスタをすべて開放する
-	//! @param		block		基本ブロック
-	void FreeUnusedRegisters(const tRisseSSABlock *block);
-
-	//! @brief		コードを確定する(未解決のジャンプなどを解決する)
-	void FixCode();
 };
 //---------------------------------------------------------------------------
 

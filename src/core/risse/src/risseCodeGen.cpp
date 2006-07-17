@@ -849,6 +849,19 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 */
 		break;
 
+	case ocWrite: // 共有変数領域への書き込み
+		RISSE_ASSERT(Name != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutAssign(*Name, Used[0]);
+		break;
+
+	case ocRead: // 共有変数領域からの読み込み
+		RISSE_ASSERT(Name != NULL);
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 0);
+		gen->PutAssign(Declared, *Name);
+		break;
+
 	default:
 		RISSE_ASSERT(!"not acceptable SSA operation code");
 		break;
@@ -1897,10 +1910,9 @@ void tRisseSSAForm::Generate()
 
 	// 変数の有効範囲を解析
 	AnalyzeVariableLiveness();
-/*
+
 	// φ関数を除去
 	RemovePhiStatements();
-*/
 }
 //---------------------------------------------------------------------------
 
@@ -2256,6 +2268,14 @@ void tRisseSSAForm::GenerateCode() const
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
+	// すべてのピンされている変数を登録する
+	CodeGenerator->SetRegisterBase();
+	for(tPinnedVariableMap::const_iterator i = PinnedVariableMap.begin();
+		i != PinnedVariableMap.end(); i++)
+	{
+		CodeGenerator->AddPinnedRegNameMap(i->first);
+	}
+
 	// すべての基本ブロックに対してコード生成を行わせる
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->GenerateCode(CodeGenerator);
@@ -2272,7 +2292,6 @@ void tRisseSSAForm::GenerateCode() const
 		i != Children.end(); i++)
 	{
 		RISSE_ASSERT((*i)->CodeGenerator != NULL);
-		(*i)->CodeGenerator->SetRegisterBase();
 		(*i)->GenerateCode();
 	}
 }
@@ -2350,6 +2369,113 @@ risse_size tRisseCodeGenerator::FindConst(const tRisseVariant & value)
 
 
 //---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
+{
+	// RegMap から指定された変数を探す
+	// 指定された変数が無ければ変数の空きマップからさがし、変数を割り当てる
+	tRegMap::iterator f = RegMap.find(var);
+	if(f != RegMap.end())
+	{
+		 // 変数が見つかった
+		 return RegisterBase + f->second;
+	}
+
+	// 変数がないので空きレジスタを探す
+	risse_size assigned_reg;
+	if(RegFreeMap.size() == 0)
+	{
+		// 空きレジスタがない
+		assigned_reg = NumUsedRegs; // 新しいレジスタを割り当てる
+	}
+	else
+	{
+		// 空きレジスタがある
+		assigned_reg = RegFreeMap.back();
+		RegFreeMap.pop_back();
+	}
+
+	NumUsedRegs ++;
+	if(MaxNumUsedRegs < NumUsedRegs) MaxNumUsedRegs = NumUsedRegs;
+
+	RegMap.insert(tRegMap::value_type(var, assigned_reg)); // RegMapに登録
+
+	return RegisterBase + assigned_reg;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::FindPinnedRegNameMap(const tRisseString & name)
+{
+	tPinnedRegNameMap::iterator f = PinnedRegNameMap.find(name);
+
+	RISSE_ASSERT(!(Parent == NULL && f == PinnedRegNameMap.end()));
+
+	if(f == PinnedRegNameMap.end())
+	{
+		// 自分にない場合、親を見る
+		if(Parent)
+			return Parent->FindPinnedRegNameMap(name);
+		RISSE_ASSERT(!"pinned variable not found in map");
+	}
+	return f->second;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::AddPinnedRegNameMap(const tRisseString & name)
+{
+	RISSE_ASSERT(PinnedRegNameMap.find(name) == PinnedRegNameMap.end()); // 二重挿入は許されない
+	PinnedRegNameMap.insert(tPinnedRegNameMap::value_type(name, RegisterBase++));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::FreeUnusedRegisters(const tRisseSSABlock *block)
+{
+	gc_vector<const tRisseSSAVariable *> free; // 開放すべき変数
+
+	// RegMap にある変数をすべて見る
+	for(tRegMap::iterator i = RegMap.begin(); i != RegMap.end(); i++)
+	{
+		if(!block->GetLiveness(i->first, true))
+		{
+			// RegMap にあって block の LiveOut にない
+			free.push_back(i->first);
+		}
+	}
+
+	// free にある変数をすべてRegMapから削除する
+	for(gc_vector<const tRisseSSAVariable *>::iterator i = free.begin(); i != free.end(); i++)
+	{
+		tRegMap::iterator f = RegMap.find(*i);
+		RISSE_ASSERT(f != RegMap.end());
+		RegFreeMap.push_back(f->second); // 変数を空き配列に追加
+		NumUsedRegs --;
+		RegMap.erase(f); // 削除
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::FixCode()
+{
+	// ジャンプアドレスのfixup
+	for(gc_vector<std::pair<const tRisseSSABlock *, risse_size> >::iterator i =
+		PendingBlockJumps.begin(); i != PendingBlockJumps.end(); i++)
+	{
+		tBlockMap::iterator b = BlockMap.find(i->first);
+		RISSE_ASSERT(b != BlockMap.end());
+		Code[i->second] = b->second;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutNoOperation()
 {
 	PutWord(ocNoOperation);
@@ -2363,6 +2489,26 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisse
 	PutWord(ocAssign);
 	PutWord(FindRegMap(dest));
 	PutWord(FindRegMap(src));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutAssign(const tRisseString & dest, const tRisseSSAVariable * src)
+{
+	PutWord(ocAssign);
+	PutWord(FindPinnedRegNameMap(dest));
+	PutWord(FindRegMap(src));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisseString & src)
+{
+	PutWord(ocAssign);
+	PutWord(FindRegMap(dest));
+	PutWord(FindPinnedRegNameMap(src));
 }
 //---------------------------------------------------------------------------
 
@@ -2550,111 +2696,6 @@ void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
-{
-	// RegMap から指定された変数を探す
-	// 指定された変数が無ければ変数の空きマップからさがし、変数を割り当てる
-	tRegMap::iterator f = RegMap.find(var);
-	if(f != RegMap.end())
-	{
-		 // 変数が見つかった
-		 return RegisterBase + f->second;
-	}
-
-	// 変数がないので空きレジスタを探す
-	risse_size assigned_reg;
-	if(RegFreeMap.size() == 0)
-	{
-		// 空きレジスタがない
-		assigned_reg = NumUsedRegs; // 新しいレジスタを割り当てる
-	}
-	else
-	{
-		// 空きレジスタがある
-		assigned_reg = RegFreeMap.back();
-		RegFreeMap.pop_back();
-	}
-
-	NumUsedRegs ++;
-	if(MaxNumUsedRegs < NumUsedRegs) MaxNumUsedRegs = NumUsedRegs;
-
-	RegMap.insert(tRegMap::value_type(var, assigned_reg)); // RegMapに登録
-
-	return RegisterBase + assigned_reg;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindRegNameMap(const tRisseString & name)
-{
-	tRegNameMap::iterator f = RegNameMap.find(name);
-
-	RISSE_ASSERT(!(Parent == NULL && f == RegNameMap.end()));
-
-	if(f == RegNameMap.end() && Parent != NULL)
-	{
-		// 自分にない場合、親を見る
-		return Parent->FindRegNameMap(name);
-	}
-	return f->second;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddRegNameMap(const tRisseString & name, risse_size reg)
-{
-	RegNameMap.insert(tRegNameMap::value_type(name, reg));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseCodeGenerator::FreeUnusedRegisters(const tRisseSSABlock *block)
-{
-	gc_vector<const tRisseSSAVariable *> free; // 開放すべき変数
-
-	// RegMap にある変数をすべて見る
-	for(tRegMap::iterator i = RegMap.begin(); i != RegMap.end(); i++)
-	{
-		if(!block->GetLiveness(i->first, true))
-		{
-			// RegMap にあって block の LiveOut にない
-			free.push_back(i->first);
-		}
-	}
-
-	// free にある変数をすべてRegMapから削除する
-	for(gc_vector<const tRisseSSAVariable *>::iterator i = free.begin(); i != free.end(); i++)
-	{
-		tRegMap::iterator f = RegMap.find(*i);
-		RISSE_ASSERT(f != RegMap.end());
-		RegFreeMap.push_back(f->second); // 変数を空き配列に追加
-		NumUsedRegs --;
-		RegMap.erase(f); // 削除
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseCodeGenerator::FixCode()
-{
-	// ジャンプアドレスのfixup
-	for(gc_vector<std::pair<const tRisseSSABlock *, risse_size> >::iterator i =
-		PendingBlockJumps.begin(); i != PendingBlockJumps.end(); i++)
-	{
-		tBlockMap::iterator b = BlockMap.find(i->first);
-		RISSE_ASSERT(b != BlockMap.end());
-		Code[i->second] = b->second;
-	}
-}
-//---------------------------------------------------------------------------
-
-
-
 
 
 
@@ -2685,9 +2726,11 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 		str = (*i)->Dump();
 		RisseFPrint(stdout, str.c_str());
 	}
-/*
+
 	// VMコードの生成
-	SSAForms.front()->EnsureCodeGenerator();
+	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+		i != SSAForms.end(); i++)
+		(*i)->EnsureCodeGenerator();
 	SSAForms.front()->GenerateCode();
 
 	// VMコードのダンプ
@@ -2700,7 +2743,6 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 		str = cb->Dump();
 		RisseFPrint(stdout, str.c_str());
 	}
-*/
 }
 //---------------------------------------------------------------------------
 

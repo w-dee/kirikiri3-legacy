@@ -234,6 +234,7 @@ RISSE_OC_ENUM_DEF()
 // SSA形式特有
 	RISSE_OC_ENUM_ITEM(Phi				,ERR	,P(0,0,0,0,0,0))//!< φ関数
 	RISSE_OC_ENUM_ITEM(DefineLazyBlock	,ERR	,P(0,0,0,0,0,0))//!< 遅延評価ブロックの定義
+	RISSE_OC_ENUM_ITEM(EndLazyBlock		,ERR	,P(0,0,0,0,0,0))//!< 遅延評価ブロックの使用終了
 	RISSE_OC_ENUM_ITEM(ParentWrite		,ERR	,P(0,0,0,0,0,0))//!< 親名前空間への書き込み
 	RISSE_OC_ENUM_ITEM(ParentRead		,ERR	,P(0,0,0,0,0,0))//!< 親名前空間からの読み込み
 	RISSE_OC_ENUM_ITEM(ChildWrite		,ERR	,P(0,0,0,0,0,0))//!< 子名前空間への書き込み

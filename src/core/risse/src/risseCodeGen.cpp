@@ -824,29 +824,90 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		break;
 
 	case ocDefineLazyBlock:
-/*
 		{
 			tRisseSSAForm * child_form = DefinedForm;
 			RISSE_ASSERT(child_form != NULL);
 			RISSE_ASSERT(Declared != NULL);
-			// Declared で使用している文のうち、ocChildWriteしてる物を探し、
-			// それに従って子SSA形式インスタンスのバイトコード
-			// ジェネレータにマップを作成する
+			// Declared で使用している文のうち、ocChildWrite/ocChildRead
+			// してる物を探し、そこで使用されている名前で gen の ParentVariableMap に
+			// マップを作成する
+			// (実際の変数へのアクセスは後の ocChildWrite や ocChildRead で処理する)
 			const gc_vector<tRisseSSAStatement *> & child_access_stmts =
-				Declared.GetUsed();
+				Declared->GetUsed();
 			for(gc_vector<tRisseSSAStatement *>::const_iterator i =
-				child_access_stmts.begin(); i != child_access_stmts().end(); i++)
+				child_access_stmts.begin(); i != child_access_stmts.end(); i++)
 			{
+				tRisseSSAStatement * stmt = *i;
 				switch((*i)->Code)
 				{
 				case ocChildWrite:
 				case ocChildRead:
-					
+					DefinedForm->GetCodeGenerator()->
+						FindParentVariableMap(*stmt->Name); // マップに変数名だけを追加する
+					break;
 				default: ;
 				}
 			}
 		}
-*/
+		break;
+
+	case ocChildWrite:
+		{
+			RISSE_ASSERT(Used.size() == 2);
+			RISSE_ASSERT(Name != NULL);
+			// Used[0] が define された文は ocDefineLazyBlock であるはずである
+			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
+			//       現状の実装は暫定的なもの。
+			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
+			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
+			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
+			gen->PutAssign(lazy_stmt->DefinedForm->GetCodeGenerator()->
+						FindParentVariableMap(*Name), Used[1]);
+		}
+		break;
+
+	case ocChildRead:
+		{
+			RISSE_ASSERT(Used.size() == 1);
+			RISSE_ASSERT(Name != NULL);
+			// Used[0] が define された文は ocDefineLazyBlock であるはずである
+			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
+			//       現状の実装は暫定的なもの。
+			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
+			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
+			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
+			gen->PutAssign(Declared, lazy_stmt->DefinedForm->GetCodeGenerator()->
+									FindParentVariableMap(*Name));
+		}
+		break;
+
+	case ocEndLazyBlock:
+		// 遅延評価ブロックの使用終了
+		// 暫定実装
+		{
+			RISSE_ASSERT(Used.size() == 1);
+			// 変数を開放する
+			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
+			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
+			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
+			lazy_stmt->DefinedForm->GetCodeGenerator()->FreeParentVariableMapVariables();
+		}
+		break;
+
+
+	case ocParentWrite:
+		// 暫定実装
+		RISSE_ASSERT(Used.size() == 1);
+		RISSE_ASSERT(Name != NULL);
+		gen->PutAssign(gen->FindParentVariableMap(*Name), Used[0]);
+		break;
+
+	case ocParentRead:
+		// 暫定実装
+		RISSE_ASSERT(Used.size() == 0);
+		RISSE_ASSERT(Name != NULL);
+		RISSE_ASSERT(Declared != NULL);
+		gen->PutAssign(Declared, gen->FindParentVariableMap(*Name));
 		break;
 
 	case ocWrite: // 共有変数領域への書き込み
@@ -2075,6 +2136,9 @@ void tRisseSSAForm::CleanupLazyBlock(void * param)
 	if(access_map)
 		access_map->GenerateChildWrite(
 			this, info_param->Position, info_param->BlockVariable);
+
+	// ocEndLazyBlock を追加する
+	AddStatement(info_param->Position, ocEndLazyBlock, NULL, info_param->BlockVariable);
 }
 //---------------------------------------------------------------------------
 
@@ -2377,15 +2441,27 @@ risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
 	if(f != RegMap.end())
 	{
 		 // 変数が見つかった
-		 return RegisterBase + f->second;
+		 return f->second;
 	}
 
-	// 変数がないので空きレジスタを探す
+	risse_size assigned_reg = AllocateRegister();
+
+	RegMap.insert(tRegMap::value_type(var, assigned_reg)); // RegMapに登録
+
+	return assigned_reg;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::AllocateRegister()
+{
+	// 空きレジスタを探す
 	risse_size assigned_reg;
 	if(RegFreeMap.size() == 0)
 	{
 		// 空きレジスタがない
-		assigned_reg = NumUsedRegs; // 新しいレジスタを割り当てる
+		assigned_reg = NumUsedRegs + RegisterBase; // 新しいレジスタを割り当てる
 	}
 	else
 	{
@@ -2395,39 +2471,18 @@ risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
 	}
 
 	NumUsedRegs ++;
-	if(MaxNumUsedRegs < NumUsedRegs) MaxNumUsedRegs = NumUsedRegs;
+	if(MaxNumUsedRegs < NumUsedRegs) MaxNumUsedRegs = NumUsedRegs; // 最大値を更新
 
-	RegMap.insert(tRegMap::value_type(var, assigned_reg)); // RegMapに登録
-
-	return RegisterBase + assigned_reg;
+	return assigned_reg;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindPinnedRegNameMap(const tRisseString & name)
+void tRisseCodeGenerator::FreeRegister(risse_size reg)
 {
-	tPinnedRegNameMap::iterator f = PinnedRegNameMap.find(name);
-
-	RISSE_ASSERT(!(Parent == NULL && f == PinnedRegNameMap.end()));
-
-	if(f == PinnedRegNameMap.end())
-	{
-		// 自分にない場合、親を見る
-		if(Parent)
-			return Parent->FindPinnedRegNameMap(name);
-		RISSE_ASSERT(!"pinned variable not found in map");
-	}
-	return f->second;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddPinnedRegNameMap(const tRisseString & name)
-{
-	RISSE_ASSERT(PinnedRegNameMap.find(name) == PinnedRegNameMap.end()); // 二重挿入は許されない
-	PinnedRegNameMap.insert(tPinnedRegNameMap::value_type(name, RegisterBase++));
+	RegFreeMap.push_back(reg); // 変数を空き配列に追加
+	NumUsedRegs --;
 }
 //---------------------------------------------------------------------------
 
@@ -2452,10 +2507,70 @@ void tRisseCodeGenerator::FreeUnusedRegisters(const tRisseSSABlock *block)
 	{
 		tRegMap::iterator f = RegMap.find(*i);
 		RISSE_ASSERT(f != RegMap.end());
-		RegFreeMap.push_back(f->second); // 変数を空き配列に追加
-		NumUsedRegs --;
+		FreeRegister(f->second); // 変数を開放
 		RegMap.erase(f); // 削除
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::FindPinnedRegNameMap(const tRisseString & name)
+{
+	tNamedRegMap::iterator f = PinnedRegNameMap.find(name);
+
+	RISSE_ASSERT(!(Parent == NULL && f == PinnedRegNameMap.end()));
+
+	if(f == PinnedRegNameMap.end())
+	{
+		// 自分にない場合、親を見る
+		if(Parent)
+			return Parent->FindPinnedRegNameMap(name);
+		RISSE_ASSERT(!"pinned variable not found in map");
+	}
+	return f->second;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::AddPinnedRegNameMap(const tRisseString & name)
+{
+	RISSE_ASSERT(PinnedRegNameMap.find(name) == PinnedRegNameMap.end()); // 二重挿入は許されない
+	PinnedRegNameMap.insert(tNamedRegMap::value_type(name, RegisterBase++));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::FindParentVariableMap(const tRisseString & name)
+{
+	RISSE_ASSERT(Parent != NULL);
+	// ParentVariableMap から指定された変数を探す
+	// 指定された変数が無ければ変数の空きマップからさがし、変数を割り当てる
+	tNamedRegMap::iterator f = ParentVariableMap.find(name);
+	if(f != ParentVariableMap.end())
+	{
+		 // 変数が見つかった
+		 return f->second;
+	}
+
+	// 変数がないので「親から」レジスタを割り当てる
+	risse_size assigned_reg = Parent->AllocateRegister();
+	ParentVariableMap.insert(tNamedRegMap::value_type(name, assigned_reg));
+
+	return assigned_reg;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::FreeParentVariableMapVariables()
+{
+	RISSE_ASSERT(Parent != NULL);
+	// ParentVariableMapにある変数を「親から」すべて開放する
+	for(tNamedRegMap::iterator i = ParentVariableMap.begin(); i != ParentVariableMap.end(); i++)
+		Parent->FreeRegister(i->second);
 }
 //---------------------------------------------------------------------------
 
@@ -2509,6 +2624,26 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisse
 	PutWord(ocAssign);
 	PutWord(FindRegMap(dest));
 	PutWord(FindPinnedRegNameMap(src));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutAssign(risse_size dest, const tRisseSSAVariable * src)
+{
+	PutWord(ocAssign);
+	PutWord(dest);
+	PutWord(FindRegMap(src));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, risse_size src)
+{
+	PutWord(ocAssign);
+	PutWord(FindRegMap(dest));
+	PutWord(src);
 }
 //---------------------------------------------------------------------------
 

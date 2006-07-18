@@ -1118,11 +1118,12 @@ class tRisseCodeGenerator : public tRisseCollectee
 	gc_vector<risse_size> RegFreeMap; // 空きレジスタの配列
 	risse_size NumUsedRegs; // 使用中のレジスタの数
 	risse_size MaxNumUsedRegs; // 使用中のレジスタの最大数
-	typedef gc_map<tRisseString, risse_size> tPinnedRegNameMap;
-		//!< pinされた変数の変数名とそれに対応するレジスタ番号のマップのtypedef
+	typedef gc_map<tRisseString, risse_size> tNamedRegMap;
+		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
 	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
-	tPinnedRegNameMap PinnedRegNameMap; //!< pinされた変数の変数名とそれに対応するレジスタ番号のマップ
+	tNamedRegMap PinnedRegNameMap; //!< pinされた変数の変数名とそれに対応するレジスタ番号のマップ
+	tNamedRegMap ParentVariableMap; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	gc_vector<std::pair<const tRisseSSABlock *, risse_size> > PendingBlockJumps;
 			//!< 未解決のジャンプとその基本ブロックのリスト
@@ -1176,12 +1177,27 @@ public:
 
 	//! @brief		レジスタのマップを変数で探す
 	//! @param		var			変数
+	//! @return		そのレジスタのインデックス
 	//! @note		varがマップ内に見つからなかったときはレジスタを割り当て
-	//!				そのレジスタを返す
+	//!				そのレジスタのインデックスを返す
 	risse_size FindRegMap(const tRisseSSAVariable * var);
+
+	//! @brief		レジスタを一つ割り当てる
+	//! @return		割り当てられたレジスタ
+	//! @note		レジスタを割り当てたら FreeRegister で開放すること
+	risse_size AllocateRegister();
+
+	//! @brief		レジスタを一つ開放する
+	//! @param		reg		AllocateRegister() で割り当てたレジスタ
+	void FreeRegister(risse_size reg);
+
+	//! @brief		基本ブロックのLiveOutにないレジスタをすべて開放する
+	//! @param		block		基本ブロック
+	void FreeUnusedRegisters(const tRisseSSABlock *block);
 
 	//! @brief		pinされたレジスタのマップを変数名で探す
 	//! @param		name			変数名
+	//! @return		そのレジスタのインデックス
 	//! @note		nameがマップ内に見つからなかった場合は(デバッグモード時は)
 	//!				ASSERTに失敗となる
 	risse_size FindPinnedRegNameMap(const tRisseString & name);
@@ -1194,9 +1210,16 @@ public:
 	//!				FindRegMapで追加されるレジスタ番号よりも低位に位置する必要があるため)
 	void AddPinnedRegNameMap(const tRisseString & name);
 
-	//! @brief		基本ブロックのLiveOutにないレジスタをすべて開放する
-	//! @param		block		基本ブロック
-	void FreeUnusedRegisters(const tRisseSSABlock *block);
+	//! @brief		ParentVariableMap 内で変数を探す (親から子に対して呼ばれる)
+	//! @param		name		変数名
+	//! @return		そのレジスタのインデックス
+	//! @note		nameがマップ内に見つからなかったときは *親から* レジスタを割り当て
+	//!				そのレジスタのインデックスを返す
+	risse_size FindParentVariableMap(const tRisseString & name);
+
+	//! @brief		ParentVariableMap にある変数をすべて開放する
+	//! @note		変数は開放するが、マップそのものはクリアしない。
+	void FreeParentVariableMapVariables();
 
 	//! @brief		コードを確定する(未解決のジャンプなどを解決する)
 	void FixCode();
@@ -1224,6 +1247,16 @@ public:
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数
 	void PutAssign(const tRisseSSAVariable * dest, const tRisseString & src);
+
+	//! @brief		Assignコードを置く(このメソッドは削除の予定;使わないこと)
+	//! @param		dest	変数コピー先変数
+	//! @param		src		変数コピー元変数
+	void PutAssign(risse_size dest, const tRisseSSAVariable * src);
+
+	//! @brief		Assignコードを置く(このメソッドは削除の予定;使わないこと)
+	//! @param		dest	変数コピー先変数
+	//! @param		src		変数コピー元変数
+	void PutAssign(const tRisseSSAVariable * dest, risse_size src);
 
 	//! @brief		AssignConstantコードを置く
 	//! @param		dest	変数コピー先変数

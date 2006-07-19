@@ -85,8 +85,8 @@ protected:
 		double Value; //!< 値
 	};
 
-	//! @brief bool ストレージ型
-	struct tBool
+	//! @brief boolean ストレージ型
+	struct tBoolean
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 3 固定
 		bool Value; //!< 値
@@ -102,10 +102,10 @@ protected:
 	//! @brief Real型へのconst参照を取得 @return Real型フィールドへのconst参照
 	const double & AsReal() const { return reinterpret_cast<const tReal*>(Storage)->Value; }
 
-	//! @brief Bool型への参照を取得 @return Bool型フィールドへの参照
-	bool & AsBool() { return reinterpret_cast<tBool*>(Storage)->Value; }
-	//! @brief Bool型へのconst参照を取得 @return Bool型フィールドへのconst参照
-	const bool & AsBool() const { return reinterpret_cast<const tBool*>(Storage)->Value; }
+	//! @brief Boolean型への参照を取得 @return Boolean型フィールドへの参照
+	bool & AsBoolean() { return reinterpret_cast<tBoolean*>(Storage)->Value; }
+	//! @brief Boolean型へのconst参照を取得 @return Boolean型フィールドへのconst参照
+	const bool & AsBoolean() const { return reinterpret_cast<const tBoolean*>(Storage)->Value; }
 
 	//! @brief String型への参照を取得 @return String型フィールドへの参照
 	tRisseString & AsString() { return *reinterpret_cast<tRisseString*>(Storage); }
@@ -139,7 +139,7 @@ protected:
 			RV_SIZE_MAX(sizeof(tVoid),
 			RV_SIZE_MAX(sizeof(tInteger),
 			RV_SIZE_MAX(sizeof(tReal),
-			RV_SIZE_MAX(sizeof(tBool),
+			RV_SIZE_MAX(sizeof(tBoolean),
 			RV_SIZE_MAX(sizeof(tRisseString),
 			RV_SIZE_MAX(sizeof(tRisseObject),
 			RV_SIZE_MAX(sizeof(tRisseOctet),
@@ -154,7 +154,7 @@ public:
 		vtVoid			= 0,
 		vtInteger		= 1,
 		vtReal			= 2,
-		vtBool			= 3,
+		vtBoolean		= 3,
 		vtString		= 4 + 0,
 		vtObject		= 4 + 1,
 		vtOctet			= 4 + 2,
@@ -199,7 +199,7 @@ public: // コンストラクタ/代入演算子
 		case vtVoid:		Type = vtVoid;				break;
 		case vtInteger:		*this = ref.AsInteger();	break;
 		case vtReal:		*this = ref.AsReal();		break;
-		case vtBool:		*this = ref.AsBool();		break;
+		case vtBoolean:		*this = ref.AsBoolean();	break;
 		case vtString:		*this = ref.AsString();		break;
 		case vtObject:		*this = ref.AsObject();		break;
 		case vtOctet:		*this = ref.AsOctet();		break;
@@ -249,8 +249,8 @@ public: // コンストラクタ/代入演算子
 	//! @param		ref		元となる真偽値
 	tRisseVariantBlock & operator = (const bool ref)
 	{
-		Type = vtBool;
-		AsBool() = ref;
+		Type = vtBoolean;
+		AsBoolean() = ref;
 		return *this;
 	}
 
@@ -316,7 +316,7 @@ public: // 演算子
 		case vtVoid:	return uminus_Void     ();
 		case vtInteger:	return uminus_Integer  ();
 		case vtReal:	return uminus_Real     ();
-		case vtBool:	return uminus_Bool     ();
+		case vtBoolean:	return uminus_Boolean  ();
 		case vtString:	return uminus_String   ();
 		case vtObject:	return uminus_Object   ();
 		case vtOctet:	return uminus_Octet    ();
@@ -327,7 +327,7 @@ public: // 演算子
 	tRisseVariantBlock uminus_Void     () const { return risse_int64(0); }
 	tRisseVariantBlock uminus_Integer  () const { return -AsInteger(); }
 	tRisseVariantBlock uminus_Real     () const { return -AsReal(); }
-	tRisseVariantBlock uminus_Bool     () const { return (risse_int64)(AsBool()?-1:0); }
+	tRisseVariantBlock uminus_Boolean  () const { return (risse_int64)(AsBoolean()?-1:0); }
 	tRisseVariantBlock uminus_String   () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock uminus_Object   () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock uminus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
@@ -344,7 +344,7 @@ public: // 演算子
 		case vtVoid:	return disceq_Void     (rhs);
 		case vtInteger:	return disceq_Integer  (rhs);
 		case vtReal:	return disceq_Real     (rhs);
-		case vtBool:	return disceq_Bool     (rhs);
+		case vtBoolean:	return disceq_Boolean  (rhs);
 		case vtString:	return disceq_String   (rhs);
 		case vtObject:	return disceq_Object   (rhs);
 		case vtOctet:	return disceq_Octet    (rhs);
@@ -358,8 +358,8 @@ public: // 演算子
 			{ return rhs.GetType() == vtInteger && rhs.AsInteger() == AsInteger(); }
 	bool disceq_Real     (const tRisseVariantBlock & rhs) const
 			{ return rhs.GetType() == vtReal && rhs.AsReal() == AsReal(); }
-	bool disceq_Bool     (const tRisseVariantBlock & rhs) const
-			{ return rhs.GetType() == vtBool && rhs.AsBool() == AsBool(); }
+	bool disceq_Boolean  (const tRisseVariantBlock & rhs) const
+			{ return rhs.GetType() == vtBoolean && rhs.AsBoolean() == AsBoolean(); }
 	bool disceq_String   (const tRisseVariantBlock & rhs) const
 			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); /* incomplete */ }
 	bool disceq_Object   (const tRisseVariantBlock & rhs) const
@@ -380,7 +380,7 @@ public: // キャスト
 		case vtVoid:	return CastToString_Void     ();
 		case vtInteger:	return CastToString_Integer  ();
 		case vtReal:	return CastToString_Real     ();
-		case vtBool:	return CastToString_Bool     ();
+		case vtBoolean:	return CastToString_Boolean  ();
 		case vtString:	return CastToString_String   ();
 		case vtObject:	return CastToString_Object   ();
 		case vtOctet:	return CastToString_Octet    ();
@@ -391,7 +391,7 @@ public: // キャスト
 	tRisseString CastToString_Void     () const { return tRisseString(); }
 	tRisseString CastToString_Integer  () const;
 	tRisseString CastToString_Real     () const;
-	tRisseString CastToString_Bool     () const;
+	tRisseString CastToString_Boolean  () const;
 	tRisseString CastToString_String   () const { return AsString(); }
 	tRisseString CastToString_Object   () const { return tRisseString(); /* incomplete */ }
 	tRisseString CastToString_Octet    () const{ return AsOctet().AsHumanReadable();  }
@@ -412,7 +412,7 @@ public: // ユーティリティ
 		case vtVoid:	return AsHumanReadable_Void     (maxlen);
 		case vtInteger:	return AsHumanReadable_Integer  (maxlen);
 		case vtReal:	return AsHumanReadable_Real     (maxlen);
-		case vtBool:	return AsHumanReadable_Bool     (maxlen);
+		case vtBoolean:	return AsHumanReadable_Boolean  (maxlen);
 		case vtString:	return AsHumanReadable_String   (maxlen);
 		case vtObject:	return AsHumanReadable_Object   (maxlen);
 		case vtOctet:	return AsHumanReadable_Octet    (maxlen);
@@ -425,8 +425,8 @@ public: // ユーティリティ
 					{ return CastToString_Integer(); }
 	tRisseString AsHumanReadable_Real     (risse_size maxlen) const
 					{ return CastToString_Real(); }
-	tRisseString AsHumanReadable_Bool     (risse_size maxlen) const
-					{ return CastToString_Bool(); }
+	tRisseString AsHumanReadable_Boolean  (risse_size maxlen) const
+					{ return CastToString_Boolean(); }
 	tRisseString AsHumanReadable_String   (risse_size maxlen) const
 					{ return AsString().AsHumanReadable(maxlen); }
 	tRisseString AsHumanReadable_Object   (risse_size maxlen) const
@@ -446,7 +446,7 @@ public: // ユーティリティ
 		printf("tVoid: %d\n", sizeof(tVoid));
 		printf("tInteger: %d\n", sizeof(tInteger));
 		printf("tReal: %d\n", sizeof(tReal));
-		printf("tBool: %d\n", sizeof(tBool));
+		printf("tBoolean: %d\n", sizeof(tBoolean));
 	}
 
 };

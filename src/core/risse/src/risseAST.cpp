@@ -961,7 +961,7 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 			tRisseSSAVariable * ret_var = NULL;
 			form->AddStatement(GetPosition(), oc, &ret_var, child_var);
 
-		//	ret_var->SetValueType(tRisseVariant::vtBool); // 結果は常に vtBool
+		//	ret_var->SetValueType(tRisseVariant::vtBoolean); // 結果は常に vtBoolean
 			//////////////////////////////////////////////////////////////////////////////////////////
 			// 演算子のオーバーロードによっては ! 演算子は bool を返さない可能性がある
 			// この仕様は後に変更の可能性アリ (! 演算子をオーバーロードできないようにする可能性がある)

@@ -92,6 +92,9 @@ public: // object property
 		if(!n) Buffer = NULL, Capacity = 0;
 	}
 
+	//! @brief オクテット列が空かどうかを得る @return オクテット列が空かどうか
+	bool IsEmpty() const { return Length == 0; }
+
 public: // pointer
 	//! @brief  n バイト分のバッファを確保する
 	//! @param  n 確保したいバイト数
@@ -228,21 +231,21 @@ public: // utilities
 //---------------------------------------------------------------------------
 //! @brief	オクテット用データ
 //! @note
-//! ポインタの最下位の2ビットが常に 10 なのは、このポインタが Octet列であることを
+//! ポインタの最下位の2ビットが常に 01 なのは、このポインタが Octet列であることを
 //! 表している。ポインタは常に少なくとも 32bit 境界に配置されるため、最下位の２ビットは
 //! オブジェクトのタイプを表すのに利用されている。tRisseVariantを参照。
 //---------------------------------------------------------------------------
 class tRisseOctetData : public tRisseCollectee
 {
-	tRisseOctetBlock * Block; //!< ブロックへのポインタ (最下位の2ビットは常に10なので注意)
+	tRisseOctetBlock * Block; //!< ブロックへのポインタ (最下位の2ビットは常に01なので注意)
 							//!< アクセス時は必ず GetBlock, SetBlock を用いること
 
 protected: // Block pointer operation
 	void SetBlock(tRisseOctetBlock * block)
-		{ Block = reinterpret_cast<tRisseOctetBlock*>(reinterpret_cast<risse_ptruint>(block) + 2); }
+		{ Block = reinterpret_cast<tRisseOctetBlock*>(reinterpret_cast<risse_ptruint>(block) + 1); }
 
 	tRisseOctetBlock * GetBlock() const
-		{ return reinterpret_cast<tRisseOctetBlock*>(reinterpret_cast<risse_ptruint>(Block) - 2); }
+		{ return reinterpret_cast<tRisseOctetBlock*>(reinterpret_cast<risse_ptruint>(Block) - 1); }
 };
 //---------------------------------------------------------------------------
 
@@ -306,6 +309,9 @@ public: // object property
 	{
 		GetBlock()->SetLength(n);
 	}
+
+	//! @brief オクテット列が空かどうかを得る @return オクテット列が空かどうか
+	bool IsEmpty() const { return GetBlock()->IsEmpty(); }
 
 public: // pointer
 	//! @brief  n バイト分のバッファを確保する

@@ -281,6 +281,16 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		「関数でない物を呼び出そうとした」例外を発生(暫定)
+void RisseThrowCannotCallNonFunctionObjectException();
+//! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生(暫定)
+void RisseThrowCannotCreateInstanceFromNonClassObjectException();
+//---------------------------------------------------------------------------
+
+
 #if 0
 
 void Risse_eRisseError(const tRisseString & msg);

@@ -63,6 +63,24 @@ void eRisseCompileError::Throw(const tRisseString & msg,
 //---------------------------------------------------------------------------
 
 
+
+
+
+//---------------------------------------------------------------------------
+void RisseThrowCannotCallNonFunctionObjectException()
+{
+	eRisseError::Throw(RISSE_WS_TR("cannot call non-function object"));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void RisseThrowCannotCreateInstanceFromNonClassObjectException()
+{
+	eRisseError::Throw(RISSE_WS_TR("cannot create instance from non-class object"));
+}
+//---------------------------------------------------------------------------
+
 #if 0
 //---------------------------------------------------------------------------
 // RisseGetExceptionObject : retrieves risse 'Exception' object

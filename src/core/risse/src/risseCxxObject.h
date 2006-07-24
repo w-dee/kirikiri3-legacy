@@ -164,7 +164,7 @@ typedef void * tRisseObjectImpl;
 //---------------------------------------------------------------------------
 //! @brief	オブジェクト用データ
 //! @note
-//! ポインタの最下位の2ビットが常に 01 なのは、このポインタが オブジェクトであることを
+//! ポインタの最下位の2ビットが常に 10 なのは、このポインタが オブジェクトであることを
 //! 表している。ポインタは常に少なくとも 32bit 境界に配置されるため、最下位の２ビットは
 //! オブジェクトのタイプを表すのに利用されている。tRisseVariantを参照。
 //---------------------------------------------------------------------------
@@ -175,10 +175,10 @@ class tRisseObjectData : public tRisseCollectee
 
 protected: // pointer operation
 	void SetImpl(tRisseObjectImpl * impl)
-		{ Impl = reinterpret_cast<tRisseObjectImpl*>(reinterpret_cast<risse_ptruint>(impl) + 1); }
+		{ Impl = reinterpret_cast<tRisseObjectImpl*>(reinterpret_cast<risse_ptruint>(impl) + 2); }
 
 	tRisseObjectImpl * GetImpl() const
-		{ return reinterpret_cast<tRisseObjectImpl*>(reinterpret_cast<risse_ptruint>(Impl) - 1); }
+		{ return reinterpret_cast<tRisseObjectImpl*>(reinterpret_cast<risse_ptruint>(Impl) - 2); }
 
 public:
 	//! @brief null ポインタ。オブジェクトが null を表す場合は、この値をとる。

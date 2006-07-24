@@ -13,7 +13,7 @@
 #include "prec.h"
 
 #include "risseVariant.h"
-
+#include "risseLexerUtils.h"
 
 namespace Risse
 {
@@ -41,11 +41,38 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Plus_String   () const
+{
+	tRisseVariant val;
+	if(tRisseLexerUtility::ParseNumber(AsString().c_str(), val))
+	{
+		// 解析に成功
+		return val;
+	}
+	else
+	{
+		// 解析に失敗
+		return 0;
+	}
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
-tRisseString tRisseVariantBlock::AsHumanReadable_Void     (risse_size maxlen) const
+risse_int64 tRisseVariantBlock::CastToInteger_String   () const
 {
-	return RISSE_WS("void");
+	tRisseVariant val;
+	if(tRisseLexerUtility::ParseNumber(AsString().c_str(), val))
+	{
+		// 解析に成功
+		return val.CastToInteger(); // val は文字列にはならないので再帰はしないはず
+	}
+	else
+	{
+		// 解析に失敗
+		return 0;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -99,6 +126,15 @@ tRisseString tRisseVariantBlock::CastToString_Boolean  () const
 		RISSE_WS("false");
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseVariantBlock::AsHumanReadable_Void     (risse_size maxlen) const
+{
+	return RISSE_WS("void");
+}
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

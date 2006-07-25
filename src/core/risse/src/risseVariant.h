@@ -378,37 +378,23 @@ public: // 演算子
 
 	//-----------------------------------------------------------------------
 	//! @brief		単項 ! 演算子		LogNot
-	//! @return		演算結果(通常、booleanへのキャストの真偽を反転させた物)
+	//! @return		演算結果(booleanへのキャストの真偽を反転させた物)
+	//! @note		この演算子の戻り値は常に bool
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock LogNot() const
+	bool LogNot() const
 	{
-		switch(GetType())
-		{
-		case vtVoid:	return LogNot_Void     ();
-		case vtInteger:	return LogNot_Integer  ();
-		case vtReal:	return LogNot_Real     ();
-		case vtBoolean:	return LogNot_Boolean  ();
-		case vtString:	return LogNot_String   ();
-		case vtOctet:	return LogNot_Octet    ();
-		case vtObject:	return LogNot_Object   ();
-		}
-		return tRisseVariantBlock();
+		return !(bool)*this);
 	}
 
-	tRisseVariantBlock operator !() const { return LogNot(); }
+	bool operator !() const { return LogNot(); }
 
-	// vtObject 以外は常に boolean へのキャストの真偽を反転させた物を返す。
-	// vtObject に関してはオブジェクトによっては演算子をオーバーロードしている可能性が
-	// あるため、別途処理を行う。
-	// vtObject の戻り値は boolean ではないかもしれない。
-
-	bool               LogNot_Void     () const { return !CastToBoolean_Void(); }
-	bool               LogNot_Integer  () const { return !CastToBoolean_Integer(); }
-	bool               LogNot_Real     () const { return !CastToBoolean_Real(); }
-	bool               LogNot_Boolean  () const { return !CastToBoolean_Boolean(); }
-	bool               LogNot_String   () const { return !CastToBoolean_String(); }
-	bool               LogNot_Octet    () const { return !CastToBoolean_Octet(); }
-	tRisseVariantBlock LogNot_Object   () const { return false; /* incomplete */; }
+	bool LogNot_Void     () const { return !CastToBoolean_Void(); }
+	bool LogNot_Integer  () const { return !CastToBoolean_Integer(); }
+	bool LogNot_Real     () const { return !CastToBoolean_Real(); }
+	bool LogNot_Boolean  () const { return !CastToBoolean_Boolean(); }
+	bool LogNot_String   () const { return !CastToBoolean_String(); }
+	bool LogNot_Octet    () const { return !CastToBoolean_Octet(); }
+	bool LogNot_Object   () const { return !CastToBoolean_Object(); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		単項 ~ 演算子		BitNot
@@ -507,66 +493,44 @@ public: // 演算子
 	//! @return		演算結果(通常、双方のbooleanキャストの論理和)
 	//! @note		この演算子はショートカットを行う。すなわち、左辺が真ならば
 	//!				右辺は評価されない
+	//! @note		この演算子の戻り値は常に bool
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock LogOr(const tRisseVariantBlock & rhs) const
+	bool LogOr(const tRisseVariantBlock & rhs) const
 	{
-		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
-		// 戻り値は bool ではないかもしれない。
-		switch(GetType())
-		{
-		case vtVoid:	return LogOr_Void     (rhs);
-		case vtInteger:	return LogOr_Integer  (rhs);
-		case vtReal:	return LogOr_Real     (rhs);
-		case vtBoolean:	return LogOr_Boolean  (rhs);
-		case vtString:	return LogOr_String   (rhs);
-		case vtOctet:	return LogOr_Octet    (rhs);
-		case vtObject:	return LogOr_Object   (rhs);
-		}
-		return false;
+		return (bool)*this || (bool)rhs; // 短絡を行う
 	}
 
-	tRisseVariantBlock operator ||(const tRisseVariantBlock & rhs) const { return LogOr(rhs); }
+	bool operator ||(const tRisseVariantBlock & rhs) const { return LogOr(rhs); }
 
-	bool               LogOr_Void     (const tRisseVariantBlock & rhs) const { return rhs.operator bool(); }
-	bool               LogOr_Integer  (const tRisseVariantBlock & rhs) const { return operator bool() || rhs.operator bool(); }
-	bool               LogOr_Real     (const tRisseVariantBlock & rhs) const { return operator bool() || rhs.operator bool(); }
-	bool               LogOr_Boolean  (const tRisseVariantBlock & rhs) const { return operator bool() || rhs.operator bool(); }
-	bool               LogOr_String   (const tRisseVariantBlock & rhs) const { return operator bool() || rhs.operator bool(); }
-	bool               LogOr_Octet    (const tRisseVariantBlock & rhs) const { return operator bool() || rhs.operator bool(); }
-	tRisseVariantBlock LogOr_Object   (const tRisseVariantBlock & rhs) const { return true; /* incomplete */; }
+	bool LogOr_Void     (const tRisseVariantBlock & rhs) const { return rhs.operator bool(); }
+	bool LogOr_Integer  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Integer() || rhs.operator bool(); }
+	bool LogOr_Real     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Real   () || rhs.operator bool(); }
+	bool LogOr_Boolean  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
+	bool LogOr_String   (const tRisseVariantBlock & rhs) const { return CastToBoolean_String () || rhs.operator bool(); }
+	bool LogOr_Octet    (const tRisseVariantBlock & rhs) const { return CastToBoolean_Octet  () || rhs.operator bool(); }
+	bool LogOr_Object   (const tRisseVariantBlock & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		&& 演算子		LogAnd
 	//! @return		演算結果(通常、双方のbooleanキャストの論理積)
 	//! @note		この演算子はショートカットを行う。すなわち、左辺が偽ならば
 	//!				右辺は評価されない
+	//! @note		この演算子の戻り値は常に bool
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock LogAnd(const tRisseVariantBlock & rhs) const
+	bool LogAnd(const tRisseVariantBlock & rhs) const
 	{
-		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
-		// 戻り値は bool ではないかもしれない。
-		switch(GetType())
-		{
-		case vtVoid:	return LogAnd_Void     (rhs);
-		case vtInteger:	return LogAnd_Integer  (rhs);
-		case vtReal:	return LogAnd_Real     (rhs);
-		case vtBoolean:	return LogAnd_Boolean  (rhs);
-		case vtString:	return LogAnd_String   (rhs);
-		case vtOctet:	return LogAnd_Octet    (rhs);
-		case vtObject:	return LogAnd_Object   (rhs);
-		}
-		return false;
+		return (bool)*this && (bool)rhs; // 短絡を行う
 	}
 
-	tRisseVariantBlock operator &&(const tRisseVariantBlock & rhs) const { return LogAnd(rhs); }
+	bool operator &&(const tRisseVariantBlock & rhs) const { return LogAnd(rhs); }
 
-	bool               LogAnd_Void     (const tRisseVariantBlock & rhs) const { return false; }
-	bool               LogAnd_Integer  (const tRisseVariantBlock & rhs) const { return operator bool() && rhs.operator bool(); }
-	bool               LogAnd_Real     (const tRisseVariantBlock & rhs) const { return operator bool() && rhs.operator bool(); }
-	bool               LogAnd_Boolean  (const tRisseVariantBlock & rhs) const { return operator bool() && rhs.operator bool(); }
-	bool               LogAnd_String   (const tRisseVariantBlock & rhs) const { return operator bool() && rhs.operator bool(); }
-	bool               LogAnd_Octet    (const tRisseVariantBlock & rhs) const { return operator bool() && rhs.operator bool(); }
-	tRisseVariantBlock LogAnd_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */; }
+	bool LogAnd_Void     (const tRisseVariantBlock & rhs) const { return false; }
+	bool LogAnd_Integer  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Integer() && rhs.operator bool(); }
+	bool LogAnd_Real     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Real   () && rhs.operator bool(); }
+	bool LogAnd_Boolean  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
+	bool LogAnd_String   (const tRisseVariantBlock & rhs) const { return CastToBoolean_String () && rhs.operator bool(); }
+	bool LogAnd_Octet    (const tRisseVariantBlock & rhs) const { return CastToBoolean_Octet  () && rhs.operator bool(); }
+	bool LogAnd_Object   (const tRisseVariantBlock & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		| 演算子		BitOr
@@ -659,7 +623,89 @@ public: // 演算子
 	risse_int64        BitAnd_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		!= 演算子		NotEqual
+	//! @return		演算結果
+	//! @note		この演算子の戻り値は常に bool
+	//-----------------------------------------------------------------------
+	bool NotEqual(const tRisseVariantBlock & rhs) const
+	{
+		// vtObject 以外は == 演算子の真偽を逆にした物である
+		// vtObject の場合はオブジェクトによって振る舞いが異なる(ように定義できる)
+		switch(GetType())
+		{
+		case vtObject:	return NotEqual_Object   (rhs);
+		default:
+			return !Equal(rhs);
+		}
+	}
+
+	bool operator !=(const tRisseVariantBlock & rhs) const { return NotEqual(rhs); }
+
+	bool NotEqual_Void     (const tRisseVariantBlock & rhs) const { return !Equal_Void   (rhs); }
+	bool NotEqual_Integer  (const tRisseVariantBlock & rhs) const { return !Equal_Integer(rhs); }
+	bool NotEqual_Real     (const tRisseVariantBlock & rhs) const { return !Equal_Real   (rhs); }
+	bool NotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
+	bool NotEqual_String   (const tRisseVariantBlock & rhs) const { return !Equal_String (rhs); }
+	bool NotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
+	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		== 演算子		Equal
+	//! @return		演算結果
+	//! @note		この演算子の戻り値は常に bool
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Equal(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Equal_Void     (rhs);
+		case vtInteger:	return Equal_Integer  (rhs);
+		case vtReal:	return Equal_Real     (rhs);
+		case vtBoolean:	return Equal_Boolean  (rhs);
+		case vtString:	return Equal_String   (rhs);
+		case vtOctet:	return Equal_Octet    (rhs);
+		case vtObject:	return Equal_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock operator ==(const tRisseVariantBlock & rhs) const { return Equal(rhs); }
+
+	bool Equal_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		!== 演算子		DiscNotEqual
+	//! @return		演算結果
+	//! @note		この演算子の戻り値は常に bool
+	//-----------------------------------------------------------------------
+	bool DiscNotEqual(const tRisseVariantBlock & rhs) const
+	{
+		// vtObject 以外は === 演算子の真偽を逆にした物である
+		// vtObject の場合はオブジェクトによって振る舞いが異なる(ように定義できる)
+		switch(GetType())
+		{
+		case vtObject:	return DiscNotEqual_Object   (rhs);
+		default:
+			return !DiscEqual(rhs);
+		}
+	}
+
+	bool DiscNotEqual_Void     (const tRisseVariantBlock & rhs) const { return !DiscEqual_Void   (rhs); }
+	bool DiscNotEqual_Integer  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Integer(rhs); }
+	bool DiscNotEqual_Real     (const tRisseVariantBlock & rhs) const { return !DiscEqual_Real   (rhs); }
+	bool DiscNotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
+	bool DiscNotEqual_String   (const tRisseVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
+	bool DiscNotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
+	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
 	//! @brief		識別 === 演算子		DiscEqual

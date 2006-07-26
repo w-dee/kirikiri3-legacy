@@ -2421,7 +2421,7 @@ risse_size tRisseCodeGenerator::FindConst(const tRisseVariant & value)
 	risse_size search_limit = const_size > MaxConstSearch ? MaxConstSearch : const_size;
 	for(risse_size n = 0; n < search_limit; n++)
 	{
-		if(Consts[const_size - n - 1].discequal(value))
+		if(Consts[const_size - n - 1].DiscEqual(value))
 			return const_size - n - 1; // 見つかった
 	}
 

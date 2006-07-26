@@ -45,7 +45,8 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 tRisseVariantBlock tRisseVariantBlock::Plus_String   () const
 {
 	tRisseVariant val;
-	if(tRisseLexerUtility::ParseNumber(AsString().c_str(), val))
+	const risse_char *p = AsString().c_str();
+	if(tRisseLexerUtility::ParseNumber(p, val))
 	{
 		// 解析に成功
 		return val;
@@ -53,7 +54,7 @@ tRisseVariantBlock tRisseVariantBlock::Plus_String   () const
 	else
 	{
 		// 解析に失敗
-		return 0;
+		return (risse_int64)0;
 	}
 }
 //---------------------------------------------------------------------------
@@ -62,16 +63,17 @@ tRisseVariantBlock tRisseVariantBlock::Plus_String   () const
 //---------------------------------------------------------------------------
 risse_int64 tRisseVariantBlock::CastToInteger_String   () const
 {
-	tRisseVariant val;
-	if(tRisseLexerUtility::ParseNumber(AsString().c_str(), val))
+	tRisseVariantBlock val;
+	const risse_char *p = AsString().c_str();
+	if(tRisseLexerUtility::ParseNumber(p, val))
 	{
 		// 解析に成功
-		return val.CastToInteger(); // val は文字列にはならないので再帰はしないはず
+		return (risse_int64)val; // val は文字列にはならないので再帰はしないはず
 	}
 	else
 	{
 		// 解析に失敗
-		return 0;
+		return (risse_int64)0;
 	}
 }
 //---------------------------------------------------------------------------

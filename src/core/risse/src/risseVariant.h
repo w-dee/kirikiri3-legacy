@@ -383,7 +383,7 @@ public: // 演算子
 	//-----------------------------------------------------------------------
 	bool LogNot() const
 	{
-		return !(bool)*this);
+		return !(bool)(*this);
 	}
 
 	bool operator !() const { return LogNot(); }
@@ -742,6 +742,406 @@ public: // 演算子
 	bool DiscEqual_Object   (const tRisseVariantBlock & rhs) const
 			{ return false; /* incomplete */ }
 
+	//-----------------------------------------------------------------------
+	//! @brief		< 演算子		Lesser
+	//! @param		rhs			右辺
+	//! @return		*this < rhs ならば真
+	//-----------------------------------------------------------------------
+	bool Lesser(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Lesser_Void     (rhs);
+		case vtInteger:	return Lesser_Integer  (rhs);
+		case vtReal:	return Lesser_Real     (rhs);
+		case vtBoolean:	return Lesser_Boolean  (rhs);
+		case vtString:	return Lesser_String   (rhs);
+		case vtOctet:	return Lesser_Octet    (rhs);
+		case vtObject:	return Lesser_Object   (rhs);
+		}
+		return false;
+	}
+
+	bool operator < (const tRisseVariantBlock & rhs) const { return Lesser(rhs); }
+
+	bool Lesser_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		> 演算子		Greater
+	//! @param		rhs			右辺
+	//! @return		*this > rhs ならば真
+	//-----------------------------------------------------------------------
+	bool Greater(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Greater_Void     (rhs);
+		case vtInteger:	return Greater_Integer  (rhs);
+		case vtReal:	return Greater_Real     (rhs);
+		case vtBoolean:	return Greater_Boolean  (rhs);
+		case vtString:	return Greater_String   (rhs);
+		case vtOctet:	return Greater_Octet    (rhs);
+		case vtObject:	return Greater_Object   (rhs);
+		}
+		return false;
+	}
+
+	bool operator > (const tRisseVariantBlock & rhs) const { return Greater(rhs); }
+
+	bool Greater_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		<= 演算子		LesserOrEqual
+	//! @param		rhs			右辺
+	//! @return		*this < rhs ならば真
+	//-----------------------------------------------------------------------
+	bool LesserOrEqual(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return LesserOrEqual_Void     (rhs);
+		case vtInteger:	return LesserOrEqual_Integer  (rhs);
+		case vtReal:	return LesserOrEqual_Real     (rhs);
+		case vtBoolean:	return LesserOrEqual_Boolean  (rhs);
+		case vtString:	return LesserOrEqual_String   (rhs);
+		case vtOctet:	return LesserOrEqual_Octet    (rhs);
+		case vtObject:	return LesserOrEqual_Object   (rhs);
+		}
+		return false;
+	}
+
+	bool operator <= (const tRisseVariantBlock & rhs) const { return LesserOrEqual(rhs); }
+
+	bool LesserOrEqual_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+
+
+	//-----------------------------------------------------------------------
+	//! @brief		>= 演算子		GreaterOrEqual
+	//! @param		rhs			右辺
+	//! @return		*this < rhs ならば真
+	//-----------------------------------------------------------------------
+	bool GreaterOrEqual(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return GreaterOrEqual_Void     (rhs);
+		case vtInteger:	return GreaterOrEqual_Integer  (rhs);
+		case vtReal:	return GreaterOrEqual_Real     (rhs);
+		case vtBoolean:	return GreaterOrEqual_Boolean  (rhs);
+		case vtString:	return GreaterOrEqual_String   (rhs);
+		case vtOctet:	return GreaterOrEqual_Octet    (rhs);
+		case vtObject:	return GreaterOrEqual_Object   (rhs);
+		}
+		return false;
+	}
+
+	bool operator >= (const tRisseVariantBlock & rhs) const { return GreaterOrEqual(rhs); }
+
+	bool GreaterOrEqual_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		>>> 演算子(符号なし右シフト)		RBitShift
+	//! @param		rhs			右辺
+	//! @return		通常、左辺をintegerにキャストした後右辺回数分シフトしたもの
+	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
+	//!				戻り値が integer だとは限らない
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock RBitShift(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return RBitShift_Void     (rhs);
+		case vtInteger:	return RBitShift_Integer  (rhs);
+		case vtReal:	return RBitShift_Real     (rhs);
+		case vtBoolean:	return RBitShift_Boolean  (rhs);
+		case vtString:	return RBitShift_String   (rhs);
+		case vtOctet:	return RBitShift_Octet    (rhs);
+		case vtObject:	return RBitShift_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock RBitShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		<< 演算子(符号つき左シフト)		LShift
+	//! @param		rhs			右辺
+	//! @return		通常、左辺をintegerにキャストした後右辺辺回数分シフトしたもの
+	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
+	//!				戻り値が integer だとは限らない
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock LShift(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return LShift_Void     (rhs);
+		case vtInteger:	return LShift_Integer  (rhs);
+		case vtReal:	return LShift_Real     (rhs);
+		case vtBoolean:	return LShift_Boolean  (rhs);
+		case vtString:	return LShift_String   (rhs);
+		case vtOctet:	return LShift_Octet    (rhs);
+		case vtObject:	return LShift_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock operator << (const tRisseVariantBlock & rhs) const { return LShift(rhs); }
+
+	tRisseVariantBlock LShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		>> 演算子(符号つき右シフト)		RShift
+	//! @param		rhs			右辺
+	//! @return		通常、左辺をintegerにキャストした後右辺回数分シフトしたもの
+	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
+	//!				戻り値が integer だとは限らない
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock RShift(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return RShift_Void     (rhs);
+		case vtInteger:	return RShift_Integer  (rhs);
+		case vtReal:	return RShift_Real     (rhs);
+		case vtBoolean:	return RShift_Boolean  (rhs);
+		case vtString:	return RShift_String   (rhs);
+		case vtOctet:	return RShift_Octet    (rhs);
+		case vtObject:	return RShift_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock operator >> (const tRisseVariantBlock & rhs) const { return RShift(rhs); }
+
+	tRisseVariantBlock RShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		% 演算子(剰余)		Mod
+	//! @param		rhs			右辺
+	//! @return		通常、両方をintegerにキャストし、左辺を右辺で割ったあまり
+	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
+	//!				戻り値が integer だとは限らない
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Mod(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Mod_Void     (rhs);
+		case vtInteger:	return Mod_Integer  (rhs);
+		case vtReal:	return Mod_Real     (rhs);
+		case vtBoolean:	return Mod_Boolean  (rhs);
+		case vtString:	return Mod_String   (rhs);
+		case vtOctet:	return Mod_Octet    (rhs);
+		case vtObject:	return Mod_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock operator % (const tRisseVariantBlock & rhs) const { return Mod(rhs); }
+
+	tRisseVariantBlock Mod_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		/ 演算子(剰余)		Div
+	//! @param		rhs			右辺
+	//! @return		通常、両方を real にキャストし、左辺を右辺で割ったもの
+	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
+	//!				戻り値が real だとは限らない
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Div(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Div_Void     (rhs);
+		case vtInteger:	return Div_Integer  (rhs);
+		case vtReal:	return Div_Real     (rhs);
+		case vtBoolean:	return Div_Boolean  (rhs);
+		case vtString:	return Div_String   (rhs);
+		case vtOctet:	return Div_Octet    (rhs);
+		case vtObject:	return Div_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock operator / (const tRisseVariantBlock & rhs) const { return Div(rhs); }
+
+	tRisseVariantBlock Div_Void     (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
+	tRisseVariantBlock Div_Integer  (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
+	tRisseVariantBlock Div_Real     (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
+	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
+	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
+	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
+	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		\ 演算子(整数除算)		Idiv
+	//! @param		rhs			右辺
+	//! @return		通常、両方をintegerにキャストし、左辺を右辺で割ったもの
+	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
+	//!				戻り値が integer だとは限らない
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Idiv(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Idiv_Void     (rhs);
+		case vtInteger:	return Idiv_Integer  (rhs);
+		case vtReal:	return Idiv_Real     (rhs);
+		case vtBoolean:	return Idiv_Boolean  (rhs);
+		case vtString:	return Idiv_String   (rhs);
+		case vtOctet:	return Idiv_Octet    (rhs);
+		case vtObject:	return Idiv_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock Idiv_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		* 演算子(除算)		Mul
+	//! @param		rhs			右辺
+	//! @return		通常、両方を 数値 にキャストし、左辺と右辺を乗算した物。
+	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
+	//!				戻り値が integerやreal だとは限らない
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Mul(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Mul_Void     (rhs);
+		case vtInteger:	return Mul_Integer  (rhs);
+		case vtReal:	return Mul_Real     (rhs);
+		case vtBoolean:	return Mul_Boolean  (rhs);
+		case vtString:	return Mul_String   (rhs);
+		case vtOctet:	return Mul_Octet    (rhs);
+		case vtObject:	return Mul_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock operator * (const tRisseVariantBlock & rhs) const { return Mul(rhs); }
+
+	tRisseVariantBlock Mul_Void     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Integer  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		+ 演算子(加算)		Add
+	//! @param		rhs			右辺
+	//! @return		左辺に右辺を加算した物
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Add(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Add_Void     (rhs);
+		case vtInteger:	return Add_Integer  (rhs);
+		case vtReal:	return Add_Real     (rhs);
+		case vtBoolean:	return Add_Boolean  (rhs);
+		case vtString:	return Add_String   (rhs);
+		case vtOctet:	return Add_Octet    (rhs);
+		case vtObject:	return Add_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock operator + (const tRisseVariantBlock & rhs) const { return Add(rhs); }
+
+	tRisseVariantBlock Add_Void     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_Integer  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		- 演算子(減算)		Sub
+	//! @param		rhs			右辺
+	//! @return		左辺から右辺を減算した物
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Sub(const tRisseVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Sub_Void     (rhs);
+		case vtInteger:	return Sub_Integer  (rhs);
+		case vtReal:	return Sub_Real     (rhs);
+		case vtBoolean:	return Sub_Boolean  (rhs);
+		case vtString:	return Sub_String   (rhs);
+		case vtOctet:	return Sub_Octet    (rhs);
+		case vtObject:	return Sub_Object   (rhs);
+		}
+		return false;
+	}
+
+	tRisseVariantBlock operator - (const tRisseVariantBlock & rhs) const { return Sub(rhs); }
+
+	tRisseVariantBlock Sub_Void     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Integer  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Real     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 
 public: // キャスト
 	//-----------------------------------------------------------------------
@@ -768,8 +1168,35 @@ public: // キャスト
 	risse_int64 CastToInteger_Real     () const { return (risse_int64)AsReal(); }
 	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)AsBoolean(); }
 	risse_int64 CastToInteger_String   () const;
-	risse_int64 CastToInteger_Octet    () const { return (risse_int64)0; /*incomplete */ }
+	risse_int64 CastToInteger_Octet    () const { return (risse_int64)0; /* incomplete */ }
 	risse_int64 CastToInteger_Object   () const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		realに変換
+	//! @return		real
+	//-----------------------------------------------------------------------
+	operator double() const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return CastToReal_Void     ();
+		case vtInteger:	return CastToReal_Integer  ();
+		case vtReal:	return CastToReal_Real     ();
+		case vtBoolean:	return CastToReal_Boolean  ();
+		case vtString:	return CastToReal_String   ();
+		case vtOctet:	return CastToReal_Octet    ();
+		case vtObject:	return CastToReal_Object   ();
+		}
+		return false;
+	}
+
+	double CastToReal_Void     () const { return (double)0.0; }
+	double CastToReal_Integer  () const { return AsInteger(); }
+	double CastToReal_Real     () const { return AsReal(); }
+	double CastToReal_Boolean  () const { return (double)(int)AsBoolean(); }
+	double CastToReal_String   () const { return (double)Plus_String(); /* Plus_String の戻りを double に再キャスト */ }
+	double CastToReal_Octet    () const { return (double)0.0; /* incomplete */ }
+	double CastToReal_Object   () const { return (double)0.0; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
 	//! @brief		boolに変換

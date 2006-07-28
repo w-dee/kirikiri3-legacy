@@ -44,7 +44,7 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 //---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Plus_String   () const
 {
-	tRisseVariant val;
+	tRisseVariantBlock val;
 	const risse_char *p = AsString().c_str();
 	if(tRisseLexerUtility::ParseNumber(p, val))
 	{
@@ -56,6 +56,728 @@ tRisseVariantBlock tRisseVariantBlock::Plus_String   () const
 		// 解析に失敗
 		return (risse_int64)0;
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Equal_Void     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return true; // void == void
+	case vtInteger:	return CastToInteger_Void() == rhs.AsInteger();
+	case vtReal:	return CastToReal_Void()    == rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Void() == rhs.AsBoolean();
+	case vtString:	return rhs.AsString().IsEmpty();
+	case vtOctet:	return rhs.AsOctet().IsEmpty();
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Equal_Integer  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return AsInteger() == 0;
+	case vtInteger:	return AsInteger() == rhs.AsInteger();
+	case vtReal:	return AsInteger() == rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Integer() == rhs.AsBoolean();
+	case vtString:	return AsInteger() == rhs.CastToInteger_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Equal_Real     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return AsReal() == 0.0;
+	case vtInteger:	return AsReal() == rhs.AsInteger();
+	case vtReal:	return AsReal() == rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Real() == rhs.AsBoolean();
+	case vtString:	return AsReal() == rhs.CastToReal_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Equal_Boolean  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return AsBoolean() == 0.0;
+	case vtInteger:	return AsBoolean() == rhs.AsInteger();
+	case vtReal:	return AsBoolean() == rhs.AsReal();
+	case vtBoolean:	return AsBoolean() == rhs.AsBoolean();
+	case vtString:	return AsBoolean() == rhs.CastToBoolean_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Equal_String   (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return AsString().IsEmpty();
+	case vtInteger:	return CastToInteger_String() == rhs.AsInteger();
+	case vtReal:	return CastToReal_String() == rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_String() == rhs.AsBoolean();
+	case vtString:	return AsString() == rhs.AsString();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Lesser_Void     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return false; // void < void
+	case vtInteger:	return CastToInteger_Void() < rhs.AsInteger();
+	case vtReal:	return CastToReal_Void()    < rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Void() < rhs.AsBoolean();
+	case vtString:	return rhs.AsString().IsEmpty();
+	case vtOctet:	return rhs.AsOctet().IsEmpty();
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Lesser_Integer  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return AsInteger() < 0;
+	case vtInteger:	return AsInteger() < rhs.AsInteger();
+	case vtReal:	return AsInteger() < rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Integer() < rhs.AsBoolean();
+	case vtString:	return AsInteger() < rhs.CastToInteger_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Lesser_Real     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return AsReal() < 0.0;
+	case vtInteger:	return AsReal() < rhs.AsInteger();
+	case vtReal:	return AsReal() < rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Real() < rhs.AsBoolean();
+	case vtString:	return AsReal() < rhs.CastToReal_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Lesser_Boolean  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return false; // boolean が void より小さくなることはない
+	case vtInteger:	return AsBoolean() < rhs.AsInteger();
+	case vtReal:	return AsBoolean() < rhs.AsReal();
+	case vtBoolean:	return AsBoolean() < rhs.AsBoolean();
+	case vtString:	return AsBoolean() < rhs.CastToBoolean_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Lesser_String   (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return false; // void は空文字列と見なす
+	case vtInteger:	return CastToInteger_String() < rhs.AsInteger();
+	case vtReal:	return CastToReal_String() < rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_String() < rhs.AsBoolean();
+	case vtString:	return AsString() < rhs.AsString();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Greater_Void     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return false; // void > void
+	case vtInteger:	return CastToInteger_Void() > rhs.AsInteger();
+	case vtReal:	return CastToReal_Void()    > rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Void() > rhs.AsBoolean();
+	case vtString:	return !rhs.AsString().IsEmpty();
+	case vtOctet:	return !rhs.AsOctet().IsEmpty();
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Greater_Integer  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return AsInteger() > 0;
+	case vtInteger:	return AsInteger() > rhs.AsInteger();
+	case vtReal:	return AsInteger() > rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Integer() > rhs.AsBoolean();
+	case vtString:	return AsInteger() > rhs.CastToInteger_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Greater_Real     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return AsReal() > 0.0;
+	case vtInteger:	return AsReal() > rhs.AsInteger();
+	case vtReal:	return AsReal() > rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_Real() > rhs.AsBoolean();
+	case vtString:	return AsReal() > rhs.CastToReal_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Greater_Boolean  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return false; // boolean が void より小さくなることはない
+	case vtInteger:	return AsBoolean() > rhs.AsInteger();
+	case vtReal:	return AsBoolean() > rhs.AsReal();
+	case vtBoolean:	return AsBoolean() > rhs.AsBoolean();
+	case vtString:	return AsBoolean() > rhs.CastToBoolean_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::Greater_String   (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return false; // void は空文字列と見なす
+	case vtInteger:	return CastToInteger_String() > rhs.AsInteger();
+	case vtReal:	return CastToReal_String() > rhs.AsReal();
+	case vtBoolean:	return CastToBoolean_String() > rhs.AsBoolean();
+	case vtString:	return AsString() > rhs.AsString();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::LesserOrEqual_Void     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !false; // void <= void
+	case vtInteger:	return !(CastToInteger_Void() > rhs.AsInteger());
+	case vtReal:	return !(CastToReal_Void()    > rhs.AsReal());
+	case vtBoolean:	return !(CastToBoolean_Void() > rhs.AsBoolean());
+	case vtString:	return !(!rhs.AsString().IsEmpty());
+	case vtOctet:	return !(!rhs.AsOctet().IsEmpty());
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::LesserOrEqual_Integer  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !(AsInteger() > 0);
+	case vtInteger:	return !(AsInteger() > rhs.AsInteger());
+	case vtReal:	return !(AsInteger() > rhs.AsReal());
+	case vtBoolean:	return !(CastToBoolean_Integer() > rhs.AsBoolean());
+	case vtString:	return !(AsInteger() > rhs.CastToInteger_String());
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !(AsReal() > 0.0);
+	case vtInteger:	return !(AsReal() > rhs.AsInteger());
+	case vtReal:	return !(AsReal() > rhs.AsReal());
+	case vtBoolean:	return !(CastToBoolean_Real() > rhs.AsBoolean());
+	case vtString:	return !(AsReal() > rhs.CastToReal_String());
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !false; // boolean が void より小さくなることはない
+	case vtInteger:	return !(AsBoolean() > rhs.AsInteger());
+	case vtReal:	return !(AsBoolean() > rhs.AsReal());
+	case vtBoolean:	return !(AsBoolean() > rhs.AsBoolean());
+	case vtString:	return !(AsBoolean() > rhs.CastToBoolean_String());
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::LesserOrEqual_String   (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !false; // void は空文字列と見なす
+	case vtInteger:	return !(CastToInteger_String() > rhs.AsInteger());
+	case vtReal:	return !(CastToReal_String() > rhs.AsReal());
+	case vtBoolean:	return !(CastToBoolean_String() > rhs.AsBoolean());
+	case vtString:	return !(AsString() > rhs.AsString());
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::GreaterOrEqual_Void     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !false; // void >= void
+	case vtInteger:	return !(CastToInteger_Void() < rhs.AsInteger());
+	case vtReal:	return !(CastToReal_Void()    < rhs.AsReal());
+	case vtBoolean:	return !(CastToBoolean_Void() < rhs.AsBoolean());
+	case vtString:	return !(rhs.AsString().IsEmpty());
+	case vtOctet:	return !(rhs.AsOctet().IsEmpty());
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::GreaterOrEqual_Integer  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !(AsInteger() < 0);
+	case vtInteger:	return !(AsInteger() < rhs.AsInteger());
+	case vtReal:	return !(AsInteger() < rhs.AsReal());
+	case vtBoolean:	return !(CastToBoolean_Integer() < rhs.AsBoolean());
+	case vtString:	return !(AsInteger() < rhs.CastToInteger_String());
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !(AsReal() < 0.0);
+	case vtInteger:	return !(AsReal() < rhs.AsInteger());
+	case vtReal:	return !(AsReal() < rhs.AsReal());
+	case vtBoolean:	return !(CastToBoolean_Real() < rhs.AsBoolean());
+	case vtString:	return !(AsReal() < rhs.CastToReal_String());
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !false; // !(boolean が void より小さくなることはない)
+	case vtInteger:	return !(AsBoolean() < rhs.AsInteger());
+	case vtReal:	return !(AsBoolean() < rhs.AsReal());
+	case vtBoolean:	return !(AsBoolean() < rhs.AsBoolean());
+	case vtString:	return !(AsBoolean() < rhs.CastToBoolean_String());
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return !false; // !(void は空文字列と見なす)
+	case vtInteger:	return !(CastToInteger_String() < rhs.AsInteger());
+	case vtReal:	return !(CastToReal_String() < rhs.AsReal());
+	case vtBoolean:	return !(CastToBoolean_String() < rhs.AsBoolean());
+	case vtString:	return !(AsString() < rhs.AsString());
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Mul_Void     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return (risse_int64)0; // void * void
+	case vtInteger:	return (risse_int64)0; // void * integer
+	case vtReal:	return (double)0.0;
+	case vtBoolean:	return (bool)false;
+	case vtString:	return Mul_Void(rhs.Plus_String()); // Plus_String の戻りは integer か real
+	case vtOctet:	return (risse_int64)0; // incomplete
+	case vtObject:	return (risse_int64)0; // incomplete
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Mul_Integer  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return (risse_int64)0; // integer * void
+	case vtInteger:	return AsInteger() * rhs.AsInteger(); // integer * integer
+	case vtReal:	return AsInteger() * rhs.AsReal(); // integer * real
+	case vtBoolean:	return AsInteger() * (int)rhs.AsBoolean(); // integer * boolean
+	case vtString:	return Mul_Integer(rhs.Plus_String()); // Plus_String の戻りは integer か real
+	case vtOctet:	return (risse_int64)0; // incomplete
+	case vtObject:	return (risse_int64)0; // incomplete
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Mul_Real     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return (risse_int64)0; // real * void
+	case vtInteger:	return AsReal() * rhs.AsInteger(); // real * integer
+	case vtReal:	return AsReal() * rhs.AsReal(); // real * real
+	case vtBoolean:	return AsReal() * (int)rhs.AsBoolean(); // real * boolean
+	case vtString:	return Mul_Real(rhs.Plus_String()); // Plus_String の戻りは integer か real
+	case vtOctet:	return (risse_int64)0; // incomplete
+	case vtObject:	return (risse_int64)0; // incomplete
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Mul_Boolean  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return false; // bool * void
+	case vtInteger:	return AsBoolean() * rhs.AsInteger(); // bool * integer
+	case vtReal:	return AsBoolean() * rhs.AsReal(); // bool * real
+	case vtBoolean:	return (risse_int64)(AsBoolean() * rhs.AsBoolean()); // bool * boolean
+	case vtString:	return Mul_Boolean(rhs.Plus_String()); // Plus_String の戻りは integer か real
+	case vtOctet:	return (risse_int64)0; // incomplete
+	case vtObject:	return (risse_int64)0; // incomplete
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Mul_String   (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:
+	case vtInteger:
+	case vtReal:
+	case vtBoolean:
+	case vtString:
+		return Plus_String() * rhs; // Plus_String は integer か real になる
+	case vtOctet:	return (risse_int64)0; // incomplete
+	case vtObject:	return (risse_int64)0; // incomplete
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Sub_Void     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return (risse_int64)0; // void - void = 0 かなぁ
+	case vtInteger:	return - rhs.AsInteger(); // void - integer
+	case vtReal:	return - rhs.AsReal();
+	case vtBoolean:	return (risse_int64)(- (int)rhs.AsBoolean());
+	case vtString:	return - rhs.Plus_String();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Sub_Integer  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return *this; // integer - void
+	case vtInteger:	return AsInteger() - rhs.AsInteger(); // integer - integer
+	case vtReal:	return AsInteger() - rhs.AsReal(); // integer - real
+	case vtBoolean:	return AsInteger() - (int)rhs.AsBoolean(); // integer - bool
+	case vtString:	return Sub_Integer(rhs.Plus_String()); // Plus_String の戻りは integer か real
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Sub_Real     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return *this; // real - void
+	case vtInteger:	return AsReal() - rhs.AsInteger(); // real - integer
+	case vtReal:	return AsReal() - rhs.AsReal(); // real - real
+	case vtBoolean:	return AsReal() - (int)rhs.AsBoolean(); // real - bool
+	case vtString:	return Sub_Real(rhs.Plus_String()); // Plus_String の戻りは integer か real
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Sub_Boolean  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return *this; // bool - void
+	case vtInteger:	return (int)AsBoolean() - rhs.AsInteger(); // bool - integer
+	case vtReal:	return (int)AsBoolean() - rhs.AsReal(); // bool - real
+	case vtBoolean:	return (risse_int64)((int)AsBoolean() - (int)rhs.AsBoolean()); // bool - bool
+	case vtString:	return Sub_Boolean(rhs.Plus_String()); // Plus_String の戻りは integer か real
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Sub_String   (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:
+	case vtInteger:
+	case vtReal:
+	case vtBoolean:
+	case vtString:
+		return Plus_String() - rhs; // Plus_String の戻りは integer か real
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Add_Void     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return tRisseVariantBlock(); // void + void = void かなぁ
+	case vtInteger:	return rhs; // void + integer
+	case vtReal:	return rhs;
+	case vtBoolean:	return rhs;
+	case vtString:	return rhs;
+	case vtOctet:	return rhs;
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Add_Integer  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return *this;
+	case vtInteger:	return AsInteger() + AsInteger();
+	case vtReal:	return AsInteger() + AsReal();
+	case vtBoolean:	return AsInteger() + (int)AsBoolean();
+	case vtString:	return CastToString_Integer() + rhs.AsString();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Add_Real     (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return *this;
+	case vtInteger:	return AsReal() + AsInteger();
+	case vtReal:	return AsReal() + AsReal();
+	case vtBoolean:	return AsReal() + (int)AsBoolean();
+	case vtString:	return CastToString_Real() + rhs.AsString();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Add_Boolean  (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return *this;
+	case vtInteger:	return (int)AsBoolean() + AsInteger();
+	case vtReal:	return (int)AsBoolean() + AsReal();
+	case vtBoolean:	return (risse_int64)((int)AsBoolean() + (int)AsBoolean());
+	case vtString:	return CastToString_Real() + rhs.AsString();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Add_String   (const tRisseVariantBlock & rhs) const
+{
+	switch(rhs.GetType())
+	{
+	case vtVoid:	return *this;
+	case vtInteger:	return AsString() + rhs.CastToString_Integer();
+	case vtReal:	return AsString() + rhs.CastToString_Real();
+	case vtBoolean:	return AsString() + rhs.CastToString_Boolean();
+	case vtString:	return AsString() + rhs.AsString();
+	case vtOctet:	return false; // incomplete; どうしよう
+	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	}
+	return tRisseVariantBlock();
 }
 //---------------------------------------------------------------------------
 

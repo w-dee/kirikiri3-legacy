@@ -306,6 +306,12 @@ public: // コンストラクタ/代入演算子
 
 public: // 演算子
 
+	/*
+		演算子群は各型ごとに固有の計算方法があるため、組み合わせが
+		膨大になる。ある程度をまとめる事はできるが、基本的にはしらみ
+		つぶしにそれぞれを記述している。
+	*/
+
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
@@ -674,11 +680,11 @@ public: // 演算子
 
 	tRisseVariantBlock operator ==(const tRisseVariantBlock & rhs) const { return Equal(rhs); }
 
-	bool Equal_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Equal_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Equal_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Equal_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Void     (const tRisseVariantBlock & rhs) const;
+	bool Equal_Integer  (const tRisseVariantBlock & rhs) const;
+	bool Equal_Real     (const tRisseVariantBlock & rhs) const;
+	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool Equal_String   (const tRisseVariantBlock & rhs) const;
 	bool Equal_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 
@@ -764,11 +770,11 @@ public: // 演算子
 
 	bool operator < (const tRisseVariantBlock & rhs) const { return Lesser(rhs); }
 
-	bool Lesser_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Lesser_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Lesser_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Lesser_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Void     (const tRisseVariantBlock & rhs) const;
+	bool Lesser_Integer  (const tRisseVariantBlock & rhs) const;
+	bool Lesser_Real     (const tRisseVariantBlock & rhs) const;
+	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool Lesser_String   (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 
@@ -794,11 +800,11 @@ public: // 演算子
 
 	bool operator > (const tRisseVariantBlock & rhs) const { return Greater(rhs); }
 
-	bool Greater_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Greater_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Greater_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Greater_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Void     (const tRisseVariantBlock & rhs) const;
+	bool Greater_Integer  (const tRisseVariantBlock & rhs) const;
+	bool Greater_Real     (const tRisseVariantBlock & rhs) const;
+	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool Greater_String   (const tRisseVariantBlock & rhs) const;
 	bool Greater_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 
@@ -824,11 +830,11 @@ public: // 演算子
 
 	bool operator <= (const tRisseVariantBlock & rhs) const { return LesserOrEqual(rhs); }
 
-	bool LesserOrEqual_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool LesserOrEqual_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Void     (const tRisseVariantBlock & rhs) const;
+	bool LesserOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
+	bool LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const;
+	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 
@@ -855,11 +861,11 @@ public: // 演算子
 
 	bool operator >= (const tRisseVariantBlock & rhs) const { return GreaterOrEqual(rhs); }
 
-	bool GreaterOrEqual_Void     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool GreaterOrEqual_Integer  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Void     (const tRisseVariantBlock & rhs) const;
+	bool GreaterOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
+	bool GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const;
+	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 
@@ -1075,11 +1081,11 @@ public: // 演算子
 
 	tRisseVariantBlock operator * (const tRisseVariantBlock & rhs) const { return Mul(rhs); }
 
-	tRisseVariantBlock Mul_Void     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Mul_Integer  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mul_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 
@@ -1105,11 +1111,11 @@ public: // 演算子
 
 	tRisseVariantBlock operator + (const tRisseVariantBlock & rhs) const { return Add(rhs); }
 
-	tRisseVariantBlock Add_Void     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Add_Integer  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Add_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 
@@ -1135,11 +1141,11 @@ public: // 演算子
 
 	tRisseVariantBlock operator - (const tRisseVariantBlock & rhs) const { return Sub(rhs); }
 
-	tRisseVariantBlock Sub_Void     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Sub_Integer  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Sub_Real     (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Sub_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Sub_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 

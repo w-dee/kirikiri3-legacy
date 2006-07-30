@@ -16,7 +16,7 @@
 #include "risseException.h"
 #include "risseScriptBlockBase.h"
 #include "risseCodeGen.h"
-
+#include "risseCodeExecutor.h"
 
 namespace Risse
 {
@@ -54,6 +54,9 @@ tRisseCodeBlock::tRisseCodeBlock(const tRisseCodeGenerator *gen)
 
 	// 必要なレジスタ数のコピー
 	NumRegs = gen->GetMaxNumUsedRegs();
+
+	// Executor を作成
+	Executor = new tRisseCodeInterpreter(this);
 }
 //---------------------------------------------------------------------------
 

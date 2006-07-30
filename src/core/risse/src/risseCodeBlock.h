@@ -22,6 +22,7 @@
 namespace Risse
 {
 class tRisseCodeGenerator;
+class tRisseCodeExecutor;
 //---------------------------------------------------------------------------
 //! @brief		コードブロッククラス
 //! @note		コードブロックは Risse の実行単位である「関数」などごとに、
@@ -35,6 +36,8 @@ class tRisseCodeBlock : public tRisseCollectee
 	risse_size ConstsSize; //!< 定数領域のサイズ(個)
 	risse_size NumRegs; //!< 必要なレジスタ数
 
+	tRisseCodeExecutor * Executor; //!< コード実行クラスのインスタンス
+
 public:
 	//! @brief		コンストラクタ(コードジェネレータから)
 	//! @param		gen		コードジェネレータ
@@ -43,6 +46,27 @@ public:
 	//! @brief		内容をダンプ(逆アセンブル)する
 	//! @return		ダンプした結果
 	tRisseString Dump() const;
+
+
+ 	//! @brief		コードを得る
+ 	//! @return		コード
+ 	const risse_uint32 * GetCode() const { return Code; }
+
+ 	//! @brief		コードのサイズ(ワード単位)を得る
+	//! @return		コードのサイズ
+ 	risse_size GetCodeSize() const { return CodeSize; }
+
+	//! @brief		定数領域を得る
+	//! @return		定数領域
+	const tRisseVariant * GetConsts() const { return Consts; }
+
+	//! @brief		定数領域のサイズ(個)を得る
+	//! @return		定数領域のサイズ(個)
+	risse_size GetConstsSize() const { return ConstsSize; }
+
+	//! @brief		必要なレジスタ数を得る
+	//! @return		必要なレジスタ数
+	risse_size GetNumRegs() const { return NumRegs; }
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

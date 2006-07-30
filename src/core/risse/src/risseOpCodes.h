@@ -207,6 +207,11 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(DDelete			,ddel	,P(R,R,R,0,0,0))//!< delete .
 	RISSE_OC_ENUM_ITEM(IDelete			,idel	,P(R,R,R,0,0,0))//!< delete [ ]
 
+// 引数1+2つ
+	RISSE_OC_ENUM_ITEM(DSet				,dset	,P(R,R,R,0,0,0))//!< set .
+	RISSE_OC_ENUM_ITEM(ISet				,iset	,P(R,R,R,0,0,0))//!< set [ ]
+
+// 代入演算子の類
 	RISSE_OC_ENUM_ITEM(BitAndAssign		,ERR	,P(0,0,0,0,0,0))//!< &=
 	RISSE_OC_ENUM_ITEM(BitOrAssign		,ERR	,P(0,0,0,0,0,0))//!< |=
 	RISSE_OC_ENUM_ITEM(BitXorAssign		,ERR	,P(0,0,0,0,0,0))//!< ^=
@@ -224,11 +229,6 @@ RISSE_OC_ENUM_DEF()
 
 // VM コードの最後
 	RISSE_OC_ENUM_ITEM(VMCodeLast		,ERR	,P(0,0,0,0,0,0))//!< VMオペコードの最後
-
-
-// 引数1+2つ
-	RISSE_OC_ENUM_ITEM(DSet				,dset	,P(R,R,R,0,0,0))//!< set .
-	RISSE_OC_ENUM_ITEM(ISet				,iset	,P(R,R,R,0,0,0))//!< set [ ]
 
 
 // SSA形式特有

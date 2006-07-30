@@ -13,14 +13,23 @@
 #ifndef risseAssertH
 #define risseAssertH
 
-#include <assert.h>
 
 #if defined(DEBUG) || defined(_DEBUG)
+	#ifdef NDEBUG
+		#undef NDEBUG
+	#endif
+#else
 	#ifndef NDEBUG
 		#define NDEBUG
 	#endif
 #endif
 
+#ifndef NDEBUG
+	#define RISSE_ASSERT_ENABLED
+#endif
+
 #define RISSE_ASSERT assert
+
+#include <assert.h>
 
 #endif

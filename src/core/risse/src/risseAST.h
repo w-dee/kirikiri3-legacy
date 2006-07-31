@@ -284,6 +284,13 @@ protected:
 	virtual tRisseString GetDumpComment() const = 0;
 
 public:
+	//! @brief		このノードの最後のソースコード上の位置を得る
+	//! @note		このノード以下をすべて探し、最後のソースコード上の位置を得る @n
+	//!				最後の return 文を書く位置を決定するために使う @n
+	//!				このノードが antContext の場合は、子をたどって最後の位置を探すことなく
+	//!				即座に EndPosition を返す。
+	risse_size SearchEndPosition() const;
+
 	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
 	//!				(必要に応じて下位クラスで実装すること)
 	//! @param		form	SSA 形式ジェネレータクラス
@@ -496,6 +503,7 @@ class tRisseASTNode_Context : public tRisseASTNode_List
 {
 	tRisseASTContextType ContextType; //!< コンテキストタイプ
 	tRisseString Name; //!< コンテキストの名前(説明用)
+	risse_size EndPosition; //!< このコンテキストが終わる位置
 
 public:
 	//! @brief		コンストラクタ
@@ -504,7 +512,8 @@ public:
 	//! @param		name			コンテキストの名前
 	tRisseASTNode_Context(risse_size position, tRisseASTContextType context_type,
 		const tRisseString & name) :
-		tRisseASTNode_List(position, antContext), ContextType(context_type), Name(name) {;}
+		tRisseASTNode_List(position, antContext), ContextType(context_type),
+		Name(name), EndPosition(position) {;}
 
 	//! @brief		コンテキストタイプを得る
 	//! @return		コンテキストタイプ
@@ -513,6 +522,14 @@ public:
 	//! @brief		名前(説明用)を得る
 	//! @return		名前(説明用)
 	const tRisseString & GetName() const { return Name; }
+
+	//! @brief		コンテキストが終わる位置を設定する
+	//! @param		pos			コンテキストが終わる位置
+	void SetEndPosition(risse_size pos) { EndPosition = pos; }
+
+	//! @brief		コンテキストが終わる位置を取得する
+	//! @return		コンテキストが終わる位置
+	risse_size GetEndPosition() const { return EndPosition; }
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント

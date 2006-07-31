@@ -770,6 +770,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocReturn:
 		RISSE_ASSERT(Used.size() == 1);
 		gen->PutReturn(Used[0]);
+		break;
 
 	case ocLogNot:
 	case ocBitNot:
@@ -1960,6 +1961,9 @@ void tRisseSSAForm::Generate()
 	// ルートノードを処理する
 	Root->GenerateReadSSA(this);
 
+	// 実行ブロックの最後の return 文を生成する
+	GenerateLastReturn();
+
 	// 未バインドのラベルジャンプをすべて解決
 	LabelMap->BindAll();
 
@@ -2168,6 +2172,19 @@ tRisseString tRisseSSAForm::Dump() const
 		ret += (*i)->Dump();
 
 	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::GenerateLastReturn()
+{
+	// 最後の return; 文がない場合に備え、これを補う。
+	// 実際に最後の return 文があった場合は単にこの文は実行されない物として
+	// 後続の LeapDeadBlocks() で破棄される。
+	risse_size pos = Root->SearchEndPosition();
+	tRisseSSAVariable * void_var = AddConstantValueStatement(pos, tRisseVariant()); // void
+	AddStatement(pos, ocReturn, NULL, void_var);
 }
 //---------------------------------------------------------------------------
 

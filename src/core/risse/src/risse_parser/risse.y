@@ -329,7 +329,8 @@ program
 
 /* toplevel definitions */
 toplevel_list
-	: toplevel_def_list						{ PR->SetRootNode(C(Context, $1)); }
+	: toplevel_def_list						{ PR->SetRootNode(C(Context, $1));
+											  C(Context, $1)->SetEndPosition(LP); }
 ;
 
 /* toplevel definition list */
@@ -354,7 +355,7 @@ def_list
 block
 	: "{"
 	  def_list
-	  "}"									{ $$ = $2; }
+	  "}"									{ $$ = $2; C(Context, $2)->SetEndPosition(LP); }
 ;
 
 

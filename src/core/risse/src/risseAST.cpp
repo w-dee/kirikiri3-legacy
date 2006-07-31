@@ -562,6 +562,25 @@ tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
 
 
 
+//---------------------------------------------------------------------------
+risse_size tRisseASTNode::SearchEndPosition() const
+{
+	if(Type == antContext)
+		return ((const tRisseASTNode_Context*)this)->GetEndPosition();
+
+	risse_size pos = Position;
+	risse_size child_count = GetChildCount();
+	for(risse_size i = 0; i < child_count; i++)
+	{
+		risse_size child_end_pos = GetChildAt(i)->SearchEndPosition();
+		if(pos < child_end_pos) pos = child_end_pos;
+	}
+
+	return pos;
+}
+//---------------------------------------------------------------------------
+
+
 
 
 

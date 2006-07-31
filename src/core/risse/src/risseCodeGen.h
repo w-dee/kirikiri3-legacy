@@ -1073,6 +1073,9 @@ public:
 
 //----
 public:
+	//! @brief		実行ブロックの最後の return を生成する
+	void GenerateLastReturn();
+
 	//! @brief		到達しない基本ブロックを削除する
 	void LeapDeadBlocks();
 

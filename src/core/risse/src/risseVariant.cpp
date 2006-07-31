@@ -716,9 +716,9 @@ tRisseVariantBlock tRisseVariantBlock::Add_Integer  (const tRisseVariantBlock & 
 	switch(rhs.GetType())
 	{
 	case vtVoid:	return *this;
-	case vtInteger:	return AsInteger() + AsInteger();
-	case vtReal:	return AsInteger() + AsReal();
-	case vtBoolean:	return AsInteger() + (int)AsBoolean();
+	case vtInteger:	return AsInteger() + rhs.AsInteger();
+	case vtReal:	return AsInteger() + rhs.AsReal();
+	case vtBoolean:	return AsInteger() + (int)rhs.AsBoolean();
 	case vtString:	return CastToString_Integer() + rhs.AsString();
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
@@ -734,9 +734,9 @@ tRisseVariantBlock tRisseVariantBlock::Add_Real     (const tRisseVariantBlock & 
 	switch(rhs.GetType())
 	{
 	case vtVoid:	return *this;
-	case vtInteger:	return AsReal() + AsInteger();
-	case vtReal:	return AsReal() + AsReal();
-	case vtBoolean:	return AsReal() + (int)AsBoolean();
+	case vtInteger:	return AsReal() + rhs.AsInteger();
+	case vtReal:	return AsReal() + rhs.AsReal();
+	case vtBoolean:	return AsReal() + (int)rhs.AsBoolean();
 	case vtString:	return CastToString_Real() + rhs.AsString();
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
@@ -752,9 +752,9 @@ tRisseVariantBlock tRisseVariantBlock::Add_Boolean  (const tRisseVariantBlock & 
 	switch(rhs.GetType())
 	{
 	case vtVoid:	return *this;
-	case vtInteger:	return (int)AsBoolean() + AsInteger();
-	case vtReal:	return (int)AsBoolean() + AsReal();
-	case vtBoolean:	return (risse_int64)((int)AsBoolean() + (int)AsBoolean());
+	case vtInteger:	return (int)AsBoolean() + rhs.AsInteger();
+	case vtReal:	return (int)AsBoolean() + rhs.AsReal();
+	case vtBoolean:	return (risse_int64)((int)AsBoolean() + (int)rhs.AsBoolean());
 	case vtString:	return CastToString_Real() + rhs.AsString();
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも

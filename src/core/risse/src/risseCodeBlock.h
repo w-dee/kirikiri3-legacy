@@ -67,6 +67,9 @@ public:
 	//! @brief		必要なレジスタ数を得る
 	//! @return		必要なレジスタ数
 	risse_size GetNumRegs() const { return NumRegs; }
+
+	//! @brief		コード実行クラスのインスタンスを得る
+	tRisseCodeExecutor * GetExecutor() const { return Executor; }
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

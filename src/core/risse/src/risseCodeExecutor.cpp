@@ -22,20 +22,6 @@
 
 namespace Risse
 {
-/*
-スタックフレームと定数領域へのアクセスなど以下のマクロを使うこと。
-frame[num] のように書くと num に毎回 sizeof(frame[0]) の乗算が発生するため、
-将来的に、あらかじめ num は乗算を済ましておき、
-*(tRisseVariant*)((risse_uint8*)frame + (num)) のようなマクロに置き換える
-可能性がある。
-*/
-//! @brief		スタックフレームにアクセス
-#define AR(num) (frame[(num)])
-//! @brief		定数領域にアクセス
-#define AC(num) (consts[(num)])
-//! @brief		レジスタのオペランド -> レジスタ/定数インデックスへの変換
-#define CI(num) (num)
-
 //---------------------------------------------------------------------------
 RISSE_DEFINE_SOURCE_ID(38733,31388,53292,19613,29887,64791,9160,61431);
 //---------------------------------------------------------------------------
@@ -75,6 +61,22 @@ void tRisseCodeInterpreter::Execute(const tRisseVariant & this_obj,
 #ifdef RISSE_ASSERT_ENABLED
 	risse_size constssize = CodeBlock->GetConstsSize();
 #endif
+
+	/*
+	スタックフレームと定数領域へのアクセスなど以下のマクロを使うこと。
+	frame[num] のように書くと num に毎回 sizeof(frame[0]) の乗算が発生するため、
+	将来的に、あらかじめ num は乗算を済ましておき、
+	*(tRisseVariant*)((risse_uint8*)frame + (num)) のようなマクロに置き換える
+	可能性がある。
+	*/
+	//! @brief		スタックフレームにアクセス
+	#define AR(num) (frame[(num)])
+	//! @brief		定数領域にアクセス
+	#define AC(num) (consts[(num)])
+	//! @brief		レジスタのオペランド -> レジスタ/定数インデックスへの変換
+	#define CI(num) (num)
+
+
 
 	// ループ
 	while(true)
@@ -181,9 +183,9 @@ void tRisseCodeInterpreter::Execute(const tRisseVariant & this_obj,
 			break;
 
 		case ocReturn			: // ret	 return ステートメント
-			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			code += 2;
+			if(result) *result = AR(code[1]);
+			//code += 2;
 			return;
 
 		case ocLogNot			: // lnot	 "!" logical not

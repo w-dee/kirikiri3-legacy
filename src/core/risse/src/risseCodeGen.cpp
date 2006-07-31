@@ -2867,6 +2867,7 @@ void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 
 }
 # include "risseCodeBlock.h"
+# include "risseCodeExecutor.h"
 namespace Risse{
 //---------------------------------------------------------------------------
 void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
@@ -2907,6 +2908,13 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 		str = cb->Dump();
 		RisseFPrint(stdout, str.c_str());
 	}
+
+	// テスト実行
+	RisseFPrint(stdout,(RISSE_WS("---------- Result ----------\n")));
+	tRisseCodeBlock * cb = new tRisseCodeBlock(SSAForms.front()->GetCodeGenerator());
+	tRisseVariant ret;
+	cb->GetExecutor()->Execute(tRisseVariant(), &ret);
+	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }
 //---------------------------------------------------------------------------
 

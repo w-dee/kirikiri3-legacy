@@ -67,8 +67,8 @@ void tRisseCodeInterpreter::Execute(const tRisseVariant & this_obj,
 	risse_size framesize = CodeBlock->GetNumRegs();
 #endif
 	const risse_uint32 * code = CodeBlock->GetCode();
-	const risse_uint32 * code_origin = CodeBlock->GetCode();
 #ifdef RISSE_ASSERT_ENABLED
+	const risse_uint32 * code_origin = CodeBlock->GetCode();
 	risse_size codesize = CodeBlock->GetCodeSize();
 #endif
 	const tRisseVariant * consts = CodeBlock->GetConsts();
@@ -157,17 +157,16 @@ void tRisseCodeInterpreter::Execute(const tRisseVariant & this_obj,
 			break;
 
 		case ocJump			: // jump	 単純なジャンプ
-			// ジャンプコードの開始番地に対する相対指定になっていた
-			// ほうが効率がよい？？(いまはそうなってない)
-			code = code_origin + code[1];
+			// アドレスはジャンプコードの開始番地に対する相対指定
+			code += static_cast<risse_int32>(code[1]);
 			break;
 
 		case ocBranch			: // branch	 分岐
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			if((bool)AC(code[1]))
-				code = code_origin + code[2];
+				code += static_cast<risse_int32>(code[2]);
 			else
-				code = code_origin + code[3];
+				code += static_cast<risse_int32>(code[3]);
 			break;
 
 		case ocDebugger		: // dbg	 debugger ステートメント

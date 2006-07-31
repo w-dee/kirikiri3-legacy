@@ -110,7 +110,10 @@ tRisseString tRisseVMCodeIterator::Dump() const
 			{
 				if(i != 0) ret += RISSE_WS(", ");
 				char address[22];
-				sprintf(address, "%05d", (int)CodePointer[i+1]);
+				if(Address != risse_size_max)
+					sprintf(address, "%05d", static_cast<int>(Address + CodePointer[i+1]));
+				else
+					sprintf(address, "%d", static_cast<int>(static_cast<risse_int32>(CodePointer[i+1])));
 				ret += tRisseString(address);
 			}
 			break;

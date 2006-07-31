@@ -2423,9 +2423,9 @@ void tRisseCodeGenerator::AddBlockMap(const tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddPendingBlockJump(const tRisseSSABlock * block)
+void tRisseCodeGenerator::AddPendingBlockJump(const tRisseSSABlock * block, risse_size insn_pos)
 {
-	PendingBlockJumps.push_back(std::pair<const tRisseSSABlock *, risse_size>(block, Code.size()));
+	PendingBlockJumps.push_back(tPendingBlockJump(block, Code.size(), insn_pos));
 }
 //---------------------------------------------------------------------------
 
@@ -2595,13 +2595,23 @@ void tRisseCodeGenerator::FreeParentVariableMapVariables()
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::FixCode()
 {
+	// サイズをチェック
+	if(Code.size() != static_cast<risse_uint32>(Code.size()))
+		eRisseError::Throw(
+			tRisseString(RISSE_WS_TR("too large code size"))); // まずあり得ないと思うが ...
+
 	// ジャンプアドレスのfixup
-	for(gc_vector<std::pair<const tRisseSSABlock *, risse_size> >::iterator i =
+	// ジャンプアドレスは 命令開始位置に対する相対指定となる。
+	// これにより 実行効率がよくなる (なぜならば絶対位置を保持する必要がないので)
+	for(gc_vector<tPendingBlockJump>::iterator i =
 		PendingBlockJumps.begin(); i != PendingBlockJumps.end(); i++)
 	{
-		tBlockMap::iterator b = BlockMap.find(i->first);
+		tBlockMap::iterator b = BlockMap.find(i->Block);
 		RISSE_ASSERT(b != BlockMap.end());
-		Code[i->second] = b->second;
+		Code[i->EmitPosition] = static_cast<risse_uint32>(
+					static_cast<risse_int32>(b->second - i->InsnPosition));
+			// コードサイズは uint32 内に収まることがこの関数の最初で保証されるので
+			// オフセットは安全に uint32 にキャストしてよい
 	}
 }
 //---------------------------------------------------------------------------
@@ -2729,8 +2739,9 @@ void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutJump(const tRisseSSABlock * target)
 {
+	risse_size insn_pos = Code.size();
 	PutWord(ocJump);
-	AddPendingBlockJump(target);
+	AddPendingBlockJump(target, insn_pos);
 	PutWord(0); // 仮
 }
 //---------------------------------------------------------------------------
@@ -2740,11 +2751,12 @@ void tRisseCodeGenerator::PutJump(const tRisseSSABlock * target)
 void tRisseCodeGenerator::PutBranch(const tRisseSSAVariable * ref,
 		const tRisseSSABlock * truetarget, const tRisseSSABlock * falsetarget)
 {
+	risse_size insn_pos = Code.size();
 	PutWord(ocBranch);
 	PutWord(FindRegMap(ref));
-	AddPendingBlockJump(truetarget);
+	AddPendingBlockJump(truetarget, insn_pos);
 	PutWord(0); // 仮
-	AddPendingBlockJump(falsetarget);
+	AddPendingBlockJump(falsetarget, insn_pos);
 	PutWord(0); // 仮
 }
 //---------------------------------------------------------------------------

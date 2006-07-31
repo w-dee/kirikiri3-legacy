@@ -1128,7 +1128,16 @@ class tRisseCodeGenerator : public tRisseCollectee
 	tNamedRegMap PinnedRegNameMap; //!< pinされた変数の変数名とそれに対応するレジスタ番号のマップ
 	tNamedRegMap ParentVariableMap; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
-	gc_vector<std::pair<const tRisseSSABlock *, risse_size> > PendingBlockJumps;
+	//! @brief		未解決のジャンプを表す構造体
+	struct tPendingBlockJump
+	{
+		const tRisseSSABlock *	Block; //!< 基本ブロック
+		risse_size			EmitPosition; //!< オフセットを入れ込む位置
+		risse_size			InsnPosition; //!< 命令位置
+		tPendingBlockJump(const tRisseSSABlock * block, risse_size emit_pos, risse_size insn_pos)
+			: Block(block), EmitPosition(emit_pos), InsnPosition(insn_pos) {;}
+	};
+	gc_vector<tPendingBlockJump> PendingBlockJumps;
 			//!< 未解決のジャンプとその基本ブロックのリスト
 	typedef gc_map<const tRisseSSABlock *, risse_size> tBlockMap;
 			//!< 基本ブロックとそれが対応するアドレスの typedef
@@ -1170,8 +1179,9 @@ public:
 
 	//! @brief		未解決のジャンプとその基本ブロックを追加する
 	//! @param		block		基本ブロック
-	//! @note		アドレスとしては現在の命令書き込み位置が用いられる
-	void AddPendingBlockJump(const tRisseSSABlock * block);
+	//! @param		insn_pos	ジャンプ命令の開始位置
+	//! @note		ジャンプ先アドレスを入れ込むアドレスとしては現在の命令書き込み位置が用いられる
+	void AddPendingBlockJump(const tRisseSSABlock * block, risse_size insn_pos);
 
 	//! @brief		定数領域から値を見つけ、その値を返す
 	//! @param		value		定数値

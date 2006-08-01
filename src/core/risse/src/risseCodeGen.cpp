@@ -1607,21 +1607,8 @@ void tRisseSSABlock::ConvertPinnedVariableAccess()
 //---------------------------------------------------------------------------
 void tRisseSSABlock::CreateLiveInAndLiveOut()
 {
-	// Pred と Succ の間に LiveIn と LiveOut を作成する
-	// 接続されている二つのブロックの接続点の LiveOut と LiveIn は
-	// 同じオブジェクトになる
-
-	// すべての Pred の LiveOut に設定を行う
-	if(!LiveIn) LiveIn = new tLiveVariableMap();
-	for(gc_vector<tRisseSSABlock *>::iterator i = Pred.begin();
-			i != Pred.end(); i++)
-		(*i)->LiveOut = LiveIn;
-
-	// すべての Succ の LiveIn に設定を行う
+	if(!LiveIn)  LiveIn  = new tLiveVariableMap();
 	if(!LiveOut) LiveOut = new tLiveVariableMap();
-	for(gc_vector<tRisseSSABlock *>::iterator i = Succ.begin();
-			i != Succ.end(); i++)
-		(*i)->LiveIn = LiveOut;
 }
 //---------------------------------------------------------------------------
 
@@ -1631,20 +1618,20 @@ void tRisseSSABlock::AnalyzeVariableLiveness()
 {
 	// すべてのマークされていない変数に対して生存区間解析を行う
 
-	// すべての文を検査し、それぞれの文で使用されている「変数」について解析を行う
+	// すべての文を検査し、それぞれの文で宣言されている「変数」について解析を行う
 	// 「文」につく「マーク」は 文のポインタそのもの
 	tRisseSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt;
 		stmt = stmt->GetSucc())
 	{
-		const gc_vector<tRisseSSAVariable *> & used = stmt->GetUsed();
-		for(risse_size s = 0; s < used.size(); s++)
+		tRisseSSAVariable * decl_var = stmt->GetDeclared();
+		if(decl_var != NULL)
 		{
-			if(used[s]->GetMark() != stmt)
+			if(decl_var->GetMark() != stmt)
 			{
-				Form->AnalyzeVariableLiveness(used[s]);
-				used[s]->SetMark(stmt);
+				Form->AnalyzeVariableLiveness(decl_var);
+				decl_var->SetMark(stmt);
 			}
 		}
 	}
@@ -2263,8 +2250,11 @@ void tRisseSSAForm::AnalyzeVariableLiveness(tRisseSSAVariable * var)
 	for(gc_vector<tRisseSSAStatement *>::const_iterator si = used.begin();
 		si != used.end(); si++)
 	{
+		// この文
+		tRisseSSAStatement * used_stmt = *si;
+
 		// この文のブロックは
-		tRisseSSABlock * used_block = (*si)->GetBlock();
+		tRisseSSABlock * used_block = used_stmt->GetBlock();
 		RISSE_ASSERT(used_block != NULL);
 
 		// ブロックを逆順にたどる
@@ -2293,7 +2283,7 @@ void tRisseSSAForm::AnalyzeVariableLiveness(tRisseSSAVariable * var)
 			// の先をたどるのは辞める
 			if(!stop &&(
 					quest_block->GetLiveness(var, true) ||
-					quest_block->GetLiveness(var, true)))
+					quest_block->GetLiveness(var, false)))
 				stop = true;
 
 			if(!stop)
@@ -2305,9 +2295,37 @@ void tRisseSSAForm::AnalyzeVariableLiveness(tRisseSSAVariable * var)
 				quest_block->AddLiveness(var, false);
 
 				// スタックに quest_block のpred を追加する
-				for(gc_vector<tRisseSSABlock *>::const_iterator i = quest_block->GetPred().begin();
-					i != quest_block->GetPred().end(); i++)
-					Stack.push_back(*i);
+				// また、pred の LiveOut にも変数を追加する
+				// ただし、この文がφ関数だった場合は、φ関数に対応した
+				// 方向のブロックのみを追加する
+				if(used_stmt->GetCode() == ocPhi && used_block == quest_block)
+				{
+					// φ関数のused内でvarを探す
+					const gc_vector<tRisseSSAVariable *> & phi_used = used_stmt->GetUsed();
+					risse_size idx = 0;
+					for(gc_vector<tRisseSSAVariable *>::const_iterator i = phi_used.begin();
+						i != phi_used.end(); i++, idx++)
+					{
+						if(*i == var)
+						{
+							// var が見つかったのでその方向へ探索を続ける
+							tRisseSSABlock * pred = quest_block->GetPred()[idx];
+							pred->AddLiveness(var, true);
+							Stack.push_back(pred);
+							break;
+						}
+					}
+				}
+				else
+				{
+					for(gc_vector<tRisseSSABlock *>::const_iterator i =
+										quest_block->GetPred().begin();
+						i != quest_block->GetPred().end(); i++)
+					{
+						(*i)->AddLiveness(var, true);
+						Stack.push_back(*i);
+					}
+				}
 			}
 		} while(Stack.size() > 0);
 

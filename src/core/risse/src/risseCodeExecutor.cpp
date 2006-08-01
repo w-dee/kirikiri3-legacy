@@ -165,14 +165,25 @@ void tRisseCodeInterpreter::Execute(const tRisseVariant & this_obj,
 
 		case ocBranch			: // branch	 分岐
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			if((bool)AC(code[1]))
+			if((bool)AR(code[1]))
 				code += static_cast<risse_int32>(code[2]);
 			else
 				code += static_cast<risse_int32>(code[3]);
 			break;
 
 		case ocDebugger		: // dbg	 debugger ステートメント
-			/* incomplete */
+			// とりあえず現在のローカル変数をダンプしてみる
+			{
+				risse_size framesize = CodeBlock->GetNumRegs();
+				for(risse_size n = 0; n < framesize; n++)
+				{
+					RisseFPrint(stderr, 
+						tRisseString(RISSE_WS("%$1 = $2\n"),
+							tRisseString::AsString((risse_int64)n),
+							AR(n).AsHumanReadable()
+								).c_str());
+				}
+			}
 			code += 1;
 			break;
 

@@ -2525,6 +2525,7 @@ void tRisseCodeGenerator::FreeRegister(risse_size reg)
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::FreeUnusedRegisters(const tRisseSSABlock *block)
 {
+/*
 	gc_vector<const tRisseSSAVariable *> free; // 開放すべき変数
 
 	// RegMap にある変数をすべて見る
@@ -2545,6 +2546,7 @@ void tRisseCodeGenerator::FreeUnusedRegisters(const tRisseSSABlock *block)
 		FreeRegister(f->second); // 変数を開放
 		RegMap.erase(f); // 削除
 	}
+*/
 }
 //---------------------------------------------------------------------------
 

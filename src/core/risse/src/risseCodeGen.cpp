@@ -452,6 +452,8 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 	// フィールドの初期化
 	Form = form;
 	Declared = stmt;
+	FirstUsedStatement = NULL;
+	LastUsedStatement = NULL;
 	Value = NULL;
 	ValueType = tRisseVariant::vtVoid;
 	Mark = NULL;
@@ -546,6 +548,23 @@ tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tR
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAVariable::AnalyzeVariableStatementLiveness()
+{
+	RISSE_ASSERT(Declared != NULL);
+	FirstUsedStatement = LastUsedStatement = Declared;
+	for(gc_vector<tRisseSSAStatement*>::iterator i = Used.begin(); i != Used.end(); i++)
+	{
+		if(FirstUsedStatement->GetOrder() < (*i)->GetOrder())
+			FirstUsedStatement = *i;
+		if(LastUsedStatement->GetOrder() > (*i)->GetOrder())
+			LastUsedStatement = *i;
+	}
+}
+
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseSSAVariable::Dump() const
 {
 	return GetQualifiedName();
@@ -602,6 +621,7 @@ tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
 	Pred = NULL;
 	Succ = NULL;
 	Declared = NULL;
+	Order = risse_size_max;
 	TrueBranch = FalseBranch = NULL;
 	JumpTarget = NULL;
 	FuncExpandFlags = 0;
@@ -1614,7 +1634,7 @@ void tRisseSSABlock::CreateLiveInAndLiveOut()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AnalyzeVariableLiveness()
+void tRisseSSABlock::AnalyzeVariableBlockLiveness()
 {
 	// すべてのマークされていない変数に対して生存区間解析を行う
 
@@ -1630,10 +1650,26 @@ void tRisseSSABlock::AnalyzeVariableLiveness()
 		{
 			if(decl_var->GetMark() != stmt)
 			{
-				Form->AnalyzeVariableLiveness(decl_var);
+				Form->AnalyzeVariableBlockLiveness(decl_var);
 				decl_var->SetMark(stmt);
 			}
 		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::AnalyzeVariableStatementLiveness()
+{
+	// すべての文で宣言された変数について文単位の有効範囲解析を行う
+	tRisseSSAStatement *stmt;
+	for(stmt = FirstStatement;
+		stmt && stmt->GetCode() == ocPhi;
+		stmt = FirstStatement)
+	{
+		tRisseSSAVariable * decl_var = stmt->GetDeclared();
+		if(decl_var) decl_var->AnalyzeVariableStatementLiveness();
 	}
 }
 //---------------------------------------------------------------------------
@@ -1700,6 +1736,21 @@ void tRisseSSABlock::RemovePhiStatements()
 
 		// φ関数を除去
 		DeleteStatement(stmt);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::SetOrder(risse_size & order)
+{
+	tRisseSSAStatement *stmt;
+	for(stmt = FirstStatement;
+		stmt && stmt->GetCode() == ocPhi;
+		stmt = FirstStatement)
+	{
+		stmt->SetOrder(order);
+		order ++;
 	}
 }
 //---------------------------------------------------------------------------
@@ -1961,7 +2012,7 @@ void tRisseSSAForm::Generate()
 	ConvertPinnedVariableAccess();
 
 	// 変数の有効範囲を解析
-	AnalyzeVariableLiveness();
+	AnalyzeVariableBlockLiveness();
 
 	// φ関数を除去
 	RemovePhiStatements();
@@ -2213,7 +2264,7 @@ void tRisseSSAForm::ConvertPinnedVariableAccess()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AnalyzeVariableLiveness()
+void tRisseSSAForm::AnalyzeVariableBlockLiveness()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得て、マークをクリアする
 	gc_vector<tRisseSSABlock *> blocks;
@@ -2227,13 +2278,13 @@ void tRisseSSAForm::AnalyzeVariableLiveness()
 
 	// それぞれのブロック内にある変数に対して生存区間解析を行う
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->AnalyzeVariableLiveness();
+		(*i)->AnalyzeVariableBlockLiveness();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AnalyzeVariableLiveness(tRisseSSAVariable * var)
+void tRisseSSAForm::AnalyzeVariableBlockLiveness(tRisseSSAVariable * var)
 {
 	// それぞれの 変数の使用位置について、変数の宣言か、この変数が使用されていると
 	// マークされている箇所にまで逆順にブロックをたどる
@@ -2366,6 +2417,15 @@ void tRisseSSAForm::GenerateCode() const
 	// EntryBlock から到達可能なすべての基本ブロックを得る
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
+
+	// すべての基本ブロック内の文に通し番号を設定する
+	risse_size order = 0;
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->SetOrder(order);
+
+	// 変数の詳細な生存範囲解析を行う
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->AnalyzeVariableStatementLiveness();
 
 	// すべてのピンされている変数を登録する
 	CodeGenerator->SetRegisterBase();

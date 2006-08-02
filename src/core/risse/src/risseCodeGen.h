@@ -242,6 +242,9 @@ class tRisseSSAVariable : public tRisseCollectee
 	tRisseSSAStatement * Declared; //!< この変数が定義された文
 	gc_vector<tRisseSSAStatement*> Used; //!< この変数が使用されている文のリスト
 
+	tRisseSSAStatement * FirstUsedStatement; //!< 文の通し番号順で最初にこの変数が使用された文
+	tRisseSSAStatement * LastUsedStatement; //!< 文の通し番号順で最後にこの変数が使用された文
+
 	const tRisseVariant *Value; //!< この変数がとりうる値(NULL=決まった値がない)
 	tRisseVariant::tType ValueType; //!< この変数がとりうる型(void = どんな型でも取りうる)
 	void * Mark; //!< マーク
@@ -352,6 +355,11 @@ public:
 	//! @brief		「マーク」を取得する
 	void * GetMark() const { return Mark; }
 
+	//! @brief		この変数の宣言と使用された文を探し、FirstUsedStatement と LastUsedStatement を設定する
+	//! @note		このメソッドを呼ぶ前に、tRisseSSABlock::SetOrder() で文に
+	//!				通し番号を設定すること
+	void AnalyzeVariableStatementLiveness();
+
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
@@ -377,6 +385,8 @@ class tRisseSSAStatement : public tRisseCollectee
 
 	tRisseSSAVariable * Declared; //!< この文で定義された変数
 	gc_vector<tRisseSSAVariable*> Used; //!< この文で使用されている変数のリスト
+
+	risse_size Order; //!< コード先頭からの通し番号
 
 	union
 	{
@@ -471,6 +481,13 @@ public:
 
 	//! @brief		この文で使用されている変数のリストを得る
 	const gc_vector<tRisseSSAVariable *> & GetUsed() const { return Used; }
+
+	//! @brief		コード先頭からの通し番号を設定する
+	//! @param		order	コード先頭からの通し番号
+	void SetOrder(risse_size order) { Order = order; }
+
+	//! @brief		コード先頭からの通し番号を取得する @return コード先頭からの通し番号
+	risse_size GetOrder() const { return Order; }
 
 	//! @brief		分岐のジャンプ先(条件が真のとき)を設定する
 	//! @param		type	分岐のジャンプ先(条件が真のとき)
@@ -704,12 +721,19 @@ public:
 	//! @brief		LiveIn と LiveOut を作成する
 	void CreateLiveInAndLiveOut();
 
-	//! @brief		変数の生存区間を解析する
-	void AnalyzeVariableLiveness();
+	//! @brief		変数の生存区間を基本ブロック単位で解析する
+	void AnalyzeVariableBlockLiveness();
+
+	//! @brief		変数の生存区間を文単位で解析する
+	void AnalyzeVariableStatementLiveness();
 
 	//! @brief		φ関数を削除する
 	//! @note		このメソッド実行後はSSA形式としての性質は保てなくなる。
 	void RemovePhiStatements();
+
+	//! @brief		すべての文に通し番号を設定する
+	//! @param		order		通し番号の開始値 (終了時には文の数が加算されている)
+	void SetOrder(risse_size & order);
 
 	//! @brief		バイトコードを生成する
 	//! @param		gen		バイトコードジェネレータ
@@ -1082,12 +1106,12 @@ public:
 	//! @brief		ピンの刺さった変数へのアクセスを別形式の文に変換
 	void ConvertPinnedVariableAccess();
 
-	//! @brief		変数の生存区間を解析する(すべての変数に対して)
-	void AnalyzeVariableLiveness();
+	//! @brief		変数の生存区間を基本ブロック単位で解析する(すべての変数に対して)
+	void AnalyzeVariableBlockLiveness();
 
-	//! @brief		変数の生存区間を解析する(個別の変数に対して)
+	//! @brief		変数の生存区間を基本ブロック単位で解析する(個別の変数に対して)
 	//! @param		var		変数
-	void AnalyzeVariableLiveness(tRisseSSAVariable * var);
+	void AnalyzeVariableBlockLiveness(tRisseSSAVariable * var);
 
 	//! @brief		φ関数を削除する
 	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ

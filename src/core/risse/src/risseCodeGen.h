@@ -305,6 +305,14 @@ public:
 	//! @brief		この変数で使用されている文のリストを得る
 	const gc_vector<tRisseSSAStatement *> & GetUsed() const { return Used; }
 
+	//! @brief		文の通し番号順で最初にこの変数が使用された文を得る
+	//! @return		文の通し番号順で最初にこの変数が使用された文
+	tRisseSSAStatement * GetFirstUsedStatement() const { return FirstUsedStatement; }
+
+	//! @brief		文の通し番号順で最後にこの変数が使用された文を得る
+	//! @return		文の通し番号順で最後にこの変数が使用された文
+	tRisseSSAStatement * GetLastUsedStatement() const { return LastUsedStatement; }
+
 	//! @brief		この変数がとりうる値を設定する
 	//! @param		value		この変数がとりうる値
 	//! @note		ValueType も、この value にあわせて設定される
@@ -355,10 +363,12 @@ public:
 	//! @brief		「マーク」を取得する
 	void * GetMark() const { return Mark; }
 
-	//! @brief		この変数の宣言と使用された文を探し、FirstUsedStatement と LastUsedStatement を設定する
+	//! @brief		この変数が使用された文が与えられるので、
+	//!				FirstUsedStatement と LastUsedStatement を設定する
+	//! @param		stmt	この変数が使用/宣言された文
 	//! @note		このメソッドを呼ぶ前に、tRisseSSABlock::SetOrder() で文に
 	//!				通し番号を設定すること
-	void AnalyzeVariableStatementLiveness();
+	void AnalyzeVariableStatementLiveness(tRisseSSAStatement * stmt);
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
@@ -549,6 +559,10 @@ public:
 	//! @return		この文で宣言された遅延評価ブロックのSSA形式インスタンス
 	tRisseSSAForm * GetDefinedForm() const { return DefinedForm; }
 
+	//! @brief		変数の生存区間を文単位で解析する
+	void AnalyzeVariableStatementLiveness();
+
+
 	//! @brief		バイトコードを生成する
 	//! @param		gen		バイトコードジェネレータ
 	void GenerateCode(tRisseCodeGenerator * gen) const;
@@ -556,6 +570,10 @@ public:
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tRisseString Dump() const;
+
+	//! @brief		文単位の変数の使用開始と使用終了についてダンプを行う
+	//! @param		is_start		使用開始のダンプを行う際にtrue,使用終了の場合はfalse
+	tRisseString DumpVariableStatementLiveness(bool is_start) const;
 };
 //---------------------------------------------------------------------------
 
@@ -616,11 +634,13 @@ public:
 
 	//! @brief		文を削除する
 	//! @param		stmt		削除する文
+	//! @note		文で使用されていた変数の使用リストは変更を行わない
 	void DeleteStatement(tRisseSSAStatement * stmt);
 
 	//! @brief		文を置き換える
 	//! @param		old_stmt		置き換えられる古い文
 	//! @param		new_stmt		新しくそこに配置される文
+	//! @note		文で使用されていた変数の使用リストは変更を行わない
 	void ReplaceStatement(tRisseSSAStatement * old_stmt, tRisseSSAStatement * new_stmt);
 
 	//! @brief		ブロックをまたがってφ関数を追加する
@@ -1117,6 +1137,9 @@ public:
 	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
 	void RemovePhiStatements();
 
+	//! @brief		変数の生存区間を文単位で解析する
+	void AnalyzeVariableStatementLiveness();
+
 	//! @brief		バイトコードジェネレータのインスタンスを生成する
 	void EnsureCodeGenerator();
 
@@ -1224,13 +1247,14 @@ public:
 	//! @note		レジスタを割り当てたら FreeRegister で開放すること
 	risse_size AllocateRegister();
 
-	//! @brief		レジスタを一つ開放する
+	//! @brief		レジスタを一つ開放する(レジスタインデックスより)
 	//! @param		reg		AllocateRegister() で割り当てたレジスタ
 	void FreeRegister(risse_size reg);
 
-	//! @brief		基本ブロックのLiveOutにないレジスタをすべて開放する
-	//! @param		block		基本ブロック
-	void FreeUnusedRegisters(const tRisseSSABlock *block);
+	//! @brief		レジスタを一つ解放する(変数インスタンスより)
+	//! @param		var		変数
+	//! @note		変数はレジスタマップ内に存在しないとならない
+	void FreeRegister(const tRisseSSAVariable *var);
 
 	//! @brief		pinされたレジスタのマップを変数名で探す
 	//! @param		name			変数名

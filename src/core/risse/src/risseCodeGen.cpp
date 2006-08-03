@@ -548,19 +548,23 @@ tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tR
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariable::AnalyzeVariableStatementLiveness()
+void tRisseSSAVariable::AnalyzeVariableStatementLiveness(tRisseSSAStatement * stmt)
 {
-	RISSE_ASSERT(Declared != NULL);
-	FirstUsedStatement = LastUsedStatement = Declared;
-	for(gc_vector<tRisseSSAStatement*>::iterator i = Used.begin(); i != Used.end(); i++)
+	// ここでは命令の生成順(通し番号順)に比較を行うため、通し番号が
+	// すでに文についていなければならない
+	RISSE_ASSERT(stmt->GetOrder() != risse_size_max);
+	if(!FirstUsedStatement)
 	{
-		if(FirstUsedStatement->GetOrder() < (*i)->GetOrder())
-			FirstUsedStatement = *i;
-		if(LastUsedStatement->GetOrder() > (*i)->GetOrder())
-			LastUsedStatement = *i;
+		FirstUsedStatement = LastUsedStatement = stmt;
+	}
+	else
+	{
+		if(FirstUsedStatement->GetOrder() > stmt->GetOrder())
+			FirstUsedStatement = stmt;
+		if(LastUsedStatement->GetOrder() < stmt->GetOrder())
+			LastUsedStatement = stmt;
 	}
 }
-
 //---------------------------------------------------------------------------
 
 
@@ -716,6 +720,17 @@ const tRisseString & tRisseSSAStatement::GetName() const
 			Code == ocDefineLazyBlock);
 	RISSE_ASSERT(Name != NULL);
 	return *Name;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::AnalyzeVariableStatementLiveness()
+{
+	if(Declared) Declared->AnalyzeVariableStatementLiveness(this);
+	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+		i != Used.end(); i++)
+		(*i)->AnalyzeVariableStatementLiveness(this);
 }
 //---------------------------------------------------------------------------
 
@@ -947,6 +962,19 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	default:
 		RISSE_ASSERT(!"not acceptable SSA operation code");
 		break;
+	}
+
+	// この文で使用が終了している変数を解放する
+	if(Declared)
+	{
+		if(Declared->GetLastUsedStatement() == this)
+			gen->FreeRegister(Declared);
+	}
+	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+			i != Used.end(); i++)
+	{
+		if((*i)->GetLastUsedStatement() == this)
+			gen->FreeRegister(*i);
 	}
 }
 //---------------------------------------------------------------------------
@@ -1196,6 +1224,31 @@ tRisseString tRisseSSAStatement::Dump() const
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSSAStatement::DumpVariableStatementLiveness(bool is_start) const
+{
+	tRisseString ret;
+	tRisseSSAVariable *var;
+	var = Declared;
+	if(var)
+		if((is_start?var->GetFirstUsedStatement():var->GetLastUsedStatement()) == this)
+			ret += var->GetQualifiedName();
+
+	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+			i != Used.end(); i++)
+	{
+		var = *i;
+		if((is_start?var->GetFirstUsedStatement():var->GetLastUsedStatement()) == this)
+		{
+			if(!ret.IsEmpty()) ret += RISSE_WS(", ");
+			ret += var->GetQualifiedName();
+		}
+	}
+
+	return ret;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -1663,14 +1716,11 @@ void tRisseSSABlock::AnalyzeVariableBlockLiveness()
 void tRisseSSABlock::AnalyzeVariableStatementLiveness()
 {
 	// すべての文で宣言された変数について文単位の有効範囲解析を行う
+	// この時点では状態はすでにSSAではない; phi関数の削除などにより、
+	// 変数のDeclaredが一カ所ではなくて複数箇所になっている場合があるので注意
 	tRisseSSAStatement *stmt;
-	for(stmt = FirstStatement;
-		stmt && stmt->GetCode() == ocPhi;
-		stmt = FirstStatement)
-	{
-		tRisseSSAVariable * decl_var = stmt->GetDeclared();
-		if(decl_var) decl_var->AnalyzeVariableStatementLiveness();
-	}
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->AnalyzeVariableStatementLiveness();
 }
 //---------------------------------------------------------------------------
 
@@ -1727,6 +1777,12 @@ void tRisseSSABlock::RemovePhiStatements()
 				new tRisseSSAStatement(Form, stmt->GetPosition(), ocAssign);
 			new_stmt->AddUsed(const_cast<tRisseSSAVariable*>(phi_used[index]));
 			new_stmt->SetDeclared(stmt_decld);
+			stmt_decld->SetDeclared(new_stmt); // 一応代入
+				/* 注意
+					「この変数が宣言された位置」(tRisseSSAVariable::Declared) は
+					φ関数を削除した後は意味がなくなる。φ関数の削除により、一つの変数
+					への代入が複数箇所になり、SSA性が保持されなくなるため。
+				*/
 
 			Pred[index]->InsertStatement(new_stmt, sipBeforeBranch);
 
@@ -1735,6 +1791,7 @@ void tRisseSSABlock::RemovePhiStatements()
 		}
 
 		// φ関数を除去
+		stmt->DeleteUsed();
 		DeleteStatement(stmt);
 	}
 }
@@ -1745,9 +1802,7 @@ void tRisseSSABlock::RemovePhiStatements()
 void tRisseSSABlock::SetOrder(risse_size & order)
 {
 	tRisseSSAStatement *stmt;
-	for(stmt = FirstStatement;
-		stmt && stmt->GetCode() == ocPhi;
-		stmt = FirstStatement)
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
 	{
 		stmt->SetOrder(order);
 		order ++;
@@ -1770,9 +1825,6 @@ void tRisseSSABlock::GenerateCode(tRisseCodeGenerator * gen) const
 	{
 		stmt->GenerateCode(gen);
 	}
-
-	// 不要な変数を解放する
-	gen->FreeUnusedRegisters(this);
 }
 //---------------------------------------------------------------------------
 
@@ -1817,12 +1869,23 @@ tRisseString tRisseSSABlock::Dump() const
 	else
 	{
 		// すべての文をダンプ
-		tRisseSSAStatement * stmt = FirstStatement;
-		do 
+		for(tRisseSSAStatement * stmt = FirstStatement; stmt != NULL; stmt = stmt->GetSucc())
 		{
+			tRisseString vars;
+			// この文で使用が開始された変数
+			vars = stmt->DumpVariableStatementLiveness(true);
+			if(!vars.IsEmpty()) ret += RISSE_WS("// Use start: ") + vars +
+																RISSE_WS("\n");
+			// 文本体
+			if(stmt->GetOrder() != risse_size_max)
+				ret += RISSE_WS("[") + tRisseString::AsString((risse_int64)stmt->GetOrder()) +
+					RISSE_WS("] ");
 			ret += stmt->Dump() + RISSE_WS("\n");
-			stmt = stmt->GetSucc();
-		} while(stmt != NULL);
+			// この文で使用が終了した変数
+			vars = stmt->DumpVariableStatementLiveness(false);
+			if(!vars.IsEmpty()) ret += RISSE_WS("// Use end: ") + vars +
+																RISSE_WS("\n");
+		}
 	}
 
 	// LiveOut を列挙
@@ -2011,11 +2074,14 @@ void tRisseSSAForm::Generate()
 	// ピンの刺さった変数へのアクセスを別形式の文に変換
 	ConvertPinnedVariableAccess();
 
-	// 変数の有効範囲を解析
+	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
 	// φ関数を除去
 	RemovePhiStatements();
+
+	// 変数の有効範囲を文単位で解析
+	AnalyzeVariableStatementLiveness();
 }
 //---------------------------------------------------------------------------
 
@@ -2400,6 +2466,25 @@ void tRisseSSAForm::RemovePhiStatements()
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAForm::AnalyzeVariableStatementLiveness()
+{
+	// EntryBlock から到達可能なすべての基本ブロックを得る
+	gc_vector<tRisseSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// すべての基本ブロック内の文に通し番号を設定する
+	risse_size order = 0;
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->SetOrder(order);
+
+	// 変数の詳細な生存範囲解析を行う
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->AnalyzeVariableStatementLiveness();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSAForm::EnsureCodeGenerator()
 {
 	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
@@ -2417,15 +2502,6 @@ void tRisseSSAForm::GenerateCode() const
 	// EntryBlock から到達可能なすべての基本ブロックを得る
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
-
-	// すべての基本ブロック内の文に通し番号を設定する
-	risse_size order = 0;
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->SetOrder(order);
-
-	// 変数の詳細な生存範囲解析を行う
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->AnalyzeVariableStatementLiveness();
 
 	// すべてのピンされている変数を登録する
 	CodeGenerator->SetRegisterBase();
@@ -2583,30 +2659,13 @@ void tRisseCodeGenerator::FreeRegister(risse_size reg)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::FreeUnusedRegisters(const tRisseSSABlock *block)
+void tRisseCodeGenerator::FreeRegister(const tRisseSSAVariable *var)
 {
-/*
-	gc_vector<const tRisseSSAVariable *> free; // 開放すべき変数
+	// RegMap から指定された変数を探す
+	tRegMap::iterator f = RegMap.find(var);
+	RISSE_ASSERT(f != RegMap.end());
 
-	// RegMap にある変数をすべて見る
-	for(tRegMap::iterator i = RegMap.begin(); i != RegMap.end(); i++)
-	{
-		if(!block->GetLiveness(i->first, true))
-		{
-			// RegMap にあって block の LiveOut にない
-			free.push_back(i->first);
-		}
-	}
-
-	// free にある変数をすべてRegMapから削除する
-	for(gc_vector<const tRisseSSAVariable *>::iterator i = free.begin(); i != free.end(); i++)
-	{
-		tRegMap::iterator f = RegMap.find(*i);
-		RISSE_ASSERT(f != RegMap.end());
-		FreeRegister(f->second); // 変数を開放
-		RegMap.erase(f); // 削除
-	}
-*/
+	FreeRegister(f->second);
 }
 //---------------------------------------------------------------------------
 

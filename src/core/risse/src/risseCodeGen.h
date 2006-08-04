@@ -929,6 +929,8 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseSSAVariable * FunctionCollapseArgumentVariable; //!< 関数引数の無名の * を保持している変数
 
 	tRisseCodeGenerator * CodeGenerator; //!< バイトコードジェネレータのインスタンス
+	tRisseCodeBlock * CodeBlock; //!< コードブロック
+	risse_size CodeBlockIndex; //!< コードブロックのスクリプトブロック内でのインデックス
 
 public:
 	//! @brief		コンストラクタ
@@ -1147,6 +1149,14 @@ public:
 	//! @return		バイトコードジェネレータ
 	tRisseCodeGenerator * GetCodeGenerator() const { return CodeGenerator; }
 
+	//! @brief		コードブロックを得る
+	//! @return		コードブロック
+	tRisseCodeBlock * GetCodeBlock() const { return CodeBlock; }
+
+	//! @brief		 コードブロックのスクリプトブロック内でのインデックスを得る
+	//! @return		コードブロックのスクリプトブロック内でのインデックス
+	risse_size GetCodeBlockIndex() const { return CodeBlockIndex; }
+
 	//! @brief		バイトコードを生成する
 	void GenerateCode() const;
 };
@@ -1190,6 +1200,8 @@ class tRisseCodeGenerator : public tRisseCollectee
 			//!< 基本ブロックとそれが対応するアドレスの typedef
 	tBlockMap BlockMap; //!< 変数とそれに対応するレジスタ番号のマップ
 
+	gc_vector<std::pair<risse_size, risse_size> > Relocations; // 他のコードブロックの再配置情報用配列
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent			親コードジェネレータ
@@ -1212,6 +1224,10 @@ public:
 
 	//! @brief	使用中のレジスタの最大数を得る @return 使用中のレジスタの最大数
 	risse_size GetMaxNumUsedRegs() const { return MaxNumUsedRegs; }
+
+	//! @brief	他のコードブロックの再配置情報用配列を得る @return 他のコードブロックの再配置情報用配列
+	const gc_vector<std::pair<risse_size, risse_size> > & GetRelocations() const
+		{ return Relocations; }
 
 protected:
 	//! @param		コードを1ワード分置く
@@ -1329,6 +1345,11 @@ public:
 	//! @param		code	オペレーションコード
 	void PutAssign(const tRisseSSAVariable * dest, tRisseOpCode code);
 
+	//! @brief		他のコードブロックへの再配置用コードを置く
+	//! @param		dest	格納先変数
+	//! @param		index	コードブロックのインデックス
+	void PutRelocatee(const tRisseSSAVariable * dest, risse_size index);
+
 	//! @brief		FuncCall あるいは New コードを置く
 	//! @param		dest	関数結果格納先
 	//! @param		func	関数を表す変数
@@ -1427,6 +1448,10 @@ public:
 	//! @param		ssaform		SSA形式インスタンス
 	void AddSSAForm(tRisseSSAForm * ssaform);
 
+	//! @brief		コードブロックを追加する
+	//! @param		block		コードブロック
+	//! @return		コードブロックのインデックス
+	risse_size AddCodeBlock(tRisseCodeBlock * block);
 
 };
 //---------------------------------------------------------------------------

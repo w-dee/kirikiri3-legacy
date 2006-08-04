@@ -26,9 +26,25 @@ RISSE_DEFINE_SOURCE_ID(13739,40903,3219,19310,50086,28697,53693,30185);
 
 
 //---------------------------------------------------------------------------
-tRisseCodeBlock::tRisseCodeBlock(const tRisseCodeGenerator *gen)
+tRisseCodeBlock::tRisseCodeBlock()
+{
+	Code = NULL;
+	CodeSize = 0;
+	Consts = NULL;
+	ConstsSize = 0;
+	NumRegs = 0;
+	Relocations = NULL;
+	RelocationSize = 0;
+	Executor = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 {
 	// gen からいろいろ情報をコピー
+	risse_size ind;
 
 	// コードのコピー
 	const gc_vector<risse_uint32> & gen_code = gen->GetCode();
@@ -38,7 +54,7 @@ tRisseCodeBlock::tRisseCodeBlock(const tRisseCodeGenerator *gen)
 		// 注意
 		// RisseMallocAtomicCollectee を使って Code 領域を確保しているため、
 		// Code 領域中にポインタを含ませるばあいは相応の対処をすること。
-	risse_size ind = 0;
+	ind = 0;
 	for(gc_vector<risse_uint32>::const_iterator i = gen_code.begin();
 		i != gen_code.end(); i++, ind++)
 		Code[ind] = *i;
@@ -52,11 +68,42 @@ tRisseCodeBlock::tRisseCodeBlock(const tRisseCodeGenerator *gen)
 		i != gen_consts.end(); i++, ind++)
 		Consts[ind] = *i;
 
+	// Relocations のコピー
+	const gc_vector<std::pair<risse_size, risse_size> > & relocations =
+			gen->GetRelocations();
+	Relocations = new tRelocation[RelocationSize = relocations.size()];
+	ind = 0;
+	for(gc_vector<std::pair<risse_size, risse_size> >::const_iterator i =
+		relocations.begin(); i != relocations.end(); i++, ind++)
+		Relocations[ind] = *i;
+
 	// 必要なレジスタ数のコピー
 	NumRegs = gen->GetMaxNumUsedRegs();
 
 	// Executor を作成
 	Executor = new tRisseCodeInterpreter(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeBlock::Fixup(tRisseScriptBlockBase * sb)
+{
+	RISSE_ASSERT(Relocations != NULL); // 二度以上このメソッドを呼べない
+
+	for(risse_size i = 0 ; i < RelocationSize; i++)
+		Consts[Relocations[i].first] =
+			sb->GetCodeBlockAt(Relocations[i].second)->GetObject(); // 再配置を行う
+
+	Relocations = NULL; // もう再配置は行った
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseCodeBlock::GetObject()
+{
+	return tRisseVariant();
 }
 //---------------------------------------------------------------------------
 

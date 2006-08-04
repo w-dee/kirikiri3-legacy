@@ -31,11 +31,8 @@ tRisseScriptBlock::tRisseScriptBlock(const tRisseString & script,
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlock::Evaluate(tRisseVariant * result, bool is_expression)
+tRisseASTNode * tRisseScriptBlock::GetASTRootNode(bool need_result, bool is_expression)
 {
-	// まず、コンパイルを行う
-	// (TODO: スクリプトブロックのキャッシュ対策)
-
 	// Lexer を準備する
 	tRisseLexer *lexer = new tRisseLexer(GetScript());
 
@@ -43,8 +40,7 @@ void tRisseScriptBlock::Evaluate(tRisseVariant * result, bool is_expression)
 	// パースする
 	tRisseParser *parser = new tRisseParser(this, lexer);
 
-	// コンパイルする
-	Compile(parser->GetRoot(), result != NULL, is_expression);
+	return parser->GetRoot();
 }
 //---------------------------------------------------------------------------
 

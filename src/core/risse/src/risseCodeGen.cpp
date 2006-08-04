@@ -15,7 +15,7 @@
 #include "risseCodeGen.h"
 #include "risseException.h"
 #include "risseScriptBlockBase.h"
-
+#include "risseCodeBlock.h"
 
 namespace Risse
 {
@@ -884,6 +884,9 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 				default: ;
 				}
 			}
+			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
+			// コードブロックの参照の問題があるので注意
+			gen->PutRelocatee(Declared, DefinedForm->GetCodeBlockIndex());
 		}
 		break;
 
@@ -2034,6 +2037,8 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	CurrentContinueInfo = NULL;
 	FunctionCollapseArgumentVariable = NULL;
 	CodeGenerator = NULL;
+	CodeBlock = NULL;
+	CodeBlockIndex = 0;
 
 	// compiler に自身を登録する
 	compiler->AddSSAForm(this);
@@ -2489,6 +2494,11 @@ void tRisseSSAForm::EnsureCodeGenerator()
 {
 	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
 	if(!CodeGenerator) CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL);
+	if(!CodeBlock)
+	{
+		CodeBlock = new tRisseCodeBlock();
+		CodeBlockIndex = Compiler->AddCodeBlock(CodeBlock);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -2529,6 +2539,9 @@ void tRisseSSAForm::GenerateCode() const
 		RISSE_ASSERT((*i)->CodeGenerator != NULL);
 		(*i)->GenerateCode();
 	}
+
+	// CodeBlock にコードを設定する
+	CodeBlock->Assign(CodeGenerator);
 }
 //---------------------------------------------------------------------------
 
@@ -2838,6 +2851,26 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, tRisseOpCode
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutRelocatee(const tRisseSSAVariable * dest, risse_size index)
+{
+	// 定数領域に仮の値をpushする
+	tRisseVariant value(tRisseString(RISSE_WS("<relocation block #$1>"),
+		tRisseString::AsString((risse_int64)index)));
+	risse_size reloc_pos = Consts.size();
+	Consts.push_back(value);
+
+	// ocAssignConstant 命令を生成する
+	PutWord(ocAssignConstant);
+	PutWord(FindRegMap(dest));
+	PutWord(reloc_pos);
+
+	// Relocations に情報を入れる
+	Relocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, index));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 		const tRisseSSAVariable * func,
 		bool is_new, bool omit, risse_uint32 expbit,
@@ -3031,11 +3064,18 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 		RisseFPrint(stdout, str.c_str());
 	}
 
-	// VMコードの生成
+	// コードジェネレータの生成
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 		(*i)->EnsureCodeGenerator();
+
+	// VMコードの生成
 	SSAForms.front()->GenerateCode();
+
+	// コードジェネレータの生成
+	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+		i != SSAForms.end(); i++)
+		(*i)->EnsureCodeGenerator();
 
 	// VMコードのダンプ
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
@@ -3043,17 +3083,13 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	{
 		RisseFPrint(stdout,(	RISSE_WS("---------- VM (") + (*i)->GetName() +
 								RISSE_WS(") ----------\n")).c_str());
-		tRisseCodeBlock * cb = new tRisseCodeBlock((*i)->GetCodeGenerator());
+		tRisseCodeBlock * cb = (*i)->GetCodeBlock();
 		str = cb->Dump();
 		RisseFPrint(stdout, str.c_str());
 	}
 
-	// テスト実行
-	RisseFPrint(stdout,(RISSE_WS("---------- Result ----------\n")));
-	tRisseCodeBlock * cb = new tRisseCodeBlock(SSAForms.front()->GetCodeGenerator());
-	tRisseVariant ret;
-	cb->GetExecutor()->Execute(tRisseVariant(), &ret);
-	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
+	// ルートのコードブロックを設定する
+	ScriptBlock->SetRootCodeBlock(SSAForms.front()->GetCodeBlock());
 }
 //---------------------------------------------------------------------------
 
@@ -3065,6 +3101,14 @@ void tRisseCompiler::AddSSAForm(tRisseSSAForm * ssaform)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+risse_size tRisseCompiler::AddCodeBlock(tRisseCodeBlock * block)
+{
+	// コードブロックの管理はスクリプトブロックが行っている
+	return ScriptBlock->AddCodeBlock(block);
+}
+//---------------------------------------------------------------------------
 
 
 

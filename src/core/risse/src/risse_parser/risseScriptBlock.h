@@ -30,12 +30,11 @@ public:
 	tRisseScriptBlock(const tRisseString & script,
 						const tRisseString & name, risse_size lineofs = 0);
 
-	//! @brief		スクリプトを評価する
-	//! @param		result			実行の結果(NULL可)
-	//! @param		is_expression	式評価モードかどうか
-	//! @note		もしスクリプトがコンパイルが必要な場合、
-	//!				Evaluate は評価に先立って Compile() を呼び、コンパイルを行う。
-	virtual void Evaluate(tRisseVariant * result = NULL, bool is_expression = false);
+	//! @brief		AST のルートノードを取得する(下位クラスで実装すること)
+	//! @param		need_result		結果が必要かどうか
+	//! @param		is_expression	式モードかどうか
+	//! @return		AST ルートノード
+	tRisseASTNode * GetASTRootNode(bool need_result = false, bool is_expression = false);
 };
 //---------------------------------------------------------------------------
 

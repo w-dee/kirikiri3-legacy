@@ -23,6 +23,7 @@ namespace Risse
 {
 class tRisseCodeGenerator;
 class tRisseCodeExecutor;
+class tRisseScriptBlockBase;
 //---------------------------------------------------------------------------
 //! @brief		コードブロッククラス
 //! @note		コードブロックは Risse の実行単位である「関数」などごとに、
@@ -36,17 +37,31 @@ class tRisseCodeBlock : public tRisseCollectee
 	risse_size ConstsSize; //!< 定数領域のサイズ(個)
 	risse_size NumRegs; //!< 必要なレジスタ数
 
+	typedef std::pair<risse_size, risse_size> tRelocation; //!<  再配置情報のtypedef
+	tRelocation * Relocations; //!< 再配置情報
+	risse_size RelocationSize;
+
 	tRisseCodeExecutor * Executor; //!< コード実行クラスのインスタンス
 
 public:
-	//! @brief		コンストラクタ(コードジェネレータから)
+	//! @brief		コンストラクタ
+	tRisseCodeBlock();
+
+	//! @brief		コードを設定する(コードジェネレータから)
 	//! @param		gen		コードジェネレータ
-	tRisseCodeBlock(const tRisseCodeGenerator *gen);
+	void Assign(const tRisseCodeGenerator *gen);
+
+	//! @brief		再配置情報の fixup を行う
+	//! @param		sb		スクリプトブロック
+	void Fixup(tRisseScriptBlockBase * sb);
+
+	//! @brief		このコードブロックのオブジェクトを得る
+	//! @return		このコードブロックを表すオブジェクト
+	tRisseVariant GetObject();
 
 	//! @brief		内容をダンプ(逆アセンブル)する
 	//! @return		ダンプした結果
 	tRisseString Dump() const;
-
 
  	//! @brief		コードを得る
  	//! @return		コード

@@ -15,6 +15,7 @@
 #include "risseScriptBlockBase.h"
 #include "risseException.h"
 #include "risseCodeGen.h"
+#include "risseCodeBlock.h"
 
 
 namespace Risse
@@ -31,6 +32,8 @@ tRisseScriptBlockBase::tRisseScriptBlockBase(const tRisseString & script,
 	Script = script;
 	Name = name;
 	LineOffset = lineofs;
+	RootCodeBlock = NULL;
+	CodeBlocks = new gc_vector<tRisseCodeBlock *>();
 }
 //---------------------------------------------------------------------------
 
@@ -128,6 +131,67 @@ void tRisseScriptBlockBase::Compile(tRisseASTNode * root, bool need_result, bool
 	// コンパイラオブジェクトを作成してコンパイルを行う
 	tRisseCompiler * compiler = new tRisseCompiler(this);
 	compiler->Compile(root, need_result, is_expression);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseScriptBlockBase::AddCodeBlock(tRisseCodeBlock * codeblock)
+{
+	RISSE_ASSERT(CodeBlocks != NULL); // このメソッドが呼ばれるのは Fixup 以前でなければならない
+	CodeBlocks->push_back(codeblock);
+	return CodeBlocks->size() - 1;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseCodeBlock * tRisseScriptBlockBase::GetCodeBlockAt(risse_size index) const
+{
+	RISSE_ASSERT(CodeBlocks != NULL);
+	RISSE_ASSERT(index < CodeBlocks->size());
+	return (*CodeBlocks)[index];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseScriptBlockBase::Fixup()
+{
+	// すべてのコードブロックの Fixup() を呼ぶ
+	for(gc_vector<tRisseCodeBlock *>::iterator i = CodeBlocks->begin();
+		i != CodeBlocks->end(); i++)
+		(*i)->Fixup(this);
+
+	// CodeBlocks をクリアする
+	CodeBlocks = NULL;
+}
+//---------------------------------------------------------------------------
+
+}
+#include "risseCodeExecutor.h" // for test ###################################
+namespace Risse {
+//---------------------------------------------------------------------------
+void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
+{
+	// まず、コンパイルを行う
+	// (TODO: スクリプトブロックのキャッシュ対策)
+
+	// AST ノードを用意する
+	tRisseASTNode * root_node = GetASTRootNode(result != NULL, is_expression);
+
+	// コンパイルする
+	Compile(root_node, result != NULL, is_expression);
+
+	// Fixup する
+	Fixup();
+
+	// テスト実行
+	RisseFPrint(stdout,(RISSE_WS("---------- Result ----------\n")));
+	tRisseVariant ret;
+	RISSE_ASSERT(RootCodeBlock != NULL);
+	RootCodeBlock->GetExecutor()->Execute(tRisseVariant(), &ret);
+	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }
 //---------------------------------------------------------------------------
 

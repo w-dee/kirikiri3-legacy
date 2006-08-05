@@ -10,10 +10,10 @@
 //! @file
 //! @brief AST(抽象構文木) の操作
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "../prec.h"
 #include "risseAST.h"
 #include "risseCodeGen.h"
-#include "risseException.h"
+#include "../risseException.h"
 
 // 名前表の読み込み
 #undef risseASTH

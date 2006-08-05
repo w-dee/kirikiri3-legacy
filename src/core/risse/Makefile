@@ -29,11 +29,10 @@ CPPFLAGS = $(CXXFLAGS)
 
 #----------------------------#
 
-CPPFILES =  src/risseAST.cpp                         \
+CPPFILES =  \
 			src/risseCharUtils.cpp                   \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \
-			src/risseCodeGen.cpp                     \
 			src/risseConfig.cpp                      \
 			src/risseCxxObject.cpp                   \
 			src/risseCxxOctet.cpp                    \
@@ -47,7 +46,9 @@ CPPFILES =  src/risseAST.cpp                         \
 			src/risseVariant.cpp                     \
 			src/risse_parser/risseLexer.cpp          \
 			src/risse_parser/risseScriptBlock.cpp    \
-			src/risse_parser/risseParser.cpp         
+			src/risse_parser/risseParser.cpp         \
+			src/compiler/risseAST.cpp                \
+			src/compiler/risseCodeGen.cpp            
 
 OBJS = $(CPPFILES:.cpp=.o)
 

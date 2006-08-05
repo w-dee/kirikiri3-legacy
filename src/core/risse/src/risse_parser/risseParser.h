@@ -16,7 +16,7 @@
 #include "risseLexer.h"
 #include "../risseTypes.h"
 #include "../risseGC.h"
-#include "../risseAST.h"
+#include "../compiler/risseAST.h"
 
 namespace Risse {
 // このファイルは Risse の名前空間内で include しないとだめ

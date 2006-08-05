@@ -13,12 +13,12 @@
 #ifndef risseCodeGenH
 #define risseCodeGenH
 
-#include "risseGC.h"
-#include "risseCharUtils.h"
-#include "risseTypes.h"
+#include "../risseGC.h"
+#include "../risseCharUtils.h"
+#include "../risseTypes.h"
 #include "risseAST.h"
-#include "risseVariant.h"
-#include "risseOpCodes.h"
+#include "../risseVariant.h"
+#include "../risseOpCodes.h"
 
 //---------------------------------------------------------------------------
 /*

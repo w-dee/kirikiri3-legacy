@@ -15,7 +15,7 @@
 #include "risseCodeBlock.h"
 #include "risseException.h"
 #include "risseScriptBlockBase.h"
-#include "risseCodeGen.h"
+#include "compiler/risseCodeGen.h"
 #include "risseCodeExecutor.h"
 
 namespace Risse

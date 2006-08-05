@@ -14,8 +14,8 @@
 #ifndef risseASTH
 #define risseASTH
 
-#include "risseGC.h"
-#include "risseVariant.h"
+#include "../risseGC.h"
+#include "../risseVariant.h"
 
 /*
 	このモジュールでは、AST のデータ型を定義するだけではなく、AST から SSA形式

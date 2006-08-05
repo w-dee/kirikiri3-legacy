@@ -10,12 +10,12 @@
 //! @file
 //! @brief バイトコードジェネレータ
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "../prec.h"
 
 #include "risseCodeGen.h"
-#include "risseException.h"
-#include "risseScriptBlockBase.h"
-#include "risseCodeBlock.h"
+#include "../risseException.h"
+#include "../risseScriptBlockBase.h"
+#include "../risseCodeBlock.h"
 
 namespace Risse
 {
@@ -3037,10 +3037,6 @@ void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 
 
 
-}
-# include "risseCodeBlock.h"
-# include "risseCodeExecutor.h"
-namespace Risse{
 //---------------------------------------------------------------------------
 void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
 {

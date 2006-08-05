@@ -187,7 +187,7 @@ void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
 	Fixup();
 
 	// テスト実行
-	RisseFPrint(stdout,(RISSE_WS("---------- Result ----------\n")));
+	RisseFPrint(stdout,(RISSE_WS("========== Result ==========\n")));
 	tRisseVariant ret;
 	RISSE_ASSERT(RootCodeBlock != NULL);
 	RootCodeBlock->GetExecutor()->Execute(tRisseVariant(), &ret);

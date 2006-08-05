@@ -319,7 +319,7 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, tRisseOpCode
 void tRisseCodeGenerator::PutRelocatee(const tRisseSSAVariable * dest, risse_size index)
 {
 	// 定数領域に仮の値をpushする
-	tRisseVariant value(tRisseString(RISSE_WS("<relocation block #$1>"),
+	tRisseVariant value(tRisseString(RISSE_WS("<relocation block #%1>"),
 		tRisseString::AsString((risse_int64)index)));
 	risse_size reloc_pos = Consts.size();
 	Consts.push_back(value);

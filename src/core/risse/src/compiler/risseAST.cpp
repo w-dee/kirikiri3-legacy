@@ -12,7 +12,10 @@
 //---------------------------------------------------------------------------
 #include "../prec.h"
 #include "risseAST.h"
-#include "risseCodeGen.h"
+#include "risseSSAForm.h"
+#include "risseSSAStatement.h"
+#include "risseSSAVariable.h"
+#include "risseCompilerNS.h"
 #include "../risseException.h"
 
 // 名前表の読み込み

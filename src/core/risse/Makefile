@@ -48,7 +48,13 @@ CPPFILES =  \
 			src/risse_parser/risseScriptBlock.cpp    \
 			src/risse_parser/risseParser.cpp         \
 			src/compiler/risseAST.cpp                \
-			src/compiler/risseCodeGen.cpp            
+			src/compiler/risseCodeGen.cpp            \
+			src/compiler/risseCompiler.cpp           \
+			src/compiler/risseCompilerNS.cpp         \
+			src/compiler/risseSSABlock.cpp           \
+			src/compiler/risseSSAForm.cpp            \
+			src/compiler/risseSSAStatement.cpp       \
+			src/compiler/risseSSAVariable.cpp        
 
 OBJS = $(CPPFILES:.cpp=.o)
 

@@ -1,0 +1,670 @@
+//---------------------------------------------------------------------------
+/*
+	Risse [りせ]
+	 stands for "Risse Is a Sweet Script Engine"
+	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
+
+	See details of license at "license.txt"
+*/
+//---------------------------------------------------------------------------
+//! @file
+//! @brief SSA形式における「文」
+//---------------------------------------------------------------------------
+#include "../prec.h"
+
+#include "risseSSAStatement.h"
+#include "risseSSAVariable.h"
+#include "risseSSABlock.h"
+#include "risseCodeGen.h"
+#include "risseSSAForm.h"
+#include "../risseException.h"
+
+namespace Risse
+{
+RISSE_DEFINE_SOURCE_ID(33139,58829,49251,19299,61572,36837,14859,14043);
+
+
+
+//---------------------------------------------------------------------------
+tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
+	risse_size position, tRisseOpCode code)
+{
+	// フィールドの初期化
+	Form = form;
+	Position = position;
+	Code = code;
+	Block = NULL;
+	Pred = NULL;
+	Succ = NULL;
+	Declared = NULL;
+	Order = risse_size_max;
+	TrueBranch = FalseBranch = NULL;
+	JumpTarget = NULL;
+	FuncExpandFlags = 0;
+	FuncArgOmitted = false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::AddUsed(tRisseSSAVariable * var)
+{
+	var->AddUsed(this);
+	Used.push_back(var);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::DeleteUsed(risse_size index)
+{
+	RISSE_ASSERT(Used.size() > index);
+	tRisseSSAVariable * var = Used[index];
+	Used.erase(Used.begin() + index);
+	var->DeleteUsed(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::DeleteUsed()
+{
+	risse_size i = Used.size();
+	while(i > 0)
+	{
+		i--;
+
+		DeleteUsed(i);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::SetTrueBranch(tRisseSSABlock * block)
+{
+	TrueBranch = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::SetJumpTarget(tRisseSSABlock * block)
+{
+	JumpTarget = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::SetFalseBranch(tRisseSSABlock * block)
+{
+	FalseBranch = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::SetName(const tRisseString & name)
+{
+	RISSE_ASSERT(
+			Code == ocParentRead || Code == ocParentWrite ||
+			Code == ocChildRead || Code == ocChildWrite ||
+			Code == ocReadVar || Code == ocWriteVar ||
+			Code == ocRead || Code == ocWrite ||
+			Code == ocDefineLazyBlock);
+	Name = new tRisseString(name);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+const tRisseString & tRisseSSAStatement::GetName() const
+{
+	RISSE_ASSERT(
+			Code == ocParentRead || Code == ocParentWrite ||
+			Code == ocChildRead || Code == ocChildWrite ||
+			Code == ocReadVar || Code == ocWriteVar ||
+			Code == ocRead || Code == ocWrite ||
+			Code == ocDefineLazyBlock);
+	RISSE_ASSERT(Name != NULL);
+	return *Name;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::AnalyzeVariableStatementLiveness()
+{
+	if(Declared) Declared->AnalyzeVariableStatementLiveness(this);
+	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+		i != Used.end(); i++)
+		(*i)->AnalyzeVariableStatementLiveness(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
+{
+	// gen に一つ文を追加する
+	switch(Code)
+	{
+	case ocNoOperation:
+		gen->PutNoOperation();
+		break;
+
+	case ocAssign:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutAssign(Declared, Used[0]);
+		break;
+
+	case ocAssignConstant:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Declared->GetValue() != NULL);
+		gen->PutAssign(Declared, *Declared->GetValue());
+		break;
+
+	case ocAssignThis:
+	case ocAssignSuper:
+	case ocAssignGlobal:
+	case ocAssignNewArray:
+	case ocAssignNewDict:
+	case ocAssignNewRegExp:
+		RISSE_ASSERT(Declared != NULL);
+		gen->PutAssign(Declared, Code);
+		break;
+
+	case ocFuncCall:
+	case ocNew:
+	case ocFuncCallBlock:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() >= 1);
+
+		{
+			gc_vector<const tRisseSSAVariable *> args, blocks;
+			// TODO: ブロックの引き渡し
+
+			for(risse_size i = /*注意*/1; i < Used.size(); i++)
+				args.push_back(Used[i]);
+			gen->PutFunctionCall(Declared, Used[0], Code == ocNew, FuncArgOmitted,
+						FuncExpandFlags, args, blocks);
+		}
+		break;
+
+	case ocJump:
+		gen->PutJump(JumpTarget);
+		break;
+
+	case ocBranch:
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutBranch(Used[0], TrueBranch, FalseBranch);
+		break;
+
+	case ocDebugger:
+		gen->PutDebugger();
+		break;
+
+	case ocThrow:
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutThrow(Used[0]);
+		break;
+
+	case ocReturn:
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutReturn(Used[0]);
+		break;
+
+	case ocLogNot:
+	case ocBitNot:
+	case ocPlus:
+	case ocMinus:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutOperator(Code, Declared, Used[0]);
+		break;
+
+	case ocLogOr:
+	case ocLogAnd:
+	case ocBitOr:
+	case ocBitXor:
+	case ocBitAnd:
+	case ocNotEqual:
+	case ocEqual:
+	case ocDiscNotEqual:
+	case ocDiscEqual:
+	case ocLesser:
+	case ocGreater:
+	case ocLesserOrEqual:
+	case ocGreaterOrEqual:
+	case ocRBitShift:
+	case ocLShift:
+	case ocRShift:
+	case ocMod:
+	case ocDiv:
+	case ocIdiv:
+	case ocMul:
+	case ocAdd:
+	case ocSub:
+	case ocIncontextOf:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 2);
+		gen->PutOperator(Code, Declared, Used[0], Used[1]);
+		break;
+
+	case ocDGet:
+	case ocIGet:
+	case ocDDelete:
+	case ocIDelete:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 2);
+		gen->PutOperator(Code, Declared, Used[0], Used[1]);
+		break;
+
+	case ocDSet:
+	case ocISet:
+		RISSE_ASSERT(Used.size() == 3);
+		gen->PutSet(Code, Used[0], Used[1], Used[2]);
+		break;
+
+	case ocDefineLazyBlock:
+		{
+			tRisseSSAForm * child_form = DefinedForm;
+			RISSE_ASSERT(child_form != NULL);
+			RISSE_ASSERT(Declared != NULL);
+			// Declared で使用している文のうち、ocChildWrite/ocChildRead
+			// してる物を探し、そこで使用されている名前で gen の ParentVariableMap に
+			// マップを作成する
+			// (実際の変数へのアクセスは後の ocChildWrite や ocChildRead で処理する)
+			const gc_vector<tRisseSSAStatement *> & child_access_stmts =
+				Declared->GetUsed();
+			for(gc_vector<tRisseSSAStatement *>::const_iterator i =
+				child_access_stmts.begin(); i != child_access_stmts.end(); i++)
+			{
+				tRisseSSAStatement * stmt = *i;
+				switch((*i)->Code)
+				{
+				case ocChildWrite:
+				case ocChildRead:
+					DefinedForm->GetCodeGenerator()->
+						FindParentVariableMap(*stmt->Name); // マップに変数名だけを追加する
+					break;
+				default: ;
+				}
+			}
+			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
+			// コードブロックの参照の問題があるので注意
+			gen->PutRelocatee(Declared, DefinedForm->GetCodeBlockIndex());
+		}
+		break;
+
+	case ocChildWrite:
+		{
+			RISSE_ASSERT(Used.size() == 2);
+			RISSE_ASSERT(Name != NULL);
+			// Used[0] が define された文は ocDefineLazyBlock であるはずである
+			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
+			//       現状の実装は暫定的なもの。
+			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
+			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
+			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
+			gen->PutAssign(lazy_stmt->DefinedForm->GetCodeGenerator()->
+						FindParentVariableMap(*Name), Used[1]);
+		}
+		break;
+
+	case ocChildRead:
+		{
+			RISSE_ASSERT(Used.size() == 1);
+			RISSE_ASSERT(Name != NULL);
+			// Used[0] が define された文は ocDefineLazyBlock であるはずである
+			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
+			//       現状の実装は暫定的なもの。
+			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
+			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
+			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
+			gen->PutAssign(Declared, lazy_stmt->DefinedForm->GetCodeGenerator()->
+									FindParentVariableMap(*Name));
+		}
+		break;
+
+	case ocEndLazyBlock:
+		// 遅延評価ブロックの使用終了
+		// 暫定実装
+		{
+			RISSE_ASSERT(Used.size() == 1);
+			// 変数を開放する
+			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
+			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
+			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
+			lazy_stmt->DefinedForm->GetCodeGenerator()->FreeParentVariableMapVariables();
+		}
+		break;
+
+
+	case ocParentWrite:
+		// 暫定実装
+		RISSE_ASSERT(Used.size() == 1);
+		RISSE_ASSERT(Name != NULL);
+		gen->PutAssign(gen->FindParentVariableMap(*Name), Used[0]);
+		break;
+
+	case ocParentRead:
+		// 暫定実装
+		RISSE_ASSERT(Used.size() == 0);
+		RISSE_ASSERT(Name != NULL);
+		RISSE_ASSERT(Declared != NULL);
+		gen->PutAssign(Declared, gen->FindParentVariableMap(*Name));
+		break;
+
+	case ocWrite: // 共有変数領域への書き込み
+		RISSE_ASSERT(Name != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutAssign(*Name, Used[0]);
+		break;
+
+	case ocRead: // 共有変数領域からの読み込み
+		RISSE_ASSERT(Name != NULL);
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 0);
+		gen->PutAssign(Declared, *Name);
+		break;
+
+	default:
+		RISSE_ASSERT(!"not acceptable SSA operation code");
+		break;
+	}
+
+	// この文で使用が終了している変数を解放する
+	if(Declared)
+	{
+		if(Declared->GetLastUsedStatement() == this)
+			gen->FreeRegister(Declared);
+	}
+	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+			i != Used.end(); i++)
+	{
+		if((*i)->GetLastUsedStatement() == this)
+			gen->FreeRegister(*i);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSSAStatement::Dump() const
+{
+	switch(Code)
+	{
+	case ocNoOperation:			// なにもしない
+		return RISSE_WS("nop");
+
+	case ocPhi:		// φ関数
+		{
+			tRisseString ret;
+
+			RISSE_ASSERT(Declared != NULL);
+			ret += Declared->Dump() + RISSE_WS(" = PHI(");
+
+			// φ関数の引数を追加
+			tRisseString used;
+			for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+					i != Used.end(); i++)
+			{
+				if(!used.IsEmpty()) used += RISSE_WS(", ");
+				used += (*i)->Dump();
+			}
+
+			ret += used + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocAssignNewRegExp: // 新しい正規表現オブジェクト
+		{
+			tRisseString ret;
+			RISSE_ASSERT(Used.size() == 2);
+			ret += Declared->Dump() + RISSE_WS(" = AssignNewRegExp(");
+
+			ret +=	Used[0]->Dump() + RISSE_WS(", ") +
+					Used[1]->Dump() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocJump:
+		{
+			RISSE_ASSERT(JumpTarget != NULL);
+			return RISSE_WS("goto *") + JumpTarget->GetName();
+		}
+
+	case ocBranch:
+		{
+			RISSE_ASSERT(TrueBranch != NULL);
+			RISSE_ASSERT(FalseBranch != NULL);
+			RISSE_ASSERT(Used.size() == 1);
+			return
+					RISSE_WS("if ") + (*Used.begin())->Dump() + 
+					RISSE_WS(" then *") + TrueBranch->GetName() +
+					RISSE_WS(" else *") + FalseBranch->GetName();
+		}
+
+	case ocDefineLazyBlock: // 遅延評価ブロックの定義
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Declared != NULL);
+
+			tRisseString ret;
+			ret += Declared->Dump() + RISSE_WS(" = DefineLazyBlock(");
+
+			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocParentWrite: // 親名前空間への書き込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Used.size() == 1);
+			return (*Used.begin())->Dump()  + RISSE_WS(".ParentWrite(") + Name->AsHumanReadable() +
+					RISSE_WS(")");
+		}
+
+	case ocParentRead: // 親名前空間からの読み込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Declared != NULL);
+
+			tRisseString ret;
+			ret += Declared->Dump() + RISSE_WS(" = ParentRead(");
+
+			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocChildWrite: // 子名前空間への書き込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Used.size() == 2);
+			return Used[0]->Dump()  + RISSE_WS(".ChildWrite(") +
+					Name->AsHumanReadable() + RISSE_WS(", ") + Used[1]->Dump() +
+					RISSE_WS(")");
+		}
+
+	case ocChildRead: // 子名前空間からの読み込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Declared != NULL);
+			RISSE_ASSERT(Used.size() == 1);
+
+			tRisseString ret;
+			ret += Declared->Dump() + RISSE_WS(" = ") + Used[0]->Dump();
+			ret += RISSE_WS(".ChildRead(");
+			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocWrite: // 共有変数領域への書き込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Used.size() == 1);
+			return Used[0]->Dump() + RISSE_WS(".Write(") +
+					Name->AsHumanReadable() +
+					RISSE_WS(")");
+		}
+
+	case ocRead: // 共有変数領域からの読み込み
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Declared != NULL);
+			RISSE_ASSERT(Used.size() == 0);
+
+			tRisseString ret;
+			ret += Declared->Dump() + RISSE_WS(" = ");
+			ret += RISSE_WS("Read(");
+			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	default:
+		{
+			tRisseString ret;
+
+			// 変数の宣言
+			if(Declared)
+				ret += Declared->Dump() + RISSE_WS(" = "); // この文で宣言された変数がある
+
+			if(Code == ocAssign || Code == ocReadVar || Code == ocWriteVar)
+			{
+				// 単純代入/共有変数の読み書き
+				RISSE_ASSERT(Used.size() == 1);
+				ret += (*Used.begin())->Dump();
+
+				if(Code == ocReadVar)
+					ret += RISSE_WS(" (read from ") + Name->AsHumanReadable()
+						+ RISSE_WS(")");
+				else if(Code == ocWriteVar)
+					ret += RISSE_WS(" (write to ") + Name->AsHumanReadable()
+						+ RISSE_WS(")");
+			}
+			else
+			{
+				// 関数呼び出しの類？
+				bool is_funccall = (Code == ocFuncCall || Code == ocNew);
+
+				// 使用している引数の最初の引数はメッセージの送り先なので
+				// オペレーションコードよりも前に置く
+				if(Used.size() != 0)
+					ret += (*Used.begin())->Dump() + RISSE_WC('.');
+
+				// オペレーションコード
+				ret += tRisseString(RisseVMInsnInfo[Code].Name);
+
+				// 使用している引数
+				if(is_funccall && FuncArgOmitted)
+				{
+					// 関数呼び出しかnew
+					ret += RISSE_WS("(...)");
+				}
+				else if(Used.size() >= 2)
+				{
+					// 引数がある
+					tRisseString used;
+					risse_int arg_index = 0;
+					for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin() + 1;
+							i != Used.end(); i++, arg_index++)
+					{
+						if(!used.IsEmpty()) used += RISSE_WS(", ");
+						used += (*i)->Dump();
+						if(is_funccall && (FuncExpandFlags & (1<<arg_index)))
+							used += RISSE_WC('*'); // 展開フラグ
+					}
+					ret += RISSE_WS("(") + used +
+									RISSE_WS(")");
+				}
+				else
+				{
+					// 引数が無い
+					ret += RISSE_WS("()");
+				}
+			}
+
+			// 変数の宣言に関してコメントがあればそれを追加
+			if(Declared)
+			{
+				tRisseString comment = Declared->GetTypeComment();
+				if(!comment.IsEmpty())
+					ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+			}
+			return ret;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSSAStatement::DumpVariableStatementLiveness(bool is_start) const
+{
+	tRisseString ret;
+	tRisseSSAVariable *var;
+	var = Declared;
+	if(var)
+		if((is_start?var->GetFirstUsedStatement():var->GetLastUsedStatement()) == this)
+			ret += var->GetQualifiedName();
+
+	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+			i != Used.end(); i++)
+	{
+		var = *i;
+		if((is_start?var->GetFirstUsedStatement():var->GetLastUsedStatement()) == this)
+		{
+			if(!ret.IsEmpty()) ret += RISSE_WS(", ");
+			ret += var->GetQualifiedName();
+		}
+	}
+
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risse

@@ -21,6 +21,17 @@ default: $(BIN)
 
 #----------------------------#
 
+document:
+	rm -rf doc
+	doxygen > doxygen.log 2>&1
+	find doc -name *.html -print | \
+		while read n; do \
+			mv $$n $$n.bak && cat $$n.bak | sed 's/content="text\/html;charset=iso-8859-1\"/content="text\/html;charset=utf-8\"/' >\
+				$$n && rm -f $$n.bak ; \
+		done
+
+#----------------------------#
+
 CXXFLAGS += \
 	-DRISSE_NO_REGEXP \
 	-DRISSE_SUPPORT_WX

@@ -20,10 +20,12 @@
 	#include <wx/intl.h>
 #endif
 
-#ifdef __cplusplus
+
+#include <limits>
+
+
 namespace Risse
 {
-#endif
 
 #if defined(_WX_DEFS_H_)
 /* Use wxWidgets definitions */
@@ -107,11 +109,34 @@ namespace Risse
 
 
 //! @brief risse_size の最大値
-//! @note この式は ( 1 << sizeof(risse_size)*8 ) - 1  と意味的には同じだが
-//! 途中でオーバーフローしないようになっている
+// std::numeric_limits<risse_size>::max() を使おうかと思ったがstatic constではない
+// 可能性がある
+// char サイズが 8bit なのは下にある sanity checking で保証する
 static const risse_size risse_size_max = ((((1UL << ((sizeof(risse_size) * 8) -1))-1)<<1)+1);
 
 typedef risse_int32 risse_error;
+
+/*
+ some sanity checking
+*/
+template<bool x> struct tRisseStaticAsserter;
+template<> struct tRisseStaticAsserter<true>  { int hoge; };
+
+// risse_int の有効ビット数は32bit符号付き？
+enum { RisseIntSizeAsserter = sizeof (tRisseStaticAsserter<
+	std::numeric_limits<risse_int>::is_signed && 
+	std::numeric_limits<risse_int>::digits >= 31 > ) };
+
+// char の有効ビット数は8bit符号付き？
+enum { RisseCharSizeAsserter = sizeof (tRisseStaticAsserter<
+	std::numeric_limits<char>::is_signed && 
+	std::numeric_limits<char>::digits == 7 > ) };
+
+// unsigned char の有効ビット数は8bit符号なし？
+enum { RisseUCharSizeAsserter = sizeof (tRisseStaticAsserter<
+	!std::numeric_limits<unsigned char>::is_signed && 
+	std::numeric_limits<unsigned char>::digits == 8 > ) };
+
 
 /* IEEE double manipulation support
  (Risse requires IEEE double(64-bit float) native support on machine or C++ compiler) */
@@ -172,8 +197,6 @@ s = sign,  negative if this is 1, otherwise positive.
 
 
 
-#ifdef __cplusplus
-	// C++ only
 
 //---------------------------------------------------------------------------
 // floating-point class checker
@@ -241,11 +264,8 @@ typedef tRissePointerSizedInteger<sizeof(void*)>::utype risse_ptruint;
 
 
 
-#endif
 
-#ifdef __cplusplus
 } /* namespace Risse */
-#endif
 
 #endif
 

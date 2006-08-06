@@ -26,8 +26,11 @@ document:
 	doxygen > doxygen.log 2>&1
 	find doc -name '*.html' -print | \
 		while read n; do \
-			mv $$n $$n.bak && cat $$n.bak | sed 's/content="text\/html;charset=iso-8859-1\"/content="text\/html;charset=utf-8\"/' >\
-				$$n && rm -f $$n.bak ; \
+			mv $$n $$n.bak && \
+			cat $$n.bak | \
+			sed 's/content="text\/html;charset=iso-8859-1\"/content="text\/html;charset=utf-8\"/' >\
+				$$n && \
+			rm -f $$n.bak ; \
 		done
 
 #----------------------------#
@@ -45,9 +48,9 @@ CPPFILES =  \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \
-			src/risseObject.cpp                   \
-			src/risseOctet.cpp                    \
-			src/risseString.cpp                   \
+			src/risseObject.cpp                      \
+			src/risseOctet.cpp                       \
+			src/risseString.cpp                      \
 			src/risseException.cpp                   \
 			src/risseLexerUtils.cpp                  \
 			src/risseOpCodes.cpp                     \

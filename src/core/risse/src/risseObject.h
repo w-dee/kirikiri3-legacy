@@ -18,7 +18,7 @@
 #include "risseAssert.h"
 #include "risseGC.h"
 #include "risseString.h"
-
+#include "risseOpCodes.h"
 
 namespace Risse
 {
@@ -160,13 +160,35 @@ public:
 
 
 
+
+
 //---------------------------------------------------------------------------
 //! @brief		Risseオブジェクトインターフェース
 //---------------------------------------------------------------------------
-class tRisseObject : public tRisseCollectee
+class tRisseObjectInterface
 {
 public:
-	
+
+	//! @brief		オブジェクトに対して操作を行う
+	//! @param		code	オペレーションコード
+	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
+	//! @param		name	操作を行うメンバ名
+	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	//! @param		flags	オペレーションフラグ
+	//! @param		argc	パラメータの個数
+	//! @param		argv	パラメータの配列
+	//! @param		This	"Thisオブジェクト" (NULL=Thisオブジェクトを指定しない場合)
+	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
+	//!				エラーコードなどの戻り値はない
+	virtual void Operate(
+		tRisseOpCode code,
+		tRisseVariant * result = NULL,
+		const tRisseString & name = tRisseString::GetEmptyString(),
+		risse_uint32 flags = 0,
+		risse_size argc = 0,
+		tRisseVariant *argv[] = NULL,
+		tRisseVariant *This = NULL
+			) = 0;
 };
 //---------------------------------------------------------------------------
 

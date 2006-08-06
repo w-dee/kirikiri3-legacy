@@ -11,7 +11,7 @@
 //! @brief オペレーションコード/VM命令定義
 //---------------------------------------------------------------------------
 #include "risseOpCodes.h"
-
+#include "risseVariant.h"
 
 namespace Risse
 {

@@ -17,7 +17,6 @@
 #include "risseCharUtils.h"
 #include "risseGC.h"
 #include "risseString.h"
-#include "risseVariant.h"
 //---------------------------------------------------------------------------
 
 namespace Risse
@@ -252,6 +251,8 @@ RISSE_OC_ENUM_END
 
 
 #ifndef RISSE_OC_DEFINE_INFO
+class tRisseVariantBlock;
+typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
 //! @brief		VMコード用イテレータ
 //---------------------------------------------------------------------------

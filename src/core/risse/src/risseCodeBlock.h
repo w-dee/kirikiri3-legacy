@@ -17,6 +17,7 @@
 #include "risseCharUtils.h"
 #include "risseTypes.h"
 #include "risseVariant.h"
+#include "risseObject.h"
 
 //---------------------------------------------------------------------------
 namespace Risse
@@ -29,7 +30,7 @@ class tRisseScriptBlockBase;
 //! @note		コードブロックは Risse の実行単位である「関数」などごとに、
 //!				VMが実行すべき環境についての情報を保持するクラスである
 //---------------------------------------------------------------------------
-class tRisseCodeBlock : public tRisseCollectee
+class tRisseCodeBlock : public tRisseObjectInterface, public tRisseCollectee
 {
 	risse_uint32 *Code; //!< コード
 	risse_size CodeSize; //!< コードのサイズ(ワード単位)
@@ -85,6 +86,18 @@ public:
 
 	//! @brief		コード実行クラスのインスタンスを得る
 	tRisseCodeExecutor * GetExecutor() const { return Executor; }
+
+public: // tRisseObjectInterface メンバ
+
+	void Operate(
+		tRisseOpCode code,
+		tRisseVariant * result = NULL,
+		const tRisseString & name = tRisseString::GetEmptyString(),
+		risse_uint32 flags = 0,
+		risse_size argc = 0,
+		tRisseVariant *argv[] = NULL,
+		tRisseVariant *This = NULL
+			);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

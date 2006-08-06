@@ -1244,7 +1244,7 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     switch(p[3]) {
     case 'l':
      p += 4;
-     if(!Risse_iswordcha_nc(*p)) { ptr = p; value = (tRisseObject*)NULL; return T_CONSTVAL; }
+     if(!Risse_iswordcha_nc(*p)) { ptr = p; value = (tRisseObjectInterface*)NULL; return T_CONSTVAL; }
      goto cut_word;
     }
     p += 3;

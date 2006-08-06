@@ -103,7 +103,7 @@ void tRisseCodeBlock::Fixup(tRisseScriptBlockBase * sb)
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCodeBlock::GetObject()
 {
-	return tRisseVariant();
+	return tRisseVariant(this);
 }
 //---------------------------------------------------------------------------
 
@@ -121,6 +121,26 @@ tRisseString tRisseCodeBlock::Dump() const
 		++iterator;
 	}
 	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeBlock::Operate(
+	tRisseOpCode code,
+	tRisseVariant * result,
+	const tRisseString & name,
+	risse_uint32 flags,
+	risse_size argc,
+	tRisseVariant *argv[],
+	tRisseVariant *This
+		)
+{
+	// 仮実装
+	if(code == ocFuncCall && name.IsEmpty())
+	{
+		Executor->Execute(This?This:tRisseVariant(), result);
+	}
 }
 //---------------------------------------------------------------------------
 

@@ -25,6 +25,7 @@
 
 namespace Risse
 {
+class tRisseObjectInterface;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 /*! @note
@@ -96,10 +97,10 @@ protected:
 	//! @brief object ストレージ型
 	struct tObject
 	{
-		tRisseObject * Impl; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常に10)
+		tRisseObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常に10)
 		tRisseVariantBlock * This; //!< This オブジェクトへのポインタ
 	};
-	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObject*>((risse_ptruint)0x10))
+	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObjectInterface*>((risse_ptruint)0x10))
 
 	//! @brief Integer型への参照を取得 @return Integer型フィールドへの参照
 	risse_int64 & AsInteger() { return reinterpret_cast<tInteger*>(Storage)->Value; }
@@ -131,27 +132,27 @@ protected:
 	//! @brief Object型へのconst参照を取得 @return Object型フィールドへのconst参照
 	const tObject & AsObject() const { return *reinterpret_cast<const tObject*>(Storage); }
 
-	//! @brief tRisseObjectへのポインタを取得 @return tRisseObjectへのポインタ
-	//! @note Implをいじる場合は常にこのメソッドを使うこと
-	tRisseObject * GetObjectImpl() const
+	//! @brief tRisseObjectInterfaceへのポインタを取得 @return tRisseObjectInterfaceへのポインタ
+	//! @note Intfをいじる場合は常にこのメソッドを使うこと
+	tRisseObjectInterface * GetObjectIntf() const
 	{
-		tRisseObject * ret = reinterpret_cast<tRisseObject*>(
-			reinterpret_cast<risse_ptruint>(AsObject().Impl) - 2);
-		// 2 = Impl の下位2ビットは常に10なので、これを元に戻す
+		tRisseObjectInterface * ret = reinterpret_cast<tRisseObjectInterface*>(
+			reinterpret_cast<risse_ptruint>(AsObject().Intf) - 2);
+		// 2 = Intf の下位2ビットは常に10なので、これを元に戻す
 		if(ret == RISSE_OBJECT_NULL_PTR) return NULL;
 			// "null"が入っていた場合はRISSE_OBJECT_NULL_PTRが得られるのでちゃんとNULLを返す
 		return ret;
 	}
 
-	//! @brief tRisseObjectへのポインタを設定 @param impl tRisseObjectへのポインタ
-	//! @note Implをいじる場合は常にこのメソッドを使うこと
-	void SetObjectImpl(tRisseObject * impl)
+	//! @brief tRisseObjectInterfaceへのポインタを設定 @param intf tRisseObjectInterfaceへのポインタ
+	//! @note Intfをいじる場合は常にこのメソッドを使うこと
+	void SetObjectIntf(tRisseObjectInterface * intf)
 	{
-		if(!impl) impl = RISSE_OBJECT_NULL_PTR;
+		if(!intf) intf = RISSE_OBJECT_NULL_PTR;
 			// "null"の代わりにRISSE_OBJECT_NULL_PTRを使う
-		AsObject().Impl = reinterpret_cast<tRisseObject*>(
-			reinterpret_cast<risse_ptruint>(impl) + 2);
-		// 2 = Impl の下位2ビットは常に10なので、これをたす
+		AsObject().Intf = reinterpret_cast<tRisseObjectInterface*>(
+			reinterpret_cast<risse_ptruint>(intf) + 2);
+		// 2 = Intf の下位2ビットは常に10なので、これをたす
 	}
 
 
@@ -321,28 +322,28 @@ public: // コンストラクタ/代入演算子
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(tRisseObject*型より)
+	//! @brief		コンストラクタ(tRisseObjectInterface*型より)
 	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock(tRisseObject * ref)
+	tRisseVariantBlock(tRisseObjectInterface * ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		コンストラクタ(tRisseObject*型とThisを表すtRisseVariantBlock*型より)
+	//! @brief		コンストラクタ(tRisseObjectInterface*型とThisを表すtRisseVariantBlock*型より)
 	//! @param		ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
 	//! @param		This	そのメソッドやプロパティが実行されるべきthisオブジェクトを表す
-	tRisseVariantBlock(tRisseObject * ref, tRisseVariantBlock * This)
+	tRisseVariantBlock(tRisseObjectInterface * ref, tRisseVariantBlock * This)
 	{
-		SetObjectImpl(ref);
+		SetObjectIntf(ref);
 		AsObject().This = This;
 	}
 
-	//! @brief		代入演算子(tRisseObject*型を代入)
+	//! @brief		代入演算子(tRisseObjectInterface*型を代入)
 	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock & operator = (tRisseObject * ref)
+	tRisseVariantBlock & operator = (tRisseObjectInterface * ref)
 	{
 		// これはちょっと特殊
-		SetObjectImpl(ref);
+		SetObjectIntf(ref);
 		AsObject().This = NULL; // this は null に設定
 		return *this;
 	}
@@ -377,24 +378,29 @@ public: // 演算子
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
+	//! @param		This		"Thisオブジェクト" (このメソッドが実行されるべきThisとなるオブジェクト)
 	//! @param		argc		引数の数
 	//! @param		argv		引数へのポインタの配列
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[])
+	void FuncCall(tRisseVariantBlock * ret, tRisseVariantBlock *This, risse_size argc, tRisseVariantBlock *argv[])
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCall_Object   (ret, argc, argv); return;
+		case vtObject:	FuncCall_Object   (ret, This, argc, argv); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
 		}
 	}
 
-	void FuncCall_Object   (tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[])
-		{ return ; /* incomplete */ }
+	void FuncCall_Object   (tRisseVariantBlock * ret, tRisseVariantBlock *This, risse_size argc, tRisseVariantBlock *argv[])
+	{
+		tRisseObjectInterface * intf = GetObjectIntf();
+		if(!intf) { /* TODO: null check */; }
+		intf->Operate(ocFuncCall, ret, tRisseString::GetEmptyString(), 0, argc, argv, This);
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトをクラスと見なした)インスタンス作成	New
@@ -421,26 +427,27 @@ public: // 演算子
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)ブロック付き関数呼び出し		FuncCallBlock
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
+	//! @param		This		"Thisオブジェクト" (このメソッドが実行されるべきThisとなるオブジェクト)
 	//! @param		argc		引数の数
 	//! @param		argv		引数へのポインタの配列
 	//! @param		bargc		ブロック引数の数
 	//! @param		bargv		ブロック引数へのポインタの配列
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[],
+	void FuncCall(tRisseVariantBlock * ret, tRisseVariantBlock *This, risse_size argc, tRisseVariantBlock *argv[],
 		risse_size bargc, tRisseVariantBlock *bargv[])
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCallBlock_Object   (ret, argc, argv, bargc, bargv); return;
+		case vtObject:	FuncCallBlock_Object   (ret, This, argc, argv, bargc, bargv); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
 		}
 	}
 
-	void FuncCallBlock_Object   (tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[],
+	void FuncCallBlock_Object   (tRisseVariantBlock * ret, tRisseVariantBlock *This, risse_size argc, tRisseVariantBlock *argv[],
 		risse_size bargc, tRisseVariantBlock *bargv[])
 		{ return ; /* incomplete */ }
 
@@ -1366,7 +1373,7 @@ public: // ユーティリティ
 		printf("risse_ptruint: %d\n", sizeof(risse_ptruint));
 		printf("tRisseString: %d\n", sizeof(tRisseString));
 		printf("tRisseOctet: %d\n", sizeof(tRisseOctet));
-		printf("tRisseObject: %d\n", sizeof(tRisseObject));
+		printf("tObject: %d\n", sizeof(tObject));
 		printf("tVoid: %d\n", sizeof(tVoid));
 		printf("tInteger: %d\n", sizeof(tInteger));
 		printf("tReal: %d\n", sizeof(tReal));

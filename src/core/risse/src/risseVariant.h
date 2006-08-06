@@ -17,9 +17,9 @@
 #include "risseCharUtils.h"
 #include "risseTypes.h"
 #include "risseAssert.h"
-#include "risseCxxObject.h"
-#include "risseCxxString.h"
-#include "risseCxxOctet.h"
+#include "risseObject.h"
+#include "risseString.h"
+#include "risseOctet.h"
 #include "risseException.h"
 
 

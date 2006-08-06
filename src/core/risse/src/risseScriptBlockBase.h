@@ -14,7 +14,7 @@
 #define risseScriptBlockBaseH
 
 #include "risseTypes.h"
-#include "risseCxxString.h"
+#include "risseString.h"
 #include "risseVariant.h"
 #include "risseAssert.h"
 #include "risseGC.h"

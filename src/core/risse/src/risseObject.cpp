@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 
-#include "risseCxxObject.h"
+#include "risseObject.h"
 
 
 namespace Risse

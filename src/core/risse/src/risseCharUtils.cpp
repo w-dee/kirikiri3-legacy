@@ -13,7 +13,7 @@
 #include "prec.h"
 #include "risseConfig.h"
 #include "risseCharUtils.h"
-#include "risseCxxString.h"
+#include "risseString.h"
 
 
 namespace Risse

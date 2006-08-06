@@ -11,8 +11,8 @@
 //! @brief オクテット列のC++クラス
 //---------------------------------------------------------------------------
 
-#ifndef risseCxxOctetH
-#define risseCxxOctetH
+#ifndef risseOctetH
+#define risseOctetH
 
 /*! @note
 Risse オクテット列について
@@ -23,7 +23,7 @@ Risse オクテット列は tRisseOctetBlock クラスで表される。
 
 #include "risseTypes.h"
 #include "risseAssert.h"
-#include "risseCxxString.h"
+#include "risseString.h"
 #include "risseGC.h"
 
 

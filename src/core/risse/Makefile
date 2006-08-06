@@ -45,9 +45,9 @@ CPPFILES =  \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \
-			src/risseCxxObject.cpp                   \
-			src/risseCxxOctet.cpp                    \
-			src/risseCxxString.cpp                   \
+			src/risseObject.cpp                   \
+			src/risseOctet.cpp                    \
+			src/risseString.cpp                   \
 			src/risseException.cpp                   \
 			src/risseLexerUtils.cpp                  \
 			src/risseOpCodes.cpp                     \

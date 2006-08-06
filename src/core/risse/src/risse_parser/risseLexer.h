@@ -14,7 +14,7 @@
 #define RisseLexerH
 
 #include "../risseLexerUtils.h"
-#include "../risseCxxString.h"
+#include "../risseString.h"
 
 namespace Risse
 {

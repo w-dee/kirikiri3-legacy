@@ -18,7 +18,7 @@
 #include "risseCharUtils.h"
 #include "risseTypes.h"
 #include "risseAssert.h"
-#include "risseCxxString.h"
+#include "risseString.h"
 #include "risseGC.h"
 
 namespace Risse

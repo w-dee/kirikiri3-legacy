@@ -10,14 +10,14 @@
 //! @file
 //! @brief オブジェクトの C++ インターフェースの実装
 //---------------------------------------------------------------------------
-#ifndef risseCxxObjectH
-#define risseCxxObjectH
+#ifndef risseObjectH
+#define risseObjectH
 
 #include "risseCharUtils.h"
 #include "risseTypes.h"
 #include "risseAssert.h"
 #include "risseGC.h"
-#include "risseCxxString.h"
+#include "risseString.h"
 
 
 namespace Risse

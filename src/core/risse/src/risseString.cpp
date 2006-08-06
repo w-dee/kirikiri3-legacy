@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 
-#include "risseCxxString.h"
+#include "risseString.h"
 
 
 

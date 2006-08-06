@@ -17,7 +17,7 @@
 #include "../risseTypes.h"
 #include "../risseGC.h"
 #include "../risseException.h"
-#include "../risseCxxObject.h"
+#include "../risseObject.h"
 #include "risseParser.h"
 #include "risseScriptBlock.h"
 

@@ -11,8 +11,8 @@
 //! @brief 文字列のC++クラス
 //---------------------------------------------------------------------------
 
-#ifndef risseCxxStringH
-#define risseCxxStringH
+#ifndef risseStringH
+#define risseStringH
 
 /*! @note
 Risse 文字列について

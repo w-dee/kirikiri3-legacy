@@ -16,7 +16,7 @@
 #include "risseTypes.h"
 #include "risseCharUtils.h"
 #include "risseGC.h"
-#include "risseCxxString.h"
+#include "risseString.h"
 #include "risseVariant.h"
 //---------------------------------------------------------------------------
 

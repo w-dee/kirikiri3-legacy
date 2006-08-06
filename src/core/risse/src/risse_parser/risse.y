@@ -544,14 +544,14 @@ catch_list
 
 catch
 	: "catch" "(" ")" block_or_statement		{ $$ = N(Catch)(
-												  		LP, tRisseString(), NULL, $4); }
+												  		LP, tRisseString::GetEmptyString(), NULL, $4); }
 	| "catch" "(" T_ID ")"
 		block_or_statement						{ $$ = N(Catch)(LP, *$3, NULL, $5); }
 	| "catch" "(" T_ID "if" expr ")"
 		block_or_statement						{ $$ = N(Catch)(LP, *$3, $5, $7); }
 	| "catch" "(" "if" expr ")"
 		block_or_statement						{ $$ = N(Catch)(
-												  		LP, tRisseString(), $4, $6); }
+												  		LP, tRisseString::GetEmptyString(), $4, $6); }
 ;
 
 
@@ -608,7 +608,7 @@ func_decl_arg
 ;
 
 func_decl_arg_collapse
-	: "*"									{ $$ = N(FuncDeclArg)(LP, tRisseString(), NULL, true); }
+	: "*"									{ $$ = N(FuncDeclArg)(LP, tRisseString::GetEmptyString(), NULL, true); }
 	| T_ID "*"								{ $$ = N(FuncDeclArg)(LP, *$1, NULL, true); }
 /*
 	These are currently not supported

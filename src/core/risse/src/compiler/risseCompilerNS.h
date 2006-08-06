@@ -153,7 +153,7 @@ public:
 	//! @return		見つかった変数、あるいはφ関数の戻り値へのポインタ
 	//!				(NULL=ローカル変数に見つからなかった)
 	tRisseSSAVariable * MakePhiFunction(risse_size pos,
-		const tRisseString & name, const tRisseString & n_name = tRisseString());
+		const tRisseString & name, const tRisseString & n_name = tRisseString::GetEmptyString());
 
 	//! @brief		必要ならばφ関数を作成する
 	//! @param		pos		スクリプト上の位置
@@ -162,7 +162,7 @@ public:
 	//! @return		見つかった変数、あるいはφ関数の戻り値へのポインタ
 	//!				(NULL=ローカル変数に見つからなかった)
 	tRisseSSAVariable * AddPhiFunctionForBlock(risse_size pos,
-		const tRisseString & name, const tRisseString & n_name = tRisseString());
+		const tRisseString & name, const tRisseString & n_name = tRisseString::GetEmptyString());
 
 	//! @brief		変数をすべて「φ関数を参照のこと」としてマークする
 	//! @note		このメソッドは、Scopes のすべてのマップの値を

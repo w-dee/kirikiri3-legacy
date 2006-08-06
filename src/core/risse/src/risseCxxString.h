@@ -168,13 +168,14 @@ namespace Risse
 {
 //---------------------------------------------------------------------------
 //! @brief	文字列用データ
+//! @note	この構造体を直接いじらないこと！
 //---------------------------------------------------------------------------
-class tRisseStringData : public tRisseCollectee
+struct tRisseStringData
 {
-protected:
 	mutable risse_char  *	Buffer;	//!< 文字列バッファ
 	risse_size				Length;	//!< 文字列長 (最後の \0 は含めない)
 
+protected:
 	const static risse_char MightBeShared  = static_cast<risse_char>(-1L);
 		//!< 共有可能性フラグとして Buffer[-1] に設定する値
 
@@ -190,7 +191,7 @@ protected:
 //---------------------------------------------------------------------------
 //! @brief	文字列ブロック
 //---------------------------------------------------------------------------
-class tRisseStringBlock : protected tRisseStringData
+class tRisseStringBlock : protected tRisseStringData, public tRisseCollectee
 {
 public:
 	//! @brief デフォルトコンストラクタ
@@ -678,6 +679,23 @@ public: // other utilities
 	//! @return		人間が読み取り可能な文字列
 	tRisseStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{ return Escape(maxlen, true); }
+
+private:
+	//! @brief		static な空文字列を表すデータ
+	static tRisseStringData EmptyStringData;
+
+public:
+	//! @brief		static な空文字列を得る
+	//! @return		static な空文字列
+	//! @note		tRisseString() は空文字列になるがstaticではない。
+	//!				このメソッドは空文字列をstaticに保持しているデータへの
+	//!				参照を返す。よって単に空文字列が欲しい場合には tRisseString() 
+	//!				と比べて効率的。ただし、あくまでこれは参照を返すので、
+	//!				たとえば tRisseString GetXXX() { return tRisseString::GetEmptyString(); }
+	//!				などとすると参照から実体が作られて、それが帰ることになるので非効率的。
+	//!				あくまで const tRisseString & の参照が求められている文脈でのみ使うこと。
+	static const tRisseStringBlock & GetEmptyString()
+		{ return *(const tRisseStringBlock*)(&EmptyStringData); }
 
 };
 //---------------------------------------------------------------------------

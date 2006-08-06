@@ -51,7 +51,7 @@ public:
 	//! @param		name	変数名
 	//!						一時変数については空文字列を渡すこと
 	tRisseSSAVariable(tRisseSSAForm * form, tRisseSSAStatement *stmt = NULL,
-						const tRisseString & name = tRisseString());
+						const tRisseString & name = tRisseString::GetEmptyString());
 
 	//! @brief		この変数が属している SSA 形式インスタンスを取得する
 	//! @return		この変数が属している SSA 形式インスタンス

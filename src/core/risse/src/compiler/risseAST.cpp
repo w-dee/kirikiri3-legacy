@@ -2115,7 +2115,7 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 	void * lazy_param = form->CreateLazyBlock(Body, false, lazyblock_var);
 
 	// 遅延評価ブロックを実行するためのfunccall文を作成
-	lazyblock_var->GenerateFuncCall(GetPosition(), tRisseString());
+	lazyblock_var->GenerateFuncCall(GetPosition(), tRisseString::GetEmptyString());
 
 	// 遅延評価ブロックをクリーンアップ
 	form->CleanupLazyBlock(lazy_param);

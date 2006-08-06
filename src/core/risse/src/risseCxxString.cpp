@@ -532,6 +532,12 @@ tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tRisseStringData tRisseStringBlock::EmptyStringData = { RISSE_STRING_EMPTY_BUFFER, 0 };
+//---------------------------------------------------------------------------
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -550,5 +556,7 @@ tRisseStringBlock operator +(const risse_char *lhs, const tRisseStringBlock &rhs
 	return newblock;
 }
 //---------------------------------------------------------------------------
+
+
 
 } // namespace Risse

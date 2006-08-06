@@ -29,10 +29,11 @@ namespace Risse
 //! @brief	バリアント型
 /*! @note
 
-tRisseStringData, tRisseObjectData, tRisseOctetData の各先頭のメンバは必ず
-何かのポインタである。それらはメンバ Type とストレージを共有する。これらは
-実際にはそれぞれ tRisseString, tRisseObject, tRisseOctet として扱われるが、
-データメンバのレイアウトは同一である。
+tRisseStringData, tRisseVariantBlock::tObject, tRisseOctetData の各先頭
+のメンバは必ず何かのポインタである。それらはメンバ Type とストレージを共有
+する。このメンバ Type と共有を行ってる書くポインタはこれらは実際にはそれぞれ
+tRisseString, tRisseObject, tRisseOctetとして扱われるが、データメンバのレイ
+アウトは同一である。
 
 各ポインタは4の倍数のアドレスにしか配置されないことがメモリアロケータの仕様
 および risse_char のサイズにより保証されている。このため、下位2ビットは必ず遊
@@ -43,9 +44,8 @@ tRisseStringData, tRisseObjectData, tRisseOctetData の各先頭のメンバは�
 ならば下位2ビット+4を Type とし、4 未満ならばそれをそのまま Type として返
 している。ここら辺は ruby の実装からヒントを得た物。
 
-問題はtRisseString, tRisseObject, tRisseOctet 内にある各ポインタのアライン
-メントがあわないことだが、これは ~0x03 との bit and をとれば、元のポインタを
-求めることができる。
+tRisseString, tRisseVariantBlock::tObject, tRisseOctet 内にある各の「本当
+の」ポインタを選るには、~0x03 との bit and をとればよい。
 
 tRisseString の内部ポインタが指し示している場所は、文字列を保持しているバッ
 ファである。RisseではUTF-32文字列を対象とするため、このポインタが 32bit境界
@@ -93,6 +93,14 @@ protected:
 		bool Value; //!< 値
 	};
 
+	//! @brief object ストレージ型
+	struct tObject
+	{
+		tRisseObject * Impl; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常に10)
+		tRisseVariantBlock * This; //!< This オブジェクトへのポインタ
+	};
+	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObject*>((risse_ptruint)0x10))
+
 	//! @brief Integer型への参照を取得 @return Integer型フィールドへの参照
 	risse_int64 & AsInteger() { return reinterpret_cast<tInteger*>(Storage)->Value; }
 	//! @brief Integer型へのconst参照を取得 @return Integer型フィールドへのconst参照
@@ -119,9 +127,34 @@ protected:
 	const tRisseOctet & AsOctet() const { return *reinterpret_cast<const tRisseOctet*>(Storage); }
 
 	//! @brief Object型への参照を取得 @return Object型フィールドへの参照
-	tRisseObject & AsObject() { return *reinterpret_cast<tRisseObject*>(Storage); }
+	tObject & AsObject() { return *reinterpret_cast<tObject*>(Storage); }
 	//! @brief Object型へのconst参照を取得 @return Object型フィールドへのconst参照
-	const tRisseObject & AsObject() const { return *reinterpret_cast<const tRisseObject*>(Storage); }
+	const tObject & AsObject() const { return *reinterpret_cast<const tObject*>(Storage); }
+
+	//! @brief tRisseObjectへのポインタを取得 @return tRisseObjectへのポインタ
+	//! @note Implをいじる場合は常にこのメソッドを使うこと
+	tRisseObject * GetObjectImpl() const
+	{
+		tRisseObject * ret = reinterpret_cast<tRisseObject*>(
+			reinterpret_cast<risse_ptruint>(AsObject().Impl) - 2);
+		// 2 = Impl の下位2ビットは常に10なので、これを元に戻す
+		if(ret == RISSE_OBJECT_NULL_PTR) return NULL;
+			// "null"が入っていた場合はRISSE_OBJECT_NULL_PTRが得られるのでちゃんとNULLを返す
+		return ret;
+	}
+
+	//! @brief tRisseObjectへのポインタを設定 @param impl tRisseObjectへのポインタ
+	//! @note Implをいじる場合は常にこのメソッドを使うこと
+	void SetObjectImpl(tRisseObject * impl)
+	{
+		if(!impl) impl = RISSE_OBJECT_NULL_PTR;
+			// "null"の代わりにRISSE_OBJECT_NULL_PTRを使う
+		AsObject().Impl = reinterpret_cast<tRisseObject*>(
+			reinterpret_cast<risse_ptruint>(impl) + 2);
+		// 2 = Impl の下位2ビットは常に10なので、これをたす
+	}
+
+
 
 	#define RV_SIZE_MAX(a, b) ((a)>(b)?(a):(b))
 	//! @brief 各バリアントの内部型の union
@@ -143,7 +176,7 @@ protected:
 			RV_SIZE_MAX(sizeof(tBoolean),
 			RV_SIZE_MAX(sizeof(tRisseString),
 			RV_SIZE_MAX(sizeof(tRisseOctet),
-			RV_SIZE_MAX(sizeof(tRisseObject),
+			RV_SIZE_MAX(sizeof(tObject),
 					4 /*ダミー*/
 			 ))))))))
 			];
@@ -288,20 +321,49 @@ public: // コンストラクタ/代入演算子
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(object型を作成)
+	//! @brief		コンストラクタ(tRisseObject*型より)
 	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock(const tRisseObject & ref)
+	tRisseVariantBlock(tRisseObject * ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(object型を代入)
-	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock & operator = (const tRisseObject & ref)
+	//! @brief		コンストラクタ(tRisseObject*型とThisを表すtRisseVariantBlock*型より)
+	//! @param		ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
+	//! @param		This	そのメソッドやプロパティが実行されるべきthisオブジェクトを表す
+	tRisseVariantBlock(tRisseObject * ref, tRisseVariantBlock * This)
 	{
-		// Type の設定は必要なし
+		SetObjectImpl(ref);
+		AsObject().This = This;
+	}
+
+	//! @brief		代入演算子(tRisseObject*型を代入)
+	//! @param		ref		元となるオブジェクト
+	tRisseVariantBlock & operator = (tRisseObject * ref)
+	{
+		// これはちょっと特殊
+		SetObjectImpl(ref);
+		AsObject().This = NULL; // this は null に設定
+		return *this;
+	}
+
+	//! @brief		代入演算子(tObject型を代入)
+	//! @param		ref		元となるオブジェクト
+	tRisseVariantBlock & operator = (const tObject & ref)
+	{
 		AsObject() = ref;
 		return *this;
+	}
+
+public: // Object関連
+	//! @brief		"Thisオブジェクト"を設定する
+	//! @param		This	そのメソッドやプロパティが実行されるべきthisオブジェクトを表す
+	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
+	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
+	//!				チェックしないので注意すること
+	void SetThisObject(tRisseVariantBlock * This)
+	{
+		AsObject().This = This;
 	}
 
 public: // 演算子

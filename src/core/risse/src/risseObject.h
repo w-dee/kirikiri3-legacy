@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief オブジェクトの C++ インターフェースの実装
+//! @brief オブジェクトの C++ インターフェースの定義と実装
 //---------------------------------------------------------------------------
 #ifndef risseObjectH
 #define risseObjectH
@@ -160,48 +160,16 @@ public:
 
 
 
-typedef void * tRisseObjectImpl;
 //---------------------------------------------------------------------------
-//! @brief	オブジェクト用データ
-//! @note
-//! ポインタの最下位の2ビットが常に 10 なのは、このポインタが オブジェクトであることを
-//! 表している。ポインタは常に少なくとも 32bit 境界に配置されるため、最下位の２ビットは
-//! オブジェクトのタイプを表すのに利用されている。tRisseVariantを参照。
+//! @brief		Risseオブジェクトインターフェース
 //---------------------------------------------------------------------------
-class tRisseObjectData : public tRisseCollectee
+class tRisseObject : public tRisseCollectee
 {
-	tRisseObjectImpl * Impl; //!< ブロックへのポインタ (最下位の2ビットは常に10なので注意)
-							//!< アクセス時は必ず GetBlock, SetBlock を用いること
-
-protected: // pointer operation
-	void SetImpl(tRisseObjectImpl * impl)
-		{ Impl = reinterpret_cast<tRisseObjectImpl*>(reinterpret_cast<risse_ptruint>(impl) + 2); }
-
-	tRisseObjectImpl * GetImpl() const
-		{ return reinterpret_cast<tRisseObjectImpl*>(reinterpret_cast<risse_ptruint>(Impl) - 2); }
-
 public:
-	//! @brief null ポインタ。オブジェクトが null を表す場合は、この値をとる。
-	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObjectImpl*>((risse_ptruint)0x10))
+	
 };
 //---------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
-class tRisseObjectBlock : public tRisseObjectData
-{
-public:
-	// デフォルトコンストラクタ
-	tRisseObjectBlock()
-	{
-		SetImpl(RISSE_OBJECT_NULL_PTR);
-	}
-};
-//---------------------------------------------------------------------------
-
-typedef tRisseObjectBlock tRisseObject; //!< いまのところ tRisseObject は tRisseObjectBlock と同じ
-
-//---------------------------------------------------------------------------
 }
 #endif
 

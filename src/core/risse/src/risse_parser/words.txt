@@ -139,12 +139,12 @@ enumerable          T_ENUMERABLE   - true false
 hidden              T_HIDDEN       - true false
 
 ##### 定数
-void                T_CONSTVAL     tRisseVariant()    true false
-null                T_CONSTVAL     tRisseObject()     true false
-true                T_CONSTVAL     true               true false
-false               T_CONSTVAL     false              true false
-NaN                 T_CONSTVAL     RisseGetNaN()      true false
-Infinity            T_CONSTVAL     RisseGetInf()      true false
+void                T_CONSTVAL     tRisseVariant()      true false
+null                T_CONSTVAL     (tRisseObject*)NULL  true false
+true                T_CONSTVAL     true                 true false
+false               T_CONSTVAL     false                true false
+NaN                 T_CONSTVAL     RisseGetNaN()        true false
+Infinity            T_CONSTVAL     RisseGetInf()        true false
 
 ##### 数値
 0                   T_BEGIN_NUMBER           - false false

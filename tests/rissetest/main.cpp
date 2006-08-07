@@ -1,7 +1,7 @@
 // openal を使って音声をストリーミング再生するテスト
 
 #include "prec.h"
-#include "risseCxxString.h"
+#include "risseString.h"
 #include "risseVariant.h"
 #include "gc_cpp.h"
 #include <wx/file.h>

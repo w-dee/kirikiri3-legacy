@@ -133,13 +133,13 @@ void tRisseCodeBlock::Operate(
 	risse_uint32 flags,
 	risse_size argc,
 	tRisseVariant *argv[],
-	tRisseVariant *This
+	const tRisseMethodContext *context
 		)
 {
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
 	{
-		Executor->Execute(This?This:tRisseVariant(), result);
+		Executor->Execute(context?context->GetThis():tRisseVariant(), result);
 	}
 }
 //---------------------------------------------------------------------------

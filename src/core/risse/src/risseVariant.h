@@ -26,6 +26,7 @@
 namespace Risse
 {
 class tRisseObjectInterface;
+class tRisseMethodContext;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 /*! @note
@@ -98,7 +99,9 @@ protected:
 	struct tObject
 	{
 		tRisseObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常に10)
-		tRisseVariantBlock * This; //!< This オブジェクトへのポインタ
+		const tRisseMethodContext * Context;
+						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
+						//!< 指しているとして)メソッドが動作するコンテキスト
 	};
 	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObjectInterface*>((risse_ptruint)0x10))
 
@@ -193,7 +196,7 @@ public:
 		vtString		= 4 + 0,
 		vtOctet			= 4 + 1,
 		vtObject		= 4 + 2,
-	//	vtReserved		= 4 + 2,
+	//	vtReserved		= 4 + 3,
 	};
 
 	//! @brief バリアントのタイプを得る
@@ -329,13 +332,13 @@ public: // コンストラクタ/代入演算子
 		* this = ref;
 	}
 
-	//! @brief		コンストラクタ(tRisseObjectInterface*型とThisを表すtRisseVariantBlock*型より)
+	//! @brief		コンストラクタ(tRisseObjectInterface*型とコンテキストを表すtRisseMethodContext*型より)
 	//! @param		ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
-	//! @param		This	そのメソッドやプロパティが実行されるべきthisオブジェクトを表す
-	tRisseVariantBlock(tRisseObjectInterface * ref, tRisseVariantBlock * This)
+	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
+	tRisseVariantBlock(tRisseObjectInterface * ref, const tRisseMethodContext * context)
 	{
 		SetObjectIntf(ref);
-		AsObject().This = This;
+		AsObject().Context = context;
 	}
 
 	//! @brief		代入演算子(tRisseObjectInterface*型を代入)
@@ -344,7 +347,7 @@ public: // コンストラクタ/代入演算子
 	{
 		// これはちょっと特殊
 		SetObjectIntf(ref);
-		AsObject().This = NULL; // this は null に設定
+		AsObject().Context = NULL; // this は null に設定
 		return *this;
 	}
 
@@ -357,14 +360,22 @@ public: // コンストラクタ/代入演算子
 	}
 
 public: // Object関連
-	//! @brief		"Thisオブジェクト"を設定する
-	//! @param		This	そのメソッドやプロパティが実行されるべきthisオブジェクトを表す
+	//! @brief		コンテキストを設定する
+	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
 	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
 	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
 	//!				チェックしないので注意すること
-	void SetThisObject(tRisseVariantBlock * This)
+	void SetContext(const tRisseMethodContext * context)
 	{
-		AsObject().This = This;
+		AsObject().Context = context;
+	}
+
+	//! @brief		オブジェクトが null かどうかを得る
+	//! @note		型がオブジェクトで無かった場合は false を返す
+	bool IsNull() const
+	{
+		if(GetType() != vtObject) return false;
+		return GetObjectIntf() == NULL;
 	}
 
 public: // 演算子
@@ -378,28 +389,28 @@ public: // 演算子
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
-	//! @param		This		"Thisオブジェクト" (このメソッドが実行されるべきThisとなるオブジェクト)
 	//! @param		argc		引数の数
 	//! @param		argv		引数へのポインタの配列
+	//! @param		context		このメソッドが実行されるべきコンテキスト
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret, tRisseVariantBlock *This, risse_size argc, tRisseVariantBlock *argv[])
+	void FuncCall(tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[], const tRisseMethodContext *context)
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCall_Object   (ret, This, argc, argv); return;
+		case vtObject:	FuncCall_Object   (ret, argc, argv, context); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
 		}
 	}
 
-	void FuncCall_Object   (tRisseVariantBlock * ret, tRisseVariantBlock *This, risse_size argc, tRisseVariantBlock *argv[])
+	void FuncCall_Object   (tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[], const tRisseMethodContext *context)
 	{
 		tRisseObjectInterface * intf = GetObjectIntf();
 		if(!intf) { /* TODO: null check */; }
-		intf->Operate(ocFuncCall, ret, tRisseString::GetEmptyString(), 0, argc, argv, This);
+		intf->Operate(ocFuncCall, ret, tRisseString::GetEmptyString(), 0, argc, argv, context);
 	}
 
 	//-----------------------------------------------------------------------
@@ -427,28 +438,28 @@ public: // 演算子
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)ブロック付き関数呼び出し		FuncCallBlock
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
-	//! @param		This		"Thisオブジェクト" (このメソッドが実行されるべきThisとなるオブジェクト)
 	//! @param		argc		引数の数
 	//! @param		argv		引数へのポインタの配列
 	//! @param		bargc		ブロック引数の数
 	//! @param		bargv		ブロック引数へのポインタの配列
+	//! @param		context		このメソッドが実行されるべきコンテキスト
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret, tRisseVariantBlock *This, risse_size argc, tRisseVariantBlock *argv[],
-		risse_size bargc, tRisseVariantBlock *bargv[])
+	void FuncCall(tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[],
+		risse_size bargc, tRisseVariantBlock *bargv[], const tRisseMethodContext *context)
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCallBlock_Object   (ret, This, argc, argv, bargc, bargv); return;
+		case vtObject:	FuncCallBlock_Object   (ret, argc, argv, bargc, bargv, context); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
 		}
 	}
 
-	void FuncCallBlock_Object   (tRisseVariantBlock * ret, tRisseVariantBlock *This, risse_size argc, tRisseVariantBlock *argv[],
-		risse_size bargc, tRisseVariantBlock *bargv[])
+	void FuncCallBlock_Object   (tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[],
+		risse_size bargc, tRisseVariantBlock *bargv[], const tRisseMethodContext *context)
 		{ return ; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
@@ -1384,6 +1395,50 @@ public: // ユーティリティ
 //---------------------------------------------------------------------------
 typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		メソッドのコンテキスト
+//---------------------------------------------------------------------------
+class tRisseMethodContext
+{
+public:
+	tRisseVariant This; //!< "Thisオブジェクト" (NULL=Thisオブジェクトを指定しない)
+	tRisseVariant *Frame; //!< スタックフレーム (NULL=スタックフレームを指定しない)
+
+public:
+	//! @brief		コンストラクタ("Thisオブジェクト"から)
+	//! @param		_This		"Thisオブジェクト"
+	tRisseMethodContext(const tRisseVariant & _This) : This(_This)
+	{
+		Frame = NULL;
+	}
+
+	//! @brief		コンストラクタ(スタックフレームから)
+	//! @param		frame		スタックフレーム
+	tRisseMethodContext(tRisseVariant * frame)
+	{
+		Frame = frame;
+	}
+
+	//! @brief		"Thisオブジェクト" を得る
+	const tRisseVariant & GetThis() const
+	{
+		return This;
+	}
+
+	//! @brief		"Thisオブジェクト" を得る
+	//! @param		alt		"Thisオブジェクト" が null だった場合に使用される別のオブジェクト
+	const tRisseVariant & GetThis(const tRisseVariant &alt) const
+	{
+		if(This.IsNull()) return alt;
+		return This;
+	}
+};
+//---------------------------------------------------------------------------
+
 } // namespace Risse
 #endif
 

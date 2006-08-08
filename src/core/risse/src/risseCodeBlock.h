@@ -96,7 +96,7 @@ public: // tRisseObjectInterface メンバ
 		risse_uint32 flags = 0,
 		risse_size argc = 0,
 		tRisseVariant *argv[] = NULL,
-		tRisseVariant *This = NULL
+		const tRisseMethodContext *context = NULL
 			);
 };
 //---------------------------------------------------------------------------

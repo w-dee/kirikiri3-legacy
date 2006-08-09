@@ -299,6 +299,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
 			// コードブロックの参照の問題があるので注意
 			gen->PutRelocatee(Declared, DefinedForm->GetCodeBlockIndex());
+			gen->PutSetFrame(Declared);
 		}
 		break;
 

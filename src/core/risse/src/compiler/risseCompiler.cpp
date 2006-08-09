@@ -54,11 +54,6 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	// VMコードの生成
 	SSAForms.front()->GenerateCode();
 
-	// コードジェネレータの生成
-	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
-		i != SSAForms.end(); i++)
-		(*i)->EnsureCodeGenerator();
-
 	// VMコードのダンプ
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)

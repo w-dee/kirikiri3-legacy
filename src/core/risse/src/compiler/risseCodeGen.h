@@ -119,6 +119,13 @@ public:
 	//!				そのレジスタのインデックスを返す
 	risse_size FindRegMap(const tRisseSSAVariable * var);
 
+	//! @brief		使用中のレジスタの最大値を更新する
+	//! @param		max		レジスタの最大値
+	//! @note		親のコードブロックと子のコードブロックはスタックを共有するため、
+	//!				このメソッドは子から親へ再帰的に呼ばれる(結果、子と親の
+	//!				MaxNumUsedRegs は同一になる)
+	void UpdateMaxNumUsedRegs(risse_size max);
+
 	//! @brief		レジスタを一つ割り当てる
 	//! @return		割り当てられたレジスタ
 	//! @note		レジスタを割り当てたら FreeRegister で開放すること
@@ -210,6 +217,10 @@ public:
 	//! @param		dest	格納先変数
 	//! @param		index	コードブロックのインデックス
 	void PutRelocatee(const tRisseSSAVariable * dest, risse_size index);
+
+	//! @brief		スタックフレームの書き換え用コードを置く
+	//! @param		dest	書き換え先変数
+	void PutSetFrame(const tRisseSSAVariable * dest);
 
 	//! @brief		FuncCall あるいは New コードを置く
 	//! @param		dest	関数結果格納先

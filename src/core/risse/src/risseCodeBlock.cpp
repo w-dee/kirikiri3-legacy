@@ -139,7 +139,7 @@ void tRisseCodeBlock::Operate(
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
 	{
-		Executor->Execute(context?context->GetThis():tRisseVariant(), result);
+		Executor->Execute(context, result);
 	}
 }
 //---------------------------------------------------------------------------

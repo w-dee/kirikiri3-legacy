@@ -1404,7 +1404,7 @@ typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
 class tRisseMethodContext
 {
-public:
+private:
 	tRisseVariant This; //!< "Thisオブジェクト" (NULL=Thisオブジェクトを指定しない)
 	tRisseVariant *Frame; //!< スタックフレーム (NULL=スタックフレームを指定しない)
 
@@ -1423,6 +1423,13 @@ public:
 		Frame = frame;
 	}
 
+	//! @brief		コンストラクタ("Thisオブジェクト"とスタックフレームから)
+	//! @param		frame		スタックフレーム
+	tRisseMethodContext(const tRisseVariant & _This, tRisseVariant * frame) : This(_This)
+	{
+		Frame = frame;
+	}
+
 	//! @brief		"Thisオブジェクト" を得る
 	const tRisseVariant & GetThis() const
 	{
@@ -1436,6 +1443,9 @@ public:
 		if(This.IsNull()) return alt;
 		return This;
 	}
+
+	//! @brief		スタックフレームを得る		@return		スタックフレーム
+	tRisseVariant * GetFrame() const { return Frame; }
 };
 //---------------------------------------------------------------------------
 

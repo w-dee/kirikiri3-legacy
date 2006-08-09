@@ -38,9 +38,9 @@ public:
 	virtual ~tRisseCodeExecutor() {;}
 
 	//! @brief		コードを実行する
-	//! @param		this		this として渡すオブジェクト
+	//! @param		context		メソッドを実行するコンテキスト
 	//! @param		result		戻りの値を格納する先
-	virtual void Execute(const tRisseVariant & this_obj, tRisseVariant * result = NULL) = 0;
+	virtual void Execute(const tRisseMethodContext * context, tRisseVariant * result = NULL) = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ public:
 	//! @brief		コードを実行する
 	//! @param		this		this として渡すオブジェクト
 	//! @param		result		戻りの値を格納する先
-	void Execute(const tRisseVariant & this_obj, tRisseVariant * result = NULL);
+	void Execute(const tRisseMethodContext * context, tRisseVariant * result = NULL);
 };
 //---------------------------------------------------------------------------
 

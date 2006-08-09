@@ -103,6 +103,15 @@ risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::UpdateMaxNumUsedRegs(risse_size max)
+{
+	if(MaxNumUsedRegs < max) MaxNumUsedRegs = max; // 最大値を更新
+	if(Parent) Parent->UpdateMaxNumUsedRegs(max); // 再帰
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_size tRisseCodeGenerator::AllocateRegister()
 {
 	// 空きレジスタを探す
@@ -120,7 +129,7 @@ risse_size tRisseCodeGenerator::AllocateRegister()
 	}
 
 	NumUsedRegs ++;
-	if(MaxNumUsedRegs < NumUsedRegs) MaxNumUsedRegs = NumUsedRegs; // 最大値を更新
+	UpdateMaxNumUsedRegs(NumUsedRegs + RegisterBase); // 最大値を更新
 
 	return assigned_reg;
 }
@@ -331,6 +340,15 @@ void tRisseCodeGenerator::PutRelocatee(const tRisseSSAVariable * dest, risse_siz
 
 	// Relocations に情報を入れる
 	Relocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, index));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutSetFrame(const tRisseSSAVariable * dest)
+{
+	PutWord(ocSetFrame);
+	PutWord(FindRegMap(dest));
 }
 //---------------------------------------------------------------------------
 

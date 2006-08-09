@@ -200,6 +200,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(Add				,add	,P(R,R,R,0,0,0))//!< +
 	RISSE_OC_ENUM_ITEM(Sub				,sub	,P(R,R,R,0,0,0))//!< -
 	RISSE_OC_ENUM_ITEM(IncontextOf		,chgc	,P(R,R,R,0,0,0))//!< incontextof
+	RISSE_OC_ENUM_ITEM(SetFrame			,sfrm	,P(R,0,0,0,0,0))//!< set stack frame (internal use)
 
 	RISSE_OC_ENUM_ITEM(DGet				,dget	,P(R,R,R,0,0,0))//!< get .  
 	RISSE_OC_ENUM_ITEM(IGet				,iget	,P(R,R,R,0,0,0))//!< get [ ]

@@ -40,12 +40,12 @@ public:
 	//! @brief		コードを実行する
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		frame	メソッドが実行されるべきスタックフレーム
-	//!						(NULL=スタックフレームを指定しない場合)
+	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
+	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @param		result		戻りの値を格納する先
 	virtual void Execute(
 		const tRisseVariant * This = NULL,
-		tRisseVariant * frame = NULL,
+		const tRisseStackFrameContext *stack = NULL,
 		tRisseVariant * result = NULL) = 0;
 };
 //---------------------------------------------------------------------------
@@ -66,12 +66,12 @@ public:
 	//! @brief		コードを実行する
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		frame	メソッドが実行されるべきスタックフレーム
-	//!						(NULL=スタックフレームを指定しない場合)
+	//! @param		frame	メソッドが実行されるべきスタックフレームコンテキスト
+	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @param		result		戻りの値を格納する先
 	void Execute(
 		const tRisseVariant * This = NULL,
-		tRisseVariant * frame = NULL,
+		const tRisseStackFrameContext *stack = NULL,
 		tRisseVariant * result = NULL);
 };
 //---------------------------------------------------------------------------

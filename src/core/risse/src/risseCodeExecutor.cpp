@@ -39,13 +39,23 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 //---------------------------------------------------------------------------
 void tRisseCodeInterpreter::Execute(
 		const tRisseVariant * This,
-		tRisseVariant * frame,
+		const tRisseStackFrameContext *stack,
 		tRisseVariant * result)
 {
 	// context でスタックフレームが指定されていない場合、スタックを割り当てる
 	// TODO: スタックフレームの再利用など
 	// 毎回スタックを new で割り当てるのは効率が悪い？
-	if(frame ==NULL) frame = new tRisseVariant[CodeBlock->GetNumRegs()];
+	tRisseVariant * frame;
+	if(stack == NULL || stack->Frame == NULL)
+		frame = new tRisseVariant[CodeBlock->GetNumRegs()];
+	else
+		frame = stack->Frame;
+
+	tRisseVariant * share;
+	if(stack == NULL || stack->Share == NULL)
+		share = frame;
+	else
+		share = stack->Share;
 
 	// This を設定
 	tRisseVariant _this;
@@ -444,8 +454,11 @@ void tRisseCodeInterpreter::Execute(
 			break;
 
 		case ocSetFrame		: // sfrm	 set stack frame (internal use)
+			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			AR(code[1]).SetContext(new tRisseMethodContext(_this, frame));
+			AR(code[1]).SetContext(
+				new tRisseMethodContext(
+					_this, tRisseStackFrameContext(frame, share)));
 			code += 2;
 			break;
 

@@ -53,7 +53,7 @@ void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret, risse_size
 		this_context?&this_context->GetThis():This,
 				// こっちはこのvariantがThisオブジェクトを保持していなければ
 				// context->GetThis() を見るが
-		this_context?this_context->GetFrame():NULL
+		this_context?&this_context->GetStack():NULL
 				// こっちは常にこのvariantが保持している値になる
 		);
 }

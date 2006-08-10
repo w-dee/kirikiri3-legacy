@@ -1398,35 +1398,48 @@ typedef tRisseVariantBlock tRisseVariant;
 
 
 //---------------------------------------------------------------------------
+//! @brief		スタックフレームコンテキスト
+//---------------------------------------------------------------------------
+struct tRisseStackFrameContext
+{
+	tRisseVariant *Frame; //!< スタックフレーム (NULL=スタックフレームを指定しない)
+	tRisseVariant *Share; //!< 共有フレーム (NULL=共有フレームを指定しない)
+
+	//! @brief		デフォルトコンストラクタ
+	tRisseStackFrameContext() { Frame = NULL; Share = NULL; }
+
+	//! @brief		コンストラクタ(スタックフレームと共有フレームから)
+	//! @param		frame		スタックフレーム
+	//! @param		share		共有フレーム
+	tRisseStackFrameContext(tRisseVariant * frame, tRisseVariant * share)
+		: Frame(frame), Share(share) {;}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		メソッドのコンテキスト
 //---------------------------------------------------------------------------
 class tRisseMethodContext
 {
 private:
 	tRisseVariant This; //!< "Thisオブジェクト" (NULL=Thisオブジェクトを指定しない)
-	tRisseVariant *Frame; //!< スタックフレーム (NULL=スタックフレームを指定しない)
+	tRisseStackFrameContext Stack; //!< スタックフレームコンテキスト
 
 public:
 	//! @brief		コンストラクタ("Thisオブジェクト"から)
 	//! @param		_This		"Thisオブジェクト"
-	tRisseMethodContext(const tRisseVariant & _This) : This(_This)
-	{
-		Frame = NULL;
-	}
+	tRisseMethodContext(const tRisseVariant & _This) : This(_This) {;}
 
-	//! @brief		コンストラクタ(スタックフレームから)
-	//! @param		frame		スタックフレーム
-	tRisseMethodContext(tRisseVariant * frame)
-	{
-		Frame = frame;
-	}
+	//! @brief		コンストラクタ(スタックフレームコンテキストから)
+	//! @brief		stack	スタックフレームコンテキスト
+	tRisseMethodContext(const tRisseStackFrameContext & stack) : Stack(stack) {;}
 
-	//! @brief		コンストラクタ("Thisオブジェクト"とスタックフレームから)
-	//! @param		frame		スタックフレーム
-	tRisseMethodContext(const tRisseVariant & _This, tRisseVariant * frame) : This(_This)
-	{
-		Frame = frame;
-	}
+	//! @brief		コンストラクタ("Thisオブジェクト"とスタックフレームと共有フレームから)
+	//! @param		_This		"Thisオブジェクト"
+	//! @brief		stack	スタックフレームコンテキスト
+	tRisseMethodContext(const tRisseVariant & _This,
+		const tRisseStackFrameContext & stack) : This(_This), Stack(stack) {;}
 
 	//! @brief		"Thisオブジェクト" を得る
 	const tRisseVariant & GetThis() const
@@ -1442,8 +1455,9 @@ public:
 		return This;
 	}
 
-	//! @brief		スタックフレームを得る		@return		スタックフレーム
-	tRisseVariant * GetFrame() const { return Frame; }
+	//! @brief		スタックフレームコンテキストを得る	
+	//! @return		スタックフレームコンテキスト
+	const tRisseStackFrameContext & GetStack() const { return Stack; }
 };
 //---------------------------------------------------------------------------
 

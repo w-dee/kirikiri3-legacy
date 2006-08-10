@@ -635,6 +635,11 @@ void tRisseSSAForm::GenerateCode() const
 	// 子 SSA 形式から生成されたコードは親 SSA 形式から生成されたコードの
 	// スタック領域を破壊しないようにレジスタを配置する必要がある。
 	// すべての子SSA形式に対してバイトコード生成を行わせる
+
+	// TODO: スタックフレームの割り当ては最小限になっているか？
+	//		try...catchはその場で実行されるので、親コードブロックの「その時点」
+	//		でのレジスタの使用分の直後にtry...catchのスタックフレームが配置
+	//		できればよい
 	for(gc_vector<tRisseSSAForm *>::const_iterator i = Children.begin();
 		i != Children.end(); i++)
 	{

@@ -97,7 +97,7 @@ public: // tRisseObjectInterface メンバ
 		risse_size argc = 0,
 		tRisseVariant *argv[] = NULL,
 		const tRisseVariant *This = NULL,
-		tRisseVariant *frame = NULL
+		const tRisseStackFrameContext *stack = NULL
 			);
 };
 //---------------------------------------------------------------------------

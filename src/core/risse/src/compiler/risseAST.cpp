@@ -643,7 +643,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		risse_uint32 exp_flag_bit = 1; // 展開フラグ用ビット
 		for(risse_size i = 0; i < inherited::GetChildCount(); i++, exp_flag_bit <<= 1)
 		{
-			if(exp_flag_bit == 0x40000000)
+			if(i >= RisseMaxArgCount)
 			{
 				// 現状、関数の引数に列挙できる数は30個までとなっている
 				// ので、それを超えるとエラーになる

@@ -37,19 +37,19 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeInterpreter::Execute(const tRisseMethodContext * context,
-	tRisseVariant * result)
+void tRisseCodeInterpreter::Execute(
+		const tRisseVariant * This,
+		tRisseVariant * frame,
+		tRisseVariant * result)
 {
 	// context でスタックフレームが指定されていない場合、スタックを割り当てる
 	// TODO: スタックフレームの再利用など
 	// 毎回スタックを new で割り当てるのは効率が悪い？
-	tRisseVariant * frame = context?context->GetFrame():NULL;
-	if(frame == NULL)
-		frame = new tRisseVariant[CodeBlock->GetNumRegs()];
+	if(frame ==NULL) frame = new tRisseVariant[CodeBlock->GetNumRegs()];
 
 	// This を設定
-	tRisseVariant This;
-	if(context) This = context->GetThis();
+	tRisseVariant _this;
+	if(This) _this = *This;
 
 	// ローカル変数に値を持ってくる
 	// いくつかのローカル変数は ASSERT が有効になっていなければ
@@ -144,10 +144,27 @@ void tRisseCodeInterpreter::Execute(const tRisseMethodContext * context,
 
 		case ocFuncCall		: // call	 function call
 			/* incomplete */
-			RISSE_ASSERT(CI(code[1]) < framesize);
-			RISSE_ASSERT(CI(code[2]) < framesize);
-			code += code[4] + 5;
-			break;
+			{
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+				// code[2] = メソッドオブジェクト
+				// code[3] = フラグ
+				// code[4] = 引数の数
+				// code[5] ～   引数
+				// TODO: 引数展開、引数の省略など
+				RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
+				tRisseVariant ** argv = new tRisseVariant*[code[4]];
+				for(risse_uint32 i = 0; i < code[4]; i++)
+				{
+					RISSE_ASSERT(CI(code[i+5]) < framesize);
+					argv[i] = &AR(code[i+5]);
+				}
+				AR(code[2]).FuncCall(CI(code[1])==RisseInvalidRegNum?NULL:&AR(code[1]),
+					code[4], argv, &_this);
+				code += code[4] + 5;
+				break;
+			}
 
 		case ocNew			: // new	 "new"
 			/* incomplete */
@@ -428,7 +445,7 @@ void tRisseCodeInterpreter::Execute(const tRisseMethodContext * context,
 
 		case ocSetFrame		: // sfrm	 set stack frame (internal use)
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			AR(code[1]).SetContext(new tRisseMethodContext(This, frame));
+			AR(code[1]).SetContext(new tRisseMethodContext(_this, frame));
 			code += 2;
 			break;
 

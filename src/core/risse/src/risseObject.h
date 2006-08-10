@@ -177,7 +177,10 @@ public:
 	//! @param		flags	オペレーションフラグ
 	//! @param		argc	パラメータの個数
 	//! @param		argv	パラメータの配列
-	//! @param		context	メソッドが実行されるべきコンテキスト(NULL=コンテキストを指定しない場合)
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		frame	メソッドが実行されるべきスタックフレーム
+	//!						(NULL=スタックフレームを指定しない場合)
 	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
 	//!				エラーコードなどの戻り値はない
 	virtual void Operate(
@@ -187,7 +190,8 @@ public:
 		risse_uint32 flags = 0,
 		risse_size argc = 0,
 		tRisseVariant *argv[] = NULL,
-		const tRisseMethodContext *context = NULL
+		const tRisseVariant *This = NULL,
+		tRisseVariant *frame = NULL
 			) = 0;
 };
 //---------------------------------------------------------------------------

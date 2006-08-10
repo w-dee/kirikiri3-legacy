@@ -30,6 +30,10 @@ static const int RisseMaxVMInsnOperand = 6;
 	//!< 命令のオペランドの最大数(ただし可変オペランド部分をのぞく)
 static const risse_uint32 RisseFuncCallFlag_Omitted = 0x80000000L;
 	//!< call などのフラグの定数 - 関数呼び出しは ... を伴っているか (引数省略されているか)
+static const risse_uint32 RisseInvalidRegNum = (risse_uint32)0xffffffff;
+	//!< 無効なレジスタを表す値
+static const risse_size RisseMaxArgCount = 30;
+	//!< 引数の最大個数
 //---------------------------------------------------------------------------
 
 

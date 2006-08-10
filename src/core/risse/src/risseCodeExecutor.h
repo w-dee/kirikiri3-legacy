@@ -38,9 +38,15 @@ public:
 	virtual ~tRisseCodeExecutor() {;}
 
 	//! @brief		コードを実行する
-	//! @param		context		メソッドを実行するコンテキスト
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		frame	メソッドが実行されるべきスタックフレーム
+	//!						(NULL=スタックフレームを指定しない場合)
 	//! @param		result		戻りの値を格納する先
-	virtual void Execute(const tRisseMethodContext * context, tRisseVariant * result = NULL) = 0;
+	virtual void Execute(
+		const tRisseVariant * This = NULL,
+		tRisseVariant * frame = NULL,
+		tRisseVariant * result = NULL) = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -58,9 +64,15 @@ public:
 
 
 	//! @brief		コードを実行する
-	//! @param		this		this として渡すオブジェクト
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		frame	メソッドが実行されるべきスタックフレーム
+	//!						(NULL=スタックフレームを指定しない場合)
 	//! @param		result		戻りの値を格納する先
-	void Execute(const tRisseMethodContext * context, tRisseVariant * result = NULL);
+	void Execute(
+		const tRisseVariant * This = NULL,
+		tRisseVariant * frame = NULL,
+		tRisseVariant * result = NULL);
 };
 //---------------------------------------------------------------------------
 

@@ -391,27 +391,25 @@ public: // 演算子
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		argc		引数の数
 	//! @param		argv		引数へのポインタの配列
-	//! @param		context		このメソッドが実行されるべきコンテキスト
+	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[], const tRisseMethodContext *context)
+	void FuncCall(tRisseVariantBlock * ret,
+		risse_size argc, tRisseVariantBlock *argv[],
+		tRisseVariant *This)
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCall_Object   (ret, argc, argv, context); return;
+		case vtObject:	FuncCall_Object   (ret, argc, argv, This); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
 		}
 	}
 
-	void FuncCall_Object   (tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[], const tRisseMethodContext *context)
-	{
-		tRisseObjectInterface * intf = GetObjectIntf();
-		if(!intf) { /* TODO: null check */; }
-		intf->Operate(ocFuncCall, ret, tRisseString::GetEmptyString(), 0, argc, argv, context);
-	}
+	void FuncCall_Object   (tRisseVariantBlock * ret, risse_size argc,
+		tRisseVariantBlock *argv[], const tRisseVariant * This);
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトをクラスと見なした)インスタンス作成	New

@@ -173,7 +173,7 @@ void tRisseSSAForm::Generate(const tRisseASTNode * root)
 	// 到達しない基本ブロックからのパスを削除
 	LeapDeadBlocks();
 
-	// 共有の刺さった変数へのアクセスを別形式の文に変換
+	// 共有変数へのアクセスを別形式の文に変換
 	ConvertSharedVariableAccess();
 
 	// 変数の有効範囲をブロック単位で解析

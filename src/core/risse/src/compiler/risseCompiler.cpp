@@ -58,7 +58,9 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 	{
-		RisseFPrint(stdout,(	RISSE_WS("========== VM (") + (*i)->GetName() +
+		RisseFPrint(stdout,(	RISSE_WS("========== VM block #") +
+									tRisseString::AsString((risse_int64)(*i)->GetCodeBlockIndex()) +
+								RISSE_WS(" (") + (*i)->GetName() +
 								RISSE_WS(") ==========\n")).c_str());
 		tRisseCodeBlock * cb = (*i)->GetCodeBlock();
 		str = cb->Dump();

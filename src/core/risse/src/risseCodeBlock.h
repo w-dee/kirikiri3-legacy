@@ -37,6 +37,7 @@ class tRisseCodeBlock : public tRisseObjectInterface, public tRisseCollectee
 	tRisseVariant *Consts; //!< 定数領域
 	risse_size ConstsSize; //!< 定数領域のサイズ(個)
 	risse_size NumRegs; //!< 必要なレジスタ数
+	risse_size NumSharedVars; //!< 必要な共有変数の数
 
 	typedef std::pair<risse_size, risse_size> tRelocation; //!<  再配置情報のtypedef
 	tRelocation * Relocations; //!< 再配置情報
@@ -83,6 +84,10 @@ public:
 	//! @brief		必要なレジスタ数を得る
 	//! @return		必要なレジスタ数
 	risse_size GetNumRegs() const { return NumRegs; }
+
+	//! @brief		必要な共有変数の数を得る
+	//! @return		必要な共有変数の数
+	risse_size GetNumSharedVars() const { return NumSharedVars; }
 
 	//! @brief		コード実行クラスのインスタンスを得る
 	tRisseCodeExecutor * GetExecutor() const { return Executor; }

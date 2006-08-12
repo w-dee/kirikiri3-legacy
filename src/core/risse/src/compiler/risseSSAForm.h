@@ -173,10 +173,11 @@ class tRisseSSAForm : public tRisseCollectee
 {
 	tRisseCompiler * Compiler; //!< この SSA 形式が含まれるコンパイラインスタンス
 	tRisseSSAForm * Parent; //!< この SSA 形式インスタンスの親インスタンス
+	bool UseParentFrame; //!< 親SSA形式インスタンスのフレームを使うかどうか
 	gc_vector<tRisseSSAForm *> Children; //!< この SSA形式インスタンスの子インスタンスの配列
-	typedef gc_map<tRisseString, tRisseSSAVariable *> tPinnedVariableMap;
-		//!< 「ピン」されている変数のマップのtypedef (tPinnedVariableMap::value_type::second は常に null)
-	tPinnedVariableMap PinnedVariableMap; //!< 「ピン」されている変数のマップ
+	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
+		//!< 共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
+	tSharedVariableMap SharedVariableMap; //!< 共有されている変数のマップ
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
@@ -198,11 +199,10 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		compiler		この SSA 形式が含まれるコンパイラインスタンス
 	//! @param		name			このSSA形式インスタンスの名前
-	tRisseSSAForm(tRisseCompiler * compiler, const tRisseString & name);
-
-	//! @brief		この SSA 形式インスタンスの親インスタンスを設定する
-	//! @param		form		この SSA 形式インスタンスの親インスタンス
-	void SetParent(tRisseSSAForm * form);
+	//! @param		parent			親SSA形式インスタンス
+	//! @param		useparentframe	親SSA形式インスタンスのフレームを使うかどうか
+	tRisseSSAForm(tRisseCompiler * compiler, const tRisseString & name,
+		tRisseSSAForm * parent, bool useparentframe);
 
 	//! @brief		AST を SSA 形式に変換する
 	//! @param		root	ASTのルートノード
@@ -211,6 +211,10 @@ public:
 	//! @brief		コンパイラインスタンスを得る
 	//! @return		コンパイラインスタンス
 	tRisseCompiler * GetCompiler() const { return Compiler; }
+
+	//! @brief		親SSA形式インスタンスのフレームを使うかどうかを得る
+	//! @param		親SSA形式インスタンスのフレームを使うかどうか
+	bool GetUseParentFrame() const { return UseParentFrame; }
 
 	//! @brief		スクリプトブロックインスタンスを得る
 	//! @return		スクリプトブロックインスタンス
@@ -335,14 +339,14 @@ public:
 		return ret_var;
 	}
 
-	//! @param		変数を「ピン」する
+	//! @param		変数を共有する
 	//! @param		name		変数名(番号付き)
-	void PinVariable(const tRisseString & name);
+	void ShareVariable(const tRisseString & name);
 
-	//! @param		変数が「ピン」されているかを得る
+	//! @param		変数が共有されているかを得る
 	//! @param		name		変数名(番号付き)
-	//! @return		ピンされているかどうか
-	bool GetPinned(const tRisseString & name);
+	//! @return		変数が共有されているかどうか
+	bool GetShared(const tRisseString & name);
 
 protected:
 	//! @brief	CreateLazyBlock で返される情報の構造体
@@ -357,9 +361,9 @@ public:
 	//! @brief		新しい遅延評価ブロックを作成する
 	//! @param		pos			スクリプト上の位置
 	//! @param		basename	新しい遅延評価ブロックの名前(実際にはこれにさらに連番がつく)
-	//! @param		pinvars		遅延評価ブロックからブロック外の変数を参照された場合に
-	//!							その参照された変数をスタックフレームに固定(pin)するかどうか。
-	//!							変数を固定することにより、遅延評価ブロックを、そのブロックが定義
+	//! @param		sharevars	遅延評価ブロックからブロック外の変数を参照された場合に
+	//!							その参照された変数を共有変数として扱うかどうか。
+	//!							変数を共有することにより、遅延評価ブロックを、そのブロックが定義
 	//!							された位置以外から呼び出しても安全に変数にアクセスできるように
 	//!							なる ( function 内 function でレキシカルクロージャを使用するとき
 	//!							などに有効 )
@@ -371,7 +375,7 @@ public:
 	//!				使う。使い終わったら CreateLazyBlock() メソッドの戻り値を
 	//!				CleanupLazyBlock() メソッドに渡して呼び出すこと。
 	void * CreateLazyBlock(risse_size pos, const tRisseString & basename,
-		bool pinvars, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var);
+		bool sharevars, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var);
 
 	//! @brief		遅延評価ブロックのクリーンアップ処理を行う
 	//! @param		param	CreateLazyBlock() の戻り値
@@ -394,8 +398,8 @@ public:
 	//! @brief		到達しない基本ブロックを削除する
 	void LeapDeadBlocks();
 
-	//! @brief		ピンの刺さった変数へのアクセスを別形式の文に変換
-	void ConvertPinnedVariableAccess();
+	//! @brief		共有された変数へのアクセスを別形式の文に変換
+	void ConvertSharedVariableAccess();
 
 	//! @brief		変数の生存区間を基本ブロック単位で解析する(すべての変数に対して)
 	void AnalyzeVariableBlockLiveness();

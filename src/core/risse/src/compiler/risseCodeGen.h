@@ -31,7 +31,8 @@ class tRisseCodeGenerator : public tRisseCollectee
 {
 	static const risse_size MaxConstSearch = 5; // 定数領域で同じ値を探す最大値
 
-	tRisseCodeGenerator * Parent; //!< 親のコードジェネレータ空間
+	tRisseCodeGenerator * Parent; //!< 親のコードジェネレータ
+	bool UseParentFrame; //!< 親のコードジェネレータのフレームを使うかどうか
 	risse_size RegisterBase; //!< レジスタの基本値
 
 	gc_vector<risse_uint32> Code; //!< コード
@@ -43,7 +44,7 @@ class tRisseCodeGenerator : public tRisseCollectee
 		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
 	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
-	tNamedRegMap PinnedRegNameMap; //!< pinされた変数の変数名とそれに対応するレジスタ番号のマップ
+	tNamedRegMap *SharedRegNameMap; //!< 共有された変数の変数名とそれに対応するレジスタ番号のマップ
 	tNamedRegMap ParentVariableMap; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	//! @brief		未解決のジャンプを表す構造体
@@ -66,8 +67,8 @@ class tRisseCodeGenerator : public tRisseCollectee
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent			親コードジェネレータ
-	//! @param		register_base	レジスタの基本値
-	tRisseCodeGenerator(tRisseCodeGenerator * parent = NULL);
+	//! @param		useparentframe	親コードジェネレータのフレームを使うかどうか
+	tRisseCodeGenerator(tRisseCodeGenerator * parent = NULL, bool useparentframe = false);
 
 public:
 
@@ -121,7 +122,8 @@ public:
 
 	//! @brief		使用中のレジスタの最大値を更新する
 	//! @param		max		レジスタの最大値
-	//! @note		親のコードブロックと子のコードブロックはスタックを共有するため、
+	//! @note		UseParentFrameが真の場合は、親のコードブロックと子
+	//!				のコードブロックはスタックフレームを共有するため、
 	//!				このメソッドは子から親へ再帰的に呼ばれる(結果、子と親の
 	//!				MaxNumUsedRegs は同一になる)
 	void UpdateMaxNumUsedRegs(risse_size max);
@@ -140,20 +142,19 @@ public:
 	//! @note		変数はレジスタマップ内に存在しないとならない
 	void FreeRegister(const tRisseSSAVariable *var);
 
-	//! @brief		pinされたレジスタのマップを変数名で探す
+	//! @brief		共有されたレジスタのマップを変数名で探す
 	//! @param		name			変数名
 	//! @return		そのレジスタのインデックス
 	//! @note		nameがマップ内に見つからなかった場合は(デバッグモード時は)
 	//!				ASSERTに失敗となる
-	risse_size FindPinnedRegNameMap(const tRisseString & name);
+	risse_size FindSharedRegNameMap(const tRisseString & name);
 
-	//! @brief		pinされたレジスタのマップに変数名とレジスタを追加する
+	//! @brief		共有されたレジスタのマップに変数名とレジスタを追加する
 	//! @param		name			変数名
-	//! @note		このメソッドは RegisterBase をインクリメントする。
-	//! 			すべてのpinされたレジスタを登録し終わってからFindRegMapを呼ぶこと。
-	//!				(pinされたレジスタのレジスタ番号は自動的に採番されるが、これは
-	//!				FindRegMapで追加されるレジスタ番号よりも低位に位置する必要があるため)
-	void AddPinnedRegNameMap(const tRisseString & name);
+	void AddSharedRegNameMap(const tRisseString & name);
+
+	//! @brief		共有されたレジスタの個数を得る @return 共有されたレジスタの個数
+	risse_size GetSharedRegCount() const { return SharedRegNameMap->size(); }
 
 	//! @brief		ParentVariableMap 内で変数を探す (親から子に対して呼ばれる)
 	//! @param		name		変数名
@@ -183,16 +184,6 @@ public:
 	//! @param		src		変数コピー元変数
 	void PutAssign(const tRisseSSAVariable * dest, const tRisseSSAVariable * src);
 
-	//! @brief		Assignコードを置く
-	//! @param		dest	変数コピー先変数
-	//! @param		src		変数コピー元変数
-	void PutAssign(const tRisseString & dest, const tRisseSSAVariable * src);
-
-	//! @brief		Assignコードを置く
-	//! @param		dest	変数コピー先変数
-	//! @param		src		変数コピー元変数
-	void PutAssign(const tRisseSSAVariable * dest, const tRisseString & src);
-
 	//! @brief		Assignコードを置く(このメソッドは削除の予定;使わないこと)
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数
@@ -213,14 +204,28 @@ public:
 	//! @param		code	オペレーションコード
 	void PutAssign(const tRisseSSAVariable * dest, tRisseOpCode code);
 
+	//! @brief		Writeコード(共有空間への書き込み)を置く
+	//! @param		dest	変数コピー先変数
+	//! @param		src		変数コピー元変数
+	void PutWrite(const tRisseString & dest, const tRisseSSAVariable * src);
+
+	//! @brief		Readコード(共有空間からの読み込み)を置く
+	//! @param		dest	変数コピー先変数
+	//! @param		src		変数コピー元変数
+	void PutRead(const tRisseSSAVariable * dest, const tRisseString & src);
+
 	//! @brief		他のコードブロックへの再配置用コードを置く
 	//! @param		dest	格納先変数
 	//! @param		index	コードブロックのインデックス
 	void PutRelocatee(const tRisseSSAVariable * dest, risse_size index);
 
-	//! @brief		スタックフレームの書き換え用コードを置く
+	//! @brief		スタックフレームと共有空間の書き換え用コードを置く
 	//! @param		dest	書き換え先変数
 	void PutSetFrame(const tRisseSSAVariable * dest);
+
+	//! @brief		共有空間の書き換え用コードを置く
+	//! @param		dest	書き換え先変数
+	void PutSetShare(const tRisseSSAVariable * dest);
 
 	//! @brief		FuncCall あるいは New コードを置く
 	//! @param		dest	関数結果格納先

@@ -52,11 +52,12 @@ void tRisseCodeInterpreter::Execute(
 	else
 		frame = stack->Frame;
 
-	tRisseVariant * share;
+	tRisseVariant * shared;
 	if(stack == NULL || stack->Share == NULL)
-		share = frame;
+		shared = CodeBlock->GetNumSharedVars() ?
+			new tRisseVariant[CodeBlock->GetNumSharedVars()] : NULL;
 	else
-		share = stack->Share;
+		shared = stack->Share;
 
 	// This を設定
 	tRisseVariant _this;
@@ -67,6 +68,9 @@ void tRisseCodeInterpreter::Execute(
 	// 必要ないので、#ifdef ～ #endif で場合分けをする。
 #ifdef RISSE_ASSERT_ENABLED
 	risse_size framesize = CodeBlock->GetNumRegs();
+#endif
+#ifdef RISSE_ASSERT_ENABLED
+	risse_size sharedsize = CodeBlock->GetNumSharedVars();
 #endif
 	const risse_uint32 * code = CodeBlock->GetCode();
 #ifdef RISSE_ASSERT_ENABLED
@@ -162,6 +166,22 @@ void tRisseCodeInterpreter::Execute(
 			code += 3;
 			break;
 
+		case ocWrite: // swrite	 共有空間への書き込み
+			RISSE_ASSERT(shared);
+			RISSE_ASSERT(CI(code[1]) < sharedsize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			shared[CI(code[1])] = AR(code[2]);
+			code += 3;
+			break;
+
+		case ocRead: // sread	共有空間からの読み込み
+			RISSE_ASSERT(shared);
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < sharedsize);
+			AR(code[1]) = shared[CI(code[2])];
+			code += 3;
+			break;
+
 		case ocFuncCall		: // call	 function call
 			/* incomplete */
 			{
@@ -200,12 +220,19 @@ void tRisseCodeInterpreter::Execute(
 			code += code[4] + code[5] + 6;
 			break;
 
-		case ocSetFrame		: // sfrm	 set stack frame (internal use)
-			/* incomplete */
+		case ocSetFrame		: // sfrm	 スタックフレームと共有空間を設定する
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			AR(code[1]).SetContext(
 				new tRisseMethodContext(
-					_this, tRisseStackFrameContext(frame, share)));
+					_this, tRisseStackFrameContext(frame, shared)));
+			code += 2;
+			break;
+
+		case ocSetShare		: // sshare	 共有空間のみ設定する
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			AR(code[1]).SetContext(
+				new tRisseMethodContext(
+					_this, tRisseStackFrameContext(NULL, shared)));
 			code += 2;
 			break;
 

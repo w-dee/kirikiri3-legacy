@@ -55,7 +55,9 @@ struct tRisseVMInsnInfo
 		vifNumber,		//!< N このオペランドは(すべての必須オペランドが終了し
 						//!<   た後に続く)追加オペランドの個数を表している
 		vifAddress,		//!< A このオペランドはアドレスを表している
-		vifSomething,	//!< S このオペランドはその他の何かを表している
+		vifParameter,	//!< A このオペランドは関数へのパラメータを表している
+		vifShared,		//!< S このオペランドは共有空間の変数を表している
+		vifOthers,		//!< O このオペランドはその他の何かを表している
 	};
 
 	const char * Name;								//!< 命令名
@@ -81,14 +83,22 @@ struct tRisseVMInsnInfo
 		#undef A
 	#endif
 	#define		A		tRisseVMInsnInfo::vifAddress
-	#ifdef S
-		#undef S
-	#endif
-	#define		S		tRisseVMInsnInfo::vifSomething
 	#ifdef P
 		#undef P
 	#endif
-	#define P(a,b,c,d,e,f) {\
+	#define		P		tRisseVMInsnInfo::vifParameter
+	#ifdef S
+		#undef S
+	#endif
+	#define		S		tRisseVMInsnInfo::vifShared
+	#ifdef O
+		#undef O
+	#endif
+	#define		O		tRisseVMInsnInfo::vifOthers
+	#ifdef Z
+		#undef Z
+	#endif
+	#define Z(a,b,c,d,e,f) {\
 		(tRisseVMInsnInfo::tInsnFlag)(a),\
 		(tRisseVMInsnInfo::tInsnFlag)(b),\
 		(tRisseVMInsnInfo::tInsnFlag)(c),\
@@ -149,108 +159,111 @@ RISSE_OC_ENUM_DEF()
 //						LongId			Mnemonic  O1O2O3O4O5O6 operands
 
 // なにもしない
-	RISSE_OC_ENUM_ITEM(NoOperation		,nop	,P(0,0,0,0,0,0))//!< なにもしない
+	RISSE_OC_ENUM_ITEM(NoOperation		,nop	,Z(0,0,0,0,0,0))//!< なにもしない
 
 // 代入
-	RISSE_OC_ENUM_ITEM(Assign			,cp		,P(R,R,0,0,0,0))//!< = (ローカル変数の代入)
-	RISSE_OC_ENUM_ITEM(AssignConstant	,const	,P(R,C,0,0,0,0))//!< = 定数の代入
-	RISSE_OC_ENUM_ITEM(AssignThis		,this	,P(R,0,0,0,0,0))//!< = thisの代入
-	RISSE_OC_ENUM_ITEM(AssignSuper		,super	,P(R,0,0,0,0,0))//!< = superの代入
-	RISSE_OC_ENUM_ITEM(AssignGlobal		,global	,P(R,0,0,0,0,0))//!< = globalの代入
-	RISSE_OC_ENUM_ITEM(AssignNewArray	,array	,P(R,0,0,0,0,0))//!< = 新しい配列オブジェクトの代入
-	RISSE_OC_ENUM_ITEM(AssignNewDict	,dict	,P(R,0,0,0,0,0))//!< = 新しい辞書配列オブジェクトの代入
-	RISSE_OC_ENUM_ITEM(AssignNewRegExp	,regexp	,P(R,0,0,0,0,0))//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
-	RISSE_OC_ENUM_ITEM(AssignArg		,getarg	,P(R,S,0,0,0,0))//!< = (S番目の関数引数を代入)
+	RISSE_OC_ENUM_ITEM(Assign			,cp		,Z(R,R,0,0,0,0))//!< = (ローカル変数の代入)
+	RISSE_OC_ENUM_ITEM(AssignConstant	,const	,Z(R,C,0,0,0,0))//!< = 定数の代入
+	RISSE_OC_ENUM_ITEM(AssignThis		,this	,Z(R,0,0,0,0,0))//!< = thisの代入
+	RISSE_OC_ENUM_ITEM(AssignSuper		,super	,Z(R,0,0,0,0,0))//!< = superの代入
+	RISSE_OC_ENUM_ITEM(AssignGlobal		,global	,Z(R,0,0,0,0,0))//!< = globalの代入
+	RISSE_OC_ENUM_ITEM(AssignNewArray	,array	,Z(R,0,0,0,0,0))//!< = 新しい配列オブジェクトの代入
+	RISSE_OC_ENUM_ITEM(AssignNewDict	,dict	,Z(R,0,0,0,0,0))//!< = 新しい辞書配列オブジェクトの代入
+	RISSE_OC_ENUM_ITEM(AssignNewRegExp	,regexp	,Z(R,0,0,0,0,0))//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+	RISSE_OC_ENUM_ITEM(AssignArg		,getarg	,Z(R,P,0,0,0,0))//!< = (O番目の関数引数を代入)
+
+// 共有空間アクセス
+	RISSE_OC_ENUM_ITEM(Write			,swrite	,Z(S,R,0,0,0,0))//!< 共有空間への書き込み
+	RISSE_OC_ENUM_ITEM(Read				,sread	,Z(R,S,0,0,0,0))//!< 共有空間からの読み込み
 
 // 関数定義/引数処理/関数呼び出し
-	RISSE_OC_ENUM_ITEM(FuncCall			,call	,P(R,R,S,N,0,0))//!< function call
-	RISSE_OC_ENUM_ITEM(New				,new	,P(R,R,S,N,0,0))//!< "new"
-	RISSE_OC_ENUM_ITEM(FuncCallBlock	,callb	,P(R,R,S,N,N,0))//!< function call with lazyblock
-	RISSE_OC_ENUM_ITEM(SetFrame			,sfrm	,P(R,0,0,0,0,0))//!< set stack frame (internal use)
+	RISSE_OC_ENUM_ITEM(FuncCall			,call	,Z(R,R,O,N,0,0))//!< function call
+	RISSE_OC_ENUM_ITEM(New				,new	,Z(R,R,O,N,0,0))//!< "new"
+	RISSE_OC_ENUM_ITEM(FuncCallBlock	,callb	,Z(R,R,O,N,N,0))//!< function call with lazyblock
+	RISSE_OC_ENUM_ITEM(SetFrame			,sfrm	,Z(R,0,0,0,0,0))//!< スタックフレームと共有空間を設定する
+	RISSE_OC_ENUM_ITEM(SetShare			,sshare	,Z(R,0,0,0,0,0))//!< 共有空間のみ設定する
 
 // ジャンプ/分岐/制御/補助
-	RISSE_OC_ENUM_ITEM(Jump				,jump	,P(A,0,0,0,0,0))//!< 単純なジャンプ
-	RISSE_OC_ENUM_ITEM(Branch			,branch	,P(R,A,A,0,0,0))//!< 分岐
-	RISSE_OC_ENUM_ITEM(Debugger			,dbg	,P(0,0,0,0,0,0))//!< debugger ステートメント
-	RISSE_OC_ENUM_ITEM(Throw			,throw	,P(R,0,0,0,0,0))//!< throw ステートメント
-	RISSE_OC_ENUM_ITEM(Return			,ret	,P(R,0,0,0,0,0))//!< return ステートメント
+	RISSE_OC_ENUM_ITEM(Jump				,jump	,Z(A,0,0,0,0,0))//!< 単純なジャンプ
+	RISSE_OC_ENUM_ITEM(Branch			,branch	,Z(R,A,A,0,0,0))//!< 分岐
+	RISSE_OC_ENUM_ITEM(Debugger			,dbg	,Z(0,0,0,0,0,0))//!< debugger ステートメント
+	RISSE_OC_ENUM_ITEM(Throw			,throw	,Z(R,0,0,0,0,0))//!< throw ステートメント
+	RISSE_OC_ENUM_ITEM(Return			,ret	,Z(R,0,0,0,0,0))//!< return ステートメント
 
 // 引数1+なし
-	RISSE_OC_ENUM_ITEM(LogNot			,lnot	,P(R,R,0,0,0,0))//!< "!" logical not
-	RISSE_OC_ENUM_ITEM(BitNot			,bnot	,P(R,R,0,0,0,0))//!< "~" bit not
-	RISSE_OC_ENUM_ITEM(DecAssign		,ERR	,P(0,0,0,0,0,0))//!< "--" decrement
-	RISSE_OC_ENUM_ITEM(IncAssign		,ERR	,P(0,0,0,0,0,0))//!< "++" increment
-	RISSE_OC_ENUM_ITEM(Plus				,plus	,P(R,R,0,0,0,0))//!< "+"
-	RISSE_OC_ENUM_ITEM(Minus			,minus	,P(R,R,0,0,0,0))//!< "-"
+	RISSE_OC_ENUM_ITEM(LogNot			,lnot	,Z(R,R,0,0,0,0))//!< "!" logical not
+	RISSE_OC_ENUM_ITEM(BitNot			,bnot	,Z(R,R,0,0,0,0))//!< "~" bit not
+	RISSE_OC_ENUM_ITEM(DecAssign		,ERR	,Z(0,0,0,0,0,0))//!< "--" decrement
+	RISSE_OC_ENUM_ITEM(IncAssign		,ERR	,Z(0,0,0,0,0,0))//!< "++" increment
+	RISSE_OC_ENUM_ITEM(Plus				,plus	,Z(R,R,0,0,0,0))//!< "+"
+	RISSE_OC_ENUM_ITEM(Minus			,minus	,Z(R,R,0,0,0,0))//!< "-"
 
 // 引数1+1つ
-	RISSE_OC_ENUM_ITEM(LogOr			,lor	,P(R,R,R,0,0,0))//!< ||
-	RISSE_OC_ENUM_ITEM(LogAnd			,land	,P(R,R,R,0,0,0))//!< &&
-	RISSE_OC_ENUM_ITEM(BitOr			,bor	,P(R,R,R,0,0,0))//!< |
-	RISSE_OC_ENUM_ITEM(BitXor			,bxor	,P(R,R,R,0,0,0))//!< ^
-	RISSE_OC_ENUM_ITEM(BitAnd			,band	,P(R,R,R,0,0,0))//!< &
-	RISSE_OC_ENUM_ITEM(NotEqual			,ne		,P(R,R,R,0,0,0))//!< !=
-	RISSE_OC_ENUM_ITEM(Equal			,eq		,P(R,R,R,0,0,0))//!< ==
-	RISSE_OC_ENUM_ITEM(DiscNotEqual		,dne	,P(R,R,R,0,0,0))//!< !==
-	RISSE_OC_ENUM_ITEM(DiscEqual		,deq	,P(R,R,R,0,0,0))//!< ===
-	RISSE_OC_ENUM_ITEM(Lesser			,lt		,P(R,R,R,0,0,0))//!< <
-	RISSE_OC_ENUM_ITEM(Greater			,gt		,P(R,R,R,0,0,0))//!< >
-	RISSE_OC_ENUM_ITEM(LesserOrEqual	,lte	,P(R,R,R,0,0,0))//!< <=
-	RISSE_OC_ENUM_ITEM(GreaterOrEqual	,gte	,P(R,R,R,0,0,0))//!< >=
-	RISSE_OC_ENUM_ITEM(RBitShift		,rbs	,P(R,R,R,0,0,0))//!< >>>
-	RISSE_OC_ENUM_ITEM(LShift			,ls		,P(R,R,R,0,0,0))//!< <<
-	RISSE_OC_ENUM_ITEM(RShift			,rs		,P(R,R,R,0,0,0))//!< >>
-	RISSE_OC_ENUM_ITEM(Mod				,mod	,P(R,R,R,0,0,0))//!< %
-	RISSE_OC_ENUM_ITEM(Div				,div	,P(R,R,R,0,0,0))//!< /
-	RISSE_OC_ENUM_ITEM(Idiv				,idiv	,P(R,R,R,0,0,0))//!< \ (integer div)
-	RISSE_OC_ENUM_ITEM(Mul				,mul	,P(R,R,R,0,0,0))//!< *
-	RISSE_OC_ENUM_ITEM(Add				,add	,P(R,R,R,0,0,0))//!< +
-	RISSE_OC_ENUM_ITEM(Sub				,sub	,P(R,R,R,0,0,0))//!< -
-	RISSE_OC_ENUM_ITEM(IncontextOf		,chgc	,P(R,R,R,0,0,0))//!< incontextof
+	RISSE_OC_ENUM_ITEM(LogOr			,lor	,Z(R,R,R,0,0,0))//!< ||
+	RISSE_OC_ENUM_ITEM(LogAnd			,land	,Z(R,R,R,0,0,0))//!< &&
+	RISSE_OC_ENUM_ITEM(BitOr			,bor	,Z(R,R,R,0,0,0))//!< |
+	RISSE_OC_ENUM_ITEM(BitXor			,bxor	,Z(R,R,R,0,0,0))//!< ^
+	RISSE_OC_ENUM_ITEM(BitAnd			,band	,Z(R,R,R,0,0,0))//!< &
+	RISSE_OC_ENUM_ITEM(NotEqual			,ne		,Z(R,R,R,0,0,0))//!< !=
+	RISSE_OC_ENUM_ITEM(Equal			,eq		,Z(R,R,R,0,0,0))//!< ==
+	RISSE_OC_ENUM_ITEM(DiscNotEqual		,dne	,Z(R,R,R,0,0,0))//!< !==
+	RISSE_OC_ENUM_ITEM(DiscEqual		,deq	,Z(R,R,R,0,0,0))//!< ===
+	RISSE_OC_ENUM_ITEM(Lesser			,lt		,Z(R,R,R,0,0,0))//!< <
+	RISSE_OC_ENUM_ITEM(Greater			,gt		,Z(R,R,R,0,0,0))//!< >
+	RISSE_OC_ENUM_ITEM(LesserOrEqual	,lte	,Z(R,R,R,0,0,0))//!< <=
+	RISSE_OC_ENUM_ITEM(GreaterOrEqual	,gte	,Z(R,R,R,0,0,0))//!< >=
+	RISSE_OC_ENUM_ITEM(RBitShift		,rbs	,Z(R,R,R,0,0,0))//!< >>>
+	RISSE_OC_ENUM_ITEM(LShift			,ls		,Z(R,R,R,0,0,0))//!< <<
+	RISSE_OC_ENUM_ITEM(RShift			,rs		,Z(R,R,R,0,0,0))//!< >>
+	RISSE_OC_ENUM_ITEM(Mod				,mod	,Z(R,R,R,0,0,0))//!< %
+	RISSE_OC_ENUM_ITEM(Div				,div	,Z(R,R,R,0,0,0))//!< /
+	RISSE_OC_ENUM_ITEM(Idiv				,idiv	,Z(R,R,R,0,0,0))//!< \ (integer div)
+	RISSE_OC_ENUM_ITEM(Mul				,mul	,Z(R,R,R,0,0,0))//!< *
+	RISSE_OC_ENUM_ITEM(Add				,add	,Z(R,R,R,0,0,0))//!< +
+	RISSE_OC_ENUM_ITEM(Sub				,sub	,Z(R,R,R,0,0,0))//!< -
+	RISSE_OC_ENUM_ITEM(IncontextOf		,chgc	,Z(R,R,R,0,0,0))//!< incontextof
 
-	RISSE_OC_ENUM_ITEM(DGet				,dget	,P(R,R,R,0,0,0))//!< get .  
-	RISSE_OC_ENUM_ITEM(IGet				,iget	,P(R,R,R,0,0,0))//!< get [ ]
-	RISSE_OC_ENUM_ITEM(DDelete			,ddel	,P(R,R,R,0,0,0))//!< delete .
-	RISSE_OC_ENUM_ITEM(IDelete			,idel	,P(R,R,R,0,0,0))//!< delete [ ]
+	RISSE_OC_ENUM_ITEM(DGet				,dget	,Z(R,R,R,0,0,0))//!< get .  
+	RISSE_OC_ENUM_ITEM(IGet				,iget	,Z(R,R,R,0,0,0))//!< get [ ]
+	RISSE_OC_ENUM_ITEM(DDelete			,ddel	,Z(R,R,R,0,0,0))//!< delete .
+	RISSE_OC_ENUM_ITEM(IDelete			,idel	,Z(R,R,R,0,0,0))//!< delete [ ]
 
 // 引数1+2つ
-	RISSE_OC_ENUM_ITEM(DSet				,dset	,P(R,R,R,0,0,0))//!< set .
-	RISSE_OC_ENUM_ITEM(ISet				,iset	,P(R,R,R,0,0,0))//!< set [ ]
+	RISSE_OC_ENUM_ITEM(DSet				,dset	,Z(R,R,R,0,0,0))//!< set .
+	RISSE_OC_ENUM_ITEM(ISet				,iset	,Z(R,R,R,0,0,0))//!< set [ ]
 
 // 代入演算子の類
-	RISSE_OC_ENUM_ITEM(BitAndAssign		,ERR	,P(0,0,0,0,0,0))//!< &=
-	RISSE_OC_ENUM_ITEM(BitOrAssign		,ERR	,P(0,0,0,0,0,0))//!< |=
-	RISSE_OC_ENUM_ITEM(BitXorAssign		,ERR	,P(0,0,0,0,0,0))//!< ^=
-	RISSE_OC_ENUM_ITEM(SubAssign		,ERR	,P(0,0,0,0,0,0))//!< -=
-	RISSE_OC_ENUM_ITEM(AddAssign		,ERR	,P(0,0,0,0,0,0))//!< +=
-	RISSE_OC_ENUM_ITEM(ModAssign		,ERR	,P(0,0,0,0,0,0))//!< %=
-	RISSE_OC_ENUM_ITEM(DivAssign		,ERR	,P(0,0,0,0,0,0))//!< /=
-	RISSE_OC_ENUM_ITEM(IdivAssign		,ERR	,P(0,0,0,0,0,0))//!< \=
-	RISSE_OC_ENUM_ITEM(MulAssign		,ERR	,P(0,0,0,0,0,0))//!< *=
-	RISSE_OC_ENUM_ITEM(LogOrAssign		,ERR	,P(0,0,0,0,0,0))//!< ||=
-	RISSE_OC_ENUM_ITEM(LogAndAssign		,ERR	,P(0,0,0,0,0,0))//!< &&=
-	RISSE_OC_ENUM_ITEM(RBitShiftAssign	,ERR	,P(0,0,0,0,0,0))//!< >>>=
-	RISSE_OC_ENUM_ITEM(LShiftAssign		,ERR	,P(0,0,0,0,0,0))//!< <<=
-	RISSE_OC_ENUM_ITEM(RShiftAssign		,ERR	,P(0,0,0,0,0,0))//!< >>=
+	RISSE_OC_ENUM_ITEM(BitAndAssign		,ERR	,Z(0,0,0,0,0,0))//!< &=
+	RISSE_OC_ENUM_ITEM(BitOrAssign		,ERR	,Z(0,0,0,0,0,0))//!< |=
+	RISSE_OC_ENUM_ITEM(BitXorAssign		,ERR	,Z(0,0,0,0,0,0))//!< ^=
+	RISSE_OC_ENUM_ITEM(SubAssign		,ERR	,Z(0,0,0,0,0,0))//!< -=
+	RISSE_OC_ENUM_ITEM(AddAssign		,ERR	,Z(0,0,0,0,0,0))//!< +=
+	RISSE_OC_ENUM_ITEM(ModAssign		,ERR	,Z(0,0,0,0,0,0))//!< %=
+	RISSE_OC_ENUM_ITEM(DivAssign		,ERR	,Z(0,0,0,0,0,0))//!< /=
+	RISSE_OC_ENUM_ITEM(IdivAssign		,ERR	,Z(0,0,0,0,0,0))//!< \=
+	RISSE_OC_ENUM_ITEM(MulAssign		,ERR	,Z(0,0,0,0,0,0))//!< *=
+	RISSE_OC_ENUM_ITEM(LogOrAssign		,ERR	,Z(0,0,0,0,0,0))//!< ||=
+	RISSE_OC_ENUM_ITEM(LogAndAssign		,ERR	,Z(0,0,0,0,0,0))//!< &&=
+	RISSE_OC_ENUM_ITEM(RBitShiftAssign	,ERR	,Z(0,0,0,0,0,0))//!< >>>=
+	RISSE_OC_ENUM_ITEM(LShiftAssign		,ERR	,Z(0,0,0,0,0,0))//!< <<=
+	RISSE_OC_ENUM_ITEM(RShiftAssign		,ERR	,Z(0,0,0,0,0,0))//!< >>=
 
 // VM コードの最後
-	RISSE_OC_ENUM_ITEM(VMCodeLast		,ERR	,P(0,0,0,0,0,0))//!< VMオペコードの最後
+	RISSE_OC_ENUM_ITEM(VMCodeLast		,ERR	,Z(0,0,0,0,0,0))//!< VMオペコードの最後
 
 
 // SSA形式特有
-	RISSE_OC_ENUM_ITEM(Phi				,ERR	,P(0,0,0,0,0,0))//!< φ関数
-	RISSE_OC_ENUM_ITEM(DefineLazyBlock	,ERR	,P(0,0,0,0,0,0))//!< 遅延評価ブロックの定義
-	RISSE_OC_ENUM_ITEM(EndLazyBlock		,ERR	,P(0,0,0,0,0,0))//!< 遅延評価ブロックの使用終了
-	RISSE_OC_ENUM_ITEM(ParentWrite		,ERR	,P(0,0,0,0,0,0))//!< 親名前空間への書き込み
-	RISSE_OC_ENUM_ITEM(ParentRead		,ERR	,P(0,0,0,0,0,0))//!< 親名前空間からの読み込み
-	RISSE_OC_ENUM_ITEM(ChildWrite		,ERR	,P(0,0,0,0,0,0))//!< 子名前空間への書き込み
-	RISSE_OC_ENUM_ITEM(ChildRead		,ERR	,P(0,0,0,0,0,0))//!< 子名前空間からの読み込み
-	RISSE_OC_ENUM_ITEM(WriteVar			,ERR	,P(0,0,0,0,0,0))//!< 変数への書き込み(変換の過程でocAssignかocWriteに変わる)
-	RISSE_OC_ENUM_ITEM(ReadVar			,ERR	,P(0,0,0,0,0,0))//!< 変数からの読み込み(変換の過程でocAssignかocReadに変わる)
-	RISSE_OC_ENUM_ITEM(Write			,ERR	,P(0,0,0,0,0,0))//!< 共有空間への書き込み
-	RISSE_OC_ENUM_ITEM(Read				,ERR	,P(0,0,0,0,0,0))//!< 共有空間からの読み込み
+	RISSE_OC_ENUM_ITEM(Phi				,ERR	,Z(0,0,0,0,0,0))//!< φ関数
+	RISSE_OC_ENUM_ITEM(DefineLazyBlock	,ERR	,Z(0,0,0,0,0,0))//!< 遅延評価ブロックの定義
+	RISSE_OC_ENUM_ITEM(EndLazyBlock		,ERR	,Z(0,0,0,0,0,0))//!< 遅延評価ブロックの使用終了
+	RISSE_OC_ENUM_ITEM(ParentWrite		,ERR	,Z(0,0,0,0,0,0))//!< 親名前空間への書き込み
+	RISSE_OC_ENUM_ITEM(ParentRead		,ERR	,Z(0,0,0,0,0,0))//!< 親名前空間からの読み込み
+	RISSE_OC_ENUM_ITEM(ChildWrite		,ERR	,Z(0,0,0,0,0,0))//!< 子名前空間への書き込み
+	RISSE_OC_ENUM_ITEM(ChildRead		,ERR	,Z(0,0,0,0,0,0))//!< 子名前空間からの読み込み
+	RISSE_OC_ENUM_ITEM(WriteVar			,ERR	,Z(0,0,0,0,0,0))//!< 変数への書き込み(変換の過程でocAssignかocWriteに変わる)
+	RISSE_OC_ENUM_ITEM(ReadVar			,ERR	,Z(0,0,0,0,0,0))//!< 変数からの読み込み(変換の過程でocAssignかocReadに変わる)
 
-	RISSE_OC_ENUM_ITEM(OpCodeLast		,ERR	,P(0,0,0,0,0,0))//!< オペコードの最後
+	RISSE_OC_ENUM_ITEM(OpCodeLast		,ERR	,Z(0,0,0,0,0,0))//!< オペコードの最後
 RISSE_OC_ENUM_END
 //---------------------------------------------------------------------------
 

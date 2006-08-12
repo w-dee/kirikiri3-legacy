@@ -123,10 +123,11 @@ void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 
 //---------------------------------------------------------------------------
 tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
-	const tRisseString & name)
+	const tRisseString & name, tRisseSSAForm * parent, bool useparentframe)
 {
 	Compiler = compiler;
-	Parent = NULL;
+	Parent = parent;
+	UseParentFrame = useparentframe;
 	Name = name;
 	UniqueNumber = 0;
 	LocalNamespace = new tRisseSSALocalNamespace();
@@ -137,20 +138,15 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	CurrentBreakInfo = NULL;
 	CurrentContinueInfo = NULL;
 	FunctionCollapseArgumentVariable = NULL;
-	CodeGenerator = NULL;
-	CodeBlock = NULL;
-	CodeBlockIndex = 0;
 
 	// compiler に自身を登録する
 	compiler->AddSSAForm(this);
-}
-//---------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
-void tRisseSSAForm::SetParent(tRisseSSAForm * form)
-{
-	Parent = form;
+	// コードジェネレータを作成する
+	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
+	CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL, UseParentFrame);
+	CodeBlock = new tRisseCodeBlock();
+	CodeBlockIndex = Compiler->AddCodeBlock(CodeBlock);
 }
 //---------------------------------------------------------------------------
 
@@ -177,8 +173,8 @@ void tRisseSSAForm::Generate(const tRisseASTNode * root)
 	// 到達しない基本ブロックからのパスを削除
 	LeapDeadBlocks();
 
-	// ピンの刺さった変数へのアクセスを別形式の文に変換
-	ConvertPinnedVariableAccess();
+	// 共有の刺さった変数へのアクセスを別形式の文に変換
+	ConvertSharedVariableAccess();
 
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
@@ -277,39 +273,38 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::PinVariable(const tRisseString & name)
+void tRisseSSAForm::ShareVariable(const tRisseString & name)
 {
-	PinnedVariableMap.insert(tPinnedVariableMap::value_type(name, NULL));
+	SharedVariableMap.insert(tSharedVariableMap::value_type(name, NULL));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tRisseSSAForm::GetPinned(const tRisseString & name)
+bool tRisseSSAForm::GetShared(const tRisseString & name)
 {
-	return PinnedVariableMap.find(name) != PinnedVariableMap.end();
+	return SharedVariableMap.find(name) != SharedVariableMap.end();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basename,
-	bool pinvars, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
+	bool sharevars, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
 {
 	// 遅延評価ブロックの名称を決める
 	tRisseString block_name = basename + RISSE_WS(" ") + tRisseString::AsString(GetUniqueNumber());
 
 	// 遅延評価ブロックを生成
 	new_form =
-		new tRisseSSAForm(Compiler, block_name);
-	new_form->SetParent(this);
+		new tRisseSSAForm(Compiler, block_name, this, !sharevars);
 	Children.push_back(new_form);
 
 	// ローカル名前空間の親子関係を設定
 	new_form->LocalNamespace->SetParent(LocalNamespace);
 
 	tRisseSSAVariableAccessMap * access_map = NULL;
-	if(!pinvars)
+	if(!sharevars)
 	{
 		// 変数を固定しない場合はAccessMapをnew_formの名前空間に作成する
 		// (AccessMapはどの変数にアクセスがあったかを記録する)
@@ -419,7 +414,7 @@ void tRisseSSAForm::LeapDeadBlocks()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::ConvertPinnedVariableAccess()
+void tRisseSSAForm::ConvertSharedVariableAccess()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得る
 	gc_vector<tRisseSSABlock *> blocks;
@@ -427,7 +422,7 @@ void tRisseSSAForm::ConvertPinnedVariableAccess()
 
 	// すべてのブロックに対して処理を行う
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->ConvertPinnedVariableAccess();
+		(*i)->ConvertSharedVariableAccess();
 }
 //---------------------------------------------------------------------------
 
@@ -590,13 +585,6 @@ void tRisseSSAForm::AnalyzeVariableStatementLiveness()
 //---------------------------------------------------------------------------
 void tRisseSSAForm::EnsureCodeGenerator()
 {
-	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
-	if(!CodeGenerator) CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL);
-	if(!CodeBlock)
-	{
-		CodeBlock = new tRisseCodeBlock();
-		CodeBlockIndex = Compiler->AddCodeBlock(CodeBlock);
-	}
 }
 //---------------------------------------------------------------------------
 
@@ -611,12 +599,12 @@ void tRisseSSAForm::GenerateCode() const
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
-	// すべてのピンされている変数を登録する
+	// すべての共有されている変数を登録する
 	CodeGenerator->SetRegisterBase();
-	for(tPinnedVariableMap::const_iterator i = PinnedVariableMap.begin();
-		i != PinnedVariableMap.end(); i++)
+	for(tSharedVariableMap::const_iterator i = SharedVariableMap.begin();
+		i != SharedVariableMap.end(); i++)
 	{
-		CodeGenerator->AddPinnedRegNameMap(i->first);
+		CodeGenerator->AddSharedRegNameMap(i->first);
 	}
 
 	// すべての基本ブロックに対してコード生成を行わせる

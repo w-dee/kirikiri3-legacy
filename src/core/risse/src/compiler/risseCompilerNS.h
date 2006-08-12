@@ -72,8 +72,8 @@ class tRisseSSALocalNamespace : public tRisseCollectee
 	tRisseSSAVariableAccessMap * AccessMap;
 		//!< この名前空間内に見つからなかった読み込みあるいは書き込みをチェックするためのマップ
 		//!< この名前空間内に見つからなかった変数は親名前空間内で検索される。見つかった場合は
-		//!< AccessMapが NULL の場合は、親名前空間内で pin されるが、
-		//!< AccessMapが非 NULL の場合はピンされずに AccessMap にマッピングが追加される
+		//!< AccessMapが NULL の場合は、親名前空間内で共有されるが、
+		//!< AccessMapが非 NULL の場合は共有されずに AccessMap にマッピングが追加される
 	tRisseSSALocalNamespace * Parent; //!< チェーンされた親名前空間
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tVariableMap;
 		//!< 変数名(番号付き)→変数オブジェクトのマップのtypedef
@@ -193,12 +193,12 @@ public:
 	//! @brief		子名前空間から呼ばれ、変数に読み込み/書き込みのためのアクセスをする
 	//! @param		name		変数名
 	//! @param		access		読み(偽)か書き(真)か
-	//! @param		should_pin	見つかった変数を「ピン」すべきかどうか
+	//! @param		should_share	見つかった変数を共有すべきかどうか
 	//! @param		child		子名前空間
 	//! @param		ret_n_name	見つかった番号付き変数名を格納する先 (NULL = いらない)
 	//! @return		変数が見つかったかどうか
 	bool AccessFromChild(const tRisseString & name, bool access,
-		bool should_pin, tRisseSSALocalNamespace * child,
+		bool should_share, tRisseSSALocalNamespace * child,
 		tRisseString * ret_n_name = NULL);
 
 	//! @brief		AccessMap を作成する (すでに存在する場合でも新規に作成する)

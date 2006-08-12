@@ -58,7 +58,9 @@ risse_size tRisseVMCodeIterator::GetInsnSize() const
 		case tRisseVMInsnInfo::vifConstant:
 		case tRisseVMInsnInfo::vifRegister:
 		case tRisseVMInsnInfo::vifAddress:
-		case tRisseVMInsnInfo::vifSomething:
+		case tRisseVMInsnInfo::vifParameter:
+		case tRisseVMInsnInfo::vifShared:
+		case tRisseVMInsnInfo::vifOthers:
 			insn_size ++;
 			break;
 		}
@@ -92,7 +94,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 			break;
 
 		case tRisseVMInsnInfo::vifNumber:
-		case tRisseVMInsnInfo::vifSomething:
+		case tRisseVMInsnInfo::vifOthers:
 			// nothing to do; simplly skip
 			break;
 
@@ -117,6 +119,19 @@ tRisseString tRisseVMCodeIterator::Dump() const
 				ret += tRisseString(address);
 			}
 			break;
+
+		case tRisseVMInsnInfo::vifParameter:
+			if(i != 0) ret += RISSE_WS(", ");
+			ret += RISSE_WS("(") + tRisseString::AsString((int)CodePointer[i+1]) +
+				RISSE_WS(")");
+			break;
+
+		case tRisseVMInsnInfo::vifShared:
+			if(i != 0) ret += RISSE_WS(", ");
+			ret += RISSE_WS("[") + tRisseString::AsString((int)CodePointer[i+1]) +
+				RISSE_WS("]");
+			break;
+
 		}
 	}
 
@@ -150,7 +165,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 						num_blocks = CodePointer[i+1];
 					}
 					break;
-				case tRisseVMInsnInfo::vifSomething:
+				case tRisseVMInsnInfo::vifOthers:
 					flags = CodePointer[i+1]; // フラグ
 					break;
 				case tRisseVMInsnInfo::vifVoid:

@@ -25,12 +25,15 @@ RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 
 //---------------------------------------------------------------------------
 tRisseCodeGenerator::tRisseCodeGenerator(
-	tRisseCodeGenerator * parent)
+	tRisseCodeGenerator * parent, bool useparentframe)
 {
 	Parent = parent;
+	UseParentFrame = useparentframe;
+	RISSE_ASSERT(!(!Parent && UseParentFrame)); // UseParentFrame が真の場合は親がなければならない
 	RegisterBase = 0;
 	NumUsedRegs = 0;
 	MaxNumUsedRegs = 0;
+	SharedRegNameMap = parent ? parent->SharedRegNameMap : new tNamedRegMap();
 }
 //---------------------------------------------------------------------------
 
@@ -39,9 +42,18 @@ tRisseCodeGenerator::tRisseCodeGenerator(
 void tRisseCodeGenerator::SetRegisterBase()
 {
 	if(Parent)
-		RegisterBase = Parent->RegisterBase + Parent->MaxNumUsedRegs;
+	{
+		// 親のコードジェネレータのフレームを使う場合は親のコードジェネレータと
+		// 重ならない位置に子のレジスタを配置しなくてはならない
+		if(UseParentFrame)
+			RegisterBase = Parent->RegisterBase + Parent->MaxNumUsedRegs;
+		else
+			RegisterBase = 0;
+	}
 	else
+	{
 		RegisterBase = 0;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -106,7 +118,7 @@ risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
 void tRisseCodeGenerator::UpdateMaxNumUsedRegs(risse_size max)
 {
 	if(MaxNumUsedRegs < max) MaxNumUsedRegs = max; // 最大値を更新
-	if(Parent) Parent->UpdateMaxNumUsedRegs(max); // 再帰
+	if(Parent && UseParentFrame) Parent->UpdateMaxNumUsedRegs(max); // 再帰
 }
 //---------------------------------------------------------------------------
 
@@ -158,29 +170,22 @@ void tRisseCodeGenerator::FreeRegister(const tRisseSSAVariable *var)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindPinnedRegNameMap(const tRisseString & name)
+risse_size tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name)
 {
-	tNamedRegMap::iterator f = PinnedRegNameMap.find(name);
+	tNamedRegMap::iterator f = SharedRegNameMap->find(name);
 
-	RISSE_ASSERT(!(Parent == NULL && f == PinnedRegNameMap.end()));
+	RISSE_ASSERT(f != SharedRegNameMap->end()); // 変数は見つからなければならない
 
-	if(f == PinnedRegNameMap.end())
-	{
-		// 自分にない場合、親を見る
-		if(Parent)
-			return Parent->FindPinnedRegNameMap(name);
-		RISSE_ASSERT(!"pinned variable not found in map");
-	}
 	return f->second;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddPinnedRegNameMap(const tRisseString & name)
+void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 {
-	RISSE_ASSERT(PinnedRegNameMap.find(name) == PinnedRegNameMap.end()); // 二重挿入は許されない
-	PinnedRegNameMap.insert(tNamedRegMap::value_type(name, RegisterBase++));
+	RISSE_ASSERT(SharedRegNameMap->find(name) == SharedRegNameMap->end()); // 二重挿入は許されない
+	SharedRegNameMap->insert(tNamedRegMap::value_type(name, SharedRegNameMap->size()));
 }
 //---------------------------------------------------------------------------
 
@@ -189,6 +194,7 @@ void tRisseCodeGenerator::AddPinnedRegNameMap(const tRisseString & name)
 risse_size tRisseCodeGenerator::FindParentVariableMap(const tRisseString & name)
 {
 	RISSE_ASSERT(Parent != NULL);
+	RISSE_ASSERT(UseParentFrame);
 	// ParentVariableMap から指定された変数を探す
 	// 指定された変数が無ければ変数の空きマップからさがし、変数を割り当てる
 	tNamedRegMap::iterator f = ParentVariableMap.find(name);
@@ -211,6 +217,7 @@ risse_size tRisseCodeGenerator::FindParentVariableMap(const tRisseString & name)
 void tRisseCodeGenerator::FreeParentVariableMapVariables()
 {
 	RISSE_ASSERT(Parent != NULL);
+	RISSE_ASSERT(UseParentFrame);
 	// ParentVariableMapにある変数を「親から」すべて開放する
 	for(tNamedRegMap::iterator i = ParentVariableMap.begin(); i != ParentVariableMap.end(); i++)
 		Parent->FreeRegister(i->second);
@@ -262,26 +269,6 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisse
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssign(const tRisseString & dest, const tRisseSSAVariable * src)
-{
-	PutWord(ocAssign);
-	PutWord(FindPinnedRegNameMap(dest));
-	PutWord(FindRegMap(src));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisseString & src)
-{
-	PutWord(ocAssign);
-	PutWord(FindRegMap(dest));
-	PutWord(FindPinnedRegNameMap(src));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutAssign(risse_size dest, const tRisseSSAVariable * src)
 {
 	PutWord(ocAssign);
@@ -325,6 +312,26 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, tRisseOpCode
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutWrite(const tRisseString & dest, const tRisseSSAVariable * src)
+{
+	PutWord(ocWrite);
+	PutWord(FindSharedRegNameMap(dest));
+	PutWord(FindRegMap(src));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutRead(const tRisseSSAVariable * dest, const tRisseString & src)
+{
+	PutWord(ocRead);
+	PutWord(FindRegMap(dest));
+	PutWord(FindSharedRegNameMap(src));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutRelocatee(const tRisseSSAVariable * dest, risse_size index)
 {
 	// 定数領域に仮の値をpushする
@@ -348,6 +355,15 @@ void tRisseCodeGenerator::PutRelocatee(const tRisseSSAVariable * dest, risse_siz
 void tRisseCodeGenerator::PutSetFrame(const tRisseSSAVariable * dest)
 {
 	PutWord(ocSetFrame);
+	PutWord(FindRegMap(dest));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutSetShare(const tRisseSSAVariable * dest)
+{
+	PutWord(ocSetShare);
 	PutWord(FindRegMap(dest));
 }
 //---------------------------------------------------------------------------

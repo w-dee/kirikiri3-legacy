@@ -33,6 +33,7 @@ tRisseCodeBlock::tRisseCodeBlock()
 	Consts = NULL;
 	ConstsSize = 0;
 	NumRegs = 0;
+	NumSharedVars = 0;
 	Relocations = NULL;
 	RelocationSize = 0;
 	Executor = NULL;
@@ -77,8 +78,9 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 		relocations.begin(); i != relocations.end(); i++, ind++)
 		Relocations[ind] = *i;
 
-	// 必要なレジスタ数のコピー
+	// 必要なレジスタ数/共有変数の数のコピー
 	NumRegs = gen->GetMaxNumUsedRegs();
+	NumSharedVars = gen->GetSharedRegCount();
 
 	// Executor を作成
 	Executor = new tRisseCodeInterpreter(this);

@@ -376,7 +376,7 @@ void tRisseSSABlock::Traverse(gc_vector<tRisseSSABlock *> & blocks) const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::ConvertPinnedVariableAccess()
+void tRisseSSABlock::ConvertSharedVariableAccess()
 {
 	// すべての文について
 	tRisseSSAStatement *stmt;
@@ -384,12 +384,12 @@ void tRisseSSABlock::ConvertPinnedVariableAccess()
 		stmt;
 		stmt = stmt->GetSucc())
 	{
-		// ocReadVar と ocWriteVar を探し、ピンされていなければ普通の
-		// ocAssign に、ピンされていれば ocRead と ocWrite にそれぞれ変換する
+		// ocReadVar と ocWriteVar を探し、共有されていなければ普通の
+		// ocAssign に、共有されていれば ocRead と ocWrite にそれぞれ変換する
 		tRisseOpCode code = stmt->GetCode();
 		if(code == ocReadVar)
 		{
-			if(Form->GetPinned(stmt->GetName()))
+			if(Form->GetShared(stmt->GetName()))
 			{
 				tRisseSSAStatement *new_stmt = new
 					tRisseSSAStatement(Form, stmt->GetPosition(), ocRead);
@@ -408,7 +408,7 @@ void tRisseSSABlock::ConvertPinnedVariableAccess()
 		}
 		else if(code == ocWriteVar)
 		{
-			if(Form->GetPinned(stmt->GetName()))
+			if(Form->GetShared(stmt->GetName()))
 			{
 				tRisseSSAStatement *new_stmt = new
 					tRisseSSAStatement(Form, stmt->GetPosition(), ocWrite);

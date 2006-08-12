@@ -309,7 +309,7 @@ tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
 		// 見つからないので親名前空間を見る
 		if(Parent)
 		{
-			// AccessMap が NULL の場合は親名前空間内でpinする
+			// AccessMap が NULL の場合は親名前空間内で共有する
 			tRisseString n_name;
 			if(Parent->AccessFromChild(name, false, AccessMap == NULL, this, &n_name))
 			{
@@ -368,7 +368,7 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 	}
 
 	// 見つからないので親名前空間を見る
-	// AccessMap が NULL の場合は親名前空間内でpinする
+	// AccessMap が NULL の場合は親名前空間内で共有する
 	if(Parent)
 	{
 		tRisseString n_name;
@@ -392,7 +392,7 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 
 //---------------------------------------------------------------------------
 bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
-	bool access, bool should_pin, tRisseSSALocalNamespace * child, 
+	bool access, bool should_share, tRisseSSALocalNamespace * child, 
 	tRisseString * ret_n_name)
 {
 	tRisseString n_name;
@@ -400,7 +400,7 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 	{
 		// 変数が見つかった
 		if(ret_n_name) *ret_n_name = n_name;
-		if(should_pin) Block->GetForm()->PinVariable(n_name);
+		if(should_share) Block->GetForm()->ShareVariable(n_name);
 
 		// 子のAccessMap に記録 (AccessMap に記録するのは「番号なし」の名前
 		if(child->AccessMap) child->AccessMap->SetUsed(name, access);
@@ -412,11 +412,11 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 		// 変数が見つからなかった
 		if(!Parent) return false; // 親名前空間がない
 
-		// この名前空間で AccessMap がないということは親空間でピンしなければならないと言うこと
-		should_pin = should_pin || AccessMap == NULL;
+		// この名前空間で AccessMap がないということは親空間で共有しなければならないと言うこと
+		should_share = should_share || AccessMap == NULL;
 
 		// 親名前空間内で探す
-		return Parent->AccessFromChild(name, access, should_pin, this, ret_n_name);
+		return Parent->AccessFromChild(name, access, should_share, this, ret_n_name);
 	}
 }
 //---------------------------------------------------------------------------

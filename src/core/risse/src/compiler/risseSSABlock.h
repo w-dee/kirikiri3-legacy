@@ -185,8 +185,8 @@ public:
 	//! @param		blocks		基本ブロックのリストの格納先
 	void Traverse(gc_vector<tRisseSSABlock *> & blocks) const;
 
-	//! @brief		ピンの刺さった変数へのアクセスを別形式の文に変換
-	void ConvertPinnedVariableAccess();
+	//! @brief		共有の刺さった変数へのアクセスを別形式の文に変換
+	void ConvertSharedVariableAccess();
 
 	//! @brief		LiveIn と LiveOut を作成する
 	void CreateLiveInAndLiveOut();

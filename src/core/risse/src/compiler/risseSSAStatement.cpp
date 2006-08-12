@@ -299,7 +299,10 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
 			// コードブロックの参照の問題があるので注意
 			gen->PutRelocatee(Declared, DefinedForm->GetCodeBlockIndex());
-			gen->PutSetFrame(Declared);
+			if(DefinedForm->GetUseParentFrame())
+				gen->PutSetFrame(Declared);
+			else
+				gen->PutSetShare(Declared);
 		}
 		break;
 
@@ -342,7 +345,8 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
 			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
 			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
-			lazy_stmt->DefinedForm->GetCodeGenerator()->FreeParentVariableMapVariables();
+			if(lazy_stmt->DefinedForm->GetUseParentFrame())
+				lazy_stmt->DefinedForm->GetCodeGenerator()->FreeParentVariableMapVariables();
 		}
 		break;
 
@@ -365,14 +369,14 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocWrite: // 共有変数領域への書き込み
 		RISSE_ASSERT(Name != NULL);
 		RISSE_ASSERT(Used.size() == 1);
-		gen->PutAssign(*Name, Used[0]);
+		gen->PutWrite(*Name, Used[0]);
 		break;
 
 	case ocRead: // 共有変数領域からの読み込み
 		RISSE_ASSERT(Name != NULL);
 		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Used.size() == 0);
-		gen->PutAssign(Declared, *Name);
+		gen->PutRead(Declared, *Name);
 		break;
 
 	default:

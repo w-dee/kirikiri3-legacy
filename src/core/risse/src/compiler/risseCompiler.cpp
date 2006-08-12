@@ -33,8 +33,8 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	RisseFPrint(stdout, str.c_str());
 
 	// (テスト)
-	tRisseSSAForm * form = new tRisseSSAForm(this, root, RISSE_WS("root"));
-	form->Generate();
+	tRisseSSAForm * form = new tRisseSSAForm(this, RISSE_WS("root"));
+	form->Generate(root);
 
 	// SSA 形式のダンプ
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();

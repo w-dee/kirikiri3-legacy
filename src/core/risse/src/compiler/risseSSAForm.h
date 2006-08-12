@@ -177,7 +177,6 @@ class tRisseSSAForm : public tRisseCollectee
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tPinnedVariableMap;
 		//!< 「ピン」されている変数のマップのtypedef (tPinnedVariableMap::value_type::second は常に null)
 	tPinnedVariableMap PinnedVariableMap; //!< 「ピン」されている変数のマップ
-	tRisseASTNode * Root; //!< このコードジェネレータが生成すべきコードのASTルートノード
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
@@ -198,17 +197,16 @@ class tRisseSSAForm : public tRisseCollectee
 public:
 	//! @brief		コンストラクタ
 	//! @param		compiler		この SSA 形式が含まれるコンパイラインスタンス
-	//! @param		root			ASTのルートノード
 	//! @param		name			このSSA形式インスタンスの名前
-	tRisseSSAForm(tRisseCompiler * compiler, tRisseASTNode * root,
-		const tRisseString & name);
+	tRisseSSAForm(tRisseCompiler * compiler, const tRisseString & name);
 
 	//! @brief		この SSA 形式インスタンスの親インスタンスを設定する
 	//! @param		form		この SSA 形式インスタンスの親インスタンス
 	void SetParent(tRisseSSAForm * form);
 
 	//! @brief		AST を SSA 形式に変換する
-	void Generate();
+	//! @param		root	ASTのルートノード
+	void Generate(const tRisseASTNode * root);
 
 	//! @brief		コンパイラインスタンスを得る
 	//! @return		コンパイラインスタンス
@@ -217,6 +215,10 @@ public:
 	//! @brief		スクリプトブロックインスタンスを得る
 	//! @return		スクリプトブロックインスタンス
 	tRisseScriptBlockBase * GetScriptBlock() const;
+
+	//! @brief		このSSA形式インスタンスの名前を設定する
+	//! @param		name		このSSA形式インスタンスの名前
+	void SetName(const tRisseString & name) { Name = name; }
 
 	//! @brief		このSSA形式インスタンスの名前を得る
 	//! @return		このSSA形式インスタンスの名前
@@ -353,20 +355,23 @@ protected:
 	};
 public:
 	//! @brief		新しい遅延評価ブロックを作成する
-	//! @param		node		遅延評価ブロックのルートノード
+	//! @param		pos			スクリプト上の位置
+	//! @param		basename	新しい遅延評価ブロックの名前(実際にはこれにさらに連番がつく)
 	//! @param		pinvars		遅延評価ブロックからブロック外の変数を参照された場合に
 	//!							その参照された変数をスタックフレームに固定(pin)するかどうか。
 	//!							変数を固定することにより、遅延評価ブロックを、そのブロックが定義
 	//!							された位置以外から呼び出しても安全に変数にアクセスできるように
 	//!							なる ( function 内 function でレキシカルクロージャを使用するとき
 	//!							などに有効 )
+	//! @param		new_form	新しく作成されたSSA形式のインスタンス。
 	//! @param		block_var	その遅延評価ブロックを表すSSA変数を格納する先
 	//! @return		CleanupLazyBlock() に渡すべき情報
 	//! @note		このメソッドは遅延評価ブロックを作成してその遅延評価ブロックを
 	//!				表す変数を返す。この変数はメソッドオブジェクトなので、呼び出して
 	//!				使う。使い終わったら CreateLazyBlock() メソッドの戻り値を
 	//!				CleanupLazyBlock() メソッドに渡して呼び出すこと。
-	void * CreateLazyBlock(tRisseASTNode * node, bool pinvars, tRisseSSAVariable *& block_var);
+	void * CreateLazyBlock(risse_size pos, const tRisseString & basename,
+		bool pinvars, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var);
 
 	//! @brief		遅延評価ブロックのクリーンアップ処理を行う
 	//! @param		param	CreateLazyBlock() の戻り値
@@ -383,7 +388,8 @@ public:
 //----
 public:
 	//! @brief		実行ブロックの最後の return を生成する
-	void GenerateLastReturn();
+	//! @param		root		実行ブロックを表すASTノード
+	void GenerateLastReturn(const tRisseASTNode * root);
 
 	//! @brief		到達しない基本ブロックを削除する
 	void LeapDeadBlocks();

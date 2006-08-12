@@ -2112,7 +2112,11 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 {
 	// try ブロックの中身を 遅延評価ブロックとして評価する
 	tRisseSSAVariable * lazyblock_var = NULL;
-	void * lazy_param = form->CreateLazyBlock(Body, false, lazyblock_var);
+	tRisseSSAForm * new_form = NULL;
+	void * lazy_param = form->CreateLazyBlock(GetPosition(),
+		RISSE_WS("try block"), false, new_form, lazyblock_var);
+
+	new_form->Generate(Body);
 
 	// 遅延評価ブロックを実行するためのfunccall文を作成
 	lazyblock_var->GenerateFuncCall(GetPosition(), tRisseString::GetEmptyString());
@@ -2122,6 +2126,30 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 
 	// このノードは答えを返さない
 	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// 関数の中身を 遅延評価ブロックとして評価する
+	tRisseSSAVariable * lazyblock_var = NULL;
+	tRisseSSAForm * new_form = NULL;
+	void * lazy_param = form->CreateLazyBlock(GetPosition(),
+												Name.IsEmpty() ?
+													RISSE_WS("anonymous function"):
+													RISSE_WS("function ") + Name,
+												true, new_form, lazyblock_var);
+
+	// ブロックの内容を生成する
+	new_form->Generate(Body);
+
+	// 遅延評価ブロックをクリーンアップ
+	form->CleanupLazyBlock(lazy_param);
+
+	// このノードは作成された関数(メソッド)を返す
+	return lazyblock_var;
 }
 //---------------------------------------------------------------------------
 

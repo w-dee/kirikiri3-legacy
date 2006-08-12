@@ -189,7 +189,7 @@ public:
 		const tRisseString & name = tRisseString::GetEmptyString(),
 		risse_uint32 flags = 0,
 		risse_size argc = 0,
-		tRisseVariant *argv[] = NULL,
+		const tRisseVariant * const * argv = NULL,
 		const tRisseVariant *This = NULL,
 		const tRisseStackFrameContext *stack = NULL
 			) = 0;

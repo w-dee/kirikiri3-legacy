@@ -225,7 +225,7 @@ public: // コンストラクタ/代入演算子
 	//! @brief デフォルトコンストラクタ(void型を作成)
 	tRisseVariantBlock()
 	{
-		Type = vtVoid;
+		Clear();
 	}
 
 	//! @brief		コピーコンストラクタ
@@ -357,6 +357,13 @@ public: // コンストラクタ/代入演算子
 	{
 		AsObject() = ref;
 		return *this;
+	}
+
+public: // 初期化
+	//! @brief		内容を初期化する (void にする)
+	void Clear()
+	{
+		Type = vtVoid;
 	}
 
 public: // Object関連

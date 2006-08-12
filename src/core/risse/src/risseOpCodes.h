@@ -160,10 +160,13 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(AssignNewArray	,array	,P(R,0,0,0,0,0))//!< = 新しい配列オブジェクトの代入
 	RISSE_OC_ENUM_ITEM(AssignNewDict	,dict	,P(R,0,0,0,0,0))//!< = 新しい辞書配列オブジェクトの代入
 	RISSE_OC_ENUM_ITEM(AssignNewRegExp	,regexp	,P(R,0,0,0,0,0))//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+	RISSE_OC_ENUM_ITEM(AssignArg		,getarg	,P(R,S,0,0,0,0))//!< = (S番目の関数引数を代入)
 
+// 関数定義/引数処理/関数呼び出し
 	RISSE_OC_ENUM_ITEM(FuncCall			,call	,P(R,R,S,N,0,0))//!< function call
 	RISSE_OC_ENUM_ITEM(New				,new	,P(R,R,S,N,0,0))//!< "new"
 	RISSE_OC_ENUM_ITEM(FuncCallBlock	,callb	,P(R,R,S,N,N,0))//!< function call with lazyblock
+	RISSE_OC_ENUM_ITEM(SetFrame			,sfrm	,P(R,0,0,0,0,0))//!< set stack frame (internal use)
 
 // ジャンプ/分岐/制御/補助
 	RISSE_OC_ENUM_ITEM(Jump				,jump	,P(A,0,0,0,0,0))//!< 単純なジャンプ
@@ -204,7 +207,6 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(Add				,add	,P(R,R,R,0,0,0))//!< +
 	RISSE_OC_ENUM_ITEM(Sub				,sub	,P(R,R,R,0,0,0))//!< -
 	RISSE_OC_ENUM_ITEM(IncontextOf		,chgc	,P(R,R,R,0,0,0))//!< incontextof
-	RISSE_OC_ENUM_ITEM(SetFrame			,sfrm	,P(R,0,0,0,0,0))//!< set stack frame (internal use)
 
 	RISSE_OC_ENUM_ITEM(DGet				,dget	,P(R,R,R,0,0,0))//!< get .  
 	RISSE_OC_ENUM_ITEM(IGet				,iget	,P(R,R,R,0,0,0))//!< get [ ]

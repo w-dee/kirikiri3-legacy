@@ -38,9 +38,10 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 
 //---------------------------------------------------------------------------
 void tRisseCodeInterpreter::Execute(
-		const tRisseVariant * This,
-		const tRisseStackFrameContext *stack,
-		tRisseVariant * result)
+	risse_size argc, const tRisseVariant * const * argv,
+	const tRisseVariant * This,
+	const tRisseStackFrameContext *stack,
+	tRisseVariant * result)
 {
 	// context でスタックフレームが指定されていない場合、スタックを割り当てる
 	// TODO: スタックフレームの再利用など
@@ -146,10 +147,19 @@ void tRisseCodeInterpreter::Execute(
 			code += 2;
 			break;
 
-		case ocAssignNewRegExp: // regexp	 = 新しい正規表現オブジェクトの代入 (引数2つ
+		case ocAssignNewRegExp: // regexp	 = 新しい正規表現オブジェクトの代入 (引数2つ)
 			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			code += 2;
+			break;
+
+		case ocAssignArg: // getarg	= (S番目の関数引数を代入)
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			if(code[2] >= argc)
+				AR(code[0]).Clear(); // 引数の範囲を超えているのでvoidを代入
+			else
+				AR(code[0]) = *argv[code[2]];
+			code += 3;
 			break;
 
 		case ocFuncCall		: // call	 function call
@@ -188,6 +198,15 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			code += code[4] + code[5] + 6;
+			break;
+
+		case ocSetFrame		: // sfrm	 set stack frame (internal use)
+			/* incomplete */
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			AR(code[1]).SetContext(
+				new tRisseMethodContext(
+					_this, tRisseStackFrameContext(frame, share)));
+			code += 2;
 			break;
 
 		case ocJump			: // jump	 単純なジャンプ
@@ -451,15 +470,6 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[3]) < framesize);
 			/* incomplete */
 			code += 4;
-			break;
-
-		case ocSetFrame		: // sfrm	 set stack frame (internal use)
-			/* incomplete */
-			RISSE_ASSERT(CI(code[1]) < framesize);
-			AR(code[1]).SetContext(
-				new tRisseMethodContext(
-					_this, tRisseStackFrameContext(frame, share)));
-			code += 2;
 			break;
 
 		case ocDGet			: // dget	 get .  

@@ -2289,7 +2289,7 @@ public:
 	//! @param		form	SSA 形式ジェネレータクラス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 

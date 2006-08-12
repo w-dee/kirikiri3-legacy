@@ -38,12 +38,15 @@ public:
 	virtual ~tRisseCodeExecutor() {;}
 
 	//! @brief		コードを実行する
+	//! @brief		argc	引数の数
+	//! @brief		argv	引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @param		result		戻りの値を格納する先
 	virtual void Execute(
+		risse_size argc = 0, const tRisseVariant * const * argv = NULL,
 		const tRisseVariant * This = NULL,
 		const tRisseStackFrameContext *stack = NULL,
 		tRisseVariant * result = NULL) = 0;
@@ -64,12 +67,15 @@ public:
 
 
 	//! @brief		コードを実行する
+	//! @brief		argc	引数の数
+	//! @brief		argv	引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		frame	メソッドが実行されるべきスタックフレームコンテキスト
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @param		result		戻りの値を格納する先
 	void Execute(
+		risse_size argc = 0, const tRisseVariant * const * argv = NULL,
 		const tRisseVariant * This = NULL,
 		const tRisseStackFrameContext *stack = NULL,
 		tRisseVariant * result = NULL);

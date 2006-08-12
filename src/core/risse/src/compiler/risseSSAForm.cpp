@@ -123,11 +123,10 @@ void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 
 //---------------------------------------------------------------------------
 tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
-	tRisseASTNode * root, const tRisseString & name)
+	const tRisseString & name)
 {
 	Compiler = compiler;
 	Parent = NULL;
-	Root = root;
 	Name = name;
 	UniqueNumber = 0;
 	LocalNamespace = new tRisseSSALocalNamespace();
@@ -157,7 +156,7 @@ void tRisseSSAForm::SetParent(tRisseSSAForm * form)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::Generate()
+void tRisseSSAForm::Generate(const tRisseASTNode * root)
 {
 	// AST をたどり、それに対応する SSA 形式を作成する
 
@@ -167,10 +166,10 @@ void tRisseSSAForm::Generate()
 	CurrentBlock = EntryBlock;
 
 	// ルートノードを処理する
-	Root->GenerateReadSSA(this);
+	root->GenerateReadSSA(this);
 
 	// 実行ブロックの最後の return 文を生成する
-	GenerateLastReturn();
+	GenerateLastReturn(root);
 
 	// 未バインドのラベルジャンプをすべて解決
 	LabelMap->BindAll();
@@ -294,45 +293,42 @@ bool tRisseSSAForm::GetPinned(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-void * tRisseSSAForm::CreateLazyBlock(tRisseASTNode * node, bool pinvars,
-											tRisseSSAVariable *& block_var)
+void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basename,
+	bool pinvars, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
 {
 	// 遅延評価ブロックの名称を決める
-	tRisseString block_name = RISSE_WS("lazy block ") + tRisseString::AsString(GetUniqueNumber());
+	tRisseString block_name = basename + RISSE_WS(" ") + tRisseString::AsString(GetUniqueNumber());
 
 	// 遅延評価ブロックを生成
-	tRisseSSAForm *newform =
-		new tRisseSSAForm(Compiler, node, block_name);
-	newform->SetParent(this);
-	Children.push_back(newform);
+	new_form =
+		new tRisseSSAForm(Compiler, block_name);
+	new_form->SetParent(this);
+	Children.push_back(new_form);
 
 	// ローカル名前空間の親子関係を設定
-	newform->LocalNamespace->SetParent(LocalNamespace);
+	new_form->LocalNamespace->SetParent(LocalNamespace);
 
 	tRisseSSAVariableAccessMap * access_map = NULL;
 	if(!pinvars)
 	{
-		// 変数を固定しない場合はAccessMapをnewformの名前空間に作成する
+		// 変数を固定しない場合はAccessMapをnew_formの名前空間に作成する
 		// (AccessMapはどの変数にアクセスがあったかを記録する)
-		access_map = newform->LocalNamespace->CreateAccessMap();
+		access_map = new_form->LocalNamespace->CreateAccessMap();
 	}
-
-	// 内容を生成
-	newform->Generate();
 
 	// 遅延評価ブロックを生成する文を追加する
 	tRisseSSAStatement * lazy_stmt =
-		AddStatement(node->GetPosition(), ocDefineLazyBlock, &block_var);
+		AddStatement(pos, ocDefineLazyBlock, &block_var);
 	lazy_stmt->SetName(block_name);
-	lazy_stmt->SetDefinedForm(newform);
+	lazy_stmt->SetDefinedForm(new_form);
 
 	// 遅延評価ブロックで読み込みが起こった変数を処理する
-	if(access_map) access_map->GenerateChildRead(this, node->GetPosition(), block_var);
+	if(access_map) access_map->GenerateChildRead(this, pos, block_var);
 
 	// 情報を返す
 	tLazyBlockParam * param = new tLazyBlockParam();
-	param->NewForm = newform;
-	param->Position = node->GetPosition();
+	param->NewForm = new_form;
+	param->Position = pos;
 	param->BlockVariable = block_var;
 	param->AccessMap = access_map;
 	return reinterpret_cast<void *>(param);
@@ -388,12 +384,12 @@ tRisseString tRisseSSAForm::Dump() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::GenerateLastReturn()
+void tRisseSSAForm::GenerateLastReturn(const tRisseASTNode * root)
 {
 	// 最後の return; 文がない場合に備え、これを補う。
 	// 実際に最後の return 文があった場合は単にこの文は実行されない物として
 	// 後続の LeapDeadBlocks() で破棄される。
-	risse_size pos = Root->SearchEndPosition();
+	risse_size pos = root->SearchEndPosition();
 	tRisseSSAVariable * void_var = AddConstantValueStatement(pos, tRisseVariant()); // void
 	AddStatement(pos, ocReturn, NULL, void_var);
 }

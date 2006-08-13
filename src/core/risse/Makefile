@@ -48,6 +48,7 @@ CPPFILES =  \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \
+			src/risseMethod.cpp                      \
 			src/risseObject.cpp                      \
 			src/risseOctet.cpp                       \
 			src/risseString.cpp                      \

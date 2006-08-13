@@ -21,13 +21,13 @@
 #include "risseString.h"
 #include "risseOctet.h"
 #include "risseException.h"
+#include "risseMethod.h"
 
 
 namespace Risse
 {
 class tRisseObjectInterface;
 class tRisseMethodContext;
-class tRisseMethodArgument;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 /*! @note
@@ -398,24 +398,28 @@ public: // 演算子
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		args		引数
+	//! @param		bargs		ブロック引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
 	void FuncCall(tRisseVariantBlock * ret,
 		const tRisseMethodArgument & args,
+		const tRisseMethodArgument & bargs,
 		tRisseVariant *This)
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCall_Object   (ret, args, This); return;
+		case vtObject:	FuncCall_Object   (ret, args, bargs, This); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
 		}
 	}
 
-	void FuncCall_Object   (tRisseVariantBlock * ret, const tRisseMethodArgument & args,
+	void FuncCall_Object   (tRisseVariantBlock * ret,
+		const tRisseMethodArgument & args,
+		const tRisseMethodArgument & bargs,
 		const tRisseVariant * This);
 
 	//-----------------------------------------------------------------------
@@ -440,32 +444,6 @@ public: // 演算子
 	void New_Object   (tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[])
 		{ return ; /* incomplete */ }
 
-	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトに対する)ブロック付き関数呼び出し		FuncCallBlock
-	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
-	//! @param		argc		引数の数
-	//! @param		argv		引数へのポインタの配列
-	//! @param		bargc		ブロック引数の数
-	//! @param		bargv		ブロック引数へのポインタの配列
-	//! @param		context		このメソッドが実行されるべきコンテキスト
-	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[],
-		risse_size bargc, tRisseVariantBlock *bargv[], const tRisseMethodContext *context)
-	{
-		// Object 以外は関数(メソッド)としては機能しないため
-		// すべて 例外を発生する
-		switch(GetType())
-		{
-		case vtObject:	FuncCallBlock_Object   (ret, argc, argv, bargc, bargv, context); return;
-
-		default:
-			RisseThrowCannotCallNonFunctionObjectException(); break;
-		}
-	}
-
-	void FuncCallBlock_Object   (tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[],
-		risse_size bargc, tRisseVariantBlock *bargv[], const tRisseMethodContext *context)
-		{ return ; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
 	//! @brief		単項 ! 演算子		LogNot
@@ -1404,6 +1382,13 @@ typedef tRisseVariantBlock tRisseVariant;
 
 
 
+// 本来ならばtRisseStackFrameContextとtRisseMethodContextはrisseMethod.hにあるべき
+// だがインクルード順の解決が難しいのでここに書く。
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		スタックフレームコンテキスト
 //---------------------------------------------------------------------------
@@ -1467,6 +1452,10 @@ public:
 	const tRisseStackFrameContext & GetStack() const { return Stack; }
 };
 //---------------------------------------------------------------------------
+
+
+
+
 
 } // namespace Risse
 #endif

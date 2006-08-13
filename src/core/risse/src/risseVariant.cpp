@@ -43,13 +43,15 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 
 //---------------------------------------------------------------------------
 void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
-	const tRisseMethodArgument & args, const tRisseVariant * This)
+	const tRisseMethodArgument & args,
+	const tRisseMethodArgument & bargs,
+	const tRisseVariant * This)
 {
 	tRisseObjectInterface * intf = GetObjectIntf();
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Operate(ocFuncCall, ret, tRisseString::GetEmptyString(),
-		0, args,
+		0, args, bargs,
 		this_context?&this_context->GetThis():This,
 				// こっちはこのvariantがThisオブジェクトを保持していなければ
 				// context->GetThis() を見るが

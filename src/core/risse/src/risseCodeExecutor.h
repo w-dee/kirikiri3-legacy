@@ -39,6 +39,7 @@ public:
 
 	//! @brief		コードを実行する
 	//! @brief		args	引数
+	//! @brief		args	ブロック引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
@@ -46,6 +47,7 @@ public:
 	//! @param		result		戻りの値を格納する先
 	virtual void Execute(
 		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
 		const tRisseVariant * This = NULL,
 		const tRisseStackFrameContext *stack = NULL,
 		tRisseVariant * result = NULL) = 0;
@@ -65,15 +67,9 @@ public:
 	tRisseCodeInterpreter(tRisseCodeBlock *cb);
 
 
-	//! @brief		コードを実行する
-	//! @brief		args	引数
-	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		frame	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
-	//! @param		result		戻りの値を格納する先
 	void Execute(
 		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
 		const tRisseVariant * This = NULL,
 		const tRisseStackFrameContext *stack = NULL,
 		tRisseVariant * result = NULL);

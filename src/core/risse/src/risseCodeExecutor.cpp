@@ -39,6 +39,7 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 //---------------------------------------------------------------------------
 void tRisseCodeInterpreter::Execute(
 	const tRisseMethodArgument & args,
+	const tRisseMethodArgument & bargs,
 	const tRisseVariant * This,
 	const tRisseStackFrameContext *stack,
 	tRisseVariant * result)
@@ -200,7 +201,7 @@ void tRisseCodeInterpreter::Execute(
 					args.argv[i] = &AR(code[i+5]);
 
 				AR(code[2]).FuncCall(CI(code[1])==RisseInvalidRegNum?NULL:&AR(code[1]),
-					args, &_this);
+					args, tRisseMethodArgument::GetEmptyArgument(), &_this);
 				code += code[4] + 5;
 				break;
 			}

@@ -179,6 +179,11 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutAssign(Declared, Code);
 		break;
 
+	case ocAssignParam:
+		RISSE_ASSERT(Declared != NULL);
+		gen->PutAssignParam(Declared, Index);
+		break;
+
 	case ocFuncCall:
 	case ocNew:
 	case ocFuncCallBlock:
@@ -448,6 +453,15 @@ tRisseString tRisseSSAStatement::Dump() const
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
+			return ret;
+		}
+
+	case ocAssignParam:
+		{
+			tRisseString ret;
+			RISSE_ASSERT(Used.size() == 0);
+			ret += Declared->Dump() + RISSE_WS(" = AssignParam(") +
+				tRisseString::AsString((risse_int)Index) + RISSE_WS(")");
 			return ret;
 		}
 

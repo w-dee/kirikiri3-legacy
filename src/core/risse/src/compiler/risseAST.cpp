@@ -2142,6 +2142,28 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void 
 													RISSE_WS("function ") + Name,
 												true, new_form, lazyblock_var);
 
+	// 引数を処理する
+	for(risse_size i = 0; i < inherited::GetChildCount(); i++)
+	{
+		tRisseASTNode_FuncDeclArg * child =
+			reinterpret_cast<tRisseASTNode_FuncDeclArg*>(inherited::GetChildAt(i));
+		RISSE_ASSERT(child->GetType() == antFuncDeclArg);
+		RISSE_ASSERT(child->GetCollapse() == false); // TODO: 配列圧縮
+
+		tRisseSSAVariable * init_var = NULL;
+		// パラメータ内容の取得
+		// TODO: デフォルト引数
+		tRisseSSAStatement * assignparam_stmt = 
+			new_form->AddStatement(GetPosition(), ocAssignParam, &init_var);
+		assignparam_stmt->SetIndex(i);
+
+		// 変数のローカル名前空間への登録
+		new_form->GetLocalNamespace()->Add(child->GetName(), NULL);
+
+		// ローカル変数への書き込み
+		new_form->GetLocalNamespace()->Write(new_form, GetPosition(), child->GetName(), init_var);
+	}
+
 	// ブロックの内容を生成する
 	new_form->Generate(Body);
 
@@ -2152,5 +2174,6 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void 
 	return lazyblock_var;
 }
 //---------------------------------------------------------------------------
+
 
 } // namespace Risse

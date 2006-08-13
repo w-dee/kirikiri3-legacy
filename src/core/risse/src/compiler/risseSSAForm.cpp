@@ -147,6 +147,11 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL, UseParentFrame);
 	CodeBlock = new tRisseCodeBlock();
 	CodeBlockIndex = Compiler->AddCodeBlock(CodeBlock);
+
+	// エントリー位置の基本ブロックを生成する
+	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"));
+	LocalNamespace->SetBlock(EntryBlock);
+	CurrentBlock = EntryBlock;
 }
 //---------------------------------------------------------------------------
 
@@ -155,11 +160,6 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 void tRisseSSAForm::Generate(const tRisseASTNode * root)
 {
 	// AST をたどり、それに対応する SSA 形式を作成する
-
-	// エントリー位置の基本ブロックを生成する
-	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"));
-	LocalNamespace->SetBlock(EntryBlock);
-	CurrentBlock = EntryBlock;
 
 	// ルートノードを処理する
 	root->GenerateReadSSA(this);

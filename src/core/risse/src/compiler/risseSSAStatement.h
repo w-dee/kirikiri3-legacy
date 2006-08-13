@@ -52,6 +52,7 @@ class tRisseSSAStatement : public tRisseCollectee
 		tRisseSSABlock * JumpTarget; //!< 単純ジャンプのジャンプ先
 		risse_uint32 FuncExpandFlags; //!< ocFuncCall/ocNew; 配列展開のビットマスク(1=配列を展開する)
 		tRisseString * Name; //!< 名前
+		risse_size Index; //!< インデックス
 	};
 	union
 	{
@@ -198,6 +199,14 @@ public:
 	//! @brief		名前を取得する
 	//! @return		名前
 	const tRisseString & GetName() const;
+
+	//! @brief		インデックスを設定する
+	//! @param		index		インデックス
+	void SetIndex(risse_size index) { Index = index; }
+
+	//! @brief		インデックスを取得する
+	//! @return		インデックス
+	risse_size GetIndex() const { return Index; }
 
 	//! @brief		この文で宣言された遅延評価ブロックのSSA形式インスタンスを設定する
 	//! @param		form		この文で宣言された遅延評価ブロックのSSA形式インスタンス

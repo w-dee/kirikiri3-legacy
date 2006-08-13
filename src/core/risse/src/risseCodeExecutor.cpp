@@ -157,12 +157,12 @@ void tRisseCodeInterpreter::Execute(
 			code += 2;
 			break;
 
-		case ocAssignArg: // getarg	= (S番目の関数引数を代入)
+		case ocAssignParam: // getpar	= (S番目の関数引数を代入)
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			if(code[2] >= argc)
-				AR(code[0]).Clear(); // 引数の範囲を超えているのでvoidを代入
+				AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
 			else
-				AR(code[0]) = *argv[code[2]];
+				AR(code[1]) = *argv[code[2]];
 			code += 3;
 			break;
 

@@ -652,7 +652,8 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 						form->GetScriptBlock(), GetPosition());
 			}
 
-			RISSE_ASSERT(inherited::GetChildAt(i)->GetType() == antFuncCallArg);
+			RISSE_ASSERT(!(inherited::GetChildAt(i) &&
+				inherited::GetChildAt(i)->GetType() != antFuncCallArg));
 			tRisseASTNode_FuncCallArg * arg =
 				reinterpret_cast<tRisseASTNode_FuncCallArg *>(
 												inherited::GetChildAt(i));
@@ -2150,18 +2151,64 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void 
 		RISSE_ASSERT(child->GetType() == antFuncDeclArg);
 		RISSE_ASSERT(child->GetCollapse() == false); // TODO: 配列圧縮
 
-		tRisseSSAVariable * init_var = NULL;
+		tRisseSSAVariable * param_var = NULL;
+
 		// パラメータ内容の取得
-		// TODO: デフォルト引数
 		tRisseSSAStatement * assignparam_stmt = 
-			new_form->AddStatement(GetPosition(), ocAssignParam, &init_var);
+			new_form->AddStatement(GetPosition(), ocAssignParam, &param_var);
 		assignparam_stmt->SetIndex(i);
+
+		// デフォルト引数の処理
+		// if(param_var === void) { param_var = デフォルト引数の式; }
+		// のようになる
+		tRisseASTNode * init_node = child->GetInitializer();
+		if(init_node)
+		{
+			// param_var が void と同じかどうかを調べる
+			tRisseSSAVariable * void_var =
+				new_form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+			tRisseSSAVariable * cond_var = NULL;
+			new_form->AddStatement(GetPosition(), ocDiscEqual, &cond_var,
+				param_var, void_var);
+
+			// 分岐文を作成
+			tRisseSSAStatement *branch_stmt =
+				new_form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
+
+			// 新しい基本ブロックを作成(条件式が真の場合)
+			tRisseSSABlock * init_block =
+				new_form->CreateNewBlock(RISSE_WS("param_init"));
+
+			// 初期化式を作成
+			tRisseSSAVariable * init_var = init_node->GenerateReadSSA(new_form);
+
+			// ジャンプ文を作成(初期化式を含むブロックからその次のブロックへ)
+			tRisseSSAStatement * init_exit_jump_stmt =
+				new_form->AddStatement(GetPosition(), ocJump, NULL);
+
+			// 新しい基本ブロックを作成(変数へ代入)
+			tRisseSSABlock * init_exit_block =
+				new_form->CreateNewBlock(RISSE_WS("param_subst"));
+
+			// 分岐/ジャンプ文のジャンプ先を設定
+			branch_stmt->SetFalseBranch(init_exit_block);
+			branch_stmt->SetTrueBranch(init_block);
+			init_exit_jump_stmt->SetJumpTarget(init_exit_block);
+
+			// φ関数を作成
+			tRisseSSAVariable * phi_ret_var = NULL;
+			new_form->AddStatement(GetPosition(), ocPhi, &phi_ret_var,
+									param_var, init_var);
+
+			param_var = phi_ret_var;
+		}
 
 		// 変数のローカル名前空間への登録
 		new_form->GetLocalNamespace()->Add(child->GetName(), NULL);
 
 		// ローカル変数への書き込み
-		new_form->GetLocalNamespace()->Write(new_form, GetPosition(), child->GetName(), init_var);
+		new_form->GetLocalNamespace()->Write(new_form, GetPosition(),
+										child->GetName(), param_var);
 	}
 
 	// ブロックの内容を生成する

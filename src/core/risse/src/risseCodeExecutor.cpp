@@ -38,7 +38,7 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 
 //---------------------------------------------------------------------------
 void tRisseCodeInterpreter::Execute(
-	risse_size argc, const tRisseVariant * const * argv,
+	const tRisseMethodArgument & args,
 	const tRisseVariant * This,
 	const tRisseStackFrameContext *stack,
 	tRisseVariant * result)
@@ -159,10 +159,10 @@ void tRisseCodeInterpreter::Execute(
 
 		case ocAssignParam: // getpar	= (S番目の関数引数を代入)
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			if(code[2] >= argc)
+			if(code[2] >= args.argc)
 				AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
 			else
-				AR(code[1]) = *argv[code[2]];
+				AR(code[1]) = *args.argv[code[2]];
 			code += 3;
 			break;
 
@@ -194,14 +194,13 @@ void tRisseCodeInterpreter::Execute(
 				// code[5] ～   引数
 				// TODO: 引数展開、引数の省略など
 				RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-				tRisseVariant ** argv = new tRisseVariant*[code[4]];
+				tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4]);
+
 				for(risse_uint32 i = 0; i < code[4]; i++)
-				{
-					RISSE_ASSERT(CI(code[i+5]) < framesize);
-					argv[i] = &AR(code[i+5]);
-				}
+					args.argv[i] = &AR(code[i+5]);
+
 				AR(code[2]).FuncCall(CI(code[1])==RisseInvalidRegNum?NULL:&AR(code[1]),
-					code[4], argv, &_this);
+					args, &_this);
 				code += code[4] + 5;
 				break;
 			}

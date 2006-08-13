@@ -190,7 +190,7 @@ void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
 	RisseFPrint(stdout,(RISSE_WS("========== Result ==========\n")));
 	tRisseVariant ret;
 	RISSE_ASSERT(RootCodeBlock != NULL);
-	RootCodeBlock->GetObject().FuncCall(&ret, 0, NULL, NULL);
+	RootCodeBlock->GetObject().FuncCall(&ret, tRisseMethodArgument::GetEmptyArgument(), NULL);
 	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }
 //---------------------------------------------------------------------------

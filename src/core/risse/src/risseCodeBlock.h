@@ -99,8 +99,7 @@ public: // tRisseObjectInterface メンバ
 		tRisseVariant * result = NULL,
 		const tRisseString & name = tRisseString::GetEmptyString(),
 		risse_uint32 flags = 0,
-		risse_size argc = 0,
-		const tRisseVariant * const * argv = NULL,
+		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
 		const tRisseVariant *This = NULL,
 		const tRisseStackFrameContext *stack = NULL
 			);

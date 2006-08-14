@@ -98,6 +98,12 @@ tRisseString tRisseASTNode_FuncCall::GetChildNameAt(risse_size index) const
 		risse_char buf[40];
 		return tRisseString(RISSE_WS("argument")) + Risse_int64_to_str(index, buf);
 	}
+	index -= inherited::GetChildCount();
+	if(index < Blocks.size())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("block")) + Risse_int64_to_str(index, buf);
+	}
 	return tRisseString();
 }
 //---------------------------------------------------------------------------
@@ -129,6 +135,16 @@ tRisseString tRisseASTNode_FuncCallArg::GetDumpComment() const
 {
 	if(Expand)
 		return RISSE_WS("expand");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncCallBlock::GetChildNameAt(risse_size index) const
+{
+	if(index == 0)
+		return RISSE_WS("block");
 	return tRisseString();
 }
 //---------------------------------------------------------------------------
@@ -443,11 +459,17 @@ tRisseString tRisseASTNode_Catch::GetDumpComment() const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_FuncDecl::GetChildNameAt(risse_size index) const
 {
-	if(index == inherited::GetChildCount()) return RISSE_WS("body");
+	if(index == inherited::GetChildCount() + Blocks.size()) return RISSE_WS("body");
 	if(index < inherited::GetChildCount())
 	{
 		risse_char buf[40];
 		return tRisseString(RISSE_WS("argument")) + Risse_int64_to_str(index, buf);
+	}
+	index -= inherited::GetChildCount();
+	if(index < Blocks.size())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("block")) + Risse_int64_to_str(index, buf);
 	}
 	return tRisseString();
 }
@@ -482,6 +504,14 @@ tRisseString tRisseASTNode_FuncDeclArg::GetDumpComment() const
 	if(Collapse)
 		ret += RISSE_WS(", collapse");
 	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncDeclBlock::GetDumpComment() const
+{
+	return Name.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 

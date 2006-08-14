@@ -109,14 +109,15 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 /* 再入可能なパーサを出力 */
 %pure_parser
 
-/* シフト・還元競合は4つある */
-%expect 4
+/* シフト・還元競合は6つある */
+%expect 6
 
 /* union 定義 */
 %union{
 	tRisseVariant * value;
 	tRisseASTNode * np;
 	tRisseMemberAttribute * attr;
+	tRisseASTArray * array;
 }
 
 /* トークン定義 */
@@ -294,6 +295,11 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
 	embeddable_string_s embeddable_string_s_unit
+
+
+%type <array>
+	call_block_list_opt call_block_list
+	func_decl_block_list func_decl_block_at_least_one
 
 
 /* 演算子の優先順位 */
@@ -584,10 +590,14 @@ func_expr_def
 /* the argument definition of a function definition */
 func_decl_arg_opt
 	: /* empty */							{ $$ = N(FuncDecl)(LP); }
-	| "(" func_decl_arg_collapse ")"		{ $$ = $2; }
-	| "(" func_decl_arg_list ")"			{ $$ = $2; }
+	| "(" func_decl_arg_collapse ")"
+	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($4); }
+	| "(" func_decl_arg_list ")"
+	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($4); }
 	| "(" func_decl_arg_at_least_one ","
-	  func_decl_arg_collapse ")"			{ $$ = $2; C(FuncDecl, $$)->AddChild($4); }
+	  func_decl_arg_collapse ")"
+	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AddChild($4);
+	  										  C(FuncDecl, $$)->AssignBlocks($6); }
 ;
 
 /* the argument list */
@@ -616,6 +626,19 @@ func_decl_arg_collapse
 	| T_ID "*=" inline_array			{ ; }
 */
 ;
+
+func_decl_block_list
+	: /* empty */							{ $$ = NULL; }
+	| func_decl_block_at_least_one
+;
+
+func_decl_block_at_least_one
+	: T_ID									{ $$ = new tRisseASTArray();
+											  $$->push_back(N(FuncDeclBlock)(LP, *$1)); }
+	| func_decl_block_at_least_one T_ID		{ $$ = $1;
+											  $$->push_back(N(FuncDeclBlock)(LP, *$2)); }
+;
+
 
 /*---------------------------------------------------------------------------
   property definition
@@ -872,8 +895,7 @@ factor_expr
 /* an expression for function call */
 func_call_expr
 	: func_call_expr_body
-	| func_call_expr_body func_expr_def	{ $$ = $1;
-										  C(FuncCall, $$)->AddChild(N(FuncCallArg(LP, $2, false))); }
+	  call_block_list_opt				{ C(FuncCall, $$)->AssignBlocks($2); }
 ;
 
 func_call_expr_body
@@ -896,6 +918,19 @@ call_arg
 	| expr "*" 							{ $$ = N(FuncCallArg)(LP, $1, true); }
 	| expr								{ $$ = N(FuncCallArg)(LP, $1, false); }
 ;
+
+/* block argument(s) for function call */
+/* このルールは 2つのシフト・還元競合を起こす */
+call_block_list_opt
+	: /* empty */						{ $$ = NULL; }
+	| call_block_list
+;
+
+call_block_list
+	: block								{ $$ = new tRisseASTArray(); $$->push_back($1); }
+	| call_block_list block				{ $$ = $1; $$->push_back($2); }
+;
+
 
 /* regular expression */
 regexp

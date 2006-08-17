@@ -663,7 +663,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 
 	// 引数の列挙用配列
 	gc_vector<tRisseSSAVariable *> arg_vec;
-	arg_vec.reserve(inherited::GetChildCount());
+	arg_vec.reserve(GetChildCount());
 
 	// ... が指定されていなければ引数を処理
 	risse_uint32 exp_flag = 0; // 展開フラグ
@@ -732,6 +732,43 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 			}
 		}
 	}
+	else
+	{
+		exp_flag = RisseFuncCallFlag_Omitted; //  関数呼び出しは ... を伴っている
+	}
+
+	// ブロック引数を処理
+	gc_vector<void *> block_params;
+	tRisseSSAVariableAccessMap * access_map = NULL;
+	if(Blocks.size() > 0)
+	{
+		// アクセスマップを作成する
+		access_map = form->CreateAccessMap(GetPosition());
+	}
+
+	for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
+	{
+		RISSE_ASSERT((*i)->GetType() == antFuncCallBlock);
+		tRisseASTNode_FuncCallBlock * block_arg =
+			reinterpret_cast<tRisseASTNode_FuncCallBlock*>(*i);
+
+		// 引数のコードを生成
+
+		// ブロックの中身を 遅延評価ブロックとして評価する
+		tRisseSSAVariable * lazyblock_var = NULL;
+		tRisseSSAForm * new_form = NULL;
+		void * lazy_param = form->CreateLazyBlock(GetPosition(),
+			RISSE_WS("callback block"), false, access_map, new_form, lazyblock_var);
+
+		new_form->Generate(block_arg->GetBlock());
+
+		// 配列にpush
+		block_params.push_back(lazy_param);
+		arg_vec.push_back(lazyblock_var);
+	}
+
+	// 遅延評価ブロックで使用された変数の処理
+	if(access_map) form->ListVariablesForLazyBlock(GetPosition(), access_map);
 
 	// 関数呼び出しの文を生成する
 	tRisseSSAVariable * returned_var = NULL;
@@ -739,14 +776,24 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		form->AddStatement(GetPosition(), CreateNew ? ocNew : ocFuncCall,
 					&returned_var, func_var);
 
-	call_stmt->SetFuncArgOmitted(Omit);
 	call_stmt->SetFuncExpandFlags(exp_flag);
+	call_stmt->SetBlockCount(Blocks.size());
 
 	for(gc_vector<tRisseSSAVariable *>::iterator i = arg_vec.begin();
 		i != arg_vec.end(); i++)
 	{
 		call_stmt->AddUsed(*i);
 	}
+
+	// ブロックのクリーンアップを行う
+	for(gc_vector<void *>::reverse_iterator i = block_params.rbegin();
+		i != block_params.rend(); i++)
+	{
+		form->CleanupLazyBlock(*i);
+	}
+
+	// アクセスマップのクリーンアップを行う
+	if(access_map) form->CleanupAccessMap(GetPosition(), access_map);
 
 	// 関数の戻り値を返す
 	return returned_var;
@@ -2144,16 +2191,27 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 	// try ブロックの中身を 遅延評価ブロックとして評価する
 	tRisseSSAVariable * lazyblock_var = NULL;
 	tRisseSSAForm * new_form = NULL;
+
+	// アクセスマップを作成する
+	tRisseSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
+
+	// 遅延評価ブロックを作成する
 	void * lazy_param = form->CreateLazyBlock(GetPosition(),
-		RISSE_WS("try block"), false, new_form, lazyblock_var);
+		RISSE_WS("try block"), false, access_map, new_form, lazyblock_var);
 
 	new_form->Generate(Body);
+
+	// 遅延評価ブロックで使用された変数の処理
+	form->ListVariablesForLazyBlock(GetPosition(), access_map);
 
 	// 遅延評価ブロックを実行するためのfunccall文を作成
 	lazyblock_var->GenerateFuncCall(GetPosition(), tRisseString::GetEmptyString());
 
 	// 遅延評価ブロックをクリーンアップ
 	form->CleanupLazyBlock(lazy_param);
+
+	// アクセスマップをクリーンアップ
+	form->CleanupAccessMap(GetPosition(), access_map);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -2171,7 +2229,7 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void 
 												Name.IsEmpty() ?
 													RISSE_WS("anonymous function"):
 													RISSE_WS("function ") + Name,
-												true, new_form, lazyblock_var);
+												true, NULL, new_form, lazyblock_var);
 
 	// 引数を処理する
 	for(risse_size i = 0; i < inherited::GetChildCount(); i++)

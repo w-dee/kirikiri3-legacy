@@ -36,28 +36,32 @@ class tRisseSSAVariableAccessMap : public tRisseCollectee
 
 	tMap Map; //!< 変数名(番号なし)→情報のマップ
 
+	tRisseSSAVariable * Variable; //!< このアクセスマップを表すSSA変数
+
 public:
 	//! @brief		コンストラクタ
-	tRisseSSAVariableAccessMap() {;}
+	//! @param		form		SSA形式インスタンス
+	//! @param		pos			スクリプト上の位置
+	tRisseSSAVariableAccessMap(tRisseSSAForm * form, risse_size pos);
+
+	//! @brief		このアクセスマップを表すSSA変数を返す
+	//! @return		このアクセスマップを表すSSA変数
+	tRisseSSAVariable * GetVariable() const { return Variable; }
 
 	//! @brief		アクセスマップに追加する
 	//! @param		name		変数名(番号なし)
 	//! @param		write		その変数に対するアクセスが書き込みか(真)、読み込みか(偽)
 	void SetUsed(const tRisseString & name, bool write);
 
-	//! @param		遅延評価ブロック中で「読み込み」が発生した変数に対して読み込みを行う文を作成する
-	//! @param		form		SSA形式インスタンス
-	//! @param		pos			スクリプト上の位置
-	//! @param		block_var	遅延評価ブロックを表す変数
-	void GenerateChildRead(tRisseSSAForm * form, risse_size pos,
-		tRisseSSAVariable* block_var);
-
 	//! @param		遅延評価ブロック中で「書き込み」が発生した変数に対して読み込みを行う文を作成する
 	//! @param		form		SSA形式インスタンス
 	//! @param		pos			スクリプト上の位置
-	//! @param		block_var	遅延評価ブロックを表す変数
-	void GenerateChildWrite(tRisseSSAForm * form, risse_size pos,
-		tRisseSSAVariable* block_var);
+	void GenerateChildWrite(tRisseSSAForm * form, risse_size pos);
+
+	//! @param		遅延評価ブロック中で「読み込み」が発生した変数に対して読み込みを行う文を作成する
+	//! @param		form		SSA形式インスタンス
+	//! @param		pos			スクリプト上の位置
+	void GenerateChildRead(tRisseSSAForm * form, risse_size pos);
 
 };
 //---------------------------------------------------------------------------
@@ -202,9 +206,9 @@ public:
 		bool should_share, tRisseSSALocalNamespace * child,
 		tRisseString * ret_n_name = NULL, bool * shared = NULL);
 
-	//! @brief		AccessMap を作成する (すでに存在する場合でも新規に作成する)
-	//! @return		新しく作成した AcecssMap
-	tRisseSSAVariableAccessMap * CreateAccessMap();
+	//! @brief		AccessMap を設定する
+	//! @param		map AcecssMap
+	void SetAccessMap(tRisseSSAVariableAccessMap * map) { AccessMap = map; }
 
 	//! @brief		AccessMap を取得する @return AcecssMap
 	tRisseSSAVariableAccessMap * GetAccessMap() const { return AccessMap; }

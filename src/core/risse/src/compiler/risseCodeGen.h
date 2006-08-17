@@ -40,12 +40,14 @@ class tRisseCodeGenerator : public tRisseCollectee
 	gc_vector<risse_size> RegFreeMap; // 空きレジスタの配列
 	risse_size NumUsedRegs; // 使用中のレジスタの数
 	risse_size MaxNumUsedRegs; // 使用中のレジスタの最大数
+public:
 	typedef gc_map<tRisseString, risse_size> tNamedRegMap;
 		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
 	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
+private:
 	tNamedRegMap *SharedRegNameMap; //!< 共有された変数の変数名とそれに対応するレジスタ番号のマップ
-	tNamedRegMap ParentVariableMap; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
+	tNamedRegMap VariableMapForChildren; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	//! @brief		未解決のジャンプを表す構造体
 	struct tPendingBlockJump
@@ -71,6 +73,9 @@ public:
 	tRisseCodeGenerator(tRisseCodeGenerator * parent = NULL, bool useparentframe = false);
 
 public:
+	//! @brief	親のコードジェネレータを得る
+	//! @return	親のコードジェネレータを得る
+	tRisseCodeGenerator * GetParent() const { return Parent; }
 
 	//! @brief	レジスタの基本値を得る @return レジスタの基本値
 	risse_size GetRegisterBase() const { return RegisterBase; }
@@ -156,16 +161,16 @@ public:
 	//! @brief		共有されたレジスタの個数を得る @return 共有されたレジスタの個数
 	risse_size GetSharedRegCount() const { return SharedRegNameMap->size(); }
 
-	//! @brief		ParentVariableMap 内で変数を探す (親から子に対して呼ばれる)
+	//! @brief		VariableMapForChildren 内で変数を探す
 	//! @param		name		変数名
 	//! @return		そのレジスタのインデックス
-	//! @note		nameがマップ内に見つからなかったときは *親から* レジスタを割り当て
+	//! @note		nameがマップ内に見つからなかったときはレジスタを割り当て
 	//!				そのレジスタのインデックスを返す
-	risse_size FindParentVariableMap(const tRisseString & name);
+	risse_size FindVariableMapForChildren(const tRisseString & name);
 
-	//! @brief		ParentVariableMap にある変数をすべて開放する
+	//! @brief		VariableMapForChildren にある変数をすべて開放する
 	//! @note		変数は開放するが、マップそのものはクリアしない。
-	void FreeParentVariableMapVariables();
+	void FreeVariableMapForChildren();
 
 	//! @brief		コードを確定する(未解決のジャンプなどを解決する)
 	void FixCode();
@@ -236,13 +241,12 @@ public:
 	//! @param		dest	関数結果格納先
 	//! @param		func	関数を表す変数
 	//! @param		is_new	newか(真), 関数呼び出しか(偽)
-	//! @param		omit	引数省略かどうか
 	//! @param		expbit	それぞれの引数が展開を行うかどうかを表すビット列
 	//! @param		args	引数
 	//! @param		blocks	遅延評価ブロック
 	void PutFunctionCall(const tRisseSSAVariable * dest,
 		const tRisseSSAVariable * func,
-		bool is_new, bool omit, risse_uint32 expbit,
+		bool is_new, risse_uint32 expbit,
 		const gc_vector<const tRisseSSAVariable *> & args,
 		const gc_vector<const tRisseSSAVariable *> & blocks);
 

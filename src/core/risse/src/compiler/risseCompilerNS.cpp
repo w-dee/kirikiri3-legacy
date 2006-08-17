@@ -26,6 +26,16 @@ RISSE_DEFINE_SOURCE_ID(49117,34809,57976,16815,63634,40614,38058,11038);
 
 
 
+
+//---------------------------------------------------------------------------
+tRisseSSAVariableAccessMap::tRisseSSAVariableAccessMap(tRisseSSAForm * form, risse_size pos)
+{
+	tRisseSSAVariable * var = NULL;
+	form->AddStatement(pos, ocDefineAccessMap, &var);
+	Variable = var;
+}
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 void tRisseSSAVariableAccessMap::SetUsed(const tRisseString & name, bool write)
 {
@@ -41,8 +51,7 @@ void tRisseSSAVariableAccessMap::SetUsed(const tRisseString & name, bool write)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_size pos,
-		tRisseSSAVariable* block_var)
+void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_size pos)
 {
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
@@ -51,7 +60,7 @@ void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_s
 			// 読み込みが発生している
 			tRisseSSAVariable * var =
 				form->GetLocalNamespace()->Read(form, pos, i->first);
-			form->AddStatement(pos, ocChildWrite, NULL, block_var, var)->SetName(i->first);
+			form->AddStatement(pos, ocChildWrite, NULL, Variable, var)->SetName(i->first);
 		}
 	}
 }
@@ -59,8 +68,7 @@ void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_s
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_size pos,
-		tRisseSSAVariable* block_var)
+void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_size pos)
 {
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
@@ -68,7 +76,7 @@ void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_
 		{
 			// 書き込みが発生している
 			tRisseSSAVariable * var = NULL;
-			form->AddStatement(pos, ocChildRead, &var, block_var)->SetName(i->first);
+			form->AddStatement(pos, ocChildRead, &var, Variable)->SetName(i->first);
 			form->GetLocalNamespace()->Write(form, pos, i->first, var);
 		}
 	}
@@ -426,15 +434,6 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 		// 親名前空間内で探す
 		return Parent->AccessFromChild(name, access, should_share, this, ret_n_name, shared);
 	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseSSAVariableAccessMap * tRisseSSALocalNamespace::CreateAccessMap()
-{
-	AccessMap = new tRisseSSAVariableAccessMap();
-	return AccessMap;
 }
 //---------------------------------------------------------------------------
 

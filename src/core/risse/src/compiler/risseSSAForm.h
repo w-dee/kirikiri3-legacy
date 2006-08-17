@@ -166,6 +166,7 @@ public:
 
 
 class tRisseCompiler;
+class tRisseSSAVariableAccessMap;
 //---------------------------------------------------------------------------
 //! @brief	SSA形式を表すクラス
 //---------------------------------------------------------------------------
@@ -355,9 +356,17 @@ protected:
 		tRisseSSAForm * NewForm; //!< 新しいSSA形式インスタンス(遅延評価ブロックを表す)
 		risse_size Position; //!< スクリプト上の位置
 		tRisseSSAVariable *BlockVariable; //!< 遅延評価ブロックを表す変数
-		tRisseSSAVariableAccessMap * AccessMap;
+		tRisseSSAVariableAccessMap * AccessMap; //!< アクセスマップ
 	};
 public:
+	//! @brief		AccessMap を作成する
+	//! @param		pos			スクリプト上の位置
+	//! @return		作成された AccessMap
+	//! @note		ここで作成したアクセスマップは CreateLazyBlock() に
+	//!				渡し、使い終わったら CleanupAccessMap() を呼ぶこと。
+	//!				このメソッドはCreateLazyBlockでsharevars=falseの場合に必須。
+	tRisseSSAVariableAccessMap * CreateAccessMap(risse_size pos);
+
 	//! @brief		新しい遅延評価ブロックを作成する
 	//! @param		pos			スクリプト上の位置
 	//! @param		basename	新しい遅延評価ブロックの名前(実際にはこれにさらに連番がつく)
@@ -367,19 +376,33 @@ public:
 	//!							された位置以外から呼び出しても安全に変数にアクセスできるように
 	//!							なる ( function 内 function でレキシカルクロージャを使用するとき
 	//!							などに有効 )
-	//! @param		new_form	新しく作成されたSSA形式のインスタンス。
+	//! @param		accessmap	アクセスマップ (sharevars が false の場合のみ必須, trueの場合は不要)
+	//! @param		new_form	新しく作成されたSSA形式のインスタンス
 	//! @param		block_var	その遅延評価ブロックを表すSSA変数を格納する先
 	//! @return		CleanupLazyBlock() に渡すべき情報
 	//! @note		このメソッドは遅延評価ブロックを作成してその遅延評価ブロックを
-	//!				表す変数を返す。この変数はメソッドオブジェクトなので、呼び出して
-	//!				使う。使い終わったら CreateLazyBlock() メソッドの戻り値を
-	//!				CleanupLazyBlock() メソッドに渡して呼び出すこと。
+	//!				表す変数をblock_varに返す。遅延評価ブロックを表すSSA形式はnew_form
+	//!				に返されるが、中身は空っぽなので呼び出しがわで内容を生成すること。
+	//!				内容を生成したら、ListVariablesForLazyBlock() を呼ぶこと。
+	//!				block_var に返される変数はメソッドオブジェクトなので、呼び出して使う。
+	//! 			使い終わったらCleanupLazyBlock() メソッドを呼ぶこと。
 	void * CreateLazyBlock(risse_size pos, const tRisseString & basename,
-		bool sharevars, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var);
+		bool sharevars, tRisseSSAVariableAccessMap * accessmap,
+		tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var);
+
+	//! @brief		遅延評価ブロックで使用されている変数を親から子へコピーする
+	//! @param		pos			スクリプト上の位置
+	//! @param		accessmap	アクセスマップ ( CreateAccessMap() で作成された物を指定)
+	void ListVariablesForLazyBlock(risse_size pos, tRisseSSAVariableAccessMap * accessmap);
 
 	//! @brief		遅延評価ブロックのクリーンアップ処理を行う
 	//! @param		param	CreateLazyBlock() の戻り値
 	void CleanupLazyBlock(void * param);
+
+	//! @brief		アクセスマップのクリーンアップ処理を行う
+	//! @param		pos			スクリプト上の位置
+	//! @param		accessmap	アクセスマップ ( CreateAccessMap() で作成された物を指定)
+	void CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap * accessmap);
 
 	//! @brief		ユニークな番号を得る
 	//! @return		ユニークな番号

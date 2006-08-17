@@ -217,8 +217,31 @@ void tRisseCodeInterpreter::Execute(
 			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
-			code += code[4] + code[5] + 6;
-			break;
+			/* incomplete */
+			{
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+				// code[2] = メソッドオブジェクト
+				// code[3] = フラグ
+				// code[4] = 引数の数
+				// code[5] = ブロック引数の数
+				// code[6] ～   引数
+				// TODO: 引数展開、引数の省略など
+				RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
+				tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4]);
+				tRisseMethodArgument & blockargs = tRisseMethodArgument::Allocate(code[5]);
+
+				for(risse_uint32 i = 0; i < code[4]; i++)
+					args.argv[i] = &AR(code[i+6]);
+				for(risse_uint32 i = 0; i < code[5]; i++)
+					blockargs.argv[i] = &AR(code[i+6+code[4]]);
+
+				AR(code[2]).FuncCall(CI(code[1])==RisseInvalidRegNum?NULL:&AR(code[1]),
+					args, blockargs, &_this);
+				code += code[4] + code[5] + 6;
+				break;
+			}
 
 		case ocSetFrame		: // sfrm	 スタックフレームと共有空間を設定する
 			RISSE_ASSERT(CI(code[1]) < framesize);

@@ -41,7 +41,6 @@ tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
 	TrueBranch = FalseBranch = NULL;
 	JumpTarget = NULL;
 	FuncExpandFlags = 0;
-	FuncArgOmitted = false;
 }
 //---------------------------------------------------------------------------
 
@@ -150,6 +149,8 @@ void tRisseSSAStatement::AnalyzeVariableStatementLiveness()
 //---------------------------------------------------------------------------
 void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 {
+	bool free_unused_var = true;
+
 	// gen に一つ文を追加する
 	switch(Code)
 	{
@@ -192,12 +193,17 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 
 		{
 			gc_vector<const tRisseSSAVariable *> args, blocks;
-			// TODO: ブロックの引き渡し
 
-			for(risse_size i = /*注意*/1; i < Used.size(); i++)
-				args.push_back(Used[i]);
-			gen->PutFunctionCall(Declared, Used[0], Code == ocNew, FuncArgOmitted,
-						FuncExpandFlags, args, blocks);
+			risse_size arg_count = Used.size() - 1 - BlockCount;
+			risse_size block_count = BlockCount;
+
+			for(risse_size i = 0; i < arg_count; i++)
+				args.push_back(Used[i + 1]);
+			for(risse_size i = 0; i < block_count; i++)
+				blocks.push_back(Used[i + arg_count + 1]);
+
+			gen->PutFunctionCall(Declared, Used[0], Code == ocNew, 
+								FuncExpandFlags, args, blocks);
 		}
 		break;
 
@@ -276,13 +282,11 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutSet(Code, Used[0], Used[1], Used[2]);
 		break;
 
-	case ocDefineLazyBlock:
+	case ocDefineAccessMap:
 		{
-			tRisseSSAForm * child_form = DefinedForm;
-			RISSE_ASSERT(child_form != NULL);
 			RISSE_ASSERT(Declared != NULL);
 			// Declared で使用している文のうち、ocChildWrite/ocChildRead
-			// してる物を探し、そこで使用されている名前で gen の ParentVariableMap に
+			// してる物を探し、そこで使用されている名前で gen の VariableMapForChildren に
 			// マップを作成する
 			// (実際の変数へのアクセスは後の ocChildWrite や ocChildRead で処理する)
 			const gc_vector<tRisseSSAStatement *> & child_access_stmts =
@@ -295,16 +299,23 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 				{
 				case ocChildWrite:
 				case ocChildRead:
-					DefinedForm->GetCodeGenerator()->
-						FindParentVariableMap(*stmt->Name); // マップに変数名だけを追加する
+					gen->FindVariableMapForChildren(*stmt->Name); // マップに変数名だけを追加する
 					break;
 				default: ;
 				}
 			}
+		}
+		break;
+
+	case ocDefineLazyBlock:
+		{
+			tRisseSSAForm * child_form = DefinedForm;
+			RISSE_ASSERT(child_form != NULL);
+			RISSE_ASSERT(Declared != NULL);
 			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
 			// コードブロックの参照の問題があるので注意
-			gen->PutRelocatee(Declared, DefinedForm->GetCodeBlockIndex());
-			if(DefinedForm->GetUseParentFrame())
+			gen->PutRelocatee(Declared, child_form->GetCodeBlockIndex());
+			if(child_form->GetUseParentFrame())
 				gen->PutSetFrame(Declared);
 			else
 				gen->PutSetShare(Declared);
@@ -315,14 +326,12 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		{
 			RISSE_ASSERT(Used.size() == 2);
 			RISSE_ASSERT(Name != NULL);
-			// Used[0] が define された文は ocDefineLazyBlock であるはずである
+			// Used[0] が define された文は ocDefineAccessMap であるはずである
 			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
 			//       現状の実装は暫定的なもの。
 			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
-			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
-			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
-			gen->PutAssign(lazy_stmt->DefinedForm->GetCodeGenerator()->
-						FindParentVariableMap(*Name), Used[1]);
+			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineAccessMap);
+			gen->PutAssign(gen->FindVariableMapForChildren(*Name), Used[1]);
 		}
 		break;
 
@@ -330,29 +339,28 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		{
 			RISSE_ASSERT(Used.size() == 1);
 			RISSE_ASSERT(Name != NULL);
-			// Used[0] が define された文は ocDefineLazyBlock であるはずである
+			// Used[0] が define された文は ocDefineAccessMap であるはずである
 			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
 			//       現状の実装は暫定的なもの。
 			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
-			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
-			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
-			gen->PutAssign(Declared, lazy_stmt->DefinedForm->GetCodeGenerator()->
-									FindParentVariableMap(*Name));
+			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineAccessMap);
+			gen->PutAssign(Declared, gen->FindVariableMapForChildren(*Name));
 		}
 		break;
 
-	case ocEndLazyBlock:
-		// 遅延評価ブロックの使用終了
+	case ocEndAccessMap:
+		// アクセスマップの使用終了
 		// 暫定実装
 		{
 			RISSE_ASSERT(Used.size() == 1);
 			// 変数を開放する
-			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
-			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineLazyBlock);
-			RISSE_ASSERT(lazy_stmt->DefinedForm != NULL);
-			if(lazy_stmt->DefinedForm->GetUseParentFrame())
-				lazy_stmt->DefinedForm->GetCodeGenerator()->FreeParentVariableMapVariables();
+			gen->FreeVariableMapForChildren();
 		}
+		free_unused_var = false;
+			// この文で使用が終わった変数(すなわち ocDefineAccessMapで
+			// 宣言した変数) の開放はおこなわない。なぜならば、ocDefineAccessMapで
+			// 宣言された変数は擬似的な変数であり、実際に変数マップに登録されないから。
+		
 		break;
 
 
@@ -360,7 +368,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		// 暫定実装
 		RISSE_ASSERT(Used.size() == 1);
 		RISSE_ASSERT(Name != NULL);
-		gen->PutAssign(gen->FindParentVariableMap(*Name), Used[0]);
+		gen->PutAssign(gen->GetParent()->FindVariableMapForChildren(*Name), Used[0]);
 		break;
 
 	case ocParentRead:
@@ -368,7 +376,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		RISSE_ASSERT(Used.size() == 0);
 		RISSE_ASSERT(Name != NULL);
 		RISSE_ASSERT(Declared != NULL);
-		gen->PutAssign(Declared, gen->FindParentVariableMap(*Name));
+		gen->PutAssign(Declared, gen->GetParent()->FindVariableMapForChildren(*Name));
 		break;
 
 	case ocWrite: // 共有変数領域への書き込み
@@ -389,17 +397,20 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		break;
 	}
 
-	// この文で使用が終了している変数を解放する
-	if(Declared)
+	if(free_unused_var)
 	{
-		if(Declared->GetLastUsedStatement() == this)
-			gen->FreeRegister(Declared);
-	}
-	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
-			i != Used.end(); i++)
-	{
-		if((*i)->GetLastUsedStatement() == this)
-			gen->FreeRegister(*i);
+		// この文で使用が終了している変数を解放する
+		if(Declared)
+		{
+			if(Declared->GetLastUsedStatement() == this)
+				gen->FreeRegister(Declared);
+		}
+		for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+				i != Used.end(); i++)
+		{
+			if((*i)->GetLastUsedStatement() == this)
+				gen->FreeRegister(*i);
+		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -617,7 +628,7 @@ tRisseString tRisseSSAStatement::Dump() const
 				ret += tRisseString(RisseVMInsnInfo[Code].Name);
 
 				// 使用している引数
-				if(is_funccall && FuncArgOmitted)
+				if(is_funccall && (FuncExpandFlags & RisseFuncCallFlag_Omitted))
 				{
 					// 関数呼び出しかnew
 					ret += RISSE_WS("(...)");

@@ -289,8 +289,17 @@ bool tRisseSSAForm::GetShared(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
+tRisseSSAVariableAccessMap * tRisseSSAForm::CreateAccessMap(risse_size pos)
+{
+	return new tRisseSSAVariableAccessMap(this, pos);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basename,
-	bool sharevars, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
+	bool sharevars, tRisseSSAVariableAccessMap * accessmap,
+	tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
 {
 	// 遅延評価ブロックの名称を決める
 	tRisseString block_name = basename + RISSE_WS(" ") + tRisseString::AsString(GetUniqueNumber());
@@ -303,12 +312,11 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 	// ローカル名前空間の親子関係を設定
 	new_form->LocalNamespace->SetParent(LocalNamespace);
 
-	tRisseSSAVariableAccessMap * access_map = NULL;
 	if(!sharevars)
 	{
-		// 変数を固定しない場合はAccessMapをnew_formの名前空間に作成する
-		// (AccessMapはどの変数にアクセスがあったかを記録する)
-		access_map = new_form->LocalNamespace->CreateAccessMap();
+		// 変数を固定しない場合はアクセスマップを設定する
+		RISSE_ASSERT(accessmap != NULL);
+		new_form->LocalNamespace->SetAccessMap(accessmap);
 	}
 
 	// 遅延評価ブロックを生成する文を追加する
@@ -317,16 +325,22 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 	lazy_stmt->SetName(block_name);
 	lazy_stmt->SetDefinedForm(new_form);
 
-	// 遅延評価ブロックで読み込みが起こった変数を処理する
-	if(access_map) access_map->GenerateChildRead(this, pos, block_var);
-
 	// 情報を返す
 	tLazyBlockParam * param = new tLazyBlockParam();
 	param->NewForm = new_form;
 	param->Position = pos;
 	param->BlockVariable = block_var;
-	param->AccessMap = access_map;
+	param->AccessMap = accessmap;
 	return reinterpret_cast<void *>(param);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::ListVariablesForLazyBlock(risse_size pos, tRisseSSAVariableAccessMap * accessmap)
+{
+	// 遅延評価ブロックで読み込みが起こった変数を処理する
+	accessmap->GenerateChildWrite(this, pos);
 }
 //---------------------------------------------------------------------------
 
@@ -335,16 +349,18 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 void tRisseSSAForm::CleanupLazyBlock(void * param)
 {
 	// param はtLazyBlockParam を表している
-	tLazyBlockParam * info_param = reinterpret_cast<tLazyBlockParam *>(param);
+	// tLazyBlockParam * info_param = reinterpret_cast<tLazyBlockParam *>(param);
+}
+//---------------------------------------------------------------------------
 
-	// 遅延評価ブロックで書き込みが起こった変数を処理する
-	tRisseSSAVariableAccessMap * access_map = info_param->AccessMap;
-	if(access_map)
-		access_map->GenerateChildWrite(
-			this, info_param->Position, info_param->BlockVariable);
 
-	// ocEndLazyBlock を追加する
-	AddStatement(info_param->Position, ocEndLazyBlock, NULL, info_param->BlockVariable);
+//---------------------------------------------------------------------------
+void tRisseSSAForm::CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap * accessmap)
+{
+	accessmap->GenerateChildRead(this, pos);
+
+	// ocEndAccessMap を追加する
+	AddStatement(pos, ocEndAccessMap, NULL, accessmap->GetVariable());
 }
 //---------------------------------------------------------------------------
 

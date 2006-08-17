@@ -895,7 +895,7 @@ factor_expr
 /* an expression for function call */
 func_call_expr
 	: func_call_expr_body
-	  call_block_list_opt				{ C(FuncCall, $$)->AssignBlocks($2); }
+	  call_block_list_opt				{ $$ = $1; C(FuncCall, $$)->AssignBlocks($2); }
 ;
 
 func_call_expr_body
@@ -927,8 +927,8 @@ call_block_list_opt
 ;
 
 call_block_list
-	: block								{ $$ = new tRisseASTArray(); $$->push_back($1); }
-	| call_block_list block				{ $$ = $1; $$->push_back($2); }
+	: block								{ $$ = new tRisseASTArray(); $$->push_back(N(FuncCallBlock)(LP, $1)); }
+	| call_block_list block				{ $$ = $1; $$->push_back(N(FuncCallBlock)(LP, $2)); }
 ;
 
 

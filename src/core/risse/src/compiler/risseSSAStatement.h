@@ -57,9 +57,9 @@ class tRisseSSAStatement : public tRisseCollectee
 	union
 	{
 		tRisseSSABlock * FalseBranch; //!< 分岐のジャンプ先(条件が偽のとき)
-		bool FuncArgOmitted; //!< 引数が省略 ( ... ) されたかどうか
 		tRisseSSAForm * DefinedForm;	//!< この文で宣言された遅延評価ブロックの
 										//!< SSA形式インスタンス(ocDefineLazyBlock)
+		risse_size BlockCount; //!< 関数呼び出し時のブロックの個数
 	};
 
 public:
@@ -184,14 +184,6 @@ public:
 	//! @return		配列展開のビットマスク
 	risse_uint32 GetFuncExpandFlags() const { return FuncExpandFlags; }
 
-	//! @brief		引数が省略されたかどうかを設定する
-	//! @param		omitted		引数が省略されたかどうか
-	void SetFuncArgOmitted(bool omitted) { FuncArgOmitted = omitted; }
-
-	//! @brief		引数が省略されたかどうかを取得する
-	//! @return		引数が省略されたかどうか
-	bool GetFuncArgOmitted() const { return FuncArgOmitted; }
-
 	//! @brief		名前を設定する
 	//! @param		name		名前
 	void SetName(const tRisseString & name);
@@ -215,6 +207,14 @@ public:
 	//! @brief		この文で宣言された遅延評価ブロックのSSA形式インスタンスを取得する
 	//! @return		この文で宣言された遅延評価ブロックのSSA形式インスタンス
 	tRisseSSAForm * GetDefinedForm() const { return DefinedForm; }
+
+	//! @brief		関数宣言のブロックの個数を設定する
+	//! @param		count		ブロックの個数
+	void SetBlockCount(risse_size count) { BlockCount = count; }
+
+	//! @brief		関数宣言のブロックの個数を取得する
+	//! @return		関数宣言のブロックの個数
+	risse_size GetBlockCount() const { return BlockCount; }
 
 	//! @brief		変数の生存区間を文単位で解析する
 	void AnalyzeVariableStatementLiveness();

@@ -160,7 +160,7 @@ void tRisseCodeGenerator::FreeRegister(risse_size reg)
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::FreeRegister(const tRisseSSAVariable *var)
 {
-	// RegMap から指定された変数を探す
+	// RegMap から指定された変数を開放する
 	tRegMap::iterator f = RegMap.find(var);
 	RISSE_ASSERT(f != RegMap.end());
 
@@ -191,22 +191,20 @@ void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindParentVariableMap(const tRisseString & name)
+risse_size tRisseCodeGenerator::FindVariableMapForChildren(const tRisseString & name)
 {
-	RISSE_ASSERT(Parent != NULL);
-	RISSE_ASSERT(UseParentFrame);
-	// ParentVariableMap から指定された変数を探す
+	// VariableMapForChildren から指定された変数を探す
 	// 指定された変数が無ければ変数の空きマップからさがし、変数を割り当てる
-	tNamedRegMap::iterator f = ParentVariableMap.find(name);
-	if(f != ParentVariableMap.end())
+	tNamedRegMap::iterator f = VariableMapForChildren.find(name);
+	if(f != VariableMapForChildren.end())
 	{
 		 // 変数が見つかった
 		 return f->second;
 	}
 
-	// 変数がないので「親から」レジスタを割り当てる
-	risse_size assigned_reg = Parent->AllocateRegister();
-	ParentVariableMap.insert(tNamedRegMap::value_type(name, assigned_reg));
+	// 変数がないので自分からレジスタを割り当てる
+	risse_size assigned_reg = AllocateRegister();
+	VariableMapForChildren.insert(tNamedRegMap::value_type(name, assigned_reg));
 
 	return assigned_reg;
 }
@@ -214,13 +212,11 @@ risse_size tRisseCodeGenerator::FindParentVariableMap(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::FreeParentVariableMapVariables()
+void tRisseCodeGenerator::FreeVariableMapForChildren()
 {
-	RISSE_ASSERT(Parent != NULL);
-	RISSE_ASSERT(UseParentFrame);
-	// ParentVariableMapにある変数を「親から」すべて開放する
-	for(tNamedRegMap::iterator i = ParentVariableMap.begin(); i != ParentVariableMap.end(); i++)
-		Parent->FreeRegister(i->second);
+	// VariableMapForChildrenにある変数を自分からすべて開放する
+	for(tNamedRegMap::iterator i = VariableMapForChildren.begin(); i != VariableMapForChildren.end(); i++)
+		FreeRegister(i->second);
 }
 //---------------------------------------------------------------------------
 
@@ -383,12 +379,13 @@ void tRisseCodeGenerator::PutSetShare(const tRisseSSAVariable * dest)
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 		const tRisseSSAVariable * func,
-		bool is_new, bool omit, risse_uint32 expbit,
+		bool is_new, risse_uint32 expbit,
 		const gc_vector<const tRisseSSAVariable *> & args,
 		const gc_vector<const tRisseSSAVariable *> & blocks)
 {
 	RISSE_ASSERT(!(is_new && blocks.size() != 0)); // ブロック付き new はない
-	RISSE_ASSERT(!(omit && args.size() != 0)); // omit なのに引数があるということはない
+	RISSE_ASSERT(!((expbit & RisseFuncCallFlag_Omitted) && args.size() != 0));
+		// omit なのに引数があるということはない
 
 	tRisseOpCode code;
 	if(is_new)
@@ -400,7 +397,6 @@ void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 	PutWord(FindRegMap(dest));
 	PutWord(FindRegMap(func));
 
-	if(omit) expbit |= RisseFuncCallFlag_Omitted;
 	PutWord(expbit); // フラグ
 
 	PutWord(static_cast<risse_uint32>(args.size()));

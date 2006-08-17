@@ -117,7 +117,6 @@ tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tR
 	tRisseSSAVariable * ret_var = NULL;
 	tRisseSSAStatement * call_stmt =
 		Form->AddStatement(pos, ocFuncCall, &ret_var, func_var, param1, param2, param3);
-	call_stmt->SetFuncArgOmitted(false);
 	call_stmt->SetFuncExpandFlags(0);
 
 	// 戻る

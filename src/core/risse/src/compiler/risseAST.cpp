@@ -675,7 +675,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		{
 			if(i >= RisseMaxArgCount)
 			{
-				// 現状、関数の引数に列挙できる数は30個までとなっている
+				// 現状、関数の引数に列挙できる数はRisseMaxArgCount個までとなっている
 				// ので、それを超えるとエラーになる
 				eRisseCompileError::Throw(
 					tRisseString(RISSE_WS_TR("Too many function arguments")),
@@ -744,6 +744,18 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	{
 		// アクセスマップを作成する
 		access_map = form->CreateAccessMap(GetPosition());
+	}
+
+	if(Blocks.size() > RisseMaxArgCount)
+	{
+		// 現状、関数のブロック引数に列挙できる数は
+		// RisseMaxArgCount 個までとなっている
+		// (普通の引数と違って本来ブロック引数の数には制限が無いはずだが
+		//  将来的にブロック引数にも普通の引数のように展開フラグなどを
+		//  つけるかもしれないので、普通の引数と同じ制限を付ける)
+		eRisseCompileError::Throw(
+			tRisseString(RISSE_WS_TR("Too many function block arguments")),
+				form->GetScriptBlock(), GetPosition());
 	}
 
 	for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
@@ -2290,6 +2302,28 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void 
 
 			param_var = phi_ret_var;
 		}
+
+		// 変数のローカル名前空間への登録
+		new_form->GetLocalNamespace()->Add(child->GetName(), NULL);
+
+		// ローカル変数への書き込み
+		new_form->GetLocalNamespace()->Write(new_form, GetPosition(),
+										child->GetName(), param_var);
+	}
+
+	// ブロック引数を処理する
+	for(risse_size i = 0; i < Blocks.size(); i++)
+	{
+		tRisseASTNode_FuncDeclArg * child =
+			reinterpret_cast<tRisseASTNode_FuncDeclArg*>(Blocks[i]);
+		RISSE_ASSERT(child->GetType() == antFuncDeclBlock);
+
+		tRisseSSAVariable * param_var = NULL;
+
+		// パラメータ内容の取得
+		tRisseSSAStatement * assignparam_stmt = 
+			new_form->AddStatement(GetPosition(), ocAssignBlockParam, &param_var);
+		assignparam_stmt->SetIndex(i);
 
 		// 変数のローカル名前空間への登録
 		new_form->GetLocalNamespace()->Add(child->GetName(), NULL);

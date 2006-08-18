@@ -185,6 +185,11 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutAssignParam(Declared, Index);
 		break;
 
+	case ocAssignBlockParam:
+		RISSE_ASSERT(Declared != NULL);
+		gen->PutAssignBlockParam(Declared, Index);
+		break;
+
 	case ocFuncCall:
 	case ocNew:
 	case ocFuncCallBlock:

@@ -319,6 +319,17 @@ void tRisseCodeGenerator::PutAssignParam(const tRisseSSAVariable * dest, risse_s
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutAssignBlockParam(const tRisseSSAVariable * dest, risse_size index)
+{
+	PutWord(ocAssignBlockParam);
+	PutWord(FindRegMap(dest));
+	PutWord(static_cast<risse_uint32>(index));
+	// index の最大値は RisseMaxArgCount で確実に risse_uint32 で表現できる範囲のため安全にキャストできる
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutWrite(const tRisseString & dest, const tRisseSSAVariable * src)
 {
 	PutWord(ocWrite);

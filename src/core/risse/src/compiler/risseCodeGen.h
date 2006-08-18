@@ -214,6 +214,11 @@ public:
 	//! @param		index	引数インデックス
 	void PutAssignParam(const tRisseSSAVariable * dest, risse_size index);
 
+	//! @brief		メソッドへのブロック引数を assign するコードを置く
+	//! @param		dest	変数コピー先変数
+	//! @param		index	ブロック引数インデックス
+	void PutAssignBlockParam(const tRisseSSAVariable * dest, risse_size index);
+
 	//! @brief		Writeコード(共有空間への書き込み)を置く
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数

@@ -171,6 +171,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(AssignNewDict	,dict	,Z(R,0,0,0,0,0))//!< = 新しい辞書配列オブジェクトの代入
 	RISSE_OC_ENUM_ITEM(AssignNewRegExp	,regexp	,Z(R,0,0,0,0,0))//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
 	RISSE_OC_ENUM_ITEM(AssignParam		,getpar	,Z(R,P,0,0,0,0))//!< = (O番目の関数引数を代入)
+	RISSE_OC_ENUM_ITEM(AssignBlockParam	,getbpar,Z(R,P,0,0,0,0))//!< = (O番目の関数ブロック引数を代入)
 
 // 共有空間アクセス
 	RISSE_OC_ENUM_ITEM(Write			,swrite	,Z(S,R,0,0,0,0))//!< 共有空間への書き込み

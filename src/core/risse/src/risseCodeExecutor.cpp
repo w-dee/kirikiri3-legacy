@@ -167,6 +167,15 @@ void tRisseCodeInterpreter::Execute(
 			code += 3;
 			break;
 
+		case ocAssignBlockParam: // getbpar	= (S番目の関数ブロック引数を代入)
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			if(code[2] >= bargs.argc)
+				AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
+			else
+				AR(code[1]) = *bargs.argv[code[2]];
+			code += 3;
+			break;
+
 		case ocWrite: // swrite	 共有空間への書き込み
 			RISSE_ASSERT(shared);
 			RISSE_ASSERT(CI(code[1]) < sharedsize);

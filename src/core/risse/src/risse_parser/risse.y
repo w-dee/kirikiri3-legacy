@@ -286,7 +286,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	definition
 	variable_def variable_def_inner variable_id variable_id_list
 	func_def func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
-	func_decl_arg func_decl_arg_collapse
+	func_decl_arg func_decl_arg_collapse call_block call_block_arg_opt
 	property_def property_expr_def property_handler_def_list
 	property_handler_getter property_handler_setter
 	class_def class_expr_def class_extender class_extends_list
@@ -927,10 +927,24 @@ call_block_list_opt
 ;
 
 call_block_list
-	: block								{ $$ = new tRisseASTArray(); $$->push_back(N(FuncCallBlock)(LP, $1)); }
-	| call_block_list block				{ $$ = $1; $$->push_back(N(FuncCallBlock)(LP, $2)); }
+	: call_block						{ $$ = new tRisseASTArray(); $$->push_back($1); }
+	| call_block_list call_block		{ $$ = $1; $$->push_back($2); }
 ;
 
+call_block
+	: "{" call_block_arg_opt
+	  def_list "}"						{ $$ = $2;
+										  C(FuncDecl, $$)->SetBody($3);
+										  C(FuncDecl, $$)->SetIsBlock(true);
+										  C(Context, $3)->SetEndPosition(LP); }
+	| func_expr_def
+;
+
+call_block_arg_opt
+	: /* empty */						{ $$ = N(FuncDecl)(LP); }
+	| "|" func_decl_arg_at_least_one
+	  "|"								{ $$ = $2; }
+;
 
 /* regular expression */
 regexp

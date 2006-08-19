@@ -64,7 +64,6 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Context		)		//!< コンテキスト
 	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
 	RISSE_AST_ENUM_ITEM(ant, FuncCallArg	)		//!< 関数呼び出しの引数
-	RISSE_AST_ENUM_ITEM(ant, FuncCallBlock	)		//!< 関数呼び出しのブロック
 	RISSE_AST_ENUM_ITEM(ant, ExprStmt		)		//!< 式のみのステートメント
 	RISSE_AST_ENUM_ITEM(ant, Factor			)		//!< 項
 	RISSE_AST_ENUM_ITEM(ant, VarDecl		)		//!< 変数宣言
@@ -206,6 +205,7 @@ class tRisseScriptBlockBase;
 class tRisseSSAForm;
 class tRisseASTNode;
 class tRisseSSAVariable;
+class tRisseSSAVariableAccessMap;
 //---------------------------------------------------------------------------
 //! @brief	ASTノードの配列
 //---------------------------------------------------------------------------
@@ -719,63 +719,6 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const;
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief	関数のブロック引数を表すノード(type=antFuncCallBlock)
-//---------------------------------------------------------------------------
-class tRisseASTNode_FuncCallBlock : public tRisseASTNode
-{
-	tRisseASTNode * Block; //!< ブロック引数を表す式ノード
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
-	//! @param		block			ブロック引数を表す式ノード
-	tRisseASTNode_FuncCallBlock(risse_size position, tRisseASTNode * block) :
-		tRisseASTNode(position, antFuncCallBlock), Block(block)
-	{
-		if(Block) Block->SetParent(this);
-	}
-
-	//! @brief		ブロック引数を表す式ノードを得る
-	//! @return		ブロック引数を表す式ノード
-	tRisseASTNode * GetBlock() const { return Block; }
-
-	//! @brief		子ノードの個数を得る
-	//! @return		子ノードの個数
-	risse_size GetChildCount() const
-	{
-		return 1;
-	}
-
-	//! @brief		指定されたインデックスの子ノードを得る
-	//! @param		index		インデックス
-	//! @return		子ノード
-	tRisseASTNode * GetChildAt(risse_size index) const
-	{
-		if(index == 0) return Block; else return NULL;
-	}
-
-	//! @brief		指定されたインデックスの子ノードの名前を得る
-	//! @param		index		インデックス
-	//! @return		名前
-	tRisseString GetChildNameAt(risse_size index) const;
-
-	//! @brief		ダンプ時のこのノードのコメントを得る
-	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const
-	{
-		return tRisseString(); // 空
-	}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式ジェネレータクラス
@@ -2310,6 +2253,7 @@ class tRisseASTNode_FuncDecl : public tRisseASTNode_List
 	tRisseString Name; //!< 関数名
 	tRisseMemberAttribute Attribute; //!< 属性
 	tRisseASTArray Blocks; //!< ブロック引数の配列
+	bool IsBlock; //!< 遅延評価ブロックブロックかどうか(真=遅延評価ブロック,偽=普通の関数)
 
 public:
 	//! @brief		コンストラクタ
@@ -2318,6 +2262,7 @@ public:
 		tRisseASTNode_List(position, antFuncDecl)
 	{
 		Body = NULL;
+		IsBlock = false;
 	}
 
 	//! @brief		関数ボディを設定する
@@ -2355,6 +2300,10 @@ public:
 	//! @return		属性
 	tRisseMemberAttribute GetAttribute() const { return Attribute; }
 
+	//! @brief		遅延評価ブロックブロックかどうかを設定する
+	//! @param		is_block		遅延評価ブロックブロックかどうか
+	void SetIsBlock(bool is_block) { IsBlock = is_block; }
+
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
@@ -2388,6 +2337,15 @@ public:
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+//--
+
+	//! @brief		関数宣言の表現を生成する
+	//! @param		form		SSA 形式ジェネレータクラス
+	//! @param		access_map	アクセスマップ (IsBlock=真の場合非null必須)
+	//! @return		関数を表す変数
+	tRisseSSAVariable * GenerateFuncDecl(tRisseSSAForm *form,
+		tRisseSSAVariableAccessMap *access_map = NULL) const;
 };
 //---------------------------------------------------------------------------
 

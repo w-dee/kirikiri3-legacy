@@ -155,6 +155,12 @@ extern const tRisseVMInsnInfo RisseVMInsnInfo[];
 
 
 //---------------------------------------------------------------------------
+/*
+	ニーモニックに関するメモ:
+	8 文字に納める
+	人間がタイプするものではないので無理な省略はしない
+*/
+//---------------------------------------------------------------------------
 RISSE_OC_ENUM_DEF()
 //						LongId			Mnemonic  O1O2O3O4O5O6 operands
 
@@ -162,7 +168,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(NoOperation		,nop	,Z(0,0,0,0,0,0))//!< なにもしない
 
 // 代入
-	RISSE_OC_ENUM_ITEM(Assign			,cp		,Z(R,R,0,0,0,0))//!< = (ローカル変数の代入)
+	RISSE_OC_ENUM_ITEM(Assign			,copy	,Z(R,R,0,0,0,0))//!< = (ローカル変数の代入)
 	RISSE_OC_ENUM_ITEM(AssignConstant	,const	,Z(R,C,0,0,0,0))//!< = 定数の代入
 	RISSE_OC_ENUM_ITEM(AssignThis		,this	,Z(R,0,0,0,0,0))//!< = thisの代入
 	RISSE_OC_ENUM_ITEM(AssignSuper		,super	,Z(R,0,0,0,0,0))//!< = superの代入
@@ -170,8 +176,8 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(AssignNewArray	,array	,Z(R,0,0,0,0,0))//!< = 新しい配列オブジェクトの代入
 	RISSE_OC_ENUM_ITEM(AssignNewDict	,dict	,Z(R,0,0,0,0,0))//!< = 新しい辞書配列オブジェクトの代入
 	RISSE_OC_ENUM_ITEM(AssignNewRegExp	,regexp	,Z(R,0,0,0,0,0))//!< = 新しい正規表現オブジェクトの代入 (引数2つ)
-	RISSE_OC_ENUM_ITEM(AssignParam		,getpar	,Z(R,P,0,0,0,0))//!< = (O番目の関数引数を代入)
-	RISSE_OC_ENUM_ITEM(AssignBlockParam	,getbpar,Z(R,P,0,0,0,0))//!< = (O番目の関数ブロック引数を代入)
+	RISSE_OC_ENUM_ITEM(AssignParam		,param	,Z(R,P,0,0,0,0))//!< = (O番目の関数引数を代入)
+	RISSE_OC_ENUM_ITEM(AssignBlockParam	,bparam	,Z(R,P,0,0,0,0))//!< = (O番目の関数ブロック引数を代入)
 
 // 共有空間アクセス
 	RISSE_OC_ENUM_ITEM(Write			,swrite	,Z(S,R,0,0,0,0))//!< 共有空間への書き込み
@@ -181,15 +187,15 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(FuncCall			,call	,Z(R,R,O,N,0,0))//!< function call
 	RISSE_OC_ENUM_ITEM(New				,new	,Z(R,R,O,N,0,0))//!< "new"
 	RISSE_OC_ENUM_ITEM(FuncCallBlock	,callb	,Z(R,R,O,N,N,0))//!< function call with lazyblock
-	RISSE_OC_ENUM_ITEM(SetFrame			,sfrm	,Z(R,0,0,0,0,0))//!< スタックフレームと共有空間を設定する
+	RISSE_OC_ENUM_ITEM(SetFrame			,sframe	,Z(R,0,0,0,0,0))//!< スタックフレームと共有空間を設定する
 	RISSE_OC_ENUM_ITEM(SetShare			,sshare	,Z(R,0,0,0,0,0))//!< 共有空間のみ設定する
 
 // ジャンプ/分岐/制御/補助
 	RISSE_OC_ENUM_ITEM(Jump				,jump	,Z(A,0,0,0,0,0))//!< 単純なジャンプ
 	RISSE_OC_ENUM_ITEM(Branch			,branch	,Z(R,A,A,0,0,0))//!< 分岐
-	RISSE_OC_ENUM_ITEM(Debugger			,dbg	,Z(0,0,0,0,0,0))//!< debugger ステートメント
+	RISSE_OC_ENUM_ITEM(Debugger			,debug	,Z(0,0,0,0,0,0))//!< debugger ステートメント
 	RISSE_OC_ENUM_ITEM(Throw			,throw	,Z(R,0,0,0,0,0))//!< throw ステートメント
-	RISSE_OC_ENUM_ITEM(Return			,ret	,Z(R,0,0,0,0,0))//!< return ステートメント
+	RISSE_OC_ENUM_ITEM(Return			,return	,Z(R,0,0,0,0,0))//!< return ステートメント
 
 // 引数1+なし
 	RISSE_OC_ENUM_ITEM(LogNot			,lnot	,Z(R,R,0,0,0,0))//!< "!" logical not

@@ -295,14 +295,14 @@ public:
 
 	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
 	//!				(必要に応じて下位クラスで実装すること)
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
 	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
 	virtual void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const
 		{ return NULL; }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する(必要に応じて下位クラスで実装すること)
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	//! @note		ここでは「読み込み用」と言っているが、書き込みではないすべての操作を意味する。
@@ -311,7 +311,7 @@ public:
 				{ return NULL; }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	//! @note		ここでは「読み込み用」と言っているが、書き込みではないすべての操作を意味する。
 	//!				(たとえば if 文などもこのメソッドで SSA 形式に変換できる)
@@ -321,7 +321,7 @@ public:
 	}
 
 	//! @brief		SSA 形式の書き込み用の表現を生成する(必要に応じて下位クラスで実装すること)
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	//! @return		このノードが値の書き込みをサポートしているかどうか
@@ -329,7 +329,7 @@ public:
 			tRisseSSAVariable * value) const { return false; }
 
 	//! @param		SSA 形式の書き込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	//! @return		書き込みが成功したかどうか
 	bool GenerateWriteSSA(tRisseSSAForm *form,
@@ -548,7 +548,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -661,7 +661,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -721,7 +721,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
@@ -742,7 +742,7 @@ public:
 		tRisseASTNode_OneExpression(position, antExprStmt, expression) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -803,7 +803,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -853,7 +853,7 @@ public:
 	tRisseString GetDumpComment() const { return Attribute.AsString(); }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -919,7 +919,7 @@ public:
 	tRisseString GetDumpComment() const { return Name; }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1000,19 +1000,19 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
 	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
 	virtual void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 
 	//! @brief		SSA 形式の書き込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	bool DoWriteSSA(tRisseSSAForm *form, void * param,
@@ -1076,26 +1076,26 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
 	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
 	void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 
 	//! @brief		SSA 形式の書き込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	bool DoWriteSSA(tRisseSSAForm *form, void * param,
 			tRisseSSAVariable * value) const;
 
 	//! @brief		この識別子がローカル名前空間に存在するかどうかを返す
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @return		この識別子がローカル名前空間に存在するかどうか
 	bool ExistInLocalNamespace(tRisseSSAForm * form) const;
 
@@ -1159,7 +1159,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1233,7 +1233,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1315,7 +1315,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1356,19 +1356,19 @@ public:
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
 	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
 	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
 	void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 
 	//! @brief		SSA 形式の書き込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	bool DoWriteSSA(tRisseSSAForm *form, void * param,
@@ -1407,19 +1407,19 @@ public:
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
 	//! @brief		SSA 形式の読み込み用/書き込み用の表現の準備を行う
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		mode	読み込み用情報を生成するか、描き込み用情報を生成するか
 	//! @return		読み込み/あるいは書き込みを行うための情報が入った構造体へのポインタ
 	void * PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 
 	//! @brief		SSA 形式の書き込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	bool DoWriteSSA(tRisseSSAForm *form, void * param,
@@ -1488,7 +1488,7 @@ public:
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
@@ -1527,7 +1527,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1610,7 +1610,7 @@ public:
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する(このクラスと ? : 演算子で使われる)
-	//! @param		form		SSA 形式ジェネレータクラス
+	//! @param		form		SSA 形式インスタンス
 	//! @param		pos			ソースコード上の位置
 	//! @param		basenamse	ブロックの名前のprefixにする基本名
 	//! @param		condition	条件式ノード
@@ -1629,7 +1629,7 @@ public:
 		);
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1699,7 +1699,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1785,7 +1785,7 @@ public:
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1806,7 +1806,7 @@ public:
 		tRisseASTNode_OneExpression(position, antReturn, expression) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1827,7 +1827,7 @@ public:
 		tRisseASTNode_OneExpression(position, antThrow, expression) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1847,7 +1847,7 @@ public:
 		tRisseASTNode_NoChildren(position, antBreak) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1867,7 +1867,7 @@ public:
 		tRisseASTNode_NoChildren(position, antContinue) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1887,7 +1887,7 @@ public:
 		tRisseASTNode_NoChildren(position, antDebugger) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -1975,7 +1975,7 @@ public:
 		tRisseASTNode_With_Switch(position, antWith, object, body) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
@@ -2005,7 +2005,7 @@ public:
 	}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -2035,7 +2035,7 @@ public:
 	}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -2058,7 +2058,7 @@ public:
 		tRisseASTNode_With_Switch(position, antSwitch, object, body) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -2083,7 +2083,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -2161,7 +2161,7 @@ public:
 	tRisseString GetDumpComment() const { return tRisseString(); }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -2235,7 +2235,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
@@ -2333,7 +2333,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
@@ -2341,7 +2341,7 @@ public:
 //--
 
 	//! @brief		関数宣言の表現を生成する
-	//! @param		form		SSA 形式ジェネレータクラス
+	//! @param		form		SSA 形式インスタンス
 	//! @param		access_map	アクセスマップ (IsBlock=真の場合非null必須)
 	//! @return		関数を表す変数
 	tRisseSSAVariable * GenerateFuncDecl(tRisseSSAForm *form,
@@ -2410,7 +2410,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
@@ -2467,7 +2467,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
@@ -2575,7 +2575,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
@@ -2653,7 +2653,7 @@ public:
 	tRisseString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式ジェネレータクラス
+	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }

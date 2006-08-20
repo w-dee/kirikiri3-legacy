@@ -38,8 +38,6 @@ tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
 	Succ = NULL;
 	Declared = NULL;
 	Order = risse_size_max;
-	TrueBranch = FalseBranch = NULL;
-	JumpTarget = NULL;
 	FuncExpandFlags = 0;
 }
 //---------------------------------------------------------------------------
@@ -82,17 +80,20 @@ void tRisseSSAStatement::DeleteUsed()
 //---------------------------------------------------------------------------
 void tRisseSSAStatement::SetTrueBranch(tRisseSSABlock * block)
 {
-	TrueBranch = block;
+	RISSE_ASSERT(Code == ocBranch);
+	if(Targets.size() != 2) Targets.resize(2, NULL);
+	Targets[0] = block;
 	block->AddPred(Block);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::SetJumpTarget(tRisseSSABlock * block)
+tRisseSSABlock * tRisseSSAStatement::GetTrueBranch() const
 {
-	JumpTarget = block;
-	block->AddPred(Block);
+	RISSE_ASSERT(Code == ocBranch);
+	RISSE_ASSERT(Targets.size() == 2);
+	return Targets[0];
 }
 //---------------------------------------------------------------------------
 
@@ -100,8 +101,41 @@ void tRisseSSAStatement::SetJumpTarget(tRisseSSABlock * block)
 //---------------------------------------------------------------------------
 void tRisseSSAStatement::SetFalseBranch(tRisseSSABlock * block)
 {
-	FalseBranch = block;
+	RISSE_ASSERT(Code == ocBranch);
+	if(Targets.size() != 2) Targets.resize(2, NULL);
+	Targets[1] = block;
 	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSABlock * tRisseSSAStatement::GetFalseBranch() const
+{
+	RISSE_ASSERT(Code == ocBranch);
+	RISSE_ASSERT(Targets.size() == 2);
+	return Targets[1];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::SetJumpTarget(tRisseSSABlock * block)
+{
+	RISSE_ASSERT(Code == ocJump);
+	if(Targets.size() != 1) Targets.resize(1, NULL);
+	Targets[0] = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSABlock * tRisseSSAStatement::GetJumpTarget() const
+{
+	RISSE_ASSERT(Code == ocJump);
+	RISSE_ASSERT(Targets.size() == 1);
+	return Targets[0];
 }
 //---------------------------------------------------------------------------
 
@@ -213,12 +247,12 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		break;
 
 	case ocJump:
-		gen->PutJump(JumpTarget);
+		gen->PutJump(GetJumpTarget());
 		break;
 
 	case ocBranch:
 		RISSE_ASSERT(Used.size() == 1);
-		gen->PutBranch(Used[0], TrueBranch, FalseBranch);
+		gen->PutBranch(Used[0], GetTrueBranch(), GetFalseBranch());
 		break;
 
 	case ocDebugger:
@@ -483,19 +517,19 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	case ocJump:
 		{
-			RISSE_ASSERT(JumpTarget != NULL);
-			return RISSE_WS("goto *") + JumpTarget->GetName();
+			RISSE_ASSERT(GetJumpTarget() != NULL);
+			return RISSE_WS("goto *") + GetJumpTarget()->GetName();
 		}
 
 	case ocBranch:
 		{
-			RISSE_ASSERT(TrueBranch != NULL);
-			RISSE_ASSERT(FalseBranch != NULL);
+			RISSE_ASSERT(GetTrueBranch() != NULL);
+			RISSE_ASSERT(GetFalseBranch() != NULL);
 			RISSE_ASSERT(Used.size() == 1);
 			return
 					RISSE_WS("if ") + (*Used.begin())->Dump() + 
-					RISSE_WS(" then *") + TrueBranch->GetName() +
-					RISSE_WS(" else *") + FalseBranch->GetName();
+					RISSE_WS(" then *") + GetTrueBranch()->GetName() +
+					RISSE_WS(" else *") + GetFalseBranch()->GetName();
 		}
 
 	case ocDefineLazyBlock: // 遅延評価ブロックの定義

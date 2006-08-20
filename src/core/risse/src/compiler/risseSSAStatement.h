@@ -46,20 +46,21 @@ class tRisseSSAStatement : public tRisseCollectee
 
 	risse_size Order; //!< コード先頭からの通し番号
 
+	std::vector<tRisseSSABlock *> Targets; //!< 分岐のターゲット(解釈はCodeによって異なる)
+
+	// ここでは構造体のバイト数の節約のために、いくつか相互に関係のない
+	// メンバをunionでくくっている。
 	union
 	{
-		tRisseSSABlock * TrueBranch; //!< 分岐のジャンプ先(条件が真のとき)
-		tRisseSSABlock * JumpTarget; //!< 単純ジャンプのジャンプ先
 		risse_uint32 FuncExpandFlags; //!< ocFuncCall/ocNew; 配列展開のビットマスク(1=配列を展開する)
 		tRisseString * Name; //!< 名前
 		risse_size Index; //!< インデックス
 	};
 	union
 	{
-		tRisseSSABlock * FalseBranch; //!< 分岐のジャンプ先(条件が偽のとき)
 		tRisseSSAForm * DefinedForm;	//!< この文で宣言された遅延評価ブロックの
 										//!< SSA形式インスタンス(ocDefineLazyBlock)
-		risse_size BlockCount; //!< 関数呼び出し時のブロックの個数
+		risse_size BlockCount;			//!< 関数呼び出し時のブロックの個数
 	};
 
 public:
@@ -112,7 +113,11 @@ public:
 	//! @brief		この文が分岐文かどうかを返す
 	//! @return		この文が分岐文かどうか
 	bool IsBranchStatement() const {
-		return Code == ocBranch || Code == ocJump; }
+		return
+			Code == ocBranch ||
+			Code == ocJump ||
+			Code == ocMultiBranch ||
+			Code == ocTryFuncCall; }
 
 	//! @brief		この文で定義された変数を設定する
 	//! @param		declared	この文で定義された変数
@@ -155,16 +160,7 @@ public:
 
 	//! @brief		分岐のジャンプ先(条件が真のとき)を取得する
 	//! @return		分岐のジャンプ先(条件が真のとき)
-	tRisseSSABlock * GetTrueBranch() const { return TrueBranch; }
-
-	//! @brief		単純ジャンプのジャンプ先を設定する
-	//! @param		type	単純ジャンプのジャンプ先
-	//! @note		block の直前基本ブロックとして Block を追加するので注意
-	void SetJumpTarget(tRisseSSABlock * block);
-
-	//! @brief		単純ジャンプのジャンプ先を取得する
-	//! @return		単純ジャンプのジャンプ先
-	tRisseSSABlock * GetJumpTarget() const { return JumpTarget; }
+	tRisseSSABlock * GetTrueBranch() const;
 
 	//! @brief		分岐のジャンプ先(条件が偽のとき)を設定する
 	//! @param		type	分岐のジャンプ先(条件が偽のとき)
@@ -173,8 +169,16 @@ public:
 
 	//! @brief		分岐のジャンプ先(条件が偽のとき)を取得する
 	//! @return		分岐のジャンプ先(条件が偽のとき)
-	tRisseSSABlock * GetFalseBranch() const { return FalseBranch; }
+	tRisseSSABlock * GetFalseBranch() const;
 
+	//! @brief		単純ジャンプのジャンプ先を設定する
+	//! @param		type	単純ジャンプのジャンプ先
+	//! @note		block の直前基本ブロックとして Block を追加するので注意
+	void SetJumpTarget(tRisseSSABlock * block);
+
+	//! @brief		単純ジャンプのジャンプ先を取得する
+	//! @return		単純ジャンプのジャンプ先
+	tRisseSSABlock * GetJumpTarget() const;
 
 	//! @brief		配列展開のビットマスクを設定する
 	//! @param		flags		配列展開のビットマスク

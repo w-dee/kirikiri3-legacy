@@ -192,6 +192,13 @@ void tRisseCodeInterpreter::Execute(
 			code += 3;
 			break;
 
+		case ocNew			: // new	 "new"
+			/* incomplete */
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			code += code[4] + 5;
+			break;
+
 		case ocFuncCall		: // call	 function call
 			/* incomplete */
 			{
@@ -209,18 +216,11 @@ void tRisseCodeInterpreter::Execute(
 				for(risse_uint32 i = 0; i < code[4]; i++)
 					args.argv[i] = &AR(code[i+5]);
 
-				AR(code[2]).FuncCall(CI(code[1])==RisseInvalidRegNum?NULL:&AR(code[1]),
+				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
 					args, tRisseMethodArgument::GetEmptyArgument(), &_this);
 				code += code[4] + 5;
 				break;
 			}
-
-		case ocNew			: // new	 "new"
-			/* incomplete */
-			RISSE_ASSERT(CI(code[1]) < framesize);
-			RISSE_ASSERT(CI(code[2]) < framesize);
-			code += code[4] + 5;
-			break;
 
 		case ocFuncCallBlock	: // callb	 function call with lazyblock
 			/* incomplete */
@@ -246,7 +246,7 @@ void tRisseCodeInterpreter::Execute(
 				for(risse_uint32 i = 0; i < code[5]; i++)
 					blockargs.argv[i] = &AR(code[i+6+code[4]]);
 
-				AR(code[2]).FuncCall(CI(code[1])==RisseInvalidRegNum?NULL:&AR(code[1]),
+				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
 					args, blockargs, &_this);
 				code += code[4] + code[5] + 6;
 				break;
@@ -281,6 +281,23 @@ void tRisseCodeInterpreter::Execute(
 				code += static_cast<risse_int32>(code[3]);
 			break;
 
+//		case ocMultiBranch		: // mbranch マルチ分岐
+//			break;
+
+		case ocEnterTryBlock	: //!< 例外保護ブロックに入る(VMのみで使用)
+			/* incomplete */
+			code += 4;
+			break;
+
+		case ocExitTryBlock		: //!< 例外保護ブロックから抜ける(VMのみで使用)
+			return; // 呼び出し元にそのまま戻る
+
+		case ocReturn			: // ret	 return ステートメント
+			RISSE_ASSERT(code[1] == RisseInvalidRegNum || CI(code[1]) < framesize);
+			if(code[1] != RisseInvalidRegNum && result) *result = AR(code[1]);
+			//code += 2;
+			return;
+
 		case ocDebugger		: // dbg	 debugger ステートメント
 			// とりあえず現在のローカル変数をダンプしてみる
 			{
@@ -302,12 +319,6 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			code += 2;
 			break;
-
-		case ocReturn			: // ret	 return ステートメント
-			RISSE_ASSERT(CI(code[1]) < framesize);
-			if(result) *result = AR(code[1]);
-			//code += 2;
-			return;
 
 		case ocLogNot			: // lnot	 "!" logical not
 			RISSE_ASSERT(CI(code[1]) < framesize);

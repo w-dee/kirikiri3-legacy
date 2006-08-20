@@ -184,18 +184,21 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(Read				,sread	,Z(R,S,0,0,0,0))//!< 共有空間からの読み込み
 
 // 関数定義/引数処理/関数呼び出し
-	RISSE_OC_ENUM_ITEM(FuncCall			,call	,Z(R,R,O,N,0,0))//!< function call
 	RISSE_OC_ENUM_ITEM(New				,new	,Z(R,R,O,N,0,0))//!< "new"
-	RISSE_OC_ENUM_ITEM(FuncCallBlock	,callb	,Z(R,R,O,N,N,0))//!< function call with lazyblock
+	RISSE_OC_ENUM_ITEM(FuncCall			,call	,Z(R,R,O,N,0,0))//!< function call
+	RISSE_OC_ENUM_ITEM(FuncCallBlock	,callb	,Z(R,R,O,N,N,0))//!< function call with lazyblock(VMのみで使用)
 	RISSE_OC_ENUM_ITEM(SetFrame			,sframe	,Z(R,0,0,0,0,0))//!< スタックフレームと共有空間を設定する
 	RISSE_OC_ENUM_ITEM(SetShare			,sshare	,Z(R,0,0,0,0,0))//!< 共有空間のみ設定する
 
 // ジャンプ/分岐/制御/補助
 	RISSE_OC_ENUM_ITEM(Jump				,jump	,Z(A,0,0,0,0,0))//!< 単純なジャンプ
 	RISSE_OC_ENUM_ITEM(Branch			,branch	,Z(R,A,A,0,0,0))//!< 分岐
+	RISSE_OC_ENUM_ITEM(MultiBranch		,mbranch,Z(R,N,0,0,0,0))//!< マルチ分岐
+	RISSE_OC_ENUM_ITEM(EnterTryBlock	,enttry	,Z(A,A,A,0,0,0))//!< 例外保護ブロックに入る(VMのみで使用)
+	RISSE_OC_ENUM_ITEM(ExitTryBlock		,exittry,Z(0,0,0,0,0,0))//!< 例外保護ブロックから抜ける(VMのみで使用)
+	RISSE_OC_ENUM_ITEM(Return			,return	,Z(R,0,0,0,0,0))//!< return ステートメント
 	RISSE_OC_ENUM_ITEM(Debugger			,debug	,Z(0,0,0,0,0,0))//!< debugger ステートメント
 	RISSE_OC_ENUM_ITEM(Throw			,throw	,Z(R,0,0,0,0,0))//!< throw ステートメント
-	RISSE_OC_ENUM_ITEM(Return			,return	,Z(R,0,0,0,0,0))//!< return ステートメント
 
 // 引数1+なし
 	RISSE_OC_ENUM_ITEM(LogNot			,lnot	,Z(R,R,0,0,0,0))//!< "!" logical not
@@ -270,6 +273,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(ChildRead		,ERR	,Z(0,0,0,0,0,0))//!< 子名前空間からの読み込み
 	RISSE_OC_ENUM_ITEM(WriteVar			,ERR	,Z(0,0,0,0,0,0))//!< 変数への書き込み(変換の過程でocAssignかocWriteに変わる)
 	RISSE_OC_ENUM_ITEM(ReadVar			,ERR	,Z(0,0,0,0,0,0))//!< 変数からの読み込み(変換の過程でocAssignかocReadに変わる)
+	RISSE_OC_ENUM_ITEM(TryFuncCall		,ERR	,Z(0,0,0,0,0,0))//!< try function call
 
 	RISSE_OC_ENUM_ITEM(OpCodeLast		,ERR	,Z(0,0,0,0,0,0))//!< オペコードの最後
 RISSE_OC_ENUM_END

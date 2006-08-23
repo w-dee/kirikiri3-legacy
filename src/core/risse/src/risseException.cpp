@@ -11,6 +11,7 @@
 //! @brief Risse 例外処理
 //---------------------------------------------------------------------------
 #include "prec.h"
+#include "risseVariant.h"
 #include "risseException.h"
 #include "risseScriptBlockBase.h"
 #include "risseCharUtils.h"
@@ -45,10 +46,17 @@ tRisseString eRisseScriptError::BuildMessage(const tRisseString & msgbase,
 		tRisseScriptBlockBase *block, risse_size pos)
 {
 	risse_size ln;
-	block->PositionToLineAndColumn(pos, &ln, NULL); // コードポイント位置->行
-	risse_char tmp[40];
-	Risse_int64_to_str((risse_int64)(ln+1), tmp); // 行は 0ベースなので +1 する
-	return tRisseString(RISSE_WS_TR("%1 at %2 line %3"), msgbase, block->GetName(), tmp);
+	if(block)
+	{
+		block->PositionToLineAndColumn(pos, &ln, NULL); // コードポイント位置->行
+		risse_char tmp[40];
+		Risse_int64_to_str((risse_int64)(ln+1), tmp); // 行は 0ベースなので +1 する
+		return tRisseString(RISSE_WS_TR("%1 at %2 line %3"), msgbase, block->GetName(), tmp);
+	}
+	else
+	{
+		return msgbase;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -63,7 +71,32 @@ void eRisseCompileError::Throw(const tRisseString & msg,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+eRisseScriptException::eRisseScriptException(const tRisseString &  msg,
+		tRisseScriptBlockBase *block, risse_size pos, const tRisseVariant & value) :
+		eRisseScriptError(msg, block, pos), Value(new tRisseVariant(value))
+{
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+eRisseScriptException::eRisseScriptException(const eRisseScriptException &ref) :
+	eRisseScriptError(ref)
+{
+	Value = ref.Value;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void eRisseScriptException::Throw(const tRisseString & msg,
+			tRisseScriptBlockBase *block, risse_size pos, const tRisseVariant & value)
+{
+	// 例外メッセージを投げる
+	throw eRisseScriptException(msg, block, pos, value);
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

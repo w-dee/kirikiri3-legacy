@@ -242,16 +242,16 @@ public:
 	//! @param		dest	書き換え先変数
 	void PutSetShare(const tRisseSSAVariable * dest);
 
-	//! @brief		FuncCall あるいは New コードを置く
+	//! @brief		FuncCall あるいは New コード または TryFuncCall を置く
 	//! @param		dest	関数結果格納先
 	//! @param		func	関数を表す変数
-	//! @param		is_new	newか(真), 関数呼び出しか(偽)
+	//! @param		code	コード(種別)
 	//! @param		expbit	それぞれの引数が展開を行うかどうかを表すビット列
 	//! @param		args	引数
 	//! @param		blocks	遅延評価ブロック
 	void PutFunctionCall(const tRisseSSAVariable * dest,
 		const tRisseSSAVariable * func,
-		bool is_new, risse_uint32 expbit,
+		tRisseOpCode code, risse_uint32 expbit,
 		const gc_vector<const tRisseSSAVariable *> & args,
 		const gc_vector<const tRisseSSAVariable *> & blocks);
 
@@ -265,6 +265,12 @@ public:
 	//! @param		falsetarget	偽の時にジャンプする先
 	void PutBranch(const tRisseSSAVariable * ref,
 		const tRisseSSABlock * truetarget, const tRisseSSABlock * falsetarget);
+
+	//! @brief		CatchBranch コードを置く
+	//! @param		ref		調べる変数
+	//! @param		targets	ジャンプ先配列
+	void PutCatchBranch(const tRisseSSAVariable * ref,
+		const gc_vector<tRisseSSABlock *> & targets);
 
 	//! @brief		Debugger コードを置く
 	void PutDebugger();

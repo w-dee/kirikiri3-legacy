@@ -95,7 +95,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 
 		case tRisseVMInsnInfo::vifNumber:
 		case tRisseVMInsnInfo::vifOthers:
-			// nothing to do; simplly skip
+			// nothing to do; simply skip
 			break;
 
 		case tRisseVMInsnInfo::vifConstant:
@@ -135,9 +135,10 @@ tRisseString tRisseVMCodeIterator::Dump() const
 		}
 	}
 
-	// 関数呼び出し系はオペランド数が可変なので特別に処理をする
+	// 関数呼び出し系などはオペランド数が可変なので特別に処理をする
 	switch(insn_code)
 	{
+	case ocTryFuncCall:
 	case ocFuncCall:
 	case ocNew:
 	case ocFuncCallBlock:
@@ -199,6 +200,22 @@ tRisseString tRisseVMCodeIterator::Dump() const
 		}
 
 		break;
+
+	case ocCatchBranch:
+		{
+			char address[22];
+			for(risse_uint32 n = 0; n < CodePointer[2]; n++)
+			{
+				ret += RISSE_WS(", ");
+				if(Address != risse_size_max)
+					sprintf(address, "%05d", static_cast<int>(Address + CodePointer[n+3]));
+				else
+					sprintf(address, "%d", static_cast<int>(static_cast<risse_int32>(CodePointer[n+3])));
+				ret += tRisseString(address);
+			}
+		}
+		break;
+
 
 	default:
 		;

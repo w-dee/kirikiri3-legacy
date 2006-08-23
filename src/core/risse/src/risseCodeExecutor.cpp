@@ -199,6 +199,44 @@ void tRisseCodeInterpreter::Execute(
 			code += code[4] + 5;
 			break;
 
+		case ocTryFuncCall		: // trycall	 try function call
+			/* incomplete */
+			{
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				// code[1] = 結果格納先
+				// code[2] = メソッドオブジェクト
+				// code[3] = フラグ
+				// code[4] = 引数の数
+				// code[5] ～   引数
+				RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
+				tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4]);
+
+				for(risse_uint32 i = 0; i < code[4]; i++)
+					args.argv[i] = &AR(code[i+5]);
+
+				bool raised = false;
+				try
+				{
+					AR(code[2]).FuncCall(NULL,
+						args, tRisseMethodArgument::GetEmptyArgument(), &_this);
+				}
+				catch(...)
+				{
+					raised = true;
+				}
+				AR(code[1]).Clear();
+				AR(code[1]).SetSignaled(raised);
+				// 例外が発生したときの例外オブジェクトは code[1] の指すレジスタに
+				// 格納される。例外が発生しなかった場合は void になるが、
+				// すると void が投げられたときに例外が発生したのかしなかったのか
+				// 分からない。そこで、tRisseVariant::SetSignaled を使って
+				// シグナル (tRisseVariant が void の時にもてる情報)を設定する。
+				// この後に続く ocCatchBranch はこの情報を見て分岐を行う。
+				code += code[4] + 5;
+				break;
+			}
+
 		case ocFuncCall		: // call	 function call
 			/* incomplete */
 			{
@@ -281,9 +319,28 @@ void tRisseCodeInterpreter::Execute(
 				code += static_cast<risse_int32>(code[3]);
 			break;
 
-//		case ocMultiBranch		: // mbranch マルチ分岐
-//			break;
-
+		case ocCatchBranch		: // cbranch 例外catch用の分岐
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(code[2] >= 2);
+			{
+				risse_uint32 num;
+				if(AR(code[1]).GetType() == tRisseVariant::vtVoid)
+				{
+					// vtVoid の場合は、void が投げられらのか、それともそもそも
+					// 例外が発生していないのかを区別するために signal 状態を見る
+					if(AR(code[1]).GetSignaled())
+						num = 1; // 例外が発生していた
+					else
+						num = 0; // 例外は発生していない
+				}
+				else
+				{
+					num = 0;
+				}
+				code += static_cast<risse_int32>(code[3 + num]);
+			}
+			break;
+#if 0
 		case ocEnterTryBlock	: //!< 例外保護ブロックに入る(VMのみで使用)
 			/* incomplete */
 			code += 4;
@@ -291,7 +348,7 @@ void tRisseCodeInterpreter::Execute(
 
 		case ocExitTryBlock		: //!< 例外保護ブロックから抜ける(VMのみで使用)
 			return; // 呼び出し元にそのまま戻る
-
+#endif
 		case ocReturn			: // ret	 return ステートメント
 			RISSE_ASSERT(code[1] == RisseInvalidRegNum || CI(code[1]) < framesize);
 			if(code[1] != RisseInvalidRegNum && result) *result = AR(code[1]);
@@ -317,6 +374,8 @@ void tRisseCodeInterpreter::Execute(
 		case ocThrow			: // throw	 throw ステートメント
 			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
+			eRisseScriptException::Throw(RISSE_WS("script exception"),
+				NULL, 0, AR(code[1]));
 			code += 2;
 			break;
 

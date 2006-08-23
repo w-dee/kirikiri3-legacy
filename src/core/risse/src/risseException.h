@@ -24,6 +24,9 @@
 namespace Risse
 {
 
+class tRisseVariantBlock;
+typedef tRisseVariantBlock tRisseVariant;
+
 #if 0
 //---------------------------------------------------------------------------
 // macro
@@ -281,6 +284,40 @@ public:
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		スクリプトで発生させた例外の基本クラス(暫定)
+//---------------------------------------------------------------------------
+class eRisseScriptException : public eRisseScriptError
+{
+	const tRisseVariant * Value; // 例外の値
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		Msg		例外メッセージ
+	//! @param		block	例外の発生したスクリプトブロック
+	//! @param		pos		例外の発生した位置
+	//! @param		value		例外の値
+	eRisseScriptException(const tRisseString &  msg,
+		tRisseScriptBlockBase *block, risse_size pos, const tRisseVariant & value);
+
+	//! @brief		コピーコンストラクタ
+	eRisseScriptException(const eRisseScriptException &ref);
+
+	//! @brief		例外の値を得る	@return	例外の値
+	const tRisseVariant & GetValue() const { return *Value; }
+
+public:
+	//! @brief		例外を投げる
+	//! @param		msg		例外メッセージ
+	//! @param		block	例外の発生したスクリプトブロック
+	//! @param		pos		例外の発生した位置
+	//! @param		value	例外の値
+	static void Throw(const tRisseString & msg,
+			tRisseScriptBlockBase *block, risse_size pos, const tRisseVariant & value);
+};
+//---------------------------------------------------------------------------
+
+
 
 
 //---------------------------------------------------------------------------
@@ -289,6 +326,7 @@ void RisseThrowCannotCallNonFunctionObjectException();
 //! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生(暫定)
 void RisseThrowCannotCreateInstanceFromNonClassObjectException();
 //---------------------------------------------------------------------------
+
 
 
 #if 0

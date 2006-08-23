@@ -141,6 +141,48 @@ tRisseSSABlock * tRisseSSAStatement::GetJumpTarget() const
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAStatement::SetTryExitTarget(tRisseSSABlock * block)
+{
+	RISSE_ASSERT(Code == ocCatchBranch);
+	if(Targets.size() < 2) Targets.resize(2, NULL);
+	Targets[0] = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSABlock * tRisseSSAStatement::GetTryExitTarget() const
+{
+	RISSE_ASSERT(Code == ocCatchBranch);
+	RISSE_ASSERT(Targets.size() >= 2);
+	return Targets[0];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAStatement::SetTryCatchTarget(tRisseSSABlock * block)
+{
+	RISSE_ASSERT(Code == ocCatchBranch);
+	if(Targets.size() < 2) Targets.resize(2, NULL);
+	Targets[1] = block;
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSABlock * tRisseSSAStatement::GetTryCatchTarget() const
+{
+	RISSE_ASSERT(Code == ocCatchBranch);
+	RISSE_ASSERT(Targets.size() >= 2);
+	return Targets[1];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSAStatement::SetName(const tRisseString & name)
 {
 	RISSE_ASSERT(
@@ -224,9 +266,9 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutAssignBlockParam(Declared, Index);
 		break;
 
-	case ocFuncCall:
 	case ocNew:
-	case ocFuncCallBlock:
+	case ocFuncCall:
+	case ocTryFuncCall:
 		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Used.size() >= 1);
 
@@ -241,7 +283,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			for(risse_size i = 0; i < block_count; i++)
 				blocks.push_back(Used[i + arg_count + 1]);
 
-			gen->PutFunctionCall(Declared, Used[0], Code == ocNew, 
+			gen->PutFunctionCall(Declared, Used[0], Code, 
 								FuncExpandFlags, args, blocks);
 		}
 		break;
@@ -253,6 +295,11 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocBranch:
 		RISSE_ASSERT(Used.size() == 1);
 		gen->PutBranch(Used[0], GetTrueBranch(), GetFalseBranch());
+		break;
+
+	case ocCatchBranch:
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutCatchBranch(Used[0], Targets);
 		break;
 
 	case ocDebugger:
@@ -532,6 +579,23 @@ tRisseString tRisseSSAStatement::Dump() const
 					RISSE_WS(" else *") + GetFalseBranch()->GetName();
 		}
 
+	case ocCatchBranch:
+		{
+			RISSE_ASSERT(GetTryExitTarget() != NULL);
+			RISSE_ASSERT(GetTryCatchTarget() != NULL);
+			RISSE_ASSERT(Used.size() == 1);
+			tRisseString ret =
+					RISSE_WS("catch branch ") + (*Used.begin())->Dump() + 
+					RISSE_WS(" exit:*") + GetTryExitTarget()->GetName() +
+					RISSE_WS(" catch:*") + GetTryCatchTarget()->GetName();
+			for(risse_size n = 2; n < Targets.size(); n++)
+			{
+				ret += RISSE_WS(" ") + tRisseString::AsString((risse_int64)(n-2)) +
+					RISSE_WS(": *") + Targets[n]->GetName();
+			}
+			return ret;
+		}
+
 	case ocDefineLazyBlock: // 遅延評価ブロックの定義
 		{
 			RISSE_ASSERT(Name != NULL);
@@ -656,7 +720,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			else
 			{
 				// 関数呼び出しの類？
-				bool is_funccall = (Code == ocFuncCall || Code == ocNew);
+				bool is_funccall = (Code == ocFuncCall || Code == ocNew || Code == ocTryFuncCall);
 
 				// 使用している引数の最初の引数はメッセージの送り先なので
 				// オペレーションコードよりも前に置く

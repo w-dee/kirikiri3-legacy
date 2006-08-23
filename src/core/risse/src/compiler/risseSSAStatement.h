@@ -46,7 +46,7 @@ class tRisseSSAStatement : public tRisseCollectee
 
 	risse_size Order; //!< コード先頭からの通し番号
 
-	std::vector<tRisseSSABlock *> Targets; //!< 分岐のターゲット(解釈はCodeによって異なる)
+	gc_vector<tRisseSSABlock *> Targets; //!< 分岐のターゲット(解釈はCodeによって異なる)
 
 	// ここでは構造体のバイト数の節約のために、いくつか相互に関係のない
 	// メンバをunionでくくっている。
@@ -116,8 +116,7 @@ public:
 		return
 			Code == ocBranch ||
 			Code == ocJump ||
-			Code == ocMultiBranch ||
-			Code == ocTryFuncCall; }
+			Code == ocCatchBranch; }
 
 	//! @brief		この文で定義された変数を設定する
 	//! @param		declared	この文で定義された変数
@@ -154,7 +153,7 @@ public:
 	risse_size GetOrder() const { return Order; }
 
 	//! @brief		分岐のジャンプ先(条件が真のとき)を設定する
-	//! @param		type	分岐のジャンプ先(条件が真のとき)
+	//! @param		block	分岐のジャンプ先(条件が真のとき)
 	//! @note		block の直前基本ブロックとして Block を追加するので注意
 	void SetTrueBranch(tRisseSSABlock * block);
 
@@ -163,7 +162,7 @@ public:
 	tRisseSSABlock * GetTrueBranch() const;
 
 	//! @brief		分岐のジャンプ先(条件が偽のとき)を設定する
-	//! @param		type	分岐のジャンプ先(条件が偽のとき)
+	//! @param		block	分岐のジャンプ先(条件が偽のとき)
 	//! @note		block の直前基本ブロックとして Block を追加するので注意
 	void SetFalseBranch(tRisseSSABlock * block);
 
@@ -172,13 +171,31 @@ public:
 	tRisseSSABlock * GetFalseBranch() const;
 
 	//! @brief		単純ジャンプのジャンプ先を設定する
-	//! @param		type	単純ジャンプのジャンプ先
+	//! @param		block	単純ジャンプのジャンプ先
 	//! @note		block の直前基本ブロックとして Block を追加するので注意
 	void SetJumpTarget(tRisseSSABlock * block);
 
 	//! @brief		単純ジャンプのジャンプ先を取得する
 	//! @return		単純ジャンプのジャンプ先
 	tRisseSSABlock * GetJumpTarget() const;
+
+	//! @brief		例外保護付き関数呼び出しの何事もなかった場合のジャンプ先を設定する
+	//! @param		block	例外保護付き関数呼び出しの何事もなかった場合のジャンプ先
+	//! @note		block の直前基本ブロックとして Block を追加するので注意
+	void SetTryExitTarget(tRisseSSABlock * block);
+
+	//! @brief		例外保護付き関数呼び出しの何事もなかった場合のジャンプ先を取得する
+	//! @return		例外保護付き関数呼び出しの何事もなかった場合のジャンプ先
+	tRisseSSABlock * GetTryExitTarget() const;
+
+	//! @brief		例外保護付き関数呼び出しの例外が発生した場合のジャンプ先を設定する
+	//! @param		type	例外保護付き関数呼び出しの例外が発生した場合のジャンプ先
+	//! @note		block の直前基本ブロックとして Block を追加するので注意
+	void SetTryCatchTarget(tRisseSSABlock * block);
+
+	//! @brief		例外保護付き関数呼び出しの例外が発生した場合のジャンプ先を取得する
+	//! @return		例外保護付き関数呼び出しの例外が発生した場合のジャンプ先
+	tRisseSSABlock * GetTryCatchTarget() const;
 
 	//! @brief		配列展開のビットマスクを設定する
 	//! @param		flags		配列展開のビットマスク

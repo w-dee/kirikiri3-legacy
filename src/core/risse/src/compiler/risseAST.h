@@ -2193,8 +2193,8 @@ public:
 		if(Body) Body->SetParent(this);
 	}
 
-	//! @brief		名前を得る
-	//! @return		名前
+	//! @brief		変数名を得る
+	//! @return		変数名
 	const tRisseString & GetName() const { return Name; }
 
 	//! @brief		条件ノードを得る

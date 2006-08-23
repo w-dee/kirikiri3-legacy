@@ -73,6 +73,7 @@ protected:
 	struct tVoid
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 0 固定
+		bool Signaled; //!< signaled void かどうか (内部的に用いられる)
 	};
 
 	//! @brief integer ストレージ型
@@ -366,6 +367,16 @@ public: // 初期化
 	{
 		Type = vtVoid;
 	}
+
+public: // Void関連
+
+	//! @brief signaled void かどうかを得る @return signaled void かどうか
+	bool GetSignaled() const { RISSE_ASSERT(GetType() == vtVoid);
+			return reinterpret_cast<const tVoid*>(Storage)->Signaled; }
+	//! @brief signaled void かどうかを設定する @param s signaled void かどうか
+	void SetSignaled(bool s) { RISSE_ASSERT(GetType() == vtVoid);
+			reinterpret_cast<tVoid*>(Storage)->Signaled = s; }
+
 
 public: // Object関連
 	//! @brief		コンテキストを設定する

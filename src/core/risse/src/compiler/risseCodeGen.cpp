@@ -390,19 +390,18 @@ void tRisseCodeGenerator::PutSetShare(const tRisseSSAVariable * dest)
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 		const tRisseSSAVariable * func,
-		bool is_new, risse_uint32 expbit,
+		tRisseOpCode code, risse_uint32 expbit,
 		const gc_vector<const tRisseSSAVariable *> & args,
 		const gc_vector<const tRisseSSAVariable *> & blocks)
 {
-	RISSE_ASSERT(!(is_new && blocks.size() != 0)); // ブロック付き new はない
+	RISSE_ASSERT(!(code == ocNew && blocks.size() != 0)); // ブロック付き new はない
 	RISSE_ASSERT(!((expbit & RisseFuncCallFlag_Omitted) && args.size() != 0));
 		// omit なのに引数があるということはない
+	RISSE_ASSERT(!(code == ocTryFuncCall && blocks.size() != 0)); // ブロック付き tryfunccallはない
+	RISSE_ASSERT(code == ocNew || code == ocFuncCall || code == ocTryFuncCall);
 
-	tRisseOpCode code;
-	if(is_new)
-		code = ocNew;
-	else
-		code = blocks.size() != 0 ? ocFuncCallBlock : ocFuncCall;
+	if(code == ocFuncCall && blocks.size() != 0)
+		code = ocFuncCallBlock;
 
 	PutWord(static_cast<risse_uint32>(code));
 	PutWord(FindRegMap(dest));
@@ -447,6 +446,31 @@ void tRisseCodeGenerator::PutBranch(const tRisseSSAVariable * ref,
 	PutWord(0); // 仮
 	AddPendingBlockJump(falsetarget, insn_pos);
 	PutWord(0); // 仮
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutCatchBranch(const tRisseSSAVariable * ref,
+		const gc_vector<tRisseSSABlock *> & targets)
+{
+	RISSE_ASSERT(targets.size() >= 2);
+		// 少なくとも何事も無かった場合と例外が発生した場合のジャンプ先を含む
+	risse_size insn_pos = Code.size();
+	PutWord(ocCatchBranch);
+	PutWord(FindRegMap(ref));
+	if(static_cast<risse_uint32>(targets.size()) != targets.size())
+	{
+		// TODO: 例外の発生
+	}
+
+	PutWord(static_cast<risse_uint32>(targets.size()));
+	for(gc_vector<tRisseSSABlock *>::const_iterator i = targets.begin();
+		i != targets.end(); i ++)
+	{
+		AddPendingBlockJump(*i, insn_pos);
+		PutWord(0); // 仮
+	}
 }
 //---------------------------------------------------------------------------
 

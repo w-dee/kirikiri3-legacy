@@ -221,17 +221,24 @@ void tRisseCodeInterpreter::Execute(
 					AR(code[2]).FuncCall(NULL,
 						args, tRisseMethodArgument::GetEmptyArgument(), &_this);
 				}
-				catch(...)
+				catch(const eRisseScriptException &e)
 				{
+					AR(code[1]) = e.GetValue();
 					raised = true;
 				}
-				AR(code[1]).Clear();
-				AR(code[1]).SetSignaled(raised);
+				catch(...)
+				{
+					AR(code[1]).Clear();
+					raised = true;
+				}
+				if(AR(code[1]).GetType() == tRisseVariant::vtVoid)
+					AR(code[1]).SetSignaled(raised);
 				// 例外が発生したときの例外オブジェクトは code[1] の指すレジスタに
 				// 格納される。例外が発生しなかった場合は void になるが、
 				// すると void が投げられたときに例外が発生したのかしなかったのか
 				// 分からない。そこで、tRisseVariant::SetSignaled を使って
-				// シグナル (tRisseVariant が void の時にもてる情報)を設定する。
+				// シグナル (tRisseVariant が void の時にだけもてる特別な内部的な
+				// ステート)を設定する。
 				// この後に続く ocCatchBranch はこの情報を見て分岐を行う。
 				code += code[4] + 5;
 				break;
@@ -323,21 +330,21 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(code[2] >= 2);
 			{
-				risse_uint32 num;
+				risse_uint32 target_index;
 				if(AR(code[1]).GetType() == tRisseVariant::vtVoid)
 				{
 					// vtVoid の場合は、void が投げられらのか、それともそもそも
 					// 例外が発生していないのかを区別するために signal 状態を見る
 					if(AR(code[1]).GetSignaled())
-						num = 1; // 例外が発生していた
+						target_index = 1; // 例外が発生していた
 					else
-						num = 0; // 例外は発生していない
+						target_index = 0; // 例外は発生していない
 				}
 				else
 				{
-					num = 0;
+					target_index = 1; // 例外が発生していた
 				}
-				code += static_cast<risse_int32>(code[3 + num]);
+				code += static_cast<risse_int32>(code[3 + target_index]);
 			}
 			break;
 #if 0

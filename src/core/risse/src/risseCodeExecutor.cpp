@@ -232,13 +232,13 @@ void tRisseCodeInterpreter::Execute(
 					raised = true;
 				}
 				if(AR(code[1]).GetType() == tRisseVariant::vtVoid)
-					AR(code[1]).SetSignaled(raised);
+					AR(code[1]).SetVoidPointer(NULL);
 				// 例外が発生したときの例外オブジェクトは code[1] の指すレジスタに
 				// 格納される。例外が発生しなかった場合は void になるが、
 				// すると void が投げられたときに例外が発生したのかしなかったのか
-				// 分からない。そこで、tRisseVariant::SetSignaled を使って
-				// シグナル (tRisseVariant が void の時にだけもてる特別な内部的な
-				// ステート)を設定する。
+				// 分からない。そこで、tRisseVariant::SetVoidPointer を使って
+				// ポインタ (tRisseVariant が void の時にだけもてる特別な内部的な
+				// ステート) をnullに設定する。
 				// この後に続く ocCatchBranch はこの情報を見て分岐を行う。
 				code += code[4] + 5;
 				break;
@@ -328,23 +328,60 @@ void tRisseCodeInterpreter::Execute(
 
 		case ocCatchBranch		: // cbranch 例外catch用の分岐
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			RISSE_ASSERT(code[2] >= 2);
+			RISSE_ASSERT(CI(code[2]) < constssize);
+			RISSE_ASSERT(AC(code[2]).GetType() == tRisseVariant::vtVoid);
+			RISSE_ASSERT(AC(code[2]).GetVoidPointer() != NULL);
+			RISSE_ASSERT(code[3] >= 2);
 			{
 				risse_uint32 target_index;
-				if(AR(code[1]).GetType() == tRisseVariant::vtVoid)
+				tRisseVariant::tType except_obj_type = AR(code[1]).GetType();
+				if(except_obj_type == tRisseVariant::vtVoid)
 				{
 					// vtVoid の場合は、void が投げられらのか、それともそもそも
 					// 例外が発生していないのかを区別するために signal 状態を見る
-					if(AR(code[1]).GetSignaled())
+					if(AR(code[1]).GetVoidPointer() != NULL)
 						target_index = 1; // 例外が発生していた
 					else
 						target_index = 0; // 例外は発生していない
+				}
+				else if(except_obj_type == tRisseVariant::vtObject)
+				{
+					// オブジェクト型
+					// (暫定実装)
+					// オブジェクト型の getExitTryRecord プロパティを読む
+					try
+					{
+						tRisseVariant v;
+						AR(code[1]).GetObjectIntf()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
+						RISSE_ASSERT(v.GetType() == tRisseVariant::vtVoid);
+						RISSE_ASSERT(v.GetVoidPointer() != NULL);
+						tRisseExitTryExceptionClass * record =
+							reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetVoidPointer());
+						// レコードに記録されている try 識別子が この branch の try 識別子と
+						// 一致するかどうかを調べる
+						if(AC(code[2]).GetVoidPointer() == record->GetIdentifier())
+						{
+							// 一致した
+							target_index = record->GetBranchTargetIndex();
+						}
+						else
+						{
+							// 一致しなかった
+							// この例外は再び投げる
+							eRisseScriptException::Throw(RISSE_WS("script exception"),
+								NULL, 0, AR(code[1]));
+						}
+					}
+					catch(...)
+					{
+						target_index = 1; // 例外が発生した(たぶんプロパティを読み込めなかった)
+					}
 				}
 				else
 				{
 					target_index = 1; // 例外が発生していた
 				}
-				code += static_cast<risse_int32>(code[3 + target_index]);
+				code += static_cast<risse_int32>(code[4 + target_index]);
 			}
 			break;
 #if 0
@@ -361,6 +398,40 @@ void tRisseCodeInterpreter::Execute(
 			if(code[1] != RisseInvalidRegNum && result) *result = AR(code[1]);
 			//code += 2;
 			return;
+
+		case ocReturnException	: // returne	return 例外を発生させる
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < constssize);
+			{
+				// 暫定実装
+				const tRisseVariant & try_id = AC(code[2]);
+				RISSE_ASSERT(try_id.GetType() == tRisseVariant::vtVoid);
+				RISSE_ASSERT(try_id.GetVoidPointer() != NULL);
+				tRisseVariant val(new tRisseExitTryExceptionClass(try_id.GetVoidPointer(),
+												code[3], &AR(code[1])));
+				eRisseScriptException::Throw(RISSE_WS("return by exit try exception"),
+					NULL, 0, val);
+			}
+			break;
+
+		case ocGetExitTryValue	: // exitval	Try脱出用例外オブジェクトから値を得る
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			{
+				// 暫定実装
+				// code[2] は tRisseExitExceptionClass であると見なして良い
+				tRisseVariant v;
+				RISSE_ASSERT(AR(code[2]).GetType() == tRisseVariant::vtObject);
+				AR(code[2]).GetObjectIntf()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
+				RISSE_ASSERT(v.GetType() == tRisseVariant::vtVoid);
+				RISSE_ASSERT(v.GetVoidPointer() != NULL);
+				tRisseExitTryExceptionClass * record =
+					reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetVoidPointer());
+				RISSE_ASSERT(record->GetValue() != NULL);
+				AR(code[1]) = *record->GetValue();
+				code += 3;
+			}
+			break;
 
 		case ocDebugger		: // dbg	 debugger ステートメント
 			// とりあえず現在のローカル変数をダンプしてみる

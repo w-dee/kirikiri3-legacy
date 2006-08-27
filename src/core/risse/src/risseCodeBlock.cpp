@@ -34,8 +34,11 @@ tRisseCodeBlock::tRisseCodeBlock()
 	ConstsSize = 0;
 	NumRegs = 0;
 	NumSharedVars = 0;
-	Relocations = NULL;
-	RelocationSize = 0;
+	CodeBlockRelocations = NULL;
+	CodeBlockRelocationSize = 0;
+	TryIdentifierRelocations = NULL;
+	TryIdentifierRelocationSize = 0;
+
 	Executor = NULL;
 }
 //---------------------------------------------------------------------------
@@ -69,14 +72,23 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 		i != gen_consts.end(); i++, ind++)
 		Consts[ind] = *i;
 
-	// Relocations のコピー
-	const gc_vector<std::pair<risse_size, risse_size> > & relocations =
-			gen->GetRelocations();
-	Relocations = new tRelocation[RelocationSize = relocations.size()];
+	// CodeBlockRelocations のコピー
+	const gc_vector<std::pair<risse_size, risse_size> > & cb_relocations =
+			gen->GetCodeBlockRelocations();
+	CodeBlockRelocations = new tRelocation[CodeBlockRelocationSize = cb_relocations.size()];
 	ind = 0;
 	for(gc_vector<std::pair<risse_size, risse_size> >::const_iterator i =
-		relocations.begin(); i != relocations.end(); i++, ind++)
-		Relocations[ind] = *i;
+		cb_relocations.begin(); i != cb_relocations.end(); i++, ind++)
+		CodeBlockRelocations[ind] = *i;
+
+	// TryIdentifierRelocations のコピー
+	const gc_vector<std::pair<risse_size, risse_size> > & ti_relocations =
+			gen->GetTryIdentifierRelocations();
+	TryIdentifierRelocations = new tRelocation[TryIdentifierRelocationSize = ti_relocations.size()];
+	ind = 0;
+	for(gc_vector<std::pair<risse_size, risse_size> >::const_iterator i =
+		ti_relocations.begin(); i != ti_relocations.end(); i++, ind++)
+		TryIdentifierRelocations[ind] = *i;
 
 	// 必要なレジスタ数/共有変数の数のコピー
 	NumRegs = gen->GetMaxNumUsedRegs();
@@ -91,13 +103,22 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 //---------------------------------------------------------------------------
 void tRisseCodeBlock::Fixup(tRisseScriptBlockBase * sb)
 {
-	RISSE_ASSERT(Relocations != NULL); // 二度以上このメソッドを呼べない
+	RISSE_ASSERT(CodeBlockRelocations != NULL); // 二度以上このメソッドを呼べない
+	RISSE_ASSERT(TryIdentifierRelocations != NULL); // 二度以上このメソッドを呼べない
 
-	for(risse_size i = 0 ; i < RelocationSize; i++)
-		Consts[Relocations[i].first] =
-			sb->GetCodeBlockAt(Relocations[i].second)->GetObject(); // 再配置を行う
+	for(risse_size i = 0 ; i < CodeBlockRelocationSize; i++)
+		Consts[CodeBlockRelocations[i].first] =
+			sb->GetCodeBlockAt(CodeBlockRelocations[i].second)->GetObject(); // 再配置を行う
 
-	Relocations = NULL; // もう再配置は行った
+	for(risse_size i = 0 ; i < TryIdentifierRelocationSize; i++)
+	{
+		Consts[TryIdentifierRelocations[i].first].Clear();
+		Consts[TryIdentifierRelocations[i].first].SetVoidPointer(
+			sb->GetTryIdentifierAt(TryIdentifierRelocations[i].second)); // 再配置を行う
+	}
+
+	CodeBlockRelocations = NULL; // もう再配置は行った
+	TryIdentifierRelocations = NULL;
 }
 //---------------------------------------------------------------------------
 

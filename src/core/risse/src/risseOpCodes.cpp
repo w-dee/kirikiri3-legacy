@@ -204,18 +204,24 @@ tRisseString tRisseVMCodeIterator::Dump() const
 	case ocCatchBranch:
 		{
 			char address[22];
-			for(risse_uint32 n = 0; n < CodePointer[2]; n++)
+			for(risse_uint32 n = 0; n < CodePointer[3]; n++)
 			{
 				ret += RISSE_WS(", ");
 				if(Address != risse_size_max)
-					sprintf(address, "%05d", static_cast<int>(Address + CodePointer[n+3]));
+					sprintf(address, "%05d", static_cast<int>(Address + CodePointer[n+4]));
 				else
-					sprintf(address, "%d", static_cast<int>(static_cast<risse_int32>(CodePointer[n+3])));
+					sprintf(address, "%d", static_cast<int>(static_cast<risse_int32>(CodePointer[n+4])));
 				ret += tRisseString(address);
 			}
 		}
 		break;
 
+	case ocReturnException:
+		{
+			ret += RISSE_WS(", ");
+			ret += tRisseString::AsString(static_cast<int>(CodePointer[3]));
+		};
+		break;
 
 	default:
 		;

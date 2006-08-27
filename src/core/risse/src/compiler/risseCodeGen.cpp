@@ -350,7 +350,7 @@ void tRisseCodeGenerator::PutRead(const tRisseSSAVariable * dest, const tRisseSt
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutRelocatee(const tRisseSSAVariable * dest, risse_size index)
+void tRisseCodeGenerator::PutCodeBlockRelocatee(const tRisseSSAVariable * dest, risse_size index)
 {
 	// 定数領域に仮の値をpushする
 	tRisseVariant value(tRisseString(RISSE_WS("<VM block #%1>"),
@@ -363,8 +363,8 @@ void tRisseCodeGenerator::PutRelocatee(const tRisseSSAVariable * dest, risse_siz
 	PutWord(FindRegMap(dest));
 	PutWord(reloc_pos);
 
-	// Relocations に情報を入れる
-	Relocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, index));
+	// CodeBlockRelocations に情報を入れる
+	CodeBlockRelocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, index));
 }
 //---------------------------------------------------------------------------
 
@@ -452,18 +452,29 @@ void tRisseCodeGenerator::PutBranch(const tRisseSSAVariable * ref,
 
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutCatchBranch(const tRisseSSAVariable * ref,
+		risse_size try_id_idx,
 		const gc_vector<tRisseSSABlock *> & targets)
 {
 	RISSE_ASSERT(targets.size() >= 2);
 		// 少なくとも何事も無かった場合と例外が発生した場合のジャンプ先を含む
+
+	// Try識別子用に定数領域に仮の値をpushする
+	tRisseVariant cvalue(tRisseString(RISSE_WS("<try id #%1>"),
+		tRisseString::AsString((risse_int64)try_id_idx)));
+	risse_size reloc_pos = Consts.size();
+	Consts.push_back(cvalue);
+	TryIdentifierRelocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, try_id_idx));
+
+	// ocCatchBranch を置く
 	risse_size insn_pos = Code.size();
 	PutWord(ocCatchBranch);
 	PutWord(FindRegMap(ref));
+	PutWord(static_cast<risse_uint32>(reloc_pos));
+
 	if(static_cast<risse_uint32>(targets.size()) != targets.size())
 	{
 		// TODO: 例外の発生
 	}
-
 	PutWord(static_cast<risse_uint32>(targets.size()));
 	for(gc_vector<tRisseSSABlock *>::const_iterator i = targets.begin();
 		i != targets.end(); i ++)
@@ -497,6 +508,37 @@ void tRisseCodeGenerator::PutReturn(const tRisseSSAVariable * value)
 {
 	PutWord(ocReturn);
 	PutWord(FindRegMap(value));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutReturnException(const tRisseSSAVariable * value,
+		risse_size try_id_idx, risse_size idx)
+{
+	// Try識別子用に定数領域に仮の値をpushする
+	tRisseVariant cvalue(tRisseString(RISSE_WS("<try id #%1>"),
+		tRisseString::AsString((risse_int64)try_id_idx)));
+	risse_size reloc_pos = Consts.size();
+	Consts.push_back(cvalue);
+	TryIdentifierRelocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, try_id_idx));
+
+	// ocReturnException 命令を書く
+	PutWord(ocReturnException);
+	PutWord(FindRegMap(value));
+	PutWord(static_cast<risse_uint32>(reloc_pos));
+	PutWord(static_cast<risse_uint32>(idx));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutGetExitTryValue(const tRisseSSAVariable * dest,
+											const tRisseSSAVariable * src)
+{
+	PutWord(ocGetExitTryValue);
+	PutWord(FindRegMap(dest));
+	PutWord(FindRegMap(src));
 }
 //---------------------------------------------------------------------------
 

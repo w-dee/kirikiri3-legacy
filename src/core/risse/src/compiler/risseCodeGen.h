@@ -64,7 +64,8 @@ private:
 			//!< 基本ブロックとそれが対応するアドレスの typedef
 	tBlockMap BlockMap; //!< 変数とそれに対応するレジスタ番号のマップ
 
-	gc_vector<std::pair<risse_size, risse_size> > Relocations; // 他のコードブロックの再配置情報用配列
+	gc_vector<std::pair<risse_size, risse_size> > CodeBlockRelocations; // 他のコードブロックの再配置情報用配列
+	gc_vector<std::pair<risse_size, risse_size> > TryIdentifierRelocations; // Try識別子の再配置情報用配列
 
 public:
 	//! @brief		コンストラクタ
@@ -93,8 +94,12 @@ public:
 	risse_size GetMaxNumUsedRegs() const { return MaxNumUsedRegs; }
 
 	//! @brief	他のコードブロックの再配置情報用配列を得る @return 他のコードブロックの再配置情報用配列
-	const gc_vector<std::pair<risse_size, risse_size> > & GetRelocations() const
-		{ return Relocations; }
+	const gc_vector<std::pair<risse_size, risse_size> > & GetCodeBlockRelocations() const
+		{ return CodeBlockRelocations; }
+
+	//! @brief	Try識別子の再配置情報用配列を得る @return Try識別子の再配置情報用配列
+	const gc_vector<std::pair<risse_size, risse_size> > & GetTryIdentifierRelocations() const
+		{ return TryIdentifierRelocations; }
 
 protected:
 	//! @param		コードを1ワード分置く
@@ -232,7 +237,7 @@ public:
 	//! @brief		他のコードブロックへの再配置用コードを置く
 	//! @param		dest	格納先変数
 	//! @param		index	コードブロックのインデックス
-	void PutRelocatee(const tRisseSSAVariable * dest, risse_size index);
+	void PutCodeBlockRelocatee(const tRisseSSAVariable * dest, risse_size index);
 
 	//! @brief		スタックフレームと共有空間の書き換え用コードを置く
 	//! @param		dest	書き換え先変数
@@ -267,9 +272,11 @@ public:
 		const tRisseSSABlock * truetarget, const tRisseSSABlock * falsetarget);
 
 	//! @brief		CatchBranch コードを置く
-	//! @param		ref		調べる変数
-	//! @param		targets	ジャンプ先配列
+	//! @param		ref			調べる変数
+	//! @param		try_id_idx	try識別子のインデックス
+	//! @param		targets		ジャンプ先配列
 	void PutCatchBranch(const tRisseSSAVariable * ref,
+		risse_size try_id_idx,
 		const gc_vector<tRisseSSABlock *> & targets);
 
 	//! @brief		Debugger コードを置く
@@ -282,6 +289,18 @@ public:
 	//! @brief		Return コードを置く
 	//! @param		value		返す値が入っている変数
 	void PutReturn(const tRisseSSAVariable * value);
+
+	//! @brief		例外による Return コードを置く
+	//! @param		value		返す値が入っている変数
+	//! @param		try_id_idx	Try 識別子番号
+	//! @param		idx			分岐先ID
+	void PutReturnException(const tRisseSSAVariable * value,
+		risse_size try_id_idx, risse_size idx);
+
+	//! @brief		例外による脱出系の例外オブジェクトから「値」を取り出す
+	//! @param		dest		「値」を格納する先の変数
+	//! @param		src			「値」を得る例外オブジェクトが入ってる変数
+	void PutGetExitTryValue(const tRisseSSAVariable * dest, const tRisseSSAVariable * src);
 
 	//! @brief		dest = op(arg1) 系コードを置く
 	//! @param		op		オペレーションコード

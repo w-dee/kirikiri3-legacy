@@ -138,6 +138,8 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	CurrentBreakInfo = NULL;
 	CurrentContinueInfo = NULL;
 	FunctionCollapseArgumentVariable = NULL;
+	TryIdentifierIndex = risse_size_max;
+	CanReturn = !UseParentFrame; // いまのところ CanReturn はこの式の通りで決定される
 
 	// compiler に自身を登録する
 	compiler->AddSSAForm(this);
@@ -220,6 +222,24 @@ tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name, tRisse
 
 
 //---------------------------------------------------------------------------
+risse_size tRisseSSAForm::AddExitTryBranchTargetLabels(const tRisseString & label)
+{
+	tExitTryBranchTargetLabels::iterator i = ExitTryBranchTargetLabels.find(label);
+	if(i != ExitTryBranchTargetLabels.end())
+		return i->second; // すでにマップにある
+
+	// マップにないので追加する
+	risse_size label_idx = ExitTryBranchTargetLabels.size();
+	ExitTryBranchTargetLabels.insert(
+		tExitTryBranchTargetLabels::value_type(
+			label, label_idx));
+
+	return label_idx;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseSSAForm::AddConstantValueStatement(
 										risse_size pos,
 										const tRisseVariant & val)
@@ -268,6 +288,99 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 
 	// 文を返す
 	return stmt;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
+{
+	if(CanReturn)
+	{
+		// 単純に return 文を作成可能
+		// return 文を作成
+		AddStatement(pos, ocReturn, NULL, var);
+
+		// 新しい基本ブロックを作成(ただしここには到達しない)
+		CreateNewBlock("disconnected_by_return");
+	}
+	else
+	{
+		// このSSA形式からreturn文で呼び出し元に戻るには例外を使って脱出を行うしかない
+		// return できるSSA形式を探す
+		tRisseSSAForm * form = this->Parent;
+		do
+		{
+			if(form->CanReturn)
+			{
+				// このSSA形式はは return文で抜けることができる
+				// この try id まで例外で抜けるためのコードを生成
+				tRisseSSAStatement * stmt = AddStatement(pos, ocReturnException, NULL, var);
+				risse_size label_idx = form->AddExitTryBranchTargetLabels(RISSE_WS("@return"));
+				stmt->SetTryIdentifierIndex(form->TryIdentifierIndex); // try id を設定
+				stmt->SetIndex(label_idx + 2); // インデックスを設定
+					// +2 = 最初の2つはreturnとbreakに割り当てられているので
+
+				CreateNewBlock(RISSE_WS("disconnected_by_return_by_exception"));
+				break;
+			}
+			form = form->Parent;
+		} while(form);
+		RISSE_ASSERT(form != NULL); // 先祖は必ずどれかが CanReturn が真でなければならない
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AddCatchBranchTargets(tRisseSSAStatement * catch_branch,
+											tRisseSSAVariable * except_var)
+{
+	RISSE_ASSERT(catch_branch->GetCode() == ocCatchBranch);
+	RISSE_ASSERT(catch_branch->GetTargetCount() == 2);
+
+	tRisseSSABlock * block_save = CurrentBlock;
+
+	// すべての分岐先をリストアップ
+	gc_vector<tRisseString> targets;
+	targets.resize(ExitTryBranchTargetLabels.size(), tRisseString::GetEmptyString());
+	for(tExitTryBranchTargetLabels::iterator i = ExitTryBranchTargetLabels.begin();
+		i != ExitTryBranchTargetLabels.end(); i++)
+		targets[i->second] = i->first;
+
+	// それぞれの分岐先に対してコードを生成
+	for(gc_vector<tRisseString>::iterator i = targets.begin(); i != targets.end(); i++)
+	{
+		RISSE_ASSERT(!i->IsEmpty());
+		tRisseSSABlock * target = NULL;
+
+		if(*i == RISSE_WS("@return"))
+		{
+			// return 文の作成
+			// 新しい基本ブロックを作成する
+			target =
+				CreateNewBlock(RISSE_WS("return_by_exception"));
+
+			// 例外オブジェクトから値を取り出す
+			tRisseSSAVariable * ret_var = NULL;
+			AddStatement(catch_branch->GetPosition(), ocGetExitTryValue, &ret_var, except_var);
+
+			// return 文を作成
+			AddStatement(catch_branch->GetPosition(), ocReturn, NULL, ret_var);
+
+			// 新しい基本ブロックを作成(ただしここには到達しない)
+			CreateNewBlock("disconnected_by_return");
+
+		}
+		else if(*i == RISSE_WS("@break"))
+		{
+		}
+
+		// catch_branch にジャンプ先を追加
+		catch_branch->AddTarget(target);
+	}
+
+	CurrentBlock = block_save;
 }
 //---------------------------------------------------------------------------
 
@@ -324,6 +437,10 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 		AddStatement(pos, ocDefineLazyBlock, &block_var);
 	lazy_stmt->SetName(block_name);
 	lazy_stmt->SetDefinedForm(new_form);
+
+	// 子が生成するかもしれない情報に備えてExitTryBranchTargetLabelsなどをクリア
+	ExitTryBranchTargetLabels.clear();
+	TryIdentifierIndex = risse_size_max;
 
 	// 情報を返す
 	tLazyBlockParam * param = new tLazyBlockParam();

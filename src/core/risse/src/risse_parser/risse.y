@@ -16,8 +16,8 @@
 #include <string.h>
 #include "../risseTypes.h"
 #include "../risseGC.h"
-#include "../risseException.h"
 #include "../risseObject.h"
+#include "../risseException.h"
 #include "risseParser.h"
 #include "risseScriptBlock.h"
 

@@ -183,6 +183,17 @@ tRisseSSABlock * tRisseSSAStatement::GetTryCatchTarget() const
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAStatement::AddTarget(tRisseSSABlock * block)
+{
+	RISSE_ASSERT(Code == ocCatchBranch);
+	RISSE_ASSERT(Targets.size() >= 2);
+	Targets.push_back(block);
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSAStatement::SetName(const tRisseString & name)
 {
 	RISSE_ASSERT(
@@ -299,7 +310,12 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 
 	case ocCatchBranch:
 		RISSE_ASSERT(Used.size() == 1);
-		gen->PutCatchBranch(Used[0], Targets);
+		gen->PutCatchBranch(Used[0], TryIdentifierIndex, Targets);
+		break;
+
+	case ocReturn:
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutReturn(Used[0]);
 		break;
 
 	case ocDebugger:
@@ -311,9 +327,15 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutThrow(Used[0]);
 		break;
 
-	case ocReturn:
+	case ocReturnException:
 		RISSE_ASSERT(Used.size() == 1);
-		gen->PutReturn(Used[0]);
+		gen->PutReturnException(Used[0], TryIdentifierIndex, Index);
+		break;
+
+	case ocGetExitTryValue:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutGetExitTryValue(Declared, Used[0]);
 		break;
 
 	case ocLogNot:
@@ -400,7 +422,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			RISSE_ASSERT(Declared != NULL);
 			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
 			// コードブロックの参照の問題があるので注意
-			gen->PutRelocatee(Declared, child_form->GetCodeBlockIndex());
+			gen->PutCodeBlockRelocatee(Declared, child_form->GetCodeBlockIndex());
 			if(child_form->GetUseParentFrame())
 				gen->PutSetFrame(Declared);
 			else

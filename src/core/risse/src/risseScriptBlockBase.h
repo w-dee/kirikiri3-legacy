@@ -37,6 +37,7 @@ private:
 
 	tRisseCodeBlock * RootCodeBlock; //!< ルート位置(主にグローバル位置) にあるコードブロック(一度実行されてしまえば要らないはず)
 	gc_vector<tRisseCodeBlock *> *CodeBlocks; //!< コードブロック配列(一度コンパイルが済めばクリアされる)
+	gc_vector<void *> *TryIdentifiers; //!< Tryを識別するための識別子(一度コンパイルが済めばクリアされる)
 
 protected:
 	//! @brief		コンストラクタ
@@ -88,6 +89,10 @@ public:
 	//! @return		そのコードブロックのインデックス
 	risse_size AddCodeBlock(tRisseCodeBlock * codeblock);
 
+	//! @brief		try識別子を追加する
+	//! @return		その識別子へのインデックス
+	risse_size AddTryIdentifier();
+
 	//! @brief		スクリプトブロックのfixupを行う
 	//! @note		コンパイル直後のスクリプトブロックやロード
 	//!				直後のスクリプトブロックは、
@@ -100,6 +105,11 @@ public:
 	//! @param		index		インデックス
 	//! @return		そのインデックスにあるコードブロック
 	tRisseCodeBlock * GetCodeBlockAt(risse_size index) const;
+
+	//! @brief		指定インデックスのtry識別子を得る
+	//! @param		index		インデックス
+	//! @return		そのインデックスにあるtry識別子
+	void * GetTryIdentifierAt(risse_size index) const;
 
 public:
 	//! @brief		スクリプトを評価する

@@ -19,7 +19,6 @@
 #include "risseGC.h"
 #include "risseString.h"
 #include "risseOpCodes.h"
-#include "risseVariant.h"
 #include "risseMethod.h"
 
 namespace Risse
@@ -162,6 +161,8 @@ public:
 
 class tRisseStackFrameContext;
 class tRisseMethodArgument;
+class tRisseVariantBlock;
+typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
 //! @brief		Risseオブジェクトインターフェース
 //---------------------------------------------------------------------------

@@ -61,6 +61,7 @@ class tRisseSSAStatement : public tRisseCollectee
 		tRisseSSAForm * DefinedForm;	//!< この文で宣言された遅延評価ブロックの
 										//!< SSA形式インスタンス(ocDefineLazyBlock)
 		risse_size BlockCount;			//!< 関数呼び出し時のブロックの個数
+		risse_size TryIdentifierIndex;	//!< Try識別子のインデックス
 	};
 
 public:
@@ -197,6 +198,14 @@ public:
 	//! @return		例外保護付き関数呼び出しの例外が発生した場合のジャンプ先
 	tRisseSSABlock * GetTryCatchTarget() const;
 
+	//! @brief		この文の分岐先の数を得る
+	//! @return		この文の分岐先の数
+	risse_size GetTargetCount() const { return Targets.size(); }
+
+	//! @brief		この文の分岐先を追加する
+	//! @param		block		この文の分岐先
+	void AddTarget(tRisseSSABlock * block);
+
 	//! @brief		配列展開のビットマスクを設定する
 	//! @param		flags		配列展開のビットマスク
 	void SetFuncExpandFlags(risse_uint32 flags) { FuncExpandFlags = flags; }
@@ -236,6 +245,14 @@ public:
 	//! @brief		関数宣言のブロックの個数を取得する
 	//! @return		関数宣言のブロックの個数
 	risse_size GetBlockCount() const { return BlockCount; }
+
+	//! @brief		Try識別子のインデックスを設定する
+	//! @param		idx		Try識別子のインデックス
+	void SetTryIdentifierIndex(risse_size idx) { TryIdentifierIndex = idx; }
+
+	//! @brief		Try識別子のインデックスを取得
+	//! @return		Try識別子のインデックス
+	risse_size GetTryIdentifierIndex() const { return TryIdentifierIndex; }
 
 	//! @brief		変数の生存区間を文単位で解析する
 	void AnalyzeVariableStatementLiveness();

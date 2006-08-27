@@ -190,11 +190,18 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseBreakInfo * CurrentBreakInfo; //!< 現在の break に関する情報
 	tRisseContinueInfo * CurrentContinueInfo; //!< 現在の continue に関する情報
 
+	bool CanReturn; //!< このSSA形式からはreturn文で戻ることが可能
+	typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
+		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
+	tExitTryBranchTargetLabels ExitTryBranchTargetLabels;
+		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)
+
 	tRisseSSAVariable * FunctionCollapseArgumentVariable; //!< 関数引数の無名の * を保持している変数
 
 	tRisseCodeGenerator * CodeGenerator; //!< バイトコードジェネレータのインスタンス
 	tRisseCodeBlock * CodeBlock; //!< コードブロック
 	risse_size CodeBlockIndex; //!< コードブロックのスクリプトブロック内でのインデックス
+	risse_size TryIdentifierIndex; //!< このSSA形式がtryブロックなどの場合、親SSA形式内の該当tryブロックのtry識別子を表す
 
 public:
 	//! @brief		コンストラクタ
@@ -240,6 +247,7 @@ public:
 	//! @brief		現在変換中の基本ブロックを得る
 	//! @return		現在変換中の基本ブロック
 	tRisseSSABlock * GetCurrentBlock() const { return CurrentBlock; }
+
 
 	//! @brief		現在の switch に関する情報を得る
 	//! @return		現在の switch に関する情報
@@ -295,6 +303,11 @@ public:
 	//! @return		新しく作成された基本ブロック
 	tRisseSSABlock * CreateNewBlock(const tRisseString & name, tRisseSSABlock * pred = NULL);
 
+	//! @brief		ExitTryBranchTargetLabels にマップを追加する
+	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
+	//! @return		そのラベルを表すインデックス
+	risse_size AddExitTryBranchTargetLabels(const tRisseString & label);
+
 	//! @brief		現在の基本ブロックに定数値を得る文を追加する
 	//! @param		pos		スクリプト上の位置
 	//! @param		val		定数
@@ -339,6 +352,19 @@ public:
 		AddStatement(pos, code, &ret_var, using1, using2, using3, using4);
 		return ret_var;
 	}
+
+	//! @brief		現在の基本ブロックにreturn文を生成する
+	//! @param		pos		スクリプト上の位置
+	//! @param		var		returnする値 (NULL=voidを返す)
+	void AddReturnStatement(risse_size pos, tRisseSSAVariable * var);
+
+	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを作成する
+	//! @param		catch_branch	ocCatchBranch文(すでに2つのused
+	//!								それぞれ例外が発生しなかったときと例外が
+	//!								発生したときのジャンプ先が登録されていること)
+	//! @param		except_var		例外オブジェクトを示す変数
+	//! @note		CurrentBlock は保存される
+	void AddCatchBranchTargets(tRisseSSAStatement * catch_branch, tRisseSSAVariable * except_var);
 
 	//! @param		変数を共有する
 	//! @param		name		変数名(番号付き)
@@ -449,9 +475,17 @@ public:
 	//! @return		コードブロック
 	tRisseCodeBlock * GetCodeBlock() const { return CodeBlock; }
 
-	//! @brief		 コードブロックのスクリプトブロック内でのインデックスを得る
+	//! @brief		コードブロックのスクリプトブロック内でのインデックスを得る
 	//! @return		コードブロックのスクリプトブロック内でのインデックス
 	risse_size GetCodeBlockIndex() const { return CodeBlockIndex; }
+
+	//! @brief		Try識別子のインデックスを設定する
+	//! @param		idx		Try識別子のインデックス
+	void SetTryIdentifierIndex(risse_size idx) { TryIdentifierIndex = idx; }
+
+	//! @brief		Try識別子のインデックスを得る
+	//! @return		Try識別子のインデックス(risse_size_max が帰った場合は無効)
+	risse_size GetTryIdentifierIndex() const { return TryIdentifierIndex; }
 
 	//! @brief		バイトコードを生成する
 	void GenerateCode() const;

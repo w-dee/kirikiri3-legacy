@@ -114,6 +114,56 @@ void RisseThrowCannotCreateInstanceFromNonClassObjectException()
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseExitTryExceptionClass::tRisseExitTryExceptionClass(
+	const void * id, risse_uint32 targ_idx, const tRisseVariant * value)
+{
+	Identifier = id;
+	BranchTargetIndex = targ_idx;
+	Value = value ? new tRisseVariant(*value) : NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseExitTryExceptionClass::Operate(
+	tRisseOpCode code,
+	tRisseVariant * result,
+	const tRisseString & name,
+	risse_uint32 flags,
+	const tRisseMethodArgument & args,
+	const tRisseMethodArgument & bargs,
+	const tRisseVariant *This,
+	const tRisseStackFrameContext *stack
+		)
+{
+	// 暫定実装
+	if(code == ocDGet && name == RISSE_WS("getExitTryRecord"))
+	{
+		// tRisseExitTryExceptionClass 型を返す
+		if(result)
+		{
+			result->Clear();
+			result->SetVoidPointer((tRisseExitTryExceptionClass*)this);
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
 #if 0
 //---------------------------------------------------------------------------
 // RisseGetExceptionObject : retrieves risse 'Exception' object

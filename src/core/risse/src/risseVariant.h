@@ -73,7 +73,11 @@ protected:
 	struct tVoid
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 0 固定
-		bool Signaled; //!< signaled void かどうか (内部的に用いられる)
+		union
+		{
+			risse_size VoidIndex; //!< インデックス (内部的に用いられる)
+			void * VoidPointer; //!< ポインタ (内部的に用いられる)
+		};
 	};
 
 	//! @brief integer ストレージ型
@@ -137,10 +141,12 @@ protected:
 	//! @brief Object型へのconst参照を取得 @return Object型フィールドへのconst参照
 	const tObject & AsObject() const { return *reinterpret_cast<const tObject*>(Storage); }
 
+public:
 	//! @brief tRisseObjectInterfaceへのポインタを取得 @return tRisseObjectInterfaceへのポインタ
 	//! @note Intfをいじる場合は常にこのメソッドを使うこと
 	tRisseObjectInterface * GetObjectIntf() const
 	{
+		RISSE_ASSERT(GetType() == vtObject);
 		tRisseObjectInterface * ret = reinterpret_cast<tRisseObjectInterface*>(
 			reinterpret_cast<risse_ptruint>(AsObject().Intf) - 2);
 		// 2 = Intf の下位2ビットは常に10なので、これを元に戻す
@@ -149,10 +155,12 @@ protected:
 		return ret;
 	}
 
+protected:
 	//! @brief tRisseObjectInterfaceへのポインタを設定 @param intf tRisseObjectInterfaceへのポインタ
 	//! @note Intfをいじる場合は常にこのメソッドを使うこと
 	void SetObjectIntf(tRisseObjectInterface * intf)
 	{
+		RISSE_ASSERT(GetType() == vtObject);
 		if(!intf) intf = RISSE_OBJECT_NULL_PTR;
 			// "null"の代わりにRISSE_OBJECT_NULL_PTRを使う
 		AsObject().Intf = reinterpret_cast<tRisseObjectInterface*>(
@@ -236,7 +244,7 @@ public: // コンストラクタ/代入演算子
 	{
 		switch(ref.GetType())
 		{
-		case vtVoid:		Type = vtVoid;				break;
+		case vtVoid:		*reinterpret_cast<tVoid*>(Storage) = *reinterpret_cast<const tVoid*>(ref.Storage);	break;
 		case vtInteger:		*this = ref.AsInteger();	break;
 		case vtReal:		*this = ref.AsReal();		break;
 		case vtBoolean:		*this = ref.AsBoolean();	break;
@@ -339,6 +347,7 @@ public: // コンストラクタ/代入演算子
 	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
 	tRisseVariantBlock(tRisseObjectInterface * ref, const tRisseMethodContext * context)
 	{
+		Type = vtObject;
 		SetObjectIntf(ref);
 		AsObject().Context = context;
 	}
@@ -348,6 +357,7 @@ public: // コンストラクタ/代入演算子
 	tRisseVariantBlock & operator = (tRisseObjectInterface * ref)
 	{
 		// これはちょっと特殊
+		Type = vtObject;
 		SetObjectIntf(ref);
 		AsObject().Context = NULL; // this は null に設定
 		return *this;
@@ -357,6 +367,7 @@ public: // コンストラクタ/代入演算子
 	//! @param		ref		元となるオブジェクト
 	tRisseVariantBlock & operator = (const tObject & ref)
 	{
+		Type = vtObject;
 		AsObject() = ref;
 		return *this;
 	}
@@ -370,12 +381,19 @@ public: // 初期化
 
 public: // Void関連
 
-	//! @brief signaled void かどうかを得る @return signaled void かどうか
-	bool GetSignaled() const { RISSE_ASSERT(GetType() == vtVoid);
-			return reinterpret_cast<const tVoid*>(Storage)->Signaled; }
-	//! @brief signaled void かどうかを設定する @param s signaled void かどうか
-	void SetSignaled(bool s) { RISSE_ASSERT(GetType() == vtVoid);
-			reinterpret_cast<tVoid*>(Storage)->Signaled = s; }
+	//! @brief VoidIndex を得る @return VoidIndex
+	risse_size GetVoidIndex() const { RISSE_ASSERT(GetType() == vtVoid);
+			return reinterpret_cast<const tVoid*>(Storage)->VoidIndex; }
+	//! @brief VoidIndex を設定する @param s VoidIndex
+	void SetVoidIndex(risse_size s) { RISSE_ASSERT(GetType() == vtVoid);
+			reinterpret_cast<tVoid*>(Storage)->VoidIndex = s; }
+
+	//! @brief VoidPointer を得る @return VoidPointer
+	void * GetVoidPointer() const { RISSE_ASSERT(GetType() == vtVoid);
+			return reinterpret_cast<const tVoid*>(Storage)->VoidPointer; }
+	//! @brief VoidPointer を設定する @param s VoidPointer
+	void SetVoidPointer(void * s) { RISSE_ASSERT(GetType() == vtVoid);
+			reinterpret_cast<tVoid*>(Storage)->VoidPointer = s; }
 
 
 public: // Object関連

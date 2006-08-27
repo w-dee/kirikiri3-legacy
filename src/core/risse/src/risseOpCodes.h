@@ -194,12 +194,14 @@ RISSE_OC_ENUM_DEF()
 // ジャンプ/分岐/制御/補助
 	RISSE_OC_ENUM_ITEM(Jump				,jump	,Z(A,0,0,0,0,0))//!< 単純なジャンプ
 	RISSE_OC_ENUM_ITEM(Branch			,branch	,Z(R,A,A,0,0,0))//!< 分岐
-	RISSE_OC_ENUM_ITEM(CatchBranch		,cbranch,Z(R,N,0,0,0,0))//!< 例外catch用の分岐
+	RISSE_OC_ENUM_ITEM(CatchBranch		,cbranch,Z(R,C,N,0,0,0))//!< 例外catch用の分岐
 //	RISSE_OC_ENUM_ITEM(EnterTryBlock	,enttry	,Z(A,A,A,0,0,0))//!< 例外保護ブロックに入る(VMのみで使用)
 //	RISSE_OC_ENUM_ITEM(ExitTryBlock		,exittry,Z(0,0,0,0,0,0))//!< 例外保護ブロックから抜ける(VMのみで使用)
 	RISSE_OC_ENUM_ITEM(Return			,return	,Z(R,0,0,0,0,0))//!< return ステートメント
 	RISSE_OC_ENUM_ITEM(Debugger			,debug	,Z(0,0,0,0,0,0))//!< debugger ステートメント
 	RISSE_OC_ENUM_ITEM(Throw			,throw	,Z(R,0,0,0,0,0))//!< throw ステートメント
+	RISSE_OC_ENUM_ITEM(ReturnException	,returne,Z(R,C,O,0,0,0))//!< return 例外を発生させる
+	RISSE_OC_ENUM_ITEM(GetExitTryValue	,exitval,Z(R,R,0,0,0,0))//!< Try脱出用例外オブジェクトから値を得る
 
 // 引数1+なし
 	RISSE_OC_ENUM_ITEM(LogNot			,lnot	,Z(R,R,0,0,0,0))//!< "!" logical not

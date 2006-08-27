@@ -39,9 +39,12 @@ class tRisseCodeBlock : public tRisseObjectInterface, public tRisseCollectee
 	risse_size NumRegs; //!< 必要なレジスタ数
 	risse_size NumSharedVars; //!< 必要な共有変数の数
 
-	typedef std::pair<risse_size, risse_size> tRelocation; //!<  再配置情報のtypedef
-	tRelocation * Relocations; //!< 再配置情報
-	risse_size RelocationSize;
+	typedef std::pair<risse_size, risse_size> tRelocation; //!<  コードブロック再配置情報のtypedef
+	tRelocation * CodeBlockRelocations; //!< コードブロック再配置情報
+	risse_size CodeBlockRelocationSize;
+
+	tRelocation * TryIdentifierRelocations; //!< try識別子再配置情報
+	risse_size TryIdentifierRelocationSize;
 
 	tRisseCodeExecutor * Executor; //!< コード実行クラスのインスタンス
 

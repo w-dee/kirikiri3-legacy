@@ -17,6 +17,7 @@
 #include "risseSSAVariable.h"
 #include "risseCompilerNS.h"
 #include "../risseException.h"
+#include "../risseScriptBlockBase.h"
 
 // 名前表の読み込み
 #undef risseASTH
@@ -1890,21 +1891,12 @@ tRisseSSAVariable * tRisseASTNode_Return::DoReadSSA(tRisseSSAForm *form, void * 
 {
 	tRisseSSAVariable * var;
 	if(Expression)
-	{
-		// 戻りとなる値を作成する
-		var = Expression->GenerateReadSSA(form);
-	}
+		var = Expression->GenerateReadSSA(form);// 戻りとなる値を作成する
 	else
-	{
-		// 戻りとなる値は void
-		var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
-	}
+		var = NULL; // 戻りとなる値は void
 
 	// return 文を作成
-	form->AddStatement(GetPosition(), ocReturn, NULL, var);
-
-	// 新しい基本ブロックを作成(ただしここには到達しない)
-	form->CreateNewBlock("disconnected_by_return");
+	form->AddReturnStatement(GetPosition(), var);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -2182,6 +2174,11 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 	tRisseSSAVariable * lazyblock_var = NULL;
 	tRisseSSAForm * new_form = NULL;
 
+	// スクリプトブロックより try ブロックの通し番号を得る
+	// 各 try ブロックは固有の ID をもち、例外で実装された大域脱出を行う
+	// return や break, goto などの脱出先の ID となる
+	risse_size try_id = form->GetScriptBlock()->AddTryIdentifier();
+
 	// アクセスマップを作成する
 	tRisseSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
 
@@ -2189,6 +2186,7 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 	void * lazy_param = form->CreateLazyBlock(GetPosition(),
 		RISSE_WS("try block"), false, access_map, new_form, lazyblock_var);
 
+	form->SetTryIdentifierIndex(try_id); // try識別子を親SSA形式に対して設定
 	new_form->Generate(Body);
 
 	// 遅延評価ブロックで使用された変数の処理
@@ -2212,8 +2210,9 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 	// どの様に結びつけられるのかはここでは関知しないが、
 	// 少なくとも try_block_ret_var が ocCatchBranch を支配
 	// していることはここで示しておかなければならない。
-	tRisseSSAStatement * multi_branch_stmt =
+	tRisseSSAStatement * catch_branch_stmt =
 		form->AddStatement(GetPosition(), ocCatchBranch, NULL, try_block_ret_var);
+	catch_branch_stmt->SetTryIdentifierIndex(try_id); // try識別子を設定
 
 	// catch用の新しい基本ブロックを作成
 	tRisseSSABlock * catch_entry_block =
@@ -2288,8 +2287,9 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 		(*i)->SetJumpTarget(last_catch_exit_block);
 
 	// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
-	multi_branch_stmt->SetTryExitTarget(last_catch_exit_block);
-	multi_branch_stmt->SetTryCatchTarget(catch_entry_block);
+	catch_branch_stmt->SetTryExitTarget(last_catch_exit_block);
+	catch_branch_stmt->SetTryCatchTarget(catch_entry_block);
+	form->AddCatchBranchTargets(catch_branch_stmt, try_block_ret_var);
 
 	// このノードは答えを返さない
 	return NULL;

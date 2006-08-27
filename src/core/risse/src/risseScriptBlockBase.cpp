@@ -34,6 +34,7 @@ tRisseScriptBlockBase::tRisseScriptBlockBase(const tRisseString & script,
 	LineOffset = lineofs;
 	RootCodeBlock = NULL;
 	CodeBlocks = new gc_vector<tRisseCodeBlock *>();
+	TryIdentifiers = new gc_vector<void *>();
 }
 //---------------------------------------------------------------------------
 
@@ -146,11 +147,41 @@ risse_size tRisseScriptBlockBase::AddCodeBlock(tRisseCodeBlock * codeblock)
 
 
 //---------------------------------------------------------------------------
+risse_size tRisseScriptBlockBase::AddTryIdentifier()
+{
+	RISSE_ASSERT(TryIdentifiers != NULL); // このメソッドが呼ばれるのは Fixup 以前でなければならない
+	TryIdentifiers->push_back(reinterpret_cast<void*>(new int(0)));
+		// 注意 int を new で確保し、そのアドレスを void にキャストして
+		// TryIdentifiers に追加している。これにより、TryIdentifiers は独立した
+		// ポインタをそれぞれが持つことになり、識別に使える。これは、
+		//  * new で確保される値は常に独立したポインタの値になる
+		//  * ポインタとしては vtVoid の際に void * へのポインタ(VoidPointer)を持つことができる
+		// という理由による。
+		// tRisseString も新規確保した文字列は独立した値になるが
+		// 同じ文字列インスタンスが常に同じポインタを持ち続けるかという保証がないので
+		// (とはいっても現時点ではそれは保証されているが将来的に保証があるかわからないので)
+		// つかわない。
+	return TryIdentifiers->size() - 1;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseCodeBlock * tRisseScriptBlockBase::GetCodeBlockAt(risse_size index) const
 {
 	RISSE_ASSERT(CodeBlocks != NULL);
 	RISSE_ASSERT(index < CodeBlocks->size());
 	return (*CodeBlocks)[index];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void * tRisseScriptBlockBase::GetTryIdentifierAt(risse_size index) const
+{
+	RISSE_ASSERT(TryIdentifiers != NULL);
+	RISSE_ASSERT(index < TryIdentifiers->size());
+	return (*TryIdentifiers)[index];
 }
 //---------------------------------------------------------------------------
 
@@ -165,6 +196,8 @@ void tRisseScriptBlockBase::Fixup()
 
 	// CodeBlocks をクリアする
 	CodeBlocks = NULL;
+	// TryIdentifiers をクリアする
+	TryIdentifiers = NULL;
 }
 //---------------------------------------------------------------------------
 

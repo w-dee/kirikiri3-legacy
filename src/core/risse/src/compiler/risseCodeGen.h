@@ -171,6 +171,13 @@ public:
 	//! @return		そのレジスタのインデックス
 	//! @note		nameがマップ内に見つからなかったときはレジスタを割り当て
 	//!				そのレジスタのインデックスを返す
+	risse_size FindOrRegisterVariableMapForChildren(const tRisseString & name);
+
+	//! @brief		VariableMapForChildren 内で変数を探す
+	//! @param		name		変数名
+	//! @return		そのレジスタのインデックス
+	//! @note		nameがマップ内に見つからなかったときは(デバッグ時は)
+	//!				ASSERTに失敗する
 	risse_size FindVariableMapForChildren(const tRisseString & name);
 
 	//! @brief		VariableMapForChildren にある変数をすべて開放する

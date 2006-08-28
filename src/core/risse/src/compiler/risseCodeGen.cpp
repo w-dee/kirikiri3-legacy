@@ -191,15 +191,15 @@ void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindVariableMapForChildren(const tRisseString & name)
+risse_size tRisseCodeGenerator::FindOrRegisterVariableMapForChildren(const tRisseString & name)
 {
 	// VariableMapForChildren から指定された変数を探す
 	// 指定された変数が無ければ変数の空きマップからさがし、変数を割り当てる
 	tNamedRegMap::iterator f = VariableMapForChildren.find(name);
 	if(f != VariableMapForChildren.end())
 	{
-		 // 変数が見つかった
-		 return f->second;
+		// 変数が見つかった
+		return f->second;
 	}
 
 	// 変数がないので自分からレジスタを割り当てる
@@ -207,6 +207,17 @@ risse_size tRisseCodeGenerator::FindVariableMapForChildren(const tRisseString & 
 	VariableMapForChildren.insert(tNamedRegMap::value_type(name, assigned_reg));
 
 	return assigned_reg;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::FindVariableMapForChildren(const tRisseString & name)
+{
+	// VariableMapForChildren から指定された変数を探す
+	tNamedRegMap::iterator f = VariableMapForChildren.find(name);
+	RISSE_ASSERT(f != VariableMapForChildren.end());
+	return f->second;
 }
 //---------------------------------------------------------------------------
 

@@ -431,6 +431,9 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 		// この名前空間で AccessMap がないということは親空間で共有しなければならないと言うこと
 		should_share = should_share || AccessMap == NULL;
 
+		// 子がAccessMapを持っていればそれに記録
+		if(!should_share && child->AccessMap) child->AccessMap->SetUsed(name, access);
+
 		// 親名前空間内で探す
 		return Parent->AccessFromChild(name, access, should_share, this, ret_n_name, shared);
 	}

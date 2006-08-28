@@ -407,7 +407,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 				{
 				case ocChildWrite:
 				case ocChildRead:
-					gen->FindVariableMapForChildren(*stmt->Name); // マップに変数名だけを追加する
+					gen->FindOrRegisterVariableMapForChildren(*stmt->Name); // マップに変数名だけを追加する
 					break;
 				default: ;
 				}

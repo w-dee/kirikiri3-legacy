@@ -368,14 +368,16 @@ void tRisseCodeInterpreter::Execute(
 						{
 							// 一致しなかった
 							// この例外は再び投げる
-							eRisseScriptException::Throw(RISSE_WS("script exception"),
-								NULL, 0, AR(code[1]));
+							target_index = static_cast<risse_uint32>(-1L);
 						}
 					}
 					catch(...)
 					{
 						target_index = 1; // 例外が発生した(たぶんプロパティを読み込めなかった)
 					}
+					if(target_index == static_cast<risse_uint32>(-1L))
+							eRisseScriptException::Throw(RISSE_WS("script exception"),
+								NULL, 0, AR(code[1]));
 				}
 				else
 				{

@@ -607,7 +607,10 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(GetTryCatchTarget() != NULL);
 			RISSE_ASSERT(Used.size() == 1);
 			tRisseString ret =
-					RISSE_WS("catch branch ") + (*Used.begin())->Dump() + 
+					RISSE_WS("catch branch (try id=") +
+					tRisseString::AsString((risse_int64)(TryIdentifierIndex)) +
+					RISSE_WS(") ") +
+					(*Used.begin())->Dump() + 
 					RISSE_WS(" exit:*") + GetTryExitTarget()->GetName() +
 					RISSE_WS(" catch:*") + GetTryCatchTarget()->GetName();
 			for(risse_size n = 2; n < Targets.size(); n++)
@@ -615,6 +618,20 @@ tRisseString tRisseSSAStatement::Dump() const
 				ret += RISSE_WS(" ") + tRisseString::AsString((risse_int64)(n)) +
 					RISSE_WS(": *") + Targets[n]->GetName();
 			}
+			return ret;
+		}
+
+	case ocExitTryException:
+		{
+			RISSE_ASSERT(Used.size() <= 1);
+			tRisseString ret;
+			ret = RISSE_WS("ExitTryException(") +
+				((Used.size() >= 1)?(Used[0]->Dump()):tRisseString(RISSE_WS("<none>"))) +
+				RISSE_WS(", try_id=")+
+				tRisseString::AsString((risse_int64)(TryIdentifierIndex)) +
+				RISSE_WS(", index=")+
+				tRisseString::AsString((risse_int64)(Index)) +
+				RISSE_WS(")");
 			return ret;
 		}
 

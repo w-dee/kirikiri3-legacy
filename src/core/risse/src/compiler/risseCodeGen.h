@@ -290,11 +290,11 @@ public:
 	//! @param		value		返す値が入っている変数
 	void PutReturn(const tRisseSSAVariable * value);
 
-	//! @brief		例外による Return コードを置く
-	//! @param		value		返す値が入っている変数
+	//! @brief		例外によるtry脱出コードを置く
+	//! @param		value		返す値が入っている変数(NULL=値はない場合)
 	//! @param		try_id_idx	Try 識別子番号
 	//! @param		idx			分岐先ID
-	void PutReturnException(const tRisseSSAVariable * value,
+	void PutExitTryException(const tRisseSSAVariable * value,
 		risse_size try_id_idx, risse_size idx);
 
 	//! @brief		例外による脱出系の例外オブジェクトから「値」を取り出す

@@ -216,7 +216,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 		}
 		break;
 
-	case ocReturnException:
+	case ocExitTryException:
 		{
 			ret += RISSE_WS(", ");
 			ret += tRisseString::AsString(static_cast<int>(CodePointer[3]));

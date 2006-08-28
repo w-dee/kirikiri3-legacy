@@ -1936,21 +1936,8 @@ tRisseSSAVariable * tRisseASTNode_Throw::DoReadSSA(tRisseSSAForm *form, void * p
 tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 									tRisseSSAForm *form, void * param) const
 {
-	// break 文をサポートする構文の中？
-	tRisseBreakInfo * info = form->GetCurrentBreakInfo();
-	if(info == NULL)
-		eRisseCompileError::Throw(
-			tRisseString(RISSE_WS_TR("cannot place 'break' here")),
-				form->GetScriptBlock(), GetPosition());
-
-	// ジャンプ文を作成
-	tRisseSSAStatement *jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
-
-	// 新しい基本ブロックを作成
-	form->CreateNewBlock("disconnected_by_break");
-
-	// ジャンプ文を info に登録
-	info->AddJump(jump_stmt);
+	// break 文を追加する
+	form->AddBreakOrContinueStatement(true, GetPosition(), NULL);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -1962,21 +1949,8 @@ tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 tRisseSSAVariable * tRisseASTNode_Continue::DoReadSSA(
 									tRisseSSAForm *form, void * param) const
 {
-	// continue 文をサポートする構文の中？
-	tRisseContinueInfo * info = form->GetCurrentContinueInfo();
-	if(info == NULL)
-		eRisseCompileError::Throw(
-			tRisseString(RISSE_WS_TR("cannot place 'continue' here")),
-				form->GetScriptBlock(), GetPosition());
-
-	// ジャンプ文を作成
-	tRisseSSAStatement *jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
-
-	// 新しい基本ブロックを作成
-	form->CreateNewBlock("disconnected_by_continue");
-
-	// ジャンプ文を info に登録
-	info->AddJump(jump_stmt);
+	// continue 文を追加する
+	form->AddBreakOrContinueStatement(false, GetPosition(), NULL);
 
 	// このノードは答えを返さない
 	return NULL;

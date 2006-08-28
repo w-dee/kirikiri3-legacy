@@ -216,6 +216,7 @@ void tRisseCodeInterpreter::Execute(
 					args.argv[i] = &AR(code[i+5]);
 
 				bool raised = false;
+				AR(code[1]).Clear();
 				try
 				{
 					AR(code[2]).FuncCall(NULL,
@@ -228,17 +229,16 @@ void tRisseCodeInterpreter::Execute(
 				}
 				catch(...)
 				{
-					AR(code[1]).Clear();
 					raised = true;
 				}
 				if(AR(code[1]).GetType() == tRisseVariant::vtVoid)
-					AR(code[1]).SetVoidPointer(NULL);
+					AR(code[1]).SetVoidPointer(raised ? this: NULL);
 				// 例外が発生したときの例外オブジェクトは code[1] の指すレジスタに
 				// 格納される。例外が発生しなかった場合は void になるが、
 				// すると void が投げられたときに例外が発生したのかしなかったのか
 				// 分からない。そこで、tRisseVariant::SetVoidPointer を使って
 				// ポインタ (tRisseVariant が void の時にだけもてる特別な内部的な
-				// ステート) をnullに設定する。
+				// ステート) をnullあるいは非nullを設定する。
 				// この後に続く ocCatchBranch はこの情報を見て分岐を行う。
 				code += code[4] + 5;
 				break;
@@ -401,8 +401,8 @@ void tRisseCodeInterpreter::Execute(
 			//code += 2;
 			return;
 
-		case ocReturnException	: // returne	return 例外を発生させる
-			RISSE_ASSERT(CI(code[1]) < framesize);
+		case ocExitTryException	: // returne	return 例外を発生させる
+			RISSE_ASSERT(CI(code[1]) == RisseInvalidRegNum || CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < constssize);
 			{
 				// 暫定実装
@@ -410,7 +410,8 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(try_id.GetType() == tRisseVariant::vtVoid);
 				RISSE_ASSERT(try_id.GetVoidPointer() != NULL);
 				tRisseVariant val(new tRisseExitTryExceptionClass(try_id.GetVoidPointer(),
-												code[3], &AR(code[1])));
+									code[3],
+									CI(code[1]) == RisseInvalidRegNum ? NULL : &AR(code[1])));
 				eRisseScriptException::Throw(RISSE_WS("return by exit try exception"),
 					NULL, 0, val);
 			}

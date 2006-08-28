@@ -200,7 +200,7 @@ RISSE_OC_ENUM_DEF()
 	RISSE_OC_ENUM_ITEM(Return			,return	,Z(R,0,0,0,0,0))//!< return ステートメント
 	RISSE_OC_ENUM_ITEM(Debugger			,debug	,Z(0,0,0,0,0,0))//!< debugger ステートメント
 	RISSE_OC_ENUM_ITEM(Throw			,throw	,Z(R,0,0,0,0,0))//!< throw ステートメント
-	RISSE_OC_ENUM_ITEM(ReturnException	,returne,Z(R,C,O,0,0,0))//!< return 例外を発生させる
+	RISSE_OC_ENUM_ITEM(ExitTryException	,exittry,Z(R,C,O,0,0,0))//!< Try脱出用例外を発生させる
 	RISSE_OC_ENUM_ITEM(GetExitTryValue	,exitval,Z(R,R,0,0,0,0))//!< Try脱出用例外オブジェクトから値を得る
 
 // 引数1+なし

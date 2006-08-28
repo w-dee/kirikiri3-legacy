@@ -513,7 +513,7 @@ void tRisseCodeGenerator::PutReturn(const tRisseSSAVariable * value)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutReturnException(const tRisseSSAVariable * value,
+void tRisseCodeGenerator::PutExitTryException(const tRisseSSAVariable * value,
 		risse_size try_id_idx, risse_size idx)
 {
 	// Try識別子用に定数領域に仮の値をpushする
@@ -523,9 +523,9 @@ void tRisseCodeGenerator::PutReturnException(const tRisseSSAVariable * value,
 	Consts.push_back(cvalue);
 	TryIdentifierRelocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, try_id_idx));
 
-	// ocReturnException 命令を書く
-	PutWord(ocReturnException);
-	PutWord(FindRegMap(value));
+	// ocExitTryException 命令を書く
+	PutWord(ocExitTryException);
+	PutWord(value?FindRegMap(value):RisseInvalidRegNum);
 	PutWord(static_cast<risse_uint32>(reloc_pos));
 	PutWord(static_cast<risse_uint32>(idx));
 }

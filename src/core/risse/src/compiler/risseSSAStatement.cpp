@@ -327,9 +327,9 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutThrow(Used[0]);
 		break;
 
-	case ocReturnException:
-		RISSE_ASSERT(Used.size() == 1);
-		gen->PutReturnException(Used[0], TryIdentifierIndex, Index);
+	case ocExitTryException:
+		RISSE_ASSERT(Used.size() <= 1);
+		gen->PutExitTryException(Used.size() >= 1 ? Used[0]: NULL, TryIdentifierIndex, Index);
 		break;
 
 	case ocGetExitTryValue:
@@ -612,7 +612,7 @@ tRisseString tRisseSSAStatement::Dump() const
 					RISSE_WS(" catch:*") + GetTryCatchTarget()->GetName();
 			for(risse_size n = 2; n < Targets.size(); n++)
 			{
-				ret += RISSE_WS(" ") + tRisseString::AsString((risse_int64)(n-2)) +
+				ret += RISSE_WS(" ") + tRisseString::AsString((risse_int64)(n)) +
 					RISSE_WS(": *") + Targets[n]->GetName();
 			}
 			return ret;

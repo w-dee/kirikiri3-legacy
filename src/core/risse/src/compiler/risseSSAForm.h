@@ -93,10 +93,19 @@ class tRisseBreakInfo : public tRisseCollectee
 {
 	typedef gc_vector<tRisseSSAStatement *> tPendingJumps;
 	tPendingJumps PendingJumps;
+	bool CanReceiveValue; //!< この break が値を伴うことができるか
 
 public:
 	//! @brief		コンストラクタ
-	tRisseBreakInfo() {;}
+	tRisseBreakInfo() { CanReceiveValue = false;}
+
+	//! @brief		この break が値を伴うことができるかを設定する
+	//! @param		b この break が値を伴うことができるか
+	void SetCanReceiveValue(bool b) { CanReceiveValue = b; }
+
+	//! @brief		この break が値を伴うことができるかを取得する
+	//! @return		この break が値を伴うことができるか
+	bool GetCanReceiveValue() const { return CanReceiveValue; }
 
 	//! @brief		未バインドのジャンプを追加する
 	//! @param		jump_stmt		ジャンプ文
@@ -249,48 +258,6 @@ public:
 	tRisseSSABlock * GetCurrentBlock() const { return CurrentBlock; }
 
 
-	//! @brief		現在の switch に関する情報を得る
-	//! @return		現在の switch に関する情報
-	tRisseSwitchInfo * GetCurrentSwitchInfo() const { return CurrentSwitchInfo; }
-
-	//! @brief		現在の switch に関する情報を設定する
-	//! @param		info		現在の switch に関する情報
-	//! @return		設定前の switch に関する情報
-	tRisseSwitchInfo * SetCurrentSwitchInfo(tRisseSwitchInfo * info)
-	{
-		tRisseSwitchInfo * prev = CurrentSwitchInfo;
-		CurrentSwitchInfo = info;
-		return prev;
-	}
-
-	//! @brief		現在の break に関する情報を得る
-	//! @return		現在の break に関する情報
-	tRisseBreakInfo * GetCurrentBreakInfo() const { return CurrentBreakInfo; }
-
-	//! @brief		現在の break に関する情報を設定する
-	//! @param		info		現在の break に関する情報
-	//! @return		設定前の break に関する情報
-	tRisseBreakInfo * SetCurrentBreakInfo(tRisseBreakInfo * info)
-	{
-		tRisseBreakInfo * prev = CurrentBreakInfo;
-		CurrentBreakInfo = info;
-		return prev;
-	}
-
-	//! @brief		現在の continue に関する情報を得る
-	//! @return		現在の continue に関する情報
-	tRisseContinueInfo * GetCurrentContinueInfo() const { return CurrentContinueInfo; }
-
-	//! @brief		現在の continue に関する情報を設定する
-	//! @param		info		現在の continue に関する情報
-	//! @return		設定前の continue に関する情報
-	tRisseContinueInfo * SetCurrentContinueInfo(tRisseContinueInfo * info)
-	{
-		tRisseContinueInfo * prev = CurrentContinueInfo;
-		CurrentContinueInfo = info;
-		return prev;
-	}
-
 	//! @brief		関数引数の無名の * を保持している変数を得る
 	//! @return		関数引数の無名の * を保持している変数
 	tRisseSSAVariable * GetFunctionCollapseArgumentVariable() const
@@ -358,6 +325,54 @@ public:
 	//! @param		var		returnする値 (NULL=voidを返す)
 	void AddReturnStatement(risse_size pos, tRisseSSAVariable * var);
 
+	//! @brief		現在の switch に関する情報を得る
+	//! @return		現在の switch に関する情報
+	tRisseSwitchInfo * GetCurrentSwitchInfo() const { return CurrentSwitchInfo; }
+
+	//! @brief		現在の switch に関する情報を設定する
+	//! @param		info		現在の switch に関する情報
+	//! @return		設定前の switch に関する情報
+	tRisseSwitchInfo * SetCurrentSwitchInfo(tRisseSwitchInfo * info)
+	{
+		tRisseSwitchInfo * prev = CurrentSwitchInfo;
+		CurrentSwitchInfo = info;
+		return prev;
+	}
+
+	//! @brief		現在の break に関する情報を得る
+	//! @return		現在の break に関する情報
+	tRisseBreakInfo * GetCurrentBreakInfo() const { return CurrentBreakInfo; }
+
+	//! @brief		現在の break に関する情報を設定する
+	//! @param		info		現在の break に関する情報
+	//! @return		設定前の break に関する情報
+	tRisseBreakInfo * SetCurrentBreakInfo(tRisseBreakInfo * info)
+	{
+		tRisseBreakInfo * prev = CurrentBreakInfo;
+		CurrentBreakInfo = info;
+		return prev;
+	}
+
+	//! @brief		現在の continue に関する情報を得る
+	//! @return		現在の continue に関する情報
+	tRisseContinueInfo * GetCurrentContinueInfo() const { return CurrentContinueInfo; }
+
+	//! @brief		現在の continue に関する情報を設定する
+	//! @param		info		現在の continue に関する情報
+	//! @return		設定前の continue に関する情報
+	tRisseContinueInfo * SetCurrentContinueInfo(tRisseContinueInfo * info)
+	{
+		tRisseContinueInfo * prev = CurrentContinueInfo;
+		CurrentContinueInfo = info;
+		return prev;
+	}
+
+	//! @brief		break 文または continue 文を追加する
+	//! @param		is_break	break(真)かcontinue(偽)か
+	//! @param		pos			スクリプト上の位置
+	//! @param		var			breakあるいはcontinueに伴った値 (NULL=voidを返す)
+	void AddBreakOrContinueStatement(bool is_break, risse_size pos, tRisseSSAVariable * var);
+
 	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを作成する
 	//! @param		catch_branch	ocCatchBranch文(すでに2つのused
 	//!								それぞれ例外が発生しなかったときと例外が
@@ -365,6 +380,7 @@ public:
 	//! @param		except_var		例外オブジェクトを示す変数
 	//! @note		CurrentBlock は保存される
 	void AddCatchBranchTargets(tRisseSSAStatement * catch_branch, tRisseSSAVariable * except_var);
+
 
 	//! @param		変数を共有する
 	//! @param		name		変数名(番号付き)

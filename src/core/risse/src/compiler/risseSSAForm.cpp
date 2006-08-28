@@ -313,13 +313,14 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 		{
 			if(form->CanReturn)
 			{
-				// このSSA形式はは return文で抜けることができる
+				// このSSA形式は return文で抜けることができる
 				// この try id まで例外で抜けるためのコードを生成
-				tRisseSSAStatement * stmt = AddStatement(pos, ocReturnException, NULL, var);
+				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
 				risse_size label_idx = form->AddExitTryBranchTargetLabels(RISSE_WS("@return"));
 				stmt->SetTryIdentifierIndex(form->TryIdentifierIndex); // try id を設定
 				stmt->SetIndex(label_idx + 2); // インデックスを設定
-					// +2 = 最初の2つはreturnとbreakに割り当てられているので
+					// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき
+					// に割り当てられているので
 
 				CreateNewBlock(RISSE_WS("disconnected_by_return_by_exception"));
 				break;
@@ -327,6 +328,94 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 			form = form->Parent;
 		} while(form);
 		RISSE_ASSERT(form != NULL); // 先祖は必ずどれかが CanReturn が真でなければならない
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
+											tRisseSSAVariable * var)
+{
+	// このSSA形式インスタンスはbreakまたはcontinueできるか？
+	tRisseBreakInfo * info;
+	if((info = is_break?GetCurrentBreakInfo():GetCurrentContinueInfo()) != NULL)
+	{
+		// この SSA 形式は break/continue できる
+
+		// break/continue が値を伴ってできるかをチェック
+		if(var != NULL && !info->GetCanReceiveValue())
+			eRisseCompileError::Throw(
+				tRisseString(
+					is_break?
+						RISSE_WS_TR("cannot break here with a value"):
+						RISSE_WS_TR("cannot continue here with a value")),
+					GetScriptBlock(), pos);
+
+		// ジャンプ文を作成
+		tRisseSSAStatement *jump_stmt = AddStatement(pos, ocJump, NULL);
+
+		// 新しい基本ブロックを作成
+		CreateNewBlock(is_break?
+						RISSE_WS("disconnected_by_break"):
+						RISSE_WS("disconnected_by_continue"));
+
+		// ジャンプ文を info に登録
+		info->AddJump(jump_stmt);
+	}
+	else
+	{
+		// break/continue できる SSA 形式を探す
+		tRisseSSAForm * form = Parent;
+		do
+		{
+			if((info = is_break?form->GetCurrentBreakInfo():form->GetCurrentContinueInfo()) != NULL)
+			{
+				// break/continue できる
+
+				// break/continue が値を伴ってできるかをチェック
+				if(var != NULL && !info->GetCanReceiveValue())
+					eRisseCompileError::Throw(
+						tRisseString(
+							is_break?
+								RISSE_WS_TR("cannot break here with a value"):
+								RISSE_WS_TR("cannot continue here with a value")),
+							GetScriptBlock(), pos);
+
+				// このSSA形式はbreak/continue文を受け取ることができる
+				// この try id まで例外で抜けるためのコードを生成
+				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
+				risse_size label_idx = form->AddExitTryBranchTargetLabels(
+													is_break?
+														RISSE_WS("@break"):
+														RISSE_WS("@continue"));
+				stmt->SetTryIdentifierIndex(form->TryIdentifierIndex); // try id を設定
+				stmt->SetIndex(label_idx + 2); // インデックスを設定
+					// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき
+					// に割り当てられているので
+
+				CreateNewBlock(is_break?
+					RISSE_WS("disconnected_by_break_by_exception"):
+					RISSE_WS("disconnected_by_continue_by_exception"));
+				break;
+			}
+
+			// CanReturn な form を超えて break/continue はできない
+			if(form->CanReturn)
+				form = NULL;
+			else
+				form = form->Parent;
+		} while(form);
+
+		if(form = NULL)
+		{
+			// break/continue できないようだ
+			eRisseCompileError::Throw(
+				tRisseString(is_break?
+					RISSE_WS_TR("cannot place 'break' here"):
+					RISSE_WS_TR("cannot place 'continue' here")),
+					GetScriptBlock(), pos);
+		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -354,26 +443,79 @@ void tRisseSSAForm::AddCatchBranchTargets(tRisseSSAStatement * catch_branch,
 		RISSE_ASSERT(!i->IsEmpty());
 		tRisseSSABlock * target = NULL;
 
+		enum { r_goto, r_return, r_break, r_continue } type;
+
 		if(*i == RISSE_WS("@return"))
-		{
-			// return 文の作成
-			// 新しい基本ブロックを作成する
-			target =
-				CreateNewBlock(RISSE_WS("return_by_exception"));
-
-			// 例外オブジェクトから値を取り出す
-			tRisseSSAVariable * ret_var = NULL;
-			AddStatement(catch_branch->GetPosition(), ocGetExitTryValue, &ret_var, except_var);
-
-			// return 文を作成
-			AddStatement(catch_branch->GetPosition(), ocReturn, NULL, ret_var);
-
-			// 新しい基本ブロックを作成(ただしここには到達しない)
-			CreateNewBlock("disconnected_by_return");
-
-		}
+			type = r_return;
 		else if(*i == RISSE_WS("@break"))
+			type = r_break;
+		else if(*i == RISSE_WS("@continue"))
+			type = r_continue;
+		else
+			type = r_goto;
+
+		switch(type)
 		{
+		case r_return:
+			{
+				// return 文の作成
+				// 新しい基本ブロックを作成する
+				target =
+					CreateNewBlock(RISSE_WS("return_by_exception"));
+
+				// 例外オブジェクトから値を取り出す
+				tRisseSSAVariable * ret_var = NULL;
+				AddStatement(catch_branch->GetPosition(), ocGetExitTryValue, &ret_var, except_var);
+
+				// return 文を作成
+				AddStatement(catch_branch->GetPosition(), ocReturn, NULL, ret_var);
+
+				// 新しい基本ブロックを作成(ただしここには到達しない)
+				CreateNewBlock("disconnected_by_return");
+			}
+			break;
+
+		case r_break:
+		case r_continue:
+			{
+
+				// GetCurrentBreakInfo()/GetCurrentContinueInfo() の戻りは、
+				// このtargetsの分岐先が生成された時点での
+				// このSSA形式のGetCurrentBreakInfo()/GetCurrentContinueInfo()
+				// の戻りと同じでなければならない
+				// (ASSERTはとくにしてないので注意すること)
+
+				tRisseBreakInfo * info =
+							type==r_break?
+								GetCurrentBreakInfo():GetCurrentContinueInfo();
+				RISSE_ASSERT(info != NULL);
+
+				// break 文の作成
+				// 新しい基本ブロックを作成する
+				target =
+					CreateNewBlock(type==r_break?
+									RISSE_WS("break_by_exception"):
+									RISSE_WS("continue_by_exception"));
+
+				// 例外オブジェクトから値を取り出す
+//				tRisseSSAVariable * break_var = NULL;
+//				AddStatement(catch_branch->GetPosition(), ocGetExitTryValue, &break_var, except_var);
+
+				// ジャンプ文を作成
+				tRisseSSAStatement *jump_stmt = AddStatement(catch_branch->GetPosition(), ocJump, NULL);
+
+				// 新しい基本ブロックを作成
+				CreateNewBlock(type==r_break?
+							RISSE_WS("disconnected_by_break"):
+							RISSE_WS("disconnected_by_continue"));
+
+				// ジャンプ文を info に登録
+				info->AddJump(jump_stmt);
+			}
+			break;
+
+		case r_goto:
+			break;
 		}
 
 		// catch_branch にジャンプ先を追加

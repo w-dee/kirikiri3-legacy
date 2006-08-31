@@ -40,6 +40,7 @@ class tRisseSSABlock : public tRisseCollectee
 	tRisseSSAStatement * FirstStatement; //!< 文のリストの先頭
 	tRisseSSAStatement * LastStatement; //!< 文のリストの最後
 	tRisseSSALocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
+	risse_size LastStatementPosition; //!< 最後の文のスクリプト上の位置
 
 public:
 	typedef gc_map<const tRisseSSAVariable *, void *> tLiveVariableMap; //!< 生存している変数のリスト
@@ -71,6 +72,17 @@ public:
 		sipBeforeBranch,	//!< 分岐/ジャンプ文の直前
 		sipTail				//!< 最後
 	};
+
+	//! @brief		LastStatementPosition を設定する
+	void SetLastStatementPosition();
+
+	//! @brief		LastStatementPosition を任意の値に設定する
+	//! @param		pos		最後の文のスクリプト上の位置
+	void SetLastStatementPosition(risse_size pos) { LastStatementPosition = pos; }
+
+	//! @brief		LastStatementPosition を取得する
+	//! @return		最後の文のスクリプト上の位置
+	risse_size GetLastStatementPosition() const  { return LastStatementPosition; }
 
 	//! @brief		文を追加する
 	//! @param		stmt	文

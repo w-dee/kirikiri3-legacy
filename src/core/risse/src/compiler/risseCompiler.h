@@ -60,7 +60,6 @@ public:
 	//! @param		block		コードブロック
 	//! @return		コードブロックのインデックス
 	risse_size AddCodeBlock(tRisseCodeBlock * block);
-
 };
 //---------------------------------------------------------------------------
 

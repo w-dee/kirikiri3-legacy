@@ -39,9 +39,21 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
 	Mark = NULL;
 	Traversing = false;
 	LiveIn = LiveOut = NULL;
+	LastStatementPosition = risse_size_max;
 
 	// 通し番号の準備
 	Name = name + RISSE_WC('_') + tRisseString::AsString(form->GetUniqueNumber());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::SetLastStatementPosition()
+{
+	if(!LastStatement)
+		LastStatementPosition = risse_size_max;
+	else
+		LastStatementPosition = LastStatement->GetPosition();
 }
 //---------------------------------------------------------------------------
 
@@ -93,6 +105,8 @@ void tRisseSSABlock::InsertStatement(tRisseSSAStatement * stmt, tStatementInsert
 	if(cs == NULL) LastStatement = stmt;
 
 	stmt->SetBlock(this);
+
+	SetLastStatementPosition();
 }
 //---------------------------------------------------------------------------
 
@@ -106,6 +120,7 @@ void tRisseSSABlock::DeleteStatement(tRisseSSAStatement * stmt)
 	if(stmt_pred == NULL) FirstStatement = stmt_succ;
 	if(stmt_succ) stmt_succ->SetPred(stmt_pred);
 	if(stmt_succ == NULL) LastStatement = stmt_pred;
+	SetLastStatementPosition();
 }
 //---------------------------------------------------------------------------
 
@@ -124,6 +139,7 @@ void tRisseSSABlock::ReplaceStatement(tRisseSSAStatement * old_stmt,
 	if(pred) pred->SetSucc(new_stmt);
 	if(succ) succ->SetPred(new_stmt);
 	new_stmt->SetBlock(this);
+	SetLastStatementPosition();
 }
 //---------------------------------------------------------------------------
 
@@ -173,6 +189,9 @@ void tRisseSSABlock::AddPhiFunctionToBlocks(
 		// phi 関数の文に変数を追加
 		quest_phi_stmt->AddUsed(*var); 
 	}
+
+	SetLastStatementPosition();
+
 }
 //---------------------------------------------------------------------------
 
@@ -200,6 +219,8 @@ tRisseSSAVariable * tRisseSSABlock::AddPhiFunction(
 		block_stack.push_back(*i);
 		phi_stmt_stack.push_back(phi_stmt);
 	}
+
+	SetLastStatementPosition();
 
 	return ret_var;
 }
@@ -554,6 +575,8 @@ void tRisseSSABlock::RemovePhiStatements()
 		stmt->DeleteUsed();
 		DeleteStatement(stmt);
 	}
+
+	SetLastStatementPosition();
 }
 //---------------------------------------------------------------------------
 

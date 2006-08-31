@@ -1713,13 +1713,13 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	// while ループ または do ～ while ループ
 
 	// break に関する情報を生成
-	tRisseBreakInfo * break_info = new tRisseBreakInfo();
+	tRisseBreakInfo * break_info = new tRisseBreakInfo(form);
 
 	// break に関する情報を form に設定
 	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
 
 	// continue に関する情報を生成
-	tRisseContinueInfo * continue_info = new tRisseContinueInfo();
+	tRisseContinueInfo * continue_info = new tRisseContinueInfo(form);
 
 	// continue に関する情報を form に設定
 	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
@@ -1803,13 +1803,13 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 		form->CreateNewBlock(RISSE_WS("for_cond"));
 
 	// break に関する情報を生成
-	tRisseBreakInfo * break_info = new tRisseBreakInfo();
+	tRisseBreakInfo * break_info = new tRisseBreakInfo(form);
 
 	// break に関する情報を form に設定
 	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
 
 	// continue に関する情報を生成
-	tRisseContinueInfo * continue_info = new tRisseContinueInfo();
+	tRisseContinueInfo * continue_info = new tRisseContinueInfo(form);
 
 	// continue に関する情報を form に設定
 	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
@@ -1973,7 +1973,7 @@ tRisseSSAVariable * tRisseASTNode_Label::DoReadSSA(tRisseSSAForm *form, void * p
 	jump_stmt->SetJumpTarget(label_block);
 
 	// form に登録
-	form->GetLabelMap()->AddMap(Name, label_block, GetPosition());
+	form->AddLabelMap(Name, label_block);
 	// このノードは答えを返さない
 	return NULL;
 }
@@ -1983,14 +1983,11 @@ tRisseSSAVariable * tRisseASTNode_Label::DoReadSSA(tRisseSSAForm *form, void * p
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_Goto::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
-	// 現在の基本ブロックを取得
-	tRisseSSABlock * cur_block = form->GetCurrentBlock();
+	// form に登録
+	form->AddPendingLabelJump(form->GetCurrentBlock(), Name);
 
 	// 新しい基本ブロックを作成 (この基本ブロックには到達しない)
 	form->CreateNewBlock(RISSE_WS("disconnected_by_goto"));
-
-	// form に登録
-	form->GetLabelMap()->AddPendingLabelJump(cur_block, GetPosition(), Name);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -2023,7 +2020,7 @@ tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * 
 	tRisseSwitchInfo * old_switch_info = form->SetCurrentSwitchInfo(switch_info);
 
 	// break に関する情報を生成
-	tRisseBreakInfo * break_info = new tRisseBreakInfo();
+	tRisseBreakInfo * break_info = new tRisseBreakInfo(form);
 
 	// break に関する情報を form に設定
 	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
@@ -2160,7 +2157,7 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 	void * lazy_param = form->CreateLazyBlock(GetPosition(),
 		RISSE_WS("try block"), false, access_map, new_form, lazyblock_var);
 
-	form->SetTryIdentifierIndex(try_id); // try識別子を親SSA形式に対して設定
+	new_form->SetTryIdentifierIndex(try_id); // try識別子を子SSA形式に対して設定
 	new_form->Generate(Body);
 
 	// 遅延評価ブロックで使用された変数の処理
@@ -2263,7 +2260,9 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 	// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
 	catch_branch_stmt->SetTryExitTarget(last_catch_exit_block);
 	catch_branch_stmt->SetTryCatchTarget(catch_entry_block);
-	form->AddCatchBranchTargets(catch_branch_stmt, try_block_ret_var);
+
+	// あとで例外の分岐先を設定できるように
+	new_form->SetCatchBranchStatement(catch_branch_stmt, try_block_ret_var);
 
 	// このノードは答えを返さない
 	return NULL;

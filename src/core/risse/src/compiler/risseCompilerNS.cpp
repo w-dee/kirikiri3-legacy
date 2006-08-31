@@ -442,4 +442,36 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseSSALocalNamespace::Dump() const
+{
+	tRisseString str;
+	risse_size scope_idx = 0;
+	for(tScopes::const_iterator i = Scopes.begin(); i != Scopes.end(); i++, scope_idx++)
+	{
+		str += RISSE_WS("=== scope #") + tRisseString::AsString((risse_int64)scope_idx) +
+			RISSE_WS(" ===\n");
+		const tVariableMap & vmap = (*i)->VariableMap;
+		const tAliasMap & amap = (*i)->AliasMap;
+
+		str += RISSE_WS("- - alias - -\n");
+		for(tAliasMap::const_iterator ai = amap.begin(); ai != amap.end(); ai++)
+		{
+			str += ai->first + RISSE_WS(" => ") + ai->second +
+				RISSE_WS("\n");
+		}
+
+		str += RISSE_WS("- - numbered - -\n");
+		for(tVariableMap::const_iterator vi = vmap.begin(); vi != vmap.end(); vi++)
+		{
+			str += vi->first + RISSE_WS("\n");
+		}
+	}
+	return str;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
 } // namespace Risse

@@ -212,6 +212,10 @@ public:
 
 	//! @brief		AccessMap を取得する @return AcecssMap
 	tRisseSSAVariableAccessMap * GetAccessMap() const { return AccessMap; }
+
+	//! @brief		内容のダンプを行う
+	//! @return		ダンプされた文字列
+	tRisseString Dump() const;
 };
 //---------------------------------------------------------------------------
 

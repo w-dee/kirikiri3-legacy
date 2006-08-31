@@ -36,6 +36,29 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	tRisseSSAForm * form = new tRisseSSAForm(this, RISSE_WS("root"), NULL, false);
 	form->Generate(root);
 
+	// 未バインドのラベルを結線する
+	// goto のジャンプ先は子→親の順に見ていくので生成順とは逆に処理を行う
+	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
+		i != SSAForms.rend(); i++)
+		(*i)->BindAllLabels();
+
+	// try 脱出時の分岐先を生成
+	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
+		i != SSAForms.rend(); i++)
+		(*i)->AddCatchBranchTargets();
+
+	// 未バインドのラベルを結線する
+	// (AddCatchBranchTargetsで再度未バインドのラベルが追加される可能性があるため)
+	// goto のジャンプ先は子→親の順に見ていくので生成順とは逆に処理を行う
+	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
+		i != SSAForms.rend(); i++)
+		(*i)->BindAllLabels();
+
+	// 最適化とSSA形式からの逆変換
+	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+		i != SSAForms.end(); i++)
+		(*i)->OptimizeAndUnSSA();
+
 	// SSA 形式のダンプ
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)

@@ -26,71 +26,26 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(7246,55563,12549,16650,3991,47135,2967,64968);
 
-//---------------------------------------------------------------------------
-void tRisseSSALabelMap::AddMap(const tRisseString &labelname, tRisseSSABlock * block, risse_size pos)
-{
-	tLabelMap::iterator i = LabelMap.find(labelname);
-	if(i != LabelMap.end())
-	{
-		// すでにラベルがある
-		eRisseCompileError::Throw(
-			tRisseString(RISSE_WS_TR("label '%1' is already defined"), labelname),
-				Form->GetScriptBlock(), pos);
-	}
 
-	LabelMap.insert(tLabelMap::value_type(labelname, block));
+
+//---------------------------------------------------------------------------
+tRisseBreakInfo::tRisseBreakInfo(tRisseSSAForm * form)
+{
+	Form = form;
+	CanReceiveValue = false;
+
+	// ターゲットブロックのラベル名を生成
+	JumpTargetLabel = 
+		tRisseString(RISSE_WS("@break_or_continue_")) +
+			tRisseString::AsString(Form->GetUniqueNumber());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALabelMap::AddPendingLabelJump(tRisseSSABlock * block, risse_size pos,
-		const tRisseString & labelname)
+void tRisseBreakInfo::AddJump(tRisseSSABlock * jump_block)
 {
-	PendingLabelJumps.push_back(tPendingLabelJump(block, pos, labelname));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseSSALabelMap::BindAll()
-{
-	for(tPendingLabelJumps::iterator i = PendingLabelJumps.begin();
-		i != PendingLabelJumps.end(); i++)
-	{
-		// それぞれの i について、その基本ブロックの最後にジャンプ文を生成する
-
-		// ジャンプ先を検索
-		tLabelMap::iterator label_pair = LabelMap.find(i->LabelName);
-		if(label_pair == LabelMap.end())
-			eRisseCompileError::Throw(
-				tRisseString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
-					Form->GetScriptBlock(), i->Position);
-
-		// ジャンプ文を生成
-		tRisseSSAStatement * stmt = new tRisseSSAStatement(Form, i->Position, ocJump);
-		i->Block->AddStatement(stmt);
-		stmt->SetJumpTarget(label_pair->second);
-	}
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-void tRisseBreakInfo::AddJump(tRisseSSAStatement * jump_stmt)
-{
-	PendingJumps.push_back(jump_stmt);
+	PendingJumpSourceBlocks.push_back(jump_block);
 }
 //---------------------------------------------------------------------------
 
@@ -98,10 +53,14 @@ void tRisseBreakInfo::AddJump(tRisseSSAStatement * jump_stmt)
 //---------------------------------------------------------------------------
 void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 {
-	for(tPendingJumps::iterator i = PendingJumps.begin(); i != PendingJumps.end(); i++)
+	// ターゲットのブロックに対してラベルを設定する
+	Form->AddLabelMap(JumpTargetLabel, target);
+
+	for(tPendingJumpSourceBlocks::iterator i = PendingJumpSourceBlocks.begin();
+		i != PendingJumpSourceBlocks.end(); i++)
 	{
-		// それぞれの i について、ジャンプ文のジャンプ先を設定する
-		(*i)->SetJumpTarget(target);
+		// それぞれの i について、Form の PendingLabelJumps に入れる
+		Form->AddPendingLabelJump(*i, JumpTargetLabel);
 	}
 }
 //---------------------------------------------------------------------------
@@ -131,7 +90,6 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	Name = name;
 	UniqueNumber = 0;
 	LocalNamespace = new tRisseSSALocalNamespace();
-	LabelMap = new tRisseSSALabelMap(this);
 	EntryBlock = NULL;
 	CurrentBlock = NULL;
 	CurrentSwitchInfo = NULL;
@@ -140,6 +98,8 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	FunctionCollapseArgumentVariable = NULL;
 	TryIdentifierIndex = risse_size_max;
 	CanReturn = !UseParentFrame; // いまのところ CanReturn はこの式の通りで決定される
+	CatchBranchStatement = NULL;
+	ExceptionValue = NULL;
 
 	// compiler に自身を登録する
 	compiler->AddSSAForm(this);
@@ -154,6 +114,19 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"));
 	LocalNamespace->SetBlock(EntryBlock);
 	CurrentBlock = EntryBlock;
+
+	// ラベルマップを作成する
+	if(!UseParentFrame)
+	{
+		LabelMap = new tLabelMap();
+		PendingLabelJumps = new tPendingLabelJumps();
+	}
+	else
+	{
+		// 親SSA形式の物を使う
+		LabelMap = Parent->LabelMap;
+		PendingLabelJumps = Parent->PendingLabelJumps;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -169,9 +142,13 @@ void tRisseSSAForm::Generate(const tRisseASTNode * root)
 	// 実行ブロックの最後の return 文を生成する
 	GenerateLastReturn(root);
 
-	// 未バインドのラベルジャンプをすべて解決
-	LabelMap->BindAll();
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::OptimizeAndUnSSA()
+{
 	// 到達しない基本ブロックからのパスを削除
 	LeapDeadBlocks();
 
@@ -199,7 +176,7 @@ tRisseScriptBlockBase * tRisseSSAForm::GetScriptBlock() const
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name, tRisseSSABlock * pred)
+tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name)
 {
 	// 今までの (Current) の基本ブロックに名前空間のスナップショットを作る
 	CurrentBlock->TakeLocalNamespaceSnapshot(LocalNamespace);
@@ -209,8 +186,6 @@ tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name, tRisse
 
 	// 新しい基本ブロックを作成する
 	tRisseSSABlock * new_block = new tRisseSSABlock(this, name);
-
-	if(pred) new_block->AddPred(pred);
 
 	LocalNamespace->SetBlock(new_block);
 
@@ -293,6 +268,119 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAForm::AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block)
+{
+	tLabelMap::iterator i = LabelMap->find(labelname);
+	if(i != LabelMap->end())
+	{
+		// すでにラベルがある
+		eRisseCompileError::Throw(
+			tRisseString(RISSE_WS_TR("label '%1' is already defined"), labelname),
+				GetScriptBlock(), block->GetLastStatementPosition());
+	}
+
+	LabelMap->insert(tLabelMap::value_type(labelname, block));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AddPendingLabelJump(tRisseSSABlock * jump_block,
+			const tRisseString & labelname)
+{
+	PendingLabelJumps->push_back(tPendingLabelJump(jump_block, labelname));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::BindAllLabels()
+{
+	if(!CanReturn) return; // return できるSSA形式の場合しか実行しない
+
+	for(tPendingLabelJumps::iterator i = PendingLabelJumps->begin();
+		i != PendingLabelJumps->end(); i++)
+	{
+		// それぞれの i について、その基本ブロックの最後にジャンプ文を生成する
+
+		// ジャンプ先を検索
+		tLabelMap::iterator label_pair = LabelMap->find(i->LabelName);
+		if(label_pair == LabelMap->end())
+		{
+			// ラベルは見つからなかった
+			eRisseCompileError::Throw(
+				tRisseString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
+					GetScriptBlock(),
+						i->SourceBlock->GetLastStatementPosition());
+		}
+
+		// ラベルが見つかった
+
+		// ラベルのジャンプ元とジャンプ先のSSA形式の親子関係を調べる
+		tRisseSSAForm * source_form = i->SourceBlock->GetForm();
+		tRisseSSAForm * target_form = label_pair->second->GetForm();
+
+		if(source_form == target_form)
+		{
+			// 同じSSA形式インスタンス内
+			// ジャンプ文を生成
+			tRisseSSAStatement * stmt =
+				new tRisseSSAStatement(this,
+					i->SourceBlock->GetLastStatementPosition(), ocJump);
+			i->SourceBlock->AddStatement(stmt);
+			stmt->SetJumpTarget(label_pair->second);
+		}
+		else
+		{
+			// 同じSSA形式インスタンスではない
+			// この場合は、source_form の親や先祖に target_form が無ければ
+			// ならない (浅いSSA形式から深いSSA形式へのジャンプはできない)
+			tRisseSSAForm * child = source_form;
+			tRisseSSAForm * form = child->Parent;
+			while(form)
+			{
+				if(target_form == form)
+				{
+					// ジャンプ先のSSA形式が見つかった
+					// この try id まで例外で抜けるためのコードを生成
+					tRisseSSAStatement * stmt =
+						new tRisseSSAStatement(this,
+							i->SourceBlock->GetLastStatementPosition(), ocExitTryException);
+					i->SourceBlock->AddStatement(stmt);
+					risse_size label_idx = child->AddExitTryBranchTargetLabels(i->LabelName);
+					stmt->SetTryIdentifierIndex(child->TryIdentifierIndex); // try id を設定
+					stmt->SetIndex(label_idx + 2); // インデックスを設定
+						// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき
+						// に割り当てられているので
+					break;
+				}
+
+				// CanReturn な form を超えて goto はできない
+				child = form;
+				if(form->CanReturn)
+					form = NULL;
+				else
+					form = child->Parent;
+			}
+
+			if(form == NULL)
+			{
+				// ジャンプ先ラベルはどうやら自分よりも深い場所にいるようだ
+				// そういうことは今のところできないのでエラーにする
+				eRisseCompileError::Throw(
+					tRisseString(RISSE_WS_TR("cannot jump into deeper try block or callback block")),
+						GetScriptBlock(),
+							i->SourceBlock->GetLastStatementPosition());
+			}
+		}
+	}
+
+	PendingLabelJumps->clear(); // リストはクリアしておく
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 {
 	if(CanReturn)
@@ -308,7 +396,8 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 	{
 		// このSSA形式からreturn文で呼び出し元に戻るには例外を使って脱出を行うしかない
 		// return できるSSA形式を探す
-		tRisseSSAForm * form = this->Parent;
+		tRisseSSAForm * child = this;
+		tRisseSSAForm * form = child->Parent;
 		do
 		{
 			if(form->CanReturn)
@@ -316,8 +405,8 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 				// このSSA形式は return文で抜けることができる
 				// この try id まで例外で抜けるためのコードを生成
 				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
-				risse_size label_idx = form->AddExitTryBranchTargetLabels(RISSE_WS("@return"));
-				stmt->SetTryIdentifierIndex(form->TryIdentifierIndex); // try id を設定
+				risse_size label_idx = child->AddExitTryBranchTargetLabels(RISSE_WS("@return"));
+				stmt->SetTryIdentifierIndex(child->TryIdentifierIndex); // try id を設定
 				stmt->SetIndex(label_idx + 2); // インデックスを設定
 					// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき
 					// に割り当てられているので
@@ -325,7 +414,8 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 				CreateNewBlock(RISSE_WS("disconnected_by_return_by_exception"));
 				break;
 			}
-			form = form->Parent;
+			child = form;
+			form = child->Parent;
 		} while(form);
 		RISSE_ASSERT(form != NULL); // 先祖は必ずどれかが CanReturn が真でなければならない
 	}
@@ -352,21 +442,19 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 						RISSE_WS_TR("cannot continue here with a value")),
 					GetScriptBlock(), pos);
 
-		// ジャンプ文を作成
-		tRisseSSAStatement *jump_stmt = AddStatement(pos, ocJump, NULL);
+		// ジャンプ文を info に登録
+		info->AddJump(GetCurrentBlock());
 
 		// 新しい基本ブロックを作成
 		CreateNewBlock(is_break?
 						RISSE_WS("disconnected_by_break"):
 						RISSE_WS("disconnected_by_continue"));
-
-		// ジャンプ文を info に登録
-		info->AddJump(jump_stmt);
 	}
 	else
 	{
 		// break/continue できる SSA 形式を探す
-		tRisseSSAForm * form = Parent;
+		tRisseSSAForm * child = this;
+		tRisseSSAForm * form = child->Parent;
 		do
 		{
 			if((info = is_break?form->GetCurrentBreakInfo():form->GetCurrentContinueInfo()) != NULL)
@@ -385,11 +473,9 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 				// このSSA形式はbreak/continue文を受け取ることができる
 				// この try id まで例外で抜けるためのコードを生成
 				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
-				risse_size label_idx = form->AddExitTryBranchTargetLabels(
-													is_break?
-														RISSE_WS("@break"):
-														RISSE_WS("@continue"));
-				stmt->SetTryIdentifierIndex(form->TryIdentifierIndex); // try id を設定
+				risse_size label_idx = child->AddExitTryBranchTargetLabels(
+													info->GetJumpTargetLabel());
+				stmt->SetTryIdentifierIndex(child->TryIdentifierIndex); // try id を設定
 				stmt->SetIndex(label_idx + 2); // インデックスを設定
 					// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき
 					// に割り当てられているので
@@ -401,10 +487,11 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 			}
 
 			// CanReturn な form を超えて break/continue はできない
+			child = form;
 			if(form->CanReturn)
 				form = NULL;
 			else
-				form = form->Parent;
+				form = child->Parent;
 		} while(form);
 
 		if(form = NULL)
@@ -422,13 +509,15 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddCatchBranchTargets(tRisseSSAStatement * catch_branch,
-											tRisseSSAVariable * except_var)
+void tRisseSSAForm::AddCatchBranchTargets()
 {
-	RISSE_ASSERT(catch_branch->GetCode() == ocCatchBranch);
-	RISSE_ASSERT(catch_branch->GetTargetCount() == 2);
+	if(!CatchBranchStatement) return; // CatchBranchの情報が無い場合は何もしない
 
-	tRisseSSABlock * block_save = CurrentBlock;
+	RISSE_ASSERT(CatchBranchStatement->GetCode() == ocCatchBranch);
+	RISSE_ASSERT(CatchBranchStatement->GetTargetCount() == 2);
+	RISSE_ASSERT(Parent != NULL);
+
+	tRisseSSABlock * block_save = Parent->CurrentBlock;
 
 	// すべての分岐先をリストアップ
 	gc_vector<tRisseString> targets;
@@ -461,68 +550,50 @@ void tRisseSSAForm::AddCatchBranchTargets(tRisseSSAStatement * catch_branch,
 				// return 文の作成
 				// 新しい基本ブロックを作成する
 				target =
-					CreateNewBlock(RISSE_WS("return_by_exception"));
+					Parent->CreateNewBlock(RISSE_WS("return_by_exception"));
 
 				// 例外オブジェクトから値を取り出す
 				tRisseSSAVariable * ret_var = NULL;
-				AddStatement(catch_branch->GetPosition(), ocGetExitTryValue, &ret_var, except_var);
+				Parent->AddStatement(CatchBranchStatement->GetPosition(),
+					ocGetExitTryValue, &ret_var, ExceptionValue);
 
 				// return 文を作成
-				AddStatement(catch_branch->GetPosition(), ocReturn, NULL, ret_var);
+				Parent->AddStatement(CatchBranchStatement->GetPosition(),
+					ocReturn, NULL, ret_var);
 
 				// 新しい基本ブロックを作成(ただしここには到達しない)
-				CreateNewBlock("disconnected_by_return");
+				Parent->CreateNewBlock("disconnected_by_return");
 			}
 			break;
 
 		case r_break:
 		case r_continue:
-			{
-
-				// GetCurrentBreakInfo()/GetCurrentContinueInfo() の戻りは、
-				// このtargetsの分岐先が生成された時点での
-				// このSSA形式のGetCurrentBreakInfo()/GetCurrentContinueInfo()
-				// の戻りと同じでなければならない
-				// (ASSERTはとくにしてないので注意すること)
-
-				tRisseBreakInfo * info =
-							type==r_break?
-								GetCurrentBreakInfo():GetCurrentContinueInfo();
-				RISSE_ASSERT(info != NULL);
-
-				// break 文の作成
-				// 新しい基本ブロックを作成する
-				target =
-					CreateNewBlock(type==r_break?
-									RISSE_WS("break_by_exception"):
-									RISSE_WS("continue_by_exception"));
-
-				// 例外オブジェクトから値を取り出す
-//				tRisseSSAVariable * break_var = NULL;
-//				AddStatement(catch_branch->GetPosition(), ocGetExitTryValue, &break_var, except_var);
-
-				// ジャンプ文を作成
-				tRisseSSAStatement *jump_stmt = AddStatement(catch_branch->GetPosition(), ocJump, NULL);
-
-				// 新しい基本ブロックを作成
-				CreateNewBlock(type==r_break?
-							RISSE_WS("disconnected_by_break"):
-							RISSE_WS("disconnected_by_continue"));
-
-				// ジャンプ文を info に登録
-				info->AddJump(jump_stmt);
-			}
-			break;
-
 		case r_goto:
+			// goto
+			// 新しい基本ブロックを作成する
+			target =
+				Parent->CreateNewBlock(RISSE_WS("goto_by_exception"));
+
+			Parent->AddPendingLabelJump(target, *i);
+
+			// 新しい基本ブロックを作成(ただしここには到達しない)
+			Parent->CreateNewBlock("disconnected_by_goto_or_continue_or_break");
+
+			// target の名前空間を CatchBranchStatement の名前空間で上書きする
+			// 上記 CreateNewBlock はそのSSA形式が最後に保持していた
+			// 基本ブロックの名前空間を最新の名前空間で上書きしてしまうが、
+			// この target は CatchBranchStatement がある名前空間の続きなので
+			// CatchBranchStatement と同じ名前空間にしなければならない。
+			target->TakeLocalNamespaceSnapshot(
+				CatchBranchStatement->GetBlock()->GetLocalNamespace());
 			break;
 		}
 
-		// catch_branch にジャンプ先を追加
-		catch_branch->AddTarget(target);
+		// CatchBranchStatement にジャンプ先を追加
+		CatchBranchStatement->AddTarget(target);
 	}
 
-	CurrentBlock = block_save;
+	Parent->CurrentBlock = block_save;
 }
 //---------------------------------------------------------------------------
 
@@ -579,10 +650,6 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 		AddStatement(pos, ocDefineLazyBlock, &block_var);
 	lazy_stmt->SetName(block_name);
 	lazy_stmt->SetDefinedForm(new_form);
-
-	// 子が生成するかもしれない情報に備えてExitTryBranchTargetLabelsなどをクリア
-	ExitTryBranchTargetLabels.clear();
-	TryIdentifierIndex = risse_size_max;
 
 	// 情報を返す
 	tLazyBlockParam * param = new tLazyBlockParam();

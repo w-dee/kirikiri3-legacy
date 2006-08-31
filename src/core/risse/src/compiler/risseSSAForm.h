@@ -29,75 +29,24 @@ class tRisseSSALocalNamespace;
 class tRisseCodeGenerator;
 class tRisseCodeBlock;
 class tRisseSSAVariableAccessMap;
-//---------------------------------------------------------------------------
-//! @brief	ラベルマップを表すクラス
-//---------------------------------------------------------------------------
-class tRisseSSALabelMap : public tRisseCollectee
-{
-	// TODO: 親コンテキストのラベルマップの継承
-	tRisseSSAForm * Form; //!< このラベルマップを保持する SSA 形式インスタンス
-
-	//! @brief		バインドがまだされていないラベルへのジャンプ
-	struct tPendingLabelJump : public tRisseCollectee
-	{
-		tRisseSSABlock * Block; //!< そのジャンプを含む基本ブロック
-		risse_size Position; //!< ジャンプのあるスクリプト上の位置
-		tRisseString LabelName; //!< ラベル名
-
-		tPendingLabelJump(tRisseSSABlock * block, risse_size pos,
-			const tRisseString & labelname)
-		{
-			Block = block;
-			Position = pos;
-			LabelName = labelname;
-		}
-	};
-
-	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
-		//!< ラベルのマップのtypedef
-	typedef gc_vector<tPendingLabelJump> tPendingLabelJumps;
-		//!< バインドがまだされていないラベルへのジャンプのリストのtypedef
-
-	tLabelMap LabelMap; //!< ラベルのマップ
-	tPendingLabelJumps PendingLabelJumps; //!< バインドがまだされていないラベルへのジャンプのリスト
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		form		このラベルマップを保持する SSA 形式インスタンス
-	tRisseSSALabelMap(tRisseSSAForm *form) { Form = form;}
-
-	//! @brief		ラベルマップを追加する
-	//! @param		labelname		ラベル名
-	//! @param		block			基本ブロック
-	//! @param		pos				基本ブロックのあるスクリプト上の位置
-	//! @note		すでに同じ名前のラベルが存在していた場合は例外が発生する
-	void AddMap(const tRisseString &labelname, tRisseSSABlock * block, risse_size pos);
-
-	//! @brief		未バインドのラベルジャンプを追加する
-	//! @param		block			そのジャンプを含む基本ブロック
-	//! @param		pos				ジャンプのあるスクリプト上の位置
-	//! @param		labelname		ラベル名
-	void AddPendingLabelJump(tRisseSSABlock * block, risse_size pos,
-			const tRisseString & labelname);
-
-	//! @brief		未バインドのラベルジャンプをすべて解決する
-	void BindAll();
-};
-//---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 //! @brief	break あるいは continue の情報
+//! @note	break や continue は goto と同様、ラベルへのジャンプとして扱われている
 //---------------------------------------------------------------------------
 class tRisseBreakInfo : public tRisseCollectee
 {
-	typedef gc_vector<tRisseSSAStatement *> tPendingJumps;
-	tPendingJumps PendingJumps;
+	tRisseSSAForm * Form; //!< この情報を保持するSSA形式インスタンス
+
+	typedef gc_vector<tRisseSSABlock *> tPendingJumpSourceBlocks;
+	tPendingJumpSourceBlocks PendingJumpSourceBlocks;
 	bool CanReceiveValue; //!< この break が値を伴うことができるか
+	tRisseString JumpTargetLabel; //!< ジャンプ先のラベル名
 
 public:
 	//! @brief		コンストラクタ
-	tRisseBreakInfo() { CanReceiveValue = false;}
+	//! @param		form	この情報を保持するSSA形式インスタンス
+	tRisseBreakInfo(tRisseSSAForm * form);
 
 	//! @brief		この break が値を伴うことができるかを設定する
 	//! @param		b この break が値を伴うことができるか
@@ -107,11 +56,15 @@ public:
 	//! @return		この break が値を伴うことができるか
 	bool GetCanReceiveValue() const { return CanReceiveValue; }
 
-	//! @brief		未バインドのジャンプを追加する
-	//! @param		jump_stmt		ジャンプ文
-	void AddJump(tRisseSSAStatement * jump_stmt);
+	//! @brief		この break のジャンプ先のラベル名を得る
+	//! @return		この break のジャンプ先のラベル名
+	const tRisseString & GetJumpTargetLabel() const { return JumpTargetLabel; }
 
-	//! @brief		未バインドのジャンプをすべて解決する
+	//! @brief		未バインドのジャンプを追加する
+	//! @param		jump_block		ジャンプもとの基本ブロック
+	void AddJump(tRisseSSABlock * jump_block);
+
+	//! @brief		未バインドのジャンプをすべてバインドする
 	//! @param		target		ターゲットのブロック
 	void BindAll(tRisseSSABlock * target);
 };
@@ -185,13 +138,35 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseSSAForm * Parent; //!< この SSA 形式インスタンスの親インスタンス
 	bool UseParentFrame; //!< 親SSA形式インスタンスのフレームを使うかどうか
 	gc_vector<tRisseSSAForm *> Children; //!< この SSA形式インスタンスの子インスタンスの配列
+
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
 		//!< 共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
+	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
+		//!< ラベルのマップのtypedef
+
+	//! @brief		バインドがまだされていないラベルへのジャンプ
+	struct tPendingLabelJump : public tRisseCollectee
+	{
+		tRisseSSABlock * SourceBlock; //!< ジャンプもとの基本ブロック
+		tRisseString LabelName; //!< ラベル名
+
+		tPendingLabelJump(tRisseSSABlock * source_block,
+			const tRisseString & labelname)
+		{
+			SourceBlock = source_block;
+			LabelName = labelname;
+		}
+	};
+
+	typedef gc_vector<tPendingLabelJump> tPendingLabelJumps;
+		//!< バインドがまだされていないラベルへのジャンプのリストのtypedef
+	tLabelMap *LabelMap; //!< ラベルのマップ
+	tPendingLabelJumps * PendingLabelJumps; //!< バインドがまだされていないラベルへのジャンプのリスト
+
 	tSharedVariableMap SharedVariableMap; //!< 共有されている変数のマップ
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
-	tRisseSSALabelMap * LabelMap; //!< ラベルマップ
 	tRisseSSABlock * EntryBlock; //!< エントリーSSA基本ブロック
 	tRisseSSABlock * CurrentBlock; //!< 現在変換中の基本ブロック
 
@@ -201,16 +176,21 @@ class tRisseSSAForm : public tRisseCollectee
 
 	bool CanReturn; //!< このSSA形式からはreturn文で戻ることが可能
 	typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
-		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
+		//!< このSSA形式の親が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
 	tExitTryBranchTargetLabels ExitTryBranchTargetLabels;
-		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)
+		//!< このSSA形式の親が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)
+	risse_size TryIdentifierIndex; //!< このSSA形式がtryブロックなどの場合、親SSA形式内の該当tryブロックのtry識別子を表す
+	tRisseSSAStatement * CatchBranchStatement;
+		//!< 親SSA形式のこのSSA形式を呼び出している箇所にあるCatchBranchの文(NULL=そんな文はない)
+	tRisseSSAVariable * ExceptionValue;
+		//!< 親SSA形式のtrycallの戻り値(例外オブジェクトを持っている)
+
 
 	tRisseSSAVariable * FunctionCollapseArgumentVariable; //!< 関数引数の無名の * を保持している変数
 
 	tRisseCodeGenerator * CodeGenerator; //!< バイトコードジェネレータのインスタンス
 	tRisseCodeBlock * CodeBlock; //!< コードブロック
 	risse_size CodeBlockIndex; //!< コードブロックのスクリプトブロック内でのインデックス
-	risse_size TryIdentifierIndex; //!< このSSA形式がtryブロックなどの場合、親SSA形式内の該当tryブロックのtry識別子を表す
 
 public:
 	//! @brief		コンストラクタ
@@ -224,6 +204,9 @@ public:
 	//! @brief		AST を SSA 形式に変換する
 	//! @param		root	ASTのルートノード
 	void Generate(const tRisseASTNode * root);
+
+	//! @brief		SSA形式の最適化と通常形式への変換
+	void OptimizeAndUnSSA();
 
 	//! @brief		コンパイラインスタンスを得る
 	//! @return		コンパイラインスタンス
@@ -249,10 +232,6 @@ public:
 	//! @return		ローカル名前空間
 	tRisseSSALocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
 
-	//! @brief		ラベルマップを得る
-	//! @return		ラベルマップ
-	tRisseSSALabelMap * GetLabelMap() const { return LabelMap; }
-
 	//! @brief		現在変換中の基本ブロックを得る
 	//! @return		現在変換中の基本ブロック
 	tRisseSSABlock * GetCurrentBlock() const { return CurrentBlock; }
@@ -263,12 +242,19 @@ public:
 	tRisseSSAVariable * GetFunctionCollapseArgumentVariable() const
 		{ return FunctionCollapseArgumentVariable; }
 
+	//! @brief		Try識別子のインデックスを設定する
+	//! @param		idx		Try識別子のインデックス
+	void SetTryIdentifierIndex(risse_size idx) { TryIdentifierIndex = idx; }
+
+	//! @brief		Try識別子のインデックスを得る
+	//! @return		Try識別子のインデックス(risse_size_max が帰った場合は無効)
+	risse_size GetTryIdentifierIndex() const { return TryIdentifierIndex; }
+
+public:
 	//! @brief		新しい基本ブロックを作成する
 	//! @param		name	基本ブロック名プリフィックス
-	//! @param		pred	直前の基本ブロック
-	//!						(NULLの場合は直前の基本ブロックは設定されない)
 	//! @return		新しく作成された基本ブロック
-	tRisseSSABlock * CreateNewBlock(const tRisseString & name, tRisseSSABlock * pred = NULL);
+	tRisseSSABlock * CreateNewBlock(const tRisseString & name);
 
 	//! @brief		ExitTryBranchTargetLabels にマップを追加する
 	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
@@ -319,6 +305,21 @@ public:
 		AddStatement(pos, code, &ret_var, using1, using2, using3, using4);
 		return ret_var;
 	}
+
+	//! @brief		ラベルマップを追加する
+	//! @param		labelname		ラベル名
+	//! @param		block			基本ブロック
+	//! @note		すでに同じ名前のラベルが存在していた場合は例外が発生する
+	void AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block);
+
+	//! @brief		未バインドのラベルジャンプを追加する
+	//! @param		jump_block		ジャンプもとの基本ブロック
+	//! @param		labelname		ジャンプ先のラベル名
+	void AddPendingLabelJump(tRisseSSABlock * jump_block,
+			const tRisseString & labelname);
+
+	//! @brief		未バインドのラベルジャンプをすべて解決する
+	void BindAllLabels();
 
 	//! @brief		現在の基本ブロックにreturn文を生成する
 	//! @param		pos		スクリプト上の位置
@@ -373,13 +374,21 @@ public:
 	//! @param		var			breakあるいはcontinueに伴った値 (NULL=voidを返す)
 	void AddBreakOrContinueStatement(bool is_break, risse_size pos, tRisseSSAVariable * var);
 
-	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを作成する
-	//! @param		catch_branch	ocCatchBranch文(すでに2つのused
-	//!								それぞれ例外が発生しなかったときと例外が
-	//!								発生したときのジャンプ先が登録されていること)
-	//! @param		except_var		例外オブジェクトを示す変数
-	//! @note		CurrentBlock は保存される
-	void AddCatchBranchTargets(tRisseSSAStatement * catch_branch, tRisseSSAVariable * except_var);
+	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを親SSAインスタンス内に作成する
+	//! @note		親SSAインスタンス内のCurrentBlock は保存される
+	void AddCatchBranchTargets();
+
+	//! @brief		CatchBranch文を設定する
+	//! @param		catch_branch_stmt	ocCatchBranch文(すでに2つのused
+	//!									それぞれ例外が発生しなかったときと例外が
+	//!									発生したときのジャンプ先が登録されていること)
+	//! @param		except_value		例外オブジェクトを示す変数
+	void SetCatchBranchStatement(tRisseSSAStatement * catch_branch_stmt,
+					tRisseSSAVariable * except_value)
+	{
+		CatchBranchStatement = catch_branch_stmt;
+		ExceptionValue = except_value;
+	}
 
 
 	//! @param		変数を共有する
@@ -494,14 +503,6 @@ public:
 	//! @brief		コードブロックのスクリプトブロック内でのインデックスを得る
 	//! @return		コードブロックのスクリプトブロック内でのインデックス
 	risse_size GetCodeBlockIndex() const { return CodeBlockIndex; }
-
-	//! @brief		Try識別子のインデックスを設定する
-	//! @param		idx		Try識別子のインデックス
-	void SetTryIdentifierIndex(risse_size idx) { TryIdentifierIndex = idx; }
-
-	//! @brief		Try識別子のインデックスを得る
-	//! @return		Try識別子のインデックス(risse_size_max が帰った場合は無効)
-	risse_size GetTryIdentifierIndex() const { return TryIdentifierIndex; }
 
 	//! @brief		バイトコードを生成する
 	void GenerateCode() const;

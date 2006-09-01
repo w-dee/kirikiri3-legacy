@@ -97,7 +97,10 @@ void tRisseCodeInterpreter::Execute(
 	//! @brief		レジスタのオペランド -> レジスタ/定数インデックスへの変換
 	#define CI(num) (num)
 
-
+	enum tExceptionState
+	{ esNone, esException, esNonException } exception_state = esNone;
+		//!< ocTryFuncCall で例外が発生したかどうかはこの変数が
+		//!< 示し、 ocCatchBranch がこれをみて分岐を行う。
 
 	// ループ
 	while(true)
@@ -204,6 +207,15 @@ void tRisseCodeInterpreter::Execute(
 			{
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
+
+				RISSE_ASSERT(exception_state == esNone);
+				/*
+					ocCatchBranch は exception_state を esNone に設定するので
+					必ずここでは esNone であるはずである。ocTryFuncCall と
+					ocCatchBranch は必ず対であり、間にほかの ocTryFuncCall や
+					ocCatchBranch が挟まってはならない （間に他のocCopy文等が挟まることはある)
+				*/
+
 				// code[1] = 結果格納先
 				// code[2] = メソッドオブジェクト
 				// code[3] = フラグ
@@ -215,8 +227,8 @@ void tRisseCodeInterpreter::Execute(
 				for(risse_uint32 i = 0; i < code[4]; i++)
 					args.argv[i] = &AR(code[i+5]);
 
-				bool raised = false;
 				AR(code[1]).Clear();
+				exception_state = esNonException;
 				try
 				{
 					AR(code[2]).FuncCall(NULL,
@@ -225,21 +237,12 @@ void tRisseCodeInterpreter::Execute(
 				catch(const eRisseScriptException &e)
 				{
 					AR(code[1]) = e.GetValue();
-					raised = true;
+					exception_state = esException;
 				}
 				catch(...)
 				{
-					raised = true;
+					exception_state = esException;
 				}
-				if(AR(code[1]).GetType() == tRisseVariant::vtVoid)
-					AR(code[1]).SetVoidPointer(raised ? this: NULL);
-				// 例外が発生したときの例外オブジェクトは code[1] の指すレジスタに
-				// 格納される。例外が発生しなかった場合は void になるが、
-				// すると void が投げられたときに例外が発生したのかしなかったのか
-				// 分からない。そこで、tRisseVariant::SetVoidPointer を使って
-				// ポインタ (tRisseVariant が void の時にだけもてる特別な内部的な
-				// ステート) をnullあるいは非nullを設定する。
-				// この後に続く ocCatchBranch はこの情報を見て分岐を行う。
 				code += code[4] + 5;
 				break;
 			}
@@ -329,20 +332,18 @@ void tRisseCodeInterpreter::Execute(
 		case ocCatchBranch		: // cbranch 例外catch用の分岐
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < constssize);
-			RISSE_ASSERT(AC(code[2]).GetType() == tRisseVariant::vtVoid);
-			RISSE_ASSERT(AC(code[2]).GetVoidPointer() != NULL);
+			RISSE_ASSERT(AC(code[2]).GetType() == tRisseVariant::vtObject);
+			RISSE_ASSERT(AC(code[2]).GetObjectInterface() != NULL);
 			RISSE_ASSERT(code[3] >= 2);
+			RISSE_ASSERT(exception_state != esNone); // 例外ステートは設定されているはず
+
 			{
 				risse_uint32 target_index;
 				tRisseVariant::tType except_obj_type = AR(code[1]).GetType();
-				if(except_obj_type == tRisseVariant::vtVoid)
+				if(exception_state == esNonException)
 				{
-					// vtVoid の場合は、void が投げられらのか、それともそもそも
-					// 例外が発生していないのかを区別するために signal 状態を見る
-					if(AR(code[1]).GetVoidPointer() != NULL)
-						target_index = 1; // 例外が発生していた
-					else
-						target_index = 0; // 例外は発生していない
+					// 直前の ocTryFuncCall では例外は発生しなかった
+					target_index = 0; // 例外が発生しなかった場合の飛び先
 				}
 				else if(except_obj_type == tRisseVariant::vtObject)
 				{
@@ -352,14 +353,14 @@ void tRisseCodeInterpreter::Execute(
 					try
 					{
 						tRisseVariant v;
-						AR(code[1]).GetObjectIntf()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
-						RISSE_ASSERT(v.GetType() == tRisseVariant::vtVoid);
-						RISSE_ASSERT(v.GetVoidPointer() != NULL);
+						AR(code[1]).GetObjectInterface()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
+						RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
+						RISSE_ASSERT(v.GetObjectInterface() != NULL);
 						tRisseExitTryExceptionClass * record =
-							reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetVoidPointer());
+							reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetObjectInterface());
 						// レコードに記録されている try 識別子が この branch の try 識別子と
 						// 一致するかどうかを調べる
-						if(AC(code[2]).GetVoidPointer() == record->GetIdentifier())
+						if(AC(code[2]).GetObjectInterface() == record->GetIdentifier())
 						{
 							// 一致した
 							target_index = record->GetBranchTargetIndex();
@@ -375,6 +376,7 @@ void tRisseCodeInterpreter::Execute(
 					{
 						target_index = 1; // 例外が発生した(たぶんプロパティを読み込めなかった)
 					}
+
 					if(target_index == static_cast<risse_uint32>(-1L))
 							eRisseScriptException::Throw(RISSE_WS("script exception"),
 								NULL, 0, AR(code[1]));
@@ -383,6 +385,7 @@ void tRisseCodeInterpreter::Execute(
 				{
 					target_index = 1; // 例外が発生していた
 				}
+				exception_state = esNone; // 例外ステートは esNone に設定しておく
 				code += static_cast<risse_int32>(code[4 + target_index]);
 			}
 			break;
@@ -407,9 +410,9 @@ void tRisseCodeInterpreter::Execute(
 			{
 				// 暫定実装
 				const tRisseVariant & try_id = AC(code[2]);
-				RISSE_ASSERT(try_id.GetType() == tRisseVariant::vtVoid);
-				RISSE_ASSERT(try_id.GetVoidPointer() != NULL);
-				tRisseVariant val(new tRisseExitTryExceptionClass(try_id.GetVoidPointer(),
+				RISSE_ASSERT(try_id.GetType() == tRisseVariant::vtObject);
+				RISSE_ASSERT(try_id.GetObjectInterface() != NULL);
+				tRisseVariant val(new tRisseExitTryExceptionClass(try_id.GetObjectInterface(),
 									code[3],
 									CI(code[1]) == RisseInvalidRegNum ? NULL : &AR(code[1])));
 				eRisseScriptException::Throw(RISSE_WS("return by exit try exception"),
@@ -425,11 +428,11 @@ void tRisseCodeInterpreter::Execute(
 				// code[2] は tRisseExitExceptionClass であると見なして良い
 				tRisseVariant v;
 				RISSE_ASSERT(AR(code[2]).GetType() == tRisseVariant::vtObject);
-				AR(code[2]).GetObjectIntf()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
+				AR(code[2]).GetObjectInterface()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
 				RISSE_ASSERT(v.GetType() == tRisseVariant::vtVoid);
-				RISSE_ASSERT(v.GetVoidPointer() != NULL);
+				RISSE_ASSERT(v.GetObjectInterface() != NULL);
 				tRisseExitTryExceptionClass * record =
-					reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetVoidPointer());
+					reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetObjectInterface());
 				RISSE_ASSERT(record->GetValue() != NULL);
 				AR(code[1]) = *record->GetValue();
 				code += 3;

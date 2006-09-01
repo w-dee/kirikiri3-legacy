@@ -154,8 +154,8 @@ void tRisseExitTryExceptionClass::Operate(
 		// tRisseExitTryExceptionClass 型を返す
 		if(result)
 		{
-			result->Clear();
-			result->SetVoidPointer((tRisseExitTryExceptionClass*)this);
+			*result = reinterpret_cast<tRisseObjectInterface*>
+				((tRisseExitTryExceptionClass*)this);
 		}
 	}
 }

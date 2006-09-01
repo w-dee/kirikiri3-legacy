@@ -47,7 +47,7 @@ void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
 	const tRisseMethodArgument & bargs,
 	const tRisseVariant * This)
 {
-	tRisseObjectInterface * intf = GetObjectIntf();
+	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Operate(ocFuncCall, ret, tRisseString::GetEmptyString(),

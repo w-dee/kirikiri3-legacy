@@ -113,8 +113,15 @@ void tRisseCodeBlock::Fixup(tRisseScriptBlockBase * sb)
 	for(risse_size i = 0 ; i < TryIdentifierRelocationSize; i++)
 	{
 		Consts[TryIdentifierRelocations[i].first].Clear();
-		Consts[TryIdentifierRelocations[i].first].SetVoidPointer(
-			sb->GetTryIdentifierAt(TryIdentifierRelocations[i].second)); // 再配置を行う
+		Consts[TryIdentifierRelocations[i].first] =
+			reinterpret_cast<tRisseObjectInterface *>
+			(sb->GetTryIdentifierAt(TryIdentifierRelocations[i].second));
+				// 再配置を行う。GetTryIdentifierAt の戻りは void * で
+				// そのポインタは tRisseObjectInterface ではないが、
+				// 実装上の都合 void * を tRisseObjectInterface に
+				// reinterpret_cast して使う。このポインタは識別子代わりに
+				// 使う物で、このポインタの指す先に実際にアクセスを行うような
+				// ことは行わないのでこれでよいが、注意のこと。
 	}
 
 	CodeBlockRelocations = NULL; // もう再配置は行った

@@ -73,11 +73,6 @@ protected:
 	struct tVoid
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 0 固定
-		union
-		{
-			risse_size VoidIndex; //!< インデックス (内部的に用いられる)
-			void * VoidPointer; //!< ポインタ (内部的に用いられる)
-		};
 	};
 
 	//! @brief integer ストレージ型
@@ -144,7 +139,7 @@ protected:
 public:
 	//! @brief tRisseObjectInterfaceへのポインタを取得 @return tRisseObjectInterfaceへのポインタ
 	//! @note Intfをいじる場合は常にこのメソッドを使うこと
-	tRisseObjectInterface * GetObjectIntf() const
+	tRisseObjectInterface * GetObjectInterface() const
 	{
 		RISSE_ASSERT(GetType() == vtObject);
 		tRisseObjectInterface * ret = reinterpret_cast<tRisseObjectInterface*>(
@@ -244,7 +239,7 @@ public: // コンストラクタ/代入演算子
 	{
 		switch(ref.GetType())
 		{
-		case vtVoid:		*reinterpret_cast<tVoid*>(Storage) = *reinterpret_cast<const tVoid*>(ref.Storage);	break;
+		case vtVoid:		Clear();					break;
 		case vtInteger:		*this = ref.AsInteger();	break;
 		case vtReal:		*this = ref.AsReal();		break;
 		case vtBoolean:		*this = ref.AsBoolean();	break;
@@ -379,23 +374,6 @@ public: // 初期化
 		Type = vtVoid;
 	}
 
-public: // Void関連
-
-	//! @brief VoidIndex を得る @return VoidIndex
-	risse_size GetVoidIndex() const { RISSE_ASSERT(GetType() == vtVoid);
-			return reinterpret_cast<const tVoid*>(Storage)->VoidIndex; }
-	//! @brief VoidIndex を設定する @param s VoidIndex
-	void SetVoidIndex(risse_size s) { RISSE_ASSERT(GetType() == vtVoid);
-			reinterpret_cast<tVoid*>(Storage)->VoidIndex = s; }
-
-	//! @brief VoidPointer を得る @return VoidPointer
-	void * GetVoidPointer() const { RISSE_ASSERT(GetType() == vtVoid);
-			return reinterpret_cast<const tVoid*>(Storage)->VoidPointer; }
-	//! @brief VoidPointer を設定する @param s VoidPointer
-	void SetVoidPointer(void * s) { RISSE_ASSERT(GetType() == vtVoid);
-			reinterpret_cast<tVoid*>(Storage)->VoidPointer = s; }
-
-
 public: // Object関連
 	//! @brief		コンテキストを設定する
 	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
@@ -412,7 +390,7 @@ public: // Object関連
 	bool IsNull() const
 	{
 		if(GetType() != vtObject) return false;
-		return GetObjectIntf() == NULL;
+		return GetObjectInterface() == NULL;
 	}
 
 public: // 演算子

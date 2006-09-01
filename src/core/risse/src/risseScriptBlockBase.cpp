@@ -155,7 +155,8 @@ risse_size tRisseScriptBlockBase::AddTryIdentifier()
 		// TryIdentifiers に追加している。これにより、TryIdentifiers は独立した
 		// ポインタをそれぞれが持つことになり、識別に使える。これは、
 		//  * new で確保される値は常に独立したポインタの値になる
-		//  * ポインタとしては vtVoid の際に void * へのポインタ(VoidPointer)を持つことができる
+		//  * ポインタとしては vtObject のときに tRisseObjectInterface へのポインタを
+		//    持つ頃ができる
 		// という理由による。
 		// tRisseString も新規確保した文字列は独立した値になるが
 		// 同じ文字列インスタンスが常に同じポインタを持ち続けるかという保証がないので

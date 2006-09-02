@@ -90,58 +90,6 @@ tRisseString tRisseASTNode_OneExpression::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncCall::GetChildNameAt(risse_size index) const
-{
-	if(index == 0) return RISSE_WS("function");
-	index --;
-	if(index < inherited::GetChildCount())
-	{
-		risse_char buf[40];
-		return tRisseString(RISSE_WS("argument")) + Risse_int64_to_str(index, buf);
-	}
-	index -= inherited::GetChildCount();
-	if(index < Blocks.size())
-	{
-		risse_char buf[40];
-		return tRisseString(RISSE_WS("block")) + Risse_int64_to_str(index, buf);
-	}
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncCall::GetDumpComment() const
-{
-	tRisseString ret;
-	if(CreateNew) ret += RISSE_WS("create_new");
-	if(Omit) { if(!ret.IsEmpty()) ret += RISSE_WC(' '); ret += RISSE_WS("omit_arg"); }
-	return ret;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncCallArg::GetChildNameAt(risse_size index) const
-{
-	if(index == 0)
-		return RISSE_WS("expression");
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncCallArg::GetDumpComment() const
-{
-	if(Expand)
-		return RISSE_WS("expand");
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_Context::GetDumpComment() const
 {
 	return RisseASTContextTypeNames[ContextType];
@@ -448,6 +396,58 @@ tRisseString tRisseASTNode_Catch::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncCall::GetChildNameAt(risse_size index) const
+{
+	if(index == 0) return RISSE_WS("function");
+	index --;
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("argument")) + Risse_int64_to_str(index, buf);
+	}
+	index -= inherited::GetChildCount();
+	if(index < Blocks.size())
+	{
+		risse_char buf[40];
+		return tRisseString(RISSE_WS("block")) + Risse_int64_to_str(index, buf);
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncCall::GetDumpComment() const
+{
+	tRisseString ret;
+	if(CreateNew) ret += RISSE_WS("create_new");
+	if(Omit) { if(!ret.IsEmpty()) ret += RISSE_WC(' '); ret += RISSE_WS("omit_arg"); }
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncCallArg::GetChildNameAt(risse_size index) const
+{
+	if(index == 0)
+		return RISSE_WS("expression");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_FuncCallArg::GetDumpComment() const
+{
+	if(Expand)
+		return RISSE_WS("expand");
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseASTNode_FuncDecl::GetChildNameAt(risse_size index) const
 {
 	if(index == inherited::GetChildCount() + Blocks.size()) return RISSE_WS("body");
@@ -645,150 +645,6 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 
 	// このノードは答えを返さない
 	return NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
-							tRisseSSAForm *form, void * param) const
-{
-	// 関数を表す式を得る
-	tRisseSSAVariable * func_var = Expression->GenerateReadSSA(form);
-
-	// 引数の列挙用配列
-	gc_vector<tRisseSSAVariable *> arg_vec;
-	arg_vec.reserve(GetChildCount());
-
-	// ... が指定されていなければ引数を処理
-	risse_uint32 exp_flag = 0; // 展開フラグ
-	if(!Omit)
-	{
-		// 引数を処理する
-		risse_uint32 exp_flag_bit = 1; // 展開フラグ用ビット
-		for(risse_size i = 0; i < inherited::GetChildCount(); i++, exp_flag_bit <<= 1)
-		{
-			if(i >= RisseMaxArgCount)
-			{
-				// 現状、関数の引数に列挙できる数はRisseMaxArgCount個までとなっている
-				// ので、それを超えるとエラーになる
-				eRisseCompileError::Throw(
-					tRisseString(RISSE_WS_TR("Too many function arguments")),
-						form->GetScriptBlock(), GetPosition());
-			}
-
-			RISSE_ASSERT(!(inherited::GetChildAt(i) &&
-				inherited::GetChildAt(i)->GetType() != antFuncCallArg));
-			tRisseASTNode_FuncCallArg * arg =
-				reinterpret_cast<tRisseASTNode_FuncCallArg *>(
-												inherited::GetChildAt(i));
-			if(arg)
-			{
-				// 引数が省略されていない
-				tRisseSSAVariable * arg_var;
-
-				if(arg->GetExpression())
-				{
-					// 式がある
-					if(arg->GetExpand()) exp_flag |= exp_flag_bit; // 展開
-
-					// 引数のコードを生成
-					arg_var = arg->GetExpression()->GenerateReadSSA(form);
-				}
-				else
-				{
-					// 式がない
-					// この場合は別に引数が省略されているのではなくて
-					// * だけがそこに指定されている場合
-					// (無名の引数配列を意味する)
-					RISSE_ASSERT(arg->GetExpand() != false); // arg->GetExpand() は真のはず
-					arg_var = form->GetFunctionCollapseArgumentVariable();
-					if(!arg_var)
-					{
-						// 関数宣言の引数に無名の * が無い
-						eRisseCompileError::Throw(
-							tRisseString(
-							RISSE_WS_TR("No anonymous collapsed arguments defined in this method")),
-								form->GetScriptBlock(), GetPosition());
-					}
-				}
-
-				// 関数呼び出し文の Used に追加するために配列に追加
-				arg_vec.push_back(arg_var);
-			}
-			else
-			{
-				// 引数が省略されているので void を追加する
-				tRisseSSAVariable * void_var =
-					form->AddConstantValueStatement(GetPosition(), tRisseVariant());
-
-				// 関数呼び出し文の Used に追加するために配列に追加
-				arg_vec.push_back(void_var);
-			}
-		}
-	}
-	else
-	{
-		exp_flag = RisseFuncCallFlag_Omitted; //  関数呼び出しは ... を伴っている
-	}
-
-	// ブロック引数を処理
-	tRisseSSAVariableAccessMap * access_map = NULL;
-	if(Blocks.size() > 0)
-	{
-		// アクセスマップを作成する
-		access_map = form->CreateAccessMap(GetPosition());
-	}
-
-	if(Blocks.size() > RisseMaxArgCount)
-	{
-		// 現状、関数のブロック引数に列挙できる数は
-		// RisseMaxArgCount 個までとなっている
-		// (普通の引数と違って本来ブロック引数の数には制限が無いはずだが
-		//  将来的にブロック引数にも普通の引数のように展開フラグなどを
-		//  つけるかもしれないので、普通の引数と同じ制限を付ける)
-		eRisseCompileError::Throw(
-			tRisseString(RISSE_WS_TR("Too many function block arguments")),
-				form->GetScriptBlock(), GetPosition());
-	}
-
-	for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
-	{
-		RISSE_ASSERT((*i)->GetType() == antFuncDecl);
-		tRisseASTNode_FuncDecl * block_arg =
-			reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
-
-		// ブロックの中身を 遅延評価ブロックとして評価する
-		tRisseSSAVariable * lazyblock_var =
-			block_arg->GenerateFuncDecl(form, access_map);
-
-		// 配列にpush
-		arg_vec.push_back(lazyblock_var);
-	}
-
-	// 遅延評価ブロックで使用された変数の処理
-	if(access_map) form->ListVariablesForLazyBlock(GetPosition(), access_map);
-
-	// 関数呼び出しの文を生成する
-	tRisseSSAVariable * returned_var = NULL;
-	tRisseSSAStatement * call_stmt =
-		form->AddStatement(GetPosition(), CreateNew ? ocNew : ocFuncCall,
-					&returned_var, func_var);
-
-	call_stmt->SetFuncExpandFlags(exp_flag);
-	call_stmt->SetBlockCount(Blocks.size());
-
-	for(gc_vector<tRisseSSAVariable *>::iterator i = arg_vec.begin();
-		i != arg_vec.end(); i++)
-	{
-		call_stmt->AddUsed(*i);
-	}
-
-	// アクセスマップのクリーンアップを行う
-	if(access_map) form->CleanupAccessMap(GetPosition(), access_map);
-
-	// 関数の戻り値を返す
-	return returned_var;
 }
 //---------------------------------------------------------------------------
 
@@ -2266,6 +2122,150 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 
 	// このノードは答えを返さない
 	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
+							tRisseSSAForm *form, void * param) const
+{
+	// 関数を表す式を得る
+	tRisseSSAVariable * func_var = Expression->GenerateReadSSA(form);
+
+	// 引数の列挙用配列
+	gc_vector<tRisseSSAVariable *> arg_vec;
+	arg_vec.reserve(GetChildCount());
+
+	// ... が指定されていなければ引数を処理
+	risse_uint32 exp_flag = 0; // 展開フラグ
+	if(!Omit)
+	{
+		// 引数を処理する
+		risse_uint32 exp_flag_bit = 1; // 展開フラグ用ビット
+		for(risse_size i = 0; i < inherited::GetChildCount(); i++, exp_flag_bit <<= 1)
+		{
+			if(i >= RisseMaxArgCount)
+			{
+				// 現状、関数の引数に列挙できる数はRisseMaxArgCount個までとなっている
+				// ので、それを超えるとエラーになる
+				eRisseCompileError::Throw(
+					tRisseString(RISSE_WS_TR("Too many function arguments")),
+						form->GetScriptBlock(), GetPosition());
+			}
+
+			RISSE_ASSERT(!(inherited::GetChildAt(i) &&
+				inherited::GetChildAt(i)->GetType() != antFuncCallArg));
+			tRisseASTNode_FuncCallArg * arg =
+				reinterpret_cast<tRisseASTNode_FuncCallArg *>(
+												inherited::GetChildAt(i));
+			if(arg)
+			{
+				// 引数が省略されていない
+				tRisseSSAVariable * arg_var;
+
+				if(arg->GetExpression())
+				{
+					// 式がある
+					if(arg->GetExpand()) exp_flag |= exp_flag_bit; // 展開
+
+					// 引数のコードを生成
+					arg_var = arg->GetExpression()->GenerateReadSSA(form);
+				}
+				else
+				{
+					// 式がない
+					// この場合は別に引数が省略されているのではなくて
+					// * だけがそこに指定されている場合
+					// (無名の引数配列を意味する)
+					RISSE_ASSERT(arg->GetExpand() != false); // arg->GetExpand() は真のはず
+					arg_var = form->GetFunctionCollapseArgumentVariable();
+					if(!arg_var)
+					{
+						// 関数宣言の引数に無名の * が無い
+						eRisseCompileError::Throw(
+							tRisseString(
+							RISSE_WS_TR("No anonymous collapsed arguments defined in this method")),
+								form->GetScriptBlock(), GetPosition());
+					}
+				}
+
+				// 関数呼び出し文の Used に追加するために配列に追加
+				arg_vec.push_back(arg_var);
+			}
+			else
+			{
+				// 引数が省略されているので void を追加する
+				tRisseSSAVariable * void_var =
+					form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+
+				// 関数呼び出し文の Used に追加するために配列に追加
+				arg_vec.push_back(void_var);
+			}
+		}
+	}
+	else
+	{
+		exp_flag = RisseFuncCallFlag_Omitted; //  関数呼び出しは ... を伴っている
+	}
+
+	// ブロック引数を処理
+	tRisseSSAVariableAccessMap * access_map = NULL;
+	if(Blocks.size() > 0)
+	{
+		// アクセスマップを作成する
+		access_map = form->CreateAccessMap(GetPosition());
+	}
+
+	if(Blocks.size() > RisseMaxArgCount)
+	{
+		// 現状、関数のブロック引数に列挙できる数は
+		// RisseMaxArgCount 個までとなっている
+		// (普通の引数と違って本来ブロック引数の数には制限が無いはずだが
+		//  将来的にブロック引数にも普通の引数のように展開フラグなどを
+		//  つけるかもしれないので、普通の引数と同じ制限を付ける)
+		eRisseCompileError::Throw(
+			tRisseString(RISSE_WS_TR("Too many function block arguments")),
+				form->GetScriptBlock(), GetPosition());
+	}
+
+	for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
+	{
+		RISSE_ASSERT((*i)->GetType() == antFuncDecl);
+		tRisseASTNode_FuncDecl * block_arg =
+			reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
+
+		// ブロックの中身を 遅延評価ブロックとして評価する
+		tRisseSSAVariable * lazyblock_var =
+			block_arg->GenerateFuncDecl(form, access_map);
+
+		// 配列にpush
+		arg_vec.push_back(lazyblock_var);
+	}
+
+	// 遅延評価ブロックで使用された変数の処理
+	if(access_map) form->ListVariablesForLazyBlock(GetPosition(), access_map);
+
+	// 関数呼び出しの文を生成する
+	tRisseSSAVariable * returned_var = NULL;
+	tRisseSSAStatement * call_stmt =
+		form->AddStatement(GetPosition(), CreateNew ? ocNew : ocFuncCall,
+					&returned_var, func_var);
+
+	call_stmt->SetFuncExpandFlags(exp_flag);
+	call_stmt->SetBlockCount(Blocks.size());
+
+	for(gc_vector<tRisseSSAVariable *>::iterator i = arg_vec.begin();
+		i != arg_vec.end(); i++)
+	{
+		call_stmt->AddUsed(*i);
+	}
+
+	// アクセスマップのクリーンアップを行う
+	if(access_map) form->CleanupAccessMap(GetPosition(), access_map);
+
+	// 関数の戻り値を返す
+	return returned_var;
 }
 //---------------------------------------------------------------------------
 

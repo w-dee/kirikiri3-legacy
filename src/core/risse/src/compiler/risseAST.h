@@ -62,8 +62,6 @@ namespace Risse
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Context		)		//!< コンテキスト
-	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
-	RISSE_AST_ENUM_ITEM(ant, FuncCallArg	)		//!< 関数呼び出しの引数
 	RISSE_AST_ENUM_ITEM(ant, ExprStmt		)		//!< 式のみのステートメント
 	RISSE_AST_ENUM_ITEM(ant, Factor			)		//!< 項
 	RISSE_AST_ENUM_ITEM(ant, VarDecl		)		//!< 変数宣言
@@ -93,6 +91,8 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Case			)		//!< case / default
 	RISSE_AST_ENUM_ITEM(ant, Try			)		//!< try
 	RISSE_AST_ENUM_ITEM(ant, Catch			)		//!< catch
+	RISSE_AST_ENUM_ITEM(ant, FuncCall		)		//!< 関数呼び出し
+	RISSE_AST_ENUM_ITEM(ant, FuncCallArg	)		//!< 関数呼び出しの引数
 	RISSE_AST_ENUM_ITEM(ant, FuncDecl		)		//!< 関数宣言
 	RISSE_AST_ENUM_ITEM(ant, FuncDeclArg	)		//!< 関数宣言の引数
 	RISSE_AST_ENUM_ITEM(ant, FuncDeclBlock	)		//!< 関数宣言のブロック引数
@@ -577,154 +577,6 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tRisseString GetDumpComment() const { return Attribute.AsString(); }
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief	関数呼び出しのASTノード(type=antFuncCall)
-//! @note	new 演算子つきの関数呼び出しはオブジェクト生成とみなし、
-//!			関数呼び出し用ASTノードと共用する(GetCreateNewで調べる)
-//---------------------------------------------------------------------------
-class tRisseASTNode_FuncCall : public tRisseASTNode_List
-{
-	typedef tRisseASTNode_List inherited;
-	tRisseASTNode * Expression; //!< 関数を表す式ノード
-	bool CreateNew; //!< new による関数呼び出しかどうか
-	bool Omit; //!< 引数省略かどうか
-	tRisseASTArray Blocks; //!< ブロック引数の配列
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
-	//! @param		omit			引数省略かどうか
-	tRisseASTNode_FuncCall(risse_size position, bool omit) :
-		tRisseASTNode_List(position, antFuncCall), Omit(omit)
-	{
-		Expression = NULL;
-	}
-
-	//! @brief		式ノードを設定する
-	//! @param		node		式ノード
-	void SetExpression(tRisseASTNode * node)
-		{ Expression = node; Expression->SetParent(this); }
-
-	//! @brief		式ノードを得る
-	//! @return		式ノード
-	tRisseASTNode * GetExpression() const { return Expression; }
-
-	//! @brief		new による関数呼び出しかどうかを設定する
-	//! @param		b	new による関数呼び出しかどうか
-	void SetCreateNew(bool b = true) { CreateNew = b; }
-
-	//! @brief		new による関数呼び出しかどうかを得る
-	//! @return		new による関数呼び出しかどうか
-	bool GetCreateNew() const { return CreateNew; }
-
-	//! @brief		ブロック引数を設定する
-	//! @param		list		ブロック引数の配列(null=配列のクリア)
-	void AssignBlocks(const tRisseASTArray * array)
-	{
-		if(array)
-			Blocks = * array;
-		else
-			Blocks.clear();
-	}
-
-	//! @brief		子ノードの個数を得る
-	//! @return		子ノードの個数
-	risse_size GetChildCount() const
-	{
-		return inherited::GetChildCount() + Blocks.size() + 1; // +1 = Expression
-	}
-
-	//! @brief		指定されたインデックスの子ノードを得る
-	//! @param		index		インデックス
-	//! @return		子ノード
-	tRisseASTNode * GetChildAt(risse_size index) const
-	{
-		if(index == 0) return Expression;
-		index --;
-		if(index < inherited::GetChildCount())
-			return inherited::GetChildAt(index);
-		index -= inherited::GetChildCount();
-		return Blocks[index];
-	}
-
-	//! @brief		指定されたインデックスの子ノードの名前を得る
-	//! @param		index		インデックス
-	//! @return		名前
-	tRisseString GetChildNameAt(risse_size index) const;
-
-	//! @brief		ダンプ時のこのノードのコメントを得る
-	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const;
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式インスタンス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief	関数の引数を表すノード(type=antFuncCallArg)
-//---------------------------------------------------------------------------
-class tRisseASTNode_FuncCallArg : public tRisseASTNode
-{
-	tRisseASTNode * Expression; //!< 引数を表す式ノード(NULL = 引数なし)
-	bool Expand; //!< 配列の引数への展開を行うかどうか
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		position		ソースコード上の位置
-	//! @param		expression		引数を表す式ノード
-	//! @param		expand			配列の引数への展開を行うかどうか
-	tRisseASTNode_FuncCallArg(risse_size position, tRisseASTNode * expression, bool expand) :
-		tRisseASTNode(position, antFuncCallArg), Expression(expression), Expand(expand)
-	{
-		if(Expression) Expression->SetParent(this);
-	}
-
-	//! @brief		式ノードを得る
-	//! @return		式ノード
-	tRisseASTNode * GetExpression() const { return Expression; }
-
-	//! @brief		配列の引数への展開を行うかどうかを得る
-	//! @return		配列の引数への展開を行うかどうか
-	bool GetExpand() const { return Expand; }
-
-	//! @brief		子ノードの個数を得る
-	//! @return		子ノードの個数
-	risse_size GetChildCount() const
-	{
-		return 1;
-	}
-
-	//! @brief		指定されたインデックスの子ノードを得る
-	//! @param		index		インデックス
-	//! @return		子ノード
-	tRisseASTNode * GetChildAt(risse_size index) const
-	{
-		if(index == 0) return Expression; else return NULL;
-	}
-
-	//! @brief		指定されたインデックスの子ノードの名前を得る
-	//! @param		index		インデックス
-	//! @return		名前
-	tRisseString GetChildNameAt(risse_size index) const;
-
-	//! @brief		ダンプ時のこのノードのコメントを得る
-	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const;
-
-	//! @brief		SSA 形式の読み込み用の表現を生成する
-	//! @param		form	SSA 形式インスタンス
-	//! @param		param	PrepareSSA() の戻り値
-	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -2244,6 +2096,154 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief	関数呼び出しのASTノード(type=antFuncCall)
+//! @note	new 演算子つきの関数呼び出しはオブジェクト生成とみなし、
+//!			関数呼び出し用ASTノードと共用する(GetCreateNewで調べる)
+//---------------------------------------------------------------------------
+class tRisseASTNode_FuncCall : public tRisseASTNode_List
+{
+	typedef tRisseASTNode_List inherited;
+	tRisseASTNode * Expression; //!< 関数を表す式ノード
+	bool CreateNew; //!< new による関数呼び出しかどうか
+	bool Omit; //!< 引数省略かどうか
+	tRisseASTArray Blocks; //!< ブロック引数の配列
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		omit			引数省略かどうか
+	tRisseASTNode_FuncCall(risse_size position, bool omit) :
+		tRisseASTNode_List(position, antFuncCall), Omit(omit)
+	{
+		Expression = NULL;
+	}
+
+	//! @brief		式ノードを設定する
+	//! @param		node		式ノード
+	void SetExpression(tRisseASTNode * node)
+		{ Expression = node; Expression->SetParent(this); }
+
+	//! @brief		式ノードを得る
+	//! @return		式ノード
+	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		new による関数呼び出しかどうかを設定する
+	//! @param		b	new による関数呼び出しかどうか
+	void SetCreateNew(bool b = true) { CreateNew = b; }
+
+	//! @brief		new による関数呼び出しかどうかを得る
+	//! @return		new による関数呼び出しかどうか
+	bool GetCreateNew() const { return CreateNew; }
+
+	//! @brief		ブロック引数を設定する
+	//! @param		list		ブロック引数の配列(null=配列のクリア)
+	void AssignBlocks(const tRisseASTArray * array)
+	{
+		if(array)
+			Blocks = * array;
+		else
+			Blocks.clear();
+	}
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return inherited::GetChildCount() + Blocks.size() + 1; // +1 = Expression
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Expression;
+		index --;
+		if(index < inherited::GetChildCount())
+			return inherited::GetChildAt(index);
+		index -= inherited::GetChildCount();
+		return Blocks[index];
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	関数呼び出しのの引数を表すノード(type=antFuncCallArg)
+//---------------------------------------------------------------------------
+class tRisseASTNode_FuncCallArg : public tRisseASTNode
+{
+	tRisseASTNode * Expression; //!< 引数を表す式ノード(NULL = 引数なし)
+	bool Expand; //!< 配列の引数への展開を行うかどうか
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		expression		引数を表す式ノード
+	//! @param		expand			配列の引数への展開を行うかどうか
+	tRisseASTNode_FuncCallArg(risse_size position, tRisseASTNode * expression, bool expand) :
+		tRisseASTNode(position, antFuncCallArg), Expression(expression), Expand(expand)
+	{
+		if(Expression) Expression->SetParent(this);
+	}
+
+	//! @brief		式ノードを得る
+	//! @return		式ノード
+	tRisseASTNode * GetExpression() const { return Expression; }
+
+	//! @brief		配列の引数への展開を行うかどうかを得る
+	//! @return		配列の引数への展開を行うかどうか
+	bool GetExpand() const { return Expand; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 1;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return Expression; else return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	関数宣言のASTノード(type=antFuncDecl)
 //---------------------------------------------------------------------------
 class tRisseASTNode_FuncDecl : public tRisseASTNode_List
@@ -2351,7 +2351,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	関数の引数を表すノード(type=antFuncDeclArg)
+//! @brief	関数宣言の引数を表すノード(type=antFuncDeclArg)
 //---------------------------------------------------------------------------
 class tRisseASTNode_FuncDeclArg : public tRisseASTNode
 {
@@ -2419,7 +2419,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	関数のブロック引数を表すノード(type=antFuncDeclBlock)
+//! @brief	関数宣言のブロック引数を表すノード(type=antFuncDeclBlock)
 //---------------------------------------------------------------------------
 class tRisseASTNode_FuncDeclBlock : public tRisseASTNode
 {

@@ -32,7 +32,7 @@ RISSE_DEFINE_SOURCE_ID(7246,55563,12549,16650,3991,47135,2967,64968);
 tRisseBreakInfo::tRisseBreakInfo(tRisseSSAForm * form)
 {
 	Form = form;
-	CanReceiveValue = false;
+	IsBlock = false;
 
 	// ターゲットブロックのラベル名を生成
 	JumpTargetLabel = 
@@ -368,10 +368,14 @@ void tRisseSSAForm::BindAllLabels()
 			// 同じSSA形式インスタンスではない
 			// この場合は、source_form の親や先祖に target_form が無ければ
 			// ならない (浅いSSA形式から深いSSA形式へのジャンプはできない)
-			tRisseSSAForm * child = source_form;
-			tRisseSSAForm * form = child->Parent;
-			while(form)
+			tRisseSSAForm * child = NULL;
+			tRisseSSAForm * form = source_form;
+			do
 			{
+				child = form;
+				form = child->Parent;
+				if(!form) break;
+
 				if(target_form == form)
 				{
 					// ジャンプ先のSSA形式が見つかった
@@ -391,14 +395,7 @@ void tRisseSSAForm::BindAllLabels()
 						// に割り当てられているので
 					break;
 				}
-
-				// CanReturn な form を超えて goto はできない
-				child = form;
-				if(form->CanReturn)
-					form = NULL;
-				else
-					form = child->Parent;
-			}
+			} while(true);
 
 			if(form == NULL)
 			{
@@ -471,7 +468,7 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 		// この SSA 形式は break/continue できる
 
 		// break/continue が値を伴ってできるかをチェック
-		if(var != NULL && !info->GetCanReceiveValue())
+		if(var != NULL && !info->GetIsBlock())
 			eRisseCompileError::Throw(
 				tRisseString(
 					is_break?
@@ -490,16 +487,19 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 	else
 	{
 		// break/continue できる SSA 形式を探す
-		tRisseSSAForm * child = this;
-		tRisseSSAForm * form = child->Parent;
+		tRisseSSAForm * child = NULL;
+		tRisseSSAForm * form = this;
 		do
 		{
+			if(form->CanReturn) { form = NULL; break; } // CanReturn な form を超えて break/continue はできない
+			child = form;
+			form = child->Parent;
+			if(!form) break;
+
 			if((info = is_break?form->GetCurrentBreakInfo():form->GetCurrentContinueInfo()) != NULL)
 			{
-				// break/continue できる
-
 				// break/continue が値を伴ってできるかをチェック
-				if(var != NULL && !info->GetCanReceiveValue())
+				if(var != NULL && !info->GetIsBlock())
 					eRisseCompileError::Throw(
 						tRisseString(
 							is_break?
@@ -522,14 +522,7 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 					RISSE_WS("disconnected_by_continue_by_exception"));
 				break;
 			}
-
-			// CanReturn な form を超えて break/continue はできない
-			child = form;
-			if(form->CanReturn)
-				form = NULL;
-			else
-				form = child->Parent;
-		} while(form);
+		} while(true);
 
 		if(form = NULL)
 		{

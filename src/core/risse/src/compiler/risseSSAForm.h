@@ -40,7 +40,8 @@ class tRisseBreakInfo : public tRisseCollectee
 
 	typedef gc_vector<tRisseSSABlock *> tPendingJumpSourceBlocks;
 	tPendingJumpSourceBlocks PendingJumpSourceBlocks;
-	bool CanReceiveValue; //!< この break が値を伴うことができるか
+	bool IsBlock; //!< この break/continue が block に対する物か
+				//!< (block に対する breakやcontinueは他と意味が異なるため)
 	tRisseString JumpTargetLabel; //!< ジャンプ先のラベル名
 
 public:
@@ -48,13 +49,13 @@ public:
 	//! @param		form	この情報を保持するSSA形式インスタンス
 	tRisseBreakInfo(tRisseSSAForm * form);
 
-	//! @brief		この break が値を伴うことができるかを設定する
-	//! @param		b この break が値を伴うことができるか
-	void SetCanReceiveValue(bool b) { CanReceiveValue = b; }
+	//! @brief		この break/continue が block に対する物かを設定する
+	//! @param		b この break/continue が block に対する物か
+	void SetIsBlock(bool b) { IsBlock = b; }
 
-	//! @brief		この break が値を伴うことができるかを取得する
-	//! @return		この break が値を伴うことができるか
-	bool GetCanReceiveValue() const { return CanReceiveValue; }
+	//! @brief		この break/continue が block に対する物かを取得する
+	//! @return		この break/continue が block に対する物か
+	bool GetIsBlock() const { return IsBlock; }
 
 	//! @brief		この break のジャンプ先のラベル名を得る
 	//! @return		この break のジャンプ先のラベル名

@@ -29,15 +29,18 @@ RISSE_DEFINE_SOURCE_ID(7246,55563,12549,16650,3991,47135,2967,64968);
 
 
 //---------------------------------------------------------------------------
-tRisseBreakInfo::tRisseBreakInfo(tRisseSSAForm * form)
+tRisseBreakInfo::tRisseBreakInfo(tRisseSSAForm * form,
+	const tRisseString & label_prefix)
 {
 	Form = form;
 	IsBlock = false;
 
 	// ターゲットブロックのラベル名を生成
 	JumpTargetLabel = 
-		tRisseString(RISSE_WS("@break_or_continue_")) +
-			tRisseString::AsString(Form->GetUniqueNumber());
+				(label_prefix.IsEmpty() ?
+					tRisseString(RISSE_WS("@break_or_continue")):label_prefix) +
+				RISSE_WS("_") +
+				tRisseString::AsString(Form->GetUniqueNumber());
 }
 //---------------------------------------------------------------------------
 
@@ -507,6 +510,12 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 								RISSE_WS_TR("cannot continue here with a value")),
 							GetScriptBlock(), pos);
 
+				if(var == NULL && info->GetIsBlock())
+				{
+					// 値を受け取ることができるのに値が無い場合はvoidにする
+					var = AddConstantValueStatement(pos, tRisseVariant()); // void
+				}
+
 				// このSSA形式はbreak/continue文を受け取ることができる
 				// この try id まで例外で抜けるためのコードを生成
 				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
@@ -543,7 +552,7 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 				tRisseSSAVariable * except_value, tExitTryBranchTargetLabels * target_labels)
 {
 	RISSE_ASSERT(catch_branch_stmt->GetCode() == ocCatchBranch);
-	RISSE_ASSERT(catch_branch_stmt->GetTargetCount() == 2);
+	RISSE_ASSERT(catch_branch_stmt->GetTargetCount() >= 2);
 
 	tRisseSSABlock * block_save = CurrentBlock;
 
@@ -560,44 +569,33 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 		RISSE_ASSERT(!i->IsEmpty());
 		tRisseSSABlock * target = NULL;
 
-		enum { r_goto, r_return, r_break, r_continue } type;
-
 		if(*i == RISSE_WS("@return"))
-			type = r_return;
-		else if(*i == RISSE_WS("@break"))
-			type = r_break;
-		else if(*i == RISSE_WS("@continue"))
-			type = r_continue;
-		else
-			type = r_goto;
-
-		switch(type)
 		{
-		case r_return:
-			{
-				// return 文の作成
-				// 新しい基本ブロックを作成する
-				target =
-					CreateNewBlock(RISSE_WS("return_by_exception"));
+			// return 文の作成
+			// 新しい基本ブロックを作成する
+			target =
+				CreateNewBlock(RISSE_WS("return_by_exception"));
 
-				// 例外オブジェクトから値を取り出す
-				tRisseSSAVariable * ret_var = NULL;
-				AddStatement(catch_branch_stmt->GetPosition(),
-					ocGetExitTryValue, &ret_var, except_value);
+			// 例外オブジェクトから値を取り出す
+			tRisseSSAVariable * ret_var = NULL;
+			AddStatement(catch_branch_stmt->GetPosition(),
+				ocGetExitTryValue, &ret_var, except_value);
 
-				// return 文を作成
-				AddStatement(catch_branch_stmt->GetPosition(),
-					ocReturn, NULL, ret_var);
+			// return 文を作成
+			AddStatement(catch_branch_stmt->GetPosition(),
+				ocReturn, NULL, ret_var);
 
-				// 新しい基本ブロックを作成(ただしここには到達しない)
-				CreateNewBlock("disconnected_by_return");
-			}
-			break;
-
-		case r_break:
-		case r_continue:
-		case r_goto:
-			// goto
+			// 新しい基本ブロックを作成(ただしここには到達しない)
+			CreateNewBlock("disconnected_by_return");
+		}
+		else if((*i)[0] == RISSE_WC('#'))
+		{
+			// すでに解決済み
+			// なにもしない
+		}
+		else
+		{
+			// goto など
 			// 新しい基本ブロックを作成する
 			target =
 				CreateNewBlock(RISSE_WS("goto_by_exception"));
@@ -614,11 +612,10 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 			// catch_branch_stmt と同じ名前空間にしなければならない。
 			target->TakeLocalNamespaceSnapshot(
 				catch_branch_stmt->GetBlock()->GetLocalNamespace());
-			break;
 		}
 
 		// catch_branch_stmt にジャンプ先を追加
-		catch_branch_stmt->AddTarget(target);
+		if(target) catch_branch_stmt->AddTarget(target);
 	}
 
 	CurrentBlock = block_save;
@@ -659,6 +656,12 @@ bool tRisseSSAForm::GetShared(const tRisseString & name)
 //---------------------------------------------------------------------------
 tRisseSSAVariableAccessMap * tRisseSSAForm::CreateAccessMap(risse_size pos)
 {
+	// 遅延評価ブロック内で発生したtry脱出用例外に備えて ExitTryBranchTargetLabels
+	// を作成する
+	// ここで作成した ExitTryBranchTargetLabels は AddCatchBranchAndExceptionValue()
+	// で CatchBranch とともに保存される
+	ExitTryBranchTargetLabels = new tExitTryBranchTargetLabels();
+
 	return new tRisseSSAVariableAccessMap(this, pos);
 }
 //---------------------------------------------------------------------------
@@ -669,13 +672,6 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 	bool sharevars, tRisseSSAVariableAccessMap * accessmap,
 	tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
 {
-	// 遅延評価ブロック内で発生したtry脱出用例外に備えて ExitTryBranchTargetLabels
-	// を作成する
-	// ここで作成した ExitTryBranchTargetLabels は AddCatchBranchAndExceptionValue()
-	// で CatchBranch とともに保存される
-	if(!sharevars)
-		ExitTryBranchTargetLabels = new tExitTryBranchTargetLabels();
-
 	// 遅延評価ブロックの名称を決める
 	tRisseString block_name = basename + RISSE_WS(" ") + tRisseString::AsString(GetUniqueNumber());
 

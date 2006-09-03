@@ -2141,6 +2141,23 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	gc_vector<tRisseSSAVariable *> arg_vec;
 	arg_vec.reserve(GetChildCount());
 
+	// break に関する情報を生成
+	tRisseBreakInfo * break_info = new tRisseBreakInfo(form, RISSE_WS("#block_break"));
+		// tRisseSSAForm::AddCatchBranchTargetsForOne は ラベル名の先頭の文字で種別を
+		// 判断する。ラベル名の先頭が # の場合はすでにコード生成済みのラベルジャンプ先
+		// として扱われる。
+	break_info->SetIsBlock(true);
+
+	// break に関する情報を form に設定
+	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
+
+	// continue に関する情報を生成
+	tRisseContinueInfo * continue_info = new tRisseContinueInfo(form);
+	continue_info->SetIsBlock(true);
+
+	// continue に関する情報を form に設定
+	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
+
 	// ... が指定されていなければ引数を処理
 	risse_uint32 exp_flag = 0; // 展開フラグ
 	if(!Omit)
@@ -2215,6 +2232,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 
 	// ブロック引数を処理
 	tRisseSSAVariableAccessMap * access_map = NULL;
+	risse_size break_try_idx = risse_size_max;
 	if(with_block)
 	{
 		// アクセスマップを作成する
@@ -2228,7 +2246,17 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 				reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
 			if(block_arg->GetIsBlock()) { block_found = true; break; }
 		}
-		if(block_found) access_map = form->CreateAccessMap(GetPosition());
+		if(block_found)
+		{
+			// ブロックが見つかったのでアクセスマップを作成する
+			access_map = form->CreateAccessMap(GetPosition());
+
+			// form の ExitTryBranchTargetLabels に break の行き先を登録する
+			// (ASSERTはしないが)これが form->ExitTryBranchTargetLabels の 最初の
+			// エントリになるはず
+			break_try_idx =
+				form->AddExitTryBranchTargetLabel(break_info->GetJumpTargetLabel());
+		}
 	}
 
 	if(Blocks.size() > RisseMaxArgCount)
@@ -2299,6 +2327,19 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		// catch した例外はそのまま投げる
 		form->AddStatement(GetPosition(), ocThrow, NULL, returned_var);
 
+		// break 用の新しい基本ブロックを作成
+		tRisseSSABlock * break_exit_block =
+			form->CreateNewBlock(RISSE_WS("break_exit"));
+
+		// break - 例外オブジェクトから値を取り出す
+		tRisseSSAVariable * break_ret_var = NULL;
+		form->AddStatement(GetPosition(),
+			ocGetExitTryValue, &break_ret_var, returned_var);
+
+		// ジャンプ文を作成
+		tRisseSSAStatement * break_exit_jump_stmt =
+			form->AddStatement(GetPosition(), ocJump, NULL);
+
 		// exit用の新しい基本ブロックを作成
 		tRisseSSABlock * trycall_exit_block =
 			form->CreateNewBlock(RISSE_WS("trycall_exit"));
@@ -2306,10 +2347,28 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		// TryFuncCall文 の分岐先を設定
 		catch_branch_stmt->SetTryExitTarget(trycall_exit_block);
 		catch_branch_stmt->SetTryCatchTarget(trycall_catch_block);
+		catch_branch_stmt->AddTarget(break_exit_block);
+			// catc_branch_stmt に登録した break_exit_block は
+			// tRisseSSAForm::AddCatchBranchTargetsForOne() の処理中では
+			// 無視される(ラベル名の先頭が '#' なので)
 
 		// あとで例外の分岐先を設定できるように
 		form->AddCatchBranchAndExceptionValue(catch_branch_stmt, returned_var);
+
+		// break から来るパスと exit から来るパス用にφ関数を作成する
+		break_exit_jump_stmt->SetJumpTarget(trycall_exit_block);
+		tRisseSSAVariable * phi_ret_var = NULL;
+		form->AddStatement(GetPosition(), ocPhi, &phi_ret_var,
+								returned_var, break_ret_var);
+
+		returned_var = phi_ret_var;
 	}
+
+	// break に関する情報を元に戻す
+	form->SetCurrentBreakInfo(old_break_info);
+
+	// continue に関する情報を元に戻す
+	form->SetCurrentContinueInfo(old_continue_info);
 
 	// 関数の戻り値を返す
 	return returned_var;

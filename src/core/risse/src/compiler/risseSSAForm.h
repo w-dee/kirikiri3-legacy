@@ -46,8 +46,10 @@ class tRisseBreakInfo : public tRisseCollectee
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		form	この情報を保持するSSA形式インスタンス
-	tRisseBreakInfo(tRisseSSAForm * form);
+	//! @param		form			この情報を保持するSSA形式インスタンス
+	//! @param		label_prefix	ラベル名プリフィックス
+	tRisseBreakInfo(tRisseSSAForm * form,
+		const tRisseString & label_prefix = tRisseString::GetEmptyString());
 
 	//! @brief		この break/continue が block に対する物かを設定する
 	//! @param		b この break/continue が block に対する物か

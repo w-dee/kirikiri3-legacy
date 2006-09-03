@@ -185,7 +185,7 @@ RISSE_OC_ENUM_DEF()
 
 // 関数定義/引数処理/関数呼び出し
 	RISSE_OC_ENUM_ITEM(New				,new	,Z(R,R,O,N,0,0))//!< "new"
-	RISSE_OC_ENUM_ITEM(TryFuncCall		,trycall,Z(R,R,O,N,0,0))//!< try function call
+	RISSE_OC_ENUM_ITEM(TryFuncCall		,trycall,Z(R,R,O,N,N,0))//!< try function call
 	RISSE_OC_ENUM_ITEM(FuncCall			,call	,Z(R,R,O,N,0,0))//!< function call
 	RISSE_OC_ENUM_ITEM(FuncCallBlock	,callb	,Z(R,R,O,N,N,0))//!< function call with lazyblock(VMのみで使用)
 	RISSE_OC_ENUM_ITEM(SetFrame			,sframe	,Z(R,0,0,0,0,0))//!< スタックフレームと共有空間を設定する

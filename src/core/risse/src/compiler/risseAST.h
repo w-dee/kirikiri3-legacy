@@ -2304,6 +2304,10 @@ public:
 	//! @param		is_block		遅延評価ブロックブロックかどうか
 	void SetIsBlock(bool is_block) { IsBlock = is_block; }
 
+	//! @brief		遅延評価ブロックブロックかどうかを取得する
+	//! @return		遅延評価ブロックブロックかどうか
+	bool GetIsBlock() const { return IsBlock; }
+
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
@@ -2343,9 +2347,10 @@ public:
 	//! @brief		関数宣言の表現を生成する
 	//! @param		form		SSA 形式インスタンス
 	//! @param		access_map	アクセスマップ (IsBlock=真の場合非null必須)
+	//! @param		try_id		try識別子(risse_size_maxは指定無しの場合)
 	//! @return		関数を表す変数
 	tRisseSSAVariable * GenerateFuncDecl(tRisseSSAForm *form,
-		tRisseSSAVariableAccessMap *access_map = NULL) const;
+		tRisseSSAVariableAccessMap *access_map = NULL, risse_size try_id = risse_size_max) const;
 };
 //---------------------------------------------------------------------------
 

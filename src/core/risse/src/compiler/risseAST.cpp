@@ -2118,7 +2118,7 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 	catch_branch_stmt->SetTryCatchTarget(catch_entry_block);
 
 	// あとで例外の分岐先を設定できるように
-	new_form->SetCatchBranchStatement(catch_branch_stmt, try_block_ret_var);
+	form->AddCatchBranchAndExceptionValue(catch_branch_stmt, try_block_ret_var);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -2130,6 +2130,10 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 							tRisseSSAForm *form, void * param) const
 {
+	// ブロック付きかどうかを得る
+	bool with_block = Blocks.size() > 0;
+	RISSE_ASSERT(!(CreateNew && with_block)); // new に対してブロックは現状指定できない
+
 	// 関数を表す式を得る
 	tRisseSSAVariable * func_var = Expression->GenerateReadSSA(form);
 
@@ -2211,10 +2215,20 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 
 	// ブロック引数を処理
 	tRisseSSAVariableAccessMap * access_map = NULL;
-	if(Blocks.size() > 0)
+	if(with_block)
 	{
 		// アクセスマップを作成する
-		access_map = form->CreateAccessMap(GetPosition());
+		// ブロックを調べ、ブロックの中に一つでもいわゆる「ブロック」
+		// (匿名関すではない物) があれば access_map を作成する
+		bool block_found = false;
+		for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
+		{
+			RISSE_ASSERT((*i)->GetType() == antFuncDecl);
+			tRisseASTNode_FuncDecl * block_arg =
+				reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
+			if(block_arg->GetIsBlock()) { block_found = true; break; }
+		}
+		if(block_found) access_map = form->CreateAccessMap(GetPosition());
 	}
 
 	if(Blocks.size() > RisseMaxArgCount)
@@ -2229,6 +2243,10 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 				form->GetScriptBlock(), GetPosition());
 	}
 
+	// try識別子を取得
+	risse_size try_id = form->GetScriptBlock()->AddTryIdentifier();
+
+	// 各ブロックの内容を生成
 	for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
 	{
 		RISSE_ASSERT((*i)->GetType() == antFuncDecl);
@@ -2237,7 +2255,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 
 		// ブロックの中身を 遅延評価ブロックとして評価する
 		tRisseSSAVariable * lazyblock_var =
-			block_arg->GenerateFuncDecl(form, access_map);
+			block_arg->GenerateFuncDecl(form, access_map, try_id);
 
 		// 配列にpush
 		arg_vec.push_back(lazyblock_var);
@@ -2247,10 +2265,12 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	if(access_map) form->ListVariablesForLazyBlock(GetPosition(), access_map);
 
 	// 関数呼び出しの文を生成する
+	// ブロック付きの文の場合は ocTryFuncCall を用いる
 	tRisseSSAVariable * returned_var = NULL;
 	tRisseSSAStatement * call_stmt =
-		form->AddStatement(GetPosition(), CreateNew ? ocNew : ocFuncCall,
-					&returned_var, func_var);
+		form->AddStatement(GetPosition(),
+			CreateNew ? ocNew : (access_map?ocTryFuncCall:ocFuncCall),
+			&returned_var, func_var);
 
 	call_stmt->SetFuncExpandFlags(exp_flag);
 	call_stmt->SetBlockCount(Blocks.size());
@@ -2264,6 +2284,33 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	// アクセスマップのクリーンアップを行う
 	if(access_map) form->CleanupAccessMap(GetPosition(), access_map);
 
+	// ブロック付き呼び出しの場合は、制御構文を実装するための分岐文を
+	// 作成する
+	if(access_map)
+	{
+		tRisseSSAStatement * catch_branch_stmt =
+			form->AddStatement(GetPosition(), ocCatchBranch, NULL, returned_var);
+		catch_branch_stmt->SetTryIdentifierIndex(try_id); // try識別子を設定
+
+		// catch用の新しい基本ブロックを作成
+		tRisseSSABlock * trycall_catch_block =
+			form->CreateNewBlock(RISSE_WS("trycall_catch"));
+
+		// catch した例外はそのまま投げる
+		form->AddStatement(GetPosition(), ocThrow, NULL, returned_var);
+
+		// exit用の新しい基本ブロックを作成
+		tRisseSSABlock * trycall_exit_block =
+			form->CreateNewBlock(RISSE_WS("trycall_exit"));
+
+		// TryFuncCall文 の分岐先を設定
+		catch_branch_stmt->SetTryExitTarget(trycall_exit_block);
+		catch_branch_stmt->SetTryCatchTarget(trycall_catch_block);
+
+		// あとで例外の分岐先を設定できるように
+		form->AddCatchBranchAndExceptionValue(catch_branch_stmt, returned_var);
+	}
+
 	// 関数の戻り値を返す
 	return returned_var;
 }
@@ -2273,14 +2320,14 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
-	return GenerateFuncDecl(form, NULL);
+	return GenerateFuncDecl(form);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form,
-		tRisseSSAVariableAccessMap *access_map) const
+		tRisseSSAVariableAccessMap *access_map, risse_size try_id) const
 {
 	// 関数の中身を 遅延評価ブロックとして評価する
 	RISSE_ASSERT(!(IsBlock && !access_map));
@@ -2294,6 +2341,7 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 								RISSE_WS("anonymous function"):
 								RISSE_WS("function ") + Name,
 							!IsBlock, access_map, new_form, lazyblock_var);
+	if(try_id != risse_size_max) new_form->SetTryIdentifierIndex(try_id);
 
 	// 引数を処理する
 	for(risse_size i = 0; i < inherited::GetChildCount(); i++)

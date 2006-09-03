@@ -144,17 +144,49 @@ class tRisseSSAForm : public tRisseCollectee
 	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
 		//!< ラベルのマップのtypedef
 
+	bool CanReturn; //!< このSSA形式からはreturn文で戻ることが可能
+	typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
+		//!< このSSA形式のが受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
+	tExitTryBranchTargetLabels *ExitTryBranchTargetLabels;
+		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)
+	risse_size TryIdentifierIndex; //!< このSSA形式がtryブロックなどの場合、親SSA形式内の該当tryブロックのtry識別子を表す
+
+	//! @brief	このSSA形式が保持しているTryCallしたあとのCatchBranch文と、
+	//!			そのTryCallの戻り値(例外の値)の情報
+	struct tCatchBranchAndExceptionValue
+	{
+		tCatchBranchAndExceptionValue(
+			tRisseSSAStatement * catch_branch_stmt,
+			tRisseSSAVariable * except_value,
+			tExitTryBranchTargetLabels * target_labels)
+		{
+			CatchBranchStatement = catch_branch_stmt;
+			ExceptionValue = except_value;
+			ExitTryBranchTargetLabels = target_labels;
+		}
+		tRisseSSAStatement * CatchBranchStatement; //!< CatchBranch文
+		tRisseSSAVariable * ExceptionValue; //!< TryCallの際の例外の値
+		tExitTryBranchTargetLabels * ExitTryBranchTargetLabels;
+	};
+	gc_vector<tCatchBranchAndExceptionValue> CatchBranchAndExceptionValues;
+		//!< このSSA形式が保持しているTryCallしたあとのCatchBranch文と、そのTryCallの戻り値の情報のリスト
+
 	//! @brief		バインドがまだされていないラベルへのジャンプ
 	struct tPendingLabelJump : public tRisseCollectee
 	{
 		tRisseSSABlock * SourceBlock; //!< ジャンプもとの基本ブロック
 		tRisseString LabelName; //!< ラベル名
+		typedef gc_map<tRisseSSAForm *, tExitTryBranchTargetLabels *>
+			tExitTryBranchTargetLabelMap; //!< SSA形式とその時点での
+											//!< tExitTryBranchTargetLabels のマップ
+		tExitTryBranchTargetLabelMap * ExitTryBranchTargetLabelMap;
 
 		tPendingLabelJump(tRisseSSABlock * source_block,
-			const tRisseString & labelname)
+			const tRisseString & labelname, tExitTryBranchTargetLabelMap * map)
 		{
 			SourceBlock = source_block;
 			LabelName = labelname;
+			ExitTryBranchTargetLabelMap = map;
 		}
 	};
 
@@ -173,18 +205,6 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseSwitchInfo * CurrentSwitchInfo; //!< 現在の switch に関する情報
 	tRisseBreakInfo * CurrentBreakInfo; //!< 現在の break に関する情報
 	tRisseContinueInfo * CurrentContinueInfo; //!< 現在の continue に関する情報
-
-	bool CanReturn; //!< このSSA形式からはreturn文で戻ることが可能
-	typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
-		//!< このSSA形式の親が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
-	tExitTryBranchTargetLabels ExitTryBranchTargetLabels;
-		//!< このSSA形式の親が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)
-	risse_size TryIdentifierIndex; //!< このSSA形式がtryブロックなどの場合、親SSA形式内の該当tryブロックのtry識別子を表す
-	tRisseSSAStatement * CatchBranchStatement;
-		//!< 親SSA形式のこのSSA形式を呼び出している箇所にあるCatchBranchの文(NULL=そんな文はない)
-	tRisseSSAVariable * ExceptionValue;
-		//!< 親SSA形式のtrycallの戻り値(例外オブジェクトを持っている)
-
 
 	tRisseSSAVariable * FunctionCollapseArgumentVariable; //!< 関数引数の無名の * を保持している変数
 
@@ -256,10 +276,20 @@ public:
 	//! @return		新しく作成された基本ブロック
 	tRisseSSABlock * CreateNewBlock(const tRisseString & name);
 
+private:
+	//! @brief		任意の ExitTryBranchTargetLabels にマップを追加する
+	//! @param		target_label	ExitTryBranchTargetLabels
+	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
+	//! @return		そのラベルを表すインデックス
+	static risse_size InternalAddExitTryBranchTargetLabel(
+				tExitTryBranchTargetLabels * target_label, 
+				const tRisseString & label);
+
+public:
 	//! @brief		ExitTryBranchTargetLabels にマップを追加する
 	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
 	//! @return		そのラベルを表すインデックス
-	risse_size AddExitTryBranchTargetLabels(const tRisseString & label);
+	risse_size AddExitTryBranchTargetLabel(const tRisseString & label);
 
 	//! @brief		現在の基本ブロックに定数値を得る文を追加する
 	//! @param		pos		スクリプト上の位置
@@ -374,20 +404,39 @@ public:
 	//! @param		var			breakあるいはcontinueに伴った値 (NULL=voidを返す)
 	void AddBreakOrContinueStatement(bool is_break, risse_size pos, tRisseSSAVariable * var);
 
-	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを親SSAインスタンス内に作成する
-	//! @note		親SSAインスタンス内のCurrentBlock は保存される
-	void AddCatchBranchTargets();
-
-	//! @brief		CatchBranch文を設定する
+private:
+	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを
+	//!				作成する
 	//! @param		catch_branch_stmt	ocCatchBranch文(すでに2つのused
 	//!									それぞれ例外が発生しなかったときと例外が
 	//!									発生したときのジャンプ先が登録されていること)
 	//! @param		except_value		例外オブジェクトを示す変数
-	void SetCatchBranchStatement(tRisseSSAStatement * catch_branch_stmt,
+	//! @param		target_labels		ExitTryBranchTargetLabels
+	//! @note		このSSAインスタンス内のCurrentBlock は保存される
+	void AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branch_stmt,
+					tRisseSSAVariable * except_value,
+					tExitTryBranchTargetLabels * target_labels);
+
+public:
+	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを
+	//!				作成する
+	//! @note		このSSAインスタンス内のCurrentBlock は保存される
+	void AddCatchBranchTargets();
+
+	//! @brief		CatchBranch文を追加する
+	//! @param		catch_branch_stmt	ocCatchBranch文(すでに2つのused
+	//!									それぞれ例外が発生しなかったときと例外が
+	//!									発生したときのジャンプ先が登録されていること)
+	//! @param		except_value		例外オブジェクトを示す変数
+	void AddCatchBranchAndExceptionValue(tRisseSSAStatement * catch_branch_stmt,
 					tRisseSSAVariable * except_value)
 	{
-		CatchBranchStatement = catch_branch_stmt;
-		ExceptionValue = except_value;
+		CatchBranchAndExceptionValues.push_back(
+			tCatchBranchAndExceptionValue(
+				catch_branch_stmt,
+				except_value,
+				ExitTryBranchTargetLabels));
+		ExitTryBranchTargetLabels = NULL; // このインスタンスは二度と使わないように
 	}
 
 

@@ -408,7 +408,6 @@ void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 	RISSE_ASSERT(!(code == ocNew && blocks.size() != 0)); // ブロック付き new はない
 	RISSE_ASSERT(!((expbit & RisseFuncCallFlag_Omitted) && args.size() != 0));
 		// omit なのに引数があるということはない
-	RISSE_ASSERT(!(code == ocTryFuncCall && blocks.size() != 0)); // ブロック付き tryfunccallはない
 	RISSE_ASSERT(code == ocNew || code == ocFuncCall || code == ocTryFuncCall);
 
 	if(code == ocFuncCall && blocks.size() != 0)
@@ -421,7 +420,12 @@ void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 	PutWord(expbit); // フラグ
 
 	PutWord(static_cast<risse_uint32>(args.size()));
-	if(blocks.size() != 0) PutWord(static_cast<risse_uint32>(blocks.size()));
+
+	if(blocks.size() != 0 || code == ocTryFuncCall)
+		PutWord(static_cast<risse_uint32>(blocks.size()));
+			// ブロックの個数があるのは ocFuncCallBlock の場合と ocTryFuncCall の場合だけ
+			// ocTryFuncCall の場合はブロックありとなしの間に命令の区別が無く、
+			// ブロックがあっても無くてもかならずブロックの個数を入れる
 
 	// 引数をput
 	for(gc_vector<const tRisseSSAVariable *>::const_iterator i = args.begin();

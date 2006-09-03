@@ -50,6 +50,7 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	// 未バインドのラベルを結線する
 	// (AddCatchBranchTargetsで再度未バインドのラベルが追加される可能性があるため)
 	// goto のジャンプ先は子→親の順に見ていくので生成順とは逆に処理を行う
+	// (この段階ではSSA形式を超えるようなジャンプは無いはず)
 	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
 		i != SSAForms.rend(); i++)
 		(*i)->BindAllLabels();

@@ -216,23 +216,28 @@ void tRisseCodeInterpreter::Execute(
 					ocCatchBranch が挟まってはならない （間に他のocCopy文等が挟まることはある)
 				*/
 
-				// code[1] = 結果格納先
+				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
 				// code[2] = メソッドオブジェクト
 				// code[3] = フラグ
 				// code[4] = 引数の数
-				// code[5] ～   引数
+				// code[5] = ブロック引数の数
+				// code[6] ～   引数
+				// TODO: 引数展開、引数の省略など
 				RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
 				tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4]);
+				tRisseMethodArgument & blockargs = tRisseMethodArgument::Allocate(code[5]);
 
 				for(risse_uint32 i = 0; i < code[4]; i++)
-					args.argv[i] = &AR(code[i+5]);
+					args.argv[i] = &AR(code[i+6]);
+				for(risse_uint32 i = 0; i < code[5]; i++)
+					blockargs.argv[i] = &AR(code[i+6+code[4]]);
 
 				AR(code[1]).Clear();
 				exception_state = esNonException;
 				try
 				{
-					AR(code[2]).FuncCall(NULL,
-						args, tRisseMethodArgument::GetEmptyArgument(), &_this);
+					AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						args, blockargs, &_this);
 				}
 				catch(const eRisseScriptException &e)
 				{
@@ -243,7 +248,7 @@ void tRisseCodeInterpreter::Execute(
 				{
 					exception_state = esException;
 				}
-				code += code[4] + 5;
+				code += code[4] + code[5] + 6;
 				break;
 			}
 
@@ -429,7 +434,7 @@ void tRisseCodeInterpreter::Execute(
 				tRisseVariant v;
 				RISSE_ASSERT(AR(code[2]).GetType() == tRisseVariant::vtObject);
 				AR(code[2]).GetObjectInterface()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
-				RISSE_ASSERT(v.GetType() == tRisseVariant::vtVoid);
+				RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
 				RISSE_ASSERT(v.GetObjectInterface() != NULL);
 				tRisseExitTryExceptionClass * record =
 					reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetObjectInterface());

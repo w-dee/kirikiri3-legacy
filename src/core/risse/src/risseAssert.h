@@ -28,8 +28,19 @@
 	#define RISSE_ASSERT_ENABLED
 #endif
 
-#define RISSE_ASSERT assert
+namespace Risse{
+	//! @brief		Assert メッセージを表示し、強制終了する
+	//! @param		message		メッセージ
+	//! @param		filename	assertion failed が発生したファイル名
+	//! @param		lineno		assertion failed が発生した行
+	void RisseAssert(const char * message, const char * filename, int lineno);
+}
 
-#include <assert.h>
+
+#ifdef RISSE_ASSERT_ENABLED
+	#define RISSE_ASSERT(X) do { if(!(X)) ::Risse::RisseAssert(#X, __FILE__, __LINE__); } while(0)
+#else
+	#define RISSE_ASSERT(X) 
+#endif
 
 #endif

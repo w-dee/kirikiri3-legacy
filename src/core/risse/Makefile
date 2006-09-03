@@ -44,6 +44,7 @@ CPPFLAGS = $(CXXFLAGS)
 #----------------------------#
 
 CPPFILES =  \
+			src/risseAssert.cpp                      \
 			src/risseCharUtils.cpp                   \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \

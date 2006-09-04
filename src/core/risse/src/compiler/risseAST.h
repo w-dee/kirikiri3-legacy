@@ -1690,13 +1690,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief	break文ノード(type=antBreak)
 //---------------------------------------------------------------------------
-class tRisseASTNode_Break : public tRisseASTNode_NoChildren
+class tRisseASTNode_Break : public tRisseASTNode_OneExpression
 {
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	tRisseASTNode_Break(risse_size position) :
-		tRisseASTNode_NoChildren(position, antBreak) {;}
+	//! @param		expression		式ノード
+	tRisseASTNode_Break(risse_size position, tRisseASTNode * expression) :
+		tRisseASTNode_OneExpression(position, antBreak, expression) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス
@@ -1710,13 +1711,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief	continue文ノード(type=antContinue)
 //---------------------------------------------------------------------------
-class tRisseASTNode_Continue : public tRisseASTNode_NoChildren
+class tRisseASTNode_Continue : public tRisseASTNode_OneExpression
 {
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	tRisseASTNode_Continue(risse_size position) :
-		tRisseASTNode_NoChildren(position, antContinue) {;}
+	//! @param		expression		式ノード
+	tRisseASTNode_Continue(risse_size position, tRisseASTNode * expression) :
+		tRisseASTNode_OneExpression(position, antContinue, expression) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス

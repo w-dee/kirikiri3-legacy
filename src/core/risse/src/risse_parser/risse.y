@@ -290,6 +290,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	property_def property_expr_def property_handler_def_list
 	property_handler_getter property_handler_setter
 	class_def class_expr_def class_extender class_extends_list
+	break continue
 	return switch with label goto try throw catch catch_list catch_or_finally
 	regexp
 	embeddable_string
@@ -380,8 +381,8 @@ statement
 	| while
 	| do_while
 	| for
-	| "break" ";"							{ $$ = N(Break)(LP); }
-	| "continue" ";"						{ $$ = N(Continue)(LP); }
+	| break
+	| continue
 	| "debugger" ";"						{ $$ = N(Debugger)(LP); }
 	| return
 	| switch
@@ -465,6 +466,18 @@ if
 if_else
 	: if "else"
 	  block_or_statement					{ $$ = $1; C(If, $$)->SetFalse($3); }
+;
+
+/* a break statement */
+break
+	: "break" ";"							{ $$ = N(Break)(LP, NULL); }
+	| "break" expr_with_comma ";"			{ $$ = N(Break)(LP, $2); }
+;
+
+/* a continue statment */
+continue
+	: "continue" ";"						{ $$ = N(Continue)(LP, NULL); }
+	| "continue" expr_with_comma ";"		{ $$ = N(Continue)(LP, $2); }
 ;
 
 /* a return statement */

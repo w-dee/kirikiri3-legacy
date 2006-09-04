@@ -420,6 +420,12 @@ void tRisseSSAForm::BindAllLabels()
 //---------------------------------------------------------------------------
 void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 {
+	if(var == NULL)
+	{
+		// 値が無い場合はvoidにする
+		var = AddConstantValueStatement(pos, tRisseVariant()); // void
+	}
+
 	if(CanReturn)
 	{
 		// 単純に return 文を作成可能
@@ -514,6 +520,18 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 				{
 					// 値を受け取ることができるのに値が無い場合はvoidにする
 					var = AddConstantValueStatement(pos, tRisseVariant()); // void
+				}
+
+				// continue が値を伴える場合は return と同じ動作になる
+				if(!is_break && info->GetIsBlock())
+				{
+					// 単純に return 文を作成可能
+					// return 文を作成
+					AddStatement(pos, ocReturn, NULL, var);
+
+					// 新しい基本ブロックを作成(ただしここには到達しない)
+					CreateNewBlock("disconnected_by_return");
+					return;
 				}
 
 				// このSSA形式はbreak/continue文を受け取ることができる

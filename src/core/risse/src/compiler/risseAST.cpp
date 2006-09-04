@@ -1792,8 +1792,14 @@ tRisseSSAVariable * tRisseASTNode_Throw::DoReadSSA(tRisseSSAForm *form, void * p
 tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 									tRisseSSAForm *form, void * param) const
 {
+	tRisseSSAVariable * var;
+	if(Expression)
+		var = Expression->GenerateReadSSA(form);// 値を作成する
+	else
+		var = NULL; // 値は void
+
 	// break 文を追加する
-	form->AddBreakOrContinueStatement(true, GetPosition(), NULL);
+	form->AddBreakOrContinueStatement(true, GetPosition(), var);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -1805,8 +1811,14 @@ tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 tRisseSSAVariable * tRisseASTNode_Continue::DoReadSSA(
 									tRisseSSAForm *form, void * param) const
 {
+	tRisseSSAVariable * var;
+	if(Expression)
+		var = Expression->GenerateReadSSA(form);// 値を作成する
+	else
+		var = NULL; // 値は void
+
 	// continue 文を追加する
-	form->AddBreakOrContinueStatement(false, GetPosition(), NULL);
+	form->AddBreakOrContinueStatement(false, GetPosition(), var);
 
 	// このノードは答えを返さない
 	return NULL;

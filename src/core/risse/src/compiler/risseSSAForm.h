@@ -130,14 +130,14 @@ public:
 //---------------------------------------------------------------------------
 
 
-class tRisseCompiler;
+class tRisseCompilerFunction;
 class tRisseSSAVariableAccessMap;
 //---------------------------------------------------------------------------
 //! @brief	SSA形式を表すクラス
 //---------------------------------------------------------------------------
 class tRisseSSAForm : public tRisseCollectee
 {
-	tRisseCompiler * Compiler; //!< この SSA 形式が含まれるコンパイラインスタンス
+	tRisseCompilerFunction * Function; //!< この SSA 形式が含まれる関数インスタンス
 	tRisseSSAForm * Parent; //!< この SSA 形式インスタンスの親インスタンス
 	bool UseParentFrame; //!< 親SSA形式インスタンスのフレームを使うかどうか
 	gc_vector<tRisseSSAForm *> Children; //!< この SSA形式インスタンスの子インスタンスの配列
@@ -217,11 +217,11 @@ class tRisseSSAForm : public tRisseCollectee
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		compiler		この SSA 形式が含まれるコンパイラインスタンス
+	//! @param		function		この SSA 形式が含まれる関数インスタンス
 	//! @param		name			このSSA形式インスタンスの名前
 	//! @param		parent			親SSA形式インスタンス
 	//! @param		useparentframe	親SSA形式インスタンスのフレームを使うかどうか
-	tRisseSSAForm(tRisseCompiler * compiler, const tRisseString & name,
+	tRisseSSAForm(tRisseCompilerFunction * function, const tRisseString & name,
 		tRisseSSAForm * parent, bool useparentframe);
 
 	//! @brief		AST を SSA 形式に変換する
@@ -231,9 +231,9 @@ public:
 	//! @brief		SSA形式の最適化と通常形式への変換
 	void OptimizeAndUnSSA();
 
-	//! @brief		コンパイラインスタンスを得る
-	//! @return		コンパイラインスタンス
-	tRisseCompiler * GetCompiler() const { return Compiler; }
+	//! @brief		関数インスタンスを得る
+	//! @return		関数インスタンス
+	tRisseCompilerFunction * GetFunction() const { return Function; }
 
 	//! @brief		親SSA形式インスタンスのフレームを使うかどうかを得る
 	//! @param		親SSA形式インスタンスのフレームを使うかどうか

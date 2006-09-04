@@ -616,7 +616,7 @@ risse_size tRisseASTNode::SearchEndPosition() const
 tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
-	// ContextType がトップレベルの場合は、SSA 生成においては、おおかたこのノードが
+	// actTopLevel がトップレベルの場合は、SSA 生成においては、おおかたこのノードが
 	// 一番最初に呼ばれることになる。
 
 	// ローカル変数スコープの生成  - コンテキストの種類に従って分岐

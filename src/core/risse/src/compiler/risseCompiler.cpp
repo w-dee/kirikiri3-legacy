@@ -18,24 +18,49 @@
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
 
+/*
+	コンパイルの単位
+
+・スクリプトブロック(tRisseScriptBlock)
+  一つのスクリプトからなる固まり
+
+・関数グループ(tRisseCompilerFunctionGroup)
+  入れ子の関数のように、複数の関数が一つの環境(共有変数など)を共有
+  する単位
+
+・関数(tRisseCompilerFunction)
+  関数単位。中にスタックフレームを共有する複数のSSA形式が入る
+
+・SSA形式(tRisseSSAForm)
+  SSA形式
+
+*/
+
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(7695,16492,63400,17880,52365,22979,50413,3135);
 
 
 //---------------------------------------------------------------------------
-void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
+tRisseCompilerFunction::tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group)
 {
-	// (テスト) ASTのダンプを行う
-	RisseFPrint(stderr, RISSE_WS("========== AST ==========\n"));
-	tRisseString str;
-	root->Dump(str);
-	RisseFPrint(stderr, str.c_str());
+	FunctionGroup = function_group;
+	FunctionGroup->AddFunction(this); // 自分自身を登録する
+}
+//---------------------------------------------------------------------------
 
-	// (テスト)
-	tRisseSSAForm * form = new tRisseSSAForm(this, RISSE_WS("root"), NULL, false);
-	form->Generate(root);
 
+//---------------------------------------------------------------------------
+void tRisseCompilerFunction::AddSSAForm(tRisseSSAForm * form)
+{
+	SSAForms.push_back(form);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunction::CompleteSSAForm()
+{
 	// 未バインドのラベルを結線する
 	// goto のジャンプ先は子→親の順に見ていくので生成順とは逆に処理を行う
 	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
@@ -54,6 +79,14 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
 		i != SSAForms.rend(); i++)
 		(*i)->BindAllLabels();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunction::GenerateVMCode()
+{
+	tRisseString str;
 
 	// 最適化とSSA形式からの逆変換
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
@@ -91,16 +124,123 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 		RisseFPrint(stderr, str.c_str());
 	}
 
-	// ルートのコードブロックを設定する
-	ScriptBlock->SetRootCodeBlock(SSAForms.front()->GetCodeBlock());
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseCompilerFunctionGroup::tRisseCompilerFunctionGroup(
+	tRisseCompiler * compiler)
+{
+	Compiler = compiler;
+	Compiler->AddFunctionGroup(this); // 自分自身を登録する
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCompiler::AddSSAForm(tRisseSSAForm * ssaform)
+void tRisseCompilerFunctionGroup::AddFunction(tRisseCompilerFunction * function)
 {
-	SSAForms.push_back(ssaform);
+	Functions.push_back(function);
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunctionGroup::CompleteSSAForm()
+{
+	// このインスタンスが所有しているすべての関数に対して処理を行わせる
+	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
+		ri != Functions.rend(); ri++)
+	{
+		(*ri)->CompleteSSAForm();
+	}
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunctionGroup::GenerateVMCode()
+{
+	// このインスタンスが所有しているすべての関数に対して処理を行わせる
+	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
+		ri != Functions.rend(); ri++)
+	{
+		(*ri)->GenerateVMCode();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
+{
+	// (テスト) ASTのダンプを行う
+	RisseFPrint(stderr, RISSE_WS("========== AST ==========\n"));
+	tRisseString str;
+	root->Dump(str);
+	RisseFPrint(stderr, str.c_str());
+
+	// トップレベルの関数グループを作成する
+	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this);
+
+	// トップレベルの関数を作成する
+	tRisseCompilerFunction *top_function = new tRisseCompilerFunction(top_function_group);
+
+	// トップレベルのSSA形式を作成する
+	tRisseSSAForm * form = new tRisseSSAForm(top_function, RISSE_WS("root"), NULL, false);
+
+	// トップレベルのSSA形式の内容を作成する
+	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
+	form->Generate(root);
+
+	// SSA形式を完結させる
+	for(gc_vector<tRisseCompilerFunctionGroup *>::iterator i = FunctionGroups.begin();
+		i != FunctionGroups.end(); i++)
+	{
+		(*i)->CompleteSSAForm();
+	}
+
+	// VMコード生成を行う
+	for(gc_vector<tRisseCompilerFunctionGroup *>::iterator i = FunctionGroups.begin();
+		i != FunctionGroups.end(); i++)
+	{
+		(*i)->GenerateVMCode();
+	}
+
+	// ルートのコードブロックを設定する
+	ScriptBlock->SetRootCodeBlock(form->GetCodeBlock());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompiler::AddFunctionGroup(tRisseCompilerFunctionGroup * function_group)
+{
+	FunctionGroups.push_back(function_group);
 }
 //---------------------------------------------------------------------------
 

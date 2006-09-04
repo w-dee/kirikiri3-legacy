@@ -84,10 +84,10 @@ void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
+tRisseSSAForm::tRisseSSAForm(tRisseCompilerFunction * function,
 	const tRisseString & name, tRisseSSAForm * parent, bool useparentframe)
 {
-	Compiler = compiler;
+	Function = function;
 	Parent = parent;
 	UseParentFrame = useparentframe;
 	Name = name;
@@ -103,14 +103,14 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompiler * compiler,
 	CanReturn = !UseParentFrame; // いまのところ CanReturn はこの式の通りで決定される
 	ExitTryBranchTargetLabels = NULL;
 
-	// compiler に自身を登録する
-	compiler->AddSSAForm(this);
+	// 関数インスタンスに自身を登録する
+	Function->AddSSAForm(this);
 
 	// コードジェネレータを作成する
 	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
 	CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL, UseParentFrame);
 	CodeBlock = new tRisseCodeBlock();
-	CodeBlockIndex = Compiler->AddCodeBlock(CodeBlock);
+	CodeBlockIndex = Function->GetFunctionGroup()->GetCompiler()->AddCodeBlock(CodeBlock);
 
 	// エントリー位置の基本ブロックを生成する
 	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"));
@@ -172,7 +172,7 @@ void tRisseSSAForm::OptimizeAndUnSSA()
 //---------------------------------------------------------------------------
 tRisseScriptBlockBase * tRisseSSAForm::GetScriptBlock() const
 {
-	return Compiler->GetScriptBlock();
+	return Function->GetFunctionGroup()->GetCompiler()->GetScriptBlock();
 }
 //---------------------------------------------------------------------------
 
@@ -695,7 +695,7 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 
 	// 遅延評価ブロックを生成
 	new_form =
-		new tRisseSSAForm(Compiler, block_name, this, !sharevars);
+		new tRisseSSAForm(Function, block_name, this, !sharevars);
 	Children.push_back(new_form);
 
 	// ローカル名前空間の親子関係を設定

@@ -1369,16 +1369,16 @@ public: // ユーティリティ
 	//! @brief		デバッグ用各種構造体サイズ表示
 	void prtsizes()
 	{
-		printf("tRisseVariantBlock: %d\n", sizeof(tRisseVariantBlock));
-		printf("Storage: %d\n", sizeof(Storage));
-		printf("risse_ptruint: %d\n", sizeof(risse_ptruint));
-		printf("tRisseString: %d\n", sizeof(tRisseString));
-		printf("tRisseOctet: %d\n", sizeof(tRisseOctet));
-		printf("tObject: %d\n", sizeof(tObject));
-		printf("tVoid: %d\n", sizeof(tVoid));
-		printf("tInteger: %d\n", sizeof(tInteger));
-		printf("tReal: %d\n", sizeof(tReal));
-		printf("tBoolean: %d\n", sizeof(tBoolean));
+		fprintf(stderr, "tRisseVariantBlock: %d\n", sizeof(tRisseVariantBlock));
+		fprintf(stderr, "Storage: %d\n", sizeof(Storage));
+		fprintf(stderr, "risse_ptruint: %d\n", sizeof(risse_ptruint));
+		fprintf(stderr, "tRisseString: %d\n", sizeof(tRisseString));
+		fprintf(stderr, "tRisseOctet: %d\n", sizeof(tRisseOctet));
+		fprintf(stderr, "tObject: %d\n", sizeof(tObject));
+		fprintf(stderr, "tVoid: %d\n", sizeof(tVoid));
+		fprintf(stderr, "tInteger: %d\n", sizeof(tInteger));
+		fprintf(stderr, "tReal: %d\n", sizeof(tReal));
+		fprintf(stderr, "tBoolean: %d\n", sizeof(tBoolean));
 	}
 
 };

@@ -92,7 +92,9 @@ int Application::OnRun()
 		}
 		catch(const eRisse & e)
 		{
-			wxFprintf(stderr, wxT("error: %s\n"), e.GetMessageString().AsWxString().c_str());
+			fflush(stderr);
+			fflush(stdout);
+			wxFprintf(stdout, wxT("error: %s\n"), e.GetMessageString().AsWxString().c_str());
 		}
 	}
 

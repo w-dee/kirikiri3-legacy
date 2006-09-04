@@ -27,10 +27,10 @@ RISSE_DEFINE_SOURCE_ID(7695,16492,63400,17880,52365,22979,50413,3135);
 void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
 {
 	// (テスト) ASTのダンプを行う
-	RisseFPrint(stdout, RISSE_WS("========== AST ==========\n"));
+	RisseFPrint(stderr, RISSE_WS("========== AST ==========\n"));
 	tRisseString str;
 	root->Dump(str);
-	RisseFPrint(stdout, str.c_str());
+	RisseFPrint(stderr, str.c_str());
 
 	// (テスト)
 	tRisseSSAForm * form = new tRisseSSAForm(this, RISSE_WS("root"), NULL, false);
@@ -64,10 +64,10 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 	{
-		RisseFPrint(stdout,(	RISSE_WS("========== SSA (") + (*i)->GetName() +
+		RisseFPrint(stderr,(	RISSE_WS("========== SSA (") + (*i)->GetName() +
 								RISSE_WS(") ==========\n")).c_str());
 		str = (*i)->Dump();
-		RisseFPrint(stdout, str.c_str());
+		RisseFPrint(stderr, str.c_str());
 	}
 
 	// コードジェネレータの生成
@@ -82,13 +82,13 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 	{
-		RisseFPrint(stdout,(	RISSE_WS("========== VM block #") +
+		RisseFPrint(stderr,(	RISSE_WS("========== VM block #") +
 									tRisseString::AsString((risse_int64)(*i)->GetCodeBlockIndex()) +
 								RISSE_WS(" (") + (*i)->GetName() +
 								RISSE_WS(") ==========\n")).c_str());
 		tRisseCodeBlock * cb = (*i)->GetCodeBlock();
 		str = cb->Dump();
-		RisseFPrint(stdout, str.c_str());
+		RisseFPrint(stderr, str.c_str());
 	}
 
 	// ルートのコードブロックを設定する

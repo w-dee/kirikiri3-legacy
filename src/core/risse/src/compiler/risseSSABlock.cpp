@@ -548,7 +548,7 @@ void tRisseSSABlock::RemovePhiStatements()
 		{
 			// TODO: 変数の干渉が見つかった場合の処理
 			RisseFPrint(stderr, tRisseString(RISSE_WS("variable interference found at block %1\n"), Dump()).c_str());
-			RISSE_ASSERT("variable interference found");
+			RISSE_ASSERT(!"variable interference found");
 		}
 
 		// 各 pred の分岐文の直前に 代入文を生成する

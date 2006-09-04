@@ -221,7 +221,9 @@ void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
 	Fixup();
 
 	// テスト実行
-	RisseFPrint(stdout,(RISSE_WS("========== Result ==========\n")));
+	RisseFPrint(stderr,(RISSE_WS("========== Result ==========\n")));
+	fflush(stderr);
+	fflush(stdout);
 	tRisseVariant ret;
 	RISSE_ASSERT(RootCodeBlock != NULL);
 	RootCodeBlock->GetObject().FuncCall(

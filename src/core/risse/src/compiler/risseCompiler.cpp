@@ -285,9 +285,15 @@ void tRisseCompilerFunctionGroup::CompleteSSAForm()
 void tRisseCompilerFunctionGroup::GenerateVMCode()
 {
 	// すべての共有されている変数をコードジェネレータに登録する
+	// いまのところ、コードジェネレータはそれよりも前段の各クラスとは情報が独立
+	// しているために、コードジェネレータが必要な情報はなんらかの形で前段が
+	// コードジェネレータに対して与えなければならない
 	for(tSharedVariableMap::const_iterator i = SharedVariableMap.begin();
 		i != SharedVariableMap.end(); i++)
 	{
+		// コードジェネレータの SharedRegNameMap は一つの関数グループ内では同じ
+		// マップを共有しているため、トップレベルのSSA形式インスタンスが作成した
+		// コードジェネレータに対してのみ共有されている変数を登録するのでよい。
 		Functions.front()->GetTopSSAForm()->GetCodeGenerator()->AddSharedRegNameMap(i->first);
 	}
 

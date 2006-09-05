@@ -201,12 +201,8 @@ void tRisseCompilerFunction::BindAllLabels()
 						new tRisseSSAStatement(source_form,
 							i->SourceBlock->GetLastStatementPosition(), ocExitTryException);
 					i->SourceBlock->AddStatement(stmt);
-					// i->CatchBranchAndExceptionValueMap から目的の form を探す
-					tPendingLabelJump::tExitTryBranchTargetLabelMap::iterator mi =
-						i->ExitTryBranchTargetLabelMap->find(form);
-					RISSE_ASSERT(mi != i->ExitTryBranchTargetLabelMap->end());
-					risse_size label_idx =
-						tRisseSSAForm::InternalAddExitTryBranchTargetLabel(mi->second, i->LabelName);
+					risse_size label_idx = form->AddExitTryBranchTargetLabel(
+								child->GetTryIdentifierIndex(), i->LabelName);
 					stmt->SetTryIdentifierIndex(child->GetTryIdentifierIndex()); // try id を設定
 					stmt->SetIndex(label_idx + 2); // インデックスを設定
 						// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき

@@ -208,6 +208,18 @@ risse_size tRisseSSAForm::InternalAddExitTryBranchTargetLabel(
 
 
 //---------------------------------------------------------------------------
+risse_size tRisseSSAForm::AddExitTryBranchTargetLabel(risse_size try_id,
+													const tRisseString & label)
+{
+	tCatchBranchAndExceptionMap::iterator i =
+		CatchBranchAndExceptionMap.find(try_id);
+	RISSE_ASSERT(i != CatchBranchAndExceptionMap.end());
+	return InternalAddExitTryBranchTargetLabel(i->second->ExitTryBranchTargetLabels, label);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_size tRisseSSAForm::AddExitTryBranchTargetLabel(const tRisseString & label)
 {
 	RISSE_ASSERT(ExitTryBranchTargetLabels != NULL);
@@ -274,7 +286,7 @@ void tRisseSSAForm::AddPendingLabelJump(tRisseSSABlock * jump_block,
 			const tRisseString & labelname)
 {
 	//============ のちに Function 内に移すかも
-
+#if 0
 	// tExitTryBranchTargetLabelMap を作成
 	// なぜここで tExitTryBranchTargetLabelMap を保存するのかというと
 	// ・ラベルはこの時点ではどこにバインドするか分からない
@@ -294,9 +306,10 @@ void tRisseSSAForm::AddPendingLabelJump(tRisseSSABlock * jump_block,
 
 		form = form->Parent;
 	}
-
+#endif
 	// PendingLabelJump に追加
-	Function->GetPendingLabelJumps().push_back(tRisseCompilerFunction::tPendingLabelJump(jump_block, labelname, map));
+	Function->GetPendingLabelJumps().push_back(
+		tRisseCompilerFunction::tPendingLabelJump(jump_block, labelname));
 }
 //---------------------------------------------------------------------------
 
@@ -530,13 +543,34 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 //---------------------------------------------------------------------------
 void tRisseSSAForm::AddCatchBranchTargets()
 {
-	for(gc_vector<tCatchBranchAndExceptionValue>::iterator i =
-							CatchBranchAndExceptionValues.begin();
-		i != CatchBranchAndExceptionValues.end(); i++)
+	for(tCatchBranchAndExceptionMap::iterator i =
+							CatchBranchAndExceptionMap.begin();
+		i != CatchBranchAndExceptionMap.end(); i++)
 	{
 		AddCatchBranchTargetsForOne(
-			i->CatchBranchStatement, i->ExceptionValue, i->ExitTryBranchTargetLabels);
+			i->second->CatchBranchStatement,
+			i->second->ExceptionValue,
+			i->second->ExitTryBranchTargetLabels);
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AddCatchBranchAndExceptionValue(
+				tRisseSSAStatement * catch_branch_stmt,
+				tRisseSSAVariable * except_value)
+{
+	RISSE_ASSERT(ExitTryBranchTargetLabels);
+	RISSE_ASSERT(catch_branch_stmt->GetCode() == ocCatchBranch);
+	CatchBranchAndExceptionMap.insert(
+		tCatchBranchAndExceptionMap::value_type(
+			catch_branch_stmt->GetTryIdentifierIndex(),
+			new tCatchBranchAndExceptionValue(
+				catch_branch_stmt,
+				except_value,
+				ExitTryBranchTargetLabels)));
+	ExitTryBranchTargetLabels = NULL; // このインスタンスはここではもう使わない
 }
 //---------------------------------------------------------------------------
 

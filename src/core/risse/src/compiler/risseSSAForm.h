@@ -168,8 +168,12 @@ class tRisseSSAForm : public tRisseCollectee
 		tRisseSSAVariable * ExceptionValue; //!< TryCallの際の例外の値
 		tExitTryBranchTargetLabels * ExitTryBranchTargetLabels;
 	};
-	gc_vector<tCatchBranchAndExceptionValue> CatchBranchAndExceptionValues;
-		//!< このSSA形式が保持しているTryCallしたあとのCatchBranch文と、そのTryCallの戻り値の情報のリスト
+	typedef gc_map<risse_size, tCatchBranchAndExceptionValue *> tCatchBranchAndExceptionMap;
+		//!< このSSA形式が保持しているTri識別子と、
+		//!< TryCallしたあとのCatchBranch文/そのTryCallの戻り値の情報のリストのtypedef
+	tCatchBranchAndExceptionMap CatchBranchAndExceptionMap;
+		//!< このSSA形式が保持しているTri識別子と、
+		//!< TryCallしたあとのCatchBranch文/そのTryCallの戻り値の情報のリスト
 
 	tSharedVariableMap SharedVariableMap; //!< 共有されている変数のマップ
 	tRisseString Name; //!< このSSA形式インスタンスの名前
@@ -257,8 +261,8 @@ public:
 	//! @return		新しく作成された基本ブロック
 	tRisseSSABlock * CreateNewBlock(const tRisseString & name);
 
-public:
-	//! @brief		任意の ExitTryBranchTargetLabels にマップを追加する
+private:
+	//! @brief		任意の ExitTryBranchTargetLabels にマップを追加する(AddExitTryBranchTargetLabel()から呼ばれる)
 	//! @param		target_label	ExitTryBranchTargetLabels
 	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
 	//! @return		そのラベルを表すインデックス
@@ -267,9 +271,20 @@ public:
 				const tRisseString & label);
 
 public:
+	//! @brief		このSSA形式インスタンスが保持している任意の ExitTryBranchTargetLabels にマップを追加する
+	//! @param		try_id			try識別子
+	//! @param		target_label	ExitTryBranchTargetLabels
+	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
+	//! @return		そのラベルを表すインデックス
+	risse_size AddExitTryBranchTargetLabel(
+				risse_size try_id,
+				const tRisseString & label);
+
 	//! @brief		ExitTryBranchTargetLabels にマップを追加する
 	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
 	//! @return		そのラベルを表すインデックス
+	//! @note		AddExitTryBranchTargetLabelのtry_id指定無し版と違い、
+	//!				このメソッドは現在の ExitTryBranchTargetLabels を対象に用いる。
 	risse_size AddExitTryBranchTargetLabel(const tRisseString & label);
 
 	//! @brief		現在の基本ブロックに定数値を得る文を追加する
@@ -401,16 +416,9 @@ public:
 	//!									発生したときのジャンプ先が登録されていること)
 	//! @param		except_value		例外オブジェクトを示す変数
 	void AddCatchBranchAndExceptionValue(tRisseSSAStatement * catch_branch_stmt,
-					tRisseSSAVariable * except_value)
-	{
-		CatchBranchAndExceptionValues.push_back(
-			tCatchBranchAndExceptionValue(
-				catch_branch_stmt,
-				except_value,
-				ExitTryBranchTargetLabels));
-		ExitTryBranchTargetLabels = NULL; // このインスタンスは二度と使わないように
-	}
+					tRisseSSAVariable * except_value);
 
+	//! @brief		このSSA形式が保持しているCatchBranch文
 
 	//! @param		変数を共有する
 	//! @param		name		変数名(番号付き)

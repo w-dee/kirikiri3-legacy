@@ -49,18 +49,22 @@ public:
 	{
 		tRisseSSABlock * SourceBlock; //!< ジャンプもとの基本ブロック
 		tRisseString LabelName; //!< ラベル名
+#if 0
 		typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
 		typedef gc_map<tRisseSSAForm *, tExitTryBranchTargetLabels *>
 			tExitTryBranchTargetLabelMap; //!< SSA形式とその時点での
 											//!< tExitTryBranchTargetLabels のマップ
 		tExitTryBranchTargetLabelMap * ExitTryBranchTargetLabelMap;
-
-		tPendingLabelJump(tRisseSSABlock * source_block,
-			const tRisseString & labelname, tExitTryBranchTargetLabelMap * map)
+#endif
+		tPendingLabelJump(
+			tRisseSSABlock * source_block,
+			const tRisseString & labelname)
 		{
 			SourceBlock = source_block;
 			LabelName = labelname;
+#if 0
 			ExitTryBranchTargetLabelMap = map;
+#endif
 		}
 	};
 

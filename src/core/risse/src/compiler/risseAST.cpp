@@ -16,6 +16,7 @@
 #include "risseSSAStatement.h"
 #include "risseSSAVariable.h"
 #include "risseCompilerNS.h"
+#include "risseCompiler.h"
 #include "../risseException.h"
 #include "../risseScriptBlockBase.h"
 
@@ -1841,7 +1842,8 @@ tRisseSSAVariable * tRisseASTNode_Label::DoReadSSA(tRisseSSAForm *form, void * p
 	jump_stmt->SetJumpTarget(label_block);
 
 	// form に登録
-	form->AddLabelMap(Name, label_block);
+	form->GetFunction()->AddLabelMap(Name, label_block);
+
 	// このノードは答えを返さない
 	return NULL;
 }

@@ -14,6 +14,9 @@
 
 #include "risseCompiler.h"
 #include "risseSSAForm.h"
+#include "risseAST.h"
+#include "risseSSABlock.h"
+#include "risseSSAStatement.h"
 #include "../risseException.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
@@ -63,9 +66,7 @@ void tRisseCompilerFunction::CompleteSSAForm()
 {
 	// 未バインドのラベルを結線する
 	// goto のジャンプ先は子→親の順に見ていくので生成順とは逆に処理を行う
-	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
-		i != SSAForms.rend(); i++)
-		(*i)->BindAllLabels();
+	BindAllLabels();
 
 	// try 脱出時の分岐先を生成
 	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
@@ -76,9 +77,7 @@ void tRisseCompilerFunction::CompleteSSAForm()
 	// (AddCatchBranchTargetsで再度未バインドのラベルが追加される可能性があるため)
 	// goto のジャンプ先は子→親の順に見ていくので生成順とは逆に処理を行う
 	// (この段階ではSSA形式を超えるようなジャンプは無いはず)
-	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
-		i != SSAForms.rend(); i++)
-		(*i)->BindAllLabels();
+	BindAllLabels();
 }
 //---------------------------------------------------------------------------
 
@@ -128,7 +127,109 @@ void tRisseCompilerFunction::GenerateVMCode()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseCompilerFunction::AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block)
+{
+	tLabelMap::iterator i = LabelMap.find(labelname);
 
+	if(i != LabelMap.end())
+	{
+		// すでにラベルがある
+		eRisseCompileError::Throw(
+			tRisseString(RISSE_WS_TR("label '%1' is already defined"), labelname),
+				FunctionGroup->GetCompiler()->GetScriptBlock(), block->GetLastStatementPosition());
+	}
+
+	LabelMap.insert(tLabelMap::value_type(labelname, block)); // ラベルを挿入
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunction::BindAllLabels()
+{
+	for(tPendingLabelJumps::iterator i = PendingLabelJumps.begin();
+		i != PendingLabelJumps.end(); i++)
+	{
+		// それぞれの i について、その基本ブロックの最後にジャンプ文を生成する
+
+		// ジャンプ先を検索
+		tLabelMap::iterator label_pair = LabelMap.find(i->LabelName);
+		if(label_pair == LabelMap.end())
+		{
+			// ラベルは見つからなかった
+			eRisseCompileError::Throw(
+				tRisseString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
+					FunctionGroup->GetCompiler()->GetScriptBlock(),
+						i->SourceBlock->GetLastStatementPosition());
+		}
+
+		// ラベルが見つかった
+
+		// ラベルのジャンプ元とジャンプ先のSSA形式の親子関係を調べる
+		tRisseSSAForm * source_form = i->SourceBlock->GetForm();
+		tRisseSSAForm * target_form = label_pair->second->GetForm();
+
+		if(source_form == target_form)
+		{
+			// 同じSSA形式インスタンス内
+			// ジャンプ文を生成
+			tRisseSSAStatement * stmt =
+				new tRisseSSAStatement(source_form,
+					i->SourceBlock->GetLastStatementPosition(), ocJump);
+			i->SourceBlock->AddStatement(stmt);
+			stmt->SetJumpTarget(label_pair->second);
+		}
+		else
+		{
+			// 同じSSA形式インスタンスではない
+			// この場合は、source_form の親や先祖に target_form が無ければ
+			// ならない (浅いSSA形式から深いSSA形式へのジャンプはできない)
+			tRisseSSAForm * child = NULL;
+			tRisseSSAForm * form = source_form;
+			do
+			{
+				child = form;
+				form = child->GetParent();
+				if(!form) break;
+
+				if(target_form == form)
+				{
+					// ジャンプ先のSSA形式が見つかった
+					// この try id まで例外で抜けるためのコードを生成
+					tRisseSSAStatement * stmt =
+						new tRisseSSAStatement(source_form,
+							i->SourceBlock->GetLastStatementPosition(), ocExitTryException);
+					i->SourceBlock->AddStatement(stmt);
+					// i->CatchBranchAndExceptionValueMap から目的の form を探す
+					tPendingLabelJump::tExitTryBranchTargetLabelMap::iterator mi =
+						i->ExitTryBranchTargetLabelMap->find(form);
+					RISSE_ASSERT(mi != i->ExitTryBranchTargetLabelMap->end());
+					risse_size label_idx =
+						tRisseSSAForm::InternalAddExitTryBranchTargetLabel(mi->second, i->LabelName);
+					stmt->SetTryIdentifierIndex(child->GetTryIdentifierIndex()); // try id を設定
+					stmt->SetIndex(label_idx + 2); // インデックスを設定
+						// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき
+						// に割り当てられているので
+					break;
+				}
+			} while(true);
+
+			if(form == NULL)
+			{
+				// ジャンプ先ラベルはどうやら自分よりも深い場所にいるようだ
+				// そういうことは今のところできないのでエラーにする
+				eRisseCompileError::Throw(
+					tRisseString(RISSE_WS_TR("cannot jump into deeper try block or callback block")),
+						FunctionGroup->GetCompiler()->GetScriptBlock(),
+							i->SourceBlock->GetLastStatementPosition());
+			}
+		}
+	}
+
+	PendingLabelJumps.clear(); // リストはクリアしておく
+}
+//---------------------------------------------------------------------------
 
 
 

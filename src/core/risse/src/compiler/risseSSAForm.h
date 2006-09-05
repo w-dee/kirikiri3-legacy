@@ -144,12 +144,9 @@ class tRisseSSAForm : public tRisseCollectee
 
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
 		//!< 共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
-	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
-		//!< ラベルのマップのtypedef
-
 	bool CanReturn; //!< このSSA形式からはreturn文で戻ることが可能
 	typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
-		//!< このSSA形式のが受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
+		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
 	tExitTryBranchTargetLabels *ExitTryBranchTargetLabels;
 		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)
 	risse_size TryIdentifierIndex; //!< このSSA形式がtryブロックなどの場合、親SSA形式内の該当tryブロックのtry識別子を表す
@@ -174,34 +171,11 @@ class tRisseSSAForm : public tRisseCollectee
 	gc_vector<tCatchBranchAndExceptionValue> CatchBranchAndExceptionValues;
 		//!< このSSA形式が保持しているTryCallしたあとのCatchBranch文と、そのTryCallの戻り値の情報のリスト
 
-	//! @brief		バインドがまだされていないラベルへのジャンプ
-	struct tPendingLabelJump : public tRisseCollectee
-	{
-		tRisseSSABlock * SourceBlock; //!< ジャンプもとの基本ブロック
-		tRisseString LabelName; //!< ラベル名
-		typedef gc_map<tRisseSSAForm *, tExitTryBranchTargetLabels *>
-			tExitTryBranchTargetLabelMap; //!< SSA形式とその時点での
-											//!< tExitTryBranchTargetLabels のマップ
-		tExitTryBranchTargetLabelMap * ExitTryBranchTargetLabelMap;
-
-		tPendingLabelJump(tRisseSSABlock * source_block,
-			const tRisseString & labelname, tExitTryBranchTargetLabelMap * map)
-		{
-			SourceBlock = source_block;
-			LabelName = labelname;
-			ExitTryBranchTargetLabelMap = map;
-		}
-	};
-
-	typedef gc_vector<tPendingLabelJump> tPendingLabelJumps;
-		//!< バインドがまだされていないラベルへのジャンプのリストのtypedef
-	tLabelMap *LabelMap; //!< ラベルのマップ
-	tPendingLabelJumps * PendingLabelJumps; //!< バインドがまだされていないラベルへのジャンプのリスト
-
 	tSharedVariableMap SharedVariableMap; //!< 共有されている変数のマップ
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
+
 	tRisseSSABlock * EntryBlock; //!< エントリーSSA基本ブロック
 	tRisseSSABlock * CurrentBlock; //!< 現在変換中の基本ブロック
 
@@ -234,6 +208,10 @@ public:
 	//! @brief		関数インスタンスを得る
 	//! @return		関数インスタンス
 	tRisseCompilerFunction * GetFunction() const { return Function; }
+
+	//! @brief		親SSA形式インスタンスを得る
+	//! @param		親SSA形式インスタンス
+	tRisseSSAForm * GetParent() const { return Parent; }
 
 	//! @brief		親SSA形式インスタンスのフレームを使うかどうかを得る
 	//! @param		親SSA形式インスタンスのフレームを使うかどうか
@@ -279,7 +257,7 @@ public:
 	//! @return		新しく作成された基本ブロック
 	tRisseSSABlock * CreateNewBlock(const tRisseString & name);
 
-private:
+public:
 	//! @brief		任意の ExitTryBranchTargetLabels にマップを追加する
 	//! @param		target_label	ExitTryBranchTargetLabels
 	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
@@ -339,20 +317,11 @@ public:
 		return ret_var;
 	}
 
-	//! @brief		ラベルマップを追加する
-	//! @param		labelname		ラベル名
-	//! @param		block			基本ブロック
-	//! @note		すでに同じ名前のラベルが存在していた場合は例外が発生する
-	void AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block);
-
 	//! @brief		未バインドのラベルジャンプを追加する
 	//! @param		jump_block		ジャンプもとの基本ブロック
 	//! @param		labelname		ジャンプ先のラベル名
 	void AddPendingLabelJump(tRisseSSABlock * jump_block,
 			const tRisseString & labelname);
-
-	//! @brief		未バインドのラベルジャンプをすべて解決する
-	void BindAllLabels();
 
 	//! @brief		現在の基本ブロックにreturn文を生成する
 	//! @param		pos		スクリプト上の位置

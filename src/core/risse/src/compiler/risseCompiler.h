@@ -16,7 +16,6 @@
 #include "../risseGC.h"
 #include "../risseCharUtils.h"
 #include "../risseTypes.h"
-#include "risseAST.h"
 #include "../risseVariant.h"
 #include "../risseOpCodes.h"
 
@@ -28,7 +27,11 @@
 //---------------------------------------------------------------------------
 namespace Risse
 {
+class tRisseASTNode;
+class tRisseSSAForm;
 class tRisseCompilerFunctionGroup;
+class tRisseSSAVariable;
+class tRisseSSABlock;
 //---------------------------------------------------------------------------
 //! @brief		関数クラス
 //---------------------------------------------------------------------------
@@ -38,6 +41,38 @@ class tRisseCompilerFunction : public tRisseCollectee
 	gc_vector<tRisseSSAForm *> SSAForms; //!< この関数が保持しているSSA形式のリスト
 
 public:
+	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
+		//!< ラベルのマップのtypedef
+
+	//! @brief		バインドがまだされていないラベルへのジャンプ
+	struct tPendingLabelJump : public tRisseCollectee
+	{
+		tRisseSSABlock * SourceBlock; //!< ジャンプもとの基本ブロック
+		tRisseString LabelName; //!< ラベル名
+		typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
+		typedef gc_map<tRisseSSAForm *, tExitTryBranchTargetLabels *>
+			tExitTryBranchTargetLabelMap; //!< SSA形式とその時点での
+											//!< tExitTryBranchTargetLabels のマップ
+		tExitTryBranchTargetLabelMap * ExitTryBranchTargetLabelMap;
+
+		tPendingLabelJump(tRisseSSABlock * source_block,
+			const tRisseString & labelname, tExitTryBranchTargetLabelMap * map)
+		{
+			SourceBlock = source_block;
+			LabelName = labelname;
+			ExitTryBranchTargetLabelMap = map;
+		}
+	};
+
+	typedef gc_vector<tPendingLabelJump> tPendingLabelJumps;
+		//!< バインドがまだされていないラベルへのジャンプのリストのtypedef
+
+private:
+	tLabelMap LabelMap; //!< ラベルのマップ
+	tPendingLabelJumps PendingLabelJumps; //!< バインドがまだされていないラベルへのジャンプのリスト
+
+
+public:
 	//! @brief		コンストラクタ
 	//! @param		function_group		関数グループクラスのインスタンス
 	tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group);
@@ -45,6 +80,14 @@ public:
 	//! @brief		関数グループクラスのインスタンスを得る
 	//! @return		関数グループクラスのインスタンス
 	tRisseCompilerFunctionGroup * GetFunctionGroup() const { return FunctionGroup; }
+
+	//! @brief		ラベルのマップを得る
+	//! @return		ラベルのマップ
+	tLabelMap & GetLabelMap() { return LabelMap; }
+
+	//! @brief		バインドがまだされていないラベルへのジャンプのリストを得る
+	//! @return		バインドがまだされていないラベルへのジャンプのリスト
+	tPendingLabelJumps & GetPendingLabelJumps() { return PendingLabelJumps; }
 
 	//! @brief		SSA形式インスタンスを追加する
 	//! @param		form		SSA形式インスタンス
@@ -57,6 +100,19 @@ public:
 
 	//! @brief		VMコード生成を行う
 	void GenerateVMCode();
+
+//--
+public:
+	//! @brief		ラベルマップを追加する
+	//! @param		labelname		ラベル名
+	//! @param		block			基本ブロック
+	//! @note		すでに同じ名前のラベルが存在していた場合は例外が発生する
+	void AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block);
+
+private:
+	//! @brief		未バインドのラベルジャンプをすべて解決する
+	void BindAllLabels();
+
 
 };
 //---------------------------------------------------------------------------
@@ -71,6 +127,10 @@ class tRisseCompilerFunctionGroup : public tRisseCollectee
 {
 	tRisseCompiler * Compiler; //!< この関数グループを保持しているコンパイラクラスのインスタンス
 	gc_vector<tRisseCompilerFunction *> Functions; //!< この関数グループが保持している関数インスタンスのリスト
+	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
+		//!< 共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
+
+	tSharedVariableMap SharedVariableMap; //!< 共有されている変数のマップ
 
 public:
 	//! @brief		コンストラクタ

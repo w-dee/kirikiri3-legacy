@@ -1854,7 +1854,7 @@ tRisseSSAVariable * tRisseASTNode_Label::DoReadSSA(tRisseSSAForm *form, void * p
 tRisseSSAVariable * tRisseASTNode_Goto::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
 	// form に登録
-	form->AddPendingLabelJump(form->GetCurrentBlock(), Name);
+	form->GetFunction()->AddPendingLabelJump(form->GetCurrentBlock(), Name);
 
 	// 新しい基本ブロックを作成 (この基本ブロックには到達しない)
 	form->CreateNewBlock(RISSE_WS("disconnected_by_goto"));

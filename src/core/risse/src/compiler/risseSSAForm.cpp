@@ -63,7 +63,7 @@ void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 		i != PendingJumpSourceBlocks.end(); i++)
 	{
 		// それぞれの i について、Form の PendingLabelJumps に入れる
-		Form->AddPendingLabelJump(*i, JumpTargetLabel);
+		Form->GetFunction()->AddPendingLabelJump(*i, JumpTargetLabel);
 	}
 }
 //---------------------------------------------------------------------------
@@ -282,41 +282,6 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddPendingLabelJump(tRisseSSABlock * jump_block,
-			const tRisseString & labelname)
-{
-	//============ のちに Function 内に移すかも
-#if 0
-	// tExitTryBranchTargetLabelMap を作成
-	// なぜここで tExitTryBranchTargetLabelMap を保存するのかというと
-	// ・ラベルはこの時点ではどこにバインドするか分からない
-	// ・分からないのですべてのSSA形式を作成し終わった後で BindAllLabels()
-	//   がバインドされていないすべてのジャンプを解決
-	// ・そのときに どの CatchBranch 文がSSA形式を抜けるための例外を受け取るか
-	//   の情報が必要
-	// ということ
-	tRisseCompilerFunction::tPendingLabelJump::tExitTryBranchTargetLabelMap * map = new
-		tRisseCompilerFunction::tPendingLabelJump::tExitTryBranchTargetLabelMap();
-
-	tRisseSSAForm * form = Parent;
-	while(form)
-	{
-		map->insert(tRisseCompilerFunction::tPendingLabelJump::tExitTryBranchTargetLabelMap::value_type(
-					form, form->ExitTryBranchTargetLabels));
-
-		form = form->Parent;
-	}
-#endif
-	// PendingLabelJump に追加
-	Function->GetPendingLabelJumps().push_back(
-		tRisseCompilerFunction::tPendingLabelJump(jump_block, labelname));
-}
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
 void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 {
 	if(var == NULL)
@@ -517,7 +482,7 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 			target =
 				CreateNewBlock(RISSE_WS("goto_by_exception"));
 
-			AddPendingLabelJump(target, *i);
+			Function->AddPendingLabelJump(target, *i);
 
 			// 新しい基本ブロックを作成(ただしここには到達しない)
 			CreateNewBlock("disconnected_by_goto_or_continue_or_break");

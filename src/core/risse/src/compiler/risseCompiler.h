@@ -49,22 +49,12 @@ public:
 	{
 		tRisseSSABlock * SourceBlock; //!< ジャンプもとの基本ブロック
 		tRisseString LabelName; //!< ラベル名
-#if 0
-		typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
-		typedef gc_map<tRisseSSAForm *, tExitTryBranchTargetLabels *>
-			tExitTryBranchTargetLabelMap; //!< SSA形式とその時点での
-											//!< tExitTryBranchTargetLabels のマップ
-		tExitTryBranchTargetLabelMap * ExitTryBranchTargetLabelMap;
-#endif
 		tPendingLabelJump(
 			tRisseSSABlock * source_block,
 			const tRisseString & labelname)
 		{
 			SourceBlock = source_block;
 			LabelName = labelname;
-#if 0
-			ExitTryBranchTargetLabelMap = map;
-#endif
 		}
 	};
 
@@ -107,6 +97,12 @@ public:
 
 //--
 public:
+	//! @brief		未バインドのラベルジャンプを追加する
+	//! @param		jump_block		ジャンプもとの基本ブロック
+	//! @param		labelname		ジャンプ先のラベル名
+	void AddPendingLabelJump(tRisseSSABlock * jump_block,
+			const tRisseString & labelname);
+
 	//! @brief		ラベルマップを追加する
 	//! @param		labelname		ラベル名
 	//! @param		block			基本ブロック

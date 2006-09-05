@@ -332,12 +332,6 @@ public:
 		return ret_var;
 	}
 
-	//! @brief		未バインドのラベルジャンプを追加する
-	//! @param		jump_block		ジャンプもとの基本ブロック
-	//! @param		labelname		ジャンプ先のラベル名
-	void AddPendingLabelJump(tRisseSSABlock * jump_block,
-			const tRisseString & labelname);
-
 	//! @brief		現在の基本ブロックにreturn文を生成する
 	//! @param		pos		スクリプト上の位置
 	//! @param		var		returnする値 (NULL=voidを返す)

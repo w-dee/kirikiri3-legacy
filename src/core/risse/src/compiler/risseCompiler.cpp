@@ -127,6 +127,17 @@ void tRisseCompilerFunction::GenerateVMCode()
 //---------------------------------------------------------------------------
 
 
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunction::AddPendingLabelJump(tRisseSSABlock * jump_block,
+			const tRisseString & labelname)
+{
+	// PendingLabelJump に追加
+	PendingLabelJumps.push_back(tPendingLabelJump(jump_block, labelname));
+}
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 void tRisseCompilerFunction::AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block)
 {

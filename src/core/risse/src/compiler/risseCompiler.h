@@ -87,6 +87,9 @@ public:
 	//! @param		form		SSA形式インスタンス
 	void AddSSAForm(tRisseSSAForm * form);
 
+	//! @brief		先頭のSSA形式インスタンスを得る
+	tRisseSSAForm * GetTopSSAForm() const { return SSAForms.front(); }
+
 	//! @brief		SSA形式を完結させる
 	//! @note		このメソッドは、一通りASTからの変換が終わった後に呼ばれる。
 	//!				未バインドのラベルなどのバインドを行う。
@@ -153,6 +156,15 @@ public:
 	//! @brief		VMコード生成を行う
 	void GenerateVMCode();
 
+//--
+	//! @param		変数を共有する
+	//! @param		name		変数名(番号付き)
+	void ShareVariable(const tRisseString & name);
+
+	//! @param		変数が共有されているかを得る
+	//! @param		name		変数名(番号付き)
+	//! @return		変数が共有されているかどうか
+	bool GetShared(const tRisseString & name);
 };
 //---------------------------------------------------------------------------
 

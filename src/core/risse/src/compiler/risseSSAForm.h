@@ -142,8 +142,6 @@ class tRisseSSAForm : public tRisseCollectee
 	bool UseParentFrame; //!< 親SSA形式インスタンスのフレームを使うかどうか
 	gc_vector<tRisseSSAForm *> Children; //!< この SSA形式インスタンスの子インスタンスの配列
 
-	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
-		//!< 共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
 	bool CanReturn; //!< このSSA形式からはreturn文で戻ることが可能
 	typedef gc_map<tRisseString, risse_size> tExitTryBranchTargetLabels;
 		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
@@ -175,7 +173,6 @@ class tRisseSSAForm : public tRisseCollectee
 		//!< このSSA形式が保持しているTri識別子と、
 		//!< TryCallしたあとのCatchBranch文/そのTryCallの戻り値の情報のリスト
 
-	tSharedVariableMap SharedVariableMap; //!< 共有されている変数のマップ
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
@@ -411,17 +408,6 @@ public:
 	//! @param		except_value		例外オブジェクトを示す変数
 	void AddCatchBranchAndExceptionValue(tRisseSSAStatement * catch_branch_stmt,
 					tRisseSSAVariable * except_value);
-
-	//! @brief		このSSA形式が保持しているCatchBranch文
-
-	//! @param		変数を共有する
-	//! @param		name		変数名(番号付き)
-	void ShareVariable(const tRisseString & name);
-
-	//! @param		変数が共有されているかを得る
-	//! @param		name		変数名(番号付き)
-	//! @return		変数が共有されているかどうか
-	bool GetShared(const tRisseString & name);
 
 protected:
 	//! @brief	CreateLazyBlock で返される情報の構造体

@@ -17,6 +17,7 @@
 #include "risseSSAForm.h"
 #include "risseSSAStatement.h"
 #include "risseSSAVariable.h"
+#include "risseCompiler.h"
 #include "risseCompilerNS.h"
 #include "../risseException.h"
 #include "../risseScriptBlockBase.h"
@@ -410,7 +411,7 @@ void tRisseSSABlock::ConvertSharedVariableAccess()
 		tRisseOpCode code = stmt->GetCode();
 		if(code == ocReadVar)
 		{
-			if(Form->GetShared(stmt->GetName()))
+			if(Form->GetFunction()->GetFunctionGroup()->GetShared(stmt->GetName()))
 			{
 				tRisseSSAStatement *new_stmt = new
 					tRisseSSAStatement(Form, stmt->GetPosition(), ocRead);
@@ -429,7 +430,7 @@ void tRisseSSABlock::ConvertSharedVariableAccess()
 		}
 		else if(code == ocWriteVar)
 		{
-			if(Form->GetShared(stmt->GetName()))
+			if(Form->GetFunction()->GetFunctionGroup()->GetShared(stmt->GetName()))
 			{
 				tRisseSSAStatement *new_stmt = new
 					tRisseSSAStatement(Form, stmt->GetPosition(), ocWrite);

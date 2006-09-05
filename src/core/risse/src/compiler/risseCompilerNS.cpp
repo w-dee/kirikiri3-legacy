@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "../prec.h"
 
+#include "risseCompiler.h"
 #include "risseCompilerNS.h"
 #include "risseSSAForm.h"
 #include "risseSSAVariable.h"
@@ -415,7 +416,7 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 	{
 		// 変数が見つかった
 		if(ret_n_name) *ret_n_name = n_name;
-		if(should_share) Block->GetForm()->ShareVariable(n_name);
+		if(should_share) Block->GetForm()->GetFunction()->GetFunctionGroup()->ShareVariable(n_name);
 		if(shared) *shared = should_share;
 
 		// 子のAccessMap に記録 (AccessMap に記録するのは「番号なし」の名前

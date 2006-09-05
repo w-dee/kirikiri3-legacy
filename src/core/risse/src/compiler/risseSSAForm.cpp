@@ -541,22 +541,6 @@ void tRisseSSAForm::AddCatchBranchAndExceptionValue(
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::ShareVariable(const tRisseString & name)
-{
-	SharedVariableMap.insert(tSharedVariableMap::value_type(name, NULL));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tRisseSSAForm::GetShared(const tRisseString & name)
-{
-	return SharedVariableMap.find(name) != SharedVariableMap.end();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseSSAVariableAccessMap * tRisseSSAForm::CreateAccessMap(risse_size pos)
 {
 	// 遅延評価ブロック内で発生したtry脱出用例外に備えて ExitTryBranchTargetLabels
@@ -884,18 +868,11 @@ void tRisseSSAForm::GenerateCode() const
 {
 	// バイトコードを生成する
 	RISSE_ASSERT(CodeGenerator != NULL);
+	CodeGenerator->SetRegisterBase();
 
 	// EntryBlock から到達可能なすべての基本ブロックを得る
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
-
-	// すべての共有されている変数を登録する
-	CodeGenerator->SetRegisterBase();
-	for(tSharedVariableMap::const_iterator i = SharedVariableMap.begin();
-		i != SharedVariableMap.end(); i++)
-	{
-		CodeGenerator->AddSharedRegNameMap(i->first);
-	}
 
 	// すべての基本ブロックに対してコード生成を行わせる
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)

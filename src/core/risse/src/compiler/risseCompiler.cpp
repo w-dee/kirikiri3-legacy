@@ -17,6 +17,7 @@
 #include "risseAST.h"
 #include "risseSSABlock.h"
 #include "risseSSAStatement.h"
+#include "risseCodeGen.h"
 #include "../risseException.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
@@ -266,6 +267,7 @@ void tRisseCompilerFunctionGroup::AddFunction(tRisseCompilerFunction * function)
 }
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
 void tRisseCompilerFunctionGroup::CompleteSSAForm()
 {
@@ -278,15 +280,39 @@ void tRisseCompilerFunctionGroup::CompleteSSAForm()
 }
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
 void tRisseCompilerFunctionGroup::GenerateVMCode()
 {
+	// すべての共有されている変数をコードジェネレータに登録する
+	for(tSharedVariableMap::const_iterator i = SharedVariableMap.begin();
+		i != SharedVariableMap.end(); i++)
+	{
+		Functions.front()->GetTopSSAForm()->GetCodeGenerator()->AddSharedRegNameMap(i->first);
+	}
+
 	// このインスタンスが所有しているすべての関数に対して処理を行わせる
 	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
 		ri != Functions.rend(); ri++)
 	{
 		(*ri)->GenerateVMCode();
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunctionGroup::ShareVariable(const tRisseString & n_name)
+{
+	SharedVariableMap.insert(tSharedVariableMap::value_type(n_name, NULL));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseCompilerFunctionGroup::GetShared(const tRisseString & n_name)
+{
+	return SharedVariableMap.find(n_name) != SharedVariableMap.end();
 }
 //---------------------------------------------------------------------------
 

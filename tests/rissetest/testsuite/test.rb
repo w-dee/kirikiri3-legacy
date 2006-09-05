@@ -14,12 +14,19 @@ Dir.glob(TESTS_DIR + '*').delete_if { |x| x =~ /^\./ }.each do |file|
 		if match == nil
 			raise "file does not contain result pattern"
 		else
-			pattern = Regexp.compile(match[1])
+			pattern = match[1]
 			print "testing #{file}\n"
 			system("\"#{File.expand_path(EXECUTABLE)}\" " +
 						" #{file} 1>#{TEMP_DIR}/stdout.log 2>#{TEMP_DIR}/stderr.log");
 			result = IO.read("#{TEMP_DIR}/stdout.log")
-			if pattern !~ result
+			matched = false
+			if p = pattern.match(/\/(.*)\//)
+				matched = result =~ Regexp.compile(p[1])
+			else
+				matched = result == pattern
+			end
+
+			if !matched
 				raise "test failed.\n" +
 						"  resulted: #{result}\n" +
 						"  expected: #{match[1]}\n" +

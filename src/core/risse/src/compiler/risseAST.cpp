@@ -2055,13 +2055,98 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 		form->AddStatement(GetPosition(), ocCatchBranch, NULL, try_block_ret_var);
 	catch_branch_stmt->SetTryIdentifierIndex(try_id); // try識別子を設定
 
+	// あとで例外の分岐先を設定できるように
+	form->AddCatchBranchAndExceptionValue(catch_branch_stmt, try_block_ret_var);
+
 	// catch用の新しい基本ブロックを作成
 	tRisseSSABlock * catch_entry_block =
 		form->CreateNewBlock(RISSE_WS("catch_entry"));
 
+	// catchブロックは、このtry文にfinallyがあるかどうかで生成の方法が異なる。
+	// finally がある場合はcatchブロック中で発生した例外を補足するために
+	// catchブロック中を遅延評価ブロックとして、trycall+catchbranchで例外の
+	// 捕捉/分岐 を行うことになる。
+	if(!Finally)
+	{
+		// finally ブロックはない
+
+		// catch ブロックを生成
+		GenerateCatchBlock(form, try_block_ret_var, false);
+
+		// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
+		catch_branch_stmt->SetTryExitTarget(form->GetCurrentBlock());
+		catch_branch_stmt->SetTryCatchTarget(catch_entry_block);
+	}
+	else
+	{
+		// finally ブロックがある！！
+
+		if(inherited::GetChildCount() > 0)
+		{
+			// catch ブロックがある場合
+
+			// スクリプトブロックより try ブロックの通し番号を得る
+			risse_size catch_try_id = form->GetScriptBlock()->AddTryIdentifier();
+
+			// アクセスマップを作成する
+			tRisseSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
+
+			// 遅延評価ブロックを作成する
+			void * lazy_param = form->CreateLazyBlock(GetPosition(),
+				RISSE_WS("catch block"), false, access_map, new_form, lazyblock_var);
+
+			new_form->SetTryIdentifierIndex(catch_try_id); // try識別子を子SSA形式に対して設定
+
+			// catchブロックを生成
+			GenerateCatchBlock(new_form, try_block_ret_var, true);
+
+			// 遅延評価ブロックで使用された変数の処理
+			form->ListVariablesForLazyBlock(GetPosition(), access_map);
+
+			// 遅延評価ブロックを実行するためのTryFuncCall文を作成
+			// 関数呼び出し文を生成する
+			tRisseSSAVariable * catch_block_ret_var = NULL;
+			tRisseSSAStatement * catch_block_call_stmt =
+				form->AddStatement(GetPosition(), ocTryFuncCall, &catch_block_ret_var, lazyblock_var);
+			catch_block_call_stmt->SetFuncExpandFlags(0);
+
+			// 遅延評価ブロックをクリーンアップ
+			form->CleanupLazyBlock(lazy_param);
+
+			// アクセスマップをクリーンアップ
+			form->CleanupAccessMap(GetPosition(), access_map);
+
+			// ocCatchBranch の作成
+			tRisseSSAStatement * catch_catch_branch_stmt =
+				form->AddStatement(GetPosition(), ocCatchBranch, NULL, catch_block_ret_var);
+			catch_catch_branch_stmt->SetTryIdentifierIndex(catch_try_id); // try識別子を設定
+
+			// あとで例外の分岐先を設定できるように
+			form->AddCatchBranchAndExceptionValue(catch_branch_stmt, catch_block_ret_var);
+
+			// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
+			catch_catch_branch_stmt->SetTryExitTarget(form->GetCurrentBlock());
+			catch_catch_branch_stmt->SetTryCatchTarget(form->GetCurrentBlock());
+		}
+
+		// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
+		catch_branch_stmt->SetTryExitTarget(form->GetCurrentBlock());
+		catch_branch_stmt->SetTryCatchTarget(catch_entry_block);
+	}
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
+	tRisseSSAVariable * try_block_ret_var, bool gen_return) const
+{
 	// catchブロックを順々に処理
 	gc_vector<tRisseSSAStatement *> catch_exit_jumps;
-	tRisseSSABlock * last_catch_exit_block = NULL;
+	tRisseSSAStatement * branch_stmt = NULL;
 	for(risse_size i = 0; i < inherited::GetChildCount(); i++)
 	{
 		RISSE_ASSERT(inherited::GetChildAt(i)->GetType() == antCatch);
@@ -2069,7 +2154,6 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 			reinterpret_cast<tRisseASTNode_Catch*>(inherited::GetChildAt(i));
 
 		tRisseASTNode * condition = catch_node->GetCondition();
-		tRisseSSAStatement * branch_stmt;
 
 		// ローカル変数の名前空間を push
 		form->GetLocalNamespace()->Push(); // スコープを push
@@ -2117,25 +2201,30 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 		// 新しい基本ブロックを作成
 		tRisseSSABlock * catch_next_block =
 			form->CreateNewBlock(RISSE_WS("catch_next"));
-		last_catch_exit_block = catch_next_block;
 		if(branch_stmt) branch_stmt->SetFalseBranch(catch_next_block);
 	}
 
+	// どの条件にも合致しなかった場合には例外をそのまま投げる
+	if(branch_stmt)
+	{
+		form->AddStatement(GetPosition(), ocThrow, NULL, try_block_ret_var);
+		form->CreateNewBlock(RISSE_WS("disconnected_by_throw"));
+	}
+
 	// 各catchブロックからの脱出を行うジャンプ先を設定
-	RISSE_ASSERT(last_catch_exit_block != NULL);
+	tRisseSSABlock * catch_exit_block =
+		form->CreateNewBlock(RISSE_WS("catch_exit"));
+
 	for(gc_vector<tRisseSSAStatement *>::iterator i = catch_exit_jumps.begin();
 			i != catch_exit_jumps.end(); i++)
-		(*i)->SetJumpTarget(last_catch_exit_block);
+		(*i)->SetJumpTarget(catch_exit_block);
 
-	// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
-	catch_branch_stmt->SetTryExitTarget(last_catch_exit_block);
-	catch_branch_stmt->SetTryCatchTarget(catch_entry_block);
-
-	// あとで例外の分岐先を設定できるように
-	form->AddCatchBranchAndExceptionValue(catch_branch_stmt, try_block_ret_var);
-
-	// このノードは答えを返さない
-	return NULL;
+	// return 文を作成
+	if(gen_return)
+	{
+		form->AddStatement(GetPosition(), ocReturn, NULL);
+		form->CreateNewBlock(RISSE_WS("disconnected_by_return"));
+	}
 }
 //---------------------------------------------------------------------------
 

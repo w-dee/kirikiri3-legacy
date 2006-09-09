@@ -2019,6 +2019,14 @@ public:
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+//--
+	//! @brief		catchブロックを生成する
+	//! @param		form				SSA 形式インスタンス
+	//! @param		try_block_ret_var	tryブロックの戻り値
+	//! @param		gen_return			最後にreturn文を生成するかどうか
+	void GenerateCatchBlock(tRisseSSAForm * form,
+		tRisseSSAVariable * try_block_ret_var, bool gen_return) const;
 };
 //---------------------------------------------------------------------------
 

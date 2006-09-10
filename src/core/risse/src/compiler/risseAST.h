@@ -2021,12 +2021,17 @@ public:
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 
 //--
+private:
+	//! @brief		try-catchブロックの内容を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		is_finally	finally用の生成を行うか
+	void GenerateTryCatchOrFinally(tRisseSSAForm *form, bool is_finally) const;
+
 	//! @brief		catchブロックを生成する
 	//! @param		form				SSA 形式インスタンス
 	//! @param		try_block_ret_var	tryブロックの戻り値
-	//! @param		gen_return			最後にreturn文を生成するかどうか
 	void GenerateCatchBlock(tRisseSSAForm * form,
-		tRisseSSAVariable * try_block_ret_var, bool gen_return) const;
+		tRisseSSAVariable * try_block_ret_var) const;
 };
 //---------------------------------------------------------------------------
 

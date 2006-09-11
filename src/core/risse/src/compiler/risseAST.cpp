@@ -2497,6 +2497,8 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		// exit用の新しい基本ブロックを作成
 		tRisseSSABlock * trycall_exit_block =
 			form->CreateNewBlock(RISSE_WS("trycall_exit"));
+		tRisseSSAStatement * trycall_exit_jump_stmt =
+			form->AddStatement(GetPosition(), ocJump, NULL);
 
 		// TryFuncCall文 の分岐先を設定
 		catch_branch_stmt->SetTryExitTarget(trycall_exit_block);
@@ -2509,8 +2511,13 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		// あとで例外の分岐先を設定できるように
 		form->AddCatchBranchAndExceptionValue(catch_branch_stmt, returned_var);
 
+		// trycallの終了用の新しい基本ブロックを作成
+		tRisseSSABlock * trycall_fin_block =
+			form->CreateNewBlock(RISSE_WS("trycall_fin"));
+		trycall_exit_jump_stmt->SetJumpTarget(trycall_fin_block);
+
 		// break から来るパスと exit から来るパス用にφ関数を作成する
-		break_exit_jump_stmt->SetJumpTarget(trycall_exit_block);
+		break_exit_jump_stmt->SetJumpTarget(trycall_fin_block);
 		tRisseSSAVariable * phi_ret_var = NULL;
 		form->AddStatement(GetPosition(), ocPhi, &phi_ret_var,
 								returned_var, break_ret_var);

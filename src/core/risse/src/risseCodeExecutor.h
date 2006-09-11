@@ -15,6 +15,7 @@
 
 #include "risseGC.h"
 #include "risseCodeBlock.h"
+#include "risseObject.h"
 
 //---------------------------------------------------------------------------
 namespace Risse
@@ -75,6 +76,50 @@ public:
 		tRisseVariant * result = NULL);
 };
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ocTryFuncCall の戻り用オブジェクト
+//! @note		このオブジェクトはocTryFuncCallとocCatchBranchの間のみ存在する
+//!				(ocCatchBranchはこのオブジェクトが入ったレジスタをocTryFuncCall
+//!				の戻り値で置き換えてしまう)
+//---------------------------------------------------------------------------
+class tRisseTryFuncCallReturnObject : public tRisseObjectInterface
+{
+private:
+	tRisseVariant Value; //!< 例外/戻り値の値
+	bool Raised; // 例外が発生したかどうか
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		value		例外/戻り値の値
+	//! @param		raised		例外が発生したかどうか
+	tRisseTryFuncCallReturnObject(const tRisseVariant &value, bool raised)
+		{ Value = value; Raised = raised; }
+
+	//! @brief		例外/戻り値の値を得る
+	//! @return		例外/戻り値の値
+	const tRisseVariant & GetValue() const { return Value; }
+
+	//! @brief		例外が発生したかどうかを得る
+	//! @return		例外が発生したかどうか
+	bool GetRaised() const { return Raised; }
+
+private:
+	void Operate(
+		tRisseOpCode code,
+		tRisseVariant * result = NULL,
+		const tRisseString & name = tRisseString::GetEmptyString(),
+		risse_uint32 flags = 0,
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
+		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
+		const tRisseVariant *This = NULL,
+		const tRisseStackFrameContext *stack = NULL
+			) {;}
+};
+//---------------------------------------------------------------------------
+
 
 } // namespace Risse
 #endif

@@ -97,11 +97,6 @@ void tRisseCodeInterpreter::Execute(
 	//! @brief		レジスタのオペランド -> レジスタ/定数インデックスへの変換
 	#define CI(num) (num)
 
-	enum tExceptionState
-	{ esNone, esException, esNonException } exception_state = esNone;
-		//!< ocTryFuncCall で例外が発生したかどうかはこの変数が
-		//!< 示し、 ocCatchBranch がこれをみて分岐を行う。
-
 	// ループ
 	while(true)
 	{
@@ -208,14 +203,6 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 
-				RISSE_ASSERT(exception_state == esNone);
-				/*
-					ocCatchBranch は exception_state を esNone に設定するので
-					必ずここでは esNone であるはずである。ocTryFuncCall と
-					ocCatchBranch は必ず対であり、間にほかの ocTryFuncCall や
-					ocCatchBranch が挟まってはならない （間に他のocCopy文等が挟まることはある)
-				*/
-
 				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
 				// code[2] = メソッドオブジェクト
 				// code[3] = フラグ
@@ -232,22 +219,24 @@ void tRisseCodeInterpreter::Execute(
 				for(risse_uint32 i = 0; i < code[5]; i++)
 					blockargs.argv[i] = &AR(code[i+6+code[4]]);
 
-				AR(code[1]).Clear();
-				exception_state = esNonException;
+				if(code[1]!=RisseInvalidRegNum) AR(code[1]).Clear();
+				bool raised = false;
+				tRisseVariant val;
 				try
 				{
-					AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-						args, blockargs, &_this);
+					AR(code[2]).FuncCall(&val, args, blockargs, &_this);
 				}
 				catch(const eRisseScriptException &e)
 				{
-					AR(code[1]) = e.GetValue();
-					exception_state = esException;
+					val = e.GetValue();
+					raised = true;
 				}
 				catch(...)
 				{
-					exception_state = esException;
+					raised = true;
 				}
+				if(code[1]!=RisseInvalidRegNum)
+					AR(code[1]) = new tRisseTryFuncCallReturnObject(val, raised);
 				code += code[4] + code[5] + 6;
 				break;
 			}
@@ -340,12 +329,21 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(AC(code[2]).GetType() == tRisseVariant::vtObject);
 			RISSE_ASSERT(AC(code[2]).GetObjectInterface() != NULL);
 			RISSE_ASSERT(code[3] >= 2);
-			RISSE_ASSERT(exception_state != esNone); // 例外ステートは設定されているはず
 
 			{
+				// code[1] ( = ocTryFuncCall で作成されたオブジェクト ) から例外が
+				// 発生したかどうかとその値を受け取る
+				tRisseTryFuncCallReturnObject * try_ret =
+					reinterpret_cast<tRisseTryFuncCallReturnObject*>(
+									AR(code[1]).GetObjectInterface());
+
+				bool raised = try_ret->GetRaised();
+				AR(code[1]) = try_ret->GetValue(); // 値はレジスタに書き戻す
+
+				// 分岐ターゲットのインデックスを決定する
 				risse_uint32 target_index;
 				tRisseVariant::tType except_obj_type = AR(code[1]).GetType();
-				if(exception_state == esNonException)
+				if(!raised)
 				{
 					// 直前の ocTryFuncCall では例外は発生しなかった
 					target_index = 0; // 例外が発生しなかった場合の飛び先
@@ -390,7 +388,6 @@ void tRisseCodeInterpreter::Execute(
 				{
 					target_index = 1; // 例外が発生していた
 				}
-				exception_state = esNone; // 例外ステートは esNone に設定しておく
 				code += static_cast<risse_int32>(code[4 + target_index]);
 			}
 			break;

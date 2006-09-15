@@ -164,6 +164,34 @@ class tRisseMethodArgument;
 class tRisseVariantBlock;
 typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
+
+//! @brief		Operateメソッドへの引数(クラス宣言用)
+//!	@note		Opereteメソッドの引数が変わるたびにすべての Operate メソッドの
+//!				引数を変える気にはなれない。
+//! 			あまりマクロは使いたくないが、それにしても
+//!				インターフェースの仕様が固まるまではこうしたい
+#define RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG \
+		tRisseOpCode code,                                                                \
+		tRisseVariant * result = NULL,                                                    \
+		const tRisseString & name = tRisseString::GetEmptyString(),                       \
+		risse_uint32 flags = 0,                                                           \
+		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),     \
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),    \
+		const tRisseVariant *This = NULL,                                                 \
+		const tRisseStackFrameContext *stack = NULL
+
+//! @brief		Operateメソッドへの引数(実装用)
+#define RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG \
+		tRisseOpCode code,                     \
+		tRisseVariant * result,                \
+		const tRisseString & name,             \
+		risse_uint32 flags,                    \
+		const tRisseMethodArgument & args,     \
+		const tRisseMethodArgument & bargs,    \
+		const tRisseVariant *This,             \
+		const tRisseStackFrameContext *stack
+
+//---------------------------------------------------------------------------
 //! @brief		Risseオブジェクトインターフェース
 //---------------------------------------------------------------------------
 class tRisseObjectInterface
@@ -184,16 +212,7 @@ public:
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
 	//!				エラーコードなどの戻り値はない
-	virtual void Operate(
-		tRisseOpCode code,
-		tRisseVariant * result = NULL,
-		const tRisseString & name = tRisseString::GetEmptyString(),
-		risse_uint32 flags = 0,
-		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseVariant *This = NULL,
-		const tRisseStackFrameContext *stack = NULL
-			) = 0;
+	virtual void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG) = 0;
 };
 //---------------------------------------------------------------------------
 

@@ -156,16 +156,7 @@ tRisseString tRisseCodeBlock::Dump() const
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeBlock::Operate(
-	tRisseOpCode code,
-	tRisseVariant * result,
-	const tRisseString & name,
-	risse_uint32 flags,
-	const tRisseMethodArgument & args,
-	const tRisseMethodArgument & bargs,
-	const tRisseVariant *This,
-	const tRisseStackFrameContext *stack
-		)
+void tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())

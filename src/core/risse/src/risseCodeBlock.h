@@ -97,16 +97,7 @@ public:
 
 public: // tRisseObjectInterface メンバ
 
-	void Operate(
-		tRisseOpCode code,
-		tRisseVariant * result = NULL,
-		const tRisseString & name = tRisseString::GetEmptyString(),
-		risse_uint32 flags = 0,
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseVariant *This = NULL,
-		const tRisseStackFrameContext *stack = NULL
-			);
+	void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

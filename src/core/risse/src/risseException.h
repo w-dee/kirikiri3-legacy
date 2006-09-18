@@ -365,7 +365,7 @@ public:
 
 public: // tRisseObjectInterface メンバ
 
-	void Operate(tRisseExecutorContext * context);
+	void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 
 };

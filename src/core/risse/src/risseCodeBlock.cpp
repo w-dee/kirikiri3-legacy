@@ -17,7 +17,6 @@
 #include "risseScriptBlockBase.h"
 #include "compiler/risseCodeGen.h"
 #include "risseCodeExecutor.h"
-#include "risseExecutorContext.h"
 
 namespace Risse
 {
@@ -157,12 +156,12 @@ tRisseString tRisseCodeBlock::Dump() const
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeBlock::Operate(tRisseExecutorContext * context)
+void tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// 仮実装
-	if(context->GetTop().Info.Code == ocFuncCall && context->GetTop().Info.Name.IsEmpty())
+	if(code == ocFuncCall && name.IsEmpty())
 	{
-		Executor->Execute(context);
+		Executor->Execute(args, bargs, This, stack, result);
 	}
 }
 //---------------------------------------------------------------------------

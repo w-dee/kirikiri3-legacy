@@ -159,12 +159,37 @@ public:
 //---------------------------------------------------------------------------
 
 
-class tRisseStackFrameClosure;
+class tRisseStackFrameContext;
 class tRisseMethodArgument;
-class tRisseExecutorContext;
 class tRisseVariantBlock;
 typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
+
+//! @brief		Operateメソッドへの引数(クラス宣言用)
+//!	@note		Opereteメソッドの引数が変わるたびにすべての Operate メソッドの
+//!				引数を変える気にはなれない。
+//! 			あまりマクロは使いたくないが、それにしても
+//!				インターフェースの仕様が固まるまではこうしたい
+#define RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG \
+		tRisseOpCode code,                                                                \
+		tRisseVariant * result = NULL,                                                    \
+		const tRisseString & name = tRisseString::GetEmptyString(),                       \
+		risse_uint32 flags = 0,                                                           \
+		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),     \
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),    \
+		const tRisseVariant *This = NULL,                                                 \
+		const tRisseStackFrameContext *stack = NULL
+
+//! @brief		Operateメソッドへの引数(実装用)
+#define RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG \
+		tRisseOpCode code,                     \
+		tRisseVariant * result,                \
+		const tRisseString & name,             \
+		risse_uint32 flags,                    \
+		const tRisseMethodArgument & args,     \
+		const tRisseMethodArgument & bargs,    \
+		const tRisseVariant *This,             \
+		const tRisseStackFrameContext *stack
 
 //---------------------------------------------------------------------------
 //! @brief		Risseオブジェクトインターフェース
@@ -174,17 +199,20 @@ class tRisseObjectInterface
 public:
 
 	//! @brief		オブジェクトに対して操作を行う
-	//! @param		context	実行コンテキスト
-	//! @note		呼び出しに関する引数などの情報はcontext->GetTop().Info を参照のこと。@r
-	//! @note		別のOperateを呼び出したい場合、context->PushCallee を呼び出して
-	//!				別のOperateを登録してからreturnする。
-	//!				その「別のOperate」から実行が戻ると、再びこのOperateが呼ばれる。
-	//!				その際、２度目以降の実行かどうかの判断をするために
-	//!				context->GetTop().State に情報を登録すること(ここは初回の呼び出しの
-	//!				場合はNULLになっている) @r
+	//! @param		code	オペレーションコード
+	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
+	//! @param		name	操作を行うメンバ名
+	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	//! @param		flags	オペレーションフラグ
+	//! @param		args	引数
+	//! @param		bargs	ブロック引数
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
+	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
-	//!				エラーコードなどの戻り値はない。
-	virtual void Operate(tRisseExecutorContext * context) = 0;
+	//!				エラーコードなどの戻り値はない
+	virtual void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG) = 0;
 };
 //---------------------------------------------------------------------------
 

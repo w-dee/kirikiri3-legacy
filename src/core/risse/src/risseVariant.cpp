@@ -14,7 +14,6 @@
 
 #include "risseVariant.h"
 #include "risseLexerUtils.h"
-#include "risseExecutorContext.h"
 
 namespace Risse
 {
@@ -43,29 +42,22 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::Operate(tRisseExecutorContext * context)
-{
-	switch(context->GetTop().Info.Code)
-	{
-	case ocFuncCall:
-		FuncCall(context);
-		break;
-	default:
-		// 本来は例外を出すべき
-		RISSE_ASSERT(!"unknown code for tRisseVariantBlock::Operate");
-		break;
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseVariantBlock::FuncCall_Object   (tRisseExecutorContext * context)
+void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
+	const tRisseMethodArgument & args,
+	const tRisseMethodArgument & bargs,
+	const tRisseVariant * This)
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
+	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
-	context->GetTop().Info.Closure = AsObject().Closure; // クロージャを上書き
-	intf->Operate(context);
+	intf->Operate(ocFuncCall, ret, tRisseString::GetEmptyString(),
+		0, args, bargs,
+		this_context?&this_context->GetThis():This,
+				// こっちはこのvariantがThisオブジェクトを保持していなければ
+				// context->GetThis() を見るが
+		this_context?&this_context->GetStack():NULL
+				// こっちは常にこのvariantが保持している値になる
+		);
 }
 //---------------------------------------------------------------------------
 

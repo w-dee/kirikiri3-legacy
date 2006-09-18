@@ -56,6 +56,7 @@ void tRisseCodeInterpreter::Execute(tRisseExecutorContext * context)
 	// 毎回スタックを new で割り当てるのは効率が悪い？
 	tRisseVariant * frame;
 	tRisseVariant * shared;
+	const risse_uint32 * code;
 	tState * state = reinterpret_cast<tState*>(block.State);
 	if(state)
 	{
@@ -63,12 +64,14 @@ void tRisseCodeInterpreter::Execute(tRisseExecutorContext * context)
 		// 保存された状態からresumeするために値をローカル変数に持ってくる
 		frame = state->Frame;
 		shared = state->Frame;
+		code = state->Code;
 	}
 	else
 	{
 		// 状態は保存されていない
 		// 状態構造体を作成
 		state = new tState;
+		state->Code = code = CodeBlock->GetCode();
 		block.State = reinterpret_cast<void *>(state); // 状態を保存
 
 		if(info.Closure == NULL || info.Closure->GetStack().Frame == NULL)
@@ -96,7 +99,6 @@ void tRisseCodeInterpreter::Execute(tRisseExecutorContext * context)
 #ifdef RISSE_ASSERT_ENABLED
 	risse_size sharedsize = CodeBlock->GetNumSharedVars();
 #endif
-	const risse_uint32 * code = CodeBlock->GetCode();
 #ifdef RISSE_ASSERT_ENABLED
 	const risse_uint32 * code_origin = CodeBlock->GetCode();
 	risse_size codesize = CodeBlock->GetCodeSize();
@@ -269,7 +271,6 @@ void tRisseCodeInterpreter::Execute(tRisseExecutorContext * context)
 		case ocFuncCall		: // call	 function call
 			/* incomplete */
 			{
-#if 0
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
@@ -284,20 +285,25 @@ void tRisseCodeInterpreter::Execute(tRisseExecutorContext * context)
 				for(risse_uint32 i = 0; i < code[4]; i++)
 					args.argv[i] = &AR(code[i+5]);
 
-				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					args, tRisseMethodArgument::GetEmptyArgument(), &state->This);
-#endif
 				code += code[4] + 5;
-				break;
+
+				if(code[1]!=RisseInvalidRegNum)
+					context->SetResultReceiveTarget(&AR(code[1]));
+				context->PushCallee(AR(code[2]), ocFuncCall, tRisseString::GetEmptyString(),
+					0, args, tRisseMethodArgument::GetEmptyArgument(), &state->This);
+
+				state->Code = code;
+				return; // ------------------ 戻る 再開時は次の命令から再開する
 			}
 
+#if 0 // UNUSED
+/* すべてのブロック付き関数呼び出しは ocTryFuncCall なのでこれは呼ばれない */
 		case ocFuncCallBlock	: // callb	 function call with lazyblock
 			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			/* incomplete */
 			{
-#if 0
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
@@ -316,12 +322,15 @@ void tRisseCodeInterpreter::Execute(tRisseExecutorContext * context)
 				for(risse_uint32 i = 0; i < code[5]; i++)
 					blockargs.argv[i] = &AR(code[i+6+code[4]]);
 
-				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					args, blockargs, &state->This);
-#endif
 				code += code[4] + code[5] + 6;
-				break;
+
+				if(code[1]!=RisseInvalidRegNum)
+					context->SetResultReceiveTarget(&AR(code[1]));
+				context->PushCallee(AR(code[2]), ocFuncCall, tRisseString::GetEmptyString(),
+					0, args, blockargs, &state->This);
+				return; // ------------------ 戻る 再開時は次の命令から再開する
 			}
+#endif
 
 		case ocSetFrame		: // sfrm	 スタックフレームと共有空間を設定する
 			RISSE_ASSERT(CI(code[1]) < framesize);

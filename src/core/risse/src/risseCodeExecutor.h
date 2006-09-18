@@ -59,6 +59,7 @@ class tRisseCodeInterpreter : public tRisseCodeExecutor
 		tRisseVariant * Frame; //!< スタックフレーム
 		tRisseVariant * Shared; //!< 共有変数
 		tRisseVariant This; //!< This
+		const risse_uint32 * Code; // 実行ポインタ (Instruction Pointer)
 	};
 
 public:

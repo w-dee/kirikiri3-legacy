@@ -21,6 +21,8 @@
 namespace Risse
 {
 class tRisseCodeBlock;
+class tRisseObjectInterface;
+class tRisseExecutorContext;
 //---------------------------------------------------------------------------
 //! @brief		バイトコード実行クラスの基底クラス
 //---------------------------------------------------------------------------
@@ -39,19 +41,8 @@ public:
 	virtual ~tRisseCodeExecutor() {;}
 
 	//! @brief		コードを実行する
-	//! @brief		args	引数
-	//! @brief		args	ブロック引数
-	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
-	//! @param		result		戻りの値を格納する先
-	virtual void Execute(
-		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseVariant * This = NULL,
-		const tRisseStackFrameContext *stack = NULL,
-		tRisseVariant * result = NULL) = 0;
+	//! @param		context		実行コンテキスト情報
+	virtual void Execute(tRisseExecutorContext * context) = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -62,18 +53,21 @@ public:
 //---------------------------------------------------------------------------
 class tRisseCodeInterpreter : public tRisseCodeExecutor
 {
+	//! @brief	実行状態保持用の構造体
+	struct tState
+	{
+		tRisseVariant * Frame; //!< スタックフレーム
+		tRisseVariant * Shared; //!< 共有変数
+		tRisseVariant This; //!< This
+	};
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		cb		コードブロック
 	tRisseCodeInterpreter(tRisseCodeBlock *cb);
 
 
-	void Execute(
-		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseVariant * This = NULL,
-		const tRisseStackFrameContext *stack = NULL,
-		tRisseVariant * result = NULL);
+	void Execute(tRisseExecutorContext * context);
 };
 //---------------------------------------------------------------------------
 
@@ -107,7 +101,7 @@ public:
 	bool GetRaised() const { return Raised; }
 
 private:
-	void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG) {;}
+	void Operate(tRisseExecutorContext * context) {;}
 };
 //---------------------------------------------------------------------------
 

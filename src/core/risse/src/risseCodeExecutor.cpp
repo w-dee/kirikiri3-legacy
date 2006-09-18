@@ -13,6 +13,7 @@
 #include "prec.h"
 
 #include "risseCodeExecutor.h"
+#include "risseExecutorContext.h"
 #include "risseOpCodes.h"
 /*
 	このソースは、実行スピード重視の、いわばダーティーな実装を行う。
@@ -37,32 +38,54 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeInterpreter::Execute(
+void tRisseCodeInterpreter::Execute(tRisseExecutorContext * context)
+/*
 	const tRisseMethodArgument & args,
 	const tRisseMethodArgument & bargs,
 	const tRisseVariant * This,
-	const tRisseStackFrameContext *stack,
+	const tRisseStackFrameClosure *stack,
 	tRisseVariant * result)
+*/
 {
+	// 呼び出し情報を得る
+	tRisseExecutorContext::tBlock & block = context->GetTop();
+	tRisseCallInfo & info = block.Info;
+
 	// context でスタックフレームが指定されていない場合、スタックを割り当てる
 	// TODO: スタックフレームの再利用など
 	// 毎回スタックを new で割り当てるのは効率が悪い？
 	tRisseVariant * frame;
-	if(stack == NULL || stack->Frame == NULL)
-		frame = new tRisseVariant[CodeBlock->GetNumRegs()];
-	else
-		frame = stack->Frame;
-
 	tRisseVariant * shared;
-	if(stack == NULL || stack->Share == NULL)
-		shared = CodeBlock->GetNumSharedVars() ?
-			new tRisseVariant[CodeBlock->GetNumSharedVars()] : NULL;
+	tState * state = reinterpret_cast<tState*>(block.State);
+	if(state)
+	{
+		// 状態が保存されている
+		// 保存された状態からresumeするために値をローカル変数に持ってくる
+		frame = state->Frame;
+		shared = state->Frame;
+	}
 	else
-		shared = stack->Share;
+	{
+		// 状態は保存されていない
+		// 状態構造体を作成
+		state = new tState;
+		block.State = reinterpret_cast<void *>(state); // 状態を保存
 
-	// This を設定
-	tRisseVariant _this;
-	if(This) _this = *This;
+		if(info.Closure == NULL || info.Closure->GetStack().Frame == NULL)
+			state->Frame = frame = new tRisseVariant[CodeBlock->GetNumRegs()];
+		else
+			state->Frame = frame = info.Closure->GetStack().Frame;
+
+		if(info.Closure == NULL || info.Closure->GetStack().Share == NULL)
+			state->Shared = shared = CodeBlock->GetNumSharedVars() ?
+				new tRisseVariant[CodeBlock->GetNumSharedVars()] : NULL;
+		else
+			state->Shared = shared = info.Closure->GetStack().Share;
+
+		// This を設定
+		state->This = info.Closure ? info.Closure->GetThis() :
+					info.This ? *info.This : tRisseVariant();
+	}
 
 	// ローカル変数に値を持ってくる
 	// いくつかのローカル変数は ASSERT が有効になっていなければ
@@ -158,19 +181,19 @@ void tRisseCodeInterpreter::Execute(
 
 		case ocAssignParam: // getpar	= (S番目の関数引数を代入)
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			if(code[2] >= args.argc)
+			if(code[2] >= info.Args.argc)
 				AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
 			else
-				AR(code[1]) = *args.argv[code[2]];
+				AR(code[1]) = *info.Args.argv[code[2]];
 			code += 3;
 			break;
 
 		case ocAssignBlockParam: // getbpar	= (S番目の関数ブロック引数を代入)
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			if(code[2] >= bargs.argc)
+			if(code[2] >= info.BArgs.argc)
 				AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
 			else
-				AR(code[1]) = *bargs.argv[code[2]];
+				AR(code[1]) = *info.BArgs.argv[code[2]];
 			code += 3;
 			break;
 
@@ -202,6 +225,7 @@ void tRisseCodeInterpreter::Execute(
 			{
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
+#if 0
 
 				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
 				// code[2] = メソッドオブジェクト
@@ -224,7 +248,7 @@ void tRisseCodeInterpreter::Execute(
 				tRisseVariant val;
 				try
 				{
-					AR(code[2]).FuncCall(&val, args, blockargs, &_this);
+					AR(code[2]).FuncCall(&val, args, blockargs, &state->This);
 				}
 				catch(const eRisseScriptException &e)
 				{
@@ -237,6 +261,7 @@ void tRisseCodeInterpreter::Execute(
 				}
 				if(code[1]!=RisseInvalidRegNum)
 					AR(code[1]) = new tRisseTryFuncCallReturnObject(val, raised);
+#endif
 				code += code[4] + code[5] + 6;
 				break;
 			}
@@ -244,6 +269,7 @@ void tRisseCodeInterpreter::Execute(
 		case ocFuncCall		: // call	 function call
 			/* incomplete */
 			{
+#if 0
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
@@ -259,7 +285,8 @@ void tRisseCodeInterpreter::Execute(
 					args.argv[i] = &AR(code[i+5]);
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					args, tRisseMethodArgument::GetEmptyArgument(), &_this);
+					args, tRisseMethodArgument::GetEmptyArgument(), &state->This);
+#endif
 				code += code[4] + 5;
 				break;
 			}
@@ -270,6 +297,7 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			/* incomplete */
 			{
+#if 0
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
@@ -289,24 +317,25 @@ void tRisseCodeInterpreter::Execute(
 					blockargs.argv[i] = &AR(code[i+6+code[4]]);
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					args, blockargs, &_this);
+					args, blockargs, &state->This);
+#endif
 				code += code[4] + code[5] + 6;
 				break;
 			}
 
 		case ocSetFrame		: // sfrm	 スタックフレームと共有空間を設定する
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			AR(code[1]).SetContext(
-				new tRisseMethodContext(
-					_this, tRisseStackFrameContext(frame, shared)));
+			AR(code[1]).SetClosure(
+				new tRisseMethodClosure(
+					state->This, tRisseStackFrameClosure(frame, shared)));
 			code += 2;
 			break;
 
 		case ocSetShare		: // sshare	 共有空間のみ設定する
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			AR(code[1]).SetContext(
-				new tRisseMethodContext(
-					_this, tRisseStackFrameContext(NULL, shared)));
+			AR(code[1]).SetClosure(
+				new tRisseMethodClosure(
+					state->This, tRisseStackFrameClosure(NULL, shared)));
 			code += 2;
 			break;
 
@@ -331,6 +360,7 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(code[3] >= 2);
 
 			{
+#if 0
 				// code[1] ( = ocTryFuncCall で作成されたオブジェクト ) から例外が
 				// 発生したかどうかとその値を受け取る
 				tRisseTryFuncCallReturnObject * try_ret =
@@ -389,6 +419,7 @@ void tRisseCodeInterpreter::Execute(
 					target_index = 1; // 例外が発生していた
 				}
 				code += static_cast<risse_int32>(code[4 + target_index]);
+#endif
 			}
 			break;
 #if 0
@@ -402,7 +433,7 @@ void tRisseCodeInterpreter::Execute(
 #endif
 		case ocReturn			: // ret	 return ステートメント
 			RISSE_ASSERT(code[1] == RisseInvalidRegNum || CI(code[1]) < framesize);
-			if(code[1] != RisseInvalidRegNum && result) *result = AR(code[1]);
+			if(code[1] != RisseInvalidRegNum) context->SetResult(AR(code[1]));
 			//code += 2;
 			return;
 
@@ -426,6 +457,7 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			{
+#if 0
 				// 暫定実装
 				// code[2] は tRisseExitExceptionClass であると見なして良い
 				tRisseVariant v;
@@ -437,6 +469,7 @@ void tRisseCodeInterpreter::Execute(
 					reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetObjectInterface());
 				RISSE_ASSERT(record->GetValue() != NULL);
 				AR(code[1]) = *record->GetValue();
+#endif
 				code += 3;
 			}
 			break;

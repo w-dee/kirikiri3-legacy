@@ -27,7 +27,7 @@
 namespace Risse
 {
 class tRisseObjectInterface;
-class tRisseMethodContext;
+class tRisseMethodClosure;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 /*! @note
@@ -100,9 +100,9 @@ protected:
 	struct tObject
 	{
 		tRisseObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常に10)
-		const tRisseMethodContext * Context;
+		const tRisseMethodClosure * Closure;
 						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
-						//!< 指しているとして)メソッドが動作するコンテキスト
+						//!< 指しているとして)メソッドが動作するクロージャ
 	};
 	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObjectInterface*>((risse_ptruint)0x10))
 
@@ -337,14 +337,14 @@ public: // コンストラクタ/代入演算子
 		* this = ref;
 	}
 
-	//! @brief		コンストラクタ(tRisseObjectInterface*型とコンテキストを表すtRisseMethodContext*型より)
+	//! @brief		コンストラクタ(tRisseObjectInterface*型とクロージャを表すtRisseMethodClosure*型より)
 	//! @param		ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
-	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
-	tRisseVariantBlock(tRisseObjectInterface * ref, const tRisseMethodContext * context)
+	//! @param		closure	そのメソッドやプロパティが実行されるべきクロージャを表す
+	tRisseVariantBlock(tRisseObjectInterface * ref, const tRisseMethodClosure * closure)
 	{
 		Type = vtObject;
 		SetObjectIntf(ref);
-		AsObject().Context = context;
+		AsObject().Closure = closure;
 	}
 
 	//! @brief		代入演算子(tRisseObjectInterface*型を代入)
@@ -354,7 +354,7 @@ public: // コンストラクタ/代入演算子
 		// これはちょっと特殊
 		Type = vtObject;
 		SetObjectIntf(ref);
-		AsObject().Context = NULL; // this は null に設定
+		AsObject().Closure = NULL; // this は null に設定
 		return *this;
 	}
 
@@ -375,14 +375,14 @@ public: // 初期化
 	}
 
 public: // Object関連
-	//! @brief		コンテキストを設定する
-	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
+	//! @brief		クロージャを設定する
+	//! @param		closure	そのメソッドやプロパティが実行されるべきクロージャを表す
 	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
 	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
 	//!				チェックしないので注意すること
-	void SetContext(const tRisseMethodContext * context)
+	void SetClosure(const tRisseMethodClosure * closure)
 	{
-		AsObject().Context = context;
+		AsObject().Closure = closure;
 	}
 
 	//! @brief		オブジェクトが null かどうかを得る
@@ -392,6 +392,11 @@ public: // Object関連
 		if(GetType() != vtObject) return false;
 		return GetObjectInterface() == NULL;
 	}
+
+public: // Operate
+	//! @brief		Operateを行う(各種機能実行用統一インターフェース)
+	//! @param		context		実行コンテキスト
+	void Operate(tRisseExecutorContext * context);
 
 public: // 演算子
 
@@ -403,31 +408,22 @@ public: // 演算子
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
-	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
-	//! @param		args		引数
-	//! @param		bargs		ブロック引数
-	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
+	//! @param		context		実行コンテキスト
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret,
-		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
-		tRisseVariant *This)
+	void FuncCall(tRisseExecutorContext * context)
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCall_Object   (ret, args, bargs, This); return;
+		case vtObject:	FuncCall_Object   (context); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
 		}
 	}
 
-	void FuncCall_Object   (tRisseVariantBlock * ret,
-		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
-		const tRisseVariant * This);
+	void FuncCall_Object   (tRisseExecutorContext * context);
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトをクラスと見なした)インスタンス作成	New
@@ -1389,7 +1385,7 @@ typedef tRisseVariantBlock tRisseVariant;
 
 
 
-// 本来ならばtRisseStackFrameContextとtRisseMethodContextはrisseMethod.hにあるべき
+// 本来ならばtRisseStackFrameClosureとtRisseMethodClosureはrisseMethod.hにあるべき
 // だがインクルード順の解決が難しいのでここに書く。
 
 
@@ -1397,48 +1393,48 @@ typedef tRisseVariantBlock tRisseVariant;
 
 
 //---------------------------------------------------------------------------
-//! @brief		スタックフレームコンテキスト
+//! @brief		スタックフレームクロージャ
 //---------------------------------------------------------------------------
-struct tRisseStackFrameContext
+struct tRisseStackFrameClosure
 {
 	tRisseVariant *Frame; //!< スタックフレーム (NULL=スタックフレームを指定しない)
 	tRisseVariant *Share; //!< 共有フレーム (NULL=共有フレームを指定しない)
 
 	//! @brief		デフォルトコンストラクタ
-	tRisseStackFrameContext() { Frame = NULL; Share = NULL; }
+	tRisseStackFrameClosure() { Frame = NULL; Share = NULL; }
 
 	//! @brief		コンストラクタ(スタックフレームと共有フレームから)
 	//! @param		frame		スタックフレーム
 	//! @param		share		共有フレーム
-	tRisseStackFrameContext(tRisseVariant * frame, tRisseVariant * share)
+	tRisseStackFrameClosure(tRisseVariant * frame, tRisseVariant * share)
 		: Frame(frame), Share(share) {;}
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		メソッドのコンテキスト
+//! @brief		メソッドのクロージャ
 //---------------------------------------------------------------------------
-class tRisseMethodContext
+class tRisseMethodClosure
 {
 private:
 	tRisseVariant This; //!< "Thisオブジェクト" (NULL=Thisオブジェクトを指定しない)
-	tRisseStackFrameContext Stack; //!< スタックフレームコンテキスト
+	tRisseStackFrameClosure Stack; //!< スタックフレームクロージャ
 
 public:
 	//! @brief		コンストラクタ("Thisオブジェクト"から)
 	//! @param		_This		"Thisオブジェクト"
-	tRisseMethodContext(const tRisseVariant & _This) : This(_This) {;}
+	tRisseMethodClosure(const tRisseVariant & _This) : This(_This) {;}
 
-	//! @brief		コンストラクタ(スタックフレームコンテキストから)
-	//! @brief		stack	スタックフレームコンテキスト
-	tRisseMethodContext(const tRisseStackFrameContext & stack) : Stack(stack) {;}
+	//! @brief		コンストラクタ(スタックフレームクロージャから)
+	//! @brief		stack	スタックフレームクロージャ
+	tRisseMethodClosure(const tRisseStackFrameClosure & stack) : Stack(stack) {;}
 
 	//! @brief		コンストラクタ("Thisオブジェクト"とスタックフレームと共有フレームから)
 	//! @param		_This		"Thisオブジェクト"
-	//! @brief		stack	スタックフレームコンテキスト
-	tRisseMethodContext(const tRisseVariant & _This,
-		const tRisseStackFrameContext & stack) : This(_This), Stack(stack) {;}
+	//! @brief		stack	スタックフレームクロージャ
+	tRisseMethodClosure(const tRisseVariant & _This,
+		const tRisseStackFrameClosure & stack) : This(_This), Stack(stack) {;}
 
 	//! @brief		"Thisオブジェクト" を得る
 	const tRisseVariant & GetThis() const
@@ -1454,9 +1450,9 @@ public:
 		return This;
 	}
 
-	//! @brief		スタックフレームコンテキストを得る	
-	//! @return		スタックフレームコンテキスト
-	const tRisseStackFrameContext & GetStack() const { return Stack; }
+	//! @brief		スタックフレームクロージャを得る
+	//! @return		スタックフレームクロージャ
+	const tRisseStackFrameClosure & GetStack() const { return Stack; }
 };
 //---------------------------------------------------------------------------
 

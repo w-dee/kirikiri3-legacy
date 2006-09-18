@@ -97,7 +97,7 @@ public:
 
 public: // tRisseObjectInterface メンバ
 
-	void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+	void Operate(tRisseExecutorContext * context);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

@@ -204,6 +204,7 @@ void tRisseScriptBlockBase::Fixup()
 
 }
 #include "risseCodeExecutor.h" // for test ###################################
+#include "risseExecutorContext.h" // for test ###################################
 namespace Risse {
 //---------------------------------------------------------------------------
 void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
@@ -224,13 +225,13 @@ void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
 	RisseFPrint(stderr,(RISSE_WS("========== Result ==========\n")));
 	fflush(stderr);
 	fflush(stdout);
-	tRisseVariant ret;
 	RISSE_ASSERT(RootCodeBlock != NULL);
-	RootCodeBlock->GetObject().FuncCall(
-				&ret,
-				tRisseMethodArgument::GetEmptyArgument(),
-				tRisseMethodArgument::GetEmptyArgument(),
-				NULL);
+	tRisseExecutorContext context;
+	tRisseVariant ret;
+	context.SetResultReceiveTarget(&ret);
+		// 本来はこのようにスタック上を戻り値の受け取り先に設定してはいけない
+	context.PushCallee(RootCodeBlock->GetObject(), ocFuncCall);
+	context.Run();
 	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }
 //---------------------------------------------------------------------------

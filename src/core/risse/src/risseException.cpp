@@ -15,6 +15,7 @@
 #include "risseException.h"
 #include "risseScriptBlockBase.h"
 #include "risseCharUtils.h"
+#include "risseExecutorContext.h"
 
 #define RISSE_MAX_TRACE_TEXT_LEN 1500
 
@@ -137,17 +138,15 @@ tRisseExitTryExceptionClass::tRisseExitTryExceptionClass(
 
 
 //---------------------------------------------------------------------------
-void tRisseExitTryExceptionClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+void tRisseExitTryExceptionClass::Operate(tRisseExecutorContext * context)
 {
 	// 暫定実装
-	if(code == ocDGet && name == RISSE_WS("getExitTryRecord"))
+	if(context->GetTop().Info.Code == ocDGet &&
+		context->GetTop().Info.Name == RISSE_WS("getExitTryRecord"))
 	{
 		// tRisseExitTryExceptionClass 型を返す
-		if(result)
-		{
-			*result = reinterpret_cast<tRisseObjectInterface*>
-				((tRisseExitTryExceptionClass*)this);
-		}
+		context->SetResult(reinterpret_cast<tRisseObjectInterface*>
+				((tRisseExitTryExceptionClass*)this));
 	}
 }
 //---------------------------------------------------------------------------

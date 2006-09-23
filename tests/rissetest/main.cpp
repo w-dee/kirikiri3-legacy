@@ -74,6 +74,9 @@ int Application::OnRun()
 		return 0;
 	}
 
+	// GCを初期化する
+	GC_init();
+
 	// 入力ファイルを開く
 	wxFile file;
 	if(file.Open(argv[1]))

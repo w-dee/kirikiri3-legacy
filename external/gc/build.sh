@@ -2,12 +2,20 @@
 
 prefix=`pwd`
 
-custom()
-{
-	cp -pR lib include bin $prefix
-}
-
-custom_build_func=custom
-
+common_configure_options="
+	--prefix=$prefix
+	"
 
 . ../build_common.sh
+
+# この時点でカレントディレクトリはgcのソースを展開したディレクトリのはず
+
+# gcのヘッダ構造は、includeの下のgcに置いてあるファイルと
+# include 直下に置いてあるファイルが重複してあるので修正する
+mv $prefix/include/gc/* $prefix/include/
+rmdir $prefix/include/gc
+
+# gcの動作をカスタマイズする必要があるので private ヘッダファイルもコピーする
+cp -pR include/private $prefix/include
+
+

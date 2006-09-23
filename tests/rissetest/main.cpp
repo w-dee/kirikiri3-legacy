@@ -11,6 +11,7 @@
 #include "risse_parser/risseParser.h"
 #include "risse_parser/risseScriptBlock.h"
 #include "risseException.h"
+#include "risseCoroutine.h"
 
 
 RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
@@ -74,8 +75,10 @@ int Application::OnRun()
 		return 0;
 	}
 
-	// GCを初期化する
+	// GCとコルーチンを初期化する
+	// TOOD: これらはRisseライブラリ内に入れるように
 	GC_init();
+	RisseInitCoroutine();
 
 	// 入力ファイルを開く
 	wxFile file;

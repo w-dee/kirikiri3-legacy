@@ -49,6 +49,7 @@ CPPFILES =  \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \
+			src/risseCoroutine.cpp                   \
 			src/risseMethod.cpp                      \
 			src/risseObject.cpp                      \
 			src/risseOctet.cpp                       \
@@ -77,7 +78,7 @@ OBJS = $(CPPFILES:.cpp=.o)
 
 PREC_H_NAME = src/prec.h
 
-INCLUDES = -I.
+INCLUDES = -I. -Isrc/boost-coroutine
 
 # risseLexerMap.inc のコンパイル
 

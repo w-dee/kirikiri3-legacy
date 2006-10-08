@@ -98,6 +98,10 @@ public:
 	tRisseTryFuncCallReturnObject(const tRisseVariant &value, bool raised)
 		{ Value = value; Raised = raised; }
 
+	//! @brief		デストラクタ
+	//! @note		このデストラクタは呼ばれないかもしれない
+	virtual ~tRisseTryFuncCallReturnObject() {;}
+
 	//! @brief		例外/戻り値の値を得る
 	//! @return		例外/戻り値の値
 	const tRisseVariant & GetValue() const { return Value; }

@@ -279,6 +279,19 @@ public:
 					const tRisseStringBlock &r2, const tRisseStringBlock &r3,
 					const tRisseStringBlock &r4);
 
+	//! @brief		デストラクタ
+	//! @note		このデストラクタは通常は呼ばれないことに注意すること。
+	//!				また、ここに内容の破壊以外に意味のあるコードをかけることを期待しないこと。
+	//!				tRisseHashTable などは明示的にin-placeでデストラクタを
+	//!				呼ぶことにより内容が破壊され、メンバが参照しているポインタが
+	//!				破壊されることにより参照のリンクが切れることを期待するので、それに
+	//!				対応する。
+	~tRisseStringBlock()
+	{
+		// 少なくとも、メンバとして持っているポインタが破壊できればよい
+		Buffer = NULL; // バッファを null に
+	}
+
 	//! @brief	代入演算子
 	//! @param	ref	コピー元オブジェクト
 	//! @return	このオブジェクトへの参照

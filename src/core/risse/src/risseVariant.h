@@ -166,6 +166,20 @@ protected:
 
 
 	#define RV_SIZE_MAX(a, b) ((a)>(b)?(a):(b))
+	#define RV_STORAGE_SIZE \
+			RV_SIZE_MAX(sizeof(risse_ptruint),\
+			RV_SIZE_MAX(sizeof(tVoid),        \
+			RV_SIZE_MAX(sizeof(tInteger),     \
+			RV_SIZE_MAX(sizeof(tReal),        \
+			RV_SIZE_MAX(sizeof(tBoolean),     \
+			RV_SIZE_MAX(sizeof(tRisseString), \
+			RV_SIZE_MAX(sizeof(tRisseOctet),  \
+			RV_SIZE_MAX(sizeof(tObject),      \
+					4                         \
+			 ))))))))
+			// ↑ 4 はダミー
+
+
 	//! @brief 各バリアントの内部型の union
 	union
 	{
@@ -174,21 +188,10 @@ protected:
 		//! @brief	データストレージ
 		//! @note
 		//! わざわざマクロで各構造体のサイズの最大値を得て、その要素数を
-		//! もった char 配列を確保しているが、これは gcc などが
-		//! union で構造体を配置する際に、望ましくないパッキングを
+		//! もった char 配列を確保しているが(RV_STORAGE_SIZEの宣言を参照)、
+		//! これは gcc など union で構造体を配置する際に、望ましくないパッキングを
 		//! 行ってしまう可能性があるため。
-		char Storage[
-			RV_SIZE_MAX(sizeof(risse_ptruint),
-			RV_SIZE_MAX(sizeof(tVoid),
-			RV_SIZE_MAX(sizeof(tInteger),
-			RV_SIZE_MAX(sizeof(tReal),
-			RV_SIZE_MAX(sizeof(tBoolean),
-			RV_SIZE_MAX(sizeof(tRisseString),
-			RV_SIZE_MAX(sizeof(tRisseOctet),
-			RV_SIZE_MAX(sizeof(tObject),
-					4 /*ダミー*/
-			 ))))))))
-			];
+		char Storage[RV_STORAGE_SIZE];
 	};
 public:
 	//! @brief バリアントのタイプ
@@ -367,8 +370,30 @@ public: // コンストラクタ/代入演算子
 		return *this;
 	}
 
+public: // デストラクタ
+	//! @brief		デストラクタ
+	//! @note		このデストラクタは通常は呼ばれないことに注意すること。
+	//!				また、ここに内容の破壊以外に意味のあるコードをかけることを期待しないこと。
+	//!				tRisseHashTable などは明示的にin-placeでデストラクタを
+	//!				呼ぶことにより内容が破壊され、メンバが参照しているポインタが
+	//!				破壊されることにより参照のリンクが切れることを期待するので、それに
+	//!				対応する。
+	~tRisseVariantBlock()
+	{
+		Clear();
+		AsObject().Context = NULL;
+			// いまのところ、Type 以外の場所にポインタを持っているのは
+			// Object の Context だけである。
+			// ここでは Object 型かどうかはチェックしないが、このフィールド
+			// はクリアしておかなければならない。
+	}
+
 public: // 初期化
 	//! @brief		内容を初期化する (void にする)
+	//! @note		このメソッドは Type を vtVoid にすることにより
+	//!				型を void にするだけである。内部のメンバが保持しているポインタなどを
+	//!				破壊するわけではないので、参照はいまだ保持されたままになる可能性
+	//!				があることに注意すること。
 	void Clear()
 	{
 		Type = vtVoid;

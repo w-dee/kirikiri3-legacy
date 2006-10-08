@@ -55,7 +55,6 @@ CPPFILES =  \
 			src/risseOctet.cpp                       \
 			src/risseString.cpp                      \
 			src/risseException.cpp                   \
-			src/risseExecutorContext.cpp             \
 			src/risseLexerUtils.cpp                  \
 			src/risseOpCodes.cpp                     \
 			src/risseScriptBlockBase.cpp             \

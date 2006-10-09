@@ -505,6 +505,7 @@ public: // hint/hash
 
 	//! @brief 文字列のハッシュを計算して返す
 	//! @return ハッシュ値
+	//! @note	戻り値は必ず0以外の値になる
 	risse_uint32 GetHash() const;
 
 public: // object property

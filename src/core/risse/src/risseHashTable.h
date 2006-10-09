@@ -13,30 +13,44 @@
 #ifndef RisseHashTableH
 #define RisseHashTableH
 
-#include "tjs.h"
+#include "risseTypes.h"
+#include "risseGC.h"
 
-#define TJS_HS_DEFAULT_HASH_SIZE 64
-#define TJS_HS_HASH_USING	0x1
-#define TJS_HS_HASH_LV1	0x2
+// #define RISSE_HS_DEBUG_CHAIN  // to debug chain algorithm
 
-// #define TJS_HS_DEBUG_CHAIN  // to debug chain algorithm
-
-namespace TJS
+namespace Risse
 {
+
+
+
+
 //---------------------------------------------------------------------------
-// tTJSHashFunc : Hash function object
+//! @brief		ハッシュ関数の特性クラス(汎用)
+//! @note		このクラスのMakeはTのビットレイアウトに対して
+//!				ハッシュを作成するものであり、通常は使うべきではない。@r
+//!				たとえ単純な構造体であっても、この関数オブジェクトはパディングと
+//!				して使われている構造体のなかのゴミビットを拾ってしまう可能性がある。@r
+//!				通常は、tRisseHashTraits のテンプレートを特化させるか、あるいは
+//!				他のハッシュ関数オブジェクトを使うこと。@r
+//!				このクラスは Make() と GetHint() と SetHint() と HasHint を実装
+//!				する必要がある。
 //---------------------------------------------------------------------------
-// the hash function used here is similar to one which used in perl 5.8,
-// see also http://burtleburtle.net/bob/hash/doobs.html (One-at-a-Time Hash)
 template <typename T>
-class tTJSHashFunc
+class tRisseHashTraits
 {
 public:
-	static tjs_uint32 Make(const T &val)
+
+	// the hash function used here is similar to one which used in perl 5.8,
+	// see also http://burtleburtle.net/bob/hash/doobs.html (One-at-a-Time Hash)
+
+	//! @brief		ハッシュを作成する
+	//! @param		val		値
+	//! @return		ハッシュ値
+	static risse_uint32 Make(const T &val)
 	{
 		const char *p = (const char*)&val;
 		const char *plim = (const char*)&val + sizeof(T);
-		register tjs_uint32 ret = 0;
+		register risse_uint32 ret = 0;
 		while(p<plim)
 		{
 			ret += *p;
@@ -47,198 +61,165 @@ public:
 		ret += (ret << 3);
 		ret ^= (ret >> 11);
 		ret += (ret << 15);
-		if(!ret) ret = (tjs_uint32)-1;
+		if(!ret) ret = (risse_uint32)-1;
 		return ret;
 	}
+
+	//! @brief		ハッシュのヒントを返す
+	//! @param		val		値
+	//! @return		ハッシュ値(0=ハッシュが無効)
+	static risse_uint32 GetHint(const T &val)
+	{
+		return 0;
+	}
+
+	//! @brief		ハッシュのヒントを設定する
+	//! @param		val		値
+	//! @param		hash	ハッシュ値
+	static void SetHint(T & val, risse_uint32 hash)
+	{
+	}
+
+	//! @brief		ハッシュのヒントを設定する(const版)
+	//! @param		val		値
+	//! @param		hash	ハッシュ値
+	//! @note		valのSetHintがmutableとして宣言されている向き
+	static void SetHint(const T & val, risse_uint32 hash)
+	{
+	}
+
+
+	static const bool HasHint = false; //!< ハッシュのヒントを得る事ができるかどうか
 };
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ハッシュ関数の特性クラス(tRisseString用)
 //---------------------------------------------------------------------------
 template <>
-class tTJSHashFunc<ttstr> // a specialized template of tTJSHashFunc for ttstr
+class tRisseHashTraits<tRisseString>
 {
+	typedef tRisseString T;
 public:
-	static tjs_uint32 Make(const ttstr &val)
+	//! @brief		ハッシュを作成する
+	//! @param		val		値
+	//! @return		ハッシュ値
+	static risse_uint32 Make(const T &val)
 	{
-		if(val.IsEmpty()) return 0;
-		const tjs_char *str = val.c_str();
-		tjs_uint32 ret = 0;
-		while(*str)
-		{
-			ret += *str;
-			ret += (ret << 10);
-			ret ^= (ret >> 6);
-			str++;
-		}
-		ret += (ret << 3);
-		ret ^= (ret >> 11);
-		ret += (ret << 15);
-		if(!ret) ret = (tjs_uint32)-1;
-		return ret;
+		return val.GetHash();
 	}
+
+	//! @brief		ハッシュのヒントを返す
+	//! @param		val		値
+	//! @return		ハッシュ値(0=ハッシュが無効)
+	static risse_uint32 GetHint(const T &val)
+	{
+		return val.GetHint();
+	}
+
+	//! @brief		ハッシュのヒントを設定する
+	//! @param		val		値
+	//! @param		hash	ハッシュ値
+	static void SetHint(T & val, risse_uint32 hash)
+	{
+		val.SetHint(hash);
+	}
+
+	//! @brief		ハッシュのヒントを設定する(const版)
+	//! @param		val		値
+	//! @param		hash	ハッシュ値
+	//! @note		valのSetHintがmutableとして宣言されている向き
+	static void SetHint(const T & val, risse_uint32 hash)
+	{
+		val.SetHint(hash);
+	}
+
+	static const bool HasHint = true; //!< ハッシュのヒントを得る事ができるかどうか
 };
 //---------------------------------------------------------------------------
-template <>
-class tTJSHashFunc<tjs_char *> // a specialized template of tTJSHashFunc for tjs_char
+
+
+//---------------------------------------------------------------------------
+//! @brief		ハッシュ表の要素を表す構造体
+//---------------------------------------------------------------------------
+template <
+	typename KeyT,
+	typename ValueT
+		>
+struct tRisseHashTableElement : public tRisseCollectee
 {
-public:
-	static tjs_uint32 Make(const tjs_char *str)
-	{
-		if(!str) return 0;
-		tjs_uint32 ret = 0;
-		while(*str)
-		{
-			ret += *str;
-			ret += (ret << 10);
-			ret ^= (ret >> 6);
-			str++;
-		}
-		ret += (ret << 3);
-		ret ^= (ret >> 11);
-		ret += (ret << 15);
-		if(!ret) ret = (tjs_uint32)-1;
-		return ret;
-	}
+	risse_uint32 Hash;
+	risse_uint32 Flags; // management flag
+	char Key[sizeof(KeyT)];
+	char Value[sizeof(ValueT)];
+	tRisseHashTableElement *Prev; // previous chain item
+	tRisseHashTableElement *Next; // next chain item
 };
 //---------------------------------------------------------------------------
-template <>
-class tTJSHashFunc<tjs_nchar *> // a specialized template of tTJSHashFunc for tjs_nchar
-{
-public:
-	static tjs_uint32 Make(const tjs_nchar *str)
-	{
-		if(!str) return 0;
-		tjs_uint32 ret = 0;
-		while(*str)
-		{
-			ret += *str;
-			ret += (ret << 10);
-			ret ^= (ret >> 6);
-			str++;
-		}
-		ret += (ret << 3);
-		ret ^= (ret >> 11);
-		ret += (ret << 15);
-		if(!ret) ret = (tjs_uint32)-1;
-		return ret;
-	}
-};
-//---------------------------------------------------------------------------
-// tTJSHashTable : a simple implementation of Chain Hash algorithm
-//---------------------------------------------------------------------------
-/*
-	Not that ValueT must implement both "operator =" and a copy constructor.
-*/
-template <typename KeyT, typename ValueT, typename HashFuncT = tTJSHashFunc<KeyT>,
-	tjs_int HashSize = TJS_HS_DEFAULT_HASH_SIZE>
-class tTJSHashTable
-{
-private:
-	struct element
-	{
-		tjs_uint32 Hash;
-		tjs_uint32 Flags; // management flag
-		char Key[sizeof(KeyT)];
-		char Value[sizeof(ValueT)];
-		element *Prev; // previous chain item
-		element *Next; // next chain item
-		element *NPrev; // previous item in the additional order
-		element *NNext; // next item in the additional order
-	} Elms[HashSize];
 
-	tjs_uint Count;
 
-	element *NFirst; // first item in the additional order
-	element *NLast;  // last item in the additional order
+//---------------------------------------------------------------------------
+//! @brief		ハッシュ表の基本機能の実装
+//---------------------------------------------------------------------------
+template <
+	typename KeyT,
+	typename ValueT,
+	typename HashTraitsT = tRisseHashTraits<KeyT>,
+	typename ElementT = tRisseHashTableElement<KeyT, ValueT>
+		>
+class tRisseHashTable : public tRisseCollectee
+{
+	ElementT * Elms; //!< 要素の配列
+	risse_size HashMask; //!< ハッシュマスク(要素のlevel1スロットの個数-1)
+	risse_size Count; //!< 要素の個数
+
+	static const risse_size InitialHashMask = (16-1); //!< 初期のHashMask
+
+	static const risse_uint32 UsingFlag = 0x1; //!< その要素は使用中である
+	static const risse_uint32 Lv1Flag	 = 0x2; //!< その要素はlevel1スロットにある
+
 
 public:
-
-	class tIterator // this differs a bit from STL's iterator
+	//! @brief		コンストラクタ
+	tRisseHashTable()
 	{
-		element * elm;
-	public:
-		tIterator() { elm = NULL; }
-
-//		tIterator(const tIterator &ref)
-//		{ elm = ref.elm; }
-
-		tIterator(element *r_elm)
-		{ elm = r_elm; }
-
-		tIterator operator ++()
-		{ elm = elm->NNext; return elm;}
-
-		tIterator operator --()
-		{ elm = elm->NPrev; return elm;}
-
-		tIterator operator ++(int dummy)
-		{ element *b_elm = elm; elm = elm->NNext; return b_elm; }
-
-		tIterator operator --(int dummy)
-		{ element *b_elm = elm; elm = elm->NPrev; return b_elm; }
-
-		void operator +(tjs_int n)
-		{ while(n--) elm = elm->NNext; }
-
-		void operator -(tjs_int n)
-		{ while(n--) elm = elm->NPrev; }
-
-		bool operator ==(const tIterator & ref) const
-		{ return elm == ref.elm; }
-
-		bool operator !=(const tIterator & ref) const
-		{ return elm != ref.elm; }
-
-		KeyT & GetKey()
-		{ return *(KeyT*)elm->Key; }
-
-		ValueT & GetValue()
-		{ return *(ValueT*)elm->Value; }
-
-		bool IsNull() const { return elm == NULL; }
-	};
-
-	static tjs_uint32 MakeHash(const KeyT &key)
-		{ return HashFuncT::Make(key); }
-
-	tTJSHashTable()
-	{
+		HashMask = InitialHashMask;
 		InternalInit();
 	}
 
-	~tTJSHashTable()
-	{
-		InternalClear();
-	}
-
+	//! @brief		要素をすべてクリアする
 	void Clear()
 	{
 		InternalClear();
 	}
 
-	tIterator GetFirst() const
-	{
-		return tIterator(NFirst);
-	}
-
-	tIterator GetLast() const
-	{
-		return tIterator(NLast);
-	}
-
-
+	//! @brief		要素を追加する
+	//! @param		key		キー
+	//! @param		value	値
+	//! @note		すでにキーが存在していた場合は値が上書きされる
 	void Add(const KeyT &key, const ValueT &value)
 	{
 		// add Key and Value
-		AddWithHash(key, HashFuncT::Make(key), value);
+		AddWithHash(key, HashTraitsT::Make(key), value);
 	}
 
-	void AddWithHash(const KeyT &key, tjs_uint32 hash, const ValueT &value)
+	//! @brief		要素を追加する(キーのハッシュ値がすでに分かっている場合)
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @param		value	値
+	//! @note		すでにキーが存在していた場合は値が上書きされる
+	void AddWithHash(const KeyT &key, risse_uint32 hash, const ValueT &value)
 	{
 		// add Key ( hash ) and Value
-#ifdef TJS_HS_DEBUG_CHAIN
+#ifdef RISSE_HS_DEBUG_CHAIN
 		hash = 0;
 #endif
-		element *lv1 = Elms + hash % HashSize;
-		element *elm = lv1->Next;
+		if(HashTraitsT::HasHint)
+			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
+
+		ElementT *lv1 = Elms + (hash & HashMask);
+		ElementT *elm = lv1->Next;
 		while(elm)
 		{
 			if(hash == elm->Hash)
@@ -247,7 +228,6 @@ public:
 				if(key == *(KeyT*)elm->Key)
 				{
 					// do copying instead of inserting if these are same
-					CheckUpdateElementOrder(elm);
 					*(ValueT*)elm->Value = value;
 					return;
 				}
@@ -256,14 +236,13 @@ public:
 		}
 
 		// lv1 used ?
-		if(!(lv1->Flags & TJS_HS_HASH_USING))
+		if(!(lv1->Flags & UsingFlag))
 		{
 			// lv1 is unused
 			Construct(*lv1, key, value);
 			lv1->Hash = hash;
 			lv1->Prev = NULL;
 			// not initialize lv1->Next here
-			CheckAddingElementOrder(lv1);
 			return;
 		}
 
@@ -274,14 +253,13 @@ public:
 			if(key == *(KeyT*)lv1->Key)
 			{
 				// do copying instead of inserting if these are same
-				CheckUpdateElementOrder(lv1);
 				*(ValueT*)lv1->Value = value;
 				return;
 			}
 		}
 
 		// insert after lv1
-		element *newelm = new element;
+		ElementT *newelm = new ElementT;
 		newelm->Flags = 0;
 		Construct(*newelm, key, value);
 		newelm->Hash = hash;
@@ -289,46 +267,88 @@ public:
 		newelm->Next = lv1->Next;
 		newelm->Prev = lv1;
 		lv1->Next = newelm;
-		CheckAddingElementOrder(newelm);
 	}
 
-
+	//! @brief		キーを検索する
+	//! @param		key		キー
+	//! @return		見つかった要素へのポインタ。null=見つからなかった
 	ValueT * Find(const KeyT &key) const
 	{
 		// find key
 		// return   NULL  if not found
-		const element * elm = InternalFindWithHash(key, HashFuncT::Make(key));
+		risse_uint32 hash;
+		if(HashTraitsT::HasHint)
+		{
+			// ヒントを持っている場合
+			// 一度ヒントで検索を試みる
+			risse_uint32 hint = HashTraitsT::GetHint(key);
+			if(hint != 0)
+			{
+				const ElementT * elm = InternalFindWithHash(key, hint);
+				if(elm) return (ValueT*)elm->Value; // 見つかった
+			}
+			// ヒントを用いて検索をしたら見つからなかった
+			// あるいはヒントが見つからなかった
+			// 本当にメンバが存在しないか、あるいはヒントが間違ってるのかの
+			// どちらかの可能性がある。
+			// ハッシュを再計算する。
+			hash = HashTraitsT::Make(key);
+			if(hint == hash)
+				return NULL; // ヒントとハッシュが同じだった場合はすでに試した
+		}
+		else
+		{
+			// ヒントを持っていない場合
+			hash = HashTraitsT::Make(key);
+		}
+
+		const ElementT * elm = InternalFindWithHash(key, hash);
 		if(!elm) return NULL;
 		return (ValueT*)elm->Value;
 	}
 
+	//! @brief		キーを検索する(見つかったキーと値のペアを返す)
+	//! @param		key		キー
+	//! @param		keyout	見つかったキー
+	//! @param		value	見つかった値
+	//! @return		キーが見つかれば真、見つからなければ偽
 	bool Find(const KeyT &key, const KeyT *& keyout, ValueT *& value) const
 	{
 		// find key
 		// return   false  if not found
-		return FindWithHash(key, HashFuncT::Make(key), keyout, value);
+		return FindWithHash(key, HashTraitsT::Make(key), keyout, value);
 	}
 
-	ValueT * FindWithHash(const KeyT &key, tjs_uint32 hash) const
+	//! @brief		キーを検索する(あらかじめハッシュが分かっている場合)
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @return		見つかった要素へのポインタ。null=見つからなかった
+	ValueT * FindWithHash(const KeyT &key, risse_uint32 hash) const
 	{
 		// find key ( hash )
 		// return   NULL  if not found
-#ifdef TJS_HS_DEBUG_CHAIN
+#ifdef RISSE_HS_DEBUG_CHAIN
 		hash = 0;
 #endif
-		const element * elm = InternalFindWithHash(key, hash);
+		const ElementT * elm = InternalFindWithHash(key, hash);
 		if(!elm) return NULL;
 		return (ValueT*)elm->Value;
 	}
 
-	bool FindWithHash(const KeyT &key, tjs_uint32 hash, const KeyT *& keyout, ValueT *& value) const
+	//! @brief		キーを検索する(あらかじめハッシュが分かっている場合)(見つかったキーと値のペアを返す)
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @param		keyout	見つかったキー
+	//! @param		value	見つかった値
+	//! @return		キーが見つかれば真、見つからなければ偽
+	bool FindWithHash(const KeyT &key, risse_uint32 hash, const KeyT *& keyout, ValueT *& value) const
 	{
 		// find key
 		// return   false  if not found
-#ifdef TJS_HS_DEBUG_CHAIN
+#ifdef RISSE_HS_DEBUG_CHAIN
 		hash = 0;
 #endif
-		const element * elm = InternalFindWithHash(key, hash);
+		const ElementT * elm = InternalFindWithHash(key, hash);
 		if(elm)
 		{
 			value = (ValueT*)elm->Value;
@@ -338,64 +358,30 @@ public:
 		return false;
 	}
 
-	ValueT * FindAndTouch(const KeyT &key)
-	{
-		// find key and move it first if found
-		const element * elm = InternalFindWithHash(key, HashFuncT::Make(key));
-		if(!elm) return NULL;
-		CheckUpdateElementOrder((element *)elm);
-		return (ValueT*)elm->Value;
-	}
-
-	bool FindAndTouch(const KeyT &key, const KeyT *& keyout, ValueT *& value)
-	{
-		// find key ( hash )
-		// return   false  if not found
-		return FindAndTouchWithHash(key, HashFuncT::Make(key), keyout, value);
-	}
-
-
-	ValueT * FindAndTouchWithHash(const KeyT &key, tjs_uint32 hash)
-	{
-		// find key ( hash ) and move it first if found
-#ifdef TJS_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
-		const element * elm = InternalFindWithHash(key, hash);
-		if(!elm) return NULL;
-		CheckUpdateElementOrder((element *)elm); // force casting
-		return (ValueT*)elm->Value;
-	}
-
-	bool FindAndTouchWithHash(const KeyT &key, tjs_uint32 hash, const KeyT *& keyout, ValueT *& value)
-	{
-		// find key
-		// return   false  if not found
-		const element * elm = InternalFindWithHash(key, hash);
-		if(elm)
-		{
-			CheckUpdateElementOrder((element *)elm);
-			value = (ValueT*)elm->Value;
-			keyout = (const KeyT*)elm->Key;
-			return true;
-		}
-		return false;
-	}
-
+	//! @brief		キーを削除する
+	//! @param		key		キー
+	//! @return		キーが見つかり、削除されれば真、削除されなければ偽
 	bool Delete(const KeyT &key)
 	{
 		// delete key and return true if successed
-		return DeleteWithHash(key, HashFuncT::Make(key));
+		return DeleteWithHash(key, HashTraitsT::Make(key));
 	}
 
-	bool DeleteWithHash(const KeyT &key, tjs_uint32 hash)
+	//! @brief		キーを削除する(あらかじめハッシュが分かっている場合)
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @return		キーが見つかり、削除されれば真、削除されなければ偽
+	bool DeleteWithHash(const KeyT &key, risse_uint32 hash)
 	{
 		// delete key ( hash ) and return true if succeeded
-#ifdef TJS_HS_DEBUG_CHAIN
+#ifdef RISSE_HS_DEBUG_CHAIN
 		hash = 0;
 #endif
-		element *lv1 = Elms + hash % HashSize;
-		if(lv1->Flags & TJS_HS_HASH_USING && hash == lv1->Hash)
+		if(HashTraitsT::HasHint)
+			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
+
+		ElementT *lv1 = Elms + (hash & HashMask);
+		if(lv1->Flags & UsingFlag && hash == lv1->Hash)
 		{
 			if(key == *(KeyT*)lv1->Key)
 			{
@@ -406,8 +392,8 @@ public:
 			}
 		}
 
-		element *prev = lv1;
-		element *elm = lv1->Next;
+		ElementT *prev = lv1;
+		ElementT *elm = lv1->Next;
 		while(elm)
 		{
 			if(hash == elm->Hash)
@@ -428,88 +414,60 @@ public:
 		return false; // not found
 	}
 
-	tjs_int ChopLast(tjs_int count)
-	{
-		// chop items from last of additional order
-		tjs_int ret = 0;
-		while(count--)
-		{
-			if(!NLast) break;
-			DeleteByElement(NLast);
-			ret++;
-		}
-		return ret;
-	}
 
-	tjs_uint GetCount() { return Count; }
+	//! @brief		要素数を得る
+	//! @return		要素数
+	risse_size GetCount() const { return Count; }
 
 private:
+	//! @brief		内部の要素をすべてクリアする
 	void InternalClear()
 	{
-		for(tjs_int i = 0; i < HashSize; i++)
+		Count = 0;
+		for(risse_size i = 0; i <= HashMask; i++)
 		{
-			// delete all items
-			element *elm = Elms[i].Next;
-			while(elm)
-			{
-				Destruct(*elm);
-				element *elmnext = elm->Next;
-				delete elm;
-				elm = elmnext;
-			}
-			if(Elms[i].Flags & TJS_HS_HASH_USING)
-			{
+			// level1の要素は参照を断ち切るために破壊する
+			if(Elms[i].Flags & UsingFlag)
 				Destruct(Elms[i]);
-			}
+
+			Elms[i].Flags = Lv1Flag;
+			Elms[i].Prev = NULL; // level2はこれにより切り離される
+			Elms[i].Next = NULL; // level2はこれにより切り離される
 		}
-		InternalInit();
 	}
 
+	//! @brief		内部を初期化する
 	void InternalInit()
 	{
-		Count = 0;
-		NFirst = NULL;
-		NLast = NULL;
-		for(tjs_int i = 0; i < HashSize; i++)
-		{
-			Elms[i].Flags = TJS_HS_HASH_LV1;
-			Elms[i].Prev = NULL;
-			Elms[i].Next = NULL;
-		}
+//		Elms = reinterpret_cast<ElementT*>(RisseMallocCollectee(sizeof(ElementT)*(HashMask + 1)));
+		Elms = new ElementT[HashMask + 1];
+		InternalClear();
 	}
 
 
-	void DeleteByElement(element *elm)
-	{
-		CheckDeletingElementOrder(elm);
-		Destruct(*elm);
-		if(elm->Flags & TJS_HS_HASH_LV1)
-		{
-			// lv1 element
-			// nothing to do
-		}
-		else
-		{
-			// other elements
-			if(elm->Prev) elm->Prev->Next = elm->Next;
-			if(elm->Next) elm->Next->Prev = elm->Prev;
-		}
-		if(!(elm->Flags & TJS_HS_HASH_LV1)) delete elm;
-	}
-
-	const element * InternalFindWithHash(const KeyT &key, tjs_uint32 hash) const
+	//! @brief		(内部関数)検索を行う
+	//! @param		key		キー
+	//! @param		hash	キーのハッシュ
+	//! @return		見つかった要素へのポインタ (NULL=見つからなかった)
+	const ElementT * InternalFindWithHash(const KeyT &key, risse_uint32 hash) const
 	{
 		// find key ( hash )
-#ifdef TJS_HS_DEBUG_CHAIN
+#ifdef RISSE_HS_DEBUG_CHAIN
 		hash = 0;
 #endif
-		const element *lv1 = Elms + hash % HashSize;
-		if(hash == lv1->Hash && lv1->Flags & TJS_HS_HASH_USING)
+
+		if(HashTraitsT::HasHint)
+			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
+
+		// lv1を検索
+		const ElementT *lv1 = Elms + (hash & HashMask);
+		if(hash == lv1->Hash && lv1->Flags & UsingFlag)
 		{
 			if(key == *(KeyT*)lv1->Key) return lv1;
 		}
 
-		element *elm = lv1->Next;
+		// lv2を検索
+		ElementT *elm = lv1->Next;
 		while(elm)
 		{
 			if(hash == elm->Hash)
@@ -521,130 +479,46 @@ private:
 		return NULL; // not found
 	}
 
-
-	void CheckAddingElementOrder(element *elm)
-	{
-		if(Count==0)
-		{
-			NLast = elm; // first addition
-			elm->NNext = NULL;
-		}
-		else
-		{
-			NFirst->NPrev = elm;
-			elm->NNext = NFirst;
-		}
-		NFirst = elm;
-		elm->NPrev = NULL;
-		Count ++;
-	}
-
-	void CheckDeletingElementOrder(element *elm)
-	{
-		Count --;
-		if(Count > 0)
-		{
-			if(elm == NFirst)
-			{
-				// deletion of first item
-				NFirst = elm->NNext;
-				NFirst->NPrev = NULL;
-			}
-			else if(elm == NLast)
-			{
-				// deletion of last item
-				NLast = elm->NPrev;
-				NLast->NNext = NULL;
-			}
-			else
-			{
-				// deletion of intermediate item
-				elm->NPrev->NNext = elm->NNext;
-				elm->NNext->NPrev = elm->NPrev;
-			}
-		}
-		else
-		{
-			// when the count becomes zero...
-			NFirst = NLast = NULL;
-		}
-	}
-
-	void CheckUpdateElementOrder(element *elm)
-	{
-		// move elm to the front of addtional order
-		if(elm != NFirst)
-		{
-			if(NLast == elm) NLast = elm->NPrev;
-			elm->NPrev->NNext = elm->NNext;
-			if(elm->NNext) elm->NNext->NPrev = elm->NPrev;
-			elm->NNext = NFirst;
-			elm->NPrev = NULL;
-			NFirst->NPrev = elm;
-			NFirst = elm;
-		}
-	}
-
-	static void Construct(element &elm, const KeyT &key, const ValueT &value)
+	//! @brief		要素をコピーコンストラクタで構築する
+	//! @param		elm			要素
+	//! @param		key			キーの値
+	//! @param		value		値
+	static void Construct(ElementT &elm, const KeyT &key, const ValueT &value)
 	{
 		::new (&elm.Key) KeyT(key);
 		::new (&elm.Value) ValueT(value);
-		elm.Flags |= TJS_HS_HASH_USING;
+		elm.Flags |= UsingFlag;
 	}
 
-	static void Destruct(element &elm)
+	//! @brief		要素を破壊する
+	//! @param		elm		要素
+	//!	@note		このメソッドは強制的に KeyT と ValueT の in-place
+	//!				デストラクタを呼ぶ。@r
+	//!				これにより、KeyT および ValueT の内部がクリアされる
+	//!				ことを期待する物である。@r
+	//!				GC対応のコードではデストラクタは通常は書かないが、
+	//!				このクラスの KeyT や ValueT として使う場合は
+	//!				フィールドが保持しているポインタを破壊するコードを
+	//!				デストラクタに書くのが好ましい。@r
+	//!				また、このクラスはすべての KeyT および ValueT のインスタンス
+	//!				に対してデストラクタを呼び出す保証はないので、デストラクタが
+	//!				呼ばれることに依存したコードを書かないこと。
+	static void Destruct(ElementT &elm)
 	{
 		((KeyT*)(&elm.Key)) -> ~KeyT();
 		((ValueT*)(&elm.Value)) -> ~ValueT();
-		elm.Flags &= ~TJS_HS_HASH_USING;
+		elm.Flags &= ~UsingFlag;
 	}
+
 };
 //---------------------------------------------------------------------------
-// tTJSHashCache : cache algorithm via tTJSHashTable
-//---------------------------------------------------------------------------
-template <typename KeyT, typename ValueT, typename HashFuncT = tTJSHashFunc<KeyT>,
-	tjs_int HashSize = TJS_HS_DEFAULT_HASH_SIZE >
-class tTJSHashCache : public tTJSHashTable<KeyT, ValueT, HashFuncT, HashSize>
-{
-	typedef tTJSHashTable<KeyT, ValueT, HashFuncT, HashSize> inherited;
 
-	tjs_uint MaxCount;
 
-public:
-	tTJSHashCache(tjs_uint maxcount) { MaxCount = maxcount; }
+} // namespace Risse
 
-	void Add(const KeyT &key, const ValueT &value)
-	{
-		inherited::Add(key, value);
-		if(GetCount() > MaxCount)
-		{
-			ChopLast(GetCount() - MaxCount);
-		}
-	}
 
-	void AddWithHash(const KeyT &key, tjs_uint32 hash, const ValueT &value)
-	{
-		inherited::AddWithHash(key, hash, value);
-		if(GetCount() > MaxCount)
-		{
-			ChopLast(GetCount() - MaxCount);
-		}
-	}
 
-	void SetMaxCount(tjs_uint maxcount)
-	{
-		MaxCount = maxcount;
-		if(GetCount() > MaxCount)
-		{
-			ChopLast(GetCount() - MaxCount);
-		}
-	}
-
-	tjs_uint GetMaxCount() { return MaxCount; }
-};
-//---------------------------------------------------------------------------
-} // namespace TJS
-//---------------------------------------------------------------------------
 
 #endif
+
 

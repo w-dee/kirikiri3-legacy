@@ -61,7 +61,7 @@ class gc_map : public std::map<T1, T2, std::less<T1>, gc_allocator<std::pair<T1,
 //---------------------------------------------------------------------------
 static inline void * RisseMallocCollectee(size_t size)
 {
-	return GC_malloc_atomic(size);
+	return GC_malloc(size);
 }
 //---------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ static inline void * RisseMallocCollectee(size_t size)
 //---------------------------------------------------------------------------
 static inline void * RisseMallocAtomicCollectee(size_t size)
 {
-	return GC_malloc(size);
+	return GC_malloc_atomic(size);
 }
 //---------------------------------------------------------------------------
 

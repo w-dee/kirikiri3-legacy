@@ -181,6 +181,84 @@ class tRisseHashTable : public tRisseCollectee
 
 
 public:
+	//! @brief	イテレータクラス
+	//! @note	非常に限定的かつ非効率的。一方向へのイテレーションしかサポートしない。
+	class tIterator : public tRisseCollectee
+	{
+		const tRisseHashTable * Table; //!< ハッシュ表
+		const ElementT * Element; //!<現在操作中の要素
+		risse_size Slot; //!< 現在操作中のlv1スロットのインデックス
+	public:
+		tIterator() { Table = NULL; Element = NULL; Slot = 0; }
+		tIterator(const tRisseHashTable & table)
+		{
+			// 最初の要素を探す
+			Table = &table;
+			Element = NULL; Slot = 0;
+			if(Table->Count > 0)
+			{
+				Slot = 0;
+				FindNext(); // 最初の要素を探す
+			}
+			// 最初の要素は存在しない
+		}
+
+		void operator ++()
+		{
+			Element = Element->Next;
+			if(!Element)
+			{
+				Slot++;
+				FindNext();
+			}
+		}
+
+		void operator ++(int dummy)
+		{
+			operator ++();
+		}
+
+	private:
+		void FindNext()
+		{
+			while(true)
+			{
+				if(Slot <= Table->HashMask)
+				{
+					if(Table->Elms[Slot].Flags & UsingFlag)
+					{
+						// lv1 が使用中
+						Element = Table->Elms + Slot;
+						break;
+					}
+					else if(Table->Elms[Slot].Next != NULL)
+					{
+						// lv2 が存在する
+						Element = Table->Elms[Slot].Next;
+						break;
+					}
+				}
+				else
+				{
+					// 見つからなかった
+					break;
+				}
+				Slot ++;
+			}
+		}
+
+
+	public:
+		KeyT & GetKey() const
+		{ return *(KeyT*)Element->Key; }
+
+		ValueT & GetValue() const
+		{ return *(ValueT*)Element->Value; }
+
+		bool End() const { return Element == NULL; }
+	};
+
+public:
 	//! @brief		コンストラクタ
 	tRisseHashTable()
 	{
@@ -240,6 +318,7 @@ public:
 		{
 			// lv1 is unused
 			Construct(*lv1, key, value);
+			Count ++;
 			lv1->Hash = hash;
 			lv1->Prev = NULL;
 			// not initialize lv1->Next here
@@ -262,6 +341,7 @@ public:
 		ElementT *newelm = new ElementT;
 		newelm->Flags = 0;
 		Construct(*newelm, key, value);
+		Count ++;
 		newelm->Hash = hash;
 		if(lv1->Next) lv1->Next->Prev = newelm;
 		newelm->Next = lv1->Next;
@@ -386,8 +466,8 @@ public:
 			if(key == *(KeyT*)lv1->Key)
 			{
 				// delete lv1
-				CheckDeletingElementOrder(lv1);
 				Destruct(*lv1);
+				Count --;
 				return true;
 			}
 		}
@@ -400,8 +480,8 @@ public:
 			{
 				if(key == *(KeyT*)elm->Key)
 				{
-					CheckDeletingElementOrder(elm);
 					Destruct(*elm);
+					Count --;
 					prev->Next = elm->Next; // sever from the chain
 					if(elm->Next) elm->Next->Prev = prev;
 					delete elm;

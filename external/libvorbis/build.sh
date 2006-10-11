@@ -4,7 +4,15 @@ prefix=`pwd`
 
 ogg_dir=$prefix/../libogg
 
-LDFLAGS="$LDFLAGS -L$ogg_dir/lib -logg.dll"
+case "`uname -s`" in
+CYGWIN* | MINGW*)
+	LDFLAGS="$LDFLAGS -L$ogg_dir/lib -logg.dll"
+	;;
+*)
+	LDFLAGS="$LDFLAGS -L$ogg_dir/lib -logg"
+	;;
+esac
+
 export LDFLAGS
 CFLAGS="$CFLAGS -I$ogg_dir/include"
 export CFLAGS

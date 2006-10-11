@@ -26,7 +26,7 @@ XRCFILES = krkrfont_res.xrc
 
 CPPFILES =  $(XRCFILES:.xrc=.cpp) \
 			KrkrFontApp.cpp \
-			msw/NativeFreeTypeFace.cpp msw/NativeFreeTypeDriver.cpp \
+			$(PLATFORM_SUBDIR)/NativeFreeTypeFace.cpp $(PLATFORM_SUBDIR)/NativeFreeTypeDriver.cpp \
 			MainDialog.cpp FreeType.cpp PreviewWindow.cpp \
 			FontDriver.cpp WriteBFF.cpp uni_cp932.cpp cp932_uni.cpp
 

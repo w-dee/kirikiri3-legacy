@@ -151,7 +151,7 @@ void tRisaXP4WriterSegment::WriteBody(iRisaProgressCallback * callback,
 		{
 			srcbuf = new unsigned char[static_cast<size_t>(Size)];
 			unsigned long compsize = 0;
-			outbuf = new BYTE[compsize =
+			outbuf = new wxByte[compsize =
 					static_cast<unsigned long>(Size + Size /100 + 1024)];
 			input.ReadBuffer(srcbuf, static_cast<unsigned int>(Size));
 
@@ -588,7 +588,7 @@ void tRisaXP4WriterArchive::WriteMetaData(iRisaProgressCallback * callback,
 	{
 		unsigned long inputsize = buf.GetDataLen();
 		unsigned long compsize = 0;
-		outbuf = new BYTE[compsize =
+		outbuf = new wxByte[compsize =
 				(unsigned long)(inputsize + inputsize /100 + 1024)];
 
 		int res;

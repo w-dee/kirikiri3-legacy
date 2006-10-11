@@ -29,7 +29,7 @@ download:
 
 # DLL や so などをターゲットの bin ディレクトリや lib ディレクトリに配置する
 
-# TODO: win32 以外の動作
+# TODO: win32/unix 以外の動作
 
 
 # Windows の場合、dll は実行可能ファイルと同じ場所か、
@@ -39,25 +39,32 @@ download:
 # また、マルチスレッドヘルパーである mingwm*.dll も bin ディレ
 # クトリにコピーする
 ifeq ($(PLATFORM),windows)
- copy_dll:
+ copy_dll: copy_dll_w32 do_copy_dll
+else
+ copy_dll: do_copy_dll
+endif
+
+copy_dll_w32:
 	mkdir -p $(BUILD_OUT_DIR)/bin
 	@cp `which mingwm10.dll` $(BUILD_OUT_DIR)/bin || \
 		(echo "error: mingwm10.dll missing." ; exit 1)
 	@cp `which unicows.dll` $(BUILD_OUT_DIR)/bin || \
 		(echo "error: unicows.dll missing. did you forget installing \
 		MSLU into MinGW bin directory ?" ; exit 1)
+
+do_copy_dll:
 	@echo "copying dlls to the target directory ..."
+	mkdir -p $(BUILD_OUT_DIR)/bin
 	@for dir in $(SUBLIBS) ; do \
 		for subdir in bin lib; do \
 			if [ -d $$dir/$$subdir ]; then \
-				files=`find $$dir/$$subdir -name '*.dll'` ;\
+				files=`find $$dir/$$subdir -name '*$(DLL_SUFFIX)'` ;\
 				if [ "x$$files" != "x" ]; then \
 					cp -p $$files $(BUILD_OUT_DIR)/bin;\
 				fi ;\
 			fi ;\
 		done ;\
 	done
-endif
 
 
 

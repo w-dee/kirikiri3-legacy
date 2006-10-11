@@ -1,0 +1,19 @@
+# プラットフォームごとの設定
+
+###### デバッグ設定
+DEBUG ?= yes
+
+## Linux/UNIX 用設定
+
+BIN_SUFFIX=
+DLL_SUFFIX=.so
+PLATFORM_SUBDIR=unix
+COMMON_LIBS = -lfontconfig
+
+ifeq ($(DEBUG),yes)
+ GUI_LDFLAGS = -g
+else
+ GUI_LDFLAGS = -g
+endif
+
+LD_LIBRARY_PATH_ENV_NAME=LD_LIBRARY_PATH

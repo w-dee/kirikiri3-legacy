@@ -1,44 +1,11 @@
-# プラットフォームごとの設定
-# TODO: 他のプラットフォームごとの設定の追加
-
-###### デバッグ設定
-
-DEBUG ?= yes
-
-## Windows用設定
-
-WINDRES = windres
-CONSOLE_LDFLAGS = -mconsole
-ifeq ($(DEBUG),yes)
- GUI_LDFLAGS = -g $(CONSOLE_LD_FLAG) $(WXWIDGETS_DIR)/lib/wx_msw_rc.o
-else
- GUI_LDFLAGS = -g -mwindows $(WXWIDGETS_DIR)/lib/wx_msw_rc.o
+PLATFORM=$(shell $(TOP_DIR)/detect_platform.sh -f)
+ifeq (windows,$(PLATFORM))
+include $(TOP_DIR)/Makefile_platform_msw
 endif
-BIN_SUFFIX=.exe
-PLATFORM=windows
 
-PLATFORM_SUBDIR=msw
+ifeq (unix,$(PLATFORM))
+include $(TOP_DIR)/Makefile_platform_unix
+endif
 
-# システム標準のライブラリ (プラットフォームによって変える必要あり)
-COMMON_LIBS = \
-	-lunicows \
-	-lkernel32 \
-	-luser32 \
-	-lgdi32 \
-	-lcomdlg32 \
-	-lwinspool \
-	-lwinmm \
-	-lshell32 \
-	-lcomctl32 \
-	-lole32 \
-	-loleaut32 \
-	-luuid \
-	-lrpcrt4 \
-	-ladvapi32 \
-	-lwsock32 \
-	-lodbc32 \
-	-lopengl32  
 
-# windows では DLL の検索にも PATH を使う
-LD_LIBRARY_PATH_ENV_NAME = PATH
-
+# TODO: 他のプラットフォームへの対応

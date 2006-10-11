@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kirikiri3-krkrfont 1.00\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2005-10-03 10:53+0900\n"
+"PO-Revision-Date: 2006-10-11 02:06+0900\n"
 "Last-Translator: W.Dee <dee@kikyou.info>\n"
 "Language-Team: W.Dee <dee@kikyou.info>\n"
 "MIME-Version: 1.0\n"
@@ -29,7 +29,7 @@ msgstr "フォント '%1$s' は使用できません"
 #. character, like "Tahoma|Times New Roman"
 #: MainDialog.cpp:62
 msgid "Tahoma"
-msgstr "ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3"
+msgstr "ＭＳ Ｐゴシック|ヒラギノ角ゴ Pro W3|さざなみゴシック"
 
 #. messsage for select a font file
 #: MainDialog.cpp:370
@@ -223,3 +223,6 @@ msgstr "x14"
 #: .xrcmsg:33
 msgid "x16"
 msgstr "x16"
+
+#~ msgid "FcInit failed"
+#~ msgstr "FcInit呼び出しに失敗しました"

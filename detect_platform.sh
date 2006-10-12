@@ -1,12 +1,12 @@
 #!/bin/sh -e
 
-# ƒRƒ}ƒ“ƒhƒ‰ƒCƒ“ˆø”‚É]‚Á‚ÄŒ»İ‚Ìƒvƒ‰ƒbƒgƒtƒH[ƒ€‚ÉŠÖ‚·‚é
-# î•ñ‚ğ•W€o—Í‚Éo—Í‚·‚é.
-# uname ‚Ìƒ‰ƒbƒp[B
+# ã‚³ãƒãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³å¼•æ•°ã«å¾“ã£ã¦ç¾åœ¨ã®ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã«é–¢ã™ã‚‹
+# æƒ…å ±ã‚’æ¨™æº–å‡ºåŠ›ã«å‡ºåŠ›ã™ã‚‹.
+# uname ã®ãƒ©ãƒƒãƒ‘ãƒ¼ã€‚
 
 case $1 in
 -f | --family)
-	# windows, unix ‚È‚Ç
+	# windows, unix ãªã©
 	case `uname -s` in
 	CYGWIN* | MINGW*)
 		echo windows ;;
@@ -18,10 +18,10 @@ case $1 in
 		echo unix ;;
 	esac;;
 -p | --platform)
-	# win32, linux, solaris mac ‚È‚Ç
+	# win32, linux, solaris mac ãªã©
 	case `uname -s` in
 	CYGWIN* | MINGW*)
-		# win64‚Ç‚¤‚µ‚æ‚¤
+		# win64ã©ã†ã—ã‚ˆã†
 		echo win32 ;;
 	Linux )
 		echo linux ;;

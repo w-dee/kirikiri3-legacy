@@ -9,6 +9,19 @@ jam_build_cmd()
 {
 	case "`uname -s`" in
 	MINGW* | CYGWIN* )
+		# bjam で使われている spawnvp はパスに " (ダブルクオーテーション) やカッコ
+		# が含まれていると解釈に失敗する模様。
+		# C:/Program Files/Microsoft DirectX SDK (June 2006)/Utilities/Bin/x86
+		# などでハマった。
+		# 一応ここでもチェックを行う。
+		if ! ( echo $PATH | awk '/[\"\(\)]/ { exit 1; }' ); then
+			echo "Your PATH contains invalid character! (one of '\"', '(', ')' )"
+			echo "PATH is :"
+			echo $PATH
+			echo "see trouble shooting information at "
+			echo "https://sv.kikyou.info/trac/kirikiri/wiki/documents/kirikiri3/development/build_win32"
+			exit 1
+		fi
 		# MINGW の仕様かどうかはわからないが、シェルから
 		# 直接バッチファイルを実行できないようなので
 		# バッチファイルを引数にしてsystem関数を呼ぶ

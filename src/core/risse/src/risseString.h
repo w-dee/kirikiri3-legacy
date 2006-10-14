@@ -34,7 +34,8 @@ risse_char は 32bit サイズであることが求められる。
 
 	tRisseStringBlock はこの二つのメンバを用い、「Bufferから始まるLength分の
 	長さを持つ文字列」を表す。
-	長さのない (空の) 文字列の場合、Buffer には NULL が入り、Length は 0 になる。
+	長さのない (空の) 文字列の場合、Length は 0 になる (BufferがNULLになる
+	保証などはないので、Length が 0 であることをもって空文字列とすること)。
 
 
 ■ バッファ

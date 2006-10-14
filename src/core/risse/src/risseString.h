@@ -567,11 +567,22 @@ public: // comparison
 		return !Risse_strcmp(Buffer, ref.Buffer);
 	}
 
+	//! @brief 同一比較
+	//! @param	ref		比較する文字列
+	//! @return	*this==ptrかどうか
+	bool operator == ( const risse_char *ptr ) const;
+
 	//! @brief 不一致判定
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this!=refかどうか
 	bool operator != (const tRisseStringBlock & ref) const
 		{ return ! (*this == ref); }
+
+	//! @brief 不一致判定
+	//! @param	ref		比較する文字列
+	//! @return	*this!=ptrかどうか
+	bool operator != (const risse_char *ptr) const
+		{ return ! (*this == ptr); }
 
 public: // operators
 	//! @brief		文字列の追加

@@ -286,6 +286,30 @@ risse_uint32 tRisseStringBlock::GetHash() const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+bool tRisseStringBlock::operator == ( const risse_char *ptr ) const
+{
+	if(Length == 0) return ptr[0] == 0; // 空文字列 ?
+
+	// ptr は null 終結していることを仮定できるが、
+	// Buffer は null 終結している保証はない。
+	// そのため、一応先頭から順に文字が一致しているかを一つ一つ見ていく。
+	// memcmpでもいいのかもしれないがmemcmp(a, b, l) で [a, a+l) と [b, b+l)
+	// のどちらかのその一部がアクセスできなかった場合の動作は未定義な
+	// 気がするので使用を避ける。
+	risse_size i;
+	for(i = 0; i < Length; i++)
+	{
+		if(Buffer[i] != ptr[i])
+			return false; // 異なる(Length分検査しないうちに*ptr_p==0に達した場合もここに来るはず)
+	}
+
+	// この時点では少なくとも Length 分は ptr と Buffer の中身が一致している
+	// 最後に ptr[Length] が \0 かをチェック (そこが \0 ならば完全一致となる)
+	return ptr[Length] == 0;
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)

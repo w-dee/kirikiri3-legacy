@@ -11,6 +11,10 @@
 //! @brief À”—£Uƒt[ƒŠƒG•ÏŠ·
 //---------------------------------------------------------------------------
 
+/*
+	Real Discrete FFT package from
+		http://momonga.t.u-tokyo.ac.jp/~ooura/fft-j.html
+*/
 
 
 static void cft1st(int n, float *a, float *w)

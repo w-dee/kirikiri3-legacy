@@ -17,7 +17,8 @@
 
 //---------------------------------------------------------------------------
 //! @brief		atan2 の高速版 (1x float, C言語版)
-//! @note		精度はあまり良くない。10bitぐらい。
+//! @note		精度はあまり良くない。10bitぐらい。 @r
+//!				原典: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
 //---------------------------------------------------------------------------
 static inline float Risa_VFast_arctan2(float y, float x)
 {
@@ -46,6 +47,7 @@ static inline float Risa_VFast_arctan2(float y, float x)
 
 //---------------------------------------------------------------------------
 //! @brief		sincos の高速版 (1x float, C言語版)
+//! @note		原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf 
 //---------------------------------------------------------------------------
 static inline float Risa_VFast_atan2_madd(float a, float b, float c) { return a*b+c; }
 static inline float Risa_VFast_atan2_nmsub(float a, float b, float c) { return -(a*b-c); }

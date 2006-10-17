@@ -36,7 +36,8 @@ extern const float RISA_V_R_2PI[4] ;
 
 //---------------------------------------------------------------------------
 //! @brief		atan2 の高速版 (4x float, SSE版)
-//! @note		精度はあまり良くない。10bitぐらい。
+//! @note		精度はあまり良くない。10bitぐらい。 @r
+//!				原典: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
 //---------------------------------------------------------------------------
 static inline __m128 Risa_VFast_arctan2_F4_SSE(__m128 y, __m128 x)
 {
@@ -96,7 +97,7 @@ STIN void Risa_SetRoundingModeToNearest_SSE()
 
 //---------------------------------------------------------------------------
 //! @brief		sincos の高速版 (4x float, SSE版)
-//! @note		http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf  @r
+//! @note		原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf  @r
 //!				呼び出しに先立って Risa_SetRoundingModeToNearest_SSE を呼ぶこと。
 //---------------------------------------------------------------------------
 STIN void Risa_VFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)

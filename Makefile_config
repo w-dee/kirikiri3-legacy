@@ -5,6 +5,22 @@ MSGMERGE = msgmerge
 MSGFMT = msgfmt
 
 
+###### CPU ごとの最適化オプションのチェック
+
+CPU_OPTIONS=
+
+ifdef USE_SSE
+ # SSE を使用する場合は自動的にMMXも使用
+ USE_MMX=1
+endif
+
+ifdef USE_SSE
+ CPU_OPTIONS = -msse -DRISA_USE_SSE
+else
+ifdef USE_MMX
+ CPU_OPTIONS = -msse -DRISE_USE_MMX
+endif
+endif
 
 
 ###### CFLAGS と CXXFLAGS や CPPFLAGS
@@ -12,9 +28,9 @@ MSGFMT = msgfmt
 
 # 標準の CFLAGS など
 
-COMMON_CFLAGS   = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
-COMMON_CXXFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
-COMMON_CPPFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
+COMMON_CFLAGS   = -Winvalid-pch -I./$(PLATFORM_SUBDIR) $(CPU_OPTIONS)
+COMMON_CXXFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR) $(CPU_OPTIONS)
+COMMON_CPPFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR) $(CPU_OPTIONS)
 
 # コンパイラなどのツールについては、ベースは wxWidgets の設定を用いる
 

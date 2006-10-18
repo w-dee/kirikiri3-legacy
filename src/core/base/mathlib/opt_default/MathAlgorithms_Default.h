@@ -14,6 +14,9 @@
 #define MATHALGORITHMSH
 
 #include <math.h>
+#include "risse/include/risse.h"
+#include "risse/include/risseError.h"
+#include "risse/include/risseUtils.h"
 
 //---------------------------------------------------------------------------
 //! @brief		atan2 の高速版 (1x float, C言語版)
@@ -83,8 +86,8 @@ static inline void RisaVFast_atan2_F1(float v, float &sin, float &cos)
 		(float)(1.0));
 
 	/* now, do one out of two angle-doublings to get sin & cos theta/2 */
-	c2=Risa_VFast_atan2_nmsub(s1, s1, RisaVFast_atan2_madd(c1, c1, (float)(0.0)));
-	s2=Risa_VFast_atan2_madd((float)(2.0), RisaVFast_atan2_madd(s1, c1, (float)(0.0)), (float)(0.0));
+	c2=RisaVFast_atan2_nmsub(s1, s1, RisaVFast_atan2_madd(c1, c1, (float)(0.0)));
+	s2=RisaVFast_atan2_madd((float)(2.0), RisaVFast_atan2_madd(s1, c1, (float)(0.0)), (float)(0.0));
 
 	/* now, cheat on the correction for magnitude drift...
 	if the pair has drifted to (1+e)*(cos, sin),
@@ -97,7 +100,7 @@ static inline void RisaVFast_atan2_F1(float v, float &sin, float &cos)
 	Then, multiply final result by (1-e) to correct */
 
 	/* this works with properly normalized sine-cosine functions, but un-normalized is more */
-	fixmag1=Risa_VFast_atan2_nmsub(s2,s2, RisaVFast_atan2_nmsub(c2, c2, (float)(2.0)));
+	fixmag1=RisaVFast_atan2_nmsub(s2,s2, RisaVFast_atan2_nmsub(c2, c2, (float)(2.0)));
 
 	c1=RisaVFast_atan2_nmsub(s2, s2, RisaVFast_atan2_madd(c2, c2, (float)(0.0)));
 	s1=RisaVFast_atan2_madd((float)(2.0), RisaVFast_atan2_madd(s2, c2, (float)(0.0)), (float)(0.0));
@@ -116,7 +119,7 @@ static inline float RisaWrapPi_F1(float v)
 	float v_quant = v / (2.0)*M_PI;
 	int i_quant = (int)v_quant;
 	if(i_quant < 0) i_quant --;
-	v_quant -= i_quant * (2.0 * PI);
+	v_quant -= i_quant * (2.0 * M_PI);
 	return v_quant + M_PI;
 }
 //---------------------------------------------------------------------------
@@ -128,19 +131,20 @@ static inline float RisaWrapPi_F1(float v)
 //! @param		src		ソース
 //! @param		win		窓関数
 //! @param		numch	チャンネル数
+//! @param		destofs	destの処理開始位置
 //! @param		len		処理するサンプル数
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
 void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
-					float * win, int numch, size_t len)
+					float * win, int numch, size_t destofs, size_t len)
 {
 	risse_size n;
 	switch(numch)
 	{
 	case 1: // mono
 		{
-			float * dest0 = dest[0];
+			float * dest0 = dest[0] + destofs;
 			for(n = 0; n < len; n++)
 			{
 				dest0[n] = src[n] * win[n];
@@ -150,8 +154,8 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 
 	case 2: // stereo
 		{
-			float * dest0 = dest[0];
-			float * dest1 = dest[1];
+			float * dest0 = dest[0] + destofs;
+			float * dest1 = dest[1] + destofs;
 			for(n = 0; n < len; n++)
 			{
 				dest0[n] = src[n*2 + 0] * win[n];
@@ -165,7 +169,7 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 		{
 			for(int ch = 0; ch < numch; ch++)
 			{
-				dest[ch][n] = *src * win[n];
+				dest[ch][n + destofs] = *src * win[n];
 				src ++;
 			}
 		}
@@ -181,19 +185,20 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 //! @param		src		ソース(複数)
 //! @param		win		窓関数
 //! @param		numch	チャンネル数
+//! @param		srcofs	srcの処理開始位置
 //! @param		len		処理するサンプル数
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
-void  RisaInterleaveOverlappingWindow(float * dest, const float * src,
-					float * win, int numch, size_t len)
+void  RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
+					float * win, int numch, size_t srcofs, size_t len)
 {
 	risse_size n;
 	switch(numch)
 	{
 	case 1: // mono
 		{
-			float * src0 = src[0];
+			const float * src0 = src[0] + srcofs;
 			for(n = 0; n < len; n++)
 			{
 				dest[n] += src0[n] * win[n];
@@ -203,8 +208,8 @@ void  RisaInterleaveOverlappingWindow(float * dest, const float * src,
 
 	case 2: // stereo
 		{
-			float * src0 = src[0];
-			float * src1 = src[1];
+			const float * src0 = src[0] + srcofs;
+			const float * src1 = src[1] + srcofs;
 			for(n = 0; n < len; n++)
 			{
 				dest[n*2 + 0] += src0[n] * win[n];
@@ -218,7 +223,7 @@ void  RisaInterleaveOverlappingWindow(float * dest, const float * src,
 		{
 			for(int ch = 0; ch < numch; ch++)
 			{
-				dest += src[ch][n] * win[n];
+				*dest += src[ch][n + srcofs] * win[n];
 				dest ++;
 			}
 		}

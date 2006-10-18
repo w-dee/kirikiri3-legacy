@@ -51,14 +51,14 @@ _ALIGN16(const float) RISA_V_2PI[4] = { pi_2, pi_2, pi_2, pi_2 };
 
 //---------------------------------------------------------------------------
 void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
-					float * win, int numch, size_t len)
+					float * win, int numch, size_t destofs, size_t len)
 {
 	risse_size n;
 	switch(numch)
 	{
 	case 1: // mono
 		{
-			float * dest0 = dest[0];
+			float * dest0 = dest[0] + destofs;
 			int condition = 
 				(RisaIsAlignedTo128bits(dest0) ? 0:4) + 
 				(RisaIsAlignedTo128bits(src)   ? 0:2) +
@@ -97,8 +97,8 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 
 	case 2: // stereo
 		{
-			float * dest0 = dest[0];
-			float * dest1 = dest[1];
+			float * dest0 = dest[0] + destofs;
+			float * dest1 = dest[1] + destofs;
 
 			int condition = 
 				( (RisaIsAlignedTo128bits(dest0)&&
@@ -161,7 +161,7 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 		{
 			for(int ch = 0; ch < numch; ch++)
 			{
-				dest[ch][n] = *src * win[n];
+				dest[ch][n + destofs] = *src * win[n];
 				src ++;
 			}
 		}

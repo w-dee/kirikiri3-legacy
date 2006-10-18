@@ -226,12 +226,13 @@ STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
 //! @param		src		ソース
 //! @param		win		窓関数
 //! @param		numch	チャンネル数
+//! @param		destofs	destの処理開始位置
 //! @param		len		処理するサンプル数
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
 void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
-					float * win, int numch, size_t len);
+					float * win, int numch, size_t destofs, size_t len);
 //---------------------------------------------------------------------------
 
 
@@ -241,19 +242,20 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 //! @param		src		ソース(複数)
 //! @param		win		窓関数
 //! @param		numch	チャンネル数
+//! @param		srcofs	srcの処理開始位置
 //! @param		len		処理するサンプル数
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
-void  RisaInterleaveOverlappingWindow(float * dest, const float * src,
-					float * win, int numch, size_t len)
+void  RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
+					float * win, int numch, size_t srcofs, size_t len)
 {
 	risse_size n;
 	switch(numch)
 	{
 	case 1: // mono
 		{
-			float * src0 = src[0];
+			const float * src0 = src[0] + srcofs;
 			for(n = 0; n < len; n++)
 			{
 				dest[n] += src0[n] * win[n];
@@ -263,8 +265,8 @@ void  RisaInterleaveOverlappingWindow(float * dest, const float * src,
 
 	case 2: // stereo
 		{
-			float * src0 = src[0];
-			float * src1 = src[1];
+			const float * src0 = src[0] + srcofs;
+			const float * src1 = src[1] + srcofs;
 			for(n = 0; n < len; n++)
 			{
 				dest[n*2 + 0] += src0[n] * win[n];
@@ -278,7 +280,7 @@ void  RisaInterleaveOverlappingWindow(float * dest, const float * src,
 		{
 			for(int ch = 0; ch < numch; ch++)
 			{
-				dest += src[ch][n] * win[n];
+				*dest += src[ch][n + srcofs] * win[n];
 				dest ++;
 			}
 		}

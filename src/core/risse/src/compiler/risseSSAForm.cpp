@@ -415,7 +415,7 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 			}
 		} while(true);
 
-		if(form = NULL)
+		if(form == NULL)
 		{
 			// break/continue できないようだ
 			eRisseCompileError::Throw(

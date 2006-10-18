@@ -11,6 +11,10 @@
 //! @brief 数学関数群
 //---------------------------------------------------------------------------
 
+#ifdef RISA_USE_SSE
+	#include "base/mathlib/opt_sse/MathAlgorithms_SSE.h"
+#else
+	#include "base/mathlib/opt_default/MathAlgorithms_Default.h"
+#endif
 
-#include "MathAlgorithms.h"
 

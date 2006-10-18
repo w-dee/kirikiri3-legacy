@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risa [りさ]		 alias 吉里吉里3 [kirikiri-3]
+	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
 	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
 
@@ -8,18 +8,8 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief 実数離散フーリエ変換
+//! @brief 数学関数群
 //---------------------------------------------------------------------------
-#ifndef REALFFT_H
-#define REALFFT_H
-
-/*
-	Real Discrete FFT package from
-		http://momonga.t.u-tokyo.ac.jp/~ooura/fft-j.html
-*/
 
 
-    void rdft(int, int, float *, int *, float *);
 
-
-#endif

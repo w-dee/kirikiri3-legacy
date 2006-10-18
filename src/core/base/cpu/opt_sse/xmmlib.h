@@ -43,6 +43,8 @@
 #ifndef _XMMLIB_H_INCLUDED
 #define _XMMLIB_H_INCLUDED
 
+#include "risse/include/risseTypes.h"
+
 #if	defined(__GNUC__)||defined(_MSC_VER)
 #else
 #error "Not supported System."
@@ -234,4 +236,16 @@ STIN float _mm_min_horz(__m128 x)
 }
 
 #endif /* (defined(__SSE__)&&defined(__GNUC__))||defined(_MSC_VER) */
+
+
+//! @brief 128ビット境界にポインタがアラインメントされているかどうか
+//! @param	p		ポインタ
+//! @return			128ビット境界にポインタがアラインメントされているかどうか
+inline bool RisaIsAlignedTo128bits(void * p)
+{
+	return !(reinterpret_cast<void*>(p) & 0xf);
+}
+
+
+
 #endif /* _XMMLIB_H_INCLUDED */

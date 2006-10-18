@@ -39,7 +39,7 @@ extern const float RISA_V_R_2PI[4] ;
 //! @note		精度はあまり良くない。10bitぐらい。 @r
 //!				原典: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
 //---------------------------------------------------------------------------
-static inline __m128 Risa_VFast_arctan2_F4_SSE(__m128 y, __m128 x)
+static inline __m128 RisaVFast_arctan2_F4_SSE(__m128 y, __m128 x)
 {
    float angle;
 
@@ -88,7 +88,7 @@ static inline __m128 Risa_VFast_arctan2_F4_SSE(__m128 y, __m128 x)
 //!				があるので注意すること。そのような場合は再びこれを呼び出して
 //!				丸めモードを再設定すること。
 //---------------------------------------------------------------------------
-STIN void Risa_SetRoundingModeToNearest_SSE()
+STIN void RisaSetRoundingModeToNearest_SSE()
 {
 	_MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
 }
@@ -100,7 +100,7 @@ STIN void Risa_SetRoundingModeToNearest_SSE()
 //! @note		原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf  @r
 //!				呼び出しに先立って Risa_SetRoundingModeToNearest_SSE を呼ぶこと。
 //---------------------------------------------------------------------------
-STIN void Risa_VFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
+STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 {
 	__m128 s1, s2, c1, c2, fixmag1;
 
@@ -190,7 +190,7 @@ STIN void Risa_VFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 //---------------------------------------------------------------------------
 //! @brief		Phase Wrapping(radianを-PI～PIにラップする) (4x float, SSE版)
 //---------------------------------------------------------------------------
-STIN __m128 Risa_Wrap_Pi_F4_SSE(__m128 v)
+STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
 {
 	v = _mm_add_ps(v, RISA_V_PI); // v += M_PI
 	__m128 v_quant = _mm_mul_ps(v, RISA_V_R_2PI); // v_quant = v / (2.0 * M_PI)
@@ -219,5 +219,73 @@ STIN __m128 Risa_Wrap_Pi_F4_SSE(__m128 v)
 //---------------------------------------------------------------------------
 
 
-#endif
 
+//---------------------------------------------------------------------------
+//! @brief		窓関数を適用しながらのインターリーブ解除
+//! @param		dest	格納先(複数)
+//! @param		src		ソース
+//! @param		win		窓関数
+//! @param		numch	チャンネル数
+//! @param		len		処理するサンプル数
+//!						(各チャンネルごとの数; 実際に処理されるサンプル
+//!						数の総計はlen*numchになる)
+//---------------------------------------------------------------------------
+void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
+					float * win, int numch, size_t len);
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		窓関数を適用しながらのインターリーブ+オーバーラッピング
+//! @param		dest	格納先
+//! @param		src		ソース(複数)
+//! @param		win		窓関数
+//! @param		numch	チャンネル数
+//! @param		len		処理するサンプル数
+//!						(各チャンネルごとの数; 実際に処理されるサンプル
+//!						数の総計はlen*numchになる)
+//---------------------------------------------------------------------------
+void  RisaInterleaveOverlappingWindow(float * dest, const float * src,
+					float * win, int numch, size_t len)
+{
+	risse_size n;
+	switch(numch)
+	{
+	case 1: // mono
+		{
+			float * src0 = src[0];
+			for(n = 0; n < len; n++)
+			{
+				dest[n] += src0[n] * win[n];
+			}
+		}
+		break;
+
+	case 2: // stereo
+		{
+			float * src0 = src[0];
+			float * src1 = src[1];
+			for(n = 0; n < len; n++)
+			{
+				dest[n*2 + 0] += src0[n] * win[n];
+				dest[n*2 + 1] += src1[n] * win[n];
+			}
+		}
+		break;
+
+	default: // generic
+		for(n = 0; n < len; n++)
+		{
+			for(int ch = 0; ch < numch; ch++)
+			{
+				dest += src[ch][n] * win[n];
+				dest ++;
+			}
+		}
+		break;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+#endif

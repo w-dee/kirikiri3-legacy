@@ -15,12 +15,12 @@ CPPFILES =
 
 ifdef USE_SSE
  CPPFILES += \
- 		opt_sse/RealFFT.cpp           \
- 		opt_sse/MathAlgorithms.cpp    
+ 		opt_sse/RealFFT_SSE.cpp           \
+ 		opt_sse/MathAlgorithms_SSE.cpp    
 else
  CPPFILES += \
- 		opt_default/RealFFT.cpp           \
- 		opt_default/MathAlgorithms.cpp    
+ 		opt_default/RealFFT_Default.cpp           \
+ 		opt_default/MathAlgorithms_Default.cpp    
 endif
 
 #-----------------------------------------

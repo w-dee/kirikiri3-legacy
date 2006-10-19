@@ -44,6 +44,7 @@
 #define _XMMLIB_H_INCLUDED
 
 #include "risse/include/risseTypes.h"
+#include <malloc.h>
 
 #if	defined(__GNUC__)||defined(_MSC_VER)
 #else
@@ -241,11 +242,37 @@ STIN float _mm_min_horz(__m128 x)
 //! @brief 128ビット境界にポインタがアラインメントされているかどうか
 //! @param	p		ポインタ
 //! @return			128ビット境界にポインタがアラインメントされているかどうか
-inline bool RisaIsAlignedTo128bits(void * p)
+inline bool RisaIsAlignedTo128bits(const void * p)
 {
-	return !(reinterpret_cast<void*>(p) & 0xf);
+	return !(reinterpret_cast<long>(p) & 0xf);
 }
 
+
+#ifdef __GNUC__
+// TODO: 64bitではここらへんどうなるんですかね
+
+
+//! @brief	スタックを128bit境界にあわせた上で指定された関数を呼び出す関数を生成するためのマクロ
+// alloca を用いると、コンパイラは -fomit-frame-pointer を指定されていても
+// フレームポインタを作らざるを得なくなる。
+// あとはスタックポインタを調整して目的の関数を呼び出す。
+// 目的の関数を呼び出す際にインライン展開されるとやっかいなため、
+// いったんもう一つのトランポリンを呼ぶ。
+// これらの処理のため、このマクロで生成された関数の呼び出しは少々高価
+// になるので注意すること。
+#define RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(rettype, funcname, args, callee, callee_args) \
+	__attribute__((noinline)) rettype funcname##_r args { return callee callee_args; }      \
+	__attribute__((noinline)) rettype funcname args {                                       \
+		alloca(1); asm __volatile__ ("andl $-16, %%esp" : : : "%esp" );              \
+		return funcname##_r callee_args; }
+
+#else
+	// おそらくコンパイラにあわせた実装が必要
+	#pragma XX Need compiler dependant implementation of stack alignment
+#define RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(rettype funcname, args, callee) \
+	rettype funcname args { return  funcname callee_args; }
+
+#endif
 
 
 #endif /* _XMMLIB_H_INCLUDED */

@@ -31,6 +31,9 @@ extern const float RISA_VFASTSINCOS_CC1[4] ;
 extern const float RISA_VFASTSINCOS_CC2[4] ;
 extern const float RISA_VFASTSINCOS_CC3[4] ;
 extern const float RISA_V_R_2PI[4] ;
+extern const float RISA_V_PI[4] ;
+extern const float RISA_V_2PI[4] ;
+
 //---------------------------------------------------------------------------
 
 
@@ -41,21 +44,19 @@ extern const float RISA_V_R_2PI[4] ;
 //---------------------------------------------------------------------------
 static inline __m128 RisaVFast_arctan2_F4_SSE(__m128 y, __m128 x)
 {
-   float angle;
-
-	__m128 abs_y = _mm_add_ps(_mm_and_ps(y, PABSMASK), RISA_VFASTATAN2_E);
+	__m128 abs_y = _mm_add_ps(_mm_and_ps(y, PM128(PABSMASK)), PM128(RISA_VFASTATAN2_E));
 //   float abs_y = fabs(y)+1e-10;     // kludge to prevent 0/0 condition
 
-	__m128 x_sign = _mm_and_ps(x, PCS_RRRR);// 0x80000000 if x < 0
-	__m128 x_mask = _mm_cmpgt_ps(x, PFV_0); // 0xffffffff if x > 0
+	__m128 x_sign = _mm_and_ps(x, PM128(PCS_RRRR));// 0x80000000 if x < 0
+	__m128 x_mask = _mm_cmpgt_ps(x, PM128(PFV_0)); // 0xffffffff if x > 0
 	__m128 abs_y2 = _mm_xor_ps(abs_y , x_sign);
-	__m128 abs_y1 = _mm_xor_ps(abs_y2, PCS_RRRR);
+	__m128 abs_y1 = _mm_xor_ps(abs_y2, PM128(PCS_RRRR));
 	__m128 r      = _mm_div_ps(_mm_add_ps(x, abs_y1), _mm_add_ps(x, abs_y2));
 	r             = _mm_xor_ps(r, x_sign);
 	__m128 coeff_1_or_2 = _mm_or_ps(
-		_mm_and_ps   (x_mask, RISA_VFASTATAN2_C1),
-		_mm_andnot_ps(x_mask, RISA_VFASTATAN2_C2));
-	__m128 angle  = _mm_sub_ps(coeff_1_or_2, _mm_mul_ps(RISA_VFASTATAN2_C1, r));
+		_mm_and_ps   (x_mask, PM128(RISA_VFASTATAN2_C1)),
+		_mm_andnot_ps(x_mask, PM128(RISA_VFASTATAN2_C2)));
+	__m128 angle  = _mm_sub_ps(coeff_1_or_2, _mm_mul_ps(PM128(RISA_VFASTATAN2_C1), r));
 /*
    if (x>=0)
    {
@@ -68,7 +69,7 @@ static inline __m128 RisaVFast_arctan2_F4_SSE(__m128 y, __m128 x)
       angle = coeff_2 - coeff_1 * r;
    }
 */
-	__m128 y_sign = _mm_and_ps(y, PCS_RRRR);
+	__m128 y_sign = _mm_and_ps(y, PM128(PCS_RRRR));
 	return _mm_xor_ps(angle, y_sign);
 /*
    if (y < 0)
@@ -104,13 +105,13 @@ STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 {
 	__m128 s1, s2, c1, c2, fixmag1;
 
-	__m128 x1 = _mm_mul_ps(v, RISA_V_R_2PI);
+	__m128 x1 = _mm_mul_ps(v, PM128(RISA_V_R_2PI));
 //	float x1=madd(v, (float)(1.0/(2.0*3.1415926536)), (float)(0.0));
 
 	/* q1=x/2pi reduced onto (-0.5,0.5), q2=q1**2 */
 	__m64 r0 = _mm_cvt_ps2pi(x1);
 	__m64 r1 = _mm_cvt_ps2pi(_mm_movehl_ps(x1, x1));
-	__m128 q1;
+	__m128 q1, q2;
 	q1 = _mm_movelh_ps(_mm_cvtpi32_ps(q1, r0), _mm_cvtpi32_ps(q1, r1));
 	q1 = _mm_sub_ps(x1, q1);
 
@@ -119,11 +120,11 @@ STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 //	float q1=nmsub(round(x1), (float)(1.0), x1); // q1 = x1 - round(x1)
 //	float q2=madd(q1, q1, (float)(0.0));
 
-	s1 = _mm_add_ps(_mm_mul_ps(q2, RISA_VFASTSINCOS_SS4), RISA_VFASTSINCOS_SS3);
+	s1 = _mm_add_ps(_mm_mul_ps(q2, PM128(RISA_VFASTSINCOS_SS4)), PM128(RISA_VFASTSINCOS_SS3));
 		// s1 = (q2 * ss4 + ss3)
-	s1 = _mm_add_ps(_mm_mul_ps(s1, q2), RISA_VFASTSINCOS_SS2);
+	s1 = _mm_add_ps(_mm_mul_ps(s1, q2), PM128(RISA_VFASTSINCOS_SS2));
 		// s1 = (q2 * (q2 * ss4 + ss3) + ss2)
-	s1 = _mm_add_ps(_mm_mul_ps(s1, q2), RISA_VFASTSINCOS_SS1);
+	s1 = _mm_add_ps(_mm_mul_ps(s1, q2), PM128(RISA_VFASTSINCOS_SS1));
 		// s1 = (q2 * (q2 * (q2 * ss4 + ss3) + ss2) + ss1)
 	s1 = _mm_mul_ps(s1, q1);
 
@@ -138,11 +139,11 @@ STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 //						(float)(0.0));
 
 
-	c1 = _mm_add_ps(_mm_mul_ps(q2, RISA_VFASTSINCOS_CC3), RISA_VFASTSINCOS_CC2);
+	c1 = _mm_add_ps(_mm_mul_ps(q2, PM128(RISA_VFASTSINCOS_CC3)), PM128(RISA_VFASTSINCOS_CC2));
 		// c1 = (q2 * cc3 + cc2)
-	c1 = _mm_add_ps(_mm_mul_ps(c1, q2), RISA_VFASTSINCOS_CC1);
+	c1 = _mm_add_ps(_mm_mul_ps(c1, q2), PM128(RISA_VFASTSINCOS_CC1));
 		// c1 =  (q2 * (q2 * cc3 + cc2) + cc1 )
-	c1 = _mm_add_ps(_mm_mul_ps(c1, q2), PFV_1);
+	c1 = _mm_add_ps(_mm_mul_ps(c1, q2), PM128(PFV_1));
 //	c1= (q2 *  (q2 * (q2 * cc3 + cc2) + cc1 ) + 1.0);
 //	c1= madd(q2,
 //			madd(q2,
@@ -152,9 +153,9 @@ STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 //		(float)(1.0));
 
 	/* now, do one out of two angle-doublings to get sin & cos theta/2 */
-	c2 = _mm_sub_ps( _mm_mul_ps(c1, c1), _mm_mul_ps(s1, s1);
+	c2 = _mm_sub_ps( _mm_mul_ps(c1, c1), _mm_mul_ps(s1, s1));
 //	c2=nmsub(s1, s1, madd(c1, c1, (float)(0.0))); // c2 = (c1*c1) - (s1*s1)
-	s2 = _mm_mul_ps(_mm_mul_ps(s1, c1), PFV_2);
+	s2 = _mm_mul_ps(_mm_mul_ps(s1, c1), PM128(PFV_2));
 //	s2=madd((float)(2.0), madd(s1, c1, (float)(0.0)), (float)(0.0)); // s2=2*s1*c1
 
 	/* now, cheat on the correction for magnitude drift...
@@ -170,12 +171,12 @@ STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 	/* this works with properly normalized sine-cosine functions, but un-normalized is more */
 	__m128 c2_c2 = _mm_mul_ps(c2, c2);
 	__m128 s2_s2 = _mm_mul_ps(s2, s2);
-	fixmag1 = _mm_sub_ps(_mm_sub_ps(PFV_2, c2_c2), s2_s2);
+	fixmag1 = _mm_sub_ps(_mm_sub_ps(PM128(PFV_2), c2_c2), s2_s2);
 //	fixmag1=nmsub(s2,s2, nmsub(c2, c2, (float)(2.0))); // fixmag1 = ( 2.0 - c2*c2 ) - s2*s2
 
 	c1 = _mm_sub_ps(c2_c2, s2_s2);
 //	c1=nmsub(s2, s2, madd(c2, c2, (float)(0.0))); // c1 = c2*c2 - s2*s2
-	s1 = _mm_mul_ps(_mm_mul_ps(s2, c2), PFV_2);
+	s1 = _mm_mul_ps(_mm_mul_ps(s2, c2), PM128(PFV_2));
 //	s1=madd((float)(2.0), madd(s2, c2, (float)(0.0)), (float)(0.0));
 	cos = _mm_mul_ps(c1, fixmag1);
 //	cos=madd(c1, fixmag1, (float)(0.0));
@@ -192,8 +193,8 @@ STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 //---------------------------------------------------------------------------
 STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
 {
-	v = _mm_add_ps(v, RISA_V_PI); // v += M_PI
-	__m128 v_quant = _mm_mul_ps(v, RISA_V_R_2PI); // v_quant = v / (2.0 * M_PI)
+	v = _mm_add_ps(v, PM128(RISA_V_PI)); // v += M_PI
+	__m128 v_quant = _mm_mul_ps(v, PM128(RISA_V_R_2PI)); // v_quant = v / (2.0 * M_PI)
 
 	// v_quantを小数点以下を切り捨てて整数に変換
 	__m64 q0 = _mm_cvtt_ps2pi(v_quant); 
@@ -205,7 +206,7 @@ STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
 
 	// それらを実数に戻し、2 * M_PI をかける
 	v_quant = _mm_movelh_ps(_mm_cvtpi32_ps(v, q0), _mm_cvtpi32_ps(v, q1));
-	v_quant = _mm_mul_ps(v_quant, RISA_V_2PI);
+	v_quant = _mm_mul_ps(v_quant, PM128(RISA_V_2PI));
 
 	// それを v から引く
 	v = _mm_sub_ps(v, v_quant);
@@ -214,7 +215,7 @@ STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
 	_mm_empty();
 
 	// 最初に足した M_PI を引いて戻る
-	return _mm_sub_ps(v, RISA_V_PI); // v -= M_PI
+	return _mm_sub_ps(v, PM128(RISA_V_PI)); // v -= M_PI
 }
 //---------------------------------------------------------------------------
 

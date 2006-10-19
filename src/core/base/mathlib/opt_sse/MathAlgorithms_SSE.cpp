@@ -10,6 +10,7 @@
 //! @file
 //! @brief 数学関数群
 //---------------------------------------------------------------------------
+#include "prec.h"
 #include "base/cpu/opt_sse/xmmlib.h"
 #include <math.h>
 
@@ -50,7 +51,7 @@ _ALIGN16(const float) RISA_V_2PI[4] = { pi_2, pi_2, pi_2, pi_2 };
 
 
 //---------------------------------------------------------------------------
-void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
+static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 					float * win, int numch, size_t destofs, size_t len)
 {
 	risse_size n;
@@ -68,8 +69,8 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 			case cond: \
 				for(n = 0; n < len - 7; n += 8) \
 				{ \
-					destf(dest0+n  , srcf(_mm_load_ps(src+n  ), winf(win+n  ))); \
-					destf(dest0+n+4, srcf(_mm_load_ps(src+n+4), winf(win+n+4))); \
+					destf(dest0+n  , _mm_mul_ps(srcf(src+n  ), winf(win+n  ))); \
+					destf(dest0+n+4, _mm_mul_ps(srcf(src+n+4), winf(win+n+4))); \
 				} \
 				break
 
@@ -90,7 +91,7 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 
 			for(     ; n < len; n++)
 			{
-				dest[n] += src0[n] * win[n];
+				dest0[n] += src[n] * win[n];
 			}
 		}
 		break;
@@ -168,5 +169,12 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 		break;
 	}
 }
+
+
+//---------------------------------------------------------------------------
+RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
+	void, RisaDeinterleaveApplyingWindow, (float * dest[], const float * src,
+					float * win, int numch, size_t destofs, size_t len),
+	_RisaDeinterleaveApplyingWindow, (dest, src, win, numch, destofs, len) )
 //---------------------------------------------------------------------------
 

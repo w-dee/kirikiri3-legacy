@@ -45,10 +45,10 @@ STIN void cft1st(int n, float *a, float *w)
 	int		j, k1, k2;
 	
 	__m128	XMM0, XMM1, XMM2, XMM3, XMM4, XMM5;
-#pragma warning(disable : 592)
+//#pragma warning(disable : 592)
 	XMM0	 = _mm_loadl_pi(XMM0, (__m64*)(a   ));
 	XMM2	 = _mm_loadl_pi(XMM2, (__m64*)(a+ 2));
-#pragma warning(default : 592)
+//#pragma warning(default : 592)
 	XMM0	 = _mm_loadh_pi(XMM0, (__m64*)(a+ 4));
 	XMM2	 = _mm_loadh_pi(XMM2, (__m64*)(a+ 6));
 	XMM1	 = XMM0;
@@ -101,10 +101,10 @@ STIN void cft1st(int n, float *a, float *w)
 	for (j = 16; j < n; j += 16) {
 		k1		+= 2;
 		k2		 = 2 * k1;
-#pragma warning(disable : 592)
+//#pragma warning(disable : 592)
 		XMM4	 = _mm_loadh_pi(XMM4, (__m64*)(w+k1	 ));
 		XMM5	 = _mm_loadl_pi(XMM5, (__m64*)(w+k2	 ));
-#pragma warning(default : 592)
+//#pragma warning(default : 592)
 		XMM0	 = XMM5;
 		XMM1	 = XMM4;
 		XMM0	 = _mm_shuffle_ps(XMM0, XMM0, _MM_SHUFFLE(0,1,0,1));
@@ -506,12 +506,12 @@ STIN void bitrv2(int n, int *ip, float *a)
 				__m128	X0, Y0, X1, Y1;
 				j1 = 2 * j + ip[k];
 				k1 = 2 * k + ip[j];
-#pragma warning(disable : 592)
+//#pragma warning(disable : 592)
 				X0	 = _mm_loadl_pi(X0, (__m64*)(a+j1	  ));
 				Y0	 = _mm_loadl_pi(Y0, (__m64*)(a+k1	  ));
 				X1	 = _mm_loadl_pi(X1, (__m64*)(a+j1+m2*2));
 				Y1	 = _mm_loadl_pi(Y1, (__m64*)(a+k1+m2  ));
-#pragma warning(default : 592)
+//#pragma warning(default : 592)
 				X0	 = _mm_loadh_pi(X0, (__m64*)(a+j1+m2  ));
 				Y0	 = _mm_loadh_pi(Y0, (__m64*)(a+k1+m2*2));
 				X1	 = _mm_loadh_pi(X1, (__m64*)(a+j1+m2*3));
@@ -542,10 +542,10 @@ STIN void bitrv2(int n, int *ip, float *a)
 				__m128	X,	Y;
 				j1 = 2 * j + ip[k];
 				k1 = 2 * k + ip[j];
-#pragma warning(disable : 592)
+//#pragma warning(disable : 592)
 				X	 = _mm_loadl_pi(X, (__m64*)(a+j1   ));
 				Y	 = _mm_loadl_pi(Y, (__m64*)(a+k1   ));
-#pragma warning(default : 592)
+//#pragma warning(default : 592)
 				X	 = _mm_loadh_pi(X, (__m64*)(a+j1+m2));
 				Y	 = _mm_loadh_pi(Y, (__m64*)(a+k1+m2));
 				_mm_storel_pi((__m64*)(a+k1	  ), X);
@@ -615,7 +615,7 @@ STIN void cftfsub(int n, float *a, float *w)
 	} else {
 		for (j = 0; j < l; j += 8)
 		{
-			__m128	XMM0, XMM1, XMM2, XMM3, XMM4, XMM5;
+			__m128	XMM0, XMM1, XMM2, XMM3;
 			j1 = j + l;
 
 #if	defined(__GNUC__)
@@ -679,9 +679,9 @@ STIN void rftfsub(int n, float *a, int nc, float *c)
 		k	 = n - j;
 		XMM0	 = _mm_load_ss(PFV_0P5);
 		XMM1	 = _mm_load_ss(c+kk	  );
-#pragma warning(disable : 592)
+//#pragma warning(disable : 592)
 		XMM6	 = _mm_loadl_pi(XMM6, (__m64*)(a+k+2));
-#pragma warning(default : 592)
+//#pragma warning(default : 592)
 		XMM2	 = XMM0;
 		XMM3	 = _mm_load_ss(c+kk+ks);
 		XMM4	 = _mm_load_ss(c+nc-kk	 );
@@ -717,7 +717,7 @@ STIN void cftbsub(int n, float *a, float *w)
 	void cft1st(int n, float *a, float *w);
 	void cftmdl(int n, int l, float *a, float *w);
 	int j, j1, j2, j3, l;
-	float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
+	float x0r, x0i;
 	
 	l = 2;
 	if (n > 8) {
@@ -822,7 +822,7 @@ STIN void cftbsub(int n, float *a, float *w)
 
 }
 
-void rftbsub(int n, float *a, int nc, float *c)
+static void rftbsub(int n, float *a, int nc, float *c)
 {
 	int j, k, kk, ks, m;
 	float wkr, wki, xr, xi, yr, yi;
@@ -851,68 +851,6 @@ void rftbsub(int n, float *a, int nc, float *c)
 	}
 	a[m + 1] = -a[m + 1];
 }
-
-
-void rdft(int n, int isgn, float *a, int *ip, float *w)
-{
-	void _rdft(int n, int isgn, float *a, int *ip, float *w);
-	// このdummyでスタックフレームが作られることを保証する
-	// もしかしたら -fomit-framepointers がついているとうまくいかないかもしれない
-	volatile long dummy = 0;
-	// スタックを調整
-	asm __volatile__ ("andl $0xfffffff0, %%esp" : : : "%esp" );
-	// 本来の関数を呼び出す
-	_rdft(n, isgn, a, ip, w);
-}
-
-void _rdft(int n, int isgn, float *a, int *ip, float *w)
-{
-	void makewt(int nw, int *ip, float *w);
-	void makect(int nc, int *ip, float *c);
-	void bitrv2(int n, int *ip, float *a);
-	void cftfsub(int n, float *a, float *w);
-	void cftbsub(int n, float *a, float *w);
-	void rftfsub(int n, float *a, int nc, float *c);
-	void rftbsub(int n, float *a, int nc, float *c);
-	int nw, nc;
-	float xi;
-	
-	nw = ip[0];
-	if (n > (nw << 2)) {
-		nw = n >> 2;
-		makewt(nw, ip, w);
-	}
-	nc = ip[1];
-	if (n > (nc << 2)) {
-		nc = n >> 2;
-		makect(nc, ip, w + nw);
-	}
-	if (isgn >= 0) {
-		if (n > 4) {
-			bitrv2(n, ip + 2, a);
-			cftfsub(n, a, w);
-			rftfsub(n, a, nc, w + nw);
-		} else if (n == 4) {
-			cftfsub(n, a, w);
-		}
-		xi = a[0] - a[1];
-		a[0] += a[1];
-		a[1] = xi;
-	} else {
-		a[1] = 0.5 * (a[0] - a[1]);
-		a[0] -= a[1];
-		if (n > 4) {
-			rftbsub(n, a, nc, w + nw);
-			bitrv2(n, ip + 2, a);
-			cftbsub(n, a, w);
-		} else if (n == 4) {
-			cftfsub(n, a, w);
-		}
-	}
-}
-
-
-/* -------- initializing routines -------- */
 
 
 #include <math.h>
@@ -964,6 +902,52 @@ void makect(int nc, int *ip, float *c)
 		}
 	}
 }
+
+
+static void _rdft(int n, int isgn, float *a, int *ip, float *w)
+{
+	int nw, nc;
+	float xi;
+
+	nw = ip[0];
+	if (n > (nw << 2)) {
+		nw = n >> 2;
+		makewt(nw, ip, w);
+	}
+	nc = ip[1];
+	if (n > (nc << 2)) {
+		nc = n >> 2;
+		makect(nc, ip, w + nw);
+	}
+	if (isgn >= 0) {
+		if (n > 4) {
+			bitrv2(n, ip + 2, a);
+			cftfsub(n, a, w);
+			rftfsub(n, a, nc, w + nw);
+		} else if (n == 4) {
+			cftfsub(n, a, w);
+		}
+		xi = a[0] - a[1];
+		a[0] += a[1];
+		a[1] = xi;
+	} else {
+		a[1] = 0.5 * (a[0] - a[1]);
+		a[0] -= a[1];
+		if (n > 4) {
+			rftbsub(n, a, nc, w + nw);
+			bitrv2(n, ip + 2, a);
+			cftbsub(n, a, w);
+		} else if (n == 4) {
+			cftfsub(n, a, w);
+		}
+	}
+}
+
+RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
+	void, rdft, (int n, int isgn, float *a, int *ip, float *w),
+	_rdft, (n, isgn, a, ip, w) )
+
+
 
 
 

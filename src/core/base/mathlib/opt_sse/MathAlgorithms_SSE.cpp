@@ -75,17 +75,18 @@ static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 				break
 
 			// それぞれのアラインメントに応じた処理を行う
-			switch(condition)
-			{
-				R(0, _mm_store_ps , _mm_load_ps , _mm_load_ps );
-				R(1, _mm_store_ps , _mm_load_ps , _mm_loadu_ps);
-				R(2, _mm_store_ps , _mm_loadu_ps, _mm_load_ps );
-				R(3, _mm_store_ps , _mm_loadu_ps, _mm_loadu_ps);
-				R(4, _mm_storeu_ps, _mm_load_ps , _mm_load_ps );
-				R(5, _mm_storeu_ps, _mm_load_ps , _mm_loadu_ps);
-				R(6, _mm_storeu_ps, _mm_loadu_ps, _mm_load_ps );
-				R(7, _mm_storeu_ps, _mm_loadu_ps, _mm_loadu_ps);
-			}
+			if(len >= 8)
+				switch(condition)
+				{
+					R(0, _mm_store_ps , _mm_load_ps , _mm_load_ps );
+					R(1, _mm_store_ps , _mm_load_ps , _mm_loadu_ps);
+					R(2, _mm_store_ps , _mm_loadu_ps, _mm_load_ps );
+					R(3, _mm_store_ps , _mm_loadu_ps, _mm_loadu_ps);
+					R(4, _mm_storeu_ps, _mm_load_ps , _mm_load_ps );
+					R(5, _mm_storeu_ps, _mm_load_ps , _mm_loadu_ps);
+					R(6, _mm_storeu_ps, _mm_loadu_ps, _mm_load_ps );
+					R(7, _mm_storeu_ps, _mm_loadu_ps, _mm_loadu_ps);
+				}
 
 #undef R
 
@@ -125,29 +126,20 @@ static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 				} \
 				break
 
-			switch(condition)
-			{
-				R(0, _mm_store_ps , _mm_load_ps , _mm_load_ps );
-				R(1, _mm_store_ps , _mm_load_ps , _mm_loadu_ps);
-				R(2, _mm_store_ps , _mm_loadu_ps, _mm_load_ps );
-				R(3, _mm_store_ps , _mm_loadu_ps, _mm_loadu_ps);
-				R(4, _mm_storeu_ps, _mm_load_ps , _mm_load_ps );
-				R(5, _mm_storeu_ps, _mm_load_ps , _mm_loadu_ps);
-				R(6, _mm_storeu_ps, _mm_loadu_ps, _mm_load_ps );
-				R(7, _mm_storeu_ps, _mm_loadu_ps, _mm_loadu_ps);
-			}
+			if(len >= 4)
+				switch(condition)
+				{
+					R(0, _mm_store_ps , _mm_load_ps , _mm_load_ps );
+					R(1, _mm_store_ps , _mm_load_ps , _mm_loadu_ps);
+					R(2, _mm_store_ps , _mm_loadu_ps, _mm_load_ps );
+					R(3, _mm_store_ps , _mm_loadu_ps, _mm_loadu_ps);
+					R(4, _mm_storeu_ps, _mm_load_ps , _mm_load_ps );
+					R(5, _mm_storeu_ps, _mm_load_ps , _mm_loadu_ps);
+					R(6, _mm_storeu_ps, _mm_loadu_ps, _mm_load_ps );
+					R(7, _mm_storeu_ps, _mm_loadu_ps, _mm_loadu_ps);
+				}
 
 #undef R
-/*
-				dest0[n  ] = src[n*2+0] * win[n  ];
-				dest1[n  ] = src[n*2+1] * win[n  ];
-				dest0[n+1] = src[n*2+2] * win[n+1];
-				dest1[n+1] = src[n*2+3] * win[n+1];
-				dest0[n+2] = src[n*2+4] * win[n+2];
-				dest1[n+2] = src[n*2+5] * win[n+2];
-				dest0[n+3] = src[n*2+6] * win[n+3];
-				dest1[n+3] = src[n*2+7] * win[n+3];
-*/
 
 			for(     ; n < len; n++)
 			{
@@ -169,6 +161,7 @@ static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 		break;
 	}
 }
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -177,4 +170,125 @@ RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
 					float * win, int numch, size_t destofs, size_t len),
 	_RisaDeinterleaveApplyingWindow, (dest, src, win, numch, destofs, len) )
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+static void  _RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
+					float * win, int numch, size_t srcofs, size_t len)
+{
+	risse_size n;
+	switch(numch)
+	{
+	case 1: // mono
+		{
+			const float * src0 = src[0] + srcofs;
+
+			int condition = 
+				(RisaIsAlignedTo128bits(dest)  ? 0:4) + 
+				(RisaIsAlignedTo128bits(src0)  ? 0:2) +
+				(RisaIsAlignedTo128bits(win)   ? 0:1 );
+
+#define R(cond, destf, destlf, srcf, winf) \
+			case cond: \
+				for(n = 0; n < len - 7; n += 8) \
+				{ \
+					destf(dest+n  , _mm_add_ps(_mm_mul_ps(srcf(src0+n  ), winf(win+n  )), destlf(dest+n  ))); \
+					destf(dest+n+4, _mm_add_ps(_mm_mul_ps(srcf(src0+n+4), winf(win+n+4)), destlf(dest+n+4))); \
+				} \
+				break
+
+			if(len >= 8)
+				switch(condition)
+				{
+					R(0, _mm_store_ps , _mm_load_ps ,_mm_load_ps , _mm_load_ps );
+					R(1, _mm_store_ps , _mm_load_ps ,_mm_load_ps , _mm_loadu_ps);
+					R(2, _mm_store_ps , _mm_load_ps ,_mm_loadu_ps, _mm_load_ps );
+					R(3, _mm_store_ps , _mm_load_ps ,_mm_loadu_ps, _mm_loadu_ps);
+					R(4, _mm_storeu_ps, _mm_loadu_ps,_mm_load_ps , _mm_load_ps );
+					R(5, _mm_storeu_ps, _mm_loadu_ps,_mm_load_ps , _mm_loadu_ps);
+					R(6, _mm_storeu_ps, _mm_loadu_ps,_mm_loadu_ps, _mm_load_ps );
+					R(7, _mm_storeu_ps, _mm_loadu_ps,_mm_loadu_ps, _mm_loadu_ps);
+				}
+#undef R
+			for(     ; n < len; n++)
+			{
+				dest[n] += src0[n] * win[n];
+			}
+		}
+		break;
+
+	case 2: // stereo
+		{
+			const float * src0 = src[0] + srcofs;
+			const float * src1 = src[1] + srcofs;
+
+			int condition = 
+				(RisaIsAlignedTo128bits(dest)  ? 0:4) + 
+				((RisaIsAlignedTo128bits(src0) &&
+				  RisaIsAlignedTo128bits(src1))? 0:2) +
+				(RisaIsAlignedTo128bits(win)   ? 0:1 );
+
+#define R(cond, destf, destlf, srcf, winf) \
+			case cond: \
+				for(n = 0; n < len - 3; n += 4) \
+				{ \
+					__m128 src0_3210  = srcf(src0 + n);        \
+					__m128 src1_3210  = srcf(src1 + n);        \
+					__m128 win3210    = winf(win  + n);        \
+					__m128 dest6420_a = src0_3210 * win3210;   \
+					__m128 dest7531_a = src1_3210 * win3210;   \
+					__m128 dest3120_a = _mm_movelh_ps(dest6420_a, dest7531_a);  \
+					__m128 dest6475_a = _mm_movehl_ps(dest6420_a, dest7531_a);  \
+					__m128 dest3210_a = _mm_shuffle_ps(dest3120_a, dest3120_a, _MM_SHUFFLE(3,1,2,0)); \
+					__m128 dest7654_a = _mm_shuffle_ps(dest6475_a, dest6475_a, _MM_SHUFFLE(1,3,0,2)); \
+					destf(dest+n*2  , _mm_add_ps(destlf(dest+n*2  ), dest3210_a)); \
+					destf(dest+n*2+4, _mm_add_ps(destlf(dest+n*2+4), dest7654_a)); \
+				} \
+				break
+
+			if(len >= 4)
+				switch(condition)
+				{
+					R(0, _mm_store_ps , _mm_load_ps ,_mm_load_ps , _mm_load_ps );
+					R(1, _mm_store_ps , _mm_load_ps ,_mm_load_ps , _mm_loadu_ps);
+					R(2, _mm_store_ps , _mm_load_ps ,_mm_loadu_ps, _mm_load_ps );
+					R(3, _mm_store_ps , _mm_load_ps ,_mm_loadu_ps, _mm_loadu_ps);
+					R(4, _mm_storeu_ps, _mm_loadu_ps,_mm_load_ps , _mm_load_ps );
+					R(5, _mm_storeu_ps, _mm_loadu_ps,_mm_load_ps , _mm_loadu_ps);
+					R(6, _mm_storeu_ps, _mm_loadu_ps,_mm_loadu_ps, _mm_load_ps );
+					R(7, _mm_storeu_ps, _mm_loadu_ps,_mm_loadu_ps, _mm_loadu_ps);
+				}
+
+#undef R
+
+			for(    ; n < len; n++)
+			{
+				dest[n*2 + 0] += src0[n] * win[n];
+				dest[n*2 + 1] += src1[n] * win[n];
+			}
+		}
+		break;
+
+	default: // generic
+		for(n = 0; n < len; n++)
+		{
+			for(int ch = 0; ch < numch; ch++)
+			{
+				*dest += src[ch][n + srcofs] * win[n];
+				dest ++;
+			}
+		}
+		break;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
+	void, RisaInterleaveOverlappingWindow, (float * dest, const float * const * src,
+					float * win, int numch, size_t srcofs, size_t len),
+	_RisaInterleaveOverlappingWindow, (dest, src, win, numch, srcofs, len) )
+//---------------------------------------------------------------------------
+
 

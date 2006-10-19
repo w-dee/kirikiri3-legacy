@@ -249,45 +249,7 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
 void  RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
-					float * win, int numch, size_t srcofs, size_t len)
-{
-	risse_size n;
-	switch(numch)
-	{
-	case 1: // mono
-		{
-			const float * src0 = src[0] + srcofs;
-			for(n = 0; n < len; n++)
-			{
-				dest[n] += src0[n] * win[n];
-			}
-		}
-		break;
-
-	case 2: // stereo
-		{
-			const float * src0 = src[0] + srcofs;
-			const float * src1 = src[1] + srcofs;
-			for(n = 0; n < len; n++)
-			{
-				dest[n*2 + 0] += src0[n] * win[n];
-				dest[n*2 + 1] += src1[n] * win[n];
-			}
-		}
-		break;
-
-	default: // generic
-		for(n = 0; n < len; n++)
-		{
-			for(int ch = 0; ch < numch; ch++)
-			{
-				*dest += src[ch][n + srcofs] * win[n];
-				dest ++;
-			}
-		}
-		break;
-	}
-}
+					float * win, int numch, size_t srcofs, size_t len);
 //---------------------------------------------------------------------------
 
 

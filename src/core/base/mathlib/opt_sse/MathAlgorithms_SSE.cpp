@@ -21,9 +21,9 @@
 #define vat_c2 (vat_c1*3)
 #define vat_e  1e-10
 
-_ALIGN16(const float) VFASTATAN2_C1[4] = { vat_c1, vat_c1, vat_c1, vat_c1 };
-_ALIGN16(const float) VFASTATAN2_C2[4] = { vat_c2, vat_c2, vat_c2, vat_c2 };
-_ALIGN16(const float) VFASTATAN2_E [4] = { vat_e,  vat_e,  vat_e,  vat_e  };
+_ALIGN16(const float) RISA_VFASTATAN2_C1[4] = { vat_c1, vat_c1, vat_c1, vat_c1 };
+_ALIGN16(const float) RISA_VFASTATAN2_C2[4] = { vat_c2, vat_c2, vat_c2, vat_c2 };
+_ALIGN16(const float) RISA_VFASTATAN2_E [4] = { vat_e,  vat_e,  vat_e,  vat_e  };
 
 
 #define ss1 1.5707963235

@@ -62,6 +62,8 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 	float * analwork = AnalWork[ch];
 	float * synthwork = SynthWork[ch];
 
+	__m128 over_sampling_radian_v = _mm_load1_ps(&OverSamplingRadian);
+
 	if(FrequencyScale != 1.0)
 	{
 		// ここでは 4 複素数 (8実数) ごとに処理を行う。
@@ -196,64 +198,42 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 		// 周波数軸方向にシフトがない場合
 		// ここでも 4 複素数 (8実数) ごとに処理を行う。
 
-
-		// 各フィルタバンドごとに変換
-		//-- 各フィルタバンドごとの音量と周波数を求める。
-		//-- FFT を実行すると各フィルタバンドごとの値が出てくるが、
-		//-- フィルタバンドというバンドパスフィルタの幅の中で
-		//-- 周波数のピークが本当はどこにあるのかは、前回計算した
-		//-- 位相との差をとってみないとわからない。
 		static float * tmpv = NULL;
 		if(!tmpv) tmpv = (float *)RisseAlignedAlloc(sizeof(float) * (framesize_d2), 4);
 		static float * magv = NULL;
 		if(!magv) magv = (float *)RisseAlignedAlloc(sizeof(float) * (framesize_d2), 4);
-		for(unsigned int i = 0; i < framesize_d2; i ++)
+		for(unsigned int i = 0; i < framesize_d2; i += 4)
 		{
-			// 直交座標系→極座標系
-			float re = analwork[i*2  ];
-			float im = analwork[i*2+1];
+			// インターリーブ解除 +  直交座標系→極座標系
+			__m128 aw3120 = *(__m128*)(analwork + i*2    );
+			__m128 aw7654 = *(__m128*)(analwork + i*2 + 4);
 
-			float mag = sqrt(re*re + im*im); // mag = √(re^2+im^2)
-			float ang = RisaVFast_arctan2(im, re); // ang = atan(im/re)
+			__m128 re3210 = _mm_shuffle_ps(aw3120, aw7654, _MM_SHUFFLE(2,0,2,0));
+			__m128 im3210 = _mm_shuffle_ps(aw3120, aw7654, _MM_SHUFFLE(3,1,3,1));
+
+			__m128 mag = _mm_sqrt_ps(re3210 * re3210 + im3210 * im3210);
+			__m128 ang = RisaVFast_arctan2_F4_SSE(im3210, re3210);
 
 			// 前回の位相との差をとる
-			// --注意: ここで使用しているFFTパッケージは、
-			// --      ソース先頭の参考資料などで示しているFFTと
-			// --      出力される複素数の虚数部の符号が逆なので
-			// --      (共役がでてくるので)注意が必要。ここでも符号を
-			// --      逆の物として扱う。
-			float tmp = LastAnalPhase[ch][i] - ang;
-			LastAnalPhase[ch][i] = ang; // 今回の値を保存
-
-			// phase shift
-			float phase_shift = i * OverSamplingRadian;
+			__m128 lastp = *(__m128*)(LastAnalPhase[ch] + i);
+			*(__m128*)(LastAnalPhase[ch] + i) = ang;
+			ang = lastp - ang;
 
 			// over sampling の影響を考慮する
-			// -- 通常、FrameSize で FFT の１周期であるところを、
-			// -- 精度を補うため、OverSampling 倍の周期で演算をしている。
-			// -- そのために生じる位相のずれを修正する。
-			tmp -= phase_shift;
+			__m128 i_3210;
+			i_3210 = _mm_cvtsi32_ss(i_3210, i);
+			i_3210 = _mm_shuffle_ps(i_3210, i_3210, _MM_SHUFFLE(0,0,0,0));
+			i_3210 = i_3210 + PM128(PFV_INIT);
 
-		tmpv[i] = tmp;
-		magv[i] = mag;
-		}
+			__m128 phase_shift = i_3210 * over_sampling_radian_v;
+			ang -= phase_shift;
 
-		for(unsigned int i = 0; i < framesize_d2; i += 8)
-		{
-			*(__m128*)(tmpv+i  ) = RisaWrap_Pi_F4_SSE(*(__m128*)(tmpv+i  ));
-			*(__m128*)(tmpv+i+4) = RisaWrap_Pi_F4_SSE(*(__m128*)(tmpv+i+4));
-/*
-		float tmp = tmpv[i];
-		float mag = magv[i];
 			// unwrapping をする
-			// -- tmp が -M_PI ～ +M_PI の範囲に収まるようにする
-			int rad_unit = static_cast<int>(tmp*(1.0/M_PI));
-			if (rad_unit >= 0) rad_unit += rad_unit&1;
-			else rad_unit -= rad_unit&1;
-			tmp -= M_PI*(double)rad_unit;
-		tmpv[i] = tmp;
-		magv[i] = mag;
-*/
+			ang = RisaWrap_Pi_F4_SSE(ang);
+
+
+			*(__m128*)(tmpv + i) = ang;
+			*(__m128*)(magv + i) = mag;
 		}
 
 //--

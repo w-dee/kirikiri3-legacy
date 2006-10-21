@@ -166,6 +166,7 @@ s = sign,  negative if this is 1, otherwise positive.
 
 
 } // namespace Risse
+using namespace Risse;
 
 #endif
 

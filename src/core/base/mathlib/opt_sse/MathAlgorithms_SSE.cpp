@@ -10,9 +10,12 @@
 //! @file
 //! @brief 数学関数群
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "base/cpu/opt_sse/xmmlib.h"
+#include "risse/include/risseTypes.h"
 #include <math.h>
+#include "base/cpu/opt_sse/xmmlib.h"
+#include "base/mathlib/opt_sse/MathAlgorithms_SSE.h"
+
+//---------------------------------------------------------------------------
 
 #define vat_c1 (M_PI /4)
 #define vat_c2 (vat_c1*3)
@@ -39,22 +42,23 @@ _ALIGN16(const float) RISA_VFASTSINCOS_CC1[4] = { cc1, cc1, cc1, cc1 };
 _ALIGN16(const float) RISA_VFASTSINCOS_CC2[4] = { cc2, cc2, cc2, cc2 };
 _ALIGN16(const float) RISA_VFASTSINCOS_CC3[4] = { cc3, cc3, cc3, cc3 };
 
+#define recppi (1.0/M_PI)
 #define recp2pi (1.0/(2.0 * M_PI))
 #define pi (M_PI)
 #define pi_2 (M_PI * 2.0)
+_ALIGN16(const float) RISA_V_R_PI[4] = { recppi, recppi, recppi, recppi };
 _ALIGN16(const float) RISA_V_R_2PI[4] = { recp2pi, recp2pi, recp2pi, recp2pi };
 _ALIGN16(const float) RISA_V_PI[4] = { pi, pi, pi, pi };
 _ALIGN16(const float) RISA_V_2PI[4] = { pi_2, pi_2, pi_2, pi_2 };
 
-
-
+_ALIGN16(const risse_uint32) RISA_V_I32_1[4] = { 1, 1, 1, 1 };
 
 
 //---------------------------------------------------------------------------
 static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 					float * win, int numch, size_t destofs, size_t len)
 {
-	risse_size n;
+	size_t n;
 	switch(numch)
 	{
 	case 1: // mono
@@ -176,7 +180,7 @@ RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
 static void  _RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
 					float * win, int numch, size_t srcofs, size_t len)
 {
-	risse_size n;
+	size_t n;
 	switch(numch)
 	{
 	case 1: // mono

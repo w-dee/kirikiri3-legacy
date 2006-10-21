@@ -19,10 +19,44 @@
 #include "risseUtils.h"
 
 
+/*
+	このソースコードでは詳しいアルゴリズムの説明は行わない。
+	基本的な流れはプレーンなC言語版と変わりないので、
+	../opt_default/PhaseVocoderDSP_default.cpp を参照のこと。
+*/
+
+//---------------------------------------------------------------------------
+//! @brief		スタックアラインメント調整用のダミークラス
+//---------------------------------------------------------------------------
+class tRisaPhaseVocoderDSP_SSE_Trampoline : public tRisaPhaseVocoderDSP
+{
+public:
+	tRisaPhaseVocoderDSP_SSE_Trampoline(unsigned int framesize, unsigned int oversamp,
+					unsigned int frequency, unsigned int channels) :
+				tRisaPhaseVocoderDSP(framesize, oversamp, frequency, channels) {;}
+
+
+	void __ProcessCore(int ch);
+
+	RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(void, _ProcessCore, (int ch),
+							__ProcessCore, (ch) )
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 void tRisaPhaseVocoderDSP::ProcessCore(int ch)
+{
+	// トランポリンを呼ぶ
+	// 結果的に tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore() が
+	// スタックのアラインメントを調整した上で呼ばれることになる
+	((tRisaPhaseVocoderDSP_SSE_Trampoline*)this)->_ProcessCore(ch);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 {
 	unsigned int framesize_d2 = FrameSize / 2;
 	float * analwork = AnalWork[ch];
@@ -30,12 +64,8 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 
 	if(FrequencyScale != 1.0)
 	{
-		// 各フィルタバンドごとに変換
-		//-- 各フィルタバンドごとの音量と周波数を求める。
-		//-- FFT を実行すると各フィルタバンドごとの値が出てくるが、
-		//-- フィルタバンドというバンドパスフィルタの幅の中で
-		//-- 周波数のピークが本当はどこにあるのかは、前回計算した
-		//-- 位相との差をとってみないとわからない。
+		// ここでは 4 複素数 (8実数) ごとに処理を行う。
+
 		for(unsigned int i = 0; i < framesize_d2; i ++)
 		{
 			// 直交座標系→極座標系
@@ -62,7 +92,10 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 
 			// unwrapping をする
 			// -- tmp が -M_PI ～ +M_PI の範囲に収まるようにする
-			tmp = RisaWrapPi_F1(tmp);
+			int rad_unit = static_cast<int>(tmp*(1.0/M_PI));
+			if (rad_unit >= 0) rad_unit += rad_unit&1;
+			else rad_unit -= rad_unit&1;
+			tmp -= M_PI*(double)rad_unit;
 
 			// -M_PI～+M_PIを-1.0～+1.0の変位に変換
 			tmp =  tmp * OverSamplingRadianRecp;
@@ -161,6 +194,8 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 	else
 	{
 		// 周波数軸方向にシフトがない場合
+		// ここでも 4 複素数 (8実数) ごとに処理を行う。
+
 
 		// 各フィルタバンドごとに変換
 		//-- 各フィルタバンドごとの音量と周波数を求める。
@@ -168,6 +203,10 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 		//-- フィルタバンドというバンドパスフィルタの幅の中で
 		//-- 周波数のピークが本当はどこにあるのかは、前回計算した
 		//-- 位相との差をとってみないとわからない。
+		static float * tmpv = NULL;
+		if(!tmpv) tmpv = (float *)RisseAlignedAlloc(sizeof(float) * (framesize_d2), 4);
+		static float * magv = NULL;
+		if(!magv) magv = (float *)RisseAlignedAlloc(sizeof(float) * (framesize_d2), 4);
 		for(unsigned int i = 0; i < framesize_d2; i ++)
 		{
 			// 直交座標系→極座標系
@@ -195,11 +234,37 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 			// -- そのために生じる位相のずれを修正する。
 			tmp -= phase_shift;
 
+		tmpv[i] = tmp;
+		magv[i] = mag;
+		}
+
+		for(unsigned int i = 0; i < framesize_d2; i += 8)
+		{
+			*(__m128*)(tmpv+i  ) = RisaWrap_Pi_F4_SSE(*(__m128*)(tmpv+i  ));
+			*(__m128*)(tmpv+i+4) = RisaWrap_Pi_F4_SSE(*(__m128*)(tmpv+i+4));
+/*
+		float tmp = tmpv[i];
+		float mag = magv[i];
 			// unwrapping をする
 			// -- tmp が -M_PI ～ +M_PI の範囲に収まるようにする
-			tmp = RisaWrapPi_F1(tmp);
+			int rad_unit = static_cast<int>(tmp*(1.0/M_PI));
+			if (rad_unit >= 0) rad_unit += rad_unit&1;
+			else rad_unit -= rad_unit&1;
+			tmp -= M_PI*(double)rad_unit;
+		tmpv[i] = tmp;
+		magv[i] = mag;
+*/
+		}
 
 //--
+		for(unsigned int i = 0; i < framesize_d2; i ++)
+		{
+		float tmp = tmpv[i];
+		float mag = magv[i];
+
+			// phase shift
+			float phase_shift = i * OverSamplingRadian;
+
 			// OverSampling による位相の補正
 			tmp += phase_shift;
 
@@ -211,7 +276,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 			// 前回の位相と加算する
 			// ここでも虚数部の符号が逆になるので注意
 			LastSynthPhase[ch][i] -= tmp;
-			ang = LastSynthPhase[ch][i];
+			float ang = LastSynthPhase[ch][i];
 
 			// 極座標系→直交座標系
 			float c, s;

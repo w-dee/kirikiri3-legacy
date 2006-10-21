@@ -15,6 +15,7 @@
 
 #include <math.h>
 
+#include "risse/include/risseTypes.h"
 #include "base/cpu/opt_sse/xmmlib.h"
 
 //---------------------------------------------------------------------------
@@ -30,9 +31,12 @@ extern const float RISA_VFASTSINCOS_SS4[4] ;
 extern const float RISA_VFASTSINCOS_CC1[4] ;
 extern const float RISA_VFASTSINCOS_CC2[4] ;
 extern const float RISA_VFASTSINCOS_CC3[4] ;
+extern const float RISA_V_R_PI[4] ;
 extern const float RISA_V_R_2PI[4] ;
 extern const float RISA_V_PI[4] ;
 extern const float RISA_V_2PI[4] ;
+extern const risse_uint32 RISA_V_I32_1[4];
+
 
 //---------------------------------------------------------------------------
 
@@ -193,20 +197,49 @@ STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 //---------------------------------------------------------------------------
 STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
 {
-	v = _mm_add_ps(v, PM128(RISA_V_PI)); // v += M_PI
-	__m128 v_quant = _mm_mul_ps(v, PM128(RISA_V_R_2PI)); // v_quant = v / (2.0 * M_PI)
+	// v を M_PI で割る
+	__m128 v_quant = _mm_mul_ps(v, PM128(RISA_V_R_PI)); // v_quant = v/M_PI
 
 	// v_quantを小数点以下を切り捨てて整数に変換
 	__m64 q0 = _mm_cvtt_ps2pi(v_quant); 
 	__m64 q1 = _mm_cvtt_ps2pi(_mm_movehl_ps(v_quant, v_quant));
 
-	// 負の場合はさらに1をひく (小数点以下切り捨てなので)
-	q0 = _mm_sub_pi32(q0, _mm_srli_pi32(q0, 31)); // q0 = q0 - 1 if q0 < 0
-	q1 = _mm_sub_pi32(q1, _mm_srli_pi32(q1, 31)); // q1 = q1 - 1 if q1 < 0
+	// 正の場合はv_quant&1を足し、負の場合は引く
+	// a = v_quant,    v_quant = a + ( (0 - (a&1)) & ((a>>31)|1) )
 
-	// それらを実数に戻し、2 * M_PI をかける
+	q0 =
+		_mm_add_pi32(
+			q0,
+			_mm_and_si64(
+				_mm_sub_pi32(
+					_mm_setzero_si64(),
+					_mm_and_si64(q0, PM64(RISA_V_I32_1))
+				),
+				_mm_or_si64(
+					_mm_srai_pi32(q0, 31),
+					PM64(RISA_V_I32_1)
+				)
+			)
+		);
+
+	q1 =
+		_mm_add_pi32(
+			q1,
+			_mm_and_si64(
+				_mm_sub_pi32(
+					_mm_setzero_si64(),
+					_mm_and_si64(q1, PM64(RISA_V_I32_1))
+				),
+				_mm_or_si64(
+					_mm_srai_pi32(q1, 31),
+					PM64(RISA_V_I32_1)
+				)
+			)
+		);
+
+	// それらを実数に戻し、M_PI をかける
 	v_quant = _mm_movelh_ps(_mm_cvtpi32_ps(v, q0), _mm_cvtpi32_ps(v, q1));
-	v_quant = _mm_mul_ps(v_quant, PM128(RISA_V_2PI));
+	v_quant = _mm_mul_ps(v_quant, PM128(RISA_V_PI));
 
 	// それを v から引く
 	v = _mm_sub_ps(v, v_quant);
@@ -214,8 +247,8 @@ STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
 	// MMX使い終わり
 	_mm_empty();
 
-	// 最初に足した M_PI を引いて戻る
-	return _mm_sub_ps(v, PM128(RISA_V_PI)); // v -= M_PI
+	// 戻る
+	return v;
 }
 //---------------------------------------------------------------------------
 

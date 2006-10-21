@@ -350,5 +350,4 @@ public:
 
 } // namespace Risse
 
-using namespace Risse;
 #endif

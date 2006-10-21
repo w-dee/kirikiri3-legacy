@@ -125,7 +125,7 @@ void tRisaSound::CallOnStatusChanged(tStatus status)
 }
 //---------------------------------------------------------------------------
 
-
+#include "sound/filter/phasevocoder/PhaseVocoder.h"
 //---------------------------------------------------------------------------
 void tRisaSound::Open(const ttstr & filename)
 {
@@ -142,8 +142,15 @@ void tRisaSound::Open(const ttstr & filename)
 		LoopManager =
 			boost::shared_ptr<tRisaWaveLoopManager>(new tRisaWaveLoopManager(Decoder));
 
+		// pv
+		boost::shared_ptr<tRisaPhaseVocoder> filter(new tRisaPhaseVocoder());
+		filter->SetOverSampling(16);
+		filter->SetFrameSize(4096);
+		filter->SetTimeScale(1.4);
+		filter->SetInput(LoopManager);
+
 		// バッファを作成
-		Buffer = boost::shared_ptr<tRisaALBuffer>(new tRisaALBuffer(LoopManager, true));
+		Buffer = boost::shared_ptr<tRisaALBuffer>(new tRisaALBuffer(filter, true));
 
 		// ソースを作成
 		Source = boost::shared_ptr<tRisaSoundALSource>(new tRisaSoundALSource(this, Buffer, LoopManager));

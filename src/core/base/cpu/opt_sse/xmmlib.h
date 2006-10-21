@@ -118,27 +118,27 @@ typedef union {
 
 #endif
 
-extern const unsigned long PCS_NNRN[4];
-extern const unsigned long PCS_NNRR[4];
-extern const unsigned long PCS_NRNN[4];
-extern const unsigned long PCS_NRNR[4];
-extern const unsigned long PCS_NRRN[4];
-extern const unsigned long PCS_NRRR[4];
-extern const unsigned long PCS_RNNN[4];
-extern const unsigned long PCS_RNRN[4];
-extern const unsigned long PCS_RNRR[4];
-extern const unsigned long PCS_RRNN[4];
-extern const unsigned long PCS_RNNR[4];
-extern const unsigned long PCS_RRRR[4];
-extern const unsigned long PCS_NNNR[4];
-extern const unsigned long PABSMASK[4];
-extern const unsigned long PSTARTEDGEM1[4];
-extern const unsigned long PSTARTEDGEM2[4];
-extern const unsigned long PSTARTEDGEM3[4];
-extern const unsigned long PENDEDGEM1[4];
-extern const unsigned long PENDEDGEM2[4];
-extern const unsigned long PENDEDGEM3[4];
-extern const unsigned long PMASKTABLE[16*4];
+extern const risse_uint32 PCS_NNRN[4];
+extern const risse_uint32 PCS_NNRR[4];
+extern const risse_uint32 PCS_NRNN[4];
+extern const risse_uint32 PCS_NRNR[4];
+extern const risse_uint32 PCS_NRRN[4];
+extern const risse_uint32 PCS_NRRR[4];
+extern const risse_uint32 PCS_RNNN[4];
+extern const risse_uint32 PCS_RNRN[4];
+extern const risse_uint32 PCS_RNRR[4];
+extern const risse_uint32 PCS_RRNN[4];
+extern const risse_uint32 PCS_RNNR[4];
+extern const risse_uint32 PCS_RRRR[4];
+extern const risse_uint32 PCS_NNNR[4];
+extern const risse_uint32 PABSMASK[4];
+extern const risse_uint32 PSTARTEDGEM1[4];
+extern const risse_uint32 PSTARTEDGEM2[4];
+extern const risse_uint32 PSTARTEDGEM3[4];
+extern const risse_uint32 PENDEDGEM1[4];
+extern const risse_uint32 PENDEDGEM2[4];
+extern const risse_uint32 PENDEDGEM3[4];
+extern const risse_uint32 PMASKTABLE[16*4];
 
 extern const float PFV_0[4];
 extern const float PFV_1[4];
@@ -148,10 +148,23 @@ extern const float PFV_8[4];
 extern const float PFV_INIT[4];
 extern const float PFV_0P5[4];
 
+extern const float RISA_VFASTATAN2_C1[4] ;
+extern const float RISA_VFASTATAN2_C2[4] ;
+extern const float RISA_VFASTATAN2_E [4] ;
+extern const float RISA_VFASTSINCOS_SS1[4] ;
+extern const float RISA_VFASTSINCOS_SS2[4] ;
+extern const float RISA_VFASTSINCOS_SS3[4] ;
+extern const float RISA_VFASTSINCOS_SS4[4] ;
+extern const float RISA_VFASTSINCOS_CC1[4] ;
+extern const float RISA_VFASTSINCOS_CC2[4] ;
+extern const float RISA_VFASTSINCOS_CC3[4] ;
+extern const float RISA_V_R_2PI[4] ;
+extern const float RISA_V_PI[4] ;
+extern const float RISA_V_2PI[4] ;
 
 STIN __m128 _mm_untnorm_ps(__m128 x)
 {
-	_SALIGN16(const unsigned long)	PIV0[4]	 = {
+	_SALIGN16(const risse_uint32)	PIV0[4]	 = {
 		0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000
 	};
 	register __m128 r;
@@ -244,7 +257,7 @@ STIN float _mm_min_horz(__m128 x)
 //! @return			128ビット境界にポインタがアラインメントされているかどうか
 inline bool RisaIsAlignedTo128bits(const void * p)
 {
-	return !(reinterpret_cast<long>(p) & 0xf);
+	return !(reinterpret_cast<risse_offset>(p) & 0xf);
 }
 
 

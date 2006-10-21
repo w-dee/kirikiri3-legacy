@@ -31,6 +31,15 @@ CPPFILES=\
 		filter/reverb/fv_revmodel.cpp              \
 		filter/reverb/Reverb.cpp                   
 
+ifdef USE_SSE
+ CPPFILES += \
+		filter/phasevocoder/opt_sse/PhaseVocoderDSP_sse.cpp
+else
+ CPPFILES += \
+		filter/phasevocoder/opt_default/PhaseVocoderDSP_default.cpp
+endif
+
+
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし
 #-----------------------------------------

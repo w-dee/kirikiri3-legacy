@@ -145,6 +145,13 @@ public:
 	//! @return		処理結果を表すenum
 	tStatus Process();
 
+	//! @brief		演算の根幹部分を処理する
+	//! @param		ch			処理を行うチャンネル
+	//! @note		ここの部分は各CPUごとに最適化されるため、
+	//!				実装は opt_default ディレクトリ下などに置かれる。
+	//!				(PhaseVocoderDSP.cpp内にはこれの実装はない)
+	void ProcessCore(int ch);
+
 private:
 	//! @brief		インターリーブを解除し、窓関数を掛けながら転送
 	//! @param		dest 転送先

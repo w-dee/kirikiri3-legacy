@@ -33,10 +33,10 @@ CPPFILES=\
 
 ifdef USE_SSE
  CPPFILES += \
-		filter/phasevocoder/opt_sse/PhaseVocoderDSP_sse.cpp
+		filter/phasevocoder/opt_sse/PhaseVocoderDSP_SSE.cpp
 else
  CPPFILES += \
-		filter/phasevocoder/opt_default/PhaseVocoderDSP_default.cpp
+		filter/phasevocoder/opt_default/PhaseVocoderDSP_Default.cpp
 endif
 
 

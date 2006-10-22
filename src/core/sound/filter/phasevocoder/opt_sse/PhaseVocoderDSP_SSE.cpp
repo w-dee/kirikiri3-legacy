@@ -198,11 +198,6 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 	{
 		// 周波数軸方向にシフトがない場合
 		// ここでも 4 複素数 (8実数) ごとに処理を行う。
-
-		static float * tmpv = NULL;
-		if(!tmpv) tmpv = (float *)RisseAlignedAlloc(sizeof(float) * (framesize_d2), 4);
-		static float * magv = NULL;
-		if(!magv) magv = (float *)RisseAlignedAlloc(sizeof(float) * (framesize_d2), 4);
 		for(unsigned int i = 0; i < framesize_d2; i += 4)
 		{
 			// インターリーブ解除 +  直交座標系→極座標系
@@ -243,22 +238,19 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 			ang = *(__m128*)(LastSynthPhase[ch] + i) - ang;
 			*(__m128*)(LastSynthPhase[ch] + i) = ang;
 
-			*(__m128*)(tmpv + i) = ang;
-			*(__m128*)(magv + i) = mag;
-		}
-
-//--
-		for(unsigned int i = 0; i < framesize_d2; i ++)
-		{
-		float ang = tmpv[i];
-		float mag = magv[i];
-
-
 			// 極座標系→直交座標系
-			float c, s;
-			RisaVFast_sincos(ang, s, c);
-			synthwork[i*2  ] = mag * c;
-			synthwork[i*2+1] = mag * s;
+			__m128 sin, cos;
+			RisaVFast_sincos_F4_SSE(ang, sin, cos);
+			re3210 = mag * cos;
+			im3210 = mag * sin;
+
+			// インターリーブ
+			__m128 im10re10 = _mm_movelh_ps(re3210, im3210);
+			__m128 im32re32 = _mm_movehl_ps(im3210, re3210);
+			__m128 im1re1im0re0 = _mm_shuffle_ps(im10re10, im10re10, _MM_SHUFFLE(3,1,2,0));
+			__m128 im3re3im2re2 = _mm_shuffle_ps(im32re32, im32re32, _MM_SHUFFLE(3,1,2,0));
+			*(__m128*)(synthwork + i*2    ) = im1re1im0re0;
+			*(__m128*)(synthwork + i*2 + 4) = im3re3im2re2;
 		}
 	}
 }

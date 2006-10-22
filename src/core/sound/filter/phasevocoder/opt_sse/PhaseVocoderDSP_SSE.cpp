@@ -62,6 +62,7 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 	float * analwork = AnalWork[ch];
 	float * synthwork = SynthWork[ch];
 
+	__m128 exact_time_scale = _mm_load1_ps(&ExactTimeScale);
 	__m128 over_sampling_radian_v = _mm_load1_ps(&OverSamplingRadian);
 
 	if(FrequencyScale != 1.0)
@@ -231,6 +232,16 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 			// unwrapping をする
 			ang = RisaWrap_Pi_F4_SSE(ang);
 
+			// OverSampling による位相の補正
+			ang += phase_shift;
+
+			// TimeScale による位相の補正
+			ang *= exact_time_scale;
+
+			// 前回の位相と加算する
+			// ここでも虚数部の符号が逆になるので注意
+			ang = *(__m128*)(LastSynthPhase[ch] + i) - ang;
+			*(__m128*)(LastSynthPhase[ch] + i) = ang;
 
 			*(__m128*)(tmpv + i) = ang;
 			*(__m128*)(magv + i) = mag;
@@ -239,24 +250,9 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 //--
 		for(unsigned int i = 0; i < framesize_d2; i ++)
 		{
-		float tmp = tmpv[i];
+		float ang = tmpv[i];
 		float mag = magv[i];
 
-			// phase shift
-			float phase_shift = i * OverSamplingRadian;
-
-			// OverSampling による位相の補正
-			tmp += phase_shift;
-
-			// TimeScale による位相の補正
-			// TimeScale で出力が時間軸方向にのびれば(あるいは縮めば)、
-			// 位相の差分もそれに伴ってのびる(縮む)
-			tmp *= ExactTimeScale;
-
-			// 前回の位相と加算する
-			// ここでも虚数部の符号が逆になるので注意
-			LastSynthPhase[ch][i] -= tmp;
-			float ang = LastSynthPhase[ch][i];
 
 			// 極座標系→直交座標系
 			float c, s;

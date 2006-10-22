@@ -186,15 +186,12 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 			// フィルタバンドの中央周波数からの-1.0～+1.0の変位
 			// に変換する
 			__m128 ang = freq * frequency_per_filter_band_recp - i_3210;
-//			float tmp = freq * FrequencyPerFilterBandRecp - (float)i;
 
 			// -1.0～+1.0の変位を-M_PI～+M_PIの位相に変換
 			ang *= over_sampling_radian_v;
-//			tmp =  tmp * OverSamplingRadian;
 
 			// OverSampling による位相の補正
 			ang += i_3210 * over_sampling_radian_v;
-//			tmp += i   * OverSamplingRadian;
 
 			// TimeScale による位相の補正
 			ang *= exact_time_scale;

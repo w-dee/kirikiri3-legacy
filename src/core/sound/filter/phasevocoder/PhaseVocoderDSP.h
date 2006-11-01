@@ -21,9 +21,6 @@
 class tRisaPhaseVocoderDSP
 {
 protected:
-	const static float MAX_TIME_SCALE = 1.95; //!< 最大の time scale 値
-	const static float MIN_TIME_SCALE = 0.25; //!< 最小の time scale 値
-
 	float ** AnalWork; //!< 解析(Analyze)用バッファ(FrameSize個) 名前で笑わないように
 	float ** SynthWork; //!< 合成用作業バッファ(FrameSize)
 	float ** LastAnalPhase; //!< 前回解析時の各フィルタバンドの位相 (各チャンネルごとにFrameSize/2個)
@@ -41,17 +38,8 @@ protected:
 	unsigned int InputHopSize; //!< FrameSize/OverSampling
 	unsigned int OutputHopSize; //!< InputHopSize * TimeScale (SetTimeScale時に再計算される)
 
-	tRisaRingBuffer<float> InputBuffer; //!< 入力用リングバッファ
-	tRisaRingBuffer<float> OutputBuffer; //!< 出力用リングバッファ
-
 	float	TimeScale; //!< 時間軸方向のスケール(出力/入力)
 	float	FrequencyScale; //!< 周波数方向のスケール(出力/入力)
-
-	bool	RebuildParams; //!< 内部的なパラメータなどを再構築しなければならないときに真
-
-	unsigned long LastSynthPhaseAdjustCounter; //!< LastSynthPhase を補正する周期をはかるためのカウンタ
-	const static unsigned long LastSynthPhaseAdjustIncrement = 0x03e8a444; //!< LastSynthPhaseAdjustCounterに加算する値
-	const static unsigned long LastSynthPhaseAdjustInterval  = 0xfa2911fe; //!< LastSynthPhase を補正する周期
 
 	// 以下、RebuildParams が真の時に再構築されるパラメータ
 	// ここにあるメンバ以外では、InputWindow と OutputWindow も再構築される
@@ -60,6 +48,20 @@ protected:
 	float FrequencyPerFilterBand; //!< Frequency/FrameSize
 	float FrequencyPerFilterBandRecp; //!< FrequencyPerFilterBand の逆数
 	float ExactTimeScale; //!< 厳密なTimeScale = OutputHopSize / InputHopSize
+	// 再構築されるパラメータ、ここまで
+
+	tRisaRingBuffer<float> InputBuffer; //!< 入力用リングバッファ
+	tRisaRingBuffer<float> OutputBuffer; //!< 出力用リングバッファ
+
+	const static float MAX_TIME_SCALE = 1.95; //!< 最大の time scale 値
+	const static float MIN_TIME_SCALE = 0.25; //!< 最小の time scale 値
+
+	bool	RebuildParams; //!< 内部的なパラメータなどを再構築しなければならないときに真
+
+	unsigned long LastSynthPhaseAdjustCounter; //!< LastSynthPhase を補正する周期をはかるためのカウンタ
+	const static unsigned long LastSynthPhaseAdjustIncrement = 0x03e8a444; //!< LastSynthPhaseAdjustCounterに加算する値
+	const static unsigned long LastSynthPhaseAdjustInterval  = 0xfa2911fe; //!< LastSynthPhase を補正する周期
+
 
 public:
 	//! @brief Process が返すステータス

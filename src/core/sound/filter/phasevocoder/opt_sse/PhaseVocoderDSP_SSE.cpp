@@ -68,11 +68,6 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 	if(FrequencyScale != 1.0)
 	{
 		// ここでは 4 複素数 (8実数) ごとに処理を行う。
-		static float * tmpv = NULL; 
-		if(!tmpv) tmpv = (float *)RisseAlignedAlloc(sizeof(float) * (framesize_d2), 4); 
-		static float * magv = NULL; 
-		if(!magv) magv = (float *)RisseAlignedAlloc(sizeof(float) * (framesize_d2), 4); 
-
 		__m128 over_sampling_radian_recp = _mm_load1_ps(&OverSamplingRadianRecp);
 		__m128 frequency_per_filter_band = _mm_load1_ps(&FrequencyPerFilterBand);
 		__m128 frequency_per_filter_band_recp = _mm_load1_ps(&FrequencyPerFilterBandRecp);

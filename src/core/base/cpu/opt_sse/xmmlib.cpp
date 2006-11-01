@@ -46,7 +46,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
-#include "xmmlib.h"
+#include "base/cpu/opt_sse/xmmlib.h"
 
 _ALIGN16(const risse_uint32) PCS_NNRN[4]	 = {0x00000000, 0x80000000, 0x00000000, 0x00000000};
 _ALIGN16(const risse_uint32) PCS_NNRR[4]	 = {0x80000000, 0x80000000, 0x00000000, 0x00000000};

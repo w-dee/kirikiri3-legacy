@@ -15,6 +15,7 @@
 #include <math.h>
 #include "base/mathlib/MathAlgorithms.h"
 #include "sound/filter/phasevocoder/PhaseVocoderDSP.h"
+#include "base/mathlib/RealFFT.h"
 #include <string.h>
 #include "risseUtils.h"
 
@@ -61,6 +62,9 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 	unsigned int framesize_d2 = FrameSize / 2;
 	float * analwork = AnalWork[ch];
 	float * synthwork = SynthWork[ch];
+
+	// FFT を実行する
+	rdft(FrameSize, 1, analwork, FFTWorkIp, FFTWorkW); // Real DFT
 
 	__m128 exact_time_scale = _mm_load1_ps(&ExactTimeScale);
 	__m128 over_sampling_radian_v = _mm_load1_ps(&OverSamplingRadian);
@@ -270,6 +274,9 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 			*(__m128*)(synthwork + i*2 + 4) = im3re3im2re2;
 		}
 	}
+
+	// FFT を実行する
+	rdft(FrameSize, -1, SynthWork[ch], FFTWorkIp, FFTWorkW); // Inverse Real DFT
 }
 //---------------------------------------------------------------------------
 

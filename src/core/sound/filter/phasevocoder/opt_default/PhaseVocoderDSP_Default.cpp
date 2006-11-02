@@ -15,6 +15,7 @@
 #include <math.h>
 #include "base/mathlib/MathAlgorithms.h"
 #include "sound/filter/phasevocoder/PhaseVocoderDSP.h"
+#include "base/mathlib/RealFFT.h"
 #include <string.h>
 #include "risseUtils.h"
 
@@ -27,6 +28,9 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 	unsigned int framesize_d2 = FrameSize / 2;
 	float * analwork = AnalWork[ch];
 	float * synthwork = SynthWork[ch];
+
+	// FFT を実行する
+	rdft(FrameSize, 1, analwork, FFTWorkIp, FFTWorkW); // Real DFT
 
 	if(FrequencyScale != 1.0)
 	{
@@ -220,6 +224,9 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 			synthwork[i*2+1] = mag * s;
 		}
 	}
+
+	// FFT を実行する
+	rdft(FrameSize, -1, SynthWork[ch], FFTWorkIp, FFTWorkW); // Inverse Real DFT
 }
 //---------------------------------------------------------------------------
 

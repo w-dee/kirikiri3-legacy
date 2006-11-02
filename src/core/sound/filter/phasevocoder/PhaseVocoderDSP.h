@@ -154,24 +154,6 @@ public:
 	//!				実装は opt_default ディレクトリ下などに置かれる。
 	//!				(PhaseVocoderDSP.cpp内にはこれの実装はない)
 	void ProcessCore(int ch);
-
-private:
-	//! @brief		インターリーブを解除し、窓関数を掛けながら転送
-	//! @param		dest 転送先
-	//! @param		src  転送元(チャンネルごとにインターリーブされている)
-	//! @param		win  窓関数
-	//! @param		len  転送するサンプルグラニュール数
-	void Deinterleave(float * dest, const float * src,
-					float * win, size_t len);
-
-	//! @brief		窓関数を掛けながら、インターリーブをしながら加算転送
-	//! @param		dest 転送先(チャンネルごとにインターリーブする)
-	//! @param		src  転送元
-	//! @param		win  窓関数
-	//! @param		len  転送するサンプルグラニュール数
-	void Interleave(float * dest, const float * src,
-					float * win, size_t len);
-
 };
 //---------------------------------------------------------------------------
 

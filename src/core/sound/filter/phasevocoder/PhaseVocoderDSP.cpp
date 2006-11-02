@@ -32,9 +32,8 @@
 
 #include "prec.h"
 #include <math.h>
-#include "base/mathlib/RealFFT.h"
-#include "base/mathlib/MathAlgorithms.h"
 #include "sound/filter/phasevocoder/PhaseVocoderDSP.h"
+#include "base/mathlib/MathAlgorithms.h"
 #include <string.h>
 #include "risseUtils.h"
 
@@ -330,14 +329,8 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 		// 解析
 		//------------------------------------------------
 
-		// FFT を実行する
-		rdft(FrameSize, 1, AnalWork[ch], FFTWorkIp, FFTWorkW); // Real DFT
-
 		// 演算の根幹部分を実行する
 		ProcessCore(ch);
-
-		// FFT を実行する
-		rdft(FrameSize, -1, SynthWork[ch], FFTWorkIp, FFTWorkW); // Inverse Real DFT
 	}
 
 	// 窓関数を適用しつつ、SynthWork から出力バッファに書き込む
@@ -385,36 +378,3 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 	return psNoError;
 }
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::Deinterleave(float * dest, const float * src,
-					float * win, size_t len)
-{
-	unsigned int numch = Channels;
-	while(len--)
-	{
-		dest[0] = *src * *win;
-		src += numch;
-		dest ++;
-		win ++;
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::Interleave(float * dest, const float * src,
-					float * win, size_t len)
-{
-	unsigned int numch = Channels;
-	while(len--)
-	{
-		*dest += *src * *win;
-		src ++;
-		dest += numch;
-		win ++;
-	}
-}
-//---------------------------------------------------------------------------
-

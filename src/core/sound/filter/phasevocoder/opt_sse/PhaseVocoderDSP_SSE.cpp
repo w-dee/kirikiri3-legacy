@@ -63,6 +63,9 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 	float * analwork = AnalWork[ch];
 	float * synthwork = SynthWork[ch];
 
+	// 丸めモードを設定
+	RisaSetRoundingModeToNearest_SSE();
+
 	// FFT を実行する
 	rdft(FrameSize, 1, analwork, FFTWorkIp, FFTWorkW); // Real DFT
 

@@ -62,6 +62,7 @@ static inline float RisaVFast_arctan2(float y, float x)
 //---------------------------------------------------------------------------
 static inline float RisaVFast_atan2_madd(float a, float b, float c) { return a*b+c; }
 static inline float RisaVFast_atan2_nmsub(float a, float b, float c) { return -(a*b-c); }
+static inline float RisaVFast_atan2_round(float a) { return (a>0)?(int)(a+0.5):(int)(a-0.5); }
 
 static inline void RisaVFast_sincos(float v, float &sin, float &cos)
 {
@@ -76,7 +77,7 @@ static inline void RisaVFast_sincos(float v, float &sin, float &cos)
 	float s1, s2, c1, c2, fixmag1;
 	float x1=RisaVFast_atan2_madd(v, (float)(1.0/(2.0*3.1415926536)), (float)(0.0));
 	/* q1=x/2pi reduced onto (-0.5,0.5), q2=q1**2 */
-	float q1=RisaVFast_atan2_nmsub(round(x1), (float)(1.0), x1);
+	float q1=RisaVFast_atan2_nmsub(RisaVFast_atan2_round(x1), (float)(1.0), x1);
 	float q2=RisaVFast_atan2_madd(q1, q1, (float)(0.0));
 	s1= RisaVFast_atan2_madd(q1,
 			RisaVFast_atan2_madd(q2,

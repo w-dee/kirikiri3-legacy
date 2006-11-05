@@ -131,9 +131,11 @@ void tRisaWaveSegmentQueue::Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 le
 			if(newlength > 0)
 				dest.Enqueue(tRisaWaveSegment(Segments.front().Start, newlength, remain));
 
-			// Segments.front() の Length と FilteredLength を修正
-			Segments.front().Length -= remain;
-			Segments.front().FilteredLength -= newlength;
+			// Segments.front() の Start, Length と FilteredLength を修正
+			Segments.front().Start += newlength;
+			Segments.front().Length -= newlength;
+			Segments.front().FilteredLength -= remain;
+
 			if(Segments.front().Length == 0 || Segments.front().FilteredLength == 0)
 			{
 				// ぶった切った結果 (線形補完した結果の誤差で)

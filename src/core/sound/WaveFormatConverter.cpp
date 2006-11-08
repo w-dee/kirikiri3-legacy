@@ -19,12 +19,19 @@
 RISSE_DEFINE_SOURCE_ID(58054,38608,61255,17526,21894,38819,54476,53804);
 
 
+/*
+	(opt_CPU)/WaveFormatConverter_CPU.cpp にある関数のプロトタイプ
+*/
+void RisaPCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples);
+void RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples);
+
+
 
 //---------------------------------------------------------------------------
 //! @brief		汎用変換ループのテンプレート実装
 //---------------------------------------------------------------------------
 template <typename DESTTYPE, typename SRCTYPE>
-static void RisaPCMConvertLoop(void * dest, const void * src, size_t numsamples)
+static void RisaPCMConvertLoop(risse_restricted void * dest, const risse_restricted void * src, size_t numsamples)
 {
 	if(DESTTYPE::id == SRCTYPE::id)
 	{
@@ -57,19 +64,7 @@ template <>
 static void RisaPCMConvertLoop<tRisaPCMTypes::f32, tRisaPCMTypes::i16>
 				(void * dest, const void * src, size_t numsamples)
 {
-	// 型が違うので変換を行う
-	risse_uint8 * d = reinterpret_cast<risse_uint8*>(dest);
-	const risse_uint8 * s = reinterpret_cast<const risse_uint8*>(src);
-	const risse_uint8 * s_lim = s + tRisaPCMTypes::i16::size * numsamples;
-
-	while(s < s_lim)
-	{
-		reinterpret_cast<tRisaPCMTypes::f32*>(d)->value = 
-			reinterpret_cast<const tRisaPCMTypes::i16*>(s)->value *
-					(1.0f / (float)tRisaPCMTypes::i16::max_value);
-		d += tRisaPCMTypes::f32::size;
-		s += tRisaPCMTypes::i16::size;
-	}
+	RisaPCMConvertLoopInt16ToFloat32(dest, src, numsamples);
 }
 //---------------------------------------------------------------------------
 
@@ -81,21 +76,7 @@ template <>
 static void RisaPCMConvertLoop<tRisaPCMTypes::i16, tRisaPCMTypes::f32>
 				(void * dest, const void * src, size_t numsamples)
 {
-	// 型が違うので変換を行う
-	risse_uint8 * d = reinterpret_cast<risse_uint8*>(dest);
-	const risse_uint8 * s = reinterpret_cast<const risse_uint8*>(src);
-	const risse_uint8 * s_lim = s + tRisaPCMTypes::f32::size * numsamples;
-
-	while(s < s_lim)
-	{
-		float v = reinterpret_cast<const tRisaPCMTypes::f32*>(s)->value * 32767.0;
-		reinterpret_cast<tRisaPCMTypes::i16*>(d)->value = 
-			 v > (float)tRisaPCMTypes::i16::max_value ? tRisaPCMTypes::i16::max_value :
-			 v < (float)tRisaPCMTypes::i16::min_value ? tRisaPCMTypes::i16::min_value :
-			 	v < 0 ? (risse_int16)(v - 0.5) : (risse_int16)(v + 0.5);
-		d += tRisaPCMTypes::i16::size;
-		s += tRisaPCMTypes::f32::size;
-	}
+	RisaPCMConvertLoopFloat32ToInt16(dest, src, numsamples);
 }
 //---------------------------------------------------------------------------
 
@@ -105,8 +86,8 @@ static void RisaPCMConvertLoop<tRisaPCMTypes::i16, tRisaPCMTypes::f32>
 
 //---------------------------------------------------------------------------
 void tRisaWaveFormatConverter::Convert(
-		tRisaPCMTypes::tType outformat, void * outdata,
-		tRisaPCMTypes::tType informat, const void * indata,
+		tRisaPCMTypes::tType outformat, risse_restricted void * outdata,
+		tRisaPCMTypes::tType informat, risse_restricted const void * indata,
 		risse_int channels, size_t numsamples)
 {
 	// チャンネルはインターリーブされているので、numsamples にチャンネル数を掛ける

@@ -11,6 +11,7 @@ include $(CORE_DIR)/Makefile_core_common
 
 all_cpp:
 	cat \
+		$(CORE_DIR)/sound/opt_sse/WaveFormatConverter_SSE.cpp \
 		$(CORE_DIR)/sound/filter/phasevocoder/opt_sse/PhaseVocoderDSP_SSE.cpp \
 		$(CORE_DIR)/base/mathlib/opt_sse/RealFFT_SSE.cpp \
 		$(CORE_DIR)/base/cpu/opt_sse/xmmlib.cpp \

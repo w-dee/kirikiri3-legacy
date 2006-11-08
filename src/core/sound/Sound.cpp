@@ -146,7 +146,8 @@ void tRisaSound::Open(const ttstr & filename)
 		boost::shared_ptr<tRisaPhaseVocoder> filter(new tRisaPhaseVocoder());
 		filter->SetOverSampling(16);
 		filter->SetFrameSize(4096);
-		filter->SetTimeScale(1.4);
+		filter->SetTimeScale(1.6);
+		filter->SetFrequencyScale(1.0);
 		filter->SetInput(LoopManager);
 
 		// バッファを作成

@@ -33,9 +33,11 @@ CPPFILES=\
 
 ifdef USE_SSE
  CPPFILES += \
+		opt_sse/WaveFormatConverter_SSE.cpp \
 		filter/phasevocoder/opt_sse/PhaseVocoderDSP_SSE.cpp
 else
  CPPFILES += \
+		opt_default/WaveFormatConverter_Default.cpp \
 		filter/phasevocoder/opt_default/PhaseVocoderDSP_Default.cpp
 endif
 

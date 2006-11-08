@@ -29,8 +29,8 @@ public:
 	//! @param		channels		チャンネル数
 	//! @param		numsamples		処理を行うサンプルグラニュール数
 	static void Convert(
-		tRisaPCMTypes::tType outformat, void * outdata,
-		tRisaPCMTypes::tType informat, const void * indata,
+		tRisaPCMTypes::tType outformat, risse_restricted void * outdata,
+		tRisaPCMTypes::tType informat, risse_restricted const void * indata,
 		risse_int channels, size_t numsamples);
 };
 //---------------------------------------------------------------------------

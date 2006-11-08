@@ -96,6 +96,12 @@ namespace Risse
 	#define RISSE_UI64_VAL(x) ((risse_uint64)(x##LL))
 #endif
 
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+/* for optimization hint */
+#define risse_restricted __restricted__ 
+#else
+#define risse_restricted
+#endif
 
 
 #if SIZEOF_WCHAR_T == 2

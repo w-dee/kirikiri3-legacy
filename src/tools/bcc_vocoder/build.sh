@@ -1,6 +1,11 @@
-#!/bin/sh
+#!/bin/sh -x
 
+current=`dirname $0`
+cd $current
 current=`pwd`
+
+cd $current
+rm pv_*.nas
 
 cd $current/default
 make

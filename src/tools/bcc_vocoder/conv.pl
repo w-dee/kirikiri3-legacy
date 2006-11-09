@@ -74,13 +74,9 @@ while($line = <STDIN>)
 		$labels{$1} = 1;
 		$out .= "$1:\n";
 	}
-	elsif($line =~ /\s*?movss\s+?(\w+)\s*?,\s*?DWORD\s*?(\[.*?\])/)
+	elsif($line =~ /\s*?([a-z]+ss)\s+?(.*?)DWORD(.*)/)
 	{
-		$out .= "\tmovss\t$1,$2\n";
-	}
-	elsif($line =~ /\s*?movss\s+?\DWORD\s*?(\[.*?\])\s*?,\s*?(\w+)\s*?/)
-	{
-		$out .= "\tmovss\t$1,$2\n";
+		$out .= "\t$1\t$2 $3\n";
 	}
 	elsif($line =~ /\s*?fld\s+?DWORD\s+?(\w+)/)
 	{
@@ -114,22 +110,99 @@ while($line = <STDIN>)
 
 $out .= "align 16\n";
 
+$head = '';
 
 foreach $extern (keys %externs)
 {
-	print "externdef $extern\n" unless defined($labels{$extern});
+	$head .= "externdef $extern\n" unless defined($labels{$extern});
 }
 
 foreach $global (keys %globals)
 {
-	print "globaldef $prefix$global\n";
+	$head .= "globaldef $prefix$global\n";
 }
 
 # replace all globals with its prefix
 foreach $global (keys %globals)
 {
 	$out =~ s/\b$global\b/$prefix$global/g;
+	$globals{"$prefix$global"} = 1;
 }
 
+
+$out = $head . $out;
+
+
+# replace all local label name according to lines around the label
+# this is to minimize differences between revisions
+sub make_hash
+{
+	my($ident) = @_;
+	my($c, @n, $o, $ret, $i, $cn);
+	@n = (0,0,0,0,0,0,0,0);
+
+	for($i = 0; $i < length($ident); $i++)
+	{
+		$cn = ord(substr($ident, $i, 1));
+		$n[$i % 8] += $cn;
+	}
+
+	$ret = '';
+	foreach $c (@n)
+	{
+		$ret .= substr("qwertyuioplkjhgfdsazxcvbnmMNBVCXZASDFGHJKLPOIUYTREWQ", $c%(26*2), 1);
+	}
+	return $ret;
+}
+
+@lines = split(/\n/s, $out);
+%known_labels = ();
+for($i = 0; $i <= $#lines; $i++)
+{
+	$line = $lines[$i];
+	if($line =~ /^(L\w+):/)
+	{
+		$label = $1;
+		if(!defined($globals{"$label"}))
+		{
+			$ident = '';
+			$ic = 0;
+			$ii = $i - 1;
+			while($ic < 5  && $ii >= 0)
+			{
+				if($lines[$ii] !~ /^(\w+):/)
+				{
+					$ident .= $lines[$ii];
+					$ic++;
+				}
+				$ii--;
+			}
+			$ic = 0;
+			$ii = $i + 1;
+			while($ic < 18 && $ii <= $#lines)
+			{
+				if($lines[$ii] !~ /^(\w+):/)
+				{
+					$ident .= $lines[$ii];
+					$ic++;
+				}
+				$ii++;
+			}
+			$hash = &make_hash($ident);
+			if(defined($known_labels{$hash}))
+			{
+				print "hash conflict!!!\n";
+				exit 1;
+			}
+			$known_labels{$hash} = $label;
+		}
+	}
+}
+
+foreach $to (keys %known_labels)
+{
+	$from = $known_labels{$to};
+	$out =~ s/\b$from\b/$to/g;
+}
 
 print $out;

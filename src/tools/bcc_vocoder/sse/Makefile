@@ -28,6 +28,9 @@ BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
 # リンカに渡すフラグ
 LDFLAGS = -g $(CUI_LDFLAGS)
 
+# CXXFLAGS
+CXXFLAGS += -mfpmath=sse,387 -ffast-math
+
 #----------------------------#
 
 CPPFILES = all.cpp

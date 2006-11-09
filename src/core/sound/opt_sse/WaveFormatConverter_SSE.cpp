@@ -63,20 +63,6 @@ RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
 
 
 //---------------------------------------------------------------------------
-//! @brief		float32→int16変換の内部関数
-//---------------------------------------------------------------------------
-static __m64 inline RisaConvertFloat32VToInt16(__m128 in)
-{
-	__m128 s0 = in * PM128(RISA_V_VEC_MAGNIFY);
-	__m64 r0, r1;
-	r0 = _mm_cvt_ps2pi(s0);
-	r1 = _mm_cvt_ps2pi(_mm_movehl_ps(s0, s0));
-	return _m_packssdw(r0, r1);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 //! @brief		float32→int16変換
 //---------------------------------------------------------------------------
 void _RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples)
@@ -99,8 +85,8 @@ void _RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restr
 	RisaSetRoundingModeToNearest_SSE();
 	for(     ; n < numsamples - 7; n += 8)
 	{
-		*(__m64*)(d + n + 0) = RisaConvertFloat32VToInt16(*(__m128*)(s + n + 0));
-		*(__m64*)(d + n + 4) = RisaConvertFloat32VToInt16(*(__m128*)(s + n + 4));
+		*(__m64*)(d + n + 0) = _mm_cvtps_pi16(*(__m128*)(s + n + 0)*PM128(RISA_V_VEC_MAGNIFY));
+		*(__m64*)(d + n + 4) = _mm_cvtps_pi16(*(__m128*)(s + n + 4)*PM128(RISA_V_VEC_MAGNIFY));
 	}
 	_mm_empty();
 

@@ -39,12 +39,15 @@ void _RisaPCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restr
 	}
 
 	// メインの部分
-	for(       ; n < numsamples - 7; n += 8)
+	if(numsamples >= 8)
 	{
-		*(__m128*)(d + n +  0) = _mm_cvtpi16_ps(*(__m64*)(s+n+ 0))* PM128(RISA_V_VEC_REDUCE);
-		*(__m128*)(d + n +  4) = _mm_cvtpi16_ps(*(__m64*)(s+n+ 4))* PM128(RISA_V_VEC_REDUCE);
+		for(       ; n < numsamples - 7; n += 8)
+		{
+			*(__m128*)(d + n +  0) = _mm_cvtpi16_ps(*(__m64*)(s+n+ 0))* PM128(RISA_V_VEC_REDUCE);
+			*(__m128*)(d + n +  4) = _mm_cvtpi16_ps(*(__m64*)(s+n+ 4))* PM128(RISA_V_VEC_REDUCE);
+		}
+		_mm_empty();
 	}
-	_mm_empty();
 
 	// のこり
 	for(       ; n < numsamples; n ++)
@@ -82,13 +85,16 @@ void _RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restr
 	}
 
 	// メインの部分
-	RisaSetRoundingModeToNearest_SSE();
-	for(     ; n < numsamples - 7; n += 8)
+	if(numsamples >= 8)
 	{
-		*(__m64*)(d + n + 0) = _mm_cvtps_pi16(*(__m128*)(s + n + 0)*PM128(RISA_V_VEC_MAGNIFY));
-		*(__m64*)(d + n + 4) = _mm_cvtps_pi16(*(__m128*)(s + n + 4)*PM128(RISA_V_VEC_MAGNIFY));
+		RisaSetRoundingModeToNearest_SSE();
+		for(     ; n < numsamples - 7; n += 8)
+		{
+			*(__m64*)(d + n + 0) = _mm_cvtps_pi16(*(__m128*)(s + n + 0)*PM128(RISA_V_VEC_MAGNIFY));
+			*(__m64*)(d + n + 4) = _mm_cvtps_pi16(*(__m128*)(s + n + 4)*PM128(RISA_V_VEC_MAGNIFY));
+		}
+		_mm_empty();
 	}
-	_mm_empty();
 
 	// のこり
 	for(     ; n < numsamples; n ++)

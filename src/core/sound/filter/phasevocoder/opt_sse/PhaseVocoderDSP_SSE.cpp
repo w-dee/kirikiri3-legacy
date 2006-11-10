@@ -32,9 +32,9 @@
 class tRisaPhaseVocoderDSP_SSE_Trampoline : public tRisaPhaseVocoderDSP
 {
 public:
-	tRisaPhaseVocoderDSP_SSE_Trampoline(unsigned int framesize, unsigned int oversamp,
+	tRisaPhaseVocoderDSP_SSE_Trampoline(unsigned int framesize,
 					unsigned int frequency, unsigned int channels) :
-				tRisaPhaseVocoderDSP(framesize, oversamp, frequency, channels) {;}
+				tRisaPhaseVocoderDSP(framesize, frequency, channels) {;}
 
 
 	void __ProcessCore(int ch);

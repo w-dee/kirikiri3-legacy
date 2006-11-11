@@ -31,6 +31,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 
 	// FFT を実行する
 	rdft(FrameSize, 1, analwork, FFTWorkIp, FFTWorkW); // Real DFT
+	analwork[1] = 0.0; // analwork[1] = nyquist freq. power (どっちみち使えないので0に)
 
 	if(FrequencyScale != 1.0)
 	{
@@ -226,6 +227,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 	}
 
 	// FFT を実行する
+	synthwork[1] = 0.0; // synthwork[1] = nyquist freq. power (どっちみち使えないので0に)
 	rdft(FrameSize, -1, SynthWork[ch], FFTWorkIp, FFTWorkW); // Inverse Real DFT
 }
 //---------------------------------------------------------------------------

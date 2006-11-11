@@ -68,6 +68,7 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 
 	// FFT を実行する
 	rdft(FrameSize, 1, analwork, FFTWorkIp, FFTWorkW); // Real DFT
+	analwork[1] = 0.0; // analwork[1] = nyquist freq. power (どっちみち使えないので0に)
 
 	__m128 exact_time_scale = _mm_load1_ps(&ExactTimeScale);
 	__m128 over_sampling_radian_v = _mm_load1_ps(&OverSamplingRadian);
@@ -279,7 +280,8 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 	}
 
 	// FFT を実行する
-	rdft(FrameSize, -1, SynthWork[ch], FFTWorkIp, FFTWorkW); // Inverse Real DFT
+	synthwork[1] = 0.0; // synthwork[1] = nyquist freq. power (どっちみち使えないので0に)
+	rdft(FrameSize, -1, synthwork, FFTWorkIp, FFTWorkW); // Inverse Real DFT
 }
 //---------------------------------------------------------------------------
 

@@ -29,7 +29,7 @@ BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
 LDFLAGS = -g $(CUI_LDFLAGS)
 
 # CXXFLAGS
-CXXFLAGS += -mfpmath=sse,387 -ffast-math
+CXXFLAGS += -mfpmath=sse,387 -ffast-math -O3 -fprefetch-loop-arrays -mtune=pentium3
 
 #----------------------------#
 

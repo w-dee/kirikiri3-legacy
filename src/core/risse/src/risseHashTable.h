@@ -432,7 +432,9 @@ protected:
 					Count --;
 					prev->Next = elm->Next; // sever from the chain
 					if(elm->Next) elm->Next->Prev = prev;
-					delete elm;
+					// ここでは *elm を Destruct したり elm を delete
+					// したりしない(チェーンから切り離され、あとはGCが
+					// 残飯処理をするので必要なし)
 					return elm;
 				}
 			}

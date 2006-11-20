@@ -187,6 +187,7 @@ protected:
 public:
 	//! @brief	イテレータクラス
 	//! @note	非常に限定的かつ非効率的。一方向へのイテレーションしかサポートしない。
+	//! 		高速なイテレーションが必要ならば順序付きハッシュ表の仕様を検討すること
 	class tDefaultIterator : public tRisseCollectee
 	{
 		const tRisseHashTableBase * Table; //!< ハッシュ表
@@ -529,6 +530,57 @@ public:
 protected:
 	tElement *NFirst; //!< 順序付き要素チェーンにおける最初の要素
 	tElement *NLast;  //!< 順序付き要素チェーンにおける最後の要素
+
+public:
+	//! @brief	イテレータクラス
+	class tOrderedIterator : public tRisseCollectee // this differs a bit from STL's iterator
+	{
+		tElement * elm;
+	public:
+		tOrderedIterator() { elm = NULL; }
+
+		tOrderedIterator(const tRisseOrderedHashTableBase & table)
+		{ elm = table.NFirst; }
+
+		tOrderedIterator(tElement * r_elm)
+		{ elm = r_elm; }
+
+		tOrderedIterator operator ++()
+		{ elm = elm->NNext; return elm;}
+
+		tOrderedIterator operator --()
+		{ elm = elm->NPrev; return elm;}
+
+		tOrderedIterator operator ++(int dummy)
+		{ tElement *b_elm = elm; elm = static_cast<tElement*>(elm->NNext); return b_elm; }
+
+		tOrderedIterator operator --(int dummy)
+		{ tElement *b_elm = elm; elm = static_cast<tElement*>(elm->NPrev); return b_elm; }
+
+		void operator +(risse_int n)
+		{ while(n--) elm = elm->NNext; }
+
+		void operator -(risse_int n)
+		{ while(n--) elm = elm->NPrev; }
+
+		bool operator ==(const tOrderedIterator & ref) const
+		{ return elm == ref.elm; }
+
+		bool operator !=(const tOrderedIterator & ref) const
+		{ return elm != ref.elm; }
+
+		KeyT & GetKey()
+		{ return *(KeyT*)elm->Key; }
+
+		ValueT & GetValue()
+		{ return *(ValueT*)elm->Value; }
+
+		bool End() const { return elm == NULL; }
+	};
+
+
+	//! @brief		イテレータのtypedef
+	typedef tOrderedIterator tIterator;
 
 public:
 	//! @brief		コンストラクタ

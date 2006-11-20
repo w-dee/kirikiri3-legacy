@@ -168,8 +168,9 @@ template <
 	typename HashTraitsT = tRisseHashTraits<KeyT>,
 	typename ElementT = tRisseHashTableElement<KeyT, ValueT>
 		>
-class tRisseHashTable : public tRisseCollectee
+class tRisseHashTableBase : public tRisseCollectee
 {
+protected:
 	ElementT * Elms; //!< 要素の配列
 	risse_size HashMask; //!< ハッシュマスク(要素のlevel1スロットの個数-1)
 	risse_size Count; //!< 要素の個数
@@ -177,20 +178,20 @@ class tRisseHashTable : public tRisseCollectee
 	static const risse_size InitialHashMask = (16-1); //!< 初期のHashMask
 
 	static const risse_uint32 UsingFlag = 0x1; //!< その要素は使用中である
-	static const risse_uint32 Lv1Flag	 = 0x2; //!< その要素はlevel1スロットにある
+	static const risse_uint32 Lv1Flag   = 0x2; //!< その要素はlevel1スロットにある
 
 
 public:
 	//! @brief	イテレータクラス
 	//! @note	非常に限定的かつ非効率的。一方向へのイテレーションしかサポートしない。
-	class tIterator : public tRisseCollectee
+	class tDefaultIterator : public tRisseCollectee
 	{
-		const tRisseHashTable * Table; //!< ハッシュ表
+		const tRisseHashTableBase * Table; //!< ハッシュ表
 		const ElementT * Element; //!<現在操作中の要素
 		risse_size Slot; //!< 現在操作中のlv1スロットのインデックス
 	public:
-		tIterator() { Table = NULL; Element = NULL; Slot = 0; }
-		tIterator(const tRisseHashTable & table)
+		tDefaultIterator() { Table = NULL; Element = NULL; Slot = 0; }
+		tDefaultIterator(const tRisseHashTableBase & table)
 		{
 			// 最初の要素を探す
 			Table = &table;
@@ -218,7 +219,7 @@ public:
 			operator ++();
 		}
 
-	private:
+	protected:
 		void FindNext()
 		{
 			while(true)
@@ -258,36 +259,43 @@ public:
 		bool End() const { return Element == NULL; }
 	};
 
+	//! @brief		イテレータのtypedef
+	typedef tDefaultIterator tIterator;
+
 public:
 	//! @brief		コンストラクタ
-	tRisseHashTable()
+	tRisseHashTableBase()
 	{
 		HashMask = InitialHashMask;
-		InternalInit();
-	}
-
-	//! @brief		要素をすべてクリアする
-	void Clear()
-	{
+		Elms = new ElementT[HashMask + 1];
 		InternalClear();
 	}
 
-	//! @brief		要素を追加する
-	//! @param		key		キー
-	//! @param		value	値
-	//! @note		すでにキーが存在していた場合は値が上書きされる
-	void Add(const KeyT &key, const ValueT &value)
+protected:
+	//! @brief		内部の要素をすべてクリアする
+	void InternalClear()
 	{
-		// add Key and Value
-		AddWithHash(key, HashTraitsT::Make(key), value);
+		Count = 0;
+		for(risse_size i = 0; i <= HashMask; i++)
+		{
+			// level1の要素は参照を断ち切るために破壊する
+			if(Elms[i].Flags & UsingFlag)
+				Destruct(Elms[i]);
+
+			Elms[i].Flags = Lv1Flag;
+			Elms[i].Prev = NULL; // level2はこれにより切り離される
+			Elms[i].Next = NULL; // level2はこれにより切り離される
+		}
 	}
+
 
 	//! @brief		要素を追加する(キーのハッシュ値がすでに分かっている場合)
 	//! @param		key		キー
 	//! @param		hash	ハッシュ
 	//! @param		value	値
+	//! @return		内部の ElementT 型へのポインタ
 	//! @note		すでにキーが存在していた場合は値が上書きされる
-	void AddWithHash(const KeyT &key, risse_uint32 hash, const ValueT &value)
+	ElementT * InternalAddWithHash(const KeyT &key, risse_uint32 hash, const ValueT &value)
 	{
 		// add Key ( hash ) and Value
 #ifdef RISSE_HS_DEBUG_CHAIN
@@ -307,7 +315,7 @@ public:
 				{
 					// do copying instead of inserting if these are same
 					*(ValueT*)elm->Value = value;
-					return;
+					return elm;
 				}
 			}
 			elm = elm->Next;
@@ -322,7 +330,7 @@ public:
 			lv1->Hash = hash;
 			lv1->Prev = NULL;
 			// not initialize lv1->Next here
-			return;
+			return lv1;
 		}
 
 		// lv1 is used
@@ -333,7 +341,7 @@ public:
 			{
 				// do copying instead of inserting if these are same
 				*(ValueT*)lv1->Value = value;
-				return;
+				return lv1;
 			}
 		}
 
@@ -347,6 +355,349 @@ public:
 		newelm->Next = lv1->Next;
 		newelm->Prev = lv1;
 		lv1->Next = newelm;
+		return newelm;
+	}
+
+	//! @brief		InternalFindWithHashへの関数ポインタのtypedef
+	typedef const ElementT * (tRisseHashTableBase::*tInternalFindWithHash)(const KeyT &key, risse_uint32 hash) const;
+
+	//! @brief		(内部関数)検索を行う
+	//! @param		key		キー
+	//! @param		hash	キーのハッシュ
+	//! @return		見つかった要素へのポインタ (NULL=見つからなかった)
+	const ElementT * InternalFindWithHash(const KeyT &key, risse_uint32 hash) const
+	{
+		// find key ( hash )
+#ifdef RISSE_HS_DEBUG_CHAIN
+		hash = 0;
+#endif
+
+		if(HashTraitsT::HasHint)
+			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
+
+		// lv1を検索
+		const ElementT *lv1 = Elms + (hash & HashMask);
+		if(hash == lv1->Hash && lv1->Flags & UsingFlag)
+		{
+			if(key == *(KeyT*)lv1->Key) return lv1;
+		}
+
+		// lv2を検索
+		ElementT *elm = lv1->Next;
+		while(elm)
+		{
+			if(hash == elm->Hash)
+			{
+				if(key == *(KeyT*)elm->Key) return elm;
+			}
+			elm = elm->Next;
+		}
+		return NULL; // not found
+	}
+
+	//! @brief		(内部関数)キーを削除する
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @return		キーが見つかり、削除されれば非NULL、削除されなければNULL
+	ElementT * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash)
+	{
+		// delete key ( hash ) and return true if succeeded
+#ifdef RISSE_HS_DEBUG_CHAIN
+		hash = 0;
+#endif
+		if(HashTraitsT::HasHint)
+			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
+
+		ElementT *lv1 = Elms + (hash & HashMask);
+		if(lv1->Flags & UsingFlag && hash == lv1->Hash)
+		{
+			if(key == *(KeyT*)lv1->Key)
+			{
+				// delete lv1
+				Destruct(*lv1);
+				Count --;
+				return lv1;
+			}
+		}
+
+		ElementT *prev = lv1;
+		ElementT *elm = lv1->Next;
+		while(elm)
+		{
+			if(hash == elm->Hash)
+			{
+				if(key == *(KeyT*)elm->Key)
+				{
+					Destruct(*elm);
+					Count --;
+					prev->Next = elm->Next; // sever from the chain
+					if(elm->Next) elm->Next->Prev = prev;
+					delete elm;
+					return elm;
+				}
+			}
+			prev = elm;
+			elm = elm->Next;
+		}
+		return NULL; // not found
+	}
+
+
+	//! @brief		要素数を得る
+	//! @return		要素数
+	risse_size InternalGetCount() const { return Count; }
+
+
+private:
+	//! @brief		要素をコピーコンストラクタで構築する
+	//! @param		elm			要素
+	//! @param		key			キーの値
+	//! @param		value		値
+	static void Construct(ElementT &elm, const KeyT &key, const ValueT &value)
+	{
+		::new (&elm.Key) KeyT(key);
+		::new (&elm.Value) ValueT(value);
+		elm.Flags |= UsingFlag;
+	}
+
+	//! @brief		要素を破壊する
+	//! @param		elm		要素
+	//!	@note		このメソッドは強制的に KeyT と ValueT の in-place
+	//!				デストラクタを呼ぶ。@r
+	//!				これにより、KeyT および ValueT の内部がクリアされる
+	//!				ことを期待する物である。@r
+	//!				GC対応のコードではデストラクタは通常は書かないが、
+	//!				このクラスの KeyT や ValueT として使う場合は
+	//!				フィールドが保持しているポインタを破壊するコードを
+	//!				デストラクタに書くのが好ましい。@r
+	//!				また、このクラスはすべての KeyT および ValueT のインスタンス
+	//!				に対してデストラクタを呼び出す保証はないので、デストラクタが
+	//!				呼ばれることに依存したコードを書かないこと。
+	static void Destruct(ElementT &elm)
+	{
+		((KeyT*)(&elm.Key)) -> ~KeyT();
+		((ValueT*)(&elm.Value)) -> ~ValueT();
+		elm.Flags &= ~UsingFlag;
+	}
+
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ハッシュ表の要素を表す構造体(順序付き)
+//---------------------------------------------------------------------------
+template <
+	typename KeyT,
+	typename ValueT
+		>
+struct tRisseOrderedHashTableElement : public tRisseHashTableElement<KeyT, ValueT>
+{
+	typedef tRisseHashTableElement<KeyT, ValueT> inherited;
+	inherited *NPrev; //!< 順序付き要素チェーンにおける前の要素
+	inherited *NNext; //!< 順序付き要素チェーンにおける後ろの要素
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		順序付きハッシュ表
+//---------------------------------------------------------------------------
+template <
+	typename KeyT,
+	typename ValueT,
+	typename HashTraitsT = tRisseHashTraits<KeyT>
+		>
+class tRisseOrderedHashTableBase :
+	public tRisseHashTableBase<KeyT, ValueT, HashTraitsT, tRisseOrderedHashTableElement<KeyT, ValueT> >
+{
+	typedef
+		tRisseHashTableBase<KeyT, ValueT, HashTraitsT, tRisseOrderedHashTableElement<KeyT, ValueT> >
+			inherited;
+	typedef tRisseOrderedHashTableElement<KeyT, ValueT> ElementT;
+
+	ElementT *NFirst; //!< 順序付き要素チェーンにおける最初の要素
+	ElementT *NLast;  //!< 順序付き要素チェーンにおける最後の要素
+
+public:
+	//! @brief		コンストラクタ
+	tRisseOrderedHashTableBase()
+	{
+		NFirst = NLast = NULL;
+	}
+
+
+protected:
+	//! @brief		内部の要素をすべてクリアする
+	void InternalClear()
+	{
+		inherited::InternalClear();
+		NFirst = NLast = NULL;
+	}
+
+	//! @brief		要素を追加する(キーのハッシュ値がすでに分かっている場合)
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @param		value	値
+	//! @return		内部の ElementT 型へのポインタ
+	//! @note		すでにキーが存在していた場合は値が上書きされる
+	ElementT * InternalAddWithHash(const KeyT &key, risse_uint32 hash, const ValueT &value)
+	{
+		risse_size org_count = inherited::InternalGetCount();
+
+		ElementT * added = inherited::AddWidhHash(key, hash, value);
+
+		if(org_count != inherited::InternalGetCount())
+			CheckAddingElementOrder(added); // 値が増えた
+		else
+			CheckUpdateElementOrder(added); // 値は増えてないが更新が行われた
+
+		return added;
+	}
+
+	//! @brief		InternalFindAndTouchWithHashへの関数ポインタのtypedef
+	typedef const ElementT * (tRisseOrderedHashTableBase::*tInternalFindWithHash)(const KeyT &key, risse_uint32 hash) const;
+
+	//! @brief		(内部関数)検索を行い、見つかった要素を順序の先頭に持ってくる
+	//! @param		key		キー
+	//! @param		hash	キーのハッシュ
+	//! @return		見つかった要素へのポインタ (NULL=見つからなかった)
+	const ElementT * InternalFindAndTouchWithHash(const KeyT &key, risse_uint32 hash) const
+	{
+		ElementT * found = inherited::InternalFindWithHash(key, hash);
+		if(found) CheckUpdateElementOrder(found); // 先頭に持ってくる
+
+		return found;
+	}
+
+	//! @brief		キーを削除する(あらかじめハッシュが分かっている場合)
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @return		キーが見つかり、削除されれば非NULL、削除されなければNULL
+	ElementT * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash)
+	{
+		ElementT * deleted = inherited::DeleteWithHash(key, hash);
+
+		if(deleted)
+		{
+			// 削除に成功した
+			CheckDeletingElementOrder(deleted);
+		}
+
+		return deleted;
+	}
+
+
+protected:
+
+	//! @brief	順序付き要素チェーンに要素を追加する
+	//! @param	elm		追加する要素
+	//! @note	count をインクリメントしたあとに呼ぶこと
+	void CheckAddingElementOrder(ElementT *elm)
+	{
+		if(inherited::InternalGetCount() == 1)
+		{
+			// 最初の追加だった
+			NLast = elm; // first addition
+			elm->NNext = NULL;
+		}
+		else
+		{
+			NFirst->NPrev = elm;
+			elm->NNext = NFirst;
+		}
+		NFirst = elm;
+		elm->NPrev = NULL;
+	}
+
+	//! @brief	順序付き要素チェーンから要素を削除する
+	//! @param	elm		削除する要素
+	//! @note	count をデクリメントしたあとに呼ぶこと
+	void CheckDeletingElementOrder(ElementT *elm)
+	{
+		if(inherited::InternalGetCount() > 0)
+		{
+			// まだ要素がある
+			if(elm == NFirst)
+			{
+				// deletion of first item
+				NFirst = elm->NNext;
+				NFirst->NPrev = NULL;
+			}
+			else if(elm == NLast)
+			{
+				// deletion of last item
+				NLast = elm->NPrev;
+				NLast->NNext = NULL;
+			}
+			else
+			{
+				// deletion of intermediate item
+				elm->NPrev->NNext = elm->NNext;
+				elm->NNext->NPrev = elm->NPrev;
+			}
+		}
+		else
+		{
+			// 要素がすべて0になったとき
+			NFirst = NLast = NULL;
+		}
+	}
+
+	//! @brief	順序付き要素を要素チェーンの先頭に持ってくる
+	//! @param	elm		要素
+	void CheckUpdateElementOrder(ElementT *elm)
+	{
+		// move elm to the front of addtional order
+		if(elm != NFirst)
+		{
+			if(NLast == elm) NLast = elm->NPrev;
+			elm->NPrev->NNext = elm->NNext;
+			if(elm->NNext) elm->NNext->NPrev = elm->NPrev;
+			elm->NNext = NFirst;
+			elm->NPrev = NULL;
+			NFirst->NPrev = elm;
+			NFirst = elm;
+		}
+	}
+
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+template <
+	typename KeyT,
+	typename ValueT,
+	typename HashTraitsT = tRisseHashTraits<KeyT>,
+	typename BaseClassT = tRisseHashTableBase<KeyT, ValueT, HashTraitsT,
+					tRisseHashTableElement<KeyT, ValueT> >
+		>
+class tRisseHashTable : public BaseClassT
+{
+	typedef BaseClassT inherited;
+	typedef tRisseHashTableElement<KeyT, ValueT> ElementT;
+
+public:
+	//! @brief		コンストラクタ
+	tRisseHashTable()
+	{
+	}
+
+	//! @brief		要素を追加する
+	//! @param		key		キー
+	//! @param		value	値
+	//! @note		すでにキーが存在していた場合は値が上書きされる
+	void Add(const KeyT &key, const ValueT &value)
+	{
+		// add Key and Value
+		inherited::InternalAddWithHash(key, HashTraitsT::Make(key), value);
 	}
 
 	//! @brief		キーを検索する
@@ -396,7 +747,7 @@ public:
 	{
 		// find key
 		// return   false  if not found
-		return FindWithHash(key, HashTraitsT::Make(key), keyout, value);
+		return Find(key, HashTraitsT::Make(key), keyout, value);
 	}
 
 	//! @brief		キーを検索する(あらかじめハッシュが分かっている場合)
@@ -444,161 +795,121 @@ public:
 	bool Delete(const KeyT &key)
 	{
 		// delete key and return true if successed
-		return DeleteWithHash(key, HashTraitsT::Make(key));
+		return InternalDeleteWithHash(key, HashTraitsT::Make(key));
 	}
 
-	//! @brief		キーを削除する(あらかじめハッシュが分かっている場合)
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @return		キーが見つかり、削除されれば真、削除されなければ偽
-	bool DeleteWithHash(const KeyT &key, risse_uint32 hash)
-	{
-		// delete key ( hash ) and return true if succeeded
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
-		if(HashTraitsT::HasHint)
-			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
-
-		ElementT *lv1 = Elms + (hash & HashMask);
-		if(lv1->Flags & UsingFlag && hash == lv1->Hash)
-		{
-			if(key == *(KeyT*)lv1->Key)
-			{
-				// delete lv1
-				Destruct(*lv1);
-				Count --;
-				return true;
-			}
-		}
-
-		ElementT *prev = lv1;
-		ElementT *elm = lv1->Next;
-		while(elm)
-		{
-			if(hash == elm->Hash)
-			{
-				if(key == *(KeyT*)elm->Key)
-				{
-					Destruct(*elm);
-					Count --;
-					prev->Next = elm->Next; // sever from the chain
-					if(elm->Next) elm->Next->Prev = prev;
-					delete elm;
-					return true;
-				}
-			}
-			prev = elm;
-			elm = elm->Next;
-		}
-		return false; // not found
-	}
-
-
-	//! @brief		要素数を得る
-	//! @return		要素数
-	risse_size GetCount() const { return Count; }
-
-private:
-	//! @brief		内部の要素をすべてクリアする
-	void InternalClear()
-	{
-		Count = 0;
-		for(risse_size i = 0; i <= HashMask; i++)
-		{
-			// level1の要素は参照を断ち切るために破壊する
-			if(Elms[i].Flags & UsingFlag)
-				Destruct(Elms[i]);
-
-			Elms[i].Flags = Lv1Flag;
-			Elms[i].Prev = NULL; // level2はこれにより切り離される
-			Elms[i].Next = NULL; // level2はこれにより切り離される
-		}
-	}
-
-	//! @brief		内部を初期化する
-	void InternalInit()
-	{
-//		Elms = reinterpret_cast<ElementT*>(RisseMallocCollectee(sizeof(ElementT)*(HashMask + 1)));
-		Elms = new ElementT[HashMask + 1];
-		InternalClear();
-	}
-
-
-	//! @brief		(内部関数)検索を行う
-	//! @param		key		キー
-	//! @param		hash	キーのハッシュ
-	//! @return		見つかった要素へのポインタ (NULL=見つからなかった)
-	const ElementT * InternalFindWithHash(const KeyT &key, risse_uint32 hash) const
-	{
-		// find key ( hash )
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
-
-		if(HashTraitsT::HasHint)
-			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
-
-		// lv1を検索
-		const ElementT *lv1 = Elms + (hash & HashMask);
-		if(hash == lv1->Hash && lv1->Flags & UsingFlag)
-		{
-			if(key == *(KeyT*)lv1->Key) return lv1;
-		}
-
-		// lv2を検索
-		ElementT *elm = lv1->Next;
-		while(elm)
-		{
-			if(hash == elm->Hash)
-			{
-				if(key == *(KeyT*)elm->Key) return elm;
-			}
-			elm = elm->Next;
-		}
-		return NULL; // not found
-	}
-
-	//! @brief		要素をコピーコンストラクタで構築する
-	//! @param		elm			要素
-	//! @param		key			キーの値
-	//! @param		value		値
-	static void Construct(ElementT &elm, const KeyT &key, const ValueT &value)
-	{
-		::new (&elm.Key) KeyT(key);
-		::new (&elm.Value) ValueT(value);
-		elm.Flags |= UsingFlag;
-	}
-
-	//! @brief		要素を破壊する
-	//! @param		elm		要素
-	//!	@note		このメソッドは強制的に KeyT と ValueT の in-place
-	//!				デストラクタを呼ぶ。@r
-	//!				これにより、KeyT および ValueT の内部がクリアされる
-	//!				ことを期待する物である。@r
-	//!				GC対応のコードではデストラクタは通常は書かないが、
-	//!				このクラスの KeyT や ValueT として使う場合は
-	//!				フィールドが保持しているポインタを破壊するコードを
-	//!				デストラクタに書くのが好ましい。@r
-	//!				また、このクラスはすべての KeyT および ValueT のインスタンス
-	//!				に対してデストラクタを呼び出す保証はないので、デストラクタが
-	//!				呼ばれることに依存したコードを書かないこと。
-	static void Destruct(ElementT &elm)
-	{
-		((KeyT*)(&elm.Key)) -> ~KeyT();
-		((ValueT*)(&elm.Value)) -> ~ValueT();
-		elm.Flags &= ~UsingFlag;
-	}
 
 };
 //---------------------------------------------------------------------------
 
 
-} // namespace Risse
+//---------------------------------------------------------------------------
+template <
+	typename KeyT,
+	typename ValueT,
+	typename HashTraitsT = tRisseHashTraits<KeyT>,
+	typename BaseClassT = tRisseHashTable<KeyT, ValueT, HashTraitsT, tRisseOrderedHashTableBase<KeyT, ValueT, HashTraitsT> >
+		>
+class tRisseOrderedHashTable : public BaseClassT
+{
+	typedef BaseClassT inherited;
+	typedef tRisseOrderedHashTableElement<KeyT, ValueT> ElementT;
 
+public:
+	//! @brief		コンストラクタ
+	tRisseOrderedHashTable()
+	{
+	}
 
+	//! @brief		キーを検索し、要素を先頭に持ってくる
+	//! @param		key		キー
+	//! @return		見つかった要素へのポインタ。null=見つからなかった
+	ValueT * FindAndTouch(const KeyT &key)
+	{
+		// find key
+		// return   NULL  if not found
+		risse_uint32 hash;
+		if(HashTraitsT::HasHint)
+		{
+			// ヒントを持っている場合
+			// 一度ヒントで検索を試みる
+			risse_uint32 hint = HashTraitsT::GetHint(key);
+			if(hint != 0)
+			{
+				const ElementT * elm = InternalFindAndTouchWithHash(key, hint);
+				if(elm) return (ValueT*)elm->Value; // 見つかった
+			}
+			// ヒントを用いて検索をしたら見つからなかった
+			// あるいはヒントが見つからなかった
+			// 本当にメンバが存在しないか、あるいはヒントが間違ってるのかの
+			// どちらかの可能性がある。
+			// ハッシュを再計算する。
+			hash = HashTraitsT::Make(key);
+			if(hint == hash)
+				return NULL; // ヒントとハッシュが同じだった場合はすでに試した
+		}
+		else
+		{
+			// ヒントを持っていない場合
+			hash = HashTraitsT::Make(key);
+		}
 
+		const ElementT * elm = InternalFindAndTouchWithHash(key, hash);
+		if(!elm) return NULL;
+		return (ValueT*)elm->Value;
+	}
 
+	//! @brief		キーを検索し、要素を先頭に持ってくる(見つかったキーと値のペアを返す)
+	//! @param		key		キー
+	//! @param		keyout	見つかったキー
+	//! @param		value	見つかった値
+	//! @return		キーが見つかれば真、見つからなければ偽
+	bool FindAndTouch(const KeyT &key, const KeyT *& keyout, ValueT *& value)
+	{
+		// find key
+		// return   false  if not found
+		return FindAndTouch(key, HashTraitsT::Make(key), keyout, value);
+	}
+
+	//! @brief		キーを検索し、要素を先頭に持ってくる(あらかじめハッシュが分かっている場合)
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @return		見つかった要素へのポインタ。null=見つからなかった
+	ValueT * FindAndTouchWithHash(const KeyT &key, risse_uint32 hash)
+	{
+		// find key ( hash )
+		// return   NULL  if not found
+#ifdef RISSE_HS_DEBUG_CHAIN
+		hash = 0;
 #endif
+		const ElementT * elm = InternalFindWithHash(key, hash);
+		if(!elm) return NULL;
+		return (ValueT*)elm->Value;
+	}
 
-
+	//! @brief		キーを検索し、要素を先頭に持ってくる(あらかじめハッシュが分かっている場合)(見つかったキーと値のペアを返す)
+	//! @param		key		キー
+	//! @param		hash	ハッシュ
+	//! @param		keyout	見つかったキー
+	//! @param		value	見つかった値
+	//! @return		キーが見つかれば真、見つからなければ偽
+	bool FindAndTouchWithHash(const KeyT &key, risse_uint32 hash, const KeyT *& keyout, ValueT *& value)
+	{
+		// find key
+		// return   false  if not found
+#ifdef RISSE_HS_DEBUG_CHAIN
+		hash = 0;
+#endif
+		const ElementT * elm = InternalFindWithHash(key, hash);
+		if(elm)
+		{
+			value = (ValueT*)elm->Value;
+			keyout = (const KeyT*)elm->Key;
+			return true;
+		}
+		return false;
+	}
+};
+//---------------------------------------------------------------------------
+}
+#endif

@@ -276,7 +276,7 @@ public:
 	}
 
 protected:
-	//! @brief		内部の要素をすべてクリアする
+	//! @brief		(内部関数)内部の要素をすべてクリアする
 	void InternalClear()
 	{
 		Count = 0;
@@ -293,7 +293,7 @@ protected:
 	}
 
 
-	//! @brief		要素を追加する(キーのハッシュ値がすでに分かっている場合)
+	//! @brief		(内部関数)要素を追加する(キーのハッシュ値がすでに分かっている場合)
 	//! @param		key		キー
 	//! @param		hash	ハッシュ
 	//! @param		value	値
@@ -429,7 +429,6 @@ protected:
 			{
 				if(key == *(KeyT*)elm->Key)
 				{
-					Destruct(*elm);
 					Count --;
 					prev->Next = elm->Next; // sever from the chain
 					if(elm->Next) elm->Next->Prev = prev;
@@ -443,6 +442,24 @@ protected:
 			elm = static_cast<tElement*>(elm->Next);
 		}
 		return NULL; // not found
+	}
+
+	//! @brief		(内部関数)キーを削除する(要素による指定)
+	//! @param		elm		削除したい要素
+	void InternalDeleteByElement(tElement * elm)
+	{
+		if(elm->Flags & Lv1Flag)
+		{
+			// 消したい要素はlv1にある
+			Destruct(*elm); // elm を破棄
+		}
+		else
+		{
+			// チェーンの中にあるのでチェーンからはずす
+			if(elm->Prev) static_cast<tElement*>(elm->Prev)->Next = static_cast<tElement*>(elm->Next);
+			if(elm->Next) static_cast<tElement*>(elm->Next)->Prev = static_cast<tElement*>(elm->Prev);
+		}
+		Count --;
 	}
 
 
@@ -591,14 +608,14 @@ public:
 
 
 protected:
-	//! @brief		内部の要素をすべてクリアする
+	//! @brief		(内部関数)内部の要素をすべてクリアする
 	void InternalClear()
 	{
 		inherited::InternalClear();
 		NFirst = NLast = NULL;
 	}
 
-	//! @brief		要素を追加する(キーのハッシュ値がすでに分かっている場合)
+	//! @brief		(内部関数)要素を追加する(キーのハッシュ値がすでに分かっている場合)
 	//! @param		key		キー
 	//! @param		hash	ハッシュ
 	//! @param		value	値
@@ -622,15 +639,15 @@ protected:
 	//! @param		key		キー
 	//! @param		hash	キーのハッシュ
 	//! @return		見つかった要素へのポインタ (NULL=見つからなかった)
-	const tElement * InternalFindAndTouchWithHash(const KeyT &key, risse_uint32 hash) const
+	const tElement * InternalFindAndTouchWithHash(const KeyT &key, risse_uint32 hash)
 	{
-		tElement * found = inherited::InternalFindWithHash(key, hash);
-		if(found) CheckUpdateElementOrder(found); // 先頭に持ってくる
+		const tElement * found = static_cast<const tElement*>(inherited::InternalFindWithHash(key, hash));
+		if(found) CheckUpdateElementOrder(const_cast<tElement*>(found)); // 先頭に持ってくる
 
 		return found;
 	}
 
-	//! @brief		キーを削除する(あらかじめハッシュが分かっている場合)
+	//! @brief		(内部関数)キーを削除する(あらかじめハッシュが分かっている場合)
 	//! @param		key		キー
 	//! @param		hash	ハッシュ
 	//! @return		キーが見つかり、削除されれば非NULL、削除されなければNULL
@@ -647,6 +664,13 @@ protected:
 		return deleted;
 	}
 
+	//! @brief		(内部関数)キーを削除する(要素による指定)
+	//! @param		elm		削除したい要素
+	void InternalDeleteByElement(tElement * elm)
+	{
+		inherited::InternalDeleteByElement(elm);
+		CheckDeletingElementOrder(elm);
+	}
 
 protected:
 
@@ -742,6 +766,12 @@ public:
 	//! @brief		コンストラクタ
 	tRisseHashTable()
 	{
+	}
+
+	//! @brief		要素をすべてクリアする
+	void Clear()
+	{
+		inherited::InternalClear();
 	}
 
 	//! @brief		要素を追加する
@@ -852,6 +882,13 @@ public:
 		return InternalDeleteWithHash(key, HashTraitsT::Make(key));
 	}
 
+
+	//! @brief		要素数を得る
+	//! @return		要素数
+	risse_size GetCount() const
+	{
+		return inherited::InternalGetCount();
+	}
 
 };
 //---------------------------------------------------------------------------
@@ -964,6 +1001,18 @@ public:
 		}
 		return false;
 	}
+
+	//! @brief		要素数を最大でn個に制限する
+	//! @param		n		制限する数(これより元々要素数が少ない場合は何もしない)
+	//! @note		余分な要素は追加/Touch順の最後の方から切り落とされる。
+	//!				ハッシュ表を使ったキャッシュの実装に用いる
+	void Crop(risse_size n)
+	{
+		if(n == 0)  { inherited::Clear(); return; }
+		while(inherited::GetCount() > n)
+			inherited::InternalDeleteByElement(inherited::NLast);
+	}
+
 };
 //---------------------------------------------------------------------------
 }

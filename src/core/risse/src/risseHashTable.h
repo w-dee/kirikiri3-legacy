@@ -16,11 +16,12 @@
 #include "risseTypes.h"
 #include "risseGC.h"
 
-// #define RISSE_HS_DEBUG_CHAIN  // to debug chain algorithm
-
 namespace Risse
 {
 
+/*
+	ハッシュ表の実装。頑張ってテンプレートにしたけどグチャグチャであんまりよくない。
+*/
 
 
 
@@ -149,12 +150,12 @@ template <
 		>
 struct tRisseHashTableElement : public tRisseCollectee
 {
-	risse_uint32 Hash;
-	risse_uint32 Flags; // management flag
-	char Key[sizeof(KeyT)];
-	char Value[sizeof(ValueT)];
-	tRisseHashTableElement *Prev; // previous chain item
-	tRisseHashTableElement *Next; // next chain item
+	risse_uint32 Hash; //!< ハッシュの値
+	risse_uint32 Flags; //!< management flag
+	char Key[sizeof(KeyT)]; // !< キーを保存するためのストレージ
+	char Value[sizeof(ValueT)]; //!< 値を保存するためのストレージ
+	tRisseHashTableElement *Prev; //!< previous chain item
+	tRisseHashTableElement *Next; //!< next chain item
 };
 //---------------------------------------------------------------------------
 
@@ -171,7 +172,7 @@ template <
 class tRisseHashTableBase : public tRisseCollectee
 {
 public:
-	typedef ElementT tElement;
+	typedef ElementT tElement; //!< 要素型のtypedef
 
 protected:
 	tElement * Elms; //!< 要素の配列
@@ -302,9 +303,6 @@ protected:
 	tElement * InternalAddWithHash(const KeyT &key, risse_uint32 hash, const ValueT &value)
 	{
 		// add Key ( hash ) and Value
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
 		if(HashTraitsT::HasHint)
 			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
 
@@ -369,10 +367,6 @@ protected:
 	const tElement * InternalFindWithHash(const KeyT &key, risse_uint32 hash) const
 	{
 		// find key ( hash )
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
-
 		if(HashTraitsT::HasHint)
 			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
 
@@ -403,9 +397,6 @@ protected:
 	tElement * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash)
 	{
 		// delete key ( hash ) and return true if succeeded
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
 		if(HashTraitsT::HasHint)
 			HashTraitsT::SetHint(key, hash); // 計算したハッシュはキーに格納しておく
 
@@ -542,7 +533,7 @@ class tRisseOrderedHashTableBase :
 		tRisseHashTableBase<KeyT, ValueT, HashTraitsT, ElementT >
 			inherited;
 public:
-	typedef ElementT tElement;
+	typedef ElementT tElement; //!< 要素型のtypedef
 
 protected:
 	tElement *NFirst; //!< 順序付き要素チェーンにおける最初の要素
@@ -760,7 +751,7 @@ template <
 class tRisseHashTable : public BaseClassT
 {
 	typedef BaseClassT inherited;
-	typedef ElementT tElement;
+	typedef ElementT tElement;  //!< 要素型のtypedef
 
 public:
 	//! @brief		コンストラクタ
@@ -842,9 +833,6 @@ public:
 	{
 		// find key ( hash )
 		// return   NULL  if not found
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
 		const tElement * elm = InternalFindWithHash(key, hash);
 		if(!elm) return NULL;
 		return (ValueT*)elm->Value;
@@ -860,9 +848,6 @@ public:
 	{
 		// find key
 		// return   false  if not found
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
 		const tElement * elm = InternalFindWithHash(key, hash);
 		if(elm)
 		{
@@ -905,7 +890,7 @@ template <
 class tRisseOrderedHashTable : public BaseClassT
 {
 	typedef BaseClassT inherited;
-	typedef ElementT tElement;
+	typedef ElementT tElement;  //!< 要素型のtypedef
 
 public:
 	//! @brief		コンストラクタ
@@ -971,9 +956,6 @@ public:
 	{
 		// find key ( hash )
 		// return   NULL  if not found
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
 		const tElement * elm = InternalFindWithHash(key, hash);
 		if(!elm) return NULL;
 		return (ValueT*)elm->Value;
@@ -989,9 +971,6 @@ public:
 	{
 		// find key
 		// return   false  if not found
-#ifdef RISSE_HS_DEBUG_CHAIN
-		hash = 0;
-#endif
 		const tElement * elm = InternalFindWithHash(key, hash);
 		if(elm)
 		{

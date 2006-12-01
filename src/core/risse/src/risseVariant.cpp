@@ -42,6 +42,14 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
+void tRisseVariantBlock::ThrowBadArgumentCount(int passed, int expected)
+{
+	throw
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
 	const tRisseMethodArgument & args,
 	const tRisseMethodArgument & bargs,

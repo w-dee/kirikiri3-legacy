@@ -323,6 +323,10 @@ public:
 void RisseThrowCannotCallNonFunctionObjectException();
 //! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生(暫定)
 void RisseThrowCannotCreateInstanceFromNonClassObjectException();
+//! @brief		「不正なパラメータの個数」例外を発生(暫定)
+//! @param		passed		実際に渡された個数
+//! @param		expected	期待した数
+void RisseThrowBadArgumentCount(risse_int passed, risse_int expected);
 //---------------------------------------------------------------------------
 
 

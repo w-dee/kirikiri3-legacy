@@ -115,6 +115,14 @@ void RisseThrowCannotCreateInstanceFromNonClassObjectException()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void RisseThrowBadArgumentCount(risse_int passed, risse_int expected)
+{
+	eRisseError::Throw(tRisseString(RISSE_WS_TR("invalid argument count (passed %1, expected %2)"),
+		tRisseString::AsString(passed), tRisseString::AsString(expected)));
+}
+//---------------------------------------------------------------------------
+
 
 
 

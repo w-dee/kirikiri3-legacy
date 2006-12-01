@@ -191,6 +191,10 @@ typedef tRisseVariantBlock tRisseVariant;
 		const tRisseVariant *This,             \
 		const tRisseStackFrameContext *stack
 
+//! @brief		Operateメソッドの引数一覧
+#define RISSE_OBJECTINTERFACE_PASS_ARG \
+		code, result, name, flags, args, bargs, This, stack
+
 //---------------------------------------------------------------------------
 //! @brief		Risseオブジェクトインターフェース
 //---------------------------------------------------------------------------

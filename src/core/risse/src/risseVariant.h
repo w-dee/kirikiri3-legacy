@@ -418,6 +418,224 @@ public: // Object関連
 		return GetObjectInterface() == NULL;
 	}
 
+public: // operate
+	//! @brief		オブジェクトに対して操作を行う
+	//! @param		code	オペレーションコード
+	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
+	//! @param		name	操作を行うメンバ名
+	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	//! @param		flags	オペレーションフラグ
+	//! @param		args	引数
+	//! @param		bargs	ブロック引数
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
+	//!						(NULL=スタックフレームコンテキストを指定しない場合)
+	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
+	//!				エラーコードなどの戻り値はない
+	void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+	{
+		if(!name.IsEmpty())
+		{
+			// 名前指定がある場合
+			return OperateForMember(RISSE_OBJECTINTERFACE_PASS_ARG);
+		}
+
+		switch(code)
+		{
+		case ocNoOperation		://!< なにもしない
+			return;
+
+		case ocNew				://!< "new"
+
+
+
+
+
+		case ocLogNot			://!< "!" logical not
+			if(result)
+				*result = LogNot();
+			else
+				BitNot(); // discard result
+			return;
+
+		case ocBitNot			://!< "~" bit not
+			if(result)
+				*result = BitNot();
+			else
+				BitNot(); // discard result
+			return;
+
+		case ocDecAssign		://!< "--" decrement
+			Dec();
+			if(result) *result = *this;
+			return;
+
+		case ocIncAssign		://!< "++" increment
+			Inc();
+			if(result) *result = *this
+			return;
+
+		case ocPlus				://!< "+"
+			if(result)
+				*result = Plus();
+			else
+				Plus(); // discard result
+			return;
+
+		case ocMinus			://!< "-"
+			if(result)
+				*result = Minus();
+			else
+				Minus(); // discard result
+			return;
+
+#define RISSE_BIN_OP(func) \
+			if(args.argc != 1) RisseThrowBadArgumentCount(args.argc, 1);\
+			if(result)                                                  \
+				*result = BitOr(*args.argv[0]);                         \
+			else                                                        \
+				BitOr(*args.argv[0]); /* discard result */              \
+			return;
+
+		case ocLogOr			://!< ||
+			RISSE_BIN_OP(LogOr);
+
+		case ocLogAnd			://!< &&
+			RISSE_BIN_OP(LogAnd);
+
+		case ocBitOr			://!< |
+			RISSE_BIN_OP(BitOr);
+
+		case ocBitXor			://!< ^
+			RISSE_BIN_OP(BitXor);
+
+		case ocBitAnd			://!< &
+			RISSE_BIN_OP(BitAnd);
+
+		case ocNotEqual			://!< !=
+			RISSE_BIN_OP(NotEqual);
+
+		case ocEqual			://!< ==
+			RISSE_BIN_OP(Equal);
+
+		case ocDiscNotEqual		://!< !==
+			RISSE_BIN_OP(DiscNotEqual);
+
+		case ocDiscEqual		://!< ===
+			RISSE_BIN_OP(DiscEqual);
+
+		case ocLesser			://!< <
+			RISSE_BIN_OP(Lesser);
+
+		case ocGreater			://!< >
+			RISSE_BIN_OP(Greater);
+
+		case ocLesserOrEqual	://!< <=
+			RISSE_BIN_OP(LesserOrEqual);
+
+		case ocGreaterOrEqual	://!< >=
+			RISSE_BIN_OP(GreaterOrEqual);
+
+		case ocRBitShift		://!< >>>
+			RISSE_BIN_OP(RBitShift);
+
+		case ocLShift			://!< <<
+			RISSE_BIN_OP(LShift);
+
+		case ocRShift			://!< >>
+			RISSE_BIN_OP(RShift);
+
+		case ocMod				://!< %
+			RISSE_BIN_OP(Mod);
+
+		case ocDiv				://!< /
+			RISSE_BIN_OP(Div);
+
+		case ocIdiv				://!< \ (integer div)
+			RISSE_BIN_OP(IDiv);
+
+		case ocMul				://!< *
+			RISSE_BIN_OP(Mul);
+
+		case ocAdd				://!< +
+			RISSE_BIN_OP(Add);
+
+		case ocSub				://!< -
+			RISSE_BIN_OP(Sub);
+
+//		case ocDGet				://!< get .  
+//			RISSE_BIN_OP(DGet);
+
+//		case ocIGet				://!< get [ ]
+//			RISSE_BIN_OP(IGet);
+
+//		case ocDDelete			://!< delete .
+//			RISSE_BIN_OP(DDelete);
+
+//		case ocIDelete			://!< delete [ ]
+//			RISSE_BIN_OP(IDelete);
+
+//		case ocDSet				://!< set .
+//			RISSE_BIN_OP(DSet);
+
+//		case ocISet				://!< set [ ]
+//			RISSE_BIN_OP(ISet);
+
+#define RISSE_ASSIGN_OP(func) \
+			if(args.argc != 1) RisseThrowBadArgumentCount(args.argc, 1);\
+			func(*args.argv[0]);                                        \
+			if(result) *result = *this;                                 \
+			return;
+
+		case ocBitAndAssign		://!< &=
+			RISSE_ASSIGN_OP(BitAndAssign);
+
+		case ocBitOrAssign		://!< |=
+			RISSE_ASSIGN_OP(BitOrAssign);
+
+		case ocBitXorAssign		://!< ^=
+			RISSE_ASSIGN_OP(BitXorAssign);
+
+		case ocSubAssign		://!< -=
+			RISSE_ASSIGN_OP(SubAssign);
+
+		case ocAddAssign		://!< +=
+			RISSE_ASSIGN_OP(AddAssign);
+
+		case ocModAssign		://!< %=
+			RISSE_ASSIGN_OP(ModAssign);
+
+		case ocDivAssign		://!< /=
+			RISSE_ASSIGN_OP(DivAssign);
+
+		case ocIdivAssign		://!< \=
+			RISSE_ASSIGN_OP(IdivAssign);
+
+		case ocMulAssign		://!< *=
+			RISSE_ASSIGN_OP(MulAssign);
+
+		case ocLogOrAssign		://!< ||=
+			RISSE_ASSIGN_OP(LogOrAssign)
+
+		case ocLogAndAssign		://!< &&=
+			RISSE_ASSIGN_OP(LogAndAssign)
+
+		case ocRBitShiftAssign	://!< >>>=
+			RISSE_ASSIGN_OP(BBitShiftAssign);
+
+		case ocLShiftAssign		://!< <<=
+			RISSE_ASSIGN_OP(LShiftAssign);
+
+		case ocRShiftAssign		://!< >>=
+			RISSE_ASSIGN_OP(RShiftAssign);
+
+		default:
+			// invalid opcode
+		}
+	}
+
+
 public: // 演算子
 
 	/*
@@ -532,6 +750,67 @@ public: // 演算子
 	tRisseVariantBlock BitNot_Object   () const { return (risse_int64)0; /* incomplete */; }
 
 	//-----------------------------------------------------------------------
+	//! @brief		++ 演算子			Inc
+	//! @return		演算結果(通常、+1 をした数値)
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & Inc()
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Inc_Void     ();
+		case vtInteger:	return Inc_Integer  ();
+		case vtReal:	return Inc_Real     ();
+		case vtBoolean:	return Inc_Boolean  ();
+		case vtString:	return Inc_String   ();
+		case vtOctet:	return Inc_Octet    ();
+		case vtObject:	return Inc_Object   ();
+		}
+		return tRisseVariantBlock();
+	}
+
+	tRisseVariantBlock & operator ++()    { /*前置*/ return Inc(); }
+	tRisseVariantBlock   operator ++(int) { /*後置*/ tRisseVariantBlock t = *this; Inc(); return t;}
+
+	tRisseVariantBlock & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
+	tRisseVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
+	tRisseVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
+	tRisseVariantBlock & Inc_Boolean  () { *this = (int)AsBoolean() + 1; return *this; }
+	tRisseVariantBlock & Inc_String   () { *this = Plus_String() + 1; return *this; }
+	tRisseVariantBlock & Inc_Octet    () { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock & Inc_Object   () { return (risse_int64)0; /* incomplete */; }
+
+	//-----------------------------------------------------------------------
+	//! @brief		-- 演算子			Dec
+	//! @return		演算結果(通常、-1 をした数値)
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & Dec()
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Dec_Void     ();
+		case vtInteger:	return Dec_Integer  ();
+		case vtReal:	return Dec_Real     ();
+		case vtBoolean:	return Dec_Boolean  ();
+		case vtString:	return Dec_String   ();
+		case vtOctet:	return Dec_Octet    ();
+		case vtObject:	return Dec_Object   ();
+		}
+		return tRisseVariantBlock();
+	}
+
+	tRisseVariantBlock & operator --()    { /*前置*/ return Dec(); }
+	tRisseVariantBlock   operator --(int) { /*後置*/ tRisseVariantBlock t = *this; Dec(); return t;}
+
+	tRisseVariantBlock & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
+	tRisseVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
+	tRisseVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
+	tRisseVariantBlock & Dec_Boolean  () { *this = (int)AsBoolean() - 1; return *this; }
+	tRisseVariantBlock & Dec_String   () { *this = Plus_String() - 1; return *this; }
+	tRisseVariantBlock & Dec_Octet    () { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock & Dec_Object   () { return (risse_int64)0; /* incomplete */; }
+
+
+	//-----------------------------------------------------------------------
 	//! @brief		単項 + 演算子		Plus
 	//! @return		演算結果(通常、数値へのキャスト)
 	//-----------------------------------------------------------------------
@@ -612,6 +891,17 @@ public: // 演算子
 	bool LogOr_Object   (const tRisseVariantBlock & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
+	//! @brief		||= 演算子		LogOrAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & LogOrAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->LogOr(rhs);
+		return *this;
+	}
+
+	//-----------------------------------------------------------------------
 	//! @brief		&& 演算子		LogAnd
 	//! @return		演算結果(通常、双方のbooleanキャストの論理積)
 	//! @note		この演算子はショートカットを行う。すなわち、左辺が偽ならば
@@ -632,6 +922,17 @@ public: // 演算子
 	bool LogAnd_String   (const tRisseVariantBlock & rhs) const { return CastToBoolean_String () && rhs.operator bool(); }
 	bool LogAnd_Octet    (const tRisseVariantBlock & rhs) const { return CastToBoolean_Octet  () && rhs.operator bool(); }
 	bool LogAnd_Object   (const tRisseVariantBlock & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
+
+	//-----------------------------------------------------------------------
+	//! @brief		&&= 演算子		LogAndAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & LogAndAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->LogAnd(rhs);
+		return *this;
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		| 演算子		BitOr
@@ -665,6 +966,19 @@ public: // 演算子
 	tRisseVariantBlock BitOr_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */; }
 
 	//-----------------------------------------------------------------------
+	//! @brief		|= 演算子		BitOrAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & BitOrAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->BitOr(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator |=(const tRisseVariantBlock & rhs) { return BitOrAssign(rhs); }
+
+	//-----------------------------------------------------------------------
 	//! @brief		^ 演算子		BitXor
 	//! @return		演算結果(通常、双方のintegerキャストのビット排他的論理和)
 	//-----------------------------------------------------------------------
@@ -696,6 +1010,19 @@ public: // 演算子
 	tRisseVariantBlock BitXor_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */; }
 
 	//-----------------------------------------------------------------------
+	//! @brief		^= 演算子		BitXorAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & BitXorAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->BitXor(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator ^=(const tRisseVariantBlock & rhs) { return BitXorAssign(rhs); }
+
+	//-----------------------------------------------------------------------
 	//! @brief		& 演算子		BitAnd
 	//! @return		演算結果(通常、双方のintegerキャストのビット論理積)
 	//-----------------------------------------------------------------------
@@ -725,6 +1052,19 @@ public: // 演算子
 	risse_int64        BitAnd_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		&= 演算子		BitAndAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & BitAndAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->BitAnd(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator &=(const tRisseVariantBlock & rhs) { return BitAndAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		!= 演算子		NotEqual
@@ -995,6 +1335,19 @@ public: // 演算子
 	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
+	//! @brief		>>>= 演算子		RBitShiftAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & RBitShiftAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->RBitShift(rhs);
+		return *this;
+	}
+
+	// 対応する C++ 演算子は無い
+
+	//-----------------------------------------------------------------------
 	//! @brief		<< 演算子(符号つき左シフト)		LShift
 	//! @param		rhs			右辺
 	//! @return		通常、左辺をintegerにキャストした後右辺辺回数分シフトしたもの
@@ -1025,6 +1378,19 @@ public: // 演算子
 	tRisseVariantBlock LShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		<<= 演算子		LShiftAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & LShiftAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->LShift(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator <<=(const tRisseVariantBlock & rhs) { return LShiftAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>> 演算子(符号つき右シフト)		RShift
@@ -1059,6 +1425,19 @@ public: // 演算子
 	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
+	//! @brief		>>= 演算子		RShiftAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & RShiftAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->RShift(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator >>=(const tRisseVariantBlock & rhs) { return RShiftAssign(rhs); }
+
+	//-----------------------------------------------------------------------
 	//! @brief		% 演算子(剰余)		Mod
 	//! @param		rhs			右辺
 	//! @return		通常、両方をintegerにキャストし、左辺を右辺で割ったあまり
@@ -1089,6 +1468,19 @@ public: // 演算子
 	tRisseVariantBlock Mod_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		%= 演算子		ModAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & ModAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->Mod(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator %=(const tRisseVariantBlock & rhs) { return ModAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		/ 演算子(剰余)		Div
@@ -1123,6 +1515,19 @@ public: // 演算子
 	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
+	//! @brief		/= 演算子		DivAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & DivAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->Div(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator /=(const tRisseVariantBlock & rhs) { return DivAssign(rhs); }
+
+	//-----------------------------------------------------------------------
 	//! @brief		\ 演算子(整数除算)		Idiv
 	//! @param		rhs			右辺
 	//! @return		通常、両方をintegerにキャストし、左辺を右辺で割ったもの
@@ -1151,6 +1556,19 @@ public: // 演算子
 	tRisseVariantBlock Idiv_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		\= 演算子		IdivAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & IdivAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->Idiv(rhs);
+		return *this;
+	}
+
+	// 対応する C++ 演算子は無い
 
 	//-----------------------------------------------------------------------
 	//! @brief		* 演算子(除算)		Mul
@@ -1185,6 +1603,19 @@ public: // 演算子
 	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
+	//! @brief		*= 演算子		MulAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & MulAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->Mul(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator *=(const tRisseVariantBlock & rhs) { return MulAssign(rhs); }
+
+	//-----------------------------------------------------------------------
 	//! @brief		+ 演算子(加算)		Add
 	//! @param		rhs			右辺
 	//! @return		左辺に右辺を加算した物
@@ -1215,6 +1646,19 @@ public: // 演算子
 	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 
 	//-----------------------------------------------------------------------
+	//! @brief		+= 演算子		AddAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & AddAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->Add(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator +=(const tRisseVariantBlock & rhs) { return AddAssign(rhs); }
+
+	//-----------------------------------------------------------------------
 	//! @brief		- 演算子(減算)		Sub
 	//! @param		rhs			右辺
 	//! @return		左辺から右辺を減算した物
@@ -1243,6 +1687,20 @@ public: // 演算子
 	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
 	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+
+	//-----------------------------------------------------------------------
+	//! @brief		-= 演算子		SubAssign
+	//! @return		演算後の*thisへの参照
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock & SubAssign(const tRisseVariantBlock & rhs)
+	{
+		// TODO: より効率的な実装
+		*this = this->Sub(rhs);
+		return *this;
+	}
+
+	tRisseVariantBlock & operator -=(const tRisseVariantBlock & rhs) { return SubAssign(rhs); }
+
 
 public: // キャスト
 	//-----------------------------------------------------------------------

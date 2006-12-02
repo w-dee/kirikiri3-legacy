@@ -180,7 +180,7 @@ protected:
 	const static risse_char MightBeShared  = static_cast<risse_char>(-1L);
 		//!< 共有可能性フラグとして Buffer[-1] に設定する値
 
-	//! @brief -1, 0 が入っている配列(空のバッファを表す)
+	//! @brief -1, 0, 0 が入っている配列(空のバッファを表す)
 	static risse_char EmptyBuffer[3];
 
 	#define RISSE_STRING_EMPTY_BUFFER (EmptyBuffer+1)

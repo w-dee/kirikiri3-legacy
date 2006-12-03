@@ -175,8 +175,8 @@ typedef tRisseVariantBlock tRisseVariant;
 		tRisseVariant * result = NULL,                                                    \
 		const tRisseString & name = tRisseString::GetEmptyString(),                       \
 		risse_uint32 flags = 0,                                                           \
-		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),     \
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),    \
+		const tRisseMethodArgument & args = tRisseMethodArgument::New(),                  \
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::New(),                 \
 		const tRisseVariant *This = NULL,                                                 \
 		const tRisseStackFrameContext *stack = NULL
 

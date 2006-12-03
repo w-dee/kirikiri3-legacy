@@ -674,6 +674,66 @@ public: // 演算子
 		const tRisseVariant * This);
 
 	//-----------------------------------------------------------------------
+	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		membername	メンバ名
+	//! @return		戻り値
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Invoke(
+		const tRisseString & membername)
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Invoke_Void     (membername);
+		case vtInteger:	return Invoke_Integer  (membername);
+		case vtReal:	return Invoke_Real     (membername);
+		case vtBoolean:	return Invoke_Boolean  (membername);
+		case vtString:	return Invoke_String   (membername);
+		case vtOctet:	return Invoke_Octet    (membername);
+		case vtObject:	return Invoke_Object   (membername);
+		}
+		return tRisseVariantBlock();
+	}
+
+	tRisseVariantBlock Invoke_Void     (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Real     (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_String   (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Object   (const tRisseString & membername);
+
+	//-----------------------------------------------------------------------
+	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		membername	メンバ名
+	//! @param		arg1		引数
+	//! @return		戻り値
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Invoke(
+		const tRisseString & membername,
+		const tRisseVariant & arg1)
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Invoke_Void     (membername,arg1);
+		case vtInteger:	return Invoke_Integer  (membername,arg1);
+		case vtReal:	return Invoke_Real     (membername,arg1);
+		case vtBoolean:	return Invoke_Boolean  (membername,arg1);
+		case vtString:	return Invoke_String   (membername,arg1);
+		case vtOctet:	return Invoke_Octet    (membername,arg1);
+		case vtObject:	return Invoke_Object   (membername,arg1);
+		}
+		return tRisseVariantBlock();
+	}
+
+	tRisseVariantBlock Invoke_Void     (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Real     (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_String   (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1);
+
+	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトをクラスと見なした)インスタンス作成	New
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		argc		引数の数

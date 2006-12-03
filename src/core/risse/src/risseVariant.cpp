@@ -63,6 +63,40 @@ void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername)
+{
+	tRisseObjectInterface * intf = GetObjectInterface();
+	if(!intf) { /* TODO: null check */; }
+	tRisseVariantBlock ret;
+	intf->Operate(ocFuncCall, &ret, membername,
+		0, 
+		tRisseMethodArgument::New(),
+		tRisseMethodArgument::New(),
+		this, NULL
+		);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1)
+{
+	tRisseObjectInterface * intf = GetObjectInterface();
+	if(!intf) { /* TODO: null check */; }
+	tRisseVariantBlock ret;
+	intf->Operate(ocFuncCall, &ret, membername,
+		0, 
+		tRisseMethodArgument::New(&arg1),
+		tRisseMethodArgument::New(),
+		this, NULL
+		);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Plus_String   () const
 {
 	tRisseVariantBlock val;

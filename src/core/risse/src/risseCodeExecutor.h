@@ -47,8 +47,8 @@ public:
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @param		result		戻りの値を格納する先
 	virtual void Execute(
-		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
+		const tRisseMethodArgument & args = tRisseMethodArgument::New(),
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::New(),
 		const tRisseVariant * This = NULL,
 		const tRisseStackFrameContext *stack = NULL,
 		tRisseVariant * result = NULL) = 0;
@@ -69,8 +69,8 @@ public:
 
 
 	void Execute(
-		const tRisseMethodArgument & args = tRisseMethodArgument::GetEmptyArgument(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::GetEmptyArgument(),
+		const tRisseMethodArgument & args = tRisseMethodArgument::New(),
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::New(),
 		const tRisseVariant * This = NULL,
 		const tRisseStackFrameContext *stack = NULL,
 		tRisseVariant * result = NULL);

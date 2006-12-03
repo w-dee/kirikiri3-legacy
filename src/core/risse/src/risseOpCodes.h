@@ -62,7 +62,14 @@ struct tRisseVMInsnInfo
 	const char * Name;							//!< 命令名
 	const char * Mnemonic;						//!< ニーモニック
 	tInsnFlag Flags[RisseMaxVMInsnOperand];		//!< オペランドnに対するフラグ
-	const char * MemberName;					//!< オブジェクトの演算子メンバ名
+
+	const tRisseStringData RawMemberName;		//!< オブジェクトの演算子メンバ名
+
+	//! @brief 演算子メンバ名に対応するtRisseStringオブジェクトを返す
+	const tRisseString & GetMemberName() const
+	{
+		return *reinterpret_cast<const tRisseString *>(&RawMemberName);
+	}
 };
 //---------------------------------------------------------------------------
 

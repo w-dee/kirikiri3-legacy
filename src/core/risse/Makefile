@@ -80,6 +80,7 @@ PREC_H_NAME = src/prec.h
 INCLUDES = -I. -Isrc/boost-coroutine
 
 # risseLexerMap.inc のコンパイル
+BIN_DEPS += src/risse_parser/risseLexerMap.inc
 
 src/risse_parser/risseLexerMap.inc: \
 		src/risse_parser/words.txt \
@@ -88,6 +89,7 @@ src/risse_parser/risseLexerMap.inc: \
 		src/risse_parser/risseLexerMap.inc
 
 # risseOpCodesEnum.inc と risseOpCodesDefs.inc のコンパイル
+BIN_DEPS += src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc
 
 src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc: \
 		src/risseOpCodes.txt \
@@ -97,6 +99,7 @@ src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc: \
 
 
 # risseParser.cpp と risseParser.inc のコンパイル
+BIN_DEPS += src/risseOpCodesEnum.inc src/risse_parser/risseParser.inc
 
 src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 		src/risse_parser/risse.y Makefile

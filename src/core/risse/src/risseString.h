@@ -176,15 +176,14 @@ struct tRisseStringData
 	mutable risse_char  *	Buffer;	//!< 文字列バッファ
 	risse_size				Length;	//!< 文字列長 (最後の \0 は含めない)
 
-protected:
+public:
 	const static risse_char MightBeShared  = static_cast<risse_char>(-1L);
 		//!< 共有可能性フラグとして Buffer[-1] に設定する値
 
 	//! @brief -1, 0, 0 が入っている配列(空のバッファを表す)
 	static risse_char EmptyBuffer[3];
 
-	#define RISSE_STRING_EMPTY_BUFFER (EmptyBuffer+1)
-
+	#define RISSE_STRING_EMPTY_BUFFER (tRisseStringData::EmptyBuffer+1)
 };
 //---------------------------------------------------------------------------
 

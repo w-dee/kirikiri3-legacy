@@ -3,12 +3,29 @@
 
 # risseOpCodes.txt から定義を生成する
 
-# エスケープ(ただし ' と " と \ しかエスケープしない)
+# ハッシュの計算
+
 class String
-	def escapeC
-		t = self.dup
-		t.gsub!(/(['\\"])/) { "\\#{$1}" }
-		t
+	# このハッシュ表は Risse のハッシュ表で使われているのと同じ方式である。
+	# 詳細は risseHashTable.h を参照のこと。
+	def make_risse_hash
+		hash = 0
+		self.each_byte do |byte|
+			hash += byte
+			hash &= 0xffffffff
+			hash += (hash << 10)
+			hash &= 0xffffffff
+			hash ^= (hash >> 6)
+			hash &= 0xffffffff
+		end
+		hash += (hash << 3)
+		hash &= 0xffffffff
+		hash ^= (hash >> 11)
+		hash &= 0xffffffff
+		hash += (hash << 15)
+		hash &= 0xffffffff
+		hash = 0xffffffff if hash == 0
+		hash
 	end
 end
 
@@ -46,6 +63,8 @@ end
 
 exit if errorcount != 0
 
+#-----------------------------------------------------------------------
+
 File.open(ARGV[1], "w") do |file|
 	# ヘッダを書き出す
 file.puts <<EOS
@@ -56,7 +75,7 @@ EOS
 
 	# 列挙型を書き出す
 	enumcount = 0
-	file.puts "//! @brief オペーレーションコードの列挙型"
+	file.puts "//! @brief オペレーションコードの列挙型"
 	file.puts "enum tRisseOpCode {"
 	defs.each do |item|
 		file.printf "/* %3d */ ", enumcount
@@ -67,6 +86,9 @@ EOS
 	file.puts "};"
 end
 
+#-----------------------------------------------------------------------
+
+
 File.open(ARGV[2], "w") do |file|
 	# ヘッダを書き出す
 file.puts <<EOS
@@ -75,17 +97,42 @@ file.puts <<EOS
 
 EOS
 
+	# RisseVMInsnInfo の tRisseString ストレージを書き出す
+	enumcount = 0
+	offset = 0
+	file.puts "//! @brief RisseVMInsnInfoのMemberNameが参照する文字列領域"
+	file.puts "//! @note この領域は tRisseString の文字列ポインタが指す先と"
+	file.puts "//!       同じレイアウトになっている"
+	file.puts "static risse_char RisseOperatorMemberNames [] = {"
+	defs.each do |item|
+		file.printf "/* %3d, offset=+%4d */", enumcount, offset
+		name = item[:member_name]
+		item[:member_name_offset] = offset
+		if name != '----'
+			file.print "tRisseStringData::MightBeShared,"
+			name.each_byte do |byte|
+				file.print "#{byte.chr.dump.gsub(/^"/,"'").gsub(/"$/,"'")},"
+			end
+			file.print "0,"  # null terminator
+			file.printf "0x%08x,", name.make_risse_hash  # hash
+			offset += name.length + 3
+		end
+		file.print "\n"
+		enumcount += 1
+	end
+	file.puts "};"
+
 	# tRisseVMInsnInfo の構造体を書き出す
 	enumcount = 0
 	file.puts "const tRisseVMInsnInfo RisseVMInsnInfo[] = {"
 	defs.each do |item|
 		file.printf "/* %3d */ {", enumcount
-		file.print "\"#{item[:long_id].escapeC}\", \"#{item[:mnemonic].escapeC}\", "
+		file.print "#{item[:long_id].dump}, #{item[:mnemonic].dump}, "
 		file.print "{#{item[:On].split(/,/).map{ |i| On_defs[i] }.join(',')}}, "
 		if item[:member_name] == '----'
-			file.print "NULL"
+			file.print "{RISSE_STRING_EMPTY_BUFFER,0}"
 		else
-			file.print "\"#{item[:member_name].escapeC}\""
+			file.print "{RisseOperatorMemberNames+#{item[:member_name_offset]+1},#{item[:member_name].length}}"
 		end
 		file.puts " /* #{item[:def_comment]} */},"
 		enumcount += 1
@@ -93,6 +140,8 @@ EOS
 
 	file.puts "};"
 end
+
+#-----------------------------------------------------------------------
 
 
 # 終了する

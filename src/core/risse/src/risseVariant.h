@@ -438,7 +438,7 @@ public: // operate
 		if(!name.IsEmpty())
 		{
 			// 名前指定がある場合
-			return OperateForMember(RISSE_OBJECTINTERFACE_PASS_ARG);
+//			return OperateForMember(RISSE_OBJECTINTERFACE_PASS_ARG);
 		}
 
 		switch(code)
@@ -473,7 +473,7 @@ public: // operate
 
 		case ocIncAssign		://!< "++" increment
 			Inc();
-			if(result) *result = *this
+			if(result) *result = *this;
 			return;
 
 		case ocPlus				://!< "+"
@@ -622,7 +622,7 @@ public: // operate
 			RISSE_ASSIGN_OP(LogAndAssign)
 
 		case ocRBitShiftAssign	://!< >>>=
-			RISSE_ASSIGN_OP(BBitShiftAssign);
+			RISSE_ASSIGN_OP(RBitShiftAssign);
 
 		case ocLShiftAssign		://!< <<=
 			RISSE_ASSIGN_OP(LShiftAssign);
@@ -632,6 +632,7 @@ public: // operate
 
 		default:
 			// invalid opcode
+			;
 		}
 	}
 
@@ -765,7 +766,7 @@ public: // 演算子
 		case vtOctet:	return Inc_Octet    ();
 		case vtObject:	return Inc_Object   ();
 		}
-		return tRisseVariantBlock();
+		return *this;
 	}
 
 	tRisseVariantBlock & operator ++()    { /*前置*/ return Inc(); }
@@ -774,10 +775,10 @@ public: // 演算子
 	tRisseVariantBlock & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
 	tRisseVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
 	tRisseVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
-	tRisseVariantBlock & Inc_Boolean  () { *this = (int)AsBoolean() + 1; return *this; }
-	tRisseVariantBlock & Inc_String   () { *this = Plus_String() + 1; return *this; }
-	tRisseVariantBlock & Inc_Octet    () { return (risse_int64)0; /* incomplete */; }
-	tRisseVariantBlock & Inc_Object   () { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)AsBoolean() + 1); return *this; }
+	tRisseVariantBlock & Inc_String   () { *this = tRisseVariantBlock((risse_int64)1).Add_Integer(Plus_String()); return *this; }
+	tRisseVariantBlock & Inc_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
+	tRisseVariantBlock & Inc_Object   () { *this = (risse_int64)0; return *this; /* incomplete */; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		-- 演算子			Dec
@@ -795,7 +796,7 @@ public: // 演算子
 		case vtOctet:	return Dec_Octet    ();
 		case vtObject:	return Dec_Object   ();
 		}
-		return tRisseVariantBlock();
+		return *this;
 	}
 
 	tRisseVariantBlock & operator --()    { /*前置*/ return Dec(); }
@@ -804,10 +805,10 @@ public: // 演算子
 	tRisseVariantBlock & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
 	tRisseVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
 	tRisseVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
-	tRisseVariantBlock & Dec_Boolean  () { *this = (int)AsBoolean() - 1; return *this; }
-	tRisseVariantBlock & Dec_String   () { *this = Plus_String() - 1; return *this; }
-	tRisseVariantBlock & Dec_Octet    () { return (risse_int64)0; /* incomplete */; }
-	tRisseVariantBlock & Dec_Object   () { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)AsBoolean() - 1); return *this; }
+	tRisseVariantBlock & Dec_String   () { *this = tRisseVariantBlock((risse_int64)-1).Add_Integer(Plus_String()); return *this; }
+	tRisseVariantBlock & Dec_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
+	tRisseVariantBlock & Dec_Object   () { *this = (risse_int64)0; return *this; /* incomplete */; }
 
 
 	//-----------------------------------------------------------------------

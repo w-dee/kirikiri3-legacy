@@ -20,17 +20,12 @@ RISSE_DEFINE_SOURCE_ID(2759,19905,41807,16730,27783,55397,28774,14847);
 } // namespace Risse
 
 
-// 名前表の読み込み
-// (ヘッダファイル中でもう一度 namespace Risse に入って
-// しまうので、ここは namespace Risse 外に置く)
-#undef risseOpCodesH
-#define RISSE_OC_DEFINE_INFO
-#include "risseOpCodes.h"
-
-
 
 namespace Risse
 {
+
+// 名前表の読み込み
+#include "risseOpCodesDefs.inc"
 
 //---------------------------------------------------------------------------
 risse_size tRisseVMCodeIterator::GetInsnSize() const

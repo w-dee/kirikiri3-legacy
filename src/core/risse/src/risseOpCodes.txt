@@ -1,0 +1,137 @@
+// 書式
+// '//' 以降はコメントとして見なされる
+// '#!<' は列挙型のコメントとして出力にも現れる
+// 順番は以下の通り
+// LongId      Mnemonic    O1O2O3O4O5O6    MemberName
+
+// MemberName に ---- と書いてある物は MemberNameが該当しない物
+
+// On の記号は以下の意味の通り (-=該当無し)
+-On		R		tRisseVMInsnInfo::vifRegister
+-On		C		tRisseVMInsnInfo::vifConstant
+-On		N		tRisseVMInsnInfo::vifNumber
+-On		A		tRisseVMInsnInfo::vifAddress
+-On		P		tRisseVMInsnInfo::vifParameter
+-On		S		tRisseVMInsnInfo::vifShared
+-On		O		tRisseVMInsnInfo::vifOthers
+
+
+//	ニーモニックに関するメモ:
+//	8 文字に納める
+//	人間がタイプするものではないので無理な省略はしない
+
+
+// なにもしない
+NoOperation				nop			-,-,-,-,-,-				----			#!< なにもしない
+
+// 代入
+Assign					copy		R,R,-,-,-,-				----			#!< = (ローカル変数の代入)
+AssignConstant			const		R,C,-,-,-,-				----			#!< = 定数の代入
+AssignThis				this		R,-,-,-,-,-				----			#!< = thisの代入
+AssignSuper				super		R,-,-,-,-,-				----			#!< = superの代入
+AssignGlobal			global		R,-,-,-,-,-				----			#!< = globalの代入
+AssignNewArray			array		R,-,-,-,-,-				----			#!< = 新しい配列オブジェクトの代入
+AssignNewDict			dict		R,-,-,-,-,-				----			#!< = 新しい辞書配列オブジェクトの代入
+AssignNewRegExp			regexp		R,-,-,-,-,-				----			#!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+AssignParam				param		R,P,-,-,-,-				----			#!< = (O番目の関数引数を代入)
+AssignBlockParam		bparam		R,P,-,-,-,-				----			#!< = (O番目の関数ブロック引数を代入)
+
+// 共有空間アクセス
+Write					swrite		S,R,-,-,-,-				----			#!< 共有空間への書き込み
+Read					sread		R,S,-,-,-,-				----			#!< 共有空間からの読み込み
+
+// 関数定義/引数処理/関数呼び出し
+New						new			R,R,O,N,-,-				new				#!< "new"
+TryFuncCall				trycall		R,R,O,N,N,-				----			#!< try function call
+FuncCall				call		R,R,O,N,-,-				----			#!< function call
+FuncCallBlock			callb		R,R,O,N,N,-				----			#!< function call with lazyblock(VMのみで使用)
+SetFrame				sframe		R,-,-,-,-,-				----			#!< スタックフレームと共有空間を設定する
+SetShare				sshare		R,-,-,-,-,-				----			#!< 共有空間のみ設定する
+
+// ジャンプ/分岐/制御/補助
+Jump					jump		A,-,-,-,-,-				----			#!< 単純なジャンプ
+Branch					branch		R,A,A,-,-,-				----			#!< 分岐
+CatchBranch				cbranch		R,C,N,-,-,-				----			#!< 例外catch用の分岐
+//EnterTryBlock			enttry		A,A,A,-,-,-				----			#!< 例外保護ブロックに入る(VMのみで使用)
+//ExitTryBlock			exittry		-,-,-,-,-,-				----			#!< 例外保護ブロックから抜ける(VMのみで使用)
+Return					return		R,-,-,-,-,-				----			#!< return ステートメント
+Debugger				debug		-,-,-,-,-,-				----			#!< debugger ステートメント
+Throw					throw		R,-,-,-,-,-				----			#!< throw ステートメント
+ExitTryException		exittry		R,C,O,-,-,-				----			#!< Try脱出用例外を発生させる
+GetExitTryValue			exitval		R,R,-,-,-,-				----			#!< Try脱出用例外オブジェクトから値を得る
+
+// 引数1+なし
+LogNot					lnot		R,R,-,-,-,-				----			#!< "!" logical not
+BitNot					bnot		R,R,-,-,-,-				~				#!< "~" bit not
+DecAssign				ERR			-,-,-,-,-,-				--				#!< "--" decrement
+IncAssign				ERR			-,-,-,-,-,-				++				#!< ++ increment
+Plus					plus		R,R,-,-,-,-				+@				#!< +
+Minus					minus		R,R,-,-,-,-				-@				#!< -
+
+// 引数1+1つ
+LogOr					lor			R,R,R,-,-,-				||				#!< ||
+LogAnd					land		R,R,R,-,-,-				&&				#!< &&
+BitOr					bor			R,R,R,-,-,-				|				#!< |
+BitXor					bxor		R,R,R,-,-,-				^				#!< ^
+BitAnd					band		R,R,R,-,-,-				&				#!< &
+NotEqual				ne			R,R,R,-,-,-				!=				#!< !=
+Equal					eq			R,R,R,-,-,-				==				#!< ==
+DiscNotEqual			dne			R,R,R,-,-,-				!==				#!< !==
+DiscEqual				deq			R,R,R,-,-,-				===				#!< ===
+Lesser					lt			R,R,R,-,-,-				<				#!< <
+Greater					gt			R,R,R,-,-,-				>				#!< >
+LesserOrEqual			lte			R,R,R,-,-,-				<=				#!< <=
+GreaterOrEqual			gte			R,R,R,-,-,-				>=				#!< >=
+RBitShift				rbs			R,R,R,-,-,-				>>>				#!< >>>
+LShift					ls			R,R,R,-,-,-				<<				#!< <<
+RShift					rs			R,R,R,-,-,-				>>				#!< >>
+Mod						mod			R,R,R,-,-,-				%				#!< %
+Div						div			R,R,R,-,-,-				/				#!< /
+Idiv					idiv		R,R,R,-,-,-				\				#!< \ (integer div)
+Mul						mul			R,R,R,-,-,-				*				#!< *
+Add						add			R,R,R,-,-,-				+				#!< +
+Sub						sub			R,R,R,-,-,-				-				#!< -
+IncontextOf				chgc		R,R,R,-,-,-				----			#!< incontextof
+
+DGet					dget		R,R,R,-,-,-				----			#!< get .  
+IGet					iget		R,R,R,-,-,-				[]				#!< get [ ]
+DDelete					ddel		R,R,R,-,-,-				----			#!< delete .
+IDelete					idel		R,R,R,-,-,-				delete[]		#!< delete [ ]
+
+// 引数1+2つ
+DSet					dset		R,R,R,-,-,-				----			#!< set .
+ISet					iset		R,R,R,-,-,-				[]=				#!< set [ ]
+
+// 代入演算子の類
+BitAndAssign			ERR			-,-,-,-,-,-				&=				#!< &=
+BitOrAssign				ERR			-,-,-,-,-,-				|=				#!< |=
+BitXorAssign			ERR			-,-,-,-,-,-				^=				#!< ^=
+SubAssign				ERR			-,-,-,-,-,-				-=				#!< -=
+AddAssign				ERR			-,-,-,-,-,-				+=				#!< +=
+ModAssign				ERR			-,-,-,-,-,-				%=				#!< %=
+DivAssign				ERR			-,-,-,-,-,-				/=				#!< /=
+IdivAssign				ERR			-,-,-,-,-,-				\=				#!< \=
+MulAssign				ERR			-,-,-,-,-,-				*=				#!< *=
+LogOrAssign				ERR			-,-,-,-,-,-				||=				#!< ||=
+LogAndAssign			ERR			-,-,-,-,-,-				&&=				#!< &&=
+RBitShiftAssign			ERR			-,-,-,-,-,-				>>>=			#!< >>>=
+LShiftAssign			ERR			-,-,-,-,-,-				<<=				#!< <<=
+RShiftAssign			ERR			-,-,-,-,-,-				>>=				#!< >>=
+
+// VM コードの最後
+VMCodeLast				ERR			-,-,-,-,-,-				----			#!< VMオペコードの最後
+
+
+// SSA形式特有
+Phi						ERR			-,-,-,-,-,-				----			#!< φ関数
+DefineAccessMap			ERR			-,-,-,-,-,-				----			#!< アクセスマップ定義
+DefineLazyBlock			ERR			-,-,-,-,-,-				----			#!< 遅延評価ブロックの定義
+EndAccessMap			ERR			-,-,-,-,-,-				----			#!< アクセスマップの使用終了
+ParentWrite				ERR			-,-,-,-,-,-				----			#!< 親名前空間への書き込み
+ParentRead				ERR			-,-,-,-,-,-				----			#!< 親名前空間からの読み込み
+ChildWrite				ERR			-,-,-,-,-,-				----			#!< 子名前空間への書き込み
+ChildRead				ERR			-,-,-,-,-,-				----			#!< 子名前空間からの読み込み
+WriteVar				ERR			-,-,-,-,-,-				----			#!< 変数への書き込み(変換の過程でocAssignかocWriteに変わる)
+ReadVar					ERR			-,-,-,-,-,-				----			#!< 変数からの読み込み(変換の過程でocAssignかocReadに変わる)
+
+OpCodeLast				ERR			-,-,-,-,-,-				----			#!< オペコードの最後

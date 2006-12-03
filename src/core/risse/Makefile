@@ -87,6 +87,15 @@ src/risse_parser/risseLexerMap.inc: \
 	ruby tools/create_word_map.rb src/risse_parser/words.txt RisseMapToken > \
 		src/risse_parser/risseLexerMap.inc
 
+# risseOpCodesEnum.inc と risseOpCodesDefs.inc のコンパイル
+
+src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc: \
+		src/risseOpCodes.txt \
+		tools/opcodes.rb Makefile
+	ruby tools/opcodes.rb src/risseOpCodes.txt \
+		src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc
+
+
 # risseParser.cpp と risseParser.inc のコンパイル
 
 src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \

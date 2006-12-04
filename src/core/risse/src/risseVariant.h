@@ -679,7 +679,7 @@ public: // 演算子
 	//! @return		戻り値
 	//-----------------------------------------------------------------------
 	tRisseVariantBlock Invoke(
-		const tRisseString & membername)
+		const tRisseString & membername) const
 	{
 		switch(GetType())
 		{
@@ -694,13 +694,13 @@ public: // 演算子
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Void     (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Real     (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_String   (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Object   (const tRisseString & membername);
+	tRisseVariantBlock Invoke_Void     (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Real     (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_String   (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Object   (const tRisseString & membername) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -710,7 +710,7 @@ public: // 演算子
 	//-----------------------------------------------------------------------
 	tRisseVariantBlock Invoke(
 		const tRisseString & membername,
-		const tRisseVariant & arg1)
+		const tRisseVariant & arg1) const
 	{
 		switch(GetType())
 		{
@@ -725,13 +725,13 @@ public: // 演算子
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Void     (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Real     (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_String   (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername,const tRisseVariant & arg1) { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1);
+	tRisseVariantBlock Invoke_Void     (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Real     (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_String   (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトをクラスと見なした)インスタンス作成	New
@@ -1789,7 +1789,7 @@ public: // キャスト
 	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)AsBoolean(); }
 	risse_int64 CastToInteger_String   () const;
 	risse_int64 CastToInteger_Octet    () const { return (risse_int64)0; /* incomplete */ }
-	risse_int64 CastToInteger_Object   () const { return (risse_int64)0; /* incomplete */ }
+	risse_int64 CastToInteger_Object   () const { return Invoke(mnInteger); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		realに変換
@@ -1816,7 +1816,7 @@ public: // キャスト
 	double CastToReal_Boolean  () const { return (double)(int)AsBoolean(); }
 	double CastToReal_String   () const { return (double)Plus_String(); /* Plus_String の戻りを double に再キャスト */ }
 	double CastToReal_Octet    () const { return (double)0.0; /* incomplete */ }
-	double CastToReal_Object   () const { return (double)0.0; /* incomplete */ }
+	double CastToReal_Object   () const { return Invoke(mnReal); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		boolに変換
@@ -1843,7 +1843,7 @@ public: // キャスト
 	bool CastToBoolean_Boolean  () const { return AsBoolean(); }
 	bool CastToBoolean_String   () const { return !AsString().IsEmpty(); }
 	bool CastToBoolean_Octet    () const { return !AsOctet().IsEmpty(); }
-	bool CastToBoolean_Object   () const { return true; /* incomplete */ }
+	bool CastToBoolean_Object   () const { return Invoke(mnBoolean); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		文字列に変換
@@ -1870,7 +1870,7 @@ public: // キャスト
 	tRisseString CastToString_Boolean  () const;
 	tRisseString CastToString_String   () const { return AsString(); }
 	tRisseString CastToString_Octet    () const { return AsOctet().AsHumanReadable();  }
-	tRisseString CastToString_Object   () const { return tRisseString(); /* incomplete */ }
+	tRisseString CastToString_Object   () const { return Invoke(mnString); }
 
 public: // ユーティリティ
 	//-----------------------------------------------------------------------

@@ -63,7 +63,7 @@ void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
 
 
 //---------------------------------------------------------------------------
-tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername)
+tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	if(!intf) { /* TODO: null check */; }
@@ -80,7 +80,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 
 
 //---------------------------------------------------------------------------
-tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1)
+tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	if(!intf) { /* TODO: null check */; }

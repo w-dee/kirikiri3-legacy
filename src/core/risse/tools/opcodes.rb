@@ -79,11 +79,21 @@ EOS
 	file.puts "enum tRisseOpCode {"
 	defs.each do |item|
 		file.printf "/* %3d */ ", enumcount
-		file.puts "oc#{item[:long_id]} /*!< #{item[:def_comment]} */,"
+		file.puts "oc#{item[:long_id]} /*!<#{item[:def_comment]} */,"
 		enumcount += 1
 	end
 
 	file.puts "};"
+
+	# 演算子メンバ名へのエイリアスを書き出す
+	defs.each do |item|
+		name = item[:member_name]
+		if name != '----'
+			file.puts("static const tRisseString & mn#{item[:long_id]} = "+
+				"*reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[oc#{item[:long_id]}].RawMemberName);"+
+				" //!< (演算子メンバ名) #{item[:def_comment]}")
+		end
+	end
 end
 
 #-----------------------------------------------------------------------

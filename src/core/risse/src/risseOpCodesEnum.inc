@@ -3,92 +3,145 @@
 
 //! @brief オペレーションコードの列挙型
 enum tRisseOpCode {
-/*   0 */ ocNoOperation /*!<  なにもしない */,
-/*   1 */ ocAssign /*!<  = (ローカル変数の代入) */,
-/*   2 */ ocAssignConstant /*!<  = 定数の代入 */,
-/*   3 */ ocAssignThis /*!<  = thisの代入 */,
-/*   4 */ ocAssignSuper /*!<  = superの代入 */,
-/*   5 */ ocAssignGlobal /*!<  = globalの代入 */,
-/*   6 */ ocAssignNewArray /*!<  = 新しい配列オブジェクトの代入 */,
-/*   7 */ ocAssignNewDict /*!<  = 新しい辞書配列オブジェクトの代入 */,
-/*   8 */ ocAssignNewRegExp /*!<  = 新しい正規表現オブジェクトの代入 (引数2つ) */,
-/*   9 */ ocAssignParam /*!<  = (O番目の関数引数を代入) */,
-/*  10 */ ocAssignBlockParam /*!<  = (O番目の関数ブロック引数を代入) */,
-/*  11 */ ocWrite /*!<  共有空間への書き込み */,
-/*  12 */ ocRead /*!<  共有空間からの読み込み */,
-/*  13 */ ocNew /*!<  "new" */,
-/*  14 */ ocTryFuncCall /*!<  try function call */,
-/*  15 */ ocFuncCall /*!<  function call */,
-/*  16 */ ocFuncCallBlock /*!<  function call with lazyblock(VMのみで使用) */,
-/*  17 */ ocSetFrame /*!<  スタックフレームと共有空間を設定する */,
-/*  18 */ ocSetShare /*!<  共有空間のみ設定する */,
-/*  19 */ ocJump /*!<  単純なジャンプ */,
-/*  20 */ ocBranch /*!<  分岐 */,
-/*  21 */ ocCatchBranch /*!<  例外catch用の分岐 */,
-/*  22 */ ocReturn /*!<  return ステートメント */,
-/*  23 */ ocDebugger /*!<  debugger ステートメント */,
-/*  24 */ ocThrow /*!<  throw ステートメント */,
-/*  25 */ ocExitTryException /*!<  Try脱出用例外を発生させる */,
-/*  26 */ ocGetExitTryValue /*!<  Try脱出用例外オブジェクトから値を得る */,
-/*  27 */ ocLogNot /*!<  "!" logical not */,
-/*  28 */ ocBitNot /*!<  "~" bit not */,
-/*  29 */ ocDecAssign /*!<  "--" decrement */,
-/*  30 */ ocIncAssign /*!<  ++ increment */,
-/*  31 */ ocPlus /*!<  + */,
-/*  32 */ ocMinus /*!<  - */,
-/*  33 */ ocLogOr /*!<  || */,
-/*  34 */ ocLogAnd /*!<  && */,
-/*  35 */ ocBitOr /*!<  | */,
-/*  36 */ ocBitXor /*!<  ^ */,
-/*  37 */ ocBitAnd /*!<  & */,
-/*  38 */ ocNotEqual /*!<  != */,
-/*  39 */ ocEqual /*!<  == */,
-/*  40 */ ocDiscNotEqual /*!<  !== */,
-/*  41 */ ocDiscEqual /*!<  === */,
-/*  42 */ ocLesser /*!<  < */,
-/*  43 */ ocGreater /*!<  > */,
-/*  44 */ ocLesserOrEqual /*!<  <= */,
-/*  45 */ ocGreaterOrEqual /*!<  >= */,
-/*  46 */ ocRBitShift /*!<  >>> */,
-/*  47 */ ocLShift /*!<  << */,
-/*  48 */ ocRShift /*!<  >> */,
-/*  49 */ ocMod /*!<  % */,
-/*  50 */ ocDiv /*!<  / */,
-/*  51 */ ocIdiv /*!<  \ (integer div) */,
-/*  52 */ ocMul /*!<  * */,
-/*  53 */ ocAdd /*!<  + */,
-/*  54 */ ocSub /*!<  - */,
-/*  55 */ ocIncontextOf /*!<  incontextof */,
-/*  56 */ ocDGet /*!<  get .   */,
-/*  57 */ ocIGet /*!<  get [ ] */,
-/*  58 */ ocDDelete /*!<  delete . */,
-/*  59 */ ocIDelete /*!<  delete [ ] */,
-/*  60 */ ocDSet /*!<  set . */,
-/*  61 */ ocISet /*!<  set [ ] */,
-/*  62 */ ocBitAndAssign /*!<  &= */,
-/*  63 */ ocBitOrAssign /*!<  |= */,
-/*  64 */ ocBitXorAssign /*!<  ^= */,
-/*  65 */ ocSubAssign /*!<  -= */,
-/*  66 */ ocAddAssign /*!<  += */,
-/*  67 */ ocModAssign /*!<  %= */,
-/*  68 */ ocDivAssign /*!<  /= */,
-/*  69 */ ocIdivAssign /*!<  \= */,
-/*  70 */ ocMulAssign /*!<  *= */,
-/*  71 */ ocLogOrAssign /*!<  ||= */,
-/*  72 */ ocLogAndAssign /*!<  &&= */,
-/*  73 */ ocRBitShiftAssign /*!<  >>>= */,
-/*  74 */ ocLShiftAssign /*!<  <<= */,
-/*  75 */ ocRShiftAssign /*!<  >>= */,
-/*  76 */ ocVMCodeLast /*!<  VMオペコードの最後 */,
-/*  77 */ ocPhi /*!<  φ関数 */,
-/*  78 */ ocDefineAccessMap /*!<  アクセスマップ定義 */,
-/*  79 */ ocDefineLazyBlock /*!<  遅延評価ブロックの定義 */,
-/*  80 */ ocEndAccessMap /*!<  アクセスマップの使用終了 */,
-/*  81 */ ocParentWrite /*!<  親名前空間への書き込み */,
-/*  82 */ ocParentRead /*!<  親名前空間からの読み込み */,
-/*  83 */ ocChildWrite /*!<  子名前空間への書き込み */,
-/*  84 */ ocChildRead /*!<  子名前空間からの読み込み */,
-/*  85 */ ocWriteVar /*!<  変数への書き込み(変換の過程でocAssignかocWriteに変わる) */,
-/*  86 */ ocReadVar /*!<  変数からの読み込み(変換の過程でocAssignかocReadに変わる) */,
-/*  87 */ ocOpCodeLast /*!<  オペコードの最後 */,
+/*   0 */ ocNoOperation /*!< なにもしない */,
+/*   1 */ ocAssign /*!< = (ローカル変数の代入) */,
+/*   2 */ ocAssignConstant /*!< = 定数の代入 */,
+/*   3 */ ocAssignThis /*!< = thisの代入 */,
+/*   4 */ ocAssignSuper /*!< = superの代入 */,
+/*   5 */ ocAssignGlobal /*!< = globalの代入 */,
+/*   6 */ ocAssignNewArray /*!< = 新しい配列オブジェクトの代入 */,
+/*   7 */ ocAssignNewDict /*!< = 新しい辞書配列オブジェクトの代入 */,
+/*   8 */ ocAssignNewRegExp /*!< = 新しい正規表現オブジェクトの代入 (引数2つ) */,
+/*   9 */ ocAssignParam /*!< = (O番目の関数引数を代入) */,
+/*  10 */ ocAssignBlockParam /*!< = (O番目の関数ブロック引数を代入) */,
+/*  11 */ ocWrite /*!< 共有空間への書き込み */,
+/*  12 */ ocRead /*!< 共有空間からの読み込み */,
+/*  13 */ ocNew /*!< "new" */,
+/*  14 */ ocTryFuncCall /*!< try function call */,
+/*  15 */ ocFuncCall /*!< function call */,
+/*  16 */ ocFuncCallBlock /*!< function call with lazyblock(VMのみで使用) */,
+/*  17 */ ocSetFrame /*!< スタックフレームと共有空間を設定する */,
+/*  18 */ ocSetShare /*!< 共有空間のみ設定する */,
+/*  19 */ ocJump /*!< 単純なジャンプ */,
+/*  20 */ ocBranch /*!< 分岐 */,
+/*  21 */ ocCatchBranch /*!< 例外catch用の分岐 */,
+/*  22 */ ocReturn /*!< return ステートメント */,
+/*  23 */ ocDebugger /*!< debugger ステートメント */,
+/*  24 */ ocThrow /*!< throw ステートメント */,
+/*  25 */ ocExitTryException /*!< Try脱出用例外を発生させる */,
+/*  26 */ ocGetExitTryValue /*!< Try脱出用例外オブジェクトから値を得る */,
+/*  27 */ ocLogNot /*!< "!" logical not */,
+/*  28 */ ocBitNot /*!< "~" bit not */,
+/*  29 */ ocDecAssign /*!< "--" decrement */,
+/*  30 */ ocIncAssign /*!< ++ increment */,
+/*  31 */ ocPlus /*!< + */,
+/*  32 */ ocMinus /*!< - */,
+/*  33 */ ocString /*!< 文字列にキャスト */,
+/*  34 */ ocBoolean /*!< booleanにキャスト */,
+/*  35 */ ocReal /*!< realにキャスト */,
+/*  36 */ ocInteger /*!< integerにキャスト */,
+/*  37 */ ocLogOr /*!< || */,
+/*  38 */ ocLogAnd /*!< && */,
+/*  39 */ ocBitOr /*!< | */,
+/*  40 */ ocBitXor /*!< ^ */,
+/*  41 */ ocBitAnd /*!< & */,
+/*  42 */ ocNotEqual /*!< != */,
+/*  43 */ ocEqual /*!< == */,
+/*  44 */ ocDiscNotEqual /*!< !== */,
+/*  45 */ ocDiscEqual /*!< === */,
+/*  46 */ ocLesser /*!< < */,
+/*  47 */ ocGreater /*!< > */,
+/*  48 */ ocLesserOrEqual /*!< <= */,
+/*  49 */ ocGreaterOrEqual /*!< >= */,
+/*  50 */ ocRBitShift /*!< >>> */,
+/*  51 */ ocLShift /*!< << */,
+/*  52 */ ocRShift /*!< >> */,
+/*  53 */ ocMod /*!< % */,
+/*  54 */ ocDiv /*!< / */,
+/*  55 */ ocIdiv /*!< \ (integer div) */,
+/*  56 */ ocMul /*!< * */,
+/*  57 */ ocAdd /*!< + */,
+/*  58 */ ocSub /*!< - */,
+/*  59 */ ocIncontextOf /*!< incontextof */,
+/*  60 */ ocDGet /*!< get .   */,
+/*  61 */ ocIGet /*!< get [ ] */,
+/*  62 */ ocDDelete /*!< delete . */,
+/*  63 */ ocIDelete /*!< delete [ ] */,
+/*  64 */ ocDSet /*!< set . */,
+/*  65 */ ocISet /*!< set [ ] */,
+/*  66 */ ocBitAndAssign /*!< &= */,
+/*  67 */ ocBitOrAssign /*!< |= */,
+/*  68 */ ocBitXorAssign /*!< ^= */,
+/*  69 */ ocSubAssign /*!< -= */,
+/*  70 */ ocAddAssign /*!< += */,
+/*  71 */ ocModAssign /*!< %= */,
+/*  72 */ ocDivAssign /*!< /= */,
+/*  73 */ ocIdivAssign /*!< \= */,
+/*  74 */ ocMulAssign /*!< *= */,
+/*  75 */ ocLogOrAssign /*!< ||= */,
+/*  76 */ ocLogAndAssign /*!< &&= */,
+/*  77 */ ocRBitShiftAssign /*!< >>>= */,
+/*  78 */ ocLShiftAssign /*!< <<= */,
+/*  79 */ ocRShiftAssign /*!< >>= */,
+/*  80 */ ocVMCodeLast /*!< VMオペコードの最後 */,
+/*  81 */ ocPhi /*!< φ関数 */,
+/*  82 */ ocDefineAccessMap /*!< アクセスマップ定義 */,
+/*  83 */ ocDefineLazyBlock /*!< 遅延評価ブロックの定義 */,
+/*  84 */ ocEndAccessMap /*!< アクセスマップの使用終了 */,
+/*  85 */ ocParentWrite /*!< 親名前空間への書き込み */,
+/*  86 */ ocParentRead /*!< 親名前空間からの読み込み */,
+/*  87 */ ocChildWrite /*!< 子名前空間への書き込み */,
+/*  88 */ ocChildRead /*!< 子名前空間からの読み込み */,
+/*  89 */ ocWriteVar /*!< 変数への書き込み(変換の過程でocAssignかocWriteに変わる) */,
+/*  90 */ ocReadVar /*!< 変数からの読み込み(変換の過程でocAssignかocReadに変わる) */,
+/*  91 */ ocOpCodeLast /*!< オペコードの最後 */,
 };
+static const tRisseString & mnNew = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocNew].RawMemberName); //!< (演算子メンバ名)  "new"
+static const tRisseString & mnBitNot = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitNot].RawMemberName); //!< (演算子メンバ名)  "~" bit not
+static const tRisseString & mnDecAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocDecAssign].RawMemberName); //!< (演算子メンバ名)  "--" decrement
+static const tRisseString & mnIncAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocIncAssign].RawMemberName); //!< (演算子メンバ名)  ++ increment
+static const tRisseString & mnPlus = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocPlus].RawMemberName); //!< (演算子メンバ名)  +
+static const tRisseString & mnMinus = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocMinus].RawMemberName); //!< (演算子メンバ名)  -
+static const tRisseString & mnString = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocString].RawMemberName); //!< (演算子メンバ名)  文字列にキャスト
+static const tRisseString & mnBoolean = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBoolean].RawMemberName); //!< (演算子メンバ名)  booleanにキャスト
+static const tRisseString & mnReal = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocReal].RawMemberName); //!< (演算子メンバ名)  realにキャスト
+static const tRisseString & mnInteger = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocInteger].RawMemberName); //!< (演算子メンバ名)  integerにキャスト
+static const tRisseString & mnLogOr = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLogOr].RawMemberName); //!< (演算子メンバ名)  ||
+static const tRisseString & mnLogAnd = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLogAnd].RawMemberName); //!< (演算子メンバ名)  &&
+static const tRisseString & mnBitOr = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitOr].RawMemberName); //!< (演算子メンバ名)  |
+static const tRisseString & mnBitXor = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitXor].RawMemberName); //!< (演算子メンバ名)  ^
+static const tRisseString & mnBitAnd = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitAnd].RawMemberName); //!< (演算子メンバ名)  &
+static const tRisseString & mnNotEqual = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocNotEqual].RawMemberName); //!< (演算子メンバ名)  !=
+static const tRisseString & mnEqual = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocEqual].RawMemberName); //!< (演算子メンバ名)  ==
+static const tRisseString & mnDiscNotEqual = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocDiscNotEqual].RawMemberName); //!< (演算子メンバ名)  !==
+static const tRisseString & mnDiscEqual = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocDiscEqual].RawMemberName); //!< (演算子メンバ名)  ===
+static const tRisseString & mnLesser = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLesser].RawMemberName); //!< (演算子メンバ名)  <
+static const tRisseString & mnGreater = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocGreater].RawMemberName); //!< (演算子メンバ名)  >
+static const tRisseString & mnLesserOrEqual = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLesserOrEqual].RawMemberName); //!< (演算子メンバ名)  <=
+static const tRisseString & mnGreaterOrEqual = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocGreaterOrEqual].RawMemberName); //!< (演算子メンバ名)  >=
+static const tRisseString & mnRBitShift = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocRBitShift].RawMemberName); //!< (演算子メンバ名)  >>>
+static const tRisseString & mnLShift = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLShift].RawMemberName); //!< (演算子メンバ名)  <<
+static const tRisseString & mnRShift = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocRShift].RawMemberName); //!< (演算子メンバ名)  >>
+static const tRisseString & mnMod = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocMod].RawMemberName); //!< (演算子メンバ名)  %
+static const tRisseString & mnDiv = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocDiv].RawMemberName); //!< (演算子メンバ名)  /
+static const tRisseString & mnIdiv = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocIdiv].RawMemberName); //!< (演算子メンバ名)  \ (integer div)
+static const tRisseString & mnMul = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocMul].RawMemberName); //!< (演算子メンバ名)  *
+static const tRisseString & mnAdd = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocAdd].RawMemberName); //!< (演算子メンバ名)  +
+static const tRisseString & mnSub = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocSub].RawMemberName); //!< (演算子メンバ名)  -
+static const tRisseString & mnIGet = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocIGet].RawMemberName); //!< (演算子メンバ名)  get [ ]
+static const tRisseString & mnIDelete = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocIDelete].RawMemberName); //!< (演算子メンバ名)  delete [ ]
+static const tRisseString & mnISet = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocISet].RawMemberName); //!< (演算子メンバ名)  set [ ]
+static const tRisseString & mnBitAndAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitAndAssign].RawMemberName); //!< (演算子メンバ名)  &=
+static const tRisseString & mnBitOrAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitOrAssign].RawMemberName); //!< (演算子メンバ名)  |=
+static const tRisseString & mnBitXorAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitXorAssign].RawMemberName); //!< (演算子メンバ名)  ^=
+static const tRisseString & mnSubAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocSubAssign].RawMemberName); //!< (演算子メンバ名)  -=
+static const tRisseString & mnAddAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocAddAssign].RawMemberName); //!< (演算子メンバ名)  +=
+static const tRisseString & mnModAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocModAssign].RawMemberName); //!< (演算子メンバ名)  %=
+static const tRisseString & mnDivAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocDivAssign].RawMemberName); //!< (演算子メンバ名)  /=
+static const tRisseString & mnIdivAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocIdivAssign].RawMemberName); //!< (演算子メンバ名)  \=
+static const tRisseString & mnMulAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocMulAssign].RawMemberName); //!< (演算子メンバ名)  *=
+static const tRisseString & mnLogOrAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLogOrAssign].RawMemberName); //!< (演算子メンバ名)  ||=
+static const tRisseString & mnLogAndAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLogAndAssign].RawMemberName); //!< (演算子メンバ名)  &&=
+static const tRisseString & mnRBitShiftAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocRBitShiftAssign].RawMemberName); //!< (演算子メンバ名)  >>>=
+static const tRisseString & mnLShiftAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLShiftAssign].RawMemberName); //!< (演算子メンバ名)  <<=
+static const tRisseString & mnRShiftAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocRShiftAssign].RawMemberName); //!< (演算子メンバ名)  >>=

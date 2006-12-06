@@ -808,7 +808,7 @@ public: // 演算子
 	risse_int64        BitNot_Boolean  () const { return ~CastToInteger_Boolean(); }
 	risse_int64        BitNot_String   () const { return ~CastToInteger_String(); }
 	risse_int64        BitNot_Octet    () const { return ~CastToInteger_Octet(); }
-	tRisseVariantBlock BitNot_Object   () const { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock BitNot_Object   () const { return Invoke(mnBitNot); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		++ 演算子			Inc
@@ -838,7 +838,7 @@ public: // 演算子
 	tRisseVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)AsBoolean() + 1); return *this; }
 	tRisseVariantBlock & Inc_String   () { *this = tRisseVariantBlock((risse_int64)1).Add_Integer(Plus_String()); return *this; }
 	tRisseVariantBlock & Inc_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
-	tRisseVariantBlock & Inc_Object   () { *this = (risse_int64)0; return *this; /* incomplete */; }
+	tRisseVariantBlock & Inc_Object   () { *this = Invoke(mnAdd, tRisseVariantBlock((risse_int64)1)); return *this; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		-- 演算子			Dec
@@ -868,7 +868,7 @@ public: // 演算子
 	tRisseVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)AsBoolean() - 1); return *this; }
 	tRisseVariantBlock & Dec_String   () { *this = tRisseVariantBlock((risse_int64)-1).Add_Integer(Plus_String()); return *this; }
 	tRisseVariantBlock & Dec_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
-	tRisseVariantBlock & Dec_Object   () { *this = (risse_int64)0; return *this; /* incomplete */; }
+	tRisseVariantBlock & Dec_Object   () { *this = Invoke(mnSub, tRisseVariantBlock((risse_int64)1)); return *this; }
 
 
 	//-----------------------------------------------------------------------
@@ -898,7 +898,7 @@ public: // 演算子
 	tRisseVariantBlock Plus_Boolean  () const { return AsBoolean() != false; /* boolean は 0 か 1 かに変換される */ }
 	tRisseVariantBlock Plus_String   () const;
 	tRisseVariantBlock Plus_Octet    () const { return (risse_int64)0; /* incomplete */; }
-	tRisseVariantBlock Plus_Object   () const { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock Plus_Object   () const { return Invoke(mnPlus); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		単項 - 演算子		Minus
@@ -927,7 +927,7 @@ public: // 演算子
 	tRisseVariantBlock Minus_Boolean  () const { return (risse_int64)(AsBoolean()?-1:0); }
 	tRisseVariantBlock Minus_String   () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock Minus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock Minus_Object   () const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock Minus_Object   () const { return Invoke(mnMinus); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		|| 演算子		LogOr
@@ -1024,7 +1024,7 @@ public: // 演算子
 	risse_int64        BitOr_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
 	risse_int64        BitOr_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
 	risse_int64        BitOr_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
-	tRisseVariantBlock BitOr_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock BitOr_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitOr, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		|= 演算子		BitOrAssign
@@ -1068,7 +1068,7 @@ public: // 演算子
 	risse_int64        BitXor_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
 	risse_int64        BitXor_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
 	risse_int64        BitXor_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
-	tRisseVariantBlock BitXor_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock BitXor_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitXor, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		^= 演算子		BitXorAssign
@@ -1112,7 +1112,7 @@ public: // 演算子
 	risse_int64        BitAnd_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitAnd, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		&= 演算子		BitAndAssign
@@ -1152,7 +1152,7 @@ public: // 演算子
 	bool NotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
 	bool NotEqual_String   (const tRisseVariantBlock & rhs) const { return !Equal_String (rhs); }
 	bool NotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
-	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnNotEqual, rhs);  }
 
 	//-----------------------------------------------------------------------
 	//! @brief		== 演算子		Equal
@@ -1182,7 +1182,7 @@ public: // 演算子
 	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Equal_String   (const tRisseVariantBlock & rhs) const;
 	bool Equal_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		!== 演算子		DiscNotEqual
@@ -1207,7 +1207,7 @@ public: // 演算子
 	bool DiscNotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
 	bool DiscNotEqual_String   (const tRisseVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
 	bool DiscNotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
-	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnDiscNotEqual, rhs);  }
 
 	//-----------------------------------------------------------------------
 	//! @brief		識別 === 演算子		DiscEqual
@@ -1242,7 +1242,7 @@ public: // 演算子
 	bool DiscEqual_Octet    (const tRisseVariantBlock & rhs) const
 			{ return false; /* incomplete */ }
 	bool DiscEqual_Object   (const tRisseVariantBlock & rhs) const
-			{ return false; /* incomplete */ }
+			{ return Invoke(mnDiscEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		< 演算子		Lesser
@@ -1272,7 +1272,7 @@ public: // 演算子
 	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Lesser_String   (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLesser, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		> 演算子		Greater
@@ -1302,7 +1302,7 @@ public: // 演算子
 	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Greater_String   (const tRisseVariantBlock & rhs) const;
 	bool Greater_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnGreater, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		<= 演算子		LesserOrEqual
@@ -1332,7 +1332,7 @@ public: // 演算子
 	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLesserOrEqual, rhs); }
 
 
 	//-----------------------------------------------------------------------
@@ -1363,7 +1363,7 @@ public: // 演算子
 	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
-	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnGreaterOrEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>> 演算子(符号なし右シフト)		RBitShift
@@ -1393,7 +1393,7 @@ public: // 演算子
 	tRisseVariantBlock RBitShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnRBitShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>>= 演算子		RBitShiftAssign
@@ -1438,7 +1438,7 @@ public: // 演算子
 	tRisseVariantBlock LShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		<<= 演算子		LShiftAssign
@@ -1483,7 +1483,7 @@ public: // 演算子
 	tRisseVariantBlock RShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnRShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>= 演算子		RShiftAssign
@@ -1528,7 +1528,7 @@ public: // 演算子
 	tRisseVariantBlock Mod_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnMod, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		%= 演算子		ModAssign
@@ -1573,7 +1573,7 @@ public: // 演算子
 	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
 	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
 	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
-	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnDiv, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		/= 演算子		DivAssign
@@ -1616,7 +1616,7 @@ public: // 演算子
 	tRisseVariantBlock Idiv_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return (risse_int64)0; /* incomplete */ }
+	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnIdiv, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		\= 演算子		IdivAssign
@@ -1661,7 +1661,7 @@ public: // 演算子
 	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnMul, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		*= 演算子		MulAssign
@@ -1704,7 +1704,7 @@ public: // 演算子
 	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnAdd, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		+= 演算子		AddAssign
@@ -1747,7 +1747,7 @@ public: // 演算子
 	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
-	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnSub, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		-= 演算子		SubAssign

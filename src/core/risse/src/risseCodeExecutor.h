@@ -111,7 +111,7 @@ public:
 	bool GetRaised() const { return Raised; }
 
 private:
-	void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG) {;}
+	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG) {return rvNoError;}
 };
 //---------------------------------------------------------------------------
 

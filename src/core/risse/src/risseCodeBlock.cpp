@@ -156,13 +156,14 @@ tRisseString tRisseCodeBlock::Dump() const
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tRisseObjectInterface::tRetValue tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
 	{
 		Executor->Execute(args, bargs, This, stack, result);
 	}
+	return rvNoError;
 }
 //---------------------------------------------------------------------------
 

@@ -356,7 +356,7 @@ void tRisseCodeInterpreter::Execute(
 					try
 					{
 						tRisseVariant v;
-						AR(code[1]).GetObjectInterface()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
+						AR(code[1]).GetObjectInterface()->Do(ocDGet, &v, RISSE_WS("getExitTryRecord"));
 						RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
 						RISSE_ASSERT(v.GetObjectInterface() != NULL);
 						tRisseExitTryExceptionClass * record =
@@ -430,7 +430,7 @@ void tRisseCodeInterpreter::Execute(
 				// code[2] は tRisseExitExceptionClass であると見なして良い
 				tRisseVariant v;
 				RISSE_ASSERT(AR(code[2]).GetType() == tRisseVariant::vtObject);
-				AR(code[2]).GetObjectInterface()->Operate(ocDGet, &v, RISSE_WS("getExitTryRecord"));
+				AR(code[2]).GetObjectInterface()->Do(ocDGet, &v, RISSE_WS("getExitTryRecord"));
 				RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
 				RISSE_ASSERT(v.GetObjectInterface() != NULL);
 				tRisseExitTryExceptionClass * record =

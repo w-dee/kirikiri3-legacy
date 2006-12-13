@@ -165,8 +165,8 @@ class tRisseVariantBlock;
 typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
 
-//! @brief		Operateメソッドへの引数(クラス宣言用)
-//!	@note		Opereteメソッドの引数が変わるたびにすべての Operate メソッドの
+//! @brief		Operate/Doメソッドへの引数(クラス宣言用)
+//!	@note		Operate/Doメソッドの引数が変わるたびにすべてのOperate/Doメソッドの
 //!				引数を変える気にはなれない。
 //! 			あまりマクロは使いたくないが、それにしても
 //!				インターフェースの仕様が固まるまではこうしたい
@@ -180,7 +180,7 @@ typedef tRisseVariantBlock tRisseVariant;
 		const tRisseVariant *This = NULL,                                                 \
 		const tRisseStackFrameContext *stack = NULL
 
-//! @brief		Operateメソッドへの引数(実装用)
+//! @brief		Operate/Doメソッドへの引数(実装用)
 #define RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG \
 		tRisseOpCode code,                     \
 		tRisseVariant * result,                \
@@ -191,7 +191,7 @@ typedef tRisseVariantBlock tRisseVariant;
 		const tRisseVariant *This,             \
 		const tRisseStackFrameContext *stack
 
-//! @brief		Operateメソッドの引数一覧
+//! @brief		Operate/Doメソッドの引数一覧
 #define RISSE_OBJECTINTERFACE_PASS_ARG \
 		code, result, name, flags, args, bargs, This, stack
 
@@ -202,7 +202,48 @@ class tRisseObjectInterface
 {
 public:
 
+	//! @brief		Operateメソッドの戻り値
+	enum tRetValue
+	{
+		rvNoError,				//!< エラー無し
+		rvMemberNotFound		//!< メンバが見つからないエラー
+	};
+
+protected:
+	//! @brief		例外を発生させる
+	//! @param		エラーコード
+	//! @param		code	オペレーションコード
+	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
+	//! @param		name	操作を行うメンバ名
+	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	//! @param		flags	オペレーションフラグ
+	//! @param		args	引数
+	//! @param		bargs	ブロック引数
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
+	//!						(NULL=スタックフレームコンテキストを指定しない場合)
+	void RaiseError(tRetValue ret, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+
+public:
 	//! @brief		オブジェクトに対して操作を行う
+	//! @param		code	オペレーションコード
+	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
+	//! @param		name	操作を行うメンバ名
+	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	//! @param		flags	オペレーションフラグ
+	//! @param		args	引数
+	//! @param		bargs	ブロック引数
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
+	//!						(NULL=スタックフレームコンテキストを指定しない場合)
+	//! @return		エラーコード
+	//! @note		何か操作に失敗した場合は例外が発生する。ただし、tRetValueにあるような
+	//!				エラーの場合は例外ではなくてエラーコードを返さなければならない。
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG) = 0;
+
+	//! @brief		オブジェクトに対して操作を行う(失敗した場合は例外を発生させる)
 	//! @param		code	オペレーションコード
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
 	//! @param		name	操作を行うメンバ名
@@ -216,7 +257,11 @@ public:
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
 	//!				エラーコードなどの戻り値はない
-	virtual void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG) = 0;
+	void Do(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+	{
+		tRetValue ret = Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
+		if(ret != rvNoError) RaiseError(ret, RISSE_OBJECTINTERFACE_PASS_ARG);
+	}
 };
 //---------------------------------------------------------------------------
 

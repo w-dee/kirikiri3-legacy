@@ -13,7 +13,7 @@
 #include "prec.h"
 
 #include "risseObject.h"
-
+#include "risseException.h"
 
 namespace Risse
 {
@@ -102,6 +102,36 @@ tRisseString tRisseMemberAttribute::AsString() const
 	return str;
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tRisseObjectInterface::RaiseError(tRetValue ret, RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+{
+	switch(ret)
+	{
+	case rvMemberNotFound:
+		// "メンバが見つからない"エラー
+		RisseThrowMemberNotFound(name);
+		break;
+
+	default:
+	case rvNoError:
+		break;
+
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
 
 //---------------------------------------------------------------------------
 } // namespace Risse

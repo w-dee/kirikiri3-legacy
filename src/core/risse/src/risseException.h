@@ -327,6 +327,9 @@ void RisseThrowCannotCreateInstanceFromNonClassObjectException();
 //! @param		passed		実際に渡された個数
 //! @param		expected	期待した数
 void RisseThrowBadArgumentCount(risse_int passed, risse_int expected);
+//! @brief		「メンバが見つからない」例外を発生(暫定)
+//! @param		name		メンバ名
+void RisseThrowMemberNotFound(const tRisseString & name);
 //---------------------------------------------------------------------------
 
 
@@ -369,7 +372,7 @@ public:
 
 public: // tRisseObjectInterface メンバ
 
-	void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 
 };

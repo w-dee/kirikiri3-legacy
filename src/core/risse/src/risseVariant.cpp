@@ -50,7 +50,7 @@ void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
-	intf->Operate(ocFuncCall, ret, tRisseString::GetEmptyString(),
+	intf->Do(ocFuncCall, ret, tRisseString::GetEmptyString(),
 		0, args, bargs,
 		this_context?&this_context->GetThis():This,
 				// こっちはこのvariantがThisオブジェクトを保持していなければ
@@ -68,7 +68,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	tRisseObjectInterface * intf = GetObjectInterface();
 	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
-	intf->Operate(ocFuncCall, &ret, membername,
+	intf->Do(ocFuncCall, &ret, membername,
 		0, 
 		tRisseMethodArgument::New(),
 		tRisseMethodArgument::New(),
@@ -85,7 +85,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	tRisseObjectInterface * intf = GetObjectInterface();
 	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
-	intf->Operate(ocFuncCall, &ret, membername,
+	intf->Do(ocFuncCall, &ret, membername,
 		0, 
 		tRisseMethodArgument::New(&arg1),
 		tRisseMethodArgument::New(),

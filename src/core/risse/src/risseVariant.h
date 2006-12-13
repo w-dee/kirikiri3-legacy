@@ -431,9 +431,9 @@ public: // operate
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
-	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
-	//!				エラーコードなどの戻り値はない
-	void Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+	//! @return		エラーコード
+	tRisseObjectInterface::tRetValue
+		Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		if(!name.IsEmpty())
 		{
@@ -444,7 +444,7 @@ public: // operate
 		switch(code)
 		{
 		case ocNoOperation		://!< なにもしない
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 		case ocNew				://!< "new"
 
@@ -457,38 +457,38 @@ public: // operate
 				*result = LogNot();
 			else
 				BitNot(); // discard result
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 		case ocBitNot			://!< "~" bit not
 			if(result)
 				*result = BitNot();
 			else
 				BitNot(); // discard result
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 		case ocDecAssign		://!< "--" decrement
 			Dec();
 			if(result) *result = *this;
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 		case ocIncAssign		://!< "++" increment
 			Inc();
 			if(result) *result = *this;
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 		case ocPlus				://!< "+"
 			if(result)
 				*result = Plus();
 			else
 				Plus(); // discard result
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 		case ocMinus			://!< "-"
 			if(result)
 				*result = Minus();
 			else
 				Minus(); // discard result
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 #define RISSE_BIN_OP(func) \
 			if(args.argc != 1) RisseThrowBadArgumentCount(args.argc, 1);\
@@ -496,7 +496,7 @@ public: // operate
 				*result = BitOr(*args.argv[0]);                         \
 			else                                                        \
 				BitOr(*args.argv[0]); /* discard result */              \
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 		case ocLogOr			://!< ||
 			RISSE_BIN_OP(LogOr);
@@ -586,7 +586,7 @@ public: // operate
 			if(args.argc != 1) RisseThrowBadArgumentCount(args.argc, 1);\
 			func(*args.argv[0]);                                        \
 			if(result) *result = *this;                                 \
-			return;
+			return tRisseObjectInterface::rvNoError;
 
 		case ocBitAndAssign		://!< &=
 			RISSE_ASSIGN_OP(BitAndAssign);
@@ -634,6 +634,7 @@ public: // operate
 			// invalid opcode
 			;
 		}
+		return  tRisseObjectInterface::rvNoError;
 	}
 
 

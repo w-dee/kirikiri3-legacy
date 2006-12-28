@@ -158,19 +158,19 @@ void tRisseCodeInterpreter::Execute(
 
 		case ocAssignParam: // getpar	= (S番目の関数引数を代入)
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			if(code[2] >= args.argc)
+			if(code[2] >= args.GetCount())
 				AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
 			else
-				AR(code[1]) = *args.argv[code[2]];
+				AR(code[1]) = args[code[2]];
 			code += 3;
 			break;
 
 		case ocAssignBlockParam: // getbpar	= (S番目の関数ブロック引数を代入)
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			if(code[2] >= bargs.argc)
+			if(code[2] >= bargs.GetCount())
 				AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
 			else
-				AR(code[1]) = *bargs.argv[code[2]];
+				AR(code[1]) = bargs[code[2]];
 			code += 3;
 			break;
 
@@ -215,9 +215,9 @@ void tRisseCodeInterpreter::Execute(
 				tRisseMethodArgument & blockargs = tRisseMethodArgument::Allocate(code[5]);
 
 				for(risse_uint32 i = 0; i < code[4]; i++)
-					args.argv[i] = &AR(code[i+6]);
+					args.Set(i, AR(code[i+6]));
 				for(risse_uint32 i = 0; i < code[5]; i++)
-					blockargs.argv[i] = &AR(code[i+6+code[4]]);
+					blockargs.Set(i, AR(code[i+6+code[4]]));
 
 				if(code[1]!=RisseInvalidRegNum) AR(code[1]).Clear();
 				bool raised = false;
@@ -256,7 +256,7 @@ void tRisseCodeInterpreter::Execute(
 				tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4]);
 
 				for(risse_uint32 i = 0; i < code[4]; i++)
-					args.argv[i] = &AR(code[i+5]);
+					args.Set(i, AR(code[i+5]));
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
 					args, tRisseMethodArgument::New(), &_this);
@@ -284,9 +284,9 @@ void tRisseCodeInterpreter::Execute(
 				tRisseMethodArgument & blockargs = tRisseMethodArgument::Allocate(code[5]);
 
 				for(risse_uint32 i = 0; i < code[4]; i++)
-					args.argv[i] = &AR(code[i+6]);
+					args.Set(i, AR(code[i+6]));
 				for(risse_uint32 i = 0; i < code[5]; i++)
-					blockargs.argv[i] = &AR(code[i+6+code[4]]);
+					blockargs.Set(i, AR(code[i+6+code[4]]));
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
 					args, blockargs, &_this);

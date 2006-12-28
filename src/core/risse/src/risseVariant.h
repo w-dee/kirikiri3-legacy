@@ -491,11 +491,12 @@ public: // operate
 			return tRisseObjectInterface::rvNoError;
 
 #define RISSE_BIN_OP(func) \
-			if(args.argc != 1) RisseThrowBadArgumentCount(args.argc, 1);\
-			if(result)                                                  \
-				*result = BitOr(*args.argv[0]);                         \
-			else                                                        \
-				BitOr(*args.argv[0]); /* discard result */              \
+			if(args.GetCount() != 1)                           \
+				RisseThrowBadArgumentCount(args.GetCount(), 1);\
+			if(result)                                         \
+				*result = BitOr(args[0]);                      \
+			else                                               \
+				BitOr(args[0]); /* discard result */           \
 			return tRisseObjectInterface::rvNoError;
 
 		case ocLogOr			://!< ||
@@ -583,9 +584,10 @@ public: // operate
 //			RISSE_BIN_OP(ISet);
 
 #define RISSE_ASSIGN_OP(func) \
-			if(args.argc != 1) RisseThrowBadArgumentCount(args.argc, 1);\
-			func(*args.argv[0]);                                        \
-			if(result) *result = *this;                                 \
+			if(args.GetCount() != 1)                           \
+				RisseThrowBadArgumentCount(args.GetCount(), 1);\
+			func(args[0]);                                     \
+			if(result) *result = *this;                        \
 			return tRisseObjectInterface::rvNoError;
 
 		case ocBitAndAssign		://!< &=

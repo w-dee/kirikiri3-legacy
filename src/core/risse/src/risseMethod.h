@@ -28,7 +28,7 @@ class tRisseMethodArgument;
 template <risse_size N>
 class tRisseMethodArgumentOf
 {
-public:
+protected:
 	risse_size argc; //!< 配列の個数
 	const tRisseVariant * argv[N<1?1:N]; //!< 引数を表す値へのポインタの配列
 
@@ -49,9 +49,30 @@ public:
 	//!				キャストできるはず
 	operator const tRisseMethodArgument & () const
 		{ return * reinterpret_cast<const tRisseMethodArgument *>(this); }
+
+
+	//! @brief		引数の個数を得る
+	//! @return		引数の個数
+	risse_size GetCount() const { return argc; }
+
+	//! @brief		指定位置にある引数への参照を返す(const版)
+	//! @param		n		位置(0～)
+	//! @return		引数への参照
+	//! @note		n の範囲はチェックしていない
+	const tRisseVariant & operator [ ] (risse_size n) const
+	{
+		return *argv[n];
+	}
+
+	//! @brief		値への参照をセットする
+	//! @param		n		パラメータ位置
+	//! @param		v		(パラメータの値)
+	void Set(risse_size n, const tRisseVariant &v)
+	{
+		argv[n] = &v;
+	}
 };
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------
@@ -59,17 +80,26 @@ public:
 //---------------------------------------------------------------------------
 class tRisseMethodArgument
 {
-public:
+	class tRisseEmptyMethodArgument
+	{
+	public:
+		risse_size argc; //!< 引数の個数
+		const tRisseVariant * argv[1]; //!< 引数を表す値へのポインタの配列
+	};
+	static tRisseEmptyMethodArgument EmptyArgument;
+
+protected:
 	risse_size argc; //!< 引数の個数
 	const tRisseVariant * argv[1]; //!< 引数を表す値へのポインタの配列
-
-private:
-	static tRisseMethodArgument EmptyArgument; //!< 引数0を表すstaticオブジェクト
 
 public:
 	//! @brief		引数0の引数を表すstaticオブジェクトへの参照を返す
 	//! @return		引数0の引数を表すstaticオブジェクトへの参照
-	static const tRisseMethodArgument & GetEmptyArgument() { return EmptyArgument; }
+	static const tRisseMethodArgument & GetEmptyArgument()
+	{
+		// バイナリレイアウトが同一なので安全にキャストできるはず
+		return *reinterpret_cast<tRisseMethodArgument*>(&EmptyArgument);
+	}
 
 
 public:
@@ -87,35 +117,67 @@ public:
 	}
 
 	//! @brief		引数=1のtRisseMethodArgumentOfオブジェクトを返す
-	static const tRisseMethodArgumentOf<1> New(const tRisseVariant *a0)
+	//! @param		a0		パラメータ0
+	//! @note		パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
+	//!				パラメータの実体が消えないように保証すること
+	static const tRisseMethodArgumentOf<1> New(const tRisseVariant &a0)
 	{
 		tRisseMethodArgumentOf<1> arg;
-		arg.argv[0] = a0;
+		arg.Set(0, a0);
 		return arg;
 	}
 
 	//! @brief		引数=2のtRisseMethodArgumentOfオブジェクトを返す
-	static const tRisseMethodArgumentOf<2> New(const tRisseVariant *a0,
-								const tRisseVariant *a1)
+	//! @param		a0		パラメータ0
+	//! @param		a1		パラメータ1
+	//! @note		パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
+	//!				パラメータの実体が消えないように保証すること
+	static const tRisseMethodArgumentOf<2> New(const tRisseVariant &a0,
+								const tRisseVariant &a1)
 	{
 		tRisseMethodArgumentOf<2> arg;
-		arg.argv[0] = a0;
-		arg.argv[1] = a1;
+		arg.Set(0, a0);
+		arg.Set(1, a1);
 		return arg;
 	}
 
 	//! @brief		引数=3のtRisseMethodArgumentOfオブジェクトを返す
-	static const tRisseMethodArgumentOf<3> New(const tRisseVariant *a0,
-								const tRisseVariant *a1, const tRisseVariant *a2)
+	//! @param		a0		パラメータ0
+	//! @param		a1		パラメータ1
+	//! @param		a2		パラメータ2
+	//! @note		パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
+	//!				パラメータの実体が消えないように保証すること
+	static const tRisseMethodArgumentOf<3> New(const tRisseVariant &a0,
+								const tRisseVariant &a1, const tRisseVariant &a2)
 	{
 		tRisseMethodArgumentOf<3> arg;
-		arg.argv[0] = a0;
-		arg.argv[1] = a1;
-		arg.argv[2] = a2;
+		arg.Set(0, a0);
+		arg.Set(1, a1);
+		arg.Set(2, a2);
 		return arg;
 	}
 
+public:
+	//! @brief		引数の個数を得る
+	//! @return		引数の個数
+	risse_size GetCount() const { return argc; }
 
+	//! @brief		指定位置にある引数への参照を返す(const版)
+	//! @param		n		位置(0～)
+	//! @return		引数への参照
+	//! @note		n の範囲はチェックしていない
+	const tRisseVariant & operator [ ] (risse_size n) const
+	{
+		return *argv[n];
+	}
+
+	//! @brief		値への参照をセットする
+	//! @param		n		パラメータ位置
+	//! @param		v		(パラメータの値)
+	void Set(risse_size n, const tRisseVariant &v)
+	{
+		argv[n] = &v;
+	}
 };
 //---------------------------------------------------------------------------
 

@@ -22,7 +22,8 @@ namespace Risse
 
 
 //---------------------------------------------------------------------------
-tRisseMethodArgument tRisseMethodArgument::EmptyArgument = {0, {NULL}};
+tRisseMethodArgument::tRisseEmptyMethodArgument
+	tRisseMethodArgument::EmptyArgument = {0, {NULL}};
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------

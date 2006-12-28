@@ -14,6 +14,7 @@
 
 #include "risseVariant.h"
 #include "risseLexerUtils.h"
+#include "risseObject.h"
 
 namespace Risse
 {
@@ -21,6 +22,16 @@ RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 
 
 
+
+
+//---------------------------------------------------------------------------
+// nullオブジェクトへのconst参照を保持するオブジェクト
+// これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
+tRisseVariantBlock::tNullObject tRisseVariantBlock::NullObject = {
+	reinterpret_cast<risse_ptruint>(RISSE_OBJECT_NULL_PTR),
+	{0}
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

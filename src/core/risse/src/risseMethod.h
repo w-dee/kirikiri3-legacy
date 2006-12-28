@@ -80,13 +80,13 @@ public:
 //---------------------------------------------------------------------------
 class tRisseMethodArgument
 {
-	class tRisseEmptyMethodArgument
+	class tEmptyMethodArgument
 	{
 	public:
 		risse_size argc; //!< 引数の個数
 		const tRisseVariant * argv[1]; //!< 引数を表す値へのポインタの配列
 	};
-	static tRisseEmptyMethodArgument EmptyArgument;
+	static tEmptyMethodArgument EmptyArgument;
 
 protected:
 	risse_size argc; //!< 引数の個数

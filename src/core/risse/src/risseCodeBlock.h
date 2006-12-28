@@ -30,7 +30,7 @@ class tRisseScriptBlockBase;
 //! @note		コードブロックは Risse の実行単位である「関数」などごとに、
 //!				VMが実行すべき環境についての情報を保持するクラスである
 //---------------------------------------------------------------------------
-class tRisseCodeBlock : public tRisseObjectInterface, public tRisseCollectee
+class tRisseCodeBlock : public tRisseObjectInterface
 {
 	risse_uint32 *Code; //!< コード
 	risse_size CodeSize; //!< コードのサイズ(ワード単位)

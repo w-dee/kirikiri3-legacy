@@ -143,36 +143,6 @@ void RisseThrowMemberNotFound(const tRisseString & name)
 
 
 
-//---------------------------------------------------------------------------
-tRisseExitTryExceptionClass::tRisseExitTryExceptionClass(
-	const void * id, risse_uint32 targ_idx, const tRisseVariant * value)
-{
-	Identifier = id;
-	BranchTargetIndex = targ_idx;
-	Value = value ? new tRisseVariant(*value) : NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseObjectInterface::tRetValue tRisseExitTryExceptionClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
-{
-	// 暫定実装
-	if(code == ocDGet && name == RISSE_WS("getExitTryRecord"))
-	{
-		// tRisseExitTryExceptionClass 型を返す
-		if(result)
-		{
-			*result = reinterpret_cast<tRisseObjectInterface*>
-				((tRisseExitTryExceptionClass*)this);
-		}
-	}
-	return rvNoError;
-}
-//---------------------------------------------------------------------------
-
-
-
 
 #if 0
 //---------------------------------------------------------------------------

@@ -14,6 +14,7 @@
 
 #include "risseCodeExecutor.h"
 #include "risseOpCodes.h"
+#include "risseExceptionClass.h"
 /*
 	このソースは、実行スピード重視の、いわばダーティーな実装を行う。
 	ダーティーな実装は極力コメントを残し、わかりやすくしておくこと。
@@ -40,7 +41,7 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 void tRisseCodeInterpreter::Execute(
 	const tRisseMethodArgument & args,
 	const tRisseMethodArgument & bargs,
-	const tRisseVariant * This,
+	const tRisseVariant & This,
 	const tRisseStackFrameContext *stack,
 	tRisseVariant * result)
 {
@@ -62,7 +63,7 @@ void tRisseCodeInterpreter::Execute(
 
 	// This を設定
 	tRisseVariant _this;
-	if(This) _this = *This;
+	if(This) _this = This;
 
 	// ローカル変数に値を持ってくる
 	// いくつかのローカル変数は ASSERT が有効になっていなければ

@@ -17,12 +17,13 @@
 #include "risseCharUtils.h"
 #include "risseTypes.h"
 #include "risseAssert.h"
-#include "risseObject.h"
 #include "risseString.h"
 #include "risseOctet.h"
 #include "risseException.h"
 #include "risseMethod.h"
-
+#include "risseOperateRetValue.h"
+#include "risseObjectInterfaceArg.h"
+#include "risseOpCodes.h"
 
 namespace Risse
 {
@@ -65,7 +66,7 @@ tRisseVariant はパフォーマンスの関係上、ILP32 システムでは 3 
 テムでは 2 * 64bit に収まるようにすること。
 */
 //---------------------------------------------------------------------------
-class tRisseVariantBlock : public tRisseCollectee
+class tRisseVariantBlock : public tRisseCollectee, tRisseOperateRetValue
 {
 protected:
 
@@ -193,6 +194,15 @@ protected:
 		//! 行ってしまう可能性があるため。
 		char Storage[RV_STORAGE_SIZE];
 	};
+
+	//! @brief null値を表すstaticな領域
+	struct tNullObject
+	{
+		risse_ptruint Type; //!< バリアントタイプ(= RISSE_OBJECT_NULL_PTR固定)
+		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint)]; //!< 残り(0で埋める) パディングは問題にならないはず
+	};
+	static tNullObject NullObject;
+
 public:
 	//! @brief バリアントのタイプ
 	enum tType
@@ -418,6 +428,13 @@ public: // Object関連
 		return GetObjectInterface() == NULL;
 	}
 
+	//! @brief		null オブジェクトを得る
+	//! @return		null オブジェクトへのstaticなconst参照
+	static const tRisseVariantBlock & GetNullObject()
+	{
+		return *reinterpret_cast<tRisseVariantBlock*>(&NullObject);
+	}
+
 public: // operate
 	//! @brief		オブジェクトに対して操作を行う
 	//! @param		code	オペレーションコード
@@ -432,7 +449,7 @@ public: // operate
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @return		エラーコード
-	tRisseObjectInterface::tRetValue
+	tRetValue
 		Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		if(!name.IsEmpty())
@@ -444,7 +461,7 @@ public: // operate
 		switch(code)
 		{
 		case ocNoOperation		://!< なにもしない
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 		case ocNew				://!< "new"
 
@@ -457,38 +474,38 @@ public: // operate
 				*result = LogNot();
 			else
 				BitNot(); // discard result
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 		case ocBitNot			://!< "~" bit not
 			if(result)
 				*result = BitNot();
 			else
 				BitNot(); // discard result
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 		case ocDecAssign		://!< "--" decrement
 			Dec();
 			if(result) *result = *this;
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 		case ocIncAssign		://!< "++" increment
 			Inc();
 			if(result) *result = *this;
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 		case ocPlus				://!< "+"
 			if(result)
 				*result = Plus();
 			else
 				Plus(); // discard result
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 		case ocMinus			://!< "-"
 			if(result)
 				*result = Minus();
 			else
 				Minus(); // discard result
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 #define RISSE_BIN_OP(func) \
 			if(args.GetCount() != 1)                           \
@@ -497,7 +514,7 @@ public: // operate
 				*result = BitOr(args[0]);                      \
 			else                                               \
 				BitOr(args[0]); /* discard result */           \
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 		case ocLogOr			://!< ||
 			RISSE_BIN_OP(LogOr);
@@ -588,7 +605,7 @@ public: // operate
 				RisseThrowBadArgumentCount(args.GetCount(), 1);\
 			func(args[0]);                                     \
 			if(result) *result = *this;                        \
-			return tRisseObjectInterface::rvNoError;
+			return rvNoError;
 
 		case ocBitAndAssign		://!< &=
 			RISSE_ASSIGN_OP(BitAndAssign);
@@ -636,7 +653,7 @@ public: // operate
 			// invalid opcode
 			;
 		}
-		return  tRisseObjectInterface::rvNoError;
+		return  rvNoError;
 	}
 
 

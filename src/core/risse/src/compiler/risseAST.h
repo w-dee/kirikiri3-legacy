@@ -16,6 +16,7 @@
 
 #include "../risseGC.h"
 #include "../risseVariant.h"
+#include "../risseObject.h"
 
 /*
 	このモジュールでは、AST のデータ型を定義するだけではなく、AST から SSA形式

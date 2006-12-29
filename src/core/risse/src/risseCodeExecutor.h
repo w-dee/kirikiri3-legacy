@@ -50,7 +50,7 @@ public:
 		const tRisseMethodArgument & args = tRisseMethodArgument::New(),
 		const tRisseMethodArgument & bargs = tRisseMethodArgument::New(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject(),
-		const tRisseStackFrameContext *stack = NULL,
+		const tRisseStackFrameContext &stack = tRisseStackFrameContext::GetNullContext(),
 		tRisseVariant * result = NULL) = 0;
 };
 //---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ public:
 		const tRisseMethodArgument & args = tRisseMethodArgument::New(),
 		const tRisseMethodArgument & bargs = tRisseMethodArgument::New(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject(),
-		const tRisseStackFrameContext *stack = NULL,
+		const tRisseStackFrameContext &stack = tRisseStackFrameContext::GetNullContext(),
 		tRisseVariant * result = NULL);
 };
 //---------------------------------------------------------------------------

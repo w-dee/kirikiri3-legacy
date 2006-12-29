@@ -22,6 +22,12 @@ RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 
 
 
+//---------------------------------------------------------------------------
+// null が入った tRisseMethodContext を保持するオブジェクト
+tRisseStackFrameContext::tNullContext tRisseStackFrameContext::NullContext = {NULL, NULL};
+//---------------------------------------------------------------------------
+
+
 
 
 //---------------------------------------------------------------------------
@@ -56,17 +62,17 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
 	const tRisseMethodArgument & args,
 	const tRisseMethodArgument & bargs,
-	const tRisseVariant * This)
+	const tRisseVariant & This)
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocFuncCall, ret, tRisseString::GetEmptyString(),
 		0, args, bargs,
-		this_context?&this_context->GetThis():This,
+		this_context?this_context->GetThis():This,
 				// こっちはこのvariantがThisオブジェクトを保持していなければ
 				// context->GetThis() を見るが
-		this_context?&this_context->GetStack():NULL
+		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
 				// こっちは常にこのvariantが保持している値になる
 		);
 }
@@ -83,7 +89,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 		0, 
 		tRisseMethodArgument::New(),
 		tRisseMethodArgument::New(),
-		this, NULL
+		*this, tRisseStackFrameContext::GetNullContext()
 		);
 	return ret;
 }
@@ -100,7 +106,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 		0, 
 		tRisseMethodArgument::New(&arg1),
 		tRisseMethodArgument::New(),
-		this, NULL
+		*this, tRisseStackFrameContext::GetNullContext()
 		);
 	return ret;
 }
@@ -924,6 +930,7 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Void     (risse_size maxlen) co
 	return RISSE_WS("void");
 }
 //---------------------------------------------------------------------------
+
 
 
 

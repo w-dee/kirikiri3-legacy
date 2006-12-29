@@ -27,6 +27,85 @@
 
 namespace Risse
 {
+
+
+// 本来ならばtRisseStackFrameContextとtRisseMethodContextはrisseMethod.hにあるべき
+// だがインクルード順の解決が難しいのでここに書く。
+class tRisseVariantBlock;
+typedef tRisseVariantBlock tRisseVariant;
+//---------------------------------------------------------------------------
+//! @brief		スタックフレームコンテキスト
+//---------------------------------------------------------------------------
+struct tRisseStackFrameContext
+{
+private:
+	tRisseVariant *Frame; //!< スタックフレーム (NULL=スタックフレームを指定しない)
+	tRisseVariant *Share; //!< 共有フレーム (NULL=共有フレームを指定しない)
+
+public:
+	//! @brief		デフォルトコンストラクタ
+	tRisseStackFrameContext() { Frame = NULL; Share = NULL; }
+
+	//! @brief		コンストラクタ(スタックフレームと共有フレームから)
+	//! @param		frame		スタックフレーム
+	//! @param		share		共有フレーム
+	tRisseStackFrameContext(tRisseVariant * frame, tRisseVariant * share)
+		: Frame(frame), Share(share) {;}
+
+	//! @brief		スタックフレームを取得する
+	//! @return		スタックフレーム
+	tRisseVariant * GetFrame() const { return Frame; }
+
+	//! @brief		スタックフレームを設定する
+	//! @param		frame		スタックフレーム
+	void SetFrame(tRisseVariant * frame) { Frame = frame; }
+
+	//! @brief		共有フレームを取得する
+	//! @return		共有フレーム
+	tRisseVariant * GetShare() const { return Share; }
+
+	//! @brief		共有フレームを設定する
+	//! @param		share		共有フレーム
+	void SetShare(tRisseVariant * share) { Share = share; }
+
+private:
+	struct tNullContext
+	{
+		// この構造体のバイナリレイアウトは tRisseStackFrameContext と同一で
+		// ある必要がある
+		tRisseVariant * Frame;
+		tRisseVariant * Share;
+	};
+	static tNullContext NullContext;
+
+public:
+	//! @brief		static な null スタックフレームコンテキストを返す
+	static const tRisseStackFrameContext & GetNullContext()
+	{
+		// tRisseStackFrameContextData から tRisseStackFrameContext へは
+		// 安全にキャストできるはず
+		return *reinterpret_cast<tRisseStackFrameContext*>(&NullContext);
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+/* ここからが真打ち */
+
+
+
+
+
+//---------------------------------------------------------------------------
 class tRisseObjectInterface;
 class tRisseMethodContext;
 //---------------------------------------------------------------------------
@@ -675,7 +754,7 @@ public: // 演算子
 	void FuncCall(tRisseVariantBlock * ret,
 		const tRisseMethodArgument & args,
 		const tRisseMethodArgument & bargs,
-		tRisseVariant *This)
+		const tRisseVariant & This)
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
@@ -691,7 +770,7 @@ public: // 演算子
 	void FuncCall_Object   (tRisseVariantBlock * ret,
 		const tRisseMethodArgument & args,
 		const tRisseMethodArgument & bargs,
-		const tRisseVariant * This);
+		const tRisseVariant & This);
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -1953,32 +2032,16 @@ typedef tRisseVariantBlock tRisseVariant;
 
 
 
+
+
+
+
+
+
+
+
 // 本来ならばtRisseStackFrameContextとtRisseMethodContextはrisseMethod.hにあるべき
 // だがインクルード順の解決が難しいのでここに書く。
-
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		スタックフレームコンテキスト
-//---------------------------------------------------------------------------
-struct tRisseStackFrameContext
-{
-	tRisseVariant *Frame; //!< スタックフレーム (NULL=スタックフレームを指定しない)
-	tRisseVariant *Share; //!< 共有フレーム (NULL=共有フレームを指定しない)
-
-	//! @brief		デフォルトコンストラクタ
-	tRisseStackFrameContext() { Frame = NULL; Share = NULL; }
-
-	//! @brief		コンストラクタ(スタックフレームと共有フレームから)
-	//! @param		frame		スタックフレーム
-	//! @param		share		共有フレーム
-	tRisseStackFrameContext(tRisseVariant * frame, tRisseVariant * share)
-		: Frame(frame), Share(share) {;}
-};
-//---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 //! @brief		メソッドのコンテキスト

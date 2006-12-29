@@ -34,7 +34,7 @@ class tRisseStackFrameContext;
 		const tRisseMethodArgument & args = tRisseMethodArgument::New(),   \
 		const tRisseMethodArgument & bargs = tRisseMethodArgument::New(),  \
 		const tRisseVariant &This = tRisseVariant::GetNullObject(),        \
-		const tRisseStackFrameContext *stack = NULL
+		const tRisseStackFrameContext &stack = tRisseStackFrameContext::GetNullContext()
 
 //! @brief		Operate/Doメソッドへの引数(実装用)
 #define RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG \
@@ -45,7 +45,7 @@ class tRisseStackFrameContext;
 		const tRisseMethodArgument & args,     \
 		const tRisseMethodArgument & bargs,    \
 		const tRisseVariant &This,             \
-		const tRisseStackFrameContext *stack
+		const tRisseStackFrameContext &stack
 
 //! @brief		Operate/Doメソッドの引数一覧
 #define RISSE_OBJECTINTERFACE_PASS_ARG \

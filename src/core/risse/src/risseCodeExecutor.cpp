@@ -42,24 +42,24 @@ void tRisseCodeInterpreter::Execute(
 	const tRisseMethodArgument & args,
 	const tRisseMethodArgument & bargs,
 	const tRisseVariant & This,
-	const tRisseStackFrameContext *stack,
+	const tRisseStackFrameContext &stack,
 	tRisseVariant * result)
 {
 	// context でスタックフレームが指定されていない場合、スタックを割り当てる
 	// TODO: スタックフレームの再利用など
 	// 毎回スタックを new で割り当てるのは効率が悪い？
 	tRisseVariant * frame;
-	if(stack == NULL || stack->Frame == NULL)
+	if(stack.GetFrame() == NULL)
 		frame = new tRisseVariant[CodeBlock->GetNumRegs()];
 	else
-		frame = stack->Frame;
+		frame = stack.GetFrame();
 
 	tRisseVariant * shared;
-	if(stack == NULL || stack->Share == NULL)
+	if(stack.GetShare() == NULL)
 		shared = CodeBlock->GetNumSharedVars() ?
 			new tRisseVariant[CodeBlock->GetNumSharedVars()] : NULL;
 	else
-		shared = stack->Share;
+		shared = stack.GetShare();
 
 	// This を設定
 	tRisseVariant _this;

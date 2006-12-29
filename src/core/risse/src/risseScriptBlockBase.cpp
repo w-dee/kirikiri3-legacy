@@ -230,7 +230,7 @@ void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
 				&ret,
 				tRisseMethodArgument::New(),
 				tRisseMethodArgument::New(),
-				NULL);
+				tRisseVariant::GetNullObject());
 	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }
 //---------------------------------------------------------------------------

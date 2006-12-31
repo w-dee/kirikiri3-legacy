@@ -2,7 +2,7 @@
 /*
 	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
 	 stands for "Risa Is a Stagecraft Architecture"
-	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
+	Copyright (C) 2000-2007 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 */
@@ -1421,8 +1421,6 @@ risse_char RisaSJISToUnicode(risse_uint sjis)
 //! @return		出力された文字数
 //!				(最後に\0は書き込まれないしその文字数も含まれないので注意)
 //!				(risse_size)-1 = 異常な文字が見つかった
-
-
 //---------------------------------------------------------------------------
 risse_size RisaSJISToUnicodeString(const char * in, risse_char *out)
 {

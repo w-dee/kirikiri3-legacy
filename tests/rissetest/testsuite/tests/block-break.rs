@@ -1,12 +1,14 @@
-var repeat_4 = function() block {
-	for(var i = 4; i <= 7; i++) block(i);
-};
+{
+	var repeat_4 = function() block {
+		for(var i = 4; i <= 7; i++) block(i);
+	};
 
-var n = 0;
+	var n = 0;
 
-repeat_4() { |i|
-	if(i == 5) { n = i; break; }
-};
+	repeat_4() { |i|
+		if(i == 5) { n = i; break; }
+	};
 
-return n; //=> 5
+	return n; //=> 5
+}
 

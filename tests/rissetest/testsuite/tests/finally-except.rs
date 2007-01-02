@@ -1,19 +1,21 @@
-var n;
-
-try
 {
+	var n;
+
 	try
 	{
-		throw "exception!";
+		try
+		{
+			throw "exception!";
+		}
+		finally
+		{
+			n = -1;
+		}
 	}
-	finally
+	catch(e)
 	{
-		n = -1;
+		return "exception thrown, but n = " + n;
+			//=> "exception thrown, but n = -1"
 	}
-}
-catch(e)
-{
-	return "exception thrown, but n = " + n;
-		//=> "exception thrown, but n = -1"
 }
 

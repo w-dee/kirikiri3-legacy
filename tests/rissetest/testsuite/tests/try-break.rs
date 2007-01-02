@@ -1,25 +1,26 @@
-
-var test2 = function() {
-	while(true)
-	{
-		try
+{
+	var test2 = function() {
+		while(true)
 		{
 			try
 			{
-				break;
+				try
+				{
+					break;
+				}
+				catch(e)
+				{
+					throw e;
+				}
 			}
 			catch(e)
 			{
-				throw e;
+				return e;
 			}
+			return "not broken";
 		}
-		catch(e)
-		{
-			return e;
-		}
-		return "not broken";
-	}
-	return "exited";
-};
+		return "exited";
+	};
 
-return test2(); //=> "exited"
+	return test2(); //=> "exited"
+}

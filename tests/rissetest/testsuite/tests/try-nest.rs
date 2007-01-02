@@ -1,15 +1,17 @@
-var a = 0;
-try
 {
+	var a = 0;
 	try
 	{
-		a += 1;
+		try
+		{
+			a += 1;
+		}
+		catch(e)
+		{
+		}
 	}
 	catch(e)
 	{
 	}
+	return a; //=> 1
 }
-catch(e)
-{
-}
-return a; //=> 1

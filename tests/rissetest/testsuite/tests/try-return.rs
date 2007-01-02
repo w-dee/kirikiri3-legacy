@@ -1,21 +1,22 @@
-
-var test2 = function() {
-	try
-	{
+{
+	var test2 = function() {
 		try
 		{
-			throw "return by exception";
+			try
+			{
+				throw "return by exception";
+			}
+			catch(e)
+			{
+				throw e;
+			}
 		}
 		catch(e)
 		{
-			throw e;
+			return e;
 		}
-	}
-	catch(e)
-	{
-		return e;
-	}
-	return "not caught";
-};
+		return "not caught";
+	};
 
-return test2(); //=> "return by exception"
+	return test2(); //=> "return by exception"
+}

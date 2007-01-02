@@ -1,19 +1,22 @@
-var n = 0;
+{
+	var n = 0;
 
-try
-{
-	n = 1;
-}
-finally
-{
 	try
 	{
-		n = -1;
+		n = 1;
 	}
-	catch(e)
+	finally
 	{
+		try
+		{
+			n = -1;
+		}
+		catch(e)
+		{
+		}
 	}
+
+
+	return n; //=> -1
 }
 
-
-return n; //=> -1

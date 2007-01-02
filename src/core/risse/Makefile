@@ -50,16 +50,16 @@ CPPFILES =  \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \
 			src/risseCoroutine.cpp                   \
-			src/risseMethod.cpp                      \
-			src/risseObject.cpp                      \
-			src/risseOctet.cpp                       \
-			src/risseString.cpp                      \
 			src/risseException.cpp                   \
 			src/risseExceptionClass.cpp              \
 			src/risseLexerUtils.cpp                  \
+			src/risseMethod.cpp                      \
+			src/risseObject.cpp                      \
+			src/risseOctet.cpp                       \
 			src/risseOpCodes.cpp                     \
 			src/risseOperateRetValue.cpp             \
 			src/risseScriptBlockBase.cpp             \
+			src/risseString.cpp                      \
 			src/risseTypes.cpp                       \
 			src/risseUtils.cpp                       \
 			src/risseVariant.cpp                     \

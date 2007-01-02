@@ -6,8 +6,9 @@ TESTS_DIR = BASE_DIR + '/tests/'
 TEMP_DIR = BASE_DIR
 
 errored = []
+test_count = 0
 
-Dir.glob(TESTS_DIR + '*').delete_if { |x| x =~ /^\./ }.each do |file|
+Dir.glob(TESTS_DIR + '*').sort.delete_if { |x| x =~ /^\./ }.each do |file|
 	begin
 		# search test result string from file in question
 		match = IO.read(file).match(/\/\/=>\s+([^\r\n]+)/)
@@ -37,6 +38,7 @@ Dir.glob(TESTS_DIR + '*').delete_if { |x| x =~ /^\./ }.each do |file|
 	rescue => e
 		errored << "#{file}: #{e.message}"
 	end
+	test_count += 1
 end
 
 print "========================================\n"
@@ -53,6 +55,9 @@ end
 errored.each do |i|
 	print "#{i}\n"
 end
+
+print "\n"
+print "Passed #{test_count - errored.size} / Failed #{errored.size} / Total #{test_count}\n"
 
 begin
 	File.unlink("#{TEMP_DIR}/stdout.log")

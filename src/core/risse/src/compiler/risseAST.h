@@ -788,6 +788,7 @@ class tRisseASTNode_MemberSel : public tRisseASTNode
 	tRisseASTNode * Object; //!< オブジェクトノード
 	tRisseASTNode * MemberName; //!< メンバ名ノード
 	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
+	tRisseMemberAttribute Attribute; //!< メンバの属性
 
 	//! @brief		PrepareSSA() で返す構造体
 	struct tPrepareSSA : public tRisseCollectee
@@ -802,10 +803,12 @@ public:
 	//! @param		object			オブジェクトノード
 	//! @param		membername		メンバ名ノード
 	//! @param		is_direct		直接参照演算子 ('.' 演算子) かどうか
+	//! @param		attrib			メンバの属性
 	tRisseASTNode_MemberSel(risse_size position,
-			tRisseASTNode * object, tRisseASTNode * membername, bool is_direct) :
+			tRisseASTNode * object, tRisseASTNode * membername, bool is_direct,
+				tRisseMemberAttribute attrib = tRisseMemberAttribute()) :
 		tRisseASTNode(position, antMemberSel),
-			Object(object), MemberName(membername), IsDirect(is_direct)
+			Object(object), MemberName(membername), IsDirect(is_direct), Attribute(attrib)
 	{
 		if(Object) Object->SetParent(this);
 		if(MemberName) MemberName->SetParent(this);
@@ -822,6 +825,10 @@ public:
 	//! @brief		直接参照演算子 ('.' 演算子) かどうかを得る
 	//! @return		直接参照演算子 ('.' 演算子) かどうか
 	bool GetIsDirect() const { return IsDirect; }
+
+	//! @brief		メンバの属性を得る
+	//! @return		メンバの属性
+	tRisseMemberAttribute GetAttribute() const { return Attribute; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数

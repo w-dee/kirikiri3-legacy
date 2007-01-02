@@ -120,6 +120,12 @@ public:
 	//! @brief		名前空間を pop する
 	void Pop();
 
+	//! @brief		スコープを持っているかどうかを得る
+	//! @return		スコープを持っているかどうか
+	//! @note		スコープを持っていないということはグローバル位置にスクリプトがあるという
+	//!				ことを意味する
+	bool GetHasScope() const { return Scopes.size() != 0; }
+
 	//! @brief		変数を定義する
 	//! @param		name		変数名
 	//! @param		where		その変数を表す SSA 変数表現

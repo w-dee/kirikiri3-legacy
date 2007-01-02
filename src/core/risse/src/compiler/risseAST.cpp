@@ -725,11 +725,28 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 		init_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
 	}
 
-	// 変数のローカル名前空間への登録
-	form->GetLocalNamespace()->Add(Name, NULL);
+	// グローバル変数として作成すべきかどうかをチェック
+	if(form->GetLocalNamespace()->GetHasScope())
+	{
+		// ローカル変数として作成する
 
-	// ローカル変数への書き込み
-	form->GetLocalNamespace()->Write(form, GetPosition(), Name, init_var);
+		// 変数のローカル名前空間への登録
+		form->GetLocalNamespace()->Add(Name, NULL);
+
+		// ローカル変数への書き込み
+		form->GetLocalNamespace()->Write(form, GetPosition(), Name, init_var);
+	}
+	else
+	{
+		// グローバル変数(あるいはクラス変数など)として作成する
+		// this 上に変数を作成するノードを一時的に作成
+		tRisseASTNode * write_node =
+			new tRisseASTNode_MemberSel(GetPosition(),
+			new tRisseASTNode_Factor(GetPosition(), aftThis),
+			new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), true,
+				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)); // 普通の変数アクセス
+		write_node->GenerateWriteSSA(form, init_var);
+	}
 
 	// このノードは答えを返さない
 	return NULL;

@@ -567,6 +567,9 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 		new tRisseSSAForm(Function, block_name, this, !sharevars);
 	Children.push_back(new_form);
 
+	// 新しく作成した遅延評価ブロックに、一番外側のローカル名前空間をpushする
+	new_form->LocalNamespace->Push();
+
 	// ローカル名前空間の親子関係を設定
 	new_form->LocalNamespace->SetParent(LocalNamespace);
 

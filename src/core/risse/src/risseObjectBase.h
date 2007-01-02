@@ -2,7 +2,7 @@
 /*
 	Risse [りせ]
 	 stands for "Risse Is a Sweet Script Engine"
-	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
+	Copyright (C) 2000-2007 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 */
@@ -59,6 +59,10 @@ public:
 	//! 			書き込もうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
 	bool Write(const tRisseString & name, tjs_uint32 flags, const tRisseVariant &This, const tRisseVariant &value);
+
+
+	//! @brief		オブジェクトに対して操作を行う
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 };
 //---------------------------------------------------------------------------

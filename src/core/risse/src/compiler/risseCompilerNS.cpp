@@ -107,7 +107,6 @@ tRisseSSALocalNamespace::tRisseSSALocalNamespace()
 	Block = NULL;
 	AccessMap = NULL;
 	Parent = NULL;
-	Push(); // 最初の名前空間を push しておく
 }
 //---------------------------------------------------------------------------
 
@@ -157,6 +156,8 @@ void tRisseSSALocalNamespace::Pop()
 //---------------------------------------------------------------------------
 void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * where)
 {
+	RISSE_ASSERT(Scopes.size() != 0); // スコープが一つもない場合は何もできない(このメソッドは呼ばれてはいけない)
+
 	// 番号を決める
 	risse_int num = Block->GetForm()->GetUniqueNumber();
 	tRisseString n_name = GetNumberedName(name, num);

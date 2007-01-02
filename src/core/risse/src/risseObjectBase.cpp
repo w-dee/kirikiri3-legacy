@@ -2,7 +2,7 @@
 /*
 	Risse [りせ]
 	 stands for "Risse Is a Sweet Script Engine"
-	Copyright (C) 2000-2006 W.Dee <dee@kikyou.info> and contributors
+	Copyright (C) 2000-2007 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 */
@@ -37,6 +37,9 @@ bool tRisseObjectBase::Read(const tRisseString & name, tjs_uint32 flags,
 	return true;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tRisseObjectBase::Write(const tRisseString & name, tjs_uint32 flags,
 	const tRisseVariant &This, const tRisseVariant &value)
 {
@@ -48,6 +51,27 @@ bool tRisseObjectBase::Write(const tRisseString & name, tjs_uint32 flags,
 	member->Value = value;
 
 	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+{
+	switch(code)
+	{
+	case ocDGet:
+		// property get
+		if(!Read(name, flags, *This, *result))
+			return rvMemberNotFound;
+		return rvNoError;
+
+	case ocDGet:
+		// property set
+		if(!Write(name, flags, *This, args))
+			return rvMemberNotFound;
+		return rvNoError;
+	}
 }
 //---------------------------------------------------------------------------
 

@@ -8,16 +8,31 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief オブジェクトの C++ インターフェースの定義と実装
+//! @brief tRisseVariantやtRisseObjectInterfaceのOperateメソッドのflags引数の処理
 //---------------------------------------------------------------------------
 #include "prec.h"
 
-#include "risseObject.h"
-#include "risseException.h"
+#include "risseOperateFlags.h"
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(53018,62403,2623,19559,39811,3052,55606,53445);
+RISSE_DEFINE_SOURCE_ID(3457,57732,10831,20390,36015,12637,53921,25070);
 //---------------------------------------------------------------------------
+tRisseString tRisseOperateFlags::AsString() const
+{
+	// まず属性を文字列化
+	tRisseString str = tRisseMemberAttribute(Flags).AsString();
+
+	// フラグを文字列化
+	if(Flags & ofMemberEnsure)
+	{
+		if(!str.IsEmpty()) str += RISSE_WC(' ');
+		str += RISSE_WS("ofMemberEnsure");
+	}
+
+	// 戻る
+	return str;
+}
 //---------------------------------------------------------------------------
-} // namespace Risse
+}
+

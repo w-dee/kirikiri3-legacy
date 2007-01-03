@@ -53,10 +53,12 @@ CPPFILES =  \
 			src/risseException.cpp                   \
 			src/risseExceptionClass.cpp              \
 			src/risseLexerUtils.cpp                  \
+			src/risseMemberAttribute.cpp             \
 			src/risseMethod.cpp                      \
 			src/risseObject.cpp                      \
 			src/risseOctet.cpp                       \
 			src/risseOpCodes.cpp                     \
+			src/risseOperateFlags.cpp                \
 			src/risseOperateRetValue.cpp             \
 			src/risseScriptBlockBase.cpp             \
 			src/risseString.cpp                      \

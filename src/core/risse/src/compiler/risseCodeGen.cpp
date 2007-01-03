@@ -613,8 +613,8 @@ void tRisseCodeGenerator::PutOperator(tRisseOpCode op, const tRisseSSAVariable *
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
-		const tRisseSSAVariable * name, const tRisseSSAVariable * value)
+void tRisseCodeGenerator::PutGet(tRisseOpCode op, const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * obj, const tRisseSSAVariable * name, risse_uint32 flags)
 {
 	// 一応 code を assert (完全ではない)
 	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[0] == tRisseVMInsnInfo::vifRegister);
@@ -622,10 +622,36 @@ void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[2] == tRisseVMInsnInfo::vifRegister);
 	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[3] == tRisseVMInsnInfo::vifVoid);
 
+	RISSE_ASSERT(!(op == ocIGet && flags != 0)); // フラグをもてるのはocDGetのみ
+
+	if(op == ocDGet && flags != 0) op = ocDGetF; // フラグがある場合は ocDGetFを置く
+	PutWord(static_cast<risse_uint32>(op));
+	PutWord(FindRegMap(dest));
+	PutWord(FindRegMap(obj));
+	PutWord(FindRegMap(name));
+	if(op == ocDGetF) PutWord(flags); // フラグを置く
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
+		const tRisseSSAVariable * name, const tRisseSSAVariable * value, risse_uint32 flags)
+{
+	// 一応 code を assert (完全ではない)
+	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[0] == tRisseVMInsnInfo::vifRegister);
+	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[1] == tRisseVMInsnInfo::vifRegister);
+	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[2] == tRisseVMInsnInfo::vifRegister);
+	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[3] == tRisseVMInsnInfo::vifVoid);
+
+	RISSE_ASSERT(!(op == ocISet && flags != 0)); // フラグをもてるのはocDSetのみ
+
+	if(op == ocDSet && flags != 0) op = ocDSetF; // フラグがある場合は ocDSetFを置く
 	PutWord(static_cast<risse_uint32>(op));
 	PutWord(FindRegMap(obj));
 	PutWord(FindRegMap(name));
 	PutWord(FindRegMap(value));
+	if(op == ocDSetF) PutWord(flags); // フラグを置く
 }
 //---------------------------------------------------------------------------
 

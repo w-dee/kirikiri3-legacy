@@ -788,7 +788,7 @@ class tRisseASTNode_MemberSel : public tRisseASTNode
 	tRisseASTNode * Object; //!< オブジェクトノード
 	tRisseASTNode * MemberName; //!< メンバ名ノード
 	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
-	tRisseMemberAttribute Attribute; //!< メンバの属性
+	tRisseOperateFlags Flags; //!< メンバの操作フラグ(tRisseObjectInterface::Opeate() に渡す物)
 
 	//! @brief		PrepareSSA() で返す構造体
 	struct tPrepareSSA : public tRisseCollectee
@@ -803,12 +803,12 @@ public:
 	//! @param		object			オブジェクトノード
 	//! @param		membername		メンバ名ノード
 	//! @param		is_direct		直接参照演算子 ('.' 演算子) かどうか
-	//! @param		attrib			メンバの属性
+	//! @param		flags			メンバの操作フラグ
 	tRisseASTNode_MemberSel(risse_size position,
 			tRisseASTNode * object, tRisseASTNode * membername, bool is_direct,
-				tRisseMemberAttribute attrib = tRisseMemberAttribute()) :
+				tRisseOperateFlags flags = tRisseOperateFlags()) :
 		tRisseASTNode(position, antMemberSel),
-			Object(object), MemberName(membername), IsDirect(is_direct), Attribute(attrib)
+			Object(object), MemberName(membername), IsDirect(is_direct), Flags(flags)
 	{
 		if(Object) Object->SetParent(this);
 		if(MemberName) MemberName->SetParent(this);
@@ -826,9 +826,9 @@ public:
 	//! @return		直接参照演算子 ('.' 演算子) かどうか
 	bool GetIsDirect() const { return IsDirect; }
 
-	//! @brief		メンバの属性を得る
-	//! @return		メンバの属性
-	tRisseMemberAttribute GetAttribute() const { return Attribute; }
+	//! @brief		メンバの操作フラグを得る
+	//! @return		メンバの操作フラグ
+	tRisseOperateFlags GetFlags() const { return Flags; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数

@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "risseOpCodes.h"
 #include "risseVariant.h"
+#include "risseObject.h"
 
 namespace Risse
 {
@@ -130,7 +131,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 		}
 	}
 
-	// 関数呼び出し系などはオペランド数が可変なので特別に処理をする
+	// 特殊なフラグを持つものや、関数呼び出し系などはオペランド数が可変なので特別に処理をする
 	switch(insn_code)
 	{
 	case ocTryFuncCall:
@@ -216,6 +217,15 @@ tRisseString tRisseVMCodeIterator::Dump() const
 			ret += RISSE_WS(", ");
 			ret += tRisseString::AsString(static_cast<int>(CodePointer[3]));
 		};
+		break;
+
+	case ocDSetF:
+	case ocDGetF:
+		{
+			ret += RISSE_WS(" <");
+			ret += tRisseOperateFlags(CodePointer[4]).AsString();
+			ret += RISSE_WS(">");
+		}
 		break;
 
 	default:

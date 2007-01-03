@@ -62,6 +62,7 @@ class tRisseSSAStatement : public tRisseCollectee
 										//!< SSA形式インスタンス(ocDefineLazyBlock)
 		risse_size BlockCount;			//!< 関数呼び出し時のブロックの個数
 		risse_size TryIdentifierIndex;	//!< Try識別子のインデックス
+		risse_uint32 OperateFlagsValue;	//!< ocDSetF, ocDGetF の操作フラグ
 	};
 
 public:
@@ -253,6 +254,14 @@ public:
 	//! @brief		Try識別子のインデックスを取得
 	//! @return		Try識別子のインデックス
 	risse_size GetTryIdentifierIndex() const { return TryIdentifierIndex; }
+
+	//! @brief		操作フラグを設定する
+	//! @param		accessflags		アクセスフラグ
+	void SetAccessFlags(tRisseOperateFlags accessflags) { OperateFlagsValue = (risse_uint32)accessflags; }
+
+	//! @brief		メンバ属性を取得する
+	//! @return		メンバ属性
+	tRisseOperateFlags GetAccessFlags() const { return tRisseOperateFlags(OperateFlagsValue); }
 
 	//! @brief		変数の生存区間を文単位で解析する
 	void AnalyzeVariableStatementLiveness();

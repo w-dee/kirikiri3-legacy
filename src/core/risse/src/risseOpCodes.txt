@@ -99,13 +99,20 @@ Sub						sub			R,R,R,-,-,-		-			#!< -
 IncontextOf				chgc		R,R,R,-,-,-		----		#!< incontextof
 
 DGet					dget		R,R,R,-,-,-		----		#!< get .  
+DGetF					dgetf		R,R,R,O,-,-		----		#!< get . with flags (下記参照)
 IGet					iget		R,R,R,-,-,-		[]			#!< get [ ]
 DDelete					ddel		R,R,R,-,-,-		----		#!< delete .
 IDelete					idel		R,R,R,-,-,-		delete[]	#!< delete [ ]
 
 // 引数1+2つ
 DSet					dset		R,R,R,-,-,-		----		#!< set .
+DSetF					dsetf		R,R,R,O,-,-		----		#!< set . with flags (下記参照)
 ISet					iset		R,R,R,-,-,-		[]=			#!< set [ ]
+
+
+// コードジェネレータはフラグが指定されていると DGet あるいは DSet から必要に応じて
+// DGetF あるいは DSetF に変換する
+
 
 // 代入演算子の類
 BitAndAssign			ERR			-,-,-,-,-,-		&=			#!< &=

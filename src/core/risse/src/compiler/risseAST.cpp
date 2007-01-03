@@ -169,9 +169,17 @@ tRisseString tRisseASTNode_MemberSel::GetChildNameAt(risse_size index) const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_MemberSel::GetDumpComment() const
 {
-	return IsDirect ?
-		RISSE_WS("direct"):
-		RISSE_WS("indirect");
+	tRisseString str = 
+		IsDirect ?
+			RISSE_WS("direct"):
+			RISSE_WS("indirect");
+	tRisseString flags = Flags.AsString();
+	if(!flags.IsEmpty())
+	{
+		str += RISSE_WC(' ');
+		str += flags;
+	}
+	return str;
 }
 //---------------------------------------------------------------------------
 
@@ -744,7 +752,11 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 			new tRisseASTNode_MemberSel(GetPosition(),
 			new tRisseASTNode_Factor(GetPosition(), aftThis),
 			new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), true,
-				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)); // 普通の変数アクセス
+
+				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+					tRisseOperateFlags::ofMemberEnsure
+					// 普通の変数アクセスかつメンバの作成
+				);
 		write_node->GenerateWriteSSA(form, init_var);
 	}
 
@@ -778,8 +790,10 @@ tRisseSSAVariable * tRisseASTNode_MemberSel::DoReadSSA(
 
 	// 文の作成
 	tRisseSSAVariable * ret_var = NULL;
-	form->AddStatement(GetPosition(), IsDirect?ocDGet:ocIGet, &ret_var,
+	tRisseSSAStatement * stmt =
+		form->AddStatement(GetPosition(), IsDirect?ocDGet:ocIGet, &ret_var,
 							pws->ObjectVar, pws->MemberNameVar);
+	stmt->SetAccessFlags(Flags);
 
 	// 戻りの変数を返す
 	return ret_var;
@@ -794,8 +808,11 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
 	// 文の作成
-	form->AddStatement(GetPosition(), IsDirect?ocDSet:ocISet, NULL,
+	tRisseSSAStatement * stmt =
+		form->AddStatement(GetPosition(), IsDirect?ocDSet:ocISet, NULL,
 							pws->ObjectVar, pws->MemberNameVar, value);
+
+	stmt->SetAccessFlags(Flags);
 
 	return true;
 }

@@ -333,13 +333,23 @@ public:
 	void PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
 		const tRisseSSAVariable * arg1, const tRisseSSAVariable * arg2, const tRisseSSAVariable * arg3);
 
+	//! @brief		DGetとIGetのコードを置く
+	//! @param		op		オペレーションコード
+	//! @param		dest	結果を格納する変
+	//! @param		obj		オブジェクトを表す変数
+	//! @param		name	メンバ名を表す変数
+	//! @param		flags	アクセスフラグ
+	void PutGet(tRisseOpCode op, const tRisseSSAVariable * obj,
+		const tRisseSSAVariable * name, const tRisseSSAVariable * value, risse_uint32 flags);
+
 	//! @brief		DSetとISetのコードを置く
 	//! @param		op		オペレーションコード
 	//! @param		obj		オブジェクトを表す変数
 	//! @param		name	メンバ名を表す変数
 	//! @param		value	格納する変数
+	//! @param		flags	アクセスフラグ
 	void PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
-		const tRisseSSAVariable * name, const tRisseSSAVariable * value);
+		const tRisseSSAVariable * name, const tRisseSSAVariable * value, risse_uint32 flags);
 };
 //---------------------------------------------------------------------------
 

@@ -13,6 +13,7 @@
 #ifndef risseObjectInterafaceArgH
 #define risseObjectInterafaceArgH
 
+#include "risseOperateFlags.h"
 
 namespace Risse
 {
@@ -30,7 +31,7 @@ class tRisseStackFrameContext;
 		tRisseOpCode code,                                                 \
 		tRisseVariant * result = NULL,                                     \
 		const tRisseString & name = tRisseString::GetEmptyString(),        \
-		risse_uint32 flags = 0,                                            \
+		tRisseOperateFlags flags = tRisseOperateFlags(),                   \
 		const tRisseMethodArgument & args = tRisseMethodArgument::New(),   \
 		const tRisseMethodArgument & bargs = tRisseMethodArgument::New(),  \
 		const tRisseVariant &This = tRisseVariant::GetNullObject(),        \
@@ -41,7 +42,7 @@ class tRisseStackFrameContext;
 		tRisseOpCode code,                     \
 		tRisseVariant * result,                \
 		const tRisseString & name,             \
-		risse_uint32 flags,                    \
+		tRisseOperateFlags flags,              \
 		const tRisseMethodArgument & args,     \
 		const tRisseMethodArgument & bargs,    \
 		const tRisseVariant &This,             \

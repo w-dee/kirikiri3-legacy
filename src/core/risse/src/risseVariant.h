@@ -515,6 +515,26 @@ public: // Object関連
 	}
 
 public: // operate
+	//! @brief		オブジェクトに対して操作を行う(失敗した場合は例外を発生させる)
+	//! @param		code	オペレーションコード
+	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
+	//! @param		name	操作を行うメンバ名
+	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	//! @param		flags	オペレーションフラグ
+	//! @param		args	引数
+	//! @param		bargs	ブロック引数
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
+	//!						(NULL=スタックフレームコンテキストを指定しない場合)
+	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
+	//!				エラーコードなどの戻り値はない
+	void Do(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+	{
+		tRetValue ret = Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
+		if(ret != rvNoError) RaiseError(ret, name);
+	}
+
 	//! @brief		オブジェクトに対して操作を行う
 	//! @param		code	オペレーションコード
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
@@ -534,7 +554,7 @@ public: // operate
 		if(!name.IsEmpty())
 		{
 			// 名前指定がある場合
-//			return OperateForMember(RISSE_OBJECTINTERFACE_PASS_ARG);
+			return OperateForMember(RISSE_OBJECTINTERFACE_PASS_ARG);
 		}
 
 		switch(code)
@@ -735,6 +755,22 @@ public: // operate
 		return  rvNoError;
 	}
 
+	//! @brief		オブジェクトのメンバに対して操作を行う
+	//! @param		code	オペレーションコード
+	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
+	//! @param		name	操作を行うメンバ名
+	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	//! @param		flags	オペレーションフラグ
+	//! @param		args	引数
+	//! @param		bargs	ブロック引数
+	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
+	//!						(NULL=スタックフレームコンテキストを指定しない場合)
+	//! @note		Operate() メソッドがname付きで呼ばれた場合にこのメソッドが呼ばれる
+	//! @return		エラーコード
+	tRetValue
+		OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 public: // 演算子
 

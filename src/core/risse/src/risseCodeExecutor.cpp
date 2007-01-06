@@ -692,8 +692,16 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			RISSE_ASSERT(CI(code[3]) < framesize);
-			/* incomplete */
+			AR(code[2]).Do(ocDGet, &AR(code[1]), AR(code[3]), 0);
 			code += 4;
+			break;
+
+		case ocDGetF		: // dget	 get . with flags
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			RISSE_ASSERT(CI(code[3]) < framesize);
+			AR(code[2]).Do(ocDGet, &AR(code[1]), AR(code[3]), code[4]);
+			code += 5;
 			break;
 
 		case ocIGet			: // iget	 get [ ]
@@ -724,8 +732,16 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			RISSE_ASSERT(CI(code[3]) < framesize);
-			/* incomplete */
+			AR(code[1]).Do(ocDSet, NULL, AR(code[2]), 0, tRisseMethodArgument::New(AR(code[3])));
 			code += 4;
+			break;
+
+		case ocDSetF		: // dset	 set . with flags
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			RISSE_ASSERT(CI(code[3]) < framesize);
+			AR(code[1]).Do(ocDSet, NULL, AR(code[2]), code[4], tRisseMethodArgument::New(AR(code[3])));
+			code += 5;
 			break;
 
 		case ocISet			: // iset	 set [ ]

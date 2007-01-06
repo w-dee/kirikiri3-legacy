@@ -59,6 +59,24 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock::tRetValue
+	tRisseVariantBlock::OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+{
+	if(GetType() == vtObject)
+	{
+		tRisseObjectInterface * intf = GetObjectInterface();
+		return intf->Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
+	}
+	else
+	{
+		/* TODO: vtObject以外の場合の処理 */
+	}
+	return rvNoError;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
 	const tRisseMethodArgument & args,
 	const tRisseMethodArgument & bargs,

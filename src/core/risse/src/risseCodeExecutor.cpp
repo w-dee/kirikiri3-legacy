@@ -61,10 +61,6 @@ void tRisseCodeInterpreter::Execute(
 	else
 		shared = stack.GetShare();
 
-	// This を設定
-	tRisseVariant _this;
-	if(This) _this = This;
-
 	// ローカル変数に値を持ってくる
 	// いくつかのローカル変数は ASSERT が有効になっていなければ
 	// 必要ないので、#ifdef ～ #endif で場合分けをする。
@@ -124,6 +120,7 @@ void tRisseCodeInterpreter::Execute(
 		case ocAssignThis		: // this	 = thisの代入
 			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
+			AR(code[1]) = This;
 			code += 2;
 			break;
 
@@ -225,7 +222,7 @@ void tRisseCodeInterpreter::Execute(
 				tRisseVariant val;
 				try
 				{
-					AR(code[2]).FuncCall(&val, args, blockargs, &_this);
+					AR(code[2]).FuncCall(&val, args, blockargs, &This);
 				}
 				catch(const eRisseScriptException &e)
 				{
@@ -260,7 +257,7 @@ void tRisseCodeInterpreter::Execute(
 					args.Set(i, AR(code[i+5]));
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					args, tRisseMethodArgument::New(), &_this);
+					args, tRisseMethodArgument::New(), &This);
 				code += code[4] + 5;
 				break;
 			}
@@ -290,7 +287,7 @@ void tRisseCodeInterpreter::Execute(
 					blockargs.Set(i, AR(code[i+6+code[4]]));
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					args, blockargs, &_this);
+					args, blockargs, &This);
 				code += code[4] + code[5] + 6;
 				break;
 			}
@@ -299,7 +296,7 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			AR(code[1]).SetContext(
 				new tRisseMethodContext(
-					_this, tRisseStackFrameContext(frame, shared)));
+					This, tRisseStackFrameContext(frame, shared)));
 			code += 2;
 			break;
 
@@ -307,7 +304,7 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			AR(code[1]).SetContext(
 				new tRisseMethodContext(
-					_this, tRisseStackFrameContext(NULL, shared)));
+					This, tRisseStackFrameContext(NULL, shared)));
 			code += 2;
 			break;
 

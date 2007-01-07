@@ -28,8 +28,14 @@ public:
 	//! @brief	メンバ情報を表す構造体
 	struct tMemberData
 	{
-		tRisseMemberAttribute	Attribute; //!< メンバの属性
 		tRisseVariant			Value;		//!< 値
+		tRisseMemberAttribute	Attribute; //!< メンバの属性
+
+		//! @brief		コンストラクタ
+		//! @param		value		値
+		//! @param		attrib		メンバの属性
+		tMemberData(const tRisseVariant & value, tRisseMemberAttribute attrib) :
+			Value(value), Attribute(attrib) {;}
 	};
 
 protected:
@@ -47,7 +53,7 @@ public:
 	//! @note		このインスタンスが保持するハッシュ表以外を読みに行くようなことはない。
 	//! 			読み出そうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
-	bool Read(const tRisseString & name, tjs_uint32 flags, const tRisseVariant &This, tRisseVariant &result);
+	bool Read(const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant &This, tRisseVariant &result);
 
 	//! @brief		メンバに書き込む
 	//! @param		name		メンバ名
@@ -58,7 +64,7 @@ public:
 	//! @note		このインスタンスが保持するハッシュ表以外を参照しに行くようなことはない。
 	//! 			書き込もうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
-	bool Write(const tRisseString & name, tjs_uint32 flags, const tRisseVariant &This, const tRisseVariant &value);
+	bool Write(const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant &This, const tRisseVariant &value);
 
 
 	//! @brief		オブジェクトに対して操作を行う

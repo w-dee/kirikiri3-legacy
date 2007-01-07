@@ -13,7 +13,7 @@
 
 #include "risseTypes.h"
 #include "risseObjectBase.h"
-
+#include "risseOperateFlags.h"
 
 /*
 	ここではオブジェクトの実装に必要な基底の機能を実装する
@@ -24,7 +24,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(45114,31718,49668,18467,56195,41722,1990,5427);
 
 //---------------------------------------------------------------------------
-bool tRisseObjectBase::Read(const tRisseString & name, tjs_uint32 flags,
+bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 	const tRisseVariant &This, tRisseVariant &result)
 {
 	tMemberData * member = HashTable.Find(name);
@@ -40,15 +40,27 @@ bool tRisseObjectBase::Read(const tRisseString & name, tjs_uint32 flags,
 
 
 //---------------------------------------------------------------------------
-bool tRisseObjectBase::Write(const tRisseString & name, tjs_uint32 flags,
+bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags,
 	const tRisseVariant &This, const tRisseVariant &value)
 {
-	tMemberData * member = HashTable.Find(name);
+	tMemberData * member;
 
-	if(!member) return false; // 見つからなかった
+	if(flags & tRisseOperateFlags::ofMemberEnsure)
+	{
+		// メンバを新規作成する
+		// TODO: プロパティアクセス、属性チェックなどなど
 
-	// TODO: プロパティアクセス、属性チェックなどなど
-	member->Value = value;
+		HashTable.Add(name, tMemberData(tMemberData(value, flags)));
+	}
+	else
+	{
+		member = HashTable.Find(name);
+
+		if(!member) return false; // 見つからなかった
+		// TODO: プロパティアクセス、属性チェックなどなど
+
+		member->Value = value;
+	}
 
 	return true;
 }
@@ -62,16 +74,21 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	{
 	case ocDGet:
 		// property get
-		if(!Read(name, flags, *This, *result))
+		if(!Read(name, flags, This, *result))
 			return rvMemberNotFound;
 		return rvNoError;
 
-	case ocDGet:
+	case ocDSet:
 		// property set
-		if(!Write(name, flags, *This, args))
+		if(args.GetCount() < 1) { ; /* TODO: raise an error */ }
+		if(!Write(name, flags, This, args[0]))
 			return rvMemberNotFound;
 		return rvNoError;
+
+	default:
+		; // TODO: unhandled operation code support
 	}
+	return rvNoError;
 }
 //---------------------------------------------------------------------------
 

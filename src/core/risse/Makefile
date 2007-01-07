@@ -56,6 +56,7 @@ CPPFILES =  \
 			src/risseMemberAttribute.cpp             \
 			src/risseMethod.cpp                      \
 			src/risseObject.cpp                      \
+			src/risseObjectBase.cpp                  \
 			src/risseOctet.cpp                       \
 			src/risseOpCodes.cpp                     \
 			src/risseOperateFlags.cpp                \

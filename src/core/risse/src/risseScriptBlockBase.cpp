@@ -204,6 +204,7 @@ void tRisseScriptBlockBase::Fixup()
 
 }
 #include "risseCodeExecutor.h" // for test ###################################
+#include "risseObjectBase.h" // for test ###################################
 namespace Risse {
 //---------------------------------------------------------------------------
 void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
@@ -226,11 +227,12 @@ void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
 	fflush(stdout);
 	tRisseVariant ret;
 	RISSE_ASSERT(RootCodeBlock != NULL);
+	tRisseVariant global_object(new tRisseObjectBase());
 	RootCodeBlock->GetObject().FuncCall(
 				&ret,
 				tRisseMethodArgument::New(),
 				tRisseMethodArgument::New(),
-				tRisseVariant::GetNullObject());
+				global_object);
 	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }
 //---------------------------------------------------------------------------

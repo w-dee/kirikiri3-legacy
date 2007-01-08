@@ -776,6 +776,15 @@ public:
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+public:
+	//! @brief		変数宣言のSSA 形式の表現を生成する
+	//! @param		form		SSA 形式インスタンス
+	//! @param		position	ソースコード上の位置
+	//! @param		name		変数名
+	//! @param		init		初期値を表すSSA形式変数
+	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseString & name,
+			tRisseSSAVariable * init);
 };
 //---------------------------------------------------------------------------
 

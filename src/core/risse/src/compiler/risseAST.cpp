@@ -733,35 +733,46 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 		init_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
 	}
 
+	// 変数宣言のSSA表現を生成する
+	GenerateVarDecl(form, GetPosition(), Name, init_var);
+
+	// このノードは答えを返さない
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
+	risse_size position,
+	const tRisseString & name, tRisseSSAVariable * init)
+{
 	// グローバル変数として作成すべきかどうかをチェック
 	if(form->GetLocalNamespace()->GetHasScope())
 	{
 		// ローカル変数として作成する
 
 		// 変数のローカル名前空間への登録
-		form->GetLocalNamespace()->Add(Name, NULL);
+		form->GetLocalNamespace()->Add(name, NULL);
 
 		// ローカル変数への書き込み
-		form->GetLocalNamespace()->Write(form, GetPosition(), Name, init_var);
+		form->GetLocalNamespace()->Write(form, position, name, init);
 	}
 	else
 	{
 		// グローバル変数(あるいはクラス変数など)として作成する
 		// this 上に変数を作成するノードを一時的に作成
 		tRisseASTNode * write_node =
-			new tRisseASTNode_MemberSel(GetPosition(),
-			new tRisseASTNode_Factor(GetPosition(), aftThis),
-			new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), true,
+			new tRisseASTNode_MemberSel(position,
+			new tRisseASTNode_Factor(position, aftThis),
+			new tRisseASTNode_Factor(position, aftConstant, name), true,
 
 				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
 					tRisseOperateFlags::ofMemberEnsure
 					// 普通の変数アクセスかつメンバの作成
 				);
-		write_node->GenerateWriteSSA(form, init_var);
+		write_node->GenerateWriteSSA(form, init);
 	}
-
-	// このノードは答えを返さない
-	return NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -2574,7 +2585,22 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
-	return GenerateFuncDecl(form);
+	tRisseSSAVariable * func_var = GenerateFuncDecl(form);
+	if(Name.IsEmpty())
+	{
+		// 匿名関数
+		return func_var;
+	}
+	else
+	{
+		// 名前付き関数
+		// function NNN() { ... } は var NNN = function() { ... } と同じ物として処理する
+
+		// 変数宣言のSSA表現を生成する
+		tRisseASTNode_VarDeclPair::GenerateVarDecl(form, GetPosition(), Name, func_var);
+
+		return NULL;
+	}
 }
 //---------------------------------------------------------------------------
 

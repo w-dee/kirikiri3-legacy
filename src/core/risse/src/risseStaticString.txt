@@ -1,0 +1,12 @@
+// 書式
+// '//' 以降はコメントとして見なされる
+// '#!<' はコメントとして出力にも現れる
+// 識別子  文字列  コメント
+// の順で記述する。
+
+
+ss_initialize		initialize			#!< "initialize" メソッド名
+ss_construct		construct			#!< "construct" メソッド名
+ss_fertilize		fertilize			#!< "fertilize" メソッド名
+
+

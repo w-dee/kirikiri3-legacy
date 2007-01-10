@@ -62,6 +62,7 @@ CPPFILES =  \
 			src/risseOperateFlags.cpp                \
 			src/risseOperateRetValue.cpp             \
 			src/risseScriptBlockBase.cpp             \
+			src/risseStaticStrings.cpp               \
 			src/risseString.cpp                      \
 			src/risseTypes.cpp                       \
 			src/risseUtils.cpp                       \
@@ -102,6 +103,14 @@ src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc: \
 	ruby tools/opcodes.rb src/risseOpCodes.txt \
 		src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc
 
+# risseStaticStringsData.inc と risseStaticStringsIds.inc のコンパイル
+BIN_DEPS += src/risseStaticStringsData.inc src/risseStaticStringsIds.inc
+
+src/risseStaticStringsData.inc src/risseStaticStringsIds.inc: \
+		src/risseStaticString.txt \
+		tools/static_strings.rb Makefile
+	ruby tools/static_strings.rb src/risseStaticString.txt \
+		src/risseStaticStringsIds.inc src/risseStaticStringsData.inc
 
 # risseParser.cpp と risseParser.inc のコンパイル
 BIN_DEPS += src/risseOpCodesEnum.inc src/risse_parser/risseParser.inc

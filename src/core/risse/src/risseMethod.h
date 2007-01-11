@@ -110,10 +110,16 @@ public:
 
 public:
 
+	//! @brief		引数=0のtRisseMethodArgumentOfオブジェクトを返す(New()のエイリアス)
+	static const tRisseMethodArgument Empty()
+	{
+		return GetEmptyArgument();
+	}
+
 	//! @brief		引数=0のtRisseMethodArgumentOfオブジェクトを返す
 	static const tRisseMethodArgument New()
 	{
-		return GetEmptyArgument();
+		return Empty();
 	}
 
 	//! @brief		引数=1のtRisseMethodArgumentOfオブジェクトを返す

@@ -787,26 +787,58 @@ public: // 演算子
 	//! @param		bargs		ブロック引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret,
-		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
-		const tRisseVariant & This)
+	void FuncCall(tRisseVariantBlock * ret = NULL,
+		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
+		const tRisseVariant & This = tRisseVariant::GetNullObject())
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCall_Object   (ret, args, bargs, This); return;
+		case vtObject:	FuncCall_Object   (ret, tRisseString::GetEmptyString(), args, bargs, This); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
 		}
 	}
 
-	void FuncCall_Object   (tRisseVariantBlock * ret,
-		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
-		const tRisseVariant & This);
+	//-----------------------------------------------------------------------
+	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
+	//! @param		name		関数名
+	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
+	//! @param		args		引数
+	//! @param		bargs		ブロック引数
+	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
+	//-----------------------------------------------------------------------
+	void FuncCall(
+		tRisseVariantBlock * ret,
+		const tRisseString & name,
+		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
+		const tRisseVariant & This = tRisseVariant::GetNullObject())
+	{
+		// Object 以外は関数(メソッド)としては機能しないため
+		// すべて 例外を発生する
+		switch(GetType())
+		{
+		case vtVoid:	return FuncCall_Void     (ret, name, args, bargs, This);
+		case vtInteger:	return FuncCall_Integer  (ret, name, args, bargs, This);
+		case vtReal:	return FuncCall_Real     (ret, name, args, bargs, This);
+		case vtBoolean:	return FuncCall_Boolean  (ret, name, args, bargs, This);
+		case vtString:	return FuncCall_String   (ret, name, args, bargs, This);
+		case vtOctet:	return FuncCall_Octet    (ret, name, args, bargs, This);
+		case vtObject:	return FuncCall_Object   (ret, name, args, bargs, This);
+		}
+	}
+
+	void FuncCall_Void    (tRisseVariantBlock * ret, const tRisseString & name, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) { return; /* incomplete */ }
+	void FuncCall_Integer (tRisseVariantBlock * ret, const tRisseString & name, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) { return; /* incomplete */ }
+	void FuncCall_Real    (tRisseVariantBlock * ret, const tRisseString & name, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) { return; /* incomplete */ }
+	void FuncCall_Boolean (tRisseVariantBlock * ret, const tRisseString & name, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) { return; /* incomplete */ }
+	void FuncCall_String  (tRisseVariantBlock * ret, const tRisseString & name, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) { return; /* incomplete */ }
+	void FuncCall_Octet   (tRisseVariantBlock * ret, const tRisseString & name, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) { return; /* incomplete */ }
+	void FuncCall_Object  (tRisseVariantBlock * ret, const tRisseString & name, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This);
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke

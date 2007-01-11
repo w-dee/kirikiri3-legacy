@@ -77,15 +77,15 @@ tRisseVariantBlock::tRetValue
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::FuncCall_Object   (tRisseVariantBlock * ret,
+void tRisseVariantBlock::FuncCall_Object  (
+	tRisseVariantBlock * ret, const tRisseString & name,
 	const tRisseMethodArgument & args,
-	const tRisseMethodArgument & bargs,
-	const tRisseVariant & This)
+	const tRisseMethodArgument & bargs, const tRisseVariant & This)
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
-	intf->Do(ocFuncCall, ret, tRisseString::GetEmptyString(),
+	intf->Do(ocFuncCall, ret, name,
 		0, args, bargs,
 		this_context?this_context->GetThis():This,
 				// こっちはこのvariantがThisオブジェクトを保持していなければ
@@ -105,8 +105,8 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	tRisseVariantBlock ret;
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
-		tRisseMethodArgument::New(),
-		tRisseMethodArgument::New(),
+		tRisseMethodArgument::Empty(),
+		tRisseMethodArgument::Empty(),
 		*this, tRisseStackFrameContext::GetNullContext()
 		);
 	return ret;
@@ -123,7 +123,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
 		tRisseMethodArgument::New(&arg1),
-		tRisseMethodArgument::New(),
+		tRisseMethodArgument::Empty(),
 		*this, tRisseStackFrameContext::GetNullContext()
 		);
 	return ret;

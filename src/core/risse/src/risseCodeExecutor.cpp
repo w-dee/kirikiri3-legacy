@@ -257,7 +257,7 @@ void tRisseCodeInterpreter::Execute(
 					args.Set(i, AR(code[i+5]));
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					args, tRisseMethodArgument::New(), &This);
+					args, tRisseMethodArgument::Empty(), &This);
 				code += code[4] + 5;
 				break;
 			}

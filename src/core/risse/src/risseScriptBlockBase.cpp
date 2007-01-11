@@ -230,8 +230,8 @@ void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
 	tRisseVariant global_object(new tRisseObjectBase());
 	RootCodeBlock->GetObject().FuncCall(
 				&ret,
-				tRisseMethodArgument::New(),
-				tRisseMethodArgument::New(),
+				tRisseMethodArgument::Empty(),
+				tRisseMethodArgument::Empty(),
 				global_object);
 	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }

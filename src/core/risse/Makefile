@@ -46,6 +46,7 @@ CPPFLAGS = $(CXXFLAGS)
 CPPFILES =  \
 			src/risseAssert.cpp                      \
 			src/risseCharUtils.cpp                   \
+			src/risseClass.cpp                       \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \
@@ -55,8 +56,10 @@ CPPFILES =  \
 			src/risseLexerUtils.cpp                  \
 			src/risseMemberAttribute.cpp             \
 			src/risseMethod.cpp                      \
+			src/risseNativeFunction.cpp              \
 			src/risseObject.cpp                      \
 			src/risseObjectBase.cpp                  \
+			src/risseObjectClass.cpp                 \
 			src/risseOctet.cpp                       \
 			src/risseOpCodes.cpp                     \
 			src/risseOperateFlags.cpp                \

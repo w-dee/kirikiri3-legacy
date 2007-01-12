@@ -13,6 +13,8 @@
 
 #include "risseTypes.h"
 #include "risseObjectClass.h"
+#include "risseNativeFunction.h"
+#include "risseStaticStrings.h"
 
 /*
 	Risseスクリプトから見える"Object" クラスの実装
@@ -46,9 +48,9 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Object.init
+//! @brief		NativeFunction: Object.initialize
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Object_init : public tRisseNativeFunctionBase
+class tRisseNativeFunction_Object_initialize : public tRisseNativeFunctionBase
 {
 protected:
 	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
@@ -86,7 +88,7 @@ protected:
 
 		// This のインスタンスメンバを取得する
 		tRisseVariant ret = 
-			This.GetPropDirect(args[0], tRisseOperateFlags::ofInstanceMemberOnly,
+			This.GetPropertyDirect(args[0], tRisseOperateFlags::ofInstanceMemberOnly,
 						This);
 		if(result) *result = ret;
 	}
@@ -113,7 +115,7 @@ protected:
 		if(args.GetCount() < 2) RisseThrowBadArgumentCount(args.GetCount(), 2);
 
 		// This のインスタンスメンバを設定する
-		This.SetPropDirect(args[0], tRisseOperateFlags::ofInstanceMemberOnly,
+		This.SetPropertyDirect(args[0], tRisseOperateFlags::ofInstanceMemberOnly,
 						args[1], This);
 	}
 };
@@ -124,18 +126,18 @@ protected:
 tRisseObjectClass::tRisseObjectClass() : tRisseClass(tRisseVariant::GetNullObject())
 {
 	// クラスに必要なメソッドを登録する
-	tRisseVariant This(this);
 
 	// construct, init などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
 
-	// new
-	This.SetPropDirect(mnNew, tRisseVariant(new tRisseNativeFunction_Class_new(), This));
-	// fertilize
-	This.SetPropDirect(ss_fertilize, tRisseVariant(new tRisseNativeFunction_Class_fertilize(), This));
-
-	// super を登録
-	This.SetPropDirect(ss_super, super_class);
+	// construct
+	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunction_Object_construct()));
+	// object
+	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunction_Object_initialize()));
+	// getInstanceMember
+	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(new tRisseNativeFunction_Object_getInstanceMember()));
+	// setInstanceMener
+	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(new tRisseNativeFunction_Object_setInstanceMember()));
 }
 //---------------------------------------------------------------------------
 

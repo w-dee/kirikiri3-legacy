@@ -47,7 +47,7 @@ public:
 
 	//! @brief		& 演算子
 	//! @param		rhs		右辺
-	tRisseOperateFlags operator | (risse_uint32 rhs) { return tRisseOperateFlags(Flags & rhs); }
+	tRisseOperateFlags operator & (risse_uint32 rhs) { return tRisseOperateFlags(Flags & rhs); }
 
 	//! @brief		bool へのキャスト
 	operator bool () const { return Flags != 0; }

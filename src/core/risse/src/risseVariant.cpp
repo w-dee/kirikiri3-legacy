@@ -59,6 +59,28 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock::tRisseVariantBlock(tRisseObjectInterface * ref,
+	const tRisseMethodContext * context)
+{
+	Type = vtObject;
+	SetObjectIntf(ref);
+	AsObject().Context = context;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock::tRisseVariantBlock(tRisseObjectInterface * ref,
+	const tRisseVariantBlock & context)
+{
+	Type = vtObject;
+	SetObjectIntf(ref);
+	AsObject().Context = new tRisseMethodContext(context);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseVariantBlock::tRetValue
 	tRisseVariantBlock::OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
@@ -77,7 +99,7 @@ tRisseVariantBlock::tRetValue
 
 
 //---------------------------------------------------------------------------
-tRisseVariantBlock tRisseVariantBlock::GetPropDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This)
+tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;
@@ -97,7 +119,7 @@ tRisseVariantBlock tRisseVariantBlock::GetPropDirect_Object  (const tRisseString
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::SetPropDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This)
+void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;
@@ -118,7 +140,7 @@ void tRisseVariantBlock::SetPropDirect_Object  (const tRisseString & name, risse
 void tRisseVariantBlock::FuncCall_Object  (
 	tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags,
 	const tRisseMethodArgument & args,
-	const tRisseMethodArgument & bargs, const tRisseVariant & This)
+	const tRisseMethodArgument & bargs, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;

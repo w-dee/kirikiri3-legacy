@@ -19,7 +19,7 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(47510,49015,53768,19018,63934,19864,53779,8975);
 //---------------------------------------------------------------------------
-tRetValue tRisseNativeFunctionBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+tRisseNativeFunctionBase::tRetValue tRisseNativeFunctionBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// このオブジェクトに対する関数呼び出しか？
 	if(code == ocFuncCall && name.IsEmpty())

@@ -19,6 +19,7 @@
 #include "risseVariant.h"
 #include "risseException.h"
 #include "risseOpCodes.h"
+#include "risseStaticStrings.h"
 
 namespace Risse
 {
@@ -60,9 +61,15 @@ protected:
 	{
 		// 空のオブジェクトを作る
 		// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
-		tRisseVariant new_object(new tObjectBase());
+		tRisseVariant new_object(new tRisseObjectBase());
 
 		// そのオブジェクトにクラス情報を設定する
+		// ここではclassメンバに「自分のクラス」を追加する
+		// 「自分のクラス」はすなわち This のこと(のはず)
+		new_object.SetPropertyDirect(ss_class,
+			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+			This, new_object);
 		// yet not
 
 		// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
@@ -79,7 +86,7 @@ protected:
 			new_object);
 
 		// オブジェクトを返す
-		if(ret) *ret = new_object;
+		if(result) *result = new_object;
 	}
 };
 //---------------------------------------------------------------------------
@@ -104,7 +111,7 @@ protected:
 		if(args.GetCount() < 1) RisseThrowBadArgumentCount(args.GetCount(), 1);
 
 		// 親クラスを得る
-		tRisseVariant super_class = This.GetPropDirect(ss_super);
+		tRisseVariant super_class = This.GetPropertyDirect(ss_super);
 
 		// 親クラスがあれば...
 		if(!super_class.IsNull())
@@ -130,7 +137,7 @@ protected:
 
 
 //---------------------------------------------------------------------------
-tRetValue tRisseClass::tRisseClass(const tRisseVariant & super_class)
+tRisseClass::tRisseClass(const tRisseVariant & super_class)
 {
 	// クラスに必要なメソッドを登録する
 	tRisseVariant This(this);
@@ -139,24 +146,24 @@ tRetValue tRisseClass::tRisseClass(const tRisseVariant & super_class)
 	// This (クラスそのもの)をあらかじめ設定する。
 
 	// new
-	This.SetPropDirect(mnNew, tRisseVariant(new tRisseNativeFunction_Class_new(), This));
+	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunction_Class_new(), This));
 	// fertilize
-	This.SetPropDirect(ss_fertilize, tRisseVariant(new tRisseNativeFunction_Class_fertilize(), This));
+	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunction_Class_fertilize(), This));
 
 	// super を登録
-	This.SetPropDirect(ss_super, super_class);
+	RegisterNormalMember(ss_super, super_class);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+tRisseClass::tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(code == ocNew && name.IsEmpty())
 	{
 		// このオブジェクトに対する new 指令
 		// このオブジェクトの new メソッドを呼ぶ
-		inherited::FuncCall(ret, mnNew, 0, args, bargs, This);
+		inherited::FuncCall(result, mnNew, 0, args, bargs, This);
 		return rvNoError;
 	}
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);

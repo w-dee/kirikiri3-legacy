@@ -53,7 +53,7 @@ public:
 	//! @note		このインスタンスが保持するハッシュ表以外を読みに行くようなことはない。
 	//! 			読み出そうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
-	bool Read(const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant &This, tRisseVariant &result);
+	bool Read(const tRisseString & name, tRisseOperateFlags flags, tRisseVariant &result, const tRisseVariant &This);
 
 	//! @brief		メンバに書き込む
 	//! @param		name		メンバ名
@@ -64,7 +64,7 @@ public:
 	//! @note		このインスタンスが保持するハッシュ表以外を参照しに行くようなことはない。
 	//! 			書き込もうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
-	bool Write(const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant &This, const tRisseVariant &value);
+	bool Write(const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant &value, const tRisseVariant &This);
 
 	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
 	//! @param		name		関数名
@@ -73,7 +73,7 @@ public:
 	//! @param		args		引数
 	//! @param		bargs		ブロック引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
-	void FuncCall(
+	bool FuncCall(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
@@ -84,6 +84,14 @@ public:
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
+
+public:
+	// ユーティリティ
+
+	//! @brief		普通のメンバ(メソッドや変数)をインスタンスに登録する(既存のメンバば上書きされる)
+	//! @param		name		名前
+	//! @param		value		値
+	void RegisterNormalMember(const tRisseString & name, const tRisseVariant & value);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

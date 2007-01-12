@@ -14,7 +14,7 @@
 #define risseNativeFunctionH
 
 #include "risseCharUtils.h"
-#include "risseObject.h"
+#include "risseObjectBase.h"
 
 namespace Risse
 {

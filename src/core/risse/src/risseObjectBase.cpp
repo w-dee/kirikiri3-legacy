@@ -14,6 +14,7 @@
 #include "risseTypes.h"
 #include "risseObjectBase.h"
 #include "risseOperateFlags.h"
+#include "risseStaticStrings.h"
 
 /*
 	ここではオブジェクトの実装に必要な基底の機能を実装する
@@ -25,7 +26,7 @@ RISSE_DEFINE_SOURCE_ID(45114,31718,49668,18467,56195,41722,1990,5427);
 
 //---------------------------------------------------------------------------
 bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
-	const tRisseVariant &This, tRisseVariant &result)
+	tRisseVariant &result, const tRisseVariant &This)
 {
 	tMemberData * member = HashTable.Find(name);
 
@@ -36,13 +37,12 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 
 		// クラスを探す
 		tRisseVariant Class;
-		if(!Read(ss_class, tRisseOperateFlags::ofInstanceMemberOnly,
-			This, result))
+		if(!Read(ss_class, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
 			return false; // クラスを特定できない
 
 		// クラスに対してメンバ取得を行う
-		tRetValue result = Class.OperateForMember(ocDGet, &result, name, flags)
-		if(result != rvNoError) return false;
+		tRetValue rv = Class.OperateForMember(ocDGet, &result, name, flags);
+		if(rv != rvNoError) return false;
 	}
 
 	// TODO: プロパティアクセス、属性チェックなどなど
@@ -55,7 +55,7 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 
 //---------------------------------------------------------------------------
 bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags,
-	const tRisseVariant &This, const tRisseVariant &value)
+	const tRisseVariant &value, const tRisseVariant &This)
 {
 	tMemberData * member;
 
@@ -88,14 +88,14 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 
 	// クラスを探す
 	tRisseVariant Class;
-	if(Read(ss_class, tRisseOperateFlags::ofInstanceMemberOnly,
-		This, result))
+	if(Read(ss_class, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
 	{
 		// クラスを特定できた場合
-		// クラスに対してメンバ取得を行う
+		// クラスに対してメンバ設定を行う
 		tRetValue result =
-			Class.OperateForMember(ocDGet, &result, name,
-							flags|tRisseOperateFlags::ofPropertyOnly)
+			Class.OperateForMember(ocDSet, NULL, name,
+							flags|tRisseOperateFlags::ofPropertyOnly,
+							tRisseMethodArgument::New(value));
 		if(result == rvNoError) return true; // アクセスに成功したので戻る
 	}
 
@@ -136,7 +136,7 @@ bool tRisseObjectBase::FuncCall(
 
 		// メンバを読み出す
 		tRisseVariant function_object;
-		if(!Read(name, flags, This, function_object)) return false;
+		if(!Read(name, flags, function_object, This)) return false;
 
 		// メンバに対して関数呼び出しを実行する
 		function_object.FuncCall(ret, flags, args, bargs, This);
@@ -154,7 +154,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	case ocDGet:
 		// property get
 		// TODO: このオブジェクトそのもに対する操作への対応
-		if(!Read(name, flags, This, *result))
+		if(!Read(name, flags, *result, This))
 			return rvMemberNotFound;
 		return rvNoError;
 
@@ -162,13 +162,13 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 		// property set
 		// TODO: このオブジェクトそのもに対する操作への対応
 		if(args.GetCount() < 1) { ; /* TODO: raise an error */ }
-		if(!Write(name, flags, This, args[0]))
+		if(!Write(name, flags, args[0], This))
 			return rvMemberNotFound;
 		return rvNoError;
 
 	case ocFuncCall:
 		// function call
-		if(!FuncCall(name, flags, args, bargs, This))
+		if(!FuncCall(result, name, flags, args, bargs, This))
 			return rvMemberNotFound;
 		return rvNoError;
 
@@ -176,6 +176,17 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 		; // TODO: unhandled operation code support
 	}
 	return rvNoError;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseObjectBase::RegisterNormalMember(const tRisseString & name, const tRisseVariant & value)
+{
+	Write(name,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+			value, tRisseVariant(this));
 }
 //---------------------------------------------------------------------------
 

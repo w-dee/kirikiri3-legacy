@@ -229,7 +229,7 @@ void tRisseScriptBlockBase::Evaluate(tRisseVariant * result, bool is_expression)
 	RISSE_ASSERT(RootCodeBlock != NULL);
 	tRisseVariant global_object(new tRisseObjectBase());
 	RootCodeBlock->GetObject().FuncCall(
-				&ret,
+				&ret, 0,
 				tRisseMethodArgument::Empty(),
 				tRisseMethodArgument::Empty(),
 				global_object);

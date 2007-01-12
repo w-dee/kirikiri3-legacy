@@ -10,3 +10,5 @@ static const tRisseString & ss_super = *reinterpret_cast<const tRisseString *>(R
 static const tRisseString & ss_getInstanceMember = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+4); //!< (演算子メンバ名)  "getInstanceMember" メソッド名
 static const tRisseString & ss_setInstanceMember = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+5); //!< (演算子メンバ名)  "setInstanceMember" メソッド名
 static const tRisseString & ss_class = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+6); //!< (演算子メンバ名)  "class" プロパティ名
+static const tRisseString & ss_Object = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+7); //!< (演算子メンバ名)  "Object" クラス名
+static const tRisseString & ss_Class = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+8); //!< (演算子メンバ名)  "Class" クラス名

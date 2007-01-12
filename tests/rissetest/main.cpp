@@ -8,11 +8,8 @@
 
 
 
-#include "risse_parser/risseParser.h"
-#include "risse_parser/risseScriptBlock.h"
 #include "risseException.h"
-#include "risseCoroutine.h"
-
+#include "risseScriptEngine.h"
 
 RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
 
@@ -75,35 +72,32 @@ int Application::OnRun()
 		return 0;
 	}
 
-	// GCとコルーチンを初期化する
-	// TOOD: これらはRisseライブラリ内に入れるように
-	GC_init();
-	RisseInitCoroutine();
-
-	// 入力ファイルを開く
-	wxFile file;
-	if(file.Open(argv[1]))
+	// Risse スクリプトエンジンを作成する
+	try
 	{
-		// 内容を読み込む
-		size_t length = file.Length();
-		char *buf = new (PointerFreeGC) char [length + 1];
-		file.Read(buf, length);
-		buf[length] = 0;
+		tRisseScriptEngine engine;
 
-		// 内容を評価する
-		try
+		// 入力ファイルを開く
+		wxFile file;
+		if(file.Open(argv[1]))
 		{
-			tRisseScriptBlock block((tRisseString)(buf), argv[1]);
-			block.Evaluate();
+			// 内容を読み込む
+			size_t length = file.Length();
+			char *buf = new (PointerFreeGC) char [length + 1];
+			file.Read(buf, length);
+			buf[length] = 0;
+
+			// 内容を評価する
+			engine.Evaluate((tRisseString)(buf), argv[1]);
 		}
-		catch(const eRisse & e)
-		{
-			fflush(stderr);
-			fflush(stdout);
-			wxFprintf(stdout, wxT("error: %s\n"), e.GetMessageString().AsWxString().c_str());
-		}
+
 	}
-
+	catch(const eRisse & e)
+	{
+		fflush(stderr);
+		fflush(stdout);
+		wxFprintf(stdout, wxT("error: %s\n"), e.GetMessageString().AsWxString().c_str());
+	}
 	return 0;
 }
 //---------------------------------------------------------------------------

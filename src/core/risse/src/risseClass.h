@@ -33,7 +33,7 @@ public:
 	tRisseClass(const tRisseVariant & super_class);
 
 	//! @brief		オブジェクトに対して操作を行う
-	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG) = 0;
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------
 

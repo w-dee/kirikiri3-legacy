@@ -192,6 +192,24 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::New_Object  (const tRisseString & name,
+	risse_uint32 flags, const tRisseMethodArgument & args) const
+{
+	tRisseObjectInterface * intf = GetObjectInterface();
+	if(!intf) { /* TODO: null check */; }
+	tRisseVariantBlock ret;
+	intf->Do(ocNew, &ret, name,
+		flags,
+		args,
+		tRisseMethodArgument::Empty(),
+		*this, tRisseStackFrameContext::GetNullContext()
+		);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Plus_String   () const
 {
 	tRisseVariantBlock val;

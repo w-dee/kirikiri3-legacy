@@ -887,17 +887,15 @@ public: // 演算子
 		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject()) const
 	{
-		// Object 以外は関数(メソッド)としては機能しないため
-		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtVoid:	return FuncCall_Void     (ret, name, flags, args, bargs, This);
-		case vtInteger:	return FuncCall_Integer  (ret, name, flags, args, bargs, This);
-		case vtReal:	return FuncCall_Real     (ret, name, flags, args, bargs, This);
-		case vtBoolean:	return FuncCall_Boolean  (ret, name, flags, args, bargs, This);
-		case vtString:	return FuncCall_String   (ret, name, flags, args, bargs, This);
-		case vtOctet:	return FuncCall_Octet    (ret, name, flags, args, bargs, This);
-		case vtObject:	return FuncCall_Object   (ret, name, flags, args, bargs, This);
+		case vtVoid:	FuncCall_Void     (ret, name, flags, args, bargs, This); return;
+		case vtInteger:	FuncCall_Integer  (ret, name, flags, args, bargs, This); return;
+		case vtReal:	FuncCall_Real     (ret, name, flags, args, bargs, This); return;
+		case vtBoolean:	FuncCall_Boolean  (ret, name, flags, args, bargs, This); return;
+		case vtString:	FuncCall_String   (ret, name, flags, args, bargs, This); return;
+		case vtOctet:	FuncCall_Octet    (ret, name, flags, args, bargs, This); return;
+		case vtObject:	FuncCall_Object   (ret, name, flags, args, bargs, This); return;
 		}
 	}
 
@@ -970,26 +968,56 @@ public: // 演算子
 	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトをクラスと見なした)インスタンス作成	New
-	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
-	//! @param		argc		引数の数
-	//! @param		argv		引数へのポインタの配列
+	//! @brief		(このオブジェクトに対する)インスタンス作成		New
+	//! @param		flags		呼び出しフラグ
+	//! @param		args		引数
+	//! @return		新しいインスタンス
 	//-----------------------------------------------------------------------
-	void New(tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[]) const
+	tRisseVariantBlock New(risse_uint32 flags = 0,
+		const tRisseMethodArgument & args = tRisseMethodArgument::Empty()) const
 	{
 		// Object 以外はクラスとしては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	New_Object   (ret, argc, argv); return;
+		case vtObject:	return New_Object   (tRisseString::GetEmptyString(), flags, args);
 
 		default:
 			RisseThrowCannotCreateInstanceFromNonClassObjectException(); break;
 		}
+		return tRisseVariantBlock();
 	}
 
-	void New_Object   (tRisseVariantBlock * ret, risse_size argc, tRisseVariantBlock *argv[]) const
-		{ return ; /* incomplete */ }
+	//-----------------------------------------------------------------------
+	//! @brief		(このオブジェクトのメンバに対する)インスタンス作成		New
+	//! @param		name		関数名
+	//! @param		flags		呼び出しフラグ
+	//! @param		args		引数
+	//! @return		新しいインスタンス
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock New(
+		const tRisseString & name, risse_uint32 flags = 0,
+		const tRisseMethodArgument & args = tRisseMethodArgument::Empty()) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return New_Void     (name, flags, args);
+		case vtInteger:	return New_Integer  (name, flags, args);
+		case vtReal:	return New_Real     (name, flags, args);
+		case vtBoolean:	return New_Boolean  (name, flags, args);
+		case vtString:	return New_String   (name, flags, args);
+		case vtOctet:	return New_Octet    (name, flags, args);
+		case vtObject:	return New_Object   (name, flags, args);
+		}
+	}
+
+	tRisseVariantBlock New_Void    (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock New_Integer (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock New_Real    (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock New_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock New_String  (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock New_Octet   (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock New_Object  (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const;
 
 
 	//-----------------------------------------------------------------------

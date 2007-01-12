@@ -12,6 +12,8 @@ static risse_char RisseStaticStrings [] = {
 /*   4, offset=+  45 */tRisseStringData::MightBeShared,'g','e','t','I','n','s','t','a','n','c','e','M','e','m','b','e','r',0,0xf4080a74,
 /*   5, offset=+  65 */tRisseStringData::MightBeShared,'s','e','t','I','n','s','t','a','n','c','e','M','e','m','b','e','r',0,0xecd5abe6,
 /*   6, offset=+  85 */tRisseStringData::MightBeShared,'c','l','a','s','s',0,0xe45c07dd,
+/*   7, offset=+  93 */tRisseStringData::MightBeShared,'O','b','j','e','c','t',0,0x3784616d,
+/*   8, offset=+ 102 */tRisseStringData::MightBeShared,'C','l','a','s','s',0,0x9e6ebc1d,
 };
 const tRisseStringData RisseStaticStringTable[] = {
 /*   0 */ {RisseStaticStrings+1,10} /*  "initialize" メソッド名 */,
@@ -21,4 +23,6 @@ const tRisseStringData RisseStaticStringTable[] = {
 /*   4 */ {RisseStaticStrings+46,17} /*  "getInstanceMember" メソッド名 */,
 /*   5 */ {RisseStaticStrings+66,17} /*  "setInstanceMember" メソッド名 */,
 /*   6 */ {RisseStaticStrings+86,5} /*  "class" プロパティ名 */,
+/*   7 */ {RisseStaticStrings+94,6} /*  "Object" クラス名 */,
+/*   8 */ {RisseStaticStrings+103,5} /*  "Class" クラス名 */,
 };

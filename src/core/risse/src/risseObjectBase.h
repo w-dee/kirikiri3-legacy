@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief オブジェクトクラスの基底実装
+//! @brief オブジェクト用C++クラスの基底実装
 //---------------------------------------------------------------------------
 
 #ifndef risseObjectBaseH
@@ -65,6 +65,20 @@ public:
 	//! 			書き込もうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
 	bool Write(const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant &This, const tRisseVariant &value);
+
+	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
+	//! @param		name		関数名
+	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
+	//! @param		flags		呼び出しフラグ
+	//! @param		args		引数
+	//! @param		bargs		ブロック引数
+	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
+	void FuncCall(
+		tRisseVariantBlock * ret,
+		const tRisseString & name, risse_uint32 flags = 0,
+		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
+		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
+		const tRisseVariant & This = tRisseVariant::GetNullObject());
 
 
 	//! @brief		オブジェクトに対して操作を行う

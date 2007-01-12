@@ -25,7 +25,8 @@ class tRisseOperateFlags : public tRisseCollectee
 	risse_uint32 Flags; //!< フラグの値
 public:
 	static const risse_uint32 ofMemberEnsure = 0x1000;  //!< メンバが無かった場合に作成を行う
-
+	static const risse_uint32 ofInstanceMemberOnly = 0x2000; //!< インスタンスメンバのみ参照(クラスのメンバを見に行かない)
+	static const risse_uint32 ofPropertyOnly = 0x4000; //!< プロパティとして起動できる物のみを探す(見つからなかった場合やプロパティとして起動できない場合はrvMemberNotFoundがかえる)
 public:
 	//! @brief		デフォルトコンストラクタ
 	tRisseOperateFlags() { Flags = 0; }
@@ -43,6 +44,13 @@ public:
 	//! @brief		| 演算子
 	//! @param		rhs		右辺
 	tRisseOperateFlags operator | (risse_uint32 rhs) { return tRisseOperateFlags(Flags | rhs); }
+
+	//! @brief		& 演算子
+	//! @param		rhs		右辺
+	tRisseOperateFlags operator | (risse_uint32 rhs) { return tRisseOperateFlags(Flags & rhs); }
+
+	//! @brief		bool へのキャスト
+	operator bool () const { return Flags != 0; }
 
 	//! @brief		tRisseMemberAttributeへのキャスト
 	operator tRisseMemberAttribute () const { return tRisseMemberAttribute(Flags); }

@@ -8,9 +8,17 @@ static risse_char RisseStaticStrings [] = {
 /*   0, offset=+   0 */tRisseStringData::MightBeShared,'i','n','i','t','i','a','l','i','z','e',0,0x18d6fc65,
 /*   1, offset=+  13 */tRisseStringData::MightBeShared,'c','o','n','s','t','r','u','c','t',0,0x2a8316ca,
 /*   2, offset=+  25 */tRisseStringData::MightBeShared,'f','e','r','t','i','l','i','z','e',0,0x9c24f504,
+/*   3, offset=+  37 */tRisseStringData::MightBeShared,'s','u','p','e','r',0,0x9c5ee034,
+/*   4, offset=+  45 */tRisseStringData::MightBeShared,'g','e','t','I','n','s','t','a','n','c','e','M','e','m','b','e','r',0,0xf4080a74,
+/*   5, offset=+  65 */tRisseStringData::MightBeShared,'s','e','t','I','n','s','t','a','n','c','e','M','e','m','b','e','r',0,0xecd5abe6,
+/*   6, offset=+  85 */tRisseStringData::MightBeShared,'c','l','a','s','s',0,0xe45c07dd,
 };
 const tRisseStringData RisseStaticStringTable[] = {
 /*   0 */ {RisseStaticStrings+1,10} /*  "initialize" メソッド名 */,
 /*   1 */ {RisseStaticStrings+14,9} /*  "construct" メソッド名 */,
 /*   2 */ {RisseStaticStrings+26,9} /*  "fertilize" メソッド名 */,
+/*   3 */ {RisseStaticStrings+38,5} /*  "super" インスタンス変数/プロパティ名 */,
+/*   4 */ {RisseStaticStrings+46,17} /*  "getInstanceMember" メソッド名 */,
+/*   5 */ {RisseStaticStrings+66,17} /*  "setInstanceMember" メソッド名 */,
+/*   6 */ {RisseStaticStrings+86,5} /*  "class" プロパティ名 */,
 };

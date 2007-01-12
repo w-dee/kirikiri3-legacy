@@ -768,8 +768,8 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 			new tRisseASTNode_Factor(position, aftConstant, name), true,
 
 				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-					tRisseOperateFlags::ofMemberEnsure
-					// 普通の変数アクセスかつメンバの作成
+					tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly
+					// 普通の変数アクセスかつメンバの作成、インスタンスメンバのみ
 				);
 		write_node->GenerateWriteSSA(form, init);
 	}

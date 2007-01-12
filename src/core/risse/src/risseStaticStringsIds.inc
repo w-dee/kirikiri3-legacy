@@ -6,3 +6,7 @@ extern const tRisseStringData RisseStaticStringTable[];
 static const tRisseString & ss_initialize = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+0); //!< (演算子メンバ名)  "initialize" メソッド名
 static const tRisseString & ss_construct = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+1); //!< (演算子メンバ名)  "construct" メソッド名
 static const tRisseString & ss_fertilize = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+2); //!< (演算子メンバ名)  "fertilize" メソッド名
+static const tRisseString & ss_super = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+3); //!< (演算子メンバ名)  "super" インスタンス変数/プロパティ名
+static const tRisseString & ss_getInstanceMember = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+4); //!< (演算子メンバ名)  "getInstanceMember" メソッド名
+static const tRisseString & ss_setInstanceMember = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+5); //!< (演算子メンバ名)  "setInstanceMember" メソッド名
+static const tRisseString & ss_class = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+6); //!< (演算子メンバ名)  "class" プロパティ名

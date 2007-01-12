@@ -65,7 +65,7 @@ tRisseVariantBlock::tRetValue
 	if(GetType() == vtObject)
 	{
 		tRisseObjectInterface * intf = GetObjectInterface();
-		return intf->Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
+		return intf->Operate(RISSE_OBJECTINTERFACE_PASS_ARG); // <- これ違う、Thisやコンテキストを正しくハンドリングするように直す必要有り
 	}
 	else
 	{
@@ -77,8 +77,46 @@ tRisseVariantBlock::tRetValue
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::GetPropDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This)
+{
+	tRisseObjectInterface * intf = GetObjectInterface();
+	const tRisseMethodContext * this_context = AsObject().Context;
+	if(!intf) { /* TODO: null check */; }
+	tRisseVariantBlock ret;
+	intf->Do(ocDGet, &ret, name,
+		0, tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(),
+		this_context?this_context->GetThis():This,
+				// こっちはこのvariantがThisオブジェクトを保持していなければ
+				// context->GetThis() を見るが
+		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
+				// こっちは常にこのvariantが保持している値になる
+		);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::SetPropDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This)
+{
+	tRisseObjectInterface * intf = GetObjectInterface();
+	const tRisseMethodContext * this_context = AsObject().Context;
+	if(!intf) { /* TODO: null check */; }
+	intf->Do(ocDSet, NULL, name,
+		0, tRisseMethodArgument::New(value), tRisseMethodArgument::Empty(),
+		this_context?this_context->GetThis():This,
+				// こっちはこのvariantがThisオブジェクトを保持していなければ
+				// context->GetThis() を見るが
+		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
+				// こっちは常にこのvariantが保持している値になる
+		);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseVariantBlock::FuncCall_Object  (
-	tRisseVariantBlock * ret, const tRisseString & name,
+	tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags,
 	const tRisseMethodArgument & args,
 	const tRisseMethodArgument & bargs, const tRisseVariant & This)
 {
@@ -86,7 +124,7 @@ void tRisseVariantBlock::FuncCall_Object  (
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocFuncCall, ret, name,
-		0, args, bargs,
+		flags, args, bargs,
 		this_context?this_context->GetThis():This,
 				// こっちはこのvariantがThisオブジェクトを保持していなければ
 				// context->GetThis() を見るが

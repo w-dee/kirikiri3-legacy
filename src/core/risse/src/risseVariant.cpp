@@ -34,7 +34,7 @@ tRisseStackFrameContext::tNullContext tRisseStackFrameContext::NullContext = {NU
 // nullオブジェクトへのconst参照を保持するオブジェクト
 // これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
 tRisseVariantBlock::tNullObject tRisseVariantBlock::NullObject = {
-	reinterpret_cast<risse_ptruint>(RISSE_OBJECT_NULL_PTR),
+	reinterpret_cast<risse_ptruint>(RISSE_OBJECT_NULL_PTR)+2, // +2 = Object Mark
 	{0}
 };
 //---------------------------------------------------------------------------

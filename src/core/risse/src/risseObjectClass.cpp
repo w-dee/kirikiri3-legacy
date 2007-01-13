@@ -123,6 +123,33 @@ protected:
 
 
 //---------------------------------------------------------------------------
+//! @brief		NativeFunction: Object.puts  テスト用関数 - 将来的には別のクラスに移動する予定
+//---------------------------------------------------------------------------
+class tRisseNativeFunction_Object_puts : public tRisseNativeFunctionBase
+{
+protected:
+	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
+	void Call(
+		tRisseVariant * result,
+		tRisseOperateFlags flags,
+		const tRisseMethodArgument & args,
+		const tRisseMethodArgument & bargs,
+		const tRisseVariant &This,
+		const tRisseStackFrameContext &stack)
+	{
+		// 引数をすべて標準出力に出力する
+		// 引数を一つ出力するたびに改行する
+		for(risse_size i = 0; i < args.GetCount(); i++)
+		{
+			RisseFPrint(stdout, args[i].AsHumanReadable().c_str());
+			RisseFPrint(stdout, RISSE_WS("\n"));
+		}
+	}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseObjectClass::tRisseObjectClass() : tRisseClass(tRisseVariant::GetNullObject())
 {
 	// クラスに必要なメソッドを登録する
@@ -131,13 +158,15 @@ tRisseObjectClass::tRisseObjectClass() : tRisseClass(tRisseVariant::GetNullObjec
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunction_Object_construct()));
+	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunction_Object_construct()));
 	// object
-	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunction_Object_initialize()));
+	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunction_Object_initialize()));
 	// getInstanceMember
 	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(new tRisseNativeFunction_Object_getInstanceMember()));
 	// setInstanceMener
 	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(new tRisseNativeFunction_Object_setInstanceMember()));
+	// setInstanceMener
+	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(new tRisseNativeFunction_Object_puts()));
 }
 //---------------------------------------------------------------------------
 

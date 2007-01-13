@@ -113,12 +113,13 @@ public:
 
 public:
 	//! @brief		スクリプトを評価する
+	//! @param		context			コンテキストオブジェクト
 	//! @param		result			実行の結果(NULL可)
 	//! @param		is_expression	式評価モードかどうか
 	//! @note		もしスクリプトがコンパイルが必要な場合、
 	//!				Evaluate は評価に先立って Compile() を呼び、コンパイルを行う。
 	//!				その後、Fixup() を呼んでから RootCodeBlock を実行する。
-	void Evaluate(tRisseVariant * result = NULL, bool is_expression = false);
+	void Evaluate(const tRisseVariant & context, tRisseVariant * result = NULL, bool is_expression = false);
 
 protected:
 	//! @brief		AST のルートノードを取得する(下位クラスで実装すること)

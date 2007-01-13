@@ -57,14 +57,14 @@ tRisseScriptEngine::tRisseScriptEngine()
 //---------------------------------------------------------------------------
 void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseString & name,
 					risse_size lineofs,
-					tRisseVariant * result, bool is_expression)
+					tRisseVariant * result, bool is_expression, const tRisseVariant & context)
 {
 	// 暫定実装
 	// スクリプトブロックを作成
 	tRisseScriptBlock block(script, name);
 
-	// スクリプトを実行
-	block.Evaluate();
+	// スクリプトをグローバルコンテキストで実行
+	block.Evaluate(context.IsNull()?GlobalObject:context);
 }
 //---------------------------------------------------------------------------
 

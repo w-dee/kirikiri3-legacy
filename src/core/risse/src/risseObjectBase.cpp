@@ -43,6 +43,7 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 		// クラスに対してメンバ取得を行う
 		tRetValue rv = Class.OperateForMember(ocDGet, &result, name, flags);
 		if(rv != rvNoError) return false;
+		return true;
 	}
 
 	// TODO: プロパティアクセス、属性チェックなどなど

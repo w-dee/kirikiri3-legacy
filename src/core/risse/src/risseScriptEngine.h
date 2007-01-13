@@ -36,6 +36,9 @@ public:
 	//! @brief		コンストラクタ
 	tRisseScriptEngine();
 
+	//! @brief		グローバルオブジェクトを得る
+	tRisseVariant & GetGlobalObject() { return GlobalObject; }
+
 	//! @brief		スクリプトを評価する
 	//! @param		script		スクリプトの内容
 	//! @param		name		スクリプトブロックの名称
@@ -45,7 +48,8 @@ public:
 	//! @param		is_expression	式評価モードかどうか
 	void Evaluate(const tRisseString & script, const tRisseString & name,
 					risse_size lineofs = 0,
-					tRisseVariant * result = NULL, bool is_expression = false);
+					tRisseVariant * result = NULL, bool is_expression = false,
+					const tRisseVariant & context = tRisseVariant::GetNullObject());
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

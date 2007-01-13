@@ -38,7 +38,7 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
   |   |  親クラスのfertilize メソッドを呼ぶ(this=親クラス,再帰)
   |   |  自分のクラスのmodules[]に登録されているモジュールのconstructメソッドを順番に呼ぶ(this=新しいオブジェクト)
   |   |  自分のクラスのconstructメソッドを呼ぶ(this=新しいオブジェクト)
-  | new メソッドは自分のクラスのinitializeメソッドを呼ぶ(this=新しいオブジェクト,再帰)
+  | new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(this=新しいオブジェクト,再帰)
   | オブジェクトを返す
 
 */
@@ -79,8 +79,8 @@ protected:
 			tRisseMethodArgument::New(new_object),
 			tRisseMethodArgument::Empty());
 
-		// new メソッドは自分のクラスのinitializeメソッドを呼ぶ(再帰)
-		This.FuncCall(NULL, ss_initialize, 0,
+		// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
+		new_object.FuncCall(NULL, ss_initialize, 0,
 			args,
 			bargs,
 			new_object);

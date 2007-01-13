@@ -106,7 +106,7 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseSt
 	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
 	intf->Do(ocDGet, &ret, name,
-		0, tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(),
+		flags, tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(),
 		this_context?this_context->GetThis():This,
 				// こっちはこのvariantがThisオブジェクトを保持していなければ
 				// context->GetThis() を見るが
@@ -125,7 +125,7 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name, r
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocDSet, NULL, name,
-		0, tRisseMethodArgument::New(value), tRisseMethodArgument::Empty(),
+		flags, tRisseMethodArgument::New(value), tRisseMethodArgument::Empty(),
 		this_context?this_context->GetThis():This,
 				// こっちはこのvariantがThisオブジェクトを保持していなければ
 				// context->GetThis() を見るが

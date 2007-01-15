@@ -21,9 +21,9 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(11177,27394,4689,17315,52629,65112,64194,51762);
 
 //---------------------------------------------------------------------------
-tRisseScriptBlock::tRisseScriptBlock(const tRisseString & script,
-	const tRisseString & name, risse_size lineofs) :
-		tRisseScriptBlockBase(script, name, lineofs)
+tRisseScriptBlock::tRisseScriptBlock(tRisseScriptEngine * engine,
+	const tRisseString & script, const tRisseString & name, risse_size lineofs) :
+		tRisseScriptBlockBase(engine, script, name, lineofs)
 {
 	;
 }

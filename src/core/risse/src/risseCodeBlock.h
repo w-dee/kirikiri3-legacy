@@ -32,6 +32,7 @@ class tRisseScriptBlockBase;
 //---------------------------------------------------------------------------
 class tRisseCodeBlock : public tRisseObjectInterface
 {
+	tRisseScriptBlockBase * ScriptBlock; //!< スクリプトブロックインスタンス
 	risse_uint32 *Code; //!< コード
 	risse_size CodeSize; //!< コードのサイズ(ワード単位)
 	tRisseVariant *Consts; //!< 定数領域
@@ -50,7 +51,12 @@ class tRisseCodeBlock : public tRisseObjectInterface
 
 public:
 	//! @brief		コンストラクタ
-	tRisseCodeBlock();
+	//! @param		sb		スクリプトブロックインスタンス
+	tRisseCodeBlock(tRisseScriptBlockBase * sb);
+
+	//! @brief		スクリプトブロックインスタンスを得る
+	//! @return		スクリプトブロックインスタンス
+	tRisseScriptBlockBase * GetScriptBlock() const { return ScriptBlock; }
 
 	//! @brief		コードを設定する(コードジェネレータから)
 	//! @param		gen		コードジェネレータ
@@ -58,7 +64,7 @@ public:
 
 	//! @brief		再配置情報の fixup を行う
 	//! @param		sb		スクリプトブロック
-	void Fixup(tRisseScriptBlockBase * sb);
+	void Fixup();
 
 	//! @brief		このコードブロックのオブジェクトを得る
 	//! @return		このコードブロックを表すオブジェクト

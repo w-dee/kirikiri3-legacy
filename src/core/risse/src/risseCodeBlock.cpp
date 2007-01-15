@@ -26,8 +26,9 @@ RISSE_DEFINE_SOURCE_ID(13739,40903,3219,19310,50086,28697,53693,30185);
 
 
 //---------------------------------------------------------------------------
-tRisseCodeBlock::tRisseCodeBlock()
+tRisseCodeBlock::tRisseCodeBlock(tRisseScriptBlockBase * sb)
 {
+	ScriptBlock = sb;
 	Code = NULL;
 	CodeSize = 0;
 	Consts = NULL;
@@ -101,21 +102,21 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeBlock::Fixup(tRisseScriptBlockBase * sb)
+void tRisseCodeBlock::Fixup()
 {
 	RISSE_ASSERT(CodeBlockRelocations != NULL); // 二度以上このメソッドを呼べない
 	RISSE_ASSERT(TryIdentifierRelocations != NULL); // 二度以上このメソッドを呼べない
 
 	for(risse_size i = 0 ; i < CodeBlockRelocationSize; i++)
 		Consts[CodeBlockRelocations[i].first] =
-			sb->GetCodeBlockAt(CodeBlockRelocations[i].second)->GetObject(); // 再配置を行う
+			ScriptBlock->GetCodeBlockAt(CodeBlockRelocations[i].second)->GetObject(); // 再配置を行う
 
 	for(risse_size i = 0 ; i < TryIdentifierRelocationSize; i++)
 	{
 		Consts[TryIdentifierRelocations[i].first].Clear();
 		Consts[TryIdentifierRelocations[i].first] =
 			reinterpret_cast<tRisseObjectInterface *>
-			(sb->GetTryIdentifierAt(TryIdentifierRelocations[i].second));
+			(ScriptBlock->GetTryIdentifierAt(TryIdentifierRelocations[i].second));
 				// 再配置を行う。GetTryIdentifierAt の戻りは void * で
 				// そのポインタは tRisseObjectInterface ではないが、
 				// 実装上の都合 void * を tRisseObjectInterface に

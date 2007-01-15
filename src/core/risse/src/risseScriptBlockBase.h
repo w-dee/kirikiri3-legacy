@@ -23,12 +23,14 @@ namespace Risse
 {
 class tRisseASTNode;
 class tRisseCodeBlock;
+class tRisseScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		スクリプトブロックの基底クラス
 //---------------------------------------------------------------------------
 class tRisseScriptBlockBase : public tRisseCollectee
 {
 private:
+	tRisseScriptEngine *ScriptEngine; //!< スクリプトエンジンインスタンス
 	tRisseString Script; //!< スクリプトの内容
 	tRisseString Name; //!< スクリプトブロックの名称(たいていはファイル名)
 	risse_size LineOffset; //!< スクリプトの行オフセット (ドキュメント埋め込みスクリプト用)
@@ -41,12 +43,13 @@ private:
 
 protected:
 	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		script		スクリプトの内容
 	//! @param		name		スクリプトブロックの名称
 	//! @param		lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
 	//!							スクリプトのオフセットを記録できる)
-	tRisseScriptBlockBase(const tRisseString & script, const tRisseString & name,
-							risse_size lineofs = 0);
+	tRisseScriptBlockBase(tRisseScriptEngine * engine, const tRisseString & script,
+		const tRisseString & name, risse_size lineofs = 0);
 
 	//! @brief		デストラクタ
 	virtual ~tRisseScriptBlockBase() {;}
@@ -59,6 +62,10 @@ protected:
 	{ if(!LinesToPosition) CreateLinesToPositionArary(); }
 
 public:
+	//! @brief		スクリプトエンジンを返す
+	//! @return		スクリプトエンジン
+	tRisseScriptEngine * GetScriptEngine() const { return ScriptEngine; }
+
 	//! @brief		スクリプトの内容を得る	@return スクリプトの内容
 	const tRisseString & GetScript() const { return Script; }
 

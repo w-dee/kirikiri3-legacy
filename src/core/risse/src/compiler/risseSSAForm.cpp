@@ -109,7 +109,7 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompilerFunction * function,
 	// コードジェネレータを作成する
 	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
 	CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL, UseParentFrame);
-	CodeBlock = new tRisseCodeBlock();
+	CodeBlock = new tRisseCodeBlock(GetScriptBlock());
 	CodeBlockIndex = Function->GetFunctionGroup()->GetCompiler()->AddCodeBlock(CodeBlock);
 
 	// エントリー位置の基本ブロックを生成する

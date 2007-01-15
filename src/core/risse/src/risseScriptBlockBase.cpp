@@ -24,10 +24,11 @@ RISSE_DEFINE_SOURCE_ID(10462,6972,23868,17748,24487,5141,43296,28534);
 
 
 //---------------------------------------------------------------------------
-tRisseScriptBlockBase::tRisseScriptBlockBase(const tRisseString & script,
-						const tRisseString & name, risse_size lineofs)
+tRisseScriptBlockBase::tRisseScriptBlockBase(tRisseScriptEngine * engine,
+	const tRisseString & script, const tRisseString & name, risse_size lineofs)
 {
 	// フィールドの初期化
+	ScriptEngine = engine;
 	LinesToPosition = NULL;
 	Script = script;
 	Name = name;
@@ -193,7 +194,7 @@ void tRisseScriptBlockBase::Fixup()
 	// すべてのコードブロックの Fixup() を呼ぶ
 	for(gc_vector<tRisseCodeBlock *>::iterator i = CodeBlocks->begin();
 		i != CodeBlocks->end(); i++)
-		(*i)->Fixup(this);
+		(*i)->Fixup();
 
 	// CodeBlocks をクリアする
 	CodeBlocks = NULL;

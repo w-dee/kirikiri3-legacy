@@ -17,17 +17,17 @@
 
 namespace Risse
 {
-
 //---------------------------------------------------------------------------
 class tRisseScriptBlock : public tRisseScriptBlockBase
 {
 public:
 	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		script		スクリプトの内容
 	//! @param		name		スクリプトブロックの名称
 	//! @param		lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
 	//!							スクリプトのオフセットを記録できる)
-	tRisseScriptBlock(const tRisseString & script,
+	tRisseScriptBlock(tRisseScriptEngine * engine, const tRisseString & script,
 						const tRisseString & name, risse_size lineofs = 0);
 
 	//! @brief		AST のルートノードを取得する(下位クラスで実装すること)

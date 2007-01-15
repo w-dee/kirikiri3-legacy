@@ -18,6 +18,7 @@
 #include "risseVariant.h"
 #include "risseAssert.h"
 #include "risseGC.h"
+#include "risseScriptEngine.h"
 
 namespace Risse
 {

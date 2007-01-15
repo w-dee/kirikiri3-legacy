@@ -61,7 +61,7 @@ void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseStrin
 {
 	// 暫定実装
 	// スクリプトブロックを作成
-	tRisseScriptBlock block(script, name);
+	tRisseScriptBlock block(this, script, name);
 
 	// スクリプトをグローバルコンテキストで実行
 	block.Evaluate(context.IsNull()?GlobalObject:context);

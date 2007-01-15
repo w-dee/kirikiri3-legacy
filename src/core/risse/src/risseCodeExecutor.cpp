@@ -15,6 +15,8 @@
 #include "risseCodeExecutor.h"
 #include "risseOpCodes.h"
 #include "risseExceptionClass.h"
+#include "risseScriptBlockBase.h"
+#include "risseScriptEngine.h"
 /*
 	このソースは、実行スピード重視の、いわばダーティーな実装を行う。
 	ダーティーな実装は極力コメントを残し、わかりやすくしておくこと。
@@ -131,8 +133,8 @@ void tRisseCodeInterpreter::Execute(
 			break;
 
 		case ocAssignGlobal	: // global	 = globalの代入
-			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
+			AR(code[1]) = CodeBlock->GetScriptBlock()->GetScriptEngine()->GetGlobalObject();
 			code += 2;
 			break;
 

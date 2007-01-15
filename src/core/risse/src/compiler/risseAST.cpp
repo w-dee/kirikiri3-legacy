@@ -822,8 +822,8 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 	tRisseSSAStatement * stmt =
 		form->AddStatement(GetPosition(), IsDirect?ocDSet:ocISet, NULL,
 							pws->ObjectVar, pws->MemberNameVar, value);
-
-	stmt->SetAccessFlags(Flags);
+	stmt->SetAccessFlags(Flags|tRisseOperateFlags::ofMemberEnsure);
+		// tRisseOperateFlags::ofMemberEnsureは常につく
 
 	return true;
 }

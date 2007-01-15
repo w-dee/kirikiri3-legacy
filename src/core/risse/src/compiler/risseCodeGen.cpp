@@ -644,9 +644,11 @@ void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[2] == tRisseVMInsnInfo::vifRegister);
 	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[3] == tRisseVMInsnInfo::vifVoid);
 
-	RISSE_ASSERT(!(op == ocISet && flags != 0)); // フラグをもてるのはocDSetのみ
+	RISSE_ASSERT(!(op == ocISet && flags != tRisseOperateFlags::ofMemberEnsure));
+		// tRisseOperateFlags::ofMemberEnsure以外のフラグをもてるのはocDSetのみ
 
-	if(op == ocDSet && flags != 0) op = ocDSetF; // フラグがある場合は ocDSetFを置く
+	if(op == ocDSet && flags != tRisseOperateFlags::ofMemberEnsure) op = ocDSetF;
+		// tRisseOperateFlags::ofMemberEnsure以外のフラグがある場合は ocDSetFを置く
 	PutWord(static_cast<risse_uint32>(op));
 	PutWord(FindRegMap(obj));
 	PutWord(FindRegMap(name));

@@ -192,10 +192,26 @@ void tRisseCodeInterpreter::Execute(
 
 		case ocNew			: // new	 "new"
 			/* incomplete */
-			RISSE_ASSERT(CI(code[1]) < framesize);
-			RISSE_ASSERT(CI(code[2]) < framesize);
-			code += code[4] + 5;
-			break;
+			{
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+				// code[2] = メソッドオブジェクト
+				// code[3] = フラグ
+				// code[4] = 引数の数
+				// code[5] ～   引数
+				// TODO: 引数展開、引数の省略など
+				RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
+				tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4]);
+
+				for(risse_uint32 i = 0; i < code[4]; i++)
+					args.Set(i, AR(code[i+5]));
+				tRisseVariant new_obj;
+				new_obj = AR(code[2]).New(0, args);
+				if(code[1]!=RisseInvalidRegNum) AR(code[1]) = new_obj;
+				code += code[4] + 5;
+				break;
+			}
 
 		case ocTryFuncCall		: // trycall	 try function call
 			/* incomplete */

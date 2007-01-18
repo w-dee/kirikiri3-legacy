@@ -24,9 +24,15 @@ class tRisseOperateFlags : public tRisseCollectee
 {
 	risse_uint32 Flags; //!< フラグの値
 public:
-	static const risse_uint32 ofMemberEnsure = 0x1000;  //!< メンバが無かった場合に作成を行う
-	static const risse_uint32 ofInstanceMemberOnly = 0x2000; //!< インスタンスメンバのみ参照(クラスのメンバを見に行かない)
-	static const risse_uint32 ofPropertyOnly = 0x4000; //!< プロパティとして起動できる物のみを探す(見つからなかった場合やプロパティとして起動できない場合はrvMemberNotFoundがかえる)
+	static const risse_uint32 ofMemberEnsure = 0x1000;
+		//!< メンバが無かった場合に作成を行う(ocDSetのみ)
+	static const risse_uint32 ofInstanceMemberOnly = 0x2000;
+		//!< インスタンスメンバのみ参照(クラスのメンバを見に行かない)
+		//!< (ocDSet/ocDGetやメンバを参照するもの全般)
+	static const risse_uint32 ofPropertyOrConstOnly = 0x4000;
+		//!< プロパティとして起動できる物か定数のみを探す(見つからなかった場合
+		//!< やプロパティとして起動できない場合はrvMemberNotFoundがかえるが、
+		//!< 見つかったのが定数の場合は例外が発生する)(ocDSetのみ)
 public:
 	//! @brief		デフォルトコンストラクタ
 	tRisseOperateFlags() { Flags = 0; }
@@ -57,6 +63,26 @@ public:
 
 	//! @brief		risse_uint32 へのキャスト
 	operator risse_uint32() const { return Flags; }
+
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	アクセス制限
+	bool Has(tRisseMemberAttribute::tAccessControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
+
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	可視性
+	bool Has(tRisseMemberAttribute::tVisibilityControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
+
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	オーバーライド性
+	bool Has(tRisseMemberAttribute::tOverrideControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
+
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	プロパティアクセス方法
+	bool Has(tRisseMemberAttribute::tPropertyControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
+
+	//! @brief		フラグを持っているかどうかを調べる
+	//! @param		v	フラグ
+	bool Has(risse_uint32 v) const { return Flags & v; }
 
 	//! @brief		フラグを文字列化する
 	//! @return		文字列化されたフラグ

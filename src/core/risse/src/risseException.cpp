@@ -135,7 +135,15 @@ void RisseThrowMemberNotFound(const tRisseString & name)
 //---------------------------------------------------------------------------
 
 
-
+//---------------------------------------------------------------------------
+void RisseThrowMemberIsReadOnly(const tRisseString & name)
+{
+	if(!name.IsEmpty())
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("member \"%1\" is read-only"), name));
+	else
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("member is read-only")));
+}
+//---------------------------------------------------------------------------
 
 
 

@@ -170,6 +170,24 @@ public:
 	//!				flags に直接渡すことができる
 	operator risse_uint32() const { return static_cast<risse_uint32>(Value); }
 
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	アクセス制限
+	bool Has(tAccessControl v) const { return Access == v; }
+
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	可視性
+	bool Has(tVisibilityControl v) const { return Visibility == v; }
+
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	オーバーライド性
+	bool Has(tOverrideControl v) const { return Override == v; }
+
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	プロパティアクセス方法
+	bool Has(tPropertyControl v) const { return Property == v; }
+
+
+
 	//! @brief		属性を文字列化する
 	//! @return		文字列化された属性
 	tRisseString AsString() const;

@@ -36,6 +36,24 @@ public:
 		//! @param		attrib		メンバの属性
 		tMemberData(const tRisseVariant & value, tRisseMemberAttribute attrib) :
 			Value(value), Attribute(attrib) {;}
+
+		//! @brief		プロパティアクセス方法を得る
+		//! @param		flags		オーバーライドする方法
+		//! @return		プロパティアクセス方法
+		tRisseMemberAttribute::tPropertyControl GetPropertyControl(tRisseOperateFlags flags) const
+		{
+			// flags にプロパティアクセス方法が指定されていた場合はそちらを優先する
+			tRisseMemberAttribute::tPropertyControl wanted_prop_control =
+				flags.operator tRisseMemberAttribute().GetProperty();
+			if(wanted_prop_control != tRisseMemberAttribute::pcNone)
+				return wanted_prop_control;
+
+			// flags にプロパティアクセス方法が記述されていなかった場合はメンバの属性を返す
+			tRisseMemberAttribute::tPropertyControl member_prop_control =
+				Attribute.GetProperty();
+			RISSE_ASSERT(member_prop_control != tRisseMemberAttribute::pcNone);
+			return member_prop_control;
+		}
 	};
 
 protected:
@@ -47,8 +65,8 @@ public:
 	//! @brief		メンバを読み出す
 	//! @param		name		メンバ名
 	//! @param		flags		操作フラグ
-	//! @param		This		メンバが呼び出される際のThisオブジェクト
 	//! @param		result		結果の格納先
+	//! @param		This		メンバが呼び出される際のThisオブジェクト
 	//! @return		読み出せた場合true、メンバが無かった場合にfalse
 	//! @note		このインスタンスが保持するハッシュ表以外を読みに行くようなことはない。
 	//! 			読み出そうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
@@ -58,14 +76,27 @@ public:
 	//! @brief		メンバに書き込む
 	//! @param		name		メンバ名
 	//! @param		flags		操作フラグ
-	//! @param		This		メンバが呼び出される際のThisオブジェクト
 	//! @param		value		書き込む値
+	//! @param		This		メンバが呼び出される際のThisオブジェクト
 	//! @return		書き込めた場合true、メンバが無かった場合にfalse
 	//! @note		このインスタンスが保持するハッシュ表以外を参照しに行くようなことはない。
 	//! 			書き込もうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
 	bool Write(const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant &value, const tRisseVariant &This);
 
+private:
+	//! @brief		メンバに値を設定する
+	//! @param		name			メンバ名
+	//! @param		flags			操作フラグ
+	//! @param		member			設定先のデータ
+	//! @param		prop_control	プロパティアクセス方法
+	//! @param		value			書き込む値
+	//! @param		This			メンバが呼び出される際のThisオブジェクト
+	void WriteMember(const tRisseString & name, tRisseOperateFlags flags, 
+		tMemberData & member, tRisseMemberAttribute::tPropertyControl prop_control,
+		const tRisseVariant & value, const tRisseVariant &This);
+
+public:
 	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
 	//! @param		name		関数名
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)

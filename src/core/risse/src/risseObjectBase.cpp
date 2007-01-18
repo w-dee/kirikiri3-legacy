@@ -32,7 +32,7 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 
 	if(!member)
 	{
-		if(flags & tRisseOperateFlags::ofInstanceMemberOnly)
+		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
 			return false; // クラスを探さない場合はここでかえる
 
 		// クラスを探す
@@ -41,13 +41,33 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 			return false; // クラスを特定できない
 
 		// クラスに対してメンバ取得を行う
-		tRetValue rv = Class.OperateForMember(ocDGet, &result, name, flags);
+		tRetValue rv = Class.OperateForMember(ocDGet, &result, name, flags,
+					tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(), This);
 		if(rv != rvNoError) return false;
 		return true;
 	}
 
-	// TODO: プロパティアクセス、属性チェックなどなど
-	result = member->Value;
+	// プロパティアクセスの方法を決定する
+	tRisseMemberAttribute::tPropertyControl member_prop_control = member->GetPropertyControl(flags);
+	// プロパティアクセスの方法に従って情報を取得する
+	switch(member_prop_control)
+	{
+	case tRisseMemberAttribute::pcNone: // あり得ない(上でASSERT)
+		break;
+
+	case tRisseMemberAttribute::pcVar: // 普通のメンバ
+	case tRisseMemberAttribute::pcConst: // 定数
+		// 単純に、結果に値をコピーする
+		result = member->Value;
+		break;
+
+	case tRisseMemberAttribute::pcProperty: // プロパティアクセス
+		// member->Value を引数なしで関数呼び出しし、その結果を得る
+		tRetValue rv = member->Value.Operate(ocFuncCall, &result, tRisseString::GetEmptyString(),
+					flags, tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(), This);
+		if(rv != rvNoError) return false;
+		break;
+	}
 
 	return true;
 }
@@ -67,18 +87,50 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 	if(member)
 	{
 		// メンバが見つかったのでこれに上書きをする
-		member->Value = value;
+		// そのまえに属性チェック
+		tRisseMemberAttribute::tPropertyControl member_prop_control = member->GetPropertyControl(flags);
+
+		if(flags.Has(tRisseOperateFlags::ofPropertyOrConstOnly))
+		{
+			// プロパティやconstへの書き込みのみ
+			switch(member_prop_control)
+			{
+			case tRisseMemberAttribute::pcNone: // あり得ない(上でASSERT)
+				break;
+
+			case tRisseMemberAttribute::pcVar: // 普通のメンバ
+				return false; // 見つからなかったというのと同じ扱い
+
+			case tRisseMemberAttribute::pcConst: // 定数
+				// 定数への書き込みは常に失敗するのでそのまま通過させる
+				// 下で処理
+				break;
+
+			case tRisseMemberAttribute::pcProperty: // プロパティアクセス
+				// 下で処理
+				break;
+			}
+		}
+
+		// 値を書き込む
+		if(member_prop_control == tRisseMemberAttribute::pcVar)
+			member->Value = value;
+		else
+			WriteMember(name, flags, *member, member_prop_control, value, This);
 		return true;
 	}
 
 	// この時点でメンバはインスタンスには見つかっていない。
-	if(flags & tRisseOperateFlags::ofInstanceMemberOnly)
+	if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
 	{
 		// クラスを探さない場合は
-		if(flags & tRisseOperateFlags::ofMemberEnsure)
+		if(flags.Has(tRisseOperateFlags::ofMemberEnsure))
 		{
 			// 新規作成フラグがある場合はメンバを新規作成する
-			HashTable.Add(name, tMemberData(tMemberData(value, flags)));
+			tRisseMemberAttribute attrib = flags;
+			if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
+				attrib.SetProperty(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
+			HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
 			return true;
 		}
 		return false; // そうでない場合はメンバは見つからなかったことにする
@@ -86,6 +138,8 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 
 	// クラスを見に行くが、クラスにプロパティとして動作する
 	// メンバがあった場合のみに、そのプロパティを起動する。
+	// または、クラスを探しに行ったときに const があった場合は
+	// それに書き込みを試みる(当然エラーになるが、意図した動作である)
 
 	// クラスを探す
 	tRisseVariant Class;
@@ -95,30 +149,73 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 		// クラスに対してメンバ設定を行う
 		tRetValue result =
 			Class.OperateForMember(ocDSet, NULL, name,
-							flags|tRisseOperateFlags::ofPropertyOnly,
-							tRisseMethodArgument::New(value));
+							flags|tRisseOperateFlags::ofPropertyOrConstOnly,
+							tRisseMethodArgument::New(value),
+							tRisseMethodArgument::Empty(), This);
+		// ちなみに見つかったのが定数で、書き込みに失敗した場合は
+		// 例外が飛ぶので OperateForMember は戻ってこない。
 		if(result == rvNoError) return true; // アクセスに成功したので戻る
 	}
 
-	if(flags & tRisseOperateFlags::ofMemberEnsure)
+	if(flags.Has(tRisseOperateFlags::ofMemberEnsure))
 	{
 		// そのほかの場合、つまりクラスを特定できない場合や、
 		// クラスにメンバが無かった場合、
 		// クラスにメンバがあったがプロパティとして起動できなかった
 		// 場合はこのインスタンスにメンバを作成する。
-		HashTable.Add(name, tMemberData(tMemberData(value, flags)));
+		tRisseMemberAttribute attrib = flags;
+		if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
+			attrib.SetProperty(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
+		HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
+		return true;
 	}
 	else
 	{
 		member = HashTable.Find(name);
 
 		if(!member) return false; // 見つからなかった
-		// TODO: プロパティアクセス、属性チェックなどなど
 
-		member->Value = value;
+		tRisseMemberAttribute::tPropertyControl member_prop_control = member->GetPropertyControl(flags);
+
+		// 値を書き込む
+		if(member_prop_control == tRisseMemberAttribute::pcVar)
+			member->Value = value;
+		else
+			WriteMember(name, flags, *member, member_prop_control, value, This);
+		return true;
 	}
 
-	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseObjectBase::WriteMember(const tRisseString & name, tRisseOperateFlags flags, 
+	tMemberData & member, tRisseMemberAttribute::tPropertyControl prop_control,
+	const tRisseVariant & value, const tRisseVariant &This)
+{
+	switch(prop_control)
+	{
+	case tRisseMemberAttribute::pcNone: // あり得ない
+		break;
+
+	case tRisseMemberAttribute::pcVar: // 普通のメンバ
+		member.Value = value;
+		break;
+
+	case tRisseMemberAttribute::pcConst: // 定数
+		// 定数には書き込みできません
+		RisseThrowMemberIsReadOnly(name);
+		break;
+
+	case tRisseMemberAttribute::pcProperty: // プロパティアクセス
+		// プロパティハンドラを起動する
+		// プロパティの設定の場合は読み出しと違い、ocFuncCallではなくてocDSetを
+		// つかう。
+		member.Value.Do(ocDSet, NULL, tRisseString::GetEmptyString(),
+					flags, tRisseMethodArgument::New(value), tRisseMethodArgument::Empty(), This);
+		break;
+	}
 }
 //---------------------------------------------------------------------------
 

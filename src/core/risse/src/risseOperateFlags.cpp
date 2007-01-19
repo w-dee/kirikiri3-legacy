@@ -30,6 +30,18 @@ tRisseString tRisseOperateFlags::AsString() const
 		str += RISSE_WS("ofMemberEnsure");
 	}
 
+	if(Flags & ofInstanceMemberOnly)
+	{
+		if(!str.IsEmpty()) str += RISSE_WC(' ');
+		str += RISSE_WS("ofInstanceMemberOnly");
+	}
+
+	if(Flags & ofPropertyOrConstOnly)
+	{
+		if(!str.IsEmpty()) str += RISSE_WC(' ');
+		str += RISSE_WS("ofPropertyOrConstOnly");
+	}
+
 	// 戻る
 	return str;
 }

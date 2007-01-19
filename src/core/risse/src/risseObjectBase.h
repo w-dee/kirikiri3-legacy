@@ -111,6 +111,13 @@ public:
 		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject());
 
+	//! @brief		(このオブジェクトのメンバに対する)属性設定		DSetAttrib
+	//! @param		name		メンバ名
+	//! @param		flags		設定する属性などが含まれたフラグ
+	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
+	bool SetAttribute(
+		const tRisseString & name, tRisseOperateFlags flags = 0,
+			const tRisseVariant & This = tRisseVariant::GetNullObject());
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

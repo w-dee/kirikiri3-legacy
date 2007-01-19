@@ -658,6 +658,17 @@ void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutSetAttribute(const tRisseSSAVariable * obj,
+		const tRisseSSAVariable * name, risse_uint32 attrib)
+{
+	// 一応 code を assert (完全ではない)
+	PutWord(static_cast<risse_uint32>(ocDSetAttrib));
+	PutWord(FindRegMap(obj));
+	PutWord(FindRegMap(name));
+	PutWord(attrib);
+}
+//---------------------------------------------------------------------------
 
 
 

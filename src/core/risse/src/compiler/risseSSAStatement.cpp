@@ -395,6 +395,11 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutSet(Code, Used[0], Used[1], Used[2], OperateFlagsValue);
 		break;
 
+	case ocDSetAttrib:
+		RISSE_ASSERT(Used.size() == 2);
+		gen->PutSetAttribute(Used[0], Used[1], OperateFlagsValue);
+		break;
+
 	case ocDefineAccessMap:
 		{
 			RISSE_ASSERT(Declared != NULL);
@@ -813,6 +818,15 @@ tRisseString tRisseSSAStatement::Dump() const
 
 			// DSet あるいは DGet についてフラグがあればそれを追加
 			if(Code == ocDGet || Code == ocDSet)
+			{
+				ret +=
+					RISSE_WS(" Flags=(") +
+					tRisseOperateFlags(OperateFlagsValue).AsString() +
+					RISSE_WS(")");
+			}
+
+			// DSetAttrib についてフラグがあればそれを追加
+			if(Code == ocDSetAttrib)
 			{
 				ret +=
 					RISSE_WS(" Flags=(") +

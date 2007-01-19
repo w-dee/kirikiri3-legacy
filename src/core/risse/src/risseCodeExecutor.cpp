@@ -743,6 +743,13 @@ void tRisseCodeInterpreter::Execute(
 			code += 4;
 			break;
 
+		case ocDSetAttrib		: // dseta	set member attribute
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			AR(code[1]).Do(ocDSetAttrib, NULL, AR(code[2]), code[3]);
+			code += 4;
+			break;
+
 		case ocDSet			: // dset	 set .
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);

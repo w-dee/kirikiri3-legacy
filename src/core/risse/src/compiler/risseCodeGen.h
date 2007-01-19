@@ -350,6 +350,13 @@ public:
 	//! @param		flags	アクセスフラグ
 	void PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 		const tRisseSSAVariable * name, const tRisseSSAVariable * value, risse_uint32 flags);
+
+	//! @brief		DSetAttribのコードを置く
+	//! @param		obj		オブジェクトを表す変数
+	//! @param		name	メンバ名を表す変数
+	//! @param		attrib	属性
+	void PutSetAttribute(const tRisseSSAVariable * obj,
+		const tRisseSSAVariable * name, risse_uint32 attrib);
 };
 //---------------------------------------------------------------------------
 

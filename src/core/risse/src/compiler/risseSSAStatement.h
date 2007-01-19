@@ -62,7 +62,7 @@ class tRisseSSAStatement : public tRisseCollectee
 										//!< SSA形式インスタンス(ocDefineLazyBlock)
 		risse_size BlockCount;			//!< 関数呼び出し時のブロックの個数
 		risse_size TryIdentifierIndex;	//!< Try識別子のインデックス
-		risse_uint32 OperateFlagsValue;	//!< ocDSetF, ocDGetF の操作フラグ
+		risse_uint32 OperateFlagsValue;	//!< ocDSetF, ocDGetF の操作フラグとocDSetAttribの属性値
 	};
 
 public:

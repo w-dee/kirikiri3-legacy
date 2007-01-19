@@ -104,6 +104,8 @@ IGet					iget		R,R,R,-,-,-		[]			#!< get [ ]
 DDelete					ddel		R,R,R,-,-,-		----		#!< delete .
 IDelete					idel		R,R,R,-,-,-		delete[]	#!< delete [ ]
 
+DSetAttrib				dseta		R,R,O,-,-,-		----		#!< set member attribute
+
 // 引数1+2つ
 DSet					dset		R,R,R,-,-,-		----		#!< set .
 DSetF					dsetf		R,R,R,O,-,-		----		#!< set . with flags (下記参照)
@@ -115,6 +117,11 @@ ISet					iset		R,R,R,-,-,-		[]=			#!< set [ ]
 // DGet のデフォルトのフラグは 0 (何もしていなし)だが、DSet のデフォルトのフラグは
 // ofMemberEnsure (メンバがなければ作成する) なので注意
 
+// tRisseObjectInterfaceにおいて、
+// プロパティハンドラが起動されるときは、プロパティの読み出しの場合は
+// そのプロパティインスタンスに対し、
+// 関数呼び出し(ocFuncCall) が引数なし、メンバ名なしで呼ばれる。
+// 書き込みの場合は DSet がメンバ名なしで呼ばれる。
 
 // 代入演算子の類
 BitAndAssign			ERR			-,-,-,-,-,-		&=			#!< &=

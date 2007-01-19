@@ -245,6 +245,37 @@ bool tRisseObjectBase::FuncCall(
 
 
 //---------------------------------------------------------------------------
+bool tRisseObjectBase::SetAttribute(
+		const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant & This)
+{
+	tMemberData * member = HashTable.Find(name);
+
+	if(!member)
+	{
+		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
+			return false; // クラスを探さない場合はここでかえる
+
+		// クラスを探す
+		tRisseVariant Class;
+		if(!Read(ss_class, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
+			return false; // クラスを特定できない
+
+		// クラスに対して属性設定を行う
+		tRetValue rv = Class.OperateForMember(ocDSetAttrib, NULL, name, flags,
+					tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(), This);
+		if(rv != rvNoError) return false;
+		return true;
+	}
+
+	// 属性を設定する
+	member->Attribute.Overwrite(flags);
+
+	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	switch(code)
@@ -267,6 +298,12 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	case ocFuncCall:
 		// function call
 		if(!FuncCall(result, name, flags, args, bargs, This))
+			return rvMemberNotFound;
+		return rvNoError;
+
+	case ocDSetAttrib:
+		// set member attrubute
+		if(!SetAttribute(name, flags))
 			return rvMemberNotFound;
 		return rvNoError;
 

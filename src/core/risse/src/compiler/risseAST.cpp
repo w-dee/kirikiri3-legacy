@@ -176,8 +176,16 @@ tRisseString tRisseASTNode_MemberSel::GetDumpComment() const
 	tRisseString flags = Flags.AsString();
 	if(!flags.IsEmpty())
 	{
-		str += RISSE_WC(' ');
+		str += RISSE_WS(" flags=<");
 		str += flags;
+		str += RISSE_WS(">");
+	}
+	tRisseString attribs = Attribute.AsString();
+	if(!attribs.IsEmpty())
+	{
+		str += RISSE_WS(" attribute=<");
+		str += attribs;
+		str += RISSE_WS(">");
 	}
 	return str;
 }
@@ -745,7 +753,7 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 //---------------------------------------------------------------------------
 void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 	risse_size position,
-	const tRisseString & name, tRisseSSAVariable * init)
+	const tRisseString & name, tRisseSSAVariable * init, tRisseMemberAttribute attrib)
 {
 	// グローバル変数として作成すべきかどうかをチェック
 	if(form->GetLocalNamespace()->GetHasScope())
@@ -762,7 +770,7 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 	{
 		// グローバル変数(あるいはクラス変数など)として作成する
 		// this 上に変数を作成するノードを一時的に作成
-		tRisseASTNode * write_node =
+		tRisseASTNode_MemberSel * write_node =
 			new tRisseASTNode_MemberSel(position,
 			new tRisseASTNode_Factor(position, aftThis),
 			new tRisseASTNode_Factor(position, aftConstant, name), true,
@@ -771,6 +779,7 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 					tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly
 					// 普通の変数アクセスかつメンバの作成、インスタンスメンバのみ
 				);
+		write_node->SetAttribute(attrib);
 		write_node->GenerateWriteSSA(form, init);
 	}
 }
@@ -824,6 +833,16 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 							pws->ObjectVar, pws->MemberNameVar, value);
 	stmt->SetAccessFlags(Flags|tRisseOperateFlags::ofMemberEnsure);
 		// tRisseOperateFlags::ofMemberEnsureは常につく
+
+	if(Attribute.HasAny())
+	{
+		RISSE_ASSERT(IsDirect);
+		// 属性を持っている場合はそれを設定する文を作成する
+		tRisseSSAStatement * stmt =
+			form->AddStatement(GetPosition(), ocDSetAttrib, NULL,
+							pws->ObjectVar, pws->MemberNameVar);
+		stmt->SetAccessFlags(Attribute);
+	}
 
 	return true;
 }

@@ -783,8 +783,9 @@ public:
 	//! @param		position	ソースコード上の位置
 	//! @param		name		変数名
 	//! @param		init		初期値を表すSSA形式変数
+	//! @param		attrib		変数の属性
 	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseString & name,
-			tRisseSSAVariable * init);
+			tRisseSSAVariable * init, tRisseMemberAttribute attrib = tRisseMemberAttribute::pcVar);
 };
 //---------------------------------------------------------------------------
 
@@ -798,6 +799,8 @@ class tRisseASTNode_MemberSel : public tRisseASTNode
 	tRisseASTNode * MemberName; //!< メンバ名ノード
 	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
 	tRisseOperateFlags Flags; //!< メンバの操作フラグ(tRisseObjectInterface::Opeate() に渡す物)
+	tRisseMemberAttribute Attribute; //!< メンバの書き込み時の属性設定値 @r
+		//!< メンバへの書き込みのついでに属性を設定する場合のメンバの属性
 
 	//! @brief		PrepareSSA() で返す構造体
 	struct tPrepareSSA : public tRisseCollectee
@@ -834,6 +837,14 @@ public:
 	//! @brief		直接参照演算子 ('.' 演算子) かどうかを得る
 	//! @return		直接参照演算子 ('.' 演算子) かどうか
 	bool GetIsDirect() const { return IsDirect; }
+
+	//! @brief		メンバの書き込み時の属性設定値を設定する
+	//! @param		attrib		メンバの書き込み時の属性設定値
+	void SetAttribute(tRisseMemberAttribute attrib) { Attribute = attrib; }
+
+	//! @brief		メンバの書き込み時の属性設定値を得る
+	//! @return		メンバの書き込み時の属性設定値
+	bool GetAttribute() const { return Attribute; }
 
 	//! @brief		メンバの操作フラグを得る
 	//! @return		メンバの操作フラグ

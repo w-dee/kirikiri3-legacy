@@ -228,6 +228,14 @@ tRisseString tRisseVMCodeIterator::Dump() const
 		}
 		break;
 
+	case ocDSetAttrib:
+		{
+			ret += RISSE_WS(" <");
+			ret += tRisseOperateFlags(CodePointer[3]).AsString();
+			ret += RISSE_WS(">");
+		}
+		break;
+
 	default:
 		;
 	}

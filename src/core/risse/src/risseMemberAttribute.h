@@ -187,6 +187,17 @@ public:
 	bool Has(tPropertyControl v) const { return Property == v; }
 
 
+	//! @brief		なにか属性を持っているかどうかを調べる
+	//! @return		何か属性を持っていれば真
+	bool HasAny() const
+		{ return
+			Access != acNone ||
+			Visibility != vcNone ||
+			Override != ocNone ||
+			Property != pcNone;
+		}
+
+
 
 	//! @brief		属性を文字列化する
 	//! @return		文字列化された属性

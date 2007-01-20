@@ -329,10 +329,16 @@ void RisseThrowCannotCreateInstanceFromNonClassObjectException();
 void RisseThrowBadArgumentCount(risse_int passed, risse_int expected);
 //! @brief		「メンバが見つからない」例外を発生(暫定)
 //! @param		name		メンバ名
-void RisseThrowMemberNotFound(const tRisseString & name);
+void RisseThrowMemberNotFound(const tRisseString & name = tRisseString::GetEmptyString());
 //! @brief		「メンバは読み出し専用」例外を発生(暫定)
 //! @param		name		メンバ名
-void RisseThrowMemberIsReadOnly(const tRisseString & name);
+void RisseThrowMemberIsReadOnly(const tRisseString & name = tRisseString::GetEmptyString());
+//! @brief		「このプロパティからは読み込むことができない」例外を発生(暫定)
+//! @param		name		メンバ名
+void RisseThrowPropertyCannotBeRead(const tRisseString & name = tRisseString::GetEmptyString());
+//! @brief		「このプロパティには書き込むことができない」例外を発生(暫定)
+//! @param		name		メンバ名
+void RisseThrowPropertyCannotBeWritten(const tRisseString & name = tRisseString::GetEmptyString());
 //---------------------------------------------------------------------------
 
 

@@ -126,10 +126,13 @@ public:
 public:
 	// ユーティリティ
 
-	//! @brief		普通のメンバ(メソッドや変数)をインスタンスに登録する(既存のメンバば上書きされる)
+	//! @brief		普通のメンバ(メソッドや変数、プロパティなど)をインスタンスに登録する(既存のメンバば上書きされる)
 	//! @param		name		名前
 	//! @param		value		値
-	void RegisterNormalMember(const tRisseString & name, const tRisseVariant & value);
+	//! @param		attrib		属性
+	void RegisterNormalMember(const tRisseString & name,
+						const tRisseVariant & value,
+						tRisseMemberAttribute attrib = tRisseMemberAttribute());
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

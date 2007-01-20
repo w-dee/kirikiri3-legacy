@@ -57,6 +57,7 @@ CPPFILES =  \
 			src/risseMemberAttribute.cpp             \
 			src/risseMethod.cpp                      \
 			src/risseNativeFunction.cpp              \
+			src/risseNativeProperty.cpp              \
 			src/risseObject.cpp                      \
 			src/risseObjectBase.cpp                  \
 			src/risseObjectClass.cpp                 \

@@ -316,12 +316,16 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 
 
 //---------------------------------------------------------------------------
-void tRisseObjectBase::RegisterNormalMember(const tRisseString & name, const tRisseVariant & value)
+void tRisseObjectBase::RegisterNormalMember(const tRisseString & name,
+			const tRisseVariant & value, tRisseMemberAttribute attrib)
 {
+	tRisseOperateFlags access_flags =
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
 	Write(name,
 		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-			value, tRisseVariant(this));
+							access_flags, value, tRisseVariant(this));
+	if(attrib.HasAny())
+		SetAttribute(name, access_flags|attrib);
 }
 //---------------------------------------------------------------------------
 

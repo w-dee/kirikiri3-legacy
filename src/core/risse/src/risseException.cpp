@@ -146,6 +146,28 @@ void RisseThrowMemberIsReadOnly(const tRisseString & name)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void RisseThrowPropertyCannotBeRead(const tRisseString & name)
+{
+	if(!name.IsEmpty())
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("property \"%1\" cannot be read"), name));
+	else
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("property cannot be read")));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void RisseThrowPropertyCannotBeWritten(const tRisseString & name)
+{
+	if(!name.IsEmpty())
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("property \"%1\" cannot be written"), name));
+	else
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("property cannot be written")));
+}
+//---------------------------------------------------------------------------
+
+
 
 
 

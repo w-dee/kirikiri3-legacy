@@ -25,6 +25,21 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(45114,31718,49668,18467,56195,41722,1990,5427);
 
 //---------------------------------------------------------------------------
+tRisseObjectBase::tRisseObjectBase() : PrototypeName(ss_class)
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseObjectBase::tRisseObjectBase(const tRisseString & prototype_name) :
+				PrototypeName(prototype_name)
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 	tRisseVariant &result, const tRisseVariant &This)
 {
@@ -37,8 +52,9 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 
 		// クラスを探す
 		tRisseVariant Class;
-		if(!Read(ss_class, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
+		if(!Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
 			return false; // クラスを特定できない
+		if(Class.IsNull()) return false; // クラスが null
 
 		// クラスに対してメンバ取得を行う
 		tRetValue rv = Class.OperateForMember(ocDGet, &result, name, flags,
@@ -143,18 +159,21 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 
 	// クラスを探す
 	tRisseVariant Class;
-	if(Read(ss_class, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
+	if(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
 	{
-		// クラスを特定できた場合
-		// クラスに対してメンバ設定を行う
-		tRetValue result =
-			Class.OperateForMember(ocDSet, NULL, name,
-							flags|tRisseOperateFlags::ofPropertyOrConstOnly,
-							tRisseMethodArgument::New(value),
-							tRisseMethodArgument::Empty(), This);
-		// ちなみに見つかったのが定数で、書き込みに失敗した場合は
-		// 例外が飛ぶので OperateForMember は戻ってこない。
-		if(result == rvNoError) return true; // アクセスに成功したので戻る
+		if(!Class.IsNull())
+		{
+			// クラスを特定できた場合
+			// クラスに対してメンバ設定を行う
+			tRetValue result =
+				Class.OperateForMember(ocDSet, NULL, name,
+								flags|tRisseOperateFlags::ofPropertyOrConstOnly,
+								tRisseMethodArgument::New(value),
+								tRisseMethodArgument::Empty(), This);
+			// ちなみに見つかったのが定数で、書き込みに失敗した場合は
+			// 例外が飛ぶので OperateForMember は戻ってこない。
+			if(result == rvNoError) return true; // アクセスに成功したので戻る
+		}
 	}
 
 	if(flags.Has(tRisseOperateFlags::ofMemberEnsure))
@@ -257,8 +276,9 @@ bool tRisseObjectBase::SetAttribute(
 
 		// クラスを探す
 		tRisseVariant Class;
-		if(!Read(ss_class, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
+		if(!Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
 			return false; // クラスを特定できない
+		if(Class.IsNull()) return false; // クラスが null
 
 		// クラスに対して属性設定を行う
 		tRetValue rv = Class.OperateForMember(ocDSetAttrib, NULL, name, flags,

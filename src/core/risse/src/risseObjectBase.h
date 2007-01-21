@@ -60,8 +60,21 @@ protected:
 	typedef tRisseHashTable<tRisseString, tMemberData>
 		tHashTable; //!< ハッシュ表の型
 	tHashTable HashTable; //!< ハッシュ表
+	const tRisseString & PrototypeName;
+		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクト
 
 public:
+	//! @brief		コンストラクタ
+	tRisseObjectBase();
+
+	//! @brief		コンストラクタ
+	//! @param		prototype_name			プロトタイプ名
+	//!										(内部でこれへの参照が保持されるので、
+	//!										スタック上の文字列を指定しないこと！！！)
+	tRisseObjectBase(const tRisseString & prototype_name);
+
+public:
+
 	//! @brief		メンバを読み出す
 	//! @param		name		メンバ名
 	//! @param		flags		操作フラグ

@@ -14,9 +14,11 @@
 #include "prec.h"
 #include "risseScriptEngine.h"
 #include "risseCoroutine.h"
-#include "risseObjectClass.h"
 #include "risseStaticStrings.h"
 #include "risse_parser/risseScriptBlock.h"
+
+#include "risseObjectClass.h"
+#include "risseArrayClass.h"
 
 namespace Risse
 {
@@ -50,6 +52,15 @@ tRisseScriptEngine::tRisseScriptEngine()
 	GlobalObject.SetPropertyDirect(ss_Object, tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
 			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				Object_class);
+
+	// "Array" クラスを作成する
+	tRisseVariant Array_class(new tRisseArrayClass(Object_class));
+
+	// グローバルオブジェクトに "Array" クラスを登録する
+	GlobalObject.SetPropertyDirect(ss_Array, tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+				Array_class);
+
 }
 //---------------------------------------------------------------------------
 

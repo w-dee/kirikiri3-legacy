@@ -137,7 +137,7 @@ protected:
 
 
 //---------------------------------------------------------------------------
-tRisseClass::tRisseClass(const tRisseVariant & super_class)
+tRisseClass::tRisseClass(const tRisseVariant & super_class) : tRisseObjectBase(ss_super)
 {
 	// クラスに必要なメソッドを登録する
 	tRisseVariant This(this);

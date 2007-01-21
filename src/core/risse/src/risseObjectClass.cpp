@@ -154,12 +154,12 @@ tRisseObjectClass::tRisseObjectClass() : tRisseClass(tRisseVariant::GetNullObjec
 {
 	// クラスに必要なメソッドを登録する
 
-	// construct, init などは新しいオブジェクトのコンテキスト上で実行されるので
+	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
 
 	// construct
 	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunction_Object_construct()));
-	// object
+	// initialize
 	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunction_Object_initialize()));
 	// getInstanceMember
 	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(new tRisseNativeFunction_Object_getInstanceMember()));

@@ -499,6 +499,17 @@ public: // Object関連
 		AsObject().Context = context;
 	}
 
+	//! @brief		コンテキストを上書きする
+	//! @param		context	上書きするコンテキスト
+	//! @note		このメソッドはvtがvtObject以外の場合はなにもしない。コンテキストの上書きは、
+	//!				このオブジェクトのコンテキストがnullの場合のみに発生する。
+	void OverwriteContext(const tRisseMethodContext * context)
+	{
+		if(GetType() != vtObject) return;
+		tObject & object = AsObject();
+		if(object.Context == NULL) object.Context = context;
+	}
+
 	//! @brief		オブジェクトが null かどうかを得る
 	//! @note		型がオブジェクトで無かった場合は false を返す
 	bool IsNull() const
@@ -749,7 +760,9 @@ public: // operate
 			RISSE_ASSIGN_OP(RShiftAssign);
 
 		default:
-			// invalid opcode
+			// invalid or unknown opcode
+			return OperateForMember(RISSE_OBJECTINTERFACE_PASS_ARG);
+				// OperateForMemberならば処理ができるかもしれない
 			;
 		}
 		return  rvNoError;

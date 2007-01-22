@@ -115,7 +115,8 @@ protected:
 		if(args.GetCount() < 2) RisseThrowBadArgumentCount(args.GetCount(), 2);
 
 		// This のインスタンスメンバを設定する
-		This.SetPropertyDirect(args[0], tRisseOperateFlags::ofInstanceMemberOnly,
+		This.SetPropertyDirect(args[0],
+			tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
 						args[1], This);
 	}
 };

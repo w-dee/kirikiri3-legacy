@@ -70,6 +70,9 @@ protected:
 			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
 			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 			This, new_object);
+		// デフォルトのコンテキストをnew_object自身に設定する
+		new_object.Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
+					tRisseMethodArgument::New(new_object));
 		// yet not
 
 		// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。

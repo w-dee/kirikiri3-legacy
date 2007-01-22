@@ -27,6 +27,7 @@ RISSE_DEFINE_SOURCE_ID(45114,31718,49668,18467,56195,41722,1990,5427);
 //---------------------------------------------------------------------------
 tRisseObjectBase::tRisseObjectBase() : PrototypeName(ss_class)
 {
+	DefaultMethodContext = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -35,6 +36,7 @@ tRisseObjectBase::tRisseObjectBase() : PrototypeName(ss_class)
 tRisseObjectBase::tRisseObjectBase(const tRisseString & prototype_name) :
 				PrototypeName(prototype_name)
 {
+	DefaultMethodContext = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -60,6 +62,10 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 		tRetValue rv = Class.OperateForMember(ocDGet, &result, name, flags,
 					tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(), This);
 		if(rv != rvNoError) return false;
+
+		// コンテキストを設定する
+		if(DefaultMethodContext) result.OverwriteContext(DefaultMethodContext);
+
 		return true;
 	}
 
@@ -84,6 +90,9 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 		if(rv != rvNoError) return false;
 		break;
 	}
+
+	// コンテキストを設定する
+	if(DefaultMethodContext) result.OverwriteContext(DefaultMethodContext);
 
 	return true;
 }
@@ -325,6 +334,17 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 		// set member attrubute
 		if(!SetAttribute(name, flags))
 			return rvMemberNotFound;
+		return rvNoError;
+
+	case ocGetDefaultContext:
+		// get default method context
+		*result = DefaultMethodContext->GetThis();
+		return rvNoError;
+
+	case ocSetDefaultContext:
+		// set default method context
+		if(args.GetCount() < 1) { ; /* TODO: raise an error */ }
+		DefaultMethodContext = new tRisseMethodContext(args[0]);
 		return rvNoError;
 
 	default:

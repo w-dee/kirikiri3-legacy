@@ -108,10 +108,7 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseSt
 	intf->Do(ocDGet, &ret, name,
 		flags, tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(),
 		this_context?this_context->GetThis():This,
-				// こっちはこのvariantがThisオブジェクトを保持していなければ
-				// context->GetThis() を見るが
 		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
-				// こっちは常にこのvariantが保持している値になる
 		);
 	return ret;
 }
@@ -127,10 +124,7 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name, r
 	intf->Do(ocDSet, NULL, name,
 		flags, tRisseMethodArgument::New(value), tRisseMethodArgument::Empty(),
 		this_context?this_context->GetThis():This,
-				// こっちはこのvariantがThisオブジェクトを保持していなければ
-				// context->GetThis() を見るが
 		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
-				// こっちは常にこのvariantが保持している値になる
 		);
 }
 //---------------------------------------------------------------------------
@@ -148,10 +142,7 @@ void tRisseVariantBlock::FuncCall_Object  (
 	intf->Do(ocFuncCall, ret, name,
 		flags, args, bargs,
 		this_context?this_context->GetThis():This,
-				// こっちはこのvariantがThisオブジェクトを保持していなければ
-				// context->GetThis() を見るが
 		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
-				// こっちは常にこのvariantが保持している値になる
 		);
 }
 //---------------------------------------------------------------------------

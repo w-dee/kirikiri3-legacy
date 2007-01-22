@@ -162,7 +162,7 @@ tRisseObjectInterface::tRetValue tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
 	{
-		Executor->Execute(args, bargs, This, stack, result);
+		Executor->Execute(args, This, stack, result);
 	}
 	return rvNoError;
 }

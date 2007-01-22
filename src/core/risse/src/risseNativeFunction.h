@@ -31,7 +31,6 @@ protected:
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
 	//! @param		flags	オペレーションフラグ
 	//! @param		args	引数
-	//! @param		bargs	ブロック引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
@@ -40,7 +39,6 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack) = 0;
 

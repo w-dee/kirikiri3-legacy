@@ -37,7 +37,6 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{
@@ -58,7 +57,6 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{
@@ -79,12 +77,11 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{
 		// 引数チェック
-		if(args.GetCount() < 1) RisseThrowBadArgumentCount(args.GetCount(), 1);
+		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 
 		// This のインスタンスメンバを取得する
 		tRisseVariant ret = 
@@ -107,12 +104,11 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{
 		// 引数チェック
-		if(args.GetCount() < 2) RisseThrowBadArgumentCount(args.GetCount(), 2);
+		if(args.GetArgumentCount() < 2) RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
 
 		// This のインスタンスメンバを設定する
 		This.SetPropertyDirect(args[0],
@@ -134,13 +130,12 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{
 		// 引数をすべて標準出力に出力する
 		// 引数を一つ出力するたびに改行する
-		for(risse_size i = 0; i < args.GetCount(); i++)
+		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
 		{
 			RisseFPrint(stdout, args[i].AsHumanReadable().c_str());
 			RisseFPrint(stdout, RISSE_WS("\n"));

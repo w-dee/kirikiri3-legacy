@@ -60,7 +60,7 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 
 		// クラスに対してメンバ取得を行う
 		tRetValue rv = Class.OperateForMember(ocDGet, &result, name, flags,
-					tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(), This);
+					tRisseMethodArgument::Empty(), This);
 		if(rv != rvNoError) return false;
 
 		// コンテキストを設定する
@@ -86,7 +86,7 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 	case tRisseMemberAttribute::pcProperty: // プロパティアクセス
 		// member->Value を引数なしで関数呼び出しし、その結果を得る
 		tRetValue rv = member->Value.Operate(ocFuncCall, &result, tRisseString::GetEmptyString(),
-					flags, tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(), This);
+					flags, tRisseMethodArgument::Empty(), This);
 		if(rv != rvNoError) return false;
 		break;
 	}
@@ -177,8 +177,7 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 			tRetValue result =
 				Class.OperateForMember(ocDSet, NULL, name,
 								flags|tRisseOperateFlags::ofPropertyOrConstOnly,
-								tRisseMethodArgument::New(value),
-								tRisseMethodArgument::Empty(), This);
+								tRisseMethodArgument::New(value), This);
 			// ちなみに見つかったのが定数で、書き込みに失敗した場合は
 			// 例外が飛ぶので OperateForMember は戻ってこない。
 			if(result == rvNoError) return true; // アクセスに成功したので戻る
@@ -241,7 +240,7 @@ void tRisseObjectBase::WriteMember(const tRisseString & name, tRisseOperateFlags
 		// プロパティの設定の場合は読み出しと違い、ocFuncCallではなくてocDSetを
 		// つかう。
 		member.Value.Do(ocDSet, NULL, tRisseString::GetEmptyString(),
-					flags, tRisseMethodArgument::New(value), tRisseMethodArgument::Empty(), This);
+					flags, tRisseMethodArgument::New(value), This);
 		break;
 	}
 }
@@ -253,7 +252,6 @@ bool tRisseObjectBase::FuncCall(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant & This)
 {
 	if(!name.IsEmpty())
@@ -265,7 +263,7 @@ bool tRisseObjectBase::FuncCall(
 		if(!Read(name, flags, function_object, This)) return false;
 
 		// メンバに対して関数呼び出しを実行する
-		function_object.FuncCall(ret, flags, args, bargs, This);
+		function_object.FuncCall(ret, flags, args, This);
 	}
 	return true;
 }
@@ -291,7 +289,7 @@ bool tRisseObjectBase::SetAttribute(
 
 		// クラスに対して属性設定を行う
 		tRetValue rv = Class.OperateForMember(ocDSetAttrib, NULL, name, flags,
-					tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(), This);
+					tRisseMethodArgument::Empty(), This);
 		if(rv != rvNoError) return false;
 		return true;
 	}
@@ -319,14 +317,14 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	case ocDSet:
 		// property set
 		// TODO: このオブジェクトそのもに対する操作への対応
-		if(args.GetCount() < 1) { ; /* TODO: raise an error */ }
+		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 		if(!Write(name, flags, args[0], This))
 			return rvMemberNotFound;
 		return rvNoError;
 
 	case ocFuncCall:
 		// function call
-		if(!FuncCall(result, name, flags, args, bargs, This))
+		if(!FuncCall(result, name, flags, args, This))
 			return rvMemberNotFound;
 		return rvNoError;
 
@@ -343,7 +341,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 
 	case ocSetDefaultContext:
 		// set default method context
-		if(args.GetCount() < 1) { ; /* TODO: raise an error */ }
+		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 		DefaultMethodContext = new tRisseMethodContext(args[0]);
 		return rvNoError;
 

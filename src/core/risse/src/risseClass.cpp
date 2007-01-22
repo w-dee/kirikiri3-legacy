@@ -55,7 +55,6 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{
@@ -79,13 +78,11 @@ protected:
 		// 「自分のクラス」はすなわち This のこと(のはず)
 		// チェックはしないが。
 		This.FuncCall(NULL, ss_fertilize, 0,
-			tRisseMethodArgument::New(new_object),
-			tRisseMethodArgument::Empty());
+			tRisseMethodArgument::New(new_object));
 
 		// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
 		new_object.FuncCall(NULL, ss_initialize, 0,
 			args,
-			bargs,
 			new_object);
 
 		// オブジェクトを返す
@@ -106,12 +103,11 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{
 		// 引数チェック
-		if(args.GetCount() < 1) RisseThrowBadArgumentCount(args.GetCount(), 1);
+		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 
 		// 親クラスを得る
 		tRisseVariant super_class = This.GetPropertyDirect(ss_super);
@@ -121,8 +117,7 @@ protected:
 		{
 			// 親クラスの fertilize メソッドを再帰して呼ぶ
 			super_class.FuncCall(NULL, ss_fertilize, 0,
-				tRisseMethodArgument::New(args[0]),
-				tRisseMethodArgument::Empty());
+				tRisseMethodArgument::New(args[0]));
 		}
 
 		// 自分のクラスのmodules[]に登録されているモジュールのconstructメソッドを順番に呼ぶ
@@ -131,9 +126,7 @@ protected:
 		// 自分のクラスのconstructメソッドを呼ぶ
 		// この際の呼び出し先の this は args[0] つまり新しいオブジェクトになる
 		This.FuncCall(NULL, ss_construct, 0,
-			tRisseMethodArgument::Empty(),
-			tRisseMethodArgument::Empty(),
-			args[0]);
+			tRisseMethodArgument::Empty(), args[0]);
 	}
 };
 //---------------------------------------------------------------------------
@@ -166,7 +159,7 @@ tRisseClass::tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_A
 	{
 		// このオブジェクトに対する new 指令
 		// このオブジェクトの new メソッドを呼ぶ
-		inherited::FuncCall(result, mnNew, 0, args, bargs, This);
+		inherited::FuncCall(result, mnNew, 0, args, This);
 		return rvNoError;
 	}
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);

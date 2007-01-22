@@ -38,7 +38,6 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{
@@ -59,7 +58,6 @@ protected:
 		tRisseVariant * result,
 		tRisseOperateFlags flags,
 		const tRisseMethodArgument & args,
-		const tRisseMethodArgument & bargs,
 		const tRisseVariant &This,
 		const tRisseStackFrameContext &stack)
 	{

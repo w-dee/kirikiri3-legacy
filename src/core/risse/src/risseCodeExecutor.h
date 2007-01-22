@@ -49,7 +49,6 @@ public:
 	//! @param		result		戻りの値を格納する先
 	virtual void Execute(
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject(),
 		const tRisseStackFrameContext &stack = tRisseStackFrameContext::GetNullContext(),
 		tRisseVariant * result = NULL) = 0;
@@ -71,7 +70,6 @@ public:
 
 	void Execute(
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject(),
 		const tRisseStackFrameContext &stack = tRisseStackFrameContext::GetNullContext(),
 		tRisseVariant * result = NULL);

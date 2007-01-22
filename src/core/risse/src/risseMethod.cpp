@@ -23,11 +23,12 @@ namespace Risse
 
 //---------------------------------------------------------------------------
 tRisseMethodArgument::tEmptyMethodArgument
-	tRisseMethodArgument::EmptyArgument = {0, {NULL}};
+	tRisseMethodArgument::EmptyArgument = {0, 0, {NULL}};
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
-tRisseMethodArgument & tRisseMethodArgument::Allocate(risse_size n)
+tRisseMethodArgument & tRisseMethodArgument::Allocate(risse_size ac, risse_size bc)
 {
 	// このメソッドは、必要なストレージのバイト数を計算して
 	// 領域を確保し、tRisseMethodArgument & にキャストして返すだけ。
@@ -42,11 +43,12 @@ tRisseMethodArgument & tRisseMethodArgument::Allocate(risse_size n)
 
 	void * alloc = new risse_uint8[
 		sizeof(tRisseMethodArgumentOf<1>) - sizeof(tRisseVariant *) +
-		sizeof(tRisseVariant) * n];
+		sizeof(tRisseVariant) * (ac+bc)];
 
 	tRisseMethodArgument & ret = *reinterpret_cast<tRisseMethodArgument*>(alloc);
 
-	ret.argc = n;
+	ret.ArgumentCount = ac;
+	ret.BlockArgumentCount = bc;
 
 	return ret;
 }

@@ -533,7 +533,6 @@ public: // operate
 	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
 	//! @param		flags	オペレーションフラグ
 	//! @param		args	引数
-	//! @param		bargs	ブロック引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
@@ -553,7 +552,6 @@ public: // operate
 	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
 	//! @param		flags	オペレーションフラグ
 	//! @param		args	引数
-	//! @param		bargs	ブロック引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
@@ -618,12 +616,12 @@ public: // operate
 			return rvNoError;
 
 #define RISSE_BIN_OP(func) \
-			if(args.GetCount() != 1)                           \
-				RisseThrowBadArgumentCount(args.GetCount(), 1);\
-			if(result)                                         \
-				*result = BitOr(args[0]);                      \
-			else                                               \
-				BitOr(args[0]); /* discard result */           \
+			if(args.GetArgumentCount() != 1)                           \
+				RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);\
+			if(result)                                                 \
+				*result = BitOr(args[0]);                              \
+			else                                                       \
+				BitOr(args[0]); /* discard result */                   \
 			return rvNoError;
 
 		case ocLogOr			://!< ||
@@ -711,8 +709,8 @@ public: // operate
 //			RISSE_BIN_OP(ISet);
 
 #define RISSE_ASSIGN_OP(func) \
-			if(args.GetCount() != 1)                           \
-				RisseThrowBadArgumentCount(args.GetCount(), 1);\
+			if(args.GetArgumentCount() != 1)                   \
+				RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);\
 			func(args[0]);                                     \
 			if(result) *result = *this;                        \
 			return rvNoError;
@@ -775,7 +773,6 @@ public: // operate
 	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
 	//! @param		flags	オペレーションフラグ
 	//! @param		args	引数
-	//! @param		bargs	ブロック引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
@@ -865,19 +862,17 @@ public: // 演算子
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		flags		呼び出しフラグ
 	//! @param		args		引数
-	//! @param		bargs		ブロック引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
 	void FuncCall(tRisseVariantBlock * ret = NULL, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject()) const
 	{
 		// Object 以外は関数(メソッド)としては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	FuncCall_Object   (ret, tRisseString::GetEmptyString(), flags, args, bargs, This); return;
+		case vtObject:	FuncCall_Object   (ret, tRisseString::GetEmptyString(), flags, args, This); return;
 
 		default:
 			RisseThrowCannotCallNonFunctionObjectException(); break;
@@ -890,35 +885,33 @@ public: // 演算子
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		flags		呼び出しフラグ
 	//! @param		args		引数
-	//! @param		bargs		ブロック引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
 	void FuncCall(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject()) const
 	{
 		switch(GetType())
 		{
-		case vtVoid:	FuncCall_Void     (ret, name, flags, args, bargs, This); return;
-		case vtInteger:	FuncCall_Integer  (ret, name, flags, args, bargs, This); return;
-		case vtReal:	FuncCall_Real     (ret, name, flags, args, bargs, This); return;
-		case vtBoolean:	FuncCall_Boolean  (ret, name, flags, args, bargs, This); return;
-		case vtString:	FuncCall_String   (ret, name, flags, args, bargs, This); return;
-		case vtOctet:	FuncCall_Octet    (ret, name, flags, args, bargs, This); return;
-		case vtObject:	FuncCall_Object   (ret, name, flags, args, bargs, This); return;
+		case vtVoid:	FuncCall_Void     (ret, name, flags, args, This); return;
+		case vtInteger:	FuncCall_Integer  (ret, name, flags, args, This); return;
+		case vtReal:	FuncCall_Real     (ret, name, flags, args, This); return;
+		case vtBoolean:	FuncCall_Boolean  (ret, name, flags, args, This); return;
+		case vtString:	FuncCall_String   (ret, name, flags, args, This); return;
+		case vtOctet:	FuncCall_Octet    (ret, name, flags, args, This); return;
+		case vtObject:	FuncCall_Object   (ret, name, flags, args, This); return;
 		}
 	}
 
-	void FuncCall_Void    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_Integer (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_Real    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_Boolean (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_String  (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_Octet   (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_Object  (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseMethodArgument & bargs, const tRisseVariant & This) const;
+	void FuncCall_Void    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
+	void FuncCall_Integer (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
+	void FuncCall_Real    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
+	void FuncCall_Boolean (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
+	void FuncCall_String  (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
+	void FuncCall_Octet   (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
+	void FuncCall_Object  (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke

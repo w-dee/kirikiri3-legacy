@@ -57,7 +57,7 @@ tRisseNativePropertyBase::tRetValue tRisseNativePropertyBase::Operate(RISSE_OBJE
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Write を呼ぶ
-			if(args.GetCount() < 1) RisseThrowBadArgumentCount(args.GetCount(), 1);
+			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 			Write(args[0], flags, This, stack);
 			return rvNoError;
 		}

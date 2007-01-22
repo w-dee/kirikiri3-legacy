@@ -117,13 +117,11 @@ public:
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		flags		呼び出しフラグ
 	//! @param		args		引数
-	//! @param		bargs		ブロック引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	bool FuncCall(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseMethodArgument & bargs = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject());
 
 	//! @brief		(このオブジェクトのメンバに対する)属性設定		DSetAttrib

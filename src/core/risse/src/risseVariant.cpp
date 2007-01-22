@@ -106,7 +106,7 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseSt
 	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
 	intf->Do(ocDGet, &ret, name,
-		flags, tRisseMethodArgument::Empty(), tRisseMethodArgument::Empty(),
+		flags, tRisseMethodArgument::Empty(),
 		this_context?this_context->GetThis():This,
 		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
 		);
@@ -122,7 +122,7 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name, r
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocDSet, NULL, name,
-		flags, tRisseMethodArgument::New(value), tRisseMethodArgument::Empty(),
+		flags, tRisseMethodArgument::New(value),
 		this_context?this_context->GetThis():This,
 		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
 		);
@@ -133,14 +133,13 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name, r
 //---------------------------------------------------------------------------
 void tRisseVariantBlock::FuncCall_Object  (
 	tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags,
-	const tRisseMethodArgument & args,
-	const tRisseMethodArgument & bargs, const tRisseVariant & This) const
+	const tRisseMethodArgument & args, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocFuncCall, ret, name,
-		flags, args, bargs,
+		flags, args,
 		this_context?this_context->GetThis():This,
 		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
 		);
@@ -156,7 +155,6 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	tRisseVariantBlock ret;
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
-		tRisseMethodArgument::Empty(),
 		tRisseMethodArgument::Empty(),
 		*this, tRisseStackFrameContext::GetNullContext()
 		);
@@ -174,7 +172,6 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
 		tRisseMethodArgument::New(&arg1),
-		tRisseMethodArgument::Empty(),
 		*this, tRisseStackFrameContext::GetNullContext()
 		);
 	return ret;
@@ -192,7 +189,6 @@ tRisseVariantBlock tRisseVariantBlock::New_Object  (const tRisseString & name,
 	intf->Do(ocNew, &ret, name,
 		flags,
 		args,
-		tRisseMethodArgument::Empty(),
 		*this, tRisseStackFrameContext::GetNullContext()
 		);
 	return ret;

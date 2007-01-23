@@ -50,6 +50,39 @@ static void Array_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
+//! @brief		NativeFunction: Array.push
+//---------------------------------------------------------------------------
+static void Array_push(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
+	tRisseArrayObject::tArray & array = obj->GetArray();
+
+	for(risse_size i = 0; i < args.GetArgumentCount(); i++)
+		array.push_back(args[i]);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		NativeFunction: Array.pop
+//---------------------------------------------------------------------------
+static void Array_pop(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
+	tRisseArrayObject::tArray & array = obj->GetArray();
+
+	tRisseVariant val;
+	if(array.size() > 0)
+	{
+		val = array.back();
+		array.pop_back();
+	}
+	if(result) *result = val;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseArrayClass::tRisseArrayClass() :
 	tRisseClass(tRisseObjectClass::GetPointer())
 {
@@ -62,6 +95,19 @@ tRisseArrayClass::tRisseArrayClass() :
 	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Array_construct)));
 	// initialize
 	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Array_initialize)));
+
+	// push
+	RegisterNormalMember(RISSE_WS("push"), tRisseVariant(new tRisseNativeFunctionBase(Array_push)));
+	// pop
+	RegisterNormalMember(RISSE_WS("pop"), tRisseVariant(new tRisseNativeFunctionBase(Array_pop)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseObjectBase * tRisseArrayClass::CreateNewObjectBase()
+{
+	return new tRisseArrayObject();
 }
 //---------------------------------------------------------------------------
 

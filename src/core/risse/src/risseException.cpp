@@ -168,6 +168,14 @@ void RisseThrowPropertyCannotBeWritten(const tRisseString & name)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void RisseThrowUnexpectedClass()
+{
+	eRisseError::Throw(tRisseString(RISSE_WS_TR("unexpected class")));
+}
+//---------------------------------------------------------------------------
+
+
 
 
 

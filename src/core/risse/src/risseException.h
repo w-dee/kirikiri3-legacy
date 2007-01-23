@@ -339,6 +339,8 @@ void RisseThrowPropertyCannotBeRead(const tRisseString & name = tRisseString::Ge
 //! @brief		「このプロパティには書き込むことができない」例外を発生(暫定)
 //! @param		name		メンバ名
 void RisseThrowPropertyCannotBeWritten(const tRisseString & name = tRisseString::GetEmptyString());
+//! @brief		「期待したクラスではありません」例外を発生(暫定)
+void RisseThrowUnexpectedClass();
 //---------------------------------------------------------------------------
 
 

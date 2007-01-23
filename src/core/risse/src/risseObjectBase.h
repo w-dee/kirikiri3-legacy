@@ -23,6 +23,8 @@ namespace Risse
 {
 class tRisseClass;
 //---------------------------------------------------------------------------
+//! @brief		"Object" クラス
+//---------------------------------------------------------------------------
 class tRisseObjectBase : public tRisseObjectInterface
 {
 public:

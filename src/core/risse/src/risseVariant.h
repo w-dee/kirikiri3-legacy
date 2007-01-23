@@ -2180,6 +2180,21 @@ public: // ユーティリティ
 	tRisseString AsHumanReadable_Object   (risse_size maxlen) const
 					{ return tRisseString(); /* incomplete */ }
 
+	//! @brief		Object型に対するtypeチェック
+	//! @note		バリアントが期待したタイプであるかどうかをチェックし
+	//!				またそのオブジェクトインターフェースを得る。
+	//!				期待した値でなければ「"期待したクラスではありません"」例外を発生する
+	//!				テンプレートパラメータのObjectTはtRisseObjectBaseの派生クラス、
+	//!				ClassTにはtRisseSingletonの派生クラスかつtRisseClassの派生クラスを指定すること。
+	template <typename ObjectT, typename ClassT>
+	ObjectT * CheckAndGetObjectInterafce() const
+	{
+		if(GetType() != vtObject) RisseThrowUnexpectedClass();
+		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
+		if(intf->GetTypeInfo() != ClassT::GetPointer()) RisseThrowUnexpectedClass();
+		return intf;
+	}
+
 	//! @brief		デバッグ用各種構造体サイズ表示
 	void prtsizes()
 	{

@@ -2191,7 +2191,8 @@ public: // ユーティリティ
 	{
 		if(GetType() != vtObject) RisseThrowUnexpectedClass();
 		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
-		if(intf->GetTypeInfo() != ClassT::GetPointer()) RisseThrowUnexpectedClass();
+		if(!ClassT::GetPointer()->GetRTTIMatcher().Match(intf->GetRTTI()))
+			RisseThrowUnexpectedClass();
 		return intf;
 	}
 

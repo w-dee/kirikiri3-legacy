@@ -16,6 +16,7 @@
 #include "risseCharUtils.h"
 #include "risseObject.h"
 #include "risseObjectBase.h"
+#include "risseObjectRTTI.h"
 
 namespace Risse
 {
@@ -27,10 +28,20 @@ class tRisseClass : public tRisseObjectBase
 	//! @brief		親クラスのtypedef
 	typedef tRisseObjectBase inherited;
 
+	tRisseRTTI RTTI; //!< RTTI 参照用データ(このクラスから作成されたインスタンスはこのRTTIを持つ)
+	tRisseRTTI::tMatcher RTTIMatcher; //!< RTTI にマッチするための情報
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		super_class		スーパークラスを表すオブジェクト
-	tRisseClass(const tRisseVariant & super_class = tRisseVariant::GetNullObject());
+	tRisseClass(tRisseClass * super_class = NULL);
+
+	//! @brief		ダミーのデストラクタ(たぶん呼ばれない)
+	virtual ~tRisseClass() {;}
+
+	//! @brief		RTTIにマッチするための情報を得る
+	//! @return		RTTIにマッチするための情報
+	const tRisseRTTI::tMatcher & GetRTTIMatcher() const { return RTTIMatcher; }
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

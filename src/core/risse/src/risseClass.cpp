@@ -127,8 +127,14 @@ static void Class_fertilize(
 
 
 //---------------------------------------------------------------------------
-tRisseClass::tRisseClass(const tRisseVariant & super_class) : tRisseObjectBase(ss_super)
+tRisseClass::tRisseClass(tRisseClass * super_class) : tRisseObjectBase(ss_super)
 {
+	// 親クラスのRTTIを引き継ぐ
+	if(super_class) RTTI = super_class->RTTI;
+
+	// RTTIに情報を格納する
+	RTTIMatcher = RTTI.AddId(this);
+
 	// クラスに必要なメソッドを登録する
 	tRisseVariant This(this);
 
@@ -141,7 +147,7 @@ tRisseClass::tRisseClass(const tRisseVariant & super_class) : tRisseObjectBase(s
 	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunctionBase(Class_fertilize), This));
 
 	// super を登録
-	RegisterNormalMember(ss_super, super_class);
+	RegisterNormalMember(ss_super, tRisseVariant(super_class));
 }
 //---------------------------------------------------------------------------
 
@@ -161,9 +167,8 @@ tRisseClass::tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_A
 		// 空のオブジェクトを作成して返す
 		RISSE_ASSERT(result != NULL);
 		tRisseObjectBase * new_object = CreateNewObjectBase();
-		new_object->SetTypeInfo(this);
-			// 型情報として this を設定する。
-			// これによりnew_objectがこのインスタンスより作成されたことを表す。
+		new_object->SetRTTI(&RTTI);
+			// RTTIとしてこのクラスの物を設定する
 		*result = tRisseVariant(new_object);
 		return rvNoError;
 	}

@@ -30,21 +30,22 @@ class tRisseStackFrameContext;
 class tRisseMethodArgument;
 class tRisseVariantBlock;
 typedef tRisseVariantBlock tRisseVariant;
+class tRisseRTTI;
 //---------------------------------------------------------------------------
 //! @brief		Risseオブジェクトインターフェース
 //---------------------------------------------------------------------------
 class tRisseObjectInterface : public tRisseCollectee, public tRisseOperateRetValue
 {
-	void * TypeInfo; //!< このオブジェクトインターフェースの「型」をC++レベルで
+	const tRisseRTTI * RTTI; //!< このオブジェクトインターフェースの「型」をC++レベルで
 					//!< 識別するためのメンバ。簡易RTTI。とくに識別しない場合は
 					//!< NULLを入れておく。
 public:
 	//! @brief		コンストラクタ
-	tRisseObjectInterface() { TypeInfo = NULL; }
+	tRisseObjectInterface() { RTTI = NULL; }
 
-	//! @brief		コンストラクタ(クラス情報を指定)
-	//! @param		type_info		型情報
-	tRisseObjectInterface(void * type_info) { TypeInfo = type_info; }
+	//! @brief		コンストラクタ(RTTIを指定)
+	//! @param		rtti		RTTI
+	tRisseObjectInterface(const tRisseRTTI * rtti) { RTTI = rtti; }
 
 	//! @brief		オブジェクトに対して操作を行う
 	//! @param		code	オペレーションコード
@@ -81,13 +82,13 @@ public:
 		if(ret != rvNoError) RaiseError(ret, name);
 	}
 
-	//! @brief		型情報を得る
-	//! @param		型情報
-	void * GetTypeInfo() const { return TypeInfo; }
+	//! @brief		RTTI情報を得る
+	//! @param		RTTI情報
+	const tRisseRTTI * GetRTTI() const { return RTTI; }
 
-	//! @brief		型情報を設定する
-	//! @param		type_info 型情報
-	void SetTypeInfo(void * type_info) { TypeInfo = type_info; }
+	//! @brief		RTTI情報を設定する
+	//! @param		rtti		RTTI情報
+	void SetRTTI(const tRisseRTTI * rtti) { RTTI = rtti; }
 
 };
 //---------------------------------------------------------------------------

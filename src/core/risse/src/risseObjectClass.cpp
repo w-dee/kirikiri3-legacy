@@ -121,7 +121,7 @@ static void Object_puts(
 
 
 //---------------------------------------------------------------------------
-tRisseObjectClass::tRisseObjectClass() : tRisseClass(tRisseVariant::GetNullObject())
+tRisseObjectClass::tRisseObjectClass() : tRisseClass(NULL)
 {
 	// クラスに必要なメソッドを登録する
 

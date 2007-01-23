@@ -18,6 +18,30 @@
 
 namespace Risse
 {
+
+// この基底クラスを派生し、下位クラスで Operate をオーバーライドして各メソッド
+// やプロパティを実装する方法もあるが、それだと各メソッドやプロパティごとに
+// クラスが作成され、RTTIを浪費することになる (RTTIを作成しないpragmaticな
+// 方法もあるだろうが)。ここでは、実際に呼び出す先を関数ポインタにし、
+// クラスはいちいち作らないことにする。ちなみにTJS2では当初はクラスを
+// それぞれのメソッドやプロパティごとに持っていたが、このような方法を
+// とったことにより大幅に実行バイナリのサイズが減った。
+
+//! @brief		tRisseNativePropertyBase::tReader の引数
+#define RISSE_NATIVEPROPERTY_READER_ARGS \
+		tRisseVariant * result,               \
+		tRisseOperateFlags flags,             \
+		const tRisseVariant &This,            \
+		const tRisseStackFrameContext &stack
+
+//! @brief		tRisseNativePropertyBase::tWriter の引数
+#define RISSE_NATIVEPROPERTY_WRITER_ARGS \
+		const tRisseVariant & value,          \
+		tRisseOperateFlags flags,             \
+		const tRisseVariant &This,            \
+		const tRisseStackFrameContext &stack
+
+
 //---------------------------------------------------------------------------
 //! @brief		Risseネイティブプロパティの基底クラス
 //---------------------------------------------------------------------------
@@ -27,7 +51,7 @@ class tRisseNativePropertyBase : public tRisseObjectBase
 	typedef tRisseObjectBase inherited;
 
 protected:
-	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッド(下位クラスでオーバーライドすること.
+	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッドのtypedef
 	//!				オーバライドしなかった場合は読み込み禁止のプロパティになる)
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
 	//! @param		flags	オペレーションフラグ
@@ -35,13 +59,9 @@ protected:
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
-	virtual void Read(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack);
+	typedef void (*tReader)(RISSE_NATIVEPROPERTY_READER_ARGS);
 
-	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッド(下位クラスでオーバーライドすること.
+	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッドのtypedef
 	//!				オーバーライドしなかった場合は書き込み禁止のプロパティになる)
 	//! @param		value	書き込む値
 	//! @param		flags	オペレーションフラグ
@@ -49,13 +69,17 @@ protected:
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
-	virtual void Write(
-		const tRisseVariant & value,
-		tRisseOperateFlags flags,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack);
+	typedef void (*tWriter)(RISSE_NATIVEPROPERTY_WRITER_ARGS);
+
+	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッド
+	tReader Reader;
+	tWriter Writer;
 
 public:
+	//! @brief		コンストラクタ
+	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
+	tRisseNativePropertyBase(tReader reader, tWriter writer = NULL);
+
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };

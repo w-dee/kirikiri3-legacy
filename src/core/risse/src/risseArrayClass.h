@@ -16,16 +16,16 @@
 
 #include "risseObject.h"
 #include "risseClass.h"
+#include "risseSingleton.h"
 
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseArrayClass : public tRisseClass
+class tRisseArrayClass : public tRisseClass, public tRisseSingleton<tRisseArrayClass>
 {
 public:
 	//! @brief		コンストラクタ
-	//! @param		super		スーパークラス(Objectクラスのクラスインスタンスを指定すること)
-	tRisseArrayClass(const tRisseVariant & super);
+	tRisseArrayClass();
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

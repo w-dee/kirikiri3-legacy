@@ -43,7 +43,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	}
 
 	// "Object" クラスを作成する
-	tRisseVariant Object_class(new tRisseObjectClass());
+	tRisseVariant Object_class(tRisseObjectClass::GetPointer());
 
 	// グローバルオブジェクトを "Object" クラスから作成する
 	GlobalObject = Object_class.New();
@@ -54,7 +54,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 				Object_class);
 
 	// "Array" クラスを作成する
-	tRisseVariant Array_class(new tRisseArrayClass(Object_class));
+	tRisseVariant Array_class(tRisseArrayClass::GetPointer());
 
 	// グローバルオブジェクトに "Array" クラスを登録する
 	GlobalObject.SetPropertyDirect(ss_Array, tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |

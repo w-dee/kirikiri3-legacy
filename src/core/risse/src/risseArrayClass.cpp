@@ -16,6 +16,7 @@
 #include "risseNativeFunction.h"
 #include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
+#include "risseObjectClass.h"
 
 /*
 	Risseスクリプトから見える"Array" クラスの実装
@@ -30,46 +31,27 @@ RISSE_DEFINE_SOURCE_ID(65360,34010,1527,19914,27817,35057,17111,22724);
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Array.construct
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Array_construct : public tRisseNativeFunctionBase
+static void Array_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
-	{
-		// デフォルトでは何もしない
-	}
-};
+	// デフォルトでは何もしない
+}
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Array.initialize
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Array_initialize : public tRisseNativeFunctionBase
+static void Array_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
-	{
-		// 親クラスの同名メソッドを呼び出す
-		// TODO: コンストラクタの正しい実装
-	}
-};
+	// 親クラスの同名メソッドを呼び出す
+	// TODO: コンストラクタの正しい実装
+}
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseArrayClass::tRisseArrayClass(const tRisseVariant & super) : tRisseClass(super)
+tRisseArrayClass::tRisseArrayClass() :
+	tRisseClass(tRisseObjectClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
 
@@ -77,9 +59,9 @@ tRisseArrayClass::tRisseArrayClass(const tRisseVariant & super) : tRisseClass(su
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunction_Array_construct()));
+	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Array_construct)));
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunction_Array_initialize()));
+	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Array_initialize)));
 }
 //---------------------------------------------------------------------------
 

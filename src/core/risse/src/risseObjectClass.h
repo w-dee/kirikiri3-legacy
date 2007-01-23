@@ -16,11 +16,12 @@
 
 #include "risseObject.h"
 #include "risseClass.h"
+#include "risseSingleton.h"
 
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseObjectClass : public tRisseClass
+class tRisseObjectClass : public tRisseClass, public tRisseSingleton<tRisseObjectClass>
 {
 public:
 	//! @brief		コンストラクタ

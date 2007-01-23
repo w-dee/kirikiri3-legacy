@@ -47,88 +47,78 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Class.new
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Class_new : public tRisseNativeFunctionBase
+static void Class_new(
+	tRisseVariant * result,
+	tRisseOperateFlags flags,
+	const tRisseMethodArgument & args,
+	const tRisseVariant &This,
+	const tRisseStackFrameContext &stack)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
-	{
-		// 空のオブジェクトを作る
-		// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
-		tRisseVariant new_object(new tRisseObjectBase());
+	// 空のオブジェクトを作る
+	// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
+	tRisseVariant new_object(new tRisseObjectBase());
 
-		// そのオブジェクトにクラス情報を設定する
-		// ここではclassメンバに「自分のクラス」を追加する
-		// 「自分のクラス」はすなわち This のこと(のはず)
-		new_object.SetPropertyDirect(ss_class,
-			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-			This, new_object);
-		// デフォルトのコンテキストをnew_object自身に設定する
-		new_object.Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
-					tRisseMethodArgument::New(new_object));
-		// yet not
+	// そのオブジェクトにクラス情報を設定する
+	// ここではclassメンバに「自分のクラス」を追加する
+	// 「自分のクラス」はすなわち This のこと(のはず)
+	new_object.SetPropertyDirect(ss_class,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+		This, new_object);
+	// デフォルトのコンテキストをnew_object自身に設定する
+	new_object.Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
+				tRisseMethodArgument::New(new_object));
+	// yet not
 
-		// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
-		// 「自分のクラス」はすなわち This のこと(のはず)
-		// チェックはしないが。
-		This.FuncCall(NULL, ss_fertilize, 0,
-			tRisseMethodArgument::New(new_object));
+	// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
+	// 「自分のクラス」はすなわち This のこと(のはず)
+	// チェックはしないが。
+	This.FuncCall(NULL, ss_fertilize, 0,
+		tRisseMethodArgument::New(new_object));
 
-		// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
-		new_object.FuncCall(NULL, ss_initialize, 0,
-			args,
-			new_object);
+	// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
+	new_object.FuncCall(NULL, ss_initialize, 0,
+		args,
+		new_object);
 
-		// オブジェクトを返す
-		if(result) *result = new_object;
-	}
-};
+	// オブジェクトを返す
+	if(result) *result = new_object;
+}
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Class.fertilize
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Class_fertilize : public tRisseNativeFunctionBase
+static void Class_fertilize(
+	tRisseVariant * result,
+	tRisseOperateFlags flags,
+	const tRisseMethodArgument & args,
+	const tRisseVariant &This,
+	const tRisseStackFrameContext &stack)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
+	// 引数チェック
+	if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+
+	// 親クラスを得る
+	tRisseVariant super_class = This.GetPropertyDirect(ss_super);
+
+	// 親クラスがあれば...
+	if(!super_class.IsNull())
 	{
-		// 引数チェック
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-
-		// 親クラスを得る
-		tRisseVariant super_class = This.GetPropertyDirect(ss_super);
-
-		// 親クラスがあれば...
-		if(!super_class.IsNull())
-		{
-			// 親クラスの fertilize メソッドを再帰して呼ぶ
-			super_class.FuncCall(NULL, ss_fertilize, 0,
-				tRisseMethodArgument::New(args[0]));
-		}
-
-		// 自分のクラスのmodules[]に登録されているモジュールのconstructメソッドを順番に呼ぶ
-		// not yet
-
-		// 自分のクラスのconstructメソッドを呼ぶ
-		// この際の呼び出し先の this は args[0] つまり新しいオブジェクトになる
-		This.FuncCall(NULL, ss_construct, 0,
-			tRisseMethodArgument::Empty(), args[0]);
+		// 親クラスの fertilize メソッドを再帰して呼ぶ
+		super_class.FuncCall(NULL, ss_fertilize, 0,
+			tRisseMethodArgument::New(args[0]));
 	}
-};
+
+	// 自分のクラスのmodules[]に登録されているモジュールのconstructメソッドを順番に呼ぶ
+	// not yet
+
+	// 自分のクラスのconstructメソッドを呼ぶ
+	// この際の呼び出し先の this は args[0] つまり新しいオブジェクトになる
+	This.FuncCall(NULL, ss_construct, 0,
+		tRisseMethodArgument::Empty(), args[0]);
+}
 //---------------------------------------------------------------------------
 
 
@@ -142,9 +132,9 @@ tRisseClass::tRisseClass(const tRisseVariant & super_class) : tRisseObjectBase(s
 	// This (クラスそのもの)をあらかじめ設定する。
 
 	// new
-	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunction_Class_new(), This));
+	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunctionBase(Class_new), This));
 	// fertilize
-	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunction_Class_fertilize(), This));
+	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunctionBase(Class_fertilize), This));
 
 	// super を登録
 	RegisterNormalMember(ss_super, super_class);

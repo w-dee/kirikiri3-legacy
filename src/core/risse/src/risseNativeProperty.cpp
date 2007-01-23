@@ -19,26 +19,13 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(21996,23593,41879,16445,47022,10284,22019,34197);
 
-//---------------------------------------------------------------------------
-void tRisseNativePropertyBase::Read(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
-{
-	RisseThrowPropertyCannotBeRead();
-}
-//---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
-void tRisseNativePropertyBase::Write(
-		const tRisseVariant & value,
-		tRisseOperateFlags flags,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
+tRisseNativePropertyBase::tRisseNativePropertyBase(tRisseNativePropertyBase::tReader reader,
+		tRisseNativePropertyBase::tWriter writer)
 {
-	RisseThrowPropertyCannotBeWritten();
+	Reader = reader;
+	Writer = writer;
 }
 //---------------------------------------------------------------------------
 
@@ -50,15 +37,17 @@ tRisseNativePropertyBase::tRetValue tRisseNativePropertyBase::Operate(RISSE_OBJE
 	{
 		if(code == ocFuncCall) // このオブジェクトに対するプロパティ読み込みか？
 		{
-			// このオブジェクトに対するプロパティ読み込みなので Read を呼ぶ
-			Read(result, flags, This, stack);
+			// このオブジェクトに対するプロパティ読み込みなので Reader を呼ぶ
+			if(!Reader) RisseThrowPropertyCannotBeRead();
+			Reader(result, flags, This, stack);
 			return rvNoError;
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
-			// このオブジェクトに対するプロパティ書き込みなので Write を呼ぶ
+			// このオブジェクトに対するプロパティ書き込みなので Writer を呼ぶ
+			if(!Writer) RisseThrowPropertyCannotBeWritten();
 			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-			Write(args[0], flags, This, stack);
+			Writer(args[0], flags, This, stack);
 			return rvNoError;
 		}
 	}

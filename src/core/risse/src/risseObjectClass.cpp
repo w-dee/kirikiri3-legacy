@@ -29,119 +29,94 @@ RISSE_DEFINE_SOURCE_ID(41134,45186,9497,17812,19604,2796,36426,21671);
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.construct
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Object_construct : public tRisseNativeFunctionBase
+static void Object_construct(
+	tRisseVariant * result,
+	tRisseOperateFlags flags,
+	const tRisseMethodArgument & args,
+	const tRisseVariant &This,
+	const tRisseStackFrameContext &stack)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
-	{
-		// デフォルトでは何もしない
-	}
-};
+	// デフォルトでは何もしない
+}
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.initialize
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Object_initialize : public tRisseNativeFunctionBase
+static void Object_initialize(
+	tRisseVariant * result,
+	tRisseOperateFlags flags,
+	const tRisseMethodArgument & args,
+	const tRisseVariant &This,
+	const tRisseStackFrameContext &stack)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
-	{
-		// デフォルトでは何もしない
-	}
-};
+	// デフォルトでは何もしない
+}
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.getInstanceMember
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Object_getInstanceMember : public tRisseNativeFunctionBase
+static void Object_getInstanceMember(
+	tRisseVariant * result,
+	tRisseOperateFlags flags,
+	const tRisseMethodArgument & args,
+	const tRisseVariant &This,
+	const tRisseStackFrameContext &stack)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
-	{
-		// 引数チェック
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+	// 引数チェック
+	if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 
-		// This のインスタンスメンバを取得する
-		tRisseVariant ret = 
-			This.GetPropertyDirect(args[0], tRisseOperateFlags::ofInstanceMemberOnly,
-						This);
-		if(result) *result = ret;
-	}
-};
+	// This のインスタンスメンバを取得する
+	tRisseVariant ret = 
+		This.GetPropertyDirect(args[0], tRisseOperateFlags::ofInstanceMemberOnly,
+					This);
+	if(result) *result = ret;
+}
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.setInstanceMember
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Object_setInstanceMember : public tRisseNativeFunctionBase
+static void Object_setInstanceMember(
+	tRisseVariant * result,
+	tRisseOperateFlags flags,
+	const tRisseMethodArgument & args,
+	const tRisseVariant &This,
+	const tRisseStackFrameContext &stack)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
-	{
-		// 引数チェック
-		if(args.GetArgumentCount() < 2) RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
+	// 引数チェック
+	if(args.GetArgumentCount() < 2) RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
 
-		// This のインスタンスメンバを設定する
-		This.SetPropertyDirect(args[0],
-			tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
-						args[1], This);
-	}
-};
+	// This のインスタンスメンバを設定する
+	This.SetPropertyDirect(args[0],
+		tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+					args[1], This);
+}
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.puts  テスト用関数 - 将来的には別のクラスに移動する予定
 //---------------------------------------------------------------------------
-class tRisseNativeFunction_Object_puts : public tRisseNativeFunctionBase
+static void Object_puts(
+	tRisseVariant * result,
+	tRisseOperateFlags flags,
+	const tRisseMethodArgument & args,
+	const tRisseVariant &This,
+	const tRisseStackFrameContext &stack)
 {
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド
-	void Call(
-		tRisseVariant * result,
-		tRisseOperateFlags flags,
-		const tRisseMethodArgument & args,
-		const tRisseVariant &This,
-		const tRisseStackFrameContext &stack)
+	// 引数をすべて標準出力に出力する
+	// 引数を一つ出力するたびに改行する
+	for(risse_size i = 0; i < args.GetArgumentCount(); i++)
 	{
-		// 引数をすべて標準出力に出力する
-		// 引数を一つ出力するたびに改行する
-		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
-		{
-			RisseFPrint(stdout, args[i].AsHumanReadable().c_str());
-			RisseFPrint(stdout, RISSE_WS("\n"));
-		}
+		RisseFPrint(stdout, args[i].AsHumanReadable().c_str());
+		RisseFPrint(stdout, RISSE_WS("\n"));
 	}
-};
+}
 //---------------------------------------------------------------------------
 
 
@@ -154,15 +129,16 @@ tRisseObjectClass::tRisseObjectClass() : tRisseClass(tRisseVariant::GetNullObjec
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunction_Object_construct()));
+	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Object_construct)));
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunction_Object_initialize()));
+	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Object_initialize)));
 	// getInstanceMember
-	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(new tRisseNativeFunction_Object_getInstanceMember()));
+
+	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(new tRisseNativeFunctionBase(Object_getInstanceMember)));
 	// setInstanceMener
-	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(new tRisseNativeFunction_Object_setInstanceMember()));
+	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(new tRisseNativeFunctionBase(Object_setInstanceMember)));
 	// setInstanceMener
-	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(new tRisseNativeFunction_Object_puts()));
+	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(new tRisseNativeFunctionBase(Object_puts)));
 }
 //---------------------------------------------------------------------------
 

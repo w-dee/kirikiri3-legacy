@@ -238,7 +238,7 @@ void tRisseCodeInterpreter::Execute(
 				tRisseVariant val;
 				try
 				{
-					AR(code[2]).FuncCall(&val, 0, args, &This);
+					AR(code[2]).FuncCall(&val, 0, args, This);
 				}
 				catch(const eRisseScriptException &e)
 				{
@@ -273,7 +273,7 @@ void tRisseCodeInterpreter::Execute(
 					args.SetArgument(i, AR(code[i+5]));
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					0, args, &This);
+					0, args, This);
 				code += code[4] + 5;
 				break;
 			}
@@ -302,7 +302,7 @@ void tRisseCodeInterpreter::Execute(
 					args.SetBlockArgument(i, AR(code[i+6+code[4]]));
 
 				AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-					0, args, &This);
+					0, args, This);
 				code += code[4] + code[5] + 6;
 				break;
 			}

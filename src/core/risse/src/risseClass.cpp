@@ -56,7 +56,12 @@ static void Class_new(
 {
 	// 空のオブジェクトを作る
 	// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
-	tRisseVariant new_object(new tRisseObjectBase());
+	// 「自分のクラス」はすなわち This のこと(のはず)
+	RISSE_ASSERT(This.GetType() == tRisseVariant::vtObject);
+	tRisseVariant new_object;
+	This.GetObjectInterface()->Do(ocCreateNewObjectBase, &new_object);
+	RISSE_ASSERT(new_object.GetType() == tRisseVariant::vtObject);
+	RISSE_ASSERT(!new_object.IsNull());
 
 	// そのオブジェクトにクラス情報を設定する
 	// ここではclassメンバに「自分のクラス」を追加する
@@ -72,7 +77,6 @@ static void Class_new(
 
 	// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
 	// 「自分のクラス」はすなわち This のこと(のはず)
-	// チェックはしないが。
 	This.FuncCall(NULL, ss_fertilize, 0,
 		tRisseMethodArgument::New(new_object));
 
@@ -152,7 +156,27 @@ tRisseClass::tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_A
 		inherited::FuncCall(result, mnNew, 0, args, This);
 		return rvNoError;
 	}
+	else if(code == ocCreateNewObjectBase && name.IsEmpty())
+	{
+		// 空のオブジェクトを作成して返す
+		RISSE_ASSERT(result != NULL);
+		tRisseObjectBase * new_object = CreateNewObjectBase();
+		new_object->SetTypeInfo(this);
+			// 型情報として this を設定する。
+			// これによりnew_objectがこのインスタンスより作成されたことを表す。
+		*result = tRisseVariant(new_object);
+		return rvNoError;
+	}
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseObjectBase * tRisseClass::CreateNewObjectBase()
+{
+	return new tRisseObjectBase();
+}
+//---------------------------------------------------------------------------
+
 } // namespace Risse

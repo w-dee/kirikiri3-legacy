@@ -35,7 +35,17 @@ typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
 class tRisseObjectInterface : public tRisseCollectee, public tRisseOperateRetValue
 {
+	void * TypeInfo; //!< このオブジェクトインターフェースの「型」をC++レベルで
+					//!< 識別するためのメンバ。簡易RTTI。とくに識別しない場合は
+					//!< NULLを入れておく。
 public:
+	//! @brief		コンストラクタ
+	tRisseObjectInterface() { TypeInfo = NULL; }
+
+	//! @brief		コンストラクタ(クラス情報を指定)
+	//! @param		type_info		型情報
+	tRisseObjectInterface(void * type_info) { TypeInfo = type_info; }
+
 	//! @brief		オブジェクトに対して操作を行う
 	//! @param		code	オペレーションコード
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
@@ -70,6 +80,15 @@ public:
 		tRetValue ret = Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 		if(ret != rvNoError) RaiseError(ret, name);
 	}
+
+	//! @brief		型情報を得る
+	//! @param		型情報
+	void * GetTypeInfo() const { return TypeInfo; }
+
+	//! @brief		型情報を設定する
+	//! @param		type_info 型情報
+	void SetTypeInfo(void * type_info) { TypeInfo = type_info; }
+
 };
 //---------------------------------------------------------------------------
 

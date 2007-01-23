@@ -34,6 +34,11 @@ public:
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+
+protected:
+	//! @brief		newの際の新しいオブジェクトを作成して返す(必要ならば下位クラスでオーバーライドすること)
+	virtual tRisseObjectBase * CreateNewObjectBase();
+
 };
 //---------------------------------------------------------------------------
 

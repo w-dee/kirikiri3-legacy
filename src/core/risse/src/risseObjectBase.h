@@ -21,6 +21,7 @@
 
 namespace Risse
 {
+class tRisseClass;
 //---------------------------------------------------------------------------
 class tRisseObjectBase : public tRisseObjectInterface
 {

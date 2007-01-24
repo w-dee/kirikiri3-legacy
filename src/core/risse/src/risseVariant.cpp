@@ -87,7 +87,11 @@ tRisseVariantBlock::tRetValue
 	if(GetType() == vtObject)
 	{
 		tRisseObjectInterface * intf = GetObjectInterface();
-		return intf->Operate(RISSE_OBJECTINTERFACE_PASS_ARG); // <- これ違う、Thisやコンテキストを正しくハンドリングするように直す必要有り
+		const tRisseMethodContext * this_context = AsObject().Context;
+		return intf->Operate(code, result, name, flags, args,
+			this_context?this_context->GetThis():This,
+			this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
+			);
 	}
 	else
 	{

@@ -21,11 +21,11 @@ RISSE_DEFINE_SOURCE_ID(21996,23593,41879,16445,47022,10284,22019,34197);
 
 
 //---------------------------------------------------------------------------
-tRisseNativePropertyBase::tRisseNativePropertyBase(tRisseNativePropertyBase::tReader reader,
-		tRisseNativePropertyBase::tWriter writer)
+tRisseNativePropertyBase::tRisseNativePropertyBase(tRisseNativePropertyBase::tGetter getter,
+		tRisseNativePropertyBase::tSetter setter)
 {
-	Reader = reader;
-	Writer = writer;
+	Getter = getter;
+	Setter = setter;
 }
 //---------------------------------------------------------------------------
 
@@ -37,17 +37,17 @@ tRisseNativePropertyBase::tRetValue tRisseNativePropertyBase::Operate(RISSE_OBJE
 	{
 		if(code == ocFuncCall) // このオブジェクトに対するプロパティ読み込みか？
 		{
-			// このオブジェクトに対するプロパティ読み込みなので Reader を呼ぶ
-			if(!Reader) RisseThrowPropertyCannotBeRead();
-			Reader(result, flags, This, stack);
+			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
+			if(!Getter) RisseThrowPropertyCannotBeRead();
+			Getter(result, flags, This, stack);
 			return rvNoError;
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
-			// このオブジェクトに対するプロパティ書き込みなので Writer を呼ぶ
-			if(!Writer) RisseThrowPropertyCannotBeWritten();
+			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
+			if(!Setter) RisseThrowPropertyCannotBeWritten();
 			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-			Writer(args[0], flags, This, stack);
+			Setter(args[0], flags, This, stack);
 			return rvNoError;
 		}
 	}

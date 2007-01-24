@@ -27,15 +27,15 @@ namespace Risse
 // それぞれのメソッドやプロパティごとに持っていたが、このような方法を
 // とったことにより大幅に実行バイナリのサイズが減った。
 
-//! @brief		tRisseNativePropertyBase::tReader の引数
-#define RISSE_NATIVEPROPERTY_READER_ARGS \
+//! @brief		tRisseNativePropertyBase::tGetter の引数
+#define RISSE_NATIVEPROPERTY_GETTER_ARGS \
 		tRisseVariant * result,               \
 		tRisseOperateFlags flags,             \
 		const tRisseVariant &This,            \
 		const tRisseStackFrameContext &stack
 
-//! @brief		tRisseNativePropertyBase::tWriter の引数
-#define RISSE_NATIVEPROPERTY_WRITER_ARGS \
+//! @brief		tRisseNativePropertyBase::tSetter の引数
+#define RISSE_NATIVEPROPERTY_SETTER_ARGS \
 		const tRisseVariant & value,          \
 		tRisseOperateFlags flags,             \
 		const tRisseVariant &This,            \
@@ -59,7 +59,7 @@ protected:
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
-	typedef void (*tReader)(RISSE_NATIVEPROPERTY_READER_ARGS);
+	typedef void (*tGetter)(RISSE_NATIVEPROPERTY_GETTER_ARGS);
 
 	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッドのtypedef
 	//!				オーバーライドしなかった場合は書き込み禁止のプロパティになる)
@@ -69,16 +69,19 @@ protected:
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
 	//!						(NULL=スタックフレームコンテキストを指定しない場合)
-	typedef void (*tWriter)(RISSE_NATIVEPROPERTY_WRITER_ARGS);
+	typedef void (*tSetter)(RISSE_NATIVEPROPERTY_SETTER_ARGS);
 
 	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッド
-	tReader Reader;
-	tWriter Writer;
+	tGetter Getter;
+
+	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッド
+	tSetter Setter;
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
-	tRisseNativePropertyBase(tReader reader, tWriter writer = NULL);
+	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
+	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
+	tRisseNativePropertyBase(tGetter getter, tSetter setter = NULL);
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

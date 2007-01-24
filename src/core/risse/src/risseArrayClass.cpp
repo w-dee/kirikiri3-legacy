@@ -83,6 +83,27 @@ static void Array_pop(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
+//! @brief		NativeProperty: Array.length
+//---------------------------------------------------------------------------
+static void Array_length_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
+{
+	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
+	tRisseArrayObject::tArray & array = obj->GetArray();
+
+	if(result) *result = (risse_int64)array.size();
+}
+static void Array_length_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
+{
+	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
+	tRisseArrayObject::tArray & array = obj->GetArray();
+
+	// TODO: デフォルトの値の扱い
+	array.resize((risse_size)(risse_int64)(value));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseArrayClass::tRisseArrayClass() :
 	tRisseClass(tRisseObjectClass::GetPointer())
 {
@@ -100,6 +121,10 @@ tRisseArrayClass::tRisseArrayClass() :
 	RegisterNormalMember(RISSE_WS("push"), tRisseVariant(new tRisseNativeFunctionBase(Array_push)));
 	// pop
 	RegisterNormalMember(RISSE_WS("pop"), tRisseVariant(new tRisseNativeFunctionBase(Array_pop)));
+	// length
+	RegisterNormalMember(RISSE_WS("length"),
+		tRisseVariant(new tRisseNativePropertyBase(Array_length_getter, Array_length_setter)),
+			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }
 //---------------------------------------------------------------------------
 

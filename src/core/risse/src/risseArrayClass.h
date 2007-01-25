@@ -53,7 +53,7 @@ public:
 	tRisseArrayClass();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	tRisseObjectBase * CreateNewObjectBase();
+	tRisseVariant CreateNewObjectBase();
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

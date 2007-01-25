@@ -166,10 +166,14 @@ tRisseClass::tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_A
 	{
 		// 空のオブジェクトを作成して返す
 		RISSE_ASSERT(result != NULL);
-		tRisseObjectBase * new_object = CreateNewObjectBase();
-		new_object->SetRTTI(&RTTI);
+		tRisseVariant new_object = CreateNewObjectBase();
+		if(new_object.GetType() == tRisseVariant::vtObject)
+		{
+			// プリミティブ型でなければ
+			new_object.GetObjectInterface()->SetRTTI(&RTTI);
 			// RTTIとしてこのクラスの物を設定する
-		*result = tRisseVariant(new_object);
+		}
+		*result = new_object;
 		return rvNoError;
 	}
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
@@ -178,9 +182,9 @@ tRisseClass::tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_A
 
 
 //---------------------------------------------------------------------------
-tRisseObjectBase * tRisseClass::CreateNewObjectBase()
+tRisseVariant tRisseClass::CreateNewObjectBase()
 {
-	return new tRisseObjectBase();
+	return tRisseVariant(new tRisseObjectBase());
 }
 //---------------------------------------------------------------------------
 

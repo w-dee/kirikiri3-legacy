@@ -48,7 +48,7 @@ public:
 
 protected:
 	//! @brief		newの際の新しいオブジェクトを作成して返す(必要ならば下位クラスでオーバーライドすること)
-	virtual tRisseObjectBase * CreateNewObjectBase();
+	virtual tRisseVariant CreateNewObjectBase();
 
 };
 //---------------------------------------------------------------------------

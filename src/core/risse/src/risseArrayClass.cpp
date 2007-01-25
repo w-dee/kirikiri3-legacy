@@ -130,9 +130,9 @@ tRisseArrayClass::tRisseArrayClass() :
 
 
 //---------------------------------------------------------------------------
-tRisseObjectBase * tRisseArrayClass::CreateNewObjectBase()
+tRisseVariant tRisseArrayClass::CreateNewObjectBase()
 {
-	return new tRisseArrayObject();
+	return tRisseVariant(new tRisseArrayObject());
 }
 //---------------------------------------------------------------------------
 

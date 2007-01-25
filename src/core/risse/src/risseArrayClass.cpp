@@ -118,11 +118,11 @@ tRisseArrayClass::tRisseArrayClass() :
 	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Array_initialize)));
 
 	// push
-	RegisterNormalMember(RISSE_WS("push"), tRisseVariant(new tRisseNativeFunctionBase(Array_push)));
+	RegisterNormalMember(ss_push, tRisseVariant(new tRisseNativeFunctionBase(Array_push)));
 	// pop
-	RegisterNormalMember(RISSE_WS("pop"), tRisseVariant(new tRisseNativeFunctionBase(Array_pop)));
+	RegisterNormalMember(ss_pop, tRisseVariant(new tRisseNativeFunctionBase(Array_pop)));
 	// length
-	RegisterNormalMember(RISSE_WS("length"),
+	RegisterNormalMember(ss_length,
 		tRisseVariant(new tRisseNativePropertyBase(Array_length_getter, Array_length_setter)),
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }

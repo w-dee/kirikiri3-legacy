@@ -87,10 +87,10 @@ tRisseStringClass::tRisseStringClass()
 	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(String_initialize)));
 
 	// charAt
-	RegisterNormalMember(RISSE_WS("charAt"), tRisseVariant(new tRisseNativeFunctionBase(String_charAt)));
+	RegisterNormalMember(ss_charAt, tRisseVariant(new tRisseNativeFunctionBase(String_charAt)));
 
 	// length
-	RegisterNormalMember(RISSE_WS("length"),
+	RegisterNormalMember(ss_length,
 		tRisseVariant(new tRisseNativePropertyBase(String_length_getter, NULL)),
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }

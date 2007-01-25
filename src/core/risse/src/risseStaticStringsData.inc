@@ -17,6 +17,10 @@ static risse_char RisseStaticStrings [] = {
 /*   9, offset=+ 110 */tRisseStringData::MightBeShared,'A','r','r','a','y',0,0xa004b591,
 /*  10, offset=+ 118 */tRisseStringData::MightBeShared,'S','t','r','i','n','g',0,0x93be81c3,
 /*  11, offset=+ 127 */tRisseStringData::MightBeShared,'p','r','o','t','o','t','y','p','e',0,0x6db6d2ce,
+/*  12, offset=+ 139 */tRisseStringData::MightBeShared,'p','u','s','h',0,0x74d4f959,
+/*  13, offset=+ 146 */tRisseStringData::MightBeShared,'p','o','p',0,0xb3388fbe,
+/*  14, offset=+ 152 */tRisseStringData::MightBeShared,'c','h','a','r','A','t',0,0xdfe2f584,
+/*  15, offset=+ 161 */tRisseStringData::MightBeShared,'l','e','n','g','t','h',0,0x957e2539,
 };
 const tRisseStringData RisseStaticStringTable[] = {
 /*   0 */ {RisseStaticStrings+1,10} /*  "initialize" メソッド名 */,
@@ -31,4 +35,8 @@ const tRisseStringData RisseStaticStringTable[] = {
 /*   9 */ {RisseStaticStrings+111,5} /*  "Array" クラス名 */,
 /*  10 */ {RisseStaticStrings+119,6} /*  "String" クラス名 */,
 /*  11 */ {RisseStaticStrings+128,9} /*  "prototype" インスタンス変数/プロパティ名 */,
+/*  12 */ {RisseStaticStrings+140,4} /*  "push" メソッド名 */,
+/*  13 */ {RisseStaticStrings+147,3} /*  "pop" メソッド名 */,
+/*  14 */ {RisseStaticStrings+153,6} /*  "charAt" メソッド名 */,
+/*  15 */ {RisseStaticStrings+162,6} /*  "length" プロパティ名 */,
 };

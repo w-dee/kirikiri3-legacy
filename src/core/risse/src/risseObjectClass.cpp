@@ -108,7 +108,6 @@ tRisseObjectClass::tRisseObjectClass() : tRisseClass(NULL)
 	// initialize
 	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Object_initialize)));
 	// getInstanceMember
-
 	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(new tRisseNativeFunctionBase(Object_getInstanceMember)));
 	// setInstanceMener
 	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(new tRisseNativeFunctionBase(Object_setInstanceMember)));

@@ -13,4 +13,5 @@ static const tRisseString & ss_class = *reinterpret_cast<const tRisseString *>(R
 static const tRisseString & ss_Object = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+7); //!< (演算子メンバ名)  "Object" クラス名
 static const tRisseString & ss_Class = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+8); //!< (演算子メンバ名)  "Class" クラス名
 static const tRisseString & ss_Array = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+9); //!< (演算子メンバ名)  "Array" クラス名
-static const tRisseString & ss_prototype = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+10); //!< (演算子メンバ名)  "prototype" インスタンス変数/プロパティ名
+static const tRisseString & ss_String = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+10); //!< (演算子メンバ名)  "String" クラス名
+static const tRisseString & ss_prototype = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+11); //!< (演算子メンバ名)  "prototype" インスタンス変数/プロパティ名

@@ -60,25 +60,28 @@ static void Class_new(
 	RISSE_ASSERT(This.GetType() == tRisseVariant::vtObject);
 	tRisseVariant new_object;
 	This.GetObjectInterface()->Do(ocCreateNewObjectBase, &new_object);
-	RISSE_ASSERT(new_object.GetType() == tRisseVariant::vtObject);
-	RISSE_ASSERT(!new_object.IsNull());
+	if(new_object.GetType() == tRisseVariant::vtObject)
+	{
+		// プリミティブ型ではない場合
+		RISSE_ASSERT(!new_object.IsNull());
 
-	// そのオブジェクトにクラス情報を設定する
-	// ここではclassメンバに「自分のクラス」を追加する
-	// 「自分のクラス」はすなわち This のこと(のはず)
-	new_object.SetPropertyDirect(ss_class,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-		This, new_object);
-	// デフォルトのコンテキストをnew_object自身に設定する
-	new_object.Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
-				tRisseMethodArgument::New(new_object));
-	// yet not
+		// そのオブジェクトにクラス情報を設定する
+		// ここではclassメンバに「自分のクラス」を追加する
+		// 「自分のクラス」はすなわち This のこと(のはず)
+		new_object.SetPropertyDirect(ss_class,
+			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+			This, new_object);
+		// デフォルトのコンテキストをnew_object自身に設定する
+		new_object.Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
+					tRisseMethodArgument::New(new_object));
+		// yet not
 
-	// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
-	// 「自分のクラス」はすなわち This のこと(のはず)
-	This.FuncCall(NULL, ss_fertilize, 0,
-		tRisseMethodArgument::New(new_object));
+		// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
+		// 「自分のクラス」はすなわち This のこと(のはず)
+		This.FuncCall(NULL, ss_fertilize, 0,
+			tRisseMethodArgument::New(new_object));
+	}
 
 	// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
 	new_object.FuncCall(NULL, ss_initialize, 0,

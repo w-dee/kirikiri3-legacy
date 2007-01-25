@@ -15,4 +15,5 @@ ss_class				class				#!< "class" プロパティ名
 ss_Object				Object				#!< "Object" クラス名
 ss_Class				Class				#!< "Class" クラス名
 ss_Array				Array				#!< "Array" クラス名
+ss_String				String				#!< "String" クラス名
 ss_prototype			prototype			#!< "prototype" インスタンス変数/プロパティ名

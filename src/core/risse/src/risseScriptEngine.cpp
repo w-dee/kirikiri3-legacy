@@ -19,6 +19,7 @@
 
 #include "risseObjectClass.h"
 #include "risseArrayClass.h"
+#include "risseStringClass.h"
 
 namespace Risse
 {
@@ -49,17 +50,28 @@ tRisseScriptEngine::tRisseScriptEngine()
 	GlobalObject = Object_class.New();
 
 	// グローバルオブジェクトに "Object" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Object, tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+	GlobalObject.SetPropertyDirect(ss_Object,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				Object_class);
 
 	// "Array" クラスを作成する
 	tRisseVariant Array_class(tRisseArrayClass::GetPointer());
 
 	// グローバルオブジェクトに "Array" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Array, tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+	GlobalObject.SetPropertyDirect(ss_Array,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				Array_class);
+
+	// "String" クラスを作成する
+	tRisseVariant String_class(tRisseStringClass::GetPointer());
+
+	// グローバルオブジェクトに "String" クラスを登録する
+	GlobalObject.SetPropertyDirect(ss_String,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+				String_class);
 
 }
 //---------------------------------------------------------------------------

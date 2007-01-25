@@ -15,6 +15,7 @@
 #include "risseVariant.h"
 #include "risseLexerUtils.h"
 #include "risseObject.h"
+#include "risseStringClass.h"
 
 namespace Risse
 {
@@ -84,18 +85,30 @@ tRisseVariantBlock::tRisseVariantBlock(tRisseObjectInterface * ref,
 tRisseVariantBlock::tRetValue
 	tRisseVariantBlock::OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
-	if(GetType() == vtObject)
+	switch(GetType())
 	{
+	case vtObject:
 		tRisseObjectInterface * intf = GetObjectInterface();
 		const tRisseMethodContext * this_context = AsObject().Context;
 		return intf->Operate(code, result, name, flags, args,
 			this_context?this_context->GetThis():This,
 			this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
 			);
-	}
-	else
-	{
-		/* TODO: vtObject以外の場合の処理 */
+
+	case vtString:
+		{
+			tRetValue rv = tRisseStringClass::GetPointer()->GetGateway().
+				Operate(code, result, name, flags, args, *this); // 動作コンテキストは常に *this
+			if(rv == rvNoError && result)
+			{
+				// コンテキストを設定する
+				result->OverwriteContext(new tRisseMethodContext(*this));
+			}
+			return rv;
+		}
+
+	default:
+		break; // TODO: これ以外のvtに対する処理
 	}
 	return rvNoError;
 }
@@ -120,7 +133,9 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseSt
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const
+void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
+		risse_uint32 flags, const tRisseVariantBlock & value,
+		const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseMethodContext * this_context = AsObject().Context;
@@ -130,6 +145,18 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name, r
 		this_context?this_context->GetThis():This,
 		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
 		);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::FuncCall_String  (tRisseVariantBlock * ret,
+		const tRisseString & name, risse_uint32 flags,
+		const tRisseMethodArgument & args, const tRisseVariant & This) const
+{
+	// vtString への要求は String クラスにリダイレクトする
+	tRisseStringClass::GetPointer()->GetGateway().
+		Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------
 

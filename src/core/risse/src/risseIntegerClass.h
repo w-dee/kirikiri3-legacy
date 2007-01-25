@@ -8,11 +8,11 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief Risse用 "String" クラスの実装
+//! @brief Risse用 "Integer" クラスの実装
 //---------------------------------------------------------------------------
 
-#ifndef risseStringClassH
-#define risseStringClassH
+#ifndef risseIntegerClassH
+#define risseIntegerClassH
 
 #include "risseObject.h"
 #include "risseClass.h"
@@ -23,13 +23,13 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		"String" クラス
+//! @brief		"Integer" クラス
 //---------------------------------------------------------------------------
-class tRisseStringClass : public tRissePrimitiveClass, public tRisseSingleton<tRisseStringClass>
+class tRisseIntegerClass : public tRissePrimitiveClass, public tRisseSingleton<tRisseIntegerClass>
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseStringClass();
+	tRisseIntegerClass();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();

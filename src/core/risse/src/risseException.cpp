@@ -125,6 +125,15 @@ void RisseThrowBadArgumentCount(risse_int passed, risse_int expected)
 
 
 //---------------------------------------------------------------------------
+void RisseThrowBadBlockArgumentCount(risse_int passed, risse_int expected)
+{
+	eRisseError::Throw(tRisseString(RISSE_WS_TR("invalid block argument count (passed %1, expected %2)"),
+		tRisseString::AsString(passed), tRisseString::AsString(expected)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void RisseThrowMemberNotFound(const tRisseString & name)
 {
 	if(!name.IsEmpty())

@@ -16,6 +16,7 @@
 #include "risseLexerUtils.h"
 #include "risseObject.h"
 #include "risseStringClass.h"
+#include "risseIntegerClass.h"
 
 namespace Risse
 {
@@ -57,12 +58,26 @@ tRisseVariantBlock::tRetValue
 {
 	switch(GetType())
 	{
-	case vtObject:
-		tRisseObjectInterface * intf = GetObjectInterface();
-		const tRisseVariantBlock * this_context = AsObject().Context;
-		return intf->Operate(code, result, name, flags, args,
-			this_context?*this_context:This
-			);
+	case vtInteger:
+		{
+			tRetValue rv = tRisseIntegerClass::GetPointer()->GetGateway().
+				Operate(code, result, name, flags, args, *this); // 動作コンテキストは常に *this
+			if(rv == rvNoError && result)
+			{
+				// コンテキストを設定する
+				// コンテキストはこの操作が実行された時の状態を保っていなければ
+				// ならない。プリミティブ型は immutable とはいえ、内部実装は
+				// 完全に mutable なので、この時点での実行結果を保存しておくために
+				// new でオブジェクトを再確保し、固定する。
+				// TODO: 返りのオブジェクトがコンテキストを持ってないと、毎回newが行われて
+				// しまう。関数やプロパティ以外はコンテキストを伴う必要はないので
+				// 努めて関数やプロパティ以外はダミーでもよいからコンテキストを
+				// 設定するようにするべき。
+				if(!result->HasContext())
+					result->SetContext(new tRisseVariantBlock(*this));
+			}
+			return rv;
+		}
 
 	case vtString:
 		{
@@ -84,6 +99,13 @@ tRisseVariantBlock::tRetValue
 			}
 			return rv;
 		}
+
+	case vtObject:
+		tRisseObjectInterface * intf = GetObjectInterface();
+		const tRisseVariantBlock * this_context = AsObject().Context;
+		return intf->Operate(code, result, name, flags, args,
+			this_context?*this_context:This
+			);
 
 	default:
 		break; // TODO: これ以外のvtに対する処理
@@ -121,6 +143,18 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 		flags, tRisseMethodArgument::New(value),
 		this_context?*this_context:This
 		);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::FuncCall_Integer  (tRisseVariantBlock * ret,
+		const tRisseString & name, risse_uint32 flags,
+		const tRisseMethodArgument & args, const tRisseVariant & This) const
+{
+	// vtInteger への要求は Integer クラスにリダイレクトする
+	tRisseIntegerClass::GetPointer()->GetGateway().
+		Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------
 

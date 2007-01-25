@@ -16,8 +16,10 @@ ss_Object				Object				#!< "Object" クラス名
 ss_Class				Class				#!< "Class" クラス名
 ss_Array				Array				#!< "Array" クラス名
 ss_String				String				#!< "String" クラス名
+ss_Integer				Integer				#!< "Integer" クラス名
 ss_prototype			prototype			#!< "prototype" インスタンス変数/プロパティ名
 ss_push					push				#!< "push" メソッド名
 ss_pop					pop					#!< "pop" メソッド名
 ss_charAt				charAt				#!< "charAt" メソッド名
 ss_length				length				#!< "length" プロパティ名
+ss_times				times				#!< "times" メソッド名

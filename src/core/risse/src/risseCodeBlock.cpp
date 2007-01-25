@@ -162,11 +162,38 @@ tRisseObjectInterface::tRetValue tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
 	{
-		Executor->Execute(args, This, stack, result);
+		Executor->Execute(args, This, NULL, NULL, result);
 	}
 	return rvNoError;
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseCodeBlockStackAdapter::tRetValue
+	tRisseCodeBlockStackAdapter::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+{
+	// 仮実装
+	if(code == ocFuncCall && name.IsEmpty())
+	{
+		CodeBlock->GetExecutor()->Execute(args, This, Frame, Shared, result);
+	}
+	return rvNoError;
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 } // namespace Risse

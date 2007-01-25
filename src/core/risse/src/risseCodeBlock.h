@@ -106,6 +106,38 @@ public: // tRisseObjectInterface メンバ
 	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief コードブロックスタックアダプタ
+//! @note	このクラスは tRisseCodeBlock を内部に参照として持つが、
+//!			それが実行されるべきスタックフレームや共有フレーム情報をも持つ。
+//!			指定のスタックフレームや共有フレームでコードブロックを実行したいときに
+//!			このアダプタを利用する。
+//!			このインスタンスはコード実行時に動的に作成される。
+//---------------------------------------------------------------------------
+class tRisseCodeBlockStackAdapter : public tRisseObjectInterface
+{
+	const tRisseCodeBlock * CodeBlock; //!< コードブロック
+	tRisseVariant * Frame; //!< スタックフレーム
+	tRisseVariant * Shared; //!< 共有フレーム
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		codeblock		コードブロック
+	//! @param		frame			スタックフレーム
+	//! @param		shared			共有フレーム
+	tRisseCodeBlockStackAdapter(const tRisseCodeBlock * codeblock,
+		tRisseVariant * frame = NULL, tRisseVariant * shared = NULL):
+		 CodeBlock(codeblock), Frame(frame), Shared(shared) {;}
+
+public: // tRisseObjectInterface メンバ
+
+	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+};
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
 } // namespace Risse
 #endif
 

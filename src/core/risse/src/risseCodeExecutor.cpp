@@ -41,26 +41,20 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 
 //---------------------------------------------------------------------------
 void tRisseCodeInterpreter::Execute(
-	const tRisseMethodArgument & args,
-	const tRisseVariant & This,
-	const tRisseStackFrameContext &stack,
-	tRisseVariant * result)
+		const tRisseMethodArgument & args,
+		const tRisseVariant & This,
+		tRisseVariant * frame, tRisseVariant * shared,
+		tRisseVariant * result)
 {
 	// context でスタックフレームが指定されていない場合、スタックを割り当てる
 	// TODO: スタックフレームの再利用など
 	// 毎回スタックを new で割り当てるのは効率が悪い？
-	tRisseVariant * frame;
-	if(stack.GetFrame() == NULL)
+	if(frame == NULL)
 		frame = new tRisseVariant[CodeBlock->GetNumRegs()];
-	else
-		frame = stack.GetFrame();
 
-	tRisseVariant * shared;
-	if(stack.GetShare() == NULL)
+	if(shared == NULL)
 		shared = CodeBlock->GetNumSharedVars() ?
 			new tRisseVariant[CodeBlock->GetNumSharedVars()] : NULL;
-	else
-		shared = stack.GetShare();
 
 	// ローカル変数に値を持ってくる
 	// いくつかのローカル変数は ASSERT が有効になっていなければ
@@ -307,20 +301,34 @@ void tRisseCodeInterpreter::Execute(
 				break;
 			}
 
-		case ocSetFrame		: // sfrm	 スタックフレームと共有空間を設定する
-			RISSE_ASSERT(CI(code[1]) < framesize);
-			AR(code[1]).SetContext(
-				new tRisseMethodContext(
-					This, tRisseStackFrameContext(frame, shared)));
-			code += 2;
+		case ocSetFrame		: // sfrm	 thisとスタックフレームと共有空間を設定する
+			{
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(AR(code[1]).GetType() == tRisseVariant::vtObject);
+
+				tRisseCodeBlock * codeblock =
+					reinterpret_cast<tRisseCodeBlock*>(AR(code[1]).GetObjectInterface());
+				RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
+				tRisseCodeBlockStackAdapter * adapter =
+					new tRisseCodeBlockStackAdapter(codeblock, frame, shared);
+				AR(code[1]) = tRisseVariant(adapter, This);
+				code += 2;
+			}
 			break;
 
-		case ocSetShare		: // sshare	 共有空間のみ設定する
-			RISSE_ASSERT(CI(code[1]) < framesize);
-			AR(code[1]).SetContext(
-				new tRisseMethodContext(
-					This, tRisseStackFrameContext(NULL, shared)));
-			code += 2;
+		case ocSetShare		: // sshare	 thisと共有空間のみ設定する
+			{
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(AR(code[1]).GetType() == tRisseVariant::vtObject);
+
+				tRisseCodeBlock * codeblock =
+					reinterpret_cast<tRisseCodeBlock*>(AR(code[1]).GetObjectInterface());
+				RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
+				tRisseCodeBlockStackAdapter * adapter =
+					new tRisseCodeBlockStackAdapter(codeblock, NULL, shared);
+				AR(code[1]) = tRisseVariant(adapter, This);
+				code += 2;
+			}
 			break;
 
 		case ocJump			: // jump	 単純なジャンプ

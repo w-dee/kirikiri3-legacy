@@ -41,16 +41,17 @@ public:
 
 	//! @brief		コードを実行する
 	//! @brief		args	引数
-	//! @brief		args	ブロック引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
+	//! @param		frame	メソッドが実行されるべきスタックフレーム
+	//!						(NULL=スタックフレームを指定しない場合)
+	//! @param		shared	メソッドが実行されるべき共有フレーム
+	//!						(NULL=共有フレームを指定しない場合)
 	//! @param		result		戻りの値を格納する先
 	virtual void Execute(
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject(),
-		const tRisseStackFrameContext &stack = tRisseStackFrameContext::GetNullContext(),
+		tRisseVariant * frame = NULL, tRisseVariant * shared = NULL,
 		tRisseVariant * result = NULL) = 0;
 };
 //---------------------------------------------------------------------------
@@ -71,7 +72,7 @@ public:
 	void Execute(
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject(),
-		const tRisseStackFrameContext &stack = tRisseStackFrameContext::GetNullContext(),
+		tRisseVariant * frame = NULL, tRisseVariant * shared = NULL,
 		tRisseVariant * result = NULL);
 };
 //---------------------------------------------------------------------------

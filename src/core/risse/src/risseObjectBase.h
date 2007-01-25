@@ -65,8 +65,8 @@ protected:
 	tHashTable HashTable; //!< ハッシュ表
 	const tRisseString & PrototypeName;
 		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクト
-	const tRisseMethodContext * DefaultMethodContext;
-		//!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキスト
+	const tRisseVariant * DefaultMethodContext;
+		//!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキスト(デフォルトのThis)
 
 public:
 	//! @brief		コンストラクタ

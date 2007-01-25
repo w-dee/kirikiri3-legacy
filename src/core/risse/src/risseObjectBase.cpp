@@ -336,13 +336,13 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 
 	case ocGetDefaultContext:
 		// get default method context
-		*result = DefaultMethodContext->GetThis();
+		*result = *DefaultMethodContext;
 		return rvNoError;
 
 	case ocSetDefaultContext:
 		// set default method context
 		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-		DefaultMethodContext = new tRisseMethodContext(args[0]);
+		DefaultMethodContext = new tRisseVariant(args[0]);
 		return rvNoError;
 
 	default:

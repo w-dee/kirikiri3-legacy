@@ -311,7 +311,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
 				tRisseCodeBlockStackAdapter * adapter =
 					new tRisseCodeBlockStackAdapter(codeblock, frame, shared);
-				AR(code[1]) = tRisseVariant(adapter, This);
+				AR(code[1]) = tRisseVariant(adapter, new tRisseVariant(This));
 				code += 2;
 			}
 			break;
@@ -326,7 +326,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
 				tRisseCodeBlockStackAdapter * adapter =
 					new tRisseCodeBlockStackAdapter(codeblock, NULL, shared);
-				AR(code[1]) = tRisseVariant(adapter, This);
+				AR(code[1]) = tRisseVariant(adapter, new tRisseVariant(This));
 				code += 2;
 			}
 			break;

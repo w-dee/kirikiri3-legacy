@@ -26,7 +26,6 @@
 
 namespace Risse
 {
-class tRisseStackFrameContext;
 class tRisseMethodArgument;
 class tRisseVariantBlock;
 typedef tRisseVariantBlock tRisseVariant;
@@ -56,8 +55,6 @@ public:
 	//! @param		args	引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @return		エラーコード
 	//! @note		何か操作に失敗した場合は例外が発生する。ただし、tRetValueにあるような
 	//!				エラーの場合は例外ではなくてエラーコードを返さなければならない。
@@ -72,8 +69,6 @@ public:
 	//! @param		args	引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
 	//!				エラーコードなどの戻り値はない
 	void Do(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)

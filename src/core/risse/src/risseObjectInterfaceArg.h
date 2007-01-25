@@ -33,8 +33,7 @@ class tRisseStackFrameContext;
 		const tRisseString & name = tRisseString::GetEmptyString(),        \
 		tRisseOperateFlags flags = tRisseOperateFlags(),                   \
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(), \
-		const tRisseVariant &This = tRisseVariant::GetNullObject(),        \
-		const tRisseStackFrameContext &stack = tRisseStackFrameContext::GetNullContext()
+		const tRisseVariant &This = tRisseVariant::GetNullObject()
 
 //! @brief		Operate/Doメソッドへの引数(実装用)
 #define RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG \
@@ -43,12 +42,11 @@ class tRisseStackFrameContext;
 		const tRisseString & name,             \
 		tRisseOperateFlags flags,              \
 		const tRisseMethodArgument & args,     \
-		const tRisseVariant &This,             \
-		const tRisseStackFrameContext &stack
+		const tRisseVariant &This
 
 //! @brief		Operate/Doメソッドの引数一覧
 #define RISSE_OBJECTINTERFACE_PASS_ARG \
-		code, result, name, flags, args, This, stack
+		code, result, name, flags, args, This
 
 //---------------------------------------------------------------------------
 }

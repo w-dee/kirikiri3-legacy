@@ -25,7 +25,7 @@ tRisseNativeFunctionBase::tRetValue tRisseNativeFunctionBase::Operate(RISSE_OBJE
 	if(code == ocFuncCall && name.IsEmpty())
 	{
 		// このオブジェクトに対する関数呼び出しなので Callee を呼ぶ
-		Callee(result, flags, args, This, stack);
+		Callee(result, flags, args, This);
 		return rvNoError;
 	}
 

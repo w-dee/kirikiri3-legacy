@@ -24,14 +24,6 @@ RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 
 
 //---------------------------------------------------------------------------
-// null が入った tRisseMethodContext を保持するオブジェクト
-tRisseStackFrameContext::tNullContext tRisseStackFrameContext::NullContext = {NULL, NULL};
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
 // nullオブジェクトへのconst参照を保持するオブジェクト
 // これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
 tRisseVariantBlock::tNullObject tRisseVariantBlock::NullObject = {
@@ -60,28 +52,6 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
-tRisseVariantBlock::tRisseVariantBlock(tRisseObjectInterface * ref,
-	const tRisseMethodContext * context)
-{
-	Type = vtObject;
-	SetObjectIntf(ref);
-	AsObject().Context = context;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseVariantBlock::tRisseVariantBlock(tRisseObjectInterface * ref,
-	const tRisseVariantBlock & context)
-{
-	Type = vtObject;
-	SetObjectIntf(ref);
-	AsObject().Context = new tRisseMethodContext(context);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseVariantBlock::tRetValue
 	tRisseVariantBlock::OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
@@ -89,10 +59,9 @@ tRisseVariantBlock::tRetValue
 	{
 	case vtObject:
 		tRisseObjectInterface * intf = GetObjectInterface();
-		const tRisseMethodContext * this_context = AsObject().Context;
+		const tRisseVariantBlock * this_context = AsObject().Context;
 		return intf->Operate(code, result, name, flags, args,
-			this_context?this_context->GetThis():This,
-			this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
+			this_context?*this_context:This
 			);
 
 	case vtString:
@@ -102,7 +71,16 @@ tRisseVariantBlock::tRetValue
 			if(rv == rvNoError && result)
 			{
 				// コンテキストを設定する
-				result->OverwriteContext(new tRisseMethodContext(*this));
+				// コンテキストはこの操作が実行された時の状態を保っていなければ
+				// ならない。プリミティブ型は immutable とはいえ、内部実装は
+				// 完全に mutable なので、この時点での実行結果を保存しておくために
+				// new でオブジェクトを再確保し、固定する。
+				// TODO: 返りのオブジェクトがコンテキストを持ってないと、毎回newが行われて
+				// しまう。関数やプロパティ以外はコンテキストを伴う必要はないので
+				// 努めて関数やプロパティ以外はダミーでもよいからコンテキストを
+				// 設定するようにするべき。
+				if(!result->HasContext())
+					result->SetContext(new tRisseVariantBlock(*this));
 			}
 			return rv;
 		}
@@ -119,13 +97,12 @@ tRisseVariantBlock::tRetValue
 tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	const tRisseMethodContext * this_context = AsObject().Context;
+	const tRisseVariantBlock * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
 	intf->Do(ocDGet, &ret, name,
 		flags, tRisseMethodArgument::Empty(),
-		this_context?this_context->GetThis():This,
-		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
+		this_context?*this_context:This
 		);
 	return ret;
 }
@@ -138,12 +115,11 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 		const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	const tRisseMethodContext * this_context = AsObject().Context;
+	const tRisseVariantBlock * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocDSet, NULL, name,
 		flags, tRisseMethodArgument::New(value),
-		this_context?this_context->GetThis():This,
-		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
+		this_context?*this_context:This
 		);
 }
 //---------------------------------------------------------------------------
@@ -167,12 +143,11 @@ void tRisseVariantBlock::FuncCall_Object  (
 	const tRisseMethodArgument & args, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	const tRisseMethodContext * this_context = AsObject().Context;
+	const tRisseVariantBlock * this_context = AsObject().Context;
 	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocFuncCall, ret, name,
 		flags, args,
-		this_context?this_context->GetThis():This,
-		this_context?this_context->GetStack():tRisseStackFrameContext::GetNullContext()
+		this_context?*this_context:This
 		);
 }
 //---------------------------------------------------------------------------
@@ -187,7 +162,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
 		tRisseMethodArgument::Empty(),
-		*this, tRisseStackFrameContext::GetNullContext()
+		*this
 		);
 	return ret;
 }
@@ -203,7 +178,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
 		tRisseMethodArgument::New(&arg1),
-		*this, tRisseStackFrameContext::GetNullContext()
+		*this
 		);
 	return ret;
 }
@@ -220,7 +195,7 @@ tRisseVariantBlock tRisseVariantBlock::New_Object  (const tRisseString & name,
 	intf->Do(ocNew, &ret, name,
 		flags,
 		args,
-		*this, tRisseStackFrameContext::GetNullContext()
+		*this
 		);
 	return ret;
 }

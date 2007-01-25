@@ -31,15 +31,13 @@ namespace Risse
 #define RISSE_NATIVEPROPERTY_GETTER_ARGS \
 		tRisseVariant * result,               \
 		tRisseOperateFlags flags,             \
-		const tRisseVariant &This,            \
-		const tRisseStackFrameContext &stack
+		const tRisseVariant &This
 
 //! @brief		tRisseNativePropertyBase::tSetter の引数
 #define RISSE_NATIVEPROPERTY_SETTER_ARGS \
 		const tRisseVariant & value,          \
 		tRisseOperateFlags flags,             \
-		const tRisseVariant &This,            \
-		const tRisseStackFrameContext &stack
+		const tRisseVariant &This
 
 
 //---------------------------------------------------------------------------
@@ -57,8 +55,6 @@ protected:
 	//! @param		flags	オペレーションフラグ
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	typedef void (*tGetter)(RISSE_NATIVEPROPERTY_GETTER_ARGS);
 
 	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッドのtypedef
@@ -67,8 +63,6 @@ protected:
 	//! @param		flags	オペレーションフラグ
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	typedef void (*tSetter)(RISSE_NATIVEPROPERTY_SETTER_ARGS);
 
 	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッド

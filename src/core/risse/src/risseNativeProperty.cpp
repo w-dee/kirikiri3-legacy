@@ -39,7 +39,7 @@ tRisseNativePropertyBase::tRetValue tRisseNativePropertyBase::Operate(RISSE_OBJE
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(!Getter) RisseThrowPropertyCannotBeRead();
-			Getter(result, flags, This, stack);
+			Getter(result, flags, This);
 			return rvNoError;
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
@@ -47,7 +47,7 @@ tRisseNativePropertyBase::tRetValue tRisseNativePropertyBase::Operate(RISSE_OBJE
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			if(!Setter) RisseThrowPropertyCannotBeWritten();
 			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-			Setter(args[0], flags, This, stack);
+			Setter(args[0], flags, This);
 			return rvNoError;
 		}
 	}

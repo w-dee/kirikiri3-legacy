@@ -47,12 +47,7 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Class.new
 //---------------------------------------------------------------------------
-static void Class_new(
-	tRisseVariant * result,
-	tRisseOperateFlags flags,
-	const tRisseMethodArgument & args,
-	const tRisseVariant &This,
-	const tRisseStackFrameContext &stack)
+static void Class_new(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 空のオブジェクトを作る
 	// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
@@ -97,12 +92,7 @@ static void Class_new(
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Class.fertilize
 //---------------------------------------------------------------------------
-static void Class_fertilize(
-	tRisseVariant * result,
-	tRisseOperateFlags flags,
-	const tRisseMethodArgument & args,
-	const tRisseVariant &This,
-	const tRisseStackFrameContext &stack)
+static void Class_fertilize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 引数チェック
 	if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
@@ -139,15 +129,15 @@ tRisseClass::tRisseClass(tRisseClass * super_class) : tRisseObjectBase(ss_super)
 	RTTIMatcher = RTTI.AddId(this);
 
 	// クラスに必要なメソッドを登録する
-	tRisseVariant This(this);
+	tRisseVariant * pThis = new tRisseVariant(this);
 
 	// new や fertilize はクラス固有のメソッドなのでコンテキストとして
 	// This (クラスそのもの)をあらかじめ設定する。
 
 	// new
-	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunctionBase(Class_new), This));
+	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunctionBase(Class_new), pThis));
 	// fertilize
-	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunctionBase(Class_fertilize), This));
+	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunctionBase(Class_fertilize), pThis));
 
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant(super_class));

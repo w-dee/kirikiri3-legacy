@@ -27,87 +27,8 @@
 
 namespace Risse
 {
-
-
-// 本来ならばtRisseStackFrameContextとtRisseMethodContextはrisseMethod.hにあるべき
-// だがインクルード順の解決が難しいのでここに書く。
-class tRisseVariantBlock;
-typedef tRisseVariantBlock tRisseVariant;
-//---------------------------------------------------------------------------
-//! @brief		スタックフレームコンテキスト
-//---------------------------------------------------------------------------
-struct tRisseStackFrameContext
-{
-private:
-	tRisseVariant *Frame; //!< スタックフレーム (NULL=スタックフレームを指定しない)
-	tRisseVariant *Share; //!< 共有フレーム (NULL=共有フレームを指定しない)
-
-public:
-	//! @brief		デフォルトコンストラクタ
-	tRisseStackFrameContext() { Frame = NULL; Share = NULL; }
-
-	//! @brief		コンストラクタ(スタックフレームと共有フレームから)
-	//! @param		frame		スタックフレーム
-	//! @param		share		共有フレーム
-	tRisseStackFrameContext(tRisseVariant * frame, tRisseVariant * share)
-		: Frame(frame), Share(share) {;}
-
-	//! @brief		スタックフレームを取得する
-	//! @return		スタックフレーム
-	tRisseVariant * GetFrame() const { return Frame; }
-
-	//! @brief		スタックフレームを設定する
-	//! @param		frame		スタックフレーム
-	void SetFrame(tRisseVariant * frame) { Frame = frame; }
-
-	//! @brief		共有フレームを取得する
-	//! @return		共有フレーム
-	tRisseVariant * GetShare() const { return Share; }
-
-	//! @brief		共有フレームを設定する
-	//! @param		share		共有フレーム
-	void SetShare(tRisseVariant * share) { Share = share; }
-
-private:
-	struct tNullContext
-	{
-		// この構造体のバイナリレイアウトは tRisseStackFrameContext と同一で
-		// ある必要がある
-		tRisseVariant * Frame;
-		tRisseVariant * Share;
-	};
-	static tNullContext NullContext;
-
-public:
-	//! @brief		static な null スタックフレームコンテキストを返す
-	static const tRisseStackFrameContext & GetNullContext()
-	{
-		// tRisseStackFrameContextData から tRisseStackFrameContext へは
-		// 安全にキャストできるはず
-		return *reinterpret_cast<tRisseStackFrameContext*>(&NullContext);
-	}
-};
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-/* ここからが真打ち */
-
-
-
-
-
 //---------------------------------------------------------------------------
 class tRisseObjectInterface;
-class tRisseMethodContext;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 /*! @note
@@ -180,7 +101,7 @@ protected:
 	struct tObject
 	{
 		tRisseObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常に10)
-		const tRisseMethodContext * Context;
+		const tRisseVariant * Context;
 						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
 						//!< 指しているとして)メソッドが動作するコンテキスト
 	};
@@ -429,15 +350,15 @@ public: // コンストラクタ/代入演算子
 		* this = ref;
 	}
 
-	//! @brief		コンストラクタ(tRisseObjectInterface*型とコンテキストを表すtRisseMethodContext*型より)
-	//! @param		ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
-	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
-	tRisseVariantBlock(tRisseObjectInterface * ref, const tRisseMethodContext * context);
-
 	//! @brief		コンストラクタ(tRisseObjectInterface*型とコンテキストを表すtRisseVariant型より)
 	//! @param		ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
 	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストオブジェクトを表す
-	tRisseVariantBlock(tRisseObjectInterface * ref, const tRisseVariantBlock & context);
+	tRisseVariantBlock(tRisseObjectInterface * ref, const tRisseVariantBlock * context)
+	{
+		Type = vtObject;
+		SetObjectIntf(ref);
+		AsObject().Context = context;
+	}
 
 	//! @brief		代入演算子(tRisseObjectInterface*型を代入)
 	//! @param		ref		元となるオブジェクト
@@ -494,20 +415,27 @@ public: // Object関連
 	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
 	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
 	//!				チェックしないので注意すること
-	void SetContext(const tRisseMethodContext * context)
+	void SetContext(const tRisseVariantBlock * context)
 	{
 		AsObject().Context = context;
+	}
+
+	//! @brief		コンテキストを持っているかどうかを得る
+	//! @note		このメソッドはvtがvtObject以外の場合はtrueを返す。
+	bool HasContext() const
+	{
+		if(GetType() != vtObject) return true;
+		return AsObject().Context != NULL;
 	}
 
 	//! @brief		コンテキストを上書きする
 	//! @param		context	上書きするコンテキスト
 	//! @note		このメソッドはvtがvtObject以外の場合はなにもしない。コンテキストの上書きは、
 	//!				このオブジェクトのコンテキストがnullの場合のみに発生する。
-	void OverwriteContext(const tRisseMethodContext * context)
+	void OverwriteContext(const tRisseVariantBlock * context)
 	{
 		if(GetType() != vtObject) return;
-		tObject & object = AsObject();
-		if(object.Context == NULL) object.Context = context;
+		if(!AsObject().Context) AsObject().Context = context;
 	}
 
 	//! @brief		オブジェクトが null かどうかを得る
@@ -535,8 +463,6 @@ public: // operate
 	//! @param		args	引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
 	//!				エラーコードなどの戻り値はない
 	void Do(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
@@ -554,8 +480,6 @@ public: // operate
 	//! @param		args	引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @return		エラーコード
 	tRetValue
 		Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
@@ -775,8 +699,6 @@ public: // operate
 	//! @param		args	引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	//! @note		Operate() メソッドがname付きで呼ばれた場合にこのメソッドが呼ばれる
 	//! @return		エラーコード
 	tRetValue
@@ -2215,66 +2137,6 @@ public: // ユーティリティ
 //---------------------------------------------------------------------------
 typedef tRisseVariantBlock tRisseVariant;
 //---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-// 本来ならばtRisseStackFrameContextとtRisseMethodContextはrisseMethod.hにあるべき
-// だがインクルード順の解決が難しいのでここに書く。
-
-//---------------------------------------------------------------------------
-//! @brief		メソッドのコンテキスト
-//---------------------------------------------------------------------------
-class tRisseMethodContext
-{
-private:
-	tRisseVariant This; //!< "Thisオブジェクト" (NULL=Thisオブジェクトを指定しない)
-	tRisseStackFrameContext Stack; //!< スタックフレームコンテキスト
-
-public:
-	//! @brief		コンストラクタ("Thisオブジェクト"から)
-	//! @param		_This		"Thisオブジェクト"
-	tRisseMethodContext(const tRisseVariant & _This) : This(_This) {;}
-
-	//! @brief		コンストラクタ(スタックフレームコンテキストから)
-	//! @brief		stack	スタックフレームコンテキスト
-	tRisseMethodContext(const tRisseStackFrameContext & stack) : Stack(stack) {;}
-
-	//! @brief		コンストラクタ("Thisオブジェクト"とスタックフレームと共有フレームから)
-	//! @param		_This		"Thisオブジェクト"
-	//! @brief		stack	スタックフレームコンテキスト
-	tRisseMethodContext(const tRisseVariant & _This,
-		const tRisseStackFrameContext & stack) : This(_This), Stack(stack) {;}
-
-	//! @brief		"Thisオブジェクト" を得る
-	const tRisseVariant & GetThis() const
-	{
-		return This;
-	}
-
-	//! @brief		"Thisオブジェクト" を得る
-	//! @param		alt		"Thisオブジェクト" が null だった場合に使用される別のオブジェクト
-	const tRisseVariant & GetThis(const tRisseVariant &alt) const
-	{
-		if(This.IsNull()) return alt;
-		return This;
-	}
-
-	//! @brief		スタックフレームコンテキストを得る	
-	//! @return		スタックフレームコンテキスト
-	const tRisseStackFrameContext & GetStack() const { return Stack; }
-};
-//---------------------------------------------------------------------------
-
-
 
 
 

@@ -31,8 +31,7 @@ namespace Risse
 		tRisseVariant * result,               \
 		tRisseOperateFlags flags,             \
 		const tRisseMethodArgument & args,    \
-		const tRisseVariant &This,            \
-		const tRisseStackFrameContext &stack
+		const tRisseVariant &This
 
 //---------------------------------------------------------------------------
 //! @brief		Risseネイティブ関数の基底クラス
@@ -49,8 +48,6 @@ protected:
 	//! @param		args	引数
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		stack	メソッドが実行されるべきスタックフレームコンテキスト
-	//!						(NULL=スタックフレームコンテキストを指定しない場合)
 	typedef void (*tCallee)(RISSE_NATIVEFUNCTION_CALLEE_ARGS);
 
 	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド(インスタンス作成時に指定)

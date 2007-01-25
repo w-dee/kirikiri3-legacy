@@ -29,12 +29,7 @@ RISSE_DEFINE_SOURCE_ID(41134,45186,9497,17812,19604,2796,36426,21671);
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.construct
 //---------------------------------------------------------------------------
-static void Object_construct(
-	tRisseVariant * result,
-	tRisseOperateFlags flags,
-	const tRisseMethodArgument & args,
-	const tRisseVariant &This,
-	const tRisseStackFrameContext &stack)
+static void Object_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// デフォルトでは何もしない
 }
@@ -44,12 +39,7 @@ static void Object_construct(
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.initialize
 //---------------------------------------------------------------------------
-static void Object_initialize(
-	tRisseVariant * result,
-	tRisseOperateFlags flags,
-	const tRisseMethodArgument & args,
-	const tRisseVariant &This,
-	const tRisseStackFrameContext &stack)
+static void Object_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// デフォルトでは何もしない
 }
@@ -59,12 +49,7 @@ static void Object_initialize(
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.getInstanceMember
 //---------------------------------------------------------------------------
-static void Object_getInstanceMember(
-	tRisseVariant * result,
-	tRisseOperateFlags flags,
-	const tRisseMethodArgument & args,
-	const tRisseVariant &This,
-	const tRisseStackFrameContext &stack)
+static void Object_getInstanceMember(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 引数チェック
 	if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
@@ -81,12 +66,7 @@ static void Object_getInstanceMember(
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.setInstanceMember
 //---------------------------------------------------------------------------
-static void Object_setInstanceMember(
-	tRisseVariant * result,
-	tRisseOperateFlags flags,
-	const tRisseMethodArgument & args,
-	const tRisseVariant &This,
-	const tRisseStackFrameContext &stack)
+static void Object_setInstanceMember(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 引数チェック
 	if(args.GetArgumentCount() < 2) RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
@@ -102,12 +82,7 @@ static void Object_setInstanceMember(
 //---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.puts  テスト用関数 - 将来的には別のクラスに移動する予定
 //---------------------------------------------------------------------------
-static void Object_puts(
-	tRisseVariant * result,
-	tRisseOperateFlags flags,
-	const tRisseMethodArgument & args,
-	const tRisseVariant &This,
-	const tRisseStackFrameContext &stack)
+static void Object_puts(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 引数をすべて標準出力に出力する
 	// 引数を一つ出力するたびに改行する

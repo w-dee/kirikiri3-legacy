@@ -65,6 +65,15 @@ tRisseScriptEngine::tRisseScriptEngine()
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				Array_class);
 
+	// "Primitive" クラスを作成する
+	tRisseVariant Primitive_class(tRissePrimitiveClass::GetPointer());
+
+	// グローバルオブジェクトに "Primitive" クラスを登録する
+	GlobalObject.SetPropertyDirect(ss_Primitive,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+				Primitive_class);
+
 	// "String" クラスを作成する
 	tRisseVariant String_class(tRisseStringClass::GetPointer());
 

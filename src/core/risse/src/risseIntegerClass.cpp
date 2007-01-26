@@ -60,7 +60,7 @@ static void Integer_times(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
-tRisseIntegerClass::tRisseIntegerClass()
+tRisseIntegerClass::tRisseIntegerClass() : tRissePrimitiveClassBase(tRissePrimitiveClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
 

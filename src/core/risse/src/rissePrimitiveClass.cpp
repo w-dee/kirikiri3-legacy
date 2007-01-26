@@ -26,9 +26,9 @@ RISSE_DEFINE_SOURCE_ID(46147,47929,28573,19337,17834,3423,43968,61532);
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: String.construct
+//! @brief		NativeFunction: XXX.construct
 //---------------------------------------------------------------------------
-static void String_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+static void XXX_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// デフォルトでは何もしない
 }
@@ -37,8 +37,8 @@ static void String_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
-tRissePrimitiveClass::tRissePrimitiveClass() :
-	tRisseClass(tRisseObjectClass::GetPointer())
+tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClass * super_class) :
+	tRisseClass(super_class)
 {
 	// ゲートウェイインターフェースを構築する
 	Gateway = new tRisseObjectBase();
@@ -55,7 +55,58 @@ tRissePrimitiveClass::tRissePrimitiveClass() :
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(String_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(XXX_construct)));
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		NativeFunction: Primitive.construct
+//---------------------------------------------------------------------------
+static void Primitive_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRissePrimitiveClass::tRissePrimitiveClass() :
+	tRisseClass(tRisseObjectClass::GetPointer())
+{
+	// クラスに必要なメソッドを登録する
+
+	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
+	// コンテキストとしては null を指定する
+
+	// construct
+	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Primitive_construct)));
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRissePrimitiveClass::CreateNewObjectBase()
+{
+	// このクラスのインスタンスは作成できないので例外を投げる
+	RisseThrowCannotCreateInstanceFromThisClass();
+	return tRisseVariant();
 }
 //---------------------------------------------------------------------------
 

@@ -77,7 +77,7 @@ static void String_length_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
 
 
 //---------------------------------------------------------------------------
-tRisseStringClass::tRisseStringClass()
+tRisseStringClass::tRisseStringClass() : tRissePrimitiveClassBase(tRissePrimitiveClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
 

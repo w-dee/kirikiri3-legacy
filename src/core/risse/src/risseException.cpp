@@ -185,6 +185,12 @@ void RisseThrowUnexpectedClass()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void RisseThrowCannotCreateInstanceFromThisClass()
+{
+	eRisseError::Throw(tRisseString(RISSE_WS_TR("Cannot create instance from this class")));
+}
+//---------------------------------------------------------------------------
 
 
 

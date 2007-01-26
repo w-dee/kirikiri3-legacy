@@ -19,9 +19,11 @@ ss_Primitive			Primitive			#!< "Primitive" クラス名
 ss_String				String				#!< "String" クラス名
 ss_Number				Number				#!< "Number" クラス名
 ss_Integer				Integer				#!< "Integer" クラス名
+ss_Real					Real				#!< "Real" クラス名
 ss_prototype			prototype			#!< "prototype" インスタンス変数/プロパティ名
 ss_push					push				#!< "push" メソッド名
 ss_pop					pop					#!< "pop" メソッド名
 ss_charAt				charAt				#!< "charAt" メソッド名
 ss_length				length				#!< "length" プロパティ名
 ss_times				times				#!< "times" メソッド名
+ss_isNaN				isNaN				#!< "isNaN" プロパティ名

@@ -829,7 +829,7 @@ public: // 演算子
 
 	void FuncCall_Void    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
 	void FuncCall_Integer (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
-	void FuncCall_Real    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
+	void FuncCall_Real    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
 	void FuncCall_Boolean (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
 	void FuncCall_String  (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
 	void FuncCall_Octet   (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }

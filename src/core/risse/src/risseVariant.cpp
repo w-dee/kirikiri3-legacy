@@ -17,6 +17,7 @@
 #include "risseObject.h"
 #include "risseStringClass.h"
 #include "risseIntegerClass.h"
+#include "risseRealClass.h"
 
 namespace Risse
 {
@@ -61,6 +62,27 @@ tRisseVariantBlock::tRetValue
 	case vtInteger:
 		{
 			tRetValue rv = tRisseIntegerClass::GetPointer()->GetGateway().
+				Operate(code, result, name, flags, args, *this); // 動作コンテキストは常に *this
+			if(rv == rvNoError && result)
+			{
+				// コンテキストを設定する
+				// コンテキストはこの操作が実行された時の状態を保っていなければ
+				// ならない。プリミティブ型は immutable とはいえ、内部実装は
+				// 完全に mutable なので、この時点での実行結果を保存しておくために
+				// new でオブジェクトを再確保し、固定する。
+				// TODO: 返りのオブジェクトがコンテキストを持ってないと、毎回newが行われて
+				// しまう。関数やプロパティ以外はコンテキストを伴う必要はないので
+				// 努めて関数やプロパティ以外はダミーでもよいからコンテキストを
+				// 設定するようにするべき。
+				if(!result->HasContext())
+					result->SetContext(new tRisseVariantBlock(*this));
+			}
+			return rv;
+		}
+
+	case vtReal:
+		{
+			tRetValue rv = tRisseRealClass::GetPointer()->GetGateway().
 				Operate(code, result, name, flags, args, *this); // 動作コンテキストは常に *this
 			if(rv == rvNoError && result)
 			{
@@ -154,6 +176,18 @@ void tRisseVariantBlock::FuncCall_Integer  (tRisseVariantBlock * ret,
 {
 	// vtInteger への要求は Integer クラスにリダイレクトする
 	tRisseIntegerClass::GetPointer()->GetGateway().
+		Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::FuncCall_Real  (tRisseVariantBlock * ret,
+		const tRisseString & name, risse_uint32 flags,
+		const tRisseMethodArgument & args, const tRisseVariant & This) const
+{
+	// vtReal への要求は Real クラスにリダイレクトする
+	tRisseRealClass::GetPointer()->GetGateway().
 		Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------

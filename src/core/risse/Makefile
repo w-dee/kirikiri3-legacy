@@ -69,6 +69,7 @@ CPPFILES =  \
 			src/risseOperateFlags.cpp                \
 			src/risseOperateRetValue.cpp             \
 			src/rissePrimitiveClass.cpp              \
+			src/risseRealClass.cpp                   \
 			src/risseScriptBlockBase.cpp             \
 			src/risseScriptEngine.cpp                \
 			src/risseStaticStrings.cpp               \

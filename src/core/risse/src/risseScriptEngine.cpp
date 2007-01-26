@@ -23,6 +23,7 @@
 #include "rissePrimitiveClass.h"
 #include "risseNumberClass.h"
 #include "risseIntegerClass.h"
+#include "risseRealClass.h"
 
 namespace Risse
 {
@@ -102,6 +103,15 @@ tRisseScriptEngine::tRisseScriptEngine()
 		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				Integer_class);
+
+	// "Real" クラスを作成する
+	tRisseVariant Real_class(tRisseRealClass::GetPointer());
+
+	// グローバルオブジェクトに "Real" クラスを登録する
+	GlobalObject.SetPropertyDirect(ss_Real,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+				Real_class);
 
 }
 //---------------------------------------------------------------------------

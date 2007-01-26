@@ -24,11 +24,36 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(2098,51592,31991,16696,47274,13601,12452,21741);
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: .construct
+//! @brief		NativeFunction: Number.construct
 //---------------------------------------------------------------------------
 static void Number_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		NativeFunction: Number.isNaN
+//---------------------------------------------------------------------------
+static void Number_isNaN_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
+{
+	tRisseVariant num = This.Plus();
+	if(result)
+	{
+		switch(num.GetType())
+		{
+		case tRisseVariant::vtReal:
+			*result = (bool)RISSE_FC_IS_NAN(RisseGetFPClass(num.operator risse_real()));
+			break;
+
+		case tRisseVariant::vtInteger:
+		default:
+			// 整数の場合やそのほかの場合は偽を返す
+			*result = false;
+			break;
+		}
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -44,6 +69,10 @@ tRisseNumberClass::tRisseNumberClass() :
 
 	// construct
 	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Number_construct)));
+	// isNaN
+	RegisterNormalMember(ss_isNaN,
+		tRisseVariant(new tRisseNativePropertyBase(Number_isNaN_getter, NULL)),
+			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }
 //---------------------------------------------------------------------------
 

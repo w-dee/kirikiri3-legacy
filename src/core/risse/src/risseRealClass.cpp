@@ -41,7 +41,7 @@ static void Real_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 	// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
 	//       を変更するため、const_cast を用いる
 	if(args.GetArgumentCount() > 0)
-		*const_cast<tRisseVariant*>(&This) = args[0].operator risse_int64();
+		*const_cast<tRisseVariant*>(&This) = args[0].operator risse_real();
 }
 //---------------------------------------------------------------------------
 

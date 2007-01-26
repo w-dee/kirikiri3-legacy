@@ -54,56 +54,40 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
+inline tRissePrimitiveClassBase * tRisseVariantBlock::GetPrimitiveClass() const
+{
+	tRissePrimitiveClassBase * Class = NULL;
+	switch(GetType())
+	{
+	case vtVoid:	break;
+	case vtInteger:	Class = tRisseIntegerClass::GetPointer(); break;
+	case vtReal:	Class = tRisseRealClass::GetPointer(); break;
+	case vtBoolean:	break;
+	case vtString:	Class = tRisseStringClass::GetPointer(); break;
+	case vtOctet:	break;
+	default:		break;
+	}
+	RISSE_ASSERT(Class != NULL);
+	return Class;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseVariantBlock::tRetValue
 	tRisseVariantBlock::OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	switch(GetType())
 	{
+	case vtVoid:
 	case vtInteger:
-		{
-			tRetValue rv = tRisseIntegerClass::GetPointer()->GetGateway().
-				Operate(code, result, name, flags, args, *this); // 動作コンテキストは常に *this
-			if(rv == rvNoError && result)
-			{
-				// コンテキストを設定する
-				// コンテキストはこの操作が実行された時の状態を保っていなければ
-				// ならない。プリミティブ型は immutable とはいえ、内部実装は
-				// 完全に mutable なので、この時点での実行結果を保存しておくために
-				// new でオブジェクトを再確保し、固定する。
-				// TODO: 返りのオブジェクトがコンテキストを持ってないと、毎回newが行われて
-				// しまう。関数やプロパティ以外はコンテキストを伴う必要はないので
-				// 努めて関数やプロパティ以外はダミーでもよいからコンテキストを
-				// 設定するようにするべき。
-				if(!result->HasContext())
-					result->SetContext(new tRisseVariantBlock(*this));
-			}
-			return rv;
-		}
-
 	case vtReal:
-		{
-			tRetValue rv = tRisseRealClass::GetPointer()->GetGateway().
-				Operate(code, result, name, flags, args, *this); // 動作コンテキストは常に *this
-			if(rv == rvNoError && result)
-			{
-				// コンテキストを設定する
-				// コンテキストはこの操作が実行された時の状態を保っていなければ
-				// ならない。プリミティブ型は immutable とはいえ、内部実装は
-				// 完全に mutable なので、この時点での実行結果を保存しておくために
-				// new でオブジェクトを再確保し、固定する。
-				// TODO: 返りのオブジェクトがコンテキストを持ってないと、毎回newが行われて
-				// しまう。関数やプロパティ以外はコンテキストを伴う必要はないので
-				// 努めて関数やプロパティ以外はダミーでもよいからコンテキストを
-				// 設定するようにするべき。
-				if(!result->HasContext())
-					result->SetContext(new tRisseVariantBlock(*this));
-			}
-			return rv;
-		}
-
+	case vtBoolean:
 	case vtString:
+	case vtOctet:
+		// プリミティブ型に対する処理
 		{
-			tRetValue rv = tRisseStringClass::GetPointer()->GetGateway().
+			tRetValue rv = GetPrimitiveClass()->GetGateway().
 				Operate(code, result, name, flags, args, *this); // 動作コンテキストは常に *this
 			if(rv == rvNoError && result)
 			{
@@ -170,37 +154,12 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::FuncCall_Integer  (tRisseVariantBlock * ret,
-		const tRisseString & name, risse_uint32 flags,
-		const tRisseMethodArgument & args, const tRisseVariant & This) const
+void tRisseVariantBlock::FuncCall_Primitive(
+	tRisseVariantBlock * ret, const tRisseString & name,
+	risse_uint32 flags, const tRisseMethodArgument & args,
+	const tRisseVariant & This) const
 {
-	// vtInteger への要求は Integer クラスにリダイレクトする
-	tRisseIntegerClass::GetPointer()->GetGateway().
-		Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseVariantBlock::FuncCall_Real  (tRisseVariantBlock * ret,
-		const tRisseString & name, risse_uint32 flags,
-		const tRisseMethodArgument & args, const tRisseVariant & This) const
-{
-	// vtReal への要求は Real クラスにリダイレクトする
-	tRisseRealClass::GetPointer()->GetGateway().
-		Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseVariantBlock::FuncCall_String  (tRisseVariantBlock * ret,
-		const tRisseString & name, risse_uint32 flags,
-		const tRisseMethodArgument & args, const tRisseVariant & This) const
-{
-	// vtString への要求は String クラスにリダイレクトする
-	tRisseStringClass::GetPointer()->GetGateway().
-		Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
+	GetPrimitiveClass()->GetGateway().Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------
 

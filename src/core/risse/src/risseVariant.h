@@ -29,6 +29,7 @@ namespace Risse
 {
 //---------------------------------------------------------------------------
 class tRisseObjectInterface;
+class tRissePrimitiveClassBase;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 /*! @note
@@ -408,6 +409,10 @@ public: // 初期化
 	{
 		Type = vtVoid;
 	}
+
+public: // Primitive関連
+	//! @brief		プリミティブ型に即してプリミティブ型クラスを得る
+	tRissePrimitiveClassBase * GetPrimitiveClass() const;
 
 public: // Object関連
 	//! @brief		コンテキストを設定する
@@ -817,23 +822,20 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	FuncCall_Void     (ret, name, flags, args, This); return;
-		case vtInteger:	FuncCall_Integer  (ret, name, flags, args, This); return;
-		case vtReal:	FuncCall_Real     (ret, name, flags, args, This); return;
-		case vtBoolean:	FuncCall_Boolean  (ret, name, flags, args, This); return;
-		case vtString:	FuncCall_String   (ret, name, flags, args, This); return;
-		case vtOctet:	FuncCall_Octet    (ret, name, flags, args, This); return;
+		case vtVoid:	
+		case vtInteger:	
+		case vtReal:	
+		case vtBoolean:	
+		case vtString:	
+		case vtOctet:	
+			FuncCall_Primitive(ret, name, flags, args, This); return;
+
 		case vtObject:	FuncCall_Object   (ret, name, flags, args, This); return;
 		}
 	}
 
-	void FuncCall_Void    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_Integer (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
-	void FuncCall_Real    (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
-	void FuncCall_Boolean (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_String  (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
-	void FuncCall_Octet   (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const { return; /* incomplete */ }
-	void FuncCall_Object  (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
+	void FuncCall_Primitive(tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
+	void FuncCall_Object   (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke

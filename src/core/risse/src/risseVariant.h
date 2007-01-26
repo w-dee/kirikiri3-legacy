@@ -87,7 +87,7 @@ protected:
 	struct tReal
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 2 固定
-		double Value; //!< 値
+		risse_real Value; //!< 値
 	};
 
 	//! @brief boolean ストレージ型
@@ -113,9 +113,9 @@ protected:
 	const risse_int64 & AsInteger() const { return reinterpret_cast<const tInteger*>(Storage)->Value; }
 
 	//! @brief Real型への参照を取得 @return Real型フィールドへの参照
-	double & AsReal() { return reinterpret_cast<tReal*>(Storage)->Value; }
+	risse_real & AsReal() { return reinterpret_cast<tReal*>(Storage)->Value; }
 	//! @brief Real型へのconst参照を取得 @return Real型フィールドへのconst参照
-	const double & AsReal() const { return reinterpret_cast<const tReal*>(Storage)->Value; }
+	const risse_real & AsReal() const { return reinterpret_cast<const tReal*>(Storage)->Value; }
 
 	//! @brief Boolean型への参照を取得 @return Boolean型フィールドへの参照
 	bool & AsBoolean() { return reinterpret_cast<tBoolean*>(Storage)->Value; }
@@ -280,14 +280,14 @@ public: // コンストラクタ/代入演算子
 
 	//! @brief		コンストラクタ(real型を作成)
 	//! @param		ref		元となる実数
-	tRisseVariantBlock(const double ref)
+	tRisseVariantBlock(const risse_real ref)
 	{
 		* this = ref;
 	}
 
 	//! @brief		代入演算子(real型を代入)
 	//! @param		ref		元となる実数
-	tRisseVariantBlock & operator = (const double ref)
+	tRisseVariantBlock & operator = (const risse_real ref)
 	{
 		Type = vtReal;
 		AsReal() = ref;
@@ -1759,12 +1759,12 @@ public: // 演算子
 
 	tRisseVariantBlock operator / (const tRisseVariantBlock & rhs) const { return Div(rhs); }
 
-	tRisseVariantBlock Div_Void     (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
-	tRisseVariantBlock Div_Integer  (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
-	tRisseVariantBlock Div_Real     (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
-	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
-	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
-	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const { return (double)(*this) / (double)rhs; }
+	tRisseVariantBlock Div_Void     (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
+	tRisseVariantBlock Div_Integer  (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
+	tRisseVariantBlock Div_Real     (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
+	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
+	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
+	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
 	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnDiv, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1852,7 +1852,7 @@ public: // 演算子
 	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnMul, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1895,7 +1895,7 @@ public: // 演算子
 	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnAdd, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1938,7 +1938,7 @@ public: // 演算子
 	tRisseVariantBlock Sub_Real     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (double)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnSub, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1987,7 +1987,7 @@ public: // キャスト
 	//! @brief		realに変換
 	//! @return		real
 	//-----------------------------------------------------------------------
-	operator double() const
+	operator risse_real() const
 	{
 		switch(GetType())
 		{
@@ -2002,13 +2002,13 @@ public: // キャスト
 		return false;
 	}
 
-	double CastToReal_Void     () const { return (double)0.0; }
-	double CastToReal_Integer  () const { return AsInteger(); }
-	double CastToReal_Real     () const { return AsReal(); }
-	double CastToReal_Boolean  () const { return (double)(int)AsBoolean(); }
-	double CastToReal_String   () const { return (double)Plus_String(); /* Plus_String の戻りを double に再キャスト */ }
-	double CastToReal_Octet    () const { return (double)0.0; /* incomplete */ }
-	double CastToReal_Object   () const { return Invoke(mnReal); }
+	risse_real CastToReal_Void     () const { return (risse_real)0.0; }
+	risse_real CastToReal_Integer  () const { return AsInteger(); }
+	risse_real CastToReal_Real     () const { return AsReal(); }
+	risse_real CastToReal_Boolean  () const { return (risse_real)(int)AsBoolean(); }
+	risse_real CastToReal_String   () const { return (risse_real)Plus_String(); /* Plus_String の戻りを risse_real に再キャスト */ }
+	risse_real CastToReal_Octet    () const { return (risse_real)0.0; /* incomplete */ }
+	risse_real CastToReal_Object   () const { return Invoke(mnReal); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		boolに変換

@@ -712,7 +712,7 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Void     (const tRisseVariantBlock & 
 	{
 	case vtVoid:	return (risse_int64)0; // void * void
 	case vtInteger:	return (risse_int64)0; // void * integer
-	case vtReal:	return (double)0.0;
+	case vtReal:	return (risse_real)0.0;
 	case vtBoolean:	return (bool)false;
 	case vtString:	return Mul_Void(rhs.Plus_String()); // Plus_String の戻りは integer か real
 	case vtOctet:	return (risse_int64)0; // incomplete

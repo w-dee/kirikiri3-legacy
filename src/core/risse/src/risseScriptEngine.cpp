@@ -20,6 +20,8 @@
 #include "risseObjectClass.h"
 #include "risseArrayClass.h"
 #include "risseStringClass.h"
+#include "rissePrimitiveClass.h"
+#include "risseNumberClass.h"
 #include "risseIntegerClass.h"
 
 namespace Risse
@@ -82,6 +84,15 @@ tRisseScriptEngine::tRisseScriptEngine()
 		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				String_class);
+
+	// "Number" クラスを作成する
+	tRisseVariant Number_class(tRisseNumberClass::GetPointer());
+
+	// グローバルオブジェクトに "Number" クラスを登録する
+	GlobalObject.SetPropertyDirect(ss_Number,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+				Number_class);
 
 	// "Integer" クラスを作成する
 	tRisseVariant Integer_class(tRisseIntegerClass::GetPointer());

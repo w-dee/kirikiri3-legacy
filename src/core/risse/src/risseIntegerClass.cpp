@@ -17,6 +17,7 @@
 #include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
+#include "risseNumberClass.h"
 
 /*
 	Risseスクリプトから見える"String" クラスの実装
@@ -60,7 +61,7 @@ static void Integer_times(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
-tRisseIntegerClass::tRisseIntegerClass() : tRissePrimitiveClassBase(tRissePrimitiveClass::GetPointer())
+tRisseIntegerClass::tRisseIntegerClass() : tRissePrimitiveClassBase(tRisseNumberClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
 

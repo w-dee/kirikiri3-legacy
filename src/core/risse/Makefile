@@ -60,6 +60,7 @@ CPPFILES =  \
 			src/risseMethod.cpp                      \
 			src/risseNativeFunction.cpp              \
 			src/risseNativeProperty.cpp              \
+			src/risseNumberClass.cpp                 \
 			src/risseObject.cpp                      \
 			src/risseObjectBase.cpp                  \
 			src/risseObjectClass.cpp                 \

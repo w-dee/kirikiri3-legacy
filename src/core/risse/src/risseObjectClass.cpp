@@ -80,17 +80,14 @@ static void Object_setInstanceMember(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Object.puts  テスト用関数 - 将来的には別のクラスに移動する予定
+//! @brief		NativeFunction: Object.puts  内容を標準出力に出力し、改行する
 //---------------------------------------------------------------------------
 static void Object_puts(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-	// 引数をすべて標準出力に出力する
-	// 引数を一つ出力するたびに改行する
-	for(risse_size i = 0; i < args.GetArgumentCount(); i++)
-	{
-		RisseFPrint(stdout, args[i].AsHumanReadable().c_str());
-		RisseFPrint(stdout, RISSE_WS("\n"));
-	}
+	// This を標準出力に出力する
+	RisseFPrint(stdout, This.operator tRisseString().c_str());
+	// 改行する
+	RisseFPrint(stdout, RISSE_WS("\n"));
 }
 //---------------------------------------------------------------------------
 

@@ -316,7 +316,7 @@ void tRisseCodeInterpreter::Execute(
 			}
 			break;
 
-		case ocSetShare		: // sshare	 thisと共有空間のみ設定する
+		case ocSetShare		: // sshare	 共有空間のみ設定する(thisは設定しないので注意)
 			{
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(AR(code[1]).GetType() == tRisseVariant::vtObject);
@@ -326,7 +326,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
 				tRisseCodeBlockStackAdapter * adapter =
 					new tRisseCodeBlockStackAdapter(codeblock, NULL, shared);
-				AR(code[1]) = tRisseVariant(adapter, new tRisseVariant(This));
+				AR(code[1]) = tRisseVariant(adapter);
 				code += 2;
 			}
 			break;

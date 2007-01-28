@@ -18,6 +18,8 @@
 #include "../risseGC.h"
 #include "../risseObject.h"
 #include "../risseException.h"
+#include "../risseOpCodes.h"
+#include "../risseStaticStrings.h"
 #include "risseParser.h"
 #include "risseScriptBlock.h"
 
@@ -123,6 +125,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 /* トークン定義 */
 %token
 	T_NONE
+	T_AT					"@"
 	T_DEFINE				"=>"
 	T_COMMA					","
 	T_EQUAL					"="
@@ -252,7 +255,6 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 
 	T_BEGIN_NUMBER
 	T_BEGIN_STRING_LITERAL
-	T_BEGIN_MACRO
 	T_BEGIN_EMSTRING_LITERAL
 	T_BEGIN_OCTET_LITERAL
 	T_BEGIN_COMMENT
@@ -272,6 +274,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %type <attr>		member_attr_list member_attr member_attr_list_non_prop
 					member_attr_non_prop member_attr_prop
 
+%type <value>		member_name
 
 %type <np>
 	toplevel_def_list def_list
@@ -532,8 +535,8 @@ variable_id_list
 
 /* a variable id and an optional initializer expression */
 variable_id
-	: T_ID									{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
-	| T_ID "=" expr							{ $$ = N(VarDeclPair)(LP, *$1, $3); }
+	: member_name							{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
+	| member_name "=" expr					{ $$ = N(VarDeclPair)(LP, *$1, $3); }
 ;
 
 /*---------------------------------------------------------------------------
@@ -587,7 +590,7 @@ throw
 
 /* a function definition */
 func_def
-	: "function" T_ID
+	: "function" member_name
 	  func_decl_arg_opt
 	  block									{ $$ = $3; C(FuncDecl, $$)->SetName(*$2);
 	  										  C(FuncDecl, $$)->SetBody($4); }
@@ -659,7 +662,7 @@ func_decl_block_at_least_one
 
 /* a property handler definition */
 property_def
-	: "property" T_ID
+	: "property" member_name
 	  "{"
 	  property_handler_def_list
 	  "}"									{ $$ = $4; C(PropDecl, $$)->SetName(*$2); }
@@ -801,6 +804,119 @@ member_attr_prop
 	| "var"									{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcVar); }
 ;
 
+/*---------------------------------------------------------------------------
+  member_name
+  ---------------------------------------------------------------------------*/
+/* メンバ名として使える名前 */
+/*
+ 通常の ID の他、new などの演算子もメンバ名として使える。
+ たとえば演算子の定義の時に function == (rhs) { ... } のように。
+*/
+
+member_name
+	: T_ID									{ $$ = $1; }
+	| "~"									{ $$ = new tRisseVariant(mnBitNot); }
+	| "--"									{ $$ = new tRisseVariant(mnDecAssign); }
+	| "++"									{ $$ = new tRisseVariant(mnIncAssign); }
+	| "+" "@"								{ $$ = new tRisseVariant(mnPlus); }
+	| "-" "@"								{ $$ = new tRisseVariant(mnMinus); }
+	| "||"									{ $$ = new tRisseVariant(mnLogOr); }
+	| "&&"									{ $$ = new tRisseVariant(mnLogAnd); }
+	| "|"									{ $$ = new tRisseVariant(mnBitOr); }
+	| "^"									{ $$ = new tRisseVariant(mnBitXor); }
+	| "&"									{ $$ = new tRisseVariant(mnBitAnd); }
+	| "!="									{ $$ = new tRisseVariant(mnNotEqual); }
+	| "=="									{ $$ = new tRisseVariant(mnEqual); }
+	| "!=="									{ $$ = new tRisseVariant(mnDiscNotEqual); }
+	| "<"									{ $$ = new tRisseVariant(mnLesser); }
+	| ">"									{ $$ = new tRisseVariant(mnGreater); }
+	| "<="									{ $$ = new tRisseVariant(mnLesserOrEqual); }
+	| ">="									{ $$ = new tRisseVariant(mnGreaterOrEqual); }
+	| ">>>"									{ $$ = new tRisseVariant(mnRBitShift); }
+	| "<<"									{ $$ = new tRisseVariant(mnLShift); }
+	| ">>"									{ $$ = new tRisseVariant(mnRShift); }
+	| "%"									{ $$ = new tRisseVariant(mnMod); }
+	| "/"									{ $$ = new tRisseVariant(mnDiv); }
+	| "\\"									{ $$ = new tRisseVariant(mnIdiv); }
+	| "*"									{ $$ = new tRisseVariant(mnMul); }
+	| "+"									{ $$ = new tRisseVariant(mnAdd); }
+	| "-"									{ $$ = new tRisseVariant(mnSub); }
+	| "[" "]"								{ $$ = new tRisseVariant(mnIGet); }
+	| "delete" "[" "]"						{ $$ = new tRisseVariant(mnIDelete); }
+	| "[" "]" "="							{ $$ = new tRisseVariant(mnISet); }
+
+/* 以下は words.txt と同期させること */
+	| "break"								{ $$ = new tRisseVariant(ss_break          ); }
+	| "continue"							{ $$ = new tRisseVariant(ss_continue       ); }
+	| "const"								{ $$ = new tRisseVariant(ss_const          ); }
+	| "catch"								{ $$ = new tRisseVariant(ss_catch          ); }
+	| "class"								{ $$ = new tRisseVariant(ss_class          ); }
+	| "case"								{ $$ = new tRisseVariant(ss_case           ); }
+	| "debugger"							{ $$ = new tRisseVariant(ss_debugger       ); }
+	| "default"								{ $$ = new tRisseVariant(ss_default        ); }
+	| "delete"								{ $$ = new tRisseVariant(ss_delete         ); }
+	| "do"									{ $$ = new tRisseVariant(ss_do             ); }
+	| "extends"								{ $$ = new tRisseVariant(ss_extends        ); }
+	| "export"								{ $$ = new tRisseVariant(ss_export         ); }
+	| "enum"								{ $$ = new tRisseVariant(ss_enum           ); }
+	| "else"								{ $$ = new tRisseVariant(ss_else           ); }
+	| "function"							{ $$ = new tRisseVariant(ss_function       ); }
+	| "finally"								{ $$ = new tRisseVariant(ss_finally        ); }
+	| "final"								{ $$ = new tRisseVariant(ss_final          ); }
+	| "for"									{ $$ = new tRisseVariant(ss_for            ); }
+	| "global"								{ $$ = new tRisseVariant(ss_global         ); }
+	| "getter"								{ $$ = new tRisseVariant(ss_getter         ); }
+	| "goto"								{ $$ = new tRisseVariant(ss_goto           ); }
+	| "incontextof"							{ $$ = new tRisseVariant(ss_incontextof    ); }
+	| "invalidate"							{ $$ = new tRisseVariant(ss_invalidate     ); }
+	| "instanceof"							{ $$ = new tRisseVariant(ss_instanceof     ); }
+	| "isvalid"								{ $$ = new tRisseVariant(ss_isvalid        ); }
+	| "import"								{ $$ = new tRisseVariant(ss_import         ); }
+	| "int"									{ $$ = new tRisseVariant(ss_int            ); }
+	| "internal"							{ $$ = new tRisseVariant(ss_internal       ); }
+	| "in"									{ $$ = new tRisseVariant(ss_in             ); }
+	| "if"									{ $$ = new tRisseVariant(ss_if             ); }
+	| "new"									{ $$ = new tRisseVariant(ss_new            ); }
+	| "octet"								{ $$ = new tRisseVariant(ss_octet          ); }
+	| "protected"							{ $$ = new tRisseVariant(ss_protected      ); }
+	| "property"							{ $$ = new tRisseVariant(ss_property       ); }
+	| "private"								{ $$ = new tRisseVariant(ss_private        ); }
+	| "public"								{ $$ = new tRisseVariant(ss_public         ); }
+	| "return"								{ $$ = new tRisseVariant(ss_return         ); }
+	| "real"								{ $$ = new tRisseVariant(ss_real           ); }
+	| "synchronized"						{ $$ = new tRisseVariant(ss_synchronized   ); }
+	| "switch"								{ $$ = new tRisseVariant(ss_switch         ); }
+	| "static"								{ $$ = new tRisseVariant(ss_static         ); }
+	| "setter"								{ $$ = new tRisseVariant(ss_setter         ); }
+	| "string"								{ $$ = new tRisseVariant(ss_string         ); }
+	| "super"								{ $$ = new tRisseVariant(ss_super          ); }
+	| "typeof"								{ $$ = new tRisseVariant(ss_typeof         ); }
+	| "throw"								{ $$ = new tRisseVariant(ss_throw          ); }
+	| "this"								{ $$ = new tRisseVariant(ss_this           ); }
+	| "try"									{ $$ = new tRisseVariant(ss_try            ); }
+	| "var"									{ $$ = new tRisseVariant(ss_var            ); }
+	| "while"								{ $$ = new tRisseVariant(ss_while          ); }
+	| "with"								{ $$ = new tRisseVariant(ss_with           ); }
+	| "as"									{ $$ = new tRisseVariant(ss_as             ); }
+	| "use"									{ $$ = new tRisseVariant(ss_use            ); }
+	| "abstract"							{ $$ = new tRisseVariant(ss_abstract       ); }
+	| "implements"							{ $$ = new tRisseVariant(ss_implements     ); }
+	| "interface"							{ $$ = new tRisseVariant(ss_interface      ); }
+	| "native"								{ $$ = new tRisseVariant(ss_native         ); }
+	| "throws"								{ $$ = new tRisseVariant(ss_throws         ); }
+	| "transient"							{ $$ = new tRisseVariant(ss_transient      ); }
+	| "volatile"							{ $$ = new tRisseVariant(ss_volatile       ); }
+	| "enumerable"							{ $$ = new tRisseVariant(ss_enumerable     ); }
+	| "hidden"								{ $$ = new tRisseVariant(ss_hidden         ); }
+
+	| "void"								{ $$ = new tRisseVariant(ss_void           ); }
+	| "null"								{ $$ = new tRisseVariant(ss_null           ); }
+	| "true"								{ $$ = new tRisseVariant(ss_true           ); }
+	| "false"								{ $$ = new tRisseVariant(ss_false          ); }
+	| "NaN"									{ $$ = new tRisseVariant(ss_NaN            ); }
+	| "Infinity"							{ $$ = new tRisseVariant(ss_Infinity       ); }
+;
+
 
 /*---------------------------------------------------------------------------
   expression
@@ -879,7 +995,7 @@ expr
 	| func_call_expr				{ ; }
 	| "(" expr_with_comma ")"		{ $$ = $2; }
 	| expr "[" expr "]"				{ $$ = N(MemberSel)(LP, $1, $3, false); }
-	| expr "." T_ID					{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), true); }
+	| expr "." member_name			{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), true); }
 	| expr "." "(" expr ")"			{ $$ = N(MemberSel)(LP, $1, $4, true); }
 	| expr "<" member_attr_list ">"
 	  %prec T_FUNCCALL				{ $$ = N(CastAttr)(LP, *$3, $1); }

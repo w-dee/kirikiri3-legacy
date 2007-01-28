@@ -119,8 +119,10 @@ BIN_DEPS += src/risseStaticStringsData.inc src/risseStaticStringsIds.inc
 
 src/risseStaticStringsData.inc src/risseStaticStringsIds.inc: \
 		src/risseStaticString.txt \
+		src/risse_parser/words.txt \
 		tools/static_strings.rb Makefile
 	ruby tools/static_strings.rb src/risseStaticString.txt \
+		src/risse_parser/words.txt \
 		src/risseStaticStringsIds.inc src/risseStaticStringsData.inc
 
 # risseParser.cpp と risseParser.inc のコンパイル

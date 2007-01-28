@@ -36,7 +36,7 @@ $               T_DOLLAR                 - false false
 "               T_BEGIN_STRING_LITERAL   - false false
 @'              T_BEGIN_EMSTRING_LITERAL - false false
 @"              T_BEGIN_EMSTRING_LITERAL - false false
-@               T_BEGIN_MACRO            - false false
+@               T_AT                     - false false
 >>>=            T_RBITSHIFTEQUAL         - false false
 >>>             T_RBITSHIFT              - false false
 >>=             T_RARITHSHIFTEQUAL       - false false
@@ -75,6 +75,14 @@ $               T_DOLLAR                 - false false
 
 
 ##### 文字類
+##### 注意
+##### これらを編集する際は、かならず risse.y の member_name_list も
+##### 編集すること！！ (自動的には連携されない)
+##### member_name_list は . (ドット演算子) の右側のように
+##### 予約語であっても予約語と見なさない単語のリストが書いてある。
+##### これはこの「文字類」にリストされている物+下の定数
+##### にリストされている、アルファベットのみで構成されている
+##### 単語に相当する。
 break               T_BREAK        - true false
 continue            T_CONTINUE     - true false
 const               T_CONST        - true false
@@ -139,6 +147,9 @@ enumerable          T_ENUMERABLE   - true false
 hidden              T_HIDDEN       - true false
 
 ##### 定数
+##### 注意
+##### これらを編集する際は、かならず risse.y の member_name_list も
+##### 編集すること！！ (自動的には連携されない)
 void     T_CONSTVAL     tRisseVariant()               true false
 null     T_CONSTVAL     (tRisseObjectInterface*)NULL  true false
 true     T_CONSTVAL     true                          true false

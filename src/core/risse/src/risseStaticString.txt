@@ -8,10 +8,8 @@
 ss_initialize			initialize			#!< "initialize" メソッド名
 ss_construct			construct			#!< "construct" メソッド名
 ss_fertilize			fertilize			#!< "fertilize" メソッド名
-ss_super				super				#!< "super" インスタンス変数/プロパティ名
 ss_getInstanceMember	getInstanceMember	#!< "getInstanceMember" メソッド名
 ss_setInstanceMember	setInstanceMember	#!< "setInstanceMember" メソッド名
-ss_class				class				#!< "class" プロパティ名
 ss_Object				Object				#!< "Object" クラス名
 ss_Class				Class				#!< "Class" クラス名
 ss_Array				Array				#!< "Array" クラス名

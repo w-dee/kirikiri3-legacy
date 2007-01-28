@@ -1602,6 +1602,16 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
    p += 2;
    { ptr = p; return T_ASTERISKEQUAL; }
   }
+ case '@':
+  switch(p[1]) {
+  default:
+   p += 1;
+   { ptr = p; return T_AT; }
+  case '"':
+  case '\'':
+   p += 2;
+   { ptr = p; return T_BEGIN_EMSTRING_LITERAL; }
+  }
  case '\\':
   switch(p[1]) {
   default:
@@ -1610,16 +1620,6 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
   case '=':
    p += 2;
    { ptr = p; return T_BACKSLASHEQUAL; }
-  }
- case '@':
-  switch(p[1]) {
-  default:
-   p += 1;
-   { ptr = p; return T_BEGIN_MACRO; }
-  case '"':
-  case '\'':
-   p += 2;
-   { ptr = p; return T_BEGIN_EMSTRING_LITERAL; }
   }
  case '^':
   switch(p[1]) {

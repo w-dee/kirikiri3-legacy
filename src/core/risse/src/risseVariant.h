@@ -2109,7 +2109,7 @@ public: // ユーティリティ
 	//!				またそのオブジェクトインターフェースを得る。
 	//!				期待した値でなければ「"期待したクラスではありません"」例外を発生する
 	//!				テンプレートパラメータのObjectTはtRisseObjectBaseの派生クラス、
-	//!				ClassTにはtRisseSingletonの派生クラスかつtRisseClassの派生クラスを指定すること。
+	//!				ClassTにはtRisseSingletonの派生クラスかつtRisseClassBaseの派生クラスを指定すること。
 	template <typename ObjectT, typename ClassT>
 	ObjectT * CheckAndGetObjectInterafce() const
 	{

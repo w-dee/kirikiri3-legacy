@@ -93,7 +93,7 @@ static void Object_puts(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
-tRisseObjectClass::tRisseObjectClass() : tRisseClass(NULL)
+tRisseObjectClass::tRisseObjectClass() : tRisseClassBase(NULL)
 {
 	// クラスに必要なメソッドを登録する
 

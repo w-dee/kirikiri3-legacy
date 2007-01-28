@@ -37,8 +37,8 @@ static void XXX_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
-tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClass * super_class) :
-	tRisseClass(super_class)
+tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class) :
+	tRisseClassBase(super_class)
 {
 	// ゲートウェイインターフェースを構築する
 	Gateway = new tRisseObjectBase();
@@ -87,7 +87,7 @@ static void Primitive_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 //---------------------------------------------------------------------------
 tRissePrimitiveClass::tRissePrimitiveClass() :
-	tRisseClass(tRisseObjectClass::GetPointer())
+	tRisseClassBase(tRisseObjectClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
 

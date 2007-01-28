@@ -24,7 +24,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		プリミティブ型用クラスの基底クラス
 //---------------------------------------------------------------------------
-class tRissePrimitiveClassBase : public tRisseClass
+class tRissePrimitiveClassBase : public tRisseClassBase
 {
 	tRisseVariant Gateway;
 		//!< ゲートウェイアクセス用の代表オブジェクト(すべてのプリミティブへのアクセスは
@@ -32,7 +32,7 @@ class tRissePrimitiveClassBase : public tRisseClass
 public:
 	//! @brief		コンストラクタ
 	//! @param		super_class		スーパークラス
-	tRissePrimitiveClassBase(tRisseClass * super_class);
+	tRissePrimitiveClassBase(tRisseClassBase * super_class);
 
 	//! @brief		ゲートウェイアクセス用の代表オブジェクトを得る
 	//! @return		ゲートウェイアクセス用の代表オブジェクト
@@ -48,7 +48,7 @@ public:
 //!				前者はC++のクラス階層において各プリミティブクラスの親クラスになり、
 //!				後者はRisseのクラス階層において各プリミティブクラスの親クラスになる。
 //---------------------------------------------------------------------------
-class tRissePrimitiveClass : public tRisseClass, public tRisseSingleton<tRissePrimitiveClass>
+class tRissePrimitiveClass : public tRisseClassBase, public tRisseSingleton<tRissePrimitiveClass>
 {
 public:
 	//! @brief		コンストラクタ

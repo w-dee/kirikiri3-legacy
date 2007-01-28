@@ -23,7 +23,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		Risseクラスの実装
 //---------------------------------------------------------------------------
-class tRisseClass : public tRisseObjectBase
+class tRisseClassBase : public tRisseObjectBase
 {
 	//! @brief		親クラスのtypedef
 	typedef tRisseObjectBase inherited;
@@ -34,10 +34,10 @@ class tRisseClass : public tRisseObjectBase
 public:
 	//! @brief		コンストラクタ
 	//! @param		super_class		スーパークラスを表すオブジェクト
-	tRisseClass(tRisseClass * super_class = NULL);
+	tRisseClassBase(tRisseClassBase * super_class = NULL);
 
 	//! @brief		ダミーのデストラクタ(たぶん呼ばれない)
-	virtual ~tRisseClass() {;}
+	virtual ~tRisseClassBase() {;}
 
 	//! @brief		RTTIにマッチするための情報を得る
 	//! @return		RTTIにマッチするための情報

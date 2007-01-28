@@ -46,7 +46,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		"Array" クラス
 //---------------------------------------------------------------------------
-class tRisseArrayClass : public tRisseClass, public tRisseSingleton<tRisseArrayClass>
+class tRisseArrayClass : public tRisseClassBase, public tRisseSingleton<tRisseArrayClass>
 {
 public:
 	//! @brief		コンストラクタ

@@ -105,7 +105,7 @@ static void Array_length_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
 
 //---------------------------------------------------------------------------
 tRisseArrayClass::tRisseArrayClass() :
-	tRisseClass(tRisseObjectClass::GetPointer())
+	tRisseClassBase(tRisseObjectClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
 

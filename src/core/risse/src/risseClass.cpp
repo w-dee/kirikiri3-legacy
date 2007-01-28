@@ -120,7 +120,7 @@ static void Class_fertilize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
-tRisseClass::tRisseClass(tRisseClass * super_class) : tRisseObjectBase(ss_super)
+tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBase(ss_super)
 {
 	// 親クラスのRTTIを引き継ぐ
 	if(super_class) RTTI = super_class->RTTI;
@@ -146,7 +146,7 @@ tRisseClass::tRisseClass(tRisseClass * super_class) : tRisseObjectBase(ss_super)
 
 
 //---------------------------------------------------------------------------
-tRisseClass::tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(code == ocNew && name.IsEmpty())
 	{
@@ -175,7 +175,7 @@ tRisseClass::tRetValue tRisseClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_A
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseClass::CreateNewObjectBase()
+tRisseVariant tRisseClassBase::CreateNewObjectBase()
 {
 	return tRisseVariant(new tRisseObjectBase());
 }

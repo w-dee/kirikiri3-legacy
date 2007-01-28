@@ -60,7 +60,7 @@ static void Number_isNaN_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
 
 //---------------------------------------------------------------------------
 tRisseNumberClass::tRisseNumberClass() :
-	tRisseClass(tRissePrimitiveClass::GetPointer())
+	tRisseClassBase(tRissePrimitiveClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
 

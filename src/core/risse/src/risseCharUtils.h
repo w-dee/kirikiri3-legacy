@@ -327,6 +327,9 @@ static bool inline Risse_iswordcha_nc(risse_char ch)
 	// 際に例外が発生する(ただしデバッグビルド時のみ)。
 	// 一行中に複数のRISSE_WSを書きたい場合は、２個目以降をRISSE_WS2、RISSE_WS3にする。
 
+	// ちなみにこれは UTF32 リテラルを生成するだけに用いる。静的な tRisseString クラスのインスタンス
+	// が欲しければ、risseStaticStrings の利用を検討すること。
+
 	#ifdef RISSE_CHARUTILS_DEBUG
 	//! @brief		一行中に複数の RISSE_WS を使用した場合に例外を送出する関数
 	void RisseThrowWSAssertionFailure(const wchar_t * source, risse_int line);

@@ -8,12 +8,11 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief "Class" (クラス) の実装
+//! @brief C++ 用 Risse (クラス) の基底クラスの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
 
 #include "risseClass.h"
-#include "risseException.h"
 #include "risseNativeFunction.h"
 #include "risseObjectBase.h"
 #include "risseVariant.h"

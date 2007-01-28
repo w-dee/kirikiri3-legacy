@@ -48,6 +48,7 @@ CPPFILES =  \
 			src/risseAssert.cpp                      \
 			src/risseCharUtils.cpp                   \
 			src/risseClass.cpp                       \
+			src/risseClassClass.cpp                  \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \

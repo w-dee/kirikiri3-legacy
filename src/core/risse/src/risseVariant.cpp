@@ -962,8 +962,8 @@ tRisseVariantBlock tRisseVariantBlock::Add_String   (const tRisseVariantBlock & 
 	case vtReal:	return AsString() + rhs.CastToString_Real();
 	case vtBoolean:	return AsString() + rhs.CastToString_Boolean();
 	case vtString:	return AsString() + rhs.AsString();
-	case vtOctet:	return false; // incomplete; どうしよう
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtOctet:	return AsString() + rhs.CastToString_Octet(); // これでいいのかなぁ
+	case vtObject:	return AsString() + rhs.CastToString_Object(); // これでいいのかなぁ
 	}
 	return tRisseVariantBlock();
 }

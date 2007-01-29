@@ -59,7 +59,6 @@ static void Class_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 
 
-
 //---------------------------------------------------------------------------
 tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseObjectClass::GetPointer())
 {

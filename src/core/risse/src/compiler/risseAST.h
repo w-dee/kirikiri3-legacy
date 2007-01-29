@@ -2705,7 +2705,14 @@ public:
 	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+//--
+
+	//! @brief		クラス宣言の表現を生成する
+	//! @param		form		SSA 形式インスタンス
+	//! @return		クラスを表す変数
+	tRisseSSAVariable * GenerateClassDecl(tRisseSSAForm *form) const;
 };
 //---------------------------------------------------------------------------
 

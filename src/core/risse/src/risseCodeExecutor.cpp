@@ -16,6 +16,7 @@
 #include "risseOpCodes.h"
 #include "risseExceptionClass.h"
 #include "risseScriptBlockBase.h"
+#include "risseClassClass.h"
 #include "risseScriptEngine.h"
 /*
 	このソースは、実行スピード重視の、いわばダーティーな実装を行う。
@@ -146,7 +147,18 @@ void tRisseCodeInterpreter::Execute(
 		case ocAssignNewRegExp: // regexp	 = 新しい正規表現オブジェクトの代入 (引数2つ)
 			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
-			code += 2;
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			RISSE_ASSERT(CI(code[3]) < framesize);
+			code += 4;
+			break;
+
+		case ocAssignNewClass: // class	 = 新しいクラスインスタンスの代入 (引数=親クラス+クラス名)
+			/* incomplete */
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			RISSE_ASSERT(CI(code[3]) < framesize);
+			AR(code[1]) = tRisseVariant(tRisseClassClass::GetPointer()).New();
+			code += 4;
 			break;
 
 		case ocAssignParam: // getpar	= (S番目の関数引数を代入)
@@ -704,7 +716,13 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			RISSE_ASSERT(CI(code[3]) < framesize);
-			/* incomplete */
+			AR(code[1]) = AR(code[2]);
+			if(AR(code[1]).GetType() == tRisseVariant::vtObject)
+			{
+				// 今のところ AR(code[2]) が vtObject でなかった場合は
+				// この操作は単に無視される
+				AR(code[1]).SetContext(new tRisseVariant(AR(code[3])));
+			}
 			code += 4;
 			break;
 

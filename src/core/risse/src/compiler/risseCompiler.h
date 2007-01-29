@@ -194,6 +194,26 @@ public:
 	//! @param		is_expression	式評価モードかどうか
 	void Compile(tRisseASTNode * root, bool need_result, bool is_expression);
 
+	//! @brief		ASTを元にクラスのコンパイルを行う
+	//! @param		root		クラスのルートASTノード
+	//! @param		name		クラス名として表示する名前
+	//! @param		form		クラスを作成する場所にあるSSA形式インスタンス
+	//! @param		new_form	新しく作成された(ルートの)SSA形式インスタンス
+	//! @param		block_var	そのクラスのSSA変数を格納する先
+	void CompileClass(tRisseASTNode * root, const tRisseString & name, tRisseSSAForm * form,
+		tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var);
+
+private:
+	//! @brief		(内部関数)ASTを元にコンパイルを行う
+	//! @param		root		ルートASTノード
+	//! @param		name		名前
+	//! @param		need_result		評価時に結果が必要かどうか
+	//! @param		is_expression	式評価モードかどうか
+	//! @return		トップレベルのSSA形式インスタンス
+	tRisseSSAForm * InternalCompile(tRisseASTNode * root, const tRisseString & name,
+		bool need_result, bool is_expression);
+
+public:
 	//! @brief		関数グループインスタンスを追加する
 	//! @param		function_group		関数グループインスタンス
 	void AddFunctionGroup(tRisseCompilerFunctionGroup * function_group);

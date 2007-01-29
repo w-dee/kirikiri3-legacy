@@ -221,6 +221,18 @@ public:
 	//! @param		code	オペレーションコード
 	void PutAssign(const tRisseSSAVariable * dest, tRisseOpCode code);
 
+	//! @brief		新しい正規表現オブジェクトを Assign するコードを置く
+	//! @param		dest	Assign先変数
+	//! @param		pattern	正規表現パターンを表す変数
+	//! @param		flags	正規表現フラグを表す変数
+	void PutAssignNewRegExp(const tRisseSSAVariable * dest, const tRisseSSAVariable * pattern, const tRisseSSAVariable * flags);
+
+	//! @brief		新しいクラスインスタンスを Assign するコードを置く
+	//! @param		dest	Assign先変数
+	//! @param		super	親クラスを表す変数
+	//! @param		name	クラス名を表す変数
+	void PutAssignNewClass(const tRisseSSAVariable * dest, const tRisseSSAVariable * super, const tRisseSSAVariable * name);
+
 	//! @brief		メソッドへの引数を assign するコードを置く
 	//! @param		dest	変数コピー先変数
 	//! @param		index	引数インデックス

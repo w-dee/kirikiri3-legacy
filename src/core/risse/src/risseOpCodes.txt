@@ -32,7 +32,8 @@ AssignSuper				super		R,-,-,-,-,-		----		#!< = superの代入
 AssignGlobal			global		R,-,-,-,-,-		----		#!< = globalの代入
 AssignNewArray			array		R,-,-,-,-,-		----		#!< = 新しい配列オブジェクトの代入
 AssignNewDict			dict		R,-,-,-,-,-		----		#!< = 新しい辞書配列オブジェクトの代入
-AssignNewRegExp			regexp		R,-,-,-,-,-		----		#!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+AssignNewRegExp			regexp		R,R,R,-,-,-		----		#!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+AssignNewClass			class		R,R,R,-,-,-		----		#!< = 新しいクラスインスタンスの代入 (引数=親クラス+クラス名)
 AssignParam				param		R,P,-,-,-,-		----		#!< = (O番目の関数引数を代入)
 AssignBlockParam		bparam		R,P,-,-,-,-		----		#!< = (O番目の関数ブロック引数を代入)
 
@@ -114,7 +115,7 @@ ISet					iset		R,R,R,-,-,-		[]=			#!< set [ ]
 
 // コードジェネレータはフラグが指定されていると DGet あるいは DSet から必要に応じて
 // DGetF あるいは DSetF に変換する
-// DGet のデフォルトのフラグは 0 (何もしていなし)だが、DSet のデフォルトのフラグは
+// DGet のデフォルトのフラグは 0 (何も指定なし)だが、DSet のデフォルトのフラグは
 // ofMemberEnsure (メンバがなければ作成する) なので注意
 
 // tRisseObjectInterfaceにおいて、
@@ -151,6 +152,7 @@ CreateNewObjectBase		ERR			-,-,-,-,-,-		----		#!< クラスから新しいイン
 Phi						ERR			-,-,-,-,-,-		----		#!< φ関数
 DefineAccessMap			ERR			-,-,-,-,-,-		----		#!< アクセスマップ定義
 DefineLazyBlock			ERR			-,-,-,-,-,-		----		#!< 遅延評価ブロックの定義
+DefineClass				ERR			-,-,-,-,-,-		----		#!< クラスの定義
 EndAccessMap			ERR			-,-,-,-,-,-		----		#!< アクセスマップの使用終了
 ParentWrite				ERR			-,-,-,-,-,-		----		#!< 親名前空間への書き込み
 ParentRead				ERR			-,-,-,-,-,-		----		#!< 親名前空間からの読み込み

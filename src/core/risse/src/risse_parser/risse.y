@@ -717,16 +717,16 @@ property_getter_handler_head
 class_def
 	: "class" T_ID
 	  class_extender
-	  block									{ $$ = $3;
-											  C(ClassDecl, $$)->SetBody($4);
+	  "{" toplevel_def_list "}"				{ $$ = $3;
+											  C(ClassDecl, $$)->SetBody($5);
 											  C(ClassDecl, $$)->SetName(*$2); }
 ;
 
 class_expr_def
 	: "class"
 	  class_extender
-	  block									{ $$ = $2;
-											  C(ClassDecl, $$)->SetBody($3); }
+	  "{" toplevel_def_list "}"				{ $$ = $2;
+											  C(ClassDecl, $$)->SetBody($4); }
 ;
 
 class_extender

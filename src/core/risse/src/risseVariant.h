@@ -1235,7 +1235,7 @@ public: // 演算子
 	bool DiscEqual_Octet    (const tRisseVariantBlock & rhs) const
 			{ return false; /* incomplete */ }
 	bool DiscEqual_Object   (const tRisseVariantBlock & rhs) const
-			{ return Invoke(mnDiscEqual, rhs); }
+			{ if(IsNull()) { return rhs.IsNull(); } return Invoke(mnDiscEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		< 演算子		Lesser

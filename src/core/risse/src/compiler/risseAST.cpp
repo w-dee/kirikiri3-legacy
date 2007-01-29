@@ -2744,4 +2744,78 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_ClassDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	tRisseSSAVariable * func_var = GenerateClassDecl(form);
+	if(Name.IsEmpty())
+	{
+		// 匿名クラス
+		return func_var;
+	}
+	else
+	{
+		// 名前付きクラス
+		// class CCC { ... } は var CCC = class { ... } と同じ物として処理する
+
+		// 変数宣言のSSA表現を生成する
+		tRisseASTNode_VarDeclPair::GenerateVarDecl(form, GetPosition(), Name, func_var);
+
+		return NULL;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *form) const
+{
+	// Body は antContext かつ actTopLevel でなくてはならない
+	RISSE_ASSERT(Body->GetType() == antContext);
+	RISSE_ASSERT(reinterpret_cast<tRisseASTNode_Context*>(Body)->GetContextType() == actTopLevel);
+
+	// クラス名を決める
+	tRisseString class_name = Name.IsEmpty() ? tRisseString(RISSE_WS("anonymous")) : Name;
+
+	// クラスの中身を作成する
+	tRisseCompiler * compiler = form->GetFunction()->GetFunctionGroup()->GetCompiler();
+	tRisseSSAVariable * classblock_var = NULL;
+	tRisseSSAForm * new_form = NULL;
+	compiler->CompileClass(Body, class_name, form, new_form, classblock_var);
+
+	// クラス名を定数として作る
+	tRisseSSAVariable * class_name_var =
+		form->AddConstantValueStatement(GetPosition(), tRisseVariant(class_name));
+
+	// 親クラスを得るための式を作る
+	// TODO: 正しい実装
+	tRisseSSAVariable * super_class_var =
+		form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
+
+	// 新しいクラスインスタンスを作成する
+	tRisseSSAVariable * class_instance_var = NULL;
+	form->AddStatement(GetPosition(),
+		ocAssignNewClass, &class_instance_var,
+		super_class_var, class_name_var);
+
+	// クラスの中身のコンテキストを、新しく作成したインスタンスの物にする
+	form->AddStatement(GetPosition(),
+			ocIncontextOf, &classblock_var, classblock_var, class_instance_var);
+
+	// クラスの中身を「実行」するためのSSA表現を生成する。
+	// class  {    } の中身はそれが実行されることにより、クラスインスタンスへの
+	// メンバの登録などが行われる。
+	// 関数呼び出しの文を生成する
+	tRisseSSAVariable * funccall_result = NULL;
+	tRisseSSAStatement * call_stmt = form->AddStatement(GetPosition(),
+													ocFuncCall, &funccall_result, classblock_var);
+
+	call_stmt->SetFuncExpandFlags(0);
+	call_stmt->SetBlockCount(0);
+
+	// 新しく作成したクラスインスタンスを返す
+	return class_instance_var;
+}
+//---------------------------------------------------------------------------
+
 } // namespace Risse

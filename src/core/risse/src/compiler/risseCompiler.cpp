@@ -333,8 +333,6 @@ bool tRisseCompilerFunctionGroup::GetShared(const tRisseString & n_name)
 
 
 
-
-
 //---------------------------------------------------------------------------
 void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
 {
@@ -344,18 +342,8 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	root->Dump(str);
 	RisseFPrint(stderr, str.c_str());
 
-	// トップレベルの関数グループを作成する
-	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this);
-
-	// トップレベルの関数を作成する
-	tRisseCompilerFunction *top_function = new tRisseCompilerFunction(top_function_group);
-
-	// トップレベルのSSA形式を作成する
-	tRisseSSAForm * form = new tRisseSSAForm(top_function, RISSE_WS("root"), NULL, false);
-
-	// トップレベルのSSA形式の内容を作成する
-	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
-	form->Generate(root);
+	// コンパイルを行う
+	tRisseSSAForm * form = InternalCompile(root, RISSE_WS("root"), need_result, is_expression);
 
 	// SSA形式を完結させる
 	for(gc_vector<tRisseCompilerFunctionGroup *>::iterator i = FunctionGroups.begin();
@@ -373,6 +361,48 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 
 	// ルートのコードブロックを設定する
 	ScriptBlock->SetRootCodeBlock(form->GetCodeBlock());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompiler::CompileClass(tRisseASTNode * root, const tRisseString & name,
+	tRisseSSAForm * form, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
+{
+	// クラスの内部名称を決める
+	tRisseString class_name = RISSE_WS("class ") + name + RISSE_WS(" ") +
+					tRisseString::AsString(form->GetUniqueNumber());
+
+	// コンパイルを行う
+	new_form = InternalCompile(root, class_name, true, true);
+
+	// クラスを生成する文を追加する
+	tRisseSSAStatement * defineclass_stmt =
+		form->AddStatement(root->GetPosition(), ocDefineClass, &block_var);
+	defineclass_stmt->SetName(class_name);
+	defineclass_stmt->SetDefinedForm(new_form);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAForm * tRisseCompiler::InternalCompile(tRisseASTNode * root, const tRisseString & name,
+	bool need_result, bool is_expression)
+{
+	// トップレベルの関数グループを作成する
+	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this);
+
+	// トップレベルの関数を作成する
+	tRisseCompilerFunction *top_function = new tRisseCompilerFunction(top_function_group);
+
+	// トップレベルのSSA形式を作成する
+	tRisseSSAForm * form = new tRisseSSAForm(top_function, name, NULL, false);
+
+	// トップレベルのSSA形式の内容を作成する
+	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
+	form->Generate(root);
+
+	return form;
 }
 //---------------------------------------------------------------------------
 

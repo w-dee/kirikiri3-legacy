@@ -201,7 +201,7 @@ void tRisseSSAStatement::SetName(const tRisseString & name)
 			Code == ocChildRead || Code == ocChildWrite ||
 			Code == ocReadVar || Code == ocWriteVar ||
 			Code == ocRead || Code == ocWrite ||
-			Code == ocDefineLazyBlock);
+			Code == ocDefineLazyBlock || Code == ocDefineClass);
 	Name = new tRisseString(name);
 }
 //---------------------------------------------------------------------------
@@ -215,7 +215,7 @@ const tRisseString & tRisseSSAStatement::GetName() const
 			Code == ocChildRead || Code == ocChildWrite ||
 			Code == ocReadVar || Code == ocWriteVar ||
 			Code == ocRead || Code == ocWrite ||
-			Code == ocDefineLazyBlock);
+			Code == ocDefineLazyBlock || Code == ocDefineClass);
 	RISSE_ASSERT(Name != NULL);
 	return *Name;
 }
@@ -262,9 +262,20 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocAssignGlobal:
 	case ocAssignNewArray:
 	case ocAssignNewDict:
-	case ocAssignNewRegExp:
 		RISSE_ASSERT(Declared != NULL);
 		gen->PutAssign(Declared, Code);
+		break;
+
+	case ocAssignNewRegExp:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 2);
+		gen->PutAssignNewRegExp(Declared, Used[0], Used[1]);
+		break;
+
+	case ocAssignNewClass:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 2);
+		gen->PutAssignNewClass(Declared, Used[0], Used[1]);
 		break;
 
 	case ocAssignParam:
@@ -431,12 +442,23 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			RISSE_ASSERT(child_form != NULL);
 			RISSE_ASSERT(Declared != NULL);
 			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
-			// コードブロックの参照の問題があるので注意
+			// コードブロックの参照の問題があるのでいったんリロケーション用の機構を通す
 			gen->PutCodeBlockRelocatee(Declared, child_form->GetCodeBlockIndex());
 			if(child_form->GetUseParentFrame())
 				gen->PutSetFrame(Declared);
 			else
 				gen->PutSetShare(Declared);
+		}
+		break;
+
+	case ocDefineClass:
+		{
+			tRisseSSAForm * class_form = DefinedForm;
+			RISSE_ASSERT(class_form != NULL);
+			RISSE_ASSERT(Declared != NULL);
+			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
+			// コードブロックの参照の問題があるのでいったんリロケーション用の機構を通す
+			gen->PutCodeBlockRelocatee(Declared, class_form->GetCodeBlockIndex());
 		}
 		break;
 
@@ -585,6 +607,23 @@ tRisseString tRisseSSAStatement::Dump() const
 			return ret;
 		}
 
+	case ocAssignNewClass: // 新しいクラスインスタンス
+		{
+			tRisseString ret;
+			RISSE_ASSERT(Used.size() == 2);
+			ret += Declared->Dump() + RISSE_WS(" = AssignNewClass(");
+
+			ret +=	Used[0]->Dump() + RISSE_WS(", ") +
+					Used[1]->Dump() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
 	case ocAssignParam:
 		{
 			tRisseString ret;
@@ -646,12 +685,16 @@ tRisseString tRisseSSAStatement::Dump() const
 		}
 
 	case ocDefineLazyBlock: // 遅延評価ブロックの定義
+	case ocDefineClass: // クラスの定義
 		{
 			RISSE_ASSERT(Name != NULL);
 			RISSE_ASSERT(Declared != NULL);
 
 			tRisseString ret;
-			ret += Declared->Dump() + RISSE_WS(" = DefineLazyBlock(");
+			ret += Declared->Dump() +
+				(Code == ocDefineLazyBlock ?
+					RISSE_WS(" = DefineLazyBlock(") :
+					RISSE_WS(" = DefineClass(") );
 
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 

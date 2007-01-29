@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risse [‚è‚¹]
+	Risse [ã‚Šã›]
 	 stands for "Risse Is a Sweet Script Engine"
 	Copyright (C) 2000-2007 W.Dee <dee@kikyou.info> and contributors
 
@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief ƒoƒŠƒAƒ“ƒgŒ^‚Ìƒf[ƒ^•”•ª‚ÌÀ‘•
+//! @brief ãƒãƒªã‚¢ãƒ³ãƒˆå‹ã®ãƒ‡ãƒ¼ã‚¿éƒ¨åˆ†ã®å®Ÿè£…
 //---------------------------------------------------------------------------
 #ifndef risseVariantDataH
 #define risseVariantDataH
@@ -28,138 +28,138 @@ class tRisseObjectInterface;
 class tRissePrimitiveClassBase;
 class tRisseVariantBlock;
 //---------------------------------------------------------------------------
-//! @brief	ƒoƒŠƒAƒ“ƒgŒ^‚Ìƒf[ƒ^•”
+//! @brief	ãƒãƒªã‚¢ãƒ³ãƒˆå‹ã®ãƒ‡ãƒ¼ã‚¿éƒ¨
 /*! @note
 
-tRisseStringData, tRisseVariantBlock::tObject, tRisseOctetData ‚ÌŠeæ“ª
-‚Ìƒƒ“ƒo‚Í•K‚¸‰½‚©‚Ìƒ|ƒCƒ“ƒ^‚Å‚ ‚éB‚»‚ê‚ç‚Íƒƒ“ƒo Type ‚ÆƒXƒgƒŒ[ƒW‚ğ‹¤—L
-‚·‚éB‚±‚Ìƒƒ“ƒo Type ‚Æ‹¤—L‚ğs‚Á‚Ä‚é‘‚­ƒ|ƒCƒ“ƒ^‚Í‚±‚ê‚ç‚ÍÀÛ‚É‚Í‚»‚ê‚¼‚ê
-tRisseString, tRisseObject, tRisseOctet‚Æ‚µ‚Äˆµ‚í‚ê‚é‚ªAƒf[ƒ^ƒƒ“ƒo‚ÌƒŒƒC
-ƒAƒEƒg‚Í“¯ˆê‚Å‚ ‚éB
+tRisseStringData, tRisseVariantBlock::tObject, tRisseOctetData ã®å„å…ˆé ­
+ã®ãƒ¡ãƒ³ãƒã¯å¿…ãšä½•ã‹ã®ãƒã‚¤ãƒ³ã‚¿ã§ã‚ã‚‹ã€‚ãã‚Œã‚‰ã¯ãƒ¡ãƒ³ãƒ Type ã¨ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ã‚’å…±æœ‰
+ã™ã‚‹ã€‚ã“ã®ãƒ¡ãƒ³ãƒ Type ã¨å…±æœ‰ã‚’è¡Œã£ã¦ã‚‹æ›¸ããƒã‚¤ãƒ³ã‚¿ã¯ã“ã‚Œã‚‰ã¯å®Ÿéš›ã«ã¯ãã‚Œãã‚Œ
+tRisseString, tRisseObject, tRisseOctetã¨ã—ã¦æ‰±ã‚ã‚Œã‚‹ãŒã€ãƒ‡ãƒ¼ã‚¿ãƒ¡ãƒ³ãƒã®ãƒ¬ã‚¤
+ã‚¢ã‚¦ãƒˆã¯åŒä¸€ã§ã‚ã‚‹ã€‚
 
-Šeƒ|ƒCƒ“ƒ^‚Í4‚Ì”{”‚ÌƒAƒhƒŒƒX‚É‚µ‚©”z’u‚³‚ê‚È‚¢‚±‚Æ‚ªƒƒ‚ƒŠƒAƒƒP[ƒ^‚Ìd—l
-‚¨‚æ‚Ñ risse_char ‚ÌƒTƒCƒY‚É‚æ‚è•ÛØ‚³‚ê‚Ä‚¢‚éB‚±‚Ì‚½‚ßA‰ºˆÊ2ƒrƒbƒg‚Í•K‚¸—V
-‚ñ‚Å‚¢‚é‚±‚Æ‚É‚È‚éB‚Ü‚½A0x10 –¢–‚Ì‚æ‚¤‚È‹É’[‚É’á‚¢”Ô’n‚É‚±‚ê‚ç‚Ìƒ|ƒCƒ“ƒ^
-‚ª”z’u‚³‚ê‚é‚±‚Æ‚Í‚ ‚è“¾‚È‚¢B
+å„ãƒã‚¤ãƒ³ã‚¿ã¯4ã®å€æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã«ã—ã‹é…ç½®ã•ã‚Œãªã„ã“ã¨ãŒãƒ¡ãƒ¢ãƒªã‚¢ãƒ­ã‚±ãƒ¼ã‚¿ã®ä»•æ§˜
+ãŠã‚ˆã³ risse_char ã®ã‚µã‚¤ã‚ºã«ã‚ˆã‚Šä¿è¨¼ã•ã‚Œã¦ã„ã‚‹ã€‚ã“ã®ãŸã‚ã€ä¸‹ä½2ãƒ“ãƒƒãƒˆã¯å¿…ãšéŠ
+ã‚“ã§ã„ã‚‹ã“ã¨ã«ãªã‚‹ã€‚ã¾ãŸã€0x10 æœªæº€ã®ã‚ˆã†ãªæ¥µç«¯ã«ä½ã„ç•ªåœ°ã«ã“ã‚Œã‚‰ã®ãƒã‚¤ãƒ³ã‚¿
+ãŒé…ç½®ã•ã‚Œã‚‹ã“ã¨ã¯ã‚ã‚Šå¾—ãªã„ã€‚
 
-‚»‚Ì‚½‚ßAtRisseVariant::GetType() ‚ğŒ©‚ê‚Î‚í‚©‚é‚Æ‚¨‚èAType ‚ª 4 ˆÈã
-‚È‚ç‚Î‰ºˆÊ2ƒrƒbƒg+4‚ğ Type ‚Æ‚µA4 –¢–‚È‚ç‚Î‚»‚ê‚ğ‚»‚Ì‚Ü‚Ü Type ‚Æ‚µ‚Ä•Ô
-‚µ‚Ä‚¢‚éB‚±‚±‚ç•Ó‚Í ruby ‚ÌÀ‘•‚©‚çƒqƒ“ƒg‚ğ“¾‚½•¨B
+ãã®ãŸã‚ã€tRisseVariant::GetType() ã‚’è¦‹ã‚Œã°ã‚ã‹ã‚‹ã¨ãŠã‚Šã€Type ãŒ 4 ä»¥ä¸Š
+ãªã‚‰ã°ä¸‹ä½2ãƒ“ãƒƒãƒˆ+4ã‚’ Type ã¨ã—ã€4 æœªæº€ãªã‚‰ã°ãã‚Œã‚’ãã®ã¾ã¾ Type ã¨ã—ã¦è¿”
+ã—ã¦ã„ã‚‹ã€‚ã“ã“ã‚‰è¾ºã¯ ruby ã®å®Ÿè£…ã‹ã‚‰ãƒ’ãƒ³ãƒˆã‚’å¾—ãŸç‰©ã€‚
 
-tRisseString, tRisseVariantBlock::tObject, tRisseOctet “à‚É‚ ‚éŠe‚Ìu–{“–
-‚Ìvƒ|ƒCƒ“ƒ^‚ğ‘I‚é‚É‚ÍA~0x03 ‚Æ‚Ì bit and ‚ğ‚Æ‚ê‚Î‚æ‚¢B
+tRisseString, tRisseVariantBlock::tObject, tRisseOctet å†…ã«ã‚ã‚‹å„ã®ã€Œæœ¬å½“
+ã®ã€ãƒã‚¤ãƒ³ã‚¿ã‚’é¸ã‚‹ã«ã¯ã€~0x03 ã¨ã® bit and ã‚’ã¨ã‚Œã°ã‚ˆã„ã€‚
 
-tRisseString ‚Ì“à•”ƒ|ƒCƒ“ƒ^‚ªw‚µ¦‚µ‚Ä‚¢‚éêŠ‚ÍA•¶š—ñ‚ğ•Û‚µ‚Ä‚¢‚éƒoƒb
-ƒtƒ@‚Å‚ ‚éBRisse‚Å‚ÍUTF-32•¶š—ñ‚ğ‘ÎÛ‚Æ‚·‚é‚½‚ßA‚±‚Ìƒ|ƒCƒ“ƒ^‚ª 32bit‹«ŠE
-‚É‚»‚ë‚í‚È‚¢‚±‚Æ‚Í‚È‚¢BƒfƒoƒbƒK‚È‚Ç‚Å‚»‚Ì‚Ü‚Ü UTF-32 •¶š—ñ‚ğ•\¦‚µ‚½‚¢—p
-“r‚ª‚ ‚éBtRisseString ‚Ì Type ‚ÌğŒ‚Í 0x04 ˆÈã‚©‚Â‰ºˆÊ2ƒrƒbƒg‚ª00
-‚Å‚ ‚é‚½‚ßA“à•”ƒ|ƒCƒ“ƒ^‚Ì’l‚Æ–{—ˆw‚µ¦‚µ‚Ä‚¢‚éƒ|ƒCƒ“ƒ^‚Í“¯‚¶‚É‚È‚éB‚±‚ê‚É
-‚æ‚èA“à•”ƒ|ƒCƒ“ƒ^‚ªw‚µ¦‚·ƒ|ƒCƒ“ƒ^‚ª‚»‚Ì‚Ü‚Ü•¶š—ñƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚Æ‚È‚èA
-‚»‚Ì‚Ü‚ÜƒfƒoƒbƒK‚È‚Ç‚Å“à—e‚ğ•\¦‚Å‚«‚éB
+tRisseString ã®å†…éƒ¨ãƒã‚¤ãƒ³ã‚¿ãŒæŒ‡ã—ç¤ºã—ã¦ã„ã‚‹å ´æ‰€ã¯ã€æ–‡å­—åˆ—ã‚’ä¿æŒã—ã¦ã„ã‚‹ãƒãƒƒ
+ãƒ•ã‚¡ã§ã‚ã‚‹ã€‚Risseã§ã¯UTF-32æ–‡å­—åˆ—ã‚’å¯¾è±¡ã¨ã™ã‚‹ãŸã‚ã€ã“ã®ãƒã‚¤ãƒ³ã‚¿ãŒ 32bitå¢ƒç•Œ
+ã«ãã‚ã‚ãªã„ã“ã¨ã¯ãªã„ã€‚ãƒ‡ãƒãƒƒã‚¬ãªã©ã§ãã®ã¾ã¾ UTF-32 æ–‡å­—åˆ—ã‚’è¡¨ç¤ºã—ãŸã„ç”¨
+é€”ãŒã‚ã‚‹ã€‚tRisseString ã® Type ã®æ¡ä»¶ã¯ 0x04 ä»¥ä¸Šã‹ã¤ä¸‹ä½2ãƒ“ãƒƒãƒˆãŒ00
+ã§ã‚ã‚‹ãŸã‚ã€å†…éƒ¨ãƒã‚¤ãƒ³ã‚¿ã®å€¤ã¨æœ¬æ¥æŒ‡ã—ç¤ºã—ã¦ã„ã‚‹ãƒã‚¤ãƒ³ã‚¿ã¯åŒã˜ã«ãªã‚‹ã€‚ã“ã‚Œã«
+ã‚ˆã‚Šã€å†…éƒ¨ãƒã‚¤ãƒ³ã‚¿ãŒæŒ‡ã—ç¤ºã™ãƒã‚¤ãƒ³ã‚¿ãŒãã®ã¾ã¾æ–‡å­—åˆ—ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã¨ãªã‚Šã€
+ãã®ã¾ã¾ãƒ‡ãƒãƒƒã‚¬ãªã©ã§å†…å®¹ã‚’è¡¨ç¤ºã§ãã‚‹ã€‚
 
-‚Æ‚è‚ ‚¦‚¸ tRiseVariant ‚ÌƒTƒCƒY‚ğ—}‚¦‚½‚¢‚ª‚½‚ß‚Ì‹ê“÷‚ÌôB‚±‚ñ‚È‚±‚Æ‚ğ‚µ‚È
-‚¢•û‚ª‘¬‚¢‚©‚à‚µ‚ê‚È‚¢‚µA‚±‚¤‚µ‚½•û‚ª‘¬‚¢‚©‚à‚µ‚ê‚È‚¢B 
+ã¨ã‚Šã‚ãˆãš tRiseVariant ã®ã‚µã‚¤ã‚ºã‚’æŠ‘ãˆãŸã„ãŒãŸã‚ã®è‹¦è‚‰ã®ç­–ã€‚ã“ã‚“ãªã“ã¨ã‚’ã—ãª
+ã„æ–¹ãŒé€Ÿã„ã‹ã‚‚ã—ã‚Œãªã„ã—ã€ã“ã†ã—ãŸæ–¹ãŒé€Ÿã„ã‹ã‚‚ã—ã‚Œãªã„ã€‚ 
 
-tRisseVariant ‚ÍƒpƒtƒH[ƒ}ƒ“ƒX‚ÌŠÖŒWãAILP32 ƒVƒXƒeƒ€‚Å‚Í 3 * 32bit, LP64 ƒVƒX
-ƒeƒ€‚Å‚Í 2 * 64bit ‚Éû‚Ü‚é‚æ‚¤‚É‚·‚é‚±‚ÆB
+tRisseVariant ã¯ãƒ‘ãƒ•ã‚©ãƒ¼ãƒãƒ³ã‚¹ã®é–¢ä¿‚ä¸Šã€ILP32 ã‚·ã‚¹ãƒ†ãƒ ã§ã¯ 3 * 32bit, LP64 ã‚·ã‚¹
+ãƒ†ãƒ ã§ã¯ 2 * 64bit ã«åã¾ã‚‹ã‚ˆã†ã«ã™ã‚‹ã“ã¨ã€‚
 */
 //---------------------------------------------------------------------------
 class tRisseVariantData : public tRisseCollectee
 {
 protected:
 
-	//! @brief void ƒXƒgƒŒ[ƒWŒ^
+	//! @brief void ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸å‹
 	struct tVoid
 	{
-		risse_ptruint Type; //!< ƒoƒŠƒAƒ“ƒgƒ^ƒCƒv: 0 ŒÅ’è
+		risse_ptruint Type; //!< ãƒãƒªã‚¢ãƒ³ãƒˆã‚¿ã‚¤ãƒ—: 0 å›ºå®š
 	};
 
-	//! @brief integer ƒXƒgƒŒ[ƒWŒ^
+	//! @brief integer ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸å‹
 	struct tInteger
 	{
-		risse_ptruint Type; //!< ƒoƒŠƒAƒ“ƒgƒ^ƒCƒv: 1 ŒÅ’è
-		risse_int64  Value; //!< ’l
+		risse_ptruint Type; //!< ãƒãƒªã‚¢ãƒ³ãƒˆã‚¿ã‚¤ãƒ—: 1 å›ºå®š
+		risse_int64  Value; //!< å€¤
 	};
 
-	//! @brief real ƒXƒgƒŒ[ƒWŒ^
+	//! @brief real ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸å‹
 	struct tReal
 	{
-		risse_ptruint Type; //!< ƒoƒŠƒAƒ“ƒgƒ^ƒCƒv: 2 ŒÅ’è
-		risse_real Value; //!< ’l
+		risse_ptruint Type; //!< ãƒãƒªã‚¢ãƒ³ãƒˆã‚¿ã‚¤ãƒ—: 2 å›ºå®š
+		risse_real Value; //!< å€¤
 	};
 
-	//! @brief boolean ƒXƒgƒŒ[ƒWŒ^
+	//! @brief boolean ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸å‹
 	struct tBoolean
 	{
-		risse_ptruint Type; //!< ƒoƒŠƒAƒ“ƒgƒ^ƒCƒv: 3 ŒÅ’è
-		bool Value; //!< ’l
+		risse_ptruint Type; //!< ãƒãƒªã‚¢ãƒ³ãƒˆã‚¿ã‚¤ãƒ—: 3 å›ºå®š
+		bool Value; //!< å€¤
 	};
 
-	//! @brief object ƒXƒgƒŒ[ƒWŒ^
+	//! @brief object ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸å‹
 	struct tObject
 	{
-		tRisseObjectInterface * Intf; //!< ƒIƒuƒWƒFƒNƒgƒCƒ“ƒ^[ƒtƒF[ƒX‚Ö‚Ìƒ|ƒCƒ“ƒ^(‰ºˆÊ‚Ì2ƒrƒbƒg‚Íí‚É10)
+		tRisseObjectInterface * Intf; //!< ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ã¸ã®ãƒã‚¤ãƒ³ã‚¿(ä¸‹ä½ã®2ãƒ“ãƒƒãƒˆã¯å¸¸ã«10)
 		const tRisseVariantBlock * Context;
-						//!< (Intf‚ªƒƒ\ƒbƒhƒIƒuƒWƒFƒNƒg‚âƒvƒƒpƒeƒBƒIƒuƒWƒFƒNƒg‚ğ
-						//!< w‚µ‚Ä‚¢‚é‚Æ‚µ‚Ä)ƒƒ\ƒbƒh‚ª“®ì‚·‚éƒRƒ“ƒeƒLƒXƒg
+						//!< (IntfãŒãƒ¡ã‚½ãƒƒãƒ‰ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚„ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’
+						//!< æŒ‡ã—ã¦ã„ã‚‹ã¨ã—ã¦)ãƒ¡ã‚½ãƒƒãƒ‰ãŒå‹•ä½œã™ã‚‹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
 	};
 	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObjectInterface*>((risse_ptruint)0x10))
 
-	//! @brief IntegerŒ^‚Ö‚ÌQÆ‚ğæ“¾ @return IntegerŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌQÆ
+	//! @brief Integerå‹ã¸ã®å‚ç…§ã‚’å–å¾— @return Integerå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®å‚ç…§
 	risse_int64 & AsInteger() { return reinterpret_cast<tInteger*>(Storage)->Value; }
-	//! @brief IntegerŒ^‚Ö‚ÌconstQÆ‚ğæ“¾ @return IntegerŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌconstQÆ
+	//! @brief Integerå‹ã¸ã®constå‚ç…§ã‚’å–å¾— @return Integerå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®constå‚ç…§
 	const risse_int64 & AsInteger() const { return reinterpret_cast<const tInteger*>(Storage)->Value; }
 
-	//! @brief RealŒ^‚Ö‚ÌQÆ‚ğæ“¾ @return RealŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌQÆ
+	//! @brief Realå‹ã¸ã®å‚ç…§ã‚’å–å¾— @return Realå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®å‚ç…§
 	risse_real & AsReal() { return reinterpret_cast<tReal*>(Storage)->Value; }
-	//! @brief RealŒ^‚Ö‚ÌconstQÆ‚ğæ“¾ @return RealŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌconstQÆ
+	//! @brief Realå‹ã¸ã®constå‚ç…§ã‚’å–å¾— @return Realå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®constå‚ç…§
 	const risse_real & AsReal() const { return reinterpret_cast<const tReal*>(Storage)->Value; }
 
-	//! @brief BooleanŒ^‚Ö‚ÌQÆ‚ğæ“¾ @return BooleanŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌQÆ
+	//! @brief Booleanå‹ã¸ã®å‚ç…§ã‚’å–å¾— @return Booleanå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®å‚ç…§
 	bool & AsBoolean() { return reinterpret_cast<tBoolean*>(Storage)->Value; }
-	//! @brief BooleanŒ^‚Ö‚ÌconstQÆ‚ğæ“¾ @return BooleanŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌconstQÆ
+	//! @brief Booleanå‹ã¸ã®constå‚ç…§ã‚’å–å¾— @return Booleanå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®constå‚ç…§
 	const bool & AsBoolean() const { return reinterpret_cast<const tBoolean*>(Storage)->Value; }
 
-	//! @brief StringŒ^‚Ö‚ÌQÆ‚ğæ“¾ @return StringŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌQÆ
+	//! @brief Stringå‹ã¸ã®å‚ç…§ã‚’å–å¾— @return Stringå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®å‚ç…§
 	tRisseString & AsString() { return *reinterpret_cast<tRisseString*>(Storage); }
-	//! @brief StringŒ^‚Ö‚ÌconstQÆ‚ğæ“¾ @return StringŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌconstQÆ
+	//! @brief Stringå‹ã¸ã®constå‚ç…§ã‚’å–å¾— @return Stringå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®constå‚ç…§
 	const tRisseString & AsString() const { return *reinterpret_cast<const tRisseString*>(Storage); }
 
-	//! @brief OctetŒ^‚Ö‚ÌQÆ‚ğæ“¾ @return OctetŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌQÆ
+	//! @brief Octetå‹ã¸ã®å‚ç…§ã‚’å–å¾— @return Octetå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®å‚ç…§
 	tRisseOctet & AsOctet() { return *reinterpret_cast<tRisseOctet*>(Storage); }
-	//! @brief OctetŒ^‚Ö‚ÌconstQÆ‚ğæ“¾ @return OctetŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌconstQÆ
+	//! @brief Octetå‹ã¸ã®constå‚ç…§ã‚’å–å¾— @return Octetå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®constå‚ç…§
 	const tRisseOctet & AsOctet() const { return *reinterpret_cast<const tRisseOctet*>(Storage); }
 
-	//! @brief ObjectŒ^‚Ö‚ÌQÆ‚ğæ“¾ @return ObjectŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌQÆ
+	//! @brief Objectå‹ã¸ã®å‚ç…§ã‚’å–å¾— @return Objectå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®å‚ç…§
 	tObject & AsObject() { return *reinterpret_cast<tObject*>(Storage); }
-	//! @brief ObjectŒ^‚Ö‚ÌconstQÆ‚ğæ“¾ @return ObjectŒ^ƒtƒB[ƒ‹ƒh‚Ö‚ÌconstQÆ
+	//! @brief Objectå‹ã¸ã®constå‚ç…§ã‚’å–å¾— @return Objectå‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®constå‚ç…§
 	const tObject & AsObject() const { return *reinterpret_cast<const tObject*>(Storage); }
 
 public:
-	//! @brief tRisseObjectInterface‚Ö‚Ìƒ|ƒCƒ“ƒ^‚ğæ“¾ @return tRisseObjectInterface‚Ö‚Ìƒ|ƒCƒ“ƒ^
-	//! @note Intf‚ğ‚¢‚¶‚éê‡‚Íí‚É‚±‚Ìƒƒ\ƒbƒh‚ğg‚¤‚±‚Æ
+	//! @brief tRisseObjectInterfaceã¸ã®ãƒã‚¤ãƒ³ã‚¿ã‚’å–å¾— @return tRisseObjectInterfaceã¸ã®ãƒã‚¤ãƒ³ã‚¿
+	//! @note Intfã‚’ã„ã˜ã‚‹å ´åˆã¯å¸¸ã«ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ã†ã“ã¨
 	tRisseObjectInterface * GetObjectInterface() const
 	{
 		RISSE_ASSERT(GetType() == vtObject);
 		tRisseObjectInterface * ret = reinterpret_cast<tRisseObjectInterface*>(
 			reinterpret_cast<risse_ptruint>(AsObject().Intf) - 2);
-		// 2 = Intf ‚Ì‰ºˆÊ2ƒrƒbƒg‚Íí‚É10‚È‚Ì‚ÅA‚±‚ê‚ğŒ³‚É–ß‚·
+		// 2 = Intf ã®ä¸‹ä½2ãƒ“ãƒƒãƒˆã¯å¸¸ã«10ãªã®ã§ã€ã“ã‚Œã‚’å…ƒã«æˆ»ã™
 		if(ret == RISSE_OBJECT_NULL_PTR) return NULL;
-			// "null"‚ª“ü‚Á‚Ä‚¢‚½ê‡‚ÍRISSE_OBJECT_NULL_PTR‚ª“¾‚ç‚ê‚é‚Ì‚Å‚¿‚á‚ñ‚ÆNULL‚ğ•Ô‚·
+			// "null"ãŒå…¥ã£ã¦ã„ãŸå ´åˆã¯RISSE_OBJECT_NULL_PTRãŒå¾—ã‚‰ã‚Œã‚‹ã®ã§ã¡ã‚ƒã‚“ã¨NULLã‚’è¿”ã™
 		return ret;
 	}
 
 protected:
-	//! @brief tRisseObjectInterface‚Ö‚Ìƒ|ƒCƒ“ƒ^‚ğİ’è @param intf tRisseObjectInterface‚Ö‚Ìƒ|ƒCƒ“ƒ^
-	//! @note Intf‚ğ‚¢‚¶‚éê‡‚Íí‚É‚±‚Ìƒƒ\ƒbƒh‚ğg‚¤‚±‚Æ
+	//! @brief tRisseObjectInterfaceã¸ã®ãƒã‚¤ãƒ³ã‚¿ã‚’è¨­å®š @param intf tRisseObjectInterfaceã¸ã®ãƒã‚¤ãƒ³ã‚¿
+	//! @note Intfã‚’ã„ã˜ã‚‹å ´åˆã¯å¸¸ã«ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ã†ã“ã¨
 	void SetObjectIntf(tRisseObjectInterface * intf)
 	{
 		RISSE_ASSERT(GetType() == vtObject);
 		if(!intf) intf = RISSE_OBJECT_NULL_PTR;
-			// "null"‚Ì‘ã‚í‚è‚ÉRISSE_OBJECT_NULL_PTR‚ğg‚¤
+			// "null"ã®ä»£ã‚ã‚Šã«RISSE_OBJECT_NULL_PTRã‚’ä½¿ã†
 		AsObject().Intf = reinterpret_cast<tRisseObjectInterface*>(
 			reinterpret_cast<risse_ptruint>(intf) + 2);
-		// 2 = Intf ‚Ì‰ºˆÊ2ƒrƒbƒg‚Íí‚É10‚È‚Ì‚ÅA‚±‚ê‚ğ‚½‚·
+		// 2 = Intf ã®ä¸‹ä½2ãƒ“ãƒƒãƒˆã¯å¸¸ã«10ãªã®ã§ã€ã“ã‚Œã‚’ãŸã™
 	}
 
 
@@ -176,25 +176,25 @@ protected:
 			RV_SIZE_MAX(sizeof(tObject),      \
 					4                         \
 			 ))))))))
-			// ª 4 ‚Íƒ_ƒ~[
+			// â†‘ 4 ã¯ãƒ€ãƒŸãƒ¼
 
 
-	//! @brief ŠeƒoƒŠƒAƒ“ƒg‚Ì“à•”Œ^‚Ì union
+	//! @brief å„ãƒãƒªã‚¢ãƒ³ãƒˆã®å†…éƒ¨å‹ã® union
 	union
 	{
-		risse_ptruint Type;	//!< ƒoƒŠƒAƒ“ƒgƒ^ƒCƒv
+		risse_ptruint Type;	//!< ãƒãƒªã‚¢ãƒ³ãƒˆã‚¿ã‚¤ãƒ—
 
-		//! @brief	ƒf[ƒ^ƒXƒgƒŒ[ƒW
+		//! @brief	ãƒ‡ãƒ¼ã‚¿ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸
 		//! @note
-		//! ‚í‚´‚í‚´ƒ}ƒNƒ‚ÅŠe\‘¢‘Ì‚ÌƒTƒCƒY‚ÌÅ‘å’l‚ğ“¾‚ÄA‚»‚Ì—v‘f”‚ğ
-		//! ‚à‚Á‚½ char ”z—ñ‚ğŠm•Û‚µ‚Ä‚¢‚é‚ª(RV_STORAGE_SIZE‚ÌéŒ¾‚ğQÆ)A
-		//! ‚±‚ê‚Í gcc ‚È‚Ç union ‚Å\‘¢‘Ì‚ğ”z’u‚·‚éÛ‚ÉA–]‚Ü‚µ‚­‚È‚¢ƒpƒbƒLƒ“ƒO‚ğ
-		//! s‚Á‚Ä‚µ‚Ü‚¤‰Â”\«‚ª‚ ‚é‚½‚ßB
+		//! ã‚ã–ã‚ã–ãƒã‚¯ãƒ­ã§å„æ§‹é€ ä½“ã®ã‚µã‚¤ã‚ºã®æœ€å¤§å€¤ã‚’å¾—ã¦ã€ãã®è¦ç´ æ•°ã‚’
+		//! ã‚‚ã£ãŸ char é…åˆ—ã‚’ç¢ºä¿ã—ã¦ã„ã‚‹ãŒ(RV_STORAGE_SIZEã®å®£è¨€ã‚’å‚ç…§)ã€
+		//! ã“ã‚Œã¯ gcc ãªã© union ã§æ§‹é€ ä½“ã‚’é…ç½®ã™ã‚‹éš›ã«ã€æœ›ã¾ã—ããªã„ãƒ‘ãƒƒã‚­ãƒ³ã‚°ã‚’
+		//! è¡Œã£ã¦ã—ã¾ã†å¯èƒ½æ€§ãŒã‚ã‚‹ãŸã‚ã€‚
 		char Storage[RV_STORAGE_SIZE];
 	};
 
 public:
-	//! @brief ƒoƒŠƒAƒ“ƒg‚Ìƒ^ƒCƒv
+	//! @brief ãƒãƒªã‚¢ãƒ³ãƒˆã®ã‚¿ã‚¤ãƒ—
 	enum tType
 	{
 		vtVoid			= 0,
@@ -207,31 +207,31 @@ public:
 	//	vtReserved		= 4 + 3,
 	};
 
-	//! @brief ƒoƒŠƒAƒ“ƒg‚Ìƒ^ƒCƒv‚ğ“¾‚é
-	//! @return ƒoƒŠƒAƒ“ƒg‚Ìƒ^ƒCƒv
+	//! @brief ãƒãƒªã‚¢ãƒ³ãƒˆã®ã‚¿ã‚¤ãƒ—ã‚’å¾—ã‚‹
+	//! @return ãƒãƒªã‚¢ãƒ³ãƒˆã®ã‚¿ã‚¤ãƒ—
 	tType GetType() const
 	{
 		return static_cast<tType>((Type & 3) + ( (Type >= 4) << 2 ));
 
-		// ã‹L‚Ìs‚ÍˆÈ‰º‚Ì2s‚Æ“¯‚¶
+		// ä¸Šè¨˜ã®è¡Œã¯ä»¥ä¸‹ã®2è¡Œã¨åŒã˜
 		//	if(Type >= 4) return static_cast<tType>((Type & 3) + 4);
 		//	return static_cast<tType>(Type);
 	}
 
-	//! @brief ƒoƒŠƒAƒ“ƒg‚ªvoid‚©‚Ç‚¤‚©‚ğ“¾‚é
-	//! @return ƒoƒŠƒAƒ“ƒg‚ªvoid‚©‚Ç‚¤‚©
+	//! @brief ãƒãƒªã‚¢ãƒ³ãƒˆãŒvoidã‹ã©ã†ã‹ã‚’å¾—ã‚‹
+	//! @return ãƒãƒªã‚¢ãƒ³ãƒˆãŒvoidã‹ã©ã†ã‹
 	bool IsVoid() const
 	{
 		return Type == static_cast<risse_ptruint>(vtVoid);
-		// ã‹L‚Ìs‚ÍˆÈ‰º‚Ìs‚Æ“¯‚¶
+		// ä¸Šè¨˜ã®è¡Œã¯ä»¥ä¸‹ã®è¡Œã¨åŒã˜
 		// return GetType() == vtVoid;
 	}
 
-	//! @brief		“à—e‚ğ‰Šú‰»‚·‚é (void ‚É‚·‚é)
-	//! @note		‚±‚Ìƒƒ\ƒbƒh‚Í Type ‚ğ vtVoid ‚É‚·‚é‚±‚Æ‚É‚æ‚è
-	//!				Œ^‚ğ void ‚É‚·‚é‚¾‚¯‚Å‚ ‚éB“à•”‚Ìƒƒ“ƒo‚ª•Û‚µ‚Ä‚¢‚éƒ|ƒCƒ“ƒ^‚È‚Ç‚ğ
-	//!				”j‰ó‚·‚é‚í‚¯‚Å‚Í‚È‚¢‚Ì‚ÅAQÆ‚Í‚¢‚Ü‚¾•Û‚³‚ê‚½‚Ü‚Ü‚É‚È‚é‰Â”\«
-	//!				‚ª‚ ‚é‚±‚Æ‚É’ˆÓ‚·‚é‚±‚ÆB
+	//! @brief		å†…å®¹ã‚’åˆæœŸåŒ–ã™ã‚‹ (void ã«ã™ã‚‹)
+	//! @note		ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã¯ Type ã‚’ vtVoid ã«ã™ã‚‹ã“ã¨ã«ã‚ˆã‚Š
+	//!				å‹ã‚’ void ã«ã™ã‚‹ã ã‘ã§ã‚ã‚‹ã€‚å†…éƒ¨ã®ãƒ¡ãƒ³ãƒãŒä¿æŒã—ã¦ã„ã‚‹ãƒã‚¤ãƒ³ã‚¿ãªã©ã‚’
+	//!				ç ´å£Šã™ã‚‹ã‚ã‘ã§ã¯ãªã„ã®ã§ã€å‚ç…§ã¯ã„ã¾ã ä¿æŒã•ã‚ŒãŸã¾ã¾ã«ãªã‚‹å¯èƒ½æ€§
+	//!				ãŒã‚ã‚‹ã“ã¨ã«æ³¨æ„ã™ã‚‹ã“ã¨ã€‚
 	void Clear()
 	{
 		Type = vtVoid;

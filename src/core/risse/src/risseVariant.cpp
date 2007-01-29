@@ -107,11 +107,13 @@ tRisseVariantBlock::tRetValue
 		}
 
 	case vtObject:
-		tRisseObjectInterface * intf = GetObjectInterface();
-		const tRisseVariantBlock * this_context = AsObject().Context;
-		return intf->Operate(code, result, name, flags, args,
-			this_context?*this_context:This
-			);
+		{
+			tRisseObjectInterface * intf = GetObjectInterface();
+			const tRisseVariantBlock * this_context = AsObject().Context;
+			return intf->Operate(code, result, name, flags, args,
+				this_context?*this_context:This
+				);
+		}
 
 	default:
 		break; // TODO: これ以外のvtに対する処理

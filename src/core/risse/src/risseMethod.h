@@ -15,7 +15,7 @@
 
 #include "risseTypes.h"
 #include "risseAssert.h"
-
+#include "risseVariantData.h"
 
 namespace Risse
 {
@@ -234,6 +234,19 @@ public:
 	void SetBlockArgument(risse_size n, const tRisseVariant &v)
 	{
 		Arguments[n+ArgumentCount] = &v;
+	}
+
+	//! @brief		引数が存在するかどうかを得る
+	//! @param		n		パラメータ位置
+	//! @return		引数が存在するかどうか
+	bool HasArgument(risse_size n) const
+	{
+		if(GetArgumentCount() <= n) return false;
+		// この時点で tRisseVariant と tRisseVariantData の両方が
+		// 使用可能である (二つのクラス間の関係が定義できている) とは限らないため
+		// やむを得ず reinterpret_cast をつかう。これはダウンキャストなので
+		// 正常に動作するはずである。
+		return !reinterpret_cast<const tRisseVariantData*>(Arguments[n])->IsVoid();
 	}
 };
 //---------------------------------------------------------------------------

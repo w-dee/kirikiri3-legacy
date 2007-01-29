@@ -44,6 +44,17 @@ static void Class_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 親クラスの同名メソッドを呼び出す
 	// TODO: コンストラクタの正しい実装
+
+	if(args.HasArgument(0))
+	{
+		// スーパークラスが指定されている
+		// super を登録
+		tRisseOperateFlags access_flags =
+			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
+		This.SetPropertyDirect(ss_super,
+			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar))|access_flags,
+			args[0], This);
+	}
 }
 //---------------------------------------------------------------------------
 

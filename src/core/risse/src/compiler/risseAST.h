@@ -785,7 +785,8 @@ public:
 	//! @param		init		初期値を表すSSA形式変数
 	//! @param		attrib		変数の属性
 	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseString & name,
-			tRisseSSAVariable * init, tRisseMemberAttribute attrib = tRisseMemberAttribute::pcVar);
+			tRisseSSAVariable * init,
+			tRisseMemberAttribute attrib = tRisseMemberAttribute(tRisseMemberAttribute::pcVar));
 };
 //---------------------------------------------------------------------------
 

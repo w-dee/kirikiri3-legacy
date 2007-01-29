@@ -26,7 +26,6 @@
 
 namespace Risse
 {
-class tRisseMethodArgument;
 class tRisseVariantBlock;
 typedef tRisseVariantBlock tRisseVariant;
 class tRisseRTTI;

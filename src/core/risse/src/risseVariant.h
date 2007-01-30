@@ -626,6 +626,7 @@ public: // 演算子
 		case vtVoid:	
 		case vtInteger:	
 		case vtReal:	
+		case vtNull:	
 		case vtString:	
 		case vtOctet:	
 		case vtBoolean:	

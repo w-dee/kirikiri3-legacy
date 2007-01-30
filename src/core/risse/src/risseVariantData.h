@@ -39,7 +39,7 @@ tRisseString, tRisseObject, tRisseOctetとして扱われるが、データメ�
 
 各ポインタは4の倍数のアドレスにしか配置されないことがメモリアロケータの仕様
 および risse_char のサイズにより保証されている。このため、下位2ビットは必ず遊
-んでいることになる。また、0x10 未満のような極端に低い番地にこれらのポインタ
+んでいることになる。また、0x100 未満のような極端に低い番地にこれらのポインタ
 が配置されることはあり得ない。
 
 そのため、tRisseVariant::GetType() を見ればわかるとおり、Type が 4 以上
@@ -91,8 +91,19 @@ protected:
 	//! @brief boolean ストレージ型
 	struct tBoolean
 	{
+		risse_ptruint Type; //!< バリアントタイプ: 0x42 = false, 0x72 = true
+	};
+
+	//! @brief boolean ストレージがfalseの時のTypeの値
+	//! @note  この数字は最下位の2ビットが10である以外は特に意味はない
+	static const risse_ptruint BooleanFalse = 0x42;
+	//! @brief boolean ストレージがtrueの時のTypeの値
+	static const risse_ptruint BooleanTrue = 0x72;
+
+	//! @brief null ストレージ型
+	struct tNull
+	{
 		risse_ptruint Type; //!< バリアントタイプ: 3 固定
-		bool Value; //!< 値
 	};
 
 	//! @brief object ストレージ型
@@ -103,37 +114,37 @@ protected:
 						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
 						//!< 指しているとして)メソッドが動作するコンテキスト
 	};
-	#define RISSE_OBJECT_NULL_PTR (reinterpret_cast<tRisseObjectInterface*>((risse_ptruint)0x10))
 
 	//! @brief Integer型への参照を取得 @return Integer型フィールドへの参照
 	risse_int64 & AsInteger() { return reinterpret_cast<tInteger*>(Storage)->Value; }
 	//! @brief Integer型へのconst参照を取得 @return Integer型フィールドへのconst参照
-	const risse_int64 & AsInteger() const { return reinterpret_cast<const tInteger*>(Storage)->Value; }
+	const risse_int64 & AsInteger() const { RISSE_ASSERT(GetType() == vtInteger); return reinterpret_cast<const tInteger*>(Storage)->Value; }
 
 	//! @brief Real型への参照を取得 @return Real型フィールドへの参照
 	risse_real & AsReal() { return reinterpret_cast<tReal*>(Storage)->Value; }
 	//! @brief Real型へのconst参照を取得 @return Real型フィールドへのconst参照
-	const risse_real & AsReal() const { return reinterpret_cast<const tReal*>(Storage)->Value; }
-
-	//! @brief Boolean型への参照を取得 @return Boolean型フィールドへの参照
-	bool & AsBoolean() { return reinterpret_cast<tBoolean*>(Storage)->Value; }
-	//! @brief Boolean型へのconst参照を取得 @return Boolean型フィールドへのconst参照
-	const bool & AsBoolean() const { return reinterpret_cast<const tBoolean*>(Storage)->Value; }
+	const risse_real & AsReal() const { RISSE_ASSERT(GetType() == vtReal); return reinterpret_cast<const tReal*>(Storage)->Value; }
 
 	//! @brief String型への参照を取得 @return String型フィールドへの参照
 	tRisseString & AsString() { return *reinterpret_cast<tRisseString*>(Storage); }
 	//! @brief String型へのconst参照を取得 @return String型フィールドへのconst参照
-	const tRisseString & AsString() const { return *reinterpret_cast<const tRisseString*>(Storage); }
+	const tRisseString & AsString() const { RISSE_ASSERT(GetType() == vtString); return *reinterpret_cast<const tRisseString*>(Storage); }
 
 	//! @brief Octet型への参照を取得 @return Octet型フィールドへの参照
 	tRisseOctet & AsOctet() { return *reinterpret_cast<tRisseOctet*>(Storage); }
 	//! @brief Octet型へのconst参照を取得 @return Octet型フィールドへのconst参照
-	const tRisseOctet & AsOctet() const { return *reinterpret_cast<const tRisseOctet*>(Storage); }
+	const tRisseOctet & AsOctet() const { RISSE_ASSERT(GetType() == vtOctet); return *reinterpret_cast<const tRisseOctet*>(Storage); }
 
 	//! @brief Object型への参照を取得 @return Object型フィールドへの参照
 	tObject & AsObject() { return *reinterpret_cast<tObject*>(Storage); }
 	//! @brief Object型へのconst参照を取得 @return Object型フィールドへのconst参照
-	const tObject & AsObject() const { return *reinterpret_cast<const tObject*>(Storage); }
+	const tObject & AsObject() const { RISSE_ASSERT(GetType() == vtObject); return *reinterpret_cast<const tObject*>(Storage); }
+
+	//! @brief Boolean型への参照を取得 @return Boolean型フィールドへの参照
+	tBoolean & AsBoolean() { return *reinterpret_cast<tBoolean*>(Storage); }
+	//! @brief Boolean型へのconst参照を取得 @return Boolean型フィールドへのconst参照
+	const tBoolean & AsBoolean() const { RISSE_ASSERT(GetType() == vtBoolean); return *reinterpret_cast<const tBoolean*>(Storage); }
+
 
 public:
 	//! @brief tRisseObjectInterfaceへのポインタを取得 @return tRisseObjectInterfaceへのポインタ
@@ -142,10 +153,9 @@ public:
 	{
 		RISSE_ASSERT(GetType() == vtObject);
 		tRisseObjectInterface * ret = reinterpret_cast<tRisseObjectInterface*>(
-			reinterpret_cast<risse_ptruint>(AsObject().Intf) - 2);
-		// 2 = Intf の下位2ビットは常に10なので、これを元に戻す
-		if(ret == RISSE_OBJECT_NULL_PTR) return NULL;
-			// "null"が入っていた場合はRISSE_OBJECT_NULL_PTRが得られるのでちゃんとNULLを返す
+			reinterpret_cast<risse_ptruint>(AsObject().Intf) - 3);
+		// 2 = Intf の下位2ビットは常に11なので、これを元に戻す
+		RISSE_ASSERT(ret != NULL);
 		return ret;
 	}
 
@@ -155,27 +165,26 @@ protected:
 	void SetObjectIntf(tRisseObjectInterface * intf)
 	{
 		RISSE_ASSERT(GetType() == vtObject);
-		if(!intf) intf = RISSE_OBJECT_NULL_PTR;
-			// "null"の代わりにRISSE_OBJECT_NULL_PTRを使う
 		AsObject().Intf = reinterpret_cast<tRisseObjectInterface*>(
-			reinterpret_cast<risse_ptruint>(intf) + 2);
-		// 2 = Intf の下位2ビットは常に10なので、これをたす
+			reinterpret_cast<risse_ptruint>(intf) + 3);
+		// 2 = Intf の下位2ビットは常に11なので、これをたす
 	}
 
 
-
+protected:
 	#define RV_SIZE_MAX(a, b) ((a)>(b)?(a):(b))
 	#define RV_STORAGE_SIZE \
 			RV_SIZE_MAX(sizeof(risse_ptruint),\
 			RV_SIZE_MAX(sizeof(tVoid),        \
 			RV_SIZE_MAX(sizeof(tInteger),     \
 			RV_SIZE_MAX(sizeof(tReal),        \
-			RV_SIZE_MAX(sizeof(tBoolean),     \
+			RV_SIZE_MAX(sizeof(tNull),        \
 			RV_SIZE_MAX(sizeof(tRisseString), \
 			RV_SIZE_MAX(sizeof(tRisseOctet),  \
+			RV_SIZE_MAX(sizeof(tBoolean),     \
 			RV_SIZE_MAX(sizeof(tObject),      \
 					4                         \
-			 ))))))))
+			 )))))))))
 			// ↑ 4 はダミー
 
 
@@ -200,11 +209,11 @@ public:
 		vtVoid			= 0,
 		vtInteger		= 1,
 		vtReal			= 2,
-		vtBoolean		= 3,
+		vtNull			= 3,
 		vtString		= 4 + 0,
 		vtOctet			= 4 + 1,
-		vtObject		= 4 + 2,
-	//	vtReserved		= 4 + 3,
+		vtBoolean		= 4 + 2,
+		vtObject		= 4 + 3,
 	};
 
 	//! @brief バリアントのタイプを得る
@@ -227,6 +236,15 @@ public:
 		// return GetType() == vtVoid;
 	}
 
+	//! @brief バリアントがnullかどうかを得る
+	//! @return バリアントがnullかどうか
+	bool IsNull() const
+	{
+		return Type == static_cast<risse_ptruint>(vtNull);
+		// 上記の行は以下の行と同じ
+		// return GetType() == vtNull;
+	}
+
 	//! @brief		内容を初期化する (void にする)
 	//! @note		このメソッドは Type を vtVoid にすることにより
 	//!				型を void にするだけである。内部のメンバが保持しているポインタなどを
@@ -235,6 +253,16 @@ public:
 	void Clear()
 	{
 		Type = vtVoid;
+	}
+
+	//! @brief		内容をNULLにする
+	//! @note		このメソッドは Type を vtNull にすることにより
+	//!				型を null にするだけである。内部のメンバが保持しているポインタなどを
+	//!				破壊するわけではないので、参照はいまだ保持されたままになる可能性
+	//!				があることに注意すること。
+	void Nullize()
+	{
+		Type = vtNull;
 	}
 };
 //---------------------------------------------------------------------------

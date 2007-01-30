@@ -28,16 +28,25 @@ namespace Risse
 //---------------------------------------------------------------------------
 class tRisseVariantBlock : public tRisseVariantData, public tRisseOperateRetValue
 {
-private: // null オブジェクト
-	//! @brief null値を表すstaticな領域
-	struct tNullObject
+
+private: // static オブジェクト
+	//! @brief null/void/などの特殊な値を表すstaticな領域
+	struct tStaticObject
 	{
-		risse_ptruint Type; //!< バリアントタイプ(= RISSE_OBJECT_NULL_PTR固定)
+		risse_ptruint Type; //!< バリアントタイプ
 		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint)]; //!< 残り(0で埋める) パディングは問題にならないはず
 	};
-	static tNullObject NullObject;
+	static tStaticObject VoidObject;
+	static tStaticObject NullObject;
 
-public: // null オブジェクト
+public: // static オブジェクト
+	//! @brief		void オブジェクトを得る
+	//! @return		void オブジェクトへのstaticなconst参照
+	static const tRisseVariantBlock & GetVoidObject()
+	{
+		return *reinterpret_cast<tRisseVariantBlock*>(&VoidObject);
+	}
+
 	//! @brief		null オブジェクトを得る
 	//! @return		null オブジェクトへのstaticなconst参照
 	static const tRisseVariantBlock & GetNullObject()
@@ -74,9 +83,10 @@ public: // コンストラクタ/代入演算子
 		case vtVoid:		Clear();					break;
 		case vtInteger:		*this = ref.AsInteger();	break;
 		case vtReal:		*this = ref.AsReal();		break;
-		case vtBoolean:		*this = ref.AsBoolean();	break;
+		case vtNull:		Nullize();					break;
 		case vtString:		*this = ref.AsString();		break;
 		case vtOctet:		*this = ref.AsOctet();		break;
+		case vtBoolean:		Type = ref.Type;			break;
 		case vtObject:		*this = ref.AsObject();		break;
 		}
 	}
@@ -124,8 +134,7 @@ public: // コンストラクタ/代入演算子
 	//! @param		ref		元となる真偽値
 	tRisseVariantBlock & operator = (const bool ref)
 	{
-		Type = vtBoolean;
-		AsBoolean() = ref;
+		Type = ref?BooleanTrue:BooleanFalse;
 		return *this;
 	}
 
@@ -229,6 +238,7 @@ public: // Object関連
 	//!				チェックしないので注意すること
 	void SetContext(const tRisseVariantBlock * context)
 	{
+		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
 		AsObject().Context = context;
 	}
 
@@ -250,13 +260,6 @@ public: // Object関連
 		if(!AsObject().Context) AsObject().Context = context;
 	}
 
-	//! @brief		オブジェクトが null かどうかを得る
-	//! @note		型がオブジェクトで無かった場合は false を返す
-	bool IsNull() const
-	{
-		if(GetType() != vtObject) return false;
-		return GetObjectInterface() == NULL;
-	}
 public: // operate
 	//! @brief		オブジェクトに対して操作を行う(失敗した場合は例外を発生させる)
 	//! @param		code	オペレーションコード
@@ -532,22 +535,22 @@ public: // 演算子
 		case vtVoid:	return GetPropertyDirect_Void     (name, flags, This);
 		case vtInteger:	return GetPropertyDirect_Integer  (name, flags, This);
 		case vtReal:	return GetPropertyDirect_Real     (name, flags, This);
-		case vtBoolean:	return GetPropertyDirect_Boolean  (name, flags, This);
+		case vtNull:	return GetPropertyDirect_Null     (name, flags, This);
 		case vtString:	return GetPropertyDirect_String   (name, flags, This);
 		case vtOctet:	return GetPropertyDirect_Octet    (name, flags, This);
+		case vtBoolean:	return GetPropertyDirect_Boolean  (name, flags, This);
 		case vtObject:	return GetPropertyDirect_Object   (name, flags, This);
-
-		default:
-			return tRisseVariantBlock();
 		}
+		return tRisseVariant();
 	}
 
 	tRisseVariantBlock GetPropertyDirect_Void    (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock GetPropertyDirect_Integer (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock GetPropertyDirect_Real    (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock GetPropertyDirect_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock GetPropertyDirect_Null    (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock GetPropertyDirect_String  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock GetPropertyDirect_Octet   (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock GetPropertyDirect_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock GetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const ;
 
 	//-----------------------------------------------------------------------
@@ -565,22 +568,21 @@ public: // 演算子
 		case vtVoid:	SetPropertyDirect_Void     (name, flags, value, This); return;
 		case vtInteger:	SetPropertyDirect_Integer  (name, flags, value, This); return;
 		case vtReal:	SetPropertyDirect_Real     (name, flags, value, This); return;
-		case vtBoolean:	SetPropertyDirect_Boolean  (name, flags, value, This); return;
+		case vtNull:	SetPropertyDirect_Null     (name, flags, value, This); return;
 		case vtString:	SetPropertyDirect_String   (name, flags, value, This); return;
 		case vtOctet:	SetPropertyDirect_Octet    (name, flags, value, This); return;
+		case vtBoolean:	SetPropertyDirect_Boolean  (name, flags, value, This); return;
 		case vtObject:	SetPropertyDirect_Object   (name, flags, value, This); return;
-
-		default:
-			return;
 		}
 	}
 
 	void SetPropertyDirect_Void    (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
 	void SetPropertyDirect_Integer (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
 	void SetPropertyDirect_Real    (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
-	void SetPropertyDirect_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
+	void SetPropertyDirect_Null    (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
 	void SetPropertyDirect_String  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
 	void SetPropertyDirect_Octet   (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
+	void SetPropertyDirect_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
 	void SetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const;
 
 	//-----------------------------------------------------------------------
@@ -624,9 +626,9 @@ public: // 演算子
 		case vtVoid:	
 		case vtInteger:	
 		case vtReal:	
-		case vtBoolean:	
 		case vtString:	
 		case vtOctet:	
+		case vtBoolean:	
 			FuncCall_Primitive(ret, name, flags, args, This); return;
 
 		case vtObject:	FuncCall_Object   (ret, name, flags, args, This); return;
@@ -649,9 +651,10 @@ public: // 演算子
 		case vtVoid:	return Invoke_Void     (membername);
 		case vtInteger:	return Invoke_Integer  (membername);
 		case vtReal:	return Invoke_Real     (membername);
-		case vtBoolean:	return Invoke_Boolean  (membername);
+		case vtNull:	return Invoke_Null     (membername);
 		case vtString:	return Invoke_String   (membername);
 		case vtOctet:	return Invoke_Octet    (membername);
+		case vtBoolean:	return Invoke_Boolean  (membername);
 		case vtObject:	return Invoke_Object   (membername);
 		}
 		return tRisseVariantBlock();
@@ -660,9 +663,10 @@ public: // 演算子
 	tRisseVariantBlock Invoke_Void     (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Real     (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Null     (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_String   (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Object   (const tRisseString & membername) const;
 
 	//-----------------------------------------------------------------------
@@ -680,9 +684,10 @@ public: // 演算子
 		case vtVoid:	return Invoke_Void     (membername,arg1);
 		case vtInteger:	return Invoke_Integer  (membername,arg1);
 		case vtReal:	return Invoke_Real     (membername,arg1);
-		case vtBoolean:	return Invoke_Boolean  (membername,arg1);
+		case vtNull:	return Invoke_Null     (membername,arg1);
 		case vtString:	return Invoke_String   (membername,arg1);
 		case vtOctet:	return Invoke_Octet    (membername,arg1);
+		case vtBoolean:	return Invoke_Boolean  (membername,arg1);
 		case vtObject:	return Invoke_Object   (membername,arg1);
 		}
 		return tRisseVariantBlock();
@@ -691,9 +696,10 @@ public: // 演算子
 	tRisseVariantBlock Invoke_Void     (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Real     (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Null     (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_String   (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
@@ -733,9 +739,10 @@ public: // 演算子
 		case vtVoid:	return New_Void     (name, flags, args);
 		case vtInteger:	return New_Integer  (name, flags, args);
 		case vtReal:	return New_Real     (name, flags, args);
-		case vtBoolean:	return New_Boolean  (name, flags, args);
+		case vtNull:	return New_Null     (name, flags, args);
 		case vtString:	return New_String   (name, flags, args);
 		case vtOctet:	return New_Octet    (name, flags, args);
+		case vtBoolean:	return New_Boolean  (name, flags, args);
 		case vtObject:	return New_Object   (name, flags, args);
 		}
 	}
@@ -743,9 +750,10 @@ public: // 演算子
 	tRisseVariantBlock New_Void    (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock New_Integer (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock New_Real    (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock New_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock New_Null    (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock New_String  (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock New_Octet   (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock New_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock New_Object  (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const;
 
 
@@ -764,9 +772,10 @@ public: // 演算子
 	bool LogNot_Void     () const { return !CastToBoolean_Void(); }
 	bool LogNot_Integer  () const { return !CastToBoolean_Integer(); }
 	bool LogNot_Real     () const { return !CastToBoolean_Real(); }
-	bool LogNot_Boolean  () const { return !CastToBoolean_Boolean(); }
+	bool LogNot_Null     () const { return !CastToBoolean_Null(); }
 	bool LogNot_String   () const { return !CastToBoolean_String(); }
 	bool LogNot_Octet    () const { return !CastToBoolean_Octet(); }
+	bool LogNot_Boolean  () const { return !CastToBoolean_Boolean(); }
 	bool LogNot_Object   () const { return !CastToBoolean_Object(); }
 
 	//-----------------------------------------------------------------------
@@ -780,9 +789,10 @@ public: // 演算子
 		case vtVoid:	return BitNot_Void     ();
 		case vtInteger:	return BitNot_Integer  ();
 		case vtReal:	return BitNot_Real     ();
-		case vtBoolean:	return BitNot_Boolean  ();
+		case vtNull:	return BitNot_Null     ();
 		case vtString:	return BitNot_String   ();
 		case vtOctet:	return BitNot_Octet    ();
+		case vtBoolean:	return BitNot_Boolean  ();
 		case vtObject:	return BitNot_Object   ();
 		}
 		return tRisseVariantBlock();
@@ -798,9 +808,10 @@ public: // 演算子
 	risse_int64        BitNot_Void     () const { return ~CastToInteger_Void(); }
 	risse_int64        BitNot_Integer  () const { return ~CastToInteger_Integer(); }
 	risse_int64        BitNot_Real     () const { return ~CastToInteger_Real(); }
-	risse_int64        BitNot_Boolean  () const { return ~CastToInteger_Boolean(); }
+	risse_int64        BitNot_Null     () const { return ~CastToInteger_Null(); }
 	risse_int64        BitNot_String   () const { return ~CastToInteger_String(); }
 	risse_int64        BitNot_Octet    () const { return ~CastToInteger_Octet(); }
+	risse_int64        BitNot_Boolean  () const { return ~CastToInteger_Boolean(); }
 	tRisseVariantBlock BitNot_Object   () const { return Invoke(mnBitNot); }
 
 	//-----------------------------------------------------------------------
@@ -814,9 +825,10 @@ public: // 演算子
 		case vtVoid:	return Inc_Void     ();
 		case vtInteger:	return Inc_Integer  ();
 		case vtReal:	return Inc_Real     ();
-		case vtBoolean:	return Inc_Boolean  ();
+		case vtNull:	return Inc_Null     ();
 		case vtString:	return Inc_String   ();
 		case vtOctet:	return Inc_Octet    ();
+		case vtBoolean:	return Inc_Boolean  ();
 		case vtObject:	return Inc_Object   ();
 		}
 		return *this;
@@ -828,9 +840,10 @@ public: // 演算子
 	tRisseVariantBlock & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
 	tRisseVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
 	tRisseVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
-	tRisseVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)AsBoolean() + 1); return *this; }
+	tRisseVariantBlock & Inc_Null     () { RisseThrowNullPointerException(); return *this; }
 	tRisseVariantBlock & Inc_String   () { *this = tRisseVariantBlock((risse_int64)1).Add_Integer(Plus_String()); return *this; }
 	tRisseVariantBlock & Inc_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
+	tRisseVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() + 1); return *this; }
 	tRisseVariantBlock & Inc_Object   () { *this = Invoke(mnAdd, tRisseVariantBlock((risse_int64)1)); return *this; }
 
 	//-----------------------------------------------------------------------
@@ -844,9 +857,10 @@ public: // 演算子
 		case vtVoid:	return Dec_Void     ();
 		case vtInteger:	return Dec_Integer  ();
 		case vtReal:	return Dec_Real     ();
-		case vtBoolean:	return Dec_Boolean  ();
+		case vtNull:	return Dec_Null     ();
 		case vtString:	return Dec_String   ();
 		case vtOctet:	return Dec_Octet    ();
+		case vtBoolean:	return Dec_Boolean  ();
 		case vtObject:	return Dec_Object   ();
 		}
 		return *this;
@@ -858,9 +872,10 @@ public: // 演算子
 	tRisseVariantBlock & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
 	tRisseVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
 	tRisseVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
-	tRisseVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)AsBoolean() - 1); return *this; }
+	tRisseVariantBlock & Dec_Null     () { RisseThrowNullPointerException(); return *this; }
 	tRisseVariantBlock & Dec_String   () { *this = tRisseVariantBlock((risse_int64)-1).Add_Integer(Plus_String()); return *this; }
 	tRisseVariantBlock & Dec_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
+	tRisseVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() - 1); return *this; }
 	tRisseVariantBlock & Dec_Object   () { *this = Invoke(mnSub, tRisseVariantBlock((risse_int64)1)); return *this; }
 
 
@@ -875,9 +890,10 @@ public: // 演算子
 		case vtVoid:	return Plus_Void     ();
 		case vtInteger:	return Plus_Integer  ();
 		case vtReal:	return Plus_Real     ();
-		case vtBoolean:	return Plus_Boolean  ();
+		case vtNull:	return Plus_Null     ();
 		case vtString:	return Plus_String   ();
 		case vtOctet:	return Plus_Octet    ();
+		case vtBoolean:	return Plus_Boolean  ();
 		case vtObject:	return Plus_Object   ();
 		}
 		return tRisseVariantBlock();
@@ -888,9 +904,10 @@ public: // 演算子
 	tRisseVariantBlock Plus_Void     () const { return (risse_int64)0; /* void は 整数の 0 */ }
 	tRisseVariantBlock Plus_Integer  () const { return *this; }
 	tRisseVariantBlock Plus_Real     () const { return *this; }
-	tRisseVariantBlock Plus_Boolean  () const { return AsBoolean() != false; /* boolean は 0 か 1 かに変換される */ }
+	tRisseVariantBlock Plus_Null     () const { RisseThrowNullPointerException(); return *this; }
 	tRisseVariantBlock Plus_String   () const;
 	tRisseVariantBlock Plus_Octet    () const { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock Plus_Boolean  () const { return CastToBoolean_Boolean() != false; /* boolean は 0 か 1 かに変換される */ }
 	tRisseVariantBlock Plus_Object   () const { return Invoke(mnPlus); }
 
 	//-----------------------------------------------------------------------
@@ -904,9 +921,10 @@ public: // 演算子
 		case vtVoid:	return Minus_Void     ();
 		case vtInteger:	return Minus_Integer  ();
 		case vtReal:	return Minus_Real     ();
-		case vtBoolean:	return Minus_Boolean  ();
+		case vtNull:	return Minus_Null     ();
 		case vtString:	return Minus_String   ();
 		case vtOctet:	return Minus_Octet    ();
+		case vtBoolean:	return Minus_Boolean  ();
 		case vtObject:	return Minus_Object   ();
 		}
 		return tRisseVariantBlock();
@@ -917,9 +935,10 @@ public: // 演算子
 	tRisseVariantBlock Minus_Void     () const { return (risse_int64)0; }
 	tRisseVariantBlock Minus_Integer  () const { return -AsInteger(); }
 	tRisseVariantBlock Minus_Real     () const { return -AsReal(); }
-	tRisseVariantBlock Minus_Boolean  () const { return (risse_int64)(AsBoolean()?-1:0); }
+	tRisseVariantBlock Minus_Null     () const { RisseThrowNullPointerException(); return *this; }
 	tRisseVariantBlock Minus_String   () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock Minus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
+	tRisseVariantBlock Minus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean()?-1:0); }
 	tRisseVariantBlock Minus_Object   () const { return Invoke(mnMinus); }
 
 	//-----------------------------------------------------------------------
@@ -939,9 +958,10 @@ public: // 演算子
 	bool LogOr_Void     (const tRisseVariantBlock & rhs) const { return rhs.operator bool(); }
 	bool LogOr_Integer  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Integer() || rhs.operator bool(); }
 	bool LogOr_Real     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Real   () || rhs.operator bool(); }
-	bool LogOr_Boolean  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
+	bool LogOr_Null     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Null   () || rhs.operator bool(); }
 	bool LogOr_String   (const tRisseVariantBlock & rhs) const { return CastToBoolean_String () || rhs.operator bool(); }
 	bool LogOr_Octet    (const tRisseVariantBlock & rhs) const { return CastToBoolean_Octet  () || rhs.operator bool(); }
+	bool LogOr_Boolean  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
 	bool LogOr_Object   (const tRisseVariantBlock & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
@@ -972,9 +992,10 @@ public: // 演算子
 	bool LogAnd_Void     (const tRisseVariantBlock & rhs) const { return false; }
 	bool LogAnd_Integer  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Integer() && rhs.operator bool(); }
 	bool LogAnd_Real     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Real   () && rhs.operator bool(); }
-	bool LogAnd_Boolean  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
+	bool LogAnd_Null     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Null   () && rhs.operator bool(); }
 	bool LogAnd_String   (const tRisseVariantBlock & rhs) const { return CastToBoolean_String () && rhs.operator bool(); }
 	bool LogAnd_Octet    (const tRisseVariantBlock & rhs) const { return CastToBoolean_Octet  () && rhs.operator bool(); }
+	bool LogAnd_Boolean  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
 	bool LogAnd_Object   (const tRisseVariantBlock & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
@@ -1001,9 +1022,10 @@ public: // 演算子
 		case vtVoid:	return BitOr_Void     (rhs);
 		case vtInteger:	return BitOr_Integer  (rhs);
 		case vtReal:	return BitOr_Real     (rhs);
-		case vtBoolean:	return BitOr_Boolean  (rhs);
+		case vtNull:	return BitOr_Null     (rhs);
 		case vtString:	return BitOr_String   (rhs);
 		case vtOctet:	return BitOr_Octet    (rhs);
+		case vtBoolean:	return BitOr_Boolean  (rhs);
 		case vtObject:	return BitOr_Object   (rhs);
 		}
 		return (risse_int64)0;
@@ -1014,9 +1036,10 @@ public: // 演算子
 	risse_int64        BitOr_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)rhs; }
 	risse_int64        BitOr_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
 	risse_int64        BitOr_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
-	risse_int64        BitOr_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
+	risse_int64        BitOr_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
 	risse_int64        BitOr_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
 	risse_int64        BitOr_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
+	risse_int64        BitOr_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
 	tRisseVariantBlock BitOr_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitOr, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1045,9 +1068,10 @@ public: // 演算子
 		case vtVoid:	return BitXor_Void     (rhs);
 		case vtInteger:	return BitXor_Integer  (rhs);
 		case vtReal:	return BitXor_Real     (rhs);
-		case vtBoolean:	return BitXor_Boolean  (rhs);
+		case vtNull:	return BitXor_Null     (rhs);
 		case vtString:	return BitXor_String   (rhs);
 		case vtOctet:	return BitXor_Octet    (rhs);
+		case vtBoolean:	return BitXor_Boolean  (rhs);
 		case vtObject:	return BitXor_Object   (rhs);
 		}
 		return (risse_int64)0;
@@ -1058,9 +1082,10 @@ public: // 演算子
 	risse_int64        BitXor_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)rhs; }
 	risse_int64        BitXor_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
 	risse_int64        BitXor_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
-	risse_int64        BitXor_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
+	risse_int64        BitXor_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
 	risse_int64        BitXor_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
 	risse_int64        BitXor_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
+	risse_int64        BitXor_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
 	tRisseVariantBlock BitXor_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitXor, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1089,9 +1114,10 @@ public: // 演算子
 		case vtVoid:	return BitAnd_Void     (rhs);
 		case vtInteger:	return BitAnd_Integer  (rhs);
 		case vtReal:	return BitAnd_Real     (rhs);
-		case vtBoolean:	return BitAnd_Boolean  (rhs);
+		case vtNull:	return BitAnd_Null     (rhs);
 		case vtString:	return BitAnd_String   (rhs);
 		case vtOctet:	return BitAnd_Octet    (rhs);
+		case vtBoolean:	return BitAnd_Boolean  (rhs);
 		case vtObject:	return BitAnd_Object   (rhs);
 		}
 		return (risse_int64)0;
@@ -1102,9 +1128,10 @@ public: // 演算子
 	risse_int64        BitAnd_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)0; }
 	risse_int64        BitAnd_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	risse_int64        BitAnd_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
+	risse_int64        BitAnd_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
+	risse_int64        BitAnd_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitAnd, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1142,9 +1169,10 @@ public: // 演算子
 	bool NotEqual_Void     (const tRisseVariantBlock & rhs) const { return !Equal_Void   (rhs); }
 	bool NotEqual_Integer  (const tRisseVariantBlock & rhs) const { return !Equal_Integer(rhs); }
 	bool NotEqual_Real     (const tRisseVariantBlock & rhs) const { return !Equal_Real   (rhs); }
-	bool NotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
+	bool NotEqual_Null     (const tRisseVariantBlock & rhs) const { return !Equal_Null   (rhs); }
 	bool NotEqual_String   (const tRisseVariantBlock & rhs) const { return !Equal_String (rhs); }
 	bool NotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
+	bool NotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
 	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnNotEqual, rhs);  }
 
 	//-----------------------------------------------------------------------
@@ -1159,9 +1187,10 @@ public: // 演算子
 		case vtVoid:	return Equal_Void     (rhs);
 		case vtInteger:	return Equal_Integer  (rhs);
 		case vtReal:	return Equal_Real     (rhs);
-		case vtBoolean:	return Equal_Boolean  (rhs);
+		case vtNull:	return Equal_Null     (rhs);
 		case vtString:	return Equal_String   (rhs);
 		case vtOctet:	return Equal_Octet    (rhs);
+		case vtBoolean:	return Equal_Boolean  (rhs);
 		case vtObject:	return Equal_Object   (rhs);
 		}
 		return false;
@@ -1172,9 +1201,10 @@ public: // 演算子
 	bool Equal_Void     (const tRisseVariantBlock & rhs) const;
 	bool Equal_Integer  (const tRisseVariantBlock & rhs) const;
 	bool Equal_Real     (const tRisseVariantBlock & rhs) const;
-	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool Equal_Null     (const tRisseVariantBlock & rhs) const;
 	bool Equal_String   (const tRisseVariantBlock & rhs) const;
 	bool Equal_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnEqual, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1197,9 +1227,10 @@ public: // 演算子
 	bool DiscNotEqual_Void     (const tRisseVariantBlock & rhs) const { return !DiscEqual_Void   (rhs); }
 	bool DiscNotEqual_Integer  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Integer(rhs); }
 	bool DiscNotEqual_Real     (const tRisseVariantBlock & rhs) const { return !DiscEqual_Real   (rhs); }
-	bool DiscNotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
+	bool DiscNotEqual_Null     (const tRisseVariantBlock & rhs) const { return !DiscEqual_Null   (rhs); }
 	bool DiscNotEqual_String   (const tRisseVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
 	bool DiscNotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
+	bool DiscNotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
 	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnDiscNotEqual, rhs);  }
 
 	//-----------------------------------------------------------------------
@@ -1214,9 +1245,10 @@ public: // 演算子
 		case vtVoid:	return DiscEqual_Void     (rhs);
 		case vtInteger:	return DiscEqual_Integer  (rhs);
 		case vtReal:	return DiscEqual_Real     (rhs);
-		case vtBoolean:	return DiscEqual_Boolean  (rhs);
+		case vtNull:	return DiscEqual_Null     (rhs);
 		case vtString:	return DiscEqual_String   (rhs);
 		case vtOctet:	return DiscEqual_Octet    (rhs);
+		case vtBoolean:	return DiscEqual_Boolean  (rhs);
 		case vtObject:	return DiscEqual_Object   (rhs);
 		}
 		return false;
@@ -1228,12 +1260,14 @@ public: // 演算子
 			{ return rhs.GetType() == vtInteger && rhs.AsInteger() == AsInteger(); }
 	bool DiscEqual_Real     (const tRisseVariantBlock & rhs) const
 			{ return rhs.GetType() == vtReal && rhs.AsReal() == AsReal(); }
-	bool DiscEqual_Boolean  (const tRisseVariantBlock & rhs) const
-			{ return rhs.GetType() == vtBoolean && rhs.AsBoolean() == AsBoolean(); }
+	bool DiscEqual_Null     (const tRisseVariantBlock & rhs) const
+			{ return rhs.GetType() == vtNull; }
 	bool DiscEqual_String   (const tRisseVariantBlock & rhs) const
 			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); /* incomplete */ }
 	bool DiscEqual_Octet    (const tRisseVariantBlock & rhs) const
 			{ return false; /* incomplete */ }
+	bool DiscEqual_Boolean  (const tRisseVariantBlock & rhs) const
+			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
 	bool DiscEqual_Object   (const tRisseVariantBlock & rhs) const
 			{ if(IsNull()) { return rhs.IsNull(); } return Invoke(mnDiscEqual, rhs); }
 
@@ -1249,9 +1283,10 @@ public: // 演算子
 		case vtVoid:	return Lesser_Void     (rhs);
 		case vtInteger:	return Lesser_Integer  (rhs);
 		case vtReal:	return Lesser_Real     (rhs);
-		case vtBoolean:	return Lesser_Boolean  (rhs);
+		case vtNull:	return Lesser_Null     (rhs);
 		case vtString:	return Lesser_String   (rhs);
 		case vtOctet:	return Lesser_Octet    (rhs);
+		case vtBoolean:	return Lesser_Boolean  (rhs);
 		case vtObject:	return Lesser_Object   (rhs);
 		}
 		return false;
@@ -1262,9 +1297,10 @@ public: // 演算子
 	bool Lesser_Void     (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Integer  (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Real     (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool Lesser_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return false; }
 	bool Lesser_String   (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLesser, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1279,9 +1315,10 @@ public: // 演算子
 		case vtVoid:	return Greater_Void     (rhs);
 		case vtInteger:	return Greater_Integer  (rhs);
 		case vtReal:	return Greater_Real     (rhs);
-		case vtBoolean:	return Greater_Boolean  (rhs);
+		case vtNull:	return Greater_Null     (rhs);
 		case vtString:	return Greater_String   (rhs);
 		case vtOctet:	return Greater_Octet    (rhs);
+		case vtBoolean:	return Greater_Boolean  (rhs);
 		case vtObject:	return Greater_Object   (rhs);
 		}
 		return false;
@@ -1292,9 +1329,10 @@ public: // 演算子
 	bool Greater_Void     (const tRisseVariantBlock & rhs) const;
 	bool Greater_Integer  (const tRisseVariantBlock & rhs) const;
 	bool Greater_Real     (const tRisseVariantBlock & rhs) const;
-	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool Greater_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return false; }
 	bool Greater_String   (const tRisseVariantBlock & rhs) const;
 	bool Greater_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnGreater, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1309,9 +1347,10 @@ public: // 演算子
 		case vtVoid:	return LesserOrEqual_Void     (rhs);
 		case vtInteger:	return LesserOrEqual_Integer  (rhs);
 		case vtReal:	return LesserOrEqual_Real     (rhs);
-		case vtBoolean:	return LesserOrEqual_Boolean  (rhs);
+		case vtNull:	return LesserOrEqual_Null     (rhs);
 		case vtString:	return LesserOrEqual_String   (rhs);
 		case vtOctet:	return LesserOrEqual_Octet    (rhs);
+		case vtBoolean:	return LesserOrEqual_Boolean  (rhs);
 		case vtObject:	return LesserOrEqual_Object   (rhs);
 		}
 		return false;
@@ -1322,9 +1361,10 @@ public: // 演算子
 	bool LesserOrEqual_Void     (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool LesserOrEqual_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return false; }
 	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLesserOrEqual, rhs); }
 
 
@@ -1340,9 +1380,10 @@ public: // 演算子
 		case vtVoid:	return GreaterOrEqual_Void     (rhs);
 		case vtInteger:	return GreaterOrEqual_Integer  (rhs);
 		case vtReal:	return GreaterOrEqual_Real     (rhs);
-		case vtBoolean:	return GreaterOrEqual_Boolean  (rhs);
+		case vtNull:	return GreaterOrEqual_Null     (rhs);
 		case vtString:	return GreaterOrEqual_String   (rhs);
 		case vtOctet:	return GreaterOrEqual_Octet    (rhs);
+		case vtBoolean:	return GreaterOrEqual_Boolean  (rhs);
 		case vtObject:	return GreaterOrEqual_Object   (rhs);
 		}
 		return false;
@@ -1353,9 +1394,10 @@ public: // 演算子
 	bool GreaterOrEqual_Void     (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
+	bool GreaterOrEqual_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return false; }
 	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnGreaterOrEqual, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1372,9 +1414,10 @@ public: // 演算子
 		case vtVoid:	return RBitShift_Void     (rhs);
 		case vtInteger:	return RBitShift_Integer  (rhs);
 		case vtReal:	return RBitShift_Real     (rhs);
-		case vtBoolean:	return RBitShift_Boolean  (rhs);
+		case vtNull:	return RBitShift_Null     (rhs);
 		case vtString:	return RBitShift_String   (rhs);
 		case vtOctet:	return RBitShift_Octet    (rhs);
+		case vtBoolean:	return RBitShift_Boolean  (rhs);
 		case vtObject:	return RBitShift_Object   (rhs);
 		}
 		return false;
@@ -1383,9 +1426,10 @@ public: // 演算子
 	tRisseVariantBlock RBitShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnRBitShift, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1415,9 +1459,10 @@ public: // 演算子
 		case vtVoid:	return LShift_Void     (rhs);
 		case vtInteger:	return LShift_Integer  (rhs);
 		case vtReal:	return LShift_Real     (rhs);
-		case vtBoolean:	return LShift_Boolean  (rhs);
+		case vtNull:	return LShift_Null     (rhs);
 		case vtString:	return LShift_String   (rhs);
 		case vtOctet:	return LShift_Octet    (rhs);
+		case vtBoolean:	return LShift_Boolean  (rhs);
 		case vtObject:	return LShift_Object   (rhs);
 		}
 		return false;
@@ -1428,9 +1473,10 @@ public: // 演算子
 	tRisseVariantBlock LShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLShift, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1460,9 +1506,10 @@ public: // 演算子
 		case vtVoid:	return RShift_Void     (rhs);
 		case vtInteger:	return RShift_Integer  (rhs);
 		case vtReal:	return RShift_Real     (rhs);
-		case vtBoolean:	return RShift_Boolean  (rhs);
+		case vtNull:	return RShift_Null     (rhs);
 		case vtString:	return RShift_String   (rhs);
 		case vtOctet:	return RShift_Octet    (rhs);
+		case vtBoolean:	return RShift_Boolean  (rhs);
 		case vtObject:	return RShift_Object   (rhs);
 		}
 		return false;
@@ -1473,9 +1520,10 @@ public: // 演算子
 	tRisseVariantBlock RShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnRShift, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1505,9 +1553,10 @@ public: // 演算子
 		case vtVoid:	return Mod_Void     (rhs);
 		case vtInteger:	return Mod_Integer  (rhs);
 		case vtReal:	return Mod_Real     (rhs);
-		case vtBoolean:	return Mod_Boolean  (rhs);
+		case vtNull:	return Mod_Null     (rhs);
 		case vtString:	return Mod_String   (rhs);
 		case vtOctet:	return Mod_Octet    (rhs);
+		case vtBoolean:	return Mod_Boolean  (rhs);
 		case vtObject:	return Mod_Object   (rhs);
 		}
 		return false;
@@ -1518,9 +1567,10 @@ public: // 演算子
 	tRisseVariantBlock Mod_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnMod, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1550,9 +1600,10 @@ public: // 演算子
 		case vtVoid:	return Div_Void     (rhs);
 		case vtInteger:	return Div_Integer  (rhs);
 		case vtReal:	return Div_Real     (rhs);
-		case vtBoolean:	return Div_Boolean  (rhs);
+		case vtNull:	return Div_Null     (rhs);
 		case vtString:	return Div_String   (rhs);
 		case vtOctet:	return Div_Octet    (rhs);
+		case vtBoolean:	return Div_Boolean  (rhs);
 		case vtObject:	return Div_Object   (rhs);
 		}
 		return false;
@@ -1563,9 +1614,10 @@ public: // 演算子
 	tRisseVariantBlock Div_Void     (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
 	tRisseVariantBlock Div_Integer  (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
 	tRisseVariantBlock Div_Real     (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
-	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
+	tRisseVariantBlock Div_Null     (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
 	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
 	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
+	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
 	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnDiv, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1595,9 +1647,10 @@ public: // 演算子
 		case vtVoid:	return Idiv_Void     (rhs);
 		case vtInteger:	return Idiv_Integer  (rhs);
 		case vtReal:	return Idiv_Real     (rhs);
-		case vtBoolean:	return Idiv_Boolean  (rhs);
+		case vtNull:	return Idiv_Null     (rhs);
 		case vtString:	return Idiv_String   (rhs);
 		case vtOctet:	return Idiv_Octet    (rhs);
+		case vtBoolean:	return Idiv_Boolean  (rhs);
 		case vtObject:	return Idiv_Object   (rhs);
 		}
 		return false;
@@ -1606,9 +1659,10 @@ public: // 演算子
 	tRisseVariantBlock Idiv_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnIdiv, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1638,9 +1692,10 @@ public: // 演算子
 		case vtVoid:	return Mul_Void     (rhs);
 		case vtInteger:	return Mul_Integer  (rhs);
 		case vtReal:	return Mul_Real     (rhs);
-		case vtBoolean:	return Mul_Boolean  (rhs);
+		case vtNull:	return Mul_Null     (rhs);
 		case vtString:	return Mul_String   (rhs);
 		case vtOctet:	return Mul_Octet    (rhs);
+		case vtBoolean:	return Mul_Boolean  (rhs);
 		case vtObject:	return Mul_Object   (rhs);
 		}
 		return false;
@@ -1651,9 +1706,10 @@ public: // 演算子
 	tRisseVariantBlock Mul_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mul_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return *this; }
 	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnMul, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1681,9 +1737,10 @@ public: // 演算子
 		case vtVoid:	return Add_Void     (rhs);
 		case vtInteger:	return Add_Integer  (rhs);
 		case vtReal:	return Add_Real     (rhs);
-		case vtBoolean:	return Add_Boolean  (rhs);
+		case vtNull:	return Add_Null     (rhs);
 		case vtString:	return Add_String   (rhs);
 		case vtOctet:	return Add_Octet    (rhs);
+		case vtBoolean:	return Add_Boolean  (rhs);
 		case vtObject:	return Add_Object   (rhs);
 		}
 		return false;
@@ -1694,9 +1751,10 @@ public: // 演算子
 	tRisseVariantBlock Add_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Add_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return *this; }
 	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
+	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnAdd, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1724,9 +1782,10 @@ public: // 演算子
 		case vtVoid:	return Sub_Void     (rhs);
 		case vtInteger:	return Sub_Integer  (rhs);
 		case vtReal:	return Sub_Real     (rhs);
-		case vtBoolean:	return Sub_Boolean  (rhs);
+		case vtNull:	return Sub_Null     (rhs);
 		case vtString:	return Sub_String   (rhs);
 		case vtOctet:	return Sub_Octet    (rhs);
+		case vtBoolean:	return Sub_Boolean  (rhs);
 		case vtObject:	return Sub_Object   (rhs);
 		}
 		return false;
@@ -1737,9 +1796,10 @@ public: // 演算子
 	tRisseVariantBlock Sub_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Sub_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return *this; }
 	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnSub, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1768,9 +1828,10 @@ public: // キャスト
 		case vtVoid:	return CastToInteger_Void     ();
 		case vtInteger:	return CastToInteger_Integer  ();
 		case vtReal:	return CastToInteger_Real     ();
-		case vtBoolean:	return CastToInteger_Boolean  ();
+		case vtNull:	return CastToInteger_Null     ();
 		case vtString:	return CastToInteger_String   ();
 		case vtOctet:	return CastToInteger_Octet    ();
+		case vtBoolean:	return CastToInteger_Boolean  ();
 		case vtObject:	return CastToInteger_Object   ();
 		}
 		return (risse_int64)0;
@@ -1779,9 +1840,10 @@ public: // キャスト
 	risse_int64 CastToInteger_Void     () const { return false; /* void は 0 */}
 	risse_int64 CastToInteger_Integer  () const { return AsInteger(); }
 	risse_int64 CastToInteger_Real     () const { return (risse_int64)AsReal(); }
-	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)AsBoolean(); }
+	risse_int64 CastToInteger_Null     () const { RisseThrowNullPointerException(); return (risse_int64)0; }
 	risse_int64 CastToInteger_String   () const;
 	risse_int64 CastToInteger_Octet    () const { return (risse_int64)0; /* incomplete */ }
+	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)CastToBoolean_Boolean(); }
 	risse_int64 CastToInteger_Object   () const { return Invoke(mnInteger); }
 
 	//-----------------------------------------------------------------------
@@ -1795,9 +1857,10 @@ public: // キャスト
 		case vtVoid:	return CastToReal_Void     ();
 		case vtInteger:	return CastToReal_Integer  ();
 		case vtReal:	return CastToReal_Real     ();
-		case vtBoolean:	return CastToReal_Boolean  ();
+		case vtNull:	return CastToReal_Null     ();
 		case vtString:	return CastToReal_String   ();
 		case vtOctet:	return CastToReal_Octet    ();
+		case vtBoolean:	return CastToReal_Boolean  ();
 		case vtObject:	return CastToReal_Object   ();
 		}
 		return false;
@@ -1806,9 +1869,10 @@ public: // キャスト
 	risse_real CastToReal_Void     () const { return (risse_real)0.0; }
 	risse_real CastToReal_Integer  () const { return AsInteger(); }
 	risse_real CastToReal_Real     () const { return AsReal(); }
-	risse_real CastToReal_Boolean  () const { return (risse_real)(int)AsBoolean(); }
+	risse_real CastToReal_Null     () const { RisseThrowNullPointerException(); return (risse_real)0.0; }
 	risse_real CastToReal_String   () const { return (risse_real)Plus_String(); /* Plus_String の戻りを risse_real に再キャスト */ }
 	risse_real CastToReal_Octet    () const { return (risse_real)0.0; /* incomplete */ }
+	risse_real CastToReal_Boolean  () const { return (risse_real)(int)CastToBoolean_Boolean(); }
 	risse_real CastToReal_Object   () const { return Invoke(mnReal); }
 
 	//-----------------------------------------------------------------------
@@ -1822,9 +1886,10 @@ public: // キャスト
 		case vtVoid:	return CastToBoolean_Void     ();
 		case vtInteger:	return CastToBoolean_Integer  ();
 		case vtReal:	return CastToBoolean_Real     ();
-		case vtBoolean:	return CastToBoolean_Boolean  ();
+		case vtNull:	return CastToBoolean_Null     ();
 		case vtString:	return CastToBoolean_String   ();
 		case vtOctet:	return CastToBoolean_Octet    ();
+		case vtBoolean:	return CastToBoolean_Boolean  ();
 		case vtObject:	return CastToBoolean_Object   ();
 		}
 		return false;
@@ -1833,9 +1898,10 @@ public: // キャスト
 	bool CastToBoolean_Void     () const { return false; /* void は偽 */}
 	bool CastToBoolean_Integer  () const { return AsInteger() != 0; }
 	bool CastToBoolean_Real     () const { return AsReal() != 0.0; }
-	bool CastToBoolean_Boolean  () const { return AsBoolean(); }
+	bool CastToBoolean_Null     () const { return false; /* null は偽 */ }
 	bool CastToBoolean_String   () const { return !AsString().IsEmpty(); }
 	bool CastToBoolean_Octet    () const { return !AsOctet().IsEmpty(); }
+	bool CastToBoolean_Boolean  () const { return Type == BooleanTrue; }
 	bool CastToBoolean_Object   () const { return Invoke(mnBoolean); }
 
 	//-----------------------------------------------------------------------
@@ -1849,9 +1915,10 @@ public: // キャスト
 		case vtVoid:	return CastToString_Void     ();
 		case vtInteger:	return CastToString_Integer  ();
 		case vtReal:	return CastToString_Real     ();
-		case vtBoolean:	return CastToString_Boolean  ();
+		case vtNull:	return CastToString_Null     ();
 		case vtString:	return CastToString_String   ();
 		case vtOctet:	return CastToString_Octet    ();
+		case vtBoolean:	return CastToString_Boolean  ();
 		case vtObject:	return CastToString_Object   ();
 		}
 		return tRisseString();
@@ -1860,9 +1927,10 @@ public: // キャスト
 	tRisseString CastToString_Void     () const { return tRisseString(); }
 	tRisseString CastToString_Integer  () const;
 	tRisseString CastToString_Real     () const;
-	tRisseString CastToString_Boolean  () const;
+	tRisseString CastToString_Null     () const;
 	tRisseString CastToString_String   () const { return AsString(); }
 	tRisseString CastToString_Octet    () const { return AsOctet().AsHumanReadable();  }
+	tRisseString CastToString_Boolean  () const;
 	tRisseString CastToString_Object   () const { return Invoke(mnString); }
 
 public: // ユーティリティ
@@ -1881,9 +1949,10 @@ public: // ユーティリティ
 		case vtVoid:	return AsHumanReadable_Void     (maxlen);
 		case vtInteger:	return AsHumanReadable_Integer  (maxlen);
 		case vtReal:	return AsHumanReadable_Real     (maxlen);
-		case vtBoolean:	return AsHumanReadable_Boolean  (maxlen);
+		case vtNull:	return AsHumanReadable_Null     (maxlen);
 		case vtString:	return AsHumanReadable_String   (maxlen);
 		case vtOctet:	return AsHumanReadable_Octet    (maxlen);
+		case vtBoolean:	return AsHumanReadable_Boolean  (maxlen);
 		case vtObject:	return AsHumanReadable_Object   (maxlen);
 		}
 		return tRisseString();
@@ -1894,12 +1963,13 @@ public: // ユーティリティ
 					{ return CastToString_Integer(); }
 	tRisseString AsHumanReadable_Real     (risse_size maxlen) const
 					{ return CastToString_Real(); }
-	tRisseString AsHumanReadable_Boolean  (risse_size maxlen) const
-					{ return CastToString_Boolean(); }
+	tRisseString AsHumanReadable_Null     (risse_size maxlen) const;
 	tRisseString AsHumanReadable_String   (risse_size maxlen) const
 					{ return AsString().AsHumanReadable(maxlen); }
 	tRisseString AsHumanReadable_Octet    (risse_size maxlen) const
 					{ return AsOctet().AsHumanReadable(maxlen); }
+	tRisseString AsHumanReadable_Boolean  (risse_size maxlen) const
+					{ return CastToString_Boolean(); }
 	tRisseString AsHumanReadable_Object   (risse_size maxlen) const
 					{ return tRisseString(); /* incomplete */ }
 
@@ -1932,6 +2002,7 @@ public: // ユーティリティ
 		fprintf(stderr, "tInteger: %d\n", sizeof(tInteger));
 		fprintf(stderr, "tReal: %d\n", sizeof(tReal));
 		fprintf(stderr, "tBoolean: %d\n", sizeof(tBoolean));
+		fprintf(stderr, "tNull: %d\n", sizeof(tNull));
 	}
 
 };

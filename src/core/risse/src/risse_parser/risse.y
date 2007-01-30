@@ -292,7 +292,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	func_decl_arg func_decl_arg_collapse call_block call_block_arg_opt
 	property_def property_expr_def property_handler_def_list
 	property_handler_getter property_handler_setter
-	class_def class_expr_def class_extender class_extends_list
+	class_def class_expr_def class_extender
 	break continue
 	return switch with label goto try throw catch catch_list catch_or_finally
 	regexp
@@ -730,14 +730,10 @@ class_expr_def
 ;
 
 class_extender
-	:										{ $$ = N(ClassDecl)(LP); }
-	| "extends" class_extends_list			{ $$ = $2; }
-;
-
-class_extends_list
-	: expr									{ $$ = N(ClassDecl)(LP);
-											  C(ClassDecl, $$)->AddChild($1); }
-	| class_extends_list "," expr			{ $$ = $1; C(ClassDecl, $$)->AddChild($3); }
+	:										{ $$ = N(ClassDecl)(LP, NULL); }
+	| "extends" expr						{ $$ = N(ClassDecl)(LP, $2); }
+	| "<" expr/* syntax sugar, Ruby like */	{ $$ = N(ClassDecl)(LP, $2); }
+	| ":" expr/* syntax sugar, C++ like */	{ $$ = N(ClassDecl)(LP, $2); }
 ;
 
 

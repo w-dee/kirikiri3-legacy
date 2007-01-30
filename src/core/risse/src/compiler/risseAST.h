@@ -2635,9 +2635,10 @@ public:
 //---------------------------------------------------------------------------
 //! @brief	クラス宣言のASTノード(type=antClassDecl)
 //---------------------------------------------------------------------------
-class tRisseASTNode_ClassDecl : public tRisseASTNode_List
+class tRisseASTNode_ClassDecl : public tRisseASTNode
 {
-	typedef tRisseASTNode_List inherited;
+	typedef tRisseASTNode inherited;
+	tRisseASTNode * SuperClass; //!< 親クラスを表す式
 	tRisseASTNode * Body; //!< クラス宣言ボディ
 	tRisseString Name; //!< クラス名
 	tRisseMemberAttribute Attribute; //!< 属性
@@ -2645,9 +2646,11 @@ class tRisseASTNode_ClassDecl : public tRisseASTNode_List
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	tRisseASTNode_ClassDecl(risse_size position) :
-		tRisseASTNode_List(position, antClassDecl)
+	//! @param		super_class		親クラスを表す式
+	tRisseASTNode_ClassDecl(risse_size position, tRisseASTNode * super_class) :
+		tRisseASTNode(position, antClassDecl)
 	{
+		SuperClass = super_class;
 		Body = NULL;
 	}
 
@@ -2680,7 +2683,7 @@ public:
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
 	{
-		return inherited::GetChildCount() + 1; // +1 = Body
+		return 1+1; // +1 = Body
 	}
 
 	//! @brief		指定されたインデックスの子ノードを得る
@@ -2688,8 +2691,9 @@ public:
 	//! @return		子ノード
 	tRisseASTNode * GetChildAt(risse_size index) const
 	{
-		if(index == inherited::GetChildCount()) return Body;
-		return inherited::GetChildAt(index);
+		if(index == 0) return SuperClass;
+		if(index == 1) return Body;
+		return NULL;
 	}
 
 	//! @brief		指定されたインデックスの子ノードの名前を得る

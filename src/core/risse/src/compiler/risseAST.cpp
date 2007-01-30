@@ -556,12 +556,8 @@ tRisseString tRisseASTNode_PropDecl::GetDumpComment() const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_ClassDecl::GetChildNameAt(risse_size index) const
 {
-	if(index == inherited::GetChildCount()) return RISSE_WS("body");
-	if(index < inherited::GetChildCount())
-	{
-		risse_char buf[40];
-		return tRisseString(RISSE_WS("super")) + Risse_int64_to_str(index, buf);
-	}
+	if(index == 0) return RISSE_WS("super");
+	if(index == 1) return RISSE_WS("body");
 	return tRisseString();
 }
 //---------------------------------------------------------------------------
@@ -2777,26 +2773,30 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	// クラス名を決める
 	tRisseString class_name = Name.IsEmpty() ? tRisseString(RISSE_WS("anonymous")) : Name;
 
-	// クラスの中身を作成する
-	tRisseCompiler * compiler = form->GetFunction()->GetFunctionGroup()->GetCompiler();
-	tRisseSSAVariable * classblock_var = NULL;
-	tRisseSSAForm * new_form = NULL;
-	compiler->CompileClass(Body, class_name, form, new_form, classblock_var);
-
 	// クラス名を定数として作る
 	tRisseSSAVariable * class_name_var =
 		form->AddConstantValueStatement(GetPosition(), tRisseVariant(class_name));
 
 	// 親クラスを得るための式を作る
-	// TODO: 正しい実装
-	tRisseSSAVariable * super_class_var =
-		form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
+	tRisseSSAVariable * super_class_var;
+
+	if(SuperClass)
+		super_class_var = SuperClass->GenerateReadSSA(form);
+	else
+		super_class_var =
+			form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
 
 	// 新しいクラスインスタンスを作成する
 	tRisseSSAVariable * class_instance_var = NULL;
 	form->AddStatement(GetPosition(),
 		ocAssignNewClass, &class_instance_var,
 		super_class_var, class_name_var);
+
+	// クラスの中身を作成する
+	tRisseCompiler * compiler = form->GetFunction()->GetFunctionGroup()->GetCompiler();
+	tRisseSSAVariable * classblock_var = NULL;
+	tRisseSSAForm * new_form = NULL;
+	compiler->CompileClass(Body, class_name, form, new_form, classblock_var);
 
 	// クラスの中身のコンテキストを、新しく作成したインスタンスの物にする
 	form->AddStatement(GetPosition(),

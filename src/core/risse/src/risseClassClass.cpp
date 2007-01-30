@@ -45,7 +45,7 @@ static void Class_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 	// 親クラスの同名メソッドを呼び出す
 	// TODO: コンストラクタの正しい実装
 
-	if(args.HasArgument(0))
+	if(args.HasArgument(0) && !args[0].IsNull())
 	{
 		// スーパークラスが指定されている
 		// super を登録

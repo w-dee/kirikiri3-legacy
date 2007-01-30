@@ -137,7 +137,6 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseSt
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseVariantBlock * this_context = AsObject().Context;
-	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
 	intf->Do(ocDGet, &ret, name,
 		flags, tRisseMethodArgument::Empty(),
@@ -155,7 +154,6 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseVariantBlock * this_context = AsObject().Context;
-	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocDSet, NULL, name,
 		flags, tRisseMethodArgument::New(value),
 		this_context?*this_context:This
@@ -182,7 +180,6 @@ void tRisseVariantBlock::FuncCall_Object  (
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
 	const tRisseVariantBlock * this_context = AsObject().Context;
-	if(!intf) { /* TODO: null check */; }
 	intf->Do(ocFuncCall, ret, name,
 		flags, args,
 		this_context?*this_context:This
@@ -195,7 +192,6 @@ void tRisseVariantBlock::FuncCall_Object  (
 tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
@@ -211,7 +207,6 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
@@ -228,7 +223,6 @@ tRisseVariantBlock tRisseVariantBlock::New_Object  (const tRisseString & name,
 	risse_uint32 flags, const tRisseMethodArgument & args) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	if(!intf) { /* TODO: null check */; }
 	tRisseVariantBlock ret;
 	intf->Do(ocNew, &ret, name,
 		flags,
@@ -1104,6 +1098,7 @@ tRisseString tRisseVariantBlock::CastToString_Real     () const
 tRisseString tRisseVariantBlock::CastToString_Null     () const
 {
 	RisseThrowNullPointerException();
+	return tRisseString();
 }
 //---------------------------------------------------------------------------
 

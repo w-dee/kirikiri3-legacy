@@ -147,14 +147,7 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBa
 //---------------------------------------------------------------------------
 tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
-	if(code == ocNew && name.IsEmpty())
-	{
-		// このオブジェクトに対する new 指令
-		// このオブジェクトの new メソッドを呼ぶ
-		inherited::FuncCall(result, mnNew, 0, args, This);
-		return rvNoError;
-	}
-	else if(code == ocCreateNewObjectBase && name.IsEmpty())
+	if(code == ocCreateNewObjectBase && name.IsEmpty())
 	{
 		// 空のオブジェクトを作成して返す
 		RISSE_ASSERT(result != NULL);

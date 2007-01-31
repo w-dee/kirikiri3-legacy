@@ -69,6 +69,8 @@ tRisseScriptEngine::tRisseScriptEngine()
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				Class_class);
 
+	Class_class.New(0, tRisseMethodArgument::New(Object_class));
+
 	// "Array" クラスを作成する
 	tRisseVariant Array_class(tRisseArrayClass::GetPointer());
 

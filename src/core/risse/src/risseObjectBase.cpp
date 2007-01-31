@@ -168,20 +168,28 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 
 	// クラスを探す
 	tRisseVariant Class;
+	tRetValue result = rvMemberNotFound;
 	if(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
 	{
 		if(!Class.IsNull())
 		{
 			// クラスを特定できた場合
 			// クラスに対してメンバ設定を行う
-			tRetValue result =
-				Class.OperateForMember(ocDSet, NULL, name,
+			result = Class.OperateForMember(ocDSet, NULL, name,
 								flags|tRisseOperateFlags::ofPropertyOrConstOnly,
 								tRisseMethodArgument::New(value), This);
 			// ちなみに見つかったのが定数で、書き込みに失敗した場合は
 			// 例外が飛ぶので OperateForMember は戻ってこない。
 			if(result == rvNoError) return true; // アクセスに成功したので戻る
 		}
+	}
+
+	if(result == rvMemberNotFound && flags.Has(tRisseOperateFlags::ofPropertyOrConstOnly))
+	{
+		// 親クラスを見に行ったがメンバがなかった、あるいはそもそも親クラスが見つからなかった。
+		// PropertyOrConstOnly が指定されているのでこの
+		// インスタンスにメンバを作成するわけにもいかない。
+		return false; // 失敗として返す
 	}
 
 	if(flags.Has(tRisseOperateFlags::ofMemberEnsure))
@@ -271,6 +279,34 @@ bool tRisseObjectBase::FuncCall(
 
 
 //---------------------------------------------------------------------------
+bool tRisseObjectBase::New(
+		tRisseVariantBlock * ret,
+		const tRisseString & name, risse_uint32 flags,
+		const tRisseMethodArgument & args,
+		const tRisseVariant & This)
+{
+	if(!name.IsEmpty())
+	{
+		// メンバを読み出す
+		tRisseVariant class_object;
+		if(!Read(name, flags, class_object, This)) return false;
+
+		// メンバに対しNewを実行する
+		tRisseVariant result = class_object.New(flags, args);
+		if(ret) *ret = result;
+
+		return true;
+	}
+	else
+	{
+		// このオブジェクトに対して Newを実行する
+		return FuncCall(ret, mnNew, flags, args, This);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tRisseObjectBase::SetAttribute(
 		const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant & This)
 {
@@ -325,6 +361,12 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	case ocFuncCall:
 		// function call
 		if(!FuncCall(result, name, flags, args, This))
+			return rvMemberNotFound;
+		return rvNoError;
+
+	case ocNew:
+		// create new instance
+		if(!New(result, name, flags, args, This))
 			return rvMemberNotFound;
 		return rvNoError;
 

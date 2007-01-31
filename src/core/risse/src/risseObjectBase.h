@@ -126,6 +126,18 @@ public:
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject());
 
+	//! @brief		(このオブジェクトのメンバあるいは自分自身に対する)インスタンスの作成		New
+	//! @param		name		メンバ名
+	//! @param		ret			結果の格納先(NULL=結果は必要なし)
+	//! @param		flags		呼び出しフラグ
+	//! @param		args		引数
+	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
+	bool New(
+		tRisseVariantBlock * ret,
+		const tRisseString & name, risse_uint32 flags = 0,
+		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
+		const tRisseVariant & This = tRisseVariant::GetNullObject());
+
 	//! @brief		(このオブジェクトのメンバに対する)属性設定		DSetAttrib
 	//! @param		name		メンバ名
 	//! @param		flags		設定する属性などが含まれたフラグ

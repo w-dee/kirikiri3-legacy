@@ -1,9 +1,11 @@
 class C {
-	function toString() { return "This is an instance of C"; }
+	function m() { return "C.m"; }
 }
 
-var i = new C();
+var c = new C();
 
-return i.toString(); //=> "This is an instance of C"
+Object.m =  function (){ return "Object.m"; };
+
+return c.m(); //=> "C.m"
 
 

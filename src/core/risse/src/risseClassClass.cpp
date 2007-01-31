@@ -79,7 +79,23 @@ tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseObjectClass::GetPoi
 //---------------------------------------------------------------------------
 tRisseVariant tRisseClassClass::CreateNewObjectBase()
 {
-	return tRisseVariant(new tRisseClassBase(tRisseObjectClass::GetPointer()));
+//	return tRisseVariant(new tRisseClassBase(tRisseObjectClass::GetPointer()));
+//	return tRisseVariant(new tRisseClassClass());
+	return tRisseVariant(new tRisseClassInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseClassInstance::CreateNewObjectBase()
+{
+	return tRisseVariant(new tRisseObjectBase());
 }
 //---------------------------------------------------------------------------
 

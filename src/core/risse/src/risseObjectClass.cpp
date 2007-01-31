@@ -80,6 +80,32 @@ static void Object_setInstanceMember(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
+//! @brief		NativeFunction: Object.ptr  引数のオブジェクトインターフェースのアドレスを数値化する
+//---------------------------------------------------------------------------
+static void Object_ptr(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	for(risse_size i = 0; i < args.GetArgumentCount(); i++)
+	{
+		if(i != 0)
+			RisseFPrint(stdout, RISSE_WS(", "));
+
+		if(args[i].GetType() == tRisseVariant::vtObject)
+		{
+			risse_char buf[40];
+			Risse_pointer_to_str(args[i].GetObjectInterface(), buf);
+			RisseFPrint(stdout, (tRisseString(RISSE_WS("Object@")) + buf).c_str());
+		}
+		else
+		{
+			RisseFPrint(stdout, (args[i].operator tRisseString()).c_str());
+		}
+	}
+	RisseFPrint(stdout, RISSE_WS("\n"));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		NativeFunction: Object.puts  内容を標準出力に出力し、改行する
 //---------------------------------------------------------------------------
 static void Object_puts(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
@@ -99,6 +125,7 @@ tRisseObjectClass::tRisseObjectClass() : tRisseClassBase(NULL)
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
+	tRisseVariant * pThis = new tRisseVariant(this);
 
 	// construct
 	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Object_construct)));
@@ -108,7 +135,9 @@ tRisseObjectClass::tRisseObjectClass() : tRisseClassBase(NULL)
 	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(new tRisseNativeFunctionBase(Object_getInstanceMember)));
 	// setInstanceMener
 	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(new tRisseNativeFunctionBase(Object_setInstanceMember)));
-	// setInstanceMener
+	// static show
+	RegisterNormalMember(RISSE_WS("ptr"), tRisseVariant(new tRisseNativeFunctionBase(Object_ptr), pThis));
+	// puts
 	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(new tRisseNativeFunctionBase(Object_puts)));
 }
 //---------------------------------------------------------------------------

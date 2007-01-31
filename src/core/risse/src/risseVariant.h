@@ -710,7 +710,7 @@ public: // 演算子
 	//! @return		新しいインスタンス
 	//-----------------------------------------------------------------------
 	tRisseVariantBlock New(risse_uint32 flags = 0,
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty()) const
+		const tRisseMethodArgument & args = tRisseMethodArgument::Empty()) const // TODO: あれ、Thisは？
 	{
 		// Object 以外はクラスとしては機能しないため
 		// すべて 例外を発生する

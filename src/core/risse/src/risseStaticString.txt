@@ -32,3 +32,4 @@ ss_charAt				charAt				#!< "charAt" メソッド名
 ss_length				length				#!< "length" プロパティ名
 ss_times				times				#!< "times" メソッド名
 ss_isNaN				isNaN				#!< "isNaN" プロパティ名
+ss_filler				filler				#!< "filler" インスタンス変数/プロパティ名

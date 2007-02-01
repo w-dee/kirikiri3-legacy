@@ -350,9 +350,9 @@ public: // operate
 			if(args.GetArgumentCount() != 1)                           \
 				RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);\
 			if(result)                                                 \
-				*result = BitOr(args[0]);                              \
+				*result = func(args[0]);                              \
 			else                                                       \
-				BitOr(args[0]); /* discard result */                   \
+				func(args[0]); /* discard result */                   \
 			return rvNoError;
 
 		case ocLogOr			://!< ||
@@ -410,7 +410,7 @@ public: // operate
 			RISSE_BIN_OP(Div);
 
 		case ocIdiv				://!< \ (integer div)
-			RISSE_BIN_OP(IDiv);
+			RISSE_BIN_OP(Idiv);
 
 		case ocMul				://!< *
 			RISSE_BIN_OP(Mul);
@@ -424,8 +424,8 @@ public: // operate
 //		case ocDGet				://!< get .  
 //			RISSE_BIN_OP(DGet);
 
-//		case ocIGet				://!< get [ ]
-//			RISSE_BIN_OP(IGet);
+		case ocIGet				://!< get [ ]
+			RISSE_BIN_OP(IGet);
 
 //		case ocDDelete			://!< delete .
 //			RISSE_BIN_OP(DDelete);
@@ -436,8 +436,11 @@ public: // operate
 //		case ocDSet				://!< set .
 //			RISSE_BIN_OP(DSet);
 
-//		case ocISet				://!< set [ ]
-//			RISSE_BIN_OP(ISet);
+		case ocISet				://!< set [ ]
+			if(args.GetArgumentCount() != 2)
+				RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
+			ISet(args[0], args[1]);
+			return rvNoError;
 
 #define RISSE_ASSIGN_OP(func) \
 			if(args.GetArgumentCount() != 1)                   \
@@ -520,7 +523,7 @@ public: // 演算子
 	*/
 
 	//-----------------------------------------------------------------------
-	//! @brief		プロパティ取得		GetPropertyDirect dget
+	//! @brief		直接プロパティ取得		GetPropertyDirect dget
 	//! @param		name		メンバ名
 	//! @param		flags		フラグ
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
@@ -554,7 +557,7 @@ public: // 演算子
 	tRisseVariantBlock GetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const ;
 
 	//-----------------------------------------------------------------------
-	//! @brief		プロパティ設定		SetPropertyDirect dset
+	//! @brief		直接プロパティ設定		SetPropertyDirect dset
 	//! @param		name		メンバ名
 	//! @param		value		設定する値
 	//! @param		flags		フラグ
@@ -584,6 +587,65 @@ public: // 演算子
 	void SetPropertyDirect_Octet   (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
 	void SetPropertyDirect_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
 	void SetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const;
+
+	//-----------------------------------------------------------------------
+	//! @brief		間接プロパティ取得		IGet iget
+	//! @param		key		キー
+	//! @return		プロパティ取得の結果
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock IGet(const tRisseVariantBlock & key) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return IGet_Void     (key);
+		case vtInteger:	return IGet_Integer  (key);
+		case vtReal:	return IGet_Real     (key);
+		case vtNull:	return IGet_Null     (key);
+		case vtString:	return IGet_String   (key);
+		case vtOctet:	return IGet_Octet    (key);
+		case vtBoolean:	return IGet_Boolean  (key);
+		case vtObject:	return IGet_Object   (key);
+		}
+		return tRisseVariant();
+	}
+
+	tRisseVariantBlock IGet_Void    (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock IGet_Integer (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock IGet_Real    (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock IGet_Null    (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock IGet_String  (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock IGet_Octet   (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock IGet_Boolean (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock IGet_Object  (const tRisseVariantBlock & key) const { return Invoke(mnIGet, key); }
+
+	//-----------------------------------------------------------------------
+	//! @brief		間接プロパティ設定		ISet iset
+	//! @param		key			キー
+	//! @param		value		設定する値
+	//-----------------------------------------------------------------------
+	void ISet(const tRisseVariantBlock & key, const tRisseVariantBlock & value) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	ISet_Void     (key, value); return;
+		case vtInteger:	ISet_Integer  (key, value); return;
+		case vtReal:	ISet_Real     (key, value); return;
+		case vtNull:	ISet_Null     (key, value); return;
+		case vtString:	ISet_String   (key, value); return;
+		case vtOctet:	ISet_Octet    (key, value); return;
+		case vtBoolean:	ISet_Boolean  (key, value); return;
+		case vtObject:	ISet_Object   (key, value); return;
+		}
+	}
+
+	void ISet_Void    (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Integer (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Real    (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Null    (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_String  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Octet   (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Boolean (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Object  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { Invoke(mnISet, key, value); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
@@ -702,6 +764,42 @@ public: // 演算子
 	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const;
+
+	//-----------------------------------------------------------------------
+	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		membername	メンバ名
+	//! @param		arg1		引数
+	//! @param		arg2		引数
+	//! @return		戻り値
+	//-----------------------------------------------------------------------
+	tRisseVariantBlock Invoke(
+		const tRisseString & membername,
+		const tRisseVariant & arg1,
+		const tRisseVariant & arg2
+		) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Invoke_Void     (membername,arg1,arg2);
+		case vtInteger:	return Invoke_Integer  (membername,arg1,arg2);
+		case vtReal:	return Invoke_Real     (membername,arg1,arg2);
+		case vtNull:	return Invoke_Null     (membername,arg1,arg2);
+		case vtString:	return Invoke_String   (membername,arg1,arg2);
+		case vtOctet:	return Invoke_Octet    (membername,arg1,arg2);
+		case vtBoolean:	return Invoke_Boolean  (membername,arg1,arg2);
+		case vtObject:	return Invoke_Object   (membername,arg1,arg2);
+		}
+		return tRisseVariantBlock();
+	}
+
+	tRisseVariantBlock Invoke_Void     (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Real     (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Null     (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_String   (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)インスタンス作成		New

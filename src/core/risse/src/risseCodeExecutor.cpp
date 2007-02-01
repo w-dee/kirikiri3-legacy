@@ -748,7 +748,7 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			RISSE_ASSERT(CI(code[3]) < framesize);
-			/* incomplete */
+			AR(code[1]) = AR(code[2]).IGet(AR(code[3]));
 			code += 4;
 			break;
 
@@ -796,7 +796,7 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			RISSE_ASSERT(CI(code[3]) < framesize);
-			/* incomplete */
+			AR(code[1]).ISet(AR(code[2]), AR(code[3]));
 			code += 4;
 			break;
 

@@ -211,7 +211,22 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 	tRisseVariantBlock ret;
 	intf->Do(ocFuncCall, &ret, membername,
 		0, 
-		tRisseMethodArgument::New(&arg1),
+		tRisseMethodArgument::New(arg1),
+		*this
+		);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const
+{
+	tRisseObjectInterface * intf = GetObjectInterface();
+	tRisseVariantBlock ret;
+	intf->Do(ocFuncCall, &ret, membername,
+		0, 
+		tRisseMethodArgument::New(arg1, arg2),
 		*this
 		);
 	return ret;

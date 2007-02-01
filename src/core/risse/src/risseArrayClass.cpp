@@ -34,7 +34,12 @@ static void Array_push(RISSE_NATIVEFUNCTION_CALLEE_ARGS);
 //---------------------------------------------------------------------------
 static void Array_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-	// デフォルトでは何もしない
+	// default メンバを追加 (デフォルトではvoid)
+	This.SetPropertyDirect(ss_default, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant::GetVoidObject(), This);
+	// filler メンバを追加 (デフォルトではvoid)
+	This.SetPropertyDirect(ss_default, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant::GetVoidObject(), This);
 }
 //---------------------------------------------------------------------------
 
@@ -49,6 +54,77 @@ static void Array_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 	// 引数を元に配列を構成する
 	Array_push(result, flags, args, This); // push を呼ぶ
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		NativeFunction: Array.[]
+//---------------------------------------------------------------------------
+static void Array_IGet(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
+	tRisseArrayObject::tArray & array = obj->GetArray();
+
+	if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+
+	risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[0]);
+	if(ofs_index < 0) ofs_index += array.size(); // 折り返す
+
+	risse_size index = static_cast<risse_size>(ofs_index);
+	if(ofs_index < 0 || index >= array.size())
+	{
+		// 範囲外
+		// default の値を得て、それを返す
+		tRisseVariant default_value = This.GetPropertyDirect(ss_default);
+		if(result) *result = default_value;
+		return;
+	}
+
+	// 値を返す
+	if(result) *result = array[index];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		NativeFunction: Array.[]=
+//---------------------------------------------------------------------------
+static void Array_ISet(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
+	tRisseArrayObject::tArray & array = obj->GetArray();
+
+	if(args.GetArgumentCount() < 2) RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
+
+	risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[0]);
+	if(ofs_index < 0) ofs_index += array.size(); // 折り返す
+
+	if(ofs_index < 0)  { /* それでもまだ負: TOOD: out of bound 例外 */ return; }
+
+	risse_size index = static_cast<risse_size>(ofs_index);
+	if(index >= array.size())
+	{
+		// 配列を拡張する
+		// もし、拡張する際に値を埋める必要があるならば
+		// 値を埋める
+		if(index > array.size())
+		{
+			// filler の値を得る
+			tRisseVariant filler = This.GetPropertyDirect(ss_filler);
+			// filler で埋める
+			array.resize(index+1, filler);
+		}
+		else /* if index == array.size() */
+		{
+			array.push_back(args[1]);
+		}
+	}
+	else
+	{
+		// 既存の値の上書き
+		array[index] = args[1];
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -120,6 +196,11 @@ tRisseArrayClass::tRisseArrayClass() :
 	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Array_construct)));
 	// initialize
 	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Array_initialize)));
+
+	// []
+	RegisterNormalMember(mnIGet, tRisseVariant(new tRisseNativeFunctionBase(Array_IGet)));
+	// []=
+	RegisterNormalMember(mnISet, tRisseVariant(new tRisseNativeFunctionBase(Array_ISet)));
 
 	// push
 	RegisterNormalMember(ss_push, tRisseVariant(new tRisseNativeFunctionBase(Array_push)));

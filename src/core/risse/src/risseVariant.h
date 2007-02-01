@@ -609,8 +609,8 @@ public: // 演算子
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
-	//! @param		name		関数名
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
+	//! @param		name		関数名
 	//! @param		flags		呼び出しフラグ
 	//! @param		args		引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
@@ -1989,6 +1989,16 @@ public: // ユーティリティ
 			RisseThrowUnexpectedClass();
 		return intf;
 	}
+
+	//! @brief		インスタンスの親クラスのメソッドを呼び出すユーティリティメソッド
+	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
+	//! @param		name		呼び出すメソッド名
+	//! @param		flags		呼び出しフラグ
+	//! @param		args		引数
+	//! @param		This		メソッドが実行されるべき"Thisオブジェクト"
+	void CallSuperClassMethod(
+		tRisseVariantBlock * ret, const tRisseString & name,
+		risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
 
 	//! @brief		デバッグ用各種構造体サイズ表示
 	void prtsizes()

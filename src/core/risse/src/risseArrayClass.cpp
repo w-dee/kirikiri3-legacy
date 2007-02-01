@@ -26,6 +26,7 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(65360,34010,1527,19914,27817,35057,17111,22724);
 //---------------------------------------------------------------------------
+static void Array_push(RISSE_NATIVEFUNCTION_CALLEE_ARGS);
 
 
 //---------------------------------------------------------------------------
@@ -44,7 +45,10 @@ static void Array_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 static void Array_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 親クラスの同名メソッドを呼び出す
-	// TODO: コンストラクタの正しい実装
+	This.CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+
+	// 引数を元に配列を構成する
+	Array_push(result, flags, args, This); // push を呼ぶ
 }
 //---------------------------------------------------------------------------
 

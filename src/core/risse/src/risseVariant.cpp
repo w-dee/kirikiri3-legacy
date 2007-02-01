@@ -18,6 +18,7 @@
 #include "risseStringClass.h"
 #include "risseIntegerClass.h"
 #include "risseRealClass.h"
+#include "risseStaticStrings.h"
 
 namespace Risse
 {
@@ -1129,6 +1130,21 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Null     (risse_size maxlen) co
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::CallSuperClassMethod(tRisseVariantBlock * ret,
+	const tRisseString & name,risse_uint32 flags, 
+	const tRisseMethodArgument & args, const tRisseVariant & This) const
+{
+	// まず、this->class を取り出す
+	tRisseVariant Class = this->GetPropertyDirect(ss_class, tRisseOperateFlags::ofInstanceMemberOnly);
+
+	// 次に、instance.class.super を取り出す
+	tRisseVariant super = Class.GetPropertyDirect(ss_super, tRisseOperateFlags::ofInstanceMemberOnly);
+
+	// super の中のメソッドを呼ぶ
+	super.FuncCall(ret, name, flags, args, This);
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

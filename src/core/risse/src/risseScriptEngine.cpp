@@ -48,6 +48,18 @@ tRisseScriptEngine::tRisseScriptEngine()
 		RisseInitCoroutine();
 	}
 
+	// "Array" クラスのシングルトンインスタンスを作成する
+	// というのも、クラスの modules は配列であり、クラスを作る前に
+	// "Array" クラスのシングルトンインスタンスができあがっていなくてはならない。
+	// ちなみに Array.modules も配列なため Array の構築に必要であり、
+	// 連鎖的に無限ループに陥るため、tRisseClassBase::RegisterModulesArray() では
+	// Array クラスの構築が完了していない場合は modules 配列が登録されないように
+	// なっている。つまり、Array.modules はこの時点では生成されない。
+	tRisseArrayClass::GetPointer();
+
+	// Array.modules を改めて登録してやる
+	tRisseArrayClass::GetPointer()->RegisterModulesArray();
+
 	// "Object" クラスを作成する
 	tRisseVariant Object_class(tRisseObjectClass::GetPointer());
 

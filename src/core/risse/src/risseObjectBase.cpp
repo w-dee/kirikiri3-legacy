@@ -50,7 +50,34 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 	if(!member)
 	{
 		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
-			return false; // クラスを探さない場合はここでかえる
+			return false; // クラスやモジュールを探さない場合はここでかえる
+
+		// モジュールを探す
+		tRisseVariant modules;
+		if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This))
+		{
+			// モジュール配列がある
+			// モジュールは、モジュール配列を逆順にたどることで検索を行う
+			risse_offset length =
+				static_cast<risse_offset>(
+					(risse_int64)modules.GetPropertyDirect(ss_length, 0, modules));
+			for(risse_offset i = length - 1; i >= 0; i--)
+			{
+				tRisseVariant index(static_cast<risse_int64>(i));
+				tRisseVariant module = modules.IGet(index);
+
+				// モジュールに対してメンバ取得を行う
+				tRetValue rv = module.OperateForMember(ocDGet, &result, name, flags,
+							tRisseMethodArgument::Empty(), This);
+				if(rv == rvNoError)
+				{
+					// コンテキストを設定する
+					if(DefaultMethodContext) result.OverwriteContext(DefaultMethodContext);
+
+					return true;
+				}
+			}
+		}
 
 		// クラスを探す
 		tRisseVariant Class;
@@ -161,14 +188,37 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 		return false; // そうでない場合はメンバは見つからなかったことにする
 	}
 
-	// クラスを見に行くが、クラスにプロパティとして動作する
+	// クラスやモジュールを見に行くが、クラスやモジュールにプロパティとして動作する
 	// メンバがあった場合のみに、そのプロパティを起動する。
 	// または、クラスを探しに行ったときに const があった場合は
 	// それに書き込みを試みる(当然エラーになるが、意図した動作である)
 
+	tRetValue result = rvMemberNotFound;
+
+	// モジュールを探す
+	tRisseVariant modules;
+	if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This))
+	{
+		// モジュール配列がある
+		// モジュールは、モジュール配列を逆順にたどることで検索を行う
+		risse_offset length =
+			static_cast<risse_offset>(
+				(risse_int64)modules.GetPropertyDirect(ss_length, 0, modules));
+		for(risse_offset i = length - 1; i >= 0; i++)
+		{
+			tRisseVariant index(static_cast<risse_int64>(i));
+			tRisseVariant module = modules.IGet(index);
+
+			// モジュールに対してメンバ設定を行う
+			result = module.OperateForMember(ocDSet, NULL, name,
+								flags|tRisseOperateFlags::ofPropertyOrConstOnly,
+								tRisseMethodArgument::New(value), This);
+			if(result == rvNoError) return true; // アクセスに成功したので戻る
+		}
+	}
+
 	// クラスを探す
 	tRisseVariant Class;
-	tRetValue result = rvMemberNotFound;
 	if(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
 	{
 		if(!Class.IsNull())

@@ -50,6 +50,9 @@ public:
 	//! @brief		インスタンスへのポインタを獲る
 	//! @note		インスタンスが作成されていなければ作成を行う
 	static T * GetPointer() { if(!_instance) _instance = new T(); return _instance; }
+
+	//! @brief		インスタンスがすでに作成されているかどうかを得る
+	static bool GetInstanceAlive() { return _instance != NULL; }
 };
 template <typename T>
 T* tRisseSingleton<T>::_instance = NULL;

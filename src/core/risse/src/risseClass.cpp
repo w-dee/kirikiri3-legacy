@@ -19,6 +19,7 @@
 #include "risseException.h"
 #include "risseOpCodes.h"
 #include "risseStaticStrings.h"
+#include "risseArrayClass.h"
 
 namespace Risse
 {
@@ -140,6 +141,9 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBa
 
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant(super_class));
+
+	// modules を登録
+	RegisterModulesArray();
 }
 //---------------------------------------------------------------------------
 
@@ -170,6 +174,20 @@ tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERAT
 tRisseVariant tRisseClassBase::CreateNewObjectBase()
 {
 	return tRisseVariant(new tRisseObjectBase());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassBase::RegisterModulesArray()
+{
+	// modules 配列を登録
+	if(tRisseArrayClass::GetInstanceAlive())
+	{
+		// Arrayクラスの構築中にArrayクラスのシングルトンインスタンスを参照できないため
+		// Arrayクラスがすでに構築されている場合だけ、modules 配列を登録する
+		RegisterNormalMember(ss_modules, tRisseVariant(tRisseVariant(tRisseArrayClass::GetPointer()).New()));
+	}
 }
 //---------------------------------------------------------------------------
 

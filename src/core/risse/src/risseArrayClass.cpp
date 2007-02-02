@@ -37,8 +37,9 @@ static void Array_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 	// default メンバを追加 (デフォルトではvoid)
 	This.SetPropertyDirect(ss_default, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
 		tRisseVariant::GetVoidObject(), This);
+
 	// filler メンバを追加 (デフォルトではvoid)
-	This.SetPropertyDirect(ss_default, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+	This.SetPropertyDirect(ss_filler, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
 		tRisseVariant::GetVoidObject(), This);
 }
 //---------------------------------------------------------------------------
@@ -114,6 +115,9 @@ static void Array_ISet(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 			tRisseVariant filler = This.GetPropertyDirect(ss_filler);
 			// filler で埋める
 			array.resize(index+1, filler);
+
+			// 値の上書き
+			array[index] = args[1];
 		}
 		else /* if index == array.size() */
 		{

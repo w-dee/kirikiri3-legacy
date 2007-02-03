@@ -98,7 +98,7 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, FuncDeclArg	)		//!< 関数宣言の引数
 	RISSE_AST_ENUM_ITEM(ant, FuncDeclBlock	)		//!< 関数宣言のブロック引数
 	RISSE_AST_ENUM_ITEM(ant, PropDecl		)		//!< プロパティ宣言
-	RISSE_AST_ENUM_ITEM(ant, ClassDecl		)		//!< クラス宣言
+	RISSE_AST_ENUM_ITEM(ant, ClassDecl		)		//!< クラス宣言/モジュール宣言
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -2633,11 +2633,12 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	クラス宣言のASTノード(type=antClassDecl)
+//! @brief	クラス宣言/モジュール宣言のASTノード(type=antClassDecl)
 //---------------------------------------------------------------------------
 class tRisseASTNode_ClassDecl : public tRisseASTNode
 {
 	typedef tRisseASTNode inherited;
+	bool IsModule; //!< モジュール宣言の場合に真
 	tRisseASTNode * SuperClass; //!< 親クラスを表す式
 	tRisseASTNode * Body; //!< クラス宣言ボディ
 	tRisseString Name; //!< クラス名
@@ -2646,10 +2647,12 @@ class tRisseASTNode_ClassDecl : public tRisseASTNode
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
-	//! @param		super_class		親クラスを表す式
-	tRisseASTNode_ClassDecl(risse_size position, tRisseASTNode * super_class) :
+	//! @param		is_module		モジュール宣言かどうか
+	//! @param		super_class		親クラスを表す式(is_module = false の時だけ)
+	tRisseASTNode_ClassDecl(risse_size position, bool is_module, tRisseASTNode * super_class = NULL) :
 		tRisseASTNode(position, antClassDecl)
 	{
+		IsModule = is_module;
 		SuperClass = super_class;
 		Body = NULL;
 	}
@@ -2662,6 +2665,10 @@ public:
 	//! @brief		クラスボディを得る
 	//! @return		クラスボディ
 	tRisseASTNode * GetBody() const { return Body; }
+
+	//! @brief		モジュール宣言かどうかを得る
+	//! @return		モジュール宣言
+	bool GetIsModule() const { return IsModule; }
 
 	//! @brief		クラス名を設定する
 	//! @param		name	クラス名

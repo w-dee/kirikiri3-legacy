@@ -278,6 +278,12 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutAssignNewClass(Declared, Used[0], Used[1]);
 		break;
 
+	case ocAssignNewModule:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutAssignNewModule(Declared, Used[0]);
+		break;
+
 	case ocAssignParam:
 		RISSE_ASSERT(Declared != NULL);
 		gen->PutAssignParam(Declared, Index);
@@ -615,6 +621,22 @@ tRisseString tRisseSSAStatement::Dump() const
 
 			ret +=	Used[0]->Dump() + RISSE_WS(", ") +
 					Used[1]->Dump() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocAssignNewModule: // 新しいモジュールインスタンス
+		{
+			tRisseString ret;
+			RISSE_ASSERT(Used.size() == 1);
+			ret += Declared->Dump() + RISSE_WS(" = AssignNewModule(");
+
+			ret +=	Used[0]->Dump() + RISSE_WS(")");
 
 			// 変数のコメントを追加
 			tRisseString comment = Declared->GetTypeComment();

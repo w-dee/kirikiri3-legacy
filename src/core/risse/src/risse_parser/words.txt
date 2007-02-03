@@ -113,6 +113,7 @@ int                 T_INT          - true false
 internal            T_INTERNAL     - true false
 in                  T_IN           - true false
 if                  T_IF           - true false
+module              T_MODULE       - true false
 new                 T_NEW          - true false
 octet               T_OCTET        - true false
 protected           T_PROTECTED    - true false

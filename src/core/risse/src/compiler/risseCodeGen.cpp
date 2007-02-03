@@ -343,6 +343,17 @@ void tRisseCodeGenerator::PutAssignNewClass(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutAssignNewModule(const tRisseSSAVariable * dest,
+			const tRisseSSAVariable * name)
+{
+	PutWord(ocAssignNewModule);
+	PutWord(FindRegMap(dest));
+	PutWord(FindRegMap(name));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutAssignParam(const tRisseSSAVariable * dest, risse_size index)
 {
 	PutWord(ocAssignParam);

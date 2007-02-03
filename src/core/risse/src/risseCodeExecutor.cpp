@@ -16,6 +16,7 @@
 #include "risseOpCodes.h"
 #include "risseExceptionClass.h"
 #include "risseScriptBlockBase.h"
+#include "risseModuleClass.h"
 #include "risseClassClass.h"
 #include "risseScriptEngine.h"
 /*
@@ -159,8 +160,18 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[3]) < framesize);
 			AR(code[1]) =
 				tRisseVariant(tRisseClassClass::GetPointer()).
-							New(0, tRisseMethodArgument::New(AR(code[2])));
+							New(0, tRisseMethodArgument::New(AR(code[2]), AR(code[3])));
 			code += 4;
+			break;
+
+		case ocAssignNewModule: // module	 = 新しいモジュールインスタンスの代入 (引数=モジュール名)
+			/* incomplete */
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			AR(code[1]) =
+				tRisseVariant(tRisseModuleClass::GetPointer()).
+							New(0, tRisseMethodArgument::New(AR(code[2])));
+			code += 3;
 			break;
 
 		case ocAssignParam: // getpar	= (S番目の関数引数を代入)

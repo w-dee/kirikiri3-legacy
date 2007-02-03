@@ -18,6 +18,7 @@ ss_fertilize			fertilize			#!< "fertilize" メソッド名
 ss_getInstanceMember	getInstanceMember	#!< "getInstanceMember" メソッド名
 ss_setInstanceMember	setInstanceMember	#!< "setInstanceMember" メソッド名
 ss_Object				Object				#!< "Object" クラス名
+ss_Module				Module				#!< "Module" モジュール名
 ss_Class				Class				#!< "Class" クラス名
 ss_Array				Array				#!< "Array" クラス名
 ss_Primitive			Primitive			#!< "Primitive" クラス名
@@ -29,8 +30,11 @@ ss_prototype			prototype			#!< "prototype" インスタンス変数/プロパテ
 ss_modules				modules				#!< "modules" インスタンス変数/プロパティ名
 ss_push					push				#!< "push" メソッド名
 ss_pop					pop					#!< "pop" メソッド名
+ss_unshift				unshift				#!< "unshift" メソッド名
+ss_shift				shift				#!< "shift" メソッド名
 ss_charAt				charAt				#!< "charAt" メソッド名
 ss_length				length				#!< "length" プロパティ名
 ss_times				times				#!< "times" メソッド名
 ss_isNaN				isNaN				#!< "isNaN" プロパティ名
 ss_filler				filler				#!< "filler" インスタンス変数/プロパティ名
+ss_include				include				#!< "include" メソッド名

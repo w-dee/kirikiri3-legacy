@@ -13,7 +13,7 @@
 #include "prec.h"
 
 #include "risseString.h"
-
+#include "risseException.h"
 
 
 namespace Risse
@@ -170,8 +170,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
 tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 {
 	Length = RisseUtf8ToRisseCharString(ref, NULL); // コードポイント数を得る
-//	if(Length == risse_size_max)
-//		; /////////////////////////////////////////// TODO: 例外を投げる
+	if(Length == risse_size_max) RisseThrowInvalidUTF8String();
 	Buffer = AllocateInternalBuffer(Length);
 	RisseUtf8ToRisseCharString(ref, Buffer);
 	Buffer[Length] = Buffer[Length + 1] = 0; // null終端と hint をクリア

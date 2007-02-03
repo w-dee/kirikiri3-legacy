@@ -187,6 +187,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	T_GLOBAL				"global"
 	T_RBRACKET				"]"
 	T_CLASS					"class"
+	T_MODULE				"module"
 	T_RPARENTHESIS			")"
 	T_COLON					":"
 	T_SEMICOLON				";"
@@ -292,7 +293,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	func_decl_arg func_decl_arg_collapse call_block call_block_arg_opt
 	property_def property_expr_def property_handler_def_list
 	property_handler_getter property_handler_setter
-	class_def class_expr_def class_extender
+	class_module_def class_module_expr_def class_extender
 	break continue
 	return switch with label goto try throw catch catch_list catch_or_finally
 	regexp
@@ -710,30 +711,37 @@ property_getter_handler_head
 ;
 
 /*---------------------------------------------------------------------------
-  class definition
+  class/module definition
   ---------------------------------------------------------------------------*/
 
-/* a class definition */
-class_def
+/* a class or module definition */
+class_module_def
 	: "class" T_ID
 	  class_extender
 	  "{" toplevel_def_list "}"				{ $$ = $3;
 											  C(ClassDecl, $$)->SetBody($5);
 											  C(ClassDecl, $$)->SetName(*$2); }
+	| "module" T_ID
+	  "{" toplevel_def_list "}"				{ $$ = N(ClassDecl)(LP, true, NULL);
+											  C(ClassDecl, $$)->SetBody($4);
+											  C(ClassDecl, $$)->SetName(*$2); }
 ;
 
-class_expr_def
+class_module_expr_def
 	: "class"
 	  class_extender
 	  "{" toplevel_def_list "}"				{ $$ = $2;
 											  C(ClassDecl, $$)->SetBody($4); }
+	| "module"
+	  "{" toplevel_def_list "}"				{ $$ = N(ClassDecl)(LP, true, NULL);
+											  C(ClassDecl, $$)->SetBody($3); }
 ;
 
 class_extender
-	:										{ $$ = N(ClassDecl)(LP, NULL); }
-	| "extends" expr						{ $$ = N(ClassDecl)(LP, $2); }
-	| "<" expr/* syntax sugar, Ruby like */	{ $$ = N(ClassDecl)(LP, $2); }
-	| ":" expr/* syntax sugar, C++ like */	{ $$ = N(ClassDecl)(LP, $2); }
+	:										{ $$ = N(ClassDecl)(LP, false, NULL); }
+	| "extends" expr						{ $$ = N(ClassDecl)(LP, false, $2); }
+	| "<" expr/* syntax sugar, Ruby like */	{ $$ = N(ClassDecl)(LP, false, $2); }
+	| ":" expr/* syntax sugar, C++ like */	{ $$ = N(ClassDecl)(LP, false, $2); }
 ;
 
 
@@ -753,8 +761,8 @@ definition
 	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
 	| property_def
 	| member_attr_list_non_prop
-	  class_def								{ $$ = $2; C(ClassDecl, $$)->SetAttribute(*$1); }
-	| class_def
+	  class_module_def						{ $$ = $2; C(ClassDecl, $$)->SetAttribute(*$1); }
+	| class_module_def
 ;
 
 
@@ -872,6 +880,7 @@ member_name
 	| "internal"							{ $$ = new tRisseVariant(ss_internal       ); }
 	| "in"									{ $$ = new tRisseVariant(ss_in             ); }
 	| "if"									{ $$ = new tRisseVariant(ss_if             ); }
+	| "module"								{ $$ = new tRisseVariant(ss_module         ); }
 	| "new"									{ $$ = new tRisseVariant(ss_new            ); }
 	| "octet"								{ $$ = new tRisseVariant(ss_octet          ); }
 	| "protected"							{ $$ = new tRisseVariant(ss_protected      ); }
@@ -1005,7 +1014,7 @@ factor_expr
 	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
 	| func_expr_def
 	| property_expr_def
-	| class_expr_def
+	| class_module_expr_def
 	| "global"						{ $$ = N(Factor)(LP, aftGlobal); }
 	| inline_array
 	| inline_dic

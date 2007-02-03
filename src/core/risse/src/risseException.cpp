@@ -196,10 +196,17 @@ void RisseThrowUnexpectedClass()
 //---------------------------------------------------------------------------
 void RisseThrowCannotCreateInstanceFromThisClass()
 {
-	eRisseError::Throw(tRisseString(RISSE_WS_TR("Cannot create instance from this class")));
+	eRisseError::Throw(tRisseString(RISSE_WS_TR("cannot create instance from this class")));
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void RisseThrowInvalidUTF8String()
+{
+	eRisseError::Throw(tRisseString(RISSE_WS_TR("invalid UTF-8 string")));
+}
+//---------------------------------------------------------------------------
 
 
 

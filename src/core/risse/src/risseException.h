@@ -349,6 +349,8 @@ void RisseThrowPropertyCannotBeWritten(const tRisseString & name = tRisseString:
 void RisseThrowUnexpectedClass();
 //! @brief		「このクラスのインスタンスは作成できません」例外を発生(暫定)
 void RisseThrowCannotCreateInstanceFromThisClass();
+//! @brief		「無効なUTF-8文字列です」例外を発生(暫定)
+void RisseThrowInvalidUTF8String();
 //---------------------------------------------------------------------------
 
 

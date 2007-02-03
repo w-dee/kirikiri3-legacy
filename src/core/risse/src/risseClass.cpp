@@ -120,6 +120,22 @@ static void Class_fertilize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
+//! @brief		NativeFunction: Class.include
+//---------------------------------------------------------------------------
+static void Class_include(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	// クラスの modules 配列にモジュールを追加する
+
+	// modules を取り出す
+	tRisseVariant modules = This.GetPropertyDirect(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
+
+	// Array.unshift を行う
+	modules.Do(ocFuncCall, NULL, ss_unshift, 0, args);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBase(ss_super)
 {
 	// 親クラスのRTTIを引き継ぐ
@@ -138,6 +154,9 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBa
 	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunctionBase(Class_new), pThis));
 	// fertilize
 	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunctionBase(Class_fertilize), pThis));
+
+	// include
+	RegisterNormalMember(ss_include, tRisseVariant(new tRisseNativeFunctionBase(Class_include)));
 
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant(super_class));
@@ -190,5 +209,22 @@ void tRisseClassBase::RegisterModulesArray()
 	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassBase::CallSuperClassMethod(tRisseVariantBlock * ret,
+	const tRisseString & name,risse_uint32 flags, 
+	const tRisseMethodArgument & args, const tRisseVariant & This)
+{
+	// class.super を取り出す
+	tRisseVariant super;
+	Do(ocDGet, &super, ss_super, tRisseOperateFlags::ofInstanceMemberOnly, tRisseMethodArgument::Empty());
+
+	// super の中のメソッドを呼ぶ
+	super.FuncCall(ret, name, flags, args, This);
+}
+//---------------------------------------------------------------------------
+
+
 
 } // namespace Risse

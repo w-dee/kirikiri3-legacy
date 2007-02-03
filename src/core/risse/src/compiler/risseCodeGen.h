@@ -233,6 +233,11 @@ public:
 	//! @param		name	クラス名を表す変数
 	void PutAssignNewClass(const tRisseSSAVariable * dest, const tRisseSSAVariable * super, const tRisseSSAVariable * name);
 
+	//! @brief		新しいモジュールインスタンスを Assign するコードを置く
+	//! @param		dest	Assign先変数
+	//! @param		name	モジュール名を表す変数
+	void PutAssignNewModule(const tRisseSSAVariable * dest, const tRisseSSAVariable * name);
+
 	//! @brief		メソッドへの引数を assign するコードを置く
 	//! @param		dest	変数コピー先変数
 	//! @param		index	引数インデックス

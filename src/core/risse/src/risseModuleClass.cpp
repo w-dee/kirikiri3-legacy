@@ -8,12 +8,10 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief "Class" (クラス) の実装
+//! @brief "Module" (モジュール) の実装
 //---------------------------------------------------------------------------
 #include "prec.h"
 
-#include "risseClass.h"
-#include "risseClassClass.h"
 #include "risseModuleClass.h"
 #include "risseObjectClass.h"
 #include "risseNativeFunction.h"
@@ -23,15 +21,15 @@
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(28480,29035,20490,18954,3474,2858,57740,45280);
+RISSE_DEFINE_SOURCE_ID(63047,20109,44050,17555,30336,10949,23175,16849);
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Class.construct
+//! @brief		NativeFunction: Module.construct
 //---------------------------------------------------------------------------
-static void Class_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+static void Module_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// デフォルトでは何もしない
 }
@@ -39,39 +37,18 @@ static void Class_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Class.initialize
+//! @brief		NativeFunction: Module.initialize
 //---------------------------------------------------------------------------
-static void Class_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+static void Module_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 親クラスの同名メソッドを呼び出す
-	// 引数は  { 親クラス, 名前 }
-	if(args.HasArgument(1))
-	{
-		// 名前を渡す
-		tRisseClassClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::New(args[1]), This);
-	}
-	else
-	{
-		// 名前がないので引数無し
-		tRisseClassClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
-	}
-
-	if(args.HasArgument(0) && !args[0].IsNull())
-	{
-		// スーパークラスが指定されている
-		// super を登録
-		tRisseOperateFlags access_flags =
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
-		This.SetPropertyDirect(ss_super,
-			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar))|access_flags,
-			args[0], This);
-	}
+	tRisseModuleClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseModuleClass::GetPointer())
+tRisseModuleClass::tRisseModuleClass() : tRisseClassBase(tRisseObjectClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
 
@@ -79,33 +56,22 @@ tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseModuleClass::GetPoi
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Class_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Module_construct)));
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Class_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Module_initialize)));
 
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseClassClass::CreateNewObjectBase()
-{
-	return tRisseVariant(new tRisseClassInstance());
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-tRisseVariant tRisseClassInstance::CreateNewObjectBase()
+tRisseVariant tRisseModuleClass::CreateNewObjectBase()
 {
 	return tRisseVariant(new tRisseObjectBase());
 }
 //---------------------------------------------------------------------------
+
+
+
 
 } // namespace Risse

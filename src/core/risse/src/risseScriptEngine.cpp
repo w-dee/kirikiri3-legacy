@@ -18,6 +18,7 @@
 #include "risse_parser/risseScriptBlock.h"
 
 #include "risseObjectClass.h"
+#include "risseModuleClass.h"
 #include "risseClassClass.h"
 #include "risseArrayClass.h"
 #include "risseStringClass.h"
@@ -72,6 +73,17 @@ tRisseScriptEngine::tRisseScriptEngine()
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				Object_class);
 
+	// "Module" クラスを作成する
+	tRisseVariant Module_class(tRisseModuleClass::GetPointer());
+
+	// グローバルオブジェクトに "Module" クラスを登録する
+	GlobalObject.SetPropertyDirect(ss_Module,
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+				Module_class);
+
+	// TODO: ここらへんのごちゃごちゃした似た物の連続をスマートに
+
 	// "Class" クラスを作成する
 	tRisseVariant Class_class(tRisseClassClass::GetPointer());
 
@@ -81,7 +93,6 @@ tRisseScriptEngine::tRisseScriptEngine()
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				Class_class);
 
-	Class_class.New(0, tRisseMethodArgument::New(Object_class));
 
 	// "Array" クラスを作成する
 	tRisseVariant Array_class(tRisseArrayClass::GetPointer());

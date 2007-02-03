@@ -57,17 +57,21 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 		if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This))
 		{
 			// モジュール配列がある
-			// モジュールは、モジュール配列を逆順にたどることで検索を行う
+			// モジュールは、モジュール配列をたどることで検索を行う
 			risse_offset length =
 				static_cast<risse_offset>(
 					(risse_int64)modules.GetPropertyDirect(ss_length, 0, modules));
-			for(risse_offset i = length - 1; i >= 0; i--)
+			for(risse_offset i = 0; i < length; i++)
 			{
 				tRisseVariant index(static_cast<risse_int64>(i));
 				tRisseVariant module = modules.IGet(index);
 
 				// モジュールに対してメンバ取得を行う
-				tRetValue rv = module.OperateForMember(ocDGet, &result, name, flags,
+				// モジュールはモジュールインスタンスのクラス (Moduleクラス以上)
+				// を検索したりしないように、tRisseOperateFlags::ofInstanceMemberOnly をつけて
+				// 検索を行う
+				tRetValue rv = module.OperateForMember(ocDGet, &result, name,
+						flags|tRisseOperateFlags::ofInstanceMemberOnly,
 							tRisseMethodArgument::Empty(), This);
 				if(rv == rvNoError)
 				{
@@ -200,19 +204,22 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 	if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This))
 	{
 		// モジュール配列がある
-		// モジュールは、モジュール配列を逆順にたどることで検索を行う
+		// モジュールは、モジュール配列をたどることで検索を行う
 		risse_offset length =
 			static_cast<risse_offset>(
 				(risse_int64)modules.GetPropertyDirect(ss_length, 0, modules));
-		for(risse_offset i = length - 1; i >= 0; i++)
+		for(risse_offset i = 0; i < length; i++)
 		{
 			tRisseVariant index(static_cast<risse_int64>(i));
 			tRisseVariant module = modules.IGet(index);
 
 			// モジュールに対してメンバ設定を行う
+			// モジュールはモジュールインスタンスのクラス (Moduleクラス以上)
+			// を検索したりしないように、tRisseOperateFlags::ofInstanceMemberOnly をつけて
+			// 検索を行う
 			result = module.OperateForMember(ocDSet, NULL, name,
-								flags|tRisseOperateFlags::ofPropertyOrConstOnly,
-								tRisseMethodArgument::New(value), This);
+				flags|tRisseOperateFlags::ofPropertyOrConstOnly|tRisseOperateFlags::ofInstanceMemberOnly,
+				tRisseMethodArgument::New(value), This);
 			if(result == rvNoError) return true; // アクセスに成功したので戻る
 		}
 	}

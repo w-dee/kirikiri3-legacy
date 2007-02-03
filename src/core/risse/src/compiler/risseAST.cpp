@@ -566,10 +566,13 @@ tRisseString tRisseASTNode_ClassDecl::GetChildNameAt(risse_size index) const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
 {
+	tRisseString type = IsModule ?
+					RISSE_WS("module ") :
+					RISSE_WS("class ");
 	tRisseString attrib = Attribute.AsString();
 	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
-	if(Name.IsEmpty()) return attrib + RISSE_WS("anonymous");
-	return attrib + Name.AsHumanReadable();
+	if(Name.IsEmpty()) return type + attrib + RISSE_WS("anonymous");
+	return type + attrib + Name.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 
@@ -2746,12 +2749,12 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::DoReadSSA(tRisseSSAForm *form, void
 	tRisseSSAVariable * func_var = GenerateClassDecl(form);
 	if(Name.IsEmpty())
 	{
-		// 匿名クラス
+		// 匿名クラス/モジュール
 		return func_var;
 	}
 	else
 	{
-		// 名前付きクラス
+		// 名前付きクラス/モジュール
 		// class CCC { ... } は var CCC = class { ... } と同じ物として処理する
 
 		// 変数宣言のSSA表現を生成する
@@ -2770,40 +2773,59 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	RISSE_ASSERT(Body->GetType() == antContext);
 	RISSE_ASSERT(reinterpret_cast<tRisseASTNode_Context*>(Body)->GetContextType() == actTopLevel);
 
-	// クラス名を決める
+	// モジュールはスーパークラスを持つことはできない
+	RISSE_ASSERT(!(IsModule && SuperClass));
+
+
+	// クラス/モジュール名を決める
 	tRisseString class_name = Name.IsEmpty() ? tRisseString(RISSE_WS("anonymous")) : Name;
 
-	// クラス名を定数として作る
+	// クラス/モジュール名を定数として作る
 	tRisseSSAVariable * class_name_var =
 		form->AddConstantValueStatement(GetPosition(), tRisseVariant(class_name));
 
-	// 親クラスを得るための式を作る
-	tRisseSSAVariable * super_class_var;
 
-	if(SuperClass)
-		super_class_var = SuperClass->GenerateReadSSA(form);
-	else
-		super_class_var =
-			form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
-
-	// 新しいクラスインスタンスを作成する
+	// クラスの場合とモジュールの場合で違う処理
 	tRisseSSAVariable * class_instance_var = NULL;
-	form->AddStatement(GetPosition(),
-		ocAssignNewClass, &class_instance_var,
-		super_class_var, class_name_var);
+	if(!IsModule)
+	{
+		// クラスの場合
 
-	// クラスの中身を作成する
+		// 親クラスを得るための式を作る
+		tRisseSSAVariable * super_class_var;
+
+		if(SuperClass)
+			super_class_var = SuperClass->GenerateReadSSA(form);
+		else
+			super_class_var =
+				form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
+
+		// 新しいクラスインスタンスを作成する
+		form->AddStatement(GetPosition(),
+			ocAssignNewClass, &class_instance_var,
+			super_class_var, class_name_var);
+	}
+	else
+	{
+		// モジュールの場合
+
+		// 新しいクモジュールインスタンスを作成する
+		form->AddStatement(GetPosition(),
+			ocAssignNewModule, &class_instance_var, class_name_var);
+	}
+
+	// クラス/モジュールの中身を作成する
 	tRisseCompiler * compiler = form->GetFunction()->GetFunctionGroup()->GetCompiler();
 	tRisseSSAVariable * classblock_var = NULL;
 	tRisseSSAForm * new_form = NULL;
 	compiler->CompileClass(Body, class_name, form, new_form, classblock_var);
 
-	// クラスの中身のコンテキストを、新しく作成したインスタンスの物にする
+	// クラス/モジュールの中身のコンテキストを、新しく作成したインスタンスの物にする
 	form->AddStatement(GetPosition(),
 			ocIncontextOf, &classblock_var, classblock_var, class_instance_var);
 
-	// クラスの中身を「実行」するためのSSA表現を生成する。
-	// class  {    } の中身はそれが実行されることにより、クラスインスタンスへの
+	// クラス/モジュールの中身を「実行」するためのSSA表現を生成する。
+	// class  {    } の中身はそれが実行されることにより、クラス/モジュールインスタンスへの
 	// メンバの登録などが行われる。
 	// 関数呼び出しの文を生成する
 	tRisseSSAVariable * funccall_result = NULL;
@@ -2813,7 +2835,7 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	call_stmt->SetFuncExpandFlags(0);
 	call_stmt->SetBlockCount(0);
 
-	// 新しく作成したクラスインスタンスを返す
+	// 新しく作成したクラス/モジュールインスタンスを返す
 	return class_instance_var;
 }
 //---------------------------------------------------------------------------

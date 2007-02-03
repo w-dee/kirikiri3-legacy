@@ -51,7 +51,7 @@ static void Array_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 static void Array_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
 	// 親クラスの同名メソッドを呼び出す
-	This.CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	tRisseArrayClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 
 	// 引数を元に配列を構成する
 	Array_push(result, flags, args, This); // push を呼ぶ
@@ -161,6 +161,47 @@ static void Array_pop(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 		val = array.back();
 		array.pop_back();
 	}
+	else
+	{
+		val = This.GetPropertyDirect(ss_default);
+	}
+	if(result) *result = val;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		NativeFunction: Array.unshift
+//---------------------------------------------------------------------------
+static void Array_unshift(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
+	tRisseArrayObject::tArray & array = obj->GetArray();
+
+	risse_size i = args.GetArgumentCount();
+	while(i--) array.push_front(args[i]);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		NativeFunction: Array.shift
+//---------------------------------------------------------------------------
+static void Array_shift(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
+	tRisseArrayObject::tArray & array = obj->GetArray();
+
+	tRisseVariant val;
+	if(array.size() > 0)
+	{
+		val = array.front();
+		array.pop_front();
+	}
+	else
+	{
+		val = This.GetPropertyDirect(ss_default);
+	}
 	if(result) *result = val;
 }
 //---------------------------------------------------------------------------
@@ -210,6 +251,10 @@ tRisseArrayClass::tRisseArrayClass() :
 	RegisterNormalMember(ss_push, tRisseVariant(new tRisseNativeFunctionBase(Array_push)));
 	// pop
 	RegisterNormalMember(ss_pop, tRisseVariant(new tRisseNativeFunctionBase(Array_pop)));
+	// unshift
+	RegisterNormalMember(ss_unshift, tRisseVariant(new tRisseNativeFunctionBase(Array_unshift)));
+	// shift
+	RegisterNormalMember(ss_shift, tRisseVariant(new tRisseNativeFunctionBase(Array_shift)));
 	// length
 	RegisterNormalMember(ss_length,
 		tRisseVariant(new tRisseNativePropertyBase(Array_length_getter, Array_length_setter)),

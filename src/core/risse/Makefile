@@ -59,6 +59,7 @@ CPPFILES =  \
 			src/risseLexerUtils.cpp                  \
 			src/risseMemberAttribute.cpp             \
 			src/risseMethod.cpp                      \
+			src/risseModuleClass.cpp                 \
 			src/risseNativeFunction.cpp              \
 			src/risseNativeProperty.cpp              \
 			src/risseNumberClass.cpp                 \

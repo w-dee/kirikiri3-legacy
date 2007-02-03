@@ -982,6 +982,35 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
   }
   p += 1;
   goto cut_word;
+ case 'm':
+  switch(p[1]) {
+  case 'o':
+   switch(p[2]) {
+   case 'd':
+    switch(p[3]) {
+    case 'u':
+     switch(p[4]) {
+     case 'l':
+      switch(p[5]) {
+      case 'e':
+       p += 6;
+       if(!Risse_iswordcha_nc(*p)) { ptr = p; return T_MODULE; }
+       goto cut_word;
+      }
+      p += 5;
+      goto cut_word;
+     }
+     p += 4;
+     goto cut_word;
+    }
+    p += 3;
+    goto cut_word;
+   }
+   p += 2;
+   goto cut_word;
+  }
+  p += 1;
+  goto cut_word;
  case 'v':
   switch(p[1]) {
   case 'o':

@@ -25,7 +25,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"Integer" クラス
 //---------------------------------------------------------------------------
-class tRisseIntegerClass : public tRissePrimitiveClassBase, public tRisseSingleton<tRisseIntegerClass>
+class tRisseIntegerClass : public tRissePrimitiveClassBase, public tRisseClassSingleton<tRisseIntegerClass>
 {
 public:
 	//! @brief		コンストラクタ

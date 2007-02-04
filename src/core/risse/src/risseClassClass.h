@@ -29,7 +29,7 @@ namespace Risse
 //!				後者はRisseスクリプトで各クラスインスタンスを生成するための
 //!				クラスになる。
 //---------------------------------------------------------------------------
-class tRisseClassClass : public tRisseClassBase, public tRisseSingleton<tRisseClassClass>
+class tRisseClassClass : public tRisseClassBase, public tRisseClassSingleton<tRisseClassClass>
 {
 public:
 	// ! @brief		コンストラクタ

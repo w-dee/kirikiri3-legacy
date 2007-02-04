@@ -24,7 +24,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		モジュール用クラスの基底クラス(Risse用)
 //---------------------------------------------------------------------------
-class tRisseModuleClass : public tRisseClassBase, public tRisseSingleton<tRisseModuleClass>
+class tRisseModuleClass : public tRisseClassBase, public tRisseClassSingleton<tRisseModuleClass>
 {
 public:
 	// ! @brief		コンストラクタ

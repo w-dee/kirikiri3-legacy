@@ -61,93 +61,19 @@ tRisseScriptEngine::tRisseScriptEngine()
 	// Array.modules を改めて登録してやる
 	tRisseArrayClass::GetPointer()->RegisterModulesArray();
 
-	// "Object" クラスを作成する
-	tRisseVariant Object_class(tRisseObjectClass::GetPointer());
-
 	// グローバルオブジェクトを "Object" クラスから作成する
-	GlobalObject = Object_class.New();
+	GlobalObject = tRisseVariant(tRisseObjectClass::GetPointer()).New();
 
-	// グローバルオブジェクトに "Object" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Object,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				Object_class);
-
-	// "Module" クラスを作成する
-	tRisseVariant Module_class(tRisseModuleClass::GetPointer());
-
-	// グローバルオブジェクトに "Module" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Module,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				Module_class);
-
-	// TODO: ここらへんのごちゃごちゃした似た物の連続をスマートに
-
-	// "Class" クラスを作成する
-	tRisseVariant Class_class(tRisseClassClass::GetPointer());
-
-	// グローバルオブジェクトに "Class" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Class,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				Class_class);
-
-
-	// "Array" クラスを作成する
-	tRisseVariant Array_class(tRisseArrayClass::GetPointer());
-
-	// グローバルオブジェクトに "Array" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Array,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				Array_class);
-
-	// "Primitive" クラスを作成する
-	tRisseVariant Primitive_class(tRissePrimitiveClass::GetPointer());
-
-	// グローバルオブジェクトに "Primitive" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Primitive,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				Primitive_class);
-
-	// "String" クラスを作成する
-	tRisseVariant String_class(tRisseStringClass::GetPointer());
-
-	// グローバルオブジェクトに "String" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_String,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				String_class);
-
-	// "Number" クラスを作成する
-	tRisseVariant Number_class(tRisseNumberClass::GetPointer());
-
-	// グローバルオブジェクトに "Number" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Number,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				Number_class);
-
-	// "Integer" クラスを作成する
-	tRisseVariant Integer_class(tRisseIntegerClass::GetPointer());
-
-	// グローバルオブジェクトに "Integer" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Integer,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				Integer_class);
-
-	// "Real" クラスを作成する
-	tRisseVariant Real_class(tRisseRealClass::GetPointer());
-
-	// グローバルオブジェクトに "Real" クラスを登録する
-	GlobalObject.SetPropertyDirect(ss_Real,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-				Real_class);
-
+	// 各クラスをグローバルオブジェクトに登録する
+	tRisseObjectClass::RegisterClassInstance(GlobalObject, ss_Object);
+	tRisseModuleClass::RegisterClassInstance(GlobalObject, ss_Module);
+	tRisseClassClass::RegisterClassInstance(GlobalObject, ss_Class);
+	tRisseArrayClass::RegisterClassInstance(GlobalObject, ss_Array);
+	tRissePrimitiveClass::RegisterClassInstance(GlobalObject, ss_Primitive);
+	tRisseStringClass::RegisterClassInstance(GlobalObject, ss_String);
+	tRisseNumberClass::RegisterClassInstance(GlobalObject, ss_Number);
+	tRisseIntegerClass::RegisterClassInstance(GlobalObject, ss_Integer);
+	tRisseRealClass::RegisterClassInstance(GlobalObject, ss_Real);
 }
 //---------------------------------------------------------------------------
 

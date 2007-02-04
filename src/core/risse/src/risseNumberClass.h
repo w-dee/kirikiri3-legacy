@@ -24,7 +24,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		数値型用クラスの基底クラス(Risse用)
 //---------------------------------------------------------------------------
-class tRisseNumberClass : public tRisseClassBase, public tRisseSingleton<tRisseNumberClass>
+class tRisseNumberClass : public tRisseClassBase, public tRisseClassSingleton<tRisseNumberClass>
 {
 public:
 	//! @brief		コンストラクタ

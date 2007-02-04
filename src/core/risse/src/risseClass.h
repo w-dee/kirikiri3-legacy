@@ -17,9 +17,35 @@
 #include "risseObject.h"
 #include "risseObjectBase.h"
 #include "risseObjectRTTI.h"
+#include "risseVariant.h"
+#include "risseSingleton.h"
 
 namespace Risse
 {
+//---------------------------------------------------------------------------
+//! @brief		Risseクラスの実装用のシングルトンクラス
+//! @note		クラスに必要ないくつかの機能をカプセル化するため、このクラスを
+//!				継承すると便利。
+//---------------------------------------------------------------------------
+template <typename T>
+class tRisseClassSingleton : public tRisseSingleton<T>
+{
+public:
+	//! @brief		シングルトンクラスインスタンスを登録するためのユーティリティメソッド
+	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
+	//! @param		name		登録名
+	static void RegisterClassInstance(tRisseVariant & target, const tRisseString &name)
+	{
+		target.SetPropertyDirect(name,
+			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+					tRisseVariant(T::GetPointer()));
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		Risseクラスの実装
 //---------------------------------------------------------------------------

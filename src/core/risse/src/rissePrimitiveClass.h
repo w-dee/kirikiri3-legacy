@@ -48,7 +48,7 @@ public:
 //!				前者はC++のクラス階層において各プリミティブクラスの親クラスになり、
 //!				後者はRisseのクラス階層において各プリミティブクラスの親クラスになる。
 //---------------------------------------------------------------------------
-class tRissePrimitiveClass : public tRisseClassBase, public tRisseSingleton<tRissePrimitiveClass>
+class tRissePrimitiveClass : public tRisseClassBase, public tRisseClassSingleton<tRissePrimitiveClass>
 {
 public:
 	//! @brief		コンストラクタ

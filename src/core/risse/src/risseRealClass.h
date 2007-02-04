@@ -25,7 +25,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"Real" クラス
 //---------------------------------------------------------------------------
-class tRisseRealClass : public tRissePrimitiveClassBase, public tRisseSingleton<tRisseRealClass>
+class tRisseRealClass : public tRissePrimitiveClassBase, public tRisseClassSingleton<tRisseRealClass>
 {
 public:
 	//! @brief		コンストラクタ

@@ -21,7 +21,7 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseObjectClass : public tRisseClassBase, public tRisseSingleton<tRisseObjectClass>
+class tRisseObjectClass : public tRisseClassBase, public tRisseClassSingleton<tRisseObjectClass>
 {
 public:
 	//! @brief		コンストラクタ

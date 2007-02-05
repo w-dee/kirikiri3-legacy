@@ -119,6 +119,7 @@ RISSE_AST_ENUM_END
 RISSE_AST_ENUM_DEF(FactorType)
 	RISSE_AST_ENUM_ITEM(aft, Constant		)		//!< 定数
 	RISSE_AST_ENUM_ITEM(aft, This			)		//!< "this"
+	RISSE_AST_ENUM_ITEM(aft, ThisProxy		)		//!< this-proxy
 	RISSE_AST_ENUM_ITEM(aft, Super			)		//!< "super"
 	RISSE_AST_ENUM_ITEM(aft, Global			)		//!< "global"
 RISSE_AST_ENUM_END
@@ -980,9 +981,9 @@ public:
 	//! @return		この識別子がローカル名前空間に存在するかどうか
 	bool ExistInLocalNamespace(tRisseSSAForm * form) const;
 
-	//! @brief		この識別子を this 内にアクセスする AST ノードを作成して返す
-	//! @return		この識別子を this 内にアクセスする AST ノード
-	const tRisseASTNode_MemberSel * CreateAccessNodeOnThis() const;
+	//! @brief		この識別子を this-proxy 内にアクセスする AST ノードを作成して返す
+	//! @return		この識別子を this-proxy 内にアクセスする AST ノード
+	const tRisseASTNode_MemberSel * CreateAccessNodeOnThisProxy() const;
 };
 //---------------------------------------------------------------------------
 

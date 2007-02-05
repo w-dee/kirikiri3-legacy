@@ -177,6 +177,8 @@ class tRisseSSAForm : public tRisseCollectee
 	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
 
+	tRisseSSAVariable * ThisProxy; //!< this-proxy (thisにメンバがなければglobalを見に行くオブジェクト)が入っているSSA変数
+
 	tRisseSSABlock * EntryBlock; //!< エントリーSSA基本ブロック
 	tRisseSSABlock * CurrentBlock; //!< 現在変換中の基本ブロック
 
@@ -192,11 +194,12 @@ class tRisseSSAForm : public tRisseCollectee
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		pos				ソースコード上の位置
 	//! @param		function		この SSA 形式が含まれる関数インスタンス
 	//! @param		name			このSSA形式インスタンスの名前
 	//! @param		parent			親SSA形式インスタンス
 	//! @param		useparentframe	親SSA形式インスタンスのフレームを使うかどうか
-	tRisseSSAForm(tRisseCompilerFunction * function, const tRisseString & name,
+	tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function, const tRisseString & name,
 		tRisseSSAForm * parent, bool useparentframe);
 
 	//! @brief		AST を SSA 形式に変換する
@@ -233,6 +236,10 @@ public:
 	//! @brief		ローカル名前空間を得る
 	//! @return		ローカル名前空間
 	tRisseSSALocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
+
+	//! @brief		this-proxyを得る
+	//! @return		this-proxy
+	tRisseSSAVariable * GetThisProxy() const { return ThisProxy; }
 
 	//! @brief		現在変換中の基本ブロックを得る
 	//! @return		現在変換中の基本ブロック

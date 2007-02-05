@@ -694,6 +694,10 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 			// 文を作成して戻る
 			return form->AddVariableWithStatement(GetPosition(), ocAssignThis);
 
+	case aftThisProxy:		// this-proxy
+			// form が保持している ThisProxy を返す
+			return form->GetThisProxy();
+
 	case aftSuper:		// "super"
 			// 文を作成して戻る
 			return form->AddVariableWithStatement(GetPosition(), ocAssignSuper);
@@ -859,8 +863,8 @@ void * tRisseASTNode_Id::PrepareSSA(
 
 	if(need_access_this)
 	{
-		// this 上のメンバにアクセスする必要がある
-		pws->MemberSel = CreateAccessNodeOnThis();
+		// this-proxy 上のメンバにアクセスする必要がある
+		pws->MemberSel = CreateAccessNodeOnThisProxy();
 		pws->MemberSelParam = pws->MemberSel->PrepareSSA(form, mode);
 	}
 	else
@@ -930,11 +934,11 @@ bool tRisseASTNode_Id::DoWriteSSA(
 
 
 //---------------------------------------------------------------------------
-const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThis() const
+const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThisProxy() const
 {
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
-		new tRisseASTNode_Factor(GetPosition(), aftThis),
+		new tRisseASTNode_Factor(GetPosition(), aftThisProxy),
 		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), true);
 }
 //---------------------------------------------------------------------------

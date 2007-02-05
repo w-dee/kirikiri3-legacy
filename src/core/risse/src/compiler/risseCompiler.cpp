@@ -396,7 +396,7 @@ tRisseSSAForm * tRisseCompiler::InternalCompile(tRisseASTNode * root, const tRis
 	tRisseCompilerFunction *top_function = new tRisseCompilerFunction(top_function_group);
 
 	// トップレベルのSSA形式を作成する
-	tRisseSSAForm * form = new tRisseSSAForm(top_function, name, NULL, false);
+	tRisseSSAForm * form = new tRisseSSAForm(root->GetPosition(), top_function, name, NULL, false);
 
 	// トップレベルのSSA形式の内容を作成する
 	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)

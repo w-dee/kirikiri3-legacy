@@ -19,6 +19,7 @@
 #include "risseModuleClass.h"
 #include "risseClassClass.h"
 #include "risseScriptEngine.h"
+#include "risseThisProxy.h"
 /*
 	このソースは、実行スピード重視の、いわばダーティーな実装を行う。
 	ダーティーな実装は極力コメントを残し、わかりやすくしておくこと。
@@ -91,6 +92,17 @@ void tRisseCodeInterpreter::Execute(
 	//! @brief		レジスタのオペランド -> レジスタ/定数インデックスへの変換
 	#define CI(num) (num)
 
+	// this-proxy 用の領域
+	// 毎回これをnewするのはどうかと思うので
+	// スタック上に配置する。ただし、必要ない場合はこれを
+	// 生成する必要はないため、この時点ではストレージを確保しておくだけにする。
+	// (まぁそんなこといってもこいつの生成コストなどたかがしれているはずなのだが)
+	union tThisProxy
+	{
+		unsigned long dummy; // 強制的にこの共用体のアラインメントを合わせるために
+		char Storage[sizeof(tRisseThisProxy)];
+	} ThisProxy;
+
 	// ループ
 	while(true)
 	{
@@ -115,9 +127,17 @@ void tRisseCodeInterpreter::Execute(
 			break;
 
 		case ocAssignThis		: // this	 = thisの代入
-			/* incomplete */
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			AR(code[1]) = This;
+			code += 2;
+			break;
+
+		case ocAssignThisProxy		: // this	 = this-proxyの代入
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			AR(code[1]) = tRisseVariant(
+				new((tRisseThisProxy*)(&ThisProxy.Storage[0])) tRisseThisProxy(
+					const_cast<tRisseVariant&>(This),
+					CodeBlock->GetScriptBlock()->GetScriptEngine()->GetGlobalObject()));
 			code += 2;
 			break;
 

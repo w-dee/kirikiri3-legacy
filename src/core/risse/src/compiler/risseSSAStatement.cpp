@@ -258,6 +258,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		break;
 
 	case ocAssignThis:
+	case ocAssignThisProxy:
 	case ocAssignSuper:
 	case ocAssignGlobal:
 	case ocAssignNewArray:

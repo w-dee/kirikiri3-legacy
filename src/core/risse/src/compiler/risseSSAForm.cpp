@@ -84,15 +84,16 @@ void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAForm::tRisseSSAForm(tRisseCompilerFunction * function,
+tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 	const tRisseString & name, tRisseSSAForm * parent, bool useparentframe)
 {
 	Function = function;
 	Parent = parent;
-	UseParentFrame = useparentframe;
+	UseParentFrame = useparentframe; // ブロックの場合に真
 	Name = name;
 	UniqueNumber = 0;
 	LocalNamespace = new tRisseSSALocalNamespace();
+	ThisProxy = NULL;
 	EntryBlock = NULL;
 	CurrentBlock = NULL;
 	CurrentSwitchInfo = NULL;
@@ -116,6 +117,13 @@ tRisseSSAForm::tRisseSSAForm(tRisseCompilerFunction * function,
 	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"));
 	LocalNamespace->SetBlock(EntryBlock);
 	CurrentBlock = EntryBlock;
+
+	// this-proxy を作成する
+	// (もし関数などの中でthis-proxyが使われなかった場合は最適化によって
+	//  この文も消えるはず)
+	// 注意! ThisProxyのオブジェクトはスタック上に配置される可能性があるため
+	// SSA形式間で共有したりしてはいけない (SSA形式ごとに毎回作成する)
+	AddStatement(pos, ocAssignThisProxy, &ThisProxy);
 }
 //---------------------------------------------------------------------------
 
@@ -130,7 +138,6 @@ void tRisseSSAForm::Generate(const tRisseASTNode * root)
 
 	// 実行ブロックの最後の return 文を生成する
 	GenerateLastReturn(root);
-
 }
 //---------------------------------------------------------------------------
 
@@ -564,7 +571,7 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 
 	// 遅延評価ブロックを生成
 	new_form =
-		new tRisseSSAForm(Function, block_name, this, !sharevars);
+		new tRisseSSAForm(pos, Function, block_name, this, !sharevars);
 	Children.push_back(new_form);
 
 	// 新しく作成した遅延評価ブロックに、一番外側のローカル名前空間をpushする

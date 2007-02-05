@@ -28,6 +28,7 @@ NoOperation				nop			-,-,-,-,-,-		----		#!< なにもしない
 Assign					copy		R,R,-,-,-,-		----		#!< = (ローカル変数の代入)
 AssignConstant			const		R,C,-,-,-,-		----		#!< = 定数の代入
 AssignThis				this		R,-,-,-,-,-		----		#!< = thisの代入
+AssignThisProxy			thisproxy	R,-,-,-,-,-		----		#!< = this-proxyの代入
 AssignSuper				super		R,-,-,-,-,-		----		#!< = superの代入
 AssignGlobal			global		R,-,-,-,-,-		----		#!< = globalの代入
 AssignNewArray			array		R,-,-,-,-,-		----		#!< = 新しい配列オブジェクトの代入

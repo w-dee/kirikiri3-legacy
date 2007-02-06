@@ -2559,7 +2559,7 @@ public:
 		return Setter;
 	}
 
-	//! @brief		セッタの引数の名前を設定する
+	//! @brief		セッタの引数の名前を設定するもちろん
 	//! @param		name	セッタの引数の名前
 	void SetSetterArgumentName(const tRisseString & name) { SetterArgumentName = name; }
 
@@ -2628,7 +2628,13 @@ public:
 	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+//--
+
+	//! @brief		プロパティ宣言の表現を生成する
+	//! @param		form		SSA 形式インスタンス
+	//! @return		プロパティを表す変数
+	tRisseSSAVariable * GeneratePropertyDecl(tRisseSSAForm *form) const;
 };
 //---------------------------------------------------------------------------
 

@@ -24,7 +24,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"Array" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
-class tRisseArrayObject : public tRisseObjectBase
+class tRisseArrayInstance : public tRisseObjectBase
 {
 public:
 	typedef gc_deque<tRisseVariant> tArray; //!< 配列の中身のtypedef
@@ -38,7 +38,7 @@ public:
 	tArray & GetArray() { return Array; }
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
-	virtual ~tRisseArrayObject() {;}
+	virtual ~tRisseArrayInstance() {;}
 };
 //---------------------------------------------------------------------------
 

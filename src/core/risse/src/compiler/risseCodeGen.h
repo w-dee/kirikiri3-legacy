@@ -227,6 +227,12 @@ public:
 	//! @param		flags	正規表現フラグを表す変数
 	void PutAssignNewRegExp(const tRisseSSAVariable * dest, const tRisseSSAVariable * pattern, const tRisseSSAVariable * flags);
 
+	//! @brief		新しいプロパティインスタンスを Assign するコードを置く
+	//! @param		dest	Assign先変数
+	//! @param		getter	ゲッタを表す変数
+	//! @param		setter	セッタを表す変数
+	void PutAssignNewProperty(const tRisseSSAVariable * dest, const tRisseSSAVariable * getter, const tRisseSSAVariable * setter);
+
 	//! @brief		新しいクラスインスタンスを Assign するコードを置く
 	//! @param		dest	Assign先変数
 	//! @param		super	親クラスを表す変数

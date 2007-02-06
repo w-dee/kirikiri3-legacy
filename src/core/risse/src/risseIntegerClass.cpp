@@ -40,7 +40,7 @@ static void Integer_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 	// 引数をすべて連結した物を初期値に使う
 	// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
 	//       を変更するため、const_cast を用いる
-	if(args.GetArgumentCount() > 0)
+	if(args.HasArgument(0))
 		*const_cast<tRisseVariant*>(&This) = args[0].operator risse_int64();
 }
 //---------------------------------------------------------------------------

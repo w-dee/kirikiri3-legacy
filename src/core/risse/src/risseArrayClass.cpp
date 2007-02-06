@@ -64,8 +64,8 @@ static void Array_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 static void Array_IGet(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
-	tRisseArrayObject::tArray & array = obj->GetArray();
+	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+	tRisseArrayInstance::tArray & array = obj->GetArray();
 
 	if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 
@@ -93,8 +93,8 @@ static void Array_IGet(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 static void Array_ISet(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
-	tRisseArrayObject::tArray & array = obj->GetArray();
+	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+	tRisseArrayInstance::tArray & array = obj->GetArray();
 
 	if(args.GetArgumentCount() < 2) RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
 
@@ -138,8 +138,8 @@ static void Array_ISet(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 static void Array_push(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
-	tRisseArrayObject::tArray & array = obj->GetArray();
+	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+	tRisseArrayInstance::tArray & array = obj->GetArray();
 
 	for(risse_size i = 0; i < args.GetArgumentCount(); i++)
 		array.push_back(args[i]);
@@ -152,8 +152,8 @@ static void Array_push(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 static void Array_pop(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
-	tRisseArrayObject::tArray & array = obj->GetArray();
+	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+	tRisseArrayInstance::tArray & array = obj->GetArray();
 
 	tRisseVariant val;
 	if(array.size() > 0)
@@ -175,8 +175,8 @@ static void Array_pop(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 static void Array_unshift(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
-	tRisseArrayObject::tArray & array = obj->GetArray();
+	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+	tRisseArrayInstance::tArray & array = obj->GetArray();
 
 	risse_size i = args.GetArgumentCount();
 	while(i--) array.push_front(args[i]);
@@ -189,8 +189,8 @@ static void Array_unshift(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 static void Array_shift(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 {
-	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
-	tRisseArrayObject::tArray & array = obj->GetArray();
+	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+	tRisseArrayInstance::tArray & array = obj->GetArray();
 
 	tRisseVariant val;
 	if(array.size() > 0)
@@ -212,15 +212,15 @@ static void Array_shift(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 static void Array_length_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
 {
-	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
-	tRisseArrayObject::tArray & array = obj->GetArray();
+	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+	tRisseArrayInstance::tArray & array = obj->GetArray();
 
 	if(result) *result = (risse_int64)array.size();
 }
 static void Array_length_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
 {
-	tRisseArrayObject * obj = This.CheckAndGetObjectInterafce<tRisseArrayObject, tRisseArrayClass>();
-	tRisseArrayObject::tArray & array = obj->GetArray();
+	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+	tRisseArrayInstance::tArray & array = obj->GetArray();
 
 	// TODO: デフォルトの値の扱い
 	array.resize((risse_size)(risse_int64)(value));
@@ -266,7 +266,7 @@ tRisseArrayClass::tRisseArrayClass() :
 //---------------------------------------------------------------------------
 tRisseVariant tRisseArrayClass::CreateNewObjectBase()
 {
-	return tRisseVariant(new tRisseArrayObject());
+	return tRisseVariant(new tRisseArrayInstance());
 }
 //---------------------------------------------------------------------------
 

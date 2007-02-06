@@ -20,6 +20,7 @@
 #include "risseObjectClass.h"
 #include "risseModuleClass.h"
 #include "risseClassClass.h"
+#include "rissePropertyClass.h"
 #include "risseArrayClass.h"
 #include "risseStringClass.h"
 #include "rissePrimitiveClass.h"
@@ -68,6 +69,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseObjectClass::RegisterClassInstance(GlobalObject, ss_Object);
 	tRisseModuleClass::RegisterClassInstance(GlobalObject, ss_Module);
 	tRisseClassClass::RegisterClassInstance(GlobalObject, ss_Class);
+	tRissePropertyClass::RegisterClassInstance(GlobalObject, ss_Property);
 	tRisseArrayClass::RegisterClassInstance(GlobalObject, ss_Array);
 	tRissePrimitiveClass::RegisterClassInstance(GlobalObject, ss_Primitive);
 	tRisseStringClass::RegisterClassInstance(GlobalObject, ss_String);

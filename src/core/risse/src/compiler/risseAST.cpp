@@ -2748,6 +2748,114 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 
 
 //---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_PropDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	tRisseSSAVariable * property_instance_var = GeneratePropertyDecl(form);
+	if(Name.IsEmpty())
+	{
+		// 匿名プロパティ
+		return property_instance_var;
+	}
+	else
+	{
+		// 名前付きプロパティ
+		// class CCC { ... } は var CCC = class { ... } と同じ物として処理する
+
+		// TODO: プロパティがローカル名前空間に作成されてもかなり意味がないのでどうするか
+
+		// 変数宣言のSSA表現を生成する
+		tRisseASTNode_VarDeclPair::GenerateVarDecl(form, GetPosition(), Name, property_instance_var,
+						tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
+
+		return NULL;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *form) const
+{
+	// ゲッタノードを処理
+	tRisseSSAVariable * getter_var = NULL;
+	if(Getter)
+	{
+		tRisseSSAVariable * lazyblock_var = NULL;
+		tRisseSSAForm * new_form = NULL;
+		void * lazy_param = form->CreateLazyBlock(
+								GetPosition(),
+								Name.IsEmpty() ?
+									RISSE_WS("anonymous property getter"):
+									RISSE_WS("property ") + Name + RISSE_WS(" getter"),
+								true, NULL, new_form, lazyblock_var);
+		// ブロックの内容を生成する
+		new_form->Generate(Getter);
+
+		// 遅延評価ブロックをクリーンアップ
+		form->CleanupLazyBlock(lazy_param);
+
+		getter_var = lazyblock_var;
+	}
+	else
+	{
+		getter_var = 
+			form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
+	}
+
+	// セッタノードを処理
+	tRisseSSAVariable * setter_var = NULL;
+	if(Setter)
+	{
+		tRisseSSAVariable * lazyblock_var = NULL;
+		tRisseSSAForm * new_form = NULL;
+		void * lazy_param = form->CreateLazyBlock(
+								GetPosition(),
+								Name.IsEmpty() ?
+									RISSE_WS("anonymous property setter"):
+									RISSE_WS("property ") + Name + RISSE_WS(" setter"),
+								true, NULL, new_form, lazyblock_var);
+
+
+		// パラメータ内容の取得
+		tRisseSSAVariable * param_var = NULL;
+		tRisseSSAStatement * assignparam_stmt = 
+			new_form->AddStatement(GetPosition(), ocAssignParam, &param_var);
+		assignparam_stmt->SetIndex(0);
+
+		// 変数のローカル名前空間への登録
+		new_form->GetLocalNamespace()->Add(SetterArgumentName, NULL);
+
+		// ローカル変数への書き込み
+		new_form->GetLocalNamespace()->Write(new_form, GetPosition(),
+										SetterArgumentName, param_var);
+
+		// ブロックの内容を生成する
+		new_form->Generate(Setter);
+
+		// 遅延評価ブロックをクリーンアップ
+		form->CleanupLazyBlock(lazy_param);
+
+		setter_var = lazyblock_var;
+	}
+	else
+	{
+		setter_var = 
+			form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
+	}
+
+	// プロパティオブジェクトを作成する
+	tRisseSSAVariable * property_instance_var = NULL;
+	form->AddStatement(GetPosition(),
+		ocAssignNewProperty, &property_instance_var,
+		getter_var, setter_var);
+
+	// プロパティオブジェクトを返す
+	return property_instance_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_ClassDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
 	tRisseSSAVariable * func_var = GenerateClassDecl(form);

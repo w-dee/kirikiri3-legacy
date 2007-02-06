@@ -18,6 +18,7 @@
 #include "risseScriptBlockBase.h"
 #include "risseModuleClass.h"
 #include "risseClassClass.h"
+#include "rissePropertyClass.h"
 #include "risseScriptEngine.h"
 #include "risseThisProxy.h"
 /*
@@ -170,6 +171,16 @@ void tRisseCodeInterpreter::Execute(
 			RISSE_ASSERT(CI(code[1]) < framesize);
 			RISSE_ASSERT(CI(code[2]) < framesize);
 			RISSE_ASSERT(CI(code[3]) < framesize);
+			code += 4;
+			break;
+
+		case ocAssignNewProperty: // property	 = 新しいプロパティインスタンスの代入 (引数=ゲッタ+セッタ)
+			RISSE_ASSERT(CI(code[1]) < framesize);
+			RISSE_ASSERT(CI(code[2]) < framesize);
+			RISSE_ASSERT(CI(code[3]) < framesize);
+			AR(code[1]) =
+				tRisseVariant(tRissePropertyClass::GetPointer()).
+							New(0, tRisseMethodArgument::New(AR(code[2]), AR(code[3])));
 			code += 4;
 			break;
 

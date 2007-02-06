@@ -147,7 +147,7 @@ void RisseThrowMemberNotFound(const tRisseString & name)
 	if(!name.IsEmpty())
 		eRisseError::Throw(tRisseString(RISSE_WS_TR("member \"%1\" not found"), name));
 	else
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("member not found")));
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("the member not found")));
 }
 //---------------------------------------------------------------------------
 
@@ -158,7 +158,7 @@ void RisseThrowMemberIsReadOnly(const tRisseString & name)
 	if(!name.IsEmpty())
 		eRisseError::Throw(tRisseString(RISSE_WS_TR("member \"%1\" is read-only"), name));
 	else
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("member is read-only")));
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("the member is read-only")));
 }
 //---------------------------------------------------------------------------
 
@@ -169,7 +169,7 @@ void RisseThrowPropertyCannotBeRead(const tRisseString & name)
 	if(!name.IsEmpty())
 		eRisseError::Throw(tRisseString(RISSE_WS_TR("property \"%1\" cannot be read"), name));
 	else
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("property cannot be read")));
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("the property cannot be read")));
 }
 //---------------------------------------------------------------------------
 
@@ -180,7 +180,7 @@ void RisseThrowPropertyCannotBeWritten(const tRisseString & name)
 	if(!name.IsEmpty())
 		eRisseError::Throw(tRisseString(RISSE_WS_TR("property \"%1\" cannot be written"), name));
 	else
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("property cannot be written")));
+		eRisseError::Throw(tRisseString(RISSE_WS_TR("the property cannot be written")));
 }
 //---------------------------------------------------------------------------
 

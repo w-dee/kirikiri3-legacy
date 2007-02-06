@@ -102,11 +102,16 @@ static void Property_getter_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
 	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
 	if(result) *result = obj->GetGetter();
 }
+/*
+このプロパティへの書き込みのサポートはない
+(いったん定義したプロパティの内容を個別に変えられると困る場合があるため.特にプリミティブクラスのプロパティ.
+また、これが再定義できてもあまりうれしくないと思うのだが)
 static void Property_getter_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
 {
 	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
 	obj->SetGetter(value);
 }
+*/
 //---------------------------------------------------------------------------
 
 
@@ -118,11 +123,16 @@ static void Property_setter_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
 	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
 	if(result) *result = obj->GetSetter();
 }
+/*
+このプロパティへの書き込みのサポートはない
+(いったん定義したプロパティの内容を個別に変えられると困る場合があるため.特にプリミティブクラスのプロパティ.
+また、これが再定義できてもあまりうれしくないと思うのだが)
 static void Property_setter_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
 {
 	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
 	obj->SetSetter(value);
 }
+*/
 //---------------------------------------------------------------------------
 
 
@@ -142,11 +152,11 @@ tRissePropertyClass::tRissePropertyClass() :
 
 	// getter
 	RegisterNormalMember(ss_getter,
-		tRisseVariant(new tRisseNativePropertyBase(Property_getter_getter, Property_getter_setter)),
+		tRisseVariant(new tRisseNativePropertyBase(Property_getter_getter, NULL)),
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 	// setter
 	RegisterNormalMember(ss_setter,
-		tRisseVariant(new tRisseNativePropertyBase(Property_setter_getter, Property_setter_setter)),
+		tRisseVariant(new tRisseNativePropertyBase(Property_setter_getter, NULL)),
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }
 //---------------------------------------------------------------------------

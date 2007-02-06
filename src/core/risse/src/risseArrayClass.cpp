@@ -222,8 +222,19 @@ static void Array_length_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
 	tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
 	tRisseArrayInstance::tArray & array = obj->GetArray();
 
-	// TODO: デフォルトの値の扱い
-	array.resize((risse_size)(risse_int64)(value));
+	risse_size new_size = (risse_size)(risse_int64)(value);
+	if(array.size() < new_size)
+	{
+		// 拡張
+		// filler の値を得る
+		tRisseVariant filler = This.GetPropertyDirect(ss_filler);
+		array.resize(new_size, filler);
+	}
+	else
+	{
+		// 縮小
+		array.resize(new_size);
+	}
 }
 //---------------------------------------------------------------------------
 

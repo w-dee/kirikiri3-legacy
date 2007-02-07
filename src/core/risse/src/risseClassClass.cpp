@@ -71,6 +71,22 @@ static void Class_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 
 //---------------------------------------------------------------------------
+//! @brief		NativeFunction: Class.include
+//---------------------------------------------------------------------------
+static void Class_include(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+{
+	// クラスの modules 配列にモジュールを追加する
+
+	// modules を取り出す
+	tRisseVariant modules = This.GetPropertyDirect(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
+
+	// Array.unshift を行う
+	modules.Do(ocFuncCall, NULL, ss_unshift, 0, args);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseModuleClass::GetPointer())
 {
 	// クラスに必要なメソッドを登録する
@@ -82,6 +98,9 @@ tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseModuleClass::GetPoi
 	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Class_construct)));
 	// initialize
 	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Class_initialize)));
+
+	// include
+	RegisterNormalMember(ss_include, tRisseVariant(tRisseNativeFunctionBase::New(Class_include)));
 
 }
 //---------------------------------------------------------------------------

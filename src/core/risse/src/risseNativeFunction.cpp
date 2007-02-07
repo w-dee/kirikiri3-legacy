@@ -39,17 +39,23 @@ tRisseNativeFunctionBase::tRetValue tRisseNativeFunctionBase::Operate(RISSE_OBJE
 //---------------------------------------------------------------------------
 tRisseFunctionInstance * tRisseNativeFunctionBase::New(tCallee callee)
 {
-	return (tRisseFunctionInstance *)(new tRisseNativeFunctionBase(callee));
-/*
-	tRisseVariant v = tRisseVariant(tRisseFunctionClass::GetPointer()).New(
-			0, tRisseMethodArgument::New(new tRisseNativeFunctionBase(callee)));
+	// tRisseFunctionClass がまだ登録されていない場合は仮のメソッドを
+	// 作成して登録する (のちに正式なメソッドオブジェクトに置き換えられる)
+	if(tRisseFunctionClass::GetInstanceAlive())
+	{
+		tRisseVariant v = tRisseVariant(tRisseFunctionClass::GetPointer()).New(
+				0, tRisseMethodArgument::New(new tRisseNativeFunctionBase(callee)));
 
-	RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
-	RISSE_ASSERT(dynamic_cast<tRisseFunctionInstance*>(v.GetObjectInterface()) != NULL);
+		RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
+		RISSE_ASSERT(dynamic_cast<tRisseFunctionInstance*>(v.GetObjectInterface()) != NULL);
 
-	tRisseFunctionInstance * intf = reinterpret_cast<tRisseFunctionInstance*>(v.GetObjectInterface());
-	return intf;
-*/
+		tRisseFunctionInstance * intf = reinterpret_cast<tRisseFunctionInstance*>(v.GetObjectInterface());
+		return intf;
+	}
+	else
+	{
+		return (tRisseFunctionInstance *)(new tRisseNativeFunctionBase(callee));
+	}
 }
 //---------------------------------------------------------------------------
 

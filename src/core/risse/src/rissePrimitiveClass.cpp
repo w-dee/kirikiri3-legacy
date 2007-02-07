@@ -89,6 +89,17 @@ static void Primitive_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 tRissePrimitiveClass::tRissePrimitiveClass() :
 	tRisseClassBase(tRisseObjectClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRissePrimitiveClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
@@ -98,7 +109,6 @@ tRissePrimitiveClass::tRissePrimitiveClass() :
 	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Primitive_construct)));
 }
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------

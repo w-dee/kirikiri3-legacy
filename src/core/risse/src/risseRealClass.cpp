@@ -49,10 +49,20 @@ static void Real_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 tRisseRealClass::tRisseRealClass() : tRissePrimitiveClassBase(tRisseNumberClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseRealClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
-
 	// initialize
 	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Real_initialize)));
 }

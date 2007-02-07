@@ -62,6 +62,19 @@ public:
 	//! @param		super_class		スーパークラスを表すオブジェクト
 	tRisseClassBase(tRisseClassBase * super_class = NULL);
 
+public:
+	//! @brief		各メンバをインスタンスに追加する
+	//! @note		これは通常コンストラクタ中から呼ばれるが、コンストラクタ中では
+	//!				「仮の」メンバが登録される可能性がある(シングルトンインスタンスの
+	//!				依存関係が解決できないため)。
+	//!				そのため、すべてのクラスのコンストラクタを呼び出した後、
+	//!				もう一度このメンバを呼び出し、本来のメンバが登録されるように
+	//!				する必要がある (つまりこのメソッドは計２回呼ばれる)。
+	//!				子クラスでオーバーライドして、子クラス内では親クラスの同名の
+	//!				メソッドを呼ぶこと。
+	virtual void RegisterMembers();
+
+public:
 	//! @brief		ダミーのデストラクタ(たぶん呼ばれない)
 	virtual ~tRisseClassBase() {;}
 
@@ -75,21 +88,6 @@ public:
 protected:
 	//! @brief		newの際の新しいオブジェクトを作成して返す(必要ならば下位クラスでオーバーライドすること)
 	virtual tRisseVariant CreateNewObjectBase();
-
-protected:
-	//! @brief		各メソッドをクラスインスタンスに登録する
-	//! @note		これは通常コンストラクタ中から呼ばれるが、唯一例外的に
-	//!				Function クラスの構築中に呼ばれても意味をなさない。
-	//!				そのため、Function クラスはこのメソッドをもう一度
-	//!				後から呼んでもらうことになる。
-	void RegisterMethods();
-
-	//! @brief		modules 配列をクラスインスタンスに登録する
-	//! @note		これは通常コンストラクタ中から呼ばれるが、唯一例外的に
-	//!				Array クラスの構築中に呼ばれても意味をなさない。
-	//!				そのため、Array クラスはこのメソッドをもう一度
-	//!				後から呼んでもらうことになる。
-	void RegisterModulesArray();
 
 public:
 	//! @brief		インスタンスの親クラスのメソッドを呼び出すユーティリティメソッド

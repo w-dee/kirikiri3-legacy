@@ -27,9 +27,13 @@ namespace Risse
 //---------------------------------------------------------------------------
 class tRisseStringClass : public tRissePrimitiveClassBase, public tRisseClassSingleton<tRisseStringClass>
 {
+	typedef tRissePrimitiveClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	tRisseStringClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();

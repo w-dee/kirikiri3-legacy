@@ -50,6 +50,17 @@ static void Module_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 tRisseModuleClass::tRisseModuleClass() : tRisseClassBase(tRisseObjectClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseModuleClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
@@ -59,7 +70,6 @@ tRisseModuleClass::tRisseModuleClass() : tRisseClassBase(tRisseObjectClass::GetP
 	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Module_construct)));
 	// initialize
 	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Module_initialize)));
-
 }
 //---------------------------------------------------------------------------
 

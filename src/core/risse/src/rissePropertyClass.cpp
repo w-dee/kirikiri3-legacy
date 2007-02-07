@@ -138,6 +138,17 @@ static void Property_setter_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
 tRissePropertyClass::tRissePropertyClass() :
 	tRisseClassBase(tRisseObjectClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRissePropertyClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので

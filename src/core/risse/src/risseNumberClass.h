@@ -26,9 +26,13 @@ namespace Risse
 //---------------------------------------------------------------------------
 class tRisseNumberClass : public tRisseClassBase, public tRisseClassSingleton<tRisseNumberClass>
 {
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	tRisseNumberClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();

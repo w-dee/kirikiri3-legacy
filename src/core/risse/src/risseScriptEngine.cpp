@@ -51,18 +51,6 @@ tRisseScriptEngine::tRisseScriptEngine()
 		RisseInitCoroutine();
 	}
 
-	// "Array" クラスのシングルトンインスタンスを作成する
-	// というのも、クラスの modules は配列であり、クラスを作る前に
-	// "Array" クラスのシングルトンインスタンスができあがっていなくてはならない。
-	// ちなみに Array.modules も配列なため Array の構築に必要であり、
-	// 連鎖的に無限ループに陥るため、tRisseClassBase::RegisterModulesArray() では
-	// Array クラスの構築が完了していない場合は modules 配列が登録されないように
-	// なっている。つまり、Array.modules はこの時点では生成されない。
-	tRisseArrayClass::GetPointer();
-
-	// Array.modules を改めて登録してやる
-	tRisseArrayClass::GetPointer()->RegisterMembers();
-
 	// グローバルオブジェクトを "Object" クラスから作成する
 	GlobalObject = tRisseVariant(tRisseObjectClass::GetPointer()).New();
 
@@ -78,6 +66,27 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseNumberClass::RegisterClassInstance(GlobalObject, ss_Number);
 	tRisseIntegerClass::RegisterClassInstance(GlobalObject, ss_Integer);
 	tRisseRealClass::RegisterClassInstance(GlobalObject, ss_Real);
+
+	// 各クラスのメンバを正式な物に登録し直すためにもう一度RegisterMembersを呼ぶ
+	// 上記の状態では メンバとして仮のものが登録されている可能性がある
+	// (たとえばArray.modulesはArrayクラスの初期化が終了しないと
+	//  登録されないし、各メソッドは Function クラスの初期化が終了しないと
+	//  登録できない)。
+	// このため、各クラスの RegisterMembers メソッドをもう一度呼び、メンバを
+	// 登録し治す。上記ですべてクラスの初期化は終了しているため、
+	// もう一度このメソッドを呼べば、正しくメソッドが登録されるはずである。
+	tRisseObjectClass::GetPointer()->RegisterMembers();
+	tRisseModuleClass::GetPointer()->RegisterMembers();
+	tRisseClassClass::GetPointer()->RegisterMembers();
+	tRisseFunctionClass::GetPointer()->RegisterMembers();
+	tRissePropertyClass::GetPointer()->RegisterMembers();
+	tRisseArrayClass::GetPointer()->RegisterMembers();
+	tRissePrimitiveClass::GetPointer()->RegisterMembers();
+	tRisseStringClass::GetPointer()->RegisterMembers();
+	tRisseNumberClass::GetPointer()->RegisterMembers();
+	tRisseIntegerClass::GetPointer()->RegisterMembers();
+	tRisseRealClass::GetPointer()->RegisterMembers();
+
 }
 //---------------------------------------------------------------------------
 

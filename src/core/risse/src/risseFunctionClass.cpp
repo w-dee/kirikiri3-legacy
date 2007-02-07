@@ -85,6 +85,17 @@ static void Function_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 tRisseFunctionClass::tRisseFunctionClass() :
 	tRisseClassBase(tRisseObjectClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseFunctionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので

@@ -63,6 +63,17 @@ static void Integer_times(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 tRisseIntegerClass::tRisseIntegerClass() : tRissePrimitiveClassBase(tRisseNumberClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIntegerClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている

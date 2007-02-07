@@ -48,12 +48,14 @@ public:
 //---------------------------------------------------------------------------
 class tRisseArrayClass : public tRisseClassBase, public tRisseClassSingleton<tRisseArrayClass>
 {
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
 public:
 	//! @brief		コンストラクタ
 	tRisseArrayClass();
 
-	//!	@brief		メンバを登録する
-	void RegisterMembers() { tRisseClassBase::RegisterModulesArray(); }
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();

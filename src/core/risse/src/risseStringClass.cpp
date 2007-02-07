@@ -79,6 +79,17 @@ static void String_length_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
 //---------------------------------------------------------------------------
 tRisseStringClass::tRisseStringClass() : tRissePrimitiveClassBase(tRissePrimitiveClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseStringClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている

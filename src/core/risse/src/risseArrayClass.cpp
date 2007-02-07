@@ -243,6 +243,17 @@ static void Array_length_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
 tRisseArrayClass::tRisseArrayClass() :
 	tRisseClassBase(tRisseObjectClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseArrayClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので

@@ -62,6 +62,17 @@ static void Number_isNaN_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
 tRisseNumberClass::tRisseNumberClass() :
 	tRisseClassBase(tRissePrimitiveClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNumberClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
@@ -75,7 +86,6 @@ tRisseNumberClass::tRisseNumberClass() :
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------

@@ -61,9 +61,14 @@ public:
 //---------------------------------------------------------------------------
 class tRisseFunctionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseFunctionClass>
 {
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
 public:
 	//! @brief		コンストラクタ
 	tRisseFunctionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();

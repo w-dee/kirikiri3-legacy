@@ -50,9 +50,13 @@ public:
 //---------------------------------------------------------------------------
 class tRissePrimitiveClass : public tRisseClassBase, public tRisseClassSingleton<tRissePrimitiveClass>
 {
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	tRissePrimitiveClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();

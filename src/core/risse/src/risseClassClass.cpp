@@ -89,6 +89,17 @@ static void Class_include(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseModuleClass::GetPointer())
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
@@ -101,7 +112,6 @@ tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseModuleClass::GetPoi
 
 	// include
 	RegisterNormalMember(ss_include, tRisseVariant(tRisseNativeFunctionBase::New(Class_include)));
-
 }
 //---------------------------------------------------------------------------
 

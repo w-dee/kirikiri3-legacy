@@ -121,12 +121,22 @@ static void Object_puts(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 //---------------------------------------------------------------------------
 tRisseObjectClass::tRisseObjectClass() : tRisseClassBase(NULL)
 {
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseObjectClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
 	// クラスに必要なメソッドを登録する
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
 	tRisseVariant * pThis = new tRisseVariant(this);
-/*
 	// construct
 	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Object_construct)));
 	// initialize
@@ -139,19 +149,6 @@ tRisseObjectClass::tRisseObjectClass() : tRisseClassBase(NULL)
 	RegisterNormalMember(RISSE_WS("ptr"), tRisseVariant(tRisseNativeFunctionBase::New(Object_ptr), pThis));
 	// puts
 	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(tRisseNativeFunctionBase::New(Object_puts)));
-*/
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Object_construct)));
-	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Object_initialize)));
-	// getInstanceMember
-	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(new tRisseNativeFunctionBase(Object_getInstanceMember)));
-	// setInstanceMener
-	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(new tRisseNativeFunctionBase(Object_setInstanceMember)));
-	// static show
-	RegisterNormalMember(RISSE_WS("ptr"), tRisseVariant(new tRisseNativeFunctionBase(Object_ptr), pThis));
-	// puts
-	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(new tRisseNativeFunctionBase(Object_puts)));
 }
 //---------------------------------------------------------------------------
 

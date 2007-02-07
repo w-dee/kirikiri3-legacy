@@ -20,6 +20,7 @@
 #include "risseObjectClass.h"
 #include "risseModuleClass.h"
 #include "risseClassClass.h"
+#include "risseFunctionClass.h"
 #include "rissePropertyClass.h"
 #include "risseArrayClass.h"
 #include "risseStringClass.h"
@@ -60,7 +61,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseArrayClass::GetPointer();
 
 	// Array.modules を改めて登録してやる
-	tRisseArrayClass::GetPointer()->RegisterModulesArray();
+	tRisseArrayClass::GetPointer()->RegisterMembers();
 
 	// グローバルオブジェクトを "Object" クラスから作成する
 	GlobalObject = tRisseVariant(tRisseObjectClass::GetPointer()).New();
@@ -69,6 +70,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseObjectClass::RegisterClassInstance(GlobalObject, ss_Object);
 	tRisseModuleClass::RegisterClassInstance(GlobalObject, ss_Module);
 	tRisseClassClass::RegisterClassInstance(GlobalObject, ss_Class);
+	tRisseFunctionClass::RegisterClassInstance(GlobalObject, ss_Function);
 	tRissePropertyClass::RegisterClassInstance(GlobalObject, ss_Property);
 	tRisseArrayClass::RegisterClassInstance(GlobalObject, ss_Array);
 	tRissePrimitiveClass::RegisterClassInstance(GlobalObject, ss_Primitive);

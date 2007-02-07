@@ -55,6 +55,7 @@ CPPFILES =  \
 			src/risseCoroutine.cpp                   \
 			src/risseException.cpp                   \
 			src/risseExceptionClass.cpp              \
+			src/risseFunctionClass.cpp               \
 			src/risseIntegerClass.cpp                \
 			src/risseLexerUtils.cpp                  \
 			src/risseMemberAttribute.cpp             \

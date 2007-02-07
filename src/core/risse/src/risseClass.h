@@ -77,6 +77,13 @@ protected:
 	virtual tRisseVariant CreateNewObjectBase();
 
 protected:
+	//! @brief		各メソッドをクラスインスタンスに登録する
+	//! @note		これは通常コンストラクタ中から呼ばれるが、唯一例外的に
+	//!				Function クラスの構築中に呼ばれても意味をなさない。
+	//!				そのため、Function クラスはこのメソッドをもう一度
+	//!				後から呼んでもらうことになる。
+	void RegisterMethods();
+
 	//! @brief		modules 配列をクラスインスタンスに登録する
 	//! @note		これは通常コンストラクタ中から呼ばれるが、唯一例外的に
 	//!				Array クラスの構築中に呼ばれても意味をなさない。

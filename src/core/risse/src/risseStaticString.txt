@@ -20,6 +20,7 @@ ss_setInstanceMember	setInstanceMember	#!< "setInstanceMember" メソッド名
 ss_Object				Object				#!< "Object" クラス名
 ss_Module				Module				#!< "Module" モジュール名
 ss_Class				Class				#!< "Class" クラス名
+ss_Function				Function			#!< "Function" クラス名
 ss_Array				Array				#!< "Array" クラス名
 ss_Primitive			Primitive			#!< "Primitive" クラス名
 ss_String				String				#!< "String" クラス名

@@ -68,7 +68,7 @@ tRisseNumberClass::tRisseNumberClass() :
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Number_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Number_construct)));
 	// isNaN
 	RegisterNormalMember(ss_isNaN,
 		tRisseVariant(new tRisseNativePropertyBase(Number_isNaN_getter, NULL)),

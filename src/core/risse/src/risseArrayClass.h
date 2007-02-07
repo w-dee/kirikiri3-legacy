@@ -52,13 +52,13 @@ public:
 	//! @brief		コンストラクタ
 	tRisseArrayClass();
 
+	//!	@brief		メンバを登録する
+	void RegisterMembers() { tRisseClassBase::RegisterModulesArray(); }
+
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();
 
 public:
-	//!	@brief		tRisseClassBase::RegisterModulesArray() を呼ぶ
-	//!	@note		Array クラスをいったん構築した後にこれを一度呼ぶこと
-	void RegisterModulesArray() { tRisseClassBase::RegisterModulesArray(); }
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

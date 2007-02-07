@@ -55,7 +55,7 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(XXX_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(XXX_construct)));
 }
 //---------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ tRissePrimitiveClass::tRissePrimitiveClass() :
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Primitive_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Primitive_construct)));
 }
 //---------------------------------------------------------------------------
 

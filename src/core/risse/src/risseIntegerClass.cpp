@@ -68,10 +68,10 @@ tRisseIntegerClass::tRisseIntegerClass() : tRissePrimitiveClassBase(tRisseNumber
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Integer_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Integer_initialize)));
 
 	// times
-	RegisterNormalMember(ss_times, tRisseVariant(new tRisseNativeFunctionBase(Integer_times)));
+	RegisterNormalMember(ss_times, tRisseVariant(tRisseNativeFunctionBase::New(Integer_times)));
 }
 //---------------------------------------------------------------------------
 

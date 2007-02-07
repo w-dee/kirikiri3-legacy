@@ -25,8 +25,6 @@
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(26307,13927,24599,16690,19605,20552,47176,34884);
-static void Array_push(RISSE_NATIVEFUNCTION_CALLEE_ARGS);
-
 
 //---------------------------------------------------------------------------
 tRissePropertyInstance::tRissePropertyInstance()
@@ -146,9 +144,9 @@ tRissePropertyClass::tRissePropertyClass() :
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Property_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Property_construct)));
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(Property_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Property_initialize)));
 
 	// getter
 	RegisterNormalMember(ss_getter,

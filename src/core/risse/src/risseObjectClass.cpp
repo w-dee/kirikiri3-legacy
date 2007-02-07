@@ -126,7 +126,20 @@ tRisseObjectClass::tRisseObjectClass() : tRisseClassBase(NULL)
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
 	tRisseVariant * pThis = new tRisseVariant(this);
-
+/*
+	// construct
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Object_construct)));
+	// initialize
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Object_initialize)));
+	// getInstanceMember
+	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(tRisseNativeFunctionBase::New(Object_getInstanceMember)));
+	// setInstanceMener
+	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(tRisseNativeFunctionBase::New(Object_setInstanceMember)));
+	// static show
+	RegisterNormalMember(RISSE_WS("ptr"), tRisseVariant(tRisseNativeFunctionBase::New(Object_ptr), pThis));
+	// puts
+	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(tRisseNativeFunctionBase::New(Object_puts)));
+*/
 	// construct
 	RegisterNormalMember(ss_construct, tRisseVariant(new tRisseNativeFunctionBase(Object_construct)));
 	// initialize

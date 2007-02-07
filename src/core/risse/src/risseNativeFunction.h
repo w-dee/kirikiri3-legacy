@@ -15,6 +15,7 @@
 
 #include "risseCharUtils.h"
 #include "risseObjectBase.h"
+#include "risseFunctionClass.h"
 
 namespace Risse
 {
@@ -33,14 +34,12 @@ namespace Risse
 		const tRisseMethodArgument & args,    \
 		const tRisseVariant &This
 
+class tRisseFunctionInstance;
 //---------------------------------------------------------------------------
 //! @brief		Risseネイティブ関数の基底クラス
 //---------------------------------------------------------------------------
-class tRisseNativeFunctionBase : public tRisseObjectBase
+class tRisseNativeFunctionBase : public tRisseObjectInterface
 {
-	//! @param		親クラスのtypedef
-	typedef tRisseObjectBase inherited;
-
 protected:
 	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッドのtypedef
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
@@ -54,9 +53,15 @@ protected:
 	tCallee Callee;
 
 public:
+//protected:
 	//! @brief		コンストラクタ
 	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
 	tRisseNativeFunctionBase(tCallee callee) { Callee = callee; }
+
+public:
+	//! @brief		新しい関数インスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
+	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
+	static tRisseFunctionInstance * New(tCallee callee);
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

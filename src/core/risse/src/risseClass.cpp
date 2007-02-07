@@ -145,18 +145,7 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBa
 	RTTIMatcher = RTTI.AddId(this);
 
 	// クラスに必要なメソッドを登録する
-	tRisseVariant * pThis = new tRisseVariant(this);
-
-	// new や fertilize はクラス固有のメソッドなのでコンテキストとして
-	// This (クラスそのもの)をあらかじめ設定する。
-
-	// new
-	RegisterNormalMember(mnNew, tRisseVariant(new tRisseNativeFunctionBase(Class_new), pThis));
-	// fertilize
-	RegisterNormalMember(ss_fertilize, tRisseVariant(new tRisseNativeFunctionBase(Class_fertilize), pThis));
-
-	// include
-	RegisterNormalMember(ss_include, tRisseVariant(new tRisseNativeFunctionBase(Class_include)));
+	RegisterMethods();
 
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant(super_class));
@@ -193,6 +182,30 @@ tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERAT
 tRisseVariant tRisseClassBase::CreateNewObjectBase()
 {
 	return tRisseVariant(new tRisseObjectBase());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassBase::RegisterMethods()
+{
+	// 各メソッドを登録
+//	if(tRisseFunctionClass::GetInstanceAlive())
+	{
+		// Functionクラスの構築中にFunctionクラスのシングルトンインスタンスを参照できないため
+		// Functionクラスがすでに構築されている場合だけ、各メソッドを登録する
+		// new や fertilize はクラス固有のメソッドなのでコンテキストとして
+		// This (クラスそのもの)をあらかじめ設定する。
+		tRisseVariant * pThis = new tRisseVariant(this);
+
+		// new
+		RegisterNormalMember(mnNew, tRisseVariant(tRisseNativeFunctionBase::New(Class_new), pThis));
+		// fertilize
+		RegisterNormalMember(ss_fertilize, tRisseVariant(tRisseNativeFunctionBase::New(Class_fertilize), pThis));
+
+		// include
+		RegisterNormalMember(ss_include, tRisseVariant(tRisseNativeFunctionBase::New(Class_include)));
+	}
 }
 //---------------------------------------------------------------------------
 

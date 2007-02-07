@@ -14,6 +14,7 @@
 
 #include "risseNativeFunction.h"
 #include "risseException.h"
+#include "risseFunctionClass.h"
 
 namespace Risse
 {
@@ -29,8 +30,27 @@ tRisseNativeFunctionBase::tRetValue tRisseNativeFunctionBase::Operate(RISSE_OBJE
 		return rvNoError;
 	}
 
-	// そのほかの場合は親クラスのメソッドを呼ぶ
-	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
+	// それ以外の機能はこのインターフェースにはない
+	return rvMemberNotFound;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseFunctionInstance * tRisseNativeFunctionBase::New(tCallee callee)
+{
+	return (tRisseFunctionInstance *)(new tRisseNativeFunctionBase(callee));
+/*
+	tRisseVariant v = tRisseVariant(tRisseFunctionClass::GetPointer()).New(
+			0, tRisseMethodArgument::New(new tRisseNativeFunctionBase(callee)));
+
+	RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
+	RISSE_ASSERT(dynamic_cast<tRisseFunctionInstance*>(v.GetObjectInterface()) != NULL);
+
+	tRisseFunctionInstance * intf = reinterpret_cast<tRisseFunctionInstance*>(v.GetObjectInterface());
+	return intf;
+*/
+}
+//---------------------------------------------------------------------------
+
 } // namespace Risse

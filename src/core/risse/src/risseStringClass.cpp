@@ -84,10 +84,10 @@ tRisseStringClass::tRisseStringClass() : tRissePrimitiveClassBase(tRissePrimitiv
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(new tRisseNativeFunctionBase(String_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(String_initialize)));
 
 	// charAt
-	RegisterNormalMember(ss_charAt, tRisseVariant(new tRisseNativeFunctionBase(String_charAt)));
+	RegisterNormalMember(ss_charAt, tRisseVariant(tRisseNativeFunctionBase::New(String_charAt)));
 
 	// length
 	RegisterNormalMember(ss_length,

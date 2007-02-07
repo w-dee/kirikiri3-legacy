@@ -138,17 +138,17 @@ void tRisseObjectClass::RegisterMembers()
 	// コンテキストとしては null を指定する
 	tRisseVariant * pThis = new tRisseVariant(this);
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Object_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Object_construct)));
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Object_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Object_initialize)));
 	// getInstanceMember
-	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(tRisseNativeFunctionBase::New(Object_getInstanceMember)));
+	RegisterNormalMember(ss_getInstanceMember, tRisseVariant(tRisseNativeFunction::New(Object_getInstanceMember)));
 	// setInstanceMener
-	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(tRisseNativeFunctionBase::New(Object_setInstanceMember)));
+	RegisterNormalMember(ss_setInstanceMember, tRisseVariant(tRisseNativeFunction::New(Object_setInstanceMember)));
 	// static show
-	RegisterNormalMember(RISSE_WS("ptr"), tRisseVariant(tRisseNativeFunctionBase::New(Object_ptr), pThis));
+	RegisterNormalMember(RISSE_WS("ptr"), tRisseVariant(tRisseNativeFunction::New(Object_ptr), pThis));
 	// puts
-	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(tRisseNativeFunctionBase::New(Object_puts)));
+	RegisterNormalMember(RISSE_WS("puts"), tRisseVariant(tRisseNativeFunction::New(Object_puts)));
 }
 //---------------------------------------------------------------------------
 

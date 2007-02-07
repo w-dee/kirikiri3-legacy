@@ -260,26 +260,26 @@ void tRisseArrayClass::RegisterMembers()
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Array_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Array_construct)));
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Array_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Array_initialize)));
 
 	// []
-	RegisterNormalMember(mnIGet, tRisseVariant(tRisseNativeFunctionBase::New(Array_IGet)));
+	RegisterNormalMember(mnIGet, tRisseVariant(tRisseNativeFunction::New(Array_IGet)));
 	// []=
-	RegisterNormalMember(mnISet, tRisseVariant(tRisseNativeFunctionBase::New(Array_ISet)));
+	RegisterNormalMember(mnISet, tRisseVariant(tRisseNativeFunction::New(Array_ISet)));
 
 	// push
-	RegisterNormalMember(ss_push, tRisseVariant(tRisseNativeFunctionBase::New(Array_push)));
+	RegisterNormalMember(ss_push, tRisseVariant(tRisseNativeFunction::New(Array_push)));
 	// pop
-	RegisterNormalMember(ss_pop, tRisseVariant(tRisseNativeFunctionBase::New(Array_pop)));
+	RegisterNormalMember(ss_pop, tRisseVariant(tRisseNativeFunction::New(Array_pop)));
 	// unshift
-	RegisterNormalMember(ss_unshift, tRisseVariant(tRisseNativeFunctionBase::New(Array_unshift)));
+	RegisterNormalMember(ss_unshift, tRisseVariant(tRisseNativeFunction::New(Array_unshift)));
 	// shift
-	RegisterNormalMember(ss_shift, tRisseVariant(tRisseNativeFunctionBase::New(Array_shift)));
+	RegisterNormalMember(ss_shift, tRisseVariant(tRisseNativeFunction::New(Array_shift)));
 	// length
 	RegisterNormalMember(ss_length,
-		tRisseVariant(new tRisseNativePropertyBase(Array_length_getter, Array_length_setter)),
+		tRisseVariant(tRisseNativeProperty::New(Array_length_getter, Array_length_setter)),
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }
 //---------------------------------------------------------------------------

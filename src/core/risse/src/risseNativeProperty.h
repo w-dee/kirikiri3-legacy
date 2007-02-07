@@ -41,14 +41,11 @@ namespace Risse
 
 
 //---------------------------------------------------------------------------
-//! @brief		Risseネイティブプロパティの基底クラス
+//! @brief		RisseネイティブプロパティのGetterの実装
 //---------------------------------------------------------------------------
-class tRisseNativePropertyBase : public tRisseObjectBase
+class tRisseNativePropertyGetter : public tRisseObjectInterface
 {
-	//! @param		親クラスのtypedef
-	typedef tRisseObjectBase inherited;
-
-protected:
+public:
 	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッドのtypedef
 	//!				オーバライドしなかった場合は読み込み禁止のプロパティになる)
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
@@ -57,6 +54,27 @@ protected:
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	typedef void (*tGetter)(RISSE_NATIVEPROPERTY_GETTER_ARGS);
 
+private:
+	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッド
+	tGetter Getter;
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
+	tRisseNativePropertyGetter(tGetter getter) { Getter = getter; }
+
+	//! @brief		オブジェクトに対して操作を行う
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		RisseネイティブプロパティのSetterの実装
+//---------------------------------------------------------------------------
+class tRisseNativePropertySetter : public tRisseObjectInterface
+{
+public:
 	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッドのtypedef
 	//!				オーバーライドしなかった場合は書き込み禁止のプロパティになる)
 	//! @param		value	書き込む値
@@ -65,17 +83,44 @@ protected:
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	typedef void (*tSetter)(RISSE_NATIVEPROPERTY_SETTER_ARGS);
 
-	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッド
-	tGetter Getter;
-
+private:
 	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッド
 	tSetter Setter;
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
+	tRisseNativePropertySetter(tSetter setter) { Setter = setter; }
+
+	//! @brief		オブジェクトに対して操作を行う
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+};
+//---------------------------------------------------------------------------
+
+
+class tRissePropertyInstance;
+//---------------------------------------------------------------------------
+//! @brief		Risseネイティブプロパティ
+//---------------------------------------------------------------------------
+class tRisseNativeProperty : public tRisseObjectInterface
+{
+	//! @param		親クラスのtypedef
+	typedef tRisseObjectInterface inherited;
+
+	tRisseNativePropertyGetter::tGetter Getter; //!< Risseプロパティが読み込まれる際に呼ばれるメソッド
+	tRisseNativePropertySetter::tSetter Setter; //!< Risseプロパティが書き込まれる際に呼ばれるメソッド
+
+protected:
+	//! @brief		コンストラクタ
 	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
 	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
-	tRisseNativePropertyBase(tGetter getter, tSetter setter = NULL);
+	tRisseNativeProperty(tRisseNativePropertyGetter::tGetter getter, tRisseNativePropertySetter::tSetter setter = NULL);
+
+public:
+	//! @brief		新しいプロパティインスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
+	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
+	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
+	static tRisseObjectInterface * New(tRisseNativePropertyGetter::tGetter getter, tRisseNativePropertySetter::tSetter setter = NULL);
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

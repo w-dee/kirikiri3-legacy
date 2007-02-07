@@ -34,11 +34,10 @@ namespace Risse
 		const tRisseMethodArgument & args,    \
 		const tRisseVariant &This
 
-class tRisseFunctionInstance;
 //---------------------------------------------------------------------------
-//! @brief		Risseネイティブ関数の基底クラス
+//! @brief		Risseネイティブ関数
 //---------------------------------------------------------------------------
-class tRisseNativeFunctionBase : public tRisseObjectInterface
+class tRisseNativeFunction : public tRisseObjectInterface
 {
 protected:
 	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッドのtypedef
@@ -52,16 +51,15 @@ protected:
 	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド(インスタンス作成時に指定)
 	tCallee Callee;
 
-public:
-//protected:
+protected:
 	//! @brief		コンストラクタ
 	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
-	tRisseNativeFunctionBase(tCallee callee) { Callee = callee; }
+	tRisseNativeFunction(tCallee callee) { Callee = callee; }
 
 public:
 	//! @brief		新しい関数インスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
 	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
-	static tRisseFunctionInstance * New(tCallee callee);
+	static tRisseObjectInterface * New(tCallee callee);
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

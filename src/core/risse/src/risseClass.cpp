@@ -147,9 +147,9 @@ void tRisseClassBase::RegisterMembers()
 	tRisseVariant * pThis = new tRisseVariant(this);
 
 	// new
-	RegisterNormalMember(mnNew, tRisseVariant(tRisseNativeFunctionBase::New(Class_new), pThis));
+	RegisterNormalMember(mnNew, tRisseVariant(tRisseNativeFunction::New(Class_new), pThis));
 	// fertilize
-	RegisterNormalMember(ss_fertilize, tRisseVariant(tRisseNativeFunctionBase::New(Class_fertilize), pThis));
+	RegisterNormalMember(ss_fertilize, tRisseVariant(tRisseNativeFunction::New(Class_fertilize), pThis));
 
 	// modules 配列を登録
 	if(tRisseArrayClass::GetInstanceAlive())

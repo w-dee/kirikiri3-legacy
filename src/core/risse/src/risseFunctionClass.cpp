@@ -102,9 +102,9 @@ void tRisseFunctionClass::RegisterMembers()
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Function_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Function_construct)));
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Function_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Function_initialize)));
 }
 //---------------------------------------------------------------------------
 

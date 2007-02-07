@@ -20,7 +20,7 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(47510,49015,53768,19018,63934,19864,53779,8975);
 //---------------------------------------------------------------------------
-tRisseNativeFunctionBase::tRetValue tRisseNativeFunctionBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tRisseNativeFunction::tRetValue tRisseNativeFunction::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// このオブジェクトに対する関数呼び出しか？
 	if(code == ocFuncCall && name.IsEmpty())
@@ -37,24 +37,24 @@ tRisseNativeFunctionBase::tRetValue tRisseNativeFunctionBase::Operate(RISSE_OBJE
 
 
 //---------------------------------------------------------------------------
-tRisseFunctionInstance * tRisseNativeFunctionBase::New(tCallee callee)
+tRisseObjectInterface * tRisseNativeFunction::New(tCallee callee)
 {
 	// tRisseFunctionClass がまだ登録されていない場合は仮のメソッドを
 	// 作成して登録する (のちに正式なメソッドオブジェクトに置き換えられる)
 	if(tRisseFunctionClass::GetInstanceAlive())
 	{
 		tRisseVariant v = tRisseVariant(tRisseFunctionClass::GetPointer()).New(
-				0, tRisseMethodArgument::New(new tRisseNativeFunctionBase(callee)));
+				0, tRisseMethodArgument::New(new tRisseNativeFunction(callee)));
 
 		RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
 		RISSE_ASSERT(dynamic_cast<tRisseFunctionInstance*>(v.GetObjectInterface()) != NULL);
 
-		tRisseFunctionInstance * intf = reinterpret_cast<tRisseFunctionInstance*>(v.GetObjectInterface());
-		return intf;
+		return v.GetObjectInterface();
 	}
 	else
 	{
-		return (tRisseFunctionInstance *)(new tRisseNativeFunctionBase(callee));
+		// 仮実装
+		return (tRisseFunctionInstance *)(new tRisseNativeFunction(callee));
 	}
 }
 //---------------------------------------------------------------------------

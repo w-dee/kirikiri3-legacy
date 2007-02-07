@@ -64,7 +64,7 @@ void tRisseRealClass::RegisterMembers()
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Real_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Real_initialize)));
 }
 //---------------------------------------------------------------------------
 

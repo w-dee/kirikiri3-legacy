@@ -155,17 +155,17 @@ void tRissePropertyClass::RegisterMembers()
 	// コンテキストとしては null を指定する
 
 	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunctionBase::New(Property_construct)));
+	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Property_construct)));
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(Property_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Property_initialize)));
 
 	// getter
 	RegisterNormalMember(ss_getter,
-		tRisseVariant(new tRisseNativePropertyBase(Property_getter_getter, NULL)),
+		tRisseVariant(tRisseNativeProperty::New(Property_getter_getter, NULL)),
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 	// setter
 	RegisterNormalMember(ss_setter,
-		tRisseVariant(new tRisseNativePropertyBase(Property_setter_getter, NULL)),
+		tRisseVariant(tRisseNativeProperty::New(Property_setter_getter, NULL)),
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }
 //---------------------------------------------------------------------------

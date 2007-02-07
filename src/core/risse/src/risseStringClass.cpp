@@ -95,14 +95,14 @@ void tRisseStringClass::RegisterMembers()
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 
 	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunctionBase::New(String_initialize)));
+	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(String_initialize)));
 
 	// charAt
-	RegisterNormalMember(ss_charAt, tRisseVariant(tRisseNativeFunctionBase::New(String_charAt)));
+	RegisterNormalMember(ss_charAt, tRisseVariant(tRisseNativeFunction::New(String_charAt)));
 
 	// length
 	RegisterNormalMember(ss_length,
-		tRisseVariant(new tRisseNativePropertyBase(String_length_getter, NULL)),
+		tRisseVariant(tRisseNativeProperty::New(String_length_getter, NULL)),
 			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
 }
 //---------------------------------------------------------------------------

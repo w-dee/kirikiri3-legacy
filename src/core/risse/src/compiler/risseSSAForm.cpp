@@ -678,21 +678,27 @@ void tRisseSSAForm::GenerateLastReturn(const tRisseASTNode * root)
 //---------------------------------------------------------------------------
 void tRisseSSAForm::LeapDeadBlocks()
 {
-	// EntryBlock から到達可能なすべての基本ブロックのマークを解除する
-	// TODO: 正確な動作は「(到達可能である・なしに関わらず)すべての基本ブロックのマークを解除する」
+	// EntryBlock から到達可能なすべての基本ブロックを得る
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->SetMark(NULL);
 
-	// EntryBlock から到達可能なすべての基本ブロックをマークする
+	// EntryBlock から到達可能なすべての基本ブロックに 「生存」の印を付ける
+	// また、そこで宣言されている変数のマークをすべてクリアする
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->SetMark();
+	{
+		(*i)->SetAlive();
+		(*i)->ClearVariableMarks();
+	}
 
 	// EntryBlock から到達可能なすべての基本ブロックのうち、
 	// 到達できないブロックが Pred にあれば削除する
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->DeleteUnmarkedPred();
+		(*i)->DeleteDeadPred();
+
+	// 各変数のうち、変数が使用されている文が所属しているブロックが死んでいる場合、
+	// その文を変数の使用リストから削除する
+	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->DeleteDeadStatementsFromVariables();
 }
 //---------------------------------------------------------------------------
 
@@ -715,10 +721,14 @@ void tRisseSSAForm::ConvertSharedVariableAccess()
 void tRisseSSAForm::AnalyzeVariableBlockLiveness()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得て、マークをクリアする
+	// また、そこで宣言されている変数のマークをすべてクリアする
 	gc_vector<tRisseSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	{
 		(*i)->SetMark(NULL);
+		(*i)->ClearVariableMarks();
+	}
 
 	// LiveIn と LiveOut を作成する
 	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)

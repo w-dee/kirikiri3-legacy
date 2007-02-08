@@ -15,6 +15,7 @@
 #include "risseSSAVariable.h"
 #include "risseSSAStatement.h"
 #include "risseSSAForm.h"
+#include "risseSSABlock.h"
 #include "risseCompilerNS.h"
 
 namespace Risse
@@ -121,6 +122,28 @@ tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tR
 
 	// 戻る
 	return ret_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAVariable::DeleteDeadStatements()
+{
+	for(gc_vector<tRisseSSAStatement*>::iterator it = Used.begin(); it != Used.end();)
+	{
+		// この文が死んだ基本ブロックに属しているならば削除
+		if((*it)->GetBlock()->GetAlive())
+		{
+			// 生きている
+			it ++;
+		}
+		else
+		{
+			// 死んでいる
+			it = Used.erase(it);
+		}
+	}
+
 }
 //---------------------------------------------------------------------------
 

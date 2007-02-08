@@ -49,6 +49,8 @@ private:
 	tLiveVariableMap * LiveOut; //!< このブロックの終了時点で生存している変数のリスト
 	mutable void * Mark; //!< マーク
 	mutable bool Traversing; //!< トラバース中かどうか
+	bool Alive; //!< この基本ブロックが生きているかどうか
+		//!< (tRisseSSAForm::LeapDeadBlocks() 後に有効;それ以前は生存している・していないにかかわらず常に偽なので注意)
 
 public:
 	//! @brief		コンストラクタ
@@ -72,6 +74,12 @@ public:
 		sipBeforeBranch,	//!< 分岐/ジャンプ文の直前
 		sipTail				//!< 最後
 	};
+
+	//! @brief		この基本ブロックが生存しているとマークする
+	void SetAlive() { Alive = true; }
+
+	//! @brief		この基本ブロックが生存しているかどうかを返す
+	bool GetAlive() { return Alive; }
 
 	//! @brief		LastStatementPosition を設定する
 	void SetLastStatementPosition();
@@ -154,8 +162,12 @@ public:
 	//! @return		直後の基本ブロックのリスト
 	const gc_vector<tRisseSSABlock *> & GetSucc() const { return Succ; }
 
-	//! @param		マークの付いていないPredがあれば削除する
-	void DeleteUnmarkedPred();
+	//! @brief		死んでいるPredがあれば削除する
+	void DeleteDeadPred();
+
+	//! @brief		各変数のうち、変数が使用されている文が所属しているブロックが死んでいる場合、
+	//!				その文を変数の使用リストから削除する
+	void DeleteDeadStatementsFromVariables();
 
 	//! @brief		ローカル名前空間のスナップショットを作成する
 	//! @param		ref		参照元ローカル名前空間
@@ -196,6 +208,9 @@ public:
 	//! @brief		この基本ブロックを起点にして基本ブロックをたどり、そのリストを得る
 	//! @param		blocks		基本ブロックのリストの格納先
 	void Traverse(gc_vector<tRisseSSABlock *> & blocks) const;
+
+	//! @brief		すべての変数のマークを解除する
+	void ClearVariableMarks();
 
 	//! @brief		共有の刺さった変数へのアクセスを別形式の文に変換
 	void ConvertSharedVariableAccess();

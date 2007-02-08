@@ -41,6 +41,7 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
 	Traversing = false;
 	LiveIn = LiveOut = NULL;
 	LastStatementPosition = risse_size_max;
+	Alive = false;
 
 	// 通し番号の準備
 	Name = name + RISSE_WC('_') + tRisseString::AsString(form->GetUniqueNumber());
@@ -301,7 +302,7 @@ void tRisseSSABlock::AddSucc(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::DeleteUnmarkedPred()
+void tRisseSSABlock::DeleteDeadPred()
 {
 	// Pred は削除の効率を考え、逆順に見ていく
 	if(Pred.size() > 0)
@@ -309,10 +310,36 @@ void tRisseSSABlock::DeleteUnmarkedPred()
 		risse_size i = Pred.size() - 1;
 		while(true)
 		{
-			if(!Pred[i]->Mark) DeletePred(i);
+			if(!Pred[i]->Alive) DeletePred(i);
 
 			if(i == 0) break;
 			i--;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSABlock::DeleteDeadStatementsFromVariables()
+{
+	// すべてのマークされていない変数に対して処理を行う
+
+	// すべての文を検査し、それぞれの文で宣言されている「変数」について解析を行う
+	// 「文」につく「マーク」は 文のポインタそのもの
+	tRisseSSAStatement *stmt;
+	for(stmt = FirstStatement;
+		stmt;
+		stmt = stmt->GetSucc())
+	{
+		tRisseSSAVariable * decl_var = stmt->GetDeclared();
+		if(decl_var != NULL)
+		{
+			if(decl_var->GetMark() != stmt)
+			{
+				decl_var->DeleteDeadStatements();
+				decl_var->SetMark(stmt);
+			}
 		}
 	}
 }
@@ -398,6 +425,24 @@ void tRisseSSABlock::Traverse(gc_vector<tRisseSSABlock *> & blocks) const
 
 
 //---------------------------------------------------------------------------
+void tRisseSSABlock::ClearVariableMarks()
+{
+	tRisseSSAStatement *stmt;
+	for(stmt = FirstStatement;
+		stmt;
+		stmt = stmt->GetSucc())
+	{
+		tRisseSSAVariable * decl_var = stmt->GetDeclared();
+		if(decl_var != NULL)
+		{
+			decl_var->SetMark(NULL);
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSABlock::ConvertSharedVariableAccess()
 {
 	// すべての文について
@@ -472,6 +517,8 @@ void tRisseSSABlock::CreateLiveInAndLiveOut()
 void tRisseSSABlock::AnalyzeVariableBlockLiveness()
 {
 	// すべてのマークされていない変数に対して生存区間解析を行う
+	// なぜマークをするのかと言えば、一度すでに生存解析を行った文を二度と解析しないようにするため。
+	// マークは ClearVariableMarks() ですべてクリアできる。
 
 	// すべての文を検査し、それぞれの文で宣言されている「変数」について解析を行う
 	// 「文」につく「マーク」は 文のポインタそのもの

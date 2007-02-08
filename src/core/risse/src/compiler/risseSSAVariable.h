@@ -158,6 +158,10 @@ public:
 	//! @brief		「マーク」を取得する
 	void * GetMark() const { return Mark; }
 
+	//! @brief		この変数が使用されている文のうち、死んでいるブロックに属する文を
+	//!				削除する
+	void DeleteDeadStatements();
+
 	//! @brief		この変数が使用された文が与えられるので、
 	//!				FirstUsedStatement と LastUsedStatement を設定する
 	//! @param		stmt	この変数が使用/宣言された文

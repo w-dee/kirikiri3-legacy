@@ -52,8 +52,12 @@ else
 	print "Test failed.\nFailed tests are:\n"
 end
 
-errored.each do |i|
-	print "#{i}\n"
+if errored.size > 0
+	errored.each do |i|
+		print "---------------------------------------\n"
+		print "#{i}\n"
+	end
+	print "---------------------------------------\n"
 end
 
 print "\n"

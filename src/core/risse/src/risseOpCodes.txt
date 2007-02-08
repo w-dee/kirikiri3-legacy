@@ -34,6 +34,7 @@ AssignGlobal			global		R,-,-,-,-,-		----		#!< = globalの代入
 AssignNewArray			array		R,-,-,-,-,-		----		#!< = 新しい配列オブジェクトの代入
 AssignNewDict			dict		R,-,-,-,-,-		----		#!< = 新しい辞書配列オブジェクトの代入
 AssignNewRegExp			regexp		R,R,R,-,-,-		----		#!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+AssignNewFunction		function	R,R,-,-,-,-		----		#!< = 新しい関数インスタンスの代入 (引数=「裸の」関数インスタンス)
 AssignNewProperty		property	R,R,R,-,-,-		----		#!< = 新しいプロパティインスタンスの代入 (引数=ゲッタ+セッタ)
 AssignNewClass			class		R,R,R,-,-,-		----		#!< = 新しいクラスインスタンスの代入 (引数=親クラス+クラス名)
 AssignNewModule			module		R,R,-,-,-,-		----		#!< = 新しいモジュールインスタンスの代入 (引数=モジュール名)

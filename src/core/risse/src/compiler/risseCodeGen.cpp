@@ -331,6 +331,17 @@ void tRisseCodeGenerator::PutAssignNewRegExp(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutAssignNewFunction(const tRisseSSAVariable * dest,
+			const tRisseSSAVariable * body)
+{
+	PutWord(ocAssignNewFunction);
+	PutWord(FindRegMap(dest));
+	PutWord(FindRegMap(body));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutAssignNewProperty(const tRisseSSAVariable * dest,
 			const tRisseSSAVariable * getter, const tRisseSSAVariable * setter)
 {

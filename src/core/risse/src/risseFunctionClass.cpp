@@ -20,6 +20,13 @@
 
 /*
 	Risseスクリプトから見える"Function" クラスの実装
+
+	Function クラスは引数を一つ取り、関数の内容(文字列)あるいは関数インスタンスを渡す。
+
+	ネイティブ実装の関数あるいは tRisseCodeBlock クラスは実際に tRisseObjectInterface
+	を実装しており、関数として動作できるのだが、そのままでは Function クラスのインスタンス
+	としての振る舞いをしない。そこで、この tRisseFunctionClass および tRisseFunctionInstance
+	でそれらの「裸の」関数インスタンスをラップすることとなる。
 */
 
 namespace Risse
@@ -75,6 +82,7 @@ static void Function_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 	tRisseFunctionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 
 	// 引数 = {body}
+	// TODO: 文字列が渡された場合は内容をコンパイルして関数として動作するようにする
 	tRisseFunctionInstance * obj = This.CheckAndGetObjectInterafce<tRisseFunctionInstance, tRisseFunctionClass>();
 	if(args.HasArgument(0)) obj->SetBody(args[0]);
 }

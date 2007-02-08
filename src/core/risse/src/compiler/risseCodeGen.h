@@ -227,6 +227,11 @@ public:
 	//! @param		flags	正規表現フラグを表す変数
 	void PutAssignNewRegExp(const tRisseSSAVariable * dest, const tRisseSSAVariable * pattern, const tRisseSSAVariable * flags);
 
+	//! @brief		新しい関数インスタンスを Assign するコードを置く
+	//! @param		dest	Assign先変数
+	//! @param		body	「裸の」関数インスタンス
+	void PutAssignNewFunction(const tRisseSSAVariable * dest, const tRisseSSAVariable * body);
+
 	//! @brief		新しいプロパティインスタンスを Assign するコードを置く
 	//! @param		dest	Assign先変数
 	//! @param		getter	ゲッタを表す変数

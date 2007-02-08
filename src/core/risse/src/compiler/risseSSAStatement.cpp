@@ -273,6 +273,12 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutAssignNewRegExp(Declared, Used[0], Used[1]);
 		break;
 
+	case ocAssignNewFunction:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutAssignNewFunction(Declared, Used[0]);
+		break;
+
 	case ocAssignNewProperty:
 		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Used.size() == 2);
@@ -620,7 +626,23 @@ tRisseString tRisseSSAStatement::Dump() const
 			return ret;
 		}
 
-	case ocAssignNewProperty: // プロパティインスタンス
+	case ocAssignNewFunction: // 新しい関数インスタンス
+		{
+			tRisseString ret;
+			RISSE_ASSERT(Used.size() == 1);
+			ret += Declared->Dump() + RISSE_WS(" = AssignNewFunction(");
+
+			ret +=	Used[0]->Dump() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocAssignNewProperty: // 新しいプロパティインスタンス
 		{
 			tRisseString ret;
 			RISSE_ASSERT(Used.size() == 2);

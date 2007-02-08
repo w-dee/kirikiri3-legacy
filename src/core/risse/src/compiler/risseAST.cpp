@@ -2741,8 +2741,12 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 	// 遅延評価ブロックをクリーンアップ
 	form->CleanupLazyBlock(lazy_param);
 
-	// このノードは作成された関数(メソッド)を返す
-	return lazyblock_var;
+	// 関数インスタンスをFunctionクラスでラップするための命令を置く
+	tRisseSSAVariable * wrapped_lazyblock_var = NULL;
+	form->AddStatement(GetPosition(), ocAssignNewFunction, &wrapped_lazyblock_var, lazyblock_var);
+
+	// このノードはラップされた方の関数(メソッド)を返す
+	return wrapped_lazyblock_var;
 }
 //---------------------------------------------------------------------------
 

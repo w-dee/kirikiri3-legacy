@@ -37,8 +37,11 @@ class tRisseSSABlock;
 //---------------------------------------------------------------------------
 class tRisseCompilerFunction : public tRisseCollectee
 {
+	tRisseString Name; //!< 関数の名前(表示用)
+	tRisseCompilerFunction * Parent; //!< 親関数
 	tRisseCompilerFunctionGroup * FunctionGroup; //!< この関数を保持している関数グループクラスのインスタンス
 	gc_vector<tRisseSSAForm *> SSAForms; //!< この関数が保持しているSSA形式のリスト
+	risse_size NestLevel; //!< 関数のネストレベル
 
 public:
 	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
@@ -69,7 +72,10 @@ private:
 public:
 	//! @brief		コンストラクタ
 	//! @param		function_group		関数グループクラスのインスタンス
-	tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group);
+	//! @param		parent				親関数インスタンス
+	//! @param		name				関数名(表示用)
+	tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group,
+		tRisseCompilerFunction * parent, const tRisseString name);
 
 	//! @brief		関数グループクラスのインスタンスを得る
 	//! @return		関数グループクラスのインスタンス
@@ -134,11 +140,13 @@ class tRisseCompilerFunctionGroup : public tRisseCollectee
 		//!< 共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
 
 	tSharedVariableMap SharedVariableMap; //!< 共有されている変数のマップ
+	tRisseString Name; //!< 関数グループの名前(表示用)
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		compiler		コンパイラクラスのインスタンス
-	tRisseCompilerFunctionGroup(tRisseCompiler * compiler);
+	//! @param		name			関数グループの名前
+	tRisseCompilerFunctionGroup(tRisseCompiler * compiler, const tRisseString & name);
 
 	//! @brief		コンパイラクラスのインスタンスを得る
 	//! @param		コンパイラクラスのインスタンス

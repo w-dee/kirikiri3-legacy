@@ -570,8 +570,22 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 	tRisseString block_name = basename + RISSE_WS(" ") + tRisseString::AsString(GetUniqueNumber());
 
 	// 遅延評価ブロックを生成
-	new_form =
-		new tRisseSSAForm(pos, Function, block_name, this, !sharevars);
+	if(sharevars)
+	{
+		// 関数の場合
+		tRisseCompilerFunction *child_function =
+			new tRisseCompilerFunction(Function->GetFunctionGroup(),
+				Function, block_name);
+		new_form =
+			new tRisseSSAForm(pos, child_function, block_name, this, !sharevars);
+	}
+	else
+	{
+		// ブロックの場合
+		new_form =
+			new tRisseSSAForm(pos, Function, block_name, this, !sharevars);
+	}
+
 	Children.push_back(new_form);
 
 	// 新しく作成した遅延評価ブロックに、一番外側のローカル名前空間をpushする

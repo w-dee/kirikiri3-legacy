@@ -30,7 +30,7 @@
 
 ・関数グループ(tRisseCompilerFunctionGroup)
   入れ子の関数のように、複数の関数が一つの環境(共有変数など)を共有
-  する単位
+  しうる単位
 
 ・関数(tRisseCompilerFunction)
   関数単位。中にスタックフレームを共有する複数のSSA形式が入る
@@ -46,8 +46,15 @@ RISSE_DEFINE_SOURCE_ID(7695,16492,63400,17880,52365,22979,50413,3135);
 
 
 //---------------------------------------------------------------------------
-tRisseCompilerFunction::tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group)
+tRisseCompilerFunction::tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group,
+	tRisseCompilerFunction * parent, const tRisseString name)
 {
+	Name = name;
+	Parent = parent;
+	if(Parent)
+		NestLevel = Parent->NestLevel + 1;
+	else
+		NestLevel = 0;
 	FunctionGroup = function_group;
 	FunctionGroup->AddFunction(this); // 自分自身を登録する
 }
@@ -87,6 +94,14 @@ void tRisseCompilerFunction::CompleteSSAForm()
 void tRisseCompilerFunction::GenerateVMCode()
 {
 	tRisseString str;
+
+	// 関数名表示
+	RisseFPrint(stderr, (RISSE_WS("######################################\n")));
+	RisseFPrint(stderr, (RISSE_WS("function ") + Name +
+					RISSE_WS(" nest level ") + tRisseString::AsString((risse_int64)NestLevel) +
+					RISSE_WS("\n")).c_str());
+	RisseFPrint(stderr, (RISSE_WS("######################################\n")));
+
 
 	// 最適化とSSA形式からの逆変換
 	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
@@ -252,9 +267,10 @@ void tRisseCompilerFunction::BindAllLabels()
 
 //---------------------------------------------------------------------------
 tRisseCompilerFunctionGroup::tRisseCompilerFunctionGroup(
-	tRisseCompiler * compiler)
+	tRisseCompiler * compiler, const tRisseString & name)
 {
 	Compiler = compiler;
+	Name = name;
 	Compiler->AddFunctionGroup(this); // 自分自身を登録する
 }
 //---------------------------------------------------------------------------
@@ -390,10 +406,10 @@ tRisseSSAForm * tRisseCompiler::InternalCompile(tRisseASTNode * root, const tRis
 	bool need_result, bool is_expression)
 {
 	// トップレベルの関数グループを作成する
-	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this);
+	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this, name);
 
 	// トップレベルの関数を作成する
-	tRisseCompilerFunction *top_function = new tRisseCompilerFunction(top_function_group);
+	tRisseCompilerFunction *top_function = new tRisseCompilerFunction(top_function_group, NULL, name);
 
 	// トップレベルのSSA形式を作成する
 	tRisseSSAForm * form = new tRisseSSAForm(root->GetPosition(), top_function, name, NULL, false);

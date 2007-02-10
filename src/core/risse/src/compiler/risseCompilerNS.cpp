@@ -326,16 +326,17 @@ tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
 		{
 			// AccessMap が NULL の場合は親名前空間内で共有する
 			tRisseString n_name;
-			bool shared = false;
-			if(Parent->AccessFromChild(name, false, AccessMap == NULL, this, &n_name, &shared))
+			risse_size shared_nest_level = risse_size_max;
+			if(Parent->AccessFromChild(name, false, AccessMap == NULL, this, &n_name, &shared_nest_level))
 			{
 				// この時点でn_name は番号付きの名前になっている
 				// 共有変数領域からの読み込み文または
 				// 親名前空間からの読み込み文を生成する
 				tRisseSSAVariable * ret_var = NULL;
 				tRisseSSAStatement *stmt = form->AddStatement(pos,
-								shared ? ocRead : ocParentRead, &ret_var);
-				stmt->SetName(shared ? n_name : name);
+								shared_nest_level != risse_size_max ? ocRead : ocParentRead, &ret_var);
+				stmt->SetName(shared_nest_level != risse_size_max ? n_name : name);
+				if(shared_nest_level != risse_size_max) stmt->SetNestLevel(shared_nest_level);
 				ret = ret_var;
 				return ret;
 			}
@@ -388,16 +389,17 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 	if(Parent)
 	{
 		tRisseString n_name;
-			bool shared = false;
-		if(Parent->AccessFromChild(name, true, AccessMap == NULL, this, &n_name, &shared))
+		risse_size shared_nest_level = risse_size_max;
+		if(Parent->AccessFromChild(name, true, AccessMap == NULL, this, &n_name, &shared_nest_level))
 		{
 			// 親名前空間で見つかった
 			// この時点でn_name は番号付きの名前になっている
 			// 共有変数領域への書き込み文または
 			// 親名前空間への書き込み文を生成する
 			tRisseSSAStatement *stmt = form->AddStatement(pos,
-							shared ? ocWrite : ocParentWrite, NULL, value);
-			stmt->SetName(shared ? n_name : name);
+							shared_nest_level != risse_size_max ? ocWrite : ocParentWrite, NULL, value);
+			stmt->SetName(shared_nest_level != risse_size_max ? n_name : name);
+			if(shared_nest_level != risse_size_max) stmt->SetNestLevel(shared_nest_level);
 			return true;
 		}
 	}
@@ -410,15 +412,31 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 //---------------------------------------------------------------------------
 bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 	bool access, bool should_share, tRisseSSALocalNamespace * child, 
-	tRisseString * ret_n_name, bool * shared)
+	tRisseString * ret_n_name, risse_size * shared_nest_level)
 {
 	tRisseString n_name;
 	if(Find(name, false, &n_name))
 	{
 		// 変数が見つかった
 		if(ret_n_name) *ret_n_name = n_name;
-		if(should_share) Block->GetForm()->GetFunction()->GetFunctionGroup()->ShareVariable(n_name);
-		if(shared) *shared = should_share;
+		if(should_share) Block->GetForm()->GetFunction()->ShareVariable(n_name);
+		if(shared_nest_level)
+		{
+			if(should_share)
+			{
+/*
+				RisseFPrint(stderr,
+					((access ? RISSE_WS("W name:") : RISSE_WS("R name:")) + name +
+					 " nestlevel:" + tRisseString::AsString(risse_int64(Block->GetForm()->GetFunction()->GetNestLevel())) +
+					 RISSE_WS("\n")).c_str());
+*/
+				*shared_nest_level = Block->GetForm()->GetFunction()->GetNestLevel();
+			}
+			else
+			{
+				*shared_nest_level = risse_size_max;
+			}
+		}
 
 		// 子のAccessMap に記録 (AccessMap に記録するのは「番号なし」の名前
 		if(!should_share && child->AccessMap) child->AccessMap->SetUsed(name, access);
@@ -437,7 +455,7 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 		if(!should_share && child->AccessMap) child->AccessMap->SetUsed(name, access);
 
 		// 親名前空間内で探す
-		return Parent->AccessFromChild(name, access, should_share, this, ret_n_name, shared);
+		return Parent->AccessFromChild(name, access, should_share, this, ret_n_name, shared_nest_level);
 	}
 }
 //---------------------------------------------------------------------------

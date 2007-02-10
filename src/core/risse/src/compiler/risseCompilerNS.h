@@ -206,11 +206,11 @@ public:
 	//! @param		should_share	見つかった変数を共有すべきかどうか
 	//! @param		child		子名前空間
 	//! @param		ret_n_name	見つかった番号付き変数名を格納する先 (NULL = いらない)
-	//! @param		shared		実際に見つかった変数を共有したかどうか
+	//! @param		shared_nest_level	実際に見つかった変数を共有した場合、関数ネストレベル、それ以外の場合はrisse_size_max
 	//! @return		変数が見つかったかどうか
 	bool AccessFromChild(const tRisseString & name, bool access,
 		bool should_share, tRisseSSALocalNamespace * child,
-		tRisseString * ret_n_name = NULL, bool * shared = NULL);
+		tRisseString * ret_n_name = NULL, risse_size * shared_nest_level = NULL);
 
 	//! @brief		AccessMap を設定する
 	//! @param		map AcecssMap

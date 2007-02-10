@@ -42,6 +42,9 @@ class tRisseCompilerFunction : public tRisseCollectee
 	tRisseCompilerFunctionGroup * FunctionGroup; //!< この関数を保持している関数グループクラスのインスタンス
 	gc_vector<tRisseSSAForm *> SSAForms; //!< この関数が保持しているSSA形式のリスト
 	risse_size NestLevel; //!< 関数のネストレベル
+	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
+		//!< 子関数により共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
+	tSharedVariableMap SharedVariableMap; //!< 子関数により共有されている変数のマップ
 
 public:
 	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
@@ -96,10 +99,16 @@ public:
 	//! @brief		先頭のSSA形式インスタンスを得る
 	tRisseSSAForm * GetTopSSAForm() const { return SSAForms.front(); }
 
+	//! @brief		関数のネストレベルを得る @return 関数のネストレベル
+	risse_size GetNestLevel() const { return NestLevel; }
+
 	//! @brief		SSA形式を完結させる
 	//! @note		このメソッドは、一通りASTからの変換が終わった後に呼ばれる。
 	//!				未バインドのラベルなどのバインドを行う。
 	void CompleteSSAForm();
+
+	//! @brief		共有変数をコードジェネレータに登録する
+	void RegisterSharedVariablesToCodeGenerator();
 
 	//! @brief		VMコード生成を行う
 	void GenerateVMCode();
@@ -117,6 +126,15 @@ public:
 	//! @param		block			基本ブロック
 	//! @note		すでに同じ名前のラベルが存在していた場合は例外が発生する
 	void AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block);
+
+	//! @param		変数を共有する
+	//! @param		name		変数名(番号付き)
+	void ShareVariable(const tRisseString & name);
+
+	//! @param		変数が共有されているかを得る
+	//! @param		name		変数名(番号付き)
+	//! @return		変数が共有されているかどうか
+	bool GetShared(const tRisseString & name);
 
 private:
 	//! @brief		未バインドのラベルジャンプをすべて解決する
@@ -136,10 +154,6 @@ class tRisseCompilerFunctionGroup : public tRisseCollectee
 {
 	tRisseCompiler * Compiler; //!< この関数グループを保持しているコンパイラクラスのインスタンス
 	gc_vector<tRisseCompilerFunction *> Functions; //!< この関数グループが保持している関数インスタンスのリスト
-	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
-		//!< 共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
-
-	tSharedVariableMap SharedVariableMap; //!< 共有されている変数のマップ
 	tRisseString Name; //!< 関数グループの名前(表示用)
 
 public:
@@ -163,16 +177,6 @@ public:
 
 	//! @brief		VMコード生成を行う
 	void GenerateVMCode();
-
-//--
-	//! @param		変数を共有する
-	//! @param		name		変数名(番号付き)
-	void ShareVariable(const tRisseString & name);
-
-	//! @param		変数が共有されているかを得る
-	//! @param		name		変数名(番号付き)
-	//! @return		変数が共有されているかどうか
-	bool GetShared(const tRisseString & name);
 };
 //---------------------------------------------------------------------------
 

@@ -91,10 +91,29 @@ void tRisseCompilerFunction::CompleteSSAForm()
 
 
 //---------------------------------------------------------------------------
+void tRisseCompilerFunction::RegisterSharedVariablesToCodeGenerator()
+{
+
+	// すべての共有されている変数をコードジェネレータに登録する
+	// いまのところ、コードジェネレータはそれよりも前段の各クラスとは情報が独立
+	// しているために、コードジェネレータが必要な情報はなんらかの形で前段が
+	// コードジェネレータに対して与えなければならない
+	for(tSharedVariableMap::const_iterator i = SharedVariableMap.begin();
+		i != SharedVariableMap.end(); i++)
+	{
+		// コードジェネレータの SharedRegNameMap は一つの関数グループ内では同じ
+		// マップを共有しているため、トップレベルのSSA形式インスタンスが作成した
+		// コードジェネレータに対してのみ共有されている変数を登録するのでよい。
+		GetTopSSAForm()->GetCodeGenerator()->AddSharedRegNameMap(i->first, NestLevel);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCompilerFunction::GenerateVMCode()
 {
 	tRisseString str;
-
 	// 関数名表示
 	RisseFPrint(stderr, (RISSE_WS("######################################\n")));
 	RisseFPrint(stderr, (RISSE_WS("function ") + Name +
@@ -168,6 +187,28 @@ void tRisseCompilerFunction::AddLabelMap(const tRisseString &labelname, tRisseSS
 	}
 
 	LabelMap.insert(tLabelMap::value_type(labelname, block)); // ラベルを挿入
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunction::ShareVariable(const tRisseString & n_name)
+{
+	SharedVariableMap.insert(tSharedVariableMap::value_type(n_name, NULL));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseCompilerFunction::GetShared(const tRisseString & n_name)
+{
+	bool result = SharedVariableMap.find(n_name) != SharedVariableMap.end();
+	RisseFPrint(stderr, (RISSE_WS("Checking shared status of ") + n_name +
+				RISSE_WS(" : ") +
+				(result ? RISSE_WS("true"):RISSE_WS("false")) +
+				RISSE_WS("\n")).c_str() );
+
+	return result;
 }
 //---------------------------------------------------------------------------
 
@@ -300,41 +341,21 @@ void tRisseCompilerFunctionGroup::CompleteSSAForm()
 //---------------------------------------------------------------------------
 void tRisseCompilerFunctionGroup::GenerateVMCode()
 {
-	// すべての共有されている変数をコードジェネレータに登録する
-	// いまのところ、コードジェネレータはそれよりも前段の各クラスとは情報が独立
-	// しているために、コードジェネレータが必要な情報はなんらかの形で前段が
-	// コードジェネレータに対して与えなければならない
-	for(tSharedVariableMap::const_iterator i = SharedVariableMap.begin();
-		i != SharedVariableMap.end(); i++)
+	// このインスタンスが所有しているすべての関数に対して処理を行わせる
+
+	// まず、コードジェネレータに共有変数を登録する
+	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
+		ri != Functions.rend(); ri++)
 	{
-		// コードジェネレータの SharedRegNameMap は一つの関数グループ内では同じ
-		// マップを共有しているため、トップレベルのSSA形式インスタンスが作成した
-		// コードジェネレータに対してのみ共有されている変数を登録するのでよい。
-		Functions.front()->GetTopSSAForm()->GetCodeGenerator()->AddSharedRegNameMap(i->first);
+		(*ri)->RegisterSharedVariablesToCodeGenerator();
 	}
 
-	// このインスタンスが所有しているすべての関数に対して処理を行わせる
+	// 次にコードを生成する
 	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
 		ri != Functions.rend(); ri++)
 	{
 		(*ri)->GenerateVMCode();
 	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseCompilerFunctionGroup::ShareVariable(const tRisseString & n_name)
-{
-	SharedVariableMap.insert(tSharedVariableMap::value_type(n_name, NULL));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tRisseCompilerFunctionGroup::GetShared(const tRisseString & n_name)
-{
-	return SharedVariableMap.find(n_name) != SharedVariableMap.end();
 }
 //---------------------------------------------------------------------------
 

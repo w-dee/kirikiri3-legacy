@@ -45,8 +45,10 @@ public:
 		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
 	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
+	typedef gc_vector<tNamedRegMap> tSharedRegNameMap;
+		//!< ネストレベルごとの変数名とレジスタ番号のマップのtypedef(共有変数用)
 private:
-	tNamedRegMap *SharedRegNameMap; //!< 共有された変数の変数名とそれに対応するレジスタ番号のマップ
+	tSharedRegNameMap *SharedRegNameMap; //!< 変数名とそれに対応するネストレベルとレジスタ番号のマップ(関数グループ一つにつき一つ)
 	tNamedRegMap VariableMapForChildren; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	//! @brief		未解決のジャンプを表す構造体
@@ -154,17 +156,21 @@ public:
 
 	//! @brief		共有されたレジスタのマップを変数名で探す
 	//! @param		name			変数名
-	//! @return		そのレジスタのインデックス
+	//! @param		nest_level		そのレジスタのネストレベル
+	//! @param		regnum			レジスタ番号
 	//! @note		nameがマップ内に見つからなかった場合は(デバッグモード時は)
 	//!				ASSERTに失敗となる
-	risse_size FindSharedRegNameMap(const tRisseString & name);
+	void FindSharedRegNameMap(const tRisseString & name, risse_uint16 &nestlevel, risse_uint16 &regnum);
 
 	//! @brief		共有されたレジスタのマップに変数名とレジスタを追加する
 	//! @param		name			変数名
-	void AddSharedRegNameMap(const tRisseString & name);
+	//! @param		nestlevel		ネストレベル
+	void AddSharedRegNameMap(const tRisseString & name, risse_size nestlevel);
 
-	//! @brief		共有されたレジスタの個数を得る @return 共有されたレジスタの個数
-	risse_size GetSharedRegCount() const { return SharedRegNameMap->size(); }
+	//! @brief		指定されたネストレベルに対する共有されたレジスタの個数を得る
+	//! @param		nestlevel		ネストレベル
+	//! @return		共有されたレジスタの個数
+	risse_size GetSharedRegCount(risse_size nestlevel) const;
 
 	//! @brief		VariableMapForChildren 内で変数を探す
 	//! @param		name		変数名

@@ -456,12 +456,13 @@ void tRisseSSABlock::ConvertSharedVariableAccess()
 		tRisseOpCode code = stmt->GetCode();
 		if(code == ocReadVar)
 		{
-			if(Form->GetFunction()->GetFunctionGroup()->GetShared(stmt->GetName()))
+			if(Form->GetFunction()->GetShared(stmt->GetName()))
 			{
 				tRisseSSAStatement *new_stmt = new
 					tRisseSSAStatement(Form, stmt->GetPosition(), ocRead);
 				new_stmt->SetName(stmt->GetName());
 				new_stmt->SetDeclared(stmt->GetDeclared());
+				new_stmt->SetNestLevel(Form->GetFunction()->GetNestLevel());
 				// stmt は消えるため、stmt の Used をすべて解放しなければならない
 				stmt->DeleteUsed();
 				// 文を置き換える
@@ -475,11 +476,12 @@ void tRisseSSABlock::ConvertSharedVariableAccess()
 		}
 		else if(code == ocWriteVar)
 		{
-			if(Form->GetFunction()->GetFunctionGroup()->GetShared(stmt->GetName()))
+			if(Form->GetFunction()->GetShared(stmt->GetName()))
 			{
 				tRisseSSAStatement *new_stmt = new
 					tRisseSSAStatement(Form, stmt->GetPosition(), ocWrite);
 				new_stmt->SetName(stmt->GetName());
+				new_stmt->SetNestLevel(Form->GetFunction()->GetNestLevel());
 				new_stmt->AddUsed(stmt->GetUsed()[0]);
 				// stmt は消えるため、stmt の Used をすべて解放しなければならない
 				stmt->DeleteUsed();

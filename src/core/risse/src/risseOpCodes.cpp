@@ -123,9 +123,11 @@ tRisseString tRisseVMCodeIterator::Dump() const
 			break;
 
 		case tRisseVMInsnInfo::vifShared:
+			// shared の上位16ビットはネストレベル、下位16ビットはレジスタ番号である
 			if(i != 0) ret += RISSE_WS(", ");
-			ret += RISSE_WS("[") + tRisseString::AsString((int)CodePointer[i+1]) +
-				RISSE_WS("]");
+			ret += RISSE_WS("[") + tRisseString::AsString((int)((CodePointer[i+1]>>16)&0xffff)) +
+					RISSE_WS(":") + tRisseString::AsString((int)((CodePointer[i+1])&0xffff)) +
+						RISSE_WS("]");
 			break;
 
 		}

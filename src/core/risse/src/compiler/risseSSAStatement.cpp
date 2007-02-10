@@ -833,6 +833,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(Name != NULL);
 			RISSE_ASSERT(Used.size() == 1);
 			return Used[0]->Dump() + RISSE_WS(".Write(") +
+					tRisseString::AsString(risse_int64(NestLevel)) + RISSE_WS(":") +
 					Name->AsHumanReadable() +
 					RISSE_WS(")");
 		}
@@ -846,6 +847,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			tRisseString ret;
 			ret += Declared->Dump() + RISSE_WS(" = ");
 			ret += RISSE_WS("Read(");
+			ret += tRisseString::AsString(risse_int64(NestLevel)) + RISSE_WS(":");
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
 			// 変数のコメントを追加

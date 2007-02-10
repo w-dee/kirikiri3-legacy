@@ -33,7 +33,7 @@ tRisseCodeGenerator::tRisseCodeGenerator(
 	RegisterBase = 0;
 	NumUsedRegs = 0;
 	MaxNumUsedRegs = 0;
-	SharedRegNameMap = parent ? parent->SharedRegNameMap : new tNamedRegMap();
+	SharedRegNameMap = parent ? parent->SharedRegNameMap : new tSharedRegNameMap();
 }
 //---------------------------------------------------------------------------
 
@@ -170,22 +170,61 @@ void tRisseCodeGenerator::FreeRegister(const tRisseSSAVariable *var)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name)
+void tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name, risse_uint16 &nestlevel, risse_uint16 &regnum)
 {
-	tNamedRegMap::iterator f = SharedRegNameMap->find(name);
+	// SharedRegNameMap を逆順に見ていく
+	RisseFPrint(stderr, (RISSE_WS("Finding ") + name +
+				RISSE_WS(" from shared variable map\n")).c_str());
 
-	RISSE_ASSERT(f != SharedRegNameMap->end()); // 変数は見つからなければならない
+	risse_size i = SharedRegNameMap->size();
+	while(i > 0)
+	{
+		i--;
+		tNamedRegMap & map = (*SharedRegNameMap)[i];
+		tNamedRegMap::iterator f = map.find(name);
+		if(f != map.end())
+		{
+			// 見つかった
+			// いまのところ、nestlevel と regnum は、VMコード中において
+			// それぞれ 32bit 整数の 上位16bitと下位16ビットを使うので、
+			// それぞれがその16bitの上限を超えることができない。
+			if(i > 0xffff)
+				eRisseError::Throw(
+					tRisseString(RISSE_WS_TR("too deep function nest level"))); // まずあり得ないと思うが ...
+			if(f->second > 0xffff)
+				eRisseError::Throw(
+					tRisseString(RISSE_WS_TR("too deep shared variables between functions"))); // まずあり得ないと思うが ...
+			nestlevel = static_cast<risse_uint16>(i);
+			regnum = static_cast<risse_uint16>(f->second);
+			return;
+		}
+	}
 
-	return f->second;
+	RISSE_ASSERT(!"shared variable not found"); // 変数は見つからなければならない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
+void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name, risse_size nestlevel)
 {
-	RISSE_ASSERT(SharedRegNameMap->find(name) == SharedRegNameMap->end()); // 二重挿入は許されない
-	SharedRegNameMap->insert(tNamedRegMap::value_type(name, SharedRegNameMap->size()));
+	RisseFPrint(stderr, (RISSE_WS("Adding ") + name +
+		RISSE_WS(" at nestlevel ") +
+		tRisseString::AsString(risse_int64(nestlevel)) + RISSE_WS("\n")).c_str() );
+
+	if(nestlevel >= SharedRegNameMap->size()) SharedRegNameMap->resize(nestlevel+1); // 拡張
+	tNamedRegMap & map = (*SharedRegNameMap)[nestlevel];
+	RISSE_ASSERT(map.find(name) == map.end()); // 二重挿入は許されない
+	map.insert(tNamedRegMap::value_type(name, map.size()));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::GetSharedRegCount(risse_size nestlevel) const
+{
+	RISSE_ASSERT(nestlevel < SharedRegNameMap->size());
+	return SharedRegNameMap[nestlevel].size();
 }
 //---------------------------------------------------------------------------
 
@@ -401,8 +440,10 @@ void tRisseCodeGenerator::PutAssignBlockParam(const tRisseSSAVariable * dest, ri
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutWrite(const tRisseString & dest, const tRisseSSAVariable * src)
 {
+	risse_uint16 nestlevel = 0, regnum = 0;
+	FindSharedRegNameMap(dest, nestlevel, regnum);
 	PutWord(ocWrite);
-	PutWord(FindSharedRegNameMap(dest));
+	PutWord((nestlevel << 16) + regnum);
 	PutWord(FindRegMap(src));
 }
 //---------------------------------------------------------------------------
@@ -411,9 +452,11 @@ void tRisseCodeGenerator::PutWrite(const tRisseString & dest, const tRisseSSAVar
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutRead(const tRisseSSAVariable * dest, const tRisseString & src)
 {
+	risse_uint16 nestlevel = 0, regnum = 0;
+	FindSharedRegNameMap(src, nestlevel, regnum);
 	PutWord(ocRead);
 	PutWord(FindRegMap(dest));
-	PutWord(FindSharedRegNameMap(src));
+	PutWord((nestlevel << 16) + regnum);
 }
 //---------------------------------------------------------------------------
 

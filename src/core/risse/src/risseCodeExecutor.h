@@ -51,7 +51,7 @@ public:
 	virtual void Execute(
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject(),
-		tRisseVariant * frame = NULL, tRisseVariant * shared = NULL,
+		tRisseVariant * frame = NULL, tRisseSharedVariableFrames * shared = NULL,
 		tRisseVariant * result = NULL) = 0;
 };
 //---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ public:
 	void Execute(
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject(),
-		tRisseVariant * frame = NULL, tRisseVariant * shared = NULL,
+		tRisseVariant * frame = NULL, tRisseSharedVariableFrames * shared = NULL,
 		tRisseVariant * result = NULL);
 };
 //---------------------------------------------------------------------------

@@ -92,6 +92,9 @@ public:
 	//! @brief	定数領域の配列を得る @return 定数領域の配列
 	const gc_vector<tRisseVariant> & GetConsts() const { return Consts; }
 
+	//! @brief	ネストレベルを得る @return ネストレベル
+	risse_size GetNestLevel() const { return NestLevel; }
+
 	//! @brief	使用中のレジスタの最大数を得る @return 使用中のレジスタの最大数
 	risse_size GetMaxNumUsedRegs() const { return MaxNumUsedRegs; }
 

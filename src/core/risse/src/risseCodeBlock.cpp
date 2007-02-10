@@ -93,6 +93,7 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 
 	// 必要なレジスタ数/共有変数の数のコピー
 	NumRegs = gen->GetMaxNumUsedRegs();
+	NestLevel = gen->GetNestLevel();
 	NumSharedVars = gen->GetSharedRegCount();
 
 	// Executor を作成

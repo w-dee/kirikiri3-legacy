@@ -100,6 +100,14 @@ public:
 	//! @return		必要なレジスタ数
 	risse_size GetNumRegs() const { return NumRegs; }
 
+	//! @brief		関数のネストレベルを得る
+	//! @return		関数のネストレベル
+	risse_size GetNestLevel() const { return NestLevel; }
+
+	//! @brief		関数の最大のネストレベルを得る
+	//! @return		関数の最大のネストレベル
+	risse_size GetMaxNestLevel() const { return MaxNestLevel; }
+
 	//! @brief		必要な共有変数の数を得る
 	//! @return		必要な共有変数の数
 	risse_size GetNumSharedVars() const { return NumSharedVars; }
@@ -110,6 +118,85 @@ public:
 public: // tRisseObjectInterface メンバ
 
 	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief 共有変数フレーム
+//---------------------------------------------------------------------------
+class tRisseSharedVariableFrames
+{
+	gc_vector<tRisseVariant *> Frames; //!< 共有変数フレームの配列 (関数のネストレベルによりフレームが異なる)
+/*
+public:
+	//! @brief	インスタンス生成時に共有フレームを作成し、消滅時にそれを元に戻すクラス
+	class tAllocator
+	{
+		tRisseSharedVariableFrames & Frames; //!< 共有フレーム
+		tRisseVariant * Prev; //!< そのネストレベルに以前存在していたフレーム
+	public:
+		//! @brief		コンストラクタ
+		//! @param		frames		共有変数フレーム
+		//! @param		level		ネストレベル
+		//! @param		size		共有フレームのサイズ
+		tAllocator(tRisseSharedVariableFrames & frames, risse_size level, risse_size size) : Frames(frames)
+		{
+			Frames.Set(level, size);
+		}
+
+		//! @brief		デストラクタ
+		~tAllocator()
+		{
+			Frames.Set(level, 
+		}
+
+	private:
+		operator new(); //!< ヒープへの確保禁止
+	};
+*/
+public:
+	//! @brief		コンストラクタ
+	//! @param		max_nest_level		最大の関数のネストレベル(このサイズにて Frames が確保される)
+	tRisseSharedVariableFrames(risse_size max_nest_level)
+	{
+		Frames.resize(max_nest_level);
+	}
+
+	//! @brief		指定のネストレベルのフレームを確保する
+	//! @param		level		ネストレベル
+	//! @param		size		フレームのサイズ
+	//! @return		そのネストレベルの位置に以前にあったフレーム
+	tRisseVariant * Set(risse_size level, risse_size size)
+	{
+		RISSE_ASSERT(level < Frames.size());
+		tRisseVariant * prev = Frames[level];
+		Frames[level] = size ? new tRisseVariant[size] : NULL;
+		return prev;
+	}
+
+	//! @brief		指定のネストレベルのフレームを設定する
+	//! @param		level		ネストレベル
+	//! @param		frame		フレーム
+	//! @return		そのネストレベルの位置に以前にあったフレーム
+	tRisseVariant * Set(risse_size level, tRisseVariant * frame)
+	{
+		RISSE_ASSERT(level < Frames.size());
+		tRisseVariant * prev = Frames[level];
+		Frames[level] = frame;
+		return prev;
+	}
+
+	//! @brief		指定位置の共有変数への参照を返す
+	//! @param		level		ネストレベル
+	//! @param		num			位置
+	//! @return		その位置にある共有変数への参照
+	tRisseVariant & At(risse_size level, risse_size num)
+	{
+		RISSE_ASSERT(level < Frames.size());
+		RISSE_ASSERT(Frames[level] != NULL);
+		return Frames[level][num];
+	}
 };
 //---------------------------------------------------------------------------
 
@@ -126,7 +213,7 @@ class tRisseCodeBlockStackAdapter : public tRisseObjectInterface
 {
 	const tRisseCodeBlock * CodeBlock; //!< コードブロック
 	tRisseVariant * Frame; //!< スタックフレーム
-	tRisseVariant * Shared; //!< 共有フレーム
+	tRisseSharedVariableFrames * Shared; //!< 共有フレーム
 
 public:
 	//! @brief		コンストラクタ
@@ -134,7 +221,7 @@ public:
 	//! @param		frame			スタックフレーム
 	//! @param		shared			共有フレーム
 	tRisseCodeBlockStackAdapter(const tRisseCodeBlock * codeblock,
-		tRisseVariant * frame = NULL, tRisseVariant * shared = NULL):
+		tRisseVariant * frame , tRisseSharedVariableFrames * shared):
 		 CodeBlock(codeblock), Frame(frame), Shared(shared) {;}
 
 public: // tRisseObjectInterface メンバ

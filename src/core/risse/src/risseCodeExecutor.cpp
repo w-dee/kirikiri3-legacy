@@ -875,6 +875,7 @@ void tRisseCodeInterpreter::Execute(
 	catch(...)
 	{
 		if(prev_shared_frame) shared->Set(CodeBlock->GetNestLevel(), prev_shared_frame);
+		throw;
 	}
 }
 //---------------------------------------------------------------------------

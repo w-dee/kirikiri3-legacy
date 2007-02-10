@@ -196,7 +196,7 @@ tRisseCodeBlockStackAdapter::tRetValue
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
 	{
-		CodeBlock->GetExecutor()->Execute(args, This, Frame, Shared, result);
+		CodeBlock->GetExecutor()->Execute(args, This, Frame, &Shared, result);
 	}
 	return rvNoError;
 }

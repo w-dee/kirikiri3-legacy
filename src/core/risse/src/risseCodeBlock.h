@@ -213,7 +213,7 @@ class tRisseCodeBlockStackAdapter : public tRisseObjectInterface
 {
 	const tRisseCodeBlock * CodeBlock; //!< コードブロック
 	tRisseVariant * Frame; //!< スタックフレーム
-	tRisseSharedVariableFrames * Shared; //!< 共有フレーム
+	tRisseSharedVariableFrames Shared; //!< 共有フレーム
 
 public:
 	//! @brief		コンストラクタ
@@ -221,12 +221,15 @@ public:
 	//! @param		frame			スタックフレーム
 	//! @param		shared			共有フレーム
 	tRisseCodeBlockStackAdapter(const tRisseCodeBlock * codeblock,
-		tRisseVariant * frame , tRisseSharedVariableFrames * shared):
+		tRisseVariant * frame , const tRisseSharedVariableFrames & shared):
 		 CodeBlock(codeblock), Frame(frame), Shared(shared) {;}
 
 public: // tRisseObjectInterface メンバ
 
 	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+
+	//! @brief	デストラクタ (コンパイラの警告潰し用;実際には呼ばれることはない)
+	virtual ~tRisseCodeBlockStackAdapter() {;}
 };
 //---------------------------------------------------------------------------
 

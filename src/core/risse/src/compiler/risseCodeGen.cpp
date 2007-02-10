@@ -25,15 +25,15 @@ RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 
 //---------------------------------------------------------------------------
 tRisseCodeGenerator::tRisseCodeGenerator(
-	tRisseCodeGenerator * parent, bool useparentframe)
+	tRisseCodeGenerator * parent, bool useparentframe, risse_size nestlevel)
 {
 	Parent = parent;
 	UseParentFrame = useparentframe;
+	NestLevel = nestlevel;
 	RISSE_ASSERT(!(!Parent && UseParentFrame)); // UseParentFrame が真の場合は親がなければならない
 	RegisterBase = 0;
 	NumUsedRegs = 0;
 	MaxNumUsedRegs = 0;
-	SharedRegNameMap = parent ? parent->SharedRegNameMap : new tSharedRegNameMap();
 }
 //---------------------------------------------------------------------------
 
@@ -176,55 +176,49 @@ void tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name, risse_
 	RisseFPrint(stderr, (RISSE_WS("Finding ") + name +
 				RISSE_WS(" from shared variable map\n")).c_str());
 
-	risse_size i = SharedRegNameMap->size();
-	while(i > 0)
+	tNamedRegMap::iterator f = SharedRegNameMap.find(name);
+	if(f != SharedRegNameMap.end())
 	{
-		i--;
-		tNamedRegMap & map = (*SharedRegNameMap)[i];
-		tNamedRegMap::iterator f = map.find(name);
-		if(f != map.end())
-		{
-			// 見つかった
-			// いまのところ、nestlevel と regnum は、VMコード中において
-			// それぞれ 32bit 整数の 上位16bitと下位16ビットを使うので、
-			// それぞれがその16bitの上限を超えることができない。
-			if(i > 0xffff)
-				eRisseError::Throw(
-					tRisseString(RISSE_WS_TR("too deep function nest level"))); // まずあり得ないと思うが ...
-			if(f->second > 0xffff)
-				eRisseError::Throw(
-					tRisseString(RISSE_WS_TR("too deep shared variables between functions"))); // まずあり得ないと思うが ...
-			nestlevel = static_cast<risse_uint16>(i);
-			regnum = static_cast<risse_uint16>(f->second);
-			return;
-		}
+		// 見つかった
+		// いまのところ、nestlevel と regnum は、VMコード中において
+		// それぞれ 32bit 整数の 上位16bitと下位16ビットを使うので、
+		// それぞれがその16bitの上限を超えることができない。
+		if(NestLevel > 0xffff)
+			eRisseError::Throw(
+				tRisseString(RISSE_WS_TR("too deep function nest level"))); // まずあり得ないと思うが ...
+		if(f->second > 0xffff)
+			eRisseError::Throw(
+				tRisseString(RISSE_WS_TR("too deep shared variables between functions"))); // まずあり得ないと思うが ...
+		nestlevel = NestLevel;
+		regnum = static_cast<risse_uint16>(f->second);
+		return;
 	}
 
-	RISSE_ASSERT(!"shared variable not found"); // 変数は見つからなければならない
+	// 見つからなかったので親に再帰する
+	if(!Parent) RISSE_ASSERT(!"shared variable not found"); // 変数は見つからなければならない
+
+	Parent->FindSharedRegNameMap(name, nestlevel, regnum);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name, risse_size nestlevel)
+void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 {
 	RisseFPrint(stderr, (RISSE_WS("Adding ") + name +
 		RISSE_WS(" at nestlevel ") +
-		tRisseString::AsString(risse_int64(nestlevel)) + RISSE_WS("\n")).c_str() );
+		tRisseString::AsString(risse_int64(NestLevel)) + RISSE_WS("\n")).c_str() );
 
-	if(nestlevel >= SharedRegNameMap->size()) SharedRegNameMap->resize(nestlevel+1); // 拡張
-	tNamedRegMap & map = (*SharedRegNameMap)[nestlevel];
-	RISSE_ASSERT(map.find(name) == map.end()); // 二重挿入は許されない
-	map.insert(tNamedRegMap::value_type(name, map.size()));
+	RISSE_ASSERT(SharedRegNameMap.find(name) == SharedRegNameMap.end()); // 二重挿入は許されない
+	SharedRegNameMap.insert(tNamedRegMap::value_type(name, SharedRegNameMap.size()));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::GetSharedRegCount(risse_size nestlevel) const
+risse_size tRisseCodeGenerator::GetSharedRegCount() const
 {
-	RISSE_ASSERT(nestlevel < SharedRegNameMap->size());
-	return SharedRegNameMap[nestlevel].size();
+	return SharedRegNameMap.size();
 }
 //---------------------------------------------------------------------------
 

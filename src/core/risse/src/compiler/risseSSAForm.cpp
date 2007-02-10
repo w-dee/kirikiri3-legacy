@@ -109,7 +109,8 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 
 	// コードジェネレータを作成する
 	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
-	CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL, UseParentFrame);
+	CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL,
+							UseParentFrame, function->GetNestLevel());
 	CodeBlock = new tRisseCodeBlock(GetScriptBlock());
 	CodeBlockIndex = Function->GetFunctionGroup()->GetCompiler()->AddCodeBlock(CodeBlock);
 
@@ -938,6 +939,13 @@ void tRisseSSAForm::GenerateCode() const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseSSAForm::SetMaxNestLevel(risse_size level)
+{
+	// コードブロックに最大のネストレベルを通知する
+	CodeBlock->SetMaxNestLevel(level);
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

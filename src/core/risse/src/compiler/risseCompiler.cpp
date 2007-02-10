@@ -93,7 +93,6 @@ void tRisseCompilerFunction::CompleteSSAForm()
 //---------------------------------------------------------------------------
 void tRisseCompilerFunction::RegisterSharedVariablesToCodeGenerator()
 {
-
 	// すべての共有されている変数をコードジェネレータに登録する
 	// いまのところ、コードジェネレータはそれよりも前段の各クラスとは情報が独立
 	// しているために、コードジェネレータが必要な情報はなんらかの形で前段が
@@ -104,7 +103,7 @@ void tRisseCompilerFunction::RegisterSharedVariablesToCodeGenerator()
 		// コードジェネレータの SharedRegNameMap は一つの関数グループ内では同じ
 		// マップを共有しているため、トップレベルのSSA形式インスタンスが作成した
 		// コードジェネレータに対してのみ共有されている変数を登録するのでよい。
-		GetTopSSAForm()->GetCodeGenerator()->AddSharedRegNameMap(i->first, NestLevel);
+		GetTopSSAForm()->GetCodeGenerator()->AddSharedRegNameMap(i->first);
 	}
 }
 //---------------------------------------------------------------------------
@@ -161,6 +160,14 @@ void tRisseCompilerFunction::GenerateVMCode()
 }
 //---------------------------------------------------------------------------
 
+
+
+//---------------------------------------------------------------------------
+void tRisseCompilerFunction::SetMaxNestLevel(risse_size level)
+{
+	SSAForms.front()->SetMaxNestLevel(level);
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -356,6 +363,24 @@ void tRisseCompilerFunctionGroup::GenerateVMCode()
 	{
 		(*ri)->GenerateVMCode();
 	}
+
+	// 最大のネストレベルを決定する一瞬であなだらけ
+	risse_size max_nest_level = 0;
+	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
+		ri != Functions.rend(); ri++)
+	{
+		risse_size level = (*ri)->GetNestLevel();
+		if(level > max_nest_level) max_nest_level = level;
+	}
+
+	// ネストレベルが 0 の関数のコードジェネレータに対して最大のネストレベルを教えてあげる
+	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
+		ri != Functions.rend(); ri++)
+	{
+		risse_size level = (*ri)->GetNestLevel();
+		if(level == 0) (*ri)->SetMaxNestLevel(max_nest_level);
+	}
+
 }
 //---------------------------------------------------------------------------
 

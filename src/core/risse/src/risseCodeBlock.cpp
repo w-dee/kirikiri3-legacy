@@ -93,10 +93,19 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 
 	// 必要なレジスタ数/共有変数の数のコピー
 	NumRegs = gen->GetMaxNumUsedRegs();
-	NumSharedVars = 0; //gen->GetSharedRegCount();
+	NumSharedVars = gen->GetSharedRegCount();
 
 	// Executor を作成
 	Executor = new tRisseCodeInterpreter(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCodeBlock::SetMaxNestLevel(risse_size level)
+{
+	RISSE_ASSERT(NestLevel == 0); // この情報を持つコードブロックのネストレベルは 0 で無くてはならない
+	MaxNestLevel = level;
 }
 //---------------------------------------------------------------------------
 

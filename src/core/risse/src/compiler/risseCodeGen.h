@@ -33,6 +33,7 @@ class tRisseCodeGenerator : public tRisseCollectee
 
 	tRisseCodeGenerator * Parent; //!< 親のコードジェネレータ
 	bool UseParentFrame; //!< 親のコードジェネレータのフレームを使うかどうか
+	risse_size NestLevel;		//!< 関数のネストレベル
 	risse_size RegisterBase; //!< レジスタの基本値
 
 	gc_vector<risse_uint32> Code; //!< コード
@@ -45,10 +46,8 @@ public:
 		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
 	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
-	typedef gc_vector<tNamedRegMap> tSharedRegNameMap;
-		//!< ネストレベルごとの変数名とレジスタ番号のマップのtypedef(共有変数用)
 private:
-	tSharedRegNameMap *SharedRegNameMap; //!< 変数名とそれに対応するネストレベルとレジスタ番号のマップ(関数グループ一つにつき一つ)
+	tNamedRegMap SharedRegNameMap; //!< 共有変数名とそれに対応するレジスタ番号のマップ
 	tNamedRegMap VariableMapForChildren; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	//! @brief		未解決のジャンプを表す構造体
@@ -73,7 +72,8 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		parent			親コードジェネレータ
 	//! @param		useparentframe	親コードジェネレータのフレームを使うかどうか
-	tRisseCodeGenerator(tRisseCodeGenerator * parent = NULL, bool useparentframe = false);
+	//! @param		nestlevel		関数のネストレベル
+	tRisseCodeGenerator(tRisseCodeGenerator * parent, bool useparentframe, risse_size nestlevel);
 
 public:
 	//! @brief	親のコードジェネレータを得る
@@ -159,18 +159,16 @@ public:
 	//! @param		nest_level		そのレジスタのネストレベル
 	//! @param		regnum			レジスタ番号
 	//! @note		nameがマップ内に見つからなかった場合は(デバッグモード時は)
-	//!				ASSERTに失敗となる
+	//!				親コードジェネレータを探し、それでも見つからなければASSERTに失敗となる
 	void FindSharedRegNameMap(const tRisseString & name, risse_uint16 &nestlevel, risse_uint16 &regnum);
 
 	//! @brief		共有されたレジスタのマップに変数名とレジスタを追加する
 	//! @param		name			変数名
-	//! @param		nestlevel		ネストレベル
-	void AddSharedRegNameMap(const tRisseString & name, risse_size nestlevel);
+	void AddSharedRegNameMap(const tRisseString & name);
 
 	//! @brief		指定されたネストレベルに対する共有されたレジスタの個数を得る
-	//! @param		nestlevel		ネストレベル
 	//! @return		共有されたレジスタの個数
-	risse_size GetSharedRegCount(risse_size nestlevel) const;
+	risse_size GetSharedRegCount() const;
 
 	//! @brief		VariableMapForChildren 内で変数を探す
 	//! @param		name		変数名

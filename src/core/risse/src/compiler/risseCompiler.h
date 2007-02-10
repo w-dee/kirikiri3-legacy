@@ -113,6 +113,12 @@ public:
 	//! @brief		VMコード生成を行う
 	void GenerateVMCode();
 
+	//! @brief		最大のネストレベルを報告する
+	//! @param		level		最大のネストレベル
+	//! @note		トップレベルの関数は、ネストレベルに応じたバッファを確保しなければならないため、
+	//!				ネストレベルが最大でどれほどまでに行くのかを知っていなくてはならない
+	void SetMaxNestLevel(risse_size level);
+
 //--
 public:
 	//! @brief		未バインドのラベルジャンプを追加する

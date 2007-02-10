@@ -522,6 +522,10 @@ public:
 
 	//! @brief		バイトコードを生成する
 	void GenerateCode() const;
+
+	//! @brief		最大のネストレベルを設定する
+	//! @param		level		最大のネストレベル
+	void SetMaxNestLevel(risse_size level);
 };
 //---------------------------------------------------------------------------
 

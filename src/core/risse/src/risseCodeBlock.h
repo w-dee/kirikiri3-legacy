@@ -38,6 +38,8 @@ class tRisseCodeBlock : public tRisseObjectInterface
 	tRisseVariant *Consts; //!< 定数領域
 	risse_size ConstsSize; //!< 定数領域のサイズ(個)
 	risse_size NumRegs; //!< 必要なレジスタ数
+	risse_size NestLevel; //!< 関数のネストレベル
+	risse_size MaxNestLevel; //!< 関数の最大のネストレベル (NestLevel==0のコードブロックでのみ有効)
 	risse_size NumSharedVars; //!< 必要な共有変数の数
 
 	typedef std::pair<risse_size, risse_size> tRelocation; //!<  コードブロック再配置情報のtypedef
@@ -61,6 +63,10 @@ public:
 	//! @brief		コードを設定する(コードジェネレータから)
 	//! @param		gen		コードジェネレータ
 	void Assign(const tRisseCodeGenerator *gen);
+
+	//! @brief		最大のネストレベルを設定する
+	//! @param		level		最大のネストレベル
+	void SetMaxNestLevel(risse_size level);
 
 	//! @brief		再配置情報の fixup を行う
 	//! @param		sb		スクリプトブロック

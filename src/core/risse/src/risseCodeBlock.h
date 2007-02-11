@@ -128,33 +128,7 @@ public: // tRisseObjectInterface メンバ
 class tRisseSharedVariableFrames
 {
 	gc_vector<tRisseVariant *> Frames; //!< 共有変数フレームの配列 (関数のネストレベルによりフレームが異なる)
-/*
-public:
-	//! @brief	インスタンス生成時に共有フレームを作成し、消滅時にそれを元に戻すクラス
-	class tAllocator
-	{
-		tRisseSharedVariableFrames & Frames; //!< 共有フレーム
-		tRisseVariant * Prev; //!< そのネストレベルに以前存在していたフレーム
-	public:
-		//! @brief		コンストラクタ
-		//! @param		frames		共有変数フレーム
-		//! @param		level		ネストレベル
-		//! @param		size		共有フレームのサイズ
-		tAllocator(tRisseSharedVariableFrames & frames, risse_size level, risse_size size) : Frames(frames)
-		{
-			Frames.Set(level, size);
-		}
 
-		//! @brief		デストラクタ
-		~tAllocator()
-		{
-			Frames.Set(level, 
-		}
-
-	private:
-		operator new(); //!< ヒープへの確保禁止
-	};
-*/
 public:
 	//! @brief		コンストラクタ
 	//! @param		max_nest_level		最大の関数のネストレベル(このサイズにて Frames が確保される)

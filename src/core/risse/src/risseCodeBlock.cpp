@@ -181,6 +181,7 @@ tRisseString tRisseCodeBlock::Dump() const
 	tRisseString ret;
 	tRisseVMCodeIterator iterator(Code, 0);
 	risse_size last_line = risse_size_max; // 最後に表示した行番号
+	risse_size max_last_line = 0; // 最後に表示した行番号のうち、もっとも大きいもの
 	while((const risse_uint32*)iterator != CodeSize + Code)
 	{
 		risse_size address = iterator.GetAddress();
@@ -202,16 +203,25 @@ tRisseString tRisseCodeBlock::Dump() const
 		else if(last_line < line)
 		{
 			// 最後に表示した行よりも現在の行があとの場合
-			if(line - last_line >= skip_count)
+			if(line <= max_last_line)
 			{
-				// 最後に表示した行から離れすぎ
-				// 直前のdisplay_line_back_count行を表示する
-				start = line > (display_line_back_count-1) ? (line - (display_line_back_count-1)) : 0;
+				// すでにその行は表示したことがあるような場合
+				start = line; // 現在の行のみを表示
 			}
 			else
 			{
-				// そうでもなければ最後の行の次の行から表示
-				start = last_line + 1;
+				// その行はまだ表示していない場合
+				if(line - last_line >= skip_count)
+				{
+					// 最後に表示した行から離れすぎ
+					// 直前のdisplay_line_back_count行を表示する
+					start = line > (display_line_back_count-1) ? (line - (display_line_back_count-1)) : 0;
+				}
+				else
+				{
+					// そうでもなければ最後の行の次の行から表示
+					start = last_line + 1;
+				}
 			}
 		}
 		else if(last_line == line)
@@ -229,6 +239,7 @@ tRisseString tRisseCodeBlock::Dump() const
 
 		count = line - start + 1;
 		last_line = line;
+		if(max_last_line < last_line) max_last_line = last_line;
 
 		// ソースコードを表示する
 		if(start != risse_size_max)

@@ -175,13 +175,80 @@ tRisseVariant tRisseCodeBlock::GetObject()
 //---------------------------------------------------------------------------
 tRisseString tRisseCodeBlock::Dump() const
 {
+	static const risse_size display_line_back_count = 3; // この行数文前から表示する
+	static const risse_size skip_count = 5; // この行数以上、前の行と離れる場合は中間をスキップする
+
 	tRisseString ret;
 	tRisseVMCodeIterator iterator(Code, 0);
+	risse_size last_line = risse_size_max; // 最後に表示した行番号
 	while((const risse_uint32*)iterator != CodeSize + Code)
 	{
-		char address[22];
-		sprintf(address, "%05d ", (int)iterator.GetAddress());
-		ret += tRisseString(address) + iterator.Dump(Consts) + RISSE_WS("\n");
+		risse_size address = iterator.GetAddress();
+
+		// アドレスからスクリプトの該当の行を計算する
+		risse_size line = 0;
+		ScriptBlock->PositionToLineAndColumn(CodePositionToSourcePosition(address), &line, NULL);
+
+		// 表示すべき行を決定する
+		risse_size start; // 表示を開始する行番号
+		risse_size count; // 表示する行数
+
+		if(last_line == risse_size_max)
+		{
+			// ループの初回の場合
+			// 直前のdisplay_line_back_count行を表示する
+			start = line > (display_line_back_count-1) ? (line - (display_line_back_count-1)) : 0;
+		}
+		else if(last_line < line)
+		{
+			// 最後に表示した行よりも現在の行があとの場合
+			if(line - last_line >= skip_count)
+			{
+				// 最後に表示した行から離れすぎ
+				// 直前のdisplay_line_back_count行を表示する
+				start = line > (display_line_back_count-1) ? (line - (display_line_back_count-1)) : 0;
+			}
+			else
+			{
+				// そうでもなければ最後の行の次の行から表示
+				start = last_line + 1;
+			}
+		}
+		else if(last_line == line)
+		{
+			// 前の行と今の行が一緒
+			// 表示しなくていい
+			start = risse_size_max;
+		}
+		else
+		{
+			// 最後に表示した行よりも現在の行が前
+			// 単純に現在の行だけを表示
+			start = line;
+		}
+
+		count = line - start + 1;
+		last_line = line;
+
+		// ソースコードを表示する
+		if(start != risse_size_max)
+		{
+			while(count--)
+			{
+				char line_string[22];
+				sprintf(line_string, "#(%d) ", start+1);
+				ret += tRisseString(line_string) + ScriptBlock->GetLineAt(start) + RISSE_WS("\n");
+
+				start ++;
+			}
+		}
+
+		// アドレス部分を文字列化
+		char address_string[22];
+		sprintf(address_string, "%05d ", address);
+
+		// VMコードのダンプを組み立てる
+		ret += tRisseString(address_string) + iterator.Dump(Consts) + RISSE_WS("\n");
 		++iterator;
 	}
 	return ret;

@@ -130,6 +130,23 @@ void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseScriptBlockBase::GetLineAt(risse_size line)
+{
+	if(line > LineCount) return tRisseString::GetEmptyString(); // 行が範囲外
+
+	// 改行記号か文字列の終端を探し、そこまでを切り取って返す
+	risse_size n, start;
+	n = start = LinesToPosition[line];
+	while(n < Script.GetLength() &&
+		Script[n] != RISSE_WC('\n') &&
+		Script[n] != RISSE_WC('\r')) n++;
+
+	return tRisseString(Script, start, n - start);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseScriptBlockBase::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
 {
 	// コンパイラオブジェクトを作成してコンパイルを行う

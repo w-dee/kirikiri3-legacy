@@ -605,7 +605,7 @@ void tRisseSSABlock::RemovePhiStatements()
 		for(risse_size index = 0; index < Pred.size(); index ++)
 		{
 			tRisseSSAStatement * new_stmt =
-				new tRisseSSAStatement(Form, stmt->GetPosition(), ocAssign);
+				new tRisseSSAStatement(Form, Pred[index]->GetLastStatementPosition(), ocAssign);
 			new_stmt->AddUsed(const_cast<tRisseSSAVariable*>(phi_used[index]));
 			new_stmt->SetDeclared(stmt_decld);
 			stmt_decld->SetDeclared(new_stmt); // 一応代入

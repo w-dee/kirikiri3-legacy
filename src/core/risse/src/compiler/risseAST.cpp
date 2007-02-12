@@ -17,6 +17,7 @@
 #include "risseSSAVariable.h"
 #include "risseCompilerNS.h"
 #include "risseCompiler.h"
+#include "risseSSABlock.h"
 #include "../risseException.h"
 #include "../risseScriptBlockBase.h"
 
@@ -1651,7 +1652,7 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	// 条件式または body にジャンプするための文を作成
 	form->GetCurrentBlock();
 	tRisseSSAStatement * entry_jump_stmt =
-		form->AddStatement(GetPosition(), ocJump, NULL);
+		form->AddStatement(SkipFirstCheck?Body->GetPosition():Condition->GetPosition(), ocJump, NULL);
 
 	// 条件式を格納する基本ブロックを作成
 	tRisseSSABlock * while_cond_block =
@@ -1663,7 +1664,7 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	// 分岐文を作成
 	form->GetCurrentBlock();
 	tRisseSSAStatement * branch_stmt =
-		form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
+		form->AddStatement(Condition->GetPosition(), ocBranch, NULL, cond_var);
 
 	// 新しい基本ブロックを作成(条件式が真の場合)
 	tRisseSSABlock * while_body_block =
@@ -1922,6 +1923,7 @@ tRisseSSAVariable * tRisseASTNode_Goto::DoReadSSA(tRisseSSAForm *form, void * pa
 {
 	// form に登録
 	form->GetFunction()->AddPendingLabelJump(form->GetCurrentBlock(), Name);
+	form->GetCurrentBlock()->SetLastStatementPosition(GetPosition());
 
 	// 新しい基本ブロックを作成 (この基本ブロックには到達しない)
 	form->CreateNewBlock(RISSE_WS("disconnected_by_goto"));
@@ -2162,7 +2164,7 @@ void tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *form,  bool is_
 	tRisseSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
 
 	// 遅延評価ブロックを作成する
-	void * lazy_param = form->CreateLazyBlock(GetPosition(),
+	void * lazy_param = form->CreateLazyBlock(Body->GetPosition(),
 		RISSE_WS("try block"), false, access_map, new_form, lazyblock_var);
 
 	new_form->SetTryIdentifierIndex(try_id); // try識別子を子SSA形式に対して設定

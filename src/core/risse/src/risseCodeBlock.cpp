@@ -46,6 +46,16 @@ tRisseCodeBlock::tRisseCodeBlock(tRisseScriptBlockBase * sb)
 
 
 //---------------------------------------------------------------------------
+//! @brief		CodeToSourcePosition をソートするための比較関数
+struct tRisseCodeToSourcePositionComparator
+{
+	bool operator () (const std::pair<risse_size, risse_size> & a, const std::pair<risse_size, risse_size> & b)
+		{ return a.first < b.first; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 {
 	// gen からいろいろ情報をコピー
@@ -95,6 +105,19 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 	NumRegs = gen->GetMaxNumUsedRegs();
 	NestLevel = gen->GetNestLevel();
 	NumSharedVars = gen->GetSharedRegCount();
+
+	// CodeToSourcePosition のコピー
+	const gc_vector<std::pair<risse_size, risse_size> > & cb_code_src = gen->GetCodeToSourcePosition();
+	CodeToSourcePosition = new std::pair<risse_size, risse_size>[cb_code_src.size()];
+	ind = 0;
+	for(gc_vector<std::pair<risse_size, risse_size> >::const_iterator i = cb_code_src.begin();
+		i != cb_code_src.end(); i++, ind++)
+		CodeToSourcePosition[ind] = *i;
+	CodeToSourcePositionSize = cb_code_src.size();
+
+	//- 一応 CodeToSourcePosition はこの時点でバイトコード順に sort されているハズだが、そういう保証はないので
+	//- stable_sort でソートし直す(あとで二分検索を行うため)
+	std::sort(CodeToSourcePosition, CodeToSourcePosition + CodeToSourcePositionSize, tRisseCodeToSourcePositionComparator());
 
 	// Executor を作成
 	Executor = new tRisseCodeInterpreter(this);
@@ -162,6 +185,27 @@ tRisseString tRisseCodeBlock::Dump() const
 		++iterator;
 	}
 	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeBlock::CodePositionToSourcePosition(risse_size pos) const
+{
+	risse_size s = 0;
+	risse_size e = CodeToSourcePositionSize;
+	if(e == 0) return 0;
+	// CodeToSourcePosition[].first はすでにソートされているため、
+	// 二分検索を行う
+	while(true)
+	{
+		if(e - s <= 1) return CodeToSourcePosition[s].second;
+		risse_size m = s + (e - s)/2;
+		if(CodeToSourcePosition[m].first > pos)
+			e = m;
+		else
+			s = m;
+	}
 }
 //---------------------------------------------------------------------------
 

@@ -41,6 +41,8 @@ class tRisseCodeBlock : public tRisseObjectInterface
 	risse_size NestLevel; //!< 関数のネストレベル
 	risse_size MaxNestLevel; //!< 関数の最大のネストレベル (NestLevel==0のコードブロックでのみ有効)
 	risse_size NumSharedVars; //!< 必要な共有変数の数
+	std::pair<risse_size, risse_size> * CodeToSourcePosition; //!< コード上の位置からソースコード上の位置へのマッピングの配列
+	risse_size CodeToSourcePositionSize; //!< コード上の位置からソースコード上の位置へのマッピングの配列のサイズ
 
 	typedef std::pair<risse_size, risse_size> tRelocation; //!<  コードブロック再配置情報のtypedef
 	tRelocation * CodeBlockRelocations; //!< コードブロック再配置情報
@@ -114,6 +116,11 @@ public:
 
 	//! @brief		コード実行クラスのインスタンスを得る
 	tRisseCodeExecutor * GetExecutor() const { return Executor; }
+
+	//! @brief		VM コード位置からソースコード上の位置へ変換する
+	//! @param		pos			VMコード位置(ワード単位)
+	//! @return		ソースコード上の位置
+	risse_size CodePositionToSourcePosition(risse_size pos) const;
 
 public: // tRisseObjectInterface メンバ
 

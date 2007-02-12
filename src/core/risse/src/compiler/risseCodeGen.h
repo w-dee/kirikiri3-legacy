@@ -67,6 +67,7 @@ private:
 
 	gc_vector<std::pair<risse_size, risse_size> > CodeBlockRelocations; // 他のコードブロックの再配置情報用配列
 	gc_vector<std::pair<risse_size, risse_size> > TryIdentifierRelocations; // Try識別子の再配置情報用配列
+	gc_vector<std::pair<risse_size, risse_size> > CodeToSourcePosition; //!< コード位置とソースコード上の位置の対応を表すペアの配列
 
 public:
 	//! @brief		コンストラクタ
@@ -105,6 +106,10 @@ public:
 	//! @brief	Try識別子の再配置情報用配列を得る @return Try識別子の再配置情報用配列
 	const gc_vector<std::pair<risse_size, risse_size> > & GetTryIdentifierRelocations() const
 		{ return TryIdentifierRelocations; }
+
+	//! @brief コード位置とソースコード上の位置の対応を表すペアの配列を得る @return コード位置とソースコード上の位置の対応を表すペアの配列
+	const gc_vector<std::pair<risse_size, risse_size> > & GetCodeToSourcePosition() const
+		{ return CodeToSourcePosition; }
 
 protected:
 	//! @param		コードを1ワード分置く
@@ -199,6 +204,10 @@ public:
 	// コード生成用関数群
 	// コードの種類別に関数を用意するのは無駄にみえるが、バイトコードのための
 	// 知識をこのクラス内で囲っておくために必要
+
+	//! @param		これから置く命令コードがソースコード上のどの位置に対応するかを通知する
+	//! @param		pos		ソースコード上の位置
+	void SetSourceCodePosition(risse_size pos);
 
 	//! @brief		Nopを置く
 	void PutNoOperation();

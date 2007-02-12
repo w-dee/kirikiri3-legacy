@@ -62,6 +62,16 @@ tRisseString eRisseScriptError::BuildMessage(const tRisseString & msgbase,
 
 
 //---------------------------------------------------------------------------
+void eRisseScriptError::Throw(const tRisseString & msg,
+						tRisseScriptBlockBase *block, risse_size pos)
+{
+	// 例外メッセージを投げる
+	throw eRisseScriptError(msg, block, pos);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void eRisseCompileError::Throw(const tRisseString & msg,
 						tRisseScriptBlockBase *block, risse_size pos)
 {

@@ -291,6 +291,17 @@ void tRisseCodeGenerator::FixCode()
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::SetSourceCodePosition(risse_size pos)
+{
+	if(CodeToSourcePosition.size() > 0 &&
+		CodeToSourcePosition.back().second == pos) return;
+			// 連続する重複するソースコード上の位置は、たとえVMコードの位置が異なったとしても挿入しない
+	CodeToSourcePosition.push_back(std::pair<risse_size, risse_size>(Code.size(), pos));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutNoOperation()
 {
 	PutWord(ocNoOperation);

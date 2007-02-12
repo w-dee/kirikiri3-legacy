@@ -238,6 +238,9 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 {
 	bool free_unused_var = true;
 
+	// gen にソースコード上の位置を伝える
+	gen->SetSourceCodePosition(Position);
+
 	// gen に一つ文を追加する
 	switch(Code)
 	{

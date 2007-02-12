@@ -252,6 +252,13 @@ public:
 	//! @return		組み立てられたメッセージ
 	static tRisseString BuildMessage(const tRisseString & msgbase,
 		tRisseScriptBlockBase *block, risse_size pos);
+
+	//! @brief		例外を投げる
+	//! @param		msg		例外メッセージ
+	//! @param		block	例外の発生したスクリプトブロック
+	//! @param		pos		例外の発生した位置
+	static void Throw(const tRisseString &  msg,
+		tRisseScriptBlockBase *block, risse_size pos);
 };
 //---------------------------------------------------------------------------
 

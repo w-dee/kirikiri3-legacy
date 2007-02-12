@@ -68,24 +68,24 @@ void tRisseCodeInterpreter::Execute(
 		CodeBlock->GetNumSharedVars() ? 
 		shared->Set(CodeBlock->GetNestLevel(), CodeBlock->GetNumSharedVars()) : NULL;
 
+	// ローカル変数に値を持ってくる
+	// いくつかのローカル変数は ASSERT が有効になっていなければ
+	// 必要ないので、#ifdef ～ #endif で場合分けをする。
+#ifdef RISSE_ASSERT_ENABLED
+	risse_size framesize = CodeBlock->GetNumRegs();
+#endif
+	const risse_uint32 * code = CodeBlock->GetCode();
+	const risse_uint32 * code_origin = CodeBlock->GetCode();
+#ifdef RISSE_ASSERT_ENABLED
+	risse_size codesize = CodeBlock->GetCodeSize();
+#endif
+	const tRisseVariant * consts = CodeBlock->GetConsts();
+#ifdef RISSE_ASSERT_ENABLED
+	risse_size constssize = CodeBlock->GetConstsSize();
+#endif
+
 	try
 	{
-		// ローカル変数に値を持ってくる
-		// いくつかのローカル変数は ASSERT が有効になっていなければ
-		// 必要ないので、#ifdef ～ #endif で場合分けをする。
-	#ifdef RISSE_ASSERT_ENABLED
-		risse_size framesize = CodeBlock->GetNumRegs();
-	#endif
-		const risse_uint32 * code = CodeBlock->GetCode();
-	#ifdef RISSE_ASSERT_ENABLED
-		const risse_uint32 * code_origin = CodeBlock->GetCode();
-		risse_size codesize = CodeBlock->GetCodeSize();
-	#endif
-		const tRisseVariant * consts = CodeBlock->GetConsts();
-	#ifdef RISSE_ASSERT_ENABLED
-		risse_size constssize = CodeBlock->GetConstsSize();
-	#endif
-
 		/*
 		スタックフレームと定数領域へのアクセスなど以下のマクロを使うこと。
 		frame[num] のように書くと num に毎回 sizeof(frame[0]) の乗算が発生するため、
@@ -481,7 +481,8 @@ void tRisseCodeInterpreter::Execute(
 
 						if(target_index == static_cast<risse_uint32>(-1L))
 								eRisseScriptException::Throw(RISSE_WS("script exception"),
-									NULL, 0, AR(code[1]));
+									CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin),
+									AR(code[1]));
 					}
 					else
 					{
@@ -517,7 +518,7 @@ void tRisseCodeInterpreter::Execute(
 										code[3],
 										CI(code[1]) == RisseInvalidRegNum ? NULL : &AR(code[1])));
 					eRisseScriptException::Throw(RISSE_WS("return by exit try exception"),
-						NULL, 0, val);
+						CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin), val);
 				}
 				break;
 
@@ -560,7 +561,7 @@ void tRisseCodeInterpreter::Execute(
 				/* incomplete */
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				eRisseScriptException::Throw(RISSE_WS("script exception"),
-					NULL, 0, AR(code[1]));
+					CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin), AR(code[1]));
 				code += 2;
 				break;
 
@@ -872,6 +873,20 @@ void tRisseCodeInterpreter::Execute(
 		}
 
 	} // try
+	catch(const eRisseScriptError & e)
+	{
+		// この例外はすでに位置情報を持っているので改めて位置情報を追加してやる必要はない。
+		if(prev_shared_frame) shared->Set(CodeBlock->GetNestLevel(), prev_shared_frame);
+		throw; // そのまま投げる
+	}
+	catch(const eRisse & e)
+	{
+		// この例外は位置情報を持っていない。
+		if(prev_shared_frame) shared->Set(CodeBlock->GetNestLevel(), prev_shared_frame);
+		// 位置情報を持つことができる eRisseScriptError に、例外を変換する。
+		eRisseScriptError::Throw(e.GetMessageString(),
+			CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
+	}
 	catch(...)
 	{
 		if(prev_shared_frame) shared->Set(CodeBlock->GetNestLevel(), prev_shared_frame);

@@ -34,7 +34,7 @@ tRisseLexer::tRisseLexer(const tRisseString & script)
 	Script = script;
 	Ptr = NULL;
 	PtrOrigin = NULL;
-	PtrPrevious = NULL;
+	PtrLastTokenStart = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 	{
 		// 初回
 		// Ptr にスクリプト文字列へのポインタを代入
-		Ptr = PtrOrigin = PtrPrevious = Script.c_str();
+		Ptr = PtrOrigin = PtrLastTokenStart = Script.c_str();
 
 		// Ptr の先頭は #! で始まっているか (UN*Xにおけるインタプリタに対応)
 		if(Ptr[0] == RISSE_WC('#') && Ptr[1] == RISSE_WC('!'))
@@ -76,7 +76,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		// 正規表現パターンであることをlexerに伝える。
 		// lexer はすでに /= や / を返したあとなので
 		// 前の位置にもどり、正規表現パターンの解析を行う。
-		Ptr = PtrPrevious; // 前の解析位置に戻す
+		Ptr = PtrLastTokenStart; // 前の解析位置に戻す
 		tRisseString pat, flags;
 		if(!ParseRegExp(Ptr, pat, flags)) return 0;
 		// 一回には一回のトークンしか返すことができないので
@@ -102,7 +102,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		if(!SkipSpace(Ptr)) { id = -1; break; } // EOF
 
 		// 現在位置にあるトークンを解析
-		const risse_char * ptr_start = PtrPrevious = Ptr;
+		const risse_char * ptr_start = PtrLastTokenStart = Ptr;
 
 		id = RisseMapToken(Ptr, val);
 

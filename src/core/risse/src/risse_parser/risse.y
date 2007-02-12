@@ -43,7 +43,7 @@
 #define LX (PR->GetLexer())
 
 /*! 字句解析器の現在の解析位置 */
-#define LP (LX->GetPosition())
+#define LP (LX->GetLastTokenStart())
 
 /* new tRisseASTNode_XXXX の省略形 */
 #ifdef N

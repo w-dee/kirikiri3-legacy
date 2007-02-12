@@ -80,7 +80,7 @@ void tRisseScriptBlockBase::CreateLinesToPositionArary() const
 	{
 		if(*p == RISSE_WC('\r') || *p == RISSE_WC('\n'))
 		{
-			LinesToPosition[i++] = p - script;
+			LinesToPosition[i++] = ls - script;
 			if(*p == RISSE_WC('\r') && p[1] == RISSE_WC('\n')) p++;
 			p++;
 			ls = p;
@@ -93,8 +93,10 @@ void tRisseScriptBlockBase::CreateLinesToPositionArary() const
 
 	if(p != ls)
 	{
-		LinesToPosition[i++] = p - script;
+		LinesToPosition[i++] = ls - script;
 	}
+
+	RISSE_ASSERT(LineCount == i);
 }
 //---------------------------------------------------------------------------
 

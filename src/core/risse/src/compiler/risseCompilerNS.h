@@ -123,8 +123,10 @@ public:
 	//! @brief		スコープを持っているかどうかを得る
 	//! @return		スコープを持っているかどうか
 	//! @note		スコープを持っていないということはグローバル位置にスクリプトがあるという
-	//!				ことを意味する
-	bool GetHasScope() const { return Scopes.size() != 0; }
+	//!				ことを意味する @n
+	//!				一番浅い位置にある名前空間は相手にしない。一番浅い位置の名前空間は自動的に
+	//!				作成されるが、特殊な変数のみ(superなど)がそこに記録される。
+	bool GetHasScope() const { return Scopes.size() > 1; }
 
 	//! @brief		変数を定義する
 	//! @param		name		変数名

@@ -107,6 +107,9 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 	// 関数インスタンスに自身を登録する
 	Function->AddSSAForm(this);
 
+	// 一番浅い位置の名前空間を作成する
+	LocalNamespace->Push();
+
 	// コードジェネレータを作成する
 	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
 	CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL,

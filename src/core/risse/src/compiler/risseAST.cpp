@@ -116,7 +116,10 @@ tRisseString tRisseASTNode_Factor::GetDumpComment() const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_Id::GetDumpComment() const
 {
-	return Name.AsHumanReadable();
+	if(IsPrivate)
+		return RISSE_WS("@ ") + Name.AsHumanReadable();
+	else
+		return Name.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 
@@ -874,22 +877,32 @@ void * tRisseASTNode_Id::PrepareSSA(
 {
 	tPrepareSSA * pws = new tPrepareSSA;
 
-	bool need_access_this; // this 上のメンバにアクセスする必要があるかどうか
-	need_access_this = !form->GetLocalNamespace()->IsAvailable(Name);
-
-	if(need_access_this)
+	if(IsPrivate)
 	{
-		// this-proxy 上のメンバにアクセスする必要がある
-		pws->MemberSel = CreateAccessNodeOnThisProxy();
+		// private 変数の場合, this へアクセスするためのノードを作成する
+		pws->MemberSel = CreatePrivateAccessNodeOnThis(
+			form->GetFunction()->GetFunctionGroup()->GetClassName() + RISSE_WC('_') );
 		pws->MemberSelParam = pws->MemberSel->PrepareSSA(form, mode);
 	}
 	else
 	{
-		// ローカル変数に見つかった
-		pws->MemberSel = NULL;
-		pws->MemberSelParam = NULL;
-	}
+		// 普通の変数の場合
+		bool need_access_this_proxy; // this-proxy 上のメンバにアクセスする必要があるかどうか
+		need_access_this_proxy = !form->GetLocalNamespace()->IsAvailable(Name);
 
+		if(need_access_this_proxy)
+		{
+			// this-proxy 上のメンバにアクセスする必要がある
+			pws->MemberSel = CreateAccessNodeOnThisProxy();
+			pws->MemberSelParam = pws->MemberSel->PrepareSSA(form, mode);
+		}
+		else
+		{
+			// ローカル変数に見つかった
+			pws->MemberSel = NULL;
+			pws->MemberSelParam = NULL;
+		}
+	}
 	return pws;
 }
 //---------------------------------------------------------------------------
@@ -907,10 +920,10 @@ tRisseSSAVariable * tRisseASTNode_Id::DoReadSSA(
 	if(pws->MemberSel)
 	{
 		// ローカル変数に見つからない
-		// ローカル変数に見つからない場合は、this へのアクセスを行う物として
+		// ローカル変数に見つからない場合は、this-proxy / this へのアクセスを行う物として
 		// 置き換えて処理を行う
 
-		// this 上のメンバをアクセスするためだけに新規に作成した AST ノードに処理をさせる
+		// this-proxy あるいは this 上のメンバをアクセスするためだけに新規に作成した AST ノードに処理をさせる
 		return pws->MemberSel->DoReadSSA(form, pws->MemberSelParam);
 	}
 	else
@@ -945,6 +958,22 @@ bool tRisseASTNode_Id::DoWriteSSA(
 		RISSE_ASSERT(result == true);
 		return result;
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(const tRisseString & prefix) const
+{
+	// private (@つき) 変数の場合は、クラス名 + '_' + 変数名を this 上において
+	// アクセスこととなる。
+	// 匿名クラス/モジュールの場合や、そもそも関数グループがクラスやモジュールでない
+	// 場合は GetClassName は空文字列が帰るため、その場合は単に '_' がプリフィクスと
+	// なる
+	return
+		new tRisseASTNode_MemberSel(GetPosition(),
+		new tRisseASTNode_Factor(GetPosition(), aftThis),
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), true);
 }
 //---------------------------------------------------------------------------
 

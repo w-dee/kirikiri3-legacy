@@ -1008,7 +1008,8 @@ expr
 ;
 
 factor_expr
-	: T_ID							{ $$ = N(Id)(LP, *$1); }
+	: T_ID							{ $$ = N(Id)(LP, *$1, false); }
+	| "@" T_ID						{ $$ = N(Id)(LP, *$2, true);  }
 	| T_CONSTVAL					{ $$ = N(Factor)(LP, aftConstant, *$1); }
 	| "this"						{ $$ = N(Factor)(LP, aftThis);  }
 	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }

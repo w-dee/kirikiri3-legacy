@@ -406,7 +406,7 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	RisseFPrint(stderr, str.c_str());
 
 	// トップレベルのSSA形式インスタンスを作成する
-	tRisseSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("root"), need_result, is_expression);
+	tRisseSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("toplevel"), need_result, is_expression);
 
 	// トップレベルのSSA形式の内容を作成する
 	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
@@ -437,12 +437,16 @@ void tRisseCompiler::CompileClass(tRisseASTNode * root, const tRisseString & nam
 	tRisseSSAForm * form, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var, bool reg_super)
 {
 	// クラスの内部名称を決める
-	tRisseString class_name = RISSE_WS("class ") + name + RISSE_WS(" ") +
+	tRisseString numbered_class_name = RISSE_WS("class ") + name + RISSE_WS(" ") +
 					tRisseString::AsString(form->GetUniqueNumber());
 
 	// トップレベルのSSA形式インスタンスを作成する
-	new_form = CreateTopLevelSSAForm(root->GetPosition(), class_name, true, true);
+	new_form = CreateTopLevelSSAForm(root->GetPosition(), numbered_class_name, true, true);
 
+	// クラス名を設定する
+	new_form->GetFunction()->GetFunctionGroup()->SetClassName(name);
+
+	// super クラスの情報を登録する場合
 	if(reg_super)
 	{
 		// クラスの第一引数はスーパークラスなのでそれを変数 "super" に記録するための文を作成する。
@@ -464,7 +468,7 @@ void tRisseCompiler::CompileClass(tRisseASTNode * root, const tRisseString & nam
 	// クラスを生成する文を追加する
 	tRisseSSAStatement * defineclass_stmt =
 		form->AddStatement(root->GetPosition(), ocDefineClass, &block_var);
-	defineclass_stmt->SetName(class_name);
+	defineclass_stmt->SetName(numbered_class_name);
 	defineclass_stmt->SetDefinedForm(new_form);
 }
 //---------------------------------------------------------------------------

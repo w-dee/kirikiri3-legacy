@@ -909,12 +909,13 @@ public:
 class tRisseASTNode_Id : public tRisseASTNode
 {
 	tRisseString Name; //!< 識別子名
+	bool IsPrivate; //!< private (@つき) 変数
 
 	//! @brief		PrepareSSA() で返す構造体
 	struct tPrepareSSA : public tRisseCollectee
 	{
 		const tRisseASTNode_MemberSel * MemberSel;
-			//!< ローカル変数ではなかったときに生成された tRisseASTNode_MemberSel のインスタンス
+			//!< ローカル変数ではなかったときには生成された tRisseASTNode_MemberSel のインスタンス
 			//!< ローカル変数の場合は NULL
 		void * MemberSelParam; //!< tRisseASTNode_MemberSel::PrepareSSA() が生成した情報
 	};
@@ -923,8 +924,9 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
 	//! @param		name			識別子名
-	tRisseASTNode_Id(risse_size position, const tRisseString & name) :
-		tRisseASTNode(position, antId), Name(name) {;}
+	//! @param		is_priv			private (@つき) 変数かどうか
+	tRisseASTNode_Id(risse_size position, const tRisseString & name, bool is_priv) :
+		tRisseASTNode(position, antId), Name(name), IsPrivate(is_priv) {;}
 
 	//! @brief		識別子名を得る
 	//! @return		識別子名
@@ -980,6 +982,11 @@ public:
 	//! @param		form	SSA 形式インスタンス
 	//! @return		この識別子がローカル名前空間に存在するかどうか
 	bool ExistInLocalNamespace(tRisseSSAForm * form) const;
+
+	//! @brief		この識別子を this 内にアクセスする private 変数用のAST ノードを作成して返す
+	//! @param		prefix		変数名の前につけるプリフィクス
+	//! @return		この識別子を this 内にアクセスする private 変数用のAST ノード
+	const tRisseASTNode_MemberSel * CreatePrivateAccessNodeOnThis(const tRisseString & prefix) const;
 
 	//! @brief		この識別子を this-proxy 内にアクセスする AST ノードを作成して返す
 	//! @return		この識別子を this-proxy 内にアクセスする AST ノード

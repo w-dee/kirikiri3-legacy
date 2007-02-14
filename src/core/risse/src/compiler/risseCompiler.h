@@ -160,7 +160,8 @@ class tRisseCompilerFunctionGroup : public tRisseCollectee
 {
 	tRisseCompiler * Compiler; //!< この関数グループを保持しているコンパイラクラスのインスタンス
 	gc_vector<tRisseCompilerFunction *> Functions; //!< この関数グループが保持している関数インスタンスのリスト
-	tRisseString Name; //!< 関数グループの名前(表示用)
+	tRisseString Name; //!< 関数グループの名前(たいていの場合、クラス名+ユニーク番号)
+	tRisseString ClassName; //!< この関数グループがクラスかモジュールの場合、そのクラスかモジュール名 (それ以外の場合は空文字列)
 
 public:
 	//! @brief		コンストラクタ
@@ -171,6 +172,14 @@ public:
 	//! @brief		コンパイラクラスのインスタンスを得る
 	//! @param		コンパイラクラスのインスタンス
 	tRisseCompiler * GetCompiler() const { return Compiler; }
+
+	//! @brief		クラス/モジュール名を設定する
+	//! @param		class_name		クラス/モジュール名
+	void SetClassName(const tRisseString class_name) { ClassName = class_name; }
+
+	//! @brief		クラス/モジュール名を得る
+	//! @return		クラス/モジュール名
+	const tRisseString & GetClassName() const { return ClassName; }
 
 	//! @brief		関数インスタンスを追加する
 	//! @param		function		関数インスタンス

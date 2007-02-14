@@ -218,17 +218,18 @@ public:
 	//! @param		form		クラスを作成する場所にあるSSA形式インスタンス
 	//! @param		new_form	新しく作成された(ルートの)SSA形式インスタンス
 	//! @param		block_var	そのクラスのSSA変数を格納する先
+	//! @param		reg_super	スーパークラス用の変数を追加するかどうか(moduleの場合は偽にする)
 	void CompileClass(tRisseASTNode * root, const tRisseString & name, tRisseSSAForm * form,
-		tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var);
+		tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var, bool reg_super);
 
 private:
-	//! @brief		(内部関数)ASTを元にコンパイルを行う
-	//! @param		root		ルートASTノード
+	//! @brief		(内部関数)トップレベルのSSA形式を作成する
+	//! @param		pos			ソースコード上の位置
 	//! @param		name		名前
 	//! @param		need_result		評価時に結果が必要かどうか
 	//! @param		is_expression	式評価モードかどうか
 	//! @return		トップレベルのSSA形式インスタンス
-	tRisseSSAForm * InternalCompile(tRisseASTNode * root, const tRisseString & name,
+	tRisseSSAForm * CreateTopLevelSSAForm(risse_size pos, const tRisseString & name,
 		bool need_result, bool is_expression);
 
 public:

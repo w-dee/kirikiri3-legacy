@@ -700,15 +700,30 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 			return form->GetThisProxy();
 
 	case aftSuper:		// "super"
+		{
 			// 文を作成して戻る
-			return form->AddVariableWithStatement(GetPosition(), ocAssignSuper);
+			// ローカル変数から "super" を探す
+			tRisseSSAVariable * ret_var =
+				form->GetLocalNamespace()->Read(form, GetPosition(), RISSE_WS("super"));
+			if(!ret_var)
+			{
+				// "super" がみつからない、すなわちそこには super キーワードをおけない
+				eRisseCompileError::Throw(
+					tRisseString(
+					RISSE_WS_TR("cannot use 'super' keyword here")),
+						form->GetScriptBlock(), GetPosition());
+			}
+			return ret_var;
+		}
 
 	case aftGlobal:		// "global"
+		{
 			// 文を作成して戻る
 			tRisseSSAVariable * ret_var =
 				form->AddVariableWithStatement(GetPosition(), ocAssignGlobal);
 			ret_var->SetValueType(tRisseVariant::vtObject); // 結果は常に vtObject
 			return ret_var;
+		}
 	}
 	return NULL;
 }
@@ -1041,7 +1056,7 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 			{
 				eRisseCompileError::Throw(
 					tRisseString(
-					RISSE_WS_TR("Writable expression required against increment/decrement oprator")),
+					RISSE_WS_TR("writable expression required against increment/decrement oprator")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
@@ -1074,7 +1089,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			if(!Child1->GenerateWriteSSA(form, rhs_var))
 			{
 				eRisseCompileError::Throw(
-					tRisseString(RISSE_WS_TR("Writable expression required at left side of '='")),
+					tRisseString(RISSE_WS_TR("writable expression required at left side of '='")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
@@ -1141,7 +1156,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			{
 				eRisseCompileError::Throw(
 					tRisseString(
-	RISSE_WS_TR("Writable expression required at left side of compound assignment operator")),
+	RISSE_WS_TR("writable expression required at left side of compound assignment operator")),
 						form->GetScriptBlock(), GetPosition());
 
 			}
@@ -1173,7 +1188,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			{
 				eRisseCompileError::Throw(
 					tRisseString(
-					RISSE_WS_TR("Writable expression required at left side of '<->'")),
+					RISSE_WS_TR("writable expression required at left side of '<->'")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
@@ -1182,7 +1197,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			{
 				eRisseCompileError::Throw(
 					tRisseString(
-					RISSE_WS_TR("Writable expression required at right side of '<->'")),
+					RISSE_WS_TR("writable expression required at right side of '<->'")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
@@ -1415,7 +1430,7 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 				Risse_int_to_str(i, i_str);
 				eRisseCompileError::Throw(
 					tRisseString(
-					RISSE_WS_TR("Writable expression required at array index %1"), i_str),
+					RISSE_WS_TR("writable expression required at array index %1"), i_str),
 						form->GetScriptBlock(), GetPosition());
 			}
 		}
@@ -1523,7 +1538,7 @@ bool tRisseASTNode_Dict::DoWriteSSA(tRisseSSAForm *form, void * param,
 			Risse_int_to_str(i, i_str);
 			eRisseCompileError::Throw(
 				tRisseString(
-				RISSE_WS_TR("Writable expression required at value of dictionary element index %1"), i_str),
+				RISSE_WS_TR("writable expression required at value of dictionary element index %1"), i_str),
 					form->GetScriptBlock(), GetPosition());
 		}
 	}
@@ -2394,7 +2409,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 				// 現状、関数の引数に列挙できる数はRisseMaxArgCount個までとなっている
 				// ので、それを超えるとエラーになる
 				eRisseCompileError::Throw(
-					tRisseString(RISSE_WS_TR("Too many function arguments")),
+					tRisseString(RISSE_WS_TR("too many function arguments")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
@@ -2429,7 +2444,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 						// 関数宣言の引数に無名の * が無い
 						eRisseCompileError::Throw(
 							tRisseString(
-							RISSE_WS_TR("No anonymous collapsed arguments defined in this method")),
+							RISSE_WS_TR("no anonymous collapsed arguments defined in this method")),
 								form->GetScriptBlock(), GetPosition());
 					}
 				}
@@ -2490,7 +2505,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		//  将来的にブロック引数にも普通の引数のように展開フラグなどを
 		//  つけるかもしれないので、普通の引数と同じ制限を付ける)
 		eRisseCompileError::Throw(
-			tRisseString(RISSE_WS_TR("Too many function block arguments")),
+			tRisseString(RISSE_WS_TR("too many function block arguments")),
 				form->GetScriptBlock(), GetPosition());
 	}
 
@@ -2905,12 +2920,12 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 
 	// クラスの場合とモジュールの場合で違う処理
 	tRisseSSAVariable * class_instance_var = NULL;
+	tRisseSSAVariable * super_class_var = NULL;
 	if(!IsModule)
 	{
 		// クラスの場合
 
 		// 親クラスを得るための式を作る
-		tRisseSSAVariable * super_class_var;
 
 		if(SuperClass)
 			super_class_var = SuperClass->GenerateReadSSA(form);
@@ -2927,7 +2942,7 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	{
 		// モジュールの場合
 
-		// 新しいクモジュールインスタンスを作成する
+		// 新しいモジュールインスタンスを作成する
 		form->AddStatement(GetPosition(),
 			ocAssignNewModule, &class_instance_var, class_name_var);
 	}
@@ -2936,7 +2951,7 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	tRisseCompiler * compiler = form->GetFunction()->GetFunctionGroup()->GetCompiler();
 	tRisseSSAVariable * classblock_var = NULL;
 	tRisseSSAForm * new_form = NULL;
-	compiler->CompileClass(Body, class_name, form, new_form, classblock_var);
+	compiler->CompileClass(Body, class_name, form, new_form, classblock_var, !IsModule);
 
 	// クラス/モジュールの中身のコンテキストを、新しく作成したインスタンスの物にする
 	form->AddStatement(GetPosition(),
@@ -2947,8 +2962,12 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	// メンバの登録などが行われる。
 	// 関数呼び出しの文を生成する
 	tRisseSSAVariable * funccall_result = NULL;
-	tRisseSSAStatement * call_stmt = form->AddStatement(GetPosition(),
-													ocFuncCall, &funccall_result, classblock_var);
+	tRisseSSAStatement * call_stmt;
+
+	call_stmt = form->AddStatement(GetPosition(),
+													ocFuncCall, &funccall_result, classblock_var, super_class_var);
+		// 引数としてスーパークラスを指定する
+		// (モジュールの場合は何も渡されない)
 
 	call_stmt->SetFuncExpandFlags(0);
 	call_stmt->SetBlockCount(0);

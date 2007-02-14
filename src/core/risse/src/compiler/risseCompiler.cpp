@@ -18,6 +18,7 @@
 #include "risseSSABlock.h"
 #include "risseSSAStatement.h"
 #include "risseCodeGen.h"
+#include "risseCompilerNS.h"
 #include "../risseException.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
@@ -404,8 +405,12 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	root->Dump(str);
 	RisseFPrint(stderr, str.c_str());
 
-	// コンパイルを行う
-	tRisseSSAForm * form = InternalCompile(root, RISSE_WS("root"), need_result, is_expression);
+	// トップレベルのSSA形式インスタンスを作成する
+	tRisseSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("root"), need_result, is_expression);
+
+	// トップレベルのSSA形式の内容を作成する
+	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
+	form->Generate(root);
 
 	// SSA形式を完結させる
 	for(gc_vector<tRisseCompilerFunctionGroup *>::iterator i = FunctionGroups.begin();
@@ -429,14 +434,32 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 
 //---------------------------------------------------------------------------
 void tRisseCompiler::CompileClass(tRisseASTNode * root, const tRisseString & name,
-	tRisseSSAForm * form, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
+	tRisseSSAForm * form, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var, bool reg_super)
 {
 	// クラスの内部名称を決める
 	tRisseString class_name = RISSE_WS("class ") + name + RISSE_WS(" ") +
 					tRisseString::AsString(form->GetUniqueNumber());
 
-	// コンパイルを行う
-	new_form = InternalCompile(root, class_name, true, true);
+	// トップレベルのSSA形式インスタンスを作成する
+	new_form = CreateTopLevelSSAForm(root->GetPosition(), class_name, true, true);
+
+	if(reg_super)
+	{
+		// クラスの第一引数はスーパークラスなのでそれを変数 "super" に記録するための文を作成する。
+		// "super" は一番浅い位置の名前空間に配置されるが、通常この位置の名前空間には普通の
+		// 変数は記録されずに、この "super" のような特殊な変数が記録されることになる。
+		tRisseSSAVariable * param_var = NULL;
+		tRisseSSAStatement * assignparam_stmt = 
+			new_form->AddStatement(root->GetPosition(), ocAssignParam, &param_var);
+		assignparam_stmt->SetIndex(0);
+
+		new_form->GetLocalNamespace()->Add(RISSE_WS("super"), NULL);
+		new_form->GetLocalNamespace()->Write(new_form, root->GetPosition(), RISSE_WS("super"), param_var);
+	}
+
+	// トップレベルのSSA形式の内容を作成する
+	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
+	new_form->Generate(root);
 
 	// クラスを生成する文を追加する
 	tRisseSSAStatement * defineclass_stmt =
@@ -448,8 +471,8 @@ void tRisseCompiler::CompileClass(tRisseASTNode * root, const tRisseString & nam
 
 
 //---------------------------------------------------------------------------
-tRisseSSAForm * tRisseCompiler::InternalCompile(tRisseASTNode * root, const tRisseString & name,
-	bool need_result, bool is_expression)
+tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
+	const tRisseString & name, bool need_result, bool is_expression)
 {
 	// トップレベルの関数グループを作成する
 	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this, name);
@@ -458,11 +481,7 @@ tRisseSSAForm * tRisseCompiler::InternalCompile(tRisseASTNode * root, const tRis
 	tRisseCompilerFunction *top_function = new tRisseCompilerFunction(top_function_group, NULL, name);
 
 	// トップレベルのSSA形式を作成する
-	tRisseSSAForm * form = new tRisseSSAForm(root->GetPosition(), top_function, name, NULL, false);
-
-	// トップレベルのSSA形式の内容を作成する
-	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
-	form->Generate(root);
+	tRisseSSAForm * form = new tRisseSSAForm(pos, top_function, name, NULL, false);
 
 	return form;
 }

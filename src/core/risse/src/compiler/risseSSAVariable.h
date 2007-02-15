@@ -45,6 +45,12 @@ class tRisseSSAVariable : public tRisseCollectee
 	void * Mark; //!< マーク
 
 public:
+	static tRisseSSAVariable * GetUninitialized()
+		{ return reinterpret_cast<tRisseSSAVariable *>(1); }
+		//!< 定義されてはいるが、値が代入されていないということを表すための特殊なインスタンスの値を返す。
+		//!< 1 というアドレスを new などが返すわけがないのでこの値は十分に他の値と区別できる
+
+public:
 	//! @brief		コンストラクタ
 	//! @param		form	この変数が属する SSA 形式インスタンス
 	//! @param		stmt	この変数が定義された文

@@ -751,6 +751,10 @@ tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
 tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
+	// 変数宣言の準備
+	PrepareVarDecl(form, Name);
+
+	// 初期化値の準備
 	tRisseSSAVariable * init_var;
 	if(Initializer)
 	{
@@ -773,6 +777,21 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
+void tRisseASTNode_VarDeclPair::PrepareVarDecl(tRisseSSAForm * form, const tRisseString & name)
+{
+	// グローバル変数として作成すべきかどうかをチェック
+	if(form->GetLocalNamespace()->GetHasScope())
+	{
+		// ローカル変数として作成する
+
+		// 変数のローカル名前空間への登録
+		form->GetLocalNamespace()->Add(name, NULL);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 	risse_size position,
 	const tRisseString & name, tRisseSSAVariable * init, tRisseMemberAttribute attrib)
@@ -783,7 +802,7 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 		// ローカル変数として作成する
 
 		// 変数のローカル名前空間への登録
-		form->GetLocalNamespace()->Add(name, NULL);
+//		form->GetLocalNamespace()->Add(name, NULL);
 
 		// ローカル変数への書き込み
 		form->GetLocalNamespace()->Write(form, position, name, init);
@@ -2653,6 +2672,12 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
+	if(!Name.IsEmpty())
+	{
+		// 名前付き関数
+		tRisseASTNode_VarDeclPair::PrepareVarDecl(form, Name);
+	}
+
 	tRisseSSAVariable * func_var = GenerateFuncDecl(form);
 	if(Name.IsEmpty())
 	{
@@ -2800,6 +2825,12 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_PropDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
+	if(!Name.IsEmpty())
+	{
+		// 名前付きプロパティ
+		tRisseASTNode_VarDeclPair::PrepareVarDecl(form, Name);
+	}
+
 	tRisseSSAVariable * property_instance_var = GeneratePropertyDecl(form);
 	if(Name.IsEmpty())
 	{
@@ -2908,6 +2939,12 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_ClassDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
+	if(!Name.IsEmpty())
+	{
+		// 名前付きクラス/モジュール
+		tRisseASTNode_VarDeclPair::PrepareVarDecl(form, Name);
+	}
+
 	tRisseSSAVariable * func_var = GenerateClassDecl(form);
 	if(Name.IsEmpty())
 	{

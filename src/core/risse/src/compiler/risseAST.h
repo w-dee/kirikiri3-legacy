@@ -779,12 +779,31 @@ public:
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
 
 public:
+	//! @brief		変数宣言のSSA 形式の表現を準備する
+	//! @param		form		SSA 形式インスタンス
+	//! @param		name		変数名
+	//! @note		GenerateVarDecl() に先だってこれを実行すること。
+	//!				このメソッドはローカル名前空間に変数を登録し、
+	//!				PrepareVarDecl() と GenerateVarDecl() の間で生成される
+	//!				コードからこのローカル変数が見えるようにする。
+	//!				これは、{ function f() { return f(); } } のように
+	//!				ローカル関数が再帰することを許すためにある。
+	//!				ただし、var t = t + 1; とした場合の = の右側の t は
+	//!				不定であると定義されるので注意が必要。前述の
+	//!				再帰の場合は、function { ... } 内で f が使用される際には
+	//!				実行順により、すでに f には値が代入されていると見なすことが
+	//!				できるため安全なのである。
+	//!				このメソッドはローカル名前空間に変数が作られるばあいのみに
+	//!				機能し、それ以外ではなにもおこなわない。
+	static void PrepareVarDecl(tRisseSSAForm * form, const tRisseString & name);
+
 	//! @brief		変数宣言のSSA 形式の表現を生成する
 	//! @param		form		SSA 形式インスタンス
 	//! @param		position	ソースコード上の位置
 	//! @param		name		変数名
 	//! @param		init		初期値を表すSSA形式変数
 	//! @param		attrib		変数の属性
+	//! @note		これに先立って PrepareVarDecl() を実行しておくこと。
 	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseString & name,
 			tRisseSSAVariable * init,
 			tRisseMemberAttribute attrib = tRisseMemberAttribute(tRisseMemberAttribute::pcVar));

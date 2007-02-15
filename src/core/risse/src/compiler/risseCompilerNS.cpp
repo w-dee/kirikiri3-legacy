@@ -171,7 +171,9 @@ void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable *
 			tAliasMap::value_type(name, n_name)); // 新規に挿入
 
 	// 番号付きの名前を登録する
-	Scopes.back()->VariableMap.insert(tVariableMap::value_type(n_name, where));
+	Scopes.back()->VariableMap.insert(tVariableMap::value_type(
+				n_name, where ? where : tRisseSSAVariable::GetUninitialized()));
+		// where が NULL の場合は tRisseSSAVariable::GetUninitialized() が入るので注意する
 
 	// 名前と番号付きの名前を where に設定する
 	if(where)
@@ -282,6 +284,17 @@ tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
 	}
 
 	if(!found) return NULL; // 見つからなかった
+
+	if(*var == tRisseSSAVariable::GetUninitialized())
+	{
+		// 値が初期化されていない(不定な)変数から読み込もうとした
+		eRisseCompileError::Throw(
+			tRisseString(
+				RISSE_WS_TR("attempt to read uninitialized variable '%1'"),
+				name),
+				Block->GetForm()->GetScriptBlock(), pos);
+	}
+
 	if(*var != NULL) return *var; // 見つかった、かつφ関数の作成の必要はない
 
 	// 見つかったがφ関数を作成する必要がある場合

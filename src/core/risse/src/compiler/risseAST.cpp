@@ -2816,8 +2816,20 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 	tRisseSSAVariable * wrapped_lazyblock_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewFunction, &wrapped_lazyblock_var, lazyblock_var);
 
+	// static 指定がついていれば this にバインドするための命令を置く
+	// TODO: MemberAttribute は static 以外用をなしていない。本当に必要なのか？
+	tRisseSSAVariable * final_var = wrapped_lazyblock_var;
+	if(Attribute.Has(tRisseMemberAttribute::ocStatic))
+	{
+		tRisseSSAVariable * this_var = NULL;
+		form->AddStatement(GetPosition(), ocAssignThis, &this_var);
+
+		form->AddStatement(GetPosition(),
+			ocIncontextOf, &final_var, wrapped_lazyblock_var, this_var);
+	}
+
 	// このノードはラップされた方の関数(メソッド)を返す
-	return wrapped_lazyblock_var;
+	return final_var;
 }
 //---------------------------------------------------------------------------
 
@@ -2930,8 +2942,21 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 		ocAssignNewProperty, &property_instance_var,
 		getter_var, setter_var);
 
+
+	// static 指定がついていれば this にバインドするための命令を置く
+	// TODO: MemberAttribute は static 以外用をなしていない。本当に必要なのか？
+	tRisseSSAVariable * final_var = property_instance_var;
+	if(Attribute.Has(tRisseMemberAttribute::ocStatic))
+	{
+		tRisseSSAVariable * this_var = NULL;
+		form->AddStatement(GetPosition(), ocAssignThis, &this_var);
+
+		form->AddStatement(GetPosition(),
+			ocIncontextOf, &final_var, property_instance_var, this_var);
+	}
+
 	// プロパティオブジェクトを返す
-	return property_instance_var;
+	return final_var;
 }
 //---------------------------------------------------------------------------
 

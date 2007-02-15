@@ -67,9 +67,6 @@ static void Class_new(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
 			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 			This, new_object);
-		// デフォルトのコンテキストをnew_object自身に設定する
-		new_object.Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
-					tRisseMethodArgument::New(new_object));
 		// yet not
 
 		// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
@@ -168,13 +165,17 @@ tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERAT
 	if(code == ocCreateNewObjectBase && name.IsEmpty())
 	{
 		// 空のオブジェクトを作成して返す
+		// 注意! tRisseClassClass ではこの動作がオーバーライドされているので注意すること
 		RISSE_ASSERT(result != NULL);
 		tRisseVariant new_object = CreateNewObjectBase();
 		if(new_object.GetType() == tRisseVariant::vtObject)
 		{
 			// プリミティブ型でなければ
-			new_object.GetObjectInterface()->SetRTTI(&RTTI);
 			// RTTIとしてこのクラスの物を設定する
+			new_object.GetObjectInterface()->SetRTTI(&RTTI);
+			// デフォルトのコンテキストをnew_object自身に設定する
+			new_object.Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
+						tRisseMethodArgument::New(new_object));
 		}
 		*result = new_object;
 		return rvNoError;

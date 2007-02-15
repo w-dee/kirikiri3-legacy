@@ -246,6 +246,16 @@ public: // Object関連
 		AsObject().Context = context;
 	}
 
+	//! @brief		コンテキストを取得する
+	//! @return		そのメソッドやプロパティが実行されるべきコンテキスト
+	//! @note		このメソッドはvtがvtObjectかどうかを
+	//!				チェックしないので注意すること
+	const tRisseVariantBlock * GetContext() const
+	{
+		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
+		return AsObject().Context;
+	}
+
 	//! @brief		コンテキストを持っているかどうかを得る
 	//! @note		このメソッドはvtがvtObject以外の場合はtrueを返す。
 	bool HasContext() const

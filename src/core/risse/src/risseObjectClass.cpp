@@ -56,8 +56,9 @@ static void Object_getInstanceMember(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 	// This のインスタンスメンバを取得する
 	tRisseVariant ret = 
-		This.GetPropertyDirect(args[0], tRisseOperateFlags::ofInstanceMemberOnly,
-					This);
+		This.GetPropertyDirect(args[0],
+			tRisseOperateFlags::ofInstanceMemberOnly|tRisseMemberAttribute(tRisseMemberAttribute::pcVar),
+			This);
 	if(result) *result = ret;
 }
 //---------------------------------------------------------------------------
@@ -73,7 +74,9 @@ static void Object_setInstanceMember(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 
 	// This のインスタンスメンバを設定する
 	This.SetPropertyDirect(args[0],
-		tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		tRisseOperateFlags::ofInstanceMemberOnly|
+		tRisseOperateFlags::ofMemberEnsure|
+		tRisseMemberAttribute(tRisseMemberAttribute::pcVar),
 					args[1], This);
 }
 //---------------------------------------------------------------------------
@@ -94,6 +97,19 @@ static void Object_ptr(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
 			risse_char buf[40];
 			Risse_pointer_to_str(args[i].GetObjectInterface(), buf);
 			RisseFPrint(stdout, (tRisseString(RISSE_WS("Object@")) + buf).c_str());
+			const tRisseVariant * context = args[i].GetContext();
+			if(context)
+			{
+				if(context->GetType() == tRisseVariant::vtObject)
+				{
+					Risse_pointer_to_str(context->GetObjectInterface(), buf);
+					RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
+				}
+				else
+				{
+					RisseFPrint(stdout, (context->AsHumanReadable()).c_str());
+				}
+			}
 		}
 		else
 		{

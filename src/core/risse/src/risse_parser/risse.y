@@ -994,7 +994,7 @@ expr
 	| "typeof" expr					{ ; }
 	| "+" expr %prec T_UNARY		{ $$ = N(Unary)(LP, autPlus				,$2); }
 	| "-" expr %prec T_UNARY		{ $$ = N(Unary)(LP, autMinus			,$2); }
-	| expr "incontextof" expr		{ ; }
+	| expr "incontextof" expr		{ $$ = N(Binary)(LP, abtIncontextOf,   $1, $3); }
 	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostDec			,$1); }
 	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
 	| func_call_expr				{ ; }

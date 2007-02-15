@@ -40,6 +40,9 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
+	//! @brief		オブジェクトに対して操作を行う
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();
 };
@@ -52,9 +55,14 @@ public:
 //---------------------------------------------------------------------------
 class tRisseClassInstance : public tRisseClassClass
 {
+	typedef tRisseClassClass inherited; //!< 親クラスの typedef
+
 public:
 	// ! @brief		コンストラクタ
 	tRisseClassInstance() {;}
+
+	//! @brief		オブジェクトに対して操作を行う
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();

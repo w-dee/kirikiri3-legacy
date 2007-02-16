@@ -39,6 +39,55 @@ namespace Risse
 		tRisseOperateFlags flags,             \
 		const tRisseVariant &This
 
+//! @brief		ネイティブプロパティ宣言の開始(コンテキスト指定)
+//! @note		prop_name は一つの単語であること。RISSE_WS( ) などでの文字列は受け付けない。
+#define RISSE_BEGIN_NATIVE_PROPERTY_CONTEXT(prop_name, prop_context) \
+{ \
+	const tRisseString & name = (prop_name); \
+	const tRisseVariantBlock * context = (prop_context); \
+	struct tNCP_##prop_name { \
+		void (*getter)(RISSE_NATIVEPROPERTY_GETTER_ARGS); \
+		void (*setter)(RISSE_NATIVEPROPERTY_SETTER_ARGS); \
+		tNCP_##prop_name() { \
+		getter = NULL; setter = NULL;
+
+
+//! @brief		ネイティブプロパティ宣言の開始
+//! @note		prop_name は一つの単語であること。RISSE_WS( ) などでの文字列は受け付けない。
+#define RISSE_BEGIN_NATIVE_PROPERTY(prop_name) \
+	RISSE_BEGIN_NATIVE_PROPERTY_CONTEXT(prop_name, NULL)
+
+//! @brief		ネイティブプロパティ宣言の終了
+#define RISSE_END_NATIVE_PROPERTY \
+		} \
+	} static instance; \
+	RegisterNormalMember(name, tRisseVariant(tRisseNativeProperty::New(instance.getter, instance.setter), context), \
+		tRisseMemberAttribute(tRisseMemberAttribute::pcProperty)); \
+}
+
+//! @brief		ゲッター宣言の開始
+#define RISSE_BEGINE_NATIVE_PROPERTY_GETTER \
+	struct tNCP_GETTER {\
+		static void Do(RISSE_NATIVEPROPERTY_GETTER_ARGS) {
+
+//! @brief		ゲッター宣言の終了
+#define RISSE_END_NATIVE_PROPERTY_GETTER \
+		} \
+	} static getter_instance; \
+	getter = getter_instance.Do;
+
+//! @brief		セッター宣言の開始
+#define RISSE_BEGINE_NATIVE_PROPERTY_SETTER \
+	struct tNCP_SETTER {\
+		static void Do(RISSE_NATIVEPROPERTY_SETTER_ARGS) {
+
+//! @brief		セッター宣言の終了
+#define RISSE_END_NATIVE_PROPERTY_SETTER \
+		} \
+	} static setter_instance; \
+	setter = setter_instance.Do;
+
+
 
 //---------------------------------------------------------------------------
 //! @brief		RisseネイティブプロパティのGetterの実装

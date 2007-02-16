@@ -27,27 +27,6 @@ RISSE_DEFINE_SOURCE_ID(63047,20109,44050,17555,30336,10949,23175,16849);
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Module.construct
-//---------------------------------------------------------------------------
-static void Module_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// デフォルトでは何もしない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Module.initialize
-//---------------------------------------------------------------------------
-static void Module_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// 親クラスの同名メソッドを呼び出す
-	tRisseModuleClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseModuleClass::tRisseModuleClass() : tRisseClassBase(tRisseObjectClass::GetPointer())
 {
 	RegisterMembers();
@@ -66,10 +45,25 @@ void tRisseModuleClass::RegisterMembers()
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
 
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Module_construct)));
-	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Module_initialize)));
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// デフォルトでは何もしない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す
+		tRisseModuleClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 }
 //---------------------------------------------------------------------------
 

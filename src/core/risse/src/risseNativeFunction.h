@@ -34,6 +34,28 @@ namespace Risse
 		const tRisseMethodArgument & args,    \
 		const tRisseVariant &This
 
+//! @brief		ネイティブ関数宣言の開始(コンテキスト指定)
+//! @note		func_name は一つの単語であること。RISSE_WS( ) などでの文字列は受け付けない。
+#define RISSE_BEGIN_NATIVE_METHOD_CONTEXT(func_name, func_context) \
+{ \
+	const tRisseString & name = (func_name); \
+	const tRisseVariantBlock * context = (func_context); \
+	struct tNCM_##func_name { \
+		static void Do(RISSE_NATIVEFUNCTION_CALLEE_ARGS) {
+
+
+//! @brief		ネイティブ関数宣言の開始
+//! @note		func_name は一つの単語であること。RISSE_WS( ) などでの文字列は受け付けない。
+#define RISSE_BEGIN_NATIVE_METHOD(func_name) \
+	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(func_name, NULL);
+
+//! @brief		ネイティブ関数宣言の終了
+#define RISSE_END_NATIVE_METHOD \
+		} \
+	} static instance;\
+	RegisterNormalMember(name, tRisseVariant(tRisseNativeFunction::New(instance.Do), context)); \
+}
+
 //---------------------------------------------------------------------------
 //! @brief		Risseネイティブ関数
 //---------------------------------------------------------------------------

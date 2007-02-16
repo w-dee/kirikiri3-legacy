@@ -29,37 +29,6 @@ RISSE_DEFINE_SOURCE_ID(39234,49682,57279,16499,28574,56016,64030,59385);
 //---------------------------------------------------------------------------
 
 
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Integer.initialize
-//---------------------------------------------------------------------------
-static void Integer_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// 親クラスの同名メソッドは「呼び出されない」
-
-	// 引数をすべて連結した物を初期値に使う
-	// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
-	//       を変更するため、const_cast を用いる
-	if(args.HasArgument(0))
-		*const_cast<tRisseVariant*>(&This) = args[0].operator risse_int64();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Integer.times
-//---------------------------------------------------------------------------
-static void Integer_times(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	if(args.GetBlockArgumentCount() < 1) RisseThrowBadBlockArgumentCount(args.GetArgumentCount(), 1);
-
-	risse_int64 count = This.operator risse_int64();
-	while(count --)
-		args.GetBlockArgument(0).FuncCall();
-}
-//---------------------------------------------------------------------------
-
-
 //---------------------------------------------------------------------------
 tRisseIntegerClass::tRisseIntegerClass() : tRissePrimitiveClassBase(tRisseNumberClass::GetPointer())
 {
@@ -78,11 +47,34 @@ void tRisseIntegerClass::RegisterMembers()
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 
-	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Integer_initialize)));
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// times
-	RegisterNormalMember(ss_times, tRisseVariant(tRisseNativeFunction::New(Integer_times)));
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドは「呼び出されない」
+
+		// 引数をすべて連結した物を初期値に使う
+		// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
+		//       を変更するため、const_cast を用いる
+		if(args.HasArgument(0))
+			*const_cast<tRisseVariant*>(&This) = args[0].operator risse_int64();
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_times)
+	{
+		if(args.GetBlockArgumentCount() < 1) RisseThrowBadBlockArgumentCount(args.GetArgumentCount(), 1);
+
+		risse_int64 count = This.operator risse_int64();
+		while(count --)
+			args.GetBlockArgument(0).FuncCall();
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 }
 //---------------------------------------------------------------------------
 

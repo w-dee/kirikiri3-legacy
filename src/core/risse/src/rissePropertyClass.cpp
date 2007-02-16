@@ -68,73 +68,6 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Property.construct
-//---------------------------------------------------------------------------
-static void Property_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Property.initialize
-//---------------------------------------------------------------------------
-static void Property_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// 親クラスの同名メソッドを呼び出す
-	tRissePropertyClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-
-	// 引数 = {getter, setter}
-	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
-	if(args.HasArgument(0)) obj->SetGetter(args[0]);
-	if(args.HasArgument(1)) obj->SetSetter(args[1]);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeProperty: Property.getter
-//---------------------------------------------------------------------------
-static void Property_getter_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
-{
-	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
-	if(result) *result = obj->GetGetter();
-}
-/*
-このプロパティへの書き込みのサポートはない
-(いったん定義したプロパティの内容を個別に変えられると困る場合があるため.特にプリミティブクラスのプロパティ.
-また、これが再定義できてもあまりうれしくないと思うのだが)
-static void Property_getter_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
-{
-	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
-	obj->SetGetter(value);
-}
-*/
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeProperty: Property.setter
-//---------------------------------------------------------------------------
-static void Property_setter_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
-{
-	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
-	if(result) *result = obj->GetSetter();
-}
-/*
-このプロパティへの書き込みのサポートはない
-(いったん定義したプロパティの内容を個別に変えられると困る場合があるため.特にプリミティブクラスのプロパティ.
-また、これが再定義できてもあまりうれしくないと思うのだが)
-static void Property_setter_setter(RISSE_NATIVEPROPERTY_SETTER_ARGS)
-{
-	tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
-	obj->SetSetter(value);
-}
-*/
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRissePropertyClass::tRissePropertyClass() :
 	tRisseClassBase(tRisseObjectClass::GetPointer())
 {
@@ -151,22 +84,80 @@ void tRissePropertyClass::RegisterMembers()
 
 	// クラスに必要なメソッドを登録する
 
-	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
-	// コンテキストとしては null を指定する
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Property_construct)));
-	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Property_initialize)));
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// なにもしない
+	}
+	RISSE_END_NATIVE_METHOD
 
-	// getter
-	RegisterNormalMember(ss_getter,
-		tRisseVariant(tRisseNativeProperty::New(Property_getter_getter, NULL)),
-			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
-	// setter
-	RegisterNormalMember(ss_setter,
-		tRisseVariant(tRisseNativeProperty::New(Property_setter_getter, NULL)),
-			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す
+		tRissePropertyClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+
+		// 引数 = {getter, setter}
+		tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+		if(args.HasArgument(0)) obj->SetGetter(args[0]);
+		if(args.HasArgument(1)) obj->SetSetter(args[1]);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_PROPERTY(ss_getter)
+	{
+		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
+		{
+			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+			if(result) *result = obj->GetGetter();
+		}
+		RISSE_END_NATIVE_PROPERTY_GETTER
+
+		/*
+		このプロパティへの書き込みのサポートはない
+		(いったん定義したプロパティの内容を個別に変えられると困る場合があるため.特にプリミティブクラスのプロパティ.
+		また、これが再定義できてもあまりうれしくないと思うのだが)
+		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
+		{
+			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+			obj->SetGetter(value);
+		}
+		RISSE_END_NATIVE_PROPERTY_SETTER
+		*/
+	}
+	RISSE_END_NATIVE_PROPERTY
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_PROPERTY(ss_setter)
+	{
+		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
+		{
+			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+			if(result) *result = obj->GetSetter();
+		}
+		RISSE_END_NATIVE_PROPERTY_GETTER
+
+		/*
+		このプロパティへの書き込みのサポートはない
+		(いったん定義したプロパティの内容を個別に変えられると困る場合があるため.特にプリミティブクラスのプロパティ.
+		また、これが再定義できてもあまりうれしくないと思うのだが)
+		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
+		{
+			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+			obj->SetSetter(value);
+		}
+		RISSE_END_NATIVE_PROPERTY_SETTER
+		*/
+	}
+	RISSE_END_NATIVE_PROPERTY
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 }
 //---------------------------------------------------------------------------
 

@@ -31,22 +31,6 @@ RISSE_DEFINE_SOURCE_ID(5442,9100,49866,17725,24713,23464,12701,40981);
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Real.initialize
-//---------------------------------------------------------------------------
-static void Real_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// 親クラスの同名メソッドは「呼び出されない」
-
-	// 引数をすべて連結した物を初期値に使う
-	// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
-	//       を変更するため、const_cast を用いる
-	if(args.HasArgument(0))
-		*const_cast<tRisseVariant*>(&This) = args[0].operator risse_real();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseRealClass::tRisseRealClass() : tRissePrimitiveClassBase(tRisseNumberClass::GetPointer())
 {
 	RegisterMembers();
@@ -63,8 +47,23 @@ void tRisseRealClass::RegisterMembers()
 	// クラスに必要なメソッドを登録する
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
-	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Real_initialize)));
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドは「呼び出されない」
+
+		// 引数をすべて連結した物を初期値に使う
+		// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
+		//       を変更するため、const_cast を用いる
+		if(args.HasArgument(0))
+			*const_cast<tRisseVariant*>(&This) = args[0].operator risse_real();
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 }
 //---------------------------------------------------------------------------
 

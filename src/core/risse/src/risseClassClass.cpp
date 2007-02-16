@@ -29,64 +29,6 @@ RISSE_DEFINE_SOURCE_ID(28480,29035,20490,18954,3474,2858,57740,45280);
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Class.construct
-//---------------------------------------------------------------------------
-static void Class_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// デフォルトでは何もしない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Class.initialize
-//---------------------------------------------------------------------------
-static void Class_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// 親クラスの同名メソッドを呼び出す
-	// 引数は  { 親クラス, 名前 }
-	if(args.HasArgument(1))
-	{
-		// 名前を渡す
-		tRisseClassClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::New(args[1]), This);
-	}
-	else
-	{
-		// 名前がないので引数無し
-		tRisseClassClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
-	}
-
-	if(args.HasArgument(0) && !args[0].IsNull())
-	{
-		// スーパークラスが指定されている
-		// super を登録
-		tRisseOperateFlags access_flags =
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
-		This.SetPropertyDirect(ss_super,
-			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar))|access_flags,
-			args[0], This);
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Class.include
-//---------------------------------------------------------------------------
-static void Class_include(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// クラスの modules 配列にモジュールを追加する
-
-	// modules を取り出す
-	tRisseVariant modules = This.GetPropertyDirect(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
-
-	// Array.unshift を行う
-	modules.Do(ocFuncCall, NULL, ss_unshift, 0, args);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseModuleClass::GetPointer())
 {
 	RegisterMembers();
@@ -102,16 +44,60 @@ void tRisseClassClass::RegisterMembers()
 
 	// クラスに必要なメソッドを登録する
 
-	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
-	// コンテキストとしては null を指定する
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Class_construct)));
-	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Class_initialize)));
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// デフォルトでは何もしない
+	}
+	RISSE_END_NATIVE_METHOD
 
-	// include
-	RegisterNormalMember(ss_include, tRisseVariant(tRisseNativeFunction::New(Class_include)));
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す
+		// 引数は  { 親クラス, 名前 }
+		if(args.HasArgument(1))
+		{
+			// 名前を渡す
+			tRisseClassClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::New(args[1]), This);
+		}
+		else
+		{
+			// 名前がないので引数無し
+			tRisseClassClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
+		}
+
+		if(args.HasArgument(0) && !args[0].IsNull())
+		{
+			// スーパークラスが指定されている
+			// super を登録
+			tRisseOperateFlags access_flags =
+				tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
+			This.SetPropertyDirect(ss_super,
+				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar))|access_flags,
+				args[0], This);
+		}
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_include)
+	{
+		// クラスの modules 配列にモジュールを追加する
+
+		// modules を取り出す
+		tRisseVariant modules = This.GetPropertyDirect(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
+
+		// Array.unshift を行う
+		modules.Do(ocFuncCall, NULL, ss_unshift, 0, args);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 }
 //---------------------------------------------------------------------------
 

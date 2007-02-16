@@ -45,78 +45,6 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Class.new
-//---------------------------------------------------------------------------
-static void Class_new(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// 空のオブジェクトを作る
-	// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
-	// 「自分のクラス」はすなわち This のこと(のはず)
-	RISSE_ASSERT(This.GetType() == tRisseVariant::vtObject);
-	tRisseVariant new_object;
-	This.GetObjectInterface()->Do(ocCreateNewObjectBase, &new_object);
-	if(new_object.GetType() == tRisseVariant::vtObject)
-	{
-		// プリミティブ型ではない場合
-		RISSE_ASSERT(!new_object.IsNull());
-
-		// そのオブジェクトにクラス情報を設定する
-		// ここではclassメンバに「自分のクラス」を追加する
-		// 「自分のクラス」はすなわち This のこと(のはず)
-		new_object.SetPropertyDirect(ss_class,
-			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-			This, new_object);
-		// yet not
-
-		// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
-		// 「自分のクラス」はすなわち This のこと(のはず)
-		This.FuncCall(NULL, ss_fertilize, 0,
-			tRisseMethodArgument::New(new_object));
-	}
-
-	// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
-	new_object.FuncCall(NULL, ss_initialize, 0,
-		args,
-		new_object);
-
-	// オブジェクトを返す
-	if(result) *result = new_object;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Class.fertilize
-//---------------------------------------------------------------------------
-static void Class_fertilize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// 引数チェック
-	if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-
-	// 親クラスを得る
-	tRisseVariant super_class = This.GetPropertyDirect(ss_super);
-
-	// 親クラスがあれば...
-	if(!super_class.IsNull())
-	{
-		// 親クラスの fertilize メソッドを再帰して呼ぶ
-		super_class.FuncCall(NULL, ss_fertilize, 0,
-			tRisseMethodArgument::New(args[0]));
-	}
-
-	// 自分のクラスのmodules[]に登録されているモジュールのconstructメソッドを順番に呼ぶ
-	// not yet
-
-	// 自分のクラスのconstructメソッドを呼ぶ
-	// この際の呼び出し先の this は args[0] つまり新しいオブジェクトになる
-	This.FuncCall(NULL, ss_construct, 0,
-		tRisseMethodArgument::Empty(), args[0]);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBase(ss_super)
 {
 	// 親クラスのRTTIを引き継ぐ
@@ -143,10 +71,75 @@ void tRisseClassBase::RegisterMembers()
 	// This (クラスそのもの)をあらかじめ設定する。
 	tRisseVariant * pThis = new tRisseVariant(this);
 
-	// new
-	RegisterNormalMember(mnNew, tRisseVariant(tRisseNativeFunction::New(Class_new), pThis));
-	// fertilize
-	RegisterNormalMember(ss_fertilize, tRisseVariant(tRisseNativeFunction::New(Class_fertilize), pThis));
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(mnNew, pThis)
+	{
+		// 空のオブジェクトを作る
+		// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
+		// 「自分のクラス」はすなわち This のこと(のはず)
+		RISSE_ASSERT(This.GetType() == tRisseVariant::vtObject);
+		tRisseVariant new_object;
+		This.GetObjectInterface()->Do(ocCreateNewObjectBase, &new_object);
+		if(new_object.GetType() == tRisseVariant::vtObject)
+		{
+			// プリミティブ型ではない場合
+			RISSE_ASSERT(!new_object.IsNull());
+
+			// そのオブジェクトにクラス情報を設定する
+			// ここではclassメンバに「自分のクラス」を追加する
+			// 「自分のクラス」はすなわち This のこと(のはず)
+			new_object.SetPropertyDirect(ss_class,
+				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+				tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+				This, new_object);
+			// yet not
+
+			// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
+			// 「自分のクラス」はすなわち This のこと(のはず)
+			This.FuncCall(NULL, ss_fertilize, 0,
+				tRisseMethodArgument::New(new_object));
+		}
+
+		// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
+		new_object.FuncCall(NULL, ss_initialize, 0,
+			args,
+			new_object);
+
+		// オブジェクトを返す
+		if(result) *result = new_object;
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(ss_fertilize, pThis)
+	{
+		// 引数チェック
+		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+
+		// 親クラスを得る
+		tRisseVariant super_class = This.GetPropertyDirect(ss_super);
+
+		// 親クラスがあれば...
+		if(!super_class.IsNull())
+		{
+			// 親クラスの fertilize メソッドを再帰して呼ぶ
+			super_class.FuncCall(NULL, ss_fertilize, 0,
+				tRisseMethodArgument::New(args[0]));
+		}
+
+		// 自分のクラスのmodules[]に登録されているモジュールのconstructメソッドを順番に呼ぶ
+		// not yet
+
+		// 自分のクラスのconstructメソッドを呼ぶ
+		// この際の呼び出し先の this は args[0] つまり新しいオブジェクトになる
+		This.FuncCall(NULL, ss_construct, 0,
+			tRisseMethodArgument::Empty(), args[0]);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	// modules 配列を登録
 	if(tRisseArrayClass::GetInstanceAlive())

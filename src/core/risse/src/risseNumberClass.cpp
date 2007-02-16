@@ -24,41 +24,6 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(2098,51592,31991,16696,47274,13601,12452,21741);
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Number.construct
-//---------------------------------------------------------------------------
-static void Number_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// デフォルトでは何もしない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Number.isNaN
-//---------------------------------------------------------------------------
-static void Number_isNaN_getter(RISSE_NATIVEPROPERTY_GETTER_ARGS)
-{
-	tRisseVariant num = This.Plus();
-	if(result)
-	{
-		switch(num.GetType())
-		{
-		case tRisseVariant::vtReal:
-			*result = (bool)RISSE_FC_IS_NAN(RisseGetFPClass(num.operator risse_real()));
-			break;
-
-		case tRisseVariant::vtInteger:
-		default:
-			// 整数の場合やそのほかの場合は偽を返す
-			*result = false;
-			break;
-		}
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseNumberClass::tRisseNumberClass() :
 	tRisseClassBase(tRissePrimitiveClass::GetPointer())
 {
@@ -75,15 +40,42 @@ void tRisseNumberClass::RegisterMembers()
 
 	// クラスに必要なメソッドを登録する
 
-	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
-	// コンテキストとしては null を指定する
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Number_construct)));
-	// isNaN
-	RegisterNormalMember(ss_isNaN,
-		tRisseVariant(tRisseNativeProperty::New(Number_isNaN_getter, NULL)),
-			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// デフォルトでは何もしない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_PROPERTY(ss_isNaN)
+	{
+		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
+		{
+			tRisseVariant num = This.Plus();
+			if(result)
+			{
+				switch(num.GetType())
+				{
+				case tRisseVariant::vtReal:
+					*result = (bool)RISSE_FC_IS_NAN(RisseGetFPClass(num.operator risse_real()));
+					break;
+
+				case tRisseVariant::vtInteger:
+				default:
+					// 整数の場合やそのほかの場合は偽を返す
+					*result = false;
+					break;
+				}
+			}
+		}
+		RISSE_END_NATIVE_PROPERTY_GETTER
+	}
+	RISSE_END_NATIVE_PROPERTY
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
 

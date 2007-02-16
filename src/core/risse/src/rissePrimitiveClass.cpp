@@ -26,17 +26,6 @@ RISSE_DEFINE_SOURCE_ID(46147,47929,28573,19337,17834,3423,43968,61532);
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: XXX.construct
-//---------------------------------------------------------------------------
-static void XXX_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// デフォルトでは何もしない
-}
-//---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
 tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class) :
 	tRisseClassBase(super_class)
 {
@@ -54,8 +43,15 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
 
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(XXX_construct)));
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// デフォルトでは何もしない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
 
@@ -73,16 +69,6 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 
 
 
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Primitive.construct
-//---------------------------------------------------------------------------
-static void Primitive_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// デフォルトでは何もしない
-}
-//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -102,11 +88,15 @@ void tRissePrimitiveClass::RegisterMembers()
 
 	// クラスに必要なメソッドを登録する
 
-	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
-	// コンテキストとしては null を指定する
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Primitive_construct)));
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// デフォルトでは何もしない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
 

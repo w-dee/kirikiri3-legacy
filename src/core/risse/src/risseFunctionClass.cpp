@@ -65,31 +65,6 @@ tRisseFunctionInstance::tRetValue tRisseFunctionInstance::Operate(RISSE_OBJECTIN
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeFunction: Function.construct
-//---------------------------------------------------------------------------
-static void Function_construct(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		NativeFunction: Function.initialize
-//---------------------------------------------------------------------------
-static void Function_initialize(RISSE_NATIVEFUNCTION_CALLEE_ARGS)
-{
-	// 親クラスの同名メソッドを呼び出す
-	tRisseFunctionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-
-	// 引数 = {body}
-	// TODO: 文字列が渡された場合は内容をコンパイルして関数として動作するようにする
-	tRisseFunctionInstance * obj = This.CheckAndGetObjectInterafce<tRisseFunctionInstance, tRisseFunctionClass>();
-	if(args.HasArgument(0)) obj->SetBody(args[0]);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseFunctionClass::tRisseFunctionClass() :
 	tRisseClassBase(tRisseObjectClass::GetPointer())
 {
@@ -106,13 +81,29 @@ void tRisseFunctionClass::RegisterMembers()
 
 	// クラスに必要なメソッドを登録する
 
-	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
-	// コンテキストとしては null を指定する
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Function_construct)));
-	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Function_initialize)));
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 何もしない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す
+		tRisseFunctionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+
+		// 引数 = {body}
+		// TODO: 文字列が渡された場合は内容をコンパイルして関数として動作するようにする
+		tRisseFunctionInstance * obj = This.CheckAndGetObjectInterafce<tRisseFunctionInstance, tRisseFunctionClass>();
+		if(args.HasArgument(0)) obj->SetBody(args[0]);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
 

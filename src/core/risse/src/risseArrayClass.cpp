@@ -253,30 +253,6 @@ void tRisseArrayClass::RegisterMembers()
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
-/*
-	// construct
-	RegisterNormalMember(ss_construct, tRisseVariant(tRisseNativeFunction::New(Array_construct)));
-	// initialize
-	RegisterNormalMember(ss_initialize, tRisseVariant(tRisseNativeFunction::New(Array_initialize)));
-
-	// []
-	RegisterNormalMember(mnIGet, tRisseVariant(tRisseNativeFunction::New(Array_IGet)));
-	// []=
-	RegisterNormalMember(mnISet, tRisseVariant(tRisseNativeFunction::New(Array_ISet)));
-
-	// push
-	RegisterNormalMember(ss_push, tRisseVariant(tRisseNativeFunction::New(Array_push)));
-	// pop
-	RegisterNormalMember(ss_pop, tRisseVariant(tRisseNativeFunction::New(Array_pop)));
-	// unshift
-	RegisterNormalMember(ss_unshift, tRisseVariant(tRisseNativeFunction::New(Array_unshift)));
-	// shift
-	RegisterNormalMember(ss_shift, tRisseVariant(tRisseNativeFunction::New(Array_shift)));
-	// length
-	RegisterNormalMember(ss_length,
-		tRisseVariant(tRisseNativeProperty::New(Array_length_getter, Array_length_setter)),
-			tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
-*/
 }
 //---------------------------------------------------------------------------
 

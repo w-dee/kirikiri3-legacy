@@ -112,13 +112,13 @@ tRisseClassClass::tRetValue tRisseClassClass::Operate(RISSE_OBJECTINTERFACE_OPER
 		tRetValue rv = inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 		if(rv != rvNoError) return rv;
 
-		// デフォルトのコンテキストを null に設定する。
+		// デフォルトのコンテキストを any context に設定する。
 		// 親クラスの ocCreateNewObjectBase ではデフォルトのコンテキストがそのクラス自身に
 		// 設定されたはずだが(普通のインスタンスならばこれでよい)、
-		// クラスインスタンスが返すデフォルトのコンテキストは NULL でなくてはならない。
+		// クラスインスタンスが返すデフォルトのコンテキストは any context でなくてはならない。
 		RISSE_ASSERT(result != NULL);
 		result->Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
-					tRisseMethodArgument::New(tRisseVariant::GetNullObject()));
+					tRisseMethodArgument::New(*tRisseVariant::GetAnyContext()));
 
 		return rvNoError;
 	}
@@ -149,7 +149,7 @@ tRisseClassInstance::tRetValue tRisseClassInstance::Operate(RISSE_OBJECTINTERFAC
 	{
 		// 親クラス(tRisseClassClass)ではなく、tRisseClassBaseの機能を呼ぶ
 
-		// 親クラスの tRisseClassClass はデフォルトのコンテキストを NULL にしてしまうが
+		// 親クラスの tRisseClassClass はデフォルトのコンテキストを any context にしてしまうが
 		// それはこのクラスにおいては困るので tRisseClassBase の機能を呼ぶ
 		return tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 	}

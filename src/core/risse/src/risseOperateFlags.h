@@ -33,6 +33,9 @@ public:
 		//!< プロパティとして起動できる物か定数のみを探す(見つからなかった場合
 		//!< やプロパティとして起動できない場合はrvMemberNotFoundがかえるが、
 		//!< 見つかったのが定数の場合は例外が発生する)(ocDSetのみ)
+	static const risse_uint32 ofNoSetDefaultContext = 0x8000;
+		//!< デフォルトのコンテキストを設定しない
+
 public:
 	//! @brief		デフォルトコンストラクタ
 	tRisseOperateFlags() { Flags = 0; }

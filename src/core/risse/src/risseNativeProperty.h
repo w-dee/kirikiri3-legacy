@@ -55,7 +55,7 @@ namespace Risse
 //! @brief		ネイティブプロパティ宣言の開始
 //! @note		prop_name は一つの単語であること。RISSE_WS( ) などでの文字列は受け付けない。
 #define RISSE_BEGIN_NATIVE_PROPERTY(prop_name) \
-	RISSE_BEGIN_NATIVE_PROPERTY_CONTEXT(prop_name, NULL)
+	RISSE_BEGIN_NATIVE_PROPERTY_CONTEXT(prop_name, tRisseVariant::GetAnyContext())
 
 //! @brief		ネイティブプロパティ宣言の終了
 #define RISSE_END_NATIVE_PROPERTY \

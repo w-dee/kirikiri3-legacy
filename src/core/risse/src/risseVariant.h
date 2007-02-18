@@ -30,14 +30,27 @@ class tRisseVariantBlock : public tRisseVariantData, public tRisseOperateRetValu
 {
 
 private: // static オブジェクト
-	//! @brief null/void/などの特殊な値を表すstaticな領域
-	struct tStaticObject
+	//! @brief	null/void/などの特殊な値を表すstaticな領域
+	struct tStaticPrimitive
 	{
 		risse_ptruint Type; //!< バリアントタイプ
-		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint)]; //!< 残り(0で埋める) パディングは問題にならないはず
+		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint)];
+			//!< 残り(0で埋める) パディングは問題にならないはず
 	};
-	static tStaticObject VoidObject;
-	static tStaticObject NullObject;
+	static tStaticPrimitive VoidObject;
+	static tStaticPrimitive NullObject;
+
+	//! @brief	AnyContext や DotContext などの特殊な値を表す static な領域
+	struct tStaticObject
+	{
+		risse_ptruint Intf; //!< オブジェクトインターフェースへのポインタ
+		const tRisseVariantBlock * Context; //!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
+						//!< 指しているとして)メソッドが動作するコンテキスト
+		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint) - sizeof(const tRisseVariantBlock *)];
+			//!< 残り(0で埋める) パディングは問題にならないはず
+	};
+	static tStaticObject AnyContext;
+	static tStaticObject DotContext;
 
 public: // static オブジェクト
 	//! @brief		void オブジェクトを得る
@@ -54,6 +67,17 @@ public: // static オブジェクト
 		return *reinterpret_cast<tRisseVariantBlock*>(&NullObject);
 	}
 
+	//! @brief		AnyContext オブジェクトを得る
+	static const tRisseVariantBlock * GetAnyContext()
+	{
+		return reinterpret_cast<tRisseVariantBlock*>(&AnyContext);
+	}
+
+	//! @brief		DotContext オブジェクトを得る
+	static const tRisseVariantBlock * GetDotContext()
+	{
+		return reinterpret_cast<tRisseVariantBlock*>(&DotContext);
+	}
 
 public: // バリアントタイプ
 	//! @brief		バリアントのタイプを文字列化する
@@ -185,6 +209,7 @@ public: // コンストラクタ/代入演算子
 	{
 		Type = vtObject;
 		SetObjectIntf(ref);
+		RISSE_ASSERT(context != NULL);
 		AsObject().Context = context;
 	}
 
@@ -195,7 +220,7 @@ public: // コンストラクタ/代入演算子
 		// これはちょっと特殊
 		Type = vtObject;
 		SetObjectIntf(ref);
-		AsObject().Context = NULL; // this は null に設定
+		AsObject().Context = GetAnyContext(); // this は AnyContext に設定
 		return *this;
 	}
 
@@ -248,10 +273,12 @@ public: // Object関連
 	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
 	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
 	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
-	//!				チェックしないので注意すること
+	//!				チェックしないので注意すること。@n
+	//!				AnyContextやDotContextを指定する場合はGetAnyContext()やGetDotContext()の戻りを指定すること。
 	void SetContext(const tRisseVariantBlock * context)
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
+		RISSE_ASSERT(context != NULL);
 		AsObject().Context = context;
 	}
 
@@ -266,23 +293,57 @@ public: // Object関連
 	}
 
 	//! @brief		コンテキストを持っているかどうかを得る
-	//! @note		このメソッドはvtがvtObject以外の場合はtrueを返す。コンテキストを持っている場合、
-	//!				コンテキストが null の場合はコンテキストを持っていると見なされるので注意。
+	//! @note		このメソッドはvtがvtObject以外の場合はtrueを返す。
+	//!				コンテキストを持っている(コンテキストがanyでもdotでもない)場合に真を返す
 	bool HasContext() const
 	{
 		if(GetType() != vtObject) return true;
-		return AsObject().Context != NULL;
+		const tObject & obj = AsObject();
+		RISSE_ASSERT(obj.Context != NULL);
+		return obj.Context != GetAnyContext() && obj.Context != GetDotContext();
+	}
+
+	//! @brief		このオブジェクトが AnyContext かどうかを返す
+	//! @return		このオブジェクトが AnyContext かどうか
+	bool IsAnyContext() const
+	{
+		if(GetType() != vtObject) return false;
+		// オブジェクトインターフェースのポインタが同一かどうかを得る
+		return AsObject().Intf == GetAnyContext()->AsObject().Intf;
+	}
+
+	//! @brief		このオブジェクトが DotContext かどうかを返す
+	//! @return		このオブジェクトが DotContext かどうか
+	bool IsDotContext() const
+	{
+		if(GetType() != vtObject) return false;
+		// オブジェクトインターフェースのポインタが同一かどうかを得る
+		return AsObject().Intf == GetDotContext()->AsObject().Intf;
 	}
 
 	//! @brief		コンテキストを上書きする
 	//! @param		context	上書きするコンテキスト
 	//! @note		このメソッドはvtがvtObject以外の場合はなにもしない。コンテキストの上書きは、
-	//!				このオブジェクトのコンテキストが設定されいていない場合のみに発生する。@n
-	//!				このオブジェクトのコンテキストが設定されていて、かつ null の場合は上書きされないので注意。
+	//!				このオブジェクトのコンテキストが設定されいていない場合のみに発生する。
 	void OverwriteContext(const tRisseVariantBlock * context)
 	{
-		if(GetType() != vtObject) return;
-		if(!AsObject().Context) AsObject().Context = context;
+		RISSE_ASSERT(context != NULL);
+		if(!HasContext()) SetContext(context);
+	}
+
+	//! @brief		コンテキストを選択する
+	//! @param		This		コンテキストを持っていなかった場合に返されるコンテキスト
+	//! @return		選択されたコンテキスト
+	//! @note		このメソッドはvtがvtObjectかどうかをチェックしないので注意。
+	//!				この値がコンテキストを持っていればそのコンテキストを返すが、そうでない場合は This を返す。
+	const tRisseVariantBlock & SelectContext(const tRisseVariantBlock & This) const
+	{
+		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
+		const tObject & obj = AsObject();
+		RISSE_ASSERT(obj.Context != NULL);
+		if(obj.Context != GetAnyContext() && obj.Context != GetDotContext())
+			return *obj.Context;
+		return This;
 	}
 
 public: // operate

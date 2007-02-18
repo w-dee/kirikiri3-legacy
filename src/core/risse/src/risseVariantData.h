@@ -109,12 +109,15 @@ protected:
 	//! @brief object ストレージ型
 	struct tObject
 	{
-		tRisseObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常に10)
+		tRisseObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常にObjectPointerBias)
 		const tRisseVariantBlock * Context;
 						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
 						//!< 指しているとして)メソッドが動作するコンテキスト
 	};
+public:
+	static const int ObjectPointerBias = 3; //!< Variantに格納される際の Object 型のポインタのバイアス値
 
+protected:
 	//! @brief Integer型への参照を取得 @return Integer型フィールドへの参照
 	risse_int64 & AsInteger() { return reinterpret_cast<tInteger*>(Storage)->Value; }
 	//! @brief Integer型へのconst参照を取得 @return Integer型フィールドへのconst参照
@@ -153,8 +156,8 @@ public:
 	{
 		RISSE_ASSERT(GetType() == vtObject);
 		tRisseObjectInterface * ret = reinterpret_cast<tRisseObjectInterface*>(
-			reinterpret_cast<risse_ptruint>(AsObject().Intf) - 3);
-		// 2 = Intf の下位2ビットは常に11なので、これを元に戻す
+			reinterpret_cast<risse_ptruint>(AsObject().Intf) - ObjectPointerBias);
+		// 2 = Intf の下位2ビットは常にObjectPointerBiasなので、これを元に戻す
 		RISSE_ASSERT(ret != NULL);
 		return ret;
 	}
@@ -166,8 +169,8 @@ protected:
 	{
 		RISSE_ASSERT(GetType() == vtObject);
 		AsObject().Intf = reinterpret_cast<tRisseObjectInterface*>(
-			reinterpret_cast<risse_ptruint>(intf) + 3);
-		// 2 = Intf の下位2ビットは常に11なので、これをたす
+			reinterpret_cast<risse_ptruint>(intf) + ObjectPointerBias);
+		// 2 = Intf の下位2ビットは常にObjectPointerBiasなので、これをたす
 	}
 
 

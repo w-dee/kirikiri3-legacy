@@ -47,7 +47,7 @@ namespace Risse
 //! @brief		ネイティブ関数宣言の開始
 //! @note		func_name は一つの単語であること。RISSE_WS( ) などでの文字列は受け付けない。
 #define RISSE_BEGIN_NATIVE_METHOD(func_name) \
-	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(func_name, NULL);
+	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(func_name, tRisseVariant::GetAnyContext());
 
 //! @brief		ネイティブ関数宣言の終了
 #define RISSE_END_NATIVE_METHOD \

@@ -10,9 +10,8 @@
 //! @file
 //! @brief Assertion 定義
 //---------------------------------------------------------------------------
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "risseTypes.h"
+#include "risseException.h"
 
 namespace Risse
 {
@@ -21,9 +20,10 @@ void RisseAssert(const char * message, const char * filename, int lineno)
 {
 	fflush(stderr);
 	fflush(stdout);
-	fprintf(stderr, "Risse: Assertion failed: '%s' failed at %s line %d\n",
+	fprintf(stderr, "\n\nRisse: Assertion failed: '%s' failed at %s line %d\n",
 			message, filename, lineno);
-	abort();
+
+	RisseThrowInternalError();
 }
 //---------------------------------------------------------------------------
 }

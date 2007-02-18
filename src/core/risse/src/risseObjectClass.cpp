@@ -111,8 +111,19 @@ void tRisseObjectClass::RegisterMembers()
 				{
 					if(context->GetType() == tRisseVariant::vtObject)
 					{
-						Risse_pointer_to_str(context->GetObjectInterface(), buf);
-						RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
+						if(context == tRisseVariant::GetAnyContext())
+						{
+							RisseFPrint(stdout, RISSE_WS(":any"));
+						}
+						else if(context == tRisseVariant::GetDotContext())
+						{
+							RisseFPrint(stdout, RISSE_WS(":dot"));
+						}
+						else
+						{
+							Risse_pointer_to_str(context->GetObjectInterface(), buf);
+							RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
+						}
 					}
 					else
 					{

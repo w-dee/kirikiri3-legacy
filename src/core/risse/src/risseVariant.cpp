@@ -29,7 +29,7 @@ RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 //---------------------------------------------------------------------------
 // voidオブジェクトへのconst参照を保持するオブジェクト
 // これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
-tRisseVariantBlock::tStaticObject tRisseVariantBlock::VoidObject = {
+tRisseVariantBlock::tStaticPrimitive tRisseVariantBlock::VoidObject = {
 	tRisseVariantBlock::vtVoid,
 	{0}
 };
@@ -39,8 +39,30 @@ tRisseVariantBlock::tStaticObject tRisseVariantBlock::VoidObject = {
 //---------------------------------------------------------------------------
 // nullオブジェクトへのconst参照を保持するオブジェクト
 // これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
-tRisseVariantBlock::tStaticObject tRisseVariantBlock::NullObject = {
+tRisseVariantBlock::tStaticPrimitive tRisseVariantBlock::NullObject = {
 	tRisseVariantBlock::vtNull,
+	{0}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+// AnyContextオブジェクトへのconst参照を保持するオブジェクト
+// これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
+static tRisseIdentifyObject RisseAnyContextObject;
+tRisseVariantBlock::tStaticObject tRisseVariantBlock::AnyContext = {
+	reinterpret_cast<risse_ptruint>(&RisseAnyContextObject) + tRisseVariantBlock::ObjectPointerBias, NULL,
+	{0}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+// DotContextオブジェクトへのconst参照を保持するオブジェクト
+// これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
+static tRisseIdentifyObject RisseDotContextObject;
+tRisseVariantBlock::tStaticObject tRisseVariantBlock::DotContext = {
+	reinterpret_cast<risse_ptruint>(&RisseDotContextObject) + tRisseVariantBlock::ObjectPointerBias, NULL,
 	{0}
 };
 //---------------------------------------------------------------------------
@@ -122,9 +144,8 @@ tRisseVariantBlock::tRetValue
 	case vtObject:
 		{
 			tRisseObjectInterface * intf = GetObjectInterface();
-			const tRisseVariantBlock * this_context = AsObject().Context;
 			return intf->Operate(code, result, name, flags, args,
-				this_context?*this_context:This
+				SelectContext(This)
 				);
 		}
 	}
@@ -137,11 +158,10 @@ tRisseVariantBlock::tRetValue
 tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	const tRisseVariantBlock * this_context = AsObject().Context;
 	tRisseVariantBlock ret;
 	intf->Do(ocDGet, &ret, name,
 		flags, tRisseMethodArgument::Empty(),
-		this_context?*this_context:This
+		SelectContext(This)
 		);
 	return ret;
 }
@@ -154,10 +174,9 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 		const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	const tRisseVariantBlock * this_context = AsObject().Context;
 	intf->Do(ocDSet, NULL, name,
 		flags, tRisseMethodArgument::New(value),
-		this_context?*this_context:This
+		SelectContext(This)
 		);
 }
 //---------------------------------------------------------------------------
@@ -180,10 +199,9 @@ void tRisseVariantBlock::FuncCall_Object  (
 	const tRisseMethodArgument & args, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
-	const tRisseVariantBlock * this_context = AsObject().Context;
 	intf->Do(ocFuncCall, ret, name,
 		flags, args,
-		this_context?*this_context:This
+		SelectContext(This)
 		);
 }
 //---------------------------------------------------------------------------
@@ -1159,8 +1177,19 @@ void tRisseVariantBlock::DebugDump() const
 		{
 			if(context->GetType() == tRisseVariant::vtObject)
 			{
-				Risse_pointer_to_str(context->GetObjectInterface(), buf);
-				RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
+				if(context == GetAnyContext())
+				{
+					RisseFPrint(stdout, RISSE_WS(":any"));
+				}
+				else if(context == GetDotContext())
+				{
+					RisseFPrint(stdout, RISSE_WS(":dot"));
+				}
+				else
+				{
+					Risse_pointer_to_str(context->GetObjectInterface(), buf);
+					RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
+				}
 			}
 			else
 			{

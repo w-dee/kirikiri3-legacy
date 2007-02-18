@@ -89,6 +89,21 @@ public:
 
 
 
+
+//---------------------------------------------------------------------------
+//! @brief		識別用クラス
+//! @note		このクラスは tRisseObjectInterface を継承するが、なにも
+//!				実装をおこなわない。このインスタンスを作り、tRisseVariantに
+//!				のせることができるが、インスタンスによる区別を行いたい場合のみに作る
+//---------------------------------------------------------------------------
+class tRisseIdentifyObject : public tRisseObjectInterface
+{
+public:
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+};
+//---------------------------------------------------------------------------
+
+
 }
 #endif
 

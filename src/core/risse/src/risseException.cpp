@@ -219,6 +219,21 @@ void RisseThrowInvalidUTF8String()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void RisseThrowOperationIsNotImplemented()
+{
+	eRisseError::Throw(tRisseString(RISSE_WS_TR("the operation is not implemented")));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void RisseThrowInternalError()
+{
+	eRisseError::Throw(tRisseString(RISSE_WS_TR("internal error")));
+}
+//---------------------------------------------------------------------------
+
 
 
 

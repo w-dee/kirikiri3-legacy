@@ -358,6 +358,10 @@ void RisseThrowUnexpectedClass();
 void RisseThrowCannotCreateInstanceFromThisClass();
 //! @brief		「無効なUTF-8文字列です」例外を発生(暫定)
 void RisseThrowInvalidUTF8String();
+//! @brief		「機能が実装されていません」例外を発生(暫定)
+void RisseThrowOperationIsNotImplemented();
+//! @brief		「内部エラー」例外を発生(暫定)
+void RisseThrowInternalError();
 //---------------------------------------------------------------------------
 
 

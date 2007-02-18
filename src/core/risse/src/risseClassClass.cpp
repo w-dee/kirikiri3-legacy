@@ -87,7 +87,6 @@ void tRisseClassClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_include)
 	{
 		// クラスの modules 配列にモジュールを追加する
-		This.DebugDump();
 
 		// modules を取り出す
 		tRisseVariant modules = This.GetPropertyDirect(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);

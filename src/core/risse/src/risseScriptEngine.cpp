@@ -28,6 +28,7 @@
 #include "risseNumberClass.h"
 #include "risseIntegerClass.h"
 #include "risseRealClass.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -66,6 +67,9 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseNumberClass::RegisterClassInstance(GlobalObject, ss_Number);
 	tRisseIntegerClass::RegisterClassInstance(GlobalObject, ss_Integer);
 	tRisseRealClass::RegisterClassInstance(GlobalObject, ss_Real);
+	tRisseSourcePointClass::RegisterClassInstance(GlobalObject, ss_SourcePoint);
+	tRisseThrowableClass::RegisterClassInstance(GlobalObject, ss_Throwable);
+	tRisseExceptionClass::RegisterClassInstance(GlobalObject, ss_Exception);
 
 	// 各クラスのメンバを正式な物に登録し直すためにもう一度RegisterMembersを呼ぶ
 	// 上記の状態では メンバとして仮のものが登録されている可能性がある
@@ -86,7 +90,9 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseNumberClass::GetPointer()->RegisterMembers();
 	tRisseIntegerClass::GetPointer()->RegisterMembers();
 	tRisseRealClass::GetPointer()->RegisterMembers();
-
+	tRisseSourcePointClass::GetPointer()->RegisterMembers();
+	tRisseThrowableClass::GetPointer()->RegisterMembers();
+	tRisseExceptionClass::GetPointer()->RegisterMembers();
 }
 //---------------------------------------------------------------------------
 

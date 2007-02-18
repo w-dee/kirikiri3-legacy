@@ -40,4 +40,12 @@ ss_times				times				#!< "times" メソッド名
 ss_isNaN				isNaN				#!< "isNaN" プロパティ名
 ss_filler				filler				#!< "filler" インスタンス変数/プロパティ名
 ss_include				include				#!< "include" メソッド名
-
+ss_Throwable			Throwable			#!< "Throwable" クラス名
+ss_message				message				#!< "message" インスタンス変数/プロパティ名
+ss_trace				trace				#!< "trace" インスタンス変数/プロパティ名
+ss_cause				cause				#!< "cause" インスタンス変数/プロパティ名
+ss_addTrace				addTrace			#!< "addTrace" メソッド名
+ss_SourcePoint			SourcePoint			#!< "SourcePoint" クラス名
+ss_filename				filename			#!< "filename" ファイル名
+ss_line					line				#!< "line" インスタンス変数/プロパティ名
+ss_Exception			Exception			#!< "Exception" クラス名

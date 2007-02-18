@@ -230,6 +230,15 @@ public: // デストラクタ
 			// はクリアしておかなければならない。
 	}
 
+public: // String関連
+	//! @brief		文字列が空文字列かどうかを得る
+	//! @note		文字列が空の場合に真が帰るが、vt が vtString 以外の場合は
+	//!				(vtVoidでも) 偽を返すので注意
+	bool IsEmptyString() const
+	{
+		return GetType() == vtString && AsString().IsEmpty();
+	}
+
 public: // Primitive関連
 	//! @brief		プリミティブ型に即してプリミティブ型クラスを得る
 	tRissePrimitiveClassBase * GetPrimitiveClass() const;

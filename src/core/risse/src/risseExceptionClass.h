@@ -21,6 +21,7 @@
 #include "risseString.h"
 #include "risseGC.h"
 #include "risseObject.h"
+#include "risseClass.h"
 
 namespace Risse
 {
@@ -54,6 +55,79 @@ public: // tRisseObjectInterface メンバ
 
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"SourcePoint" クラス
+//! @note		ソースコード上の位置を表すクラス@n
+//!				注意: このクラスの実装は将来的に変更される可能性がある。
+//!				このクラスのインスタンスを自前で作成したり、インスタンスのメンバに
+//!				書き込んだりしないこと。
+//---------------------------------------------------------------------------
+class tRisseSourcePointClass : public tRisseClassBase, public tRisseClassSingleton<tRisseSourcePointClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseSourcePointClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Throwable" クラス
+//---------------------------------------------------------------------------
+class tRisseThrowableClass : public tRisseClassBase, public tRisseClassSingleton<tRisseThrowableClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseThrowableClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Exception" クラス
+//---------------------------------------------------------------------------
+class tRisseExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
 } // namespace Risse
 //---------------------------------------------------------------------------
 

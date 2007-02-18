@@ -44,7 +44,6 @@ void tRisseObjectClass::RegisterMembers()
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
-	tRisseVariant * pThis = new tRisseVariant(this);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

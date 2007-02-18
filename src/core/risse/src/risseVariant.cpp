@@ -1145,5 +1145,38 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Null     (risse_size maxlen) co
 //---------------------------------------------------------------------------
 
 
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::DebugDump() const
+{
+	if(GetType() == tRisseVariant::vtObject)
+	{
+		risse_char buf[40];
+		Risse_pointer_to_str(GetObjectInterface(), buf);
+		RisseFPrint(stdout, (tRisseString(RISSE_WS("Object@")) + buf).c_str());
+		const tRisseVariant * context = GetContext();
+		if(context)
+		{
+			if(context->GetType() == tRisseVariant::vtObject)
+			{
+				Risse_pointer_to_str(context->GetObjectInterface(), buf);
+				RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
+			}
+			else
+			{
+				RisseFPrint(stdout, (context->AsHumanReadable()).c_str());
+			}
+		}
+	}
+	else
+	{
+		RisseFPrint(stdout, (operator tRisseString()).c_str());
+	}
+
+	RisseFPrint(stdout, RISSE_WS("\n"));
+}
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 } // namespace Risse

@@ -94,20 +94,19 @@ void tRisseObjectClass::RegisterMembers()
 	RISSE_END_NATIVE_METHOD
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-/*
-	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(ss_setInstanceMember, pThis)
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_p)
 	{
 		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
 		{
-			if(i != 0)
-				RisseFPrint(stdout, RISSE_WS(", "));
+			const tRisseVariant & v = args[i];
 
-			if(args[i].GetType() == tRisseVariant::vtObject)
+			if(v.GetType() == tRisseVariant::vtObject)
 			{
 				risse_char buf[40];
-				Risse_pointer_to_str(args[i].GetObjectInterface(), buf);
+				Risse_pointer_to_str(v.GetObjectInterface(), buf);
 				RisseFPrint(stdout, (tRisseString(RISSE_WS("Object@")) + buf).c_str());
-				const tRisseVariant * context = args[i].GetContext();
+				const tRisseVariant * context = v.GetContext();
 				if(context)
 				{
 					if(context->GetType() == tRisseVariant::vtObject)
@@ -123,13 +122,13 @@ void tRisseObjectClass::RegisterMembers()
 			}
 			else
 			{
-				RisseFPrint(stdout, (args[i].operator tRisseString()).c_str());
+				RisseFPrint(stdout, (v.operator tRisseString()).c_str());
 			}
 		}
 		RisseFPrint(stdout, RISSE_WS("\n"));
 	}
 	RISSE_END_NATIVE_METHOD
-
+/*
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	RISSE_BEGIN_NATIVE_METHOD(ss_puts)

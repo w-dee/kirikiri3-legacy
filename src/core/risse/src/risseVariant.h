@@ -266,7 +266,8 @@ public: // Object関連
 	}
 
 	//! @brief		コンテキストを持っているかどうかを得る
-	//! @note		このメソッドはvtがvtObject以外の場合はtrueを返す。
+	//! @note		このメソッドはvtがvtObject以外の場合はtrueを返す。コンテキストを持っている場合、
+	//!				コンテキストが null の場合はコンテキストを持っていると見なされるので注意。
 	bool HasContext() const
 	{
 		if(GetType() != vtObject) return true;
@@ -276,7 +277,8 @@ public: // Object関連
 	//! @brief		コンテキストを上書きする
 	//! @param		context	上書きするコンテキスト
 	//! @note		このメソッドはvtがvtObject以外の場合はなにもしない。コンテキストの上書きは、
-	//!				このオブジェクトのコンテキストがnullの場合のみに発生する。
+	//!				このオブジェクトのコンテキストが設定されいていない場合のみに発生する。@n
+	//!				このオブジェクトのコンテキストが設定されていて、かつ null の場合は上書きされないので注意。
 	void OverwriteContext(const tRisseVariantBlock * context)
 	{
 		if(GetType() != vtObject) return;
@@ -2111,8 +2113,11 @@ public: // ユーティリティ
 		return intf;
 	}
 
+	//! @brief		デバッグ用ダンプ(標準出力に出力する)
+	void DebugDump() const;
+
 	//! @brief		デバッグ用各種構造体サイズ表示
-	void prtsizes()
+	void prtsizes() const
 	{
 		fprintf(stderr, "tRisseVariantBlock: %d\n", sizeof(tRisseVariantBlock));
 		fprintf(stderr, "Storage: %d\n", sizeof(Storage));

@@ -788,21 +788,7 @@ void tRisseCodeInterpreter::Execute(
 				{
 					// 今のところ AR(code[2]) が vtObject でなかった場合は
 					// この操作は単に無視される
-					const tRisseVariant * context;
-					if(AR(code[3]).GetType() == tRisseVariant::vtObject)
-					{
-						if(AR(code[3]).IsAnyContext())
-							context = tRisseVariant::GetAnyContext();
-						else if(AR(code[3]).IsDotContext())
-							context = tRisseVariant::GetDotContext();
-						else
-							context = new tRisseVariant(AR(code[3]));
-					}
-					else
-					{
-						context = new tRisseVariant(AR(code[3]));
-					}
-					AR(code[1]).SetContext(context);
+					AR(code[1]).SetContext(AR(code[3]));
 				}
 				code += 4;
 				break;

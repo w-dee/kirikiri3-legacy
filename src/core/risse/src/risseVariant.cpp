@@ -108,6 +108,28 @@ inline tRissePrimitiveClassBase * tRisseVariantBlock::GetPrimitiveClass() const
 
 
 //---------------------------------------------------------------------------
+void tRisseVariantBlock::SetContext(const tRisseVariantBlock &context)
+{
+	const tRisseVariant * context_ptr;
+	if(context.GetType() == tRisseVariant::vtObject)
+	{
+		if(context.IsAnyContext())
+			context_ptr = tRisseVariant::GetAnyContext();
+		else if(context.IsDotContext())
+			context_ptr = tRisseVariant::GetDotContext();
+		else
+			context_ptr = new tRisseVariant(context);
+	}
+	else
+	{
+		context_ptr = new tRisseVariant(context);
+	}
+	SetContext(context_ptr);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseVariantBlock::tRetValue
 	tRisseVariantBlock::OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {

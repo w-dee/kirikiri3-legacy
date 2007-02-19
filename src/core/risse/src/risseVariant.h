@@ -282,6 +282,18 @@ public: // Object関連
 		AsObject().Context = context;
 	}
 
+	//! @brief		コンテキストを設定する
+	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
+	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
+	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
+	//!				チェックしないので注意すること。@n
+	//!				AnyContextやDotContextを指定する場合はGetAnyContext()やGetDotContext()の戻りを指定すること。@n
+	//!				このメソッドは const tRisseVariantBlock * context を引数に取る版とちがい、
+	//!				context がどうやら any context や dot コンテキストらしい場合は自動的に GetAnyContext() や
+	//!				GetDotContext() の戻りに変換する。そうでない場合は tRisseVariantBlock を new してそのポインタを
+	//!				SetContext() で設定する。
+	void SetContext(const tRisseVariantBlock &context);
+
 	//! @brief		コンテキストを取得する
 	//! @return		そのメソッドやプロパティが実行されるべきコンテキスト
 	//! @note		このメソッドはvtがvtObjectかどうかを

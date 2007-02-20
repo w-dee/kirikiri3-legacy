@@ -42,10 +42,10 @@ tRisseString tRisseOperateFlags::AsString() const
 		str += RISSE_WS("ofPropertyOrConstOnly");
 	}
 
-	if(Flags & ofNoSetDefaultContext)
+	if(Flags & ofUseThisAsContext)
 	{
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
-		str += RISSE_WS("ofNoSetDefaultContext");
+		str += RISSE_WS("ofUseThisAsContext");
 	}
 
 	// 戻る

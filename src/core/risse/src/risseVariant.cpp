@@ -133,7 +133,7 @@ tRisseVariantBlock::tRetValue
 		{
 			tRetValue rv = GetPrimitiveClass()->GetGateway().
 				Operate(code, result, name,
-				flags | tRisseOperateFlags::ofNoSetDefaultContext,
+				flags | tRisseOperateFlags::ofUseThisAsContext,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 				args, *this); // 動作コンテキストは常に *this
 			if(rv == rvNoError && result) // TODO: code が ocDGet かどうかをチェックすべきじゃないのか？
@@ -202,7 +202,7 @@ void tRisseVariantBlock::FuncCall_Primitive(
 {
 	GetPrimitiveClass()->GetGateway().
 		Do(ocFuncCall, NULL, name,
-		flags |tRisseOperateFlags::ofNoSetDefaultContext,
+		flags |tRisseOperateFlags::ofUseThisAsContext,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 		args, *this); // 動作コンテキストは常に *this
 }

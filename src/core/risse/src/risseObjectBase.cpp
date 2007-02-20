@@ -71,15 +71,15 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 				// を検索したりしないように、tRisseOperateFlags::ofInstanceMemberOnly をつけて
 				// 検索を行う
 				// また、
-				// デフォルトのコンテキストを設定しないように
-				// tRisseOperateFlags::ofNoSetDefaultContext もつける
+				// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
+				// tRisseOperateFlags::ofUseThisAsContext もつける
 				tRetValue rv = module.OperateForMember(ocDGet, &result, name,
-						flags|tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofNoSetDefaultContext,
+						flags|tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseThisAsContext,
 							tRisseMethodArgument::Empty(),
-							(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofNoSetDefaultContext)) ? *DefaultMethodContext:This);
+							(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
 				if(rv == rvNoError)
 				{
-					if(!flags.Has(tRisseOperateFlags::ofNoSetDefaultContext))
+					if(!flags.Has(tRisseOperateFlags::ofUseThisAsContext))
 					{
 						// コンテキストを設定する
 						if(DefaultMethodContext) result.OverwriteContext(DefaultMethodContext);
@@ -97,15 +97,15 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 		if(Class.IsNull()) return false; // クラスが null
 
 		// クラスに対してメンバ取得を行う
-		// デフォルトのコンテキストを設定しないように
-		// tRisseOperateFlags::ofNoSetDefaultContext もつける
+		// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
+		// tRisseOperateFlags::ofUseThisAsContext もつける
 		tRetValue rv = Class.OperateForMember(ocDGet, &result, name,
-					flags|tRisseOperateFlags::ofNoSetDefaultContext,
+					flags|tRisseOperateFlags::ofUseThisAsContext,
 					tRisseMethodArgument::Empty(),
-					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofNoSetDefaultContext)) ? *DefaultMethodContext:This);
+					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
 		if(rv != rvNoError) return false;
 
-		if(!flags.Has(tRisseOperateFlags::ofNoSetDefaultContext))
+		if(!flags.Has(tRisseOperateFlags::ofUseThisAsContext))
 		{
 			// コンテキストを設定する
 			if(DefaultMethodContext)
@@ -133,12 +133,12 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 		// member->Value を引数なしで関数呼び出しし、その結果を得る
 		tRetValue rv = member->Value.Operate(ocFuncCall, &result, tRisseString::GetEmptyString(),
 					flags, tRisseMethodArgument::Empty(),
-					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofNoSetDefaultContext)) ? *DefaultMethodContext:This);
+					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
 		if(rv != rvNoError) return false;
 		break;
 	}
 
-	if(!flags.Has(tRisseOperateFlags::ofNoSetDefaultContext))
+	if(!flags.Has(tRisseOperateFlags::ofUseThisAsContext))
 	{
 		// コンテキストを設定する
 		if(DefaultMethodContext)
@@ -237,12 +237,12 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 			// モジュールはモジュールインスタンスのクラス (Moduleクラス以上)
 			// を検索したりしないように、tRisseOperateFlags::ofInstanceMemberOnly をつけて
 			// 検索を行う
-			// デフォルトのコンテキストを設定しないように
-			// tRisseOperateFlags::ofNoSetDefaultContext もつける
+			// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
+			// tRisseOperateFlags::ofUseThisAsContext もつける
 			result = module.OperateForMember(ocDSet, NULL, name,
-				flags|tRisseOperateFlags::ofPropertyOrConstOnly|tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofNoSetDefaultContext,
+				flags|tRisseOperateFlags::ofPropertyOrConstOnly|tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseThisAsContext,
 				tRisseMethodArgument::New(value),
-				(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofNoSetDefaultContext)) ? *DefaultMethodContext:This);
+				(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
 			if(result == rvNoError) return true; // アクセスに成功したので戻る
 		}
 	}
@@ -255,12 +255,12 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 		{
 			// クラスを特定できた場合
 			// クラスに対してメンバ設定を行う
-			// デフォルトのコンテキストを設定しないように
-			// tRisseOperateFlags::ofNoSetDefaultContext もつける
+			// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
+			// tRisseOperateFlags::ofUseThisAsContext もつける
 			result = Class.OperateForMember(ocDSet, NULL, name,
-								flags|tRisseOperateFlags::ofPropertyOrConstOnly|tRisseOperateFlags::ofNoSetDefaultContext,
+								flags|tRisseOperateFlags::ofPropertyOrConstOnly|tRisseOperateFlags::ofUseThisAsContext,
 								tRisseMethodArgument::New(value),
-								(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofNoSetDefaultContext)) ? *DefaultMethodContext:This);
+								(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
 			// ちなみに見つかったのが定数で、書き込みに失敗した場合は
 			// 例外が飛ぶので OperateForMember は戻ってこない。
 			if(result == rvNoError) return true; // アクセスに成功したので戻る
@@ -332,7 +332,7 @@ void tRisseObjectBase::WriteMember(const tRisseString & name, tRisseOperateFlags
 		// つかう。
 		member.Value.Do(ocDSet, NULL, tRisseString::GetEmptyString(),
 					flags, tRisseMethodArgument::New(value),
-					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofNoSetDefaultContext)) ? *DefaultMethodContext:This);
+					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
 		break;
 	}
 }

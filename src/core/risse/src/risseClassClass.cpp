@@ -113,13 +113,13 @@ tRisseClassClass::tRetValue tRisseClassClass::Operate(RISSE_OBJECTINTERFACE_OPER
 		tRetValue rv = inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 		if(rv != rvNoError) return rv;
 
-		// デフォルトのコンテキストを dot context に設定する。
+		// デフォルトのコンテキストを dynamic context に設定する。
 		// 親クラスの ocCreateNewObjectBase ではデフォルトのコンテキストがそのクラス自身に
 		// 設定されたはずだが(普通のインスタンスならばこれでよい)、
-		// クラスインスタンスが返すデフォルトのコンテキストは dot context でなくてはならない。
+		// クラスインスタンスが返すデフォルトのコンテキストは dynamic context でなくてはならない。
 		RISSE_ASSERT(result != NULL);
 		result->Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
-					tRisseMethodArgument::New(*tRisseVariant::GetDotContext()));
+					tRisseMethodArgument::New(*tRisseVariant::GetDyanamicContext()));
 
 		return rvNoError;
 	}
@@ -168,7 +168,7 @@ tRisseClassInstance::tRetValue tRisseClassInstance::Operate(RISSE_OBJECTINTERFAC
 	{
 		// 親クラス(tRisseClassClass)ではなく、tRisseClassBaseの機能を呼ぶ
 
-		// 親クラスの tRisseClassClass はデフォルトのコンテキストを dot context にしてしまうが
+		// 親クラスの tRisseClassClass はデフォルトのコンテキストを dynamic context にしてしまうが
 		// それはこのクラスにおいては困るので tRisseClassBase の機能を呼ぶ
 		return tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 	}

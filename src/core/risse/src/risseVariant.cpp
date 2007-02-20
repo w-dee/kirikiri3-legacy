@@ -47,11 +47,11 @@ tRisseVariantBlock::tStaticPrimitive tRisseVariantBlock::NullObject = {
 
 
 //---------------------------------------------------------------------------
-// DotContextオブジェクトへのconst参照を保持するオブジェクト
+// DynamicContextオブジェクトへのconst参照を保持するオブジェクト
 // これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
-static tRisseIdentifyObject RisseDotContextObject;
-tRisseVariantBlock::tStaticObject tRisseVariantBlock::DotContext = {
-	reinterpret_cast<risse_ptruint>(&RisseDotContextObject) + tRisseVariantBlock::ObjectPointerBias, NULL,
+static tRisseIdentifyObject RisseDynamicContextObject;
+tRisseVariantBlock::tStaticObject tRisseVariantBlock::DynamicContext = {
+	reinterpret_cast<risse_ptruint>(&RisseDynamicContextObject) + tRisseVariantBlock::ObjectPointerBias, NULL,
 	{0}
 };
 //---------------------------------------------------------------------------
@@ -102,8 +102,8 @@ void tRisseVariantBlock::SetContext(const tRisseVariantBlock &context)
 	const tRisseVariant * context_ptr;
 	if(context.GetType() == tRisseVariant::vtObject)
 	{
-		if(context.IsDotContext())
-			context_ptr = tRisseVariant::GetDotContext();
+		if(context.IsDynamicContext())
+			context_ptr = tRisseVariant::GetDynamicContext();
 		else
 			context_ptr = new tRisseVariant(context);
 	}
@@ -1193,9 +1193,9 @@ void tRisseVariantBlock::DebugDump() const
 		{
 			if(context->GetType() == tRisseVariant::vtObject)
 			{
-				if(context == GetDotContext())
+				if(context == GetDynamicContext())
 				{
-					RisseFPrint(stdout, RISSE_WS(":dot"));
+					RisseFPrint(stdout, RISSE_WS(":dynamic"));
 				}
 				else
 				{

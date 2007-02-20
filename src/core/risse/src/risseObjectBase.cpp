@@ -469,8 +469,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 		// TODO: この機能要らないかもしれない
 		// set default method context
 		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-		// dot のチェック
-		if(args[0].IsDotContext())
+		// dynamic のチェック
+		if(args[0].IsDynamicContext())
 			DefaultMethodContext = NULL; // TODO: この場合も null でよかったっけ？
 		else
 			DefaultMethodContext = new tRisseVariant(args[0]);

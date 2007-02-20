@@ -52,7 +52,7 @@ namespace Risse
 //! @brief		ネイティブ関数宣言の終了
 #define RISSE_END_NATIVE_METHOD \
 		} \
-	} static instance;\
+	} static instance; \
 	RegisterNormalMember(name, tRisseVariant(tRisseNativeFunction::New(instance.Do), context)); \
 }
 

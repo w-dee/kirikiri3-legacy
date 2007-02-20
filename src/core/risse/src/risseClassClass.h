@@ -59,7 +59,10 @@ class tRisseClassInstance : public tRisseClassClass
 
 public:
 	// ! @brief		コンストラクタ
-	tRisseClassInstance() {;}
+	tRisseClassInstance();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

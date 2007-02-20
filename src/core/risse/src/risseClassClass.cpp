@@ -142,6 +142,22 @@ tRisseVariant tRisseClassClass::CreateNewObjectBase()
 
 
 
+//---------------------------------------------------------------------------
+tRisseClassInstance::tRisseClassInstance()
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassInstance::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 tRisseClassInstance::tRetValue tRisseClassInstance::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)

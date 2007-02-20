@@ -111,11 +111,7 @@ void tRisseObjectClass::RegisterMembers()
 				{
 					if(context->GetType() == tRisseVariant::vtObject)
 					{
-						if(context == tRisseVariant::GetAnyContext())
-						{
-							RisseFPrint(stdout, RISSE_WS(":any"));
-						}
-						else if(context == tRisseVariant::GetDotContext())
+						if(context == tRisseVariant::GetDotContext())
 						{
 							RisseFPrint(stdout, RISSE_WS(":dot"));
 						}

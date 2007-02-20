@@ -468,10 +468,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	case ocSetDefaultContext:
 		// set default method context
 		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-		// any と dot のチェック
-		if(args[0].IsAnyContext())
-			DefaultMethodContext = NULL;
-		else if(args[0].IsDotContext())
+		// dot のチェック
+		if(args[0].IsDotContext())
 			DefaultMethodContext = NULL; // TODO: この場合も null でよかったっけ？
 		else
 			DefaultMethodContext = new tRisseVariant(args[0]);

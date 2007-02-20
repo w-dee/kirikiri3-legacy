@@ -40,7 +40,7 @@ private: // static オブジェクト
 	static tStaticPrimitive VoidObject;
 	static tStaticPrimitive NullObject;
 
-	//! @brief	AnyContext や DotContext などの特殊な値を表す static な領域
+	//! @brief	DotContext などの特殊な値を表す static な領域
 	struct tStaticObject
 	{
 		risse_ptruint Intf; //!< オブジェクトインターフェースへのポインタ
@@ -49,7 +49,6 @@ private: // static オブジェクト
 		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint) - sizeof(const tRisseVariantBlock *)];
 			//!< 残り(0で埋める) パディングは問題にならないはず
 	};
-	static tStaticObject AnyContext;
 	static tStaticObject DotContext;
 
 public: // static オブジェクト
@@ -65,12 +64,6 @@ public: // static オブジェクト
 	static const tRisseVariantBlock & GetNullObject()
 	{
 		return *reinterpret_cast<tRisseVariantBlock*>(&NullObject);
-	}
-
-	//! @brief		AnyContext オブジェクトを得る
-	static const tRisseVariantBlock * GetAnyContext()
-	{
-		return reinterpret_cast<tRisseVariantBlock*>(&AnyContext);
 	}
 
 	//! @brief		DotContext オブジェクトを得る
@@ -220,7 +213,7 @@ public: // コンストラクタ/代入演算子
 		// これはちょっと特殊
 		Type = vtObject;
 		SetObjectIntf(ref);
-		AsObject().Context = GetAnyContext(); // this は AnyContext に設定
+		AsObject().Context = GetDotContext(); // this は DotContext に設定
 		return *this;
 	}
 
@@ -274,7 +267,7 @@ public: // Object関連
 	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
 	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
 	//!				チェックしないので注意すること。@n
-	//!				AnyContextやDotContextを指定する場合はGetAnyContext()やGetDotContext()の戻りを指定すること。
+	//!				DotContextを指定する場合はGetDotContext()の戻りを指定すること。
 	void SetContext(const tRisseVariantBlock * context)
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
@@ -287,11 +280,11 @@ public: // Object関連
 	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
 	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
 	//!				チェックしないので注意すること。@n
-	//!				AnyContextやDotContextを指定する場合はGetAnyContext()やGetDotContext()の戻りを指定すること。@n
+	//!				DotContextを指定する場合はGetDotContext()の戻りを指定すること。@n
 	//!				このメソッドは const tRisseVariantBlock * context を引数に取る版とちがい、
-	//!				context がどうやら any context や dot コンテキストらしい場合は自動的に GetAnyContext() や
-	//!				GetDotContext() の戻りに変換する。そうでない場合は tRisseVariantBlock を new してそのポインタを
-	//!				SetContext() で設定する。
+	//!				context がどうやらdot コンテキストらしい場合は自動的に
+	//!				GetDotContext() の戻りに変換する。そうでない場合は
+	//!				tRisseVariantBlock を new してそのポインタを SetContext() で設定する。
 	void SetContext(const tRisseVariantBlock &context);
 
 	//! @brief		コンテキストを取得する
@@ -306,22 +299,13 @@ public: // Object関連
 
 	//! @brief		コンテキストを持っているかどうかを得る
 	//! @note		このメソッドはvtがvtObject以外の場合はtrueを返す。
-	//!				コンテキストを持っている(コンテキストがanyでもdotでもない)場合に真を返す
+	//!				コンテキストを持っている(コンテキストがdotでない)場合に真を返す
 	bool HasContext() const
 	{
 		if(GetType() != vtObject) return true;
 		const tObject & obj = AsObject();
 		RISSE_ASSERT(obj.Context != NULL);
-		return obj.Context != GetAnyContext() && obj.Context != GetDotContext();
-	}
-
-	//! @brief		このオブジェクトが AnyContext かどうかを返す
-	//! @return		このオブジェクトが AnyContext かどうか
-	bool IsAnyContext() const
-	{
-		if(GetType() != vtObject) return false;
-		// オブジェクトインターフェースのポインタが同一かどうかを得る
-		return AsObject().Intf == GetAnyContext()->AsObject().Intf;
+		return obj.Context != GetDotContext();
 	}
 
 	//! @brief		このオブジェクトが DotContext かどうかを返す
@@ -353,7 +337,7 @@ public: // Object関連
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
 		const tObject & obj = AsObject();
 		RISSE_ASSERT(obj.Context != NULL);
-		if(obj.Context != GetAnyContext() && obj.Context != GetDotContext())
+		if(obj.Context != GetDotContext())
 			return *obj.Context;
 		return This;
 	}

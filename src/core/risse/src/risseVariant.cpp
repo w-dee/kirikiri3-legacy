@@ -132,8 +132,11 @@ tRisseVariantBlock::tRetValue
 		// プリミティブ型に対する処理
 		{
 			tRetValue rv = GetPrimitiveClass()->GetGateway().
-				Operate(code, result, name, flags, args, *this); // 動作コンテキストは常に *this
-			if(rv == rvNoError && result)
+				Operate(code, result, name,
+				flags | tRisseOperateFlags::ofNoSetDefaultContext,
+					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+				args, *this); // 動作コンテキストは常に *this
+			if(rv == rvNoError && result) // TODO: code が ocDGet かどうかをチェックすべきじゃないのか？
 			{
 				// コンテキストを設定する
 				// コンテキストはこの操作が実行された時の状態を保っていなければ
@@ -154,7 +157,7 @@ tRisseVariantBlock::tRetValue
 		{
 			tRisseObjectInterface * intf = GetObjectInterface();
 			return intf->Operate(code, result, name, flags, args,
-				SelectContext(This)
+				SelectContext(flags, This)
 				);
 		}
 	}
@@ -170,7 +173,7 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseSt
 	tRisseVariantBlock ret;
 	intf->Do(ocDGet, &ret, name,
 		flags, tRisseMethodArgument::Empty(),
-		SelectContext(This)
+		SelectContext(flags, This)
 		);
 	return ret;
 }
@@ -185,7 +188,7 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 	tRisseObjectInterface * intf = GetObjectInterface();
 	intf->Do(ocDSet, NULL, name,
 		flags, tRisseMethodArgument::New(value),
-		SelectContext(This)
+		SelectContext(flags, This)
 		);
 }
 //---------------------------------------------------------------------------
@@ -197,7 +200,11 @@ void tRisseVariantBlock::FuncCall_Primitive(
 	risse_uint32 flags, const tRisseMethodArgument & args,
 	const tRisseVariant & This) const
 {
-	GetPrimitiveClass()->GetGateway().Do(ocFuncCall, NULL, name, flags, args, *this); // 動作コンテキストは常に *this
+	GetPrimitiveClass()->GetGateway().
+		Do(ocFuncCall, NULL, name,
+		flags |tRisseOperateFlags::ofNoSetDefaultContext,
+		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+		args, *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------
 
@@ -210,7 +217,7 @@ void tRisseVariantBlock::FuncCall_Object  (
 	tRisseObjectInterface * intf = GetObjectInterface();
 	intf->Do(ocFuncCall, ret, name,
 		flags, args,
-		SelectContext(This)
+		SelectContext(flags, This)
 		);
 }
 //---------------------------------------------------------------------------
@@ -1204,7 +1211,7 @@ void tRisseVariantBlock::DebugDump() const
 	}
 	else
 	{
-		RisseFPrint(stdout, (operator tRisseString()).c_str());
+		RisseFPrint(stdout, AsHumanReadable().c_str());
 	}
 
 	RisseFPrint(stdout, RISSE_WS("\n"));

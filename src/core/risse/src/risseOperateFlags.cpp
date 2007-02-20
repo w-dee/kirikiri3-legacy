@@ -42,6 +42,12 @@ tRisseString tRisseOperateFlags::AsString() const
 		str += RISSE_WS("ofPropertyOrConstOnly");
 	}
 
+	if(Flags & ofNoSetDefaultContext)
+	{
+		if(!str.IsEmpty()) str += RISSE_WC(' ');
+		str += RISSE_WS("ofNoSetDefaultContext");
+	}
+
 	// 戻る
 	return str;
 }

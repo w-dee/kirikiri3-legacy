@@ -105,6 +105,7 @@ void tRisseClassClass::RegisterMembers()
 //---------------------------------------------------------------------------
 tRisseClassClass::tRetValue tRisseClassClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
+/*
 	// ocCreateNewObjectBase の処理をオーバーライドする
 	if(code == ocCreateNewObjectBase && name.IsEmpty())
 	{
@@ -122,6 +123,7 @@ tRisseClassClass::tRetValue tRisseClassClass::Operate(RISSE_OBJECTINTERFACE_OPER
 
 		return rvNoError;
 	}
+*/
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 }
 //---------------------------------------------------------------------------
@@ -144,6 +146,7 @@ tRisseVariant tRisseClassClass::CreateNewObjectBase()
 //---------------------------------------------------------------------------
 tRisseClassInstance::tRetValue tRisseClassInstance::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
+/*
 	// ocCreateNewObjectBase の処理をオーバーライドする
 	if(code == ocCreateNewObjectBase && name.IsEmpty())
 	{
@@ -153,6 +156,7 @@ tRisseClassInstance::tRetValue tRisseClassInstance::Operate(RISSE_OBJECTINTERFAC
 		// それはこのクラスにおいては困るので tRisseClassBase の機能を呼ぶ
 		return tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 	}
+*/
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 }
 //---------------------------------------------------------------------------

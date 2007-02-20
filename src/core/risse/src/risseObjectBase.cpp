@@ -27,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID(45114,31718,49668,18467,56195,41722,1990,5427);
 //---------------------------------------------------------------------------
 tRisseObjectBase::tRisseObjectBase() : PrototypeName(ss_class)
 {
-	DefaultMethodContext = NULL;
+	DefaultMethodContext = new tRisseVariant(this);
 }
 //---------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ tRisseObjectBase::tRisseObjectBase() : PrototypeName(ss_class)
 tRisseObjectBase::tRisseObjectBase(const tRisseString & prototype_name) :
 				PrototypeName(prototype_name)
 {
-	DefaultMethodContext = NULL;
+	DefaultMethodContext = new tRisseVariant(this);
 }
 //---------------------------------------------------------------------------
 
@@ -466,6 +466,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 		return rvNoError;
 
 	case ocSetDefaultContext:
+		// TODO: この機能要らないかもしれない
 		// set default method context
 		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 		// dot のチェック

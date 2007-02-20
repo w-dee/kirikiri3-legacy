@@ -166,9 +166,6 @@ tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERAT
 			// プリミティブ型でなければ
 			// RTTIとしてこのクラスの物を設定する
 			new_object.GetObjectInterface()->SetRTTI(&RTTI);
-			// デフォルトのコンテキストをnew_object自身に設定する
-			new_object.Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
-						tRisseMethodArgument::New(new_object));
 		}
 		*result = new_object;
 		return rvNoError;

@@ -328,17 +328,22 @@ public: // Object関連
 	}
 
 	//! @brief		コンテキストを選択する
+	//! @param		flags		フラグ
 	//! @param		This		コンテキストを持っていなかった場合に返されるコンテキスト
 	//! @return		選択されたコンテキスト
 	//! @note		このメソッドはvtがvtObjectかどうかをチェックしないので注意。
 	//!				この値がコンテキストを持っていればそのコンテキストを返すが、そうでない場合は This を返す。
-	const tRisseVariantBlock & SelectContext(const tRisseVariantBlock & This) const
+	//!				ただし、フラグに ofNoSetDefaultContext が指定されていた場合は常に This を返す
+	const tRisseVariantBlock & SelectContext(risse_uint32 flags, const tRisseVariantBlock & This) const
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
-		const tObject & obj = AsObject();
-		RISSE_ASSERT(obj.Context != NULL);
-		if(obj.Context != GetDotContext())
-			return *obj.Context;
+		if(!(flags & tRisseOperateFlags::ofNoSetDefaultContext))
+		{
+			const tObject & obj = AsObject();
+			RISSE_ASSERT(obj.Context != NULL);
+			if(obj.Context != GetDotContext())
+				return *obj.Context;
+		}
 		return This;
 	}
 

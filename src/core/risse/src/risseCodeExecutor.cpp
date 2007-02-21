@@ -271,14 +271,22 @@ void tRisseCodeInterpreter::Execute(
 					// code[3] = フラグ
 					// code[4] = 引数の数
 					// code[5] ～   引数
-					// TODO: 引数展開、引数の省略など
+					// TODO: 引数展開など
 					RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-					tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4]);
-
-					for(risse_uint32 i = 0; i < code[4]; i++)
-						args.SetArgument(i, AR(code[i+5]));
 					tRisseVariant new_obj;
-					new_obj = AR(code[2]).New(0, args);
+					if(code[3] & RisseFuncCallFlag_Omitted)
+					{
+						// 引数の省略
+						new_obj = AR(code[2]).New(0, args);
+					}
+					else
+					{
+						// 引数の省略はなし
+						tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(code[4]);
+						for(risse_uint32 i = 0; i < code[4]; i++)
+							new_args.SetArgument(i, AR(code[i+5]));
+						new_obj = AR(code[2]).New(0, new_args);
+					}
 					if(code[1]!=RisseInvalidRegNum) AR(code[1]) = new_obj;
 					code += code[4] + 5;
 					break;
@@ -296,21 +304,30 @@ void tRisseCodeInterpreter::Execute(
 					// code[4] = 引数の数
 					// code[5] = ブロック引数の数
 					// code[6] ～   引数
-					// TODO: 引数展開、引数の省略など
+					// TODO: 引数展開など
 					RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-					tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4], code[5]);
-
-					for(risse_uint32 i = 0; i < code[4]; i++)
-						args.SetArgument(i, AR(code[i+6]));
-					for(risse_uint32 i = 0; i < code[5]; i++)
-						args.SetBlockArgument(i, AR(code[i+6+code[4]]));
-
 					if(code[1]!=RisseInvalidRegNum) AR(code[1]).Clear();
 					bool raised = false;
 					tRisseVariant val;
 					try
 					{
-						AR(code[2]).FuncCall(&val, 0, args, This);
+						if(code[3] & RisseFuncCallFlag_Omitted)
+						{
+							// 引数の省略
+							AR(code[2]).FuncCall(&val, 0, args, This);
+						}
+						else
+						{
+							// 引数の省略はなし
+							tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(code[4], code[5]);
+
+							for(risse_uint32 i = 0; i < code[4]; i++)
+								new_args.SetArgument(i, AR(code[i+6]));
+							for(risse_uint32 i = 0; i < code[5]; i++)
+								new_args.SetBlockArgument(i, AR(code[i+6+code[4]]));
+
+							AR(code[2]).FuncCall(&val, 0, new_args, This);
+						}
 					}
 					catch(const eRisseScriptException &e)
 					{
@@ -337,15 +354,25 @@ void tRisseCodeInterpreter::Execute(
 					// code[3] = フラグ
 					// code[4] = 引数の数
 					// code[5] ～   引数
-					// TODO: 引数展開、引数の省略など
+					// TODO: 引数展開など
 					RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-					tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4]);
+					if(code[3] & RisseFuncCallFlag_Omitted)
+					{
+						// 引数の省略
+						AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+							0, args, This);
+					}
+					else
+					{
+						// 引数の省略はなし
+						tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(code[4]);
 
-					for(risse_uint32 i = 0; i < code[4]; i++)
-						args.SetArgument(i, AR(code[i+5]));
+						for(risse_uint32 i = 0; i < code[4]; i++)
+							new_args.SetArgument(i, AR(code[i+5]));
 
-					AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-						0, args, This);
+						AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+							0, new_args, This);
+					}
 					code += code[4] + 5;
 					break;
 				}
@@ -364,17 +391,27 @@ void tRisseCodeInterpreter::Execute(
 					// code[4] = 引数の数
 					// code[5] = ブロック引数の数
 					// code[6] ～   引数
-					// TODO: 引数展開、引数の省略など
+					// TODO: 引数展開など
 					RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-					tRisseMethodArgument & args = tRisseMethodArgument::Allocate(code[4], code[5]);
+					if(code[3] & RisseFuncCallFlag_Omitted)
+					{
+						// 引数の省略
+						AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+							0, args, This);
+					}
+					else
+					{
+						// 引数の省略はなし
+						tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(code[4], code[5]);
 
-					for(risse_uint32 i = 0; i < code[4]; i++)
-						args.SetArgument(i, AR(code[i+6]));
-					for(risse_uint32 i = 0; i < code[5]; i++)
-						args.SetBlockArgument(i, AR(code[i+6+code[4]]));
+						for(risse_uint32 i = 0; i < code[4]; i++)
+							new_args.SetArgument(i, AR(code[i+6]));
+						for(risse_uint32 i = 0; i < code[5]; i++)
+							new_args.SetBlockArgument(i, AR(code[i+6+code[4]]));
 
-					AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
-						0, args, This);
+						AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+							0, new_args, This);
+					}
 					code += code[4] + code[5] + 6;
 					break;
 				}

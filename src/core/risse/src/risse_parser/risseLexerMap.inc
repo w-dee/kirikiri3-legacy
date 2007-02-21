@@ -19,9 +19,6 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
  case '\'':
   p += 1;
   { ptr = p; return T_BEGIN_STRING_LITERAL; }
- case ':':
-  p += 1;
-  { ptr = p; return T_COLON; }
  case ',':
   p += 1;
   { ptr = p; return T_COMMA; }
@@ -1658,6 +1655,15 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
   case '=':
    p += 2;
    { ptr = p; return T_CHEVRONEQUAL; }
+  }
+ case ':':
+  switch(p[1]) {
+  default:
+   p += 1;
+   { ptr = p; return T_COLON; }
+  case ':':
+   p += 2;
+   { ptr = p; return T_DOUBLECOLON; }
   }
  case '.':
   switch(p[1]) {

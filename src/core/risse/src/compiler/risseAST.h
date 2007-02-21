@@ -114,6 +114,17 @@ RISSE_AST_ENUM_END
 
 
 //---------------------------------------------------------------------------
+//! @brief		メンバ選択演算子のアクセス方法のタイプ
+//---------------------------------------------------------------------------
+RISSE_AST_ENUM_DEF(MemberAccessType)
+	RISSE_AST_ENUM_ITEM(mat, Direct			)		//!< 直接メンバ選択
+	RISSE_AST_ENUM_ITEM(mat, DirectThis		)		//!< 直接メンバ選択(Thisをコンテキストとして使う)
+	RISSE_AST_ENUM_ITEM(mat, Indirect		)		//!< 間接メンバ選択
+RISSE_AST_ENUM_END
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief	項のタイプ
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(FactorType)
@@ -818,11 +829,12 @@ class tRisseASTNode_MemberSel : public tRisseASTNode
 {
 	tRisseASTNode * Object; //!< オブジェクトノード
 	tRisseASTNode * MemberName; //!< メンバ名ノード
-	bool IsDirect; //!< 直接参照演算子 ('.' 演算子) かどうか
+	tRisseASTMemberAccessType AccessType ; //!< 演算子の種類
 	tRisseOperateFlags Flags; //!< メンバの操作フラグ(tRisseObjectInterface::Opeate() に渡す物)
 	tRisseMemberAttribute Attribute; //!< メンバの書き込み時の属性設定値 @r
 		//!< メンバへの書き込みのついでに属性を設定する場合のメンバの属性
 
+private:
 	//! @brief		PrepareSSA() で返す構造体
 	struct tPrepareSSA : public tRisseCollectee
 	{
@@ -835,13 +847,13 @@ public:
 	//! @param		position		ソースコード上の位置
 	//! @param		object			オブジェクトノード
 	//! @param		membername		メンバ名ノード
-	//! @param		is_direct		直接参照演算子 ('.' 演算子) かどうか
+	//! @param		access_type		アクセス方法の種類
 	//! @param		flags			メンバの操作フラグ
 	tRisseASTNode_MemberSel(risse_size position,
-			tRisseASTNode * object, tRisseASTNode * membername, bool is_direct,
+			tRisseASTNode * object, tRisseASTNode * membername, tRisseASTMemberAccessType access_type,
 				tRisseOperateFlags flags = tRisseOperateFlags()) :
 		tRisseASTNode(position, antMemberSel),
-			Object(object), MemberName(membername), IsDirect(is_direct), Flags(flags)
+			Object(object), MemberName(membername), AccessType(access_type), Flags(flags)
 	{
 		if(Object) Object->SetParent(this);
 		if(MemberName) MemberName->SetParent(this);
@@ -855,9 +867,9 @@ public:
 	//! @return		メンバ名ノード
 	tRisseASTNode * GetMemberName() const { return MemberName; }
 
-	//! @brief		直接参照演算子 ('.' 演算子) かどうかを得る
-	//! @return		直接参照演算子 ('.' 演算子) かどうか
-	bool GetIsDirect() const { return IsDirect; }
+	//! @brief		アクセス方法の種類を得る
+	//! @return		アクセス方法の種類
+	tRisseASTMemberAccessType GetAccessType() const { return AccessType; }
 
 	//! @brief		メンバの書き込み時の属性設定値を設定する
 	//! @param		attrib		メンバの書き込み時の属性設定値

@@ -173,10 +173,7 @@ tRisseString tRisseASTNode_MemberSel::GetChildNameAt(risse_size index) const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_MemberSel::GetDumpComment() const
 {
-	tRisseString str = 
-		IsDirect ?
-			RISSE_WS("direct"):
-			RISSE_WS("indirect");
+	tRisseString str = RisseASTMemberAccessTypeNames[AccessType];
 	tRisseString flags = Flags.AsString();
 	if(!flags.IsEmpty())
 	{
@@ -814,7 +811,7 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 		tRisseASTNode_MemberSel * write_node =
 			new tRisseASTNode_MemberSel(position,
 			new tRisseASTNode_Factor(position, aftThis),
-			new tRisseASTNode_Factor(position, aftConstant, name), true,
+			new tRisseASTNode_Factor(position, aftConstant, name), matDirect,
 
 				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
 					tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly
@@ -851,10 +848,21 @@ tRisseSSAVariable * tRisseASTNode_MemberSel::DoReadSSA(
 
 	// 文の作成
 	tRisseSSAVariable * ret_var = NULL;
+	tRisseOpCode code = ocNoOperation;
+	tRisseOperateFlags new_flags = Flags;
+	switch(AccessType)
+	{
+	case matDirect:		code = ocDGet;		break;
+	case matDirectThis:	code = ocDGet;
+			new_flags = new_flags | tRisseOperateFlags::ofUseThisAsContext;	break;
+	case matIndirect:	code = ocIGet;		break;
+	}
+	RISSE_ASSERT(code != ocNoOperation);
+
 	tRisseSSAStatement * stmt =
-		form->AddStatement(GetPosition(), IsDirect?ocDGet:ocIGet, &ret_var,
+		form->AddStatement(GetPosition(), code, &ret_var,
 							pws->ObjectVar, pws->MemberNameVar);
-	stmt->SetAccessFlags(Flags);
+	stmt->SetAccessFlags(new_flags);
 
 	// 戻りの変数を返す
 	return ret_var;
@@ -869,15 +877,26 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
 	// 文の作成
+	tRisseOperateFlags new_flags = Flags;
+	tRisseOpCode code = ocNoOperation;
+	switch(AccessType)
+	{
+	case matDirect:		code = ocDSet;		break;
+	case matDirectThis:	code = ocDSet;
+			new_flags = new_flags | tRisseOperateFlags::ofUseThisAsContext;	break;
+	case matIndirect:	code = ocISet;		break;
+	}
+	RISSE_ASSERT(code != ocNoOperation);
+
 	tRisseSSAStatement * stmt =
-		form->AddStatement(GetPosition(), IsDirect?ocDSet:ocISet, NULL,
+		form->AddStatement(GetPosition(), code, NULL,
 							pws->ObjectVar, pws->MemberNameVar, value);
-	stmt->SetAccessFlags(Flags|tRisseOperateFlags::ofMemberEnsure);
+	stmt->SetAccessFlags(new_flags|tRisseOperateFlags::ofMemberEnsure);
 		// tRisseOperateFlags::ofMemberEnsureは常につく
 
 	if(Attribute.HasAny())
 	{
-		RISSE_ASSERT(IsDirect);
+		RISSE_ASSERT(AccessType == matDirect || AccessType == matDirectThis);
 		// 属性を持っている場合はそれを設定する文を作成する
 		tRisseSSAStatement * stmt =
 			form->AddStatement(GetPosition(), ocDSetAttrib, NULL,
@@ -992,7 +1011,7 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
 		new tRisseASTNode_Factor(GetPosition(), aftThis),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), true);
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirect);
 }
 //---------------------------------------------------------------------------
 
@@ -1003,7 +1022,7 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThisProxy() 
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
 		new tRisseASTNode_Factor(GetPosition(), aftThisProxy),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), true);
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), matDirect);
 }
 //---------------------------------------------------------------------------
 

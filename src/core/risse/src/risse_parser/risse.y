@@ -190,6 +190,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	T_MODULE				"module"
 	T_RPARENTHESIS			")"
 	T_COLON					":"
+	T_DOUBLECOLON			"::"
 	T_SEMICOLON				";"
 	T_LBRACE				"{"
 	T_RBRACE				"}"
@@ -326,7 +327,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %left		<np>	"%" "/" "\\" "*"
 %right		<np>	"!" "~" "--" "++" "new" "delete" "typeof" "#" "$" T_UNARY
 %nonassoc	<np>	"incontextof" T_POSTUNARY
-%left		<np>	"(" ")" "[" "]" "." T_FUNCCALL
+%left		<np>	"(" ")" "[" "]" "." "::" T_FUNCCALL
 
 
 %%
@@ -999,9 +1000,11 @@ expr
 	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
 	| func_call_expr				{ ; }
 	| "(" expr_with_comma ")"		{ $$ = $2; }
-	| expr "[" expr "]"				{ $$ = N(MemberSel)(LP, $1, $3, false); }
-	| expr "." member_name			{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), true); }
-	| expr "." "(" expr ")"			{ $$ = N(MemberSel)(LP, $1, $4, true); }
+	| expr "[" expr "]"				{ $$ = N(MemberSel)(LP, $1, $3, matIndirect); }
+	| expr "." member_name			{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirect); }
+	| expr "." "(" expr ")"			{ $$ = N(MemberSel)(LP, $1, $4, matDirect); }
+	| expr "::" member_name			{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirectThis); }
+	| expr "::" "(" expr ")"		{ $$ = N(MemberSel)(LP, $1, $4, matDirectThis); }
 	| expr "<" member_attr_list ">"
 	  %prec T_FUNCCALL				{ $$ = N(CastAttr)(LP, *$3, $1); }
 	| factor_expr

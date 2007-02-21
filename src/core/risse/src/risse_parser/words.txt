@@ -26,6 +26,7 @@
 ~               T_TILDE                  - false false
 ?               T_QUESTION               - false false
 :               T_COLON                  - false false
+::              T_DOUBLECOLON            - false false
 ,               T_COMMA                  - false false
 ;               T_SEMICOLON              - false false
 {               T_LBRACE                 - false false

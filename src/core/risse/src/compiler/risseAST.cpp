@@ -247,6 +247,29 @@ tRisseString tRisseASTNode_Trinary::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
+tRisseString tRisseASTNode_InContextOf::GetChildNameAt(risse_size index) const
+{
+	switch(index)
+	{
+	case 0: return RISSE_WS("instance");
+	case 1: return RISSE_WS("context");
+	}
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode_InContextOf::GetDumpComment() const
+{
+	tRisseString ret;
+	if(Context == NULL) ret = RISSE_WS("dynamic");
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseASTNode_Array::Strip()
 {
 	while(GetChildCount() > 0 && GetLastChild() == NULL) PopChild();
@@ -1302,7 +1325,6 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 	case abtMul:				// *
 	case abtAdd:				// +
 	case abtSub:				// -
-	case abtIncontextOf:		// incontextof
 		{
 			// 普通の２項演算子
 
@@ -1330,7 +1352,6 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			case abtMul:				code = ocMul;				break; // *
 			case abtAdd:				code = ocAdd;				break; // +
 			case abtSub:				code = ocSub;				break; // -
-			case abtIncontextOf:		code = ocIncontextOf;		break; // incontextof
 			default:
 				// ここには来ないがこれを書いておかないと
 				// コンパイラが文句をたれるので
@@ -1365,6 +1386,27 @@ tRisseSSAVariable * tRisseASTNode_Trinary::DoReadSSA(
 	RISSE_ASSERT(TrinaryType == attCondition);
 	return tRisseASTNode_If::InternalDoReadSSA(form, GetPosition(),
 		RISSE_WS("cond"), Child1, Child2, Child3, true);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_InContextOf::DoReadSSA(
+			tRisseSSAForm *form, void * param) const
+{
+
+	// 左辺の値を得る
+	tRisseSSAVariable * lhs_var = Instance->GenerateReadSSA(form);
+	// 右辺の値を得る
+	tRisseSSAVariable * rhs_var = Context ?  Context->GenerateReadSSA(form) : NULL;
+
+	// 演算を行う文を生成
+	tRisseSSAVariable * ret_var = NULL;
+	form->AddStatement(GetPosition(), ocInContextOf, &ret_var, lhs_var, rhs_var);
+		// Context が NULL の場合は rhs_var も NULL になるので注意
+
+	// 戻る
+	return ret_var;
 }
 //---------------------------------------------------------------------------
 
@@ -2844,7 +2886,7 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 		form->AddStatement(GetPosition(), ocAssignThis, &this_var);
 
 		form->AddStatement(GetPosition(),
-			ocIncontextOf, &final_var, wrapped_lazyblock_var, this_var);
+			ocInContextOf, &final_var, wrapped_lazyblock_var, this_var);
 	}
 
 	// このノードはラップされた方の関数(メソッド)を返す
@@ -2971,7 +3013,7 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 		form->AddStatement(GetPosition(), ocAssignThis, &this_var);
 
 		form->AddStatement(GetPosition(),
-			ocIncontextOf, &final_var, property_instance_var, this_var);
+			ocInContextOf, &final_var, property_instance_var, this_var);
 	}
 
 	// プロパティオブジェクトを返す
@@ -3065,7 +3107,7 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 
 	// クラス/モジュールの中身のコンテキストを、新しく作成したインスタンスの物にする
 	form->AddStatement(GetPosition(),
-			ocIncontextOf, &classblock_var, classblock_var, class_instance_var);
+			ocInContextOf, &classblock_var, classblock_var, class_instance_var);
 
 	// クラス/モジュールの中身を「実行」するためのSSA表現を生成する。
 	// class  {    } の中身はそれが実行されることにより、クラス/モジュールインスタンスへの

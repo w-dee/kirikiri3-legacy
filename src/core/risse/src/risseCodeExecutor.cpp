@@ -779,7 +779,7 @@ void tRisseCodeInterpreter::Execute(
 				code += 4;
 				break;
 
-			case ocIncontextOf	: // chgc	 incontextof
+			case ocInContextOf	: // cntx	 incontextof
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
@@ -791,6 +791,19 @@ void tRisseCodeInterpreter::Execute(
 					AR(code[1]).SetContext(AR(code[3]));
 				}
 				code += 4;
+				break;
+
+			case ocInContextOfDyn	: // cntxdyn	 incontextofdyn
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				AR(code[1]) = AR(code[2]);
+				if(AR(code[1]).GetType() == tRisseVariant::vtObject)
+				{
+					// 今のところ AR(code[2]) が vtObject でなかった場合は
+					// この操作は単に無視される
+					AR(code[1]).SetContext(tRisseVariant::GetDynamicContext());
+				}
+				code += 3;
 				break;
 
 			case ocDGet			: // dget	 get .  

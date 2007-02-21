@@ -101,7 +101,8 @@ Idiv					idiv		R,R,R,-,-,-		\			#!< \ (integer div)
 Mul						mul			R,R,R,-,-,-		*			#!< *
 Add						add			R,R,R,-,-,-		+			#!< +
 Sub						sub			R,R,R,-,-,-		-			#!< -
-IncontextOf				chgc		R,R,R,-,-,-		----		#!< incontextof
+InContextOf				cntx		R,R,R,-,-,-		----		#!< incontextof
+InContextOfDyn			cntxdyn		R,R,-,-,-,-		----		#!< incontextof dynamic
 
 DGet					dget		R,R,R,-,-,-		----		#!< get .  
 DGetF					dgetf		R,R,R,O,-,-		----		#!< get . with flags (下記参照)

@@ -72,6 +72,7 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Unary			)		//!< 単項演算子
 	RISSE_AST_ENUM_ITEM(ant, Binary			)		//!< 二項演算子
 	RISSE_AST_ENUM_ITEM(ant, Trinary		)		//!< 三項演算子
+	RISSE_AST_ENUM_ITEM(ant, InContextOf	)		//!< incontextof 演算子
 	RISSE_AST_ENUM_ITEM(ant, CastAttr		)		//!< 属性のキャスト
 	RISSE_AST_ENUM_ITEM(ant, Array			)		//!< インライン配列
 	RISSE_AST_ENUM_ITEM(ant, Dict			)		//!< インライン辞書配列
@@ -198,7 +199,6 @@ RISSE_AST_ENUM_DEF(BinaryType)
 	RISSE_AST_ENUM_ITEM(abt, Mul			)		//!< *
 	RISSE_AST_ENUM_ITEM(abt, Add			)		//!< +
 	RISSE_AST_ENUM_ITEM(abt, Sub			)		//!< -
-	RISSE_AST_ENUM_ITEM(abt, IncontextOf	)		//!< incontextof
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 
@@ -1221,6 +1221,74 @@ public:
 		case 0: return Child1;
 		case 1: return Child2;
 		case 2: return Child3;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tRisseString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tRisseString GetDumpComment() const;
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	InContextOf ノード
+//---------------------------------------------------------------------------
+class tRisseASTNode_InContextOf : public tRisseASTNode
+{
+	tRisseASTNode * Instance; //!< インスタンスノード
+	tRisseASTNode * Context; //!< コンテキストノード (NULL=dynamicのとき)
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		instance		インスタンス
+	//! @param		context			コンテキスト (NULL = dynamicのとき)
+	tRisseASTNode_InContextOf(risse_size position,
+			tRisseASTNode * instance, tRisseASTNode * context) :
+		tRisseASTNode(position, antInContextOf),
+			Instance(instance), Context(context)
+	{
+		if(Instance) Instance->SetParent(this);
+		if(Context) Context->SetParent(this);
+	}
+
+	//! @brief		インスタンスノードを得る
+	//! @return		インスタンスノード
+	tRisseASTNode * GetInstance() const { return Instance; }
+
+	//! @brief		コンテキストノードを得る
+	//! @return		コンテキストノード
+	tRisseASTNode * GetContext() const { return Context; }
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tRisseASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Instance;
+		case 1: return Context;
 		}
 		return NULL;
 	}

@@ -719,6 +719,18 @@ void tRisseCodeGenerator::PutOperator(tRisseOpCode op, const tRisseSSAVariable *
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutInContextOf(const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * instance, const tRisseSSAVariable * context)
+{
+	PutWord(static_cast<risse_uint32>(context ? ocInContextOf : ocInContextOfDyn));
+	PutWord(FindRegMap(dest));
+	PutWord(FindRegMap(instance));
+	if(context) PutWord(FindRegMap(context));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutGet(tRisseOpCode op, const tRisseSSAVariable * dest,
 		const tRisseSSAVariable * obj, const tRisseSSAVariable * name, risse_uint32 flags)
 {

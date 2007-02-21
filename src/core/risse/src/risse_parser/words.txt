@@ -94,6 +94,7 @@ debugger            T_DEBUGGER     - true false
 default             T_DEFAULT      - true false
 delete              T_DELETE       - true false
 do                  T_DO           - true false
+dynamic             T_DYNAMIC      - true false
 extends             T_EXTENDS      - true false
 export              T_EXPORT       - true false
 enum                T_ENUM         - true false

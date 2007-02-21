@@ -238,6 +238,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	T_OCTET					"octet"
 	T_AS					"as"
 	T_USE					"use"
+	T_DYNAMIC				"dynamic"
 	T_ABSTRACT				"abstract"
 	T_IMPLEMENTS			"implements"
 	T_INTERFACE				"interface"
@@ -861,6 +862,7 @@ member_name
 	| "default"								{ $$ = new tRisseVariant(ss_default        ); }
 	| "delete"								{ $$ = new tRisseVariant(ss_delete         ); }
 	| "do"									{ $$ = new tRisseVariant(ss_do             ); }
+	| "dynamic"								{ $$ = new tRisseVariant(ss_dynamic        ); }
 	| "extends"								{ $$ = new tRisseVariant(ss_extends        ); }
 	| "export"								{ $$ = new tRisseVariant(ss_export         ); }
 	| "enum"								{ $$ = new tRisseVariant(ss_enum           ); }
@@ -995,7 +997,8 @@ expr
 	| "typeof" expr					{ ; }
 	| "+" expr %prec T_UNARY		{ $$ = N(Unary)(LP, autPlus				,$2); }
 	| "-" expr %prec T_UNARY		{ $$ = N(Unary)(LP, autMinus			,$2); }
-	| expr "incontextof" expr		{ $$ = N(Binary)(LP, abtIncontextOf,   $1, $3); }
+	| expr "incontextof" expr		{ $$ = N(InContextOf)(LP,  $1, $3  ); }
+	| expr "incontextof" "dynamic"	{ $$ = N(InContextOf)(LP,  $1, NULL); }
 	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostDec			,$1); }
 	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
 	| func_call_expr				{ ; }

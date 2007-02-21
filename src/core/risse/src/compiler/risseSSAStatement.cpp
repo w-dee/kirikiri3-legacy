@@ -402,10 +402,18 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocMul:
 	case ocAdd:
 	case ocSub:
-	case ocIncontextOf:
 		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Used.size() == 2);
 		gen->PutOperator(Code, Declared, Used[0], Used[1]);
+		break;
+
+	case ocInContextOf:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1 || Used.size() == 2);
+		if(Used.size() == 2)
+			gen->PutInContextOf(Declared, Used[0], Used[1]); // 普通の incontextof
+		else
+			gen->PutInContextOf(Declared, Used[0], NULL); // incontextof dynamic
 		break;
 
 	case ocDGet:

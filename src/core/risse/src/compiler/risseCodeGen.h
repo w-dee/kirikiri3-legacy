@@ -377,6 +377,13 @@ public:
 	void PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
 		const tRisseSSAVariable * arg1, const tRisseSSAVariable * arg2, const tRisseSSAVariable * arg3);
 
+	//! @brief		InContextOf コードを置く
+	//! @param		dest	結果を格納する変数
+	//! @param		instance	インスタンスを表す変数
+	//! @param		context		コンテキストを表す変数(NULLの場合はdynamicコンテキスト)
+	void PutInContextOf(const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * instance, const tRisseSSAVariable * context);
+
 	//! @brief		DGetとIGetのコードを置く
 	//! @param		op		オペレーションコード
 	//! @param		dest	結果を格納する変

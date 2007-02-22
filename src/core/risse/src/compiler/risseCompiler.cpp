@@ -433,15 +433,18 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 
 
 //---------------------------------------------------------------------------
-void tRisseCompiler::CompileClass(tRisseASTNode * root, const tRisseString & name,
+void tRisseCompiler::CompileClass(const gc_vector<tRisseASTNode *> & roots, const tRisseString & name,
 	tRisseSSAForm * form, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var, bool reg_super)
 {
+	RISSE_ASSERT(roots.size() >= 1);
+	risse_size pos = roots[0]->GetPosition();
+
 	// クラスの内部名称を決める
 	tRisseString numbered_class_name = RISSE_WS("class ") + name + RISSE_WS(" ") +
 					tRisseString::AsString(form->GetUniqueNumber());
 
 	// トップレベルのSSA形式インスタンスを作成する
-	new_form = CreateTopLevelSSAForm(root->GetPosition(), numbered_class_name, true, true);
+	new_form = CreateTopLevelSSAForm(pos, numbered_class_name, true, true);
 
 	// クラス名を設定する
 	new_form->GetFunction()->GetFunctionGroup()->SetClassName(name);
@@ -454,20 +457,20 @@ void tRisseCompiler::CompileClass(tRisseASTNode * root, const tRisseString & nam
 		// 変数は記録されずに、この "super" のような特殊な変数が記録されることになる。
 		tRisseSSAVariable * param_var = NULL;
 		tRisseSSAStatement * assignparam_stmt = 
-			new_form->AddStatement(root->GetPosition(), ocAssignParam, &param_var);
+			new_form->AddStatement(pos, ocAssignParam, &param_var);
 		assignparam_stmt->SetIndex(0);
 
 		new_form->GetLocalNamespace()->Add(RISSE_WS("super"), NULL);
-		new_form->GetLocalNamespace()->Write(new_form, root->GetPosition(), RISSE_WS("super"), param_var);
+		new_form->GetLocalNamespace()->Write(new_form, pos, RISSE_WS("super"), param_var);
 	}
 
 	// トップレベルのSSA形式の内容を作成する
 	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
-	new_form->Generate(root);
+	new_form->Generate(roots);
 
 	// クラスを生成する文を追加する
 	tRisseSSAStatement * defineclass_stmt =
-		form->AddStatement(root->GetPosition(), ocDefineClass, &block_var);
+		form->AddStatement(pos, ocDefineClass, &block_var);
 	defineclass_stmt->SetName(numbered_class_name);
 	defineclass_stmt->SetDefinedForm(new_form);
 }

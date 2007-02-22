@@ -45,6 +45,9 @@ void tRisseRealClass::RegisterMembers()
 	inherited::RegisterMembers();
 
 	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 

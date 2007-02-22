@@ -3080,10 +3080,23 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 		// 親クラスを得るための式を作る
 
 		if(SuperClass)
+		{
+			// スーパークラスが指定されている
 			super_class_var = SuperClass->GenerateReadSSA(form);
+		}
 		else
-			super_class_var =
-				form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
+		{
+			// スーパークラスが指定されていないので global.Object を
+			// 使う
+			tRisseASTNode_Factor * global = new tRisseASTNode_Factor(GetPosition(), aftGlobal);
+			tRisseASTNode_Factor * Object =
+				new tRisseASTNode_Factor(GetPosition(), aftConstant,
+					tRisseVariant(tRisseString(RISSE_WS("Object"))));
+			tRisseASTNode_MemberSel * global_Object =
+				new tRisseASTNode_MemberSel(GetPosition(), global, Object, matDirect);
+
+			super_class_var = global_Object->GenerateReadSSA(form);
+		}
 
 		// 新しいクラスインスタンスを作成する
 		form->AddStatement(GetPosition(),
@@ -3103,7 +3116,20 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	tRisseCompiler * compiler = form->GetFunction()->GetFunctionGroup()->GetCompiler();
 	tRisseSSAVariable * classblock_var = NULL;
 	tRisseSSAForm * new_form = NULL;
-	compiler->CompileClass(Body, class_name, form, new_form, classblock_var, !IsModule);
+	gc_vector<tRisseASTNode *> roots;
+
+	if(!IsModule)
+	{
+		roots.push_back(GenerateDefaultInitializeAST(Body->GetPosition()));
+		// デフォルトの function initialize() { super::initialize(...); } を生成する。
+		// これはあとからユーザスクリプトでオーバーライドしてもよいし、しなくてもよい。
+		roots.push_back(GenerateDefaultConstructAST(Body->GetPosition()));
+		// デフォルトの function construct() {} を生成する。
+		// これはあとからユーザスクリプトでオーバーライドしてもよいし、しなくてもよい。
+	}
+
+	roots.push_back(Body);
+	compiler->CompileClass(roots, class_name, form, new_form, classblock_var, !IsModule);
 
 	// クラス/モジュールの中身のコンテキストを、新しく作成したインスタンスの物にする
 	form->AddStatement(GetPosition(),
@@ -3117,7 +3143,7 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	tRisseSSAStatement * call_stmt;
 
 	call_stmt = form->AddStatement(GetPosition(),
-													ocFuncCall, &funccall_result, classblock_var, super_class_var);
+		ocFuncCall, &funccall_result, classblock_var, super_class_var);
 		// 引数としてスーパークラスを指定する
 		// (モジュールの場合は何も渡されない)
 
@@ -3126,6 +3152,60 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 
 	// 新しく作成したクラス/モジュールインスタンスを返す
 	return class_instance_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseASTNode * tRisseASTNode_ClassDecl::GenerateDefaultInitializeAST(risse_size pos)
+{
+	// function initialize() { super::initialize(...); }
+	// を表すASTノードを生成して返す
+
+	// function 定義を作成
+	tRisseASTNode_FuncDecl * funcdecl = new tRisseASTNode_FuncDecl(pos);
+	funcdecl->SetName(RISSE_WS("initialize"));
+
+	// super::initialize() の部分を作成
+	tRisseASTNode_Factor * super = new tRisseASTNode_Factor(pos, aftSuper);
+	tRisseASTNode_Factor * initialize =
+		new tRisseASTNode_Factor(pos, aftConstant,
+			tRisseVariant(tRisseString(RISSE_WS("initialize"))));
+	tRisseASTNode_MemberSel * super_initialize =
+		new tRisseASTNode_MemberSel(pos, super, initialize, matDirectThis);
+
+	tRisseASTNode_FuncCall * funccall = new tRisseASTNode_FuncCall(pos, true);
+	funccall->SetExpression(super_initialize);
+
+	tRisseASTNode_ExprStmt * funccall_expr = new tRisseASTNode_ExprStmt(pos, funccall);
+
+	// function 定義のブロックを作成
+	tRisseASTNode_Context * body = new tRisseASTNode_Context(pos, actBlock, RISSE_WS("Block"));
+	body->AddChild(funccall_expr);
+
+	// function 定義を返す
+	funcdecl->SetBody(body);
+	return funcdecl;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseASTNode * tRisseASTNode_ClassDecl::GenerateDefaultConstructAST(risse_size pos)
+{
+	// function construct() { }
+	// を表すASTノードを生成して返す
+
+	// function 定義を作成
+	tRisseASTNode_FuncDecl * funcdecl = new tRisseASTNode_FuncDecl(pos);
+	funcdecl->SetName(RISSE_WS("construct"));
+
+	// function 定義のブロックを作成
+	tRisseASTNode_Context * body = new tRisseASTNode_Context(pos, actBlock, RISSE_WS("Block"));
+
+	// function 定義を返す
+	funcdecl->SetBody(body);
+	return funcdecl;
 }
 //---------------------------------------------------------------------------
 

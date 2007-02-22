@@ -2837,6 +2837,14 @@ public:
 	//! @param		form		SSA 形式インスタンス
 	//! @return		クラスを表す変数
 	tRisseSSAVariable * GenerateClassDecl(tRisseSSAForm *form) const;
+
+	//! @brief		デフォルトの initialize メソッドを表す AST を生成して返す
+	//! @param		pos			スクリプト上の位置
+	static tRisseASTNode * GenerateDefaultInitializeAST(risse_size pos);
+
+	//! @brief		デフォルトの construct メソッドを表す AST を生成して返す
+	//! @param		pos			スクリプト上の位置
+	static tRisseASTNode * GenerateDefaultConstructAST(risse_size pos);
 };
 //---------------------------------------------------------------------------
 

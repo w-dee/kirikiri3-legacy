@@ -76,6 +76,10 @@ void tRisseSourcePointClass::RegisterMembers()
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
 
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)

@@ -203,6 +203,10 @@ public:
 		tRisseSSAForm * parent, bool useparentframe);
 
 	//! @brief		AST を SSA 形式に変換する
+	//! @param		roots	ASTのルートノードの配列
+	void Generate(const gc_vector<tRisseASTNode *> & roots);
+
+	//! @brief		AST を SSA 形式に変換する
 	//! @param		root	ASTのルートノード
 	void Generate(const tRisseASTNode * root);
 

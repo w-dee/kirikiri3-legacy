@@ -222,13 +222,14 @@ public:
 	void Compile(tRisseASTNode * root, bool need_result, bool is_expression);
 
 	//! @brief		ASTを元にクラスのコンパイルを行う
-	//! @param		root		クラスのルートASTノード
+	//! @param		root		クラスのルートASTノード(複数可)
 	//! @param		name		クラス名として表示する名前
 	//! @param		form		クラスを作成する場所にあるSSA形式インスタンス
 	//! @param		new_form	新しく作成された(ルートの)SSA形式インスタンス
 	//! @param		block_var	そのクラスのSSA変数を格納する先
 	//! @param		reg_super	スーパークラス用の変数を追加するかどうか(moduleの場合は偽にする)
-	void CompileClass(tRisseASTNode * root, const tRisseString & name, tRisseSSAForm * form,
+	void CompileClass(const gc_vector<tRisseASTNode *> & roots,
+		const tRisseString & name, tRisseSSAForm * form,
 		tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var, bool reg_super);
 
 private:

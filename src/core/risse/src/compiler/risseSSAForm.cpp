@@ -133,6 +133,22 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAForm::Generate(const gc_vector<tRisseASTNode *> & roots)
+{
+	// AST をたどり、それに対応する SSA 形式を作成する
+	RISSE_ASSERT(roots.size() >= 1);
+
+	// ルートノードを処理する
+	for(gc_vector<tRisseASTNode *>::const_iterator i = roots.begin(); i != roots.end(); i++)
+		(*i)->GenerateReadSSA(this);
+
+	// 実行ブロックの最後の return 文を生成する
+	GenerateLastReturn(roots.back());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSAForm::Generate(const tRisseASTNode * root)
 {
 	// AST をたどり、それに対応する SSA 形式を作成する

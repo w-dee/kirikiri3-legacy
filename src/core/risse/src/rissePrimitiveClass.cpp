@@ -39,6 +39,11 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 		tRisseVariant(this), Gateway);
 
 	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// initialize は各C++サブクラスで実装すること。
 
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する

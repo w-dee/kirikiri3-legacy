@@ -401,6 +401,8 @@ bool tRisseObjectBase::SetAttribute(
 		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
 			return false; // クラスを探さない場合はここでかえる
 
+		// TODO: モジュールに対する設定は？
+
 		// クラスを探す
 		tRisseVariant Class;
 		if(!Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
@@ -418,6 +420,57 @@ bool tRisseObjectBase::SetAttribute(
 	member->Attribute.Overwrite(flags);
 
 	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseObjectBase::InstanceOf(
+		const tRisseVariant & RefClass, risse_uint32 flags,
+		const tRisseVariant & This
+		)
+{
+	if(RefClass.GetType() != tRisseVariant::vtObject) return false;// vt は vtObjectでなければならない
+
+	if(this == RefClass.GetObjectInterface()) return true; // これそのものだ
+
+	if(flags & tRisseOperateFlags::ofInstanceMemberOnly)
+		return false; // クラスやモジュールを探さない場合はここでかえる
+
+	// モジュールを探す
+	tRisseVariant modules;
+	if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This))
+	{
+		// モジュール配列がある
+		// モジュールは、モジュール配列をたどることで検索を行う
+		risse_offset length =
+			static_cast<risse_offset>(
+				(risse_int64)modules.GetPropertyDirect(ss_length, 0, modules));
+		for(risse_offset i = 0; i < length; i++)
+		{
+			tRisseVariant index(static_cast<risse_int64>(i));
+			tRisseVariant module = modules.IGet(index);
+
+			if(module.ObjectInterfaceMatch(RefClass)) return true; // マッチした
+		}
+	}
+
+	// クラスを探す
+	tRisseVariant Class;
+	if(!Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
+		return false; // クラスを特定できない
+	if(Class.IsNull()) return false; // クラスが null
+
+	if(Class.ObjectInterfaceMatch(RefClass)) return true; // マッチした
+
+	// クラスに対して再帰
+	tRisseVariant result;
+	Class.GetObjectInterface()->Do(ocInstanceOf, &result, tRisseString::GetEmptyString(),
+		flags|tRisseOperateFlags::ofUseThisAsContext,
+		tRisseMethodArgument::New(RefClass),
+		(DefaultMethodContext && (flags & tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
+
+	return result.operator bool();
 }
 //---------------------------------------------------------------------------
 
@@ -459,6 +512,16 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 		if(!SetAttribute(name, flags))
 			return rvMemberNotFound;
 		return rvNoError;
+
+	case ocInstanceOf:
+		// TODO: このオブジェクトのメンバに対する操作への対応
+		{
+			RISSE_ASSERT(name.IsEmpty());
+			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+			bool res = InstanceOf(args[0], flags, This);
+			if(result) *result = res;
+			return rvNoError;
+		}
 
 	case ocGetDefaultContext:
 		// get default method context

@@ -71,45 +71,46 @@ static risse_char RisseOperatorMemberNames [] = {
 /*  63, offset=+ 172 */tRisseStringData::MightBeShared,'-',0,0x371a6e28,
 /*  64, offset=+ 176 */
 /*  65, offset=+ 176 */
-/*  66, offset=+ 176 */
-/*  67, offset=+ 176 */
-/*  68, offset=+ 176 */tRisseStringData::MightBeShared,'[',']',0,0x321b7cff,
-/*  69, offset=+ 181 */
-/*  70, offset=+ 181 */tRisseStringData::MightBeShared,'d','e','l','e','t','e','[',']',0,0xa063490b,
-/*  71, offset=+ 192 */
-/*  72, offset=+ 192 */
-/*  73, offset=+ 192 */
-/*  74, offset=+ 192 */tRisseStringData::MightBeShared,'[',']','=',0,0xcdc754c6,
-/*  75, offset=+ 198 */tRisseStringData::MightBeShared,'&','=',0,0xf73fc38c,
-/*  76, offset=+ 203 */tRisseStringData::MightBeShared,'|','=',0,0x3940e28e,
-/*  77, offset=+ 208 */tRisseStringData::MightBeShared,'^','=',0,0x68e166fa,
-/*  78, offset=+ 213 */tRisseStringData::MightBeShared,'-','=',0,0x9ae502b0,
-/*  79, offset=+ 218 */tRisseStringData::MightBeShared,'+','=',0,0x14807825,
-/*  80, offset=+ 223 */tRisseStringData::MightBeShared,'%','=',0,0xbc1a4e72,
-/*  81, offset=+ 228 */tRisseStringData::MightBeShared,'/','=',0,0x913a6d17,
-/*  82, offset=+ 233 */tRisseStringData::MightBeShared,'\\','=',0,0xd31cbda3,
-/*  83, offset=+ 238 */tRisseStringData::MightBeShared,'*','=',0,0x3e43cd2b,
-/*  84, offset=+ 243 */tRisseStringData::MightBeShared,'|','|','=',0,0x3c1d903a,
-/*  85, offset=+ 249 */tRisseStringData::MightBeShared,'&','&','=',0,0x0220217d,
-/*  86, offset=+ 255 */tRisseStringData::MightBeShared,'>','>','>','=',0,0x43b190ce,
-/*  87, offset=+ 262 */tRisseStringData::MightBeShared,'<','<','=',0,0x7d38fd56,
-/*  88, offset=+ 268 */tRisseStringData::MightBeShared,'>','>','=',0,0x222ef3a1,
-/*  89, offset=+ 274 */
-/*  90, offset=+ 274 */
-/*  91, offset=+ 274 */
-/*  92, offset=+ 274 */
-/*  93, offset=+ 274 */
-/*  94, offset=+ 274 */
-/*  95, offset=+ 274 */
-/*  96, offset=+ 274 */
-/*  97, offset=+ 274 */
-/*  98, offset=+ 274 */
-/*  99, offset=+ 274 */
-/* 100, offset=+ 274 */
-/* 101, offset=+ 274 */
-/* 102, offset=+ 274 */
-/* 103, offset=+ 274 */
-/* 104, offset=+ 274 */
+/*  66, offset=+ 176 */tRisseStringData::MightBeShared,'i','s','A',0,0xbc75eb92,
+/*  67, offset=+ 182 */
+/*  68, offset=+ 182 */
+/*  69, offset=+ 182 */tRisseStringData::MightBeShared,'[',']',0,0x321b7cff,
+/*  70, offset=+ 187 */
+/*  71, offset=+ 187 */tRisseStringData::MightBeShared,'d','e','l','e','t','e','[',']',0,0xa063490b,
+/*  72, offset=+ 198 */
+/*  73, offset=+ 198 */
+/*  74, offset=+ 198 */
+/*  75, offset=+ 198 */tRisseStringData::MightBeShared,'[',']','=',0,0xcdc754c6,
+/*  76, offset=+ 204 */tRisseStringData::MightBeShared,'&','=',0,0xf73fc38c,
+/*  77, offset=+ 209 */tRisseStringData::MightBeShared,'|','=',0,0x3940e28e,
+/*  78, offset=+ 214 */tRisseStringData::MightBeShared,'^','=',0,0x68e166fa,
+/*  79, offset=+ 219 */tRisseStringData::MightBeShared,'-','=',0,0x9ae502b0,
+/*  80, offset=+ 224 */tRisseStringData::MightBeShared,'+','=',0,0x14807825,
+/*  81, offset=+ 229 */tRisseStringData::MightBeShared,'%','=',0,0xbc1a4e72,
+/*  82, offset=+ 234 */tRisseStringData::MightBeShared,'/','=',0,0x913a6d17,
+/*  83, offset=+ 239 */tRisseStringData::MightBeShared,'\\','=',0,0xd31cbda3,
+/*  84, offset=+ 244 */tRisseStringData::MightBeShared,'*','=',0,0x3e43cd2b,
+/*  85, offset=+ 249 */tRisseStringData::MightBeShared,'|','|','=',0,0x3c1d903a,
+/*  86, offset=+ 255 */tRisseStringData::MightBeShared,'&','&','=',0,0x0220217d,
+/*  87, offset=+ 261 */tRisseStringData::MightBeShared,'>','>','>','=',0,0x43b190ce,
+/*  88, offset=+ 268 */tRisseStringData::MightBeShared,'<','<','=',0,0x7d38fd56,
+/*  89, offset=+ 274 */tRisseStringData::MightBeShared,'>','>','=',0,0x222ef3a1,
+/*  90, offset=+ 280 */
+/*  91, offset=+ 280 */
+/*  92, offset=+ 280 */
+/*  93, offset=+ 280 */
+/*  94, offset=+ 280 */
+/*  95, offset=+ 280 */
+/*  96, offset=+ 280 */
+/*  97, offset=+ 280 */
+/*  98, offset=+ 280 */
+/*  99, offset=+ 280 */
+/* 100, offset=+ 280 */
+/* 101, offset=+ 280 */
+/* 102, offset=+ 280 */
+/* 103, offset=+ 280 */
+/* 104, offset=+ 280 */
+/* 105, offset=+ 280 */
 };
 const tRisseVMInsnInfo RisseVMInsnInfo[] = {
 /*   0 */ {"NoOperation", "nop", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  なにもしない */},
@@ -178,43 +179,44 @@ const tRisseVMInsnInfo RisseVMInsnInfo[] = {
 /*  63 */ {"Sub", "sub", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+173,1} /*  - */},
 /*  64 */ {"InContextOf", "cntx", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  incontextof */},
 /*  65 */ {"InContextOfDyn", "cntxdyn", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  incontextof dynamic */},
-/*  66 */ {"DGet", "dget", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  get .   */},
-/*  67 */ {"DGetF", "dgetf", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  get . with flags (下記参照) */},
-/*  68 */ {"IGet", "iget", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+177,2} /*  get [ ] */},
-/*  69 */ {"DDelete", "ddel", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  delete . */},
-/*  70 */ {"IDelete", "idel", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+182,8} /*  delete [ ] */},
-/*  71 */ {"DSetAttrib", "dseta", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set member attribute */},
-/*  72 */ {"DSet", "dset", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set . */},
-/*  73 */ {"DSetF", "dsetf", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set . with flags (下記参照) */},
-/*  74 */ {"ISet", "iset", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+193,3} /*  set [ ] */},
-/*  75 */ {"BitAndAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+199,2} /*  &= */},
-/*  76 */ {"BitOrAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+204,2} /*  |= */},
-/*  77 */ {"BitXorAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+209,2} /*  ^= */},
-/*  78 */ {"SubAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+214,2} /*  -= */},
-/*  79 */ {"AddAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+219,2} /*  += */},
-/*  80 */ {"ModAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+224,2} /*  %= */},
-/*  81 */ {"DivAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+229,2} /*  /= */},
-/*  82 */ {"IdivAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+234,2} /*  \= */},
-/*  83 */ {"MulAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+239,2} /*  *= */},
-/*  84 */ {"LogOrAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+244,3} /*  ||= */},
-/*  85 */ {"LogAndAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+250,3} /*  &&= */},
-/*  86 */ {"RBitShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+256,4} /*  >>>= */},
-/*  87 */ {"LShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+263,3} /*  <<= */},
-/*  88 */ {"RShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+269,3} /*  >>= */},
-/*  89 */ {"VMCodeLast", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  VMオペコードの最後 */},
-/*  90 */ {"SetDefaultContext", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスに対して設定する */},
-/*  91 */ {"GetDefaultContext", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスから取得する */},
-/*  92 */ {"CreateNewObjectBase", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  クラスから新しいインスタンスを作成する際のベースとなるオブジェクトを新たに作成して返す */},
-/*  93 */ {"Phi", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  φ関数 */},
-/*  94 */ {"DefineAccessMap", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  アクセスマップ定義 */},
-/*  95 */ {"DefineLazyBlock", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  遅延評価ブロックの定義 */},
-/*  96 */ {"DefineClass", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  クラスの定義 */},
-/*  97 */ {"EndAccessMap", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  アクセスマップの使用終了 */},
-/*  98 */ {"ParentWrite", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  親名前空間への書き込み */},
-/*  99 */ {"ParentRead", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  親名前空間からの読み込み */},
-/* 100 */ {"ChildWrite", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  子名前空間への書き込み */},
-/* 101 */ {"ChildRead", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  子名前空間からの読み込み */},
-/* 102 */ {"WriteVar", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  変数への書き込み(変換の過程でocAssignかocWriteに変わる) */},
-/* 103 */ {"ReadVar", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  変数からの読み込み(変換の過程でocAssignかocReadに変わる) */},
-/* 104 */ {"OpCodeLast", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  オペコードの最後 */},
+/*  66 */ {"InstanceOf", "instof", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+177,3} /*  instanceof (isA) */},
+/*  67 */ {"DGet", "dget", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  get .   */},
+/*  68 */ {"DGetF", "dgetf", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  get . with flags (下記参照) */},
+/*  69 */ {"IGet", "iget", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+183,2} /*  get [ ] */},
+/*  70 */ {"DDelete", "ddel", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  delete . */},
+/*  71 */ {"IDelete", "idel", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+188,8} /*  delete [ ] */},
+/*  72 */ {"DSetAttrib", "dseta", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set member attribute */},
+/*  73 */ {"DSet", "dset", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set . */},
+/*  74 */ {"DSetF", "dsetf", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set . with flags (下記参照) */},
+/*  75 */ {"ISet", "iset", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+199,3} /*  set [ ] */},
+/*  76 */ {"BitAndAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+205,2} /*  &= */},
+/*  77 */ {"BitOrAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+210,2} /*  |= */},
+/*  78 */ {"BitXorAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+215,2} /*  ^= */},
+/*  79 */ {"SubAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+220,2} /*  -= */},
+/*  80 */ {"AddAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+225,2} /*  += */},
+/*  81 */ {"ModAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+230,2} /*  %= */},
+/*  82 */ {"DivAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+235,2} /*  /= */},
+/*  83 */ {"IdivAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+240,2} /*  \= */},
+/*  84 */ {"MulAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+245,2} /*  *= */},
+/*  85 */ {"LogOrAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+250,3} /*  ||= */},
+/*  86 */ {"LogAndAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+256,3} /*  &&= */},
+/*  87 */ {"RBitShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+262,4} /*  >>>= */},
+/*  88 */ {"LShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+269,3} /*  <<= */},
+/*  89 */ {"RShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+275,3} /*  >>= */},
+/*  90 */ {"VMCodeLast", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  VMオペコードの最後 */},
+/*  91 */ {"SetDefaultContext", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスに対して設定する */},
+/*  92 */ {"GetDefaultContext", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスから取得する */},
+/*  93 */ {"CreateNewObjectBase", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  クラスから新しいインスタンスを作成する際のベースとなるオブジェクトを新たに作成して返す */},
+/*  94 */ {"Phi", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  φ関数 */},
+/*  95 */ {"DefineAccessMap", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  アクセスマップ定義 */},
+/*  96 */ {"DefineLazyBlock", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  遅延評価ブロックの定義 */},
+/*  97 */ {"DefineClass", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  クラスの定義 */},
+/*  98 */ {"EndAccessMap", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  アクセスマップの使用終了 */},
+/*  99 */ {"ParentWrite", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  親名前空間への書き込み */},
+/* 100 */ {"ParentRead", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  親名前空間からの読み込み */},
+/* 101 */ {"ChildWrite", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  子名前空間への書き込み */},
+/* 102 */ {"ChildRead", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  子名前空間からの読み込み */},
+/* 103 */ {"WriteVar", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  変数への書き込み(変換の過程でocAssignかocWriteに変わる) */},
+/* 104 */ {"ReadVar", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  変数からの読み込み(変換の過程でocAssignかocReadに変わる) */},
+/* 105 */ {"OpCodeLast", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  オペコードの最後 */},
 };

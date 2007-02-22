@@ -147,7 +147,7 @@ tRisseVariantBlock::tRetValue
 				// しまう。関数やプロパティ以外はコンテキストを伴う必要はないので
 				// 努めて関数やプロパティ以外はダミーでもよいからコンテキストを
 				// 設定するようにするべき。
-				if(!result->HasContext())
+				if(!result->HasContext() && !(flags & tRisseOperateFlags::ofUseThisAsContext))
 					result->SetContext(new tRisseVariantBlock(*this));
 			}
 			return rv;
@@ -167,6 +167,23 @@ tRisseVariantBlock::tRetValue
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const
+{
+	tRisseVariantBlock result;
+	GetPrimitiveClass()->GetGateway().Do(ocDGet, &result, name,
+				flags | tRisseOperateFlags::ofUseThisAsContext,
+					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+				tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
+	// コンテキストを設定する
+	// ここの長ったらしい説明は tRisseVariantBlock::OperateForMember() 内を参照
+	if(!result.HasContext() && !(flags & tRisseOperateFlags::ofUseThisAsContext))
+		result.SetContext(new tRisseVariantBlock(*this));
+	return result;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
@@ -176,6 +193,17 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseSt
 		SelectContext(flags, This)
 		);
 	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::SetPropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const
+{
+	GetPrimitiveClass()->GetGateway().Do(ocDSet, NULL, name,
+				flags | tRisseOperateFlags::ofUseThisAsContext,
+					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+				tRisseMethodArgument::New(value), *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------
 
@@ -224,6 +252,20 @@ void tRisseVariantBlock::FuncCall_Object  (
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & membername) const
+{
+	tRisseVariantBlock ret;
+	GetPrimitiveClass()->GetGateway().
+		Do(ocFuncCall, &ret, membername,
+		tRisseOperateFlags::ofUseThisAsContext,
+		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+		tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
@@ -239,6 +281,20 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1) const
+{
+	tRisseVariantBlock ret;
+	GetPrimitiveClass()->GetGateway().
+		Do(ocFuncCall, &ret, membername,
+		tRisseOperateFlags::ofUseThisAsContext,
+		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+		tRisseMethodArgument::New(arg1), *this); // 動作コンテキストは常に *this
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const
 {
 	tRisseObjectInterface * intf = GetObjectInterface();
@@ -248,6 +304,20 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 		tRisseMethodArgument::New(arg1),
 		*this
 		);
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const
+{
+	tRisseVariantBlock ret;
+	GetPrimitiveClass()->GetGateway().
+		Do(ocFuncCall, &ret, membername,
+		tRisseOperateFlags::ofUseThisAsContext,
+		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+		tRisseMethodArgument::New(arg1, arg2), *this); // 動作コンテキストは常に *this
 	return ret;
 }
 //---------------------------------------------------------------------------
@@ -1080,6 +1150,22 @@ tRisseVariantBlock tRisseVariantBlock::Add_Boolean  (const tRisseVariantBlock & 
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseVariantBlock::InstanceOf(const tRisseVariantBlock & rhs) const
+{
+	// this の class を得る
+	tRisseVariant Class = GetPropertyDirect(ss_class, tRisseOperateFlags::ofInstanceMemberOnly, *this);
+
+	RISSE_ASSERT(Class.GetType() == vtObject);
+
+	tRisseVariantBlock ret;
+	Class.GetObjectInterface()->Do(ocInstanceOf, &ret, tRisseString::GetEmptyString(), 0,
+			tRisseMethodArgument::New(rhs), Class);
+	return ret.operator bool();
 }
 //---------------------------------------------------------------------------
 

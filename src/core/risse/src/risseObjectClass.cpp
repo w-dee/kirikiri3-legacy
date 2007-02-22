@@ -66,6 +66,19 @@ void tRisseObjectClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	RISSE_BEGIN_NATIVE_METHOD(ss_isA)
+	{
+		// 自身が引数(=クラス) のインスタンスかどうかを得る
+		// 引数チェック
+		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+
+		tRisseVariant ret = This.InstanceOf(args[0]);
+		if(result) *result = ret;
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	RISSE_BEGIN_NATIVE_METHOD(ss_getInstanceMember)
 	{
 		// 引数チェック
@@ -138,8 +151,9 @@ void tRisseObjectClass::RegisterMembers()
 		RisseFPrint(stdout, RISSE_WS("\n"));
 	}
 	RISSE_END_NATIVE_METHOD
-/*
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+/*
 
 	RISSE_BEGIN_NATIVE_METHOD(ss_puts)
 	{

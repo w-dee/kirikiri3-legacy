@@ -1316,6 +1316,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 	case abtGreater:			// >
 	case abtLesserOrEqual:		// <=
 	case abtGreaterOrEqual:		// >=
+	case abtInstanceOf:			// instanceof
 	case abtRBitShift:			// >>>
 	case abtLShift:				// <<
 	case abtRShift:				// >>
@@ -1343,6 +1344,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			case abtGreater:			code = ocGreater;			break; // >
 			case abtLesserOrEqual:		code = ocLesserOrEqual;		break; // <=
 			case abtGreaterOrEqual:		code = ocGreaterOrEqual;	break; // >=
+			case abtInstanceOf:			code = ocInstanceOf;		break; // instanceof
 			case abtRBitShift:			code = ocRBitShift;			break; // >>>
 			case abtLShift:				code = ocLShift;			break; // <<
 			case abtRShift:				code = ocRShift;			break; // >>

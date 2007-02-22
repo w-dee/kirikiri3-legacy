@@ -744,6 +744,14 @@ void tRisseCodeInterpreter::Execute(
 				code += 4;
 				break;
 
+			case ocInstanceOf	: // instof	 instanceof
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				RISSE_ASSERT(CI(code[3]) < framesize);
+				AR(code[1]) = AR(code[2]).InstanceOf(AR(code[3]));
+				code += 4;
+				break;
+
 			case ocRBitShift		: // rbs	 >>>
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);

@@ -20,6 +20,7 @@
 #include "risseOpCodes.h"
 #include "risseStaticStrings.h"
 #include "risseArrayClass.h"
+#include "risseClassClass.h"
 
 namespace Risse
 {
@@ -147,6 +148,18 @@ void tRisseClassBase::RegisterMembers()
 		// Arrayクラスの構築中にArrayクラスのシングルトンインスタンスを参照できないため
 		// Arrayクラスがすでに構築されている場合だけ、modules 配列を登録する
 		RegisterNormalMember(ss_modules, tRisseVariant(tRisseVariant(tRisseArrayClass::GetPointer()).New()));
+	}
+
+	// class を登録
+	if(tRisseClassClass::GetInstanceAlive())
+	{
+		// クラスのクラスはClass
+		// これもわざわざ tRisseClassClass のインスタンスが有効かどうかをチェックしている。
+		// 理由は modules 配列と同じ。
+		pThis->SetPropertyDirect(ss_class,
+			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+			tRisseVariant(tRisseClassClass::GetPointer()), *pThis);
 	}
 }
 //---------------------------------------------------------------------------

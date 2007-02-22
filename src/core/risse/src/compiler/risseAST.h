@@ -190,6 +190,7 @@ RISSE_AST_ENUM_DEF(BinaryType)
 	RISSE_AST_ENUM_ITEM(abt, Greater		)		//!< >
 	RISSE_AST_ENUM_ITEM(abt, LesserOrEqual	)		//!< <=
 	RISSE_AST_ENUM_ITEM(abt, GreaterOrEqual	)		//!< >=
+	RISSE_AST_ENUM_ITEM(abt, InstanceOf		)		//! instanceof
 	RISSE_AST_ENUM_ITEM(abt, RBitShift		)		//!< >>>
 	RISSE_AST_ENUM_ITEM(abt, LShift			)		//!< <<
 	RISSE_AST_ENUM_ITEM(abt, RShift			)		//!< >>

@@ -262,6 +262,18 @@ public: // Primitive関連
 	tRissePrimitiveClassBase * GetPrimitiveClass() const;
 
 public: // Object関連
+	//! @brief		オブジェクトインターフェースがマッチするかどうかを調べる
+	//! @param		rhs			右辺値
+	//! @return		マッチしたかどうか
+	//! @note		このメソッドは、(1)thisとrhsが両方ともvtObjectかつ(2)オブジェクトインターフェース
+	//!				ポインタが同一であるかどうかを調べる
+	bool ObjectInterfaceMatch(const tRisseVariant & rhs)
+	{
+		if(GetType() != vtObject) return false;
+		if(rhs.GetType() != vtObject) return false;
+		return AsObject().Intf == rhs.AsObject().Intf;
+	}
+
 	//! @brief		コンテキストを設定する
 	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
 	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
@@ -508,6 +520,9 @@ public: // operate
 		case ocSub				://!< -
 			RISSE_BIN_OP(Sub);
 
+		case ocInstanceOf		://!< instanceof
+			RISSE_BIN_OP(InstanceOf);
+
 //		case ocDGet				://!< get .  
 //			RISSE_BIN_OP(DGet);
 
@@ -622,26 +637,22 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	return GetPropertyDirect_Void     (name, flags, This);
-		case vtInteger:	return GetPropertyDirect_Integer  (name, flags, This);
-		case vtReal:	return GetPropertyDirect_Real     (name, flags, This);
-		case vtNull:	return GetPropertyDirect_Null     (name, flags, This);
-		case vtString:	return GetPropertyDirect_String   (name, flags, This);
-		case vtOctet:	return GetPropertyDirect_Octet    (name, flags, This);
-		case vtBoolean:	return GetPropertyDirect_Boolean  (name, flags, This);
-		case vtObject:	return GetPropertyDirect_Object   (name, flags, This);
+		case vtVoid:
+		case vtInteger:
+		case vtReal:
+		case vtNull:
+		case vtString:
+		case vtOctet:
+		case vtBoolean:
+			return GetPropertyDirect_Primitive(name, flags, This);
+		case vtObject:
+			return GetPropertyDirect_Object   (name, flags, This);
 		}
 		return tRisseVariant();
 	}
 
-	tRisseVariantBlock GetPropertyDirect_Void    (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock GetPropertyDirect_Integer (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock GetPropertyDirect_Real    (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock GetPropertyDirect_Null    (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock GetPropertyDirect_String  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock GetPropertyDirect_Octet   (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock GetPropertyDirect_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock GetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const ;
+	tRisseVariantBlock GetPropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const ;
+	tRisseVariantBlock GetPropertyDirect_Object   (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const ;
 
 	//-----------------------------------------------------------------------
 	//! @brief		直接プロパティ設定		SetPropertyDirect dset
@@ -655,25 +666,21 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	SetPropertyDirect_Void     (name, flags, value, This); return;
-		case vtInteger:	SetPropertyDirect_Integer  (name, flags, value, This); return;
-		case vtReal:	SetPropertyDirect_Real     (name, flags, value, This); return;
-		case vtNull:	SetPropertyDirect_Null     (name, flags, value, This); return;
-		case vtString:	SetPropertyDirect_String   (name, flags, value, This); return;
-		case vtOctet:	SetPropertyDirect_Octet    (name, flags, value, This); return;
-		case vtBoolean:	SetPropertyDirect_Boolean  (name, flags, value, This); return;
-		case vtObject:	SetPropertyDirect_Object   (name, flags, value, This); return;
+		case vtVoid:
+		case vtInteger:
+		case vtReal:
+		case vtNull:
+		case vtString:
+		case vtOctet:
+		case vtBoolean:
+			SetPropertyDirect_Primitive(name, flags, value, This); return;
+		case vtObject:
+			SetPropertyDirect_Object   (name, flags, value, This); return;
 		}
 	}
 
-	void SetPropertyDirect_Void    (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
-	void SetPropertyDirect_Integer (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
-	void SetPropertyDirect_Real    (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
-	void SetPropertyDirect_Null    (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
-	void SetPropertyDirect_String  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
-	void SetPropertyDirect_Octet   (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
-	void SetPropertyDirect_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const { return; /* incomplete */ }
-	void SetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const;
+	void SetPropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const;
+	void SetPropertyDirect_Object   (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		間接プロパティ取得		IGet iget
@@ -772,13 +779,13 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	
-		case vtInteger:	
-		case vtReal:	
-		case vtNull:	
-		case vtString:	
-		case vtOctet:	
-		case vtBoolean:	
+		case vtVoid:
+		case vtInteger:
+		case vtReal:
+		case vtNull:
+		case vtString:
+		case vtOctet:
+		case vtBoolean:
 			FuncCall_Primitive(ret, name, flags, args, This); return;
 
 		case vtObject:	FuncCall_Object   (ret, name, flags, args, This); return;
@@ -798,25 +805,21 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	return Invoke_Void     (membername);
-		case vtInteger:	return Invoke_Integer  (membername);
-		case vtReal:	return Invoke_Real     (membername);
-		case vtNull:	return Invoke_Null     (membername);
-		case vtString:	return Invoke_String   (membername);
-		case vtOctet:	return Invoke_Octet    (membername);
-		case vtBoolean:	return Invoke_Boolean  (membername);
-		case vtObject:	return Invoke_Object   (membername);
+		case vtVoid:
+		case vtInteger:
+		case vtReal:
+		case vtNull:
+		case vtString:
+		case vtOctet:
+		case vtBoolean:
+			return Invoke_Primitive(membername);
+		case vtObject:
+			return Invoke_Object   (membername);
 		}
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Void     (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Real     (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Null     (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_String   (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Primitive(const tRisseString & membername) const;
 	tRisseVariantBlock Invoke_Object   (const tRisseString & membername) const;
 
 	//-----------------------------------------------------------------------
@@ -831,25 +834,21 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	return Invoke_Void     (membername,arg1);
-		case vtInteger:	return Invoke_Integer  (membername,arg1);
-		case vtReal:	return Invoke_Real     (membername,arg1);
-		case vtNull:	return Invoke_Null     (membername,arg1);
-		case vtString:	return Invoke_String   (membername,arg1);
-		case vtOctet:	return Invoke_Octet    (membername,arg1);
-		case vtBoolean:	return Invoke_Boolean  (membername,arg1);
-		case vtObject:	return Invoke_Object   (membername,arg1);
+		case vtVoid:
+		case vtInteger:
+		case vtReal:
+		case vtNull:
+		case vtString:
+		case vtOctet:
+		case vtBoolean:
+			return Invoke_Primitive(membername, arg1);
+		case vtObject:
+			return Invoke_Object   (membername,arg1);
 		}
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Void     (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Real     (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Null     (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_String   (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1) const;
 	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
@@ -867,25 +866,21 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	return Invoke_Void     (membername,arg1,arg2);
-		case vtInteger:	return Invoke_Integer  (membername,arg1,arg2);
-		case vtReal:	return Invoke_Real     (membername,arg1,arg2);
-		case vtNull:	return Invoke_Null     (membername,arg1,arg2);
-		case vtString:	return Invoke_String   (membername,arg1,arg2);
-		case vtOctet:	return Invoke_Octet    (membername,arg1,arg2);
-		case vtBoolean:	return Invoke_Boolean  (membername,arg1,arg2);
-		case vtObject:	return Invoke_Object   (membername,arg1,arg2);
+		case vtVoid:	
+		case vtInteger:	
+		case vtReal:	
+		case vtNull:	
+		case vtString:	
+		case vtOctet:	
+		case vtBoolean:
+			return Invoke_Primitive(membername,arg1,arg2);
+		case vtObject:
+			return Invoke_Object   (membername,arg1,arg2);
 		}
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Void     (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Integer  (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Real     (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Null     (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_String   (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Octet    (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock Invoke_Boolean  (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const { return tRisseVariant(); /* incomplete */ }
+	tRisseVariantBlock Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
 	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
 
 	//-----------------------------------------------------------------------
@@ -2000,6 +1995,13 @@ public: // 演算子
 	}
 
 	tRisseVariantBlock & operator -=(const tRisseVariantBlock & rhs) { return SubAssign(rhs); }
+
+	//-----------------------------------------------------------------------
+	//! @brief		instanceof 演算子(instanceof)		InstanceOf
+	//! @param		rhs			右辺
+	//! @return		左辺が右辺で示したクラスのインスタンスならば真
+	//-----------------------------------------------------------------------
+	bool InstanceOf(const tRisseVariantBlock & rhs) const;
 
 
 public: // キャスト

@@ -50,3 +50,4 @@ ss_filename				filename			#!< "filename" ファイル名
 ss_line					line				#!< "line" インスタンス変数/プロパティ名
 ss_Exception			Exception			#!< "Exception" クラス名
 ss_p					p					#!< "p" メソッド名
+ss_isA					isA					#!< "isA" メソッド名

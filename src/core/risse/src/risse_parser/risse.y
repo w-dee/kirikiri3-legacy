@@ -322,7 +322,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %left		<np>	"^"
 %left		<np>	"&"
 %left		<np>	"!=" "==" "!==" "==="
-%left		<np>	"<" ">" "<=" ">="
+%left		<np>	"<" ">" "<=" ">=" "instanceof"
 %left		<np>	">>" "<<" ">>>"
 %left		<np>	"+" "-"
 %left		<np>	"%" "/" "\\" "*"
@@ -974,6 +974,7 @@ expr
 	| expr ">" expr					{ $$ = N(Binary)(LP, abtGreater			,$1, $3); }
 	| expr "<=" expr				{ $$ = N(Binary)(LP, abtLesserOrEqual	,$1, $3); }
 	| expr ">=" expr				{ $$ = N(Binary)(LP, abtGreaterOrEqual	,$1, $3); }
+	| expr "instanceof" expr		{ $$ = N(Binary)(LP, abtInstanceOf		,$1, $3); }
 	| expr ">>" expr				{ $$ = N(Binary)(LP, abtLShift			,$1, $3); }
 	| expr "<<" expr				{ $$ = N(Binary)(LP, abtRShift			,$1, $3); }
 	| expr ">>>" expr				{ $$ = N(Binary)(LP, abtRBitShift		,$1, $3); }

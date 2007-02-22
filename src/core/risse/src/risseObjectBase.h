@@ -146,6 +146,16 @@ public:
 		const tRisseString & name, tRisseOperateFlags flags = 0,
 			const tRisseVariant & This = tRisseVariant::GetNullObject());
 
+	//! @brief		(このオブジェクトに対して)特定クラスのインスタンスかどうかを調べる InstanceOf
+	//! @param		RefClass	クラスオブジェクト
+	//! @param		flags		呼び出しフラグ
+	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
+	//! @return		特定クラスのインスタンスだった場合に真、そうでなければ偽
+	bool InstanceOf(
+		const tRisseVariant & RefClass, risse_uint32 flags = 0,
+		const tRisseVariant & This = tRisseVariant::GetNullObject()
+		);
+
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 

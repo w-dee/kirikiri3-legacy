@@ -393,6 +393,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocGreater:
 	case ocLesserOrEqual:
 	case ocGreaterOrEqual:
+	case ocInstanceOf:
 	case ocRBitShift:
 	case ocLShift:
 	case ocRShift:

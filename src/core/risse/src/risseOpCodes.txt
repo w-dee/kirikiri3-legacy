@@ -103,6 +103,7 @@ Add						add			R,R,R,-,-,-		+			#!< +
 Sub						sub			R,R,R,-,-,-		-			#!< -
 InContextOf				cntx		R,R,R,-,-,-		----		#!< incontextof
 InContextOfDyn			cntxdyn		R,R,-,-,-,-		----		#!< incontextof dynamic
+InstanceOf				instof		R,R,R,-,-,-		isA			#!< instanceof (isA)
 
 DGet					dget		R,R,R,-,-,-		----		#!< get .  
 DGetF					dgetf		R,R,R,O,-,-		----		#!< get . with flags (下記参照)

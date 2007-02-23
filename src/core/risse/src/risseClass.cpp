@@ -135,7 +135,9 @@ void tRisseClassBase::RegisterMembers()
 
 		// 自分のクラスのconstructメソッドを呼ぶ
 		// この際の呼び出し先の this は args[0] つまり新しいオブジェクトになる
-		This.FuncCall(NULL, ss_construct, 0,
+		// 渡した args[0] を確実にコンテキストにして実行するために
+		// tRisseOperateFlags::ofUseThisAsContext を用いる
+		This.FuncCall(NULL, ss_construct, tRisseOperateFlags::ofUseThisAsContext,
 			tRisseMethodArgument::Empty(), args[0]);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -206,7 +208,7 @@ void tRisseClassBase::CallSuperClassMethod(tRisseVariantBlock * ret,
 	Do(ocDGet, &super, ss_super, tRisseOperateFlags::ofInstanceMemberOnly, tRisseMethodArgument::Empty());
 
 	// super の中のメソッドを呼ぶ
-	super.FuncCall(ret, name, flags, args, This);
+	super.FuncCall(ret, name, flags|tRisseOperateFlags::ofUseThisAsContext, args, This);
 }
 //---------------------------------------------------------------------------
 

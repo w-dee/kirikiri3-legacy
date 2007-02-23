@@ -38,7 +38,7 @@ namespace Risse{
 
 
 #ifdef RISSE_ASSERT_ENABLED
-	#define RISSE_ASSERT(X) do { if(!(X)) ::Risse::RisseAssert(#X, __FILE__, __LINE__); } while(0)
+	#define RISSE_ASSERT(X) do { if(!(bool)(X)) ::Risse::RisseAssert(#X, __FILE__, __LINE__); } while(0)
 #else
 	#define RISSE_ASSERT(X) 
 #endif

@@ -22,6 +22,7 @@
 #include "rissePropertyClass.h"
 #include "risseScriptEngine.h"
 #include "risseThisProxy.h"
+#include "risseStaticStrings.h"
 /*
 	このソースは、実行スピード重視の、いわばダーティーな実装を行う。
 	ダーティーな実装は極力コメントを残し、わかりやすくしておくこと。
@@ -309,6 +310,7 @@ void tRisseCodeInterpreter::Execute(
 					if(code[1]!=RisseInvalidRegNum) AR(code[1]).Clear();
 					bool raised = false;
 					tRisseVariant val;
+
 					try
 					{
 						if(code[3] & RisseFuncCallFlag_Omitted)
@@ -319,7 +321,8 @@ void tRisseCodeInterpreter::Execute(
 						else
 						{
 							// 引数の省略はなし
-							tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(code[4], code[5]);
+							tRisseMethodArgument & new_args =
+								tRisseMethodArgument::Allocate(code[4], code[5]);
 
 							for(risse_uint32 i = 0; i < code[4]; i++)
 								new_args.SetArgument(i, AR(code[i+6]));
@@ -338,6 +341,7 @@ void tRisseCodeInterpreter::Execute(
 					{
 						raised = true;
 					}
+
 					if(code[1]!=RisseInvalidRegNum)
 						AR(code[1]) = new tRisseTryFuncCallReturnObject(val, raised);
 					code += code[4] + code[5] + 6;
@@ -477,7 +481,7 @@ void tRisseCodeInterpreter::Execute(
 					AR(code[1]) = try_ret->GetValue(); // 値はレジスタに書き戻す
 
 					// 分岐ターゲットのインデックスを決定する
-					risse_uint32 target_index;
+					risse_uint32 target_index = static_cast<risse_uint32>(-1L);
 					tRisseVariant::tType except_obj_type = AR(code[1]).GetType();
 					if(!raised)
 					{
@@ -487,28 +491,32 @@ void tRisseCodeInterpreter::Execute(
 					else if(except_obj_type == tRisseVariant::vtObject)
 					{
 						// オブジェクト型
-						// (暫定実装)
-						// オブジェクト型の getExitTryRecord プロパティを読む
 						try
 						{
-							tRisseVariant v;
-							AR(code[1]).GetObjectInterface()->Do(ocDGet, &v, RISSE_WS("getExitTryRecord"));
-							RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
-							RISSE_ASSERT(v.GetObjectInterface() != NULL);
-							tRisseExitTryExceptionClass * record =
-								reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetObjectInterface());
-							// レコードに記録されている try 識別子が この branch の try 識別子と
-							// 一致するかどうかを調べる
-							if(AC(code[2]).GetObjectInterface() == record->GetIdentifier())
+							// オブジェクトのクラスを調べる
+							if(AR(code[1]).InstanceOf(
+								tRisseVariant(tRisseBlockExitExceptionClass::GetPointer())))
 							{
-								// 一致した
-								target_index = record->GetBranchTargetIndex();
+								// 例外オブジェクトは BlockExitException のサブクラス。
+								// try 識別子が この branch の try 識別子と
+								// 一致するかどうかを調べる
+								tRisseVariant identifier = AR(code[1]).GetPropertyDirect(ss_identifier);
+								if(AC(code[2]).ObjectInterfaceMatch(identifier))
+								{
+									// 一致した
+									target_index = (risse_uint32)(risse_int64)
+										AR(code[1]).GetPropertyDirect(ss_target);
+								}
+								else
+								{
+									// 一致しなかった
+									// この例外は再び投げる
+									target_index = static_cast<risse_uint32>(-1L);
+								}
 							}
 							else
 							{
-								// 一致しなかった
-								// この例外は再び投げる
-								target_index = static_cast<risse_uint32>(-1L);
+								target_index = 1; // 例外が発生していた
 							}
 						}
 						catch(...)
@@ -517,9 +525,10 @@ void tRisseCodeInterpreter::Execute(
 						}
 
 						if(target_index == static_cast<risse_uint32>(-1L))
-								eRisseScriptException::Throw(RISSE_WS("script exception"),
-									CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin),
-									AR(code[1]));
+							eRisseScriptException::Throw(RISSE_WS("script exception"),
+								CodeBlock->GetScriptBlock(),
+								CodeBlock->CodePositionToSourcePosition(code - code_origin),
+								AR(code[1]));
 					}
 					else
 					{
@@ -551,11 +560,18 @@ void tRisseCodeInterpreter::Execute(
 					const tRisseVariant & try_id = AC(code[2]);
 					RISSE_ASSERT(try_id.GetType() == tRisseVariant::vtObject);
 					RISSE_ASSERT(try_id.GetObjectInterface() != NULL);
-					tRisseVariant val(new tRisseExitTryExceptionClass(try_id.GetObjectInterface(),
-										code[3],
-										CI(code[1]) == RisseInvalidRegNum ? NULL : &AR(code[1])));
+					tRisseVariant exception_object =
+						tRisseVariant(tRisseBlockExitExceptionClass::GetPointer()).New(
+							0,
+							tRisseMethodArgument::New(
+								try_id,
+								tRisseVariant((risse_int64)code[3]), 
+								CI(code[1]) == RisseInvalidRegNum ?
+									tRisseVariant::GetNullObject() : AR(code[1]) ));
 					eRisseScriptException::Throw(RISSE_WS("return by exit try exception"),
-						CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin), val);
+						CodeBlock->GetScriptBlock(),
+						CodeBlock->CodePositionToSourcePosition(code - code_origin),
+						exception_object);
 				}
 				break;
 
@@ -564,16 +580,13 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				{
 					// 暫定実装
-					// code[2] は tRisseExitExceptionClass であると見なして良い
+					// code[2] は tRisseBlockExitExceptionClass であると見なして良い
 					tRisseVariant v;
 					RISSE_ASSERT(AR(code[2]).GetType() == tRisseVariant::vtObject);
-					AR(code[2]).GetObjectInterface()->Do(ocDGet, &v, RISSE_WS("getExitTryRecord"));
-					RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
-					RISSE_ASSERT(v.GetObjectInterface() != NULL);
-					tRisseExitTryExceptionClass * record =
-						reinterpret_cast<tRisseExitTryExceptionClass*>(v.GetObjectInterface());
-					RISSE_ASSERT(record->GetValue() != NULL);
-					AR(code[1]) = *record->GetValue();
+					RISSE_ASSERT(AR(code[2]).InstanceOf(
+						tRisseVariant(tRisseBlockExitExceptionClass::GetPointer())));
+					v = AR(code[2]).GetPropertyDirect(ss_value);
+					AR(code[1]) = v;
 					code += 3;
 				}
 				break;

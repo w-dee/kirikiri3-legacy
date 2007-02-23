@@ -51,3 +51,7 @@ ss_line					line				#!< "line" インスタンス変数/プロパティ名
 ss_Exception			Exception			#!< "Exception" クラス名
 ss_p					p					#!< "p" メソッド名
 ss_isA					isA					#!< "isA" メソッド名
+ss_BlockExitException	BlockExitException	#!< "BlockExitException" クラス名
+ss_identifier			identifier			#!< "identifier" インスタンス変数/プロパティ名
+ss_target				target				#!< "target" インスタンス変数/プロパティ名
+ss_value				value				#!< "value" インスタンス変数/プロパティ名

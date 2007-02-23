@@ -267,7 +267,7 @@ public: // Object関連
 	//! @return		マッチしたかどうか
 	//! @note		このメソッドは、(1)thisとrhsが両方ともvtObjectかつ(2)オブジェクトインターフェース
 	//!				ポインタが同一であるかどうかを調べる
-	bool ObjectInterfaceMatch(const tRisseVariant & rhs)
+	bool ObjectInterfaceMatch(const tRisseVariant & rhs) const
 	{
 		if(GetType() != vtObject) return false;
 		if(rhs.GetType() != vtObject) return false;

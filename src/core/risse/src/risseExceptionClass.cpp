@@ -178,6 +178,9 @@ void tRisseThrowableClass::RegisterMembers()
 	inherited::RegisterMembers();
 
 	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -237,6 +240,67 @@ void tRisseThrowableClass::RegisterMembers()
 
 
 
+//---------------------------------------------------------------------------
+tRisseBlockExitExceptionClass::tRisseBlockExitExceptionClass() :
+	tRisseClassBase(tRisseThrowableClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBlockExitExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// identifier メンバを追加 (デフォルトではnull)
+		This.SetPropertyDirect(ss_identifier, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+			tRisseVariant::GetNullObject(), This);
+
+		// target メンバを追加 (デフォルトでは-1)
+		This.SetPropertyDirect(ss_target, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+			tRisseVariant((risse_int64)-1), This);
+
+		// value メンバを追加 (デフォルトではnull)
+		This.SetPropertyDirect(ss_value, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+			tRisseVariant::GetNullObject(), This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
+		tRisseBlockExitExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0,
+			tRisseMethodArgument::New(RISSE_WS("break/return helper exception")), This);
+		if(args.HasArgument(0))
+			This.SetPropertyDirect(ss_identifier, 0, args[0], This);
+		if(args.HasArgument(1))
+			This.SetPropertyDirect(ss_target, 0, args[1], This);
+		if(args.HasArgument(2))
+			This.SetPropertyDirect(ss_value, 0, args[2], This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -262,6 +326,9 @@ void tRisseExceptionClass::RegisterMembers()
 	inherited::RegisterMembers();
 
 	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

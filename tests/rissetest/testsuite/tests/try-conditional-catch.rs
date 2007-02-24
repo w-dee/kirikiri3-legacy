@@ -1,3 +1,10 @@
+class MyExceptionA extends Exception {}
+class MyExceptionB extends Exception {}
+class MyExceptionAA extends MyExceptionA {}
+class MyExceptionBB extends MyExceptionB {}
+
+
+
 {
 	var test = function(v)
 	{
@@ -7,17 +14,13 @@
 			{
 				throw v;
 			}
-			catch(e if e < 0)
+			catch(e if e instanceof MyExceptionA)
 			{
-				return "negative";
+				return "A";
 			}
-			catch(e if e > 0)
+			catch(e if e instanceof MyExceptionB)
 			{
-				return "positive";
-			}
-			catch(e if e === 0)
-			{
-				return "zero";
+				return "B";
 			}
 		}
 		catch(e)
@@ -26,6 +29,7 @@
 		}
 	};
 
-	return test(-1) + ":" + test(1) + ":" + test(0) + ":" + test("hoge");
-	 //=> "negative:positive:zero:non caught exception"
+	return test(MyExceptionA) + ":" + test(MyExceptionBB) + ":" + test(Exception);
+	 //=> "A:B:non caught exception"
 }
+

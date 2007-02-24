@@ -15,6 +15,7 @@
 #include "risseObjectClass.h"
 #include "risseNativeFunction.h"
 #include "risseStaticStrings.h"
+#include "risseExceptionClass.h"
 
 /*
 	Risseスクリプトから見える"Object" クラスの実装
@@ -106,6 +107,20 @@ void tRisseObjectClass::RegisterMembers()
 			tRisseOperateFlags::ofMemberEnsure|
 			tRisseMemberAttribute(tRisseMemberAttribute::pcVar),
 						args[1], This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_toException)
+	{
+		// デフォルトの動作は、This を文字列化してそれを RuntimeException.new 
+		// に渡し、その結果を返す
+		// TODO: global.RuntimeException を見に行かずに直接シングルトンインスタンスに
+		//		バインドしちゃっていいの？
+		tRisseVariant ret = tRisseVariant(tRisseRuntimeExceptionClass::GetPointer()).
+				New(0, tRisseMethodArgument::New((tRisseString)This));
+		if(result) *result = ret;
 	}
 	RISSE_END_NATIVE_METHOD
 

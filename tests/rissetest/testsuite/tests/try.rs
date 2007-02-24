@@ -12,6 +12,6 @@ try
 }
 catch(e)
 {
-	return e; //=> "return by exception"
+	return e.toString(); //=> "return by exception"
 }
 return "not caught";

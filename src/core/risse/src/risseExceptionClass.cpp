@@ -19,6 +19,7 @@
 #include "risseStaticStrings.h"
 #include "risseNativeFunction.h"
 #include "risseArrayClass.h"
+#include "risseClassClass.h"
 
 namespace Risse
 {
@@ -217,6 +218,16 @@ void tRisseThrowableClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	RISSE_BEGIN_NATIVE_METHOD(mnString) // toString
+	{
+		// message を返す
+		tRisseVariant ret = This.GetPropertyDirect(ss_message);
+		if(result) *result = ret;
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	RISSE_BEGIN_NATIVE_METHOD(ss_addTrace)
 	{
 		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
@@ -228,8 +239,77 @@ void tRisseThrowableClass::RegisterMembers()
 	RISSE_END_NATIVE_METHOD
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_toException)
+	{
+		// 自分自身が Class のサブクラスの場合は
+		// 例外クラスを構築して返す
+		// そうでない場合は This をそのまま返す
+		tRisseVariant ret;
+		if(This.InstanceOf(tRisseVariant(tRisseClassClass::GetPointer())))
+			ret = This.New(0, tRisseMethodArgument::Empty());
+		else
+			ret = This;
+		if(result) *result = ret;
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseErrorClass::tRisseErrorClass() :
+	tRisseClassBase(tRisseThrowableClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseErrorClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 
@@ -310,6 +390,10 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 
 
 
+
+
+
+
 //---------------------------------------------------------------------------
 tRisseExceptionClass::tRisseExceptionClass() :
 	tRisseClassBase(tRisseThrowableClass::GetPointer())
@@ -344,6 +428,50 @@ void tRisseExceptionClass::RegisterMembers()
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 		tRisseExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseRuntimeExceptionClass::tRisseRuntimeExceptionClass() :
+	tRisseClassBase(tRisseExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseRuntimeExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseRuntimeExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 

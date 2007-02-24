@@ -69,8 +69,10 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseRealClass::RegisterClassInstance(GlobalObject, ss_Real);
 	tRisseSourcePointClass::RegisterClassInstance(GlobalObject, ss_SourcePoint);
 	tRisseThrowableClass::RegisterClassInstance(GlobalObject, ss_Throwable);
+	tRisseErrorClass::RegisterClassInstance(GlobalObject, ss_Error);
 	tRisseBlockExitExceptionClass::RegisterClassInstance(GlobalObject, ss_BlockExitException);
 	tRisseExceptionClass::RegisterClassInstance(GlobalObject, ss_Exception);
+	tRisseRuntimeExceptionClass::RegisterClassInstance(GlobalObject, ss_RuntimeException);
 
 	// 各クラスのメンバを正式な物に登録し直すためにもう一度RegisterMembersを呼ぶ
 	// 上記の状態では メンバとして仮のものが登録されている可能性がある
@@ -93,8 +95,10 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseRealClass::GetPointer()->RegisterMembers();
 	tRisseSourcePointClass::GetPointer()->RegisterMembers();
 	tRisseThrowableClass::GetPointer()->RegisterMembers();
+	tRisseErrorClass::GetPointer()->RegisterMembers();
 	tRisseBlockExitExceptionClass::GetPointer()->RegisterMembers();
 	tRisseExceptionClass::GetPointer()->RegisterMembers();
+	tRisseRuntimeExceptionClass::GetPointer()->RegisterMembers();
 }
 //---------------------------------------------------------------------------
 

@@ -610,8 +610,14 @@ void tRisseCodeInterpreter::Execute(
 			case ocThrow			: // throw	 throw ステートメント
 				/* incomplete */
 				RISSE_ASSERT(CI(code[1]) < framesize);
-				eRisseScriptException::Throw(RISSE_WS("script exception"),
-					CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin), AR(code[1]));
+				{
+					// AR(code[1]) の toException() を呼び出し、その結果を投げる
+					tRisseVariant exception_object = AR(code[1]).Invoke(ss_toException);
+					// TODO: exception_object が Throwable のインスタンスであることをチェックするように
+					// TODO: C++ 例外のメッセージを Risse 例外クラスのもつメッセージを見るように
+					eRisseScriptException::Throw(RISSE_WS("script exception"),
+						CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin), exception_object);
+				}
 				code += 2;
 				break;
 

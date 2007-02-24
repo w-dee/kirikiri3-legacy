@@ -55,3 +55,6 @@ ss_BlockExitException	BlockExitException	#!< "BlockExitException" クラス名
 ss_identifier			identifier			#!< "identifier" インスタンス変数/プロパティ名
 ss_target				target				#!< "target" インスタンス変数/プロパティ名
 ss_value				value				#!< "value" インスタンス変数/プロパティ名
+ss_Error				Error				#!< "Error" クラス名
+ss_RuntimeException		RuntimeException	#!< "RuntimeException" クラス名
+ss_toException			toException			#!< "toException" 

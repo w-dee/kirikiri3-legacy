@@ -172,6 +172,23 @@ public: // コンストラクタ/代入演算子
 		return *this;
 	}
 
+	//! @brief		コンストラクタ(string型を作成)
+	//! @param		ref		元となる文字列
+	tRisseVariantBlock(const risse_char * ref)
+	{
+		* this = ref;
+	}
+
+	//! @brief		代入演算子(string型を代入)
+	//! @param		ref		元となる文字列
+	//! @return		このオブジェクトへの参照
+	tRisseVariantBlock & operator = (const risse_char * ref)
+	{
+		// Type の設定は必要なし
+		AsString() = tRisseString(ref);
+		return *this;
+	}
+
 	//! @brief		コンストラクタ(octet型を作成)
 	//! @param		ref		元となるオクテット列
 	tRisseVariantBlock(const tRisseOctet & ref)

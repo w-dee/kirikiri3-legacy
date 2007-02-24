@@ -13,7 +13,7 @@
 		}
 		catch(e)
 		{
-			return e;
+			return e.toString();
 		}
 		return "not caught";
 	};

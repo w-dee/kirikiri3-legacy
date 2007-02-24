@@ -109,6 +109,28 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"Error" クラス
+//---------------------------------------------------------------------------
+class tRisseErrorClass : public tRisseClassBase, public tRisseClassSingleton<tRisseErrorClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseErrorClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		"BlockExitException" クラス
 //---------------------------------------------------------------------------
 class tRisseBlockExitExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseBlockExitExceptionClass>
@@ -140,6 +162,25 @@ class tRisseExceptionClass : public tRisseClassBase, public tRisseClassSingleton
 public:
 	//! @brief		コンストラクタ
 	tRisseExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		"RuntimeException" クラス
+//---------------------------------------------------------------------------
+class tRisseRuntimeExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseRuntimeExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseRuntimeExceptionClass();
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

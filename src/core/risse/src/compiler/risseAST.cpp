@@ -2404,33 +2404,54 @@ void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
 			form->GetLocalNamespace()->Push(); // スコープを push
 
 			// 例外を受け取る変数がある場合は例外を受け取る変数に例外を代入する
-			// 変数のローカル名前空間への登録
-			form->GetLocalNamespace()->Add(catch_node->GetName(), NULL);
+			if(!catch_node->GetName().IsEmpty())
+			{
+				// 変数のローカル名前空間への登録
+				form->GetLocalNamespace()->Add(catch_node->GetName(), NULL);
 
-			// ローカル変数への書き込み
-			form->GetLocalNamespace()->Write(form, GetPosition(),
-											catch_node->GetName(), try_block_ret_var);
+				// ローカル変数への書き込み
+				form->GetLocalNamespace()->Write(form, GetPosition(),
+												catch_node->GetName(), try_block_ret_var);
+			}
 
 			// 例外 catch の条件式の処理
+			tRisseSSAVariable * cond_var;
 			if(condition)
 			{
 				// 条件判断文を作成
-				tRisseSSAVariable * cond_var = condition->GenerateReadSSA(form);
-
-				// 分岐文を作成
-				branch_stmt =
-					form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
-
-				// 新しい基本ブロックを作成
-				tRisseSSABlock * catch_body_block =
-					form->CreateNewBlock(RISSE_WS("catch_block"));
-
-				branch_stmt->SetTrueBranch(catch_body_block);
+				cond_var = condition->GenerateReadSSA(form);
 			}
 			else
 			{
-				branch_stmt = NULL;
+				// 条件式がない
+				// 条件式が無い場合は、例外が Exception クラスのサブクラスで
+				// ある場合にのみ受け取るという条件文を作成する
+
+				// global.Exception を表す AST ノードを作成
+				tRisseASTNode_Factor * global = new tRisseASTNode_Factor(GetPosition(), aftGlobal);
+				tRisseASTNode_Factor * Exception =
+					new tRisseASTNode_Factor(GetPosition(), aftConstant,
+						tRisseVariant(tRisseString(RISSE_WS("Exception"))));
+				tRisseASTNode_MemberSel * global_Exception_node =
+					new tRisseASTNode_MemberSel(GetPosition(), global, Exception, matDirect);
+
+				// global.Exception を取得
+				tRisseSSAVariable * global_Exception = global_Exception_node->GenerateReadSSA(form);
+
+				// instanceof
+				form->AddStatement(GetPosition(), ocInstanceOf, &cond_var,
+					try_block_ret_var, global_Exception);
 			}
+
+			// 分岐文を作成
+			branch_stmt =
+				form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
+
+			// 新しい基本ブロックを作成
+			tRisseSSABlock * catch_body_block =
+				form->CreateNewBlock(RISSE_WS("catch_block"));
+
+			branch_stmt->SetTrueBranch(catch_body_block);
 
 			// catch の内容を生成
 			catch_node->GetBody()->GenerateReadSSA(form);

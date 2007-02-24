@@ -70,7 +70,6 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseSourcePointClass::RegisterClassInstance(GlobalObject, ss_SourcePoint);
 	tRisseThrowableClass::RegisterClassInstance(GlobalObject, ss_Throwable);
 	tRisseErrorClass::RegisterClassInstance(GlobalObject, ss_Error);
-	tRisseBlockExitExceptionClass::RegisterClassInstance(GlobalObject, ss_BlockExitException);
 	tRisseExceptionClass::RegisterClassInstance(GlobalObject, ss_Exception);
 	tRisseRuntimeExceptionClass::RegisterClassInstance(GlobalObject, ss_RuntimeException);
 
@@ -96,7 +95,6 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseSourcePointClass::GetPointer()->RegisterMembers();
 	tRisseThrowableClass::GetPointer()->RegisterMembers();
 	tRisseErrorClass::GetPointer()->RegisterMembers();
-	tRisseBlockExitExceptionClass::GetPointer()->RegisterMembers();
 	tRisseExceptionClass::GetPointer()->RegisterMembers();
 	tRisseRuntimeExceptionClass::GetPointer()->RegisterMembers();
 }

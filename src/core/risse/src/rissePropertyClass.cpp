@@ -51,7 +51,7 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			if(Setter.IsNull()) RisseThrowPropertyCannotBeWritten();
-			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+			args.ExpectArgumentCount(1);
 			Setter.FuncCall(NULL, flags, args, This);
 			return rvNoError;
 		}

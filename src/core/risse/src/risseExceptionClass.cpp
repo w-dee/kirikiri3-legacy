@@ -239,7 +239,7 @@ void tRisseThrowableClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD(ss_addTrace)
 	{
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+		args.ExpectArgumentCount(1);
 
 		// 引数 = SourcePoint クラスのインスタンス
 		// TODO: インスタンスが SourcePoint クラスのインスタンスかどうかをチェック
@@ -499,6 +499,176 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseArgumentExceptionClass::tRisseArgumentExceptionClass() :
+	tRisseClassBase(tRisseExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseArgumentExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseArgumentExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseIllegalArgumentExceptionClass::tRisseIllegalArgumentExceptionClass() :
+	tRisseClassBase(tRisseArgumentExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalArgumentExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseIllegalArgumentExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseBadArgumentCountExceptionClass::tRisseBadArgumentCountExceptionClass() :
+	tRisseClassBase(tRisseArgumentExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBadArgumentCountExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseBadArgumentCountExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBadArgumentCountExceptionClass::ThrowNormal(risse_size passed, risse_size expected)
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseBadArgumentCountExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				tRisseString(RISSE_WS_TR("bad argument count (%1 given, but %2 expected)"),
+					tRisseString::AsString((risse_int64)passed),
+					tRisseString::AsString((risse_int64)expected))
+					)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBadArgumentCountExceptionClass::ThrowBlock(risse_size passed, risse_size expected)
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseBadArgumentCountExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				tRisseString(RISSE_WS_TR("bad block argument count (%1 given, but %2 expected)"),
+					tRisseString::AsString((risse_int64)passed),
+					tRisseString::AsString((risse_int64)expected))
+					)));
+}
+//---------------------------------------------------------------------------
 
 
 

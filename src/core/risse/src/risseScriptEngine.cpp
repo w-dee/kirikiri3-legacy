@@ -74,6 +74,9 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseRuntimeExceptionClass::RegisterClassInstance(GlobalObject, ss_RuntimeException);
 	tRisseMemberAccessExceptionClass::RegisterClassInstance(GlobalObject, ss_MemberAccessException);
 	tRisseNoSuchMemberExceptionClass::RegisterClassInstance(GlobalObject, ss_NoSuchMemberException);
+	tRisseArgumentExceptionClass::RegisterClassInstance(GlobalObject, ss_ArgumentException);
+	tRisseIllegalArgumentExceptionClass::RegisterClassInstance(GlobalObject, ss_IllegalArgumentException);
+	tRisseBadArgumentCountExceptionClass::RegisterClassInstance(GlobalObject, ss_BadArgumentCountException);
 
 	// 各クラスのメンバを正式な物に登録し直すためにもう一度RegisterMembersを呼ぶ
 	// 上記の状態では メンバとして仮のものが登録されている可能性がある
@@ -101,6 +104,9 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseRuntimeExceptionClass::GetPointer()->RegisterMembers();
 	tRisseMemberAccessExceptionClass::GetPointer()->RegisterMembers();
 	tRisseNoSuchMemberExceptionClass::GetPointer()->RegisterMembers();
+	tRisseArgumentExceptionClass::GetPointer()->RegisterMembers();
+	tRisseIllegalArgumentExceptionClass::GetPointer()->RegisterMembers();
+	tRisseBadArgumentCountExceptionClass::GetPointer()->RegisterMembers();
 
 }
 //---------------------------------------------------------------------------

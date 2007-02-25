@@ -71,7 +71,7 @@ void tRisseObjectClass::RegisterMembers()
 	{
 		// 自身が引数(=クラス) のインスタンスかどうかを得る
 		// 引数チェック
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+		args.ExpectArgumentCount(1);
 
 		tRisseVariant ret = This.InstanceOf(args[0]);
 		if(result) *result = ret;
@@ -83,7 +83,7 @@ void tRisseObjectClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_getInstanceMember)
 	{
 		// 引数チェック
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+		args.ExpectArgumentCount(1);
 
 		// This のインスタンスメンバを取得する
 		tRisseVariant ret = 
@@ -99,7 +99,7 @@ void tRisseObjectClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_setInstanceMember)
 	{
 		// 引数チェック
-		if(args.GetArgumentCount() < 2) RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
+		args.ExpectArgumentCount(2);
 
 		// This のインスタンスメンバを設定する
 		This.SetPropertyDirect(args[0],

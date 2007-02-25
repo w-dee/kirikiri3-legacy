@@ -195,6 +195,79 @@ public:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		"ArgumentException" クラス
+//---------------------------------------------------------------------------
+class tRisseArgumentExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseArgumentExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseArgumentExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"IllegalArgumentException" クラス
+//---------------------------------------------------------------------------
+class tRisseIllegalArgumentExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseIllegalArgumentExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseIllegalArgumentExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"BadArgumentCountException" クラス
+//---------------------------------------------------------------------------
+class tRisseBadArgumentCountExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseBadArgumentCountExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseBadArgumentCountExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		普通の引数の数が期待した数でなかった場合の例外を発生
+	//! @param		passed		渡された引数の数
+	//! @param		expected	期待した数
+	static void ThrowNormal(risse_size passed, risse_size expected);
+
+	//! @brief		ブロック引数の数が期待した数でなかった場合の例外を発生
+	//! @param		passed		渡された引数の数
+	//! @param		expected	期待した数
+	static void ThrowBlock(risse_size passed, risse_size expected);
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 //! @brief		"MemberAccessException" クラス

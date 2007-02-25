@@ -117,7 +117,7 @@ void tRisseClassBase::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(ss_fertilize, pThis)
 	{
 		// 引数チェック
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+		args.ExpectArgumentCount(1);
 
 		// 親クラスを得る
 		tRisseVariant super_class = This.GetPropertyDirect(ss_super);

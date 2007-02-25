@@ -19,9 +19,22 @@
 
 namespace Risse
 {
+//---------------------------------------------------------------------------
+//! @brief		「不正なパラメータの個数」例外を発生(暫定)
+//! @param		passed		実際に渡された個数
+//! @param		expected	期待した数
+void RisseThrowBadArgumentCount(risse_size passed, risse_size expected);
+//! @brief		「不正なブロックパラメータの個数」例外を発生(暫定)
+//! @param		passed		実際に渡された個数
+//! @param		expected	期待した数
+void RisseThrowBadBlockArgumentCount(risse_size passed, risse_size expected);
+//---------------------------------------------------------------------------
+
+
 class tRisseVariantBlock;
 typedef tRisseVariantBlock tRisseVariant;
 class tRisseMethodArgument;
+
 //---------------------------------------------------------------------------
 //! @brief		メソッドへ渡す引数を表すクラス(可変引数用テンプレートクラス)
 //---------------------------------------------------------------------------
@@ -92,6 +105,20 @@ public:
 	void SetBlockArgument(risse_size n, const tRisseVariant &v)
 	{
 		Arguments[n+ArgumentCount] = &v;
+	}
+
+	//! @brief		普通の引数が想定した数未満の場合に例外を発生させる
+	//! @param		n		想定したパラメータの数
+	void ExpectArgumentCount(risse_size n) const
+	{
+		if(AC < n) RisseThrowBadArgumentCount(AC, n);
+	}
+
+	//! @brief		ブロック引数が想定した数未満の場合に例外を発生させる
+	//! @param		n		想定したパラメータの数
+	void ExpectBlockArgumentCount(risse_size n) const
+	{
+		if(BC < n) RisseThrowBadBlockArgumentCount(BC, n);
 	}
 };
 //---------------------------------------------------------------------------
@@ -247,6 +274,20 @@ public:
 		// やむを得ず reinterpret_cast をつかう。これはダウンキャストなので
 		// 正常に動作するはずである。
 		return !reinterpret_cast<const tRisseVariantData*>(Arguments[n])->IsVoid();
+	}
+
+	//! @brief		普通の引数が想定した数未満の場合に例外を発生させる
+	//! @param		n		想定したパラメータの数
+	void ExpectArgumentCount(risse_size n) const
+	{
+		if(ArgumentCount < n) RisseThrowBadArgumentCount(ArgumentCount, n);
+	}
+
+	//! @brief		ブロック引数が想定した数未満の場合に例外を発生させる
+	//! @param		n		想定したパラメータの数
+	void ExpectBlockArgumentCount(risse_size n) const
+	{
+		if(BlockArgumentCount < n) RisseThrowBadBlockArgumentCount(BlockArgumentCount, n);
 	}
 };
 //---------------------------------------------------------------------------

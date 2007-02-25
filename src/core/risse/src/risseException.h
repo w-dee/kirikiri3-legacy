@@ -332,18 +332,7 @@ void RisseThrowNullPointerException();
 void RisseThrowCannotCallNonFunctionObjectException();
 //! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生(暫定)
 void RisseThrowCannotCreateInstanceFromNonClassObjectException();
-//! @brief		「不正なパラメータの個数」例外を発生(暫定)
-//! @param		passed		実際に渡された個数
-//! @param		expected	期待した数
-void RisseThrowBadArgumentCount(risse_int passed, risse_int expected);
-//! @brief		「不正なブロックパラメータの個数」例外を発生(暫定)
-//! @param		passed		実際に渡された個数
-//! @param		expected	期待した数
-void RisseThrowBadBlockArgumentCount(risse_int passed, risse_int expected);
 //! @brief		「メンバが見つからない」例外を発生(暫定)
-//! @param		name		メンバ名
-void RisseThrowMemberNotFound(const tRisseString & name = tRisseString::GetEmptyString());
-//! @brief		「メンバは読み出し専用」例外を発生(暫定)
 //! @param		name		メンバ名
 void RisseThrowMemberIsReadOnly(const tRisseString & name = tRisseString::GetEmptyString());
 //! @brief		「このプロパティからは読み込むことができない」例外を発生(暫定)

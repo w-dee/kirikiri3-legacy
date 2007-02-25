@@ -463,11 +463,10 @@ public: // operate
 			return rvNoError;
 
 #define RISSE_BIN_OP(func) \
-			if(args.GetArgumentCount() != 1)                           \
-				RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);\
-			if(result)                                                 \
+			args.ExpectArgumentCount(1);                              \
+			if(result)                                                \
 				*result = func(args[0]);                              \
-			else                                                       \
+			else                                                      \
 				func(args[0]); /* discard result */                   \
 			return rvNoError;
 
@@ -556,14 +555,12 @@ public: // operate
 //			RISSE_BIN_OP(DSet);
 
 		case ocISet				://!< set [ ]
-			if(args.GetArgumentCount() != 2)
-				RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
+			args.ExpectArgumentCount(2);
 			ISet(args[0], args[1]);
 			return rvNoError;
 
 #define RISSE_ASSIGN_OP(func) \
-			if(args.GetArgumentCount() != 1)                   \
-				RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);\
+			args.ExpectArgumentCount(1);                       \
 			func(args[0]);                                     \
 			if(result) *result = *this;                        \
 			return rvNoError;

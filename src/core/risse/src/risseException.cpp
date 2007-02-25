@@ -152,17 +152,6 @@ void RisseThrowBadBlockArgumentCount(risse_int passed, risse_int expected)
 
 
 //---------------------------------------------------------------------------
-void RisseThrowMemberNotFound(const tRisseString & name)
-{
-	if(!name.IsEmpty())
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("member \"%1\" not found"), name));
-	else
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("the member not found")));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void RisseThrowMemberIsReadOnly(const tRisseString & name)
 {
 	if(!name.IsEmpty())

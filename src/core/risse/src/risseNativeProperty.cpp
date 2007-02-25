@@ -51,7 +51,7 @@ tRisseNativePropertySetter::tRetValue tRisseNativePropertySetter::Operate(RISSE_
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			if(!Setter) RisseThrowPropertyCannotBeWritten();
-			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+			args.ExpectArgumentCount(1);
 			Setter(args[0], flags, This);
 			return rvNoError;
 		}
@@ -90,7 +90,7 @@ tRisseNativeProperty::tRetValue tRisseNativeProperty::Operate(RISSE_OBJECTINTERF
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			if(!Setter) RisseThrowPropertyCannotBeWritten();
-			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+			args.ExpectArgumentCount(1);
 			Setter(args[0], flags, This);
 			return rvNoError;
 		}

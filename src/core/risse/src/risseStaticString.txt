@@ -62,4 +62,7 @@ ss_MemberAccessException		MemberAccessException		#!< "MemberAccessException" ク
 ss_NoSuchMemberException		NoSuchMemberException		#!< "NoSuchMemberException" クラス名
 ss_name							name						#!< "name" インスタンス変数/プロパティ名
 ss_object						object						#!< "object" インスタンス変数/プロパティ名
+ss_ArgumentException			ArgumentException			#!< "ArgumentException" クラス名
+ss_IllegalArgumentException		IllegalArgumentException	#!< "IllegalArgumentException" クラス名
+ss_BadArgumentCountException	BadArgumentCountException	#!< "BadArgumentException" クラス名
 

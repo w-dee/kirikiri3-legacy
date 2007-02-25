@@ -14,6 +14,7 @@
 
 #include "risseVariant.h"
 #include "risseMethod.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -25,6 +26,24 @@ namespace Risse
 tRisseMethodArgument::tEmptyMethodArgument
 	tRisseMethodArgument::EmptyArgument = {0, 0, {NULL}};
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+void RisseThrowBadArgumentCount(risse_size passed, risse_size expected)
+{
+	tRisseBadArgumentCountExceptionClass::ThrowNormal(passed, expected);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void RisseThrowBadBlockArgumentCount(risse_size passed, risse_size expected)
+{
+	tRisseBadArgumentCountExceptionClass::ThrowBlock(passed, expected);
+}
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

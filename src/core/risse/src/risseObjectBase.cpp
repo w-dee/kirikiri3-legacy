@@ -490,7 +490,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	case ocDSet:
 		// property set
 		// TODO: このオブジェクトそのもに対する操作への対応
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+		args.ExpectArgumentCount(1);
 		if(!Write(name, flags, args[0], This))
 			return rvMemberNotFound;
 		return rvNoError;
@@ -517,7 +517,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 		// TODO: このオブジェクトのメンバに対する操作への対応
 		{
 			RISSE_ASSERT(name.IsEmpty());
-			if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+			args.ExpectArgumentCount(1);
 			bool res = InstanceOf(args[0], flags, This);
 			if(result) *result = res;
 			return rvNoError;
@@ -531,7 +531,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	case ocSetDefaultContext:
 		// TODO: この機能要らないかもしれない
 		// set default method context
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+		args.ExpectArgumentCount(1);
 		// dynamic のチェック
 		if(args[0].IsDynamicContext())
 			DefaultMethodContext = NULL; // TODO: この場合も null でよかったっけ？

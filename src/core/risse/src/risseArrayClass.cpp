@@ -87,7 +87,7 @@ void tRisseArrayClass::RegisterMembers()
 		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
+		args.ExpectArgumentCount(1);
 
 		risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[0]);
 		if(ofs_index < 0) ofs_index += array.size(); // 折り返す
@@ -114,7 +114,7 @@ void tRisseArrayClass::RegisterMembers()
 		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
-		if(args.GetArgumentCount() < 2) RisseThrowBadArgumentCount(args.GetArgumentCount(), 2);
+		args.ExpectArgumentCount(2);
 
 		risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[0]);
 		if(ofs_index < 0) ofs_index += array.size(); // 折り返す

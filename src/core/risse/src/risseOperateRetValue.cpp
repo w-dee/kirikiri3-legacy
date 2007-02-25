@@ -13,7 +13,7 @@
 #include "prec.h"
 
 #include "risseObject.h"
-#include "risseException.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -25,7 +25,7 @@ void tRisseOperateRetValue::RaiseError(tRetValue ret, const tRisseString & name)
 	{
 	case rvMemberNotFound:
 		// "メンバが見つからない"エラー
-		RisseThrowMemberNotFound(name);
+		tRisseNoSuchMemberExceptionClass::Throw(name);
 		break;
 
 	default:

@@ -92,6 +92,12 @@ int Application::OnRun()
 		}
 
 	}
+	catch(const tRisseVariant * e)
+	{
+		fflush(stderr);
+		fflush(stdout);
+		wxFprintf(stdout, wxT("exception: %s\n"), e->operator tRisseString().AsWxString().c_str());
+	}
 	catch(const eRisse & e)
 	{
 		fflush(stderr);

@@ -128,14 +128,15 @@ void tRisseSourcePointClass::RegisterMembers()
 
 		tRisseVariant filename, line, function;
 		filename = This.GetPropertyDirect(ss_filename);
-		line = This.GetPropertyDirect(ss_line);
+		line =     This.GetPropertyDirect(ss_line);
 		function = This.GetPropertyDirect(ss_function);
 
 		tRisseString ret;
-		if(filename.IsEmptyString())
-			ret = filename.operator tRisseString() + RISSE_WC(':');
+		tRisseString fn = filename.operator tRisseString();
+		if(!fn.IsEmpty())
+			ret = fn + RISSE_WC(':');
 		else
-			ret = RISSE_WS_TR("<unknown>");
+			ret = RISSE_WS_TR("<unknown>:");
 
 		if(line != tRisseVariant((risse_int64)-1))
 			ret += line.operator tRisseString();
@@ -208,11 +209,9 @@ void tRisseThrowableClass::RegisterMembers()
 		// 親クラスの同名メソッドを呼び出す(引数は空)
 		tRisseThrowableClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
 
-		// 引数 = メッセージ, cause
+		// 引数 = メッセージ
 		if(args.HasArgument(0))
 			This.SetPropertyDirect(ss_message, 0, args[0], This);
-		if(args.HasArgument(1))
-			This.SetPropertyDirect(ss_cause, 0, args[1], This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -220,9 +219,19 @@ void tRisseThrowableClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD(mnString) // toString
 	{
-		// message を返す
-		tRisseVariant ret = This.GetPropertyDirect(ss_message);
-		if(result) *result = ret;
+		// message at [発生場所] を返す
+		tRisseString message = (tRisseString)This.GetPropertyDirect(ss_message);
+		tRisseVariant trace_array = This.GetPropertyDirect(ss_trace);
+		tRisseString at = (tRisseString)trace_array.Invoke(mnIGet, risse_int64(0));
+			// 先頭の要素を取り出す
+			// 先頭の要素が無い場合は void が返り、at は空文字列になるはず
+		if(result)
+		{
+			if(at.IsEmpty())
+				*result = message;
+			else
+				*result = tRisseString(RISSE_WS_TR("%1 at %2"), message, at);
+		}
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -365,6 +374,8 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 		// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
 		tRisseBlockExitExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0,
 			tRisseMethodArgument::New(RISSE_WS("break/return helper exception")), This);
+
+		// メンバを設定する
 		if(args.HasArgument(0))
 			This.SetPropertyDirect(ss_identifier, 0, args[0], This);
 		if(args.HasArgument(1))
@@ -377,8 +388,6 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
-
-
 
 
 
@@ -438,6 +447,17 @@ void tRisseExceptionClass::RegisterMembers()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tRisseRuntimeExceptionClass::tRisseRuntimeExceptionClass() :
 	tRisseClassBase(tRisseExceptionClass::GetPointer())
@@ -478,6 +498,130 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseMemberAccessExceptionClass::tRisseMemberAccessExceptionClass() :
+	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseMemberAccessExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// name メンバを追加 (デフォルトでは空文字列)
+		This.SetPropertyDirect(ss_name, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+			tRisseVariant(tRisseString::GetEmptyString()), This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はargs[0])
+		tRisseMemberAccessExceptionClass::GetPointer()->CallSuperClassMethod(NULL,
+			ss_initialize, 0, tRisseMethodArgument::New(args[0]), This);
+
+		// メンバを設定する
+		if(args.HasArgument(1))
+			This.SetPropertyDirect(ss_name, 0, args[1], This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseNoSuchMemberExceptionClass::tRisseNoSuchMemberExceptionClass() :
+	tRisseClassBase(tRisseMemberAccessExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNoSuchMemberExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseNoSuchMemberExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNoSuchMemberExceptionClass::Throw(const tRisseString & name)
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseNoSuchMemberExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				name.IsEmpty() ?
+					tRisseString(RISSE_WS_TR("member not found"), name):
+					tRisseString(RISSE_WS_TR("member \"%1\" not found"), name),
+				name)));
+}
+//---------------------------------------------------------------------------
+
 
 
 

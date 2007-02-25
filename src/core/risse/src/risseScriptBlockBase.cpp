@@ -130,6 +130,16 @@ void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 
 
 //---------------------------------------------------------------------------
+risse_size tRisseScriptBlockBase::PositionToLine(risse_size pos) const
+{
+	risse_size line;
+	PositionToLineAndColumn(pos, &line, NULL);
+	return line;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseScriptBlockBase::GetLineAt(risse_size line)
 {
 	if(line > LineCount) return tRisseString::GetEmptyString(); // 行が範囲外

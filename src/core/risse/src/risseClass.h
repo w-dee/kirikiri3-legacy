@@ -102,6 +102,32 @@ public:
 };
 //---------------------------------------------------------------------------
 
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ただ親クラスを継承するためだけのクラス階層用のテンプレートクラス
+//---------------------------------------------------------------------------
+#define RISSE_DEFINE_EMPTY_CLASS(classname, super_class, additional) \
+class classname : \
+	public tRisseClassBase, public tRisseClassSingleton<classname> \
+{ \
+	typedef tRisseClassBase inherited; \
+public: \
+	classname()  : tRisseClassBase(super_class::GetPointer()) \
+	{ RegisterMembers(); } \
+	void RegisterMembers() { \
+		RISSE_BEGIN_NATIVE_METHOD(ss_construct) { } RISSE_END_NATIVE_METHOD \
+		RISSE_BEGIN_NATIVE_METHOD(ss_initialize) { \
+			classname::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This); \
+		} RISSE_END_NATIVE_METHOD \
+	} \
+	additional \
+}
+
+//---------------------------------------------------------------------------
+
 }
 #endif
 

@@ -78,6 +78,11 @@ public:
 	//! @param		col			桁位置(0～; 興味がない場合はnull可)
 	void PositionToLineAndColumn(risse_size pos, risse_size *line, risse_size *col) const;
 
+	//! @brief		スクリプトのコードポイント位置から行への変換を行う
+	//! @param		pos			コードポイント位置
+	//! @return		行位置(0～)
+	risse_size PositionToLine(risse_size pos) const;
+
 	//! @brief		指定行のスクリプトの内容を返す
 	//! @param		line		行位置(0～)
 	//! @return		その行にあるスクリプト(最後の改行記号は取り除かれる)

@@ -332,6 +332,11 @@ void tRisseCodeInterpreter::Execute(
 							AR(code[2]).FuncCall(&val, 0, new_args, This);
 						}
 					}
+					catch(const tRisseVariant * e)
+					{
+						val = *e;
+						raised = true;
+					}
 					catch(const eRisseScriptException &e)
 					{
 						val = e.GetValue();
@@ -963,6 +968,21 @@ void tRisseCodeInterpreter::Execute(
 		// 位置情報を持つことができる eRisseScriptError に、例外を変換する。
 		eRisseScriptError::Throw(e.GetMessageString(),
 			CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
+	}
+	catch(const tRisseVariant * e)
+	{
+		// この例外は位置情報を持っていない可能性がある
+		RISSE_ASSERT(e->InstanceOf(tRisseExceptionClass::GetPointer()));
+		// 例外位置情報を追加してやる
+		tRisseVariant source_point = tRisseVariant(tRisseSourcePointClass::GetPointer()).New(0,
+			tRisseMethodArgument::New(
+				CodeBlock->GetScriptBlock()->GetName(),
+				1 + (risse_int64)CodeBlock->GetScriptBlock()->PositionToLine(
+							CodeBlock->CodePositionToSourcePosition(code - code_origin))
+				));
+		e->Invoke(ss_addTrace, source_point);
+		// 投げ直す
+		throw e;
 	}
 	catch(...)
 	{

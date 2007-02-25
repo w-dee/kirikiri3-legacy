@@ -171,6 +171,7 @@ public:
 //---------------------------------------------------------------------------
 
 
+
 //---------------------------------------------------------------------------
 //! @brief		"RuntimeException" クラス
 //---------------------------------------------------------------------------
@@ -188,6 +189,59 @@ public:
 public:
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"MemberAccessException" クラス
+//---------------------------------------------------------------------------
+class tRisseMemberAccessExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseMemberAccessExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseMemberAccessExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"NoSuchMemberException" クラス
+//---------------------------------------------------------------------------
+class tRisseNoSuchMemberExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseNoSuchMemberExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseNoSuchMemberExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		例外を発生
+	//! @param		name		メンバ名
+	//! @param		object		オブジェクト
+	static void Throw(const tRisseString & name);
+};
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 

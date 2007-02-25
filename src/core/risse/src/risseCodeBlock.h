@@ -132,7 +132,7 @@ public: // tRisseObjectInterface メンバ
 //---------------------------------------------------------------------------
 //! @brief 共有変数フレーム
 //---------------------------------------------------------------------------
-class tRisseSharedVariableFrames
+class tRisseSharedVariableFrames : public tRisseCollectee
 {
 	gc_vector<tRisseVariant *> Frames; //!< 共有変数フレームの配列 (関数のネストレベルによりフレームが異なる)
 

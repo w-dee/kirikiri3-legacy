@@ -40,7 +40,7 @@ class tRisseRTTI : public tRisseCollectee
 
 public:
 	//! @brief		Ids の中の特定のインデックスにマッチする構造体
-	struct tMatcher
+	struct tMatcher : public tRisseCollectee
 	{
 		risse_size Index; //!< Classes 内のインデックス
 		void * Id; //!< クラスId

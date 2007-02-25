@@ -51,7 +51,7 @@ private:
 	tNamedRegMap VariableMapForChildren; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	//! @brief		未解決のジャンプを表す構造体
-	struct tPendingBlockJump
+	struct tPendingBlockJump : public tRisseCollectee
 	{
 		const tRisseSSABlock *	Block; //!< 基本ブロック
 		risse_size			EmitPosition; //!< オフセットを入れ込む位置

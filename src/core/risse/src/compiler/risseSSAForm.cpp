@@ -555,6 +555,7 @@ void tRisseSSAForm::AddCatchBranchAndExceptionValue(
 {
 	RISSE_ASSERT(ExitTryBranchTargetLabels);
 	RISSE_ASSERT(catch_branch_stmt->GetCode() == ocCatchBranch);
+
 	CatchBranchAndExceptionMap.insert(
 		tCatchBranchAndExceptionMap::value_type(
 			catch_branch_stmt->GetTryIdentifierIndex(),
@@ -563,6 +564,8 @@ void tRisseSSAForm::AddCatchBranchAndExceptionValue(
 				except_value,
 				ExitTryBranchTargetLabels)));
 	ExitTryBranchTargetLabels = NULL; // このインスタンスはここではもう使わない
+
+
 }
 //---------------------------------------------------------------------------
 
@@ -575,7 +578,6 @@ tRisseSSAVariableAccessMap * tRisseSSAForm::CreateAccessMap(risse_size pos)
 	// ここで作成した ExitTryBranchTargetLabels は AddCatchBranchAndExceptionValue()
 	// で CatchBranch とともに保存される
 	ExitTryBranchTargetLabels = new tExitTryBranchTargetLabels();
-
 	return new tRisseSSAVariableAccessMap(this, pos);
 }
 //---------------------------------------------------------------------------

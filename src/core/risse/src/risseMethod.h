@@ -39,7 +39,7 @@ class tRisseMethodArgument;
 //! @brief		メソッドへ渡す引数を表すクラス(可変引数用テンプレートクラス)
 //---------------------------------------------------------------------------
 template <risse_size AC, risse_size BC = 0>
-class tRisseMethodArgumentOf
+class tRisseMethodArgumentOf : public tRisseCollectee
 {
 protected:
 	risse_size ArgumentCount; //!< 普通の引数の配列の個数
@@ -127,7 +127,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		メソッドへ渡す引数を表すクラス
 //---------------------------------------------------------------------------
-class tRisseMethodArgument
+class tRisseMethodArgument : public tRisseCollectee
 {
 	class tEmptyMethodArgument
 	{

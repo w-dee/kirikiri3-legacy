@@ -151,7 +151,7 @@ class tRisseSSAForm : public tRisseCollectee
 
 	//! @brief	このSSA形式が保持しているTryCallしたあとのCatchBranch文と、
 	//!			そのTryCallの戻り値(例外の値)の情報
-	struct tCatchBranchAndExceptionValue
+	struct tCatchBranchAndExceptionValue : public tRisseCollectee
 	{
 		tCatchBranchAndExceptionValue(
 			tRisseSSAStatement * catch_branch_stmt,

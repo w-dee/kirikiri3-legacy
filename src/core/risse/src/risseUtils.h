@@ -14,6 +14,7 @@
 #define risseUtilsH
 
 #include "risseConfig.h"
+#include "risseGC.h"
 
 //---------------------------------------------------------------------------
 // クリティカルセクション
@@ -38,7 +39,7 @@
 	namespace Risse
 	{
 	//! @brief クリティカルセクションの実装
-	class tRisseCriticalSection
+	class tRisseCriticalSection : public tRisseCollectee
 	{
 		CRITICAL_SECTION CS; //!< Win32 クリティカルセクションオブジェクト
 	public:
@@ -53,7 +54,7 @@
 		void Leave() { LeaveCriticalSection(&CS); } //!< クリティカルセクションから出る
 
 	public:
-		class tLocker
+		class tLocker : public tRisseCollectee
 		{
 			tRisseCriticalSection & CS;
 		public:
@@ -80,7 +81,7 @@
 	namespace Risse
 	{
 	//! @brief クリティカルセクションの実装
-	class tRisseCriticalSection
+	class tRisseCriticalSection : public tRisseCollectee
 	{
 		boost::recursive_mutex mutex; //!< boost::recursive_mutex mutexオブジェクト
 	public:
@@ -91,7 +92,7 @@
 		tRisseCriticalSection(const tRisseCriticalSection &); // non-copyable
 
 	public:
-		class tLocker
+		class tLocker : public tRisseCollectee
 		{
 			boost::recursive_mutex::scoped_lock lock;
 		public:

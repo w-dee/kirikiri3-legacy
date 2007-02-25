@@ -28,7 +28,7 @@ class tRisseObjectBase : public tRisseObjectInterface
 {
 public:
 	//! @brief	メンバ情報を表す構造体
-	struct tMemberData
+	struct tMemberData : public tRisseCollectee
 	{
 		tRisseVariant			Value;		//!< 値
 		tRisseMemberAttribute	Attribute; //!< メンバの属性

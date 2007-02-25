@@ -20,7 +20,7 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseLexerUtility
+class tRisseLexerUtility : public tRisseCollectee
 {
 public: // public static members
 	//! @brief		ホワイトスペースのスキップ

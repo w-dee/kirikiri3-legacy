@@ -20,7 +20,7 @@ namespace Risse
 {
 
 //---------------------------------------------------------------------------
-class tRisseLexer : public tRisseLexerUtility, public tRisseCollectee
+class tRisseLexer : public tRisseLexerUtility
 {
 	tRisseString Script; //!< スクリプト
 	const risse_char * Ptr; //!< 解析ポインタの現在位置
@@ -28,7 +28,7 @@ class tRisseLexer : public tRisseLexerUtility, public tRisseCollectee
 	const risse_char * PtrLastTokenStart; //!< 最後に返したトークンの先頭位置
 
 	//! @brief		トークンIDと値の組
-	struct tTokenIdAndValue
+	struct tTokenIdAndValue : public tRisseCollectee
 	{
 		int				Id;		//!< ID
 		tRisseVariant	Value;	//!< 値

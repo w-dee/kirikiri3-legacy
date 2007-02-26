@@ -19,6 +19,7 @@
 #include "risseIntegerClass.h"
 #include "risseRealClass.h"
 #include "risseStaticStrings.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -218,6 +219,24 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 		flags, tRisseMethodArgument::New(value),
 		SelectContext(flags, This)
 		);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::FuncCall(tRisseVariantBlock * ret, risse_uint32 flags,
+	const tRisseMethodArgument & args,
+	const tRisseVariant & This) const
+{
+	// Object 以外は関数(メソッド)としては機能しないため
+	// すべて 例外を発生する
+	switch(GetType())
+	{
+	case vtObject:	FuncCall_Object   (ret, tRisseString::GetEmptyString(), flags, args, This); return;
+
+	default:
+		tRisseUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException(); break;
+	}
 }
 //---------------------------------------------------------------------------
 

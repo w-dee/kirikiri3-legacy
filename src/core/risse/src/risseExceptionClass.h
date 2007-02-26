@@ -238,6 +238,32 @@ public:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		"UnsupportedOperationException" クラス
+//---------------------------------------------------------------------------
+class tRisseUnsupportedOperationExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseUnsupportedOperationExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseUnsupportedOperationExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「関数でない物を呼び出そうとした」例外を発生
+	static void ThrowCannotCallNonFunctionObjectException();
+
+	//! @brief		「機能が実装されていません」例外を発生
+	static void ThrowOperationIsNotImplemented();
+};
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -258,7 +284,6 @@ public:
 public:
 };
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------

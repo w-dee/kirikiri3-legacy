@@ -613,6 +613,76 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 
 
 
+//---------------------------------------------------------------------------
+tRisseUnsupportedOperationExceptionClass::tRisseUnsupportedOperationExceptionClass() :
+	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseUnsupportedOperationExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseUnsupportedOperationExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException()
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseUnsupportedOperationExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				tRisseString(RISSE_WS_TR("cannot call non-function object"))
+					)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented()
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseUnsupportedOperationExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				tRisseString(RISSE_WS_TR("operation is not implemented"))
+					)));
+}
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 

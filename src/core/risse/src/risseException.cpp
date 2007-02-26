@@ -118,14 +118,6 @@ void RisseThrowNullPointerException()
 
 
 //---------------------------------------------------------------------------
-void RisseThrowCannotCallNonFunctionObjectException()
-{
-	eRisseError::Throw(RISSE_WS_TR("cannot call non-function object"));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void RisseThrowCannotCreateInstanceFromNonClassObjectException()
 {
 	eRisseError::Throw(RISSE_WS_TR("cannot create instance from non-class object"));
@@ -145,14 +137,6 @@ void RisseThrowUnexpectedClass()
 void RisseThrowCannotCreateInstanceFromThisClass()
 {
 	eRisseError::Throw(tRisseString(RISSE_WS_TR("cannot create instance from this class")));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void RisseThrowOperationIsNotImplemented()
-{
-	eRisseError::Throw(tRisseString(RISSE_WS_TR("the operation is not implemented")));
 }
 //---------------------------------------------------------------------------
 

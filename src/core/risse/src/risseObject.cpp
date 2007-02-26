@@ -14,6 +14,7 @@
 
 #include "risseObject.h"
 #include "risseException.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -21,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(53018,62403,2623,19559,39811,3052,55606,53445);
 //---------------------------------------------------------------------------
 tRisseIdentifyObject::tRetValue tRisseIdentifyObject::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
-	RisseThrowOperationIsNotImplemented();
+	tRisseUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
 	return rvNoError;
 }
 //---------------------------------------------------------------------------

@@ -328,16 +328,12 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		「nullオブジェクトにアクセスしようとした」例外を発生(暫定)
 void RisseThrowNullPointerException();
-//! @brief		「関数でない物を呼び出そうとした」例外を発生(暫定) UnsupportedOperationException < RuntimeException
-void RisseThrowCannotCallNonFunctionObjectException();
 //! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生(暫定) - InstantiationException < RuntimeException
 void RisseThrowCannotCreateInstanceFromNonClassObjectException();
 //! @brief		「期待したクラスではありません」例外を発生(暫定) - UnexpectedContext < RuntimeException
 void RisseThrowUnexpectedClass();
 //! @brief		「このクラスのインスタンスは作成できません」例外を発生(暫定) - InstantiationException < RuntimeException
 void RisseThrowCannotCreateInstanceFromThisClass();
-//! @brief		「機能が実装されていません」例外を発生(暫定) UnsupportedOperationException < RuntimeException
-void RisseThrowOperationIsNotImplemented();
 //! @brief		「内部エラー」例外を発生(暫定) - InternalError < Error
 void RisseThrowInternalError();
 //---------------------------------------------------------------------------

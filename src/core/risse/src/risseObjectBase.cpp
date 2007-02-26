@@ -15,6 +15,7 @@
 #include "risseObjectBase.h"
 #include "risseOperateFlags.h"
 #include "risseStaticStrings.h"
+#include "risseExceptionClass.h"
 
 /*
 	ここではオブジェクトの実装に必要な基底の機能を実装する
@@ -365,7 +366,6 @@ tRisseObjectBase::tRetValue tRisseObjectBase::FuncCall(
 {
 	if(!name.IsEmpty())
 	{
-		// TODO: このオブジェクトに対するメソッド呼び出し
 
 		// メンバを読み出す
 		tRisseVariant function_object;
@@ -374,6 +374,12 @@ tRisseObjectBase::tRetValue tRisseObjectBase::FuncCall(
 
 		// メンバに対して関数呼び出しを実行する
 		function_object.FuncCall(ret, flags, args, This);
+	}
+	else
+	{
+		// このオブジェクトに対するメソッド呼び出し
+		// 普通、メソッドとしては動作しない
+		tRisseUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException();
 	}
 	return rvNoError;
 }

@@ -764,18 +764,7 @@ public: // 演算子
 	//-----------------------------------------------------------------------
 	void FuncCall(tRisseVariantBlock * ret = NULL, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseVariant & This = tRisseVariant::GetNullObject()) const
-	{
-		// Object 以外は関数(メソッド)としては機能しないため
-		// すべて 例外を発生する
-		switch(GetType())
-		{
-		case vtObject:	FuncCall_Object   (ret, tRisseString::GetEmptyString(), flags, args, This); return;
-
-		default:
-			RisseThrowCannotCallNonFunctionObjectException(); break;
-		}
-	}
+		const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall

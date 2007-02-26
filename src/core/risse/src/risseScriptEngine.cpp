@@ -71,6 +71,8 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseThrowableClass::RegisterClassInstance(GlobalObject, ss_Throwable);
 	tRisseErrorClass::RegisterClassInstance(GlobalObject, ss_Error);
 	tRisseExceptionClass::RegisterClassInstance(GlobalObject, ss_Exception);
+	tRisseIOExceptionClass::RegisterClassInstance(GlobalObject, ss_IOException);
+	tRisseCharConversionExceptionClass::RegisterClassInstance(GlobalObject, ss_CharConversionException);
 	tRisseRuntimeExceptionClass::RegisterClassInstance(GlobalObject, ss_RuntimeException);
 	tRisseMemberAccessExceptionClass::RegisterClassInstance(GlobalObject, ss_MemberAccessException);
 	tRisseNoSuchMemberExceptionClass::RegisterClassInstance(GlobalObject, ss_NoSuchMemberException);
@@ -102,6 +104,8 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseThrowableClass::GetPointer()->RegisterMembers();
 	tRisseErrorClass::GetPointer()->RegisterMembers();
 	tRisseExceptionClass::GetPointer()->RegisterMembers();
+	tRisseIOExceptionClass::GetPointer()->RegisterMembers();
+	tRisseCharConversionExceptionClass::GetPointer()->RegisterMembers();
 	tRisseRuntimeExceptionClass::GetPointer()->RegisterMembers();
 	tRisseMemberAccessExceptionClass::GetPointer()->RegisterMembers();
 	tRisseNoSuchMemberExceptionClass::GetPointer()->RegisterMembers();

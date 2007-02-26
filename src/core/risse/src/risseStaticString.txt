@@ -66,4 +66,6 @@ ss_ArgumentException			ArgumentException				#!< "ArgumentException" クラス名
 ss_IllegalArgumentException		IllegalArgumentException		#!< "IllegalArgumentException" クラス名
 ss_BadArgumentCountException	BadArgumentCountException		#!< "BadArgumentException" クラス名
 ss_IllegalMemberAccessException	IllegalMemberAccessException	#!< "IllegalMemberAccessException" クラス名
+ss_IOException					IOException						#!< "IOException" クラス名
+ss_CharConversionException		CharConversionException			#!< "CharConversionException" クラス名
 

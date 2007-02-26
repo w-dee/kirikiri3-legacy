@@ -173,6 +173,52 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"IOException" クラス
+//---------------------------------------------------------------------------
+class tRisseIOExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseIOExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseIOExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"CharConversionException" クラス
+//---------------------------------------------------------------------------
+class tRisseCharConversionExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseCharConversionExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseCharConversionExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「無効なUTF-8文字列です」例外を発生
+	static void ThrowInvalidUTF8String();
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		"RuntimeException" クラス
 //---------------------------------------------------------------------------
 class tRisseRuntimeExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseRuntimeExceptionClass>

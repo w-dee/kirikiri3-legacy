@@ -76,6 +76,6 @@ function throw3()
 
 
 
-return '' + throw0() + throw1() + throw2() + throw3();
+return '' + throw0().message + throw1().message + throw2().message + throw3().message;
 	//=> "4321!!"
 

@@ -134,57 +134,6 @@ void RisseThrowCannotCreateInstanceFromNonClassObjectException()
 
 
 //---------------------------------------------------------------------------
-void RisseThrowBadArgumentCount(risse_int passed, risse_int expected)
-{
-	eRisseError::Throw(tRisseString(RISSE_WS_TR("invalid argument count (passed %1, expected %2)"),
-		tRisseString::AsString(passed), tRisseString::AsString(expected)));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void RisseThrowBadBlockArgumentCount(risse_int passed, risse_int expected)
-{
-	eRisseError::Throw(tRisseString(RISSE_WS_TR("invalid block argument count (passed %1, expected %2)"),
-		tRisseString::AsString(passed), tRisseString::AsString(expected)));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void RisseThrowMemberIsReadOnly(const tRisseString & name)
-{
-	if(!name.IsEmpty())
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("member \"%1\" is read-only"), name));
-	else
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("the member is read-only")));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void RisseThrowPropertyCannotBeRead(const tRisseString & name)
-{
-	if(!name.IsEmpty())
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("property \"%1\" cannot be read"), name));
-	else
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("the property cannot be read")));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void RisseThrowPropertyCannotBeWritten(const tRisseString & name)
-{
-	if(!name.IsEmpty())
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("property \"%1\" cannot be written"), name));
-	else
-		eRisseError::Throw(tRisseString(RISSE_WS_TR("the property cannot be written")));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void RisseThrowUnexpectedClass()
 {
 	eRisseError::Throw(tRisseString(RISSE_WS_TR("unexpected class")));

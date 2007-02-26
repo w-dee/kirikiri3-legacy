@@ -788,7 +788,9 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 	}
 
 	// 変数宣言のSSA表現を生成する
-	GenerateVarDecl(form, GetPosition(), Name, init_var);
+	RISSE_ASSERT(GetParent()->GetType() == antVarDecl);
+	tRisseASTNode_VarDecl * parent = reinterpret_cast<tRisseASTNode_VarDecl*>(GetParent());
+	GenerateVarDecl(form, GetPosition(), Name, init_var, parent->GetAttribute());
 
 	// このノードは答えを返さない
 	return NULL;

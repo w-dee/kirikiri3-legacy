@@ -307,8 +307,39 @@ public:
 public:
 	//! @brief		例外を発生
 	//! @param		name		メンバ名
-	//! @param		object		オブジェクト
 	static void Throw(const tRisseString & name);
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"IllegalMemberAccessException" クラス
+//---------------------------------------------------------------------------
+class tRisseIllegalMemberAccessExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseIllegalMemberAccessExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseIllegalMemberAccessExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+
+	//! @brief		「読み出し専用メンバに上書きしようとした」例外を発生
+	//! @param		name		メンバ名
+	static void ThrowMemberIsReadOnly(const tRisseString & name);
+
+	//! @brief		「このプロパティからは読み込むことができない」例外を発生
+	//! @param		name		メンバ名
+	static void ThrowPropertyCannotBeRead(const tRisseString & name);
+
+	//! @brief		「このプロパティには書き込むことができない」例外を発生
+	//! @param		name		メンバ名
+	static void ThrowPropertyCannotBeWritten(const tRisseString & name);
 };
 //---------------------------------------------------------------------------
 

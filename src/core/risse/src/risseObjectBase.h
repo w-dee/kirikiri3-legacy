@@ -84,22 +84,24 @@ public:
 	//! @param		flags		操作フラグ
 	//! @param		result		結果の格納先
 	//! @param		This		メンバが呼び出される際のThisオブジェクト
-	//! @return		読み出せた場合true、メンバが無かった場合にfalse
+	//! @return		結果
 	//! @note		このインスタンスが保持するハッシュ表以外を読みに行くようなことはない。
 	//! 			読み出そうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
-	bool Read(const tRisseString & name, tRisseOperateFlags flags, tRisseVariant &result, const tRisseVariant &This);
+	tRetValue Read(const tRisseString & name, tRisseOperateFlags flags,
+				tRisseVariant &result, const tRisseVariant &This);
 
 	//! @brief		メンバに書き込む
 	//! @param		name		メンバ名
 	//! @param		flags		操作フラグ
 	//! @param		value		書き込む値
 	//! @param		This		メンバが呼び出される際のThisオブジェクト
-	//! @return		書き込めた場合true、メンバが無かった場合にfalse
+	//! @return		結果
 	//! @note		このインスタンスが保持するハッシュ表以外を参照しに行くようなことはない。
 	//! 			書き込もうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
-	bool Write(const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant &value, const tRisseVariant &This);
+	tRetValue Write(const tRisseString & name, tRisseOperateFlags flags,
+				const tRisseVariant &value, const tRisseVariant &This);
 
 private:
 	//! @brief		メンバに値を設定する
@@ -109,7 +111,7 @@ private:
 	//! @param		prop_control	プロパティアクセス方法
 	//! @param		value			書き込む値
 	//! @param		This			メンバが呼び出される際のThisオブジェクト
-	void WriteMember(const tRisseString & name, tRisseOperateFlags flags, 
+	tRetValue WriteMember(const tRisseString & name, tRisseOperateFlags flags, 
 		tMemberData & member, tRisseMemberAttribute::tPropertyControl prop_control,
 		const tRisseVariant & value, const tRisseVariant &This);
 
@@ -120,7 +122,8 @@ public:
 	//! @param		flags		呼び出しフラグ
 	//! @param		args		引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
-	bool FuncCall(
+	//! @return		結果
+	tRetValue FuncCall(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
@@ -132,7 +135,8 @@ public:
 	//! @param		flags		呼び出しフラグ
 	//! @param		args		引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
-	bool New(
+	//! @return		結果
+	tRetValue New(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
@@ -142,7 +146,8 @@ public:
 	//! @param		name		メンバ名
 	//! @param		flags		設定する属性などが含まれたフラグ
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
-	bool SetAttribute(
+	//! @return		結果
+	tRetValue SetAttribute(
 		const tRisseString & name, tRisseOperateFlags flags = 0,
 			const tRisseVariant & This = tRisseVariant::GetNullObject());
 

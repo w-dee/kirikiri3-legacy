@@ -30,7 +30,7 @@ tRisseNativePropertyGetter::tRetValue tRisseNativePropertyGetter::Operate(RISSE_
 		if(code == ocFuncCall)
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
-			if(!Getter) RisseThrowPropertyCannotBeRead();
+			if(!Getter) return rvPropertyCannotBeRead;
 			Getter(result, flags, This);
 			return rvNoError;
 		}
@@ -50,7 +50,7 @@ tRisseNativePropertySetter::tRetValue tRisseNativePropertySetter::Operate(RISSE_
 		if(code == ocFuncCall)
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
-			if(!Setter) RisseThrowPropertyCannotBeWritten();
+			if(!Setter) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
 			Setter(args[0], flags, This);
 			return rvNoError;
@@ -82,14 +82,14 @@ tRisseNativeProperty::tRetValue tRisseNativeProperty::Operate(RISSE_OBJECTINTERF
 		if(code == ocFuncCall) // このオブジェクトに対するプロパティ読み込みか？
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
-			if(!Getter) RisseThrowPropertyCannotBeRead();
+			if(!Getter) return rvPropertyCannotBeRead;
 			Getter(result, flags, This);
 			return rvNoError;
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
-			if(!Setter) RisseThrowPropertyCannotBeWritten();
+			if(!Setter) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
 			Setter(args[0], flags, This);
 			return rvNoError;

@@ -796,4 +796,99 @@ void tRisseNoSuchMemberExceptionClass::Throw(const tRisseString & name)
 
 
 
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseIllegalMemberAccessExceptionClass::tRisseIllegalMemberAccessExceptionClass() :
+	tRisseClassBase(tRisseMemberAccessExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalMemberAccessExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseIllegalMemberAccessExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(const tRisseString & name)
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseIllegalMemberAccessExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				name.IsEmpty() ?
+					tRisseString(RISSE_WS_TR("member is read-only"), name):
+					tRisseString(RISSE_WS_TR("member \"%1\" is read-only"), name),
+				name)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(const tRisseString & name)
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseIllegalMemberAccessExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				name.IsEmpty() ?
+					tRisseString(RISSE_WS_TR("property cannot be read"), name):
+					tRisseString(RISSE_WS_TR("property \"%1\" cannot be read"), name),
+				name)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(const tRisseString & name)
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseIllegalMemberAccessExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				name.IsEmpty() ?
+					tRisseString(RISSE_WS_TR("property cannot be written"), name):
+					tRisseString(RISSE_WS_TR("property \"%1\" cannot be written"), name),
+				name)));
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
 } // namespace Risse

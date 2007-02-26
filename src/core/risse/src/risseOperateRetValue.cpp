@@ -28,7 +28,21 @@ void tRisseOperateRetValue::RaiseError(tRetValue ret, const tRisseString & name)
 		tRisseNoSuchMemberExceptionClass::Throw(name);
 		break;
 
-	default:
+	case rvMemberIsReadOnly:
+		// "読み出し専用メンバに上書きしようとした"エラー
+		tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(name);
+		break;
+
+	case rvPropertyCannotBeRead:
+		// "このプロパティからは読み込むことができない"エラー
+		tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(name);
+		break;
+
+	case rvPropertyCannotBeWritten:
+		// "このプロパティには書き込むことができない"エラー
+		tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(name);
+		break;
+
 	case rvNoError:
 		break;
 

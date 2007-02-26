@@ -43,14 +43,14 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 		if(code == ocFuncCall) // このオブジェクトに対するプロパティ読み込みか？
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
-			if(Getter.IsNull()) RisseThrowPropertyCannotBeRead();
+			if(Getter.IsNull()) return rvPropertyCannotBeRead;
 			Getter.FuncCall(result, flags, tRisseMethodArgument::Empty(), This);
 			return rvNoError;
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
-			if(Setter.IsNull()) RisseThrowPropertyCannotBeWritten();
+			if(Setter.IsNull()) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
 			Setter.FuncCall(NULL, flags, args, This);
 			return rvNoError;

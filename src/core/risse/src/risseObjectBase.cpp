@@ -42,7 +42,7 @@ tRisseObjectBase::tRisseObjectBase(const tRisseString & prototype_name) :
 
 
 //---------------------------------------------------------------------------
-bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
+tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 	tRisseVariant &result, const tRisseVariant &This)
 {
 	tMemberData * member = HashTable.Find(name);
@@ -50,11 +50,12 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 	if(!member)
 	{
 		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
-			return false; // クラスやモジュールを探さない場合はここでかえる
+			return rvMemberNotFound; // クラスやモジュールを探さない場合はここでかえる
 
 		// モジュールを探す
 		tRisseVariant modules;
-		if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This))
+		tRetValue modules_rv = Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This);
+		if(modules_rv == rvNoError)
 		{
 			// モジュール配列がある
 			// モジュールは、モジュール配列をたどることで検索を行う
@@ -85,16 +86,26 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 						if(DefaultMethodContext) result.OverwriteContext(DefaultMethodContext);
 					}
 
-					return true;
+					return rvNoError;
 				}
+
+				if(rv != rvMemberNotFound) return rv; // MemberNotFound 以外はここでエラー
 			}
+		}
+		else if(modules_rv == rvMemberNotFound)
+		{
+			// modules メンバが見つからないのはかまわない
+		}
+		else
+		{
+			// それいがいはまずい
+			RaiseError(modules_rv, ss_modules);
 		}
 
 		// クラスを探す
 		tRisseVariant Class;
-		if(!Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
-			return false; // クラスを特定できない
-		if(Class.IsNull()) return false; // クラスが null
+		RaiseIfError(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This), PrototypeName);
+		if(Class.IsNull()) return rvMemberNotFound; // クラスが null
 
 		// クラスに対してメンバ取得を行う
 		// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
@@ -103,7 +114,7 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 					flags|tRisseOperateFlags::ofUseThisAsContext,
 					tRisseMethodArgument::Empty(),
 					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
-		if(rv != rvNoError) return false;
+		if(rv != rvNoError) return rv; // なにかエラーがおこあったらここで戻る
 
 		if(!flags.Has(tRisseOperateFlags::ofUseThisAsContext))
 		{
@@ -112,7 +123,7 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 				result.OverwriteContext(DefaultMethodContext);
 		}
 
-		return true;
+		return rvNoError;
 	}
 
 	// プロパティアクセスの方法を決定する
@@ -134,7 +145,7 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 		tRetValue rv = member->Value.Operate(ocFuncCall, &result, tRisseString::GetEmptyString(),
 					flags, tRisseMethodArgument::Empty(),
 					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
-		if(rv != rvNoError) return false;
+		if(rv != rvNoError && rv != rvMemberNotFound) return rv; // rvMemberNotFound以外のなにかエラーがおこあったらここで戻る
 		break;
 	}
 
@@ -145,13 +156,13 @@ bool tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 			result.OverwriteContext(DefaultMethodContext);
 	}
 
-	return true;
+	return rvNoError;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags,
+tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags,
 	const tRisseVariant &value, const tRisseVariant &This)
 {
 	tMemberData * member;
@@ -175,7 +186,7 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 				break;
 
 			case tRisseMemberAttribute::pcVar: // 普通のメンバ
-				return false; // 見つからなかったというのと同じ扱い
+				return rvMemberNotFound; // 見つからなかったというのと同じ扱い
 
 			case tRisseMemberAttribute::pcConst: // 定数
 				// 定数への書き込みは常に失敗するのでそのまま通過させる
@@ -190,10 +201,14 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 
 		// 値を書き込む
 		if(member_prop_control == tRisseMemberAttribute::pcVar)
+		{
 			member->Value = value;
+			return rvNoError;
+		}
 		else
-			WriteMember(name, flags, *member, member_prop_control, value, This);
-		return true;
+		{
+			return WriteMember(name, flags, *member, member_prop_control, value, This);
+		}
 	}
 
 	// この時点でメンバはインスタンスには見つかっていない。
@@ -207,9 +222,9 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 			if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
 				attrib.SetProperty(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
 			HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
-			return true;
+			return rvNoError;
 		}
-		return false; // そうでない場合はメンバは見つからなかったことにする
+		return rvMemberNotFound; // そうでない場合はメンバは見つからなかったことにする
 	}
 
 	// クラスやモジュールを見に行くが、クラスやモジュールにプロパティとして動作する
@@ -221,7 +236,7 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 
 	// モジュールを探す
 	tRisseVariant modules;
-	if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This))
+	if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This) == rvNoError)
 	{
 		// モジュール配列がある
 		// モジュールは、モジュール配列をたどることで検索を行う
@@ -243,28 +258,26 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 				flags|tRisseOperateFlags::ofPropertyOrConstOnly|tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseThisAsContext,
 				tRisseMethodArgument::New(value),
 				(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
-			if(result == rvNoError) return true; // アクセスに成功したので戻る
+			if(result != rvMemberNotFound) return result; // 「メンバが見つからない」以外は戻る
 		}
 	}
 
 	// クラスを探す
 	tRisseVariant Class;
-	if(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
+	RaiseIfError(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This), PrototypeName);
+	if(!Class.IsNull())
 	{
-		if(!Class.IsNull())
-		{
-			// クラスを特定できた場合
-			// クラスに対してメンバ設定を行う
-			// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
-			// tRisseOperateFlags::ofUseThisAsContext もつける
-			result = Class.OperateForMember(ocDSet, NULL, name,
-								flags|tRisseOperateFlags::ofPropertyOrConstOnly|tRisseOperateFlags::ofUseThisAsContext,
-								tRisseMethodArgument::New(value),
-								(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
-			// ちなみに見つかったのが定数で、書き込みに失敗した場合は
-			// 例外が飛ぶので OperateForMember は戻ってこない。
-			if(result == rvNoError) return true; // アクセスに成功したので戻る
-		}
+		// クラスを特定できた場合
+		// クラスに対してメンバ設定を行う
+		// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
+		// tRisseOperateFlags::ofUseThisAsContext もつける
+		result = Class.OperateForMember(ocDSet, NULL, name,
+							flags|tRisseOperateFlags::ofPropertyOrConstOnly|tRisseOperateFlags::ofUseThisAsContext,
+							tRisseMethodArgument::New(value),
+							(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
+		// ちなみに見つかったのが定数で、書き込みに失敗した場合は
+		// 例外が飛ぶので OperateForMember は戻ってこない。
+		if(result != rvMemberNotFound) return result; // 「メンバが見つからない」以外は戻る
 	}
 
 	if(result == rvMemberNotFound && flags.Has(tRisseOperateFlags::ofPropertyOrConstOnly))
@@ -272,7 +285,7 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 		// 親クラスを見に行ったがメンバがなかった、あるいはそもそも親クラスが見つからなかった。
 		// PropertyOrConstOnly が指定されているのでこの
 		// インスタンスにメンバを作成するわけにもいかない。
-		return false; // 失敗として返す
+		return rvMemberNotFound; // 失敗として返す
 	}
 
 	if(flags.Has(tRisseOperateFlags::ofMemberEnsure))
@@ -285,22 +298,26 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 		if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
 			attrib.SetProperty(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
 		HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
-		return true;
+		return rvNoError;
 	}
 	else
 	{
 		member = HashTable.Find(name);
 
-		if(!member) return false; // 見つからなかった
+		if(!member) return rvMemberNotFound; // 見つからなかった
 
 		tRisseMemberAttribute::tPropertyControl member_prop_control = member->GetPropertyControl(flags);
 
 		// 値を書き込む
 		if(member_prop_control == tRisseMemberAttribute::pcVar)
+		{
 			member->Value = value;
+			return rvNoError;
+		}
 		else
-			WriteMember(name, flags, *member, member_prop_control, value, This);
-		return true;
+		{
+			return WriteMember(name, flags, *member, member_prop_control, value, This);
+		}
 	}
 
 }
@@ -308,39 +325,39 @@ bool tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags
 
 
 //---------------------------------------------------------------------------
-void tRisseObjectBase::WriteMember(const tRisseString & name, tRisseOperateFlags flags, 
-	tMemberData & member, tRisseMemberAttribute::tPropertyControl prop_control,
+tRisseObjectBase::tRetValue tRisseObjectBase::WriteMember(const tRisseString & name,
+	tRisseOperateFlags flags,  tMemberData & member,
+	tRisseMemberAttribute::tPropertyControl prop_control,
 	const tRisseVariant & value, const tRisseVariant &This)
 {
 	switch(prop_control)
 	{
 	case tRisseMemberAttribute::pcNone: // あり得ない
-		break;
+		return rvNoError;
 
 	case tRisseMemberAttribute::pcVar: // 普通のメンバ
 		member.Value = value;
-		break;
+		return rvNoError;;
 
 	case tRisseMemberAttribute::pcConst: // 定数
 		// 定数には書き込みできません
-		RisseThrowMemberIsReadOnly(name);
-		break;
+		return rvMemberIsReadOnly;
 
 	case tRisseMemberAttribute::pcProperty: // プロパティアクセス
 		// プロパティハンドラを起動する
 		// プロパティの設定の場合は読み出しと違い、ocFuncCallではなくてocDSetを
 		// つかう。
-		member.Value.Do(ocDSet, NULL, tRisseString::GetEmptyString(),
+		return member.Value.Operate(ocDSet, NULL, tRisseString::GetEmptyString(),
 					flags, tRisseMethodArgument::New(value),
 					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
-		break;
 	}
+	return rvNoError;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tRisseObjectBase::FuncCall(
+tRisseObjectBase::tRetValue tRisseObjectBase::FuncCall(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags,
 		const tRisseMethodArgument & args,
@@ -352,18 +369,19 @@ bool tRisseObjectBase::FuncCall(
 
 		// メンバを読み出す
 		tRisseVariant function_object;
-		if(!Read(name, flags, function_object, This)) return false;
+		tRetValue rv = Read(name, flags, function_object, This);
+		if(rv != rvNoError) return rv;
 
 		// メンバに対して関数呼び出しを実行する
 		function_object.FuncCall(ret, flags, args, This);
 	}
-	return true;
+	return rvNoError;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tRisseObjectBase::New(
+tRisseObjectBase::tRetValue tRisseObjectBase::New(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags,
 		const tRisseMethodArgument & args,
@@ -373,13 +391,14 @@ bool tRisseObjectBase::New(
 	{
 		// メンバを読み出す
 		tRisseVariant class_object;
-		if(!Read(name, flags, class_object, This)) return false;
+		tRetValue rv = Read(name, flags, class_object, This);
+		if(rv != rvNoError) return rv;
 
 		// メンバに対しNewを実行する
 		tRisseVariant result = class_object.New(flags, args);
 		if(ret) *ret = result;
 
-		return true;
+		return rvNoError;
 	}
 	else
 	{
@@ -391,7 +410,7 @@ bool tRisseObjectBase::New(
 
 
 //---------------------------------------------------------------------------
-bool tRisseObjectBase::SetAttribute(
+tRisseObjectBase::tRetValue tRisseObjectBase::SetAttribute(
 		const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant & This)
 {
 	tMemberData * member = HashTable.Find(name);
@@ -399,27 +418,25 @@ bool tRisseObjectBase::SetAttribute(
 	if(!member)
 	{
 		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
-			return false; // クラスを探さない場合はここでかえる
+			return rvMemberNotFound; // クラスを探さない場合はここでかえる
 
 		// TODO: モジュールに対する設定は？
 
 		// クラスを探す
 		tRisseVariant Class;
-		if(!Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
-			return false; // クラスを特定できない
-		if(Class.IsNull()) return false; // クラスが null
+		RaiseIfError(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This), PrototypeName);
+		if(Class.IsNull()) return rvMemberNotFound; // クラスが null
 
 		// クラスに対して属性設定を行う
 		tRetValue rv = Class.OperateForMember(ocDSetAttrib, NULL, name, flags,
 					tRisseMethodArgument::Empty(), This);
-		if(rv != rvNoError) return false;
-		return true;
+		return rv;
 	}
 
 	// 属性を設定する
 	member->Attribute.Overwrite(flags);
 
-	return true;
+	return rvNoError;
 }
 //---------------------------------------------------------------------------
 
@@ -439,7 +456,8 @@ bool tRisseObjectBase::InstanceOf(
 
 	// モジュールを探す
 	tRisseVariant modules;
-	if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This))
+	tRetValue modules_rv = Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This);
+	if(modules_rv == rvNoError)
 	{
 		// モジュール配列がある
 		// モジュールは、モジュール配列をたどることで検索を行う
@@ -454,18 +472,26 @@ bool tRisseObjectBase::InstanceOf(
 			if(module.ObjectInterfaceMatch(RefClass)) return true; // マッチした
 		}
 	}
+	else if(modules_rv == rvMemberNotFound)
+	{
+		// modules メンバが見つからないのはかまわない
+	}
+	else
+	{
+		// それいがいはまずい
+		RaiseError(modules_rv, ss_modules);
+	}
 
-	// クラスを探す
-	tRisseVariant Class;
-	if(!Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, Class, This))
-		return false; // クラスを特定できない
-	if(Class.IsNull()) return false; // クラスが null
+	// スーパークラスをゲット
+	tRisseVariant SuperClass;
+	RaiseIfError(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly, SuperClass, This), PrototypeName);
+	if(SuperClass.IsNull()) return false; // クラスが null
 
-	if(Class.ObjectInterfaceMatch(RefClass)) return true; // マッチした
+	if(SuperClass.ObjectInterfaceMatch(RefClass)) return true; // マッチした
 
 	// クラスに対して再帰
 	tRisseVariant result;
-	Class.GetObjectInterface()->Do(ocInstanceOf, &result, tRisseString::GetEmptyString(),
+	SuperClass.GetObjectInterface()->Do(ocInstanceOf, &result, tRisseString::GetEmptyString(),
 		flags|tRisseOperateFlags::ofUseThisAsContext,
 		tRisseMethodArgument::New(RefClass),
 		(DefaultMethodContext && (flags & tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
@@ -483,35 +509,25 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 	case ocDGet:
 		// property get
 		// TODO: このオブジェクトそのもに対する操作への対応
-		if(!Read(name, flags, *result, This))
-			return rvMemberNotFound;
-		return rvNoError;
+		return Read(name, flags, *result, This);
 
 	case ocDSet:
 		// property set
 		// TODO: このオブジェクトそのもに対する操作への対応
 		args.ExpectArgumentCount(1);
-		if(!Write(name, flags, args[0], This))
-			return rvMemberNotFound;
-		return rvNoError;
+		return Write(name, flags, args[0], This);
 
 	case ocFuncCall:
 		// function call
-		if(!FuncCall(result, name, flags, args, This))
-			return rvMemberNotFound;
-		return rvNoError;
+		return FuncCall(result, name, flags, args, This);
 
 	case ocNew:
 		// create new instance
-		if(!New(result, name, flags, args, This))
-			return rvMemberNotFound;
-		return rvNoError;
+		return New(result, name, flags, args, This);
 
 	case ocDSetAttrib:
 		// set member attrubute
-		if(!SetAttribute(name, flags))
-			return rvMemberNotFound;
-		return rvNoError;
+		return SetAttribute(name, flags);
 
 	case ocInstanceOf:
 		// TODO: このオブジェクトのメンバに対する操作への対応
@@ -553,9 +569,9 @@ void tRisseObjectBase::RegisterNormalMember(const tRisseString & name,
 {
 	tRisseOperateFlags access_flags =
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
-	Write(name,
+	RaiseIfError(Write(name,
 		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-							access_flags, value, tRisseVariant(this));
+							access_flags, value, tRisseVariant(this)), name);
 	if(attrib.HasAny())
 		SetAttribute(name, access_flags|attrib);
 }

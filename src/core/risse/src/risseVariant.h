@@ -28,6 +28,18 @@ namespace Risse
 //---------------------------------------------------------------------------
 class tRisseVariantBlock : public tRisseVariantData, public tRisseOperateRetValue
 {
+private:
+	//! @brief		CannotCreateInstanceFromNonClassObjectException を投げる
+	//! @note		本来 risseExceptionClass.h に書いてある物だが
+	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	static void ThrowCannotCreateInstanceFromNonClassObjectException();
+
+	//! @brief		BadContextException を投げる
+	//! @note		本来 risseExceptionClass.h に書いてある物だが
+	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	static void ThrowBadContextException();
+
+
 
 private: // static オブジェクト
 	//! @brief	null/void/などの特殊な値を表すstaticな領域
@@ -886,6 +898,7 @@ public: // 演算子
 	tRisseVariantBlock Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
 	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
 
+public:
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)インスタンス作成		New
 	//! @param		flags		呼び出しフラグ
@@ -902,7 +915,7 @@ public: // 演算子
 		case vtObject:	return New_Object   (tRisseString::GetEmptyString(), flags, args);
 
 		default:
-			RisseThrowCannotCreateInstanceFromNonClassObjectException(); break;
+			ThrowCannotCreateInstanceFromNonClassObjectException(); break;
 		}
 		return tRisseVariantBlock();
 	}
@@ -2164,13 +2177,6 @@ public: // ユーティリティ
 	tRisseString AsHumanReadable_Object   (risse_size maxlen) const
 					{ return tRisseString(); /* incomplete */ }
 
-private:
-	//! @brief		BadContextException を投げる
-	//! @note		本来 risseExceptionClass.h に書いてある物だが
-	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
-	static void ThrowBadContextException();
-
-public:
 	//! @brief		Object型に対するtypeチェック
 	//! @note		バリアントが期待したタイプであるかどうかをチェックし
 	//!				またそのオブジェクトインターフェースを得る。

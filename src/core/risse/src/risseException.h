@@ -328,10 +328,6 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		「nullオブジェクトにアクセスしようとした」例外を発生(暫定)
 void RisseThrowNullPointerException();
-//! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生(暫定) - InstantiationException < RuntimeException
-void RisseThrowCannotCreateInstanceFromNonClassObjectException();
-//! @brief		「このクラスのインスタンスは作成できません」例外を発生(暫定) - InstantiationException < RuntimeException
-void RisseThrowCannotCreateInstanceFromThisClass();
 //! @brief		「内部エラー」例外を発生(暫定) - InternalError < Error
 void RisseThrowInternalError();
 //---------------------------------------------------------------------------

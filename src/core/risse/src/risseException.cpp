@@ -118,22 +118,6 @@ void RisseThrowNullPointerException()
 
 
 //---------------------------------------------------------------------------
-void RisseThrowCannotCreateInstanceFromNonClassObjectException()
-{
-	eRisseError::Throw(RISSE_WS_TR("cannot create instance from non-class object"));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void RisseThrowCannotCreateInstanceFromThisClass()
-{
-	eRisseError::Throw(tRisseString(RISSE_WS_TR("cannot create instance from this class")));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void RisseThrowInternalError()
 {
 	eRisseError::Throw(tRisseString(RISSE_WS_TR("internal error")));

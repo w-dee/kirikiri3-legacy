@@ -28,6 +28,23 @@ RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 
 
 //---------------------------------------------------------------------------
+void tRisseVariantBlock::ThrowCannotCreateInstanceFromNonClassObjectException()
+{
+	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromNonClassObject();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::ThrowBadContextException()
+{
+	tRisseBadContextExceptionClass::Throw();
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 // voidオブジェクトへのconst参照を保持するオブジェクト
 // これのバイナリレイアウトはtRisseVariantBlockと同一でなければならない
 tRisseVariantBlock::tStaticPrimitive tRisseVariantBlock::VoidObject = {
@@ -1280,14 +1297,6 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Void     (risse_size maxlen) co
 tRisseString tRisseVariantBlock::AsHumanReadable_Null     (risse_size maxlen) const
 {
 	return RISSE_WS("null");
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseVariantBlock::ThrowBadContextException()
-{
-	tRisseBadContextExceptionClass::Throw();
 }
 //---------------------------------------------------------------------------
 

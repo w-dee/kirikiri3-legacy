@@ -17,6 +17,7 @@
 #include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
+#include "risseExceptionClass.h"
 
 
 namespace Risse
@@ -110,7 +111,7 @@ void tRissePrimitiveClass::RegisterMembers()
 tRisseVariant tRissePrimitiveClass::CreateNewObjectBase()
 {
 	// このクラスのインスタンスは作成できないので例外を投げる
-	RisseThrowCannotCreateInstanceFromThisClass();
+	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
 	return tRisseVariant();
 }
 //---------------------------------------------------------------------------

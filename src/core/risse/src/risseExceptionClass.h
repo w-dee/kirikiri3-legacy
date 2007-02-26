@@ -239,6 +239,31 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"InstantiationException" クラス
+//---------------------------------------------------------------------------
+class tRisseInstantiationExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseInstantiationExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseInstantiationExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生
+	static void ThrowCannotCreateInstanceFromNonClassObject();
+
+	//! @brief		「このクラスからインスタンスは作成できません」例外を発生
+	static void ThrowCannotCreateInstanceFromThisClass();
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		"BadContextException" クラス
 //---------------------------------------------------------------------------
 class tRisseBadContextExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseBadContextExceptionClass>

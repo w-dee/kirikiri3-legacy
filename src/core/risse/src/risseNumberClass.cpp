@@ -18,6 +18,7 @@
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "rissePrimitiveClass.h"
+#include "risseExceptionClass.h"
 
 
 namespace Risse
@@ -87,7 +88,7 @@ void tRisseNumberClass::RegisterMembers()
 tRisseVariant tRisseNumberClass::CreateNewObjectBase()
 {
 	// このクラスのインスタンスは作成できないので例外を投げる
-	RisseThrowCannotCreateInstanceFromThisClass();
+	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
 	return tRisseVariant();
 }
 //---------------------------------------------------------------------------

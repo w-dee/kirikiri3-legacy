@@ -239,6 +239,28 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"BadContextException" クラス
+//---------------------------------------------------------------------------
+class tRisseBadContextExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseBadContextExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseBadContextExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「異なるクラスのコンテキストです」例外を発生
+	static void Throw();
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		"UnsupportedOperationException" クラス
 //---------------------------------------------------------------------------
 class tRisseUnsupportedOperationExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseUnsupportedOperationExceptionClass>

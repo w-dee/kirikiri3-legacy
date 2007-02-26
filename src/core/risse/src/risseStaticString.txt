@@ -69,4 +69,4 @@ ss_IllegalMemberAccessException		IllegalMemberAccessException	#!< "IllegalMember
 ss_IOException						IOException						#!< "IOException" クラス名
 ss_CharConversionException			CharConversionException			#!< "CharConversionException" クラス名
 ss_UnsupportedOperationException	UnsupportedOperationException	#!< "UnsupportedOperationException" クラス名
-
+ss_BadContextException				BadContextException				#!< "BadContextException" クラス名

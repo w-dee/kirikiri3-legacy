@@ -1284,6 +1284,13 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Null     (risse_size maxlen) co
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::ThrowBadContextException()
+{
+	tRisseBadContextExceptionClass::Throw();
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 void tRisseVariantBlock::DebugDump() const

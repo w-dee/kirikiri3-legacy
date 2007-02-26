@@ -2164,6 +2164,13 @@ public: // ユーティリティ
 	tRisseString AsHumanReadable_Object   (risse_size maxlen) const
 					{ return tRisseString(); /* incomplete */ }
 
+private:
+	//! @brief		BadContextException を投げる
+	//! @note		本来 risseExceptionClass.h に書いてある物だが
+	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	static void ThrowBadContextException();
+
+public:
 	//! @brief		Object型に対するtypeチェック
 	//! @note		バリアントが期待したタイプであるかどうかをチェックし
 	//!				またそのオブジェクトインターフェースを得る。
@@ -2173,10 +2180,10 @@ public: // ユーティリティ
 	template <typename ObjectT, typename ClassT>
 	ObjectT * CheckAndGetObjectInterafce() const
 	{
-		if(GetType() != vtObject) RisseThrowUnexpectedClass();
+		if(GetType() != vtObject) ThrowBadContextException();
 		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
 		if(!ClassT::GetPointer()->GetRTTIMatcher().Match(intf->GetRTTI()))
-			RisseThrowUnexpectedClass();
+			ThrowBadContextException();
 		return intf;
 	}
 

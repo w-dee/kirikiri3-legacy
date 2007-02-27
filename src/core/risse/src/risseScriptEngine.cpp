@@ -81,6 +81,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseNoSuchMemberExceptionClass::RegisterClassInstance(GlobalObject, ss_NoSuchMemberException);
 	tRisseArgumentExceptionClass::RegisterClassInstance(GlobalObject, ss_ArgumentException);
 	tRisseIllegalArgumentExceptionClass::RegisterClassInstance(GlobalObject, ss_IllegalArgumentException);
+	tRisseNullObjectExceptionClass::RegisterClassInstance(GlobalObject, ss_NullObjectException);
 	tRisseBadArgumentCountExceptionClass::RegisterClassInstance(GlobalObject, ss_BadArgumentCountException);
 	tRisseIllegalMemberAccessExceptionClass::RegisterClassInstance(GlobalObject, ss_IllegalMemberAccessException);
 
@@ -117,6 +118,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseNoSuchMemberExceptionClass::GetPointer()->RegisterMembers();
 	tRisseArgumentExceptionClass::GetPointer()->RegisterMembers();
 	tRisseIllegalArgumentExceptionClass::GetPointer()->RegisterMembers();
+	tRisseNullObjectExceptionClass::GetPointer()->RegisterMembers();
 	tRisseBadArgumentCountExceptionClass::GetPointer()->RegisterMembers();
 	tRisseIllegalMemberAccessExceptionClass::GetPointer()->RegisterMembers();
 

@@ -39,6 +39,11 @@ private:
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
 	static void ThrowBadContextException();
 
+	//! @brief		NoSuchMemberException を投げる
+	//! @param		name		メンバ名
+	//! @note		本来 risseExceptionClass.h に書いてある物だが
+	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	static void ThrowNoSuchMemberException(const tRisseString & name);
 
 
 private: // static オブジェクト
@@ -1037,7 +1042,7 @@ public:
 	tRisseVariantBlock & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
 	tRisseVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
 	tRisseVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
-	tRisseVariantBlock & Inc_Null     () { RisseThrowNullPointerException(); return *this; }
+	tRisseVariantBlock & Inc_Null     () { ThrowNoSuchMemberException(mnAdd); return *this; }
 	tRisseVariantBlock & Inc_String   () { *this = tRisseVariantBlock((risse_int64)1).Add_Integer(Plus_String()); return *this; }
 	tRisseVariantBlock & Inc_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
 	tRisseVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() + 1); return *this; }
@@ -1069,7 +1074,7 @@ public:
 	tRisseVariantBlock & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
 	tRisseVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
 	tRisseVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
-	tRisseVariantBlock & Dec_Null     () { RisseThrowNullPointerException(); return *this; }
+	tRisseVariantBlock & Dec_Null     () { ThrowNoSuchMemberException(mnSub); return *this; }
 	tRisseVariantBlock & Dec_String   () { *this = tRisseVariantBlock((risse_int64)-1).Add_Integer(Plus_String()); return *this; }
 	tRisseVariantBlock & Dec_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
 	tRisseVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() - 1); return *this; }
@@ -1101,7 +1106,7 @@ public:
 	tRisseVariantBlock Plus_Void     () const { return (risse_int64)0; /* void は 整数の 0 */ }
 	tRisseVariantBlock Plus_Integer  () const { return *this; }
 	tRisseVariantBlock Plus_Real     () const { return *this; }
-	tRisseVariantBlock Plus_Null     () const { RisseThrowNullPointerException(); return *this; }
+	tRisseVariantBlock Plus_Null     () const { ThrowNoSuchMemberException(mnPlus); return *this; }
 	tRisseVariantBlock Plus_String   () const;
 	tRisseVariantBlock Plus_Octet    () const { return (risse_int64)0; /* incomplete */; }
 	tRisseVariantBlock Plus_Boolean  () const { return CastToBoolean_Boolean() != false; /* boolean は 0 か 1 かに変換される */ }
@@ -1132,7 +1137,7 @@ public:
 	tRisseVariantBlock Minus_Void     () const { return (risse_int64)0; }
 	tRisseVariantBlock Minus_Integer  () const { return -AsInteger(); }
 	tRisseVariantBlock Minus_Real     () const { return -AsReal(); }
-	tRisseVariantBlock Minus_Null     () const { RisseThrowNullPointerException(); return *this; }
+	tRisseVariantBlock Minus_Null     () const { ThrowNoSuchMemberException(mnMinus); return *this; }
 	tRisseVariantBlock Minus_String   () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock Minus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock Minus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean()?-1:0); }
@@ -1494,7 +1499,7 @@ public:
 	bool Lesser_Void     (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Integer  (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Real     (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return false; }
+	bool Lesser_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnLesser); return false; }
 	bool Lesser_String   (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1526,7 +1531,7 @@ public:
 	bool Greater_Void     (const tRisseVariantBlock & rhs) const;
 	bool Greater_Integer  (const tRisseVariantBlock & rhs) const;
 	bool Greater_Real     (const tRisseVariantBlock & rhs) const;
-	bool Greater_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return false; }
+	bool Greater_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnGreater); return false; }
 	bool Greater_String   (const tRisseVariantBlock & rhs) const;
 	bool Greater_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1558,7 +1563,7 @@ public:
 	bool LesserOrEqual_Void     (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return false; }
+	bool LesserOrEqual_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnLesserOrEqual); return false; }
 	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1591,7 +1596,7 @@ public:
 	bool GreaterOrEqual_Void     (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return false; }
+	bool GreaterOrEqual_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnGreaterOrEqual); return false; }
 	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1903,7 +1908,7 @@ public:
 	tRisseVariantBlock Mul_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return *this; }
+	tRisseVariantBlock Mul_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnMul); return *this; }
 	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1948,7 +1953,7 @@ public:
 	tRisseVariantBlock Add_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return *this; }
+	tRisseVariantBlock Add_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnAdd); return *this; }
 	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1993,7 +1998,7 @@ public:
 	tRisseVariantBlock Sub_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Null     (const tRisseVariantBlock & rhs) const { RisseThrowNullPointerException(); return *this; }
+	tRisseVariantBlock Sub_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnSub); return *this; }
 	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -2044,7 +2049,7 @@ public: // キャスト
 	risse_int64 CastToInteger_Void     () const { return false; /* void は 0 */}
 	risse_int64 CastToInteger_Integer  () const { return AsInteger(); }
 	risse_int64 CastToInteger_Real     () const { return (risse_int64)AsReal(); }
-	risse_int64 CastToInteger_Null     () const { RisseThrowNullPointerException(); return (risse_int64)0; }
+	risse_int64 CastToInteger_Null     () const { ThrowNoSuchMemberException(mnInteger); return (risse_int64)0; }
 	risse_int64 CastToInteger_String   () const;
 	risse_int64 CastToInteger_Octet    () const { return (risse_int64)0; /* incomplete */ }
 	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)CastToBoolean_Boolean(); }
@@ -2073,7 +2078,7 @@ public: // キャスト
 	risse_real CastToReal_Void     () const { return (risse_real)0.0; }
 	risse_real CastToReal_Integer  () const { return AsInteger(); }
 	risse_real CastToReal_Real     () const { return AsReal(); }
-	risse_real CastToReal_Null     () const { RisseThrowNullPointerException(); return (risse_real)0.0; }
+	risse_real CastToReal_Null     () const { ThrowNoSuchMemberException(mnReal); return (risse_real)0.0; }
 	risse_real CastToReal_String   () const { return (risse_real)Plus_String(); /* Plus_String の戻りを risse_real に再キャスト */ }
 	risse_real CastToReal_Octet    () const { return (risse_real)0.0; /* incomplete */ }
 	risse_real CastToReal_Boolean  () const { return (risse_real)(int)CastToBoolean_Boolean(); }

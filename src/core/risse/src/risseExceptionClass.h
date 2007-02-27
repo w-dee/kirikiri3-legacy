@@ -240,9 +240,6 @@ public:
 
 
 
-
-
-
 //---------------------------------------------------------------------------
 //! @brief		"RuntimeException" クラス
 //---------------------------------------------------------------------------
@@ -260,7 +257,6 @@ public:
 public:
 };
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------
@@ -285,7 +281,6 @@ public:
 	static void ThrowCannotCreateInstanceFromThisClass();
 };
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------
@@ -359,6 +354,27 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"NullObjectException" クラス
+//---------------------------------------------------------------------------
+class tRisseNullObjectExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseNullObjectExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseNullObjectExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「異なるクラスのコンテキストです」例外を発生
+	static void Throw();
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		"IllegalArgumentException" クラス
 //---------------------------------------------------------------------------
 class tRisseIllegalArgumentExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseIllegalArgumentExceptionClass>
@@ -404,10 +420,6 @@ public:
 	static void ThrowBlock(risse_size passed, risse_size expected);
 };
 //---------------------------------------------------------------------------
-
-
-
-
 
 
 

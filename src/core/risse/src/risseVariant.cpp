@@ -43,6 +43,14 @@ void tRisseVariantBlock::ThrowBadContextException()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::ThrowNoSuchMemberException(const tRisseString &name)
+{
+	tRisseNoSuchMemberExceptionClass::Throw(name);
+}
+//---------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------
 // voidオブジェクトへのconst参照を保持するオブジェクト
@@ -911,7 +919,7 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Void     (const tRisseVariantBlock & 
 	case vtVoid:	return (risse_int64)0; // void * void
 	case vtInteger:	return (risse_int64)0; // void * integer
 	case vtReal:	return (risse_real)0.0;
-	case vtNull:	RisseThrowNullPointerException(); return (risse_real)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_real)0;
 	case vtString:	return Mul_Void(rhs.Plus_String()); // Plus_String の戻りは integer か real
 	case vtOctet:	return (risse_int64)0; // incomplete
 	case vtBoolean:	return (bool)false;
@@ -930,7 +938,7 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Integer  (const tRisseVariantBlock & 
 	case vtVoid:	return (risse_int64)0; // integer * void
 	case vtInteger:	return AsInteger() * rhs.AsInteger(); // integer * integer
 	case vtReal:	return AsInteger() * rhs.AsReal(); // integer * real
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return Mul_Integer(rhs.Plus_String()); // Plus_String の戻りは integer か real
 	case vtOctet:	return (risse_int64)0; // incomplete
 	case vtBoolean:	return AsInteger() * (int)rhs.CastToBoolean_Boolean(); // integer * boolean
@@ -949,7 +957,7 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Real     (const tRisseVariantBlock & 
 	case vtVoid:	return (risse_int64)0; // real * void
 	case vtInteger:	return AsReal() * rhs.AsInteger(); // real * integer
 	case vtReal:	return AsReal() * rhs.AsReal(); // real * real
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return Mul_Real(rhs.Plus_String()); // Plus_String の戻りは integer か real
 	case vtOctet:	return (risse_int64)0; // incomplete
 	case vtBoolean:	return AsReal() * (int)rhs.CastToBoolean_Boolean(); // real * boolean
@@ -973,7 +981,7 @@ tRisseVariantBlock tRisseVariantBlock::Mul_String   (const tRisseVariantBlock & 
 		return Plus_String() * rhs; // Plus_String は integer か real になる
 	case vtOctet:	return (risse_int64)0; // incomplete
 	case vtObject:	return (risse_int64)0; // incomplete
-	case vtNull: RisseThrowNullPointerException();
+	case vtNull: tRisseNullObjectExceptionClass::Throw();
 	}
 	return tRisseVariantBlock();
 }
@@ -988,7 +996,7 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Boolean  (const tRisseVariantBlock & 
 	case vtVoid:	return false; // bool * void
 	case vtInteger:	return CastToBoolean_Boolean() * rhs.AsInteger(); // bool * integer
 	case vtReal:	return CastToBoolean_Boolean() * rhs.AsReal(); // bool * real
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return Mul_Boolean(rhs.Plus_String()); // Plus_String の戻りは integer か real
 	case vtOctet:	return (risse_int64)0; // incomplete
 	case vtBoolean:	return (risse_int64)(CastToBoolean_Boolean() * rhs.CastToBoolean_Boolean()); // bool * boolean
@@ -1007,7 +1015,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Void     (const tRisseVariantBlock & 
 	case vtVoid:	return (risse_int64)0; // void - void = 0 かなぁ
 	case vtInteger:	return - rhs.AsInteger(); // void - integer
 	case vtReal:	return - rhs.AsReal();
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return - rhs.Plus_String();
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtBoolean:	return (risse_int64)(- (int)rhs.CastToBoolean_Boolean());
@@ -1026,7 +1034,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Integer  (const tRisseVariantBlock & 
 	case vtVoid:	return *this; // integer - void
 	case vtInteger:	return AsInteger() - rhs.AsInteger(); // integer - integer
 	case vtReal:	return AsInteger() - rhs.AsReal(); // integer - real
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return Sub_Integer(rhs.Plus_String()); // Plus_String の戻りは integer か real
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtBoolean:	return AsInteger() - (int)rhs.CastToBoolean_Boolean(); // integer - bool
@@ -1045,7 +1053,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Real     (const tRisseVariantBlock & 
 	case vtVoid:	return *this; // real - void
 	case vtInteger:	return AsReal() - rhs.AsInteger(); // real - integer
 	case vtReal:	return AsReal() - rhs.AsReal(); // real - real
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return Sub_Real(rhs.Plus_String()); // Plus_String の戻りは integer か real
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtBoolean:	return AsReal() - (int)rhs.CastToBoolean_Boolean(); // real - bool
@@ -1069,7 +1077,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_String   (const tRisseVariantBlock & 
 		return Plus_String() - rhs; // Plus_String の戻りは integer か real
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
-	case vtNull: RisseThrowNullPointerException();
+	case vtNull: tRisseNullObjectExceptionClass::Throw();
 	}
 	return tRisseVariantBlock();
 }
@@ -1084,7 +1092,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Boolean  (const tRisseVariantBlock & 
 	case vtVoid:	return *this; // bool - void
 	case vtInteger:	return (int)CastToBoolean_Boolean() - rhs.AsInteger(); // bool - integer
 	case vtReal:	return (int)CastToBoolean_Boolean() - rhs.AsReal(); // bool - real
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return Sub_Boolean(rhs.Plus_String()); // Plus_String の戻りは integer か real
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtBoolean:	return (risse_int64)((int)CastToBoolean_Boolean() - (int)rhs.CastToBoolean_Boolean()); // bool - bool
@@ -1103,7 +1111,7 @@ tRisseVariantBlock tRisseVariantBlock::Add_Void     (const tRisseVariantBlock & 
 	case vtVoid:	return tRisseVariantBlock(); // void + void = void かなぁ
 	case vtInteger:	return rhs; // void + integer
 	case vtReal:	return rhs;
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return rhs;
 	case vtOctet:	return rhs;
 	case vtBoolean:	return rhs;
@@ -1122,7 +1130,7 @@ tRisseVariantBlock tRisseVariantBlock::Add_Integer  (const tRisseVariantBlock & 
 	case vtVoid:	return *this;
 	case vtInteger:	return AsInteger() + rhs.AsInteger();
 	case vtReal:	return AsInteger() + rhs.AsReal();
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return CastToString_Integer() + rhs.AsString();
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtBoolean:	return AsInteger() + (int)rhs.CastToBoolean_Boolean();
@@ -1141,7 +1149,7 @@ tRisseVariantBlock tRisseVariantBlock::Add_Real     (const tRisseVariantBlock & 
 	case vtVoid:	return *this;
 	case vtInteger:	return AsReal() + rhs.AsInteger();
 	case vtReal:	return AsReal() + rhs.AsReal();
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return CastToString_Real() + rhs.AsString();
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtBoolean:	return AsReal() + (int)rhs.CastToBoolean_Boolean();
@@ -1160,7 +1168,7 @@ tRisseVariantBlock tRisseVariantBlock::Add_String   (const tRisseVariantBlock & 
 	case vtVoid:	return *this;
 	case vtInteger:	return AsString() + rhs.CastToString_Integer();
 	case vtReal:	return AsString() + rhs.CastToString_Real();
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return AsString() + rhs.AsString();
 	case vtOctet:	return AsString() + rhs.CastToString_Octet(); // これでいいのかなぁ
 	case vtBoolean:	return AsString() + rhs.CastToString_Boolean();
@@ -1179,7 +1187,7 @@ tRisseVariantBlock tRisseVariantBlock::Add_Boolean  (const tRisseVariantBlock & 
 	case vtVoid:	return *this;
 	case vtInteger:	return (int)CastToBoolean_Boolean() + rhs.AsInteger();
 	case vtReal:	return (int)CastToBoolean_Boolean() + rhs.AsReal();
-	case vtNull:	RisseThrowNullPointerException(); return (risse_int64)0;
+	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
 	case vtString:	return CastToString_Real() + rhs.AsString();
 	case vtOctet:	return false; // incomplete; どうしよう
 	case vtBoolean:	return (risse_int64)((int)CastToBoolean_Boolean() + (int)rhs.CastToBoolean_Boolean());
@@ -1269,7 +1277,7 @@ tRisseString tRisseVariantBlock::CastToString_Real     () const
 //---------------------------------------------------------------------------
 tRisseString tRisseVariantBlock::CastToString_Null     () const
 {
-	RisseThrowNullPointerException();
+	ThrowNoSuchMemberException(mnString);
 	return tRisseString();
 }
 //---------------------------------------------------------------------------

@@ -681,6 +681,8 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 
 
 
+
+
 //---------------------------------------------------------------------------
 tRisseInstantiationExceptionClass::tRisseInstantiationExceptionClass() :
 	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
@@ -932,6 +934,9 @@ void tRisseArgumentExceptionClass::RegisterMembers()
 
 
 
+
+
+
 //---------------------------------------------------------------------------
 tRisseIllegalArgumentExceptionClass::tRisseIllegalArgumentExceptionClass() :
 	tRisseClassBase(tRisseArgumentExceptionClass::GetPointer())
@@ -974,6 +979,62 @@ void tRisseIllegalArgumentExceptionClass::RegisterMembers()
 //---------------------------------------------------------------------------
 
 
+
+
+
+//---------------------------------------------------------------------------
+tRisseNullObjectExceptionClass::tRisseNullObjectExceptionClass() :
+	tRisseClassBase(tRisseIllegalArgumentExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNullObjectExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseNullObjectExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNullObjectExceptionClass::Throw()
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseNullObjectExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				tRisseString(RISSE_WS_TR("null object was given"))
+					)));
+}
+//---------------------------------------------------------------------------
 
 
 

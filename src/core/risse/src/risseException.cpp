@@ -109,13 +109,6 @@ void eRisseScriptException::Throw(const tRisseString & msg,
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-void RisseThrowNullPointerException()
-{
-	eRisseError::Throw(RISSE_WS_TR("access to null object"));
-}
-//---------------------------------------------------------------------------
-
 
 
 

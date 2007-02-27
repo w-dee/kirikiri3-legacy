@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risse用 "Object" クラスの実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "risseObjectClass.h"
 #include "risseNativeFunction.h"

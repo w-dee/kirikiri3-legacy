@@ -10,7 +10,6 @@
 //! @file
 //! @brief スクリプトブロック管理
 //---------------------------------------------------------------------------
-
 #include "prec.h"
 #include "risseScriptBlockBase.h"
 #include "risseException.h"

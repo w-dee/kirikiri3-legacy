@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risse用 "Property" クラスの実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "rissePropertyClass.h"
 #include "risseNativeFunction.h"

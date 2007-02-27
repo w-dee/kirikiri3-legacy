@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risse用 "Integer" クラスの実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "risseIntegerClass.h"
 #include "risseNativeFunction.h"

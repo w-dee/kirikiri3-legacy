@@ -10,7 +10,7 @@
 //! @file
 //! @brief オブジェクト用C++クラスの基底実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "risseObjectBase.h"
 #include "risseOperateFlags.h"

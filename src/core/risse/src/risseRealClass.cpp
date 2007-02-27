@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risse用 "Real" クラスの実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "risseRealClass.h"
 #include "risseNativeFunction.h"

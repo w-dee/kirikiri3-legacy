@@ -131,6 +131,31 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"AssertionError" クラス
+//---------------------------------------------------------------------------
+class tRisseAssertionErrorClass : public tRisseClassBase, public tRisseClassSingleton<tRisseAssertionErrorClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseAssertionErrorClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		例外を投げる
+	//! @param		expression		ASSERTに失敗した式
+	static void Throw(const tRisseString & expression);
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		"BlockExitException" クラス
 //---------------------------------------------------------------------------
 class tRisseBlockExitExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseBlockExitExceptionClass>

@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risseのプリミティブ型用クラス関連の処理の実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "rissePrimitiveClass.h"
 #include "risseNativeFunction.h"

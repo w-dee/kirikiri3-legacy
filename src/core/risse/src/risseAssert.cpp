@@ -10,11 +10,16 @@
 //! @file
 //! @brief Assertion 定義
 //---------------------------------------------------------------------------
+#include "prec.h"
 #include "risseTypes.h"
-#include "risseException.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
+//---------------------------------------------------------------------------
+RISSE_DEFINE_SOURCE_ID(10710,4962,63524,19088,28325,47284,39725,62590);
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 void RisseAssert(const char * message, const char * filename, int lineno)
 {
@@ -23,7 +28,11 @@ void RisseAssert(const char * message, const char * filename, int lineno)
 	fprintf(stderr, "\n\nRisse: Assertion failed: '%s' failed at %s line %d\n",
 			message, filename, lineno);
 
-	RisseThrowInternalError();
+	tRisseAssertionErrorClass::Throw(
+		tRisseString(RISSE_WS("assertion failed: '%1' failed at source %2 line %3"),
+						tRisseString(message),
+						tRisseString(filename),
+						tRisseString::AsString((risse_int)lineno)));
 }
 //---------------------------------------------------------------------------
 }

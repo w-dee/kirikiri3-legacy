@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risse で使う型などの宣言  
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 
 namespace Risse

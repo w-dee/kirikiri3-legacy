@@ -71,3 +71,5 @@ ss_CharConversionException			CharConversionException			#!< "CharConversionExcept
 ss_UnsupportedOperationException	UnsupportedOperationException	#!< "UnsupportedOperationException" クラス名
 ss_BadContextException				BadContextException				#!< "BadContextException" クラス名
 ss_InstantiationException			InstantiationException			#!< "InstantiationException" クラス名
+ss_AssertionError					AssertionError					#!< "AssertionError" クラス名
+ss_expression						expression						#!< "expression" インスタンス変数/プロパティ名

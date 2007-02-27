@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risseの数値型用クラス関連の処理の実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "risseNumberClass.h"
 #include "risseNativeFunction.h"

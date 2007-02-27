@@ -970,7 +970,7 @@ void tRisseCodeInterpreter::Execute(
 	catch(const tRisseVariant * e)
 	{
 		// この例外は位置情報を持っていない可能性がある
-		RISSE_ASSERT(e->InstanceOf(tRisseExceptionClass::GetPointer()));
+		RISSE_ASSERT(e->InstanceOf(tRisseThrowableClass::GetPointer()));
 		// 例外位置情報を追加してやる
 		tRisseVariant source_point = tRisseVariant(tRisseSourcePointClass::GetPointer()).New(0,
 			tRisseMethodArgument::New(

@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risse用 "String" クラスの実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "risseStringClass.h"
 #include "risseNativeFunction.h"

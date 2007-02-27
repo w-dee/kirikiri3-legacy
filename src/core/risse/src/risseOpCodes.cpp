@@ -10,6 +10,7 @@
 //! @file
 //! @brief オペレーションコード/VM命令定義
 //---------------------------------------------------------------------------
+#include "prec.h"
 #include "risseOpCodes.h"
 #include "risseVariant.h"
 #include "risseObject.h"

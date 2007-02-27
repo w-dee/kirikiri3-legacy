@@ -10,7 +10,7 @@
 //! @file
 //! @brief Risse用 "Array" クラスの実装
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "risseTypes.h"
 #include "risseArrayClass.h"
 #include "risseNativeFunction.h"

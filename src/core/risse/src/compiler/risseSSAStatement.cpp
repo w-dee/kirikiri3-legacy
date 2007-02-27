@@ -17,7 +17,6 @@
 #include "risseSSABlock.h"
 #include "risseCodeGen.h"
 #include "risseSSAForm.h"
-#include "../risseException.h"
 
 namespace Risse
 {

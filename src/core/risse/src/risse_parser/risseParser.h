@@ -47,7 +47,7 @@ public:
 	//! @brief		字句解析を一つ進める
 	//! @param		トークンの値を格納する先
 	//! @return		トークンID
-	int GetToken(tRisseVariant & value) { return Lexer->GetToken(value); }
+	int GetToken(tRisseVariant & value);
 
 	//! @brief		Lexerを得る
 	//! @return		Lexer

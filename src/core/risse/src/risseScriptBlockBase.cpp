@@ -12,7 +12,6 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "risseScriptBlockBase.h"
-#include "risseException.h"
 #include "compiler/risseCompiler.h"
 #include "risseCodeBlock.h"
 

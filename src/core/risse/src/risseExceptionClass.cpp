@@ -12,7 +12,6 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "risseVariant.h"
-#include "risseException.h"
 #include "risseExceptionClass.h"
 #include "risseObjectClass.h"
 #include "risseClass.h"
@@ -736,12 +735,7 @@ void tRisseCompileExceptionClass::Throw(const tRisseString & reason, const tRiss
 					)));
 
 	// 例外位置情報を追加してやる
-	tRisseVariant source_point = tRisseVariant(tRisseSourcePointClass::GetPointer()).New(0,
-		tRisseMethodArgument::New(
-			sb->GetName(),
-			1 + (risse_int64)sb->PositionToLine(pos)
-			));
-	e->Invoke(ss_addTrace, source_point);
+	e->AddTrace(sb, pos);
 
 	// 例外を投げる
 	throw e;

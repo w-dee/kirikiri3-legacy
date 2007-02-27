@@ -13,7 +13,6 @@
 #include "prec.h"
 
 #include "risseString.h"
-#include "risseException.h"
 #include "risseExceptionClass.h"
 
 

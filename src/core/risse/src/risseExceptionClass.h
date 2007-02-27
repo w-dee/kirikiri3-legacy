@@ -279,7 +279,7 @@ public:
 	//! @param		reason		例外の理由
 	//! @param		sb			スクリプトブロック
 	//! @param		pos			スクリプト上の位置
-	static void Throw(const tRisseString & reason, const tRisseScriptBlockBase * sb, risse_size pos);
+	static void Throw(const tRisseString & reason, const tRisseScriptBlockBase * sb = NULL, risse_size pos = risse_size_max);
 };
 //---------------------------------------------------------------------------
 

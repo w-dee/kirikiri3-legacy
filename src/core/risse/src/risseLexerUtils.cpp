@@ -18,7 +18,7 @@
 
 #include "prec.h"
 #include "risseLexerUtils.h"
-#include "risseException.h"
+#include "risseExceptionClass.h"
 
 
 namespace Risse
@@ -150,7 +150,7 @@ tRisseLexerUtility::tSkipCommentResult
 		// block comment; skip to the next '*' '/'
 		// and we must allow nesting of the comment.
 		ptr += 2;
-		if(*ptr == 0) eRisseError::Throw(RISSE_WS_TR("Unclosed comment found"));
+		if(*ptr == 0) tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
 		risse_int level = 0;
 		for(;;)
 		{
@@ -169,7 +169,7 @@ tRisseLexerUtility::tSkipCommentResult
 				}
 				level --;
 			}
-			if(!*(++ptr)) eRisseError::Throw(RISSE_WS_TR("Unclosed comment found"));
+			if(!*(++ptr)) tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
 		}
 		if(*ptr ==0) return scrEnded;
 		SkipSpace(ptr);
@@ -254,7 +254,7 @@ tRisseLexerUtility::tParseStringResult
 				// ビットは使用できない (エラー状態を表す用途に使われる
 				// 可能性があるため )
 				if(code == 0 || (code & (1 << (sizeof(risse_char)*8 - 1))))
-					eRisseError::Throw(RISSE_WS_TR("UTF-32 code out of range"));
+					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("UTF-32 code out of range"));
 
 				str += (risse_char)code;
 			}
@@ -277,7 +277,7 @@ tRisseLexerUtility::tParseStringResult
 				// ビットは使用できない (エラー状態を表す用途に使われる
 				// 可能性があるため )
 				if(code == 0 || (code & (1 << (sizeof(risse_char)*8 - 1))))
-					eRisseError::Throw(RISSE_WS_TR("UTF-32 code out of range"));
+					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("UTF-32 code out of range"));
 
 				str += (risse_char)code;
 			}
@@ -360,7 +360,7 @@ tRisseLexerUtility::tParseStringResult
 	if(status == psrNone)
 	{
 		// error
-		eRisseError::Throw(RISSE_WS_TR("Unclosed string literal"));
+		tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed string literal"));
 	}
 
 	str.Fit();
@@ -811,13 +811,13 @@ bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 	{
 		// 空白をスキップ
 		if(!SkipSpace(ptr))
-			eRisseError::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
 
 		// コメントをスキップ
 		switch(SkipComment(ptr))
 		{
 		case scrEnded:
-			eRisseError::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
 		case scrContinue:
 		case scrNotComment:
 			;
@@ -825,7 +825,7 @@ bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 
 		// 空白をスキップ
 		if(!SkipSpace(ptr))
-			eRisseError::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
 
 		// 次の一文字へのポインタを得る
 		const risse_char *next = ptr;
@@ -883,7 +883,7 @@ bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 	}
 
 	// error
-	eRisseError::Throw(RISSE_WS_TR("Unclosed octet literal"));
+	tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
 
 	return false;
 }
@@ -945,7 +945,7 @@ bool tRisseLexerUtility::ParseRegExp(const risse_char * & ptr, tRisseString &pat
 	if(!ok)
 	{
 		// error
-		eRisseError::Throw("Unclosed regular expression literal");
+		tRisseCompileExceptionClass::Throw("Unclosed regular expression literal");
 	}
 
 	pat = str;

@@ -337,11 +337,6 @@ void tRisseCodeInterpreter::Execute(
 						val = *e;
 						raised = true;
 					}
-					catch(const eRisseScriptException &e)
-					{
-						val = e.GetValue();
-						raised = true;
-					}
 					catch(...)
 					{
 						raised = true;
@@ -530,10 +525,7 @@ void tRisseCodeInterpreter::Execute(
 						}
 
 						if(target_index == static_cast<risse_uint32>(-1L))
-							eRisseScriptException::Throw(RISSE_WS("script exception"),
-								CodeBlock->GetScriptBlock(),
-								CodeBlock->CodePositionToSourcePosition(code - code_origin),
-								AR(code[1]));
+							throw new tRisseVariant(AR(code[1]));
 					}
 					else
 					{
@@ -565,18 +557,16 @@ void tRisseCodeInterpreter::Execute(
 					const tRisseVariant & try_id = AC(code[2]);
 					RISSE_ASSERT(try_id.GetType() == tRisseVariant::vtObject);
 					RISSE_ASSERT(try_id.GetObjectInterface() != NULL);
-					tRisseVariant exception_object =
-						tRisseVariant(tRisseBlockExitExceptionClass::GetPointer()).New(
-							0,
-							tRisseMethodArgument::New(
-								try_id,
-								tRisseVariant((risse_int64)code[3]), 
-								CI(code[1]) == RisseInvalidRegNum ?
-									tRisseVariant::GetNullObject() : AR(code[1]) ));
-					eRisseScriptException::Throw(RISSE_WS("return by exit try exception"),
-						CodeBlock->GetScriptBlock(),
-						CodeBlock->CodePositionToSourcePosition(code - code_origin),
-						exception_object);
+					throw new 
+						tRisseVariant(
+							tRisseVariant(tRisseBlockExitExceptionClass::GetPointer()).New(
+								0,
+								tRisseMethodArgument::New(
+									try_id,
+									tRisseVariant((risse_int64)code[3]), 
+									CI(code[1]) == RisseInvalidRegNum ?
+										tRisseVariant::GetNullObject() : AR(code[1]) ))
+						);
 				}
 				break;
 
@@ -953,32 +943,14 @@ void tRisseCodeInterpreter::Execute(
 		}
 
 	} // try
-	catch(const eRisseScriptError & e)
-	{
-		// この例外はすでに位置情報を持っているので改めて位置情報を追加してやる必要はない。
-		if(prev_shared_frame) shared->Set(CodeBlock->GetNestLevel(), prev_shared_frame);
-		throw; // そのまま投げる
-	}
-	catch(const eRisse & e)
-	{
-		// この例外は位置情報を持っていない。
-		if(prev_shared_frame) shared->Set(CodeBlock->GetNestLevel(), prev_shared_frame);
-		// 位置情報を持つことができる eRisseScriptError に、例外を変換する。
-		eRisseScriptError::Throw(e.GetMessageString(),
-			CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
-	}
 	catch(const tRisseVariant * e)
 	{
 		// この例外は位置情報を持っていない可能性がある
 		RISSE_ASSERT(e->InstanceOf(tRisseThrowableClass::GetPointer()));
+
 		// 例外位置情報を追加してやる
-		tRisseVariant source_point = tRisseVariant(tRisseSourcePointClass::GetPointer()).New(0,
-			tRisseMethodArgument::New(
-				CodeBlock->GetScriptBlock()->GetName(),
-				1 + (risse_int64)CodeBlock->GetScriptBlock()->PositionToLine(
-							CodeBlock->CodePositionToSourcePosition(code - code_origin))
-				));
-		e->Invoke(ss_addTrace, source_point);
+		e->AddTrace(CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
+
 		// 投げ直す
 		throw e;
 	}

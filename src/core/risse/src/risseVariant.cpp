@@ -20,6 +20,7 @@
 #include "risseRealClass.h"
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
+#include "risseScriptBlockBase.h"
 
 namespace Risse
 {
@@ -1305,6 +1306,22 @@ tRisseString tRisseVariantBlock::AsHumanReadable_Void     (risse_size maxlen) co
 tRisseString tRisseVariantBlock::AsHumanReadable_Null     (risse_size maxlen) const
 {
 	return RISSE_WS("null");
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::AddTrace(const tRisseScriptBlockBase * sb, risse_size pos) const
+{
+	if(sb != NULL && pos != risse_size_max)
+	{
+		tRisseVariant source_point = tRisseVariant(tRisseSourcePointClass::GetPointer()).New(0,
+			tRisseMethodArgument::New(
+				sb->GetName(),
+				1 + (risse_int64)sb->PositionToLine(pos)
+				));
+		Invoke(ss_addTrace, source_point);
+	}
 }
 //---------------------------------------------------------------------------
 

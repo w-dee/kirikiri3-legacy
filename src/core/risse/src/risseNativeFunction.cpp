@@ -13,7 +13,6 @@
 #include "prec.h"
 
 #include "risseNativeFunction.h"
-#include "risseException.h"
 #include "risseFunctionClass.h"
 
 namespace Risse

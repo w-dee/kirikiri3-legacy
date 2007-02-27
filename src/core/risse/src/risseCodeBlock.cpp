@@ -13,7 +13,6 @@
 #include "prec.h"
 
 #include "risseCodeBlock.h"
-#include "risseException.h"
 #include "risseScriptBlockBase.h"
 #include "compiler/risseCodeGen.h"
 #include "risseCodeExecutor.h"

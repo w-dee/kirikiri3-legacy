@@ -14,7 +14,6 @@
 
 #include "risseNativeProperty.h"
 #include "rissePropertyClass.h"
-#include "risseException.h"
 
 namespace Risse
 {

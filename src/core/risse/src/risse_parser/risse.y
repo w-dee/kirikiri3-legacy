@@ -1233,6 +1233,23 @@ tRisseParser::tRisseParser(tRisseScriptBlock * sb, tRisseLexer * lexer)
 
 
 //---------------------------------------------------------------------------
+int tRisseParser::GetToken(tRisseVariant & value)
+{
+	// lexer 中に発生するかもしれない例外をキャッチする
+	try
+	{
+		return Lexer->GetToken(value);
+	}
+	catch(const tRisseVariant * e)
+	{
+		e->AddTrace(ScriptBlock, Lexer->GetPosition());
+		throw e;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseParser::SetRootNode(tRisseASTNode * root)
 {
 	Root = root;

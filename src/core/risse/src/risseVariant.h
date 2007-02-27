@@ -14,7 +14,6 @@
 #define risseVariantH
 
 #include "risseVariantData.h"
-#include "risseException.h"
 #include "risseMethod.h"
 #include "risseOperateRetValue.h"
 #include "risseObjectInterfaceArg.h"
@@ -22,6 +21,7 @@
 
 namespace Risse
 {
+class tRisseScriptBlockBase;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 //! @note	tRisseVariantData よりも高度な動作をここで定義する
@@ -2197,6 +2197,14 @@ public: // ユーティリティ
 			ThrowBadContextException();
 		return intf;
 	}
+
+	//! @brief		トレースを追加する
+	//! @param		sb			スクリプトブロック
+	//! @param		pos			スクリプト上の位置
+	//! @note		この variant に Throwable クラスのインスタンスが入っているとみなし、
+	//!				指定されたトレースを追加する。sb が null の場合は
+	//!				トレースは追加されない。
+	void AddTrace(const tRisseScriptBlockBase * sb, risse_size pos) const;
 
 	//! @brief		デバッグ用ダンプ(標準出力に出力する)
 	void DebugDump() const;

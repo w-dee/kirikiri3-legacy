@@ -53,7 +53,6 @@ CPPFILES =  \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \
 			src/risseCoroutine.cpp                   \
-			src/risseException.cpp                   \
 			src/risseExceptionClass.cpp              \
 			src/risseFunctionClass.cpp               \
 			src/risseIntegerClass.cpp                \

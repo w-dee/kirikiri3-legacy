@@ -13,7 +13,7 @@
 #include "../prec.h"
 
 #include "../risseLexerUtils.h"
-#include "../risseException.h"
+#include "../risseExceptionClass.h"
 #include "risseLexer.h"
 #include "risseParser.h"
 
@@ -112,7 +112,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		case 0:
 			{
 				// 認識できないトークン
-				eRisseError::Throw(RISSE_WS_TR("Unrecognized token"));
+				tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unrecognized token"));
 				break;
 			}
 
@@ -164,7 +164,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 				tRisseOctet octet;
 				Ptr = ptr_start;
 				if(!ParseOctet(Ptr, octet))
-					eRisseError::Throw(RISSE_WS_TR("Invalid octet literal"));
+					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Invalid octet literal"));
 				val = octet;
 				id = T_CONSTVAL;
 				break;
@@ -174,7 +174,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 			{
 				Ptr = ptr_start;
 				if(!ParseNumber(Ptr, val))
-					eRisseError::Throw(RISSE_WS_TR("Invalid number literal"));
+					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Invalid number literal"));
 				id = T_CONSTVAL;
 				break;
 			}

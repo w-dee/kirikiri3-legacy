@@ -16,7 +16,6 @@
 #include "risseNativeFunction.h"
 #include "risseObjectBase.h"
 #include "risseVariant.h"
-#include "risseException.h"
 #include "risseOpCodes.h"
 #include "risseStaticStrings.h"
 #include "risseArrayClass.h"

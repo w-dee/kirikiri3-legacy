@@ -20,6 +20,7 @@
 #include "risseNativeFunction.h"
 #include "risseArrayClass.h"
 #include "risseClassClass.h"
+#include "risseScriptBlockBase.h"
 
 namespace Risse
 {
@@ -676,6 +677,76 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseCompileExceptionClass::tRisseCompileExceptionClass() :
+	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompileExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseCompileExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCompileExceptionClass::Throw(const tRisseString & reason, const tRisseScriptBlockBase * sb, risse_size pos)
+{
+	// 例外インスタンスを生成
+	tRisseVariant * e = new tRisseVariant(
+		tRisseVariant(tRisseCompileExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				tRisseString(RISSE_WS_TR("compile error: %1"), reason)
+					)));
+
+	// 例外位置情報を追加してやる
+	tRisseVariant source_point = tRisseVariant(tRisseSourcePointClass::GetPointer()).New(0,
+		tRisseMethodArgument::New(
+			sb->GetName(),
+			1 + (risse_int64)sb->PositionToLine(pos)
+			));
+	e->Invoke(ss_addTrace, source_point);
+
+	// 例外を投げる
+	throw e;
+}
+//---------------------------------------------------------------------------
 
 
 

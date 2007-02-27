@@ -135,3 +135,4 @@ static const tRisseString & ss_InstantiationException = *reinterpret_cast<const 
 static const tRisseString & ss_AssertionError = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+129); //!< (演算子メンバ名)  "AssertionError" クラス名
 static const tRisseString & ss_expression = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+130); //!< (演算子メンバ名)  "expression" インスタンス変数/プロパティ名
 static const tRisseString & ss_NullObjectException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+131); //!< (演算子メンバ名)  "NullObjectException" クラス名
+static const tRisseString & ss_CompileException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+132); //!< (演算子メンバ名)  "CompileException" クラス名

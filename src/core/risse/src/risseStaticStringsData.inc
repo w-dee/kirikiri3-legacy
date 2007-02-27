@@ -137,6 +137,7 @@ static risse_char RisseStaticStrings [] = {
 /* 129, offset=+1391 */tRisseStringData::MightBeShared,'A','s','s','e','r','t','i','o','n','E','r','r','o','r',0,0xb84941b9,
 /* 130, offset=+1408 */tRisseStringData::MightBeShared,'e','x','p','r','e','s','s','i','o','n',0,0x7a5ba1cb,
 /* 131, offset=+1421 */tRisseStringData::MightBeShared,'N','u','l','l','O','b','j','e','c','t','E','x','c','e','p','t','i','o','n',0,0x0bf108b8,
+/* 132, offset=+1443 */tRisseStringData::MightBeShared,'C','o','m','p','i','l','e','E','x','c','e','p','t','i','o','n',0,0xde025a3f,
 };
 const tRisseStringData RisseStaticStringTable[] = {
 /*   0 */ {RisseStaticStrings+1,5} /* トークンの値 */,
@@ -271,4 +272,5 @@ const tRisseStringData RisseStaticStringTable[] = {
 /* 129 */ {RisseStaticStrings+1392,14} /*  "AssertionError" クラス名 */,
 /* 130 */ {RisseStaticStrings+1409,10} /*  "expression" インスタンス変数/プロパティ名 */,
 /* 131 */ {RisseStaticStrings+1422,19} /*  "NullObjectException" クラス名 */,
+/* 132 */ {RisseStaticStrings+1444,16} /*  "CompileException" クラス名 */,
 };

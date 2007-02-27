@@ -13,7 +13,8 @@
 #include "../prec.h"
 
 #include "risseCodeGen.h"
-#include "../risseException.h"
+#include "risseSSAForm.h"
+#include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
 
@@ -24,9 +25,10 @@ RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 
 
 //---------------------------------------------------------------------------
-tRisseCodeGenerator::tRisseCodeGenerator(
+tRisseCodeGenerator::tRisseCodeGenerator(tRisseSSAForm * form,
 	tRisseCodeGenerator * parent, bool useparentframe, risse_size nestlevel)
 {
+	Form = form;
 	Parent = parent;
 	UseParentFrame = useparentframe;
 	NestLevel = nestlevel;
@@ -173,8 +175,6 @@ void tRisseCodeGenerator::FreeRegister(const tRisseSSAVariable *var)
 void tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name, risse_uint16 &nestlevel, risse_uint16 &regnum)
 {
 	// SharedRegNameMap を逆順に見ていく
-	RisseFPrint(stderr, (RISSE_WS("Finding ") + name +
-				RISSE_WS(" from shared variable map\n")).c_str());
 
 	tNamedRegMap::iterator f = SharedRegNameMap.find(name);
 	if(f != SharedRegNameMap.end())
@@ -184,11 +184,13 @@ void tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name, risse_
 		// それぞれ 32bit 整数の 上位16bitと下位16ビットを使うので、
 		// それぞれがその16bitの上限を超えることができない。
 		if(NestLevel > 0xffff)
-			eRisseError::Throw(
-				tRisseString(RISSE_WS_TR("too deep function nest level"))); // まずあり得ないと思うが ...
+			tRisseCompileExceptionClass::Throw(
+				tRisseString(RISSE_WS_TR("too deep function nest level")), Form->GetScriptBlock(),
+					GetSourceCodePosition()); // まずあり得ないと思うが ...
 		if(f->second > 0xffff)
-			eRisseError::Throw(
-				tRisseString(RISSE_WS_TR("too deep shared variables between functions"))); // まずあり得ないと思うが ...
+			tRisseCompileExceptionClass::Throw(
+				tRisseString(RISSE_WS_TR("too deep shared variables between functions")), Form->GetScriptBlock(),
+					GetSourceCodePosition()); // まずあり得ないと思うが ...
 		nestlevel = NestLevel;
 		regnum = static_cast<risse_uint16>(f->second);
 		return;
@@ -270,8 +272,8 @@ void tRisseCodeGenerator::FixCode()
 {
 	// サイズをチェック
 	if(Code.size() != static_cast<risse_uint32>(Code.size()))
-		eRisseError::Throw(
-			tRisseString(RISSE_WS_TR("too large code size"))); // まずあり得ないと思うが ...
+		tRisseCompileExceptionClass::Throw(
+			tRisseString(RISSE_WS_TR("too large code size")), Form->GetScriptBlock(), 0); // まずあり得ないと思うが ...
 
 	// ジャンプアドレスのfixup
 	// ジャンプアドレスは 命令開始位置に対する相対指定となる。
@@ -297,6 +299,15 @@ void tRisseCodeGenerator::SetSourceCodePosition(risse_size pos)
 		CodeToSourcePosition.back().second == pos) return;
 			// 連続する重複するソースコード上の位置は、たとえVMコードの位置が異なったとしても挿入しない
 	CodeToSourcePosition.push_back(std::pair<risse_size, risse_size>(Code.size(), pos));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::GetSourceCodePosition() const
+{
+	if(CodeToSourcePosition.size() > 0) return CodeToSourcePosition.back().second;
+	return risse_size_max;
 }
 //---------------------------------------------------------------------------
 

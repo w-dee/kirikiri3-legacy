@@ -18,7 +18,7 @@
 #include "risseCompilerNS.h"
 #include "risseSSABlock.h"
 #include "risseCodeGen.h"
-#include "../risseException.h"
+#include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
 
@@ -112,7 +112,7 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 
 	// コードジェネレータを作成する
 	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
-	CodeGenerator = new tRisseCodeGenerator(Parent ? Parent->CodeGenerator : NULL,
+	CodeGenerator = new tRisseCodeGenerator(this, Parent ? Parent->CodeGenerator : NULL,
 							UseParentFrame, function->GetNestLevel());
 	CodeBlock = new tRisseCodeBlock(GetScriptBlock());
 	CodeBlockIndex = Function->GetFunctionGroup()->GetCompiler()->AddCodeBlock(CodeBlock);
@@ -369,7 +369,7 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 
 		// break/continue が値を伴ってできるかをチェック
 		if(var != NULL && !info->GetIsBlock())
-			eRisseCompileError::Throw(
+			tRisseCompileExceptionClass::Throw(
 				tRisseString(
 					is_break?
 						RISSE_WS_TR("cannot break here with a value"):
@@ -400,7 +400,7 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 			{
 				// break/continue が値を伴ってできるかをチェック
 				if(var != NULL && !info->GetIsBlock())
-					eRisseCompileError::Throw(
+					tRisseCompileExceptionClass::Throw(
 						tRisseString(
 							is_break?
 								RISSE_WS_TR("cannot break here with a value"):
@@ -445,7 +445,7 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 		if(form == NULL)
 		{
 			// break/continue できないようだ
-			eRisseCompileError::Throw(
+			tRisseCompileExceptionClass::Throw(
 				tRisseString(is_break?
 					RISSE_WS_TR("cannot place 'break' here"):
 					RISSE_WS_TR("cannot place 'continue' here")),

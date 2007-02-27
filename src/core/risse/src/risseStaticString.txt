@@ -74,3 +74,4 @@ ss_InstantiationException			InstantiationException			#!< "InstantiationException
 ss_AssertionError					AssertionError					#!< "AssertionError" クラス名
 ss_expression						expression						#!< "expression" インスタンス変数/プロパティ名
 ss_NullObjectException				NullObjectException				#!< "NullObjectException" クラス名
+ss_CompileException					CompileException				#!< "CompileException" クラス名

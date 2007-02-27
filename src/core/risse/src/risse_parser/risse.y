@@ -17,7 +17,7 @@
 #include "../risseTypes.h"
 #include "../risseGC.h"
 #include "../risseObject.h"
-#include "../risseException.h"
+#include "../risseExceptionClass.h"
 #include "../risseOpCodes.h"
 #include "../risseStaticStrings.h"
 #include "risseParser.h"
@@ -1214,7 +1214,7 @@ int yylex(YYSTYPE * value, void *pr)
 //---------------------------------------------------------------------------
 int raise_yyerror(char * msg, void *pr)
 {
-	eRisseCompileError::Throw(tRisseString(msg), PR->GetScriptBlock(), LP);
+	tRisseCompileExceptionClass::Throw(tRisseString(msg), PR->GetScriptBlock(), LP);
 	return 0;
 }
 //---------------------------------------------------------------------------

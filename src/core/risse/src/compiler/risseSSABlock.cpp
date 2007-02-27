@@ -19,7 +19,7 @@
 #include "risseSSAVariable.h"
 #include "risseCompiler.h"
 #include "risseCompilerNS.h"
-#include "../risseException.h"
+#include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
 
@@ -177,7 +177,7 @@ void tRisseSSABlock::AddPhiFunctionToBlocks(
 			// 変数が見つからない
 			// エラーにする
 			// TODO: もっと親切なエラーメッセージ
-			eRisseCompileError::Throw(
+			tRisseCompileExceptionClass::Throw(
 				tRisseString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
 					name),
@@ -256,7 +256,7 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 			// 変数が見つからない
 			// エラーにする
 			// TODO: もっと親切なエラーメッセージ
-			eRisseCompileError::Throw(
+			tRisseCompileExceptionClass::Throw(
 				tRisseString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
 					decl_var->GetName()),

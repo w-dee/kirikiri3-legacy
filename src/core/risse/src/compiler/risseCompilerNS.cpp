@@ -18,7 +18,7 @@
 #include "risseSSAVariable.h"
 #include "risseSSAStatement.h"
 #include "risseSSABlock.h"
-#include "../risseException.h"
+#include "../risseExceptionClass.h"
 
 namespace Risse
 {
@@ -288,7 +288,7 @@ tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
 	if(*var == tRisseSSAVariable::GetUninitialized())
 	{
 		// 値が初期化されていない(不定な)変数から読み込もうとした
-		eRisseCompileError::Throw(
+		tRisseCompileExceptionClass::Throw(
 			tRisseString(
 				RISSE_WS_TR("attempt to read uninitialized variable '%1'"),
 				name),

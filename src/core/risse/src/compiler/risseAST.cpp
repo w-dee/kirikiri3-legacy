@@ -18,7 +18,7 @@
 #include "risseCompilerNS.h"
 #include "risseCompiler.h"
 #include "risseSSABlock.h"
-#include "../risseException.h"
+#include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
 
 // 名前表の読み込み
@@ -731,7 +731,7 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 			if(!ret_var)
 			{
 				// "super" がみつからない、すなわちそこには super キーワードをおけない
-				eRisseCompileError::Throw(
+				tRisseCompileExceptionClass::Throw(
 					tRisseString(
 					RISSE_WS_TR("cannot use 'super' keyword here")),
 						form->GetScriptBlock(), GetPosition());
@@ -1146,9 +1146,9 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 			// その結果を識別子に書き込む文を生成
 			if(!Child->DoWriteSSA(form, child_param, processed_var))
 			{
-				eRisseCompileError::Throw(
+				tRisseCompileExceptionClass::Throw(
 					tRisseString(
-					RISSE_WS_TR("writable expression required against increment/decrement oprator")),
+					RISSE_WS_TR("writable expression expected as an increment/decrement operand")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
@@ -1180,8 +1180,8 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			// 左辺に書き込む
 			if(!Child1->GenerateWriteSSA(form, rhs_var))
 			{
-				eRisseCompileError::Throw(
-					tRisseString(RISSE_WS_TR("writable expression required at left side of '='")),
+				tRisseCompileExceptionClass::Throw(
+					tRisseString(RISSE_WS_TR("writable expression expected at left side of '='")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
@@ -1246,9 +1246,9 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			// その結果を識別子に書き込む文を生成
 			if(!Child1->DoWriteSSA(form, lhs_param, ret_var))
 			{
-				eRisseCompileError::Throw(
+				tRisseCompileExceptionClass::Throw(
 					tRisseString(
-	RISSE_WS_TR("writable expression required at left side of compound assignment operator")),
+	RISSE_WS_TR("writable expression expected at left side of compound assignment operator")),
 						form->GetScriptBlock(), GetPosition());
 
 			}
@@ -1278,18 +1278,18 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			// 右辺の値を左辺に代入
 			if(!Child1->DoWriteSSA(form, lhs_param, rhs_var))
 			{
-				eRisseCompileError::Throw(
+				tRisseCompileExceptionClass::Throw(
 					tRisseString(
-					RISSE_WS_TR("writable expression required at left side of '<->'")),
+					RISSE_WS_TR("writable expression expected at left side of '<->'")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
 			// 左辺の値を右辺に代入
 			if(!Child2->DoWriteSSA(form, rhs_param, lhs_var))
 			{
-				eRisseCompileError::Throw(
+				tRisseCompileExceptionClass::Throw(
 					tRisseString(
-					RISSE_WS_TR("writable expression required at right side of '<->'")),
+					RISSE_WS_TR("writable expression expected at right side of '<->'")),
 						form->GetScriptBlock(), GetPosition());
 			}
 
@@ -1541,9 +1541,9 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 				// 書き込みに失敗
 				risse_char i_str[40];
 				Risse_int_to_str(i, i_str);
-				eRisseCompileError::Throw(
+				tRisseCompileExceptionClass::Throw(
 					tRisseString(
-					RISSE_WS_TR("writable expression required at array index %1"), i_str),
+					RISSE_WS_TR("writable expression expected at array index %1"), i_str),
 						form->GetScriptBlock(), GetPosition());
 			}
 		}
@@ -1649,9 +1649,9 @@ bool tRisseASTNode_Dict::DoWriteSSA(tRisseSSAForm *form, void * param,
 			// 書き込みに失敗
 			risse_char i_str[40];
 			Risse_int_to_str(i, i_str);
-			eRisseCompileError::Throw(
+			tRisseCompileExceptionClass::Throw(
 				tRisseString(
-				RISSE_WS_TR("writable expression required at value of dictionary element index %1"), i_str),
+				RISSE_WS_TR("writable expression expected at value of dictionary element index %1"), i_str),
 					form->GetScriptBlock(), GetPosition());
 		}
 	}
@@ -2140,7 +2140,7 @@ tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * pa
 	// switch 文の中？
 	tRisseSwitchInfo * info = form->GetCurrentSwitchInfo();
 	if(info == NULL)
-		eRisseCompileError::Throw(
+		tRisseCompileExceptionClass::Throw(
 			tRisseString(Expression ?
 				RISSE_WS_TR("cannot place 'case' out of switch") :
 				RISSE_WS_TR("cannot 'default' out of switch")),
@@ -2190,7 +2190,7 @@ tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * pa
 
 		// default 文のあるブロックを登録する
 		if(info->GetDefaultBlock() != NULL)
-			eRisseCompileError::Throw(
+			tRisseCompileExceptionClass::Throw(
 				tRisseString(RISSE_WS_TR("cannot place multiple 'default' in a switch")),
 				form->GetScriptBlock(), GetPosition());
 		info->SetDefaultBlock(case_block);
@@ -2542,7 +2542,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 			{
 				// 現状、関数の引数に列挙できる数はRisseMaxArgCount個までとなっている
 				// ので、それを超えるとエラーになる
-				eRisseCompileError::Throw(
+				tRisseCompileExceptionClass::Throw(
 					tRisseString(RISSE_WS_TR("too many function arguments")),
 						form->GetScriptBlock(), GetPosition());
 			}
@@ -2576,7 +2576,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 					if(!arg_var)
 					{
 						// 関数宣言の引数に無名の * が無い
-						eRisseCompileError::Throw(
+						tRisseCompileExceptionClass::Throw(
 							tRisseString(
 							RISSE_WS_TR("no anonymous collapsed arguments defined in this method")),
 								form->GetScriptBlock(), GetPosition());
@@ -2638,7 +2638,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		// (普通の引数と違って本来ブロック引数の数には制限が無いはずだが
 		//  将来的にブロック引数にも普通の引数のように展開フラグなどを
 		//  つけるかもしれないので、普通の引数と同じ制限を付ける)
-		eRisseCompileError::Throw(
+		tRisseCompileExceptionClass::Throw(
 			tRisseString(RISSE_WS_TR("too many function block arguments")),
 				form->GetScriptBlock(), GetPosition());
 	}

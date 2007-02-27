@@ -24,6 +24,7 @@ namespace Risse
 {
 
 class tRisseSSABlock;
+class tRisseSSAForm;
 //---------------------------------------------------------------------------
 //! @brief		コードジェネレータクラス
 //---------------------------------------------------------------------------
@@ -31,6 +32,7 @@ class tRisseCodeGenerator : public tRisseCollectee
 {
 	static const risse_size MaxConstSearch = 5; // 定数領域で同じ値を探す最大値
 
+	tRisseSSAForm * Form; //!< このコードジェネレータを作成した SSA 形式インスタンス
 	tRisseCodeGenerator * Parent; //!< 親のコードジェネレータ
 	bool UseParentFrame; //!< 親のコードジェネレータのフレームを使うかどうか
 	risse_size NestLevel;		//!< 関数のネストレベル
@@ -71,10 +73,11 @@ private:
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		form			このコードジェネレータを作成した SSA 形式インスタンス
 	//! @param		parent			親コードジェネレータ
 	//! @param		useparentframe	親コードジェネレータのフレームを使うかどうか
 	//! @param		nestlevel		関数のネストレベル
-	tRisseCodeGenerator(tRisseCodeGenerator * parent, bool useparentframe, risse_size nestlevel);
+	tRisseCodeGenerator(tRisseSSAForm * form, tRisseCodeGenerator * parent, bool useparentframe, risse_size nestlevel);
 
 public:
 	//! @brief	親のコードジェネレータを得る
@@ -208,6 +211,10 @@ public:
 	//! @param		これから置く命令コードがソースコード上のどの位置に対応するかを通知する
 	//! @param		pos		ソースコード上の位置
 	void SetSourceCodePosition(risse_size pos);
+
+	//! @param		これから置く命令コードがソースコード上のどの位置に対応するかを得る
+	//! @return		ソースコード上の位置(まだ位置が特定されていない場合は risse_size_max が帰る)
+	risse_size GetSourceCodePosition() const;
 
 	//! @brief		Nopを置く
 	void PutNoOperation();

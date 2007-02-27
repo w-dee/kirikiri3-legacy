@@ -19,7 +19,7 @@
 #include "risseSSAStatement.h"
 #include "risseCodeGen.h"
 #include "risseCompilerNS.h"
-#include "../risseException.h"
+#include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
 
@@ -189,7 +189,7 @@ void tRisseCompilerFunction::AddLabelMap(const tRisseString &labelname, tRisseSS
 	if(i != LabelMap.end())
 	{
 		// すでにラベルがある
-		eRisseCompileError::Throw(
+		tRisseCompileExceptionClass::Throw(
 			tRisseString(RISSE_WS_TR("label '%1' is already defined"), labelname),
 				FunctionGroup->GetCompiler()->GetScriptBlock(), block->GetLastStatementPosition());
 	}
@@ -234,7 +234,7 @@ void tRisseCompilerFunction::BindAllLabels()
 		if(label_pair == LabelMap.end())
 		{
 			// ラベルは見つからなかった
-			eRisseCompileError::Throw(
+			tRisseCompileExceptionClass::Throw(
 				tRisseString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
 					FunctionGroup->GetCompiler()->GetScriptBlock(),
 						i->SourceBlock->GetLastStatementPosition());
@@ -291,7 +291,7 @@ void tRisseCompilerFunction::BindAllLabels()
 			{
 				// ジャンプ先ラベルはどうやら自分よりも深い場所にいるようだ
 				// そういうことは今のところできないのでエラーにする
-				eRisseCompileError::Throw(
+				tRisseCompileExceptionClass::Throw(
 					tRisseString(RISSE_WS_TR("cannot jump into deeper try block or callback block")),
 						FunctionGroup->GetCompiler()->GetScriptBlock(),
 							i->SourceBlock->GetLastStatementPosition());

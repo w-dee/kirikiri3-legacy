@@ -25,6 +25,7 @@
 
 namespace Risse
 {
+class tRisseScriptBlockBase;
 //---------------------------------------------------------------------------
 //! @brief			RisseのReturnExceptionやBreakExceptionなどのインスタンス(暫定実装)
 //---------------------------------------------------------------------------
@@ -255,6 +256,30 @@ public:
 	void RegisterMembers();
 
 public:
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		"CompileException" クラス
+//---------------------------------------------------------------------------
+class tRisseCompileExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseCompileExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseCompileExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「コンパイルエラー」例外を発生
+	//! @param		reason		例外の理由
+	//! @param		sb			スクリプトブロック
+	//! @param		pos			スクリプト上の位置
+	static void Throw(const tRisseString & reason, const tRisseScriptBlockBase * sb, risse_size pos);
 };
 //---------------------------------------------------------------------------
 

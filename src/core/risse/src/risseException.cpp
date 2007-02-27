@@ -70,7 +70,7 @@ void eRisseScriptError::Throw(const tRisseString & msg,
 }
 //---------------------------------------------------------------------------
 
-
+/*
 //---------------------------------------------------------------------------
 void eRisseCompileError::Throw(const tRisseString & msg,
 						tRisseScriptBlockBase *block, risse_size pos)
@@ -79,7 +79,7 @@ void eRisseCompileError::Throw(const tRisseString & msg,
 	throw eRisseCompileError(msg, block, pos);
 }
 //---------------------------------------------------------------------------
-
+*/
 
 //---------------------------------------------------------------------------
 eRisseScriptException::eRisseScriptException(const tRisseString &  msg,

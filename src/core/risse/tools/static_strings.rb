@@ -29,10 +29,28 @@ class String
 	end
 end
 
-# 入力ファイルを開いて一行ずつ処理をする
 errorcount = 0
-linecount = 0
 defs = []
+
+
+# words.txt を開いて処理をする
+linecount = 0
+File.open(ARGV[1]).readlines.each do |line|
+	linecount += 1
+	# コメントの除去
+	line.gsub!(/^#####.*/, '')
+	# 空白のみになったらその行は処理しない
+	next if line =~ /^\s*$/
+	# 行の分解
+	sp = line.split(/\s+/)
+	# 単語マッチを行う物のみを抽出
+	if sp[3] == 'true'
+		defs << { :id => 'ss_' + sp[0], :string => sp[0], :def_comment => 'トークンの値' }
+	end
+end
+
+# 入力ファイルを開いて一行ずつ処理をする
+linecount = 0
 File.open(ARGV[0]).readlines.each do |line|
 	linecount += 1
 	# コメントの除去
@@ -55,23 +73,6 @@ File.open(ARGV[0]).readlines.each do |line|
 	end
 
 end
-
-# words.txt を開いて処理をする
-linecount = 0
-File.open(ARGV[1]).readlines.each do |line|
-	linecount += 1
-	# コメントの除去
-	line.gsub!(/^#####.*/, '')
-	# 空白のみになったらその行は処理しない
-	next if line =~ /^\s*$/
-	# 行の分解
-	sp = line.split(/\s+/)
-	# 単語マッチを行う物のみを抽出
-	if sp[3] == 'true'
-		defs << { :id => 'ss_' + sp[0], :string => sp[0], :def_comment => 'トークンの値' }
-	end
-end
-
 exit if errorcount != 0
 
 #-----------------------------------------------------------------------

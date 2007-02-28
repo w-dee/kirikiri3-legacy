@@ -8,7 +8,6 @@
 
 
 
-#include "risseException.h"
 #include "risseScriptEngine.h"
 
 RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
@@ -97,12 +96,6 @@ int Application::OnRun()
 		fflush(stderr);
 		fflush(stdout);
 		wxFprintf(stdout, wxT("exception: %s\n"), e->operator tRisseString().AsWxString().c_str());
-	}
-	catch(const eRisse & e)
-	{
-		fflush(stderr);
-		fflush(stdout);
-		wxFprintf(stdout, wxT("error: %s\n"), e.GetMessageString().AsWxString().c_str());
 	}
 	return 0;
 }

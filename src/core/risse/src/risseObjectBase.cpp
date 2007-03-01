@@ -132,11 +132,10 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 	// プロパティアクセスの方法に従って情報を取得する
 	switch(member_prop_control)
 	{
-	case tRisseMemberAttribute::pcNone: // あり得ない(上でASSERT)
+	case tRisseMemberAttribute::pcNone: // あり得ない( GetPropertyControl() 中でASSERT)
 		break;
 
 	case tRisseMemberAttribute::pcVar: // 普通のメンバ
-	case tRisseMemberAttribute::pcConst: // 定数
 		// 単純に、結果に値をコピーする
 		result = member->Value;
 		break;
@@ -177,38 +176,38 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		// メンバが見つかったのでこれに上書きをする
 		// そのまえに属性チェック
 		tRisseMemberAttribute::tPropertyControl member_prop_control = member->GetPropertyControl(flags);
+		tRisseMemberAttribute::tOverrideControl member_ovl_control  = member->GetOverrideControl(flags);
 
-		if(flags.Has(tRisseOperateFlags::ofPropertyOrConstOnly))
+		switch(member_ovl_control)
 		{
-			// プロパティやconstへの書き込みのみ
-			switch(member_prop_control)
-			{
-			case tRisseMemberAttribute::pcNone: // あり得ない(上でASSERT)
-				break;
+		case tRisseMemberAttribute::ocNone: // あり得ない( GetPropertyControl() 中でASSERT)
+			RISSE_ASSERT(member_ovl_control != tRisseMemberAttribute::ocNone);
+			break;
 
-			case tRisseMemberAttribute::pcVar: // 普通のメンバ
-				return rvMemberNotFound; // 見つからなかったというのと同じ扱い
+		case tRisseMemberAttribute::ocVirtual: // ふつうのやつ
+			// 下で処理
+			break;
 
-			case tRisseMemberAttribute::pcConst: // 定数
-				// 定数への書き込みは常に失敗するのでそのまま通過させる
-				// 下で処理
-				break;
-
-			case tRisseMemberAttribute::pcProperty: // プロパティアクセス
-				// 下で処理
-				break;
-			}
+		case tRisseMemberAttribute::ocConst: // 定数
+			return rvMemberIsReadOnly; // 書き込めません
 		}
 
-		// 値を書き込む
-		if(member_prop_control == tRisseMemberAttribute::pcVar)
+		switch(member_prop_control)
 		{
+		case tRisseMemberAttribute::pcNone: // あり得ない( GetPropertyControl() 中でASSERT)
+			break;
+
+		case tRisseMemberAttribute::pcVar: // 普通のメンバ
+			if(flags.Has(tRisseOperateFlags::ofPropertyOrConstOnly))
+				return rvMemberNotFound; // 見つからなかったというのと同じ扱い
 			member->Value = value;
 			return rvNoError;
-		}
-		else
-		{
-			return WriteMember(name, flags, *member, member_prop_control, value, This);
+
+		case tRisseMemberAttribute::pcProperty: // プロパティアクセス
+			return member->Value.Operate(ocDSet, NULL, tRisseString::GetEmptyString(),
+						flags, tRisseMethodArgument::New(value),
+						(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ?
+							*DefaultMethodContext:This);
 		}
 	}
 
@@ -222,6 +221,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 			tRisseMemberAttribute attrib = flags;
 			if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
 				attrib.SetProperty(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
+			if(attrib.GetOverride() == tRisseMemberAttribute::ocNone)
+				attrib.SetOverride(tRisseMemberAttribute::ocVirtual); // デフォルトはocVirtual
 			HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
 			return rvNoError;
 		}
@@ -298,6 +299,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		tRisseMemberAttribute attrib = flags;
 		if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
 			attrib.SetProperty(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
+		if(attrib.GetOverride() == tRisseMemberAttribute::ocNone)
+			attrib.SetOverride(tRisseMemberAttribute::ocVirtual); // デフォルトはocVirtual
 		HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
 		return rvNoError;
 	}
@@ -307,52 +310,42 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 
 		if(!member) return rvMemberNotFound; // 見つからなかった
 
+		// メンバが見つかったのでこれに上書きをする
+		// そのまえに属性チェック
 		tRisseMemberAttribute::tPropertyControl member_prop_control = member->GetPropertyControl(flags);
+		tRisseMemberAttribute::tOverrideControl member_ovl_control  = member->GetOverrideControl(flags);
 
-		// 値を書き込む
-		if(member_prop_control == tRisseMemberAttribute::pcVar)
+		switch(member_ovl_control)
 		{
+		case tRisseMemberAttribute::ocNone: // あり得ない( GetPropertyControl() 中でASSERT)
+			RISSE_ASSERT(member_ovl_control != tRisseMemberAttribute::ocNone);
+			break;
+
+		case tRisseMemberAttribute::ocVirtual: // ふつうのやつ
+			// 下で処理
+			break;
+
+		case tRisseMemberAttribute::ocConst: // 定数
+			return rvMemberIsReadOnly; // 書き込めません
+		}
+
+		switch(member_prop_control)
+		{
+		case tRisseMemberAttribute::pcNone: // あり得ない( GetPropertyControl() 中でASSERT)
+			break;
+
+		case tRisseMemberAttribute::pcVar: // 普通のメンバ
 			member->Value = value;
 			return rvNoError;
-		}
-		else
-		{
-			return WriteMember(name, flags, *member, member_prop_control, value, This);
+
+		case tRisseMemberAttribute::pcProperty: // プロパティアクセス
+			return member->Value.Operate(ocDSet, NULL, tRisseString::GetEmptyString(),
+						flags, tRisseMethodArgument::New(value),
+						(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ?
+							*DefaultMethodContext:This);
 		}
 	}
 
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseObjectBase::tRetValue tRisseObjectBase::WriteMember(const tRisseString & name,
-	tRisseOperateFlags flags,  tMemberData & member,
-	tRisseMemberAttribute::tPropertyControl prop_control,
-	const tRisseVariant & value, const tRisseVariant &This)
-{
-	switch(prop_control)
-	{
-	case tRisseMemberAttribute::pcNone: // あり得ない
-		return rvNoError;
-
-	case tRisseMemberAttribute::pcVar: // 普通のメンバ
-		member.Value = value;
-		return rvNoError;;
-
-	case tRisseMemberAttribute::pcConst: // 定数
-		// 定数には書き込みできません
-		return rvMemberIsReadOnly;
-
-	case tRisseMemberAttribute::pcProperty: // プロパティアクセス
-		// プロパティハンドラを起動する
-		// プロパティの設定の場合は読み出しと違い、ocFuncCallではなくてocDSetを
-		// つかう。
-		return member.Value.Operate(ocDSet, NULL, tRisseString::GetEmptyString(),
-					flags, tRisseMethodArgument::New(value),
-					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
-	}
-	return rvNoError;
 }
 //---------------------------------------------------------------------------
 
@@ -577,6 +570,7 @@ void tRisseObjectBase::RegisterNormalMember(const tRisseString & name,
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
 	RaiseIfError(Write(name,
 		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
 							access_flags, value, tRisseVariant(this)), name);
 	if(attrib.HasAny())
 		SetAttribute(name, access_flags|attrib);

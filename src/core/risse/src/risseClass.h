@@ -37,7 +37,7 @@ public:
 	static void RegisterClassInstance(tRisseVariant & target, const tRisseString &name)
 	{
 		target.SetPropertyDirect(name,
-			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcConst)) |
+			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::ocConst)) |
 			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 					tRisseVariant(T::GetPointer()));
 	}

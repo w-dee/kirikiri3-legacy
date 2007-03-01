@@ -17,6 +17,7 @@
 #include "../risseGC.h"
 #include "../risseVariant.h"
 #include "../risseObject.h"
+#include "risseDeclAttribute.h"
 
 /*
 	このモジュールでは、AST のデータ型を定義するだけではなく、AST から SSA形式
@@ -575,13 +576,13 @@ public:
 //---------------------------------------------------------------------------
 class tRisseASTNode_CastAttr : public tRisseASTNode_OneExpression
 {
-	tRisseMemberAttribute Attribute; //!< 属性
+	tRisseDeclAttribute Attribute; //!< 属性
 public:
 	//! @brief		コンストラクタ
 	//! @brief		position		ソースコード上の位置
 	//! @param		attribute		属性
 	//! @param		expression		式ノード
-	tRisseASTNode_CastAttr(risse_size position, tRisseMemberAttribute attribute,
+	tRisseASTNode_CastAttr(risse_size position, tRisseDeclAttribute attribute,
 		tRisseASTNode * expression) :
 		tRisseASTNode_OneExpression(position, antCastAttr, expression)
 	{
@@ -683,7 +684,7 @@ public:
 class tRisseASTNode_VarDecl : public tRisseASTNode_List
 {
 	typedef tRisseASTNode_List inherited;
-	tRisseMemberAttribute Attribute; //!< 属性
+	tRisseDeclAttribute Attribute; //!< 属性
 
 public:
 	//! @brief		コンストラクタ
@@ -696,18 +697,18 @@ public:
 	void SetIsConstant(bool is_constant)
 	{
 		if(is_constant)
-			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::pcConst));
+			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::ocConst));
 		else
-			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::pcVar));
+			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual));
 	}
 
 	//! @brief		属性を設定する
 	//! @param		attrib	属性
-	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+	void SetAttribute(tRisseDeclAttribute attrib) { Attribute.Overwrite(attrib); }
 
 	//! @brief		属性を設定する
 	//! @return		属性
-	tRisseMemberAttribute GetAttribute() const { return Attribute; }
+	tRisseDeclAttribute GetAttribute() const { return Attribute; }
 
 	//! @brief		指定されたインデックスの子ノードの名前を得る
 	//! @param		index		インデックス
@@ -818,7 +819,9 @@ public:
 	//! @note		これに先立って PrepareVarDecl() を実行しておくこと。
 	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseString & name,
 			tRisseSSAVariable * init,
-			tRisseMemberAttribute attrib = tRisseMemberAttribute(tRisseMemberAttribute::pcVar));
+			tRisseDeclAttribute attrib = tRisseMemberAttribute(
+				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
+				tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)));
 };
 //---------------------------------------------------------------------------
 
@@ -832,7 +835,7 @@ class tRisseASTNode_MemberSel : public tRisseASTNode
 	tRisseASTNode * MemberName; //!< メンバ名ノード
 	tRisseASTMemberAccessType AccessType ; //!< 演算子の種類
 	tRisseOperateFlags Flags; //!< メンバの操作フラグ(tRisseObjectInterface::Opeate() に渡す物)
-	tRisseMemberAttribute Attribute; //!< メンバの書き込み時の属性設定値 @r
+	tRisseDeclAttribute Attribute; //!< メンバの書き込み時の属性設定値 @r
 		//!< メンバへの書き込みのついでに属性を設定する場合のメンバの属性
 
 private:
@@ -874,7 +877,7 @@ public:
 
 	//! @brief		メンバの書き込み時の属性設定値を設定する
 	//! @param		attrib		メンバの書き込み時の属性設定値
-	void SetAttribute(tRisseMemberAttribute attrib) { Attribute = attrib; }
+	void SetAttribute(tRisseDeclAttribute attrib) { Attribute = attrib; }
 
 	//! @brief		メンバの書き込み時の属性設定値を得る
 	//! @return		メンバの書き込み時の属性設定値
@@ -2403,7 +2406,7 @@ class tRisseASTNode_FuncDecl : public tRisseASTNode_List
 	typedef tRisseASTNode_List inherited;
 	tRisseASTNode * Body; //!< 関数ボディ
 	tRisseString Name; //!< 関数名
-	tRisseMemberAttribute Attribute; //!< 属性
+	tRisseDeclAttribute Attribute; //!< 属性
 	tRisseASTArray Blocks; //!< ブロック引数の配列
 	bool IsBlock; //!< 遅延評価ブロックブロックかどうか(真=遅延評価ブロック,偽=普通の関数)
 
@@ -2446,11 +2449,11 @@ public:
 
 	//! @brief		属性を設定する
 	//! @param		attrib	属性
-	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+	void SetAttribute(tRisseDeclAttribute attrib) { Attribute.Overwrite(attrib); }
 
 	//! @brief		属性を設定する
 	//! @return		属性
-	tRisseMemberAttribute GetAttribute() const { return Attribute; }
+	tRisseDeclAttribute GetAttribute() const { return Attribute; }
 
 	//! @brief		遅延評価ブロックブロックかどうかを設定する
 	//! @param		is_block		遅延評価ブロックブロックかどうか
@@ -2640,7 +2643,7 @@ class tRisseASTNode_PropDecl : public tRisseASTNode
 	tRisseASTNode * Setter; //!< セッタ
 	tRisseString SetterArgumentName; //!< セッタの引数の名前
 	tRisseASTNode * Getter; //!< ゲッタ
-	tRisseMemberAttribute Attribute; //!< 属性
+	tRisseDeclAttribute Attribute; //!< 属性
 	tRisseString Name; //!< プロパティ名
 
 public:
@@ -2699,11 +2702,11 @@ public:
 
 	//! @brief		属性を設定する
 	//! @param		attrib	属性
-	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+	void SetAttribute(tRisseDeclAttribute attrib) { Attribute.Overwrite(attrib); }
 
 	//! @brief		属性を設定する
 	//! @return		属性
-	tRisseMemberAttribute GetAttribute() const { return Attribute; }
+	tRisseDeclAttribute GetAttribute() const { return Attribute; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
@@ -2756,7 +2759,7 @@ class tRisseASTNode_ClassDecl : public tRisseASTNode
 	tRisseASTNode * SuperClass; //!< 親クラスを表す式
 	tRisseASTNode * Body; //!< クラス宣言ボディ
 	tRisseString Name; //!< クラス名
-	tRisseMemberAttribute Attribute; //!< 属性
+	tRisseDeclAttribute Attribute; //!< 属性
 
 public:
 	//! @brief		コンストラクタ
@@ -2794,11 +2797,11 @@ public:
 
 	//! @brief		属性を設定する
 	//! @param		attrib	属性
-	void SetAttribute(tRisseMemberAttribute attrib) { Attribute.Overwrite(attrib); }
+	void SetAttribute(tRisseDeclAttribute attrib) { Attribute.Overwrite(attrib); }
 
 	//! @brief		属性を設定する
 	//! @return		属性
-	tRisseMemberAttribute GetAttribute() const { return Attribute; }
+	tRisseDeclAttribute GetAttribute() const { return Attribute; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数

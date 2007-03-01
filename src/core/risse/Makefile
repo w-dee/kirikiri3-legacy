@@ -88,6 +88,7 @@ CPPFILES =  \
 			src/compiler/risseCodeGen.cpp            \
 			src/compiler/risseCompiler.cpp           \
 			src/compiler/risseCompilerNS.cpp         \
+			src/compiler/risseDeclAttribute.cpp      \
 			src/compiler/risseSSABlock.cpp           \
 			src/compiler/risseSSAForm.cpp            \
 			src/compiler/risseSSAStatement.cpp       \

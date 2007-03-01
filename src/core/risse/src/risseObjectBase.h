@@ -56,6 +56,24 @@ public:
 			RISSE_ASSERT(member_prop_control != tRisseMemberAttribute::pcNone);
 			return member_prop_control;
 		}
+
+		//! @brief		オーバーライド性を得る
+		//! @param		flags		オーバーライド性をオーバーライドする方法
+		//! @return		オーバーライド性
+		tRisseMemberAttribute::tOverrideControl GetOverrideControl(tRisseOperateFlags flags) const
+		{
+			// flags にプロパティアクセス方法が指定されていた場合はそちらを優先する
+			tRisseMemberAttribute::tOverrideControl wanted_prop_control =
+				flags.operator tRisseMemberAttribute().GetOverride();
+			if(wanted_prop_control != tRisseMemberAttribute::ocNone)
+				return wanted_prop_control;
+
+			// flags にプロパティアクセス方法が記述されていなかった場合はメンバの属性を返す
+			tRisseMemberAttribute::tOverrideControl member_prop_control =
+				Attribute.GetOverride();
+			RISSE_ASSERT(member_prop_control != tRisseMemberAttribute::ocNone);
+			return member_prop_control;
+		}
 	};
 
 protected:
@@ -104,17 +122,6 @@ public:
 				const tRisseVariant &value, const tRisseVariant &This);
 
 private:
-	//! @brief		メンバに値を設定する
-	//! @param		name			メンバ名
-	//! @param		flags			操作フラグ
-	//! @param		member			設定先のデータ
-	//! @param		prop_control	プロパティアクセス方法
-	//! @param		value			書き込む値
-	//! @param		This			メンバが呼び出される際のThisオブジェクト
-	tRetValue WriteMember(const tRisseString & name, tRisseOperateFlags flags, 
-		tMemberData & member, tRisseMemberAttribute::tPropertyControl prop_control,
-		const tRisseVariant & value, const tRisseVariant &This);
-
 public:
 	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
 	//! @param		name		関数名

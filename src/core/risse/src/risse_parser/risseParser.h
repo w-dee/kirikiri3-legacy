@@ -17,6 +17,8 @@
 #include "../risseTypes.h"
 #include "../risseGC.h"
 #include "../compiler/risseAST.h"
+#include "../compiler/risseDeclAttribute.h"
+
 
 namespace Risse {
 // このファイルは Risse の名前空間内で include しないとだめ

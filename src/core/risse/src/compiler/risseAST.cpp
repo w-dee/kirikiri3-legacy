@@ -816,7 +816,7 @@ void tRisseASTNode_VarDeclPair::PrepareVarDecl(tRisseSSAForm * form, const tRiss
 //---------------------------------------------------------------------------
 void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 	risse_size position,
-	const tRisseString & name, tRisseSSAVariable * init, tRisseMemberAttribute attrib)
+	const tRisseString & name, tRisseSSAVariable * init, tRisseDeclAttribute attrib)
 {
 	// グローバル変数として作成すべきかどうかをチェック
 	if(form->GetLocalNamespace()->GetHasScope())
@@ -838,7 +838,9 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 			new tRisseASTNode_Factor(position, aftThis),
 			new tRisseASTNode_Factor(position, aftConstant, name), matDirect,
 
-				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+				tRisseOperateFlags(
+					tRisseDeclAttribute(tRisseDeclAttribute::pcVar)|
+					tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
 					tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly
 					// 普通の変数アクセスかつメンバの作成、インスタンスメンバのみ
 				);
@@ -2905,7 +2907,7 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 	// static 指定がついていれば this にバインドするための命令を置く
 	// TODO: MemberAttribute は static 以外用をなしていない。本当に必要なのか？
 	tRisseSSAVariable * final_var = wrapped_lazyblock_var;
-	if(Attribute.Has(tRisseMemberAttribute::ocStatic))
+	if(Attribute.Has(tRisseDeclAttribute::ccStatic))
 	{
 		tRisseSSAVariable * this_var = NULL;
 		form->AddStatement(GetPosition(), ocAssignThis, &this_var);
@@ -2944,7 +2946,7 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::DoReadSSA(tRisseSSAForm *form, void 
 
 		// 変数宣言のSSA表現を生成する
 		tRisseASTNode_VarDeclPair::GenerateVarDecl(form, GetPosition(), Name, property_instance_var,
-						tRisseMemberAttribute(tRisseMemberAttribute::pcProperty));
+						tRisseDeclAttribute(tRisseDeclAttribute::pcProperty));
 
 		return NULL;
 	}
@@ -3032,7 +3034,7 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 	// static 指定がついていれば this にバインドするための命令を置く
 	// TODO: MemberAttribute は static 以外用をなしていない。本当に必要なのか？
 	tRisseSSAVariable * final_var = property_instance_var;
-	if(Attribute.Has(tRisseMemberAttribute::ocStatic))
+	if(Attribute.Has(tRisseDeclAttribute::ccStatic))
 	{
 		tRisseSSAVariable * this_var = NULL;
 		form->AddStatement(GetPosition(), ocAssignThis, &this_var);

@@ -48,9 +48,8 @@ public:
 	enum tOverrideControl
 	{
 		ocNone,
-		ocStatic, //!< 同じクラスの異なるインスタンス間で共有
 		ocVirtual, //!< インスタンスごとに異なる値を持ち、サブクラスでオーバーライド可
-		ocFinal, //!< インスタンスごとに異なる値を持ち、サブクラスでオーバーライド不可
+		ocConst, //!< 定数
 	};
 
 	//! @brief	プロパティアクセス方法を規定する物
@@ -58,7 +57,6 @@ public:
 	{
 		pcNone,
 		pcVar, //!< 普通のメンバ
-		pcConst, //!< 定数
 		pcProperty, //!< 読み出しと書き込みにおいてゲッタとセッタの呼び出しを伴うメンバ
 	};
 

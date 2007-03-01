@@ -91,6 +91,7 @@ void tRisseClassBase::RegisterMembers()
 			// 「自分のクラス」はすなわち This のこと(のはず)
 			new_object.SetPropertyDirect(ss_class,
 				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
 				tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				This, new_object);
 			// yet not
@@ -159,6 +160,7 @@ void tRisseClassBase::RegisterMembers()
 		// 理由は modules 配列と同じ。
 		pThis->SetPropertyDirect(ss_class,
 			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
+			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
 			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 			tRisseVariant(tRisseClassClass::GetPointer()), *pThis);
 	}

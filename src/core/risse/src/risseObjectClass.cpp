@@ -88,7 +88,9 @@ void tRisseObjectClass::RegisterMembers()
 		// This のインスタンスメンバを取得する
 		tRisseVariant ret = 
 			This.GetPropertyDirect(args[0],
-				tRisseOperateFlags::ofInstanceMemberOnly|tRisseMemberAttribute(tRisseMemberAttribute::pcVar),
+				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
+				tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)|
+				tRisseOperateFlags::ofInstanceMemberOnly,
 				This);
 		if(result) *result = ret;
 	}
@@ -103,9 +105,10 @@ void tRisseObjectClass::RegisterMembers()
 
 		// This のインスタンスメンバを設定する
 		This.SetPropertyDirect(args[0],
+			tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
+			tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)|
 			tRisseOperateFlags::ofInstanceMemberOnly|
-			tRisseOperateFlags::ofMemberEnsure|
-			tRisseMemberAttribute(tRisseMemberAttribute::pcVar),
+			tRisseOperateFlags::ofMemberEnsure,
 						args[1], This);
 	}
 	RISSE_END_NATIVE_METHOD

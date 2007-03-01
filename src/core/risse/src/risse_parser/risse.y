@@ -12,6 +12,8 @@
 /* risse.y */
 /* Risse bison input file */
 
+#include "../prec.h"
+
 #include <stdio.h>
 #include <string.h>
 #include "../risseTypes.h"
@@ -104,6 +106,23 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 }
 
 
+/*!
+	@brief	属性を上書きする
+	@param	l			上書きされる属性
+	@param	r			上書きする属性
+	@return		結果
+	@note	矛盾した属性を上書きしようとすると例外を発する
+*/
+static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
+	tRisseParser * pr,
+	tRisseDeclAttribute * l, const tRisseDeclAttribute * r)
+{
+	if(l->Overwrite(*r))
+		tRisseCompileExceptionClass::Throw(RISSE_WS_TR("duplicated attribute specifier"),
+			PR->GetScriptBlock(), LP);
+	return l;
+}
+
 %}
 
 /*###########################################################################*/
@@ -118,7 +137,7 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %union{
 	tRisseVariant * value;
 	tRisseASTNode * np;
-	tRisseMemberAttribute * attr;
+	tRisseDeclAttribute * attr;
 	tRisseASTArray * array;
 }
 
@@ -274,8 +293,14 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 %token <value>		T_ID
 %token <value>		T_REGEXP T_REGEXP_FLAGS
 
-%type <attr>		member_attr_list member_attr member_attr_list_non_prop
-					member_attr_non_prop member_attr_prop
+%type <attr>		decl_attr_list
+					decl_attr
+					decl_attr_list_var
+					decl_attr_var
+					decl_attr_context
+					decl_attr_access
+					decl_attr_visibility
+					decl_attr_override
 
 %type <value>		member_name
 
@@ -290,7 +315,8 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	while do_while
 	for for_first_clause for_second_clause for_third_clause
 	definition
-	variable_def variable_def_inner variable_id variable_id_list
+	variable_def_with_var variable_def_var_opt
+	variable_def_no_semicolon variable_id variable_id_list
 	func_def func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
 	func_decl_arg func_decl_arg_collapse call_block call_block_arg_opt
 	property_def property_expr_def property_handler_def_list
@@ -433,7 +459,7 @@ for
 /* the first clause of a for statement */
 for_first_clause
 	: /* empty */							{ $$ = NULL; }
-	| variable_def_inner
+	| variable_def_no_semicolon
 	| expr_with_comma
 ;
 
@@ -521,11 +547,17 @@ with
   ---------------------------------------------------------------------------*/
 
 /* variable definition */
-variable_def
-	: variable_def_inner ";"				{ $$ = $1; }
+
+variable_def_with_var
+	: "var" variable_id_list ";"			{ $$ = $2; C(VarDecl, $$)->SetIsConstant(false); }
 ;
 
-variable_def_inner
+variable_def_var_opt
+	: variable_id_list ";"					{ $$ = $1; C(VarDecl, $$)->SetIsConstant(false); }
+	| "var" variable_id_list ";"			{ $$ = $2; C(VarDecl, $$)->SetIsConstant(false); }
+;
+
+variable_def_no_semicolon
 	: "var" variable_id_list				{ $$ = $2; C(VarDecl, $$)->SetIsConstant(false); }
 	| "const" variable_id_list				{ $$ = $2; C(VarDecl, $$)->SetIsConstant(true); }
 ;
@@ -538,8 +570,8 @@ variable_id_list
 
 /* a variable id and an optional initializer expression */
 variable_id
-	: member_name							{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
-	| member_name "=" expr					{ $$ = N(VarDeclPair)(LP, *$1, $3); }
+	: T_ID									{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
+	| T_ID "=" expr							{ $$ = N(VarDeclPair)(LP, *$1, $3); }
 ;
 
 /*---------------------------------------------------------------------------
@@ -748,67 +780,70 @@ class_extender
 
 
 /*---------------------------------------------------------------------------
-  member attribute
+  declaration attributes
   ---------------------------------------------------------------------------*/
 
 /* definitions */
 definition
-	: member_attr_list_non_prop
-	  variable_def							{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
-	| variable_def
-	| member_attr_list_non_prop
+	: decl_attr_list_var
+	  variable_def_var_opt					{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
+	| variable_def_with_var		/* 変数の場合、const R = 0; のように var を省略して宣言できる */
+	| decl_attr_list
 	  func_def								{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
 	| func_def
-	| member_attr_list_non_prop
+	| decl_attr_list
 	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
 	| property_def
-	| member_attr_list_non_prop
+	| decl_attr_list_var
 	  class_module_def						{ $$ = $2; C(ClassDecl, $$)->SetAttribute(*$1); }
 	| class_module_def
 ;
 
 
-/* member attributes */
-member_attr_list
-	: member_attr							{ $$ = new tRisseMemberAttribute(*$1); }
-	| member_attr_list member_attr			{ $$ = $1;
-											  if($1->Overwrite(*$2))
-											  { yyerror("duplicated attribute specifier");
-											    YYERROR; }
-											}
+/* attribute lists */
+
+decl_attr_list
+	: decl_attr								{ $$ = new tRisseDeclAttribute(*$1); }
+	| decl_attr_list decl_attr				{ $$ = RisseOverwriteDeclAttribute(PR, $1, $2); }
 ;
 
-member_attr_list_non_prop
-	: member_attr_non_prop					{ $$ = new tRisseMemberAttribute(*$1); }
-	| member_attr_list_non_prop
-	  member_attr_non_prop					{ $$ = $1;
-											  if($1->Overwrite(*$2))
-											  { yyerror("duplicated attribute specifier");
-											    YYERROR; }
-											}
+decl_attr
+	: decl_attr_context | decl_attr_access | decl_attr_visibility | decl_attr_override
 ;
 
-member_attr
-	: member_attr_non_prop
-	| member_attr_prop
+decl_attr_list_var
+	: decl_attr_var							{ $$ = new tRisseDeclAttribute(*$1); }
+	| decl_attr_list decl_attr_var			{ $$ = RisseOverwriteDeclAttribute(PR, $1, $2); }
 ;
 
-member_attr_non_prop
-	: "public"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::acPublic); }
-	| "internal"							{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::acInternal); }
-	| "private"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::acPrivate); }
-	| "enumerable"							{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::vcEnumerable); }
-	| "hidden"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::vcHidden); }
-	| "static"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::ocStatic); }
-	| "final"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::ocFinal); }
-	| "virtual"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual); }
+decl_attr_var
+	: decl_attr_access | decl_attr_visibility | decl_attr_override
 ;
 
-member_attr_prop
-	: "property"							{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcProperty); }
-	| "const"								{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcConst); }
-	| "var"									{ $$ = new tRisseMemberAttribute(tRisseMemberAttribute::pcVar); }
+
+/* attribute specifiers */
+
+
+decl_attr_context
+	: "static"								{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::ccStatic); }
 ;
+
+decl_attr_access
+	: "public"								{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::acPublic); }
+	| "internal"							{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::acInternal); }
+	| "private"								{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::acPrivate); }
+;
+
+decl_attr_visibility
+	: "enumerable"							{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::vcEnumerable); }
+	| "hidden"								{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::vcHidden); }
+;
+
+decl_attr_override
+	: "const"								{ $$ = new tRisseDeclAttribute(tRisseMemberAttribute::ocConst); }
+	| "virtual"								{ $$ = new tRisseDeclAttribute(tRisseMemberAttribute::ocVirtual); }
+;
+
 
 /*---------------------------------------------------------------------------
   member_name
@@ -1009,8 +1044,10 @@ expr
 	| expr "." "(" expr ")"			{ $$ = N(MemberSel)(LP, $1, $4, matDirect); }
 	| expr "::" member_name			{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirectThis); }
 	| expr "::" "(" expr ")"		{ $$ = N(MemberSel)(LP, $1, $4, matDirectThis); }
-	| expr "<" member_attr_list ">"
+/*
+	| expr "<" decl_attr_list ">"
 	  %prec T_FUNCCALL				{ $$ = N(CastAttr)(LP, *$3, $1); }
+*/
 	| factor_expr
 ;
 

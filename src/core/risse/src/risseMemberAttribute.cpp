@@ -80,9 +80,9 @@ tRisseString tRisseMemberAttribute::AsString() const
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
 		switch(Override)
 		{
-			case ocStatic:		str += RISSE_WS("static");		break;
 			case ocVirtual:		str += RISSE_WS("virtual");		break;
-			case ocFinal:		str += RISSE_WS("final");		break;
+			case ocConst:		str += RISSE_WS("const");		break;
+//			case ocFinal:		str += RISSE_WS("final");		break;
 			default: ;
 		}
 	}
@@ -92,7 +92,6 @@ tRisseString tRisseMemberAttribute::AsString() const
 		switch(Property)
 		{
 			case pcVar:			str += RISSE_WS("var");			break;
-			case pcConst:		str += RISSE_WS("const");		break;
 			case pcProperty:	str += RISSE_WS("property");	break;
 			default: ;
 		}

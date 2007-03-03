@@ -684,7 +684,6 @@ public:
 class tRisseASTNode_VarDecl : public tRisseASTNode_List
 {
 	typedef tRisseASTNode_List inherited;
-	tRisseDeclAttribute Attribute; //!< 属性
 
 public:
 	//! @brief		コンストラクタ
@@ -692,23 +691,12 @@ public:
 	tRisseASTNode_VarDecl(risse_size position) :
 		tRisseASTNode_List(position, antVarDecl) {;}
 
-	//! @brief		定数宣言かどうかを設定する
-	//! @param		is_constant	定数宣言かどうか
-	void SetIsConstant(bool is_constant)
-	{
-		if(is_constant)
-			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::ocConst));
-		else
-			Attribute.Overwrite(tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual));
-	}
-
 	//! @brief		属性を設定する
 	//! @param		attrib	属性
-	void SetAttribute(tRisseDeclAttribute attrib) { Attribute.Overwrite(attrib); }
-
-	//! @brief		属性を設定する
-	//! @return		属性
-	tRisseDeclAttribute GetAttribute() const { return Attribute; }
+	//! @note		この操作は、すべての子ノード (tRisseASTNode_VarDeclPair) に対して
+	//!				属性を再設定する。これ以降に子に加わったノードに対しては
+	//!				属性は自動的には設定されないので注意すること。
+	void SetAttribute(tRisseDeclAttribute attrib);
 
 	//! @brief		指定されたインデックスの子ノードの名前を得る
 	//! @param		index		インデックス
@@ -717,7 +705,7 @@ public:
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const { return Attribute.AsString(); }
+	tRisseString GetDumpComment() const { return tRisseString(); }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス
@@ -733,35 +721,43 @@ public:
 //---------------------------------------------------------------------------
 class tRisseASTNode_VarDeclPair : public tRisseASTNode
 {
-	tRisseString Name; //!< 名前
+	tRisseASTNode * Name; //!< 名前を表すノード
 	tRisseASTNode * Initializer; //!< 初期値ノード
+	tRisseDeclAttribute Attribute; //!< 属性
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
 	//! @param		name			名前
-	//! @param		initializer			初期値ノード
+	//! @param		initializer		初期値ノード
 	tRisseASTNode_VarDeclPair(risse_size position,
-		const tRisseString & name, tRisseASTNode * initializer) :
+		tRisseASTNode * name, tRisseASTNode * initializer) :
 		tRisseASTNode(position, antVarDeclPair),
 			Name(name), Initializer(initializer)
 	{
+		if(Name) Name->SetParent(this);
 		if(Initializer) Initializer->SetParent(this);
 	}
 
 	//! @brief		名前を得る
 	//! @return		名前
-	const tRisseString & GetName() const { return Name; }
+	tRisseASTNode * GetName() const { return Name; }
 
 	//! @brief		初期値ノードを得る
 	//! @return		初期値ノード
 	tRisseASTNode * GetInitializer() const { return Initializer; }
 
+	//! @brief		属性を設定する
+	//! @param		attrib	属性
+	//! @note		この操作は、Name がメンバ選択演算子だった場合、そのメンバ選択演算子
+	//!				にも同じ属性を設定する。
+	void SetAttribute(tRisseDeclAttribute attrib);
+
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
 	{
-		return 1;
+		return 2;
 	}
 
 	//! @brief		指定されたインデックスの子ノードを得る
@@ -771,7 +767,8 @@ public:
 	{
 		switch(index)
 		{
-		case 0: return Initializer;
+		case 0: return Name;
+		case 1: return Initializer;
 		}
 		return NULL;
 	}
@@ -783,7 +780,7 @@ public:
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tRisseString GetDumpComment() const { return Name; }
+	tRisseString GetDumpComment() const { return Attribute.AsString(); }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス

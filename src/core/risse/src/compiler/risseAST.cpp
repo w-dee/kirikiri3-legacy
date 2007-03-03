@@ -150,7 +150,8 @@ tRisseString tRisseASTNode_VarDeclPair::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0: return RISSE_WS("initializer");
+	case 0: return RISSE_WS("name");
+	case 1: return RISSE_WS("initializer");
 	}
 	return tRisseString();
 }
@@ -754,6 +755,20 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
+void tRisseASTNode_VarDecl::SetAttribute(tRisseDeclAttribute attrib)
+{
+	// 子に再帰する
+	for(risse_size i = 0; i < GetChildCount(); i++)
+	{
+		tRisseASTNode_VarDeclPair * pair = reinterpret_cast<tRisseASTNode_VarDeclPair*>(GetChildAt(i));
+		RISSE_ASSERT(pair->GetType() == antVarDeclPair);
+		pair->SetAttribute(attrib);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
@@ -768,29 +783,99 @@ tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
+void tRisseASTNode_VarDeclPair::SetAttribute(tRisseDeclAttribute attrib)
+{
+	Attribute = attrib;
+	if(Name->GetType() == antMemberSel)
+	{
+		// Name がメンバ選択演算子だった場合
+		reinterpret_cast<tRisseASTNode_MemberSel*>(Name)->SetAttribute(attrib);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
 	// 変数宣言の準備
+/*
 	PrepareVarDecl(form, Name);
+*/
+	if(Name->GetType() == antId)
+	{
+		// name ノードに id が直接来ている場合
+
+		// TODO: @つき変数への対応
+
+		// グローバル変数として作成すべきかどうかをチェック
+		tRisseString name = reinterpret_cast<tRisseASTNode_Id*>(Name)->GetName();
+		if(form->GetLocalNamespace()->GetHasScope())
+		{
+			// ローカル変数として作成する
+
+			// 変数のローカル名前空間への登録
+			form->GetLocalNamespace()->Add(name, NULL);
+		}
+	}
 
 	// 初期化値の準備
-	tRisseSSAVariable * init_var;
+	tRisseSSAVariable * init;
 	if(Initializer)
 	{
 		// 初期化値がある
-		init_var = Initializer->GenerateReadSSA(form);
+		init = Initializer->GenerateReadSSA(form);
 	}
 	else
 	{
 		// void の定数値の作成
-		init_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+		init = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
 	}
 
 	// 変数宣言のSSA表現を生成する
-	RISSE_ASSERT(GetParent()->GetType() == antVarDecl);
-	tRisseASTNode_VarDecl * parent = reinterpret_cast<tRisseASTNode_VarDecl*>(GetParent());
+/*
 	GenerateVarDecl(form, GetPosition(), Name, init_var, parent->GetAttribute());
+*/
+	if(Name->GetType() == antId)
+	{
+		// name ノードに id が直接来ている場合
+		tRisseString name = reinterpret_cast<tRisseASTNode_Id*>(Name)->GetName();
+		risse_size position = GetPosition();
+
+		// グローバル変数として作成すべきかどうかをチェック
+		if(form->GetLocalNamespace()->GetHasScope())
+		{
+			// ローカル変数として作成する
+
+			// ローカル変数への書き込み
+			form->GetLocalNamespace()->Write(form, position, name, init);
+		}
+		else
+		{
+			// グローバル変数(あるいはクラス変数など)として作成する
+			// this 上に変数を作成するノードを一時的に作成
+			tRisseASTNode_MemberSel * write_node =
+				new tRisseASTNode_MemberSel(position,
+				new tRisseASTNode_Factor(position, aftThis),
+				new tRisseASTNode_Factor(position, aftConstant, name), matDirect,
+
+					tRisseOperateFlags(
+						tRisseDeclAttribute(tRisseDeclAttribute::pcVar)|
+						tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
+						tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly
+						// 普通の変数アクセスかつメンバの作成、インスタンスメンバのみ
+					);
+			write_node->SetAttribute(Attribute);
+			write_node->GenerateWriteSSA(form, init);
+		}
+	}
+	else
+	{
+		// name ノードが id じゃない場合
+		// そこに代入を行う式を生成する
+		Name->GenerateWriteSSA(form, init);
+	}
 
 	// このノードは答えを返さない
 	return NULL;

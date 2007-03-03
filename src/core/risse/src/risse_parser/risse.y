@@ -295,8 +295,6 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 
 %type <attr>		decl_attr_list
 					decl_attr
-					decl_attr_list_var
-					decl_attr_var
 					decl_attr_context
 					decl_attr_access
 					decl_attr_visibility
@@ -306,7 +304,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 
 %type <np>
 	toplevel_def_list def_list
-	expr expr_with_comma factor_expr call_arg call_arg_list
+	expr expr_with_comma access_expr call_arg call_arg_list
 	func_expr_def func_call_expr func_call_expr_body
 	inline_array array_elm_list array_elm
 	inline_dic dic_elm dic_elm_list
@@ -549,17 +547,17 @@ with
 /* variable definition */
 
 variable_def_with_var
-	: "var" variable_id_list ";"			{ $$ = $2; C(VarDecl, $$)->SetIsConstant(false); }
+	: "var" variable_id_list ";"			{ $$ = $2; }
 ;
 
 variable_def_var_opt
-	: variable_id_list ";"					{ $$ = $1; C(VarDecl, $$)->SetIsConstant(false); }
-	| "var" variable_id_list ";"			{ $$ = $2; C(VarDecl, $$)->SetIsConstant(false); }
+	: variable_id_list ";"					{ $$ = $1; }
+	| "var" variable_id_list ";"			{ $$ = $2; }
 ;
 
 variable_def_no_semicolon
-	: "var" variable_id_list				{ $$ = $2; C(VarDecl, $$)->SetIsConstant(false); }
-	| "const" variable_id_list				{ $$ = $2; C(VarDecl, $$)->SetIsConstant(true); }
+	: "var" variable_id_list				{ $$ = $2; }
+	| "const" variable_id_list				{ $$ = $2; /* TODO: const handling */ }
 ;
 
 /* list for the variable definition */
@@ -570,8 +568,8 @@ variable_id_list
 
 /* a variable id and an optional initializer expression */
 variable_id
-	: T_ID									{ $$ = N(VarDeclPair)(LP, *$1, NULL); }
-	| T_ID "=" expr							{ $$ = N(VarDeclPair)(LP, *$1, $3); }
+	: access_expr							{ $$ = N(VarDeclPair)(LP, $1, NULL); }
+	| access_expr "=" expr					{ $$ = N(VarDeclPair)(LP, $1, $3); }
 ;
 
 /*---------------------------------------------------------------------------
@@ -785,7 +783,7 @@ class_extender
 
 /* definitions */
 definition
-	: decl_attr_list_var
+	: decl_attr_list
 	  variable_def_var_opt					{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
 	| variable_def_with_var		/* 変数の場合、const R = 0; のように var を省略して宣言できる */
 	| decl_attr_list
@@ -794,7 +792,7 @@ definition
 	| decl_attr_list
 	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
 	| property_def
-	| decl_attr_list_var
+	| decl_attr_list
 	  class_module_def						{ $$ = $2; C(ClassDecl, $$)->SetAttribute(*$1); }
 	| class_module_def
 ;
@@ -811,18 +809,7 @@ decl_attr
 	: decl_attr_context | decl_attr_access | decl_attr_visibility | decl_attr_override
 ;
 
-decl_attr_list_var
-	: decl_attr_var							{ $$ = new tRisseDeclAttribute(*$1); }
-	| decl_attr_list decl_attr_var			{ $$ = RisseOverwriteDeclAttribute(PR, $1, $2); }
-;
-
-decl_attr_var
-	: decl_attr_access | decl_attr_visibility | decl_attr_override
-;
-
-
 /* attribute specifiers */
-
 
 decl_attr_context
 	: "static"								{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::ccStatic); }
@@ -975,7 +962,7 @@ expr_with_comma
 ;
 
 /*
-	expr_no_comma は、関数への引数リストなど、式中にカンマがあると、リストの
+	expr は、関数への引数リストなど、式中にカンマがあると、リストの
 	区切り記号と区別が付かない場合はこちらを使う
 */
 expr
@@ -1037,38 +1024,35 @@ expr
 	| expr "incontextof" "dynamic"	{ $$ = N(InContextOf)(LP,  $1, NULL); }
 	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostDec			,$1); }
 	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
-	| func_call_expr				{ ; }
-	| "(" expr_with_comma ")"		{ $$ = $2; }
-	| expr "[" expr "]"				{ $$ = N(MemberSel)(LP, $1, $3, matIndirect); }
-	| expr "." member_name			{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirect); }
-	| expr "." "(" expr ")"			{ $$ = N(MemberSel)(LP, $1, $4, matDirect); }
-	| expr "::" member_name			{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirectThis); }
-	| expr "::" "(" expr ")"		{ $$ = N(MemberSel)(LP, $1, $4, matDirectThis); }
-/*
-	| expr "<" decl_attr_list ">"
-	  %prec T_FUNCCALL				{ $$ = N(CastAttr)(LP, *$3, $1); }
-*/
-	| factor_expr
+	| access_expr
 ;
 
-factor_expr
-	: T_ID							{ $$ = N(Id)(LP, *$1, false); }
-	| "@" T_ID						{ $$ = N(Id)(LP, *$2, true);  }
-	| T_CONSTVAL					{ $$ = N(Factor)(LP, aftConstant, *$1); }
-	| "this"						{ $$ = N(Factor)(LP, aftThis);  }
-	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
+access_expr
+	: access_expr "[" expr "]"		{ $$ = N(MemberSel)(LP, $1, $3, matIndirect); }
+	| access_expr "." member_name	{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirect); }
+	| access_expr "." "(" expr ")"	{ $$ = N(MemberSel)(LP, $1, $4, matDirect); }
+	| access_expr "::" member_name	{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirectThis); }
+	| access_expr "::" "(" expr ")"	{ $$ = N(MemberSel)(LP, $1, $4, matDirectThis); }
+	| "(" expr_with_comma ")"		{ $$ = $2; }
+	| func_call_expr
 	| func_expr_def
 	| property_expr_def
 	| class_module_expr_def
-	| "global"						{ $$ = N(Factor)(LP, aftGlobal); }
+	| T_ID							{ $$ = N(Id)(LP, *$1, false); }
+	| "@" T_ID						{ $$ = N(Id)(LP, *$2, true);  }
 	| inline_array
 	| inline_dic
 	| "/="							{ LX->SetNextIsRegularExpression(); }
 	  regexp						{ $$ = $3; }
 	| "/"							{ LX->SetNextIsRegularExpression(); }
 	  regexp						{ $$ = $3; }
+	| "this"						{ $$ = N(Factor)(LP, aftThis);  }
+	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
+	| T_CONSTVAL					{ $$ = N(Factor)(LP, aftConstant, *$1); }
+	| "global"						{ $$ = N(Factor)(LP, aftGlobal); }
 	| embeddable_string
 ;
+
 
 
 /* an expression for function call */
@@ -1078,9 +1062,9 @@ func_call_expr
 ;
 
 func_call_expr_body
-	: expr "(" call_arg_list ")"		{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
-	| expr "(" "..." ")"				{ $$ = N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
-	| expr "(" ")"						{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }
+	: access_expr "(" call_arg_list ")"		{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
+	| access_expr "(" "..." ")"				{ $$ = N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
+	| access_expr "(" ")"						{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }
 		/* このルールは "(" と ")" の間で下記の 「call_arg が empty」 のルールと
 		  シフト・還元競合を起こす(こちらが優先される) */
 ;

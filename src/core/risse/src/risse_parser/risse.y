@@ -295,7 +295,6 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 
 %type <attr>		decl_attr_list
 					decl_attr
-					decl_attr_context
 					decl_attr_access
 					decl_attr_visibility
 					decl_attr_override
@@ -305,7 +304,9 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 %type <np>
 	toplevel_def_list def_list
 	expr expr_with_comma access_expr call_arg call_arg_list
-	func_expr_def func_call_expr func_call_expr_body
+	func_expr_def func_expr_def_inner
+	func_call_expr
+	func_call_expr_body
 	inline_array array_elm_list array_elm
 	inline_dic dic_elm dic_elm_list
 	if if_else
@@ -313,11 +314,14 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	while do_while
 	for for_first_clause for_second_clause for_third_clause
 	definition
-	variable_def_with_var variable_def_var_opt
-	variable_def_no_semicolon variable_id variable_id_list
-	func_def func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
+	variable_def variable_def_no_var variable_def_no_semicolon
+	variable_id variable_id_list
+	func_def func_def_inner
+	func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
 	func_decl_arg func_decl_arg_collapse call_block call_block_arg_opt
-	property_def property_expr_def property_handler_def_list
+	property_def property_def_inner
+	property_expr_def property_expr_def_inner
+	property_handler_def_list
 	property_handler_getter property_handler_setter
 	class_module_def class_module_expr_def class_extender
 	break continue
@@ -546,18 +550,21 @@ with
 
 /* variable definition */
 
-variable_def_with_var
-	: "var" variable_id_list ";"			{ $$ = $2; }
+variable_def
+	: "var"
+	  variable_id_list ";"					{ $$ = $2; }
 ;
 
-variable_def_var_opt
-	: variable_id_list ";"					{ $$ = $1; }
-	| "var" variable_id_list ";"			{ $$ = $2; }
+variable_def_no_var
+	:  variable_id_list ";"					{ $$ = $1; }
 ;
 
 variable_def_no_semicolon
 	: "var" variable_id_list				{ $$ = $2; }
-	| "const" variable_id_list				{ $$ = $2; /* TODO: const handling */ }
+	| "const" variable_id_list				{ $$ = $2;
+											  C(VarDecl, $$)->SetAttribute(
+											  	tRisseDeclAttribute(
+											  	tRisseDeclAttribute::ocConst));; }
 ;
 
 /* list for the variable definition */
@@ -623,6 +630,14 @@ throw
 
 /* a function definition */
 func_def
+	: "static" func_def_inner				{ $$ = $2;
+											  C(FuncDecl, $$)->SetAttribute(
+											  	tRisseDeclAttribute(
+											  	tRisseDeclAttribute::ccStatic)); }
+	| func_def_inner						{ $$ = $1; }
+;
+
+func_def_inner
 	: "function" member_name
 	  func_decl_arg_opt
 	  block									{ $$ = $3; C(FuncDecl, $$)->SetName(*$2);
@@ -631,6 +646,14 @@ func_def
 
 /* a function expression definition */
 func_expr_def
+	: "static" func_expr_def_inner			{ $$ = $2;
+											  C(FuncDecl, $$)->SetAttribute(
+											  	tRisseDeclAttribute(
+											  	tRisseDeclAttribute::ccStatic)); }
+	| func_expr_def_inner					{ $$ = $1; }
+;
+
+func_expr_def_inner
 	: "function"
 	  func_decl_arg_opt
 	  block									{ $$ = $2; C(FuncDecl, $$)->SetBody($3); }
@@ -695,7 +718,16 @@ func_decl_block_at_least_one
 
 /* a property handler definition */
 property_def
-	: "property" member_name
+	: "static" property_def_inner			{ $$ = $2;
+											  C(PropDecl, $$)->SetAttribute(
+											  	tRisseDeclAttribute(
+											  	tRisseDeclAttribute::ccStatic)); }
+	| property_def_inner					{ $$ = $1; }
+;
+
+property_def_inner
+	: 
+	  "property" member_name
 	  "{"
 	  property_handler_def_list
 	  "}"									{ $$ = $4; C(PropDecl, $$)->SetName(*$2); }
@@ -703,7 +735,16 @@ property_def
 
 /* a property expression definition */
 property_expr_def
-	: "property"
+	: "static" property_expr_def_inner		{ $$ = $2;
+											  C(PropDecl, $$)->SetAttribute(
+											  	tRisseDeclAttribute(
+											  	tRisseDeclAttribute::ccStatic)); }
+	| property_expr_def_inner				{ $$ = $1; }
+;
+
+property_expr_def_inner
+	: 
+	  "property"
 	  "{"
 	  property_handler_def_list
 	  "}"									{ $$ = $3; }
@@ -783,20 +824,16 @@ class_extender
 
 /* definitions */
 definition
-	: decl_attr_list
-	  variable_def_var_opt					{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
-	| variable_def_with_var		/* 変数の場合、const R = 0; のように var を省略して宣言できる */
-	| decl_attr_list
-	  func_def								{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
+	: decl_attr_list variable_def			{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
+	| decl_attr_list variable_def_no_var	{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
+	| variable_def
+	| decl_attr_list func_def				{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
 	| func_def
-	| decl_attr_list
-	  property_def							{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
+	| decl_attr_list property_def			{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
 	| property_def
-	| decl_attr_list
-	  class_module_def						{ $$ = $2; C(ClassDecl, $$)->SetAttribute(*$1); }
+	| decl_attr_list class_module_def		{ $$ = $2; C(ClassDecl, $$)->SetAttribute(*$1); }
 	| class_module_def
 ;
-
 
 /* attribute lists */
 
@@ -806,14 +843,10 @@ decl_attr_list
 ;
 
 decl_attr
-	: decl_attr_context | decl_attr_access | decl_attr_visibility | decl_attr_override
+	: decl_attr_access | decl_attr_visibility | decl_attr_override
 ;
 
 /* attribute specifiers */
-
-decl_attr_context
-	: "static"								{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::ccStatic); }
-;
 
 decl_attr_access
 	: "public"								{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::acPublic); }

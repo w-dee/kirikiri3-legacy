@@ -134,7 +134,7 @@ BIN_DEPS += src/risse_parser/risseParser.inc
 
 src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 		src/risse_parser/risse.y Makefile
-	(set -e ;\
+	@(set -e ;\
 		cd src/risse_parser ;\
 		bison -dv --name-prefix=risse risse.y ;\
 		cat risse.tab.c | \
@@ -148,6 +148,14 @@ src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 				-e "s|risse\.y|$(shell pwd)/src/risse_parser/risse.y|" \
 				>  risseParser.inc ;\
 		rm risse.tab.c risse.tab.h ;\
+		(grep -i "As a special exception" risseParser.cpp > /dev/null) || (\
+			echo "**********************************************************"; \
+			echo "The bison output file seems not to contain a term which"; \
+			echo "permits the parser is to be used in non-GPL software."; \
+			echo "This isn't a problem when you use Risse script engine"; \
+			echo "in GPLed software, otherwise you should update your"; \
+			echo "bison 2.2 or above (which permits use in non-GPL software). "; \
+			echo "**********************************************************"; ) \
 	)
 
 #----------------------------#

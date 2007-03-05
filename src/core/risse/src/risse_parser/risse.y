@@ -591,15 +591,17 @@ variable_id
 
 try
 	: "try" block_or_statement
-	  catch_list					%dprec 3	{ $$ = $3; C(Try, $$)->SetBody($2); }
+	  catch_list								{ $$ = $3; C(Try, $$)->SetBody($2); }
 	| "try" block_or_statement
 	  catch_list "finally" block_or_statement
-									%dprec 2	{ $$ = $3; C(Try, $$)->SetBody($2);
+												{ $$ = $3; C(Try, $$)->SetBody($2);
 												  C(Try, $$)->SetFinally($5); }
 	| "try" block_or_statement
-	  "finally" block_or_statement	%dprec 1	{ $$ = N(Try)(LP); C(Try, $$)->SetBody($2);
+	  "finally" block_or_statement				{ $$ = N(Try)(LP); C(Try, $$)->SetBody($2);
 												  C(Try, $$)->SetFinally($4);}
 	/* この構文はシフト・還元競合を２つ起こす */
+	/* あえて %dprec は指定しない。解決が難しいような形で入力文を記述すると
+	   parser が自動的に文法エラーにする */
 
 catch_list
 	: catch										{ $$ = N(Try)(LP); C(Try, $$)->AddChild($1); }

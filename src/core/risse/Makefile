@@ -130,7 +130,7 @@ src/risseStaticStringsData.inc src/risseStaticStringsIds.inc: \
 		src/risseStaticStringsIds.inc src/risseStaticStringsData.inc
 
 # risseParser.cpp と risseParser.inc のコンパイル
-BIN_DEPS += src/risseOpCodesEnum.inc src/risse_parser/risseParser.inc
+BIN_DEPS += src/risse_parser/risseParser.inc
 
 src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 		src/risse_parser/risse.y Makefile

@@ -331,7 +331,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	property_handler_getter property_handler_setter
 	class_module_def class_module_expr_def class_extender
 	break continue
-	return switch with label goto try throw catch catch_list catch_or_finally
+	return switch with label goto try throw catch catch_list
 	regexp
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
@@ -590,17 +590,16 @@ variable_id
 /* a structured exception handling */
 
 try
-	: "try"
-	  block_or_statement
-	  catch_or_finally							{ $$ = $3; C(Try, $$)->SetBody($2); }
-;
-
-catch_or_finally
-	: catch_list
-	| catch_list "finally" block_or_statement	{ $$ = $1; C(Try, $$)->SetFinally($3); }
-	| "finally" block_or_statement				{ $$ = N(Try)(LP); C(Try, $$)->SetFinally($2); }
-	/* この構文はシフト・還元競合を 2 つ起こすが、問題ない */
-;
+	: "try" block_or_statement
+	  catch_list					%dprec 3	{ $$ = $3; C(Try, $$)->SetBody($2); }
+	| "try" block_or_statement
+	  catch_list "finally" block_or_statement
+									%dprec 2	{ $$ = $3; C(Try, $$)->SetBody($2);
+												  C(Try, $$)->SetFinally($5); }
+	| "try" block_or_statement
+	  "finally" block_or_statement	%dprec 1	{ $$ = N(Try)(LP); C(Try, $$)->SetBody($2);
+												  C(Try, $$)->SetFinally($4);}
+	/* この構文はシフト・還元競合を２つ起こす */
 
 catch_list
 	: catch										{ $$ = N(Try)(LP); C(Try, $$)->AddChild($1); }

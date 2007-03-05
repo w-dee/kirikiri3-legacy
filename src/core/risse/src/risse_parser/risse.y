@@ -383,7 +383,7 @@ toplevel_list
 /* toplevel definition list */
 toplevel_def_list
 	:										{ $$ = N(Context)(LP, actTopLevel, RISSE_WS("TopLevel")); }
-	| toplevel_def_list block_or_statement	{ $$ = $1; if($2) C(Context, $$)->AddChild($2); }
+	| toplevel_def_list block_or_statement  { $$ = $1; if($2) C(Context, $$)->AddChild($2); }
 	| toplevel_def_list error ";"			{ if(yynerrs > 20)
 												YYABORT;
 											  else yyerrok; }
@@ -399,6 +399,12 @@ def_list
 ;
 
 /* a block */
+/*
+
+	TODO:
+		{};
+	という入力文が、 {} が 辞書配列なのか ブロックなのか分からないという理由で文法エラーになる。
+*/
 block
 	: "{"
 	  def_list
@@ -408,8 +414,8 @@ block
 
 /* a block or a single statement */
 block_or_statement
-	: statement
-	| block
+	: block
+	| statement
 ;
 
 /* a statement */
@@ -1177,10 +1183,10 @@ array_elm
 
 /* an inline dictionary */
 inline_dic
-	: "%" "["
+	: "{"
 	  dic_elm_list
 	  dummy_elm_opt
-	  "]"								{ $$ = $3; }
+	  "}"								{ $$ = $2; }
 ;
 
 

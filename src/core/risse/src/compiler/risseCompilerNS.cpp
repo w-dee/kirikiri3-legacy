@@ -56,9 +56,15 @@ void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_
 {
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
-		if(i->second.Read)
+		if(i->second.Read || i->second.Write)
 		{
-			// 読み込みが発生している
+			// 読み込みまたは書き込みが発生している
+			// 「書き込み」は「読み込み」も伴うと見なす。
+			// このようにしないと、かりに(条件分岐などで)実際に書き込みが行われなかった場合に
+			// 元の値を保持できない (いったん親名前空間から変数をもってきて子名前空間に書き、
+			// 処理の後、子名前空間から親名前空間に書き戻すため)。
+			// そもそも読み込みと書き込みを区別して記録しているのは、読み込みのみしか
+			// 行われなかった変数は、親の名前空間内に書き戻す必要がないため。
 			tRisseSSAVariable * var =
 				form->GetLocalNamespace()->Read(form, pos, i->first);
 			form->AddStatement(pos, ocChildWrite, NULL, Variable, var)->SetName(i->first);

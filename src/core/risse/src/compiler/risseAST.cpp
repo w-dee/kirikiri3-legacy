@@ -2422,12 +2422,15 @@ void tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *form,  bool is_
 	if(is_finally)
 	{
 		// ここで finally の中身を呼び出す
-		form->AddStatement(GetPosition(), ocJump, NULL)->SetJumpTarget(finally_entry_block);
+		tRisseSSAStatement * finally_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
 
 		// ocCatchBranch用の基本ブロックを作成
 		tRisseSSABlock * catch_branch_block =
 			form->CreateNewBlock(RISSE_WS("catch_branch"));
 		finally_last_jump_stmt->SetJumpTarget(catch_branch_block);
+
+		// ジャンプ先を設定
+		finally_jump_stmt->SetJumpTarget(finally_entry_block);
 	}
 
 	// try_block_ret_var は ocCatchBranch にわたる。

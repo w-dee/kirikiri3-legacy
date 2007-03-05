@@ -641,8 +641,12 @@ risse_size tRisseASTNode::SearchEndPosition() const
 	risse_size child_count = GetChildCount();
 	for(risse_size i = 0; i < child_count; i++)
 	{
-		risse_size child_end_pos = GetChildAt(i)->SearchEndPosition();
-		if(pos < child_end_pos) pos = child_end_pos;
+		tRisseASTNode * child = GetChildAt(i);
+		if(child)
+		{
+			risse_size child_end_pos = child->SearchEndPosition();
+			if(pos < child_end_pos) pos = child_end_pos;
+		}
 	}
 
 	return pos;

@@ -68,10 +68,10 @@ RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 int yylex(YYSTYPE * value, void *pr);
 
 /* yyerror のプロトタイプ */
-int raise_yyerror(char * msg, void *pr);
+int raise_yyerror(const char * msg, void *pr);
 
 /* yyerror のリダイレクト */
-#define risseerror(X) raise_yyerror(X, pr);
+#define risseerror(pr, X) raise_yyerror(X, pr);
 
 
 /*!
@@ -128,7 +128,13 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 /*###########################################################################*/
 
 /* 再入可能なパーサを出力 */
-%pure_parser
+%pure-parser
+
+%parse-param {void * pr}
+%lex-param   {void * pr}
+
+/* GLR parser を出力 */
+%glr-parser
 
 /* シフト・還元競合は6つある */
 %expect 6
@@ -309,7 +315,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	func_call_expr_body
 	inline_array array_elm_list array_elm
 	inline_dic dic_elm dic_elm_list
-	if if_else
+	if
 	block block_or_statement statement
 	while do_while
 	for for_first_clause for_second_clause for_third_clause
@@ -411,7 +417,6 @@ statement
 	: ";"									{ $$ = N(ExprStmt)(LP, NULL); }
 	| expr_with_comma ";"					{ $$ = N(ExprStmt)(LP, $1); }
 	| if
-	| if_else
 	| while
 	| do_while
 	| for
@@ -492,15 +497,13 @@ switch
 if
 	: "if" "("
 	  expr_with_comma
-	  ")" block_or_statement				{ $$ = N(If)(LP, $3, $5); }
-;
-
-/* an if-else statement */
-/* この規則は上記の if とシフト・還元競合を起こす */
-if_else
-	: if "else"
-	  block_or_statement					{ $$ = $1; C(If, $$)->SetFalse($3); }
-;
+	  ")" block_or_statement	%dprec 2	{ $$ = N(If)(LP, $3, $5); }
+	| "if" "("
+	  expr_with_comma
+	  ")" block_or_statement
+	   "else"
+	  block_or_statement		%dprec 1	{ $$ = N(If)(LP, $3, $5); C(If, $$)->SetFalse($7); }
+/* この規則は とシフト・還元競合を起こす */
 
 /* a break statement */
 break
@@ -1046,7 +1049,7 @@ expr
 	| "new" expr					{ $$ = $2;
 									  /* new の子ノードは必ず関数呼び出し式である必要がある */
 									  if($$->GetType() != antFuncCall)
-									  { yyerror("expected func_call_expr after new");
+									  { yyerror(PR, "expected func_call_expr after new");
 											    YYERROR; }
 									  C(FuncCall, $$)->SetCreateNew(); }
 	| "delete" expr					{ $$ = N(Unary)(LP, autDelete			,$2); }
@@ -1095,9 +1098,10 @@ func_call_expr
 ;
 
 func_call_expr_body
-	: access_expr "(" call_arg_list ")"		{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
-	| access_expr "(" "..." ")"				{ $$ = N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
-	| access_expr "(" ")"						{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }
+	: access_expr "(" call_arg_list ")"
+							%dprec 1	{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
+	| access_expr "(" "..." ")"			{ $$ = N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
+	| access_expr "(" ")"	%dprec 2	{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }
 		/* このルールは "(" と ")" の間で下記の 「call_arg が empty」 のルールと
 		  シフト・還元競合を起こす(こちらが優先される) */
 ;
@@ -1266,7 +1270,7 @@ int yylex(YYSTYPE * value, void *pr)
 
 
 //---------------------------------------------------------------------------
-int raise_yyerror(char * msg, void *pr)
+int raise_yyerror(const char * msg, void *pr)
 {
 	tRisseCompileExceptionClass::Throw(tRisseString(msg), PR->GetScriptBlock(), LP);
 	return 0;

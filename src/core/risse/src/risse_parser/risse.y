@@ -59,6 +59,8 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 
+union YYSTYPE;
+
 /* yylex のプロトタイプ */
 int yylex(YYSTYPE * value, void *pr);
 

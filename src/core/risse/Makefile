@@ -137,18 +137,14 @@ src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 	@echo Compiling src/risse_parser/risse.y
 	@(set -e ;\
 		cd src/risse_parser ;\
-		bison -dv --name-prefix=risse risse.y ;\
+		bison -v --name-prefix=risse risse.y ;\
 		cat risse.tab.c | \
-			sed -e "s|risse.tab.h|$(shell pwd)/src/risse_parser/risseParser.inc|" \
-				-e "s|risse.tab.c|$(shell pwd)/src/risse_parser/risseParser.cpp|" \
-				-e "s|risse\.y|$(shell pwd)/src/risse_parser/risse.y|" \
+			sed -e "s|risse.tab.h|src/risse_parser/risseParser.inc|" \
+				-e "s|risse.tab.c|src/risse_parser/risseParser.cpp|" \
+				-e "s|risse\.y|src/risse_parser/risse.y|" \
 				>  risseParser.cpp ;\
-		cat risse.tab.h | \
-			sed -e "s|risse.tab.h|$(shell pwd)/src/risse_parser/risseParser.inc|" \
-				-e "s|risse.tab.c|$(shell pwd)/src/risse_parser/risseParser.cpp|" \
-				-e "s|risse\.y|$(shell pwd)/src/risse_parser/risse.y|" \
-				>  risseParser.inc ;\
-		rm risse.tab.c risse.tab.h ;\
+		ruby ../../tools/extract_yytokentype.rb risse.tab.c > risseParser.inc; \
+		rm risse.tab.c ;\
 		(grep -i "As a special exception" risseParser.cpp > /dev/null) || (\
 			echo "**********************************************************"; \
 			echo "The bison output file seems not to contain a term which"; \

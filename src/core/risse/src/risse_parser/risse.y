@@ -25,18 +25,13 @@
 #include "risseParser.h"
 #include "risseScriptBlock.h"
 
-/* エラーの詳細出力 */
-#define YYERROR_VERBOSE 1
-
-/* yyparse に渡すパラメータ */
-#define YYPARSE_PARAM	pr
-
-/* yylex に渡すパラメータ */
-#define YYLEX_PARAM pr
-
 /* メモリ確保は Risse のインターフェースを使うように */
 #define YYMALLOC	RisseMallocCollectee
+#define YYREALLOC	RisseReallocCollectee
 #define YYFREE		RisseFreeCollectee
+
+/* 最大深さ */
+#define YYMAXDEPTH 20000
 
 /*! パーサへのアクセス */
 #define PR (reinterpret_cast<tRisseParser*>(pr))
@@ -127,17 +122,24 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 
 /*###########################################################################*/
 
+/* デバッグ */
+%debug
+
 /* 再入可能なパーサを出力 */
 %pure-parser
 
 %parse-param {void * pr}
 %lex-param   {void * pr}
 
+/* 詳細なエラー出力 */
+%error-verbose
+
 /* GLR parser を出力 */
 %glr-parser
 
 /* シフト・還元競合は6つある */
-%expect 6
+%expect    38
+%expect-rr 5
 
 /* union 定義 */
 %union{
@@ -319,8 +321,8 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	variable_def variable_def_no_var variable_def_no_semicolon
 	variable_id variable_id_list
 	func_def func_def_inner
-	func_decl_arg_opt func_decl_arg_list func_decl_arg_at_least_one
-	func_decl_arg func_decl_arg_collapse call_block call_block_arg_opt
+	func_decl_arg func_decl_arg_list func_decl_arg_at_least_one
+	func_decl_arg_elm func_decl_arg_elm_collapse call_block call_block_arg_opt
 	property_def property_def_inner
 	property_expr_def property_expr_def_inner
 	property_handler_def_list
@@ -644,10 +646,12 @@ func_def
 ;
 
 func_def_inner
-	: "function" member_name
-	  func_decl_arg_opt
-	  block									{ $$ = $3; C(FuncDecl, $$)->SetName(*$2);
+	: "function" access_expr func_decl_arg
+	  block						%dprec 2	{ $$ = $3; C(FuncDecl, $$)->SetName($2);
 	  										  C(FuncDecl, $$)->SetBody($4); }
+	| "function" access_expr
+	  block						%dprec 1	{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->SetName($2);
+	  										  C(FuncDecl, $$)->SetBody($3); }
 ;
 
 /* a function expression definition */
@@ -661,19 +665,20 @@ func_expr_def
 
 func_expr_def_inner
 	: "function"
-	  func_decl_arg_opt
+	  block									{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->SetBody($2); }
+	| "function"
+	  func_decl_arg
 	  block									{ $$ = $2; C(FuncDecl, $$)->SetBody($3); }
 ;
 
 /* the argument definition of a function definition */
-func_decl_arg_opt
-	: /* empty */							{ $$ = N(FuncDecl)(LP); }
-	| "(" func_decl_arg_collapse ")"
+func_decl_arg
+	: "(" func_decl_arg_elm_collapse ")"
 	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($4); }
 	| "(" func_decl_arg_list ")"
 	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($4); }
 	| "(" func_decl_arg_at_least_one ","
-	  func_decl_arg_collapse ")"
+	  func_decl_arg_elm_collapse ")"
 	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AddChild($4);
 	  										  C(FuncDecl, $$)->AssignBlocks($6); }
 ;
@@ -685,17 +690,17 @@ func_decl_arg_list
 ;
 
 func_decl_arg_at_least_one
-	: func_decl_arg							{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->AddChild($1); }
+	: func_decl_arg_elm						{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->AddChild($1); }
 	| func_decl_arg_at_least_one ","
-	  func_decl_arg							{ $$ =$1; C(FuncDecl, $$)->AddChild($3); }
+	  func_decl_arg_elm						{ $$ =$1; C(FuncDecl, $$)->AddChild($3); }
 ;
 
-func_decl_arg
+func_decl_arg_elm
 	: T_ID									{ $$ = N(FuncDeclArg)(LP, *$1, NULL, false); }
 	| T_ID "=" expr							{ $$ = N(FuncDeclArg)(LP, *$1, $3, false); }
 ;
 
-func_decl_arg_collapse
+func_decl_arg_elm_collapse
 	: "*"									{ $$ = N(FuncDeclArg)(LP, tRisseString::GetEmptyString(), NULL, true); }
 	| T_ID "*"								{ $$ = N(FuncDeclArg)(LP, *$1, NULL, true); }
 /*

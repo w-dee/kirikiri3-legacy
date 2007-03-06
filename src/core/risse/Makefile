@@ -134,6 +134,7 @@ BIN_DEPS += src/risse_parser/risseParser.inc
 
 src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 		src/risse_parser/risse.y Makefile
+	@echo Compiling src/risse_parser/risse.y
 	@(set -e ;\
 		cd src/risse_parser ;\
 		bison -dv --name-prefix=risse risse.y ;\

@@ -805,6 +805,7 @@ public:
 	//!				できるため安全なのである。
 	//!				このメソッドはローカル名前空間に変数が作られるばあいのみに
 	//!				機能し、それ以外ではなにもおこなわない。
+	static void PrepareVarDecl(tRisseSSAForm * form, const tRisseASTNode * name);
 	static void PrepareVarDecl(tRisseSSAForm * form, const tRisseString & name);
 
 	//! @brief		変数宣言のSSA 形式の表現を生成する
@@ -814,6 +815,11 @@ public:
 	//! @param		init		初期値を表すSSA形式変数
 	//! @param		attrib		変数の属性
 	//! @note		これに先立って PrepareVarDecl() を実行しておくこと。
+	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseASTNode * name,
+			tRisseSSAVariable * init,
+			tRisseDeclAttribute attrib = tRisseMemberAttribute(
+				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
+				tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)));
 	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseString & name,
 			tRisseSSAVariable * init,
 			tRisseDeclAttribute attrib = tRisseMemberAttribute(
@@ -2402,7 +2408,7 @@ class tRisseASTNode_FuncDecl : public tRisseASTNode_List
 {
 	typedef tRisseASTNode_List inherited;
 	tRisseASTNode * Body; //!< 関数ボディ
-	tRisseString Name; //!< 関数名
+	tRisseASTNode * Name; //!< 関数名
 	tRisseDeclAttribute Attribute; //!< 属性
 	tRisseASTArray Blocks; //!< ブロック引数の配列
 	bool IsBlock; //!< 遅延評価ブロックブロックかどうか(真=遅延評価ブロック,偽=普通の関数)
@@ -2427,12 +2433,12 @@ public:
 	tRisseASTNode * GetBody() const { return Body; }
 
 	//! @brief		関数名を設定する
-	//! @param		name	関数名
-	void SetName(const tRisseString & name) { Name = name; }
+	//! @param		name	関数名を表す AST ノード
+	void SetName(tRisseASTNode * name) { Name = name; }
 
 	//! @brief		関数名を得る
-	//! @return		関数名
-	tRisseString GetName() const { return Name; }
+	//! @return		関数名を表す AST ノード
+	tRisseASTNode * GetName() const { return Name; }
 
 	//! @brief		ブロック引数の配列を設定する
 	//! @param		blocks	ブロック引数の配列(NULL=クリア)
@@ -2464,7 +2470,7 @@ public:
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
 	{
-		return inherited::GetChildCount() + Blocks.size() + 1; // +1 = Body
+		return inherited::GetChildCount() + Blocks.size() + 2; // +2 = Name + Body
 	}
 
 	//! @brief		指定されたインデックスの子ノードを得る
@@ -2472,6 +2478,14 @@ public:
 	//! @return		子ノード
 	tRisseASTNode * GetChildAt(risse_size index) const
 	{
+		// 子ノードは
+		// 1. 名前
+		// 2. 引数 = inherited
+		// 3. ブロック引数 = blocks
+		// 4. body
+		// の順番になる
+		if(index == 0) return Name;
+		index --;
 		if(index == inherited::GetChildCount() + Blocks.size()) return Body;
 		if(index < inherited::GetChildCount())
 			return inherited::GetChildAt(index);

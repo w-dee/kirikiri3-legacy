@@ -139,9 +139,9 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 /* GLR parser を出力 */
 %glr-parser
 
-/* シフト・還元競合は6つある */
-%expect    38
-%expect-rr 5
+/* シフト・還元競合の数 */
+%expect    37
+%expect-rr 3
 
 /* union 定義 */
 %union{
@@ -310,6 +310,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 %type <np>
 	toplevel_def_list def_list
 	expr expr_with_comma access_expr call_arg call_arg_list
+	decl_name_expr factor
 	func_expr_def func_expr_def_inner
 	func_call_expr
 	func_call_expr_body
@@ -648,10 +649,10 @@ func_def
 ;
 
 func_def_inner
-	: "function" access_expr func_decl_arg
+	: "function" decl_name_expr func_decl_arg
 	  block						%dprec 2	{ $$ = $3; C(FuncDecl, $$)->SetName($2);
 	  										  C(FuncDecl, $$)->SetBody($4); }
-	| "function" access_expr
+	| "function" decl_name_expr
 	  block						%dprec 1	{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->SetName($2);
 	  										  C(FuncDecl, $$)->SetBody($3); }
 ;
@@ -1084,7 +1085,12 @@ access_expr
 	| func_expr_def
 	| property_expr_def
 	| class_module_expr_def
-	| T_ID							{ $$ = N(Id)(LP, *$1, false); }
+	| factor
+;
+
+
+factor
+	: T_ID							{ $$ = N(Id)(LP, *$1, false); }
 	| "@" T_ID						{ $$ = N(Id)(LP, *$2, true);  }
 	| inline_array
 	| inline_dic
@@ -1099,6 +1105,23 @@ access_expr
 	| embeddable_string
 ;
 
+
+/*
+  function XXX () { } や class XXXX {  } の XXXX の部分に相当する場所に
+  記述する式。とくに function においては、ここに普通の式を記述できるようにしてしまうと
+  reduce/reduce 競合による parser stack の使い果たしで簡単に memory exhausted に
+  なってしまうため、そのような記述はできなくする必要がある。
+  ここの記述はある程度上記の記述と重複する。
+*/
+decl_name_expr
+	: decl_name_expr "[" expr "]"		{ $$ = N(MemberSel)(LP, $1, $3, matIndirect); }
+	| decl_name_expr "." member_name	{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirect); }
+	| decl_name_expr "." "(" expr ")"	{ $$ = N(MemberSel)(LP, $1, $4, matDirect); }
+	| decl_name_expr "::" member_name	{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$3), matDirectThis); }
+	| decl_name_expr "::" "(" expr ")"	{ $$ = N(MemberSel)(LP, $1, $4, matDirectThis); }
+	| "(" expr_with_comma ")"			{ $$ = $2; }
+	| factor							{ $$ = $1; }
+;
 
 
 /* an expression for function call */

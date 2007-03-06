@@ -125,6 +125,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 /*###########################################################################*/
 
 /* デバッグ */
+/* TODO: リリース前にはずしておこう！ */
 %debug
 
 /* 再入可能なパーサを出力 */
@@ -741,10 +742,10 @@ property_def
 
 property_def_inner
 	: 
-	  "property" member_name
+	  "property" decl_name_expr
 	  "{"
 	  property_handler_def_list
-	  "}"									{ $$ = $4; C(PropDecl, $$)->SetName(*$2); }
+	  "}"									{ $$ = $4; C(PropDecl, $$)->SetName($2); }
 ;
 
 /* a property expression definition */
@@ -803,15 +804,15 @@ property_getter_handler_head
 
 /* a class or module definition */
 class_module_def
-	: "class" T_ID
+	: "class" decl_name_expr
 	  class_extender
 	  "{" toplevel_def_list "}"				{ $$ = $3;
 											  C(ClassDecl, $$)->SetBody($5);
-											  C(ClassDecl, $$)->SetName(*$2); }
-	| "module" T_ID
+											  C(ClassDecl, $$)->SetName($2); }
+	| "module" decl_name_expr
 	  "{" toplevel_def_list "}"				{ $$ = N(ClassDecl)(LP, true, NULL);
 											  C(ClassDecl, $$)->SetBody($4);
-											  C(ClassDecl, $$)->SetName(*$2); }
+											  C(ClassDecl, $$)->SetName($2); }
 ;
 
 class_module_expr_def

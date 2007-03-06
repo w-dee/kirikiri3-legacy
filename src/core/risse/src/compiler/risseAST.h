@@ -712,6 +712,13 @@ public:
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+	//! @brief		式から名前を得る
+	//! @param		node		式を表す AST ノード
+	//! @return		名前 (名前を特定できない場合は空文字列が返る)
+	//! @note		この関数は、たとえば A というノードならば "A"、
+	//!				A.B というノードならば "B" を返す。
+	static tRisseString GetAccessTargetId(tRisseASTNode * node);
 };
 //---------------------------------------------------------------------------
 
@@ -2420,6 +2427,7 @@ public:
 		tRisseASTNode_List(position, antFuncDecl)
 	{
 		Body = NULL;
+		Name = NULL;
 		IsBlock = false;
 	}
 
@@ -2655,7 +2663,7 @@ class tRisseASTNode_PropDecl : public tRisseASTNode
 	tRisseString SetterArgumentName; //!< セッタの引数の名前
 	tRisseASTNode * Getter; //!< ゲッタ
 	tRisseDeclAttribute Attribute; //!< 属性
-	tRisseString Name; //!< プロパティ名
+	tRisseASTNode * Name; //!< プロパティ名を表す AST ノード
 
 public:
 	//! @brief		コンストラクタ
@@ -2663,6 +2671,7 @@ public:
 	tRisseASTNode_PropDecl(risse_size position) :
 		tRisseASTNode(position, antPropDecl)
 	{
+		Name = NULL;
 		Setter = Getter = NULL;
 	}
 
@@ -2702,13 +2711,13 @@ public:
 		return Getter;
 	}
 
-	//! @brief		プロパティ名を設定する
-	//! @param		name	プロパティ名
-	void SetName(const tRisseString & name) { Name = name; }
+	//! @brief		プロパティ名を表す AST ノードを設定する
+	//! @param		name	プロパティ名を表す AST ノード
+	void SetName(tRisseASTNode * name) { Name = name; }
 
-	//! @brief		プロパティ名を得る
-	//! @return		プロパティ名
-	tRisseString GetName() const { return Name; }
+	//! @brief		プロパティ名を表す AST ノードを得る
+	//! @return		プロパティ名を表す AST ノード
+	tRisseASTNode * GetName() const { return Name; }
 
 
 	//! @brief		属性を設定する
@@ -2723,6 +2732,10 @@ public:
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
 	{
+		// 子ノード =
+		// 0. name
+		// 1. setter
+		// 2. getter
 		return 2;
 	}
 
@@ -2731,8 +2744,9 @@ public:
 	//! @return		子ノード
 	tRisseASTNode * GetChildAt(risse_size index) const
 	{
-		if(index == 0) return Setter;
-		if(index == 1) return Getter;
+		if(index == 0) return Name;
+		if(index == 1) return Setter;
+		if(index == 2) return Getter;
 		return NULL;
 	}
 
@@ -2769,7 +2783,7 @@ class tRisseASTNode_ClassDecl : public tRisseASTNode
 	bool IsModule; //!< モジュール宣言の場合に真
 	tRisseASTNode * SuperClass; //!< 親クラスを表す式
 	tRisseASTNode * Body; //!< クラス宣言ボディ
-	tRisseString Name; //!< クラス名
+	tRisseASTNode * Name; //!< クラス名
 	tRisseDeclAttribute Attribute; //!< 属性
 
 public:
@@ -2783,6 +2797,7 @@ public:
 		IsModule = is_module;
 		SuperClass = super_class;
 		Body = NULL;
+		Name = NULL;
 	}
 
 	//! @brief		クラスボディを設定する
@@ -2798,13 +2813,13 @@ public:
 	//! @return		モジュール宣言
 	bool GetIsModule() const { return IsModule; }
 
-	//! @brief		クラス名を設定する
+	//! @brief		クラス名を表す AST ノードを設定する
 	//! @param		name	クラス名
-	void SetName(const tRisseString & name) { Name = name; }
+	void SetName(tRisseASTNode * name) { Name = name; }
 
-	//! @brief		クラス名を得る
+	//! @brief		クラス名を表す AST ノードを得る
 	//! @return		クラス名
-	tRisseString GetName() const { return Name; }
+	tRisseASTNode * GetName() const { return Name; }
 
 	//! @brief		属性を設定する
 	//! @param		attrib	属性
@@ -2818,7 +2833,7 @@ public:
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const
 	{
-		return 1+1; // +1 = Body
+		return 1+1+1; // +2 = Name, Body
 	}
 
 	//! @brief		指定されたインデックスの子ノードを得る
@@ -2826,8 +2841,9 @@ public:
 	//! @return		子ノード
 	tRisseASTNode * GetChildAt(risse_size index) const
 	{
-		if(index == 0) return SuperClass;
-		if(index == 1) return Body;
+		if(index == 0) return Name;
+		if(index == 1) return SuperClass;
+		if(index == 2) return Body;
 		return NULL;
 	}
 

@@ -262,6 +262,10 @@ public:
 	//! @return		ソースコード上の位置
 	risse_size GetPosition() const { return Position; }
 
+	//! @brief		ソースコード上の位置を設定する
+	//! @param		pos		ソースコード上の位置
+	void SetPosition(risse_size pos) { Position = pos; }
+
 	//! @brief		親ノードを設定する
 	//! @param		parent		親ノード
 	void SetParent(tRisseASTNode * parent) { Parent = parent; }

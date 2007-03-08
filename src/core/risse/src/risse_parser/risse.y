@@ -39,9 +39,6 @@
 /*! 字句解析器 */
 #define LX (PR->GetLexer())
 
-/*! 字句解析器の現在の解析位置 */
-#define LP (LX->GetLastTokenStart())
-
 /* new tRisseASTNode_XXXX の省略形 */
 #ifdef N
  #undef N
@@ -59,16 +56,41 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 
+/* 位置情報を表す定義 */
+struct RisseYYLTYPE
+{
+	risse_size first;
+	risse_size last;
+};
+#define YYLTYPE RisseYYLTYPE
+
+/* 位置情報のマージ */
+
+#define YYLLOC_DEFAULT(Current, Rhs, N)                    \
+ do                                                        \
+   if (N)                                                  \
+     {                                                     \
+       (Current).first   = YYRHSLOC(Rhs, 1).first;         \
+       (Current).last    = YYRHSLOC(Rhs, N).last;          \
+     }                                                     \
+   else                                                    \
+     {                                                     \
+       (Current).first   = (Current).last   =              \
+         YYRHSLOC(Rhs, 0).last;                            \
+     }                                                     \
+ while (0)
+
+/* YYSTYPE の前方参照用定義 */
 union YYSTYPE;
 
 /* yylex のプロトタイプ */
-int yylex(YYSTYPE * value, void *pr);
+int yylex(YYSTYPE * value, YYLTYPE *llocp, void *pr);
 
 /* yyerror のプロトタイプ */
-int raise_yyerror(const char * msg, void *pr);
+int raise_yyerror(const char * msg, void *pr, YYLTYPE *loc);
 
 /* yyerror のリダイレクト */
-#define risseerror(pr, X) raise_yyerror(X, pr);
+#define risseerror(loc, pr, X) raise_yyerror(X, pr, loc);
 
 
 /*!
@@ -111,12 +133,12 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	@note	矛盾した属性を上書きしようとすると例外を発する
 */
 static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
-	tRisseParser * pr,
+	tRisseParser * pr, risse_size pos,
 	tRisseDeclAttribute * l, const tRisseDeclAttribute * r)
 {
 	if(l->Overwrite(*r))
 		tRisseCompileExceptionClass::Throw(RISSE_WS_TR("duplicated attribute specifier"),
-			PR->GetScriptBlock(), LP);
+			PR->GetScriptBlock(), pos);
 	return l;
 }
 
@@ -137,12 +159,11 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 /* 詳細なエラー出力 */
 %error-verbose
 
-/* GLR parser を出力 */
-%glr-parser
+/* 位置情報を使う */
+%locations
 
 /* シフト・還元競合の数 */
-%expect    37
-%expect-rr 3
+%expect    6
 
 /* union 定義 */
 %union{
@@ -381,12 +402,12 @@ program
 /* toplevel definitions */
 toplevel_list
 	: toplevel_def_list						{ PR->SetRootNode(C(Context, $1));
-											  C(Context, $1)->SetEndPosition(LP); }
+											  C(Context, $1)->SetEndPosition(@$.last); }
 ;
 
 /* toplevel definition list */
 toplevel_def_list
-	: 										{ $$ = N(Context)(LP, actTopLevel, RISSE_WS("TopLevel")); }
+	: 										{ $$ = N(Context)(@$.first, actTopLevel, RISSE_WS("TopLevel")); }
 	| toplevel_def_list block_or_statement  { $$ = $1; if($2) C(Context, $$)->AddChild($2); }
 	| toplevel_def_list error snl			{ if(yynerrs > 20)
 												YYABORT;
@@ -395,7 +416,7 @@ toplevel_def_list
 
 /* definition list of a block */
 def_list
-	: 										{ $$ = N(Context)(LP, actBlock, RISSE_WS("Block"));  }
+	: 										{ $$ = N(Context)(@$.first, actBlock, RISSE_WS("Block"));  }
 	| def_list block_or_statement			{ $$ = $1; if($2) C(Context, $$)->AddChild($2); }
 	| def_list error snl					{ if(yynerrs > 20)
 												YYABORT;
@@ -413,28 +434,28 @@ block
 	: "{" 
 	  onl
 	  def_list
-	  "}"									{ $$ = $3; C(Context, $$)->SetEndPosition(LP); }
+	  "}"									{ $$ = $3; C(Context, $$)->SetEndPosition(@$.last); }
 ;
 
 
 /* a block or a single statement */
 block_or_statement
-	: block	onl			%dprec 2			{ $$ = $1; }
-	| statement			%dprec 1			{ $$ = $1; }
+	: block	onl			/*%dprec 2*/		{ $$ = $1; }
+	| statement			/*%dprec 1*/		{ $$ = $1; }
 ;
 
 /* a statement */
 statement
-	: ";" nl								{ $$ = N(ExprStmt)(LP, NULL); }
-	| ";"									{ $$ = N(ExprStmt)(LP, NULL); }
-	| expr_with_comma snl					{ $$ = N(ExprStmt)(LP, $1); }
+	: ";" nl								{ $$ = N(ExprStmt)(@1.first, NULL); }
+	| ";"									{ $$ = N(ExprStmt)(@1.first, NULL); }
+	| expr_with_comma snl					{ $$ = N(ExprStmt)(@1.first, $1); }
 	| if
 	| while
 	| do_while
 	| for
 	| break
 	| continue
-	| "debugger" snl						{ $$ = N(Debugger)(LP); }
+	| "debugger" snl						{ $$ = N(Debugger)(@1.first); }
 	| return
 	| switch
 	| with
@@ -453,7 +474,7 @@ statement
 while
 	: "while" onl
 	  "(" onl expr onl ")" onl
-	  block_or_statement					{ $$ = N(While)(LP, $5, $9, false); }
+	  block_or_statement					{ $$ = N(While)(@1.first, $5, $9, false); }
 ;
 
 /* a do-while loop */
@@ -462,7 +483,7 @@ do_while
 	  block_or_statement
 	  "while" onl
 	  "(" onl expr onl ")"
-	  snl									{ $$ = N(While)(LP, $8, $3, true); }
+	  snl									{ $$ = N(While)(@1.first, $8, $3, true); }
 ;
 
 /* a for loop */
@@ -471,7 +492,7 @@ for
 	  for_first_clause  ";"
 	  for_second_clause ";" 
 	  for_third_clause  ")" onl
-	  block_or_statement					{ $$ = N(For)(LP, $4, $6, $8, $11); }
+	  block_or_statement					{ $$ = N(For)(@1.first, $4, $6, $8, $11); }
 ;
 
 
@@ -502,7 +523,7 @@ for_third_clause
 switch
 	: "switch" onl "(" onl
 	  expr_with_comma onl ")" onl
-	  block	onl								{ $$ = N(Switch)(LP, $5, $9); }
+	  block	onl								{ $$ = N(Switch)(@1.first, $5, $9); }
 ;
 
 /* an if statement */
@@ -510,42 +531,42 @@ if
 	: "if" onl "(" 
 	  expr_with_comma onl
 	  ")" onl block_or_statement
-	  							%dprec 2	{ $$ = N(If)(LP, $4, $8); }
+	  							/*%dprec 2*/	{ $$ = N(If)(@1.first, $4, $8); }
 	| "if" onl "(" 
 	  expr_with_comma onl
 	  ")" onl block_or_statement
 	   "else" onl
-	  block_or_statement		%dprec 1	{ $$ = N(If)(LP, $4, $8); C(If, $$)->SetFalse($11); }
+	  block_or_statement		/*%dprec 1*/	{ $$ = N(If)(@1.first, $4, $8); C(If, $$)->SetFalse($11); }
 /* この規則は とシフト・還元競合を起こす */
 
 /* a break statement */
 break
-	: "break" snl							{ $$ = N(Break)(LP, NULL); }
-	| "break" expr_with_comma snl			{ $$ = N(Break)(LP, $2); }
+	: "break" snl							{ $$ = N(Break)(@1.first, NULL); }
+	| "break" expr_with_comma snl			{ $$ = N(Break)(@1.first, $2); }
 ;
 
 /* a continue statment */
 continue
-	: "continue" snl						{ $$ = N(Continue)(LP, NULL); }
-	| "continue" expr_with_comma snl		{ $$ = N(Continue)(LP, $2); }
+	: "continue" snl						{ $$ = N(Continue)(@1.first, NULL); }
+	| "continue" expr_with_comma snl		{ $$ = N(Continue)(@1.first, $2); }
 ;
 
 /* a return statement */
 return
-	: "return" snl							{ $$ = N(Return)(LP, NULL); }
-	| "return" expr_with_comma snl			{ $$ = N(Return)(LP, $2); }
+	: "return" snl							{ $$ = N(Return)(@1.first, NULL); }
+	| "return" expr_with_comma snl			{ $$ = N(Return)(@1.first, $2); }
 ;
 
 /* label or case: */
 label
-	: "case" onl expr ":" onl	 			{ $$ = N(Case)(LP, $3); }
-	| "default" onl  ":" onl	 			{ $$ = N(Case)(LP, NULL); }
-	| T_ID ":" onl	 						{ $$ = N(Label)(LP, *$1); }
+	: "case" onl expr ":" onl	 			{ $$ = N(Case)(@1.first, $3); }
+	| "default" onl  ":" onl	 			{ $$ = N(Case)(@1.first, NULL); }
+	| T_ID ":" onl	 						{ $$ = N(Label)(@1.first, *$1); }
 ;
 
 /* goto */
 goto
-	: "goto" onl T_ID snl					{ $$ = N(Goto)(LP, *$3); }
+	: "goto" onl T_ID snl					{ $$ = N(Goto)(@1.first, *$3); }
 ;
 
 /*---------------------------------------------------------------------------
@@ -556,7 +577,7 @@ goto
 with
 	: "with" onl "(" onl
 	  expr_with_comma onl ")" onl
-	  block_or_statement					{ $$ = N(With)(LP, $5, $9); }
+	  block_or_statement					{ $$ = N(With)(@1.first, $5, $9); }
 ;
 
 
@@ -585,14 +606,14 @@ variable_def_no_semicolon
 
 /* list for the variable definition */
 variable_id_list
-	: variable_id							{ $$ = N(VarDecl)(LP); C(VarDecl, $$)->AddChild($1); }
+	: variable_id							{ $$ = N(VarDecl)(@1.first); C(VarDecl, $$)->AddChild($1); }
 	| variable_id_list "," onl variable_id	{ $$ = $1;             C(VarDecl, $$)->AddChild($4); }
 ;
 
 /* a variable id and an optional initializer expression */
 variable_id
-	: access_expr							{ $$ = N(VarDeclPair)(LP, $1, NULL); }
-	| access_expr "=" onl expr				{ $$ = N(VarDeclPair)(LP, $1, $4); }
+	: access_expr							{ $$ = N(VarDeclPair)(@1.first, $1, NULL); }
+	| access_expr "=" onl expr				{ $$ = N(VarDeclPair)(@1.first, $1, $4); }
 ;
 
 /*---------------------------------------------------------------------------
@@ -604,41 +625,39 @@ variable_id
 
 try
 	: "try" onl block_or_statement
-	  catch_list								{ $$ = $4; C(Try, $$)->SetBody($3); }
+	  catch_list								{ $$ = $4; C(Try, $$)->SetBody($3); $$->SetPosition(@1.first); }
 	| "try" onl block_or_statement
 	  catch_list "finally" onl block_or_statement
 												{ $$ = $4; C(Try, $$)->SetBody($3);
-												  C(Try, $$)->SetFinally($7); }
+												  C(Try, $$)->SetFinally($7); $$->SetPosition(@1.first); }
 	| "try" onl block_or_statement
-	  "finally" onl block_or_statement			{ $$ = N(Try)(LP); C(Try, $$)->SetBody($3);
-												  C(Try, $$)->SetFinally($6);}
+	  "finally" onl block_or_statement			{ $$ = N(Try)(@1.first); C(Try, $$)->SetBody($3);
+												  C(Try, $$)->SetFinally($6);  $$->SetPosition(@1.first); }
 	/* この構文はシフト・還元競合を２つ起こす */
-	/* あえて %dprec は指定しない。解決が難しいような形で入力文を記述すると
-	   parser が自動的に文法エラーにする */
 
 catch_list
-	: catch 									{ $$ = N(Try)(LP); C(Try, $$)->AddChild($1); }
+	: catch 									{ $$ = N(Try)(@1.first); C(Try, $$)->AddChild($1); }
 	| catch_list catch							{ $$ = $1; C(Try, $1)->AddChild($2); }
 ;
 
 catch
 	: "catch" onl "(" onl ")" onl
 	  block_or_statement 						{ $$ = N(Catch)(
-												  		LP, tRisseString::GetEmptyString(), NULL, $7); }
+												  		@1.first, tRisseString::GetEmptyString(), NULL, $7); }
 	| "catch" onl "(" onl T_ID onl ")" onl
-	  block_or_statement 						{ $$ = N(Catch)(LP, *$5, NULL, $9); }
+	  block_or_statement 						{ $$ = N(Catch)(@1.first, *$5, NULL, $9); }
 	| "catch" onl "(" onl T_ID onl "if" onl expr onl ")" onl
-	  block_or_statement						{ $$ = N(Catch)(LP, *$5, $9, $13); }
+	  block_or_statement						{ $$ = N(Catch)(@1.first, *$5, $9, $13); }
 	| "catch" onl "(" onl "if" onl expr onl ")" onl
 	  block_or_statement 						{ $$ = N(Catch)(
-												  		LP, tRisseString::GetEmptyString(), $7, $11); }
+												  		@1.first, tRisseString::GetEmptyString(), $7, $11); }
 ;
 
 
 /* a throw statement */
 throw
-	: "throw" expr_with_comma snl				{ $$ = N(Throw)(LP, $2); }
-	| "throw" snl								{ $$ = N(Throw)(LP, NULL); }
+	: "throw" expr_with_comma snl				{ $$ = N(Throw)(@1.first, $2); }
+	| "throw" snl								{ $$ = N(Throw)(@1.first, NULL); }
 ;
 
 /*---------------------------------------------------------------------------
@@ -657,10 +676,10 @@ func_def
 
 func_def_inner
 	: "function" onl decl_name_expr onl func_decl_arg
-	  block	onl					%dprec 2	{ $$ = $5; C(FuncDecl, $$)->SetName($3);
-	  										  C(FuncDecl, $$)->SetBody($6); }
+	  block	onl					/*%dprec 2*/{ $$ = $5; C(FuncDecl, $$)->SetName($3);
+	  										  C(FuncDecl, $$)->SetBody($6);  $$->SetPosition(@1.first); }
 	| "function" onl decl_name_expr onl
-	  block	onl					%dprec 1	{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->SetName($3);
+	  block	onl					/*%dprec 1*/{ $$ = N(FuncDecl)(@1.first); C(FuncDecl, $$)->SetName($3);
 	  										  C(FuncDecl, $$)->SetBody($5); }
 ;
 
@@ -675,10 +694,10 @@ func_expr_def
 
 func_expr_def_inner
 	: "function"
-	  onl block								{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->SetBody($3); }
+	  onl block								{ $$ = N(FuncDecl)(@1.first); C(FuncDecl, $$)->SetBody($3); }
 	| "function"
 	  onl func_decl_arg
-	  block									{ $$ = $3; C(FuncDecl, $$)->SetBody($4); }
+	  block									{ $$ = $3; C(FuncDecl, $$)->SetBody($4);  $$->SetPosition(@1.first); }
 ;
 
 /* the argument definition of a function definition */
@@ -695,24 +714,24 @@ func_decl_arg
 
 /* the argument list */
 func_decl_arg_list
-	: onl 									{ $$ = N(FuncDecl)(LP); }
+	: onl 									{ $$ = N(FuncDecl)(@1.first); }
 	| func_decl_arg_at_least_one
 ;
 
 func_decl_arg_at_least_one
-	: func_decl_arg_elm						{ $$ = N(FuncDecl)(LP); C(FuncDecl, $$)->AddChild($1); }
+	: func_decl_arg_elm						{ $$ = N(FuncDecl)(@1.first); C(FuncDecl, $$)->AddChild($1); }
 	| func_decl_arg_at_least_one ","
 	  func_decl_arg_elm						{ $$ =$1; C(FuncDecl, $$)->AddChild($3); }
 ;
 
 func_decl_arg_elm
-	: onl T_ID onl							{ $$ = N(FuncDeclArg)(LP, *$2, NULL, false); }
-	| onl T_ID onl "=" onl expr				{ $$ = N(FuncDeclArg)(LP, *$2, $6, false); }
+	: onl T_ID onl							{ $$ = N(FuncDeclArg)(@2.first, *$2, NULL, false); }
+	| onl T_ID onl "=" onl expr				{ $$ = N(FuncDeclArg)(@2.first, *$2, $6, false); }
 ;
 
 func_decl_arg_elm_collapse
-	: onl "*" onl							{ $$ = N(FuncDeclArg)(LP, tRisseString::GetEmptyString(), NULL, true); }
-	| onl T_ID "*"	onl						{ $$ = N(FuncDeclArg)(LP, *$2, NULL, true); }
+	: onl "*" onl							{ $$ = N(FuncDeclArg)(@2.first, tRisseString::GetEmptyString(), NULL, true); }
+	| onl T_ID "*"	onl						{ $$ = N(FuncDeclArg)(@2.first, *$2, NULL, true); }
 /*
 	These are currently not supported
 	| T_ID "*" "=" inline_array			{ ; }
@@ -727,9 +746,9 @@ func_decl_block_list
 
 func_decl_block_at_least_one
 	: T_ID onl								{ $$ = new tRisseASTArray();
-											  $$->push_back(N(FuncDeclBlock)(LP, *$1)); }
+											  $$->push_back(N(FuncDeclBlock)(@1.first, *$1)); }
 	| func_decl_block_at_least_one T_ID onl	{ $$ = $1;
-											  $$->push_back(N(FuncDeclBlock)(LP, *$2)); }
+											  $$->push_back(N(FuncDeclBlock)(@2.first, *$2)); }
 ;
 
 
@@ -750,7 +769,7 @@ property_def_inner
 	: "property" onl decl_name_expr onl
 	  "{"
 	  property_handler_def_list
-	  "}"									{ $$ = $6; C(PropDecl, $$)->SetName($3); }
+	  "}"									{ $$ = $6; C(PropDecl, $$)->SetName($3);  $$->SetPosition(@1.first); }
 ;
 
 /* a property expression definition */
@@ -766,7 +785,7 @@ property_expr_def_inner
 	: "property" onl
 	  "{"
 	  property_handler_def_list
-	  "}"									{ $$ = $4; }
+	  "}"									{ $$ = $4;  $$->SetPosition(@1.first); }
 ;
 
 property_handler_def_list
@@ -786,14 +805,14 @@ property_handler_def_list
 
 property_handler_setter
 	: "setter" onl "(" onl T_ID onl ")"
-	  block									{ $$ = N(PropDecl)(LP);
+	  block									{ $$ = N(PropDecl)(@1.first);
 											  C(PropDecl, $$)->SetSetter($8);
 											  C(PropDecl, $$)->SetSetterArgumentName(*$5); }
 ;
 
 property_handler_getter
 	: property_getter_handler_head
-	  block									{ $$ = N(PropDecl)(LP);
+	  block									{ $$ = N(PropDecl)(@1.first);
 											  C(PropDecl, $$)->SetGetter($2); }
 ;
 
@@ -810,11 +829,11 @@ property_getter_handler_head
 class_module_def
 	: "class" onl decl_name_expr
 	  class_extender
-	  "{" onl toplevel_def_list "}"	onl	 	{ $$ = $4;
+	  "{" onl toplevel_def_list "}"	onl	 	{ $$ = $4;  $$->SetPosition(@1.first);
 											  C(ClassDecl, $$)->SetBody($7);
 											  C(ClassDecl, $$)->SetName($3); }
 	| "module" onl decl_name_expr onl
-	  "{" onl toplevel_def_list "}"	onl		{ $$ = N(ClassDecl)(LP, true, NULL);
+	  "{" onl toplevel_def_list "}"	onl		{ $$ = N(ClassDecl)(@1.first, true, NULL);
 											  C(ClassDecl, $$)->SetBody($7);
 											  C(ClassDecl, $$)->SetName($3); }
 ;
@@ -822,18 +841,18 @@ class_module_def
 class_module_expr_def
 	: "class"
 	  class_extender
-	  "{" onl toplevel_def_list "}"			{ $$ = $2;
+	  "{" onl toplevel_def_list "}"			{ $$ = $2;  $$->SetPosition(@1.first);
 											  C(ClassDecl, $$)->SetBody($5); }
 	| "module" onl
-	  "{" onl toplevel_def_list "}"			{ $$ = N(ClassDecl)(LP, true, NULL);
+	  "{" onl toplevel_def_list "}"			{ $$ = N(ClassDecl)(@1.first, true, NULL);
 											  C(ClassDecl, $$)->SetBody($5); }
 ;
 
 class_extender
-	: onl 									{ $$ = N(ClassDecl)(LP, false, NULL); }
-	| onl "extends" onl expr onl 			{ $$ = N(ClassDecl)(LP, false, $4); }
-	| onl "<" onl expr onl /* syntax sugar, Ruby like */	{ $$ = N(ClassDecl)(LP, false, $4); }
-	| onl ":" onl expr onl /* syntax sugar, C++ like */	{ $$ = N(ClassDecl)(LP, false, $4); }
+	: onl 									{ $$ = N(ClassDecl)(@1.first, false, NULL); }
+	| onl "extends" onl expr onl 			{ $$ = N(ClassDecl)(@2.first, false, $4); }
+	| onl "<" onl expr onl /* syntax sugar, Ruby like */	{ $$ = N(ClassDecl)(@2.first, false, $4); }
+	| onl ":" onl expr onl /* syntax sugar, C++ like */	{ $$ = N(ClassDecl)(@2.first, false, $4); }
 ;
 
 
@@ -858,7 +877,7 @@ definition
 
 decl_attr_list
 	: decl_attr								{ $$ = new tRisseDeclAttribute(*$1); }
-	| decl_attr_list decl_attr				{ $$ = RisseOverwriteDeclAttribute(PR, $1, $2); }
+	| decl_attr_list decl_attr				{ $$ = RisseOverwriteDeclAttribute(PR, @1.first, $1, $2); }
 ;
 
 decl_attr
@@ -1008,8 +1027,8 @@ member_name
 /* 式 */
 /* カンマとそれ以下の優先順位の式を含む場合はこちらを使う */
 expr_with_comma
-	: expr_with_comma "if" onl expr_with_comma	{ $$ = N(Binary)(LP, abtIf			,$4, $1);/*順番に注意*/ }
-	| expr_with_comma ","  onl expr_with_comma	{ $$ = N(Binary)(LP, abtComma		,$1, $4); }
+	: expr_with_comma "if" onl expr_with_comma	{ $$ = N(Binary)(@2.first, abtIf			,$4, $1);/*順番に注意*/ }
+	| expr_with_comma ","  onl expr_with_comma	{ $$ = N(Binary)(@2.first, abtComma		,$1, $4); }
 	| expr
 ;
 
@@ -1018,78 +1037,78 @@ expr_with_comma
 	区切り記号と区別が付かない場合はこちらを使う
 */
 expr
-	: expr "=" onl expr				{ $$ = N(Binary)(LP, abtAssign			,$1, $4); }
-	| expr "&=" onl expr			{ $$ = N(Binary)(LP, abtBitAndAssign	,$1, $4); }
-	| expr "|=" onl expr			{ $$ = N(Binary)(LP, abtBitOrAssign		,$1, $4); }
-	| expr "^=" onl expr			{ $$ = N(Binary)(LP, abtBitXorAssign	,$1, $4); }
-	| expr "-=" onl expr			{ $$ = N(Binary)(LP, abtSubAssign		,$1, $4); }
-	| expr "+=" onl expr			{ $$ = N(Binary)(LP, abtAddAssign		,$1, $4); }
-	| expr "%=" onl expr			{ $$ = N(Binary)(LP, abtModAssign		,$1, $4); }
-	| expr "/=" onl expr			{ $$ = N(Binary)(LP, abtDivAssign		,$1, $4); }
-	| expr "\\=" onl expr			{ $$ = N(Binary)(LP, abtIdivAssign		,$1, $4); }
-	| expr "*=" onl expr			{ $$ = N(Binary)(LP, abtMulAssign		,$1, $4); }
-	| expr "||=" onl expr			{ $$ = N(Binary)(LP, abtLogOrAssign		,$1, $4); }
-	| expr "&&=" onl expr			{ $$ = N(Binary)(LP, abtLogAndAssign	,$1, $4); }
-	| expr ">>=" onl expr			{ $$ = N(Binary)(LP, abtRShiftAssign	,$1, $4); }
-	| expr "<<=" onl expr			{ $$ = N(Binary)(LP, abtLShiftAssign	,$1, $4); }
-	| expr ">>>=" onl expr			{ $$ = N(Binary)(LP, abtRBitShiftAssign	,$1, $4); }
-	| expr "<->" onl expr			{ $$ = N(Binary)(LP, abtSwap			,$1, $4); }
-	| expr "?" onl expr onl ":" onl expr		{ $$ = N(Trinary)(LP, attCondition 		,$1, $4, $8); }
-	| expr "||" onl expr			{ $$ = N(Binary)(LP, abtLogOr			,$1, $4); }
-	| expr "&&" onl expr			{ $$ = N(Binary)(LP, abtLogAnd			,$1, $4); }
-	| expr "|" onl expr				{ $$ = N(Binary)(LP, abtBitOr			,$1, $4); }
-	| expr "^" onl expr				{ $$ = N(Binary)(LP, abtBitXor			,$1, $4); }
-	| expr "&" onl expr				{ $$ = N(Binary)(LP, abtBitAnd			,$1, $4); }
-	| expr "!=" onl expr			{ $$ = N(Binary)(LP, abtNotEqual		,$1, $4); }
-	| expr "==" onl expr			{ $$ = N(Binary)(LP, abtEqual			,$1, $4); }
-	| expr "!==" onl expr			{ $$ = N(Binary)(LP, abtDiscNotEqual	,$1, $4); }
-	| expr "===" onl expr			{ $$ = N(Binary)(LP, abtDiscEqual		,$1, $4); }
-	| expr "<" onl expr				{ $$ = N(Binary)(LP, abtLesser			,$1, $4); }
-	| expr ">" onl expr				{ $$ = N(Binary)(LP, abtGreater			,$1, $4); }
-	| expr "<=" onl expr			{ $$ = N(Binary)(LP, abtLesserOrEqual	,$1, $4); }
-	| expr ">=" onl expr			{ $$ = N(Binary)(LP, abtGreaterOrEqual	,$1, $4); }
-	| expr "instanceof" onl expr	{ $$ = N(Binary)(LP, abtInstanceOf		,$1, $4); }
-	| expr ">>" onl expr			{ $$ = N(Binary)(LP, abtLShift			,$1, $4); }
-	| expr "<<" onl expr			{ $$ = N(Binary)(LP, abtRShift			,$1, $4); }
-	| expr ">>>" onl expr			{ $$ = N(Binary)(LP, abtRBitShift		,$1, $4); }
-	| expr "+" onl expr				{ $$ = N(Binary)(LP, abtAdd				,$1, $4); }
-	| expr "-" onl expr				{ $$ = N(Binary)(LP, abtSub				,$1, $4); }
-	| expr "%" onl expr				{ $$ = N(Binary)(LP, abtMod				,$1, $4); }
-	| expr "/" onl expr				{ $$ = N(Binary)(LP, abtDiv				,$1, $4); }
-	| expr "\\" onl expr			{ $$ = N(Binary)(LP, abtIdiv			,$1, $4); }
-	| expr "*" onl expr				{ $$ = N(Binary)(LP, abtMul				,$1, $4); }
-	| "!" onl expr					{ $$ = N(Unary)(LP, autLogNot			,$3); }
-	| "~" onl expr					{ $$ = N(Unary)(LP, autBitNot			,$3); }
-	| "--" onl expr					{ $$ = N(Unary)(LP, autPreDec			,$3); }
-	| "++" onl expr					{ $$ = N(Unary)(LP, autPreInc			,$3); }
+	: expr "=" onl expr				{ $$ = N(Binary)(@2.first, abtAssign			,$1, $4); }
+	| expr "&=" onl expr			{ $$ = N(Binary)(@2.first, abtBitAndAssign	,$1, $4); }
+	| expr "|=" onl expr			{ $$ = N(Binary)(@2.first, abtBitOrAssign		,$1, $4); }
+	| expr "^=" onl expr			{ $$ = N(Binary)(@2.first, abtBitXorAssign	,$1, $4); }
+	| expr "-=" onl expr			{ $$ = N(Binary)(@2.first, abtSubAssign		,$1, $4); }
+	| expr "+=" onl expr			{ $$ = N(Binary)(@2.first, abtAddAssign		,$1, $4); }
+	| expr "%=" onl expr			{ $$ = N(Binary)(@2.first, abtModAssign		,$1, $4); }
+	| expr "/=" onl expr			{ $$ = N(Binary)(@2.first, abtDivAssign		,$1, $4); }
+	| expr "\\=" onl expr			{ $$ = N(Binary)(@2.first, abtIdivAssign		,$1, $4); }
+	| expr "*=" onl expr			{ $$ = N(Binary)(@2.first, abtMulAssign		,$1, $4); }
+	| expr "||=" onl expr			{ $$ = N(Binary)(@2.first, abtLogOrAssign		,$1, $4); }
+	| expr "&&=" onl expr			{ $$ = N(Binary)(@2.first, abtLogAndAssign	,$1, $4); }
+	| expr ">>=" onl expr			{ $$ = N(Binary)(@2.first, abtRShiftAssign	,$1, $4); }
+	| expr "<<=" onl expr			{ $$ = N(Binary)(@2.first, abtLShiftAssign	,$1, $4); }
+	| expr ">>>=" onl expr			{ $$ = N(Binary)(@2.first, abtRBitShiftAssign	,$1, $4); }
+	| expr "<->" onl expr			{ $$ = N(Binary)(@2.first, abtSwap			,$1, $4); }
+	| expr "?" onl expr onl ":" onl expr		{ $$ = N(Trinary)(@2.first, attCondition 		,$1, $4, $8); }
+	| expr "||" onl expr			{ $$ = N(Binary)(@2.first, abtLogOr			,$1, $4); }
+	| expr "&&" onl expr			{ $$ = N(Binary)(@2.first, abtLogAnd			,$1, $4); }
+	| expr "|" onl expr				{ $$ = N(Binary)(@2.first, abtBitOr			,$1, $4); }
+	| expr "^" onl expr				{ $$ = N(Binary)(@2.first, abtBitXor			,$1, $4); }
+	| expr "&" onl expr				{ $$ = N(Binary)(@2.first, abtBitAnd			,$1, $4); }
+	| expr "!=" onl expr			{ $$ = N(Binary)(@2.first, abtNotEqual		,$1, $4); }
+	| expr "==" onl expr			{ $$ = N(Binary)(@2.first, abtEqual			,$1, $4); }
+	| expr "!==" onl expr			{ $$ = N(Binary)(@2.first, abtDiscNotEqual	,$1, $4); }
+	| expr "===" onl expr			{ $$ = N(Binary)(@2.first, abtDiscEqual		,$1, $4); }
+	| expr "<" onl expr				{ $$ = N(Binary)(@2.first, abtLesser			,$1, $4); }
+	| expr ">" onl expr				{ $$ = N(Binary)(@2.first, abtGreater			,$1, $4); }
+	| expr "<=" onl expr			{ $$ = N(Binary)(@2.first, abtLesserOrEqual	,$1, $4); }
+	| expr ">=" onl expr			{ $$ = N(Binary)(@2.first, abtGreaterOrEqual	,$1, $4); }
+	| expr "instanceof" onl expr	{ $$ = N(Binary)(@2.first, abtInstanceOf		,$1, $4); }
+	| expr ">>" onl expr			{ $$ = N(Binary)(@2.first, abtLShift			,$1, $4); }
+	| expr "<<" onl expr			{ $$ = N(Binary)(@2.first, abtRShift			,$1, $4); }
+	| expr ">>>" onl expr			{ $$ = N(Binary)(@2.first, abtRBitShift		,$1, $4); }
+	| expr "+" onl expr				{ $$ = N(Binary)(@2.first, abtAdd				,$1, $4); }
+	| expr "-" onl expr				{ $$ = N(Binary)(@2.first, abtSub				,$1, $4); }
+	| expr "%" onl expr				{ $$ = N(Binary)(@2.first, abtMod				,$1, $4); }
+	| expr "/" onl expr				{ $$ = N(Binary)(@2.first, abtDiv				,$1, $4); }
+	| expr "\\" onl expr			{ $$ = N(Binary)(@2.first, abtIdiv			,$1, $4); }
+	| expr "*" onl expr				{ $$ = N(Binary)(@2.first, abtMul				,$1, $4); }
+	| "!" onl expr					{ $$ = N(Unary)(@2.first, autLogNot			,$3); }
+	| "~" onl expr					{ $$ = N(Unary)(@2.first, autBitNot			,$3); }
+	| "--" onl expr					{ $$ = N(Unary)(@2.first, autPreDec			,$3); }
+	| "++" onl expr					{ $$ = N(Unary)(@2.first, autPreInc			,$3); }
 	| "new" onl expr				{ $$ = $3;
 									  /* new の子ノードは必ず関数呼び出し式である必要がある */
 									  if($$->GetType() != antFuncCall)
-									  { yyerror(PR, "expected func_call_expr after new");
+									  { yyerror(&@$, PR, "expected func_call_expr after new");
 											    YYERROR; }
 									  C(FuncCall, $$)->SetCreateNew(); }
-	| "delete" onl expr				{ $$ = N(Unary)(LP, autDelete			,$3); }
+	| "delete" onl expr				{ $$ = N(Unary)(@1.first, autDelete			,$3); }
 	| "typeof" onl expr				{ ; }
-	| "+" onl expr %prec T_UNARY	{ $$ = N(Unary)(LP, autPlus				,$3); }
-	| "-" onl expr %prec T_UNARY	{ $$ = N(Unary)(LP, autMinus			,$3); }
-	| expr "incontextof" onl expr		{ $$ = N(InContextOf)(LP,  $1, $4  ); }
-	| expr "incontextof" onl "dynamic"	{ $$ = N(InContextOf)(LP,  $1, NULL); }
-	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostDec			,$1); }
-	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(LP, autPostInc			,$1); }
+	| "+" onl expr %prec T_UNARY	{ $$ = N(Unary)(@1.first, autPlus				,$3); }
+	| "-" onl expr %prec T_UNARY	{ $$ = N(Unary)(@1.first, autMinus			,$3); }
+	| expr "incontextof" onl expr		{ $$ = N(InContextOf)(@2.first,  $1, $4  ); }
+	| expr "incontextof" onl "dynamic"	{ $$ = N(InContextOf)(@2.first,  $1, NULL); }
+	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(@2.first, autPostDec			,$1); }
+	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(@2.first, autPostInc			,$1); }
 	| access_expr
 ;
 
 access_expr
 	: access_expr "[" onl expr onl "]"
-									{ $$ = N(MemberSel)(LP, $1, $4, matIndirect); }
+									{ $$ = N(MemberSel)(@2.first, $1, $4, matIndirect); }
 	| access_expr "." onl member_name
-									{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$4), matDirect); }
+									{ $$ = N(MemberSel)(@2.first, $1, N(Factor)(@4.first, aftConstant, *$4), matDirect); }
 	| access_expr "." onl "(" onl expr onl ")"
-									{ $$ = N(MemberSel)(LP, $1, $6, matDirect); }
+									{ $$ = N(MemberSel)(@2.first, $1, $6, matDirect); }
 	| access_expr "::" onl member_name
-									{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$4), matDirectThis); }
+									{ $$ = N(MemberSel)(@2.first, $1, N(Factor)(@4.first, aftConstant, *$4), matDirectThis); }
 	| access_expr "::" onl "(" onl expr onl ")"
-									{ $$ = N(MemberSel)(LP, $1, $6, matDirectThis); }
+									{ $$ = N(MemberSel)(@2.first, $1, $6, matDirectThis); }
 	| "(" onl expr_with_comma onl ")"
 									{ $$ = $3; }
 	| func_call_expr
@@ -1101,42 +1120,38 @@ access_expr
 
 
 factor
-	: T_ID							{ $$ = N(Id)(LP, *$1, false); }
-	| "@" T_ID						{ $$ = N(Id)(LP, *$2, true);  }
+	: T_ID							{ $$ = N(Id)(@1.first, *$1, false); }
+	| "@" T_ID						{ $$ = N(Id)(@2.first, *$2, true);  }
 	| inline_array
 	| inline_dic
 	| "/="							{ LX->SetNextIsRegularExpression(); }
 	  regexp						{ $$ = $3; }
 	| "/"							{ LX->SetNextIsRegularExpression(); }
 	  regexp						{ $$ = $3; }
-	| "this"						{ $$ = N(Factor)(LP, aftThis);  }
-	| "super"						{ $$ = N(Factor)(LP, aftSuper);  }
-	| T_CONSTVAL					{ $$ = N(Factor)(LP, aftConstant, *$1); }
-	| "global"						{ $$ = N(Factor)(LP, aftGlobal); }
+	| "this"						{ $$ = N(Factor)(@1.first, aftThis);  }
+	| "super"						{ $$ = N(Factor)(@1.first, aftSuper);  }
+	| T_CONSTVAL					{ $$ = N(Factor)(@1.first, aftConstant, *$1); }
+	| "global"						{ $$ = N(Factor)(@1.first, aftGlobal); }
 	| embeddable_string
 ;
 
 
 /*
   function XXX () { } や class XXXX {  } の XXXX の部分に相当する場所に
-  記述する式。とくに function においては、ここに普通の式を記述できるようにしてしまうと
-  reduce/reduce 競合による parser stack の使い果たしで簡単に memory exhausted に
-  なってしまうため、そのような記述はできなくする必要がある。
-  ここの記述はある程度上記の記述と重複する。
+  記述する式。  ここの記述はある程度上記の記述と重複する。
 */
 decl_name_expr
 	: decl_name_expr "[" onl expr onl "]"
-										{ $$ = N(MemberSel)(LP, $1, $4, matIndirect); }
+									{ $$ = N(MemberSel)(@2.first, $1, $4, matIndirect); }
 	| decl_name_expr "." onl member_name
-										{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$4), matDirect); }
+									{ $$ = N(MemberSel)(@2.first, $1, N(Factor)(@4.first, aftConstant, *$4), matDirect); }
 	| decl_name_expr "." onl "(" onl expr onl ")"
-										{ $$ = N(MemberSel)(LP, $1, $6, matDirect); }
+									{ $$ = N(MemberSel)(@2.first, $1, $6, matDirect); }
 	| decl_name_expr "::" onl member_name
-										{ $$ = N(MemberSel)(LP, $1, N(Factor)(LP, aftConstant, *$4), matDirectThis); }
+									{ $$ = N(MemberSel)(@2.first, $1, N(Factor)(@4.first, aftConstant, *$4), matDirectThis); }
 	| decl_name_expr "::" onl "(" onl expr onl ")"
-										{ $$ = N(MemberSel)(LP, $1, $6, matDirectThis); }
-/*	| "(" onl expr_with_comma onl ")"		{ $$ = $3; } */
-	| factor							{ $$ = $1; }
+									{ $$ = N(MemberSel)(@2.first, $1, $6, matDirectThis); }
+	| factor						{ $$ = $1; }
 ;
 
 
@@ -1148,24 +1163,25 @@ func_call_expr
 
 func_call_expr_body
 	: access_expr "(" call_arg_list ")"
-							%dprec 1	{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
-	| access_expr "(" onl "..." onl ")"	{ $$ = N(FuncCall)(LP, true);  C(FuncCall, $$)->SetExpression($1); }
-	| access_expr "(" onl ")"	%dprec 2{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->SetExpression($1); }
+						/*%dprec 1*/	{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
+	| access_expr "(" onl "..." onl ")"	{ $$ = N(FuncCall)(@2.first, true);  C(FuncCall, $$)->SetExpression($1); }
+	| access_expr "(" onl ")"
+						/*%dprec 2*/	{ $$ = N(FuncCall)(@2.first, false); C(FuncCall, $$)->SetExpression($1); }
 		/* このルールは "(" と ")" の間で下記の 「call_arg が empty」 のルールと
 		  シフト・還元競合を起こす(こちらが優先される) */
 ;
 
 /* argument(s) for function call */
 call_arg_list
-	: call_arg 							{ $$ = N(FuncCall)(LP, false); C(FuncCall, $$)->AddChild($1); }
+	: call_arg 							{ $$ = N(FuncCall)(@1.first, false); C(FuncCall, $$)->AddChild($1); }
 	| call_arg_list "," call_arg		{ C(FuncCall, $1)->AddChild($3); }
 ;
 
 call_arg
 	: onl								{ $$ = NULL; }
-	| onl "*" onl						{ $$ = N(FuncCallArg)(LP, NULL, true); }
-	| onl expr "*" onl					{ $$ = N(FuncCallArg)(LP, $2, true); }
-	| onl expr onl						{ $$ = N(FuncCallArg)(LP, $2, false); }
+	| onl "*" onl						{ $$ = N(FuncCallArg)(@2.first, NULL, true); }
+	| onl expr "*" onl					{ $$ = N(FuncCallArg)(@2.first, $2, true); }
+	| onl expr onl						{ $$ = N(FuncCallArg)(@2.first, $2, false); }
 ;
 
 /* block argument(s) for function call */
@@ -1185,19 +1201,19 @@ call_block
 	  def_list "}"						{ $$ = $2;
 										  C(FuncDecl, $$)->SetBody($3);
 										  C(FuncDecl, $$)->SetIsBlock(true);
-										  C(Context, $3)->SetEndPosition(LP); }
+										  C(Context, $3)->SetEndPosition(@$.last); }
 	| func_expr_def						{ $$ = $1; }
 ;
 
 call_block_arg_opt
-	: onl								{ $$ = N(FuncDecl)(LP); }
+	: onl								{ $$ = N(FuncDecl)(@1.first); }
 	| onl "|" func_decl_arg_at_least_one
 	  "|" onl							{ $$ = $3; }
 ;
 
 /* regular expression */
 regexp
-	: T_REGEXP T_REGEXP_FLAGS			{ $$ = N(RegExp)(LP, *$1, *$2); }
+	: T_REGEXP T_REGEXP_FLAGS			{ $$ = N(RegExp)(@1.first, *$1, *$2); }
 ;
 
 /*---------------------------------------------------------------------------
@@ -1213,7 +1229,7 @@ inline_array
 
 /* an inline array's element list */
 array_elm_list
-	: array_elm							{ $$ = N(Array)(LP); if($1) C(Array, $$)->AddChild($1); }
+	: array_elm							{ $$ = N(Array)(@1.first); if($1) C(Array, $$)->AddChild($1); }
 	| array_elm_list "," array_elm		{ $$ = $1; C(Array, $$)->AddChild($3); }
 ;
 
@@ -1225,27 +1241,24 @@ array_elm
 
 /* an inline dictionary */
 inline_dic
-	: inline_dic_start
+	: "%" "["
 	  dic_elm_list
 	  dummy_elm_opt
-	  inline_dic_end					{ $$ = $2; }
+	  "]"								{ $$ = $2; }
 ;
-
-inline_dic_start: "{" ;
-inline_dic_end  : "}" ;
 
 /* an inline dictionary's element list */
 dic_elm_list
-    : onl								{ $$ = N(Dict)(LP); }
-	| dic_elm 							{ $$ = N(Dict)(LP); C(Dict, $$)->AddChild($1); }
+    : onl								{ $$ = N(Dict)(@1.first); }
+	| dic_elm 							{ $$ = N(Dict)(@1.first); C(Dict, $$)->AddChild($1); }
 	| dic_elm_list "," dic_elm			{ $$ = $1; C(Dict, $$)->AddChild($3); }
 ;
 
 /* an inline dictionary's element */
 dic_elm
-	: onl expr onl "=>" onl expr onl	{ $$ = N(DictPair)(LP, $2, $6); }
-	| onl T_ID  ":"  onl expr onl		{ $$ = N(DictPair)(LP,
-										  N(Factor)(LP, aftConstant, *$2), $5); }
+	: onl expr onl "=>" onl expr onl	{ $$ = N(DictPair)(@2.first, $2, $6); }
+	| onl T_ID  ":"  onl expr onl		{ $$ = N(DictPair)(@2.first,
+										  N(Factor)(@2.first, aftConstant, *$2), $5); }
 	/* 注意   T_ID の後の改行は許されない */
 ;
 
@@ -1279,33 +1292,33 @@ dummy_elm_opt
    (&式; 形式についても同様)。Lexer はこれを受け、再び文字列リテラルの解析モードに入る。
 */
 embeddable_string
-	: embeddable_string_d T_CONSTVAL { $$ = RisseAddExprConstStr(LP, $1, *$2); }
-	| embeddable_string_s T_CONSTVAL { $$ = RisseAddExprConstStr(LP, $1, *$2); }
+	: embeddable_string_d T_CONSTVAL { $$ = RisseAddExprConstStr(@1.first, $1, *$2); }
+	| embeddable_string_s T_CONSTVAL { $$ = RisseAddExprConstStr(@1.first, $1, *$2); }
 ;
 
 /* 埋め込み可能な文字列リテラル(ダブルクオーテーション) */
 embeddable_string_d
 	: embeddable_string_d_unit
-	| embeddable_string_d embeddable_string_d_unit	{ $$ = N(Binary)(LP, abtAdd, $1, $2); }
+	| embeddable_string_d embeddable_string_d_unit	{ $$ = N(Binary)(@1.first, abtAdd, $1, $2); }
 ;
 
 embeddable_string_d_unit
-	: T_EMSTRING_AMPERSAND_D expr_with_comma ";" { $$ = RisseAddExprConstStr(LP, *$1, $2);
+	: T_EMSTRING_AMPERSAND_D expr_with_comma ";" { $$ = RisseAddExprConstStr(@1.first, *$1, $2);
 													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
-	| T_EMSTRING_DOLLAR_D    expr_with_comma "}" { $$ = RisseAddExprConstStr(LP, *$1, $2);
+	| T_EMSTRING_DOLLAR_D    expr_with_comma "}" { $$ = RisseAddExprConstStr(@1.first, *$1, $2);
 													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
 ;
 
 /* 埋め込み可能な文字列リテラル(シングルクオーテーション) */
 embeddable_string_s
 	: embeddable_string_s_unit
-	| embeddable_string_s embeddable_string_s_unit	{ $$ = N(Binary)(LP, abtAdd, $1, $2); }
+	| embeddable_string_s embeddable_string_s_unit	{ $$ = N(Binary)(@1.first, abtAdd, $1, $2); }
 ;
 
 embeddable_string_s_unit
-	: T_EMSTRING_AMPERSAND_S expr_with_comma ";" { $$ = RisseAddExprConstStr(LP, *$1, $2);
+	: T_EMSTRING_AMPERSAND_S expr_with_comma ";" { $$ = RisseAddExprConstStr(@1.first, *$1, $2);
 													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
-	| T_EMSTRING_DOLLAR_S    expr_with_comma "}" { $$ = RisseAddExprConstStr(LP, *$1, $2);
+	| T_EMSTRING_DOLLAR_S    expr_with_comma "}" { $$ = RisseAddExprConstStr(@1.first, *$1, $2);
 													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
 ;
 
@@ -1324,10 +1337,12 @@ snl		: ";" |  nl | ";" nl ;
 %%
 
 //---------------------------------------------------------------------------
-int yylex(YYSTYPE * value, void *pr)
+int yylex(YYSTYPE * value, YYLTYPE * llocp, void *pr)
 {
 	value->value = new tRisseVariant();
 	int token = PR->GetToken(*(value->value));
+	llocp->first = LX->GetLastTokenStart();
+	llocp->last = LX->GetPosition();
 //	fprintf(stderr, "token : %d\n", token);
 	return token;
 }
@@ -1335,9 +1350,9 @@ int yylex(YYSTYPE * value, void *pr)
 
 
 //---------------------------------------------------------------------------
-int raise_yyerror(const char * msg, void *pr)
+int raise_yyerror(const char * msg, void *pr, YYLTYPE *loc)
 {
-	tRisseCompileExceptionClass::Throw(tRisseString(msg), PR->GetScriptBlock(), LP);
+	tRisseCompileExceptionClass::Throw(tRisseString(msg), PR->GetScriptBlock(), loc->first);
 	return 0;
 }
 //---------------------------------------------------------------------------

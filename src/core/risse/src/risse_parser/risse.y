@@ -1040,63 +1040,61 @@ expr_with_comma
 */
 expr
 	: expr "=" onl expr				{ $$ = N(Binary)(@2.first, abtAssign			,$1, $4); }
-	| expr "&=" onl expr			{ $$ = N(Binary)(@2.first, abtBitAndAssign	,$1, $4); }
+	| expr "&=" onl expr			{ $$ = N(Binary)(@2.first, abtBitAndAssign		,$1, $4); }
 	| expr "|=" onl expr			{ $$ = N(Binary)(@2.first, abtBitOrAssign		,$1, $4); }
-	| expr "^=" onl expr			{ $$ = N(Binary)(@2.first, abtBitXorAssign	,$1, $4); }
-	| expr "-=" onl expr			{ $$ = N(Binary)(@2.first, abtSubAssign		,$1, $4); }
-	| expr "+=" onl expr			{ $$ = N(Binary)(@2.first, abtAddAssign		,$1, $4); }
-	| expr "%=" onl expr			{ $$ = N(Binary)(@2.first, abtModAssign		,$1, $4); }
-	| expr "/=" onl expr			{ $$ = N(Binary)(@2.first, abtDivAssign		,$1, $4); }
+	| expr "^=" onl expr			{ $$ = N(Binary)(@2.first, abtBitXorAssign		,$1, $4); }
+	| expr "-=" onl expr			{ $$ = N(Binary)(@2.first, abtSubAssign			,$1, $4); }
+	| expr "+=" onl expr			{ $$ = N(Binary)(@2.first, abtAddAssign			,$1, $4); }
+	| expr "%=" onl expr			{ $$ = N(Binary)(@2.first, abtModAssign			,$1, $4); }
+	| expr "/=" onl expr			{ $$ = N(Binary)(@2.first, abtDivAssign			,$1, $4); }
 	| expr "\\=" onl expr			{ $$ = N(Binary)(@2.first, abtIdivAssign		,$1, $4); }
-	| expr "*=" onl expr			{ $$ = N(Binary)(@2.first, abtMulAssign		,$1, $4); }
+	| expr "*=" onl expr			{ $$ = N(Binary)(@2.first, abtMulAssign			,$1, $4); }
 	| expr "||=" onl expr			{ $$ = N(Binary)(@2.first, abtLogOrAssign		,$1, $4); }
-	| expr "&&=" onl expr			{ $$ = N(Binary)(@2.first, abtLogAndAssign	,$1, $4); }
-	| expr ">>=" onl expr			{ $$ = N(Binary)(@2.first, abtRShiftAssign	,$1, $4); }
-	| expr "<<=" onl expr			{ $$ = N(Binary)(@2.first, abtLShiftAssign	,$1, $4); }
+	| expr "&&=" onl expr			{ $$ = N(Binary)(@2.first, abtLogAndAssign		,$1, $4); }
+	| expr ">>=" onl expr			{ $$ = N(Binary)(@2.first, abtRShiftAssign		,$1, $4); }
+	| expr "<<=" onl expr			{ $$ = N(Binary)(@2.first, abtLShiftAssign		,$1, $4); }
 	| expr ">>>=" onl expr			{ $$ = N(Binary)(@2.first, abtRBitShiftAssign	,$1, $4); }
-	| expr "<->" onl expr			{ $$ = N(Binary)(@2.first, abtSwap			,$1, $4); }
-	| expr "?" onl expr onl ":" onl expr		{ $$ = N(Trinary)(@2.first, attCondition 		,$1, $4, $8); }
-	| expr "||" onl expr			{ $$ = N(Binary)(@2.first, abtLogOr			,$1, $4); }
+	| expr "<->" onl expr			{ $$ = N(Binary)(@2.first, abtSwap				,$1, $4); }
+	| expr "?" onl expr onl ":" onl expr		{ $$ = N(Trinary)(@2.first, attCondition ,$1, $4, $8); }
+	| expr "||" onl expr			{ $$ = N(Binary)(@2.first, abtLogOr				,$1, $4); }
 	| expr "&&" onl expr			{ $$ = N(Binary)(@2.first, abtLogAnd			,$1, $4); }
-	| expr "|" onl expr				{ $$ = N(Binary)(@2.first, abtBitOr			,$1, $4); }
+	| expr "|" onl expr				{ $$ = N(Binary)(@2.first, abtBitOr				,$1, $4); }
 	| expr "^" onl expr				{ $$ = N(Binary)(@2.first, abtBitXor			,$1, $4); }
 	| expr "&" onl expr				{ $$ = N(Binary)(@2.first, abtBitAnd			,$1, $4); }
-	| expr "!=" onl expr			{ $$ = N(Binary)(@2.first, abtNotEqual		,$1, $4); }
-	| expr "==" onl expr			{ $$ = N(Binary)(@2.first, abtEqual			,$1, $4); }
-	| expr "!==" onl expr			{ $$ = N(Binary)(@2.first, abtDiscNotEqual	,$1, $4); }
-	| expr "===" onl expr			{ $$ = N(Binary)(@2.first, abtDiscEqual		,$1, $4); }
+	| expr "!=" onl expr			{ $$ = N(Binary)(@2.first, abtNotEqual			,$1, $4); }
+	| expr "==" onl expr			{ $$ = N(Binary)(@2.first, abtEqual				,$1, $4); }
+	| expr "!==" onl expr			{ $$ = N(Binary)(@2.first, abtDiscNotEqual		,$1, $4); }
+	| expr "===" onl expr			{ $$ = N(Binary)(@2.first, abtDiscEqual			,$1, $4); }
 	| expr "<" onl expr				{ $$ = N(Binary)(@2.first, abtLesser			,$1, $4); }
 	| expr ">" onl expr				{ $$ = N(Binary)(@2.first, abtGreater			,$1, $4); }
-	| expr "<=" onl expr			{ $$ = N(Binary)(@2.first, abtLesserOrEqual	,$1, $4); }
+	| expr "<=" onl expr			{ $$ = N(Binary)(@2.first, abtLesserOrEqual		,$1, $4); }
 	| expr ">=" onl expr			{ $$ = N(Binary)(@2.first, abtGreaterOrEqual	,$1, $4); }
 	| expr "instanceof" onl expr	{ $$ = N(Binary)(@2.first, abtInstanceOf		,$1, $4); }
 	| expr ">>" onl expr			{ $$ = N(Binary)(@2.first, abtLShift			,$1, $4); }
 	| expr "<<" onl expr			{ $$ = N(Binary)(@2.first, abtRShift			,$1, $4); }
-	| expr ">>>" onl expr			{ $$ = N(Binary)(@2.first, abtRBitShift		,$1, $4); }
+	| expr ">>>" onl expr			{ $$ = N(Binary)(@2.first, abtRBitShift			,$1, $4); }
 	| expr "+" onl expr				{ $$ = N(Binary)(@2.first, abtAdd				,$1, $4); }
 	| expr "-" onl expr				{ $$ = N(Binary)(@2.first, abtSub				,$1, $4); }
 	| expr "%" onl expr				{ $$ = N(Binary)(@2.first, abtMod				,$1, $4); }
 	| expr "/" onl expr				{ $$ = N(Binary)(@2.first, abtDiv				,$1, $4); }
-	| expr "\\" onl expr			{ $$ = N(Binary)(@2.first, abtIdiv			,$1, $4); }
+	| expr "\\" onl expr			{ $$ = N(Binary)(@2.first, abtIdiv				,$1, $4); }
 	| expr "*" onl expr				{ $$ = N(Binary)(@2.first, abtMul				,$1, $4); }
-	| "!" onl expr					{ $$ = N(Unary)(@2.first, autLogNot			,$3); }
-	| "~" onl expr					{ $$ = N(Unary)(@2.first, autBitNot			,$3); }
-	| "--" onl expr					{ $$ = N(Unary)(@2.first, autPreDec			,$3); }
-	| "++" onl expr					{ $$ = N(Unary)(@2.first, autPreInc			,$3); }
-	| "new" onl expr				{ $$ = $3;
+	| "!" onl expr					{ $$ = N(Unary)(@2.first, autLogNot				,$3); }
+	| "~" onl expr					{ $$ = N(Unary)(@2.first, autBitNot				,$3); }
+	| "--" onl expr					{ $$ = N(Unary)(@2.first, autPreDec				,$3); }
+	| "++" onl expr					{ $$ = N(Unary)(@2.first, autPreInc				,$3); }
+	| "new" onl func_call_expr		{ $$ = $3;
 									  /* new の子ノードは必ず関数呼び出し式である必要がある */
-									  if($$->GetType() != antFuncCall)
-									  { yyerror(&@$, PR, "expected func_call_expr after new");
-											    YYERROR; }
+									  RISSE_ASSERT($$->GetType() == antFuncCall);
 									  C(FuncCall, $$)->SetCreateNew(); }
 	| "delete" onl expr				{ $$ = N(Unary)(@1.first, autDelete			,$3); }
 	| "typeof" onl expr				{ ; }
-	| "+" onl expr %prec T_UNARY	{ $$ = N(Unary)(@1.first, autPlus				,$3); }
+	| "+" onl expr %prec T_UNARY	{ $$ = N(Unary)(@1.first, autPlus			,$3); }
 	| "-" onl expr %prec T_UNARY	{ $$ = N(Unary)(@1.first, autMinus			,$3); }
 	| expr "incontextof" onl expr		{ $$ = N(InContextOf)(@2.first,  $1, $4  ); }
 	| expr "incontextof" onl "dynamic"	{ $$ = N(InContextOf)(@2.first,  $1, NULL); }
-	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(@2.first, autPostDec			,$1); }
-	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(@2.first, autPostInc			,$1); }
+	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(@2.first, autPostDec		,$1); }
+	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(@2.first, autPostInc		,$1); }
 	| access_expr
 ;
 

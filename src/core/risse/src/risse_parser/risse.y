@@ -431,10 +431,10 @@ def_list
 	という入力文が、 {} が 辞書配列なのか ブロックなのか分からないという理由で文法エラーになる。
 */
 block
-	: "{" 
+	: "{" 									{ LX->CheckBlockAfterFunctionCall(); }
 	  onl
 	  def_list
-	  "}"									{ $$ = $3; C(Context, $$)->SetEndPosition(@$.last); }
+	  "}"									{ $$ = $4; C(Context, $$)->SetEndPosition(@$.last); }
 ;
 
 
@@ -769,7 +769,8 @@ property_def_inner
 	: "property" onl decl_name_expr onl
 	  "{"
 	  property_handler_def_list
-	  "}"									{ $$ = $6; C(PropDecl, $$)->SetName($3);  $$->SetPosition(@1.first); }
+	  ";" "}"/* "}" の前のセミコロンに注意 */
+	  										{ $$ = $6; C(PropDecl, $$)->SetName($3);  $$->SetPosition(@1.first); }
 ;
 
 /* a property expression definition */
@@ -785,7 +786,8 @@ property_expr_def_inner
 	: "property" onl
 	  "{"
 	  property_handler_def_list
-	  "}"									{ $$ = $4;  $$->SetPosition(@1.first); }
+	  ";" "}"/* "}" の前のセミコロンに注意 */
+		  									{ $$ = $4;  $$->SetPosition(@1.first); }
 ;
 
 property_handler_def_list
@@ -1303,9 +1305,11 @@ embeddable_string_d
 ;
 
 embeddable_string_d_unit
-	: T_EMSTRING_AMPERSAND_D expr_with_comma ";" { $$ = RisseAddExprConstStr(@1.first, *$1, $2);
+	: T_EMSTRING_AMPERSAND_D expr_with_comma ";"
+												{ $$ = RisseAddExprConstStr(@1.first, *$1, $2);
 													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
-	| T_EMSTRING_DOLLAR_D    expr_with_comma "}" { $$ = RisseAddExprConstStr(@1.first, *$1, $2);
+	| T_EMSTRING_DOLLAR_D    expr_with_comma ";" "}"/* "}" の前のセミコロンに注意 */
+												{ $$ = RisseAddExprConstStr(@1.first, *$1, $2);
 													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
 ;
 
@@ -1316,9 +1320,11 @@ embeddable_string_s
 ;
 
 embeddable_string_s_unit
-	: T_EMSTRING_AMPERSAND_S expr_with_comma ";" { $$ = RisseAddExprConstStr(@1.first, *$1, $2);
+	: T_EMSTRING_AMPERSAND_S expr_with_comma ";"
+												{ $$ = RisseAddExprConstStr(@1.first, *$1, $2);
 													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
-	| T_EMSTRING_DOLLAR_S    expr_with_comma "}" { $$ = RisseAddExprConstStr(@1.first, *$1, $2);
+	| T_EMSTRING_DOLLAR_S    expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
+												{ $$ = RisseAddExprConstStr(@1.first, *$1, $2);
 													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
 ;
 

@@ -151,6 +151,16 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 				break;
 			}
 
+		case T_RBRACE:
+			{
+				// "}" の場合はセミコロンを返し、その直後に "}" を返す。
+				// これは、 "}" の直前でセミコロンを省略できるようにするためである。
+				// 逆に、"}" の直前には文脈にかかわらず ";" が来るため、余分な ";" を
+				// 吸収する文法を定義しておかなければならない。
+				TokenFIFO.push_back(tTokenIdAndValue(T_RBRACE, tRisseVariant::GetVoidObject()));
+				return T_SEMICOLON;
+			}
+
 		case T_BEGIN_COMMENT: // コメントの開始
 			{
 				// コメントをスキップする
@@ -237,7 +247,6 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 void tRisseLexer::SetFuncCallReduced()
 {
 	FuncCallReduced = true;
-	fprintf(stderr, "funccallreduced : %d:%d\n", FuncCallReduced, NewLineRunningCount);
 }
 //---------------------------------------------------------------------------
 
@@ -245,7 +254,6 @@ void tRisseLexer::SetFuncCallReduced()
 //---------------------------------------------------------------------------
 void tRisseLexer::CheckBlockAfterFunctionCall()
 {
-	fprintf(stderr, "CheckBlockAfterFunctionCall : %d:%d\n", FuncCallReduced, NewLineRunningCount);
 	// f()
 	// {
 	// }

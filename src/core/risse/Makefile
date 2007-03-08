@@ -151,7 +151,7 @@ src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 			echo "permits the parser is to be used in non-GPL software."; \
 			echo "This isn't a problem when you use Risse script engine"; \
 			echo "in GPLed software, otherwise you should update your"; \
-			echo "bison 2.2 or above (which permits use in non-GPL software). "; \
+			echo "bison 1.24 or above (which permits use in non-GPL software). "; \
 			echo "**********************************************************"; ) \
 	)
 

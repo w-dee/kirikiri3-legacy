@@ -33,9 +33,8 @@ class C
 }
 
 
-return
-	C.new().test1() + "-" + C.new().test2() + "-" +
-	C.new().test3() + "-" + C.new().test4(); //=> "instance-global-global-global"
+return	C.new().test1() + "-" + C.new().test2() + "-" +
+		C.new().test3() + "-" + C.new().test4(); //=> "instance-global-global-global"
 
 
 

@@ -35,6 +35,9 @@ tRisseLexer::tRisseLexer(const tRisseString & script)
 	Ptr = NULL;
 	PtrOrigin = NULL;
 	PtrLastTokenStart = NULL;
+	LastTokenId = T_NL; // 最初の空行を読み飛ばすように
+	NewLineRunningCount = 1;
+	FuncCallReduced = false;
 }
 //---------------------------------------------------------------------------
 
@@ -63,6 +66,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		id = value.Id;
 		val = value.Value;
 		TokenFIFO.pop_front();
+		LastTokenId = id;
 		return id;
 	}
 
@@ -83,7 +87,9 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		// 最初にパターンを送り、次にフラグを送る
 		TokenFIFO.push_back(tTokenIdAndValue(T_REGEXP_FLAGS, flags));
 		val = pat;
-		return T_REGEXP;
+		id = T_REGEXP;
+		LastTokenId = id;
+		return id;
 	}
 
 	// ContinueEmbeddableString ?
@@ -92,19 +98,48 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		// 「埋め込み可能な」文字列リテラルの開始
 		risse_char delimiter = ContinueEmbeddableString;
 		ContinueEmbeddableString = 0;
-		return ParseEmbeddableString(val, delimiter);
+		id = ParseEmbeddableString(val, delimiter);
+		LastTokenId = id;
+		return id;
 	}
 
 	// トークンを読む
+	id = T_NONE;
 	do
 	{
 		// ホワイトスペースのスキップ
-		if(!SkipSpace(Ptr)) { id = -1; break; } // EOF
+		if(!SkipSpaceExceptForNewLine(Ptr)) { id = -1; break; } // EOF
+
+		// 改行のチェック
+		if(*Ptr == '\r' || *Ptr == '\n')
+		{
+			StepNewLineChar(Ptr);
+			if(LastTokenId == T_NL)
+			{
+				// 連続する T_NL は一つにまとめる
+				NewLineRunningCount ++;
+				continue;
+			}
+			else
+			{
+				NewLineRunningCount = 1;
+			}
+			id = T_NL;
+			break;
+		}
+
 
 		// 現在位置にあるトークンを解析
 		const risse_char * ptr_start = PtrLastTokenStart = Ptr;
 
 		id = RisseMapToken(Ptr, val);
+
+		// LBRACE ?
+		if(id != T_LBRACE)
+		{
+			// 関数呼び出しの次の "{" をチェックするためのフラグを倒す
+			FuncCallReduced = false;
+		}
 
 		// トークンによってはさらに処理をしなければならない場合があるので分岐
 		switch(id)
@@ -112,7 +147,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		case 0:
 			{
 				// 認識できないトークン
-				tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unrecognized token"));
+				tRisseCompileExceptionClass::Throw(RISSE_WS_TR("unrecognized token"));
 				break;
 			}
 
@@ -164,7 +199,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 				tRisseOctet octet;
 				Ptr = ptr_start;
 				if(!ParseOctet(Ptr, octet))
-					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Invalid octet literal"));
+					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("invalid octet literal"));
 				val = octet;
 				id = T_CONSTVAL;
 				break;
@@ -174,7 +209,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 			{
 				Ptr = ptr_start;
 				if(!ParseNumber(Ptr, val))
-					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Invalid number literal"));
+					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("invalid number literal"));
 				id = T_CONSTVAL;
 				break;
 			}
@@ -192,7 +227,32 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 
 	} while(id == T_NONE);
 
+	LastTokenId = id;
 	return id;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseLexer::SetFuncCallReduced()
+{
+	FuncCallReduced = true;
+	fprintf(stderr, "funccallreduced : %d:%d\n", FuncCallReduced, NewLineRunningCount);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseLexer::CheckBlockAfterFunctionCall()
+{
+	fprintf(stderr, "CheckBlockAfterFunctionCall : %d:%d\n", FuncCallReduced, NewLineRunningCount);
+	// f()
+	// {
+	// }
+	// のうち、"{" が読み込まれた直後にメソッドが呼ばれる。
+	// f() のあとの改行の数を数え、1つきりならばエラーにする。
+	if(FuncCallReduced && NewLineRunningCount == 1)
+		tRisseCompileExceptionClass::Throw(RISSE_WS_TR("ambiguous block after function call"));
 }
 //---------------------------------------------------------------------------
 

@@ -1,7 +1,6 @@
 function callback() b { return b(); }
 
-return callback()
-{
+return callback() {
 	try
 	{
 		break "this should not be caught";

@@ -26,6 +26,8 @@ class tRisseLexer : public tRisseLexerUtility
 	const risse_char * Ptr; //!< 解析ポインタの現在位置
 	const risse_char * PtrOrigin; //!< 解析ポインタの先頭
 	const risse_char * PtrLastTokenStart; //!< 最後に返したトークンの先頭位置
+	int		LastTokenId; //!< 最後に返したトークンの ID
+	risse_size NewLineRunningCount; //!< 改行が連続した回数
 
 	//! @brief		トークンIDと値の組
 	struct tTokenIdAndValue : public tRisseCollectee
@@ -47,6 +49,7 @@ class tRisseLexer : public tRisseLexerUtility
 		//!   で再開するかどうか(0=しない、'\'' または '"' =デリミタ)
 
 	bool NextIsRegularExpression; //!< 次の解析は正規表現パターン
+	bool FuncCallReduced;
 
 public:
 	//! @brief		コンストラクタ
@@ -72,6 +75,18 @@ public:
 
 	//! @brief		次のトークン読み込みで正規表現パターンを解析する
 	void SetNextIsRegularExpression() { NextIsRegularExpression = true; }
+
+	//! @brief		関数呼び出しが還元されたことを通知する
+	void SetFuncCallReduced();
+
+	//! @brief		関数呼び出しの次の "{" の位置をチェックする
+	//! @note		f()@n
+	//!				{@n
+	//!				}@n
+	//!				のような呼び出しは、関数をブロック付きで呼び出しているのか
+	//!				それとも関数呼び出し + ブロックなのかの区別がつきにくいため、
+	//!				あえて文法エラーにする。
+	void CheckBlockAfterFunctionCall();
 
 private:
 	//! @brief		埋め込み可能な文字列リテラルの解析

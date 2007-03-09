@@ -45,7 +45,7 @@ tRisseLexer::tRisseLexer(const tRisseString & script)
 //---------------------------------------------------------------------------
 int tRisseLexer::GetToken(tRisseVariant & val)
 {
-	int id;
+	int id = T_NONE;
 
 	// 初回?
 	if(Ptr == NULL)
@@ -66,8 +66,10 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		id = value.Id;
 		val = value.Value;
 		TokenFIFO.pop_front();
-		LastTokenId = id;
-		return id;
+		if(id == -1)
+			return id; // -1 (スクリプトの終わり) が入っていた場合はここで帰る。
+						// そうしないとまた -1 が push されてしまい無限ループに陥る。
+		goto ret;
 	}
 
 	// NextIsRegularExpression ?
@@ -82,14 +84,13 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		// 前の位置にもどり、正規表現パターンの解析を行う。
 		Ptr = PtrLastTokenStart; // 前の解析位置に戻す
 		tRisseString pat, flags;
-		if(!ParseRegExp(Ptr, pat, flags)) return 0;
+		if(!ParseRegExp(Ptr, pat, flags)) { id = -1; goto ret; }
 		// 一回には一回のトークンしか返すことができないので
 		// 最初にパターンを送り、次にフラグを送る
 		TokenFIFO.push_back(tTokenIdAndValue(T_REGEXP_FLAGS, flags));
 		val = pat;
 		id = T_REGEXP;
-		LastTokenId = id;
-		return id;
+		goto ret;
 	}
 
 	// ContinueEmbeddableString ?
@@ -99,12 +100,10 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		risse_char delimiter = ContinueEmbeddableString;
 		ContinueEmbeddableString = 0;
 		id = ParseEmbeddableString(val, delimiter);
-		LastTokenId = id;
-		return id;
+		goto ret;
 	}
 
 	// トークンを読む
-	id = T_NONE;
 	do
 	{
 		// ホワイトスペースのスキップ
@@ -237,6 +236,19 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 
 	} while(id == T_NONE);
 
+ret:
+	if(id == -1)
+	{
+		// スクリプトの終了。
+		if(LastTokenId != T_NL)
+		{
+			// いったん改行を返してからスクリプトの終了ということにする
+			// (最終行に改行が入っていない場合への対処)
+			id = T_NL;
+			TokenFIFO.push_back(tTokenIdAndValue(-1, tRisseVariant::GetVoidObject()));
+		}
+	}
+
 	LastTokenId = id;
 	return id;
 }
@@ -273,7 +285,7 @@ int tRisseLexer::ParseEmbeddableString(tRisseVariant & val, risse_char delimiter
 	switch(ParseString(Ptr, str, delimiter, true))
 	{
 	case psrNone:
-		id = 0;
+		id = -1;
 		break;
 	case psrDelimiter: // デリミタに遭遇した; 文字列リテラルの終わり
 		id = T_CONSTVAL;

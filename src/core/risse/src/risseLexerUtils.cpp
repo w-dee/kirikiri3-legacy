@@ -59,12 +59,20 @@ bool tRisseLexerUtility::StepNewLineChar(const risse_char * & ptr)
 }
 //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
+bool tRisseLexerUtility::SkipToBeforeNewLineChar(const risse_char * & ptr)
+{
+	while(*ptr && !IsNewLineChar(*ptr)) ptr++;
+	if(*ptr == 0) return false;
+	return true;
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 bool tRisseLexerUtility::SkipToLineEnd(const risse_char * & ptr)
 {
-	while(*ptr && !IsNewLineChar(*ptr)) ptr++;
-	if(*ptr == 0) return false;
+	if(!SkipToBeforeNewLineChar(ptr)) return false;
 	return StepNewLineChar(ptr);
 }
 //---------------------------------------------------------------------------
@@ -139,8 +147,7 @@ tRisseLexerUtility::tSkipCommentResult
 	if(ptr[1] == RISSE_WC('/'))
 	{
 		// line comment; skip to newline
-		if(!SkipToLineEnd(ptr)) return scrEnded;
-		SkipSpace(ptr);
+		if(!SkipToBeforeNewLineChar(ptr)) return scrEnded;
 		if(*ptr ==0) return scrEnded;
 
 		return scrContinue;
@@ -148,7 +155,6 @@ tRisseLexerUtility::tSkipCommentResult
 	else if(ptr[1] == RISSE_WC('*'))
 	{
 		// block comment; skip to the next '*' '/'
-		// and we must allow nesting of the comment.
 		ptr += 2;
 		if(*ptr == 0) tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
 		risse_int level = 0;
@@ -171,8 +177,6 @@ tRisseLexerUtility::tSkipCommentResult
 			}
 			if(!*(++ptr)) tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
 		}
-		if(*ptr ==0) return scrEnded;
-		SkipSpace(ptr);
 		if(*ptr ==0) return scrEnded;
 
 		return scrContinue;

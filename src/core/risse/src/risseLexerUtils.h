@@ -46,7 +46,12 @@ public: // public static members
 	//! @note		ptr は改行文字を指していなければならない
 	static bool StepNewLineChar(const risse_char * & ptr);
 
-	//! @brief		改行までスキップ
+	//! @brief		改行前までスキップ
+	//! @param		ptr		解析ポインタ (実行後、改行の直前にまで移動する)
+	//! @return		スクリプトが継続するかどうか
+	static bool SkipToBeforeNewLineChar(const risse_char * & ptr);
+
+	//! @brief		改行後までスキップ
 	//! @param		ptr		解析ポインタ (実行後、改行の直後にまで移動する)
 	//! @return		スクリプトが継続するかどうか
 	static bool SkipToLineEnd(const risse_char * & ptr);
@@ -87,6 +92,9 @@ public: // public static members
 	//! @brief		コメントのスキップ
 	//! @param		ptr		解析ポインタ
 	//! @return		スキップした結果どうなったか
+	//! @note		ptr は // または /* の最初のスラッシュを指していないとならない。
+	//!				// の場合は改行位置で、 /* の場合は */ の直後で停止して帰る。
+	//!				もちろんどちらの場合も、先にスクリプトの終了に突き当たった場合はそこで帰る。
 	static tSkipCommentResult SkipComment(const risse_char * & ptr);
 
 	//! @brief		ptr にある文字列を別の文字列と比較する

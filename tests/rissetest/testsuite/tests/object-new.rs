@@ -1,4 +1,4 @@
 var obj = new Object();
-obj.a = 3;
+var obj.a = 3;
 return obj.a; //=> 3
 

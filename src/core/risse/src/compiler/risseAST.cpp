@@ -806,6 +806,27 @@ tRisseString tRisseASTNode_VarDecl::GetAccessTargetId(tRisseASTNode * node)
 
 
 //---------------------------------------------------------------------------
+tRisseASTNode_VarDeclPair::tRisseASTNode_VarDeclPair(risse_size position,
+	tRisseASTNode * name, tRisseASTNode * initializer) :
+	tRisseASTNode(position, antVarDeclPair),
+		Name(name), Initializer(initializer)
+{
+	if(Name) Name->SetParent(this);
+	if(Initializer) Initializer->SetParent(this);
+
+	if(Name->GetType() == antMemberSel)
+	{
+		// Name がメンバ選択演算子だった場合
+		tRisseASTNode_MemberSel * memsel =
+			reinterpret_cast<tRisseASTNode_MemberSel*>(Name);
+		// ofMemberEnsure を指定する
+		memsel->SetFlags(memsel->GetFlags() | tRisseOperateFlags::ofMemberEnsure);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseASTNode_VarDeclPair::SetAttribute(tRisseDeclAttribute attrib)
 {
 	Attribute = attrib;
@@ -871,21 +892,6 @@ void tRisseASTNode_VarDeclPair::PrepareVarDecl(tRisseSSAForm * form, const tRiss
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_VarDeclPair::PrepareVarDecl(tRisseSSAForm * form, const tRisseString & name)
-{
-	// グローバル変数として作成すべきかどうかをチェック
-	if(form->GetLocalNamespace()->GetHasScope())
-	{
-		// ローカル変数として作成する
-
-		// 変数のローカル名前空間への登録
-		form->GetLocalNamespace()->Add(name, NULL);
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 	risse_size position,
 	const tRisseASTNode * name, tRisseSSAVariable * init, tRisseDeclAttribute attrib)
@@ -915,8 +921,8 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 					tRisseOperateFlags(
 						tRisseDeclAttribute(tRisseDeclAttribute::pcVar)|
 						tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
-						tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly
-						// 普通の変数アクセスかつメンバの作成、インスタンスメンバのみ
+						tRisseOperateFlags::ofMemberEnsure
+						// 普通の変数アクセスかつメンバの作成
 					);
 			write_node->SetAttribute(attrib);
 			write_node->GenerateWriteSSA(form, init);
@@ -927,44 +933,6 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 		// name ノードが id じゃない場合
 		// そこに代入を行う式を生成する
 		name->GenerateWriteSSA(form, init);
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
-	risse_size position,
-	const tRisseString & name, tRisseSSAVariable * init, tRisseDeclAttribute attrib)
-{
-	// グローバル変数として作成すべきかどうかをチェック
-	if(form->GetLocalNamespace()->GetHasScope())
-	{
-		// ローカル変数として作成する
-
-		// 変数のローカル名前空間への登録
-//		form->GetLocalNamespace()->Add(name, NULL);
-
-		// ローカル変数への書き込み
-		form->GetLocalNamespace()->Write(form, position, name, init);
-	}
-	else
-	{
-		// グローバル変数(あるいはクラス変数など)として作成する
-		// this 上に変数を作成するノードを一時的に作成
-		tRisseASTNode_MemberSel * write_node =
-			new tRisseASTNode_MemberSel(position,
-			new tRisseASTNode_Factor(position, aftThis),
-			new tRisseASTNode_Factor(position, aftConstant, name), matDirect,
-
-				tRisseOperateFlags(
-					tRisseDeclAttribute(tRisseDeclAttribute::pcVar)|
-					tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
-					tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly
-					// 普通の変数アクセスかつメンバの作成、インスタンスメンバのみ
-				);
-		write_node->SetAttribute(attrib);
-		write_node->GenerateWriteSSA(form, init);
 	}
 }
 //---------------------------------------------------------------------------
@@ -1037,8 +1005,7 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 	tRisseSSAStatement * stmt =
 		form->AddStatement(GetPosition(), code, NULL,
 							pws->ObjectVar, pws->MemberNameVar, value);
-	stmt->SetAccessFlags(new_flags|tRisseOperateFlags::ofMemberEnsure);
-		// tRisseOperateFlags::ofMemberEnsureは常につく
+	stmt->SetAccessFlags(new_flags);
 
 	if(Attribute.HasAny())
 	{

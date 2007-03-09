@@ -1,4 +1,4 @@
-global.result = "";
+var global.result = "";
 
 class A
 {

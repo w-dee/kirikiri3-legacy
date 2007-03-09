@@ -2,7 +2,7 @@
 
 var o = new Object();
 
-o.value = 5;
+var o.value = 5;
 
 
 var m = function () { return this.value; };

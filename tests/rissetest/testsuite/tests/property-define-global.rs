@@ -1,4 +1,4 @@
-global.v = 0;
+var global.v = 0;
 
 property p
 {

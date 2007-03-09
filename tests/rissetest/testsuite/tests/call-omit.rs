@@ -1,6 +1,6 @@
-global.a = '';
-global.b = '';
-global.c = '';
+var global.a = '';
+var global.b = '';
+var global.c = '';
 
 function f(a, b, c)
 {

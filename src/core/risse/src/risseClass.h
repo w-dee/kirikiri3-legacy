@@ -38,7 +38,7 @@ public:
 	{
 		target.SetPropertyDirect(name,
 			tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::ocConst)) |
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+			tRisseOperateFlags::ofMemberEnsure,
 					tRisseVariant(T::GetPointer()));
 	}
 };

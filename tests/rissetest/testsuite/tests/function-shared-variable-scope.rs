@@ -6,8 +6,8 @@ function C() {
 		{
 			var r = 0;
 			var obj = new Object();
-			obj.set = function(x) { r = x; };
-			obj.get = function() { return r; };
+			var obj.set = function(x) { r = x; };
+			var obj.get = function() { return r; };
 			return obj;
 		};
 		a[i] = a[i] ();

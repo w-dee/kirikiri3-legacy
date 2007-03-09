@@ -593,7 +593,7 @@ variable_def
 ;
 
 variable_def_no_var
-	:  variable_id_list snl				{ $$ = $1; }
+	:  variable_id_list snl					{ $$ = $1; }
 ;
 
 variable_def_no_semicolon
@@ -601,7 +601,7 @@ variable_def_no_semicolon
 	| "const" onl variable_id_list			{ $$ = $3;
 											  C(VarDecl, $$)->SetAttribute(
 											  	tRisseDeclAttribute(
-											  	tRisseDeclAttribute::ocConst));; }
+											  	tRisseDeclAttribute::ocConst)); }
 ;
 
 /* list for the variable definition */

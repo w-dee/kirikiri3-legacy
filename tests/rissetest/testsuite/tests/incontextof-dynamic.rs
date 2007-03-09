@@ -1,14 +1,14 @@
-global.value = "global";
+var global.value = "global";
 
-global.m1 = function () { return this.value; } incontextof dynamic;
-global.m2 = function () { return this.value; } incontextof global;
+var global.m1 = function () { return this.value; } incontextof dynamic;
+var global.m2 = function () { return this.value; } incontextof global;
 
 
 class C
 {
 	function initialize()
 	{
-		this.value = "instance";
+		var this.value = "instance";
 	}
 
 	function test1()

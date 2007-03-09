@@ -2,7 +2,7 @@ class C
 {
 	function initialize(a, b, c)
 	{
-		this.v = a + ":" + b + ":" + c;
+		var this.v = a + ":" + b + ":" + c;
 	}
 }
 

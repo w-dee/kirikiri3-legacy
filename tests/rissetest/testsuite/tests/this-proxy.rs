@@ -9,7 +9,7 @@ class C
 
 	function initialize()
 	{
-		this.c = "instance-c";
+		var this.c = "instance-c";
 	}
 
 	function test()

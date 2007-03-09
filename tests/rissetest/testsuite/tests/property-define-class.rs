@@ -2,7 +2,7 @@ class C
 {
 	function initialize()
 	{
-		this.v = 0;
+		var this.v = 0;
 	}
 
 	property a

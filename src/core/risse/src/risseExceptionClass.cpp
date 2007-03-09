@@ -86,15 +86,15 @@ void tRisseSourcePointClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// filename メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect(ss_filename, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_filename, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseString::GetEmptyString()), This);
 
 		// line メンバを追加 (デフォルトでは-1)
-		This.SetPropertyDirect(ss_line, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_line, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant((risse_int64)-1), This);
 
 		// function メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect(ss_function, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_function, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetNullObject(), This);
 
 		/*
@@ -189,15 +189,15 @@ void tRisseThrowableClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// message メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect(ss_message, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_message, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseString::GetEmptyString()), This);
 
 		// trace メンバを追加 (デフォルトでは空配列)
-		This.SetPropertyDirect(ss_trace, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_trace, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseVariant(tRisseArrayClass::GetPointer()).New()), This);
 
 		// cause メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect(ss_cause, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_cause, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetNullObject(), This);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -351,7 +351,7 @@ void tRisseAssertionErrorClass::RegisterMembers()
 	{
 		// expression メンバを追加 (デフォルトでは空文字列)
 		This.SetPropertyDirect(ss_expression,
-			tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+			tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseString::GetEmptyString()), This);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -422,15 +422,15 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// identifier メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect(ss_identifier, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_identifier, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetNullObject(), This);
 
 		// target メンバを追加 (デフォルトでは-1)
-		This.SetPropertyDirect(ss_target, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_target, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant((risse_int64)-1), This);
 
 		// value メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect(ss_value, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_value, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetNullObject(), This);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -1209,7 +1209,7 @@ void tRisseMemberAccessExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// name メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect(ss_name, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect(ss_name, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseString::GetEmptyString()), This);
 	}
 	RISSE_END_NATIVE_METHOD

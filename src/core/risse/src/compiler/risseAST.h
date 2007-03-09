@@ -742,13 +742,7 @@ public:
 	//! @param		name			名前
 	//! @param		initializer		初期値ノード
 	tRisseASTNode_VarDeclPair(risse_size position,
-		tRisseASTNode * name, tRisseASTNode * initializer) :
-		tRisseASTNode(position, antVarDeclPair),
-			Name(name), Initializer(initializer)
-	{
-		if(Name) Name->SetParent(this);
-		if(Initializer) Initializer->SetParent(this);
-	}
+		tRisseASTNode * name, tRisseASTNode * initializer);
 
 	//! @brief		名前を得る
 	//! @return		名前
@@ -817,7 +811,6 @@ public:
 	//!				このメソッドはローカル名前空間に変数が作られるばあいのみに
 	//!				機能し、それ以外ではなにもおこなわない。
 	static void PrepareVarDecl(tRisseSSAForm * form, const tRisseASTNode * name);
-	static void PrepareVarDecl(tRisseSSAForm * form, const tRisseString & name);
 
 	//! @brief		変数宣言のSSA 形式の表現を生成する
 	//! @param		form		SSA 形式インスタンス
@@ -827,11 +820,6 @@ public:
 	//! @param		attrib		変数の属性
 	//! @note		これに先立って PrepareVarDecl() を実行しておくこと。
 	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseASTNode * name,
-			tRisseSSAVariable * init,
-			tRisseDeclAttribute attrib = tRisseMemberAttribute(
-				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
-				tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)));
-	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseString & name,
 			tRisseSSAVariable * init,
 			tRisseDeclAttribute attrib = tRisseMemberAttribute(
 				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
@@ -891,11 +879,15 @@ public:
 
 	//! @brief		メンバの書き込み時の属性設定値を設定する
 	//! @param		attrib		メンバの書き込み時の属性設定値
-	void SetAttribute(tRisseDeclAttribute attrib) { Attribute = attrib; }
+	void SetAttribute(tRisseDeclAttribute attrib) { Attribute.Overwrite(attrib); }
 
 	//! @brief		メンバの書き込み時の属性設定値を得る
 	//! @return		メンバの書き込み時の属性設定値
 	bool GetAttribute() const { return Attribute; }
+
+	//! @brief		メンバの操作フラグを設定する
+	//! @param		flags		メンバの操作フラグ
+	void SetFlags(tRisseOperateFlags flags) { Flags = flags; }
 
 	//! @brief		メンバの操作フラグを得る
 	//! @return		メンバの操作フラグ

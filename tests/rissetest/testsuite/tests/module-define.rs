@@ -1,4 +1,4 @@
-global.s = '';
+var global.s = '';
 
 module M1
 {

@@ -2,7 +2,7 @@ class A
 {
 	function initialize()
 	{
-		this.v = 0;
+		var this.v = 0;
 	}
 
 	function super_m(s)

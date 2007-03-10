@@ -300,6 +300,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	T_VOLATILE				"volatile"
 	T_ENUMERABLE			"enumerable"
 	T_HIDDEN				"hidden"
+	T_VIRTUAL				"virtual"
 
 	T_FALSE					"false"
 	T_NULL					"null"
@@ -1048,6 +1049,7 @@ member_name
 	| "volatile"							{ $$ = new tRisseVariant(ss_volatile       ); }
 	| "enumerable"							{ $$ = new tRisseVariant(ss_enumerable     ); }
 	| "hidden"								{ $$ = new tRisseVariant(ss_hidden         ); }
+	| "virtual"								{ $$ = new tRisseVariant(ss_virtual        ); }
 
 	| "void"								{ $$ = new tRisseVariant(ss_void           ); }
 	| "null"								{ $$ = new tRisseVariant(ss_null           ); }

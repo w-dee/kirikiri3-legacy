@@ -918,8 +918,7 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 
 					tRisseOperateFlags(
 						tRisseDeclAttribute(tRisseDeclAttribute::pcVar)|
-						tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
-						tRisseOperateFlags::ofMemberEnsure
+						tRisseOperateFlags::ofMemberEnsure)
 						// 普通の変数アクセスかつメンバの作成
 					);
 			write_node->SetAttribute(attrib);

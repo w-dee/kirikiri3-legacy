@@ -135,28 +135,32 @@ public:
 	tAccessControl GetAccess() const { return Access; }
 	//! @brief		アクセス制限を設定する
 	//! @param		v	アクセス制限
-	void SetAccess(tAccessControl v) { Access = v; }
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & Set(tAccessControl v) { Access = v; return *this; }
 
 	//! @brief		可視性を得る
 	//! @return		可視性
 	tVisibilityControl GetVisibility() const { return Visibility; }
 	//! @brief		可視性を設定する
 	//! @param		v	可視性
-	void SetVisibility(tVisibilityControl v) { Visibility = v; }
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & Set(tVisibilityControl v) { Visibility = v; return *this; }
 
 	//! @brief		オーバーライド性を得る
 	//! @return		オーバーライド性
 	tOverrideControl GetOverride() const { return Override; }
 	//! @brief		オーバーライド性を設定する
 	//! @param		v	オーバーライド性
-	void SetOverride(tOverrideControl v) { Override = v; }
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & Set(tOverrideControl v) { Override = v; return *this; }
 
 	//! @brief		プロパティアクセス方法を得る
 	//! @return		プロパティアクセス方法
 	tPropertyControl GetProperty() const { return Property; }
 	//! @brief		プロパティアクセス方法を設定する
 	//! @param		v	プロパティアクセス方法
-	void SetProperty(tPropertyControl v) { Property = v; }
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & Set(tPropertyControl v) { Property = v; return *this; }
 
 	//! @brief		属性を上書きする
 	//! @param		rhs		上書きする属性

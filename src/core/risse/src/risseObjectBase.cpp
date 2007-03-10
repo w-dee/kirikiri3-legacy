@@ -220,9 +220,9 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 			// 新規作成フラグがある場合はメンバを新規作成する
 			tRisseMemberAttribute attrib = flags;
 			if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
-				attrib.SetProperty(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
+				attrib.Set(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
 			if(attrib.GetOverride() == tRisseMemberAttribute::ocNone)
-				attrib.SetOverride(tRisseMemberAttribute::ocVirtual); // デフォルトはocVirtual
+				attrib.Set(tRisseMemberAttribute::ocVirtual); // デフォルトはocVirtual
 			HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
 			return rvNoError;
 		}
@@ -309,9 +309,9 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		// 場合はこのインスタンスにメンバを作成する。
 		tRisseMemberAttribute attrib = flags;
 		if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
-			attrib.SetProperty(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
+			attrib.Set(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
 		if(attrib.GetOverride() == tRisseMemberAttribute::ocNone)
-			attrib.SetOverride(tRisseMemberAttribute::ocVirtual); // デフォルトはocVirtual
+			attrib.Set(tRisseMemberAttribute::ocVirtual); // デフォルトはocVirtual
 		HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
 		return rvNoError;
 	}

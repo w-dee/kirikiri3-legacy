@@ -14,7 +14,7 @@ class C
 
 	function initialize()
 	{
-		this.value = "instance-variable";
+		var this.value = "instance-variable";
 	}
 
 	function m_instance()

@@ -25,6 +25,11 @@
 #include "risseParser.h"
 #include "risseScriptBlock.h"
 
+/* 名前空間を Risse に */
+namespace Risse
+{
+RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
+
 /* メモリ確保は Risse のインターフェースを使うように */
 #define YYMALLOC	RisseMallocCollectee
 #define YYREALLOC	RisseReallocCollectee
@@ -49,12 +54,8 @@
 #ifdef C
  #undef C
 #endif
-#define C(XXXX, EXP) (reinterpret_cast<tRisseASTNode_##XXXX*>(EXP))
+#define C(XXXX, EXP) (RISSE_ASSERT((EXP)->GetType() == ant##XXXX), reinterpret_cast<tRisseASTNode_##XXXX *>(EXP))
 
-/* 名前空間を Risse に */
-namespace Risse
-{
-RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 
 /* 位置情報を表す定義 */
 struct RisseYYLTYPE
@@ -666,21 +667,37 @@ throw
 
 
 /* a function definition */
+/*
+   function A() {  }  は var A = function () {  }; と見なすので、そのような
+   AST を生成する。
+   (property や class も同じ)
+   ただし、関数名やプロパティ名、クラス名はデバッグやそのほか重要な役割を
+   担うので、名前が分かる場合は極力名前を設定する。
+*/
 func_def
-	: "static" onl func_def_inner			{ $$ = $3;
-											  C(FuncDecl, $$)->SetAttribute(
-											  	tRisseDeclAttribute(
-											  	tRisseDeclAttribute::ccStatic)); }
-	| func_def_inner						{ $$ = $1; }
+	: "static" onl func_def_inner			{ $$ = N(VarDecl)(@1.first);
+											  C(VarDecl, $$)->AddChild($3/*<-*/);
+											  C(FuncDecl, C(VarDeclPair, $3)->GetInitializer())->
+											  	SetAttribute(
+											  		tRisseDeclAttribute(
+											  		tRisseDeclAttribute::ccStatic)); }
+	| func_def_inner						{ $$ = N(VarDecl)(@1.first);
+											  C(VarDecl, $$)->AddChild($1/*<-*/); }
 ;
 
 func_def_inner
 	: "function" onl decl_name_expr onl func_decl_arg
-	  block	onl					/*%dprec 2*/{ $$ = $5; C(FuncDecl, $$)->SetName($3);
-	  										  C(FuncDecl, $$)->SetBody($6);  $$->SetPosition(@1.first); }
+	  block	onl				/*%dprec 2*/	{ tRisseASTNode * func_decl = $5;
+	  										  C(FuncDecl, func_decl)->SetName($3->GetAccessTargetId());
+	  										  C(FuncDecl, func_decl)->SetBody($6/*<-*/);
+	  										  func_decl->SetPosition(@1.first);
+	  										  $$ = N(VarDeclPair)(@1.first, $3, func_decl); }
 	| "function" onl decl_name_expr onl
-	  block	onl					/*%dprec 1*/{ $$ = N(FuncDecl)(@1.first); C(FuncDecl, $$)->SetName($3);
-	  										  C(FuncDecl, $$)->SetBody($5); }
+	  block	onl				/*%dprec 1*/	{ tRisseASTNode * func_decl = N(FuncDecl)(@1.first);
+	  										  C(FuncDecl, func_decl)->SetName($3->GetAccessTargetId());
+	  										  C(FuncDecl, func_decl)->SetBody($5/*<-*/);
+	  										  func_decl->SetPosition(@1.first);
+	  										  $$ = N(VarDeclPair)(@1.first, $3, func_decl); }
 ;
 
 /* a function expression definition */
@@ -734,8 +751,8 @@ func_decl_arg_elm_collapse
 	| onl T_ID "*"	onl						{ $$ = N(FuncDeclArg)(@2.first, *$2, NULL, true); }
 /*
 	These are currently not supported
-	| T_ID "*" "=" inline_array			{ ; }
-	| T_ID "*=" inline_array			{ ; }
+	| T_ID "*" "=" inline_array				{ ; }
+	| T_ID "*=" inline_array				{ ; }
 */
 ;
 
@@ -758,11 +775,21 @@ func_decl_block_at_least_one
 
 /* a property handler definition */
 property_def
-	: "static" onl property_def_inner	onl	{ $$ = $3;
-											  C(PropDecl, $$)->SetAttribute(
-											  	tRisseDeclAttribute(
-											  	tRisseDeclAttribute::ccStatic)); }
-	| property_def_inner	onl				{ $$ = $1; }
+	: "static" onl property_def_inner	onl	{ $$ = N(VarDecl)(@1.first);
+											  C(VarDecl, $$)->AddChild($3/*<-*/);
+											  tRisseDeclAttribute attrib;
+											  attrib.Set(tRisseDeclAttribute::ccStatic);
+											  attrib.Set(tRisseDeclAttribute::pcProperty);
+											  C(VarDecl, $$)->SetAttribute(attrib);
+											  C(PropDecl, C(VarDeclPair, $3)->GetInitializer())->
+											  	SetAttribute(
+											  		tRisseDeclAttribute(
+											  		tRisseDeclAttribute::ccStatic)); }
+	| property_def_inner	onl				{ $$ = N(VarDecl)(@1.first);
+											  C(VarDecl, $$)->AddChild($1/*<-*/);
+											  tRisseDeclAttribute attrib;
+											  attrib.Set(tRisseDeclAttribute::pcProperty);
+											  C(VarDecl, $$)->SetAttribute(attrib); }
 ;
 
 property_def_inner
@@ -770,7 +797,10 @@ property_def_inner
 	  "{"
 	  property_handler_def_list
 	  ";" "}"/* "}" の前のセミコロンに注意 */
-	  										{ $$ = $6; C(PropDecl, $$)->SetName($3);  $$->SetPosition(@1.first); }
+	  										{ tRisseASTNode * prop_decl = $6;
+	  										  C(PropDecl, prop_decl)->SetName($3->GetAccessTargetId());
+	  										  prop_decl->SetPosition(@1.first);
+	  										  $$ = N(VarDeclPair)(@1.first, $3, prop_decl); }
 ;
 
 /* a property expression definition */
@@ -831,13 +861,20 @@ property_getter_handler_head
 class_module_def
 	: "class" onl decl_name_expr
 	  class_extender
-	  "{" onl toplevel_def_list "}"	onl	 	{ $$ = $4;  $$->SetPosition(@1.first);
-											  C(ClassDecl, $$)->SetBody($7);
-											  C(ClassDecl, $$)->SetName($3); }
+	  "{" onl toplevel_def_list "}"	onl	 	{ tRisseASTNode_ClassDecl * class_decl = C(ClassDecl, $4);
+											  class_decl->SetPosition(@1.first);
+											  class_decl->SetBody($7);
+											  class_decl->SetName($3->GetAccessTargetId());
+											  $$ = N(VarDecl)(@1.first);
+											  C(VarDecl, $$)->AddChild(N(VarDeclPair)(@1.first, $3, class_decl));
+											}
 	| "module" onl decl_name_expr onl
-	  "{" onl toplevel_def_list "}"	onl		{ $$ = N(ClassDecl)(@1.first, true, NULL);
-											  C(ClassDecl, $$)->SetBody($7);
-											  C(ClassDecl, $$)->SetName($3); }
+	  "{" onl toplevel_def_list "}"	onl		{ tRisseASTNode_ClassDecl * class_decl = N(ClassDecl)(@1.first, true, NULL);
+											  class_decl->SetBody($7);
+											  class_decl->SetName($3->GetAccessTargetId());
+											  $$ = N(VarDecl)(@1.first);
+											  C(VarDecl, $$)->AddChild(N(VarDeclPair)(@1.first, $3, class_decl));
+											}
 ;
 
 class_module_expr_def
@@ -867,11 +904,11 @@ definition
 	: decl_attr_list variable_def			{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
 	| decl_attr_list variable_def_no_var	{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
 	| variable_def
-	| decl_attr_list func_def				{ $$ = $2; C(FuncDecl, $$)->SetAttribute(*$1); }
+	| decl_attr_list func_def				{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
 	| func_def
-	| decl_attr_list property_def			{ $$ = $2; C(PropDecl, $$)->SetAttribute(*$1); }
+	| decl_attr_list property_def			{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
 	| property_def
-	| decl_attr_list class_module_def		{ $$ = $2; C(ClassDecl, $$)->SetAttribute(*$1); }
+	| decl_attr_list class_module_def		{ $$ = $2; C(VarDecl, $$)->SetAttribute(*$1); }
 	| class_module_def
 ;
 

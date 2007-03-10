@@ -15,7 +15,7 @@ class D : C
 {
 	function D_m()
 	{
-		@value = 10;
+		var @value = 10;
 	}
 
 	function D_get()

@@ -90,12 +90,33 @@ public:
 	//! @brief	ダウンキャスト
 	operator tRisseMemberAttribute () const { return *(const tRisseMemberAttribute*)this; }
 
+	//! @brief		アクセス制限を設定する
+	//! @param		v	アクセス制限
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & Set(tAccessControl v) { tRisseMemberAttribute::Set(v); return *this; }
+
+	//! @brief		可視性を設定する
+	//! @param		v	可視性
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & Set(tVisibilityControl v) { tRisseMemberAttribute::Set(v); return *this; }
+
+	//! @brief		オーバーライド性を設定する
+	//! @param		v	オーバーライド性
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & Set(tOverrideControl v) { tRisseMemberAttribute::Set(v); return *this; }
+
+	//! @brief		プロパティアクセス方法を設定する
+	//! @param		v	プロパティアクセス方法
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & Set(tPropertyControl v) { tRisseMemberAttribute::Set(v); return *this; }
+
 	//! @brief		コンテキスト規定を得る
 	//! @return		コンテキスト規定
 	tContextControl GetContext() const { return Context; }
 	//! @brief		コンテキスト規定を設定する
 	//! @param		v	コンテキスト規定
-	void SetAccess(tContextControl v) { Context = v; }
+	//! @return		このオブジェクト自身への参照
+	tRisseDeclAttribute & Set(tContextControl v) { Context = v; return *this; }
 
 	//! @brief		属性を上書きする
 	//! @param		rhs		上書きする属性

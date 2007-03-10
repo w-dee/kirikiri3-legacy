@@ -492,8 +492,6 @@ tRisseString tRisseASTNode_FuncCallArg::GetDumpComment() const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_FuncDecl::GetChildNameAt(risse_size index) const
 {
-	if(index == 0) return RISSE_WS("name");
-	index --;
 	if(index == inherited::GetChildCount() + Blocks.size()) return RISSE_WS("body");
 	if(index < inherited::GetChildCount())
 	{
@@ -516,7 +514,7 @@ tRisseString tRisseASTNode_FuncDecl::GetDumpComment() const
 {
 	tRisseString attrib = Attribute.AsString();
 	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
-	if(Name == NULL) attrib += RISSE_WS("anonymous");
+	if(Name.IsEmpty()) attrib += RISSE_WS("anonymous"); else attrib += Name;
 	if(IsBlock) attrib += RISSE_WS(" block");
 	return attrib;
 }
@@ -557,10 +555,9 @@ tRisseString tRisseASTNode_PropDecl::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0: return tRisseString(RISSE_WS("name"));
-	case 1: return tRisseString(RISSE_WS("setter(argument=")) +
+	case 0: return tRisseString(RISSE_WS("setter(argument=")) +
 			SetterArgumentName.AsHumanReadable() + RISSE_WS(")");
-	case 2: return RISSE_WS("getter");
+	case 1: return RISSE_WS("getter");
 	}
 	return tRisseString();
 }
@@ -572,8 +569,8 @@ tRisseString tRisseASTNode_PropDecl::GetDumpComment() const
 {
 	tRisseString attrib = Attribute.AsString();
 	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
-	if(Name == 0) return attrib + RISSE_WS("anonymous");
-	return attrib;
+	if(Name.IsEmpty()) return attrib + RISSE_WS("anonymous");
+	return attrib + Name;
 }
 //---------------------------------------------------------------------------
 
@@ -581,9 +578,8 @@ tRisseString tRisseASTNode_PropDecl::GetDumpComment() const
 //---------------------------------------------------------------------------
 tRisseString tRisseASTNode_ClassDecl::GetChildNameAt(risse_size index) const
 {
-	if(index == 0) return RISSE_WS("name");
-	if(index == 1) return RISSE_WS("super");
-	if(index == 2) return RISSE_WS("body");
+	if(index == 0) return RISSE_WS("super");
+	if(index == 1) return RISSE_WS("body");
 	return tRisseString();
 }
 //---------------------------------------------------------------------------
@@ -597,8 +593,8 @@ tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
 					RISSE_WS("class ");
 	tRisseString attrib = Attribute.AsString();
 	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
-	if(Name == NULL) return type + attrib + RISSE_WS("anonymous");
-	return type + attrib + tRisseASTNode_VarDecl::GetAccessTargetId(Name);
+	if(Name.IsEmpty()) return type + attrib + RISSE_WS("anonymous");
+	return type + attrib + Name;
 }
 //---------------------------------------------------------------------------
 
@@ -630,6 +626,28 @@ tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
 
 
 
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseASTNode::GetAccessTargetId()
+{
+	if(!this) return tRisseString();
+	if(GetType() == antId) return reinterpret_cast<tRisseASTNode_Id*>(this)->GetName();
+
+	// obj.mem.mem.mem ... 等の . 演算子 / :: 演算子をどんどんと右にたどっていき、
+	// id を見つける。見つかったらそれを返す。
+	tRisseASTNode * target = this;
+	while(target->GetType() == antMemberSel)
+	{
+		tRisseASTNode * membername = reinterpret_cast<tRisseASTNode_MemberSel*>(target)->GetMemberName();
+		if(membername->GetType() == antId) return reinterpret_cast<tRisseASTNode_Id*>(membername)->GetName();
+		target = membername;
+	}
+
+	// 特定できない
+	return tRisseString();
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -788,24 +806,6 @@ tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_VarDecl::GetAccessTargetId(tRisseASTNode * node)
-{
-	if(!node) return tRisseString();
-	if(node->GetType() == antId) return reinterpret_cast<tRisseASTNode_Id*>(node)->GetName();
-
-	if(node->GetType() == antMemberSel)
-	{
-		tRisseASTNode * membername = reinterpret_cast<tRisseASTNode_MemberSel*>(node)->GetMemberName();
-		return GetAccessTargetId(membername); // 再帰
-	}
-
-	// 特定できない
-	return tRisseString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 tRisseASTNode_VarDeclPair::tRisseASTNode_VarDeclPair(risse_size position,
 	tRisseASTNode * name, tRisseASTNode * initializer) :
 	tRisseASTNode(position, antVarDeclPair),
@@ -871,11 +871,9 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 //---------------------------------------------------------------------------
 void tRisseASTNode_VarDeclPair::PrepareVarDecl(tRisseSSAForm * form, const tRisseASTNode * name)
 {
-	if(name->GetType() == antId)
+	if(name->GetType() == antId && !reinterpret_cast<const tRisseASTNode_Id*>(name)->GetIsPrivate())
 	{
-		// name ノードに id が直接来ている場合
-
-		// TODO: @つき変数への対応
+		// name ノードに id が直接来ている場合、かつプライベート (@付き) 変数ではない場合
 
 		// グローバル変数として作成すべきかどうかをチェック
 		tRisseString str_name = reinterpret_cast<const tRisseASTNode_Id*>(name)->GetName();
@@ -896,9 +894,9 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 	risse_size position,
 	const tRisseASTNode * name, tRisseSSAVariable * init, tRisseDeclAttribute attrib)
 {
-	if(name->GetType() == antId)
+	if(name->GetType() == antId && !reinterpret_cast<const tRisseASTNode_Id*>(name)->GetIsPrivate())
 	{
-		// name ノードに id が直接来ている場合
+		// name ノードに id が直接来ている場合、かつプライベート (@付き) 変数ではない場合
 		tRisseString str_name = reinterpret_cast<const tRisseASTNode_Id*>(name)->GetName();
 
 		// グローバル変数として作成すべきかどうかをチェック
@@ -1032,7 +1030,8 @@ void * tRisseASTNode_Id::PrepareSSA(
 	{
 		// private 変数の場合, this へアクセスするためのノードを作成する
 		pws->MemberSel = CreatePrivateAccessNodeOnThis(
-			form->GetFunction()->GetFunctionGroup()->GetClassName() + RISSE_WC('_') );
+			form->GetFunction()->GetFunctionGroup()->GetClassName() + RISSE_WC('_') ,
+			(mode == pmWrite || mode == pmReadWrite));
 		pws->MemberSelParam = pws->MemberSel->PrepareSSA(form, mode);
 	}
 	else
@@ -1114,7 +1113,7 @@ bool tRisseASTNode_Id::DoWriteSSA(
 
 
 //---------------------------------------------------------------------------
-const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(const tRisseString & prefix) const
+const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(const tRisseString & prefix, bool write) const
 {
 	// private (@つき) 変数の場合は、クラス名 + '_' + 変数名を this 上において
 	// アクセスこととなる。
@@ -1124,7 +1123,10 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
 		new tRisseASTNode_Factor(GetPosition(), aftThis),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirect);
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirect,
+			write ?	tRisseOperateFlags(tRisseOperateFlags::ofMemberEnsure) :
+					tRisseOperateFlags()
+					);
 }
 //---------------------------------------------------------------------------
 
@@ -1527,10 +1529,10 @@ void * tRisseASTNode_Array::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) c
 		// インデックスの準備
 		if(mode == pmWrite && !child)
 		{
-			// 書き込みモードかつchildが NULL の場合はインデックスを準備する必要はない
+			// 読み込みを伴わない 、かつ childが NULL の場合はインデックスを準備する必要はない
 			data->Indices.push_back(NULL);
 		}
-		else
+		else /* mode == pmRead || mode == pmReadWrite */
 		{
 			if(i < max_prepare_index)
 			{
@@ -2849,28 +2851,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
-	if(Name != NULL)
-	{
-		// 名前付き関数
-		tRisseASTNode_VarDeclPair::PrepareVarDecl(form, Name);
-	}
-
-	tRisseSSAVariable * func_var = GenerateFuncDecl(form);
-	if(Name == NULL)
-	{
-		// 匿名関数
-		return func_var;
-	}
-	else
-	{
-		// 名前付き関数
-		// function NNN() { ... } は var NNN = function() { ... } と同じ物として処理する
-
-		// 変数宣言のSSA表現を生成する
-		tRisseASTNode_VarDeclPair::GenerateVarDecl(form, GetPosition(), Name, func_var, Attribute);
-
-		return NULL;
-	}
+	return GenerateFuncDecl(form);
 }
 //---------------------------------------------------------------------------
 
@@ -2884,12 +2865,12 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 
 	tRisseSSAVariable * lazyblock_var = NULL;
 	tRisseSSAForm * new_form = NULL;
-	tRisseString display_name = tRisseASTNode_VarDecl::GetAccessTargetId(Name);
+	tRisseString display_name = Name;
 	if(display_name.IsEmpty()) display_name = RISSE_WS("<not determinate>");
 	void * lazy_param = form->CreateLazyBlock(
 							GetPosition(),
 							IsBlock ? RISSE_WS("callback block") :
-							Name == NULL ?
+							Name.IsEmpty() ?
 								RISSE_WS("anonymous function"):
 								display_name,
 							!IsBlock, access_map, new_form, lazyblock_var);
@@ -3016,31 +2997,8 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_PropDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
-	if(Name == NULL)
-	{
-		// 名前付きプロパティ
-		tRisseASTNode_VarDeclPair::PrepareVarDecl(form, Name);
-	}
-
-	tRisseSSAVariable * property_instance_var = GeneratePropertyDecl(form);
-	if(Name == NULL)
-	{
-		// 匿名プロパティ
-		return property_instance_var;
-	}
-	else
-	{
-		// 名前付きプロパティ
-		// class CCC { ... } は var CCC = class { ... } と同じ物として処理する
-
-		// TODO: プロパティがローカル名前空間に作成されてもかなり意味がないのでどうするか
-
-		// 変数宣言のSSA表現を生成する
-		tRisseASTNode_VarDeclPair::GenerateVarDecl(form, GetPosition(), Name, property_instance_var,
-						tRisseDeclAttribute(tRisseDeclAttribute::pcProperty));
-
-		return NULL;
-	}
+	return GeneratePropertyDecl(form);
+	// TODO: プロパティがローカル名前空間に作成されてもかなり意味がないのでどうするか
 }
 //---------------------------------------------------------------------------
 
@@ -3048,7 +3006,7 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::DoReadSSA(tRisseSSAForm *form, void 
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *form) const
 {
-	tRisseString display_name = tRisseASTNode_VarDecl::GetAccessTargetId(Name);
+	tRisseString display_name = Name;
 
 	// ゲッタノードを処理
 	tRisseSSAVariable * getter_var = NULL;
@@ -3056,10 +3014,10 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 	{
 		tRisseSSAVariable * lazyblock_var = NULL;
 		tRisseSSAForm * new_form = NULL;
-		if(display_name.IsEmpty()) display_name = RISSE_WS("<nondeterminate>");
+		if(display_name.IsEmpty()) display_name = RISSE_WS("<nondetermined>");
 		void * lazy_param = form->CreateLazyBlock(
 								GetPosition(),
-								Name == NULL ?
+								Name.IsEmpty() ?
 									RISSE_WS("anonymous property getter"):
 									RISSE_WS("property ") + display_name + RISSE_WS(" getter"),
 								true, NULL, new_form, lazyblock_var);
@@ -3085,7 +3043,7 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 		tRisseSSAForm * new_form = NULL;
 		void * lazy_param = form->CreateLazyBlock(
 								GetPosition(),
-								Name == NULL ?
+								Name.IsEmpty() ?
 									RISSE_WS("anonymous property setter"):
 									RISSE_WS("property ") + display_name + RISSE_WS(" setter"),
 								true, NULL, new_form, lazyblock_var);
@@ -3146,28 +3104,7 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_ClassDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
-	if(Name != NULL)
-	{
-		// 名前付きクラス/モジュール
-		tRisseASTNode_VarDeclPair::PrepareVarDecl(form, Name);
-	}
-
-	tRisseSSAVariable * func_var = GenerateClassDecl(form);
-	if(Name == NULL)
-	{
-		// 匿名クラス/モジュール
-		return func_var;
-	}
-	else
-	{
-		// 名前付きクラス/モジュール
-		// class CCC { ... } は var CCC = class { ... } と同じ物として処理する
-
-		// 変数宣言のSSA表現を生成する
-		tRisseASTNode_VarDeclPair::GenerateVarDecl(form, GetPosition(), Name, func_var);
-
-		return NULL;
-	}
+	return GenerateClassDecl(form);
 }
 //---------------------------------------------------------------------------
 
@@ -3184,9 +3121,9 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 
 
 	// クラス/モジュール名を決める
-	tRisseString display_name = tRisseASTNode_VarDecl::GetAccessTargetId(Name);
-	if(display_name.IsEmpty()) display_name = RISSE_WS("nondeterminate");
-	tRisseString class_name = Name == NULL ? tRisseString(RISSE_WS("anonymous")) : display_name;
+	tRisseString display_name = Name;
+	if(display_name.IsEmpty()) display_name = RISSE_WS("nondetermined");
+	tRisseString class_name = Name.IsEmpty() ? tRisseString(RISSE_WS("anonymous")) : display_name;
 
 	// クラス/モジュール名を定数として作る
 	tRisseSSAVariable * class_name_var =
@@ -3285,10 +3222,6 @@ tRisseASTNode * tRisseASTNode_ClassDecl::GenerateDefaultInitializeAST(risse_size
 	// function initialize() { super::initialize(...); }
 	// を表すASTノードを生成して返す
 
-	// function 定義を作成
-	tRisseASTNode_FuncDecl * funcdecl = new tRisseASTNode_FuncDecl(pos);
-	funcdecl->SetName(new tRisseASTNode_Id(pos, RISSE_WS("initialize"), false));
-
 	// super::initialize() の部分を作成
 	tRisseASTNode_Factor * super = new tRisseASTNode_Factor(pos, aftSuper);
 	tRisseASTNode_Factor * initialize =
@@ -3306,9 +3239,17 @@ tRisseASTNode * tRisseASTNode_ClassDecl::GenerateDefaultInitializeAST(risse_size
 	tRisseASTNode_Context * body = new tRisseASTNode_Context(pos, actBlock, RISSE_WS("Block"));
 	body->AddChild(funccall_expr);
 
-	// function 定義を返す
+	// function 定義を作成
+	tRisseASTNode_FuncDecl * funcdecl = new tRisseASTNode_FuncDecl(pos);
 	funcdecl->SetBody(body);
-	return funcdecl;
+	funcdecl->SetName(RISSE_WS("initialize"));
+	tRisseASTNode_VarDecl * funcvardecl = new tRisseASTNode_VarDecl(pos);
+	tRisseASTNode_VarDeclPair * funcvardeclpair = new tRisseASTNode_VarDeclPair(
+			pos, new tRisseASTNode_Id(pos, RISSE_WS("initialize"), false), funcdecl);
+	funcvardecl->AddChild(funcvardeclpair);
+
+	// var 定義を返す
+	return funcvardecl;
 }
 //---------------------------------------------------------------------------
 
@@ -3319,16 +3260,21 @@ tRisseASTNode * tRisseASTNode_ClassDecl::GenerateDefaultConstructAST(risse_size 
 	// function construct() { }
 	// を表すASTノードを生成して返す
 
-	// function 定義を作成
-	tRisseASTNode_FuncDecl * funcdecl = new tRisseASTNode_FuncDecl(pos);
-	funcdecl->SetName(new tRisseASTNode_Id(pos, RISSE_WS("construct"), false));
-
 	// function 定義のブロックを作成
 	tRisseASTNode_Context * body = new tRisseASTNode_Context(pos, actBlock, RISSE_WS("Block"));
 
-	// function 定義を返す
+	// function 定義を作成
+	tRisseASTNode_FuncDecl * funcdecl = new tRisseASTNode_FuncDecl(pos);
 	funcdecl->SetBody(body);
-	return funcdecl;
+	funcdecl->SetName(RISSE_WS("construct"));
+	tRisseASTNode_VarDecl * funcvardecl = new tRisseASTNode_VarDecl(pos);
+	tRisseASTNode_VarDeclPair * funcvardeclpair = new tRisseASTNode_VarDeclPair(
+			pos, new tRisseASTNode_Id(pos, RISSE_WS("construct"), false), funcdecl);
+	funcvardecl->AddChild(funcvardeclpair);
+	funcdecl->SetBody(body);
+
+	// function 定義を返す
+	return funcvardecl;
 }
 //---------------------------------------------------------------------------
 

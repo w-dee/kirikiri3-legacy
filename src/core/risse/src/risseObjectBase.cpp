@@ -185,6 +185,22 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		RISSE_ASSERT(attrib.GetOverride() != tRisseMemberAttribute::ocNone);
 		RISSE_ASSERT(attrib.GetProperty() != tRisseMemberAttribute::pcNone);
 
+		if(flags.Has(tRisseOperateFlags::ofFinalOnly))
+		{
+			switch(attrib.GetOverride())
+			{
+			case tRisseMemberAttribute::ocNone: // あり得ない(上でassert)
+				break;
+
+			case tRisseMemberAttribute::ocVirtual: // ふつうのやつ
+				break;
+
+			case tRisseMemberAttribute::ocFinal: // final メンバ
+				return rvMemberIsFinal;
+			}
+			return rvMemberNotFound; // 見つからなかったというのと同じ扱い
+		}
+
 		switch(attrib.GetVariable())
 		{
 		case tRisseMemberAttribute::vcNone: // あり得ない
@@ -198,9 +214,6 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		case tRisseMemberAttribute::vcConst: // 定数
 			return rvMemberIsReadOnly; // 書き込めません
 		}
-
-		if(flags.Has(tRisseOperateFlags::ofConstOnly))
-				return rvMemberNotFound; // 見つからなかったというのと同じ扱い
 
 		switch(attrib.GetProperty())
 		{
@@ -244,12 +257,12 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 	// モジュールやクラスのメンバを検索するときの基本的なフラグ
 	// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
 	// tRisseOperateFlags::ofUseThisAsContext もつける
-	// ofConstOnly をつけるのは flags に ofMemberEnsure がくっついているときだけ
+	// ofFinalOnly をつけるのは flags に ofMemberEnsure がくっついているときだけ
 	tRisseOperateFlags class_search_base_flags =
-			flags & ~(tRisseOperateFlags::ofConstOnly) |
+			flags & ~(tRisseOperateFlags::ofFinalOnly) |
 			(
 				flags.Has(tRisseOperateFlags::ofMemberEnsure) ?
-						(tRisseOperateFlags::ofConstOnly|tRisseOperateFlags::ofUseThisAsContext) :
+						(tRisseOperateFlags::ofFinalOnly|tRisseOperateFlags::ofUseThisAsContext) :
 						(                                tRisseOperateFlags::ofUseThisAsContext) 
 			);
 
@@ -298,10 +311,10 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		if(result != rvMemberNotFound) return result; // 「メンバが見つからない」以外は戻る
 	}
 
-	if(result == rvMemberNotFound && flags.Has(tRisseOperateFlags::ofConstOnly))
+	if(result == rvMemberNotFound && flags.Has(tRisseOperateFlags::ofFinalOnly))
 	{
 		// 親クラスを見に行ったがメンバがなかった、あるいはそもそも親クラスが見つからなかった。
-		// PropertyOrConstOnly が指定されているのでこの
+		// ofFinalOnly が指定されているのでこの
 		// インスタンスにメンバを作成するわけにもいかない。
 		return rvMemberNotFound; // メンバが見つからない
 	}

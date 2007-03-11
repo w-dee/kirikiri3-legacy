@@ -23,24 +23,12 @@ RISSE_DEFINE_SOURCE_ID(8931,16672,6481,19338,53901,49923,23094,28080);
 bool tRisseMemberAttribute::Overwrite(tRisseMemberAttribute rhs)
 {
 	bool overwritten = false;
-/*
-	if(rhs.Access != acNone)
-	{
-		if(Access != acNone) overwritten = true;
-		Access = rhs.Access;
-	}
-	if(rhs.Visibility != vcNone)
-	{
-		if(Visibility != vcNone) overwritten = true;
-		Visibility = rhs.Visibility;
-	}
-*/
+
 	if(rhs.Variable != vcNone)
 	{
 		if(Variable != vcNone) overwritten = true;
 		Variable = rhs.Variable;
 	}
-
 	if(rhs.Override != ocNone)
 	{
 		if(Override != ocNone) overwritten = true;

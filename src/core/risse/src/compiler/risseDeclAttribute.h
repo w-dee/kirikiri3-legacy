@@ -40,6 +40,14 @@ public:
 		Context = ccNone;
 	}
 
+	//! @brief		コピーコンストラクタ
+	//! @param		rhs		コピー元
+	tRisseDeclAttribute(const tRisseDeclAttribute & rhs) :
+		tRisseMemberAttribute(rhs)
+	{
+		Context = rhs.Context;
+	}
+
 	//! @brief		コンストラクタ (tRisseMemberAttributeから)
 	//! @param		attrib	属性
 	tRisseDeclAttribute(const tRisseMemberAttribute & context)

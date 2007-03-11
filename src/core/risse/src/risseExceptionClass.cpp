@@ -1364,6 +1364,21 @@ void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(const tRisse
 
 
 //---------------------------------------------------------------------------
+void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(const tRisseString & name)
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseIllegalMemberAccessExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				name.IsEmpty() ?
+					tRisseString(RISSE_WS_TR("member is final, cannot be overridden"), name):
+					tRisseString(RISSE_WS_TR("member \"%1\" is final, cannot be overridden"), name),
+				name)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(const tRisseString & name)
 {
 	throw new tRisseVariant(

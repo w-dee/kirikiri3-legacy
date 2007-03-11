@@ -29,9 +29,9 @@ public:
 	static const risse_uint32 ofInstanceMemberOnly = 0x2000;
 		//!< インスタンスメンバのみ参照(クラスのメンバを見に行かない)
 		//!< (ocDSet/ocDGetやメンバを参照するもの全般)
-	static const risse_uint32 ofConstOnly = 0x4000;
-		//!< 定数のみを探す。見つかった場合はrvMemberIsReadOnlyが帰る。
-		//!< 見つからなかった場合や、見つかっても定数ではなかった場合は
+	static const risse_uint32 ofFinalOnly = 0x4000;
+		//!< finalメンバのみを探す。見つかった場合はrvMemberIsFinalが帰る。
+		//!< 見つからなかった場合や、見つかってもfinalメンバではなかった場合は
 		//!< rvMemberNotFound が帰る。
 	static const risse_uint32 ofUseThisAsContext = 0x8000;
 		//!< デフォルトのコンテキストを設定しない

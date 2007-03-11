@@ -79,6 +79,13 @@ public:
 		Value = static_cast<risse_uint8>(value);
 	}
 
+	//! @brief		コピーコンストラクタ
+	//! @param		rhs		コピー元
+	tRisseMemberAttribute(const tRisseMemberAttribute & rhs)
+	{
+		Value = rhs.Value;
+	}
+
 	//! @brief		デフォルトのメンバ属性を得る
 	//! @return		デフォルトのメンバ属性
 	static tRisseMemberAttribute GetDefault()

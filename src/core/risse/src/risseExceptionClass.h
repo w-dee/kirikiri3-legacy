@@ -513,6 +513,10 @@ public:
 	//! @param		name		メンバ名
 	static void ThrowMemberIsReadOnly(const tRisseString & name);
 
+	//! @brief		「finalメンバをオーバーライドしようとした」例外を発生
+	//! @param		name		メンバ名
+	static void ThrowMemberIsFinal(const tRisseString & name);
+
 	//! @brief		「このプロパティからは読み込むことができない」例外を発生
 	//! @param		name		メンバ名
 	static void ThrowPropertyCannotBeRead(const tRisseString & name);

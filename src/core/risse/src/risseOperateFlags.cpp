@@ -36,10 +36,10 @@ tRisseString tRisseOperateFlags::AsString() const
 		str += RISSE_WS("ofInstanceMemberOnly");
 	}
 
-	if(Flags & ofConstOnly)
+	if(Flags & ofFinalOnly)
 	{
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
-		str += RISSE_WS("ofConstOnly");
+		str += RISSE_WS("ofFinalOnly");
 	}
 
 	if(Flags & ofUseThisAsContext)

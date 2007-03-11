@@ -33,6 +33,11 @@ void tRisseOperateRetValue::RaiseError(tRetValue ret, const tRisseString & name)
 		tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(name);
 		break;
 
+	case rvMemberIsFinal:
+		// "finalメンバをオーバーライドしようとした"エラー
+		tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(name);
+		break;
+
 	case rvPropertyCannotBeRead:
 		// "このプロパティからは読み込むことができない"エラー
 		tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(name);

@@ -67,7 +67,7 @@ void tRisseObjectClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_isA)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_isA, (attribute=tRisseMemberAttribute::ocConst))
 	{
 		// 自身が引数(=クラス) のインスタンスかどうかを得る
 		// 引数チェック

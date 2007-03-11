@@ -73,7 +73,7 @@ void tRisseClassBase::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(mnNew, pThis)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnNew, (context=pThis,attribute=tRisseMemberAttribute::ocConst))
 	{
 		// 空のオブジェクトを作る
 		// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
@@ -114,7 +114,7 @@ void tRisseClassBase::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD_CONTEXT(ss_fertilize, pThis)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_fertilize, (context=pThis,attribute=tRisseMemberAttribute::ocConst))
 	{
 		// 引数チェック
 		args.ExpectArgumentCount(1);

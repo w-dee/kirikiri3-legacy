@@ -137,6 +137,10 @@ public:
 	//! @param		v	アクセス制限
 	//! @return		このオブジェクト自身への参照
 	tRisseMemberAttribute & Set(tAccessControl v) { Access = v; return *this; }
+	//! @brief		アクセス制限を設定する
+	//! @param		v	アクセス制限
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & operator=(tAccessControl v) { Access = v; return *this; }
 
 	//! @brief		可視性を得る
 	//! @return		可視性
@@ -145,6 +149,10 @@ public:
 	//! @param		v	可視性
 	//! @return		このオブジェクト自身への参照
 	tRisseMemberAttribute & Set(tVisibilityControl v) { Visibility = v; return *this; }
+	//! @brief		可視性を設定する
+	//! @param		v	可視性
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & operator = (tVisibilityControl v) { Visibility = v; return *this; }
 
 	//! @brief		オーバーライド性を得る
 	//! @return		オーバーライド性
@@ -153,6 +161,10 @@ public:
 	//! @param		v	オーバーライド性
 	//! @return		このオブジェクト自身への参照
 	tRisseMemberAttribute & Set(tOverrideControl v) { Override = v; return *this; }
+	//! @brief		オーバーライド性を設定する
+	//! @param		v	オーバーライド性
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & operator =(tOverrideControl v) { Override = v; return *this; }
 
 	//! @brief		プロパティアクセス方法を得る
 	//! @return		プロパティアクセス方法
@@ -161,6 +173,10 @@ public:
 	//! @param		v	プロパティアクセス方法
 	//! @return		このオブジェクト自身への参照
 	tRisseMemberAttribute & Set(tPropertyControl v) { Property = v; return *this; }
+	//! @brief		プロパティアクセス方法を設定する
+	//! @param		v	プロパティアクセス方法
+	//! @return		このオブジェクト自身への参照
+	tRisseMemberAttribute & operator =(tPropertyControl v) { Property = v; return *this; }
 
 	//! @brief		属性を上書きする
 	//! @param		rhs		上書きする属性

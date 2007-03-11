@@ -39,12 +39,14 @@ namespace Risse
 		tRisseOperateFlags flags,             \
 		const tRisseVariant &This
 
-//! @brief		ネイティブプロパティ宣言の開始(コンテキスト指定)
+//! @brief		ネイティブプロパティ宣言の開始(オプション指定)
 //! @note		prop_name は一つの単語であること。RISSE_WS( ) などでの文字列は受け付けない。
-#define RISSE_BEGIN_NATIVE_PROPERTY_CONTEXT(prop_name, prop_context) \
+#define RISSE_BEGIN_NATIVE_PROPERTY_OPTION(prop_name, options) \
 { \
 	const tRisseString & name = (prop_name); \
-	const tRisseVariantBlock * context = (prop_context); \
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(); \
+	tRisseMemberAttribute attribute; \
+	options; \
 	struct tNCP_##prop_name { \
 		void (*getter)(RISSE_NATIVEPROPERTY_GETTER_ARGS); \
 		void (*setter)(RISSE_NATIVEPROPERTY_SETTER_ARGS); \
@@ -55,14 +57,15 @@ namespace Risse
 //! @brief		ネイティブプロパティ宣言の開始
 //! @note		prop_name は一つの単語であること。RISSE_WS( ) などでの文字列は受け付けない。
 #define RISSE_BEGIN_NATIVE_PROPERTY(prop_name) \
-	RISSE_BEGIN_NATIVE_PROPERTY_CONTEXT(prop_name, tRisseVariant::GetDynamicContext())
+	RISSE_BEGIN_NATIVE_PROPERTY_OPTION(prop_name, (void)0)
 
 //! @brief		ネイティブプロパティ宣言の終了
 #define RISSE_END_NATIVE_PROPERTY \
 		} \
 	} static instance; \
+	attribute.Set(tRisseMemberAttribute::pcProperty); \
 	RegisterNormalMember(name, tRisseVariant(tRisseNativeProperty::New(instance.getter, instance.setter), context), \
-		tRisseMemberAttribute(tRisseMemberAttribute::pcProperty)); \
+		attribute); \
 }
 
 //! @brief		ゲッター宣言の開始

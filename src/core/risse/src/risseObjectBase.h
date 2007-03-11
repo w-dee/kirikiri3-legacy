@@ -38,42 +38,6 @@ public:
 		//! @param		attrib		メンバの属性
 		tMemberData(const tRisseVariant & value, tRisseMemberAttribute attrib) :
 			Value(value), Attribute(attrib) {;}
-
-		//! @brief		プロパティアクセス方法を得る
-		//! @param		flags		オーバーライドする方法
-		//! @return		プロパティアクセス方法
-		tRisseMemberAttribute::tPropertyControl GetPropertyControl(tRisseOperateFlags flags) const
-		{
-			// flags にプロパティアクセス方法が指定されていた場合はそちらを優先する
-			tRisseMemberAttribute::tPropertyControl wanted_prop_control =
-				flags.operator tRisseMemberAttribute().GetProperty();
-			if(wanted_prop_control != tRisseMemberAttribute::pcNone)
-				return wanted_prop_control;
-
-			// flags にプロパティアクセス方法が記述されていなかった場合はメンバの属性を返す
-			tRisseMemberAttribute::tPropertyControl member_prop_control =
-				Attribute.GetProperty();
-			RISSE_ASSERT(member_prop_control != tRisseMemberAttribute::pcNone);
-			return member_prop_control;
-		}
-
-		//! @brief		オーバーライド性を得る
-		//! @param		flags		オーバーライド性をオーバーライドする方法
-		//! @return		オーバーライド性
-		tRisseMemberAttribute::tOverrideControl GetOverrideControl(tRisseOperateFlags flags) const
-		{
-			// flags にプロパティアクセス方法が指定されていた場合はそちらを優先する
-			tRisseMemberAttribute::tOverrideControl wanted_prop_control =
-				flags.operator tRisseMemberAttribute().GetOverride();
-			if(wanted_prop_control != tRisseMemberAttribute::ocNone)
-				return wanted_prop_control;
-
-			// flags にプロパティアクセス方法が記述されていなかった場合はメンバの属性を返す
-			tRisseMemberAttribute::tOverrideControl member_prop_control =
-				Attribute.GetOverride();
-			RISSE_ASSERT(member_prop_control != tRisseMemberAttribute::ocNone);
-			return member_prop_control;
-		}
 	};
 
 protected:

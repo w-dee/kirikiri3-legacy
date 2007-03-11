@@ -128,14 +128,19 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 	}
 
 	// プロパティアクセスの方法を決定する
-	tRisseMemberAttribute::tPropertyControl member_prop_control = member->GetPropertyControl(flags);
+	tRisseMemberAttribute attrib = member->Attribute;
+	attrib.Overwrite(flags);
+	RISSE_ASSERT(attrib.GetVariable() != tRisseMemberAttribute::vcNone);
+	RISSE_ASSERT(attrib.GetOverride() != tRisseMemberAttribute::ocNone);
+	RISSE_ASSERT(attrib.GetProperty() != tRisseMemberAttribute::pcNone);
+
 	// プロパティアクセスの方法に従って情報を取得する
-	switch(member_prop_control)
+	switch(attrib.GetProperty())
 	{
-	case tRisseMemberAttribute::pcNone: // あり得ない( GetPropertyControl() 中でASSERT)
+	case tRisseMemberAttribute::pcNone: // あり得ない
 		break;
 
-	case tRisseMemberAttribute::pcVar: // 普通のメンバ
+	case tRisseMemberAttribute::pcField: // 普通のメンバ
 		// 単純に、結果に値をコピーする
 		result = member->Value;
 		break;
@@ -174,32 +179,35 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 	{
 		// メンバが見つかったのでこれに上書きをする
 		// そのまえに属性チェック
-		tRisseMemberAttribute::tPropertyControl member_prop_control = member->GetPropertyControl(flags);
-		tRisseMemberAttribute::tOverrideControl member_ovl_control  = member->GetOverrideControl(flags);
+		tRisseMemberAttribute attrib = member->Attribute;
+		attrib.Overwrite(flags); // flags の指定を優先させる
+		RISSE_ASSERT(attrib.GetVariable() != tRisseMemberAttribute::vcNone);
+		RISSE_ASSERT(attrib.GetOverride() != tRisseMemberAttribute::ocNone);
+		RISSE_ASSERT(attrib.GetProperty() != tRisseMemberAttribute::pcNone);
 
-		switch(member_ovl_control)
+		switch(attrib.GetVariable())
 		{
-		case tRisseMemberAttribute::ocNone: // あり得ない( GetPropertyControl() 中でASSERT)
-			RISSE_ASSERT(member_ovl_control != tRisseMemberAttribute::ocNone);
+		case tRisseMemberAttribute::vcNone: // あり得ない
+			RISSE_ASSERT(attrib.GetVariable() != tRisseMemberAttribute::vcNone);
 			break;
 
-		case tRisseMemberAttribute::ocVirtual: // ふつうのやつ
+		case tRisseMemberAttribute::vcVar: // ふつうのやつ
 			// 下で処理
 			break;
 
-		case tRisseMemberAttribute::ocConst: // 定数
+		case tRisseMemberAttribute::vcConst: // 定数
 			return rvMemberIsReadOnly; // 書き込めません
 		}
 
 		if(flags.Has(tRisseOperateFlags::ofConstOnly))
 				return rvMemberNotFound; // 見つからなかったというのと同じ扱い
 
-		switch(member_prop_control)
+		switch(attrib.GetProperty())
 		{
-		case tRisseMemberAttribute::pcNone: // あり得ない( GetPropertyControl() 中でASSERT)
+		case tRisseMemberAttribute::pcNone: // あり得ない
 			break;
 
-		case tRisseMemberAttribute::pcVar: // 普通のメンバ
+		case tRisseMemberAttribute::pcField: // 普通のメンバ
 			member->Value = value;
 			return rvNoError;
 
@@ -218,11 +226,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		if(flags.Has(tRisseOperateFlags::ofMemberEnsure))
 		{
 			// 新規作成フラグがある場合はメンバを新規作成する
-			tRisseMemberAttribute attrib = flags;
-			if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
-				attrib.Set(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
-			if(attrib.GetOverride() == tRisseMemberAttribute::ocNone)
-				attrib.Set(tRisseMemberAttribute::ocVirtual); // デフォルトはocVirtual
+			tRisseMemberAttribute attrib = tRisseMemberAttribute::GetDefault();
+			attrib.Overwrite(flags);
 			HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
 			return rvNoError;
 		}
@@ -307,11 +312,9 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		// クラスにメンバが無かった場合、
 		// クラスにメンバがあったがプロパティとして起動できなかった
 		// 場合はこのインスタンスにメンバを作成する。
-		tRisseMemberAttribute attrib = flags;
-		if(attrib.GetProperty() == tRisseMemberAttribute::pcNone)
-			attrib.Set(tRisseMemberAttribute::pcVar); // デフォルトはpcVar
-		if(attrib.GetOverride() == tRisseMemberAttribute::ocNone)
-			attrib.Set(tRisseMemberAttribute::ocVirtual); // デフォルトはocVirtual
+		tRisseMemberAttribute attrib;
+		attrib = tRisseMemberAttribute::GetDefault();
+		attrib.Overwrite(flags);
 		HashTable.Add(name, tMemberData(tMemberData(value, attrib)));
 		return rvNoError;
 	}
@@ -543,8 +546,7 @@ void tRisseObjectBase::RegisterNormalMember(const tRisseString & name,
 	tRisseOperateFlags access_flags =
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
 	RaiseIfError(Write(name,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
+		tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
 							access_flags, value, tRisseVariant(this)), name);
 	if(attrib.HasAny())
 		SetAttribute(name, access_flags|attrib);

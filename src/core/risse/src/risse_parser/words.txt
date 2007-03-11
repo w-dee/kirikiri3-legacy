@@ -149,6 +149,7 @@ volatile            T_VOLATILE     - true false
 enumerable          T_ENUMERABLE   - true false
 hidden              T_HIDDEN       - true false
 virtual             T_VIRTUAL      - true false
+field               T_FIELD        - true false
 
 ##### 定数
 ##### 注意

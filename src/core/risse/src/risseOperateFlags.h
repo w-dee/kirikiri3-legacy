@@ -69,12 +69,8 @@ public:
 	operator risse_uint32() const { return Flags; }
 
 	//! @brief		属性を持っているかどうかを調べる
-	//! @param		v	アクセス制限
-	bool Has(tRisseMemberAttribute::tAccessControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
-
-	//! @brief		属性を持っているかどうかを調べる
-	//! @param		v	可視性
-	bool Has(tRisseMemberAttribute::tVisibilityControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
+	//! @param		v	変更性
+	bool Has(tRisseMemberAttribute::tVariableControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	オーバーライド性

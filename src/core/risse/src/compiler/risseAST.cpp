@@ -917,7 +917,7 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 				new tRisseASTNode_Factor(position, aftConstant, str_name), matDirect,
 
 					tRisseOperateFlags(
-						tRisseDeclAttribute(tRisseDeclAttribute::pcVar)|
+						tRisseDeclAttribute(tRisseDeclAttribute::pcField)|
 						tRisseOperateFlags::ofMemberEnsure)
 						// 普通の変数アクセスかつメンバの作成
 					);

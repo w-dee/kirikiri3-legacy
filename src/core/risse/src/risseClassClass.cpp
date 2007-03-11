@@ -79,8 +79,7 @@ void tRisseClassClass::RegisterMembers()
 			tRisseOperateFlags access_flags =
 				tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
 			This.SetPropertyDirect(ss_super,
-				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar))|
-				tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual))|
+				tRisseOperateFlags(tRisseMemberAttribute::GetDefault())|
 				access_flags,
 				args[0], This);
 		}

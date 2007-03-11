@@ -23,7 +23,7 @@ RISSE_DEFINE_SOURCE_ID(8931,16672,6481,19338,53901,49923,23094,28080);
 bool tRisseMemberAttribute::Overwrite(tRisseMemberAttribute rhs)
 {
 	bool overwritten = false;
-
+/*
 	if(rhs.Access != acNone)
 	{
 		if(Access != acNone) overwritten = true;
@@ -34,6 +34,13 @@ bool tRisseMemberAttribute::Overwrite(tRisseMemberAttribute rhs)
 		if(Visibility != vcNone) overwritten = true;
 		Visibility = rhs.Visibility;
 	}
+*/
+	if(rhs.Variable != vcNone)
+	{
+		if(Variable != vcNone) overwritten = true;
+		Variable = rhs.Variable;
+	}
+
 	if(rhs.Override != ocNone)
 	{
 		if(Override != ocNone) overwritten = true;
@@ -54,24 +61,13 @@ bool tRisseMemberAttribute::Overwrite(tRisseMemberAttribute rhs)
 tRisseString tRisseMemberAttribute::AsString() const
 {
 	tRisseString str;
-	if(Access != acNone)
+	if(Variable != vcNone)
 	{
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
-		switch(Access)
+		switch(Variable)
 		{
-			case acPublic:		str += RISSE_WS("public");		break;
-			case acInternal:	str += RISSE_WS("internal");	break;
-			case acPrivate:		str += RISSE_WS("private");		break;
-			default: ;
-		}
-	}
-	if(Visibility != vcNone)
-	{
-		if(!str.IsEmpty()) str += RISSE_WC(' ');
-		switch(Visibility)
-		{
-			case vcEnumerable:	str += RISSE_WS("enumerable");	break;
-			case vcHidden:		str += RISSE_WS("hidden");		break;
+			case vcVar:			str += RISSE_WS("var");			break;
+			case vcConst:		str += RISSE_WS("const");		break;
 			default: ;
 		}
 	}
@@ -81,8 +77,7 @@ tRisseString tRisseMemberAttribute::AsString() const
 		switch(Override)
 		{
 			case ocVirtual:		str += RISSE_WS("virtual");		break;
-			case ocConst:		str += RISSE_WS("const");		break;
-//			case ocFinal:		str += RISSE_WS("final");		break;
+			case ocFinal:		str += RISSE_WS("final");		break;
 			default: ;
 		}
 	}
@@ -91,7 +86,7 @@ tRisseString tRisseMemberAttribute::AsString() const
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
 		switch(Property)
 		{
-			case pcVar:			str += RISSE_WS("var");			break;
+			case pcField:		str += RISSE_WS("field");		break;
 			case pcProperty:	str += RISSE_WS("property");	break;
 			default: ;
 		}

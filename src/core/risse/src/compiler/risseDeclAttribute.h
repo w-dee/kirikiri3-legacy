@@ -48,18 +48,10 @@ public:
 		Context = ccNone;
 	}
 
-	//! @brief		コンストラクタ (accessから)
-	//! @param		access	アクセス制限
-	explicit tRisseDeclAttribute(tAccessControl access) :
-		tRisseMemberAttribute(access)
-	{
-		Context = ccNone;
-	}
-
-	//! @brief		コンストラクタ (visibilityから)
-	//! @param		visibility	可視性
-	explicit tRisseDeclAttribute(tVisibilityControl visibility) :
-		tRisseMemberAttribute(visibility)
+	//! @brief		コンストラクタ (variableから)
+	//! @param		variable	変更性
+	explicit tRisseDeclAttribute(tVariableControl variable) :
+		tRisseMemberAttribute(variable)
 	{
 		Context = ccNone;
 	}
@@ -90,15 +82,10 @@ public:
 	//! @brief	ダウンキャスト
 	operator tRisseMemberAttribute () const { return *(const tRisseMemberAttribute*)this; }
 
-	//! @brief		アクセス制限を設定する
-	//! @param		v	アクセス制限
+	//! @brief		変更性を設定する
+	//! @param		v	変更性
 	//! @return		このオブジェクト自身への参照
-	tRisseMemberAttribute & Set(tAccessControl v) { tRisseMemberAttribute::Set(v); return *this; }
-
-	//! @brief		可視性を設定する
-	//! @param		v	可視性
-	//! @return		このオブジェクト自身への参照
-	tRisseMemberAttribute & Set(tVisibilityControl v) { tRisseMemberAttribute::Set(v); return *this; }
+	tRisseMemberAttribute & Set(tVariableControl v) { tRisseMemberAttribute::Set(v); return *this; }
 
 	//! @brief		オーバーライド性を設定する
 	//! @param		v	オーバーライド性

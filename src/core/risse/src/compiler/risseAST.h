@@ -821,9 +821,7 @@ public:
 	//! @note		これに先立って PrepareVarDecl() を実行しておくこと。
 	static void GenerateVarDecl(tRisseSSAForm * form, risse_size position, const tRisseASTNode * name,
 			tRisseSSAVariable * init,
-			tRisseDeclAttribute attrib = tRisseMemberAttribute(
-				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
-				tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)));
+			tRisseDeclAttribute attrib = tRisseMemberAttribute::GetDefault() );
 };
 //---------------------------------------------------------------------------
 

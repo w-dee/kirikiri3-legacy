@@ -67,7 +67,7 @@ void tRisseObjectClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_isA, (attribute=tRisseMemberAttribute::ocConst))
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_isA, (attribute=tRisseMemberAttribute::vcConst))
 	{
 		// 自身が引数(=クラス) のインスタンスかどうかを得る
 		// 引数チェック
@@ -88,8 +88,7 @@ void tRisseObjectClass::RegisterMembers()
 		// This のインスタンスメンバを取得する
 		tRisseVariant ret = 
 			This.GetPropertyDirect(args[0],
-				tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
-				tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)|
+				tRisseMemberAttribute::GetDefault()|
 				tRisseOperateFlags::ofInstanceMemberOnly,
 				This);
 		if(result) *result = ret;
@@ -105,8 +104,7 @@ void tRisseObjectClass::RegisterMembers()
 
 		// This のインスタンスメンバを設定する
 		This.SetPropertyDirect(args[0],
-			tRisseMemberAttribute(tRisseMemberAttribute::pcVar)|
-			tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)|
+			tRisseMemberAttribute::GetDefault()|
 			tRisseOperateFlags::ofInstanceMemberOnly|
 			tRisseOperateFlags::ofMemberEnsure,
 						args[1], This);

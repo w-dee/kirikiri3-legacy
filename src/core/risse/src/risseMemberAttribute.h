@@ -27,21 +27,12 @@ namespace Risse
 class tRisseMemberAttribute : public tRisseCollectee
 {
 public:
-	//! @brief	アクセス制限を規定するもの
-	enum tAccessControl
-	{
-		acNone,
-		acPublic, //!< public アクセス
-		acInternal, //!< internal アクセス
-		acPrivate,	//!< private アクセス
-	};
-
-	//! @brief	可視性を規定するもの
-	enum tVisibilityControl
+	//! @brief	変更性を規定する物
+	enum tVariableControl
 	{
 		vcNone,
-		vcEnumerable, //!< 列挙可能
-		vcHidden, //!< 列挙不可
+		vcVar, //!< メンバは変更可能
+		vcConst, //!< 一度assignした値は変更不可
 	};
 
 	//! @brief	オーバーライド性を規定する物
@@ -49,14 +40,14 @@ public:
 	{
 		ocNone,
 		ocVirtual, //!< インスタンスごとに異なる値を持ち、サブクラスでオーバーライド可
-		ocConst, //!< 定数
+		ocFinal, //!< サブクラスでオーバーライド不可
 	};
 
 	//! @brief	プロパティアクセス方法を規定する物
 	enum tPropertyControl
 	{
 		pcNone,
-		pcVar, //!< 普通のメンバ
+		pcField, //!< 普通のメンバ
 		pcProperty, //!< 読み出しと書き込みにおいてゲッタとセッタの呼び出しを伴うメンバ
 	};
 
@@ -65,8 +56,7 @@ private:
 	{
 		struct
 		{
-			tAccessControl		Access		: 2;
-			tVisibilityControl	Visibility	: 2;
+			tVariableControl	Variable	: 2;
 			tOverrideControl	Override	: 2;
 			tPropertyControl	Property	: 2;
 		};
@@ -77,8 +67,7 @@ public:
 	//! @brief		デフォルトコンストラクタ
 	tRisseMemberAttribute()
 	{
-		Access = acNone;
-		Visibility = vcNone;
+		Variable = vcNone;
 		Override = ocNone;
 		Property = pcNone;
 	}
@@ -90,32 +79,29 @@ public:
 		Value = static_cast<risse_uint8>(value);
 	}
 
-	//! @brief		コンストラクタ (accessから)
-	//! @param		access	アクセス制限
-	explicit tRisseMemberAttribute(tAccessControl access)
+	//! @brief		デフォルトのメンバ属性を得る
+	//! @return		デフォルトのメンバ属性
+	static tRisseMemberAttribute GetDefault()
 	{
-		Access = access;
-		Visibility = vcNone;
+		tRisseMemberAttribute ret;
+		return ret.Set(vcVar).Set(ocVirtual).Set(pcField);
+	}
+
+	//! @brief		コンストラクタ (variableから)
+	//! @param		variable	変更性
+	explicit tRisseMemberAttribute(tVariableControl variable)
+	{
+		Variable = variable;
 		Override = ocNone;
 		Property = pcNone;
 	}
 
-	//! @brief		コンストラクタ (visibilityから)
-	//! @param		visibility	可視性
-	explicit tRisseMemberAttribute(tVisibilityControl visibility)
-	{
-		Access = acNone;
-		Visibility = visibility;
-		Override = ocNone;
-		Property = pcNone;
-	}
 
 	//! @brief		コンストラクタ (overrideから)
 	//! @param		override	オーバーライド性
 	explicit tRisseMemberAttribute(tOverrideControl override)
 	{
-		Access = acNone;
-		Visibility = vcNone;
+		Variable = vcNone;
 		Override = override;
 		Property = pcNone;
 	}
@@ -124,35 +110,22 @@ public:
 	//! @param		property	プロパティアクセス方法
 	explicit tRisseMemberAttribute(tPropertyControl property)
 	{
-		Access = acNone;
-		Visibility = vcNone;
+		Variable = vcNone;
 		Override = ocNone;
 		Property = property;
 	}
 
-	//! @brief		アクセス制限を得る
-	//! @return		アクセス制限
-	tAccessControl GetAccess() const { return Access; }
-	//! @brief		アクセス制限を設定する
-	//! @param		v	アクセス制限
+	//! @brief		変更性を得る
+	//! @return		変更性
+	tVariableControl GetVariable() const { return Variable; }
+	//! @brief		変更性を設定する
+	//! @param		v	変更性
 	//! @return		このオブジェクト自身への参照
-	tRisseMemberAttribute & Set(tAccessControl v) { Access = v; return *this; }
-	//! @brief		アクセス制限を設定する
-	//! @param		v	アクセス制限
+	tRisseMemberAttribute & Set(tVariableControl v) { Variable = v; return *this; }
+	//! @brief		変更性を設定する
+	//! @param		v	変更性
 	//! @return		このオブジェクト自身への参照
-	tRisseMemberAttribute & operator=(tAccessControl v) { Access = v; return *this; }
-
-	//! @brief		可視性を得る
-	//! @return		可視性
-	tVisibilityControl GetVisibility() const { return Visibility; }
-	//! @brief		可視性を設定する
-	//! @param		v	可視性
-	//! @return		このオブジェクト自身への参照
-	tRisseMemberAttribute & Set(tVisibilityControl v) { Visibility = v; return *this; }
-	//! @brief		可視性を設定する
-	//! @param		v	可視性
-	//! @return		このオブジェクト自身への参照
-	tRisseMemberAttribute & operator = (tVisibilityControl v) { Visibility = v; return *this; }
+	tRisseMemberAttribute & operator = (tVariableControl v) { Variable = v; return *this; }
 
 	//! @brief		オーバーライド性を得る
 	//! @return		オーバーライド性
@@ -189,12 +162,9 @@ public:
 	operator risse_uint32() const { return static_cast<risse_uint32>(Value); }
 
 	//! @brief		属性を持っているかどうかを調べる
-	//! @param		v	アクセス制限
-	bool Has(tAccessControl v) const { return Access == v; }
+	//! @param		v	変更性
+	bool Has(tVariableControl v) const { return Variable == v; }
 
-	//! @brief		属性を持っているかどうかを調べる
-	//! @param		v	可視性
-	bool Has(tVisibilityControl v) const { return Visibility == v; }
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	オーバーライド性
@@ -209,8 +179,7 @@ public:
 	//! @return		何か属性を持っていれば真
 	bool HasAny() const
 		{ return
-			Access != acNone ||
-			Visibility != vcNone ||
+			Variable != vcNone ||
 			Override != ocNone ||
 			Property != pcNone;
 		}

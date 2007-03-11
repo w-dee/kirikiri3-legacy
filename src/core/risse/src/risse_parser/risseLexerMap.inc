@@ -120,6 +120,20 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
     }
     p += 3;
     goto cut_word;
+   case 'e':
+    switch(p[3]) {
+    case 'l':
+     switch(p[4]) {
+     case 'd':
+      p += 5;
+      if(!Risse_iswordcha_nc(*p)) { ptr = p; return T_FIELD; }
+      goto cut_word;
+     }
+     p += 4;
+     goto cut_word;
+    }
+    p += 3;
+    goto cut_word;
    }
    p += 2;
    goto cut_word;

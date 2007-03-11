@@ -35,8 +35,7 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 	// そのオブジェクトにクラス情報を設定する
 	// ここではclassメンバに「自分のクラス」を追加する
 	Gateway.SetPropertyDirect(ss_class,
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::pcVar)) |
-		tRisseOperateFlags(tRisseMemberAttribute(tRisseMemberAttribute::ocVirtual)) |
+		tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 		tRisseVariant(this), Gateway);
 

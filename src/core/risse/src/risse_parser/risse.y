@@ -301,6 +301,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	T_ENUMERABLE			"enumerable"
 	T_HIDDEN				"hidden"
 	T_VIRTUAL				"virtual"
+	T_FIELD					"field"
 
 	T_FALSE					"false"
 	T_NULL					"null"
@@ -327,8 +328,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 
 %type <attr>		decl_attr_list
 					decl_attr
-					decl_attr_access
-					decl_attr_visibility
+					decl_attr_variable
 					decl_attr_override
 
 %type <value>		member_name
@@ -603,7 +603,7 @@ variable_def_no_semicolon
 	| "const" onl variable_id_list			{ $$ = $3;
 											  C(VarDecl, $$)->SetAttribute(
 											  	tRisseDeclAttribute(
-											  	tRisseDeclAttribute::ocConst)); }
+											  	tRisseDeclAttribute::vcConst)); }
 ;
 
 /* list for the variable definition */
@@ -921,25 +921,17 @@ decl_attr_list
 ;
 
 decl_attr
-	: decl_attr_access | decl_attr_visibility | decl_attr_override
+	: decl_attr_variable | decl_attr_override
 ;
 
 /* attribute specifiers */
 
-decl_attr_access
-	: "public"	onl 						{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::acPublic); }
-	| "internal"onl 						{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::acInternal); }
-	| "private"	onl 						{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::acPrivate); }
-;
-
-decl_attr_visibility
-	: "enumerable"	onl 					{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::vcEnumerable); }
-	| "hidden"		onl 					{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::vcHidden); }
+decl_attr_variable
+	: "const"	onl 						{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::vcConst); }
 ;
 
 decl_attr_override
-	: "const"		onl 					{ $$ = new tRisseDeclAttribute(tRisseMemberAttribute::ocConst); }
-	| "virtual"		onl 					{ $$ = new tRisseDeclAttribute(tRisseMemberAttribute::ocVirtual); }
+	: "final"	onl 						{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::ocFinal); }
 ;
 
 
@@ -1050,6 +1042,7 @@ member_name
 	| "enumerable"							{ $$ = new tRisseVariant(ss_enumerable     ); }
 	| "hidden"								{ $$ = new tRisseVariant(ss_hidden         ); }
 	| "virtual"								{ $$ = new tRisseVariant(ss_virtual        ); }
+	| "field"								{ $$ = new tRisseVariant(ss_field          ); }
 
 	| "void"								{ $$ = new tRisseVariant(ss_void           ); }
 	| "null"								{ $$ = new tRisseVariant(ss_null           ); }

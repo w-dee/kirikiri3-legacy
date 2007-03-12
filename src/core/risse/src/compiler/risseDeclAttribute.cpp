@@ -23,7 +23,7 @@ RISSE_DEFINE_SOURCE_ID(59144,28247,41947,16395,152,20119,4221,27137);
 bool tRisseDeclAttribute::Overwrite(const tRisseDeclAttribute & rhs)
 {
 	bool mem_overwritten = tRisseMemberAttribute::Overwrite(rhs);
-	bool overwritten;
+	bool overwritten = false;
 
 	if(rhs.Context != ccNone)
 	{

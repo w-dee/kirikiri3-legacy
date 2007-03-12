@@ -916,7 +916,7 @@ definition
 /* attribute lists */
 
 decl_attr_list
-	: decl_attr								{ $$ = new tRisseDeclAttribute(*$1); }
+	: decl_attr								{ $$ = $1; }
 	| decl_attr_list decl_attr				{ $$ = RisseOverwriteDeclAttribute(PR, @1.first, $1, $2); }
 ;
 

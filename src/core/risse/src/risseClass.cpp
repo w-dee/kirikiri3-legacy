@@ -14,6 +14,7 @@
 
 #include "risseClass.h"
 #include "risseNativeFunction.h"
+#include "risseNativeProperty.h"
 #include "risseObjectBase.h"
 #include "risseVariant.h"
 #include "risseOpCodes.h"
@@ -162,6 +163,42 @@ void tRisseClassBase::RegisterMembers()
 			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 			tRisseVariant(tRisseClassClass::GetPointer()), *pThis);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_include)
+	{
+		// クラスの modules 配列にモジュールを追加する
+
+		// modules を取り出す
+		tRisseVariant modules = This.GetPropertyDirect(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
+
+		// Array.unshift を行う
+		modules.Do(ocFuncCall, NULL, ss_unshift, 0, args);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_PROPERTY(ss_extensible)
+	{
+		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
+		{
+			tRisseClassInstance * obj = This.CheckAndGetObjectInterafce<tRisseClassInstance, tRisseClassClass>();
+
+		}
+		RISSE_END_NATIVE_PROPERTY_GETTER
+
+		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
+		{
+			tRisseClassInstance * obj = This.CheckAndGetObjectInterafce<tRisseClassInstance, tRisseClassClass>();
+		}
+		RISSE_END_NATIVE_PROPERTY_SETTER
+	}
+	RISSE_END_NATIVE_PROPERTY
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 }
 //---------------------------------------------------------------------------
 

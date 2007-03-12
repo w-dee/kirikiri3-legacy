@@ -70,8 +70,10 @@ ss_IOException						IOException						#!< "IOException" クラス名
 ss_CharConversionException			CharConversionException			#!< "CharConversionException" クラス名
 ss_UnsupportedOperationException	UnsupportedOperationException	#!< "UnsupportedOperationException" クラス名
 ss_BadContextException				BadContextException				#!< "BadContextException" クラス名
+ss_ClassDefinitionException			ClassDefinitionException		#!< "ClassDefinitionException" クラス名
 ss_InstantiationException			InstantiationException			#!< "InstantiationException" クラス名
 ss_AssertionError					AssertionError					#!< "AssertionError" クラス名
 ss_expression						expression						#!< "expression" インスタンス変数/プロパティ名
 ss_NullObjectException				NullObjectException				#!< "NullObjectException" クラス名
 ss_CompileException					CompileException				#!< "CompileException" クラス名
+ss_extensible						extensible						#!< "extensible" プロパティ名

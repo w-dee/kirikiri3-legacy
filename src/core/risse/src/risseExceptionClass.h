@@ -285,6 +285,30 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"ClassDefinitionException" クラス
+//---------------------------------------------------------------------------
+class tRisseClassDefinitionExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseClassDefinitionExceptionClass>
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	tRisseClassDefinitionExceptionClass();
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「extensibleでないクラスのサブクラスを作成しようとした」例外を発生
+	static void ThrowCannotCreateSubClassOfNonExtensibleClass();
+
+	//! @brief		「スーパークラスはクラスではない」例外を発生
+	static void ThrowSuperClassIsNotAClass();
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		"InstantiationException" クラス
 //---------------------------------------------------------------------------
 class tRisseInstantiationExceptionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseInstantiationExceptionClass>

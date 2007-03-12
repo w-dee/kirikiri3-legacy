@@ -20,6 +20,7 @@
 #include "risseNativeProperty.h"
 #include "risseOpCodes.h"
 #include "risseStaticStrings.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -75,32 +76,23 @@ void tRisseClassClass::RegisterMembers()
 		if(args.HasArgument(0) && !args[0].IsNull())
 		{
 			// スーパークラスが指定されている
+			// スーパークラスはクラスのインスタンスかどうかをチェック
+			tRisseVariant super_class = args[0];
+			if(!super_class.InstanceOf(tRisseVariant(tRisseClassClass::GetPointer())))
+				tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass();
+
 			// super を登録
 			tRisseOperateFlags access_flags =
 				tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
 			This.SetPropertyDirect(ss_super,
 				tRisseOperateFlags(tRisseMemberAttribute::GetDefault())|
 				access_flags,
-				args[0], This);
+				super_class, This);
 		}
 	}
 	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_include)
-	{
-		// クラスの modules 配列にモジュールを追加する
-
-		// modules を取り出す
-		tRisseVariant modules = This.GetPropertyDirect(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
-
-		// Array.unshift を行う
-		modules.Do(ocFuncCall, NULL, ss_unshift, 0, args);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 }
 //---------------------------------------------------------------------------

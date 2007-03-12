@@ -25,6 +25,29 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
 
+/*
+ 例外クラス階層
+
+ Throwable
+   Error
+     AssertionError
+   BlockExitException
+   Exception
+     IOException
+       CharConversionException
+     RuntimeException
+       CompileException
+       InstantiationException
+       BadContextException
+       UnsupportedOperation
+       ArgumentException
+         IllegalArgumentException
+           NullObjectException
+         BadArgumentCountException
+       MemberAccessException
+         NoSuchMemberException
+         IllegalMemberAccessException
+*/
 
 //---------------------------------------------------------------------------
 tRisseExitTryExceptionClass::tRisseExitTryExceptionClass(
@@ -327,7 +350,7 @@ void tRisseErrorClass::RegisterMembers()
 
 //---------------------------------------------------------------------------
 tRisseAssertionErrorClass::tRisseAssertionErrorClass() :
-	tRisseClassBase(tRisseThrowableClass::GetPointer())
+	tRisseClassBase(tRisseErrorClass::GetPointer())
 {
 	RegisterMembers();
 }
@@ -739,6 +762,79 @@ void tRisseCompileExceptionClass::Throw(const tRisseString & reason, const tRiss
 
 	// 例外を投げる
 	throw e;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseClassDefinitionExceptionClass::tRisseClassDefinitionExceptionClass() :
+	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassDefinitionExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// 特にやることはない
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+		tRisseClassDefinitionExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleClass()
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseClassDefinitionExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				tRisseString(RISSE_WS_TR("cannot create subclass of non-extensible superclass"))
+					)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass()
+{
+	throw new tRisseVariant(
+		tRisseVariant(tRisseClassDefinitionExceptionClass::GetPointer()).
+			New(0,
+				tRisseMethodArgument::New(
+				tRisseString(RISSE_WS_TR("the superclass is not a class"))
+					)));
 }
 //---------------------------------------------------------------------------
 

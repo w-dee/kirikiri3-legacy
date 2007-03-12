@@ -75,6 +75,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseCharConversionExceptionClass::RegisterClassInstance(GlobalObject, ss_CharConversionException);
 	tRisseRuntimeExceptionClass::RegisterClassInstance(GlobalObject, ss_RuntimeException);
 	tRisseCompileExceptionClass::RegisterClassInstance(GlobalObject, ss_CompileException);
+	tRisseClassDefinitionExceptionClass::RegisterClassInstance(GlobalObject, ss_ClassDefinitionException);
 	tRisseInstantiationExceptionClass::RegisterClassInstance(GlobalObject, ss_InstantiationException);
 	tRisseUnsupportedOperationExceptionClass::RegisterClassInstance(GlobalObject, ss_UnsupportedOperationException);
 	tRisseBadContextExceptionClass::RegisterClassInstance(GlobalObject, ss_BadContextException);
@@ -113,6 +114,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	tRisseCharConversionExceptionClass::GetPointer()->RegisterMembers();
 	tRisseRuntimeExceptionClass::GetPointer()->RegisterMembers();
 	tRisseCompileExceptionClass::GetPointer()->RegisterMembers();
+	tRisseClassDefinitionExceptionClass::GetPointer()->RegisterMembers();
 	tRisseInstantiationExceptionClass::GetPointer()->RegisterMembers();
 	tRisseUnsupportedOperationExceptionClass::GetPointer()->RegisterMembers();
 	tRisseBadContextExceptionClass::GetPointer()->RegisterMembers();

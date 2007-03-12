@@ -46,7 +46,7 @@ void tRisseNumberClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_construct,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
 		// デフォルトでは何もしない
 	}
@@ -54,7 +54,7 @@ void tRisseNumberClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_PROPERTY(ss_isNaN)
+	RISSE_BEGIN_NATIVE_PROPERTY_OPTION(ss_isNaN,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
 		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
 		{

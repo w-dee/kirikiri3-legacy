@@ -60,7 +60,8 @@ class tRisseClassBase : public tRisseObjectBase
 public:
 	//! @brief		コンストラクタ
 	//! @param		super_class		スーパークラスを表すオブジェクト
-	tRisseClassBase(tRisseClassBase * super_class = NULL);
+	//! @param		extensible		extensible の場合に真
+	tRisseClassBase(tRisseClassBase * super_class = NULL, bool extensible = true);
 
 public:
 	//! @brief		各メンバをインスタンスに追加する

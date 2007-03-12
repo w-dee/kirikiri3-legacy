@@ -46,7 +46,7 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 
 
 //---------------------------------------------------------------------------
-tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBase(ss_super)
+tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible) : tRisseObjectBase(ss_super)
 {
 	// 親クラスのRTTIを引き継ぐ
 	if(super_class) RTTI = super_class->RTTI;
@@ -59,6 +59,7 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class) : tRisseObjectBa
 
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant(super_class));
+
 }
 //---------------------------------------------------------------------------
 
@@ -74,7 +75,7 @@ void tRisseClassBase::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnNew, (context=pThis,attribute=tRisseMemberAttribute::vcConst))
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnNew, (context=pThis,attribute.Set(tRisseMemberAttribute::vcConst)))
 	{
 		// 空のオブジェクトを作る
 		// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
@@ -177,25 +178,6 @@ void tRisseClassBase::RegisterMembers()
 		modules.Do(ocFuncCall, NULL, ss_unshift, 0, args);
 	}
 	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_PROPERTY(ss_extensible)
-	{
-		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
-		{
-			tRisseClassInstance * obj = This.CheckAndGetObjectInterafce<tRisseClassInstance, tRisseClassClass>();
-
-		}
-		RISSE_END_NATIVE_PROPERTY_GETTER
-
-		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
-		{
-			tRisseClassInstance * obj = This.CheckAndGetObjectInterafce<tRisseClassInstance, tRisseClassClass>();
-		}
-		RISSE_END_NATIVE_PROPERTY_SETTER
-	}
-	RISSE_END_NATIVE_PROPERTY
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

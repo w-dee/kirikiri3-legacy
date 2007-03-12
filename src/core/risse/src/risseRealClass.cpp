@@ -53,7 +53,7 @@ void tRisseRealClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_initialize,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
 		// 親クラスの同名メソッドは「呼び出されない」
 

@@ -52,7 +52,7 @@ void tRisseStringClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_initialize,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
 		// 親クラスの同名メソッドは「呼び出されない」
 
@@ -66,7 +66,7 @@ void tRisseStringClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_charAt)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_charAt,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
 		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
 
@@ -85,7 +85,7 @@ void tRisseStringClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_PROPERTY(ss_length)
+	RISSE_BEGIN_NATIVE_PROPERTY_OPTION(ss_length,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
 		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
 		{

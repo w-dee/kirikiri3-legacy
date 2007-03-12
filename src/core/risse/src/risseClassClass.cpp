@@ -92,8 +92,7 @@ void tRisseClassClass::RegisterMembers()
 	}
 	RISSE_END_NATIVE_METHOD
 
-
-
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
 
@@ -101,25 +100,6 @@ void tRisseClassClass::RegisterMembers()
 //---------------------------------------------------------------------------
 tRisseClassClass::tRetValue tRisseClassClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
-/*
-	// ocCreateNewObjectBase の処理をオーバーライドする
-	if(code == ocCreateNewObjectBase && name.IsEmpty())
-	{
-		// 親クラスの機能を呼ぶ
-		tRetValue rv = inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
-		if(rv != rvNoError) return rv;
-
-		// デフォルトのコンテキストを dynamic context に設定する。
-		// 親クラスの ocCreateNewObjectBase ではデフォルトのコンテキストがそのクラス自身に
-		// 設定されたはずだが(普通のインスタンスならばこれでよい)、
-		// クラスインスタンスが返すデフォルトのコンテキストは dynamic context でなくてはならない。
-		RISSE_ASSERT(result != NULL);
-		result->Do(ocSetDefaultContext, NULL, tRisseString::GetEmptyString(), 0,
-					tRisseMethodArgument::New(*tRisseVariant::GetDyanamicContext()));
-
-		return rvNoError;
-	}
-*/
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 }
 //---------------------------------------------------------------------------
@@ -158,17 +138,6 @@ void tRisseClassInstance::RegisterMembers()
 //---------------------------------------------------------------------------
 tRisseClassInstance::tRetValue tRisseClassInstance::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
-/*
-	// ocCreateNewObjectBase の処理をオーバーライドする
-	if(code == ocCreateNewObjectBase && name.IsEmpty())
-	{
-		// 親クラス(tRisseClassClass)ではなく、tRisseClassBaseの機能を呼ぶ
-
-		// 親クラスの tRisseClassClass はデフォルトのコンテキストを dynamic context にしてしまうが
-		// それはこのクラスにおいては困るので tRisseClassBase の機能を呼ぶ
-		return tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
-	}
-*/
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 }
 //---------------------------------------------------------------------------

@@ -51,8 +51,9 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_construct,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
+		// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
 		// デフォルトでは何もしない
 	}
 	RISSE_END_NATIVE_METHOD
@@ -96,8 +97,9 @@ void tRissePrimitiveClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_construct, (attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal)))
 	{
+		// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
 		// デフォルトでは何もしない
 	}
 	RISSE_END_NATIVE_METHOD

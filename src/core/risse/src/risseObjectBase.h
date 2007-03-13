@@ -85,6 +85,12 @@ public:
 	tRetValue Write(const tRisseString & name, tRisseOperateFlags flags,
 				const tRisseVariant &value, const tRisseVariant &This);
 
+	//! @brief		メンバを削除する
+	//! @param		name		メンバ名
+	//! @param		flags		操作フラグ
+	//! @return		結果
+	tRetValue Delete(const tRisseString & name, tRisseOperateFlags flags);
+
 private:
 public:
 	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall

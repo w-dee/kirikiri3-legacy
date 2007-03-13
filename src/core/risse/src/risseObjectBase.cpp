@@ -341,6 +341,33 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 
 
 //---------------------------------------------------------------------------
+tRisseObjectBase::tRetValue tRisseObjectBase::Delete(const tRisseString & name, tRisseOperateFlags flags)
+{
+	if(!HashTable.Delete(name))
+	{
+		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
+			return rvMemberNotFound; // クラスを探さない場合はここでかえる
+
+		// TODO: モジュールに対する削除は？
+
+		// クラスを探す
+		tRisseVariant Class;
+		RaiseIfError(Read(PrototypeName, tRisseOperateFlags::ofInstanceMemberOnly,
+			Class, tRisseVariant::GetDynamicContext()), PrototypeName);
+		if(Class.IsNull()) return rvMemberNotFound; // クラスが null
+
+		// クラスに対して削除を行う
+		tRetValue rv = Class.OperateForMember(ocDDelete, NULL, name, flags,
+					tRisseMethodArgument::Empty(), tRisseVariant::GetDynamicContext());
+		return rv;
+	}
+
+	return rvNoError;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseObjectBase::tRetValue tRisseObjectBase::FuncCall(
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags,
@@ -505,6 +532,11 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 		// TODO: このオブジェクトそのもに対する操作への対応
 		args.ExpectArgumentCount(1);
 		return Write(name, flags, args[0], This);
+
+	case ocDDelete:
+		// delete member
+		// TODO: このオブジェクトそのもに対する操作への対応
+		return Delete(name, flags);
 
 	case ocFuncCall:
 		// function call

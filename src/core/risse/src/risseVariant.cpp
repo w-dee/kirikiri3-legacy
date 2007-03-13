@@ -250,6 +250,29 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
+void tRisseVariantBlock::DeletePropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags) const
+{
+	GetPrimitiveClass()->GetGateway().Do(ocDDelete, NULL, name,
+				flags | tRisseOperateFlags::ofUseThisAsContext,
+					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+				tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseVariantBlock::DeletePropertyDirect_Object   (const tRisseString & name, risse_uint32 flags) const
+{
+	tRisseObjectInterface * intf = GetObjectInterface();
+	intf->Do(ocDDelete, NULL, name,
+		flags, tRisseMethodArgument::Empty(),
+		*this // 動作コンテキストは無視されるが一応 this を指定しておく
+		);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseVariantBlock::FuncCall(tRisseVariantBlock * ret, risse_uint32 flags,
 	const tRisseMethodArgument & args,
 	const tRisseVariant & This) const

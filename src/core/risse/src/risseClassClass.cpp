@@ -89,6 +89,14 @@ void tRisseClassClass::RegisterMembers()
 				access_flags,
 				super_class, This);
 		}
+
+		// ここで登録した construct と initialize を削除する。
+		// これらは、This の初期化には必要だったが、このさきこのクラスに実装されるであろう
+		// ユーザ定義の construct と initialize にとってはじゃまである。
+		// これらがここに残っていると、親クラス内の construct や initialize を正常に
+		// 参照できないという意味でもじゃまである。
+		This.DeletePropertyDirect(ss_construct, tRisseOperateFlags::ofInstanceMemberOnly);
+		This.DeletePropertyDirect(ss_initialize, tRisseOperateFlags::ofInstanceMemberOnly);
 	}
 	RISSE_END_NATIVE_METHOD
 

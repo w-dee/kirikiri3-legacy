@@ -773,6 +773,31 @@ public: // 演算子
 	void ISet_Object  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { Invoke(mnISet, key, value); }
 
 	//-----------------------------------------------------------------------
+	//! @brief		直接プロパティ削除		DeletePropertyDirect ddelete
+	//! @param		name		メンバ名
+	//! @param		flags		フラグ
+	//-----------------------------------------------------------------------
+	void DeletePropertyDirect(const tRisseString & name, risse_uint32 flags) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:
+		case vtInteger:
+		case vtReal:
+		case vtNull:
+		case vtString:
+		case vtOctet:
+		case vtBoolean:
+			DeletePropertyDirect_Primitive(name, flags); return;
+		case vtObject:
+			DeletePropertyDirect_Object   (name, flags); return;
+		}
+	}
+
+	void DeletePropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags) const;
+	void DeletePropertyDirect_Object   (const tRisseString & name, risse_uint32 flags) const;
+
+	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		flags		呼び出しフラグ

@@ -56,6 +56,11 @@ RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 #endif
 #define C(XXXX, EXP) (RISSE_ASSERT((EXP)->GetType() == ant##XXXX), reinterpret_cast<tRisseASTNode_##XXXX *>(EXP))
 
+/* 改行の無視/認識区間を字句解析器に伝えるマクロ */
+#define BR (LX->PushRecognizeNewLine())
+#define ER (LX->PopRecognizeNewLine())
+#define BI (LX->PushIgnoreNewLine())
+#define EI (LX->PopIgnoreNewLine())
 
 /* 位置情報を表す定義 */
 struct RisseYYLTYPE
@@ -338,11 +343,10 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	expr expr_with_comma access_expr call_arg call_arg_list
 	decl_name_expr factor
 	func_expr_def func_expr_def_inner
-	func_call_expr
-	func_call_expr_body
+	func_call_expr func_call_expr_head func_call_expr_body
 	inline_array array_elm_list array_elm
 	inline_dic dic_elm dic_elm_list
-	if
+	if if_head
 	block block_or_statement statement
 	while do_while
 	for for_first_clause for_second_clause for_third_clause
@@ -426,17 +430,11 @@ def_list
 ;
 
 /* a block */
-/*
-
-	TODO:
-		{};
-	という入力文が、 {} が 辞書配列なのか ブロックなのか分からないという理由で文法エラーになる。
-*/
 block
-	: "{" 									{ LX->CheckBlockAfterFunctionCall(); }
+	: "{" 									{ LX->CheckBlockAfterFunctionCall(); BR; }
 	  onl
 	  def_list
-	  "}"									{ $$ = $4; C(Context, $$)->SetEndPosition(@$.last); }
+	  "}"									{ ER; $$ = $4; C(Context, $$)->SetEndPosition(@$.last); }
 ;
 
 
@@ -475,8 +473,8 @@ statement
 /* a while loop */
 while
 	: "while" onl
-	  "(" onl expr onl ")" onl
-	  block_or_statement					{ $$ = N(While)(@1.first, $5, $9, false); }
+	  "(" {BI} onl expr onl ")" {EI} onl
+	  block_or_statement					{ $$ = N(While)(@1.first, $6, $11, false); }
 ;
 
 /* a do-while loop */
@@ -484,17 +482,17 @@ do_while
 	: "do" onl
 	  block_or_statement
 	  "while" onl
-	  "(" onl expr onl ")"
-	  snl									{ $$ = N(While)(@1.first, $8, $3, true); }
+	  "(" {BI} onl expr onl ")" {EI}
+	  snl									{ $$ = N(While)(@1.first, $9, $3, true); }
 ;
 
 /* a for loop */
 for
-	: "for" onl "(" 
+	: "for" onl "(" {BI}
 	  for_first_clause  ";"
 	  for_second_clause ";" 
-	  for_third_clause  ")" onl
-	  block_or_statement					{ $$ = N(For)(@1.first, $4, $6, $8, $11); }
+	  for_third_clause  ")" {EI} onl
+	  block_or_statement					{ $$ = N(For)(@1.first, $5, $7, $9, $13); }
 ;
 
 
@@ -523,23 +521,23 @@ for_third_clause
 
 /* a switch statement */
 switch
-	: "switch" onl "(" onl
-	  expr_with_comma onl ")" onl
-	  block	onl								{ $$ = N(Switch)(@1.first, $5, $9); }
+	: "switch" onl "(" {BI} onl
+	  expr_with_comma onl ")" {EI} onl
+	  block	onl								{ $$ = N(Switch)(@1.first, $6, $11); }
 ;
 
 /* an if statement */
+if_head
+	: "if" onl "(" {BI} onl
+	  expr_with_comma onl
+	  ")" {EI} onl block_or_statement		{ $$ = N(If)(@1.first, $6, $11); }
+
 if
-	: "if" onl "(" 
-	  expr_with_comma onl
-	  ")" onl block_or_statement
-	  							/*%dprec 2*/	{ $$ = N(If)(@1.first, $4, $8); }
-	| "if" onl "(" 
-	  expr_with_comma onl
-	  ")" onl block_or_statement
+	: if_head								{ $$ = $1; }
+	| if_head
 	   "else" onl
-	  block_or_statement		/*%dprec 1*/	{ $$ = N(If)(@1.first, $4, $8); C(If, $$)->SetFalse($11); }
-/* この規則は とシフト・還元競合を起こす */
+	  block_or_statement					{ $$ = $1; C(If, $$)->SetFalse($4); }
+/* この規則は if_head とシフト・還元競合を起こす */
 
 /* a break statement */
 break
@@ -577,9 +575,9 @@ goto
 
 /* a with statement */
 with
-	: "with" onl "(" onl
-	  expr_with_comma onl ")" onl
-	  block_or_statement					{ $$ = N(With)(@1.first, $5, $9); }
+	: "with" onl "(" {BI} onl
+	  expr_with_comma onl ")" {EI} onl
+	  block_or_statement					{ $$ = N(With)(@1.first, $6, $11); }
 ;
 
 
@@ -642,17 +640,21 @@ catch_list
 	| catch_list catch							{ $$ = $1; C(Try, $1)->AddChild($2); }
 ;
 
+catch_head
+	: "catch" onl "(" {BI}
+;
+
 catch
-	: "catch" onl "(" onl ")" onl
+	: catch_head onl ")" {EI} onl
 	  block_or_statement 						{ $$ = N(Catch)(
-												  		@1.first, tRisseString::GetEmptyString(), NULL, $7); }
-	| "catch" onl "(" onl T_ID onl ")" onl
-	  block_or_statement 						{ $$ = N(Catch)(@1.first, *$5, NULL, $9); }
-	| "catch" onl "(" onl T_ID onl "if" onl expr onl ")" onl
-	  block_or_statement						{ $$ = N(Catch)(@1.first, *$5, $9, $13); }
-	| "catch" onl "(" onl "if" onl expr onl ")" onl
+												  	@1.first, tRisseString::GetEmptyString(), NULL, $6); }
+	| catch_head onl T_ID onl ")" {EI} onl
+	  block_or_statement 						{ $$ = N(Catch)(@1.first, *$3, NULL, $8); }
+	| catch_head onl T_ID onl "if" onl expr onl ")" {EI} onl
+	  block_or_statement						{ $$ = N(Catch)(@1.first, *$3, $7, $12); }
+	| catch_head onl "if" onl expr onl ")" {EI} onl
 	  block_or_statement 						{ $$ = N(Catch)(
-												  		@1.first, tRisseString::GetEmptyString(), $7, $11); }
+												  	@1.first, tRisseString::GetEmptyString(), $5, $10); }
 ;
 
 
@@ -719,15 +721,19 @@ func_expr_def_inner
 ;
 
 /* the argument definition of a function definition */
+func_decl_arg_head
+	: "(" {BI}
+;
+
 func_decl_arg
-	: "(" func_decl_arg_elm_collapse ")"
-	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($4); }
-	| "(" func_decl_arg_list ")"
-	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($4); }
-	| "(" func_decl_arg_at_least_one ","
-	  func_decl_arg_elm_collapse ")"
+	: func_decl_arg_head func_decl_arg_elm_collapse ")" {EI}
+	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($5); }
+	| func_decl_arg_head func_decl_arg_list ")" {EI}
+	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($5); }
+	| func_decl_arg_head func_decl_arg_at_least_one ","
+	  func_decl_arg_elm_collapse ")" {EI}
 	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AddChild($4);
-	  										  C(FuncDecl, $$)->AssignBlocks($6); }
+	  										  C(FuncDecl, $$)->AssignBlocks($7); }
 ;
 
 /* the argument list */
@@ -795,10 +801,10 @@ property_def
 
 property_def_inner
 	: "property" onl decl_name_expr onl
-	  "{"
+	  "{" {BR}
 	  property_handler_def_list
-	  ";" "}"/* "}" の前のセミコロンに注意 */
-	  										{ tRisseASTNode * prop_decl = $6;
+	  ";" "}" {ER} /* "}" の前のセミコロンに注意 */
+	  										{ tRisseASTNode * prop_decl = $7;
 	  										  C(PropDecl, prop_decl)->SetName($3->GetAccessTargetId());
 	  										  prop_decl->SetPosition(@1.first);
 	  										  $$ = N(VarDeclPair)(@1.first, $3, prop_decl); }
@@ -815,10 +821,10 @@ property_expr_def
 
 property_expr_def_inner
 	: "property" onl
-	  "{"
+	  "{" {BR}
 	  property_handler_def_list
-	  ";" "}"/* "}" の前のセミコロンに注意 */
-		  									{ $$ = $4;  $$->SetPosition(@1.first); }
+	  ";" "}" {ER}/* "}" の前のセミコロンに注意 */
+		  									{ $$ = $5;  $$->SetPosition(@1.first); }
 ;
 
 property_handler_def_list
@@ -837,10 +843,10 @@ property_handler_def_list
 ;
 
 property_handler_setter
-	: "setter" onl "(" onl T_ID onl ")"
+	: "setter" onl "(" {BI} onl T_ID onl ")" {EI}
 	  block									{ $$ = N(PropDecl)(@1.first);
-											  C(PropDecl, $$)->SetSetter($8);
-											  C(PropDecl, $$)->SetSetterArgumentName(*$5); }
+											  C(PropDecl, $$)->SetSetter($10);
+											  C(PropDecl, $$)->SetSetterArgumentName(*$6); }
 ;
 
 property_handler_getter
@@ -850,7 +856,7 @@ property_handler_getter
 ;
 
 property_getter_handler_head
-	: "getter" "(" onl ")"
+	: "getter" "(" {BI} onl ")" {EI}
 	| "getter"
 ;
 
@@ -862,16 +868,18 @@ property_getter_handler_head
 class_module_def
 	: "class" onl decl_name_expr
 	  class_extender
-	  "{" onl toplevel_def_list "}"	onl	 	{ tRisseASTNode_ClassDecl * class_decl = C(ClassDecl, $4);
+	  "{" {BR} onl toplevel_def_list "}" {ER}	onl
+											{ tRisseASTNode_ClassDecl * class_decl = C(ClassDecl, $4);
 											  class_decl->SetPosition(@1.first);
-											  class_decl->SetBody($7);
+											  class_decl->SetBody($8);
 											  class_decl->SetName($3->GetAccessTargetId());
 											  $$ = N(VarDecl)(@1.first);
 											  C(VarDecl, $$)->AddChild(N(VarDeclPair)(@1.first, $3, class_decl));
 											}
 	| "module" onl decl_name_expr onl
-	  "{" onl toplevel_def_list "}"	onl		{ tRisseASTNode_ClassDecl * class_decl = N(ClassDecl)(@1.first, true, NULL);
-											  class_decl->SetBody($7);
+	  "{" {BR} onl toplevel_def_list "}" {ER}	onl
+											{ tRisseASTNode_ClassDecl * class_decl = N(ClassDecl)(@1.first, true, NULL);
+											  class_decl->SetBody($8);
 											  class_decl->SetName($3->GetAccessTargetId());
 											  $$ = N(VarDecl)(@1.first);
 											  C(VarDecl, $$)->AddChild(N(VarDeclPair)(@1.first, $3, class_decl));
@@ -881,11 +889,13 @@ class_module_def
 class_module_expr_def
 	: "class"
 	  class_extender
-	  "{" onl toplevel_def_list "}"			{ $$ = $2;  $$->SetPosition(@1.first);
-											  C(ClassDecl, $$)->SetBody($5); }
+	  "{" {BR} onl toplevel_def_list "}" {ER}
+											{ $$ = $2;  $$->SetPosition(@1.first);
+											  C(ClassDecl, $$)->SetBody($6); }
 	| "module" onl
-	  "{" onl toplevel_def_list "}"			{ $$ = N(ClassDecl)(@1.first, true, NULL);
-											  C(ClassDecl, $$)->SetBody($5); }
+	  "{" {BR} onl toplevel_def_list "}" {ER}
+											{ $$ = N(ClassDecl)(@1.first, true, NULL);
+											  C(ClassDecl, $$)->SetBody($6); }
 ;
 
 class_extender
@@ -1061,8 +1071,10 @@ member_name
 /* 式 */
 /* カンマとそれ以下の優先順位の式を含む場合はこちらを使う */
 expr_with_comma
-	: expr_with_comma "if" onl expr_with_comma	{ $$ = N(Binary)(@2.first, abtIf			,$4, $1);/*順番に注意*/ }
-	| expr_with_comma ","  onl expr_with_comma	{ $$ = N(Binary)(@2.first, abtComma		,$1, $4); }
+	: expr_with_comma "if" onl expr_with_comma
+									{ $$ = N(Binary)(@2.first, abtIf		,$4, $1);/*順番に注意*/ }
+	| expr_with_comma ","  onl expr_with_comma
+									{ $$ = N(Binary)(@2.first, abtComma		,$1, $4); }
 	| expr
 ;
 
@@ -1131,18 +1143,20 @@ expr
 ;
 
 access_expr
-	: access_expr "[" onl expr onl "]"
-									{ $$ = N(MemberSel)(@2.first, $1, $4, matIndirect); }
+	: access_expr "[" {BI} onl expr onl "]" {EI}
+									{ $$ = N(MemberSel)(@2.first, $1, $5, matIndirect); }
 	| access_expr "." onl member_name
-									{ $$ = N(MemberSel)(@2.first, $1, N(Factor)(@4.first, aftConstant, *$4), matDirect); }
-	| access_expr "." onl "(" onl expr onl ")"
-									{ $$ = N(MemberSel)(@2.first, $1, $6, matDirect); }
+									{ $$ = N(MemberSel)(@2.first, $1,
+									         N(Factor)(@4.first, aftConstant, *$4), matDirect); }
+	| access_expr "." onl "(" {BI} onl expr onl ")" {EI}
+									{ $$ = N(MemberSel)(@2.first, $1, $7, matDirect); }
 	| access_expr "::" onl member_name
-									{ $$ = N(MemberSel)(@2.first, $1, N(Factor)(@4.first, aftConstant, *$4), matDirectThis); }
-	| access_expr "::" onl "(" onl expr onl ")"
-									{ $$ = N(MemberSel)(@2.first, $1, $6, matDirectThis); }
-	| "(" onl expr_with_comma onl ")"
-									{ $$ = $3; }
+									{ $$ = N(MemberSel)(@2.first, $1,
+									         N(Factor)(@4.first, aftConstant, *$4), matDirectThis); }
+	| access_expr "::" onl "(" {BI} onl expr onl ")" {EI}
+									{ $$ = N(MemberSel)(@2.first, $1, $7, matDirectThis); }
+	| "(" {BI} onl expr_with_comma onl ")" {EI}
+									{ $$ = $4; }
 	| func_call_expr
 	| func_expr_def
 	| property_expr_def
@@ -1173,16 +1187,18 @@ factor
   記述する式。  ここの記述はある程度上記の記述と重複する。
 */
 decl_name_expr
-	: decl_name_expr "[" onl expr onl "]"
-									{ $$ = N(MemberSel)(@2.first, $1, $4, matIndirect); }
+	: decl_name_expr "[" {BI} onl expr onl "]" {EI}
+									{ $$ = N(MemberSel)(@2.first, $1, $5, matIndirect); }
 	| decl_name_expr "." onl member_name
-									{ $$ = N(MemberSel)(@2.first, $1, N(Factor)(@4.first, aftConstant, *$4), matDirect); }
-	| decl_name_expr "." onl "(" onl expr onl ")"
-									{ $$ = N(MemberSel)(@2.first, $1, $6, matDirect); }
+									{ $$ = N(MemberSel)(@2.first, $1,
+									         N(Factor)(@4.first, aftConstant, *$4), matDirect); }
+	| decl_name_expr "." onl "(" {BI} onl expr onl ")" {EI}
+									{ $$ = N(MemberSel)(@2.first, $1, $7, matDirect); }
 	| decl_name_expr "::" onl member_name
-									{ $$ = N(MemberSel)(@2.first, $1, N(Factor)(@4.first, aftConstant, *$4), matDirectThis); }
-	| decl_name_expr "::" onl "(" onl expr onl ")"
-									{ $$ = N(MemberSel)(@2.first, $1, $6, matDirectThis); }
+									{ $$ = N(MemberSel)(@2.first, $1,
+									         N(Factor)(@4.first, aftConstant, *$4), matDirectThis); }
+	| decl_name_expr "::" onl "(" {BI} onl expr onl ")" {EI}
+									{ $$ = N(MemberSel)(@2.first, $1, $7, matDirectThis); }
 	| factor						{ $$ = $1; }
 ;
 
@@ -1193,12 +1209,19 @@ func_call_expr
 	  call_block_list_opt				{ $$ = $1; C(FuncCall, $$)->AssignBlocks($3); }
 ;
 
+func_call_expr_head
+	: access_expr "(" {BI}				{ $$ = $1; }
+;
+
 func_call_expr_body
-	: access_expr "(" call_arg_list ")"
-						/*%dprec 1*/	{ $$ = $3; C(FuncCall, $$)->SetExpression($1); }
-	| access_expr "(" onl "..." onl ")"	{ $$ = N(FuncCall)(@2.first, true);  C(FuncCall, $$)->SetExpression($1); }
-	| access_expr "(" onl ")"
-						/*%dprec 2*/	{ $$ = N(FuncCall)(@2.first, false); C(FuncCall, $$)->SetExpression($1); }
+	: func_call_expr_head call_arg_list ")" {EI}
+						/*%dprec 1*/	{ $$ = $2; C(FuncCall, $$)->SetExpression($1); }
+	| func_call_expr_head onl "..." onl ")" {EI}
+										{ $$ = N(FuncCall)(@2.first, true);
+										  C(FuncCall, $$)->SetExpression($1); }
+	| func_call_expr_head onl ")" {EI}
+						/*%dprec 2*/	{ $$ = N(FuncCall)(@2.first, false);
+										  C(FuncCall, $$)->SetExpression($1); }
 		/* このルールは "(" と ")" の間で下記の 「call_arg が empty」 のルールと
 		  シフト・還元競合を起こす(こちらが優先される) */
 ;
@@ -1229,11 +1252,11 @@ call_block_list
 ;
 
 call_block
-	: "{" call_block_arg_opt
-	  def_list "}"						{ $$ = $2;
-										  C(FuncDecl, $$)->SetBody($3);
+	: "{" {BR} call_block_arg_opt
+	  def_list "}" {ER}					{ $$ = $3;
+										  C(FuncDecl, $$)->SetBody($4);
 										  C(FuncDecl, $$)->SetIsBlock(true);
-										  C(Context, $3)->SetEndPosition(@$.last); }
+										  C(Context, $4)->SetEndPosition(@$.last); }
 	| func_expr_def						{ $$ = $1; }
 ;
 
@@ -1254,9 +1277,9 @@ regexp
 
 /* an inline array object */
 inline_array
-	: "["
+	: "[" {BI}
 	  array_elm_list
-	  "]"								{ $$ = $3; C(Array, $$)->Strip(); }
+	  "]" {EI}							{ $$ = $3; C(Array, $$)->Strip(); }
 ;
 
 /* an inline array's element list */
@@ -1273,10 +1296,10 @@ array_elm
 
 /* an inline dictionary */
 inline_dic
-	: "%" "["
+	: "%" "[" {BI}
 	  dic_elm_list
 	  dummy_elm_opt
-	  "]"								{ $$ = $2; }
+	  "]" {EI}							{ $$ = $4; }
 ;
 
 /* an inline dictionary's element list */
@@ -1335,11 +1358,11 @@ embeddable_string_d
 ;
 
 embeddable_string_d_unit
-	: T_EMSTRING_AMPERSAND_D expr_with_comma ";"
-												{ $$ = RisseAddExprConstStr(@1.first, *$1, $2);
+	: T_EMSTRING_AMPERSAND_D {BI} expr_with_comma ";"
+												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
 													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
-	| T_EMSTRING_DOLLAR_D    expr_with_comma ";" "}"/* "}" の前のセミコロンに注意 */
-												{ $$ = RisseAddExprConstStr(@1.first, *$1, $2);
+	| T_EMSTRING_DOLLAR_D  {BI}  expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
+												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
 													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
 ;
 
@@ -1350,11 +1373,11 @@ embeddable_string_s
 ;
 
 embeddable_string_s_unit
-	: T_EMSTRING_AMPERSAND_S expr_with_comma ";"
-												{ $$ = RisseAddExprConstStr(@1.first, *$1, $2);
+	: T_EMSTRING_AMPERSAND_S {BI} expr_with_comma ";"
+												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
 													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
-	| T_EMSTRING_DOLLAR_S    expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
-												{ $$ = RisseAddExprConstStr(@1.first, *$1, $2);
+	| T_EMSTRING_DOLLAR_S {BI} expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
+												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
 													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
 ;
 

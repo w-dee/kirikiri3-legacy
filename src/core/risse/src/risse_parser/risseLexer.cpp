@@ -106,25 +106,35 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 	// トークンを読む
 	do
 	{
-		// ホワイトスペースのスキップ
-		if(!SkipSpaceExceptForNewLine(Ptr)) { id = -1; break; } // EOF
-
-		// 改行のチェック
-		if(*Ptr == '\r' || *Ptr == '\n')
+		if(GetIgnoreNewLine())
 		{
-			StepNewLineChar(Ptr);
-			if(LastTokenId == T_NL)
+			// 改行を無視する場合
+			if(!SkipSpace(Ptr)) { id = -1; break; } // EOF
+		}
+		else
+		{
+			// 改行を無視しない場合
+
+			// ホワイトスペースのスキップ
+			if(!SkipSpaceExceptForNewLine(Ptr)) { id = -1; break; } // EOF
+
+			// 改行のチェック
+			if(*Ptr == '\r' || *Ptr == '\n')
 			{
-				// 連続する T_NL は一つにまとめる
-				NewLineRunningCount ++;
-				continue;
+				StepNewLineChar(Ptr);
+				if(LastTokenId == T_NL)
+				{
+					// 連続する T_NL は一つにまとめる
+					NewLineRunningCount ++;
+					continue;
+				}
+				else
+				{
+					NewLineRunningCount = 1;
+				}
+				id = T_NL;
+				break;
 			}
-			else
-			{
-				NewLineRunningCount = 1;
-			}
-			id = T_NL;
-			break;
 		}
 
 

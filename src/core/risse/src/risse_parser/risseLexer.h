@@ -49,7 +49,9 @@ class tRisseLexer : public tRisseLexerUtility
 		//!   で再開するかどうか(0=しない、'\'' または '"' =デリミタ)
 
 	bool NextIsRegularExpression; //!< 次の解析は正規表現パターン
-	bool FuncCallReduced;
+	bool FuncCallReduced; //!< 関数の呼び出しが還元し終わったか
+
+	gc_vector<bool> IgnoreNewLineStack; //!< 改行を無視するかどうかを表すスタック
 
 public:
 	//! @brief		コンストラクタ
@@ -75,6 +77,42 @@ public:
 
 	//! @brief		次のトークン読み込みで正規表現パターンを解析する
 	void SetNextIsRegularExpression() { NextIsRegularExpression = true; }
+
+	//! @brief		改行を無視するかどうかを返す
+	//! @return		改行を無視するかどうか
+	bool GetIgnoreNewLine() const
+	{
+		if(IgnoreNewLineStack.size() == 0) return false;
+		return IgnoreNewLineStack.back();
+	}
+
+	//! @brief		改行を無視する区間を開始する
+	void PushIgnoreNewLine()
+	{
+		IgnoreNewLineStack.push_back(true);
+	}
+
+	//! @brief		改行を無視する区間を終了する
+	void PopIgnoreNewLine()
+	{
+		RISSE_ASSERT(IgnoreNewLineStack.size() != 0);
+		RISSE_ASSERT(IgnoreNewLineStack.back() == true);
+		IgnoreNewLineStack.pop_back();
+	}
+
+	//! @brief		改行を無視しない区間を開始する
+	void PushRecognizeNewLine()
+	{
+		IgnoreNewLineStack.push_back(false);
+	}
+
+	//! @brief		改行を無視しない区間を終了する
+	void PopRecognizeNewLine()
+	{
+		RISSE_ASSERT(IgnoreNewLineStack.size() != 0);
+		RISSE_ASSERT(IgnoreNewLineStack.back() == false);
+		IgnoreNewLineStack.pop_back();
+	}
 
 	//! @brief		関数呼び出しが還元されたことを通知する
 	void SetFuncCallReduced();

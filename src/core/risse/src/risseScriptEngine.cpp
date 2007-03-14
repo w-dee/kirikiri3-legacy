@@ -43,6 +43,9 @@ bool tRisseScriptEngine::CommonObjectsInitialized = false;
 //---------------------------------------------------------------------------
 tRisseScriptEngine::tRisseScriptEngine()
 {
+	// フィールドの初期化
+	WarningOutput = NULL;
+
 	// 共通に初期化しなくてはならない部分は初期化されているか
 	if(!CommonObjectsInitialized)
 	{

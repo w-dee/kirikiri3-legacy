@@ -1388,7 +1388,11 @@ nl		: "\n" ;
 onl		: /* empty */ | nl ;
 
 /* semicolon or new line */
-snl		: ";" |  nl | ";" nl ;
+snl
+	: ";"
+	|  nl			{ LX->NotifyStatementEndStyle(false); }
+	| ";" nl		{ LX->NotifyStatementEndStyle(true); }
+;
 
 
 /*###########################################################################*/

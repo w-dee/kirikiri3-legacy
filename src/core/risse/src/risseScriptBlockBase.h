@@ -89,6 +89,17 @@ public:
 	//! @note		line が範囲外だった場合は空文字列が帰る
 	tRisseString GetLineAt(risse_size line);
 
+	//! @brief		スクリプト上の位置から "%1 at %2" 形式のメッセージを組み立てる
+	//! @param		pos		スクリプト上の位置
+	//! @param		message	メッセージ
+	//! @return		組み立てられたメッセージ
+	tRisseString BuildMessageAt(risse_size pos, const tRisseString & message);
+
+	//! @brief		警告を表示する
+	//! @param		pos		スクリプト上の位置
+	//! @param		message	メッセージ
+	void OutputWarning(risse_size pos, const tRisseString & message);
+
 protected:
 	//! @brief		ASTを元にコンパイルを行う
 	//! @param		root		ルートASTノード

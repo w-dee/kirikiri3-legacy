@@ -34,7 +34,7 @@ tRisseScriptBlock::tRisseScriptBlock(tRisseScriptEngine * engine,
 tRisseASTNode * tRisseScriptBlock::GetASTRootNode(bool need_result, bool is_expression)
 {
 	// Lexer を準備する
-	tRisseLexer *lexer = new tRisseLexer(GetScript());
+	tRisseLexer *lexer = new tRisseLexer(this);
 
 	// Parser を準備する
 	// パースする

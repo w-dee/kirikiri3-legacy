@@ -28,6 +28,9 @@ void RisseAssert(const char * message, const char * filename, int lineno)
 	fprintf(stderr, "\n\nRisse: Assertion failed: '%s' failed at %s line %d\n",
 			message, filename, lineno);
 
+	fflush(stderr);
+	fflush(stdout);
+
 	tRisseAssertionErrorClass::Throw(
 		tRisseString(RISSE_WS("assertion failed: '%1' failed at source %2 line %3"),
 						tRisseString(message),

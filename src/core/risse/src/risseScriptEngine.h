@@ -23,6 +23,19 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
+//! @brief		警告情報等の通知インターフェース
+//---------------------------------------------------------------------------
+class tRisseLineOutputInterface : public tRisseCollectee
+{
+public:
+	//! @brief		情報を通知する
+	//! @param		info		情報
+	virtual void Output(const tRisseString & info) = 0;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		スクリプトエンジンクラス
 //---------------------------------------------------------------------------
 class tRisseScriptEngine : public tRisseCollectee
@@ -32,6 +45,7 @@ private:
 
 protected:
 	tRisseVariant GlobalObject; //!< グローバルオブジェクト
+	tRisseLineOutputInterface *WarningOutput; //!< 警告情報の出力先
 
 public:
 	//! @brief		コンストラクタ
@@ -51,6 +65,21 @@ public:
 					risse_size lineofs = 0,
 					tRisseVariant * result = NULL, bool is_expression = false,
 					const tRisseVariant & context = tRisseVariant::GetNullObject());
+
+	//! @brief		警告情報の出力先を設定する
+	//! @param		output		警告情報の出力先
+	void SetWarningOutput(tRisseLineOutputInterface * output)  { WarningOutput = output; }
+
+	//! @brief		警告情報の出力先を取得する
+	//! @return		警告情報の出力先
+	tRisseLineOutputInterface * GetWarningOutput() const  { return WarningOutput; }
+
+	//! @brief		警告情報を出力する
+	//! @param		info	警告情報
+	void OutputWarning(const tRisseString & info) const
+	{
+		if(WarningOutput) WarningOutput->Output(info);
+	}
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

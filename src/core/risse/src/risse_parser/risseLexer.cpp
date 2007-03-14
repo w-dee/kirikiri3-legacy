@@ -14,6 +14,7 @@
 
 #include "../risseLexerUtils.h"
 #include "../risseExceptionClass.h"
+#include "../risseScriptBlockBase.h"
 #include "risseLexer.h"
 #include "risseParser.h"
 
@@ -26,18 +27,22 @@ RISSE_DEFINE_SOURCE_ID(26774,17704,8265,19906,55701,8958,30467,4610);
 
 
 //---------------------------------------------------------------------------
-tRisseLexer::tRisseLexer(const tRisseString & script)
+tRisseLexer::tRisseLexer(tRisseScriptBlockBase * sb)
 {
 	// フィールドを初期化
+	ScriptBlock = sb;
+	Script = ScriptBlock->GetScript();
 	NextIsRegularExpression = false;
 	ContinueEmbeddableString = 0;
-	Script = script;
 	Ptr = NULL;
 	PtrOrigin = NULL;
 	PtrLastTokenStart = NULL;
 	LastTokenId = T_NL; // 最初の空行を読み飛ばすように
 	NewLineRunningCount = 1;
 	FuncCallReduced = false;
+
+	// デフォルトでは改行を無視しない
+	PushRecognizeNewLine();
 }
 //---------------------------------------------------------------------------
 
@@ -266,6 +271,39 @@ ret:
 
 
 //---------------------------------------------------------------------------
+void tRisseLexer::NotifyStatementEndStyle(bool semicolon)
+{
+	if(NewLineRecogInfo.size() == 0) return;
+
+	// 前回、文の終了にセミコロンを使ったのか、改行を使ったのかを調べる。
+	// スタイルが変わっていれば警告する。
+	bool warn = false;
+	switch(NewLineRecogInfo.back().SemicolonState)
+	{
+	case tNewLineRecogInfo::ssUnknown:
+		break;
+
+	case tNewLineRecogInfo::ssSemicolon:
+		if(!semicolon)
+			warn = true;
+		break;
+
+	case tNewLineRecogInfo::ssNewLine:
+		if(semicolon)
+			warn = true;
+		break;
+	}
+	NewLineRecogInfo.back().SemicolonState =
+		semicolon ? tNewLineRecogInfo::ssSemicolon : tNewLineRecogInfo::ssNewLine;
+
+	if(warn)
+		ScriptBlock->OutputWarning(GetLastTokenStart(), 
+			RISSE_WS_TR("mixing semicolon style and newline style") );
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseLexer::SetFuncCallReduced()
 {
 	FuncCallReduced = true;
@@ -280,9 +318,10 @@ void tRisseLexer::CheckBlockAfterFunctionCall()
 	// {
 	// }
 	// のうち、"{" が読み込まれた直後にメソッドが呼ばれる。
-	// f() のあとの改行の数を数え、1つきりならばエラーにする。
+	// f() のあとの改行の数を数え、1つきりならば警告にする。
 	if(FuncCallReduced && NewLineRunningCount == 1)
-		tRisseCompileExceptionClass::Throw(RISSE_WS_TR("ambiguous block after function call"));
+		ScriptBlock->OutputWarning(GetLastTokenStart(), 
+			RISSE_WS_TR("ambiguous block after function call") );
 }
 //---------------------------------------------------------------------------
 

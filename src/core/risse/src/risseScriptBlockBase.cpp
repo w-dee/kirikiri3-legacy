@@ -14,6 +14,7 @@
 #include "risseScriptBlockBase.h"
 #include "compiler/risseCompiler.h"
 #include "risseCodeBlock.h"
+#include "risseScriptEngine.h"
 
 
 namespace Risse
@@ -150,6 +151,23 @@ tRisseString tRisseScriptBlockBase::GetLineAt(risse_size line)
 		Script[n] != RISSE_WC('\r')) n++;
 
 	return tRisseString(Script, start, n - start);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseScriptBlockBase::BuildMessageAt(risse_size pos, const tRisseString & message)
+{
+	return tRisseString(RISSE_WS("%1 at %2:%3"),
+		message, GetName(), tRisseString::AsString((risse_int64)(1 + PositionToLine(pos))));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseScriptBlockBase::OutputWarning(risse_size pos, const tRisseString & message)
+{
+	ScriptEngine->OutputWarning(BuildMessageAt(pos, message));
 }
 //---------------------------------------------------------------------------
 

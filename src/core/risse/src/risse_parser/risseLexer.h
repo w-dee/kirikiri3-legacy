@@ -18,10 +18,11 @@
 
 namespace Risse
 {
-
+class tRisseScriptBlockBase;
 //---------------------------------------------------------------------------
 class tRisseLexer : public tRisseLexerUtility
 {
+	tRisseScriptBlockBase * ScriptBlock; //!< スクリプトブロック
 	tRisseString Script; //!< スクリプト
 	const risse_char * Ptr; //!< 解析ポインタの現在位置
 	const risse_char * PtrOrigin; //!< 解析ポインタの先頭
@@ -51,12 +52,31 @@ class tRisseLexer : public tRisseLexerUtility
 	bool NextIsRegularExpression; //!< 次の解析は正規表現パターン
 	bool FuncCallReduced; //!< 関数の呼び出しが還元し終わったか
 
-	gc_vector<bool> IgnoreNewLineStack; //!< 改行を無視するかどうかを表すスタック
+	//! @brief		改行の取り扱いに関する情報
+	struct tNewLineRecogInfo : public tRisseCollectee
+	{
+		bool			Ignore;		//!< 改行を無視するかどうか
+		//! @brief		セミコロンで文が終わったか、改行で文が終わったかの状態
+		//! @note		書き方のスタイルが混在している場合に警告するためにある
+		enum			tSemicolonState
+		{
+			ssUnknown,		//!< 不明
+			ssSemicolon,	//!< セミコロンで文が終わってる
+			ssNewLine,		//!< 改行で文が終わってる
+		} SemicolonState;
+
+		//! @brief		コンストラクタ
+		//! @param		ignore		改行を無視するかどうか
+		//! @param		semistate	セミコロンの状態
+		tNewLineRecogInfo(bool ignoge, tSemicolonState semistate = ssUnknown)
+			{ Ignore = ignoge; SemicolonState = semistate; }
+	};
+	gc_vector<tNewLineRecogInfo> NewLineRecogInfo; //!< 改行の取り扱いに関する情報のスタック
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		script		入力スクリプト
-	tRisseLexer(const tRisseString & script);
+	//! @param		sb		スクリプトブロック
+	tRisseLexer(tRisseScriptBlockBase * sb);
 
 	//! @brief		トークンを得る
 	//! @param		val		トークンの値の格納先
@@ -82,37 +102,41 @@ public:
 	//! @return		改行を無視するかどうか
 	bool GetIgnoreNewLine() const
 	{
-		if(IgnoreNewLineStack.size() == 0) return false;
-		return IgnoreNewLineStack.back();
+		if(NewLineRecogInfo.size() == 0) return false;
+		return NewLineRecogInfo.back().Ignore;
 	}
 
 	//! @brief		改行を無視する区間を開始する
 	void PushIgnoreNewLine()
 	{
-		IgnoreNewLineStack.push_back(true);
+		NewLineRecogInfo.push_back(tNewLineRecogInfo(true));
 	}
 
 	//! @brief		改行を無視する区間を終了する
 	void PopIgnoreNewLine()
 	{
-		RISSE_ASSERT(IgnoreNewLineStack.size() != 0);
-		RISSE_ASSERT(IgnoreNewLineStack.back() == true);
-		IgnoreNewLineStack.pop_back();
+		RISSE_ASSERT(NewLineRecogInfo.size() != 0);
+		RISSE_ASSERT(NewLineRecogInfo.back().Ignore == true);
+		NewLineRecogInfo.pop_back();
 	}
 
 	//! @brief		改行を無視しない区間を開始する
 	void PushRecognizeNewLine()
 	{
-		IgnoreNewLineStack.push_back(false);
+		NewLineRecogInfo.push_back(tNewLineRecogInfo(false));
 	}
 
 	//! @brief		改行を無視しない区間を終了する
 	void PopRecognizeNewLine()
 	{
-		RISSE_ASSERT(IgnoreNewLineStack.size() != 0);
-		RISSE_ASSERT(IgnoreNewLineStack.back() == false);
-		IgnoreNewLineStack.pop_back();
+		RISSE_ASSERT(NewLineRecogInfo.size() != 0);
+		RISSE_ASSERT(NewLineRecogInfo.back().Ignore == false);
+		NewLineRecogInfo.pop_back();
 	}
+
+	//! @brief		改行で一文が終わったかどうかを通知する
+	//! @param		semicolon セミコロンを用いた場合に真
+	void NotifyStatementEndStyle(bool semicolon);
 
 	//! @brief		関数呼び出しが還元されたことを通知する
 	void SetFuncCallReduced();
@@ -123,7 +147,7 @@ public:
 	//!				}@n
 	//!				のような呼び出しは、関数をブロック付きで呼び出しているのか
 	//!				それとも関数呼び出し + ブロックなのかの区別がつきにくいため、
-	//!				あえて文法エラーにする。
+	//!				警告を表示する。
 	void CheckBlockAfterFunctionCall();
 
 private:

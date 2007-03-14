@@ -23,6 +23,23 @@ RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
 
 using namespace Risse;
 
+//---------------------------------------------------------------------------
+//! @brief		警告情報の出力先インターフェース
+//---------------------------------------------------------------------------
+class tRisseWarningOutput : public tRisseLineOutputInterface
+{
+	void Output(const tRisseString & info)
+	{
+		fflush(stderr);
+		fflush(stdout);
+		RisseFPrint(stderr, RISSE_WS("warning: "));
+		RisseFPrint(stderr, info.c_str());
+		RisseFPrint(stderr, RISSE_WS("\n"));
+		fflush(stderr);
+	}
+};
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 //! @brief		アプリケーションクラス
@@ -75,6 +92,7 @@ int Application::OnRun()
 	try
 	{
 		tRisseScriptEngine engine;
+		engine.SetWarningOutput(new tRisseWarningOutput());
 
 		// 入力ファイルを開く
 		wxFile file;

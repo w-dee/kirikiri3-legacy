@@ -37,6 +37,7 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
        CharConversionException
      RuntimeException
        CompileException
+       ClassDefinitionException
        InstantiationException
        BadContextException
        UnsupportedOperation

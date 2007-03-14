@@ -116,7 +116,7 @@ void tRisseArrayClass::RegisterMembers()
 
 		args.ExpectArgumentCount(2);
 
-		risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[0]);
+		risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[1]);
 		if(ofs_index < 0) ofs_index += array.size(); // 折り返す
 
 		if(ofs_index < 0)  { /* それでもまだ負: TOOD: out of bound 例外 */ return; }
@@ -135,17 +135,17 @@ void tRisseArrayClass::RegisterMembers()
 				array.resize(index+1, filler);
 
 				// 値の上書き
-				array[index] = args[1];
+				array[index] = args[0];
 			}
 			else /* if index == array.size() */
 			{
-				array.push_back(args[1]);
+				array.push_back(args[0]);
 			}
 		}
 		else
 		{
 			// 既存の値の上書き
-			array[index] = args[1];
+			array[index] = args[0];
 		}
 	}
 	RISSE_END_NATIVE_METHOD

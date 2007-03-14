@@ -770,7 +770,9 @@ public: // 演算子
 	void ISet_String  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
 	void ISet_Octet   (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
 	void ISet_Boolean (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Object  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { Invoke(mnISet, key, value); }
+	void ISet_Object  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { Invoke(mnISet, value, key);
+		/* 注意!!! ISet がメソッド呼び出しに変換される場合、value が先に来て key が後に来る。これは将来的に
+		複数の key を使用可能にする可能性があるためである */ }
 
 	//-----------------------------------------------------------------------
 	//! @brief		直接プロパティ削除		DeletePropertyDirect ddelete

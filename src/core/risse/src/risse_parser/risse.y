@@ -559,7 +559,7 @@ return
 
 /* label or case: */
 label
-	: "case" onl expr ":" onl	 			{ $$ = N(Case)(@1.first, $3); }
+	: "case" {BI} expr ":" {EI} onl			{ $$ = N(Case)(@1.first, $3); }
 	| "default" onl  ":" onl	 			{ $$ = N(Case)(@1.first, NULL); }
 	| T_ID ":" onl	 						{ $$ = N(Label)(@1.first, *$1); }
 ;

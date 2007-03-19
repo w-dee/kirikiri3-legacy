@@ -115,11 +115,6 @@ void tRisseClassBase::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// 関数呼び出しを new と同じ意味に
-	RegisterNormalMember(mnFuncCall, pThis->GetPropertyDirect(mnNew));
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_fertilize, (context=pThis,attribute=tRisseMemberAttribute::vcConst))
 	{
 		// 引数チェック

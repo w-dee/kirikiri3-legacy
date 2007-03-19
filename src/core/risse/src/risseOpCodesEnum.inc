@@ -111,6 +111,7 @@ enum tRisseOpCode {
 /* 105 */ ocOpCodeLast /*!< オペコードの最後 */,
 };
 static const tRisseString & mnNew = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocNew].RawMemberName); //!< (演算子メンバ名)  "new"
+static const tRisseString & mnFuncCall = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocFuncCall].RawMemberName); //!< (演算子メンバ名)  function call
 static const tRisseString & mnBitNot = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitNot].RawMemberName); //!< (演算子メンバ名)  "~" bit not
 static const tRisseString & mnDecAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocDecAssign].RawMemberName); //!< (演算子メンバ名)  "--" decrement
 static const tRisseString & mnIncAssign = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocIncAssign].RawMemberName); //!< (演算子メンバ名)  ++ increment

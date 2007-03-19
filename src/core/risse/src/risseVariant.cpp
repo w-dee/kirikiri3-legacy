@@ -277,14 +277,18 @@ void tRisseVariantBlock::FuncCall(tRisseVariantBlock * ret, risse_uint32 flags,
 	const tRisseMethodArgument & args,
 	const tRisseVariant & This) const
 {
-	// Object 以外は関数(メソッド)としては機能しないため
-	// すべて 例外を発生する
 	switch(GetType())
 	{
-	case vtObject:	FuncCall_Object   (ret, tRisseString::GetEmptyString(), flags, args, This); return;
-
-	default:
-		tRisseUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException(); break;
+	case vtVoid:
+	case vtInteger:
+	case vtReal:
+	case vtNull:
+	case vtString:
+	case vtOctet:
+	case vtBoolean:
+		FuncCall_Primitive(ret, tRisseString::GetEmptyString(), flags, args, This); return;
+	case vtObject:
+		FuncCall_Object   (ret, tRisseString::GetEmptyString(), flags, args, This); return;
 	}
 }
 //---------------------------------------------------------------------------
@@ -297,7 +301,7 @@ void tRisseVariantBlock::FuncCall_Primitive(
 	const tRisseVariant & This) const
 {
 	GetPrimitiveClass()->GetGateway().
-		Do(ocFuncCall, NULL, name,
+		Do(ocFuncCall, ret, name,
 		flags |tRisseOperateFlags::ofUseThisAsContext,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 		args, *this); // 動作コンテキストは常に *this

@@ -48,7 +48,7 @@ Read					sread		R,S,-,-,-,-		----		#!< 共有空間からの読み込み
 // 関数定義/引数処理/関数呼び出し
 New						new			R,R,O,N,-,-		new			#!< "new"
 TryFuncCall				trycall		R,R,O,N,N,-		----		#!< try function call
-FuncCall				call		R,R,O,N,-,-		----		#!< function call
+FuncCall				call		R,R,O,N,-,-		()			#!< function call
 FuncCallBlock			callb		R,R,O,N,N,-		----		#!< function call with lazyblock(VMのみで使用)
 SetFrame				sframe		R,-,-,-,-,-		----		#!< スタックフレームと共有空間を設定する
 SetShare				sshare		R,-,-,-,-,-		----		#!< 共有空間のみ設定する

@@ -25,92 +25,92 @@ static risse_char RisseOperatorMemberNames [] = {
 /*  17, offset=+   0 */
 /*  18, offset=+   0 */tRisseStringData::MightBeShared,'n','e','w',0,0xc7fea6cd,
 /*  19, offset=+   6 */
-/*  20, offset=+   6 */
-/*  21, offset=+   6 */
-/*  22, offset=+   6 */
-/*  23, offset=+   6 */
-/*  24, offset=+   6 */
-/*  25, offset=+   6 */
-/*  26, offset=+   6 */
-/*  27, offset=+   6 */
-/*  28, offset=+   6 */
-/*  29, offset=+   6 */
-/*  30, offset=+   6 */
-/*  31, offset=+   6 */
-/*  32, offset=+   6 */
-/*  33, offset=+   6 */tRisseStringData::MightBeShared,'~',0,0xff65fea8,
-/*  34, offset=+  10 */tRisseStringData::MightBeShared,'-','-',0,0x4078cde9,
-/*  35, offset=+  15 */tRisseStringData::MightBeShared,'+','+',0,0xd7fe7f8a,
-/*  36, offset=+  20 */tRisseStringData::MightBeShared,'+','@',0,0xbf694df8,
-/*  37, offset=+  25 */tRisseStringData::MightBeShared,'-','@',0,0x975efba0,
-/*  38, offset=+  30 */tRisseStringData::MightBeShared,'t','o','S','t','r','i','n','g',0,0x0e037fe7,
-/*  39, offset=+  41 */tRisseStringData::MightBeShared,'t','o','B','o','o','l','e','a','n',0,0x933dbb40,
-/*  40, offset=+  53 */tRisseStringData::MightBeShared,'t','o','R','e','a','l',0,0xdf35b6b0,
-/*  41, offset=+  62 */tRisseStringData::MightBeShared,'t','o','I','n','t','e','g','e','r',0,0xf72737b9,
-/*  42, offset=+  74 */tRisseStringData::MightBeShared,'|','|',0,0xbe2a6c93,
-/*  43, offset=+  79 */tRisseStringData::MightBeShared,'&','&',0,0x3c194d32,
-/*  44, offset=+  84 */tRisseStringData::MightBeShared,'|',0,0xdbdb3793,
-/*  45, offset=+  88 */tRisseStringData::MightBeShared,'^',0,0xb51a6a1a,
-/*  46, offset=+  92 */tRisseStringData::MightBeShared,'&',0,0xb672ecdb,
-/*  47, offset=+  96 */tRisseStringData::MightBeShared,'!','=',0,0xc29e5fee,
-/*  48, offset=+ 101 */tRisseStringData::MightBeShared,'=','=',0,0xbb63b011,
-/*  49, offset=+ 106 */tRisseStringData::MightBeShared,'!','=','=',0,0x29bd9ad5,
-/*  50, offset=+ 112 */tRisseStringData::MightBeShared,'=','=','=',0,0x61645e2e,
-/*  51, offset=+ 118 */tRisseStringData::MightBeShared,'<',0,0x496f92ce,
-/*  52, offset=+ 122 */tRisseStringData::MightBeShared,'>',0,0x6df35bd5,
-/*  53, offset=+ 126 */tRisseStringData::MightBeShared,'<','=',0,0x0300c052,
-/*  54, offset=+ 131 */tRisseStringData::MightBeShared,'>','=',0,0x56786510,
-/*  55, offset=+ 136 */tRisseStringData::MightBeShared,'>','>','>',0,0xeb980674,
-/*  56, offset=+ 142 */tRisseStringData::MightBeShared,'<','<',0,0xdd3df4cd,
-/*  57, offset=+ 147 */tRisseStringData::MightBeShared,'>','>',0,0xe8b08972,
-/*  58, offset=+ 152 */tRisseStringData::MightBeShared,'%',0,0xa55f4ab4,
-/*  59, offset=+ 156 */tRisseStringData::MightBeShared,'/',0,0x5a873501,
-/*  60, offset=+ 160 */tRisseStringData::MightBeShared,'\\',0,0x919da321,
-/*  61, offset=+ 164 */tRisseStringData::MightBeShared,'*',0,0xff387e65,
-/*  62, offset=+ 168 */tRisseStringData::MightBeShared,'+',0,0x11e1a3b7,
-/*  63, offset=+ 172 */tRisseStringData::MightBeShared,'-',0,0x371a6e28,
-/*  64, offset=+ 176 */
-/*  65, offset=+ 176 */
-/*  66, offset=+ 176 */tRisseStringData::MightBeShared,'i','s','A',0,0xbc75eb92,
-/*  67, offset=+ 182 */
-/*  68, offset=+ 182 */
-/*  69, offset=+ 182 */tRisseStringData::MightBeShared,'[',']',0,0x321b7cff,
-/*  70, offset=+ 187 */
-/*  71, offset=+ 187 */tRisseStringData::MightBeShared,'d','e','l','e','t','e','[',']',0,0xa063490b,
-/*  72, offset=+ 198 */
-/*  73, offset=+ 198 */
-/*  74, offset=+ 198 */
-/*  75, offset=+ 198 */tRisseStringData::MightBeShared,'[',']','=',0,0xcdc754c6,
-/*  76, offset=+ 204 */tRisseStringData::MightBeShared,'&','=',0,0xf73fc38c,
-/*  77, offset=+ 209 */tRisseStringData::MightBeShared,'|','=',0,0x3940e28e,
-/*  78, offset=+ 214 */tRisseStringData::MightBeShared,'^','=',0,0x68e166fa,
-/*  79, offset=+ 219 */tRisseStringData::MightBeShared,'-','=',0,0x9ae502b0,
-/*  80, offset=+ 224 */tRisseStringData::MightBeShared,'+','=',0,0x14807825,
-/*  81, offset=+ 229 */tRisseStringData::MightBeShared,'%','=',0,0xbc1a4e72,
-/*  82, offset=+ 234 */tRisseStringData::MightBeShared,'/','=',0,0x913a6d17,
-/*  83, offset=+ 239 */tRisseStringData::MightBeShared,'\\','=',0,0xd31cbda3,
-/*  84, offset=+ 244 */tRisseStringData::MightBeShared,'*','=',0,0x3e43cd2b,
-/*  85, offset=+ 249 */tRisseStringData::MightBeShared,'|','|','=',0,0x3c1d903a,
-/*  86, offset=+ 255 */tRisseStringData::MightBeShared,'&','&','=',0,0x0220217d,
-/*  87, offset=+ 261 */tRisseStringData::MightBeShared,'>','>','>','=',0,0x43b190ce,
-/*  88, offset=+ 268 */tRisseStringData::MightBeShared,'<','<','=',0,0x7d38fd56,
-/*  89, offset=+ 274 */tRisseStringData::MightBeShared,'>','>','=',0,0x222ef3a1,
-/*  90, offset=+ 280 */
-/*  91, offset=+ 280 */
-/*  92, offset=+ 280 */
-/*  93, offset=+ 280 */
-/*  94, offset=+ 280 */
-/*  95, offset=+ 280 */
-/*  96, offset=+ 280 */
-/*  97, offset=+ 280 */
-/*  98, offset=+ 280 */
-/*  99, offset=+ 280 */
-/* 100, offset=+ 280 */
-/* 101, offset=+ 280 */
-/* 102, offset=+ 280 */
-/* 103, offset=+ 280 */
-/* 104, offset=+ 280 */
-/* 105, offset=+ 280 */
+/*  20, offset=+   6 */tRisseStringData::MightBeShared,'(',')',0,0x775ec198,
+/*  21, offset=+  11 */
+/*  22, offset=+  11 */
+/*  23, offset=+  11 */
+/*  24, offset=+  11 */
+/*  25, offset=+  11 */
+/*  26, offset=+  11 */
+/*  27, offset=+  11 */
+/*  28, offset=+  11 */
+/*  29, offset=+  11 */
+/*  30, offset=+  11 */
+/*  31, offset=+  11 */
+/*  32, offset=+  11 */
+/*  33, offset=+  11 */tRisseStringData::MightBeShared,'~',0,0xff65fea8,
+/*  34, offset=+  15 */tRisseStringData::MightBeShared,'-','-',0,0x4078cde9,
+/*  35, offset=+  20 */tRisseStringData::MightBeShared,'+','+',0,0xd7fe7f8a,
+/*  36, offset=+  25 */tRisseStringData::MightBeShared,'+','@',0,0xbf694df8,
+/*  37, offset=+  30 */tRisseStringData::MightBeShared,'-','@',0,0x975efba0,
+/*  38, offset=+  35 */tRisseStringData::MightBeShared,'t','o','S','t','r','i','n','g',0,0x0e037fe7,
+/*  39, offset=+  46 */tRisseStringData::MightBeShared,'t','o','B','o','o','l','e','a','n',0,0x933dbb40,
+/*  40, offset=+  58 */tRisseStringData::MightBeShared,'t','o','R','e','a','l',0,0xdf35b6b0,
+/*  41, offset=+  67 */tRisseStringData::MightBeShared,'t','o','I','n','t','e','g','e','r',0,0xf72737b9,
+/*  42, offset=+  79 */tRisseStringData::MightBeShared,'|','|',0,0xbe2a6c93,
+/*  43, offset=+  84 */tRisseStringData::MightBeShared,'&','&',0,0x3c194d32,
+/*  44, offset=+  89 */tRisseStringData::MightBeShared,'|',0,0xdbdb3793,
+/*  45, offset=+  93 */tRisseStringData::MightBeShared,'^',0,0xb51a6a1a,
+/*  46, offset=+  97 */tRisseStringData::MightBeShared,'&',0,0xb672ecdb,
+/*  47, offset=+ 101 */tRisseStringData::MightBeShared,'!','=',0,0xc29e5fee,
+/*  48, offset=+ 106 */tRisseStringData::MightBeShared,'=','=',0,0xbb63b011,
+/*  49, offset=+ 111 */tRisseStringData::MightBeShared,'!','=','=',0,0x29bd9ad5,
+/*  50, offset=+ 117 */tRisseStringData::MightBeShared,'=','=','=',0,0x61645e2e,
+/*  51, offset=+ 123 */tRisseStringData::MightBeShared,'<',0,0x496f92ce,
+/*  52, offset=+ 127 */tRisseStringData::MightBeShared,'>',0,0x6df35bd5,
+/*  53, offset=+ 131 */tRisseStringData::MightBeShared,'<','=',0,0x0300c052,
+/*  54, offset=+ 136 */tRisseStringData::MightBeShared,'>','=',0,0x56786510,
+/*  55, offset=+ 141 */tRisseStringData::MightBeShared,'>','>','>',0,0xeb980674,
+/*  56, offset=+ 147 */tRisseStringData::MightBeShared,'<','<',0,0xdd3df4cd,
+/*  57, offset=+ 152 */tRisseStringData::MightBeShared,'>','>',0,0xe8b08972,
+/*  58, offset=+ 157 */tRisseStringData::MightBeShared,'%',0,0xa55f4ab4,
+/*  59, offset=+ 161 */tRisseStringData::MightBeShared,'/',0,0x5a873501,
+/*  60, offset=+ 165 */tRisseStringData::MightBeShared,'\\',0,0x919da321,
+/*  61, offset=+ 169 */tRisseStringData::MightBeShared,'*',0,0xff387e65,
+/*  62, offset=+ 173 */tRisseStringData::MightBeShared,'+',0,0x11e1a3b7,
+/*  63, offset=+ 177 */tRisseStringData::MightBeShared,'-',0,0x371a6e28,
+/*  64, offset=+ 181 */
+/*  65, offset=+ 181 */
+/*  66, offset=+ 181 */tRisseStringData::MightBeShared,'i','s','A',0,0xbc75eb92,
+/*  67, offset=+ 187 */
+/*  68, offset=+ 187 */
+/*  69, offset=+ 187 */tRisseStringData::MightBeShared,'[',']',0,0x321b7cff,
+/*  70, offset=+ 192 */
+/*  71, offset=+ 192 */tRisseStringData::MightBeShared,'d','e','l','e','t','e','[',']',0,0xa063490b,
+/*  72, offset=+ 203 */
+/*  73, offset=+ 203 */
+/*  74, offset=+ 203 */
+/*  75, offset=+ 203 */tRisseStringData::MightBeShared,'[',']','=',0,0xcdc754c6,
+/*  76, offset=+ 209 */tRisseStringData::MightBeShared,'&','=',0,0xf73fc38c,
+/*  77, offset=+ 214 */tRisseStringData::MightBeShared,'|','=',0,0x3940e28e,
+/*  78, offset=+ 219 */tRisseStringData::MightBeShared,'^','=',0,0x68e166fa,
+/*  79, offset=+ 224 */tRisseStringData::MightBeShared,'-','=',0,0x9ae502b0,
+/*  80, offset=+ 229 */tRisseStringData::MightBeShared,'+','=',0,0x14807825,
+/*  81, offset=+ 234 */tRisseStringData::MightBeShared,'%','=',0,0xbc1a4e72,
+/*  82, offset=+ 239 */tRisseStringData::MightBeShared,'/','=',0,0x913a6d17,
+/*  83, offset=+ 244 */tRisseStringData::MightBeShared,'\\','=',0,0xd31cbda3,
+/*  84, offset=+ 249 */tRisseStringData::MightBeShared,'*','=',0,0x3e43cd2b,
+/*  85, offset=+ 254 */tRisseStringData::MightBeShared,'|','|','=',0,0x3c1d903a,
+/*  86, offset=+ 260 */tRisseStringData::MightBeShared,'&','&','=',0,0x0220217d,
+/*  87, offset=+ 266 */tRisseStringData::MightBeShared,'>','>','>','=',0,0x43b190ce,
+/*  88, offset=+ 273 */tRisseStringData::MightBeShared,'<','<','=',0,0x7d38fd56,
+/*  89, offset=+ 279 */tRisseStringData::MightBeShared,'>','>','=',0,0x222ef3a1,
+/*  90, offset=+ 285 */
+/*  91, offset=+ 285 */
+/*  92, offset=+ 285 */
+/*  93, offset=+ 285 */
+/*  94, offset=+ 285 */
+/*  95, offset=+ 285 */
+/*  96, offset=+ 285 */
+/*  97, offset=+ 285 */
+/*  98, offset=+ 285 */
+/*  99, offset=+ 285 */
+/* 100, offset=+ 285 */
+/* 101, offset=+ 285 */
+/* 102, offset=+ 285 */
+/* 103, offset=+ 285 */
+/* 104, offset=+ 285 */
+/* 105, offset=+ 285 */
 };
 const tRisseVMInsnInfo RisseVMInsnInfo[] = {
 /*   0 */ {"NoOperation", "nop", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  なにもしない */},
@@ -133,7 +133,7 @@ const tRisseVMInsnInfo RisseVMInsnInfo[] = {
 /*  17 */ {"Read", "sread", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifShared,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  共有空間からの読み込み */},
 /*  18 */ {"New", "new", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,tRisseVMInsnInfo::vifNumber,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+1,3} /*  "new" */},
 /*  19 */ {"TryFuncCall", "trycall", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,tRisseVMInsnInfo::vifNumber,tRisseVMInsnInfo::vifNumber,(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  try function call */},
-/*  20 */ {"FuncCall", "call", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,tRisseVMInsnInfo::vifNumber,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  function call */},
+/*  20 */ {"FuncCall", "call", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,tRisseVMInsnInfo::vifNumber,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+7,2} /*  function call */},
 /*  21 */ {"FuncCallBlock", "callb", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,tRisseVMInsnInfo::vifNumber,tRisseVMInsnInfo::vifNumber,(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  function call with lazyblock(VMのみで使用) */},
 /*  22 */ {"SetFrame", "sframe", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  スタックフレームと共有空間を設定する */},
 /*  23 */ {"SetShare", "sshare", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  共有空間のみ設定する */},
@@ -146,63 +146,63 @@ const tRisseVMInsnInfo RisseVMInsnInfo[] = {
 /*  30 */ {"ExitTryException", "exittry", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifConstant,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  Try脱出用例外を発生させる */},
 /*  31 */ {"GetExitTryValue", "exitval", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  Try脱出用例外オブジェクトから値を得る */},
 /*  32 */ {"LogNot", "lnot", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  "!" logical not */},
-/*  33 */ {"BitNot", "bnot", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+7,1} /*  "~" bit not */},
-/*  34 */ {"DecAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+11,2} /*  "--" decrement */},
-/*  35 */ {"IncAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+16,2} /*  ++ increment */},
-/*  36 */ {"Plus", "plus", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+21,2} /*  + */},
-/*  37 */ {"Minus", "minus", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+26,2} /*  - */},
-/*  38 */ {"String", "string", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+31,8} /*  文字列にキャスト */},
-/*  39 */ {"Boolean", "boolean", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+42,9} /*  booleanにキャスト */},
-/*  40 */ {"Real", "real", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+54,6} /*  realにキャスト */},
-/*  41 */ {"Integer", "int", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+63,9} /*  integerにキャスト */},
-/*  42 */ {"LogOr", "lor", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+75,2} /*  || */},
-/*  43 */ {"LogAnd", "land", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+80,2} /*  && */},
-/*  44 */ {"BitOr", "bor", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+85,1} /*  | */},
-/*  45 */ {"BitXor", "bxor", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+89,1} /*  ^ */},
-/*  46 */ {"BitAnd", "band", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+93,1} /*  & */},
-/*  47 */ {"NotEqual", "ne", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+97,2} /*  != */},
-/*  48 */ {"Equal", "eq", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+102,2} /*  == */},
-/*  49 */ {"DiscNotEqual", "dne", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+107,3} /*  !== */},
-/*  50 */ {"DiscEqual", "deq", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+113,3} /*  === */},
-/*  51 */ {"Lesser", "lt", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+119,1} /*  < */},
-/*  52 */ {"Greater", "gt", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+123,1} /*  > */},
-/*  53 */ {"LesserOrEqual", "lte", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+127,2} /*  <= */},
-/*  54 */ {"GreaterOrEqual", "gte", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+132,2} /*  >= */},
-/*  55 */ {"RBitShift", "rbs", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+137,3} /*  >>> */},
-/*  56 */ {"LShift", "ls", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+143,2} /*  << */},
-/*  57 */ {"RShift", "rs", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+148,2} /*  >> */},
-/*  58 */ {"Mod", "mod", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+153,1} /*  % */},
-/*  59 */ {"Div", "div", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+157,1} /*  / */},
-/*  60 */ {"Idiv", "idiv", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+161,1} /*  \ (integer div) */},
-/*  61 */ {"Mul", "mul", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+165,1} /*  * */},
-/*  62 */ {"Add", "add", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+169,1} /*  + */},
-/*  63 */ {"Sub", "sub", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+173,1} /*  - */},
+/*  33 */ {"BitNot", "bnot", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+12,1} /*  "~" bit not */},
+/*  34 */ {"DecAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+16,2} /*  "--" decrement */},
+/*  35 */ {"IncAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+21,2} /*  ++ increment */},
+/*  36 */ {"Plus", "plus", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+26,2} /*  + */},
+/*  37 */ {"Minus", "minus", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+31,2} /*  - */},
+/*  38 */ {"String", "string", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+36,8} /*  文字列にキャスト */},
+/*  39 */ {"Boolean", "boolean", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+47,9} /*  booleanにキャスト */},
+/*  40 */ {"Real", "real", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+59,6} /*  realにキャスト */},
+/*  41 */ {"Integer", "int", {tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+68,9} /*  integerにキャスト */},
+/*  42 */ {"LogOr", "lor", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+80,2} /*  || */},
+/*  43 */ {"LogAnd", "land", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+85,2} /*  && */},
+/*  44 */ {"BitOr", "bor", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+90,1} /*  | */},
+/*  45 */ {"BitXor", "bxor", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+94,1} /*  ^ */},
+/*  46 */ {"BitAnd", "band", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+98,1} /*  & */},
+/*  47 */ {"NotEqual", "ne", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+102,2} /*  != */},
+/*  48 */ {"Equal", "eq", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+107,2} /*  == */},
+/*  49 */ {"DiscNotEqual", "dne", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+112,3} /*  !== */},
+/*  50 */ {"DiscEqual", "deq", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+118,3} /*  === */},
+/*  51 */ {"Lesser", "lt", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+124,1} /*  < */},
+/*  52 */ {"Greater", "gt", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+128,1} /*  > */},
+/*  53 */ {"LesserOrEqual", "lte", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+132,2} /*  <= */},
+/*  54 */ {"GreaterOrEqual", "gte", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+137,2} /*  >= */},
+/*  55 */ {"RBitShift", "rbs", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+142,3} /*  >>> */},
+/*  56 */ {"LShift", "ls", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+148,2} /*  << */},
+/*  57 */ {"RShift", "rs", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+153,2} /*  >> */},
+/*  58 */ {"Mod", "mod", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+158,1} /*  % */},
+/*  59 */ {"Div", "div", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+162,1} /*  / */},
+/*  60 */ {"Idiv", "idiv", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+166,1} /*  \ (integer div) */},
+/*  61 */ {"Mul", "mul", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+170,1} /*  * */},
+/*  62 */ {"Add", "add", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+174,1} /*  + */},
+/*  63 */ {"Sub", "sub", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+178,1} /*  - */},
 /*  64 */ {"InContextOf", "cntx", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  incontextof */},
 /*  65 */ {"InContextOfDyn", "cntxdyn", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  incontextof dynamic */},
-/*  66 */ {"InstanceOf", "instof", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+177,3} /*  instanceof (isA) */},
+/*  66 */ {"InstanceOf", "instof", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+182,3} /*  instanceof (isA) */},
 /*  67 */ {"DGet", "dget", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  get .   */},
 /*  68 */ {"DGetF", "dgetf", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  get . with flags (下記参照) */},
-/*  69 */ {"IGet", "iget", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+183,2} /*  get [ ] */},
+/*  69 */ {"IGet", "iget", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+188,2} /*  get [ ] */},
 /*  70 */ {"DDelete", "ddel", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  delete . */},
-/*  71 */ {"IDelete", "idel", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+188,8} /*  delete [ ] */},
+/*  71 */ {"IDelete", "idel", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+193,8} /*  delete [ ] */},
 /*  72 */ {"DSetAttrib", "dseta", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set member attribute */},
 /*  73 */ {"DSet", "dset", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set . */},
 /*  74 */ {"DSetF", "dsetf", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifOthers,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  set . with flags (下記参照) */},
-/*  75 */ {"ISet", "iset", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+199,3} /*  set [ ] */},
-/*  76 */ {"BitAndAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+205,2} /*  &= */},
-/*  77 */ {"BitOrAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+210,2} /*  |= */},
-/*  78 */ {"BitXorAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+215,2} /*  ^= */},
-/*  79 */ {"SubAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+220,2} /*  -= */},
-/*  80 */ {"AddAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+225,2} /*  += */},
-/*  81 */ {"ModAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+230,2} /*  %= */},
-/*  82 */ {"DivAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+235,2} /*  /= */},
-/*  83 */ {"IdivAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+240,2} /*  \= */},
-/*  84 */ {"MulAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+245,2} /*  *= */},
-/*  85 */ {"LogOrAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+250,3} /*  ||= */},
-/*  86 */ {"LogAndAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+256,3} /*  &&= */},
-/*  87 */ {"RBitShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+262,4} /*  >>>= */},
-/*  88 */ {"LShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+269,3} /*  <<= */},
-/*  89 */ {"RShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+275,3} /*  >>= */},
+/*  75 */ {"ISet", "iset", {tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,tRisseVMInsnInfo::vifRegister,(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+204,3} /*  set [ ] */},
+/*  76 */ {"BitAndAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+210,2} /*  &= */},
+/*  77 */ {"BitOrAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+215,2} /*  |= */},
+/*  78 */ {"BitXorAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+220,2} /*  ^= */},
+/*  79 */ {"SubAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+225,2} /*  -= */},
+/*  80 */ {"AddAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+230,2} /*  += */},
+/*  81 */ {"ModAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+235,2} /*  %= */},
+/*  82 */ {"DivAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+240,2} /*  /= */},
+/*  83 */ {"IdivAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+245,2} /*  \= */},
+/*  84 */ {"MulAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+250,2} /*  *= */},
+/*  85 */ {"LogOrAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+255,3} /*  ||= */},
+/*  86 */ {"LogAndAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+261,3} /*  &&= */},
+/*  87 */ {"RBitShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+267,4} /*  >>>= */},
+/*  88 */ {"LShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+274,3} /*  <<= */},
+/*  89 */ {"RShiftAssign", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RisseOperatorMemberNames+280,3} /*  >>= */},
 /*  90 */ {"VMCodeLast", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  VMオペコードの最後 */},
 /*  91 */ {"SetDefaultContext", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスに対して設定する */},
 /*  92 */ {"GetDefaultContext", "ERR", {(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0),(tRisseVMInsnInfo::tInsnFlag)(0)}, {RISSE_STRING_EMPTY_BUFFER,0} /*  メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスから取得する */},

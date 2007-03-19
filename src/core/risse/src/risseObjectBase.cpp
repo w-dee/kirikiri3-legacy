@@ -383,13 +383,12 @@ tRisseObjectBase::tRetValue tRisseObjectBase::FuncCall(
 		if(rv != rvNoError) return rv;
 
 		// メンバに対して関数呼び出しを実行する
-		function_object.FuncCall(ret, flags, args, This);
+		function_object.FuncCall(ret, flags & ~tRisseOperateFlags::ofUseThisAsContext, args, This);
 	}
 	else
 	{
-		// このオブジェクトに対するメソッド呼び出し
-		// 普通、メソッドとしては動作しない
-		tRisseUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException();
+		// このオブジェクトに対して FuncCall を実行する
+		return FuncCall(ret, mnFuncCall, flags & ~tRisseOperateFlags::ofUseThisAsContext, args, This);
 	}
 	return rvNoError;
 }
@@ -411,7 +410,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::New(
 		if(rv != rvNoError) return rv;
 
 		// メンバに対しNewを実行する
-		tRisseVariant result = class_object.New(flags, args);
+		tRisseVariant result = class_object.New(flags & ~tRisseOperateFlags::ofUseThisAsContext, args);
 		if(ret) *ret = result;
 
 		return rvNoError;
@@ -419,7 +418,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::New(
 	else
 	{
 		// このオブジェクトに対して Newを実行する
-		return FuncCall(ret, mnNew, flags, args, This);
+		return FuncCall(ret, mnNew, flags & ~tRisseOperateFlags::ofUseThisAsContext, args, This);
 	}
 }
 //---------------------------------------------------------------------------

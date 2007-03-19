@@ -115,6 +115,11 @@ void tRisseClassBase::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	// 関数呼び出しを new と同じ意味に
+	RegisterNormalMember(mnFuncCall, pThis->GetPropertyDirect(mnNew));
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_fertilize, (context=pThis,attribute=tRisseMemberAttribute::vcConst))
 	{
 		// 引数チェック
@@ -191,7 +196,6 @@ tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERAT
 	if(code == ocCreateNewObjectBase && name.IsEmpty())
 	{
 		// 空のオブジェクトを作成して返す
-		// 注意! tRisseClassClass ではこの動作がオーバーライドされているので注意すること
 		RISSE_ASSERT(result != NULL);
 		tRisseVariant new_object = CreateNewObjectBase();
 		if(new_object.GetType() == tRisseVariant::vtObject)

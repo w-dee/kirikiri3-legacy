@@ -985,6 +985,7 @@ member_name
 	| "[" "]"								{ $$ = new tRisseVariant(mnIGet); }
 	| "delete" "[" "]"						{ $$ = new tRisseVariant(mnIDelete); }
 	| "[" "]" "="							{ $$ = new tRisseVariant(mnISet); }
+	| "(" ")"								{ $$ = new tRisseVariant(mnFuncCall); }
 
 /* 以下は words.txt と同期させること */
 	| "break"								{ $$ = new tRisseVariant(ss_break          ); }

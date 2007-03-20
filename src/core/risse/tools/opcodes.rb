@@ -78,7 +78,7 @@ EOS
 	file.puts "//! @brief オペレーションコードの列挙型"
 	file.puts "enum tRisseOpCode {"
 	defs.each do |item|
-		file.printf "/* %3d */ ", enumcount
+#		file.printf "/* %3d */ ", enumcount
 		file.puts "oc#{item[:long_id]} /*!<#{item[:def_comment]} */,"
 		enumcount += 1
 	end
@@ -110,39 +110,39 @@ EOS
 	# RisseVMInsnInfo の tRisseString ストレージを書き出す
 	enumcount = 0
 	offset = 0
-	file.puts "//! @brief RisseVMInsnInfoのMemberNameが参照する文字列領域"
-	file.puts "//! @note この領域は tRisseString の文字列ポインタが指す先と"
-	file.puts "//!       同じレイアウトになっている"
-	file.puts "static risse_char RisseOperatorMemberNames [] = {"
+	file.puts "// RisseVMInsnInfoのMemberNameが参照する文字列領域"
+	file.puts "// この領域は tRisseString の文字列ポインタが指す先と"
+	file.puts "//       同じレイアウトになっている"
 	defs.each do |item|
-		file.printf "/* %3d, offset=+%4d */", enumcount, offset
 		name = item[:member_name]
-		item[:member_name_offset] = offset
 		if name != '----'
+			file.print "static risse_char v_#{item[:long_id]}[] = { "
 			file.print "tRisseStringData::MightBeShared,"
 			name.each_byte do |byte|
 				file.print "#{byte.chr.dump.gsub(/^"/,"'").gsub(/"$/,"'")},"
 			end
 			file.print "0,"  # null terminator
-			file.printf "0x%08x,", name.make_risse_hash  # hash
-			offset += name.length + 3
+			file.printf "0x%08x", name.make_risse_hash  # hash
+			file.print " };"
+			file.print " /*!< string of #{item[:def_comment]} */"
+			file.print "\n"
 		end
-		file.print "\n"
-		enumcount += 1
 	end
-	file.puts "};"
+
+	file.print "\n\n"
 
 	# tRisseVMInsnInfo の構造体を書き出す
 	enumcount = 0
 	file.puts "const tRisseVMInsnInfo RisseVMInsnInfo[] = {"
 	defs.each do |item|
-		file.printf "/* %3d */ {", enumcount
+#		file.printf "/* %3d */", enumcount
+		file.printf "{"
 		file.print "#{item[:long_id].dump}, #{item[:mnemonic].dump}, "
 		file.print "{#{item[:On].split(/,/).map{ |i| On_defs[i] }.join(',')}}, "
 		if item[:member_name] == '----'
 			file.print "{RISSE_STRING_EMPTY_BUFFER,0}"
 		else
-			file.print "{RisseOperatorMemberNames+#{item[:member_name_offset]+1},#{item[:member_name].length}}"
+			file.print "{v_#{item[:long_id]}+1,#{item[:member_name].length}}"
 		end
 		file.puts " /* #{item[:def_comment]} */},"
 		enumcount += 1

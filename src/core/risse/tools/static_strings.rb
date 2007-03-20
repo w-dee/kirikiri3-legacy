@@ -45,7 +45,7 @@ File.open(ARGV[1]).readlines.each do |line|
 	sp = line.split(/\s+/)
 	# 単語マッチを行う物のみを抽出
 	if sp[3] == 'true'
-		defs << { :id => 'ss_' + sp[0], :string => sp[0], :def_comment => 'トークンの値' }
+		defs << { :id => 'ss_' + sp[0], :string => sp[0], :def_comment => "トークンの値 #{sp[0]}" }
 	end
 end
 
@@ -87,12 +87,13 @@ extern const tRisseStringData RisseStaticStringTable[];
 
 EOS
 
-	# 演算子メンバ名へのエイリアスを書き出す
+	# static string への実体の externとエイリアスを書き出す
 	defs.each_index do |index|
 		item = defs[index]
+		file.puts("extern tRisseStringData data_#{item[:id]};")
 		file.puts("static const tRisseString & #{item[:id]} = "+
-			"*reinterpret_cast<const tRisseString *>(RisseStaticStringTable+#{index});"+
-			" //!< (演算子メンバ名) #{item[:def_comment]}")
+			"*reinterpret_cast<const tRisseString *>(&data_#{item[:id]});"+
+			" //!< (static string) #{item[:def_comment]}")
 	end
 end
 
@@ -109,36 +110,34 @@ EOS
 
 	# static strings の tRisseString ストレージを書き出す
 	offset = 0
-	file.puts "//! @brief static strings の文字列領域"
-	file.puts "//! @note この領域は tRisseString の文字列ポインタが指す先と"
-	file.puts "//!       同じレイアウトになっている"
-	file.puts "static risse_char RisseStaticStrings [] = {"
+	file.puts "// static strings の文字列領域"
+	file.puts "// この領域は tRisseString の文字列ポインタが指す先と"
+	file.puts "// 同じレイアウトになっている"
 	defs.each_index do |index|
 		item = defs[index]
-		file.printf "/* %3d, offset=+%4d */", index, offset
+#		file.printf "/* %3d, offset=+%4d */", index, offset
 		name = item[:string]
-		item[:string_offset] = offset
+		file.print "static risse_char v_#{item[:id]}[] = { "
 		file.print "tRisseStringData::MightBeShared,"
 		name.each_byte do |byte|
 			file.print "#{byte.chr.dump.gsub(/^"/,"'").gsub(/"$/,"'")},"
 		end
 		file.print "0,"  # null terminator
-		file.printf "0x%08x,", name.make_risse_hash  # hash
-		offset += name.length + 3
+		file.printf "0x%08x", name.make_risse_hash  # hash
+		file.print " };"
+		file.print " /*!< string of #{item[:def_comment]} */"
 		file.print "\n"
-	end
-	file.puts "};"
 
-	# tRisseStringData の構造体を書き出す
-	file.puts "const tRisseStringData RisseStaticStringTable[] = {"
-	defs.each_index do |index|
+
 		item = defs[index]
-		file.printf "/* %3d */ ", index
-		file.print "{RisseStaticStrings+#{item[:string_offset]+1},#{item[:string].length}}"
-		file.puts " /* #{item[:def_comment]} */,"
+		name = item[:string]
+		file.print "tRisseStringData data_#{item[:id]} = { "
+#		file.printf "/* %3d */ ", index
+		file.print "v_#{item[:id]}+1,#{item[:string].length} };"
+		file.puts " /* #{item[:def_comment]} */"
 	end
 
-	file.puts "};"
+	file.print "\n\n"
 end
 
 #-----------------------------------------------------------------------

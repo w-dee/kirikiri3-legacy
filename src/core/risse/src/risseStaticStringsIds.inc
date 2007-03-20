@@ -3,140 +3,277 @@
 
 extern const tRisseStringData RisseStaticStringTable[];
 
-static const tRisseString & ss_break = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+0); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_continue = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+1); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_const = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+2); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_catch = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+3); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_class = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+4); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_case = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+5); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_debugger = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+6); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_default = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+7); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_delete = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+8); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_do = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+9); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_dynamic = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+10); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_extends = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+11); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_export = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+12); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_enum = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+13); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_else = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+14); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_function = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+15); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_finally = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+16); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_final = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+17); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_for = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+18); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_global = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+19); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_getter = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+20); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_goto = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+21); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_incontextof = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+22); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_invalidate = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+23); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_instanceof = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+24); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_isvalid = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+25); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_import = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+26); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_int = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+27); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_internal = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+28); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_in = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+29); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_if = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+30); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_module = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+31); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_new = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+32); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_octet = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+33); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_protected = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+34); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_property = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+35); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_private = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+36); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_public = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+37); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_return = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+38); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_real = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+39); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_synchronized = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+40); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_switch = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+41); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_static = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+42); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_setter = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+43); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_string = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+44); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_super = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+45); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_typeof = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+46); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_throw = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+47); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_this = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+48); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_try = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+49); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_var = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+50); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_while = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+51); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_with = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+52); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_as = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+53); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_use = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+54); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_abstract = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+55); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_implements = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+56); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_interface = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+57); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_native = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+58); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_throws = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+59); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_transient = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+60); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_volatile = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+61); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_enumerable = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+62); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_hidden = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+63); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_virtual = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+64); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_field = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+65); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_void = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+66); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_null = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+67); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_true = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+68); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_false = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+69); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_NaN = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+70); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_Infinity = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+71); //!< (演算子メンバ名) トークンの値
-static const tRisseString & ss_initialize = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+72); //!< (演算子メンバ名)  "initialize" メソッド名
-static const tRisseString & ss_construct = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+73); //!< (演算子メンバ名)  "construct" メソッド名
-static const tRisseString & ss_fertilize = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+74); //!< (演算子メンバ名)  "fertilize" メソッド名
-static const tRisseString & ss_getInstanceMember = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+75); //!< (演算子メンバ名)  "getInstanceMember" メソッド名
-static const tRisseString & ss_setInstanceMember = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+76); //!< (演算子メンバ名)  "setInstanceMember" メソッド名
-static const tRisseString & ss_Object = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+77); //!< (演算子メンバ名)  "Object" クラス名
-static const tRisseString & ss_Module = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+78); //!< (演算子メンバ名)  "Module" モジュール名
-static const tRisseString & ss_Class = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+79); //!< (演算子メンバ名)  "Class" クラス名
-static const tRisseString & ss_Function = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+80); //!< (演算子メンバ名)  "Function" クラス名
-static const tRisseString & ss_Array = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+81); //!< (演算子メンバ名)  "Array" クラス名
-static const tRisseString & ss_Primitive = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+82); //!< (演算子メンバ名)  "Primitive" クラス名
-static const tRisseString & ss_String = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+83); //!< (演算子メンバ名)  "String" クラス名
-static const tRisseString & ss_Number = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+84); //!< (演算子メンバ名)  "Number" クラス名
-static const tRisseString & ss_Integer = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+85); //!< (演算子メンバ名)  "Integer" クラス名
-static const tRisseString & ss_Property = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+86); //!< (演算子メンバ名)  "Property" クラス名
-static const tRisseString & ss_Real = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+87); //!< (演算子メンバ名)  "Real" クラス名
-static const tRisseString & ss_prototype = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+88); //!< (演算子メンバ名)  "prototype" インスタンス変数/プロパティ名
-static const tRisseString & ss_modules = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+89); //!< (演算子メンバ名)  "modules" インスタンス変数/プロパティ名
-static const tRisseString & ss_push = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+90); //!< (演算子メンバ名)  "push" メソッド名
-static const tRisseString & ss_pop = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+91); //!< (演算子メンバ名)  "pop" メソッド名
-static const tRisseString & ss_unshift = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+92); //!< (演算子メンバ名)  "unshift" メソッド名
-static const tRisseString & ss_shift = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+93); //!< (演算子メンバ名)  "shift" メソッド名
-static const tRisseString & ss_charAt = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+94); //!< (演算子メンバ名)  "charAt" メソッド名
-static const tRisseString & ss_length = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+95); //!< (演算子メンバ名)  "length" プロパティ名
-static const tRisseString & ss_times = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+96); //!< (演算子メンバ名)  "times" メソッド名
-static const tRisseString & ss_isNaN = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+97); //!< (演算子メンバ名)  "isNaN" プロパティ名
-static const tRisseString & ss_filler = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+98); //!< (演算子メンバ名)  "filler" インスタンス変数/プロパティ名
-static const tRisseString & ss_include = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+99); //!< (演算子メンバ名)  "include" メソッド名
-static const tRisseString & ss_Throwable = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+100); //!< (演算子メンバ名)  "Throwable" クラス名
-static const tRisseString & ss_message = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+101); //!< (演算子メンバ名)  "message" インスタンス変数/プロパティ名
-static const tRisseString & ss_trace = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+102); //!< (演算子メンバ名)  "trace" インスタンス変数/プロパティ名
-static const tRisseString & ss_cause = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+103); //!< (演算子メンバ名)  "cause" インスタンス変数/プロパティ名
-static const tRisseString & ss_addTrace = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+104); //!< (演算子メンバ名)  "addTrace" メソッド名
-static const tRisseString & ss_SourcePoint = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+105); //!< (演算子メンバ名)  "SourcePoint" クラス名
-static const tRisseString & ss_filename = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+106); //!< (演算子メンバ名)  "filename" ファイル名
-static const tRisseString & ss_line = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+107); //!< (演算子メンバ名)  "line" インスタンス変数/プロパティ名
-static const tRisseString & ss_Exception = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+108); //!< (演算子メンバ名)  "Exception" クラス名
-static const tRisseString & ss_p = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+109); //!< (演算子メンバ名)  "p" メソッド名
-static const tRisseString & ss_isA = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+110); //!< (演算子メンバ名)  "isA" メソッド名
-static const tRisseString & ss_BlockExitException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+111); //!< (演算子メンバ名)  "BlockExitException" クラス名
-static const tRisseString & ss_identifier = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+112); //!< (演算子メンバ名)  "identifier" インスタンス変数/プロパティ名
-static const tRisseString & ss_target = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+113); //!< (演算子メンバ名)  "target" インスタンス変数/プロパティ名
-static const tRisseString & ss_value = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+114); //!< (演算子メンバ名)  "value" インスタンス変数/プロパティ名
-static const tRisseString & ss_Error = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+115); //!< (演算子メンバ名)  "Error" クラス名
-static const tRisseString & ss_RuntimeException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+116); //!< (演算子メンバ名)  "RuntimeException" クラス名
-static const tRisseString & ss_toException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+117); //!< (演算子メンバ名)  "toException" 
-static const tRisseString & ss_MemberAccessException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+118); //!< (演算子メンバ名)  "MemberAccessException" クラス名
-static const tRisseString & ss_NoSuchMemberException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+119); //!< (演算子メンバ名)  "NoSuchMemberException" クラス名
-static const tRisseString & ss_name = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+120); //!< (演算子メンバ名)  "name" インスタンス変数/プロパティ名
-static const tRisseString & ss_object = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+121); //!< (演算子メンバ名)  "object" インスタンス変数/プロパティ名
-static const tRisseString & ss_ArgumentException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+122); //!< (演算子メンバ名)  "ArgumentException" クラス名
-static const tRisseString & ss_IllegalArgumentException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+123); //!< (演算子メンバ名)  "IllegalArgumentException" クラス名
-static const tRisseString & ss_BadArgumentCountException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+124); //!< (演算子メンバ名)  "BadArgumentException" クラス名
-static const tRisseString & ss_IllegalMemberAccessException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+125); //!< (演算子メンバ名)  "IllegalMemberAccessException" クラス名
-static const tRisseString & ss_IOException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+126); //!< (演算子メンバ名)  "IOException" クラス名
-static const tRisseString & ss_CharConversionException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+127); //!< (演算子メンバ名)  "CharConversionException" クラス名
-static const tRisseString & ss_UnsupportedOperationException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+128); //!< (演算子メンバ名)  "UnsupportedOperationException" クラス名
-static const tRisseString & ss_BadContextException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+129); //!< (演算子メンバ名)  "BadContextException" クラス名
-static const tRisseString & ss_ClassDefinitionException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+130); //!< (演算子メンバ名)  "ClassDefinitionException" クラス名
-static const tRisseString & ss_InstantiationException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+131); //!< (演算子メンバ名)  "InstantiationException" クラス名
-static const tRisseString & ss_AssertionError = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+132); //!< (演算子メンバ名)  "AssertionError" クラス名
-static const tRisseString & ss_expression = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+133); //!< (演算子メンバ名)  "expression" インスタンス変数/プロパティ名
-static const tRisseString & ss_NullObjectException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+134); //!< (演算子メンバ名)  "NullObjectException" クラス名
-static const tRisseString & ss_CompileException = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+135); //!< (演算子メンバ名)  "CompileException" クラス名
-static const tRisseString & ss_extensible = *reinterpret_cast<const tRisseString *>(RisseStaticStringTable+136); //!< (演算子メンバ名)  "extensible" プロパティ名
+extern tRisseStringData data_ss_break;
+static const tRisseString & ss_break = *reinterpret_cast<const tRisseString *>(&data_ss_break); //!< (static string) トークンの値 break
+extern tRisseStringData data_ss_continue;
+static const tRisseString & ss_continue = *reinterpret_cast<const tRisseString *>(&data_ss_continue); //!< (static string) トークンの値 continue
+extern tRisseStringData data_ss_const;
+static const tRisseString & ss_const = *reinterpret_cast<const tRisseString *>(&data_ss_const); //!< (static string) トークンの値 const
+extern tRisseStringData data_ss_catch;
+static const tRisseString & ss_catch = *reinterpret_cast<const tRisseString *>(&data_ss_catch); //!< (static string) トークンの値 catch
+extern tRisseStringData data_ss_class;
+static const tRisseString & ss_class = *reinterpret_cast<const tRisseString *>(&data_ss_class); //!< (static string) トークンの値 class
+extern tRisseStringData data_ss_case;
+static const tRisseString & ss_case = *reinterpret_cast<const tRisseString *>(&data_ss_case); //!< (static string) トークンの値 case
+extern tRisseStringData data_ss_debugger;
+static const tRisseString & ss_debugger = *reinterpret_cast<const tRisseString *>(&data_ss_debugger); //!< (static string) トークンの値 debugger
+extern tRisseStringData data_ss_default;
+static const tRisseString & ss_default = *reinterpret_cast<const tRisseString *>(&data_ss_default); //!< (static string) トークンの値 default
+extern tRisseStringData data_ss_delete;
+static const tRisseString & ss_delete = *reinterpret_cast<const tRisseString *>(&data_ss_delete); //!< (static string) トークンの値 delete
+extern tRisseStringData data_ss_do;
+static const tRisseString & ss_do = *reinterpret_cast<const tRisseString *>(&data_ss_do); //!< (static string) トークンの値 do
+extern tRisseStringData data_ss_dynamic;
+static const tRisseString & ss_dynamic = *reinterpret_cast<const tRisseString *>(&data_ss_dynamic); //!< (static string) トークンの値 dynamic
+extern tRisseStringData data_ss_extends;
+static const tRisseString & ss_extends = *reinterpret_cast<const tRisseString *>(&data_ss_extends); //!< (static string) トークンの値 extends
+extern tRisseStringData data_ss_export;
+static const tRisseString & ss_export = *reinterpret_cast<const tRisseString *>(&data_ss_export); //!< (static string) トークンの値 export
+extern tRisseStringData data_ss_enum;
+static const tRisseString & ss_enum = *reinterpret_cast<const tRisseString *>(&data_ss_enum); //!< (static string) トークンの値 enum
+extern tRisseStringData data_ss_else;
+static const tRisseString & ss_else = *reinterpret_cast<const tRisseString *>(&data_ss_else); //!< (static string) トークンの値 else
+extern tRisseStringData data_ss_function;
+static const tRisseString & ss_function = *reinterpret_cast<const tRisseString *>(&data_ss_function); //!< (static string) トークンの値 function
+extern tRisseStringData data_ss_finally;
+static const tRisseString & ss_finally = *reinterpret_cast<const tRisseString *>(&data_ss_finally); //!< (static string) トークンの値 finally
+extern tRisseStringData data_ss_final;
+static const tRisseString & ss_final = *reinterpret_cast<const tRisseString *>(&data_ss_final); //!< (static string) トークンの値 final
+extern tRisseStringData data_ss_for;
+static const tRisseString & ss_for = *reinterpret_cast<const tRisseString *>(&data_ss_for); //!< (static string) トークンの値 for
+extern tRisseStringData data_ss_global;
+static const tRisseString & ss_global = *reinterpret_cast<const tRisseString *>(&data_ss_global); //!< (static string) トークンの値 global
+extern tRisseStringData data_ss_getter;
+static const tRisseString & ss_getter = *reinterpret_cast<const tRisseString *>(&data_ss_getter); //!< (static string) トークンの値 getter
+extern tRisseStringData data_ss_goto;
+static const tRisseString & ss_goto = *reinterpret_cast<const tRisseString *>(&data_ss_goto); //!< (static string) トークンの値 goto
+extern tRisseStringData data_ss_incontextof;
+static const tRisseString & ss_incontextof = *reinterpret_cast<const tRisseString *>(&data_ss_incontextof); //!< (static string) トークンの値 incontextof
+extern tRisseStringData data_ss_invalidate;
+static const tRisseString & ss_invalidate = *reinterpret_cast<const tRisseString *>(&data_ss_invalidate); //!< (static string) トークンの値 invalidate
+extern tRisseStringData data_ss_instanceof;
+static const tRisseString & ss_instanceof = *reinterpret_cast<const tRisseString *>(&data_ss_instanceof); //!< (static string) トークンの値 instanceof
+extern tRisseStringData data_ss_isvalid;
+static const tRisseString & ss_isvalid = *reinterpret_cast<const tRisseString *>(&data_ss_isvalid); //!< (static string) トークンの値 isvalid
+extern tRisseStringData data_ss_import;
+static const tRisseString & ss_import = *reinterpret_cast<const tRisseString *>(&data_ss_import); //!< (static string) トークンの値 import
+extern tRisseStringData data_ss_int;
+static const tRisseString & ss_int = *reinterpret_cast<const tRisseString *>(&data_ss_int); //!< (static string) トークンの値 int
+extern tRisseStringData data_ss_internal;
+static const tRisseString & ss_internal = *reinterpret_cast<const tRisseString *>(&data_ss_internal); //!< (static string) トークンの値 internal
+extern tRisseStringData data_ss_in;
+static const tRisseString & ss_in = *reinterpret_cast<const tRisseString *>(&data_ss_in); //!< (static string) トークンの値 in
+extern tRisseStringData data_ss_if;
+static const tRisseString & ss_if = *reinterpret_cast<const tRisseString *>(&data_ss_if); //!< (static string) トークンの値 if
+extern tRisseStringData data_ss_module;
+static const tRisseString & ss_module = *reinterpret_cast<const tRisseString *>(&data_ss_module); //!< (static string) トークンの値 module
+extern tRisseStringData data_ss_new;
+static const tRisseString & ss_new = *reinterpret_cast<const tRisseString *>(&data_ss_new); //!< (static string) トークンの値 new
+extern tRisseStringData data_ss_octet;
+static const tRisseString & ss_octet = *reinterpret_cast<const tRisseString *>(&data_ss_octet); //!< (static string) トークンの値 octet
+extern tRisseStringData data_ss_protected;
+static const tRisseString & ss_protected = *reinterpret_cast<const tRisseString *>(&data_ss_protected); //!< (static string) トークンの値 protected
+extern tRisseStringData data_ss_property;
+static const tRisseString & ss_property = *reinterpret_cast<const tRisseString *>(&data_ss_property); //!< (static string) トークンの値 property
+extern tRisseStringData data_ss_private;
+static const tRisseString & ss_private = *reinterpret_cast<const tRisseString *>(&data_ss_private); //!< (static string) トークンの値 private
+extern tRisseStringData data_ss_public;
+static const tRisseString & ss_public = *reinterpret_cast<const tRisseString *>(&data_ss_public); //!< (static string) トークンの値 public
+extern tRisseStringData data_ss_return;
+static const tRisseString & ss_return = *reinterpret_cast<const tRisseString *>(&data_ss_return); //!< (static string) トークンの値 return
+extern tRisseStringData data_ss_real;
+static const tRisseString & ss_real = *reinterpret_cast<const tRisseString *>(&data_ss_real); //!< (static string) トークンの値 real
+extern tRisseStringData data_ss_synchronized;
+static const tRisseString & ss_synchronized = *reinterpret_cast<const tRisseString *>(&data_ss_synchronized); //!< (static string) トークンの値 synchronized
+extern tRisseStringData data_ss_switch;
+static const tRisseString & ss_switch = *reinterpret_cast<const tRisseString *>(&data_ss_switch); //!< (static string) トークンの値 switch
+extern tRisseStringData data_ss_static;
+static const tRisseString & ss_static = *reinterpret_cast<const tRisseString *>(&data_ss_static); //!< (static string) トークンの値 static
+extern tRisseStringData data_ss_setter;
+static const tRisseString & ss_setter = *reinterpret_cast<const tRisseString *>(&data_ss_setter); //!< (static string) トークンの値 setter
+extern tRisseStringData data_ss_string;
+static const tRisseString & ss_string = *reinterpret_cast<const tRisseString *>(&data_ss_string); //!< (static string) トークンの値 string
+extern tRisseStringData data_ss_super;
+static const tRisseString & ss_super = *reinterpret_cast<const tRisseString *>(&data_ss_super); //!< (static string) トークンの値 super
+extern tRisseStringData data_ss_typeof;
+static const tRisseString & ss_typeof = *reinterpret_cast<const tRisseString *>(&data_ss_typeof); //!< (static string) トークンの値 typeof
+extern tRisseStringData data_ss_throw;
+static const tRisseString & ss_throw = *reinterpret_cast<const tRisseString *>(&data_ss_throw); //!< (static string) トークンの値 throw
+extern tRisseStringData data_ss_this;
+static const tRisseString & ss_this = *reinterpret_cast<const tRisseString *>(&data_ss_this); //!< (static string) トークンの値 this
+extern tRisseStringData data_ss_try;
+static const tRisseString & ss_try = *reinterpret_cast<const tRisseString *>(&data_ss_try); //!< (static string) トークンの値 try
+extern tRisseStringData data_ss_var;
+static const tRisseString & ss_var = *reinterpret_cast<const tRisseString *>(&data_ss_var); //!< (static string) トークンの値 var
+extern tRisseStringData data_ss_while;
+static const tRisseString & ss_while = *reinterpret_cast<const tRisseString *>(&data_ss_while); //!< (static string) トークンの値 while
+extern tRisseStringData data_ss_with;
+static const tRisseString & ss_with = *reinterpret_cast<const tRisseString *>(&data_ss_with); //!< (static string) トークンの値 with
+extern tRisseStringData data_ss_as;
+static const tRisseString & ss_as = *reinterpret_cast<const tRisseString *>(&data_ss_as); //!< (static string) トークンの値 as
+extern tRisseStringData data_ss_use;
+static const tRisseString & ss_use = *reinterpret_cast<const tRisseString *>(&data_ss_use); //!< (static string) トークンの値 use
+extern tRisseStringData data_ss_abstract;
+static const tRisseString & ss_abstract = *reinterpret_cast<const tRisseString *>(&data_ss_abstract); //!< (static string) トークンの値 abstract
+extern tRisseStringData data_ss_implements;
+static const tRisseString & ss_implements = *reinterpret_cast<const tRisseString *>(&data_ss_implements); //!< (static string) トークンの値 implements
+extern tRisseStringData data_ss_interface;
+static const tRisseString & ss_interface = *reinterpret_cast<const tRisseString *>(&data_ss_interface); //!< (static string) トークンの値 interface
+extern tRisseStringData data_ss_native;
+static const tRisseString & ss_native = *reinterpret_cast<const tRisseString *>(&data_ss_native); //!< (static string) トークンの値 native
+extern tRisseStringData data_ss_throws;
+static const tRisseString & ss_throws = *reinterpret_cast<const tRisseString *>(&data_ss_throws); //!< (static string) トークンの値 throws
+extern tRisseStringData data_ss_transient;
+static const tRisseString & ss_transient = *reinterpret_cast<const tRisseString *>(&data_ss_transient); //!< (static string) トークンの値 transient
+extern tRisseStringData data_ss_volatile;
+static const tRisseString & ss_volatile = *reinterpret_cast<const tRisseString *>(&data_ss_volatile); //!< (static string) トークンの値 volatile
+extern tRisseStringData data_ss_enumerable;
+static const tRisseString & ss_enumerable = *reinterpret_cast<const tRisseString *>(&data_ss_enumerable); //!< (static string) トークンの値 enumerable
+extern tRisseStringData data_ss_hidden;
+static const tRisseString & ss_hidden = *reinterpret_cast<const tRisseString *>(&data_ss_hidden); //!< (static string) トークンの値 hidden
+extern tRisseStringData data_ss_virtual;
+static const tRisseString & ss_virtual = *reinterpret_cast<const tRisseString *>(&data_ss_virtual); //!< (static string) トークンの値 virtual
+extern tRisseStringData data_ss_field;
+static const tRisseString & ss_field = *reinterpret_cast<const tRisseString *>(&data_ss_field); //!< (static string) トークンの値 field
+extern tRisseStringData data_ss_void;
+static const tRisseString & ss_void = *reinterpret_cast<const tRisseString *>(&data_ss_void); //!< (static string) トークンの値 void
+extern tRisseStringData data_ss_null;
+static const tRisseString & ss_null = *reinterpret_cast<const tRisseString *>(&data_ss_null); //!< (static string) トークンの値 null
+extern tRisseStringData data_ss_true;
+static const tRisseString & ss_true = *reinterpret_cast<const tRisseString *>(&data_ss_true); //!< (static string) トークンの値 true
+extern tRisseStringData data_ss_false;
+static const tRisseString & ss_false = *reinterpret_cast<const tRisseString *>(&data_ss_false); //!< (static string) トークンの値 false
+extern tRisseStringData data_ss_NaN;
+static const tRisseString & ss_NaN = *reinterpret_cast<const tRisseString *>(&data_ss_NaN); //!< (static string) トークンの値 NaN
+extern tRisseStringData data_ss_Infinity;
+static const tRisseString & ss_Infinity = *reinterpret_cast<const tRisseString *>(&data_ss_Infinity); //!< (static string) トークンの値 Infinity
+extern tRisseStringData data_ss_initialize;
+static const tRisseString & ss_initialize = *reinterpret_cast<const tRisseString *>(&data_ss_initialize); //!< (static string)  "initialize" メソッド名
+extern tRisseStringData data_ss_construct;
+static const tRisseString & ss_construct = *reinterpret_cast<const tRisseString *>(&data_ss_construct); //!< (static string)  "construct" メソッド名
+extern tRisseStringData data_ss_fertilize;
+static const tRisseString & ss_fertilize = *reinterpret_cast<const tRisseString *>(&data_ss_fertilize); //!< (static string)  "fertilize" メソッド名
+extern tRisseStringData data_ss_getInstanceMember;
+static const tRisseString & ss_getInstanceMember = *reinterpret_cast<const tRisseString *>(&data_ss_getInstanceMember); //!< (static string)  "getInstanceMember" メソッド名
+extern tRisseStringData data_ss_setInstanceMember;
+static const tRisseString & ss_setInstanceMember = *reinterpret_cast<const tRisseString *>(&data_ss_setInstanceMember); //!< (static string)  "setInstanceMember" メソッド名
+extern tRisseStringData data_ss_Object;
+static const tRisseString & ss_Object = *reinterpret_cast<const tRisseString *>(&data_ss_Object); //!< (static string)  "Object" クラス名
+extern tRisseStringData data_ss_Module;
+static const tRisseString & ss_Module = *reinterpret_cast<const tRisseString *>(&data_ss_Module); //!< (static string)  "Module" モジュール名
+extern tRisseStringData data_ss_Class;
+static const tRisseString & ss_Class = *reinterpret_cast<const tRisseString *>(&data_ss_Class); //!< (static string)  "Class" クラス名
+extern tRisseStringData data_ss_Function;
+static const tRisseString & ss_Function = *reinterpret_cast<const tRisseString *>(&data_ss_Function); //!< (static string)  "Function" クラス名
+extern tRisseStringData data_ss_Array;
+static const tRisseString & ss_Array = *reinterpret_cast<const tRisseString *>(&data_ss_Array); //!< (static string)  "Array" クラス名
+extern tRisseStringData data_ss_Primitive;
+static const tRisseString & ss_Primitive = *reinterpret_cast<const tRisseString *>(&data_ss_Primitive); //!< (static string)  "Primitive" クラス名
+extern tRisseStringData data_ss_String;
+static const tRisseString & ss_String = *reinterpret_cast<const tRisseString *>(&data_ss_String); //!< (static string)  "String" クラス名
+extern tRisseStringData data_ss_Number;
+static const tRisseString & ss_Number = *reinterpret_cast<const tRisseString *>(&data_ss_Number); //!< (static string)  "Number" クラス名
+extern tRisseStringData data_ss_Integer;
+static const tRisseString & ss_Integer = *reinterpret_cast<const tRisseString *>(&data_ss_Integer); //!< (static string)  "Integer" クラス名
+extern tRisseStringData data_ss_Property;
+static const tRisseString & ss_Property = *reinterpret_cast<const tRisseString *>(&data_ss_Property); //!< (static string)  "Property" クラス名
+extern tRisseStringData data_ss_Real;
+static const tRisseString & ss_Real = *reinterpret_cast<const tRisseString *>(&data_ss_Real); //!< (static string)  "Real" クラス名
+extern tRisseStringData data_ss_prototype;
+static const tRisseString & ss_prototype = *reinterpret_cast<const tRisseString *>(&data_ss_prototype); //!< (static string)  "prototype" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_modules;
+static const tRisseString & ss_modules = *reinterpret_cast<const tRisseString *>(&data_ss_modules); //!< (static string)  "modules" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_push;
+static const tRisseString & ss_push = *reinterpret_cast<const tRisseString *>(&data_ss_push); //!< (static string)  "push" メソッド名
+extern tRisseStringData data_ss_pop;
+static const tRisseString & ss_pop = *reinterpret_cast<const tRisseString *>(&data_ss_pop); //!< (static string)  "pop" メソッド名
+extern tRisseStringData data_ss_unshift;
+static const tRisseString & ss_unshift = *reinterpret_cast<const tRisseString *>(&data_ss_unshift); //!< (static string)  "unshift" メソッド名
+extern tRisseStringData data_ss_shift;
+static const tRisseString & ss_shift = *reinterpret_cast<const tRisseString *>(&data_ss_shift); //!< (static string)  "shift" メソッド名
+extern tRisseStringData data_ss_charAt;
+static const tRisseString & ss_charAt = *reinterpret_cast<const tRisseString *>(&data_ss_charAt); //!< (static string)  "charAt" メソッド名
+extern tRisseStringData data_ss_length;
+static const tRisseString & ss_length = *reinterpret_cast<const tRisseString *>(&data_ss_length); //!< (static string)  "length" プロパティ名
+extern tRisseStringData data_ss_times;
+static const tRisseString & ss_times = *reinterpret_cast<const tRisseString *>(&data_ss_times); //!< (static string)  "times" メソッド名
+extern tRisseStringData data_ss_isNaN;
+static const tRisseString & ss_isNaN = *reinterpret_cast<const tRisseString *>(&data_ss_isNaN); //!< (static string)  "isNaN" プロパティ名
+extern tRisseStringData data_ss_filler;
+static const tRisseString & ss_filler = *reinterpret_cast<const tRisseString *>(&data_ss_filler); //!< (static string)  "filler" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_include;
+static const tRisseString & ss_include = *reinterpret_cast<const tRisseString *>(&data_ss_include); //!< (static string)  "include" メソッド名
+extern tRisseStringData data_ss_Throwable;
+static const tRisseString & ss_Throwable = *reinterpret_cast<const tRisseString *>(&data_ss_Throwable); //!< (static string)  "Throwable" クラス名
+extern tRisseStringData data_ss_message;
+static const tRisseString & ss_message = *reinterpret_cast<const tRisseString *>(&data_ss_message); //!< (static string)  "message" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_trace;
+static const tRisseString & ss_trace = *reinterpret_cast<const tRisseString *>(&data_ss_trace); //!< (static string)  "trace" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_cause;
+static const tRisseString & ss_cause = *reinterpret_cast<const tRisseString *>(&data_ss_cause); //!< (static string)  "cause" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_addTrace;
+static const tRisseString & ss_addTrace = *reinterpret_cast<const tRisseString *>(&data_ss_addTrace); //!< (static string)  "addTrace" メソッド名
+extern tRisseStringData data_ss_SourcePoint;
+static const tRisseString & ss_SourcePoint = *reinterpret_cast<const tRisseString *>(&data_ss_SourcePoint); //!< (static string)  "SourcePoint" クラス名
+extern tRisseStringData data_ss_filename;
+static const tRisseString & ss_filename = *reinterpret_cast<const tRisseString *>(&data_ss_filename); //!< (static string)  "filename" ファイル名
+extern tRisseStringData data_ss_line;
+static const tRisseString & ss_line = *reinterpret_cast<const tRisseString *>(&data_ss_line); //!< (static string)  "line" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_Exception;
+static const tRisseString & ss_Exception = *reinterpret_cast<const tRisseString *>(&data_ss_Exception); //!< (static string)  "Exception" クラス名
+extern tRisseStringData data_ss_p;
+static const tRisseString & ss_p = *reinterpret_cast<const tRisseString *>(&data_ss_p); //!< (static string)  "p" メソッド名
+extern tRisseStringData data_ss_isA;
+static const tRisseString & ss_isA = *reinterpret_cast<const tRisseString *>(&data_ss_isA); //!< (static string)  "isA" メソッド名
+extern tRisseStringData data_ss_BlockExitException;
+static const tRisseString & ss_BlockExitException = *reinterpret_cast<const tRisseString *>(&data_ss_BlockExitException); //!< (static string)  "BlockExitException" クラス名
+extern tRisseStringData data_ss_identifier;
+static const tRisseString & ss_identifier = *reinterpret_cast<const tRisseString *>(&data_ss_identifier); //!< (static string)  "identifier" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_target;
+static const tRisseString & ss_target = *reinterpret_cast<const tRisseString *>(&data_ss_target); //!< (static string)  "target" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_value;
+static const tRisseString & ss_value = *reinterpret_cast<const tRisseString *>(&data_ss_value); //!< (static string)  "value" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_Error;
+static const tRisseString & ss_Error = *reinterpret_cast<const tRisseString *>(&data_ss_Error); //!< (static string)  "Error" クラス名
+extern tRisseStringData data_ss_RuntimeException;
+static const tRisseString & ss_RuntimeException = *reinterpret_cast<const tRisseString *>(&data_ss_RuntimeException); //!< (static string)  "RuntimeException" クラス名
+extern tRisseStringData data_ss_toException;
+static const tRisseString & ss_toException = *reinterpret_cast<const tRisseString *>(&data_ss_toException); //!< (static string)  "toException" 
+extern tRisseStringData data_ss_MemberAccessException;
+static const tRisseString & ss_MemberAccessException = *reinterpret_cast<const tRisseString *>(&data_ss_MemberAccessException); //!< (static string)  "MemberAccessException" クラス名
+extern tRisseStringData data_ss_NoSuchMemberException;
+static const tRisseString & ss_NoSuchMemberException = *reinterpret_cast<const tRisseString *>(&data_ss_NoSuchMemberException); //!< (static string)  "NoSuchMemberException" クラス名
+extern tRisseStringData data_ss_name;
+static const tRisseString & ss_name = *reinterpret_cast<const tRisseString *>(&data_ss_name); //!< (static string)  "name" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_object;
+static const tRisseString & ss_object = *reinterpret_cast<const tRisseString *>(&data_ss_object); //!< (static string)  "object" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_ArgumentException;
+static const tRisseString & ss_ArgumentException = *reinterpret_cast<const tRisseString *>(&data_ss_ArgumentException); //!< (static string)  "ArgumentException" クラス名
+extern tRisseStringData data_ss_IllegalArgumentException;
+static const tRisseString & ss_IllegalArgumentException = *reinterpret_cast<const tRisseString *>(&data_ss_IllegalArgumentException); //!< (static string)  "IllegalArgumentException" クラス名
+extern tRisseStringData data_ss_BadArgumentCountException;
+static const tRisseString & ss_BadArgumentCountException = *reinterpret_cast<const tRisseString *>(&data_ss_BadArgumentCountException); //!< (static string)  "BadArgumentException" クラス名
+extern tRisseStringData data_ss_IllegalMemberAccessException;
+static const tRisseString & ss_IllegalMemberAccessException = *reinterpret_cast<const tRisseString *>(&data_ss_IllegalMemberAccessException); //!< (static string)  "IllegalMemberAccessException" クラス名
+extern tRisseStringData data_ss_IOException;
+static const tRisseString & ss_IOException = *reinterpret_cast<const tRisseString *>(&data_ss_IOException); //!< (static string)  "IOException" クラス名
+extern tRisseStringData data_ss_CharConversionException;
+static const tRisseString & ss_CharConversionException = *reinterpret_cast<const tRisseString *>(&data_ss_CharConversionException); //!< (static string)  "CharConversionException" クラス名
+extern tRisseStringData data_ss_UnsupportedOperationException;
+static const tRisseString & ss_UnsupportedOperationException = *reinterpret_cast<const tRisseString *>(&data_ss_UnsupportedOperationException); //!< (static string)  "UnsupportedOperationException" クラス名
+extern tRisseStringData data_ss_BadContextException;
+static const tRisseString & ss_BadContextException = *reinterpret_cast<const tRisseString *>(&data_ss_BadContextException); //!< (static string)  "BadContextException" クラス名
+extern tRisseStringData data_ss_ClassDefinitionException;
+static const tRisseString & ss_ClassDefinitionException = *reinterpret_cast<const tRisseString *>(&data_ss_ClassDefinitionException); //!< (static string)  "ClassDefinitionException" クラス名
+extern tRisseStringData data_ss_InstantiationException;
+static const tRisseString & ss_InstantiationException = *reinterpret_cast<const tRisseString *>(&data_ss_InstantiationException); //!< (static string)  "InstantiationException" クラス名
+extern tRisseStringData data_ss_AssertionError;
+static const tRisseString & ss_AssertionError = *reinterpret_cast<const tRisseString *>(&data_ss_AssertionError); //!< (static string)  "AssertionError" クラス名
+extern tRisseStringData data_ss_expression;
+static const tRisseString & ss_expression = *reinterpret_cast<const tRisseString *>(&data_ss_expression); //!< (static string)  "expression" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_NullObjectException;
+static const tRisseString & ss_NullObjectException = *reinterpret_cast<const tRisseString *>(&data_ss_NullObjectException); //!< (static string)  "NullObjectException" クラス名
+extern tRisseStringData data_ss_CompileException;
+static const tRisseString & ss_CompileException = *reinterpret_cast<const tRisseString *>(&data_ss_CompileException); //!< (static string)  "CompileException" クラス名
+extern tRisseStringData data_ss_extensible;
+static const tRisseString & ss_extensible = *reinterpret_cast<const tRisseString *>(&data_ss_extensible); //!< (static string)  "extensible" プロパティ名

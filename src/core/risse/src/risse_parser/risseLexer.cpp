@@ -40,6 +40,7 @@ tRisseLexer::tRisseLexer(tRisseScriptBlockBase * sb)
 	LastTokenId = T_NL; // 最初の空行を読み飛ばすように
 	NewLineRunningCount = 1;
 	FuncCallReduced = false;
+	IgnoreNextNewLineStyleCheck = false;
 
 	// デフォルトでは改行を無視しない
 	PushRecognizeNewLine();
@@ -127,6 +128,16 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 			if(*Ptr == '\r' || *Ptr == '\n')
 			{
 				StepNewLineChar(Ptr);
+				if(LastTokenId == T_RBRACE)
+				{
+					// 直前のトークンが "}" だった場合は、
+					// 直後の改行スタイルのチェックを行わない。
+					// "}" の直後にはセミコロンを書かないが、それ以外
+					// ではセミコロンを書く、といった混在のスタイルが
+					// 十分ありうるため、警告を抑制する。
+					IgnoreNextNewLineStyleCheck = true;
+				}
+
 				if(LastTokenId == T_NL)
 				{
 					// 連続する T_NL は一つにまとめる
@@ -275,30 +286,35 @@ void tRisseLexer::NotifyStatementEndStyle(bool semicolon)
 {
 	if(NewLineRecogInfo.size() == 0) return;
 
-	// 前回、文の終了にセミコロンを使ったのか、改行を使ったのかを調べる。
-	// スタイルが変わっていれば警告する。
-	bool warn = false;
-	switch(NewLineRecogInfo.back().SemicolonState)
+	if(!IgnoreNextNewLineStyleCheck)
 	{
-	case tNewLineRecogInfo::ssUnknown:
-		break;
 
-	case tNewLineRecogInfo::ssSemicolon:
-		if(!semicolon)
-			warn = true;
-		break;
+		// 前回、文の終了にセミコロンを使ったのか、改行を使ったのかを調べる。
+		// スタイルが変わっていれば警告する。
+		bool warn = false;
+		switch(NewLineRecogInfo.back().SemicolonState)
+		{
+		case tNewLineRecogInfo::ssUnknown:
+			break;
 
-	case tNewLineRecogInfo::ssNewLine:
-		if(semicolon)
-			warn = true;
-		break;
+		case tNewLineRecogInfo::ssSemicolon:
+			if(!semicolon)
+				warn = true;
+			break;
+
+		case tNewLineRecogInfo::ssNewLine:
+			if(semicolon)
+				warn = true;
+			break;
+		}
+		NewLineRecogInfo.back().SemicolonState =
+			semicolon ? tNewLineRecogInfo::ssSemicolon : tNewLineRecogInfo::ssNewLine;
+
+		if(warn)
+			ScriptBlock->OutputWarning(GetLastTokenStart(), 
+				RISSE_WS_TR("mixing semicolon style and newline style") );
 	}
-	NewLineRecogInfo.back().SemicolonState =
-		semicolon ? tNewLineRecogInfo::ssSemicolon : tNewLineRecogInfo::ssNewLine;
-
-	if(warn)
-		ScriptBlock->OutputWarning(GetLastTokenStart(), 
-			RISSE_WS_TR("mixing semicolon style and newline style") );
+	IgnoreNextNewLineStyleCheck = false;
 }
 //---------------------------------------------------------------------------
 

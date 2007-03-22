@@ -73,6 +73,8 @@ class tRisseLexer : public tRisseLexerUtility
 	};
 	gc_vector<tNewLineRecogInfo> NewLineRecogInfo; //!< 改行の取り扱いに関する情報のスタック
 
+	bool IgnoreNextNewLineStyleCheck; //!< 次回、改行のスタイルのチェックを無視するかどうか
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		sb		スクリプトブロック

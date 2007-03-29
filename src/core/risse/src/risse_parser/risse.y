@@ -340,7 +340,8 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 
 %type <np>
 	toplevel_def_list def_list
-	expr expr_with_comma access_expr call_arg call_arg_list
+	expr_with_block expr_with_comma expr
+	access_expr call_arg call_arg_list
 	decl_name_expr factor
 	func_expr_def func_expr_def_inner
 	func_call_expr func_call_expr_head func_call_expr_body
@@ -1067,6 +1068,10 @@ member_name
 /*---------------------------------------------------------------------------
   expression
   ---------------------------------------------------------------------------*/
+expr_with_block
+	: block
+	| expr_with_comma
+;
 
 
 /* 式 */
@@ -1156,8 +1161,8 @@ access_expr
 									         N(Factor)(@4.first, aftConstant, *$4), matDirectThis); }
 	| access_expr "::" onl "(" {BI} onl expr onl ")" {EI}
 									{ $$ = N(MemberSel)(@2.first, $1, $7, matDirectThis); }
-	| "(" {BI} onl expr_with_comma onl ")" {EI}
-									{ $$ = $4; }
+	| "(" {BI} expr_with_block ")" {EI}
+									{ $$ = $3; }
 	| func_call_expr
 	| func_expr_def
 	| property_expr_def

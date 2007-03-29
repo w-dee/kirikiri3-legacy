@@ -20,6 +20,7 @@
 #include "risseSSABlock.h"
 #include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
+#include "../risseStaticStrings.h"
 
 // 名前表の読み込み
 #undef risseASTH
@@ -694,8 +695,13 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 	}
 
 	// すべての子ノードに再帰する
+	// すべての子ノードは、その結果を(もしあれば) ss_lastEvalResultHiddenVarName に代入する
 	for(risse_size i = 0; i < GetChildCount(); i++)
-		GetChildAt(i)->GenerateReadSSA(form);
+	{
+		tRisseSSAVariable *value = GetChildAt(i)->GenerateReadSSA(form);
+		if(value) form->GetLocalNamespace()->Write(form, GetPosition(),
+					ss_lastEvalResultHiddenVarName, value);
+	}
 
 	// ローカル変数スコープの消滅  - コンテキストの種類に従って分岐
 	switch(ContextType)
@@ -707,8 +713,8 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 		break;
 	}
 
-	// このノードは答えを返さない
-	return NULL;
+	// このノードは ss_lastEvalResultHiddenVarName を返す
+	return form->GetLocalNamespace()->Read(form, GetEndPosition(), ss_lastEvalResultHiddenVarName);
 }
 //---------------------------------------------------------------------------
 
@@ -720,10 +726,11 @@ tRisseSSAVariable * tRisseASTNode_ExprStmt::DoReadSSA(
 	// このノードは式を保持しているだけなので子ノードに処理をさせるだけ
 	// ただし、node は NULL の可能性がある(空文の場合)
 	tRisseASTNode * node = GetChildAt(0);
-	if(node) node->GenerateReadSSA(form);
+	tRisseSSAVariable * res = NULL;
+	if(node) res = node->GenerateReadSSA(form);
 
-	// このノードは答えを返さない
-	return NULL;
+	// このノードは子の答えを返す
+	return res;
 }
 //---------------------------------------------------------------------------
 
@@ -772,6 +779,8 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 			return ret_var;
 		}
 	}
+	// ありえん
+	RISSE_ASSERT(!"at last at tRisseASTNode_Factor::DoReadSSA");
 	return NULL;
 }
 //---------------------------------------------------------------------------
@@ -797,10 +806,12 @@ tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
 {
 	// 変数宣言
 	// 子に再帰する
+	tRisseSSAVariable * value;
 	for(risse_size i = 0; i < GetChildCount(); i++)
-		GetChildAt(i)->GenerateReadSSA(form);
-	// このノードは答えを返さない
-	return NULL;
+		value = GetChildAt(i)->GenerateReadSSA(form);
+
+	// このノードは最後に宣言された子の値を返す
+	return value;
 }
 //---------------------------------------------------------------------------
 
@@ -862,8 +873,8 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 	// 変数宣言のSSA表現を生成する
 	GenerateVarDecl(form, GetPosition(), Name, init, Attribute);
 
-	// このノードは答えを返さない
-	return NULL;
+	// このノードは初期化値を返す
+	return init;
 }
 //---------------------------------------------------------------------------
 
@@ -1248,6 +1259,8 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 	case autDelete:		// "delete"
 		;
 	}
+	// ありえない
+	RISSE_ASSERT(!"at last at tRisseASTNode_Unary::DoReadSSA");
 	return NULL;
 }
 //---------------------------------------------------------------------------
@@ -1468,6 +1481,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 	default:
 		return NULL;
 	}
+	RISSE_ASSERT(!"at last at tRisseASTNode_Binary::DoReadSSA");
 }
 //---------------------------------------------------------------------------
 
@@ -1790,6 +1804,9 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 
 	// 真の場合に実行する内容を作成
 	tRisseSSAVariable * true_var = truenode->GenerateReadSSA(form);
+
+	// もし 値を得られないような物であれば void を代わりに使う
+	if(!true_var) true_var = form->AddConstantValueStatement(pos, tRisseVariant());
 	form->GetCurrentBlock();
 
 	// ジャンプ文を作成
@@ -1801,6 +1818,7 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 	tRisseSSABlock * false_block = NULL;
 	tRisseSSAStatement * false_exit_jump_stmt = NULL;
 	tRisseSSAVariable * false_var = NULL;
+
 	if(falsenode)
 	{
 		// 新しい基本ブロックを作成(偽の場合)
@@ -1808,12 +1826,36 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 
 		// 偽の場合に実行する内容を作成
 		false_var = falsenode->GenerateReadSSA(form);
+
+		// もし 値を得られないような物であれば void を代わりに使う
+		if(!false_var) false_var = form->AddConstantValueStatement(pos, tRisseVariant());
+
 		false_last_block = form->GetCurrentBlock();
 
 		// ジャンプ文を作成
 		false_exit_jump_stmt =
 			form->AddStatement(pos, ocJump, NULL);
 	}
+	else
+	{
+		// false ノードがない場合
+		if(needresult)
+		{
+			// 結果が必要な場合は void を代入する式を作成する
+
+			// 新しい基本ブロックを作成(偽の場合)
+			false_block = form->CreateNewBlock(basename + RISSE_WS("_pseudo_false"));
+
+			// 偽の場合に実行する内容を作成
+			false_var = form->AddConstantValueStatement(pos, tRisseVariant());
+			false_last_block = form->GetCurrentBlock();
+
+			// ジャンプ文を作成
+			false_exit_jump_stmt =
+				form->AddStatement(pos, ocJump, NULL);
+		}
+	}
+
 
 	// 新しい基本ブロックを作成(if文からの脱出)
 	tRisseSSABlock * if_exit_block;
@@ -1828,11 +1870,7 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 	// もし答えが必要ならば、答えを返すための φ関数を作成する
 	tRisseSSAVariable * ret_var = NULL;
 	if(needresult)
-	{
-		// false_var は false ノードが無い場合は NULL になるので、
-		// そのまま渡す (その場合は true_var だけがφ関数の引数になる)
 		form->AddStatement(pos, ocPhi, &ret_var, true_var, false_var);
-	}
 
 	return ret_var;
 }
@@ -1844,7 +1882,7 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
 	return InternalDoReadSSA(form, GetPosition(), RISSE_WS("if"), Condition,
-		True, False, false);
+		True, False, true);
 }
 //---------------------------------------------------------------------------
 
@@ -1917,8 +1955,9 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	// continue に関する情報を元に戻す
 	form->SetCurrentContinueInfo(old_continue_info);
 
-	// このノードは答えを返さない
-	return NULL;
+	// このノードはvoidを返す
+	// TODO: 値付き break への対応
+	return form->AddConstantValueStatement(GetPosition(), tRisseVariant());
 }
 //---------------------------------------------------------------------------
 
@@ -2022,8 +2061,9 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 	// スコープを pop
 	form->GetLocalNamespace()->Pop(); // スコープを pop
 
-	// このノードは答えを返さない
-	return NULL;
+	// このノードはvoidを返す
+	// TODO: 値付き break への対応
+	return form->AddConstantValueStatement(GetPosition(), tRisseVariant());
 }
 //---------------------------------------------------------------------------
 
@@ -2088,6 +2128,7 @@ tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 	form->AddBreakOrContinueStatement(true, GetPosition(), var);
 
 	// このノードは答えを返さない
+	// TODO: 値付き break への対応
 	return NULL;
 }
 //---------------------------------------------------------------------------

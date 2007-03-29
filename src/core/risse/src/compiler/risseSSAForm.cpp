@@ -21,6 +21,7 @@
 #include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
+#include "../risseStaticStrings.h"
 
 namespace Risse
 {
@@ -128,6 +129,12 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 	// 注意! ThisProxyのオブジェクトはスタック上に配置される可能性があるため
 	// SSA形式間で共有したりしてはいけない (SSA形式ごとに毎回作成する)
 	AddStatement(pos, ocAssignThisProxy, &ThisProxy);
+
+	// 一番浅い位置の名前空間に、変数 ss_lastEvalResultHiddenVarName を登録する
+	// 内容は void である
+	tRisseSSAVariable * voidvalue = AddConstantValueStatement(pos, tRisseVariant());
+	LocalNamespace->Add(ss_lastEvalResultHiddenVarName, NULL);
+	LocalNamespace->Write(this, pos, ss_lastEvalResultHiddenVarName, voidvalue);
 }
 //---------------------------------------------------------------------------
 
@@ -704,9 +711,10 @@ void tRisseSSAForm::GenerateLastReturn(const tRisseASTNode * root)
 	// 最後の return; 文がない場合に備え、これを補う。
 	// 実際に最後の return 文があった場合は単にこの文は実行されない物として
 	// 後続の LeapDeadBlocks() で破棄される。
+	// 返す値は '_' の値となる。
 	risse_size pos = root->SearchEndPosition();
-	tRisseSSAVariable * void_var = AddConstantValueStatement(pos, tRisseVariant()); // void
-	AddStatement(pos, ocReturn, NULL, void_var);
+	tRisseSSAVariable * ret_var = LocalNamespace->Read(this, pos, ss_lastEvalResultHiddenVarName);
+	AddStatement(pos, ocReturn, NULL, ret_var);
 }
 //---------------------------------------------------------------------------
 

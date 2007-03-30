@@ -42,6 +42,8 @@ class tRisseBreakInfo : public tRisseCollectee
 	tPendingJumpSourceBlocks PendingJumpSourceBlocks;
 	bool IsBlock; //!< この break/continue が block に対する物か
 				//!< (block に対する breakやcontinueは他と意味が異なるため)
+	bool NonValueBreakShouldSetVoidToLastEvalValue;
+		//!< 値なし break が _ に void をセットすべきかどうか(デフォルトでtrueなので注意)
 	tRisseString JumpTargetLabel; //!< ジャンプ先のラベル名
 
 public:
@@ -58,6 +60,16 @@ public:
 	//! @brief		この break/continue が block に対する物かを取得する
 	//! @return		この break/continue が block に対する物か
 	bool GetIsBlock() const { return IsBlock; }
+
+	//! @brief		値なし break が _ に void をセットすべきかどうかを設定する
+	//! @param		b 値なし break が _ に void をセットすべきかどうか
+	void SetNonValueBreakShouldSetVoidToLastEvalValue(bool b)
+		{ NonValueBreakShouldSetVoidToLastEvalValue = b; }
+
+	//! @brief		値なし break が _ に void をセットすべきかどうかを得る
+	//! @return		値なし break が _ に void をセットすべきかどうか
+	bool GetNonValueBreakShouldSetVoidToLastEvalValue() const
+		{ return NonValueBreakShouldSetVoidToLastEvalValue; }
 
 	//! @brief		この break のジャンプ先のラベル名を得る
 	//! @return		この break のジャンプ先のラベル名

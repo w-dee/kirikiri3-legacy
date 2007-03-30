@@ -35,6 +35,7 @@ tRisseBreakInfo::tRisseBreakInfo(tRisseSSAForm * form,
 {
 	Form = form;
 	IsBlock = false;
+	NonValueBreakShouldSetVoidToLastEvalValue = true;
 
 	// ターゲットブロックのラベル名を生成
 	JumpTargetLabel = 
@@ -390,13 +391,30 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 		// この SSA 形式は break/continue できる
 
 		// break/continue が値を伴ってできるかをチェック
-		if(var != NULL && !info->GetIsBlock())
+		// break は常に値を伴うことができるので break の場合はチェックをパスする
+		if(var != NULL && !info->GetIsBlock() && !is_break)
 			tRisseCompileExceptionClass::Throw(
-				tRisseString(
-					is_break?
-						RISSE_WS_TR("cannot break here with a value"):
-						RISSE_WS_TR("cannot continue here with a value")),
+				tRisseString(RISSE_WS_TR("cannot continue here with a value")),
 					GetScriptBlock(), pos);
+
+		// break の場合、値を _ にどう代入するかをチェック
+		if(is_break)
+		{
+			if(var)
+			{
+				// 値がある場合、値を _ に設定
+				WriteLastEvalResult(pos, var);
+			}
+			else
+			{
+				// 値がない場合は………
+				if(info->GetNonValueBreakShouldSetVoidToLastEvalValue())
+				{
+					// void を設定する
+					WriteLastEvalResult(pos, AddConstantValueStatement(pos, tRisseVariant()));
+				}
+			}
+		}
 
 		// ジャンプ文を info に登録
 		info->AddJump(GetCurrentBlock());

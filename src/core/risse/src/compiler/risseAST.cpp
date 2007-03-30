@@ -1940,14 +1940,24 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	tRisseSSABlock * while_exit_block =
 		form->CreateNewBlock(RISSE_WS("while_exit"));
 
+	// _ に void を代入 (値付き break で終了しないループの値は void )
+	form->WriteLastEvalResult(GetPosition(),
+		form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
+	tRisseSSAStatement * while_exit_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+
 	// 分岐/ジャンプ文のジャンプ先を設定
 	entry_jump_stmt->SetJumpTarget(SkipFirstCheck?while_body_block:while_cond_block);
 	while_body_jump_stmt->SetJumpTarget(while_cond_block);
 	branch_stmt->SetTrueBranch(while_body_block);
 	branch_stmt->SetFalseBranch(while_exit_block);
 
+	// 新しい基本ブロックを作成(break文のターゲット)
+	tRisseSSABlock * while_break_target_block =
+		form->CreateNewBlock(RISSE_WS("while_break_target"));
+	while_exit_jump_stmt->SetJumpTarget(while_break_target_block);
+
 	// break の処理
-	break_info->BindAll(while_exit_block);
+	break_info->BindAll(while_break_target_block);
 
 	// continue の処理
 	continue_info->BindAll(while_cond_block);
@@ -1958,10 +1968,12 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	// continue に関する情報を元に戻す
 	form->SetCurrentContinueInfo(old_continue_info);
 
-	// このノードはvoidを返す
-	// TODO: 値付き break への対応
-	tRisseSSAVariable * res = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
-	form->WriteLastEvalResult(GetPosition(), res);
+	// このノードは _ を返す。
+	// _ への書き込みは上の form->WriteLastEvalResult ですでに行われているか、
+	// あるいは break 文によって tRisseSSAForm::AddBreakOrContinueStatement() 内で
+	// _ への書き込みが行われている。
+	tRisseSSAVariable * res = form->GetLocalNamespace()->Read(
+					form, GetPosition(), ss_lastEvalResultHiddenVarName);
 	return res;
 }
 //---------------------------------------------------------------------------
@@ -2044,6 +2056,11 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 	tRisseSSABlock * for_exit_block =
 		form->CreateNewBlock(RISSE_WS("for_exit"));
 
+	// _ に void を代入 (値付き break で終了しないループの値は void )
+	form->WriteLastEvalResult(GetPosition(),
+		form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
+	tRisseSSAStatement * for_exit_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+
 	// 分岐/ジャンプ文のジャンプ先を設定
 	entry_jump_stmt->SetJumpTarget(for_cond_block);
 	for_body_jump_stmt->SetJumpTarget(for_iter_block ? for_iter_block : for_cond_block);
@@ -2051,8 +2068,13 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 	branch_stmt->SetTrueBranch(for_body_block);
 	branch_stmt->SetFalseBranch(for_exit_block);
 
+	// 新しい基本ブロックを作成(break文のターゲット)
+	tRisseSSABlock * for_break_target_block =
+		form->CreateNewBlock(RISSE_WS("for_break_target"));
+	for_exit_jump_stmt->SetJumpTarget(for_break_target_block);
+
 	// break の処理
-	break_info->BindAll(for_exit_block);
+	break_info->BindAll(for_break_target_block);
 
 	// continue の処理
 	continue_info->BindAll(for_iter_block ? for_iter_block : for_cond_block);
@@ -2066,10 +2088,12 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 	// スコープを pop
 	form->GetLocalNamespace()->Pop(); // スコープを pop
 
-	// このノードはvoidを返す
-	// TODO: 値付き break への対応
-	tRisseSSAVariable * res = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
-	form->WriteLastEvalResult(GetPosition(), res);
+	// このノードは _ を返す。
+	// _ への書き込みは上の form->WriteLastEvalResult ですでに行われているか、
+	// あるいは break 文によって tRisseSSAForm::AddBreakOrContinueStatement() 内で
+	// _ への書き込みが行われている。
+	tRisseSSAVariable * res = form->GetLocalNamespace()->Read(
+					form, GetPosition(), ss_lastEvalResultHiddenVarName);
 	return res;
 }
 //---------------------------------------------------------------------------
@@ -2135,7 +2159,6 @@ tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 	form->AddBreakOrContinueStatement(true, GetPosition(), var);
 
 	// このノードは答えを返さない
-	// TODO: 値付き break への対応
 	return NULL;
 }
 //---------------------------------------------------------------------------
@@ -2225,6 +2248,8 @@ tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * 
 
 	// break に関する情報を生成
 	tRisseBreakInfo * break_info = new tRisseBreakInfo(form);
+	break_info->SetNonValueBreakShouldSetVoidToLastEvalValue(false);
+		// swtich 文での値なし break で _ の値が void になってしまうと困るため
 
 	// break に関する情報を form に設定
 	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);

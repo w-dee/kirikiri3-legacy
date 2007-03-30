@@ -249,7 +249,6 @@ public:
 	//! @return		現在変換中の基本ブロック
 	tRisseSSABlock * GetCurrentBlock() const { return CurrentBlock; }
 
-
 	//! @brief		関数引数の無名の * を保持している変数を得る
 	//! @return		関数引数の無名の * を保持している変数
 	tRisseSSAVariable * GetFunctionCollapseArgumentVariable() const
@@ -264,6 +263,11 @@ public:
 	risse_size GetTryIdentifierIndex() const { return TryIdentifierIndex; }
 
 public:
+	//! @brief		_ 変数に値を書き込む
+	//! @param		pos		スクリプト上の位置
+	//! @param		value	値(NULLの場合は何もしない)
+	void WriteLastEvalResult(risse_size pos, tRisseSSAVariable * value);
+
 	//! @brief		新しい基本ブロックを作成する
 	//! @param		name	基本ブロック名プリフィックス
 	//! @return		新しく作成された基本ブロック

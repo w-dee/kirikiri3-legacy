@@ -2174,7 +2174,8 @@ private:
 	//! @brief		try-catchブロックの内容を生成する
 	//! @param		form	SSA 形式インスタンス
 	//! @param		is_finally	finally用の生成を行うか
-	void GenerateTryCatchOrFinally(tRisseSSAForm *form, bool is_finally) const;
+	//! @return		このブロックの結果を表す SSA 形式変数
+	tRisseSSAVariable * GenerateTryCatchOrFinally(tRisseSSAForm *form, bool is_finally) const;
 
 	//! @brief		catchブロックを生成する
 	//! @param		form				SSA 形式インスタンス

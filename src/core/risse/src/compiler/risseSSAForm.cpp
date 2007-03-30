@@ -199,6 +199,21 @@ tRisseScriptBlockBase * tRisseSSAForm::GetScriptBlock() const
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAForm::WriteLastEvalResult(risse_size pos, tRisseSSAVariable * value)
+{
+	if(value)
+	{
+		// @_ 変数に値を書き込む
+		bool result = LocalNamespace->Write(this, pos,
+						ss_lastEvalResultHiddenVarName, value);
+		(void)result;
+		RISSE_ASSERT(result != false);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name)
 {
 	// 今までの (Current) の基本ブロックに名前空間のスナップショットを作る

@@ -695,13 +695,8 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 	}
 
 	// すべての子ノードに再帰する
-	// すべての子ノードは、その結果を(もしあれば) ss_lastEvalResultHiddenVarName に代入する
 	for(risse_size i = 0; i < GetChildCount(); i++)
-	{
-		tRisseSSAVariable *value = GetChildAt(i)->GenerateReadSSA(form);
-		if(value) form->GetLocalNamespace()->Write(form, GetPosition(),
-					ss_lastEvalResultHiddenVarName, value);
-	}
+		GetChildAt(i)->GenerateReadSSA(form);
 
 	// ローカル変数スコープの消滅  - コンテキストの種類に従って分岐
 	switch(ContextType)
@@ -730,6 +725,7 @@ tRisseSSAVariable * tRisseASTNode_ExprStmt::DoReadSSA(
 	if(node) res = node->GenerateReadSSA(form);
 
 	// このノードは子の答えを返す
+	form->WriteLastEvalResult(GetPosition(), res);
 	return res;
 }
 //---------------------------------------------------------------------------
@@ -811,6 +807,7 @@ tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
 		value = GetChildAt(i)->GenerateReadSSA(form);
 
 	// このノードは最後に宣言された子の値を返す
+	form->WriteLastEvalResult(GetPosition(), value);
 	return value;
 }
 //---------------------------------------------------------------------------
@@ -1881,8 +1878,14 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 			tRisseSSAForm *form, void * param) const
 {
-	return InternalDoReadSSA(form, GetPosition(), RISSE_WS("if"), Condition,
-		True, False, true);
+	// if文を作成
+	tRisseSSAVariable * res = 
+		InternalDoReadSSA(form, GetPosition(), RISSE_WS("if"), Condition,
+			True, False, true);
+
+	// 結果は _ に書き込まれるとともにこの関数の戻り値となる
+	form->WriteLastEvalResult(GetPosition(), res);
+	return res;
 }
 //---------------------------------------------------------------------------
 
@@ -1957,7 +1960,9 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 
 	// このノードはvoidを返す
 	// TODO: 値付き break への対応
-	return form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+	tRisseSSAVariable * res = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+	form->WriteLastEvalResult(GetPosition(), res);
+	return res;
 }
 //---------------------------------------------------------------------------
 
@@ -2063,7 +2068,9 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 
 	// このノードはvoidを返す
 	// TODO: 値付き break への対応
-	return form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+	tRisseSSAVariable * res = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+	form->WriteLastEvalResult(GetPosition(), res);
+	return res;
 }
 //---------------------------------------------------------------------------
 
@@ -2338,29 +2345,40 @@ tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * pa
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
+	tRisseSSAVariable * res;
 	// try 文およびcatch文を作成する
 	if(!Finally)
 	{
 		// finally 文が無い
 		// 普通に try 文と catch 文を生成する
-		GenerateTryCatchOrFinally(form, false);
+		res = GenerateTryCatchOrFinally(form, false);
 	}
 	else
 	{
 		// finally 文がある
-		GenerateTryCatchOrFinally(form, true);
+		res = GenerateTryCatchOrFinally(form, true);
 	}
 
 
-	// このノードは答えを返さない
-	return NULL;
+	// このノードは最後に実行された try ブロック、あるいは catch / finally ブロックの
+	// 値を返す。
+	form->WriteLastEvalResult(GetPosition(), res);
+	return res;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *form,  bool is_finally) const
+tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *form,  bool is_finally) const
 {
+	// 名前空間をpushし、そこに ss_lastEvalResultHiddenVarName を作成する
+	// try ブロックや各 catch ブロックの結果がそこに書き込まれる。
+	form->GetLocalNamespace()->Push();
+	tRisseSSAVariable * voidvalue = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+	form->GetLocalNamespace()->Add(ss_lastEvalResultHiddenVarName, NULL);
+	form->GetLocalNamespace()->Write(form, GetPosition(), ss_lastEvalResultHiddenVarName, voidvalue);
+
+	// finallyがある？
 	tRisseSSABlock * finally_entry_block = NULL;
 	tRisseSSAStatement * finally_last_jump_stmt = NULL;
 	if(is_finally)
@@ -2513,6 +2531,16 @@ void tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *form,  bool is_
 		catch_branch_stmt->SetTryExitTarget(exit_try_block);
 		catch_branch_stmt->SetTryCatchTarget(catch_entry_block);
 	}
+
+	// ss_lastEvalResultHiddenVarName の値を取り出す
+	tRisseSSAVariable * last_value =
+		form->GetLocalNamespace()->Read(form, GetPosition(), ss_lastEvalResultHiddenVarName);
+
+	// 名前空間のpop
+	form->GetLocalNamespace()->Pop();
+
+	// このノードは ss_lastEvalResultHiddenVarName を返す
+	return last_value;
 }
 //---------------------------------------------------------------------------
 

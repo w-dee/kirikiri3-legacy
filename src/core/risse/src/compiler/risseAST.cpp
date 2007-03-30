@@ -2371,13 +2371,6 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 //---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *form,  bool is_finally) const
 {
-	// 名前空間をpushし、そこに ss_lastEvalResultHiddenVarName を作成する
-	// try ブロックや各 catch ブロックの結果がそこに書き込まれる。
-	form->GetLocalNamespace()->Push();
-	tRisseSSAVariable * voidvalue = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
-	form->GetLocalNamespace()->Add(ss_lastEvalResultHiddenVarName, NULL);
-	form->GetLocalNamespace()->Write(form, GetPosition(), ss_lastEvalResultHiddenVarName, voidvalue);
-
 	// finallyがある？
 	tRisseSSABlock * finally_entry_block = NULL;
 	tRisseSSAStatement * finally_last_jump_stmt = NULL;
@@ -2413,8 +2406,15 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 		finally_entry_block = form->CreateNewBlock(RISSE_WS("finally_entry"));
 
 		// finally の中身を生成
+		//- finally の結果がない場合に備えて void を _ に代入する
+		form->WriteLastEvalResult(GetPosition(),
+				form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
 		form->GetLocalNamespace()->Push(); // スコープを push
-		Finally->GenerateReadSSA(form);
+		tRisseSSAVariable * finally_res_var = Finally->GenerateReadSSA(form);
+		//- finally の結果がない場合は void を _ に代入する(再度)
+		if(!finally_res_var)
+				form->WriteLastEvalResult(GetPosition(),
+					form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
 		form->GetLocalNamespace()->Pop(); // スコープを pop
 
 		// finally ブロックの最後に jump 文を生成
@@ -2504,6 +2504,14 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 
 	if(!is_finally)
 	{
+		// 脱出用の新しい基本ブロックを作成
+		tRisseSSABlock * exit_try_block =
+			form->CreateNewBlock(RISSE_WS("exit_try"));
+		// try ブロックの結果を _ に書き込むための文を生成
+		form->WriteLastEvalResult(GetPosition(), try_block_ret_var);
+		tRisseSSAStatement * exit_try_block_jump_stmt =
+			form->AddStatement(GetPosition(), ocJump, NULL);
+
 		// catch用の新しい基本ブロックを作成
 		tRisseSSABlock * catch_entry_block =
 			form->CreateNewBlock(RISSE_WS("catch_entry"));
@@ -2512,8 +2520,11 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 		GenerateCatchBlock(form, try_block_ret_var);
 
 		// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
-		catch_branch_stmt->SetTryExitTarget(form->GetCurrentBlock());
+		catch_branch_stmt->SetTryExitTarget(exit_try_block);
 		catch_branch_stmt->SetTryCatchTarget(catch_entry_block);
+
+		// try ブロックからの脱出用ブロックからのジャンプを設定
+		exit_try_block_jump_stmt->SetJumpTarget(form->GetCurrentBlock());
 	}
 	else
 	{
@@ -2535,9 +2546,6 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 	// ss_lastEvalResultHiddenVarName の値を取り出す
 	tRisseSSAVariable * last_value =
 		form->GetLocalNamespace()->Read(form, GetPosition(), ss_lastEvalResultHiddenVarName);
-
-	// 名前空間のpop
-	form->GetLocalNamespace()->Pop();
 
 	// このノードは ss_lastEvalResultHiddenVarName を返す
 	return last_value;
@@ -2616,8 +2624,17 @@ void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
 
 			branch_stmt->SetTrueBranch(catch_body_block);
 
+			// catch の内容がなかった場合に備えて void を _ に代入する
+			form->WriteLastEvalResult(GetPosition(),
+					form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
+
 			// catch の内容を生成
-			catch_node->GetBody()->GenerateReadSSA(form);
+			tRisseSSAVariable * catch_result_var = catch_node->GetBody()->GenerateReadSSA(form);
+
+			// catch の結果がない場合は void を _ に代入する(再度)
+			if(!catch_result_var)
+				form->WriteLastEvalResult(GetPosition(),
+					form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
 
 			// catch の終了用のジャンプ文を生成
 			tRisseSSAStatement * catch_exit_jump_stmt =

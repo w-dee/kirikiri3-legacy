@@ -2250,7 +2250,7 @@ tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * 
 		switch_info->GetLastStatement()->SetFalseBranch(last_block); // 分岐
 
 	// break の処理
-	break_info->BindAll(last_block);
+	break_info->BindAll(exit_switch_block);
 
 	// switch に関する情報を元に戻す
 	form->SetCurrentSwitchInfo(old_switch_info);

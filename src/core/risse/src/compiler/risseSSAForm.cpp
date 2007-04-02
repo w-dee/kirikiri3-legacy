@@ -334,6 +334,11 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 //---------------------------------------------------------------------------
 void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 {
+	// ***注意***
+	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
+	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
+	// 同様の変更点がないかを検討すること。
+
 	if(var == NULL)
 	{
 		// 値が無い場合はvoidにする
@@ -381,38 +386,32 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
+void tRisseSSAForm::AddBreakStatement(risse_size pos,
 											tRisseSSAVariable * var)
 {
-	// このSSA形式インスタンスはbreakまたはcontinueできるか？
-	tRisseBreakInfo * info;
-	if((info = is_break?GetCurrentBreakInfo():GetCurrentContinueInfo()) != NULL)
+	// ***注意***
+	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
+	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
+	// 同様の変更点がないかを検討すること。
+
+	// このSSA形式インスタンスはbreakできるか？
+	tRisseBreakInfo * info = GetCurrentBreakInfo();
+	if(info)
 	{
-		// この SSA 形式は break/continue できる
+		// この SSA 形式は break できる
 
-		// break/continue が値を伴ってできるかをチェック
-		// break は常に値を伴うことができるので break の場合はチェックをパスする
-		if(var != NULL && !info->GetIsBlock() && !is_break)
-			tRisseCompileExceptionClass::Throw(
-				tRisseString(RISSE_WS_TR("cannot continue here with a value")),
-					GetScriptBlock(), pos);
-
-		// break の場合、値を _ にどう代入するかをチェック
-		if(is_break)
+		if(var)
 		{
-			if(var)
+			// 値がある場合、値を _ に設定
+			WriteLastEvalResult(pos, var);
+		}
+		else
+		{
+			// 値がない場合は………
+			if(info->GetNonValueBreakShouldSetVoidToLastEvalValue())
 			{
-				// 値がある場合、値を _ に設定
-				WriteLastEvalResult(pos, var);
-			}
-			else
-			{
-				// 値がない場合は………
-				if(info->GetNonValueBreakShouldSetVoidToLastEvalValue())
-				{
-					// void を設定する
-					WriteLastEvalResult(pos, AddConstantValueStatement(pos, tRisseVariant()));
-				}
+				// void を設定する
+				WriteLastEvalResult(pos, AddConstantValueStatement(pos, tRisseVariant()));
 			}
 		}
 
@@ -420,31 +419,108 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 		info->AddJump(GetCurrentBlock());
 
 		// 新しい基本ブロックを作成
-		CreateNewBlock(is_break?
-						RISSE_WS("disconnected_by_break"):
-						RISSE_WS("disconnected_by_continue"));
+		CreateNewBlock(RISSE_WS("disconnected_by_break"));
 	}
 	else
 	{
-		// break/continue できる SSA 形式を探す
+		// break できる SSA 形式を探す
 		tRisseSSAForm * child = NULL;
 		tRisseSSAForm * form = this;
 		do
 		{
-			if(form->CanReturn) { form = NULL; break; } // CanReturn な form を超えて break/continue はできない
+			if(form->CanReturn) { form = NULL; break; } // CanReturn な form を超えて break はできない
 			child = form;
 			form = child->Parent;
 			if(!form) break;
 
-			if((info = is_break?form->GetCurrentBreakInfo():form->GetCurrentContinueInfo()) != NULL)
+			info = form->GetCurrentBreakInfo();
+			if(info)
 			{
-				// break/continue が値を伴ってできるかをチェック
+				// break が値を伴ってできるかをチェック
 				if(var != NULL && !info->GetIsBlock())
 					tRisseCompileExceptionClass::Throw(
-						tRisseString(
-							is_break?
-								RISSE_WS_TR("cannot break here with a value"):
-								RISSE_WS_TR("cannot continue here with a value")),
+						tRisseString(RISSE_WS_TR("cannot break here with a value")),
+							GetScriptBlock(), pos);
+
+				if(var == NULL && info->GetIsBlock())
+				{
+					// 値を受け取ることができるのに値が無い場合はvoidにする
+					var = AddConstantValueStatement(pos, tRisseVariant()); // void
+				}
+
+				// このSSA形式はbreak文を受け取ることができる
+				// この try id まで例外で抜けるためのコードを生成
+				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
+				risse_size label_idx = form->AddExitTryBranchTargetLabel(
+													info->GetJumpTargetLabel());
+				stmt->SetTryIdentifierIndex(child->TryIdentifierIndex); // try id を設定
+				stmt->SetIndex(label_idx + 2); // インデックスを設定
+					// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき
+					// に割り当てられているので
+
+				CreateNewBlock(RISSE_WS("disconnected_by_break_by_exception"));
+				break;
+			}
+		} while(true);
+
+		if(form == NULL)
+		{
+			// break できないようだ
+			tRisseCompileExceptionClass::Throw(
+				tRisseString(RISSE_WS_TR("cannot place 'break' here")),
+					GetScriptBlock(), pos);
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSAForm::AddContinueStatement(risse_size pos,
+											tRisseSSAVariable * var)
+{
+	// ***注意***
+	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
+	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
+	// 同様の変更点がないかを検討すること。
+
+	// このSSA形式インスタンスはcontinueできるか？
+	tRisseBreakInfo * info = GetCurrentContinueInfo();
+	if(info)
+	{
+		// この SSA 形式は continue できる
+
+		// continue が値を伴ってできるかをチェック
+		if(var != NULL && !info->GetIsBlock())
+			tRisseCompileExceptionClass::Throw(
+				tRisseString(RISSE_WS_TR("cannot continue here with a value")),
+					GetScriptBlock(), pos);
+
+		// ジャンプ文を info に登録
+		info->AddJump(GetCurrentBlock());
+
+		// 新しい基本ブロックを作成
+		CreateNewBlock(RISSE_WS("disconnected_by_continue"));
+	}
+	else
+	{
+		// continue できる SSA 形式を探す
+		tRisseSSAForm * child = NULL;
+		tRisseSSAForm * form = this;
+		do
+		{
+			if(form->CanReturn) { form = NULL; break; } // CanReturn な form を超えて continue はできない
+			child = form;
+			form = child->Parent;
+			if(!form) break;
+
+			info = form->GetCurrentContinueInfo();
+			if(info)
+			{
+				// continue が値を伴ってできるかをチェック
+				if(var != NULL && !info->GetIsBlock())
+					tRisseCompileExceptionClass::Throw(
+						tRisseString(RISSE_WS_TR("cannot continue here with a value")),
 							GetScriptBlock(), pos);
 
 				if(var == NULL && info->GetIsBlock())
@@ -454,7 +530,7 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 				}
 
 				// continue が値を伴える場合は return と同じ動作になる
-				if(!is_break && info->GetIsBlock())
+				if(info->GetIsBlock())
 				{
 					// 単純に return 文を作成可能
 					// return 文を作成
@@ -465,7 +541,7 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 					return;
 				}
 
-				// このSSA形式はbreak/continue文を受け取ることができる
+				// このSSA形式はcontinue文を受け取ることができる
 				// この try id まで例外で抜けるためのコードを生成
 				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
 				risse_size label_idx = form->AddExitTryBranchTargetLabel(
@@ -475,20 +551,16 @@ void tRisseSSAForm::AddBreakOrContinueStatement(bool is_break, risse_size pos,
 					// +2 = 最初の2つは例外が発生しなかったときと通常の例外が発生したとき
 					// に割り当てられているので
 
-				CreateNewBlock(is_break?
-					RISSE_WS("disconnected_by_break_by_exception"):
-					RISSE_WS("disconnected_by_continue_by_exception"));
+				CreateNewBlock(RISSE_WS("disconnected_by_continue_by_exception"));
 				break;
 			}
 		} while(true);
 
 		if(form == NULL)
 		{
-			// break/continue できないようだ
+			// continue できないようだ
 			tRisseCompileExceptionClass::Throw(
-				tRisseString(is_break?
-					RISSE_WS_TR("cannot place 'break' here"):
-					RISSE_WS_TR("cannot place 'continue' here")),
+				tRisseString(RISSE_WS_TR("cannot place 'continue' here")),
 					GetScriptBlock(), pos);
 		}
 	}

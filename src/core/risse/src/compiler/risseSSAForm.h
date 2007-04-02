@@ -403,11 +403,15 @@ public:
 		return prev;
 	}
 
-	//! @brief		break 文または continue 文を追加する
-	//! @param		is_break	break(真)かcontinue(偽)か
+	//! @brief		break 文を追加する
 	//! @param		pos			スクリプト上の位置
-	//! @param		var			breakあるいはcontinueに伴った値 (NULL=voidを返す)
-	void AddBreakOrContinueStatement(bool is_break, risse_size pos, tRisseSSAVariable * var);
+	//! @param		var			breakに伴った値 (NULL=voidを返す)
+	void AddBreakStatement(risse_size pos, tRisseSSAVariable * var);
+
+	//! @brief		continue 文を追加する
+	//! @param		pos			スクリプト上の位置
+	//! @param		var			continueに伴った値 (NULL=voidを返す)
+	void AddContinueStatement(risse_size pos, tRisseSSAVariable * var);
 
 private:
 	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを

@@ -2156,7 +2156,7 @@ tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 		var = NULL; // 値は void
 
 	// break 文を追加する
-	form->AddBreakOrContinueStatement(true, GetPosition(), var);
+	form->AddBreakStatement(GetPosition(), var);
 
 	// このノードは答えを返さない
 	return NULL;
@@ -2175,7 +2175,7 @@ tRisseSSAVariable * tRisseASTNode_Continue::DoReadSSA(
 		var = NULL; // 値は void
 
 	// continue 文を追加する
-	form->AddBreakOrContinueStatement(false, GetPosition(), var);
+	form->AddContinueStatement(GetPosition(), var);
 
 	// このノードは答えを返さない
 	return NULL;

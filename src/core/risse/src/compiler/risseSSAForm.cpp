@@ -338,6 +338,8 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
 	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
 	// 同様の変更点がないかを検討すること。
+	// AddExitTryBranchTargetLabel() を呼び出すところは
+	// tRisseCompilerFunction::BindAllLabels() にもある。
 
 	if(var == NULL)
 	{
@@ -393,6 +395,8 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
 	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
 	// 同様の変更点がないかを検討すること。
+	// AddExitTryBranchTargetLabel() を呼び出すところは
+	// tRisseCompilerFunction::BindAllLabels() にもある。
 
 	// このSSA形式インスタンスはbreakできるか？
 	tRisseBreakInfo * info = GetCurrentBreakInfo();
@@ -483,6 +487,8 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
 	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
 	// 同様の変更点がないかを検討すること。
+	// AddExitTryBranchTargetLabel() を呼び出すところは
+	// tRisseCompilerFunction::BindAllLabels() にもある。
 
 	// このSSA形式インスタンスはcontinueできるか？
 	tRisseBreakInfo * info = GetCurrentContinueInfo();

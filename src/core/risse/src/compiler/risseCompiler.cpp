@@ -273,6 +273,9 @@ void tRisseCompilerFunction::BindAllLabels()
 				{
 					// ジャンプ先のSSA形式が見つかった
 					// この try id まで例外で抜けるためのコードを生成
+					// tRisseSSAForm の AddReturnStatement と AddBreakStatement と AddContinueStatement
+					// も参照のこと。
+
 					tRisseSSAStatement * stmt =
 						new tRisseSSAStatement(source_form,
 							i->SourceBlock->GetLastStatementPosition(), ocExitTryException);

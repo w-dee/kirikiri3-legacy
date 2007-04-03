@@ -22,6 +22,7 @@
 #include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
+#include "../risseStaticStrings.h"
 
 /*
 	コンパイルの単位
@@ -276,9 +277,16 @@ void tRisseCompilerFunction::BindAllLabels()
 					// tRisseSSAForm の AddReturnStatement と AddBreakStatement と AddContinueStatement
 					// も参照のこと。
 
+					// _ の値を取得する
+					tRisseSSAVariable * var =
+						i->SourceBlock->GetLocalNamespace()->Read(source_form,
+							i->SourceBlock->GetLastStatementPosition(), ss_lastEvalResultHiddenVarName);
+
+					// この try id まで例外で抜けるためのコードを生成
 					tRisseSSAStatement * stmt =
 						new tRisseSSAStatement(source_form,
 							i->SourceBlock->GetLastStatementPosition(), ocExitTryException);
+					stmt->AddUsed(var);
 					i->SourceBlock->AddStatement(stmt);
 					risse_size label_idx = form->AddExitTryBranchTargetLabel(
 								child->GetTryIdentifierIndex(), i->LabelName);

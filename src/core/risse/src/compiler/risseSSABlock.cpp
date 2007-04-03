@@ -32,11 +32,13 @@ RISSE_DEFINE_SOURCE_ID(35032,16995,23933,19143,62087,6357,32511,34753);
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name)
+tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name,
+	const tRisseSSALocalNamespace * ns)
 {
 	Form = form;
 	FirstStatement = LastStatement = NULL;
-	LocalNamespace = NULL;
+	LocalNamespace = new tRisseSSALocalNamespace(*ns);
+	LocalNamespace->SetBlock(this);
 	Mark = NULL;
 	Traversing = false;
 	LiveIn = LiveOut = NULL;
@@ -342,15 +344,6 @@ void tRisseSSABlock::DeleteDeadStatementsFromVariables()
 			}
 		}
 	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseSSABlock::TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref)
-{
-	LocalNamespace = new tRisseSSALocalNamespace(*ref);
-	LocalNamespace->SetBlock(this);
 }
 //---------------------------------------------------------------------------
 

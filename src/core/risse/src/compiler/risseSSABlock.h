@@ -56,7 +56,9 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		form		この基本ブロックを保持する SSA 形式インスタンス
 	//! @param		name		この基本ブロックの名前(実際にはこれに _ が続き連番がつく)
-	tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name);
+	//! @param		ns			この基本ブロックが引き継ぐローカル名前空間
+	//!							(内容はコピーされ、コピーされた内容をこのインスタンスが保持する)
+	tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name, const tRisseSSALocalNamespace * ns);
 
 	//! @brief		この基本ブロックが属している SSA 形式インスタンスを取得する
 	//! @return		この基本ブロックが属している SSA 形式インスタンス
@@ -169,12 +171,8 @@ public:
 	//!				その文を変数の使用リストから削除する
 	void DeleteDeadStatementsFromVariables();
 
-	//! @brief		ローカル名前空間のスナップショットを作成する
-	//! @param		ref		参照元ローカル名前空間
-	void TakeLocalNamespaceSnapshot(tRisseSSALocalNamespace * ref);
-
-	//! @brief		ローカル名前空間のスナップショットを得る
-	//! @return		ローカル名前空間のスナップショット
+	//! @brief		ローカル名前空間を得る
+	//! @return		ローカル名前空間
 	tRisseSSALocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
 
 	//! @brief		LiveIn/Outに変数を追加する

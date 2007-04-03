@@ -282,8 +282,9 @@ public:
 
 	//! @brief		新しい基本ブロックを作成する
 	//! @param		name	基本ブロック名プリフィックス
+	//! @param		ns		引き継ぐローカル名前空間(nullを指定すると現在の名前空間を引き継ぐ)
 	//! @return		新しく作成された基本ブロック
-	tRisseSSABlock * CreateNewBlock(const tRisseString & name);
+	tRisseSSABlock * CreateNewBlock(const tRisseString & name, const tRisseSSALocalNamespace * ns = NULL);
 
 private:
 	//! @brief		任意の ExitTryBranchTargetLabels にマップを追加する(AddExitTryBranchTargetLabel()から呼ばれる)

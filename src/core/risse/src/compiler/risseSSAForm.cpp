@@ -120,8 +120,8 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 	CodeBlockIndex = Function->GetFunctionGroup()->GetCompiler()->AddCodeBlock(CodeBlock);
 
 	// エントリー位置の基本ブロックを生成する
-	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"));
-	LocalNamespace->SetBlock(EntryBlock);
+	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"), LocalNamespace);
+	LocalNamespace = EntryBlock->GetLocalNamespace();
 	CurrentBlock = EntryBlock;
 
 	// this-proxy を作成する
@@ -215,18 +215,18 @@ void tRisseSSAForm::WriteLastEvalResult(risse_size pos, tRisseSSAVariable * valu
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name)
+tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name,
+						const tRisseSSALocalNamespace * ns)
 {
-	// 今までの (Current) の基本ブロックに名前空間のスナップショットを作る
-	CurrentBlock->TakeLocalNamespaceSnapshot(LocalNamespace);
+	// 新しい基本ブロックを作成する
+	// (この際、tRisseSSABlock 内で ns あるいは LocalNamespace がコピーされる)
+	tRisseSSABlock * new_block = new tRisseSSABlock(this, name, ns ? ns : LocalNamespace);
+
+	// LocalNamespace を、新しい block のものを指すように更新
+	LocalNamespace = new_block->GetLocalNamespace();
 
 	// ローカル変数名前空間をいったんすべてφ関数を見るようにマークする
 	LocalNamespace->MarkToCreatePhi();
-
-	// 新しい基本ブロックを作成する
-	tRisseSSABlock * new_block = new tRisseSSABlock(this, name);
-
-	LocalNamespace->SetBlock(new_block);
 
 	// 新しい「現在の」基本ブロックを設定し、それを返す
 	CurrentBlock = new_block;
@@ -581,7 +581,10 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 	RISSE_ASSERT(catch_branch_stmt->GetCode() == ocCatchBranch);
 	RISSE_ASSERT(catch_branch_stmt->GetTargetCount() >= 2);
 
+	// この処理の中では CurrentBlock や LocalNamespace が変更される
+	// 可能性があるのでいったん保存する
 	tRisseSSABlock * block_save = CurrentBlock;
+	tRisseSSALocalNamespace * ns_save = LocalNamespace;
 
 	// すべての分岐先をリストアップ
 	gc_vector<tRisseString> targets;
@@ -601,7 +604,8 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 			// return 文の作成
 			// 新しい基本ブロックを作成する
 			target =
-				CreateNewBlock(RISSE_WS("return_by_exception"));
+				CreateNewBlock(RISSE_WS("return_by_exception"),
+					catch_branch_stmt->GetBlock()->GetLocalNamespace());
 
 			// 例外オブジェクトから値を取り出す
 			tRisseSSAVariable * ret_var = NULL;
@@ -624,28 +628,27 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 		{
 			// goto など
 			// 新しい基本ブロックを作成する
+
+			// この新しいブロックは、catch_branch_stmt の名前空間を引き継ぐ。
+			// 生成順序が前後しているが、このブロックは catch_branch_stmt の
+			// あとに来るためである。
 			target =
-				CreateNewBlock(RISSE_WS("goto_by_exception"));
+				CreateNewBlock(RISSE_WS("goto_by_exception"),
+					catch_branch_stmt->GetBlock()->GetLocalNamespace());
 
 			Function->AddPendingLabelJump(target, *i);
 
 			// 新しい基本ブロックを作成(ただしここには到達しない)
 			CreateNewBlock("disconnected_by_goto_or_continue_or_break");
-
-			// target の名前空間を catch_branch_stmt の名前空間で上書きする
-			// 上記 CreateNewBlock はそのSSA形式が最後に保持していた
-			// 基本ブロックの名前空間を最新の名前空間で上書きしてしまうが、
-			// この target は catch_branch_stmt がある名前空間の続きなので
-			// catch_branch_stmt と同じ名前空間にしなければならない。
-			target->TakeLocalNamespaceSnapshot(
-				catch_branch_stmt->GetBlock()->GetLocalNamespace());
 		}
 
 		// catch_branch_stmt にジャンプ先を追加
 		if(target) catch_branch_stmt->AddTarget(target);
 	}
 
+	// 保存しておいた CurrentBlock や LocalNamespace を元に戻す
 	CurrentBlock = block_save;
+	LocalNamespace = ns_save;
 }
 //---------------------------------------------------------------------------
 

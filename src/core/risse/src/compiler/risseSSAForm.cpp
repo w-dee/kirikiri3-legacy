@@ -440,12 +440,20 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 			info = form->GetCurrentBreakInfo();
 			if(info)
 			{
-				// break が値を伴ってできるかをチェック
-				if(var != NULL && !info->GetIsBlock())
-					tRisseCompileExceptionClass::Throw(
-						tRisseString(RISSE_WS_TR("cannot break here with a value")),
-							GetScriptBlock(), pos);
-
+				if(var == NULL)
+				{
+					// 値が指定されていない場合
+					if(info->GetNonValueBreakShouldSetVoidToLastEvalValue())
+					{
+						// void を設定する
+						var = AddConstantValueStatement(pos, tRisseVariant());
+					}
+					else
+					{
+						// そうでなければ _ の値を得る
+						var = LocalNamespace->Read(this, pos, ss_lastEvalResultHiddenVarName);
+					}
+				}
 				if(var == NULL && info->GetIsBlock())
 				{
 					// 値を受け取ることができるのに値が無い場合はvoidにする
@@ -635,6 +643,14 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 			target =
 				CreateNewBlock(RISSE_WS("goto_by_exception"),
 					catch_branch_stmt->GetBlock()->GetLocalNamespace());
+
+			// 例外オブジェクトから値を取り出す
+			tRisseSSAVariable * break_var = NULL;
+			AddStatement(catch_branch_stmt->GetPosition(),
+				ocGetExitTryValue, &break_var, except_value);
+
+			// _ に値を書き込む
+			WriteLastEvalResult(catch_branch_stmt->GetPosition(), break_var);
 
 			Function->AddPendingLabelJump(target, *i);
 

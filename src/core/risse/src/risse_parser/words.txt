@@ -72,7 +72,7 @@ $               T_DOLLAR                 - false false
 \=              T_BACKSLASHEQUAL         - false false
 %=              T_PERCENTEQUAL           - false false
 ^=              T_CHEVRONEQUAL           - false false
-
+(@)             T_BINDING                - false false
 
 
 ##### 文字類

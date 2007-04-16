@@ -29,6 +29,7 @@
 #include "risseIntegerClass.h"
 #include "risseRealClass.h"
 #include "risseExceptionClass.h"
+#include "risseBindingClass.h"
 
 namespace Risse
 {
@@ -60,6 +61,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 
 	// 各クラスをグローバルオブジェクトに登録する
 	tRisseObjectClass::RegisterClassInstance(GlobalObject, ss_Object);
+	tRisseBindingClass::RegisterClassInstance(GlobalObject, ss_Binding);
 	tRisseModuleClass::RegisterClassInstance(GlobalObject, ss_Module);
 	tRisseClassClass::RegisterClassInstance(GlobalObject, ss_Class);
 	tRisseFunctionClass::RegisterClassInstance(GlobalObject, ss_Function);
@@ -99,6 +101,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	// 登録し治す。上記ですべてクラスの初期化は終了しているため、
 	// もう一度このメソッドを呼べば、正しくメソッドが登録されるはずである。
 	tRisseObjectClass::GetPointer()->RegisterMembers();
+	tRisseBindingClass::GetPointer()->RegisterMembers();
 	tRisseModuleClass::GetPointer()->RegisterMembers();
 	tRisseClassClass::GetPointer()->RegisterMembers();
 	tRisseFunctionClass::GetPointer()->RegisterMembers();

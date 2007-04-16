@@ -135,6 +135,7 @@ RISSE_AST_ENUM_DEF(FactorType)
 	RISSE_AST_ENUM_ITEM(aft, ThisProxy		)		//!< this-proxy
 	RISSE_AST_ENUM_ITEM(aft, Super			)		//!< "super"
 	RISSE_AST_ENUM_ITEM(aft, Global			)		//!< "global"
+	RISSE_AST_ENUM_ITEM(aft, Binding		)		//!< (@) (binding)
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 

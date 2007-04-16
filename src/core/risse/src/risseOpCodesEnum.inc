@@ -6,6 +6,7 @@ enum tRisseOpCode {
 ocNoOperation /*!< なにもしない */,
 ocAssign /*!< = (ローカル変数の代入) */,
 ocAssignConstant /*!< = 定数の代入 */,
+ocAssignNewBinding /*!< = 新しいバインディングオブジェクトの代入 */,
 ocAssignThis /*!< = thisの代入 */,
 ocAssignThisProxy /*!< = this-proxyの代入 */,
 ocAssignSuper /*!< = superの代入 */,

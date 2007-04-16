@@ -280,5 +280,7 @@ static risse_char v_ss_CompileException[] = { tRisseStringData::MightBeShared,'C
 tRisseStringData data_ss_CompileException = { v_ss_CompileException+1,16 }; /*  "CompileException" クラス名 */
 static risse_char v_ss_extensible[] = { tRisseStringData::MightBeShared,'e','x','t','e','n','s','i','b','l','e',0,0xb49ae182 }; /*!< string of  "extensible" プロパティ名 */
 tRisseStringData data_ss_extensible = { v_ss_extensible+1,10 }; /*  "extensible" プロパティ名 */
+static risse_char v_ss_Binding[] = { tRisseStringData::MightBeShared,'B','i','n','d','i','n','g',0,0x40383f90 }; /*!< string of  "Binding" クラス名 */
+tRisseStringData data_ss_Binding = { v_ss_Binding+1,7 }; /*  "Binding" クラス名 */
 
 

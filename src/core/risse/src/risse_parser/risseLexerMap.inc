@@ -31,9 +31,6 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
  case '[':
   p += 1;
   { ptr = p; return T_LBRACKET; }
- case '(':
-  p += 1;
-  { ptr = p; return T_LPARENTHESIS; }
  case '?':
   p += 1;
   { ptr = p; return T_QUESTION; }
@@ -1807,6 +1804,18 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
      p += 4;
      { ptr = p; return T_RBITSHIFTEQUAL; }
     }
+   }
+  }
+ case '(':
+  switch(p[1]) {
+  default:
+   p += 1;
+   { ptr = p; return T_LPARENTHESIS; }
+  case '@':
+   switch(p[2]) {
+   case ')':
+    p += 3;
+    { ptr = p; return T_BINDING; }
    }
   }
  case '<':

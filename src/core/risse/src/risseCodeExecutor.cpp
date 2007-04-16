@@ -20,6 +20,7 @@
 #include "risseClassClass.h"
 #include "risseFunctionClass.h"
 #include "rissePropertyClass.h"
+#include "risseBindingClass.h"
 #include "risseScriptEngine.h"
 #include "risseThisProxy.h"
 #include "risseStaticStrings.h"
@@ -133,6 +134,14 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < constssize);
 				AR(code[1]) = AC(code[2]);
 				code += 3;
+				break;
+
+			case ocAssignNewBinding: // binding	= 新しいバインディングオブジェクトの代入
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				AR(code[1]) =
+					tRisseVariant(tRisseBindingClass::GetPointer()).
+								New(0, tRisseMethodArgument::Empty());
+				code += 2;
 				break;
 
 			case ocAssignThis		: // this	 = thisの代入

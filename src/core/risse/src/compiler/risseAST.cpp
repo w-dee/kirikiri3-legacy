@@ -774,6 +774,15 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 			ret_var->SetValueType(tRisseVariant::vtObject); // 結果は常に vtObject
 			return ret_var;
 		}
+
+	case aftBinding:		// "(@)"
+		{
+			// 文を作成して戻る
+			tRisseSSAVariable * ret_var =
+				form->AddVariableWithStatement(GetPosition(), ocAssignNewBinding);
+			ret_var->SetValueType(tRisseVariant::vtObject); // 結果は常に vtObject
+			return ret_var;
+		}
 	}
 	// ありえん
 	RISSE_ASSERT(!"at last at tRisseASTNode_Factor::DoReadSSA");

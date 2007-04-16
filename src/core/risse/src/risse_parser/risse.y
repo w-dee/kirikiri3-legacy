@@ -243,6 +243,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	T_SUPER					"super"
 	T_GLOBAL				"global"
 	T_RBRACKET				"]"
+	T_BINDING				"(@)"
 	T_CLASS					"class"
 	T_MODULE				"module"
 	T_RPARENTHESIS			")"
@@ -1184,6 +1185,7 @@ factor
 	| "super"						{ $$ = N(Factor)(@1.first, aftSuper);  }
 	| T_CONSTVAL					{ $$ = N(Factor)(@1.first, aftConstant, *$1); }
 	| "global"						{ $$ = N(Factor)(@1.first, aftGlobal); }
+	| "(@)"							{ $$ = N(Factor)(@1.first, aftBinding); }
 	| embeddable_string
 ;
 

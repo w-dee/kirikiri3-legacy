@@ -77,3 +77,4 @@ ss_expression						expression						#!< "expression" インスタンス変数/プ
 ss_NullObjectException				NullObjectException				#!< "NullObjectException" クラス名
 ss_CompileException					CompileException				#!< "CompileException" クラス名
 ss_extensible						extensible						#!< "extensible" プロパティ名
+ss_Binding							Binding							#!< "Binding" クラス名

@@ -259,6 +259,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		gen->PutAssign(Declared, *Declared->GetValue());
 		break;
 
+	case ocAssignNewBinding:
 	case ocAssignThis:
 	case ocAssignThisProxy:
 	case ocAssignSuper:

@@ -279,3 +279,5 @@ extern tRisseStringData data_ss_CompileException;
 static const tRisseString & ss_CompileException = *reinterpret_cast<const tRisseString *>(&data_ss_CompileException); //!< (static string)  "CompileException" クラス名
 extern tRisseStringData data_ss_extensible;
 static const tRisseString & ss_extensible = *reinterpret_cast<const tRisseString *>(&data_ss_extensible); //!< (static string)  "extensible" プロパティ名
+extern tRisseStringData data_ss_Binding;
+static const tRisseString & ss_Binding = *reinterpret_cast<const tRisseString *>(&data_ss_Binding); //!< (static string)  "Binding" クラス名

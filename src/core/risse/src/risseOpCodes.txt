@@ -27,6 +27,7 @@ NoOperation				nop			-,-,-,-,-,-		----		#!< なにもしない
 // 代入
 Assign					copy		R,R,-,-,-,-		----		#!< = (ローカル変数の代入)
 AssignConstant			const		R,C,-,-,-,-		----		#!< = 定数の代入
+AssignNewBinding		binding		R,-,-,-,-,-		----		#!< = 新しいバインディングオブジェクトの代入
 AssignThis				this		R,-,-,-,-,-		----		#!< = thisの代入
 AssignThisProxy			thisproxy	R,-,-,-,-,-		----		#!< = this-proxyの代入
 AssignSuper				super		R,-,-,-,-,-		----		#!< = superの代入

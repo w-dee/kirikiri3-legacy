@@ -231,7 +231,7 @@ void tRisseCodeInterpreter::Execute(
 				code += 3;
 				break;
 
-			case ocAssignParam: // getpar	= (S番目の関数引数を代入)
+			case ocAssignParam: // getpar	= (O番目の関数引数を代入)
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				if(code[2] >= args.GetArgumentCount())
 					AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
@@ -240,13 +240,20 @@ void tRisseCodeInterpreter::Execute(
 				code += 3;
 				break;
 
-			case ocAssignBlockParam: // getbpar	= (S番目の関数ブロック引数を代入)
+			case ocAssignBlockParam: // getbpar	= (O番目の関数ブロック引数を代入)
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				if(code[2] >= args.GetBlockArgumentCount())
 					AR(code[1]).Clear(); // 引数の範囲を超えているのでvoidを代入
 				else
 					AR(code[1]) = args.GetBlockArgument(code[2]);
 				code += 3;
+				break;
+
+			case ocAddBindingMap: // bindmap	ローカル変数のバインディング情報を追加
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				tRisseBindingInstance::AddMap(AR(code[1]), AR(code[2]), code[3]);
+				code += 4;
 				break;
 
 			case ocWrite: // swrite	 共有空間への書き込み

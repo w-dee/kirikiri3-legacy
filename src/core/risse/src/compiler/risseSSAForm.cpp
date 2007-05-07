@@ -204,7 +204,7 @@ void tRisseSSAForm::WriteLastEvalResult(risse_size pos, tRisseSSAVariable * valu
 {
 	if(value)
 	{
-		// @_ 変数に値を書き込む
+		// _ 変数に値を書き込む
 		bool result = LocalNamespace->Write(this, pos,
 						ss_lastEvalResultHiddenVarName, value);
 		(void)result;

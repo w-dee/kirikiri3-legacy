@@ -11,7 +11,7 @@
 // そのため、このリストと words.txt で定義されているリストに重複があると
 // エラーになるので注意が必要。words.txt に登録されている単語ならばここに
 // 記述する必要はない。
-ss_lastEvalResultHiddenVarName		@_								#!< 最後に評価した文や式の結果を格納するための隠し変数名
+ss_lastEvalResultHiddenVarName		._								#!< 最後に評価した文や式の結果を格納するための隠し変数名
 ss_initialize						initialize						#!< "initialize" メソッド名
 ss_construct						construct						#!< "construct" メソッド名
 ss_fertilize						fertilize						#!< "fertilize" メソッド名

@@ -496,6 +496,12 @@ public:
 	//! @param		accessmap	アクセスマップ ( CreateAccessMap() で作成された物を指定)
 	void CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap * accessmap);
 
+	//! @brief		バインディングマップを追加する
+	//! @param		binding		バインディングオブジェクトを表すSSA形式変数
+	//! @note		このメソッドを実行すると、現時点で可視な変数がすべて共有変数に
+	//!				なる。
+	void AddBindingMap(tRisseSSAVariable * binding);
+
 	//! @brief		ユニークな番号を得る
 	//! @return		ユニークな番号
 	risse_int GetUniqueNumber();
@@ -548,9 +554,9 @@ public:
 	//! @brief		バイトコードを生成する
 	void GenerateCode() const;
 
-	//! @brief		最大のネストレベルを設定する
-	//! @param		level		最大のネストレベル
-	void SetMaxNestLevel(risse_size level);
+	//! @brief		最大の共有変数のネストカウントを設定する
+	//! @param		level		最大の共有変数のネストカウント
+	void SetSharedVariableNestCount(risse_size level);
 };
 //---------------------------------------------------------------------------
 

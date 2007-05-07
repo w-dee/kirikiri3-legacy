@@ -39,7 +39,7 @@ class tRisseCodeBlock : public tRisseObjectInterface
 	risse_size ConstsSize; //!< 定数領域のサイズ(個)
 	risse_size NumRegs; //!< 必要なレジスタ数
 	risse_size NestLevel; //!< 関数のネストレベル
-	risse_size MaxNestLevel; //!< 関数の最大のネストレベル (NestLevel==0のコードブロックでのみ有効)
+	risse_size SharedVariableNestCount; //!< 共有変数の最大のネストカウント (NestLevel==0のコードブロックでのみ有効)
 	risse_size NumSharedVars; //!< 必要な共有変数の数
 	std::pair<risse_size, risse_size> * CodeToSourcePosition; //!< コード上の位置からソースコード上の位置へのマッピングの配列
 	risse_size CodeToSourcePositionSize; //!< コード上の位置からソースコード上の位置へのマッピングの配列のサイズ
@@ -66,9 +66,9 @@ public:
 	//! @param		gen		コードジェネレータ
 	void Assign(const tRisseCodeGenerator *gen);
 
-	//! @brief		最大のネストレベルを設定する
-	//! @param		level		最大のネストレベル
-	void SetMaxNestLevel(risse_size level);
+	//! @brief		共有変数の最大のネストカウントを設定する
+	//! @param		level		共有変数の最大のネストカウント
+	void SetSharedVariableNestCount(risse_size level);
 
 	//! @brief		再配置情報の fixup を行う
 	//! @param		sb		スクリプトブロック
@@ -106,9 +106,9 @@ public:
 	//! @return		関数のネストレベル
 	risse_size GetNestLevel() const { return NestLevel; }
 
-	//! @brief		関数の最大のネストレベルを得る
-	//! @return		関数の最大のネストレベル
-	risse_size GetMaxNestLevel() const { return MaxNestLevel; }
+	//! @brief		共有変数の最大のネストレベルを得る
+	//! @return		共有変数の最大のネストレベル
+	risse_size GetSharedVariableNestCount() const { return SharedVariableNestCount; }
 
 	//! @brief		必要な共有変数の数を得る
 	//! @return		必要な共有変数の数

@@ -807,6 +807,14 @@ void tRisseSSAForm::CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap 
 
 
 //---------------------------------------------------------------------------
+void tRisseSSAForm::AddBindingMap(tRisseSSAVariable * binding)
+{
+	LocalNamespace->ShareAllVisibleVariableNames();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_int tRisseSSAForm::GetUniqueNumber()
 {
 	if(Parent) return Parent->GetUniqueNumber(); // 親がある場合は親のを使う
@@ -1099,10 +1107,10 @@ void tRisseSSAForm::GenerateCode() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::SetMaxNestLevel(risse_size level)
+void tRisseSSAForm::SetSharedVariableNestCount(risse_size level)
 {
-	// コードブロックに最大のネストレベルを通知する
-	CodeBlock->SetMaxNestLevel(level);
+	// コードブロックに最大の共有変数のネストカウントを通知する
+	CodeBlock->SetSharedVariableNestCount(level);
 }
 //---------------------------------------------------------------------------
 

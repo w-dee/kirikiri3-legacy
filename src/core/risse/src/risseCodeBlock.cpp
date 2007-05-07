@@ -125,10 +125,10 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeBlock::SetMaxNestLevel(risse_size level)
+void tRisseCodeBlock::SetSharedVariableNestCount(risse_size level)
 {
 	RISSE_ASSERT(NestLevel == 0); // この情報を持つコードブロックのネストレベルは 0 で無くてはならない
-	MaxNestLevel = level;
+	SharedVariableNestCount = level;
 }
 //---------------------------------------------------------------------------
 

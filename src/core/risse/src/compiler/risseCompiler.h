@@ -44,7 +44,7 @@ class tRisseCompilerFunction : public tRisseCollectee
 	risse_size NestLevel; //!< 関数のネストレベル
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
 		//!< 子関数により共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
-	tSharedVariableMap SharedVariableMap; //!< 子関数により共有されている変数のマップ
+	tSharedVariableMap SharedVariableMap; //!< 子関数(あるいはbinding)により共有されている変数のマップ
 
 public:
 	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
@@ -113,11 +113,11 @@ public:
 	//! @brief		VMコード生成を行う
 	void GenerateVMCode();
 
-	//! @brief		最大のネストレベルを報告する
-	//! @param		level		最大のネストレベル
-	//! @note		トップレベルの関数は、ネストレベルに応じたバッファを確保しなければならないため、
-	//!				ネストレベルが最大でどれほどまでに行くのかを知っていなくてはならない
-	void SetMaxNestLevel(risse_size level);
+	//! @brief		最大の共有変数のネストカウントを報告する
+	//! @param		level		最大の共有変数のネストカウント
+	//! @note		トップレベルの関数は、共有変数のネストカウントに応じたバッファを確保しなければならないため、
+	//!				ネスト数が最大でどれほどまでに行くのかを知っていなくてはならない
+	void SetSharedVariableNestCount(risse_size level);
 
 //--
 public:
@@ -141,6 +141,10 @@ public:
 	//! @param		name		変数名(番号付き)
 	//! @return		変数が共有されているかどうか
 	bool GetShared(const tRisseString & name);
+
+	//! @param		この関数のネストレベルが共有変数を持っているかどうかを返す
+	//! @return		この関数のネストレベルが共有変数を持っているかどうか
+	bool HasSharedVariable() const { return SharedVariableMap.size() > 0; }
 
 private:
 	//! @brief		未バインドのラベルジャンプをすべて解決する

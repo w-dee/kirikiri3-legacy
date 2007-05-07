@@ -165,9 +165,9 @@ void tRisseCompilerFunction::GenerateVMCode()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::SetMaxNestLevel(risse_size level)
+void tRisseCompilerFunction::SetSharedVariableNestCount(risse_size level)
 {
-	SSAForms.front()->SetMaxNestLevel(level);
+	SSAForms.front()->SetSharedVariableNestCount(level);
 }
 //---------------------------------------------------------------------------
 
@@ -212,11 +212,12 @@ void tRisseCompilerFunction::ShareVariable(const tRisseString & n_name)
 bool tRisseCompilerFunction::GetShared(const tRisseString & n_name)
 {
 	bool result = SharedVariableMap.find(n_name) != SharedVariableMap.end();
+/*
 	RisseFPrint(stderr, (RISSE_WS("Checking shared status of ") + n_name +
 				RISSE_WS(" : ") +
 				(result ? RISSE_WS("true"):RISSE_WS("false")) +
 				RISSE_WS("\n")).c_str() );
-
+*/
 	return result;
 }
 //---------------------------------------------------------------------------
@@ -377,12 +378,17 @@ void tRisseCompilerFunctionGroup::GenerateVMCode()
 	}
 
 	// 最大のネストレベルを決定する一瞬であなだらけ
-	risse_size max_nest_level = 0;
+	risse_size max_shared_var_nest_count = 0;
 	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
 		ri != Functions.rend(); ri++)
 	{
-		risse_size level = (*ri)->GetNestLevel();
-		if(level > max_nest_level) max_nest_level = level;
+		if((*ri)->HasSharedVariable())
+		{
+			risse_size level = (*ri)->GetNestLevel() + 1;
+			// たとえばネストレベル 0 の関数が共有変数を持っていれば、共有変数の
+			// ネストカウントは 1 である (そのためにネストレベルに +1 をする)
+			if(level > max_shared_var_nest_count) max_shared_var_nest_count = level;
+		}
 	}
 
 	// ネストレベルが 0 の関数のコードジェネレータに対して最大のネストレベルを教えてあげる
@@ -390,7 +396,7 @@ void tRisseCompilerFunctionGroup::GenerateVMCode()
 		ri != Functions.rend(); ri++)
 	{
 		risse_size level = (*ri)->GetNestLevel();
-		if(level == 0) (*ri)->SetMaxNestLevel(max_nest_level);
+		if(level == 0) (*ri)->SetSharedVariableNestCount(max_shared_var_nest_count);
 	}
 
 }

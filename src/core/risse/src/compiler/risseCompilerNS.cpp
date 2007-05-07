@@ -481,6 +481,69 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
+void tRisseSSALocalNamespace::InternalListAllVisibleVariableNumberedNames(tAliasMap & map) const
+{
+	// 親に再帰
+	if(Parent) Parent->InternalListAllVisibleVariableNumberedNames(map);
+
+	// Scopes を頭から見ていき、変数名を片っ端から追加する
+	// 通常はスコープの深いところから見ていくところだが、ここでは
+	// スコープのより深いところの alias で map を上書きするために
+	// スコープの浅いところから見ていく。
+	for(tScopes::const_iterator fi = Scopes.begin(); fi != Scopes.end(); fi++)
+	{
+		tAliasMap & aliasmap = (*fi)->AliasMap;
+		for(tAliasMap::iterator i = aliasmap.begin(); i != aliasmap.end(); i++)
+		{
+			if(i->first[0] != RISSE_WC('.'))
+			{
+				// ただし、先頭が '.' で始まっている変数は隠し変数なのでリストアップしない
+				map.insert(tAliasMap::value_type(i->first, i->second));
+			}
+		}
+	}
+
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSALocalNamespace::ListAllVisibleVariableNumberedNames(gc_vector<tRisseString> & dest) const
+{
+	// InternalListAllVisibleVariableNames を呼び出し、map に変数名を追加させる
+	// map は first が番号無しの名前、secondのほうが番号付きの名前になる
+	tAliasMap map;
+	InternalListAllVisibleVariableNumberedNames(map);
+
+	// map から dest に内容を移す
+	dest.clear();
+	dest.reserve(map.size());
+	for(tAliasMap::iterator i = map.begin(); i != map.end(); i++)
+		dest.push_back(i->second);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSALocalNamespace::ShareAllVisibleVariableNames()
+{
+	// すべての可視な変数名をリストアップ
+	gc_vector<tRisseString> list;
+	ListAllVisibleVariableNumberedNames(list);
+
+	// すべての変数を共有としてマーク
+	for(gc_vector<tRisseString>::iterator i = list.begin(); i != list.end(); i++)
+	{
+		RisseFPrint(stderr,
+			(RISSE_WS("marking : ") + *i + RISSE_WS("\n")).c_str());
+
+		Block->GetForm()->GetFunction()->ShareVariable(*i);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseSSALocalNamespace::Dump() const
 {
 	tRisseString str;

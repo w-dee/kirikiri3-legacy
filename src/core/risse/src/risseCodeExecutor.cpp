@@ -63,7 +63,7 @@ void tRisseCodeInterpreter::Execute(
 	if(shared == NULL)
 	{
 		RISSE_ASSERT(CodeBlock->GetNestLevel() == 0);
-		shared = new tRisseSharedVariableFrames(CodeBlock->GetMaxNestLevel());
+		shared = new tRisseSharedVariableFrames(CodeBlock->GetSharedVariableNestCount());
 	}
 
 	tRisseVariant * prev_shared_frame = 

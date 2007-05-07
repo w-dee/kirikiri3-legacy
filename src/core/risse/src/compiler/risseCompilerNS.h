@@ -221,6 +221,21 @@ public:
 	//! @brief		AccessMap を取得する @return AcecssMap
 	tRisseSSAVariableAccessMap * GetAccessMap() const { return AccessMap; }
 
+private:
+	//! @brief		すべての「可視な」番号付き変数名をリストアップする
+	//! @param		map		格納先
+	//! @note		この関数は、親名前空間がある場合、親名前空間に対して再帰する。
+	void InternalListAllVisibleVariableNumberedNames(tAliasMap & map) const;
+
+public:
+	//! @brief		すべての「可視な」番号付き変数名をリストアップする
+	//! @param		dest		格納先(内容はクリアされる)
+	//! @note		ここで得られる変数名は、番号付きの名前である。
+	void ListAllVisibleVariableNumberedNames(gc_vector<tRisseString> & dest) const;
+
+	//! @brief		すべての「可視な」変数を共有変数としてマークする
+	void ShareAllVisibleVariableNames();
+
 	//! @brief		内容のダンプを行う
 	//! @return		ダンプされた文字列
 	tRisseString Dump() const;

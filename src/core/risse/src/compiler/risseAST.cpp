@@ -781,6 +781,10 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 			tRisseSSAVariable * ret_var =
 				form->AddVariableWithStatement(GetPosition(), ocAssignNewBinding);
 			ret_var->SetValueType(tRisseVariant::vtObject); // 結果は常に vtObject
+
+			// bindingオブジェクトに変数とそのレジスタ番号の対応を追加する
+			form->AddBindingMap(ret_var);
+
 			return ret_var;
 		}
 	}

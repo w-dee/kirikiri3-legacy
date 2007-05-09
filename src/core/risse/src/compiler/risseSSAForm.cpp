@@ -819,7 +819,7 @@ void tRisseSSAForm::AddBindingMap(risse_size pos, tRisseSSAVariable * binding)
 	{
 		const tRisseString & name = i->first; // 装飾なしの名前
 		const tRisseString & nname = i->second; // 番号付きの名前
-		tRisseSSAVariable * name_var = AddConstantValueStatement(pos, i->first);
+		tRisseSSAVariable * name_var = AddConstantValueStatement(pos, name);
 		tRisseSSAStatement * stmt = AddStatement(pos, ocAddBindingMap, NULL, binding, name_var);
 		stmt->SetName(nname);
 	}

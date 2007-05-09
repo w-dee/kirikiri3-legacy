@@ -62,7 +62,6 @@ class tRisseSSAStatement : public tRisseCollectee
 										//!< SSA形式インスタンス(ocDefineLazyBlock)
 		risse_size BlockCount;			//!< 関数呼び出し時のブロックの個数
 		risse_size TryIdentifierIndex;	//!< Try識別子のインデックス
-		risse_size NestLevel;			//!< 共有変数のネストレベル
 		risse_uint32 OperateFlagsValue;	//!< ocDSetF, ocDGetF の操作フラグとocDSetAttribの属性値
 	};
 
@@ -256,13 +255,6 @@ public:
 	//! @return		Try識別子のインデックス
 	risse_size GetTryIdentifierIndex() const { return TryIdentifierIndex; }
 
-	//! @brief		共有変数のネストレベルを設定する
-	//! @param		level		共有変数のネストレベル
-	void SetNestLevel(risse_size level) { NestLevel = level; }
-
-	//! @brief		共有変数のネストレベルを取得する
-	//! @return		共有変数のネストレベル
-	risse_size GetNestLevel() const { return NestLevel; }
 
 	//! @brief		操作フラグを設定する
 	//! @param		accessflags		アクセスフラグ

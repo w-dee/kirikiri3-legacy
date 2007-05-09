@@ -355,7 +355,6 @@ tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
 				tRisseSSAStatement *stmt = form->AddStatement(pos,
 								shared_nest_level != risse_size_max ? ocRead : ocParentRead, &ret_var);
 				stmt->SetName(shared_nest_level != risse_size_max ? n_name : name);
-				if(shared_nest_level != risse_size_max) stmt->SetNestLevel(shared_nest_level);
 				ret = ret_var;
 				return ret;
 			}
@@ -418,7 +417,6 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 			tRisseSSAStatement *stmt = form->AddStatement(pos,
 							shared_nest_level != risse_size_max ? ocWrite : ocParentWrite, NULL, value);
 			stmt->SetName(shared_nest_level != risse_size_max ? n_name : name);
-			if(shared_nest_level != risse_size_max) stmt->SetNestLevel(shared_nest_level);
 			return true;
 		}
 	}

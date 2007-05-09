@@ -2825,7 +2825,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	{
 		// アクセスマップを作成する
 		// ブロックを調べ、ブロックの中に一つでもいわゆる「ブロック」
-		// (匿名関すではない物) があれば access_map を作成する
+		// (匿名関数ではない物) があれば access_map を作成する
 		bool block_found = false;
 		for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
 		{

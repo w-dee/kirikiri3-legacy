@@ -1061,6 +1061,8 @@ void tRisseSSAForm::AnalyzeVariableStatementLiveness()
 //---------------------------------------------------------------------------
 void tRisseSSAForm::EnsureCodeGenerator()
 {
+	// code generator は既にコンストラクタ内で作成されているので
+	// ここでは何もしない
 }
 //---------------------------------------------------------------------------
 

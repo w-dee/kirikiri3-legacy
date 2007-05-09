@@ -282,6 +282,13 @@ public:
 	//! @param		index	ブロック引数インデックス
 	void PutAssignBlockParam(const tRisseSSAVariable * dest, risse_size index);
 
+	//! @brief		ローカル変数のバインディング情報を追加するコードを置く
+	//! @param		map		マップ
+	//! @param		name	変数名(装飾無し)を表すSSA形式変数
+	//! @param		nname	共有変数名(番号付き)
+	void PutAddBindingMap(const tRisseSSAVariable * map, const tRisseSSAVariable *name,
+					const tRisseString &nname);
+
 	//! @brief		Writeコード(共有空間への書き込み)を置く
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数

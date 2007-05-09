@@ -454,6 +454,20 @@ void tRisseCodeGenerator::PutAssignBlockParam(const tRisseSSAVariable * dest, ri
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutAddBindingMap(const tRisseSSAVariable * map,
+	const tRisseSSAVariable *name, const tRisseString &nname)
+{
+	risse_uint16 nestlevel = 0, regnum = 0;
+	FindSharedRegNameMap(nname, nestlevel, regnum);
+	PutWord(ocAddBindingMap);
+	PutWord(FindRegMap(map));
+	PutWord(FindRegMap(name));
+	PutWord((nestlevel << 16) + regnum);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutWrite(const tRisseString & dest, const tRisseSSAVariable * src)
 {
 	risse_uint16 nestlevel = 0, regnum = 0;

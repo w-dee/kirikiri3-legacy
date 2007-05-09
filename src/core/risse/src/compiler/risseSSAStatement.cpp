@@ -200,7 +200,7 @@ void tRisseSSAStatement::SetName(const tRisseString & name)
 			Code == ocChildRead || Code == ocChildWrite ||
 			Code == ocReadVar || Code == ocWriteVar ||
 			Code == ocRead || Code == ocWrite ||
-			Code == ocDefineLazyBlock || Code == ocDefineClass);
+			Code == ocDefineLazyBlock || Code == ocDefineClass || Code == ocAddBindingMap);
 	Name = new tRisseString(name);
 }
 //---------------------------------------------------------------------------
@@ -214,7 +214,7 @@ const tRisseString & tRisseSSAStatement::GetName() const
 			Code == ocChildRead || Code == ocChildWrite ||
 			Code == ocReadVar || Code == ocWriteVar ||
 			Code == ocRead || Code == ocWrite ||
-			Code == ocDefineLazyBlock || Code == ocDefineClass);
+			Code == ocDefineLazyBlock || Code == ocDefineClass || Code == ocAddBindingMap);
 	RISSE_ASSERT(Name != NULL);
 	return *Name;
 }
@@ -308,6 +308,24 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocAssignBlockParam:
 		RISSE_ASSERT(Declared != NULL);
 		gen->PutAssignBlockParam(Declared, Index);
+		break;
+
+	case ocAddBindingMap:
+		RISSE_ASSERT(Used.size() == 2);
+		gen->PutAddBindingMap(Used[0], Used[1], *Name);
+		break;
+
+	case ocWrite: // 共有変数領域への書き込み
+		RISSE_ASSERT(Name != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutWrite(*Name, Used[0]);
+		break;
+
+	case ocRead: // 共有変数領域からの読み込み
+		RISSE_ASSERT(Name != NULL);
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 0);
+		gen->PutRead(Declared, *Name);
 		break;
 
 	case ocNew:
@@ -548,19 +566,6 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		RISSE_ASSERT(Name != NULL);
 		RISSE_ASSERT(Declared != NULL);
 		gen->PutAssign(Declared, gen->GetParent()->FindVariableMapForChildren(*Name));
-		break;
-
-	case ocWrite: // 共有変数領域への書き込み
-		RISSE_ASSERT(Name != NULL);
-		RISSE_ASSERT(Used.size() == 1);
-		gen->PutWrite(*Name, Used[0]);
-		break;
-
-	case ocRead: // 共有変数領域からの読み込み
-		RISSE_ASSERT(Name != NULL);
-		RISSE_ASSERT(Declared != NULL);
-		RISSE_ASSERT(Used.size() == 0);
-		gen->PutRead(Declared, *Name);
 		break;
 
 	default:
@@ -868,6 +873,17 @@ tRisseString tRisseSSAStatement::Dump() const
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
 			return ret;
+		}
+
+	case ocAddBindingMap: // ローカル変数のバインディング情報を追加
+		{
+			RISSE_ASSERT(Name != NULL);
+			RISSE_ASSERT(Used.size() == 2);
+
+			return Used[0]->Dump() + RISSE_WS(".AddBindingMap(") +
+					Used[1]->Dump() + RISSE_WS(", ") +
+					Name->AsHumanReadable() +
+					RISSE_WS(")");
 		}
 
 	default:

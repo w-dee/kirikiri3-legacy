@@ -508,36 +508,25 @@ void tRisseSSALocalNamespace::InternalListAllVisibleVariableNumberedNames(tAlias
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::ListAllVisibleVariableNumberedNames(gc_vector<tRisseString> & dest) const
+void tRisseSSALocalNamespace::ListAllVisibleVariableNumberedNames(tAliasMap & dest) const
 {
-	// InternalListAllVisibleVariableNames を呼び出し、map に変数名を追加させる
-	// map は first が番号無しの名前、secondのほうが番号付きの名前になる
-	tAliasMap map;
-	InternalListAllVisibleVariableNumberedNames(map);
-
-	// map から dest に内容を移す
+	// InternalListAllVisibleVariableNames を呼び出す
 	dest.clear();
-	dest.reserve(map.size());
-	for(tAliasMap::iterator i = map.begin(); i != map.end(); i++)
-		dest.push_back(i->second);
+	InternalListAllVisibleVariableNumberedNames(dest);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::ShareAllVisibleVariableNames()
+void tRisseSSALocalNamespace::ShareAllVisibleVariableNames(const tAliasMap & names)
 {
-	// すべての可視な変数名をリストアップ
-	gc_vector<tRisseString> list;
-	ListAllVisibleVariableNumberedNames(list);
-
 	// すべての変数を共有としてマーク
-	for(gc_vector<tRisseString>::iterator i = list.begin(); i != list.end(); i++)
+	for(tAliasMap::const_iterator i = names.begin(); i != names.end(); i++)
 	{
 		RisseFPrint(stderr,
-			(RISSE_WS("marking : ") + *i + RISSE_WS("\n")).c_str());
+			(RISSE_WS("marking : ") + i->second + RISSE_WS("\n")).c_str());
 
-		Block->GetForm()->GetFunction()->ShareVariable(*i);
+		Block->GetForm()->GetFunction()->ShareVariable(i->second);
 	}
 }
 //---------------------------------------------------------------------------

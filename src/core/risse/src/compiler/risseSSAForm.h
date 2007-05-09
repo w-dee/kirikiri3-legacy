@@ -497,10 +497,11 @@ public:
 	void CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap * accessmap);
 
 	//! @brief		バインディングマップを追加する
+	//! @param		pos			スクリプト上の位置
 	//! @param		binding		バインディングオブジェクトを表すSSA形式変数
 	//! @note		このメソッドを実行すると、現時点で可視な変数がすべて共有変数に
 	//!				なる。
-	void AddBindingMap(tRisseSSAVariable * binding);
+	void AddBindingMap(risse_size pos, tRisseSSAVariable * binding);
 
 	//! @brief		ユニークな番号を得る
 	//! @return		ユニークな番号

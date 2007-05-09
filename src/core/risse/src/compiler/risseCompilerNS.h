@@ -79,10 +79,12 @@ class tRisseSSALocalNamespace : public tRisseCollectee
 		//!< AccessMapが NULL の場合は、親名前空間内で共有されるが、
 		//!< AccessMapが非 NULL の場合は共有されずに AccessMap にマッピングが追加される
 	tRisseSSALocalNamespace * Parent; //!< チェーンされた親名前空間
+public:
 	typedef gc_map<tRisseString, tRisseSSAVariable *> tVariableMap;
 		//!< 変数名(番号付き)→変数オブジェクトのマップのtypedef
 	typedef gc_map<tRisseString, tRisseString> tAliasMap;
 		//!< 変数名(番号なし)→変数名(番号付き)のマップのtypedef
+private:
 
 	//! @brief		名前空間の一つのスコープを表す構造体
 	struct tScope : public tRisseCollectee
@@ -231,10 +233,12 @@ public:
 	//! @brief		すべての「可視な」番号付き変数名をリストアップする
 	//! @param		dest		格納先(内容はクリアされる)
 	//! @note		ここで得られる変数名は、番号付きの名前である。
-	void ListAllVisibleVariableNumberedNames(gc_vector<tRisseString> & dest) const;
+	void ListAllVisibleVariableNumberedNames(tAliasMap & dest) const;
 
 	//! @brief		すべての「可視な」変数を共有変数としてマークする
-	void ShareAllVisibleVariableNames();
+	//! @param		names		マークする変数名のマップ。
+	//!							ただし second (番号付き) の方しか参照しない
+	void ShareAllVisibleVariableNames(const tAliasMap & names);
 
 	//! @brief		内容のダンプを行う
 	//! @return		ダンプされた文字列

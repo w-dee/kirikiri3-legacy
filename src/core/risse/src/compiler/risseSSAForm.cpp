@@ -807,9 +807,22 @@ void tRisseSSAForm::CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap 
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddBindingMap(tRisseSSAVariable * binding)
+void tRisseSSAForm::AddBindingMap(risse_size pos, tRisseSSAVariable * binding)
 {
-	LocalNamespace->ShareAllVisibleVariableNames();
+	// まず、このスコープから可視な変数をすべて共有するとしてマークする
+	tRisseSSALocalNamespace::tAliasMap names;
+	LocalNamespace->ListAllVisibleVariableNumberedNames(names);
+	LocalNamespace->ShareAllVisibleVariableNames(names);
+
+	// それぞれの変数のマッピングを追加する
+	for(tRisseSSALocalNamespace::tAliasMap::iterator i = names.begin(); i != names.end(); i++)
+	{
+		const tRisseString & name = i->first; // 装飾なしの名前
+		const tRisseString & nname = i->second; // 番号付きの名前
+		tRisseSSAVariable * name_var = AddConstantValueStatement(pos, i->first);
+		tRisseSSAStatement * stmt = AddStatement(pos, ocAddBindingMap, NULL, binding, name_var);
+		stmt->SetName(nname);
+	}
 }
 //---------------------------------------------------------------------------
 

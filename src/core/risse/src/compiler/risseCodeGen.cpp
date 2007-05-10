@@ -189,7 +189,7 @@ void tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name, risse_
 					GetSourceCodePosition()); // まずあり得ないと思うが ...
 		if(f->second > 0xffff)
 			tRisseCompileExceptionClass::Throw(
-				tRisseString(RISSE_WS_TR("too deep shared variables between functions")), Form->GetScriptBlock(),
+				tRisseString(RISSE_WS_TR("too many shared variables")), Form->GetScriptBlock(),
 					GetSourceCodePosition()); // まずあり得ないと思うが ...
 		nestlevel = NestLevel;
 		regnum = static_cast<risse_uint16>(f->second);

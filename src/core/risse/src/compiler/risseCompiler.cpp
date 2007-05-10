@@ -102,7 +102,7 @@ void tRisseCompilerFunction::RegisterSharedVariablesToCodeGenerator()
 	for(tSharedVariableMap::const_iterator i = SharedVariableMap.begin();
 		i != SharedVariableMap.end(); i++)
 	{
-		// コードジェネレータの SharedRegNameMap は一つの関数グループ内では同じ
+		// コードジェネレータの SharedRegNameMap は一つの関数内では同じ
 		// マップを共有しているため、トップレベルのSSA形式インスタンスが作成した
 		// コードジェネレータに対してのみ共有されている変数を登録するのでよい。
 		GetTopSSAForm()->GetCodeGenerator()->AddSharedRegNameMap(i->first);

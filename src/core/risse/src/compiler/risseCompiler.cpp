@@ -102,9 +102,12 @@ void tRisseCompilerFunction::RegisterSharedVariablesToCodeGenerator()
 	for(tSharedVariableMap::const_iterator i = SharedVariableMap.begin();
 		i != SharedVariableMap.end(); i++)
 	{
-		// コードジェネレータの SharedRegNameMap は一つの関数内では同じ
-		// マップを共有しているため、トップレベルのSSA形式インスタンスが作成した
-		// コードジェネレータに対してのみ共有されている変数を登録するのでよい。
+		// コードジェネレータの SharedRegNameMap は一つの関数グループ内では同じ
+		// マップを共有しているが、ネストレベルをともに記録する必要があるため
+		// 各関数別にそれぞれ呼び出す。
+		// 各関数内のSSA形式ではネストレベルが同じため、トップレベルのSSA形式
+		// インスタンスが作成したコードジェネレータに対してのみ共有されている
+		// 変数を登録するのでよい。
 		GetTopSSAForm()->GetCodeGenerator()->AddSharedRegNameMap(i->first);
 	}
 }
@@ -163,11 +166,11 @@ void tRisseCompilerFunction::GenerateVMCode()
 //---------------------------------------------------------------------------
 
 
-
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::SetSharedVariableNestCount(risse_size level)
+void tRisseCompilerFunction::SetSharedVariableNestCount()
 {
-	SSAForms.front()->SetSharedVariableNestCount(level);
+	RISSE_ASSERT(NestLevel == 0);
+	SSAForms.front()->SetSharedVariableNestCount();
 }
 //---------------------------------------------------------------------------
 
@@ -377,26 +380,13 @@ void tRisseCompilerFunctionGroup::GenerateVMCode()
 		(*ri)->GenerateVMCode();
 	}
 
-	// 最大のネストレベルを決定する一瞬であなだらけ
-	risse_size max_shared_var_nest_count = 0;
-	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
-		ri != Functions.rend(); ri++)
-	{
-		if((*ri)->HasSharedVariable())
-		{
-			risse_size level = (*ri)->GetNestLevel() + 1;
-			// たとえばネストレベル 0 の関数が共有変数を持っていれば、共有変数の
-			// ネストカウントは 1 である (そのためにネストレベルに +1 をする)
-			if(level > max_shared_var_nest_count) max_shared_var_nest_count = level;
-		}
-	}
-
-	// ネストレベルが 0 の関数のコードジェネレータに対して最大のネストレベルを教えてあげる
+	// ネストレベルが 0 の関数のコードブロックに対して最大のネストレベルを
+	// 調べて設定するように指示する
 	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
 		ri != Functions.rend(); ri++)
 	{
 		risse_size level = (*ri)->GetNestLevel();
-		if(level == 0) (*ri)->SetSharedVariableNestCount(max_shared_var_nest_count);
+		if(level == 0) (*ri)->SetSharedVariableNestCount();
 	}
 
 }

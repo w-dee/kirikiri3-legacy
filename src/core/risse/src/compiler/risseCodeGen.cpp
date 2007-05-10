@@ -36,6 +36,9 @@ tRisseCodeGenerator::tRisseCodeGenerator(tRisseSSAForm * form,
 	RegisterBase = 0;
 	NumUsedRegs = 0;
 	MaxNumUsedRegs = 0;
+	SharedRegCount = 0;
+	SharedRegNameMap = parent ? parent->SharedRegNameMap : new tNamedRegMap();
+		// SharedRegNameMap は親がある場合は親と共有する
 }
 //---------------------------------------------------------------------------
 
@@ -174,32 +177,19 @@ void tRisseCodeGenerator::FreeRegister(const tRisseSSAVariable *var)
 //---------------------------------------------------------------------------
 void tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name, risse_uint16 &nestlevel, risse_uint16 &regnum)
 {
-	// SharedRegNameMap を逆順に見ていく
-
-	tNamedRegMap::iterator f = SharedRegNameMap.find(name);
-	if(f != SharedRegNameMap.end())
+	tNamedRegMap::iterator f = SharedRegNameMap->find(name);
+	if(f != SharedRegNameMap->end())
 	{
 		// 見つかった
-		// いまのところ、nestlevel と regnum は、VMコード中において
-		// それぞれ 32bit 整数の 上位16bitと下位16ビットを使うので、
-		// それぞれがその16bitの上限を超えることができない。
-		if(NestLevel > 0xffff)
-			tRisseCompileExceptionClass::Throw(
-				tRisseString(RISSE_WS_TR("too deep function nest level")), Form->GetScriptBlock(),
-					GetSourceCodePosition()); // まずあり得ないと思うが ...
-		if(f->second > 0xffff)
-			tRisseCompileExceptionClass::Throw(
-				tRisseString(RISSE_WS_TR("too many shared variables")), Form->GetScriptBlock(),
-					GetSourceCodePosition()); // まずあり得ないと思うが ...
-		nestlevel = NestLevel;
-		regnum = static_cast<risse_uint16>(f->second);
+		nestlevel = (f->second >> 16) & 0xffff;
+		regnum    = f->second & 0xffff;
 		return;
 	}
 
-	// 見つからなかったので親に再帰する
-	if(!Parent) RISSE_ASSERT(!"shared variable not found"); // 変数は見つからなければならない
+	// 見つからなかった
+	RISSE_ASSERT(!"shared variable not found"); // 変数は見つからなければならない
 
-	Parent->FindSharedRegNameMap(name, nestlevel, regnum);
+	// 親も同じマップを共有しているので親に再帰する必要はない
 }
 //---------------------------------------------------------------------------
 
@@ -211,8 +201,24 @@ void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 		RISSE_WS(" at nestlevel ") +
 		tRisseString::AsString(risse_int64(NestLevel)) + RISSE_WS("\n")).c_str() );
 
-	RISSE_ASSERT(SharedRegNameMap.find(name) == SharedRegNameMap.end()); // 二重挿入は許されない
-	SharedRegNameMap.insert(tNamedRegMap::value_type(name, SharedRegNameMap.size()));
+	RISSE_ASSERT(SharedRegNameMap->find(name) == SharedRegNameMap->end()); // 二重挿入は許されない
+
+	// いまのところ、nestlevel と regnum は、VMコード中において
+	// それぞれ 32bit 整数の 上位16bitと下位16ビットを使うので、
+	// それぞれがその16bitの上限を超えることができない。
+	if(NestLevel > 0xffff)
+		tRisseCompileExceptionClass::Throw(
+			tRisseString(RISSE_WS_TR("too deep function nest level")), Form->GetScriptBlock(),
+				GetSourceCodePosition()); // まずあり得ないと思うが ...
+
+	risse_size reg_num = SharedRegCount;
+	if(reg_num > 0xffff)
+		tRisseCompileExceptionClass::Throw(
+			tRisseString(RISSE_WS_TR("too many shared variables")), Form->GetScriptBlock(),
+				GetSourceCodePosition()); // まずあり得ないと思うが ...
+
+	SharedRegNameMap->insert(tNamedRegMap::value_type(name, (NestLevel<<16) + reg_num));
+	SharedRegCount ++;
 }
 //---------------------------------------------------------------------------
 
@@ -220,7 +226,26 @@ void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 //---------------------------------------------------------------------------
 risse_size tRisseCodeGenerator::GetSharedRegCount() const
 {
-	return SharedRegNameMap.size();
+	return SharedRegCount;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tRisseCodeGenerator::QuerySharedVariableNestCount() const
+{
+	risse_size max_nest_count = 0;
+	for(tNamedRegMap::const_iterator i = SharedRegNameMap->begin();
+		i != SharedRegNameMap->end(); i++)
+	{
+		risse_size nestlevel = (i->second >> 16) & 0xffff;
+		nestlevel ++;
+			// ↑ たとえば、nestlevel 0 に共有変数があるということはネストカウントは 1
+			// なので 1 を加算する
+		if(max_nest_count < nestlevel) max_nest_count = nestlevel;
+	}
+
+	return max_nest_count;
 }
 //---------------------------------------------------------------------------
 

@@ -49,7 +49,9 @@ public:
 	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
 private:
-	tNamedRegMap SharedRegNameMap; //!< 共有変数名とそれに対応するレジスタ番号のマップ
+	tNamedRegMap *SharedRegNameMap; //!< 共有変数名とそれに対応するレジスタ番号のマップ(一連の関数グループ内ではこれを共有する)
+	risse_size SharedRegCount; //!< このコードジェネレータのネストレベルに対する共有変数の数を返す
+
 	tNamedRegMap VariableMapForChildren; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	//! @brief		未解決のジャンプを表す構造体
@@ -179,7 +181,15 @@ public:
 
 	//! @brief		指定されたネストレベルに対する共有されたレジスタの個数を得る
 	//! @return		共有されたレジスタの個数
+	//! @note		SharedRegNameMap は同じ関数グループ内では共有しているが、
+	//!				このメソッドが返す値は、このネストレベルに対応する共有変数の数
+	//!				だけであることに注意。
 	risse_size GetSharedRegCount() const;
+
+	//! @brief		共有変数の最大のネストカウントを取得する
+	//! @return		共有変数の最大のネストカウント
+	risse_size QuerySharedVariableNestCount() const;
+
 
 	//! @brief		VariableMapForChildren 内で変数を探す
 	//! @param		name		変数名

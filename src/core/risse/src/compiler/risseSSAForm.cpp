@@ -1122,10 +1122,11 @@ void tRisseSSAForm::GenerateCode() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::SetSharedVariableNestCount(risse_size level)
+void tRisseSSAForm::SetSharedVariableNestCount()
 {
 	// コードブロックに最大の共有変数のネストカウントを通知する
-	CodeBlock->SetSharedVariableNestCount(level);
+	risse_size nestcount = CodeGenerator->QuerySharedVariableNestCount();
+	CodeBlock->SetSharedVariableNestCount(nestcount);
 }
 //---------------------------------------------------------------------------
 

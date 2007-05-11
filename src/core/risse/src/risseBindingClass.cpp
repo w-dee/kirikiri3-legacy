@@ -92,7 +92,7 @@ void tRisseBindingClass::RegisterMembers()
 
 
 		args.ExpectArgumentCount(1);
-		tRisseBindingInstance::tBindingMap::iterator i = map.find((tRisseString)args[1]);
+		tRisseBindingInstance::tBindingMap::iterator i = map.find((tRisseString)args[0]);
 		if(i == map.end())
 		{
 			// 見つからなかった
@@ -116,44 +116,30 @@ void tRisseBindingClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnISet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
-#if 0
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
-		tRisseArrayInstance::tArray & array = obj->GetArray();
+
+		// ローカル変数の値を設定する
+		// TODO: Dictionary 互換の実装
+		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
+		tRisseBindingInstance::tBindingMap & map = obj->GetBindingMap();
+
 
 		args.ExpectArgumentCount(2);
-
-		risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[1]);
-		if(ofs_index < 0) ofs_index += array.size(); // 折り返す
-
-		if(ofs_index < 0)  { /* それでもまだ負: TOOD: out of bound 例外 */ return; }
-
-		risse_size index = static_cast<risse_size>(ofs_index);
-		if(index >= array.size())
+		tRisseBindingInstance::tBindingMap::iterator i = map.find((tRisseString)args[1]);
+		if(i == map.end())
 		{
-			// 配列を拡張する
-			// もし、拡張する際に値を埋める必要があるならば
-			// 値を埋める
-			if(index > array.size())
-			{
-				// filler の値を得る
-				tRisseVariant filler = This.GetPropertyDirect(ss_filler);
-				// filler で埋める
-				array.resize(index+1, filler);
-
-				// 値の上書き
-				array[index] = args[0];
-			}
-			else /* if index == array.size() */
-			{
-				array.push_back(args[0]);
-			}
+			// 見つからなかった
+			// TODO: Dictionary 互換の例外
 		}
 		else
 		{
-			// 既存の値の上書き
-			array[index] = args[0];
+			// 見つかった
+			if(result)
+			{
+				risse_size nestlevel = (i->second >> 16) & 0xffff;
+				risse_size regnum = i->second & 0xffff;
+				obj->GetFrames()->At(nestlevel, regnum) = args[0];
+			}
 		}
-#endif
 	}
 	RISSE_END_NATIVE_METHOD
 

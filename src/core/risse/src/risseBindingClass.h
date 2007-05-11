@@ -56,6 +56,15 @@ public:
 	//! @param		name		ローカル変数名
 	//! @param		reg			レジスタ番号
 	static void AddMap(tRisseVariant &This, const tRisseString &name, risse_uint32 reg);
+
+	//! @brief		各種情報をセットする
+	//! @param		This		このバインディングの "This"
+	//! @param		frames		共有フレーム
+	void Set(const tRisseVariant & This, tRisseSharedVariableFrames * frames)
+	{
+		this->This = This;
+		Frames = frames;
+	}
 };
 //---------------------------------------------------------------------------
 

@@ -141,6 +141,10 @@ void tRisseCodeInterpreter::Execute(
 				AR(code[1]) =
 					tRisseVariant(tRisseBindingClass::GetPointer()).
 								New(0, tRisseMethodArgument::Empty());
+				tRisseBindingInstance * obj =
+					AR(code[1]).CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
+				obj->Set(This, shared);
+
 				code += 2;
 				break;
 

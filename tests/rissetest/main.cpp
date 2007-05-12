@@ -105,7 +105,12 @@ int Application::OnRun()
 			buf[length] = 0;
 
 			// 内容を評価する
-			engine.Evaluate((tRisseString)(buf), argv[1]);
+			tRisseVariant result;
+			engine.Evaluate((tRisseString)(buf), argv[1], 0, &result);
+			RisseFPrint(stderr,(RISSE_WS("========== Result ==========\n")));
+			fflush(stderr);
+			fflush(stdout);
+			RisseFPrint(stdout, result.AsHumanReadable().c_str());
 		}
 
 	}

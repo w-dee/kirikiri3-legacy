@@ -265,16 +265,11 @@ void tRisseScriptBlockBase::Evaluate(const tRisseBindingInfo & binding, tRisseVa
 	Fixup();
 
 	// テスト実行
-	RisseFPrint(stderr,(RISSE_WS("========== Result ==========\n")));
-	fflush(stderr);
-	fflush(stdout);
-	tRisseVariant ret;
 	RISSE_ASSERT(RootCodeBlock != NULL);
 	RootCodeBlock->GetObject().FuncCall(
-				&ret, 0,
+				result, 0,
 				tRisseMethodArgument::Empty(),
 				binding.GetThis());
-	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }
 //---------------------------------------------------------------------------
 

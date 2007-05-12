@@ -23,14 +23,20 @@
 
 namespace Risse
 {
+class tRisseScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		"Binding" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
 class tRisseBindingInstance : public tRisseObjectBase
 {
 	tRisseBindingInfo * Info; //!< バインディングに関する情報
+	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
+
 
 public:
+	//! @brief		コンストラクタ
+	tRisseBindingInstance() { Info = NULL; Engine = NULL; }
+
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
 	virtual ~tRisseBindingInstance() {;}
 
@@ -54,6 +60,15 @@ public:
 	{
 		Info = info;
 	}
+
+	//! @brief		スクリプトエンジンを設定する
+	//! @param		info		スクリプトエンジン
+	//! @note		eval する際にスクリプトエンジンの情報が必要。
+	void SetScriptEngine(tRisseScriptEngine * engine) { Engine = engine; }
+
+	//! @brief		スクリプトエンジンを取得する
+	//! @return		スクリプトエンジン
+	tRisseScriptEngine * GetScriptEngine() const { return Engine; }
 };
 //---------------------------------------------------------------------------
 

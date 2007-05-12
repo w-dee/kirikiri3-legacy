@@ -19,7 +19,6 @@
 
 namespace Risse
 {
-class tRisseScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		バインディングに関する情報
 //---------------------------------------------------------------------------
@@ -36,18 +35,15 @@ private:
 	tRisseSharedVariableFrames * Frames; //!< 共有フレーム
 	tBindingMap BindingMap; //!< ローカル変数のバインディング
 	tRisseVariant This; //!< このバインディングの "This"
-	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		This		このバインディングの "This"
 	//! @param		frames		共有フレーム
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseBindingInfo(const tRisseVariant & This, tRisseSharedVariableFrames * frames, tRisseScriptEngine * engine)
+	tRisseBindingInfo(const tRisseVariant & This, tRisseSharedVariableFrames * frames)
 	{
 		this->This = This;
 		Frames = frames;
-		Engine = engine;
 	}
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)

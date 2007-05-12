@@ -139,14 +139,15 @@ tRisseScriptEngine::tRisseScriptEngine()
 //---------------------------------------------------------------------------
 void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseString & name,
 					risse_size lineofs,
-					tRisseVariant * result, bool is_expression, const tRisseVariant & context)
+					tRisseVariant * result, const tRisseBindingInfo * binding,
+					bool is_expresion)
 {
 	// 暫定実装
 	// スクリプトブロックを作成
-	tRisseScriptBlock block(this, script, name);
+	tRisseScriptBlock * block = new tRisseScriptBlock(this, script, name);
 
 	// スクリプトをグローバルコンテキストで実行
-	block.Evaluate(context.IsNull()?GlobalObject:context);
+	block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding, result, is_expresion);
 }
 //---------------------------------------------------------------------------
 

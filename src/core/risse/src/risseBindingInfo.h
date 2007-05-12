@@ -46,16 +46,28 @@ public:
 		Frames = frames;
 	}
 
+	//! @brief		コンストラクタ
+	//! @param		This		このバインディングの "This"
+	tRisseBindingInfo(const tRisseVariant & This)
+	{
+		this->This = This;
+		Frames = NULL;
+	}
+
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
 	virtual ~tRisseBindingInfo() {;}
+
+	//! @brief		共有フレームを得る
+	//! @return		共有フレーム
+	tRisseSharedVariableFrames * GetFrames() const { return Frames; }
 
 	//! @brief		ローカル変数のバインディングへの参照を得る
 	//! @return		ローカル変数のバインディングへの参照
 	tBindingMap & GetBindingMap() { return BindingMap; }
 
-	//! @brief		共有フレームを得る
-	//! @return		共有フレーム
-	tRisseSharedVariableFrames * GetFrames() const { return Frames; }
+	//! @brief		このバインディングの "This" を得る
+	//! @return		このバインディングの "This"
+	const tRisseVariant & GetThis() const { return This; }
 
 	//! @brief		ローカル変数のバインディングのマップを追加する
 	//! @param		This		Bindingクラスのインスタンス

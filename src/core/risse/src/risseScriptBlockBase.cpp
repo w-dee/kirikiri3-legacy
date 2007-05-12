@@ -15,7 +15,7 @@
 #include "compiler/risseCompiler.h"
 #include "risseCodeBlock.h"
 #include "risseScriptEngine.h"
-
+#include "risseBindingInfo.h"
 
 namespace Risse
 {
@@ -250,13 +250,13 @@ void tRisseScriptBlockBase::Fixup()
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockBase::Evaluate(const tRisseVariant & context, tRisseVariant * result, bool is_expression)
+void tRisseScriptBlockBase::Evaluate(const tRisseBindingInfo & binding, tRisseVariant * result, bool is_expression)
 {
 	// まず、コンパイルを行う
 	// (TODO: スクリプトブロックのキャッシュ対策)
 
 	// AST ノードを用意する
-	tRisseASTNode * root_node = GetASTRootNode(result != NULL, is_expression);
+	tRisseASTNode * root_node = GetASTRootNode(result != NULL);
 
 	// コンパイルする
 	Compile(root_node, result != NULL, is_expression);
@@ -273,7 +273,7 @@ void tRisseScriptBlockBase::Evaluate(const tRisseVariant & context, tRisseVarian
 	RootCodeBlock->GetObject().FuncCall(
 				&ret, 0,
 				tRisseMethodArgument::Empty(),
-				context);
+				binding.GetThis());
 	RisseFPrint(stdout, ret.AsHumanReadable().c_str());
 }
 //---------------------------------------------------------------------------

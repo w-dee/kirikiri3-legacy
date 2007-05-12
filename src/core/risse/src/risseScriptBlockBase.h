@@ -24,6 +24,7 @@ namespace Risse
 class tRisseASTNode;
 class tRisseCodeBlock;
 class tRisseScriptEngine;
+class tRisseBindingInfo;
 //---------------------------------------------------------------------------
 //! @brief		スクリプトブロックの基底クラス
 //---------------------------------------------------------------------------
@@ -142,13 +143,14 @@ public:
 
 public:
 	//! @brief		スクリプトを評価する
-	//! @param		context			コンテキストオブジェクト
+	//! @param		binding			バインディング情報
 	//! @param		result			実行の結果(NULL可)
-	//! @param		is_expression	式評価モードかどうか
+	//! @param		is_expression	式モードかどうか
 	//! @note		もしスクリプトがコンパイルが必要な場合、
 	//!				Evaluate は評価に先立って Compile() を呼び、コンパイルを行う。
 	//!				その後、Fixup() を呼んでから RootCodeBlock を実行する。
-	void Evaluate(const tRisseVariant & context, tRisseVariant * result = NULL, bool is_expression = false);
+	//!				is_expression	は Risse のように文と式を区別しない言語では常にfalseでよい。
+	void Evaluate(const tRisseBindingInfo & binding, tRisseVariant * result = NULL, bool is_expression = false);
 
 protected:
 	//! @brief		AST のルートノードを取得する(下位クラスで実装すること)

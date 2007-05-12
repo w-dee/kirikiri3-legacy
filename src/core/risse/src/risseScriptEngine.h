@@ -22,6 +22,7 @@
 
 namespace Risse
 {
+class tRisseBindingInfo;
 //---------------------------------------------------------------------------
 //! @brief		警告情報等の通知インターフェース
 //---------------------------------------------------------------------------
@@ -55,16 +56,18 @@ public:
 	tRisseVariant & GetGlobalObject() { return GlobalObject; }
 
 	//! @brief		スクリプトを評価する
-	//! @param		script		スクリプトの内容
-	//! @param		name		スクリプトブロックの名称
-	//! @param		lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
-	//!							スクリプトのオフセットを記録できる)
+	//! @param		script			スクリプトの内容
+	//! @param		name			スクリプトブロックの名称
+	//! @param		lineofs			行オフセット(ドキュメント埋め込みスクリプト用に、
+	//!								スクリプトのオフセットを記録できる)
 	//! @param		result			実行の結果(NULL可)
-	//! @param		is_expression	式評価モードかどうか
+	//! @param		binding			バインディング情報(NULLの場合はグローバルバインディング)
+	//! @param		is_expresion	式モードかどうか(Risseのように文と式の区別を
+	//!								する必要がない言語ではfalseでよい)
 	void Evaluate(const tRisseString & script, const tRisseString & name,
 					risse_size lineofs = 0,
-					tRisseVariant * result = NULL, bool is_expression = false,
-					const tRisseVariant & context = tRisseVariant::GetNullObject());
+					tRisseVariant * result = NULL,
+					const tRisseBindingInfo * binding = NULL, bool is_expresion = false);
 
 	//! @brief		警告情報の出力先を設定する
 	//! @param		output		警告情報の出力先

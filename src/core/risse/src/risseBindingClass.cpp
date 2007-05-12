@@ -37,7 +37,7 @@ void tRisseBindingInstance::AddMap(tRisseVariant &This, const tRisseString &name
 {
 	tRisseBindingInstance * obj =
 		This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
-	obj->GetBindingMap().insert(tBindingMap::value_type(name, reg));
+	obj->GetBindingMap().insert(tRisseBindingInfo::tBindingMap::value_type(name, reg));
 }
 //---------------------------------------------------------------------------
 
@@ -82,17 +82,28 @@ void tRisseBindingClass::RegisterMembers()
 	RISSE_END_NATIVE_METHOD
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+/*
+	RISSE_BEGIN_NATIVE_METHOD(ss_eval)
+	{
+		// eval (式やスクリプトの評価)
+		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
+
+		
+	}
+	RISSE_END_NATIVE_METHOD
+*/
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnIGet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
 		// ローカル変数の値を得る
 		// TODO: Dictionary 互換の実装
 		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
-		tRisseBindingInstance::tBindingMap & map = obj->GetBindingMap();
+		tRisseBindingInfo::tBindingMap & map = obj->GetBindingMap();
 
 
 		args.ExpectArgumentCount(1);
-		tRisseBindingInstance::tBindingMap::iterator i = map.find((tRisseString)args[0]);
+		tRisseBindingInfo::tBindingMap::iterator i = map.find((tRisseString)args[0]);
 		if(i == map.end())
 		{
 			// 見つからなかった
@@ -120,11 +131,11 @@ void tRisseBindingClass::RegisterMembers()
 		// ローカル変数の値を設定する
 		// TODO: Dictionary 互換の実装
 		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
-		tRisseBindingInstance::tBindingMap & map = obj->GetBindingMap();
+		tRisseBindingInfo::tBindingMap & map = obj->GetBindingMap();
 
 
 		args.ExpectArgumentCount(2);
-		tRisseBindingInstance::tBindingMap::iterator i = map.find((tRisseString)args[1]);
+		tRisseBindingInfo::tBindingMap::iterator i = map.find((tRisseString)args[1]);
 		if(i == map.end())
 		{
 			// 見つからなかった

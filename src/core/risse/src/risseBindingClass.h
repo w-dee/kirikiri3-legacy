@@ -19,6 +19,7 @@
 #include "risseSingleton.h"
 #include "risseCodeBlock.h"
 #include "risseGC.h"
+#include "risseBindingInfo.h"
 
 namespace Risse
 {
@@ -27,17 +28,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 class tRisseBindingInstance : public tRisseObjectBase
 {
-public:
-	typedef gc_map<tRisseString, risse_uint32> tBindingMap;
-		//!< ローカル変数のバインディングのマップのtypedef @n
-		//!< second の risse_uint32 には VM コードと同じフォーマットで
-		//!< 共有フレーム内の変数番号が入る; つまり上位16bitがネストレベル、
-		//!< 下位16bitが変数番号。
-
-private:
-	tRisseSharedVariableFrames * Frames; //!< 共有フレーム
-	tBindingMap BindingMap; //!< ローカル変数のバインディング
-	tRisseVariant This; //!< このバインディングの "This"
+	tRisseBindingInfo * Info; //!< バインディングに関する情報
 
 public:
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
@@ -45,11 +36,11 @@ public:
 
 	//! @brief		ローカル変数のバインディングへの参照を得る
 	//! @return		ローカル変数のバインディングへの参照
-	tBindingMap & GetBindingMap() { return BindingMap; }
+	tRisseBindingInfo::tBindingMap & GetBindingMap() { RISSE_ASSERT(Info != NULL); return Info->GetBindingMap(); }
 
 	//! @brief		共有フレームを得る
 	//! @return		共有フレーム
-	tRisseSharedVariableFrames * GetFrames() const { return Frames; }
+	tRisseSharedVariableFrames * GetFrames() const { RISSE_ASSERT(Info != NULL); return Info->GetFrames(); }
 
 	//! @brief		ローカル変数のバインディングのマップを追加する
 	//! @param		This		Bindingクラスのインスタンス
@@ -57,13 +48,11 @@ public:
 	//! @param		reg			レジスタ番号
 	static void AddMap(tRisseVariant &This, const tRisseString &name, risse_uint32 reg);
 
-	//! @brief		各種情報をセットする
-	//! @param		This		このバインディングの "This"
-	//! @param		frames		共有フレーム
-	void Set(const tRisseVariant & This, tRisseSharedVariableFrames * frames)
+	//! @brief		バインディングに関する情報をセットする
+	//! @param		info		バインディングに関する情報
+	void SetInfo(tRisseBindingInfo * info)
 	{
-		this->This = This;
-		Frames = frames;
+		Info = info;
 	}
 };
 //---------------------------------------------------------------------------

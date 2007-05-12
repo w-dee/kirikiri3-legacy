@@ -1,0 +1,72 @@
+//---------------------------------------------------------------------------
+/*
+	Risse [りせ]
+	 stands for "Risse Is a Sweet Script Engine"
+	Copyright (C) 2000-2007 W.Dee <dee@kikyou.info> and contributors
+
+	See details of license at "license.txt"
+*/
+//---------------------------------------------------------------------------
+//! @file
+//! @brief バインディングに関する情報の管理
+//---------------------------------------------------------------------------
+
+#ifndef risseBindingInfoH
+#define risseBindingInfoH
+
+#include "risseCodeBlock.h"
+#include "risseGC.h"
+
+namespace Risse
+{
+class tRisseScriptEngine;
+//---------------------------------------------------------------------------
+//! @brief		バインディングに関する情報
+//---------------------------------------------------------------------------
+class tRisseBindingInfo : public tRisseCollectee
+{
+public:
+	typedef gc_map<tRisseString, risse_uint32> tBindingMap;
+		//!< ローカル変数のバインディングのマップのtypedef @n
+		//!< second の risse_uint32 には VM コードと同じフォーマットで
+		//!< 共有フレーム内の変数番号が入る; つまり上位16bitがネストレベル、
+		//!< 下位16bitが変数番号。
+
+private:
+	tRisseSharedVariableFrames * Frames; //!< 共有フレーム
+	tBindingMap BindingMap; //!< ローカル変数のバインディング
+	tRisseVariant This; //!< このバインディングの "This"
+	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		This		このバインディングの "This"
+	//! @param		frames		共有フレーム
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseBindingInfo(const tRisseVariant & This, tRisseSharedVariableFrames * frames, tRisseScriptEngine * engine)
+	{
+		this->This = This;
+		Frames = frames;
+		Engine = engine;
+	}
+
+	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	virtual ~tRisseBindingInfo() {;}
+
+	//! @brief		ローカル変数のバインディングへの参照を得る
+	//! @return		ローカル変数のバインディングへの参照
+	tBindingMap & GetBindingMap() { return BindingMap; }
+
+	//! @brief		共有フレームを得る
+	//! @return		共有フレーム
+	tRisseSharedVariableFrames * GetFrames() const { return Frames; }
+
+	//! @brief		ローカル変数のバインディングのマップを追加する
+	//! @param		This		Bindingクラスのインスタンス
+	//! @param		name		ローカル変数名
+	//! @param		reg			レジスタ番号
+	static void AddMap(tRisseVariant &This, const tRisseString &name, risse_uint32 reg);
+};
+//---------------------------------------------------------------------------
+}
+#endif

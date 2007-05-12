@@ -1809,7 +1809,6 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 		form->AddStatement(pos, ocBranch, NULL, cond_var);
 
 	// 新しい基本ブロックを作成(真の場合)
-	form->GetCurrentBlock();
 	tRisseSSABlock * true_block = form->CreateNewBlock(basename + RISSE_WS("_true"));
 
 	// 真の場合に実行する内容を作成
@@ -1817,7 +1816,6 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 
 	// もし 値を得られないような物であれば void を代わりに使う
 	if(!true_var) true_var = form->AddConstantValueStatement(pos, tRisseVariant());
-	form->GetCurrentBlock();
 
 	// ジャンプ文を作成
 	tRisseSSAStatement * true_exit_jump_stmt =
@@ -1921,7 +1919,6 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
 
 	// 条件式または body にジャンプするための文を作成
-	form->GetCurrentBlock();
 	tRisseSSAStatement * entry_jump_stmt =
 		form->AddStatement(SkipFirstCheck?Body->GetPosition():Condition->GetPosition(), ocJump, NULL);
 
@@ -1933,7 +1930,6 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	tRisseSSAVariable * cond_var = Condition->GenerateReadSSA(form);
 
 	// 分岐文を作成
-	form->GetCurrentBlock();
 	tRisseSSAStatement * branch_stmt =
 		form->AddStatement(Condition->GetPosition(), ocBranch, NULL, cond_var);
 
@@ -1943,7 +1939,6 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 
 	// while 文の body を生成
 	Body->GenerateReadSSA(form);
-	form->GetCurrentBlock();
 
 	// ジャンプ文を作成
 	tRisseSSAStatement * while_body_jump_stmt =
@@ -2005,7 +2000,6 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 
 
 	// 条件式にジャンプするための文を作成
-	form->GetCurrentBlock();
 	tRisseSSAStatement * entry_jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
@@ -2033,7 +2027,6 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 		cond_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant(true));
 
 	// 分岐文を作成
-	form->GetCurrentBlock();
 	tRisseSSAStatement * branch_stmt =
 		form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
 
@@ -2043,7 +2036,6 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 
 	// for 文の body を生成
 	Body->GenerateReadSSA(form);
-	form->GetCurrentBlock();
 
 	// ジャンプ文を作成
 	tRisseSSAStatement * for_body_jump_stmt =

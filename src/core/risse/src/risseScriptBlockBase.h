@@ -104,9 +104,10 @@ public:
 protected:
 	//! @brief		ASTを元にコンパイルを行う
 	//! @param		root		ルートASTノード
+	//! @param		binding		バインディング情報
 	//! @param		need_result		評価時に結果が必要かどうか
 	//! @param		is_expression	式評価モードかどうか
-	void Compile(tRisseASTNode * root, bool need_result, bool is_expression);
+	void Compile(tRisseASTNode * root, const tRisseBindingInfo & binding, bool need_result, bool is_expression);
 
 
 public:

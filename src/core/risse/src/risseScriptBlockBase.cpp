@@ -173,11 +173,11 @@ void tRisseScriptBlockBase::OutputWarning(risse_size pos, const tRisseString & m
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockBase::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
+void tRisseScriptBlockBase::Compile(tRisseASTNode * root, const tRisseBindingInfo & binding, bool need_result, bool is_expression)
 {
 	// コンパイラオブジェクトを作成してコンパイルを行う
 	tRisseCompiler * compiler = new tRisseCompiler(this);
-	compiler->Compile(root, need_result, is_expression);
+	compiler->Compile(root, binding, need_result, is_expression);
 }
 //---------------------------------------------------------------------------
 
@@ -259,7 +259,7 @@ void tRisseScriptBlockBase::Evaluate(const tRisseBindingInfo & binding, tRisseVa
 	tRisseASTNode * root_node = GetASTRootNode(result != NULL);
 
 	// コンパイルする
-	Compile(root_node, result != NULL, is_expression);
+	Compile(root_node, binding, result != NULL, is_expression);
 
 	// Fixup する
 	Fixup();

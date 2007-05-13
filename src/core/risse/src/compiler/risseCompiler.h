@@ -32,6 +32,7 @@ class tRisseSSAForm;
 class tRisseCompilerFunctionGroup;
 class tRisseSSAVariable;
 class tRisseSSABlock;
+class tRisseBindingInfo;
 //---------------------------------------------------------------------------
 //! @brief		関数クラス
 //---------------------------------------------------------------------------
@@ -225,9 +226,11 @@ public:
 
 	//! @brief		ASTを元にコンパイルを行う
 	//! @param		root		ルートASTノード
+	//! @param		binding		バインディング情報
 	//! @param		need_result		評価時に結果が必要かどうか
 	//! @param		is_expression	式評価モードかどうか
-	void Compile(tRisseASTNode * root, bool need_result, bool is_expression);
+	void Compile(tRisseASTNode * root, const tRisseBindingInfo & binding,
+		bool need_result, bool is_expression);
 
 	//! @brief		ASTを元にクラスのコンパイルを行う
 	//! @param		root		クラスのルートASTノード(複数可)
@@ -244,10 +247,12 @@ private:
 	//! @brief		(内部関数)トップレベルのSSA形式を作成する
 	//! @param		pos			ソースコード上の位置
 	//! @param		name		名前
+	//! @param		binding		バインディング情報(NULLの場合=バインディングが無い場合)
 	//! @param		need_result		評価時に結果が必要かどうか
 	//! @param		is_expression	式評価モードかどうか
 	//! @return		トップレベルのSSA形式インスタンス
 	tRisseSSAForm * CreateTopLevelSSAForm(risse_size pos, const tRisseString & name,
+		const tRisseBindingInfo * binding,
 		bool need_result, bool is_expression);
 
 public:

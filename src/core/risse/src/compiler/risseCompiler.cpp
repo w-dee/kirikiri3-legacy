@@ -23,6 +23,7 @@
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
 #include "../risseStaticStrings.h"
+#include "../risseBindingInfo.h"
 
 /*
 	コンパイルの単位
@@ -404,7 +405,8 @@ void tRisseCompilerFunctionGroup::GenerateVMCode()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_expression)
+void tRisseCompiler::Compile(tRisseASTNode * root, const tRisseBindingInfo & binding,
+	bool need_result, bool is_expression)
 {
 	// (テスト) ASTのダンプを行う
 	RisseFPrint(stderr, RISSE_WS("========== AST ==========\n"));
@@ -413,7 +415,8 @@ void tRisseCompiler::Compile(tRisseASTNode * root, bool need_result, bool is_exp
 	RisseFPrint(stderr, str.c_str());
 
 	// トップレベルのSSA形式インスタンスを作成する
-	tRisseSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("toplevel"), need_result, is_expression);
+	tRisseSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("toplevel"),
+		&binding, need_result, is_expression);
 
 	// トップレベルのSSA形式の内容を作成する
 	// (その下にぶら下がる他のSSA形式などは順次芋づる式に作成される)
@@ -451,7 +454,7 @@ void tRisseCompiler::CompileClass(const gc_vector<tRisseASTNode *> & roots, cons
 					tRisseString::AsString(form->GetUniqueNumber());
 
 	// トップレベルのSSA形式インスタンスを作成する
-	new_form = CreateTopLevelSSAForm(pos, numbered_class_name, true, true);
+	new_form = CreateTopLevelSSAForm(pos, numbered_class_name, NULL, true, true);
 
 	// クラス名を設定する
 	new_form->GetFunction()->GetFunctionGroup()->SetClassName(name);
@@ -486,8 +489,21 @@ void tRisseCompiler::CompileClass(const gc_vector<tRisseASTNode *> & roots, cons
 
 //---------------------------------------------------------------------------
 tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
-	const tRisseString & name, bool need_result, bool is_expression)
+	const tRisseString & name, const tRisseBindingInfo * binding,
+	bool need_result, bool is_expression)
 {
+	// バインディングを元に、名前空間オブジェクトを作成する
+	// この名前空間オブジェクトは、関数グループよりもさらに外側の名前空間オブジェクトとして
+	// 作成される。
+	tRisseSSALocalNamespace *ns = NULL;
+	if(binding && binding->GetFrames())
+	{
+		ns = new tRisseSSALocalNamespace();
+		const tRisseBindingInfo::tBindingMap & map = binding->GetBindingMap();
+		for(tRisseBindingInfo::tBindingMap::const_iterator i = map.begin(); i != map.end(); i++)
+			ns->Add(i->first, NULL);
+	}
+
 	// トップレベルの関数グループを作成する
 	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this, name);
 
@@ -496,6 +512,9 @@ tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
 
 	// トップレベルのSSA形式を作成する
 	tRisseSSAForm * form = new tRisseSSAForm(pos, top_function, name, NULL, false);
+
+	// トップレベルのSSA形式に 先ほど作成した ns を設定する
+	if(ns) form->GetLocalNamespace()->SetParent(ns);
 
 	return form;
 }

@@ -65,6 +65,10 @@ public:
 	//! @return		ローカル変数のバインディングへの参照
 	tBindingMap & GetBindingMap() { return BindingMap; }
 
+	//! @brief		ローカル変数のバインディングへの参照を得る
+	//! @return		ローカル変数のバインディングへの参照
+	const tBindingMap & GetBindingMap() const { return BindingMap; }
+
 	//! @brief		このバインディングの "This" を得る
 	//! @return		このバインディングの "This"
 	const tRisseVariant & GetThis() const { return This; }

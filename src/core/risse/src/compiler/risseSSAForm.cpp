@@ -42,7 +42,8 @@ tRisseBreakInfo::tRisseBreakInfo(tRisseSSAForm * form,
 				(label_prefix.IsEmpty() ?
 					tRisseString(RISSE_WS("@break_or_continue")):label_prefix) +
 				RISSE_WS("_") +
-				tRisseString::AsString(Form->GetUniqueNumber());
+				tRisseString::AsString(Form->GetFunction()->GetFunctionGroup()->
+									GetCompiler()->GetUniqueNumber());
 }
 //---------------------------------------------------------------------------
 
@@ -93,7 +94,6 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 	Parent = parent;
 	UseParentFrame = useparentframe; // ブロックの場合に真
 	Name = name;
-	UniqueNumber = 0;
 	LocalNamespace = new tRisseSSALocalNamespace();
 	ThisProxy = NULL;
 	EntryBlock = NULL;
@@ -726,7 +726,9 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 	tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
 {
 	// 遅延評価ブロックの名称を決める
-	tRisseString block_name = basename + RISSE_WS(" ") + tRisseString::AsString(GetUniqueNumber());
+	tRisseString block_name = basename + RISSE_WS(" ") +
+		tRisseString::AsString(GetFunction()->
+						GetFunctionGroup()->GetCompiler()->GetUniqueNumber());
 
 	// 遅延評価ブロックを生成
 	if(sharevars)
@@ -823,20 +825,6 @@ void tRisseSSAForm::AddBindingMap(risse_size pos, tRisseSSAVariable * binding)
 		tRisseSSAStatement * stmt = AddStatement(pos, ocAddBindingMap, NULL, binding, name_var);
 		stmt->SetName(nname);
 	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_int tRisseSSAForm::GetUniqueNumber()
-{
-	if(Parent) return Parent->GetUniqueNumber(); // 親がある場合は親のを使う
-	UniqueNumber++;
-	// int のサイズにもよるが、32bit integer では 2^30 ぐらいで元に戻る
-	// もちろんこれはそれほど変数が使われることは無いだろうという推測の元なので
-	// 周回が起こったらここで例外を吐いて止まってしまった方がいいかもしれない
-	if(UniqueNumber >= 1 << (sizeof(risse_int) * 8 - 2)) UniqueNumber = 0;
-	return UniqueNumber;
 }
 //---------------------------------------------------------------------------
 

@@ -186,7 +186,6 @@ class tRisseSSAForm : public tRisseCollectee
 		//!< TryCallしたあとのCatchBranch文/そのTryCallの戻り値の情報のリスト
 
 	tRisseString Name; //!< このSSA形式インスタンスの名前
-	risse_int UniqueNumber; //!< ユニークな番号 (変数のバージョン付けに用いる)
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
 
 	tRisseSSAVariable * ThisProxy; //!< this-proxy (thisにメンバがなければglobalを見に行くオブジェクト)が入っているSSA変数
@@ -502,10 +501,6 @@ public:
 	//! @note		このメソッドを実行すると、現時点で可視な変数がすべて共有変数に
 	//!				なる。
 	void AddBindingMap(risse_size pos, tRisseSSAVariable * binding);
-
-	//! @brief		ユニークな番号を得る
-	//! @return		ユニークな番号
-	risse_int GetUniqueNumber();
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列

@@ -17,6 +17,7 @@
 #include "risseSSAForm.h"
 #include "risseSSABlock.h"
 #include "risseCompilerNS.h"
+#include "risseCompiler.h"
 
 namespace Risse
 {
@@ -54,7 +55,7 @@ void tRisseSSAVariable::SetName(const tRisseString & name)
 	Name = name;
 
 	// 通し番号の準備
-	Version = Form->GetUniqueNumber();
+	Version = Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetUniqueNumber();
 }
 //---------------------------------------------------------------------------
 

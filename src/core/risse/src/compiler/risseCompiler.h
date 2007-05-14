@@ -215,10 +215,12 @@ class tRisseCompiler : public tRisseCollectee
 	gc_vector<tRisseCompilerFunctionGroup *> FunctionGroups;
 		//!< この関数グループが保持している関数グループインスタンスのリスト
 
+	risse_int UniqueNumber; //!< ユニークな番号 (変数などのバージョン付けに用いる)
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		scriptblock		スクリプトブロックインスタンス
-	tRisseCompiler(tRisseScriptBlockBase * scriptblock) { ScriptBlock = scriptblock; }
+	tRisseCompiler(tRisseScriptBlockBase * scriptblock) { ScriptBlock = scriptblock; UniqueNumber = 0; }
 
 	//! @brief		スクリプトブロックインスタンスを得る
 	//! @return		スクリプトブロックインスタンス
@@ -264,6 +266,14 @@ public:
 	//! @param		block		コードブロック
 	//! @return		コードブロックのインデックス
 	risse_size AddCodeBlock(tRisseCodeBlock * block);
+
+
+public:
+	//! @brief		ユニークな番号を得る
+	//! @return		ユニークな番号(0と負の値は絶対に帰らない)
+	//! @note		30bit程度を使い果たすと例外が発生する
+	risse_int GetUniqueNumber();
+
 };
 //---------------------------------------------------------------------------
 

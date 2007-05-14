@@ -46,7 +46,9 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name,
 	Alive = false;
 
 	// 通し番号の準備
-	Name = name + RISSE_WC('_') + tRisseString::AsString(form->GetUniqueNumber());
+	Name = name + RISSE_WC('_') +
+		tRisseString::AsString(form->GetFunction()->GetFunctionGroup()->
+								GetCompiler()->GetUniqueNumber());
 }
 //---------------------------------------------------------------------------
 

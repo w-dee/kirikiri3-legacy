@@ -48,6 +48,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(7695,16492,63400,17880,52365,22979,50413,3135);
 
 
+
 //---------------------------------------------------------------------------
 tRisseCompilerFunction::tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group,
 	tRisseCompilerFunction * parent, const tRisseString name)
@@ -451,7 +452,7 @@ void tRisseCompiler::CompileClass(const gc_vector<tRisseASTNode *> & roots, cons
 
 	// クラスの内部名称を決める
 	tRisseString numbered_class_name = RISSE_WS("class ") + name + RISSE_WS(" ") +
-					tRisseString::AsString(form->GetUniqueNumber());
+					tRisseString::AsString(GetUniqueNumber());
 
 	// トップレベルのSSA形式インスタンスを作成する
 	new_form = CreateTopLevelSSAForm(pos, numbered_class_name, NULL, true, true);
@@ -539,6 +540,22 @@ risse_size tRisseCompiler::AddCodeBlock(tRisseCodeBlock * block)
 
 
 
+//---------------------------------------------------------------------------
+risse_int tRisseCompiler::GetUniqueNumber()
+{
+	UniqueNumber++;
+	// int のサイズにもよるが、32bit integer では 2^30 ぐらいまで。
+	// もちろんこれはそれほど変数が使われることは無いだろうという推測の元。
+	// コレを超えるとエラーになる。
+	if(UniqueNumber >= 1 << (sizeof(risse_int) * 8 - 2))
+		tRisseCompileExceptionClass::Throw(
+			tRisseString(RISSE_WS_TR("too large source code; compiler internal number exhausted")));
+	return UniqueNumber;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 
 
 

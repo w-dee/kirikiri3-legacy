@@ -60,11 +60,20 @@ void tRisseCodeInterpreter::Execute(
 		frame = new tRisseVariant[CodeBlock->GetNumRegs()];
 
 	// 共有変数領域の割り当て
-	if(shared == NULL)
+	if(CodeBlock->GetSharedVariableNestCount() != risse_size_max)
 	{
-		RISSE_ASSERT(CodeBlock->GetNestLevel() == 0);
-		shared = new tRisseSharedVariableFrames(CodeBlock->GetSharedVariableNestCount());
+		if(!shared)
+		{
+			// 新規割り当て
+			shared = new tRisseSharedVariableFrames(CodeBlock->GetSharedVariableNestCount());
+		}
+		else
+		{
+			// 拡張
+			shared = new tRisseSharedVariableFrames(*shared, CodeBlock->GetSharedVariableNestCount());
+		}
 	}
+	RISSE_ASSERT(shared != NULL);
 
 	tRisseVariant * prev_shared_frame = 
 		CodeBlock->GetNumSharedVars() ? 

@@ -39,7 +39,7 @@ class tRisseCodeBlock : public tRisseObjectInterface
 	risse_size ConstsSize; //!< 定数領域のサイズ(個)
 	risse_size NumRegs; //!< 必要なレジスタ数
 	risse_size NestLevel; //!< 関数のネストレベル
-	risse_size SharedVariableNestCount; //!< 共有変数の最大のネストカウント (NestLevel==0のコードブロックでのみ有効)
+	risse_size SharedVariableNestCount; //!< 共有変数の最大のネストカウント (risse_size_maxの場合はこの情報が無効のとき)
 	risse_size NumSharedVars; //!< 必要な共有変数の数
 	std::pair<risse_size, risse_size> * CodeToSourcePosition; //!< コード上の位置からソースコード上の位置へのマッピングの配列
 	risse_size CodeToSourcePositionSize; //!< コード上の位置からソースコード上の位置へのマッピングの配列のサイズ
@@ -143,6 +143,17 @@ public:
 	{
 		Frames.resize(max_nest_level);
 	}
+
+	//! @brief		コンストラクタ
+	//! @param		ref					コピー元の共有変数フレーム
+	//! @param		max_nest_level		最大の関数のネストレベル(このサイズにて Frames が確保される)
+	//! @note		ref の Frames がシャローコピーされた後、max_nest_level までリサイズされる
+	tRisseSharedVariableFrames(const tRisseSharedVariableFrames & ref,
+		risse_size max_nest_level) : Frames(ref.Frames)
+	{
+		Frames.resize(max_nest_level);
+	}
+
 
 	//! @brief		指定のネストレベルのフレームを確保する
 	//! @param		level		ネストレベル

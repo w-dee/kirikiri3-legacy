@@ -78,3 +78,4 @@ ss_NullObjectException				NullObjectException				#!< "NullObjectException" ク�
 ss_CompileException					CompileException				#!< "CompileException" クラス名
 ss_extensible						extensible						#!< "extensible" プロパティ名
 ss_Binding							Binding							#!< "Binding" クラス名
+ss_eval								eval							#!< "eval" メソッド名

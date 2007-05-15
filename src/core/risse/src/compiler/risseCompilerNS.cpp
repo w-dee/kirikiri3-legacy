@@ -110,6 +110,7 @@ void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_s
 //---------------------------------------------------------------------------
 tRisseSSALocalNamespace::tRisseSSALocalNamespace()
 {
+	Compiler = NULL;
 	Block = NULL;
 	AccessMap = NULL;
 	Parent = NULL;
@@ -144,6 +145,23 @@ tRisseString tRisseSSALocalNamespace::GetNumberedName(
 
 
 //---------------------------------------------------------------------------
+void tRisseSSALocalNamespace::SetBlock(tRisseSSABlock * block)
+{
+	Block = block;
+	Compiler = block->GetForm()->GetFunction()->GetFunctionGroup()->GetCompiler();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSALocalNamespace::SetCompiler(tRisseCompiler * compiler)
+{
+	Compiler = compiler;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseSSALocalNamespace::Push()
 {
 	Scopes.push_back(new tScope());
@@ -162,12 +180,10 @@ void tRisseSSALocalNamespace::Pop()
 //---------------------------------------------------------------------------
 void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * where)
 {
-	RISSE_ASSERT(Block != NULL);
 	RISSE_ASSERT(Scopes.size() != 0); // スコープが一つもない場合は何もできない(このメソッドは呼ばれてはいけない)
 
 	// 番号を決める
-	risse_int num = Block->GetForm()->GetFunction()->GetFunctionGroup()->
-					GetCompiler()->GetUniqueNumber();
+	risse_int num = Compiler->GetUniqueNumber(); // ここで Compiler を使う
 	tRisseString n_name = GetNumberedName(name, num);
 
 	// 一番深いレベルのスコープにエイリアスを追加/上書きする
@@ -278,6 +294,7 @@ bool tRisseSSALocalNamespace::Delete(const tRisseString & name)
 tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
 					risse_size pos, const tRisseString & name, const tRisseString & n_name)
 {
+	RISSE_ASSERT(Block != NULL);
 	tRisseSSAVariable ** var = NULL;
 	tRisseString n_name_found;
 	bool found;
@@ -438,7 +455,7 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 	{
 		// 変数が見つかった
 		if(ret_n_name) *ret_n_name = n_name;
-		if(should_share) Block->GetForm()->GetFunction()->ShareVariable(n_name);
+		if(should_share) if(Block) Block->GetForm()->GetFunction()->ShareVariable(n_name);
 		if(is_shared)
 		{
 			if(should_share)
@@ -486,6 +503,10 @@ void tRisseSSALocalNamespace::InternalListAllVisibleVariableNumberedNames(tAlias
 	// 親に再帰
 	if(Parent) Parent->InternalListAllVisibleVariableNumberedNames(map);
 
+	if(!Block) return;
+		// ↑ Block がない名前空間の場合は何もしない。
+		// これは今のところバインディング情報に記録されていた変数用の名前空間の場合。
+
 	// Scopes を頭から見ていき、変数名を片っ端から追加する
 	// 通常はスコープの深いところから見ていくところだが、ここでは
 	// スコープのより深いところの alias で map を上書きするために
@@ -521,12 +542,15 @@ void tRisseSSALocalNamespace::ListAllVisibleVariableNumberedNames(tAliasMap & de
 void tRisseSSALocalNamespace::ShareAllVisibleVariableNames(const tAliasMap & names)
 {
 	// すべての変数を共有としてマーク
-	for(tAliasMap::const_iterator i = names.begin(); i != names.end(); i++)
+	if(Block)
 	{
-		RisseFPrint(stderr,
-			(RISSE_WS("marking : ") + i->second + RISSE_WS("\n")).c_str());
+		for(tAliasMap::const_iterator i = names.begin(); i != names.end(); i++)
+		{
+			RisseFPrint(stderr,
+				(RISSE_WS("marking : ") + i->second + RISSE_WS("\n")).c_str());
 
-		Block->GetForm()->GetFunction()->ShareVariable(i->second);
+			Block->GetForm()->GetFunction()->ShareVariable(i->second);
+		}
 	}
 }
 //---------------------------------------------------------------------------

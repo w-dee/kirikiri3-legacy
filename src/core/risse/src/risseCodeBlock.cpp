@@ -34,7 +34,8 @@ tRisseCodeBlock::tRisseCodeBlock(tRisseScriptBlockBase * sb)
 	ConstsSize = 0;
 	NumRegs = 0;
 	NumSharedVars = 0;
-	CodeBlockRelocations = NULL;
+	NestLevel = 0;
+	SharedVariableNestCount = risse_size_max;
 	CodeBlockRelocationSize = 0;
 	TryIdentifierRelocations = NULL;
 	TryIdentifierRelocationSize = 0;
@@ -127,7 +128,6 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 //---------------------------------------------------------------------------
 void tRisseCodeBlock::SetSharedVariableNestCount(risse_size level)
 {
-	RISSE_ASSERT(NestLevel == 0); // この情報を持つコードブロックのネストレベルは 0 で無くてはならない
 	SharedVariableNestCount = level;
 }
 //---------------------------------------------------------------------------

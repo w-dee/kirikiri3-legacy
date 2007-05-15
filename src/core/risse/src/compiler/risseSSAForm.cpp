@@ -736,7 +736,7 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 		// 関数の場合
 		tRisseCompilerFunction *child_function =
 			new tRisseCompilerFunction(Function->GetFunctionGroup(),
-				Function, block_name);
+				Function, risse_size_max, block_name);
 		new_form =
 			new tRisseSSAForm(pos, child_function, block_name, this, !sharevars);
 	}

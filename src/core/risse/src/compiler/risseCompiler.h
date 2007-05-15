@@ -77,9 +77,10 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		function_group		関数グループクラスのインスタンス
 	//! @param		parent				親関数インスタンス
+	//! @param		nestlevel			ネストレベル(risse_size_max = 親関数インスタンス+1にする)
 	//! @param		name				関数名(表示用)
 	tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group,
-		tRisseCompilerFunction * parent, const tRisseString name);
+		tRisseCompilerFunction * parent, risse_size nestlevel, const tRisseString name);
 
 	//! @brief		関数グループクラスのインスタンスを得る
 	//! @return		関数グループクラスのインスタンス
@@ -117,9 +118,8 @@ public:
 	//! @brief		最大の共有変数のネストカウントを設定する。
 	//! @note		トップレベルの関数は、共有変数のネストカウントに応じたバッファを
 	//!				確保しなければならないため、ネスト数が最大でどれほどまでに行くの
-	//!				かを知っていなくてはならない。このメソッドはネストレベルが0の
-	//!				関数(つまり、関数グループのうち一番最初に実行される関数)
-	//!				にのみ有効である。このメソッドはコードジェネレータに
+	//!				かを知っていなくてはならない。関数グループのうち一番最初に
+	//!				実行される関数にのみ有効である。このメソッドはコードジェネレータに
 	//!				共有変数のネストレベルを問い合わせ、それをSSA形式インスタンスに設定する。
 	void SetSharedVariableNestCount();
 

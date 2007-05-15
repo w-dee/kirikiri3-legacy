@@ -51,14 +51,21 @@ RISSE_DEFINE_SOURCE_ID(7695,16492,63400,17880,52365,22979,50413,3135);
 
 //---------------------------------------------------------------------------
 tRisseCompilerFunction::tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group,
-	tRisseCompilerFunction * parent, const tRisseString name)
+	tRisseCompilerFunction * parent, risse_size nestlevel, const tRisseString name)
 {
 	Name = name;
 	Parent = parent;
-	if(Parent)
-		NestLevel = Parent->NestLevel + 1;
+	if(nestlevel != risse_size_max)
+	{
+		NestLevel = nestlevel;
+	}
 	else
-		NestLevel = 0;
+	{
+		if(Parent)
+			NestLevel = Parent->NestLevel + 1;
+		else
+			NestLevel = 0;
+	}
 	FunctionGroup = function_group;
 	FunctionGroup->AddFunction(this); // 自分自身を登録する
 }
@@ -171,7 +178,6 @@ void tRisseCompilerFunction::GenerateVMCode()
 //---------------------------------------------------------------------------
 void tRisseCompilerFunction::SetSharedVariableNestCount()
 {
-	RISSE_ASSERT(NestLevel == 0);
 	SSAForms.front()->SetSharedVariableNestCount();
 }
 //---------------------------------------------------------------------------
@@ -366,9 +372,7 @@ void tRisseCompilerFunctionGroup::CompleteSSAForm()
 //---------------------------------------------------------------------------
 void tRisseCompilerFunctionGroup::GenerateVMCode()
 {
-	// このインスタンスが所有しているすべての関数に対して処理を行わせる
-
-	// まず、コードジェネレータに共有変数を登録する
+	// コードジェネレータに各関数が保持している共有変数を登録する
 	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
 		ri != Functions.rend(); ri++)
 	{
@@ -382,15 +386,9 @@ void tRisseCompilerFunctionGroup::GenerateVMCode()
 		(*ri)->GenerateVMCode();
 	}
 
-	// ネストレベルが 0 の関数のコードブロックに対して最大のネストレベルを
-	// 調べて設定するように指示する
-	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
-		ri != Functions.rend(); ri++)
-	{
-		risse_size level = (*ri)->GetNestLevel();
-		if(level == 0) (*ri)->SetSharedVariableNestCount();
-	}
-
+	// 一番最初の関数 (つまり一番最初に実行される関数)のコードブロックに
+	// 対して最大のネストレベルを調べ、設定させる。
+	Functions.front()->SetSharedVariableNestCount();
 }
 //---------------------------------------------------------------------------
 
@@ -493,29 +491,57 @@ tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
 	const tRisseString & name, const tRisseBindingInfo * binding,
 	bool need_result, bool is_expression)
 {
-	// バインディングを元に、名前空間オブジェクトを作成する
+	// バインディングを元に、名前空間オブジェクトを作成する。
 	// この名前空間オブジェクトは、関数グループよりもさらに外側の名前空間オブジェクトとして
 	// 作成される。
+	// また同時に、バインディング内で用いられている最大の共有変数ネストレベルを求める。
+	// これからコンパイルされる関数に置いては、このネストレベルよりも深い値が用いられる。
+	risse_size nestlevel_start = 0;
 	tRisseSSALocalNamespace *ns = NULL;
 	if(binding && binding->GetFrames())
 	{
 		ns = new tRisseSSALocalNamespace();
+		ns->Push(); // 名前空間を push
+		ns->SetCompiler(this); // コンパイラインスタンスを設定
 		const tRisseBindingInfo::tBindingMap & map = binding->GetBindingMap();
 		for(tRisseBindingInfo::tBindingMap::const_iterator i = map.begin(); i != map.end(); i++)
+		{
 			ns->Add(i->first, NULL);
+			risse_size nestlevel = (i->second >> 16) + 1;
+			if(nestlevel_start < nestlevel) nestlevel_start = nestlevel;
+		}
 	}
 
 	// トップレベルの関数グループを作成する
 	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this, name);
 
 	// トップレベルの関数を作成する
-	tRisseCompilerFunction *top_function = new tRisseCompilerFunction(top_function_group, NULL, name);
+	tRisseCompilerFunction *top_function =
+		new tRisseCompilerFunction(top_function_group, NULL, nestlevel_start, name);
 
 	// トップレベルのSSA形式を作成する
 	tRisseSSAForm * form = new tRisseSSAForm(pos, top_function, name, NULL, false);
 
 	// トップレベルのSSA形式に 先ほど作成した ns を設定する
 	if(ns) form->GetLocalNamespace()->SetParent(ns);
+
+	// バインディングに登録されている変数を共有変数としてあらかじめコードジェネレータに登録する
+	if(binding && binding->GetFrames())
+	{
+		const tRisseBindingInfo::tBindingMap & map = binding->GetBindingMap();
+		for(tRisseBindingInfo::tBindingMap::const_iterator i = map.begin(); i != map.end(); i++)
+		{
+			// i->first は番号なしの名前だが、共有変数には番号付きの名前でアクセス
+			// されるので、対応を ns からとってこなければならない。
+			tRisseString n_name;
+			bool found = ns->Find(i->first, false, &n_name, NULL);
+			(void)found; // (found変数は代入されたのに使われていないという)警告を抑制
+			RISSE_ASSERT(found); // 変数は見つからなくてはならない
+			form->GetCodeGenerator()->AddBindingRegNameMap(n_name,
+						static_cast<risse_uint16>(i->second >> 16),
+						static_cast<risse_uint16>(i->second & 0xffff));
+		}
+	}
 
 	return form;
 }

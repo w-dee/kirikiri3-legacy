@@ -224,6 +224,25 @@ void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::AddBindingRegNameMap(const tRisseString & name,
+								risse_uint16 nestlevel, risse_uint16 regnum)
+{
+	RisseFPrint(stderr, (RISSE_WS("Adding binding ") + name +
+		RISSE_WS(" at nestlevel ") +
+		tRisseString::AsString(risse_int64(nestlevel)) + RISSE_WS(", regnum ") +
+		tRisseString::AsString(risse_int64(regnum)) +  RISSE_WS("\n")).c_str() );
+
+	RISSE_ASSERT(SharedRegNameMap->find(name) == SharedRegNameMap->end()); // 二重挿入は許されない
+
+	SharedRegNameMap->insert(tNamedRegMap::value_type(name, (nestlevel<<16) + regnum));
+
+	// この関数グループ内のどのネストレベルにも属さない変数を追加することを
+	// 目的としているので、 SharedRegCount はインクリメントしない。
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_size tRisseCodeGenerator::GetSharedRegCount() const
 {
 	return SharedRegCount;

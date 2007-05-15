@@ -281,3 +281,5 @@ extern tRisseStringData data_ss_extensible;
 static const tRisseString & ss_extensible = *reinterpret_cast<const tRisseString *>(&data_ss_extensible); //!< (static string)  "extensible" プロパティ名
 extern tRisseStringData data_ss_Binding;
 static const tRisseString & ss_Binding = *reinterpret_cast<const tRisseString *>(&data_ss_Binding); //!< (static string)  "Binding" クラス名
+extern tRisseStringData data_ss_eval;
+static const tRisseString & ss_eval = *reinterpret_cast<const tRisseString *>(&data_ss_eval); //!< (static string)  "eval" メソッド名

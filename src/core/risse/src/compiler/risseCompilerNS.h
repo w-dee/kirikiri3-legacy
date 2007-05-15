@@ -20,6 +20,7 @@ namespace Risse
 {
 class tRisseSSABlock;
 class tRisseSSAForm;
+class tRisseCompiler;
 //---------------------------------------------------------------------------
 //! @brief	ローカル変数にアクセスがあったかどうかを記録するためのマップクラス
 //---------------------------------------------------------------------------
@@ -72,6 +73,8 @@ public:
 //---------------------------------------------------------------------------
 class tRisseSSALocalNamespace : public tRisseCollectee
 {
+	tRisseCompiler * Compiler; //!< この名前空間に結びつけられている基本ブロック
+				//!< たとえ Block が null でも、 ユニークな値を得るために必要。
 	tRisseSSABlock * Block; //!< この名前空間に結びつけられている基本ブロック
 	tRisseSSAVariableAccessMap * AccessMap;
 		//!< この名前空間内に見つからなかった読み込みあるいは書き込みをチェックするためのマップ
@@ -114,7 +117,12 @@ public:
 
 	//! @brief		この名前空間に結びつけられる基本ブロックを設定する
 	//! @param		block	この名前空間に結びつけられる基本ブロック
-	void SetBlock(tRisseSSABlock * block) { Block = block; }
+	//! @note		このメソッドはついでに Compiler も設定するので注意。
+	void SetBlock(tRisseSSABlock * block);
+
+	//! @brief		この名前空間に結びつけられているコンパイラインスタンスを設定する
+	//! @param		compiler	この名前空間に結びつけられている基本ブロック
+	void SetCompiler(tRisseCompiler * compiler);
 
 	//! @brief		名前空間を push する
 	void Push();
@@ -227,12 +235,14 @@ private:
 	//! @brief		すべての「可視な」番号付き変数名をリストアップする
 	//! @param		map		格納先
 	//! @note		この関数は、親名前空間がある場合、親名前空間に対して再帰する。
+	//!				この関数は、バインディング情報にもともとあった変数はリストアップしない。
 	void InternalListAllVisibleVariableNumberedNames(tAliasMap & map) const;
 
 public:
 	//! @brief		すべての「可視な」番号付き変数名をリストアップする
 	//! @param		dest		格納先(内容はクリアされる)
 	//! @note		ここで得られる変数名は、番号付きの名前である。
+	//!				この関数は、バインディング情報にもともとあった変数はリストアップしない。
 	void ListAllVisibleVariableNumberedNames(tAliasMap & dest) const;
 
 	//! @brief		すべての「可視な」変数を共有変数としてマークする

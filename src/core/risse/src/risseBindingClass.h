@@ -54,12 +54,13 @@ public:
 	//! @param		reg			レジスタ番号
 	static void AddMap(tRisseVariant &This, const tRisseString &name, risse_uint32 reg);
 
-	//! @brief		バインディングに関する情報をセットする
+	//! @brief		バインディングに関する情報を設定する
 	//! @param		info		バインディングに関する情報
-	void SetInfo(tRisseBindingInfo * info)
-	{
-		Info = info;
-	}
+	void SetInfo(tRisseBindingInfo * info) { Info = info; }
+
+	//! @brief		バインディングに関する情報を取得する
+	//! @return		バインディングに関する情報
+	tRisseBindingInfo * GetInfo() const { return Info; }
 
 	//! @brief		スクリプトエンジンを設定する
 	//! @param		info		スクリプトエンジン

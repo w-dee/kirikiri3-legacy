@@ -169,15 +169,23 @@ public:
 
 	//! @brief		共有されたレジスタのマップを変数名で探す
 	//! @param		name			変数名
-	//! @param		nest_level		そのレジスタのネストレベル
+	//! @param		nestlevel		そのレジスタのネストレベル
 	//! @param		regnum			レジスタ番号
 	//! @note		nameがマップ内に見つからなかった場合は(デバッグモード時は)
 	//!				親コードジェネレータを探し、それでも見つからなければASSERTに失敗となる
 	void FindSharedRegNameMap(const tRisseString & name, risse_uint16 &nestlevel, risse_uint16 &regnum);
 
-	//! @brief		共有されたレジスタのマップに変数名とレジスタを追加する
+	//! @brief		共有されたレジスタのマップに変数名を追加する
 	//! @param		name			変数名
 	void AddSharedRegNameMap(const tRisseString & name);
+
+	//! @brief		共有されたレジスタのマップにバインディング変数名とレジスタを追加する
+	//! @param		name			変数名
+	//! @param		nestlevel		そのレジスタのネストレベル
+	//! @param		regnum			レジスタ番号
+	//! @note		このメソッドは、バインディング情報中の変数を登録するためにある。
+	//!				つまり、関数グループ内の共有変数をこのメソッドで追加してはならない。
+	void AddBindingRegNameMap(const tRisseString & name, risse_uint16 nestlevel, risse_uint16 regnum);
 
 	//! @brief		指定されたネストレベルに対する共有されたレジスタの個数を得る
 	//! @return		共有されたレジスタの個数

@@ -17,6 +17,7 @@
 #include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
+#include "risseScriptEngine.h"
 
 /*
 	"Binding" クラスの実装
@@ -82,16 +83,22 @@ void tRisseBindingClass::RegisterMembers()
 	RISSE_END_NATIVE_METHOD
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-/*
+
 	RISSE_BEGIN_NATIVE_METHOD(ss_eval)
 	{
 		// eval (式やスクリプトの評価)
+		args.ExpectArgumentCount(1);
 		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
 
-		
+		tRisseString script = args[0];
+		tRisseString name = args.HasArgument(1) ?
+						tRisseString(args[1]) : tRisseString(RISSE_WS("(anonymous)"));
+		risse_size lineofs = args.HasArgument(2) ? (risse_size)(risse_int64)args[2] : (risse_size)0;
+
+		obj->GetScriptEngine()->Evaluate(script, name, lineofs, result, obj->GetInfo(), true);
 	}
 	RISSE_END_NATIVE_METHOD
-*/
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnIGet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))

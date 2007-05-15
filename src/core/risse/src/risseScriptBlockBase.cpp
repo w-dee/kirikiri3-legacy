@@ -16,6 +16,7 @@
 #include "risseCodeBlock.h"
 #include "risseScriptEngine.h"
 #include "risseBindingInfo.h"
+#include "risseCodeExecutor.h"
 
 namespace Risse
 {
@@ -266,10 +267,12 @@ void tRisseScriptBlockBase::Evaluate(const tRisseBindingInfo & binding, tRisseVa
 
 	// テスト実行
 	RISSE_ASSERT(RootCodeBlock != NULL);
-	RootCodeBlock->GetObject().FuncCall(
-				result, 0,
+	RootCodeBlock->GetExecutor()->Execute(
 				tRisseMethodArgument::Empty(),
-				binding.GetThis());
+				binding.GetThis(),
+				NULL,
+				binding.GetFrames(),
+				result);
 }
 //---------------------------------------------------------------------------
 

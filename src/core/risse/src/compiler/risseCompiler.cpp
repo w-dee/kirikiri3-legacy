@@ -522,8 +522,12 @@ tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
 	// トップレベルのSSA形式を作成する
 	tRisseSSAForm * form = new tRisseSSAForm(pos, top_function, name, NULL, false);
 
-	// トップレベルのSSA形式に 先ほど作成した ns を設定する
+	// トップレベルのSSA形式のローカル変数の名前空間の親に 先ほど作成した ns を設定する
 	if(ns) form->GetLocalNamespace()->SetParent(ns);
+
+	// ローカルバインディングがある場合はローカル変数の名前空間を一つ push する。
+	// これにより eval 全体が {  } で囲まれているかのような状態にする。
+	if(binding && binding->GetFrames()) form->GetLocalNamespace()->Push();
 
 	// バインディングに登録されている変数を共有変数としてあらかじめコードジェネレータに登録する
 	if(binding && binding->GetFrames())

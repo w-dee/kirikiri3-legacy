@@ -503,14 +503,12 @@ void tRisseSSALocalNamespace::InternalListAllVisibleVariableNumberedNames(tAlias
 	// 親に再帰
 	if(Parent) Parent->InternalListAllVisibleVariableNumberedNames(map);
 
-	if(!Block) return;
-		// ↑ Block がない名前空間の場合は何もしない。
-		// これは今のところバインディング情報に記録されていた変数用の名前空間の場合。
-
 	// Scopes を頭から見ていき、変数名を片っ端から追加する
 	// 通常はスコープの深いところから見ていくところだが、ここでは
 	// スコープのより深いところの alias で map を上書きするために
 	// スコープの浅いところから見ていく。
+	// 処理の都合上 InternalShareAllVisibleVariableNames() とは処理の方向が逆なのに
+	// 注意
 	for(tScopes::const_iterator fi = Scopes.begin(); fi != Scopes.end(); fi++)
 	{
 		tAliasMap & aliasmap = (*fi)->AliasMap;
@@ -539,19 +537,46 @@ void tRisseSSALocalNamespace::ListAllVisibleVariableNumberedNames(tAliasMap & de
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::ShareAllVisibleVariableNames(const tAliasMap & names)
+void tRisseSSALocalNamespace::InternalShareAllVisibleVariableNames(tAliasMap & names) const
 {
-	// すべての変数を共有としてマーク
-	if(Block)
-	{
-		for(tAliasMap::const_iterator i = names.begin(); i != names.end(); i++)
-		{
-			RisseFPrint(stderr,
-				(RISSE_WS("marking : ") + i->second + RISSE_WS("\n")).c_str());
+	if(!Block) return;
+		// ↑ Block がない名前空間の場合は何もしない。
+		// これは今のところバインディング情報に記録されていた変数用の名前空間の場合。
 
-			Block->GetForm()->GetFunction()->ShareVariable(i->second);
+	// Scopes を深いところから見ていき、見つかった変数をすべて共有する。
+	// 一度共有した番号なしの変数名は names に入れ、より浅いスコープにそれが
+	// みつかっても浅いスコープのそれは共有しないようにする。
+	for(tScopes::const_reverse_iterator fi = Scopes.rbegin(); fi != Scopes.rend(); fi++)
+	{
+		tAliasMap & aliasmap = (*fi)->AliasMap;
+		for(tAliasMap::iterator i = aliasmap.begin(); i != aliasmap.end(); i++)
+		{
+			if(i->first[0] != RISSE_WC('.'))
+			{
+				// 先頭が '.' で始まっている変数は隠し変数なのでリストアップしない
+				if(names.find(i->first) == names.end())
+				{
+					// 一度共有をした変数はもう共有しない
+					names.insert(tAliasMap::value_type(i->first, i->second));
+
+					// 関数に共有を指示
+					Block->GetForm()->GetFunction()->ShareVariable(i->second);
+				}
+			}
 		}
 	}
+
+	// 親に再帰
+	if(Parent) Parent->InternalShareAllVisibleVariableNames(names);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSSALocalNamespace::ShareAllVisibleVariableNames() const
+{
+	tAliasMap names;
+	InternalShareAllVisibleVariableNames(names);
 }
 //---------------------------------------------------------------------------
 

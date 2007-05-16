@@ -812,11 +812,11 @@ void tRisseSSAForm::CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap 
 void tRisseSSAForm::AddBindingMap(risse_size pos, tRisseSSAVariable * binding)
 {
 	// まず、このスコープから可視な変数をすべて共有するとしてマークする
-	tRisseSSALocalNamespace::tAliasMap names;
-	LocalNamespace->ListAllVisibleVariableNumberedNames(names);
-	LocalNamespace->ShareAllVisibleVariableNames(names);
+	LocalNamespace->ShareAllVisibleVariableNames();
 
 	// それぞれの変数のマッピングを追加する
+	tRisseSSALocalNamespace::tAliasMap names;
+	LocalNamespace->ListAllVisibleVariableNumberedNames(names);
 	for(tRisseSSALocalNamespace::tAliasMap::iterator i = names.begin(); i != names.end(); i++)
 	{
 		const tRisseString & name = i->first; // 装飾なしの名前

@@ -235,20 +235,23 @@ private:
 	//! @brief		すべての「可視な」番号付き変数名をリストアップする
 	//! @param		map		格納先
 	//! @note		この関数は、親名前空間がある場合、親名前空間に対して再帰する。
-	//!				この関数は、バインディング情報にもともとあった変数はリストアップしない。
 	void InternalListAllVisibleVariableNumberedNames(tAliasMap & map) const;
 
 public:
 	//! @brief		すべての「可視な」番号付き変数名をリストアップする
 	//! @param		dest		格納先(内容はクリアされる)
 	//! @note		ここで得られる変数名は、番号付きの名前である。
-	//!				この関数は、バインディング情報にもともとあった変数はリストアップしない。
 	void ListAllVisibleVariableNumberedNames(tAliasMap & dest) const;
 
+
+private:
+	//! @brief		すべての「可視な」変数を共有変数としてマークする(内部関数)
+	//! @param		names	既にマークした関数のマップ
+	void InternalShareAllVisibleVariableNames(tAliasMap & names) const;
+
+public:
 	//! @brief		すべての「可視な」変数を共有変数としてマークする
-	//! @param		names		マークする変数名のマップ。
-	//!							ただし second (番号付き) の方しか参照しない
-	void ShareAllVisibleVariableNames(const tAliasMap & names);
+	void ShareAllVisibleVariableNames() const;
 
 	//! @brief		内容のダンプを行う
 	//! @return		ダンプされた文字列

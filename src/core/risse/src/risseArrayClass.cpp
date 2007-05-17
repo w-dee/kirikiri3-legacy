@@ -55,11 +55,11 @@ void tRisseArrayClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// default メンバを追加 (デフォルトではvoid)
-		This.SetPropertyDirect_Object(ss_default, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_default, tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 			tRisseVariant::GetVoidObject(), This);
 
 		// filler メンバを追加 (デフォルトではvoid)
-		This.SetPropertyDirect_Object(ss_filler, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_filler, tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 			tRisseVariant::GetVoidObject(), This);
 	}
 	RISSE_END_NATIVE_METHOD

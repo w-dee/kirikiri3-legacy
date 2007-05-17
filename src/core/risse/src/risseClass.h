@@ -47,14 +47,14 @@ public:
 	//! @param		extensible		extensible の場合に真
 	tRisseClassBase(tRisseScriptEngine * engine);
 
-	//! @brief		シングルトンクラスインスタンスを登録するためのユーティリティメソッド
+	//! @brief		クラスインスタンスを登録するためのユーティリティメソッド
 	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
 	//! @param		name		登録名
 	void RegisterClassInstance(tRisseVariant & target, const tRisseString &name)
 	{
 		target.SetPropertyDirect_Object(name,
 			tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
-			tRisseOperateFlags::ofMemberEnsure,
+			tRisseOperateFlags::ofMemberEnsure | tRisseOperateFlags::ofInstanceMemberOnly,
 					tRisseVariant(this));
 	}
 public:

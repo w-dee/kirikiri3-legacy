@@ -32,7 +32,10 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 	tRisseClassBase(super_class)
 {
 	// ゲートウェイインターフェースを構築する
-	Gateway = new tRisseObjectBase();
+	tRisseObjectBase * gateway_obj = new tRisseObjectBase();
+	gateway_obj->SetRTTI(new tRisseRTTI(super_class->GetRTTI()->GetScriptEngine()));
+	Gateway = gateway_obj;
+
 	// そのオブジェクトにクラス情報を設定する
 	// ここではclassメンバに「自分のクラス」を追加する
 	Gateway.SetPropertyDirect_Object(ss_class,

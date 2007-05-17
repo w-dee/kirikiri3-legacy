@@ -49,8 +49,12 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 //---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible) : tRisseObjectBase(ss_super)
 {
-	// 親クラスのClassRTTIを引き継ぐ
 	RISSE_ASSERT(super_class != NULL);
+
+	// スクリプトエンジンの情報を持った RTTI を登録する
+	SetRTTI(new tRisseRTTI(super_class->GetRTTI()->GetScriptEngine()));
+
+	// 親クラスのClassRTTIを引き継ぐ
 	ClassRTTI = super_class->ClassRTTI;
 
 	// ClassRTTIに情報を格納する
@@ -69,9 +73,11 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 //---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 {
-	ClassRTTI.SetScriptEngine(engine);
+	// スクリプトエンジンの情報を持った RTTI を登録する
+	SetRTTI(new tRisseRTTI(engine));
 
 	// ClassRTTIに情報を格納する
+	ClassRTTI.SetScriptEngine(engine);
 	RTTIMatcher = ClassRTTI.AddId(this);
 
 	// クラスに必要なメソッドを登録する

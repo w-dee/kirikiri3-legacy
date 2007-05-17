@@ -155,7 +155,6 @@ void tRisseCodeInterpreter::Execute(
 				tRisseBindingInstance * obj =
 					AR(code[1]).CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 				obj->SetInfo(new tRisseBindingInfo(This, shared));
-				obj->SetScriptEngine(engine);
 				code += 2;
 				break;
 

@@ -97,7 +97,7 @@ void tRisseBindingClass::RegisterMembers()
 						tRisseString(args[1]) : tRisseString(RISSE_WS("(anonymous)"));
 		risse_size lineofs = args.HasArgument(2) ? (risse_size)(risse_int64)args[2] : (risse_size)0;
 
-		obj->GetScriptEngine()->Evaluate(script, name, lineofs, result, obj->GetInfo(), true);
+		obj->GetRTTI()->GetScriptEngine()->Evaluate(script, name, lineofs, result, obj->GetInfo(), true);
 	}
 	RISSE_END_NATIVE_METHOD
 

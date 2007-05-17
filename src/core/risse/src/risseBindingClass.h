@@ -30,12 +30,9 @@ class tRisseScriptEngine;
 class tRisseBindingInstance : public tRisseObjectBase
 {
 	tRisseBindingInfo * Info; //!< バインディングに関する情報
-	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
-
-
 public:
 	//! @brief		コンストラクタ
-	tRisseBindingInstance() { Info = NULL; Engine = NULL; }
+	tRisseBindingInstance() : tRisseObjectBase() { Info = NULL; }
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
 	virtual ~tRisseBindingInstance() {;}
@@ -61,15 +58,6 @@ public:
 	//! @brief		バインディングに関する情報を取得する
 	//! @return		バインディングに関する情報
 	tRisseBindingInfo * GetInfo() const { return Info; }
-
-	//! @brief		スクリプトエンジンを設定する
-	//! @param		info		スクリプトエンジン
-	//! @note		eval する際にスクリプトエンジンの情報が必要。
-	void SetScriptEngine(tRisseScriptEngine * engine) { Engine = engine; }
-
-	//! @brief		スクリプトエンジンを取得する
-	//! @return		スクリプトエンジン
-	tRisseScriptEngine * GetScriptEngine() const { return Engine; }
 };
 //---------------------------------------------------------------------------
 

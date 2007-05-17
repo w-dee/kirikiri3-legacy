@@ -24,12 +24,13 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		モジュール用クラスの基底クラス(Risse用)
 //---------------------------------------------------------------------------
-class tRisseModuleClass : public tRisseClassBase, public tRisseClassSingleton<tRisseModuleClass>
+class tRisseModuleClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 public:
 	// ! @brief		コンストラクタ
-	tRisseModuleClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseModuleClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

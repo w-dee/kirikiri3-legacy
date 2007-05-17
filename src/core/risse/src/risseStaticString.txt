@@ -56,6 +56,7 @@ ss_identifier						identifier						#!< "identifier" インスタンス変数/プ
 ss_target							target							#!< "target" インスタンス変数/プロパティ名
 ss_value							value							#!< "value" インスタンス変数/プロパティ名
 ss_Error							Error							#!< "Error" クラス名
+ss_AssertionError					AssertionError					#!< "AssertionError" クラス名
 ss_RuntimeException					RuntimeException				#!< "RuntimeException" クラス名
 ss_toException						toException						#!< "toException" 
 ss_MemberAccessException			MemberAccessException			#!< "MemberAccessException" クラス名
@@ -72,7 +73,6 @@ ss_UnsupportedOperationException	UnsupportedOperationException	#!< "UnsupportedO
 ss_BadContextException				BadContextException				#!< "BadContextException" クラス名
 ss_ClassDefinitionException			ClassDefinitionException		#!< "ClassDefinitionException" クラス名
 ss_InstantiationException			InstantiationException			#!< "InstantiationException" クラス名
-ss_AssertionError					AssertionError					#!< "AssertionError" クラス名
 ss_expression						expression						#!< "expression" インスタンス変数/プロパティ名
 ss_NullObjectException				NullObjectException				#!< "NullObjectException" クラス名
 ss_CompileException					CompileException				#!< "CompileException" クラス名

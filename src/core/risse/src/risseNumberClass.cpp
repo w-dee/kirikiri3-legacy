@@ -19,14 +19,14 @@
 #include "risseObjectClass.h"
 #include "rissePrimitiveClass.h"
 #include "risseExceptionClass.h"
-
+#include "risseScriptEngine.h"
 
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(2098,51592,31991,16696,47274,13601,12452,21741);
 //---------------------------------------------------------------------------
-tRisseNumberClass::tRisseNumberClass() :
-	tRisseClassBase(tRissePrimitiveClass::GetPointer())
+tRisseNumberClass::tRisseNumberClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->PrimitiveClass)
 {
 	RegisterMembers();
 }

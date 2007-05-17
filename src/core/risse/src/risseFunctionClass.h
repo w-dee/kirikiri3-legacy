@@ -59,13 +59,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		"Function" クラス
 //---------------------------------------------------------------------------
-class tRisseFunctionClass : public tRisseClassBase, public tRisseClassSingleton<tRisseFunctionClass>
+class tRisseFunctionClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
-	tRisseFunctionClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseFunctionClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

@@ -21,6 +21,7 @@
 #include "risseStaticStrings.h"
 #include "risseArrayClass.h"
 #include "risseClassClass.h"
+#include "risseScriptEngine.h"
 
 namespace Risse
 {
@@ -48,11 +49,12 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 //---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible) : tRisseObjectBase(ss_super)
 {
-	// 親クラスのRTTIを引き継ぐ
-	if(super_class) RTTI = super_class->RTTI;
+	// 親クラスのClassRTTIを引き継ぐ
+	RISSE_ASSERT(super_class != NULL);
+	ClassRTTI = super_class->ClassRTTI;
 
-	// RTTIに情報を格納する
-	RTTIMatcher = RTTI.AddId(this);
+	// ClassRTTIに情報を格納する
+	RTTIMatcher = ClassRTTI.AddId(this);
 
 	// クラスに必要なメソッドを登録する
 	RegisterMembers();
@@ -60,6 +62,23 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant(super_class));
 
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
+{
+	ClassRTTI.SetScriptEngine(engine);
+
+	// ClassRTTIに情報を格納する
+	RTTIMatcher = ClassRTTI.AddId(this);
+
+	// クラスに必要なメソッドを登録する
+	RegisterMembers();
+
+	// super を登録
+	RegisterNormalMember(ss_super, tRisseVariant((tRisseClassBase*)NULL));
 }
 //---------------------------------------------------------------------------
 
@@ -91,7 +110,7 @@ void tRisseClassBase::RegisterMembers()
 			// そのオブジェクトにクラス情報を設定する
 			// ここではclassメンバに「自分のクラス」を追加する
 			// 「自分のクラス」はすなわち This のこと(のはず)
-			new_object.SetPropertyDirect(ss_class,
+			new_object.SetPropertyDirect(engine, ss_class,
 				tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
 				tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 				This, new_object);
@@ -99,12 +118,12 @@ void tRisseClassBase::RegisterMembers()
 
 			// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
 			// 「自分のクラス」はすなわち This のこと(のはず)
-			This.FuncCall(NULL, ss_fertilize, 0,
+			This.FuncCall_Object(NULL, ss_fertilize, 0,
 				tRisseMethodArgument::New(new_object));
 		}
 
 		// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
-		new_object.FuncCall(NULL, ss_initialize, 0,
+		new_object.FuncCall(engine, NULL, ss_initialize, 0,
 			args,
 			new_object);
 
@@ -121,13 +140,13 @@ void tRisseClassBase::RegisterMembers()
 		args.ExpectArgumentCount(1);
 
 		// 親クラスを得る
-		tRisseVariant super_class = This.GetPropertyDirect(ss_super);
+		tRisseVariant super_class = This.GetPropertyDirect(engine, ss_super);
 
 		// 親クラスがあれば...
 		if(!super_class.IsNull())
 		{
 			// 親クラスの fertilize メソッドを再帰して呼ぶ
-			super_class.FuncCall(NULL, ss_fertilize, 0,
+			super_class.FuncCall_Object(NULL, ss_fertilize, 0,
 				tRisseMethodArgument::New(args[0]));
 		}
 
@@ -138,7 +157,7 @@ void tRisseClassBase::RegisterMembers()
 		// この際の呼び出し先の this は args[0] つまり新しいオブジェクトになる
 		// 渡した args[0] を確実にコンテキストにして実行するために
 		// tRisseOperateFlags::ofUseThisAsContext を用いる
-		This.FuncCall(NULL, ss_construct, tRisseOperateFlags::ofUseThisAsContext,
+		This.FuncCall(engine, NULL, ss_construct, tRisseOperateFlags::ofUseThisAsContext,
 			tRisseMethodArgument::Empty(), args[0]);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -146,23 +165,23 @@ void tRisseClassBase::RegisterMembers()
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	// modules 配列を登録
-	if(tRisseArrayClass::GetInstanceAlive())
+	if(GetRTTI()->GetScriptEngine()->ArrayClass)
 	{
 		// Arrayクラスの構築中にArrayクラスのシングルトンインスタンスを参照できないため
 		// Arrayクラスがすでに構築されている場合だけ、modules 配列を登録する
-		RegisterNormalMember(ss_modules, tRisseVariant(tRisseVariant(tRisseArrayClass::GetPointer()).New()));
+		RegisterNormalMember(ss_modules, tRisseVariant(tRisseVariant(GetRTTI()->GetScriptEngine()->ArrayClass).New()));
 	}
 
 	// class を登録
-	if(tRisseClassClass::GetInstanceAlive())
+	if(GetRTTI()->GetScriptEngine()->ClassClass)
 	{
 		// クラスのクラスはClass
 		// これもわざわざ tRisseClassClass のインスタンスが有効かどうかをチェックしている。
 		// 理由は modules 配列と同じ。
-		pThis->SetPropertyDirect(ss_class,
+		pThis->SetPropertyDirect(GetRTTI()->GetScriptEngine(), ss_class,
 			tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
 			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-			tRisseVariant(tRisseClassClass::GetPointer()), *pThis);
+			tRisseVariant(GetRTTI()->GetScriptEngine()->ClassClass), *pThis);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -172,10 +191,11 @@ void tRisseClassBase::RegisterMembers()
 		// クラスの modules 配列にモジュールを追加する
 
 		// modules を取り出す
-		tRisseVariant modules = This.GetPropertyDirect(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
+		tRisseVariant modules =
+			This.GetPropertyDirect(engine, ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
 
 		// Array.unshift を行う
-		modules.Do(ocFuncCall, NULL, ss_unshift, 0, args);
+		modules.Do(engine, ocFuncCall, NULL, ss_unshift, 0, args);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -197,7 +217,7 @@ tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERAT
 		{
 			// プリミティブ型でなければ
 			// RTTIとしてこのクラスの物を設定する
-			new_object.GetObjectInterface()->SetRTTI(&RTTI);
+			new_object.GetObjectInterface()->SetRTTI(&ClassRTTI);
 		}
 		*result = new_object;
 		return rvNoError;
@@ -225,7 +245,7 @@ void tRisseClassBase::CallSuperClassMethod(tRisseVariantBlock * ret,
 	Do(ocDGet, &super, ss_super, tRisseOperateFlags::ofInstanceMemberOnly, tRisseMethodArgument::Empty());
 
 	// super の中のメソッドを呼ぶ
-	super.FuncCall(ret, name, flags|tRisseOperateFlags::ofUseThisAsContext, args, This);
+	super.FuncCall_Object(ret, name, flags|tRisseOperateFlags::ofUseThisAsContext, args, This);
 }
 //---------------------------------------------------------------------------
 

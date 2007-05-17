@@ -17,6 +17,7 @@
 #include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
+#include "risseScriptEngine.h"
 
 /*
 	Risseスクリプトから見える"Array" クラスの実装
@@ -30,8 +31,8 @@ RISSE_DEFINE_SOURCE_ID(65360,34010,1527,19914,27817,35057,17111,22724);
 
 
 //---------------------------------------------------------------------------
-tRisseArrayClass::tRisseArrayClass() :
-	tRisseClassBase(tRisseObjectClass::GetPointer())
+tRisseArrayClass::tRisseArrayClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -54,11 +55,11 @@ void tRisseArrayClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// default メンバを追加 (デフォルトではvoid)
-		This.SetPropertyDirect(ss_default, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_default, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetVoidObject(), This);
 
 		// filler メンバを追加 (デフォルトではvoid)
-		This.SetPropertyDirect(ss_filler, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_filler, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetVoidObject(), This);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -68,11 +69,11 @@ void tRisseArrayClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す
-		tRisseArrayClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->ArrayClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 
 		// 引数を元に配列を構成する
 		// ここの動作は push と同じ
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
 		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
@@ -84,7 +85,7 @@ void tRisseArrayClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnIGet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
 		args.ExpectArgumentCount(1);
@@ -97,7 +98,7 @@ void tRisseArrayClass::RegisterMembers()
 		{
 			// 範囲外
 			// default の値を得て、それを返す
-			tRisseVariant default_value = This.GetPropertyDirect(ss_default);
+			tRisseVariant default_value = This.GetPropertyDirect_Object(ss_default);
 			if(result) *result = default_value;
 			return;
 		}
@@ -111,7 +112,7 @@ void tRisseArrayClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnISet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
 		args.ExpectArgumentCount(2);
@@ -130,7 +131,7 @@ void tRisseArrayClass::RegisterMembers()
 			if(index > array.size())
 			{
 				// filler の値を得る
-				tRisseVariant filler = This.GetPropertyDirect(ss_filler);
+				tRisseVariant filler = This.GetPropertyDirect_Object(ss_filler);
 				// filler で埋める
 				array.resize(index+1, filler);
 
@@ -154,7 +155,7 @@ void tRisseArrayClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD(ss_push)
 	{
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
 		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
@@ -166,7 +167,7 @@ void tRisseArrayClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD(ss_pop)
 	{
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
 		tRisseVariant val;
@@ -177,7 +178,7 @@ void tRisseArrayClass::RegisterMembers()
 		}
 		else
 		{
-			val = This.GetPropertyDirect(ss_default);
+			val = This.GetPropertyDirect_Object(ss_default);
 		}
 		if(result) *result = val;
 	}
@@ -187,7 +188,7 @@ void tRisseArrayClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD(ss_unshift)
 	{
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
 		risse_size i = args.GetArgumentCount();
@@ -199,7 +200,7 @@ void tRisseArrayClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD(ss_shift)
 	{
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
 
 		tRisseVariant val;
@@ -210,7 +211,7 @@ void tRisseArrayClass::RegisterMembers()
 		}
 		else
 		{
-			val = This.GetPropertyDirect(ss_default);
+			val = This.GetPropertyDirect_Object(ss_default);
 		}
 		if(result) *result = val;
 	}
@@ -222,7 +223,7 @@ void tRisseArrayClass::RegisterMembers()
 	{
 		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
 		{
-			tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+			tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 			tRisseArrayInstance::tArray & array = obj->GetArray();
 
 			if(result) *result = (risse_int64)array.size();
@@ -231,7 +232,7 @@ void tRisseArrayClass::RegisterMembers()
 
 		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
 		{
-			tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
+			tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 			tRisseArrayInstance::tArray & array = obj->GetArray();
 
 			risse_size new_size = (risse_size)(risse_int64)(value);
@@ -239,7 +240,7 @@ void tRisseArrayClass::RegisterMembers()
 			{
 				// 拡張
 				// filler の値を得る
-				tRisseVariant filler = This.GetPropertyDirect(ss_filler);
+				tRisseVariant filler = This.GetPropertyDirect_Object(ss_filler);
 				array.resize(new_size, filler);
 			}
 			else

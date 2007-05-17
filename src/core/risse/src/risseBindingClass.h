@@ -77,13 +77,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		"Binding" クラス
 //---------------------------------------------------------------------------
-class tRisseBindingClass : public tRisseClassBase, public tRisseClassSingleton<tRisseBindingClass>
+class tRisseBindingClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
-	tRisseBindingClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseBindingClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

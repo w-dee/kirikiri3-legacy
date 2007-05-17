@@ -44,6 +44,13 @@ bool tRisseScriptEngine::CommonObjectsInitialized = false;
 //---------------------------------------------------------------------------
 tRisseScriptEngine::tRisseScriptEngine()
 {
+	// 各クラスのインスタンスをいったん NULL に設定
+	// ここでは StartSentinel と EndSentinel の間が連続して各オブジェクトのインスタンス
+	// へのポインタの領域として割り当たっていることを仮定する(構造体というかクラスのレイアウト
+	// はそうなっている訳だしコンパイラもそう割り当てるはずだが...)
+	EndSentinel = NULL;
+	for(void ** p = &StartSentinel; p < &EndSentinel; p++) *p = NULL;
+
 	// フィールドの初期化
 	WarningOutput = NULL;
 
@@ -56,41 +63,79 @@ tRisseScriptEngine::tRisseScriptEngine()
 		RisseInitCoroutine();
 	}
 
+	// 各クラスのインスタンスを作成する
+	ObjectClass                            = new tRisseObjectClass                        (this);
+	BindingClass                           = new tRisseBindingClass                       (this);
+	ModuleClass                            = new tRisseModuleClass                        (this);
+	ClassClass                             = new tRisseClassClass                         (this);
+	FunctionClass                          = new tRisseFunctionClass                      (this);
+	PropertyClass                          = new tRissePropertyClass                      (this);
+	ArrayClass                             = new tRisseArrayClass                         (this);
+	PrimitiveClass                         = new tRissePrimitiveClass                     (this);
+	StringClass                            = new tRisseStringClass                        (this);
+	NumberClass                            = new tRisseNumberClass                        (this);
+	IntegerClass                           = new tRisseIntegerClass                       (this);
+	RealClass                              = new tRisseRealClass                          (this);
+	SourcePointClass                       = new tRisseSourcePointClass                   (this);
+	ThrowableClass                         = new tRisseThrowableClass                     (this);
+	ErrorClass                             = new tRisseErrorClass                         (this);
+	AssertionErrorClass                    = new tRisseAssertionErrorClass                (this);
+	ExceptionClass                         = new tRisseExceptionClass                     (this);
+	IOExceptionClass                       = new tRisseIOExceptionClass                   (this);
+	CharConversionExceptionClass           = new tRisseCharConversionExceptionClass       (this);
+	RuntimeExceptionClass                  = new tRisseRuntimeExceptionClass              (this);
+	CompileExceptionClass                  = new tRisseCompileExceptionClass              (this);
+	ClassDefinitionExceptionClass          = new tRisseClassDefinitionExceptionClass      (this);
+	InstantiationExceptionClass            = new tRisseInstantiationExceptionClass        (this);
+	UnsupportedOperationExceptionClass     = new tRisseUnsupportedOperationExceptionClass (this);
+	BadContextExceptionClass               = new tRisseBadContextExceptionClass           (this);
+	MemberAccessExceptionClass             = new tRisseMemberAccessExceptionClass         (this);
+	NoSuchMemberExceptionClass             = new tRisseNoSuchMemberExceptionClass         (this);
+	ArgumentExceptionClass                 = new tRisseArgumentExceptionClass             (this);
+	IllegalArgumentExceptionClass          = new tRisseIllegalArgumentExceptionClass      (this);
+	NullObjectExceptionClass               = new tRisseNullObjectExceptionClass           (this);
+	BadArgumentCountExceptionClass         = new tRisseBadArgumentCountExceptionClass     (this);
+	IllegalMemberAccessExceptionClass      = new tRisseIllegalMemberAccessExceptionClass  (this);
+
+	BlockExitExceptionClass                = new tRisseBlockExitExceptionClass            (this);
+
+
 	// グローバルオブジェクトを "Object" クラスから作成する
-	GlobalObject = tRisseVariant(tRisseObjectClass::GetPointer()).New();
+	GlobalObject = tRisseVariant(ObjectClass).New();
 
 	// 各クラスをグローバルオブジェクトに登録する
-	tRisseObjectClass::RegisterClassInstance(GlobalObject, ss_Object);
-	tRisseBindingClass::RegisterClassInstance(GlobalObject, ss_Binding);
-	tRisseModuleClass::RegisterClassInstance(GlobalObject, ss_Module);
-	tRisseClassClass::RegisterClassInstance(GlobalObject, ss_Class);
-	tRisseFunctionClass::RegisterClassInstance(GlobalObject, ss_Function);
-	tRissePropertyClass::RegisterClassInstance(GlobalObject, ss_Property);
-	tRisseArrayClass::RegisterClassInstance(GlobalObject, ss_Array);
-	tRissePrimitiveClass::RegisterClassInstance(GlobalObject, ss_Primitive);
-	tRisseStringClass::RegisterClassInstance(GlobalObject, ss_String);
-	tRisseNumberClass::RegisterClassInstance(GlobalObject, ss_Number);
-	tRisseIntegerClass::RegisterClassInstance(GlobalObject, ss_Integer);
-	tRisseRealClass::RegisterClassInstance(GlobalObject, ss_Real);
-	tRisseSourcePointClass::RegisterClassInstance(GlobalObject, ss_SourcePoint);
-	tRisseThrowableClass::RegisterClassInstance(GlobalObject, ss_Throwable);
-	tRisseErrorClass::RegisterClassInstance(GlobalObject, ss_Error);
-	tRisseExceptionClass::RegisterClassInstance(GlobalObject, ss_Exception);
-	tRisseIOExceptionClass::RegisterClassInstance(GlobalObject, ss_IOException);
-	tRisseCharConversionExceptionClass::RegisterClassInstance(GlobalObject, ss_CharConversionException);
-	tRisseRuntimeExceptionClass::RegisterClassInstance(GlobalObject, ss_RuntimeException);
-	tRisseCompileExceptionClass::RegisterClassInstance(GlobalObject, ss_CompileException);
-	tRisseClassDefinitionExceptionClass::RegisterClassInstance(GlobalObject, ss_ClassDefinitionException);
-	tRisseInstantiationExceptionClass::RegisterClassInstance(GlobalObject, ss_InstantiationException);
-	tRisseUnsupportedOperationExceptionClass::RegisterClassInstance(GlobalObject, ss_UnsupportedOperationException);
-	tRisseBadContextExceptionClass::RegisterClassInstance(GlobalObject, ss_BadContextException);
-	tRisseMemberAccessExceptionClass::RegisterClassInstance(GlobalObject, ss_MemberAccessException);
-	tRisseNoSuchMemberExceptionClass::RegisterClassInstance(GlobalObject, ss_NoSuchMemberException);
-	tRisseArgumentExceptionClass::RegisterClassInstance(GlobalObject, ss_ArgumentException);
-	tRisseIllegalArgumentExceptionClass::RegisterClassInstance(GlobalObject, ss_IllegalArgumentException);
-	tRisseNullObjectExceptionClass::RegisterClassInstance(GlobalObject, ss_NullObjectException);
-	tRisseBadArgumentCountExceptionClass::RegisterClassInstance(GlobalObject, ss_BadArgumentCountException);
-	tRisseIllegalMemberAccessExceptionClass::RegisterClassInstance(GlobalObject, ss_IllegalMemberAccessException);
+	ObjectClass->RegisterClassInstance(GlobalObject, ss_Object);
+	BindingClass->RegisterClassInstance(GlobalObject, ss_Binding);
+	ModuleClass->RegisterClassInstance(GlobalObject, ss_Module);
+	ClassClass->RegisterClassInstance(GlobalObject, ss_Class);
+	FunctionClass->RegisterClassInstance(GlobalObject, ss_Function);
+	PropertyClass->RegisterClassInstance(GlobalObject, ss_Property);
+	ArrayClass->RegisterClassInstance(GlobalObject, ss_Array);
+	PrimitiveClass->RegisterClassInstance(GlobalObject, ss_Primitive);
+	StringClass->RegisterClassInstance(GlobalObject, ss_String);
+	NumberClass->RegisterClassInstance(GlobalObject, ss_Number);
+	IntegerClass->RegisterClassInstance(GlobalObject, ss_Integer);
+	RealClass->RegisterClassInstance(GlobalObject, ss_Real);
+	SourcePointClass->RegisterClassInstance(GlobalObject, ss_SourcePoint);
+	ThrowableClass->RegisterClassInstance(GlobalObject, ss_Throwable);
+	ErrorClass->RegisterClassInstance(GlobalObject, ss_Error);
+	AssertionErrorClass->RegisterClassInstance(GlobalObject, ss_AssertionError);
+	ExceptionClass->RegisterClassInstance(GlobalObject, ss_Exception);
+	IOExceptionClass->RegisterClassInstance(GlobalObject, ss_IOException);
+	CharConversionExceptionClass->RegisterClassInstance(GlobalObject, ss_CharConversionException);
+	RuntimeExceptionClass->RegisterClassInstance(GlobalObject, ss_RuntimeException);
+	CompileExceptionClass->RegisterClassInstance(GlobalObject, ss_CompileException);
+	ClassDefinitionExceptionClass->RegisterClassInstance(GlobalObject, ss_ClassDefinitionException);
+	InstantiationExceptionClass->RegisterClassInstance(GlobalObject, ss_InstantiationException);
+	UnsupportedOperationExceptionClass->RegisterClassInstance(GlobalObject, ss_UnsupportedOperationException);
+	BadContextExceptionClass->RegisterClassInstance(GlobalObject, ss_BadContextException);
+	MemberAccessExceptionClass->RegisterClassInstance(GlobalObject, ss_MemberAccessException);
+	NoSuchMemberExceptionClass->RegisterClassInstance(GlobalObject, ss_NoSuchMemberException);
+	ArgumentExceptionClass->RegisterClassInstance(GlobalObject, ss_ArgumentException);
+	IllegalArgumentExceptionClass->RegisterClassInstance(GlobalObject, ss_IllegalArgumentException);
+	NullObjectExceptionClass->RegisterClassInstance(GlobalObject, ss_NullObjectException);
+	BadArgumentCountExceptionClass->RegisterClassInstance(GlobalObject, ss_BadArgumentCountException);
+	IllegalMemberAccessExceptionClass->RegisterClassInstance(GlobalObject, ss_IllegalMemberAccessException);
 
 	// 各クラスのメンバを正式な物に登録し直すためにもう一度RegisterMembersを呼ぶ
 	// 上記の状態では メンバとして仮のものが登録されている可能性がある
@@ -100,38 +145,40 @@ tRisseScriptEngine::tRisseScriptEngine()
 	// このため、各クラスの RegisterMembers メソッドをもう一度呼び、メンバを
 	// 登録し治す。上記ですべてクラスの初期化は終了しているため、
 	// もう一度このメソッドを呼べば、正しくメソッドが登録されるはずである。
-	tRisseObjectClass::GetPointer()->RegisterMembers();
-	tRisseBindingClass::GetPointer()->RegisterMembers();
-	tRisseModuleClass::GetPointer()->RegisterMembers();
-	tRisseClassClass::GetPointer()->RegisterMembers();
-	tRisseFunctionClass::GetPointer()->RegisterMembers();
-	tRissePropertyClass::GetPointer()->RegisterMembers();
-	tRisseArrayClass::GetPointer()->RegisterMembers();
-	tRissePrimitiveClass::GetPointer()->RegisterMembers();
-	tRisseStringClass::GetPointer()->RegisterMembers();
-	tRisseNumberClass::GetPointer()->RegisterMembers();
-	tRisseIntegerClass::GetPointer()->RegisterMembers();
-	tRisseRealClass::GetPointer()->RegisterMembers();
-	tRisseSourcePointClass::GetPointer()->RegisterMembers();
-	tRisseThrowableClass::GetPointer()->RegisterMembers();
-	tRisseErrorClass::GetPointer()->RegisterMembers();
-	tRisseExceptionClass::GetPointer()->RegisterMembers();
-	tRisseIOExceptionClass::GetPointer()->RegisterMembers();
-	tRisseCharConversionExceptionClass::GetPointer()->RegisterMembers();
-	tRisseRuntimeExceptionClass::GetPointer()->RegisterMembers();
-	tRisseCompileExceptionClass::GetPointer()->RegisterMembers();
-	tRisseClassDefinitionExceptionClass::GetPointer()->RegisterMembers();
-	tRisseInstantiationExceptionClass::GetPointer()->RegisterMembers();
-	tRisseUnsupportedOperationExceptionClass::GetPointer()->RegisterMembers();
-	tRisseBadContextExceptionClass::GetPointer()->RegisterMembers();
-	tRisseMemberAccessExceptionClass::GetPointer()->RegisterMembers();
-	tRisseNoSuchMemberExceptionClass::GetPointer()->RegisterMembers();
-	tRisseArgumentExceptionClass::GetPointer()->RegisterMembers();
-	tRisseIllegalArgumentExceptionClass::GetPointer()->RegisterMembers();
-	tRisseNullObjectExceptionClass::GetPointer()->RegisterMembers();
-	tRisseBadArgumentCountExceptionClass::GetPointer()->RegisterMembers();
-	tRisseIllegalMemberAccessExceptionClass::GetPointer()->RegisterMembers();
+	ObjectClass->RegisterMembers();
+	BindingClass->RegisterMembers();
+	ModuleClass->RegisterMembers();
+	ClassClass->RegisterMembers();
+	FunctionClass->RegisterMembers();
+	PropertyClass->RegisterMembers();
+	ArrayClass->RegisterMembers();
+	PrimitiveClass->RegisterMembers();
+	StringClass->RegisterMembers();
+	NumberClass->RegisterMembers();
+	IntegerClass->RegisterMembers();
+	RealClass->RegisterMembers();
+	SourcePointClass->RegisterMembers();
+	ThrowableClass->RegisterMembers();
+	ErrorClass->RegisterMembers();
+	AssertionErrorClass->RegisterMembers();
+	ExceptionClass->RegisterMembers();
+	IOExceptionClass->RegisterMembers();
+	CharConversionExceptionClass->RegisterMembers();
+	RuntimeExceptionClass->RegisterMembers();
+	CompileExceptionClass->RegisterMembers();
+	ClassDefinitionExceptionClass->RegisterMembers();
+	InstantiationExceptionClass->RegisterMembers();
+	UnsupportedOperationExceptionClass->RegisterMembers();
+	BadContextExceptionClass->RegisterMembers();
+	MemberAccessExceptionClass->RegisterMembers();
+	NoSuchMemberExceptionClass->RegisterMembers();
+	ArgumentExceptionClass->RegisterMembers();
+	IllegalArgumentExceptionClass->RegisterMembers();
+	NullObjectExceptionClass->RegisterMembers();
+	BadArgumentCountExceptionClass->RegisterMembers();
+	IllegalMemberAccessExceptionClass->RegisterMembers();
 
+	BlockExitExceptionClass->RegisterMembers();
 }
 //---------------------------------------------------------------------------
 
@@ -142,12 +189,19 @@ void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseStrin
 					tRisseVariant * result, const tRisseBindingInfo * binding,
 					bool is_expresion)
 {
-	// 暫定実装
-	// スクリプトブロックを作成
-	tRisseScriptBlock * block = new tRisseScriptBlock(this, script, name);
+	try
+	{
+		// 暫定実装
+		// スクリプトブロックを作成
+		tRisseScriptBlock * block = new tRisseScriptBlock(this, script, name);
 
-	// スクリプトをグローバルコンテキストで実行
-	block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding, result, is_expresion);
+		// スクリプトをグローバルコンテキストで実行
+		block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding, result, is_expresion);
+	}
+	catch(const tRisseTemporaryException * te)
+	{
+		te->ThrowConverted(this);
+	}
 }
 //---------------------------------------------------------------------------
 

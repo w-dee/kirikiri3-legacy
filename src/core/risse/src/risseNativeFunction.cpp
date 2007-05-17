@@ -14,10 +14,13 @@
 
 #include "risseNativeFunction.h"
 #include "risseFunctionClass.h"
+#include "risseScriptEngine.h"
 
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(47510,49015,53768,19018,63934,19864,53779,8975);
+
+
 //---------------------------------------------------------------------------
 tRisseNativeFunction::tRetValue tRisseNativeFunction::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
@@ -25,7 +28,7 @@ tRisseNativeFunction::tRetValue tRisseNativeFunction::Operate(RISSE_OBJECTINTERF
 	if(code == ocFuncCall && name.IsEmpty())
 	{
 		// このオブジェクトに対する関数呼び出しなので Callee を呼ぶ
-		Callee(result, flags, args, This);
+		Callee(GetRTTI()->GetScriptEngine(), result, flags, args, This);
 		return rvNoError;
 	}
 
@@ -36,14 +39,14 @@ tRisseNativeFunction::tRetValue tRisseNativeFunction::Operate(RISSE_OBJECTINTERF
 
 
 //---------------------------------------------------------------------------
-tRisseObjectInterface * tRisseNativeFunction::New(tCallee callee)
+tRisseObjectInterface * tRisseNativeFunction::New(tRisseScriptEngine * engine, tCallee callee)
 {
 	// tRisseFunctionClass がまだ登録されていない場合は仮のメソッドを
 	// 作成して登録する (のちに正式なメソッドオブジェクトに置き換えられる)
-	if(tRisseFunctionClass::GetInstanceAlive())
+	if(engine->FunctionClass)
 	{
-		tRisseVariant v = tRisseVariant(tRisseFunctionClass::GetPointer()).New(
-				0, tRisseMethodArgument::New(new tRisseNativeFunction(callee)));
+		tRisseVariant v = tRisseVariant(engine->FunctionClass).New(
+				0, tRisseMethodArgument::New(new tRisseNativeFunction(engine, callee)));
 
 		RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
 		RISSE_ASSERT(dynamic_cast<tRisseFunctionInstance*>(v.GetObjectInterface()) != NULL);
@@ -53,7 +56,7 @@ tRisseObjectInterface * tRisseNativeFunction::New(tCallee callee)
 	else
 	{
 		// 仮実装
-		return (tRisseFunctionInstance *)(new tRisseNativeFunction(callee));
+		return (tRisseFunctionInstance *)(new tRisseNativeFunction(engine, callee));
 	}
 }
 //---------------------------------------------------------------------------

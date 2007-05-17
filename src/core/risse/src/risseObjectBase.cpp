@@ -16,6 +16,7 @@
 #include "risseOperateFlags.h"
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
+#include "risseScriptEngine.h"
 
 /*
 	ここではオブジェクトの実装に必要な基底の機能を実装する
@@ -62,7 +63,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 			// モジュールは、モジュール配列をたどることで検索を行う
 			risse_offset length =
 				static_cast<risse_offset>(
-					(risse_int64)modules.GetPropertyDirect(ss_length, 0, modules));
+					(risse_int64)modules.GetPropertyDirect(GetRTTI()->GetScriptEngine(), ss_length, 0, modules));
 			for(risse_offset i = 0; i < length; i++)
 			{
 				tRisseVariant index(static_cast<risse_int64>(i));
@@ -75,7 +76,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 				// また、
 				// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
 				// tRisseOperateFlags::ofUseThisAsContext もつける
-				tRetValue rv = module.OperateForMember(ocDGet, &result, name,
+				tRetValue rv = module.OperateForMember(GetRTTI()->GetScriptEngine(), ocDGet, &result, name,
 						flags|tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseThisAsContext,
 							tRisseMethodArgument::Empty(),
 							(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
@@ -111,7 +112,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 		// クラスに対してメンバ取得を行う
 		// デフォルトのコンテキストを設定しないように(常にThisをコンテキストとして使うように)
 		// tRisseOperateFlags::ofUseThisAsContext もつける
-		tRetValue rv = Class.OperateForMember(ocDGet, &result, name,
+		// TODO : もっと効率的な実装
+		tRetValue rv = Class.OperateForMember(GetRTTI()->GetScriptEngine(), ocDGet, &result, name,
 					flags|tRisseOperateFlags::ofUseThisAsContext,
 					tRisseMethodArgument::Empty(),
 					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
@@ -147,9 +149,10 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 
 	case tRisseMemberAttribute::pcProperty: // プロパティアクセス
 		// member->Value を引数なしで関数呼び出しし、その結果を得る
-		tRetValue rv = member->Value.Operate(ocFuncCall, &result, tRisseString::GetEmptyString(),
-					flags, tRisseMethodArgument::Empty(),
-					(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
+		tRetValue rv = member->Value.Operate(GetRTTI()->GetScriptEngine(),
+			ocFuncCall, &result, tRisseString::GetEmptyString(),
+			flags, tRisseMethodArgument::Empty(),
+			(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ? *DefaultMethodContext:This);
 		if(rv != rvNoError && rv != rvMemberNotFound) return rv; // rvMemberNotFound以外のなにかエラーがおこあったらここで戻る
 		break;
 	}
@@ -225,10 +228,11 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 			return rvNoError;
 
 		case tRisseMemberAttribute::pcProperty: // プロパティアクセス
-			return member->Value.Operate(ocDSet, NULL, tRisseString::GetEmptyString(),
-						flags, tRisseMethodArgument::New(value),
-						(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ?
-							*DefaultMethodContext:This);
+			return member->Value.Operate(GetRTTI()->GetScriptEngine(), ocDSet, NULL,
+				tRisseString::GetEmptyString(),
+				flags, tRisseMethodArgument::New(value),
+				(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseThisAsContext)) ?
+						*DefaultMethodContext:This);
 		}
 	}
 
@@ -274,7 +278,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		// モジュールは、モジュール配列をたどることで検索を行う
 		risse_offset length =
 			static_cast<risse_offset>(
-				(risse_int64)modules.GetPropertyDirect(ss_length, 0, modules));
+				(risse_int64)modules.GetPropertyDirect(GetRTTI()->GetScriptEngine(), ss_length, 0, modules));
 		for(risse_offset i = 0; i < length; i++)
 		{
 			tRisseVariant index(static_cast<risse_int64>(i));
@@ -284,7 +288,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 			// モジュールはモジュールインスタンスのクラス (Moduleクラス以上)
 			// を検索したりしないように、tRisseOperateFlags::ofInstanceMemberOnly をつけて
 			// 検索を行う
-			result = module.OperateForMember(ocDSet, NULL, name,
+			result = module.OperateForMember(GetRTTI()->GetScriptEngine(), ocDSet, NULL, name,
 				flags|
 					class_search_base_flags|
 					tRisseOperateFlags::ofInstanceMemberOnly ,
@@ -301,7 +305,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 	{
 		// クラスを特定できた場合
 		// クラスに対してメンバ設定を行う
-		result = Class.OperateForMember(ocDSet, NULL, name,
+		result = Class.OperateForMember(GetRTTI()->GetScriptEngine(), ocDSet, NULL, name,
 							flags|
 							class_search_base_flags ,
 							tRisseMethodArgument::New(value),
@@ -357,7 +361,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Delete(const tRisseString & name, 
 		if(Class.IsNull()) return rvMemberNotFound; // クラスが null
 
 		// クラスに対して削除を行う
-		tRetValue rv = Class.OperateForMember(ocDDelete, NULL, name, flags,
+		tRetValue rv = Class.OperateForMember(GetRTTI()->GetScriptEngine(), ocDDelete, NULL, name, flags,
 					tRisseMethodArgument::Empty(), tRisseVariant::GetDynamicContext());
 		return rv;
 	}
@@ -383,7 +387,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::FuncCall(
 		if(rv != rvNoError) return rv;
 
 		// メンバに対して関数呼び出しを実行する
-		function_object.FuncCall(ret, flags & ~tRisseOperateFlags::ofUseThisAsContext, args, This);
+		function_object.FuncCall(GetRTTI()->GetScriptEngine(), ret, flags & ~tRisseOperateFlags::ofUseThisAsContext, args, This);
 	}
 	else
 	{
@@ -443,8 +447,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::SetAttribute(
 		if(Class.IsNull()) return rvMemberNotFound; // クラスが null
 
 		// クラスに対して属性設定を行う
-		tRetValue rv = Class.OperateForMember(ocDSetAttrib, NULL, name, flags,
-					tRisseMethodArgument::Empty(), This);
+		tRetValue rv = Class.OperateForMember(GetRTTI()->GetScriptEngine(),
+			ocDSetAttrib, NULL, name, flags, tRisseMethodArgument::Empty(), This);
 		return rv;
 	}
 
@@ -478,7 +482,8 @@ bool tRisseObjectBase::InstanceOf(
 		// モジュールは、モジュール配列をたどることで検索を行う
 		risse_offset length =
 			static_cast<risse_offset>(
-				(risse_int64)modules.GetPropertyDirect(ss_length, 0, modules));
+				(risse_int64)modules.GetPropertyDirect(GetRTTI()->GetScriptEngine(),
+						ss_length, 0, modules));
 		for(risse_offset i = 0; i < length; i++)
 		{
 			tRisseVariant index(static_cast<risse_int64>(i));

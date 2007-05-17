@@ -202,6 +202,7 @@ void tRisseCompilerFunction::AddLabelMap(const tRisseString &labelname, tRisseSS
 	{
 		// すでにラベルがある
 		tRisseCompileExceptionClass::Throw(
+			FunctionGroup->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 			tRisseString(RISSE_WS_TR("label '%1' is already defined"), labelname),
 				FunctionGroup->GetCompiler()->GetScriptBlock(), block->GetLastStatementPosition());
 	}
@@ -248,6 +249,7 @@ void tRisseCompilerFunction::BindAllLabels()
 		{
 			// ラベルは見つからなかった
 			tRisseCompileExceptionClass::Throw(
+				FunctionGroup->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 				tRisseString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
 					FunctionGroup->GetCompiler()->GetScriptBlock(),
 						i->SourceBlock->GetLastStatementPosition());
@@ -315,6 +317,7 @@ void tRisseCompilerFunction::BindAllLabels()
 				// ジャンプ先ラベルはどうやら自分よりも深い場所にいるようだ
 				// そういうことは今のところできないのでエラーにする
 				tRisseCompileExceptionClass::Throw(
+					FunctionGroup->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 					tRisseString(RISSE_WS_TR("cannot jump into deeper try block or callback block")),
 						FunctionGroup->GetCompiler()->GetScriptBlock(),
 							i->SourceBlock->GetLastStatementPosition());
@@ -579,6 +582,7 @@ risse_int tRisseCompiler::GetUniqueNumber()
 	// コレを超えるとエラーになる。
 	if(UniqueNumber >= 1 << (sizeof(risse_int) * 8 - 2))
 		tRisseCompileExceptionClass::Throw(
+			ScriptBlock->GetScriptEngine(),
 			tRisseString(RISSE_WS_TR("too large source code; compiler internal number exhausted")));
 	return UniqueNumber;
 }

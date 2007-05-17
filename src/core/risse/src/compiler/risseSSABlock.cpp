@@ -182,6 +182,7 @@ void tRisseSSABlock::AddPhiFunctionToBlocks(
 			// エラーにする
 			// TODO: もっと親切なエラーメッセージ
 			tRisseCompileExceptionClass::Throw(
+				Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 				tRisseString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
 					name),
@@ -261,6 +262,7 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 			// エラーにする
 			// TODO: もっと親切なエラーメッセージ
 			tRisseCompileExceptionClass::Throw(
+				Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 				tRisseString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
 					decl_var->GetName()),

@@ -17,6 +17,7 @@
 #include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
+#include "risseScriptEngine.h"
 
 /*
 	Risseスクリプトから見える"Property" クラスの実装
@@ -44,7 +45,8 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(Getter.IsNull()) return rvPropertyCannotBeRead;
-			Getter.FuncCall(result, flags, tRisseMethodArgument::Empty(), This);
+			Getter.FuncCall_Object(result, tRisseString::GetEmptyString(),
+							flags, tRisseMethodArgument::Empty(), This);
 			return rvNoError;
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
@@ -52,7 +54,8 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			if(Setter.IsNull()) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
-			Setter.FuncCall(NULL, flags, args, This);
+			Setter.FuncCall_Object(NULL, tRisseString::GetEmptyString(),
+							flags, args, This);
 			return rvNoError;
 		}
 	}
@@ -68,8 +71,8 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 
 
 //---------------------------------------------------------------------------
-tRissePropertyClass::tRissePropertyClass() :
-	tRisseClassBase(tRisseObjectClass::GetPointer())
+tRissePropertyClass::tRissePropertyClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -100,10 +103,10 @@ void tRissePropertyClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す
-		tRissePropertyClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->PropertyClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 
 		// 引数 = {getter, setter}
-		tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+		tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
 		if(args.HasArgument(0)) obj->SetGetter(args[0]);
 		if(args.HasArgument(1)) obj->SetSetter(args[1]);
 	}
@@ -115,7 +118,7 @@ void tRissePropertyClass::RegisterMembers()
 	{
 		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
 		{
-			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
 			if(result) *result = obj->GetGetter();
 		}
 		RISSE_END_NATIVE_PROPERTY_GETTER
@@ -126,7 +129,7 @@ void tRissePropertyClass::RegisterMembers()
 		また、これが再定義できてもあまりうれしくないと思うのだが)
 		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
 		{
-			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
 			obj->SetGetter(value);
 		}
 		RISSE_END_NATIVE_PROPERTY_SETTER
@@ -140,7 +143,7 @@ void tRissePropertyClass::RegisterMembers()
 	{
 		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
 		{
-			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
 			if(result) *result = obj->GetSetter();
 		}
 		RISSE_END_NATIVE_PROPERTY_GETTER
@@ -151,7 +154,7 @@ void tRissePropertyClass::RegisterMembers()
 		また、これが再定義できてもあまりうれしくないと思うのだが)
 		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
 		{
-			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRissePropertyClass>();
+			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
 			obj->SetSetter(value);
 		}
 		RISSE_END_NATIVE_PROPERTY_SETTER

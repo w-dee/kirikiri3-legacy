@@ -17,6 +17,7 @@
 #include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
+#include "risseScriptEngine.h"
 
 /*
 	Risseスクリプトから見える"Function" クラスの実装
@@ -49,7 +50,7 @@ tRisseFunctionInstance::tRetValue tRisseFunctionInstance::Operate(RISSE_OBJECTIN
 	{
 		if(code == ocFuncCall) // このオブジェクトに対するメソッド呼び出しか？
 		{
-			Body.FuncCall(result, flags, args, This);
+			Body.FuncCall_Object(result, tRisseString::GetEmptyString(), flags, args, This);
 			return rvNoError;
 		}
 	}
@@ -65,8 +66,8 @@ tRisseFunctionInstance::tRetValue tRisseFunctionInstance::Operate(RISSE_OBJECTIN
 
 
 //---------------------------------------------------------------------------
-tRisseFunctionClass::tRisseFunctionClass() :
-	tRisseClassBase(tRisseObjectClass::GetPointer())
+tRisseFunctionClass::tRisseFunctionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -97,11 +98,11 @@ void tRisseFunctionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す
-		tRisseFunctionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->FunctionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 
 		// 引数 = {body}
 		// TODO: 文字列が渡された場合は内容をコンパイルして関数として動作するようにする
-		tRisseFunctionInstance * obj = This.CheckAndGetObjectInterafce<tRisseFunctionInstance, tRisseFunctionClass>();
+		tRisseFunctionInstance * obj = This.CheckAndGetObjectInterafce<tRisseFunctionInstance, tRisseClassBase>(engine->FunctionClass);
 		if(args.HasArgument(0)) obj->SetBody(args[0]);
 	}
 	RISSE_END_NATIVE_METHOD

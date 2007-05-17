@@ -36,8 +36,10 @@ RISSE_DEFINE_SOURCE_ID(26427,5348,61020,19015,38284,853,37508,24976);
 //---------------------------------------------------------------------------
 void tRisseBindingInstance::AddMap(tRisseVariant &This, const tRisseString &name, risse_uint32 reg)
 {
+	RISSE_ASSERT(This.GetType() == tRisseVariant::vtObject);
+	tRisseScriptEngine * engine = This.GetObjectInterface()->GetRTTI()->GetScriptEngine();
 	tRisseBindingInstance * obj =
-		This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
+		This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 	obj->GetBindingMap().insert(tRisseBindingInfo::tBindingMap::value_type(name, reg));
 }
 //---------------------------------------------------------------------------
@@ -46,8 +48,8 @@ void tRisseBindingInstance::AddMap(tRisseVariant &This, const tRisseString &name
 
 
 //---------------------------------------------------------------------------
-tRisseBindingClass::tRisseBindingClass() :
-	tRisseClassBase(tRisseObjectClass::GetPointer())
+tRisseBindingClass::tRisseBindingClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -78,7 +80,7 @@ void tRisseBindingClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す
-		tRisseBindingClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->BindingClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -88,7 +90,7 @@ void tRisseBindingClass::RegisterMembers()
 	{
 		// eval (式やスクリプトの評価)
 		args.ExpectArgumentCount(1);
-		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
+		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 
 		tRisseString script = args[0];
 		tRisseString name = args.HasArgument(1) ?
@@ -105,7 +107,7 @@ void tRisseBindingClass::RegisterMembers()
 	{
 		// ローカル変数の値を得る
 		// TODO: Dictionary 互換の実装
-		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
+		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 		tRisseBindingInfo::tBindingMap & map = obj->GetBindingMap();
 
 
@@ -137,7 +139,7 @@ void tRisseBindingClass::RegisterMembers()
 
 		// ローカル変数の値を設定する
 		// TODO: Dictionary 互換の実装
-		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
+		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 		tRisseBindingInfo::tBindingMap & map = obj->GetBindingMap();
 
 

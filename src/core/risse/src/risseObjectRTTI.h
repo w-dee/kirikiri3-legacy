@@ -29,13 +29,19 @@ namespace Risse
 	C++ レベルでチェックする機構が必要になる。C++のRTTI(dynamic_cast) を使う
 	こともできるだろうが、ここでは自前で非常に簡易的な(そして高速な) RTTIを
 	使うことにする。
+	また、RTTIはスクリプトエンジンインスタンスへのポインタを提供するという重要な
+	役割も担う。これにより一連のオブジェクトやクラスからスクリプト
+	エンジンインスタンスを参照することができるようになり、グローバル変数などを
+	使用してスクリプトエンジンインスタンスを特定する必要が無くなる。
 */
 
+class tRisseScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		簡易RTTI
 //---------------------------------------------------------------------------
 class tRisseRTTI : public tRisseCollectee
 {
+	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
 	gc_vector<void*> Ids; //!< クラスIdの配列
 
 public:
@@ -54,6 +60,20 @@ public:
 		}
 	};
 
+public:
+	//! @brief		コンストラクタ
+	tRisseRTTI()
+	{
+		Engine = NULL;
+	}
+
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseRTTI(tRisseScriptEngine * engine)
+	{
+		Engine = engine;
+	}
+
 
 public:
 	//! @brief		RTTIにId情報を追加する
@@ -68,6 +88,15 @@ public:
 		matcher.Id = id;
 		return matcher;
 	}
+
+public:
+	//! @param		スクリプトエンジンインスタンスを取得する
+	//! @return		スクリプトエンジンインスタンス
+	tRisseScriptEngine * GetScriptEngine() const { return Engine; }
+
+	//! @param		スクリプトエンジンインスタンスを設定する
+	//! @param		engine		スクリプトエンジンインスタンス
+	void SetScriptEngine(tRisseScriptEngine * engine) { Engine = engine; }
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

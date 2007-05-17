@@ -21,8 +21,8 @@
 */
 
 //---------------------------------------------------------------------------
-
-
+#include <stdio.h>
+ #include <typeinfo>
 namespace Risse
 {
 
@@ -45,11 +45,11 @@ public:
 
 	//! @brief		インスタンスを得る
 	//! @note		インスタンスが作成されていなければ作成を行う
-	static T & GetInstance() { if(!_instance) _instance = new T(); return *_instance; }
+	static T & GetInstance() {if(!_instance) { printf("%s\n", typeid(T).name()); _instance = new T();}  return *_instance; }
 
 	//! @brief		インスタンスへのポインタを獲る
 	//! @note		インスタンスが作成されていなければ作成を行う
-	static T * GetPointer() { if(!_instance) _instance = new T(); return _instance; }
+	static T * GetPointer() { if(!_instance) { printf("%s\n", typeid(T).name()); _instance = new T();} return _instance; }
 
 	//! @brief		インスタンスがすでに作成されているかどうかを得る
 	static bool GetInstanceAlive() { return _instance != NULL; }

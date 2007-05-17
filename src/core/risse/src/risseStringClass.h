@@ -25,12 +25,13 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"String" クラス
 //---------------------------------------------------------------------------
-class tRisseStringClass : public tRissePrimitiveClassBase, public tRisseClassSingleton<tRisseStringClass>
+class tRisseStringClass : public tRissePrimitiveClassBase
 {
 	typedef tRissePrimitiveClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
-	tRisseStringClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseStringClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

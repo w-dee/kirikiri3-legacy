@@ -479,6 +479,7 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 		{
 			// break できないようだ
 			tRisseCompileExceptionClass::Throw(
+				Function->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 				tRisseString(RISSE_WS_TR("cannot place 'break' here")),
 					GetScriptBlock(), pos);
 		}
@@ -507,6 +508,7 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 		// continue が値を伴ってできるかをチェック
 		if(var != NULL && !info->GetIsBlock())
 			tRisseCompileExceptionClass::Throw(
+				Function->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 				tRisseString(RISSE_WS_TR("cannot continue here with a value")),
 					GetScriptBlock(), pos);
 
@@ -534,6 +536,7 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 				// continue が値を伴ってできるかをチェック
 				if(var != NULL && !info->GetIsBlock())
 					tRisseCompileExceptionClass::Throw(
+						Function->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 						tRisseString(RISSE_WS_TR("cannot continue here with a value")),
 							GetScriptBlock(), pos);
 
@@ -574,6 +577,7 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 		{
 			// continue できないようだ
 			tRisseCompileExceptionClass::Throw(
+				Function->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 				tRisseString(RISSE_WS_TR("cannot place 'continue' here")),
 					GetScriptBlock(), pos);
 		}

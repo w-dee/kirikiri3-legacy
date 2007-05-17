@@ -22,6 +22,7 @@
 namespace Risse
 {
 class tRisseScriptBlockBase;
+class tRisseScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 //! @note	tRisseVariantData よりも高度な動作をここで定義する
@@ -293,7 +294,8 @@ public: // String関連
 
 public: // Primitive関連
 	//! @brief		プリミティブ型に即してプリミティブ型クラスを得る
-	tRissePrimitiveClassBase * GetPrimitiveClass() const;
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRissePrimitiveClassBase * GetPrimitiveClass(tRisseScriptEngine * engine) const;
 
 public: // Object関連
 	//! @brief		オブジェクトインターフェースがマッチするかどうかを調べる
@@ -395,6 +397,7 @@ public: // Object関連
 
 public: // operate
 	//! @brief		オブジェクトに対して操作を行う(失敗した場合は例外を発生させる)
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		code	オペレーションコード
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
 	//! @param		name	操作を行うメンバ名
@@ -405,13 +408,14 @@ public: // operate
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
 	//!				エラーコードなどの戻り値はない
-	void Do(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+	void Do(tRisseScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
-		tRetValue ret = Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
+		tRetValue ret = Operate(engine, RISSE_OBJECTINTERFACE_PASS_ARG);
 		if(ret != rvNoError) RaiseError(ret, name);
 	}
 
 	//! @brief		オブジェクトに対して操作を行う
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		code	オペレーションコード
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
 	//! @param		name	操作を行うメンバ名
@@ -422,12 +426,12 @@ public: // operate
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @return		エラーコード
 	tRetValue
-		Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+		Operate(tRisseScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		if(!name.IsEmpty())
 		{
 			// 名前指定がある場合
-			return OperateForMember(RISSE_OBJECTINTERFACE_PASS_ARG);
+			return OperateForMember(engine, RISSE_OBJECTINTERFACE_PASS_ARG);
 		}
 
 		switch(code)
@@ -554,7 +558,12 @@ public: // operate
 			RISSE_BIN_OP(Sub);
 
 		case ocInstanceOf		://!< instanceof
-			RISSE_BIN_OP(InstanceOf);
+			args.ExpectArgumentCount(1);
+			if(result)
+				*result = InstanceOf(engine, args[0]);
+			else
+				InstanceOf(engine, args[0]); /* discard result */
+			return rvNoError;
 
 //		case ocDGet				://!< get .  
 //			RISSE_BIN_OP(DGet);
@@ -626,7 +635,7 @@ public: // operate
 
 		default:
 			// invalid or unknown opcode
-			return OperateForMember(RISSE_OBJECTINTERFACE_PASS_ARG);
+			return OperateForMember(engine, RISSE_OBJECTINTERFACE_PASS_ARG);
 				// OperateForMemberならば処理ができるかもしれない
 			;
 		}
@@ -634,6 +643,7 @@ public: // operate
 	}
 
 	//! @brief		オブジェクトのメンバに対して操作を行う
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		code	オペレーションコード
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
 	//! @param		name	操作を行うメンバ名
@@ -645,7 +655,7 @@ public: // operate
 	//! @note		Operate() メソッドがname付きで呼ばれた場合にこのメソッドが呼ばれる
 	//! @return		エラーコード
 	tRetValue
-		OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+		OperateForMember(tRisseScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 public: // 演算子
 
@@ -662,7 +672,7 @@ public: // 演算子
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//! @return		プロパティ取得の結果
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock GetPropertyDirect(const tRisseString & name,
+	tRisseVariantBlock GetPropertyDirect(tRisseScriptEngine * engine, const tRisseString & name,
 		risse_uint32 flags = 0,
 		const tRisseVariant & This = tRisseVariant::GetNullObject()) const
 	{
@@ -675,24 +685,25 @@ public: // 演算子
 		case vtString:
 		case vtOctet:
 		case vtBoolean:
-			return GetPropertyDirect_Primitive(name, flags, This);
+			return GetPropertyDirect_Primitive(engine, name, flags, This);
 		case vtObject:
-			return GetPropertyDirect_Object   (name, flags, This);
+			return GetPropertyDirect_Object   (        name, flags, This);
 		}
 		return tRisseVariant();
 	}
 
-	tRisseVariantBlock GetPropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const ;
-	tRisseVariantBlock GetPropertyDirect_Object   (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const ;
+	tRisseVariantBlock GetPropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags = 0, const tRisseVariant & This = tRisseVariant::GetNullObject()) const ;
+	tRisseVariantBlock GetPropertyDirect_Object   (                             const tRisseString & name, risse_uint32 flags = 0, const tRisseVariant & This = tRisseVariant::GetNullObject()) const ;
 
 	//-----------------------------------------------------------------------
 	//! @brief		直接プロパティ設定		SetPropertyDirect dset
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
 	//! @param		value		設定する値
 	//! @param		flags		フラグ
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
-	void SetPropertyDirect(const tRisseString & name, risse_uint32 flags,
+	void SetPropertyDirect(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags,
 		const tRisseVariantBlock & value, const tRisseVariant & This = tRisseVariant::GetNullObject()) const
 	{
 		switch(GetType())
@@ -704,14 +715,14 @@ public: // 演算子
 		case vtString:
 		case vtOctet:
 		case vtBoolean:
-			SetPropertyDirect_Primitive(name, flags, value, This); return;
+			SetPropertyDirect_Primitive(engine, name, flags, value, This); return;
 		case vtObject:
-			SetPropertyDirect_Object   (name, flags, value, This); return;
+			SetPropertyDirect_Object   (        name, flags, value, This); return;
 		}
 	}
 
-	void SetPropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const;
-	void SetPropertyDirect_Object   (const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const;
+	void SetPropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
+	void SetPropertyDirect_Object   (                             const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		間接プロパティ取得		IGet iget
@@ -741,7 +752,7 @@ public: // 演算子
 	tRisseVariantBlock IGet_String  (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock IGet_Octet   (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
 	tRisseVariantBlock IGet_Boolean (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock IGet_Object  (const tRisseVariantBlock & key) const { return Invoke(mnIGet, key); }
+	tRisseVariantBlock IGet_Object  (const tRisseVariantBlock & key) const { return Invoke_Object(mnIGet, key); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		間接プロパティ設定		ISet iset
@@ -770,16 +781,17 @@ public: // 演算子
 	void ISet_String  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
 	void ISet_Octet   (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
 	void ISet_Boolean (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Object  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { Invoke(mnISet, value, key);
+	void ISet_Object  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { Invoke_Object(mnISet, value, key);
 		/* 注意!!! ISet がメソッド呼び出しに変換される場合、value が先に来て key が後に来る。これは将来的に
 		複数の key を使用可能にする可能性があるためである */ }
 
 	//-----------------------------------------------------------------------
 	//! @brief		直接プロパティ削除		DeletePropertyDirect ddelete
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
 	//! @param		flags		フラグ
 	//-----------------------------------------------------------------------
-	void DeletePropertyDirect(const tRisseString & name, risse_uint32 flags) const
+	void DeletePropertyDirect(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags) const
 	{
 		switch(GetType())
 		{
@@ -790,28 +802,30 @@ public: // 演算子
 		case vtString:
 		case vtOctet:
 		case vtBoolean:
-			DeletePropertyDirect_Primitive(name, flags); return;
+			DeletePropertyDirect_Primitive(engine, name, flags); return;
 		case vtObject:
-			DeletePropertyDirect_Object   (name, flags); return;
+			DeletePropertyDirect_Object   (        name, flags); return;
 		}
 	}
 
-	void DeletePropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags) const;
-	void DeletePropertyDirect_Object   (const tRisseString & name, risse_uint32 flags) const;
+	void DeletePropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags) const;
+	void DeletePropertyDirect_Object   (                             const tRisseString & name, risse_uint32 flags) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		flags		呼び出しフラグ
 	//! @param		args		引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseVariantBlock * ret = NULL, risse_uint32 flags = 0,
+	void FuncCall(tRisseScriptEngine * engine, tRisseVariantBlock * ret = NULL, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
 		const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
 	//! @param		name		関数名
 	//! @param		flags		呼び出しフラグ
@@ -819,6 +833,7 @@ public: // 演算子
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
 	void FuncCall(
+		tRisseScriptEngine * engine,
 		tRisseVariantBlock * ret,
 		const tRisseString & name, risse_uint32 flags = 0,
 		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
@@ -833,21 +848,22 @@ public: // 演算子
 		case vtString:
 		case vtOctet:
 		case vtBoolean:
-			FuncCall_Primitive(ret, name, flags, args, This); return;
+			FuncCall_Primitive(engine,     ret, name, flags, args, This); return;
 
 		case vtObject:	FuncCall_Object   (ret, name, flags, args, This); return;
 		}
 	}
 
-	void FuncCall_Primitive(tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
-	void FuncCall_Object   (tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This) const;
+	void FuncCall_Primitive(tRisseScriptEngine * engine, tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags = 0, const tRisseMethodArgument & args = tRisseMethodArgument::Empty(), const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
+	void FuncCall_Object   (                             tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags = 0, const tRisseMethodArgument & args = tRisseMethodArgument::Empty(), const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		membername	メンバ名
 	//! @return		戻り値
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Invoke(
+	tRisseVariantBlock Invoke(tRisseScriptEngine * engine,
 		const tRisseString & membername) const
 	{
 		switch(GetType())
@@ -859,23 +875,25 @@ public: // 演算子
 		case vtString:
 		case vtOctet:
 		case vtBoolean:
-			return Invoke_Primitive(membername);
+			return Invoke_Primitive(engine, membername);
 		case vtObject:
-			return Invoke_Object   (membername);
+			return Invoke_Object   (        membername);
 		}
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Primitive(const tRisseString & membername) const;
-	tRisseVariantBlock Invoke_Object   (const tRisseString & membername) const;
+	tRisseVariantBlock Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername) const;
+	tRisseVariantBlock Invoke_Object   (                             const tRisseString & membername) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		membername	メンバ名
 	//! @param		arg1		引数
 	//! @return		戻り値
 	//-----------------------------------------------------------------------
 	tRisseVariantBlock Invoke(
+		tRisseScriptEngine * engine,
 		const tRisseString & membername,
 		const tRisseVariant & arg1) const
 	{
@@ -888,24 +906,26 @@ public: // 演算子
 		case vtString:
 		case vtOctet:
 		case vtBoolean:
-			return Invoke_Primitive(membername, arg1);
+			return Invoke_Primitive(engine, membername, arg1);
 		case vtObject:
-			return Invoke_Object   (membername,arg1);
+			return Invoke_Object   (        membername,arg1);
 		}
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1) const;
-	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const;
+	tRisseVariantBlock Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername,const tRisseVariant & arg1) const;
+	tRisseVariantBlock Invoke_Object   (                             const tRisseString & membername,const tRisseVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		membername	メンバ名
 	//! @param		arg1		引数
 	//! @param		arg2		引数
 	//! @return		戻り値
 	//-----------------------------------------------------------------------
 	tRisseVariantBlock Invoke(
+		tRisseScriptEngine * engine,
 		const tRisseString & membername,
 		const tRisseVariant & arg1,
 		const tRisseVariant & arg2
@@ -920,15 +940,15 @@ public: // 演算子
 		case vtString:	
 		case vtOctet:	
 		case vtBoolean:
-			return Invoke_Primitive(membername,arg1,arg2);
+			return Invoke_Primitive(engine, membername,arg1,arg2);
 		case vtObject:
-			return Invoke_Object   (membername,arg1,arg2);
+			return Invoke_Object   (        membername,arg1,arg2);
 		}
 		return tRisseVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
-	tRisseVariantBlock Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
+	tRisseVariantBlock Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
+	tRisseVariantBlock Invoke_Object   (                             const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
 
 public:
 	//-----------------------------------------------------------------------
@@ -1041,7 +1061,7 @@ public:
 	risse_int64        BitNot_String   () const { return ~CastToInteger_String(); }
 	risse_int64        BitNot_Octet    () const { return ~CastToInteger_Octet(); }
 	risse_int64        BitNot_Boolean  () const { return ~CastToInteger_Boolean(); }
-	tRisseVariantBlock BitNot_Object   () const { return Invoke(mnBitNot); }
+	tRisseVariantBlock BitNot_Object   () const { return Invoke_Object(mnBitNot); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		++ 演算子			Inc
@@ -1073,7 +1093,7 @@ public:
 	tRisseVariantBlock & Inc_String   () { *this = tRisseVariantBlock((risse_int64)1).Add_Integer(Plus_String()); return *this; }
 	tRisseVariantBlock & Inc_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
 	tRisseVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() + 1); return *this; }
-	tRisseVariantBlock & Inc_Object   () { *this = Invoke(mnAdd, tRisseVariantBlock((risse_int64)1)); return *this; }
+	tRisseVariantBlock & Inc_Object   () { *this = Invoke_Object(mnAdd, tRisseVariantBlock((risse_int64)1)); return *this; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		-- 演算子			Dec
@@ -1105,7 +1125,7 @@ public:
 	tRisseVariantBlock & Dec_String   () { *this = tRisseVariantBlock((risse_int64)-1).Add_Integer(Plus_String()); return *this; }
 	tRisseVariantBlock & Dec_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
 	tRisseVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() - 1); return *this; }
-	tRisseVariantBlock & Dec_Object   () { *this = Invoke(mnSub, tRisseVariantBlock((risse_int64)1)); return *this; }
+	tRisseVariantBlock & Dec_Object   () { *this = Invoke_Object(mnSub, tRisseVariantBlock((risse_int64)1)); return *this; }
 
 
 	//-----------------------------------------------------------------------
@@ -1137,7 +1157,7 @@ public:
 	tRisseVariantBlock Plus_String   () const;
 	tRisseVariantBlock Plus_Octet    () const { return (risse_int64)0; /* incomplete */; }
 	tRisseVariantBlock Plus_Boolean  () const { return CastToBoolean_Boolean() != false; /* boolean は 0 か 1 かに変換される */ }
-	tRisseVariantBlock Plus_Object   () const { return Invoke(mnPlus); }
+	tRisseVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		単項 - 演算子		Minus
@@ -1168,7 +1188,7 @@ public:
 	tRisseVariantBlock Minus_String   () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock Minus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
 	tRisseVariantBlock Minus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean()?-1:0); }
-	tRisseVariantBlock Minus_Object   () const { return Invoke(mnMinus); }
+	tRisseVariantBlock Minus_Object   () const { return Invoke_Object(mnMinus); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		|| 演算子		LogOr
@@ -1269,7 +1289,7 @@ public:
 	risse_int64        BitOr_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
 	risse_int64        BitOr_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
 	risse_int64        BitOr_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
-	tRisseVariantBlock BitOr_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitOr, rhs); }
+	tRisseVariantBlock BitOr_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitOr, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		|= 演算子		BitOrAssign
@@ -1315,7 +1335,7 @@ public:
 	risse_int64        BitXor_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
 	risse_int64        BitXor_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
 	risse_int64        BitXor_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
-	tRisseVariantBlock BitXor_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitXor, rhs); }
+	tRisseVariantBlock BitXor_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitXor, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		^= 演算子		BitXorAssign
@@ -1361,7 +1381,7 @@ public:
 	risse_int64        BitAnd_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
 	risse_int64        BitAnd_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnBitAnd, rhs); }
+	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitAnd, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		&= 演算子		BitAndAssign
@@ -1402,7 +1422,7 @@ public:
 	bool NotEqual_String   (const tRisseVariantBlock & rhs) const { return !Equal_String (rhs); }
 	bool NotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
 	bool NotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
-	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnNotEqual, rhs);  }
+	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnNotEqual, rhs);  }
 
 	//-----------------------------------------------------------------------
 	//! @brief		== 演算子		Equal
@@ -1434,7 +1454,7 @@ public:
 	bool Equal_String   (const tRisseVariantBlock & rhs) const;
 	bool Equal_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnEqual, rhs); }
+	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		!== 演算子		DiscNotEqual
@@ -1460,7 +1480,7 @@ public:
 	bool DiscNotEqual_String   (const tRisseVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
 	bool DiscNotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
 	bool DiscNotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
-	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnDiscNotEqual, rhs);  }
+	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnDiscNotEqual, rhs);  }
 
 	//-----------------------------------------------------------------------
 	//! @brief		識別 === 演算子		DiscEqual
@@ -1498,7 +1518,7 @@ public:
 	bool DiscEqual_Boolean  (const tRisseVariantBlock & rhs) const
 			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
 	bool DiscEqual_Object   (const tRisseVariantBlock & rhs) const
-			{ if(IsNull()) { return rhs.IsNull(); } return Invoke(mnDiscEqual, rhs); }
+			{ if(IsNull()) { return rhs.IsNull(); } return Invoke_Object(mnDiscEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		< 演算子		Lesser
@@ -1530,7 +1550,7 @@ public:
 	bool Lesser_String   (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLesser, rhs); }
+	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLesser, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		> 演算子		Greater
@@ -1562,7 +1582,7 @@ public:
 	bool Greater_String   (const tRisseVariantBlock & rhs) const;
 	bool Greater_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnGreater, rhs); }
+	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnGreater, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		<= 演算子		LesserOrEqual
@@ -1594,7 +1614,7 @@ public:
 	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLesserOrEqual, rhs); }
+	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLesserOrEqual, rhs); }
 
 
 	//-----------------------------------------------------------------------
@@ -1627,7 +1647,7 @@ public:
 	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
 	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnGreaterOrEqual, rhs); }
+	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnGreaterOrEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>> 演算子(符号なし右シフト)		RBitShift
@@ -1659,7 +1679,7 @@ public:
 	tRisseVariantBlock RBitShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
 	tRisseVariantBlock RBitShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnRBitShift, rhs); }
+	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnRBitShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>>= 演算子		RBitShiftAssign
@@ -1706,7 +1726,7 @@ public:
 	tRisseVariantBlock LShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
 	tRisseVariantBlock LShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnLShift, rhs); }
+	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		<<= 演算子		LShiftAssign
@@ -1753,7 +1773,7 @@ public:
 	tRisseVariantBlock RShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
 	tRisseVariantBlock RShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnRShift, rhs); }
+	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnRShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>= 演算子		RShiftAssign
@@ -1800,7 +1820,7 @@ public:
 	tRisseVariantBlock Mod_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
 	tRisseVariantBlock Mod_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnMod, rhs); }
+	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnMod, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		%= 演算子		ModAssign
@@ -1847,7 +1867,7 @@ public:
 	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
 	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
 	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
-	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnDiv, rhs); }
+	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnDiv, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		/= 演算子		DivAssign
@@ -1892,7 +1912,7 @@ public:
 	tRisseVariantBlock Idiv_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
 	tRisseVariantBlock Idiv_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnIdiv, rhs); }
+	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnIdiv, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		\= 演算子		IdivAssign
@@ -1939,7 +1959,7 @@ public:
 	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnMul, rhs); }
+	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnMul, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		*= 演算子		MulAssign
@@ -1984,7 +2004,7 @@ public:
 	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnAdd, rhs); }
+	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnAdd, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		+= 演算子		AddAssign
@@ -2029,7 +2049,7 @@ public:
 	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
 	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return Invoke(mnSub, rhs); }
+	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnSub, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		-= 演算子		SubAssign
@@ -2046,10 +2066,11 @@ public:
 
 	//-----------------------------------------------------------------------
 	//! @brief		instanceof 演算子(instanceof)		InstanceOf
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		rhs			右辺
 	//! @return		左辺が右辺で示したクラスのインスタンスならば真
 	//-----------------------------------------------------------------------
-	bool InstanceOf(const tRisseVariantBlock & rhs) const;
+	bool InstanceOf(tRisseScriptEngine * engine, const tRisseVariantBlock & rhs) const;
 
 
 public: // キャスト
@@ -2080,7 +2101,7 @@ public: // キャスト
 	risse_int64 CastToInteger_String   () const;
 	risse_int64 CastToInteger_Octet    () const { return (risse_int64)0; /* incomplete */ }
 	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)CastToBoolean_Boolean(); }
-	risse_int64 CastToInteger_Object   () const { return Invoke(mnInteger); }
+	risse_int64 CastToInteger_Object   () const { return Invoke_Object(mnInteger); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		realに変換
@@ -2109,7 +2130,7 @@ public: // キャスト
 	risse_real CastToReal_String   () const { return (risse_real)Plus_String(); /* Plus_String の戻りを risse_real に再キャスト */ }
 	risse_real CastToReal_Octet    () const { return (risse_real)0.0; /* incomplete */ }
 	risse_real CastToReal_Boolean  () const { return (risse_real)(int)CastToBoolean_Boolean(); }
-	risse_real CastToReal_Object   () const { return Invoke(mnReal); }
+	risse_real CastToReal_Object   () const { return Invoke_Object(mnReal); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		boolに変換
@@ -2138,7 +2159,7 @@ public: // キャスト
 	bool CastToBoolean_String   () const { return !AsString().IsEmpty(); }
 	bool CastToBoolean_Octet    () const { return !AsOctet().IsEmpty(); }
 	bool CastToBoolean_Boolean  () const { return Type == BooleanTrue; }
-	bool CastToBoolean_Object   () const { return Invoke(mnBoolean); }
+	bool CastToBoolean_Object   () const { return Invoke_Object(mnBoolean); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		文字列に変換
@@ -2167,7 +2188,7 @@ public: // キャスト
 	tRisseString CastToString_String   () const { return AsString(); }
 	tRisseString CastToString_Octet    () const { return AsOctet().AsHumanReadable();  }
 	tRisseString CastToString_Boolean  () const;
-	tRisseString CastToString_Object   () const { return Invoke(mnString); }
+	tRisseString CastToString_Object   () const { return Invoke_Object(mnString); }
 
 public: // ユーティリティ
 	//-----------------------------------------------------------------------
@@ -2210,17 +2231,19 @@ public: // ユーティリティ
 					{ return tRisseString(); /* incomplete */ }
 
 	//! @brief		Object型に対するtypeチェック
+	//! @param		cls		クラスオブジェクトインスタンス
 	//! @note		バリアントが期待したタイプであるかどうかをチェックし
 	//!				またそのオブジェクトインターフェースを得る。
-	//!				期待した値でなければ「"期待したクラスではありません"」例外を発生する
+	//!				期待した値でなければ「"期待したクラスではありません"」例外を発生する。
 	//!				テンプレートパラメータのObjectTはtRisseObjectBaseの派生クラス、
-	//!				ClassTにはtRisseSingletonの派生クラスかつtRisseClassBaseの派生クラスを指定すること。
+	//!				clsにはtRisseClassBaseの派生クラスのインスタンスを指定すること。
+	//!				ClassT には通常 tRisseClassBaseを指定する。
 	template <typename ObjectT, typename ClassT>
-	ObjectT * CheckAndGetObjectInterafce() const
+	ObjectT * CheckAndGetObjectInterafce(ClassT * cls) const
 	{
 		if(GetType() != vtObject) ThrowBadContextException();
 		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
-		if(!ClassT::GetPointer()->GetRTTIMatcher().Match(intf->GetRTTI()))
+		if(!cls->GetRTTIMatcher().Match(intf->GetRTTI()))
 			ThrowBadContextException();
 		return intf;
 	}

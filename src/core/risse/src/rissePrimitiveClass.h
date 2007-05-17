@@ -48,12 +48,13 @@ public:
 //!				前者はC++のクラス階層において各プリミティブクラスの親クラスになり、
 //!				後者はRisseのクラス階層において各プリミティブクラスの親クラスになる。
 //---------------------------------------------------------------------------
-class tRissePrimitiveClass : public tRisseClassBase, public tRisseClassSingleton<tRissePrimitiveClass>
+class tRissePrimitiveClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
-	tRissePrimitiveClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRissePrimitiveClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

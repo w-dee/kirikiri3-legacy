@@ -34,6 +34,7 @@ private:
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
 	tRissePropertyInstance();
 
 	//! @brief		ゲッタメソッドを取得する
@@ -64,12 +65,13 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		"Property" クラス
 //---------------------------------------------------------------------------
-class tRissePropertyClass : public tRisseClassBase, public tRisseClassSingleton<tRissePropertyClass>
+class tRissePropertyClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
-	tRissePropertyClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRissePropertyClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

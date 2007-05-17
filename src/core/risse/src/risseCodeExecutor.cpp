@@ -95,6 +95,8 @@ void tRisseCodeInterpreter::Execute(
 	risse_size constssize = CodeBlock->GetConstsSize();
 #endif
 
+	tRisseScriptEngine * engine = CodeBlock->GetScriptBlock()->GetScriptEngine();
+
 	try
 	{
 		/*
@@ -148,12 +150,12 @@ void tRisseCodeInterpreter::Execute(
 			case ocAssignNewBinding: // binding	= 新しいバインディングオブジェクトの代入
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(tRisseBindingClass::GetPointer()).
+					tRisseVariant(engine->BindingClass).
 								New(0, tRisseMethodArgument::Empty());
 				tRisseBindingInstance * obj =
-					AR(code[1]).CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseBindingClass>();
+					AR(code[1]).CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 				obj->SetInfo(new tRisseBindingInfo(This, shared));
-				obj->SetScriptEngine(CodeBlock->GetScriptBlock()->GetScriptEngine());
+				obj->SetScriptEngine(engine);
 				code += 2;
 				break;
 
@@ -167,8 +169,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				AR(code[1]) = tRisseVariant(
 					new((tRisseThisProxy*)(&ThisProxy.Storage[0])) tRisseThisProxy(
-						const_cast<tRisseVariant&>(This),
-						CodeBlock->GetScriptBlock()->GetScriptEngine()->GetGlobalObject()));
+						const_cast<tRisseVariant&>(This), engine->GetGlobalObject(), engine));
 				code += 2;
 				break;
 
@@ -180,7 +181,7 @@ void tRisseCodeInterpreter::Execute(
 
 			case ocAssignGlobal	: // global	 = globalの代入
 				RISSE_ASSERT(CI(code[1]) < framesize);
-				AR(code[1]) = CodeBlock->GetScriptBlock()->GetScriptEngine()->GetGlobalObject();
+				AR(code[1]) = engine->GetGlobalObject();
 				code += 2;
 				break;
 
@@ -208,7 +209,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(tRisseFunctionClass::GetPointer()).
+					tRisseVariant(engine->FunctionClass).
 								New(0, tRisseMethodArgument::New(AR(code[2])));
 				code += 3;
 				break;
@@ -218,7 +219,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(tRissePropertyClass::GetPointer()).
+					tRisseVariant(engine->PropertyClass).
 								New(0, tRisseMethodArgument::New(AR(code[2]), AR(code[3])));
 				code += 4;
 				break;
@@ -229,7 +230,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(tRisseClassClass::GetPointer()).
+					tRisseVariant(engine->ClassClass).
 								New(0, tRisseMethodArgument::New(AR(code[2]), AR(code[3])));
 				code += 4;
 				break;
@@ -239,7 +240,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(tRisseModuleClass::GetPointer()).
+					tRisseVariant(engine->ModuleClass).
 								New(0, tRisseMethodArgument::New(AR(code[2])));
 				code += 3;
 				break;
@@ -345,7 +346,7 @@ void tRisseCodeInterpreter::Execute(
 						if(code[3] & RisseFuncCallFlag_Omitted)
 						{
 							// 引数の省略
-							AR(code[2]).FuncCall(&val, 0, args, This);
+							AR(code[2]).FuncCall(engine, &val, 0, args, This);
 						}
 						else
 						{
@@ -358,7 +359,7 @@ void tRisseCodeInterpreter::Execute(
 							for(risse_uint32 i = 0; i < code[5]; i++)
 								new_args.SetBlockArgument(i, AR(code[i+6+code[4]]));
 
-							AR(code[2]).FuncCall(&val, 0, new_args, This);
+							AR(code[2]).FuncCall(engine, &val, 0, new_args, This);
 						}
 					}
 					catch(const tRisseVariant * e)
@@ -392,7 +393,7 @@ void tRisseCodeInterpreter::Execute(
 					if(code[3] & RisseFuncCallFlag_Omitted)
 					{
 						// 引数の省略
-						AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						AR(code[2]).FuncCall(engine, code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
 							0, args, This);
 					}
 					else
@@ -403,7 +404,7 @@ void tRisseCodeInterpreter::Execute(
 						for(risse_uint32 i = 0; i < code[4]; i++)
 							new_args.SetArgument(i, AR(code[i+5]));
 
-						AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						AR(code[2]).FuncCall(engine, code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
 							0, new_args, This);
 					}
 					code += code[4] + 5;
@@ -429,7 +430,7 @@ void tRisseCodeInterpreter::Execute(
 					if(code[3] & RisseFuncCallFlag_Omitted)
 					{
 						// 引数の省略
-						AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						AR(code[2]).FuncCall(engine, code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
 							0, args, This);
 					}
 					else
@@ -442,7 +443,7 @@ void tRisseCodeInterpreter::Execute(
 						for(risse_uint32 i = 0; i < code[5]; i++)
 							new_args.SetBlockArgument(i, AR(code[i+6+code[4]]));
 
-						AR(code[2]).FuncCall(code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						AR(code[2]).FuncCall(engine, code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
 							0, new_args, This);
 					}
 					code += code[4] + code[5] + 6;
@@ -523,18 +524,19 @@ void tRisseCodeInterpreter::Execute(
 						try
 						{
 							// オブジェクトのクラスを調べる
-							if(AR(code[1]).InstanceOf(
-								tRisseVariant(tRisseBlockExitExceptionClass::GetPointer())))
+							if(AR(code[1]).InstanceOf(engine,
+								tRisseVariant(engine->BlockExitExceptionClass)))
 							{
 								// 例外オブジェクトは BlockExitException のサブクラス。
 								// try 識別子が この branch の try 識別子と
 								// 一致するかどうかを調べる
-								tRisseVariant identifier = AR(code[1]).GetPropertyDirect(ss_identifier);
+								tRisseVariant identifier =
+									AR(code[1]).GetPropertyDirect_Object(ss_identifier);
 								if(AC(code[2]).ObjectInterfaceMatch(identifier))
 								{
 									// 一致した
 									target_index = (risse_uint32)(risse_int64)
-										AR(code[1]).GetPropertyDirect(ss_target);
+										AR(code[1]).GetPropertyDirect_Object(ss_target);
 								}
 								else
 								{
@@ -588,7 +590,7 @@ void tRisseCodeInterpreter::Execute(
 					RISSE_ASSERT(try_id.GetObjectInterface() != NULL);
 					throw new 
 						tRisseVariant(
-							tRisseVariant(tRisseBlockExitExceptionClass::GetPointer()).New(
+							tRisseVariant(engine->BlockExitExceptionClass).New(
 								0,
 								tRisseMethodArgument::New(
 									try_id,
@@ -607,9 +609,9 @@ void tRisseCodeInterpreter::Execute(
 					// code[2] は tRisseBlockExitExceptionClass であると見なして良い
 					tRisseVariant v;
 					RISSE_ASSERT(AR(code[2]).GetType() == tRisseVariant::vtObject);
-					RISSE_ASSERT(AR(code[2]).InstanceOf(
-						tRisseVariant(tRisseBlockExitExceptionClass::GetPointer())));
-					v = AR(code[2]).GetPropertyDirect(ss_value);
+					RISSE_ASSERT(AR(code[2]).InstanceOf(engine,
+						tRisseVariant(engine->BlockExitExceptionClass)));
+					v = AR(code[2]).GetPropertyDirect_Object(ss_value);
 					AR(code[1]) = v;
 					code += 3;
 				}
@@ -636,7 +638,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				{
 					// AR(code[1]) の toException() を呼び出し、その結果を投げる
-					tRisseVariant exception_object = AR(code[1]).Invoke(ss_toException);
+					tRisseVariant exception_object = AR(code[1]).Invoke(engine, ss_toException);
 					// TODO: exception_object が Throwable のインスタンスであることをチェックするように
 					throw new tRisseVariant(exception_object);
 				}
@@ -789,7 +791,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				AR(code[1]) = AR(code[2]).InstanceOf(AR(code[3]));
+				AR(code[1]) = AR(code[2]).InstanceOf(engine, AR(code[3]));
 				code += 4;
 				break;
 
@@ -896,7 +898,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				AR(code[2]).Do(ocDGet, &AR(code[1]), AR(code[3]), 0);
+				AR(code[2]).Do(engine, ocDGet, &AR(code[1]), AR(code[3]), 0);
 				code += 4;
 				break;
 
@@ -904,7 +906,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				AR(code[2]).Do(ocDGet, &AR(code[1]), AR(code[3]), code[4]);
+				AR(code[2]).Do(engine, ocDGet, &AR(code[1]), AR(code[3]), code[4]);
 				code += 5;
 				break;
 
@@ -935,7 +937,7 @@ void tRisseCodeInterpreter::Execute(
 			case ocDSetAttrib		: // dseta	set member attribute
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
-				AR(code[1]).Do(ocDSetAttrib, NULL, AR(code[2]), code[3]);
+				AR(code[1]).Do(engine, ocDSetAttrib, NULL, AR(code[2]), code[3]);
 				code += 4;
 				break;
 
@@ -943,7 +945,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				AR(code[1]).Do(ocDSet, NULL, AR(code[2]),
+				AR(code[1]).Do(engine, ocDSet, NULL, AR(code[2]),
 					0, tRisseMethodArgument::New(AR(code[3])));
 				code += 4;
 				break;
@@ -952,7 +954,8 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				AR(code[1]).Do(ocDSet, NULL, AR(code[2]), code[4], tRisseMethodArgument::New(AR(code[3])));
+				AR(code[1]).Do(engine, ocDSet, NULL, AR(code[2]), code[4],
+					tRisseMethodArgument::New(AR(code[3])));
 				code += 5;
 				break;
 
@@ -972,10 +975,23 @@ void tRisseCodeInterpreter::Execute(
 		}
 
 	} // try
+	catch(const tRisseTemporaryException * te)
+	{
+		const tRisseVariant * e = te->Convert(engine);
+
+		// この例外は位置情報を持っていない可能性がある
+		RISSE_ASSERT(e->InstanceOf(engine, engine->ThrowableClass));
+
+		// 例外位置情報を追加してやる
+		e->AddTrace(CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
+
+		// 投げ直す
+		throw e;
+	}
 	catch(const tRisseVariant * e)
 	{
 		// この例外は位置情報を持っていない可能性がある
-		RISSE_ASSERT(e->InstanceOf(tRisseThrowableClass::GetPointer()));
+		RISSE_ASSERT(e->InstanceOf(engine, engine->ThrowableClass));
 
 		// 例外位置情報を追加してやる
 		e->AddTrace(CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin));

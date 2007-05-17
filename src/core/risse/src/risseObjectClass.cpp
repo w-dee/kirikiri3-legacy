@@ -16,6 +16,7 @@
 #include "risseNativeFunction.h"
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
+#include "risseScriptEngine.h"
 
 /*
 	Risseスクリプトから見える"Object" クラスの実装
@@ -28,7 +29,8 @@ RISSE_DEFINE_SOURCE_ID(41134,45186,9497,17812,19604,2796,36426,21671);
 
 
 //---------------------------------------------------------------------------
-tRisseObjectClass::tRisseObjectClass() : tRisseClassBase(NULL)
+tRisseObjectClass::tRisseObjectClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine)
 {
 	RegisterMembers();
 }
@@ -73,7 +75,7 @@ void tRisseObjectClass::RegisterMembers()
 		// 引数チェック
 		args.ExpectArgumentCount(1);
 
-		tRisseVariant ret = This.InstanceOf(args[0]);
+		tRisseVariant ret = This.InstanceOf(engine, args[0]);
 		if(result) *result = ret;
 	}
 	RISSE_END_NATIVE_METHOD
@@ -87,7 +89,7 @@ void tRisseObjectClass::RegisterMembers()
 
 		// This のインスタンスメンバを取得する
 		tRisseVariant ret = 
-			This.GetPropertyDirect(args[0],
+			This.GetPropertyDirect(engine, args[0],
 				tRisseMemberAttribute::GetDefault()|
 				tRisseOperateFlags::ofInstanceMemberOnly,
 				This);
@@ -103,7 +105,7 @@ void tRisseObjectClass::RegisterMembers()
 		args.ExpectArgumentCount(2);
 
 		// This のインスタンスメンバを設定する
-		This.SetPropertyDirect(args[0],
+		This.SetPropertyDirect(engine, args[0],
 			tRisseMemberAttribute::GetDefault()|
 			tRisseOperateFlags::ofInstanceMemberOnly|
 			tRisseOperateFlags::ofMemberEnsure,
@@ -119,7 +121,7 @@ void tRisseObjectClass::RegisterMembers()
 		// に渡し、その結果を返す
 		// TODO: global.RuntimeException を見に行かずに直接シングルトンインスタンスに
 		//		バインドしちゃっていいの？
-		tRisseVariant ret = tRisseVariant(tRisseRuntimeExceptionClass::GetPointer()).
+		tRisseVariant ret = tRisseVariant(engine->RuntimeExceptionClass).
 				New(0, tRisseMethodArgument::New((tRisseString)This));
 		if(result) *result = ret;
 	}

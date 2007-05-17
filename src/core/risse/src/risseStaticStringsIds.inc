@@ -237,6 +237,8 @@ extern tRisseStringData data_ss_value;
 static const tRisseString & ss_value = *reinterpret_cast<const tRisseString *>(&data_ss_value); //!< (static string)  "value" インスタンス変数/プロパティ名
 extern tRisseStringData data_ss_Error;
 static const tRisseString & ss_Error = *reinterpret_cast<const tRisseString *>(&data_ss_Error); //!< (static string)  "Error" クラス名
+extern tRisseStringData data_ss_AssertionError;
+static const tRisseString & ss_AssertionError = *reinterpret_cast<const tRisseString *>(&data_ss_AssertionError); //!< (static string)  "AssertionError" クラス名
 extern tRisseStringData data_ss_RuntimeException;
 static const tRisseString & ss_RuntimeException = *reinterpret_cast<const tRisseString *>(&data_ss_RuntimeException); //!< (static string)  "RuntimeException" クラス名
 extern tRisseStringData data_ss_toException;
@@ -269,8 +271,6 @@ extern tRisseStringData data_ss_ClassDefinitionException;
 static const tRisseString & ss_ClassDefinitionException = *reinterpret_cast<const tRisseString *>(&data_ss_ClassDefinitionException); //!< (static string)  "ClassDefinitionException" クラス名
 extern tRisseStringData data_ss_InstantiationException;
 static const tRisseString & ss_InstantiationException = *reinterpret_cast<const tRisseString *>(&data_ss_InstantiationException); //!< (static string)  "InstantiationException" クラス名
-extern tRisseStringData data_ss_AssertionError;
-static const tRisseString & ss_AssertionError = *reinterpret_cast<const tRisseString *>(&data_ss_AssertionError); //!< (static string)  "AssertionError" クラス名
 extern tRisseStringData data_ss_expression;
 static const tRisseString & ss_expression = *reinterpret_cast<const tRisseString *>(&data_ss_expression); //!< (static string)  "expression" インスタンス変数/プロパティ名
 extern tRisseStringData data_ss_NullObjectException;

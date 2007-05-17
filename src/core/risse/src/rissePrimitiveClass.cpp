@@ -18,6 +18,7 @@
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseExceptionClass.h"
+#include "risseScriptEngine.h"
 
 
 namespace Risse
@@ -34,7 +35,7 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 	Gateway = new tRisseObjectBase();
 	// そのオブジェクトにクラス情報を設定する
 	// ここではclassメンバに「自分のクラス」を追加する
-	Gateway.SetPropertyDirect(ss_class,
+	Gateway.SetPropertyDirect_Object(ss_class,
 		tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 		tRisseVariant(this), Gateway);
@@ -79,8 +80,8 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 
 
 //---------------------------------------------------------------------------
-tRissePrimitiveClass::tRissePrimitiveClass() :
-	tRisseClassBase(tRisseObjectClass::GetPointer())
+tRissePrimitiveClass::tRissePrimitiveClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
 {
 	RegisterMembers();
 }

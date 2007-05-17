@@ -143,8 +143,10 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	tRisseDeclAttribute * l, const tRisseDeclAttribute * r)
 {
 	if(l->Overwrite(*r))
-		tRisseCompileExceptionClass::Throw(RISSE_WS_TR("duplicated attribute specifier"),
-			PR->GetScriptBlock(), pos);
+		tRisseCompileExceptionClass::Throw(
+			pr->GetScriptBlock()->GetScriptEngine(),
+			RISSE_WS_TR("duplicated attribute specifier"),
+			pr->GetScriptBlock(), pos);
 	return l;
 }
 
@@ -1423,7 +1425,8 @@ int yylex(YYSTYPE * value, YYLTYPE * llocp, void *pr)
 //---------------------------------------------------------------------------
 int raise_yyerror(const char * msg, void *pr, YYLTYPE *loc)
 {
-	tRisseCompileExceptionClass::Throw(tRisseString(msg), PR->GetScriptBlock(), loc->first);
+	tRisseCompileExceptionClass::Throw(PR->GetScriptBlock()->GetScriptEngine(),
+		tRisseString(msg), PR->GetScriptBlock(), loc->first);
 	return 0;
 }
 //---------------------------------------------------------------------------
@@ -1445,15 +1448,35 @@ tRisseParser::tRisseParser(tRisseScriptBlock * sb, tRisseLexer * lexer)
 int tRisseParser::GetToken(tRisseVariant & value)
 {
 	// lexer 中に発生するかもしれない例外をキャッチする
+	// これらには位置情報が含まれていない可能性があるため、トレース情報として
+	// 追加する。
 	try
 	{
-		return Lexer->GetToken(value);
+		try
+		{
+			return Lexer->GetToken(value);
+		}
+		catch(const tRisseTemporaryException * e)
+		{
+			e->ThrowConverted(ScriptBlock->GetScriptEngine());
+		}
+	}
+	catch(const tRisseTemporaryException * te)
+	{
+		const tRisseVariant * e = te->Convert(ScriptBlock->GetScriptEngine());
+		e->AddTrace(ScriptBlock, Lexer->GetPosition());
+		throw e;
 	}
 	catch(const tRisseVariant * e)
 	{
 		e->AddTrace(ScriptBlock, Lexer->GetPosition());
 		throw e;
 	}
+	catch(...)
+	{
+		throw;
+	}
+	return -1;
 }
 //---------------------------------------------------------------------------
 

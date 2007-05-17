@@ -18,6 +18,7 @@
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseNumberClass.h"
+#include "risseScriptEngine.h"
 
 /*
 	Risseスクリプトから見える"String" クラスの実装
@@ -31,7 +32,8 @@ RISSE_DEFINE_SOURCE_ID(5442,9100,49866,17725,24713,23464,12701,40981);
 
 
 //---------------------------------------------------------------------------
-tRisseRealClass::tRisseRealClass() : tRissePrimitiveClassBase(tRisseNumberClass::GetPointer())
+tRisseRealClass::tRisseRealClass(tRisseScriptEngine * engine) :
+	tRissePrimitiveClassBase(engine->NumberClass)
 {
 	RegisterMembers();
 }

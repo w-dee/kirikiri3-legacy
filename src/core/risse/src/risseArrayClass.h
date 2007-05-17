@@ -46,13 +46,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		"Array" クラス
 //---------------------------------------------------------------------------
-class tRisseArrayClass : public tRisseClassBase, public tRisseClassSingleton<tRisseArrayClass>
+class tRisseArrayClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
-	tRisseArrayClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseArrayClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

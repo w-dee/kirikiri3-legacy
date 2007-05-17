@@ -29,13 +29,14 @@ namespace Risse
 //!				後者はRisseスクリプトで各クラスインスタンスを生成するための
 //!				クラスになる。
 //---------------------------------------------------------------------------
-class tRisseClassClass : public tRisseClassBase, public tRisseClassSingleton<tRisseClassClass>
+class tRisseClassClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 
 public:
-	// ! @brief		コンストラクタ
-	tRisseClassClass();
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseClassClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
@@ -59,7 +60,8 @@ class tRisseClassInstance : public tRisseClassClass
 
 public:
 	// ! @brief		コンストラクタ
-	tRisseClassInstance();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseClassInstance(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

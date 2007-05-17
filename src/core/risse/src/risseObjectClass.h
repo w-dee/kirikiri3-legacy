@@ -21,12 +21,13 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseObjectClass : public tRisseClassBase, public tRisseClassSingleton<tRisseObjectClass>
+class tRisseObjectClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
-	tRisseObjectClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseObjectClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

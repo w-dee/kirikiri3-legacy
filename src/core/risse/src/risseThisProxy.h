@@ -17,6 +17,7 @@
 
 namespace Risse
 {
+class tRisseScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		this-proxyクラス (オブジェクトAにメンバがなければオブジェクトBを見に行く特殊なオブジェクト)
 //---------------------------------------------------------------------------
@@ -24,11 +25,14 @@ class tRisseThisProxy : public tRisseObjectInterface
 {
 	tRisseVariant & A; //!< オブジェクトA
 	tRisseVariant & B; //!< オブジェクトB
+	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
 public:
 	//! @brief		コンストラクタ
 	//! @param		a		オブジェクトA
 	//! @param		b		オブジェクトB
-	tRisseThisProxy(tRisseVariant & a, tRisseVariant & b) : A(a), B(b)
+	//! @param		engine	スクリプトエンジンインスタンス
+	tRisseThisProxy(tRisseVariant & a, tRisseVariant & b, tRisseScriptEngine * engine) :
+		A(a), B(b), Engine(engine)
 	{
 	}
 
@@ -36,11 +40,11 @@ public:
 	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		// まず A をみる
-		tRetValue ret = A.Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
+		tRetValue ret = A.Operate(Engine, RISSE_OBJECTINTERFACE_PASS_ARG);
 		if(ret == rvMemberNotFound)
 		{
 			// A にメンバがなかったのでBを見る
-			ret = B.Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
+			ret = B.Operate(Engine, RISSE_OBJECTINTERFACE_PASS_ARG);
 		}
 		return ret;
 	}

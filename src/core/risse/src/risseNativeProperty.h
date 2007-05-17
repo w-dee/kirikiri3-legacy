@@ -15,6 +15,7 @@
 
 #include "risseCharUtils.h"
 #include "risseObjectBase.h"
+#include "risseObjectRTTI.h"
 
 namespace Risse
 {
@@ -29,12 +30,14 @@ namespace Risse
 
 //! @brief		tRisseNativePropertyBase::tGetter の引数
 #define RISSE_NATIVEPROPERTY_GETTER_ARGS \
+		tRisseScriptEngine * engine,          \
 		tRisseVariant * result,               \
 		tRisseOperateFlags flags,             \
 		const tRisseVariant &This
 
 //! @brief		tRisseNativePropertyBase::tSetter の引数
 #define RISSE_NATIVEPROPERTY_SETTER_ARGS \
+		tRisseScriptEngine * engine,          \
 		const tRisseVariant & value,          \
 		tRisseOperateFlags flags,             \
 		const tRisseVariant &This
@@ -64,7 +67,7 @@ namespace Risse
 		} \
 	} static instance; \
 	attribute.Set(tRisseMemberAttribute::pcProperty); \
-	RegisterNormalMember(name, tRisseVariant(tRisseNativeProperty::New(instance.getter, instance.setter), context), \
+	RegisterNormalMember(name, tRisseVariant(tRisseNativeProperty::New(GetRTTI()->GetScriptEngine(), instance.getter, instance.setter), context), \
 		attribute); \
 }
 
@@ -112,8 +115,11 @@ private:
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
-	tRisseNativePropertyGetter(tGetter getter) { Getter = getter; }
+	tRisseNativePropertyGetter(tRisseScriptEngine * engine, tGetter getter) :
+		tRisseObjectInterface(new tRisseRTTI(engine))
+	{ Getter = getter; }
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
@@ -141,8 +147,11 @@ private:
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
-	tRisseNativePropertySetter(tSetter setter) { Setter = setter; }
+	tRisseNativePropertySetter(tRisseScriptEngine * engine, tSetter setter) :
+		tRisseObjectInterface(new tRisseRTTI(engine))
+	{ Setter = setter; }
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
@@ -164,15 +173,17 @@ class tRisseNativeProperty : public tRisseObjectInterface
 
 protected:
 	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
 	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
-	tRisseNativeProperty(tRisseNativePropertyGetter::tGetter getter, tRisseNativePropertySetter::tSetter setter = NULL);
+	tRisseNativeProperty(tRisseScriptEngine * engine, tRisseNativePropertyGetter::tGetter getter, tRisseNativePropertySetter::tSetter setter = NULL);
 
 public:
 	//! @brief		新しいプロパティインスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
 	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
-	static tRisseObjectInterface * New(tRisseNativePropertyGetter::tGetter getter, tRisseNativePropertySetter::tSetter setter = NULL);
+	static tRisseObjectInterface * New(tRisseScriptEngine * engine, tRisseNativePropertyGetter::tGetter getter, tRisseNativePropertySetter::tSetter setter = NULL);
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

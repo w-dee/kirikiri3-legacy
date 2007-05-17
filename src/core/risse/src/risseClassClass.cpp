@@ -21,6 +21,7 @@
 #include "risseOpCodes.h"
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
+#include "risseScriptEngine.h"
 
 namespace Risse
 {
@@ -30,7 +31,8 @@ RISSE_DEFINE_SOURCE_ID(28480,29035,20490,18954,3474,2858,57740,45280);
 
 
 //---------------------------------------------------------------------------
-tRisseClassClass::tRisseClassClass() : tRisseClassBase(tRisseModuleClass::GetPointer())
+tRisseClassClass::tRisseClassClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ModuleClass)
 {
 	RegisterMembers();
 }
@@ -65,12 +67,14 @@ void tRisseClassClass::RegisterMembers()
 		if(args.HasArgument(1))
 		{
 			// 名前を渡す
-			tRisseClassClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::New(args[1]), This);
+			engine->ClassClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+								tRisseMethodArgument::New(args[1]), This);
 		}
 		else
 		{
 			// 名前がないので引数無し
-			tRisseClassClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
+			engine->ClassClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+								tRisseMethodArgument::Empty(), This);
 		}
 
 		if(args.HasArgument(0) && !args[0].IsNull())
@@ -78,13 +82,13 @@ void tRisseClassClass::RegisterMembers()
 			// スーパークラスが指定されている
 			// スーパークラスはクラスのインスタンスかどうかをチェック
 			tRisseVariant super_class = args[0];
-			if(!super_class.InstanceOf(tRisseVariant(tRisseClassClass::GetPointer())))
+			if(!super_class.InstanceOf(engine, tRisseVariant(engine->ClassClass)))
 				tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass();
 
 			// super を登録
 			tRisseOperateFlags access_flags =
 				tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
-			This.SetPropertyDirect(ss_super,
+			This.SetPropertyDirect(engine, ss_super,
 				tRisseOperateFlags(tRisseMemberAttribute::GetDefault())|
 				access_flags,
 				super_class, This);
@@ -95,8 +99,8 @@ void tRisseClassClass::RegisterMembers()
 		// ユーザ定義の construct と initialize にとってはじゃまである。
 		// これらがここに残っていると、親クラス内の construct や initialize を正常に
 		// 参照できないという意味でもじゃまである。
-		This.DeletePropertyDirect(ss_construct, tRisseOperateFlags::ofInstanceMemberOnly);
-		This.DeletePropertyDirect(ss_initialize, tRisseOperateFlags::ofInstanceMemberOnly);
+		This.DeletePropertyDirect_Object(ss_construct, tRisseOperateFlags::ofInstanceMemberOnly);
+		This.DeletePropertyDirect_Object(ss_initialize, tRisseOperateFlags::ofInstanceMemberOnly);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -116,7 +120,7 @@ tRisseClassClass::tRetValue tRisseClassClass::Operate(RISSE_OBJECTINTERFACE_OPER
 //---------------------------------------------------------------------------
 tRisseVariant tRisseClassClass::CreateNewObjectBase()
 {
-	return tRisseVariant(new tRisseClassInstance());
+	return tRisseVariant(new tRisseClassInstance(GetRTTI()->GetScriptEngine()));
 }
 //---------------------------------------------------------------------------
 
@@ -127,7 +131,8 @@ tRisseVariant tRisseClassClass::CreateNewObjectBase()
 
 
 //---------------------------------------------------------------------------
-tRisseClassInstance::tRisseClassInstance()
+tRisseClassInstance::tRisseClassInstance(tRisseScriptEngine * engine) :
+	tRisseClassClass(engine)
 {
 	RegisterMembers();
 }

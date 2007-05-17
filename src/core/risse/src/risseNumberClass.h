@@ -24,12 +24,13 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		数値型用クラスの基底クラス(Risse用)
 //---------------------------------------------------------------------------
-class tRisseNumberClass : public tRisseClassBase, public tRisseClassSingleton<tRisseNumberClass>
+class tRisseNumberClass : public tRisseClassBase
 {
 	typedef tRisseClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
-	tRisseNumberClass();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseNumberClass(tRisseScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

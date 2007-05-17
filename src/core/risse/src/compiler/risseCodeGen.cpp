@@ -14,6 +14,7 @@
 
 #include "risseCodeGen.h"
 #include "risseSSAForm.h"
+#include "risseCompiler.h"
 #include "../risseExceptionClass.h"
 #include "../risseScriptBlockBase.h"
 #include "../risseCodeBlock.h"
@@ -208,12 +209,14 @@ void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 	// それぞれがその16bitの上限を超えることができない。
 	if(NestLevel > 0xffff)
 		tRisseCompileExceptionClass::Throw(
+			Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 			tRisseString(RISSE_WS_TR("too deep function nest level")), Form->GetScriptBlock(),
 				GetSourceCodePosition()); // まずあり得ないと思うが ...
 
 	risse_size reg_num = SharedRegCount;
 	if(reg_num > 0xffff)
 		tRisseCompileExceptionClass::Throw(
+			Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 			tRisseString(RISSE_WS_TR("too many shared variables")), Form->GetScriptBlock(),
 				GetSourceCodePosition()); // まずあり得ないと思うが ...
 
@@ -317,6 +320,7 @@ void tRisseCodeGenerator::FixCode()
 	// サイズをチェック
 	if(Code.size() != static_cast<risse_uint32>(Code.size()))
 		tRisseCompileExceptionClass::Throw(
+			Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
 			tRisseString(RISSE_WS_TR("too large code size")), Form->GetScriptBlock(), 0); // まずあり得ないと思うが ...
 
 	// ジャンプアドレスのfixup

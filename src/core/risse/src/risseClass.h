@@ -22,29 +22,7 @@
 
 namespace Risse
 {
-//---------------------------------------------------------------------------
-//! @brief		Risseクラスの実装用のシングルトンクラス
-//! @note		クラスに必要ないくつかの機能をカプセル化するため、このクラスを
-//!				継承すると便利。
-//---------------------------------------------------------------------------
-template <typename T>
-class tRisseClassSingleton : public tRisseSingleton<T>
-{
-public:
-	//! @brief		シングルトンクラスインスタンスを登録するためのユーティリティメソッド
-	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
-	//! @param		name		登録名
-	static void RegisterClassInstance(tRisseVariant & target, const tRisseString &name)
-	{
-		target.SetPropertyDirect(name,
-			tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
-			tRisseOperateFlags::ofMemberEnsure,
-					tRisseVariant(T::GetPointer()));
-	}
-};
-//---------------------------------------------------------------------------
-
-
+class tRisseScriptEngine;
 
 //---------------------------------------------------------------------------
 //! @brief		Risseクラスの実装
@@ -54,15 +32,31 @@ class tRisseClassBase : public tRisseObjectBase
 	//! @brief		親クラスのtypedef
 	typedef tRisseObjectBase inherited;
 
-	tRisseRTTI RTTI; //!< RTTI 参照用データ(このクラスから作成されたインスタンスはこのRTTIを持つ)
-	tRisseRTTI::tMatcher RTTIMatcher; //!< RTTI にマッチするための情報
+	tRisseRTTI ClassRTTI; //!< RTTI 参照用データ(このクラスから作成されたインスタンスはこのRTTIを持つ)
+	tRisseRTTI::tMatcher RTTIMatcher; //!< ClassRTTI にマッチするための情報
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		engine			スクリプトエンジンインスタンス
 	//! @param		super_class		スーパークラスを表すオブジェクト
 	//! @param		extensible		extensible の場合に真
-	tRisseClassBase(tRisseClassBase * super_class = NULL, bool extensible = true);
+	tRisseClassBase(tRisseClassBase * super_class, bool extensible = true);
 
+	//! @brief		コンストラクタ(Objectクラス用)
+	//! @param		engine			スクリプトエンジンインスタンス
+	//! @param		extensible		extensible の場合に真
+	tRisseClassBase(tRisseScriptEngine * engine);
+
+	//! @brief		シングルトンクラスインスタンスを登録するためのユーティリティメソッド
+	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
+	//! @param		name		登録名
+	void RegisterClassInstance(tRisseVariant & target, const tRisseString &name)
+	{
+		target.SetPropertyDirect_Object(name,
+			tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
+			tRisseOperateFlags::ofMemberEnsure,
+					tRisseVariant(this));
+	}
 public:
 	//! @brief		各メンバをインスタンスに追加する
 	//! @note		これは通常コンストラクタ中から呼ばれるが、コンストラクタ中では
@@ -106,28 +100,6 @@ public:
 
 
 
-
-//---------------------------------------------------------------------------
-//! @brief		ただ親クラスを継承するためだけのクラス階層用のテンプレートクラス
-//---------------------------------------------------------------------------
-#define RISSE_DEFINE_EMPTY_CLASS(classname, super_class, additional) \
-class classname : \
-	public tRisseClassBase, public tRisseClassSingleton<classname> \
-{ \
-	typedef tRisseClassBase inherited; \
-public: \
-	classname()  : tRisseClassBase(super_class::GetPointer()) \
-	{ RegisterMembers(); } \
-	void RegisterMembers() { \
-		RISSE_BEGIN_NATIVE_METHOD(ss_construct) { } RISSE_END_NATIVE_METHOD \
-		RISSE_BEGIN_NATIVE_METHOD(ss_initialize) { \
-			classname::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This); \
-		} RISSE_END_NATIVE_METHOD \
-	} \
-	additional \
-}
-
-//---------------------------------------------------------------------------
 
 }
 #endif

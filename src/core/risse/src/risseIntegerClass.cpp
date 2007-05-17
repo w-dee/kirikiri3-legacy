@@ -18,6 +18,7 @@
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseNumberClass.h"
+#include "risseScriptEngine.h"
 
 /*
 	Risseスクリプトから見える"String" クラスの実装
@@ -30,7 +31,8 @@ RISSE_DEFINE_SOURCE_ID(39234,49682,57279,16499,28574,56016,64030,59385);
 
 
 //---------------------------------------------------------------------------
-tRisseIntegerClass::tRisseIntegerClass() : tRissePrimitiveClassBase(tRisseNumberClass::GetPointer())
+tRisseIntegerClass::tRisseIntegerClass(tRisseScriptEngine * engine) :
+	tRissePrimitiveClassBase(engine->NumberClass)
 {
 	RegisterMembers();
 }
@@ -72,7 +74,7 @@ void tRisseIntegerClass::RegisterMembers()
 
 		risse_int64 count = This.operator risse_int64();
 		while(count --)
-			args.GetBlockArgument(0).FuncCall();
+			args.GetBlockArgument(0).FuncCall(engine);
 	}
 	RISSE_END_NATIVE_METHOD
 

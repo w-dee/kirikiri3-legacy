@@ -21,6 +21,7 @@
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
 #include "risseScriptBlockBase.h"
+#include "risseScriptEngine.h"
 
 namespace Risse
 {
@@ -104,16 +105,16 @@ const risse_char * tRisseVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
-inline tRissePrimitiveClassBase * tRisseVariantBlock::GetPrimitiveClass() const
+inline tRissePrimitiveClassBase * tRisseVariantBlock::GetPrimitiveClass(tRisseScriptEngine * engine) const
 {
 	tRissePrimitiveClassBase * Class = NULL;
 	switch(GetType())
 	{
 	case vtVoid:	break;
-	case vtInteger:	Class = tRisseIntegerClass::GetPointer(); break;
-	case vtReal:	Class = tRisseRealClass::GetPointer(); break;
+	case vtInteger:	Class = engine->IntegerClass; break;
+	case vtReal:	Class = engine->RealClass; break;
 	case vtBoolean:	break;
-	case vtString:	Class = tRisseStringClass::GetPointer(); break;
+	case vtString:	Class = engine->StringClass; break;
 	case vtOctet:	break;
 	default:		break;
 	}
@@ -145,7 +146,7 @@ void tRisseVariantBlock::SetContext(const tRisseVariantBlock &context)
 
 //---------------------------------------------------------------------------
 tRisseVariantBlock::tRetValue
-	tRisseVariantBlock::OperateForMember(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+	tRisseVariantBlock::OperateForMember(tRisseScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	switch(GetType())
 	{
@@ -158,8 +159,8 @@ tRisseVariantBlock::tRetValue
 	case vtBoolean:
 		// プリミティブ型に対する処理
 		{
-			tRetValue rv = GetPrimitiveClass()->GetGateway().
-				Operate(code, result, name,
+			tRetValue rv = GetPrimitiveClass(engine)->GetGateway().
+				Operate(engine, code, result, name,
 				flags | tRisseOperateFlags::ofUseThisAsContext,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 				args, *this); // 動作コンテキストは常に *this
@@ -194,10 +195,10 @@ tRisseVariantBlock::tRetValue
 
 
 //---------------------------------------------------------------------------
-tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const
+tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const
 {
 	tRisseVariantBlock result;
-	GetPrimitiveClass()->GetGateway().Do(ocDGet, &result, name,
+	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDGet, &result, name,
 				flags | tRisseOperateFlags::ofUseThisAsContext,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 				tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
@@ -213,6 +214,7 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Primitive(const tRisseS
 //---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseString & name, risse_uint32 flags, const tRisseVariant & This) const
 {
+	RISSE_ASSERT(GetType() == vtObject);
 	tRisseObjectInterface * intf = GetObjectInterface();
 	tRisseVariantBlock ret;
 	intf->Do(ocDGet, &ret, name,
@@ -225,9 +227,11 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Object  (const tRisseSt
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::SetPropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This) const
+void tRisseVariantBlock::SetPropertyDirect_Primitive(tRisseScriptEngine * engine,
+	const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value,
+	const tRisseVariant & This) const
 {
-	GetPrimitiveClass()->GetGateway().Do(ocDSet, NULL, name,
+	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDSet, NULL, name,
 				flags | tRisseOperateFlags::ofUseThisAsContext,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 				tRisseMethodArgument::New(value), *this); // 動作コンテキストは常に *this
@@ -240,6 +244,7 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 		risse_uint32 flags, const tRisseVariantBlock & value,
 		const tRisseVariant & This) const
 {
+	RISSE_ASSERT(GetType() == vtObject);
 	tRisseObjectInterface * intf = GetObjectInterface();
 	intf->Do(ocDSet, NULL, name,
 		flags, tRisseMethodArgument::New(value),
@@ -250,9 +255,9 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::DeletePropertyDirect_Primitive(const tRisseString & name, risse_uint32 flags) const
+void tRisseVariantBlock::DeletePropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags) const
 {
-	GetPrimitiveClass()->GetGateway().Do(ocDDelete, NULL, name,
+	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDDelete, NULL, name,
 				flags | tRisseOperateFlags::ofUseThisAsContext,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 				tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
@@ -263,6 +268,7 @@ void tRisseVariantBlock::DeletePropertyDirect_Primitive(const tRisseString & nam
 //---------------------------------------------------------------------------
 void tRisseVariantBlock::DeletePropertyDirect_Object   (const tRisseString & name, risse_uint32 flags) const
 {
+	RISSE_ASSERT(GetType() == vtObject);
 	tRisseObjectInterface * intf = GetObjectInterface();
 	intf->Do(ocDDelete, NULL, name,
 		flags, tRisseMethodArgument::Empty(),
@@ -273,7 +279,7 @@ void tRisseVariantBlock::DeletePropertyDirect_Object   (const tRisseString & nam
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::FuncCall(tRisseVariantBlock * ret, risse_uint32 flags,
+void tRisseVariantBlock::FuncCall(tRisseScriptEngine * engine, tRisseVariantBlock * ret, risse_uint32 flags,
 	const tRisseMethodArgument & args,
 	const tRisseVariant & This) const
 {
@@ -286,22 +292,22 @@ void tRisseVariantBlock::FuncCall(tRisseVariantBlock * ret, risse_uint32 flags,
 	case vtString:
 	case vtOctet:
 	case vtBoolean:
-		FuncCall_Primitive(ret, tRisseString::GetEmptyString(), flags, args, This); return;
+		FuncCall_Primitive(engine, ret, tRisseString::GetEmptyString(), flags, args, This); return;
 	case vtObject:
-		FuncCall_Object   (ret, tRisseString::GetEmptyString(), flags, args, This); return;
+		FuncCall_Object   (        ret, tRisseString::GetEmptyString(), flags, args, This); return;
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseVariantBlock::FuncCall_Primitive(
+void tRisseVariantBlock::FuncCall_Primitive(tRisseScriptEngine * engine, 
 	tRisseVariantBlock * ret, const tRisseString & name,
 	risse_uint32 flags, const tRisseMethodArgument & args,
 	const tRisseVariant & This) const
 {
-	GetPrimitiveClass()->GetGateway().
-		Do(ocFuncCall, ret, name,
+	GetPrimitiveClass(engine)->GetGateway().
+		Do(engine, ocFuncCall, ret, name,
 		flags |tRisseOperateFlags::ofUseThisAsContext,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 		args, *this); // 動作コンテキストは常に *this
@@ -314,6 +320,7 @@ void tRisseVariantBlock::FuncCall_Object  (
 	tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags,
 	const tRisseMethodArgument & args, const tRisseVariant & This) const
 {
+	RISSE_ASSERT(GetType() == vtObject);
 	tRisseObjectInterface * intf = GetObjectInterface();
 	intf->Do(ocFuncCall, ret, name,
 		flags, args,
@@ -324,11 +331,11 @@ void tRisseVariantBlock::FuncCall_Object  (
 
 
 //---------------------------------------------------------------------------
-tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & membername) const
+tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername) const
 {
 	tRisseVariantBlock ret;
-	GetPrimitiveClass()->GetGateway().
-		Do(ocFuncCall, &ret, membername,
+	GetPrimitiveClass(engine)->GetGateway().
+		Do(engine, ocFuncCall, &ret, membername,
 		tRisseOperateFlags::ofUseThisAsContext,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 		tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
@@ -340,6 +347,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & mem
 //---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername) const
 {
+	RISSE_ASSERT(GetType() == vtObject);
 	tRisseObjectInterface * intf = GetObjectInterface();
 	tRisseVariantBlock ret;
 	intf->Do(ocFuncCall, &ret, membername,
@@ -353,11 +361,11 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 
 
 //---------------------------------------------------------------------------
-tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1) const
+tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername,const tRisseVariant & arg1) const
 {
 	tRisseVariantBlock ret;
-	GetPrimitiveClass()->GetGateway().
-		Do(ocFuncCall, &ret, membername,
+	GetPrimitiveClass(engine)->GetGateway().
+		Do(engine, ocFuncCall, &ret, membername,
 		tRisseOperateFlags::ofUseThisAsContext,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 		tRisseMethodArgument::New(arg1), *this); // 動作コンテキストは常に *this
@@ -369,6 +377,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & mem
 //---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1) const
 {
+	RISSE_ASSERT(GetType() == vtObject);
 	tRisseObjectInterface * intf = GetObjectInterface();
 	tRisseVariantBlock ret;
 	intf->Do(ocFuncCall, &ret, membername,
@@ -382,11 +391,11 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 
 
 //---------------------------------------------------------------------------
-tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const
+tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const
 {
 	tRisseVariantBlock ret;
-	GetPrimitiveClass()->GetGateway().
-		Do(ocFuncCall, &ret, membername,
+	GetPrimitiveClass(engine)->GetGateway().
+		Do(engine, ocFuncCall, &ret, membername,
 		tRisseOperateFlags::ofUseThisAsContext,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 		tRisseMethodArgument::New(arg1, arg2), *this); // 動作コンテキストは常に *this
@@ -398,6 +407,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(const tRisseString & mem
 //---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const
 {
+	RISSE_ASSERT(GetType() == vtObject);
 	tRisseObjectInterface * intf = GetObjectInterface();
 	tRisseVariantBlock ret;
 	intf->Do(ocFuncCall, &ret, membername,
@@ -414,6 +424,7 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Object   (const tRisseString & mem
 tRisseVariantBlock tRisseVariantBlock::New_Object  (const tRisseString & name,
 	risse_uint32 flags, const tRisseMethodArgument & args) const
 {
+	RISSE_ASSERT(GetType() == vtObject);
 	tRisseObjectInterface * intf = GetObjectInterface();
 	tRisseVariantBlock ret;
 	intf->Do(ocNew, &ret, name,
@@ -1227,10 +1238,10 @@ tRisseVariantBlock tRisseVariantBlock::Add_Boolean  (const tRisseVariantBlock & 
 
 
 //---------------------------------------------------------------------------
-bool tRisseVariantBlock::InstanceOf(const tRisseVariantBlock & rhs) const
+bool tRisseVariantBlock::InstanceOf(tRisseScriptEngine * engine, const tRisseVariantBlock & rhs) const
 {
 	// this の class を得る
-	tRisseVariant Class = GetPropertyDirect(ss_class, tRisseOperateFlags::ofInstanceMemberOnly, *this);
+	tRisseVariant Class = GetPropertyDirect(engine, ss_class, tRisseOperateFlags::ofInstanceMemberOnly, *this);
 
 	RISSE_ASSERT(Class.GetType() == vtObject);
 
@@ -1342,12 +1353,14 @@ void tRisseVariantBlock::AddTrace(const tRisseScriptBlockBase * sb, risse_size p
 {
 	if(sb != NULL && pos != risse_size_max)
 	{
-		tRisseVariant source_point = tRisseVariant(tRisseSourcePointClass::GetPointer()).New(0,
+		RISSE_ASSERT(GetType() == vtObject);
+		tRisseScriptEngine * engine = this->GetObjectInterface()->GetRTTI()->GetScriptEngine();
+		tRisseVariant source_point = tRisseVariant(engine->SourcePointClass).New(0,
 			tRisseMethodArgument::New(
 				sb->GetName(),
 				1 + (risse_int64)sb->PositionToLine(pos)
 				));
-		Invoke(ss_addTrace, source_point);
+		Invoke_Object(ss_addTrace, source_point);
 	}
 }
 //---------------------------------------------------------------------------

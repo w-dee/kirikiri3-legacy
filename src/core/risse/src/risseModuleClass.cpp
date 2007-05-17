@@ -18,6 +18,7 @@
 #include "risseNativeProperty.h"
 #include "risseOpCodes.h"
 #include "risseStaticStrings.h"
+#include "risseScriptEngine.h"
 
 namespace Risse
 {
@@ -27,7 +28,8 @@ RISSE_DEFINE_SOURCE_ID(63047,20109,44050,17555,30336,10949,23175,16849);
 
 
 //---------------------------------------------------------------------------
-tRisseModuleClass::tRisseModuleClass() : tRisseClassBase(tRisseObjectClass::GetPointer())
+tRisseModuleClass::tRisseModuleClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -61,7 +63,7 @@ void tRisseModuleClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す
-		tRisseModuleClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
+		engine->ModuleClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
 	}
 	RISSE_END_NATIVE_METHOD
 

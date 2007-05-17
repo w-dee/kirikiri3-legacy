@@ -14,6 +14,7 @@
 
 #include "risseNativeProperty.h"
 #include "rissePropertyClass.h"
+#include "risseScriptEngine.h"
 
 namespace Risse
 {
@@ -30,7 +31,7 @@ tRisseNativePropertyGetter::tRetValue tRisseNativePropertyGetter::Operate(RISSE_
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(!Getter) return rvPropertyCannotBeRead;
-			Getter(result, flags, This);
+			Getter(GetRTTI()->GetScriptEngine(), result, flags, This);
 			return rvNoError;
 		}
 	}
@@ -51,7 +52,7 @@ tRisseNativePropertySetter::tRetValue tRisseNativePropertySetter::Operate(RISSE_
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			if(!Setter) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
-			Setter(args[0], flags, This);
+			Setter(GetRTTI()->GetScriptEngine(), args[0], flags, This);
 			return rvNoError;
 		}
 	}
@@ -63,9 +64,9 @@ tRisseNativePropertySetter::tRetValue tRisseNativePropertySetter::Operate(RISSE_
 
 
 //---------------------------------------------------------------------------
-tRisseNativeProperty::tRisseNativeProperty(
+tRisseNativeProperty::tRisseNativeProperty(tRisseScriptEngine * engine, 
 	tRisseNativePropertyGetter::tGetter getter,
-	tRisseNativePropertySetter::tSetter setter)
+	tRisseNativePropertySetter::tSetter setter) : tRisseObjectInterface(new tRisseRTTI(engine))
 {
 	Getter = getter;
 	Setter = setter;
@@ -82,7 +83,7 @@ tRisseNativeProperty::tRetValue tRisseNativeProperty::Operate(RISSE_OBJECTINTERF
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(!Getter) return rvPropertyCannotBeRead;
-			Getter(result, flags, This);
+			Getter(GetRTTI()->GetScriptEngine(), result, flags, This);
 			return rvNoError;
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
@@ -90,7 +91,7 @@ tRisseNativeProperty::tRetValue tRisseNativeProperty::Operate(RISSE_OBJECTINTERF
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			if(!Setter) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
-			Setter(args[0], flags, This);
+			Setter(GetRTTI()->GetScriptEngine(), args[0], flags, This);
 			return rvNoError;
 		}
 	}
@@ -102,14 +103,17 @@ tRisseNativeProperty::tRetValue tRisseNativeProperty::Operate(RISSE_OBJECTINTERF
 
 
 //---------------------------------------------------------------------------
-tRisseObjectInterface * tRisseNativeProperty::New(tRisseNativePropertyGetter::tGetter getter, tRisseNativePropertySetter::tSetter setter)
+tRisseObjectInterface * tRisseNativeProperty::New(tRisseScriptEngine * engine,
+	tRisseNativePropertyGetter::tGetter getter, tRisseNativePropertySetter::tSetter setter)
 {
 	// tRissePropertyClass がまだ登録されていない場合は仮のメソッドを
 	// 作成して登録する (のちに正式なメソッドオブジェクトに置き換えられる)
-	if(tRissePropertyClass::GetInstanceAlive())
+	if(engine->PropertyClass)
 	{
-		tRisseVariant v = tRisseVariant(tRissePropertyClass::GetPointer()).New(
-				0, tRisseMethodArgument::New(new tRisseNativePropertyGetter(getter), new tRisseNativePropertySetter(setter)));
+		tRisseVariant v = tRisseVariant(engine->PropertyClass).New(
+				0, tRisseMethodArgument::New(
+					new tRisseNativePropertyGetter(engine, getter),
+					new tRisseNativePropertySetter(engine, setter)));
 
 		RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
 		RISSE_ASSERT(dynamic_cast<tRissePropertyInstance*>(v.GetObjectInterface()) != NULL);
@@ -119,7 +123,7 @@ tRisseObjectInterface * tRisseNativeProperty::New(tRisseNativePropertyGetter::tG
 	else
 	{
 		// 仮実装
-		return (tRissePropertyInstance *)(new tRisseNativeProperty(getter, setter));
+		return (tRissePropertyInstance *)(new tRisseNativeProperty(engine, getter, setter));
 	}
 }
 //---------------------------------------------------------------------------

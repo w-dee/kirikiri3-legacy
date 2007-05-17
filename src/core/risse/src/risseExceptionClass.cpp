@@ -20,6 +20,7 @@
 #include "risseArrayClass.h"
 #include "risseClassClass.h"
 #include "risseScriptBlockBase.h"
+#include "risseScriptEngine.h"
 
 namespace Risse
 {
@@ -50,9 +51,79 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
          IllegalMemberAccessException
 */
 
+
+
+
 //---------------------------------------------------------------------------
-tRisseExitTryExceptionClass::tRisseExitTryExceptionClass(
-	const void * id, risse_uint32 targ_idx, const tRisseVariant * value)
+tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname)
+{
+	ExceptionClassName = classname;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
+		const tRisseVariant & arg1)
+{
+	ExceptionClassName = classname;
+	Arguments.push_back(arg1);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
+		const tRisseVariant & arg1, const tRisseVariant & arg2)
+{
+	ExceptionClassName = classname;
+	Arguments.push_back(arg1);
+	Arguments.push_back(arg2);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
+		const tRisseVariant & arg1, const tRisseVariant & arg2, const tRisseVariant & arg3)
+{
+	ExceptionClassName = classname;
+	Arguments.push_back(arg1);
+	Arguments.push_back(arg2);
+	Arguments.push_back(arg3);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant * tRisseTemporaryException::Convert(tRisseScriptEngine * engine) const
+{
+	// まず、例外クラスを取得する
+	tRisseVariant cls = engine->GetGlobalObject().GetPropertyDirect_Object(ExceptionClassName);
+
+	// 引数を用意する
+	tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(Arguments.size());
+
+	for(risse_size i = 0; i < Arguments.size(); i++)
+		new_args.SetArgument(i, Arguments[i]);
+
+	// New を呼び出し、それを返す
+	return new tRisseVariant(cls.New(0, new_args));
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseExitTryExceptionClass::tRisseExitTryExceptionClass(tRisseScriptEngine * engine,
+	const void * id, risse_uint32 targ_idx, const tRisseVariant * value) :
+		tRisseObjectInterface(new tRisseRTTI(engine))
 {
 	Identifier = id;
 	BranchTargetIndex = targ_idx;
@@ -87,8 +158,8 @@ tRisseObjectInterface::tRetValue tRisseExitTryExceptionClass::Operate(RISSE_OBJE
 
 
 //---------------------------------------------------------------------------
-tRisseSourcePointClass::tRisseSourcePointClass() :
-	tRisseClassBase(tRisseObjectClass::GetPointer())
+tRisseSourcePointClass::tRisseSourcePointClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -110,15 +181,15 @@ void tRisseSourcePointClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// filename メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect(ss_filename, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_filename, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseString::GetEmptyString()), This);
 
 		// line メンバを追加 (デフォルトでは-1)
-		This.SetPropertyDirect(ss_line, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_line, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant((risse_int64)-1), This);
 
 		// function メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect(ss_function, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_function, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetNullObject(), This);
 
 		/*
@@ -132,15 +203,15 @@ void tRisseSourcePointClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数は空)
-		tRisseSourcePointClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
+		engine->SourcePointClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
 
 		// 引数 = ファイル名, 行, メソッド
 		if(args.HasArgument(0))
-			This.SetPropertyDirect(ss_filename, 0, args[0], This);
+			This.SetPropertyDirect_Object(ss_filename, 0, args[0], This);
 		if(args.HasArgument(1))
-			This.SetPropertyDirect(ss_line, 0, args[1], This);
+			This.SetPropertyDirect_Object(ss_line, 0, args[1], This);
 		if(args.HasArgument(2))
-			This.SetPropertyDirect(ss_function, 0, args[2], This);
+			This.SetPropertyDirect_Object(ss_function, 0, args[2], This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -151,9 +222,9 @@ void tRisseSourcePointClass::RegisterMembers()
 		// ファイル名:行番号: in 関数名 を生成して返す
 
 		tRisseVariant filename, line, function;
-		filename = This.GetPropertyDirect(ss_filename);
-		line =     This.GetPropertyDirect(ss_line);
-		function = This.GetPropertyDirect(ss_function);
+		filename = This.GetPropertyDirect_Object(ss_filename);
+		line =     This.GetPropertyDirect_Object(ss_line);
+		function = This.GetPropertyDirect_Object(ss_function);
 
 		tRisseString ret;
 		tRisseString fn = filename.operator tRisseString();
@@ -189,8 +260,8 @@ void tRisseSourcePointClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseThrowableClass::tRisseThrowableClass() :
-	tRisseClassBase(tRisseObjectClass::GetPointer())
+tRisseThrowableClass::tRisseThrowableClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -213,15 +284,15 @@ void tRisseThrowableClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// message メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect(ss_message, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_message, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseString::GetEmptyString()), This);
 
 		// trace メンバを追加 (デフォルトでは空配列)
-		This.SetPropertyDirect(ss_trace, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant(tRisseVariant(tRisseArrayClass::GetPointer()).New()), This);
+		This.SetPropertyDirect_Object(ss_trace, tRisseOperateFlags::ofMemberEnsure,
+			tRisseVariant(tRisseVariant(engine->ArrayClass).New()), This);
 
 		// cause メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect(ss_cause, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_cause, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetNullObject(), This);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -231,11 +302,12 @@ void tRisseThrowableClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数は空)
-		tRisseThrowableClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
+		engine->ThrowableClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+										tRisseMethodArgument::Empty(), This);
 
 		// 引数 = メッセージ
 		if(args.HasArgument(0))
-			This.SetPropertyDirect(ss_message, 0, args[0], This);
+			This.SetPropertyDirect_Object(ss_message, 0, args[0], This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -244,9 +316,9 @@ void tRisseThrowableClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(mnString) // toString
 	{
 		// message at [発生場所] を返す
-		tRisseString message = (tRisseString)This.GetPropertyDirect(ss_message);
-		tRisseVariant trace_array = This.GetPropertyDirect(ss_trace);
-		tRisseString at = (tRisseString)trace_array.Invoke(mnIGet, risse_int64(0));
+		tRisseString message = (tRisseString)This.GetPropertyDirect_Object(ss_message);
+		tRisseVariant trace_array = This.GetPropertyDirect_Object(ss_trace);
+		tRisseString at = (tRisseString)trace_array.Invoke_Object(mnIGet, risse_int64(0));
 			// 先頭の要素を取り出す
 			// 先頭の要素が無い場合は void が返り、at は空文字列になるはず
 		if(result)
@@ -267,7 +339,7 @@ void tRisseThrowableClass::RegisterMembers()
 
 		// 引数 = SourcePoint クラスのインスタンス
 		// TODO: インスタンスが SourcePoint クラスのインスタンスかどうかをチェック
-		This.GetPropertyDirect(ss_trace, 0, This).FuncCall(NULL, ss_push, 0, args, This);
+		This.GetPropertyDirect_Object(ss_trace, 0, This).FuncCall_Object(NULL, ss_push, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -279,7 +351,7 @@ void tRisseThrowableClass::RegisterMembers()
 		// 例外クラスを構築して返す
 		// そうでない場合は This をそのまま返す
 		tRisseVariant ret;
-		if(This.InstanceOf(tRisseVariant(tRisseClassClass::GetPointer())))
+		if(This.InstanceOf(engine, tRisseVariant(engine->ClassClass)))
 			ret = This.New(0, tRisseMethodArgument::Empty());
 		else
 			ret = This;
@@ -301,8 +373,8 @@ void tRisseThrowableClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseErrorClass::tRisseErrorClass() :
-	tRisseClassBase(tRisseThrowableClass::GetPointer())
+tRisseErrorClass::tRisseErrorClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -333,7 +405,7 @@ void tRisseErrorClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->ExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -350,8 +422,8 @@ void tRisseErrorClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseAssertionErrorClass::tRisseAssertionErrorClass() :
-	tRisseClassBase(tRisseErrorClass::GetPointer())
+tRisseAssertionErrorClass::tRisseAssertionErrorClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ErrorClass)
 {
 	RegisterMembers();
 }
@@ -374,7 +446,7 @@ void tRisseAssertionErrorClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// expression メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect(ss_expression,
+		This.SetPropertyDirect_Object(ss_expression,
 			tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseString::GetEmptyString()), This);
 	}
@@ -386,10 +458,10 @@ void tRisseAssertionErrorClass::RegisterMembers()
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
 		if(args.HasArgument(0))
-			tRisseAssertionErrorClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0,
+			engine->AssertionErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0,
 				tRisseMethodArgument::New(args[0]), This);
 		else
-			tRisseAssertionErrorClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0,
+			engine->AssertionErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0,
 				tRisseMethodArgument::New(RISSE_WS("assertion failed")), This);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -400,13 +472,10 @@ void tRisseAssertionErrorClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseAssertionErrorClass::Throw(const tRisseString & expression)
+void tRisseAssertionErrorClass::Throw(tRisseScriptEngine * engine, const tRisseString & expression)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseAssertionErrorClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(expression)
-					));
+	tRisseTemporaryException * e = new tRisseTemporaryException(ss_AssertionError, expression);
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -422,8 +491,8 @@ void tRisseAssertionErrorClass::Throw(const tRisseString & expression)
 
 
 //---------------------------------------------------------------------------
-tRisseBlockExitExceptionClass::tRisseBlockExitExceptionClass() :
-	tRisseClassBase(tRisseThrowableClass::GetPointer())
+tRisseBlockExitExceptionClass::tRisseBlockExitExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -446,15 +515,15 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// identifier メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect(ss_identifier, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_identifier, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetNullObject(), This);
 
 		// target メンバを追加 (デフォルトでは-1)
-		This.SetPropertyDirect(ss_target, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_target, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant((risse_int64)-1), This);
 
 		// value メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect(ss_value, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_value, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant::GetNullObject(), This);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -464,16 +533,16 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
-		tRisseBlockExitExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0,
+		engine->BlockExitExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0,
 			tRisseMethodArgument::New(RISSE_WS("break/return helper exception")), This);
 
 		// メンバを設定する
 		if(args.HasArgument(0))
-			This.SetPropertyDirect(ss_identifier, 0, args[0], This);
+			This.SetPropertyDirect_Object(ss_identifier, 0, args[0], This);
 		if(args.HasArgument(1))
-			This.SetPropertyDirect(ss_target, 0, args[1], This);
+			This.SetPropertyDirect_Object(ss_target, 0, args[1], This);
 		if(args.HasArgument(2))
-			This.SetPropertyDirect(ss_value, 0, args[2], This);
+			This.SetPropertyDirect_Object(ss_value, 0, args[2], This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -496,8 +565,8 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseExceptionClass::tRisseExceptionClass() :
-	tRisseClassBase(tRisseThrowableClass::GetPointer())
+tRisseExceptionClass::tRisseExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -528,7 +597,7 @@ void tRisseExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->ExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -551,8 +620,8 @@ void tRisseExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseIOExceptionClass::tRisseIOExceptionClass() :
-	tRisseClassBase(tRisseExceptionClass::GetPointer())
+tRisseIOExceptionClass::tRisseIOExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ExceptionClass)
 {
 	RegisterMembers();
 }
@@ -583,7 +652,7 @@ void tRisseIOExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseIOExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->IOExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -600,8 +669,8 @@ void tRisseIOExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseCharConversionExceptionClass::tRisseCharConversionExceptionClass() :
-	tRisseClassBase(tRisseIOExceptionClass::GetPointer())
+tRisseCharConversionExceptionClass::tRisseCharConversionExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->IOExceptionClass)
 {
 	RegisterMembers();
 }
@@ -632,7 +701,8 @@ void tRisseCharConversionExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseCharConversionExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->CharConversionExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -642,14 +712,12 @@ void tRisseCharConversionExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseCharConversionExceptionClass::ThrowInvalidUTF8String()
+void tRisseCharConversionExceptionClass::ThrowInvalidUTF8String(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseCharConversionExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("invalid UTF-8 string"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_CharConversionException,
+			tRisseString(RISSE_WS_TR("invalid UTF-8 string")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -660,8 +728,8 @@ void tRisseCharConversionExceptionClass::ThrowInvalidUTF8String()
 
 
 //---------------------------------------------------------------------------
-tRisseRuntimeExceptionClass::tRisseRuntimeExceptionClass() :
-	tRisseClassBase(tRisseExceptionClass::GetPointer())
+tRisseRuntimeExceptionClass::tRisseRuntimeExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ExceptionClass)
 {
 	RegisterMembers();
 }
@@ -692,7 +760,7 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseRuntimeExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->RuntimeExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -706,8 +774,8 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseCompileExceptionClass::tRisseCompileExceptionClass() :
-	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+tRisseCompileExceptionClass::tRisseCompileExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -738,7 +806,7 @@ void tRisseCompileExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseCompileExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->CompileExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -748,21 +816,26 @@ void tRisseCompileExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompileExceptionClass::Throw(const tRisseString & reason, const tRisseScriptBlockBase * sb, risse_size pos)
+void tRisseCompileExceptionClass::Throw(tRisseScriptEngine * engine,
+	const tRisseString & reason, const tRisseScriptBlockBase * sb, risse_size pos)
 {
 	// 例外インスタンスを生成
-	tRisseVariant * e = new tRisseVariant(
-		tRisseVariant(tRisseCompileExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("compile error: %1"), reason)
-					)));
+	tRisseTemporaryException * et =
+		new tRisseTemporaryException(ss_CompileException,
+			tRisseString(RISSE_WS_TR("compile error: %1"), reason));
+	if(engine)
+	{
+		tRisseVariant * e = et->Convert(engine);
 
-	// 例外位置情報を追加してやる
-	e->AddTrace(sb, pos);
+		// 例外位置情報を追加してやる
+		e->AddTrace(sb, pos);
 
-	// 例外を投げる
-	throw e;
+		throw e;
+	}
+	else
+	{
+		throw et;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -773,8 +846,8 @@ void tRisseCompileExceptionClass::Throw(const tRisseString & reason, const tRiss
 
 
 //---------------------------------------------------------------------------
-tRisseClassDefinitionExceptionClass::tRisseClassDefinitionExceptionClass() :
-	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+tRisseClassDefinitionExceptionClass::tRisseClassDefinitionExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -805,7 +878,8 @@ void tRisseClassDefinitionExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseClassDefinitionExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->ClassDefinitionExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -815,27 +889,23 @@ void tRisseClassDefinitionExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleClass()
+void tRisseClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleClass(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseClassDefinitionExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("cannot create subclass of non-extensible superclass"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_ClassDefinitionException,
+			tRisseString(RISSE_WS_TR("cannot create subclass of non-extensible superclass")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass()
+void tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseClassDefinitionExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("the superclass is not a class"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_ClassDefinitionException,
+			tRisseString(RISSE_WS_TR("the superclass is not a class")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -846,8 +916,8 @@ void tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass()
 
 
 //---------------------------------------------------------------------------
-tRisseInstantiationExceptionClass::tRisseInstantiationExceptionClass() :
-	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+tRisseInstantiationExceptionClass::tRisseInstantiationExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -878,7 +948,8 @@ void tRisseInstantiationExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseInstantiationExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->InstantiationExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -888,27 +959,23 @@ void tRisseInstantiationExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromNonClassObject()
+void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromNonClassObject(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseInstantiationExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("cannot create instance from non-class object"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_InstantiationException,
+			tRisseString(RISSE_WS_TR("cannot create instance from non-class object")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass()
+void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseInstantiationExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("cannot create instance from this class"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_InstantiationException,
+			tRisseString(RISSE_WS_TR("cannot create instance from this class")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -918,8 +985,8 @@ void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass()
 
 
 //---------------------------------------------------------------------------
-tRisseBadContextExceptionClass::tRisseBadContextExceptionClass() :
-	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+tRisseBadContextExceptionClass::tRisseBadContextExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -950,7 +1017,8 @@ void tRisseBadContextExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseBadContextExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->BadContextExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -960,14 +1028,12 @@ void tRisseBadContextExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseBadContextExceptionClass::Throw()
+void tRisseBadContextExceptionClass::Throw(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseBadContextExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("given context is not compatible with this method/property"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_BadContextException,
+			tRisseString(RISSE_WS_TR("given context is not compatible with this method/property")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -978,8 +1044,8 @@ void tRisseBadContextExceptionClass::Throw()
 
 
 //---------------------------------------------------------------------------
-tRisseUnsupportedOperationExceptionClass::tRisseUnsupportedOperationExceptionClass() :
-	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+tRisseUnsupportedOperationExceptionClass::tRisseUnsupportedOperationExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1010,7 +1076,8 @@ void tRisseUnsupportedOperationExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseUnsupportedOperationExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->UnsupportedOperationExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -1020,27 +1087,23 @@ void tRisseUnsupportedOperationExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException()
+void tRisseUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseUnsupportedOperationExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("cannot call non-function object"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_UnsupportedOperationException,
+			tRisseString(RISSE_WS_TR("cannot call non-function object")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented()
+void tRisseUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseUnsupportedOperationExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("operation is not implemented"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_UnsupportedOperationException,
+			tRisseString(RISSE_WS_TR("operation is not implemented")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -1051,8 +1114,8 @@ void tRisseUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented()
 
 
 //---------------------------------------------------------------------------
-tRisseArgumentExceptionClass::tRisseArgumentExceptionClass() :
-	tRisseClassBase(tRisseExceptionClass::GetPointer())
+tRisseArgumentExceptionClass::tRisseArgumentExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1083,7 +1146,8 @@ void tRisseArgumentExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseArgumentExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->ArgumentExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -1100,8 +1164,8 @@ void tRisseArgumentExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseIllegalArgumentExceptionClass::tRisseIllegalArgumentExceptionClass() :
-	tRisseClassBase(tRisseArgumentExceptionClass::GetPointer())
+tRisseIllegalArgumentExceptionClass::tRisseIllegalArgumentExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1132,7 +1196,8 @@ void tRisseIllegalArgumentExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseIllegalArgumentExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->IllegalArgumentExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -1145,8 +1210,8 @@ void tRisseIllegalArgumentExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseNullObjectExceptionClass::tRisseNullObjectExceptionClass() :
-	tRisseClassBase(tRisseIllegalArgumentExceptionClass::GetPointer())
+tRisseNullObjectExceptionClass::tRisseNullObjectExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->IllegalArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1177,7 +1242,8 @@ void tRisseNullObjectExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseNullObjectExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->NullObjectExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -1187,14 +1253,12 @@ void tRisseNullObjectExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseNullObjectExceptionClass::Throw()
+void tRisseNullObjectExceptionClass::Throw(tRisseScriptEngine * engine)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseNullObjectExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("null object was given"))
-					)));
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_NullObjectException,
+			tRisseString(RISSE_WS_TR("null object was given")));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -1202,8 +1266,8 @@ void tRisseNullObjectExceptionClass::Throw()
 
 
 //---------------------------------------------------------------------------
-tRisseBadArgumentCountExceptionClass::tRisseBadArgumentCountExceptionClass() :
-	tRisseClassBase(tRisseArgumentExceptionClass::GetPointer())
+tRisseBadArgumentCountExceptionClass::tRisseBadArgumentCountExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1234,7 +1298,8 @@ void tRisseBadArgumentCountExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseBadArgumentCountExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->BadArgumentCountExceptionClass->CallSuperClassMethod(NULL,
+												ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -1244,31 +1309,27 @@ void tRisseBadArgumentCountExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseBadArgumentCountExceptionClass::ThrowNormal(risse_size passed, risse_size expected)
+void tRisseBadArgumentCountExceptionClass::ThrowNormal(tRisseScriptEngine * engine, risse_size passed, risse_size expected)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseBadArgumentCountExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("bad argument count (%1 given, but %2 expected)"),
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_BadArgumentCountException,
+			tRisseString(RISSE_WS_TR("bad argument count (%1 given, but %2 expected)"),
 					tRisseString::AsString((risse_int64)passed),
-					tRisseString::AsString((risse_int64)expected))
-					)));
+					tRisseString::AsString((risse_int64)expected)));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBadArgumentCountExceptionClass::ThrowBlock(risse_size passed, risse_size expected)
+void tRisseBadArgumentCountExceptionClass::ThrowBlock(tRisseScriptEngine * engine, risse_size passed, risse_size expected)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseBadArgumentCountExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				tRisseString(RISSE_WS_TR("bad block argument count (%1 given, but %2 expected)"),
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_BadArgumentCountException,
+			tRisseString(RISSE_WS_TR("bad block argument count (%1 given, but %2 expected)"),
 					tRisseString::AsString((risse_int64)passed),
-					tRisseString::AsString((risse_int64)expected))
-					)));
+					tRisseString::AsString((risse_int64)expected)));
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -1282,8 +1343,8 @@ void tRisseBadArgumentCountExceptionClass::ThrowBlock(risse_size passed, risse_s
 
 
 //---------------------------------------------------------------------------
-tRisseMemberAccessExceptionClass::tRisseMemberAccessExceptionClass() :
-	tRisseClassBase(tRisseRuntimeExceptionClass::GetPointer())
+tRisseMemberAccessExceptionClass::tRisseMemberAccessExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1306,7 +1367,7 @@ void tRisseMemberAccessExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
 	{
 		// name メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect(ss_name, tRisseOperateFlags::ofMemberEnsure,
+		This.SetPropertyDirect_Object(ss_name, tRisseOperateFlags::ofMemberEnsure,
 			tRisseVariant(tRisseString::GetEmptyString()), This);
 	}
 	RISSE_END_NATIVE_METHOD
@@ -1316,12 +1377,12 @@ void tRisseMemberAccessExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はargs[0])
-		tRisseMemberAccessExceptionClass::GetPointer()->CallSuperClassMethod(NULL,
+		engine->MemberAccessExceptionClass->CallSuperClassMethod(NULL,
 			ss_initialize, 0, tRisseMethodArgument::New(args[0]), This);
 
 		// メンバを設定する
 		if(args.HasArgument(1))
-			This.SetPropertyDirect(ss_name, 0, args[1], This);
+			This.SetPropertyDirect_Object(ss_name, 0, args[1], This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -1339,8 +1400,8 @@ void tRisseMemberAccessExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseNoSuchMemberExceptionClass::tRisseNoSuchMemberExceptionClass() :
-	tRisseClassBase(tRisseMemberAccessExceptionClass::GetPointer())
+tRisseNoSuchMemberExceptionClass::tRisseNoSuchMemberExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->MemberAccessExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1371,7 +1432,8 @@ void tRisseNoSuchMemberExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseNoSuchMemberExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->NoSuchMemberExceptionClass->CallSuperClassMethod(NULL,
+											ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -1381,16 +1443,15 @@ void tRisseNoSuchMemberExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseNoSuchMemberExceptionClass::Throw(const tRisseString & name)
+void tRisseNoSuchMemberExceptionClass::Throw(tRisseScriptEngine * engine, const tRisseString & name)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseNoSuchMemberExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				name.IsEmpty() ?
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_NoSuchMemberException,
+			name.IsEmpty() ?
 					tRisseString(RISSE_WS_TR("member not found"), name):
 					tRisseString(RISSE_WS_TR("member \"%1\" not found"), name),
-				name)));
+				name);
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
@@ -1404,8 +1465,8 @@ void tRisseNoSuchMemberExceptionClass::Throw(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-tRisseIllegalMemberAccessExceptionClass::tRisseIllegalMemberAccessExceptionClass() :
-	tRisseClassBase(tRisseMemberAccessExceptionClass::GetPointer())
+tRisseIllegalMemberAccessExceptionClass::tRisseIllegalMemberAccessExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->MemberAccessExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1436,7 +1497,8 @@ void tRisseIllegalMemberAccessExceptionClass::RegisterMembers()
 	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
 	{
 		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		tRisseIllegalMemberAccessExceptionClass::GetPointer()->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+		engine->IllegalMemberAccessExceptionClass->CallSuperClassMethod(NULL,
+											ss_initialize, 0, args, This);
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -1446,61 +1508,57 @@ void tRisseIllegalMemberAccessExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(const tRisseString & name)
+void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(tRisseScriptEngine * engine, const tRisseString & name)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseIllegalMemberAccessExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				name.IsEmpty() ?
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IllegalMemberAccessException,
+			name.IsEmpty() ?
 					tRisseString(RISSE_WS_TR("member is read-only"), name):
 					tRisseString(RISSE_WS_TR("member \"%1\" is read-only"), name),
-				name)));
+				name);
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(const tRisseString & name)
+void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(tRisseScriptEngine * engine, const tRisseString & name)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseIllegalMemberAccessExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				name.IsEmpty() ?
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IllegalMemberAccessException,
+			name.IsEmpty() ?
 					tRisseString(RISSE_WS_TR("member is final, cannot be overridden"), name):
 					tRisseString(RISSE_WS_TR("member \"%1\" is final, cannot be overridden"), name),
-				name)));
+				name);
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(const tRisseString & name)
+void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(tRisseScriptEngine * engine, const tRisseString & name)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseIllegalMemberAccessExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				name.IsEmpty() ?
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IllegalMemberAccessException,
+			name.IsEmpty() ?
 					tRisseString(RISSE_WS_TR("property cannot be read"), name):
 					tRisseString(RISSE_WS_TR("property \"%1\" cannot be read"), name),
-				name)));
+				name);
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(const tRisseString & name)
+void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tRisseScriptEngine * engine, const tRisseString & name)
 {
-	throw new tRisseVariant(
-		tRisseVariant(tRisseIllegalMemberAccessExceptionClass::GetPointer()).
-			New(0,
-				tRisseMethodArgument::New(
-				name.IsEmpty() ?
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IllegalMemberAccessException,
+			name.IsEmpty() ?
 					tRisseString(RISSE_WS_TR("property cannot be written"), name):
 					tRisseString(RISSE_WS_TR("property \"%1\" cannot be written"), name),
-				name)));
+				name);
+	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 

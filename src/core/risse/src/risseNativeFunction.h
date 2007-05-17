@@ -29,6 +29,7 @@ namespace Risse
 
 //! @brief		tRisseNativeFunctionBase::tCallee の引数
 #define RISSE_NATIVEFUNCTION_CALLEE_ARGS \
+		tRisseScriptEngine * engine,          \
 		tRisseVariant * result,               \
 		tRisseOperateFlags flags,             \
 		const tRisseMethodArgument & args,    \
@@ -55,7 +56,7 @@ namespace Risse
 #define RISSE_END_NATIVE_METHOD \
 		} \
 	} static instance; \
-	RegisterNormalMember(name, tRisseVariant(tRisseNativeFunction::New(instance.Do), context), attribute); \
+	RegisterNormalMember(name, tRisseVariant(tRisseNativeFunction::New(GetRTTI()->GetScriptEngine(), instance.Do), context), attribute); \
 }
 
 //---------------------------------------------------------------------------
@@ -77,13 +78,17 @@ protected:
 
 protected:
 	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
-	tRisseNativeFunction(tCallee callee) { Callee = callee; }
+	tRisseNativeFunction(tRisseScriptEngine * engine, tCallee callee) :
+		tRisseObjectInterface(new tRisseRTTI(engine))
+		{ Callee = callee; }
 
 public:
 	//! @brief		新しい関数インスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
+	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
-	static tRisseObjectInterface * New(tCallee callee);
+	static tRisseObjectInterface * New(tRisseScriptEngine * engine, tCallee callee);
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

@@ -17,7 +17,7 @@
 
 
 //	ニーモニックに関するメモ:
-//	8 文字に納める
+//	7 文字に納める (タブ幅8に対応)
 //	人間がタイプするものではないので無理な省略はしない
 
 
@@ -29,14 +29,14 @@ Assign					copy		R,R,-,-,-,-		----		#!< = (ローカル変数の代入)
 AssignConstant			const		R,C,-,-,-,-		----		#!< = 定数の代入
 AssignNewBinding		binding		R,-,-,-,-,-		----		#!< = 新しいバインディングオブジェクトの代入
 AssignThis				this		R,-,-,-,-,-		----		#!< = thisの代入
-AssignThisProxy			thisproxy	R,-,-,-,-,-		----		#!< = this-proxyの代入
+AssignThisProxy			proxy		R,-,-,-,-,-		----		#!< = this-proxyの代入
 AssignSuper				super		R,-,-,-,-,-		----		#!< = superの代入
 AssignGlobal			global		R,-,-,-,-,-		----		#!< = globalの代入
 AssignNewArray			array		R,-,-,-,-,-		----		#!< = 新しい配列オブジェクトの代入
 AssignNewDict			dict		R,-,-,-,-,-		----		#!< = 新しい辞書配列オブジェクトの代入
 AssignNewRegExp			regexp		R,R,R,-,-,-		----		#!< = 新しい正規表現オブジェクトの代入 (引数2つ)
-AssignNewFunction		function	R,R,-,-,-,-		----		#!< = 新しい関数インスタンスの代入 (引数=「裸の」関数インスタンス)
-AssignNewProperty		property	R,R,R,-,-,-		----		#!< = 新しいプロパティインスタンスの代入 (引数=ゲッタ+セッタ)
+AssignNewFunction		func		R,R,-,-,-,-		----		#!< = 新しい関数インスタンスの代入 (引数=「裸の」関数インスタンス)
+AssignNewProperty		prop		R,R,R,-,-,-		----		#!< = 新しいプロパティインスタンスの代入 (引数=ゲッタ+セッタ)
 AssignNewClass			class		R,R,R,-,-,-		----		#!< = 新しいクラスインスタンスの代入 (引数=親クラス+クラス名)
 AssignNewModule			module		R,R,-,-,-,-		----		#!< = 新しいモジュールインスタンスの代入 (引数=モジュール名)
 AssignParam				param		R,P,-,-,-,-		----		#!< = (O番目の関数引数を代入)

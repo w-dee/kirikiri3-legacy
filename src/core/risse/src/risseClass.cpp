@@ -47,7 +47,8 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 
 
 //---------------------------------------------------------------------------
-tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible) : tRisseObjectBase(ss_super)
+tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
+	 : tRisseObjectBase(ss_super)
 {
 	RISSE_ASSERT(super_class != NULL);
 
@@ -72,6 +73,7 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 
 //---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
+	 : tRisseObjectBase(ss_super)
 {
 	// スクリプトエンジンの情報を持った RTTI を登録する
 	SetRTTI(new tRisseRTTI(engine));

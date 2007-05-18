@@ -17,6 +17,7 @@
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
 #include "risseScriptEngine.h"
+#include "risseBindingInfo.h"
 
 /*
 	Risseスクリプトから見える"Object" クラスの実装
@@ -77,6 +78,22 @@ void tRisseObjectClass::RegisterMembers()
 
 		tRisseVariant ret = This.InstanceOf(engine, args[0]);
 		if(result) *result = ret;
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_eval)
+	{
+		// eval (式やスクリプトの評価)
+		args.ExpectArgumentCount(1);
+
+		tRisseString script = args[0];
+		tRisseString name = args.HasArgument(1) ?
+						tRisseString(args[1]) : tRisseString(RISSE_WS("(anonymous)"));
+		risse_size lineofs = args.HasArgument(2) ? (risse_size)(risse_int64)args[2] : (risse_size)0;
+
+		engine->Evaluate(script, name, lineofs, result, new tRisseBindingInfo(This), true);
 	}
 	RISSE_END_NATIVE_METHOD
 

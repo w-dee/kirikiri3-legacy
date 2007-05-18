@@ -50,8 +50,8 @@ tRisseNativePropertySetter::tRetValue tRisseNativePropertySetter::Operate(RISSE_
 		if(code == ocFuncCall)
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
-			if(!Setter) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
+			if(!Setter) return rvPropertyCannotBeWritten;
 			Setter(GetRTTI()->GetScriptEngine(), args[0], flags, This);
 			return rvNoError;
 		}
@@ -89,8 +89,8 @@ tRisseNativeProperty::tRetValue tRisseNativeProperty::Operate(RISSE_OBJECTINTERF
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
-			if(!Setter) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
+			if(!Setter) return rvPropertyCannotBeWritten;
 			Setter(GetRTTI()->GetScriptEngine(), args[0], flags, This);
 			return rvNoError;
 		}

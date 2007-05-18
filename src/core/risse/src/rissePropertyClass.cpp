@@ -52,8 +52,8 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
-			if(Setter.IsNull()) return rvPropertyCannotBeWritten;
 			args.ExpectArgumentCount(1);
+			if(Setter.IsNull()) return rvPropertyCannotBeWritten;
 			Setter.FuncCall_Object(NULL, tRisseString::GetEmptyString(),
 							flags, args, This);
 			return rvNoError;

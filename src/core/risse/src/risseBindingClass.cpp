@@ -90,6 +90,7 @@ void tRisseBindingClass::RegisterMembers()
 	{
 		// eval (式やスクリプトの評価)
 		args.ExpectArgumentCount(1);
+
 		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 
 		tRisseString script = args[0];
@@ -105,13 +106,14 @@ void tRisseBindingClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnIGet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
+		args.ExpectArgumentCount(1);
+
 		// ローカル変数の値を得る
 		// TODO: Dictionary 互換の実装
 		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 		tRisseBindingInfo::tBindingMap & map = obj->GetBindingMap();
 
 
-		args.ExpectArgumentCount(1);
 		tRisseBindingInfo::tBindingMap::iterator i = map.find((tRisseString)args[0]);
 		if(i == map.end())
 		{
@@ -136,14 +138,13 @@ void tRisseBindingClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnISet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
+		args.ExpectArgumentCount(2);
 
 		// ローカル変数の値を設定する
 		// TODO: Dictionary 互換の実装
 		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
 		tRisseBindingInfo::tBindingMap & map = obj->GetBindingMap();
 
-
-		args.ExpectArgumentCount(2);
 		tRisseBindingInfo::tBindingMap::iterator i = map.find((tRisseString)args[1]);
 		if(i == map.end())
 		{

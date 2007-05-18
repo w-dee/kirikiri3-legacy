@@ -85,10 +85,10 @@ void tRisseArrayClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnIGet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
+		args.ExpectArgumentCount(1);
+
 		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
-
-		args.ExpectArgumentCount(1);
 
 		risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[0]);
 		if(ofs_index < 0) ofs_index += array.size(); // 折り返す
@@ -112,10 +112,10 @@ void tRisseArrayClass::RegisterMembers()
 
 	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnISet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
 	{
+		args.ExpectArgumentCount(2);
+
 		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
 		tRisseArrayInstance::tArray & array = obj->GetArray();
-
-		args.ExpectArgumentCount(2);
 
 		risse_offset ofs_index = static_cast<risse_size>((risse_int64)args[1]);
 		if(ofs_index < 0) ofs_index += array.size(); // 折り返す

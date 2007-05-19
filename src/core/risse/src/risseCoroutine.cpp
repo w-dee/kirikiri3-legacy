@@ -355,6 +355,87 @@ void RisseInitCoroutine()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @param		コルーチンの本当の実装クラス
+//---------------------------------------------------------------------------
+class tRisseCoroutineImpl : public tRisseDestructee /* デストラクタが呼ばれなければならない */
+{
+public:
+	typedef coro::coroutine<tRisseVariant (tRisseCoroutineImpl * coro, const tRisseVariant &)> coroutine_type;
+	coroutine_type Coroutine;
+
+	tRisseCoroutine * RisseCoroutine;
+	coroutine_type::self * CoroutineSelf;
+
+	tRisseCoroutineImpl(tRisseCoroutine * risse_coroutine) : Coroutine(Body)
+	{
+		RisseCoroutine = risse_coroutine;
+		CoroutineSelf = NULL;
+	}
+
+private:
+	static tRisseVariant Body(coroutine_type::self &self, tRisseCoroutineImpl * coro, const tRisseVariant & arg)
+	{
+		coro->CoroutineSelf = &self;
+		tRisseVariant ret;
+		coro->RisseCoroutine->Function.FuncCall(
+			coro->RisseCoroutine->Engine, &ret, tRisseString::GetEmptyString(), 0,
+			tRisseMethodArgument::New(coro->RisseCoroutine->FunctionArg, arg));
+		coro->CoroutineSelf = NULL;
+		return ret;
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+tRisseCoroutine::tRisseCoroutine(tRisseScriptEngine * engine,
+	const tRisseVariant & function, const tRisseVariant arg)
+{
+	Engine = engine;
+	Function = function;
+	FunctionArg = arg;
+	Impl = new tRisseCoroutineImpl(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseCoroutine::Run(const tRisseVariant &arg)
+{
+	return Impl->Coroutine(Impl, arg);
+}
+//---------------------------------------------------------------------------
+
+	//! @brief		コルーチンからyieldする
+	//! @param		arg		Run() メソッドの戻り値となる値
+	//! @return		Run() メソッドの引数
+//---------------------------------------------------------------------------
+tRisseVariant tRisseCoroutine::DoYield(const tRisseVariant &arg)
+{
+	return Impl->CoroutineSelf->yield(arg).get<1>();
+		// yield の戻りはこの場合tupleになるので、2番目の値を取り出す
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseCoroutine::GetAlive() const
+{
+	return Impl->CoroutineSelf != NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCoroutine::Exit()
+{
+	Impl->Coroutine.exit();
+	Impl->CoroutineSelf = NULL;
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 } // namespace Risse

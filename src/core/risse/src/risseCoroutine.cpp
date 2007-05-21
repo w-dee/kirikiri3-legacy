@@ -361,7 +361,7 @@ void RisseInitCoroutine()
 class tRisseCoroutineImpl : public tRisseDestructee /* デストラクタが呼ばれなければならない */
 {
 public:
-	typedef coro::coroutine<tRisseVariant (tRisseCoroutineImpl * coro, const tRisseVariant &)> coroutine_type;
+	typedef coro::coroutine<tRisseVariant (tRisseCoroutineImpl * coro, tRisseVariant)> coroutine_type;
 	coroutine_type Coroutine;
 
 	tRisseCoroutine * RisseCoroutine;
@@ -374,13 +374,28 @@ public:
 	}
 
 private:
-	static tRisseVariant Body(coroutine_type::self &self, tRisseCoroutineImpl * coro, const tRisseVariant & arg)
+	static tRisseVariant Body(coroutine_type::self &self, tRisseCoroutineImpl * coro, tRisseVariant arg)
 	{
 		coro->CoroutineSelf = &self;
 		tRisseVariant ret;
-		coro->RisseCoroutine->Function.FuncCall(
-			coro->RisseCoroutine->Engine, &ret, tRisseString::GetEmptyString(), 0,
-			tRisseMethodArgument::New(coro->RisseCoroutine->FunctionArg, arg));
+		try
+		{
+			coro->RisseCoroutine->Function.FuncCall(
+				coro->RisseCoroutine->Engine, &ret, tRisseString::GetEmptyString(), 0,
+				tRisseMethodArgument::New(coro->RisseCoroutine->FunctionArg, arg),
+				coro->RisseCoroutine->FunctionArg);
+		}
+		catch(coro::exit_exception & e)
+		{
+			// exit_exception はキャッチするが何もしない
+		}
+		catch(const tRisseVariant * e)
+		{
+			// 普通の例外
+			// うーん
+			throw e;
+		}
+
 		coro->CoroutineSelf = NULL;
 		return ret;
 	}
@@ -408,9 +423,7 @@ tRisseVariant tRisseCoroutine::Run(const tRisseVariant &arg)
 }
 //---------------------------------------------------------------------------
 
-	//! @brief		コルーチンからyieldする
-	//! @param		arg		Run() メソッドの戻り値となる値
-	//! @return		Run() メソッドの引数
+
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCoroutine::DoYield(const tRisseVariant &arg)
 {

@@ -99,7 +99,9 @@ void tRisseCoroutineClass::RegisterMembers()
 	{
 		tRisseCoroutineInstance * obj = This.CheckAndGetObjectInterafce<tRisseCoroutineInstance, tRisseClassBase>(engine->CoroutineClass);
 
-		obj->GetCoroutine().Run(args.HasArgument(0)?tRisseVariant::GetVoidObject():args[0]);
+		tRisseVariant ret =
+			obj->GetCoroutine().Run(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
+		if(result) *result = ret;
 	}
 	RISSE_END_NATIVE_METHOD
 
@@ -109,7 +111,9 @@ void tRisseCoroutineClass::RegisterMembers()
 	{
 		tRisseCoroutineInstance * obj = This.CheckAndGetObjectInterafce<tRisseCoroutineInstance, tRisseClassBase>(engine->CoroutineClass);
 
-		obj->GetCoroutine().DoYield(args.HasArgument(0)?tRisseVariant::GetVoidObject():args[0]);
+		tRisseVariant ret =
+			obj->GetCoroutine().DoYield(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
+		if(result) *result = ret;
 	}
 	RISSE_END_NATIVE_METHOD
 

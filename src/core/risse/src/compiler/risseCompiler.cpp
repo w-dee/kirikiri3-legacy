@@ -440,6 +440,11 @@ void tRisseCompiler::Compile(tRisseASTNode * root, const tRisseBindingInfo & bin
 
 	// ルートのコードブロックを設定する
 	ScriptBlock->SetRootCodeBlock(form->GetCodeBlock());
+
+	// (テスト) 出力のフラッシュ
+	RisseFPrint(stderr, RISSE_WS("=========================\n"));
+	fflush(stderr);
+	fflush(stdout);
 }
 //---------------------------------------------------------------------------
 

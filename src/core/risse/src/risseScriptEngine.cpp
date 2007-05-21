@@ -28,6 +28,7 @@
 #include "risseNumberClass.h"
 #include "risseIntegerClass.h"
 #include "risseRealClass.h"
+#include "risseCoroutineClass.h"
 #include "risseExceptionClass.h"
 #include "risseBindingClass.h"
 
@@ -76,6 +77,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	NumberClass                            = new tRisseNumberClass                        (this);
 	IntegerClass                           = new tRisseIntegerClass                       (this);
 	RealClass                              = new tRisseRealClass                          (this);
+	CoroutineClass                         = new tRisseCoroutineClass                     (this);
 	SourcePointClass                       = new tRisseSourcePointClass                   (this);
 	ThrowableClass                         = new tRisseThrowableClass                     (this);
 	ErrorClass                             = new tRisseErrorClass                         (this);
@@ -116,6 +118,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	NumberClass->RegisterClassInstance(GlobalObject, ss_Number);
 	IntegerClass->RegisterClassInstance(GlobalObject, ss_Integer);
 	RealClass->RegisterClassInstance(GlobalObject, ss_Real);
+	CoroutineClass->RegisterClassInstance(GlobalObject, ss_Coroutine);
 	SourcePointClass->RegisterClassInstance(GlobalObject, ss_SourcePoint);
 	ThrowableClass->RegisterClassInstance(GlobalObject, ss_Throwable);
 	ErrorClass->RegisterClassInstance(GlobalObject, ss_Error);
@@ -157,6 +160,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	NumberClass->RegisterMembers();
 	IntegerClass->RegisterMembers();
 	RealClass->RegisterMembers();
+	CoroutineClass->RegisterMembers();
 	SourcePointClass->RegisterMembers();
 	ThrowableClass->RegisterMembers();
 	ErrorClass->RegisterMembers();

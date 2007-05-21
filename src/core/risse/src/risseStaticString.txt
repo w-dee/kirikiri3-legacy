@@ -79,3 +79,8 @@ ss_CompileException					CompileException				#!< "CompileException" クラス名
 ss_extensible						extensible						#!< "extensible" プロパティ名
 ss_Binding							Binding							#!< "Binding" クラス名
 ss_eval								eval							#!< "eval" メソッド名
+ss_Coroutine						Coroutine						#!< "Coroutine" クラス名
+ss_run								run								#!< "run" メソッド名
+ss_yield							yield							#!< "yield" メソッド名
+ss_exit								exit							#!< "exit" メソッド名
+ss_alive							alive							#!< "alive" プロパティ名

@@ -283,3 +283,13 @@ extern tRisseStringData data_ss_Binding;
 static const tRisseString & ss_Binding = *reinterpret_cast<const tRisseString *>(&data_ss_Binding); //!< (static string)  "Binding" クラス名
 extern tRisseStringData data_ss_eval;
 static const tRisseString & ss_eval = *reinterpret_cast<const tRisseString *>(&data_ss_eval); //!< (static string)  "eval" メソッド名
+extern tRisseStringData data_ss_Coroutine;
+static const tRisseString & ss_Coroutine = *reinterpret_cast<const tRisseString *>(&data_ss_Coroutine); //!< (static string)  "Coroutine" クラス名
+extern tRisseStringData data_ss_run;
+static const tRisseString & ss_run = *reinterpret_cast<const tRisseString *>(&data_ss_run); //!< (static string)  "run" メソッド名
+extern tRisseStringData data_ss_yield;
+static const tRisseString & ss_yield = *reinterpret_cast<const tRisseString *>(&data_ss_yield); //!< (static string)  "yield" メソッド名
+extern tRisseStringData data_ss_exit;
+static const tRisseString & ss_exit = *reinterpret_cast<const tRisseString *>(&data_ss_exit); //!< (static string)  "exit" メソッド名
+extern tRisseStringData data_ss_alive;
+static const tRisseString & ss_alive = *reinterpret_cast<const tRisseString *>(&data_ss_alive); //!< (static string)  "alive" プロパティ名

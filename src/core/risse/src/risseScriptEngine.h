@@ -48,6 +48,7 @@ class tRisseStringClass;
 class tRisseNumberClass;
 class tRisseIntegerClass;
 class tRisseRealClass;
+class tRisseCoroutineClass;
 class tRisseSourcePointClass;
 class tRisseThrowableClass;
 class tRisseErrorClass;
@@ -89,6 +90,7 @@ public:
 	class tRisseNumberClass                             * NumberClass;
 	class tRisseIntegerClass                            * IntegerClass;
 	class tRisseRealClass                               * RealClass;
+	class tRisseCoroutineClass                          * CoroutineClass;
 	class tRisseSourcePointClass                        * SourcePointClass;
 	class tRisseThrowableClass                          * ThrowableClass;
 	class tRisseErrorClass                              * ErrorClass;

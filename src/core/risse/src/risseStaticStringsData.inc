@@ -284,5 +284,15 @@ static risse_char v_ss_Binding[] = { tRisseStringData::MightBeShared,'B','i','n'
 tRisseStringData data_ss_Binding = { v_ss_Binding+1,7 }; /*  "Binding" クラス名 */
 static risse_char v_ss_eval[] = { tRisseStringData::MightBeShared,'e','v','a','l',0,0x5c4d6bef }; /*!< string of  "eval" メソッド名 */
 tRisseStringData data_ss_eval = { v_ss_eval+1,4 }; /*  "eval" メソッド名 */
+static risse_char v_ss_Coroutine[] = { tRisseStringData::MightBeShared,'C','o','r','o','u','t','i','n','e',0,0x852b6f3b }; /*!< string of  "Coroutine" クラス名 */
+tRisseStringData data_ss_Coroutine = { v_ss_Coroutine+1,9 }; /*  "Coroutine" クラス名 */
+static risse_char v_ss_run[] = { tRisseStringData::MightBeShared,'r','u','n',0,0x1109b569 }; /*!< string of  "run" メソッド名 */
+tRisseStringData data_ss_run = { v_ss_run+1,3 }; /*  "run" メソッド名 */
+static risse_char v_ss_yield[] = { tRisseStringData::MightBeShared,'y','i','e','l','d',0,0xc19cf546 }; /*!< string of  "yield" メソッド名 */
+tRisseStringData data_ss_yield = { v_ss_yield+1,5 }; /*  "yield" メソッド名 */
+static risse_char v_ss_exit[] = { tRisseStringData::MightBeShared,'e','x','i','t',0,0x728e4b44 }; /*!< string of  "exit" メソッド名 */
+tRisseStringData data_ss_exit = { v_ss_exit+1,4 }; /*  "exit" メソッド名 */
+static risse_char v_ss_alive[] = { tRisseStringData::MightBeShared,'a','l','i','v','e',0,0xda565b2e }; /*!< string of  "alive" プロパティ名 */
+tRisseStringData data_ss_alive = { v_ss_alive+1,5 }; /*  "alive" プロパティ名 */
 
 

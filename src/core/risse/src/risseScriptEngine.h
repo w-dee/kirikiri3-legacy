@@ -36,39 +36,12 @@ public:
 //---------------------------------------------------------------------------
 
 
-class tRisseObjectClass;
-class tRisseBindingClass;
-class tRisseModuleClass;
-class tRisseClassClass;
-class tRisseFunctionClass;
-class tRissePropertyClass;
-class tRisseArrayClass;
-class tRissePrimitiveClass;
-class tRisseStringClass;
-class tRisseNumberClass;
-class tRisseIntegerClass;
-class tRisseRealClass;
-class tRisseCoroutineClass;
-class tRisseSourcePointClass;
-class tRisseThrowableClass;
-class tRisseErrorClass;
-class tRisseExceptionClass;
-class tRisseIOExceptionClass;
-class tRisseCharConversionExceptionClass;
-class tRisseRuntimeExceptionClass;
-class tRisseCompileExceptionClass;
-class tRisseClassDefinitionExceptionClass;
-class tRisseInstantiationExceptionClass;
-class tRisseUnsupportedOperationExceptionClass;
-class tRisseBadContextExceptionClass;
-class tRisseMemberAccessExceptionClass;
-class tRisseNoSuchMemberExceptionClass;
-class tRisseArgumentExceptionClass;
-class tRisseIllegalArgumentExceptionClass;
-class tRisseNullObjectExceptionClass;
-class tRisseBadArgumentCountExceptionClass;
-class tRisseIllegalMemberAccessExceptionClass;
 
+
+// クラスの前方定義を行う
+#define RISSE_INTERNALCLASSES_CLASS(X) class tRisse##X##Class;
+#include "risseInternalClasses.inc"
+#undef RISSE_INTERNALCLASSES_CLASS
 
 //---------------------------------------------------------------------------
 //! @brief		スクリプトエンジンクラス
@@ -78,42 +51,10 @@ class tRisseScriptEngine : public tRisseCollectee
 public:
 	void * StartSentinel; //!< クラスインスタンスの開始位置
 
-	class tRisseObjectClass                             * ObjectClass;
-	class tRisseBindingClass                            * BindingClass;
-	class tRisseModuleClass                             * ModuleClass;
-	class tRisseClassClass                              * ClassClass;
-	class tRisseFunctionClass                           * FunctionClass;
-	class tRissePropertyClass                           * PropertyClass;
-	class tRisseArrayClass                              * ArrayClass;
-	class tRissePrimitiveClass                          * PrimitiveClass;
-	class tRisseStringClass                             * StringClass;
-	class tRisseNumberClass                             * NumberClass;
-	class tRisseIntegerClass                            * IntegerClass;
-	class tRisseRealClass                               * RealClass;
-	class tRisseCoroutineClass                          * CoroutineClass;
-	class tRisseSourcePointClass                        * SourcePointClass;
-	class tRisseThrowableClass                          * ThrowableClass;
-	class tRisseErrorClass                              * ErrorClass;
-	class tRisseAssertionErrorClass                     * AssertionErrorClass;
-	class tRisseExceptionClass                          * ExceptionClass;
-	class tRisseIOExceptionClass                        * IOExceptionClass;
-	class tRisseCharConversionExceptionClass            * CharConversionExceptionClass;
-	class tRisseRuntimeExceptionClass                   * RuntimeExceptionClass;
-	class tRisseCompileExceptionClass                   * CompileExceptionClass;
-	class tRisseClassDefinitionExceptionClass           * ClassDefinitionExceptionClass;
-	class tRisseInstantiationExceptionClass             * InstantiationExceptionClass;
-	class tRisseUnsupportedOperationExceptionClass      * UnsupportedOperationExceptionClass;
-	class tRisseBadContextExceptionClass                * BadContextExceptionClass;
-	class tRisseMemberAccessExceptionClass              * MemberAccessExceptionClass;
-	class tRisseNoSuchMemberExceptionClass              * NoSuchMemberExceptionClass;
-	class tRisseArgumentExceptionClass                  * ArgumentExceptionClass;
-	class tRisseIllegalArgumentExceptionClass           * IllegalArgumentExceptionClass;
-	class tRisseNullObjectExceptionClass                * NullObjectExceptionClass;
-	class tRisseBadArgumentCountExceptionClass          * BadArgumentCountExceptionClass;
-	class tRisseIllegalMemberAccessExceptionClass       * IllegalMemberAccessExceptionClass;
-
-	// これ以降は非公開クラス
-	class tRisseBlockExitExceptionClass                 * BlockExitExceptionClass;
+	// 各クラスインスタンスへのポインタを定義する
+	#define RISSE_INTERNALCLASSES_CLASS(X) tRisse##X##Class * X##Class;
+	#include "risseInternalClasses.inc"
+	#undef RISSE_INTERNALCLASSES_CLASS
 
 	void * EndSentinel; //!< クラスインスタンスの開始位置
 

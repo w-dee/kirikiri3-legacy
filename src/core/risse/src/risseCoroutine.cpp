@@ -366,11 +366,15 @@ public:
 
 	tRisseCoroutine * RisseCoroutine;
 	coroutine_type::self * CoroutineSelf;
+	bool Alive;
+
+	tRisseVariant ExceptionValue;
 
 	tRisseCoroutineImpl(tRisseCoroutine * risse_coroutine) : Coroutine(Body)
 	{
 		RisseCoroutine = risse_coroutine;
 		CoroutineSelf = NULL;
+		Alive = true;
 	}
 
 private:
@@ -378,24 +382,23 @@ private:
 	{
 		coro->CoroutineSelf = &self;
 		tRisseVariant ret;
+
 		try
 		{
 			coro->RisseCoroutine->Function.FuncCall(
 				coro->RisseCoroutine->Engine, &ret, tRisseString::GetEmptyString(), 0,
 				tRisseMethodArgument::New(coro->RisseCoroutine->FunctionArg, arg),
 				coro->RisseCoroutine->FunctionArg);
-		}
-		catch(coro::exit_exception & e)
-		{
-			// exit_exception はキャッチするが何もしない
+			coro->Alive = false;
 		}
 		catch(const tRisseVariant * e)
 		{
-			// 普通の例外
-			// うーん
-			throw e;
+			coro->Alive = false;
+			coro->ExceptionValue = *e;
+			throw;
 		}
 
+		coro->Alive = false;
 		coro->CoroutineSelf = NULL;
 		return ret;
 	}
@@ -419,7 +422,21 @@ tRisseCoroutine::tRisseCoroutine(tRisseScriptEngine * engine,
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCoroutine::Run(const tRisseVariant &arg)
 {
-	return Impl->Coroutine(Impl, arg);
+	if(!Impl->Alive)
+	{
+		// TODO: 例外
+	}
+
+	tRisseVariant ret;
+	try
+	{
+		ret = Impl->Coroutine(Impl, arg);
+	}
+	catch(coro::abnormal_exit & e)
+	{
+		throw new tRisseVariant(Impl->ExceptionValue);
+	}
+	return ret;
 }
 //---------------------------------------------------------------------------
 
@@ -427,6 +444,11 @@ tRisseVariant tRisseCoroutine::Run(const tRisseVariant &arg)
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCoroutine::DoYield(const tRisseVariant &arg)
 {
+	if(!Impl->Alive)
+	{
+		// TODO: 例外
+	}
+
 	return Impl->CoroutineSelf->yield(arg).get<1>();
 		// yield の戻りはこの場合tupleになるので、2番目の値を取り出す
 }
@@ -436,16 +458,7 @@ tRisseVariant tRisseCoroutine::DoYield(const tRisseVariant &arg)
 //---------------------------------------------------------------------------
 bool tRisseCoroutine::GetAlive() const
 {
-	return Impl->CoroutineSelf != NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseCoroutine::Exit()
-{
-	Impl->Coroutine.exit();
-	Impl->CoroutineSelf = NULL;
+	return Impl->Alive;
 }
 //---------------------------------------------------------------------------
 

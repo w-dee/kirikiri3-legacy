@@ -119,16 +119,6 @@ void tRisseCoroutineClass::RegisterMembers()
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_exit)
-	{
-		tRisseCoroutineInstance * obj = This.CheckAndGetObjectInterafce<tRisseCoroutineInstance, tRisseClassBase>(engine->CoroutineClass);
-
-		obj->GetCoroutine().Exit();
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	RISSE_BEGIN_NATIVE_PROPERTY(ss_alive)
 	{
 		RISSE_BEGINE_NATIVE_PROPERTY_GETTER

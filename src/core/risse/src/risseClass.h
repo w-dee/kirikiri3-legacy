@@ -18,7 +18,6 @@
 #include "risseObjectBase.h"
 #include "risseObjectRTTI.h"
 #include "risseVariant.h"
-#include "risseSingleton.h"
 
 namespace Risse
 {

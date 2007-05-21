@@ -16,7 +16,6 @@
 
 #include "risseObject.h"
 #include "risseClass.h"
-#include "risseSingleton.h"
 
 namespace Risse
 {

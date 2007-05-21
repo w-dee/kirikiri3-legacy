@@ -16,7 +16,6 @@
 #include "risseCharUtils.h"
 #include "risseObject.h"
 #include "risseClass.h"
-#include "risseSingleton.h"
 #include "risseObjectBase.h"
 #include "risseObjectRTTI.h"
 

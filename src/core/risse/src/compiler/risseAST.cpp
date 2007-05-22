@@ -747,7 +747,7 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 
 	case aftThisProxy:		// this-proxy
 			// form が保持している ThisProxy を返す
-			return form->GetThisProxy();
+			return form->GetThisProxy(GetPosition());
 
 	case aftSuper:		// "super"
 		{

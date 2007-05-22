@@ -149,6 +149,8 @@ extern tRisseStringData data_ss_Infinity;
 static const tRisseString & ss_Infinity = *reinterpret_cast<const tRisseString *>(&data_ss_Infinity); //!< (static string) トークンの値 Infinity
 extern tRisseStringData data_ss_lastEvalResultHiddenVarName;
 static const tRisseString & ss_lastEvalResultHiddenVarName = *reinterpret_cast<const tRisseString *>(&data_ss_lastEvalResultHiddenVarName); //!< (static string)  最後に評価した文や式の結果を格納するための隠し変数名
+extern tRisseStringData data_ss_thisProxyHiddenVarName;
+static const tRisseString & ss_thisProxyHiddenVarName = *reinterpret_cast<const tRisseString *>(&data_ss_thisProxyHiddenVarName); //!< (static string)  this-proxy を格納するための隠し変数名
 extern tRisseStringData data_ss_initialize;
 static const tRisseString & ss_initialize = *reinterpret_cast<const tRisseString *>(&data_ss_initialize); //!< (static string)  "initialize" メソッド名
 extern tRisseStringData data_ss_construct;

@@ -188,8 +188,6 @@ class tRisseSSAForm : public tRisseCollectee
 	tRisseString Name; //!< このSSA形式インスタンスの名前
 	tRisseSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
 
-	tRisseSSAVariable * ThisProxy; //!< this-proxy (thisにメンバがなければglobalを見に行くオブジェクト)が入っているSSA変数
-
 	tRisseSSABlock * EntryBlock; //!< エントリーSSA基本ブロック
 	tRisseSSABlock * CurrentBlock; //!< 現在変換中の基本ブロック
 
@@ -254,7 +252,7 @@ public:
 
 	//! @brief		this-proxyを得る
 	//! @return		this-proxy
-	tRisseSSAVariable * GetThisProxy() const { return ThisProxy; }
+	tRisseSSAVariable * GetThisProxy(risse_size pos);
 
 	//! @brief		現在変換中の基本ブロックを得る
 	//! @return		現在変換中の基本ブロック

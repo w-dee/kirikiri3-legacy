@@ -95,7 +95,6 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 	UseParentFrame = useparentframe; // ブロックの場合に真
 	Name = name;
 	LocalNamespace = new tRisseSSALocalNamespace();
-	ThisProxy = NULL;
 	EntryBlock = NULL;
 	CurrentBlock = NULL;
 	CurrentSwitchInfo = NULL;
@@ -129,7 +128,10 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 	//  この文も消えるはず)
 	// 注意! ThisProxyのオブジェクトはスタック上に配置される可能性があるため
 	// SSA形式間で共有したりしてはいけない (SSA形式ごとに毎回作成する)
-	AddStatement(pos, ocAssignThisProxy, &ThisProxy);
+	tRisseSSAVariable * thisproxy = NULL;
+	AddStatement(pos, ocAssignThisProxy, &thisproxy);
+	LocalNamespace->Add(ss_thisProxyHiddenVarName, NULL);
+	LocalNamespace->Write(this, pos, ss_thisProxyHiddenVarName, thisproxy);
 
 	// 一番浅い位置の名前空間に、変数 ss_lastEvalResultHiddenVarName を登録する
 	// 内容は void である
@@ -195,6 +197,14 @@ void tRisseSSAForm::OptimizeAndUnSSA()
 tRisseScriptBlockBase * tRisseSSAForm::GetScriptBlock() const
 {
 	return Function->GetFunctionGroup()->GetCompiler()->GetScriptBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseSSAForm::GetThisProxy(risse_size pos)
+{
+	return LocalNamespace->Read(this, pos, ss_thisProxyHiddenVarName);
 }
 //---------------------------------------------------------------------------
 

@@ -49,6 +49,7 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
        MemberAccessException
          NoSuchMemberException
          IllegalMemberAccessException
+       CoroutineException
 */
 
 
@@ -1564,6 +1565,88 @@ void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tRiss
 
 
 
+
+
+//---------------------------------------------------------------------------
+tRisseCoroutineExceptionClass::tRisseCoroutineExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->RuntimeExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCoroutineExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
+	{
+		// name メンバを追加 (デフォルトでは空文字列)
+		This.SetPropertyDirect_Object(ss_name, tRisseOperateFlags::ofMemberEnsure,
+			tRisseVariant(tRisseString::GetEmptyString()), This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
+	{
+		// 親クラスの同名メソッドを呼び出す(引数はargs[0])
+		engine->CoroutineExceptionClass->CallSuperClassMethod(NULL,
+			ss_initialize, 0, tRisseMethodArgument::New(args[0]), This);
+
+		// メンバを設定する
+		if(args.HasArgument(1))
+			This.SetPropertyDirect_Object(ss_name, 0, args[1], This);
+	}
+	RISSE_END_NATIVE_METHOD
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited(tRisseScriptEngine * engine)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_CoroutineException,
+					tRisseString(RISSE_WS_TR("coroutine has already exited")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet(tRisseScriptEngine * engine)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_CoroutineException,
+					tRisseString(RISSE_WS_TR("coroutine has not started yet")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCoroutineExceptionClass::ThrowCoroutineIsNotRunning(tRisseScriptEngine * engine)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_CoroutineException,
+					tRisseString(RISSE_WS_TR("coroutine is not running")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
 
 
 } // namespace Risse

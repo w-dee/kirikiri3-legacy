@@ -63,6 +63,7 @@ RISSE_INTERNALCLASSES_CLASS(IllegalArgumentException        )
 RISSE_INTERNALCLASSES_CLASS(NullObjectException             )
 RISSE_INTERNALCLASSES_CLASS(BadArgumentCountException       )
 RISSE_INTERNALCLASSES_CLASS(IllegalMemberAccessException    )
+RISSE_INTERNALCLASSES_CLASS(CoroutineException              )
 RISSE_INTERNALCLASSES_CLASS(BlockExitException              )
 
 

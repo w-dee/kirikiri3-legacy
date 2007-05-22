@@ -295,3 +295,5 @@ extern tRisseStringData data_ss_exit;
 static const tRisseString & ss_exit = *reinterpret_cast<const tRisseString *>(&data_ss_exit); //!< (static string)  "exit" メソッド名
 extern tRisseStringData data_ss_alive;
 static const tRisseString & ss_alive = *reinterpret_cast<const tRisseString *>(&data_ss_alive); //!< (static string)  "alive" プロパティ名
+extern tRisseStringData data_ss_CoroutineException;
+static const tRisseString & ss_CoroutineException = *reinterpret_cast<const tRisseString *>(&data_ss_CoroutineException); //!< (static string)  "CoroutineException" クラス名

@@ -714,6 +714,52 @@ public:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		"CoroutineException" クラス
+//---------------------------------------------------------------------------
+class tRisseCoroutineExceptionClass : public tRisseClassBase
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseCoroutineExceptionClass(tRisseScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「コルーチンは既に終了している」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCoroutineHasAlreadyExited(tRisseScriptEngine * engine);
+	//! @brief		「コルーチンは既に終了している」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCoroutineHasAlreadyExited()
+		{ ThrowCoroutineHasAlreadyExited(NULL); }
+
+	//! @brief		「コルーチンはまだ開始していない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCoroutineHasNotStartedYet(tRisseScriptEngine * engine);
+	//! @brief		「コルーチンはまだ開始していない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCoroutineHasNotStartedYet()
+		{ ThrowCoroutineHasNotStartedYet(NULL); }
+
+	//! @brief		「コルーチンは実行中でない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCoroutineIsNotRunning(tRisseScriptEngine * engine);
+	//! @brief		「コルーチンは実行中でない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCoroutineIsNotRunning()
+		{ ThrowCoroutineIsNotRunning(NULL); }
+
+};
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 } // namespace Risse

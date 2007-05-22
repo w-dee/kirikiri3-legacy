@@ -296,5 +296,7 @@ static risse_char v_ss_exit[] = { tRisseStringData::MightBeShared,'e','x','i','t
 tRisseStringData data_ss_exit = { v_ss_exit+1,4 }; /*  "exit" メソッド名 */
 static risse_char v_ss_alive[] = { tRisseStringData::MightBeShared,'a','l','i','v','e',0,0xda565b2e }; /*!< string of  "alive" プロパティ名 */
 tRisseStringData data_ss_alive = { v_ss_alive+1,5 }; /*  "alive" プロパティ名 */
+static risse_char v_ss_CoroutineException[] = { tRisseStringData::MightBeShared,'C','o','r','o','u','t','i','n','e','E','x','c','e','p','t','i','o','n',0,0x40b8a64e }; /*!< string of  "CoroutineException" クラス名 */
+tRisseStringData data_ss_CoroutineException = { v_ss_CoroutineException+1,18 }; /*  "CoroutineException" クラス名 */
 
 

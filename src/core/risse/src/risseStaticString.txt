@@ -85,3 +85,4 @@ ss_run								run								#!< "run" メソッド名
 ss_yield							yield							#!< "yield" メソッド名
 ss_exit								exit							#!< "exit" メソッド名
 ss_alive							alive							#!< "alive" プロパティ名
+ss_CoroutineException				CoroutineException				#!< "CoroutineException" クラス名

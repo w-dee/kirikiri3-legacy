@@ -15,6 +15,7 @@
 #include "risseCharUtils.h"
 #include "risseAssert.h"
 #include "risseCoroutine.h"
+#include "risseExceptionClass.h"
 
 
 namespace Risse
@@ -367,6 +368,7 @@ public:
 	tRisseCoroutine * RisseCoroutine;
 	coroutine_type::self * CoroutineSelf;
 	bool Alive;
+	bool Running;
 
 	tRisseVariant ExceptionValue;
 
@@ -375,6 +377,7 @@ public:
 		RisseCoroutine = risse_coroutine;
 		CoroutineSelf = NULL;
 		Alive = true;
+		Running = false;
 	}
 
 private:
@@ -390,15 +393,18 @@ private:
 				tRisseMethodArgument::New(coro->RisseCoroutine->FunctionArg, arg),
 				coro->RisseCoroutine->FunctionArg);
 			coro->Alive = false;
+			coro->Running = false;
 		}
 		catch(const tRisseVariant * e)
 		{
 			coro->Alive = false;
+			coro->Running = false;
 			coro->ExceptionValue = *e;
 			throw;
 		}
 
 		coro->Alive = false;
+		coro->Running = false;
 		coro->CoroutineSelf = NULL;
 		return ret;
 	}
@@ -424,9 +430,11 @@ tRisseVariant tRisseCoroutine::Run(const tRisseVariant &arg)
 {
 	if(!Impl->Alive)
 	{
-		// TODO: 例外
+		// コルーチンは無効
+		tRisseCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited();
 	}
 
+	Impl->Running = true;
 	tRisseVariant ret;
 	try
 	{
@@ -434,8 +442,15 @@ tRisseVariant tRisseCoroutine::Run(const tRisseVariant &arg)
 	}
 	catch(coro::abnormal_exit & e)
 	{
+		Impl->Running = false;
 		throw new tRisseVariant(Impl->ExceptionValue);
 	}
+	catch(...)
+	{
+		Impl->Running = false;
+		throw;
+	}
+	Impl->Running = false;
 	return ret;
 }
 //---------------------------------------------------------------------------
@@ -446,7 +461,20 @@ tRisseVariant tRisseCoroutine::DoYield(const tRisseVariant &arg)
 {
 	if(!Impl->Alive)
 	{
-		// TODO: 例外
+		// コルーチンは無効
+		tRisseCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited();
+	}
+
+	if(!Impl->CoroutineSelf)
+	{
+		// コルーチンは開始していない
+		tRisseCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet();
+	}
+
+	if(!Impl->Running)
+	{
+		// コルーチンは待ちの状態 (実行中でない)
+		tRisseCoroutineExceptionClass::ThrowCoroutineIsNotRunning();
 	}
 
 	return Impl->CoroutineSelf->yield(arg).get<1>();

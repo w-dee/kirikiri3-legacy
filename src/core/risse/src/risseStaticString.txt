@@ -68,6 +68,7 @@ ss_ArgumentException				ArgumentException				#!< "ArgumentException" クラス�
 ss_IllegalArgumentException			IllegalArgumentException		#!< "IllegalArgumentException" クラス名
 ss_BadArgumentCountException		BadArgumentCountException		#!< "BadArgumentException" クラス名
 ss_IllegalMemberAccessException		IllegalMemberAccessException	#!< "IllegalMemberAccessException" クラス名
+ss_InsufficientResourceException	InsufficientResourceException	#!< "InsufficientResourceException" クラス名
 ss_IOException						IOException						#!< "IOException" クラス名
 ss_CharConversionException			CharConversionException			#!< "CharConversionException" クラス名
 ss_UnsupportedOperationException	UnsupportedOperationException	#!< "UnsupportedOperationException" クラス名
@@ -85,4 +86,5 @@ ss_run								run								#!< "run" メソッド名
 ss_yield							yield							#!< "yield" メソッド名
 ss_exit								exit							#!< "exit" メソッド名
 ss_alive							alive							#!< "alive" プロパティ名
+ss_dispose							dispose							#!< "dispose" メソッド名
 ss_CoroutineException				CoroutineException				#!< "CoroutineException" クラス名

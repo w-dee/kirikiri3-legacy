@@ -262,6 +262,8 @@ static risse_char v_ss_BadArgumentCountException[] = { tRisseStringData::MightBe
 tRisseStringData data_ss_BadArgumentCountException = { v_ss_BadArgumentCountException+1,25 }; /*  "BadArgumentException" クラス名 */
 static risse_char v_ss_IllegalMemberAccessException[] = { tRisseStringData::MightBeShared,'I','l','l','e','g','a','l','M','e','m','b','e','r','A','c','c','e','s','s','E','x','c','e','p','t','i','o','n',0,0x5de4d54f }; /*!< string of  "IllegalMemberAccessException" クラス名 */
 tRisseStringData data_ss_IllegalMemberAccessException = { v_ss_IllegalMemberAccessException+1,28 }; /*  "IllegalMemberAccessException" クラス名 */
+static risse_char v_ss_InsufficientResourceException[] = { tRisseStringData::MightBeShared,'I','n','s','u','f','f','i','c','i','e','n','t','R','e','s','o','u','r','c','e','E','x','c','e','p','t','i','o','n',0,0x63713389 }; /*!< string of  "InsufficientResourceException" クラス名 */
+tRisseStringData data_ss_InsufficientResourceException = { v_ss_InsufficientResourceException+1,29 }; /*  "InsufficientResourceException" クラス名 */
 static risse_char v_ss_IOException[] = { tRisseStringData::MightBeShared,'I','O','E','x','c','e','p','t','i','o','n',0,0x67ff1a24 }; /*!< string of  "IOException" クラス名 */
 tRisseStringData data_ss_IOException = { v_ss_IOException+1,11 }; /*  "IOException" クラス名 */
 static risse_char v_ss_CharConversionException[] = { tRisseStringData::MightBeShared,'C','h','a','r','C','o','n','v','e','r','s','i','o','n','E','x','c','e','p','t','i','o','n',0,0xfcb9ff84 }; /*!< string of  "CharConversionException" クラス名 */
@@ -296,6 +298,8 @@ static risse_char v_ss_exit[] = { tRisseStringData::MightBeShared,'e','x','i','t
 tRisseStringData data_ss_exit = { v_ss_exit+1,4 }; /*  "exit" メソッド名 */
 static risse_char v_ss_alive[] = { tRisseStringData::MightBeShared,'a','l','i','v','e',0,0xda565b2e }; /*!< string of  "alive" プロパティ名 */
 tRisseStringData data_ss_alive = { v_ss_alive+1,5 }; /*  "alive" プロパティ名 */
+static risse_char v_ss_dispose[] = { tRisseStringData::MightBeShared,'d','i','s','p','o','s','e',0,0xea4edfc6 }; /*!< string of  "dispose" メソッド名 */
+tRisseStringData data_ss_dispose = { v_ss_dispose+1,7 }; /*  "dispose" メソッド名 */
 static risse_char v_ss_CoroutineException[] = { tRisseStringData::MightBeShared,'C','o','r','o','u','t','i','n','e','E','x','c','e','p','t','i','o','n',0,0x40b8a64e }; /*!< string of  "CoroutineException" クラス名 */
 tRisseStringData data_ss_CoroutineException = { v_ss_CoroutineException+1,18 }; /*  "CoroutineException" クラス名 */
 

@@ -263,6 +263,32 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"InsufficientResourceException" クラス
+//---------------------------------------------------------------------------
+class tRisseInsufficientResourceExceptionClass : public tRisseClassBase
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseInsufficientResourceExceptionClass(tRisseScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public:
+	//! @brief		「コルーチンを作成できない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCouldNotCreateCoroutine(tRisseScriptEngine * engine);
+	//! @brief		「コルーチンを作成できない」例外を発生
+	static void ThrowCouldNotCreateCoroutine() { ThrowCouldNotCreateCoroutine(NULL); }
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		"IOException" クラス
 //---------------------------------------------------------------------------
 class tRisseIOExceptionClass : public tRisseClassBase
@@ -753,6 +779,14 @@ public:
 	//! @param		engine		スクリプトエンジンインスタンス
 	static void ThrowCoroutineIsNotRunning()
 		{ ThrowCoroutineIsNotRunning(NULL); }
+
+	//! @brief		「コルーチンは実行中」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCoroutineIsRunning(tRisseScriptEngine * engine);
+	//! @brief		「コルーチンは実行中」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCoroutineIsRunning()
+		{ ThrowCoroutineIsRunning(NULL); }
 
 };
 //---------------------------------------------------------------------------

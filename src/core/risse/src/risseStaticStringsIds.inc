@@ -261,6 +261,8 @@ extern tRisseStringData data_ss_BadArgumentCountException;
 static const tRisseString & ss_BadArgumentCountException = *reinterpret_cast<const tRisseString *>(&data_ss_BadArgumentCountException); //!< (static string)  "BadArgumentException" クラス名
 extern tRisseStringData data_ss_IllegalMemberAccessException;
 static const tRisseString & ss_IllegalMemberAccessException = *reinterpret_cast<const tRisseString *>(&data_ss_IllegalMemberAccessException); //!< (static string)  "IllegalMemberAccessException" クラス名
+extern tRisseStringData data_ss_InsufficientResourceException;
+static const tRisseString & ss_InsufficientResourceException = *reinterpret_cast<const tRisseString *>(&data_ss_InsufficientResourceException); //!< (static string)  "InsufficientResourceException" クラス名
 extern tRisseStringData data_ss_IOException;
 static const tRisseString & ss_IOException = *reinterpret_cast<const tRisseString *>(&data_ss_IOException); //!< (static string)  "IOException" クラス名
 extern tRisseStringData data_ss_CharConversionException;
@@ -295,5 +297,7 @@ extern tRisseStringData data_ss_exit;
 static const tRisseString & ss_exit = *reinterpret_cast<const tRisseString *>(&data_ss_exit); //!< (static string)  "exit" メソッド名
 extern tRisseStringData data_ss_alive;
 static const tRisseString & ss_alive = *reinterpret_cast<const tRisseString *>(&data_ss_alive); //!< (static string)  "alive" プロパティ名
+extern tRisseStringData data_ss_dispose;
+static const tRisseString & ss_dispose = *reinterpret_cast<const tRisseString *>(&data_ss_dispose); //!< (static string)  "dispose" メソッド名
 extern tRisseStringData data_ss_CoroutineException;
 static const tRisseString & ss_CoroutineException = *reinterpret_cast<const tRisseString *>(&data_ss_CoroutineException); //!< (static string)  "CoroutineException" クラス名

@@ -31,6 +31,7 @@ void RisseInitCoroutine();
 
 
 class tRisseCoroutineImpl;
+class tRisseCoroutinePtr;
 //---------------------------------------------------------------------------
 //! @brief		コルーチンの実装クラス
 //! @note		コルーチンに関する実装はすべてこのクラス内で隠蔽することにする
@@ -40,9 +41,10 @@ class tRisseCoroutine : public tRisseCollectee
 	friend class tRisseCoroutineImpl;
 
 	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
-	tRisseCoroutineImpl * Impl; //!< 実装クラス
+	tRisseCoroutinePtr * Ptr; //!< 実装クラス
 	tRisseVariant Function; //!< 呼び出し先の関数
 	tRisseVariant FunctionArg; //!< 呼び出し先関数の先頭の引数
+	const tRisseVariant * ExceptionValue; //!< コルーチン中で例外が発生した場合、その値
 
 public:
 	//! @brief		コンストラクタ
@@ -70,7 +72,7 @@ public:
 	bool GetAlive() const;
 
 	//! @brief		コルーチンを破棄する
-	void Exit();
+	void Dispose();
 
 };
 //---------------------------------------------------------------------------

@@ -86,7 +86,7 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 	// CodeBlockRelocations のコピー
 	const gc_vector<std::pair<risse_size, risse_size> > & cb_relocations =
 			gen->GetCodeBlockRelocations();
-	CodeBlockRelocations = new tRelocation[CodeBlockRelocationSize = cb_relocations.size()];
+	CodeBlockRelocations = new (GC) tRelocation[CodeBlockRelocationSize = cb_relocations.size()];
 	ind = 0;
 	for(gc_vector<std::pair<risse_size, risse_size> >::const_iterator i =
 		cb_relocations.begin(); i != cb_relocations.end(); i++, ind++)
@@ -95,7 +95,7 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 	// TryIdentifierRelocations のコピー
 	const gc_vector<std::pair<risse_size, risse_size> > & ti_relocations =
 			gen->GetTryIdentifierRelocations();
-	TryIdentifierRelocations = new tRelocation[TryIdentifierRelocationSize = ti_relocations.size()];
+	TryIdentifierRelocations = new (GC) tRelocation[TryIdentifierRelocationSize = ti_relocations.size()];
 	ind = 0;
 	for(gc_vector<std::pair<risse_size, risse_size> >::const_iterator i =
 		ti_relocations.begin(); i != ti_relocations.end(); i++, ind++)
@@ -108,7 +108,7 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 
 	// CodeToSourcePosition のコピー
 	const gc_vector<std::pair<risse_size, risse_size> > & cb_code_src = gen->GetCodeToSourcePosition();
-	CodeToSourcePosition = new std::pair<risse_size, risse_size>[cb_code_src.size()];
+	CodeToSourcePosition = new (GC) std::pair<risse_size, risse_size>[cb_code_src.size()];
 	ind = 0;
 	for(gc_vector<std::pair<risse_size, risse_size> >::const_iterator i = cb_code_src.begin();
 		i != cb_code_src.end(); i++, ind++)

@@ -197,7 +197,7 @@ risse_size tRisseScriptBlockBase::AddCodeBlock(tRisseCodeBlock * codeblock)
 risse_size tRisseScriptBlockBase::AddTryIdentifier()
 {
 	RISSE_ASSERT(TryIdentifiers != NULL); // このメソッドが呼ばれるのは Fixup 以前でなければならない
-	TryIdentifiers->push_back(reinterpret_cast<void*>(new int(0)));
+	TryIdentifiers->push_back(reinterpret_cast<void*>(new (GC) int(0)));
 		// 注意 int を new で確保し、そのアドレスを void にキャストして
 		// TryIdentifiers に追加している。これにより、TryIdentifiers は独立した
 		// ポインタをそれぞれが持つことになり、識別に使える。これは、

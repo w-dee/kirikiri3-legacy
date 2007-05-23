@@ -209,7 +209,7 @@ void * RisseAlignedAlloc(risse_uint bytes, risse_uint align_bits)
 {
 	// aligned memory allocation is to be used to gain performance on some processors.
 	risse_int align = 1 << align_bits;
-	void *ptr = (void *)(new risse_uint8[bytes + align + sizeof(void*)]);
+	void *ptr = (void *)(new (GC) risse_uint8[bytes + align + sizeof(void*)]);
 	void *org_ptr = ptr;
 	tRissePointerSizedInteger::type *iptr =
 		reinterpret_cast<tRissePointerSizedInteger::type *>(&ptr);

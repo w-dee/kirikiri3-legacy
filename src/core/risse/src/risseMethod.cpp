@@ -60,7 +60,7 @@ tRisseMethodArgument & tRisseMethodArgument::Allocate(risse_size ac, risse_size 
 		sizeof(tRisseMethodArgumentOf<2>) -
 		sizeof(tRisseMethodArgumentOf<1>) == sizeof(tRisseVariant *));
 
-	void * alloc = new risse_uint8[
+	void * alloc = new (GC) risse_uint8[
 		sizeof(tRisseMethodArgumentOf<1>) - sizeof(tRisseVariant *) +
 		sizeof(tRisseVariant) * (ac+bc)];
 

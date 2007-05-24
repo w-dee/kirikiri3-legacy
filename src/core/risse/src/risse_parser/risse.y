@@ -380,6 +380,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	call_block_list_opt call_block_list
 	func_decl_block_list func_decl_block_at_least_one
 	call_block_alt_list call_block_alt_list_opt
+	func_decl_block_alt_opt func_decl_block_at_least_one_comma
 
 
 /* 演算子の優先順位 */
@@ -734,14 +735,17 @@ func_decl_arg_head
 ;
 
 func_decl_arg
-	: func_decl_arg_head func_decl_arg_elm_collapse ")" {EI}
-	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($5); }
-	| func_decl_arg_head func_decl_arg_list ")" {EI}
-	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AssignBlocks($5); }
+	: func_decl_arg_head func_decl_arg_elm_collapse func_decl_block_alt_opt ")" {EI}
+	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AddBlocks($3);
+											  C(FuncDecl, $$)->AddBlocks($6); }
+	| func_decl_arg_head func_decl_arg_list func_decl_block_alt_opt ")" {EI}
+	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AddBlocks($3);
+											  C(FuncDecl, $$)->AddBlocks($6); }
 	| func_decl_arg_head func_decl_arg_at_least_one ","
-	  func_decl_arg_elm_collapse ")" {EI}
+	  func_decl_arg_elm_collapse func_decl_block_alt_opt ")" {EI}
 	  func_decl_block_list					{ $$ = $2; C(FuncDecl, $$)->AddChild($4);
-	  										  C(FuncDecl, $$)->AssignBlocks($7); }
+											  C(FuncDecl, $$)->AddBlocks($5);
+											  C(FuncDecl, $$)->AddBlocks($8); }
 ;
 
 /* the argument list */
@@ -771,6 +775,12 @@ func_decl_arg_elm_collapse
 */
 ;
 
+func_decl_block_alt_opt
+	: 										{ $$ = NULL; }
+	| ";" onl func_decl_block_at_least_one_comma
+											{ $$ = $3; }
+;
+
 func_decl_block_list
 	: onl									{ $$ = NULL; }
 	| func_decl_block_at_least_one			{ $$ = $1; }
@@ -781,6 +791,14 @@ func_decl_block_at_least_one
 											  $$->push_back(N(FuncDeclBlock)(@1.first, *$1)); }
 	| func_decl_block_at_least_one T_ID onl	{ $$ = $1;
 											  $$->push_back(N(FuncDeclBlock)(@2.first, *$2)); }
+;
+
+func_decl_block_at_least_one_comma
+	: T_ID onl								{ $$ = new tRisseASTArray();
+											  $$->push_back(N(FuncDeclBlock)(@1.first, *$1)); }
+	| func_decl_block_at_least_one "," onl T_ID onl
+											{ $$ = $1;
+											  $$->push_back(N(FuncDeclBlock)(@2.first, *$4)); }
 ;
 
 

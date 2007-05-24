@@ -2446,14 +2446,12 @@ public:
 	//! @return		関数名
 	const tRisseString & GetName() const { return Name; }
 
-	//! @brief		ブロック引数の配列を設定する
-	//! @param		blocks	ブロック引数の配列(NULL=クリア)
-	void AssignBlocks(const tRisseASTArray * blocks)
+	//! @brief		ブロック引数の配列を追加する
+	//! @param		array	ブロック引数の配列(NULL=なにもしない)
+	void AddBlocks(const tRisseASTArray * array)
 	{
-		if(blocks)
-			Blocks = *blocks;
-		else
-			Blocks.clear();
+		if(array)
+			Blocks.insert(Blocks.end(), array->begin(), array->end());
 	}
 
 	//! @brief		属性を設定する

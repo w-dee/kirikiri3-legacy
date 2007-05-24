@@ -244,7 +244,7 @@ public:
 	//! @note		n の範囲はチェックしていない
 	const tRisseVariant & GetBlockArgument (risse_size n) const
 	{
-		return *Arguments[n];
+		return *Arguments[n+ArgumentCount];
 	}
 
 	//! @brief		普通の引数へ値への参照をセットする

@@ -2822,6 +2822,24 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		exp_flag = RisseFuncCallFlag_Omitted; //  関数呼び出しは ... を伴っている
 	}
 
+	// ブロック引数のうち、関数宣言やブロックでないものはここで先に内容を行ってしまう。
+	// これは、ブロック式中に入れ子のブロックがあった場合にアクセスマップが混乱するため。
+	// また、引数の並び順とそれらが評価される順序は同一でない可能性があるということ。
+	gc_vector<tRisseSSAVariable *> non_func_block_arg_vec;
+	for(tRisseASTArray::const_reverse_iterator i = Blocks.rbegin();
+		i != Blocks.rend(); i++) // あとで取り出しやすいようにここでは逆順に処理する
+	{
+		if((*i)->GetType() != antFuncDecl)
+		{
+			// 普通の式
+			tRisseSSAVariable * arg_var =
+					(*i)->GenerateReadSSA(form);
+
+			// 配列にpush
+			non_func_block_arg_vec.push_back(arg_var);
+		}
+	}
+
 	// ブロック引数を処理
 	tRisseSSAVariableAccessMap * access_map = NULL;
 	risse_size break_try_idx = risse_size_max;
@@ -2886,14 +2904,18 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		}
 		else
 		{
-			// 普通の式
-			tRisseSSAVariable * arg_var =
-					(*i)->GenerateReadSSA(form);
+			// すでに先に作成しておいた物から引っ張ってくる
+			RISSE_ASSERT(non_func_block_arg_vec.size() != 0);
+			tRisseSSAVariable * arg_var = non_func_block_arg_vec.back();
+			non_func_block_arg_vec.pop_back();
 
 			// 配列にpush
 			arg_vec.push_back(arg_var);
 		}
 	}
+
+	RISSE_ASSERT(non_func_block_arg_vec.size() == 0); // non_func_block_arg_vec はすでに使い切っているはず
+
 
 	// 遅延評価ブロックで使用された変数の処理
 	if(access_map) form->ListVariablesForLazyBlock(GetPosition(), access_map);

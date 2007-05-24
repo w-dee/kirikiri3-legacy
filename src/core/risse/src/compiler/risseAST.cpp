@@ -2833,10 +2833,12 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		bool block_found = false;
 		for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
 		{
-			RISSE_ASSERT((*i)->GetType() == antFuncDecl);
-			tRisseASTNode_FuncDecl * block_arg =
-				reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
-			if(block_arg->GetIsBlock()) { block_found = true; break; }
+			if((*i)->GetType() == antFuncDecl)
+			{
+				tRisseASTNode_FuncDecl * block_arg =
+					reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
+				if(block_arg->GetIsBlock()) { block_found = true; break; }
+			}
 		}
 		if(block_found)
 		{
@@ -2870,16 +2872,27 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	// 各ブロックの内容を生成
 	for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
 	{
-		RISSE_ASSERT((*i)->GetType() == antFuncDecl);
-		tRisseASTNode_FuncDecl * block_arg =
-			reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
+		if((*i)->GetType() == antFuncDecl)
+		{
+			tRisseASTNode_FuncDecl * block_arg =
+				reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
 
-		// ブロックの中身を 遅延評価ブロックとして評価する
-		tRisseSSAVariable * lazyblock_var =
-			block_arg->GenerateFuncDecl(form, access_map, try_id);
+			// ブロックの中身を 遅延評価ブロックとして評価する
+			tRisseSSAVariable * lazyblock_var =
+				block_arg->GenerateFuncDecl(form, access_map, try_id);
 
-		// 配列にpush
-		arg_vec.push_back(lazyblock_var);
+			// 配列にpush
+			arg_vec.push_back(lazyblock_var);
+		}
+		else
+		{
+			// 普通の式
+			tRisseSSAVariable * arg_var =
+					(*i)->GenerateReadSSA(form);
+
+			// 配列にpush
+			arg_vec.push_back(arg_var);
+		}
 	}
 
 	// 遅延評価ブロックで使用された変数の処理

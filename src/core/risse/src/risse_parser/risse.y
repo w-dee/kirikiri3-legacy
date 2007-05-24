@@ -359,7 +359,10 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	variable_id variable_id_list
 	func_def func_def_inner
 	func_decl_arg func_decl_arg_list func_decl_arg_at_least_one
-	func_decl_arg_elm func_decl_arg_elm_collapse call_block call_block_arg_opt
+	func_decl_arg_elm func_decl_arg_elm_collapse
+	call_inline_block call_block
+	call_inline_block_arg_opt
+	call_block_alt_arg
 	property_def property_def_inner
 	property_expr_def property_expr_def_inner
 	property_handler_def_list
@@ -376,6 +379,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 %type <array>
 	call_block_list_opt call_block_list
 	func_decl_block_list func_decl_block_at_least_one
+	call_block_alt_list call_block_alt_list_opt
 
 
 /* 演算子の優先順位 */
@@ -1216,7 +1220,7 @@ decl_name_expr
 /* an expression for function call */
 func_call_expr
 	: func_call_expr_body				{ LX->SetFuncCallReduced(); }
-	  call_block_list_opt				{ $$ = $1; C(FuncCall, $$)->AssignBlocks($3); }
+	  call_block_list_opt				{ $$ = $1; C(FuncCall, $$)->AddBlocks($3); }
 ;
 
 func_call_expr_head
@@ -1224,15 +1228,16 @@ func_call_expr_head
 ;
 
 func_call_expr_body
-	: func_call_expr_head call_arg_list ")" {EI}
-						/*%dprec 1*/	{ $$ = $2; C(FuncCall, $$)->SetExpression($1); }
+	: func_call_expr_head call_arg_list call_block_alt_list_opt ")" {EI}
+						/*%dprec 1*/	{ $$ = $2; C(FuncCall, $$)->SetExpression($1);
+										  C(FuncCall, $$)->AddBlocks($3); }
 	| func_call_expr_head onl "..." onl ")" {EI}
 										{ $$ = N(FuncCall)(@2.first, true);
 										  C(FuncCall, $$)->SetExpression($1); }
 	| func_call_expr_head onl ")" {EI}
 						/*%dprec 2*/	{ $$ = N(FuncCall)(@2.first, false);
 										  C(FuncCall, $$)->SetExpression($1); }
-		/* このルールは "(" と ")" の間で下記の 「call_arg が empty」 のルールと
+		/* このルールは "(" と ")" の間で下記の 「call_arg が onlのみ」 のルールと
 		  シフト・還元競合を起こす(こちらが優先される) */
 ;
 
@@ -1249,7 +1254,25 @@ call_arg
 	| onl expr onl						{ $$ = N(FuncCallArg)(@2.first, $2, false); }
 ;
 
-/* block argument(s) for function call */
+/* block argument(s) for function call, within parenthesis */
+call_block_alt_list_opt
+	: 									{ $$ = NULL; }
+	| ";" call_block_alt_list			{ $$ = $2; }
+;
+
+call_block_alt_list
+	: call_block_alt_arg				{ $$ = new tRisseASTArray(); $$->push_back($1); }
+	| call_block_alt_list ","
+	  call_block_alt_arg				{ $$ = $1; $$->push_back($3); }
+;
+
+call_block_alt_arg
+	: onl expr onl						{ $$ = $2; }
+	| onl call_inline_block onl			{ $$ = $2; }
+;
+
+
+/* block argument(s) for function call, after closing parenthesis */
 /* このルールは 2つのシフト・還元競合を起こす */
 call_block_list_opt
 	: 									{ $$ = NULL; }
@@ -1262,15 +1285,19 @@ call_block_list
 ;
 
 call_block
-	: "{" {BR} call_block_arg_opt
+	: call_inline_block					{ $$ = $1; }
+	| func_expr_def						{ $$ = $1; }
+;
+
+call_inline_block
+	: "{" {BR} call_inline_block_arg_opt
 	  def_list "}" {ER}					{ $$ = $3;
 										  C(FuncDecl, $$)->SetBody($4);
 										  C(FuncDecl, $$)->SetIsBlock(true);
 										  C(Context, $4)->SetEndPosition(@$.last); }
-	| func_expr_def						{ $$ = $1; }
 ;
 
-call_block_arg_opt
+call_inline_block_arg_opt
 	: onl								{ $$ = N(FuncDecl)(@1.first); }
 	| onl "|" func_decl_arg_at_least_one
 	  "|" onl							{ $$ = $3; }

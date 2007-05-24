@@ -2301,14 +2301,12 @@ public:
 	//! @return		new による関数呼び出しかどうか
 	bool GetCreateNew() const { return CreateNew; }
 
-	//! @brief		ブロック引数を設定する
-	//! @param		list		ブロック引数の配列(null=配列のクリア)
-	void AssignBlocks(const tRisseASTArray * array)
+	//! @brief		ブロック引数を追加する
+	//! @param		list		ブロック引数の配列(null=何もしない)
+	void AddBlocks(const tRisseASTArray * array)
 	{
 		if(array)
-			Blocks = * array;
-		else
-			Blocks.clear();
+			Blocks.insert(Blocks.end(), array->begin(), array->end());
 	}
 
 	//! @brief		子ノードの個数を得る

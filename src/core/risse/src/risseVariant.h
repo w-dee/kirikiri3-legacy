@@ -113,6 +113,13 @@ public: // コンストラクタ/代入演算子
 	//! @param		ref		元となるオブジェクト
 	tRisseVariantBlock(const tRisseVariantBlock & ref)
 	{
+		* this = ref;
+	}
+
+	//! @brief		単純代入
+	//! @param		ref		元となるオブジェクト
+	tRisseVariantBlock & operator = (const tRisseVariantBlock & ref)
+	{
 		switch(ref.GetType())
 		{
 		case vtVoid:		Clear();					break;
@@ -124,6 +131,7 @@ public: // コンストラクタ/代入演算子
 		case vtBoolean:		Type = ref.Type;			break;
 		case vtObject:		*this = ref.AsObject();		break;
 		}
+		return *this;
 	}
 
 	//! @brief		コンストラクタ(integer型を作成)
@@ -170,6 +178,7 @@ public: // コンストラクタ/代入演算子
 	tRisseVariantBlock & operator = (const bool ref)
 	{
 		Type = ref?BooleanTrue:BooleanFalse;
+		Ptr = 0;
 		return *this;
 	}
 

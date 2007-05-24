@@ -14,6 +14,7 @@
 #ifndef __RisseGC_H__
 #define __RisseGC_H__
 
+//#define GC_DEBUG
 #include <gc.h>
 #include <gc_cpp.h>
 #include <gc_allocator.h>

@@ -19,6 +19,7 @@
 
 
 // #define RISSE_COROUTINE_DEBUG
+// #define RISSE_TRACK_FIBERS
 
 namespace Risse
 {
@@ -128,6 +129,7 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 
 extern "C" {
 #include "private/gc_priv.h"
+#include "gc_backptr.h"
 }
 
 namespace Risse {
@@ -142,6 +144,43 @@ struct fiber_data
 	CONTEXT context;
 };
 
+
+#ifdef RISSE_TRACK_FIBERS
+typedef std::vector<fiber_data *> fibers_t;
+static fibers_t fibers;
+static tRisseCriticalSection *fibers_critical_section = NULL;
+
+static void register_fiber(fiber_data * data)
+{
+	tRisseCriticalSection::tLocker lock(*fibers_critical_section);
+	fibers.push_back(data);
+}
+
+static void unregister_fiber(fiber_data * data)
+{
+	tRisseCriticalSection::tLocker lock(*fibers_critical_section);
+	fibers_t::iterator i = std::find(fibers.begin(), fibers.end(), data);
+	RISSE_ASSERT(i != fibers.end());
+	fibers.erase(i);
+}
+
+WINBASEAPI BOOL WINAPI RISSE_NEW_ConvertFiberToThread(void)
+{
+	// スレッドであれはGCが探すことができるハズなので
+	// スレッドに変換する前に登録を解除する
+	unregister_fiber(reinterpret_cast<fiber_data*>(GetCurrentFiber()));
+	return ConvertFiberToThread();
+}
+
+WINBASEAPI PVOID WINAPI RISSE_NEW_ConvertThreadToFiber(PVOID arg1)
+{
+	// ファイバに変換される場合は登録する
+	PVOID ret = ConvertThreadToFiber(arg1);
+	if(ret) register_fiber(reinterpret_cast<fiber_data*>(ret));
+	return ret;
+}
+#endif
+
 WINBASEAPI LPVOID WINAPI RISSE_NEW_CreateFiber(
 	SIZE_T arg1, LPFIBER_START_ROUTINE arg2, LPVOID arg3)
 {
@@ -152,20 +191,47 @@ WINBASEAPI LPVOID WINAPI RISSE_NEW_CreateFiber(
 	for(int i = 0; i < 3; i++) // 3回ほどリトライ
 	{
 		PVOID ret = CreateFiber(arg1, arg2, arg3);
-		if(ret) return ret; // 成功
+		if(ret)
+		{
+			// 成功
+#ifdef RISSE_TRACK_FIBERS
+			register_fiber(reinterpret_cast<fiber_data*>(ret));
+#endif
+			return ret;
+		}
+		GC_gcollect(); // コレクトしてみる
+#ifdef GC_DEBUG
+		GC_dump();
+		GC_generate_random_backtrace();
+#endif
 #ifdef RISSE_COROUTINE_DEBUG
 		fflush(stdout); fflush(stderr);
-		fprintf(stderr, "CreateFiber failed. retrying (%d) ...\n", i+1);
+		fprintf(stderr, "CreateFiber failed. fibers=%d, retried (%d)\n", (int)fibers.size(), (int)(i+1));
 		fflush(stdout); fflush(stderr);
 #endif
-		GC_gcollect(); // コレクトしてみる
 	}
 	tRisseInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine();
 	return NULL; // 失敗...
 }
 
+#ifdef RISSE_TRACK_FIBERS
+WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
+{
+	// ファイバの登録を解除する
+	unregister_fiber(reinterpret_cast<fiber_data*>(arg1));
+	DeleteFiber(arg1);
+}
+#endif
+
 // 関数の置き換えを宣言する
+#ifdef RISSE_TRACK_FIBERS
+	#define ConvertFiberToThread Risse::RISSE_NEW_ConvertFiberToThread
+	#define ConvertThreadToFiber Risse::RISSE_NEW_ConvertThreadToFiber
+#endif
 #define CreateFiber Risse::RISSE_NEW_CreateFiber
+#ifdef RISSE_TRACK_FIBERS
+	#define DeleteFiber Risse::RISSE_NEW_DeleteFiber
+#endif
 
 // typedef など
 typedef fiber_data tRisseCoroutineContext;
@@ -292,6 +358,9 @@ namespace Risse
 //---------------------------------------------------------------------------
 void RisseInitCoroutine()
 {
+#ifdef RISSE_TRACK_FIBERS
+	fibers_critical_section = new tRisseCriticalSection();
+#endif
 }
 //---------------------------------------------------------------------------
 

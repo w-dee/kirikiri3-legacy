@@ -61,6 +61,7 @@ namespace Risse
 
 //---------------------------------------------------------------------------
 //! @brief		Risseネイティブ関数
+//! @note		risseNativeBinder.h にもよく似た tRisseNativeBindFunction というのがあるので注意
 //---------------------------------------------------------------------------
 class tRisseNativeFunction : public tRisseObjectInterface
 {

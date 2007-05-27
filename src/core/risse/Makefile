@@ -62,6 +62,7 @@ CPPFILES =  \
 			src/risseMemberAttribute.cpp             \
 			src/risseMethod.cpp                      \
 			src/risseModuleClass.cpp                 \
+			src/risseNativeBinder.cpp                \
 			src/risseNativeFunction.cpp              \
 			src/risseNativeProperty.cpp              \
 			src/risseNumberClass.cpp                 \
@@ -130,6 +131,13 @@ src/risseStaticStringsData.inc src/risseStaticStringsIds.inc: \
 	ruby tools/static_strings.rb src/risseStaticString.txt \
 		src/risse_parser/words.txt \
 		src/risseStaticStringsIds.inc src/risseStaticStringsData.inc
+
+# risseNativeBinderTemplates.inc のコンパイル
+BIN_DEPS += src/risseNativeBinderTemplates.inc
+
+src/risseNativeBinderTemplates.inc: \
+		tools/create_binder.rb Makefile
+	ruby tools/create_binder.rb > src/risseNativeBinderTemplates.inc
 
 # risseParser.cpp と risseParser.inc のコンパイル
 BIN_DEPS += src/risse_parser/risseParser.inc

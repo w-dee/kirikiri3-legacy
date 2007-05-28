@@ -17,6 +17,7 @@
 #include "risseObject.h"
 #include "risseClass.h"
 #include "risseGC.h"
+#include "risseNativeBinder.h"
 
 namespace Risse
 {
@@ -38,6 +39,15 @@ public:
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
 	virtual ~tRisseArrayInstance() {;}
+
+	void construct();
+	void initialize(const tRisseNativeBindFunctionCallingInfo &info);
+	tRisseVariant iget(risse_offset ofs_index);
+	void iset(const tRisseVariant & value, risse_offset ofs_index);
+	void push(const tRisseMethodArgument & args);
+	tRisseVariant pop();
+	void unshift(const tRisseMethodArgument & args);
+	tRisseVariant shift();
 };
 //---------------------------------------------------------------------------
 

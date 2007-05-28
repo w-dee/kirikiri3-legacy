@@ -17,6 +17,35 @@
 
 namespace Risse
 {
+//---------------------------------------------------------------------------
+//! @brief		ネイティブ関数呼び出し情報
+//---------------------------------------------------------------------------
+class tRisseNativeBindFunctionCallingInfo
+{
+public:
+	tRisseScriptEngine * engine;		//!< スクリプトエンジンインスタンス
+	tRisseVariant * result;				//!< 結果の格納先 (NULLの場合は結果が要らない場合)
+	tRisseOperateFlags flags;			//!< オペレーションフラグ
+	const tRisseMethodArgument & args;	//!< 引数
+	const tRisseVariant &This;			//!< メソッドが実行されるべき"Thisオブジェクト"
+										//!< (NULL="Thisオブジェクト"を指定しない場合)
+
+	//! @brief		コンストラクタ
+	//! @param		engine_	スクリプトエンジンインスタンス
+	//! @param		result_	結果の格納先 (NULLの場合は結果が要らない場合)
+	//! @param		flags_	オペレーションフラグ
+	//! @param		args_	引数
+	//! @param		This_	メソッドが実行されるべき"Thisオブジェクト"
+	//!						(NULL="Thisオブジェクト"を指定しない場合)
+	tRisseNativeBindFunctionCallingInfo(
+		tRisseScriptEngine * engine_,
+		tRisseVariant * result_,
+		tRisseOperateFlags flags_,
+		const tRisseMethodArgument & args_,
+		const tRisseVariant &This_):
+		engine(engine_), result(result_), flags(flags_), args(args_), This(This_) {;}
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -26,12 +55,11 @@ class tRisseNativeBindFunction : public tRisseObjectInterface
 {
 protected:
 	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッドのtypedef
-	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
-	//! @param		flags	オペレーションフラグ
-	//! @param		args	引数
-	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	typedef void (*tCallee)(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS);
+	//! @param		_class		クラス
+	//! @param		f			呼び出し先オブジェクト
+	//! @param		info		呼び出し情報
+	typedef void (*tCallee)(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+		const tRisseNativeBindFunctionCallingInfo & info);
 
 	//! @brief		Risseクラスインスタンス
 	tRisseClassBase * Class; 
@@ -77,12 +105,11 @@ class tRisseNativeBindStaticFunction : public tRisseObjectInterface
 {
 protected:
 	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッドのtypedef
-	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
-	//! @param		flags	オペレーションフラグ
-	//! @param		args	引数
-	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	typedef void (*tCallee)(tRisseClassBase * _class, void (*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS);
+	//! @param		_class		クラス
+	//! @param		f			呼び出し先オブジェクト
+	//! @param		info		呼び出し情報
+	typedef void (*tCallee)(tRisseClassBase * _class, void (*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info);
 
 	//! @brief		Risseクラスインスタンス
 	tRisseClassBase * Class; 
@@ -140,7 +167,12 @@ inline tRisseVariant RisseToVariant(T s)
 //---------------------------------------------------------------------------
 // 整数系
 template <>
-inline tRisseVariant RisseToVariant<size_t>(size_t s)
+inline tRisseVariant RisseToVariant<risse_size>(risse_size s)
+{
+	return tRisseVariant((risse_int64)s);
+}
+template <>
+inline tRisseVariant RisseToVariant<risse_offset>(risse_offset s)
 {
 	return tRisseVariant((risse_int64)s);
 }
@@ -163,13 +195,74 @@ inline T RisseFromVariant(const tRisseVariant & v)
 //---------------------------------------------------------------------------
 // 整数系
 template <>
-inline size_t RisseFromVariant<size_t>(const tRisseVariant & v)
+inline risse_size RisseFromVariant<risse_size>(const tRisseVariant & v)
 {
-	return (size_t)(risse_int64)v;
+	return (risse_size)(risse_int64)v;
+}
+//---------------------------------------------------------------------------
+// 整数系
+template <>
+inline risse_offset RisseFromVariant<risse_offset>(const tRisseVariant & v)
+{
+	return (risse_offset)(risse_int64)v;
 }
 //---------------------------------------------------------------------------
 
 
+
+
+
+//---------------------------------------------------------------------------
+// 関数オブジェクトをサポートするためのテンプレート群
+//---------------------------------------------------------------------------
+// 型が同一かどうか
+template <typename A, typename B> struct tRisseIsSameType { enum { value = false }; };
+template <typename A> struct tRisseIsSameType<A,A> { enum { value = true }; };
+//---------------------------------------------------------------------------
+// メタ型 (tRisseNativeBindFunctionCallingInfo内の情報つまり関数の呼び出しに関する
+// 情報) なのか 実引数なのか
+// メタ型でない場合は value が 1 になる
+// メタ型の場合は RisseFromVariantOrCallingInfo でメタ型に変換できる
+template <typename T> struct tRisseIsFuncCallNonMetaType { enum { value = 1 }; };
+template <> struct tRisseIsFuncCallNonMetaType<const tRisseNativeBindFunctionCallingInfo &>
+													{ enum { value = 0 }; };
+template <> struct tRisseIsFuncCallNonMetaType<tRisseScriptEngine *>
+													{ enum { value = 0 }; };
+template <> struct tRisseIsFuncCallNonMetaType<const tRisseMethodArgument &>
+													{ enum { value = 0 }; };
+//---------------------------------------------------------------------------
+// T への、メソッドへの引数あるいは呼び出し情報からの変換
+template <typename T>
+inline T RisseFromVariantOrCallingInfo(const tRisseVariant & v,
+				const tRisseNativeBindFunctionCallingInfo & info)
+{
+	return RisseFromVariant<T>(v);
+}
+//---------------------------------------------------------------------------
+template <>
+inline const tRisseNativeBindFunctionCallingInfo &
+	RisseFromVariantOrCallingInfo<const tRisseNativeBindFunctionCallingInfo &>
+		(const tRisseVariant & v, const tRisseNativeBindFunctionCallingInfo & info)
+{
+	return info;
+}
+//---------------------------------------------------------------------------
+template <>
+inline tRisseScriptEngine *
+	RisseFromVariantOrCallingInfo<tRisseScriptEngine *>
+		(const tRisseVariant & v, const tRisseNativeBindFunctionCallingInfo & info)
+{
+	return info.engine;
+}
+//---------------------------------------------------------------------------
+template <>
+inline const tRisseMethodArgument &
+	RisseFromVariantOrCallingInfo<const tRisseMethodArgument &>
+		(const tRisseVariant & v, const tRisseNativeBindFunctionCallingInfo & info)
+{
+	return info.args;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -183,6 +276,11 @@ inline size_t RisseFromVariant<size_t>(const tRisseVariant & v)
 //---------------------------------------------------------------------------
 #include "risseNativeBinderTemplates.inc"
 //---------------------------------------------------------------------------
+
+/*
+	TODO: 呼び出しの効率化
+	RTTI が増えるかもしれないがのう
+*/
 
 }
 #endif

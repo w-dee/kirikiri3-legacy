@@ -149,9 +149,27 @@ public:
 	//! @param		name		名前
 	//! @param		value		値
 	//! @param		attrib		属性
+	//! @note		登録に失敗した場合は例外が発生する
 	void RegisterNormalMember(const tRisseString & name,
 						const tRisseVariant & value,
 						tRisseMemberAttribute attrib = tRisseMemberAttribute());
+
+	//! @brief		メンバを登録する
+	//! @param		name		名前
+	//! @param		value		値
+	//! @param		flags		フラグ
+	//! @note		登録に失敗した場合は例外が発生する
+	void RegisterMember(const tRisseString & name,
+						const tRisseVariant & value,
+						risse_uint32 flags = 0);
+
+	//! @brief		メンバを読み出す
+	//! @param		name		名前
+	//! @param		flags		フラグ
+	//! @return		読み出された内容
+	//! @note		読み出しに失敗した場合は例外が発生する
+	tRisseVariant ReadMember(const tRisseString & name,
+						risse_uint32 flags = 0);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

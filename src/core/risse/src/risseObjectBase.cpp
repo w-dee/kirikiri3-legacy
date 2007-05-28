@@ -602,5 +602,26 @@ void tRisseObjectBase::RegisterNormalMember(const tRisseString & name,
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tRisseObjectBase::RegisterMember(const tRisseString & name,
+						const tRisseVariant & value,
+						risse_uint32 flags)
+{
+	RaiseIfError(Write(name, flags, value, tRisseVariant(this)), name);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseObjectBase::ReadMember(const tRisseString & name,
+					risse_uint32 flags)
+{
+	tRisseVariant result;
+	RaiseIfError(Read(name, flags, result, tRisseVariant(this)), name);
+	return result;
+}
+//---------------------------------------------------------------------------
+
 } /* namespace Risse */
 

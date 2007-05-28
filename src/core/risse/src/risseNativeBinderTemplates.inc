@@ -2,21 +2,21 @@
 // このファイルは create_binder.rb により再生成されます
 
 
-
 	// static関数、非 void の戻り値用
 	template <typename CC, typename R >
 	class RisseBinderFunctor0s
 	{
-		static const size_t NumArgs = 0;
 		typedef R (*tFunc)();
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)());
+			info.args.ExpectArgumentCount(
+				0
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)());
 			else
 				((tFunc)f)();
 		}
@@ -25,31 +25,34 @@
 	template <typename CC >
 	class RisseBinderFunctor0s<CC, void >
 	{
-		static const size_t NumArgs = 0;
 		typedef void (*tFunc)();
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
+			info.args.ExpectArgumentCount(
+				0
+			);
 			((tFunc)f)();
-			if(result) result->Clear();
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R >
 	class RisseBinderFunctor0
 	{
-		static const size_t NumArgs = 0;
 		typedef R (IC::*tFunc)();
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))());
+			info.args.ExpectArgumentCount(
+				0
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))());
 			else
 				(instance->*((tFunc)f))();
 		}
@@ -58,15 +61,17 @@
 	template <typename CC, typename IC >
 	class RisseBinderFunctor0<CC, IC, void  >
 	{
-		static const size_t NumArgs = 0;
 		typedef void (IC::*tFunc)();
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			info.args.ExpectArgumentCount(
+				0
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			(instance->*((tFunc)f))();
-			if(result) result->Clear();
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -101,66 +106,88 @@
 	template <typename CC, typename R ,typename T0>
 	class RisseBinderFunctor1s
 	{
-		static const size_t NumArgs = 1;
 		typedef R (*tFunc)(T0);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0>
 	class RisseBinderFunctor1s<CC, void ,T0>
 	{
-		static const size_t NumArgs = 1;
 		typedef void (*tFunc)(T0);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0>
 	class RisseBinderFunctor1
 	{
-		static const size_t NumArgs = 1;
 		typedef R (IC::*tFunc)(T0);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0>
 	class RisseBinderFunctor1<CC, IC, void  ,T0>
 	{
-		static const size_t NumArgs = 1;
 		typedef void (IC::*tFunc)(T0);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -195,66 +222,110 @@
 	template <typename CC, typename R ,typename T0,typename T1>
 	class RisseBinderFunctor2s
 	{
-		static const size_t NumArgs = 2;
 		typedef R (*tFunc)(T0,T1);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1>
 	class RisseBinderFunctor2s<CC, void ,T0,T1>
 	{
-		static const size_t NumArgs = 2;
 		typedef void (*tFunc)(T0,T1);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1>
 	class RisseBinderFunctor2
 	{
-		static const size_t NumArgs = 2;
 		typedef R (IC::*tFunc)(T0,T1);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1>
 	class RisseBinderFunctor2<CC, IC, void  ,T0,T1>
 	{
-		static const size_t NumArgs = 2;
 		typedef void (IC::*tFunc)(T0,T1);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -289,66 +360,138 @@
 	template <typename CC, typename R ,typename T0,typename T1,typename T2>
 	class RisseBinderFunctor3s
 	{
-		static const size_t NumArgs = 3;
 		typedef R (*tFunc)(T0,T1,T2);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1,typename T2>
 	class RisseBinderFunctor3s<CC, void ,T0,T1,T2>
 	{
-		static const size_t NumArgs = 3;
 		typedef void (*tFunc)(T0,T1,T2);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2>
 	class RisseBinderFunctor3
 	{
-		static const size_t NumArgs = 3;
 		typedef R (IC::*tFunc)(T0,T1,T2);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1,typename T2>
 	class RisseBinderFunctor3<CC, IC, void  ,T0,T1,T2>
 	{
-		static const size_t NumArgs = 3;
 		typedef void (IC::*tFunc)(T0,T1,T2);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -383,66 +526,172 @@
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3>
 	class RisseBinderFunctor4s
 	{
-		static const size_t NumArgs = 4;
 		typedef R (*tFunc)(T0,T1,T2,T3);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1,typename T2,typename T3>
 	class RisseBinderFunctor4s<CC, void ,T0,T1,T2,T3>
 	{
-		static const size_t NumArgs = 4;
 		typedef void (*tFunc)(T0,T1,T2,T3);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3>
 	class RisseBinderFunctor4
 	{
-		static const size_t NumArgs = 4;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1,typename T2,typename T3>
 	class RisseBinderFunctor4<CC, IC, void  ,T0,T1,T2,T3>
 	{
-		static const size_t NumArgs = 4;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -477,66 +726,212 @@
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4>
 	class RisseBinderFunctor5s
 	{
-		static const size_t NumArgs = 5;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1,typename T2,typename T3,typename T4>
 	class RisseBinderFunctor5s<CC, void ,T0,T1,T2,T3,T4>
 	{
-		static const size_t NumArgs = 5;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4>
 	class RisseBinderFunctor5
 	{
-		static const size_t NumArgs = 5;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1,typename T2,typename T3,typename T4>
 	class RisseBinderFunctor5<CC, IC, void  ,T0,T1,T2,T3,T4>
 	{
-		static const size_t NumArgs = 5;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -571,66 +966,258 @@
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
 	class RisseBinderFunctor6s
 	{
-		static const size_t NumArgs = 6;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
 	class RisseBinderFunctor6s<CC, void ,T0,T1,T2,T3,T4,T5>
 	{
-		static const size_t NumArgs = 6;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
 	class RisseBinderFunctor6
 	{
-		static const size_t NumArgs = 6;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
 	class RisseBinderFunctor6<CC, IC, void  ,T0,T1,T2,T3,T4,T5>
 	{
-		static const size_t NumArgs = 6;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -665,66 +1252,310 @@
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
 	class RisseBinderFunctor7s
 	{
-		static const size_t NumArgs = 7;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
 	class RisseBinderFunctor7s<CC, void ,T0,T1,T2,T3,T4,T5,T6>
 	{
-		static const size_t NumArgs = 7;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
 	class RisseBinderFunctor7
 	{
-		static const size_t NumArgs = 7;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
 	class RisseBinderFunctor7<CC, IC, void  ,T0,T1,T2,T3,T4,T5,T6>
 	{
-		static const size_t NumArgs = 7;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -759,66 +1590,368 @@
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
 	class RisseBinderFunctor8s
 	{
-		static const size_t NumArgs = 8;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
 	class RisseBinderFunctor8s<CC, void ,T0,T1,T2,T3,T4,T5,T6,T7>
 	{
-		static const size_t NumArgs = 8;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
 	class RisseBinderFunctor8
 	{
-		static const size_t NumArgs = 8;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
 	class RisseBinderFunctor8<CC, IC, void  ,T0,T1,T2,T3,T4,T5,T6,T7>
 	{
-		static const size_t NumArgs = 8;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -853,66 +1986,432 @@
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
 	class RisseBinderFunctor9s
 	{
-		static const size_t NumArgs = 9;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
 	class RisseBinderFunctor9s<CC, void ,T0,T1,T2,T3,T4,T5,T6,T7,T8>
 	{
-		static const size_t NumArgs = 9;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
 	class RisseBinderFunctor9
 	{
-		static const size_t NumArgs = 9;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
 	class RisseBinderFunctor9<CC, IC, void  ,T0,T1,T2,T3,T4,T5,T6,T7,T8>
 	{
-		static const size_t NumArgs = 9;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -947,66 +2446,502 @@
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
 	class RisseBinderFunctor10s
 	{
-		static const size_t NumArgs = 10;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			if(result)
-				*result = RisseToVariant(((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]),RisseFromVariant<T9>(args[9])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value+
+				tRisseIsFuncCallNonMetaType<T9>::value
+			);
+			if(info.result)
+				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			],info)));
 			else
-				((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]),RisseFromVariant<T9>(args[9]));
+				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			],info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
 	class RisseBinderFunctor10s<CC, void ,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>
 	{
-		static const size_t NumArgs = 10;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
-			RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			((tFunc)f)(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]),RisseFromVariant<T9>(args[9]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value+
+				tRisseIsFuncCallNonMetaType<T9>::value
+			);
+			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
 	class RisseBinderFunctor10
 	{
-		static const size_t NumArgs = 10;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			if(result)
-				*result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]),RisseFromVariant<T9>(args[9])));
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value+
+				tRisseIsFuncCallNonMetaType<T9>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result)
+				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			],info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]),RisseFromVariant<T9>(args[9]));
+				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			],info));
 		}
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
 	class RisseBinderFunctor10<CC, IC, void  ,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>
 	{
-		static const size_t NumArgs = 10;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(), RISSE_NATIVEFUNCTION_CALLEE_ARGS)
+		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			args.ExpectArgumentCount(NumArgs);
-			IC * instance = This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariant<T0>(args[0]),RisseFromVariant<T1>(args[1]),RisseFromVariant<T2>(args[2]),RisseFromVariant<T3>(args[3]),RisseFromVariant<T4>(args[4]),RisseFromVariant<T5>(args[5]),RisseFromVariant<T6>(args[6]),RisseFromVariant<T7>(args[7]),RisseFromVariant<T8>(args[8]),RisseFromVariant<T9>(args[9]));
-			if(result) result->Clear();
+			info.args.ExpectArgumentCount(
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value+
+				tRisseIsFuncCallNonMetaType<T9>::value
+			);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
+				0
+			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value
+			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value
+			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value
+			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value
+			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value
+			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value
+			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value
+			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value
+			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
+				0+
+				tRisseIsFuncCallNonMetaType<T0>::value+
+				tRisseIsFuncCallNonMetaType<T1>::value+
+				tRisseIsFuncCallNonMetaType<T2>::value+
+				tRisseIsFuncCallNonMetaType<T3>::value+
+				tRisseIsFuncCallNonMetaType<T4>::value+
+				tRisseIsFuncCallNonMetaType<T5>::value+
+				tRisseIsFuncCallNonMetaType<T6>::value+
+				tRisseIsFuncCallNonMetaType<T7>::value+
+				tRisseIsFuncCallNonMetaType<T8>::value
+			],info));
+			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数

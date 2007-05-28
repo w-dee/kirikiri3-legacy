@@ -27,7 +27,8 @@ tRisseNativeBindFunction::tRetValue tRisseNativeBindFunction::Operate(RISSE_OBJE
 	if(code == ocFuncCall && name.IsEmpty())
 	{
 		// このオブジェクトに対する関数呼び出しなので Callee を呼ぶ
-		Callee(Class, TargetFunction, GetRTTI()->GetScriptEngine(), result, flags, args, This);
+		tRisseNativeBindFunctionCallingInfo info(GetRTTI()->GetScriptEngine(), result, flags, args, This);
+		Callee(Class, TargetFunction, info);
 		return rvNoError;
 	}
 
@@ -78,7 +79,8 @@ tRisseNativeBindStaticFunction::tRetValue tRisseNativeBindStaticFunction::Operat
 	if(code == ocFuncCall && name.IsEmpty())
 	{
 		// このオブジェクトに対する関数呼び出しなので Callee を呼ぶ
-		Callee(Class, TargetFunction, GetRTTI()->GetScriptEngine(), result, flags, args, This);
+		tRisseNativeBindFunctionCallingInfo info(GetRTTI()->GetScriptEngine(), result, flags, args, This);
+		Callee(Class, TargetFunction, info);
 		return rvNoError;
 	}
 

@@ -7,18 +7,21 @@
 	class RisseBinderFunctor0s
 	{
 		typedef R (*tFunc)();
+
+		enum { NumMandatoryArgs = 0 };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)());
+				*info.result = RisseToVariant(((tFunc)f)(
+));
 			else
-				((tFunc)f)();
+				((tFunc)f)(
+);
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -26,15 +29,17 @@
 	class RisseBinderFunctor0s<CC, void >
 	{
 		typedef void (*tFunc)();
+
+		enum { NumMandatoryArgs = 0 };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0
-			);
-			((tFunc)f)();
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+);
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -43,18 +48,21 @@
 	class RisseBinderFunctor0
 	{
 		typedef R (IC::*tFunc)();
+
+		enum { NumMandatoryArgs = 0 };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))());
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+));
 			else
-				(instance->*((tFunc)f))();
+				(instance->*((tFunc)f))(
+);
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -62,15 +70,17 @@
 	class RisseBinderFunctor0<CC, IC, void  >
 	{
 		typedef void (IC::*tFunc)();
+
+		enum { NumMandatoryArgs = 0 };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))();
+			(instance->*((tFunc)f))(
+);
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -107,23 +117,21 @@
 	class RisseBinderFunctor1s
 	{
 		typedef R (*tFunc)(T0);
+		enum { ArgIndex0=0 };
+		enum { NumMandatoryArgs = ArgIndex0+ tRisseIsFuncCallNonMetaType<T0>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -131,18 +139,17 @@
 	class RisseBinderFunctor1s<CC, void ,T0>
 	{
 		typedef void (*tFunc)(T0);
+		enum { ArgIndex0=0 };
+		enum { NumMandatoryArgs = ArgIndex0+ tRisseIsFuncCallNonMetaType<T0>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -151,23 +158,21 @@
 	class RisseBinderFunctor1
 	{
 		typedef R (IC::*tFunc)(T0);
+		enum { ArgIndex0=0 };
+		enum { NumMandatoryArgs = ArgIndex0+ tRisseIsFuncCallNonMetaType<T0>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -175,18 +180,17 @@
 	class RisseBinderFunctor1<CC, IC, void  ,T0>
 	{
 		typedef void (IC::*tFunc)(T0);
+		enum { ArgIndex0=0 };
+		enum { NumMandatoryArgs = ArgIndex0+ tRisseIsFuncCallNonMetaType<T0>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -223,30 +227,24 @@
 	class RisseBinderFunctor2s
 	{
 		typedef R (*tFunc)(T0,T1);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { NumMandatoryArgs = ArgIndex1+ tRisseIsFuncCallNonMetaType<T1>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -254,22 +252,19 @@
 	class RisseBinderFunctor2s<CC, void ,T0,T1>
 	{
 		typedef void (*tFunc)(T0,T1);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { NumMandatoryArgs = ArgIndex1+ tRisseIsFuncCallNonMetaType<T1>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -278,30 +273,24 @@
 	class RisseBinderFunctor2
 	{
 		typedef R (IC::*tFunc)(T0,T1);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { NumMandatoryArgs = ArgIndex1+ tRisseIsFuncCallNonMetaType<T1>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -309,22 +298,19 @@
 	class RisseBinderFunctor2<CC, IC, void  ,T0,T1>
 	{
 		typedef void (IC::*tFunc)(T0,T1);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { NumMandatoryArgs = ArgIndex1+ tRisseIsFuncCallNonMetaType<T1>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -361,39 +347,27 @@
 	class RisseBinderFunctor3s
 	{
 		typedef R (*tFunc)(T0,T1,T2);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { NumMandatoryArgs = ArgIndex2+ tRisseIsFuncCallNonMetaType<T2>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -401,27 +375,21 @@
 	class RisseBinderFunctor3s<CC, void ,T0,T1,T2>
 	{
 		typedef void (*tFunc)(T0,T1,T2);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { NumMandatoryArgs = ArgIndex2+ tRisseIsFuncCallNonMetaType<T2>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -430,39 +398,27 @@
 	class RisseBinderFunctor3
 	{
 		typedef R (IC::*tFunc)(T0,T1,T2);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { NumMandatoryArgs = ArgIndex2+ tRisseIsFuncCallNonMetaType<T2>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -470,27 +426,21 @@
 	class RisseBinderFunctor3<CC, IC, void  ,T0,T1,T2>
 	{
 		typedef void (IC::*tFunc)(T0,T1,T2);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { NumMandatoryArgs = ArgIndex2+ tRisseIsFuncCallNonMetaType<T2>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -527,50 +477,30 @@
 	class RisseBinderFunctor4s
 	{
 		typedef R (*tFunc)(T0,T1,T2,T3);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { NumMandatoryArgs = ArgIndex3+ tRisseIsFuncCallNonMetaType<T3>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -578,33 +508,23 @@
 	class RisseBinderFunctor4s<CC, void ,T0,T1,T2,T3>
 	{
 		typedef void (*tFunc)(T0,T1,T2,T3);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { NumMandatoryArgs = ArgIndex3+ tRisseIsFuncCallNonMetaType<T3>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -613,50 +533,30 @@
 	class RisseBinderFunctor4
 	{
 		typedef R (IC::*tFunc)(T0,T1,T2,T3);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { NumMandatoryArgs = ArgIndex3+ tRisseIsFuncCallNonMetaType<T3>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -664,33 +564,23 @@
 	class RisseBinderFunctor4<CC, IC, void  ,T0,T1,T2,T3>
 	{
 		typedef void (IC::*tFunc)(T0,T1,T2,T3);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { NumMandatoryArgs = ArgIndex3+ tRisseIsFuncCallNonMetaType<T3>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -727,63 +617,33 @@
 	class RisseBinderFunctor5s
 	{
 		typedef R (*tFunc)(T0,T1,T2,T3,T4);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { NumMandatoryArgs = ArgIndex4+ tRisseIsFuncCallNonMetaType<T4>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -791,40 +651,25 @@
 	class RisseBinderFunctor5s<CC, void ,T0,T1,T2,T3,T4>
 	{
 		typedef void (*tFunc)(T0,T1,T2,T3,T4);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { NumMandatoryArgs = ArgIndex4+ tRisseIsFuncCallNonMetaType<T4>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -833,63 +678,33 @@
 	class RisseBinderFunctor5
 	{
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { NumMandatoryArgs = ArgIndex4+ tRisseIsFuncCallNonMetaType<T4>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -897,40 +712,25 @@
 	class RisseBinderFunctor5<CC, IC, void  ,T0,T1,T2,T3,T4>
 	{
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { NumMandatoryArgs = ArgIndex4+ tRisseIsFuncCallNonMetaType<T4>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -967,78 +767,36 @@
 	class RisseBinderFunctor6s
 	{
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { NumMandatoryArgs = ArgIndex5+ tRisseIsFuncCallNonMetaType<T5>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -1046,48 +804,27 @@
 	class RisseBinderFunctor6s<CC, void ,T0,T1,T2,T3,T4,T5>
 	{
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { NumMandatoryArgs = ArgIndex5+ tRisseIsFuncCallNonMetaType<T5>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -1096,78 +833,36 @@
 	class RisseBinderFunctor6
 	{
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { NumMandatoryArgs = ArgIndex5+ tRisseIsFuncCallNonMetaType<T5>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -1175,48 +870,27 @@
 	class RisseBinderFunctor6<CC, IC, void  ,T0,T1,T2,T3,T4,T5>
 	{
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { NumMandatoryArgs = ArgIndex5+ tRisseIsFuncCallNonMetaType<T5>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -1253,95 +927,39 @@
 	class RisseBinderFunctor7s
 	{
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { NumMandatoryArgs = ArgIndex6+ tRisseIsFuncCallNonMetaType<T6>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -1349,57 +967,29 @@
 	class RisseBinderFunctor7s<CC, void ,T0,T1,T2,T3,T4,T5,T6>
 	{
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { NumMandatoryArgs = ArgIndex6+ tRisseIsFuncCallNonMetaType<T6>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -1408,95 +998,39 @@
 	class RisseBinderFunctor7
 	{
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { NumMandatoryArgs = ArgIndex6+ tRisseIsFuncCallNonMetaType<T6>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -1504,57 +1038,29 @@
 	class RisseBinderFunctor7<CC, IC, void  ,T0,T1,T2,T3,T4,T5,T6>
 	{
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { NumMandatoryArgs = ArgIndex6+ tRisseIsFuncCallNonMetaType<T6>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -1591,114 +1097,42 @@
 	class RisseBinderFunctor8s
 	{
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { NumMandatoryArgs = ArgIndex7+ tRisseIsFuncCallNonMetaType<T7>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -1706,67 +1140,31 @@
 	class RisseBinderFunctor8s<CC, void ,T0,T1,T2,T3,T4,T5,T6,T7>
 	{
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { NumMandatoryArgs = ArgIndex7+ tRisseIsFuncCallNonMetaType<T7>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -1775,114 +1173,42 @@
 	class RisseBinderFunctor8
 	{
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { NumMandatoryArgs = ArgIndex7+ tRisseIsFuncCallNonMetaType<T7>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -1890,67 +1216,31 @@
 	class RisseBinderFunctor8<CC, IC, void  ,T0,T1,T2,T3,T4,T5,T6,T7>
 	{
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { NumMandatoryArgs = ArgIndex7+ tRisseIsFuncCallNonMetaType<T7>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -1987,135 +1277,45 @@
 	class RisseBinderFunctor9s
 	{
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { ArgIndex8=ArgIndex7 + tRisseIsFuncCallNonMetaType<T7>::value };
+		enum { NumMandatoryArgs = ArgIndex8+ tRisseIsFuncCallNonMetaType<T8>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -2123,78 +1323,33 @@
 	class RisseBinderFunctor9s<CC, void ,T0,T1,T2,T3,T4,T5,T6,T7,T8>
 	{
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { ArgIndex8=ArgIndex7 + tRisseIsFuncCallNonMetaType<T7>::value };
+		enum { NumMandatoryArgs = ArgIndex8+ tRisseIsFuncCallNonMetaType<T8>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -2203,135 +1358,45 @@
 	class RisseBinderFunctor9
 	{
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { ArgIndex8=ArgIndex7 + tRisseIsFuncCallNonMetaType<T7>::value };
+		enum { NumMandatoryArgs = ArgIndex8+ tRisseIsFuncCallNonMetaType<T8>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -2339,78 +1404,33 @@
 	class RisseBinderFunctor9<CC, IC, void  ,T0,T1,T2,T3,T4,T5,T6,T7,T8>
 	{
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { ArgIndex8=ArgIndex7 + tRisseIsFuncCallNonMetaType<T7>::value };
+		enum { NumMandatoryArgs = ArgIndex8+ tRisseIsFuncCallNonMetaType<T8>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -2447,158 +1467,48 @@
 	class RisseBinderFunctor10s
 	{
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { ArgIndex8=ArgIndex7 + tRisseIsFuncCallNonMetaType<T7>::value };
+		enum { ArgIndex9=ArgIndex8 + tRisseIsFuncCallNonMetaType<T8>::value };
+		enum { NumMandatoryArgs = ArgIndex9+ tRisseIsFuncCallNonMetaType<T9>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value+
-				tRisseIsFuncCallNonMetaType<T9>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
-				*info.result = RisseToVariant(((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			],info)));
+				*info.result = RisseToVariant(((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T9>(tRisseIsFuncCallNonMetaType<T9>::value==1?info.args[ArgIndex9]:tRisseVariant::GetVoidObject(),info)));
 			else
-				((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			],info));
+				((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T9>(tRisseIsFuncCallNonMetaType<T9>::value==1?info.args[ArgIndex9]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// static関数、void の戻り値用の特殊化
@@ -2606,90 +1516,35 @@
 	class RisseBinderFunctor10s<CC, void ,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>
 	{
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { ArgIndex8=ArgIndex7 + tRisseIsFuncCallNonMetaType<T7>::value };
+		enum { ArgIndex9=ArgIndex8 + tRisseIsFuncCallNonMetaType<T8>::value };
+		enum { NumMandatoryArgs = ArgIndex9+ tRisseIsFuncCallNonMetaType<T9>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value+
-				tRisseIsFuncCallNonMetaType<T9>::value
-			);
-			((tFunc)f)(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			],info));
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			((tFunc)f)(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T9>(tRisseIsFuncCallNonMetaType<T9>::value==1?info.args[ArgIndex9]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};
@@ -2698,158 +1553,48 @@
 	class RisseBinderFunctor10
 	{
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { ArgIndex8=ArgIndex7 + tRisseIsFuncCallNonMetaType<T7>::value };
+		enum { ArgIndex9=ArgIndex8 + tRisseIsFuncCallNonMetaType<T8>::value };
+		enum { NumMandatoryArgs = ArgIndex9+ tRisseIsFuncCallNonMetaType<T9>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value+
-				tRisseIsFuncCallNonMetaType<T9>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
-				*info.result = RisseToVariant((instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			],info)));
+				*info.result = RisseToVariant((instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T9>(tRisseIsFuncCallNonMetaType<T9>::value==1?info.args[ArgIndex9]:tRisseVariant::GetVoidObject(),info)));
 			else
-				(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			],info));
+				(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T9>(tRisseIsFuncCallNonMetaType<T9>::value==1?info.args[ArgIndex9]:tRisseVariant::GetVoidObject(),info));
 		}
 	};
 	// 非static関数、void の戻り値用
@@ -2857,90 +1602,35 @@
 	class RisseBinderFunctor10<CC, IC, void  ,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>
 	{
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
+		enum { ArgIndex0=0 };
+		enum { ArgIndex1=ArgIndex0 + tRisseIsFuncCallNonMetaType<T0>::value };
+		enum { ArgIndex2=ArgIndex1 + tRisseIsFuncCallNonMetaType<T1>::value };
+		enum { ArgIndex3=ArgIndex2 + tRisseIsFuncCallNonMetaType<T2>::value };
+		enum { ArgIndex4=ArgIndex3 + tRisseIsFuncCallNonMetaType<T3>::value };
+		enum { ArgIndex5=ArgIndex4 + tRisseIsFuncCallNonMetaType<T4>::value };
+		enum { ArgIndex6=ArgIndex5 + tRisseIsFuncCallNonMetaType<T5>::value };
+		enum { ArgIndex7=ArgIndex6 + tRisseIsFuncCallNonMetaType<T6>::value };
+		enum { ArgIndex8=ArgIndex7 + tRisseIsFuncCallNonMetaType<T7>::value };
+		enum { ArgIndex9=ArgIndex8 + tRisseIsFuncCallNonMetaType<T8>::value };
+		enum { NumMandatoryArgs = ArgIndex9+ tRisseIsFuncCallNonMetaType<T9>::value };
+
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value+
-				tRisseIsFuncCallNonMetaType<T9>::value
-			);
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(RisseFromVariantOrCallingInfo<T0>(info.args[
-				0
-			],info),RisseFromVariantOrCallingInfo<T1>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value
-			],info),RisseFromVariantOrCallingInfo<T2>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value
-			],info),RisseFromVariantOrCallingInfo<T3>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value
-			],info),RisseFromVariantOrCallingInfo<T4>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value
-			],info),RisseFromVariantOrCallingInfo<T5>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value
-			],info),RisseFromVariantOrCallingInfo<T6>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value
-			],info),RisseFromVariantOrCallingInfo<T7>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value
-			],info),RisseFromVariantOrCallingInfo<T8>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value
-			],info),RisseFromVariantOrCallingInfo<T9>(info.args[
-				0+
-				tRisseIsFuncCallNonMetaType<T0>::value+
-				tRisseIsFuncCallNonMetaType<T1>::value+
-				tRisseIsFuncCallNonMetaType<T2>::value+
-				tRisseIsFuncCallNonMetaType<T3>::value+
-				tRisseIsFuncCallNonMetaType<T4>::value+
-				tRisseIsFuncCallNonMetaType<T5>::value+
-				tRisseIsFuncCallNonMetaType<T6>::value+
-				tRisseIsFuncCallNonMetaType<T7>::value+
-				tRisseIsFuncCallNonMetaType<T8>::value
-			],info));
+			(instance->*((tFunc)f))(
+						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info),
+						RisseFromVariantOrCallingInfo<T9>(tRisseIsFuncCallNonMetaType<T9>::value==1?info.args[ArgIndex9]:tRisseVariant::GetVoidObject(),info));
 			if(info.result) info.result->Clear();
 		}
 	};

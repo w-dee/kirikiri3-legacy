@@ -28,18 +28,19 @@ STDOUT.print "
 
 "
 
-# Risse関数に渡された引数の数を合計するためのコードを返す
-def num_args(n)
-	"\n" + "\t\t\t\t0" + n.append('+'){|n| "\n\t\t\t\ttRisseIsFuncCallNonMetaType<T#{n}>::value"} + "\n\t\t\t"
-end
-
 
 # 引数の数の分だけ
 (COUNT+1).times do |argnum|
 
 
-	# RisseFromVariantOrCallingInfo<T0>(info.args[0],info),RisseFromVariantOrCallingInfo<T1>(info.args[1],info), ...
-	args_list = argnum.join{|n|"RisseFromVariantOrCallingInfo<T#{n}>(info.args[#{num_args(n)}],info)"}
+	# ターゲット呼び出しの引数
+	args_list = "\n" +
+		argnum.join(",\n"){|n|"\t\t\t\t\t\tRisseFromVariantOrCallingInfo<T#{n}>(tRisseIsFuncCallNonMetaType<T#{n}>::value==1?info.args[ArgIndex#{n}]:tRisseVariant::GetVoidObject(),info)"}
+
+	# 引数インデックス
+	arg_index_enums = argnum.join("\n") {
+		|n|"\t\tenum { ArgIndex#{n}=#{n == 0 ? "0":"ArgIndex#{n-1} + tRisseIsFuncCallNonMetaType<T#{n-1}>::value"} };"}
+	arg_index_enums << "\n\t\tenum { NumMandatoryArgs = #{argnum == 0 ? "0" : "ArgIndex#{argnum-1}+ tRisseIsFuncCallNonMetaType<T#{argnum-1}>::value"} };\n"
 
 	STDOUT.print "
 	// static関数、非 void の戻り値用
@@ -47,12 +48,13 @@ end
 	class RisseBinderFunctor#{argnum}s
 	{
 		typedef R (*tFunc)(#{argnum.join{|n|"T#{n}"}});
+#{arg_index_enums}
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(#{num_args(argnum)});
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			if(info.result)
 				*info.result = RisseToVariant(((tFunc)f)(#{args_list}));
 			else
@@ -64,12 +66,13 @@ end
 	class RisseBinderFunctor#{argnum}s<CC, void #{argnum.append{|n|"T#{n}"}}>
 	{
 		typedef void (*tFunc)(#{argnum.join{|n|"T#{n}"}});
+#{arg_index_enums}
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(#{num_args(argnum)});
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			((tFunc)f)(#{args_list});
 			if(info.result) info.result->Clear();
 		}
@@ -79,11 +82,12 @@ end
 	class RisseBinderFunctor#{argnum}
 	{
 		typedef R (IC::*tFunc)(#{argnum.join{|n|"T#{n}"}});
+#{arg_index_enums}
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(#{num_args(argnum)});
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(#{args_list}));
@@ -96,11 +100,12 @@ end
 	class RisseBinderFunctor#{argnum}<CC, IC, void  #{argnum.append{|n|"T#{n}"}}>
 	{
 		typedef void (IC::*tFunc)(#{argnum.join{|n|"T#{n}"}});
+#{arg_index_enums}
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(#{num_args(argnum)});
+			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			(instance->*((tFunc)f))(#{args_list});
 			if(info.result) info.result->Clear();

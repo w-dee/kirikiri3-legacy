@@ -38,9 +38,9 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 );
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -79,9 +79,9 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 );
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -148,9 +148,9 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -189,9 +189,9 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -262,10 +262,10 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -308,10 +308,10 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -386,11 +386,11 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -437,11 +437,11 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -520,12 +520,12 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -576,12 +576,12 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -664,13 +664,13 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -725,13 +725,13 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T2>(tRisseIsFuncCallNonMetaType<T2>::value==1?info.args[ArgIndex2]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -818,6 +818,7 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -825,7 +826,6 @@
 						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -884,6 +884,7 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -891,7 +892,6 @@
 						RisseFromVariantOrCallingInfo<T3>(tRisseIsFuncCallNonMetaType<T3>::value==1?info.args[ArgIndex3]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -982,6 +982,7 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -990,7 +991,6 @@
 						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -1053,6 +1053,7 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -1061,7 +1062,6 @@
 						RisseFromVariantOrCallingInfo<T4>(tRisseIsFuncCallNonMetaType<T4>::value==1?info.args[ArgIndex4]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -1156,6 +1156,7 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -1165,7 +1166,6 @@
 						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -1232,6 +1232,7 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -1241,7 +1242,6 @@
 						RisseFromVariantOrCallingInfo<T5>(tRisseIsFuncCallNonMetaType<T5>::value==1?info.args[ArgIndex5]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -1340,6 +1340,7 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -1350,7 +1351,6 @@
 						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -1421,6 +1421,7 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -1431,7 +1432,6 @@
 						RisseFromVariantOrCallingInfo<T6>(tRisseIsFuncCallNonMetaType<T6>::value==1?info.args[ArgIndex6]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数
@@ -1534,6 +1534,7 @@
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			if(info.result) info.result->Clear();
 			((tFunc)f)(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -1545,7 +1546,6 @@
 						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T9>(tRisseIsFuncCallNonMetaType<T9>::value==1?info.args[ArgIndex9]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -1620,6 +1620,7 @@
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(
 						RisseFromVariantOrCallingInfo<T0>(tRisseIsFuncCallNonMetaType<T0>::value==1?info.args[ArgIndex0]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T1>(tRisseIsFuncCallNonMetaType<T1>::value==1?info.args[ArgIndex1]:tRisseVariant::GetVoidObject(),info),
@@ -1631,7 +1632,6 @@
 						RisseFromVariantOrCallingInfo<T7>(tRisseIsFuncCallNonMetaType<T7>::value==1?info.args[ArgIndex7]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T8>(tRisseIsFuncCallNonMetaType<T8>::value==1?info.args[ArgIndex8]:tRisseVariant::GetVoidObject(),info),
 						RisseFromVariantOrCallingInfo<T9>(tRisseIsFuncCallNonMetaType<T9>::value==1?info.args[ArgIndex9]:tRisseVariant::GetVoidObject(),info));
-			if(info.result) info.result->Clear();
 		}
 	};
 	// static関数用binder登録関数

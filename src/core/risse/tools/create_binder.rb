@@ -73,8 +73,8 @@ STDOUT.print "
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
-			((tFunc)f)(#{args_list});
 			if(info.result) info.result->Clear();
+			((tFunc)f)(#{args_list});
 		}
 	};
 	// 非static関数、非 void の戻り値用
@@ -107,8 +107,8 @@ STDOUT.print "
 		{
 			info.args.ExpectArgumentCount(NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
-			(instance->*((tFunc)f))(#{args_list});
 			if(info.result) info.result->Clear();
+			(instance->*((tFunc)f))(#{args_list});
 		}
 	};
 	// static関数用binder登録関数

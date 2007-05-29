@@ -40,6 +40,8 @@ public:
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
 	virtual ~tRisseArrayInstance() {;}
 
+public: // Risse用メソッドなど
+
 	void construct();
 	void initialize(const tRisseNativeBindFunctionCallingInfo &info);
 	tRisseVariant iget(risse_offset ofs_index) const;

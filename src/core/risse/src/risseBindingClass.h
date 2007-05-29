@@ -19,6 +19,7 @@
 #include "risseCodeBlock.h"
 #include "risseGC.h"
 #include "risseBindingInfo.h"
+#include "risseNativeBinder.h"
 
 namespace Risse
 {
@@ -38,7 +39,7 @@ public:
 
 	//! @brief		ローカル変数のバインディングへの参照を得る
 	//! @return		ローカル変数のバインディングへの参照
-	tRisseBindingInfo::tBindingMap & GetBindingMap() { RISSE_ASSERT(Info != NULL); return Info->GetBindingMap(); }
+	tRisseBindingInfo::tBindingMap & GetBindingMap() const { RISSE_ASSERT(Info != NULL); return Info->GetBindingMap(); }
 
 	//! @brief		共有フレームを得る
 	//! @return		共有フレーム
@@ -57,6 +58,13 @@ public:
 	//! @brief		バインディングに関する情報を取得する
 	//! @return		バインディングに関する情報
 	tRisseBindingInfo * GetInfo() const { return Info; }
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tRisseNativeBindFunctionCallingInfo &info);
+	void eval(const tRisseString & script, const tRisseNativeBindFunctionCallingInfo &info) const;
+	tRisseVariant iget(const tRisseString & name) const;
+	void iset(const tRisseVariant & value, const tRisseString & name);
 };
 //---------------------------------------------------------------------------
 

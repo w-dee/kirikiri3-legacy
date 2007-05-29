@@ -13,8 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "risseBindingClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseScriptEngine.h"
@@ -45,6 +43,83 @@ void tRisseBindingInstance::AddMap(tRisseVariant &This, const tRisseString &name
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseBindingInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBindingInstance::initialize(const tRisseNativeBindFunctionCallingInfo &info)
+{
+	info.engine->BindingClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBindingInstance::eval(const tRisseString & script,
+			const tRisseNativeBindFunctionCallingInfo &info) const
+{
+	tRisseString name = info.args.HasArgument(1) ?
+					tRisseString(info.args[1]) : tRisseString(RISSE_WS("(anonymous)"));
+	risse_size lineofs = info.args.HasArgument(2) ? (risse_size)(risse_int64)info.args[2] : (risse_size)0;
+
+	GetRTTI()->GetScriptEngine()->Evaluate(script, name, lineofs, info.result, GetInfo(), true);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseBindingInstance::iget(const tRisseString & name) const
+{
+	tRisseBindingInfo::tBindingMap & map = GetBindingMap();
+	tRisseBindingInfo::tBindingMap::iterator i = map.find(name);
+	if(i == map.end())
+	{
+		// 見つからなかった
+		// とりあえず void を返す
+		return tRisseVariant::GetVoidObject();
+	}
+	else
+	{
+		// 見つかった
+		risse_size nestlevel = (i->second >> 16) & 0xffff;
+		risse_size regnum = i->second & 0xffff;
+		return GetFrames()->At(nestlevel, regnum);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBindingInstance::iset(const tRisseVariant & value, const tRisseString & name)
+{
+	tRisseBindingInfo::tBindingMap & map = GetBindingMap();
+	tRisseBindingInfo::tBindingMap::iterator i = map.find(name);
+	if(i == map.end())
+	{
+		// 見つからなかった
+		// TODO: Dictionary 互換の例外
+	}
+	else
+	{
+		// 見つかった
+		risse_size nestlevel = (i->second >> 16) & 0xffff;
+		risse_size regnum = i->second & 0xffff;
+		GetFrames()->At(nestlevel, regnum) = value;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -67,216 +142,11 @@ void tRisseBindingClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// デフォルトでは何もしない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す
-		engine->BindingClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_eval)
-	{
-		// eval (式やスクリプトの評価)
-		args.ExpectArgumentCount(1);
-
-		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
-
-		tRisseString script = args[0];
-		tRisseString name = args.HasArgument(1) ?
-						tRisseString(args[1]) : tRisseString(RISSE_WS("(anonymous)"));
-		risse_size lineofs = args.HasArgument(2) ? (risse_size)(risse_int64)args[2] : (risse_size)0;
-
-		obj->GetRTTI()->GetScriptEngine()->Evaluate(script, name, lineofs, result, obj->GetInfo(), true);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnIGet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		args.ExpectArgumentCount(1);
-
-		// ローカル変数の値を得る
-		// TODO: Dictionary 互換の実装
-		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
-		tRisseBindingInfo::tBindingMap & map = obj->GetBindingMap();
-
-
-		tRisseBindingInfo::tBindingMap::iterator i = map.find((tRisseString)args[0]);
-		if(i == map.end())
-		{
-			// 見つからなかった
-			// とりあえず void を返す
-			if(result) result->Clear();
-		}
-		else
-		{
-			// 見つかった
-			if(result)
-			{
-				risse_size nestlevel = (i->second >> 16) & 0xffff;
-				risse_size regnum = i->second & 0xffff;
-				*result = obj->GetFrames()->At(nestlevel, regnum);
-			}
-		}
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(mnISet,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		args.ExpectArgumentCount(2);
-
-		// ローカル変数の値を設定する
-		// TODO: Dictionary 互換の実装
-		tRisseBindingInstance * obj = This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
-		tRisseBindingInfo::tBindingMap & map = obj->GetBindingMap();
-
-		tRisseBindingInfo::tBindingMap::iterator i = map.find((tRisseString)args[1]);
-		if(i == map.end())
-		{
-			// 見つからなかった
-			// TODO: Dictionary 互換の例外
-		}
-		else
-		{
-			// 見つかった
-			if(result)
-			{
-				risse_size nestlevel = (i->second >> 16) & 0xffff;
-				risse_size regnum = i->second & 0xffff;
-				obj->GetFrames()->At(nestlevel, regnum) = args[0];
-			}
-		}
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_push)
-	{
-/*
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
-		tRisseArrayInstance::tArray & array = obj->GetArray();
-
-		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
-			array.push_back(args[i]);
-*/
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_pop)
-	{
-/*
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
-		tRisseArrayInstance::tArray & array = obj->GetArray();
-
-		tRisseVariant val;
-		if(array.size() > 0)
-		{
-			val = array.back();
-			array.pop_back();
-		}
-		else
-		{
-			val = This.GetPropertyDirect(ss_default);
-		}
-		if(result) *result = val;
-*/
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_unshift)
-	{
-/*
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
-		tRisseArrayInstance::tArray & array = obj->GetArray();
-
-		risse_size i = args.GetArgumentCount();
-		while(i--) array.push_front(args[i]);
-*/
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_shift)
-	{
-/*
-		tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
-		tRisseArrayInstance::tArray & array = obj->GetArray();
-
-		tRisseVariant val;
-		if(array.size() > 0)
-		{
-			val = array.front();
-			array.pop_front();
-		}
-		else
-		{
-			val = This.GetPropertyDirect(ss_default);
-		}
-		if(result) *result = val;
-*/
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_PROPERTY(ss_length)
-	{
-/*
-		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
-		{
-			tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
-			tRisseArrayInstance::tArray & array = obj->GetArray();
-
-			if(result) *result = (risse_int64)array.size();
-		}
-		RISSE_END_NATIVE_PROPERTY_GETTER
-
-		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
-		{
-			tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseArrayClass>();
-			tRisseArrayInstance::tArray & array = obj->GetArray();
-
-			risse_size new_size = (risse_size)(risse_int64)(value);
-			if(array.size() < new_size)
-			{
-				// 拡張
-				// filler の値を得る
-				tRisseVariant filler = This.GetPropertyDirect(ss_filler);
-				array.resize(new_size, filler);
-			}
-			else
-			{
-				// 縮小
-				array.resize(new_size);
-			}
-		}
-		RISSE_END_NATIVE_PROPERTY_SETTER
-*/
-	}
-	RISSE_END_NATIVE_PROPERTY
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseRegisterBinder(this, ss_construct, &tRisseBindingInstance::construct);
+	RisseRegisterBinder(this, ss_initialize, &tRisseBindingInstance::initialize);
+	RisseRegisterBinder(this, ss_eval, &tRisseBindingInstance::eval);
+	RisseRegisterBinder(this, mnIGet, &tRisseBindingInstance::iget);
+	RisseRegisterBinder(this, mnISet, &tRisseBindingInstance::iset);
 }
 //---------------------------------------------------------------------------
 

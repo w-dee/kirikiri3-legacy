@@ -169,6 +169,30 @@ tRisseVariant tRisseArrayInstance::shift()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+size_t tRisseArrayInstance::get_length() const
+{
+	return Array.size();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseArrayInstance::set_length(size_t new_size)
+{
+	if(Array.size() < new_size)
+	{
+		// 拡張
+		Array.resize(new_size, ReadMember(ss_filler));
+	}
+	else
+	{
+		// 縮小
+		Array.resize(new_size);
+	}
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -197,43 +221,6 @@ void tRisseArrayClass::RegisterMembers()
 	// 基本的に ss_construct と ss_initialize は各クラスごとに
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_PROPERTY(ss_length)
-	{
-		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
-		{
-			tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
-			tRisseArrayInstance::tArray & array = obj->GetArray();
-
-			if(result) *result = (risse_int64)array.size();
-		}
-		RISSE_END_NATIVE_PROPERTY_GETTER
-
-		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
-		{
-			tRisseArrayInstance * obj = This.CheckAndGetObjectInterafce<tRisseArrayInstance, tRisseClassBase>(engine->ArrayClass);
-			tRisseArrayInstance::tArray & array = obj->GetArray();
-
-			risse_size new_size = (risse_size)(risse_int64)(value);
-			if(array.size() < new_size)
-			{
-				// 拡張
-				// filler の値を得る
-				tRisseVariant filler = This.GetPropertyDirect_Object(ss_filler);
-				array.resize(new_size, filler);
-			}
-			else
-			{
-				// 縮小
-				array.resize(new_size);
-			}
-		}
-		RISSE_END_NATIVE_PROPERTY_SETTER
-	}
-	RISSE_END_NATIVE_PROPERTY
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	RisseRegisterBinder(this, ss_construct, &tRisseArrayInstance::construct);
 	RisseRegisterBinder(this, ss_initialize, &tRisseArrayInstance::initialize);
@@ -243,6 +230,7 @@ void tRisseArrayClass::RegisterMembers()
 	RisseRegisterBinder(this, ss_pop, &tRisseArrayInstance::pop);
 	RisseRegisterBinder(this, ss_unshift, &tRisseArrayInstance::unshift);
 	RisseRegisterBinder(this, ss_shift, &tRisseArrayInstance::shift);
+	RisseRegisterBinder(this, ss_length, &tRisseArrayInstance::get_length, &tRisseArrayInstance::set_length);
 }
 //---------------------------------------------------------------------------
 

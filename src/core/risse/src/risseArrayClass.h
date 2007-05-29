@@ -48,6 +48,8 @@ public:
 	tRisseVariant pop();
 	void unshift(const tRisseMethodArgument & args);
 	tRisseVariant shift();
+	size_t get_length() const;
+	void set_length(size_t new_size);
 };
 //---------------------------------------------------------------------------
 

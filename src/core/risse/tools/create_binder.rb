@@ -35,26 +35,35 @@ STDOUT.print "
 
 	# ターゲット呼び出しの引数
 	args_list = "\n" +
-		argnum.join(",\n"){|n|"\t\t\t\t\t\tRisseFromVariantOrCallingInfo<T#{n}>(tRisseIsFuncCallNonMetaType<T#{n}>::value==1?info.args[ArgIndex#{n}]:tRisseVariant::GetVoidObject(),info)"}
+		argnum.join(",\n"){|n|"\t\t\t\t\t\tRisseFromVariantOrCallingInfo<T#{n}>(tRisseIsFuncCallNonMetaType<T#{n}>::value==1?info.args[Consts::ArgIndex#{n}]:tRisseVariant::GetVoidObject(),info)"} +
+			"\n\t\t\t\t"
 
-	# 引数インデックス
-	arg_index_enums = argnum.join("\n") {
-		|n|"\t\tenum { ArgIndex#{n}=#{n == 0 ? "0":"ArgIndex#{n-1} + tRisseIsFuncCallNonMetaType<T#{n-1}>::value"} };"}
-	arg_index_enums << "\n\t\tenum { NumMandatoryArgs = #{argnum == 0 ? "0" : "ArgIndex#{argnum-1}+ tRisseIsFuncCallNonMetaType<T#{argnum-1}>::value"} };\n"
+	# 定数クラス名
+	const_class = "tRisseBinderConsts#{argnum}#{argnum > 0 ? "<#{argnum.join{|n|"T#{n}"}}>":""}"
 
 	STDOUT.print "
+	// 定数
+	#{argnum > 0 ? "template <#{argnum.join{|n|"typename T#{n}"}}>" : ""}
+	struct tRisseBinderConsts#{argnum}
+	{
+#{
+	argnum.join("\n") {
+		|n|"\t\tenum { ArgIndex#{n}=#{n == 0 ? "0":"ArgIndex#{n-1} + tRisseIsFuncCallNonMetaType<T#{n-1}>::value"} };"} +
+	"\n\t\tenum { NumMandatoryArgs = #{argnum == 0 ? "0" : "ArgIndex#{argnum-1}+ tRisseIsFuncCallNonMetaType<T#{argnum-1}>::value"} };\n"
+}
+	};
 	// static関数、非 void の戻り値用
 	template <typename CC, typename R #{argnum.append{|n|"typename T#{n}"}}>
-	class RisseBinderFunctor#{argnum}s
+	class tRisseBinderFunctor#{argnum}s
 	{
+		typedef #{const_class} Consts;
 		typedef R (*tFunc)(#{argnum.join{|n|"T#{n}"}});
-#{arg_index_enums}
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			info.args.ExpectArgumentCount(Consts::NumMandatoryArgs);
 			if(info.result)
 				*info.result = RisseToVariant(((tFunc)f)(#{args_list}));
 			else
@@ -63,31 +72,31 @@ STDOUT.print "
 	};
 	// static関数、void の戻り値用の特殊化
 	template <typename CC #{argnum.append{|n|"typename T#{n}"}}>
-	class RisseBinderFunctor#{argnum}s<CC, void #{argnum.append{|n|"T#{n}"}}>
+	class tRisseBinderFunctor#{argnum}s<CC, void #{argnum.append{|n|"T#{n}"}}>
 	{
+		typedef #{const_class} Consts;
 		typedef void (*tFunc)(#{argnum.join{|n|"T#{n}"}});
-#{arg_index_enums}
 	public:
 		static void Call(tRisseClassBase * _class,
 			void (*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			info.args.ExpectArgumentCount(Consts::NumMandatoryArgs);
 			if(info.result) info.result->Clear();
 			((tFunc)f)(#{args_list});
 		}
 	};
 	// 非static関数、非 void の戻り値用
 	template <typename CC, typename IC, typename R #{argnum.append{|n|"typename T#{n}"}}>
-	class RisseBinderFunctor#{argnum}
+	class tRisseBinderFunctor#{argnum}
 	{
+		typedef #{const_class} Consts;
 		typedef R (IC::*tFunc)(#{argnum.join{|n|"T#{n}"}});
-#{arg_index_enums}
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			info.args.ExpectArgumentCount(Consts::NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(#{args_list}));
@@ -97,15 +106,15 @@ STDOUT.print "
 	};
 	// 非static関数、void の戻り値用
 	template <typename CC, typename IC #{argnum.append{|n|"typename T#{n}"}}>
-	class RisseBinderFunctor#{argnum}<CC, IC, void  #{argnum.append{|n|"T#{n}"}}>
+	class tRisseBinderFunctor#{argnum}<CC, IC, void  #{argnum.append{|n|"T#{n}"}}>
 	{
+		typedef #{const_class} Consts;
 		typedef void (IC::*tFunc)(#{argnum.join{|n|"T#{n}"}});
-#{arg_index_enums}
 	public:
 		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
 			const tRisseNativeBindFunctionCallingInfo & info)
 		{
-			info.args.ExpectArgumentCount(NumMandatoryArgs);
+			info.args.ExpectArgumentCount(Consts::NumMandatoryArgs);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(#{args_list});
@@ -121,7 +130,7 @@ STDOUT.print "
 			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
-				&RisseBinderFunctor#{argnum}s<CC, R #{argnum.append{|n|"T#{n}"}}>::Call
+				&tRisseBinderFunctor#{argnum}s<CC, R #{argnum.append{|n|"T#{n}"}}>::Call
 					), context), attribute);
 	}
 	// 非static関数用binder登録関数
@@ -134,7 +143,7 @@ STDOUT.print "
 			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
-				&RisseBinderFunctor#{argnum}<CC, IC, R #{argnum.append{|n|"T#{n}"}}>::Call
+				&tRisseBinderFunctor#{argnum}<CC, IC, R #{argnum.append{|n|"T#{n}"}}>::Call
 					), context), attribute);
 	}
 

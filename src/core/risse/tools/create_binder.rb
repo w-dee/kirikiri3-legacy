@@ -127,7 +127,7 @@ STDOUT.print "
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor#{argnum}s<CC, R #{argnum.append{|n|"T#{n}"}}>::Call
@@ -140,7 +140,7 @@ STDOUT.print "
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor#{argnum}<CC, IC, R #{argnum.append{|n|"T#{n}"}}>::Call

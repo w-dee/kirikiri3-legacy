@@ -14,6 +14,8 @@
 
 #include "risseNativeBinder.h"
 #include "risseScriptEngine.h"
+#include "risseFunctionClass.h"
+#include "rissePropertyClass.h"
 
 namespace Risse
 {
@@ -21,7 +23,8 @@ RISSE_DEFINE_SOURCE_ID(50153,12161,23237,20278,22942,17690,37012,37765);
 
 
 //---------------------------------------------------------------------------
-tRisseNativeBindFunction::tRetValue tRisseNativeBindFunction::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+template <typename TT>
+tRisseObjectInterface::tRetValue tRisseNativeBindFunction<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// このオブジェクトに対する関数呼び出しか？
 	if(code == ocFuncCall && name.IsEmpty())
@@ -39,8 +42,9 @@ tRisseNativeBindFunction::tRetValue tRisseNativeBindFunction::Operate(RISSE_OBJE
 
 
 //---------------------------------------------------------------------------
-tRisseObjectInterface * tRisseNativeBindFunction::New(tRisseScriptEngine * engine,
-	tRisseClassBase * class_, void (tRisseObjectBase::*target)(), tCallee callee)
+template <typename TT>
+tRisseObjectInterface * tRisseNativeBindFunction<TT>::New(tRisseScriptEngine * engine,
+	tRisseClassBase * class_, TT target, tCallee callee)
 {
 	// tRisseFunctionClass がまだ登録されていない場合は仮のメソッドを
 	// 作成して登録する (のちに正式なメソッドオブジェクトに置き換えられる)
@@ -63,56 +67,11 @@ tRisseObjectInterface * tRisseNativeBindFunction::New(tRisseScriptEngine * engin
 //---------------------------------------------------------------------------
 
 
-
-
-
-
-
-
-
-
-
 //---------------------------------------------------------------------------
-tRisseNativeBindStaticFunction::tRetValue tRisseNativeBindStaticFunction::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
-{
-	// このオブジェクトに対する関数呼び出しか？
-	if(code == ocFuncCall && name.IsEmpty())
-	{
-		// このオブジェクトに対する関数呼び出しなので Callee を呼ぶ
-		tRisseNativeBindFunctionCallingInfo info(GetRTTI()->GetScriptEngine(), result, flags, args, This);
-		Callee(Class, TargetFunction, info);
-		return rvNoError;
-	}
-
-	// それ以外の機能はこのインターフェースにはない
-	return rvMemberNotFound;
-}
+template class tRisseNativeBindFunction<void (tRisseObjectBase::*)()>; // メンバ関数用
+template class tRisseNativeBindFunction<void (*)()>; // staticメンバ関数用
 //---------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
-tRisseObjectInterface * tRisseNativeBindStaticFunction::New(tRisseScriptEngine * engine,
-	tRisseClassBase * class_, void (*target)(), tCallee callee)
-{
-	// tRisseFunctionClass がまだ登録されていない場合は仮のメソッドを
-	// 作成して登録する (のちに正式なメソッドオブジェクトに置き換えられる)
-	if(engine->FunctionClass)
-	{
-		tRisseVariant v = tRisseVariant(engine->FunctionClass).New(
-				0, tRisseMethodArgument::New(new tRisseNativeBindStaticFunction(engine, class_, target, callee)));
-
-		RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
-		RISSE_ASSERT(dynamic_cast<tRisseFunctionInstance*>(v.GetObjectInterface()) != NULL);
-
-		return v.GetObjectInterface();
-	}
-	else
-	{
-		// 仮実装
-		return (tRisseFunctionInstance *)(new tRisseNativeBindStaticFunction(engine, class_, target, callee));
-	}
-}
-//---------------------------------------------------------------------------
 
 
 

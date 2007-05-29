@@ -16,11 +16,11 @@
 
 #include "risseCharUtils.h"
 #include "risseObjectBase.h"
-#include "risseFunctionClass.h"
-#include "rissePropertyClass.h"
+#include "risseObjectRTTI.h"
 
 namespace Risse
 {
+class tRisseClassBase;
 //---------------------------------------------------------------------------
 //! @brief		ネイティブ関数呼び出し情報
 //---------------------------------------------------------------------------
@@ -55,6 +55,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		Risseネイティブ関数
 //---------------------------------------------------------------------------
+template <typename TT> // target-type, void (tRisseObjectBase::*)() とか
 class tRisseNativeBindFunction : public tRisseObjectInterface
 {
 protected:
@@ -62,14 +63,14 @@ protected:
 	//! @param		_class		クラス
 	//! @param		f			呼び出し先オブジェクト
 	//! @param		info		呼び出し情報
-	typedef void (*tCallee)(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+	typedef void (*tCallee)(tRisseClassBase * _class, TT f,
 		const tRisseNativeBindFunctionCallingInfo & info);
 
 	//! @brief		Risseクラスインスタンス
 	tRisseClassBase * Class; 
 
 	//! @brief		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
-	void (tRisseObjectBase::*TargetFunction)();
+	TT TargetFunction;
 
 	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド(インスタンス作成時に指定)
 	tCallee Callee;
@@ -81,7 +82,7 @@ protected:
 	//! @param		target		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
 	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
 	tRisseNativeBindFunction(tRisseScriptEngine * engine,
-		tRisseClassBase * class_, void (tRisseObjectBase::*target)(), tCallee callee) :
+		tRisseClassBase * class_, TT target, tCallee callee) :
 		tRisseObjectInterface(new tRisseRTTI(engine))
 		{ Class = class_; TargetFunction = target; Callee = callee; }
 
@@ -92,57 +93,7 @@ public:
 	//! @param		target		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
 	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
 	static tRisseObjectInterface * New(tRisseScriptEngine * engine,
-		tRisseClassBase * class_, void (tRisseObjectBase::*target)(), tCallee callee);
-
-	//! @brief		オブジェクトに対して操作を行う
-	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
-};
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		Risseネイティブ関数
-//---------------------------------------------------------------------------
-class tRisseNativeBindStaticFunction : public tRisseObjectInterface
-{
-protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッドのtypedef
-	//! @param		_class		クラス
-	//! @param		f			呼び出し先オブジェクト
-	//! @param		info		呼び出し情報
-	typedef void (*tCallee)(tRisseClassBase * _class, void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info);
-
-	//! @brief		Risseクラスインスタンス
-	tRisseClassBase * Class; 
-
-	//! @brief		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
-	void (*TargetFunction)();
-
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド(インスタンス作成時に指定)
-	tCallee Callee;
-
-protected:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		class_		Risseクラスインスタンス
-	//! @param		target		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
-	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
-	tRisseNativeBindStaticFunction(tRisseScriptEngine * engine,
-		tRisseClassBase * class_, void (*target)(), tCallee callee) :
-		tRisseObjectInterface(new tRisseRTTI(engine))
-		{ Class = class_; TargetFunction = target; Callee = callee; }
-
-public:
-	//! @brief		新しい関数インスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		class_		Risseクラスインスタンス
-	//! @param		target		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
-	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
-	static tRisseObjectInterface * New(tRisseScriptEngine * engine,
-		tRisseClassBase * class_, void (*target)(), tCallee callee);
+		tRisseClassBase * class_, TT target, tCallee callee);
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

@@ -97,7 +97,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor0s<CC, R >::Call
@@ -110,7 +110,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor0<CC, IC, R >::Call
@@ -213,7 +213,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor1s<CC, R ,T0>::Call
@@ -226,7 +226,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor1<CC, IC, R ,T0>::Call
@@ -336,7 +336,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor2s<CC, R ,T0,T1>::Call
@@ -349,7 +349,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor2<CC, IC, R ,T0,T1>::Call
@@ -466,7 +466,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor3s<CC, R ,T0,T1,T2>::Call
@@ -479,7 +479,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor3<CC, IC, R ,T0,T1,T2>::Call
@@ -603,7 +603,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor4s<CC, R ,T0,T1,T2,T3>::Call
@@ -616,7 +616,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor4<CC, IC, R ,T0,T1,T2,T3>::Call
@@ -747,7 +747,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor5s<CC, R ,T0,T1,T2,T3,T4>::Call
@@ -760,7 +760,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor5<CC, IC, R ,T0,T1,T2,T3,T4>::Call
@@ -898,7 +898,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor6s<CC, R ,T0,T1,T2,T3,T4,T5>::Call
@@ -911,7 +911,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor6<CC, IC, R ,T0,T1,T2,T3,T4,T5>::Call
@@ -1056,7 +1056,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor7s<CC, R ,T0,T1,T2,T3,T4,T5,T6>::Call
@@ -1069,7 +1069,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor7<CC, IC, R ,T0,T1,T2,T3,T4,T5,T6>::Call
@@ -1221,7 +1221,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor8s<CC, R ,T0,T1,T2,T3,T4,T5,T6,T7>::Call
@@ -1234,7 +1234,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor8<CC, IC, R ,T0,T1,T2,T3,T4,T5,T6,T7>::Call
@@ -1393,7 +1393,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor9s<CC, R ,T0,T1,T2,T3,T4,T5,T6,T7,T8>::Call
@@ -1406,7 +1406,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor9<CC, IC, R ,T0,T1,T2,T3,T4,T5,T6,T7,T8>::Call
@@ -1572,7 +1572,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindStaticFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor10s<CC, R ,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>::Call
@@ -1585,7 +1585,7 @@
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
 		_class->RegisterNormalMember(name,
-			tRisseVariant(tRisseNativeBindFunction::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor10<CC, IC, R ,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>::Call

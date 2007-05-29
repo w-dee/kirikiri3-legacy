@@ -112,6 +112,17 @@ public: // tRisseObjectInterface メンバ
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		"SourcePoint" クラスのインスタンス用 C++クラス
+//---------------------------------------------------------------------------
+class tRisseSourcePointInstance : public tRisseObjectBase
+{
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	tRisseString toString() const;
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -133,7 +144,8 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	tRisseVariant CreateNewObjectBase();
 };
 //---------------------------------------------------------------------------
 

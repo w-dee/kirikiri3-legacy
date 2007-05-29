@@ -159,6 +159,73 @@ tRisseObjectInterface::tRetValue tRisseExitTryExceptionClass::Operate(RISSE_OBJE
 
 
 
+
+//---------------------------------------------------------------------------
+void tRisseSourcePointInstance::construct()
+{
+	// filename メンバを追加 (デフォルトでは空文字列)
+	RegisterNormalMember(ss_filename, tRisseVariant(tRisseString::GetEmptyString()));
+
+	// line メンバを追加 (デフォルトでは-1)
+	RegisterNormalMember(ss_line, tRisseVariant((risse_int64)-1));
+
+	// function メンバを追加 (デフォルトではnull)
+	RegisterNormalMember(ss_function, tRisseVariant::GetNullObject());
+
+	/*
+		ほかにメンバを追加するかも
+	*/
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseSourcePointInstance::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数は空)
+	info.engine->SourcePointClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), info.This);
+
+	// 引数 = ファイル名, 行, メソッド
+	if(info.args.HasArgument(0))
+		info.This.SetPropertyDirect_Object(ss_filename,	0, info.args[0], info.This);
+	if(info.args.HasArgument(1))
+		info.This.SetPropertyDirect_Object(ss_line,		0, info.args[1], info.This);
+	if(info.args.HasArgument(2))
+		info.This.SetPropertyDirect_Object(ss_function,	0, info.args[2], info.This);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseSourcePointInstance::toString() const
+{
+	// ファイル名:行番号: in 関数名 を生成して返す
+
+	tRisseVariant filename, line, function;
+	filename = ReadMember(ss_filename);
+	line =     ReadMember(ss_line);
+	function = ReadMember(ss_function);
+
+	tRisseString ret;
+	tRisseString fn = filename.operator tRisseString();
+	if(!fn.IsEmpty())
+		ret = fn + RISSE_WC(':');
+	else
+		ret = RISSE_WS_TR("<unknown>:");
+
+	if(line != tRisseVariant((risse_int64)-1))
+		ret += line.operator tRisseString();
+	else
+		ret += RISSE_WS_TR("<unknown>");
+
+	if(!function.IsNull())
+		ret += tRisseString(RISSE_WS_TR(": in ")) + function.operator tRisseString();
+
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 tRisseSourcePointClass::tRisseSourcePointClass(tRisseScriptEngine * engine) :
 	tRisseClassBase(engine->ObjectClass)
@@ -178,76 +245,17 @@ void tRisseSourcePointClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct,  &tRisseSourcePointInstance::construct);
+	RisseBindFunction(this, ss_initialize,  &tRisseSourcePointInstance::initialize);
+	RisseBindFunction(this, mnString,  &tRisseSourcePointInstance::toString);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// filename メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect_Object(ss_filename, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant(tRisseString::GetEmptyString()), This);
 
-		// line メンバを追加 (デフォルトでは-1)
-		This.SetPropertyDirect_Object(ss_line, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant((risse_int64)-1), This);
-
-		// function メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect_Object(ss_function, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant::GetNullObject(), This);
-
-		/*
-			ほかにメンバを追加するかも
-		*/
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数は空)
-		engine->SourcePointClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
-
-		// 引数 = ファイル名, 行, メソッド
-		if(args.HasArgument(0))
-			This.SetPropertyDirect_Object(ss_filename, 0, args[0], This);
-		if(args.HasArgument(1))
-			This.SetPropertyDirect_Object(ss_line, 0, args[1], This);
-		if(args.HasArgument(2))
-			This.SetPropertyDirect_Object(ss_function, 0, args[2], This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(mnString) // toString
-	{
-		// ファイル名:行番号: in 関数名 を生成して返す
-
-		tRisseVariant filename, line, function;
-		filename = This.GetPropertyDirect_Object(ss_filename);
-		line =     This.GetPropertyDirect_Object(ss_line);
-		function = This.GetPropertyDirect_Object(ss_function);
-
-		tRisseString ret;
-		tRisseString fn = filename.operator tRisseString();
-		if(!fn.IsEmpty())
-			ret = fn + RISSE_WC(':');
-		else
-			ret = RISSE_WS_TR("<unknown>:");
-
-		if(line != tRisseVariant((risse_int64)-1))
-			ret += line.operator tRisseString();
-		else
-			ret += RISSE_WS_TR("<unknown>");
-
-		if(!function.IsNull())
-			ret += tRisseString(RISSE_WS_TR(": in ")) + function.operator tRisseString();
-
-		if(result) *result = ret;
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+tRisseVariant tRisseSourcePointClass::CreateNewObjectBase()
+{
+	return tRisseVariant(new tRisseSourcePointInstance());
 }
 //---------------------------------------------------------------------------
 

@@ -37,14 +37,10 @@ RISSE_DEFINE_SOURCE_ID(65360,34010,1527,19914,27817,35057,17111,22724);
 void tRisseArrayInstance::construct()
 {
 	// default メンバを追加 (デフォルトではvoid)
-	RegisterMember(ss_default,
-		tRisseVariant::GetVoidObject(),
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly);
+	RegisterNormalMember(ss_default, tRisseVariant::GetVoidObject());
 
 	// filler メンバを追加 (デフォルトではvoid)
-	RegisterMember(ss_filler,
-		tRisseVariant::GetVoidObject(),
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly);
+	RegisterNormalMember(ss_filler, tRisseVariant::GetVoidObject());
 }
 //---------------------------------------------------------------------------
 

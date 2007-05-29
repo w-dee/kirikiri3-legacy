@@ -45,7 +45,7 @@ tRisseObjectBase::tRisseObjectBase(const tRisseString & prototype_name) :
 
 //---------------------------------------------------------------------------
 tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
-	tRisseVariant &result, const tRisseVariant &This)
+	tRisseVariant &result, const tRisseVariant &This) const
 {
 	tMemberData * member = HashTable.Find(name);
 
@@ -615,7 +615,7 @@ void tRisseObjectBase::RegisterMember(const tRisseString & name,
 
 //---------------------------------------------------------------------------
 tRisseVariant tRisseObjectBase::ReadMember(const tRisseString & name,
-					risse_uint32 flags)
+					risse_uint32 flags) const
 {
 	tRisseVariant result;
 	RaiseIfError(Read(name, flags, result, tRisseVariant(this)), name);

@@ -71,7 +71,7 @@ public:
 	//! 			読み出そうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
 	tRetValue Read(const tRisseString & name, tRisseOperateFlags flags,
-				tRisseVariant &result, const tRisseVariant &This);
+				tRisseVariant &result, const tRisseVariant &This) const;
 
 	//! @brief		メンバに書き込む
 	//! @param		name		メンバ名
@@ -169,7 +169,7 @@ public:
 	//! @return		読み出された内容
 	//! @note		読み出しに失敗した場合は例外が発生する
 	tRisseVariant ReadMember(const tRisseString & name,
-						risse_uint32 flags = 0);
+						risse_uint32 flags = 0) const;
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

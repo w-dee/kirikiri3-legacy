@@ -65,7 +65,7 @@ void tRisseArrayInstance::initialize(const tRisseNativeBindFunctionCallingInfo &
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index)
+tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index) const
 {
 	if(ofs_index < 0) ofs_index += Array.size(); // 折り返す
 
@@ -80,6 +80,9 @@ tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index)
 	// 値を返す
 	return Array[index];
 }
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 void tRisseArrayInstance::iset(const tRisseVariant & value, risse_offset ofs_index)
 {

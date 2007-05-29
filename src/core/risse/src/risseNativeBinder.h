@@ -520,7 +520,7 @@ void RisseRegisterBinder(CC * _class, const tRisseString & name,
 
 template <typename CC, typename IC, typename ST>
 void RisseRegisterBinder(CC * _class, const tRisseString & name,
-	void (IC::*getter)(const tRisseNativeBindPropertyGetterCallingInfo &) const, void (IC::*setter)(ST),
+	void (IC::*getter)(const tRisseNativeBindPropertyGetterCallingInfo &), void (IC::*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 {

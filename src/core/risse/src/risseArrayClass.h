@@ -42,7 +42,7 @@ public:
 
 	void construct();
 	void initialize(const tRisseNativeBindFunctionCallingInfo &info);
-	tRisseVariant iget(risse_offset ofs_index);
+	tRisseVariant iget(risse_offset ofs_index) const;
 	void iset(const tRisseVariant & value, risse_offset ofs_index);
 	void push(const tRisseMethodArgument & args);
 	tRisseVariant pop();

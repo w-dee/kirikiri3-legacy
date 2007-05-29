@@ -13,8 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "risseNumberClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "rissePrimitiveClass.h"
@@ -44,42 +42,16 @@ void tRisseNumberClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct,
+		&tRisseNumberClass::construct,
+		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
+								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
 
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_construct,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		// デフォルトでは何もしない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_PROPERTY_OPTION(ss_isNaN,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
-		{
-			tRisseVariant num = This.Plus();
-			if(result)
-			{
-				switch(num.GetType())
-				{
-				case tRisseVariant::vtReal:
-					*result = (bool)RISSE_FC_IS_NAN(RisseGetFPClass(num.operator risse_real()));
-					break;
-
-				case tRisseVariant::vtInteger:
-				default:
-					// 整数の場合やそのほかの場合は偽を返す
-					*result = false;
-					break;
-				}
-			}
-		}
-		RISSE_END_NATIVE_PROPERTY_GETTER
-	}
-	RISSE_END_NATIVE_PROPERTY
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// ↓プロパティの型 (ここではbool) を指定しないとこの場合はsetterの型を特定できずにNULLを渡すとエラーになる
+	RisseBindProperty<tRisseNumberClass, bool>(this, ss_isNaN,
+		&tRisseNumberClass::isNaN, NULL,
+		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
+								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
 
@@ -92,6 +64,37 @@ tRisseVariant tRisseNumberClass::CreateNewObjectBase()
 	return tRisseVariant();
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNumberClass::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNumberClass::isNaN(const tRisseNativeBindPropertyGetterCallingInfo & info)
+{
+	tRisseVariant num = info.This.Plus();
+
+	bool result;
+	switch(num.GetType())
+	{
+	case tRisseVariant::vtReal:
+		result = (bool)RISSE_FC_IS_NAN(RisseGetFPClass(num.operator risse_real()));
+		break;
+
+	case tRisseVariant::vtInteger:
+	default:
+		// 整数の場合やそのほかの場合は偽を返す
+		result = false;
+	}
+	if(info.result) *info.result = result;
+}
+//---------------------------------------------------------------------------
+
 
 } /* namespace Risse */
 

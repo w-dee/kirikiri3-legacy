@@ -225,15 +225,15 @@ void tRisseArrayClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseRegisterBinder(this, ss_construct, &tRisseArrayInstance::construct);
-	RisseRegisterBinder(this, ss_initialize, &tRisseArrayInstance::initialize);
-	RisseRegisterBinder(this, mnIGet, &tRisseArrayInstance::iget);
-	RisseRegisterBinder(this, mnISet, &tRisseArrayInstance::iset);
-	RisseRegisterBinder(this, ss_push, &tRisseArrayInstance::push);
-	RisseRegisterBinder(this, ss_pop, &tRisseArrayInstance::pop);
-	RisseRegisterBinder(this, ss_unshift, &tRisseArrayInstance::unshift);
-	RisseRegisterBinder(this, ss_shift, &tRisseArrayInstance::shift);
-	RisseRegisterBinder(this, ss_length, &tRisseArrayInstance::get_length, &tRisseArrayInstance::set_length);
+	RisseBindFunction(this, ss_construct, &tRisseArrayInstance::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseArrayInstance::initialize);
+	RisseBindFunction(this, mnIGet, &tRisseArrayInstance::iget);
+	RisseBindFunction(this, mnISet, &tRisseArrayInstance::iset);
+	RisseBindFunction(this, ss_push, &tRisseArrayInstance::push);
+	RisseBindFunction(this, ss_pop, &tRisseArrayInstance::pop);
+	RisseBindFunction(this, ss_unshift, &tRisseArrayInstance::unshift);
+	RisseBindFunction(this, ss_shift, &tRisseArrayInstance::shift);
+	RisseBindProperty(this, ss_length, &tRisseArrayInstance::get_length, &tRisseArrayInstance::set_length);
 }
 //---------------------------------------------------------------------------
 

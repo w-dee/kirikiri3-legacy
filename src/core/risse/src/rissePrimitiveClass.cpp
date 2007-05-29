@@ -13,13 +13,10 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "rissePrimitiveClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseExceptionClass.h"
 #include "risseScriptEngine.h"
-
 
 namespace Risse
 {
@@ -53,20 +50,21 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_construct,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
-		// デフォルトでは何もしない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct,
+		&tRissePrimitiveClassBase::construct,
+		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
+								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRissePrimitiveClassBase::construct()
+{
+	// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -99,16 +97,10 @@ void tRissePrimitiveClass::RegisterMembers()
 
 	// クラスに必要なメソッドを登録する
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_construct, (attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal)))
-	{
-		// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
-		// デフォルトでは何もしない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct,
+		&tRissePrimitiveClass::construct,
+		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
+								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
 
@@ -119,6 +111,15 @@ tRisseVariant tRissePrimitiveClass::CreateNewObjectBase()
 	// このクラスのインスタンスは作成できないので例外を投げる
 	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
 	return tRisseVariant();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRissePrimitiveClass::construct()
+{
+	// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
+	// デフォルトでは何もしない
 }
 //---------------------------------------------------------------------------
 

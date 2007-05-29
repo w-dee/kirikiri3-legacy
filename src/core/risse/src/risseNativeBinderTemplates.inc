@@ -92,7 +92,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R >
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -105,7 +105,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R >
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -208,7 +208,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -221,7 +221,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -331,7 +331,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -344,7 +344,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -461,7 +461,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1,typename T2>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1,T2), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -474,7 +474,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1,T2), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -598,7 +598,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1,T2,T3), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -611,7 +611,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1,T2,T3), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -742,7 +742,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1,T2,T3,T4), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -755,7 +755,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1,T2,T3,T4), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -893,7 +893,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1,T2,T3,T4,T5), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -906,7 +906,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1,T2,T3,T4,T5), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -1051,7 +1051,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1,T2,T3,T4,T5,T6), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -1064,7 +1064,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1,T2,T3,T4,T5,T6), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -1216,7 +1216,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1,T2,T3,T4,T5,T6,T7), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -1229,7 +1229,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1,T2,T3,T4,T5,T6,T7), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -1388,7 +1388,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1,T2,T3,T4,T5,T6,T7,T8), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -1401,7 +1401,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1,T2,T3,T4,T5,T6,T7,T8), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -1567,7 +1567,7 @@
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -1580,7 +1580,7 @@
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R ,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{

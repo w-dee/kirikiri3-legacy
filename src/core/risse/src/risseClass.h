@@ -22,7 +22,7 @@
 namespace Risse
 {
 class tRisseScriptEngine;
-
+class tRisseNativeBindFunctionCallingInfo;
 //---------------------------------------------------------------------------
 //! @brief		Risseクラスの実装
 //---------------------------------------------------------------------------
@@ -93,6 +93,11 @@ public:
 	void CallSuperClassMethod(
 		tRisseVariantBlock * ret, const tRisseString & name,
 		risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This);
+
+public: // Risse用メソッドなど
+	static void risse_new(const tRisseNativeBindFunctionCallingInfo &info);
+	static void fertilize(const tRisseVariant & instance, const tRisseNativeBindFunctionCallingInfo &info);
+	static void include(const tRisseMethodArgument & args, const tRisseNativeBindFunctionCallingInfo &info);
 };
 //---------------------------------------------------------------------------
 

@@ -122,7 +122,7 @@ STDOUT.print "
 	};
 	// static関数用binder登録関数
 	template <typename CC, typename R #{argnum.append{|n|"typename T#{n}"}}>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(#{argnum.join{|n|"T#{n}"}}), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{
@@ -135,7 +135,7 @@ STDOUT.print "
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R #{argnum.append{|n|"typename T#{n}"}}>
-	void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(#{argnum.join{|n|"T#{n}"}}), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 	{

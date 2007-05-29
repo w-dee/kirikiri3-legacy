@@ -13,8 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "risseIntegerClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseNumberClass.h"
@@ -52,34 +50,11 @@ void tRisseIntegerClass::RegisterMembers()
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_initialize,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		// 親クラスの同名メソッドは「呼び出されない」
-
-		// 引数をすべて連結した物を初期値に使う
-		// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
-		//       を変更するため、const_cast を用いる
-		if(args.HasArgument(0))
-			*const_cast<tRisseVariant*>(&This) = args[0].operator risse_int64();
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_times)
-	{
-		if(args.GetBlockArgumentCount() < 1) RisseThrowBadBlockArgumentCount(args.GetArgumentCount(), 1);
-
-		risse_int64 count = This.operator risse_int64();
-		while(count --)
-			args.GetBlockArgument(0).FuncCall(engine);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+	RisseBindFunction(this, ss_initialize,
+		&tRisseIntegerClass::initialize,
+		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
+								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
+	RisseBindFunction(this, ss_times, &tRisseIntegerClass::times);
 }
 //---------------------------------------------------------------------------
 
@@ -88,6 +63,32 @@ void tRisseIntegerClass::RegisterMembers()
 tRisseVariant tRisseIntegerClass::CreateNewObjectBase()
 {
 	return tRisseVariant((risse_int64)0);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIntegerClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドは「呼び出されない」
+
+	// 引数を初期値に使う
+	// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
+	//       を変更するため、const_cast を用いる
+	if(info.args.HasArgument(0))
+		*const_cast<tRisseVariant*>(&info.This) = info.args[0].operator risse_int64();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIntegerClass::times(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	info.args.ExpectBlockArgumentCount(1);
+
+	risse_int64 count = info.This.operator risse_int64();
+	while(count --)
+		info.args.GetBlockArgument(0).FuncCall(info.engine);
 }
 //---------------------------------------------------------------------------
 

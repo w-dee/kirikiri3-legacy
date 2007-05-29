@@ -495,7 +495,7 @@ public:
 
 // static without calling info getter
 template <typename CC, typename GR, typename ST>
-void RisseRegisterBinder(CC * _class, const tRisseString & name,
+void RisseBindProperty(CC * _class, const tRisseString & name,
 	GR (*getter)(), void (*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
@@ -514,7 +514,7 @@ void RisseRegisterBinder(CC * _class, const tRisseString & name,
 
 // non-static without calling info getter
 template <typename CC, typename IC, typename GR, typename ST>
-void RisseRegisterBinder(CC * _class, const tRisseString & name,
+void RisseBindProperty(CC * _class, const tRisseString & name,
 	GR (IC::*getter)() const, void (IC::*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
@@ -533,7 +533,7 @@ void RisseRegisterBinder(CC * _class, const tRisseString & name,
 
 // static with calling info getter
 template <typename CC, typename ST>
-void RisseRegisterBinder(CC * _class, const tRisseString & name,
+void RisseBindProperty(CC * _class, const tRisseString & name,
 	void (*getter)(const tRisseNativeBindPropertyGetterCallingInfo &), void (*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
@@ -552,7 +552,7 @@ void RisseRegisterBinder(CC * _class, const tRisseString & name,
 
 // non-static with calling info getter
 template <typename CC, typename IC, typename ST>
-void RisseRegisterBinder(CC * _class, const tRisseString & name,
+void RisseBindProperty(CC * _class, const tRisseString & name,
 	void (IC::*getter)(const tRisseNativeBindPropertyGetterCallingInfo &), void (IC::*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
@@ -573,9 +573,9 @@ void RisseRegisterBinder(CC * _class, const tRisseString & name,
 
 //---------------------------------------------------------------------------
 // 関数オブジェクトなど
-// いまのところ RisseRegisterBinder はどのクラスにも属していない。
+// いまのところ RisseBindFunction や RisseBindProperty はどのクラスにも属していない。
 // ネイティブ関数の定義が必要ないところに、かなり大きいテンプレートライブラリを
-// 読み込みたくなく、RisseRegisterBinder をそのほかの実装/定義と分離するためである。
+// 読み込みたくなく、RisseBindFunction や RisseBindProperty をそのほかの実装/定義と分離するためである。
 //---------------------------------------------------------------------------
 #include "risseNativeBinderTemplates.inc"
 //---------------------------------------------------------------------------

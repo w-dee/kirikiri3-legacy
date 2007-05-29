@@ -142,11 +142,11 @@ void tRisseBindingClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseRegisterBinder(this, ss_construct, &tRisseBindingInstance::construct);
-	RisseRegisterBinder(this, ss_initialize, &tRisseBindingInstance::initialize);
-	RisseRegisterBinder(this, ss_eval, &tRisseBindingInstance::eval);
-	RisseRegisterBinder(this, mnIGet, &tRisseBindingInstance::iget);
-	RisseRegisterBinder(this, mnISet, &tRisseBindingInstance::iset);
+	RisseBindFunction(this, ss_construct, &tRisseBindingInstance::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseBindingInstance::initialize);
+	RisseBindFunction(this, ss_eval, &tRisseBindingInstance::eval);
+	RisseBindFunction(this, mnIGet, &tRisseBindingInstance::iget);
+	RisseBindFunction(this, mnISet, &tRisseBindingInstance::iset);
 }
 //---------------------------------------------------------------------------
 

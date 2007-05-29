@@ -18,6 +18,7 @@
 #include "risseClass.h"
 #include "risseObjectBase.h"
 #include "risseObjectRTTI.h"
+#include "risseNativeBinder.h"
 
 namespace Risse
 {
@@ -45,6 +46,10 @@ public:
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo &info);
 };
 //---------------------------------------------------------------------------
 

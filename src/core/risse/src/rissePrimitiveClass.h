@@ -17,6 +17,7 @@
 #include "risseObject.h"
 #include "risseClass.h"
 #include "risseGC.h"
+#include "risseNativeBinder.h"
 
 namespace Risse
 {
@@ -36,6 +37,10 @@ public:
 	//! @brief		ゲートウェイアクセス用の代表オブジェクトを得る
 	//! @return		ゲートウェイアクセス用の代表オブジェクト
 	tRisseVariant & GetGateway() { return Gateway; }
+
+
+public: // Risse用メソッドなど
+	static void construct();
 };
 //---------------------------------------------------------------------------
 
@@ -60,6 +65,9 @@ public:
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	tRisseVariant CreateNewObjectBase();
+
+public: // Risse用メソッドなど
+	static void construct();
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

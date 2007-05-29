@@ -81,7 +81,8 @@ template class tRisseNativeBindFunction<void (*)()>; // staticメンバ関数用
 
 
 //---------------------------------------------------------------------------
-tRisseNativeBindPropertyGetter::tRetValue tRisseNativeBindPropertyGetter::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+template <typename TT>
+tRisseObjectInterface::tRetValue tRisseNativeBindPropertyGetter<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(name.IsEmpty())
 	{
@@ -102,7 +103,8 @@ tRisseNativeBindPropertyGetter::tRetValue tRisseNativeBindPropertyGetter::Operat
 
 
 //---------------------------------------------------------------------------
-tRisseNativeBindPropertySetter::tRetValue tRisseNativeBindPropertySetter::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+template <typename TT>
+tRisseObjectInterface::tRetValue tRisseNativeBindPropertySetter<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(name.IsEmpty())
 	{
@@ -125,7 +127,8 @@ tRisseNativeBindPropertySetter::tRetValue tRisseNativeBindPropertySetter::Operat
 
 
 //---------------------------------------------------------------------------
-tRisseNativeBindProperty::tRetValue tRisseNativeBindProperty::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+template <typename TT>
+tRisseObjectInterface::tRetValue tRisseNativeBindProperty<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(name.IsEmpty())
 	{
@@ -151,10 +154,11 @@ tRisseNativeBindProperty::tRetValue tRisseNativeBindProperty::Operate(RISSE_OBJE
 
 
 //---------------------------------------------------------------------------
-tRisseObjectInterface * tRisseNativeBindProperty::New(tRisseScriptEngine * engine,
+template <typename TT>
+tRisseObjectInterface * tRisseNativeBindProperty<TT>::New(tRisseScriptEngine * engine,
 		tRisseClassBase * Class,
-		void (tRisseObjectBase::*gettertarget)(), tRisseNativeBindPropertyGetter::tGetter getter,
-		void (tRisseObjectBase::*settertarget)(), tRisseNativeBindPropertySetter::tSetter setter)
+		TT gettertarget, typename tRisseNativeBindPropertyGetter<TT>::tGetter getter,
+		TT settertarget, typename tRisseNativeBindPropertySetter<TT>::tSetter setter)
 {
 	// tRissePropertyClass がまだ登録されていない場合は仮のプロパティオブジェクトを
 	// 作成して登録する (のちに正式なプロパティオブジェクトに置き換えられる)
@@ -164,11 +168,11 @@ tRisseObjectInterface * tRisseNativeBindProperty::New(tRisseScriptEngine * engin
 		tRisseVariant v = tRisseVariant(engine->PropertyClass).New(
 				0, tRisseMethodArgument::New(
 					getter ?
-						tRisseVariant(new tRisseNativeBindPropertyGetter(
+						tRisseVariant(new tRisseNativeBindPropertyGetter<TT>(
 												engine, Class, gettertarget, getter)):
 						tRisseVariant::GetNullObject(),
 					setter ?
-						tRisseVariant(new tRisseNativeBindPropertySetter(
+						tRisseVariant(new tRisseNativeBindPropertySetter<TT>(
 												engine, Class, settertarget, setter)):
 						tRisseVariant::GetNullObject()
 						));
@@ -181,13 +185,21 @@ tRisseObjectInterface * tRisseNativeBindProperty::New(tRisseScriptEngine * engin
 	else
 	{
 		// 仮実装
-		return (tRissePropertyInstance *)(new tRisseNativeBindProperty(engine,
+		return (tRissePropertyInstance *)(new tRisseNativeBindProperty<TT>(engine,
 			Class, gettertarget, getter, settertarget, setter));
 	}
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+template class tRisseNativeBindPropertyGetter<void (tRisseObjectBase::*)()>; // メンバ関数用
+template class tRisseNativeBindPropertyGetter<void (*)()>; // staticメンバ関数用
+template class tRisseNativeBindPropertySetter<void (tRisseObjectBase::*)()>; // メンバ関数用
+template class tRisseNativeBindPropertySetter<void (*)()>; // staticメンバ関数用
+template class tRisseNativeBindProperty<void (tRisseObjectBase::*)()>; // メンバ関数用
+template class tRisseNativeBindProperty<void (*)()>; // staticメンバ関数用
+//---------------------------------------------------------------------------
 
 
 } // namespace Risse

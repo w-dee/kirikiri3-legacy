@@ -166,6 +166,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		RisseネイティブプロパティのGetterの実装
 //---------------------------------------------------------------------------
+template <typename TT> // target-type, void (tRisseObjectBase::*)() とか
 class tRisseNativeBindPropertyGetter : public tRisseObjectInterface
 {
 public:
@@ -173,7 +174,7 @@ public:
 	//! @param		_class		クラス
 	//! @param		f			呼び出し先オブジェクト
 	//! @param		info		呼び出し情報
-	typedef void (*tGetter)(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+	typedef void (*tGetter)(tRisseClassBase * _class, TT f,
 		const tRisseNativeBindPropertyGetterCallingInfo & info);
 
 private:
@@ -181,7 +182,7 @@ private:
 	tRisseClassBase * Class; 
 
 	//! @brief		Risseプロパティが読み込まれる際に本当に呼ばれるネイティブな関数
-	void (tRisseObjectBase::*TargetFunction)();
+	TT TargetFunction;
 
 	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッド
 	tGetter Getter;
@@ -193,7 +194,7 @@ public:
 	//! @param		target		Risseプロパティ読み込み時に本当に呼ばれるネイティブな関数
 	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
 	tRisseNativeBindPropertyGetter(tRisseScriptEngine * engine,
-		tRisseClassBase * class_, void (tRisseObjectBase::*target)(), tGetter getter) :
+		tRisseClassBase * class_, TT target, tGetter getter) :
 		tRisseObjectInterface(new tRisseRTTI(engine))
 	{ Class = class_; TargetFunction = target; Getter = getter; }
 
@@ -206,6 +207,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		RisseネイティブプロパティのSetterの実装
 //---------------------------------------------------------------------------
+template <typename TT> // target-type, void (tRisseObjectBase::*)() とか
 class tRisseNativeBindPropertySetter : public tRisseObjectInterface
 {
 public:
@@ -213,7 +215,7 @@ public:
 	//! @param		_class		クラス
 	//! @param		f			呼び出し先オブジェクト
 	//! @param		info		呼び出し情報
-	typedef void (*tSetter)(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
+	typedef void (*tSetter)(tRisseClassBase * _class, TT f,
 		const tRisseNativeBindPropertySetterCallingInfo & info);
 
 
@@ -222,7 +224,7 @@ private:
 	tRisseClassBase * Class; 
 
 	//! @brief		Risseプロパティが書き込まれる際に本当に呼ばれるネイティブな関数
-	void (tRisseObjectBase::*TargetFunction)();
+	TT TargetFunction;
 
 	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッド
 	tSetter Setter;
@@ -234,7 +236,7 @@ public:
 	//! @param		target		Risseプロパティ書き込み時に本当に呼ばれるネイティブな関数
 	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
 	tRisseNativeBindPropertySetter(tRisseScriptEngine * engine,
-		tRisseClassBase * class_, void (tRisseObjectBase::*target)(), tSetter setter) :
+		tRisseClassBase * class_, TT target, tSetter setter) :
 		tRisseObjectInterface(new tRisseRTTI(engine))
 	{ Class = class_; TargetFunction = target; Setter = setter; }
 
@@ -249,6 +251,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		Risseネイティブプロパティ
 //---------------------------------------------------------------------------
+template <typename TT> // target-type, void (tRisseObjectBase::*)() とか
 class tRisseNativeBindProperty : public tRisseObjectInterface
 {
 	//! @param		親クラスのtypedef
@@ -264,11 +267,11 @@ protected:
 	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
 	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
 	tRisseNativeBindProperty(tRisseScriptEngine * engine, tRisseClassBase * Class,
-		void (tRisseObjectBase::*gettertarget)(), tRisseNativeBindPropertyGetter::tGetter getter,
-		void (tRisseObjectBase::*settertarget)(), tRisseNativeBindPropertySetter::tSetter setter)
+		TT gettertarget, typename tRisseNativeBindPropertyGetter<TT>::tGetter getter,
+		TT settertarget, typename tRisseNativeBindPropertySetter<TT>::tSetter setter)
 		: tRisseObjectInterface(new tRisseRTTI(engine)),
-		Getter(new tRisseNativeBindPropertyGetter(engine, Class, gettertarget, getter)),
-		Setter(new tRisseNativeBindPropertySetter(engine, Class, settertarget, setter)) {}
+		Getter(new tRisseNativeBindPropertyGetter<TT>(engine, Class, gettertarget, getter)),
+		Setter(new tRisseNativeBindPropertySetter<TT>(engine, Class, settertarget, setter)) {}
 
 public:
 	//! @brief		新しいプロパティインスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
@@ -278,8 +281,8 @@ public:
 	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
 	static tRisseObjectInterface * New(tRisseScriptEngine * engine,
 		tRisseClassBase * Class,
-		void (tRisseObjectBase::*gettertarget)(), tRisseNativeBindPropertyGetter::tGetter getter,
-		void (tRisseObjectBase::*settertarget)(), tRisseNativeBindPropertySetter::tSetter setter);
+		TT gettertarget, typename tRisseNativeBindPropertyGetter<TT>::tGetter getter,
+		TT settertarget, typename tRisseNativeBindPropertySetter<TT>::tSetter setter);
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
@@ -408,6 +411,22 @@ inline const tRisseMethodArgument &
 //---------------------------------------------------------------------------
 // プロパティ関連
 //---------------------------------------------------------------------------
+// static getter
+template <typename CC, typename GR>
+class tRisseBinderPropertyGetterS
+{
+	typedef GR (*tFunc)();
+public:
+	static void Call(tRisseClassBase * _class, void (*f)(),
+		const tRisseNativeBindPropertyGetterCallingInfo & info)
+	{
+		if(info.result)
+			*info.result = RisseToVariant(((tFunc)f)());
+		else
+			((tFunc)f)();
+	}
+};
+// non-static getter
 template <typename CC, typename IC, typename GR>
 class tRisseBinderPropertyGetter
 {
@@ -423,7 +442,19 @@ public:
 			(instance->*((tFunc)f))();
 	}
 };
-
+// static getter with calling info
+template <typename CC>
+class tRisseBinderPropertyGetter_InfoS
+{
+	typedef void (*tFunc)(const tRisseNativeBindPropertyGetterCallingInfo & info);
+public:
+	static void Call(tRisseClassBase * _class, void (*f)(),
+		const tRisseNativeBindPropertyGetterCallingInfo & info)
+	{
+		((tFunc)f)(info);
+	}
+};
+// non-static getter with calling info
 template <typename CC, typename IC>
 class tRisseBinderPropertyGetter_Info
 {
@@ -436,7 +467,19 @@ public:
 		(instance->*((tFunc)f))(info);
 	}
 };
-
+// static setter
+template <typename CC, typename ST>
+class tRisseBinderPropertySetterS
+{
+	typedef void (*tFunc)(ST);
+public:
+	static void Call(tRisseClassBase * _class, void (*f)(),
+		const tRisseNativeBindPropertySetterCallingInfo & info)
+	{
+		((tFunc)f)(RisseFromVariant<ST>(info.value));
+	}
+};
+// non-static setter
 template <typename CC, typename IC, typename ST>
 class tRisseBinderPropertySetter
 {
@@ -450,7 +493,26 @@ public:
 	}
 };
 
+// static without calling info getter
+template <typename CC, typename GR, typename ST>
+void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	GR (*getter)(), void (*setter)(ST),
+	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+{
+	attribute.Set(tRisseMemberAttribute::pcProperty);
+	_class->RegisterNormalMember(name,
+		tRisseVariantBlock(
+			tRisseNativeBindProperty<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
+				(tRisseClassBase *)_class,
+				getter ? reinterpret_cast<void (*)()>(getter) : NULL,
+				getter ? &tRisseBinderPropertyGetterS<CC, GR >::Call : NULL,
+				setter ? reinterpret_cast<void (*)()>(setter) : NULL,
+				setter ? &tRisseBinderPropertySetterS<CC, ST >::Call : NULL
+				), context), attribute);
+}
 
+// non-static without calling info getter
 template <typename CC, typename IC, typename GR, typename ST>
 void RisseRegisterBinder(CC * _class, const tRisseString & name,
 	GR (IC::*getter)() const, void (IC::*setter)(ST),
@@ -460,7 +522,7 @@ void RisseRegisterBinder(CC * _class, const tRisseString & name,
 	attribute.Set(tRisseMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
 		tRisseVariantBlock(
-			tRisseNativeBindProperty::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseNativeBindProperty<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				getter ? reinterpret_cast<void (tRisseObjectBase::*)()>(getter) : NULL,
 				getter ? &tRisseBinderPropertyGetter<CC, IC, GR >::Call : NULL,
@@ -469,6 +531,26 @@ void RisseRegisterBinder(CC * _class, const tRisseString & name,
 				), context), attribute);
 }
 
+// static with calling info getter
+template <typename CC, typename ST>
+void RisseRegisterBinder(CC * _class, const tRisseString & name,
+	void (*getter)(const tRisseNativeBindPropertyGetterCallingInfo &), void (*setter)(ST),
+	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+{
+	attribute.Set(tRisseMemberAttribute::pcProperty);
+	_class->RegisterNormalMember(name,
+		tRisseVariantBlock(
+			tRisseNativeBindProperty<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
+				(tRisseClassBase *)_class,
+				getter ? reinterpret_cast<void (*)()>(getter) : NULL,
+				getter ? &tRisseBinderPropertyGetter_InfoS<CC>::Call : NULL,
+				setter ? reinterpret_cast<void (*)()>(setter) : NULL,
+				setter ? &tRisseBinderPropertySetterS<CC, ST >::Call : NULL
+				), context), attribute);
+}
+
+// non-static with calling info getter
 template <typename CC, typename IC, typename ST>
 void RisseRegisterBinder(CC * _class, const tRisseString & name,
 	void (IC::*getter)(const tRisseNativeBindPropertyGetterCallingInfo &), void (IC::*setter)(ST),
@@ -478,7 +560,7 @@ void RisseRegisterBinder(CC * _class, const tRisseString & name,
 	attribute.Set(tRisseMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
 		tRisseVariantBlock(
-			tRisseNativeBindProperty::New(_class->GetRTTI()->GetScriptEngine(),
+			tRisseNativeBindProperty<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				getter ? reinterpret_cast<void (tRisseObjectBase::*)()>(getter) : NULL,
 				getter ? &tRisseBinderPropertyGetter_Info<CC, IC>::Call : NULL,

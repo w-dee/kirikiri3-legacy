@@ -14,8 +14,6 @@
 
 #include "risseModuleClass.h"
 #include "risseObjectClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseOpCodes.h"
 #include "risseStaticStrings.h"
 #include "risseScriptEngine.h"
@@ -47,28 +45,8 @@ void tRisseModuleClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
-	// コンテキストとしては null を指定する
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// デフォルトでは何もしない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す
-		engine->ModuleClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+	RisseBindFunction(this, ss_construct, &tRisseModuleClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseModuleClass::initialize);
 }
 //---------------------------------------------------------------------------
 
@@ -80,6 +58,22 @@ tRisseVariant tRisseModuleClass::CreateNewObjectBase()
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tRisseModuleClass::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseModuleClass::initialize(const tRisseNativeBindFunctionCallingInfo &info)
+{
+	// 親クラスの同名メソッドを呼び出す
+	info.engine->ModuleClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), info.This);
+}
+//---------------------------------------------------------------------------
 
 
 

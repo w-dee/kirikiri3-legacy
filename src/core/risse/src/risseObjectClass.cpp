@@ -13,7 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "risseObjectClass.h"
-#include "risseNativeFunction.h"
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
 #include "risseScriptEngine.h"
@@ -49,158 +48,140 @@ void tRisseObjectClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
-	// コンテキストとしては null を指定する
+	RisseBindFunction(this, ss_construct, &tRisseObjectClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseObjectClass::initialize);
+	RisseBindFunction(this, ss_isA, &tRisseObjectClass::isA, 
+		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
+	RisseBindFunction(this, ss_eval, &tRisseObjectClass::eval);
+	RisseBindFunction(this, ss_getInstanceMember, &tRisseObjectClass::getInstanceMember);
+	RisseBindFunction(this, ss_setInstanceMember, &tRisseObjectClass::setInstanceMember);
+	RisseBindFunction(this, ss_toException, &tRisseObjectClass::toException);
+	RisseBindFunction(this, ss_p, &tRisseObjectClass::p);
+}
+//---------------------------------------------------------------------------
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// デフォルトでは何もしない
-	}
-	RISSE_END_NATIVE_METHOD
+//---------------------------------------------------------------------------
+void tRisseObjectClass::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// デフォルトでは何もしない
-	}
-	RISSE_END_NATIVE_METHOD
+//---------------------------------------------------------------------------
+void tRisseObjectClass::initialize()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_isA, (attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal)))
-	{
-		// 自身が引数(=クラス) のインスタンスかどうかを得る
-		// 引数チェック
-		args.ExpectArgumentCount(1);
+//---------------------------------------------------------------------------
+bool tRisseObjectClass::isA(const tRisseVariant & Class,
+						const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 自身が引数(=クラス) のインスタンスかどうかを得る
+	return info.This.InstanceOf(info.engine, Class);
+}
+//---------------------------------------------------------------------------
 
-		tRisseVariant ret = This.InstanceOf(engine, args[0]);
-		if(result) *result = ret;
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseObjectClass::eval(const tRisseString & script,
+							const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// eval (式やスクリプトの評価)
+	tRisseString name = info.args.HasArgument(1) ?
+					tRisseString(info.args[1]) : tRisseString(RISSE_WS("(anonymous)"));
+	risse_size lineofs = info.args.HasArgument(2) ? (risse_size)(risse_int64)info.args[2] : (risse_size)0;
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_eval)
-	{
-		// eval (式やスクリプトの評価)
-		args.ExpectArgumentCount(1);
+	info.engine->Evaluate(script, name, lineofs, info.result,
+							new tRisseBindingInfo(info.This), true);
+}
+//---------------------------------------------------------------------------
 
-		tRisseString script = args[0];
-		tRisseString name = args.HasArgument(1) ?
-						tRisseString(args[1]) : tRisseString(RISSE_WS("(anonymous)"));
-		risse_size lineofs = args.HasArgument(2) ? (risse_size)(risse_int64)args[2] : (risse_size)0;
 
-		engine->Evaluate(script, name, lineofs, result, new tRisseBindingInfo(This), true);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_getInstanceMember)
-	{
-		// 引数チェック
-		args.ExpectArgumentCount(1);
-
-		// This のインスタンスメンバを取得する
-		tRisseVariant ret = 
-			This.GetPropertyDirect(engine, args[0],
-				tRisseMemberAttribute::GetDefault()|
-				tRisseOperateFlags::ofInstanceMemberOnly,
-				This);
-		if(result) *result = ret;
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_setInstanceMember)
-	{
-		// 引数チェック
-		args.ExpectArgumentCount(2);
-
-		// This のインスタンスメンバを設定する
-		This.SetPropertyDirect(engine, args[0],
+//---------------------------------------------------------------------------
+tRisseVariant tRisseObjectClass::getInstanceMember(
+	const tRisseNativeBindFunctionCallingInfo & info,
+	const tRisseString & membername)
+{
+	// This のインスタンスメンバを取得する
+	return info.This.GetPropertyDirect(info.engine, membername,
 			tRisseMemberAttribute::GetDefault()|
-			tRisseOperateFlags::ofInstanceMemberOnly|
-			tRisseOperateFlags::ofMemberEnsure,
-						args[1], This);
-	}
-	RISSE_END_NATIVE_METHOD
+			tRisseOperateFlags::ofInstanceMemberOnly,
+			info.This);
+}
+//---------------------------------------------------------------------------
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_toException)
+//---------------------------------------------------------------------------
+void tRisseObjectClass::setInstanceMember(
+	const tRisseNativeBindFunctionCallingInfo & info,
+	const tRisseString & membername, const tRisseVariant & value)
+{
+	// This のインスタンスメンバを設定する
+	info.This.SetPropertyDirect(info.engine, membername,
+		tRisseMemberAttribute::GetDefault()|
+		tRisseOperateFlags::ofInstanceMemberOnly|
+		tRisseOperateFlags::ofMemberEnsure,
+					value, info.This);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseObjectClass::toException(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// デフォルトの動作は、This を文字列化してそれを RuntimeException.new 
+	// に渡し、その結果を返す
+	// TODO: global.RuntimeException を見に行かずに直接クラスを見に行っちゃっていいの？
+	return tRisseVariant(info.engine->RuntimeExceptionClass).
+			New(0, tRisseMethodArgument::New((tRisseString)info.This));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseObjectClass::p(const tRisseMethodArgument & args)
+{
+	for(risse_size i = 0; i < args.GetArgumentCount(); i++)
 	{
-		// デフォルトの動作は、This を文字列化してそれを RuntimeException.new 
-		// に渡し、その結果を返す
-		// TODO: global.RuntimeException を見に行かずに直接シングルトンインスタンスに
-		//		バインドしちゃっていいの？
-		tRisseVariant ret = tRisseVariant(engine->RuntimeExceptionClass).
-				New(0, tRisseMethodArgument::New((tRisseString)This));
-		if(result) *result = ret;
-	}
-	RISSE_END_NATIVE_METHOD
+		const tRisseVariant & v = args[i];
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_p)
-	{
-		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
+		if(v.GetType() == tRisseVariant::vtObject)
 		{
-			const tRisseVariant & v = args[i];
-
-			if(v.GetType() == tRisseVariant::vtObject)
+			risse_char buf[40];
+			Risse_pointer_to_str(v.GetObjectInterface(), buf);
+			RisseFPrint(stdout, (tRisseString(RISSE_WS("Object@")) + buf).c_str());
+			const tRisseVariant * context = v.GetContext();
+			if(context)
 			{
-				risse_char buf[40];
-				Risse_pointer_to_str(v.GetObjectInterface(), buf);
-				RisseFPrint(stdout, (tRisseString(RISSE_WS("Object@")) + buf).c_str());
-				const tRisseVariant * context = v.GetContext();
-				if(context)
+				if(context->GetType() == tRisseVariant::vtObject)
 				{
-					if(context->GetType() == tRisseVariant::vtObject)
+					if(context == tRisseVariant::GetDynamicContext())
 					{
-						if(context == tRisseVariant::GetDynamicContext())
-						{
-							RisseFPrint(stdout, RISSE_WS(":dynamic"));
-						}
-						else
-						{
-							Risse_pointer_to_str(context->GetObjectInterface(), buf);
-							RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
-						}
+						RisseFPrint(stdout, RISSE_WS(":dynamic"));
 					}
 					else
 					{
-						RisseFPrint(stdout, (context->AsHumanReadable()).c_str());
+						Risse_pointer_to_str(context->GetObjectInterface(), buf);
+						RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
 					}
 				}
-			}
-			else
-			{
-				RisseFPrint(stdout, (v.operator tRisseString()).c_str());
+				else
+				{
+					RisseFPrint(stdout, (context->AsHumanReadable()).c_str());
+				}
 			}
 		}
-		RisseFPrint(stdout, RISSE_WS("\n"));
+		else
+		{
+			RisseFPrint(stdout, (v.operator tRisseString()).c_str());
+		}
 	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-/*
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_puts)
-	{
-		// This を標準出力に出力する
-		RisseFPrint(stdout, This.operator tRisseString().c_str());
-		// 改行する
-		RisseFPrint(stdout, RISSE_WS("\n"));
-	}
-	RISSE_END_NATIVE_METHOD
-*/
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+	RisseFPrint(stdout, RISSE_WS("\n"));
 }
 //---------------------------------------------------------------------------
 

@@ -374,36 +374,45 @@ template <> struct tRisseIsFuncCallNonMetaType<const tRisseMethodArgument &>
 													{ enum { value = 0 }; };
 //---------------------------------------------------------------------------
 // T への、メソッドへの引数あるいは呼び出し情報からの変換
-template <typename T>
-inline T RisseFromVariantOrCallingInfo(const tRisseVariant & v,
-				const tRisseNativeBindFunctionCallingInfo & info)
+// RisseFVoC = RisseFromVariantOrCallingInfo
+template <typename T, int N>
+struct tRisseFVoC
 {
-	return RisseFromVariant<T>(v);
-}
+	static T Cnv(const tRisseNativeBindFunctionCallingInfo & info)
+	{
+		return RisseFromVariant<T>(info.args[N]);
+	}
+};
 //---------------------------------------------------------------------------
-template <>
-inline const tRisseNativeBindFunctionCallingInfo &
-	RisseFromVariantOrCallingInfo<const tRisseNativeBindFunctionCallingInfo &>
-		(const tRisseVariant & v, const tRisseNativeBindFunctionCallingInfo & info)
+template <int N>
+struct tRisseFVoC<const tRisseNativeBindFunctionCallingInfo &, N>
 {
-	return info;
-}
+	static const tRisseNativeBindFunctionCallingInfo & Cnv(
+					const tRisseNativeBindFunctionCallingInfo & info)
+	{
+		return info;
+	}
+};
 //---------------------------------------------------------------------------
-template <>
-inline tRisseScriptEngine *
-	RisseFromVariantOrCallingInfo<tRisseScriptEngine *>
-		(const tRisseVariant & v, const tRisseNativeBindFunctionCallingInfo & info)
+template <int N>
+struct tRisseFVoC<tRisseScriptEngine *, N>
 {
-	return info.engine;
-}
+	static tRisseScriptEngine * Cnv(
+					const tRisseNativeBindFunctionCallingInfo & info)
+	{
+		return info.engine;
+	}
+};
 //---------------------------------------------------------------------------
-template <>
-inline const tRisseMethodArgument &
-	RisseFromVariantOrCallingInfo<const tRisseMethodArgument &>
-		(const tRisseVariant & v, const tRisseNativeBindFunctionCallingInfo & info)
+template <int N>
+struct tRisseFVoC<const tRisseMethodArgument &, N>
 {
-	return info.args;
-}
+	static const tRisseMethodArgument & Cnv(
+					const tRisseNativeBindFunctionCallingInfo & info)
+	{
+		return info.args;
+	}
+};
 //---------------------------------------------------------------------------
 
 

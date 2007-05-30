@@ -55,6 +55,10 @@ public:
 	//! 			渡される。
 	tRisseCoroutine(tRisseScriptEngine * engine, const tRisseVariant & function, const tRisseVariant arg);
 
+	//! @brief		呼び出し先の関数を設定する
+	//! @param		function	呼び出し先の関数
+	void SetFunction(const tRisseVariant & function) { Function = function; }
+
 	//! @brief		コルーチンを実行する
 	//! @param		arg		呼び出される関数の２番目の引数、あるいは yield メソッドの
 	//!						戻り値となる値

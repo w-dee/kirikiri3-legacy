@@ -33,16 +33,16 @@ public:
 	//! @brief		コンストラクタ
 	tRisseCoroutineInstance();
 
-	//! @brief		Coroutineへの参照を得る
-	//! @return		Coroutineへの参照
-	tRisseCoroutine & GetCoroutine() { return *Coroutine; }
-
-	//! @brief		Coroutineを作成する
-	//! @param		function		呼び出す関数オブジェクト
-	void MakeCoroutine(const tRisseVariant & function);
-
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
 	virtual ~tRisseCoroutineInstance() {;}
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	tRisseVariant run(const tRisseMethodArgument & args) const;
+	tRisseVariant yield(const tRisseMethodArgument & args) const;
+	void dispose() const;
+	bool get_alive() const;
 };
 //---------------------------------------------------------------------------
 

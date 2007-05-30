@@ -405,10 +405,13 @@ private:
 
 		try
 		{
-			coro->Function.FuncCall(
-				coro->Engine, &ret, tRisseString::GetEmptyString(), 0,
-				tRisseMethodArgument::New(coro->FunctionArg, arg),
-				coro->FunctionArg);
+			if(!coro->Function.IsNull())
+			{
+				coro->Function.FuncCall(
+					coro->Engine, &ret, tRisseString::GetEmptyString(), 0,
+					tRisseMethodArgument::New(coro->FunctionArg, arg),
+					coro->FunctionArg);
+			}
 			coroimpl->Alive = false;
 			coroimpl->Running = false;
 			coroimpl->Context = NULL;

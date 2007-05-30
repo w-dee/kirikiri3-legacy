@@ -36,13 +36,61 @@ tRisseCoroutineInstance::tRisseCoroutineInstance()
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineInstance::MakeCoroutine(const tRisseVariant & function)
+void tRisseCoroutineInstance::construct()
 {
-	Coroutine = new tRisseCoroutine(GetRTTI()->GetScriptEngine(), function, tRisseVariant(this));
+	// コルーチンの実装オブジェクトを作成
+	Coroutine = new tRisseCoroutine(GetRTTI()->GetScriptEngine(),
+		tRisseVariant::GetNullObject(), tRisseVariant(this));
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseCoroutineInstance::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 引数の数チェック
+	info.args.ExpectBlockArgumentCount(1);
+
+	// 親クラスの同名メソッドを呼び出す
+	info.engine->CoroutineClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+
+	// 引数を元にコルーチンを作成する
+	// TODO: ブロック引数だけでなくコンストラクタ引数としても関数オブジェクトを渡せるように
+	Coroutine->SetFunction(info.args.GetBlockArgument(0));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseCoroutineInstance::run(const tRisseMethodArgument & args) const
+{
+	return Coroutine->Run(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseCoroutineInstance::yield(const tRisseMethodArgument & args) const
+{
+	return Coroutine->DoYield(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseCoroutineInstance::dispose() const
+{
+	Coroutine->Dispose();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseCoroutineInstance::get_alive() const
+{
+	return Coroutine->GetAlive();
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -68,80 +116,12 @@ void tRisseCoroutineClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやること無し
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 引数の数チェック
-		args.ExpectBlockArgumentCount(1);
-
-		// 親クラスの同名メソッドを呼び出す
-		engine->CoroutineClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-
-		// 引数を元にコルーチンを作成する
-		// TODO: ブロック引数だけでなくコンストラクタ引数としても関数オブジェクトを渡せるように
-		tRisseCoroutineInstance * obj = This.CheckAndGetObjectInterafce<tRisseCoroutineInstance, tRisseClassBase>(engine->CoroutineClass);
-		obj->MakeCoroutine(args.GetBlockArgument(0));
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_run)
-	{
-		tRisseCoroutineInstance * obj = This.CheckAndGetObjectInterafce<tRisseCoroutineInstance, tRisseClassBase>(engine->CoroutineClass);
-
-		tRisseVariant ret =
-			obj->GetCoroutine().Run(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
-		if(result) *result = ret;
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_yield)
-	{
-		tRisseCoroutineInstance * obj = This.CheckAndGetObjectInterafce<tRisseCoroutineInstance, tRisseClassBase>(engine->CoroutineClass);
-
-		tRisseVariant ret =
-			obj->GetCoroutine().DoYield(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
-		if(result) *result = ret;
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_dispose)
-	{
-		tRisseCoroutineInstance * obj = This.CheckAndGetObjectInterafce<tRisseCoroutineInstance, tRisseClassBase>(engine->CoroutineClass);
-
-		obj->GetCoroutine().Dispose();
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_PROPERTY(ss_alive)
-	{
-		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
-		{
-			tRisseCoroutineInstance * obj = This.CheckAndGetObjectInterafce<tRisseCoroutineInstance, tRisseClassBase>(engine->CoroutineClass);
-
-			if(result) *result = obj->GetCoroutine().GetAlive();
-		}
-		RISSE_END_NATIVE_PROPERTY_GETTER
-	}
-	RISSE_END_NATIVE_PROPERTY
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseCoroutineInstance::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseCoroutineInstance::initialize);
+	RisseBindFunction(this, ss_run, &tRisseCoroutineInstance::run);
+	RisseBindFunction(this, ss_yield, &tRisseCoroutineInstance::yield);
+	RisseBindFunction(this, ss_dispose, &tRisseCoroutineInstance::dispose);
+	RisseBindProperty(this, ss_alive, &tRisseCoroutineInstance::get_alive);
 }
 //---------------------------------------------------------------------------
 

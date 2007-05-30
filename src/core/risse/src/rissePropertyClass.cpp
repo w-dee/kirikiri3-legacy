@@ -13,8 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "rissePropertyClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseScriptEngine.h"
@@ -66,6 +64,28 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRissePropertyInstance::construct()
+{
+	// なにもしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRissePropertyInstance::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す
+	info.engine->PropertyClass->CallSuperClassMethod(NULL, ss_initialize, 0, 
+			tRisseMethodArgument::Empty(), info.This);
+
+	// 引数 = {getter, setter}
+	if(info.args.HasArgument(0)) SetGetter(info.args[0]);
+	if(info.args.HasArgument(1)) SetSetter(info.args[1]);
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -90,80 +110,10 @@ void tRissePropertyClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// なにもしない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す
-		engine->PropertyClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-
-		// 引数 = {getter, setter}
-		tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
-		if(args.HasArgument(0)) obj->SetGetter(args[0]);
-		if(args.HasArgument(1)) obj->SetSetter(args[1]);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_PROPERTY(ss_getter)
-	{
-		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
-		{
-			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
-			if(result) *result = obj->GetGetter();
-		}
-		RISSE_END_NATIVE_PROPERTY_GETTER
-
-		/*
-		このプロパティへの書き込みのサポートはない
-		(いったん定義したプロパティの内容を個別に変えられると困る場合があるため.特にプリミティブクラスのプロパティ.
-		また、これが再定義できてもあまりうれしくないと思うのだが)
-		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
-		{
-			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
-			obj->SetGetter(value);
-		}
-		RISSE_END_NATIVE_PROPERTY_SETTER
-		*/
-	}
-	RISSE_END_NATIVE_PROPERTY
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_PROPERTY(ss_setter)
-	{
-		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
-		{
-			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
-			if(result) *result = obj->GetSetter();
-		}
-		RISSE_END_NATIVE_PROPERTY_GETTER
-
-		/*
-		このプロパティへの書き込みのサポートはない
-		(いったん定義したプロパティの内容を個別に変えられると困る場合があるため.特にプリミティブクラスのプロパティ.
-		また、これが再定義できてもあまりうれしくないと思うのだが)
-		RISSE_BEGINE_NATIVE_PROPERTY_SETTER
-		{
-			tRissePropertyInstance * obj = This.CheckAndGetObjectInterafce<tRissePropertyInstance, tRisseClassBase>(engine->PropertyClass);
-			obj->SetSetter(value);
-		}
-		RISSE_END_NATIVE_PROPERTY_SETTER
-		*/
-	}
-	RISSE_END_NATIVE_PROPERTY
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+	RisseBindFunction(this, ss_construct, &tRissePropertyInstance::construct);
+	RisseBindFunction(this, ss_initialize, &tRissePropertyInstance::initialize);
+	RisseBindProperty(this, ss_getter, &tRissePropertyInstance::GetGetter, (void(tRissePropertyInstance::*)(const tRisseVariant &))NULL);
+	RisseBindProperty<tRissePropertyClass, tRissePropertyInstance, tRisseVariant &, tRisseVariant>(this, ss_setter, &tRissePropertyInstance::GetSetter, NULL);
 }
 //---------------------------------------------------------------------------
 

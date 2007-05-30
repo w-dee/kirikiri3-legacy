@@ -521,10 +521,29 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 				), context), attribute);
 }
 
-// non-static without calling info getter
+// non-static without calling info getter, const getter
 template <typename CC, typename IC, typename GR, typename ST>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	GR (IC::*getter)() const, void (IC::*setter)(ST),
+	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+{
+	attribute.Set(tRisseMemberAttribute::pcProperty);
+	_class->RegisterNormalMember(name,
+		tRisseVariantBlock(
+			tRisseNativeBindProperty<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
+				(tRisseClassBase *)_class,
+				getter ? reinterpret_cast<void (tRisseObjectBase::*)()>(getter) : NULL,
+				getter ? &tRisseBinderPropertyGetter<CC, IC, GR >::Call : NULL,
+				setter ? reinterpret_cast<void (tRisseObjectBase::*)()>(setter) : NULL,
+				setter ? &tRisseBinderPropertySetter<CC, IC, ST >::Call : NULL
+				), context), attribute);
+}
+
+// non-static without calling info getter, non-const getter
+template <typename CC, typename IC, typename GR, typename ST>
+void RisseBindProperty(CC * _class, const tRisseString & name,
+	GR (IC::*getter)(), void (IC::*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 {

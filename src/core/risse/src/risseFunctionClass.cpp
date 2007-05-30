@@ -13,8 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "risseFunctionClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseScriptEngine.h"
@@ -61,6 +59,29 @@ tRisseFunctionInstance::tRetValue tRisseFunctionInstance::Operate(RISSE_OBJECTIN
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseFunctionInstance::construct()
+{
+	// 何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseFunctionInstance::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す
+	info.engine->FunctionClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+		tRisseMethodArgument::Empty(), info.This);
+
+	// 引数 = {body}
+	// TODO: 文字列が渡された場合は内容をコンパイルして関数として動作するようにする
+	if(info.args.HasArgument(0)) SetBody(info.args[0]);
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 
@@ -85,29 +106,8 @@ void tRisseFunctionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 何もしない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す
-		engine->FunctionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-
-		// 引数 = {body}
-		// TODO: 文字列が渡された場合は内容をコンパイルして関数として動作するようにする
-		tRisseFunctionInstance * obj = This.CheckAndGetObjectInterafce<tRisseFunctionInstance, tRisseClassBase>(engine->FunctionClass);
-		if(args.HasArgument(0)) obj->SetBody(args[0]);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseFunctionInstance::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseFunctionInstance::initialize);
 }
 //---------------------------------------------------------------------------
 

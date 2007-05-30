@@ -17,6 +17,7 @@
 #include "risseObject.h"
 #include "risseClass.h"
 #include "risseGC.h"
+#include "risseNativeBinder.h"
 
 namespace Risse
 {
@@ -51,6 +52,10 @@ public:
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+
+public: // Risse用メソッドとか
+	void construct();
+	void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
 

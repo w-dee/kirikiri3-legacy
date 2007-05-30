@@ -46,10 +46,7 @@ void tRisseNumberClass::RegisterMembers()
 		&tRisseNumberClass::construct,
 		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
 								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
-
-	// ↓プロパティの型 (ここではbool) を指定しないとこの場合はsetterの型を特定できずにNULLを渡すとエラーになる
-	RisseBindProperty<tRisseNumberClass, bool>(this, ss_isNaN,
-		&tRisseNumberClass::isNaN, NULL,
+	RisseBindProperty(this, ss_isNaN, &tRisseNumberClass::isNaN,
 		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
 								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
 }

@@ -54,7 +54,7 @@ void tRisseStringClass::RegisterMembers()
 		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
 	RisseBindFunction(this, ss_charAt, &tRisseStringClass::charAt,
 		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
-	RisseBindProperty<tRisseStringClass, risse_size>(this, ss_length, &tRisseStringClass::get_length, NULL,
+	RisseBindProperty(this, ss_length, &tRisseStringClass::get_length,
 		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
 
 }

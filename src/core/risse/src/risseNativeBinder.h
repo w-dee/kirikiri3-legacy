@@ -520,30 +520,21 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 				setter ? &tRisseBinderPropertySetterS<CC, ST >::Call : NULL
 				), context), attribute);
 }
-
-// non-static without calling info getter, const getter
-template <typename CC, typename IC, typename GR, typename ST>
+// static without calling info getter, read-only
+template <typename CC, typename GR/*, typename ST*/>
 void RisseBindProperty(CC * _class, const tRisseString & name,
-	GR (IC::*getter)() const, void (IC::*setter)(ST),
+	GR (*getter)()/*, void (*setter)(ST)*/,
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 {
-	attribute.Set(tRisseMemberAttribute::pcProperty);
-	_class->RegisterNormalMember(name,
-		tRisseVariantBlock(
-			tRisseNativeBindProperty<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
-				(tRisseClassBase *)_class,
-				getter ? reinterpret_cast<void (tRisseObjectBase::*)()>(getter) : NULL,
-				getter ? &tRisseBinderPropertyGetter<CC, IC, GR >::Call : NULL,
-				setter ? reinterpret_cast<void (tRisseObjectBase::*)()>(setter) : NULL,
-				setter ? &tRisseBinderPropertySetter<CC, IC, ST >::Call : NULL
-				), context), attribute);
+	RisseBindProperty<CC, GR, const tRisseVariant &>(
+		_class, name, getter, NULL, attribute, context);
 }
 
 // non-static without calling info getter, non-const getter
-template <typename CC, typename IC, typename GR, typename ST>
+template <typename CC, typename GIC, typename SIC, typename GR, typename ST>
 void RisseBindProperty(CC * _class, const tRisseString & name,
-	GR (IC::*getter)(), void (IC::*setter)(ST),
+	GR (GIC::*getter)(), void (SIC::*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 {
@@ -553,11 +544,22 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 			tRisseNativeBindProperty<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				getter ? reinterpret_cast<void (tRisseObjectBase::*)()>(getter) : NULL,
-				getter ? &tRisseBinderPropertyGetter<CC, IC, GR >::Call : NULL,
+				getter ? &tRisseBinderPropertyGetter<CC, GIC, GR >::Call : NULL,
 				setter ? reinterpret_cast<void (tRisseObjectBase::*)()>(setter) : NULL,
-				setter ? &tRisseBinderPropertySetter<CC, IC, ST >::Call : NULL
+				setter ? &tRisseBinderPropertySetter<CC, SIC, ST >::Call : NULL
 				), context), attribute);
 }
+// non-static without calling info getter, non-const getter, read-only
+template <typename CC, typename GIC/*, typename SIC*/, typename GR/*, typename ST*/>
+void RisseBindProperty(CC * _class, const tRisseString & name,
+	GR (GIC::*getter)()/*, void (SIC::*setter)(ST)*/,
+	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+{
+	RisseBindProperty<CC, GIC, tRisseObjectInterface, GR, const tRisseVariant &>(
+		_class, name, getter, NULL, attribute, context);
+}
+
 
 // static with calling info getter
 template <typename CC, typename ST>
@@ -577,11 +579,21 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 				setter ? &tRisseBinderPropertySetterS<CC, ST >::Call : NULL
 				), context), attribute);
 }
-
-// non-static with calling info getter
-template <typename CC, typename IC, typename ST>
+// static with calling info getter, read-only
+template <typename CC/*, typename ST*/>
 void RisseBindProperty(CC * _class, const tRisseString & name,
-	void (IC::*getter)(const tRisseNativeBindPropertyGetterCallingInfo &), void (IC::*setter)(ST),
+	void (*getter)(const tRisseNativeBindPropertyGetterCallingInfo &)/*, void (*setter)(ST)*/,
+	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+{
+	RisseBindProperty<CC, const tRisseVariant &>(
+		_class, name, getter, NULL, attribute, context);
+}
+
+// non-static with calling info getter, non-const getter
+template <typename CC, typename GIC, typename SIC, typename ST>
+void RisseBindProperty(CC * _class, const tRisseString & name,
+	void (GIC::*getter)(const tRisseNativeBindPropertyGetterCallingInfo &), void (SIC::*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
 	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
 {
@@ -591,13 +603,21 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 			tRisseNativeBindProperty<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				getter ? reinterpret_cast<void (tRisseObjectBase::*)()>(getter) : NULL,
-				getter ? &tRisseBinderPropertyGetter_Info<CC, IC>::Call : NULL,
+				getter ? &tRisseBinderPropertyGetter_Info<CC, GIC>::Call : NULL,
 				setter ? reinterpret_cast<void (tRisseObjectBase::*)()>(setter) : NULL,
-				setter ? &tRisseBinderPropertySetter<CC, IC, ST >::Call : NULL
+				setter ? &tRisseBinderPropertySetter<CC, SIC, ST >::Call : NULL
 				), context), attribute);
 }
-
-
+// non-static with calling info getter, non-const getter, read-only
+template <typename CC, typename GIC/*, typename SIC, typename ST*/>
+void RisseBindProperty(CC * _class, const tRisseString & name,
+	void (GIC::*getter)(const tRisseNativeBindPropertyGetterCallingInfo &)/*, void (SIC::*setter)(ST)*/,
+	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+{
+	RisseBindProperty<CC, GIC, tRisseObjectInterface, const tRisseVariant &>(
+		_class, name, getter, NULL, attribute, context);
+}
 
 //---------------------------------------------------------------------------
 // 関数オブジェクトなど

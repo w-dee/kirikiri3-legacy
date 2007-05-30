@@ -112,8 +112,8 @@ void tRissePropertyClass::RegisterMembers()
 
 	RisseBindFunction(this, ss_construct, &tRissePropertyInstance::construct);
 	RisseBindFunction(this, ss_initialize, &tRissePropertyInstance::initialize);
-	RisseBindProperty(this, ss_getter, &tRissePropertyInstance::GetGetter, (void(tRissePropertyInstance::*)(const tRisseVariant &))NULL);
-	RisseBindProperty<tRissePropertyClass, tRissePropertyInstance, tRisseVariant &, tRisseVariant>(this, ss_setter, &tRissePropertyInstance::GetSetter, NULL);
+	RisseBindProperty(this, ss_getter, &tRissePropertyInstance::GetGetter);
+	RisseBindProperty(this, ss_setter, &tRissePropertyInstance::GetSetter);
 }
 //---------------------------------------------------------------------------
 

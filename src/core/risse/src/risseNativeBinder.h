@@ -17,6 +17,116 @@
 #include "risseCharUtils.h"
 #include "risseObjectBase.h"
 #include "risseObjectRTTI.h"
+/*! @note
+
+native binder について
+
+以下に説明する RisseBindFunction と RisseBindProperty は tRisseClassBase 派生
+クラスの RegisterMembers 内に通常は記述する。
+
+
+■ RisseBindFunction(Class, name, funcptr, attribute, context)
+
+  Class      クラスインスタンスオブジェクト。通常 tRisseClassBase の
+             サブクラスのインスタンスなので、tRisseClassBase 派生
+             クラスの RegisterMembers 内では this になる。
+  name       このメソッドを登録するメンバ名
+  funcptr    実際に呼び出されるC++メソッドポインタ
+  attribute  tRisseMemberAttribute 型のメンバ属性
+             (省略可、省略するとデフォルトの属性になる)
+  context    このメソッドが実行されるコンテキスト。省略すると
+             this になる。
+
+  funcptr に記述するC++メソッドはstaticでも非staticでもよい。
+  非staticの場合は、tRisseClassBase::CreateNewObjectBase() をオーバーライドした
+  C++ メソッドで返すRisseインスタンスの、そのC++クラスのメンバ関数である必要がある。
+  たとえば Array クラスの場合、
+
+	void tRisseArrayInstance::iset(const tRisseVariant & value, risse_offset ofs_index)
+
+  のようなメソッドが funcptr に渡っている。この tRisseArrayInstance は
+  tRisseArrayClass::CreateNewObjectBase() で返されているインスタンスのC++クラスである。
+
+  funcptr に非 static メソッドが渡った場合、関数が呼び出される際、必ず this が
+  正しいインスタンスであるかどうかの RTTI によるチェックが入る。その後、funcptr が
+  呼ばれる。
+  static メソッドが渡った場合は、このようなチェックはいっさい行われない。
+  static メソッドが渡された場合は、その static メソッドが属するクラスは問わない。
+
+  funcptr に渡す関数の戻り値の型は void あるいは任意の型だが、tRisseVariant に
+  変換可能な型、あるいは RisseToVariant で変換可能な型に限られる。もし標準で変換
+  出来ないような型の場合は、RisseToVariant を特殊化することにより独自の変換ルールを
+  書くこと。
+
+  funcptr に渡す関数の引数は、任意の型だが、これも tRisseVariant から変換可能な型、
+  あるいは RisseFromVariant で変換可能な型に限られる。もし標準で変換
+  出来ないような型の場合は、RisseFromVariant を特殊化することにより独自の変換ルールを
+  書くこと。
+
+  funcptr がたとえば4つの引数をとるメソッドの場合は、Risseでも4つの引数が必須となる
+  (これより少ない場合は例外が発生する)。ただし、引数の型が以下の場合は特殊で、これらは
+  必須引数の数には数えられないし、Risse の引数には対応しない。
+
+  const tRisseNativeBindFunctionCallingInfo &
+     メソッド呼び出しに関する情報を含む構造体
+
+  tRisseScriptEngine *
+     スクリプトエンジンインスタンス
+
+  const tRisseMethodArgument &
+     引数。特に、可変長の引数を取る場合は、これにより情報を得ることが出来る。
+
+
+  たとえば
+
+  	void eval( const tRisseNativeBindFunctionCallingInfo &info, const tRisseString & script) const;
+
+  というメソッドの場合は、const tRisseNativeBindFunctionCallingInfo &info は必須引数に
+  数えられないが、const tRisseString & script は必須引数に数えられる。また、info は
+  Risse の引数には対応しない。つまり、この Risse メソッドの必須引数は 1 個で最初の引数が
+  script に渡ることになる。
+
+
+■ RisseBindProperty(Class, name, getter, setter, attribute, context)
+■ RisseBindProperty(Class, name, getter, attribute, context)
+
+  Class      クラスインスタンスオブジェクト。通常 tRisseClassBase の
+             サブクラスのインスタンスなので、tRisseClassBase 派生
+             クラスの RegisterMembers 内では this になる。
+  name       このプロパティを登録するメンバ名
+  getter     ゲッタに対応するC++関数ポインタ
+  setter     セッタに対応するC++関数ポインタ
+             (省略すると読み出し専用プロパティになる)
+  attribute  tRisseMemberAttribute 型のメンバ属性
+             (省略可、省略するとデフォルトの属性になる)
+  context    このプロパティが実行されるコンテキスト。省略すると
+             this になる。
+
+  プロパティを登録する。
+
+  getter は以下の形のC++メソッドを指定する。
+
+  型 (*getter)()
+  void (*getter)(const tRisseNativeBindPropertyGetterCallingInfo &)
+
+  前者は単純で、「型」で表される型の値が戻ることを表す。これは RisseToVariant で
+  変換可能な型である必要がある。後者の場合は、プロパティ読み出しに関する
+  情報が渡ってくる。
+
+  setter は以下の形のC++メソッドを指定する。
+
+  void (*setter)(型)
+  void (*setter)(const tRisseNativeBindPropertySetterCallingInfo &)
+
+  前者は簡単な形で、「型」で表される型の値を設定することを表す。この型は
+  RisseFromVariant で変換可能な型である必要がある。
+  後者の場合は、プロパティ書き込みに関する情報が渡ってくる。
+
+  getterもsetterも、関数ポインタはメンバポインタでも、staticメンバ関数の
+  ポインタでもよい (メソッドの場合と一緒である)。
+
+*/
+
 
 namespace Risse
 {

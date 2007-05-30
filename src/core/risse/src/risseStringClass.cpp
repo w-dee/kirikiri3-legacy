@@ -13,8 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "risseStringClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseScriptEngine.h"
@@ -52,52 +50,13 @@ void tRisseStringClass::RegisterMembers()
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_initialize, &tRisseStringClass::initialize,
+		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
+	RisseBindFunction(this, ss_charAt, &tRisseStringClass::charAt,
+		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
+	RisseBindProperty<tRisseStringClass, risse_size>(this, ss_length, &tRisseStringClass::get_length, NULL,
+		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
 
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_initialize,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		// 親クラスの同名メソッドは「呼び出されない」
-
-		// 引数をすべて連結した物を初期値に使う
-		// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
-		//       を変更するため、const_cast を用いる
-		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
-			*const_cast<tRisseVariant*>(&This) += args[i];
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_charAt,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		if(args.GetArgumentCount() < 1) RisseThrowBadArgumentCount(args.GetArgumentCount(), 1);
-
-		if(result)
-		{
-			const tRisseString & str = This.operator tRisseString();
-			risse_offset index = (risse_int64)args[0];
-			if(index < 0) index += str.GetLength();
-			if(index < 0 || static_cast<risse_size>(index) >= str.GetLength())
-				result->Clear(); // 値が範囲外なので void を返す
-			else
-				*result = tRisseString(str, static_cast<risse_size>(index), 1);
-		}
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_PROPERTY_OPTION(ss_length,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		RISSE_BEGINE_NATIVE_PROPERTY_GETTER
-		{
-			if(result) *result = (risse_int64)This.operator tRisseString().GetLength();
-		}
-		RISSE_END_NATIVE_PROPERTY_GETTER
-	}
-	RISSE_END_NATIVE_PROPERTY
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 //---------------------------------------------------------------------------
 
@@ -106,6 +65,44 @@ void tRisseStringClass::RegisterMembers()
 tRisseVariant tRisseStringClass::CreateNewObjectBase()
 {
 	return tRisseVariant(tRisseString());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseStringClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドは「呼び出されない」
+
+	// 引数をすべて連結した物を初期値に使う
+	// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
+	//       を変更するため、const_cast を用いる
+	for(risse_size i = 0; i < info.args.GetArgumentCount(); i++)
+		*const_cast<tRisseVariant*>(&info.This) += info.args[i];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseStringClass::charAt(const tRisseNativeBindFunctionCallingInfo & info, risse_offset index)
+{
+	if(info.result)
+	{
+		const tRisseString & str = info.This.operator tRisseString();
+		if(index < 0) index += str.GetLength();
+		if(index < 0 || static_cast<risse_size>(index) >= str.GetLength())
+			info.result->Clear(); // 値が範囲外なので void を返す
+		else
+			*info.result = tRisseString(str, static_cast<risse_size>(index), 1);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseStringClass::get_length(const tRisseNativeBindPropertyGetterCallingInfo & info)
+{
+	if(info.result) *info.result = (risse_int64)info.This.operator tRisseString().GetLength();
 }
 //---------------------------------------------------------------------------
 

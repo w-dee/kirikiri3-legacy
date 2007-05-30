@@ -289,87 +289,87 @@ void tRisseThrowableClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseThrowableClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseThrowableClass::initialize);
+	RisseBindFunction(this, mnString, &tRisseThrowableClass::toString);
+	RisseBindFunction(this, ss_addTrace, &tRisseThrowableClass::addTrace);
+	RisseBindFunction(this, ss_toException, &tRisseThrowableClass::toException);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// message メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect_Object(ss_message, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant(tRisseString::GetEmptyString()), This);
 
-		// trace メンバを追加 (デフォルトでは空配列)
-		This.SetPropertyDirect_Object(ss_trace, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant(tRisseVariant(engine->ArrayClass).New()), This);
+//---------------------------------------------------------------------------
+void tRisseThrowableClass::construct(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// message メンバを追加 (デフォルトでは空文字列)
+	info.This.SetPropertyDirect_Object(ss_message, tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant(tRisseString::GetEmptyString()), info.This);
 
-		// cause メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect_Object(ss_cause, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant::GetNullObject(), This);
-	}
-	RISSE_END_NATIVE_METHOD
+	// trace メンバを追加 (デフォルトでは空配列)
+	info.This.SetPropertyDirect_Object(ss_trace, tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant(tRisseVariant(info.engine->ArrayClass).New()), info.This);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// cause メンバを追加 (デフォルトではnull)
+	info.This.SetPropertyDirect_Object(ss_cause, tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant::GetNullObject(), info.This);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数は空)
-		engine->ThrowableClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-										tRisseMethodArgument::Empty(), This);
 
-		// 引数 = メッセージ
-		if(args.HasArgument(0))
-			This.SetPropertyDirect_Object(ss_message, 0, args[0], This);
-	}
-	RISSE_END_NATIVE_METHOD
+//---------------------------------------------------------------------------
+void tRisseThrowableClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数は空)
+	info.engine->ThrowableClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+									tRisseMethodArgument::Empty(), info.This);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// 引数 = メッセージ
+	if(info.args.HasArgument(0))
+		info.This.SetPropertyDirect_Object(ss_message, 0, info.args[0], info.This);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(mnString) // toString
-	{
-		// message at [発生場所] を返す
-		tRisseString message = (tRisseString)This.GetPropertyDirect_Object(ss_message);
-		tRisseVariant trace_array = This.GetPropertyDirect_Object(ss_trace);
-		tRisseString at = (tRisseString)trace_array.Invoke_Object(mnIGet, risse_int64(0));
-			// 先頭の要素を取り出す
-			// 先頭の要素が無い場合は void が返り、at は空文字列になるはず
-		if(result)
-		{
-			if(at.IsEmpty())
-				*result = message;
-			else
-				*result = tRisseString(RISSE_WS_TR("%1 at %2"), message, at);
-		}
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+tRisseString tRisseThrowableClass::toString(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// message at [発生場所] を返す
+	tRisseString message = (tRisseString)info.This.GetPropertyDirect_Object(ss_message);
+	tRisseVariant trace_array = info.This.GetPropertyDirect_Object(ss_trace);
+	tRisseString at = (tRisseString)trace_array.Invoke_Object(mnIGet, risse_int64(0));
+		// 先頭の要素を取り出す
+		// 先頭の要素が無い場合は void が返り、at は空文字列になるはず
+	if(at.IsEmpty())
+		return message;
+	else
+		return tRisseString(RISSE_WS_TR("%1 at %2"), message, at);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_addTrace)
-	{
-		args.ExpectArgumentCount(1);
 
-		// 引数 = SourcePoint クラスのインスタンス
-		// TODO: インスタンスが SourcePoint クラスのインスタンスかどうかをチェック
-		This.GetPropertyDirect_Object(ss_trace, 0, This).FuncCall_Object(NULL, ss_push, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
+//---------------------------------------------------------------------------
+void tRisseThrowableClass::addTrace(const tRisseVariant & point,
+		const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 引数 = SourcePoint クラスのインスタンス
+	// TODO: インスタンスが SourcePoint クラスのインスタンスかどうかをチェック
+	info.This.GetPropertyDirect_Object(ss_trace, 0, info.This).
+						FuncCall_Object(NULL, ss_push, 0, info.args, info.This);
+}
+//---------------------------------------------------------------------------
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_toException)
-	{
-		// 自分自身が Class のサブクラスの場合は
-		// 例外クラスを構築して返す
-		// そうでない場合は This をそのまま返す
-		tRisseVariant ret;
-		if(This.InstanceOf(engine, tRisseVariant(engine->ClassClass)))
-			ret = This.New(0, tRisseMethodArgument::Empty());
-		else
-			ret = This;
-		if(result) *result = ret;
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+tRisseVariant tRisseThrowableClass::toException(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 自分自身が Class のサブクラスの場合は
+	// 例外クラスを構築して返す
+	// そうでない場合は This をそのまま返す
+	tRisseVariant ret;
+	if(info.This.InstanceOf(info.engine, tRisseVariant(info.engine->ClassClass)))
+		return info.This.New(0, tRisseMethodArgument::Empty());
+	else
+		return info.This;
 }
 //---------------------------------------------------------------------------
 
@@ -402,26 +402,29 @@ void tRisseErrorClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->ExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseErrorClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseErrorClass::initialize);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseErrorClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseErrorClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->ErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -451,32 +454,33 @@ void tRisseAssertionErrorClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseAssertionErrorClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseAssertionErrorClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// expression メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect_Object(ss_expression,
-			tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant(tRisseString::GetEmptyString()), This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseAssertionErrorClass::construct(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// expression メンバを追加 (デフォルトでは空文字列)
+	info.This.SetPropertyDirect_Object(ss_expression,
+		tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant(tRisseString::GetEmptyString()), info.This);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
-		if(args.HasArgument(0))
-			engine->AssertionErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-				tRisseMethodArgument::New(args[0]), This);
-		else
-			engine->AssertionErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-				tRisseMethodArgument::New(RISSE_WS("assertion failed")), This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseAssertionErrorClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
+	if(info.args.HasArgument(0))
+		info.engine->AssertionErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+			tRisseMethodArgument::New(info.args[0]), info.This);
+	else
+		info.engine->AssertionErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+			tRisseMethodArgument::New(RISSE_WS("assertion failed")), info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -520,47 +524,46 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// identifier メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect_Object(ss_identifier, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant::GetNullObject(), This);
-
-		// target メンバを追加 (デフォルトでは-1)
-		This.SetPropertyDirect_Object(ss_target, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant((risse_int64)-1), This);
-
-		// value メンバを追加 (デフォルトではnull)
-		This.SetPropertyDirect_Object(ss_value, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant::GetNullObject(), This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
-		engine->BlockExitExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-			tRisseMethodArgument::New(RISSE_WS("break/return helper exception")), This);
-
-		// メンバを設定する
-		if(args.HasArgument(0))
-			This.SetPropertyDirect_Object(ss_identifier, 0, args[0], This);
-		if(args.HasArgument(1))
-			This.SetPropertyDirect_Object(ss_target, 0, args[1], This);
-		if(args.HasArgument(2))
-			This.SetPropertyDirect_Object(ss_value, 0, args[2], This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseBlockExitExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseBlockExitExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseBlockExitExceptionClass::construct(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// identifier メンバを追加 (デフォルトではnull)
+	info.This.SetPropertyDirect_Object(ss_identifier, tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant::GetNullObject(), info.This);
+
+	// target メンバを追加 (デフォルトでは-1)
+	info.This.SetPropertyDirect_Object(ss_target, tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant((risse_int64)-1), info.This);
+
+	// value メンバを追加 (デフォルトではnull)
+	info.This.SetPropertyDirect_Object(ss_value, tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant::GetNullObject(), info.This);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseBlockExitExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
+	info.engine->BlockExitExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+		tRisseMethodArgument::New(RISSE_WS("break/return helper exception")), info.This);
+
+	// メンバを設定する
+	if(info.args.HasArgument(0))
+		info.This.SetPropertyDirect_Object(ss_identifier, 0, info.args[0], info.This);
+	if(info.args.HasArgument(1))
+		info.This.SetPropertyDirect_Object(ss_target, 0, info.args[1], info.This);
+	if(info.args.HasArgument(2))
+		info.This.SetPropertyDirect_Object(ss_value, 0, info.args[2], info.This);
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -594,28 +597,27 @@ void tRisseExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->ExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->ExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -645,25 +647,26 @@ void tRisseInsufficientResourceExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseInsufficientResourceExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseInsufficientResourceExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseInsufficientResourceExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->InsufficientResourceExceptionClass->
-			CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseInsufficientResourceExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->InsufficientResourceExceptionClass->
+			CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -706,28 +709,27 @@ void tRisseIOExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->IOExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseIOExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseIOExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseIOExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIOExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->IOExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -755,25 +757,25 @@ void tRisseCharConversionExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseCharConversionExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseCharConversionExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseCharConversionExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->CharConversionExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseCharConversionExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->ErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -814,26 +816,28 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->RuntimeExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseRuntimeExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseRuntimeExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseRuntimeExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseRuntimeExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->RuntimeExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -860,24 +864,25 @@ void tRisseCompileExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseCompileExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseCompileExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseCompileExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->CompileExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseCompileExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->CompileExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -932,25 +937,26 @@ void tRisseClassDefinitionExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseClassDefinitionExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseClassDefinitionExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseClassDefinitionExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->ClassDefinitionExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseClassDefinitionExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->ClassDefinitionExceptionClass->
+			CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -1002,25 +1008,26 @@ void tRisseInstantiationExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseInstantiationExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseInstantiationExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseInstantiationExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->InstantiationExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseInstantiationExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->InstantiationExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -1071,25 +1078,26 @@ void tRisseBadContextExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseBadContextExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseBadContextExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseBadContextExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->BadContextExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseBadContextExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->BadContextExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -1130,25 +1138,26 @@ void tRisseUnsupportedOperationExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseUnsupportedOperationExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseUnsupportedOperationExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseUnsupportedOperationExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->UnsupportedOperationExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseUnsupportedOperationExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->UnsupportedOperationExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -1200,29 +1209,92 @@ void tRisseArgumentExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->ArgumentExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseArgumentExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseArgumentExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseArgumentExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseArgumentExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->ArgumentExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseNullObjectExceptionClass::tRisseNullObjectExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->IllegalArgumentExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNullObjectExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	RisseBindFunction(this, ss_construct, &tRisseNullObjectExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseNullObjectExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNullObjectExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNullObjectExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->NullObjectExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseNullObjectExceptionClass::Throw(tRisseScriptEngine * engine)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_NullObjectException,
+			tRisseString(RISSE_WS_TR("null object was given")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -1250,84 +1322,35 @@ void tRisseIllegalArgumentExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->IllegalArgumentExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseIllegalArgumentExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseIllegalArgumentExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
-
-
-
 //---------------------------------------------------------------------------
-tRisseNullObjectExceptionClass::tRisseNullObjectExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->IllegalArgumentExceptionClass)
+void tRisseIllegalArgumentExceptionClass::construct()
 {
-	RegisterMembers();
+	// 特にやることはない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseNullObjectExceptionClass::RegisterMembers()
+void tRisseIllegalArgumentExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
 {
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->NullObjectExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->IllegalArgumentExceptionClass->
+			CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-void tRisseNullObjectExceptionClass::Throw(tRisseScriptEngine * engine)
-{
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_NullObjectException,
-			tRisseString(RISSE_WS_TR("null object was given")));
-	if(engine) e->ThrowConverted(engine); else throw e;
-}
-//---------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -1352,25 +1375,26 @@ void tRisseBadArgumentCountExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseBadArgumentCountExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseBadArgumentCountExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseBadArgumentCountExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->BadArgumentCountExceptionClass->CallSuperClassMethod(NULL,
-												ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseBadArgumentCountExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->BadArgumentCountExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -1429,31 +1453,32 @@ void tRisseMemberAccessExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseMemberAccessExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseMemberAccessExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// name メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect_Object(ss_name, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant(tRisseString::GetEmptyString()), This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseMemberAccessExceptionClass::construct(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// name メンバを追加 (デフォルトでは空文字列)
+	info.This.SetPropertyDirect_Object(ss_name, tRisseOperateFlags::ofMemberEnsure,
+		tRisseVariant(tRisseString::GetEmptyString()), info.This);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はargs[0])
-		engine->MemberAccessExceptionClass->CallSuperClassMethod(NULL,
-			ss_initialize, 0, tRisseMethodArgument::New(args[0]), This);
 
-		// メンバを設定する
-		if(args.HasArgument(1))
-			This.SetPropertyDirect_Object(ss_name, 0, args[1], This);
-	}
-	RISSE_END_NATIVE_METHOD
+//---------------------------------------------------------------------------
+void tRisseMemberAccessExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はargs[0])
+	info.engine->MemberAccessExceptionClass->CallSuperClassMethod(NULL,
+		ss_initialize, 0, tRisseMethodArgument::New(info.args[0]), info.This);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// メンバを設定する
+	if(info.args.HasArgument(1))
+		info.This.SetPropertyDirect_Object(ss_name, 0, info.args[1], info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -1486,25 +1511,26 @@ void tRisseNoSuchMemberExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseNoSuchMemberExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseNoSuchMemberExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseNoSuchMemberExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->NoSuchMemberExceptionClass->CallSuperClassMethod(NULL,
-											ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseNoSuchMemberExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->NoSuchMemberExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -1551,25 +1577,26 @@ void tRisseIllegalMemberAccessExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseIllegalMemberAccessExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseIllegalMemberAccessExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// 特にやることはない
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseIllegalMemberAccessExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-		engine->IllegalMemberAccessExceptionClass->CallSuperClassMethod(NULL,
-											ss_initialize, 0, args, This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseIllegalMemberAccessExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->IllegalMemberAccessExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -1653,31 +1680,26 @@ void tRisseCoroutineExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	RisseBindFunction(this, ss_construct, &tRisseCoroutineExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseCoroutineExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_construct)
-	{
-		// name メンバを追加 (デフォルトでは空文字列)
-		This.SetPropertyDirect_Object(ss_name, tRisseOperateFlags::ofMemberEnsure,
-			tRisseVariant(tRisseString::GetEmptyString()), This);
-	}
-	RISSE_END_NATIVE_METHOD
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseCoroutineExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
 
-	RISSE_BEGIN_NATIVE_METHOD(ss_initialize)
-	{
-		// 親クラスの同名メソッドを呼び出す(引数はargs[0])
-		engine->CoroutineExceptionClass->CallSuperClassMethod(NULL,
-			ss_initialize, 0, tRisseMethodArgument::New(args[0]), This);
 
-		// メンバを設定する
-		if(args.HasArgument(1))
-			This.SetPropertyDirect_Object(ss_name, 0, args[1], This);
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//---------------------------------------------------------------------------
+void tRisseCoroutineExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.engine->CoroutineExceptionClass->
+		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
 }
 //---------------------------------------------------------------------------
 

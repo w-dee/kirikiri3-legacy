@@ -13,8 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "risseRealClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseNumberClass.h"
@@ -53,22 +51,8 @@ void tRisseRealClass::RegisterMembers()
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	RISSE_BEGIN_NATIVE_METHOD_OPTION(ss_initialize,attribute.Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal))
-	{
-		// 親クラスの同名メソッドは「呼び出されない」
-
-		// 引数をすべて連結した物を初期値に使う
-		// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
-		//       を変更するため、const_cast を用いる
-		if(args.HasArgument(0))
-			*const_cast<tRisseVariant*>(&This) = args[0].operator risse_real();
-	}
-	RISSE_END_NATIVE_METHOD
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+	RisseBindFunction(this, ss_initialize, &tRisseRealClass::initialize,
+		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
 }
 //---------------------------------------------------------------------------
 
@@ -76,7 +60,21 @@ void tRisseRealClass::RegisterMembers()
 //---------------------------------------------------------------------------
 tRisseVariant tRisseRealClass::CreateNewObjectBase()
 {
-	return tRisseVariant((risse_real)0);
+	return tRisseVariant((risse_real)0.0);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseRealClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+{
+	// 親クラスの同名メソッドは「呼び出されない」
+
+	// 引数を初期値に使う
+	// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
+	//       を変更するため、const_cast を用いる
+	if(info.args.HasArgument(0))
+		*const_cast<tRisseVariant*>(&info.This) = info.args[0].operator risse_real();
 }
 //---------------------------------------------------------------------------
 

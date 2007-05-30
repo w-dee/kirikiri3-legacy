@@ -76,6 +76,12 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+
 class tRisseScriptBlockBase;
 //---------------------------------------------------------------------------
 //! @brief			RisseのReturnExceptionやBreakExceptionなどのインスタンス(暫定実装)
@@ -109,6 +115,11 @@ public: // tRisseObjectInterface メンバ
 
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -153,8 +164,15 @@ public:
 
 
 
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		"Throwable" クラス
+//! @note		このクラスでは専用のインスタンス用 C++クラスを用いない
+//!				(tRisseObjectBase を直接使う)。そのため RisseBindFunction に渡す
+//!				C++メソッドはすべてstatic宣言になり、あまりNativeBinderの恩恵が
+//!				無いが、しかたない。
 //---------------------------------------------------------------------------
 class tRisseThrowableClass : public tRisseClassBase
 {
@@ -168,9 +186,18 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static tRisseString toString(const tRisseNativeBindFunctionCallingInfo & info);
+	static void addTrace(const tRisseVariant & point,
+		const tRisseNativeBindFunctionCallingInfo & info);
+	static tRisseVariant toException(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
 
 
 
@@ -191,9 +218,16 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -214,6 +248,10 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
+public: // Risse用メソッドなど
+	static void construct(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+
 public:
 	//! @brief		例外を投げる
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -225,6 +263,10 @@ public:
 	static void Throw(const tRisseString & expression) { Throw(NULL, expression); }
 };
 //---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -245,9 +287,16 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -268,9 +317,19 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 
@@ -289,6 +348,10 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+
 public:
 	//! @brief		「コルーチンを作成できない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -297,6 +360,13 @@ public:
 	static void ThrowCouldNotCreateCoroutine() { ThrowCouldNotCreateCoroutine(NULL); }
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 
 
@@ -315,9 +385,15 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -337,6 +413,10 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+
 public:
 	//! @brief		「無効なUTF-8文字列です」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -345,6 +425,12 @@ public:
 	static void ThrowInvalidUTF8String() { ThrowInvalidUTF8String(NULL); }
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 
@@ -363,9 +449,16 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -383,6 +476,10 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+
 public:
 	//! @brief		「コンパイルエラー」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -399,6 +496,14 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		"ClassDefinitionException" クラス
 //---------------------------------------------------------------------------
@@ -413,6 +518,10 @@ public:
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 
 public:
 	//! @brief		「extensibleでないクラスのサブクラスを作成しようとした」例外を発生
@@ -433,6 +542,15 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		"InstantiationException" クラス
 //---------------------------------------------------------------------------
@@ -447,6 +565,10 @@ public:
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 
 public:
 	//! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生
@@ -466,6 +588,12 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		"BadContextException" クラス
 //---------------------------------------------------------------------------
@@ -481,6 +609,10 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+
 public:
 	//! @brief		「異なるクラスのコンテキストです」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -489,6 +621,14 @@ public:
 	static void Throw() { Throw(NULL); }
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 
@@ -506,6 +646,10 @@ public:
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 
 public:
 	//! @brief		「関数でない物を呼び出そうとした」例外を発生
@@ -545,9 +689,20 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -565,6 +720,10 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+
 public:
 	//! @brief		「異なるクラスのコンテキストです」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -573,6 +732,13 @@ public:
 	static void Throw() { Throw(NULL); }
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -590,9 +756,19 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 
@@ -610,6 +786,10 @@ public:
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 
 public:
 	//! @brief		普通の引数の数が期待した数でなかった場合の例外を発生
@@ -639,6 +819,11 @@ public:
 
 
 
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		"MemberAccessException" クラス
 //---------------------------------------------------------------------------
@@ -654,9 +839,17 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 
@@ -676,6 +869,10 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+
 public:
 	//! @brief		例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -686,6 +883,11 @@ public:
 	static void Throw(const tRisseString & name) { Throw(NULL, name); }
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -704,8 +906,11 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
-public:
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 
+public:
 	//! @brief		「読み出し専用メンバに上書きしようとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
@@ -752,6 +957,9 @@ public:
 
 
 
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		"CoroutineException" クラス
 //---------------------------------------------------------------------------
@@ -766,6 +974,10 @@ public:
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
 
 public:
 	//! @brief		「コルーチンは既に終了している」例外を発生

@@ -16,7 +16,6 @@
 #include "risseObjectClass.h"
 #include "risseClass.h"
 #include "risseStaticStrings.h"
-#include "risseNativeFunction.h"
 #include "risseArrayClass.h"
 #include "risseClassClass.h"
 #include "risseScriptBlockBase.h"

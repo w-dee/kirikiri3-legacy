@@ -13,8 +13,6 @@
 #include "prec.h"
 #include "risseTypes.h"
 #include "risseArrayClass.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseScriptEngine.h"

@@ -14,8 +14,6 @@
 #include "risseTypes.h"
 #include "risseCoroutineClass.h"
 #include "risseCoroutine.h"
-#include "risseNativeFunction.h"
-#include "risseNativeProperty.h"
 #include "risseStaticStrings.h"
 #include "risseObjectClass.h"
 #include "risseScriptEngine.h"

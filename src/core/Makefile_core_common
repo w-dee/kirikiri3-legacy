@@ -6,10 +6,12 @@ include $(TOP_DIR)/Makefile_filenames
 
 SUBSYS_DIRS=\
 	$(CORE_DIR)/base/config        \
+	$(CORE_DIR)/base/cpu           \
 	$(CORE_DIR)/base/event         \
 	$(CORE_DIR)/base/exception     \
 	$(CORE_DIR)/base/fs            \
 	$(CORE_DIR)/base/log           \
+	$(CORE_DIR)/base/mathlib       \
 	$(CORE_DIR)/base/script        \
 	$(CORE_DIR)/base/system        \
 	$(CORE_DIR)/base/ui            \

@@ -116,10 +116,11 @@ void tRisaPhaseVocoder::Clear()
 void tRisaPhaseVocoder::RebuildDSP()
 {
 	if(DSP) delete DSP, DSP = NULL;
-	DSP = new tRisaPhaseVocoderDSP(FrameSize, OverSampling,
+	DSP = new tRisaPhaseVocoderDSP(FrameSize,
 		InputFormat.Frequency, InputFormat.Channels);
 	DSP->SetTimeScale(TimeScale);
 	DSP->SetFrequencyScale(FrequencyScale);
+	DSP->SetOverSampling(OverSampling);
 }
 //---------------------------------------------------------------------------
 

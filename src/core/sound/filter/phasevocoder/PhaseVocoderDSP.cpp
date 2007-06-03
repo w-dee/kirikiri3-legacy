@@ -30,15 +30,18 @@
 			ソースあり。
 */
 
-
+#include "prec.h"
 #include <math.h>
-#include "base/utils/fftsg.h"
 #include "sound/filter/phasevocoder/PhaseVocoderDSP.h"
+#include "base/mathlib/MathAlgorithms.h"
 #include <string.h>
+#include "risseUtils.h"
+
+RISSE_DEFINE_SOURCE_ID(46678,10832,40512,19852,21662,48847,10996,40273);
 
 //---------------------------------------------------------------------------
 tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
-				unsigned int framesize, unsigned int oversamp,
+				unsigned int framesize,
 				unsigned int frequency, unsigned int channels) :
 					InputBuffer(framesize * 4 * channels),
 					OutputBuffer(framesize * 4 * channels)
@@ -58,7 +61,7 @@ tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
 	LastSynthPhase = NULL;
 
 	FrameSize = framesize;
-	OverSampling = oversamp;
+	OverSampling = 8;
 	Frequency = frequency;
 	Channels = channels;
 	InputHopSize = OutputHopSize = FrameSize / OverSampling;
@@ -72,32 +75,39 @@ tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
 	try
 	{
 		// ワークなどの確保
-		AnalWork = new float [FrameSize];
-		SynthWork = new float [FrameSize];
+		AnalWork  = (float **)RisseAlignedAlloc(sizeof(float *) * Channels, 4);
+		SynthWork = (float **)RisseAlignedAlloc(sizeof(float *) * Channels, 4);
+		for(unsigned int ch = 0; ch < Channels; ch++)
+			AnalWork[ch] = NULL, SynthWork[ch] = NULL;
+		for(unsigned int ch = 0; ch < Channels; ch++)
+		{
+			AnalWork[ch]  = (float *)RisseAlignedAlloc(sizeof(float) * (FrameSize), 4);
+			SynthWork[ch] = (float *)RisseAlignedAlloc(sizeof(float) * (FrameSize), 4);
+		}
 
-		LastAnalPhase = new float * [Channels];
+		LastAnalPhase = (float **)RisseAlignedAlloc(sizeof(float *) * Channels, 4);
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			LastAnalPhase[ch] = NULL;
 		for(unsigned int ch = 0; ch < Channels; ch++)
 		{
-			LastAnalPhase[ch] = new float [FrameSize/2];
+			LastAnalPhase[ch] = (float *)RisseAlignedAlloc(sizeof(float) * (FrameSize/2), 4);
 			memset(LastAnalPhase[ch], 0, FrameSize/2 * sizeof(float)); // 0 でクリア
 		}
 
-		LastSynthPhase = new float * [Channels];
+		LastSynthPhase = (float **)RisseAlignedAlloc(sizeof(float *) * Channels, 4);
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			LastSynthPhase[ch] = NULL;
 		for(unsigned int ch = 0; ch < Channels; ch++)
 		{
-			LastSynthPhase[ch] = new float [FrameSize/2];
+			LastSynthPhase[ch] = (float *)RisseAlignedAlloc(sizeof(float) * (FrameSize/2), 4);
 			memset(LastSynthPhase[ch], 0, FrameSize/2 * sizeof(float)); // 0 でクリア
 		}
 
-		FFTWorkIp = new int[static_cast<int>(2+sqrt((double)FrameSize/4))];
+		FFTWorkIp = (int *)RisseAlignedAlloc(sizeof(int) * (static_cast<int>(2+sqrt((double)FrameSize/4))), 4);
 		FFTWorkIp[0] = FFTWorkIp[1] = 0;
-		FFTWorkW = new float[FrameSize/2];
-		InputWindow = new float[FrameSize];
-		OutputWindow = new float[FrameSize];
+		FFTWorkW = (float *)RisseAlignedAlloc(sizeof(float) * (FrameSize/2), 4);
+		InputWindow = (float *)RisseAlignedAlloc(sizeof(float) * FrameSize, 4);
+		OutputWindow = (float *)RisseAlignedAlloc(sizeof(float) * FrameSize, 4);
 	}
 	catch(...)
 	{
@@ -135,15 +145,17 @@ tRisaPhaseVocoderDSP::~tRisaPhaseVocoderDSP()
 //---------------------------------------------------------------------------
 void tRisaPhaseVocoderDSP::SetTimeScale(float v)
 {
-	TimeScale = v;
-	if(TimeScale < MIN_TIME_SCALE) TimeScale = MIN_TIME_SCALE;
-	else if(TimeScale > MAX_TIME_SCALE) TimeScale = MAX_TIME_SCALE;
-	RebuildParams = true;
-	OutputHopSize = static_cast<unsigned int>(InputHopSize * TimeScale) & ~1;
-		// ↑ 偶数にアライン(重要)
-		// 複素数 re,im, re,im, ... の配列が逆FFTにより同数の(複素数の個数×2の)
-		// PCMサンプルに変換されるため、PCMサンプルも２個ずつで扱わないとならない.
-		// この実際の OutputHopSize に従って ExactTimeScale が計算される.
+	if(TimeScale != v)
+	{
+		TimeScale = v;
+		RebuildParams = true;
+		InputHopSize = OutputHopSize = FrameSize / OverSampling;
+		OutputHopSize = static_cast<unsigned int>(InputHopSize * TimeScale) & ~1;
+			// ↑ 偶数にアライン(重要)
+			// 複素数 re,im, re,im, ... の配列が逆FFTにより同数の(複素数の個数×2の)
+			// PCMサンプルに変換されるため、PCMサンプルも２個ずつで扱わないとならない.
+			// この実際の OutputHopSize に従って ExactTimeScale が計算される.
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -151,8 +163,37 @@ void tRisaPhaseVocoderDSP::SetTimeScale(float v)
 //---------------------------------------------------------------------------
 void tRisaPhaseVocoderDSP::SetFrequencyScale(float v)
 {
-	FrequencyScale = v;
-	RebuildParams = true;
+	if(FrequencyScale != v)
+	{
+		FrequencyScale = v;
+		RebuildParams = true;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisaPhaseVocoderDSP::SetOverSampling(unsigned int v)
+{
+	if(v == 0)
+	{
+		// TimeScale に従って値を設定
+		// これらの閾値は実際のリスニングにより決定された数値であり、
+		// 論理的な根拠はない。
+		if(TimeScale <= 0.2) v = 2;
+		else if(TimeScale <= 1.2) v = 4;
+		else v = 8;
+	}
+
+	if(OverSampling != v)
+	{
+		OverSampling = v;
+		InputHopSize = OutputHopSize = FrameSize / OverSampling;
+		OutputHopSize = static_cast<unsigned int>(InputHopSize * TimeScale) & ~1;
+		// ここのOutputHopSizeの計算については tRisaPhaseVocoderDSP::SetTimeScale
+		// も参照のこと
+		RebuildParams = true;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -161,25 +202,34 @@ void tRisaPhaseVocoderDSP::SetFrequencyScale(float v)
 void tRisaPhaseVocoderDSP::Clear()
 {
 	// 全てのバッファなどを解放する
-	delete [] AnalWork, AnalWork = NULL;
-	delete [] SynthWork, SynthWork = NULL;
+	if(AnalWork)
+	{
+		for(unsigned int ch = 0; ch < Channels; ch++)
+			RisseAlignedDealloc(AnalWork[ch]), AnalWork[ch] = NULL;
+		RisseAlignedDealloc(AnalWork), AnalWork = NULL;
+	}
+	if(SynthWork)
+	{
+		for(unsigned int ch = 0; ch < Channels; ch++)
+			RisseAlignedDealloc(SynthWork[ch]), SynthWork[ch] = NULL;
+		RisseAlignedDealloc(SynthWork), SynthWork = NULL;
+	}
 	if(LastAnalPhase)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
-			delete [] LastAnalPhase[ch], LastAnalPhase[ch] = NULL;
-		delete [] LastAnalPhase, LastAnalPhase = NULL;
+			RisseAlignedDealloc(LastAnalPhase[ch]), LastAnalPhase[ch] = NULL;
+		RisseAlignedDealloc(LastAnalPhase), LastAnalPhase = NULL;
 	}
 	if(LastSynthPhase)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
-			delete [] LastSynthPhase[ch], LastSynthPhase[ch] = NULL;
-		delete [] LastSynthPhase, LastSynthPhase = NULL;
+			RisseAlignedDealloc(LastSynthPhase[ch]), LastSynthPhase[ch] = NULL;
+		RisseAlignedDealloc(LastSynthPhase), LastSynthPhase = NULL;
 	}
-	delete [] LastSynthPhase, LastSynthPhase = NULL;
-	delete [] FFTWorkIp, FFTWorkIp = NULL;
-	delete [] FFTWorkW, FFTWorkW = NULL;
-	delete [] InputWindow, InputWindow = NULL;
-	delete [] OutputWindow, OutputWindow = NULL;
+	RisseAlignedDealloc(FFTWorkIp), FFTWorkIp = NULL;
+	RisseAlignedDealloc(FFTWorkW), FFTWorkW = NULL;
+	RisseAlignedDealloc(InputWindow), InputWindow = NULL;
+	RisseAlignedDealloc(OutputWindow), OutputWindow = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -247,18 +297,22 @@ bool tRisaPhaseVocoderDSP::GetOutputBuffer(
 //---------------------------------------------------------------------------
 tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 {
-	// いくつかの値をローカル変数に持っておく
-	unsigned int framesize_d2 = FrameSize / 2;
-
 	// パラメータの再計算の必要がある場合は再計算をする
 	if(RebuildParams)
 	{
-		// 窓関数の計算(ここではHamming窓)
-		float output_volume = 
-			TimeScale / FrameSize  / sqrt(FrequencyScale) / OverSampling * 4;
+		// 窓関数の計算(ここではVorbis I 窓)
+		float recovery_of_loss_of_vorbis_window = 2.0;
+				//         1            1         2
+				//  2  =  ∫  1dx  /   ∫   vorbis (x) dx
+				//         0            0
+				// where vobis = vorbis I window function
+		float output_volume =
+			TimeScale / FrameSize  / sqrt(FrequencyScale) / OverSampling * 2 *
+											recovery_of_loss_of_vorbis_window;
 		for(unsigned int i = 0; i < FrameSize; i++)
 		{
-			double window = cos(2.0*M_PI*((double)i+0.5)/FrameSize) * -0.46 + 0.54;
+			double x = ((double)i+0.5)/FrameSize;
+			double window = sin(M_PI/2*sin(M_PI*x)*sin(M_PI*x));
 			InputWindow[i]  = (float)(window);
 			OutputWindow[i] = (float)(window *output_volume);
 		}
@@ -294,6 +348,18 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 		if(p2) memset(p2, 0, p2len * sizeof(float));
 	}
 
+	// 窓関数を適用しつつ、入力バッファから AnalWork に読み込む
+	{
+		const float *p1, *p2;
+		size_t p1len, p2len;
+		InputBuffer.GetReadPointer(FrameSize*Channels, p1, p1len, p2, p2len);
+		p1len /= Channels;
+		p2len /= Channels;
+		RisaDeinterleaveApplyingWindow(AnalWork, p1, InputWindow, Channels, 0, p1len);
+		if(p2)
+			RisaDeinterleaveApplyingWindow(AnalWork, p2, InputWindow + p1len, Channels, p1len, p2len);
+	}
+
 	// チャンネルごとに処理
 	for(unsigned int ch = 0; ch < Channels; ch++)
 	{
@@ -301,174 +367,21 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 		// 解析
 		//------------------------------------------------
 
-		// 窓関数を適用しつつ、入力バッファから AnalWork に読み込む
-		{
-			const float *p1, *p2;
-			size_t p1len, p2len;
-			InputBuffer.GetReadPointer(FrameSize*Channels, p1, p1len, p2, p2len);
-			p1len /= Channels;
-			p2len /= Channels;
-			Deinterleave(AnalWork, p1 + ch, InputWindow, p1len);
-			if(p2)
-				Deinterleave(AnalWork + p1len, p2 + ch,
-							InputWindow + p1len, p2len);
-		}
+		// 演算の根幹部分を実行する
+		ProcessCore(ch);
+	}
 
-		// FFT を実行する
-		rdft(FrameSize, 1, AnalWork, FFTWorkIp, FFTWorkW); // Real DFT
+	// 窓関数を適用しつつ、SynthWork から出力バッファに書き込む
+	{
+		float *p1, *p2;
+		size_t p1len, p2len;
 
-		// 各フィルタバンドごとに変換
-		//-- 各フィルタバンドごとの音量と周波数を求める。
-		//-- FFT を実行すると各フィルタバンドごとの値が出てくるが、
-		//-- フィルタバンドというバンドパスフィルタの幅の中で
-		//-- 周波数のピークが本当はどこにあるのかは、前回計算した
-		//-- 位相との差をとってみないとわからない。
-		for(unsigned int i = 0; i < framesize_d2; i ++)
-		{
-			// 直交座標系→極座標系
-			float re = AnalWork[i*2  ];
-			float im = AnalWork[i*2+1];
-
-			float mag = sqrt(re*re + im*im); // mag = √(re^2+im^2)
-			float ang = atan2(im, re); // ang = atan(im/re)
-
-			// 前回の位相との差をとる
-			// --注意: ここで使用しているFFTパッケージは、
-			// --      ソース先頭の参考資料などで示しているFFTと
-			// --      出力される複素数の虚数部の符号が逆なので
-			// --      (共役がでてくるので)注意が必要。ここでも符号を
-			// --      逆の物として扱う。
-			float tmp = LastAnalPhase[ch][i] - ang;
-			LastAnalPhase[ch][i] = ang; // 今回の値を保存
-
-			// over sampling の影響を考慮する
-			// -- 通常、FrameSize で FFT の１周期であるところを、
-			// -- 精度を補うため、OverSampling 倍の周期で演算をしている。
-			// -- そのために生じる位相のずれを修正する。
-			tmp -= i * OverSamplingRadian;
-
-			// unwrapping をする
-			// -- tmp が -M_PI ～ +M_PI の範囲に収まるようにする
-			int rad_unit = static_cast<int>(tmp*(1.0/M_PI));
-			if (rad_unit >= 0) rad_unit += rad_unit&1;
-			else rad_unit -= rad_unit&1;
-			tmp -= M_PI*(double)rad_unit;
-
-			// -M_PI～+M_PIを-1.0～+1.0の変位に変換
-			tmp =  tmp * OverSamplingRadianRecp;
-
-			// tmp をフィルタバンド中央からの周波数の変位に変換し、
-			// それにフィルタバンドの中央周波数を加算する
-			// -- i * FrequencyPerFilterBand はフィルタバンドの中央周波数を
-			// -- 表し、tmp * FrequencyPerFilterBand は フィルタバンド中央から
-			// -- の周波数の変位を表す。これらをあわせた物が、そのフィルタ
-			// -- バンド内での「真」の周波数である。
-			float freq = (i + tmp) *FrequencyPerFilterBand;
-
-			// AnalWork に値を格納する
-			AnalWork[i*2  ] = mag;
-			AnalWork[i*2+1] = freq;
-		}
-
-
-		//------------------------------------------------
-		// 変換
-		//------------------------------------------------
-
-		// 周波数軸方向のリサンプリングを行う
-		if(FrequencyScale != 1.0)
-		{
-			float FrequencyScale_rcp = 1.0 / FrequencyScale;
-			for(unsigned int i = 0; i < framesize_d2; i ++)
-			{
-				// i に対応するインデックスを得る
-				float fi = i * FrequencyScale_rcp;
-
-				// floor(x) と floor(x) + 1 の間でバイリニア補間を行う
-				unsigned int index = static_cast<unsigned int>(fi); // floor
-				float frac = fi - index;
-
-				if(index + 1 < framesize_d2)
-				{
-					SynthWork[i*2  ] =
-						AnalWork[index*2  ] +
-						frac * (AnalWork[index*2+2]-AnalWork[index*2  ]);
-					SynthWork[i*2+1] =
-						FrequencyScale * (
-						AnalWork[index*2+1] +
-						frac * (AnalWork[index*2+3]-AnalWork[index*2+1]) );
-				}
-				else if(index < framesize_d2)
-				{
-					SynthWork[i*2  ] = AnalWork[index*2  ];
-					SynthWork[i*2+1] = AnalWork[index*2+1] * FrequencyScale;
-				}
-				else
-				{
-					SynthWork[i*2  ] = 0.0;
-					SynthWork[i*2+1] = 0.0;
-				}
-			}
-		}
-		else
-		{
-			memcpy(SynthWork, AnalWork, FrameSize * sizeof(float));
-		}
-
-
-		//------------------------------------------------
-		// 合成
-		//------------------------------------------------
-
-		// 各フィルタバンドごとに変換
-		// 基本的には解析の逆変換である
-		for(unsigned int i = 0; i < framesize_d2; i ++)
-		{
-			float mag  = SynthWork[i*2  ];
-			float freq = SynthWork[i*2+1];
-
-			// 周波数から各フィルタバンドの中央周波数を減算し、
-			// フィルタバンドの中央周波数からの-1.0～+1.0の変位
-			// に変換する
-			float tmp = freq * FrequencyPerFilterBandRecp - (float)i;
-
-			// -1.0～+1.0の変位を-M_PI～+M_PIの位相に変換
-			tmp =  tmp * OverSamplingRadian;
-
-			// OverSampling による位相の補正
-			tmp += i   * OverSamplingRadian;
-
-			// TimeScale による位相の補正
-			// TimeScale で出力が時間軸方向にのびれば(あるいは縮めば)、
-			// 位相の差分もそれに伴ってのびる(縮む)
-			tmp *= ExactTimeScale;
-
-			// 前回の位相と加算する
-			// ここでも虚数部の符号が逆になるので注意
-			LastSynthPhase[ch][i] -= tmp;
-			float ang = LastSynthPhase[ch][i];
-
-			// 極座標系→直交座標系
-			SynthWork[i*2  ] = mag * cos(ang);
-			SynthWork[i*2+1] = mag * sin(ang);
-		}
-
-		// FFT を実行する
-		rdft(FrameSize, -1, SynthWork, FFTWorkIp, FFTWorkW); // Inverse Real DFT
-
-		// 窓関数を適用しつつ、SynthWork から出力バッファに書き込む
-		{
-			float *p1, *p2;
-			size_t p1len, p2len;
-
-			OutputBuffer.GetWritePointer(FrameSize*Channels, p1, p1len, p2, p2len);
-			p1len /= Channels;
-			p2len /= Channels;
-			Interleave(p1 + ch, SynthWork, OutputWindow, p1len);
-			if(p2)
-				Interleave(p2 + ch, SynthWork + p1len,
-							OutputWindow + p1len, p2len);
-		}
+		OutputBuffer.GetWritePointer(FrameSize*Channels, p1, p1len, p2, p2len);
+		p1len /= Channels;
+		p2len /= Channels;
+		RisaInterleaveOverlappingWindow(p1, SynthWork, OutputWindow, Channels, 0, p1len);
+		if(p2)
+			RisaInterleaveOverlappingWindow(p2, SynthWork, OutputWindow + p1len, Channels, p1len, p2len);
 	}
 
 	// LastSynthPhase を再調整するか
@@ -486,6 +399,7 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 		// ここでは LastSynthPhaseAdjustInterval/LastSynthPhaseAdjustIncrement 回ごとに調整を行う。
 		for(unsigned int ch = 0; ch < Channels; ch++)
 		{
+			unsigned int framesize_d2 = FrameSize / 2;
 			for(unsigned int i = 0; i < framesize_d2; i++)
 			{
 				long int n = static_cast<long int>(LastSynthPhase[ch][i] / (2.0*M_PI));
@@ -502,36 +416,3 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 	return psNoError;
 }
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::Deinterleave(float * dest, const float * src,
-					float * win, size_t len)
-{
-	unsigned int numch = Channels;
-	while(len--)
-	{
-		dest[0] = *src * *win;
-		src += numch;
-		dest ++;
-		win ++;
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::Interleave(float * dest, const float * src,
-					float * win, size_t len)
-{
-	unsigned int numch = Channels;
-	while(len--)
-	{
-		*dest += *src * *win;
-		src ++;
-		dest += numch;
-		win ++;
-	}
-}
-//---------------------------------------------------------------------------
-

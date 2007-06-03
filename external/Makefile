@@ -51,7 +51,10 @@ copy_dll_w32:
 	@cp `which unicows.dll` $(BUILD_OUT_DIR)/bin || \
 		(echo "error: unicows.dll missing. did you forget installing \
 		MSLU into MinGW bin directory ?" ; exit 1)
+
+do_copy_dll:
 	@echo "copying dlls to the target directory ..."
+	mkdir -p $(BUILD_OUT_DIR)/bin
 	@for dir in $(SUBLIBS) ; do \
 		for subdir in bin lib; do \
 			if [ -d $$dir/$$subdir ]; then \

@@ -52,14 +52,15 @@ static void RisaCompressGlyphBitmap(const risse_uint8 * in,
 
 	risse_uint in_size = in_w * in_h;
 
-	for(risse_uint i = in_w; i < in_size; i++)
+	if(in_size > 0)
 	{
-		diff[i] -= diff[i - in_w];
+		for(risse_uint i = in_size - 1; i >= in_w; i--)
+			diff[i] -= diff[i - in_w];
 	}
 
 	risse_uint8 * op = out;
 
-	for(risse_uint i = 0; i < in_size; i++)
+	for(risse_uint i = 0; i < in_size; /**/)
 	{
 		risse_uint j;
 		risse_uint limit;

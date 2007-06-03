@@ -45,6 +45,11 @@ endif
 ## C++ソース→オブジェクトファイル
 %.o: %.cpp
 	$(CXX) -c $(DEFAULT_CXXFLAGS) $(CXXFLAGS) $(INCLUDES) $< -o $@
+ifdef PRESERVE_ASM
+#   主にPhase Vocoderをbccに移植するために使用する。
+#   特定用途以外に使い道は無いはず
+	$(CXX) -c -masm=intel $(DEFAULT_CXXFLAGS) $(CXXFLAGS) $(INCLUDES) $< -S -o $(@:.o=.s)
+endif
 
 
 ## コンパイル済みヘッダ
@@ -181,6 +186,7 @@ clean:
 	rm -f messages.pot $(MESSAGE_OBJECTS)
 	rm -f locale/*~ $(CPPFILES:.cpp=.d) $(CPPFILES:.cpp=.dt)
 	rm -f .mktmp $(CFILES:.c=.d) $(CFILES:.c=.dt)
+	rm -f $(CFILES:.c=.s) $(CPPFILES:.cpp=.s)
 	rm -f *.bak resource.cpp resource.h
 	rm -f $(patsubst %.xrc,%.cpp,$(wildcard *.xrc))
 	rm -f $(patsubst %.xrc,%.h,$(wildcard *.xrc))

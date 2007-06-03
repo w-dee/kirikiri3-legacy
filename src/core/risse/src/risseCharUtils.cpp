@@ -398,7 +398,7 @@ risse_size RisseConvertRisseCharToUTF16String(risse_uint16 * out,
 
 
 //---------------------------------------------------------------------------
-static risse_int inline RisseRisseCharToUtf8(risse_char in, char * out)
+static risse_int RisseRisseCharToUtf8(risse_char in, char * out)
 {
 	// convert a wide character 'in' to utf-8 character 'out'
 	if     (in < (1<< 7))
@@ -468,10 +468,10 @@ static risse_int inline RisseRisseCharToUtf8(risse_char in, char * out)
 	return -1;
 }
 //---------------------------------------------------------------------------
-static bool inline RisseUtf8ToRisseChar(const char * & in, risse_char *out)
+static bool RisseUtf8ToRisseChar(const char * & in, risse_char *out)
 {
 	// convert a utf-8 charater from 'in' to wide charater 'out'
-	const unsigned char * & p = (const unsigned char * &)in;
+	const unsigned char * p = (const unsigned char * &)in;
 	if(p[0] < 0x80)
 	{
 		if(out) *out = (risse_char)in[0];

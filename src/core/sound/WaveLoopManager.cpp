@@ -433,7 +433,6 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 			if(one_unit > CrossFadeLen - CrossFadePosition)
 				one_unit = CrossFadeLen - CrossFadePosition;
 		}
-		segmentqueue.Enqueue(tRisaWaveSegment(Position, one_unit));
 
 		if(one_unit > 0) give_up_count = 0; // reset give up count
 
@@ -456,6 +455,9 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 		// enqueue events
 		segmentqueue.Enqueue(events);
+
+		// enqueue segment
+		segmentqueue.Enqueue(tRisaWaveSegment(Position, one_unit));
 
 		// decode or copy
 		if(!CrossFadeSamples)

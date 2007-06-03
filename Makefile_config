@@ -5,6 +5,22 @@ MSGMERGE = msgmerge
 MSGFMT = msgfmt
 
 
+###### CPU ごとの最適化オプションのチェック
+
+CPU_OPTIONS=
+
+ifdef USE_SSE
+ # SSE を使用する場合は自動的にMMXも使用
+ USE_MMX=1
+endif
+
+ifdef USE_SSE
+ CPU_OPTIONS = -msse -DRISA_USE_SSE
+else
+ifdef USE_MMX
+ CPU_OPTIONS = -msse -DRISE_USE_MMX
+endif
+endif
 
 
 ###### CFLAGS と CXXFLAGS や CPPFLAGS
@@ -12,9 +28,9 @@ MSGFMT = msgfmt
 
 # 標準の CFLAGS など
 
-COMMON_CFLAGS   = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
-COMMON_CXXFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
-COMMON_CPPFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR)
+COMMON_CFLAGS   = -Winvalid-pch -I./$(PLATFORM_SUBDIR) $(CPU_OPTIONS)
+COMMON_CXXFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR) $(CPU_OPTIONS)
+COMMON_CPPFLAGS = -Winvalid-pch -I./$(PLATFORM_SUBDIR) $(CPU_OPTIONS)
 
 # コンパイラなどのツールについては、ベースは wxWidgets の設定を用いる
 
@@ -63,7 +79,7 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 				$(WXWIDGETS_CONFIG) $(WXWIDGETS_CONFIG_ARG) $$conf --libs | \
 					sed -e "s|-Wl,--subsystem,windows||g" -e "s|-mwindows||g" ;\
 		};\
-		comflags="-Wall ";           conf=--debug=no;  get >> $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
+		comflags="-Wall -O2 ";       conf=--debug=no;  get >> $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
 		comflags="-Wall -g -DDEBUG"; conf=--debug=yes; get >> $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
 		touch $(TOP_DIR)/config_success ;\
 	)

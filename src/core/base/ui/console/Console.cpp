@@ -313,7 +313,7 @@ tRisaLogViewerStatusBar::tRisaLogViewerStatusBar(wxWindow *parent)
 
 	TextCtrl = new tRisaHistoryTextCtrl(this);
 
-    SetMinHeight(TextCtrl->GetSize().GetHeight() + 4);
+	SetSize(-1, -1, -1, TextCtrl->GetSize().GetHeight() + 4);
 
 	AdjustControlSize();
 }

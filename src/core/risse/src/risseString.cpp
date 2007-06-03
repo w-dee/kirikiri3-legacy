@@ -7,585 +7,579 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-//! @brief 文字列クラス tRisseString ( ttstr ) の実装
+//! @file
+//! @brief 文字列のC++クラス
 //---------------------------------------------------------------------------
-#include "risseCommHead.h"
-
-#include <stdarg.h>
-#include <stdio.h>
-
+#include "prec.h"
 
 #include "risseString.h"
-#include "risseVariant.h"
+#include "risseExceptionClass.h"
 
 
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID(35412,4231,23251,16964,5557,10004,55378,56854);
+RISSE_DEFINE_SOURCE_ID(45632,47818,10920,18335,63117,13582,59145,24628);
 
-const risse_char *RisseNullStrPtr = RISSE_WS("");
-//---------------------------------------------------------------------------
-tRisseString::tRisseString(const tRisseVariant & val)
-{
-	Ptr = val.AsString();
-}
-//---------------------------------------------------------------------------
-tRisseString::tRisseString(risse_int n) // from int
-{
-	Ptr = RisseIntegerToString(n);
-}
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(文字列中の%1などを置き換えたいとき)
-//! @param		str  文字列 (中に %1 などの指令を埋め込む)
-//! @param		s1   文字列中の %1 と置き換えたい文字列
+risse_char tRisseStringData::EmptyBuffer[3] = { tRisseStringBlock::MightBeShared, 0, 0 };
 //---------------------------------------------------------------------------
-tRisseString::tRisseString(
-	const tRisseString &str,
-	const tRisseString &s1)
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock & ref,
+	risse_size offset, risse_size length)
 {
-	risse_offset allocsize = str.GetLen() + s1.GetLen();
-	if(allocsize <= 0)
+	if(length)
 	{
-		// str が2CP以下
-		Ptr = str.Ptr; if(Ptr) Ptr->AddRef();
+		RISSE_ASSERT(ref.Length - offset >= length);
+		if(ref.Buffer[-1] == 0)
+			ref.Buffer[-1] = MightBeShared; // 共有可能性フラグをたてる
+		Buffer = ref.Buffer + offset;
+		Length = length;
 	}
 	else
 	{
-		bool s1_emit = false;
-		Ptr = RisseAllocVariantStringBuffer(allocsize);
-		risse_char *dest = *Ptr;
-		const risse_char *strp = str.c_str();
-
-		while(*strp)
-		{
-			if     (*strp == RISSE_WC('%') && strp[1] == RISSE_WC('1') && !s1_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s1.c_str());
-				dest += s1.GetLen();
-				s1_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('%'))
-			{
-				strp += 2;
-				*(dest++) = RISSE_WC('%');
-			}
-			else
-			{
-				*(dest++) = *(strp++);
-			}
-		}
-		*dest = 0;
-
-		Ptr->FixLength();
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
+		Length = 0;
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(文字列中の%1などを置き換えたいとき)
-//! @param		str  文字列 (中に %1 などの指令を埋め込む)
-//! @param		s1   文字列中の %1 と置き換えたい文字列
-//! @param		s2   文字列中の %2 と置き換えたい文字列
-//---------------------------------------------------------------------------
-tRisseString::tRisseString(
-	const tRisseString &str,
-	const tRisseString &s1,
-	const tRisseString &s2)
+tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 {
-	risse_offset allocsize = str.GetLen() + s1.GetLen() + s2.GetLen();
-	if(allocsize <= 0)
+	Length = n;
+	if(n == 0)
 	{
-		Ptr = str.Ptr; if(Ptr) Ptr->AddRef();
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
 	}
 	else
 	{
-		bool s1_emit = false;
-		bool s2_emit = false;
-		Ptr = RisseAllocVariantStringBuffer(allocsize);
-		risse_char *dest = *Ptr;
-		const risse_char *strp = str.c_str();
-
-		while(*strp)
-		{
-			if     (*strp == RISSE_WC('%') && strp[1] == RISSE_WC('1') && !s1_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s1.c_str());
-				dest += s1.GetLen();
-				s1_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('2') && !s2_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s2.c_str());
-				dest += s2.GetLen();
-				s2_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('%'))
-			{
-				strp += 2;
-				*(dest++) = RISSE_WC('%');
-			}
-			else
-			{
-				*(dest++) = *(strp++);
-			}
-		}
-		*dest = 0;
-
-		Ptr->FixLength();
+		Buffer = AllocateInternalBuffer(Length);
+		Buffer[n] = Buffer[n+1] = 0; // null終端と hint をクリア
+		memcpy(Buffer, ref, sizeof(risse_char) * n);
 	}
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1)
+{
+	*this = msg.Replace(RISSE_WS("%1"), r1);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(文字列中の%1などを置き換えたいとき)
-//! @param		str  文字列 (中に %1 などの指令を埋め込む)
-//! @param		s1   文字列中の %1 と置き換えたい文字列
-//! @param		s2   文字列中の %2 と置き換えたい文字列
-//! @param		s3   文字列中の %3 と置き換えたい文字列
-//---------------------------------------------------------------------------
-tRisseString::tRisseString(
-	const tRisseString &str,
-	const tRisseString &s1,
-	const tRisseString &s2,
-	const tRisseString &s3)
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+				const tRisseStringBlock &r2)
 {
-	risse_offset allocsize = str.GetLen() + s1.GetLen() + s2.GetLen() + s3.GetLen();
-	if(allocsize <= 0)
+	*this = msg.
+			Replace(RISSE_WS("%1"), r1).
+			Replace(RISSE_WS("%2"), r2);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+				const tRisseStringBlock &r2, const tRisseStringBlock &r3)
+{
+	*this = msg.
+			Replace(RISSE_WS("%1"), r1).
+			Replace(RISSE_WS("%2"), r2).
+			Replace(RISSE_WS("%3"), r3);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
+					const tRisseStringBlock &r2, const tRisseStringBlock &r3,
+					const tRisseStringBlock &r4)
+{
+	*this = msg.
+			Replace(RISSE_WS("%1"), r1).
+			Replace(RISSE_WS("%2"), r2).
+			Replace(RISSE_WS("%3"), r3).
+			Replace(RISSE_WS("%4"), r4);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
+{
+	if((Length = Risse_strlen(ref)) == 0)
 	{
-		Ptr = str.Ptr; if(Ptr) Ptr->AddRef();
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
 	}
 	else
 	{
-		bool s1_emit = false;
-		bool s2_emit = false;
-		bool s3_emit = false;
-		Ptr = RisseAllocVariantStringBuffer(allocsize);
-		risse_char *dest = *Ptr;
-		const risse_char *strp = str.c_str();
-
-		while(*strp)
-		{
-			if     (*strp == RISSE_WC('%') && strp[1] == RISSE_WC('1') && !s1_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s1.c_str());
-				dest += s1.GetLen();
-				s1_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('2') && !s2_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s2.c_str());
-				dest += s2.GetLen();
-				s2_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('3') && !s3_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s3.c_str());
-				dest += s3.GetLen();
-				s3_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('%'))
-			{
-				strp += 2;
-				*(dest++) = RISSE_WC('%');
-			}
-			else
-			{
-				*(dest++) = *(strp++);
-			}
-		}
-		*dest = 0;
-
-		Ptr->FixLength();
+		Buffer = AllocateInternalBuffer(Length);
+		memcpy(Buffer, ref, Length * sizeof(risse_char));
+			// サイズがわかっているならば memcpy の方が若干早い
+//		Risse_strcpy(Buffer, ref);
+		Buffer[Length] = Buffer[Length+1] = 0; // null終端と hint をクリア
 	}
+	return *this;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(文字列中の%1などを置き換えたいとき)
-//! @param		str  文字列 (中に %1 などの指令を埋め込む)
-//! @param		s1   文字列中の %1 と置き換えたい文字列
-//! @param		s2   文字列中の %2 と置き換えたい文字列
-//! @param		s3   文字列中の %3 と置き換えたい文字列
-//! @param		s4   文字列中の %4 と置き換えたい文字列
-//---------------------------------------------------------------------------
-tRisseString::tRisseString(
-	const tRisseString &str,
-	const tRisseString &s1,
-	const tRisseString &s2,
-	const tRisseString &s3,
-	const tRisseString &s4)
+tRisseStringBlock & tRisseStringBlock::operator = (const risse_char ref)
 {
-	risse_offset allocsize = str.GetLen() +
-		s1.GetLen() + s2.GetLen() + s3.GetLen() + s4.GetLen();
-	if(allocsize <= 0)
+	if(ref == 0)
 	{
-		Ptr = str.Ptr; if(Ptr) Ptr->AddRef();
+		Length = 0;
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
 	}
 	else
 	{
-		bool s1_emit = false;
-		bool s2_emit = false;
-		bool s3_emit = false;
-		Ptr = RisseAllocVariantStringBuffer(allocsize);
-		risse_char *dest = *Ptr;
-		const risse_char *strp = str.c_str();
+		Length = 1;
+		Buffer = AllocateInternalBuffer(1);
+		Buffer[0] = ref;
+		Buffer[1] = Buffer[1+1] = 0; // null終端と hint をクリア
+	}
+	return *this;
+}
+//---------------------------------------------------------------------------
 
-		while(*strp)
+
+#ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
+//---------------------------------------------------------------------------
+tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
+{
+	risse_size org_len = wcslen(str);
+	Buffer = AllocateInternalBuffer(org_len);
+	risse_size new_len = RisseConvertUTF16ToRisseCharString(Buffer,
+		reinterpret_cast<const risse_uint16 *>(str)); // UTF16 を UTF32 に変換
+	if(new_len)
+		Buffer[new_len] = Buffer[new_len+1] = 0; // null終端と hint をクリア
+	Length = new_len;
+	return *this;
+}
+//---------------------------------------------------------------------------
+#endif
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
+{
+	Length = RisseUtf8ToRisseCharString(ref, NULL); // コードポイント数を得る
+	if(Length == risse_size_max) tRisseCharConversionExceptionClass::ThrowInvalidUTF8String();
+	Buffer = AllocateInternalBuffer(Length);
+	RisseUtf8ToRisseCharString(ref, Buffer);
+	Buffer[Length] = Buffer[Length + 1] = 0; // null終端と hint をクリア
+	return *this;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_char * tRisseStringBlock::AllocateInternalBuffer(
+	risse_size n, risse_char *prevbuf)
+{
+	// バッファを確保
+	size_t newbytes = sizeof(risse_size) + (n + 3)*sizeof(risse_char);
+	void *ptr;
+	if(!prevbuf)
+	{
+		ptr = RisseMallocAtomicCollectee(newbytes);
+	}
+	else
+	{
+		char * buffer_head = reinterpret_cast<char *>(prevbuf) -
+			 ( sizeof(risse_char) + sizeof(risse_size) );
+		ptr = RisseReallocCollectee(buffer_head, newbytes);
+	}
+
+	// ２番目の文字を指すポインタを獲る
+	risse_char *  buffer = reinterpret_cast<risse_char*>(
+		reinterpret_cast<char*>(ptr) +
+				( sizeof(risse_char) + sizeof(risse_size) ) );
+
+	// 共有可能性フラグを 0 に
+	buffer[-1] = 0;
+
+	// 確保容量を書き込む
+	*reinterpret_cast<risse_size *>(ptr) = n;
+
+	// もどる
+	return buffer;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_char * tRisseStringBlock::InternalIndepend() const
+{
+	risse_char * newbuf = AllocateInternalBuffer(Length);
+	memcpy(newbuf, Buffer, sizeof(risse_char) * Length);
+	newbuf[Length] = newbuf[Length + 1] = 0; // null終端とhintをクリア
+	return Buffer = newbuf;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseStringBlock::Reserve(risse_size capacity) const
+{
+	if(capacity < Length) return; // 長さが容量より長い
+
+	if(Buffer[-1])
+	{
+		// 共有可能性フラグが立っている
+		// 新しく領域を確保し、そこにコピーする
+		risse_char * newbuf = AllocateInternalBuffer(capacity);
+		memcpy(newbuf, Buffer, Length * sizeof(risse_char));
+		Buffer = newbuf;
+
+		// null 終端と hint=0 を設定する
+		Buffer[Length] = Buffer[Length + 1] = 0;
+	}
+	else
+	{
+		// 共有可能性フラグは立っていない
+		// 現在の領域を拡張する必要がある？
+		if(GetBufferCapacity(Buffer) < capacity)
 		{
-			if     (*strp == RISSE_WC('%') && strp[1] == RISSE_WC('1') && !s1_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s1.c_str());
-				dest += s1.GetLen();
-				s1_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('2') && !s2_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s2.c_str());
-				dest += s2.GetLen();
-				s2_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('3') && !s3_emit)
-			{
-				strp += 2;
-				Risse_strcpy(dest, s3.c_str());
-				dest += s3.GetLen();
-				s3_emit = true;
-			}
-			else if(*strp == RISSE_WC('%') && strp[1] == RISSE_WC('%'))
-			{
-				strp += 2;
-				*(dest++) = RISSE_WC('%');
-			}
-			else
-			{
-				*(dest++) = *(strp++);
-			}
-		}
-		*dest = 0;
+			// 容量が足りないので拡張する必要あり
+			// 適当に新規確保の容量を計算
+			// バッファを再確保
+			Buffer = AllocateInternalBuffer(capacity, Buffer);
 
-		Ptr->FixLength();
+			// null 終端と hint=0 を設定する
+			Buffer[Length] = Buffer[Length + 1] = 0;
+		}
 	}
 }
 //---------------------------------------------------------------------------
 
 
-
 //---------------------------------------------------------------------------
-risse_char * tRisseString::InternalIndepend()
+risse_uint32 tRisseStringBlock::GetHash() const
 {
-	// severs sharing of the string instance
-	// and returns independent internal buffer
+	// the hash function used here is similar to one which used in perl 5.8,
+	// see also http://burtleburtle.net/bob/hash/doobs.html (One-at-a-Time Hash)
 
-	tRisseVariantString *newstr =
-		RisseAllocVariantString(Ptr->operator const risse_char*());
-
-	Ptr->Release();
-	Ptr = newstr;
-
-	return const_cast<risse_char *>(newstr->operator const risse_char*());
+	const risse_char *p = Buffer;
+	const risse_char *plim = Buffer + Length;
+	risse_uint32 ret = 0;
+	while(p<plim)
+	{
+		ret += *p;
+		ret += (ret << 10);
+		ret ^= (ret >> 6);
+		p++;
+	}
+	ret += (ret << 3);
+	ret ^= (ret >> 11);
+	ret += (ret << 15);
+	if(!ret) ret = (risse_uint32)-1L;
+	return ret;
 }
 //---------------------------------------------------------------------------
-risse_int64 tRisseString::AsInteger() const
+
+
+//---------------------------------------------------------------------------
+bool tRisseStringBlock::operator == ( const risse_char *ptr ) const
 {
-	return Ptr->ToInteger();
+	if(Length == 0) return ptr[0] == 0; // 空文字列 ?
+
+	// ptr は null 終結していることを仮定できるが、
+	// Buffer は null 終結している保証はない。
+	// そのため、一応先頭から順に文字が一致しているかを一つ一つ見ていく。
+	// memcmpでもいいのかもしれないがmemcmp(a, b, l) で [a, a+l) と [b, b+l)
+	// のどちらかのその一部がアクセスできなかった場合の動作は未定義な
+	// 気がするので使用を避ける。
+	risse_size i;
+	for(i = 0; i < Length; i++)
+	{
+		if(Buffer[i] != ptr[i])
+			return false; // 異なる(Length分検査しないうちに*ptr_p==0に達した場合もここに来るはず)
+	}
+
+	// この時点では少なくとも Length 分は ptr と Buffer の中身が一致している
+	// 最後に ptr[Length] が \0 かをチェック (そこが \0 ならば完全一致となる)
+	return ptr[Length] == 0;
 }
 //---------------------------------------------------------------------------
-void tRisseString::Replace(const tRisseString &from, const tRisseString &to, bool forall)
+
+
+//---------------------------------------------------------------------------
+void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
 {
-	// replaces the string partial "from", to "to".
-	// all "from" are replaced when "forall" is true.
-	if(IsEmpty()) return;
-	if(from.IsEmpty()) return;
+	if(length == 0) return; // 追加するものなし
 
-	risse_int fromlen = from.GetLen();
+	risse_size newlength = Length + length;
 
+	if(Buffer[-1])
+	{
+		// 共有可能性フラグが立っている
+		// 新しく領域を確保し、そこにコピーする
+		risse_char * newbuf = AllocateInternalBuffer(newlength);
+		memcpy(newbuf, Buffer, Length * sizeof(risse_char));
+		memcpy(newbuf + Length, buffer, length * sizeof(risse_char));
+		Buffer = newbuf;
+	}
+	else
+	{
+		// 共有可能性フラグは立っていない
+		// 現在の領域を拡張する必要がある？
+		if(GetBufferCapacity(Buffer) < newlength)
+		{
+			// 容量が足りないので拡張する必要あり
+			// 適当に新規確保の容量を計算
+			risse_size newcapacity;
+			if(newlength < 16*1024)
+				newcapacity = newlength * 2;
+			else
+				newcapacity = newlength + 16*1024;
+			// バッファを再確保
+			Buffer = AllocateInternalBuffer(newcapacity, Buffer);
+		}
+
+		// 現在保持している文字列の直後に buffer をコピーする
+		memcpy(Buffer + Length, buffer, length * sizeof(risse_char));
+	}
+
+	// null 終端と hint=0 を設定する
+	Length = newlength;
+	Buffer[newlength] = Buffer[newlength + 1] = 0;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::operator + (const tRisseStringBlock & ref) const
+{
+	if(Length == 0) return ref;
+	if(ref.Length == 0) return *this;
+
+	tRisseStringBlock newblock;
+	risse_size newsize = Length + ref.Length;
+	newblock.Allocate(newsize);
+	memcpy(newblock.Buffer, Buffer, Length * sizeof(risse_char));
+	memcpy(newblock.Buffer + Length, ref.Buffer, ref.Length * sizeof(risse_char));
+
+	return newblock;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::operator + (const risse_char * ref) const
+{
+	if(Length == 0) return ref;
+	if(ref == NULL) return *this;
+	risse_size ref_length = Risse_strlen(ref);
+	if(ref_length == 0) return *this;
+
+	tRisseStringBlock newblock;
+	risse_size newsize = Length + ref_length;
+	newblock.Allocate(newsize);
+	memcpy(newblock.Buffer, Buffer, Length * sizeof(risse_char));
+	memcpy(newblock.Buffer + Length, ref, ref_length * sizeof(risse_char));
+
+	return newblock;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::AsString(risse_int v)
+{
+	risse_char num_str[40];
+	Risse_int_to_str(v, num_str);
+	return tRisseStringBlock(num_str);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::AsString(risse_int64 v)
+{
+	risse_char num_str[40];
+	Risse_int64_to_str(v, num_str);
+	return tRisseStringBlock(num_str);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
+		const tRisseStringBlock &new_str, bool replace_all) const
+{
+	// 長さチェック
+	if(GetLength() < old_str.GetLength()) return *this; // 置き換えられない
+
+	// old_str が最低1個分 new_str に変わると期待してバッファをあらかじめ確保
+	tRisseStringBlock ret;
+	ret.Reserve(GetLength() - old_str.GetLength() + new_str.GetLength());
+
+	// 置き換え
+	const risse_char * this_c_str = c_str();
+	const risse_char * old_c_str = old_str.c_str();
+	const risse_char * new_c_str = new_str.c_str();
+	const risse_char * lp = this_c_str;
 	for(;;)
 	{
-		const risse_char *st;
 		const risse_char *p;
-		st = c_str();
-		p = Risse_strstr(st, from.c_str());
+		p = Risse_strstr(lp, old_c_str);
 		if(p)
 		{
-			tRisseString name(*this, p-st);
-			tRisseString n2(p + fromlen);
-			*this = name + to + n2;
-			if(!forall) break;
+			ret.Append(lp, p - lp);
+			ret.Append(new_c_str, new_str.GetLength());
+			if(!replace_all) break;
+			lp = p + old_str.GetLength();
 		}
 		else
 		{
 			break;
 		}
 	}
-}
-//---------------------------------------------------------------------------
-tRisseString tRisseString::AsLowerCase() const
-{
-	risse_int len = GetLen();
 
-	if(len == 0) return tRisseString();
-
-	tRisseString ret((tRisseStringBufferLength)(len));
-
-	const risse_char *s = c_str();
-	risse_char *d = ret.Independ();
-	while(*s)
-	{
-		if(*s >= RISSE_WC('A') && *s <= RISSE_WC('Z'))
-			*d = *s +(RISSE_WC('a')-RISSE_WC('A'));
-		else
-			*d = *s;
-		d++;
-		s++;
-	}
+	ret.Append(lp, GetLength() - (lp - this_c_str));
 
 	return ret;
 }
 //---------------------------------------------------------------------------
-tRisseString tRisseString::AsUpperCase() const
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock tRisseStringBlock::Times(risse_size count)
 {
-	risse_int len = GetLen();
+	tRisseStringBlock ret;
 
-	if(len == 0) return tRisseString();
+	// バッファを確保
+	risse_size target_length = count * Length;
+	risse_char * buffer = ret.Allocate(target_length);
 
-	tRisseString ret((tRisseStringBufferLength)(len));
-
-	const risse_char *s = c_str();
-	risse_char *d = ret.Independ();
-	while(*s)
+	// 繰り返しを生成する
+	if(target_length > 0)
 	{
-		if(*s >= RISSE_WC('a') && *s <= RISSE_WC('z'))
-			*d = *s +(RISSE_WC('A')-RISSE_WC('a'));
-		else
-			*d = *s;
-		d++;
-		s++;
+		for(risse_size i = 0; i < count; i++)
+		{
+			memcpy(buffer, Buffer, sizeof(risse_char) * Length);
+			buffer += Length;
+		}
 	}
 
+	// 戻る
 	return ret;
 }
 //---------------------------------------------------------------------------
-void tRisseString::ToLowerCase()
-{
-	risse_char *p = Independ();
-	if(p)
-	{
-		while(*p)
-		{
-			if(*p >= RISSE_WC('A') && *p <= RISSE_WC('Z'))
-				*p += (RISSE_WC('a')-RISSE_WC('A'));
-			p++;
-		}
-	}
-}
+
+
 //---------------------------------------------------------------------------
-void tRisseString::ToUppserCase()
+tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 {
-	risse_char *p = Independ();
-	if(p)
-	{
-		while(*p)
-		{
-			if(*p >= RISSE_WC('a') && *p <= RISSE_WC('z'))
-				*p += (RISSE_WC('A')-RISSE_WC('a'));
-			p++;
-		}
-	}
-}
-//---------------------------------------------------------------------------
-tRisseString tRisseString::EscapeC() const
-{
-	const risse_char * hexchars = RISSE_WS("0123456789");
-	ttstr ret;
-	const risse_char * p = c_str();
+	const risse_char * hexchars = RISSE_WS("0123456789ABCDEF");
+
+	// 返値用のバッファを確保
+	tRisseStringBlock ret;
+	ret.Reserve((maxlen > Length ? Length : maxlen) + 4 + (quote?2:0));
+		// 最低でも今の文字列長以上にはなる (+4=余裕)
+
+	// エスケープを行う。
+	// \x01 のようなエスケープの後に 'a' のような、16進数の一部として間違
+	// われるような文字が続く場合は、その 'a' も \x の形でエスケープする。
+	// (その状態の制御を行っている変数が hexflag)
+	const risse_char * p = Buffer;
 	bool hexflag = false;
-	for(;*p;p++)
+	if(quote) ret += RISSE_WC('"');
+	for(risse_size i = 0; i < Length; i++)
 	{
-		switch(*p)
+		if(ret.GetLength() >= maxlen)
 		{
-		case 0x07: ret += RISSE_WS("\\a"); hexflag = false; continue;
-		case 0x08: ret += RISSE_WS("\\b"); hexflag = false; continue;
-		case 0x0c: ret += RISSE_WS("\\f"); hexflag = false; continue;
-		case 0x0a: ret += RISSE_WS("\\n"); hexflag = false; continue;
-		case 0x0d: ret += RISSE_WS("\\r"); hexflag = false; continue;
-		case 0x09: ret += RISSE_WS("\\t"); hexflag = false; continue;
-		case 0x0b: ret += RISSE_WS("\\v"); hexflag = false; continue;
-		case RISSE_WC('\\'): ret += RISSE_WS("\\\\"); hexflag = false; continue;
-		case RISSE_WC('\''): ret += RISSE_WS("\\\'"); hexflag = false; continue;
-		case RISSE_WC('\"'): ret += RISSE_WS("\\\""); hexflag = false; continue;
+			// 最大長に達した
+			if(quote) ret.Append(RISSE_WS(" ..."), 4);
+			return ret;  //--------------------------------------------- return
+		}
+
+		switch(p[i])
+		{
+		case 0x07: ret.Append(RISSE_WS("\\a"), 2); hexflag = false; continue;
+		case 0x08: ret.Append(RISSE_WS("\\b"), 2); hexflag = false; continue;
+		case 0x0c: ret.Append(RISSE_WS("\\f"), 2); hexflag = false; continue;
+		case 0x0a: ret.Append(RISSE_WS("\\n"), 2); hexflag = false; continue;
+		case 0x0d: ret.Append(RISSE_WS("\\r"), 2); hexflag = false; continue;
+		case 0x09: ret.Append(RISSE_WS("\\t"), 2); hexflag = false; continue;
+		case 0x0b: ret.Append(RISSE_WS("\\v"), 2); hexflag = false; continue;
+		case RISSE_WC('\\'): ret.Append(RISSE_WS("\\\\"), 2); hexflag = false; continue;
+		case RISSE_WC('\''): ret.Append(RISSE_WS("\\\'"), 2); hexflag = false; continue;
+		case RISSE_WC('\"'): ret.Append(RISSE_WS("\\\""), 2); hexflag = false; continue;
 		default:
 			if(hexflag)
 			{
-				if(*p >= RISSE_WC('a') && *p <= RISSE_WC('f') ||
-					*p >= RISSE_WC('A') && *p <= RISSE_WC('F') ||
-						*p >= RISSE_WC('0') && *p <= RISSE_WC('9') )
+				if(p[i] >= RISSE_WC('a') && p[i] <= RISSE_WC('f') ||
+					p[i] >= RISSE_WC('A') && p[i] <= RISSE_WC('F') ||
+						p[i] >= RISSE_WC('0') && p[i] <= RISSE_WC('9') )
 				{
-					risse_char buf[5];
+					risse_char buf[4];
 					buf[0] = RISSE_WC('\\');
 					buf[1] = RISSE_WC('x');
-					buf[2] = hexchars[ (*p >> 4)  & 0x0f];
-					buf[3] = hexchars[ (*p     )  & 0x0f];
-					buf[4] = 0;
+					buf[2] = hexchars[ (p[i] >> 4)  & 0x0f];
+					buf[3] = hexchars[ (p[i]     )  & 0x0f];
 					hexflag = true;
-					ret += buf;
+					ret.Append(buf, 4);
 					continue;
 				}
 			}
 
-			if(*p < 0x20)
+			if(p[i] < 0x20)
 			{
-				risse_char buf[5];
+				risse_char buf[4];
 				buf[0] = RISSE_WC('\\');
 				buf[1] = RISSE_WC('x');
-				buf[2] = hexchars[ (*p >> 4)  & 0x0f];
-				buf[3] = hexchars[ (*p     )  & 0x0f];
+				buf[2] = hexchars[ (p[i] >> 4)  & 0x0f];
+				buf[3] = hexchars[ (p[i]     )  & 0x0f];
 				buf[4] = 0;
 				hexflag = true;
-				ret += buf;
+				ret.Append(buf, 4);
 			}
 			else
 			{
-				ret += *p;
+				ret += p[i];
 				hexflag = false;
 			}
 		}
 	}
-	return ret;
-}
-//---------------------------------------------------------------------------
-tRisseString tRisseString::UnescapeC() const
-{
-	// TODO: UnescapeC
-	return RISSE_WS("");
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		文字列が指定された文字列で始まっているかどうかをチェック
-//! @param		string 文字列
-//! @return		文字列が指定された文字列で始まっていれば真、そうでなければ偽
-//---------------------------------------------------------------------------
-bool tRisseString::StartsWith(const risse_char *string) const
-{
-	// return true if this starts with "string"
-	if(!Ptr)
-	{
-		if(!*string) return true; // empty string starts with empty string
-		return false;
-	}
-	const risse_char *this_p = *Ptr;
-	while(*string && *this_p)
-	{
-		if(*string != *this_p) return false;
-		string++, this_p++;
-	}
-	if(!*string) return true;
-	return false;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		文字列が指定された文字列で終わっているかどうかをチェック
-//! @param		string 文字列
-//! @return		文字列が指定された文字列で終わっていれば真、そうでなければ偽
-//---------------------------------------------------------------------------
-bool tRisseString::EndsWith(const risse_char *string) const
-{
-	if(!Ptr)
-	{
-		if(!*string) return true; // empty string ends with empty string
-		return false;
-	}
-
-	risse_size string_len = Risse_strlen(string);
-	risse_size this_len = Ptr->GetLength();
-
-	if(string_len > this_len) return false; // string が この文字列よりも長いので偽
-
-	return !Risse_strcmp(string, *Ptr + this_len - string_len);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		UTF-8文字列に変換を行った場合の長さを返す
-//! @return		UTF-8文字列の長さ(null terminatorを含まず) (size_t)-1L = 変換に失敗した場合
-//---------------------------------------------------------------------------
-size_t tRisseString::GetUtf8Length() const
-{
-	return RisseRisseCharToUtf8String(c_str(), NULL);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		UTF-8文字列に変換する
-//! @param		dest 書き込み先 (GetUtf8Length() +1 の長さが最低でも必要)
-//---------------------------------------------------------------------------
-void tRisseString::GetUtf8String(char * dest) const
-{
-	size_t written = RisseRisseCharToUtf8String(c_str(), dest);
-	if(written != static_cast<size_t>(-1L))
-		dest[written] = 0;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseString operator + (const risse_char *lhs, const tRisseString &rhs)
-{
-	tRisseString ret(lhs);
-	ret += rhs;
+	if(quote) ret += RISSE_WC('"');
 	return ret;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString RisseInt32ToHex(risse_uint32 num, int zeropad)
+tRisseStringData tRisseStringBlock::EmptyStringData = { RISSE_STRING_EMPTY_BUFFER, 0 };
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseStringBlock operator +(const risse_char *lhs, const tRisseStringBlock &rhs)
 {
-	// convert given number to HEX string.
-	// zeros are padded when the output string's length is smaller than "zeropad".
-	// "zeropad" cannot be larger than 8.
-	if(zeropad > 8) zeropad = 8;
+	risse_size lhs_length = Risse_strlen(lhs);
+	if(lhs == NULL) return rhs;
+	if(lhs_length == 0) return rhs;
 
-	risse_char buf[12];
-	risse_char buf2[12];
+	tRisseStringBlock newblock;
+	risse_size newsize = lhs_length + rhs.Length;
+	newblock.Allocate(newsize);
+	memcpy(newblock.Buffer, lhs, lhs_length * sizeof(risse_char));
+	memcpy(newblock.Buffer + lhs_length, rhs.Buffer, rhs.Length * sizeof(risse_char));
 
-	risse_char *p = buf;
-	risse_char *d = buf2;
-
-	do
-	{
-		*(p++) = (RISSE_WS("0123456789ABCDEF"))[num % 16];
-		num /= 16;
-		zeropad --;
-	} while(zeropad || num);
-
-	p--;
-	while(buf <= p) *(d++) = *(p--);
-	*d = 0;
-
-	return ttstr(buf2); 
+	return newblock;
 }
 //---------------------------------------------------------------------------
 
-tRisseString RisseEmptyString; // holds an empty string
+
 
 } // namespace Risse
-

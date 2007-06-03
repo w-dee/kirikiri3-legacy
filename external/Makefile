@@ -3,7 +3,7 @@ include $(TOP_DIR)/Makefile_filenames
 
 # サブディレクトリの定義
 
-SUBLIBS= icu boost zlib libpng libjpeg expat wxWidgets libtomcrypt freetype libogg libvorbis openal
+SUBLIBS= icu boost zlib libpng libjpeg expat wxWidgets libtomcrypt freetype libogg libvorbis openal gc
 
 
 # デフォルトターゲット
@@ -39,9 +39,9 @@ download:
 # また、マルチスレッドヘルパーである mingwm*.dll も bin ディレ
 # クトリにコピーする
 ifeq ($(PLATFORM),windows)
- copy_dll: copy_dll_w32 do_copy_dll
+ copy_dll: copy_dll_w32
 else
- copy_dll: do_copy_dll
+ copy_dll: copy_dll_so
 endif
 
 copy_dll_w32:
@@ -62,6 +62,21 @@ do_copy_dll:
 				if [ "x$$files" != "x" ]; then \
 					cp -p $$files $(BUILD_OUT_DIR)/bin;\
 				fi ;\
+			fi ;\
+		done ;\
+	done
+
+# Linuxの場合、.soは、実体ではなく、
+# シンボリックリンクになってることがあるので、
+# 必要なら、シンボリックを辿る
+# (copy_dll_sub.sh参照)
+copy_dll_so:
+	@echo "copying dlls to the target directory ..."
+	@mkdir -p $(BUILD_OUT_DIR)/bin
+	@for dir in $(SUBLIBS) ; do \
+		for subdir in bin lib; do \
+			if [ -d $$dir/$$subdir ]; then \
+				find $$dir/$$subdir -name '*$(DLL_SUFFIX)' | sh copy_so_sub.sh $(BUILD_OUT_DIR)/bin; \
 			fi ;\
 		done ;\
 	done

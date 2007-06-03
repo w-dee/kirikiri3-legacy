@@ -7,12 +7,14 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
+//! @file
 //! @brief ユーティリティ
 //---------------------------------------------------------------------------
-#include "risseCommHead.h"
+#include "prec.h"
 
 #include "risseUtils.h"
 
+#if 0
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(3401,9600,47324,18071,37028,228,43889,3977);
@@ -207,7 +209,7 @@ void * RisseAlignedAlloc(risse_uint bytes, risse_uint align_bits)
 {
 	// aligned memory allocation is to be used to gain performance on some processors.
 	risse_int align = 1 << align_bits;
-	void *ptr = (void *)(new risse_uint8[bytes + align + sizeof(void*)]);
+	void *ptr = (void *)(new (GC) risse_uint8[bytes + align + sizeof(void*)]);
 	void *org_ptr = ptr;
 	tRissePointerSizedInteger::type *iptr =
 		reinterpret_cast<tRissePointerSizedInteger::type *>(&ptr);
@@ -225,32 +227,7 @@ void RisseAlignedDealloc(void *ptr)
 
 
 
-//---------------------------------------------------------------------------
-// floating-point class checker
-//---------------------------------------------------------------------------
-risse_uint32 RisseGetFPClass(risse_real r)
-{
-	risse_uint64 *ui64 = (risse_uint64*)&r;
-
-	if(RISSE_IEEE_D_IS_NaN(*ui64))
-	{
-		if(RISSE_IEEE_D_SIGN_MASK & *ui64)
-			return RISSE_FC_CLASS_NAN | RISSE_FC_SIGN_MASK;
-		else
-			return RISSE_FC_CLASS_NAN;
-	}
-	if(RISSE_IEEE_D_IS_INF(*ui64))
-	{
-		if(RISSE_IEEE_D_SIGN_MASK & *ui64)
-			return RISSE_FC_CLASS_INF | RISSE_FC_SIGN_MASK;
-		else
-			return RISSE_FC_CLASS_INF;
-	}
-	if(RISSE_IEEE_D_SIGN_MASK & *ui64)
-		return RISSE_FC_CLASS_NORMAL | RISSE_FC_SIGN_MASK;
-	else
-		return RISSE_FC_CLASS_NORMAL;
-}
-//---------------------------------------------------------------------------
 
 }
+
+#endif

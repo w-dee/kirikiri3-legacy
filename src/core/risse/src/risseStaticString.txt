@@ -1,0 +1,90 @@
+// 書式
+// このファイルは生成スクリプト ( ../tools/statis_strings.rb ) によって
+// 読み込まれ、C++ファイルに変換される。
+// '//' 以降はコメントとして見なされる
+// '#!<' はコメントとして出力にも現れる
+// 識別子  文字列  コメント
+// の順で記述する。
+
+// 生成スクリプトは risse_parser/words.txt も読み込む。words.txt で定義されている
+// アルファベットからなる「単語」が、ss_ のプリフィクスとともに生成される。
+// そのため、このリストと words.txt で定義されているリストに重複があると
+// エラーになるので注意が必要。words.txt に登録されている単語ならばここに
+// 記述する必要はない。
+ss_lastEvalResultHiddenVarName		._								#!< 最後に評価した文や式の結果を格納するための隠し変数名
+ss_thisProxyHiddenVarName			.proxy							#!< this-proxy を格納するための隠し変数名
+ss_initialize						initialize						#!< "initialize" メソッド名
+ss_construct						construct						#!< "construct" メソッド名
+ss_fertilize						fertilize						#!< "fertilize" メソッド名
+ss_getInstanceMember				getInstanceMember				#!< "getInstanceMember" メソッド名
+ss_setInstanceMember				setInstanceMember				#!< "setInstanceMember" メソッド名
+ss_Object							Object							#!< "Object" クラス名
+ss_Module							Module							#!< "Module" モジュール名
+ss_Class							Class							#!< "Class" クラス名
+ss_Function							Function						#!< "Function" クラス名
+ss_Array							Array							#!< "Array" クラス名
+ss_Primitive						Primitive						#!< "Primitive" クラス名
+ss_String							String							#!< "String" クラス名
+ss_Number							Number							#!< "Number" クラス名
+ss_Integer							Integer							#!< "Integer" クラス名
+ss_Property							Property						#!< "Property" クラス名
+ss_Real								Real							#!< "Real" クラス名
+ss_prototype						prototype						#!< "prototype" インスタンス変数/プロパティ名
+ss_modules							modules							#!< "modules" インスタンス変数/プロパティ名
+ss_push								push							#!< "push" メソッド名
+ss_pop								pop								#!< "pop" メソッド名
+ss_unshift							unshift							#!< "unshift" メソッド名
+ss_shift							shift							#!< "shift" メソッド名
+ss_charAt							charAt							#!< "charAt" メソッド名
+ss_length							length							#!< "length" プロパティ名
+ss_times							times							#!< "times" メソッド名
+ss_isNaN							isNaN							#!< "isNaN" プロパティ名
+ss_filler							filler							#!< "filler" インスタンス変数/プロパティ名
+ss_include							include							#!< "include" メソッド名
+ss_Throwable						Throwable						#!< "Throwable" クラス名
+ss_message							message							#!< "message" インスタンス変数/プロパティ名
+ss_trace							trace							#!< "trace" インスタンス変数/プロパティ名
+ss_cause							cause							#!< "cause" インスタンス変数/プロパティ名
+ss_addTrace							addTrace						#!< "addTrace" メソッド名
+ss_SourcePoint						SourcePoint						#!< "SourcePoint" クラス名
+ss_filename							filename						#!< "filename" ファイル名
+ss_line								line							#!< "line" インスタンス変数/プロパティ名
+ss_Exception						Exception						#!< "Exception" クラス名
+ss_p								p								#!< "p" メソッド名
+ss_isA								isA								#!< "isA" メソッド名
+ss_BlockExitException				BlockExitException				#!< "BlockExitException" クラス名
+ss_identifier						identifier						#!< "identifier" インスタンス変数/プロパティ名
+ss_target							target							#!< "target" インスタンス変数/プロパティ名
+ss_value							value							#!< "value" インスタンス変数/プロパティ名
+ss_Error							Error							#!< "Error" クラス名
+ss_AssertionError					AssertionError					#!< "AssertionError" クラス名
+ss_RuntimeException					RuntimeException				#!< "RuntimeException" クラス名
+ss_toException						toException						#!< "toException" 
+ss_MemberAccessException			MemberAccessException			#!< "MemberAccessException" クラス名
+ss_NoSuchMemberException			NoSuchMemberException			#!< "NoSuchMemberException" クラス名
+ss_name								name							#!< "name" インスタンス変数/プロパティ名
+ss_object							object							#!< "object" インスタンス変数/プロパティ名
+ss_ArgumentException				ArgumentException				#!< "ArgumentException" クラス名
+ss_IllegalArgumentException			IllegalArgumentException		#!< "IllegalArgumentException" クラス名
+ss_BadArgumentCountException		BadArgumentCountException		#!< "BadArgumentException" クラス名
+ss_IllegalMemberAccessException		IllegalMemberAccessException	#!< "IllegalMemberAccessException" クラス名
+ss_InsufficientResourceException	InsufficientResourceException	#!< "InsufficientResourceException" クラス名
+ss_IOException						IOException						#!< "IOException" クラス名
+ss_CharConversionException			CharConversionException			#!< "CharConversionException" クラス名
+ss_UnsupportedOperationException	UnsupportedOperationException	#!< "UnsupportedOperationException" クラス名
+ss_BadContextException				BadContextException				#!< "BadContextException" クラス名
+ss_ClassDefinitionException			ClassDefinitionException		#!< "ClassDefinitionException" クラス名
+ss_InstantiationException			InstantiationException			#!< "InstantiationException" クラス名
+ss_expression						expression						#!< "expression" インスタンス変数/プロパティ名
+ss_NullObjectException				NullObjectException				#!< "NullObjectException" クラス名
+ss_CompileException					CompileException				#!< "CompileException" クラス名
+ss_extensible						extensible						#!< "extensible" プロパティ名
+ss_Binding							Binding							#!< "Binding" クラス名
+ss_eval								eval							#!< "eval" メソッド名
+ss_Coroutine						Coroutine						#!< "Coroutine" クラス名
+ss_run								run								#!< "run" メソッド名
+ss_yield							yield							#!< "yield" メソッド名
+ss_exit								exit							#!< "exit" メソッド名
+ss_alive							alive							#!< "alive" プロパティ名
+ss_dispose							dispose							#!< "dispose" メソッド名
+ss_CoroutineException				CoroutineException				#!< "CoroutineException" クラス名

@@ -152,9 +152,30 @@ else
 
 # executableの場合
 # リンカドライバとしては CXX を用いる
+ifeq (unix,$(PLATFORM))
+
+# unixの場合は、PATHと、DLLを探すパスが異なっているので、
+# $(BIN)という名前のラッパスクリプトを作って、そのスクリプトの中から
+# $(BIN)-binを呼ぶようにする。
+# 
+# TODO: Linux以外のラッパスクリプト
+ $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
+	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
+	$(CXX) $(LDFLAGS) $(OBJS) -o $(BIN)-bin $(LIBS) $(DEFAULT_LIBS)
+	echo -e '#!/bin/sh\n\
+bindir=`dirname $$0`\n\
+export $(LD_LIBRARY_PATH_ENV_NAME)=$$bindir:$$$(LD_LIBRARY_PATH_ENV_NAME)\n\
+exec $$bindir/$(notdir $(BIN))-bin $$@' > $(BIN)
+	chmod a+x $(BIN)
+
+
+else	# $(PLATFORM) != unix
  $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
 	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
 	$(CXX) $(LDFLAGS) $(OBJS) -o $(BIN) $(LIBS) $(DEFAULT_LIBS)
+
+endif	# $(PLATFORM)
+
 endif
 endif
 

@@ -91,6 +91,17 @@ $ export http_proxy
   このアーカイブには必要なライブラリやヘッダが含まれていますが、現状
   Win32 のみです。
 
+・gc
+
+  入手先: http://www.hpl.hp.com/personal/Hans_Boehm/gc/
+
+  Boehm GC (ガーベジコレクタ) です。
+
+  Makefile が自動的にダウンロードするのは本家においてあるアーカイブではなく
+  kikyou.info においてある、W.Deeが独自に作成したアーカイブです。
+  このアーカイブには必要なライブラリやヘッダが含まれていますが、現状
+  Win32 のみです。
+
 --
 
 gzip: stdin: not in gzip format

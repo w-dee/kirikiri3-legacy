@@ -15,7 +15,7 @@ build_release()
 
 # ビルドを行う
 
-cd src
+cd src_temp
 
 build_release
 

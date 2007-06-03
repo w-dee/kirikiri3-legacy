@@ -81,15 +81,10 @@ build_release()
 
 # ビルドを行う
 
-cd src
+cd src_temp
 
-for dir in *; do
-	if [ -d $dir ]; then
-		cd $dir
-		build_debug
-		build_release
-	fi
-done
+build_debug
+build_release
 
 
 

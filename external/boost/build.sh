@@ -92,15 +92,6 @@ custom_build()
 
 	# ビルド
 	make && make install
-
-	case "`uname -s`" in
-	    CYGWIN* | MINGW*)
-	    # lib 中の *.lib を *.a に
-		cd $prefix/lib
-		for fname in *.lib; do mv $fname ${fname%.lib}.a; done
-		cd $current
-		;;
-	esac
 }
 
 

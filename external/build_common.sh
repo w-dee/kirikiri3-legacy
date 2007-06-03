@@ -17,13 +17,5 @@ build_release()
 
 cd src
 
-for dir in *; do
-	if [ -d "$dir" ]; then
-		cd $dir
-		if [ -d "$subdir_in_src" ]; then
-			cd $subdir_in_src
-		fi
-		build_release
-	fi
-done
+build_release
 

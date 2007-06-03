@@ -54,11 +54,24 @@ int main(void)
 
 # boost のビルド
 
+# ↓ ICU を使う場合
+#	--with-icu=$prefix/../icu
+
+
 common_configure_options="
 	--prefix=$prefix
-	--with-icu=$prefix/../icu
+	--with-toolset=gcc
 	"
 
+case "`uname -s`" in
+	MINGW*)
+		# --with-toolset=gcc を書く。
+		# どうも 1.34 から MSYS がサポートされなくなったらしいorz
+		common_configure_options="$common_configure_options
+			--with-toolset=gcc
+			"
+	;;
+esac
 
 custom_build_func=custom_build
 
@@ -68,7 +81,7 @@ custom_build()
 	current=`pwd`
 
 	# bjam のビルド
-	cd tools/build/jam_src
+	cd tools/jam/src
 
 	jam_build_cmd
 

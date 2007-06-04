@@ -39,7 +39,7 @@ download:
 # また、マルチスレッドヘルパーである mingwm*.dll も bin ディレ
 # クトリにコピーする
 ifeq ($(PLATFORM),windows)
- copy_dll: copy_dll_w32
+ copy_dll: copy_dll_w32 do_copy_dll
 else
  copy_dll: copy_dll_so
 endif
@@ -56,7 +56,7 @@ do_copy_dll:
 	@echo "copying dlls to the target directory ..."
 	mkdir -p $(BUILD_OUT_DIR)/bin
 	@for dir in $(SUBLIBS) ; do \
-		for subdir in bin lib; do \
+		for subdir in bin lib src_temp/bin.v2; do \
 			if [ -d $$dir/$$subdir ]; then \
 				files=`find $$dir/$$subdir -name '*$(DLL_SUFFIX)'` ;\
 				if [ "x$$files" != "x" ]; then \

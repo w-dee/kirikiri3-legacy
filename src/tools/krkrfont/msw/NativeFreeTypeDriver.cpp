@@ -16,6 +16,11 @@
 #include "NativeFreeTypeDriver.h"
 
 
+// wxGetFontEncFromCharSet の前方定義。本当は
+// msw/private.h の中にある。さすがに公式なAPIではないので将来的には
+// リンクできなくなるかもしれないが、そのときはそのときで別に考えよう。
+WXDLLEXPORT wxFontEncoding wxGetFontEncFromCharSet(int charset);
+
 // 以下の二つのdefineはOpenType フォントを表していて、
 // EnumFontsProc の lpntme->ntmTm.ntmFlags にビットセットとして渡されてくる。
 // (OpenTypeがサポートされた Windows 2000 以降で存在)

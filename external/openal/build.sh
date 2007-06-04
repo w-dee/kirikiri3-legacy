@@ -2,12 +2,9 @@
 
 prefix=`pwd`
 
-custom()
-{
-	cp -pR lib include bin $prefix
-}
-
-custom_build_func=custom
-
+common_configure_options="
+	--prefix=$prefix
+	"
 
 . ../build_common.sh
+

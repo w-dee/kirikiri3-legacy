@@ -13,6 +13,8 @@
 #ifndef _XP4FSBIND_H_
 #define _XP4FSBIND_H_
 
+#if 0
+
 #include "base/fs/common/FSManagerBind.h"
 #include "base/fs/xp4fs/XP4FS.h"
 #include "risse/include/risseNative.h"
@@ -85,6 +87,6 @@ public:
 };
 //---------------------------------------------------------------------------
 
-
+#endif
 
 #endif

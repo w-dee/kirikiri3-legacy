@@ -48,6 +48,13 @@ FREETYPE_CONFIG = $(FREETYPE_DIR)/bin/freetype-config
 FREETYPE_CONFIG_BASE_ARG=
 FREETYPE_CONFIG_ARG=$(FREETYPE_CONFIG_BASE_ARG)
 
+# openal-config の名前
+OPENAL_CONFIG = $(OPENAL_DIR)/bin/openal-config
+
+# openal-config に渡す標準のオプション
+OPENAL_CONFIG_BASE_ARG=
+OPENAL_CONFIG_ARG=$(OPENAL_CONFIG_BASE_ARG)
+
 # 使用するフラグなどを調べる
 # wx-config の --libs の出力するフラグのうち、-Wl,--subsystem,windows と
 # -mwindows はアプリケーションによっては必要が無いので削除する
@@ -192,10 +199,18 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	@echo "openal ..."
 	@(set -e ;\
 		echo "####  openal config  ####" ;\
-		echo "OPENAL_CFLAGS   := -I$(OPENAL_DIR)/include" ;\
-		echo "OPENAL_CXXFLAGS := -I$(OPENAL_DIR)/include" ;\
-		echo "OPENAL_CPPFLAGS := -I$(OPENAL_DIR)/include" ;\
-		echo "OPENAL_LIBS     := -L$(OPENAL_DIR)/lib -lopenal" ;\
+		OPENAL_LIBS=`$(OPENAL_CONFIG) $(OPENAL_CONFIG_ARG) --libs` ;\
+		if [ -f $(OPENAL_DIR)/lib/libopenal.dll.a ] ; then \
+			OPENAL_LIBS=`echo "$$OPENAL_LIBS" | sed -e 's/-lopenal[^.]/-lopenal.dll/' -e 's/.dll.dll/.dll/'`; \
+		fi; \
+		echo -n "OPENAL_CFLAGS   := " ;\
+			$(OPENAL_CONFIG) $(OPENAL_CONFIG_ARG) --cflags ;\
+		echo -n "OPENAL_CXXFLAGS := " ;\
+			$(OPENAL_CONFIG) $(OPENAL_CONFIG_ARG) --cflags ;\
+		echo -n "OPENAL_CPPFLAGS := " ;\
+			$(OPENAL_CONFIG) $(OPENAL_CONFIG_ARG) --cflags ;\
+		echo -n "OPENAL_LIBS     := " ;\
+			echo "$$OPENAL_LIBS" ;\
 		touch $(TOP_DIR)/config_success ;\
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: openal configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi

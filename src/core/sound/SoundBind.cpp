@@ -15,6 +15,9 @@
 #include "sound/SoundBind.h"
 #include "base/script/RisseEngine.h"
 
+#if 0
+
+
 RISSE_DEFINE_SOURCE_ID(38428,3640,56667,17105,48032,55694,30447,43980);
 
 
@@ -446,5 +449,5 @@ public:
 //---------------------------------------------------------------------------
 
 
-
+#endif
 

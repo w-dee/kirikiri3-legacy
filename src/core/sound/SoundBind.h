@@ -13,7 +13,10 @@
 #ifndef SoundBindH
 #define SoundBindH
 
+#if 0
+
 #include "sound/Sound.h"
 
+#endif
 
 #endif

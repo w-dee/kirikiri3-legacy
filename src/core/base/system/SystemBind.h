@@ -16,6 +16,7 @@
 #include "base/script/RisseEngine.h"
 #include "risse/include/risseNative.h"
 
+#if 0
 
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
@@ -39,6 +40,8 @@ public:
 	bool GetExceptionHandlerObject(tRisseVariantClosure & dest);
 };
 //---------------------------------------------------------------------------
+
+#endif
 
 #endif
 

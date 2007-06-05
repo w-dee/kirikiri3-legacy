@@ -13,6 +13,7 @@
 #ifndef _OSFSBIND_H_
 #define _OSFSBIND_H_
 
+#if 0
 #include "base/fs/common/FSManagerBind.h"
 #include "base/fs/osfs/OSFS.h"
 #include "risse/include/risseNative.h"
@@ -81,5 +82,6 @@ public:
 };
 //---------------------------------------------------------------------------
 
+#endif
 
 #endif

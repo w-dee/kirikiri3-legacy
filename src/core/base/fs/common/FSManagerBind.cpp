@@ -19,7 +19,7 @@
 RISSE_DEFINE_SOURCE_ID(57103,491,17401,17369,5283,30429,30396,3005);
 
 
-
+#if 0
 
 
 
@@ -373,3 +373,4 @@ void tRisaFileSystemRegisterer::RegisterClassObject(const risse_char *name,
 //---------------------------------------------------------------------------
 
 
+#endif

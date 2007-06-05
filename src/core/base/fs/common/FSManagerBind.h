@@ -13,11 +13,12 @@
 #ifndef _FSMANAGERBIND_H_
 #define _FSMANAGERBIND_H_
 
+#if 0
+
 #include "base/fs/common/FSManager.h"
 #include "risse/include/risseNative.h"
 #include "base/utils/Singleton.h"
 #include "base/script/RisseEngine.h"
-
 
 //---------------------------------------------------------------------------
 //! @brief ファイルシステム ネイティブインスタンス
@@ -137,6 +138,6 @@ public:
 
 
 
-
+#endif
 
 #endif

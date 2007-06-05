@@ -13,6 +13,7 @@
 #ifndef _PATHSFSBIND_H_
 #define _PATHSFSBIND_H_
 
+#if 0
 #include "base/fs/common/FSManagerBind.h"
 #include "base/fs/pathfs/PathFS.h"
 #include "risse/include/risseNative.h"
@@ -82,6 +83,6 @@ public:
 };
 //---------------------------------------------------------------------------
 
-
+#endif
 
 #endif

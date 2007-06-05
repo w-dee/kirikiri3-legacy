@@ -15,6 +15,8 @@
 #include "risse/include/risseError.h"
 #include "base/log/Log.h"
 
+#if 0
+
 RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);
 
 
@@ -113,3 +115,4 @@ void tRisaRisseScriptEngine::ExecuteScript(
 }
 //---------------------------------------------------------------------------
 
+#endif

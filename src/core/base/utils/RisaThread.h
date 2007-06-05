@@ -42,13 +42,14 @@ Risa は wxWidgets と boost という２つのライブラリのスレッド実
 
 	- wxCriticalSection				問題あり
 	- boost::recursive_mutex		とくに問題なし
-	- tRisseCiriticalSection		問題なし
+	- Risse::tRisseCiriticalSection	問題なし
 
 	wxCriticalSection は、再帰的な(再入可能な)クリティカルセクションを実現できる
 	保証がない。boost::recursive_mutex はその名の通り再入可能な mutex だが、
 	たとえば Windows の提供する CriticalSection よりは効率が悪い。
-	tRisseCiriticalSection は、プラットフォームネイティブなクリティカルセクショ
-	ンを利用できる場合は利用するようになっているのでもっとも効率がよい。
+	Risse::tRisseCiriticalSection は、プラットフォームネイティブな
+	クリティカルセクションを利用できる場合は利用するようになっているので
+	もっとも効率がよい。
 
 	ここでは、tRisseCriticalSection を typedef したものを tRisaCriticalSection
 	として用いて使うこととする。
@@ -63,7 +64,7 @@ Risa は wxWidgets と boost という２つのライブラリのスレッド実
 //---------------------------------------------------------------------------
 //! @brief		クリティカルセクションクラス
 //---------------------------------------------------------------------------
-typedef tRisseCriticalSection tRisaCriticalSection;
+typedef Risse::tRisseCriticalSection tRisaCriticalSection;
 //---------------------------------------------------------------------------
 
 

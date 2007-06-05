@@ -13,6 +13,8 @@
 #ifndef _TMPFSBIND_H_
 #define _TMPFSBIND_H_
 
+#if 0
+
 #include "base/fs/common/FSManagerBind.h"
 #include "base/fs/tmpfs/TmpFS.h"
 #include "risse/include/risseNative.h"
@@ -88,6 +90,6 @@ public:
 };
 //---------------------------------------------------------------------------
 
-
+#endif
 
 #endif

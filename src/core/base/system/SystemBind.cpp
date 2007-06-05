@@ -15,6 +15,9 @@
 #include "base/system/SystemBind.h"
 #include "risse/include/risseNative.h"
 
+#if 0
+
+
 RISSE_DEFINE_SOURCE_ID(42003,44071,47107,17145,37820,23105,1673,13784);
 
 
@@ -148,4 +151,4 @@ bool tRisaSystemRegisterer::GetExceptionHandlerObject(tRisseVariantClosure & des
 }
 //---------------------------------------------------------------------------
 
-
+#endif

@@ -10,6 +10,9 @@ Risse_CPPFLAGS := $(shell $(Risse_DIR)/bin/risse-config --cppflags)
 Risse_LIBS     := $(shell $(Risse_DIR)/bin/risse-config --libs)
 Risse_LINKDEPS := $(shell $(Risse_DIR)/bin/risse-config --linkdeps)
 
+ifneq ($(filter GC,$(DEP_LIBS)),GC)
+ DEP_LIBS += GC
+endif
 ifneq ($(filter WX,$(DEP_LIBS)),WX)
  DEP_LIBS += WX
 endif

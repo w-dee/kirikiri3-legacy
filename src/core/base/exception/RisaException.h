@@ -13,7 +13,6 @@
 #ifndef _RisaExceptionH_
 #define _RisaExceptionH_
 
-#include "basetypes.h"
 #include "risse/include/risseExceptionClass.h"
 #include "base/exception/UnhandledException.h"
 

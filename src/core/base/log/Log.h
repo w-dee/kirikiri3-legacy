@@ -13,7 +13,6 @@
 #ifndef _LOG_H
 #define _LOG_H
 
-#include "basetypes.h"
 #include "base/utils/Singleton.h"
 #include "base/utils/RingBuffer.h"
 #include "base/utils/RisaThread.h"

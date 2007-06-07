@@ -13,7 +13,6 @@
 #ifndef _EVENT_H
 #define _EVENT_H
 
-#include "basetypes.h"
 #include <deque>
 #include <boost/array.hpp>
 #include "base/utils/RisaThread.h"

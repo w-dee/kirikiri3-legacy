@@ -67,7 +67,6 @@
 */
 
 
-#include "basetypes.h"
 #include "base/utils/Singleton.h"
 #include "base/utils/RisaThread.h"
 

@@ -13,13 +13,14 @@
 #ifndef _FSMANAGER_H_
 #define _FSMANAGER_H_
 
+#include "basetypes.h"
 #include <wx/file.h>
 #include <wx/datetime.h>
-#include "risse/include/risse.h"
-#include "risse/include/risseHashSearch.h"
+#include "risse/include/risseHashTable.h"
 #include "base/utils/Singleton.h"
 #include "base/utils/RisaThread.h"
 #include "base/script/RisseEngine.h"
+#include "risse/include/risseString.h"
 #include <boost/smart_ptr.hpp>
 
 

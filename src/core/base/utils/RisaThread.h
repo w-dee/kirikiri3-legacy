@@ -12,6 +12,8 @@
 //---------------------------------------------------------------------------
 #ifndef _RISATHREAD_H
 #define _RISATHREAD_H
+
+#include <wx/log.h>
 /*! @note
 
 Risa は wxWidgets と boost という２つのライブラリのスレッド実装の恩恵を

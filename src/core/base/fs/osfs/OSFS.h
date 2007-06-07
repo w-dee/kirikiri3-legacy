@@ -14,7 +14,6 @@
 #define _OSFSH_
 
 #include "base/fs/common/FSManager.h"
-#include "risse/include/risseNative.h"
 #include "base/utils/RisaThread.h"
 #include <wx/file.h>
 

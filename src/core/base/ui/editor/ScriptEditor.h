@@ -13,7 +13,6 @@
 #ifndef _SCRIPTEDITOR_H
 #define _SCRIPTEDITOR_H
 
-#include "risse/include/risse.h"
 #include "base/ui/UIUtils.h"
 
 

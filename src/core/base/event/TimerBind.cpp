@@ -16,7 +16,6 @@
 #include "base/event/Timer.h"
 #include "base/script/RisseEngine.h"
 #include "base/exception/RisaException.h"
-#include "risse/include/risseNative.h"
 
 RISSE_DEFINE_SOURCE_ID(25021,49177,9141,20257,35249,61240,44766,27087);
 

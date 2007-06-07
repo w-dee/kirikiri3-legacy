@@ -18,11 +18,12 @@
 #include "base/event/Event.h"
 #include "base/log/Log.h"
 #include "base/ui/editor/ScriptEditor.h"
-#include "risse/include/risseScriptBlock.h"
 
 RISSE_DEFINE_SOURCE_ID(28545,30194,3434,19984,56458,2209,37707,53134);
 
 
+#if 0
+// TODO: 一時的に無効化
 
 //---------------------------------------------------------------------------
 //! @brief		スクリプト例外を表示する
@@ -288,3 +289,4 @@ void tRisaUnhandledExceptionHandler::Process(eRisse &e)
 //---------------------------------------------------------------------------
 
 
+#endif

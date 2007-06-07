@@ -13,6 +13,7 @@
 #ifndef _RisaExceptionH_
 #define _RisaExceptionH_
 
+#include "basetypes.h"
 #include "risse/include/risseExceptionClass.h"
 #include "base/exception/UnhandledException.h"
 
@@ -76,7 +77,11 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		例外を捕捉し、必要ならばエラー表示を行うマクロ
 //---------------------------------------------------------------------------
-#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(origin) /*\
+#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(origin) \
+	catch(...) { throw; }
+
+
+/*\
 	catch(eRisseScriptException &e) \
 	{ \
 		e.AddTrace(tRisseString(origin)); \
@@ -102,7 +107,10 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		例外を捕捉し、強制的にエラー表示を行うマクロ
 //---------------------------------------------------------------------------
-#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION_FORCE_SHOW_EXCEPTION(origin) /*\
+#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION_FORCE_SHOW_EXCEPTION(origin) \
+	catch(...) { throw; }
+
+/*\
 	catch(eRisseScriptError &e) \
 	{ \
 		e.AddTrace(tRisseString(origin)); \

@@ -14,6 +14,7 @@
 #include "base/config/ConfigData.h"
 #include "base/exception/RisaException.h"
 #include <wx/filename.h>
+#include <wx/app.h>
 
 RISSE_DEFINE_SOURCE_ID(7464,23094,50611,20409,11701,31915,19285,41427);
 

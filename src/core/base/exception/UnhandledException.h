@@ -14,11 +14,12 @@
 #define _UnhandledH_
 
 #include "base/utils/Singleton.h"
-#include "risse/include/risseError.h"
 
 //---------------------------------------------------------------------------
 //! @brief ハンドルされなかった例外のハンドルを行うクラス
 //---------------------------------------------------------------------------
+#if 0
+// TODO: 一時的に無効化
 class tRisaUnhandledExceptionHandler
 {
 public:
@@ -29,6 +30,7 @@ public:
 	static void Process(eRisseScriptError &e);
 	static void Process(eRisse &e);
 };
+#endif
 //---------------------------------------------------------------------------
 
 

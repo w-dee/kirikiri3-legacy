@@ -59,7 +59,7 @@ void eRisaException::Throw(const tRisseString &str, const tRisseString & s1, con
 //---------------------------------------------------------------------------
 void eRisaException::ThrowInternalError(int line, const char * filename)
 {
-	Throw(RISSE_WS_TR("Internal error at %2 line %1"), tRisseString(line), tRisseString(wxString(filename, wxConvUTF8)));
+	Throw(RISSE_WS_TR("Internal error at %2 line %1"), tRisseString::AsString(line), tRisseString(wxString(filename, wxConvUTF8)));
 }
 //---------------------------------------------------------------------------
 

@@ -13,7 +13,7 @@
 #ifndef _LOG_H
 #define _LOG_H
 
-#include "risse/include/risse.h"
+#include "basetypes.h"
 #include "base/utils/Singleton.h"
 #include "base/utils/RingBuffer.h"
 #include "base/utils/RisaThread.h"
@@ -95,13 +95,13 @@ private:
 	//! @param		level		ログレベル
 	//! @param		linkinfo	リンク情報
 	void InternalLog(const tRisseString & content, tLevel level = llInfo,
-		const tRisseString & linkinfo = RisseEmptyString);
+		const tRisseString & linkinfo = tRisseString::GetEmptyString());
 
 public:
 	//! @brief ログを行う
 	//! @note 通常のログ記録にはこちらを使うこと
 	static void Log(const tRisseString & content, tLevel level = llInfo,
-		const tRisseString & linkinfo = RisseEmptyString)
+		const tRisseString & linkinfo = tRisseString::GetEmptyString())
 	{
 		if(tRisaLogger::pointer r = instance())
 			r->InternalLog(content, level, linkinfo);

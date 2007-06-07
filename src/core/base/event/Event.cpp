@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "base/event/Event.h"
 #include "base/exception/RisaException.h"
+#include <wx/app.h>
 
 RISSE_DEFINE_SOURCE_ID(1676,31212,48005,18878,7819,32358,49817,14499);
 

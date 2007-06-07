@@ -13,7 +13,6 @@
 #ifndef RisseENGINEH
 #define RisseENGINEH
 
-#include "risse/include/risse.h"
 #include "base/utils/Singleton.h"
 
 #if 0

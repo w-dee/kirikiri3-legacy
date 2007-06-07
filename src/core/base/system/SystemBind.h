@@ -13,10 +13,10 @@
 #ifndef _SYSTEMBIND_H
 #define _SYSTEMBIND_H
 
+#if 0
 #include "base/script/RisseEngine.h"
 #include "risse/include/risseNative.h"
 
-#if 0
 
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ

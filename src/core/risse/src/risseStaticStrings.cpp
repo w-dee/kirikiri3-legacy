@@ -35,7 +35,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(42208,23419,40632,19449,10161,42357,6322,51208);
 //---------------------------------------------------------------------------
 
-#include "risseStaticStringsData.inc"
+#include "risseStaticStringsData.def"
 
 //---------------------------------------------------------------------------
 } // namespace Risse

@@ -27,7 +27,7 @@ namespace Risse
 {
 
 // 名前表の読み込み
-#include "risseOpCodesDefs.inc"
+#include "risseOpCodesDefs.def"
 
 //---------------------------------------------------------------------------
 risse_size tRisseVMCodeIterator::GetInsnSize() const

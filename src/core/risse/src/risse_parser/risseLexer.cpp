@@ -23,7 +23,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(26774,17704,8265,19906,55701,8958,30467,4610);
 
 // マッパーを include
-#include "risseLexerMap.inc"
+#include "risseLexerMap.def"
 
 
 //---------------------------------------------------------------------------

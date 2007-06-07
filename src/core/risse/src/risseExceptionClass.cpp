@@ -100,7 +100,15 @@ tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
 tRisseVariant * tRisseTemporaryException::Convert(tRisseScriptEngine * engine) const
 {
 	// まず、例外クラスを取得する
-	tRisseVariant cls = engine->GetGlobalObject().GetPropertyDirect_Object(ExceptionClassName);
+	tRisseVariant cls;
+	tRisseObjectInterface::tRetValue ret =
+		engine->GetGlobalObject().Operate(engine, ocDGet, &cls, ExceptionClassName);
+	if(ret != tRisseObjectInterface::rvNoError)
+	{
+		// ExceptionClassNameを取得できなかった。
+		// この場合は ss_RuntimeException を取得する
+		cls = engine->GetGlobalObject().GetPropertyDirect_Object(ss_RuntimeException);
+	}
 
 	// 引数を用意する
 	tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(Arguments.size());

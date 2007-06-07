@@ -48,7 +48,7 @@ static risse_uint8 RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
 
 
 //---------------------------------------------------------------------------
-tRisaRIFFWaveDecoder::tRisaRIFFWaveDecoder(const ttstr & filename)
+tRisaRIFFWaveDecoder::tRisaRIFFWaveDecoder(const tRisseString & filename)
 {
 	Stream = tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
 
@@ -337,7 +337,7 @@ class tRisaRIFFWaveWaveDecoderFactory : public tRisaWaveDecoderFactory
 {
 public:
 	//! @brief デコーダを作成する
-	boost::shared_ptr<tRisaWaveDecoder> Create(const ttstr & filename)
+	boost::shared_ptr<tRisaWaveDecoder> Create(const tRisseString & filename)
 	{
 		boost::shared_ptr<tRisaWaveDecoder>
 			decoder(new tRisaRIFFWaveDecoder(filename));

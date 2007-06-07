@@ -43,7 +43,7 @@ public:
 		//! @param		inarchivename このアーカイブアイテムの名前を格納する先
 		//! @param		deleted ファイルが削除されている時に真に設定される
 		tFile(tRisaXP4Archive *owner, const unsigned char * meta,
-							size_t metasize, ttstr & inarchivename, bool &deleted);
+							size_t metasize, tRisseString & inarchivename, bool &deleted);
 	};
 
 	struct tSegment
@@ -62,21 +62,21 @@ public:
 	class iMapCallback
 	{
 	public:
-		virtual void operator () (const ttstr & name, risse_size file_index) = 0; //!< 追加/置き換えの場合
-		virtual void operator () (const ttstr & name) = 0; //!< 削除の場合
+		virtual void operator () (const tRisseString & name, risse_size file_index) = 0; //!< 追加/置き換えの場合
+		virtual void operator () (const tRisseString & name) = 0; //!< 削除の場合
 	};
 
 private:
 	std::vector<tFile> Files; //!< ファイルの配列
 	std::vector<tSegment> Segments; //!< セグメントの配列
 
-	ttstr FileName;
+	tRisseString FileName;
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		filename アーカイブファイル名
 	//! @param		callback ファイル名とアーカイブ内インデックスの対応をpushするコールバック
-	tRisaXP4Archive(const ttstr & filename, iMapCallback & callback);
+	tRisaXP4Archive(const tRisseString & filename, iMapCallback & callback);
 
 	//! @brief		デストラクタ
 	~tRisaXP4Archive();
@@ -102,7 +102,7 @@ public:
 		{ return Files[idx]; } //!< idx に対応する tFile 構造体を返す
 	const tSegment * GetSegmentInfo(risse_size idx) const
 		{ return &(Segments[Files[idx].SegmentStart]); } //!< idx に対応するセグメント情報を返す
-	const ttstr & GetFileName() const
+	const tRisseString & GetFileName() const
 		{ return FileName; } //!< ファイル名を返す
 };
 //---------------------------------------------------------------------------

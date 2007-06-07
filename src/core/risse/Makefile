@@ -101,34 +101,34 @@ PREC_H_NAME = src/prec.h
 
 INCLUDES = -I. -Isrc/boost-coroutine
 
-# risseLexerMap.inc のコンパイル
-BIN_DEPS += src/risse_parser/risseLexerMap.inc
+# risseLexerMap.def のコンパイル
+BIN_DEPS += src/risse_parser/risseLexerMap.def
 
-src/risse_parser/risseLexerMap.inc: \
+src/risse_parser/risseLexerMap.def: \
 		src/risse_parser/words.txt \
 		tools/create_word_map.rb Makefile
 	ruby tools/create_word_map.rb src/risse_parser/words.txt RisseMapToken > \
-		src/risse_parser/risseLexerMap.inc
+		src/risse_parser/risseLexerMap.def
 
-# risseOpCodesEnum.inc と risseOpCodesDefs.inc のコンパイル
-BIN_DEPS += src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc
+# risseOpCodesEnum.inc と risseOpCodesDefs.def のコンパイル
+BIN_DEPS += src/risseOpCodesEnum.inc src/risseOpCodesDefs.def
 
-src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc: \
+src/risseOpCodesEnum.inc src/risseOpCodesDefs.def: \
 		src/risseOpCodes.txt \
 		tools/opcodes.rb Makefile
 	ruby tools/opcodes.rb src/risseOpCodes.txt \
-		src/risseOpCodesEnum.inc src/risseOpCodesDefs.inc
+		src/risseOpCodesEnum.inc src/risseOpCodesDefs.def
 
-# risseStaticStringsData.inc と risseStaticStringsIds.inc のコンパイル
-BIN_DEPS += src/risseStaticStringsData.inc src/risseStaticStringsIds.inc
+# risseStaticStringsData.def と risseStaticStringsIds.inc のコンパイル
+BIN_DEPS += src/risseStaticStringsData.def src/risseStaticStringsIds.inc
 
-src/risseStaticStringsData.inc src/risseStaticStringsIds.inc: \
+src/risseStaticStringsData.def src/risseStaticStringsIds.inc: \
 		src/risseStaticString.txt \
 		src/risse_parser/words.txt \
 		tools/static_strings.rb Makefile
 	ruby tools/static_strings.rb src/risseStaticString.txt \
 		src/risse_parser/words.txt \
-		src/risseStaticStringsIds.inc src/risseStaticStringsData.inc
+		src/risseStaticStringsIds.inc src/risseStaticStringsData.def
 
 # risseNativeBinderTemplates.inc のコンパイル
 BIN_DEPS += src/risseNativeBinderTemplates.inc
@@ -190,7 +190,7 @@ BIN_DEPS = $(Risse_BIN_OUTPUT_DIR)/risse-config
 #----------------------------#
 
 # ヘッダファイルを集めてコピーする
-RISSE_HEADER_FILES := $(wildcard src/*.h)
+RISSE_HEADER_FILES := $(wildcard src/risse*.h) $(wildcard src/risse*.inc)
 RISSE_HEADER_DESTS := $(addprefix include/,$(notdir $(RISSE_HEADER_FILES)))
 
 include/% :: src/%

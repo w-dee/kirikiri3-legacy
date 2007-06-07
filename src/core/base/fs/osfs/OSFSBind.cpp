@@ -40,7 +40,7 @@ risse_error tRisseNI_OSFS::Construct(risse_int numparams,
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
-	ttstr basedir = *param[0];
+	tRisseString basedir = *param[0];
 	bool checkcase = RISSE_PARAM_EXIST(1) ? (risse_int)*param[1] : true;
 
 	// filesystem オブジェクトの生成と登録

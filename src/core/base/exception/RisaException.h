@@ -13,41 +13,35 @@
 #ifndef _RisaExceptionH_
 #define _RisaExceptionH_
 
-#include "risse/include/risseError.h"
+#include "risse/include/risseExceptionClass.h"
 #include "base/exception/UnhandledException.h"
 
 //---------------------------------------------------------------------------
 //! @brief		Risa用の汎用例外クラス
 //---------------------------------------------------------------------------
-class eRisaException : public eRisseError
+class eRisaException
 {
 public:
-	//! @brief		コンストラクタ
-	eRisaException(const ttstr & msg) : eRisseError(msg) {;}
-
-	//! @brief		コピーコンストラクタ
-	eRisaException(const eRisaException & ref) : eRisseError(ref) {;}
-
 	//! @brief		eRisaException型の例外を投げる
-	static void Throw(const ttstr &msg);
+	static void Throw(const tRisseString &msg);
 
 	//! @brief		eRisaException型の例外を投げる
 	//! @param		str  文字列 (中に %1 などの指令を埋め込む)
 	//! @param		s1   文字列中の %1 と置き換えたい文字列
-	static void Throw(const ttstr &msg, const ttstr & s1);
+	static void Throw(const tRisseString &msg, const tRisseString & s1);
 
 	//! @brief		eRisaException型の例外を投げる
 	//! @param		str  文字列 (中に %1 などの指令を埋め込む)
 	//! @param		s1   文字列中の %1 と置き換えたい文字列
 	//! @param		s2   文字列中の %2 と置き換えたい文字列
-	static void Throw(const ttstr &msg, const ttstr & s1, const ttstr & s2);
+	static void Throw(const tRisseString &msg, const tRisseString & s1, const tRisseString & s2);
 
 	//! @brief		eRisaException型の例外を投げる
 	//! @param		str  文字列 (中に %1 などの指令を埋め込む)
 	//! @param		s1   文字列中の %1 と置き換えたい文字列
 	//! @param		s2   文字列中の %2 と置き換えたい文字列
 	//! @param		s3   文字列中の %3 と置き換えたい文字列
-	static void Throw(const ttstr &msg, const ttstr & s1, const ttstr & s2, const ttstr & s3);
+	static void Throw(const tRisseString &msg, const tRisseString & s1, const tRisseString & s2, const tRisseString & s3);
 
 	//! @brief		eRisaException型の例外を投げる
 	//! @param		str  文字列 (中に %1 などの指令を埋め込む)
@@ -55,7 +49,7 @@ public:
 	//! @param		s2   文字列中の %2 と置き換えたい文字列
 	//! @param		s3   文字列中の %3 と置き換えたい文字列
 	//! @param		s4   文字列中の %4 と置き換えたい文字列
-	static void Throw(const ttstr &msg, const ttstr & s1, const ttstr & s2, const ttstr & s3, const ttstr & s4);
+	static void Throw(const tRisseString &msg, const tRisseString & s1, const tRisseString & s2, const tRisseString & s3, const tRisseString & s4);
 
 	//! @brief		内部エラー例外を発生させる
 	//! @param		line     エラーの起こった行
@@ -82,15 +76,15 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		例外を捕捉し、必要ならばエラー表示を行うマクロ
 //---------------------------------------------------------------------------
-#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(origin) \
+#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(origin) /*\
 	catch(eRisseScriptException &e) \
 	{ \
-		e.AddTrace(ttstr(origin)); \
+		e.AddTrace(tRisseString(origin)); \
 		tRisaUnhandledExceptionHandler::Process(e); \
 	} \
 	catch(eRisseScriptError &e) \
 	{ \
-		e.AddTrace(ttstr(origin)); \
+		e.AddTrace(tRisseString(origin)); \
 		tRisaUnhandledExceptionHandler::Process(e); \
 	} \
 	catch(eRisse &e) \
@@ -100,17 +94,18 @@ public:
 	catch(...) \
 	{ \
 		throw; \
-	}
+	}*/
+// TODO:implement this
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		例外を捕捉し、強制的にエラー表示を行うマクロ
 //---------------------------------------------------------------------------
-#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION_FORCE_SHOW_EXCEPTION(origin) \
+#define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION_FORCE_SHOW_EXCEPTION(origin) /*\
 	catch(eRisseScriptError &e) \
 	{ \
-		e.AddTrace(ttstr(origin)); \
+		e.AddTrace(tRisseString(origin)); \
 		tRisaUnhandledExceptionHandler::ShowScriptException(e); \
 	} \
 	catch(eRisse &e) \
@@ -120,7 +115,8 @@ public:
 	catch(...) \
 	{ \
 		throw; \
-	}
+	}*/
+// TODO: implement this
 //---------------------------------------------------------------------------
 
 

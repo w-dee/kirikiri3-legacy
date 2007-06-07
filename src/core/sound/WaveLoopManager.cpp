@@ -1057,7 +1057,7 @@ bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 	delete [] us;
 	return true;
 #else
-	v = ttstr(wxString(s, wxConvUTF8));
+	v = tRisseString(wxString(s, wxConvUTF8));
 	return true;
 #endif
 }

@@ -37,7 +37,7 @@ tRisaPathFS::~tRisaPathFS()
 
 
 //---------------------------------------------------------------------------
-size_t tRisaPathFS::GetFileListAt(const ttstr & dirname,
+size_t tRisaPathFS::GetFileListAt(const tRisseString & dirname,
 	tRisaFileSystemIterationCallback * callback)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -62,11 +62,11 @@ size_t tRisaPathFS::GetFileListAt(const ttstr & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tRisaPathFS::FileExists(const ttstr & filename)
+bool tRisaPathFS::FileExists(const tRisseString & filename)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	ttstr fn;
+	tRisseString fn;
 	if(filename.StartsWith(RISSE_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
@@ -78,7 +78,7 @@ bool tRisaPathFS::FileExists(const ttstr & filename)
 
 
 //---------------------------------------------------------------------------
-bool tRisaPathFS::DirectoryExists(const ttstr & dirname)
+bool tRisaPathFS::DirectoryExists(const tRisseString & dirname)
 {
 	// PathFS にはサブディレクトリは存在しない
 	if(dirname != RISSE_WS("/") || !dirname.IsEmpty())
@@ -89,7 +89,7 @@ bool tRisaPathFS::DirectoryExists(const ttstr & dirname)
 
 
 //---------------------------------------------------------------------------
-void tRisaPathFS::RemoveFile(const ttstr & filename)
+void tRisaPathFS::RemoveFile(const tRisseString & filename)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
 }
@@ -97,7 +97,7 @@ void tRisaPathFS::RemoveFile(const ttstr & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
+void tRisaPathFS::RemoveDirectory(const tRisseString & dirname, bool recursive)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
 }
@@ -105,7 +105,7 @@ void tRisaPathFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
+void tRisaPathFS::CreateDirectory(const tRisseString & dirname, bool recursive)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
 }
@@ -113,11 +113,11 @@ void tRisaPathFS::CreateDirectory(const ttstr & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaPathFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
+void tRisaPathFS::Stat(const tRisseString & filename, tRisaStatStruc & struc)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	ttstr fn;
+	tRisseString fn;
 	if(filename.StartsWith(RISSE_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
@@ -125,7 +125,7 @@ void tRisaPathFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 
 	Ensure();
 
-	ttstr * mapped_filename = Hash.Find(fn);
+	tRisseString * mapped_filename = Hash.Find(fn);
 	if(!mapped_filename)
 		tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
@@ -135,11 +135,11 @@ void tRisaPathFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tRisaPathFS::CreateStream(const ttstr & filename, risse_uint32 flags)
+tRisseBinaryStream * tRisaPathFS::CreateStream(const tRisseString & filename, risse_uint32 flags)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	ttstr fn;
+	tRisseString fn;
 	if(filename.StartsWith(RISSE_WC('/')))
 		fn = filename.c_str() + 1; // 先頭の '/' を取り除く
 	else
@@ -147,7 +147,7 @@ tRisseBinaryStream * tRisaPathFS::CreateStream(const ttstr & filename, risse_uin
 
 	Ensure();
 
-	ttstr * mapped_filename = Hash.Find(fn);
+	tRisseString * mapped_filename = Hash.Find(fn);
 	if(!mapped_filename)
 		tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
@@ -157,12 +157,12 @@ tRisseBinaryStream * tRisaPathFS::CreateStream(const ttstr & filename, risse_uin
 
 
 //---------------------------------------------------------------------------
-void tRisaPathFS::Add(const ttstr & name, bool recursive)
+void tRisaPathFS::Add(const tRisseString & name, bool recursive)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// ディレクトリ名の最後に '/' がついていなければ追加
-	ttstr fn(name);
+	tRisseString fn(name);
 	if(fn.EndsWith(RISSE_WC('/'))) fn += RISSE_WC('/');
 
 	// ディレクトリが存在しないことを確かにする
@@ -178,14 +178,14 @@ void tRisaPathFS::Add(const ttstr & name, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaPathFS::Remove(const ttstr & name)
+void tRisaPathFS::Remove(const tRisseString & name)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	std::vector<ttstr>::iterator i;
+	std::vector<tRisseString>::iterator i;
 
 	// ディレクトリ名の最後に '/' がついていなければ追加
-	ttstr fn(name);
+	tRisseString fn(name);
 	if(fn.EndsWith(RISSE_WC('/'))) fn += RISSE_WC('/');
 
 	// ' ' + name が存在するか
@@ -208,36 +208,36 @@ void tRisaPathFS::Ensure()
 	class tCallback : public tRisaFileSystemIterationCallback
 	{
 		tHash & Hash;
-		ttstr DirName;
+		tRisseString DirName;
 	public:
 		tCallback(tHash & hash) : Hash(hash) {;}
 
-		bool OnFile(const ttstr & filename)
+		bool OnFile(const tRisseString & filename)
 		{
 			// filename の名前だけを取り出す
-			ttstr basename;
+			tRisseString basename;
 			tRisaFileSystemManager::SplitPathAndName(filename, NULL, &basename);
 
 			// 表に追加
 			Hash.Add(basename, DirName + filename);
 			return true;
 		}
-		bool OnDirectory(const ttstr & dirname)
+		bool OnDirectory(const tRisseString & dirname)
 		{
 			// ディレクトリには興味はない
 			return true;
 		}
-		void SetDirName(const ttstr & name) { DirName = name; }
+		void SetDirName(const tRisseString & name) { DirName = name; }
 	} callback(Hash);
 
 	// 表をクリア
 	Hash.Clear();
 
 	// 全てのパスに対して
-	for(std::vector<ttstr>::iterator i = Paths.begin(); i != Paths.end(); i++)
+	for(std::vector<tRisseString>::iterator i = Paths.begin(); i != Paths.end(); i++)
 	{
 		bool recursive = (i->c_str()[0] == static_cast<risse_char>(RISSE_WC('+')));
-		ttstr dirname(i->c_str() + 1);
+		tRisseString dirname(i->c_str() + 1);
 		tRisaFileSystemManager::instance()->GetFileListAt(dirname, &callback, recursive);
 	}
 

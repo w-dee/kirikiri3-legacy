@@ -47,7 +47,7 @@ public:
 	//! @param		pointer アーカイブインスタンスへのポインタ (識別に用いられる)
 	//! @param		name アーカイブファイル名
 	//! @return		ストリーム
-	tRisseBinaryStream * GetStream(void * pointer, const ttstr & name);
+	tRisseBinaryStream * GetStream(void * pointer, const tRisseString & name);
 
 	//! @brief		ストリームを解放する
 	//! @param		pointer アーカイブインスタンスへのポインタ

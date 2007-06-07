@@ -100,7 +100,7 @@ void tRisseNI_Timer::OnTimer()
 		eRisaException::Throw(RISSE_WS_TR("constructor onTimer was not properly called; call the constructor from subclass constructor"));
 	}
 
-	static ttstr onTimer_name(RISSE_WS("onTimer"));
+	static tRisseString onTimer_name(RISSE_WS("onTimer"));
 	Owner->FuncCall(
 		0, // flag
 		onTimer_name.c_str(), // name

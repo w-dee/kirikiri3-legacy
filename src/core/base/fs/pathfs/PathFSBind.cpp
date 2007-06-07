@@ -104,7 +104,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/add)
 	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_PathFS);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	ttstr dir = *param[0];
+	tRisseString dir = *param[0];
 	bool recursive = RISSE_PARAM_EXIST(1) ? (risse_int)*param[1] : false;
 
 	_this->GetFileSystem()->Add(dir, recursive);
@@ -124,7 +124,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/remove)
 	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_PathFS);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	ttstr dir = *param[0];
+	tRisseString dir = *param[0];
 
 	_this->GetFileSystem()->Remove(dir);
 

@@ -22,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(11001,39824,8006,19566,26243,29715,33801,62487);
 
 
 //---------------------------------------------------------------------------
-tRisaOggVorbisDecoder::tRisaOggVorbisDecoder(const ttstr & filename)
+tRisaOggVorbisDecoder::tRisaOggVorbisDecoder(const tRisseString & filename)
 {
 	CurrentSection = -1;
 	Stream = tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
@@ -292,7 +292,7 @@ class tRisaOggVorbisWaveDecoderFactory : public tRisaWaveDecoderFactory
 {
 public:
 	//! @brief デコーダを作成する
-	boost::shared_ptr<tRisaWaveDecoder> Create(const ttstr & filename)
+	boost::shared_ptr<tRisaWaveDecoder> Create(const tRisseString & filename)
 	{
 		boost::shared_ptr<tRisaWaveDecoder>
 			decoder(new tRisaOggVorbisDecoder(filename));

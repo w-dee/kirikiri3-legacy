@@ -39,7 +39,7 @@ risse_error tRisseNI_XP4FS::Construct(risse_int numparams,
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
-	ttstr filename = *param[0];
+	tRisseString filename = *param[0];
 
 	// filesystem オブジェクトの生成と登録
 	RegisterFileSystemNativeInstance(risse_obj, new tRisaXP4FS(filename));

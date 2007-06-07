@@ -73,7 +73,7 @@ public:
 	tRisaSound();
 
 	//! @brief		ファイル名を指定してのコンストラクタ
-	tRisaSound(const ttstr & filename);
+	tRisaSound(const tRisseString & filename);
 
 	//! @brief		デストラクタ
 	virtual ~tRisaSound();
@@ -93,7 +93,7 @@ protected:
 public:
 	//! @brief		メディアを開く
 	//! @param		filename	ファイル名
-	void Open(const ttstr & filename);
+	void Open(const tRisseString & filename);
 
 	//! @brief		メディアを閉じる
 	void Close();

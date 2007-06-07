@@ -44,8 +44,8 @@ public:
 	struct tItem
 	{
 		wxDateTime Timestamp; //!< ログが行われた日付時刻
-		ttstr Content; //!< ログの内容
-		ttstr Link; //!< リンク情報
+		tRisseString Content; //!< ログの内容
+		tRisseString Link; //!< リンク情報
 		tLevel Level; //!< ログレベル
 	};
 
@@ -94,14 +94,14 @@ private:
 	//! @param		content		ログの内容
 	//! @param		level		ログレベル
 	//! @param		linkinfo	リンク情報
-	void InternalLog(const ttstr & content, tLevel level = llInfo,
-		const ttstr & linkinfo = RisseEmptyString);
+	void InternalLog(const tRisseString & content, tLevel level = llInfo,
+		const tRisseString & linkinfo = RisseEmptyString);
 
 public:
 	//! @brief ログを行う
 	//! @note 通常のログ記録にはこちらを使うこと
-	static void Log(const ttstr & content, tLevel level = llInfo,
-		const ttstr & linkinfo = RisseEmptyString)
+	static void Log(const tRisseString & content, tLevel level = llInfo,
+		const tRisseString & linkinfo = RisseEmptyString)
 	{
 		if(tRisaLogger::pointer r = instance())
 			r->InternalLog(content, level, linkinfo);

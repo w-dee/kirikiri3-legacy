@@ -71,7 +71,7 @@ tRisaSound::tRisaSound()
 
 
 //---------------------------------------------------------------------------
-tRisaSound::tRisaSound(const ttstr & filename)
+tRisaSound::tRisaSound(const tRisseString & filename)
 {
 	Init();
 	Open(filename);
@@ -127,7 +127,7 @@ void tRisaSound::CallOnStatusChanged(tStatus status)
 
 #include "sound/filter/phasevocoder/PhaseVocoder.h"
 //---------------------------------------------------------------------------
-void tRisaSound::Open(const ttstr & filename)
+void tRisaSound::Open(const tRisseString & filename)
 {
 	// メディアを開くのに先立って内部状態をクリア
 	Clear();

@@ -32,6 +32,4 @@ public:
 //---------------------------------------------------------------------------
 
 
-#define RisaThrowInternalError eRisaException::ThrowInternalError(__LINE__, __FILE__)
-
 #endif

@@ -15,10 +15,14 @@
 	// 頻繁に使うヘッダはこの中にかいてください
 	#include <wx/wx.h>
 //	#include "risse/include/risse.h"
+	#include "risse/include/risseGC.h"
+	#include "risse/include/risseTypes.h"
 //	#include "risse/include/risseError.h"
 //	#include "risse/include/risseUtils.h"
 	#include <boost/smart_ptr.hpp>
 	#include "base/utils/Singleton.h"
 	#include "base/utils/RingBuffer.h"
 	#include "base/utils/RisaThread.h"
+
+	using namespace Risse;
 #endif

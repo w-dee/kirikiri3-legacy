@@ -75,7 +75,7 @@ class tRisaOSFS : public tRisaFileSystem
 
 public:
 	//! @brief		コンストラクタ
-	tRisaOSFS(const ttstr & basedir, bool checkcase = true);
+	tRisaOSFS(const tRisseString & basedir, bool checkcase = true);
 
 	//-- tRisaFileSystem メンバ
 
@@ -87,43 +87,43 @@ public:
 	//! @param		dirname ディレクトリ名
 	//! @param		callback コールバックオブジェクト
 	//! @return		取得できたファイル数
-	size_t GetFileListAt(const ttstr & dirname,
+	size_t GetFileListAt(const tRisseString & dirname,
 		tRisaFileSystemIterationCallback * callback);
 
 	//! @brief		ファイルが存在するかどうかを得る
 	//! @param		filename ファイル名
 	//! @return		ファイルが存在する場合真
-	bool FileExists(const ttstr & filename);
+	bool FileExists(const tRisseString & filename);
 
 	//! @brief		ディレクトリが存在するかどうかを得る
 	//! @param		dirname ディレクトリ名
 	//! @return		ディレクトリが存在する場合真
-	bool DirectoryExists(const ttstr & dirname);
+	bool DirectoryExists(const tRisseString & dirname);
 
 	//! @brief		ファイルを削除する
 	//! @param		filename ファイル名
-	void RemoveFile(const ttstr & filename);
+	void RemoveFile(const tRisseString & filename);
 
 	//! @brief		ディレクトリを削除する
 	//! @param		dirname ディレクトリ名
 	//! @param		recursive 再帰的にディレクトリを削除するかどうか
-	void RemoveDirectory(const ttstr & dirname, bool recursive = false);
+	void RemoveDirectory(const tRisseString & dirname, bool recursive = false);
 
 	//! @brief		ディレクトリを作成する
 	//! @param		dirname ディレクトリ名
 	//! @param		recursive 再帰的にディレクトリを作成するかどうか
-	void CreateDirectory(const ttstr & dirname, bool recursive = false);
+	void CreateDirectory(const tRisseString & dirname, bool recursive = false);
 
 	//! @brief		指定されたファイルの stat を得る
 	//! @param		filename ファイル名
 	//! @param		struc stat 結果の出力先
-	void Stat(const ttstr & filename, tRisaStatStruc & struc);
+	void Stat(const tRisseString & filename, tRisaStatStruc & struc);
 
 	//! @brief		指定されたファイルのストリームを得る
 	//! @param		filename ファイル名
 	//! @param		flags フラグ
 	//! @return		ストリームオブジェクト
-	tRisseBinaryStream * CreateStream(const ttstr & filename, risse_uint32 flags);
+	tRisseBinaryStream * CreateStream(const tRisseString & filename, risse_uint32 flags);
 
 	//-- tRisaFileSystem メンバ ここまで
 private:

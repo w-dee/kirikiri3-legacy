@@ -70,7 +70,7 @@ public:
 private:
 	//! @brief		行を一行出力する
 	//! @param		str  行 (EOLはこのメソッドが自動的に出力する)
-	void OutputOneLine(const ttstr & str);
+	void OutputOneLine(const tRisseString & str);
 
 	//! @brief		ログが追加されるとき
 	//! @param		item  ログアイテム

@@ -30,7 +30,7 @@ class tRisaRIFFWaveDecoder : public tRisaWaveDecoder
 public:
 	//! @brief		コンストラクタ
 	//! @param		filename   ファイル名
-	tRisaRIFFWaveDecoder(const ttstr & filename);
+	tRisaRIFFWaveDecoder(const tRisseString & filename);
 
 	// tRisaWaveDecoder をオーバーライドするもの
 	//! @brief		デストラクタ

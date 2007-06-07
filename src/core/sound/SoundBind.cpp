@@ -37,9 +37,9 @@ public:
 
 	void OnStatusChanged(tStatus status); //  from tRisaSound
 
-	ttstr GetStatusString() const;
+	tRisseString GetStatusString() const;
 
-	static ttstr StatusToString(tStatus status);
+	static tRisseString StatusToString(tStatus status);
 };
 //---------------------------------------------------------------------------
 
@@ -94,7 +94,7 @@ void tRisseNI_Sound::OnStatusChanged(tStatus status)
 	// イベント関数を呼ぶ
 	if(Owner)
 	{
-		static ttstr onStatusChanged_name(RISSE_WS("onStatusChanged"));
+		static tRisseString onStatusChanged_name(RISSE_WS("onStatusChanged"));
 		tRisseVariant val(StatusToString(status));
 		tRisseVariant *params[] = {&val};
 		Owner->FuncCall(
@@ -114,7 +114,7 @@ void tRisseNI_Sound::OnStatusChanged(tStatus status)
 //---------------------------------------------------------------------------
 //! @brief		ステータス文字列を得る
 //---------------------------------------------------------------------------
-ttstr tRisseNI_Sound::GetStatusString() const
+tRisseString tRisseNI_Sound::GetStatusString() const
 {
 	return StatusToString(GetStatus());
 }
@@ -126,13 +126,13 @@ ttstr tRisseNI_Sound::GetStatusString() const
 //! @param		status ステータス
 //! @return		ステータス文字列
 //---------------------------------------------------------------------------
-ttstr tRisseNI_Sound::StatusToString(tStatus status)
+tRisseString tRisseNI_Sound::StatusToString(tStatus status)
 {
-	static ttstr unload(RISSE_WS("unload"));
-	static ttstr play  (RISSE_WS("play"));
-	static ttstr stop  (RISSE_WS("stop"));
-	static ttstr pause (RISSE_WS("pause"));
-	static ttstr unknown (RISSE_WS("unknown"));
+	static tRisseString unload(RISSE_WS("unload"));
+	static tRisseString play  (RISSE_WS("play"));
+	static tRisseString stop  (RISSE_WS("stop"));
+	static tRisseString pause (RISSE_WS("pause"));
+	static tRisseString unknown (RISSE_WS("unknown"));
 
 	switch(status)
 	{

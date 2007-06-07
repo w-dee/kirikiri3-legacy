@@ -102,11 +102,11 @@ void tRisaThreadInternal::RecordUnhandledException(
 {
 	tRisaLogger::Log(RISSE_WS("Unhandled exception caught in sub-thread."), tRisaLogger::llCritical);
 	tRisaLogger::Log(RISSE_WS("This should be considered as a fatal error!"), tRisaLogger::llCritical);
-	tRisaLogger::Log(RISSE_WS("Thread: ") + ttstr(Owner->GetName()), tRisaLogger::llCritical);
+	tRisaLogger::Log(RISSE_WS("Thread: ") + tRisseString(Owner->GetName()), tRisaLogger::llCritical);
 	if(message_risse)
-		tRisaLogger::Log(RISSE_WS("Message: ") + ttstr(message_risse), tRisaLogger::llCritical);
+		tRisaLogger::Log(RISSE_WS("Message: ") + tRisseString(message_risse), tRisaLogger::llCritical);
 	if(message_char)
-		tRisaLogger::Log(RISSE_WS("Message: ") + ttstr(message_char), tRisaLogger::llCritical);
+		tRisaLogger::Log(RISSE_WS("Message: ") + tRisseString(message_char), tRisaLogger::llCritical);
 }
 //---------------------------------------------------------------------------
 

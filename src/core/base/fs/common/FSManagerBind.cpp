@@ -262,7 +262,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
 
 	if(numparams < 2) return RISSE_E_BADPARAMCOUNT;
 
-	ttstr mountpoint = *param[0];
+	tRisseString mountpoint = *param[0];
 	iRisseDispatch2 * dsp = param[1]->AsObjectNoAddRef();
 	tRisaFileSystemManager::instance()->Mount(mountpoint, dsp);
 
@@ -283,7 +283,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
 	*/
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
-	ttstr mountpoint = *param[0];
+	tRisseString mountpoint = *param[0];
 
 	tRisaFileSystemManager::instance()->Unmount(mountpoint);
 

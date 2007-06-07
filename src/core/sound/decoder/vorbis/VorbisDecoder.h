@@ -32,7 +32,7 @@ class tRisaOggVorbisDecoder : public tRisaWaveDecoder
 public:
 	//! @brief		コンストラクタ
 	//! @param		filename   ファイル名
-	tRisaOggVorbisDecoder(const ttstr & filename);
+	tRisaOggVorbisDecoder(const tRisseString & filename);
 
 	// tRisaWaveDecoder をオーバーライドするもの
 	//! @brief		デストラクタ

@@ -66,12 +66,12 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 			e.GetMessageString(), tRisaLogger::llError);
 		if(e.GetTrace().GetLen() != 0)
 			tRisaLogger::Log(
-				ttstr(RISSE_WS_TR("Trace: ")) + e.GetTrace(), tRisaLogger::llError);
+				tRisseString(RISSE_WS_TR("Trace: ")) + e.GetTrace(), tRisaLogger::llError);
 	}
 
 	// スクリプトエディタを表示
 	tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
-	editor->SetContent(ttstr(e.GetBlockNoAddRef()->GetScript()).AsWxString());
+	editor->SetContent(tRisseString(e.GetBlockNoAddRef()->GetScript()).AsWxString());
 	editor->SetReadOnly(true);
 	editor->SetLinePosition(e.GetBlockNoAddRef()->SrcPosToLine(e.GetPosition() )
 			- e.GetBlockNoAddRef()->GetLineOffset());

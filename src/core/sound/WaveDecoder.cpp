@@ -33,18 +33,18 @@ tRisaWaveDecoderFactoryManager::~tRisaWaveDecoderFactoryManager()
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveDecoderFactoryManager::Register(const ttstr & extension,
+void tRisaWaveDecoderFactoryManager::Register(const tRisseString & extension,
 	boost::shared_ptr<tRisaWaveDecoderFactory> factory)
 {
 	Map.insert(
-		std::pair<ttstr, boost::shared_ptr<tRisaWaveDecoderFactory> >(
+		std::pair<tRisseString, boost::shared_ptr<tRisaWaveDecoderFactory> >(
 														extension, factory));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveDecoderFactoryManager::Unregister(const ttstr & extension)
+void tRisaWaveDecoderFactoryManager::Unregister(const tRisseString & extension)
 {
 	Map.erase(extension);
 }
@@ -53,10 +53,10 @@ void tRisaWaveDecoderFactoryManager::Unregister(const ttstr & extension)
 
 //---------------------------------------------------------------------------
 boost::shared_ptr<tRisaWaveDecoder>
-	tRisaWaveDecoderFactoryManager::Create(const ttstr & filename)
+	tRisaWaveDecoderFactoryManager::Create(const tRisseString & filename)
 {
 	// 拡張子を取り出す
-	ttstr ext = tRisaFileSystemManager::ExtractExtension(filename);
+	tRisseString ext = tRisaFileSystemManager::ExtractExtension(filename);
 	ext.ToLowerCase();
 
 	// ファクトリを探す

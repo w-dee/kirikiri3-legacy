@@ -45,7 +45,7 @@ tRisaXP4StreamCache::~tRisaXP4StreamCache()
 
 
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const ttstr & name)
+tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const tRisseString & name)
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 

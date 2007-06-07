@@ -99,7 +99,7 @@ static bool RisaFindChunk(const unsigned char * chunkname,
 
 //---------------------------------------------------------------------------
 tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta,
-	size_t metasize, ttstr & inarchivename, bool &deleted)
+	size_t metasize, tRisseString & inarchivename, bool &deleted)
 {
 	// この時点で meta, metasize は File チャンクの先頭 'File' の
 	// 内容を示していなければならない
@@ -117,7 +117,7 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 	// info チャンクから情報を読み取る
 	Flags = RisaReadI16LEFromMem(chunk + 0);
 	Flags &=~ RISA__XP4_FILE_MARKED; // MARKED はクリア
-	inarchivename = ttstr(wxString(reinterpret_cast<const char *>(chunk + 2), wxConvUTF8));
+	inarchivename = tRisseString(wxString(reinterpret_cast<const char *>(chunk + 2), wxConvUTF8));
 	deleted = (Flags & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED ;
 
 	// time チャンクを探す
@@ -203,7 +203,7 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 
 
 //---------------------------------------------------------------------------
-tRisaXP4Archive::tRisaXP4Archive(const ttstr & filename, iMapCallback & callback)
+tRisaXP4Archive::tRisaXP4Archive(const tRisseString & filename, iMapCallback & callback)
 {
 	// アーカイブファイルを読み込む
 	FileName = filename;
@@ -226,7 +226,7 @@ tRisaXP4Archive::tRisaXP4Archive(const ttstr & filename, iMapCallback & callback
 		memcmp(buf+8, XP4Mark2, 3))
 	{
 		// シグニチャが一致しない
-		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("'%s' is not an XP4 archive file"),
+		eRisaException::Throw(tRisseString(wxString::Format(RISSE_WS_TR("'%s' is not an XP4 archive file"),
 			filename.AsWxString().c_str())));
 	}
 
@@ -274,7 +274,7 @@ tRisaXP4Archive::tRisaXP4Archive(const ttstr & filename, iMapCallback & callback
 			if(res != Z_OK || output_size != raw_index_size)
 			{
 				// 圧縮インデックスの展開に失敗した
-				eRisaException::Throw(ttstr(wxString::Format(
+				eRisaException::Throw(tRisseString(wxString::Format(
 					RISSE_WS_TR("decompression of archive index of '%s' failed"),
 					filename.AsWxString().c_str())));
 			}
@@ -291,7 +291,7 @@ tRisaXP4Archive::tRisaXP4Archive(const ttstr & filename, iMapCallback & callback
 		static unsigned char chunkname_Item[] = { 'I', 't', 'e', 'm' };
 		if(!RisaFindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
 		{
-			eRisaException::Throw(ttstr(wxString::Format(
+			eRisaException::Throw(tRisseString(wxString::Format(
 				RISSE_WS_TR("chunk 'Item' not found in file '%s'"),
 				filename.AsWxString().c_str())));
 		}
@@ -302,7 +302,7 @@ tRisaXP4Archive::tRisaXP4Archive(const ttstr & filename, iMapCallback & callback
 		const unsigned char *mem_limit = mem + chunksize;
 		size_t left = mem_limit - mem;
 		static unsigned char chunkname_File[] = { 'F', 'i', 'l', 'e' };
-		ttstr inarchivename;
+		tRisseString inarchivename;
 		bool deleted;
 		while(RisaFindChunk(chunkname_File, mem, left, &chunk, &chunksize))
 		{

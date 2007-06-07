@@ -41,10 +41,10 @@ class tRisaTextReadStream : public iRisseTextReadStream
 	};
 	tEncoding Encoding; //!< エンコーディング
 
-	ttstr FileName; //!< ファイル名
+	tRisseString FileName; //!< ファイル名
 
 public:
-	tRisaTextReadStream(const ttstr & name, const ttstr & modestr);
+	tRisaTextReadStream(const tRisseString & name, const tRisseString & modestr);
 	virtual ~tRisaTextReadStream();
 	risse_uint Read(tRisseString & targ, risse_uint size);
 
@@ -59,7 +59,7 @@ private:
 //! @param		name		入力ファイル名
 //! @param		modestr		モード文字列
 //---------------------------------------------------------------------------
-tRisaTextReadStream::tRisaTextReadStream(const ttstr & name, const ttstr & modestr)
+tRisaTextReadStream::tRisaTextReadStream(const tRisseString & name, const tRisseString & modestr)
 {
 	// フィールドの初期化
 	Stream = NULL;
@@ -77,7 +77,7 @@ tRisaTextReadStream::tRisaTextReadStream(const ttstr & name, const ttstr & modes
 	{
 		// 指定位置にシークする
 		// ここでは、いったん別のバッファにコピーした後それを
-		// ttstr に変換して Integer に変換する…という方法をとる。
+		// tRisseString に変換して Integer に変換する…という方法をとる。
 		// (速度的にクリティカルではないのでこれで十分だと思う)
 		o_ofs++;
 		risse_char buf[256];
@@ -89,7 +89,7 @@ tRisaTextReadStream::tRisaTextReadStream(const ttstr & name, const ttstr & modes
 			else break;
 		}
 		buf[i] = 0;
-		ofs = ttstr(buf).AsInteger();
+		ofs = tRisseString(buf).AsInteger();
 		Stream->SetPosition(ofs);
 	}
 
@@ -302,9 +302,9 @@ class tRisaTextWriteStream : public iRisseTextWriteStream
 	tRisseBinaryStream * Stream; //!< ストリーム
 
 public:
-	tRisaTextWriteStream(const ttstr & name, const ttstr &modestr);
+	tRisaTextWriteStream(const tRisseString & name, const tRisseString &modestr);
 	virtual ~tRisaTextWriteStream();
-	void Write(const ttstr & targ);
+	void Write(const tRisseString & targ);
 };
 //---------------------------------------------------------------------------
 
@@ -312,7 +312,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisaTextWriteStream::tRisaTextWriteStream(const ttstr & name, const ttstr &modestr)
+tRisaTextWriteStream::tRisaTextWriteStream(const tRisseString & name, const tRisseString &modestr)
 {
 	Stream = NULL;
 
@@ -324,7 +324,7 @@ tRisaTextWriteStream::tRisaTextWriteStream(const ttstr & name, const ttstr &mode
 	{
 		// 指定位置にシークする
 		// ここでは、いったん別のバッファにコピーした後それを
-		// ttstr に変換して Integer に変換する…という方法をとる。
+		// tRisseString に変換して Integer に変換する…という方法をとる。
 		// (速度的にクリティカルではないのでこれで十分だと思う)
 		o_ofs++;
 		risse_char buf[256];
@@ -336,7 +336,7 @@ tRisaTextWriteStream::tRisaTextWriteStream(const ttstr & name, const ttstr &mode
 			else break;
 		}
 		buf[i] = 0;
-		ofs = ttstr(buf).AsInteger();
+		ofs = tRisseString(buf).AsInteger();
 		Stream = tRisaFileSystemManager::instance()->CreateStream(name, RISSE_BS_UPDATE);
 		Stream->SetPosition(ofs);
 	}
@@ -363,7 +363,7 @@ tRisaTextWriteStream::~tRisaTextWriteStream()
 //! @brief		ストリームに書き込む
 //! @param		targ		書き込みたい文字列
 //---------------------------------------------------------------------------
-void tRisaTextWriteStream::Write(const ttstr & targ)
+void tRisaTextWriteStream::Write(const tRisseString & targ)
 {
 	for(;;)
 	{

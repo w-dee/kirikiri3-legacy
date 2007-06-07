@@ -96,7 +96,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/save)
 	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_TmpFS);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	ttstr filename = *param[0];
+	tRisseString filename = *param[0];
 
 	_this->GetFileSystem()->SerializeTo(filename);
 
@@ -123,7 +123,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/load)
 	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_TmpFS);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	ttstr filename = *param[0];
+	tRisseString filename = *param[0];
 
 	_this->GetFileSystem()->UnserializeFrom(filename);
 

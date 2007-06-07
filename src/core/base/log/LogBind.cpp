@@ -74,7 +74,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/message)
 	*/
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	ttstr msg = *param[0];
+	tRisseString msg = *param[0];
 	tRisaLogger::tLevel level = tRisaLogger::llInfo;
 	if(RISSE_PARAM_EXIST(1))
 		level = static_cast<tRisaLogger::tLevel>((risse_int)*param[1]);
@@ -129,7 +129,7 @@ tRisaLogRegisterer::tRisaLogRegisterer()
 
 	// 定数を登録する
 	depends_on<tRisaRisseScriptEngine>::locked_instance()->ExecuteScript(
-		ttstr(
+		tRisseString(
 		"var llDebug = 0;"		//!< デバッグに関する物
 		"var llInfo = 1;"		//!< 情報通知
 		"var llNotice = 2;"		//!< 通常状態だが大事な情報通知

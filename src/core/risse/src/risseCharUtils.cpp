@@ -677,8 +677,8 @@ void RisseThrowWSAssertionFailure(const wchar_t * source, risse_int line)
 	abort();
 #if 0
 	Risse_eRisseError(
-		ttstr(RISSE_WS("you can not use multiple RISSE_WS in a line; use RISSE_WS, RISSE_WS2, RISSE_WS3 ... at %1 line %2"),
-			ttstr(source), ttstr(line)));
+		tRisseString(RISSE_WS("you can not use multiple RISSE_WS in a line; use RISSE_WS, RISSE_WS2, RISSE_WS3 ... at %1 line %2"),
+			tRisseString(source), tRisseString(line)));
 #endif
 }
 //---------------------------------------------------------------------------

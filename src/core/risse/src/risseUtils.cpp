@@ -85,7 +85,7 @@ tRisseString RisseVariantToReadableString(const tRisseVariant &val,
 	case tvtString:
 	  {
 		tRisseString str(RISSE_WS("(string)\""));
-		str += ttstr(val).EscapeC();
+		str += tRisseString(val).EscapeC();
 		str += RISSE_WS("\"");
 		RisseTrimStringLength(str, maxlen);
 		return str;
@@ -114,7 +114,7 @@ tRisseString RisseVariantToReadableString(const tRisseVariant &val,
 		tRisseString str(RISSE_WS("(object)"));
 		try
 		{
-			str += ttstr(val);
+			str += tRisseString(val);
 		}
 		catch(...)
 		{
@@ -141,7 +141,7 @@ tRisseString RisseVariantToExpressionString(const tRisseVariant &val)
 	  }
 	case tvtInteger:
 	  {
-		return RISSE_WS("int ") + ttstr(val);
+		return RISSE_WS("int ") + tRisseString(val);
 	  }
 	case tvtReal:
 	  {
@@ -157,12 +157,12 @@ tRisseString RisseVariantToExpressionString(const tRisseVariant &val)
 			throw;
 		}
 		if(s) s->Release();
-		return str + RISSE_WS1(" /") + RISSE_WS2("* ") + ttstr(val) + RISSE_WS3(" *") + RISSE_WS4("/");
+		return str + RISSE_WS1(" /") + RISSE_WS2("* ") + tRisseString(val) + RISSE_WS3(" *") + RISSE_WS4("/");
 	  }
 	case tvtString:
 	  {
 		tRisseString str(RISSE_WS("string \""));
-		str += ttstr(val).EscapeC();
+		str += tRisseString(val).EscapeC();
 		str += RISSE_WS("\"");
 		return str;
 	  }

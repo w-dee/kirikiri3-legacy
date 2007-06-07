@@ -40,7 +40,7 @@ tRisaOSNativeStream::tRisaOSNativeStream(const wxString & filename, risse_uint32
 
 	// ファイルを開く
 	if(!File.Open(filename))
-		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not open file '%s'"),
+		eRisaException::Throw(tRisseString(wxString::Format(RISSE_WS_TR("can not open file '%s'"),
 			filename.c_str())));
 
 	// APPEND の場合はファイルポインタを最後に移動する
@@ -122,7 +122,7 @@ risse_uint64 tRisaOSNativeStream::GetSize()
 
 
 //---------------------------------------------------------------------------
-tRisaOSFS::tRisaOSFS(const ttstr & basedir, bool checkcase) : 
+tRisaOSFS::tRisaOSFS(const tRisseString & basedir, bool checkcase) : 
 	BaseDirectory(basedir.AsWxString()), CheckCase(checkcase)
 {
 	// ベースディレクトリのパス区切りをネイティブなものに変更
@@ -152,7 +152,7 @@ tRisaOSFS::~tRisaOSFS()
 
 
 //---------------------------------------------------------------------------
-size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
+size_t tRisaOSFS::GetFileListAt(const tRisseString & dirname,
 	tRisaFileSystemIterationCallback * callback)
 {
 	wxString wxdirname(dirname.AsWxString());
@@ -171,7 +171,7 @@ size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
 	// ディレクトリの存在をチェック
 	if(!wxFileName::DirExists(native_name)
 		|| !dir.Open(native_name))
-			eRisaException::Throw(ttstr(wxString::Format(
+			eRisaException::Throw(tRisseString(wxString::Format(
 				RISSE_WS_TR("can not open directory '%s'"), native_name.c_str())));
 
 	// ファイルを列挙
@@ -181,7 +181,7 @@ size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
 		count ++;
 		if(callback)
 		{
-			if(!callback->OnFile(ttstr(filename)))
+			if(!callback->OnFile(tRisseString(filename)))
 				return count;
 		}
 		cont = dir.GetNext(&filename);
@@ -196,7 +196,7 @@ size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
 			count ++;
 			if(callback)
 			{
-				if(!callback->OnDirectory(ttstr(filename)))
+				if(!callback->OnDirectory(tRisseString(filename)))
 					return count;
 			}
 		}
@@ -209,7 +209,7 @@ size_t tRisaOSFS::GetFileListAt(const ttstr & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tRisaOSFS::FileExists(const ttstr & filename)
+bool tRisaOSFS::FileExists(const tRisseString & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -225,7 +225,7 @@ bool tRisaOSFS::FileExists(const ttstr & filename)
 
 
 //---------------------------------------------------------------------------
-bool tRisaOSFS::DirectoryExists(const ttstr & dirname)
+bool tRisaOSFS::DirectoryExists(const tRisseString & dirname)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -241,7 +241,7 @@ bool tRisaOSFS::DirectoryExists(const ttstr & dirname)
 
 
 //---------------------------------------------------------------------------
-void tRisaOSFS::RemoveFile(const ttstr & filename)
+void tRisaOSFS::RemoveFile(const tRisseString & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -252,13 +252,13 @@ void tRisaOSFS::RemoveFile(const ttstr & filename)
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
 
 	if(!::wxRemoveFile(native_name))
-		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not remove file '%s'"), native_name.c_str())));
+		eRisaException::Throw(tRisseString(wxString::Format(RISSE_WS_TR("can not remove file '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
+void tRisaOSFS::RemoveDirectory(const tRisseString & dirname, bool recursive)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -273,13 +273,13 @@ void tRisaOSFS::RemoveDirectory(const ttstr & dirname, bool recursive)
 			RISSE_WS_TR("recursive directory remove is not yet implemented"));
 
 	if(::wxRmdir(native_name))
-		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not remove directory '%s'"), native_name.c_str())));
+		eRisaException::Throw(tRisseString(wxString::Format(RISSE_WS_TR("can not remove directory '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
+void tRisaOSFS::CreateDirectory(const tRisseString & dirname, bool recursive)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -290,13 +290,13 @@ void tRisaOSFS::CreateDirectory(const ttstr & dirname, bool recursive)
 	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
 
 	if(!wxFileName::Mkdir(native_name, 0777, recursive?wxPATH_MKDIR_FULL:0))
-		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not create directory '%s'"), native_name.c_str())));
+		eRisaException::Throw(tRisseString(wxString::Format(RISSE_WS_TR("can not create directory '%s'"), native_name.c_str())));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaOSFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
+void tRisaOSFS::Stat(const tRisseString & filename, tRisaStatStruc & struc)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -313,12 +313,12 @@ void tRisaOSFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 	wxFileName filename_obj(native_name);
 
 	if(!filename_obj.GetTimes(&struc.ATime, &struc.MTime, &struc.CTime))
-		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
+		eRisaException::Throw(tRisseString(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
 
 	// サイズを取得
 	wxFile file;
 	if(!file.Open(native_name))
-		eRisaException::Throw(ttstr(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
+		eRisaException::Throw(tRisseString(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
 
 	struc.Size = file.Length();
 }
@@ -326,7 +326,7 @@ void tRisaOSFS::Stat(const ttstr & filename, tRisaStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tRisaOSFS::CreateStream(const ttstr & filename, risse_uint32 flags)
+tRisseBinaryStream * tRisaOSFS::CreateStream(const tRisseString & filename, risse_uint32 flags)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -389,7 +389,7 @@ bool tRisaOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 			{
 				// ファイル名が違う
 				if(raise)
-					eRisaException::Throw(ttstr(wxString::Format(msg, path_to_check.c_str(),
+					eRisaException::Throw(tRisseString(wxString::Format(msg, path_to_check.c_str(),
 						(subpath + existing).c_str())));
 				else
 					return false;
@@ -409,7 +409,7 @@ bool tRisaOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 			{
 				// ファイル名が違う
 				if(raise)
-					eRisaException::Throw(ttstr(wxString::Format(msg, testpath.GetFullPath().c_str(),
+					eRisaException::Throw(tRisseString(wxString::Format(msg, testpath.GetFullPath().c_str(),
 						(subpath + existing).c_str())));
 				else
 					return false;

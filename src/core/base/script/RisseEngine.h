@@ -45,7 +45,7 @@ public:
 
 	//! @brief		式を評価して結果をコンソールに表示する
 	//! @param		expression 式
-	void EvalExpresisonAndPrintResultToConsole(const ttstr & expression);
+	void EvalExpresisonAndPrintResultToConsole(const tRisseString & expression);
 
 	//! @brief		スクリプトブロックを実行する
 	//! @param		script		スクリプト
@@ -53,9 +53,9 @@ public:
 	//! @param		context		実行を行うコンテキスト(globalで動かしたい場合はNULL)
 	//! @param		name		スクリプトブロック名
 	//! @param		lineofs		このスクリプトブロックの(オリジナルのファイル全体に対する)開始行
-	void ExecuteScript(const ttstr &script, tRisseVariant *result = NULL,
+	void ExecuteScript(const tRisseString &script, tRisseVariant *result = NULL,
 		iRisseDispatch2 *context = NULL,
-		const ttstr *name = NULL, risse_int lineofs = 0);
+		const tRisseString *name = NULL, risse_int lineofs = 0);
 };
 //---------------------------------------------------------------------------
 

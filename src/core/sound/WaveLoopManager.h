@@ -28,7 +28,7 @@
 	typedef AnsiString tRisaLabelStringType;
 	typedef char   tRisaLabelCharType;
 #else
-	typedef ttstr tRisaLabelStringType;
+	typedef tRisseString tRisaLabelStringType;
 	typedef risse_char tRisaLabelCharType;
 #endif
 //---------------------------------------------------------------------------

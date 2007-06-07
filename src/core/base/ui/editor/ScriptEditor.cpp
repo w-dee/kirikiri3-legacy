@@ -354,9 +354,9 @@ void tRisaScriptEditorTextCtrl::Execute()
 	// Risse に実行させる
 	try
 	{
-		ttstr block_name("Script Editor");
+		tRisseString block_name("Script Editor");
 		tRisaRisseScriptEngine::instance()->
-			ExecuteScript(ttstr(GetValue()), NULL, NULL, &block_name, 0);
+			ExecuteScript(tRisseString(GetValue()), NULL, NULL, &block_name, 0);
 	}
 	RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(RISSE_WS_TR("Script Editor"))
 }

@@ -35,7 +35,7 @@ tRisaLogFile::~tRisaLogFile()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogFile::OutputOneLine(const ttstr & str)
+void tRisaLogFile::OutputOneLine(const tRisseString & str)
 {
 	// UTF-8 に変換する
 	size_t utf8_len = str.GetUtf8Length();
@@ -90,7 +90,7 @@ void tRisaLogFile::OnLog(const tRisaLogger::tItem & item)
 	// 時刻 ログレベル メッセージ
 
 	// 時刻
-	ttstr logline = ttstr(item.Timestamp.Format()) + RISSE_WS(" ");
+	tRisseString logline = tRisseString(item.Timestamp.Format()) + RISSE_WS(" ");
 
 	// ログレベル
 	switch(item.Level)

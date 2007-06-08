@@ -107,6 +107,13 @@ namespace Risse
 	#define RISSE_WCHAR_T_SIZE_IS_16BIT
 #endif
 
+// endian check
+#ifdef RISSE_HOST_IS_BIG_ENDIAN
+#elif  RISSE_HOST_IS_LITTLE_ENDIAN
+#else
+	#error "unknown host endian"
+#endif
+
 
 //! @brief risse_size の最大値
 // std::numeric_limits<risse_size>::max() を使おうかと思ったがstatic constではない

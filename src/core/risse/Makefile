@@ -46,6 +46,7 @@ CPPFLAGS = $(CXXFLAGS)
 CPPFILES =  \
 			src/risseArrayClass.cpp                  \
 			src/risseAssert.cpp                      \
+			src/risseBinaryStream.cpp                \
 			src/risseBindingClass.cpp                \
 			src/risseCharUtils.cpp                   \
 			src/risseClass.cpp                       \

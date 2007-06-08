@@ -388,6 +388,51 @@ public:
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+
+public:
+	//! @brief		「読み込みエラーが発生した」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		ストリームなどの名前
+	static void ThrowReadError(tRisseScriptEngine * engine,
+		const tRisseString & name = tRisseString::GetEmptyString());
+	//! @brief		「読み込みエラーが発生した」例外を発生
+	static void ThrowReadError(const tRisseString & name =
+		tRisseString::GetEmptyString())
+		{ ThrowReadError(NULL, name); }
+
+	//! @brief		「書き込みエラーが発生した」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		ストリームなどの名前
+	static void ThrowWriteError(tRisseScriptEngine * engine,
+		const tRisseString & name = tRisseString::GetEmptyString());
+	//! @brief		「書き込みエラーが発生した」例外を発生
+	static void ThrowWriteError(const tRisseString & name =
+		tRisseString::GetEmptyString()) { ThrowWriteError(NULL, name); }
+
+	//! @brief		「シークエラーが発生した」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		ストリームなどの名前
+	//! @param		pos			シークしようとした位置
+	static void ThrowSeekError(tRisseScriptEngine * engine,
+		const tRisseString & name = tRisseString::GetEmptyString(),
+		risse_size pos = risse_size_max);
+	//! @brief		「シークエラーが発生した」例外を発生
+	static void ThrowSeekError(const tRisseString & name =
+		tRisseString::GetEmptyString(), risse_size pos = risse_size_max)
+		{ ThrowSeekError(NULL, name, pos); }
+
+	//! @brief		「ファイルの切りつめに失敗した」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		ストリームなどの名前
+	//! @param		pos			切りつめようとした位置
+	static void ThrowTruncateError(tRisseScriptEngine * engine,
+		const tRisseString & name = tRisseString::GetEmptyString(),
+		risse_size pos = risse_size_max);
+	//! @brief		「シークエラーが発生した」例外を発生
+	static void ThrowTruncateError(const tRisseString & name =
+		tRisseString::GetEmptyString(), risse_size pos = risse_size_max)
+		{ ThrowTruncateError(NULL, name, pos); }
+
 };
 //---------------------------------------------------------------------------
 

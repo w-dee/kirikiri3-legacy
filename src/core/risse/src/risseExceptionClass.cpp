@@ -739,6 +739,70 @@ void tRisseIOExceptionClass::initialize(const tRisseNativeBindFunctionCallingInf
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseIOExceptionClass::ThrowReadError(tRisseScriptEngine * engine,
+							const tRisseString & name)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IOException,
+			name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not read")) :
+							 tRisseString(RISSE_WS_TR("could not read at %1"), name)
+			);
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIOExceptionClass::ThrowWriteError(tRisseScriptEngine * engine,
+							const tRisseString & name)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IOException,
+			name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not write")) :
+							 tRisseString(RISSE_WS_TR("could not write at %1"), name)
+			);
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIOExceptionClass::ThrowSeekError(tRisseScriptEngine * engine,
+							const tRisseString & name, risse_size pos)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IOException,
+			pos != risse_size_max ?
+				(name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not seek to position %1"), tRisseString::AsString((risse_int64)pos)) :
+								  tRisseString(RISSE_WS_TR("could not seek to position %1 of %2"), tRisseString::AsString((risse_int64)pos) , name) ) :
+				(name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not seek")) :
+								  tRisseString(RISSE_WS_TR("could not seek at %1"), name) )
+			);
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIOExceptionClass::ThrowTruncateError(tRisseScriptEngine * engine,
+							const tRisseString & name, risse_size pos)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IOException,
+			pos != risse_size_max ?
+				(name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not truncate at position %1"), tRisseString::AsString((risse_int64)pos)) :
+								  tRisseString(RISSE_WS_TR("could not truncate at position %1 of %2"), tRisseString::AsString((risse_int64)pos) , name) ) :
+				(name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not truncate")) :
+								  tRisseString(RISSE_WS_TR("could not truncate at %1"), name) )
+			);
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 

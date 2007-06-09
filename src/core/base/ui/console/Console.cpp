@@ -146,8 +146,8 @@ void tRisaHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 
 	// Risse に式を評価させ、結果をコンソールに表示する
 	wxString value = event.GetString();
-	tRisaRisseScriptEngine::instance()->
-		EvalExpresisonAndPrintResultToConsole(tRisseString(value));
+//	tRisaRisseScriptEngine::instance()->
+//		EvalExpresisonAndPrintResultToConsole(tRisseString(value));
 
 	// 入力をヒストリに入れる
 	if(History.size() == 0 || History[0] != value)
@@ -449,8 +449,11 @@ void tRisaConsoleFrame::SetFocusToTextCtrl(int insert_code)
 //---------------------------------------------------------------------------
 void tRisaConsoleFrame::OnEventTool(wxCommandEvent & event)
 {
+/*
+	TODO: handle this
 	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
 	tRisaEventSystem::instance()->SetCanDeliverEvents(event_enabled);
+*/
 }
 //---------------------------------------------------------------------------
 
@@ -458,6 +461,8 @@ void tRisaConsoleFrame::OnEventTool(wxCommandEvent & event)
 //---------------------------------------------------------------------------
 void tRisaConsoleFrame::OnUpdateUI(wxUpdateUIEvent & event)
 {
+/*
+	TODO: handle this
 	// "Event" ボタンの状態を更新
 	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
 	if(event_enabled != tRisaEventSystem::instance()->GetCanDeliverEvents())
@@ -467,6 +472,7 @@ void tRisaConsoleFrame::OnUpdateUI(wxUpdateUIEvent & event)
 	}
 
 	event.Skip(false);
+*/
 }
 //---------------------------------------------------------------------------
 

@@ -14,7 +14,6 @@
 #include "base/log/Log.h"
 #include "base/ui/console/LogViewer.h"
 #include "base/ui/console/Console.h"
-#include "risse/include/risseError.h"
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>

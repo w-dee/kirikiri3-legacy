@@ -13,7 +13,6 @@
 #ifndef _CONSOLE_H
 #define _CONSOLE_H
 
-#include "risse/include/risse.h"
 #include "base/ui/UIUtils.h"
 #include "base/event/Event.h"
 
@@ -23,8 +22,8 @@ class tRisaLogViewerStatusBar;
 //---------------------------------------------------------------------------
 //! @brief		コンソールのフレーム
 //---------------------------------------------------------------------------
-class tRisaConsoleFrame : public tRisaUIFrame,
-						depends_on<tRisaEventSystem>
+class tRisaConsoleFrame : public tRisaUIFrame/*, TODO: handle this 
+						depends_on<tRisaEventSystem> */
 {
 	enum
 	{

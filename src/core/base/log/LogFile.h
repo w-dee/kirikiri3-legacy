@@ -23,7 +23,6 @@
 
 
 
-#include "risse/include/risse.h"
 #include "base/utils/Singleton.h"
 #include "base/log/Log.h"
 #include "base/utils/RisaThread.h"

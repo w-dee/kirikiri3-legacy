@@ -17,7 +17,7 @@
 #include "base/event/IdleEvent.h"
 #include "base/event/TickCount.h"
 #include "base/script/RisseEngine.h"
-#include "base/ui/console/Console.h"
+//#include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
 #include "base/log/Log.h"
 
@@ -103,17 +103,16 @@ bool tRisaApplication::OnInit()
 
 	//---- ↓↓テストコード↓↓ ----
 	// ファイルシステムのルートにカレントディレクトリをマウント
-	tRisaRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
-		RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
-		NULL, NULL, NULL);
+//	tRisaRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
+//		RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
+//		NULL, NULL, NULL);
 
-	// コンソールをメインウィンドウとして表示
-	tRisaConsoleFrame *console = new tRisaConsoleFrame();
-//	wxFrame *frame = new wxFrame(NULL, wxID_ANY, wxT("hoge"));
-	console->Show(true);
-
+	// スクリプトエディタをメインウィンドウとして表示
 	tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
 	editor->Show(true);
+
+//	tRisaConsoleFrame *console = new tRisaConsoleFrame();
+//	console->Show(true);
 
 	//---- ↑↑テストコード↑↑ ----
 
@@ -131,7 +130,7 @@ int tRisaApplication::OnExit()
 	printf("tRisaApplication::OnExit entered\n");
 
 	// スクリプトエンジンをシャットダウンする
-	tRisaRisseScriptEngine::instance()->Shutdown();
+//	tRisaRisseScriptEngine::instance()->Shutdown();
 
 	// すべてのシングルトンインスタンスへの参照を切る
 	singleton_manager::disconnect_all();
@@ -154,6 +153,8 @@ int tRisaApplication::OnExit()
 bool tRisaApplication::ProcessIdle()
 {
 	bool cont = false;
+/*
+	TODO: handle this
 	if(tRisaTickCount::pointer tick_count = tRisaTickCount::instance())
 	{
 		// この回で呼び出すハンドラに渡すtickを得る
@@ -170,6 +171,7 @@ bool tRisaApplication::ProcessIdle()
 			cont = r->Deliver(tick) || cont;
 	}
 	cont = wxApp::ProcessIdle() || cont;
+*/
 	return cont;
 }
 //---------------------------------------------------------------------------
@@ -180,11 +182,14 @@ bool tRisaApplication::ProcessIdle()
 //---------------------------------------------------------------------------
 void tRisaApplication::OnActivate(wxActivateEvent & event)
 {
+/*
+	TODO: handle this
 	if(!event.GetActive())
 	{
 		if(tRisaCompactEventManager::pointer r = tRisaCompactEventManager::instance())
 			r->OnDeactivate();
 	}
+*/
 }
 //---------------------------------------------------------------------------
 
@@ -194,11 +199,14 @@ void tRisaApplication::OnActivate(wxActivateEvent & event)
 //---------------------------------------------------------------------------
 void tRisaApplication::OnActivateApp(wxActivateEvent & event)
 {
+/*
+	TODO: handle this
 	if(!event.GetActive())
 	{
 		if(tRisaCompactEventManager::pointer r = tRisaCompactEventManager::instance())
 			r->OnDeactivateApp();
 	}
+*/
 }
 //---------------------------------------------------------------------------
 

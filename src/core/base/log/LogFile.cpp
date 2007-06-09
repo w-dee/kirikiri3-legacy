@@ -37,6 +37,8 @@ tRisaLogFile::~tRisaLogFile()
 //---------------------------------------------------------------------------
 void tRisaLogFile::OutputOneLine(const tRisseString & str)
 {
+/*
+	TODO: handle this
 	// UTF-8 に変換する
 	size_t utf8_len = str.GetUtf8Length();
 	if(utf8_len == static_cast<size_t>(-1L))
@@ -75,6 +77,7 @@ void tRisaLogFile::OutputOneLine(const tRisseString & str)
 
 	// ファイルを flush する
 	LogFile.Flush();
+*/
 }
 //---------------------------------------------------------------------------
 
@@ -142,7 +145,7 @@ void tRisaLogFile::Begin()
 
 	// セパレータを出力
 	if(write_start != 0)
-		for(int i = 0; i < 10; i++) OutputOneLine(RisseEmptyString);
+		for(int i = 0; i < 10; i++) OutputOneLine(tRisseString::GetEmptyString());
 
 	const risse_char * sep = 
 	RISSE_WS(
@@ -151,7 +154,7 @@ void tRisaLogFile::Begin()
 
 	for(int i = 0; i < 2; i++) OutputOneLine(sep);
 
-	OutputOneLine(RisseEmptyString);
+	OutputOneLine(tRisseString::GetEmptyString());
 
 	// LastLogを出力
 	depends_on<tRisaLogger>::locked_instance()->SendPreservedLogs(&Receiver);
@@ -163,7 +166,7 @@ void tRisaLogFile::Begin()
 		"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 		);
 	OutputOneLine(sep2);
-	OutputOneLine(RisseEmptyString);
+	OutputOneLine(tRisseString::GetEmptyString());
 
 }
 //---------------------------------------------------------------------------

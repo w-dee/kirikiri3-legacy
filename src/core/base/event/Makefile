@@ -12,11 +12,12 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 # このディレクトリにあるソースファイルを列挙
 #-----------------------------------------
 CPPFILES=\
-	Event.cpp                      \
-	IdleEvent.cpp                  \
-	TickCount.cpp                  \
-	Timer.cpp                      \
-	TimerBind.cpp
+	TickCount.cpp                  
+
+#	Event.cpp                      \
+#	IdleEvent.cpp                  \
+#	Timer.cpp                      \
+#	TimerBind.cpp
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

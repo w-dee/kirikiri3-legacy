@@ -77,6 +77,8 @@ wxThread::ExitCode tRisaThreadInternal::Entry()
 	{
 		Owner->Execute();
 	}
+/*
+TODO: handle exceptions
 	catch(const eRisse &e)
 	{
 		// !!!!!!! 例外が投げられた
@@ -86,6 +88,11 @@ wxThread::ExitCode tRisaThreadInternal::Entry()
 	{
 		// !!!!!!! 例外が投げられた
 		RecordUnhandledException(NULL, e.what());
+	}
+*/
+	catch(...)
+	{
+		throw;
 	}
 	return 0;
 }

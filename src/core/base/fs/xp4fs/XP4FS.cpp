@@ -25,7 +25,7 @@ RISSE_DEFINE_SOURCE_ID(9133,5164,36031,18883,4749,40441,40379,56790);
 tRisaXP4FS::tRisaXP4FS(const tRisseString & name)
 {
 	// まず、nameで示されたディレクトリにあるすべてのパッチアーカイブを列挙する
-	std::vector<tRisseString> archive_names;
+	gc_vector<tRisseString> archive_names;
 	tRisseString path; // アーカイブのあるディレクトリ
 	tRisseString name_noext; // name_base から拡張子を取り除いた物
 	tRisseString name_nopath; // name からパスを取り除いた物
@@ -41,13 +41,13 @@ tRisaXP4FS::tRisaXP4FS(const tRisseString & name)
 	//- ファイルを archive_names に追加する
 	class tLister : public tRisaFileSystemIterationCallback
 	{
-		std::vector<tRisseString>& archive_names;
+		gc_vector<tRisseString>& archive_names;
 		const tRisseString & name_noext;
 		const tRisseString & exclude;
 		const tRisseString & path;
 	public:
 		tLister(
-			std::vector<tRisseString>& n,
+			gc_vector<tRisseString>& n,
 			const tRisseString & b, const tRisseString & e, const tRisseString & p) :
 
 			archive_names(n),
@@ -81,14 +81,14 @@ tRisaXP4FS::tRisaXP4FS(const tRisseString & name)
 	std::sort(archive_names.begin() + 1, archive_names.end());
 
 	// パッチリビジョンを追うためのマップを作成
-	std::map<tRisseString, tFileItemBasicInfo> map;
+	gc_map<tRisseString, tFileItemBasicInfo> map;
 
 	class tMapper : public tRisaXP4Archive::iMapCallback
 	{
-		std::map<tRisseString, tFileItemBasicInfo> & Map;
+		gc_map<tRisseString, tFileItemBasicInfo> & Map;
 		risse_size CurrentArchiveIndex;
 	public:
-		tMapper(std::map<tRisseString, tFileItemBasicInfo> & map) :
+		tMapper(gc_map<tRisseString, tFileItemBasicInfo> & map) :
 			Map(map), CurrentArchiveIndex(0)
 			{;}
 
@@ -97,7 +97,7 @@ tRisaXP4FS::tRisaXP4FS(const tRisseString & name)
 			risse_size file_index)
 		{
 			// 追加/置き換えの場合
-			std::map<tRisseString, tFileItemBasicInfo>::iterator i;
+			gc_map<tRisseString, tFileItemBasicInfo>::iterator i;
 			i = Map.find(name);
 
 			if(i != Map.end()) Map.erase(i);
@@ -111,7 +111,7 @@ tRisaXP4FS::tRisaXP4FS(const tRisseString & name)
 			const tRisseString & name )
 		{
 			// 削除の場合
-			std::map<tRisseString, tFileItemBasicInfo>::iterator i;
+			gc_map<tRisseString, tFileItemBasicInfo>::iterator i;
 			i = Map.find(name);
 			if(i != Map.end()) Map.erase(i);
 		}
@@ -120,7 +120,7 @@ tRisaXP4FS::tRisaXP4FS(const tRisseString & name)
 
 	// アーカイブそれぞれを順に読み込む
 	Archives.reserve(archive_names.size());
-	for(std::vector<tRisseString>::iterator i = archive_names.begin();
+	for(gc_vector<tRisseString>::iterator i = archive_names.begin();
 		i != archive_names.end(); i++)
 	{
 		mapper.SetArchiveIndex(i - archive_names.begin());
@@ -131,7 +131,7 @@ tRisaXP4FS::tRisaXP4FS(const tRisseString & name)
 	// FileItems を作成
 	FileItems.reserve(map.size());
 	for(
-		std::map<tRisseString, tFileItemBasicInfo>::iterator i = map.begin();
+		gc_map<tRisseString, tFileItemBasicInfo>::iterator i = map.begin();
 		i != map.end(); i++)
 	{
 		FileItems.push_back(tFileItemInfo(i->second, i->first));

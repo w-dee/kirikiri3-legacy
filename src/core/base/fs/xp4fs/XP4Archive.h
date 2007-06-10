@@ -67,8 +67,8 @@ public:
 	};
 
 private:
-	std::vector<tFile> Files; //!< ファイルの配列
-	std::vector<tSegment> Segments; //!< セグメントの配列
+	gc_vector<tFile> Files; //!< ファイルの配列
+	gc_vector<tSegment> Segments; //!< セグメントの配列
 
 	tRisseString FileName;
 
@@ -96,7 +96,7 @@ public:
 				risse_size idx, risse_uint32 flags);
 
 
-	std::vector<tSegment> & GetSegments()
+	gc_vector<tSegment> & GetSegments()
 		{ return Segments; } //!< Segments を返す
 	const tFile & GetFileInfo(risse_size idx) const
 		{ return Files[idx]; } //!< idx に対応する tFile 構造体を返す

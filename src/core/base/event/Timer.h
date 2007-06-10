@@ -47,7 +47,7 @@ class tRisaTimerScheduler : protected depends_on<tRisaTickCount>,
 {
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	tRisaThreadEvent Event; //!< イベント
-	typedef std::vector<tRisaTimerConsumer*> tConsumers; //!< tRisaTimerConsumer の配列 の typedef
+	typedef gc_vector<tRisaTimerConsumer*> tConsumers; //!< tRisaTimerConsumer の配列 の typedef
 	tConsumers Consumers; //!< tRisaTimerConsumer の配列
 
 	risse_uint64 NearestTick; //!< もっとも時間的に近い位置にあるTick (tRisaTickCount::InvalidTickCount の場合は無効)

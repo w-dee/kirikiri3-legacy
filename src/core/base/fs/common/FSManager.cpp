@@ -47,10 +47,10 @@ tRisaFileSystemManager::~tRisaFileSystemManager()
 	// 全てのマウントポイントをアンマウントする
 	// 全てのRisseオブジェクトをvectorにとり、最後にこれが削除されることにより
 	// すべての Risse オブジェクトを解放する。
-	std::vector<tRisseRefHolder<iRisseDispatch2> > objects;
+	gc_vector<tRisseRefHolder<iRisseDispatch2> > objects;
 	objects.reserve(MountPoints.GetCount());
 
-	std::vector<tRisseString> points;
+	gc_vector<tRisseString> points;
 
 	tRisseHashTable<tRisseString, tFileSystemInfo>::tIterator i;
 	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
@@ -62,7 +62,7 @@ tRisaFileSystemManager::~tRisaFileSystemManager()
 	MountPoints.Clear();
 
 	//- 全ての objects を invalidate
-	for(std::vector<tRisseRefHolder<iRisseDispatch2> >::iterator i =
+	for(gc_vector<tRisseRefHolder<iRisseDispatch2> >::iterator i =
 		objects.begin(); i != objects.end(); i++)
 	{
 		i->GetObjectNoAddRef()->Invalidate(0, NULL, NULL, NULL);
@@ -152,7 +152,7 @@ void tRisaFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	// そのファイルシステムがマウントされているマウントポイントを調べる
-	std::vector<tRisseString> points;
+	gc_vector<tRisseString> points;
 
 	tRisseHashTable<tRisseString, tFileSystemInfo>::tIterator i;
 	for(i = MountPoints.GetFirst(); !i.IsNull(); i++)
@@ -162,7 +162,7 @@ void tRisaFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 	}
 
 	// 調べたマウントポイントをすべてアンマウントする
-	for(std::vector<tRisseString>::iterator i = points.begin(); i != points.end(); i++)
+	for(gc_vector<tRisseString>::iterator i = points.begin(); i != points.end(); i++)
 	{
 		Unmount(*i);
 	}
@@ -258,13 +258,13 @@ size_t tRisaFileSystemManager::GetFileListAt(const tRisseString & dirname,
 	// 再帰をする場合
 	class tIteratorCallback : public tRisaFileSystemIterationCallback
 	{
-		std::vector<tRisseString> & List;
+		gc_vector<tRisseString> & List;
 		tRisaFileSystemIterationCallback *Destination;
 		size_t Count;
 		tRisseString CurrentDirectory;
 
 	public:
-		tIteratorCallback(std::vector<tRisseString> &list,
+		tIteratorCallback(gc_vector<tRisseString> &list,
 			tRisaFileSystemIterationCallback *destination)
 				: List(list), Destination(destination), Count(0)
 		{
@@ -290,7 +290,7 @@ size_t tRisaFileSystemManager::GetFileListAt(const tRisseString & dirname,
 
 		size_t GetCount() const { return Count; }
 	} ;
-	std::vector<tRisseString> list; // ディレクトリのリスト
+	gc_vector<tRisseString> list; // ディレクトリのリスト
 	list.push_back(tRisseString()); // 空ディレクトリを push
 
 	tIteratorCallback localcallback(list, callback);

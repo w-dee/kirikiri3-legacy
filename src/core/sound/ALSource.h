@@ -39,7 +39,7 @@ class tRisaWaveWatchThread :
 	tRisaThreadEvent Event; //!< スレッドをたたき起こすため/スレッドを眠らせるためのイベント
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	std::vector<tRisaALSource*> Sources; //!< Source の配列
+	gc_vector<tRisaALSource*> Sources; //!< Source の配列
 
 public:
 	//! @brief		コンストラクタ
@@ -119,7 +119,7 @@ private:
 	tRisaWaveDecodeThread * DecodeThread; //!< デコードスレッド
 	tStatus Status; //!< サウンドステータス
 	tStatus PrevStatus; //!< 直前のサウンドステータス
-	std::deque<tRisaWaveSegmentQueue> SegmentQueues; //!< セグメントキューの配列
+	gc_deque<tRisaWaveSegmentQueue> SegmentQueues; //!< セグメントキューの配列
 
 public:
 	//! @brief		コンストラクタ

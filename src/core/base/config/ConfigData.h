@@ -40,7 +40,7 @@ class tRisaConfig;
 //---------------------------------------------------------------------------
 //! @brief		設定情報のデータを管理するクラス
 //---------------------------------------------------------------------------
-class tRisaConfigData : public wxFileConfig
+class tRisaConfigData : public wxFileConfig, public tRisseDestructee
 {
 	friend class tRisaConfig;
 

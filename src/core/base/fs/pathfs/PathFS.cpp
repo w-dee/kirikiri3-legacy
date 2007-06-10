@@ -182,7 +182,7 @@ void tRisaPathFS::Remove(const tRisseString & name)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	std::vector<tRisseString>::iterator i;
+	gc_vector<tRisseString>::iterator i;
 
 	// ディレクトリ名の最後に '/' がついていなければ追加
 	tRisseString fn(name);
@@ -234,7 +234,7 @@ void tRisaPathFS::Ensure()
 	Hash.Clear();
 
 	// 全てのパスに対して
-	for(std::vector<tRisseString>::iterator i = Paths.begin(); i != Paths.end(); i++)
+	for(gc_vector<tRisseString>::iterator i = Paths.begin(); i != Paths.end(); i++)
 	{
 		bool recursive = (i->c_str()[0] == static_cast<risse_char>(RISSE_WC('+')));
 		tRisseString dirname(i->c_str() + 1);

@@ -89,7 +89,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisaWaveDecoderFactoryManager : public singleton_base<tRisaWaveDecoderFactoryManager>
 {
-	typedef std::map<tRisseString, boost::shared_ptr<tRisaWaveDecoderFactory> >  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
+	typedef gc_map<tRisseString, boost::shared_ptr<tRisaWaveDecoderFactory> >  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
 	tMap Map; //!< 拡張子→ファクトリのマップ
 
 public:

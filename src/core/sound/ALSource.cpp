@@ -151,7 +151,7 @@ class tRisaWaveDecodeThreadPool :
 								manual_start<tRisaWaveDecodeThreadPool>,
 								protected tRisaCompactEventDestination
 {
-	std::vector<tRisaWaveDecodeThread *> FreeThreads; //!< 使用していないスレッドのリスト
+	gc_vector<tRisaWaveDecodeThread *> FreeThreads; //!< 使用していないスレッドのリスト
 
 public:
 	tRisaWaveDecodeThreadPool();
@@ -187,7 +187,7 @@ tRisaWaveDecodeThreadPool::tRisaWaveDecodeThreadPool()
 tRisaWaveDecodeThreadPool::~tRisaWaveDecodeThreadPool()
 {
 	// FreeThreads を解放する
-	for(std::vector<tRisaWaveDecodeThread*>::iterator i = FreeThreads.begin();
+	for(gc_vector<tRisaWaveDecodeThread*>::iterator i = FreeThreads.begin();
 		i != FreeThreads.end(); i++)
 		delete (*i);
 }
@@ -202,7 +202,7 @@ void tRisaWaveDecodeThreadPool::OnCompact(tCompactLevel level)
 	if(level >= clSlowBeat)
 	{
 		// FreeThreads を解放する
-		for(std::vector<tRisaWaveDecodeThread*>::iterator i = FreeThreads.begin();
+		for(gc_vector<tRisaWaveDecodeThread*>::iterator i = FreeThreads.begin();
 			i != FreeThreads.end(); i++)
 			delete (*i);
 		FreeThreads.clear();
@@ -336,7 +336,7 @@ void tRisaWaveWatchThread::RegisterSource(tRisaALSource * source)
 void tRisaWaveWatchThread::UnregisterSource(tRisaALSource * source)
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
-	std::vector<tRisaALSource*>::iterator i =
+	gc_vector<tRisaALSource*>::iterator i =
 		std::find(Sources.begin(), Sources.end(), source);
 	if(i != Sources.end()) Sources.erase(i);
 }
@@ -355,7 +355,7 @@ void tRisaWaveWatchThread::Execute(void)
 			if(Sources.size())
 			{
 				// すべてのソースの WatchCallback を呼び出す
-				for(std::vector<tRisaALSource*>::iterator i = Sources.begin();
+				for(gc_vector<tRisaALSource*>::iterator i = Sources.begin();
 						i != Sources.end(); i++)
 					(*i)->WatchCallback();
 				sleep_time = 50; // 50ms 固定

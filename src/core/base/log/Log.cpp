@@ -44,7 +44,7 @@ void tRisaLogger::SendPreservedLogs(tRisaLogReceiver *target)
 	LogSending = true;
 	try
 	{
-		for(std::vector<tItem>::iterator i = PreserveBuffer.begin();
+		for(gc_vector<tItem>::iterator i = PreserveBuffer.begin();
 			i != PreserveBuffer.end(); i++)
 		{
 			target->OnLog(*i);
@@ -111,7 +111,7 @@ void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
-	std::vector<tRisaLogReceiver*>::iterator i;
+	gc_vector<tRisaLogReceiver*>::iterator i;
 	i = std::find(Receivers.begin(), Receivers.end(), receiver);
 	if(i != Receivers.end())
 		Receivers.erase(i);
@@ -171,7 +171,7 @@ void tRisaLogger::InternalLog(const tRisseString & content,
 	LogSending = true;
 	try
 	{
-		for(std::vector<tRisaLogReceiver*>::iterator i = Receivers.begin();
+		for(gc_vector<tRisaLogReceiver*>::iterator i = Receivers.begin();
 			i != Receivers.end(); i++)
 		{
 			(*i)->OnLog(item);

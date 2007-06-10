@@ -68,8 +68,8 @@ class tRisaWaveSegmentQueue
 	// deque による Segments と Events の配列。
 	// 実用上は、これらの配列に大量のデータが入ることはまずないので
 	// vector で十分なのかもしれないが ...
-	std::deque<tRisaWaveSegment> Segments; //!< セグメントの配列
-	std::deque<tRisaWaveEvent> Events; //!< イベントの配列
+	gc_deque<tRisaWaveSegment> Segments; //!< セグメントの配列
+	gc_deque<tRisaWaveEvent> Events; //!< イベントの配列
 
 public:
 	//! @brief		内容をクリアする
@@ -90,11 +90,11 @@ public:
 
 	//! @brief		tRisaWaveSegmentの配列をエンキューする
 	//! @param		queue		エンキューしたい std::dequeue<tRisaWaveSegment>オブジェクト
-	void Enqueue(const std::deque<tRisaWaveSegment> & segments);
+	void Enqueue(const gc_deque<tRisaWaveSegment> & segments);
 
 	//! @brief		tRisaWaveEventの配列をエンキューする
 	//! @param		queue		エンキューしたい std::dequeue<tRisaWaveEvent>オブジェクト
-	void Enqueue(const std::deque<tRisaWaveEvent> & events);
+	void Enqueue(const gc_deque<tRisaWaveEvent> & events);
 
 	//! @brief		先頭から指定長さ分をデキューする
 	//! @param		dest		格納先キュー(内容はクリアされる)

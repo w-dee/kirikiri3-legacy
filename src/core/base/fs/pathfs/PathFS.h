@@ -28,7 +28,7 @@ class tRisaPathFS : public tRisaFileSystem
 	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 	typedef tRisseHashTable<tRisseString, tRisseString> tHash; //!< ファイルシステム中のファイル名と実際のファイル名の対応表のtypedef
 	tHash Hash;//!< ファイルシステム中のファイル名と実際のファイル名の対応表
-	std::vector<tRisseString> Paths; //!< パス(最初の文字が ' ' ならばディレクトリ単独、'+' ならばrecursive)
+	gc_vector<tRisseString> Paths; //!< パス(最初の文字が ' ' ならばディレクトリ単独、'+' ならばrecursive)
 	bool NeedRebuild; //!< パスのハッシュ表を作り直す必要がある場合に真になる
 
 public:

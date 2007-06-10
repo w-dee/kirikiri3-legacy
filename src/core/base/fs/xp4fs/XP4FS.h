@@ -45,8 +45,8 @@ class tRisaXP4FS : public tRisaFileSystem
 			{ return Name < rhs.Name; } //!< 比較関数
 	};
 
-	std::vector<boost::shared_ptr<tRisaXP4Archive> > Archives; //!< アーカイブの配列
-	std::vector<tFileItemInfo> FileItems; //! ファイルの情報の配列
+	gc_vector<boost::shared_ptr<tRisaXP4Archive> > Archives; //!< アーカイブの配列
+	gc_vector<tFileItemInfo> FileItems; //! ファイルの情報の配列
 
 public:
 	//! @brief		コンストラクタ

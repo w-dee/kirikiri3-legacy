@@ -72,10 +72,10 @@ void tRisaWaveSegmentQueue::Enqueue(const tRisaWaveEvent & event)
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveSegment> & segments)
+void tRisaWaveSegmentQueue::Enqueue(const gc_deque<tRisaWaveSegment> & segments)
 {
 	// segment の追加
-	for(std::deque<tRisaWaveSegment>::const_iterator i = segments.begin();
+	for(gc_deque<tRisaWaveSegment>::const_iterator i = segments.begin();
 		i != segments.end(); i++)
 		Enqueue(*i);
 }
@@ -83,13 +83,13 @@ void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveSegment> & segment
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveSegmentQueue::Enqueue(const std::deque<tRisaWaveEvent> & events)
+void tRisaWaveSegmentQueue::Enqueue(const gc_deque<tRisaWaveEvent> & events)
 {
 	// オフセットに加算する値を得る
 	risse_int64 event_offset = GetFilteredLength();
 
 	// event の追加
-	for(std::deque<tRisaWaveEvent>::const_iterator i = events.begin();
+	for(gc_deque<tRisaWaveEvent>::const_iterator i = events.begin();
 		i != events.end(); i++)
 	{
 		tRisaWaveEvent one_event(*i);
@@ -148,7 +148,7 @@ void tRisaWaveSegmentQueue::Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 le
 
 	// Events を切り出す
 	size_t events_to_dequeue = 0;
-	for(std::deque<tRisaWaveEvent>::iterator i = Events.begin();
+	for(gc_deque<tRisaWaveEvent>::iterator i = Events.begin();
 		i != Events.end(); i++)
 	{
 		risse_int64 newoffset = i->Offset - length;
@@ -175,7 +175,7 @@ risse_int64 tRisaWaveSegmentQueue::GetFilteredLength() const
 {
 	// キューの長さは すべての Segments のFilteredLengthの合計
 	risse_int64 length = 0;
-	for(std::deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
+	for(gc_deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
 		i != Segments.end(); i++)
 		length += i->FilteredLength;
 
@@ -196,7 +196,7 @@ void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_filtered_length)
 	risse_int64 offset_was = 0; // 変化前のオフセット
 	risse_int64 offset_is = 0; // 変化後のオフセット
 
-	for(std::deque<tRisaWaveSegment>::iterator i = Segments.begin();
+	for(gc_deque<tRisaWaveSegment>::iterator i = Segments.begin();
 		i != Segments.end(); i++)
 	{
 		risse_int64 old_end = offset_was + i->FilteredLength;
@@ -216,7 +216,7 @@ void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_filtered_length)
 	}
 
 	// からっぽのSegments の除去
-	for(std::deque<tRisaWaveSegment>::iterator i = Segments.begin();
+	for(gc_deque<tRisaWaveSegment>::iterator i = Segments.begin();
 		i != Segments.end() ; )
 	{
 		if(i->FilteredLength == 0 || i->Length == 0)
@@ -227,7 +227,7 @@ void tRisaWaveSegmentQueue::Scale(risse_int64 new_total_filtered_length)
 
 	// Events の修正
 	double ratio = (double)new_total_filtered_length / (double)total_length_was;
-	for(std::deque<tRisaWaveEvent>::iterator i = Events.begin();
+	for(gc_deque<tRisaWaveEvent>::iterator i = Events.begin();
 		i != Events.end(); i++)
 	{
 		i->Offset = static_cast<risse_int64>(i->Offset * ratio);
@@ -242,7 +242,7 @@ risse_int64 tRisaWaveSegmentQueue::FilteredPositionToDecodePosition(risse_int64 
 	// Segments の修正
 	risse_int64 offset_filtered = 0;
 
-	for(std::deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
+	for(gc_deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
 		i != Segments.end(); i++)
 	{
 		if(offset_filtered <= pos && pos < offset_filtered + i->FilteredLength)
@@ -272,7 +272,7 @@ void tRisaWaveSegmentQueue::Dump() const
 
 	fprintf(stderr, "Segments [");
 	first = true;
-	for(std::deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
+	for(gc_deque<tRisaWaveSegment>::const_iterator i = Segments.begin();
 		i != Segments.end(); i++)
 	{
 		if(!first)
@@ -284,7 +284,7 @@ void tRisaWaveSegmentQueue::Dump() const
 
 	fprintf(stderr, "  Events [");
 	first = true;
-	for(std::deque<tRisaWaveEvent>::const_iterator i = Events.begin();
+	for(gc_deque<tRisaWaveEvent>::const_iterator i = Events.begin();
 		i != Events.end(); i++)
 	{
 		if(!first)

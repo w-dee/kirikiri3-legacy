@@ -222,8 +222,8 @@ private:
 	tRisaCriticalSection FlagsCS; //!< CS to protect flags/links/labels
 	int Flags[MaxFlags]; //!< フラグ
 	bool FlagsModifiedByLabelExpression; //!< true if the flags are modified by EvalLabelExpression
-	std::vector<tRisaWaveLoopLink> Links; //!< リンクの配列
-	std::vector<tRisaWaveLabel> Labels; //!< ラベルの配列
+	gc_vector<tRisaWaveLoopLink> Links; //!< リンクの配列
+	gc_vector<tRisaWaveLabel> Labels; //!< ラベルの配列
 	tRisaCriticalSection DataCS; // CS to protect other members
 	tRisaWaveFileInfo * FileInfo; //!< デコーダのファイル情報
 	boost::shared_ptr<tRisaWaveDecoder> Decoder; //!< デコーダ
@@ -288,19 +288,19 @@ public:
 
 	//! @brief		リンクの配列を得る
 	//! @return		リンクの配列への参照
-	const std::vector<tRisaWaveLoopLink> & GetLinks() const;
+	const gc_vector<tRisaWaveLoopLink> & GetLinks() const;
 
 	//! @brief		ラベルの配列を得る
 	//! @return		ラベルの配列への参照
-	const std::vector<tRisaWaveLabel> & GetLabels() const;
+	const gc_vector<tRisaWaveLabel> & GetLabels() const;
 
 	//! @brief		リンクの配列を設定する
 	//! @param		links		設定したい配列
-	void SetLinks(const std::vector<tRisaWaveLoopLink> & links);
+	void SetLinks(const gc_vector<tRisaWaveLoopLink> & links);
 
 	//! @brief		ラベルの配列を設定する
 	//! @param		links		設定したい配列
-	void SetLabels(const std::vector<tRisaWaveLabel> & labels);
+	void SetLabels(const gc_vector<tRisaWaveLabel> & labels);
 
 	//! @brief		リンクを無視しながら再生しているかどうかを返す
 	//! @return		リンクを無視しながら再生しているかどうか
@@ -358,7 +358,7 @@ private:
 	//! @param		to			検索終了位置
 	//! @param		events		結果を格納する配列
 	void GetEventAt(risse_int64 from, risse_int64 to,
-		std::deque<tRisaWaveEvent> & labels);
+		gc_deque<tRisaWaveEvent> & labels);
 
 	//! @brief		クロスフェードを行う
 	//! @param		dest		結果格納先

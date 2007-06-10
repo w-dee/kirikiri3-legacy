@@ -24,7 +24,7 @@
 	それぞれについて
 	for(item in vector) item->callback();
 	のようにイテレーションを行った場合、callback 内で vector に対して削除や
-	追加などを行った場合、たとえば STL の std::vector を使用すると、
+	追加などを行った場合、たとえば STL の gc_vector を使用すると、
 	vector に操作を行った時点でイテレータが無効になり、安全にイテレーションを
 	することができない。
 	このクラスは、イテレーション中に、イテレーション用配列を保護することにより、
@@ -39,8 +39,8 @@
 //---------------------------------------------------------------------------
 class void_pointer_list
 {
-	std::vector<void *> m_list; //!< ポインタリスト
-	std::vector<void *> *m_shadow_list; //!< シャドーリスト
+	gc_vector<void *> m_list; //!< ポインタリスト
+	gc_vector<void *> *m_shadow_list; //!< シャドーリスト
 	size_t m_lock_count; //!< ロックカウント
 	size_t m_locked_item_count; //!< ロック中の要素数
 	bool m_has_null; //!< NULL を含んだポインタが存在するかどうか
@@ -141,12 +141,12 @@ public:
 	void remove(void * item)
 	{
 		if(item == NULL) return;
-		std::vector<void *>::iterator it = 
+		gc_vector<void *>::iterator it = 
 			std::find(m_list.begin(), m_list.end(), item);
 		if(it != m_list.end()) { m_has_null = true; *it = NULL; }
 		if(m_shadow_list)
 		{
-			std::vector<void *>::iterator it = 
+			gc_vector<void *>::iterator it = 
 				std::find(m_shadow_list->begin(), m_shadow_list->end(), item);
 			if(it != m_shadow_list->end()) *it = NULL;
 		}
@@ -168,8 +168,8 @@ public:
 	{
 		if(!m_has_null) return;
 		make_shadow();
-		std::vector<void *>::iterator d_it = m_list.begin();
-		for(std::vector<void *>::iterator it = d_it;
+		gc_vector<void *>::iterator d_it = m_list.begin();
+		for(gc_vector<void *>::iterator it = d_it;
 			it != m_list.end(); /**/)
 		{
 			// NULL をスキップしながら d_it にコピー
@@ -194,7 +194,7 @@ public:
 	size_t find(void * item) const
 	{
 		if(item == NULL) return static_cast<size_t>(-1L); // null は探せない
-		std::vector<void *>::const_iterator it = 
+		gc_vector<void *>::const_iterator it = 
 			std::find(m_list.begin(), m_list.end(), item);
 		if(it == m_list.end()) return static_cast<size_t>(-1L); // 見つからない
 		return it - m_list.begin();
@@ -228,8 +228,9 @@ private:
 	{
 		if(m_lock_count == 0) return; // ロック中でない場合はなにもしない
 		if(m_shadow_list) return;
-		m_shadow_list = new std::vector<void*>(
-				m_list.begin(), m_list.begin() + m_locked_item_count); // コピーを作成
+		m_shadow_list = new gc_vector<void*>();
+		m_shadow_list->insert(m_shadow_list->begin(),
+			m_list.begin(), m_list.begin() + m_locked_item_count); // コピーを作成
 	}
 };
 //---------------------------------------------------------------------------

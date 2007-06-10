@@ -64,7 +64,7 @@ class tRisaSound :
 
 	boost::shared_ptr<tRisaSoundALSource> Source;
 	boost::shared_ptr<tRisaALBuffer> Buffer;
-	std::vector<boost::shared_ptr<tRisaWaveFilter> > Filters;
+	gc_vector<boost::shared_ptr<tRisaWaveFilter> > Filters;
 	boost::shared_ptr<tRisaWaveLoopManager> LoopManager;
 	boost::shared_ptr<tRisaWaveDecoder> Decoder;
 

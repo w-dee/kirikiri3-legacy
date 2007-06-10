@@ -158,7 +158,7 @@ public:
 private:
 	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	typedef std::deque<tRisaEventInfo *> tQueue; //!< キュー用コンテナの typedef
+	typedef gc_deque<tRisaEventInfo *> tQueue; //!< キュー用コンテナの typedef
 	tQueue Queues[tRisaEventInfo::epMax + 1]; //!< イベント用キュー
 	bool CanDeliverEvents; //!< イベントを配信可能かどうか
 	bool HasPendingEvents; //!< post してから処理されていないイベントが存在する場合に真

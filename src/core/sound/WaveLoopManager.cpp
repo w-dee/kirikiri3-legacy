@@ -179,7 +179,7 @@ void tRisaWaveLoopManager::ClearLinksAndLabels()
 
 
 //---------------------------------------------------------------------------
-const std::vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
+const gc_vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
 {
 	volatile tRisaCriticalSection::tLocker
 		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
@@ -189,7 +189,7 @@ const std::vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
 
 
 //---------------------------------------------------------------------------
-const std::vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
+const gc_vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
 {
 	volatile tRisaCriticalSection::tLocker
 		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
@@ -199,7 +199,7 @@ const std::vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetLinks(const std::vector<tRisaWaveLoopLink> & links)
+void tRisaWaveLoopManager::SetLinks(const gc_vector<tRisaWaveLoopLink> & links)
 {
 	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	Links = links;
@@ -209,7 +209,7 @@ void tRisaWaveLoopManager::SetLinks(const std::vector<tRisaWaveLoopLink> & links
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetLabels(const std::vector<tRisaWaveLabel> & labels)
+void tRisaWaveLoopManager::SetLabels(const gc_vector<tRisaWaveLabel> & labels)
 {
 	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
 	Labels = labels;
@@ -283,7 +283,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 	risse_int give_up_count = 0;
 
-	std::deque<tRisaWaveEvent> events;
+	gc_deque<tRisaWaveEvent> events;
 
 	while(written != samples/* && Position < FileInfo->TotalSamples*/)
 	{
@@ -438,7 +438,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 		// evaluate each label
 		GetEventAt(Position, Position + one_unit, events);
-		for(std::deque<tRisaWaveEvent>::iterator i = events.begin();
+		for(gc_deque<tRisaWaveEvent>::iterator i = events.begin();
 			i != events.end(); i++)
 		{
 			if(i->Name.c_str()[0] == ':')
@@ -449,7 +449,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 		}
 
 		// calculate each label offset
-		for(std::deque<tRisaWaveEvent>::iterator i = events.begin();
+		for(gc_deque<tRisaWaveEvent>::iterator i = events.begin();
 			i != events.end(); i++)
 			i->Offset = (risse_int)(i->Position - Position) + written;
 
@@ -636,7 +636,7 @@ bool tRisaWaveLoopManager::GetNearestLink(risse_int64 current,
 
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
-		std::deque<tRisaWaveEvent> & events)
+		gc_deque<tRisaWaveEvent> & events)
 {
 	if(Labels.size() == 0) return; // no labels found
 	if(!IsLabelsSorted)
@@ -1430,7 +1430,7 @@ void tRisaWaveLoopManager::WriteInformation(AnsiString &s)
 /*
 Link { From=0000000000000000; To=0000000000000000; Smooth=False; Condition=ne; RefValue=444444444; CondVar=99; }
 */
-	for(std::vector<tRisaWaveLoopLink>::iterator i = Links.begin();
+	for(gc_vector<tRisaWaveLoopLink>::iterator i = Links.begin();
 		i != Links.end(); i++)
 	{
 		AnsiString l;
@@ -1475,7 +1475,7 @@ Link { From=0000000000000000; To=0000000000000000; Smooth=False; Condition=ne; R
 /*
 Label { Position=0000000000000000; name="                                         "; }
 */
-	for(std::vector<tRisaWaveLabel>::iterator i = Labels.begin();
+	for(gc_vector<tRisaWaveLabel>::iterator i = Labels.begin();
 		i != Labels.end(); i++)
 	{
 		AnsiString l;

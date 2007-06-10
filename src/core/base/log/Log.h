@@ -55,8 +55,8 @@ private:
 
 
 	tRisaRingBuffer<tItem> Buffer; //!< ログを格納するためのリングバッファ
-	std::vector<tItem> PreserveBuffer; //!< ログからあふれたアイテムを保持し続けるバッファ
-	std::vector<tRisaLogReceiver*> Receivers; //!< ログを受信するオブジェクト(レシーバ)の配列
+	gc_vector<tItem> PreserveBuffer; //!< ログからあふれたアイテムを保持し続けるバッファ
+	gc_vector<tRisaLogReceiver*> Receivers; //!< ログを受信するオブジェクト(レシーバ)の配列
 	bool LogSending; //!< レシーバにログを送っている最中に真
 
 public:

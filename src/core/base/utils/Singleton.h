@@ -168,11 +168,14 @@ main end
 #include <boost/smart_ptr.hpp>
 #include <stdio.h>
 #include <typeinfo>
+#include "risse/include/risseGC.h"
+
+using namespace Risse;
 
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト管理用クラス
 //---------------------------------------------------------------------------
-class singleton_manager
+class singleton_manager : public tRisseDestructee
 {
 	typedef void (*handler_t)(); //!< ensure/disconnect 関数のtypedef
 	typedef const char * (*get_name_function_t)(); //!< get_name 関数のtypedef
@@ -184,9 +187,9 @@ class singleton_manager
 		alive_function_t alive; //!< ailve 関数
 	};
 
-	static std::vector<register_info_t> * functions; //!< ensure関数の配列
-	static std::vector<handler_t> * disconnectors; //!< disconnect関数の配列
-	static std::vector<handler_t> * manual_starts; //!< 手動起動をするクラスのensure関数の配列
+	static gc_vector<register_info_t> * functions; //!< ensure関数の配列
+	static gc_vector<handler_t> * disconnectors; //!< disconnect関数の配列
+	static gc_vector<handler_t> * manual_starts; //!< 手動起動をするクラスのensure関数の配列
 	static unsigned int ref_count; //!< リファレンスカウンタ
 
 public:
@@ -223,10 +226,12 @@ public:
 
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト用クラス
-//! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス
+//! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス。
+//!			すべてのシングルトンクラスは同時に tRisseDestructee のサブクラスとなり、
+//!			つまり GC reachable である。
 //---------------------------------------------------------------------------
 template <typename T>
-class singleton_base
+class singleton_base : public tRisseDestructee
 {
 	singleton_base(const singleton_base &); //!< non-copyable
 	void operator = (const singleton_base &); //!< non-copyable

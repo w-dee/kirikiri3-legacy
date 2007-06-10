@@ -94,8 +94,8 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 		}
 	};
 
-	std::deque<tLogicalLine> LogicalLines; //!< 論理行の deque
-	std::deque<tDisplayLine> DisplayLines; //!< 表示行の deque
+	gc_deque<tLogicalLine> LogicalLines; //!< 論理行の deque
+	gc_deque<tDisplayLine> DisplayLines; //!< 表示行の deque
 	wxFont CurrentFont; //!< フォント
 	size_t LineHeight; //!< 一行の高さ(pixel単位)
 	size_t LinesPerWindow; //!< 一画面中の有効な行数(半端な行を含まず)

@@ -18,6 +18,7 @@
 #include <deque>
 #include <wx/textctrl.h>
 #include <wx/clipbrd.h>
+#include <wx/datetime.h>
 
 #if wxUSE_OWNER_DRAWN
 #include <wx/artprov.h>
@@ -311,7 +312,7 @@ wxString tRisaLogScrollView::CreateOneLineString(const tRisaLogger::tItem & item
 	// 時刻 ログレベル メッセージ
 
 	// 時刻
-	wxString logline = item.Timestamp.FormatTime() + wxT(" ");
+	wxString logline = item.Timestamp.Format(wxT("%X")) + wxT(" ");
 
 	// ログレベル
 	switch(item.Level)

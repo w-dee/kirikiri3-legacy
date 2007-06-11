@@ -63,8 +63,11 @@ public:
 	//! @brief		コンストラクタ
 	tRisaLogger();
 
-	//! @brief		デストラクタ
-	~tRisaLogger();
+	//! @brief		デストラクタ(呼ばれないので注意)
+	virtual ~tRisaLogger() {;}
+
+	//! @brief		消滅関数
+	void destruct();
 
 public:
 	const tRisaRingBuffer<tItem> & GetBuffer() const 
@@ -102,8 +105,8 @@ public:
 	static void Log(const tRisseString & content, tLevel level = llInfo,
 		const tRisseString & linkinfo = tRisseString::GetEmptyString())
 	{
-		if(tRisaLogger::pointer r = instance())
-			r->InternalLog(content, level, linkinfo);
+		if(tRisaLogger::alive())
+			tRisaLogger::instance()->InternalLog(content, level, linkinfo);
 	}
 };
 //---------------------------------------------------------------------------
@@ -146,8 +149,8 @@ public:
 	//! @brief		コンストラクタ
 	tRisaWxLogProxy();
 
-	//! @brief		コンストラクタ
-	~tRisaWxLogProxy();
+	//! @brief		消滅関数
+	void destruct();
 
 protected:
 	//! @brief		ログを行う

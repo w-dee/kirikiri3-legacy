@@ -12,13 +12,13 @@
 //---------------------------------------------------------------------------
 
 #include "base/utils/Singleton.h"
+#include <algorithm>
 
 
 //---------------------------------------------------------------------------
 gc_vector<singleton_manager::register_info_t> * singleton_manager::functions = NULL;
 gc_vector<singleton_manager::handler_t> * singleton_manager::disconnectors = NULL;
 gc_vector<singleton_manager::handler_t> * singleton_manager::manual_starts = NULL;
-unsigned int singleton_manager::ref_count = 0;
 //---------------------------------------------------------------------------
 
 
@@ -35,8 +35,6 @@ void singleton_manager::register_info(const singleton_manager::register_info_t &
 		functions = new gc_vector<register_info_t>();
 
 	functions->push_back(info);
-
-	ref_count ++;
 }
 //---------------------------------------------------------------------------
 
@@ -64,16 +62,6 @@ void singleton_manager::register_disconnector(handler_t func)
 //---------------------------------------------------------------------------
 void singleton_manager::unregister_info()
 {
-	if(functions)
-	{
-		ref_count --;
-		if(ref_count == 0)
-		{
-			delete functions, functions = NULL;
-			delete disconnectors, disconnectors = NULL;
-			delete manual_starts, manual_starts = NULL;
-		}
-	}
 }
 //---------------------------------------------------------------------------
 

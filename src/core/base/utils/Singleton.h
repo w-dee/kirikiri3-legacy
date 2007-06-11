@@ -46,126 +46,11 @@
 
   使用例
 
-→ (やじるし) を使い、
-
-依存しているクラス→依存されているクラス
-
-と記述することにすると、
-
-
-s3 → s2
-s3 → s1
-
-s2 → s0
-s1 → s0
-
-という関係を例にとる。
-
-依存しているクラスのメンバに、依存されているクラスのシングルトンオブジェクト
-をこのように記述することでシングルトンオブジェクトの生成順や消滅順を決定づけ
-ることが出来る。
-
-
-<code>
-
-
-#include <stdio.h>
-#include "Singleton.h"
-
-class s0 : singleton_of<s0>
-{
-public:
-	s0() { printf("s0 construct\n"); }
-	~s0() { printf("s0 destruct\n"); }
-};
-
-class s1 : singleton_of<s1>, depends_on<s0>
-{
-public:
-	s1() { printf("s1 construct\n"); }
-	~s1() { printf("s1 destruct\n"); }
-};
-
-class s2 : singleton_of<s2>, depends_on<s0>
-{
-public:
-	s2() { printf("s2 construct\n"); }
-	~s2() { printf("s2 destruct\n"); }
-};
-
-class s3 : singleton_of<s3>,
-		depends_on<s0>,
-		depends_on<s1>,
-		depends_on<s2>
-{
-	int n;
-public:
-	s3() { printf("s3 construct\n"); n = 1; }
-	~s3() { printf("s3 destruct\n"); n = 0; }
-	int getN() const { return n; }
-};
-
-class s4 : singleton_of<s4>, manual_start<s4>
-{
-	int n;
-public:
-	s4() { printf("s4 construct\n"); n = 2; }
-	~s4() { printf("s4 destruct\n"); n = 0; }
-	int getN() const { return n; }
-};
-
-
-int main()
-{
-//	s3::referrer s3;
-	fprintf(stderr, "main begin\n");
-	fprintf(stderr, "init_all begin\n");
-	singleton_manager::init_all();
-	fprintf(stderr, "init_all end\n");
-	fprintf(stderr, "s3::n : %d\n", s3::instance()->getN());
-	fprintf(stderr, "s4::n : %d\n", s4::instance()->getN());
-	fprintf(stderr, "Disconnect begin\n");
-	singleton_manager::disconnect_all();
-	fprintf(stderr, "Disconnect end\n");
-	singleton_manager::report_alive_objects();
-	fprintf(stderr, "main end\n");
-}
-
-</code>
-
-
-実行結果は以下の通りとなる。
-
-<pre>
-
-main begin
-init_all begin
-s0 construct
-s1 construct
-s2 construct
-s3 construct
-init_all end
-s3::n : 1
-s4 construct
-s4::n : 2
-Disconnect begin
-s4 destruct
-s3 destruct
-s2 destruct
-s1 destruct
-s0 destruct
-Disconnect end
-main end
-
-
-</pre>
-
-
+TODO: 使用例をここに書く
 */
 
 
 #include <vector>
-#include <boost/smart_ptr.hpp>
 #include <stdio.h>
 #include <typeinfo>
 #include "risse/include/risseGC.h"
@@ -175,7 +60,7 @@ using namespace Risse;
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト管理用クラス
 //---------------------------------------------------------------------------
-class singleton_manager : public tRisseDestructee
+class singleton_manager : public tRisseCollectee
 {
 	typedef void (*handler_t)(); //!< ensure/disconnect 関数のtypedef
 	typedef const char * (*get_name_function_t)(); //!< get_name 関数のtypedef
@@ -190,7 +75,6 @@ class singleton_manager : public tRisseDestructee
 	static gc_vector<register_info_t> * functions; //!< ensure関数の配列
 	static gc_vector<handler_t> * disconnectors; //!< disconnect関数の配列
 	static gc_vector<handler_t> * manual_starts; //!< 手動起動をするクラスのensure関数の配列
-	static unsigned int ref_count; //!< リファレンスカウンタ
 
 public:
 	//! @brief		シングルトン情報を登録する
@@ -203,6 +87,10 @@ public:
 	static void register_disconnector(handler_t func);
 
 	//! @brief		シングルトン情報の登録を解除する
+	//! @note		とはなっているが実際にはなにもしない。
+	//!				昔はここに参照カウンタをデクリメントし、0になれば
+	//!				情報をすべて破棄するようなコードが書かれていたが、
+	//!				GC を利用するようになってからそれは無くなった。
 	static void unregister_info();
 
 	//! @brief		全てのシングルトンを初期化する
@@ -227,11 +115,15 @@ public:
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト用クラス
 //! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス。
-//!			すべてのシングルトンクラスは同時に tRisseDestructee のサブクラスとなり、
+//!			すべてのシングルトンクラスは同時に tRisseCollectee のサブクラスとなり、
 //!			つまり GC reachable である。
+//!			シングルトンオブジェクトのデストラクタは「呼ばれない」。
+//!			destruct という仮想関数があり、これが
+//!			singleton_manager::disconnect_all の時点で呼ばれる事になっているので
+//!			必要な終了処理などはこのタイミングで行うこと。
 //---------------------------------------------------------------------------
 template <typename T>
-class singleton_base : public tRisseDestructee
+class singleton_base : public tRisseCollectee
 {
 	singleton_base(const singleton_base &); //!< non-copyable
 	void operator = (const singleton_base &); //!< non-copyable
@@ -276,26 +168,28 @@ class singleton_base : public tRisseDestructee
 	};
 	static object_registerer register_object; //!< object_registerer のstatic変数
 
+
 	//! @brief オブジェクトを保持する構造体
 	//! @note
 	//! このクラスのコンストラクタは manipulate_object 内のローカルスコープにある static 変数
 	//! が初めて作成される際に呼ばれ、マネージャに disconnect メソッドを登録する。
 	//! この関数が呼ばれるのは必ず依存先→依存元の順番となるため、マネージャは
-	//! disconnect をこれとは逆順に呼ぶことで依存関係を保ったままオブジェクトの
-	//! 消滅を行おうとする。
+	//! disconnect をこれとは逆順に呼ぶことで依存関係を保ったまま destruct の
+	//! 呼び出しを行おうとする。
 	struct object_holder
 	{
-		boost::shared_ptr<T> object; //!< シングルトンオブジェクト
-		boost::weak_ptr<T> weak_object; //!< シングルトンオブジェクトへの弱参照
-		object_holder() : object(create()), weak_object(object)
+		T * object; //!< オブジェクトインスタンス
+		object_holder() : object(create())
 		{
 			singleton_manager::register_disconnector(&singleton_base<T>::disconnect);
 			singleton_base<T>::object_created = true;
 			fprintf(stderr, "created %s\n", singleton_base<T>::get_name());
+			fflush(stderr);
 		}
 		static T* create()
 		{
 			fprintf(stderr, "creating %s\n", singleton_base<T>::get_name());
+			fflush(stderr);
 			return new T();
 		}
 	};
@@ -311,21 +205,27 @@ class singleton_base : public tRisseDestructee
 	//! 参照を切る。is_alive が非nullの場合は、object.weak_object を
 	//! 参照することによりシングルトンオブジェクトが有効かどうかを*is_aliveに
 	//! 書き込む。
-	static boost::weak_ptr<T> & manipulate_object(bool reset=false, bool * is_alive = NULL)
+	static T * manipulate_object(bool reset=false, bool * is_alive = NULL)
 	{
 		static object_holder holder;
 		register_object.do_nothing();
-		if(reset) holder.object.reset();
-		if(is_alive) *is_alive = !holder.weak_object.expired();
-		return holder.weak_object;
+		if(reset) holder.object = NULL;
+		if(is_alive) *is_alive = holder.object;
+		return holder.object;
 	}
 
 	//! @brief オブジェクトへの参照を切る
 	static void disconnect()
 	{
 		fprintf(stderr, "disconnecting %s\n", get_name());
+		fflush(stderr);
+		if(alive()) instance()->destruct();
 		(void) manipulate_object(true);
 	}
+
+	//! @brief	オブジェクトの消滅を行う仮想関数(下位クラスでオーバーライドすること)
+	//! @note	この中では delete this を「してもよい」
+	virtual void destruct() {;}
 
 	//! @brief クラス名を得る
 	static const char * get_name()
@@ -342,13 +242,7 @@ protected:
 			// register_object が作成されることを確実にする
 	}
 
-	//! @brief デストラクタ
-	~singleton_base() {;}
-
 public:
-	//! @brief shared_ptr の typdef
-	typedef boost::shared_ptr<T> pointer;
-
 	//! @brief オブジェクトが存在することを確かにする
 	static void ensure()
 	{
@@ -356,29 +250,18 @@ public:
 	}
 
 	//! @brief シングルトンオブジェクトのインスタンスを返す
-	//! @note  一度 boost::weak_ptr から boost::shared_ptr に変換が
-	//! 行われるため、少々高価である。もし depends_on によって
-	//! オブジェクトが生きていることが保証できるならば、
-	//! depends_on::locked_instance の方が(変換の手間がないだけに)
-	//! 効率的にアクセスを行うことができる。
-	//! オブジェクトがすでに無効の場合は空のポインタが帰る。
-	static pointer instance()
+	static T* instance()
 	{
-		return manipulate_object().lock();
+		return manipulate_object();
 	}
 
 	//! @brief オブジェクトが有効かどうかを得る
 	//! @note
 	//! 当然ながらこの関数が呼ばれた時点の状態を返す。
 	//! 次の瞬間にオブジェクトがいまだ有効かどうかは保証がない。
-	//! 要するに、if(singleton::alive()) singleton::instance()-> ...
-	//! のような使い方では、最初に if 文中の alive で確認した状態で
-	//! 有効であっても、次の instance() では無効なオブジェクトが
-	//! 返される可能性があると言うこと。
-	//! 一般的に、シングルトンオブジェクトが生きている間だけ
-	//! 処理を行いたい場合は以下の構文を用いる:
-	//! if(SingletonClass::pointer r = SingletonClass::instance())
-	//! { /* use r */ }
+	//! 次の瞬間にオブジェクトが無効になる可能性があるのは、
+	//! 次の瞬間までに singleton_manager::disconnect_all が
+	//! 呼ばれた場合だけなのであまり考えなくてよいかもしれない
 	static bool alive()
 	{
 		if(!object_created) return false;
@@ -395,18 +278,6 @@ bool singleton_base<T>::object_created = false;
 
 
 //---------------------------------------------------------------------------
-//! @brief	シングルトン基底クラス用define
-//! @note	これは単純に、class A : public singleton_base<T> よりも class A: singleton_of<A> と
-//!			書けた方が幸せだろうというだけのこと。混乱の元ならば書かない方が使わない方が
-//!			いいかもしれないがそもそもテンプレートを使いまくってる時点で混乱するんだからこれぐらいの
-//!			混乱はなんと言うことはないのだろうか→結局これ使ってません
-//---------------------------------------------------------------------------
-#define singleton_of public singleton_base
-//---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
 //! @brief  シングルトン用依存関係定義テンプレート
 //! @note
 //! 特定のシングルトンクラスに依存していることを表すためにこれを継承させる。例を参照。
@@ -414,12 +285,12 @@ bool singleton_base<T>::object_created = false;
 template <typename T>
 class depends_on
 {
-	boost::shared_ptr<T> __referrer_object; //!< シングルトンオブジェクトへの参照を保持するメンバ
+	T* __referrer_object; //!< シングルトンオブジェクトへの参照を保持するメンバ
 public:
 	depends_on() : __referrer_object(singleton_base<T>::instance()) {;}
 
 	//! @brief オブジェクトのインスタンスを得る
-	boost::shared_ptr<T> & locked_instance() { return __referrer_object; }
+	T* depend_instance() { return __referrer_object; }
 };
 //---------------------------------------------------------------------------
 

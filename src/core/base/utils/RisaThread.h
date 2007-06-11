@@ -55,6 +55,12 @@ Risa は wxWidgets と boost という２つのライブラリのスレッド実
 
 	ここでは、tRisseCriticalSection を typedef したものを tRisaCriticalSection
 	として用いて使うこととする。
+
+
+	CriticalSection は、プログラム終了時までに正常に破棄される保証はない
+	(破棄されるよりも前にプログラムが終了する可能性がある)。通常は OS が
+	mutex などを回収するし、Windows の CriticalSection にあっては特に回収
+	すべき物など本来はないので問題は起きないと思われる。
 */
 
 

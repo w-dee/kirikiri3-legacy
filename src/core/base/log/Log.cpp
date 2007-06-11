@@ -25,7 +25,7 @@ tRisaLogger::tRisaLogger() : Buffer(MaxLogItems)
 
 
 //---------------------------------------------------------------------------
-tRisaLogger::~tRisaLogger()
+void tRisaLogger::destruct()
 {
 }
 //---------------------------------------------------------------------------
@@ -228,7 +228,7 @@ tRisaWxLogProxy::tRisaWxLogProxy()
 
 
 //---------------------------------------------------------------------------
-tRisaWxLogProxy::~tRisaWxLogProxy()
+void tRisaWxLogProxy::destruct()
 {
 	wxLog::SetActiveTarget(OldLog);
 }

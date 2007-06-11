@@ -80,7 +80,7 @@ class tRisaThreadInternal;
 //---------------------------------------------------------------------------
 //! @brief		スレッドの基本クラス
 //---------------------------------------------------------------------------
-class tRisaThread
+class tRisaThread : public tRisseDestructee
 {
 	friend class tRisaThreadInternal;
 
@@ -155,7 +155,7 @@ protected:
  を使うこと。
 */
 //---------------------------------------------------------------------------
-class tRisaThreadEvent
+class tRisaThreadEvent : public tRisseDestructee
 {
 	wxSemaphore Semaphore; //!< セマフォオブジェクト
 public:

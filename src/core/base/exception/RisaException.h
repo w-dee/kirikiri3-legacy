@@ -21,6 +21,9 @@
 //---------------------------------------------------------------------------
 class eRisaException
 {
+	//! このクラスはインスタンスを生成できない
+	eRisaException();
+
 public:
 	//! @brief		eRisaException型の例外を投げる
 	static void Throw(const tRisseString &msg);

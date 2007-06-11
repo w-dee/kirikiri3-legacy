@@ -20,9 +20,12 @@
 
 //---------------------------------------------------------------------------
 //! @brief		固定長リングバッファの実装
+//! @note		T のデストラクタはすべて呼び出されない
+//!				可能性があるので注意、というかデストラクタによる後処理が必要な
+//!				オブジェクトは指定しないこと。
 //---------------------------------------------------------------------------
 template <typename T>
-class tRisaRingBuffer
+class tRisaRingBuffer : public tRisseCollectee
 {
 	T * Buffer; //!< バッファ
 	size_t Size; //!< バッファのサイズ
@@ -35,17 +38,17 @@ public:
 	tRisaRingBuffer(size_t size)
 	{
 		Size = size;
-		Buffer = new T[Size];
+		Buffer = new (GC) T[Size];
 		WritePos = ReadPos = 0;
 		DataSize = 0;
 	}
-
+/*
 	//! @brief デストラクタ
 	~tRisaRingBuffer()
 	{
 		delete [] Buffer;
 	}
-
+*/
 	//! @brief	サイズを得る
 	size_t GetSize() { return Size; }
 

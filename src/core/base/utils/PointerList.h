@@ -37,7 +37,7 @@
 //---------------------------------------------------------------------------
 //! @brief  void * オブジェクトポインタリスト
 //---------------------------------------------------------------------------
-class void_pointer_list
+class void_pointer_list : public tRisseCollectee
 {
 	gc_vector<void *> m_list; //!< ポインタリスト
 	gc_vector<void *> *m_shadow_list; //!< シャドーリスト
@@ -66,13 +66,13 @@ public:
 		m_locked_item_count = 0;
 		m_has_null = false;
 	}
-
+/*
 	//! @brief		デストラクタ
 	~void_pointer_list()
 	{
 		delete m_shadow_list;
 	}
-
+*/
 private:
 	// 今のところこれらはコピー不可
 	void_pointer_list(const void_pointer_list & ref);
@@ -240,7 +240,7 @@ private:
 //! @brief  任意型のオブジェクトポインタリスト
 //---------------------------------------------------------------------------
 template <typename T>
-class pointer_list
+class pointer_list : public tRisseCollectee
 {
 	void_pointer_list m_list;
 

@@ -40,7 +40,7 @@ public:
 	};
 
 	//! @brief ログの１アイテム(１行) を表す構造体
-	struct tItem
+	struct tItem : public tRisseCollectee
 	{
 		wxDateTime Timestamp; //!< ログが行われた日付時刻
 		tRisseString Content; //!< ログの内容

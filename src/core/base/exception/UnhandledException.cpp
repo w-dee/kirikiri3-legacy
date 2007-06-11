@@ -10,6 +10,7 @@
 //! @file
 //! @brief ハンドルされなかった例外のハンドル
 //---------------------------------------------------------------------------
+
 #include "prec.h"
 #include "base/script/RisseEngine.h"
 #include "base/exception/RisaException.h"
@@ -22,32 +23,35 @@
 RISSE_DEFINE_SOURCE_ID(28545,30194,3434,19984,56458,2209,37707,53134);
 
 
-#if 0
-// TODO: 一時的に無効化
-
 //---------------------------------------------------------------------------
 //! @brief		スクリプト例外を表示する
 //! @param		e		例外オブジェクト
 //---------------------------------------------------------------------------
-void tRisaUnhandledExceptionHandler::ShowScriptException(eRisse &e)
+void tRisaUnhandledExceptionHandler::ShowScriptException(const tRisseVariant * e)
 {
+/*
+	TODO: handle this
 	// イベント配信を無効に
 	if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
 		r->SetCanDeliverEvents(false);
+*/
 
 	// ログ
+	tRisseString message = e->operator tRisseString();
+
 	tRisaLogger::Log(
 		RISSE_WS_TR("An exception had been occured"), tRisaLogger::llError);
 	tRisaLogger::Log(
-		e.GetMessageString(), tRisaLogger::llError);
+		message, tRisaLogger::llError);
 
 	// メッセージボックスを表示
 	wxMessageBox(wxString(_("An exception had been occured")) + wxT("\n") +
-		e.GetMessageString().AsWxString(), _("Exception"), wxICON_ERROR);
+		message.AsWxString(), _("Exception"), wxICON_ERROR);
 }
 //---------------------------------------------------------------------------
 
 
+#if 0
 //---------------------------------------------------------------------------
 //! @brief		スクリプト例外を表示する
 //! @param		e		例外オブジェクト

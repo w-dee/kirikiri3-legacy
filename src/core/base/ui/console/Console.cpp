@@ -150,9 +150,6 @@ void tRisaHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 	tRisaRisseScriptEngine::instance()->
 		EvaluateExpresisonAndPrintResultToConsole(tRisseString(value));
 
-	// GC
-	GC_gcollect();
-
 	// 入力をヒストリに入れる
 	if(History.size() == 0 || History[0] != value)
 		PushHistory(value);

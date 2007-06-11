@@ -80,7 +80,10 @@ public:
 //! @brief		例外を捕捉し、必要ならばエラー表示を行うマクロ
 //---------------------------------------------------------------------------
 #define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(origin) \
-	catch(...) { throw; }
+	catch(const tRisseVariant * e) \
+	{ \
+		tRisaUnhandledExceptionHandler::ShowScriptException(e); \
+	} \
 
 
 /*\

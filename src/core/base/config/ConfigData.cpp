@@ -52,18 +52,16 @@ tRisaConfigData::~tRisaConfigData()
 
 //---------------------------------------------------------------------------
 tRisaConfig::tRisaConfig() :
-	Variable(new tRisaConfigData(GetConfigFileName(wxT("variable")))),
-	System  (new tRisaConfigData(GetConfigFileName(wxT("system"))))
+	Variable(GetConfigFileName(wxT("variable"))),
+	System  (GetConfigFileName(wxT("system")))
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaConfig::destruct()
+tRisaConfig::~tRisaConfig()
 {
-	delete Variable;
-	delete System;
 }
 //---------------------------------------------------------------------------
 

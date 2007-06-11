@@ -63,11 +63,8 @@ public:
 	//! @brief		コンストラクタ
 	tRisaLogFile();
 
-	//! @brief		デストラクタ(destructから呼ばれる)
-	virtual ~tRisaLogFile();
-
-	//! @brief		消滅関数
-	void destruct();
+	//! @brief		デストラクタ
+	~tRisaLogFile();
 
 private:
 	//! @brief		行を一行出力する

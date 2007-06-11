@@ -17,7 +17,7 @@
 #include "base/event/IdleEvent.h"
 #include "base/event/TickCount.h"
 #include "base/script/RisseEngine.h"
-//#include "base/ui/console/Console.h"
+#include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
 #include "base/log/Log.h"
 
@@ -125,12 +125,13 @@ bool tRisaApplication::OnInit()
 //		RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 //		NULL, NULL, NULL);
 
-	// スクリプトエディタをメインウィンドウとして表示
+	// コンソールをメインウィンドウとして表示
+	tRisaConsoleFrame *console = new tRisaConsoleFrame();
+	console->Show(true);
+
 	tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
 	editor->Show(true);
 
-//	tRisaConsoleFrame *console = new tRisaConsoleFrame();
-//	console->Show(true);
 
 	//---- ↑↑テストコード↑↑ ----
 
@@ -188,8 +189,8 @@ bool tRisaApplication::ProcessIdle()
 		if(tRisaIdleEventManager::pointer r = tRisaIdleEventManager::instance())
 			cont = r->Deliver(tick) || cont;
 	}
-	cont = wxApp::ProcessIdle() || cont;
 */
+	cont = wxApp::ProcessIdle()/* || cont*/;
 	return cont;
 }
 //---------------------------------------------------------------------------

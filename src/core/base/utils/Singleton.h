@@ -117,10 +117,14 @@ public:
 //! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス。
 //!			すべてのシングルトンクラスは同時に tRisseCollectee のサブクラスとなり、
 //!			つまり GC reachable である。
-//!			シングルトンオブジェクトのデストラクタは「呼ばれない」。
 //!			destruct という仮想関数があり、これが
 //!			singleton_manager::disconnect_all の時点で呼ばれる事になっているので
-//!			必要な終了処理などはこのタイミングで行うこと。
+//!			必要な終了処理などはこのタイミングで行うこと。destruct の規定の動作は
+//!			delete this である。つまり、一応 singleton_manager::disconnect_all
+//!			が呼ばれる以上はデストラクタが呼ばれると仮定して良い。
+//!			ただし、instance() で得たポインタが有効なのは
+//!			singleton_manager::disconnect_all が呼ばれるまでの間であることには
+//!			注意しなければならない。
 //---------------------------------------------------------------------------
 template <typename T>
 class singleton_base : public tRisseCollectee
@@ -224,8 +228,8 @@ class singleton_base : public tRisseCollectee
 	}
 
 	//! @brief	オブジェクトの消滅を行う仮想関数(下位クラスでオーバーライドすること)
-	//! @note	この中では delete this を「してもよい」
-	virtual void destruct() {;}
+	//! @note	デフォルトでは delete this する
+	virtual void destruct() {delete this;}
 
 	//! @brief クラス名を得る
 	static const char * get_name()
@@ -241,6 +245,9 @@ protected:
 			// 何もしないダミーのメソッドである do_nothing を呼ぶことにより、
 			// register_object が作成されることを確実にする
 	}
+
+	//! @brief	デストラクタ
+	virtual ~singleton_base() {;}
 
 public:
 	//! @brief オブジェクトが存在することを確かにする

@@ -63,11 +63,8 @@ public:
 	//! @brief		コンストラクタ
 	tRisaLogger();
 
-	//! @brief		デストラクタ(呼ばれないので注意)
-	virtual ~tRisaLogger() {;}
-
-	//! @brief		消滅関数
-	void destruct();
+	//! @brief		デストラクタ
+	~tRisaLogger();
 
 public:
 	const tRisaRingBuffer<tItem> & GetBuffer() const 
@@ -149,8 +146,8 @@ public:
 	//! @brief		コンストラクタ
 	tRisaWxLogProxy();
 
-	//! @brief		消滅関数
-	void destruct();
+	//! @brief		デストラクタ
+	~tRisaWxLogProxy();
 
 protected:
 	//! @brief		ログを行う

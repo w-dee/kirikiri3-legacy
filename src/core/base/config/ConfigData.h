@@ -64,19 +64,19 @@ private:
 //---------------------------------------------------------------------------
 class tRisaConfig : public singleton_base<tRisaConfig>
 {
-	tRisaConfigData *Variable; //!< Variable設定情報
-	tRisaConfigData *System; //!< System設定情報
+	tRisaConfigData Variable; //!< Variable設定情報
+	tRisaConfigData System; //!< System設定情報
 
 public:
 	//! @brief		コンストラクタ
 	tRisaConfig();
 
-	//! @brief		消滅関数
-	void destruct();
+	//! @brief		デストラクタ
+	~tRisaConfig();
 
 public:
-	tRisaConfigData & GetVariableConfig() { return *Variable; } //!< Variable設定情報を返す
-	tRisaConfigData & GetSystemConfig()   { return *System;   } //!< System設定情報を返す
+	tRisaConfigData & GetVariableConfig() { return Variable; } //!< Variable設定情報を返す
+	tRisaConfigData & GetSystemConfig()   { return System;   } //!< System設定情報を返す
 
 private:
 	//! @brief		設定ファイルのファイル名を得る

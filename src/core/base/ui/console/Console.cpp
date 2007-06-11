@@ -312,9 +312,11 @@ tRisaLogViewerStatusBar::tRisaLogViewerStatusBar(wxWindow *parent)
 {
 	SetFieldsCount(1);
 
-	TextCtrl = new tRisaHistoryTextCtrl(this);
+	wxClientDC dc(this);
+	int lineheight = dc.GetCharHeight();
 
-	SetSize(-1, -1, -1, TextCtrl->GetSize().GetHeight() + 4);
+	TextCtrl = new tRisaHistoryTextCtrl(this);
+	SetSize(-1, -1, -1, lineheight + 10); // XXX 10?
 
 	AdjustControlSize();
 }

@@ -146,8 +146,9 @@ void tRisaHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 
 	// Risse に式を評価させ、結果をコンソールに表示する
 	wxString value = event.GetString();
-//	tRisaRisseScriptEngine::instance()->
-//		EvalExpresisonAndPrintResultToConsole(tRisseString(value));
+
+	tRisaRisseScriptEngine::instance()->
+		EvaluateExpresisonAndPrintResultToConsole(tRisseString(value));
 
 	// 入力をヒストリに入れる
 	if(History.size() == 0 || History[0] != value)

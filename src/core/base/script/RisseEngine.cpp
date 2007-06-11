@@ -12,10 +12,9 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/script/RisseEngine.h"
-#include "risse/include/risseError.h"
 #include "base/log/Log.h"
+#include "risse/include/risseObjectBase.h"
 
-#if 0
 
 RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);
 
@@ -23,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);
 //---------------------------------------------------------------------------
 tRisaRisseScriptEngine::tRisaRisseScriptEngine()
 {
-	Engine = new tRisse();
+	Engine = new tRisseScriptEngine();
 }
 //---------------------------------------------------------------------------
 
@@ -31,15 +30,6 @@ tRisaRisseScriptEngine::tRisaRisseScriptEngine()
 //---------------------------------------------------------------------------
 tRisaRisseScriptEngine::~tRisaRisseScriptEngine()
 {
-	if(Engine)
-	{
-/*
-#ifdef __WXDEBUG__
-		wxFprintf(stderr, wxT("warning: tRisaRisseScriptEngine::instance()->Shutdown() should be called before main() ends.\n"));
-#endif
-*/
-		Shutdown();
-	}
 }
 //---------------------------------------------------------------------------
 
@@ -47,47 +37,37 @@ tRisaRisseScriptEngine::~tRisaRisseScriptEngine()
 //---------------------------------------------------------------------------
 void tRisaRisseScriptEngine::Shutdown()
 {
-	if(Engine)
-	{
-		Engine->Shutdown();
-		Engine->Release();
-		Engine = NULL;
-	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaRisseScriptEngine::RegisterGlobalObject(const risse_char *name,
-	iRisseDispatch2 * object)
+void tRisaRisseScriptEngine::RegisterGlobalObject(const tRisseString & name, const tRisseVariant & object)
 {
 	if(!Engine) return;
-	tRisseVariant val(object, NULL);
-	iRisseDispatch2 * global = Engine->GetGlobalNoAddRef();
-	risse_error er;
-	er = global->PropSet(RISSE_MEMBERENSURE, name, NULL, &val, global);
-	if(RISSE_FAILED(er))
-		RisseThrowFrom_risse_error(er, name);
+	// グローバルオブジェクトは tRisseObjectBase のはず・・・
+	RISSE_ASSERT(dynamic_cast<tRisseObjectBase *>(Engine->GetGlobalObject().GetObjectInterface()) != NULL);
+	static_cast<tRisseObjectBase *>(Engine->GetGlobalObject().GetObjectInterface())->RegisterNormalMember(name, object);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const tRisseString & expression)
+void tRisaRisseScriptEngine::EvaluateExpresisonAndPrintResultToConsole(const tRisseString & expression)
 {
 	// execute the expression
 	tRisseString result_str;
 	tRisseVariant result;
 	try
 	{
-		Engine->EvalExpression(expression, &result);
+		Engine->Evaluate(expression, RISSE_WS_TR("console"), 0, &result, NULL, true);
 	}
-	catch(eRisse &e)
+	catch(const tRisseVariant * e)
 	{
 		// An exception had been occured in console quick Risse expression evaluation
-		result_str = tRisseString(RISSE_WS_TR("(Console) ")) + expression +
+		result_str = tRisseString(RISSE_WS_TR("(Console)")) + expression +
 			tRisseString(RISSE_WS_TR(" = (exception) ")) +
-			e.GetMessageString();
+			e->operator tRisseString();
 		tRisaLogger::Log(result_str, tRisaLogger::llError);
 		return;
 	}
@@ -98,21 +78,19 @@ void tRisaRisseScriptEngine::EvalExpresisonAndPrintResultToConsole(const tRisseS
 
 	// success in console quick Risse expression evaluation
 	result_str = tRisseString(RISSE_WS_TR("(Console) ")) + expression +
-		tRisseString(RISSE_WS_TR(" = ")) +
-		RisseVariantToReadableString(result);
+		tRisseString(RISSE_WS_TR(" = ")) + result.AsHumanReadable();
 	tRisaLogger::Log(result_str);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaRisseScriptEngine::ExecuteScript(
-		const tRisseString &script, tRisseVariant *result,
-		iRisseDispatch2 *context,
-		const tRisseString *name, risse_int lineofs)
+void tRisaRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseString & name,
+				risse_size lineofs,
+				tRisseVariant * result,
+				const tRisseBindingInfo * binding, bool is_expression)
 {
-	Engine->ExecScript(script, result, context, name, lineofs);
+	Engine->Evaluate(script, name, lineofs, result, binding, is_expression);
 }
 //---------------------------------------------------------------------------
 
-#endif

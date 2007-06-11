@@ -89,7 +89,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseString & name,
 					risse_size lineofs,
 					tRisseVariant * result, const tRisseBindingInfo * binding,
-					bool is_expresion)
+					bool is_expression)
 {
 	try
 	{
@@ -98,7 +98,7 @@ void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseStrin
 		tRisseScriptBlock * block = new tRisseScriptBlock(this, script, name);
 
 		// スクリプトをグローバルコンテキストで実行
-		block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding, result, is_expresion);
+		block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding, result, is_expression);
 	}
 	catch(const tRisseTemporaryException * te)
 	{

@@ -79,12 +79,12 @@ public:
 	//!								スクリプトのオフセットを記録できる)
 	//! @param		result			実行の結果(NULL可)
 	//! @param		binding			バインディング情報(NULLの場合はグローバルバインディング)
-	//! @param		is_expresion	式モードかどうか(Risseのように文と式の区別を
+	//! @param		is_expression	式モードかどうか(Risseのように文と式の区別を
 	//!								する必要がない言語ではfalseでよい)
 	void Evaluate(const tRisseString & script, const tRisseString & name,
 					risse_size lineofs = 0,
 					tRisseVariant * result = NULL,
-					const tRisseBindingInfo * binding = NULL, bool is_expresion = false);
+					const tRisseBindingInfo * binding = NULL, bool is_expression = false);
 
 	//! @brief		警告情報の出力先を設定する
 	//! @param		output		警告情報の出力先

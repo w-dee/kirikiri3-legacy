@@ -13,15 +13,15 @@
 #ifndef RisseENGINEH
 #define RisseENGINEH
 
+#include "risse/include/risseScriptEngine.h"
 #include "base/utils/Singleton.h"
 
-#if 0
 //---------------------------------------------------------------------------
 //! @brief		Risseスクリプトエンジンへのインターフェース
 //---------------------------------------------------------------------------
 class tRisaRisseScriptEngine : public singleton_base<tRisaRisseScriptEngine>
 {
-	tRisse *Engine;
+	tRisseScriptEngine *Engine; //!< スクリプトエンジンインスタンス
 
 public:
 	//! @brief		コンストラクタ
@@ -33,32 +33,37 @@ public:
 	//! @brief		シャットダウン
 	void Shutdown();
 
-	tRisse * GetEngineNoAddRef() { return Engine; } //!< スクリプトエンジンを返す
-	iRisseDispatch2 * GetGlobalNoAddRef()
-		{ if(!Engine) return NULL; return Engine->GetGlobalNoAddRef(); } //!< スクリプトエンジンを返す
+	tRisseScriptEngine * GetEngine() { return Engine; } //!< スクリプトエンジンを返す
+
+	const tRisseVariant & GetGlobalObject()
+		{ if(!Engine) return tRisseVariant::GetNullObject(); return Engine->GetGlobalObject(); }
+		//!< グローバルオブジェクトを返す
 
 	//! @brief		グローバルにオブジェクトを登録する
 	//! @param		name    オブジェクトにつけたい名前
 	//! @param		object  その名前で登録したいオブジェクト
-	void RegisterGlobalObject(const risse_char *name, iRisseDispatch2 * object);
+	void RegisterGlobalObject(const tRisseString & name, const tRisseVariant & object);
 
 	//! @brief		式を評価して結果をコンソールに表示する
 	//! @param		expression 式
-	void EvalExpresisonAndPrintResultToConsole(const tRisseString & expression);
+	void EvaluateExpresisonAndPrintResultToConsole(const tRisseString & expression);
 
-	//! @brief		スクリプトブロックを実行する
-	//! @param		script		スクリプト
-	//! @param		result		実行結果を受け取るtRisseVariant型オブジェクトへのポインタ(要らない場合はNULLを)
-	//! @param		context		実行を行うコンテキスト(globalで動かしたい場合はNULL)
-	//! @param		name		スクリプトブロック名
-	//! @param		lineofs		このスクリプトブロックの(オリジナルのファイル全体に対する)開始行
-	void ExecuteScript(const tRisseString &script, tRisseVariant *result = NULL,
-		iRisseDispatch2 *context = NULL,
-		const tRisseString *name = NULL, risse_int lineofs = 0);
+	//! @brief		スクリプトを評価する
+	//! @param		script			スクリプトの内容
+	//! @param		name			スクリプトブロックの名称
+	//! @param		lineofs			行オフセット(ドキュメント埋め込みスクリプト用に、
+	//!								スクリプトのオフセットを記録できる)
+	//! @param		result			実行の結果(NULL可)
+	//! @param		binding			バインディング情報(NULLの場合はグローバルバインディング)
+	//! @param		is_expression	式モードかどうか(Risseのように文と式の区別を
+	//!								する必要がない言語ではfalseでよい)
+	void Evaluate(const tRisseString & script, const tRisseString & name,
+					risse_size lineofs = 0,
+					tRisseVariant * result = NULL,
+					const tRisseBindingInfo * binding = NULL, bool is_expression = false);
 };
 //---------------------------------------------------------------------------
 
-#endif
 
 
 #endif

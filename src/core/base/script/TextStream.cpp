@@ -371,24 +371,18 @@ void tRisaTextWriteStream::Write(const tRisseString & targ)
 		// UTF-8 に変換したときのサイズを得る
 		size_t utf8_len = targ.GetUtf8Length();
 		if(utf8_len == static_cast<size_t>(-1L)) break; // 変換に失敗
-		char * utf8_buf = new char [utf8_len + 1];
-		try
-		{
-			// UTF-8 に変換する
-			targ.GetUtf8String(utf8_buf);
+		char * utf8_buf = new (PointerFreeGC) char [utf8_len + 1];
 
-			// ファイルに書き込む
-			Stream->WriteBuffer(utf8_buf, utf8_len);
+		// UTF-8 に変換する
+		targ.GetUtf8String(utf8_buf);
 
-			// 戻る
-			return;
-		}
-		catch(...)
-		{
-			delete [] utf8_buf;
-			throw;
-		}
-		delete [] utf8_buf;
+		// ファイルに書き込む
+		Stream->WriteBuffer(utf8_buf, utf8_len);
+
+		delete (PointerFreeGC) [] utf8_buf;
+
+		// 戻る
+		return;
 	}
 
 	// エラーの場合

@@ -41,20 +41,14 @@ tRisaDecompressedHolder::tRisaDecompressedHolder(tMethod method,
 	Data = NULL;
 
 	// 入力データをメモリに読み込む
-	risse_uint8 * indata = new risse_uint8[insize];
-	try
-	{
-		instream->ReadBuffer(indata, insize);
+	risse_uint8 * indata = new (PointerFreeGC) risse_uint8[insize];
 
-		// データを展開
-		Decompress(method, indata, insize, uncomp_size);
-	}
-	catch(...)
-	{
-		delete [] indata;
-		throw;
-	}
-	delete [] indata;
+	instream->ReadBuffer(indata, insize);
+
+	// データを展開
+	Decompress(method, indata, insize, uncomp_size);
+
+	delete (PointerFreeGC) [] indata;
 }
 //---------------------------------------------------------------------------
 
@@ -62,7 +56,7 @@ tRisaDecompressedHolder::tRisaDecompressedHolder(tMethod method,
 //---------------------------------------------------------------------------
 tRisaDecompressedHolder::~tRisaDecompressedHolder()
 {
-	delete [] Data;
+	delete (PointerFreeGC) [] Data;
 }
 //---------------------------------------------------------------------------
 
@@ -72,7 +66,7 @@ void tRisaDecompressedHolder::Decompress(tRisaDecompressedHolder::tMethod method
 		risse_size uncomp_size)
 {
 	// すでにメモリブロックが割り当てられていた場合はメモリブロックを解放
-	delete [] Data, Data = NULL;
+	delete (PointerFreeGC) [] Data, Data = NULL;
 	Size = 0;
 
 	// メソッドをチェック (現在はzlibのみ)
@@ -80,21 +74,14 @@ void tRisaDecompressedHolder::Decompress(tRisaDecompressedHolder::tMethod method
 
 	// 出力メモリブロックを確保
 	Size = uncomp_size;
-	Data = new risse_uint8[uncomp_size];
-	try
-	{
-		// uncompress data
-		unsigned long destlen = Size;
-		int result = uncompress( (unsigned char*)indata, &destlen,
-				(unsigned char*)indata, insize);
-		if(result != Z_OK || destlen != Size)
-			eRisaException::Throw(RISSE_WS_TR("Decompression failed. Data may be corrupted."));
-	}
-	catch(...)
-	{
-		delete [] Data;
-		throw;
-	}
+	Data = new (PointerFreeGC) risse_uint8[uncomp_size];
+
+	// uncompress data
+	unsigned long destlen = Size;
+	int result = uncompress( (unsigned char*)Data, &destlen,
+			(unsigned char*)indata, insize);
+	if(result != Z_OK || destlen != Size)
+		eRisaException::Throw(RISSE_WS_TR("Decompression failed. Data may be corrupted."));
 }
 //---------------------------------------------------------------------------
 

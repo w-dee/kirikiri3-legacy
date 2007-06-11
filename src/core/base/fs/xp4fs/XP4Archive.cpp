@@ -256,68 +256,67 @@ tRisaXP4Archive::tRisaXP4Archive(const tRisseString & filename, iMapCallback & c
 
 	unsigned char * raw_index = NULL;
 	unsigned char * compressed_index = NULL;
-	try
+
+	raw_index = new (PointerFreeGC) unsigned char [raw_index_size];
+	compressed_index = new (PointerFreeGC) unsigned char [compressed_index_size];
+	stream->ReadBuffer(compressed_index, compressed_index_size);
+
+	// 圧縮が行われている場合は展開を行う
+	if((flags & RISA__XP4_INDEX_ENCODE_METHOD_MASK) ==
+		RISA__XP4_INDEX_ENCODE_ZLIB)
 	{
-		raw_index = new unsigned char [raw_index_size];
-		compressed_index = new unsigned char [compressed_index_size];
-		stream->ReadBuffer(compressed_index, compressed_index_size);
-
-		// 圧縮が行われている場合は展開を行う
-		if((flags & RISA__XP4_INDEX_ENCODE_METHOD_MASK) ==
-			RISA__XP4_INDEX_ENCODE_ZLIB)
+		// 圧縮が行われている
+		unsigned long input_size = compressed_index_size;
+		unsigned long output_size = raw_index_size;
+		int res = uncompress(raw_index, &output_size,
+			compressed_index, input_size);
+		if(res != Z_OK || output_size != raw_index_size)
 		{
-			// 圧縮が行われている
-			unsigned long input_size = compressed_index_size;
-			unsigned long output_size = raw_index_size;
-			int res = uncompress(raw_index, &output_size,
-				compressed_index, input_size);
-			if(res != Z_OK || output_size != raw_index_size)
-			{
-				// 圧縮インデックスの展開に失敗した
-				eRisaException::Throw(tRisseString(wxString::Format(
-					RISSE_WS_TR("decompression of archive index of '%s' failed"),
-					filename.AsWxString().c_str())));
-			}
-		}
-		else
-		{
-			// 圧縮は行われていない
-			memcpy(raw_index, compressed_index, compressed_index_size);
-		}
-
-		// Item チャンクを探す
-		const unsigned char *chunk;
-		size_t chunksize;
-		static unsigned char chunkname_Item[] = { 'I', 't', 'e', 'm' };
-		if(!RisaFindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
-		{
+			// 圧縮インデックスの展開に失敗した
 			eRisaException::Throw(tRisseString(wxString::Format(
-				RISSE_WS_TR("chunk 'Item' not found in file '%s'"),
+				RISSE_WS_TR("decompression of archive index of '%s' failed"),
 				filename.AsWxString().c_str())));
 		}
+	}
+	else
+	{
+		// 圧縮は行われていない
+		memcpy(raw_index, compressed_index, compressed_index_size);
+	}
 
-		// Item チャンクの内容を読み込む
-		// Item チャンクの中には複数の File チャンクがある
-		const unsigned char *mem = chunk;
-		const unsigned char *mem_limit = mem + chunksize;
-		size_t left = mem_limit - mem;
-		static unsigned char chunkname_File[] = { 'F', 'i', 'l', 'e' };
-		tRisseString inarchivename;
-		bool deleted;
-		while(RisaFindChunk(chunkname_File, mem, left, &chunk, &chunksize))
-		{
-			// File チャンクが見つかった
-			risse_size idx = Files.size();
-			Files.push_back(tFile(this, chunk, chunksize, inarchivename, deleted));
-			mem = chunk + chunksize;
-			left = mem_limit - mem;
+	// Item チャンクを探す
+	const unsigned char *chunk;
+	size_t chunksize;
+	static unsigned char chunkname_Item[] = { 'I', 't', 'e', 'm' };
+	if(!RisaFindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
+	{
+		eRisaException::Throw(tRisseString(wxString::Format(
+			RISSE_WS_TR("chunk 'Item' not found in file '%s'"),
+			filename.AsWxString().c_str())));
+	}
 
-			// callback を呼ぶ
-			if(deleted)
-				callback(inarchivename); // 削除
-			else
-				callback(inarchivename, idx); // 追加または更新
-		}
+	// Item チャンクの内容を読み込む
+	// Item チャンクの中には複数の File チャンクがある
+	const unsigned char *mem = chunk;
+	const unsigned char *mem_limit = mem + chunksize;
+	size_t left = mem_limit - mem;
+	static unsigned char chunkname_File[] = { 'F', 'i', 'l', 'e' };
+	tRisseString inarchivename;
+	bool deleted;
+	while(RisaFindChunk(chunkname_File, mem, left, &chunk, &chunksize))
+	{
+		// File チャンクが見つかった
+		risse_size idx = Files.size();
+		Files.push_back(tFile(this, chunk, chunksize, inarchivename, deleted));
+		mem = chunk + chunksize;
+		left = mem_limit - mem;
+
+		// callback を呼ぶ
+		if(deleted)
+			callback(inarchivename); // 削除
+		else
+			callback(inarchivename, idx); // 追加または更新
+	}
 
 	/*
 		// Meta チャンクを探す
@@ -335,15 +334,9 @@ tRisaXP4Archive::tRisaXP4Archive(const tRisseString & filename, iMapCallback & c
 			}
 		}
 	*/
-	}
-	catch(...)
-	{
-		if(raw_index) delete [] raw_index;
-		if(compressed_index) delete [] compressed_index;
-		throw;
-	}
-	delete [] raw_index;
-	delete [] compressed_index;
+
+	delete (PointerFreeGC) [] raw_index;
+	delete (PointerFreeGC) [] compressed_index;
 }
 //---------------------------------------------------------------------------
 

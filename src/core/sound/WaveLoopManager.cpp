@@ -361,18 +361,18 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 						risse_int alloc_size =
 							(before_count + after_count) * 
 								FileInfo->GetSampleGranuleSize();
-						CrossFadeSamples = new risse_uint8[alloc_size];
-						src1 = new risse_uint8[alloc_size];
-						src2 = new risse_uint8[alloc_size];
+						CrossFadeSamples = new (PointerFreeGC) risse_uint8[alloc_size];
+						src1 = new (PointerFreeGC) risse_uint8[alloc_size];
+						src2 = new (PointerFreeGC) risse_uint8[alloc_size];
 					}
 					catch(...)
 					{
 						// memory allocation failed. perform normal link.
 						if(CrossFadeSamples)
-							delete [] CrossFadeSamples,
+							delete (PointerFreeGC) [] CrossFadeSamples,
 								CrossFadeSamples = NULL;
-						if(src1) delete [] src1;
-						if(src2) delete [] src2;
+						if(src1) delete (PointerFreeGC) [] src1;
+						if(src2) delete (PointerFreeGC) [] src2;
 						next_event_pos = link.From;
 					}
 					if(CrossFadeSamples)
@@ -397,8 +397,8 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 						DoCrossFade(CrossFadeSamples + after_offset,
 							src1 + after_offset, src2 + after_offset,
 								after_count, 50, 100);
-						delete [] src1;
-						delete [] src2;
+						delete (PointerFreeGC) [] src1;
+						delete (PointerFreeGC) [] src2;
 						// reset CrossFadePosition and CrossFadeLen
 						CrossFadePosition = 0;
 						CrossFadeLen = before_count + after_count;
@@ -726,7 +726,7 @@ void tRisaWaveLoopManager::DoCrossFade(void *dest, void *src1,
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::ClearCrossFadeInformation()
 {
-	if(CrossFadeSamples) delete [] CrossFadeSamples, CrossFadeSamples = NULL;
+	if(CrossFadeSamples) delete (PointerFreeGC) [] CrossFadeSamples, CrossFadeSamples = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -1039,7 +1039,7 @@ bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 	if(size == -1) return false; // not able to convert the string
 
 	// allocate output buffer
-	risse_char *us = new risse_char[size + 1];
+	risse_char *us = new (PointerFreeGC) risse_char[size + 1];
 	try
 	{
 		RisaUtf8ToWideCharString(s, us);
@@ -1051,10 +1051,10 @@ bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 	}
 	catch(...)
 	{
-		delete [] us;
+		delete (PointerFreeGC) [] us;
 		throw;
 	}
-	delete [] us;
+	delete (PointerFreeGC) [] us;
 	return true;
 #else
 	v = tRisseString(wxString(s, wxConvUTF8));
@@ -1382,7 +1382,7 @@ void tRisaWaveLoopManager::PutString(AnsiString &s, tRisaLabelStringType v)
 	// count output bytes
 	int size = RisaWideCharToUtf8String(pi, NULL);
 
-	char * out = new char [size + 1];
+	char * out = new (PointerFreeGC) char [size + 1];
 	try
 	{
 		// convert the string
@@ -1394,10 +1394,10 @@ void tRisaWaveLoopManager::PutString(AnsiString &s, tRisaLabelStringType v)
 	}
 	catch(...)
 	{
-		delete [] out;
+		delete (PointerFreeGC) [] out;
 		throw;
 	}
-	delete [] out;
+	delete (PointerFreeGC) [] out;
 }
 //---------------------------------------------------------------------------
 void tRisaWaveLoopManager::DoSpacing(AnsiString &l, int col)

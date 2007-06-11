@@ -44,7 +44,7 @@ void tRisaLogFile::OutputOneLine(const tRisseString & str)
 	if(utf8_len == static_cast<size_t>(-1L))
 		return; // ログ不可(実際にはUTF32がUTF8に変換できないことはないのでこれはあり得ない)
 
-	char * utf8_buf = new char [utf8_len + 1 + 2]; // +2 = CR+LF分の余裕
+	char * utf8_buf = new (PointerFreeGC) char [utf8_len + 1 + 2]; // +2 = CR+LF分の余裕
 	try
 	{
 		str.GetUtf8String(utf8_buf);
@@ -70,10 +70,10 @@ void tRisaLogFile::OutputOneLine(const tRisseString & str)
 	}
 	catch(...)
 	{
-		delete [] utf8_buf;
+		delete (PointerFreeGC) [] utf8_buf;
 		throw;
 	}
-	delete [] utf8_buf;
+	delete (PointerFreeGC) [] utf8_buf;
 
 	// ファイルを flush する
 	LogFile.Flush();

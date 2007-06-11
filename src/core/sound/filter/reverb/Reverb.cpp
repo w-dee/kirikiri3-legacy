@@ -27,7 +27,7 @@ tRisaReverb::tRisaReverb() :
 //---------------------------------------------------------------------------
 tRisaReverb::~tRisaReverb()
 {
-	delete [] Buffer;
+	delete (PointerFreeGC) [] Buffer;
 }
 //---------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ void tRisaReverb::Filter()
 	if(channels != 2) return; // チャンネルは 2 (stereo)以外は今のところ対応していない
 
 	// 入力バッファを確保
-	if(!Buffer) Buffer = new float[NumBufferSampleGranules * InputFormat.Channels];
+	if(!Buffer) Buffer = new (PointerFreeGC) float[NumBufferSampleGranules * InputFormat.Channels];
 
 	// 出力バッファを確保
 	float * dest_buf = reinterpret_cast<float*>(PrepareQueue(NumBufferSampleGranules));

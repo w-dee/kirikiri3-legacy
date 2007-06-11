@@ -72,7 +72,7 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 		if(metadataid == 0x01)
 		{
 			// ファイル名
-			unsigned char * p = new unsigned char [metalen];
+			unsigned char * p = new (PointerFreeGC) unsigned char [metalen];
 			src->ReadBuffer(p, metalen);
 			p[metalen - 1] = 0;
 			Name = tRisseString(wxString(reinterpret_cast<char*>(p), wxConvUTF8));

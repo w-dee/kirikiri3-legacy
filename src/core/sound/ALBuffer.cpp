@@ -109,9 +109,9 @@ void tRisaALBuffer::Clear()
 //---------------------------------------------------------------------------
 void tRisaALBuffer::FreeTempBuffers()
 {
-	free(RenderBuffer), RenderBuffer = NULL;
+	RisseFreeCollectee(RenderBuffer), RenderBuffer = NULL;
 	RenderBufferSize = 0;
-	free(ConvertBuffer), ConvertBuffer = NULL;
+	RisseFreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
 	ConvertBufferSize = 0;
 }
 //---------------------------------------------------------------------------
@@ -171,10 +171,14 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 			size_t buffer_size_needed = ( rendered + one_want ) * ALSampleGranuleBytes;
 			if(RenderBufferSize < buffer_size_needed)
 			{
-				void * newbuffer = realloc(RenderBuffer, buffer_size_needed);
+				void * newbuffer;
+				if(RenderBuffer == NULL)
+					newbuffer = RisseMallocAtomicCollectee(RenderBuffer);
+				else
+					newbuffer = RisseReallocCollectee(RenderBuffer, buffer_size_needed);
 				if(!newbuffer)
 				{
-					free(RenderBuffer), RenderBuffer = NULL;
+					RisseFreeCollectee(RenderBuffer), RenderBuffer = NULL;
 					RenderBufferSize = 0;
 					cont = false;
 				}
@@ -191,10 +195,14 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 				buffer_size_needed = one_want * filter_sample_granule_bytes;
 				if(ConvertBufferSize < buffer_size_needed)
 				{
-					void * newbuffer = realloc(ConvertBuffer, buffer_size_needed);
+					void * newbuffer;
+					if(ConvertBuffer == NULL)
+						newbuffer = RisseMallocAtomicCollectee(ConvertBuffer);
+					else
+						newbuffer = RisseReallocCollectee(ConvertBuffer, buffer_size_needed);
 					if(!newbuffer)
 					{
-						free(ConvertBuffer), ConvertBuffer = NULL;
+						RisseFreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
 						ConvertBufferSize = 0;
 						cont = false;
 					}

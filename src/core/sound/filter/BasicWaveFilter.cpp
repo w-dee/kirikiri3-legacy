@@ -34,8 +34,8 @@ tRisaBasicWaveFilter::tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_t
 //---------------------------------------------------------------------------
 tRisaBasicWaveFilter::~tRisaBasicWaveFilter()
 {
-	if(ConvertBuffer) free(ConvertBuffer);
-	if(QueuedData) free(QueuedData);
+	if(ConvertBuffer) RisseFreeCollectee(ConvertBuffer);
+	if(QueuedData) RisseFreeCollectee(QueuedData);
 }
 //---------------------------------------------------------------------------
 
@@ -127,10 +127,14 @@ void * tRisaBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 	risse_uint buffer_size_needed = numsamplegranules * OutputFormat.GetSampleGranuleSize();
 	if(QueuedDataAllocSize < buffer_size_needed)
 	{
-		void * newbuffer = realloc(QueuedData, buffer_size_needed);
+		void * newbuffer;
+		if(QueuedData == NULL)
+			newbuffer = RisseMallocAtomicCollectee(QueuedData, buffer_size_needed);
+		else
+			newbuffer = RisseReallocCollectee(QueuedData, buffer_size_needed);
 		if(!newbuffer)
 		{
-			free(QueuedData), QueuedData = NULL;
+			RisseFreeCollectee(QueuedData), QueuedData = NULL;
 			QueuedDataAllocSize = 0;
 		}
 		else
@@ -220,10 +224,14 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 				risse_uint buffer_size_needed = one_want * filter_sample_granule_bytes;
 				if(ConvertBufferSize < buffer_size_needed)
 				{
-					void * newbuffer = realloc(ConvertBuffer, buffer_size_needed);
+					void * newbuffer;
+					if(ConvertBuffer == NULL)
+						newbuffer = RisseMallocAtomicCollectee(ConvertBuffer);
+					else
+						newbuffer = RisseReallocCollectee(ConvertBuffer, buffer_size_needed);
 					if(!newbuffer)
 					{
-						free(ConvertBuffer), ConvertBuffer = NULL;
+						RisseFreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
 						ConvertBufferSize = 0;
 						cont = false;
 					}

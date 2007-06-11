@@ -32,7 +32,7 @@ class tRisaHistoryTextCtrl :  public wxTextCtrl, protected depends_on<tRisaConfi
 {
 	const static size_t MaxNumHistoryItems = 100; //!< ヒストリの最大個数
 	const static size_t InvalidIndex = static_cast<size_t>(-1L); //!< 無効なインデックス値
-	gc_deque<wxString> History; //!< ヒストリ(先頭が新、最後が旧)
+	std::deque<wxString> History; //!< ヒストリ(先頭が新、最後が旧)
 	size_t HistoryIndex; //!< 現在選択中のヒストリインデックス
 
 public:
@@ -108,7 +108,7 @@ void tRisaHistoryTextCtrl::WriteConfig()
 
 	config.DeleteGroup(wxT("ui/console/history"));
 	int cnt = 0;
-	for(gc_deque<wxString>::iterator i = History.begin();
+	for(std::deque<wxString>::iterator i = History.begin();
 		i != History.end(); i++, cnt++)
 	{
 		config.Write(wxT("ui/console/history/") + wxString::Format(wxT("%d"), cnt), *i);
@@ -149,6 +149,9 @@ void tRisaHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 
 	tRisaRisseScriptEngine::instance()->
 		EvaluateExpresisonAndPrintResultToConsole(tRisseString(value));
+
+	// GC
+	GC_gcollect();
 
 	// 入力をヒストリに入れる
 	if(History.size() == 0 || History[0] != value)

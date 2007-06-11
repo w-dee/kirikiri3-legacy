@@ -164,14 +164,14 @@ void tRisaLogScrollView::Rotate()
 	}
 
 	// LogicalLines の fixup
-	for(gc_deque<tLogicalLine>::iterator i = LogicalLines.begin() + log_num_delete_items;
+	for(std::deque<tLogicalLine>::iterator i = LogicalLines.begin() + log_num_delete_items;
 		i != LogicalLines.end(); i++)
 	{
 		i->DisplayIndex -= disp_num_delete_items;
 	}
 
 	// DisplayLines の fixup
-	for(gc_deque<tDisplayLine>::iterator i = DisplayLines.begin() + disp_num_delete_items;
+	for(std::deque<tDisplayLine>::iterator i = DisplayLines.begin() + disp_num_delete_items;
 		i != DisplayLines.end(); i++)
 	{
 		i->LogicalIndex -= log_num_delete_items;

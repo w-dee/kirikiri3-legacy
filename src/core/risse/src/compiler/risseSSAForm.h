@@ -236,7 +236,7 @@ public:
 
 	//! @brief		スクリプトブロックインスタンスを得る
 	//! @return		スクリプトブロックインスタンス
-	tRisseScriptBlockBase * GetScriptBlock() const;
+	tRisseScriptBlockInstance * GetScriptBlockInstance() const;
 
 	//! @brief		このSSA形式インスタンスの名前を設定する
 	//! @param		name		このSSA形式インスタンスの名前

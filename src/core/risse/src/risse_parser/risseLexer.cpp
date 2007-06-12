@@ -14,7 +14,7 @@
 
 #include "../risseLexerUtils.h"
 #include "../risseExceptionClass.h"
-#include "../risseScriptBlockBase.h"
+#include "../risseScriptBlockClass.h"
 #include "risseLexer.h"
 #include "risseParser.h"
 
@@ -27,11 +27,11 @@ RISSE_DEFINE_SOURCE_ID(26774,17704,8265,19906,55701,8958,30467,4610);
 
 
 //---------------------------------------------------------------------------
-tRisseLexer::tRisseLexer(tRisseScriptBlockBase * sb)
+tRisseLexer::tRisseLexer(tRisseScriptBlockInstance * sb)
 {
 	// フィールドを初期化
-	ScriptBlock = sb;
-	Script = ScriptBlock->GetScript();
+	ScriptBlockInstance = sb;
+	Script = ScriptBlockInstance->GetScript();
 	NextIsRegularExpression = false;
 	ContinueEmbeddableString = 0;
 	Ptr = NULL;
@@ -311,7 +311,7 @@ void tRisseLexer::NotifyStatementEndStyle(bool semicolon)
 			semicolon ? tNewLineRecogInfo::ssSemicolon : tNewLineRecogInfo::ssNewLine;
 
 		if(warn)
-			ScriptBlock->OutputWarning(GetLastTokenStart(), 
+			ScriptBlockInstance->OutputWarning(GetLastTokenStart(), 
 				RISSE_WS_TR("mixing semicolon style and newline style") );
 	}
 	IgnoreNextNewLineStyleCheck = false;
@@ -336,7 +336,7 @@ void tRisseLexer::CheckBlockAfterFunctionCall()
 	// のうち、"{" が読み込まれた直後にメソッドが呼ばれる。
 	// f() のあとの改行の数を数え、1つきりならば警告にする。
 	if(FuncCallReduced && NewLineRunningCount == 1)
-		ScriptBlock->OutputWarning(GetLastTokenStart(), 
+		ScriptBlockInstance->OutputWarning(GetLastTokenStart(), 
 			RISSE_WS_TR("ambiguous block after function call") );
 }
 //---------------------------------------------------------------------------

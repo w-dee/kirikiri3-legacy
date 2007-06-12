@@ -20,7 +20,7 @@
 #include "risseCompiler.h"
 #include "risseCompilerNS.h"
 #include "../risseExceptionClass.h"
-#include "../risseScriptBlockBase.h"
+#include "../risseScriptBlockClass.h"
 #include "../risseCodeBlock.h"
 
 namespace Risse
@@ -182,11 +182,12 @@ void tRisseSSABlock::AddPhiFunctionToBlocks(
 			// エラーにする
 			// TODO: もっと親切なエラーメッセージ
 			tRisseCompileExceptionClass::Throw(
-				Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
+				Form->GetFunction()->GetFunctionGroup()->GetCompiler()->
+					GetScriptBlockInstance()->GetScriptEngine(),
 				tRisseString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
 					name),
-					quest_block->Form->GetScriptBlock(), quest_phi_stmt->GetPosition());
+					quest_block->Form->GetScriptBlockInstance(), quest_phi_stmt->GetPosition());
 		}
 
 		if(*var == NULL)
@@ -262,11 +263,12 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 			// エラーにする
 			// TODO: もっと親切なエラーメッセージ
 			tRisseCompileExceptionClass::Throw(
-				Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
+				Form->GetFunction()->GetFunctionGroup()->
+					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
 				tRisseString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
 					decl_var->GetName()),
-					Form->GetScriptBlock(), stmt->GetPosition());
+					Form->GetScriptBlockInstance(), stmt->GetPosition());
 		}
 		stmt->AddUsed(found_var);
 

@@ -10,14 +10,17 @@
 //! @file
 //! @brief スクリプトブロック管理
 //---------------------------------------------------------------------------
-#ifndef risseScriptBlockBaseH
-#define risseScriptBlockBaseH
+#ifndef risseScriptBlockClassH
+#define risseScriptBlockClassH
 
 #include "risseTypes.h"
 #include "risseString.h"
 #include "risseVariant.h"
 #include "risseAssert.h"
 #include "risseGC.h"
+#include "risseObjectBase.h"
+#include "risseNativeBinder.h"
+#include "risseClass.h"
 
 namespace Risse
 {
@@ -28,10 +31,9 @@ class tRisseBindingInfo;
 //---------------------------------------------------------------------------
 //! @brief		スクリプトブロックの基底クラス
 //---------------------------------------------------------------------------
-class tRisseScriptBlockBase : public tRisseCollectee
+class tRisseScriptBlockInstance : public tRisseObjectBase
 {
 private:
-	tRisseScriptEngine *ScriptEngine; //!< スクリプトエンジンインスタンス
 	tRisseString Script; //!< スクリプトの内容
 	tRisseString Name; //!< スクリプトブロックの名称(たいていはファイル名)
 	risse_size LineOffset; //!< スクリプトの行オフセット (ドキュメント埋め込みスクリプト用)
@@ -44,16 +46,18 @@ private:
 
 protected:
 	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseScriptBlockInstance();
+
+	//! @brief		スクリプトと名前の設定
 	//! @param		script		スクリプトの内容
 	//! @param		name		スクリプトブロックの名称
 	//! @param		lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
 	//!							スクリプトのオフセットを記録できる)
-	tRisseScriptBlockBase(tRisseScriptEngine * engine, const tRisseString & script,
-		const tRisseString & name, risse_size lineofs = 0);
+	//! @note		構築直後に１回だけ呼ぶこと。
+	void SetScriptAndName(const tRisseString & script, const tRisseString & name, int lineofs);
 
-	//! @brief		デストラクタ
-	virtual ~tRisseScriptBlockBase() {;}
+	//! @brief		デストラクタ(呼ばれない)
+	virtual ~tRisseScriptBlockInstance() {;}
 
 	//! @brief		LinesToPosition の内容を作成する
 	void CreateLinesToPositionArary() const;
@@ -65,7 +69,7 @@ protected:
 public:
 	//! @brief		スクリプトエンジンを返す
 	//! @return		スクリプトエンジン
-	tRisseScriptEngine * GetScriptEngine() const { return ScriptEngine; }
+	tRisseScriptEngine * GetScriptEngine() const { return GetRTTI()->GetScriptEngine(); }
 
 	//! @brief		スクリプトの内容を得る	@return スクリプトの内容
 	const tRisseString & GetScript() const { return Script; }
@@ -160,8 +164,43 @@ protected:
 	//! @return		AST ルートノード
 	virtual tRisseASTNode * GetASTRootNode(bool need_result = false, bool is_expression = false) = 0;
 
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(
+		const tRisseString &script, const tRisseString & name, risse_size lineofs,
+		const tRisseNativeBindFunctionCallingInfo &info);
+	tRisseString mnString() { return GetScript(); }
+	tRisseString get_script() { return GetScript(); }
+	tRisseString get_name() { return GetName(); }
+	tRisseString getLineAt(risse_size line) { return GetLineAt(line); }
+	risse_size positionToLine(risse_size pos) { return PositionToLine(pos); }
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		"ScriptBlock" クラス
+//---------------------------------------------------------------------------
+class tRisseScriptBlockClass : public tRisseClassBase
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseScriptBlockClass(tRisseScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	tRisseVariant CreateNewObjectBase();
+
+public:
+};
+//---------------------------------------------------------------------------
+
 } // namespace Risse
 
 #endif

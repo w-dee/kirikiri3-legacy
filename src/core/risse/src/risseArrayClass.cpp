@@ -47,11 +47,11 @@ void tRisseArrayInstance::construct()
 void tRisseArrayInstance::initialize(const tRisseNativeBindFunctionCallingInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
-	info.engine->ArrayClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.engine->ArrayClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+		tRisseMethodArgument::Empty(), info.This);
 
 	// 引数を元に配列を構成する
 	// ここの動作は push と同じ
-
 	for(risse_size i = 0; i < info.args.GetArgumentCount(); i++)
 		Array.push_back(info.args[i]);
 }

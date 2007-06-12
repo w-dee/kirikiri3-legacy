@@ -217,7 +217,7 @@ RISSE_AST_ENUM_END
 
 #ifndef RISSE_AST_DEFINE_NAMES
 
-class tRisseScriptBlockBase;
+class tRisseScriptBlockInstance;
 class tRisseSSAForm;
 class tRisseASTNode;
 class tRisseSSAVariable;

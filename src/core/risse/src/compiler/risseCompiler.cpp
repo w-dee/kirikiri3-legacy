@@ -20,7 +20,7 @@
 #include "risseCodeGen.h"
 #include "risseCompilerNS.h"
 #include "../risseExceptionClass.h"
-#include "../risseScriptBlockBase.h"
+#include "../risseScriptBlockClass.h"
 #include "../risseCodeBlock.h"
 #include "../risseStaticStrings.h"
 #include "../risseBindingInfo.h"
@@ -28,7 +28,7 @@
 /*
 	コンパイルの単位
 
-・スクリプトブロック(tRisseScriptBlock)
+・スクリプトブロック(tRisseScriptBlockInstance)
   一つのスクリプトからなる固まり
 
 ・関数グループ(tRisseCompilerFunctionGroup)
@@ -202,9 +202,9 @@ void tRisseCompilerFunction::AddLabelMap(const tRisseString &labelname, tRisseSS
 	{
 		// すでにラベルがある
 		tRisseCompileExceptionClass::Throw(
-			FunctionGroup->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
+			FunctionGroup->GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
 			tRisseString(RISSE_WS_TR("label '%1' is already defined"), labelname),
-				FunctionGroup->GetCompiler()->GetScriptBlock(), block->GetLastStatementPosition());
+				FunctionGroup->GetCompiler()->GetScriptBlockInstance(), block->GetLastStatementPosition());
 	}
 
 	LabelMap.insert(tLabelMap::value_type(labelname, block)); // ラベルを挿入
@@ -249,9 +249,9 @@ void tRisseCompilerFunction::BindAllLabels()
 		{
 			// ラベルは見つからなかった
 			tRisseCompileExceptionClass::Throw(
-				FunctionGroup->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
+				FunctionGroup->GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
 				tRisseString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
-					FunctionGroup->GetCompiler()->GetScriptBlock(),
+					FunctionGroup->GetCompiler()->GetScriptBlockInstance(),
 						i->SourceBlock->GetLastStatementPosition());
 		}
 
@@ -317,9 +317,9 @@ void tRisseCompilerFunction::BindAllLabels()
 				// ジャンプ先ラベルはどうやら自分よりも深い場所にいるようだ
 				// そういうことは今のところできないのでエラーにする
 				tRisseCompileExceptionClass::Throw(
-					FunctionGroup->GetCompiler()->GetScriptBlock()->GetScriptEngine(),
+					FunctionGroup->GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
 					tRisseString(RISSE_WS_TR("cannot jump into deeper try block or callback block")),
-						FunctionGroup->GetCompiler()->GetScriptBlock(),
+						FunctionGroup->GetCompiler()->GetScriptBlockInstance(),
 							i->SourceBlock->GetLastStatementPosition());
 			}
 		}
@@ -439,7 +439,7 @@ void tRisseCompiler::Compile(tRisseASTNode * root, const tRisseBindingInfo & bin
 	}
 
 	// ルートのコードブロックを設定する
-	ScriptBlock->SetRootCodeBlock(form->GetCodeBlock());
+	ScriptBlockInstance->SetRootCodeBlock(form->GetCodeBlock());
 
 	// (テスト) 出力のフラッシュ
 	RisseFPrint(stderr, RISSE_WS("=========================\n"));
@@ -572,7 +572,7 @@ void tRisseCompiler::AddFunctionGroup(tRisseCompilerFunctionGroup * function_gro
 risse_size tRisseCompiler::AddCodeBlock(tRisseCodeBlock * block)
 {
 	// コードブロックの管理はスクリプトブロックが行っている
-	return ScriptBlock->AddCodeBlock(block);
+	return ScriptBlockInstance->AddCodeBlock(block);
 }
 //---------------------------------------------------------------------------
 
@@ -587,7 +587,7 @@ risse_int tRisseCompiler::GetUniqueNumber()
 	// コレを超えるとエラーになる。
 	if(UniqueNumber >= 1 << (sizeof(risse_int) * 8 - 2))
 		tRisseCompileExceptionClass::Throw(
-			ScriptBlock->GetScriptEngine(),
+			ScriptBlockInstance->GetScriptEngine(),
 			tRisseString(RISSE_WS_TR("too large source code; compiler internal number exhausted")));
 	return UniqueNumber;
 }

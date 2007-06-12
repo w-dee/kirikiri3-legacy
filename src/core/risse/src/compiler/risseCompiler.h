@@ -205,13 +205,13 @@ public:
 
 
 class tRisseCodeBlock;
-class tRisseScriptBlockBase;
+class tRisseScriptBlockInstance;
 //---------------------------------------------------------------------------
 //! @brief		コンパイラクラス
 //---------------------------------------------------------------------------
 class tRisseCompiler : public tRisseCollectee
 {
-	tRisseScriptBlockBase * ScriptBlock; //!< このコンパイラを保有しているスクリプトブロック
+	tRisseScriptBlockInstance * ScriptBlockInstance; //!< このコンパイラを保有しているスクリプトブロック
 	gc_vector<tRisseCompilerFunctionGroup *> FunctionGroups;
 		//!< この関数グループが保持している関数グループインスタンスのリスト
 
@@ -220,11 +220,12 @@ class tRisseCompiler : public tRisseCollectee
 public:
 	//! @brief		コンストラクタ
 	//! @param		scriptblock		スクリプトブロックインスタンス
-	tRisseCompiler(tRisseScriptBlockBase * scriptblock) { ScriptBlock = scriptblock; UniqueNumber = 0; }
+	tRisseCompiler(tRisseScriptBlockInstance * scriptblock)
+		{ ScriptBlockInstance = scriptblock; UniqueNumber = 0; }
 
 	//! @brief		スクリプトブロックインスタンスを得る
 	//! @return		スクリプトブロックインスタンス
-	tRisseScriptBlockBase * GetScriptBlock() const { return ScriptBlock; }
+	tRisseScriptBlockInstance * GetScriptBlockInstance() const { return ScriptBlockInstance; }
 
 	//! @brief		ASTを元にコンパイルを行う
 	//! @param		root		ルートASTノード

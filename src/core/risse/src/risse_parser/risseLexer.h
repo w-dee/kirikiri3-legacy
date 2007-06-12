@@ -18,11 +18,11 @@
 
 namespace Risse
 {
-class tRisseScriptBlockBase;
+class tRisseScriptBlockInstance;
 //---------------------------------------------------------------------------
 class tRisseLexer : public tRisseLexerUtility
 {
-	tRisseScriptBlockBase * ScriptBlock; //!< スクリプトブロック
+	tRisseScriptBlockInstance * ScriptBlockInstance; //!< スクリプトブロック
 	tRisseString Script; //!< スクリプト
 	const risse_char * Ptr; //!< 解析ポインタの現在位置
 	const risse_char * PtrOrigin; //!< 解析ポインタの先頭
@@ -78,7 +78,7 @@ class tRisseLexer : public tRisseLexerUtility
 public:
 	//! @brief		コンストラクタ
 	//! @param		sb		スクリプトブロック
-	tRisseLexer(tRisseScriptBlockBase * sb);
+	tRisseLexer(tRisseScriptBlockInstance * sb);
 
 	//! @brief		トークンを得る
 	//! @param		val		トークンの値の格納先

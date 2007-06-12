@@ -82,7 +82,7 @@ public:
 
 
 
-class tRisseScriptBlockBase;
+class tRisseScriptBlockInstance;
 //---------------------------------------------------------------------------
 //! @brief			RisseのReturnExceptionやBreakExceptionなどのインスタンス(暫定実装)
 //---------------------------------------------------------------------------
@@ -532,7 +532,7 @@ public:
 	//! @param		sb			スクリプトブロック
 	//! @param		pos			スクリプト上の位置
 	static void Throw(tRisseScriptEngine * engine, const tRisseString & reason,
-		const tRisseScriptBlockBase * sb = NULL, risse_size pos = risse_size_max);
+		const tRisseScriptBlockInstance * sb = NULL, risse_size pos = risse_size_max);
 	//! @brief		「コンパイルエラー」例外を発生
 	//! @param		reason		例外の理由
 	static void Throw(const tRisseString & reason)

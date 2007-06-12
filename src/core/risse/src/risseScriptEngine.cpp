@@ -15,7 +15,7 @@
 #include "risseScriptEngine.h"
 #include "risseCoroutine.h"
 #include "risseStaticStrings.h"
-#include "risse_parser/risseScriptBlock.h"
+#include "risse_parser/risseRisseScriptBlockClass.h"
 
 // 各クラスの new に必要なインクルードファイルをインクルードする
 #define RISSE_INTERNALCLASSES_INCLUDE
@@ -95,10 +95,17 @@ void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseStrin
 	{
 		// 暫定実装
 		// スクリプトブロックを作成
-		tRisseScriptBlock * block = new tRisseScriptBlock(this, script, name);
+		tRisseVariant sb =
+			tRisseVariant(RisseScriptBlockClass).
+				New(0, tRisseMethodArgument::New(script, name, (risse_int64)lineofs));
+
+		tRisseScriptBlockInstance * block =
+			sb.CheckAndGetObjectInterafce<tRisseScriptBlockInstance, tRisseScriptBlockClass>(
+																			ScriptBlockClass);
 
 		// スクリプトをグローバルコンテキストで実行
-		block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding, result, is_expression);
+		block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding,
+								result, is_expression);
 	}
 	catch(const tRisseTemporaryException * te)
 	{

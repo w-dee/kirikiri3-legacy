@@ -13,7 +13,7 @@
 #include "prec.h"
 
 #include "risseCodeBlock.h"
-#include "risseScriptBlockBase.h"
+#include "risseScriptBlockClass.h"
 #include "compiler/risseCodeGen.h"
 #include "risseCodeExecutor.h"
 
@@ -25,9 +25,9 @@ RISSE_DEFINE_SOURCE_ID(13739,40903,3219,19310,50086,28697,53693,30185);
 
 
 //---------------------------------------------------------------------------
-tRisseCodeBlock::tRisseCodeBlock(tRisseScriptBlockBase * sb)
+tRisseCodeBlock::tRisseCodeBlock(tRisseScriptBlockInstance * sb)
 {
-	ScriptBlock = sb;
+	ScriptBlockInstance = sb;
 	Code = NULL;
 	CodeSize = 0;
 	Consts = NULL;
@@ -141,14 +141,14 @@ void tRisseCodeBlock::Fixup()
 
 	for(risse_size i = 0 ; i < CodeBlockRelocationSize; i++)
 		Consts[CodeBlockRelocations[i].first] =
-			ScriptBlock->GetCodeBlockAt(CodeBlockRelocations[i].second)->GetObject(); // 再配置を行う
+			ScriptBlockInstance->GetCodeBlockAt(CodeBlockRelocations[i].second)->GetObject(); // 再配置を行う
 
 	for(risse_size i = 0 ; i < TryIdentifierRelocationSize; i++)
 	{
 		Consts[TryIdentifierRelocations[i].first].Clear();
 		Consts[TryIdentifierRelocations[i].first] =
 			reinterpret_cast<tRisseObjectInterface *>
-			(ScriptBlock->GetTryIdentifierAt(TryIdentifierRelocations[i].second));
+			(ScriptBlockInstance->GetTryIdentifierAt(TryIdentifierRelocations[i].second));
 				// 再配置を行う。GetTryIdentifierAt の戻りは void * で
 				// そのポインタは tRisseObjectInterface ではないが、
 				// 実装上の都合 void * を tRisseObjectInterface に
@@ -187,7 +187,7 @@ tRisseString tRisseCodeBlock::Dump() const
 
 		// アドレスからスクリプトの該当の行を計算する
 		risse_size line = 0;
-		ScriptBlock->PositionToLineAndColumn(CodePositionToSourcePosition(address), &line, NULL);
+		ScriptBlockInstance->PositionToLineAndColumn(CodePositionToSourcePosition(address), &line, NULL);
 
 		// 表示すべき行を決定する
 		risse_size start; // 表示を開始する行番号
@@ -247,7 +247,7 @@ tRisseString tRisseCodeBlock::Dump() const
 			{
 				char line_string[22];
 				sprintf(line_string, "#(%d) ", start+1);
-				ret += tRisseString(line_string) + ScriptBlock->GetLineAt(start) + RISSE_WS("\n");
+				ret += tRisseString(line_string) + ScriptBlockInstance->GetLineAt(start) + RISSE_WS("\n");
 
 				start ++;
 			}

@@ -23,7 +23,7 @@
 #include "../risseOpCodes.h"
 #include "../risseStaticStrings.h"
 #include "risseParser.h"
-#include "risseScriptBlock.h"
+#include "risseRisseScriptBlockClass.h"
 
 /* 名前空間を Risse に */
 namespace Risse
@@ -144,9 +144,9 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 {
 	if(l->Overwrite(*r))
 		tRisseCompileExceptionClass::Throw(
-			pr->GetScriptBlock()->GetScriptEngine(),
+			pr->GetScriptBlockInstance()->GetScriptEngine(),
 			RISSE_WS_TR("duplicated attribute specifier"),
-			pr->GetScriptBlock(), pos);
+			pr->GetScriptBlockInstance(), pos);
 	return l;
 }
 
@@ -1470,17 +1470,17 @@ int yylex(YYSTYPE * value, YYLTYPE * llocp, void *pr)
 //---------------------------------------------------------------------------
 int raise_yyerror(const char * msg, void *pr, YYLTYPE *loc)
 {
-	tRisseCompileExceptionClass::Throw(PR->GetScriptBlock()->GetScriptEngine(),
-		tRisseString(msg), PR->GetScriptBlock(), loc->first);
+	tRisseCompileExceptionClass::Throw(PR->GetScriptBlockInstance()->GetScriptEngine(),
+		tRisseString(msg), PR->GetScriptBlockInstance(), loc->first);
 	return 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseParser::tRisseParser(tRisseScriptBlock * sb, tRisseLexer * lexer)
+tRisseParser::tRisseParser(tRisseScriptBlockInstance * sb, tRisseLexer * lexer)
 {
-	ScriptBlock = sb;
+	ScriptBlockInstance = sb;
 	Root = NULL;
 	Lexer = lexer;
 
@@ -1503,18 +1503,18 @@ int tRisseParser::GetToken(tRisseVariant & value)
 		}
 		catch(const tRisseTemporaryException * e)
 		{
-			e->ThrowConverted(ScriptBlock->GetScriptEngine());
+			e->ThrowConverted(ScriptBlockInstance->GetScriptEngine());
 		}
 	}
 	catch(const tRisseTemporaryException * te)
 	{
-		const tRisseVariant * e = te->Convert(ScriptBlock->GetScriptEngine());
-		e->AddTrace(ScriptBlock, Lexer->GetPosition());
+		const tRisseVariant * e = te->Convert(ScriptBlockInstance->GetScriptEngine());
+		e->AddTrace(ScriptBlockInstance, Lexer->GetPosition());
 		throw e;
 	}
 	catch(const tRisseVariant * e)
 	{
-		e->AddTrace(ScriptBlock, Lexer->GetPosition());
+		e->AddTrace(ScriptBlockInstance, Lexer->GetPosition());
 		throw e;
 	}
 	catch(...)

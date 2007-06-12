@@ -22,7 +22,8 @@
 #include "risseCoroutineClass.h"
 #include "risseExceptionClass.h"
 #include "risseBindingClass.h"
-
+#include "risseScriptBlockClass.h"
+#include "risse_parser/risseRisseScriptBlockClass.h"
 
 #else
 
@@ -32,6 +33,8 @@
 
 RISSE_INTERNALCLASSES_CLASS(Object                          )
 RISSE_INTERNALCLASSES_CLASS(Binding                         )
+RISSE_INTERNALCLASSES_CLASS(ScriptBlock                     )
+RISSE_INTERNALCLASSES_CLASS(RisseScriptBlock                )
 RISSE_INTERNALCLASSES_CLASS(Module                          )
 RISSE_INTERNALCLASSES_CLASS(Class                           )
 RISSE_INTERNALCLASSES_CLASS(Function                        )

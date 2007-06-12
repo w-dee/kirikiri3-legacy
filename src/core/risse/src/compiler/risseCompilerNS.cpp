@@ -19,7 +19,7 @@
 #include "risseSSAStatement.h"
 #include "risseSSABlock.h"
 #include "../risseExceptionClass.h"
-#include "../risseScriptBlockBase.h"
+#include "../risseScriptBlockClass.h"
 
 namespace Risse
 {
@@ -315,11 +315,11 @@ tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
 	{
 		// 値が初期化されていない(不定な)変数から読み込もうとした
 		tRisseCompileExceptionClass::Throw(
-			Compiler->GetScriptBlock()->GetScriptEngine(),
+			Compiler->GetScriptBlockInstance()->GetScriptEngine(),
 			tRisseString(
 				RISSE_WS_TR("attempt to read uninitialized variable '%1'"),
 				name),
-				Block->GetForm()->GetScriptBlock(), pos);
+				Block->GetForm()->GetScriptBlockInstance(), pos);
 	}
 
 	if(*var != NULL) return *var; // 見つかった、かつφ関数の作成の必要はない

@@ -15,7 +15,7 @@
 #include "risseCodeExecutor.h"
 #include "risseOpCodes.h"
 #include "risseExceptionClass.h"
-#include "risseScriptBlockBase.h"
+#include "risseScriptBlockClass.h"
 #include "risseModuleClass.h"
 #include "risseClassClass.h"
 #include "risseFunctionClass.h"
@@ -95,7 +95,7 @@ void tRisseCodeInterpreter::Execute(
 	risse_size constssize = CodeBlock->GetConstsSize();
 #endif
 
-	tRisseScriptEngine * engine = CodeBlock->GetScriptBlock()->GetScriptEngine();
+	tRisseScriptEngine * engine = CodeBlock->GetScriptBlockInstance()->GetScriptEngine();
 
 	try
 	{
@@ -982,7 +982,7 @@ void tRisseCodeInterpreter::Execute(
 		RISSE_ASSERT(e->InstanceOf(engine, engine->ThrowableClass));
 
 		// 例外位置情報を追加してやる
-		e->AddTrace(CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
+		e->AddTrace(CodeBlock->GetScriptBlockInstance(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
 
 		// 投げ直す
 		throw e;
@@ -993,7 +993,7 @@ void tRisseCodeInterpreter::Execute(
 		RISSE_ASSERT(e->InstanceOf(engine, engine->ThrowableClass));
 
 		// 例外位置情報を追加してやる
-		e->AddTrace(CodeBlock->GetScriptBlock(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
+		e->AddTrace(CodeBlock->GetScriptBlockInstance(), CodeBlock->CodePositionToSourcePosition(code - code_origin));
 
 		// 投げ直す
 		throw e;

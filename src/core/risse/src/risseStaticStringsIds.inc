@@ -219,8 +219,12 @@ extern tRisseStringData data_ss_addTrace;
 static const tRisseString & ss_addTrace = *reinterpret_cast<const tRisseString *>(&data_ss_addTrace); //!< (static string)  "addTrace" メソッド名
 extern tRisseStringData data_ss_SourcePoint;
 static const tRisseString & ss_SourcePoint = *reinterpret_cast<const tRisseString *>(&data_ss_SourcePoint); //!< (static string)  "SourcePoint" クラス名
+extern tRisseStringData data_ss_position;
+static const tRisseString & ss_position = *reinterpret_cast<const tRisseString *>(&data_ss_position); //!< (static string)  "position" インスタンス変数/プロパティ名
 extern tRisseStringData data_ss_filename;
-static const tRisseString & ss_filename = *reinterpret_cast<const tRisseString *>(&data_ss_filename); //!< (static string)  "filename" ファイル名
+static const tRisseString & ss_filename = *reinterpret_cast<const tRisseString *>(&data_ss_filename); //!< (static string)  "filename" インスタンス変数/プロパティ名
+extern tRisseStringData data_ss_scriptBlock;
+static const tRisseString & ss_scriptBlock = *reinterpret_cast<const tRisseString *>(&data_ss_scriptBlock); //!< (static string)  "scriptBlock" インスタンス変数/プロパティ名
 extern tRisseStringData data_ss_line;
 static const tRisseString & ss_line = *reinterpret_cast<const tRisseString *>(&data_ss_line); //!< (static string)  "line" インスタンス変数/プロパティ名
 extern tRisseStringData data_ss_Exception;
@@ -301,3 +305,13 @@ extern tRisseStringData data_ss_dispose;
 static const tRisseString & ss_dispose = *reinterpret_cast<const tRisseString *>(&data_ss_dispose); //!< (static string)  "dispose" メソッド名
 extern tRisseStringData data_ss_CoroutineException;
 static const tRisseString & ss_CoroutineException = *reinterpret_cast<const tRisseString *>(&data_ss_CoroutineException); //!< (static string)  "CoroutineException" クラス名
+extern tRisseStringData data_ss_ScriptBlock;
+static const tRisseString & ss_ScriptBlock = *reinterpret_cast<const tRisseString *>(&data_ss_ScriptBlock); //!< (static string)  "ScriptBlock" クラス名
+extern tRisseStringData data_ss_getLineAt;
+static const tRisseString & ss_getLineAt = *reinterpret_cast<const tRisseString *>(&data_ss_getLineAt); //!< (static string)  "getLineAt" メソッド名
+extern tRisseStringData data_ss_script;
+static const tRisseString & ss_script = *reinterpret_cast<const tRisseString *>(&data_ss_script); //!< (static string)  "script" プロパティ名
+extern tRisseStringData data_ss_positionToLine;
+static const tRisseString & ss_positionToLine = *reinterpret_cast<const tRisseString *>(&data_ss_positionToLine); //!< (static string)  "positionToLine" メソッド名
+extern tRisseStringData data_ss_RisseScriptBlock;
+static const tRisseString & ss_RisseScriptBlock = *reinterpret_cast<const tRisseString *>(&data_ss_RisseScriptBlock); //!< (static string)  "RisseScriptBlock" クラス名

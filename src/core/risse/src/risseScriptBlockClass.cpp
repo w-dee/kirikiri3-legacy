@@ -11,12 +11,15 @@
 //! @brief スクリプトブロック管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "risseScriptBlockBase.h"
+#include "risseScriptBlockClass.h"
 #include "compiler/risseCompiler.h"
 #include "risseCodeBlock.h"
 #include "risseScriptEngine.h"
 #include "risseBindingInfo.h"
 #include "risseCodeExecutor.h"
+#include "risseStaticStrings.h"
+#include "risseObjectClass.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -24,15 +27,11 @@ RISSE_DEFINE_SOURCE_ID(10462,6972,23868,17748,24487,5141,43296,28534);
 
 
 //---------------------------------------------------------------------------
-tRisseScriptBlockBase::tRisseScriptBlockBase(tRisseScriptEngine * engine,
-	const tRisseString & script, const tRisseString & name, risse_size lineofs)
+tRisseScriptBlockInstance::tRisseScriptBlockInstance()
 {
 	// フィールドの初期化
-	ScriptEngine = engine;
 	LinesToPosition = NULL;
-	Script = script;
-	Name = name;
-	LineOffset = lineofs;
+	LineOffset = 0;
 	RootCodeBlock = NULL;
 	CodeBlocks = new gc_vector<tRisseCodeBlock *>();
 	TryIdentifiers = new gc_vector<void *>();
@@ -41,7 +40,17 @@ tRisseScriptBlockBase::tRisseScriptBlockBase(tRisseScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockBase::CreateLinesToPositionArary() const
+void tRisseScriptBlockInstance::SetScriptAndName(const tRisseString & script, const tRisseString & name, int lineofs)
+{
+	Script = script;
+	Name = name;
+	LineOffset = lineofs;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseScriptBlockInstance::CreateLinesToPositionArary() const
 {
 	// まず、全体の行数を数える
 	LineCount = 0;
@@ -102,7 +111,7 @@ void tRisseScriptBlockBase::CreateLinesToPositionArary() const
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
+void tRisseScriptBlockInstance::PositionToLineAndColumn(risse_size pos,
 						risse_size *line, risse_size *col) const
 {
 	// LinesToPosition 配列が作られていなければ作る
@@ -130,7 +139,7 @@ void tRisseScriptBlockBase::PositionToLineAndColumn(risse_size pos,
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseScriptBlockBase::PositionToLine(risse_size pos) const
+risse_size tRisseScriptBlockInstance::PositionToLine(risse_size pos) const
 {
 	risse_size line;
 	PositionToLineAndColumn(pos, &line, NULL);
@@ -140,7 +149,7 @@ risse_size tRisseScriptBlockBase::PositionToLine(risse_size pos) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseScriptBlockBase::GetLineAt(risse_size line)
+tRisseString tRisseScriptBlockInstance::GetLineAt(risse_size line)
 {
 	if(line > LineCount) return tRisseString::GetEmptyString(); // 行が範囲外
 
@@ -157,7 +166,7 @@ tRisseString tRisseScriptBlockBase::GetLineAt(risse_size line)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseScriptBlockBase::BuildMessageAt(risse_size pos, const tRisseString & message)
+tRisseString tRisseScriptBlockInstance::BuildMessageAt(risse_size pos, const tRisseString & message)
 {
 	return tRisseString(RISSE_WS("%1 at %2:%3"),
 		message, GetName(), tRisseString::AsString((risse_int64)(1 + PositionToLine(pos))));
@@ -166,15 +175,15 @@ tRisseString tRisseScriptBlockBase::BuildMessageAt(risse_size pos, const tRisseS
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockBase::OutputWarning(risse_size pos, const tRisseString & message)
+void tRisseScriptBlockInstance::OutputWarning(risse_size pos, const tRisseString & message)
 {
-	ScriptEngine->OutputWarning(BuildMessageAt(pos, message));
+	GetRTTI()->GetScriptEngine()->OutputWarning(BuildMessageAt(pos, message));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockBase::Compile(tRisseASTNode * root, const tRisseBindingInfo & binding, bool need_result, bool is_expression)
+void tRisseScriptBlockInstance::Compile(tRisseASTNode * root, const tRisseBindingInfo & binding, bool need_result, bool is_expression)
 {
 	// コンパイラオブジェクトを作成してコンパイルを行う
 	tRisseCompiler * compiler = new tRisseCompiler(this);
@@ -184,7 +193,7 @@ void tRisseScriptBlockBase::Compile(tRisseASTNode * root, const tRisseBindingInf
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseScriptBlockBase::AddCodeBlock(tRisseCodeBlock * codeblock)
+risse_size tRisseScriptBlockInstance::AddCodeBlock(tRisseCodeBlock * codeblock)
 {
 	RISSE_ASSERT(CodeBlocks != NULL); // このメソッドが呼ばれるのは Fixup 以前でなければならない
 	CodeBlocks->push_back(codeblock);
@@ -194,7 +203,7 @@ risse_size tRisseScriptBlockBase::AddCodeBlock(tRisseCodeBlock * codeblock)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseScriptBlockBase::AddTryIdentifier()
+risse_size tRisseScriptBlockInstance::AddTryIdentifier()
 {
 	RISSE_ASSERT(TryIdentifiers != NULL); // このメソッドが呼ばれるのは Fixup 以前でなければならない
 	TryIdentifiers->push_back(reinterpret_cast<void*>(new (GC) int(0)));
@@ -215,7 +224,7 @@ risse_size tRisseScriptBlockBase::AddTryIdentifier()
 
 
 //---------------------------------------------------------------------------
-tRisseCodeBlock * tRisseScriptBlockBase::GetCodeBlockAt(risse_size index) const
+tRisseCodeBlock * tRisseScriptBlockInstance::GetCodeBlockAt(risse_size index) const
 {
 	RISSE_ASSERT(CodeBlocks != NULL);
 	RISSE_ASSERT(index < CodeBlocks->size());
@@ -225,7 +234,7 @@ tRisseCodeBlock * tRisseScriptBlockBase::GetCodeBlockAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
-void * tRisseScriptBlockBase::GetTryIdentifierAt(risse_size index) const
+void * tRisseScriptBlockInstance::GetTryIdentifierAt(risse_size index) const
 {
 	RISSE_ASSERT(TryIdentifiers != NULL);
 	RISSE_ASSERT(index < TryIdentifiers->size());
@@ -235,7 +244,7 @@ void * tRisseScriptBlockBase::GetTryIdentifierAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockBase::Fixup()
+void tRisseScriptBlockInstance::Fixup()
 {
 	// すべてのコードブロックの Fixup() を呼ぶ
 	for(gc_vector<tRisseCodeBlock *>::iterator i = CodeBlocks->begin();
@@ -251,7 +260,7 @@ void tRisseScriptBlockBase::Fixup()
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockBase::Evaluate(const tRisseBindingInfo & binding, tRisseVariant * result, bool is_expression)
+void tRisseScriptBlockInstance::Evaluate(const tRisseBindingInfo & binding, tRisseVariant * result, bool is_expression)
 {
 	// まず、コンパイルを行う
 	// (TODO: スクリプトブロックのキャッシュ対策)
@@ -273,6 +282,85 @@ void tRisseScriptBlockBase::Evaluate(const tRisseBindingInfo & binding, tRisseVa
 				NULL,
 				binding.GetFrames(),
 				result);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseScriptBlockInstance::construct()
+{
+	// 特に何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseScriptBlockInstance::initialize(
+	const tRisseString &script, const tRisseString & name, risse_size lineofs,
+	const tRisseNativeBindFunctionCallingInfo &info)
+{
+	// 親クラスの同名メソッドを呼び出す
+	info.engine->ScriptBlockClass->CallSuperClassMethod(NULL, ss_initialize, 0,
+		tRisseMethodArgument::Empty(), info.This);
+
+	// 引数を元に設定を行う
+	SetScriptAndName(script, name, lineofs);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseScriptBlockClass::tRisseScriptBlockClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseScriptBlockClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	RisseBindFunction(this, ss_construct, &tRisseScriptBlockInstance::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseScriptBlockInstance::initialize);
+	RisseBindFunction(this, mnString, &tRisseScriptBlockInstance::mnString);
+	RisseBindProperty(this, ss_script, &tRisseScriptBlockInstance::get_script);
+	RisseBindProperty(this, ss_name, &tRisseScriptBlockInstance::get_name);
+	RisseBindFunction(this, ss_getLineAt, &tRisseScriptBlockInstance::getLineAt);
+	RisseBindFunction(this, ss_positionToLine, &tRisseScriptBlockInstance::positionToLine);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseScriptBlockClass::CreateNewObjectBase()
+{
+	// このクラスのインスタンスは作成できないので例外を投げる
+	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tRisseVariant();
 }
 //---------------------------------------------------------------------------
 

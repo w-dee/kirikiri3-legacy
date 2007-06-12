@@ -75,7 +75,7 @@ CPPFILES =  \
 			src/rissePrimitiveClass.cpp              \
 			src/rissePropertyClass.cpp               \
 			src/risseRealClass.cpp                   \
-			src/risseScriptBlockBase.cpp             \
+			src/risseScriptBlockClass.cpp            \
 			src/risseScriptEngine.cpp                \
 			src/risseStaticStrings.cpp               \
 			src/risseString.cpp                      \
@@ -84,7 +84,7 @@ CPPFILES =  \
 			src/risseUtils.cpp                       \
 			src/risseVariant.cpp                     \
 			src/risse_parser/risseLexer.cpp          \
-			src/risse_parser/risseScriptBlock.cpp    \
+			src/risse_parser/risseRisseScriptBlockClass.cpp    \
 			src/risse_parser/risseParser.cpp         \
 			src/compiler/risseAST.cpp                \
 			src/compiler/risseCodeGen.cpp            \

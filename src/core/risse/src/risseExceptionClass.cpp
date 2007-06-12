@@ -18,7 +18,7 @@
 #include "risseStaticStrings.h"
 #include "risseArrayClass.h"
 #include "risseClassClass.h"
-#include "risseScriptBlockBase.h"
+#include "risseScriptBlockClass.h"
 #include "risseScriptEngine.h"
 
 namespace Risse
@@ -170,11 +170,11 @@ tRisseObjectInterface::tRetValue tRisseExitTryExceptionClass::Operate(RISSE_OBJE
 //---------------------------------------------------------------------------
 void tRisseSourcePointInstance::construct()
 {
-	// filename メンバを追加 (デフォルトでは空文字列)
-	RegisterNormalMember(ss_filename, tRisseVariant(tRisseString::GetEmptyString()));
+	// scriptBlock メンバを追加 (デフォルトではnull)
+	RegisterNormalMember(ss_scriptBlock, tRisseVariant::GetNullObject());
 
-	// line メンバを追加 (デフォルトでは-1)
-	RegisterNormalMember(ss_line, tRisseVariant((risse_int64)-1));
+	// position メンバを追加 (デフォルトでは-1)
+	RegisterNormalMember(ss_position, tRisseVariant((risse_int64)-1));
 
 	// function メンバを追加 (デフォルトではnull)
 	RegisterNormalMember(ss_function, tRisseVariant::GetNullObject());
@@ -192,13 +192,13 @@ void tRisseSourcePointInstance::initialize(const tRisseNativeBindFunctionCalling
 	// 親クラスの同名メソッドを呼び出す(引数は空)
 	info.engine->SourcePointClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), info.This);
 
-	// 引数 = ファイル名, 行, メソッド
+	// 引数 = スクリプトブロック, 行, メソッド
 	if(info.args.HasArgument(0))
-		info.This.SetPropertyDirect_Object(ss_filename,	0, info.args[0], info.This);
+		info.This.SetPropertyDirect_Object(ss_scriptBlock,	0, info.args[0], info.This);
 	if(info.args.HasArgument(1))
-		info.This.SetPropertyDirect_Object(ss_line,		0, info.args[1], info.This);
+		info.This.SetPropertyDirect_Object(ss_position,		0, info.args[1], info.This);
 	if(info.args.HasArgument(2))
-		info.This.SetPropertyDirect_Object(ss_function,	0, info.args[2], info.This);
+		info.This.SetPropertyDirect_Object(ss_function,		0, info.args[2], info.This);
 }
 //---------------------------------------------------------------------------
 
@@ -208,20 +208,23 @@ tRisseString tRisseSourcePointInstance::toString() const
 {
 	// ファイル名:行番号: in 関数名 を生成して返す
 
-	tRisseVariant filename, line, function;
-	filename = ReadMember(ss_filename);
-	line =     ReadMember(ss_line);
+	tRisseVariant sb, position, function;
+	sb =       ReadMember(ss_scriptBlock);
+	position = ReadMember(ss_position);
 	function = ReadMember(ss_function);
 
 	tRisseString ret;
-	tRisseString fn = filename.operator tRisseString();
+	tRisseString fn = sb.GetPropertyDirect(GetRTTI()->GetScriptEngine(), ss_name);
 	if(!fn.IsEmpty())
 		ret = fn + RISSE_WC(':');
 	else
 		ret = RISSE_WS_TR("<unknown>:");
 
-	if(line != tRisseVariant((risse_int64)-1))
-		ret += line.operator tRisseString();
+	if(position != tRisseVariant((risse_int64)-1))
+	{
+		tRisseVariant line = sb.Invoke(GetRTTI()->GetScriptEngine(), ss_positionToLine, position);
+		ret += (line + tRisseVariant((risse_int64)1)).operator tRisseString();
+	}
 	else
 		ret += RISSE_WS_TR("<unknown>");
 
@@ -960,7 +963,7 @@ void tRisseCompileExceptionClass::initialize(const tRisseNativeBindFunctionCalli
 
 //---------------------------------------------------------------------------
 void tRisseCompileExceptionClass::Throw(tRisseScriptEngine * engine,
-	const tRisseString & reason, const tRisseScriptBlockBase * sb, risse_size pos)
+	const tRisseString & reason, const tRisseScriptBlockInstance * sb, risse_size pos)
 {
 	// 例外インスタンスを生成
 	tRisseTemporaryException * et =

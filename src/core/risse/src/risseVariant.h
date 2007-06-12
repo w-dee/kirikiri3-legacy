@@ -21,7 +21,7 @@
 
 namespace Risse
 {
-class tRisseScriptBlockBase;
+class tRisseScriptBlockInstance;
 class tRisseScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
@@ -2263,7 +2263,7 @@ public: // ユーティリティ
 	//! @note		この variant に Throwable クラスのインスタンスが入っているとみなし、
 	//!				指定されたトレースを追加する。sb が null の場合は
 	//!				トレースは追加されない。
-	void AddTrace(const tRisseScriptBlockBase * sb, risse_size pos) const;
+	void AddTrace(const tRisseScriptBlockInstance * sb, risse_size pos) const;
 
 	//! @brief		デバッグ用ダンプ(標準出力に出力する)
 	void DebugDump() const;

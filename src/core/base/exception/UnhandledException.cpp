@@ -19,6 +19,7 @@
 #include "base/event/Event.h"
 #include "base/log/Log.h"
 #include "base/ui/editor/ScriptEditor.h"
+#include "risse/include/risseStaticStrings.h"
 
 RISSE_DEFINE_SOURCE_ID(28545,30194,3434,19984,56458,2209,37707,53134);
 
@@ -44,9 +45,33 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(const tRisseVariant * e
 	tRisaLogger::Log(
 		message, tRisaLogger::llError);
 
+	// 例外オブジェクトはトレースを持っているか？
+	tRisseVariant trace_array = e->GetPropertyDirect_Object(ss_trace);
+	tRisseVariant top_sp = trace_array.Invoke_Object(mnIGet, risse_int64(0));
+		// 先頭の source point
+
+	if(!top_sp.IsVoid() && top_sp.GetType() == tRisseVariant::vtObject)
+	{
+		// トレースを持っている
+		tRisseScriptEngine * engine = top_sp.GetObjectInterface()->GetRTTI()->GetScriptEngine();
+		tRisseVariant sb = top_sp.GetPropertyDirect(engine, ss_scriptBlock);
+		tRisseString script = (tRisseString)sb.GetPropertyDirect(engine, ss_script);
+		tRisseVariant position = top_sp.GetPropertyDirect(engine, ss_position);
+		risse_size line = (risse_int64)sb.Invoke(engine, ss_positionToLine, position);
+
+		// スクリプトエディタを表示
+		tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
+		editor->SetContent(script.AsWxString());
+		editor->SetReadOnly(true);
+		editor->SetLinePosition(line);
+		editor->SetStatusString(message.AsWxString());
+		editor->Show(true);
+	}
+
 	// メッセージボックスを表示
 	wxMessageBox(wxString(_("An exception had been occured")) + wxT("\n") +
 		message.AsWxString(), _("Exception"), wxICON_ERROR);
+
 }
 //---------------------------------------------------------------------------
 

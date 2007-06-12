@@ -73,7 +73,7 @@ public:
 	tRisaArtProviderRegisterer()
 	{
 		Provider = new tRisaArtProvider;
-		wxArtProvider::PushProvider(Provider);
+		wxArtProvider::Push(Provider);
 	}
 };
 //---------------------------------------------------------------------------

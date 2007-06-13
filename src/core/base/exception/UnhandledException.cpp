@@ -30,12 +30,8 @@ RISSE_DEFINE_SOURCE_ID(28545,30194,3434,19984,56458,2209,37707,53134);
 //---------------------------------------------------------------------------
 void tRisaUnhandledExceptionHandler::ShowScriptException(const tRisseVariant * e)
 {
-/*
-	TODO: handle this
 	// イベント配信を無効に
-	if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
-		r->SetCanDeliverEvents(false);
-*/
+	tRisaEventSystem::instance()->SetCanDeliverEvents(false);
 
 	// ログ
 	tRisseString message = e->operator tRisseString();

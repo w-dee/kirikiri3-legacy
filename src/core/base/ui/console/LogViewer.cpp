@@ -896,11 +896,11 @@ void tRisaLogScrollView::OnChar(wxKeyEvent & event)
 			DoScroll(+1, false);
 			break;
 
-		case WXK_PRIOR: // Page Up
+		case WXK_PAGEUP: // Page Up
 			DoScroll(-LinesPerWindow, false);
 			break;
 
-		case WXK_NEXT: // Page Down
+		case WXK_PAGEDOWN: // Page Down
 			DoScroll(+LinesPerWindow, false);
 			break;
 

@@ -448,7 +448,7 @@ void tRisaScriptEditorTextCtrl::OnMenuOpen(wxCommandEvent & event)
 		// filename filter for selecting a font file
 		DefaultFilter,
 		// flags
-		wxOPEN|wxFILE_MUST_EXIST
+		wxFD_OPEN|wxFD_FILE_MUST_EXIST
 		);
 	if(!filename.empty())
 	{
@@ -491,7 +491,7 @@ void tRisaScriptEditorTextCtrl::OnMenuSaveAs(wxCommandEvent & event)
 		// filename filter for selecting output file
 		DefaultFilter,
 		// flags
-		wxSAVE|wxOVERWRITE_PROMPT
+		wxFD_SAVE|wxFD_OVERWRITE_PROMPT
 		);
 	if(!filename.empty())
 	{

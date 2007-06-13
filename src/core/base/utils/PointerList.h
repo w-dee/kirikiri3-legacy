@@ -33,12 +33,42 @@
 	たい場合は注意が必要。
 */
 
+//---------------------------------------------------------------------------
+//! @brief  ダミーのクリティカルセクションの実装
+//---------------------------------------------------------------------------
+class tRisseDummyCriticalSection : public tRisseCollectee
+{
+public:
+	tRisseDummyCriticalSection() { ; } //!< コンストラクタ
+	~tRisseDummyCriticalSection() { ; } //!< デストラクタ
+
+private:
+	tRisseDummyCriticalSection(const tRisseDummyCriticalSection &); // non-copyable
+
+private:
+	void Enter() { ; } //!< クリティカルセクションに入る
+	void Leave() { ; } //!< クリティカルセクションから出る
+
+public:
+	class tLocker : public tRisseCollectee
+	{
+	public:
+		tLocker(tRisseDummyCriticalSection & cs) { }
+		~tLocker() { }
+	private:
+		tLocker(const tLocker &); // non-copyable
+	};
+};
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 //! @brief  void * オブジェクトポインタリスト
 //---------------------------------------------------------------------------
-class void_pointer_list : public tRisseCollectee
+template <typename CST>
+class void_pointer_list : public tRisseDestructee
 {
+	CST CS; //!< クリティカルセクション
 	gc_vector<void *> m_list; //!< ポインタリスト
 	gc_vector<void *> *m_shadow_list; //!< シャドーリスト
 	size_t m_lock_count; //!< ロックカウント
@@ -49,9 +79,9 @@ public:
 	//! @brief 配列のロックを行うための scoped_lock
 	class scoped_lock
 	{
-		void_pointer_list & m_list;
+		void_pointer_list<CST> & m_list;
 	public:
-		scoped_lock(void_pointer_list & list) : m_list(list)
+		scoped_lock(void_pointer_list<CST> & list) : m_list(list)
 			{	m_list.lock(); }
 		~scoped_lock()
 			{	m_list.unlock(); }
@@ -61,22 +91,24 @@ public:
 	//! @brief		デフォルトコンストラクタ
 	void_pointer_list()
 	{
+		volatile typename CST::tLocker lock(CST);
 		m_shadow_list = NULL;
 		m_lock_count = 0;
 		m_locked_item_count = 0;
 		m_has_null = false;
 	}
-/*
+
 	//! @brief		デストラクタ
-	~void_pointer_list()
+	virtual ~void_pointer_list()
 	{
-		delete m_shadow_list;
+		volatile typename CST::tLocker lock(CST);
+		if(m_shadow_list) delete m_shadow_list;
 	}
-*/
+
 private:
 	// 今のところこれらはコピー不可
-	void_pointer_list(const void_pointer_list & ref);
-	void operator = (const void_pointer_list & ref);
+	void_pointer_list(const void_pointer_list<CST> & ref);
+	void operator = (const void_pointer_list<CST> & ref);
 
 public:
 	//! @brief		配列のサイズを得る
@@ -84,6 +116,7 @@ public:
 	//!				NULL を含んだサイズを返す
 	size_t get_count() const
 	{
+		volatile typename CST::tLocker lock(CST);
 		return m_list.size();
 	}
 
@@ -92,6 +125,7 @@ public:
 	size_t get_locked_count() const
 	{
 		assert(m_lock_count > 0);
+		volatile typename CST::tLocker lock(CST);
 		if(m_shadow_list)
 			return m_shadow_list->size();
 		else
@@ -102,6 +136,7 @@ public:
 	//! @param		index インデックス
 	void * get(size_t index) const
 	{
+		volatile typename CST::tLocker lock(CST);
 		return m_list[index];
 	}
 
@@ -111,6 +146,7 @@ public:
 	void * get_locked(size_t index) const
 	{
 		assert(m_lock_count > 0);
+		volatile typename CST::tLocker lock(CST);
 		if(m_shadow_list)
 			return (*m_shadow_list)[index];
 		return m_list[index];
@@ -122,6 +158,7 @@ public:
 	void set(size_t index, void *item)
 	{
 		if(item == NULL) m_has_null = true;
+		volatile typename CST::tLocker lock(CST);
 		m_list[index] = item;
 	}
 
@@ -130,6 +167,7 @@ public:
 	void add(void * item)
 	{
 		if(item == NULL) return; // NULL は add できない
+		volatile typename CST::tLocker lock(CST);
 		m_list.push_back(item);
 	}
 
@@ -141,6 +179,7 @@ public:
 	void remove(void * item)
 	{
 		if(item == NULL) return;
+		volatile typename CST::tLocker lock(CST);
 		gc_vector<void *>::iterator it = 
 			std::find(m_list.begin(), m_list.end(), item);
 		if(it != m_list.end()) { m_has_null = true; *it = NULL; }
@@ -159,6 +198,7 @@ public:
 	void insert(size_t index, void * item)
 	{
 		if(item == NULL) return; // NULL は insert できない
+		volatile typename CST::tLocker lock(CST);
 		make_shadow();
 		m_list.insert(m_list.begin() + index, item);
 	}
@@ -166,6 +206,7 @@ public:
 	//! @brief		配列中の NULL 要素を削除する
 	void compact()
 	{
+		volatile typename CST::tLocker lock(CST);
 		if(!m_has_null) return;
 		make_shadow();
 		gc_vector<void *>::iterator d_it = m_list.begin();
@@ -194,6 +235,7 @@ public:
 	size_t find(void * item) const
 	{
 		if(item == NULL) return static_cast<size_t>(-1L); // null は探せない
+		volatile typename CST::tLocker lock(CST);
 		gc_vector<void *>::const_iterator it = 
 			std::find(m_list.begin(), m_list.end(), item);
 		if(it == m_list.end()) return static_cast<size_t>(-1L); // 見つからない
@@ -204,6 +246,7 @@ private:
 	//! @brief		配列のロックを行う
 	void lock()
 	{
+		volatile typename CST::tLocker lock(CST);
 		if(m_lock_count++ == 0)
 		{
 			// ロックをする
@@ -214,6 +257,7 @@ private:
 	//! @brief		配列のロックの解除をする
 	void unlock()
 	{
+		volatile typename CST::tLocker lock(CST);
 		if(--m_lock_count == 0)
 		{
 			// ロックを解除する
@@ -226,6 +270,7 @@ private:
 	//! @brief		配列のシャドー化
 	void make_shadow()
 	{
+		volatile typename CST::tLocker lock(CST);
 		if(m_lock_count == 0) return; // ロック中でない場合はなにもしない
 		if(m_shadow_list) return;
 		m_shadow_list = new gc_vector<void*>();
@@ -242,13 +287,13 @@ private:
 template <typename T>
 class pointer_list : public tRisseCollectee
 {
-	void_pointer_list m_list;
+	void_pointer_list<tRisseCriticalSection> m_list;
 
 public:
 	//! @brief 配列のロックを行うための scoped_lock
 	class scoped_lock
 	{
-		void_pointer_list::scoped_lock m_lock;
+		void_pointer_list<tRisseCriticalSection>::scoped_lock m_lock;
 	public:
 		scoped_lock(pointer_list<T> & list) : m_lock(list.m_list) {;}
 	};

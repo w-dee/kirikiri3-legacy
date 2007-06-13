@@ -82,7 +82,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		イベント情報クラス
 //---------------------------------------------------------------------------
-class tRisaEventInfo
+class tRisaEventInfo : public tRisseCollectee
 {
 	friend class tRisaEventSystem;
 public:
@@ -122,11 +122,6 @@ public:
 			Source(source),
 			Destination(destination),
 			Priority(prio)
-	{
-	}
-
-	//! @brief デストラクタ
-	virtual ~tRisaEventInfo()
 	{
 	}
 

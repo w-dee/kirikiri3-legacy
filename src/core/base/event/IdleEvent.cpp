@@ -15,6 +15,11 @@
 
 RISSE_DEFINE_SOURCE_ID(58504,55707,27606,20246,35200,16274,28002,46284);
 
+/*
+	pointer_list はすでにそれ自身でスレッド保護を行っているので
+	pointer_list にさわっている分には特にスレッド保護を考えなくてもよい
+*/
+
 
 
 //---------------------------------------------------------------------------
@@ -38,18 +43,15 @@ bool tRisaIdleEventManager::Deliver(risse_uint64 mastertick)
 {
 	bool need_more = false;
 
-	// Idleイベントは tRisaEventSystem がイベントを配信可能かどうかを見る
-	if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
+	tRisaEventSystem * r = tRisaEventSystem::instance();
+	if(r->GetCanDeliverEvents())
 	{
-		if(r->GetCanDeliverEvents())
+		// イベントを配信する
+		pointer_list<tRisaIdleEventDestination>::scoped_lock lock(Destinations);
+		for(size_t i = 0; i < Destinations.get_locked_count(); i++)
 		{
-			// イベントを配信する
-			pointer_list<tRisaIdleEventDestination>::scoped_lock lock(Destinations);
-			for(size_t i = 0; i < Destinations.get_locked_count(); i++)
-			{
-				if(Destinations.get_locked(i)->OnIdle(mastertick))
-					need_more = true;
-			}
+			if(Destinations.get_locked(i)->OnIdle(mastertick))
+				need_more = true;
 		}
 	}
 	return need_more;
@@ -79,7 +81,7 @@ tRisaIdleEventDestination::tRisaIdleEventDestination()
 //---------------------------------------------------------------------------
 tRisaIdleEventDestination::~tRisaIdleEventDestination()
 {
-	if(Receiving) depends_on<tRisaIdleEventManager>::locked_instance()->Unregister(this);
+	if(Receiving) tRisaIdleEventManager::instance()->Unregister(this);
 }
 //---------------------------------------------------------------------------
 
@@ -89,7 +91,7 @@ void tRisaIdleEventDestination::StartReceiveIdle()
 {
 	if(!Receiving)
 	{
-		depends_on<tRisaIdleEventManager>::locked_instance()->Register(this);
+		tRisaIdleEventManager::instance()->Register(this);
 		Receiving = true;
 	}
 }
@@ -101,7 +103,7 @@ void tRisaIdleEventDestination::EndReceiveIdle()
 {
 	if(Receiving)
 	{
-		depends_on<tRisaIdleEventManager>::locked_instance()->Unregister(this);
+		tRisaIdleEventManager::instance()->Unregister(this);
 		Receiving = false;
 	}
 }

@@ -39,7 +39,7 @@ class tRisaIdleEventDestination;
 //---------------------------------------------------------------------------
 //! @brief		アイドル時に発生するイベントを管理するクラス
 //---------------------------------------------------------------------------
-class tRisaIdleEventManager : public singleton_base<tRisaIdleEventManager>
+class tRisaIdleEventManager : public singleton_base<tRisaIdleEventManager>, depends_on<tRisaEventSystem>
 {
 	friend class tRisaIdleEventDestination;
 
@@ -67,7 +67,8 @@ public:
 //! @brief		アイドル時に発生するイベントの送り先となるクラス
 //! @note		StartReceiveIdle を呼ばない限りはイベントは発生しない
 //---------------------------------------------------------------------------
-class tRisaIdleEventDestination : protected depends_on<tRisaIdleEventManager>
+class tRisaIdleEventDestination : protected depends_on<tRisaIdleEventManager>,
+	public tRisseDestructee
 {
 	bool Receiving; //!< イベント配信が有効かどうか
 
@@ -150,18 +151,19 @@ public:
 };
 //---------------------------------------------------------------------------
 
-/*
+
+
 //---------------------------------------------------------------------------
 //! @brief		コンパクト時に発生するイベントの送り先となるクラス
 //---------------------------------------------------------------------------
 class tRisaCompactEventDestination : protected depends_on<tRisaCompactEventManager>,
-								public tRisaCompactEventEnum
+								public tRisaCompactEventEnum, public tRisseDestructee
 {
 public:
 	tRisaCompactEventDestination()
-	{ depends_on<tRisaCompactEventManager>::locked_instance()->Register(this); }
+	{ tRisaCompactEventManager::instance()->Register(this); }
 	virtual ~tRisaCompactEventDestination()
-	{ depends_on<tRisaCompactEventManager>::locked_instance()->Unregister(this); }
+	{ tRisaCompactEventManager::instance()->Unregister(this); }
 
 public:
 	//! @brief		コンパクトイベントが配信されるとき
@@ -169,5 +171,5 @@ public:
 	virtual void OnCompact(tCompactLevel level) = 0;
 };
 //---------------------------------------------------------------------------
-*/
+
 #endif

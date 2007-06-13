@@ -2,16 +2,26 @@
 
 prefix=`pwd`
 
+# GC のスレッドのサポートを wxWidgets でも有効にしている点に注意
+# (RisaのtRisaThreadはwxThreadをベースにしているため)
+
+# -DCreateThread=GC_CreateThread をつけなければならないのは
+# どうも gc.h を見ているとこれが WindowsCE でのみ有効になっている
+# ようだから。
+
 prefix_zlib=$prefix/../zlib
 prefix_libpng=$prefix/../libpng
 prefix_libjpeg=$prefix/../libjpeg
 prefix_expat=$prefix/../expat
+prefix_gc=$prefix/../gc
 
 includes=" \
 		-I$prefix_zlib/include     \
 		-I$prefix_libpng/include   \
 		-I$prefix_libjpeg/include  \
 		-I$prefix_expat/include    \
+		-I$prefix_gc/include       \
+		  -include gc.h -DCreateThread=GC_CreateThread \
 	"
 
 libs=" \
@@ -19,6 +29,7 @@ libs=" \
 		-L$prefix_libpng/lib      \
 		-L$prefix_libjpeg/lib     \
 		-L$prefix_expat/lib       \
+		-L$prefix_gc/lib     -lgc \
 	"
 
 CFLAGS="$CFLAGS $includes"
@@ -36,7 +47,10 @@ export LDFLAGS
 
 common_configure_options="--with-opengl --enable-exceptions
 	--enable-catch_segvs --enable-mousewheel --enable-unicode
-	--enable-intl --enable-mslu --disable-compat24 --prefix=$prefix
+	--enable-intl --enable-mslu
+	--disable-compat24
+	--disable-compat26
+	--prefix=$prefix
 	--with-zlib=sys
 	--with-expat=sys
 	--with-libpng=sys

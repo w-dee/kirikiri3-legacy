@@ -4,6 +4,7 @@ prefix=`pwd`
 
 common_configure_options="
 	--prefix=$prefix
+	--enable-cplusplus
 	"
 
 . ../build_common.sh

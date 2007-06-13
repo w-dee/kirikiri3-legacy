@@ -55,6 +55,7 @@ common_configure_options="--with-opengl --enable-exceptions
 	--with-expat=sys
 	--with-libpng=sys
 	--with-libjpeg=sys
+	--enable-vendor=k3
 	
 	"
 

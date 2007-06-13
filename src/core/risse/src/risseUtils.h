@@ -39,7 +39,7 @@
 	namespace Risse
 	{
 	//! @brief クリティカルセクションの実装
-	class tRisseCriticalSection : public tRisseCollectee
+	class tRisseCriticalSection : public tRisseDestructee
 	{
 		CRITICAL_SECTION CS; //!< Win32 クリティカルセクションオブジェクト
 	public:

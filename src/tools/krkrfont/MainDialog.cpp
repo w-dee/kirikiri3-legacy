@@ -15,7 +15,7 @@
 #include "FreeType.h"
 #include "PreviewWindow.h"
 #include "WriteBFF.h"
-
+#include <wx/filedlg.h>
 
 //---------------------------------------------------------------------------
 //! @brief		イベントハンドラ定義
@@ -382,7 +382,7 @@ void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 		_("OpenType fonts (*.otf)|*.otf")					+ wxT("|") +
 		_("All files (*.*)|*.*"),
 		// flags
-		wxOPEN|wxFILE_MUST_EXIST
+		wxFD_OPEN|wxFD_FILE_MUST_EXIST
 		);
 	if(!filename.empty())
 	{
@@ -415,7 +415,7 @@ void wxMainDialog::OutputFileNameRefButtonClick(wxCommandEvent& event)
 		_("Kirikiri3 bitmap font (*.bff)|*.bff")	+ wxT("|") +
 		_("All files (*.*)|*.*"),
 		// flags
-		wxSAVE|wxOVERWRITE_PROMPT
+		wxFD_SAVE|wxFD_OVERWRITE_PROMPT
 		);
 	if(!filename.empty())
 	{

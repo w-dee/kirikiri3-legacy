@@ -79,6 +79,7 @@ wxThread::ExitCode tRisaThreadInternal::Entry()
 	}
 /*
 TODO: handle exceptions
+TODO: 例外が発生したらログ吐いて強制終了でいいと思う
 	catch(const eRisse &e)
 	{
 		// !!!!!!! 例外が投げられた

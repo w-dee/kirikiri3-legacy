@@ -16,6 +16,7 @@
 #include "base/event/Event.h"
 #include "base/event/IdleEvent.h"
 #include "base/event/TickCount.h"
+#include "base/gc/RisaGC.h"
 #include "base/script/RisseEngine.h"
 #include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
@@ -107,6 +108,7 @@ bool tRisaApplication::OnInit()
 	try
 	{
 		// 先だって初期化しておきたい物
+		tRisaCollectorThread::ensure();
 		tRisaWxLogProxy::ensure();
 
 		// 残り全てのシングルトンインスタンスを初期化

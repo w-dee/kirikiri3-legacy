@@ -14,6 +14,7 @@ SUBSYS_DIRS=\
 	$(CORE_DIR)/base/event         \
 	$(CORE_DIR)/base/log           \
 	$(CORE_DIR)/base/script        \
+	$(CORE_DIR)/base/gc            \
 #	$(CORE_DIR)/base/fs            \
 #	$(CORE_DIR)/base/system        \
 #	$(CORE_DIR)/sound              

@@ -138,6 +138,15 @@ src/risseNativeBinderTemplates.inc: \
 		tools/create_binder.rb Makefile
 	ruby tools/create_binder.rb > src/risseNativeBinderTemplates.inc
 
+# risseStringTemplates.inc のコンパイル
+BIN_DEPS += src/risseStringTemplates.inc
+
+src/risseStringTemplates.inc: \
+		tools/create_ss_templates.rb Makefile
+	ruby tools/create_ss_templates.rb > src/risseStringTemplates.inc
+
+
+
 # risseParser.cpp と risseParser.inc のコンパイル
 BIN_DEPS += src/risse_parser/risseParser.inc
 

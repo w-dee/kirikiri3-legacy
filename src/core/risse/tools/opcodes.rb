@@ -3,31 +3,6 @@
 
 # risseOpCodes.txt から定義を生成する
 
-# ハッシュの計算
-
-class String
-	# このハッシュ表は Risse のハッシュ表で使われているのと同じ方式である。
-	# 詳細は risseHashTable.h を参照のこと。
-	def make_risse_hash
-		hash = 0
-		self.each_byte do |byte|
-			hash += byte
-			hash &= 0xffffffff
-			hash += (hash << 10)
-			hash &= 0xffffffff
-			hash ^= (hash >> 6)
-			hash &= 0xffffffff
-		end
-		hash += (hash << 3)
-		hash &= 0xffffffff
-		hash ^= (hash >> 11)
-		hash &= 0xffffffff
-		hash += (hash << 15)
-		hash &= 0xffffffff
-		hash = 0xffffffff if hash == 0
-		hash
-	end
-end
 
 # 入力ファイルを開いて一行ずつ処理をする
 errorcount = 0
@@ -110,26 +85,9 @@ EOS
 	# RisseVMInsnInfo の tRisseString ストレージを書き出す
 	enumcount = 0
 	offset = 0
-	file.puts "// RisseVMInsnInfoのMemberNameが参照する文字列領域"
-	file.puts "// この領域は tRisseString の文字列ポインタが指す先と"
+	file.puts "// RawMemberNameの領域は tRisseString の文字列ポインタが指す先と"
 	file.puts "//       同じレイアウトになっている"
-	defs.each do |item|
-		name = item[:member_name]
-		if name != '----'
-			file.print "static risse_char v_#{item[:long_id]}[] = { "
-			file.print "tRisseStringData::MightBeShared,"
-			name.each_byte do |byte|
-				file.print "#{byte.chr.dump.gsub(/^"/,"'").gsub(/"$/,"'")},"
-			end
-			file.print "0,"  # null terminator
-			file.printf "0x%08x", name.make_risse_hash  # hash
-			file.print " };"
-			file.print " /*!< string of #{item[:def_comment]} */"
-			file.print "\n"
-		end
-	end
-
-	file.print "\n\n"
+	file.puts "// risseStaticStrings も似た実装になっているので参照のこと"
 
 	# tRisseVMInsnInfo の構造体を書き出す
 	enumcount = 0
@@ -142,7 +100,16 @@ EOS
 		if item[:member_name] == '----'
 			file.print "{RISSE_STRING_EMPTY_BUFFER,0}"
 		else
-			file.print "{v_#{item[:long_id]}+1,#{item[:member_name].length}}"
+			file.print "{"
+			file.print "tRisseSS<"
+			chars = ''
+			item[:member_name].each_byte do |byte|
+				chars << ',' if chars != ''
+				chars << "#{byte.chr.dump.gsub(/^"/,"'").gsub(/"$/,"'")}"
+			end
+			file.print chars
+			file.print ">::data.Buffer"
+			file.print ",#{item[:member_name].length}}"
 		end
 		file.puts " /* #{item[:def_comment]} */},"
 		enumcount += 1

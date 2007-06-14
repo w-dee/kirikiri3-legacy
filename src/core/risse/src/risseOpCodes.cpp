@@ -14,6 +14,7 @@
 #include "risseOpCodes.h"
 #include "risseVariant.h"
 #include "risseObject.h"
+#include "risseStringTemplate.h"
 
 namespace Risse
 {

@@ -14,6 +14,7 @@
 
 #include "risseString.h"
 #include "risseStaticStrings.h"
+#include "risseStringTemplate.h"
 
 /*
 	このモジュールは、スタティックな tRisseString への参照を保持する。

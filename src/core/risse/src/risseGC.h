@@ -33,6 +33,8 @@ namespace Risse
 //---------------------------------------------------------------------------
 typedef	gc			tRisseCollectee; //!< コレクタの対象となるクラスの基本クラス
 typedef	gc_cleanup	tRisseDestructee; //!< コレクタの対象かつデストラクタが呼ばれるクラスの基本クラス
+	//!< @note tRisseDestructee のデストラクタは、
+	//!< コンストラクタとは異なるスレッドから呼ばれる可能性があることに注意。
 
 // http://www.al.cs.kobe-u.ac.jp/~inamoto/unix-tools/useful/programming/gc/x272.html
 

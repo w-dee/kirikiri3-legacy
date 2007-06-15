@@ -16,10 +16,23 @@
 #include "risseScriptEngine.h"
 #include "risseFunctionClass.h"
 #include "rissePropertyClass.h"
+#include "risseStaticStrings.h"
 
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(50153,12161,23237,20278,22942,17690,37012,37765);
+
+
+
+//---------------------------------------------------------------------------
+void tRisseNativeCallInfo::InitializeSuperClass(const tRisseMethodArgument & args) const
+{
+	Class->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -30,8 +43,9 @@ tRisseObjectInterface::tRetValue tRisseNativeBindFunction<TT>::Operate(RISSE_OBJ
 	if(code == ocFuncCall && name.IsEmpty())
 	{
 		// このオブジェクトに対する関数呼び出しなので Callee を呼ぶ
-		tRisseNativeBindFunctionCallingInfo info(GetRTTI()->GetScriptEngine(), result, flags, args, This);
-		Callee(Class, TargetFunction, info);
+		tRisseNativeCallInfo info(
+			GetRTTI()->GetScriptEngine(), result, flags, args, This, Class);
+		Callee(TargetFunction, info);
 		return rvNoError;
 	}
 
@@ -90,8 +104,9 @@ tRisseObjectInterface::tRetValue tRisseNativeBindPropertyGetter<TT>::Operate(RIS
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(!Getter) return rvPropertyCannotBeRead;
-			tRisseNativeBindPropertyGetterCallingInfo info(GetRTTI()->GetScriptEngine(), result, flags, This);
-			Getter(Class, TargetFunction, info);
+			tRisseNativePropGetInfo info(
+				GetRTTI()->GetScriptEngine(), result, flags, This, Class);
+			Getter(TargetFunction, info);
 			return rvNoError;
 		}
 	}
@@ -113,8 +128,9 @@ tRisseObjectInterface::tRetValue tRisseNativeBindPropertySetter<TT>::Operate(RIS
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			args.ExpectArgumentCount(1);
 			if(!Setter) return rvPropertyCannotBeWritten;
-			tRisseNativeBindPropertySetterCallingInfo info(GetRTTI()->GetScriptEngine(), args[0], flags, This);
-			Setter(Class, TargetFunction, info);
+			tRisseNativePropSetInfo info(
+				GetRTTI()->GetScriptEngine(), args[0], flags, This, Class);
+			Setter(TargetFunction, info);
 			return rvNoError;
 		}
 	}

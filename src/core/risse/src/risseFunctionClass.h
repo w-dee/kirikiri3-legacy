@@ -55,7 +55,7 @@ public:
 
 public: // Risse用メソッドとか
 	void construct();
-	void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 

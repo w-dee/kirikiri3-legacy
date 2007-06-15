@@ -35,7 +35,7 @@ public: // Risse用メソッドなど
 	void construct();
 	void initialize(
 		const tRisseString &script, const tRisseString & name, risse_size lineofs,
-		const tRisseNativeBindFunctionCallingInfo &info);
+		const tRisseNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
 

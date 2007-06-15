@@ -68,11 +68,10 @@ void tRisseFunctionInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseFunctionInstance::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseFunctionInstance::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す
-	info.engine->FunctionClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-		tRisseMethodArgument::Empty(), info.This);
+	info.InitializeSuperClass();
 
 	// 引数 = {body}
 	// TODO: 文字列が渡された場合は内容をコンパイルして関数として動作するようにする

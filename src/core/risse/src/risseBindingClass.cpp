@@ -52,16 +52,16 @@ void tRisseBindingInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseBindingInstance::initialize(const tRisseNativeBindFunctionCallingInfo &info)
+void tRisseBindingInstance::initialize(const tRisseNativeCallInfo &info)
 {
-	info.engine->BindingClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 void tRisseBindingInstance::eval(const tRisseString & script,
-			const tRisseNativeBindFunctionCallingInfo &info) const
+			const tRisseNativeCallInfo &info) const
 {
 	tRisseString name = info.args.HasArgument(1) ?
 					tRisseString(info.args[1]) : tRisseString(RISSE_WS("(anonymous)"));

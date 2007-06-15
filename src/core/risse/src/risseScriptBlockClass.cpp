@@ -297,11 +297,10 @@ void tRisseScriptBlockInstance::construct()
 //---------------------------------------------------------------------------
 void tRisseScriptBlockInstance::initialize(
 	const tRisseString &script, const tRisseString & name, risse_size lineofs,
-	const tRisseNativeBindFunctionCallingInfo &info)
+	const tRisseNativeCallInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
-	info.engine->ScriptBlockClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-		tRisseMethodArgument::Empty(), info.This);
+	info.InitializeSuperClass();
 
 	// 引数を元に設定を行う
 	SetScriptAndName(script, name, lineofs);

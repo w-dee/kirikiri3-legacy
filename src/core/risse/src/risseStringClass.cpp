@@ -70,7 +70,7 @@ tRisseVariant tRisseStringClass::CreateNewObjectBase()
 
 
 //---------------------------------------------------------------------------
-void tRisseStringClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseStringClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドは「呼び出されない」
 
@@ -84,7 +84,7 @@ void tRisseStringClass::initialize(const tRisseNativeBindFunctionCallingInfo & i
 
 
 //---------------------------------------------------------------------------
-void tRisseStringClass::charAt(const tRisseNativeBindFunctionCallingInfo & info, risse_offset index)
+void tRisseStringClass::charAt(const tRisseNativeCallInfo & info, risse_offset index)
 {
 	if(info.result)
 	{
@@ -100,7 +100,7 @@ void tRisseStringClass::charAt(const tRisseNativeBindFunctionCallingInfo & info,
 
 
 //---------------------------------------------------------------------------
-void tRisseStringClass::get_length(const tRisseNativeBindPropertyGetterCallingInfo & info)
+void tRisseStringClass::get_length(const tRisseNativePropGetInfo & info)
 {
 	if(info.result) *info.result = (risse_int64)info.This.operator tRisseString().GetLength();
 }

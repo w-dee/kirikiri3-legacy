@@ -40,7 +40,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo &info);
+	static void initialize(const tRisseNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
 }

@@ -66,7 +66,7 @@ tRisseVariant tRisseRealClass::CreateNewObjectBase()
 
 
 //---------------------------------------------------------------------------
-void tRisseRealClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseRealClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドは「呼び出されない」
 

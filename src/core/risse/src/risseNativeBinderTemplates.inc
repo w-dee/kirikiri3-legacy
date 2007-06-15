@@ -17,9 +17,8 @@
 		typedef tRisseBinderConsts0 Cs;
 		typedef R (*tFunc)();
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -35,9 +34,8 @@
 		typedef tRisseBinderConsts0 Cs;
 		typedef void (*tFunc)();
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -51,11 +49,11 @@
 		typedef tRisseBinderConsts0 Cs;
 		typedef R (IC::*tFunc)();
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))());
 			else
@@ -69,11 +67,11 @@
 		typedef tRisseBinderConsts0 Cs;
 		typedef void (IC::*tFunc)();
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))();
 		}
@@ -121,9 +119,8 @@
 		typedef tRisseBinderConsts1<T0> Cs;
 		typedef R (*tFunc)(T0);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -139,9 +136,8 @@
 		typedef tRisseBinderConsts1<T0> Cs;
 		typedef void (*tFunc)(T0);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -155,11 +151,11 @@
 		typedef tRisseBinderConsts1<T0> Cs;
 		typedef R (IC::*tFunc)(T0);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info)));
 			else
@@ -173,11 +169,11 @@
 		typedef tRisseBinderConsts1<T0> Cs;
 		typedef void (IC::*tFunc)(T0);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info));
 		}
@@ -226,9 +222,8 @@
 		typedef tRisseBinderConsts2<T0,T1> Cs;
 		typedef R (*tFunc)(T0,T1);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -244,9 +239,8 @@
 		typedef tRisseBinderConsts2<T0,T1> Cs;
 		typedef void (*tFunc)(T0,T1);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -260,11 +254,11 @@
 		typedef tRisseBinderConsts2<T0,T1> Cs;
 		typedef R (IC::*tFunc)(T0,T1);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info)));
 			else
@@ -278,11 +272,11 @@
 		typedef tRisseBinderConsts2<T0,T1> Cs;
 		typedef void (IC::*tFunc)(T0,T1);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info));
 		}
@@ -332,9 +326,8 @@
 		typedef tRisseBinderConsts3<T0,T1,T2> Cs;
 		typedef R (*tFunc)(T0,T1,T2);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -350,9 +343,8 @@
 		typedef tRisseBinderConsts3<T0,T1,T2> Cs;
 		typedef void (*tFunc)(T0,T1,T2);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -366,11 +358,11 @@
 		typedef tRisseBinderConsts3<T0,T1,T2> Cs;
 		typedef R (IC::*tFunc)(T0,T1,T2);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info)));
 			else
@@ -384,11 +376,11 @@
 		typedef tRisseBinderConsts3<T0,T1,T2> Cs;
 		typedef void (IC::*tFunc)(T0,T1,T2);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info));
 		}
@@ -439,9 +431,8 @@
 		typedef tRisseBinderConsts4<T0,T1,T2,T3> Cs;
 		typedef R (*tFunc)(T0,T1,T2,T3);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -457,9 +448,8 @@
 		typedef tRisseBinderConsts4<T0,T1,T2,T3> Cs;
 		typedef void (*tFunc)(T0,T1,T2,T3);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -473,11 +463,11 @@
 		typedef tRisseBinderConsts4<T0,T1,T2,T3> Cs;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info)));
 			else
@@ -491,11 +481,11 @@
 		typedef tRisseBinderConsts4<T0,T1,T2,T3> Cs;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info));
 		}
@@ -547,9 +537,8 @@
 		typedef tRisseBinderConsts5<T0,T1,T2,T3,T4> Cs;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -565,9 +554,8 @@
 		typedef tRisseBinderConsts5<T0,T1,T2,T3,T4> Cs;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -581,11 +569,11 @@
 		typedef tRisseBinderConsts5<T0,T1,T2,T3,T4> Cs;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info)));
 			else
@@ -599,11 +587,11 @@
 		typedef tRisseBinderConsts5<T0,T1,T2,T3,T4> Cs;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info));
 		}
@@ -656,9 +644,8 @@
 		typedef tRisseBinderConsts6<T0,T1,T2,T3,T4,T5> Cs;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -674,9 +661,8 @@
 		typedef tRisseBinderConsts6<T0,T1,T2,T3,T4,T5> Cs;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -690,11 +676,11 @@
 		typedef tRisseBinderConsts6<T0,T1,T2,T3,T4,T5> Cs;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info)));
 			else
@@ -708,11 +694,11 @@
 		typedef tRisseBinderConsts6<T0,T1,T2,T3,T4,T5> Cs;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info));
 		}
@@ -766,9 +752,8 @@
 		typedef tRisseBinderConsts7<T0,T1,T2,T3,T4,T5,T6> Cs;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -784,9 +769,8 @@
 		typedef tRisseBinderConsts7<T0,T1,T2,T3,T4,T5,T6> Cs;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -800,11 +784,11 @@
 		typedef tRisseBinderConsts7<T0,T1,T2,T3,T4,T5,T6> Cs;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info)));
 			else
@@ -818,11 +802,11 @@
 		typedef tRisseBinderConsts7<T0,T1,T2,T3,T4,T5,T6> Cs;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info));
 		}
@@ -877,9 +861,8 @@
 		typedef tRisseBinderConsts8<T0,T1,T2,T3,T4,T5,T6,T7> Cs;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -895,9 +878,8 @@
 		typedef tRisseBinderConsts8<T0,T1,T2,T3,T4,T5,T6,T7> Cs;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -911,11 +893,11 @@
 		typedef tRisseBinderConsts8<T0,T1,T2,T3,T4,T5,T6,T7> Cs;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info)));
 			else
@@ -929,11 +911,11 @@
 		typedef tRisseBinderConsts8<T0,T1,T2,T3,T4,T5,T6,T7> Cs;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info));
 		}
@@ -989,9 +971,8 @@
 		typedef tRisseBinderConsts9<T0,T1,T2,T3,T4,T5,T6,T7,T8> Cs;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -1007,9 +988,8 @@
 		typedef tRisseBinderConsts9<T0,T1,T2,T3,T4,T5,T6,T7,T8> Cs;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -1023,11 +1003,11 @@
 		typedef tRisseBinderConsts9<T0,T1,T2,T3,T4,T5,T6,T7,T8> Cs;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info),tRisseFVoC<T8, Cs::AI8>::Cnv(info)));
 			else
@@ -1041,11 +1021,11 @@
 		typedef tRisseBinderConsts9<T0,T1,T2,T3,T4,T5,T6,T7,T8> Cs;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info),tRisseFVoC<T8, Cs::AI8>::Cnv(info));
 		}
@@ -1102,9 +1082,8 @@
 		typedef tRisseBinderConsts10<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9> Cs;
 		typedef R (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -1120,9 +1099,8 @@
 		typedef tRisseBinderConsts10<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9> Cs;
 		typedef void (*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -1136,11 +1114,11 @@
 		typedef tRisseBinderConsts10<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9> Cs;
 		typedef R (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info),tRisseFVoC<T8, Cs::AI8>::Cnv(info),tRisseFVoC<T9, Cs::AI9>::Cnv(info)));
 			else
@@ -1154,11 +1132,11 @@
 		typedef tRisseBinderConsts10<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9> Cs;
 		typedef void (IC::*tFunc)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info),tRisseFVoC<T8, Cs::AI8>::Cnv(info),tRisseFVoC<T9, Cs::AI9>::Cnv(info));
 		}

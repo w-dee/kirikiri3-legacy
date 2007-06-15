@@ -61,8 +61,8 @@ public:
 
 public: // Risse用メソッドなど
 	void construct();
-	void initialize(const tRisseNativeBindFunctionCallingInfo &info);
-	void eval(const tRisseString & script, const tRisseNativeBindFunctionCallingInfo &info) const;
+	void initialize(const tRisseNativeCallInfo &info);
+	void eval(const tRisseString & script, const tRisseNativeCallInfo &info) const;
 	tRisseVariant iget(const tRisseString & name) const;
 	void iset(const tRisseVariant & value, const tRisseString & name);
 };

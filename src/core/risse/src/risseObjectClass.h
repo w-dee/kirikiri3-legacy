@@ -36,17 +36,17 @@ public: // Risse用メソッドなど
 	static void construct();
 	static void initialize();
 	static bool isA(const tRisseVariant & Class,
-				const tRisseNativeBindFunctionCallingInfo & info);
+				const tRisseNativeCallInfo & info);
 	static void eval(const tRisseString & script,
-				const tRisseNativeBindFunctionCallingInfo & info);
+				const tRisseNativeCallInfo & info);
 	static tRisseVariant getInstanceMember(
-				const tRisseNativeBindFunctionCallingInfo & info,
+				const tRisseNativeCallInfo & info,
 				const tRisseString & membername);
 	static void setInstanceMember(
-				const tRisseNativeBindFunctionCallingInfo & info,
+				const tRisseNativeCallInfo & info,
 				const tRisseString & membername, const tRisseVariant & value);
 	static tRisseVariant toException(
-				const tRisseNativeBindFunctionCallingInfo & info);
+				const tRisseNativeCallInfo & info);
 	static void p(const tRisseMethodArgument & args);
 };
 //---------------------------------------------------------------------------

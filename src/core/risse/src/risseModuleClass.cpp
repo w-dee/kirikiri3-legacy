@@ -68,10 +68,10 @@ void tRisseModuleClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseModuleClass::initialize(const tRisseNativeBindFunctionCallingInfo &info)
+void tRisseModuleClass::initialize(const tRisseNativeCallInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
-	info.engine->ModuleClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), info.This);
+	info.InitializeSuperClass();
 }
 //---------------------------------------------------------------------------
 

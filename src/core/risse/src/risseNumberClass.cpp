@@ -72,7 +72,7 @@ void tRisseNumberClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseNumberClass::isNaN(const tRisseNativeBindPropertyGetterCallingInfo & info)
+void tRisseNumberClass::isNaN(const tRisseNativePropGetInfo & info)
 {
 	tRisseVariant num = info.This.Plus();
 

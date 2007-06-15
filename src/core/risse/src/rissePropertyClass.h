@@ -61,7 +61,7 @@ public:
 
 public: // Risse用オブジェクトなど
 	void construct();
-	void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 

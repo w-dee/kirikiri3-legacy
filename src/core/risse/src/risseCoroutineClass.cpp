@@ -44,13 +44,13 @@ void tRisseCoroutineInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineInstance::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseCoroutineInstance::initialize(const tRisseNativeCallInfo & info)
 {
 	// 引数の数チェック
 	info.args.ExpectBlockArgumentCount(1);
 
 	// 親クラスの同名メソッドを呼び出す
-	info.engine->CoroutineClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass();
 
 	// 引数を元にコルーチンを作成する
 	// TODO: ブロック引数だけでなくコンストラクタ引数としても関数オブジェクトを渡せるように

@@ -187,10 +187,10 @@ void tRisseSourcePointInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseSourcePointInstance::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseSourcePointInstance::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数は空)
-	info.engine->SourcePointClass->CallSuperClassMethod(NULL, ss_initialize, 0, tRisseMethodArgument::Empty(), info.This);
+	info.InitializeSuperClass();
 
 	// 引数 = スクリプトブロック, 行, メソッド
 	if(info.args.HasArgument(0))
@@ -309,7 +309,7 @@ void tRisseThrowableClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseThrowableClass::construct(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseThrowableClass::construct(const tRisseNativeCallInfo & info)
 {
 	// message メンバを追加 (デフォルトでは空文字列)
 	info.This.SetPropertyDirect_Object(ss_message, tRisseOperateFlags::ofMemberEnsure,
@@ -327,11 +327,10 @@ void tRisseThrowableClass::construct(const tRisseNativeBindFunctionCallingInfo &
 
 
 //---------------------------------------------------------------------------
-void tRisseThrowableClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseThrowableClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数は空)
-	info.engine->ThrowableClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-									tRisseMethodArgument::Empty(), info.This);
+	info.InitializeSuperClass();
 
 	// 引数 = メッセージ
 	if(info.args.HasArgument(0))
@@ -341,7 +340,7 @@ void tRisseThrowableClass::initialize(const tRisseNativeBindFunctionCallingInfo 
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseThrowableClass::toString(const tRisseNativeBindFunctionCallingInfo & info)
+tRisseString tRisseThrowableClass::toString(const tRisseNativeCallInfo & info)
 {
 	// message at [発生場所] を返す
 	tRisseString message = (tRisseString)info.This.GetPropertyDirect_Object(ss_message);
@@ -359,7 +358,7 @@ tRisseString tRisseThrowableClass::toString(const tRisseNativeBindFunctionCallin
 
 //---------------------------------------------------------------------------
 void tRisseThrowableClass::addTrace(const tRisseVariant & point,
-		const tRisseNativeBindFunctionCallingInfo & info)
+		const tRisseNativeCallInfo & info)
 {
 	// 引数 = SourcePoint クラスのインスタンス
 	// TODO: インスタンスが SourcePoint クラスのインスタンスかどうかをチェック
@@ -370,7 +369,7 @@ void tRisseThrowableClass::addTrace(const tRisseVariant & point,
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseThrowableClass::toException(const tRisseNativeBindFunctionCallingInfo & info)
+tRisseVariant tRisseThrowableClass::toException(const tRisseNativeCallInfo & info)
 {
 	// 自分自身が Class のサブクラスの場合は
 	// 例外クラスを構築して返す
@@ -427,10 +426,10 @@ void tRisseErrorClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseErrorClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseErrorClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->ErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -471,7 +470,7 @@ void tRisseAssertionErrorClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseAssertionErrorClass::construct(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseAssertionErrorClass::construct(const tRisseNativeCallInfo & info)
 {
 	// expression メンバを追加 (デフォルトでは空文字列)
 	info.This.SetPropertyDirect_Object(ss_expression,
@@ -482,15 +481,13 @@ void tRisseAssertionErrorClass::construct(const tRisseNativeBindFunctionCallingI
 
 
 //---------------------------------------------------------------------------
-void tRisseAssertionErrorClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseAssertionErrorClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
 	if(info.args.HasArgument(0))
-		info.engine->AssertionErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-			tRisseMethodArgument::New(info.args[0]), info.This);
+		info.InitializeSuperClass(tRisseMethodArgument::New(info.args[0]));
 	else
-		info.engine->AssertionErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-			tRisseMethodArgument::New(RISSE_WS("assertion failed")), info.This);
+		info.InitializeSuperClass(tRisseMethodArgument::New(RISSE_WS("assertion failed")));
 }
 //---------------------------------------------------------------------------
 
@@ -541,7 +538,7 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseBlockExitExceptionClass::construct(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseBlockExitExceptionClass::construct(const tRisseNativeCallInfo & info)
 {
 	// identifier メンバを追加 (デフォルトではnull)
 	info.This.SetPropertyDirect_Object(ss_identifier, tRisseOperateFlags::ofMemberEnsure,
@@ -559,11 +556,10 @@ void tRisseBlockExitExceptionClass::construct(const tRisseNativeBindFunctionCall
 
 
 //---------------------------------------------------------------------------
-void tRisseBlockExitExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseBlockExitExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
-	info.engine->BlockExitExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-		tRisseMethodArgument::New(RISSE_WS("break/return helper exception")), info.This);
+	info.InitializeSuperClass(tRisseMethodArgument::New(RISSE_WS("break/return helper exception")));
 
 	// メンバを設定する
 	if(info.args.HasArgument(0))
@@ -622,10 +618,10 @@ void tRisseExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->ExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -672,11 +668,10 @@ void tRisseInsufficientResourceExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseInsufficientResourceExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseInsufficientResourceExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->InsufficientResourceExceptionClass->
-			CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -734,10 +729,10 @@ void tRisseIOExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseIOExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseIOExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->IOExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -846,10 +841,10 @@ void tRisseCharConversionExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseCharConversionExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseCharConversionExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->ErrorClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -905,10 +900,10 @@ void tRisseRuntimeExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseRuntimeExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseRuntimeExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->RuntimeExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -953,10 +948,10 @@ void tRisseCompileExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompileExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseCompileExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->CompileExceptionClass->CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1026,11 +1021,10 @@ void tRisseClassDefinitionExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseClassDefinitionExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseClassDefinitionExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->ClassDefinitionExceptionClass->
-			CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1097,11 +1091,10 @@ void tRisseInstantiationExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseInstantiationExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseInstantiationExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->InstantiationExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1167,11 +1160,10 @@ void tRisseBadContextExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseBadContextExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseBadContextExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->BadContextExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1227,11 +1219,10 @@ void tRisseUnsupportedOperationExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseUnsupportedOperationExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseUnsupportedOperationExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->UnsupportedOperationExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1298,11 +1289,10 @@ void tRisseArgumentExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseArgumentExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseArgumentExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->ArgumentExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1351,11 +1341,10 @@ void tRisseNullObjectExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseNullObjectExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseNullObjectExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->NullObjectExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1411,11 +1400,10 @@ void tRisseIllegalArgumentExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalArgumentExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseIllegalArgumentExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->IllegalArgumentExceptionClass->
-			CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1464,11 +1452,10 @@ void tRisseBadArgumentCountExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseBadArgumentCountExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseBadArgumentCountExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->BadArgumentCountExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1534,7 +1521,7 @@ void tRisseMemberAccessExceptionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-void tRisseMemberAccessExceptionClass::construct(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseMemberAccessExceptionClass::construct(const tRisseNativeCallInfo & info)
 {
 	// name メンバを追加 (デフォルトでは空文字列)
 	info.This.SetPropertyDirect_Object(ss_name, tRisseOperateFlags::ofMemberEnsure,
@@ -1544,11 +1531,10 @@ void tRisseMemberAccessExceptionClass::construct(const tRisseNativeBindFunctionC
 
 
 //---------------------------------------------------------------------------
-void tRisseMemberAccessExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseMemberAccessExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はargs[0])
-	info.engine->MemberAccessExceptionClass->CallSuperClassMethod(NULL,
-		ss_initialize, 0, tRisseMethodArgument::New(info.args[0]), info.This);
+	info.InitializeSuperClass(tRisseMethodArgument::New(info.args[0]));
 
 	// メンバを設定する
 	if(info.args.HasArgument(1))
@@ -1600,11 +1586,10 @@ void tRisseNoSuchMemberExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseNoSuchMemberExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseNoSuchMemberExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->NoSuchMemberExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1666,11 +1651,10 @@ void tRisseIllegalMemberAccessExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseIllegalMemberAccessExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->IllegalMemberAccessExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 
@@ -1769,11 +1753,10 @@ void tRisseCoroutineExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineExceptionClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseCoroutineExceptionClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.engine->CoroutineExceptionClass->
-		CallSuperClassMethod(NULL, ss_initialize, 0, info.args, info.This);
+	info.InitializeSuperClass(info.args);
 }
 //---------------------------------------------------------------------------
 

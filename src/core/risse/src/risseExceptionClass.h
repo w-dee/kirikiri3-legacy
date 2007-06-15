@@ -130,7 +130,7 @@ class tRisseSourcePointInstance : public tRisseObjectBase
 {
 public: // Risse用メソッドなど
 	void construct();
-	void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	void initialize(const tRisseNativeCallInfo & info);
 	tRisseString toString() const;
 };
 //---------------------------------------------------------------------------
@@ -187,12 +187,12 @@ public:
 	void RegisterMembers();
 
 public: // Risse用メソッドなど
-	static void construct(const tRisseNativeBindFunctionCallingInfo & info);
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
-	static tRisseString toString(const tRisseNativeBindFunctionCallingInfo & info);
+	static void construct(const tRisseNativeCallInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
+	static tRisseString toString(const tRisseNativeCallInfo & info);
 	static void addTrace(const tRisseVariant & point,
-		const tRisseNativeBindFunctionCallingInfo & info);
-	static tRisseVariant toException(const tRisseNativeBindFunctionCallingInfo & info);
+		const tRisseNativeCallInfo & info);
+	static tRisseVariant toException(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 
@@ -220,7 +220,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 
@@ -249,8 +249,8 @@ public:
 	void RegisterMembers();
 
 public: // Risse用メソッドなど
-	static void construct(const tRisseNativeBindFunctionCallingInfo & info);
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void construct(const tRisseNativeCallInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		例外を投げる
@@ -288,8 +288,8 @@ public:
 	void RegisterMembers();
 
 public: // Risse用メソッドなど
-	static void construct(const tRisseNativeBindFunctionCallingInfo & info);
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void construct(const tRisseNativeCallInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 
@@ -319,7 +319,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 
@@ -350,7 +350,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「コルーチンを作成できない」例外を発生
@@ -387,7 +387,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「読み込みエラーが発生した」例外を発生
@@ -460,7 +460,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「無効なUTF-8文字列です」例外を発生
@@ -496,7 +496,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 
@@ -523,7 +523,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「コンパイルエラー」例外を発生
@@ -566,7 +566,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「extensibleでないクラスのサブクラスを作成しようとした」例外を発生
@@ -613,7 +613,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生
@@ -656,7 +656,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「異なるクラスのコンテキストです」例外を発生
@@ -694,7 +694,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「関数でない物を呼び出そうとした」例外を発生
@@ -736,7 +736,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 
@@ -767,7 +767,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「異なるクラスのコンテキストです」例外を発生
@@ -803,7 +803,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 
@@ -834,7 +834,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		普通の引数の数が期待した数でなかった場合の例外を発生
@@ -885,8 +885,8 @@ public:
 	void RegisterMembers();
 
 public: // Risse用メソッドなど
-	static void construct(const tRisseNativeBindFunctionCallingInfo & info);
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void construct(const tRisseNativeCallInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 
@@ -916,7 +916,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		例外を発生
@@ -953,7 +953,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「読み出し専用メンバに上書きしようとした」例外を発生
@@ -1022,7 +1022,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
 	//! @brief		「コルーチンは既に終了している」例外を発生

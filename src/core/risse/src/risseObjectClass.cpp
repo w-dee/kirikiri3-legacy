@@ -79,7 +79,7 @@ void tRisseObjectClass::initialize()
 
 //---------------------------------------------------------------------------
 bool tRisseObjectClass::isA(const tRisseVariant & Class,
-						const tRisseNativeBindFunctionCallingInfo & info)
+						const tRisseNativeCallInfo & info)
 {
 	// 自身が引数(=クラス) のインスタンスかどうかを得る
 	return info.This.InstanceOf(info.engine, Class);
@@ -89,7 +89,7 @@ bool tRisseObjectClass::isA(const tRisseVariant & Class,
 
 //---------------------------------------------------------------------------
 void tRisseObjectClass::eval(const tRisseString & script,
-							const tRisseNativeBindFunctionCallingInfo & info)
+							const tRisseNativeCallInfo & info)
 {
 	// eval (式やスクリプトの評価)
 	tRisseString name = info.args.HasArgument(1) ?
@@ -104,7 +104,7 @@ void tRisseObjectClass::eval(const tRisseString & script,
 
 //---------------------------------------------------------------------------
 tRisseVariant tRisseObjectClass::getInstanceMember(
-	const tRisseNativeBindFunctionCallingInfo & info,
+	const tRisseNativeCallInfo & info,
 	const tRisseString & membername)
 {
 	// This のインスタンスメンバを取得する
@@ -118,7 +118,7 @@ tRisseVariant tRisseObjectClass::getInstanceMember(
 
 //---------------------------------------------------------------------------
 void tRisseObjectClass::setInstanceMember(
-	const tRisseNativeBindFunctionCallingInfo & info,
+	const tRisseNativeCallInfo & info,
 	const tRisseString & membername, const tRisseVariant & value)
 {
 	// This のインスタンスメンバを設定する
@@ -132,7 +132,7 @@ void tRisseObjectClass::setInstanceMember(
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseObjectClass::toException(const tRisseNativeBindFunctionCallingInfo & info)
+tRisseVariant tRisseObjectClass::toException(const tRisseNativeCallInfo & info)
 {
 	// デフォルトの動作は、This を文字列化してそれを RuntimeException.new 
 	// に渡し、その結果を返す

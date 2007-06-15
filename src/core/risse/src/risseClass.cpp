@@ -175,7 +175,7 @@ void tRisseClassBase::CallSuperClassMethod(tRisseVariantBlock * ret,
 
 
 //---------------------------------------------------------------------------
-void tRisseClassBase::risse_new(const tRisseNativeBindFunctionCallingInfo &info)
+void tRisseClassBase::risse_new(const tRisseNativeCallInfo &info)
 {
 	// 空のオブジェクトを作る
 	// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
@@ -216,7 +216,7 @@ void tRisseClassBase::risse_new(const tRisseNativeBindFunctionCallingInfo &info)
 
 //---------------------------------------------------------------------------
 void tRisseClassBase::fertilize(const tRisseVariant & instance,
-			const tRisseNativeBindFunctionCallingInfo &info)
+			const tRisseNativeCallInfo &info)
 {
 	// 親クラスを得る
 	tRisseVariant super_class = info.This.GetPropertyDirect(info.engine, ss_super);
@@ -246,7 +246,7 @@ void tRisseClassBase::fertilize(const tRisseVariant & instance,
 
 //---------------------------------------------------------------------------
 void tRisseClassBase::include(const tRisseMethodArgument & args,
-					const tRisseNativeBindFunctionCallingInfo &info)
+					const tRisseNativeCallInfo &info)
 {
 	// クラスの modules 配列にモジュールを追加する
 

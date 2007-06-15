@@ -39,8 +39,8 @@ public:
 	tRisseVariant CreateNewObjectBase();
 
 public: // Risse用メソッドなど
-	static void initialize(const tRisseNativeBindFunctionCallingInfo & info);
-	static void times(const tRisseNativeBindFunctionCallingInfo & info);
+	static void initialize(const tRisseNativeCallInfo & info);
+	static void times(const tRisseNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

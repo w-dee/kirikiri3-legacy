@@ -68,7 +68,7 @@ tRisseVariant tRisseIntegerClass::CreateNewObjectBase()
 
 
 //---------------------------------------------------------------------------
-void tRisseIntegerClass::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseIntegerClass::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドは「呼び出されない」
 
@@ -82,7 +82,7 @@ void tRisseIntegerClass::initialize(const tRisseNativeBindFunctionCallingInfo & 
 
 
 //---------------------------------------------------------------------------
-void tRisseIntegerClass::times(const tRisseNativeBindFunctionCallingInfo & info)
+void tRisseIntegerClass::times(const tRisseNativeCallInfo & info)
 {
 	info.args.ExpectBlockArgumentCount(1);
 

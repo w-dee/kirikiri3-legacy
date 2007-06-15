@@ -40,7 +40,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void isNaN(const tRisseNativeBindPropertyGetterCallingInfo & info);
+	static void isNaN(const tRisseNativePropGetInfo & info);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

@@ -58,9 +58,8 @@ STDOUT.print "
 		typedef #{const_class} Cs;
 		typedef R (*tFunc)(#{argnum.join{|n|"T#{n}"}});
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result)
@@ -76,9 +75,8 @@ STDOUT.print "
 		typedef #{const_class} Cs;
 		typedef void (*tFunc)(#{argnum.join{|n|"T#{n}"}});
 	public:
-		static void Call(tRisseClassBase * _class,
-			void (*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			if(info.result) info.result->Clear();
@@ -92,11 +90,11 @@ STDOUT.print "
 		typedef #{const_class} Cs;
 		typedef R (IC::*tFunc)(#{argnum.join{|n|"T#{n}"}});
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result)
 				*info.result = RisseToVariant((instance->*((tFunc)f))(#{args_list}));
 			else
@@ -110,11 +108,11 @@ STDOUT.print "
 		typedef #{const_class} Cs;
 		typedef void (IC::*tFunc)(#{argnum.join{|n|"T#{n}"}});
 	public:
-		static void Call(tRisseClassBase * _class, void (tRisseObjectBase::*f)(),
-			const tRisseNativeBindFunctionCallingInfo & info)
+		static void Call(void (tRisseObjectBase::*f)(),
+			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)_class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
 			if(info.result) info.result->Clear();
 			(instance->*((tFunc)f))(#{args_list});
 		}

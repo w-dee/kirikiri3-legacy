@@ -79,21 +79,19 @@ void tRisseClassClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseClassClass::initialize(const tRisseNativeBindFunctionCallingInfo &info)
+void tRisseClassClass::initialize(const tRisseNativeCallInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
 	// 引数は  { 親クラス, 名前 }
 	if(info.args.HasArgument(1))
 	{
 		// 名前を渡す
-		info.engine->ClassClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-							tRisseMethodArgument::New(info.args[1]), info.This);
+		info.InitializeSuperClass(tRisseMethodArgument::New(info.args[1]));
 	}
 	else
 	{
 		// 名前がないので引数無し
-		info.engine->ClassClass->CallSuperClassMethod(NULL, ss_initialize, 0,
-							tRisseMethodArgument::Empty(), info.This);
+		info.InitializeSuperClass();
 	}
 
 	if(info.args.HasArgument(0) && !info.args[0].IsNull())

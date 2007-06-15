@@ -73,11 +73,10 @@ void tRissePropertyInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRissePropertyInstance::initialize(const tRisseNativeBindFunctionCallingInfo & info)
+void tRissePropertyInstance::initialize(const tRisseNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す
-	info.engine->PropertyClass->CallSuperClassMethod(NULL, ss_initialize, 0, 
-			tRisseMethodArgument::Empty(), info.This);
+	info.InitializeSuperClass();
 
 	// 引数 = {getter, setter}
 	if(info.args.HasArgument(0)) SetGetter(info.args[0]);

@@ -113,7 +113,7 @@ void tRisaTimerScheduler::Execute()
 		risse_int64 sleep_ms; // どれぐらい sleep すればよいか
 		while(true)
 		{
-			risse_uint64 current_tick = depends_on<tRisaTickCount>::locked_instance()->Get();
+			risse_uint64 current_tick = tRisaTickCount::instance()->Get();
 
 			// 直近のTickを持つConsumerを探し、何ms後に起きれば良いのかを計算する
 			{
@@ -235,7 +235,7 @@ void tRisaTimerConsumer::SetNextTick(risse_uint64 nexttick)
 
 //---------------------------------------------------------------------------
 tRisaEventTimerConsumer::tRisaEventTimerConsumer() :
-		tRisaTimerConsumer(tRisaEventTimerScheduler::instance().get())
+		tRisaTimerConsumer(tRisaEventTimerScheduler::instance())
 {
 	// フィールドの初期化
 	Enabled = false;
@@ -310,7 +310,7 @@ void tRisaEventTimerConsumer::ResetInterval()
 	if(Enabled && Interval != tRisaTickCount::InvalidTickCount)
 	{
 		// 有効の場合
-		ReferenceTick = depends_on<tRisaTickCount>::locked_instance()->Get() + Interval;
+		ReferenceTick = tRisaTickCount::instance()->Get() + Interval;
 		SetNextTick(ReferenceTick);
 	}
 	else
@@ -319,7 +319,7 @@ void tRisaEventTimerConsumer::ResetInterval()
 		SetNextTick(tRisaTickCount::InvalidTickCount);
 	}
 
-	depends_on<tRisaEventSystem>::locked_instance()->CancelEvents(this); // pending なイベントはすべてキャンセル
+	tRisaEventSystem::instance()->CancelEvents(this); // pending なイベントはすべてキャンセル
 	QueueCount = 0;
 }
 //---------------------------------------------------------------------------
@@ -336,7 +336,7 @@ void tRisaEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64
 		if(Capacity == 0 || QueueCount < Capacity)
 		{
 			// イベント管理システムにイベントをPostする
-			depends_on<tRisaEventSystem>::locked_instance()->PostEvent(
+			tRisaEventSystem::instance()->PostEvent(
 				new tRisaEventInfo(
 					0, // id
 					this, // source

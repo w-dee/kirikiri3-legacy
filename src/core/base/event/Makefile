@@ -15,9 +15,8 @@ CPPFILES=\
 	TickCount.cpp                  \
 	Event.cpp                      \
 	IdleEvent.cpp                  \
-
-#	Timer.cpp                      \
-#	TimerBind.cpp
+	Timer.cpp                      \
+	TimerBind.cpp
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

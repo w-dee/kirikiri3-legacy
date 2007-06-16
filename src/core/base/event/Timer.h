@@ -101,8 +101,10 @@ protected:
 
 //---------------------------------------------------------------------------
 //! @brief		タイマーのタイミング発生先となるクラス
+//! @note		このクラスおよびこの派生クラスのデストラクタは、
+//!				メインスレッド以外から非同期に呼ばれる可能性があるので注意すること
 //---------------------------------------------------------------------------
-class tRisaTimerConsumer
+class tRisaTimerConsumer : public tRisseDestructee
 {
 	tRisaTimerScheduler * Owner;
 	risse_uint64 NextTick; // 次に OnPeriod を呼ぶべき絶対Tick

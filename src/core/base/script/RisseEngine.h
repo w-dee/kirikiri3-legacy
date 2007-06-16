@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 class tRisaRisseScriptEngine : public singleton_base<tRisaRisseScriptEngine>
 {
-	tRisseScriptEngine *Engine; //!< スクリプトエンジンインスタンス
+	tRisseScriptEngine *ScriptEngine; //!< スクリプトエンジンインスタンス
 
 public:
 	//! @brief		コンストラクタ
@@ -33,10 +33,11 @@ public:
 	//! @brief		シャットダウン
 	void Shutdown();
 
-	tRisseScriptEngine * GetEngine() { return Engine; } //!< スクリプトエンジンを返す
+	tRisseScriptEngine * GetScriptEngine() { return ScriptEngine; } //!< スクリプトエンジンを返す
 
 	const tRisseVariant & GetGlobalObject()
-		{ if(!Engine) return tRisseVariant::GetNullObject(); return Engine->GetGlobalObject(); }
+		{ if(!ScriptEngine) return tRisseVariant::GetNullObject();
+		  return ScriptEngine->GetGlobalObject(); }
 		//!< グローバルオブジェクトを返す
 
 	//! @brief		グローバルにオブジェクトを登録する
@@ -64,6 +65,27 @@ public:
 };
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		インスタンスをスクリプトエンジンに登録するためのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename ClassT, typename ClassNameT>
+class tRisaRisseClassRegisterer :
+	public singleton_base<tRisaRisseClassRegisterer<ClassT, ClassNameT> >,
+	depends_on<tRisaRisseScriptEngine>
+{
+public:
+	//! @brief		コンストラクタ
+	tRisaRisseClassRegisterer()
+	{
+		// ここらへんのプロセスについては tRisseScriptEngine のコンストラクタも参照のこと
+		tRisseScriptEngine * engine = tRisaRisseScriptEngine::instance()->GetScriptEngine();
+		ClassT *class_instance = new ClassT(engine);
+		class_instance->RegisterClassInstance(engine->GetGlobalObject(), ClassNameT());
+		class_instance->RegisterMembers();
+	}
+};
+//---------------------------------------------------------------------------
 
 
 #endif

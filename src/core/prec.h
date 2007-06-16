@@ -19,6 +19,7 @@
 	#include "risse/include/risseGC.h"
 	#include "risse/include/risseTypes.h"
 	#include "risse/include/risseVariant.h"
+	#include "risse/include/risseStringTemplate.h"
 	#include "base/utils/Singleton.h"
 	#include "base/utils/RingBuffer.h"
 	#include "base/utils/RisaThread.h"

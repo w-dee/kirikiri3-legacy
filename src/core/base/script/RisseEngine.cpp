@@ -22,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);
 //---------------------------------------------------------------------------
 tRisaRisseScriptEngine::tRisaRisseScriptEngine()
 {
-	Engine = new tRisseScriptEngine();
+	ScriptEngine = new tRisseScriptEngine();
 }
 //---------------------------------------------------------------------------
 
@@ -44,10 +44,10 @@ void tRisaRisseScriptEngine::Shutdown()
 //---------------------------------------------------------------------------
 void tRisaRisseScriptEngine::RegisterGlobalObject(const tRisseString & name, const tRisseVariant & object)
 {
-	if(!Engine) return;
+	if(!ScriptEngine) return;
 	// グローバルオブジェクトは tRisseObjectBase のはず・・・
-	RISSE_ASSERT(dynamic_cast<tRisseObjectBase *>(Engine->GetGlobalObject().GetObjectInterface()) != NULL);
-	static_cast<tRisseObjectBase *>(Engine->GetGlobalObject().GetObjectInterface())->RegisterNormalMember(name, object);
+	RISSE_ASSERT(dynamic_cast<tRisseObjectBase *>(ScriptEngine->GetGlobalObject().GetObjectInterface()) != NULL);
+	static_cast<tRisseObjectBase *>(ScriptEngine->GetGlobalObject().GetObjectInterface())->RegisterNormalMember(name, object);
 }
 //---------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ void tRisaRisseScriptEngine::EvaluateExpresisonAndPrintResultToConsole(const tRi
 	tRisseVariant result;
 	try
 	{
-		Engine->Evaluate(expression, RISSE_WS_TR("console"), 0, &result, NULL, true);
+		ScriptEngine->Evaluate(expression, RISSE_WS_TR("console"), 0, &result, NULL, true);
 	}
 	catch(const tRisseVariant * e)
 	{
@@ -90,7 +90,7 @@ void tRisaRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseS
 				tRisseVariant * result,
 				const tRisseBindingInfo * binding, bool is_expression)
 {
-	Engine->Evaluate(script, name, lineofs, result, binding, is_expression);
+	ScriptEngine->Evaluate(script, name, lineofs, result, binding, is_expression);
 }
 //---------------------------------------------------------------------------
 

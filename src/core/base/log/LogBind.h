@@ -13,12 +13,5 @@
 #ifndef _LOGBIND_H_
 #define _LOGBIND_H_
 
-#if 0
-#include "base/utils/Singleton.h"
-#include "base/log/Log.h"
-
-#endif
-
-
 
 #endif

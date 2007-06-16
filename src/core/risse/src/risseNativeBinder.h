@@ -87,6 +87,11 @@ native binder について
   script に渡ることになる。
 
 
+ tRisseNativeCallInfo には便利なメソッド tRisseNativeCallInfo::InitializeSuperClass()
+ があり、これを用いると簡単に親クラスの initialize メソッドを呼び出すことが出来る。
+
+
+
 ■ RisseBindProperty(Class, name, getter, setter, attribute, context)
 ■ RisseBindProperty(Class, name, getter, attribute, context)
 
@@ -434,6 +439,11 @@ inline tRisseVariant RisseToVariant<risse_size>(risse_size s)
 	return tRisseVariant((risse_int64)s);
 }
 template <>
+inline tRisseVariant RisseToVariant<risse_uint64>(risse_uint64 s)
+{
+	return tRisseVariant((risse_int64)s);
+}
+template <>
 inline tRisseVariant RisseToVariant<risse_offset>(risse_offset s)
 {
 	return tRisseVariant((risse_int64)s);
@@ -461,8 +471,11 @@ inline risse_size RisseFromVariant<risse_size>(const tRisseVariant & v)
 {
 	return (risse_size)(risse_int64)v;
 }
-//---------------------------------------------------------------------------
-// 整数系
+template <>
+inline risse_uint64 RisseFromVariant<risse_uint64>(const tRisseVariant & v)
+{
+	return (risse_uint64)(risse_int64)v;
+}
 template <>
 inline risse_offset RisseFromVariant<risse_offset>(const tRisseVariant & v)
 {

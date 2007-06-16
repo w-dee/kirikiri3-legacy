@@ -22,6 +22,9 @@
 
 RISSE_DEFINE_SOURCE_ID(25021,49177,9141,20257,35249,61240,44766,27087);
 
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		Timerのイベントを受け取るクラス
 //---------------------------------------------------------------------------
@@ -54,10 +57,33 @@ protected:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		"Timer" クラスのインスタンス用 C++クラス
+//---------------------------------------------------------------------------
+class tRisaTimerInstance : public tRisseObjectBase
+{
+	tRisaTimerBindingConsumer * Consumer; //!< Timer のイベントを受け取るインスタンス
 
+public:
+	//! @brief		コンストラクタ
+	tRisaTimerInstance();
 
+	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	virtual ~tRisaTimerInstance() {;}
 
-
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tRisseNativeCallInfo &info);
+	void set_enabled(bool b);
+	bool get_enabled() const;
+	void set_interval(risse_uint64 interval);
+	risse_uint64 get_interval() const;
+	void set_capacity(risse_size capa);
+	risse_size get_capacity() const;
+	void reset();
+	void onTimer();
+};
+//---------------------------------------------------------------------------
 
 
 
@@ -153,6 +179,40 @@ void tRisaTimerInstance::onTimer()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Timer" クラス
+//---------------------------------------------------------------------------
+class tRisaTimerClass : public tRisseClassBase
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaTimerClass(tRisseScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	tRisseVariant CreateNewObjectBase();
+
+public:
+};
+//---------------------------------------------------------------------------
 
 
 

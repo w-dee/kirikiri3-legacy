@@ -54,6 +54,7 @@ tRisaThreadInternal::tRisaThreadInternal(tRisaThread * owner) :
 
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
+//! @note		このデストラクタはメインスレッド以外から非同期に呼ばれる可能性がある
 //---------------------------------------------------------------------------
 tRisaThreadInternal::~tRisaThreadInternal()
 {
@@ -138,6 +139,8 @@ tRisaThread::tRisaThread(wxString name) : Name(name)
 //---------------------------------------------------------------------------
 tRisaThread::~tRisaThread()
 {
+	//注意	このデストラクタはメインスレッド以外から非同期に呼ばれる可能性がある
+
 	Wait();
 
 	// Internal は自分で自分自身を解放するのでここでは解放しない

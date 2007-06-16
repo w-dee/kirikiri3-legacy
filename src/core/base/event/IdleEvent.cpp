@@ -89,6 +89,7 @@ tRisaIdleEventDestination::~tRisaIdleEventDestination()
 //---------------------------------------------------------------------------
 void tRisaIdleEventDestination::StartReceiveIdle()
 {
+	// TODO: ここのスレッド保護
 	if(!Receiving)
 	{
 		tRisaIdleEventManager::instance()->Register(this);
@@ -101,6 +102,7 @@ void tRisaIdleEventDestination::StartReceiveIdle()
 //---------------------------------------------------------------------------
 void tRisaIdleEventDestination::EndReceiveIdle()
 {
+	// TODO: ここのスレッド保護
 	if(Receiving)
 	{
 		tRisaIdleEventManager::instance()->Unregister(this);

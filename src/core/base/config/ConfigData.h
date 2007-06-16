@@ -39,8 +39,9 @@
 class tRisaConfig;
 //---------------------------------------------------------------------------
 //! @brief		設定情報のデータを管理するクラス
+//! @note		このクラスは GC 管理下ではないのでインスタンスを明示的にdeleteする必要あり
 //---------------------------------------------------------------------------
-class tRisaConfigData : public wxFileConfig, public tRisseDestructee
+class tRisaConfigData : public wxFileConfig
 {
 	friend class tRisaConfig;
 

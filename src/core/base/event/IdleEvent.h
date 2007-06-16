@@ -66,6 +66,8 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		アイドル時に発生するイベントの送り先となるクラス
 //! @note		StartReceiveIdle を呼ばない限りはイベントは発生しない
+//!				このクラスのインスタンスのデストラクタは、メインスレッド以外から非同期に
+//!				呼ばれる可能性があるので注意すること (シングルトンクラスならば問題ない)
 //---------------------------------------------------------------------------
 class tRisaIdleEventDestination : protected depends_on<tRisaIdleEventManager>,
 	public tRisseDestructee
@@ -155,6 +157,8 @@ public:
 
 //---------------------------------------------------------------------------
 //! @brief		コンパクト時に発生するイベントの送り先となるクラス
+//!				このクラスのインスタンスのデストラクタは、メインスレッド以外から非同期に
+//!				呼ばれる可能性があるので注意すること (シングルトンクラスならば問題ない)
 //---------------------------------------------------------------------------
 class tRisaCompactEventDestination : protected depends_on<tRisaCompactEventManager>,
 								public tRisaCompactEventEnum, public tRisseDestructee

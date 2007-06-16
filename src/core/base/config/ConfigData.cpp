@@ -21,7 +21,7 @@ RISSE_DEFINE_SOURCE_ID(7464,23094,50611,20409,11701,31915,19285,41427);
 
 
 
-
+// TODO: Config data のスレッド保護
 
 //---------------------------------------------------------------------------
 tRisaConfigData::tRisaConfigData(const wxString & filename) :

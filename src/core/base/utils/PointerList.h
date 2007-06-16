@@ -89,6 +89,7 @@ public:
 
 public:
 	//! @brief		デフォルトコンストラクタ
+	//! @note		このデストラクタはメインスレッド以外から非同期に呼ばれる
 	void_pointer_list()
 	{
 		volatile typename CST::tLocker lock(CST);

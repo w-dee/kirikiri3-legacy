@@ -52,8 +52,15 @@ TODO: 使用例をここに書く
 
 #include <vector>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <typeinfo>
 #include "risse/include/risseGC.h"
+
+#define HAVE_CXXABI_H
+#ifdef HAVE_CXXABI_H
+	#include <cxxabi.h>
+#endif
 
 using namespace Risse;
 
@@ -234,7 +241,23 @@ class singleton_base : public tRisseCollectee
 	//! @brief クラス名を得る
 	static const char * get_name()
 	{
+#ifdef HAVE_CXXABI_H
+		// __cxa_demangle を用いて、name のマングリングを解除する
+		int status = 0;
+		char * demangled = abi::__cxa_demangle(typeid(T).name(), NULL, 0, &status);
+		if(demangled)
+		{
+			// GC の管理下のバッファに文字列をコピーする
+			char *p = (char*)RisseMallocAtomicCollectee(strlen(demangled)+1);
+			strcpy(p, demangled);
+			free(demangled);
+			return p;
+		}
+		else
+			return typeid(T).name();
+#else
 		return typeid(T).name();
+#endif
 	}
 
 protected:

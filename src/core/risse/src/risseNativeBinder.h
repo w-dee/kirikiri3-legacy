@@ -419,6 +419,16 @@ public:
 
 
 //---------------------------------------------------------------------------
+// 参照の付いていない型を得るためのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename T> struct tRisseRemoveReference     { typedef T type; };
+template <typename T> struct tRisseRemoveReference<T&> { typedef T type; };
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
 // 各種型 -> tRisseVariant 変換
 // 自前の型がある場合は RisseToVariant のテンプレート特殊化を行うこと。
 // tRisseVariant のメンバ関数の方がよいのでは？という考えもあるかもしれないが
@@ -459,9 +469,9 @@ inline tRisseVariant RisseToVariant<risse_offset>(risse_offset s)
 // 自前の型がある場合は RisseFromVariant のテンプレート特殊化を行うこと。
 //---------------------------------------------------------------------------
 template <typename T>
-inline T RisseFromVariant(const tRisseVariant & v)
+inline typename tRisseRemoveReference<T>::type RisseFromVariant(const tRisseVariant & v)
 {
-	return (T)v;
+	return (typename tRisseRemoveReference<T>::type)v;
 }
 
 //---------------------------------------------------------------------------
@@ -511,7 +521,7 @@ template <> struct tRisseIsFuncCallNonMetaType<const tRisseMethodArgument &>
 template <typename T, int N>
 struct tRisseFVoC
 {
-	static T Cnv(const tRisseNativeCallInfo & info)
+	static typename tRisseRemoveReference<T>::type Cnv(const tRisseNativeCallInfo & info)
 	{
 		return RisseFromVariant<T>(info.args[N]);
 	}

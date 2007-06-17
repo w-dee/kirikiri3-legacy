@@ -32,9 +32,21 @@
 RISSE_DEFINE_SOURCE_ID(57288,52924,45855,20290,20385,24474,35332,13597);
 
 
+//---------------------------------------------------------------------------
+// 行が追加されたことを表すイベントを定義
+//---------------------------------------------------------------------------
+DECLARE_EVENT_TYPE(wxEVT_LINE_ADDED, -1)
+DEFINE_EVENT_TYPE(wxEVT_LINE_ADDED)
+DECLARE_EVENT_TYPE(wxEVT_DO_ROTATION_REFRESH, -1)
+DEFINE_EVENT_TYPE(wxEVT_DO_ROTATION_REFRESH)
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRisaLogScrollView, wxPanel)
+	EVT_COMMAND(wxID_ANY,				wxEVT_LINE_ADDED, tRisaLogScrollView::OnLineAdded)
+	EVT_COMMAND(wxID_ANY,				wxEVT_DO_ROTATION_REFRESH, tRisaLogScrollView::OnDoRotationRefresh)
+
 	EVT_PAINT(							tRisaLogScrollView::OnPaint)
 	EVT_CHAR(							tRisaLogScrollView::OnChar)
 	EVT_SCROLLWIN(						tRisaLogScrollView::OnScroll)
@@ -73,6 +85,12 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 	ViewOriginX = 8;
 
 	MouseSelecting = false;
+
+	LayoutRequested = false;
+	LayoutRequestFirstLogicalLine = 0;
+	LayoutRequestFirstDisplayLine = 0;
+	RotationRefreshLostDisplayLines = 0;
+
 	ScrollTimer = NULL;
 	ScrollTimerScrollAmount = 0;
 
@@ -163,6 +181,18 @@ void tRisaLogScrollView::Rotate()
 			break;
 	}
 
+	// LayoutRequestFirstLogicalLine の fixup
+	if(LayoutRequestFirstLogicalLine >= log_num_delete_items)
+		LayoutRequestFirstLogicalLine -= log_num_delete_items;
+	else
+		LayoutRequestFirstLogicalLine = 0;
+
+	// LayoutRequestFirstDisplayLine の fixup
+	if(LayoutRequestFirstDisplayLine >= log_num_delete_items)
+		LayoutRequestFirstDisplayLine -= log_num_delete_items;
+	else
+		LayoutRequestFirstDisplayLine = 0;
+
 	// LogicalLines の fixup
 	for(std::deque<tLogicalLine>::iterator i = LogicalLines.begin() + log_num_delete_items;
 		i != LogicalLines.end(); i++)
@@ -188,25 +218,14 @@ void tRisaLogScrollView::Rotate()
 	if(!FixupSelection(MouseSelStart1, MouseSelStart2, log_num_delete_items))
 		MouseSelecting = false;
 
-	// スクロールバーの位置を調整
-	int anchor = GetScrollAnchor();
-	if(anchor != -1)
+	// メインスレッドでレイアウトを行うことが出来るように画面更新イベントをポスト
+	if(RotationRefreshLostDisplayLines == 0)
 	{
-		// 表示位置が最後部に固定されていない場合
-		int top = GetScrollPos(wxVERTICAL);
-		top -= disp_num_delete_items;
-		if(top < 0)
-		{
-			Refresh();
-			top = 0;
-		}
-		SetScrollPos(wxVERTICAL, top);
-		anchor = top;
+		wxCommandEvent evt(wxEVT_DO_ROTATION_REFRESH);
+		GetEventHandler()->AddPendingEvent(evt);
 	}
-	SetScrollBarInfo(anchor);
 
-	// 表示を更新する
-	Refresh();
+	RotationRefreshLostDisplayLines += disp_num_delete_items;
 }
 //---------------------------------------------------------------------------
 
@@ -215,6 +234,8 @@ void tRisaLogScrollView::Rotate()
 bool tRisaLogScrollView::FixupSelection(
 	tCharacterPosition &sel1, tCharacterPosition &sel2, size_t log_num_delete_items)
 {
+	// GUI へのアクセスなし
+
 	if(sel1.IsValid())
 	{
 		if(sel1.LogicalIndex < log_num_delete_items)
@@ -354,6 +375,9 @@ void tRisaLogScrollView::LayoutAllLines()
 
 	// スクロールバーの調整
 	SetScrollBarInfo(GetScrollAnchor());
+
+	// レイアウトがすんだので LayoutRequested はいらない
+	LayoutRequested = false;
 }
 //---------------------------------------------------------------------------
 
@@ -361,6 +385,8 @@ void tRisaLogScrollView::LayoutAllLines()
 //---------------------------------------------------------------------------
 void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 {
+	// このメソッドはメインスレッド以外から呼ばれる可能性があるので注意すること
+
 	size_t old_num_displaylines = DisplayLines.size();
 
 	wxString line = CreateOneLineString(logger_item);
@@ -369,17 +395,21 @@ void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 	bool bold;
 	GetFontFromLogItemLevel(logger_item.Level, bold, colour);
 	LogicalLines.push_back(tLogicalLine(line, link, colour, bold));
-	LayoutOneLine(LogicalLines.size() - 1);
+
+	// レイアウトをリクエストする
+	if(!LayoutRequested)
+	{
+		LayoutRequestFirstLogicalLine = LogicalLines.size() - 1;
+		LayoutRequestFirstDisplayLine = old_num_displaylines;
+		LayoutRequested = true;
+
+		// メインスレッドでレイアウトを行うことが出来るようにイベントをポスト
+		wxCommandEvent evt(wxEVT_LINE_ADDED);
+		GetEventHandler()->AddPendingEvent(evt);
+	}
 
 	// 必要であればローテーションを行う
 	Rotate();
-
-	// スクロールバーの調整
-	SetScrollBarInfo(GetScrollAnchor());
-
-	// 新しく追加した領域の再描画
-	RefreshDisplayLine(old_num_displaylines, DisplayLines.size() - old_num_displaylines);
-
 }
 //---------------------------------------------------------------------------
 
@@ -770,6 +800,58 @@ void tRisaLogScrollView::OnLog(const tRisaLogger::tItem & logger_item)
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
 	AddLine(logger_item);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnLineAdded(wxCommandEvent& event)
+{
+	volatile tRisaCriticalSection::tLocker holder(CS);
+
+	if(LayoutRequested)
+	{
+		LayoutRequested = false;
+
+		// LayoutRequestFirstLogicalLine から最終行までをレイアウトする
+		for(size_t l = LayoutRequestFirstLogicalLine; l < LogicalLines.size(); l++)
+			LayoutOneLine(l);
+
+		// スクロールバーの調整
+		SetScrollBarInfo(GetScrollAnchor());
+
+		// 新しく追加した領域の再描画
+		RefreshDisplayLine(LayoutRequestFirstDisplayLine, DisplayLines.size() - LayoutRequestFirstDisplayLine);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisaLogScrollView::OnDoRotationRefresh(wxCommandEvent& event)
+{
+	volatile tRisaCriticalSection::tLocker holder(CS);
+
+	// スクロールバーの位置を調整
+	int anchor = GetScrollAnchor();
+	if(anchor != -1)
+	{
+		// 表示位置が最後部に固定されていない場合
+		int top = GetScrollPos(wxVERTICAL);
+		top -= RotationRefreshLostDisplayLines;
+		if(top < 0)
+		{
+			Refresh();
+			top = 0;
+		}
+		SetScrollPos(wxVERTICAL, top);
+		anchor = top;
+	}
+	SetScrollBarInfo(anchor);
+
+	Refresh();
+
+	RotationRefreshLostDisplayLines = 0;
 }
 //---------------------------------------------------------------------------
 

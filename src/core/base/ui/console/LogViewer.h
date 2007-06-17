@@ -148,6 +148,12 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 	tCharacterPosition MouseSelStart1; //!< マウスでの選択開始位置1
 	tCharacterPosition MouseSelStart2; //!< マウスでの選択開始位置2
 
+	bool LayoutRequested; //!< 行が追加されて、レイアウト待ちの行がある場合に真
+	size_t LayoutRequestFirstLogicalLine; //!< レイアウトが必要な最初の論理行 (レイアウトはこれ以降について行われる)
+	size_t LayoutRequestFirstDisplayLine; //!< レイアウトが必要な最初の表示行
+
+	size_t RotationRefreshLostDisplayLines; //!< ローテーション中に失われた表示行(スクロールバーの調整に用いる)
+
 	//! @brief マウスで選択中にスクロールを行うためのタイマークラス
 	class tScrollTimer : public wxTimer
 	{
@@ -290,9 +296,18 @@ private:
 public:
 	//! @brief		tRisaLogReceiver::OnLog のオーバーライド
 	//! @param		logger_item  tRisaLogger::tItem 型
+	//! @note		このメソッドはメインスレッド以外から呼ばれる可能性がある
 	void OnLog(const tRisaLogger::tItem & logger_item); // tRisaLogReceiver の override
 
 private:
+	//! @brief		行が追加されたとき
+	//! @param		event イベントオブジェクト
+	void OnLineAdded(wxCommandEvent& event);
+
+	//! @brief		行が追加されたとき
+	//! @param		event イベントオブジェクト
+	void OnDoRotationRefresh(wxCommandEvent& event);
+
 	//! @brief		描画が必要なとき
 	//! @param		event イベントオブジェクト
 	void OnPaint(wxPaintEvent& event);

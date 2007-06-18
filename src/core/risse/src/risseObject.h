@@ -23,6 +23,7 @@
 #include "risseOperateRetValue.h"
 #include "risseObjectInterfaceArg.h"
 #include "risseVariant.h"
+#include "risseThread.h"
 
 namespace Risse
 {
@@ -37,13 +38,15 @@ class tRisseObjectInterface : public tRisseCollectee, public tRisseOperateRetVal
 	const tRisseRTTI * RTTI; //!< このオブジェクトインターフェースの「型」をC++レベルで
 					//!< 識別するためのメンバ。簡易RTTI。とくに識別しない場合は
 					//!< NULLを入れておく。
+	tRisseCriticalSection * CS; //!< このオブジェクトを保護するためのクリティカルセクション
+
 public:
 	//! @brief		コンストラクタ
-	tRisseObjectInterface() { RTTI = NULL; }
+	tRisseObjectInterface() { RTTI = NULL; CS = new tRisseCriticalSection(); /* TODO: CS のキャッシュ */ }
 
 	//! @brief		コンストラクタ(RTTIを指定)
 	//! @param		rtti		RTTI
-	tRisseObjectInterface(const tRisseRTTI * rtti) { RTTI = rtti; }
+	tRisseObjectInterface(const tRisseRTTI * rtti) { RTTI = rtti; CS = new tRisseCriticalSection(); /* TODO: CS のキャッシュ */ }
 
 	//! @brief		オブジェクトに対して操作を行う
 	//! @param		code	オペレーションコード
@@ -83,6 +86,19 @@ public:
 	//! @brief		RTTI情報を設定する
 	//! @param		rtti		RTTI情報
 	void SetRTTI(const tRisseRTTI * rtti) { RTTI = rtti; }
+
+	//! @brief		synchronize を行うクラス
+	class tSynchronizer
+	{
+	private:
+		tRisseCriticalSection::tLocker Lock; //!< ロックオブジェクト
+		void * operator new(size_t); //!< heap 上に作成できません
+		void * operator new[](size_t); //!< heap 上に作成できません
+		tSynchronizer(const tSynchronizer &); //!< copy 出来ません
+		void operator =(const tSynchronizer &); //!< cpoy 出来ません
+	public:
+		tSynchronizer(const tRisseObjectInterface * intf) : Lock(*(intf->CS)) {;}
+	};
 
 };
 //---------------------------------------------------------------------------

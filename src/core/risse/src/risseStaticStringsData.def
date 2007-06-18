@@ -58,6 +58,7 @@ tRisseStringData data_ss_typeof = { tRisseSS<'t','y','p','e','o','f'>::data.Buff
 tRisseStringData data_ss_throw = { tRisseSS<'t','h','r','o','w'>::data.Buffer,5 }; /* トークンの値 throw */
 tRisseStringData data_ss_this = { tRisseSS<'t','h','i','s'>::data.Buffer,4 }; /* トークンの値 this */
 tRisseStringData data_ss_try = { tRisseSS<'t','r','y'>::data.Buffer,3 }; /* トークンの値 try */
+tRisseStringData data_ss_using = { tRisseSS<'u','s','i','n','g'>::data.Buffer,5 }; /* トークンの値 using */
 tRisseStringData data_ss_var = { tRisseSS<'v','a','r'>::data.Buffer,3 }; /* トークンの値 var */
 tRisseStringData data_ss_while = { tRisseSS<'w','h','i','l','e'>::data.Buffer,5 }; /* トークンの値 while */
 tRisseStringData data_ss_with = { tRisseSS<'w','i','t','h'>::data.Buffer,4 }; /* トークンの値 with */

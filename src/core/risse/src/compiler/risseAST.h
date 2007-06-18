@@ -88,6 +88,8 @@ RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Continue		)		//!< continue
 	RISSE_AST_ENUM_ITEM(ant, Debugger		)		//!< debugger
 	RISSE_AST_ENUM_ITEM(ant, With			)		//!< with
+	RISSE_AST_ENUM_ITEM(ant, Synchronized	)		//!< synchronized
+	RISSE_AST_ENUM_ITEM(ant, Using			)		//!< using
 	RISSE_AST_ENUM_ITEM(ant, Label			)		//!< ラベル
 	RISSE_AST_ENUM_ITEM(ant, Goto			)		//!< goto
 	RISSE_AST_ENUM_ITEM(ant, Switch			)		//!< switch
@@ -1900,9 +1902,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	with文とswitch文の基本クラス
+//! @brief	with文などの基本クラス
 //---------------------------------------------------------------------------
-class tRisseASTNode_With_Switch : public tRisseASTNode
+class tRisseASTNode_ExpressionBlock : public tRisseASTNode
 {
 protected:
 	tRisseASTNode * Object; //!< オブジェクトノード
@@ -1914,7 +1916,7 @@ public:
 	//! @param		type			ノードタイプ
 	//! @param		object			オブジェクトノード
 	//! @param		body			ブロックまたは文のノード
-	tRisseASTNode_With_Switch(risse_size position,
+	tRisseASTNode_ExpressionBlock(risse_size position,
 		tRisseASTNodeType type,
 		tRisseASTNode * object, tRisseASTNode * body) :
 		tRisseASTNode(position, type),
@@ -1967,7 +1969,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief	with文ノード(type=antWith)
 //---------------------------------------------------------------------------
-class tRisseASTNode_With : public tRisseASTNode_With_Switch
+class tRisseASTNode_With : public tRisseASTNode_ExpressionBlock
 {
 public:
 	//! @brief		コンストラクタ
@@ -1976,7 +1978,53 @@ public:
 	//! @param		body			ブロックまたは文のノード
 	tRisseASTNode_With(risse_size position,
 		tRisseASTNode * object, tRisseASTNode * body) :
-		tRisseASTNode_With_Switch(position, antWith, object, body) {;}
+		tRisseASTNode_ExpressionBlock(position, antWith, object, body) {;}
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	synchronized文ノード(type=antSynchronized)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Synchronized : public tRisseASTNode_ExpressionBlock
+{
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		object			オブジェクトノード
+	//! @param		body			ブロックまたは文のノード
+	tRisseASTNode_Synchronized(risse_size position,
+		tRisseASTNode * object, tRisseASTNode * body) :
+		tRisseASTNode_ExpressionBlock(position, antSynchronized, object, body) {;}
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const { return NULL; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	using文ノード(type=antUsing)
+//---------------------------------------------------------------------------
+class tRisseASTNode_Using : public tRisseASTNode_ExpressionBlock
+{
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		object			オブジェクトノード
+	//! @param		body			ブロックまたは文のノード
+	tRisseASTNode_Using(risse_size position,
+		tRisseASTNode * object, tRisseASTNode * body) :
+		tRisseASTNode_ExpressionBlock(position, antUsing, object, body) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス
@@ -2050,7 +2098,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief	switch文ノード(type=antSwitch)
 //---------------------------------------------------------------------------
-class tRisseASTNode_Switch : public tRisseASTNode_With_Switch
+class tRisseASTNode_Switch : public tRisseASTNode_ExpressionBlock
 {
 public:
 	//! @brief		コンストラクタ
@@ -2059,7 +2107,7 @@ public:
 	//! @param		body			ブロックまたは文のノード
 	tRisseASTNode_Switch(risse_size position,
 		tRisseASTNode * object, tRisseASTNode * body) :
-		tRisseASTNode_With_Switch(position, antSwitch, object, body) {;}
+		tRisseASTNode_ExpressionBlock(position, antSwitch, object, body) {;}
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス

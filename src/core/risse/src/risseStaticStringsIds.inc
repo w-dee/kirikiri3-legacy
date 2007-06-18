@@ -101,6 +101,8 @@ extern tRisseStringData data_ss_this;
 static const tRisseString & ss_this = *reinterpret_cast<const tRisseString *>(&data_ss_this); //!< (static string) トークンの値 this
 extern tRisseStringData data_ss_try;
 static const tRisseString & ss_try = *reinterpret_cast<const tRisseString *>(&data_ss_try); //!< (static string) トークンの値 try
+extern tRisseStringData data_ss_using;
+static const tRisseString & ss_using = *reinterpret_cast<const tRisseString *>(&data_ss_using); //!< (static string) トークンの値 using
 extern tRisseStringData data_ss_var;
 static const tRisseString & ss_var = *reinterpret_cast<const tRisseString *>(&data_ss_var); //!< (static string) トークンの値 var
 extern tRisseStringData data_ss_while;

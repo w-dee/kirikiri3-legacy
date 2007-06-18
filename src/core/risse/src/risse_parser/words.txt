@@ -77,7 +77,7 @@ $               T_DOLLAR                 - false false
 
 ##### 文字類
 ##### 注意
-##### これらを編集する際は、かならず risse.y の member_name_list も
+##### これらを編集する際は、かならず risse.y の member_name も
 ##### 編集すること！！ (自動的には連携されない)
 ##### member_name_list は . (ドット演算子) の右側のように
 ##### 予約語であっても予約語と見なさない単語のリストが書いてある。
@@ -134,6 +134,7 @@ typeof              T_TYPEOF       - true false
 throw               T_THROW        - true false
 this                T_THIS         - true false
 try                 T_TRY          - true false
+using               T_USING        - true false
 var                 T_VAR          - true false
 while               T_WHILE        - true false
 with                T_WITH         - true false

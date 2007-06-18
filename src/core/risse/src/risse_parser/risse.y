@@ -292,6 +292,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	T_OMIT					"..."
 	T_SYNCHRONIZED			"synchronized"
 	T_WITH					"with"
+	T_USING					"using"
 	T_INT					"int"
 	T_REAL					"real"
 	T_STRING				"string"
@@ -369,7 +370,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	property_handler_getter property_handler_setter
 	class_module_def class_module_expr_def class_extender
 	break continue
-	return switch with label goto try throw catch catch_list
+	return switch with synchronized using label goto try throw catch catch_list
 	regexp
 	embeddable_string
 	embeddable_string_d embeddable_string_d_unit
@@ -468,6 +469,8 @@ statement
 	| return
 	| switch
 	| with
+	| synchronized
+	| using
 	| try
 	| throw
 	| label
@@ -589,6 +592,27 @@ with
 	  block_or_statement					{ $$ = N(With)(@1.first, $6, $11); }
 ;
 
+/*---------------------------------------------------------------------------
+  thread synchronization
+  ---------------------------------------------------------------------------*/
+
+/* a synchronized statement */
+synchronized
+	: "synchronized" onl "(" {BI} onl
+	  expr_with_comma onl ")" {EI} onl
+	  block_or_statement					{ $$ = N(Synchronized)(@1.first, $6, $11); }
+;
+
+/*---------------------------------------------------------------------------
+  lexical scope
+  ---------------------------------------------------------------------------*/
+
+/* a using statement */
+using
+	: "using" onl "(" {BI} onl
+	  expr_with_comma onl ")" {EI} onl
+	  block_or_statement					{ $$ = N(Using)(@1.first, $6, $11); }
+;
 
 /*---------------------------------------------------------------------------
   variable definition
@@ -624,6 +648,7 @@ variable_id
 	: access_expr							{ $$ = N(VarDeclPair)(@1.first, $1, NULL); }
 	| access_expr "=" onl expr				{ $$ = N(VarDeclPair)(@1.first, $1, $4); }
 ;
+
 
 /*---------------------------------------------------------------------------
   structured exception handling
@@ -1064,6 +1089,7 @@ member_name
 	| "throw"								{ $$ = new tRisseVariant(ss_throw          ); }
 	| "this"								{ $$ = new tRisseVariant(ss_this           ); }
 	| "try"									{ $$ = new tRisseVariant(ss_try            ); }
+	| "using"								{ $$ = new tRisseVariant(ss_using          ); }
 	| "var"									{ $$ = new tRisseVariant(ss_var            ); }
 	| "while"								{ $$ = new tRisseVariant(ss_while          ); }
 	| "with"								{ $$ = new tRisseVariant(ss_with           ); }

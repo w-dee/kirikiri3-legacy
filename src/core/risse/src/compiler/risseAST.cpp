@@ -380,7 +380,7 @@ tRisseString tRisseASTNode_For::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_With_Switch::GetChildNameAt(risse_size index) const
+tRisseString tRisseASTNode_ExpressionBlock::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{

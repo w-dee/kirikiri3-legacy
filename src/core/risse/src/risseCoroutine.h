@@ -14,7 +14,7 @@
 #define risseCoroutineH
 
 #include "risseConfig.h"
-#include "risseUtils.h"
+#include "risseThread.h"
 #include "risseGC.h"
 #include "risseVariant.h"
 

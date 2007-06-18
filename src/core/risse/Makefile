@@ -37,7 +37,8 @@ document:
 
 CXXFLAGS += \
 	-DRISSE_NO_REGEXP \
-	-DRISSE_SUPPORT_WX
+	-DRISSE_SUPPORT_WX \
+	-DRISSE_SUPPORT_THREADS
 
 CPPFLAGS = $(CXXFLAGS)
 
@@ -80,8 +81,8 @@ CPPFILES =  \
 			src/risseStaticStrings.cpp               \
 			src/risseString.cpp                      \
 			src/risseStringClass.cpp                 \
+			src/risseThread.cpp                      \
 			src/risseTypes.cpp                       \
-			src/risseUtils.cpp                       \
 			src/risseVariant.cpp                     \
 			src/risse_parser/risseLexer.cpp          \
 			src/risse_parser/risseRisseScriptBlockClass.cpp    \
@@ -180,10 +181,8 @@ src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 Risse_INCLUDE_DIR := $(shell pwd)/include
 
 # risse-config を作成する。
-# boost ライブラリを使っているかどうかは、依存関係ファイルの中に
-# 特定の文字列があるかどうかで判断する。
 
-$(Risse_BIN_OUTPUT_DIR)/risse-config: Makefile risse-config.in src/risseUtils.d
+$(Risse_BIN_OUTPUT_DIR)/risse-config: Makefile risse-config.in
 	mkdir -p $(Risse_BIN_OUTPUT_DIR)
 	(set -e ;\
 		sed risse-config.in \

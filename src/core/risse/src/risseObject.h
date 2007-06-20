@@ -42,11 +42,15 @@ class tRisseObjectInterface : public tRisseCollectee, public tRisseOperateRetVal
 
 public:
 	//! @brief		コンストラクタ
-	tRisseObjectInterface() { RTTI = NULL; CS = new tRisseCriticalSection(); /* TODO: CS のキャッシュ */ }
+	tRisseObjectInterface() { RTTI = NULL; CS = NULL; }
 
 	//! @brief		コンストラクタ(RTTIを指定)
 	//! @param		rtti		RTTI
-	tRisseObjectInterface(const tRisseRTTI * rtti) { RTTI = rtti; CS = new tRisseCriticalSection(); /* TODO: CS のキャッシュ */ }
+	tRisseObjectInterface(const tRisseRTTI * rtti) { RTTI = rtti; CS = NULL; }
+
+	//! @brief		コンストラクタ(RTTIとCSを指定)
+	//! @param		rtti		RTTI
+	tRisseObjectInterface(const tRisseRTTI * rtti, tRisseCriticalSection * cs) { RTTI = rtti; CS = cs; }
 
 	//! @brief		オブジェクトに対して操作を行う
 	//! @param		code	オペレーションコード
@@ -115,6 +119,8 @@ public:
 class tRisseIdentifyObject : public tRisseObjectInterface
 {
 public:
+	tRisseIdentifyObject() : tRisseObjectInterface((const tRisseRTTI *)NULL, (tRisseCriticalSection *)NULL) {;}
+
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------

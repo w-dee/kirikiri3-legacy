@@ -2205,6 +2205,111 @@ tRisseSSAVariable * tRisseASTNode_Continue::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, void * param) const
+{
+	// ここの処理の中身は try ブロックによく似ているので注意
+
+	// ここでは synchronized や using ブロックのことを critical block と呼ぶことにする
+
+	// 式を評価
+	tRisseSSAVariable * object_var = GetObject()->GenerateReadSSA(form);
+
+	// critical ブロックは、ブロックの中身を 遅延評価ブロックとして評価する
+	tRisseSSAVariable * lazyblock_var = NULL;
+	tRisseSSAForm * new_form = NULL;
+
+	// スクリプトブロックより critical ブロックの通し番号を得る
+	// 各 critical ブロックは try ブロックと同じく
+	// 固有の ID をもち(というかtryブロックと共通)、例外で実装された大域脱出を行う
+	// return や break, goto などの脱出先の ID となる
+	risse_size try_id = form->GetScriptBlockInstance()->AddTryIdentifier();
+
+	// アクセスマップを作成する
+	tRisseSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
+
+	// 遅延評価ブロックを作成する
+	void * lazy_param = form->CreateLazyBlock(Body->GetPosition(),
+		RISSE_WS("critical block"), false, access_map, new_form, lazyblock_var);
+
+	new_form->SetTryIdentifierIndex(try_id); // try識別子を子SSA形式に対して設定
+
+	// 内容を生成する
+	new_form->GetLocalNamespace()->Push(); // スコープを push
+	new_form->Generate(Body);
+	new_form->GetLocalNamespace()->Pop(); // スコープを pop
+
+	// 遅延評価ブロックで使用された変数の処理
+	form->ListVariablesForLazyBlock(GetPosition(), access_map);
+
+	// 遅延評価ブロックを実行するためのTryFuncCall文を作成
+	// 関数呼び出し文を生成する
+	tRisseSSAVariable * critical_block_ret_var = NULL;
+	tRisseSSAStatement * critical_block_call_stmt =
+		form->AddStatement(GetPosition(), ocTryFuncCall, &critical_block_ret_var, lazyblock_var);
+	critical_block_call_stmt->SetFuncExpandFlags(0);
+
+	// 関数呼び出し文の引数として object_var をわたす
+	critical_block_call_stmt->SetFuncExpandFlags(0);
+	critical_block_call_stmt->SetBlockCount(0);
+	critical_block_call_stmt->AddUsed(object_var);
+
+	// 遅延評価ブロックをクリーンアップ
+	form->CleanupLazyBlock(lazy_param);
+
+	// アクセスマップをクリーンアップ
+	form->CleanupAccessMap(GetPosition(), access_map);
+
+	// critical_block_ret_var は ocCatchBranch にわたる。
+	// critical_block_ret_var の値と ocCatchBranch が具体的に
+	// どの様に結びつけられるのかはここでは関知しないが、
+	// 少なくとも critical_block_ret_var が ocCatchBranch を支配
+	// していることはここで示しておかなければならない。
+	tRisseSSAStatement * catch_branch_stmt =
+		form->AddStatement(GetPosition(), ocCatchBranch, NULL, critical_block_ret_var);
+	catch_branch_stmt->SetTryIdentifierIndex(try_id); // try識別子を設定
+
+	// あとで例外の分岐先を設定できるように
+	form->AddCatchBranchAndExceptionValue(catch_branch_stmt, critical_block_ret_var);
+
+	// 脱出用の新しい基本ブロックを作成
+	tRisseSSABlock * exit_critical_block =
+		form->CreateNewBlock(RISSE_WS("exit_critical"));
+
+	// critical ブロックの結果を _ に書き込むための文を生成
+	form->WriteLastEvalResult(GetPosition(), critical_block_ret_var);
+	tRisseSSAStatement * exit_critical_block_jump_stmt =
+		form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// catch用の新しい基本ブロックを作成
+	tRisseSSABlock * catch_encritical_block =
+		form->CreateNewBlock(RISSE_WS("catch_entry"));
+
+	// catch に相当する部分は、例外をそのまま投げる。
+	form->AddStatement(GetPosition(), ocThrow, NULL, critical_block_ret_var);
+	form->CreateNewBlock(RISSE_WS("disconnected_by_throw"));
+
+	// critical ブロックからの脱出用ブロックを作成
+	tRisseSSABlock * exit_block =
+		form->CreateNewBlock(RISSE_WS("catch_exit"));
+
+	// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
+	catch_branch_stmt->SetTryExitTarget(exit_critical_block);
+	catch_branch_stmt->SetTryCatchTarget(catch_encritical_block);
+
+	// critical ブロックからの脱出用ブロックへのジャンプを設定
+	exit_critical_block_jump_stmt->SetJumpTarget(exit_block);
+
+	// ss_lastEvalResultHiddenVarName の値を取り出す
+	tRisseSSAVariable * last_value =
+		form->GetLocalNamespace()->Read(form, GetPosition(), ss_lastEvalResultHiddenVarName);
+
+	// このノードは ss_lastEvalResultHiddenVarName を返す
+	return last_value;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseSSAVariable * tRisseASTNode_Label::DoReadSSA(tRisseSSAForm *form, void * param) const
 {
 	// ジャンプ文を作成

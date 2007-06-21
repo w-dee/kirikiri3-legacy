@@ -318,7 +318,7 @@ void tRisseCompilerFunction::BindAllLabels()
 				// そういうことは今のところできないのでエラーにする
 				tRisseCompileExceptionClass::Throw(
 					FunctionGroup->GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(RISSE_WS_TR("cannot jump into deeper try block or callback block")),
+					tRisseString(RISSE_WS_TR("cannot jump into deeper try/synchronized/using/callback block")),
 						FunctionGroup->GetCompiler()->GetScriptBlockInstance(),
 							i->SourceBlock->GetLastStatementPosition());
 			}

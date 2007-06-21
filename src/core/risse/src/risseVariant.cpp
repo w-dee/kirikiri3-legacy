@@ -1314,6 +1314,53 @@ tRisseString tRisseVariantBlock::CastToString_Real     () const
 
 
 //---------------------------------------------------------------------------
+tRisseVariantBlock::tSynchronizer::tSynchronizer(const tRisseVariant & object)
+{
+	// この ASSERT は、 tRisseObjectInterface::tSynchronizer のサイズが
+	// Synchronizer 以下であることを保証する。
+	// ヘッダの記述位置では tRisseObjectInterface も tRisseCriticalSection も
+	// 定義済みかどうかが怪しい。とりあえず sizeof(void*) の分を確保しているが、
+	// tRisseCriticalSection::tLocker の実装を見る限りは大丈夫なはず。
+	RISSE_ASSERT(sizeof(Synchronizer) >= sizeof(tRisseObjectInterface::tSynchronizer));
+
+	// 今のところ、ロックが出来るのは vtObject だけ。
+	// vtObject 以外の場合はロックを行わない。
+	if(object.GetType() == tRisseVariantBlock::vtObject)
+	{
+		// vtObject
+		Intf = object.GetObjectInterface();
+		// Intf が CS を持ってない場合もあるがその場合もロックできない
+		if(!Intf->HasCS()) Intf = NULL;
+	}
+	else
+	{
+		Intf = NULL;
+	}
+
+	// ロックオブジェクトを Synchronizer の場所に作成する
+	if(Intf)
+	{
+		new (reinterpret_cast<tRisseObjectInterface::tSynchronizer*>(Synchronizer))
+				tRisseObjectInterface::tSynchronizer(Intf);
+	}
+
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock::tSynchronizer::~tSynchronizer()
+{
+	// ロックオブジェクトを消滅させる
+	if(Intf)
+	{
+		(reinterpret_cast<tRisseObjectInterface::tSynchronizer*>(Synchronizer))->~tSynchronizer();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tRisseString tRisseVariantBlock::CastToString_Null     () const
 {
 	ThrowNoSuchMemberException(mnString);

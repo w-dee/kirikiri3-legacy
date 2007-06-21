@@ -42,11 +42,11 @@ class tRisseObjectInterface : public tRisseCollectee, public tRisseOperateRetVal
 
 public:
 	//! @brief		コンストラクタ
-	tRisseObjectInterface() { RTTI = NULL; CS = NULL; }
+	tRisseObjectInterface() { RTTI = NULL; CS = new tRisseCriticalSection();/*TODO: CSのキャッシュ*/}
 
 	//! @brief		コンストラクタ(RTTIを指定)
 	//! @param		rtti		RTTI
-	tRisseObjectInterface(const tRisseRTTI * rtti) { RTTI = rtti; CS = NULL; }
+	tRisseObjectInterface(const tRisseRTTI * rtti) { RTTI = rtti; CS = new tRisseCriticalSection();/*TODO: CSのキャッシュ*/}
 
 	//! @brief		コンストラクタ(RTTIとCSを指定)
 	//! @param		rtti		RTTI
@@ -91,13 +91,16 @@ public:
 	//! @param		rtti		RTTI情報
 	void SetRTTI(const tRisseRTTI * rtti) { RTTI = rtti; }
 
+	//! @brief		CS を持っているかどうかを返す
+	bool HasCS() const { return CS != NULL; }
+
 	//! @brief		synchronize を行うクラス
 	class tSynchronizer
 	{
 	private:
 		tRisseCriticalSection::tLocker Lock; //!< ロックオブジェクト
-		void * operator new(size_t); //!< heap 上に作成できません
-		void * operator new[](size_t); //!< heap 上に作成できません
+		// void * operator new(size_t); //!< heap 上に作成できません
+		// void * operator new[](size_t); //!< heap 上に作成できません
 		tSynchronizer(const tSynchronizer &); //!< copy 出来ません
 		void operator =(const tSynchronizer &); //!< cpoy 出来ません
 	public:

@@ -377,6 +377,45 @@ void tRisseCodeInterpreter::Execute(
 					break;
 				}
 
+			case ocSync			: // synchronized
+				{
+					// ここは大まかな構造が ocTryFuncCall に似る
+					RISSE_ASSERT(CI(code[1]) < framesize);
+					RISSE_ASSERT(CI(code[2]) < framesize);
+					RISSE_ASSERT(CI(code[3]) < framesize);
+
+					// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+					// code[2] = メソッドオブジェクト
+					// code[3] = 同期オブジェクト
+
+					if(code[1]!=RisseInvalidRegNum) AR(code[1]).Clear();
+					bool raised = false;
+					tRisseVariant val;
+
+					try
+					{
+						// ロックをかける
+						volatile tRisseVariant::tSynchronizer sync(AR(code[3]));
+
+						// メソッドオブジェクトを呼ぶ
+						AR(code[2]).FuncCall(engine, &val, 0, args, This);
+					}
+					catch(const tRisseVariant * e)
+					{
+						val = *e;
+						raised = true;
+					}
+					catch(...)
+					{
+						raised = true;
+					}
+
+					if(code[1]!=RisseInvalidRegNum)
+						AR(code[1]) = new tRisseTryFuncCallReturnObject(val, raised);
+					code += 4;
+					break;
+				}
+
 			case ocFuncCall		: // call	 function call
 				/* incomplete */
 				{

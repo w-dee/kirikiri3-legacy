@@ -2241,11 +2241,11 @@ tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, v
 	// 遅延評価ブロックで使用された変数の処理
 	form->ListVariablesForLazyBlock(GetPosition(), access_map);
 
-	// 遅延評価ブロックを実行するためのTryFuncCall文を作成
+	// 遅延評価ブロックを実行するためのSync文を作成
 	// 関数呼び出し文を生成する
 	tRisseSSAVariable * critical_block_ret_var = NULL;
 	tRisseSSAStatement * critical_block_call_stmt =
-		form->AddStatement(GetPosition(), ocTryFuncCall, &critical_block_ret_var, lazyblock_var);
+		form->AddStatement(GetPosition(), ocSync, &critical_block_ret_var, lazyblock_var);
 	critical_block_call_stmt->SetFuncExpandFlags(0);
 
 	// 関数呼び出し文の引数として object_var をわたす

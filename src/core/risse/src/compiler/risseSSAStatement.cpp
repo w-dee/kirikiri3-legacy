@@ -350,6 +350,12 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		}
 		break;
 
+	case ocSync:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 2);
+		gen->PutSync(Declared, Used[0], Used[1]);
+		break;
+
 	case ocJump:
 		gen->PutJump(GetJumpTarget());
 		break;
@@ -864,6 +870,25 @@ tRisseString tRisseSSAStatement::Dump() const
 			ret += Declared->Dump() + RISSE_WS(" = ");
 			ret += RISSE_WS("Read(");
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
+
+			// 変数のコメントを追加
+			tRisseString comment = Declared->GetTypeComment();
+			if(!comment.IsEmpty())
+				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
+
+			return ret;
+		}
+
+	case ocSync: // synchronized
+		{
+			RISSE_ASSERT(Used.size() == 2);
+			RISSE_ASSERT(Declared != NULL);
+
+			tRisseString ret;
+			ret += Declared->Dump() + RISSE_WS(" = ");
+			ret += Used[0]->Dump() + RISSE_WS("()");
+			ret += RISSE_WS(" Synchronized(") + Used[1]->Dump() + 
+				RISSE_WS(")");
 
 			// 変数のコメントを追加
 			tRisseString comment = Declared->GetTypeComment();

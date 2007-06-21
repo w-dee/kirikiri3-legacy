@@ -2199,6 +2199,25 @@ public: // キャスト
 	tRisseString CastToString_Boolean  () const;
 	tRisseString CastToString_Object   () const { return Invoke_Object(mnString); }
 
+public: // スレッド同期
+
+	//! @brief		オブジェクトをロックする為のクラス
+	class tSynchronizer
+	{
+		tSynchronizer(const tSynchronizer &); //!< コピー不可です
+		void operator = (const tSynchronizer &); //!< コピー不可です
+		void * operator new(size_t); //!< ヒープ上に置かないでください
+		void * operator new [] (size_t); //!< ヒープ上に置かないでください
+		tRisseObjectInterface * Intf; //!< ロック対象となるオブジェクト
+		char Synchronizer[sizeof(void*)]; //!< tRisseObjectInterface::tSynchronizer を作成する先
+	public:
+		//! @brief		コンストラクタ
+		tSynchronizer(const tRisseVariant & object);
+
+		//! @brief		デストラクタ
+		~tSynchronizer();
+	};
+
 public: // ユーティリティ
 	//-----------------------------------------------------------------------
 	//! @brief		人間が可読な形式に変換

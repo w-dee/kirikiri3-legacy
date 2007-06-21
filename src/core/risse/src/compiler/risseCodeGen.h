@@ -343,6 +343,13 @@ public:
 		const gc_vector<const tRisseSSAVariable *> & args,
 		const gc_vector<const tRisseSSAVariable *> & blocks);
 
+	//! @brief		sync コードを奥
+	//! @param		dest	sync ブロックの結果格納先
+	//! @param		func	sync ブロックを表す変数
+	//! @param		lockee	sync するためのオブジェクト
+	void PutSync(const tRisseSSAVariable * dest,
+		const tRisseSSAVariable * func, const tRisseSSAVariable * lockee);
+
 	//! @brief		Jump コードを置く
 	//! @param		target	ジャンプ先基本ブロック
 	void PutJump(const tRisseSSABlock * target);

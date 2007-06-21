@@ -623,6 +623,18 @@ void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
+void tRisseCodeGenerator::PutSync(const tRisseSSAVariable * dest,
+	const tRisseSSAVariable * func, const tRisseSSAVariable * lockee)
+{
+	PutWord(ocSync);
+	PutWord(FindRegMap(dest));
+	PutWord(FindRegMap(func));
+	PutWord(FindRegMap(lockee));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseCodeGenerator::PutJump(const tRisseSSABlock * target)
 {
 	risse_size insn_pos = Code.size();

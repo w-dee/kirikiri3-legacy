@@ -2566,6 +2566,16 @@ public:
 	//! @return		関数を表す変数
 	tRisseSSAVariable * GenerateFuncDecl(tRisseSSAForm *form,
 		tRisseSSAVariableAccessMap *access_map = NULL, risse_size try_id = risse_size_max) const;
+
+
+	//! @brief		属性に従って関数オブジェクトの設定を行う
+	//! @param		form			SSA 形式インスタンス
+	//! @param		position		ソースコード上の位置
+	//! @param		function		関数オブジェクトを表すSSA形式変数
+	//! @param		attr			属性
+	static void ApplyMethodAttribute(tRisseSSAForm * form, risse_size position,
+		tRisseSSAVariable *& function, tRisseDeclAttribute attrib);
+
 };
 //---------------------------------------------------------------------------
 

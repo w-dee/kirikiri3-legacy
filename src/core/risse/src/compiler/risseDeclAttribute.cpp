@@ -31,6 +31,12 @@ bool tRisseDeclAttribute::Overwrite(const tRisseDeclAttribute & rhs)
 		Context = rhs.Context;
 	}
 
+	if(rhs.Sync != scNone)
+	{
+		if(Sync != scNone) overwritten = true;
+		Sync = rhs.Sync;
+	}
+
 	return overwritten || mem_overwritten;
 }
 //---------------------------------------------------------------------------
@@ -45,7 +51,16 @@ tRisseString tRisseDeclAttribute::AsString() const
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
 		switch(Context)
 		{
-			case ccStatic:		str += RISSE_WS("static");		break;
+			case ccStatic:			str += RISSE_WS("static");		break;
+			default: ;
+		}
+	}
+	if(Sync != scNone)
+	{
+		if(!str.IsEmpty()) str += RISSE_WC(' ');
+		switch(Sync)
+		{
+			case scSynchronized:	str += RISSE_WS("synchronized");		break;
 			default: ;
 		}
 	}

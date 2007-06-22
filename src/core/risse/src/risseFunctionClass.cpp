@@ -37,6 +37,7 @@ RISSE_DEFINE_SOURCE_ID(40031,39054,14544,17698,39309,64830,49090,60837);
 tRisseFunctionInstance::tRisseFunctionInstance()
 {
 	Body.Nullize();
+	Synchronized = false;
 }
 //---------------------------------------------------------------------------
 
@@ -48,6 +49,10 @@ tRisseFunctionInstance::tRetValue tRisseFunctionInstance::Operate(RISSE_OBJECTIN
 	{
 		if(code == ocFuncCall) // このオブジェクトに対するメソッド呼び出しか？
 		{
+			// synchronized メソッドの場合はロックを行う
+			tRisseVariant::tSynchronizer sync(Synchronized ? This : tRisseVariant::GetNullObject());
+
+			// Body を呼び出す
 			Body.FuncCall_Object(result, tRisseString::GetEmptyString(), flags, args, This);
 			return rvNoError;
 		}
@@ -107,6 +112,8 @@ void tRisseFunctionClass::RegisterMembers()
 
 	RisseBindFunction(this, ss_construct, &tRisseFunctionInstance::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseFunctionInstance::initialize);
+	RisseBindProperty(this, ss_synchronized,
+		&tRisseFunctionInstance::get_synchronized, &tRisseFunctionInstance::set_synchronized);
 }
 //---------------------------------------------------------------------------
 

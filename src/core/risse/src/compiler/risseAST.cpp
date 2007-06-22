@@ -3257,20 +3257,48 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 	tRisseSSAVariable * wrapped_lazyblock_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewFunction, &wrapped_lazyblock_var, lazyblock_var);
 
-	// static 指定がついていれば this にバインドするための命令を置く
-	// TODO: MemberAttribute は static 以外用をなしていない。本当に必要なのか？
+	// 属性を適用する
 	tRisseSSAVariable * final_var = wrapped_lazyblock_var;
-	if(Attribute.Has(tRisseDeclAttribute::ccStatic))
-	{
-		tRisseSSAVariable * this_var = NULL;
-		form->AddStatement(GetPosition(), ocAssignThis, &this_var);
-
-		form->AddStatement(GetPosition(),
-			ocInContextOf, &final_var, wrapped_lazyblock_var, this_var);
-	}
+	tRisseASTNode_FuncDecl::ApplyMethodAttribute(form, GetPosition(), final_var, Attribute);
 
 	// このノードはラップされた方の関数(メソッド)を返す
 	return final_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseASTNode_FuncDecl::ApplyMethodAttribute(
+	tRisseSSAForm * form, risse_size position,
+	tRisseSSAVariable *& function, tRisseDeclAttribute attrib)
+{
+	// static 指定がついていれば this にバインドするための命令を置く
+	if(attrib.Has(tRisseDeclAttribute::ccStatic))
+	{
+		tRisseSSAVariable * this_var = NULL;
+		form->AddStatement(position, ocAssignThis, &this_var);
+
+		tRisseSSAVariable * input_function = function;
+		form->AddStatement(position,
+			ocInContextOf, &function, input_function, this_var);
+	}
+
+	// synchronized 指定が付いていれば synchronized プロパティを真に設定する命令を置く
+	if(attrib.Has(tRisseDeclAttribute::scSynchronized))
+	{
+		tRisseSSAVariable * true_var =
+				form->AddConstantValueStatement(position, tRisseVariant(true));
+
+		tRisseSSAVariable * synchronized_var =
+				form->AddConstantValueStatement(position, tRisseVariant(ss_synchronized));
+
+		tRisseSSAVariable * method_var = function;
+
+		tRisseSSAStatement * stmt =
+			form->AddStatement(position, ocDSet, NULL,
+								method_var, synchronized_var, true_var);
+		stmt->SetAccessFlags(tRisseOperateFlags());
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -3364,17 +3392,9 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 		getter_var, setter_var);
 
 
-	// static 指定がついていれば this にバインドするための命令を置く
-	// TODO: MemberAttribute は static 以外用をなしていない。本当に必要なのか？
+	// 属性を適用する
 	tRisseSSAVariable * final_var = property_instance_var;
-	if(Attribute.Has(tRisseDeclAttribute::ccStatic))
-	{
-		tRisseSSAVariable * this_var = NULL;
-		form->AddStatement(GetPosition(), ocAssignThis, &this_var);
-
-		form->AddStatement(GetPosition(),
-			ocInContextOf, &final_var, property_instance_var, this_var);
-	}
+	tRisseASTNode_FuncDecl::ApplyMethodAttribute(form, GetPosition(), final_var, Attribute);
 
 	// プロパティオブジェクトを返す
 	return final_var;

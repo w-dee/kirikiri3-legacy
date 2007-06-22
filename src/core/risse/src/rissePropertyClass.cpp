@@ -41,6 +41,9 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 	{
 		if(code == ocFuncCall) // このオブジェクトに対するプロパティ読み込みか？
 		{
+			// synchronized メソッドの場合はロックを行う
+			tRisseVariant::tSynchronizer sync(Synchronized ? This : tRisseVariant::GetVoidObject());
+
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(Getter.IsNull()) return rvPropertyCannotBeRead;
 			Getter.FuncCall_Object(result, tRisseString::GetEmptyString(),
@@ -49,6 +52,9 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
+			// synchronized メソッドの場合はロックを行う
+			tRisseVariant::tSynchronizer sync(Synchronized ? This : tRisseVariant::GetVoidObject());
+
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			args.ExpectArgumentCount(1);
 			if(Setter.IsNull()) return rvPropertyCannotBeWritten;
@@ -113,6 +119,8 @@ void tRissePropertyClass::RegisterMembers()
 	RisseBindFunction(this, ss_initialize, &tRissePropertyInstance::initialize);
 	RisseBindProperty(this, ss_getter, &tRissePropertyInstance::GetGetter);
 	RisseBindProperty(this, ss_setter, &tRissePropertyInstance::GetSetter);
+	RisseBindProperty(this, ss_synchronized,
+		&tRissePropertyInstance::get_synchronized, &tRissePropertyInstance::set_synchronized);
 }
 //---------------------------------------------------------------------------
 

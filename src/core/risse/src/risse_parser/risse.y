@@ -339,6 +339,9 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 					decl_attr
 					decl_attr_variable
 					decl_attr_override
+					method_attr_list
+					method_attr
+
 
 %type <value>		member_name
 
@@ -712,12 +715,10 @@ throw
    担うので、名前が分かる場合は極力名前を設定する。
 */
 func_def
-	: "static" onl func_def_inner			{ $$ = N(VarDecl)(@1.first);
-											  C(VarDecl, $$)->AddChild($3/*<-*/);
-											  C(FuncDecl, C(VarDeclPair, $3)->GetInitializer())->
-											  	SetAttribute(
-											  		tRisseDeclAttribute(
-											  		tRisseDeclAttribute::ccStatic)); }
+	: method_attr_list func_def_inner		{ $$ = N(VarDecl)(@1.first);
+											  C(VarDecl, $$)->AddChild($2/*<-*/);
+											  C(FuncDecl, C(VarDeclPair, $2)->GetInitializer())->
+											  	SetAttribute(*$1); }
 	| func_def_inner						{ $$ = N(VarDecl)(@1.first);
 											  C(VarDecl, $$)->AddChild($1/*<-*/); }
 ;
@@ -739,10 +740,8 @@ func_def_inner
 
 /* a function expression definition */
 func_expr_def
-	: "static" onl func_expr_def_inner		{ $$ = $3;
-											  C(FuncDecl, $$)->SetAttribute(
-											  	tRisseDeclAttribute(
-											  	tRisseDeclAttribute::ccStatic)); }
+	: method_attr_list func_expr_def_inner	{ $$ = $2;
+											  C(FuncDecl, $$)->SetAttribute(*$1); }
 	| func_expr_def_inner					{ $$ = $1; }
 ;
 
@@ -833,16 +832,16 @@ func_decl_block_at_least_one_comma
 
 /* a property handler definition */
 property_def
-	: "static" onl property_def_inner	onl	{ $$ = N(VarDecl)(@1.first);
-											  C(VarDecl, $$)->AddChild($3/*<-*/);
+	: method_attr_list property_def_inner
+	  onl									{ $$ = N(VarDecl)(@1.first);
+											  C(VarDecl, $$)->AddChild($2/*<-*/);
 											  tRisseDeclAttribute attrib;
-											  attrib.Set(tRisseDeclAttribute::ccStatic);
+											  attrib.Overwrite(*$1);
 											  attrib.Set(tRisseDeclAttribute::pcProperty);
 											  C(VarDecl, $$)->SetAttribute(attrib);
-											  C(PropDecl, C(VarDeclPair, $3)->GetInitializer())->
+											  C(PropDecl, C(VarDeclPair, $2/*<-*/)->GetInitializer())->
 											  	SetAttribute(
-											  		tRisseDeclAttribute(
-											  		tRisseDeclAttribute::ccStatic)); }
+											  		tRisseDeclAttribute(*$1)); }
 	| property_def_inner	onl				{ $$ = N(VarDecl)(@1.first);
 											  C(VarDecl, $$)->AddChild($1/*<-*/);
 											  tRisseDeclAttribute attrib;
@@ -863,10 +862,10 @@ property_def_inner
 
 /* a property expression definition */
 property_expr_def
-	: "static" onl property_expr_def_inner	{ $$ = $3;
+	: method_attr_list property_expr_def_inner
+											{ $$ = $2;
 											  C(PropDecl, $$)->SetAttribute(
-											  	tRisseDeclAttribute(
-											  	tRisseDeclAttribute::ccStatic)); }
+											  	tRisseDeclAttribute(*$1)); }
 	| property_expr_def_inner				{ $$ = $1; }
 ;
 
@@ -993,6 +992,16 @@ decl_attr_variable
 
 decl_attr_override
 	: "final"	onl 						{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::ocFinal); }
+;
+
+method_attr_list
+	: method_attr							{ $$ = $1; }
+	| method_attr_list method_attr			{ $$ = RisseOverwriteDeclAttribute(PR, @1.first, $1, $2); }
+;
+
+method_attr
+	: "static" onl							{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::ccStatic); }
+	| "synchronized" onl					{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::scSynchronized); }
 ;
 
 

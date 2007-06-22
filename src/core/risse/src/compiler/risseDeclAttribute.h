@@ -30,14 +30,28 @@ public:
 		ccStatic, //!< static コンテキスト
 	};
 
-private:
-	tContextControl		Context;
+	//! @brief	同期動作を規定する物
+	enum tSyncControl
+	{
+		scNone,
+		scSynchronized, //!< synchronized コンテキスト
+	};
 
+private:
+	union
+	{
+		struct
+		{
+			tContextControl		Context;
+			tSyncControl		Sync;
+		};
+	};
 public:
 	//! @brief		デフォルトコンストラクタ
 	tRisseDeclAttribute()
 	{
 		Context = ccNone;
+		Sync = scNone;
 	}
 
 	//! @brief		コピーコンストラクタ
@@ -46,6 +60,7 @@ public:
 		tRisseMemberAttribute(rhs)
 	{
 		Context = rhs.Context;
+		Sync = rhs.Sync;
 	}
 
 	//! @brief		コンストラクタ (tRisseMemberAttributeから)
@@ -54,6 +69,7 @@ public:
 	{
 		*(tRisseMemberAttribute*)this = context;
 		Context = ccNone;
+		Sync = scNone;
 	}
 
 	//! @brief		コンストラクタ (variableから)
@@ -62,6 +78,7 @@ public:
 		tRisseMemberAttribute(variable)
 	{
 		Context = ccNone;
+		Sync = scNone;
 	}
 
 	//! @brief		コンストラクタ (overrideから)
@@ -70,6 +87,7 @@ public:
 		tRisseMemberAttribute(override)
 	{
 		Context = ccNone;
+		Sync = scNone;
 	}
 
 	//! @brief		コンストラクタ (propertyから)
@@ -78,6 +96,7 @@ public:
 		tRisseMemberAttribute(property)
 	{
 		Context = ccNone;
+		Sync = scNone;
 	}
 
 	//! @brief		コンストラクタ (contextから)
@@ -85,6 +104,15 @@ public:
 	explicit tRisseDeclAttribute(tContextControl context)
 	{
 		Context = context;
+		Sync = scNone;
+	}
+
+	//! @brief		コンストラクタ (syncから)
+	//! @param		sync	コンテキスト規定
+	explicit tRisseDeclAttribute(tSyncControl sync)
+	{
+		Context = ccNone;
+		Sync = sync;
 	}
 
 	//! @brief	ダウンキャスト
@@ -113,6 +141,14 @@ public:
 	//! @return		このオブジェクト自身への参照
 	tRisseDeclAttribute & Set(tContextControl v) { Context = v; return *this; }
 
+	//! @brief		同期動作規定を得る
+	//! @return		同期動作規定
+	tSyncControl GetSync() const { return Sync; }
+	//! @brief		同期動作規定を設定する
+	//! @param		v	同期動作規定
+	//! @return		このオブジェクト自身への参照
+	tRisseDeclAttribute & Set(tSyncControl v) { Sync = v; return *this; }
+
 	//! @brief		属性を上書きする
 	//! @param		rhs		上書きする属性
 	//! @return		上書きされた属性があった場合に真
@@ -122,12 +158,16 @@ public:
 	//! @param		v	コンテキスト規定
 	bool Has(tContextControl v) const { return Context == v; }
 
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	コンテキスト規定
+	bool Has(tSyncControl v) const { return Sync == v; }
+
 
 	//! @brief		なにか属性を持っているかどうかを調べる
 	//! @return		何か属性を持っていれば真
 	bool HasAny() const
 		{ return tRisseMemberAttribute::HasAny() ||
-			Context != ccNone;
+			Context != ccNone || Sync != scNone;
 		}
 
 	//! @brief		属性を文字列化する

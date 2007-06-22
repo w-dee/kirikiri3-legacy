@@ -31,6 +31,7 @@ class tRissePropertyInstance : public tRisseObjectBase
 private:
 	tRisseVariant Getter; //!< ゲッタメソッド
 	tRisseVariant Setter; //!< セッタメソッド
+	bool Synchronized; //!< synchronized メソッドかどうか
 
 public:
 	//! @brief		コンストラクタ
@@ -59,9 +60,20 @@ public:
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
+	//! @brief		synchronized メソッドかどうかを取得する
+	//! @return		synchronized メソッドかどうか
+	bool GetSynchronized() const { return Synchronized; }
+
+	//! @brief		synchronized メソッドかどうかを設定する
+	//! @param		b	synchronized メソッドかどうか
+	void SetSynchronized(bool b) { Synchronized = b; }
+
+
 public: // Risse用オブジェクトなど
 	void construct();
 	void initialize(const tRisseNativeCallInfo & info);
+	bool get_synchronized() const { return GetSynchronized(); }
+	void set_synchronized(bool b) { SetSynchronized(b); }
 };
 //---------------------------------------------------------------------------
 

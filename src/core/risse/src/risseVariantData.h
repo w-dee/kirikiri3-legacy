@@ -68,6 +68,8 @@ tRisseVariantData::tVoid や tRisseVariantData::tNull, tRisseVariantData::tBoole
 void や null や boolean にしたとき、ここにポインタが入っていると
 GCによりマークし続けられてしまう。そのため、void や integer , boolean に
 する際はここのポインタも破壊するようになっている。
+
+スレッド保護はない。
 */
 //---------------------------------------------------------------------------
 class tRisseVariantData : public tRisseCollectee

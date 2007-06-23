@@ -54,6 +54,8 @@ void tRisseBindingInstance::construct()
 //---------------------------------------------------------------------------
 void tRisseBindingInstance::initialize(const tRisseNativeCallInfo &info)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	info.InitializeSuperClass();
 }
 //---------------------------------------------------------------------------
@@ -63,6 +65,8 @@ void tRisseBindingInstance::initialize(const tRisseNativeCallInfo &info)
 void tRisseBindingInstance::eval(const tRisseString & script,
 			const tRisseNativeCallInfo &info) const
 {
+	// ロックしない
+
 	tRisseString name = info.args.HasArgument(1) ?
 					tRisseString(info.args[1]) : tRisseString(RISSE_WS("(anonymous)"));
 	risse_size lineofs = info.args.HasArgument(2) ? (risse_size)(risse_int64)info.args[2] : (risse_size)0;
@@ -75,6 +79,8 @@ void tRisseBindingInstance::eval(const tRisseString & script,
 //---------------------------------------------------------------------------
 tRisseVariant tRisseBindingInstance::iget(const tRisseString & name) const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	tRisseBindingInfo::tBindingMap & map = GetBindingMap();
 	tRisseBindingInfo::tBindingMap::iterator i = map.find(name);
 	if(i == map.end())
@@ -88,7 +94,7 @@ tRisseVariant tRisseBindingInstance::iget(const tRisseString & name) const
 		// 見つかった
 		risse_size nestlevel = (i->second >> 16) & 0xffff;
 		risse_size regnum = i->second & 0xffff;
-		return GetFrames()->At(nestlevel, regnum);
+		return GetFrames()->Get(nestlevel, regnum);
 	}
 }
 //---------------------------------------------------------------------------
@@ -97,6 +103,8 @@ tRisseVariant tRisseBindingInstance::iget(const tRisseString & name) const
 //---------------------------------------------------------------------------
 void tRisseBindingInstance::iset(const tRisseVariant & value, const tRisseString & name)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	tRisseBindingInfo::tBindingMap & map = GetBindingMap();
 	tRisseBindingInfo::tBindingMap::iterator i = map.find(name);
 	if(i == map.end())
@@ -109,7 +117,7 @@ void tRisseBindingInstance::iset(const tRisseVariant & value, const tRisseString
 		// 見つかった
 		risse_size nestlevel = (i->second >> 16) & 0xffff;
 		risse_size regnum = i->second & 0xffff;
-		GetFrames()->At(nestlevel, regnum) = value;
+		GetFrames()->Set(nestlevel, regnum, value);
 	}
 }
 //---------------------------------------------------------------------------

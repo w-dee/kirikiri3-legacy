@@ -47,6 +47,8 @@ tRisseObjectBase::tRisseObjectBase(const tRisseString & prototype_name) :
 tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tRisseOperateFlags flags,
 	tRisseVariant &result, const tRisseVariant &This) const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	tMemberData * member = HashTable.Find(name);
 
 	if(!member)
@@ -173,6 +175,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, tRisseOperateFlags flags,
 	const tRisseVariant &value, const tRisseVariant &This)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	tMemberData * member;
 
 	// メンバに書き込む
@@ -347,6 +351,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 //---------------------------------------------------------------------------
 tRisseObjectBase::tRetValue tRisseObjectBase::Delete(const tRisseString & name, tRisseOperateFlags flags)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(!HashTable.Delete(name))
 	{
 		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
@@ -432,6 +438,8 @@ tRisseObjectBase::tRetValue tRisseObjectBase::New(
 tRisseObjectBase::tRetValue tRisseObjectBase::SetAttribute(
 		const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant & This)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	tMemberData * member = HashTable.Find(name);
 
 	if(!member)

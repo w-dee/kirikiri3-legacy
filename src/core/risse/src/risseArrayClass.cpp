@@ -46,6 +46,8 @@ void tRisseArrayInstance::construct()
 //---------------------------------------------------------------------------
 void tRisseArrayInstance::initialize(const tRisseNativeCallInfo &info)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
 
@@ -60,6 +62,8 @@ void tRisseArrayInstance::initialize(const tRisseNativeCallInfo &info)
 //---------------------------------------------------------------------------
 tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index) const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(ofs_index < 0) ofs_index += Array.size(); // 折り返す
 
 	risse_size index = static_cast<risse_size>(ofs_index);
@@ -79,6 +83,8 @@ tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index) const
 //---------------------------------------------------------------------------
 void tRisseArrayInstance::iset(const tRisseVariant & value, risse_offset ofs_index)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(ofs_index < 0) ofs_index += Array.size(); // 折り返す
 
 	if(ofs_index < 0)  { /* それでもまだ負: TOOD: out of bound 例外 */ return; }
@@ -114,6 +120,8 @@ void tRisseArrayInstance::iset(const tRisseVariant & value, risse_offset ofs_ind
 //---------------------------------------------------------------------------
 void tRisseArrayInstance::push(const tRisseMethodArgument & args)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	for(risse_size i = 0; i < args.GetArgumentCount(); i++)
 		Array.push_back(args[i]);
 }
@@ -123,6 +131,8 @@ void tRisseArrayInstance::push(const tRisseMethodArgument & args)
 //---------------------------------------------------------------------------
 tRisseVariant tRisseArrayInstance::pop()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(Array.size() > 0)
 	{
 		tRisseVariant val;
@@ -141,6 +151,8 @@ tRisseVariant tRisseArrayInstance::pop()
 //---------------------------------------------------------------------------
 void tRisseArrayInstance::unshift(const tRisseMethodArgument & args)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	risse_size i = args.GetArgumentCount();
 	while(i--) Array.push_front(args[i]);
 }
@@ -150,6 +162,8 @@ void tRisseArrayInstance::unshift(const tRisseMethodArgument & args)
 //---------------------------------------------------------------------------
 tRisseVariant tRisseArrayInstance::shift()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(Array.size() > 0)
 	{
 		tRisseVariant val;
@@ -168,6 +182,8 @@ tRisseVariant tRisseArrayInstance::shift()
 //---------------------------------------------------------------------------
 size_t tRisseArrayInstance::get_length() const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	return Array.size();
 }
 //---------------------------------------------------------------------------
@@ -176,6 +192,8 @@ size_t tRisseArrayInstance::get_length() const
 //---------------------------------------------------------------------------
 void tRisseArrayInstance::set_length(size_t new_size)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(Array.size() < new_size)
 	{
 		// 拡張

@@ -52,6 +52,8 @@ void tRisseScriptBlockInstance::SetScriptAndName(const tRisseString & script, co
 //---------------------------------------------------------------------------
 void tRisseScriptBlockInstance::CreateLinesToPositionArary() const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// まず、全体の行数を数える
 	LineCount = 0;
 
@@ -114,6 +116,8 @@ void tRisseScriptBlockInstance::CreateLinesToPositionArary() const
 void tRisseScriptBlockInstance::PositionToLineAndColumn(risse_size pos,
 						risse_size *line, risse_size *col) const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// LinesToPosition 配列が作られていなければ作る
 	EnsureLinesToPositionArary();
 
@@ -151,6 +155,8 @@ risse_size tRisseScriptBlockInstance::PositionToLine(risse_size pos) const
 //---------------------------------------------------------------------------
 tRisseString tRisseScriptBlockInstance::GetLineAt(risse_size line)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(line > LineCount) return tRisseString::GetEmptyString(); // 行が範囲外
 
 	// 改行記号か文字列の終端を探し、そこまでを切り取って返す
@@ -185,6 +191,8 @@ void tRisseScriptBlockInstance::OutputWarning(risse_size pos, const tRisseString
 //---------------------------------------------------------------------------
 void tRisseScriptBlockInstance::Compile(tRisseASTNode * root, const tRisseBindingInfo & binding, bool need_result, bool is_expression)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// コンパイラオブジェクトを作成してコンパイルを行う
 	tRisseCompiler * compiler = new tRisseCompiler(this);
 	compiler->Compile(root, binding, need_result, is_expression);
@@ -195,6 +203,8 @@ void tRisseScriptBlockInstance::Compile(tRisseASTNode * root, const tRisseBindin
 //---------------------------------------------------------------------------
 risse_size tRisseScriptBlockInstance::AddCodeBlock(tRisseCodeBlock * codeblock)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	RISSE_ASSERT(CodeBlocks != NULL); // このメソッドが呼ばれるのは Fixup 以前でなければならない
 	CodeBlocks->push_back(codeblock);
 	return CodeBlocks->size() - 1;
@@ -205,6 +215,8 @@ risse_size tRisseScriptBlockInstance::AddCodeBlock(tRisseCodeBlock * codeblock)
 //---------------------------------------------------------------------------
 risse_size tRisseScriptBlockInstance::AddTryIdentifier()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	RISSE_ASSERT(TryIdentifiers != NULL); // このメソッドが呼ばれるのは Fixup 以前でなければならない
 	TryIdentifiers->push_back(reinterpret_cast<void*>(new (GC) int(0)));
 		// 注意 int を new で確保し、そのアドレスを void にキャストして
@@ -226,6 +238,8 @@ risse_size tRisseScriptBlockInstance::AddTryIdentifier()
 //---------------------------------------------------------------------------
 tRisseCodeBlock * tRisseScriptBlockInstance::GetCodeBlockAt(risse_size index) const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	RISSE_ASSERT(CodeBlocks != NULL);
 	RISSE_ASSERT(index < CodeBlocks->size());
 	return (*CodeBlocks)[index];
@@ -236,6 +250,8 @@ tRisseCodeBlock * tRisseScriptBlockInstance::GetCodeBlockAt(risse_size index) co
 //---------------------------------------------------------------------------
 void * tRisseScriptBlockInstance::GetTryIdentifierAt(risse_size index) const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	RISSE_ASSERT(TryIdentifiers != NULL);
 	RISSE_ASSERT(index < TryIdentifiers->size());
 	return (*TryIdentifiers)[index];
@@ -246,6 +262,8 @@ void * tRisseScriptBlockInstance::GetTryIdentifierAt(risse_size index) const
 //---------------------------------------------------------------------------
 void tRisseScriptBlockInstance::Fixup()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// すべてのコードブロックの Fixup() を呼ぶ
 	for(gc_vector<tRisseCodeBlock *>::iterator i = CodeBlocks->begin();
 		i != CodeBlocks->end(); i++)
@@ -262,21 +280,30 @@ void tRisseScriptBlockInstance::Fixup()
 //---------------------------------------------------------------------------
 void tRisseScriptBlockInstance::Evaluate(const tRisseBindingInfo & binding, tRisseVariant * result, bool is_expression)
 {
-	// まず、コンパイルを行う
-	// (TODO: スクリプトブロックのキャッシュ対策)
+	tRisseCodeExecutor *executor;
 
-	// AST ノードを用意する
-	tRisseASTNode * root_node = GetASTRootNode(result != NULL);
+	{
+		volatile tSynchronizer sync(this); // sync
 
-	// コンパイルする
-	Compile(root_node, binding, result != NULL, is_expression);
+		// まず、コンパイルを行う
+		// (TODO: スクリプトブロックのキャッシュ対策)
 
-	// Fixup する
-	Fixup();
+		// AST ノードを用意する
+		tRisseASTNode * root_node = GetASTRootNode(result != NULL);
+
+		// コンパイルする
+		Compile(root_node, binding, result != NULL, is_expression);
+
+		// Fixup する
+		Fixup();
+
+		// executor を得る
+		executor = RootCodeBlock->GetExecutor();
+	}
 
 	// テスト実行
 	RISSE_ASSERT(RootCodeBlock != NULL);
-	RootCodeBlock->GetExecutor()->Execute(
+	executor->Execute(
 				tRisseMethodArgument::Empty(),
 				binding.GetThis(),
 				NULL,
@@ -299,6 +326,8 @@ void tRisseScriptBlockInstance::initialize(
 	const tRisseString &script, const tRisseString & name, risse_size lineofs,
 	const tRisseNativeCallInfo &info)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
 

@@ -35,6 +35,7 @@ namespace Risse
 //!				他のハッシュ関数オブジェクトを使うこと。@r
 //!				このクラスは Make() と GetHint() と SetHint() と HasHint を実装
 //!				する必要がある。
+//!				スレッド保護はない
 //---------------------------------------------------------------------------
 template <typename T>
 class tRisseHashTraits

@@ -135,12 +135,14 @@ public: // tRisseObjectInterface メンバ
 class tRisseSharedVariableFrames : public tRisseCollectee
 {
 	gc_vector<tRisseVariant *> Frames; //!< 共有変数フレームの配列 (関数のネストレベルによりフレームが異なる)
+	tRisseCriticalSection * CS; //!< この共有フレームへのアクセスを保護するための CS
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		max_nest_level		最大の関数のネストレベル(このサイズにて Frames が確保される)
 	tRisseSharedVariableFrames(risse_size max_nest_level)
 	{
+		CS = new tRisseCriticalSection();
 		Frames.resize(max_nest_level);
 	}
 
@@ -151,6 +153,7 @@ public:
 	tRisseSharedVariableFrames(const tRisseSharedVariableFrames & ref,
 		risse_size max_nest_level) : Frames(ref.Frames)
 	{
+		CS = new tRisseCriticalSection();
 		Frames.resize(max_nest_level);
 	}
 
@@ -161,6 +164,8 @@ public:
 	//! @return		そのネストレベルの位置に以前にあったフレーム
 	tRisseVariant * Set(risse_size level, risse_size size)
 	{
+		volatile tRisseCriticalSection::tLocker sync(*CS);
+
 		RISSE_ASSERT(level < Frames.size());
 		tRisseVariant * prev = Frames[level];
 		Frames[level] = size ? new tRisseVariant[size] : NULL;
@@ -173,22 +178,42 @@ public:
 	//! @return		そのネストレベルの位置に以前にあったフレーム
 	tRisseVariant * Set(risse_size level, tRisseVariant * frame)
 	{
+		volatile tRisseCriticalSection::tLocker sync(*CS);
+
 		RISSE_ASSERT(level < Frames.size());
 		tRisseVariant * prev = Frames[level];
 		Frames[level] = frame;
 		return prev;
 	}
 
-	//! @brief		指定位置の共有変数への参照を返す
+	//! @brief		指定位置の共有変数へ書き込みを行う
 	//! @param		level		ネストレベル
 	//! @param		num			位置
-	//! @return		その位置にある共有変数への参照
-	tRisseVariant & At(risse_size level, risse_size num)
+	//! @param		value		値
+	void Set(risse_size level, risse_size num, const tRisseVariant & val)
 	{
+		volatile tRisseCriticalSection::tLocker sync(*CS);
+		RISSE_ASSERT(level < Frames.size());
+		RISSE_ASSERT(Frames[level] != NULL);
+		Frames[level][num] = val;
+	}
+
+	//! @brief		指定位置の共有変数からの読み込みを行う
+	//! @param		level		ネストレベル
+	//! @param		num			位置
+	//! @return		値
+	const tRisseVariant & Get(risse_size level, risse_size num) const
+	{
+		volatile tRisseCriticalSection::tLocker sync(*CS);
 		RISSE_ASSERT(level < Frames.size());
 		RISSE_ASSERT(Frames[level] != NULL);
 		return Frames[level][num];
 	}
+
+
+	//! @brief		このオブジェクトのクリティカルセクションを得る
+	//! @return		クリティカルセクションオブジェクト
+	tRisseCriticalSection & GetCS() const { return *CS; }
 };
 //---------------------------------------------------------------------------
 

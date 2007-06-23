@@ -94,16 +94,18 @@ void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseStrin
 	try
 	{
 		// 暫定実装
-		// スクリプトブロックを作成
+		// スクリプトブロックを作成(コンパイル)
+		tRisseScriptBlockInstance * block;
+
 		tRisseVariant sb =
 			tRisseVariant(RisseScriptBlockClass).
 				New(0, tRisseMethodArgument::New(script, name, (risse_int64)lineofs));
 
-		tRisseScriptBlockInstance * block =
+		block =
 			sb.CheckAndGetObjectInterafce<tRisseScriptBlockInstance, tRisseScriptBlockClass>(
 																			ScriptBlockClass);
 
-		// スクリプトをグローバルコンテキストで実行
+		// スクリプトを実行
 		block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding,
 								result, is_expression);
 	}

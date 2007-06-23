@@ -81,6 +81,8 @@ void tRissePropertyInstance::construct()
 //---------------------------------------------------------------------------
 void tRissePropertyInstance::initialize(const tRisseNativeCallInfo & info)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
 

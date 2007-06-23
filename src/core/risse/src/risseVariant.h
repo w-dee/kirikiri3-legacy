@@ -26,6 +26,7 @@ class tRisseScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 //! @note	tRisseVariantData よりも高度な動作をここで定義する
+//! @note	スレッド保護無し
 //---------------------------------------------------------------------------
 class tRisseVariantBlock : public tRisseVariantData, public tRisseOperateRetValue
 {

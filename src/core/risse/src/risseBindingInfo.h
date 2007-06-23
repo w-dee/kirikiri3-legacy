@@ -16,11 +16,15 @@
 
 #include "risseCodeBlock.h"
 #include "risseGC.h"
+#include "risseThread.h"
 
 namespace Risse
 {
 //---------------------------------------------------------------------------
 //! @brief		バインディングに関する情報
+//! @note		一度作成されればこのオブジェクト自体は read-only な使い方しかしない
+//!				(もっとも Frames 内の変数へのアクセスは Frames->GetCS() によって得られる
+//!				クリティカルセクションを利用すること。
 //---------------------------------------------------------------------------
 class tRisseBindingInfo : public tRisseCollectee
 {

@@ -36,6 +36,8 @@ tRisseCoroutineInstance::tRisseCoroutineInstance()
 //---------------------------------------------------------------------------
 void tRisseCoroutineInstance::construct()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// コルーチンの実装オブジェクトを作成
 	Coroutine = new tRisseCoroutine(GetRTTI()->GetScriptEngine(),
 		tRisseVariant::GetNullObject(), tRisseVariant(this));
@@ -46,6 +48,8 @@ void tRisseCoroutineInstance::construct()
 //---------------------------------------------------------------------------
 void tRisseCoroutineInstance::initialize(const tRisseNativeCallInfo & info)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// 引数の数チェック
 	info.args.ExpectBlockArgumentCount(1);
 
@@ -62,6 +66,8 @@ void tRisseCoroutineInstance::initialize(const tRisseNativeCallInfo & info)
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCoroutineInstance::run(const tRisseMethodArgument & args) const
 {
+	volatile tSynchronizer sync(this); // sync
+
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "in tRisseCoroutineInstance::run b: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
@@ -77,6 +83,8 @@ tRisseVariant tRisseCoroutineInstance::run(const tRisseMethodArgument & args) co
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCoroutineInstance::yield(const tRisseMethodArgument & args) const
 {
+	volatile tSynchronizer sync(this); // sync
+
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "in tRisseCoroutineInstance::yield b: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
@@ -99,6 +107,8 @@ tRisseVariant tRisseCoroutineInstance::yield(const tRisseMethodArgument & args) 
 //---------------------------------------------------------------------------
 void tRisseCoroutineInstance::dispose() const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	Coroutine->Dispose();
 }
 //---------------------------------------------------------------------------
@@ -107,6 +117,8 @@ void tRisseCoroutineInstance::dispose() const
 //---------------------------------------------------------------------------
 bool tRisseCoroutineInstance::get_alive() const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	return Coroutine->GetAlive();
 }
 //---------------------------------------------------------------------------

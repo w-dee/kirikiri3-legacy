@@ -123,6 +123,7 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		void Leave() { LeaveCriticalSection(&CS); } //!< クリティカルセクションから出る
 
 	public:
+		//! @brief  クリティカルセクション用ロッカー
 		class tLocker : public tRisseCollectee
 		{
 			tRisseCriticalSection & CS;
@@ -137,6 +138,37 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			}
 		private:
 			tLocker(const tLocker &); // non-copyable
+		};
+
+		//! @brief  「条件によってはロックを行わない」クリティカルセクション用ロッカー
+		class tConditionalLocker : public tRisseCollectee
+		{
+			char Locker[sizeof(tLocker)]; // !< tLockerを格納する先
+			bool Locked; //!< 実際にロックが行われたかどうか
+		public:
+			//! @brief	コンストラクタ
+			//! @param	cs		クリティカルセクションオブジェクトへのポインタ(NULLの場合はロックを行わない)
+			tConditionalLocker(tRisseCriticalSection * cs)
+			{
+				if(cs)
+				{
+					Locked = true;
+					new (reinterpret_cast<tLocker*>(Locker)) tLocker(*(cs));
+				}
+				else
+				{
+					Locked = false;
+				}
+			}
+
+			//! @brief	デストラクタ
+			~tConditionalLocker()
+			{
+				if(Locked)
+				{
+					(reinterpret_cast<tLocker*>(Locker))->~tLocker();
+				}
+			}
 		};
 	};
 
@@ -162,6 +194,7 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		tRisseCriticalSection(const tRisseCriticalSection &); // non-copyable
 
 	public:
+		//! @brief  クリティカルセクション用ロッカー
 		class tLocker : public tRisseCollectee
 		{
 			boost::recursive_mutex::scoped_lock lock;
@@ -170,11 +203,41 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		private:
 			tLocker(const tLocker &); // non-copyable
 		};
+
+		//! @brief  「条件によってはロックを行わない」クリティカルセクション用ロッカー
+		class tConditionalLocker : public tRisseCollectee
+		{
+			char Storage[sizeof(tRisseCriticalSection)]; // !< tLockerを格納する先
+			bool Locked; //!< 実際にロックが行われたかどうか
+		public:
+			//! @brief	コンストラクタ
+			//! @param	cs		クリティカルセクションオブジェクトへのポインタ(NULLの場合はロックを行わない)
+			tConditionalLocker(tRisseCriticalSection * cs)
+			{
+				if(cs)
+				{
+					Locked = true;
+					new (reinterpret_cast<tLocker*>(Locker)) tLocker(*(cs));
+				}
+			}
+
+			//! @brief	デストラクタ
+			~tConditionalLocker()
+			{
+				if(Locked)
+				{
+					(reinterpret_cast<tLocker*>(Locker))->~tLocker();
+				}
+			}
+		};
 	};
 
 	} // namespace Risse
 
 #endif
+
+
+
 //---------------------------------------------------------------------------
 
 

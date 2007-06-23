@@ -121,9 +121,9 @@ public:
 			if(intf && intf->CS)
 			{
 				// ロックを行う
+				CS = intf->CS;
 				new (reinterpret_cast<tRisseCriticalSection::tLocker*>(Locker))
 					tRisseCriticalSection::tLocker(*(intf->CS));
-				CS = intf->CS;
 			}
 			else
 			{

@@ -275,7 +275,7 @@ void tRisseCodeInterpreter::Execute(
 					risse_uint16 nest_level = (code[1] >> 16) & 0xffff; // 上位16ビット
 					risse_uint16 num = (code[1]) & 0xffff; // 下位16ビット
 					RISSE_ASSERT(CI(code[2]) < framesize);
-					shared->At(nest_level, num) = AR(code[2]);
+					shared->Set(nest_level, num, AR(code[2]));
 					code += 3;
 					break;
 				}
@@ -286,7 +286,7 @@ void tRisseCodeInterpreter::Execute(
 					risse_int16 nest_level = (code[2] >> 16) & 0xffff; // 上位16ビット
 					risse_int16 num = (code[2]) & 0xffff; // 下位16ビット
 					RISSE_ASSERT(CI(code[1]) < framesize);
-					AR(code[1]) = shared->At(nest_level, num);
+					AR(code[1]) = shared->Get(nest_level, num);
 					code += 3;
 					break;
 				}

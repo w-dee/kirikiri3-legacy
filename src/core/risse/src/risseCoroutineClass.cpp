@@ -62,6 +62,13 @@ void tRisseCoroutineInstance::initialize(const tRisseNativeCallInfo & info)
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCoroutineInstance::run(const tRisseMethodArgument & args) const
 {
+#ifdef RISSE_COROUTINE_DEBUG
+	fflush(stdout); fflush(stderr);
+	fprintf(stdout, "in tRisseCoroutineInstance::run b: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
+					Coroutine, this);
+	fflush(stdout); fflush(stderr);
+#endif
+
 	return Coroutine->Run(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
 }
 //---------------------------------------------------------------------------
@@ -70,6 +77,20 @@ tRisseVariant tRisseCoroutineInstance::run(const tRisseMethodArgument & args) co
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCoroutineInstance::yield(const tRisseMethodArgument & args) const
 {
+#ifdef RISSE_COROUTINE_DEBUG
+	fflush(stdout); fflush(stderr);
+	fprintf(stdout, "in tRisseCoroutineInstance::yield b: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
+					Coroutine, this);
+	fflush(stdout); fflush(stderr);
+
+	GC_gcollect();
+
+	fflush(stdout); fflush(stderr);
+	fprintf(stdout, "in tRisseCoroutineInstance::yield a: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
+					Coroutine, this);
+	fflush(stdout); fflush(stderr);
+#endif
+
 	return Coroutine->DoYield(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
 }
 //---------------------------------------------------------------------------

@@ -18,9 +18,6 @@
 #include "risseExceptionClass.h"
 
 
-// #define RISSE_COROUTINE_DEBUG
-// #define RISSE_TRACK_FIBERS
-
 namespace Risse
 {
 //---------------------------------------------------------------------------
@@ -316,9 +313,12 @@ struct GC_ms_entry *RisseMarkCoroutineContext(
 
 	if(stack_min > stack_max) std::swap(stack_min, stack_max);
 
-	for(ptr_t p = stack_min; p <= stack_max; p += sizeof(GC_PTR) / sizeof(*p))
+	// ptr_t は char* で、GC_PTR は void * であることに注意
+//	fprintf(stderr, "pushing from %p to %p (%d words)\n", stack_min, stack_max, ((long)stack_max - (long)stack_min)/sizeof(void*));
+
+	for(ptr_t p = stack_min; p < stack_max; p += sizeof(GC_PTR) / sizeof(*p))
 	{
-		mark_sp = GC_MARK_AND_PUSH((GC_PTR)p, mark_sp, mark_sp_limit, (GC_PTR*)co_context);
+		mark_sp = GC_MARK_AND_PUSH((GC_PTR)(*(void**)p), mark_sp, mark_sp_limit, (GC_PTR*)co_context);
 	}
 
 	return mark_sp;
@@ -399,6 +399,15 @@ public:
 #endif
 	}
 
+#ifdef RISSE_COROUTINE_DEBUG
+	void Dump()
+	{
+		fflush(stdout); fflush(stderr);
+		fprintf(stdout, "tRisseCoroutineImpl %p : Alive(%s), Running(%s)\n", this, Alive?"true":"false", Running?"true":"false");
+		fflush(stdout); fflush(stderr);
+	}
+#endif
+
 private:
 	static tRisseVariant Body(coroutine_type::self &self, tRisseCoroutineImpl * coroimpl, tRisseCoroutine * coro, tRisseVariant arg)
 	{
@@ -415,19 +424,55 @@ private:
 					tRisseMethodArgument::New(coro->FunctionArg, arg),
 					coro->FunctionArg);
 			}
-			coroimpl->Alive = false;
-			coroimpl->Running = false;
-			coroimpl->Context = NULL;
 		}
 		catch(const tRisseVariant * e)
 		{
+#ifdef RISSE_COROUTINE_DEBUG
+			fflush(stdout); fflush(stderr);
+			fprintf(stdout, "tRisseCoroutineImpl %p caught an exception tRisseVariant: ", coroimpl);
+			RisseFPrint(stdout, e->operator tRisseString().c_str());
+			RisseFPrint(stdout, RISSE_WS("\n"));
+			coroimpl->Dump();
+			fflush(stdout); fflush(stderr);
+#endif
+#ifdef RISSE_COROUTINE_DEBUG
+			fflush(stdout); fflush(stderr);
+			fprintf(stdout, "tRisseCoroutineImpl %p finished\n", coroimpl);
+			coroimpl->Dump();
+			fflush(stdout); fflush(stderr);
+#endif
 			coroimpl->Alive = false;
 			coroimpl->Running = false;
 			coro->ExceptionValue = e;
 			coroimpl->Context = NULL;
 			throw;
 		}
+		catch(...)
+		{
+#ifdef RISSE_COROUTINE_DEBUG
+			fflush(stdout); fflush(stderr);
+			fprintf(stdout, "tRisseCoroutineImpl %p caught an unknown exception\n", coroimpl);
+			coroimpl->Dump();
+			fflush(stdout); fflush(stderr);
+#endif
+#ifdef RISSE_COROUTINE_DEBUG
+			fflush(stdout); fflush(stderr);
+			fprintf(stdout, "tRisseCoroutineImpl %p finished\n", coroimpl);
+			fflush(stdout); fflush(stderr);
+#endif
+			coroimpl->Alive = false;
+			coroimpl->Running = false;
+			coro->ExceptionValue = NULL;
+			coroimpl->Context = NULL;
+			throw;
+		}
 
+#ifdef RISSE_COROUTINE_DEBUG
+			fflush(stdout); fflush(stderr);
+			fprintf(stdout, "tRisseCoroutineImpl %p finished\n", coroimpl);
+			coroimpl->Dump();
+			fflush(stdout); fflush(stderr);
+#endif
 		coroimpl->Alive = false;
 		coroimpl->Running = false;
 		coroimpl->CoroutineSelf = NULL;
@@ -519,6 +564,7 @@ struct GC_ms_entry *RisseMarkCoroutinePtr(GC_word *addr,
 #ifdef RISSE_COROUTINE_DEBUG
 		fflush(stdout); fflush(stderr);
 		fprintf(stdout, "marking Ptr %p, tRisseCoroutineImpl %p\n", a, a->Impl);
+		a->Impl->Dump();
 		fflush(stdout); fflush(stderr);
 #endif
 
@@ -607,6 +653,12 @@ tRisseVariant tRisseCoroutine::Run(const tRisseVariant &arg)
 //---------------------------------------------------------------------------
 tRisseVariant tRisseCoroutine::DoYield(const tRisseVariant &arg)
 {
+#ifdef RISSE_COROUTINE_DEBUG
+	fflush(stdout); fflush(stderr);
+	fprintf(stdout, "in tRisseCoroutine::DoYield: tRisseCoroutineImpl %p: Alive(%s), Running(%s)\n", Ptr->Impl, Ptr->Impl->Alive?"true":"false", Ptr->Impl->Running?"true":"false");
+	fflush(stdout); fflush(stderr);
+#endif
+
 	if(!GetAlive())
 	{
 		// コルーチンは無効

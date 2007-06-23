@@ -98,13 +98,48 @@ public:
 	class tSynchronizer
 	{
 	private:
-		tRisseCriticalSection::tLocker Lock; //!< ロックオブジェクト
+		char Locker[sizeof(tRisseCriticalSection::tLocker)]; //!< ロックオブジェクトを配置する先
+		tRisseCriticalSection * CS; //!< ロックが行うCS
+			//!< (たんにロックが行われたかどうかを表すbool値でもよいのだが
+			//!<  この構造体のサイズを推測しなければならない理由が risseVariant.h にあり
+			//!< 推測しやすいポインタサイズとした (bool はパディングがどうなるかが分かりづらい) )
 		// void * operator new(size_t); //!< heap 上に作成できません
 		// void * operator new[](size_t); //!< heap 上に作成できません
 		tSynchronizer(const tSynchronizer &); //!< copy 出来ません
-		void operator =(const tSynchronizer &); //!< cpoy 出来ません
+		void operator =(const tSynchronizer &); //!< copy 出来ません
 	public:
-		tSynchronizer(const tRisseObjectInterface * intf) : Lock(*(intf->CS)) {;}
+		//! @brief	コンストラクタ
+		//! @param	intf	オブジェクトインターフェース
+		tSynchronizer(const tRisseObjectInterface * intf)
+		{
+			// intf が非 null かつ intf が CS を持っている場合のみに
+			// ロックを行う。
+			// tRisseCriticalSection::tLocker はコンストラクタでロックを
+			// 行い、デストラクタでロックの解除をするため、ロックを行う
+			// 必要がある場合はプレースメント new でロックを行う。解除は
+			// 同様にデストラクタを個別に呼び出すことで実現する。
+			if(intf && intf->CS)
+			{
+				// ロックを行う
+				new (reinterpret_cast<tRisseCriticalSection::tLocker*>(Locker))
+					tRisseCriticalSection::tLocker(*(intf->CS));
+				CS = intf->CS;
+			}
+			else
+			{
+				CS = NULL;
+			}
+		}
+
+		//! @brief	デストラクタ
+		~tSynchronizer()
+		{
+			if(CS)
+			{
+				(reinterpret_cast<tRisseCriticalSection::tLocker*>(Locker))->
+						~tLocker();
+			}
+		}
 	};
 
 };

@@ -2208,8 +2208,7 @@ public: // スレッド同期
 		void operator = (const tSynchronizer &); //!< コピー不可です
 		void * operator new(size_t); //!< ヒープ上に置かないでください
 		void * operator new [] (size_t); //!< ヒープ上に置かないでください
-		tRisseObjectInterface * Intf; //!< ロック対象となるオブジェクト
-		char Synchronizer[sizeof(void*)]; //!< tRisseObjectInterface::tSynchronizer を作成する先
+		char Synchronizer[sizeof(void*)+sizeof(void*)]; //!< tRisseObjectInterface::tSynchronizer を作成する先
 	public:
 		//! @brief		コンストラクタ
 		tSynchronizer(const tRisseVariant & object);

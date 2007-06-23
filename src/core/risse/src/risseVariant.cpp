@@ -1419,7 +1419,7 @@ void tRisseVariantBlock::DebugDump() const
 	{
 		risse_char buf[40];
 		Risse_pointer_to_str(GetObjectInterface(), buf);
-		RisseFPrint(stdout, (tRisseString(RISSE_WS("Object@")) + buf).c_str());
+		RisseFPrint(stderr, (tRisseString(RISSE_WS("Object@")) + buf).c_str());
 		const tRisseVariant * context = GetContext();
 		if(context)
 		{
@@ -1427,26 +1427,26 @@ void tRisseVariantBlock::DebugDump() const
 			{
 				if(context == GetDynamicContext())
 				{
-					RisseFPrint(stdout, RISSE_WS(":dynamic"));
+					RisseFPrint(stderr, RISSE_WS(":dynamic"));
 				}
 				else
 				{
 					Risse_pointer_to_str(context->GetObjectInterface(), buf);
-					RisseFPrint(stdout, (tRisseString(RISSE_WS(":")) + buf).c_str());
+					RisseFPrint(stderr, (tRisseString(RISSE_WS(":")) + buf).c_str());
 				}
 			}
 			else
 			{
-				RisseFPrint(stdout, (context->AsHumanReadable()).c_str());
+				RisseFPrint(stderr, (context->AsHumanReadable()).c_str());
 			}
 		}
 	}
 	else
 	{
-		RisseFPrint(stdout, AsHumanReadable().c_str());
+		RisseFPrint(stderr, AsHumanReadable().c_str());
 	}
 
-	RisseFPrint(stdout, RISSE_WS("\n"));
+	RisseFPrint(stderr, RISSE_WS("\n"));
 }
 //---------------------------------------------------------------------------
 

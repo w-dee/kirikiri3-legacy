@@ -659,14 +659,21 @@ void tRisseCodeInterpreter::Execute(
 				// とりあえず現在のローカル変数をダンプしてみる
 				{
 					risse_size framesize = CodeBlock->GetNumRegs();
+					fflush(stdout); fflush(stderr);
+					RisseFPrint(stderr, RISSE_WS("Dumping@frame "));
+					fprintf(stderr, "%p", frame);
+					RisseFPrint(stderr, (RISSE_WS(" ip:") +
+						tRisseString::AsString((risse_int64)(code - code_origin))).c_str());
+					RisseFPrint(stderr, RISSE_WS(" this:"));
+					fflush(stdout); fflush(stderr);
+					This.DebugDump();
 					for(risse_size n = 0; n < framesize; n++)
 					{
-						RisseFPrint(stderr, 
-							tRisseString(RISSE_WS("%$1 = $2\n"),
-								tRisseString::AsString((risse_int64)n),
-								AR(n).AsHumanReadable()
-									).c_str());
+						RisseFPrint(stderr, tRisseString::AsString((risse_int64)n).c_str());
+						RisseFPrint(stderr, RISSE_WS(" = "));
+						AR(n).DebugDump();
 					}
+					fflush(stdout); fflush(stderr);
 				}
 				code += 1;
 				break;

@@ -129,11 +129,13 @@ public: // tRisseObjectInterface メンバ
 //---------------------------------------------------------------------------
 
 
+class tRisseSharedVariableFramesOverlay;
 //---------------------------------------------------------------------------
 //! @brief 共有変数フレーム
 //---------------------------------------------------------------------------
 class tRisseSharedVariableFrames : public tRisseCollectee
 {
+protected:
 	gc_vector<tRisseVariant *> Frames; //!< 共有変数フレームの配列 (関数のネストレベルによりフレームが異なる)
 	tRisseCriticalSection * CS; //!< この共有フレームへのアクセスを保護するための CS
 
@@ -146,18 +148,28 @@ public:
 		Frames.resize(max_nest_level);
 	}
 
+	//! @brief		コピーコンストラクタ
+	//! @param		ref					コピー元の共有変数フレーム
+	//! @note		ref の Frames がシャローコピーされた後、CS はコピー元と共有されるようになる
+	tRisseSharedVariableFrames(const tRisseSharedVariableFrames & ref) : Frames(ref.Frames), CS(ref.CS)
+	{;}
+
 	//! @brief		コンストラクタ
 	//! @param		ref					コピー元の共有変数フレーム
 	//! @param		max_nest_level		最大の関数のネストレベル(このサイズにて Frames が確保される)
-	//! @note		ref の Frames がシャローコピーされた後、max_nest_level までリサイズされる
+	//! @note		ref の Frames がシャローコピーされた後、max_nest_level までリサイズされる。
+	//!				CS はコピー元と共有されるようになる
 	tRisseSharedVariableFrames(const tRisseSharedVariableFrames & ref,
-		risse_size max_nest_level) : Frames(ref.Frames)
+		risse_size max_nest_level) : Frames(ref.Frames), CS(ref.CS)
 	{
-		CS = new tRisseCriticalSection();
 		Frames.resize(max_nest_level);
 	}
 
+	//! @brief		コンストラクタ(tRisseSharedVariableFramesOverlayから)
+	//! @param		ref					コピー元のtRisseSharedVariableFramesOverlayオブジェクト
+	tRisseSharedVariableFrames(const tRisseSharedVariableFramesOverlay & ref);
 
+/*
 	//! @brief		指定のネストレベルのフレームを確保する
 	//! @param		level		ネストレベル
 	//! @param		size		フレームのサイズ
@@ -185,6 +197,7 @@ public:
 		Frames[level] = frame;
 		return prev;
 	}
+*/
 
 	//! @brief		指定位置の共有変数へ書き込みを行う
 	//! @param		level		ネストレベル
@@ -214,8 +227,91 @@ public:
 	//! @brief		このオブジェクトのクリティカルセクションを得る
 	//! @return		クリティカルセクションオブジェクト
 	tRisseCriticalSection & GetCS() const { return *CS; }
+
+
+	// friend 指定
+	friend class tRisseSharedVariableFramesOverlay;
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief 共有変数フレームオーバーレイ
+//! @note	tRisseSharedVariableFrames に1レベルだけ frames をオーバーレイできる
+//!			クラス
+//---------------------------------------------------------------------------
+class tRisseSharedVariableFramesOverlay
+{
+private:
+	tRisseSharedVariableFramesOverlay(const tRisseSharedVariableFramesOverlay &); //!< コピー不可です
+	void operator = (const tRisseSharedVariableFramesOverlay &); //!< コピー不可です
+	void * operator new(size_t); //!< ヒープ上に置かないでください
+	void * operator new [] (size_t); //!< ヒープ上に置かないでください
+
+	const tRisseSharedVariableFrames * Frames; // フレーム
+	tRisseVariant * OverlayedFrame; // 新しいフレーム
+	risse_size OverlayedFrameLevel; // OverlayedFrame のレベル
+
+public:
+	// コンストラクタ
+	//! @param		frames				共有変数フレーム
+	//! @param		overlayed_frame_level		新しいフレームのレベル
+	//! @param		overlayed_frame_size		新しいフレームのサイズ
+	tRisseSharedVariableFramesOverlay(const tRisseSharedVariableFrames * frames,
+		risse_size overlayed_frame_level, risse_size overlayed_frame_size)
+	{
+		RISSE_ASSERT(frames != NULL);
+		Frames = frames;
+		OverlayedFrame = overlayed_frame_size ? new tRisseVariant[overlayed_frame_size] : NULL;
+		OverlayedFrameLevel = overlayed_frame_level;
+		RISSE_ASSERT(overlayed_frame_size == 0 || OverlayedFrameLevel < Frames->Frames.size());
+		if(!OverlayedFrame) OverlayedFrameLevel = risse_size_max;
+					// オーバーレイを行わない場合は常に Frames を見に行くように
+	}
+
+	//! @brief		指定位置の共有変数へ書き込みを行う
+	//! @param		level		ネストレベル
+	//! @param		num			位置
+	//! @param		value		値
+	void Set(risse_size level, risse_size num, const tRisseVariant & val)
+	{
+		volatile tRisseCriticalSection::tLocker sync(*Frames->CS);
+		RISSE_ASSERT(level < Frames->Frames.size());
+		if(level == OverlayedFrameLevel)
+		{
+			OverlayedFrame[num] = val;
+		}
+		else
+		{
+			RISSE_ASSERT(Frames->Frames[level] != NULL);
+			Frames->Frames[level][num] = val;
+		}
+	}
+
+	//! @brief		指定位置の共有変数からの読み込みを行う
+	//! @param		level		ネストレベル
+	//! @param		num			位置
+	//! @return		値
+	const tRisseVariant & Get(risse_size level, risse_size num) const
+	{
+		volatile tRisseCriticalSection::tLocker sync(*Frames->CS);
+		RISSE_ASSERT(level < Frames->Frames.size());
+		if(level == OverlayedFrameLevel)
+		{
+			return OverlayedFrame[num];
+		}
+		else
+		{
+			RISSE_ASSERT(Frames->Frames[level] != NULL);
+			return Frames->Frames[level][num];
+		}
+	}
+
+	// friend 指定
+	friend class tRisseSharedVariableFrames;
+};
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------
@@ -236,10 +332,10 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		codeblock		コードブロック
 	//! @param		frame			スタックフレーム
-	//! @param		shared			共有フレーム
+	//! @param		shared			共有フレームオーバーレイ
 	tRisseCodeBlockStackAdapter(const tRisseCodeBlock * codeblock,
-		tRisseVariant * frame , const tRisseSharedVariableFrames & shared):
-		 CodeBlock(codeblock), Frame(frame), Shared(shared) {;}
+		tRisseVariant * frame , const tRisseSharedVariableFramesOverlay & shared_overlay):
+		 CodeBlock(codeblock), Frame(frame), Shared(shared_overlay) {;}
 
 public: // tRisseObjectInterface メンバ
 

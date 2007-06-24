@@ -306,6 +306,21 @@ tRisseObjectInterface::tRetValue tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_
 
 
 
+//---------------------------------------------------------------------------
+tRisseSharedVariableFrames::tRisseSharedVariableFrames(const tRisseSharedVariableFramesOverlay & ref) :
+	Frames(ref.Frames->Frames), CS(ref.Frames->CS)
+{
+	if(ref.OverlayedFrame)
+	{
+		RISSE_ASSERT(ref.OverlayedFrameLevel < Frames.size());
+		Frames[ref.OverlayedFrameLevel] = ref.OverlayedFrame;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 

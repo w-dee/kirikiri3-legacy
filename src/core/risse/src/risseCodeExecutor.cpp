@@ -70,14 +70,16 @@ void tRisseCodeInterpreter::Execute(
 		else
 		{
 			// 拡張
+			// eval は既存の共有変数領域を拡張することがある
 			shared = new tRisseSharedVariableFrames(*shared, CodeBlock->GetSharedVariableNestCount());
 		}
 	}
 	RISSE_ASSERT(shared != NULL);
 
-	tRisseVariant * prev_shared_frame = 
-		CodeBlock->GetNumSharedVars() ? 
-		shared->Set(CodeBlock->GetNestLevel(), CodeBlock->GetNumSharedVars()) : NULL;
+	tRisseSharedVariableFramesOverlay shared_overlay(shared,
+				CodeBlock->GetNestLevel(), CodeBlock->GetNumSharedVars());
+		// 共有フレームのうち、CodeBlock->GetNestLevel() にある共有フレームを
+		// 新しく置き換えるためのオブジェクトを準備する。
 
 	// ローカル変数に値を持ってくる
 	// いくつかのローカル変数は ASSERT が有効になっていなければ
@@ -154,7 +156,7 @@ void tRisseCodeInterpreter::Execute(
 								New(0, tRisseMethodArgument::Empty());
 				tRisseBindingInstance * obj =
 					AR(code[1]).CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
-				obj->SetInfo(new tRisseBindingInfo(This, shared));
+				obj->SetInfo(new tRisseBindingInfo(This, new tRisseSharedVariableFrames(shared_overlay)));
 				code += 2;
 				break;
 
@@ -271,22 +273,20 @@ void tRisseCodeInterpreter::Execute(
 
 			case ocWrite: // swrite	 共有空間への書き込み
 				{
-					RISSE_ASSERT(shared);
 					risse_uint16 nest_level = (code[1] >> 16) & 0xffff; // 上位16ビット
 					risse_uint16 num = (code[1]) & 0xffff; // 下位16ビット
 					RISSE_ASSERT(CI(code[2]) < framesize);
-					shared->Set(nest_level, num, AR(code[2]));
+					shared_overlay.Set(nest_level, num, AR(code[2]));
 					code += 3;
 					break;
 				}
 
 			case ocRead: // sread	共有空間からの読み込み
 				{
-					RISSE_ASSERT(shared);
 					risse_int16 nest_level = (code[2] >> 16) & 0xffff; // 上位16ビット
 					risse_int16 num = (code[2]) & 0xffff; // 下位16ビット
 					RISSE_ASSERT(CI(code[1]) < framesize);
-					AR(code[1]) = shared->Get(nest_level, num);
+					AR(code[1]) = shared_overlay.Get(nest_level, num);
 					code += 3;
 					break;
 				}
@@ -497,7 +497,9 @@ void tRisseCodeInterpreter::Execute(
 						reinterpret_cast<tRisseCodeBlock*>(AR(code[1]).GetObjectInterface());
 					RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
 					tRisseCodeBlockStackAdapter * adapter =
-						new tRisseCodeBlockStackAdapter(codeblock, frame, *shared);
+						new tRisseCodeBlockStackAdapter(codeblock, frame, shared_overlay);
+							// 注: ここで shared_overlay の中の Frames 配列は新しい
+							// tRisseCodeBlockStackAdapter にコピーされることになる
 					AR(code[1]) = tRisseVariant(adapter, new tRisseVariant(This));
 					code += 2;
 				}
@@ -512,7 +514,9 @@ void tRisseCodeInterpreter::Execute(
 						reinterpret_cast<tRisseCodeBlock*>(AR(code[1]).GetObjectInterface());
 					RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
 					tRisseCodeBlockStackAdapter * adapter =
-						new tRisseCodeBlockStackAdapter(codeblock, NULL, *shared);
+						new tRisseCodeBlockStackAdapter(codeblock, NULL, shared_overlay);
+							// 注: ここで shared_overlay の中の Frames 配列は新しい
+							// tRisseCodeBlockStackAdapter にコピーされることになる
 					AR(code[1]) = tRisseVariant(adapter);
 					code += 2;
 				}
@@ -1046,7 +1050,6 @@ void tRisseCodeInterpreter::Execute(
 	}
 	catch(...)
 	{
-		if(prev_shared_frame) shared->Set(CodeBlock->GetNestLevel(), prev_shared_frame);
 		throw;
 	}
 }

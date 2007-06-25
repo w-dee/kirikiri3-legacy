@@ -15,7 +15,7 @@
 #include "prec.h"
 #include "risseThread.h"
 
-
+#include <wx/utils.h>
 
 namespace Risse 
 {
@@ -54,7 +54,6 @@ tRisseThreadInternal::tRisseThreadInternal(tRisseThread * owner) :
 
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
-//! @note		このデストラクタはメインスレッド以外から非同期に呼ばれる可能性がある
 //---------------------------------------------------------------------------
 tRisseThreadInternal::~tRisseThreadInternal()
 {
@@ -72,6 +71,9 @@ wxThread::ExitCode tRisseThreadInternal::Entry()
 {
 	// ミューテックスをロックする
 	Owner->ThreadMutex.Lock();
+
+	// スレッドが実際に開始したことを表す
+	Owner->Started = true;
 
 	// スレッドのメイン関数を実行する
 	// 例外が発生するかも。
@@ -93,6 +95,7 @@ wxThread::ExitCode tRisseThreadInternal::Entry()
 //---------------------------------------------------------------------------
 tRisseThread::tRisseThread()
 {
+	Started = false;
 	_Terminated = false;
 	Internal = new tRisseThreadInternal(this);
 }
@@ -122,8 +125,14 @@ void tRisseThread::Run()
 //---------------------------------------------------------------------------
 void tRisseThread::Wait()
 {
+	// まだスレッドが開始していない場合は開始するまで待つ
+	while(!Started) { ::wxMilliSleep(1); } // あまりよい実装とは言えないが……
+
+	// 終了指示
 	Terminate();
-	wxMutexLocker lock(ThreadMutex); // スレッドが終了するまで待つ
+
+	// スレッドが終了するまで待つ
+	wxMutexLocker lock(ThreadMutex);
 }
 //---------------------------------------------------------------------------
 

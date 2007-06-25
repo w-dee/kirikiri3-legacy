@@ -310,6 +310,7 @@ class tRisseThread : public tRisseDestructee
 
 	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
+	volatile bool Started; //!< スレッドが実際に開始したかどうか
 	volatile bool _Terminated; //!< スレッドが終了すべきかどうか
 	volatile bool Get_Terminated() const { return _Terminated; }
 	volatile void Set_Terminated(bool b) { _Terminated = b; }
@@ -330,6 +331,7 @@ public:
 	void Run();
 
 	//! @brief		スレッドが終了するまで待つ
+	//! @note		呼び出し時点でまだスレッドが実行されていない場合は実行・終了するまで待つ
 	void Wait();
 
 	void Terminate() { Set_Terminated(true); } //!< スレッドに終了を通知する

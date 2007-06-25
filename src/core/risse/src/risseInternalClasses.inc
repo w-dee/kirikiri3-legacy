@@ -23,6 +23,7 @@
 #include "risseExceptionClass.h"
 #include "risseBindingClass.h"
 #include "risseScriptBlockClass.h"
+#include "risseThreadClass.h"
 #include "risse_parser/risseRisseScriptBlockClass.h"
 
 #else
@@ -45,6 +46,7 @@ RISSE_INTERNALCLASSES_CLASS(String                          )
 RISSE_INTERNALCLASSES_CLASS(Number                          )
 RISSE_INTERNALCLASSES_CLASS(Integer                         )
 RISSE_INTERNALCLASSES_CLASS(Real                            )
+RISSE_INTERNALCLASSES_CLASS(Thread                          )
 RISSE_INTERNALCLASSES_CLASS(Coroutine                       )
 RISSE_INTERNALCLASSES_CLASS(SourcePoint                     )
 RISSE_INTERNALCLASSES_CLASS(Throwable                       )

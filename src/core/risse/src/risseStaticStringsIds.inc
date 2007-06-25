@@ -315,3 +315,9 @@ extern tRisseStringData data_ss_positionToLine;
 static const tRisseString & ss_positionToLine = *reinterpret_cast<const tRisseString *>(&data_ss_positionToLine); //!< (static string)  "positionToLine" メソッド名
 extern tRisseStringData data_ss_RisseScriptBlock;
 static const tRisseString & ss_RisseScriptBlock = *reinterpret_cast<const tRisseString *>(&data_ss_RisseScriptBlock); //!< (static string)  "RisseScriptBlock" クラス名
+extern tRisseStringData data_ss_Thread;
+static const tRisseString & ss_Thread = *reinterpret_cast<const tRisseString *>(&data_ss_Thread); //!< (static string)  "Thread" クラス名
+extern tRisseStringData data_ss_start;
+static const tRisseString & ss_start = *reinterpret_cast<const tRisseString *>(&data_ss_start); //!< (static string)  "start" メソッド名
+extern tRisseStringData data_ss_join;
+static const tRisseString & ss_join = *reinterpret_cast<const tRisseString *>(&data_ss_join); //!< (static string)  "join" メソッド名

@@ -31,6 +31,7 @@ class tRisseLineOutputInterface : public tRisseCollectee
 public:
 	//! @brief		情報を通知する
 	//! @param		info		情報
+	//! @note		警告情報は複数スレッドから同時に出力される可能性があるので注意
 	virtual void Output(const tRisseString & info) = 0;
 };
 //---------------------------------------------------------------------------
@@ -88,6 +89,7 @@ public:
 
 	//! @brief		警告情報の出力先を設定する
 	//! @param		output		警告情報の出力先
+	//! @note		警告情報は複数スレッドから同時に出力される可能性があるので注意
 	void SetWarningOutput(tRisseLineOutputInterface * output)  { WarningOutput = output; }
 
 	//! @brief		警告情報の出力先を取得する

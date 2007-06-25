@@ -165,5 +165,8 @@ tRisseStringData data_ss_getLineAt = { tRisseSS<'g','e','t','L','i','n','e','A',
 tRisseStringData data_ss_script = { tRisseSS<'s','c','r','i','p','t'>::data.Buffer,6 }; /*  "script" プロパティ名 */
 tRisseStringData data_ss_positionToLine = { tRisseSS<'p','o','s','i','t','i','o','n','T','o','L','i','n','e'>::data.Buffer,14 }; /*  "positionToLine" メソッド名 */
 tRisseStringData data_ss_RisseScriptBlock = { tRisseSS<'R','i','s','s','e','S','c','r','i','p','t','B','l','o','c','k'>::data.Buffer,16 }; /*  "RisseScriptBlock" クラス名 */
+tRisseStringData data_ss_Thread = { tRisseSS<'T','h','r','e','a','d'>::data.Buffer,6 }; /*  "Thread" クラス名 */
+tRisseStringData data_ss_start = { tRisseSS<'s','t','a','r','t'>::data.Buffer,5 }; /*  "start" メソッド名 */
+tRisseStringData data_ss_join = { tRisseSS<'j','o','i','n'>::data.Buffer,4 }; /*  "join" メソッド名 */
 
 

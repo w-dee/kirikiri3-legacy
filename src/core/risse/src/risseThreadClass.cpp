@@ -31,11 +31,14 @@ RISSE_DEFINE_SOURCE_ID(18367,25403,3163,16422,1923,3893,57628,424);
 //---------------------------------------------------------------------------
 //! @brief		Risseスクリプト用スレッドを実装するクラス
 //---------------------------------------------------------------------------
-class tRisseScriptThread : public tRisseThread
+class tRisseScriptThread : protected tRisseThread
 {
+	//TODO: 正しくスレッドの状態をハンドリングすること
+
 	tRisseScriptEngine * ScriptEngine; //!< スクリプトエンジン
 	tRisseVariant Method; //!< 実行するメソッド
-
+	tRisseVariant Context; //!< 実行するメソッドのコンテキスト
+	tRisseVariant Ret; //!< Execute メソッドの戻り値
 
 protected:
 	//! @brief		スレッドの実行ルーチン
@@ -48,8 +51,10 @@ protected:
 				try
 				{
 					// Method を呼び出す
+					// TODO: メソッドのコンテキストを正しく
 					if(!Method.IsVoid())
-						Method.FuncCall(ScriptEngine);
+						Method.FuncCall(ScriptEngine, &Ret, tRisseString::GetEmptyString(), 0,
+							tRisseMethodArgument::Empty(), Context);
 				}
 				catch(const tRisseTemporaryException * te)
 				{
@@ -82,6 +87,22 @@ public:
 	//! @brief	実行するメソッドを設定する
 	//! @param	method		実行するメソッド
 	void SetMethod(const tRisseVariant & method) {Method=method;}
+
+	//! @brief	スレッドの実行を開始する
+	//! @param	context		デフォルトのコンテキスト
+	void Start(const tRisseVariant & context)
+	{
+		Context = context;
+		Run(); // tRisseThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
+	}
+
+	//! @brief	スレッドの終了を待つ
+	//! @return	スレッドメソッドの戻り値
+	const tRisseVariant & Join()
+	{
+		Wait(); // tRisseThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
+		return Ret;
+	}
 };
 //---------------------------------------------------------------------------
 
@@ -145,16 +166,16 @@ void tRisseThreadInstance::run(void) const
 void tRisseThreadInstance::start() const
 {
 	// スレッドの実行を開始する
-	Thread->Run();
+	Thread->Start(tRisseVariant((tRisseObjectInterface*)this));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseThreadInstance::join() const
+tRisseVariant tRisseThreadInstance::join() const
 {
 	// スレッドの終了を待機する
-	Thread->Wait();
+	return Thread->Join();
 }
 //---------------------------------------------------------------------------
 

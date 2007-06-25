@@ -41,7 +41,7 @@ public: // Risse用メソッドなど
 	void initialize(const tRisseNativeCallInfo & info);
 	void run() const;
 	void start() const;
-	void join() const;
+	tRisseVariant join() const;
 };
 //---------------------------------------------------------------------------
 

@@ -82,6 +82,7 @@ CPPFILES =  \
 			src/risseString.cpp                      \
 			src/risseStringClass.cpp                 \
 			src/risseThread.cpp                      \
+			src/risseThreadClass.cpp                 \
 			src/risseTypes.cpp                       \
 			src/risseVariant.cpp                     \
 			src/risse_parser/risseLexer.cpp          \

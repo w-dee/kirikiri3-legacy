@@ -154,6 +154,10 @@ public:
 		return *reinterpret_cast<tRisseMethodArgument*>(&EmptyArgument);
 	}
 
+
+private:
+	tRisseMethodArgument(); //!< コンストラクタ (このクラスのインスタンスを作成するには以下のstatic関数をつかってね)
+
 public:
 	//! @brief		N個の引数分のストレージを持つこのクラスのインスタンスを動的に作成して返す
 	//! @param		ac		普通の引数の数

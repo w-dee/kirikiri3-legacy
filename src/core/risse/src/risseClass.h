@@ -31,6 +31,7 @@ class tRisseClassBase : public tRisseObjectBase
 	//! @brief		親クラスのtypedef
 	typedef tRisseObjectBase inherited;
 
+private:
 	tRisseRTTI ClassRTTI; //!< RTTI 参照用データ(このクラスから作成されたインスタンスはこのRTTIを持つ)
 	tRisseRTTI::tMatcher RTTIMatcher; //!< ClassRTTI にマッチするための情報
 
@@ -50,6 +51,10 @@ public:
 	//! @param		engine			スクリプトエンジンインスタンス
 	void SetClassClassRTTI(tRisseScriptEngine * engine);
 
+	//! @brief		このインスタンスの ClassRTTI を取得する
+	//! @return		このインスタンスの ClassRTTI
+	tRisseRTTI & GetClassRTTI() { return ClassRTTI; }
+
 	//! @brief		クラスインスタンスを登録するためのユーティリティメソッド
 	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
 	//! @param		name		登録名
@@ -60,6 +65,8 @@ public:
 			tRisseOperateFlags::ofMemberEnsure | tRisseOperateFlags::ofInstanceMemberOnly,
 					tRisseVariant(this));
 	}
+
+
 public:
 	//! @brief		各メンバをインスタンスに追加する
 	//! @note		これは通常コンストラクタ中から呼ばれるが、コンストラクタ中では

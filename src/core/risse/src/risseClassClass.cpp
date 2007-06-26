@@ -110,6 +110,17 @@ void tRisseClassClass::initialize(const tRisseNativeCallInfo &info)
 			tRisseOperateFlags(tRisseMemberAttribute::GetDefault())|
 			access_flags,
 			super_class, info.This);
+
+		// 親クラスの ClassRTTI を引き継ぐ
+		tRisseClassBase * this_class_intf =
+			info.This.CheckAndGetObjectInterafce<tRisseClassBase, tRisseClassBase>(
+				info.engine->ClassClass);
+		tRisseClassBase * super_class_intf =
+			super_class.CheckAndGetObjectInterafce<tRisseClassBase, tRisseClassBase>(
+				info.engine->ClassClass);
+
+		this_class_intf->GetClassRTTI() = super_class_intf->GetClassRTTI();
+		this_class_intf->GetClassRTTI().AddId(this_class_intf);
 	}
 
 	// ここで登録した ovulate と construct と initialize を削除する。

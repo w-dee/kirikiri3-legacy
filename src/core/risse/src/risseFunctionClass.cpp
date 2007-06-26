@@ -107,11 +107,24 @@ void tRisseFunctionClass::RegisterMembers()
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
 
+	// 注: この時点では Function クラスの ovulate は inherited::RegisterMembers で
+	// 登録された、親クラスの ovulate となっている。
+	// この状態で function クラスのメソッドを登録しようとしても(間違ったovulateが
+	// 呼ばれるため)うまくいかないので、
+	// たとえ仮であろうと ovulate メソッドを登録する。
+	// いったん ScriptEngine インスタンスの FunctionClass を NULL に設定すると
+	// RisseBindFunction は仮のメソッドインスタンスを用いるようになる。
+	tRisseFunctionClass * f_save = GetRTTI()->GetScriptEngine()->FunctionClass;
+	GetRTTI()->GetScriptEngine()->FunctionClass = NULL;
+	RisseBindFunction(this, ss_ovulate, &tRisseFunctionClass::ovulate);
+	GetRTTI()->GetScriptEngine()->FunctionClass = f_save;
+
 	// クラスに必要なメソッドを登録する
 	// 基本的に ss_construct と ss_initialize は各クラスごとに
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+	RisseBindFunction(this, ss_ovulate, &tRisseFunctionClass::ovulate);
 	RisseBindFunction(this, ss_construct, &tRisseFunctionInstance::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseFunctionInstance::initialize);
 	RisseBindProperty(this, ss_synchronized,
@@ -121,7 +134,7 @@ void tRisseFunctionClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseFunctionClass::CreateNewObjectBase()
+tRisseVariant tRisseFunctionClass::ovulate()
 {
 	return tRisseVariant(new tRisseFunctionInstance());
 }

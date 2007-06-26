@@ -93,7 +93,7 @@ public:
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	tRisseVariant CreateNewObjectBase();
+	static tRisseVariant ovulate();
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

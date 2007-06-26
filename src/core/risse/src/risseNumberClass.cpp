@@ -42,6 +42,10 @@ void tRisseNumberClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+	RisseBindFunction(this, ss_ovulate,
+		&tRisseNumberClass::ovulate,
+		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
+								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
 	RisseBindFunction(this, ss_construct,
 		&tRisseNumberClass::construct,
 		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
@@ -54,7 +58,7 @@ void tRisseNumberClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseNumberClass::CreateNewObjectBase()
+tRisseVariant tRisseNumberClass::ovulate()
 {
 	// このクラスのインスタンスは作成できないので例外を投げる
 	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();

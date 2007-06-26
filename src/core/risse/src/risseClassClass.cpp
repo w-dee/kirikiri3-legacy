@@ -48,6 +48,7 @@ void tRisseClassClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+	RisseBindFunction(this, ss_ovulate, &tRisseClassClass::ovulate);
 	RisseBindFunction(this, ss_construct, &tRisseClassClass::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseClassClass::initialize);
 }
@@ -63,9 +64,9 @@ tRisseClassClass::tRetValue tRisseClassClass::Operate(RISSE_OBJECTINTERFACE_OPER
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseClassClass::CreateNewObjectBase()
+tRisseVariant tRisseClassClass::ovulate(const tRisseNativeCallInfo &info)
 {
-	return tRisseVariant(new tRisseClassInstance(GetRTTI()->GetScriptEngine()));
+	return tRisseVariant(new tRisseClassInstance(info.engine));
 }
 //---------------------------------------------------------------------------
 
@@ -111,11 +112,12 @@ void tRisseClassClass::initialize(const tRisseNativeCallInfo &info)
 			super_class, info.This);
 	}
 
-	// ここで登録した construct と initialize を削除する。
+	// ここで登録した ovulate と construct と initialize を削除する。
 	// これらは、This の初期化には必要だったが、このさきこのクラスに実装されるであろう
-	// ユーザ定義の construct と initialize にとってはじゃまである。
-	// これらがここに残っていると、親クラス内の construct や initialize を正常に
+	// ユーザ定義の ovulate, construct と initialize にとってはじゃまである。
+	// これらがここに残っていると、親クラス内の ovulate, construct や initialize を正常に
 	// 参照できないという意味でもじゃまである。
+	info.This.DeletePropertyDirect_Object(ss_ovulate, tRisseOperateFlags::ofInstanceMemberOnly);
 	info.This.DeletePropertyDirect_Object(ss_construct, tRisseOperateFlags::ofInstanceMemberOnly);
 	info.This.DeletePropertyDirect_Object(ss_initialize, tRisseOperateFlags::ofInstanceMemberOnly);
 }
@@ -148,14 +150,6 @@ void tRisseClassInstance::RegisterMembers()
 tRisseClassInstance::tRetValue tRisseClassInstance::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseVariant tRisseClassInstance::CreateNewObjectBase()
-{
-	return tRisseVariant(new tRisseObjectBase());
 }
 //---------------------------------------------------------------------------
 

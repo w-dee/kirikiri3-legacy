@@ -236,6 +236,7 @@ void tRisseArrayClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+	RisseBindFunction(this, ss_ovulate, &tRisseArrayClass::ovulate);
 	RisseBindFunction(this, ss_construct, &tRisseArrayInstance::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseArrayInstance::initialize);
 	RisseBindFunction(this, mnIGet, &tRisseArrayInstance::iget);
@@ -250,7 +251,7 @@ void tRisseArrayClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseArrayClass::CreateNewObjectBase()
+tRisseVariant tRisseArrayClass::ovulate()
 {
 	return tRisseVariant(new tRisseArrayInstance());
 }

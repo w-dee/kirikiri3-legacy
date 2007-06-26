@@ -38,14 +38,14 @@ native binder について
              this になる。
 
   funcptr に記述するC++メソッドはstaticでも非staticでもよい。
-  非staticの場合は、tRisseClassBase::CreateNewObjectBase() をオーバーライドした
+  非staticの場合は、tRisseClassBase::ovulate() をオーバーライドした
   C++ メソッドで返すRisseインスタンスの、そのC++クラスのメンバ関数である必要がある。
   たとえば Array クラスの場合、
 
 	void tRisseArrayInstance::iset(const tRisseVariant & value, risse_offset ofs_index)
 
   のようなメソッドが funcptr に渡っている。この tRisseArrayInstance は
-  tRisseArrayClass::CreateNewObjectBase() で返されているインスタンスのC++クラスである。
+  tRisseArrayClass::ovulate() で返されているインスタンスのC++クラスである。
 
   funcptr に非 static メソッドが渡った場合、関数が呼び出される際、必ず this が
   正しいインスタンスであるかどうかの RTTI によるチェックが入る。その後、funcptr が

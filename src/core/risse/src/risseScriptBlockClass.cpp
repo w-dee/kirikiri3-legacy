@@ -372,6 +372,7 @@ void tRisseScriptBlockClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+	RisseBindFunction(this, ss_ovulate, &tRisseScriptBlockClass::ovulate);
 	RisseBindFunction(this, ss_construct, &tRisseScriptBlockInstance::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseScriptBlockInstance::initialize);
 	RisseBindFunction(this, mnString, &tRisseScriptBlockInstance::mnString);
@@ -384,7 +385,7 @@ void tRisseScriptBlockClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseScriptBlockClass::CreateNewObjectBase()
+tRisseVariant tRisseScriptBlockClass::ovulate()
 {
 	// このクラスのインスタンスは作成できないので例外を投げる
 	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();

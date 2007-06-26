@@ -141,6 +141,7 @@ void tRisseClassBase::RegisterMembers()
 	}
 
 	RisseBindFunction(this, ss_include, &tRisseClassBase::include);
+	RisseBindFunction(this, ss_ovulate, &tRisseClassBase::ovulate);
 }
 //---------------------------------------------------------------------------
 
@@ -148,23 +149,7 @@ void tRisseClassBase::RegisterMembers()
 //---------------------------------------------------------------------------
 tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
-	if(code == ocCreateNewObjectBase && name.IsEmpty())
-	{
-		// 空のオブジェクトを作成して返す
-		RISSE_ASSERT(result != NULL);
-		tRisseVariant new_object = CreateNewObjectBase();
-		*result = new_object;
-		return rvNoError;
-	}
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRisseVariant tRisseClassBase::CreateNewObjectBase()
-{
-	return tRisseVariant(new tRisseObjectBase());
 }
 //---------------------------------------------------------------------------
 
@@ -187,12 +172,12 @@ void tRisseClassBase::CallSuperClassMethod(tRisseVariantBlock * ret,
 //---------------------------------------------------------------------------
 void tRisseClassBase::risse_new(const tRisseNativeCallInfo &info)
 {
-	// 空のオブジェクトを作る
+	// 空のオブジェクトを作る(ovulateメソッドを呼び出す)
 	// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
 	// 「自分のクラス」はすなわち This のこと(のはず)
 	RISSE_ASSERT(info.This.GetType() == tRisseVariant::vtObject);
-	tRisseVariant new_object;
-	info.This.GetObjectInterface()->Do(ocCreateNewObjectBase, &new_object);
+	tRisseVariant new_object = info.This.Invoke_Object(ss_ovulate);
+
 	if(new_object.GetType() == tRisseVariant::vtObject)
 	{
 		// プリミティブ型ではない場合
@@ -278,6 +263,13 @@ void tRisseClassBase::include(const tRisseMethodArgument & args,
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseClassBase::ovulate()
+{
+	return tRisseVariant(new tRisseObjectBase());
+}
+//---------------------------------------------------------------------------
 
 
 } // namespace Risse

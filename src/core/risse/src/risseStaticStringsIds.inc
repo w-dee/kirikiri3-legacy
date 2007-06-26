@@ -157,6 +157,8 @@ extern tRisseStringData data_ss_construct;
 static const tRisseString & ss_construct = *reinterpret_cast<const tRisseString *>(&data_ss_construct); //!< (static string)  "construct" メソッド名
 extern tRisseStringData data_ss_fertilize;
 static const tRisseString & ss_fertilize = *reinterpret_cast<const tRisseString *>(&data_ss_fertilize); //!< (static string)  "fertilize" メソッド名
+extern tRisseStringData data_ss_ovulate;
+static const tRisseString & ss_ovulate = *reinterpret_cast<const tRisseString *>(&data_ss_ovulate); //!< (static string)  "ovulate" メソッド名
 extern tRisseStringData data_ss_getInstanceMember;
 static const tRisseString & ss_getInstanceMember = *reinterpret_cast<const tRisseString *>(&data_ss_getInstanceMember); //!< (static string)  "getInstanceMember" メソッド名
 extern tRisseStringData data_ss_setInstanceMember;

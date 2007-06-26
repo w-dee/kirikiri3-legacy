@@ -50,6 +50,8 @@ void tRisseStringClass::RegisterMembers()
 
 	// construct は tRissePrimitiveClass 内ですでに登録されている
 
+	RisseBindFunction(this, ss_ovulate, &tRisseStringClass::ovulate,
+		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
 	RisseBindFunction(this, ss_initialize, &tRisseStringClass::initialize,
 		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
 	RisseBindFunction(this, ss_charAt, &tRisseStringClass::charAt,
@@ -62,7 +64,7 @@ void tRisseStringClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseStringClass::CreateNewObjectBase()
+tRisseVariant tRisseStringClass::ovulate()
 {
 	return tRisseVariant(tRisseString());
 }
@@ -75,7 +77,7 @@ void tRisseStringClass::initialize(const tRisseNativeCallInfo & info)
 	// 親クラスの同名メソッドは「呼び出されない」
 
 	// 引数をすべて連結した物を初期値に使う
-	// 注意: いったん CreateNewObjectBase で作成されたオブジェクトの中身
+	// 注意: いったん ovulate で作成されたオブジェクトの中身
 	//       を変更するため、const_cast を用いる
 	for(risse_size i = 0; i < info.args.GetArgumentCount(); i++)
 		*const_cast<tRisseVariant*>(&info.This) += info.args[i];

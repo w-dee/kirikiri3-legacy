@@ -97,6 +97,10 @@ void tRissePrimitiveClass::RegisterMembers()
 
 	// クラスに必要なメソッドを登録する
 
+	RisseBindFunction(this, ss_ovulate,
+		&tRissePrimitiveClass::ovulate,
+		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
+								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
 	RisseBindFunction(this, ss_construct,
 		&tRissePrimitiveClass::construct,
 		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
@@ -106,7 +110,7 @@ void tRissePrimitiveClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRissePrimitiveClass::CreateNewObjectBase()
+tRisseVariant tRissePrimitiveClass::ovulate()
 {
 	// このクラスのインスタンスは作成できないので例外を投げる
 	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();

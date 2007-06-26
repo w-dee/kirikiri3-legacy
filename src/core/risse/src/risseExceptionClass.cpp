@@ -255,6 +255,7 @@ void tRisseSourcePointClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+	RisseBindFunction(this, ss_ovulate,  &tRisseSourcePointClass::ovulate);
 	RisseBindFunction(this, ss_construct,  &tRisseSourcePointInstance::construct);
 	RisseBindFunction(this, ss_initialize,  &tRisseSourcePointInstance::initialize);
 	RisseBindFunction(this, mnString,  &tRisseSourcePointInstance::toString);
@@ -263,7 +264,7 @@ void tRisseSourcePointClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseSourcePointClass::CreateNewObjectBase()
+tRisseVariant tRisseSourcePointClass::ovulate()
 {
 	return tRisseVariant(new tRisseSourcePointInstance());
 }

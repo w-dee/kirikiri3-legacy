@@ -45,6 +45,7 @@ void tRisseModuleClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+	RisseBindFunction(this, ss_ovulate, &tRisseModuleClass::ovulate);
 	RisseBindFunction(this, ss_construct, &tRisseModuleClass::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseModuleClass::initialize);
 }
@@ -52,7 +53,7 @@ void tRisseModuleClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseModuleClass::CreateNewObjectBase()
+tRisseVariant tRisseModuleClass::ovulate()
 {
 	return tRisseVariant(new tRisseObjectBase());
 }

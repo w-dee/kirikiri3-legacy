@@ -1,12 +1,8 @@
 // 書式
 // '//' 以降はコメントとして見なされる
 // '#!<' は列挙型のコメントとして出力にも現れる
-// 順番は以下の通り
-// LongId      Mnemonic    O1O2O3O4O5O6    MemberName
 
-// MemberName に ---- と書いてある物は MemberNameが該当しない物
-
-// On の記号は以下の意味の通り (-=該当無し)
+// On の記号は以下の意味の通り
 -On		R		tRisseVMInsnInfo::vifRegister
 -On		C		tRisseVMInsnInfo::vifConstant
 -On		N		tRisseVMInsnInfo::vifNumber
@@ -20,6 +16,11 @@
 //	7 文字に納める (タブ幅8に対応)
 //	人間がタイプするものではないので無理な省略はしない
 
+// MemberName に ---- と書いてある物は MemberNameが該当しない物
+// Mnemonic に ERR と書いてある物は該当するニーモニックが存在しない物
+
+// 順番は以下の通り
+// LongId				Mnemonic	O1O2O3O4O5O6    MemberName	Comment
 
 // なにもしない
 NoOperation				nop			-,-,-,-,-,-		----		#!< なにもしない
@@ -157,7 +158,6 @@ VMCodeLast				ERR			-,-,-,-,-,-		----		#!< VMオペコードの最後
 // オブジェクトメタオペレーション
 SetDefaultContext		ERR			-,-,-,-,-,-		----		#!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスに対して設定する
 GetDefaultContext		ERR			-,-,-,-,-,-		----		#!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスから取得する
-CreateNewObjectBase		ERR			-,-,-,-,-,-		----		#!< クラスから新しいインスタンスを作成する際のベースとなるオブジェクトを新たに作成して返す
 
 // SSA形式特有
 Phi						ERR			-,-,-,-,-,-		----		#!< φ関数

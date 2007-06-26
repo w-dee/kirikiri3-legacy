@@ -147,6 +147,7 @@ void tRisseCoroutineClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+	RisseBindFunction(this, ss_ovulate, &tRisseCoroutineClass::ovulate);
 	RisseBindFunction(this, ss_construct, &tRisseCoroutineInstance::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseCoroutineInstance::initialize);
 	RisseBindFunction(this, ss_run, &tRisseCoroutineInstance::run);
@@ -158,7 +159,7 @@ void tRisseCoroutineClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCoroutineClass::CreateNewObjectBase()
+tRisseVariant tRisseCoroutineClass::ovulate()
 {
 	return tRisseVariant(new tRisseCoroutineInstance());
 }

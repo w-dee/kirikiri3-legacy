@@ -16,6 +16,7 @@ ss_thisProxyHiddenVarName			.proxy							#!< this-proxy を格納するための
 ss_initialize						initialize						#!< "initialize" メソッド名
 ss_construct						construct						#!< "construct" メソッド名
 ss_fertilize						fertilize						#!< "fertilize" メソッド名
+ss_ovulate							ovulate							#!< "ovulate" メソッド名
 ss_getInstanceMember				getInstanceMember				#!< "getInstanceMember" メソッド名
 ss_setInstanceMember				setInstanceMember				#!< "setInstanceMember" メソッド名
 ss_Object							Object							#!< "Object" クラス名

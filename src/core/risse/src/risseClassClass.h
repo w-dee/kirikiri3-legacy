@@ -45,7 +45,7 @@ public:
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	tRisseVariant CreateNewObjectBase();
+	static tRisseVariant ovulate(const tRisseNativeCallInfo &info);
 
 public: // Risse用メソッドなど
 	static void construct();
@@ -72,9 +72,6 @@ public:
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
-
-	//! @brief		newの際の新しいオブジェクトを作成して返す
-	tRisseVariant CreateNewObjectBase();
 };
 //---------------------------------------------------------------------------
 

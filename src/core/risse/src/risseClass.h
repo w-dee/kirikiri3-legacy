@@ -83,10 +83,6 @@ public:
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
-protected:
-	//! @brief		newの際の新しいオブジェクトを作成して返す(必要ならば下位クラスでオーバーライドすること)
-	virtual tRisseVariant CreateNewObjectBase();
-
 public:
 	//! @brief		インスタンスの親クラスのメソッドを呼び出すユーティリティメソッド
 	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
@@ -102,6 +98,7 @@ public: // Risse用メソッドなど
 	static void risse_new(const tRisseNativeCallInfo &info);
 	static void fertilize(const tRisseVariant & instance, const tRisseNativeCallInfo &info);
 	static void include(const tRisseMethodArgument & args, const tRisseNativeCallInfo &info);
+	static tRisseVariant ovulate();
 };
 //---------------------------------------------------------------------------
 

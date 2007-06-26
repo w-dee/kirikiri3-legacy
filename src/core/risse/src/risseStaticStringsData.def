@@ -86,6 +86,7 @@ tRisseStringData data_ss_thisProxyHiddenVarName = { tRisseSS<'.','p','r','o','x'
 tRisseStringData data_ss_initialize = { tRisseSS<'i','n','i','t','i','a','l','i','z','e'>::data.Buffer,10 }; /*  "initialize" メソッド名 */
 tRisseStringData data_ss_construct = { tRisseSS<'c','o','n','s','t','r','u','c','t'>::data.Buffer,9 }; /*  "construct" メソッド名 */
 tRisseStringData data_ss_fertilize = { tRisseSS<'f','e','r','t','i','l','i','z','e'>::data.Buffer,9 }; /*  "fertilize" メソッド名 */
+tRisseStringData data_ss_ovulate = { tRisseSS<'o','v','u','l','a','t','e'>::data.Buffer,7 }; /*  "ovulate" メソッド名 */
 tRisseStringData data_ss_getInstanceMember = { tRisseSS<'g','e','t','I','n','s','t','a','n','c','e','M','e','m','b','e','r'>::data.Buffer,17 }; /*  "getInstanceMember" メソッド名 */
 tRisseStringData data_ss_setInstanceMember = { tRisseSS<'s','e','t','I','n','s','t','a','n','c','e','M','e','m','b','e','r'>::data.Buffer,17 }; /*  "setInstanceMember" メソッド名 */
 tRisseStringData data_ss_Object = { tRisseSS<'O','b','j','e','c','t'>::data.Buffer,6 }; /*  "Object" クラス名 */

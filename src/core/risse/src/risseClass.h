@@ -46,6 +46,10 @@ public:
 	//! @param		extensible		extensible の場合に真
 	tRisseClassBase(tRisseScriptEngine * engine);
 
+	//! @brief		このインスタンスの RTTI に Class クラスの RTTI を設定する
+	//! @param		engine			スクリプトエンジンインスタンス
+	void SetClassClassRTTI(tRisseScriptEngine * engine);
+
 	//! @brief		クラスインスタンスを登録するためのユーティリティメソッド
 	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
 	//! @param		name		登録名

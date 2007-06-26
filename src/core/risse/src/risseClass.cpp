@@ -32,7 +32,7 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 
 クラスオブジェクトの new メソッドが呼ばれる
   newメソッド内
-  | 空のオブジェクトを作る
+  | ovulate メソッドが呼ばれる(空のオブジェクトを作る)
   | そのオブジェクトにクラス情報を設定する
   | new メソッドは自分のクラスのfertilizeメソッドを呼ぶ(this=自分のクラス)
   |   fertilize メソッド内
@@ -43,16 +43,14 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
   | オブジェクトを返す
 
 */
-
-
 //---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 	 : tRisseObjectBase(ss_super)
 {
 	RISSE_ASSERT(super_class != NULL);
 
-	// スクリプトエンジンの情報を持った RTTI を登録する
-	SetRTTI(new tRisseRTTI(super_class->GetRTTI()->GetScriptEngine()));
+	// このインスタンスの RTTI に Class クラスの RTTI を設定する
+	SetClassClassRTTI(super_class->GetRTTI()->GetScriptEngine());
 
 	// 親クラスのClassRTTIを引き継ぐ
 	ClassRTTI = super_class->ClassRTTI;
@@ -74,8 +72,8 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 	 : tRisseObjectBase(ss_super)
 {
-	// スクリプトエンジンの情報を持った RTTI を登録する
-	SetRTTI(new tRisseRTTI(engine));
+	// このインスタンスの RTTI に Class クラスの RTTI を設定する
+	SetClassClassRTTI(engine);
 
 	// ClassRTTIに情報を格納する
 	ClassRTTI.SetScriptEngine(engine);
@@ -86,6 +84,24 @@ tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant((tRisseClassBase*)NULL));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseClassBase::SetClassClassRTTI(tRisseScriptEngine * engine)
+{
+	if(engine->ClassClass)
+	{
+		// Class クラスの RTTI を設定する
+		SetRTTI(&engine->ClassClass->ClassRTTI);
+	}
+	else
+	{
+		// Class クラスはまだ構築されていないよう。
+		// スクリプトエンジンの情報を持った RTTI を登録する
+		SetRTTI(new tRisseRTTI(engine));
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -137,12 +153,6 @@ tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERAT
 		// 空のオブジェクトを作成して返す
 		RISSE_ASSERT(result != NULL);
 		tRisseVariant new_object = CreateNewObjectBase();
-		if(new_object.GetType() == tRisseVariant::vtObject)
-		{
-			// プリミティブ型でなければ
-			// RTTIとしてこのクラスの物を設定する
-			new_object.GetObjectInterface()->SetRTTI(&ClassRTTI);
-		}
 		*result = new_object;
 		return rvNoError;
 	}
@@ -187,6 +197,15 @@ void tRisseClassBase::risse_new(const tRisseNativeCallInfo &info)
 	{
 		// プリミティブ型ではない場合
 		RISSE_ASSERT(!new_object.IsNull());
+
+		// This はクラスのはずだよなぁ
+		tRisseClassBase * class_intf =
+			info.This.CheckAndGetObjectInterafce<tRisseClassBase, tRisseClassBase>(
+				info.engine->ClassClass);
+
+		// プリミティブ型でなければ
+		// RTTIとしてこのクラスの物を設定する
+		new_object.GetObjectInterface()->SetRTTI(&class_intf->ClassRTTI);
 
 		// そのオブジェクトにクラス情報を設定する
 		// ここではclassメンバに「自分のクラス」を追加する

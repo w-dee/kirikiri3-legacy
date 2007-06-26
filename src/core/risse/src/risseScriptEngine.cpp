@@ -60,6 +60,13 @@ tRisseScriptEngine::tRisseScriptEngine()
 	#undef RISSE_INTERNALCLASSES_CLASS
 
 
+	// Object, Module, Class の各クラスは Class の作成以前に
+	// 作成されており、Class クラスの RTTI が正常に登録されていないはずなので
+	// 登録する
+	ObjectClass->SetClassClassRTTI(this);
+	ModuleClass->SetClassClassRTTI(this);
+	ClassClass->SetClassClassRTTI(this);
+
 	// グローバルオブジェクトを "Object" クラスから作成する
 	GlobalObject = tRisseVariant(ObjectClass).New();
 

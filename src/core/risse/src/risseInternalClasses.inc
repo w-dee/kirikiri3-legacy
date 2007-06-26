@@ -33,11 +33,11 @@
 // ここに書いた順番でクラスの初期化が行われることに注意。
 
 RISSE_INTERNALCLASSES_CLASS(Object                          )
+RISSE_INTERNALCLASSES_CLASS(Module                          )
+RISSE_INTERNALCLASSES_CLASS(Class                           )
 RISSE_INTERNALCLASSES_CLASS(Binding                         )
 RISSE_INTERNALCLASSES_CLASS(ScriptBlock                     )
 RISSE_INTERNALCLASSES_CLASS(RisseScriptBlock                )
-RISSE_INTERNALCLASSES_CLASS(Module                          )
-RISSE_INTERNALCLASSES_CLASS(Class                           )
 RISSE_INTERNALCLASSES_CLASS(Function                        )
 RISSE_INTERNALCLASSES_CLASS(Property                        )
 RISSE_INTERNALCLASSES_CLASS(Array                           )

@@ -8,7 +8,14 @@ TEMP_DIR = BASE_DIR
 errored = []
 test_count = 0
 
-Dir.glob(TESTS_DIR + '*').sort.delete_if { |x| x =~ /^\./ }.each do |file|
+files = Dir.glob(TESTS_DIR + '*').sort.delete_if { |x| x =~ /^\./ }
+
+# if an argument is specified, pick up files witch include specified string.
+if ARGV[0]
+	files.delete_if { |x| !x[ARGV[0]] }
+end
+
+files.each do |file|
 	begin
 		# search test result string from file in question
 		match = IO.read(file).match(/\/\/=>\s+([^\r\n]+)/)
@@ -16,7 +23,7 @@ Dir.glob(TESTS_DIR + '*').sort.delete_if { |x| x =~ /^\./ }.each do |file|
 			raise "file does not contain result pattern"
 		else
 			pattern = match[1]
-			print "testing #{file}\n"
+			print "testing #{File.basename file} ... "
 			system("\"#{File.expand_path(EXECUTABLE)}\" " +
 						" #{file} 1>#{TEMP_DIR}/stdout.log 2>#{TEMP_DIR}/stderr.log");
 			result = IO.read("#{TEMP_DIR}/stdout.log")
@@ -28,12 +35,16 @@ Dir.glob(TESTS_DIR + '*').sort.delete_if { |x| x =~ /^\./ }.each do |file|
 			end
 
 			if !matched
+				print "\rfailed!\n"
 				raise "test failed.\n" +
 						"  resulted: #{result}\n" +
 						"  expected: #{match[1]}\n" +
 						"  To examine the test:\n" +
 						"    #{EXECUTABLE} #{file}"
+			else
+				print "\rok     \n"
 			end
+			STDOUT.flush
 		end
 	rescue => e
 		errored << "#{file}: #{e.message}"

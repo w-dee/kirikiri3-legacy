@@ -3,11 +3,11 @@ var c = Coroutine.new() static function(co) {
 }
 
 
-c.run();
+c.resume();
 
 try
 {
-	c.run(); // coroutine has already exited
+	c.resume(); // coroutine has already exited
 }
 catch(e if e instanceof CoroutineException)
 {

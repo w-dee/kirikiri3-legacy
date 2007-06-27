@@ -19,16 +19,16 @@ function test_one()
 		}
 	}
 
-	a.run(0)+
-	b.run(1)+
-	a.run(0)+
-	b.run(1)+
-	a.run(0)+
-	b.run(1)+
-	a.run(0)+
-	b.run(1)+
-	a.run(0)+
-	b.run(1);
+	a.resume(0)+
+	b.resume(1)+
+	a.resume(0)+
+	b.resume(1)+
+	a.resume(0)+
+	b.resume(1)+
+	a.resume(0)+
+	b.resume(1)+
+	a.resume(0)+
+	b.resume(1);
 }
 
 for(var i = 0; i < 1000; i++)

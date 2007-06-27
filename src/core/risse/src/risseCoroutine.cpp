@@ -612,7 +612,7 @@ tRisseCoroutine::tRisseCoroutine(tRisseScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCoroutine::Run(const tRisseVariant &arg)
+tRisseVariant tRisseCoroutine::Resume(const tRisseVariant &arg)
 {
 	if(!GetAlive())
 	{

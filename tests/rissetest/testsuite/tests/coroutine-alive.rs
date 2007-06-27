@@ -2,7 +2,7 @@ function make_coro(n) {
 	var c = Coroutine.new() static function(co) {
 		while(n--) co.yield();
 	}
-	c.run(); // initial run
+	c.resume(); // initial run
 	c;
 }
 
@@ -12,7 +12,7 @@ var c = make_coro(0);
 ret += (c.alive ? "t" : "f");
 var c = make_coro(1);
 ret += (c.alive ? "t" : "f");
-c.run();
+c.resume();
 ret += (c.alive ? "t" : "f");
 
 function make_coro() {
@@ -24,7 +24,7 @@ function make_coro() {
 var c = make_coro();
 try
 {
-	c.run(); // will throw exception
+	c.resume(); // will throw exception
 }
 catch(e)
 {

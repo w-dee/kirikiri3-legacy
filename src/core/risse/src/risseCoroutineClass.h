@@ -39,7 +39,8 @@ public:
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tRisseNativeCallInfo & info);
-	tRisseVariant run(const tRisseMethodArgument & args) const;
+	void run() const;
+	tRisseVariant resume(const tRisseMethodArgument & args) const;
 	tRisseVariant yield(const tRisseMethodArgument & args) const;
 	void dispose() const;
 	bool get_alive() const;

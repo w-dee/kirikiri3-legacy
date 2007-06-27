@@ -12,23 +12,23 @@ function make_coro(n)
 
 var ret;
 
-// exception on firsttime run()
+// exception on firsttime resume()
 var c = make_coro(0);
 try
 {
-	c.run(); 
+	c.resume(); 
 }
 catch(e if e instanceof TestException)
 {
 	ret += "[ok]";
 }
 
-// exception on secondtime run()
+// exception on secondtime resume()
 var c = make_coro(1);
-c.run();
+c.resume();
 try
 {
-	c.run(); 
+	c.resume(); 
 }
 catch(e if e instanceof TestException)
 {

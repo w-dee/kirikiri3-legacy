@@ -50,32 +50,43 @@ void tRisseCoroutineInstance::initialize(const tRisseNativeCallInfo & info)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	// 引数の数チェック
-	info.args.ExpectBlockArgumentCount(1);
-
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
 
-	// 引数を元にコルーチンを作成する
-	// TODO: ブロック引数だけでなくコンストラクタ引数としても関数オブジェクトを渡せるように
-	Coroutine->SetFunction(info.args.GetBlockArgument(0));
+	// ブロック引数があればそれを実行、無ければ run メソッドを実行するように設定する
+	if(info.args.GetBlockArgumentCount() >= 1)
+	{
+		Coroutine->SetFunction(info.args.GetBlockArgument(0));
+	}
+	else
+	{
+		Coroutine->SetFunction(info.This.GetPropertyDirect_Object(ss_run));
+	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCoroutineInstance::run(const tRisseMethodArgument & args) const
+void tRisseCoroutineInstance::run() const
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseCoroutineInstance::resume(const tRisseMethodArgument & args) const
 {
 	volatile tSynchronizer sync(this); // sync
 
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
-	fprintf(stdout, "in tRisseCoroutineInstance::run b: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
+	fprintf(stdout, "in tRisseCoroutineInstance::resume b: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
 					Coroutine, this);
 	fflush(stdout); fflush(stderr);
 #endif
 
-	return Coroutine->Run(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
+	return Coroutine->Resume(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
 }
 //---------------------------------------------------------------------------
 
@@ -151,6 +162,7 @@ void tRisseCoroutineClass::RegisterMembers()
 	RisseBindFunction(this, ss_construct, &tRisseCoroutineInstance::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseCoroutineInstance::initialize);
 	RisseBindFunction(this, ss_run, &tRisseCoroutineInstance::run);
+	RisseBindFunction(this, ss_resume, &tRisseCoroutineInstance::resume);
 	RisseBindFunction(this, ss_yield, &tRisseCoroutineInstance::yield);
 	RisseBindFunction(this, ss_dispose, &tRisseCoroutineInstance::dispose);
 	RisseBindProperty(this, ss_alive, &tRisseCoroutineInstance::get_alive);

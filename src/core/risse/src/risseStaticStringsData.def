@@ -155,7 +155,7 @@ tRisseStringData data_ss_extensible = { tRisseSS<'e','x','t','e','n','s','i','b'
 tRisseStringData data_ss_Binding = { tRisseSS<'B','i','n','d','i','n','g'>::data.Buffer,7 }; /*  "Binding" クラス名 */
 tRisseStringData data_ss_eval = { tRisseSS<'e','v','a','l'>::data.Buffer,4 }; /*  "eval" メソッド名 */
 tRisseStringData data_ss_Coroutine = { tRisseSS<'C','o','r','o','u','t','i','n','e'>::data.Buffer,9 }; /*  "Coroutine" クラス名 */
-tRisseStringData data_ss_run = { tRisseSS<'r','u','n'>::data.Buffer,3 }; /*  "run" メソッド名 */
+tRisseStringData data_ss_resume = { tRisseSS<'r','e','s','u','m','e'>::data.Buffer,6 }; /*  "resume" メソッド名 */
 tRisseStringData data_ss_yield = { tRisseSS<'y','i','e','l','d'>::data.Buffer,5 }; /*  "yield" メソッド名 */
 tRisseStringData data_ss_exit = { tRisseSS<'e','x','i','t'>::data.Buffer,4 }; /*  "exit" メソッド名 */
 tRisseStringData data_ss_alive = { tRisseSS<'a','l','i','v','e'>::data.Buffer,5 }; /*  "alive" プロパティ名 */
@@ -167,6 +167,7 @@ tRisseStringData data_ss_script = { tRisseSS<'s','c','r','i','p','t'>::data.Buff
 tRisseStringData data_ss_positionToLine = { tRisseSS<'p','o','s','i','t','i','o','n','T','o','L','i','n','e'>::data.Buffer,14 }; /*  "positionToLine" メソッド名 */
 tRisseStringData data_ss_RisseScriptBlock = { tRisseSS<'R','i','s','s','e','S','c','r','i','p','t','B','l','o','c','k'>::data.Buffer,16 }; /*  "RisseScriptBlock" クラス名 */
 tRisseStringData data_ss_Thread = { tRisseSS<'T','h','r','e','a','d'>::data.Buffer,6 }; /*  "Thread" クラス名 */
+tRisseStringData data_ss_run = { tRisseSS<'r','u','n'>::data.Buffer,3 }; /*  "run" メソッド名 */
 tRisseStringData data_ss_start = { tRisseSS<'s','t','a','r','t'>::data.Buffer,5 }; /*  "start" メソッド名 */
 tRisseStringData data_ss_join = { tRisseSS<'j','o','i','n'>::data.Buffer,4 }; /*  "join" メソッド名 */
 

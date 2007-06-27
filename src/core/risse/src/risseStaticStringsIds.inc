@@ -295,8 +295,8 @@ extern tRisseStringData data_ss_eval;
 static const tRisseString & ss_eval = *reinterpret_cast<const tRisseString *>(&data_ss_eval); //!< (static string)  "eval" メソッド名
 extern tRisseStringData data_ss_Coroutine;
 static const tRisseString & ss_Coroutine = *reinterpret_cast<const tRisseString *>(&data_ss_Coroutine); //!< (static string)  "Coroutine" クラス名
-extern tRisseStringData data_ss_run;
-static const tRisseString & ss_run = *reinterpret_cast<const tRisseString *>(&data_ss_run); //!< (static string)  "run" メソッド名
+extern tRisseStringData data_ss_resume;
+static const tRisseString & ss_resume = *reinterpret_cast<const tRisseString *>(&data_ss_resume); //!< (static string)  "resume" メソッド名
 extern tRisseStringData data_ss_yield;
 static const tRisseString & ss_yield = *reinterpret_cast<const tRisseString *>(&data_ss_yield); //!< (static string)  "yield" メソッド名
 extern tRisseStringData data_ss_exit;
@@ -319,6 +319,8 @@ extern tRisseStringData data_ss_RisseScriptBlock;
 static const tRisseString & ss_RisseScriptBlock = *reinterpret_cast<const tRisseString *>(&data_ss_RisseScriptBlock); //!< (static string)  "RisseScriptBlock" クラス名
 extern tRisseStringData data_ss_Thread;
 static const tRisseString & ss_Thread = *reinterpret_cast<const tRisseString *>(&data_ss_Thread); //!< (static string)  "Thread" クラス名
+extern tRisseStringData data_ss_run;
+static const tRisseString & ss_run = *reinterpret_cast<const tRisseString *>(&data_ss_run); //!< (static string)  "run" メソッド名
 extern tRisseStringData data_ss_start;
 static const tRisseString & ss_start = *reinterpret_cast<const tRisseString *>(&data_ss_start); //!< (static string)  "start" メソッド名
 extern tRisseStringData data_ss_join;

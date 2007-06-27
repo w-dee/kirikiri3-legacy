@@ -7,8 +7,8 @@ var c2 = Coroutine.new() static function(co) {
 }
 
 
-c1.run();
-c2.run();
+c1.resume();
+c2.resume();
 
 
 try

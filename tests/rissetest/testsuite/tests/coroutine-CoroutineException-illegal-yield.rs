@@ -1,7 +1,7 @@
 var c = Coroutine.new() static function(co) {
 	// immediately return
 }
-c.run(); // will finish coroutine
+c.resume(); // will finish coroutine
 
 
 try

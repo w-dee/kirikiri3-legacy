@@ -56,7 +56,7 @@ public:
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		function	呼び出される関数
 	//! @param		arg			呼び出される関数の先頭の引数
-	//! @note		関数の引数は、1番目にarg, 2番目に初回の Run 呼び出しの引数が
+	//! @note		関数の引数は、1番目にarg, 2番目に初回の Resume 呼び出しの引数が
 	//! 			渡される。
 	tRisseCoroutine(tRisseScriptEngine * engine, const tRisseVariant & function, const tRisseVariant arg);
 
@@ -68,11 +68,11 @@ public:
 	//! @param		arg		呼び出される関数の２番目の引数、あるいは yield メソッドの
 	//!						戻り値となる値
 	//! @return		DoYield() メソッドの戻り値 (実行が終了した場合は void が帰る)
-	tRisseVariant Run(const tRisseVariant &arg);
+	tRisseVariant Resume(const tRisseVariant &arg);
 
 	//! @brief		コルーチンからyieldする
-	//! @param		arg		Run() メソッドの戻り値となる値
-	//! @return		Run() メソッドの引数
+	//! @param		arg		Resume() メソッドの戻り値となる値
+	//! @return		Resume() メソッドの引数
 	//! @note		なんか Yield がどこかでマクロとして定義されているらしいので DoYield にする
 	tRisseVariant DoYield(const tRisseVariant &arg);
 

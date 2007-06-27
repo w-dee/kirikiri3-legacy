@@ -96,6 +96,7 @@ wxThread::ExitCode tRisseThreadInternal::Entry()
 tRisseThread::tRisseThread()
 {
 	Started = false;
+	StartInitiated = false;
 	_Terminated = false;
 	Internal = new tRisseThreadInternal(this);
 }
@@ -106,8 +107,7 @@ tRisseThread::tRisseThread()
 tRisseThread::~tRisseThread()
 {
 	//注意	このデストラクタはメインスレッド以外から非同期に呼ばれる可能性がある
-
-	Wait();
+	if(Started) Wait();
 
 	// Internal は自分で自分自身を解放するのでここでは解放しない
 }
@@ -117,6 +117,11 @@ tRisseThread::~tRisseThread()
 //---------------------------------------------------------------------------
 void tRisseThread::Run()
 {
+	{
+		volatile tRisseCriticalSection::tLocker(&CS);
+		if(StartInitiated) {  /* already running */ return; }
+		StartInitiated = true;
+	}
 	Internal->Run();
 }
 //---------------------------------------------------------------------------

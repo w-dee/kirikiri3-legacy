@@ -48,15 +48,15 @@ class tRisseCoroutine : public tRisseCollectee
 	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
 	tRisseCoroutinePtr * Ptr; //!< 実装クラス
 	tRisseVariant Function; //!< 呼び出し先の関数
-	tRisseVariant FunctionArg; //!< 呼び出し先関数の先頭の引数
+	tRisseVariant FunctionArg; //!< 呼び出し先関数の2番目の引数
 	const tRisseVariant * ExceptionValue; //!< コルーチン中で例外が発生した場合、その値
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		function	呼び出される関数
-	//! @param		arg			呼び出される関数の先頭の引数
-	//! @note		関数の引数は、1番目にarg, 2番目に初回の Resume 呼び出しの引数が
+	//! @param		arg			呼び出される関数の2番目の引数
+	//! @note		関数の引数は、1番目に初回の Resume 呼び出しの引数、2番目にargが
 	//! 			渡される。
 	tRisseCoroutine(tRisseScriptEngine * engine, const tRisseVariant & function, const tRisseVariant arg);
 

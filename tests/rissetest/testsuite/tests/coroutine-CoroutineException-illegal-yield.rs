@@ -1,4 +1,4 @@
-var c = Coroutine.new() static function(co) {
+var c = Coroutine.new() static function(arg, co) {
 	// immediately return
 }
 c.resume(); // will finish coroutine

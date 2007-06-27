@@ -1,5 +1,5 @@
 function make_coro(n) {
-	var c = Coroutine.new() static function(co) {
+	var c = Coroutine.new() static function(arg, co) {
 		while(n--) co.yield();
 	}
 	c.resume(); // initial run
@@ -16,7 +16,7 @@ c.resume();
 ret += (c.alive ? "t" : "f");
 
 function make_coro() {
-	Coroutine.new() static function(co) {
+	Coroutine.new() static function(arg, co) {
 		throw new RuntimeException("hoge");
 	}
 }

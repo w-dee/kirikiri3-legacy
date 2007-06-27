@@ -118,7 +118,7 @@ tRisseThread::~tRisseThread()
 void tRisseThread::Run()
 {
 	{
-		volatile tRisseCriticalSection::tLocker(&CS);
+		volatile tRisseCriticalSection::tLocker lock(CS);
 		if(StartInitiated) {  /* already running */ return; }
 		StartInitiated = true;
 	}

@@ -421,7 +421,7 @@ private:
 			{
 				coro->Function.FuncCall(
 					coro->Engine, &ret, tRisseString::GetEmptyString(), 0,
-					tRisseMethodArgument::New(coro->FunctionArg, arg),
+					tRisseMethodArgument::New(arg, coro->FunctionArg),
 					coro->FunctionArg);
 			}
 		}

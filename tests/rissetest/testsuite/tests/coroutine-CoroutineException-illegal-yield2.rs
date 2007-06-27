@@ -1,4 +1,4 @@
-var c1 = Coroutine.new() static function(co) {
+var c1 = Coroutine.new() static function(arg, co) {
 	while(true) co.yield();
 }
 

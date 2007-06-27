@@ -4,7 +4,7 @@ class TestException extends RuntimeException {}
 
 function make_coro(n)
 {
-	Coroutine.new() static function(co) {
+	Coroutine.new() static function(arg, co) {
 		while(n--) co.yield();
 		throw new TestException("throw!");
 	}

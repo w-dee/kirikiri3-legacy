@@ -1,12 +1,12 @@
 
-var a = Coroutine.new() static function(co, arg) {
+var a = Coroutine.new() static function(arg, co) {
 	var count = arg;
 	while(true) {
 		var res = "a:" + count + " ";
 		count += co.yield(res);
 	}
 }
-var b = Coroutine.new()        function(co, arg) {
+var b = Coroutine.new()        function(arg, co) {
 	// this function's context will be the same as the instance of
 	// class Coroutine, because this callback function is not
 	// marked as 'static'.

@@ -1,8 +1,8 @@
-var c1 = Coroutine.new() static function(co) {
+var c1 = Coroutine.new() static function(arg, co) {
 	while(true) co.yield();
 }
 
-var c2 = Coroutine.new() static function(co) {
+var c2 = Coroutine.new() static function(arg, co) {
 	while(true) co.yield();
 }
 

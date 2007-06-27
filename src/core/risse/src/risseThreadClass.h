@@ -29,6 +29,10 @@ class tRisseThreadInstance : public tRisseObjectBase
 private:
 	tRisseScriptThread * Thread; //!< スレッドの実装
 
+	tRisseVariant Method; //!< 実行するメソッド
+	tRisseVariant Context; //!< 実行するメソッドのコンテキスト
+	tRisseVariant Ret; //!< Execute メソッドの戻り値
+
 public:
 	//! @brief		コンストラクタ
 	tRisseThreadInstance();
@@ -40,8 +44,11 @@ public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tRisseNativeCallInfo & info);
 	void run() const;
-	void start() const;
+	void start();
 	tRisseVariant join() const;
+
+	// friend 指定
+	friend class tRisseScriptThread;
 };
 //---------------------------------------------------------------------------
 

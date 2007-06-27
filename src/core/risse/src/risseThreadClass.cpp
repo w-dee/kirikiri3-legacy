@@ -34,74 +34,71 @@ RISSE_DEFINE_SOURCE_ID(18367,25403,3163,16422,1923,3893,57628,424);
 class tRisseScriptThread : protected tRisseThread
 {
 	//TODO: 正しくスレッドの状態をハンドリングすること
-
-	tRisseScriptEngine * ScriptEngine; //!< スクリプトエンジン
-	tRisseVariant Method; //!< 実行するメソッド
-	tRisseVariant Context; //!< 実行するメソッドのコンテキスト
-	tRisseVariant Ret; //!< Execute メソッドの戻り値
+	tRisseThreadInstance * Owner; //!< オーナー
 
 protected:
 	//! @brief		スレッドの実行ルーチン
 	void Execute()
 	{
-		if(ScriptEngine)
+		if(Owner)
 		{
+			tRisseScriptEngine * engine = Owner->GetRTTI()->GetScriptEngine();
 			try
 			{
 				try
 				{
 					// Method を呼び出す
 					// TODO: メソッドのコンテキストを正しく
-					if(!Method.IsVoid())
-						Method.FuncCall(ScriptEngine, &Ret, tRisseString::GetEmptyString(), 0,
-							tRisseMethodArgument::Empty(), Context);
+					if(!Owner->Method.IsVoid())
+						Owner->Method.FuncCall(engine, &Owner->Ret,
+							tRisseString::GetEmptyString(), 0,
+							tRisseMethodArgument::Empty(), Owner->Context);
 				}
 				catch(const tRisseTemporaryException * te)
 				{
-					te->ThrowConverted(ScriptEngine);
+					te->ThrowConverted(engine);
 				}
 			}
 			catch(const tRisseVariant * e)
 			{
 				// 例外を受け取った
 				// TODO: より親切な表示
-				ScriptEngine->GetWarningOutput()->Output(
+				engine->GetWarningOutput()->Output(
 					tRisseString(
 						RISSE_WS_TR("Unexpected thread abortion due to unhandled exception: %1"),
 						e->operator tRisseString()));
 			}
 		}
+
+		// スレッドが存在している間は、これらはスタック上などから参照可能な位置にあるが、
+		// スレッドが無くなったとき (GCからも見えなくなったとき)、また他のポインタも
+		// とぎれたとき、これらのポインタが残っていると、finalization が
+		// 必要なオブジェクトを巻き込んだ循環参照に
+		// はまることになる。それを避けるため、このオブジェクトが持っているポインタの類を
+		// すべてここで無効にする。
+		Owner = NULL;
 	}
 
 public:
 	//! @brief	コンストラクタ
 	tRisseScriptThread()
 	{
-		ScriptEngine = NULL;
+		Owner = NULL;
 	}
 
-	//! @brief	スクリプトエンジンインスタンスを設定する
-	//! @param	engine		スクリプトエンジンインスタンス
-	void SetScriptEngine(tRisseScriptEngine * engine) { ScriptEngine = engine ; }
-
-	//! @brief	実行するメソッドを設定する
-	//! @param	method		実行するメソッド
-	void SetMethod(const tRisseVariant & method) {Method=method;}
-
 	//! @brief	スレッドの実行を開始する
-	//! @param	context		デフォルトのコンテキスト
-	void Start(const tRisseVariant & context)
+	//! @param	owner		オーナーとなる tRisseThreadInstance のインスタンス
+	void Start(tRisseThreadInstance * owner)
 	{
-		Context = context;
+		Owner = owner;
 		Run(); // tRisseThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
 	}
 
 	//! @brief	スレッドの終了を待つ
 	//! @return	スレッドメソッドの戻り値
-	const tRisseVariant & Join()
+	void Join()
 	{
 		Wait(); // tRisseThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
-		return Ret;
 	}
 };
 //---------------------------------------------------------------------------
@@ -117,7 +114,6 @@ public:
 //---------------------------------------------------------------------------
 tRisseThreadInstance::tRisseThreadInstance()
 {
-	Thread = new tRisseScriptThread();
 }
 //---------------------------------------------------------------------------
 
@@ -125,10 +121,7 @@ tRisseThreadInstance::tRisseThreadInstance()
 //---------------------------------------------------------------------------
 void tRisseThreadInstance::construct()
 {
-	volatile tSynchronizer sync(this); // sync
-
-	// スレッドの実装オブジェクトに情報を設定
-	Thread->SetScriptEngine(GetRTTI()->GetScriptEngine());
+	// 何もしない
 }
 //---------------------------------------------------------------------------
 
@@ -143,13 +136,9 @@ void tRisseThreadInstance::initialize(const tRisseNativeCallInfo & info)
 
 	// ブロック引数があればそれを実行、無ければ run メソッドを実行するように設定する
 	if(info.args.GetBlockArgumentCount() >= 1)
-	{
-		Thread->SetMethod(info.args.GetBlockArgument(0));
-	}
+		Method = info.args.GetBlockArgument(0);
 	else
-	{
-		Thread->SetMethod(info.This.GetPropertyDirect_Object(ss_run));
-	}
+		Method = info.This.GetPropertyDirect_Object(ss_run);
 }
 //---------------------------------------------------------------------------
 
@@ -163,10 +152,19 @@ void tRisseThreadInstance::run(void) const
 
 
 //---------------------------------------------------------------------------
-void tRisseThreadInstance::start() const
+void tRisseThreadInstance::start()
 {
 	// スレッドの実行を開始する
-	Thread->Start(tRisseVariant((tRisseObjectInterface*)this));
+	{
+		volatile tSynchronizer sync(this); // sync
+
+		if(Thread) return; // already started
+		Thread = new tRisseScriptThread();
+	}
+
+	Context = (tRisseObjectInterface*)this;
+
+	Thread->Start(this);
 }
 //---------------------------------------------------------------------------
 
@@ -175,7 +173,9 @@ void tRisseThreadInstance::start() const
 tRisseVariant tRisseThreadInstance::join() const
 {
 	// スレッドの終了を待機する
-	return Thread->Join();
+	if(!Thread) return Ret; // no thread
+	Thread->Join();
+	return Ret;
 }
 //---------------------------------------------------------------------------
 

@@ -183,7 +183,7 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 	namespace Risse
 	{
 	//! @brief クリティカルセクションの実装
-	class tRisseCriticalSection : public tRisseCollectee
+	class tRisseCriticalSection : public tRisseDestructee
 	{
 		boost::recursive_mutex mutex; //!< boost::recursive_mutex mutexオブジェクト
 	public:

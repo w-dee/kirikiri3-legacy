@@ -2,12 +2,12 @@
 
 prefix=`pwd`
 
-# GC のスレッドのサポートを wxWidgets でも有効にしている点に注意
-# (RisaのtRisaThreadはwxThreadをベースにしているため)
+# TODO: GC のスレッドのサポートを wxWidgets でも有効にしなければならない
+# (RisseのtRisseThreadはwxThreadをベースにしているため)
 
-# -DCreateThread=GC_CreateThread をつけなければならないのは
-# どうも gc.h を見ているとこれが WindowsCE でのみ有効になっている
-# ようだから。
+# TODO: 各プラットフォームに応じて GC に必要なオプションが変わるので
+# 注意。
+
 
 prefix_zlib=$prefix/../zlib
 prefix_libpng=$prefix/../libpng
@@ -20,8 +20,6 @@ includes=" \
 		-I$prefix_libpng/include   \
 		-I$prefix_libjpeg/include  \
 		-I$prefix_expat/include    \
-		-I$prefix_gc/include       \
-		  -include gc.h -DCreateThread=GC_CreateThread \
 	"
 
 libs=" \
@@ -29,8 +27,31 @@ libs=" \
 		-L$prefix_libpng/lib      \
 		-L$prefix_libjpeg/lib     \
 		-L$prefix_expat/lib       \
-		-L$prefix_gc/lib     -lgc \
 	"
+
+
+case "`uname -s`" in
+MINGW* | CYGWIN* )
+	;;
+
+Linux*)
+	# see details at README.linux of Boehm GC document.
+	includes="$includes \
+		-I$prefix_gc/include       \
+		-DGC_LINUX_THREADS -D_REENTRANT \
+		-include gc.h              \
+		"
+	libs="$libs \"
+		-L$prefix_gc/lib     -lgc \
+		"
+	;;
+*)
+	echo "Your platform is not supported yet at this time."
+	echo "Please contact W.Dee <dee@kikyou.info>"
+	exit 1
+	;;
+esac
+
 
 CFLAGS="$CFLAGS $includes"
 export CFLAGS

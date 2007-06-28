@@ -1,0 +1,95 @@
+# mingw 用 Boehm GC 用の Makefile です。
+# 標準の Makefile は DLL がうまく作れないので独自に作成しました。
+
+
+CFLAGS=                           \
+	-DGC_WIN32_THREADS=1          \
+	-DNO_GETENV=1                 \
+	-DSTDC_HEADERS=1              \
+	-DHAVE_SYS_TYPES_H=1          \
+	-DHAVE_SYS_STAT_H=1           \
+	-DHAVE_STDLIB_H=1             \
+	-DHAVE_STRING_H=1             \
+	-DHAVE_MEMORY_H=1             \
+	-DHAVE_STRINGS_H=1            \
+	-DHAVE_INTTYPES_H=1           \
+	-DHAVE_STDINT_H=1             \
+	-DHAVE_UNISTD_H=1             \
+	-DSILENT=1                    \
+	-DNO_SIGNALS=1                \
+	-DNO_EXECUTE_PERMISSION=1     \
+	-DALL_INTERIOR_POINTERS=1     \
+	-DJAVA_FINALIZATION=1         \
+	-DGC_GCJ_SUPPORT=1            \
+	-DATOMIC_UNCOLLECTABLE=1      \
+	-DGC_DLL=1                    \
+	-DGC_BUILD=1                  \
+	-I./include                   \
+	-fexceptions                  \
+	-g                            \
+	-O2                           \
+	-fexceptions
+
+SOURCES_C=                  \
+	allchblk.c              \
+	alloc.c                 \
+	backgraph.c             \
+	blacklst.c              \
+	checksums.c             \
+	dbg_mlc.c               \
+	dyn_load.c              \
+	finalize.c              \
+	gc_dlopen.c             \
+	gcc_support.c           \
+	gcj_mlc.c               \
+	headers.c               \
+	mach_dep.c              \
+	malloc.c                \
+	mallocx.c               \
+	mark.c                  \
+	mark_rts.c              \
+	misc.c                  \
+	new_hblk.c              \
+	obj_map.c               \
+	os_dep.c                \
+	pcr_interface.c         \
+	pthread_stop_world.c    \
+	pthread_support.c       \
+	ptr_chck.c              \
+	real_malloc.c           \
+	reclaim.c               \
+	specific.c              \
+	stubborn.c              \
+	typd_mlc.c              \
+	win32_threads.c
+
+
+OBJS=$(SOURCES_C:.c=.o)
+
+LIB=gc.all.a
+DEF=gc.def
+DLL=gc.dll
+IMPLIB=gc.a
+
+all: $(DLL)
+
+clean:
+	rm -fr $(OBJS) $(LIB) $(DEF) $(DLL) $(IMPLIB)
+
+%.o: %.c
+	gcc $(CFLAGS) -c -o $@ $< 
+%.o: %.cpp
+	g++ $(CFLAGS) -c -o $@ $< 
+
+
+$(OBJS): $(SOURCES) Makefile
+
+$(LIB): $(OBJS) Makefile
+	ar -cru $(LIB) $(OBJS)
+
+$(DEF): $(LIB) Makefile
+	echo EXPORTS > $@
+	nm $< | grep '^........ [BCDRT] _' | sed 's/[^_]*_//' | grep -v '^_' >> $@
+
+$(DLL): $(DEF) $(LIB) Makefile
+	dllwrap -k -def $(DEF) --driver-name g++ -o $(DLL) $(LIB) --implib $(IMPLIB)

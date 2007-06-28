@@ -32,6 +32,7 @@ private:
 	tRisseVariant Method; //!< 実行するメソッド
 	tRisseVariant Context; //!< 実行するメソッドのコンテキスト
 	tRisseVariant Ret; //!< Execute メソッドの戻り値
+	const tRisseVariant *Exception; //!< 例外が発生した場合の例外オブジェクト
 
 public:
 	//! @brief		コンストラクタ

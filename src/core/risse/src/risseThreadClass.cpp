@@ -62,11 +62,8 @@ protected:
 			catch(const tRisseVariant * e)
 			{
 				// 例外を受け取った
-				// TODO: より親切な表示
-				engine->GetWarningOutput()->Output(
-					tRisseString(
-						RISSE_WS_TR("Unexpected thread abortion due to unhandled exception: %1"),
-						e->operator tRisseString()));
+				// Owner が例外を参照できるように例外オブジェクトを設定する
+				Owner->Exception = e;
 			}
 		}
 
@@ -175,6 +172,7 @@ tRisseVariant tRisseThreadInstance::join() const
 	// スレッドの終了を待機する
 	if(!Thread) return Ret; // no thread
 	Thread->Join();
+	if(Exception) throw Exception; // 例外が発生していた場合はそれを再び投げる
 	return Ret;
 }
 //---------------------------------------------------------------------------

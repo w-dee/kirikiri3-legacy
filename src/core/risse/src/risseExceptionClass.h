@@ -131,7 +131,7 @@ class tRisseSourcePointInstance : public tRisseObjectBase
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tRisseNativeCallInfo & info);
-	tRisseString toString() const;
+	tRisseString toString();
 };
 //---------------------------------------------------------------------------
 

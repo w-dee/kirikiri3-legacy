@@ -204,14 +204,14 @@ void tRisseSourcePointInstance::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSourcePointInstance::toString() const
+tRisseString tRisseSourcePointInstance::toString()
 {
 	// ファイル名:行番号: in 関数名 を生成して返す
 
 	tRisseVariant sb, position, function;
-	sb =       ReadMember(ss_scriptBlock);
-	position = ReadMember(ss_position);
-	function = ReadMember(ss_function);
+	sb =       GetPropertyDirect(ss_scriptBlock);
+	position = GetPropertyDirect(ss_position);
+	function = GetPropertyDirect(ss_function);
 
 	tRisseString ret;
 	tRisseString fn = sb.GetPropertyDirect(GetRTTI()->GetScriptEngine(), ss_name);

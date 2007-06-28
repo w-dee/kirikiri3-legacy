@@ -44,7 +44,7 @@ public: // Risse用メソッドなど
 
 	void construct();
 	void initialize(const tRisseNativeCallInfo &info);
-	tRisseVariant iget(risse_offset ofs_index) const;
+	tRisseVariant iget(risse_offset ofs_index);
 	void iset(const tRisseVariant & value, risse_offset ofs_index);
 	void push(const tRisseMethodArgument & args);
 	tRisseVariant pop();

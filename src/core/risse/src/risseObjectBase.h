@@ -164,6 +164,12 @@ public:
 	//!				RegisterNormalMember() とは違い、flags はそのまま使われる。
 	tRisseVariant ReadMember(const tRisseString & name,
 						risse_uint32 flags = 0) const;
+
+
+	//! @brief		プロパティ(や変数など) の読み込みを行う
+	//! @param		name		メンバ名
+	//! @param		flags		フラグ
+	tRisseVariant GetPropertyDirect(const tRisseString & name, risse_uint32 flags = 0);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

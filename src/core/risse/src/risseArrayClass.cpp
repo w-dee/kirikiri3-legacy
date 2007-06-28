@@ -60,7 +60,7 @@ void tRisseArrayInstance::initialize(const tRisseNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index) const
+tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -71,7 +71,7 @@ tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index) const
 	{
 		// 範囲外
 		// default の値を得て、それを返す
-		return ReadMember(ss_default);
+		return GetPropertyDirect(ss_default);
 	}
 
 	// 値を返す
@@ -98,7 +98,7 @@ void tRisseArrayInstance::iset(const tRisseVariant & value, risse_offset ofs_ind
 		if(index > Array.size())
 		{
 			// filler で埋める
-			Array.resize(index+1, ReadMember(ss_filler));
+			Array.resize(index+1, GetPropertyDirect(ss_filler));
 
 			// 値の上書き
 			Array[index] = value;
@@ -142,7 +142,7 @@ tRisseVariant tRisseArrayInstance::pop()
 	}
 	else
 	{
-		return ReadMember(ss_default);
+		return GetPropertyDirect(ss_default);
 	}
 }
 //---------------------------------------------------------------------------
@@ -173,7 +173,7 @@ tRisseVariant tRisseArrayInstance::shift()
 	}
 	else
 	{
-		return ReadMember(ss_default);
+		return GetPropertyDirect(ss_default);
 	}
 }
 //---------------------------------------------------------------------------
@@ -197,7 +197,7 @@ void tRisseArrayInstance::set_length(size_t new_size)
 	if(Array.size() < new_size)
 	{
 		// 拡張
-		Array.resize(new_size, ReadMember(ss_filler));
+		Array.resize(new_size, GetPropertyDirect(ss_filler));
 	}
 	else
 	{

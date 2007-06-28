@@ -621,5 +621,16 @@ tRisseVariant tRisseObjectBase::ReadMember(const tRisseString & name,
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseObjectBase::GetPropertyDirect(const tRisseString & name, risse_uint32 flags)
+{
+	tRisseVariant value;
+	Do(ocDGet, &value, name, flags, tRisseMethodArgument::Empty());
+	return value;
+}
+//---------------------------------------------------------------------------
+
+
 } /* namespace Risse */
 

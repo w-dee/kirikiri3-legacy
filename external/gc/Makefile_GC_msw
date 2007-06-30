@@ -1,6 +1,8 @@
 # mingw 用 Boehm GC 用の Makefile です。
 # 標準の Makefile は DLL がうまく作れないので独自に作成しました。
 
+# declspec による DLL エクスポート/インポートの機能は使わないので、
+# GC_DLL は定義しない
 
 CFLAGS=                           \
 	-DGC_WIN32_THREADS=1          \
@@ -22,7 +24,6 @@ CFLAGS=                           \
 	-DJAVA_FINALIZATION=1         \
 	-DGC_GCJ_SUPPORT=1            \
 	-DATOMIC_UNCOLLECTABLE=1      \
-	-DGC_DLL=1                    \
 	-DGC_BUILD=1                  \
 	-I./include                   \
 	-fexceptions                  \
@@ -100,7 +101,7 @@ $(DEF): $(LIB) Makefile
 # GC のオリジナルの Makefile.DLLs も参照のこと。
 
 $(RENAME_H): $(LIB) Makefile
-	echo "#define GC_DLL" > $@
+	echo "" > $@
 	for sym in `nm $< | grep '^........ [BCDR] _' | sed 's/[^_]*_//' |\
 				 grep -v '^_' | sort | uniq`; do \
 		echo "#define $$sym	(*_imp__$$sym)"	>> $@; \

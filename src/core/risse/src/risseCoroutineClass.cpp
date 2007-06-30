@@ -41,6 +41,9 @@ void tRisseCoroutineInstance::construct()
 	// コルーチンの実装オブジェクトを作成
 	Coroutine = new tRisseCoroutine(GetRTTI()->GetScriptEngine(),
 		tRisseVariant::GetNullObject(), tRisseVariant(this));
+
+	// デフォルトでは run メソッドを実行するようにする
+	Coroutine->SetFunction(GetPropertyDirect(ss_run));
 }
 //---------------------------------------------------------------------------
 
@@ -55,13 +58,7 @@ void tRisseCoroutineInstance::initialize(const tRisseNativeCallInfo & info)
 
 	// ブロック引数があればそれを実行、無ければ run メソッドを実行するように設定する
 	if(info.args.GetBlockArgumentCount() >= 1)
-	{
 		Coroutine->SetFunction(info.args.GetBlockArgument(0));
-	}
-	else
-	{
-		Coroutine->SetFunction(info.This.GetPropertyDirect_Object(ss_run));
-	}
 }
 //---------------------------------------------------------------------------
 

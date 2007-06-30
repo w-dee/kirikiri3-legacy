@@ -158,7 +158,10 @@ tRisseThreadInstance::tRisseThreadInstance()
 //---------------------------------------------------------------------------
 void tRisseThreadInstance::construct()
 {
-	// 何もしない
+	volatile tSynchronizer sync(this); // sync
+
+	// デフォルトでは run メソッドを実行するように設定する
+	Method = GetPropertyDirect(ss_run);
 }
 //---------------------------------------------------------------------------
 
@@ -171,11 +174,9 @@ void tRisseThreadInstance::initialize(const tRisseNativeCallInfo & info)
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
 
-	// ブロック引数があればそれを実行、無ければ run メソッドを実行するように設定する
+	// ブロック引数があればそれを実行するようにする
 	if(info.args.GetBlockArgumentCount() >= 1)
 		Method = info.args.GetBlockArgument(0);
-	else
-		Method = info.This.GetPropertyDirect_Object(ss_run);
 }
 //---------------------------------------------------------------------------
 
@@ -225,6 +226,7 @@ bool tRisseThreadInstance::sleep(risse_int64 timeout)
 	if(!Thread) return false;
 	return Thread->Sleep(timeout);
 #endif
+	return false;
 }
 //---------------------------------------------------------------------------
 

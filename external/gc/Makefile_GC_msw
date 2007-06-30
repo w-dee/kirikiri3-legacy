@@ -69,12 +69,13 @@ OBJS=$(SOURCES_C:.c=.o)
 LIB=gc.all.a
 DEF=gc.def
 DLL=gc.dll
-IMPLIB=gc.a
+IMPLIB=libgc.a
+RENAME_H=rename.h
 
-all: $(DLL)
+all: $(DLL) $(RENAME_H)
 
 clean:
-	rm -fr $(OBJS) $(LIB) $(DEF) $(DLL) $(IMPLIB)
+	rm -fr $(OBJS) $(LIB) $(DEF) $(DLL) $(IMPLIB) $(RENAME_H)
 
 %.o: %.c
 	gcc $(CFLAGS) -c -o $@ $< 
@@ -89,7 +90,21 @@ $(LIB): $(OBJS) Makefile
 
 $(DEF): $(LIB) Makefile
 	echo EXPORTS > $@
-	nm $< | grep '^........ [BCDRT] _' | sed 's/[^_]*_//' | grep -v '^_' >> $@
+	nm $< | grep '^........ [BCDRT] _' | sed 's/[^_]*_//' |\
+			grep -v '^_' | sort | uniq >> $@
+
+# RENAME_H は、変数のインポートを補助する。
+# 変数は _imp_ に続く変数ポインタへのアクセスの形に
+# 変形させなければならない (ld の機能であるauto-importを使えばこの限りではないが
+# ここでは使わない)
+# GC のオリジナルの Makefile.DLLs も参照のこと。
+
+$(RENAME_H): $(LIB) Makefile
+	echo "#define GC_DLL" > $@
+	for sym in `nm $< | grep '^........ [BCDR] _' | sed 's/[^_]*_//' |\
+				 grep -v '^_' | sort | uniq`; do \
+		echo "#define $$sym	(*_imp__$$sym)"	>> $@; \
+	done
 
 $(DLL): $(DEF) $(LIB) Makefile
-	dllwrap -k -def $(DEF) --driver-name g++ -o $(DLL) $(LIB) --implib $(IMPLIB)
+	dllwrap -mno-cygwin -k -def $(DEF) --driver-name g++ -o $(DLL) $(LIB) --implib $(IMPLIB)

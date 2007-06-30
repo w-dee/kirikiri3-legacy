@@ -9,12 +9,17 @@ MINGW* | CYGWIN* )
 	# ビルドする。
 	cp Makefile_GC_msw src_temp/Makefile
 	(cd src_temp && make)
-	# この時点で gc.dll と gc.a が できているはず
+	# この時点で gc.dll と libgc.a が できているはず
 	# 必要なファイルをコピーする
 	mkdir -p $prefix/lib
-	cp -p src_temp/gc.dll src_temp/gc.a $prefix/lib
+	cp -p src_temp/gc.dll src_temp/libgc.a $prefix/lib
 	cp -pR src_temp/include $prefix
-
+	# rename.h は gc_config_macros.h の前にくっつける
+	cat src_temp/rename.h > src_temp/_tmp
+	echo "" >> src_temp/_tmp
+	cat $prefix/include/gc_config_macros.h >> src_temp/_tmp
+	cp src_temp/_tmp $prefix/include/gc_config_macros.h
+	rm src_temp/_tmp
 	;;
 
 *)

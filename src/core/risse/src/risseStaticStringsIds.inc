@@ -325,3 +325,7 @@ extern tRisseStringData data_ss_start;
 static const tRisseString & ss_start = *reinterpret_cast<const tRisseString *>(&data_ss_start); //!< (static string)  "start" メソッド名
 extern tRisseStringData data_ss_join;
 static const tRisseString & ss_join = *reinterpret_cast<const tRisseString *>(&data_ss_join); //!< (static string)  "join" メソッド名
+extern tRisseStringData data_ss_sleep;
+static const tRisseString & ss_sleep = *reinterpret_cast<const tRisseString *>(&data_ss_sleep); //!< (static string)  "sleep" メソッド名
+extern tRisseStringData data_ss_wakeup;
+static const tRisseString & ss_wakeup = *reinterpret_cast<const tRisseString *>(&data_ss_wakeup); //!< (static string)  "wakeup" メソッド名

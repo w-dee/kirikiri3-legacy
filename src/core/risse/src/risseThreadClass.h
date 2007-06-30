@@ -47,6 +47,8 @@ public: // Risse用メソッドなど
 	void run() const;
 	void start();
 	tRisseVariant join() const;
+	bool sleep(risse_int64 timeout);
+	void wakeup();
 
 	// friend 指定
 	friend class tRisseScriptThread;

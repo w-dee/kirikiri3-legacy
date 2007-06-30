@@ -100,3 +100,5 @@ ss_Thread							Thread							#!< "Thread" クラス名
 ss_run								run								#!< "run" メソッド名
 ss_start							start							#!< "start" メソッド名
 ss_join								join							#!< "join" メソッド名
+ss_sleep							sleep							#!< "sleep" メソッド名
+ss_wakeup							wakeup							#!< "wakeup" メソッド名

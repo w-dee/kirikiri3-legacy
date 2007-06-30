@@ -35,6 +35,9 @@ class tRisseScriptThread : protected tRisseThread
 {
 	//TODO: 正しくスレッドの状態をハンドリングすること
 	tRisseThreadInstance * Owner; //!< オーナー
+#if 0
+	tRisseThreadEvent Event; //!< イベントオブジェクト
+#endif
 
 protected:
 	//! @brief		スレッドの実行ルーチン
@@ -97,6 +100,43 @@ public:
 	{
 		Wait(); // tRisseThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
 	}
+#if 0
+	//! @brief	スレッドを一定時間停止する
+	//! @param	timeout		タイムアウト(-1=無限に待つ)
+	//! @return	タイムアウトした場合は真、Wakeup により Sleep が中断された場合は偽
+	//! @note	他のスレッドからこのメソッドを呼び出した場合、呼び出したスレッドが待つ事になるが
+	//!			想定外の使い方である (将来的にはそのようなことを行った場合は例外を吐くように
+	//!			するかもしれない)
+	bool Sleep(risse_int64 timeout)
+	{
+		if(timeout == 0) return true; // すぐに戻る
+		if(timeout < 0)
+		{
+			return Event.Wait(0); // 無限に待つ
+		}
+		// Event.Wait は unsigned long 型の引数を取る。
+		// これは risse_int64 よりもサイズが小さい場合がある
+		// そのため、一度に max_one_wait ずつ待つことにする。
+		const unsigned long max_one_wait = 1<<(sizeof(unsigned long)*8-2);
+		while(timeout > max_one_wait)
+		{
+			if(!Event.Wait(max_one_wait)) return false;
+				// タイムアウトしなかった場合はすぐに戻る
+			timeout -= max_one_wait;
+		}
+		// この時点で timeout は 1 以上 max_one_wait 以下
+		return Event.Wait(static_cast<unsigned long>(timeout));
+	}
+
+	//! @brief	Sleep しているスレッドの Sleep を解除する
+	//! @note	スレッドが Sleep していない場合は、スレッドが次回 Sleep した
+	//!			場合はその Sleep はすぐに false を伴って戻るので注意。
+	//! 		呼び出し側でこれのCriticalSectionによる保護を行うこと。
+	void Wakeup()
+	{
+		Event.Signal();
+	}
+#endif
 };
 //---------------------------------------------------------------------------
 
@@ -178,6 +218,29 @@ tRisseVariant tRisseThreadInstance::join() const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+bool tRisseThreadInstance::sleep(risse_int64 timeout)
+{
+#if 0
+	if(!Thread) return false;
+	return Thread->Sleep(timeout);
+#endif
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseThreadInstance::wakeup()
+{
+#if 0
+	volatile tSynchronizer sync(this); // sync
+	if(!Thread) return;
+	Thread->Wakeup();
+#endif
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -208,6 +271,10 @@ void tRisseThreadClass::RegisterMembers()
 	RisseBindFunction(this, ss_run, &tRisseThreadInstance::run);
 	RisseBindFunction(this, ss_start, &tRisseThreadInstance::start);
 	RisseBindFunction(this, ss_join, &tRisseThreadInstance::join);
+#if 0
+	RisseBindFunction(this, ss_sleep, &tRisseThreadInstance::sleep);
+	RisseBindFunction(this, ss_wakeup, &tRisseThreadInstance::wakeup);
+#endif
 }
 //---------------------------------------------------------------------------
 

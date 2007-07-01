@@ -49,6 +49,7 @@ CPPFILES =  \
 			src/risseAssert.cpp                      \
 			src/risseBinaryStream.cpp                \
 			src/risseBindingClass.cpp                \
+			src/risseBooleanClass.cpp                \
 			src/risseCharUtils.cpp                   \
 			src/risseClass.cpp                       \
 			src/risseClassClass.cpp                  \

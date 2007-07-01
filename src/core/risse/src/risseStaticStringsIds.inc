@@ -333,3 +333,5 @@ extern tRisseStringData data_ss_Void;
 static const tRisseString & ss_Void = *reinterpret_cast<const tRisseString *>(&data_ss_Void); //!< (static string)  "Void" クラス名
 extern tRisseStringData data_ss_dump;
 static const tRisseString & ss_dump = *reinterpret_cast<const tRisseString *>(&data_ss_dump); //!< (static string)  "dump" メソッド名
+extern tRisseStringData data_ss_Boolean;
+static const tRisseString & ss_Boolean = *reinterpret_cast<const tRisseString *>(&data_ss_Boolean); //!< (static string)  "Boolean" クラス名

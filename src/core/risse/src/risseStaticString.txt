@@ -104,3 +104,4 @@ ss_sleep							sleep							#!< "sleep" メソッド名
 ss_wakeup							wakeup							#!< "wakeup" メソッド名
 ss_Void								Void							#!< "Void" クラス名
 ss_dump								dump							#!< "dump" メソッド名
+ss_Boolean							Boolean							#!< "Boolean" クラス名

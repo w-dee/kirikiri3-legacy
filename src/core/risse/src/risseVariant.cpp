@@ -18,6 +18,7 @@
 #include "risseStringClass.h"
 #include "risseIntegerClass.h"
 #include "risseRealClass.h"
+#include "risseVoidClass.h"
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
 #include "risseScriptBlockClass.h"
@@ -110,7 +111,7 @@ inline tRissePrimitiveClassBase * tRisseVariantBlock::GetPrimitiveClass(tRisseSc
 	tRissePrimitiveClassBase * Class = NULL;
 	switch(GetType())
 	{
-	case vtVoid:	break;
+	case vtVoid:	Class = engine->VoidClass; break;
 	case vtInteger:	Class = engine->IntegerClass; break;
 	case vtReal:	Class = engine->RealClass; break;
 	case vtBoolean:	break;

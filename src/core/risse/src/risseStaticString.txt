@@ -102,3 +102,5 @@ ss_start							start							#!< "start" メソッド名
 ss_join								join							#!< "join" メソッド名
 ss_sleep							sleep							#!< "sleep" メソッド名
 ss_wakeup							wakeup							#!< "wakeup" メソッド名
+ss_Void								Void							#!< "Void" クラス名
+ss_dump								dump							#!< "dump" メソッド名

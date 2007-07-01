@@ -172,5 +172,7 @@ tRisseStringData data_ss_start = { tRisseSS<'s','t','a','r','t'>::data.Buffer,5 
 tRisseStringData data_ss_join = { tRisseSS<'j','o','i','n'>::data.Buffer,4 }; /*  "join" メソッド名 */
 tRisseStringData data_ss_sleep = { tRisseSS<'s','l','e','e','p'>::data.Buffer,5 }; /*  "sleep" メソッド名 */
 tRisseStringData data_ss_wakeup = { tRisseSS<'w','a','k','e','u','p'>::data.Buffer,6 }; /*  "wakeup" メソッド名 */
+tRisseStringData data_ss_Void = { tRisseSS<'V','o','i','d'>::data.Buffer,4 }; /*  "Void" クラス名 */
+tRisseStringData data_ss_dump = { tRisseSS<'d','u','m','p'>::data.Buffer,4 }; /*  "dump" メソッド名 */
 
 

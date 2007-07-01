@@ -58,6 +58,9 @@ native binder について
   出来ないような型の場合は、RisseToVariant を特殊化することにより独自の変換ルールを
   書くこと。
 
+  もし funcptr に渡す関数の戻り値の型が void だった場合、Risse では自動的に this が帰る
+  関数になる。
+
   funcptr に渡す関数の引数は、任意の型だが、これも tRisseVariant から変換可能な型、
   あるいは RisseFromVariant で変換可能な型に限られる。もし標準で変換
   出来ないような型の場合は、RisseFromVariant を特殊化することにより独自の変換ルールを

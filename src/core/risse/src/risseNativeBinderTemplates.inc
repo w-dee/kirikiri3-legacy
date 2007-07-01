@@ -38,7 +38,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)();
 		}
 	};
@@ -72,7 +72,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))();
 		}
 	};
@@ -140,7 +140,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info));
 		}
 	};
@@ -174,7 +174,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info));
 		}
 	};
@@ -243,7 +243,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info));
 		}
 	};
@@ -277,7 +277,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info));
 		}
 	};
@@ -347,7 +347,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info));
 		}
 	};
@@ -381,7 +381,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info));
 		}
 	};
@@ -452,7 +452,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info));
 		}
 	};
@@ -486,7 +486,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info));
 		}
 	};
@@ -558,7 +558,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info));
 		}
 	};
@@ -592,7 +592,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info));
 		}
 	};
@@ -665,7 +665,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info));
 		}
 	};
@@ -699,7 +699,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info));
 		}
 	};
@@ -773,7 +773,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info));
 		}
 	};
@@ -807,7 +807,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info));
 		}
 	};
@@ -882,7 +882,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info));
 		}
 	};
@@ -916,7 +916,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info));
 		}
 	};
@@ -992,7 +992,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info),tRisseFVoC<T8, Cs::AI8>::Cnv(info));
 		}
 	};
@@ -1026,7 +1026,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info),tRisseFVoC<T8, Cs::AI8>::Cnv(info));
 		}
 	};
@@ -1103,7 +1103,7 @@
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info),tRisseFVoC<T8, Cs::AI8>::Cnv(info),tRisseFVoC<T9, Cs::AI9>::Cnv(info));
 		}
 	};
@@ -1137,7 +1137,7 @@
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tRisseFVoC<T0, Cs::AI0>::Cnv(info),tRisseFVoC<T1, Cs::AI1>::Cnv(info),tRisseFVoC<T2, Cs::AI2>::Cnv(info),tRisseFVoC<T3, Cs::AI3>::Cnv(info),tRisseFVoC<T4, Cs::AI4>::Cnv(info),tRisseFVoC<T5, Cs::AI5>::Cnv(info),tRisseFVoC<T6, Cs::AI6>::Cnv(info),tRisseFVoC<T7, Cs::AI7>::Cnv(info),tRisseFVoC<T8, Cs::AI8>::Cnv(info),tRisseFVoC<T9, Cs::AI9>::Cnv(info));
 		}
 	};

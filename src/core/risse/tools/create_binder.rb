@@ -79,7 +79,7 @@ STDOUT.print "
 			const tRisseNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			((tFunc)f)(#{args_list});
 		}
 	};
@@ -113,7 +113,7 @@ STDOUT.print "
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
 			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
-			if(info.result) info.result->Clear();
+			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(#{args_list});
 		}
 	};

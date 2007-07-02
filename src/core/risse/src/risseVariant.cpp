@@ -1267,7 +1267,7 @@ tRisseVariantBlock tRisseVariantBlock::Add_Boolean  (const tRisseVariantBlock & 
 	case vtInteger:	return (int)CastToBoolean_Boolean() + rhs.AsInteger();
 	case vtReal:	return (int)CastToBoolean_Boolean() + rhs.AsReal();
 	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return CastToString_Real() + rhs.AsString();
+	case vtString:	return CastToString_Boolean() + rhs.AsString();
 	case vtOctet:	return Add_Boolean(rhs.Plus_Octet());
 	case vtBoolean:	return (risse_int64)((int)CastToBoolean_Boolean() + (int)rhs.CastToBoolean_Boolean());
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも

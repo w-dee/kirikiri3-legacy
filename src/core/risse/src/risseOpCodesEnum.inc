@@ -48,6 +48,7 @@ ocString /*!< 文字列にキャスト */,
 ocBoolean /*!< booleanにキャスト */,
 ocReal /*!< realにキャスト */,
 ocInteger /*!< integerにキャスト */,
+ocOctet /*!< octetにキャスト */,
 ocLogOr /*!< || */,
 ocLogAnd /*!< && */,
 ocBitOr /*!< | */,
@@ -123,6 +124,7 @@ static const tRisseString & mnString = *reinterpret_cast<const tRisseString *>(&
 static const tRisseString & mnBoolean = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBoolean].RawMemberName); //!< (演算子メンバ名)  booleanにキャスト
 static const tRisseString & mnReal = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocReal].RawMemberName); //!< (演算子メンバ名)  realにキャスト
 static const tRisseString & mnInteger = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocInteger].RawMemberName); //!< (演算子メンバ名)  integerにキャスト
+static const tRisseString & mnOctet = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocOctet].RawMemberName); //!< (演算子メンバ名)  octetにキャスト
 static const tRisseString & mnLogOr = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLogOr].RawMemberName); //!< (演算子メンバ名)  ||
 static const tRisseString & mnLogAnd = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocLogAnd].RawMemberName); //!< (演算子メンバ名)  &&
 static const tRisseString & mnBitOr = *reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[ocBitOr].RawMemberName); //!< (演算子メンバ名)  |

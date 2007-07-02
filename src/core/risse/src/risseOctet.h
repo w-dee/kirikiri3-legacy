@@ -122,7 +122,7 @@ private: // storage
 
 public: // comparison
 
-	//! @brief 同一比較
+	//! @brief	同一比較
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this==refかどうか
 	bool operator == (const tRisseOctetBlock & ref) const
@@ -133,11 +133,43 @@ public: // comparison
 		return !memcmp(Buffer, ref.Buffer, Length);
 	}
 
-	//! @brief 不一致判定
+	//! @brief	不一致判定
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this!=refかどうか
 	bool operator != (const tRisseOctetBlock & ref) const
 		{ return ! (*this == ref); }
+
+
+	//! @brief	< 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this < refかどうか
+	bool operator < (const tRisseOctetBlock & ref) const;
+
+	//! @brief	> 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this > refかどうか
+	bool operator > (const tRisseOctetBlock & ref) const
+	{
+		return ref.operator < (*this);
+	}
+
+	//! @brief	<= 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this <= refかどうか
+	bool operator <= (const tRisseOctetBlock & ref) const
+	{
+		return !(operator >(ref));
+	}
+
+	//! @brief	>= 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this >= refかどうか
+	bool operator >= (const tRisseOctetBlock & ref) const
+	{
+		return !(operator <(ref));
+	}
+
+
 
 public: // operators
 	//! @brief		オクテット列の連結(risse_uint8 と length から)
@@ -340,6 +372,31 @@ public: // comparison
 	//! @return	*this!=refかどうか
 	bool operator != (const tRisseOctet & ref) const
 		{ return ! (*this == ref); }
+
+	//! @brief	< 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this < refかどうか
+	bool operator < (const tRisseOctet & ref) const
+		{ return *GetBlock() < *ref.GetBlock(); }
+
+	//! @brief	> 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this > refかどうか
+	bool operator > (const tRisseOctet & ref) const
+		{ return *GetBlock() > *ref.GetBlock(); }
+
+	//! @brief	<= 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this <= refかどうか
+	bool operator <= (const tRisseOctet & ref) const
+		{ return *GetBlock() <= *ref.GetBlock(); }
+
+	//! @brief	>= 演算子
+	//! @param	ref		比較するオブジェクト
+	//! @return	*this >= refかどうか
+	bool operator >= (const tRisseOctet & ref) const
+		{ return *GetBlock() >= *ref.GetBlock(); }
+
 
 public: // operators
 	//! @brief		オクテット列の連結(risse_uint8 と length から)

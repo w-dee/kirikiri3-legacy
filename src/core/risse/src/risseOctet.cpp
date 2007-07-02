@@ -57,6 +57,25 @@ tRisseOctetBlock::tRisseOctetBlock(const tRisseOctetBlock & ref,
 
 
 //---------------------------------------------------------------------------
+bool tRisseOctetBlock::operator < (const tRisseOctetBlock & ref) const
+{
+	if(this == &ref) return false; // 同じポインタ
+
+	// まずは、this と ref のどちらか短い方までの範囲で比較を行う
+	size_t size_min = Length < ref.Length ? Length : ref.Length;
+	int cmp_result = size_min == 0 ? 0 : memcmp(Buffer, ref.Buffer, size_min);
+	if(cmp_result < 0) return true; // この時点で this<ref だったり this>ref だったら即帰る
+	if(cmp_result > 0) return false;
+
+	// この時点で、少なくとも size_min までは this == ref である
+	if(Length == ref.Length) return false; // 内容が全く同じ場合
+	if(Length > ref.Length) return false; // this の方が長い
+	return true; // this の方が短い場合は this < ref である
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseOctetBlock::Append(const risse_uint8 * buffer, risse_size length)
 {
 	if(length == 0) return; // 追加するものなし

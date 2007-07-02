@@ -82,6 +82,7 @@ String					string		R,-,-,-,-,-		toString	#!< 文字列にキャスト
 Boolean					boolean		R,-,-,-,-,-		toBoolean	#!< booleanにキャスト
 Real					real		R,-,-,-,-,-		toReal		#!< realにキャスト
 Integer					int			R,-,-,-,-,-		toInteger	#!< integerにキャスト
+Octet					octet		R,-,-,-,-,-		toOctet		#!< octetにキャスト
 
 
 // 引数1+1つ

@@ -1165,7 +1165,7 @@ public:
 	tRisseVariantBlock Plus_Real     () const { return *this; }
 	tRisseVariantBlock Plus_Null     () const { ThrowNoSuchMemberException(mnPlus); return *this; }
 	tRisseVariantBlock Plus_String   () const;
-	tRisseVariantBlock Plus_Octet    () const { return (risse_int64)0; /* incomplete */; }
+	tRisseVariantBlock Plus_Octet    () const { ThrowNoSuchMemberException(mnPlus); return *this; }
 	tRisseVariantBlock Plus_Boolean  () const { return CastToBoolean_Boolean() != false; /* boolean は 0 か 1 かに変換される */ }
 	tRisseVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
 
@@ -1462,7 +1462,7 @@ public:
 	bool Equal_Real     (const tRisseVariantBlock & rhs) const;
 	bool Equal_Null     (const tRisseVariantBlock & rhs) const;
 	bool Equal_String   (const tRisseVariantBlock & rhs) const;
-	bool Equal_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Equal_Octet    (const tRisseVariantBlock & rhs) const;
 	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnEqual, rhs); }
 
@@ -1522,9 +1522,9 @@ public:
 	bool DiscEqual_Null     (const tRisseVariantBlock & rhs) const
 			{ return rhs.GetType() == vtNull; }
 	bool DiscEqual_String   (const tRisseVariantBlock & rhs) const
-			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); /* incomplete */ }
+			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); }
 	bool DiscEqual_Octet    (const tRisseVariantBlock & rhs) const
-			{ return false; /* incomplete */ }
+			{ return rhs.GetType() == vtOctet && rhs.AsOctet() == AsOctet(); }
 	bool DiscEqual_Boolean  (const tRisseVariantBlock & rhs) const
 			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
 	bool DiscEqual_Object   (const tRisseVariantBlock & rhs) const
@@ -1558,7 +1558,7 @@ public:
 	bool Lesser_Real     (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnLesser); return false; }
 	bool Lesser_String   (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLesser, rhs); }
 
@@ -1590,7 +1590,7 @@ public:
 	bool Greater_Real     (const tRisseVariantBlock & rhs) const;
 	bool Greater_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnGreater); return false; }
 	bool Greater_String   (const tRisseVariantBlock & rhs) const;
-	bool Greater_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool Greater_Octet    (const tRisseVariantBlock & rhs) const;
 	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnGreater, rhs); }
 
@@ -1622,7 +1622,7 @@ public:
 	bool LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnLesserOrEqual); return false; }
 	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLesserOrEqual, rhs); }
 
@@ -1655,7 +1655,7 @@ public:
 	bool GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnGreaterOrEqual); return false; }
 	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const { return false; /* incomplete */ }
+	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnGreaterOrEqual, rhs); }
 
@@ -1967,7 +1967,7 @@ public:
 	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnMul); return *this; }
 	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
+	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnMul, rhs); }
 
@@ -2012,7 +2012,7 @@ public:
 	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnAdd); return *this; }
 	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
+	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnAdd, rhs); }
 
@@ -2109,7 +2109,7 @@ public: // キャスト
 	risse_int64 CastToInteger_Real     () const { return (risse_int64)AsReal(); }
 	risse_int64 CastToInteger_Null     () const { ThrowNoSuchMemberException(mnInteger); return (risse_int64)0; }
 	risse_int64 CastToInteger_String   () const;
-	risse_int64 CastToInteger_Octet    () const { return (risse_int64)0; /* incomplete */ }
+	risse_int64 CastToInteger_Octet    () const { ThrowNoSuchMemberException(mnInteger); return (risse_int64)0; }
 	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)CastToBoolean_Boolean(); }
 	risse_int64 CastToInteger_Object   () const { return Invoke_Object(mnInteger); }
 
@@ -2138,7 +2138,7 @@ public: // キャスト
 	risse_real CastToReal_Real     () const { return AsReal(); }
 	risse_real CastToReal_Null     () const { ThrowNoSuchMemberException(mnReal); return (risse_real)0.0; }
 	risse_real CastToReal_String   () const { return (risse_real)Plus_String(); /* Plus_String の戻りを risse_real に再キャスト */ }
-	risse_real CastToReal_Octet    () const { return (risse_real)0.0; /* incomplete */ }
+	risse_real CastToReal_Octet    () const { ThrowNoSuchMemberException(mnReal); return (risse_real)0.0; }
 	risse_real CastToReal_Boolean  () const { return (risse_real)(int)CastToBoolean_Boolean(); }
 	risse_real CastToReal_Object   () const { return Invoke_Object(mnReal); }
 
@@ -2199,6 +2199,35 @@ public: // キャスト
 	tRisseString CastToString_Octet    () const { return AsOctet().AsHumanReadable();  }
 	tRisseString CastToString_Boolean  () const;
 	tRisseString CastToString_Object   () const { return Invoke_Object(mnString); }
+
+	//-----------------------------------------------------------------------
+	//! @brief		オクテット列に変換
+	//! @return		オクテット列
+	//-----------------------------------------------------------------------
+	operator tRisseOctet() const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return CastToOctet_Void     ();
+		case vtInteger:	return CastToOctet_Integer  ();
+		case vtReal:	return CastToOctet_Real     ();
+		case vtNull:	return CastToOctet_Null     ();
+		case vtString:	return CastToOctet_String   ();
+		case vtOctet:	return CastToOctet_Octet    ();
+		case vtBoolean:	return CastToOctet_Boolean  ();
+		case vtObject:	return CastToOctet_Object   ();
+		}
+		return tRisseOctet();
+	}
+
+	tRisseOctet CastToOctet_Void     () const { return tRisseOctet(); }
+	tRisseOctet CastToOctet_Integer  () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
+	tRisseOctet CastToOctet_Real     () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
+	tRisseOctet CastToOctet_Null     () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
+	tRisseOctet CastToOctet_String   () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
+	tRisseOctet CastToOctet_Octet    () const { return AsOctet();  }
+	tRisseOctet CastToOctet_Boolean  () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
+	tRisseOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet); }
 
 public: // スレッド同期
 

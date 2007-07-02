@@ -1595,6 +1595,8 @@ tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * p
 	form->AddStatement(GetPosition(), ocAssignNewArray, &array_var);
 	array_var->SetValueType(tRisseVariant::vtObject); // 結果は常に object
 
+#if 0
+XXXX: Array は内部的に deque を使っているので配列の予約はできない(必要ない)
 	// 配列の reserve メソッドを呼び出し、配列数を予約する
 	if(GetChildCount() != 0)
 	{
@@ -1602,6 +1604,7 @@ tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * p
 			form->AddConstantValueStatement(GetPosition(), (risse_int64)GetChildCount());
 		array_var->GenerateFuncCall(GetPosition(), RISSE_WS("reserve"), element_count_var);
 	}
+#endif
 
 	// 各配列の要素となる変数を作成しつつ、配列に設定していく
 	RISSE_ASSERT(data->Elements.size() == GetChildCount());

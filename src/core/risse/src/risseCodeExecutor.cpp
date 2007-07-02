@@ -24,6 +24,7 @@
 #include "risseScriptEngine.h"
 #include "risseThisProxy.h"
 #include "risseStaticStrings.h"
+#include "risseArrayClass.h"
 /*
 	このソースは、実行スピード重視の、いわばダーティーな実装を行う。
 	ダーティーな実装は極力コメントを残し、わかりやすくしておくこと。
@@ -187,8 +188,8 @@ void tRisseCodeInterpreter::Execute(
 				break;
 
 			case ocAssignNewArray	: // array	 = 新しい配列オブジェクトの代入
-				/* incomplete */
 				RISSE_ASSERT(CI(code[1]) < framesize);
+				AR(code[1]) = tRisseVariant(engine->ArrayClass).New();
 				code += 2;
 				break;
 

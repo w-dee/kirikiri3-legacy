@@ -8,7 +8,7 @@ TEMP_DIR = BASE_DIR
 errored = []
 test_count = 0
 
-files = Dir.glob(TESTS_DIR + '*').sort.delete_if { |x| x =~ /^\./ }
+files = Dir.glob(TESTS_DIR + '*.rs').sort.delete_if { |x| x =~ /^\./ }
 
 # if an argument is specified, pick up files witch include specified string.
 if ARGV[0]

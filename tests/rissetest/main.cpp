@@ -5,23 +5,106 @@
 #include "risseVariant.h"
 #include "gc_cpp.h"
 #include <wx/file.h>
+#include <wx/filename.h>
 
 
 
 #include "risseScriptEngine.h"
+#include "risseClass.h"
+#include "risseStaticStrings.h"
+#include "risseNativeBinder.h"
+#include "risseStringTemplate.h"
+#include "risseObjectClass.h"
 
 RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
 
 
-
-
-
-
-
-
-
-
 using namespace Risse;
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		暫定 Script クラス
+//---------------------------------------------------------------------------
+class tRisseScriptClass : public tRisseClassBase
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseScriptClass(tRisseScriptEngine * engine) :
+		tRisseClassBase(engine->ObjectClass)
+	{
+		RegisterMembers();
+	}
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers()
+	{
+		RisseBindFunction(this, ss_construct, &tRisseScriptClass::construct);
+		RisseBindFunction(this, ss_initialize, &tRisseScriptClass::initialize);
+		RisseBindFunction(this, tRisseSS<'r','e','q','u','i','r','e'>(), &tRisseScriptClass::require);
+		RisseBindFunction(this, tRisseSS<'p','r','i','n','t'>(), &tRisseScriptClass::print);
+	}
+
+	static void construct()
+	{
+	}
+
+	static void initialize()
+	{
+	}
+
+	static void require(const tRisseString & name, tRisseScriptEngine * engine)
+	{
+		// name を取ってきて eval する
+		wxFile file;
+		if(file.Open(name.AsWxString()))
+		{
+			// 内容を読み込む
+			size_t length = file.Length();
+			char *buf = new (PointerFreeGC) char [length + 1];
+			file.Read(buf, length);
+			buf[length] = 0;
+
+			// 内容を評価する
+			fflush(stderr);
+			fflush(stdout);
+			engine->Evaluate((tRisseString)(buf), name, 0, NULL);
+			fflush(stderr);
+			fflush(stdout);
+		}
+		else
+		{
+			// TODO: IOException
+		}
+	}
+
+	static void print(const tRisseMethodArgument & args)
+	{
+		fflush(stderr);
+		fflush(stdout);
+		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
+			RisseFPrint(stdout, args[i].operator tRisseString().c_str());
+		fflush(stderr);
+		fflush(stdout);
+	}
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 //! @brief		警告情報の出力先インターフェース
@@ -94,10 +177,19 @@ int Application::OnRun()
 		tRisseScriptEngine engine;
 		engine.SetWarningOutput(new tRisseWarningOutput());
 
+		// Script クラスを追加する
+		(new tRisseScriptClass(&engine))->
+				RegisterClassInstance(engine.GetGlobalObject(),
+					tRisseSS<'S','c','r','i','p','t'>());
+
 		// 入力ファイルを開く
 		wxFile file;
 		if(file.Open(argv[1]))
 		{
+			// スクリプトのある場所をカレントディレクトリに指定する
+			wxFileName filename(argv[1]);
+			wxFileName::SetCwd(filename.GetPath());
+
 			// 内容を読み込む
 			size_t length = file.Length();
 			char *buf = new (PointerFreeGC) char [length + 1];

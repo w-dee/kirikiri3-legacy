@@ -23,4 +23,4 @@ var expects =
 
 test(labels, values1, values2, expects) { |a,b| a + b };
 
-//=> d
+//=> "ok"

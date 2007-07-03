@@ -76,7 +76,7 @@ void tRisseRisseScriptBlockInstance::initialize(
 
 //---------------------------------------------------------------------------
 tRisseRisseScriptBlockClass::tRisseRisseScriptBlockClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ScriptBlockClass)
+	tRisseClassBase(ss_RisseScriptBlock, engine->ScriptBlockClass)
 {
 	RegisterMembers();
 }

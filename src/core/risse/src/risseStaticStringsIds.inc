@@ -147,6 +147,8 @@ extern tRisseStringData data_ss_NaN;
 static const tRisseString & ss_NaN = *reinterpret_cast<const tRisseString *>(&data_ss_NaN); //!< (static string) トークンの値 NaN
 extern tRisseStringData data_ss_Infinity;
 static const tRisseString & ss_Infinity = *reinterpret_cast<const tRisseString *>(&data_ss_Infinity); //!< (static string) トークンの値 Infinity
+extern tRisseStringData data_ss_doubleColon;
+static const tRisseString & ss_doubleColon = *reinterpret_cast<const tRisseString *>(&data_ss_doubleColon); //!< (static string)  ダブルコロン
 extern tRisseStringData data_ss_lastEvalResultHiddenVarName;
 static const tRisseString & ss_lastEvalResultHiddenVarName = *reinterpret_cast<const tRisseString *>(&data_ss_lastEvalResultHiddenVarName); //!< (static string)  最後に評価した文や式の結果を格納するための隠し変数名
 extern tRisseStringData data_ss_thisProxyHiddenVarName;
@@ -285,6 +287,8 @@ extern tRisseStringData data_ss_expression;
 static const tRisseString & ss_expression = *reinterpret_cast<const tRisseString *>(&data_ss_expression); //!< (static string)  "expression" インスタンス変数/プロパティ名
 extern tRisseStringData data_ss_NullObjectException;
 static const tRisseString & ss_NullObjectException = *reinterpret_cast<const tRisseString *>(&data_ss_NullObjectException); //!< (static string)  "NullObjectException" クラス名
+extern tRisseStringData data_ss_IllegalArgumentTypeException;
+static const tRisseString & ss_IllegalArgumentTypeException = *reinterpret_cast<const tRisseString *>(&data_ss_IllegalArgumentTypeException); //!< (static string)  "IllegalArgumentTypeException" クラス名
 extern tRisseStringData data_ss_CompileException;
 static const tRisseString & ss_CompileException = *reinterpret_cast<const tRisseString *>(&data_ss_CompileException); //!< (static string)  "CompileException" クラス名
 extern tRisseStringData data_ss_extensible;
@@ -335,3 +339,7 @@ extern tRisseStringData data_ss_dump;
 static const tRisseString & ss_dump = *reinterpret_cast<const tRisseString *>(&data_ss_dump); //!< (static string)  "dump" メソッド名
 extern tRisseStringData data_ss_Boolean;
 static const tRisseString & ss_Boolean = *reinterpret_cast<const tRisseString *>(&data_ss_Boolean); //!< (static string)  "Boolean" クラス名
+extern tRisseStringData data_ss_Octet;
+static const tRisseString & ss_Octet = *reinterpret_cast<const tRisseString *>(&data_ss_Octet); //!< (static string)  "Octet" クラス名
+extern tRisseStringData data_ss_Null;
+static const tRisseString & ss_Null = *reinterpret_cast<const tRisseString *>(&data_ss_Null); //!< (static string)  "Null" クラス名

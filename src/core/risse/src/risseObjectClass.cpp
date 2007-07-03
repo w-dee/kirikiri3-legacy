@@ -50,6 +50,7 @@ void tRisseObjectClass::RegisterMembers()
 
 	RisseBindFunction(this, ss_construct, &tRisseObjectClass::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseObjectClass::initialize);
+	RisseBindFunction(this, mnDiscEqual, &tRisseObjectClass::DiscEqual);
 	RisseBindFunction(this, ss_isA, &tRisseObjectClass::isA, 
 		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
 	RisseBindFunction(this, ss_eval, &tRisseObjectClass::eval);
@@ -75,6 +76,22 @@ void tRisseObjectClass::initialize()
 	// デフォルトでは何もしない
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tRisseObjectClass::DiscEqual(const tRisseNativeCallInfo & info, const tRisseVariant &rhs)
+{
+	// === 演算子
+	if(info.This.GetType() == tRisseVariant::vtObject)
+	{
+		if(rhs.GetType() != tRisseVariant::vtObject) return false;
+		return info.This.GetObjectInterface() == rhs.GetObjectInterface();
+	}
+	// プリミティブ型
+	return info.This.DiscEqual(rhs);
+}
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

@@ -31,8 +31,9 @@ class tRissePrimitiveClassBase : public tRisseClassBase
 		//!< このオブジェクトを経由して行われる
 public:
 	//! @brief		コンストラクタ
+	//! @param		name			クラス名
 	//! @param		super_class		スーパークラス
-	tRissePrimitiveClassBase(tRisseClassBase * super_class);
+	tRissePrimitiveClassBase(const tRisseString & name, tRisseClassBase * super_class);
 
 	//! @brief		ゲートウェイアクセス用の代表オブジェクトを得る
 	//! @return		ゲートウェイアクセス用の代表オブジェクト

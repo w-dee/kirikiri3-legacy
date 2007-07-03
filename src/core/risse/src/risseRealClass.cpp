@@ -31,7 +31,7 @@ RISSE_DEFINE_SOURCE_ID(5442,9100,49866,17725,24713,23464,12701,40981);
 
 //---------------------------------------------------------------------------
 tRisseRealClass::tRisseRealClass(tRisseScriptEngine * engine) :
-	tRissePrimitiveClassBase(engine->NumberClass)
+	tRissePrimitiveClassBase(ss_Real, engine->NumberClass)
 {
 	RegisterMembers();
 }

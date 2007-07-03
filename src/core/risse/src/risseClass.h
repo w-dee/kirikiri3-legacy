@@ -37,10 +37,10 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		engine			スクリプトエンジンインスタンス
+	//! @param		name			クラス名
 	//! @param		super_class		スーパークラスを表すオブジェクト
 	//! @param		extensible		extensible の場合に真
-	tRisseClassBase(tRisseClassBase * super_class, bool extensible = true);
+	tRisseClassBase(const tRisseString & name, tRisseClassBase * super_class, bool extensible = true);
 
 	//! @brief		コンストラクタ(Objectクラス用)
 	//! @param		engine			スクリプトエンジンインスタンス

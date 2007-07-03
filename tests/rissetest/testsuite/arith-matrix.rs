@@ -1,8 +1,6 @@
 // library for examining operator matrix test
 
 
-var E = "errors";
-
 
 function test(labels, values1, values2, expects) testmethod
 {
@@ -28,7 +26,7 @@ function test(labels, values1, values2, expects) testmethod
 			}
 			catch(e)
 			{
-				result = E;
+				result = e.class;
 			}
 			if(result === expects_row[r2])
 				checks += '-- ', pass_count ++;

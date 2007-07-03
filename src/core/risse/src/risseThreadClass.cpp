@@ -249,7 +249,7 @@ void tRisseThreadInstance::wakeup()
 
 //---------------------------------------------------------------------------
 tRisseThreadClass::tRisseThreadClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Thread, engine->ObjectClass)
 {
 	RegisterMembers();
 }

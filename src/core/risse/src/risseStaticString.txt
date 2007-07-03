@@ -11,6 +11,7 @@
 // そのため、このリストと words.txt で定義されているリストに重複があると
 // エラーになるので注意が必要。words.txt に登録されている単語ならばここに
 // 記述する必要はない。
+ss_doubleColon						::								#!< ダブルコロン
 ss_lastEvalResultHiddenVarName		._								#!< 最後に評価した文や式の結果を格納するための隠し変数名
 ss_thisProxyHiddenVarName			.proxy							#!< this-proxy を格納するための隠し変数名
 ss_initialize						initialize						#!< "initialize" メソッド名
@@ -80,6 +81,7 @@ ss_ClassDefinitionException			ClassDefinitionException		#!< "ClassDefinitionExce
 ss_InstantiationException			InstantiationException			#!< "InstantiationException" クラス名
 ss_expression						expression						#!< "expression" インスタンス変数/プロパティ名
 ss_NullObjectException				NullObjectException				#!< "NullObjectException" クラス名
+ss_IllegalArgumentTypeException		IllegalArgumentTypeException	#!< "IllegalArgumentTypeException" クラス名
 ss_CompileException					CompileException				#!< "CompileException" クラス名
 ss_extensible						extensible						#!< "extensible" プロパティ名
 ss_Binding							Binding							#!< "Binding" クラス名
@@ -105,3 +107,5 @@ ss_wakeup							wakeup							#!< "wakeup" メソッド名
 ss_Void								Void							#!< "Void" クラス名
 ss_dump								dump							#!< "dump" メソッド名
 ss_Boolean							Boolean							#!< "Boolean" クラス名
+ss_Octet							Octet							#!< "Octet" クラス名
+ss_Null								Null							#!< "Null" クラス名

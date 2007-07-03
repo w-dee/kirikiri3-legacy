@@ -30,7 +30,7 @@ RISSE_DEFINE_SOURCE_ID(32602,55496,58565,16678,10384,39976,12087,42806);
 
 //---------------------------------------------------------------------------
 tRisseVoidClass::tRisseVoidClass(tRisseScriptEngine * engine) :
-	tRissePrimitiveClassBase(engine->PrimitiveClass)
+	tRissePrimitiveClassBase(ss_Void, engine->PrimitiveClass)
 {
 	RegisterMembers();
 }

@@ -30,7 +30,7 @@ RISSE_DEFINE_SOURCE_ID(60941,39465,30047,17348,4512,31235,57590,9843);
 
 //---------------------------------------------------------------------------
 tRisseBooleanClass::tRisseBooleanClass(tRisseScriptEngine * engine) :
-	tRissePrimitiveClassBase(engine->PrimitiveClass)
+	tRissePrimitiveClassBase(ss_Boolean, engine->PrimitiveClass)
 {
 	RegisterMembers();
 }

@@ -45,6 +45,7 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
        ArgumentException
          IllegalArgumentException
            NullObjectException
+           InvalidTypeException
          BadArgumentCountException
        MemberAccessException
          NoSuchMemberException
@@ -238,7 +239,7 @@ tRisseString tRisseSourcePointInstance::toString()
 
 //---------------------------------------------------------------------------
 tRisseSourcePointClass::tRisseSourcePointClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_SourcePoint, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -282,7 +283,7 @@ tRisseVariant tRisseSourcePointClass::ovulate()
 
 //---------------------------------------------------------------------------
 tRisseThrowableClass::tRisseThrowableClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Throwable, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -394,7 +395,7 @@ tRisseVariant tRisseThrowableClass::toException(const tRisseNativeCallInfo & inf
 
 //---------------------------------------------------------------------------
 tRisseErrorClass::tRisseErrorClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ThrowableClass)
+	tRisseClassBase(ss_Error, engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -446,7 +447,7 @@ void tRisseErrorClass::initialize(const tRisseNativeCallInfo & info)
 
 //---------------------------------------------------------------------------
 tRisseAssertionErrorClass::tRisseAssertionErrorClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ErrorClass)
+	tRisseClassBase(ss_AssertionError, engine->ErrorClass)
 {
 	RegisterMembers();
 }
@@ -514,7 +515,7 @@ void tRisseAssertionErrorClass::Throw(tRisseScriptEngine * engine, const tRisseS
 
 //---------------------------------------------------------------------------
 tRisseBlockExitExceptionClass::tRisseBlockExitExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ThrowableClass)
+	tRisseClassBase(ss_BlockExitException, engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -586,7 +587,7 @@ void tRisseBlockExitExceptionClass::initialize(const tRisseNativeCallInfo & info
 
 //---------------------------------------------------------------------------
 tRisseExceptionClass::tRisseExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ThrowableClass)
+	tRisseClassBase(ss_Exception, engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -636,7 +637,7 @@ void tRisseExceptionClass::initialize(const tRisseNativeCallInfo & info)
 //---------------------------------------------------------------------------
 tRisseInsufficientResourceExceptionClass::tRisseInsufficientResourceExceptionClass(
 	tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ExceptionClass)
+	tRisseClassBase(ss_InsufficientResourceException, engine->ExceptionClass)
 {
 	RegisterMembers();
 }
@@ -697,7 +698,7 @@ void tRisseInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine(tRis
 
 //---------------------------------------------------------------------------
 tRisseIOExceptionClass::tRisseIOExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ExceptionClass)
+	tRisseClassBase(ss_IOException, engine->ExceptionClass)
 {
 	RegisterMembers();
 }
@@ -809,7 +810,7 @@ void tRisseIOExceptionClass::ThrowTruncateError(tRisseScriptEngine * engine,
 
 //---------------------------------------------------------------------------
 tRisseCharConversionExceptionClass::tRisseCharConversionExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->IOExceptionClass)
+	tRisseClassBase(ss_CharConversionException, engine->IOExceptionClass)
 {
 	RegisterMembers();
 }
@@ -868,7 +869,7 @@ void tRisseCharConversionExceptionClass::ThrowInvalidUTF8String(tRisseScriptEngi
 
 //---------------------------------------------------------------------------
 tRisseRuntimeExceptionClass::tRisseRuntimeExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ExceptionClass)
+	tRisseClassBase(ss_RuntimeException, engine->ExceptionClass)
 {
 	RegisterMembers();
 }
@@ -916,7 +917,7 @@ void tRisseRuntimeExceptionClass::initialize(const tRisseNativeCallInfo & info)
 
 //---------------------------------------------------------------------------
 tRisseCompileExceptionClass::tRisseCompileExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->RuntimeExceptionClass)
+	tRisseClassBase(ss_CompileException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -989,7 +990,7 @@ void tRisseCompileExceptionClass::Throw(tRisseScriptEngine * engine,
 
 //---------------------------------------------------------------------------
 tRisseClassDefinitionExceptionClass::tRisseClassDefinitionExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->RuntimeExceptionClass)
+	tRisseClassBase(ss_ClassDefinitionException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1059,7 +1060,7 @@ void tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tRisseScrip
 
 //---------------------------------------------------------------------------
 tRisseInstantiationExceptionClass::tRisseInstantiationExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->RuntimeExceptionClass)
+	tRisseClassBase(ss_InstantiationException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1128,7 +1129,7 @@ void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass(t
 
 //---------------------------------------------------------------------------
 tRisseBadContextExceptionClass::tRisseBadContextExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->RuntimeExceptionClass)
+	tRisseClassBase(ss_BadContextException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1187,7 +1188,7 @@ void tRisseBadContextExceptionClass::Throw(tRisseScriptEngine * engine)
 
 //---------------------------------------------------------------------------
 tRisseUnsupportedOperationExceptionClass::tRisseUnsupportedOperationExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->RuntimeExceptionClass)
+	tRisseClassBase(ss_UnsupportedOperationException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1257,7 +1258,7 @@ void tRisseUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented(tR
 
 //---------------------------------------------------------------------------
 tRisseArgumentExceptionClass::tRisseArgumentExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->RuntimeExceptionClass)
+	tRisseClassBase(ss_ArgumentException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1309,7 +1310,7 @@ void tRisseArgumentExceptionClass::initialize(const tRisseNativeCallInfo & info)
 
 //---------------------------------------------------------------------------
 tRisseNullObjectExceptionClass::tRisseNullObjectExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->IllegalArgumentExceptionClass)
+	tRisseClassBase(ss_NullObjectException, engine->IllegalArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1367,8 +1368,69 @@ void tRisseNullObjectExceptionClass::Throw(tRisseScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
+tRisseIllegalArgumentTypeExceptionClass::tRisseIllegalArgumentTypeExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(ss_IllegalArgumentTypeException, engine->IllegalArgumentExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalArgumentTypeExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	RisseBindFunction(this, ss_construct, &tRisseIllegalArgumentTypeExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseIllegalArgumentTypeExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalArgumentTypeExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalArgumentTypeExceptionClass::initialize(const tRisseNativeCallInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(tRisseScriptEngine * engine,
+		const tRisseString & method_name, const tRisseString & type_name)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_IllegalArgumentTypeException,
+			tRisseString(RISSE_WS_TR("cannot accept type %2 as argument for method %1()"),
+				method_name, type_name));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
 tRisseIllegalArgumentExceptionClass::tRisseIllegalArgumentExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ArgumentExceptionClass)
+	tRisseClassBase(ss_IllegalArgumentException, engine->ArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1420,7 +1482,7 @@ void tRisseIllegalArgumentExceptionClass::initialize(const tRisseNativeCallInfo 
 
 //---------------------------------------------------------------------------
 tRisseBadArgumentCountExceptionClass::tRisseBadArgumentCountExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ArgumentExceptionClass)
+	tRisseClassBase(ss_BadArgumentCountException, engine->ArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1497,7 +1559,7 @@ void tRisseBadArgumentCountExceptionClass::ThrowBlock(tRisseScriptEngine * engin
 
 //---------------------------------------------------------------------------
 tRisseMemberAccessExceptionClass::tRisseMemberAccessExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->RuntimeExceptionClass)
+	tRisseClassBase(ss_MemberAccessException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1554,7 +1616,7 @@ void tRisseMemberAccessExceptionClass::initialize(const tRisseNativeCallInfo & i
 
 //---------------------------------------------------------------------------
 tRisseNoSuchMemberExceptionClass::tRisseNoSuchMemberExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->MemberAccessExceptionClass)
+	tRisseClassBase(ss_NoSuchMemberException, engine->MemberAccessExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1619,7 +1681,7 @@ void tRisseNoSuchMemberExceptionClass::Throw(tRisseScriptEngine * engine, const 
 
 //---------------------------------------------------------------------------
 tRisseIllegalMemberAccessExceptionClass::tRisseIllegalMemberAccessExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->MemberAccessExceptionClass)
+	tRisseClassBase(ss_IllegalMemberAccessException, engine->MemberAccessExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1721,7 +1783,7 @@ void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tRiss
 
 //---------------------------------------------------------------------------
 tRisseCoroutineExceptionClass::tRisseCoroutineExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->RuntimeExceptionClass)
+	tRisseClassBase(ss_CoroutineException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }

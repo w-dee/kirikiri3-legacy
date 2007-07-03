@@ -1432,7 +1432,7 @@ public:
 	bool NotEqual_String   (const tRisseVariantBlock & rhs) const { return !Equal_String (rhs); }
 	bool NotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
 	bool NotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
-	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnNotEqual, rhs);  }
+	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return !Equal_Object (rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		== 演算子		Equal
@@ -1490,7 +1490,7 @@ public:
 	bool DiscNotEqual_String   (const tRisseVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
 	bool DiscNotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
 	bool DiscNotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
-	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnDiscNotEqual, rhs);  }
+	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return !DiscEqual_Object (rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		識別 === 演算子		DiscEqual
@@ -2010,7 +2010,7 @@ public:
 	tRisseVariantBlock Add_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnAdd); return *this; }
+	tRisseVariantBlock Add_Null     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;

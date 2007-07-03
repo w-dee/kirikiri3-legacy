@@ -132,7 +132,7 @@ void tRisseBindingInstance::iset(const tRisseVariant & value, const tRisseString
 
 //---------------------------------------------------------------------------
 tRisseBindingClass::tRisseBindingClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Binding, engine->ObjectClass)
 {
 	RegisterMembers();
 }

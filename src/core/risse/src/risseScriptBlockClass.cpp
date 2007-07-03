@@ -354,7 +354,7 @@ void tRisseScriptBlockInstance::initialize(
 
 //---------------------------------------------------------------------------
 tRisseScriptBlockClass::tRisseScriptBlockClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_ScriptBlock, engine->ObjectClass)
 {
 	RegisterMembers();
 }

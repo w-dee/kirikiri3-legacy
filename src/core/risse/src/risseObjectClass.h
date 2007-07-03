@@ -35,6 +35,7 @@ public:
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize();
+	static bool DiscEqual(const tRisseNativeCallInfo & info, const tRisseVariant &rhs); // === 演算子
 	static bool isA(const tRisseVariant & Class,
 				const tRisseNativeCallInfo & info);
 	static void eval(const tRisseString & script,

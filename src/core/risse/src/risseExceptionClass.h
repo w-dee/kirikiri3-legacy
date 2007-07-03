@@ -770,11 +770,53 @@ public: // Risse用メソッドなど
 	static void initialize(const tRisseNativeCallInfo & info);
 
 public:
-	//! @brief		「異なるクラスのコンテキストです」例外を発生
+	//! @brief		「nullオブジェクトにアクセスしようとしました」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	static void Throw(tRisseScriptEngine * engine);
-	//! @brief		「異なるクラスのコンテキストです」例外を発生
+	//! @brief		「nullオブジェクトにアクセスしようとしました」例外を発生
 	static void Throw() { Throw(NULL); }
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"IllegalArgumentTypeException" クラス
+//---------------------------------------------------------------------------
+class tRisseIllegalArgumentTypeExceptionClass : public tRisseClassBase
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseIllegalArgumentTypeExceptionClass(tRisseScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeCallInfo & info);
+
+public:
+	//! @brief		「methodに型typeは受け入れられない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		method_name	メソッド名
+	//! @param		type_name	型名
+	static void ThrowNonAcceptableType(tRisseScriptEngine * engine,
+		const tRisseString & method_name, const tRisseString & type_name);
+	//! @brief		「methodに型typeは受け入れられない」例外を発生
+	//! @param		method_name	メソッド名
+	//! @param		type_name	型名
+	static void ThrowNonAcceptableType(const tRisseString & method_name, const tRisseString & type_name)
+		{ ThrowNonAcceptableType(NULL, method_name, type_name); }
 };
 //---------------------------------------------------------------------------
 

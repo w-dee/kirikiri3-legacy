@@ -94,7 +94,7 @@ void tRisseFunctionInstance::initialize(const tRisseNativeCallInfo & info)
 
 //---------------------------------------------------------------------------
 tRisseFunctionClass::tRisseFunctionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Function, engine->ObjectClass)
 {
 	RegisterMembers();
 }

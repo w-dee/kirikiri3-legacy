@@ -44,7 +44,7 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 
 */
 //---------------------------------------------------------------------------
-tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
+tRisseClassBase::tRisseClassBase(const tRisseString & name, tRisseClassBase * super_class, bool extensible)
 	 : tRisseObjectBase(ss_super)
 {
 	RISSE_ASSERT(super_class != NULL);
@@ -64,6 +64,9 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant(super_class));
 
+	// name はクラス名
+	// This に name という名前で値を登録し、書き込み禁止にする
+	RegisterNormalMember(ss_name, name, tRisseMemberAttribute(tRisseMemberAttribute::vcConst));
 }
 //---------------------------------------------------------------------------
 
@@ -84,6 +87,10 @@ tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant((tRisseClassBase*)NULL));
+
+	// クラス名は Object
+	// This に name という名前で値を登録し、書き込み禁止にする
+	RegisterNormalMember(ss_name, ss_Object, tRisseMemberAttribute(tRisseMemberAttribute::vcConst));
 }
 //---------------------------------------------------------------------------
 

@@ -24,7 +24,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(2098,51592,31991,16696,47274,13601,12452,21741);
 //---------------------------------------------------------------------------
 tRisseNumberClass::tRisseNumberClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->PrimitiveClass)
+	tRisseClassBase(ss_Number, engine->PrimitiveClass)
 {
 	RegisterMembers();
 }

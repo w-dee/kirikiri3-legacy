@@ -37,7 +37,7 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
 	tRisseScriptClass(tRisseScriptEngine * engine) :
-		tRisseClassBase(engine->ObjectClass)
+		tRisseClassBase(tRisseSS<'S','c','r','i','p','t'>(), engine->ObjectClass)
 	{
 		RegisterMembers();
 	}

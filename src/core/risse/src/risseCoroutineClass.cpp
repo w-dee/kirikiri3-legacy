@@ -137,7 +137,7 @@ bool tRisseCoroutineInstance::get_alive() const
 
 //---------------------------------------------------------------------------
 tRisseCoroutineClass::tRisseCoroutineClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Coroutine, engine->ObjectClass)
 {
 	RegisterMembers();
 }

@@ -27,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID(63047,20109,44050,17555,30336,10949,23175,16849);
 
 //---------------------------------------------------------------------------
 tRisseModuleClass::tRisseModuleClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Module, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -69,10 +69,19 @@ void tRisseModuleClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseModuleClass::initialize(const tRisseNativeCallInfo &info)
+void tRisseModuleClass::initialize(const tRisseVariant & name, const tRisseNativeCallInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
+
+	// name はクラス名
+	// This に name という名前で値を登録し、書き込み禁止にする
+	info.This.SetPropertyDirect(info.engine, ss_name,
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+		name);
+	(*const_cast<tRisseVariant*>(&info.This)).
+		Do(info.engine, ocDSetAttrib, NULL, ss_name,
+			tRisseMemberAttribute(tRisseMemberAttribute::vcConst));
 }
 //---------------------------------------------------------------------------
 

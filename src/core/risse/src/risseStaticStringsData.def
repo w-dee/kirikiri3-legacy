@@ -81,6 +81,7 @@ tRisseStringData data_ss_true = { tRisseSS<'t','r','u','e'>::data.Buffer,4 }; /*
 tRisseStringData data_ss_false = { tRisseSS<'f','a','l','s','e'>::data.Buffer,5 }; /* トークンの値 false */
 tRisseStringData data_ss_NaN = { tRisseSS<'N','a','N'>::data.Buffer,3 }; /* トークンの値 NaN */
 tRisseStringData data_ss_Infinity = { tRisseSS<'I','n','f','i','n','i','t','y'>::data.Buffer,8 }; /* トークンの値 Infinity */
+tRisseStringData data_ss_doubleColon = { tRisseSS<':',':'>::data.Buffer,2 }; /*  ダブルコロン */
 tRisseStringData data_ss_lastEvalResultHiddenVarName = { tRisseSS<'.','_'>::data.Buffer,2 }; /*  最後に評価した文や式の結果を格納するための隠し変数名 */
 tRisseStringData data_ss_thisProxyHiddenVarName = { tRisseSS<'.','p','r','o','x','y'>::data.Buffer,6 }; /*  this-proxy を格納するための隠し変数名 */
 tRisseStringData data_ss_initialize = { tRisseSS<'i','n','i','t','i','a','l','i','z','e'>::data.Buffer,10 }; /*  "initialize" メソッド名 */
@@ -150,6 +151,7 @@ tRisseStringData data_ss_ClassDefinitionException = { tRisseSS<'C','l','a','s','
 tRisseStringData data_ss_InstantiationException = { tRisseSS<'I','n','s','t','a','n','t','i','a','t','i','o','n','E','x','c','e','p','t','i','o','n'>::data.Buffer,22 }; /*  "InstantiationException" クラス名 */
 tRisseStringData data_ss_expression = { tRisseSS<'e','x','p','r','e','s','s','i','o','n'>::data.Buffer,10 }; /*  "expression" インスタンス変数/プロパティ名 */
 tRisseStringData data_ss_NullObjectException = { tRisseSS<'N','u','l','l','O','b','j','e','c','t','E','x','c','e','p','t','i','o','n'>::data.Buffer,19 }; /*  "NullObjectException" クラス名 */
+tRisseStringData data_ss_IllegalArgumentTypeException = { tRisseSS<'I','l','l','e','g','a','l','A','r','g','u','m','e','n','t','T','y','p','e','E','x','c','e','p','t','i','o','n'>::data.Buffer,28 }; /*  "IllegalArgumentTypeException" クラス名 */
 tRisseStringData data_ss_CompileException = { tRisseSS<'C','o','m','p','i','l','e','E','x','c','e','p','t','i','o','n'>::data.Buffer,16 }; /*  "CompileException" クラス名 */
 tRisseStringData data_ss_extensible = { tRisseSS<'e','x','t','e','n','s','i','b','l','e'>::data.Buffer,10 }; /*  "extensible" プロパティ名 */
 tRisseStringData data_ss_Binding = { tRisseSS<'B','i','n','d','i','n','g'>::data.Buffer,7 }; /*  "Binding" クラス名 */
@@ -175,5 +177,7 @@ tRisseStringData data_ss_wakeup = { tRisseSS<'w','a','k','e','u','p'>::data.Buff
 tRisseStringData data_ss_Void = { tRisseSS<'V','o','i','d'>::data.Buffer,4 }; /*  "Void" クラス名 */
 tRisseStringData data_ss_dump = { tRisseSS<'d','u','m','p'>::data.Buffer,4 }; /*  "dump" メソッド名 */
 tRisseStringData data_ss_Boolean = { tRisseSS<'B','o','o','l','e','a','n'>::data.Buffer,7 }; /*  "Boolean" クラス名 */
+tRisseStringData data_ss_Octet = { tRisseSS<'O','c','t','e','t'>::data.Buffer,5 }; /*  "Octet" クラス名 */
+tRisseStringData data_ss_Null = { tRisseSS<'N','u','l','l'>::data.Buffer,4 }; /*  "Null" クラス名 */
 
 

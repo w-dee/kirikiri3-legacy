@@ -99,7 +99,7 @@ void tRissePropertyInstance::initialize(const tRisseNativeCallInfo & info)
 
 //---------------------------------------------------------------------------
 tRissePropertyClass::tRissePropertyClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Property, engine->ObjectClass)
 {
 	RegisterMembers();
 }

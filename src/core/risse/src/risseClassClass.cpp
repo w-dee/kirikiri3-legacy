@@ -30,7 +30,7 @@ RISSE_DEFINE_SOURCE_ID(28480,29035,20490,18954,3474,2858,57740,45280);
 
 //---------------------------------------------------------------------------
 tRisseClassClass::tRisseClassClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ModuleClass)
+	tRisseClassBase(ss_Class, engine->ModuleClass)
 {
 	RegisterMembers();
 }

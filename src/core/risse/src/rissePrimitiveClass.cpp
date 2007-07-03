@@ -25,8 +25,8 @@ RISSE_DEFINE_SOURCE_ID(46147,47929,28573,19337,17834,3423,43968,61532);
 
 
 //---------------------------------------------------------------------------
-tRissePrimitiveClassBase::tRissePrimitiveClassBase(tRisseClassBase * super_class) :
-	tRisseClassBase(super_class)
+tRissePrimitiveClassBase::tRissePrimitiveClassBase(const tRisseString & name, tRisseClassBase * super_class) :
+	tRisseClassBase(name, super_class)
 {
 	// ゲートウェイインターフェースを構築する
 	tRisseObjectBase * gateway_obj = new tRisseObjectBase();
@@ -82,7 +82,7 @@ void tRissePrimitiveClassBase::construct()
 
 //---------------------------------------------------------------------------
 tRissePrimitiveClass::tRissePrimitiveClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Primitive, engine->ObjectClass)
 {
 	RegisterMembers();
 }

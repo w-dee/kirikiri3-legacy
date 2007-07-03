@@ -218,7 +218,7 @@ void tRisseArrayInstance::set_length(size_t new_size)
 
 //---------------------------------------------------------------------------
 tRisseArrayClass::tRisseArrayClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+	tRisseClassBase(ss_Array, engine->ObjectClass)
 {
 	RegisterMembers();
 }

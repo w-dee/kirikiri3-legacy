@@ -77,6 +77,7 @@ void tRisseModuleClass::initialize(const tRisseVariant & name, const tRisseNativ
 	// name はクラス名
 	// This に name という名前で値を登録し、書き込み禁止にする
 	info.This.SetPropertyDirect(info.engine, ss_name,
+		tRisseMemberAttribute::GetDefault() |
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 		name);
 	(*const_cast<tRisseVariant*>(&info.This)).

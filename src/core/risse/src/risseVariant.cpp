@@ -24,11 +24,22 @@
 #include "risseExceptionClass.h"
 #include "risseScriptBlockClass.h"
 #include "risseScriptEngine.h"
+#include "risseStringTemplate.h"
 
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 
+
+
+//---------------------------------------------------------------------------
+// tRisseIllegalArgumentTypeExceptionClass を投げるためのマクロ
+// この中では this と rhs を使い、tRisseVariant を帰す。
+#define RISSE_THROW_ILLEGAL_ARG_TYPE(method_name) \
+	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType( \
+			GetClassName() + ss_doubleColon + (method_name), rhs.GetClassName()); \
+			return tRisseVariant::GetVoidObject();
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -1171,13 +1182,11 @@ tRisseVariantBlock tRisseVariantBlock::Add_Void     (const tRisseVariantBlock & 
 	case vtVoid:	return tRisseVariantBlock(); // void + void = void かなぁ
 	case vtInteger:	return rhs; // void + integer
 	case vtReal:	return rhs;
-	case vtNull:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Void + ss_doubleColon + mnAdd, ss_Null); return tRisseVariant::GetVoidObject();
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtString:	return rhs;
 	case vtOctet:	return rhs;
-	case vtBoolean:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Void + ss_doubleColon + mnAdd, ss_Boolean); return tRisseVariant::GetVoidObject();
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tRisseVariantBlock();
 }
@@ -1192,14 +1201,10 @@ tRisseVariantBlock tRisseVariantBlock::Add_Integer  (const tRisseVariantBlock & 
 	case vtVoid:	return *this;
 	case vtInteger:	return AsInteger() + rhs.AsInteger();
 	case vtReal:	return AsInteger() + rhs.AsReal();
-	case vtNull:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_Null); return tRisseVariant::GetVoidObject();
-	case vtString:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Integer + ss_doubleColon + mnAdd, ss_String); return tRisseVariant::GetVoidObject();
-	case vtOctet:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Integer + ss_doubleColon + mnAdd, ss_Octet); return tRisseVariant::GetVoidObject();
-	case vtBoolean:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Integer + ss_doubleColon + mnAdd, ss_Boolean); return tRisseVariant::GetVoidObject();
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return tRisseVariantBlock();
@@ -1215,15 +1220,11 @@ tRisseVariantBlock tRisseVariantBlock::Add_Real     (const tRisseVariantBlock & 
 	case vtVoid:	return *this;
 	case vtInteger:	return AsReal() + rhs.AsInteger();
 	case vtReal:	return AsReal() + rhs.AsReal();
-	case vtNull:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Real + ss_doubleColon + mnAdd, ss_Null); return tRisseVariant::GetVoidObject();
-	case vtString:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Real + ss_doubleColon + mnAdd, ss_String); return tRisseVariant::GetVoidObject();
-	case vtOctet:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Real + ss_doubleColon + mnAdd, ss_Octet); return tRisseVariant::GetVoidObject();
-	case vtBoolean:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Real + ss_doubleColon + mnAdd, ss_Boolean); return tRisseVariant::GetVoidObject();
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tRisseVariantBlock();
 }
@@ -1233,26 +1234,8 @@ tRisseVariantBlock tRisseVariantBlock::Add_Real     (const tRisseVariantBlock & 
 //---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Add_Null     (const tRisseVariantBlock & rhs) const
 {
-	switch(rhs.GetType())
-	{
-	case vtVoid:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_Void); return tRisseVariant::GetVoidObject();
-	case vtInteger:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_Integer); return tRisseVariant::GetVoidObject();
-	case vtReal:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_Real); return tRisseVariant::GetVoidObject();
-	case vtNull:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_Null); return tRisseVariant::GetVoidObject();
-	case vtString:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_String); return tRisseVariant::GetVoidObject();
-	case vtOctet:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_Octet); return tRisseVariant::GetVoidObject();
-	case vtBoolean:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_Boolean); return tRisseVariant::GetVoidObject();
-	case vtObject:	tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(
-						ss_Null + ss_doubleColon + mnAdd, ss_Boolean); return tRisseVariant::GetVoidObject();
-	}
-	return tRisseVariantBlock();
+	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	return tRisseVariant::GetVoidObject();
 }
 //---------------------------------------------------------------------------
 
@@ -1263,13 +1246,13 @@ tRisseVariantBlock tRisseVariantBlock::Add_String   (const tRisseVariantBlock & 
 	switch(rhs.GetType())
 	{
 	case vtVoid:	return *this;
-	case vtInteger:	return AsString() + rhs.CastToString_Integer();
-	case vtReal:	return AsString() + rhs.CastToString_Real();
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
+	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtString:	return AsString() + rhs.AsString();
-	case vtOctet:	return CastToOctet_String() + rhs.AsOctet(); // これでいいのかなぁ
-	case vtBoolean:	return AsString() + rhs.CastToString_Boolean();
-	case vtObject:	return AsString() + rhs.CastToString_Object(); // これでいいのかなぁ
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tRisseVariantBlock();
 }
@@ -1282,13 +1265,13 @@ tRisseVariantBlock tRisseVariantBlock::Add_Octet    (const tRisseVariantBlock & 
 	switch(rhs.GetType())
 	{
 	case vtVoid:	return *this;
-	case vtInteger:	return AsOctet() + rhs.CastToOctet_Integer();
-	case vtReal:	return AsOctet() + rhs.CastToOctet_Real();
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return AsOctet() + rhs.CastToOctet_String();
+	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtOctet:	return AsOctet() + rhs.AsOctet();
-	case vtBoolean:	return AsOctet() + rhs.CastToOctet_Boolean();
-	case vtObject:	return AsOctet() + rhs.CastToOctet_Object(); // これでいいのかなぁ
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tRisseVariantBlock();
 }
@@ -1298,18 +1281,7 @@ tRisseVariantBlock tRisseVariantBlock::Add_Octet    (const tRisseVariantBlock & 
 //---------------------------------------------------------------------------
 tRisseVariantBlock tRisseVariantBlock::Add_Boolean  (const tRisseVariantBlock & rhs) const
 {
-	switch(rhs.GetType())
-	{
-	case vtVoid:	return *this;
-	case vtInteger:	return (int)CastToBoolean_Boolean() + rhs.AsInteger();
-	case vtReal:	return (int)CastToBoolean_Boolean() + rhs.AsReal();
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return CastToString_Boolean() + rhs.AsString();
-	case vtOctet:	return Add_Boolean(rhs.Plus_Octet());
-	case vtBoolean:	return (risse_int64)((int)CastToBoolean_Boolean() + (int)rhs.CastToBoolean_Boolean());
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
-	}
-	return tRisseVariantBlock();
+	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 }
 //---------------------------------------------------------------------------
 
@@ -1568,6 +1540,64 @@ void tRisseVariantBlock::AddTrace(const tRisseScriptBlockInstance * sb, risse_si
 				(risse_int64)pos));
 		Invoke_Object(ss_addTrace, source_point);
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseString tRisseVariantBlock::GetClassName(bool * got) const
+{
+	// class.name を得る
+	switch(GetType())
+	{
+	case vtVoid:		if(got) *got=true; return ss_Void;
+	case vtInteger:		if(got) *got=true; return ss_Integer;
+	case vtReal:		if(got) *got=true; return ss_Real;
+	case vtNull:		if(got) *got=true; return ss_Null;
+	case vtString:		if(got) *got=true; return ss_String;
+	case vtBoolean:		if(got) *got=true; return ss_Boolean;
+	case vtOctet:		if(got) *got=true; return ss_Octet;
+	case vtObject:
+		{
+			tRisseVariant name;
+			try
+			{
+				tRisseObjectInterface * intf = GetObjectInterface();
+				// class を得る
+				tRisseVariant Class;
+				if(intf->Operate(ocDGet, &Class, ss_class) !=
+					tRisseOperateRetValue::rvNoError)
+				{
+					if(got) *got = false;
+					return tRisseSS<'<','u','n','k','n','o','w','n','>'>();
+				}
+				// class.name を得る
+				if(Class.GetType() != vtObject)
+				{
+					if(got) *got = false;
+					return tRisseSS<'<','u','n','k','n','o','w','n','>'>();
+				}
+				intf = Class.GetObjectInterface();
+				if(intf->Operate(ocDGet, &name, ss_name) !=
+					tRisseOperateRetValue::rvNoError)
+				{
+					if(got) *got = false;
+					return tRisseSS<'<','u','n','k','n','o','w','n','>'>();
+				}
+			}
+			catch(...)
+			{
+				// 例外が発生
+				// 型名は不明であると判断する
+				if(got) *got = false;
+				return tRisseSS<'<','u','n','k','n','o','w','n','>'>();
+			}
+			tRisseString str = name.operator tRisseString();
+			if(str.IsEmpty()) str = tRisseSS<'<','a','n','o','n','y','m','o','u','s','>'>();
+			return str;
+		}
+	}
+	return tRisseSS<'<','u','n','k','n','o','w','n','>'>();
 }
 //---------------------------------------------------------------------------
 

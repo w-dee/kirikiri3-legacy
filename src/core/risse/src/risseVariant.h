@@ -2305,6 +2305,14 @@ public: // ユーティリティ
 		return intf;
 	}
 
+	//! @brief		型名を得る
+	//! @param		got		型名が正常に取得できた場合に 真、
+	//!						型名が不明だったり取得に失敗した場合に 偽が書き込まれる。
+	//!						この情報が必要ない場合は NULL を指定する。
+	//! @return		型名(文字列)   型名が不明な場合は <unknown>, 匿名クラスの場合は <anomymous> が帰る
+	//! @note		この値の型名を得る。たとえば整数ならば "Integer" など
+	tRisseString GetClassName(bool * got = NULL) const;
+
 	//! @brief		トレースを追加する
 	//! @param		sb			スクリプトブロック
 	//! @param		pos			スクリプト上の位置

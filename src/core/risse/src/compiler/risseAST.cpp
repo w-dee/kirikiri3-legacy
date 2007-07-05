@@ -941,8 +941,10 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 
 					tRisseOperateFlags(
 						tRisseDeclAttribute(tRisseDeclAttribute::pcField)|
-						tRisseOperateFlags::ofMemberEnsure)
+						tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofUseThisAsContext)
 						// 普通の変数アクセスかつメンバの作成
+						// ofUseThisAsContext をつけることにより、クラス上では
+						// members に優先してアクセスすることになる
 					);
 			write_node->SetAttribute(attrib);
 			write_node->GenerateWriteSSA(form, init);
@@ -1145,9 +1147,10 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
 		new tRisseASTNode_Factor(GetPosition(), aftThis),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirect,
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirectThis,
+			(
 			write ?	tRisseOperateFlags(tRisseOperateFlags::ofMemberEnsure) :
-					tRisseOperateFlags()
+					tRisseOperateFlags() )
 					);
 }
 //---------------------------------------------------------------------------
@@ -1159,7 +1162,7 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThisProxy() 
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
 		new tRisseASTNode_Factor(GetPosition(), aftThisProxy),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), matDirect);
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), matDirectThis);
 }
 //---------------------------------------------------------------------------
 

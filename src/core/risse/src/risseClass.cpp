@@ -164,7 +164,7 @@ void tRisseClassBase::CallSuperClassMethod(tRisseVariantBlock * ret,
 	Do(ocDGet, &super, ss_super, tRisseOperateFlags::ofInstanceMemberOnly, tRisseMethodArgument::Empty());
 
 	// super の中のメソッドを呼ぶ
-	super.FuncCall_Object(ret, name, flags|tRisseOperateFlags::ofUseThisAsContext, args, This);
+	super.FuncCall_Object(ret, name, flags|tRisseOperateFlags::ofUseClassMembersRule, args, This);
 }
 //---------------------------------------------------------------------------
 
@@ -239,9 +239,10 @@ void tRisseClassBase::fertilize(const tRisseVariant & instance,
 	// 自分のクラスのconstructメソッドを呼ぶ
 	// この際の呼び出し先の this は instance つまり新しいオブジェクトになる
 	// 渡した instance を確実にコンテキストにして実行するために
-	// tRisseOperateFlags::ofUseThisAsContext を用いる
+	// またクラスの members 内の construct を呼ぶために
+	// tRisseOperateFlags::ofUseClassMembersRule を用いる
 	info.This.FuncCall(info.engine, NULL, ss_construct,
-		tRisseOperateFlags::ofUseThisAsContext,
+		tRisseOperateFlags::ofUseClassMembersRule,
 		tRisseMethodArgument::Empty(), instance);
 
 }

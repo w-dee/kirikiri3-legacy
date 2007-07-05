@@ -27,7 +27,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(45114,31718,49668,18467,56195,41722,1990,5427);
 
 //---------------------------------------------------------------------------
-tRisseObjectBase::tRisseObjectBase() : PrototypeName(ss_class)
+tRisseObjectBase::tRisseObjectBase() : PrototypeName(ss_class), MembersName(tRisseString::GetEmptyString())
 {
 	DefaultMethodContext = new tRisseVariant(this);
 }
@@ -35,8 +35,8 @@ tRisseObjectBase::tRisseObjectBase() : PrototypeName(ss_class)
 
 
 //---------------------------------------------------------------------------
-tRisseObjectBase::tRisseObjectBase(const tRisseString & prototype_name) :
-				PrototypeName(prototype_name)
+tRisseObjectBase::tRisseObjectBase(const tRisseString & prototype_name, const tRisseString & members_name) :
+				PrototypeName(prototype_name), MembersName(members_name)
 {
 	DefaultMethodContext = new tRisseVariant(this);
 }
@@ -48,6 +48,19 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 	tRisseVariant &result, const tRisseVariant &This) const
 {
 	volatile tSynchronizer sync(this); // sync
+
+	if(flags.Has(tRisseOperateFlags::ofUseClassMembersRule) && !MembersName.IsEmpty())
+	{
+		// ofUseClassMembersRule が指定されているのでそちらを見に行く
+		tRisseVariant members;
+		tRetValue members_rv = Read(ss_members, tRisseOperateFlags::ofInstanceMemberOnly, members, This);
+		if(members_rv == rvNoError)
+		{
+			// 要求を members にリダイレクトする
+			return members.OperateForMember(GetRTTI()->GetScriptEngine(), ocDGet, &result, name,
+				flags, tRisseMethodArgument::Empty(), This);
+		}
+	}
 
 	tMemberData * member = HashTable.Find(name);
 
@@ -178,6 +191,19 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 	const tRisseVariant &value, const tRisseVariant &This)
 {
 	volatile tSynchronizer sync(this); // sync
+
+	if(flags.Has(tRisseOperateFlags::ofUseClassMembersRule) && !MembersName.IsEmpty())
+	{
+		// ofUseClassMembersRule が指定されているのでそちらを見に行く
+		tRisseVariant members;
+		tRetValue members_rv = Read(ss_members, tRisseOperateFlags::ofInstanceMemberOnly, members, This);
+		if(members_rv == rvNoError)
+		{
+			// 要求を members にリダイレクトする
+			return members.OperateForMember(GetRTTI()->GetScriptEngine(), ocDSet, NULL, name,
+				flags, tRisseMethodArgument::New(value), This);
+		}
+	}
 
 	tMemberData * member;
 
@@ -356,6 +382,19 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Delete(const tRisseString & name, 
 {
 	volatile tSynchronizer sync(this); // sync
 
+	if(flags.Has(tRisseOperateFlags::ofUseClassMembersRule) && !MembersName.IsEmpty())
+	{
+		// ofUseClassMembersRule が指定されているのでそちらを見に行く
+		tRisseVariant members;
+		tRetValue members_rv = Read(ss_members, tRisseOperateFlags::ofInstanceMemberOnly, members, tRisseVariant::GetDynamicContext());
+		if(members_rv == rvNoError)
+		{
+			// 要求を members にリダイレクトする
+			return members.OperateForMember(GetRTTI()->GetScriptEngine(), ocDDelete, NULL, name,
+				flags, tRisseMethodArgument::Empty(), tRisseVariant::GetDynamicContext());
+		}
+	}
+
 	if(!HashTable.Delete(name))
 	{
 		if(flags.Has(tRisseOperateFlags::ofInstanceMemberOnly))
@@ -442,6 +481,19 @@ tRisseObjectBase::tRetValue tRisseObjectBase::SetAttribute(
 		const tRisseString & name, tRisseOperateFlags flags, const tRisseVariant & This)
 {
 	volatile tSynchronizer sync(this); // sync
+
+	if(flags.Has(tRisseOperateFlags::ofUseClassMembersRule) && !MembersName.IsEmpty())
+	{
+		// ofUseClassMembersRule が指定されているのでそちらを見に行く
+		tRisseVariant members;
+		tRetValue members_rv = Read(ss_members, tRisseOperateFlags::ofInstanceMemberOnly, members, This);
+		if(members_rv == rvNoError)
+		{
+			// 要求を members にリダイレクトする
+			return members.OperateForMember(GetRTTI()->GetScriptEngine(), ocDSetAttrib, NULL, name,
+				flags, tRisseMethodArgument::Empty(), This);
+		}
+	}
 
 	tMemberData * member = HashTable.Find(name);
 

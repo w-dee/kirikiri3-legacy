@@ -83,6 +83,7 @@ tRisseStringData data_ss_NaN = { tRisseSS<'N','a','N'>::data.Buffer,3 }; /* ト�
 tRisseStringData data_ss_Infinity = { tRisseSS<'I','n','f','i','n','i','t','y'>::data.Buffer,8 }; /* トークンの値 Infinity */
 tRisseStringData data_ss_lastEvalResultHiddenVarName = { tRisseSS<'.','_'>::data.Buffer,2 }; /*  最後に評価した文や式の結果を格納するための隠し変数名 */
 tRisseStringData data_ss_thisProxyHiddenVarName = { tRisseSS<'.','p','r','o','x','y'>::data.Buffer,6 }; /*  this-proxy を格納するための隠し変数名 */
+tRisseStringData data_ss_members = { tRisseSS<'m','e','m','b','e','r','s'>::data.Buffer,7 }; /*  "members" インスタンス変数/プロパティ名 */
 tRisseStringData data_ss_initialize = { tRisseSS<'i','n','i','t','i','a','l','i','z','e'>::data.Buffer,10 }; /*  "initialize" メソッド名 */
 tRisseStringData data_ss_construct = { tRisseSS<'c','o','n','s','t','r','u','c','t'>::data.Buffer,9 }; /*  "construct" メソッド名 */
 tRisseStringData data_ss_fertilize = { tRisseSS<'f','e','r','t','i','l','i','z','e'>::data.Buffer,9 }; /*  "fertilize" メソッド名 */

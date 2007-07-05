@@ -45,7 +45,9 @@ protected:
 		tHashTable; //!< ハッシュ表の型
 	tHashTable HashTable; //!< ハッシュ表
 	const tRisseString & PrototypeName;
-		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクト
+		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクトの名前
+	const tRisseString & MembersName;
+		//!< Members名; ofUseMembersRule が指定された場合に読みに行く先のオブジェクトの名前
 	const tRisseVariant * DefaultMethodContext;
 		//!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキスト(デフォルトのThis)
 
@@ -57,7 +59,10 @@ public:
 	//! @param		prototype_name			プロトタイプ名
 	//!										(内部でこれへの参照が保持されるので、
 	//!										スタック上の文字列を指定しないこと！！！)
-	tRisseObjectBase(const tRisseString & prototype_name);
+	//! @param		members_name			Members名
+	//!										(内部でこれへの参照が保持されるので、
+	//!										スタック上の文字列を指定しないこと！！！)
+	tRisseObjectBase(const tRisseString & prototype_name, const tRisseString & members_name = tRisseString::GetEmptyString());
 
 public:
 

@@ -122,6 +122,20 @@ tRisseVariant * tRisseTemporaryException::Convert(tRisseScriptEngine * engine) c
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRisseTemporaryException::Dump() const
+{
+	fflush(stderr);
+	fflush(stdout);
+
+	RisseFPrint(stderr, RISSE_WS("tRisseTemporaryException: type "));
+	RisseFPrint(stderr, ExceptionClassName.c_str());
+	RisseFPrint(stderr, RISSE_WS("\n"));
+
+	fflush(stderr);
+	fflush(stdout);
+}
+//---------------------------------------------------------------------------
 
 
 

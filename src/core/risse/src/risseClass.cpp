@@ -45,7 +45,7 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 */
 //---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
-	 : tRisseObjectBase(ss_super)
+	 : tRisseObjectBase(ss_super, ss_members)
 {
 	RISSE_ASSERT(super_class != NULL);
 
@@ -57,6 +57,13 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 
 	// ClassRTTIに情報を格納する
 	RTTIMatcher = ClassRTTI.AddId(this);
+
+	// members に空のオブジェクトを登録する
+	tRisseObjectBase * members = new tRisseObjectBase(ss_prototype);
+	members->SetRTTI(new tRisseRTTI(super_class->GetRTTI()->GetScriptEngine()));
+	RegisterNormalMember(ss_members, tRisseVariant((tRisseObjectInterface*)members));
+	// members の prototype に 親クラスの members を指定する
+	members->RegisterNormalMember(ss_prototype, super_class->ReadMember(ss_members));
 
 	// クラスに必要なメソッドを登録する
 	RegisterMembers();
@@ -70,7 +77,7 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 
 //---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
-	 : tRisseObjectBase(ss_super)
+	 : tRisseObjectBase(ss_super, ss_members)
 {
 	// このインスタンスの RTTI に Class クラスの RTTI を設定する
 	SetClassClassRTTI(engine);
@@ -78,6 +85,13 @@ tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 	// ClassRTTIに情報を格納する
 	ClassRTTI.SetScriptEngine(engine);
 	RTTIMatcher = ClassRTTI.AddId(this);
+
+	// members に空のオブジェクトを登録する
+	tRisseObjectBase * members = new tRisseObjectBase(ss_prototype);
+	members->SetRTTI(new tRisseRTTI(engine));
+	RegisterNormalMember(ss_members, tRisseVariant((tRisseObjectInterface*)members));
+	// members の prototype に NULL を指定
+	members->RegisterNormalMember(ss_prototype, tRisseVariant((tRisseClassBase*)NULL));
 
 	// クラスに必要なメソッドを登録する
 	RegisterMembers();
@@ -176,8 +190,12 @@ void tRisseClassBase::risse_new(const tRisseNativeCallInfo &info)
 	// 空のオブジェクトを作る(ovulateメソッドを呼び出す)
 	// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
 	// 「自分のクラス」はすなわち This のこと(のはず)
+	// またクラスの members 内の ovulate を呼ぶために
+	// tRisseOperateFlags::ofUseClassMembersRule を使用する。
 	RISSE_ASSERT(info.This.GetType() == tRisseVariant::vtObject);
-	tRisseVariant new_object = info.This.Invoke_Object(ss_ovulate);
+	tRisseVariant new_object;
+	info.This.FuncCall_Object(&new_object, ss_ovulate,
+								tRisseOperateFlags::ofUseClassMembersRule);
 
 	if(new_object.GetType() == tRisseVariant::vtObject)
 	{
@@ -209,7 +227,10 @@ void tRisseClassBase::risse_new(const tRisseNativeCallInfo &info)
 	}
 
 	// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
-	new_object.FuncCall(info.engine, NULL, ss_initialize, 0,
+	// またクラスの members 内の construct を呼ぶために
+	// tRisseOperateFlags::ofUseClassMembersRule を使用する。
+	new_object.FuncCall(info.engine, NULL, ss_initialize,
+		tRisseOperateFlags::ofUseClassMembersRule,
 		info.args,
 		new_object);
 

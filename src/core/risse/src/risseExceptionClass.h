@@ -72,6 +72,9 @@ public:
 	//! @brief		例外を本来の例外に変換し、再び投げる
 	//! @param		engine		スクリプトエンジン
 	void ThrowConverted(tRisseScriptEngine * engine) const { throw Convert(engine); }
+
+	//! @brief		内容を標準エラー出力にダンプする
+	void Dump() const;
 };
 //---------------------------------------------------------------------------
 

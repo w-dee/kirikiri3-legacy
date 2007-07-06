@@ -937,14 +937,12 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 			tRisseASTNode_MemberSel * write_node =
 				new tRisseASTNode_MemberSel(position,
 				new tRisseASTNode_Factor(position, aftThis),
-				new tRisseASTNode_Factor(position, aftConstant, str_name), matDirect,
+				new tRisseASTNode_Factor(position, aftConstant, str_name), matDirectThis,
 
 					tRisseOperateFlags(
 						tRisseDeclAttribute(tRisseDeclAttribute::pcField)|
-						tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofUseClassMembersRule)
+						tRisseOperateFlags::ofMemberEnsure)
 						// 普通の変数アクセスかつメンバの作成
-						// ofUseClassMembersRule をつけることにより、クラス上では
-						// members に優先してアクセスすることになる
 					);
 			write_node->SetAttribute(attrib);
 			write_node->GenerateWriteSSA(form, init);
@@ -1014,12 +1012,15 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 
 	// 文の作成
 	tRisseOperateFlags new_flags = Flags;
+	tRisseOperateFlags attrib_flags;
 	tRisseOpCode code = ocNoOperation;
 	switch(AccessType)
 	{
 	case matDirect:		code = ocDSet;		break;
 	case matDirectThis:	code = ocDSet;
-			new_flags = new_flags | tRisseOperateFlags::ofUseClassMembersRule;	break;
+			new_flags = new_flags | tRisseOperateFlags::ofUseClassMembersRule;
+			attrib_flags = attrib_flags | tRisseOperateFlags::ofUseClassMembersRule;
+			break;
 	case matIndirect:	code = ocISet;		break;
 	}
 	RISSE_ASSERT(code != ocNoOperation);
@@ -1036,7 +1037,7 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 		tRisseSSAStatement * stmt =
 			form->AddStatement(GetPosition(), ocDSetAttrib, NULL,
 							pws->ObjectVar, pws->MemberNameVar);
-		stmt->SetAccessFlags(Attribute);
+		stmt->SetAccessFlags(attrib_flags| Attribute);
 	}
 
 	return true;

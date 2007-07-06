@@ -31,5 +31,5 @@ class C
 
 var i = new C();
 
-return C.m_static() + ":" + C.p_static + ":" + i.m_instance() + ":" + i.p_instance;
+return C::m_static() + ":" + C::p_static + ":" + i.m_instance() + ":" + i.p_instance;
 	//=> "static-variable:static-variable:instance-variable:instance-variable"

@@ -12,7 +12,7 @@ class B : A
 {
 	function m()
 	{
-		super.m();
+		super::m();
 		global.result += "B.m()";
 	}
 }

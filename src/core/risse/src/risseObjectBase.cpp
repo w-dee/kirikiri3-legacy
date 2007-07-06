@@ -653,10 +653,11 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Operate(RISSE_OBJECTINTERFACE_OPER
 
 //---------------------------------------------------------------------------
 void tRisseObjectBase::RegisterNormalMember(const tRisseString & name,
-			const tRisseVariant & value, tRisseMemberAttribute attrib)
+			const tRisseVariant & value, tRisseMemberAttribute attrib, bool ismembers)
 {
 	tRisseOperateFlags access_flags =
 		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly;
+	if(ismembers) access_flags = access_flags | tRisseOperateFlags::ofUseClassMembersRule;
 	RaiseIfError(Write(name,
 		tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
 							access_flags, value, tRisseVariant(this)), name);

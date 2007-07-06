@@ -113,12 +113,13 @@ void tRisseClassBase::RegisterMembers()
 
 	// new や fertilize はクラス固有のメソッドなのでコンテキストとして
 	// This (クラスそのもの)をあらかじめ設定する。
+	// また、これらは members ではなく、クラスインスタンスそのものに対して指定する。
 	tRisseVariant * pThis = new tRisseVariant(this);
 
 	RisseBindFunction(this, mnNew, &tRisseClassBase::risse_new,
-				tRisseMemberAttribute(tRisseMemberAttribute::vcConst), pThis);
+				tRisseMemberAttribute(tRisseMemberAttribute::vcConst), pThis, false);
 	RisseBindFunction(this, ss_fertilize, &tRisseClassBase::fertilize,
-				tRisseMemberAttribute(tRisseMemberAttribute::vcConst), pThis);
+				tRisseMemberAttribute(tRisseMemberAttribute::vcConst), pThis, false);
 
 	// modules 配列を登録
 	if(GetRTTI()->GetScriptEngine()->ArrayClass)

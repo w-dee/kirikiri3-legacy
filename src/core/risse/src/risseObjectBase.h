@@ -154,12 +154,13 @@ public:
 	//! @param		name		名前
 	//! @param		value		値
 	//! @param		attrib		属性
+	//! @param		ismembers	members に登録する場合は true (membersがもしあるばあいのみ) 
 	//! @note		登録に失敗した場合は例外が発生する。
 	//!				フラグとしてはtRisseOperateFlags::ofMemberEnsure|
 	//!				tRisseOperateFlags::ofInstanceMemberOnlyが自動的に付加される。
 	void RegisterNormalMember(const tRisseString & name,
 						const tRisseVariant & value,
-						tRisseMemberAttribute attrib = tRisseMemberAttribute());
+						tRisseMemberAttribute attrib = tRisseMemberAttribute(), bool ismembers = false);
 
 	//! @brief		メンバを読み出す
 	//! @param		name		名前

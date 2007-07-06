@@ -25,7 +25,7 @@ native binder について
 クラスの RegisterMembers 内に通常は記述する。
 
 
-■ RisseBindFunction(Class, name, funcptr, attribute, context)
+■ RisseBindFunction(Class, name, funcptr, attribute, context, is_members)
 
   Class      クラスインスタンスオブジェクト。通常 tRisseClassBase の
              サブクラスのインスタンスなので、tRisseClassBase 派生
@@ -36,6 +36,7 @@ native binder について
              (省略可、省略するとデフォルトの属性になる)
   context    このメソッドが実行されるコンテキスト。省略すると
              this になる。
+  is_members members に登録するかどうか。省略すると true になる。
 
   funcptr に記述するC++メソッドはstaticでも非staticでもよい。
   非staticの場合は、tRisseClassBase::ovulate() をオーバーライドした
@@ -95,8 +96,8 @@ native binder について
 
 
 
-■ RisseBindProperty(Class, name, getter, setter, attribute, context)
-■ RisseBindProperty(Class, name, getter, attribute, context)
+■ RisseBindProperty(Class, name, getter, setter, attribute, context, is_members)
+■ RisseBindProperty(Class, name, getter, attribute, context, is_members)
 
   Class      クラスインスタンスオブジェクト。通常 tRisseClassBase の
              サブクラスのインスタンスなので、tRisseClassBase 派生
@@ -109,6 +110,7 @@ native binder について
              (省略可、省略するとデフォルトの属性になる)
   context    このプロパティが実行されるコンテキスト。省略すると
              this になる。
+  is_members members に登録するかどうか。省略すると true になる。
 
   プロパティを登録する。
 
@@ -653,7 +655,7 @@ template <typename CC, typename GR, typename ST>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	GR (*getter)(), void (*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tRisseMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
@@ -664,17 +666,17 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 				getter ? &tRisseBinderPropertyGetterS<CC, GR >::Call : NULL,
 				setter ? reinterpret_cast<void (*)()>(setter) : NULL,
 				setter ? &tRisseBinderPropertySetterS<CC, ST >::Call : NULL
-				), context), attribute);
+				), context), attribute, is_members);
 }
 // static without calling info getter, read-only
 template <typename CC, typename GR/*, typename ST*/>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	GR (*getter)()/*, void (*setter)(ST)*/,
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 {
 	RisseBindProperty<CC, GR, const tRisseVariant &>(
-		_class, name, getter, NULL, attribute, context);
+		_class, name, getter, NULL, attribute, context, is_members);
 }
 
 // non-static without calling info getter, non-const getter
@@ -682,7 +684,7 @@ template <typename CC, typename GIC, typename SIC, typename GR, typename ST>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	GR (GIC::*getter)(), void (SIC::*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tRisseMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
@@ -693,17 +695,17 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 				getter ? &tRisseBinderPropertyGetter<CC, GIC, GR >::Call : NULL,
 				setter ? reinterpret_cast<void (tRisseObjectBase::*)()>(setter) : NULL,
 				setter ? &tRisseBinderPropertySetter<CC, SIC, ST >::Call : NULL
-				), context), attribute);
+				), context), attribute, is_members);
 }
 // non-static without calling info getter, non-const getter, read-only
 template <typename CC, typename GIC/*, typename SIC*/, typename GR/*, typename ST*/>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	GR (GIC::*getter)()/*, void (SIC::*setter)(ST)*/,
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 {
 	RisseBindProperty<CC, GIC, tRisseObjectInterface, GR, const tRisseVariant &>(
-		_class, name, getter, NULL, attribute, context);
+		_class, name, getter, NULL, attribute, context, is_members);
 }
 
 
@@ -712,7 +714,7 @@ template <typename CC, typename ST>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	void (*getter)(const tRisseNativePropGetInfo &), void (*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tRisseMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
@@ -723,17 +725,17 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 				getter ? &tRisseBinderPropertyGetter_InfoS<CC>::Call : NULL,
 				setter ? reinterpret_cast<void (*)()>(setter) : NULL,
 				setter ? &tRisseBinderPropertySetterS<CC, ST >::Call : NULL
-				), context), attribute);
+				), context), attribute, is_members);
 }
 // static with calling info getter, read-only
 template <typename CC/*, typename ST*/>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	void (*getter)(const tRisseNativePropGetInfo &)/*, void (*setter)(ST)*/,
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 {
 	RisseBindProperty<CC, const tRisseVariant &>(
-		_class, name, getter, NULL, attribute, context);
+		_class, name, getter, NULL, attribute, context, is_members);
 }
 
 // non-static with calling info getter, non-const getter
@@ -741,7 +743,7 @@ template <typename CC, typename GIC, typename SIC, typename ST>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	void (GIC::*getter)(const tRisseNativePropGetInfo &), void (SIC::*setter)(ST),
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tRisseMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
@@ -752,17 +754,17 @@ void RisseBindProperty(CC * _class, const tRisseString & name,
 				getter ? &tRisseBinderPropertyGetter_Info<CC, GIC>::Call : NULL,
 				setter ? reinterpret_cast<void (tRisseObjectBase::*)()>(setter) : NULL,
 				setter ? &tRisseBinderPropertySetter<CC, SIC, ST >::Call : NULL
-				), context), attribute);
+				), context), attribute, is_members);
 }
 // non-static with calling info getter, non-const getter, read-only
 template <typename CC, typename GIC/*, typename SIC, typename ST*/>
 void RisseBindProperty(CC * _class, const tRisseString & name,
 	void (GIC::*getter)(const tRisseNativePropGetInfo &)/*, void (SIC::*setter)(ST)*/,
 	tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+	const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 {
 	RisseBindProperty<CC, GIC, tRisseObjectInterface, const tRisseVariant &>(
-		_class, name, getter, NULL, attribute, context);
+		_class, name, getter, NULL, attribute, context, is_members);
 }
 
 //---------------------------------------------------------------------------

@@ -48,6 +48,17 @@ void tRisseModuleClass::RegisterMembers()
 	RisseBindFunction(this, ss_ovulate, &tRisseModuleClass::ovulate);
 	RisseBindFunction(this, ss_construct, &tRisseModuleClass::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseModuleClass::initialize);
+
+	// members を Object クラスのインスタンスとしてマークする。
+	// ここは Object クラスが初期化される前に呼ばれる可能性があるため、
+	// 本当に Object クラスが初期化されているかどうかをチェックする。
+	// すべてのクラスが初期化された後にこのメソッドはもう一度呼ばれるので、
+	// その際は Object クラスが利用できる。
+	if(GetRTTI()->GetScriptEngine()->ObjectClass != NULL)
+	{
+		tRisseObjectInterface * intf = ReadMember(ss_members).GetObjectInterface();
+		GetRTTI()->GetScriptEngine()->ObjectClass->Bless(intf);
+	}
 }
 //---------------------------------------------------------------------------
 

@@ -48,6 +48,13 @@ public: // Risse用メソッドなど
 	static tRisseVariant toException(
 				const tRisseNativeCallInfo & info);
 	static void p(const tRisseMethodArgument & args);
+
+public: // ユーティリティ
+	//! @brief		intf を Object クラスのインスタンスとしてマークする
+	//! @param		intf		マークする対象となるインスタンス
+	//! @note		いまだ Object クラスが初期化されていない時期に作成されたインスタンス
+	//!				に対してオブジェクトクラスとしての情報を付加するために用いる
+	void Bless(tRisseObjectInterface * intf);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

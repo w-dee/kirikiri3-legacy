@@ -22,6 +22,7 @@
 #include "risseScriptEngine.h"
 #include "risseNativeBinder.h"
 #include "risseModuleClass.h"
+#include "risseObjectClass.h"
 
 namespace Risse
 {
@@ -156,6 +157,17 @@ void tRisseClassBase::RegisterMembers()
 			tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
 			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
 			tRisseVariant(GetRTTI()->GetScriptEngine()->ClassClass), *pThis);
+	}
+
+	// members を Object クラスのインスタンスとしてマークする。
+	// ここは Object クラスが初期化される前に呼ばれる可能性があるため、
+	// 本当に Object クラスが初期化されているかどうかをチェックする。
+	// すべてのクラスが初期化された後にこのメソッドはもう一度呼ばれるので、
+	// その際は Object クラスが利用できる。
+	if(GetRTTI()->GetScriptEngine()->ObjectClass != NULL)
+	{
+		tRisseObjectInterface * intf = ReadMember(ss_members).GetObjectInterface();
+		GetRTTI()->GetScriptEngine()->ObjectClass->Bless(intf);
 	}
 
 	RisseBindFunction(this, ss_include, &tRisseClassBase::include);

@@ -40,7 +40,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseVariant & name, const tRisseNativeCallInfo &info);
+	static void initialize(const tRisseNativeCallInfo &info);
 
 public: // ユーティリティ
 	//! @brief		members 用のオブジェクトを作成する

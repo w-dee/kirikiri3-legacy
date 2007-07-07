@@ -87,10 +87,13 @@ void tRisseModuleClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseModuleClass::initialize(const tRisseVariant & name, const tRisseNativeCallInfo &info)
+void tRisseModuleClass::initialize(const tRisseNativeCallInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
+
+	tRisseVariant name;
+	if(info.args.HasArgument(0)) name = info.args[0]; // もし引数が与えられていない場合はモジュールは匿名になる
 
 	// name はクラス名
 	// This に name という名前で値を登録し、書き込み禁止にする

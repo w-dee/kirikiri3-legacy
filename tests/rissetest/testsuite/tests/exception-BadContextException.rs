@@ -1,6 +1,6 @@
 try
 {
-	(Array.pop incontextof 1)(); // given context is not compatible with this method/property   line no.3
+	(Array::pop incontextof 1)(); // given context is not compatible with this method/property   line no.3
 }
 catch(e if e instanceof BadContextException)
 {

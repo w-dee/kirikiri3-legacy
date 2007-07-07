@@ -202,5 +202,20 @@ void tRisseObjectClass::p(const tRisseMethodArgument & args)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tRisseObjectClass::Bless(tRisseObjectInterface * intf)
+{
+	// intf の RTTI にこのクラスの ClassRTTI を設定する
+	intf->SetRTTI(&GetClassRTTI());
+
+	// intf に class を登録し、Object クラスを指すようにする
+	intf->Do(ocDSet, NULL, ss_class,
+		tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
+		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+		tRisseMethodArgument::New(tRisseVariant((tRisseObjectInterface *)this)) );
+}
+//---------------------------------------------------------------------------
+
 } /* namespace Risse */
 

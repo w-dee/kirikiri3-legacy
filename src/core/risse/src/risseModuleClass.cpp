@@ -48,14 +48,32 @@ void tRisseModuleClass::RegisterMembers()
 	RisseBindFunction(this, ss_ovulate, &tRisseModuleClass::ovulate);
 	RisseBindFunction(this, ss_construct, &tRisseModuleClass::construct);
 	RisseBindFunction(this, ss_initialize, &tRisseModuleClass::initialize);
+
+	// members を Object クラスのインスタンスとしてマークする。
+	// ここは Object クラスが初期化される前に呼ばれる可能性があるため、
+	// 本当に Object クラスが初期化されているかどうかをチェックする。
+	// すべてのクラスが初期化された後にこのメソッドはもう一度呼ばれるので、
+	// その際は Object クラスが利用できる。
+	if(GetRTTI()->GetScriptEngine()->ObjectClass != NULL)
+	{
+		tRisseObjectInterface * intf = ReadMember(ss_members).GetObjectInterface();
+		GetRTTI()->GetScriptEngine()->ObjectClass->Bless(intf);
+	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseModuleClass::ovulate()
+tRisseVariant tRisseModuleClass::ovulate(const tRisseNativeCallInfo &info)
 {
-	return tRisseVariant(new tRisseObjectBase());
+	tRisseObjectBase * new_base_object = new tRisseObjectBase();
+
+	// new_base_object に members を登録する
+	tRisseVariant members = tRisseModuleClass::CreateMembersObject(
+					info.engine, tRisseVariant((tRisseClassBase*)NULL));
+	new_base_object->RegisterNormalMember(ss_members, members);
+
+	return tRisseVariant((tRisseObjectInterface*)new_base_object);
 }
 //---------------------------------------------------------------------------
 
@@ -86,6 +104,17 @@ void tRisseModuleClass::initialize(const tRisseVariant & name, const tRisseNativ
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseModuleClass::CreateMembersObject(
+			tRisseScriptEngine * engine, const tRisseVariant proto)
+{
+	tRisseObjectBase * members = new tRisseObjectBase(ss_prototype);
+	members->SetRTTI(new tRisseRTTI(engine));
+	members->RegisterNormalMember(ss_prototype, proto);
+	return tRisseVariant((tRisseObjectInterface*)members);
+}
+//---------------------------------------------------------------------------
 
 
 } // namespace Risse

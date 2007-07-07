@@ -1,10 +1,10 @@
 var global.s = '';
 
 var M1 = new Module();
-var M1.push1 = function () { global.s += '1'; };
+var M1::push1 = function () { global.s += '1'; };
 
 var M2 = Module.new();
-var M2.push2 = function () { global.s += '2'; };
+var M2::push2 = function () { global.s += '2'; };
 
 class C1
 {

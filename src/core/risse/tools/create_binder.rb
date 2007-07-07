@@ -121,27 +121,27 @@ STDOUT.print "
 	template <typename CC, typename R #{argnum.append{|n|"typename T#{n}"}}>
 	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (*f)(#{argnum.join{|n|"T#{n}"}}), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 	{
 		_class->RegisterNormalMember(name,
 			tRisseVariant(tRisseNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (*)()>(f),
 				&tRisseBinderFunctor#{argnum}s<CC, R #{argnum.append{|n|"T#{n}"}}>::Call
-					), context), attribute);
+					), context), attribute, is_members);
 	}
 	// 非static関数用binder登録関数
 	template <typename CC, typename IC, typename R #{argnum.append{|n|"typename T#{n}"}}>
 	void RisseBindFunction(CC * _class, const tRisseString & name,
 		R (IC::*f)(#{argnum.join{|n|"T#{n}"}}), tRisseMemberAttribute attribute = tRisseMemberAttribute(),
-		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext())
+		const tRisseVariantBlock * context = tRisseVariant::GetDynamicContext(), bool is_members = true)
 	{
 		_class->RegisterNormalMember(name,
 			tRisseVariant(tRisseNativeBindFunction<void (tRisseObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tRisseClassBase *)_class,
 				reinterpret_cast<void (tRisseObjectBase::*)()>(f),
 				&tRisseBinderFunctor#{argnum}<CC, IC, R #{argnum.append{|n|"T#{n}"}}>::Call
-					), context), attribute);
+					), context), attribute, is_members);
 	}
 
 "

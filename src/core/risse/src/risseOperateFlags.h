@@ -33,9 +33,10 @@ public:
 		//!< finalメンバのみを探す。見つかった場合はrvMemberIsFinalが帰る。
 		//!< 見つからなかった場合や、見つかってもfinalメンバではなかった場合は
 		//!< rvMemberNotFound が帰る。
-	static const risse_uint32 ofUseThisAsContext = 0x8000;
-		//!< デフォルトのコンテキストを設定しない
-		//!< (常にThisパラメータで渡されたインスタンスをコンテキストとして使う)
+	static const risse_uint32 ofUseClassMembersRule = 0x8000;
+		//!< 常にThisパラメータで渡されたインスタンスをコンテキストとして使う。
+		//!< また、クラスやモジュールにおいては、
+		//!< members の中身を見に行く (クラスそのものを見ない)
 
 public:
 	//! @brief		デフォルトコンストラクタ

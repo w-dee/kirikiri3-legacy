@@ -937,7 +937,7 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 			tRisseASTNode_MemberSel * write_node =
 				new tRisseASTNode_MemberSel(position,
 				new tRisseASTNode_Factor(position, aftThis),
-				new tRisseASTNode_Factor(position, aftConstant, str_name), matDirect,
+				new tRisseASTNode_Factor(position, aftConstant, str_name), matDirectThis,
 
 					tRisseOperateFlags(
 						tRisseDeclAttribute(tRisseDeclAttribute::pcField)|
@@ -988,7 +988,7 @@ tRisseSSAVariable * tRisseASTNode_MemberSel::DoReadSSA(
 	{
 	case matDirect:		code = ocDGet;		break;
 	case matDirectThis:	code = ocDGet;
-			new_flags = new_flags | tRisseOperateFlags::ofUseThisAsContext;	break;
+			new_flags = new_flags | tRisseOperateFlags::ofUseClassMembersRule;	break;
 	case matIndirect:	code = ocIGet;		break;
 	}
 	RISSE_ASSERT(code != ocNoOperation);
@@ -1012,12 +1012,15 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 
 	// 文の作成
 	tRisseOperateFlags new_flags = Flags;
+	tRisseOperateFlags attrib_flags;
 	tRisseOpCode code = ocNoOperation;
 	switch(AccessType)
 	{
 	case matDirect:		code = ocDSet;		break;
 	case matDirectThis:	code = ocDSet;
-			new_flags = new_flags | tRisseOperateFlags::ofUseThisAsContext;	break;
+			new_flags = new_flags | tRisseOperateFlags::ofUseClassMembersRule;
+			attrib_flags = attrib_flags | tRisseOperateFlags::ofUseClassMembersRule;
+			break;
 	case matIndirect:	code = ocISet;		break;
 	}
 	RISSE_ASSERT(code != ocNoOperation);
@@ -1034,7 +1037,7 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 		tRisseSSAStatement * stmt =
 			form->AddStatement(GetPosition(), ocDSetAttrib, NULL,
 							pws->ObjectVar, pws->MemberNameVar);
-		stmt->SetAccessFlags(Attribute);
+		stmt->SetAccessFlags(attrib_flags| Attribute);
 	}
 
 	return true;
@@ -1145,9 +1148,10 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
 		new tRisseASTNode_Factor(GetPosition(), aftThis),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirect,
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirectThis,
+			(
 			write ?	tRisseOperateFlags(tRisseOperateFlags::ofMemberEnsure) :
-					tRisseOperateFlags()
+					tRisseOperateFlags() )
 					);
 }
 //---------------------------------------------------------------------------
@@ -1159,7 +1163,7 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThisProxy() 
 	return
 		new tRisseASTNode_MemberSel(GetPosition(),
 		new tRisseASTNode_Factor(GetPosition(), aftThisProxy),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), matDirect);
+		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), matDirectThis);
 }
 //---------------------------------------------------------------------------
 

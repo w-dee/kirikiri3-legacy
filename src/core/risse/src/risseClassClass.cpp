@@ -111,6 +111,16 @@ void tRisseClassClass::initialize(const tRisseNativeCallInfo &info)
 			access_flags,
 			super_class, info.This);
 
+		// members の prototype に super.members を指定
+		tRisseVariant members = info.This.GetPropertyDirect(info.engine, ss_members,
+											tRisseOperateFlags::ofInstanceMemberOnly);
+		tRisseVariant super_members = super_class.GetPropertyDirect(info.engine, ss_members,
+											tRisseOperateFlags::ofInstanceMemberOnly);
+		members.SetPropertyDirect(info.engine, ss_prototype, 
+			tRisseOperateFlags(tRisseMemberAttribute::GetDefault())|
+			access_flags,
+			super_members, info.This);
+
 		// 親クラスの ClassRTTI を引き継ぐ
 		tRisseClassBase * this_class_intf =
 			info.This.CheckAndGetObjectInterafce<tRisseClassBase, tRisseClassBase>(
@@ -128,9 +138,12 @@ void tRisseClassClass::initialize(const tRisseNativeCallInfo &info)
 	// ユーザ定義の ovulate, construct と initialize にとってはじゃまである。
 	// これらがここに残っていると、親クラス内の ovulate, construct や initialize を正常に
 	// 参照できないという意味でもじゃまである。
-	info.This.DeletePropertyDirect_Object(ss_ovulate, tRisseOperateFlags::ofInstanceMemberOnly);
-	info.This.DeletePropertyDirect_Object(ss_construct, tRisseOperateFlags::ofInstanceMemberOnly);
-	info.This.DeletePropertyDirect_Object(ss_initialize, tRisseOperateFlags::ofInstanceMemberOnly);
+	info.This.DeletePropertyDirect_Object(ss_ovulate,
+				tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseClassMembersRule);
+	info.This.DeletePropertyDirect_Object(ss_construct,
+				tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseClassMembersRule);
+	info.This.DeletePropertyDirect_Object(ss_initialize,
+				tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseClassMembersRule);
 }
 //---------------------------------------------------------------------------
 

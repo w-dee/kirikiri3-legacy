@@ -14,6 +14,7 @@
 ss_doubleColon						::								#!< ダブルコロン
 ss_lastEvalResultHiddenVarName		._								#!< 最後に評価した文や式の結果を格納するための隠し変数名
 ss_thisProxyHiddenVarName			.proxy							#!< this-proxy を格納するための隠し変数名
+ss_members							members							#!< "members" インスタンス変数/プロパティ名
 ss_initialize						initialize						#!< "initialize" メソッド名
 ss_construct						construct						#!< "construct" メソッド名
 ss_fertilize						fertilize						#!< "fertilize" メソッド名

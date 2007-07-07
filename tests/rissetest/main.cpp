@@ -15,6 +15,7 @@
 #include "risseNativeBinder.h"
 #include "risseStringTemplate.h"
 #include "risseObjectClass.h"
+#include "risseExceptionClass.h"
 
 RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
 
@@ -175,6 +176,7 @@ int Application::OnRun()
 	try
 	{
 		tRisseScriptEngine engine;
+
 		engine.SetWarningOutput(new tRisseWarningOutput());
 
 		// Script クラスを追加する
@@ -205,6 +207,10 @@ int Application::OnRun()
 			RisseFPrint(stdout, result.AsHumanReadable().c_str());
 		}
 
+	}
+	catch(const tRisseTemporaryException * te)
+	{
+		te->Dump();
 	}
 	catch(const tRisseVariant * e)
 	{

@@ -45,7 +45,9 @@ protected:
 		tHashTable; //!< ハッシュ表の型
 	tHashTable HashTable; //!< ハッシュ表
 	const tRisseString & PrototypeName;
-		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクト
+		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクトの名前
+	const tRisseString & MembersName;
+		//!< Members名; ofUseMembersRule が指定された場合に読みに行く先のオブジェクトの名前
 	const tRisseVariant * DefaultMethodContext;
 		//!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキスト(デフォルトのThis)
 
@@ -57,7 +59,10 @@ public:
 	//! @param		prototype_name			プロトタイプ名
 	//!										(内部でこれへの参照が保持されるので、
 	//!										スタック上の文字列を指定しないこと！！！)
-	tRisseObjectBase(const tRisseString & prototype_name);
+	//! @param		members_name			Members名
+	//!										(内部でこれへの参照が保持されるので、
+	//!										スタック上の文字列を指定しないこと！！！)
+	tRisseObjectBase(const tRisseString & prototype_name, const tRisseString & members_name = tRisseString::GetEmptyString());
 
 public:
 
@@ -149,12 +154,13 @@ public:
 	//! @param		name		名前
 	//! @param		value		値
 	//! @param		attrib		属性
+	//! @param		ismembers	members に登録する場合は true (membersがもしあるばあいのみ) 
 	//! @note		登録に失敗した場合は例外が発生する。
 	//!				フラグとしてはtRisseOperateFlags::ofMemberEnsure|
 	//!				tRisseOperateFlags::ofInstanceMemberOnlyが自動的に付加される。
 	void RegisterNormalMember(const tRisseString & name,
 						const tRisseVariant & value,
-						tRisseMemberAttribute attrib = tRisseMemberAttribute());
+						tRisseMemberAttribute attrib = tRisseMemberAttribute(), bool ismembers = false);
 
 	//! @brief		メンバを読み出す
 	//! @param		name		名前

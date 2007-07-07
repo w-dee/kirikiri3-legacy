@@ -1,4 +1,4 @@
-Script.require("../arith-matrix.rs");
+Script::require("../arith-matrix.rs");
 
 // "8" = octet
 

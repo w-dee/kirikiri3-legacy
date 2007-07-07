@@ -174,8 +174,9 @@ tRisseVariantBlock::tRetValue
 		{
 			tRetValue rv = GetPrimitiveClass(engine)->GetGateway().
 				Operate(engine, code, result, name,
-				flags | tRisseOperateFlags::ofUseThisAsContext,
+				flags | tRisseOperateFlags::ofUseClassMembersRule,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+					// また、ゲートウェイの members の中から探す
 				args, *this); // 動作コンテキストは常に *this
 			if(rv == rvNoError && result) // TODO: code が ocDGet かどうかをチェックすべきじゃないのか？
 			{
@@ -188,7 +189,7 @@ tRisseVariantBlock::tRetValue
 				// しまう。関数やプロパティ以外はコンテキストを伴う必要はないので
 				// 努めて関数やプロパティ以外はダミーでもよいからコンテキストを
 				// 設定するようにするべき。
-				if(!result->HasContext() && !(flags & tRisseOperateFlags::ofUseThisAsContext))
+				if(!result->HasContext() && !(flags & tRisseOperateFlags::ofUseClassMembersRule))
 					result->SetContext(new tRisseVariantBlock(*this));
 			}
 			return rv;
@@ -212,12 +213,13 @@ tRisseVariantBlock tRisseVariantBlock::GetPropertyDirect_Primitive(tRisseScriptE
 {
 	tRisseVariantBlock result;
 	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDGet, &result, name,
-				flags | tRisseOperateFlags::ofUseThisAsContext,
+				flags | tRisseOperateFlags::ofUseClassMembersRule,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+					// また、ゲートウェイの members の中から探す
 				tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
 	// コンテキストを設定する
 	// ここの長ったらしい説明は tRisseVariantBlock::OperateForMember() 内を参照
-	if(!result.HasContext() && !(flags & tRisseOperateFlags::ofUseThisAsContext))
+	if(!result.HasContext() && !(flags & tRisseOperateFlags::ofUseClassMembersRule))
 		result.SetContext(new tRisseVariantBlock(*this));
 	return result;
 }
@@ -245,8 +247,9 @@ void tRisseVariantBlock::SetPropertyDirect_Primitive(tRisseScriptEngine * engine
 	const tRisseVariant & This) const
 {
 	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDSet, NULL, name,
-				flags | tRisseOperateFlags::ofUseThisAsContext,
+				flags | tRisseOperateFlags::ofUseClassMembersRule,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+					// また、ゲートウェイの members の中から探す
 				tRisseMethodArgument::New(value), *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------
@@ -271,8 +274,9 @@ void tRisseVariantBlock::SetPropertyDirect_Object  (const tRisseString & name,
 void tRisseVariantBlock::DeletePropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags) const
 {
 	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDDelete, NULL, name,
-				flags | tRisseOperateFlags::ofUseThisAsContext,
+				flags | tRisseOperateFlags::ofUseClassMembersRule,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+					// また、ゲートウェイの members の中から探す
 				tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------
@@ -321,8 +325,9 @@ void tRisseVariantBlock::FuncCall_Primitive(tRisseScriptEngine * engine,
 {
 	GetPrimitiveClass(engine)->GetGateway().
 		Do(engine, ocFuncCall, ret, name,
-		flags |tRisseOperateFlags::ofUseThisAsContext,
+		flags |tRisseOperateFlags::ofUseClassMembersRule,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+		// また、ゲートウェイの members の中から探す
 		args, *this); // 動作コンテキストは常に *this
 }
 //---------------------------------------------------------------------------
@@ -349,8 +354,9 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(tRisseScriptEngine * eng
 	tRisseVariantBlock ret;
 	GetPrimitiveClass(engine)->GetGateway().
 		Do(engine, ocFuncCall, &ret, membername,
-		tRisseOperateFlags::ofUseThisAsContext,
+		tRisseOperateFlags::ofUseClassMembersRule,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+		// また、ゲートウェイの members の中から探す
 		tRisseMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
 	return ret;
 }
@@ -379,8 +385,9 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(tRisseScriptEngine * eng
 	tRisseVariantBlock ret;
 	GetPrimitiveClass(engine)->GetGateway().
 		Do(engine, ocFuncCall, &ret, membername,
-		tRisseOperateFlags::ofUseThisAsContext,
+		tRisseOperateFlags::ofUseClassMembersRule,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+		// また、ゲートウェイの members の中から探す
 		tRisseMethodArgument::New(arg1), *this); // 動作コンテキストは常に *this
 	return ret;
 }
@@ -409,8 +416,9 @@ tRisseVariantBlock tRisseVariantBlock::Invoke_Primitive(tRisseScriptEngine * eng
 	tRisseVariantBlock ret;
 	GetPrimitiveClass(engine)->GetGateway().
 		Do(engine, ocFuncCall, &ret, membername,
-		tRisseOperateFlags::ofUseThisAsContext,
+		tRisseOperateFlags::ofUseClassMembersRule,
 		// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
+		// また、ゲートウェイの members の中から探す
 		tRisseMethodArgument::New(arg1, arg2), *this); // 動作コンテキストは常に *this
 	return ret;
 }

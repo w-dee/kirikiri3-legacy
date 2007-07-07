@@ -168,7 +168,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 		// member->Value を引数なしで関数呼び出しし、その結果を得る
 		tRetValue rv = member->Value.Operate(GetRTTI()->GetScriptEngine(),
 			ocFuncCall, &result, tRisseString::GetEmptyString(),
-			flags, tRisseMethodArgument::Empty(),
+			flags & ~tRisseOperateFlags::ofUseClassMembersRule, tRisseMethodArgument::Empty(),
 			(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseClassMembersRule)) ? *DefaultMethodContext:This);
 		if(rv != rvNoError && rv != rvMemberNotFound) return rv; // rvMemberNotFound以外のなにかエラーがおこあったらここで戻る
 		break;
@@ -262,7 +262,7 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 		case tRisseMemberAttribute::pcProperty: // プロパティアクセス
 			return member->Value.Operate(GetRTTI()->GetScriptEngine(), ocDSet, NULL,
 				tRisseString::GetEmptyString(),
-				flags, tRisseMethodArgument::New(value),
+				flags & ~tRisseOperateFlags::ofUseClassMembersRule, tRisseMethodArgument::New(value),
 				(DefaultMethodContext && !flags.Has(tRisseOperateFlags::ofUseClassMembersRule)) ?
 						*DefaultMethodContext:This);
 		}

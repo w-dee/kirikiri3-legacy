@@ -77,7 +77,7 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 
 //---------------------------------------------------------------------------
 tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
-	 : tRisseObjectBase(ss_super, ss_members)
+	 : tRisseObjectBase(ss_prototype, ss_members)
 {
 	// このインスタンスの RTTI に Class クラスの RTTI を設定する
 	SetClassClassRTTI(engine);
@@ -98,6 +98,9 @@ tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 
 	// super を登録
 	RegisterNormalMember(ss_super, tRisseVariant((tRisseClassBase*)NULL));
+
+	// this の prototype に members を設定
+	RegisterNormalMember(ss_prototype, tRisseVariant((tRisseObjectInterface*)members));
 }
 //---------------------------------------------------------------------------
 

@@ -12,7 +12,7 @@ for(var y = 0; y < td.length; y++)
 	var row = td[y];
 	for(var x = 0; x < row.length; x++)
 	{
-		res += ':' + row[x];
+		res += ':' + row[x].toString();
 	}
 	res += "|";
 }

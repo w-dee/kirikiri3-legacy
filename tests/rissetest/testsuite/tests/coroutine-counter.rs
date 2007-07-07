@@ -2,7 +2,7 @@
 var a = Coroutine.new() static function(arg, co) {
 	var count = arg;
 	while(true) {
-		var res = "a:" + count + " ";
+		var res = "a:" + count.toString() + " ";
 		count += co.yield(res);
 	}
 }
@@ -12,7 +12,7 @@ var b = Coroutine.new()        function(arg, co) {
 	// marked as 'static'.
 	var count = arg;
 	while(true) {
-		var res = "b:" + count + " ";
+		var res = "b:" + count.toString() + " ";
 		count +=    yield(res); // so we don't need to prefix 'co.' here.
 	}
 }

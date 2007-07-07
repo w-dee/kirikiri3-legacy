@@ -4,7 +4,7 @@ try
 }
 catch(e if e instanceof ClassDefinitionException)
 {
-	return e.message + " at " + e.trace[0];
+	return e.message + " at " + e.trace[0].toString();
 		//=> /^"the superclass is not a class at .*?:3"$/
 }
 

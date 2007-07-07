@@ -17,6 +17,7 @@
 #include "risseObjectClass.h"
 #include "risseExceptionClass.h"
 #include "risseScriptEngine.h"
+#include "risseOpCodes.h"
 
 namespace Risse
 {
@@ -105,6 +106,10 @@ void tRissePrimitiveClass::RegisterMembers()
 		&tRissePrimitiveClass::construct,
 		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
 								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
+	RisseBindFunction(this, mnString,
+		&tRissePrimitiveClass::toString,
+		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
+								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
 
@@ -124,6 +129,14 @@ void tRissePrimitiveClass::construct()
 {
 	// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
 	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariant tRissePrimitiveClass::toString(const tRisseNativeCallInfo & info)
+{
+	return info.This.operator tRisseString();
 }
 //---------------------------------------------------------------------------
 

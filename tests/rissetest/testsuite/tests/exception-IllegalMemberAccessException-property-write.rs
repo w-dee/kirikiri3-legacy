@@ -9,7 +9,7 @@ try
 }
 catch(e if e instanceof IllegalMemberAccessException)
 {
-	return e.message + " at " + e.trace[0];
+	return e.message + " at " + e.trace[0].toString();
 		//=> /^"property \\"p\\" cannot be written at .*?:8"$/
 }
 

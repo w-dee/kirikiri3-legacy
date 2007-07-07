@@ -4,7 +4,7 @@ class A extends Coroutine
 	{
 		var count = arg;
 		while(true) {
-			var res = "a:" + count + " ";
+			var res = "a:" + count.toString() + " ";
 			count +=    yield(res);
 		}
 	}
@@ -16,7 +16,7 @@ class B extends Coroutine
 	{
 		var count = arg;
 		while(true) {
-			var res = "b:" + count + " ";
+			var res = "b:" + count.toString() + " ";
 			count +=    yield(res);
 		}
 	}

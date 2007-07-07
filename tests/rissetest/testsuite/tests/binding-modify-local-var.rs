@@ -4,5 +4,5 @@
 	var c = 3
 	var binding = (@)
 	binding['c'] = 5
-	binding['a'] + ':' + binding['b'] + ':' + c //=> "1:2:5"
+	binding['a'].toString() + ':' + binding['b'].toString() + ':' + c.toString() //=> "1:2:5"
 }

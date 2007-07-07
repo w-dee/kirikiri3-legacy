@@ -4,7 +4,7 @@ try
 }
 catch(e if e instanceof BadContextException)
 {
-	return e.message + " at " + e.trace[0];
+	return e.message + " at " + e.trace[0].toString();
 		//=> /^"given context is not compatible with this method\/property at .*?:3"$/
 }
 

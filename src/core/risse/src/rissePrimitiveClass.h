@@ -69,6 +69,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void construct();
+	static tRisseVariant toString(const tRisseNativeCallInfo & info); // toString
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

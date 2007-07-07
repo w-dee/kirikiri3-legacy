@@ -14,7 +14,7 @@
 	}
 	catch(e)
 	{
-		return "exception thrown, but n = " + n;
+		return "exception thrown, but n = " + n.toString();
 			//=> "exception thrown, but n = -1"
 	}
 }

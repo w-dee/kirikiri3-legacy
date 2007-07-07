@@ -4,7 +4,7 @@ try
 }
 catch(e if e instanceof BadArgumentCountException)
 {
-	return e.message + " at " + e.trace[0];
+	return e.message + " at " + e.trace[0].toString();
 		//=> /^"bad argument count \(0 given, but 1 expected\) at .*?:3"$/
 }
 

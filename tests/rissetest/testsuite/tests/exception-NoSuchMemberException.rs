@@ -4,7 +4,7 @@ try
 }
 catch(e if e instanceof NoSuchMemberException)
 {
-	return e.message + " at " + e.trace[0];
+	return e.message + " at " + e.trace[0].toString();
 		//=> /^"member \\"v\\" not found at .*?:3"$/
 }
 

@@ -36,7 +36,7 @@ public:
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tRisseVariant ovulate(const tRisseNativeCallInfo &info);
 
 public: // Risse用メソッドなど
 	static void construct();

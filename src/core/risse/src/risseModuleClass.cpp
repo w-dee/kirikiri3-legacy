@@ -53,9 +53,19 @@ void tRisseModuleClass::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseModuleClass::ovulate()
+tRisseVariant tRisseModuleClass::ovulate(const tRisseNativeCallInfo &info)
 {
-	return tRisseVariant(new tRisseObjectBase());
+	tRisseObjectBase * new_base_object = new tRisseObjectBase();
+
+	// new_base_object に members を登録する
+	tRisseObjectBase * members = new tRisseObjectBase(ss_prototype);
+	members->SetRTTI(new tRisseRTTI(info.engine));
+	new_base_object->RegisterNormalMember(ss_members, tRisseVariant((tRisseObjectInterface*)members));
+
+	// members の prototype を null にする
+	members->RegisterNormalMember(ss_prototype, tRisseVariant((tRisseClassBase*)NULL));
+
+	return tRisseVariant((tRisseObjectInterface*)new_base_object);
 }
 //---------------------------------------------------------------------------
 

@@ -135,12 +135,15 @@ void tRisseClassBase::RegisterMembers()
 	RisseBindFunction(this, ss_fertilize, &tRisseClassBase::fertilize,
 				tRisseMemberAttribute(tRisseMemberAttribute::vcConst), pThis, false);
 
-	// modules 配列を登録
+	// modules 配列を members に登録
 	if(GetRTTI()->GetScriptEngine()->ArrayClass)
 	{
 		// Arrayクラスの構築中にArrayクラスのシングルトンインスタンスを参照できないため
 		// Arrayクラスがすでに構築されている場合だけ、modules 配列を登録する
-		RegisterNormalMember(ss_modules, tRisseVariant(tRisseVariant(GetRTTI()->GetScriptEngine()->ArrayClass).New()));
+		// modules は members 配列に登録する (RegisterNormalMember の最後の引数に注目)
+		RegisterNormalMember(ss_modules,
+			tRisseVariant(tRisseVariant(GetRTTI()->GetScriptEngine()->ArrayClass).New()),
+			tRisseMemberAttribute(), true);
 	}
 
 	// class を登録
@@ -278,8 +281,11 @@ void tRisseClassBase::include(const tRisseMethodArgument & args,
 	// クラスの modules 配列にモジュールを追加する
 
 	// modules を取り出す
+	// modules 配列の場合は members の中に modules 配列がある場合があるので
+	// ofUseClassMembersRule フラグをつける
 	tRisseVariant modules =
-		info.This.GetPropertyDirect(info.engine, ss_modules, tRisseOperateFlags::ofInstanceMemberOnly);
+		info.This.GetPropertyDirect(info.engine, ss_modules,
+			tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseClassMembersRule);
 
 	// Array.unshift を行う
 	modules.Do(info.engine, ocFuncCall, NULL, ss_unshift, 0, args);

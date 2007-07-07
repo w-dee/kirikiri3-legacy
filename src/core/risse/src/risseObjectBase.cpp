@@ -70,8 +70,10 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Read(const tRisseString & name, tR
 			return rvMemberNotFound; // クラスやモジュールを探さない場合はここでかえる
 
 		// モジュールを探す
+		// modules 配列の場合は members の中に modules 配列がある場合があるので
+		// ofUseClassMembersRule フラグをつける
 		tRisseVariant modules;
-		tRetValue modules_rv = Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This);
+		tRetValue modules_rv = Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseClassMembersRule, modules, This);
 		if(modules_rv == rvNoError)
 		{
 			// モジュール配列がある
@@ -304,8 +306,10 @@ tRisseObjectBase::tRetValue tRisseObjectBase::Write(const tRisseString & name, t
 			);
 
 	// モジュールを探す
+	// modules 配列の場合は members の中に modules 配列がある場合があるので
+	// ofUseClassMembersRule フラグをつける
 	tRisseVariant modules;
-	if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This) == rvNoError)
+	if(Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseClassMembersRule, modules, This) == rvNoError)
 	{
 		// モジュール配列がある
 		// モジュールは、モジュール配列をたどることで検索を行う
@@ -537,8 +541,10 @@ bool tRisseObjectBase::InstanceOf(
 		return false; // クラスやモジュールを探さない場合はここでかえる
 
 	// モジュールを探す
+	// modules 配列の場合は members の中に modules 配列がある場合があるので
+	// ofUseClassMembersRule フラグをつける
 	tRisseVariant modules;
-	tRetValue modules_rv = Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly, modules, This);
+	tRetValue modules_rv = Read(ss_modules, tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseClassMembersRule, modules, This);
 	if(modules_rv == rvNoError)
 	{
 		// モジュール配列がある

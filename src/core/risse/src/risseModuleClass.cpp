@@ -58,12 +58,9 @@ tRisseVariant tRisseModuleClass::ovulate(const tRisseNativeCallInfo &info)
 	tRisseObjectBase * new_base_object = new tRisseObjectBase();
 
 	// new_base_object に members を登録する
-	tRisseObjectBase * members = new tRisseObjectBase(ss_prototype);
-	members->SetRTTI(new tRisseRTTI(info.engine));
-	new_base_object->RegisterNormalMember(ss_members, tRisseVariant((tRisseObjectInterface*)members));
-
-	// members の prototype を null にする
-	members->RegisterNormalMember(ss_prototype, tRisseVariant((tRisseClassBase*)NULL));
+	tRisseVariant members = tRisseModuleClass::CreateMembersObject(
+					info.engine, tRisseVariant((tRisseClassBase*)NULL));
+	new_base_object->RegisterNormalMember(ss_members, members);
 
 	return tRisseVariant((tRisseObjectInterface*)new_base_object);
 }
@@ -86,6 +83,17 @@ void tRisseModuleClass::initialize(const tRisseNativeCallInfo &info)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tRisseVariant tRisseModuleClass::CreateMembersObject(
+			tRisseScriptEngine * engine, const tRisseVariant proto)
+{
+	tRisseObjectBase * members = new tRisseObjectBase(ss_prototype);
+	members->SetRTTI(new tRisseRTTI(engine));
+	members->RegisterNormalMember(ss_prototype, proto);
+	return tRisseVariant((tRisseObjectInterface*)members);
+}
+//---------------------------------------------------------------------------
 
 
 } // namespace Risse

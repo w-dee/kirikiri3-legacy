@@ -21,6 +21,7 @@
 #include "risseClassClass.h"
 #include "risseScriptEngine.h"
 #include "risseNativeBinder.h"
+#include "risseModuleClass.h"
 
 namespace Risse
 {
@@ -58,12 +59,10 @@ tRisseClassBase::tRisseClassBase(tRisseClassBase * super_class, bool extensible)
 	// ClassRTTIに情報を格納する
 	RTTIMatcher = ClassRTTI.AddId(this);
 
-	// members に空のオブジェクトを登録する
-	tRisseObjectBase * members = new tRisseObjectBase(ss_prototype);
-	members->SetRTTI(new tRisseRTTI(super_class->GetRTTI()->GetScriptEngine()));
-	RegisterNormalMember(ss_members, tRisseVariant((tRisseObjectInterface*)members));
-	// members の prototype に 親クラスの members を指定する
-	members->RegisterNormalMember(ss_prototype, super_class->ReadMember(ss_members));
+	// members に members 用オブジェクトを作成して登録する
+	tRisseVariant members = tRisseModuleClass::CreateMembersObject(
+					super_class->GetRTTI()->GetScriptEngine(), super_class->ReadMember(ss_members));
+	RegisterNormalMember(ss_members, members);
 
 	// クラスに必要なメソッドを登録する
 	RegisterMembers();
@@ -86,12 +85,10 @@ tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 	ClassRTTI.SetScriptEngine(engine);
 	RTTIMatcher = ClassRTTI.AddId(this);
 
-	// members に空のオブジェクトを登録する
-	tRisseObjectBase * members = new tRisseObjectBase(ss_prototype);
-	members->SetRTTI(new tRisseRTTI(engine));
-	RegisterNormalMember(ss_members, tRisseVariant((tRisseObjectInterface*)members));
-	// members の prototype に NULL を指定
-	members->RegisterNormalMember(ss_prototype, tRisseVariant((tRisseClassBase*)NULL));
+	// members に members 用オブジェクトを作成して登録する
+	tRisseVariant members = tRisseModuleClass::CreateMembersObject(
+					engine, tRisseVariant((tRisseClassBase*)NULL));
+	RegisterNormalMember(ss_members, members);
 
 	// クラスに必要なメソッドを登録する
 	RegisterMembers();
@@ -100,7 +97,7 @@ tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 	RegisterNormalMember(ss_super, tRisseVariant((tRisseClassBase*)NULL));
 
 	// this の prototype に members を設定
-	RegisterNormalMember(ss_prototype, tRisseVariant((tRisseObjectInterface*)members));
+	RegisterNormalMember(ss_prototype, members);
 }
 //---------------------------------------------------------------------------
 

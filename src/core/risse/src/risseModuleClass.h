@@ -41,6 +41,17 @@ public:
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tRisseNativeCallInfo &info);
+
+public: // ユーティリティ
+	//! @brief		members 用のオブジェクトを作成する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		proto		members の prototype が見に行く先
+	//! @note		ここで作成されるオブジェクトには、それが Object クラスの
+	//!				インスタンスであるという情報が付かないため、必要ならば
+	//!				tRisseObjectClass::Bless でクラス情報を付加すること。
+	//!				(このメソッドが呼ばれる時点ではまだ Object クラスが有効
+	//!				でない可能性があるため)
+	static tRisseVariant CreateMembersObject(tRisseScriptEngine * engine, const tRisseVariant proto);
 };
 //---------------------------------------------------------------------------
 }

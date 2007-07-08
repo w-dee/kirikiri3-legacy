@@ -203,27 +203,9 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 				break;
 			}
 
-		case T_BEGIN_STRING_LITERAL: // 文字列リテラルの開始
-			{
-				tRisseString str;
-				switch(ParseString(Ptr, str, *ptr_start, false))
-				{
-				case psrNone:
-					break;
-				case psrDelimiter:
-					id = T_CONSTVAL;
-					break;
-				case psrAmpersand:
-				case psrDollar:
-					break;
-				}
-				val = str;
-				break;
-			}
-
 		case T_BEGIN_EMSTRING_LITERAL: // 「埋め込み可能な」文字列リテラルの開始
 			{
-				// この時点で ptr_start は '@' 、Ptr[-1] は '"' または '\'' のはず
+				// この時点で Ptr[-1] は '"' または '\'' のはず
 				// (つまりデリミタ)
 				id = ParseEmbeddableString(val, Ptr[-1]);
 				break;
@@ -355,13 +337,9 @@ int tRisseLexer::ParseEmbeddableString(tRisseVariant & val, risse_char delimiter
 	case psrDelimiter: // デリミタに遭遇した; 文字列リテラルの終わり
 		id = T_CONSTVAL;
 		break;
-	case psrAmpersand:// & に遭遇したのでいったん解析が打ち切られた
+	case psrEmExpr: // \{ に遭遇したのでいったん解析が打ち切られた
 		id = (delimiter==RISSE_WC('"'))?
-			T_EMSTRING_AMPERSAND_D:T_EMSTRING_AMPERSAND_S;
-		break;
-	case psrDollar: // ${ に遭遇したのでいったん解析が打ち切られた
-		id = (delimiter==RISSE_WC('"'))?
-			T_EMSTRING_DOLLAR_D:T_EMSTRING_DOLLAR_S;
+			T_EMSTRING_D:T_EMSTRING_S;
 		break;
 	}
 	val = str;

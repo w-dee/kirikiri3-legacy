@@ -3,6 +3,13 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
  const risse_char * p = ptr;
 
  switch(p[0]) {
+ case '@':
+  p += 1;
+  { ptr = p; return T_AT; }
+ case '"':
+ case '\'':
+  p += 1;
+  { ptr = p; return T_BEGIN_EMSTRING_LITERAL; }
  case '0':
  case '1':
  case '2':
@@ -15,10 +22,6 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
  case '9':
   p += 1;
   { ptr = p; return T_BEGIN_NUMBER; }
- case '"':
- case '\'':
-  p += 1;
-  { ptr = p; return T_BEGIN_STRING_LITERAL; }
  case ',':
   p += 1;
   { ptr = p; return T_COMMA; }
@@ -1757,16 +1760,6 @@ static int RisseMapToken(const risse_char * & ptr, tRisseVariant &value)
   case '=':
    p += 2;
    { ptr = p; return T_ASTERISKEQUAL; }
-  }
- case '@':
-  switch(p[1]) {
-  default:
-   p += 1;
-   { ptr = p; return T_AT; }
-  case '"':
-  case '\'':
-   p += 2;
-   { ptr = p; return T_BEGIN_EMSTRING_LITERAL; }
   }
  case '\\':
   switch(p[1]) {

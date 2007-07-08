@@ -285,6 +285,13 @@ tRisseLexerUtility::tParseStringResult
 
 				str += (risse_char)code;
 			}
+			else if(embexpmode && *ptr == RISSE_WC('{')) // \{
+			{
+				if(!*(++ptr)) break;
+
+				status = psrEmExpr;
+				break;
+			}
 			else
 			{
 				str += (risse_char)UnescapeBackSlash(*ptr);
@@ -312,32 +319,6 @@ tRisseLexerUtility::tParseStringResult
 			{
 				status = psrDelimiter;
 				break;
-			}
-		}
-		else if(embexpmode && *ptr == RISSE_WC('&'))
-		{
-			// '&'
-			if(!*(++ptr)) break;
-			status = psrAmpersand;
-			break;
-		}
-		else if(embexpmode && *ptr == RISSE_WC('$'))
-		{
-			// '$'
-			// '{' must be placed immediately after '$'
-			const risse_char *p = ptr;
-			if(!*(++ptr)) break;
-			if(*ptr == RISSE_WC('{'))
-			{
-				if(!*(++ptr)) break;
-				status = psrDollar;
-				break;
-			}
-			else
-			{
-				ptr = p;
-				str += *ptr;
-				++ptr;
 			}
 		}
 		else

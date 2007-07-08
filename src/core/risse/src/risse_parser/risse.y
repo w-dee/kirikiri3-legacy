@@ -333,8 +333,7 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 
 
 %token <value>		T_CONSTVAL
-%token <value>		T_EMSTRING_AMPERSAND_D T_EMSTRING_AMPERSAND_S
-%token <value>		T_EMSTRING_DOLLAR_D T_EMSTRING_DOLLAR_S
+%token <value>		T_EMSTRING_D T_EMSTRING_S
 %token <value>		T_ID
 %token <value>		T_REGEXP T_REGEXP_FLAGS
 
@@ -1447,18 +1446,17 @@ dummy_elm_opt
 
 /* 埋め込み可能な文字列リテラル */
 /*
-   埋め込み可能な文字列リテラルは @ に続くシングルクオーテーションまたは
-   ダブルクオーテーションで囲まれた文字列リテラルであり、中に ${式} あるいは
-   &式; の形式での式の埋め込みができる (実行時に展開される) */
+   埋め込み可能な文字列リテラルは 中に \{式} の形式で式の埋め込みができる
+   (実行時に展開される)
 /*
    ダブルクオーテーションで始まった文字列リテラルはダブルクオーテーションで
    終了する必要があり、シングルクオーテーションにおいても同様だが、
    クオーテーションの種類についてはここでは文脈を分けることで対処する。
 */
 /*
-   ${ で始まる埋め込み式は }  で終わるため、parser は式と '}' が来たその直後に
+   \{ で始まる埋め込み式は }  で終わるため、parser は式と '}' が来たその直後に
    Lexer に対して埋め込み可能な文字列リテラルの再開を告げる
-   (&式; 形式についても同様)。Lexer はこれを受け、再び文字列リテラルの解析モードに入る。
+   Lexer はこれを受け、再び文字列リテラルの解析モードに入る。
 */
 embeddable_string
 	: embeddable_string_d T_CONSTVAL { $$ = RisseAddExprConstStr(@1.first, $1, *$2); }
@@ -1472,10 +1470,7 @@ embeddable_string_d
 ;
 
 embeddable_string_d_unit
-	: T_EMSTRING_AMPERSAND_D {BI} expr_with_comma ";"
-												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
-													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
-	| T_EMSTRING_DOLLAR_D  {BI}  expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
+	: T_EMSTRING_D  {BI}  expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
 												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
 													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
 ;
@@ -1487,10 +1482,7 @@ embeddable_string_s
 ;
 
 embeddable_string_s_unit
-	: T_EMSTRING_AMPERSAND_S {BI} expr_with_comma ";"
-												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
-													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
-	| T_EMSTRING_DOLLAR_S {BI} expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
+	: T_EMSTRING_S {BI} expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
 												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
 													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
 ;

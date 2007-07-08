@@ -109,8 +109,7 @@ public: // public static members
 	{
 		psrNone, //!< (エラー)
 		psrDelimiter, //!< デリミタにぶつかった
-		psrAmpersand, //!< & にぶつかった ( &式; 形式の埋め込み )
-		psrDollar  //!< $ にぶつかった ( ${ } 形式の埋め込み )
+		psrEmExpr //!< \{ にぶつかった
 	};
 
 	//! @brief		文字列を解析する

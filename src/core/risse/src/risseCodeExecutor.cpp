@@ -733,6 +733,41 @@ void tRisseCodeInterpreter::Execute(
 				code += 3;
 				break;
 
+			case ocString			: // 文字列にキャスト
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				AR(code[1]) = AR(code[2]).CastToString();
+				code += 3;
+				break;
+
+			case ocBoolean			: // booleanにキャスト
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				AR(code[1]) = AR(code[2]).CastToBoolean();
+				code += 3;
+				break;
+
+			case ocReal				: // realにキャスト
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				AR(code[1]) = AR(code[2]).CastToReal();
+				code += 3;
+				break;
+
+			case ocInteger			: // integerにキャスト
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				AR(code[1]) = AR(code[2]).CastToInteger();
+				code += 3;
+				break;
+
+			case ocOctet			: // octetにキャスト
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				AR(code[1]) = AR(code[2]).CastToOctet();
+				code += 3;
+				break;
+
 			case ocLogOr			: // lor	 ||
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);

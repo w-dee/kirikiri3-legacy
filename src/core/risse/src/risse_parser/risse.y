@@ -294,9 +294,12 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 	T_WITH					"with"
 	T_USING					"using"
 	T_INT					"int"
+	T_INTEGER				"integer"
 	T_REAL					"real"
 	T_STRING				"string"
 	T_OCTET					"octet"
+	T_BOOLEAN				"boolean"
+	T_BOOL					"bool"
 	T_AS					"as"
 	T_USE					"use"
 	T_DYNAMIC				"dynamic"
@@ -1048,6 +1051,8 @@ member_name
 	| "(" ")"								{ $$ = new tRisseVariant(mnFuncCall); }
 
 /* 以下は words.txt と同期させること */
+	| "bool"								{ $$ = new tRisseVariant(ss_bool           ); }
+	| "boolean"                             { $$ = new tRisseVariant(ss_boolean        ); }
 	| "break"								{ $$ = new tRisseVariant(ss_break          ); }
 	| "continue"							{ $$ = new tRisseVariant(ss_continue       ); }
 	| "const"								{ $$ = new tRisseVariant(ss_const          ); }
@@ -1076,6 +1081,7 @@ member_name
 	| "isvalid"								{ $$ = new tRisseVariant(ss_isvalid        ); }
 	| "import"								{ $$ = new tRisseVariant(ss_import         ); }
 	| "int"									{ $$ = new tRisseVariant(ss_int            ); }
+	| "integer"								{ $$ = new tRisseVariant(ss_integer        ); }
 	| "internal"							{ $$ = new tRisseVariant(ss_internal       ); }
 	| "in"									{ $$ = new tRisseVariant(ss_in             ); }
 	| "if"									{ $$ = new tRisseVariant(ss_if             ); }
@@ -1197,6 +1203,20 @@ expr
 									  /* new の子ノードは必ず関数呼び出し式である必要がある */
 									  RISSE_ASSERT($$->GetType() == antFuncCall);
 									  C(FuncCall, $$)->SetCreateNew(); }
+	| paren_bi_onl "string" onl ")" {EI} onl expr %prec T_UNARY
+									{ $$ = N(Unary)(@4.first, autString,		$7); }
+	| paren_bi_onl "bool" onl ")" {EI} onl expr %prec T_UNARY
+									{ $$ = N(Unary)(@4.first, autBoolean,		$7); }
+	| paren_bi_onl "boolean" onl ")" {EI} onl expr %prec T_UNARY
+									{ $$ = N(Unary)(@4.first, autBoolean,		$7); }
+	| paren_bi_onl "real" onl ")" {EI} onl expr %prec T_UNARY
+									{ $$ = N(Unary)(@4.first, autReal,			$7); }
+	| paren_bi_onl "int" onl ")" {EI} onl expr %prec T_UNARY
+									{ $$ = N(Unary)(@4.first, autInteger,		$7); }
+	| paren_bi_onl "integer" onl ")" {EI} onl expr %prec T_UNARY
+									{ $$ = N(Unary)(@4.first, autInteger,		$7); }
+	| paren_bi_onl "octet" onl ")" {EI} onl expr %prec T_UNARY
+									{ $$ = N(Unary)(@4.first, autOctet,			$7); }
 	| "delete" onl expr				{ $$ = N(Unary)(@1.first, autDelete			,$3); }
 	| "typeof" onl expr				{ ; }
 	| "+" onl expr %prec T_UNARY	{ $$ = N(Unary)(@1.first, autPlus			,$3); }
@@ -1206,6 +1226,10 @@ expr
 	| expr "--" %prec T_POSTUNARY	{ $$ = N(Unary)(@2.first, autPostDec		,$1); }
 	| expr "++" %prec T_POSTUNARY	{ $$ = N(Unary)(@2.first, autPostInc		,$1); }
 	| access_expr
+;
+
+paren_bi_onl:
+	"(" {BI} onl
 ;
 
 access_expr

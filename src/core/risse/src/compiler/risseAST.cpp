@@ -1176,25 +1176,23 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 	// 単項演算子
 	switch(UnaryType)
 	{
-	case autLogNot:	// "!" logical not
-	case autBitNot:	// "~" bit not
-	case autPlus:	// "+"
-	case autMinus:	// "-"
+	case autLogNot:		// "!" logical not
+	case autBitNot:		// "~" bit not
+	case autPlus:		// "+"
+	case autMinus:		// "-"
 		{
 			// 子の計算結果を得る
 			tRisseSSAVariable * child_var = Child->GenerateReadSSA(form);
-			if(!child_var)
-			{
-				// エラー
-			}
+			RISSE_ASSERT(child_var != NULL);
+
 			// オペコードを決定
 			tRisseOpCode oc;
 			switch(UnaryType)
 			{
-			case autLogNot:	oc = ocLogNot;	break;
-			case autBitNot:	oc = ocBitNot;	break;
-			case autPlus:	oc = ocPlus;	break;
-			case autMinus:	oc = ocMinus;	break;
+			case autLogNot:		oc = ocLogNot;	break;
+			case autBitNot:		oc = ocBitNot;	break;
+			case autPlus:		oc = ocPlus;	break;
+			case autMinus:		oc = ocMinus;	break;
 			default: oc = ocNoOperation;
 			}
 			// 文の作成
@@ -1207,6 +1205,39 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 			// この仕様は後に変更の可能性アリ (! 演算子をオーバーロードできないようにする可能性がある)
 			// 他の ~ や + などの演算子についてもそうなる可能性がある
 			//////////////////////////////////////////////////////////////////////////////////////////
+
+			// 戻る
+			return ret_var;
+		}
+
+	// キャスト演算子の類
+	case autString:		//!< "string" cast to string
+	case autBoolean:	//!< "boolean" cast to boolean
+	case autReal:		//!< "real" cast to real
+	case autInteger:	//!< "integer" cast to integer
+	case autOctet:		//!< "octet" cast to octet
+		{
+			// 子の計算結果を得る
+			tRisseSSAVariable * child_var = Child->GenerateReadSSA(form);
+			RISSE_ASSERT(child_var != NULL);
+
+			// オペコードを決定
+			tRisseOpCode oc;
+			tRisseVariant::tType rettype = tRisseVariant::vtVoid;
+			switch(UnaryType)
+			{
+			case autString:		oc = ocString;	rettype = tRisseVariant::vtString;		break;
+			case autBoolean:	oc = ocBoolean;	rettype = tRisseVariant::vtBoolean;		break;
+			case autReal:		oc = ocReal;	rettype = tRisseVariant::vtReal;		break;
+			case autInteger:	oc = ocInteger;	rettype = tRisseVariant::vtInteger;		break;
+			case autOctet:		oc = ocOctet;	rettype = tRisseVariant::vtOctet;		break;
+			default: oc = ocNoOperation;
+			}
+			// 文の作成
+			tRisseSSAVariable * ret_var = NULL;
+			form->AddStatement(GetPosition(), oc, &ret_var, child_var);
+
+			ret_var->SetValueType(rettype); // 結果は常にキャストした後の型になる
 
 			// 戻る
 			return ret_var;

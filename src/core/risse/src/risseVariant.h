@@ -2104,6 +2104,8 @@ public: // キャスト
 		return (risse_int64)0;
 	}
 
+	risse_int64 CastToInteger          () const { return operator risse_int64(); }
+
 	risse_int64 CastToInteger_Void     () const { return false; /* void は 0 */}
 	risse_int64 CastToInteger_Integer  () const { return AsInteger(); }
 	risse_int64 CastToInteger_Real     () const { return (risse_int64)AsReal(); }
@@ -2132,6 +2134,8 @@ public: // キャスト
 		}
 		return false;
 	}
+
+	risse_real CastToReal          () const { return operator risse_real(); }
 
 	risse_real CastToReal_Void     () const { return (risse_real)0.0; }
 	risse_real CastToReal_Integer  () const { return AsInteger(); }
@@ -2162,6 +2166,8 @@ public: // キャスト
 		return false;
 	}
 
+	bool CastToBoolean          () const { return operator bool(); }
+
 	bool CastToBoolean_Void     () const { return false; /* void は偽 */}
 	bool CastToBoolean_Integer  () const { return AsInteger() != 0; }
 	bool CastToBoolean_Real     () const { return AsReal() != 0.0; }
@@ -2191,6 +2197,8 @@ public: // キャスト
 		return tRisseString();
 	}
 
+	tRisseString CastToString          () const { return operator tRisseString(); }
+
 	tRisseString CastToString_Void     () const { return tRisseString(); }
 	tRisseString CastToString_Integer  () const;
 	tRisseString CastToString_Real     () const;
@@ -2219,6 +2227,8 @@ public: // キャスト
 		}
 		return tRisseOctet();
 	}
+
+	tRisseOctet CastToOctet          () const { return operator tRisseOctet(); }
 
 	tRisseOctet CastToOctet_Void     () const { return tRisseOctet(); }
 	tRisseOctet CastToOctet_Integer  () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }

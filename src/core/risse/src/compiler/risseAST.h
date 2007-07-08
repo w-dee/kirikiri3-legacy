@@ -155,6 +155,11 @@ RISSE_AST_ENUM_DEF(UnaryType)
 	RISSE_AST_ENUM_ITEM(aut, Delete			)		//!< "delete"
 	RISSE_AST_ENUM_ITEM(aut, Plus			)		//!< "+"
 	RISSE_AST_ENUM_ITEM(aut, Minus			)		//!< "-"
+	RISSE_AST_ENUM_ITEM(aut, String			)		//!< "string" cast to string
+	RISSE_AST_ENUM_ITEM(aut, Boolean		)		//!< "boolean" cast to boolean
+	RISSE_AST_ENUM_ITEM(aut, Real			)		//!< "real" cast to real
+	RISSE_AST_ENUM_ITEM(aut, Integer		)		//!< "integer" cast to integer
+	RISSE_AST_ENUM_ITEM(aut, Octet			)		//!< "octet" cast to octet
 RISSE_AST_ENUM_END
 //---------------------------------------------------------------------------
 

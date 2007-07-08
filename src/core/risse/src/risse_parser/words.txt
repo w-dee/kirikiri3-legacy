@@ -84,6 +84,8 @@ $               T_DOLLAR                 - false false
 ##### これはこの「文字類」にリストされている物+下の定数
 ##### にリストされている、アルファベットのみで構成されている
 ##### 単語に相当する。
+bool                T_BOOL         - true false
+boolean             T_BOOLEAN      - true false
 break               T_BREAK        - true false
 continue            T_CONTINUE     - true false
 const               T_CONST        - true false
@@ -112,6 +114,7 @@ instanceof          T_INSTANCEOF   - true false
 isvalid             T_ISVALID      - true false
 import              T_IMPORT       - true false
 int                 T_INT          - true false
+integer             T_INTEGER      - true false
 internal            T_INTERNAL     - true false
 in                  T_IN           - true false
 if                  T_IF           - true false

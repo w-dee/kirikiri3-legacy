@@ -8,6 +8,8 @@
 // それと重複するものをここで定義しており冗長に見えるが
 // ヘッダ側に tRisseSS の実装(長ったらしいテンプレート)
 // を見せたくなかったのでこうしている
+tRisseStringData data_ss_bool = { tRisseSS<'b','o','o','l'>::data.Buffer,4 }; /* トークンの値 bool */
+tRisseStringData data_ss_boolean = { tRisseSS<'b','o','o','l','e','a','n'>::data.Buffer,7 }; /* トークンの値 boolean */
 tRisseStringData data_ss_break = { tRisseSS<'b','r','e','a','k'>::data.Buffer,5 }; /* トークンの値 break */
 tRisseStringData data_ss_continue = { tRisseSS<'c','o','n','t','i','n','u','e'>::data.Buffer,8 }; /* トークンの値 continue */
 tRisseStringData data_ss_const = { tRisseSS<'c','o','n','s','t'>::data.Buffer,5 }; /* トークンの値 const */
@@ -36,6 +38,7 @@ tRisseStringData data_ss_instanceof = { tRisseSS<'i','n','s','t','a','n','c','e'
 tRisseStringData data_ss_isvalid = { tRisseSS<'i','s','v','a','l','i','d'>::data.Buffer,7 }; /* トークンの値 isvalid */
 tRisseStringData data_ss_import = { tRisseSS<'i','m','p','o','r','t'>::data.Buffer,6 }; /* トークンの値 import */
 tRisseStringData data_ss_int = { tRisseSS<'i','n','t'>::data.Buffer,3 }; /* トークンの値 int */
+tRisseStringData data_ss_integer = { tRisseSS<'i','n','t','e','g','e','r'>::data.Buffer,7 }; /* トークンの値 integer */
 tRisseStringData data_ss_internal = { tRisseSS<'i','n','t','e','r','n','a','l'>::data.Buffer,8 }; /* トークンの値 internal */
 tRisseStringData data_ss_in = { tRisseSS<'i','n'>::data.Buffer,2 }; /* トークンの値 in */
 tRisseStringData data_ss_if = { tRisseSS<'i','f'>::data.Buffer,2 }; /* トークンの値 if */

@@ -399,6 +399,11 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 	case ocBitNot:
 	case ocPlus:
 	case ocMinus:
+	case ocString:
+	case ocBoolean:
+	case ocReal:
+	case ocInteger:
+	case ocOctet:
 		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Used.size() == 1);
 		gen->PutOperator(Code, Declared, Used[0]);

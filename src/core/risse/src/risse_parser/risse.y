@@ -110,8 +110,8 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 		const tRisseVariant & conststr, tRisseASTNode * node)
 {
 	if(((tRisseString)(conststr)).IsEmpty())
-		return node; // 文字列リテラルが空文字列
-	return N(Binary)(lp, abtAdd, N(Factor)(lp, aftConstant, conststr), node);
+		return N(Unary)(lp, autString, node); // 文字列リテラルが空文字列
+	return N(Binary)(lp, abtAdd, N(Factor)(lp, aftConstant, conststr), N(Unary)(lp, autString, node));
 }
 
 
@@ -126,8 +126,8 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 		tRisseASTNode * node, const tRisseVariant & conststr)
 {
 	if(((tRisseString)(conststr)).IsEmpty())
-		return node; // 文字列リテラルが空文字列
-	return N(Binary)(lp, abtAdd, node, N(Factor)(lp, aftConstant, conststr));
+		return N(Unary)(lp, autString, node); // 文字列リテラルが空文字列
+	return N(Binary)(lp, abtAdd, N(Unary)(lp, autString, node), N(Factor)(lp, aftConstant, conststr));
 }
 
 

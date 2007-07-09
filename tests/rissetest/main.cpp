@@ -181,8 +181,7 @@ int Application::OnRun()
 
 		// Script クラスを追加する
 		(new tRisseScriptClass(&engine))->
-				RegisterClassInstance(engine.GetGlobalObject(),
-					tRisseSS<'S','c','r','i','p','t'>());
+				RegisterClassInstance(engine.GetGlobalObject());
 
 		// 入力ファイルを開く
 		wxFile file;

@@ -129,6 +129,18 @@ void tRisseClassBase::SetClassClassRTTI(tRisseScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
+void tRisseClassBase::RegisterClassInstance(tRisseVariant & target)
+{
+	tRisseString name = GetPropertyDirect(ss_name);
+	target.SetPropertyDirect_Object(name,
+		tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
+		tRisseOperateFlags::ofMemberEnsure | tRisseOperateFlags::ofInstanceMemberOnly,
+				tRisseVariant(this));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRisseClassBase::RegisterMembers()
 {
 	// 各メソッドを登録

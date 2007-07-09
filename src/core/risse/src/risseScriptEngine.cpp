@@ -71,7 +71,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	GlobalObject = tRisseVariant(ObjectClass).New();
 
 	// 各クラスをグローバルオブジェクトに登録する
-	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterClassInstance(GlobalObject, ss_##X);
+	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterClassInstance(GlobalObject);
 	#include "risseInternalClasses.inc"
 	#undef RISSE_INTERNALCLASSES_CLASS
 

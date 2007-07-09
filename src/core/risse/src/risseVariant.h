@@ -2055,9 +2055,9 @@ public:
 	tRisseVariantBlock Sub_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnSub); return *this; }
+	tRisseVariantBlock Sub_Null     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)0; /* incomplete */ }
+	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnSub, rhs); }
 

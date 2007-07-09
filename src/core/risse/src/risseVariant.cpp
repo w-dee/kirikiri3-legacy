@@ -1243,7 +1243,6 @@ tRisseVariantBlock tRisseVariantBlock::Add_Real     (const tRisseVariantBlock & 
 tRisseVariantBlock tRisseVariantBlock::Add_Null     (const tRisseVariantBlock & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
-	return tRisseVariant::GetVoidObject();
 }
 //---------------------------------------------------------------------------
 
@@ -1299,13 +1298,13 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Void     (const tRisseVariantBlock & 
 {
 	switch(rhs.GetType())
 	{
-	case vtVoid:	return (risse_int64)0; // void - void = 0 かなぁ
+	case vtVoid:	return tRisseVariant::GetVoidObject(); // void - void = void かなぁ
 	case vtInteger:	return - rhs.AsInteger(); // void - integer
 	case vtReal:	return - rhs.AsReal();
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return - rhs.Plus_String();
-	case vtOctet:	return false; // incomplete; どうしよう
-	case vtBoolean:	return (risse_int64)(- (int)rhs.CastToBoolean_Boolean());
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return tRisseVariantBlock();
@@ -1321,10 +1320,10 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Integer  (const tRisseVariantBlock & 
 	case vtVoid:	return *this; // integer - void
 	case vtInteger:	return AsInteger() - rhs.AsInteger(); // integer - integer
 	case vtReal:	return AsInteger() - rhs.AsReal(); // integer - real
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return Sub_Integer(rhs.Plus_String()); // Plus_String の戻りは integer か real
-	case vtOctet:	return false; // incomplete; どうしよう
-	case vtBoolean:	return AsInteger() - (int)rhs.CastToBoolean_Boolean(); // integer - bool
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return tRisseVariantBlock();
@@ -1340,13 +1339,29 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Real     (const tRisseVariantBlock & 
 	case vtVoid:	return *this; // real - void
 	case vtInteger:	return AsReal() - rhs.AsInteger(); // real - integer
 	case vtReal:	return AsReal() - rhs.AsReal(); // real - real
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return Sub_Real(rhs.Plus_String()); // Plus_String の戻りは integer か real
-	case vtOctet:	return false; // incomplete; どうしよう
-	case vtBoolean:	return AsReal() - (int)rhs.CastToBoolean_Boolean(); // real - bool
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Sub_Null     (const tRisseVariantBlock & rhs) const
+{
+	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Sub_Octet    (const tRisseVariantBlock & rhs) const
+{
+	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 }
 //---------------------------------------------------------------------------
 
@@ -1359,12 +1374,12 @@ tRisseVariantBlock tRisseVariantBlock::Sub_String   (const tRisseVariantBlock & 
 	case vtVoid:
 	case vtInteger:
 	case vtReal:
+	case vtNull:
 	case vtString:
 	case vtBoolean:
-		return Plus_String() - rhs; // Plus_String の戻りは integer か real
-	case vtOctet:	return false; // incomplete; どうしよう
+	case vtOctet:
+			RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
-	case vtNull: tRisseNullObjectExceptionClass::Throw();
 	}
 	return tRisseVariantBlock();
 }
@@ -1376,13 +1391,13 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Boolean  (const tRisseVariantBlock & 
 {
 	switch(rhs.GetType())
 	{
-	case vtVoid:	return *this; // bool - void
-	case vtInteger:	return (int)CastToBoolean_Boolean() - rhs.AsInteger(); // bool - integer
-	case vtReal:	return (int)CastToBoolean_Boolean() - rhs.AsReal(); // bool - real
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return Sub_Boolean(rhs.Plus_String()); // Plus_String の戻りは integer か real
-	case vtOctet:	return false; // incomplete; どうしよう
-	case vtBoolean:	return (risse_int64)((int)CastToBoolean_Boolean() - (int)rhs.CastToBoolean_Boolean()); // bool - bool
+	case vtVoid:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return tRisseVariantBlock();

@@ -144,7 +144,7 @@ class tRisseClassBase;
 //---------------------------------------------------------------------------
 //! @brief		ネイティブ関数呼び出し情報
 //---------------------------------------------------------------------------
-class tRisseNativeCallInfo
+class tRisseNativeCallInfo : public tRisseCollectee
 {
 public:
 	tRisseScriptEngine * engine;		//!< スクリプトエンジンインスタンス
@@ -231,7 +231,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ネイティブプロパティゲッター呼び出し情報
 //---------------------------------------------------------------------------
-class tRisseNativePropGetInfo
+class tRisseNativePropGetInfo : public tRisseCollectee
 {
 public:
 	tRisseScriptEngine * engine;		//!< スクリプトエンジンインスタンス
@@ -264,7 +264,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ネイティブプロパティセッター呼び出し情報
 //---------------------------------------------------------------------------
-class tRisseNativePropSetInfo
+class tRisseNativePropSetInfo : public tRisseCollectee
 {
 public:
 	tRisseScriptEngine * engine;		//!< スクリプトエンジンインスタンス

@@ -257,6 +257,7 @@ struct GC_ms_entry *RisseMarkCoroutineContext(
 	CONTEXT &context = co_context->context;
 
 	ptr_t sp, stack_min, stack_max;
+	int dummy;
 
 //---------------------------------------------------------------------
 // ここの内容は GC の win32_threads.c の GC_push_all_stacks()
@@ -302,6 +303,15 @@ struct GC_ms_entry *RisseMarkCoroutineContext(
 //---------------------------------------------------------------------
 
 	// スタックの push
+
+	if((tRisseCoroutineContext*)GetCurrentFiber() == co_context)
+	{
+		// 現在 push しようとしているファイバが現在のファイバの場合、
+		// sp が変な値になっているので、スタック上のダミーの変数のアドレスに
+		// (これがおおむねスタックのトップのはず) 修正する
+		sp = (ptr_t) &dummy;
+	}
+
 	stack_min = (ptr_t)(co_context->stack_limit);
 	stack_max = (ptr_t)co_context->stack_base;
 	if (sp >= stack_min && sp < (ptr_t)co_context->stack_base)
@@ -314,11 +324,14 @@ struct GC_ms_entry *RisseMarkCoroutineContext(
 	if(stack_min > stack_max) std::swap(stack_min, stack_max);
 
 	// ptr_t は char* で、GC_PTR は void * であることに注意
-//	fprintf(stderr, "pushing from %p to %p (%d words)\n", stack_min, stack_max, ((long)stack_max - (long)stack_min)/sizeof(void*));
+#ifdef RISSE_COROUTINE_DEBUG
+	fprintf(stderr, "pushing from %p to %p (%d words)\n", stack_min, stack_max, ((long)stack_max - (long)stack_min)/sizeof(void*));
+#endif
 
 	for(ptr_t p = stack_min; p < stack_max; p += sizeof(GC_PTR) / sizeof(*p))
 	{
-		mark_sp = GC_MARK_AND_PUSH((GC_PTR)(*(void**)p), mark_sp, mark_sp_limit, (GC_PTR*)co_context);
+		void * ptr = (*(void**)p);
+		mark_sp = GC_MARK_AND_PUSH((GC_PTR)ptr, mark_sp, mark_sp_limit, (GC_PTR*)co_context);
 	}
 
 	return mark_sp;
@@ -565,6 +578,8 @@ struct GC_ms_entry *RisseMarkCoroutinePtr(GC_word *addr,
 		fflush(stdout); fflush(stderr);
 		fprintf(stdout, "marking Ptr %p, tRisseCoroutineImpl %p\n", a, a->Impl);
 		a->Impl->Dump();
+		fprintf(stdout, "GC_least_plausible_heap_addr %p, GC_greatest_plausible_heap_addr %p\n",
+			GC_least_plausible_heap_addr, GC_greatest_plausible_heap_addr);
 		fflush(stdout); fflush(stderr);
 #endif
 

@@ -40,8 +40,8 @@ function test(labels, values1, values2, expects) testmethod
 
 	if(pass_count == test_count) return "ok";
 
-	Script.print("Error!! (see below)\n");
-	Script.print(checks);
+	Script::print("Error!! (see below)\n");
+	Script::print(checks);
 
 	return "failed";
 }

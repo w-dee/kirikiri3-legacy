@@ -41,7 +41,8 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
        ClassDefinitionException
        InstantiationException
        BadContextException
-       UnsupportedOperation
+       UnsupportedOperationException
+       ArithmeticException
        ArgumentException
          IllegalArgumentException
            NullObjectException
@@ -1260,6 +1261,65 @@ void tRisseUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented(tR
 	tRisseTemporaryException * e =
 		new tRisseTemporaryException(ss_UnsupportedOperationException,
 			tRisseString(RISSE_WS_TR("operation is not implemented")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRisseArithmeticExceptionClass::tRisseArithmeticExceptionClass(tRisseScriptEngine * engine) :
+	tRisseClassBase(ss_ArithmeticException, engine->RuntimeExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseArithmeticExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	RisseBindFunction(this, ss_construct, &tRisseArithmeticExceptionClass::construct);
+	RisseBindFunction(this, ss_initialize, &tRisseArithmeticExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseArithmeticExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseArithmeticExceptionClass::initialize(const tRisseNativeCallInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisseArithmeticExceptionClass::ThrowDivideByZeroException(tRisseScriptEngine * engine)
+{
+	tRisseTemporaryException * e =
+		new tRisseTemporaryException(ss_ArithmeticException,
+			tRisseString(RISSE_WS_TR("attempt to divide by zero")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------

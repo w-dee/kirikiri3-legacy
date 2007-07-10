@@ -299,6 +299,8 @@ extern tRisseStringData data_ss_IllegalArgumentTypeException;
 static const tRisseString & ss_IllegalArgumentTypeException = *reinterpret_cast<const tRisseString *>(&data_ss_IllegalArgumentTypeException); //!< (static string)  "IllegalArgumentTypeException" クラス名
 extern tRisseStringData data_ss_CompileException;
 static const tRisseString & ss_CompileException = *reinterpret_cast<const tRisseString *>(&data_ss_CompileException); //!< (static string)  "CompileException" クラス名
+extern tRisseStringData data_ss_ArithmeticException;
+static const tRisseString & ss_ArithmeticException = *reinterpret_cast<const tRisseString *>(&data_ss_ArithmeticException); //!< (static string)  "ArithmeticException" クラス名
 extern tRisseStringData data_ss_extensible;
 static const tRisseString & ss_extensible = *reinterpret_cast<const tRisseString *>(&data_ss_extensible); //!< (static string)  "extensible" プロパティ名
 extern tRisseStringData data_ss_Binding;

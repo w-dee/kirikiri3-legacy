@@ -157,6 +157,7 @@ tRisseStringData data_ss_expression = { tRisseSS<'e','x','p','r','e','s','s','i'
 tRisseStringData data_ss_NullObjectException = { tRisseSS<'N','u','l','l','O','b','j','e','c','t','E','x','c','e','p','t','i','o','n'>::data.Buffer,19 }; /*  "NullObjectException" クラス名 */
 tRisseStringData data_ss_IllegalArgumentTypeException = { tRisseSS<'I','l','l','e','g','a','l','A','r','g','u','m','e','n','t','T','y','p','e','E','x','c','e','p','t','i','o','n'>::data.Buffer,28 }; /*  "IllegalArgumentTypeException" クラス名 */
 tRisseStringData data_ss_CompileException = { tRisseSS<'C','o','m','p','i','l','e','E','x','c','e','p','t','i','o','n'>::data.Buffer,16 }; /*  "CompileException" クラス名 */
+tRisseStringData data_ss_ArithmeticException = { tRisseSS<'A','r','i','t','h','m','e','t','i','c','E','x','c','e','p','t','i','o','n'>::data.Buffer,19 }; /*  "ArithmeticException" クラス名 */
 tRisseStringData data_ss_extensible = { tRisseSS<'e','x','t','e','n','s','i','b','l','e'>::data.Buffer,10 }; /*  "extensible" プロパティ名 */
 tRisseStringData data_ss_Binding = { tRisseSS<'B','i','n','d','i','n','g'>::data.Buffer,7 }; /*  "Binding" クラス名 */
 tRisseStringData data_ss_eval = { tRisseSS<'e','v','a','l'>::data.Buffer,4 }; /*  "eval" メソッド名 */

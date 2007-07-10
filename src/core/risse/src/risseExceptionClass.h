@@ -719,6 +719,38 @@ public:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		"ArithmeticException" クラス
+//---------------------------------------------------------------------------
+class tRisseArithmeticExceptionClass : public tRisseClassBase
+{
+	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisseArithmeticExceptionClass(tRisseScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tRisseNativeCallInfo & info);
+
+public:
+	//! @brief		「0で除算をしようとした」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowDivideByZeroException(tRisseScriptEngine * engine);
+	//! @brief		「0で除算をしようとした」例外を発生
+	static void ThrowDivideByZeroException()
+		{ ThrowDivideByZeroException(NULL); }
+};
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 

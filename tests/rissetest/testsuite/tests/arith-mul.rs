@@ -12,9 +12,9 @@ var eM = NoSuchMemberException;
 var expects =
 [
 //     ____V2____,____I2____,____R2____,____N2____,____S2____,____O2____,____T2____,____F2____,____A2____
-/*V1*/[ void     ,    -2    ,  -2.0    ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
-/*I1*/[ 1        ,    -1    ,  -1.0    ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
-/*R1*/[ 1.0      ,   -1.0   ,  -1.0    ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
+/*V1*/[ void     ,    0     ,   0.0    ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
+/*I1*/[   0      ,    2     ,   2.0    ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
+/*R1*/[  0.0     ,   2.0    ,   2.0    ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*N1*/[   eT     ,   eT     ,   eT     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*S1*/[   eT     ,   eT     ,   eT     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*O1*/[   eT     ,   eT     ,   eT     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
@@ -23,6 +23,6 @@ var expects =
 /*A1*/[   eM     ,   eM     ,   eM     ,    eM    ,   eM     ,   eM     ,   eM     ,   eM     ,   eM      ],
 ];
 
-test(labels, values1, values2, expects) { |a,b| a - b };
+test(labels, values1, values2, expects) { |a,b| a * b };
 
 //=> "ok"

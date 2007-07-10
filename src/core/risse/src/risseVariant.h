@@ -1870,13 +1870,13 @@ public:
 
 	tRisseVariantBlock operator / (const tRisseVariantBlock & rhs) const { return Div(rhs); }
 
-	tRisseVariantBlock Div_Void     (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
-	tRisseVariantBlock Div_Integer  (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
-	tRisseVariantBlock Div_Real     (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
-	tRisseVariantBlock Div_Null     (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
-	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
-	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
-	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_real)(*this) / (risse_real)rhs; }
+	tRisseVariantBlock Div_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Div_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Div_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Div_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnDiv, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1915,13 +1915,13 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock Idiv_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
-	tRisseVariantBlock Idiv_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) / (risse_int64)rhs; }
+	tRisseVariantBlock Idiv_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Idiv_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Idiv_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Idiv_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Idiv_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Idiv_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Idiv_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnIdiv, rhs); }
 
 	//-----------------------------------------------------------------------

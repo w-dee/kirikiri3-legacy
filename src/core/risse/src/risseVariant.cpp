@@ -1213,7 +1213,7 @@ tRisseVariantBlock tRisseVariantBlock::Add_Integer  (const tRisseVariantBlock & 
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tRisseVariantBlock();
 }
@@ -1305,7 +1305,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Void     (const tRisseVariantBlock & 
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tRisseVariantBlock();
 }
@@ -1324,7 +1324,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Integer  (const tRisseVariantBlock & 
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tRisseVariantBlock();
 }
@@ -1343,7 +1343,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Real     (const tRisseVariantBlock & 
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tRisseVariantBlock();
 }
@@ -1379,7 +1379,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_String   (const tRisseVariantBlock & 
 	case vtBoolean:
 	case vtOctet:
 			RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tRisseVariantBlock();
 }
@@ -1398,7 +1398,7 @@ tRisseVariantBlock tRisseVariantBlock::Sub_Boolean  (const tRisseVariantBlock & 
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tRisseVariantBlock();
 }

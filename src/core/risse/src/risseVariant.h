@@ -1965,7 +1965,7 @@ public:
 	tRisseVariantBlock Mul_Void     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Integer  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnMul); return *this; }
+	tRisseVariantBlock Mul_Null     (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;

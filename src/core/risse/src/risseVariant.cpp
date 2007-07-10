@@ -1071,14 +1071,14 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Void     (const tRisseVariantBlock & 
 {
 	switch(rhs.GetType())
 	{
-	case vtVoid:	return (risse_int64)0; // void * void
+	case vtVoid:	return tRisseVariant::GetVoidObject(); // void * void
 	case vtInteger:	return (risse_int64)0; // void * integer
 	case vtReal:	return (risse_real)0.0;
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_real)0;
-	case vtString:	return Mul_Void(rhs.Plus_String()); // Plus_String の戻りは integer か real
-	case vtOctet:	return Mul_Void(rhs.Plus_Octet()); // Plus_Octet の戻りは integer か real
-	case vtBoolean:	return (bool)false;
-	case vtObject:	return (risse_int64)0; // incomplete
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tRisseVariantBlock();
 }
@@ -1093,11 +1093,11 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Integer  (const tRisseVariantBlock & 
 	case vtVoid:	return (risse_int64)0; // integer * void
 	case vtInteger:	return AsInteger() * rhs.AsInteger(); // integer * integer
 	case vtReal:	return AsInteger() * rhs.AsReal(); // integer * real
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return Mul_Integer(rhs.Plus_String()); // Plus_String の戻りは integer か real
-	case vtOctet:	return Mul_Integer(rhs.Plus_Octet()); // Plus_Octet の戻りは integer か real
-	case vtBoolean:	return AsInteger() * (int)rhs.CastToBoolean_Boolean(); // integer * boolean
-	case vtObject:	return (risse_int64)0; // incomplete
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tRisseVariantBlock();
 }
@@ -1109,16 +1109,24 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Real     (const tRisseVariantBlock & 
 {
 	switch(rhs.GetType())
 	{
-	case vtVoid:	return (risse_int64)0; // real * void
+	case vtVoid:	return (risse_real)0; // real * void
 	case vtInteger:	return AsReal() * rhs.AsInteger(); // real * integer
 	case vtReal:	return AsReal() * rhs.AsReal(); // real * real
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return Mul_Real(rhs.Plus_String()); // Plus_String の戻りは integer か real
-	case vtOctet:	return Mul_Real(rhs.Plus_Octet()); // Plus_Octet の戻りは integer か real
-	case vtBoolean:	return AsReal() * (int)rhs.CastToBoolean_Boolean(); // real * boolean
-	case vtObject:	return (risse_int64)0; // incomplete
+	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tRisseVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseVariantBlock tRisseVariantBlock::Mul_Null     (const tRisseVariantBlock & rhs) const
+{
+	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 }
 //---------------------------------------------------------------------------
 
@@ -1131,12 +1139,12 @@ tRisseVariantBlock tRisseVariantBlock::Mul_String   (const tRisseVariantBlock & 
 	case vtVoid:
 	case vtInteger:
 	case vtReal:
+	case vtNull:
 	case vtString:
 	case vtBoolean:
 	case vtOctet:
 	case vtObject:
-		return Plus_String() * rhs; // Plus_String は integer か real になる
-	case vtNull: tRisseNullObjectExceptionClass::Throw();
+		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tRisseVariantBlock();
 }
@@ -1151,12 +1159,12 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Octet    (const tRisseVariantBlock & 
 	case vtVoid:
 	case vtInteger:
 	case vtReal:
+	case vtNull:
 	case vtString:
 	case vtBoolean:
 	case vtOctet:
 	case vtObject:
-		return Plus_Octet() * rhs; // Plus_Octet は integer か real になる
-	case vtNull: tRisseNullObjectExceptionClass::Throw();
+		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tRisseVariantBlock();
 }
@@ -1168,14 +1176,15 @@ tRisseVariantBlock tRisseVariantBlock::Mul_Boolean  (const tRisseVariantBlock & 
 {
 	switch(rhs.GetType())
 	{
-	case vtVoid:	return false; // bool * void
-	case vtInteger:	return CastToBoolean_Boolean() * rhs.AsInteger(); // bool * integer
-	case vtReal:	return CastToBoolean_Boolean() * rhs.AsReal(); // bool * real
-	case vtNull:	tRisseNullObjectExceptionClass::Throw(); return (risse_int64)0;
-	case vtString:	return Mul_Boolean(rhs.Plus_String()); // Plus_String の戻りは integer か real
-	case vtOctet:	return Mul_Boolean(rhs.Plus_Octet()); // Plus_Octet の戻りは integer か real
-	case vtBoolean:	return (risse_int64)(CastToBoolean_Boolean() * rhs.CastToBoolean_Boolean()); // bool * boolean
-	case vtObject:	return (risse_int64)0; // incomplete
+	case vtVoid:
+	case vtInteger:
+	case vtReal:
+	case vtNull:
+	case vtString:
+	case vtBoolean:
+	case vtOctet:
+	case vtObject:
+		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tRisseVariantBlock();
 }

@@ -1292,13 +1292,13 @@ public:
 
 	tRisseVariantBlock operator |(const tRisseVariantBlock & rhs) const { return BitOr(rhs); }
 
-	risse_int64        BitOr_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)rhs; }
-	risse_int64        BitOr_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
-	risse_int64        BitOr_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
-	risse_int64        BitOr_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
-	risse_int64        BitOr_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
-	risse_int64        BitOr_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
-	risse_int64        BitOr_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) | (risse_int64)rhs; }
+	tRisseVariantBlock BitOr_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitOr_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitOr_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitOr_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitOr_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitOr_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitOr_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock BitOr_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitOr, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1338,13 +1338,13 @@ public:
 
 	tRisseVariantBlock operator ^(const tRisseVariantBlock & rhs) const { return BitXor(rhs); }
 
-	risse_int64        BitXor_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)rhs; }
-	risse_int64        BitXor_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
-	risse_int64        BitXor_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
-	risse_int64        BitXor_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
-	risse_int64        BitXor_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
-	risse_int64        BitXor_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
-	risse_int64        BitXor_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) ^ (risse_int64)rhs; }
+	tRisseVariantBlock BitXor_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitXor_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitXor_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitXor_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitXor_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitXor_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitXor_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock BitXor_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitXor, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1384,13 +1384,13 @@ public:
 
 	tRisseVariantBlock operator &(const tRisseVariantBlock & rhs) const { return BitAnd(rhs); }
 
-	risse_int64        BitAnd_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)0; }
-	risse_int64        BitAnd_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	risse_int64        BitAnd_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	risse_int64        BitAnd_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	risse_int64        BitAnd_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	risse_int64        BitAnd_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
-	risse_int64        BitAnd_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) & (risse_int64)rhs; }
+	tRisseVariantBlock BitAnd_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitAnd_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitAnd_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitAnd_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitAnd_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitAnd_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock BitAnd_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitAnd, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1682,13 +1682,13 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock RBitShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
-	tRisseVariantBlock RBitShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)((risse_uint64)(risse_int64)(*this) >> (risse_int64)rhs); }
+	tRisseVariantBlock RBitShift_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RBitShift_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RBitShift_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RBitShift_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RBitShift_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RBitShift_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RBitShift_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnRBitShift, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1729,13 +1729,13 @@ public:
 
 	tRisseVariantBlock operator << (const tRisseVariantBlock & rhs) const { return LShift(rhs); }
 
-	tRisseVariantBlock LShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
-	tRisseVariantBlock LShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) << (risse_int64)rhs; }
+	tRisseVariantBlock LShift_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock LShift_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock LShift_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock LShift_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock LShift_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock LShift_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock LShift_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLShift, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1776,13 +1776,13 @@ public:
 
 	tRisseVariantBlock operator >> (const tRisseVariantBlock & rhs) const { return RShift(rhs); }
 
-	tRisseVariantBlock RShift_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
-	tRisseVariantBlock RShift_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) >> (risse_int64)rhs; }
+	tRisseVariantBlock RShift_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RShift_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RShift_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RShift_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RShift_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RShift_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock RShift_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnRShift, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1823,13 +1823,13 @@ public:
 
 	tRisseVariantBlock operator % (const tRisseVariantBlock & rhs) const { return Mod(rhs); }
 
-	tRisseVariantBlock Mod_Void     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_Integer  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_Real     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_Null     (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_String   (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_Octet    (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
-	tRisseVariantBlock Mod_Boolean  (const tRisseVariantBlock & rhs) const { return (risse_int64)(*this) % (risse_int64)rhs; }
+	tRisseVariantBlock Mod_Void     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mod_Integer  (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mod_Real     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mod_Null     (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mod_String   (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mod_Octet    (const tRisseVariantBlock & rhs) const;
+	tRisseVariantBlock Mod_Boolean  (const tRisseVariantBlock & rhs) const;
 	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnMod, rhs); }
 
 	//-----------------------------------------------------------------------

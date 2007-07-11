@@ -1185,8 +1185,8 @@ expr
 	| expr "<=" onl expr			{ $$ = N(Binary)(@2.first, abtLesserOrEqual		,$1, $4); }
 	| expr ">=" onl expr			{ $$ = N(Binary)(@2.first, abtGreaterOrEqual	,$1, $4); }
 	| expr "instanceof" onl expr	{ $$ = N(Binary)(@2.first, abtInstanceOf		,$1, $4); }
-	| expr ">>" onl expr			{ $$ = N(Binary)(@2.first, abtLShift			,$1, $4); }
-	| expr "<<" onl expr			{ $$ = N(Binary)(@2.first, abtRShift			,$1, $4); }
+	| expr ">>" onl expr			{ $$ = N(Binary)(@2.first, abtRShift			,$1, $4); }
+	| expr "<<" onl expr			{ $$ = N(Binary)(@2.first, abtLShift			,$1, $4); }
 	| expr ">>>" onl expr			{ $$ = N(Binary)(@2.first, abtRBitShift			,$1, $4); }
 	| expr "+" onl expr				{ $$ = N(Binary)(@2.first, abtAdd				,$1, $4); }
 	| expr "-" onl expr				{ $$ = N(Binary)(@2.first, abtSub				,$1, $4); }

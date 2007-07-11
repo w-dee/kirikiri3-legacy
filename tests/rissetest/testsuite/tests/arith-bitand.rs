@@ -12,9 +12,9 @@ var eM = NoSuchMemberException;
 var expects =
 [
 //     ____V2____,____I2____,____R2____,____N2____,____S2____,____O2____,____T2____,____F2____,____A2____
-/*V1*/[   0      ,  0b101   ,   0b101  ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
-/*I1*/[ 0b110    ,  0b100   ,   0b100  ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
-/*R1*/[ 0b110    ,  0b100   ,   0b100  ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
+/*V1*/[   0      ,  0b000   ,   0b000  ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
+/*I1*/[ 0b000    ,  0b100   ,   0b100  ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
+/*R1*/[ 0b000    ,  0b100   ,   0b100  ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*N1*/[   eT     ,   eT     ,   eT     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*S1*/[   eT     ,   eT     ,   eT     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*O1*/[   eT     ,   eT     ,   eT     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],

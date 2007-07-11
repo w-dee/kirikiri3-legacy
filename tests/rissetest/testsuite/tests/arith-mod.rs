@@ -13,7 +13,7 @@ var eA = ArithmeticException;
 var expects =
 [
 //     ____V2____,____I2____,____R2____,____N2____,____S2____,____O2____,____T2____,____F2____,____A2____
-/*V1*/[   eA     ,    0     ,    0     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
+/*V1*/[   eT     ,    0     ,    0     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*I1*/[   eA     ,    1     ,    1     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*R1*/[   eA     ,    1     ,    1     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],
 /*N1*/[   eT     ,   eT     ,   eT     ,    eT    ,   eT     ,   eT     ,   eT     ,   eT     ,   eT      ],

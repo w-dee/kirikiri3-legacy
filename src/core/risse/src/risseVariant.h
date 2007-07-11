@@ -1556,7 +1556,7 @@ public:
 	bool Lesser_Void     (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Integer  (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Real     (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnLesser); return false; }
+	bool Lesser_Null     (const tRisseVariantBlock & rhs) const;
 	bool Lesser_String   (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const;
 	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1588,7 +1588,7 @@ public:
 	bool Greater_Void     (const tRisseVariantBlock & rhs) const;
 	bool Greater_Integer  (const tRisseVariantBlock & rhs) const;
 	bool Greater_Real     (const tRisseVariantBlock & rhs) const;
-	bool Greater_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnGreater); return false; }
+	bool Greater_Null     (const tRisseVariantBlock & rhs) const;
 	bool Greater_String   (const tRisseVariantBlock & rhs) const;
 	bool Greater_Octet    (const tRisseVariantBlock & rhs) const;
 	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1620,7 +1620,7 @@ public:
 	bool LesserOrEqual_Void     (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnLesserOrEqual); return false; }
+	bool LesserOrEqual_Null     (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const;
 	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
@@ -1653,7 +1653,7 @@ public:
 	bool GreaterOrEqual_Void     (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Null     (const tRisseVariantBlock & rhs) const { ThrowNoSuchMemberException(mnGreaterOrEqual); return false; }
+	bool GreaterOrEqual_Null     (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const;
 	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;

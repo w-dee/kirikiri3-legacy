@@ -30,6 +30,11 @@ var expects =
 ];
 
 var a1 = test(labels, values1, values2, expects) { |a,b| a <= b };
+
+// let all A2 column eM, A1 row (except for A1/A2) eT
+for(var i = 0; i < expects.length; i++) expects[i][expects[i].length-1] = eM;
+for(var i = 0; i < expects[expects.length-1].length - 1; i++) expects[expects.length-1][i] = eT;
+
 var a2 = test(labels, values1, values2, expects) { |a,b| b >= a };
 
 a1 + a2; //=> "okok"

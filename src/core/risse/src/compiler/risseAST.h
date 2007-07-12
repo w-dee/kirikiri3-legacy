@@ -1178,6 +1178,11 @@ public:
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tRisseSSAVariable * DoReadSSA(tRisseSSAForm *form, void * param) const;
+
+	//! @brief		&& 演算子と || 演算子に対する SSA 形式表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tRisseSSAVariable * GenerateLogicalAndOr(tRisseSSAForm *form) const;
 };
 //---------------------------------------------------------------------------
 

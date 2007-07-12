@@ -1461,10 +1461,11 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 		return Child2->GenerateReadSSA(form); // 右辺値を返す
 
 	case abtIf:					// if
-	case abtLogOr:				// ||
-	case abtLogAnd:				// &&
 		return NULL;
 
+	case abtLogOr:				// ||
+	case abtLogAnd:				// &&
+		return GenerateLogicalAndOr(form);
 
 	case abtBitOr:				// |
 	case abtBitXor:				// ^
@@ -1539,6 +1540,80 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 		return NULL;
 	}
 	RISSE_ASSERT(!"at last at tRisseASTNode_Binary::DoReadSSA");
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tRisseSSAVariable * tRisseASTNode_Binary::GenerateLogicalAndOr(tRisseSSAForm *form) const
+{
+	// && or || ?
+	RISSE_ASSERT(BinaryType == abtLogAnd || BinaryType == abtLogOr);
+	bool is_and = BinaryType == abtLogAnd;
+
+	// 左辺の値を得る
+	tRisseSSAVariable * lhs_var = Child1->GenerateReadSSA(form);
+
+	// 分岐文を作成
+	tRisseSSAStatement * lhs_branch_stmt =
+		form->AddStatement(GetPosition(), ocBranch, NULL, lhs_var);
+
+	// ショートカットしないとき用の新しい基本ブロックを作成
+	// && の場合は 真の時にここに来て、右辺の評価を続行する
+	// || の場合は 偽の時にここにきて、右辺の評価を続行する
+	tRisseSSABlock * non_shortcut_block = form->CreateNewBlock(RISSE_WS("log_nonshortcut"));
+
+	// 右辺の値を得る
+	tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
+
+	// 分岐文を作成
+	tRisseSSAStatement * rhs_branch_stmt =
+		form->AddStatement(GetPosition(), ocBranch, NULL, rhs_var);
+
+	// 結果が真の時にくる基本ブロックを作成
+	tRisseSSABlock * true_block = form->CreateNewBlock(RISSE_WS("log_true"));
+
+	// true の値を作成
+	tRisseSSAVariable * true_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant(true));
+
+	// ジャンプ文を作成
+	tRisseSSAStatement * true_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 結果が偽の時にくる基本ブロックを作成
+	tRisseSSABlock * false_block = form->CreateNewBlock(RISSE_WS("log_false"));
+
+	// true の値を作成
+	tRisseSSAVariable * false_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant(false));
+
+	// ジャンプ文を作成
+	tRisseSSAStatement * false_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+
+	// 文を抜けるための基本ブロックを作成
+	tRisseSSABlock * exit_block = form->CreateNewBlock(RISSE_WS("log_exit"));
+
+	// 各ブロックの配線と、答えを返すための φ関数を作成する
+	tRisseSSAVariable * ret_var = NULL;
+	if(is_and)
+	{
+		// &&
+		lhs_branch_stmt->SetTrueBranch(non_shortcut_block);
+		lhs_branch_stmt->SetFalseBranch(false_block);
+		rhs_branch_stmt->SetTrueBranch(true_block);
+		rhs_branch_stmt->SetFalseBranch(false_block);
+	}
+	else
+	{
+		// ||
+		lhs_branch_stmt->SetTrueBranch(true_block);
+		lhs_branch_stmt->SetFalseBranch(non_shortcut_block);
+		rhs_branch_stmt->SetTrueBranch(true_block);
+		rhs_branch_stmt->SetFalseBranch(false_block);
+	}
+	true_jump_stmt->SetJumpTarget(exit_block);
+	false_jump_stmt->SetJumpTarget(exit_block);
+	form->AddStatement(GetPosition(), ocPhi, &ret_var, true_var, false_var);
+
+	return ret_var;
 }
 //---------------------------------------------------------------------------
 

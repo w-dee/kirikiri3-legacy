@@ -13,11 +13,17 @@
 // UNICODEとSJIS(cp932)の変換マップについては unicode.org を参照のこと
 
 
+
 #ifndef _CP932_UNI_
 #define _CP932_UNI_
+
+namespace Risa {
+//---------------------------------------------------------------------------
 
 risse_size RisaSJISToUnicodeString(const char * in, risse_char *out);
 risse_char RisaSJISToUnicode(risse_uint sjis);
 
+//---------------------------------------------------------------------------
+} // namespace Risa
 #endif
 

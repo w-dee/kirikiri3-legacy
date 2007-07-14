@@ -16,6 +16,9 @@
 #include "MainDialog.h"
 
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 #define RISA__PREVIEW_MARGIN_RATIO 0.5
 #define RISA__PREVIEW_MARGIN_MIN   1
 
@@ -635,5 +638,9 @@ void wxFontPreviewFrame::MagnifyChoiceSelected(wxCommandEvent& event)
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 

@@ -38,6 +38,7 @@ $head =  <<EOF;
 //---------------------------------------------------------------------------
 // UNICODEとSJIS(cp932)の変換マップについては unicode.org を参照のこと
 
+
 EOF
 
 print FH $head;
@@ -46,6 +47,8 @@ print HH $head;
 print FH <<EOF;
 #include "prec.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 EOF
 
@@ -264,6 +267,9 @@ risse_size RisaSJISToUnicodeString(const char * in, risse_char *out)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 EOF
 
 
@@ -272,9 +278,14 @@ print HH <<EOF;
 #ifndef _CP932_UNI_
 #define _CP932_UNI_
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 risse_size RisaSJISToUnicodeString(const char * in, risse_char *out);
 risse_char RisaSJISToUnicode(risse_uint sjis);
 
+//---------------------------------------------------------------------------
+} // namespace Risa
 #endif
 
 EOF

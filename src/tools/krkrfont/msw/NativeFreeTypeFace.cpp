@@ -22,6 +22,8 @@
 #include FT_TRUETYPE_TABLES_H
 #include FT_TRUETYPE_UNPATENTED_H
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 #define RISA__TT_TABLE_ttcf  (('t' << 0) + ('t' << 8) + ('c' << 16) + ('f' << 24))
 #define RISA__TT_TABLE_name  (('n' << 0) + ('a' << 8) + ('m' << 16) + ('e' << 24))
@@ -353,4 +355,8 @@ bool tRisaNativeFreeTypeFace::OpenFaceByIndex(int index)
 
 
 
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

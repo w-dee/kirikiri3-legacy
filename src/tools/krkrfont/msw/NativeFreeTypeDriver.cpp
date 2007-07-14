@@ -21,6 +21,9 @@
 // リンクできなくなるかもしれないが、そのときはそのときで別に考えよう。
 WXDLLEXPORT wxFontEncoding wxGetFontEncFromCharSet(int charset);
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 // 以下の二つのdefineはOpenType フォントを表していて、
 // EnumFontsProc の lpntme->ntmTm.ntmFlags にビットセットとして渡されてくる。
 // (OpenTypeがサポートされた Windows 2000 以降で存在)
@@ -226,5 +229,9 @@ void tRisaBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 

@@ -15,6 +15,10 @@
 
 #include "WriteXP4.h"
 #include "ReadXP4Meta.h"
+
+namespace Risa {
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 void RisaXP4GetDefaultClassList(wxArrayString & dest);
 
@@ -48,5 +52,9 @@ void RisaXP4MetadataReaderStorageItemToXP4WriterInputFile(
 
 void RisaDeleteArchiveSet(const wxString & archivename);
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 #endif

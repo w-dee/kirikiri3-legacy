@@ -14,8 +14,15 @@
 #ifndef _WRITEBFF_H_
 #define _WRITEBFF_H_
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 	bool write_bitmap,
 	bool write_kerning_vector, wxWindow * parent);
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 #endif

@@ -35,6 +35,7 @@ $head =  <<EOF;
 //---------------------------------------------------------------------------
 // UNICODEとSJIS(cp932)の変換マップについては unicode.org を参照のこと
 
+
 EOF
 
 print FH $head;
@@ -45,13 +46,20 @@ print HH <<EOF;
 #ifndef _UNI_CP932_H_
 #define _UNI_CP932_H_
 
+namespace Risa {
+//---------------------------------------------------------------------------
 risse_uint RisaUnicodeToSJIS(risse_char in);
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 #endif
 EOF
 
 print FH <<EOF;
 #include "prec.h"
+
+namespace Risa {
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 //! \@brief		UNICODEとShiftJISコードの組を表す型
@@ -120,6 +128,7 @@ risse_uint RisaUnicodeToSJIS(risse_char in)
 }
 //---------------------------------------------------------------------------
 
+} // namespace Risa
 
 #ifdef SELFTEST
 

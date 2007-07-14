@@ -13,6 +13,9 @@
 #include "prec.h"
 #include "wxFileWrapper.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 #define RAISE_EXCEPTION(msg) throw wxString(msg)
 
 
@@ -163,4 +166,8 @@ void wxFileEx::Fill(wxFileOffset fillbytes, unsigned int padding)
 	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

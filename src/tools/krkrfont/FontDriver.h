@@ -13,6 +13,8 @@
 #ifndef _FONTDRIVER_H_
 #define _FONTDRIVER_H_
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 //! @brief		１グリフのメトリックを表す構造体
@@ -79,6 +81,10 @@ public:
 #define RISA__FACE_OPTIONS_NO_HINTING 0x00020000 //!< ヒンティングを行わない
 #define RISA__FACE_OPTIONS_FORCE_AUTO_HINTING 0x00020000 //!< 強制的に auto hinting を行う
 #define RISA__FACE_OPTIONS_NO_ANTIALIASING 0x00040000 //!< アンチエイリアスを行わない
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 #endif
 

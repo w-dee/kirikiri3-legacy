@@ -25,24 +25,24 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"Boolean" クラス
 //---------------------------------------------------------------------------
-class tRisseBooleanClass : public tRissePrimitiveClassBase
+class tBooleanClass : public tPrimitiveClassBase
 {
-	typedef tRissePrimitiveClassBase inherited; //!< 親クラスの typedef
+	typedef tPrimitiveClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseBooleanClass(tRisseScriptEngine * engine);
+	tBooleanClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public: // Risse用メソッドなど
-	static void initialize(const tRisseNativeCallInfo & info);
-	static tRisseString toString(const tRisseNativeCallInfo & info);
-	static tRisseString dump(const tRisseNativeCallInfo & info);
+	static void initialize(const tNativeCallInfo & info);
+	static tString toString(const tNativeCallInfo & info);
+	static tString dump(const tNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

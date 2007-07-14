@@ -20,7 +20,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(22894,62791,44554,18883,55951,15622,1807,62704);
 
 //---------------------------------------------------------------------------
-tRisseOctetBlock::tRisseOctetBlock(const risse_uint8 * buf, risse_size length)
+tOctetBlock::tOctetBlock(const risse_uint8 * buf, risse_size length)
 {
 	Capacity = Length = length;
 	if(length)
@@ -37,7 +37,7 @@ tRisseOctetBlock::tRisseOctetBlock(const risse_uint8 * buf, risse_size length)
 
 
 //---------------------------------------------------------------------------
-tRisseOctetBlock::tRisseOctetBlock(const tRisseOctetBlock & ref,
+tOctetBlock::tOctetBlock(const tOctetBlock & ref,
 	risse_size offset, risse_size length)
 {
 	if(length)
@@ -57,7 +57,7 @@ tRisseOctetBlock::tRisseOctetBlock(const tRisseOctetBlock & ref,
 
 
 //---------------------------------------------------------------------------
-bool tRisseOctetBlock::operator < (const tRisseOctetBlock & ref) const
+bool tOctetBlock::operator < (const tOctetBlock & ref) const
 {
 	if(this == &ref) return false; // 同じポインタ
 
@@ -76,7 +76,7 @@ bool tRisseOctetBlock::operator < (const tRisseOctetBlock & ref) const
 
 
 //---------------------------------------------------------------------------
-void tRisseOctetBlock::Append(const risse_uint8 * buffer, risse_size length)
+void tOctetBlock::Append(const risse_uint8 * buffer, risse_size length)
 {
 	if(length == 0) return; // 追加するものなし
 
@@ -120,7 +120,7 @@ void tRisseOctetBlock::Append(const risse_uint8 * buffer, risse_size length)
 
 
 //---------------------------------------------------------------------------
-tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
+tOctetBlock & tOctetBlock::operator += (const tOctetBlock & ref)
 {
 	if(Length == 0) return *this = ref; // 単純なコピーでよい
 	Append(ref.Buffer, ref.Length);
@@ -130,9 +130,9 @@ tRisseOctetBlock & tRisseOctetBlock::operator += (const tRisseOctetBlock & ref)
 
 
 //---------------------------------------------------------------------------
-tRisseOctetBlock tRisseOctetBlock::operator + (const tRisseOctetBlock & ref) const
+tOctetBlock tOctetBlock::operator + (const tOctetBlock & ref) const
 {
-	tRisseOctetBlock block;
+	tOctetBlock block;
 	Concat(&block, ref);
 	return block;
 }
@@ -140,7 +140,7 @@ tRisseOctetBlock tRisseOctetBlock::operator + (const tRisseOctetBlock & ref) con
 
 
 //---------------------------------------------------------------------------
-void tRisseOctetBlock::Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & ref) const
+void tOctetBlock::Concat(tOctetBlock * dest, const tOctetBlock & ref) const
 {
 	if(Length == 0) { *dest = ref; return; }
 	if(ref.Length == 0) { *dest = *this; return; }
@@ -154,7 +154,7 @@ void tRisseOctetBlock::Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & 
 
 
 //---------------------------------------------------------------------------
-risse_uint8 * tRisseOctetBlock::InternalIndepend() const
+risse_uint8 * tOctetBlock::InternalIndepend() const
 {
 	if(!Buffer) return NULL;
 	risse_uint8 * newbuf = AllocateInternalBuffer(Length);
@@ -167,9 +167,9 @@ risse_uint8 * tRisseOctetBlock::InternalIndepend() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseOctetBlock::AsHumanReadable(risse_size maxlen) const
+tString tOctetBlock::AsHumanReadable(risse_size maxlen) const
 {
-	tRisseString ret;
+	tString ret;
 
 	// 変換するオクテット長を計算
 	risse_size max_octet_len;

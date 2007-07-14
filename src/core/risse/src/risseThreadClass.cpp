@@ -31,12 +31,12 @@ RISSE_DEFINE_SOURCE_ID(18367,25403,3163,16422,1923,3893,57628,424);
 //---------------------------------------------------------------------------
 //! @brief		Risseスクリプト用スレッドを実装するクラス
 //---------------------------------------------------------------------------
-class tRisseScriptThread : protected tRisseThread
+class tScriptThread : protected tThread
 {
 	//TODO: 正しくスレッドの状態をハンドリングすること
-	tRisseThreadInstance * Owner; //!< オーナー
+	tThreadInstance * Owner; //!< オーナー
 #if 0
-	tRisseThreadEvent Event; //!< イベントオブジェクト
+	tThreadEvent Event; //!< イベントオブジェクト
 #endif
 
 protected:
@@ -45,7 +45,7 @@ protected:
 	{
 		if(Owner)
 		{
-			tRisseScriptEngine * engine = Owner->GetRTTI()->GetScriptEngine();
+			tScriptEngine * engine = Owner->GetRTTI()->GetScriptEngine();
 			try
 			{
 				try
@@ -54,15 +54,15 @@ protected:
 					// TODO: メソッドのコンテキストを正しく
 					if(!Owner->Method.IsVoid())
 						Owner->Method.FuncCall(engine, &Owner->Ret,
-							tRisseString::GetEmptyString(), 0,
-							tRisseMethodArgument::Empty(), Owner->Context);
+							tString::GetEmptyString(), 0,
+							tMethodArgument::Empty(), Owner->Context);
 				}
-				catch(const tRisseTemporaryException * te)
+				catch(const tTemporaryException * te)
 				{
 					te->ThrowConverted(engine);
 				}
 			}
-			catch(const tRisseVariant * e)
+			catch(const tVariant * e)
 			{
 				// 例外を受け取った
 				// Owner が例外を参照できるように例外オブジェクトを設定する
@@ -81,24 +81,24 @@ protected:
 
 public:
 	//! @brief	コンストラクタ
-	tRisseScriptThread()
+	tScriptThread()
 	{
 		Owner = NULL;
 	}
 
 	//! @brief	スレッドの実行を開始する
-	//! @param	owner		オーナーとなる tRisseThreadInstance のインスタンス
-	void Start(tRisseThreadInstance * owner)
+	//! @param	owner		オーナーとなる tThreadInstance のインスタンス
+	void Start(tThreadInstance * owner)
 	{
 		Owner = owner;
-		Run(); // tRisseThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
+		Run(); // tThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
 	}
 
 	//! @brief	スレッドの終了を待つ
 	//! @return	スレッドメソッドの戻り値
 	void Join()
 	{
-		Wait(); // tRisseThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
+		Wait(); // tThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
 	}
 #if 0
 	//! @brief	スレッドを一定時間停止する
@@ -149,14 +149,14 @@ public:
 
 
 //---------------------------------------------------------------------------
-tRisseThreadInstance::tRisseThreadInstance()
+tThreadInstance::tThreadInstance()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseThreadInstance::construct()
+void tThreadInstance::construct()
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -167,7 +167,7 @@ void tRisseThreadInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseThreadInstance::initialize(const tRisseNativeCallInfo & info)
+void tThreadInstance::initialize(const tNativeCallInfo & info)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -182,7 +182,7 @@ void tRisseThreadInstance::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-void tRisseThreadInstance::run(void) const
+void tThreadInstance::run(void) const
 {
 	// デフォルトの run は何もしない
 }
@@ -190,17 +190,17 @@ void tRisseThreadInstance::run(void) const
 
 
 //---------------------------------------------------------------------------
-void tRisseThreadInstance::start()
+void tThreadInstance::start()
 {
 	// スレッドの実行を開始する
 	{
 		volatile tSynchronizer sync(this); // sync
 
 		if(Thread) return; // already started
-		Thread = new tRisseScriptThread();
+		Thread = new tScriptThread();
 	}
 
-	Context = (tRisseObjectInterface*)this;
+	Context = (tObjectInterface*)this;
 
 	Thread->Start(this);
 }
@@ -208,7 +208,7 @@ void tRisseThreadInstance::start()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseThreadInstance::join() const
+tVariant tThreadInstance::join() const
 {
 	// スレッドの終了を待機する
 	if(!Thread) return Ret; // no thread
@@ -220,7 +220,7 @@ tRisseVariant tRisseThreadInstance::join() const
 
 
 //---------------------------------------------------------------------------
-bool tRisseThreadInstance::sleep(risse_int64 timeout)
+bool tThreadInstance::sleep(risse_int64 timeout)
 {
 #if 0
 	if(!Thread) return false;
@@ -232,7 +232,7 @@ bool tRisseThreadInstance::sleep(risse_int64 timeout)
 
 
 //---------------------------------------------------------------------------
-void tRisseThreadInstance::wakeup()
+void tThreadInstance::wakeup()
 {
 #if 0
 	volatile tSynchronizer sync(this); // sync
@@ -248,8 +248,8 @@ void tRisseThreadInstance::wakeup()
 
 
 //---------------------------------------------------------------------------
-tRisseThreadClass::tRisseThreadClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Thread, engine->ObjectClass)
+tThreadClass::tThreadClass(tScriptEngine * engine) :
+	tClassBase(ss_Thread, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -257,7 +257,7 @@ tRisseThreadClass::tRisseThreadClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseThreadClass::RegisterMembers()
+void tThreadClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -267,24 +267,24 @@ void tRisseThreadClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate, &tRisseThreadClass::ovulate);
-	RisseBindFunction(this, ss_construct, &tRisseThreadInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseThreadInstance::initialize);
-	RisseBindFunction(this, ss_run, &tRisseThreadInstance::run);
-	RisseBindFunction(this, ss_start, &tRisseThreadInstance::start);
-	RisseBindFunction(this, ss_join, &tRisseThreadInstance::join);
+	BindFunction(this, ss_ovulate, &tThreadClass::ovulate);
+	BindFunction(this, ss_construct, &tThreadInstance::construct);
+	BindFunction(this, ss_initialize, &tThreadInstance::initialize);
+	BindFunction(this, ss_run, &tThreadInstance::run);
+	BindFunction(this, ss_start, &tThreadInstance::start);
+	BindFunction(this, ss_join, &tThreadInstance::join);
 #if 0
-	RisseBindFunction(this, ss_sleep, &tRisseThreadInstance::sleep);
-	RisseBindFunction(this, ss_wakeup, &tRisseThreadInstance::wakeup);
+	BindFunction(this, ss_sleep, &tThreadInstance::sleep);
+	BindFunction(this, ss_wakeup, &tThreadInstance::wakeup);
 #endif
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseThreadClass::ovulate()
+tVariant tThreadClass::ovulate()
 {
-	return tRisseVariant(new tRisseThreadInstance());
+	return tVariant(new tThreadInstance());
 }
 //---------------------------------------------------------------------------
 

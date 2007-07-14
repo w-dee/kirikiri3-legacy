@@ -46,8 +46,8 @@ RISSE_DEFINE_SOURCE_ID(61181,65237,39210,16947,26767,23057,16328,36120);
 
 */
 //---------------------------------------------------------------------------
-tRisseClassBase::tRisseClassBase(const tRisseString & name, tRisseClassBase * super_class, bool extensible)
-	 : tRisseObjectBase(ss_super, ss_members)
+tClassBase::tClassBase(const tString & name, tClassBase * super_class, bool extensible)
+	 : tObjectBase(ss_super, ss_members)
 {
 	RISSE_ASSERT(super_class != NULL);
 
@@ -61,7 +61,7 @@ tRisseClassBase::tRisseClassBase(const tRisseString & name, tRisseClassBase * su
 	RTTIMatcher = ClassRTTI.AddId(this);
 
 	// members に members 用オブジェクトを作成して登録する
-	tRisseVariant members = tRisseModuleClass::CreateMembersObject(
+	tVariant members = tModuleClass::CreateMembersObject(
 					super_class->GetRTTI()->GetScriptEngine(), super_class->ReadMember(ss_members));
 	RegisterNormalMember(ss_members, members);
 
@@ -69,18 +69,18 @@ tRisseClassBase::tRisseClassBase(const tRisseString & name, tRisseClassBase * su
 	RegisterMembers();
 
 	// super を登録
-	RegisterNormalMember(ss_super, tRisseVariant(super_class));
+	RegisterNormalMember(ss_super, tVariant(super_class));
 
 	// name はクラス名
 	// This に name という名前で値を登録し、書き込み禁止にする
-	RegisterNormalMember(ss_name, name, tRisseMemberAttribute(tRisseMemberAttribute::vcConst));
+	RegisterNormalMember(ss_name, name, tMemberAttribute(tMemberAttribute::vcConst));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
-	 : tRisseObjectBase(ss_prototype, ss_members)
+tClassBase::tClassBase(tScriptEngine * engine)
+	 : tObjectBase(ss_prototype, ss_members)
 {
 	// このインスタンスの RTTI に Class クラスの RTTI を設定する
 	SetClassClassRTTI(engine);
@@ -90,28 +90,28 @@ tRisseClassBase::tRisseClassBase(tRisseScriptEngine * engine)
 	RTTIMatcher = ClassRTTI.AddId(this);
 
 	// members に members 用オブジェクトを作成して登録する
-	tRisseVariant members = tRisseModuleClass::CreateMembersObject(
-					engine, tRisseVariant((tRisseClassBase*)NULL));
+	tVariant members = tModuleClass::CreateMembersObject(
+					engine, tVariant((tClassBase*)NULL));
 	RegisterNormalMember(ss_members, members);
 
 	// クラスに必要なメソッドを登録する
 	RegisterMembers();
 
 	// super を登録
-	RegisterNormalMember(ss_super, tRisseVariant((tRisseClassBase*)NULL));
+	RegisterNormalMember(ss_super, tVariant((tClassBase*)NULL));
 
 	// this の prototype に members を設定
 	RegisterNormalMember(ss_prototype, members);
 
 	// クラス名は Object
 	// This に name という名前で値を登録し、書き込み禁止にする
-	RegisterNormalMember(ss_name, ss_Object, tRisseMemberAttribute(tRisseMemberAttribute::vcConst));
+	RegisterNormalMember(ss_name, ss_Object, tMemberAttribute(tMemberAttribute::vcConst));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseClassBase::SetClassClassRTTI(tRisseScriptEngine * engine)
+void tClassBase::SetClassClassRTTI(tScriptEngine * engine)
 {
 	if(engine->ClassClass)
 	{
@@ -122,38 +122,38 @@ void tRisseClassBase::SetClassClassRTTI(tRisseScriptEngine * engine)
 	{
 		// Class クラスはまだ構築されていないよう。
 		// スクリプトエンジンの情報を持った RTTI を登録する
-		SetRTTI(new tRisseRTTI(engine));
+		SetRTTI(new tRTTI(engine));
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseClassBase::RegisterClassInstance(tRisseVariant & target)
+void tClassBase::RegisterClassInstance(tVariant & target)
 {
-	tRisseString name = GetPropertyDirect(ss_name);
+	tString name = GetPropertyDirect(ss_name);
 	target.SetPropertyDirect_Object(name,
-		tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
-		tRisseOperateFlags::ofMemberEnsure | tRisseOperateFlags::ofInstanceMemberOnly,
-				tRisseVariant(this));
+		tOperateFlags(tMemberAttribute::GetDefault()) |
+		tOperateFlags::ofMemberEnsure | tOperateFlags::ofInstanceMemberOnly,
+				tVariant(this));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseClassBase::RegisterMembers()
+void tClassBase::RegisterMembers()
 {
 	// 各メソッドを登録
 
 	// new や fertilize はクラス固有のメソッドなのでコンテキストとして
 	// This (クラスそのもの)をあらかじめ設定する。
 	// また、これらは members ではなく、クラスインスタンスそのものに対して指定する。
-	tRisseVariant * pThis = new tRisseVariant(this);
+	tVariant * pThis = new tVariant(this);
 
-	RisseBindFunction(this, mnNew, &tRisseClassBase::risse_new,
-				tRisseMemberAttribute(tRisseMemberAttribute::vcConst), pThis, false);
-	RisseBindFunction(this, ss_fertilize, &tRisseClassBase::fertilize,
-				tRisseMemberAttribute(tRisseMemberAttribute::vcConst), pThis, false);
+	BindFunction(this, mnNew, &tClassBase::risse_new,
+				tMemberAttribute(tMemberAttribute::vcConst), pThis, false);
+	BindFunction(this, ss_fertilize, &tClassBase::fertilize,
+				tMemberAttribute(tMemberAttribute::vcConst), pThis, false);
 
 	// modules 配列を members に登録
 	if(GetRTTI()->GetScriptEngine()->ArrayClass)
@@ -162,20 +162,20 @@ void tRisseClassBase::RegisterMembers()
 		// Arrayクラスがすでに構築されている場合だけ、modules 配列を登録する
 		// modules は members 配列に登録する (RegisterNormalMember の最後の引数に注目)
 		RegisterNormalMember(ss_modules,
-			tRisseVariant(tRisseVariant(GetRTTI()->GetScriptEngine()->ArrayClass).New()),
-			tRisseMemberAttribute(), true);
+			tVariant(tVariant(GetRTTI()->GetScriptEngine()->ArrayClass).New()),
+			tMemberAttribute(), true);
 	}
 
 	// class を登録
 	if(GetRTTI()->GetScriptEngine()->ClassClass)
 	{
 		// クラスのクラスはClass
-		// これもわざわざ tRisseClassClass のインスタンスが有効かどうかをチェックしている。
+		// これもわざわざ tClassClass のインスタンスが有効かどうかをチェックしている。
 		// 理由は modules 配列と同じ。
 		pThis->SetPropertyDirect(GetRTTI()->GetScriptEngine(), ss_class,
-			tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-			tRisseVariant(GetRTTI()->GetScriptEngine()->ClassClass), *pThis);
+			tOperateFlags(tMemberAttribute::GetDefault()) |
+			tOperateFlags::ofMemberEnsure|tOperateFlags::ofInstanceMemberOnly,
+			tVariant(GetRTTI()->GetScriptEngine()->ClassClass), *pThis);
 	}
 
 	// members を Object クラスのインスタンスとしてマークする。
@@ -185,18 +185,18 @@ void tRisseClassBase::RegisterMembers()
 	// その際は Object クラスが利用できる。
 	if(GetRTTI()->GetScriptEngine()->ObjectClass != NULL)
 	{
-		tRisseObjectInterface * intf = ReadMember(ss_members).GetObjectInterface();
+		tObjectInterface * intf = ReadMember(ss_members).GetObjectInterface();
 		GetRTTI()->GetScriptEngine()->ObjectClass->Bless(intf);
 	}
 
-	RisseBindFunction(this, ss_include, &tRisseClassBase::include);
-	RisseBindFunction(this, ss_ovulate, &tRisseClassBase::ovulate);
+	BindFunction(this, ss_include, &tClassBase::include);
+	BindFunction(this, ss_ovulate, &tClassBase::ovulate);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tClassBase::tRetValue tClassBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	return inherited::Operate(RISSE_OBJECTINTERFACE_PASS_ARG);
 }
@@ -204,41 +204,41 @@ tRisseClassBase::tRetValue tRisseClassBase::Operate(RISSE_OBJECTINTERFACE_OPERAT
 
 
 //---------------------------------------------------------------------------
-void tRisseClassBase::CallSuperClassMethod(tRisseVariantBlock * ret,
-	const tRisseString & name,risse_uint32 flags, 
-	const tRisseMethodArgument & args, const tRisseVariant & This)
+void tClassBase::CallSuperClassMethod(tVariantBlock * ret,
+	const tString & name,risse_uint32 flags, 
+	const tMethodArgument & args, const tVariant & This)
 {
 	// class.super を取り出す
-	tRisseVariant super;
-	Do(ocDGet, &super, ss_super, tRisseOperateFlags::ofInstanceMemberOnly, tRisseMethodArgument::Empty());
+	tVariant super;
+	Do(ocDGet, &super, ss_super, tOperateFlags::ofInstanceMemberOnly, tMethodArgument::Empty());
 
 	// super の中のメソッドを呼ぶ
-	super.FuncCall_Object(ret, name, flags|tRisseOperateFlags::ofUseClassMembersRule, args, This);
+	super.FuncCall_Object(ret, name, flags|tOperateFlags::ofUseClassMembersRule, args, This);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseClassBase::risse_new(const tRisseNativeCallInfo &info)
+void tClassBase::risse_new(const tNativeCallInfo &info)
 {
 	// 空のオブジェクトを作る(ovulateメソッドを呼び出す)
 	// (以降のメソッド呼び出しはこのオブジェクトをthisにして呼ぶ)
 	// 「自分のクラス」はすなわち This のこと(のはず)
 	// またクラスの members 内の ovulate を呼ぶために
-	// tRisseOperateFlags::ofUseClassMembersRule を使用する。
-	RISSE_ASSERT(info.This.GetType() == tRisseVariant::vtObject);
-	tRisseVariant new_object;
+	// tOperateFlags::ofUseClassMembersRule を使用する。
+	RISSE_ASSERT(info.This.GetType() == tVariant::vtObject);
+	tVariant new_object;
 	info.This.FuncCall_Object(&new_object, ss_ovulate,
-								tRisseOperateFlags::ofUseClassMembersRule);
+								tOperateFlags::ofUseClassMembersRule);
 
-	if(new_object.GetType() == tRisseVariant::vtObject)
+	if(new_object.GetType() == tVariant::vtObject)
 	{
 		// プリミティブ型ではない場合
 		RISSE_ASSERT(!new_object.IsNull());
 
 		// This はクラスのはずだよなぁ
-		tRisseClassBase * class_intf =
-			info.This.CheckAndGetObjectInterafce<tRisseClassBase, tRisseClassBase>(
+		tClassBase * class_intf =
+			info.This.CheckAndGetObjectInterafce<tClassBase, tClassBase>(
 				info.engine->ClassClass);
 
 		// プリミティブ型でなければ
@@ -249,22 +249,22 @@ void tRisseClassBase::risse_new(const tRisseNativeCallInfo &info)
 		// ここではclassメンバに「自分のクラス」を追加する
 		// 「自分のクラス」はすなわち This のこと(のはず)
 		new_object.SetPropertyDirect(info.engine, ss_class,
-			tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
-			tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
+			tOperateFlags(tMemberAttribute::GetDefault()) |
+			tOperateFlags::ofMemberEnsure|tOperateFlags::ofInstanceMemberOnly,
 			info.This, new_object);
 		// yet not
 
 		// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。
 		// 「自分のクラス」はすなわち This のこと(のはず)
 		info.This.FuncCall_Object(NULL, ss_fertilize, 0,
-			tRisseMethodArgument::New(new_object));
+			tMethodArgument::New(new_object));
 	}
 
 	// new メソッドは新しいオブジェクトのinitializeメソッドを呼ぶ(再帰)
 	// またクラスの members 内の construct を呼ぶために
-	// tRisseOperateFlags::ofUseClassMembersRule を使用する。
+	// tOperateFlags::ofUseClassMembersRule を使用する。
 	new_object.FuncCall(info.engine, NULL, ss_initialize,
-		tRisseOperateFlags::ofUseClassMembersRule,
+		tOperateFlags::ofUseClassMembersRule,
 		info.args,
 		new_object);
 
@@ -275,18 +275,18 @@ void tRisseClassBase::risse_new(const tRisseNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-void tRisseClassBase::fertilize(const tRisseVariant & instance,
-			const tRisseNativeCallInfo &info)
+void tClassBase::fertilize(const tVariant & instance,
+			const tNativeCallInfo &info)
 {
 	// 親クラスを得る
-	tRisseVariant super_class = info.This.GetPropertyDirect(info.engine, ss_super);
+	tVariant super_class = info.This.GetPropertyDirect(info.engine, ss_super);
 
 	// 親クラスがあれば...
 	if(!super_class.IsNull())
 	{
 		// 親クラスの fertilize メソッドを再帰して呼ぶ
 		super_class.FuncCall_Object(NULL, ss_fertilize, 0,
-			tRisseMethodArgument::New(instance));
+			tMethodArgument::New(instance));
 	}
 
 	// 自分のクラスのmodules[]に登録されているモジュールのconstructメソッドを順番に呼ぶ
@@ -296,27 +296,27 @@ void tRisseClassBase::fertilize(const tRisseVariant & instance,
 	// この際の呼び出し先の this は instance つまり新しいオブジェクトになる
 	// 渡した instance を確実にコンテキストにして実行するために
 	// またクラスの members 内の construct を呼ぶために
-	// tRisseOperateFlags::ofUseClassMembersRule を用いる
+	// tOperateFlags::ofUseClassMembersRule を用いる
 	info.This.FuncCall(info.engine, NULL, ss_construct,
-		tRisseOperateFlags::ofUseClassMembersRule,
-		tRisseMethodArgument::Empty(), instance);
+		tOperateFlags::ofUseClassMembersRule,
+		tMethodArgument::Empty(), instance);
 
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseClassBase::include(const tRisseMethodArgument & args,
-					const tRisseNativeCallInfo &info)
+void tClassBase::include(const tMethodArgument & args,
+					const tNativeCallInfo &info)
 {
 	// クラスの modules 配列にモジュールを追加する
 
 	// modules を取り出す
 	// modules 配列の場合は members の中に modules 配列がある場合があるので
 	// ofUseClassMembersRule フラグをつける
-	tRisseVariant modules =
+	tVariant modules =
 		info.This.GetPropertyDirect(info.engine, ss_modules,
-			tRisseOperateFlags::ofInstanceMemberOnly|tRisseOperateFlags::ofUseClassMembersRule);
+			tOperateFlags::ofInstanceMemberOnly|tOperateFlags::ofUseClassMembersRule);
 
 	// Array.unshift を行う
 	modules.Do(info.engine, ocFuncCall, NULL, ss_unshift, 0, args);
@@ -325,9 +325,9 @@ void tRisseClassBase::include(const tRisseMethodArgument & args,
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseClassBase::ovulate()
+tVariant tClassBase::ovulate()
 {
-	return tRisseVariant(new tRisseObjectBase());
+	return tVariant(new tObjectBase());
 }
 //---------------------------------------------------------------------------
 

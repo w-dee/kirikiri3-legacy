@@ -29,8 +29,8 @@ RISSE_DEFINE_SOURCE_ID(32602,55496,58565,16678,10384,39976,12087,42806);
 
 
 //---------------------------------------------------------------------------
-tRisseVoidClass::tRisseVoidClass(tRisseScriptEngine * engine) :
-	tRissePrimitiveClassBase(ss_Void, engine->PrimitiveClass)
+tVoidClass::tVoidClass(tScriptEngine * engine) :
+	tPrimitiveClassBase(ss_Void, engine->PrimitiveClass)
 {
 	RegisterMembers();
 }
@@ -38,7 +38,7 @@ tRisseVoidClass::tRisseVoidClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseVoidClass::RegisterMembers()
+void tVoidClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -48,30 +48,30 @@ void tRisseVoidClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// construct は tRissePrimitiveClass 内ですでに登録されている
+	// construct は tPrimitiveClass 内ですでに登録されている
 
-	RisseBindFunction(this, ss_ovulate, &tRisseVoidClass::ovulate,
-		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
-	RisseBindFunction(this, ss_initialize, &tRisseVoidClass::initialize,
-		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
-	RisseBindFunction(this, mnString, &tRisseVoidClass::toString,
-		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
-	RisseBindFunction(this, ss_dump, &tRisseVoidClass::dump,
-		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
+	BindFunction(this, ss_ovulate, &tVoidClass::ovulate,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
+	BindFunction(this, ss_initialize, &tVoidClass::initialize,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
+	BindFunction(this, mnString, &tVoidClass::toString,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
+	BindFunction(this, ss_dump, &tVoidClass::dump,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseVoidClass::ovulate()
+tVariant tVoidClass::ovulate()
 {
-	return tRisseVariant();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseVoidClass::initialize(const tRisseNativeCallInfo & info)
+void tVoidClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドは「呼び出されない」
 }
@@ -79,15 +79,15 @@ void tRisseVoidClass::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseVoidClass::toString()
+tString tVoidClass::toString()
 {
-	return tRisseString(); // toString は必ず空の文字列を返す
+	return tString(); // toString は必ず空の文字列を返す
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseVoidClass::dump()
+tString tVoidClass::dump()
 {
 	return ss_void; // "void" を返す
 }

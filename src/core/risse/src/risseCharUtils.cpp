@@ -21,7 +21,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(1411,29360,55440,18029,27323,38271,59690,56185);
 
 //---------------------------------------------------------------------------
-risse_int Risse_atoi(const risse_char *s)
+risse_int atoi(const risse_char *s)
 {
 	int r = 0;
 	bool sign = false;
@@ -48,7 +48,7 @@ risse_int Risse_atoi(const risse_char *s)
 
 
 //---------------------------------------------------------------------------
-risse_char * Risse_int_to_str(risse_int value, risse_char *string)
+risse_char * int_to_str(risse_int value, risse_char *string)
 {
 	risse_char *ostring = string;
 
@@ -74,12 +74,12 @@ risse_char * Risse_int_to_str(risse_int value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-risse_char * Risse_int64_to_str(risse_int64 value, risse_char *string)
+risse_char * int64_to_str(risse_int64 value, risse_char *string)
 {
 	if((risse_uint64)value == RISSE_UI64_VAL(0x8000000000000000))
 	{
 		// this is a special number which we must avoid normal conversion
-		Risse_strcpy(string, RISSE_WS("-9223372036854775808"));
+		::Risse::strcpy(string, RISSE_WS("-9223372036854775808"));
 		return string;
 	}
 
@@ -108,14 +108,14 @@ risse_char * Risse_int64_to_str(risse_int64 value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-risse_char * Risse_real_to_str(risse_real value, risse_char *string)
+risse_char * real_to_str(risse_real value, risse_char *string)
 {
 	// 実数を文字列に変換する処理は実は結構難しい
 	// なので、とりあえず snprintf を使うことにする。
 	// snprintf が使えない環境では 一度 sprintf で変換した文字を risse_char に
 	// 変換する。
-#ifdef Risse_snprintf
-	Risse_snprintf(string, 25, RISSE_WS("%.15lg"), value);
+#ifdef RISSE_snprintf
+	RISSE_snprintf(string, 25, RISSE_WS("%.15lg"), value);
 	return string;
 #else
 	char tmp[25];
@@ -135,10 +135,10 @@ risse_char * Risse_real_to_str(risse_real value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-risse_char * Risse_pointer_to_str(const void *value, risse_char *string)
+risse_char * pointer_to_str(const void *value, risse_char *string)
 {
-#ifdef Risse_snprintf
-	Risse_snprintf(string, 25, RISSE_WS("%p"), value);
+#ifdef RISSE_snprintf
+	snprintf(string, 25, RISSE_WS("%p"), value);
 	return string;
 #else
 	char tmp[25];
@@ -158,7 +158,7 @@ risse_char * Risse_pointer_to_str(const void *value, risse_char *string)
 
 
 //---------------------------------------------------------------------------
-risse_int Risse_straicmp(const risse_char *s1, const risse_char *s2)
+risse_int straicmp(const risse_char *s1, const risse_char *s2)
 {
 	for(;;)
 	{
@@ -177,7 +177,7 @@ risse_int Risse_straicmp(const risse_char *s1, const risse_char *s2)
 
 
 //---------------------------------------------------------------------------
-void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len)
+void strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len)
 {
 	risse_char ch;
 	len++;
@@ -188,7 +188,7 @@ void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len)
 
 
 //---------------------------------------------------------------------------
-void Risse_strcpy(risse_char *d, const risse_char *s)
+void strcpy(risse_char *d, const risse_char *s)
 {
 	while((*(d++) = *(s++)) != 0)   ;
 }
@@ -196,7 +196,7 @@ void Risse_strcpy(risse_char *d, const risse_char *s)
 
 
 //---------------------------------------------------------------------------
-risse_size Risse_strlen(const risse_char *d)
+risse_size strlen(const risse_char *d)
 {
 	const risse_char *p = d;
 	if(!*d) return 0;
@@ -209,7 +209,7 @@ risse_size Risse_strlen(const risse_char *d)
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 
 //---------------------------------------------------------------------------
-int Risse_strcmp(const risse_char *s1, const risse_char *s2)
+int strcmp(const risse_char *s1, const risse_char *s2)
 {
 	for(;;)
 	{
@@ -227,7 +227,7 @@ int Risse_strcmp(const risse_char *s1, const risse_char *s2)
 
 
 //---------------------------------------------------------------------------
-int Risse_strncmp(const risse_char *s1, const risse_char *s2, risse_size n)
+int strncmp(const risse_char *s1, const risse_char *s2, risse_size n)
 {
 	for(;;)
 	{
@@ -246,7 +246,7 @@ int Risse_strncmp(const risse_char *s1, const risse_char *s2, risse_size n)
 
 
 //---------------------------------------------------------------------------
-risse_char *Risse_strncpy(risse_char *d, const risse_char *s, risse_size len)
+risse_char *strncpy(risse_char *d, const risse_char *s, risse_size len)
 {
 	risse_char * pd = d;
 
@@ -264,18 +264,18 @@ risse_char *Risse_strncpy(risse_char *d, const risse_char *s, risse_size len)
 
 
 //---------------------------------------------------------------------------
-risse_char *Risse_strcat(risse_char *d, const risse_char *s)
+risse_char *strcat(risse_char *d, const risse_char *s)
 {
 	risse_char * pd = d;
 	while(*d) d++;
-	Risse_strcpy(d, s);
+	strcpy(d, s);
 	return pd;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_char *Risse_strstr(const risse_char *s1, const risse_char *s2)
+risse_char *strstr(const risse_char *s1, const risse_char *s2)
 {
 	while(*s1)
 	{
@@ -294,7 +294,7 @@ risse_char *Risse_strstr(const risse_char *s1, const risse_char *s2)
 
 
 //---------------------------------------------------------------------------
-risse_char *Risse_strchr(const risse_char *s, int c)
+risse_char *strchr(const risse_char *s, int c)
 {
 	while(*s)
 	{
@@ -307,7 +307,7 @@ risse_char *Risse_strchr(const risse_char *s, int c)
 
 
 //---------------------------------------------------------------------------
-double Risse_strtod(const risse_char *nptr, risse_char **endptr)
+double strtod(const risse_char *nptr, risse_char **endptr)
 {
 	// ここでは非常に簡易的な実装を採る
 	// いったん  buf に内容をコピーしてから それを strtod で変換して帰す。
@@ -318,7 +318,7 @@ double Risse_strtod(const risse_char *nptr, risse_char **endptr)
 		*bp = static_cast<char>(*p), bp++, p++;
 	*bp = 0;
 	char *ep;
-	double val = strtod(buf, &ep);
+	double val = ::strtod(buf, &ep);
 	if(endptr) *endptr = const_cast<risse_char *>((ep - buf) + nptr);
 	return val;
 }
@@ -326,7 +326,7 @@ double Risse_strtod(const risse_char *nptr, risse_char **endptr)
 
 
 //---------------------------------------------------------------------------
-risse_size RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in)
+risse_size ConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in)
 {
 	risse_char *org_out = out;
 	while(*in)
@@ -355,7 +355,7 @@ risse_size RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint
 
 
 //---------------------------------------------------------------------------
-risse_size RisseConvertRisseCharToUTF16String(risse_uint16 * out,
+risse_size ConvertRisseCharToUTF16String(risse_uint16 * out,
 	const risse_char * in, risse_size in_len)
 {
 	// in_len が -1 の場合はすでにそれが risse_size で表すことのできる
@@ -398,7 +398,7 @@ risse_size RisseConvertRisseCharToUTF16String(risse_uint16 * out,
 
 
 //---------------------------------------------------------------------------
-static risse_int RisseRisseCharToUtf8(risse_char in, char * out)
+static risse_int CharToUtf8(risse_char in, char * out)
 {
 	// convert a wide character 'in' to utf-8 character 'out'
 	if     (in < (1<< 7))
@@ -468,7 +468,7 @@ static risse_int RisseRisseCharToUtf8(risse_char in, char * out)
 	return -1;
 }
 //---------------------------------------------------------------------------
-static bool RisseUtf8ToRisseChar(const char * & in, risse_char *out)
+static bool Utf8ToRisseChar(const char * & in, risse_char *out)
 {
 	// convert a utf-8 charater from 'in' to wide charater 'out'
 	const unsigned char * p = (const unsigned char * &)in;
@@ -543,7 +543,7 @@ static bool RisseUtf8ToRisseChar(const char * & in, risse_char *out)
 
 
 //---------------------------------------------------------------------------
-risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out)
+risse_size Utf8ToRisseCharString(const char * in, risse_char *out)
 {
 	// convert input utf-8 string to output wide string
 	risse_size count = 0;
@@ -552,13 +552,13 @@ risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out)
 		risse_char c;
 		if(out)
 		{
-			if(!RisseUtf8ToRisseChar(in, &c))
+			if(!Utf8ToRisseChar(in, &c))
 				return risse_size_max; // invalid character found
 			*out++ = c;
 		}
 		else
 		{
-			if(!RisseUtf8ToRisseChar(in, NULL))
+			if(!Utf8ToRisseChar(in, NULL))
 				return risse_size_max; // invalid character found
 		}
 		count ++;
@@ -569,7 +569,7 @@ risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out)
 
 
 //---------------------------------------------------------------------------
-risse_size RisseRisseCharToUtf8String(const risse_char * in, char * out)
+risse_size CharToUtf8String(const risse_char * in, char * out)
 {
 	// convert input wide string to output utf-8 string
 	risse_size count = 0;
@@ -578,16 +578,16 @@ risse_size RisseRisseCharToUtf8String(const risse_char * in, char * out)
 		risse_int n;
 		if(out)
 		{
-			n = RisseRisseCharToUtf8(*in, out);
+			n = CharToUtf8(*in, out);
 			out += n;
 		}
 		else
 		{
-			n = RisseRisseCharToUtf8(*in, NULL);
+			n = CharToUtf8(*in, NULL);
 				/*
 					in this situation, the compiler's inliner
 					will collapse all null check parts in
-					RisseRisseCharToUtf8.
+					CharToUtf8.
 				*/
 		}
 		if(n == -1) return risse_size_max; // invalid character found
@@ -600,7 +600,7 @@ risse_size RisseRisseCharToUtf8String(const risse_char * in, char * out)
 
 
 //---------------------------------------------------------------------------
-void RisseFPrint(FILE * output, const risse_char * str)
+void FPrint(FILE * output, const risse_char * str)
 {
 	if(!str) return;
 	if(str[0] == 0) return;
@@ -608,7 +608,7 @@ void RisseFPrint(FILE * output, const risse_char * str)
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	// 変換後の文字列長を取得
 	risse_size converted_size =
-		RisseConvertRisseCharToUTF16String(NULL, str, risse_size_max);
+		ConvertRisseCharToUTF16String(NULL, str, risse_size_max);
 
 	if(converted_size == risse_size_max) return;
 
@@ -616,7 +616,7 @@ void RisseFPrint(FILE * output, const risse_char * str)
 	wchar_t *buf = new (PointerFreeGC) wchar_t[converted_size + 1];
 
 	// 変換
-	if(RisseConvertRisseCharToUTF16String(
+	if(ConvertRisseCharToUTF16String(
 			reinterpret_cast<risse_uint16*>(buf), str, risse_size_max)
 					== risse_size_max)
 		return;
@@ -632,7 +632,7 @@ void RisseFPrint(FILE * output, const risse_char * str)
 
 #ifdef RISSE_SUPPORT_WX
 //---------------------------------------------------------------------------
-wxString RisseCharToWxString(const risse_char * str, risse_size len)
+wxString CharToWxString(const risse_char * str, risse_size len)
 {
 	if(!str) return wxString();
 	if(str[0] == 0) return wxString();
@@ -641,7 +641,7 @@ wxString RisseCharToWxString(const risse_char * str, risse_size len)
 
 	// 変換後の文字列長を取得
 	risse_size converted_size =
-		RisseConvertRisseCharToUTF16String(NULL, str, len); // lenは-1になりうるので注意
+		ConvertRisseCharToUTF16String(NULL, str, len); // lenは-1になりうるので注意
 
 	if(converted_size == risse_size_max)
 		return wxString(); // failed to convert
@@ -650,7 +650,7 @@ wxString RisseCharToWxString(const risse_char * str, risse_size len)
 	wchar_t *buf = new (PointerFreeGC) wchar_t[converted_size + 1];
 
 	// 変換
-	if(RisseConvertRisseCharToUTF16String(
+	if(ConvertRisseCharToUTF16String(
 			reinterpret_cast<risse_uint16*>(buf), str, len)
 					== risse_size_max)
 		return wxString();
@@ -671,15 +671,10 @@ wxString RisseCharToWxString(const risse_char * str, risse_size len)
 #ifdef RISSE_CHARUTILS_DEBUG
 #include <stdio.h>
 //---------------------------------------------------------------------------
-void RisseThrowWSAssertionFailure(const wchar_t * source, risse_int line)
+void ThrowWSAssertionFailure(const wchar_t * source, risse_int line)
 {
 	fprintf(stderr, "assertion failure at %ls line %d\n", source, line);
 	abort();
-#if 0
-	Risse_eRisseError(
-		tRisseString(RISSE_WS("you can not use multiple RISSE_WS in a line; use RISSE_WS, RISSE_WS2, RISSE_WS3 ... at %1 line %2"),
-			tRisseString(source), tRisseString(line)));
-#endif
 }
 //---------------------------------------------------------------------------
 #endif

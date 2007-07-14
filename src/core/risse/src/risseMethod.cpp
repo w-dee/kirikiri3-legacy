@@ -23,48 +23,48 @@ namespace Risse
 
 
 //---------------------------------------------------------------------------
-tRisseMethodArgument::tEmptyMethodArgument
-	tRisseMethodArgument::EmptyArgument = {0, 0, {NULL}};
+tMethodArgument::tEmptyMethodArgument
+	tMethodArgument::EmptyArgument = {0, 0, {NULL}};
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-void RisseThrowBadArgumentCount(risse_size passed, risse_size expected)
+void ThrowBadArgumentCount(risse_size passed, risse_size expected)
 {
-	tRisseBadArgumentCountExceptionClass::ThrowNormal(passed, expected);
+	tBadArgumentCountExceptionClass::ThrowNormal(passed, expected);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void RisseThrowBadBlockArgumentCount(risse_size passed, risse_size expected)
+void ThrowBadBlockArgumentCount(risse_size passed, risse_size expected)
 {
-	tRisseBadArgumentCountExceptionClass::ThrowBlock(passed, expected);
+	tBadArgumentCountExceptionClass::ThrowBlock(passed, expected);
 }
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-tRisseMethodArgument & tRisseMethodArgument::Allocate(risse_size ac, risse_size bc)
+tMethodArgument & tMethodArgument::Allocate(risse_size ac, risse_size bc)
 {
 	// このメソッドは、必要なストレージのバイト数を計算して
-	// 領域を確保し、tRisseMethodArgument & にキャストして返すだけ。
+	// 領域を確保し、tMethodArgument & にキャストして返すだけ。
 
-	// tRisseMethodArgument::argv の配列サイズの差はそのまま
+	// tMethodArgument::argv の配列サイズの差はそのまま
 	// ポインタサイズであることを確認
 	// 構造体のパッキングによっては構造体サイズの計算を誤る可能性があるため
 	// 単純に各メンバのサイズの合計はとらずにすこしトリッキーな式を使う。
 	RISSE_ASSERT(
-		sizeof(tRisseMethodArgumentOf<2>) -
-		sizeof(tRisseMethodArgumentOf<1>) == sizeof(tRisseVariant *));
+		sizeof(tMethodArgumentOf<2>) -
+		sizeof(tMethodArgumentOf<1>) == sizeof(tVariant *));
 
 	void * alloc = new (GC) risse_uint8[
-		sizeof(tRisseMethodArgumentOf<1>) - sizeof(tRisseVariant *) +
-		sizeof(tRisseVariant) * (ac+bc)];
+		sizeof(tMethodArgumentOf<1>) - sizeof(tVariant *) +
+		sizeof(tVariant) * (ac+bc)];
 
-	tRisseMethodArgument & ret = *reinterpret_cast<tRisseMethodArgument*>(alloc);
+	tMethodArgument & ret = *reinterpret_cast<tMethodArgument*>(alloc);
 
 	ret.ArgumentCount = ac;
 	ret.BlockArgumentCount = bc;

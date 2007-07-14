@@ -20,28 +20,28 @@
 
 namespace Risse
 {
-class tRisseCoroutine;
+class tCoroutine;
 //---------------------------------------------------------------------------
 //! @brief		"Coroutine" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
-class tRisseCoroutineInstance : public tRisseObjectBase
+class tCoroutineInstance : public tObjectBase
 {
 private:
-	tRisseCoroutine * Coroutine; //!< コルーチンの実装
+	tCoroutine * Coroutine; //!< コルーチンの実装
 
 public:
 	//! @brief		コンストラクタ
-	tRisseCoroutineInstance();
+	tCoroutineInstance();
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
-	virtual ~tRisseCoroutineInstance() {;}
+	virtual ~tCoroutineInstance() {;}
 
 public: // Risse用メソッドなど
 	void construct();
-	void initialize(const tRisseNativeCallInfo & info);
+	void initialize(const tNativeCallInfo & info);
 	void run() const;
-	tRisseVariant resume(const tRisseMethodArgument & args) const;
-	tRisseVariant yield(const tRisseMethodArgument & args) const;
+	tVariant resume(const tMethodArgument & args) const;
+	tVariant yield(const tMethodArgument & args) const;
 	void dispose() const;
 	bool get_alive() const;
 };
@@ -51,20 +51,20 @@ public: // Risse用メソッドなど
 //---------------------------------------------------------------------------
 //! @brief		"Coroutine" クラス
 //---------------------------------------------------------------------------
-class tRisseCoroutineClass : public tRisseClassBase
+class tCoroutineClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseCoroutineClass(tRisseScriptEngine * engine);
+	tCoroutineClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public:
 };

@@ -28,12 +28,12 @@ RISSE_DEFINE_SOURCE_ID(4659,21296,13745,17188,45721,42457,47629,47295);
 
 
 //---------------------------------------------------------------------------
-bool tRisseScriptEngine::CommonObjectsInitialized = false;
+bool tScriptEngine::CommonObjectsInitialized = false;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseScriptEngine::tRisseScriptEngine()
+tScriptEngine::tScriptEngine()
 {
 	// 各クラスのインスタンスをいったん NULL に設定
 	// ここでは StartSentinel と EndSentinel の間が連続して各オブジェクトのインスタンス
@@ -51,11 +51,11 @@ tRisseScriptEngine::tRisseScriptEngine()
 		CommonObjectsInitialized = true;
 		// 共通初期化
 		GC_init();
-		RisseInitCoroutine();
+		InitCoroutine();
 	}
 
 	// 各クラスのインスタンスを作成する
-	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class = new tRisse##X##Class(this);
+	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class = new t##X##Class(this);
 	#include "risseInternalClasses.inc"
 	#undef RISSE_INTERNALCLASSES_CLASS
 
@@ -68,7 +68,7 @@ tRisseScriptEngine::tRisseScriptEngine()
 	ClassClass->SetClassClassRTTI(this);
 
 	// グローバルオブジェクトを "Object" クラスから作成する
-	GlobalObject = tRisseVariant(ObjectClass).New();
+	GlobalObject = tVariant(ObjectClass).New();
 
 	// 各クラスをグローバルオブジェクトに登録する
 	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterClassInstance(GlobalObject);
@@ -93,9 +93,9 @@ tRisseScriptEngine::tRisseScriptEngine()
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseString & name,
+void tScriptEngine::Evaluate(const tString & script, const tString & name,
 					risse_size lineofs,
-					tRisseVariant * result, const tRisseBindingInfo * binding,
+					tVariant * result, const tBindingInfo * binding,
 					bool is_expression)
 {
 	try
@@ -104,19 +104,19 @@ void tRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseStrin
 		// スクリプトブロックを作成(コンパイル)
 		tRisseScriptBlockInstance * block;
 
-		tRisseVariant sb =
-			tRisseVariant(RisseScriptBlockClass).
-				New(0, tRisseMethodArgument::New(script, name, (risse_int64)lineofs));
+		tVariant sb =
+			tVariant(RisseScriptBlockClass).
+				New(0, tMethodArgument::New(script, name, (risse_int64)lineofs));
 
 		block =
 			sb.CheckAndGetObjectInterafce<tRisseScriptBlockInstance, tRisseScriptBlockClass>(
-																			ScriptBlockClass);
+																			RisseScriptBlockClass);
 
 		// スクリプトを実行
-		block->Evaluate(binding == NULL ? (tRisseBindingInfo(GlobalObject)) : *binding,
+		block->Evaluate(binding == NULL ? (tBindingInfo(GlobalObject)) : *binding,
 								result, is_expression);
 	}
-	catch(const tRisseTemporaryException * te)
+	catch(const tTemporaryException * te)
 	{
 		te->ThrowConverted(this);
 	}

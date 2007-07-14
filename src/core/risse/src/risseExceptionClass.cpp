@@ -58,7 +58,7 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
 
 
 //---------------------------------------------------------------------------
-tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname)
+tTemporaryException::tTemporaryException(const tString classname)
 {
 	ExceptionClassName = classname;
 }
@@ -66,8 +66,8 @@ tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname)
 
 
 //---------------------------------------------------------------------------
-tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
-		const tRisseVariant & arg1)
+tTemporaryException::tTemporaryException(const tString classname,
+		const tVariant & arg1)
 {
 	ExceptionClassName = classname;
 	Arguments.push_back(arg1);
@@ -76,8 +76,8 @@ tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
 
 
 //---------------------------------------------------------------------------
-tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
-		const tRisseVariant & arg1, const tRisseVariant & arg2)
+tTemporaryException::tTemporaryException(const tString classname,
+		const tVariant & arg1, const tVariant & arg2)
 {
 	ExceptionClassName = classname;
 	Arguments.push_back(arg1);
@@ -87,8 +87,8 @@ tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
 
 
 //---------------------------------------------------------------------------
-tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
-		const tRisseVariant & arg1, const tRisseVariant & arg2, const tRisseVariant & arg3)
+tTemporaryException::tTemporaryException(const tString classname,
+		const tVariant & arg1, const tVariant & arg2, const tVariant & arg3)
 {
 	ExceptionClassName = classname;
 	Arguments.push_back(arg1);
@@ -99,13 +99,13 @@ tRisseTemporaryException::tRisseTemporaryException(const tRisseString classname,
 
 
 //---------------------------------------------------------------------------
-tRisseVariant * tRisseTemporaryException::Convert(tRisseScriptEngine * engine) const
+tVariant * tTemporaryException::Convert(tScriptEngine * engine) const
 {
 	// まず、例外クラスを取得する
-	tRisseVariant cls;
-	tRisseObjectInterface::tRetValue ret =
+	tVariant cls;
+	tObjectInterface::tRetValue ret =
 		engine->GetGlobalObject().Operate(engine, ocDGet, &cls, ExceptionClassName);
-	if(ret != tRisseObjectInterface::rvNoError)
+	if(ret != tObjectInterface::rvNoError)
 	{
 		// ExceptionClassNameを取得できなかった。
 		// この場合は ss_RuntimeException を取得する
@@ -113,26 +113,26 @@ tRisseVariant * tRisseTemporaryException::Convert(tRisseScriptEngine * engine) c
 	}
 
 	// 引数を用意する
-	tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(Arguments.size());
+	tMethodArgument & new_args = tMethodArgument::Allocate(Arguments.size());
 
 	for(risse_size i = 0; i < Arguments.size(); i++)
 		new_args.SetArgument(i, Arguments[i]);
 
 	// New を呼び出し、それを返す
-	return new tRisseVariant(cls.New(0, new_args));
+	return new tVariant(cls.New(0, new_args));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseTemporaryException::Dump() const
+void tTemporaryException::Dump() const
 {
 	fflush(stderr);
 	fflush(stdout);
 
-	RisseFPrint(stderr, RISSE_WS("tRisseTemporaryException: type "));
-	RisseFPrint(stderr, ExceptionClassName.c_str());
-	RisseFPrint(stderr, RISSE_WS("\n"));
+	FPrint(stderr, RISSE_WS("tTemporaryException: type "));
+	FPrint(stderr, ExceptionClassName.c_str());
+	FPrint(stderr, RISSE_WS("\n"));
 
 	fflush(stderr);
 	fflush(stdout);
@@ -146,28 +146,28 @@ void tRisseTemporaryException::Dump() const
 
 
 //---------------------------------------------------------------------------
-tRisseExitTryExceptionClass::tRisseExitTryExceptionClass(tRisseScriptEngine * engine,
-	const void * id, risse_uint32 targ_idx, const tRisseVariant * value) :
-		tRisseObjectInterface(new tRisseRTTI(engine))
+tExitTryExceptionClass::tExitTryExceptionClass(tScriptEngine * engine,
+	const void * id, risse_uint32 targ_idx, const tVariant * value) :
+		tObjectInterface(new tRTTI(engine))
 {
 	Identifier = id;
 	BranchTargetIndex = targ_idx;
-	Value = value ? new tRisseVariant(*value) : NULL;
+	Value = value ? new tVariant(*value) : NULL;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseObjectInterface::tRetValue tRisseExitTryExceptionClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tObjectInterface::tRetValue tExitTryExceptionClass::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// 暫定実装
 	if(code == ocDGet && name == RISSE_WS("getExitTryRecord"))
 	{
-		// tRisseExitTryExceptionClass 型を返す
+		// tExitTryExceptionClass 型を返す
 		if(result)
 		{
-			*result = reinterpret_cast<tRisseObjectInterface*>
-				((tRisseExitTryExceptionClass*)this);
+			*result = reinterpret_cast<tObjectInterface*>
+				((tExitTryExceptionClass*)this);
 		}
 	}
 	return rvNoError;
@@ -184,16 +184,16 @@ tRisseObjectInterface::tRetValue tRisseExitTryExceptionClass::Operate(RISSE_OBJE
 
 
 //---------------------------------------------------------------------------
-void tRisseSourcePointInstance::construct()
+void tSourcePointInstance::construct()
 {
 	// scriptBlock メンバを追加 (デフォルトではnull)
-	RegisterNormalMember(ss_scriptBlock, tRisseVariant::GetNullObject());
+	RegisterNormalMember(ss_scriptBlock, tVariant::GetNullObject());
 
 	// position メンバを追加 (デフォルトでは-1)
-	RegisterNormalMember(ss_position, tRisseVariant((risse_int64)-1));
+	RegisterNormalMember(ss_position, tVariant((risse_int64)-1));
 
 	// function メンバを追加 (デフォルトではnull)
-	RegisterNormalMember(ss_function, tRisseVariant::GetNullObject());
+	RegisterNormalMember(ss_function, tVariant::GetNullObject());
 
 	/*
 		ほかにメンバを追加するかも
@@ -203,7 +203,7 @@ void tRisseSourcePointInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseSourcePointInstance::initialize(const tRisseNativeCallInfo & info)
+void tSourcePointInstance::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数は空)
 	info.InitializeSuperClass();
@@ -220,32 +220,32 @@ void tRisseSourcePointInstance::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSourcePointInstance::toString()
+tString tSourcePointInstance::toString()
 {
 	// ファイル名:行番号: in 関数名 を生成して返す
 
-	tRisseVariant sb, position, function;
+	tVariant sb, position, function;
 	sb =       GetPropertyDirect(ss_scriptBlock);
 	position = GetPropertyDirect(ss_position);
 	function = GetPropertyDirect(ss_function);
 
-	tRisseString ret;
-	tRisseString fn = sb.GetPropertyDirect(GetRTTI()->GetScriptEngine(), ss_name);
+	tString ret;
+	tString fn = sb.GetPropertyDirect(GetRTTI()->GetScriptEngine(), ss_name);
 	if(!fn.IsEmpty())
 		ret = fn + RISSE_WC(':');
 	else
 		ret = RISSE_WS_TR("<unknown>:");
 
-	if(position != tRisseVariant((risse_int64)-1))
+	if(position != tVariant((risse_int64)-1))
 	{
-		tRisseVariant line = sb.Invoke(GetRTTI()->GetScriptEngine(), ss_positionToLine, position);
-		ret += (line + tRisseVariant((risse_int64)1)).operator tRisseString();
+		tVariant line = sb.Invoke(GetRTTI()->GetScriptEngine(), ss_positionToLine, position);
+		ret += (line + tVariant((risse_int64)1)).operator tString();
 	}
 	else
 		ret += RISSE_WS_TR("<unknown>");
 
 	if(!function.IsNull())
-		ret += tRisseString(RISSE_WS_TR(": in ")) + function.operator tRisseString();
+		ret += tString(RISSE_WS_TR(": in ")) + function.operator tString();
 
 	return ret;
 }
@@ -253,8 +253,8 @@ tRisseString tRisseSourcePointInstance::toString()
 
 
 //---------------------------------------------------------------------------
-tRisseSourcePointClass::tRisseSourcePointClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_SourcePoint, engine->ObjectClass)
+tSourcePointClass::tSourcePointClass(tScriptEngine * engine) :
+	tClassBase(ss_SourcePoint, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -262,7 +262,7 @@ tRisseSourcePointClass::tRisseSourcePointClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseSourcePointClass::RegisterMembers()
+void tSourcePointClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -271,18 +271,18 @@ void tRisseSourcePointClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate,  &tRisseSourcePointClass::ovulate);
-	RisseBindFunction(this, ss_construct,  &tRisseSourcePointInstance::construct);
-	RisseBindFunction(this, ss_initialize,  &tRisseSourcePointInstance::initialize);
-	RisseBindFunction(this, mnString,  &tRisseSourcePointInstance::toString);
+	BindFunction(this, ss_ovulate,  &tSourcePointClass::ovulate);
+	BindFunction(this, ss_construct,  &tSourcePointInstance::construct);
+	BindFunction(this, ss_initialize,  &tSourcePointInstance::initialize);
+	BindFunction(this, mnString,  &tSourcePointInstance::toString);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseSourcePointClass::ovulate()
+tVariant tSourcePointClass::ovulate()
 {
-	return tRisseVariant(new tRisseSourcePointInstance());
+	return tVariant(new tSourcePointInstance());
 }
 //---------------------------------------------------------------------------
 
@@ -297,8 +297,8 @@ tRisseVariant tRisseSourcePointClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-tRisseThrowableClass::tRisseThrowableClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Throwable, engine->ObjectClass)
+tThrowableClass::tThrowableClass(tScriptEngine * engine) :
+	tClassBase(ss_Throwable, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -306,7 +306,7 @@ tRisseThrowableClass::tRisseThrowableClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseThrowableClass::RegisterMembers()
+void tThrowableClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -316,35 +316,35 @@ void tRisseThrowableClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseThrowableClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseThrowableClass::initialize);
-	RisseBindFunction(this, mnString, &tRisseThrowableClass::toString);
-	RisseBindFunction(this, ss_addTrace, &tRisseThrowableClass::addTrace);
-	RisseBindFunction(this, ss_toException, &tRisseThrowableClass::toException);
+	BindFunction(this, ss_construct, &tThrowableClass::construct);
+	BindFunction(this, ss_initialize, &tThrowableClass::initialize);
+	BindFunction(this, mnString, &tThrowableClass::toString);
+	BindFunction(this, ss_addTrace, &tThrowableClass::addTrace);
+	BindFunction(this, ss_toException, &tThrowableClass::toException);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseThrowableClass::construct(const tRisseNativeCallInfo & info)
+void tThrowableClass::construct(const tNativeCallInfo & info)
 {
 	// message メンバを追加 (デフォルトでは空文字列)
-	info.This.SetPropertyDirect_Object(ss_message, tRisseOperateFlags::ofMemberEnsure,
-		tRisseVariant(tRisseString::GetEmptyString()), info.This);
+	info.This.SetPropertyDirect_Object(ss_message, tOperateFlags::ofMemberEnsure,
+		tVariant(tString::GetEmptyString()), info.This);
 
 	// trace メンバを追加 (デフォルトでは空配列)
-	info.This.SetPropertyDirect_Object(ss_trace, tRisseOperateFlags::ofMemberEnsure,
-		tRisseVariant(tRisseVariant(info.engine->ArrayClass).New()), info.This);
+	info.This.SetPropertyDirect_Object(ss_trace, tOperateFlags::ofMemberEnsure,
+		tVariant(tVariant(info.engine->ArrayClass).New()), info.This);
 
 	// cause メンバを追加 (デフォルトではnull)
-	info.This.SetPropertyDirect_Object(ss_cause, tRisseOperateFlags::ofMemberEnsure,
-		tRisseVariant::GetNullObject(), info.This);
+	info.This.SetPropertyDirect_Object(ss_cause, tOperateFlags::ofMemberEnsure,
+		tVariant::GetNullObject(), info.This);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseThrowableClass::initialize(const tRisseNativeCallInfo & info)
+void tThrowableClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数は空)
 	info.InitializeSuperClass();
@@ -357,25 +357,25 @@ void tRisseThrowableClass::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseThrowableClass::toString(const tRisseNativeCallInfo & info)
+tString tThrowableClass::toString(const tNativeCallInfo & info)
 {
 	// message at [発生場所] を返す
-	tRisseString message = (tRisseString)info.This.GetPropertyDirect_Object(ss_message);
-	tRisseVariant trace_array = info.This.GetPropertyDirect_Object(ss_trace);
-	tRisseString at = (tRisseString)trace_array.Invoke_Object(mnIGet, risse_int64(0));
+	tString message = (tString)info.This.GetPropertyDirect_Object(ss_message);
+	tVariant trace_array = info.This.GetPropertyDirect_Object(ss_trace);
+	tString at = (tString)trace_array.Invoke_Object(mnIGet, risse_int64(0));
 		// 先頭の要素を取り出す
 		// 先頭の要素が無い場合は void が返り、at は空文字列になるはず
 	if(at.IsEmpty())
 		return message;
 	else
-		return tRisseString(RISSE_WS_TR("%1 at %2"), message, at);
+		return tString(RISSE_WS_TR("%1 at %2"), message, at);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseThrowableClass::addTrace(const tRisseVariant & point,
-		const tRisseNativeCallInfo & info)
+void tThrowableClass::addTrace(const tVariant & point,
+		const tNativeCallInfo & info)
 {
 	// 引数 = SourcePoint クラスのインスタンス
 	// TODO: インスタンスが SourcePoint クラスのインスタンスかどうかをチェック
@@ -386,14 +386,14 @@ void tRisseThrowableClass::addTrace(const tRisseVariant & point,
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseThrowableClass::toException(const tRisseNativeCallInfo & info)
+tVariant tThrowableClass::toException(const tNativeCallInfo & info)
 {
 	// 自分自身が Class のサブクラスの場合は
 	// 例外クラスを構築して返す
 	// そうでない場合は This をそのまま返す
-	tRisseVariant ret;
-	if(info.This.InstanceOf(info.engine, tRisseVariant(info.engine->ClassClass)))
-		return info.This.New(0, tRisseMethodArgument::Empty());
+	tVariant ret;
+	if(info.This.InstanceOf(info.engine, tVariant(info.engine->ClassClass)))
+		return info.This.New(0, tMethodArgument::Empty());
 	else
 		return info.This;
 }
@@ -409,8 +409,8 @@ tRisseVariant tRisseThrowableClass::toException(const tRisseNativeCallInfo & inf
 
 
 //---------------------------------------------------------------------------
-tRisseErrorClass::tRisseErrorClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Error, engine->ThrowableClass)
+tErrorClass::tErrorClass(tScriptEngine * engine) :
+	tClassBase(ss_Error, engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -418,7 +418,7 @@ tRisseErrorClass::tRisseErrorClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseErrorClass::RegisterMembers()
+void tErrorClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -428,14 +428,14 @@ void tRisseErrorClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseErrorClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseErrorClass::initialize);
+	BindFunction(this, ss_construct, &tErrorClass::construct);
+	BindFunction(this, ss_initialize, &tErrorClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseErrorClass::construct()
+void tErrorClass::construct()
 {
 	// 特にやることはない
 }
@@ -443,7 +443,7 @@ void tRisseErrorClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseErrorClass::initialize(const tRisseNativeCallInfo & info)
+void tErrorClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -461,8 +461,8 @@ void tRisseErrorClass::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseAssertionErrorClass::tRisseAssertionErrorClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_AssertionError, engine->ErrorClass)
+tAssertionErrorClass::tAssertionErrorClass(tScriptEngine * engine) :
+	tClassBase(ss_AssertionError, engine->ErrorClass)
 {
 	RegisterMembers();
 }
@@ -470,7 +470,7 @@ tRisseAssertionErrorClass::tRisseAssertionErrorClass(tRisseScriptEngine * engine
 
 
 //---------------------------------------------------------------------------
-void tRisseAssertionErrorClass::RegisterMembers()
+void tAssertionErrorClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -480,39 +480,39 @@ void tRisseAssertionErrorClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseAssertionErrorClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseAssertionErrorClass::initialize);
+	BindFunction(this, ss_construct, &tAssertionErrorClass::construct);
+	BindFunction(this, ss_initialize, &tAssertionErrorClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseAssertionErrorClass::construct(const tRisseNativeCallInfo & info)
+void tAssertionErrorClass::construct(const tNativeCallInfo & info)
 {
 	// expression メンバを追加 (デフォルトでは空文字列)
 	info.This.SetPropertyDirect_Object(ss_expression,
-		tRisseOperateFlags::ofMemberEnsure,
-		tRisseVariant(tRisseString::GetEmptyString()), info.This);
+		tOperateFlags::ofMemberEnsure,
+		tVariant(tString::GetEmptyString()), info.This);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseAssertionErrorClass::initialize(const tRisseNativeCallInfo & info)
+void tAssertionErrorClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
 	if(info.args.HasArgument(0))
-		info.InitializeSuperClass(tRisseMethodArgument::New(info.args[0]));
+		info.InitializeSuperClass(tMethodArgument::New(info.args[0]));
 	else
-		info.InitializeSuperClass(tRisseMethodArgument::New(RISSE_WS("assertion failed")));
+		info.InitializeSuperClass(tMethodArgument::New(RISSE_WS("assertion failed")));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseAssertionErrorClass::Throw(tRisseScriptEngine * engine, const tRisseString & expression)
+void tAssertionErrorClass::Throw(tScriptEngine * engine, const tString & expression)
 {
-	tRisseTemporaryException * e = new tRisseTemporaryException(ss_AssertionError, expression);
+	tTemporaryException * e = new tTemporaryException(ss_AssertionError, expression);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -529,8 +529,8 @@ void tRisseAssertionErrorClass::Throw(tRisseScriptEngine * engine, const tRisseS
 
 
 //---------------------------------------------------------------------------
-tRisseBlockExitExceptionClass::tRisseBlockExitExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_BlockExitException, engine->ThrowableClass)
+tBlockExitExceptionClass::tBlockExitExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_BlockExitException, engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -538,7 +538,7 @@ tRisseBlockExitExceptionClass::tRisseBlockExitExceptionClass(tRisseScriptEngine 
 
 
 //---------------------------------------------------------------------------
-void tRisseBlockExitExceptionClass::RegisterMembers()
+void tBlockExitExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -548,35 +548,35 @@ void tRisseBlockExitExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseBlockExitExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseBlockExitExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tBlockExitExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tBlockExitExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBlockExitExceptionClass::construct(const tRisseNativeCallInfo & info)
+void tBlockExitExceptionClass::construct(const tNativeCallInfo & info)
 {
 	// identifier メンバを追加 (デフォルトではnull)
-	info.This.SetPropertyDirect_Object(ss_identifier, tRisseOperateFlags::ofMemberEnsure,
-		tRisseVariant::GetNullObject(), info.This);
+	info.This.SetPropertyDirect_Object(ss_identifier, tOperateFlags::ofMemberEnsure,
+		tVariant::GetNullObject(), info.This);
 
 	// target メンバを追加 (デフォルトでは-1)
-	info.This.SetPropertyDirect_Object(ss_target, tRisseOperateFlags::ofMemberEnsure,
-		tRisseVariant((risse_int64)-1), info.This);
+	info.This.SetPropertyDirect_Object(ss_target, tOperateFlags::ofMemberEnsure,
+		tVariant((risse_int64)-1), info.This);
 
 	// value メンバを追加 (デフォルトではnull)
-	info.This.SetPropertyDirect_Object(ss_value, tRisseOperateFlags::ofMemberEnsure,
-		tRisseVariant::GetNullObject(), info.This);
+	info.This.SetPropertyDirect_Object(ss_value, tOperateFlags::ofMemberEnsure,
+		tVariant::GetNullObject(), info.This);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBlockExitExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tBlockExitExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はメッセージ)
-	info.InitializeSuperClass(tRisseMethodArgument::New(RISSE_WS("break/return helper exception")));
+	info.InitializeSuperClass(tMethodArgument::New(RISSE_WS("break/return helper exception")));
 
 	// メンバを設定する
 	if(info.args.HasArgument(0))
@@ -601,8 +601,8 @@ void tRisseBlockExitExceptionClass::initialize(const tRisseNativeCallInfo & info
 
 
 //---------------------------------------------------------------------------
-tRisseExceptionClass::tRisseExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Exception, engine->ThrowableClass)
+tExceptionClass::tExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_Exception, engine->ThrowableClass)
 {
 	RegisterMembers();
 }
@@ -610,7 +610,7 @@ tRisseExceptionClass::tRisseExceptionClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseExceptionClass::RegisterMembers()
+void tExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -620,14 +620,14 @@ void tRisseExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseExceptionClass::construct()
+void tExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -635,7 +635,7 @@ void tRisseExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -650,9 +650,9 @@ void tRisseExceptionClass::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseInsufficientResourceExceptionClass::tRisseInsufficientResourceExceptionClass(
-	tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_InsufficientResourceException, engine->ExceptionClass)
+tInsufficientResourceExceptionClass::tInsufficientResourceExceptionClass(
+	tScriptEngine * engine) :
+	tClassBase(ss_InsufficientResourceException, engine->ExceptionClass)
 {
 	RegisterMembers();
 }
@@ -660,7 +660,7 @@ tRisseInsufficientResourceExceptionClass::tRisseInsufficientResourceExceptionCla
 
 
 //---------------------------------------------------------------------------
-void tRisseInsufficientResourceExceptionClass::RegisterMembers()
+void tInsufficientResourceExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -670,14 +670,14 @@ void tRisseInsufficientResourceExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseInsufficientResourceExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseInsufficientResourceExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tInsufficientResourceExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tInsufficientResourceExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseInsufficientResourceExceptionClass::construct()
+void tInsufficientResourceExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -685,7 +685,7 @@ void tRisseInsufficientResourceExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseInsufficientResourceExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tInsufficientResourceExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -694,11 +694,11 @@ void tRisseInsufficientResourceExceptionClass::initialize(const tRisseNativeCall
 
 
 //---------------------------------------------------------------------------
-void tRisseInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine(tRisseScriptEngine * engine)
+void tInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_InsufficientResourceException,
-			tRisseString(RISSE_WS_TR("could not create coroutine")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_InsufficientResourceException,
+			tString(RISSE_WS_TR("could not create coroutine")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -712,8 +712,8 @@ void tRisseInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine(tRis
 
 
 //---------------------------------------------------------------------------
-tRisseIOExceptionClass::tRisseIOExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_IOException, engine->ExceptionClass)
+tIOExceptionClass::tIOExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_IOException, engine->ExceptionClass)
 {
 	RegisterMembers();
 }
@@ -721,7 +721,7 @@ tRisseIOExceptionClass::tRisseIOExceptionClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseIOExceptionClass::RegisterMembers()
+void tIOExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -731,14 +731,14 @@ void tRisseIOExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseIOExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseIOExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tIOExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tIOExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIOExceptionClass::construct()
+void tIOExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -746,7 +746,7 @@ void tRisseIOExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseIOExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tIOExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -755,13 +755,13 @@ void tRisseIOExceptionClass::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-void tRisseIOExceptionClass::ThrowReadError(tRisseScriptEngine * engine,
-							const tRisseString & name)
+void tIOExceptionClass::ThrowReadError(tScriptEngine * engine,
+							const tString & name)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IOException,
-			name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not read")) :
-							 tRisseString(RISSE_WS_TR("could not read at %1"), name)
+	tTemporaryException * e =
+		new tTemporaryException(ss_IOException,
+			name.IsEmpty() ? tString(RISSE_WS_TR("could not read")) :
+							 tString(RISSE_WS_TR("could not read at %1"), name)
 			);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -769,13 +769,13 @@ void tRisseIOExceptionClass::ThrowReadError(tRisseScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-void tRisseIOExceptionClass::ThrowWriteError(tRisseScriptEngine * engine,
-							const tRisseString & name)
+void tIOExceptionClass::ThrowWriteError(tScriptEngine * engine,
+							const tString & name)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IOException,
-			name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not write")) :
-							 tRisseString(RISSE_WS_TR("could not write at %1"), name)
+	tTemporaryException * e =
+		new tTemporaryException(ss_IOException,
+			name.IsEmpty() ? tString(RISSE_WS_TR("could not write")) :
+							 tString(RISSE_WS_TR("could not write at %1"), name)
 			);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -783,16 +783,16 @@ void tRisseIOExceptionClass::ThrowWriteError(tRisseScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-void tRisseIOExceptionClass::ThrowSeekError(tRisseScriptEngine * engine,
-							const tRisseString & name, risse_size pos)
+void tIOExceptionClass::ThrowSeekError(tScriptEngine * engine,
+							const tString & name, risse_size pos)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IOException,
+	tTemporaryException * e =
+		new tTemporaryException(ss_IOException,
 			pos != risse_size_max ?
-				(name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not seek to position %1"), tRisseString::AsString((risse_int64)pos)) :
-								  tRisseString(RISSE_WS_TR("could not seek to position %1 of %2"), tRisseString::AsString((risse_int64)pos) , name) ) :
-				(name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not seek")) :
-								  tRisseString(RISSE_WS_TR("could not seek at %1"), name) )
+				(name.IsEmpty() ? tString(RISSE_WS_TR("could not seek to position %1"), tString::AsString((risse_int64)pos)) :
+								  tString(RISSE_WS_TR("could not seek to position %1 of %2"), tString::AsString((risse_int64)pos) , name) ) :
+				(name.IsEmpty() ? tString(RISSE_WS_TR("could not seek")) :
+								  tString(RISSE_WS_TR("could not seek at %1"), name) )
 			);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -800,16 +800,16 @@ void tRisseIOExceptionClass::ThrowSeekError(tRisseScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-void tRisseIOExceptionClass::ThrowTruncateError(tRisseScriptEngine * engine,
-							const tRisseString & name, risse_size pos)
+void tIOExceptionClass::ThrowTruncateError(tScriptEngine * engine,
+							const tString & name, risse_size pos)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IOException,
+	tTemporaryException * e =
+		new tTemporaryException(ss_IOException,
 			pos != risse_size_max ?
-				(name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not truncate at position %1"), tRisseString::AsString((risse_int64)pos)) :
-								  tRisseString(RISSE_WS_TR("could not truncate at position %1 of %2"), tRisseString::AsString((risse_int64)pos) , name) ) :
-				(name.IsEmpty() ? tRisseString(RISSE_WS_TR("could not truncate")) :
-								  tRisseString(RISSE_WS_TR("could not truncate at %1"), name) )
+				(name.IsEmpty() ? tString(RISSE_WS_TR("could not truncate at position %1"), tString::AsString((risse_int64)pos)) :
+								  tString(RISSE_WS_TR("could not truncate at position %1 of %2"), tString::AsString((risse_int64)pos) , name) ) :
+				(name.IsEmpty() ? tString(RISSE_WS_TR("could not truncate")) :
+								  tString(RISSE_WS_TR("could not truncate at %1"), name) )
 			);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -824,8 +824,8 @@ void tRisseIOExceptionClass::ThrowTruncateError(tRisseScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-tRisseCharConversionExceptionClass::tRisseCharConversionExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_CharConversionException, engine->IOExceptionClass)
+tCharConversionExceptionClass::tCharConversionExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_CharConversionException, engine->IOExceptionClass)
 {
 	RegisterMembers();
 }
@@ -833,7 +833,7 @@ tRisseCharConversionExceptionClass::tRisseCharConversionExceptionClass(tRisseScr
 
 
 //---------------------------------------------------------------------------
-void tRisseCharConversionExceptionClass::RegisterMembers()
+void tCharConversionExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -843,14 +843,14 @@ void tRisseCharConversionExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseCharConversionExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseCharConversionExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tCharConversionExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tCharConversionExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCharConversionExceptionClass::construct()
+void tCharConversionExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -858,7 +858,7 @@ void tRisseCharConversionExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseCharConversionExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tCharConversionExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -867,11 +867,11 @@ void tRisseCharConversionExceptionClass::initialize(const tRisseNativeCallInfo &
 
 
 //---------------------------------------------------------------------------
-void tRisseCharConversionExceptionClass::ThrowInvalidUTF8String(tRisseScriptEngine * engine)
+void tCharConversionExceptionClass::ThrowInvalidUTF8String(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_CharConversionException,
-			tRisseString(RISSE_WS_TR("invalid UTF-8 string")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_CharConversionException,
+			tString(RISSE_WS_TR("invalid UTF-8 string")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -883,8 +883,8 @@ void tRisseCharConversionExceptionClass::ThrowInvalidUTF8String(tRisseScriptEngi
 
 
 //---------------------------------------------------------------------------
-tRisseRuntimeExceptionClass::tRisseRuntimeExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_RuntimeException, engine->ExceptionClass)
+tRuntimeExceptionClass::tRuntimeExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_RuntimeException, engine->ExceptionClass)
 {
 	RegisterMembers();
 }
@@ -892,7 +892,7 @@ tRisseRuntimeExceptionClass::tRisseRuntimeExceptionClass(tRisseScriptEngine * en
 
 
 //---------------------------------------------------------------------------
-void tRisseRuntimeExceptionClass::RegisterMembers()
+void tRuntimeExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -902,14 +902,14 @@ void tRisseRuntimeExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseRuntimeExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseRuntimeExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tRuntimeExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tRuntimeExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseRuntimeExceptionClass::construct()
+void tRuntimeExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -917,7 +917,7 @@ void tRisseRuntimeExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseRuntimeExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tRuntimeExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -931,8 +931,8 @@ void tRisseRuntimeExceptionClass::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseCompileExceptionClass::tRisseCompileExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_CompileException, engine->RuntimeExceptionClass)
+tCompileExceptionClass::tCompileExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_CompileException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -940,7 +940,7 @@ tRisseCompileExceptionClass::tRisseCompileExceptionClass(tRisseScriptEngine * en
 
 
 //---------------------------------------------------------------------------
-void tRisseCompileExceptionClass::RegisterMembers()
+void tCompileExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -950,14 +950,14 @@ void tRisseCompileExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseCompileExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseCompileExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tCompileExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tCompileExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCompileExceptionClass::construct()
+void tCompileExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -965,7 +965,7 @@ void tRisseCompileExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompileExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tCompileExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -974,16 +974,16 @@ void tRisseCompileExceptionClass::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-void tRisseCompileExceptionClass::Throw(tRisseScriptEngine * engine,
-	const tRisseString & reason, const tRisseScriptBlockInstance * sb, risse_size pos)
+void tCompileExceptionClass::Throw(tScriptEngine * engine,
+	const tString & reason, const tScriptBlockInstance * sb, risse_size pos)
 {
 	// 例外インスタンスを生成
-	tRisseTemporaryException * et =
-		new tRisseTemporaryException(ss_CompileException,
-			tRisseString(RISSE_WS_TR("compile error: %1"), reason));
+	tTemporaryException * et =
+		new tTemporaryException(ss_CompileException,
+			tString(RISSE_WS_TR("compile error: %1"), reason));
 	if(engine)
 	{
-		tRisseVariant * e = et->Convert(engine);
+		tVariant * e = et->Convert(engine);
 
 		// 例外位置情報を追加してやる
 		e->AddTrace(sb, pos);
@@ -1004,8 +1004,8 @@ void tRisseCompileExceptionClass::Throw(tRisseScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-tRisseClassDefinitionExceptionClass::tRisseClassDefinitionExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_ClassDefinitionException, engine->RuntimeExceptionClass)
+tClassDefinitionExceptionClass::tClassDefinitionExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_ClassDefinitionException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1013,7 +1013,7 @@ tRisseClassDefinitionExceptionClass::tRisseClassDefinitionExceptionClass(tRisseS
 
 
 //---------------------------------------------------------------------------
-void tRisseClassDefinitionExceptionClass::RegisterMembers()
+void tClassDefinitionExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1023,14 +1023,14 @@ void tRisseClassDefinitionExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseClassDefinitionExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseClassDefinitionExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tClassDefinitionExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tClassDefinitionExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseClassDefinitionExceptionClass::construct()
+void tClassDefinitionExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1038,7 +1038,7 @@ void tRisseClassDefinitionExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseClassDefinitionExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tClassDefinitionExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1047,22 +1047,22 @@ void tRisseClassDefinitionExceptionClass::initialize(const tRisseNativeCallInfo 
 
 
 //---------------------------------------------------------------------------
-void tRisseClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleClass(tRisseScriptEngine * engine)
+void tClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleClass(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_ClassDefinitionException,
-			tRisseString(RISSE_WS_TR("cannot create subclass of non-extensible superclass")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_ClassDefinitionException,
+			tString(RISSE_WS_TR("cannot create subclass of non-extensible superclass")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tRisseScriptEngine * engine)
+void tClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_ClassDefinitionException,
-			tRisseString(RISSE_WS_TR("the superclass is not a class")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_ClassDefinitionException,
+			tString(RISSE_WS_TR("the superclass is not a class")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -1074,8 +1074,8 @@ void tRisseClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tRisseScrip
 
 
 //---------------------------------------------------------------------------
-tRisseInstantiationExceptionClass::tRisseInstantiationExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_InstantiationException, engine->RuntimeExceptionClass)
+tInstantiationExceptionClass::tInstantiationExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_InstantiationException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1083,7 +1083,7 @@ tRisseInstantiationExceptionClass::tRisseInstantiationExceptionClass(tRisseScrip
 
 
 //---------------------------------------------------------------------------
-void tRisseInstantiationExceptionClass::RegisterMembers()
+void tInstantiationExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1093,14 +1093,14 @@ void tRisseInstantiationExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseInstantiationExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseInstantiationExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tInstantiationExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tInstantiationExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseInstantiationExceptionClass::construct()
+void tInstantiationExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1108,7 +1108,7 @@ void tRisseInstantiationExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseInstantiationExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tInstantiationExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1117,22 +1117,22 @@ void tRisseInstantiationExceptionClass::initialize(const tRisseNativeCallInfo & 
 
 
 //---------------------------------------------------------------------------
-void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromNonClassObject(tRisseScriptEngine * engine)
+void tInstantiationExceptionClass::ThrowCannotCreateInstanceFromNonClassObject(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_InstantiationException,
-			tRisseString(RISSE_WS_TR("cannot create instance from non-class object")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_InstantiationException,
+			tString(RISSE_WS_TR("cannot create instance from non-class object")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass(tRisseScriptEngine * engine)
+void tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_InstantiationException,
-			tRisseString(RISSE_WS_TR("cannot create instance from this class")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_InstantiationException,
+			tString(RISSE_WS_TR("cannot create instance from this class")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -1143,8 +1143,8 @@ void tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass(t
 
 
 //---------------------------------------------------------------------------
-tRisseBadContextExceptionClass::tRisseBadContextExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_BadContextException, engine->RuntimeExceptionClass)
+tBadContextExceptionClass::tBadContextExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_BadContextException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1152,7 +1152,7 @@ tRisseBadContextExceptionClass::tRisseBadContextExceptionClass(tRisseScriptEngin
 
 
 //---------------------------------------------------------------------------
-void tRisseBadContextExceptionClass::RegisterMembers()
+void tBadContextExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1162,14 +1162,14 @@ void tRisseBadContextExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseBadContextExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseBadContextExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tBadContextExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tBadContextExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBadContextExceptionClass::construct()
+void tBadContextExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1177,7 +1177,7 @@ void tRisseBadContextExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseBadContextExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tBadContextExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1186,11 +1186,11 @@ void tRisseBadContextExceptionClass::initialize(const tRisseNativeCallInfo & inf
 
 
 //---------------------------------------------------------------------------
-void tRisseBadContextExceptionClass::Throw(tRisseScriptEngine * engine)
+void tBadContextExceptionClass::Throw(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_BadContextException,
-			tRisseString(RISSE_WS_TR("given context is not compatible with this method/property")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_BadContextException,
+			tString(RISSE_WS_TR("given context is not compatible with this method/property")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -1202,8 +1202,8 @@ void tRisseBadContextExceptionClass::Throw(tRisseScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
-tRisseUnsupportedOperationExceptionClass::tRisseUnsupportedOperationExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_UnsupportedOperationException, engine->RuntimeExceptionClass)
+tUnsupportedOperationExceptionClass::tUnsupportedOperationExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_UnsupportedOperationException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1211,7 +1211,7 @@ tRisseUnsupportedOperationExceptionClass::tRisseUnsupportedOperationExceptionCla
 
 
 //---------------------------------------------------------------------------
-void tRisseUnsupportedOperationExceptionClass::RegisterMembers()
+void tUnsupportedOperationExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1221,14 +1221,14 @@ void tRisseUnsupportedOperationExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseUnsupportedOperationExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseUnsupportedOperationExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tUnsupportedOperationExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tUnsupportedOperationExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseUnsupportedOperationExceptionClass::construct()
+void tUnsupportedOperationExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1236,7 +1236,7 @@ void tRisseUnsupportedOperationExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseUnsupportedOperationExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tUnsupportedOperationExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1245,81 +1245,22 @@ void tRisseUnsupportedOperationExceptionClass::initialize(const tRisseNativeCall
 
 
 //---------------------------------------------------------------------------
-void tRisseUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException(tRisseScriptEngine * engine)
+void tUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_UnsupportedOperationException,
-			tRisseString(RISSE_WS_TR("cannot call non-function object")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_UnsupportedOperationException,
+			tString(RISSE_WS_TR("cannot call non-function object")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented(tRisseScriptEngine * engine)
+void tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_UnsupportedOperationException,
-			tRisseString(RISSE_WS_TR("operation is not implemented")));
-	if(engine) e->ThrowConverted(engine); else throw e;
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-tRisseArithmeticExceptionClass::tRisseArithmeticExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_ArithmeticException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseArithmeticExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
-	RisseBindFunction(this, ss_construct, &tRisseArithmeticExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseArithmeticExceptionClass::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseArithmeticExceptionClass::construct()
-{
-	// 特にやることはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseArithmeticExceptionClass::initialize(const tRisseNativeCallInfo & info)
-{
-	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.InitializeSuperClass(info.args);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseArithmeticExceptionClass::ThrowDivideByZeroException(tRisseScriptEngine * engine)
-{
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_ArithmeticException,
-			tRisseString(RISSE_WS_TR("attempt to divide by zero")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_UnsupportedOperationException,
+			tString(RISSE_WS_TR("operation is not implemented")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -1331,8 +1272,8 @@ void tRisseArithmeticExceptionClass::ThrowDivideByZeroException(tRisseScriptEngi
 
 
 //---------------------------------------------------------------------------
-tRisseArgumentExceptionClass::tRisseArgumentExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_ArgumentException, engine->RuntimeExceptionClass)
+tArithmeticExceptionClass::tArithmeticExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_ArithmeticException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1340,7 +1281,7 @@ tRisseArgumentExceptionClass::tRisseArgumentExceptionClass(tRisseScriptEngine * 
 
 
 //---------------------------------------------------------------------------
-void tRisseArgumentExceptionClass::RegisterMembers()
+void tArithmeticExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1350,14 +1291,14 @@ void tRisseArgumentExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseArgumentExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseArgumentExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tArithmeticExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tArithmeticExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseArgumentExceptionClass::construct()
+void tArithmeticExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1365,59 +1306,7 @@ void tRisseArgumentExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseArgumentExceptionClass::initialize(const tRisseNativeCallInfo & info)
-{
-	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.InitializeSuperClass(info.args);
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-tRisseNullObjectExceptionClass::tRisseNullObjectExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_NullObjectException, engine->IllegalArgumentExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseNullObjectExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
-	RisseBindFunction(this, ss_construct, &tRisseNullObjectExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseNullObjectExceptionClass::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseNullObjectExceptionClass::construct()
-{
-	// 特にやることはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseNullObjectExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tArithmeticExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1426,11 +1315,11 @@ void tRisseNullObjectExceptionClass::initialize(const tRisseNativeCallInfo & inf
 
 
 //---------------------------------------------------------------------------
-void tRisseNullObjectExceptionClass::Throw(tRisseScriptEngine * engine)
+void tArithmeticExceptionClass::ThrowDivideByZeroException(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_NullObjectException,
-			tRisseString(RISSE_WS_TR("null object was given")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_ArithmeticException,
+			tString(RISSE_WS_TR("attempt to divide by zero")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -1442,8 +1331,8 @@ void tRisseNullObjectExceptionClass::Throw(tRisseScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
-tRisseIllegalArgumentTypeExceptionClass::tRisseIllegalArgumentTypeExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_IllegalArgumentTypeException, engine->IllegalArgumentExceptionClass)
+tArgumentExceptionClass::tArgumentExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_ArgumentException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1451,7 +1340,7 @@ tRisseIllegalArgumentTypeExceptionClass::tRisseIllegalArgumentTypeExceptionClass
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalArgumentTypeExceptionClass::RegisterMembers()
+void tArgumentExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1461,14 +1350,14 @@ void tRisseIllegalArgumentTypeExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseIllegalArgumentTypeExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseIllegalArgumentTypeExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tArgumentExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tArgumentExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalArgumentTypeExceptionClass::construct()
+void tArgumentExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1476,7 +1365,59 @@ void tRisseIllegalArgumentTypeExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalArgumentTypeExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tArgumentExceptionClass::initialize(const tNativeCallInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tNullObjectExceptionClass::tNullObjectExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_NullObjectException, engine->IllegalArgumentExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tNullObjectExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_construct, &tNullObjectExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tNullObjectExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tNullObjectExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tNullObjectExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1485,12 +1426,71 @@ void tRisseIllegalArgumentTypeExceptionClass::initialize(const tRisseNativeCallI
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(tRisseScriptEngine * engine,
-		const tRisseString & method_name, const tRisseString & type_name)
+void tNullObjectExceptionClass::Throw(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IllegalArgumentTypeException,
-			tRisseString(RISSE_WS_TR("cannot accept type %2 as argument for method %1()"),
+	tTemporaryException * e =
+		new tTemporaryException(ss_NullObjectException,
+			tString(RISSE_WS_TR("null object was given")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tIllegalArgumentTypeExceptionClass::tIllegalArgumentTypeExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_IllegalArgumentTypeException, engine->IllegalArgumentExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tIllegalArgumentTypeExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_construct, &tIllegalArgumentTypeExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tIllegalArgumentTypeExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tIllegalArgumentTypeExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tIllegalArgumentTypeExceptionClass::initialize(const tNativeCallInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(tScriptEngine * engine,
+		const tString & method_name, const tString & type_name)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_IllegalArgumentTypeException,
+			tString(RISSE_WS_TR("cannot accept type %2 as argument for method %1()"),
 				method_name, type_name));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1503,8 +1503,8 @@ void tRisseIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(tRisseScrip
 
 
 //---------------------------------------------------------------------------
-tRisseIllegalArgumentExceptionClass::tRisseIllegalArgumentExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_IllegalArgumentException, engine->ArgumentExceptionClass)
+tIllegalArgumentExceptionClass::tIllegalArgumentExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_IllegalArgumentException, engine->ArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1512,7 +1512,7 @@ tRisseIllegalArgumentExceptionClass::tRisseIllegalArgumentExceptionClass(tRisseS
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalArgumentExceptionClass::RegisterMembers()
+void tIllegalArgumentExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1522,14 +1522,14 @@ void tRisseIllegalArgumentExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseIllegalArgumentExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseIllegalArgumentExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tIllegalArgumentExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tIllegalArgumentExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalArgumentExceptionClass::construct()
+void tIllegalArgumentExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1537,7 +1537,7 @@ void tRisseIllegalArgumentExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalArgumentExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tIllegalArgumentExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1555,8 +1555,8 @@ void tRisseIllegalArgumentExceptionClass::initialize(const tRisseNativeCallInfo 
 
 
 //---------------------------------------------------------------------------
-tRisseBadArgumentCountExceptionClass::tRisseBadArgumentCountExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_BadArgumentCountException, engine->ArgumentExceptionClass)
+tBadArgumentCountExceptionClass::tBadArgumentCountExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_BadArgumentCountException, engine->ArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1564,7 +1564,7 @@ tRisseBadArgumentCountExceptionClass::tRisseBadArgumentCountExceptionClass(tRiss
 
 
 //---------------------------------------------------------------------------
-void tRisseBadArgumentCountExceptionClass::RegisterMembers()
+void tBadArgumentCountExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1574,14 +1574,14 @@ void tRisseBadArgumentCountExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseBadArgumentCountExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseBadArgumentCountExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tBadArgumentCountExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tBadArgumentCountExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBadArgumentCountExceptionClass::construct()
+void tBadArgumentCountExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1589,7 +1589,7 @@ void tRisseBadArgumentCountExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseBadArgumentCountExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tBadArgumentCountExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1598,26 +1598,26 @@ void tRisseBadArgumentCountExceptionClass::initialize(const tRisseNativeCallInfo
 
 
 //---------------------------------------------------------------------------
-void tRisseBadArgumentCountExceptionClass::ThrowNormal(tRisseScriptEngine * engine, risse_size passed, risse_size expected)
+void tBadArgumentCountExceptionClass::ThrowNormal(tScriptEngine * engine, risse_size passed, risse_size expected)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_BadArgumentCountException,
-			tRisseString(RISSE_WS_TR("bad argument count (%1 given, but %2 expected)"),
-					tRisseString::AsString((risse_int64)passed),
-					tRisseString::AsString((risse_int64)expected)));
+	tTemporaryException * e =
+		new tTemporaryException(ss_BadArgumentCountException,
+			tString(RISSE_WS_TR("bad argument count (%1 given, but %2 expected)"),
+					tString::AsString((risse_int64)passed),
+					tString::AsString((risse_int64)expected)));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBadArgumentCountExceptionClass::ThrowBlock(tRisseScriptEngine * engine, risse_size passed, risse_size expected)
+void tBadArgumentCountExceptionClass::ThrowBlock(tScriptEngine * engine, risse_size passed, risse_size expected)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_BadArgumentCountException,
-			tRisseString(RISSE_WS_TR("bad block argument count (%1 given, but %2 expected)"),
-					tRisseString::AsString((risse_int64)passed),
-					tRisseString::AsString((risse_int64)expected)));
+	tTemporaryException * e =
+		new tTemporaryException(ss_BadArgumentCountException,
+			tString(RISSE_WS_TR("bad block argument count (%1 given, but %2 expected)"),
+					tString::AsString((risse_int64)passed),
+					tString::AsString((risse_int64)expected)));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -1632,8 +1632,8 @@ void tRisseBadArgumentCountExceptionClass::ThrowBlock(tRisseScriptEngine * engin
 
 
 //---------------------------------------------------------------------------
-tRisseMemberAccessExceptionClass::tRisseMemberAccessExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_MemberAccessException, engine->RuntimeExceptionClass)
+tMemberAccessExceptionClass::tMemberAccessExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_MemberAccessException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1641,7 +1641,7 @@ tRisseMemberAccessExceptionClass::tRisseMemberAccessExceptionClass(tRisseScriptE
 
 
 //---------------------------------------------------------------------------
-void tRisseMemberAccessExceptionClass::RegisterMembers()
+void tMemberAccessExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1651,27 +1651,27 @@ void tRisseMemberAccessExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseMemberAccessExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseMemberAccessExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tMemberAccessExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tMemberAccessExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseMemberAccessExceptionClass::construct(const tRisseNativeCallInfo & info)
+void tMemberAccessExceptionClass::construct(const tNativeCallInfo & info)
 {
 	// name メンバを追加 (デフォルトでは空文字列)
-	info.This.SetPropertyDirect_Object(ss_name, tRisseOperateFlags::ofMemberEnsure,
-		tRisseVariant(tRisseString::GetEmptyString()), info.This);
+	info.This.SetPropertyDirect_Object(ss_name, tOperateFlags::ofMemberEnsure,
+		tVariant(tString::GetEmptyString()), info.This);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseMemberAccessExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tMemberAccessExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はargs[0])
-	info.InitializeSuperClass(tRisseMethodArgument::New(info.args[0]));
+	info.InitializeSuperClass(tMethodArgument::New(info.args[0]));
 
 	// メンバを設定する
 	if(info.args.HasArgument(1))
@@ -1689,8 +1689,8 @@ void tRisseMemberAccessExceptionClass::initialize(const tRisseNativeCallInfo & i
 
 
 //---------------------------------------------------------------------------
-tRisseNoSuchMemberExceptionClass::tRisseNoSuchMemberExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_NoSuchMemberException, engine->MemberAccessExceptionClass)
+tNoSuchMemberExceptionClass::tNoSuchMemberExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_NoSuchMemberException, engine->MemberAccessExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1698,7 +1698,7 @@ tRisseNoSuchMemberExceptionClass::tRisseNoSuchMemberExceptionClass(tRisseScriptE
 
 
 //---------------------------------------------------------------------------
-void tRisseNoSuchMemberExceptionClass::RegisterMembers()
+void tNoSuchMemberExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1708,14 +1708,14 @@ void tRisseNoSuchMemberExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseNoSuchMemberExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseNoSuchMemberExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tNoSuchMemberExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tNoSuchMemberExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseNoSuchMemberExceptionClass::construct()
+void tNoSuchMemberExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1723,7 +1723,7 @@ void tRisseNoSuchMemberExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseNoSuchMemberExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tNoSuchMemberExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1732,13 +1732,13 @@ void tRisseNoSuchMemberExceptionClass::initialize(const tRisseNativeCallInfo & i
 
 
 //---------------------------------------------------------------------------
-void tRisseNoSuchMemberExceptionClass::Throw(tRisseScriptEngine * engine, const tRisseString & name)
+void tNoSuchMemberExceptionClass::Throw(tScriptEngine * engine, const tString & name)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_NoSuchMemberException,
+	tTemporaryException * e =
+		new tTemporaryException(ss_NoSuchMemberException,
 			name.IsEmpty() ?
-					tRisseString(RISSE_WS_TR("member not found"), name):
-					tRisseString(RISSE_WS_TR("member \"%1\" not found"), name),
+					tString(RISSE_WS_TR("member not found"), name):
+					tString(RISSE_WS_TR("member \"%1\" not found"), name),
 				name);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1754,8 +1754,8 @@ void tRisseNoSuchMemberExceptionClass::Throw(tRisseScriptEngine * engine, const 
 
 
 //---------------------------------------------------------------------------
-tRisseIllegalMemberAccessExceptionClass::tRisseIllegalMemberAccessExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_IllegalMemberAccessException, engine->MemberAccessExceptionClass)
+tIllegalMemberAccessExceptionClass::tIllegalMemberAccessExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_IllegalMemberAccessException, engine->MemberAccessExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1763,7 +1763,7 @@ tRisseIllegalMemberAccessExceptionClass::tRisseIllegalMemberAccessExceptionClass
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::RegisterMembers()
+void tIllegalMemberAccessExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1773,14 +1773,14 @@ void tRisseIllegalMemberAccessExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseIllegalMemberAccessExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseIllegalMemberAccessExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tIllegalMemberAccessExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tIllegalMemberAccessExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::construct()
+void tIllegalMemberAccessExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1788,7 +1788,7 @@ void tRisseIllegalMemberAccessExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tIllegalMemberAccessExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1797,13 +1797,13 @@ void tRisseIllegalMemberAccessExceptionClass::initialize(const tRisseNativeCallI
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(tRisseScriptEngine * engine, const tRisseString & name)
+void tIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(tScriptEngine * engine, const tString & name)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IllegalMemberAccessException,
+	tTemporaryException * e =
+		new tTemporaryException(ss_IllegalMemberAccessException,
 			name.IsEmpty() ?
-					tRisseString(RISSE_WS_TR("member is read-only"), name):
-					tRisseString(RISSE_WS_TR("member \"%1\" is read-only"), name),
+					tString(RISSE_WS_TR("member is read-only"), name):
+					tString(RISSE_WS_TR("member \"%1\" is read-only"), name),
 				name);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1811,13 +1811,13 @@ void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(tRisseScript
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(tRisseScriptEngine * engine, const tRisseString & name)
+void tIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(tScriptEngine * engine, const tString & name)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IllegalMemberAccessException,
+	tTemporaryException * e =
+		new tTemporaryException(ss_IllegalMemberAccessException,
 			name.IsEmpty() ?
-					tRisseString(RISSE_WS_TR("member is final, cannot be overridden"), name):
-					tRisseString(RISSE_WS_TR("member \"%1\" is final, cannot be overridden"), name),
+					tString(RISSE_WS_TR("member is final, cannot be overridden"), name):
+					tString(RISSE_WS_TR("member \"%1\" is final, cannot be overridden"), name),
 				name);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1825,13 +1825,13 @@ void tRisseIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(tRisseScriptEng
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(tRisseScriptEngine * engine, const tRisseString & name)
+void tIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(tScriptEngine * engine, const tString & name)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IllegalMemberAccessException,
+	tTemporaryException * e =
+		new tTemporaryException(ss_IllegalMemberAccessException,
 			name.IsEmpty() ?
-					tRisseString(RISSE_WS_TR("property cannot be read"), name):
-					tRisseString(RISSE_WS_TR("property \"%1\" cannot be read"), name),
+					tString(RISSE_WS_TR("property cannot be read"), name):
+					tString(RISSE_WS_TR("property \"%1\" cannot be read"), name),
 				name);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1839,13 +1839,13 @@ void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(tRisseSc
 
 
 //---------------------------------------------------------------------------
-void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tRisseScriptEngine * engine, const tRisseString & name)
+void tIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tScriptEngine * engine, const tString & name)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_IllegalMemberAccessException,
+	tTemporaryException * e =
+		new tTemporaryException(ss_IllegalMemberAccessException,
 			name.IsEmpty() ?
-					tRisseString(RISSE_WS_TR("property cannot be written"), name):
-					tRisseString(RISSE_WS_TR("property \"%1\" cannot be written"), name),
+					tString(RISSE_WS_TR("property cannot be written"), name):
+					tString(RISSE_WS_TR("property \"%1\" cannot be written"), name),
 				name);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1856,8 +1856,8 @@ void tRisseIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tRiss
 
 
 //---------------------------------------------------------------------------
-tRisseCoroutineExceptionClass::tRisseCoroutineExceptionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_CoroutineException, engine->RuntimeExceptionClass)
+tCoroutineExceptionClass::tCoroutineExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_CoroutineException, engine->RuntimeExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1865,7 +1865,7 @@ tRisseCoroutineExceptionClass::tRisseCoroutineExceptionClass(tRisseScriptEngine 
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineExceptionClass::RegisterMembers()
+void tCoroutineExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1875,14 +1875,14 @@ void tRisseCoroutineExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisseCoroutineExceptionClass::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseCoroutineExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tCoroutineExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tCoroutineExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineExceptionClass::construct()
+void tCoroutineExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1890,7 +1890,7 @@ void tRisseCoroutineExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineExceptionClass::initialize(const tRisseNativeCallInfo & info)
+void tCoroutineExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1899,44 +1899,44 @@ void tRisseCoroutineExceptionClass::initialize(const tRisseNativeCallInfo & info
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited(tRisseScriptEngine * engine)
+void tCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_CoroutineException,
-					tRisseString(RISSE_WS_TR("coroutine has already exited")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_CoroutineException,
+					tString(RISSE_WS_TR("coroutine has already exited")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet(tRisseScriptEngine * engine)
+void tCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_CoroutineException,
-					tRisseString(RISSE_WS_TR("coroutine has not started yet")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_CoroutineException,
+					tString(RISSE_WS_TR("coroutine has not started yet")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineExceptionClass::ThrowCoroutineIsNotRunning(tRisseScriptEngine * engine)
+void tCoroutineExceptionClass::ThrowCoroutineIsNotRunning(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_CoroutineException,
-					tRisseString(RISSE_WS_TR("coroutine is not running")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_CoroutineException,
+					tString(RISSE_WS_TR("coroutine is not running")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineExceptionClass::ThrowCoroutineIsRunning(tRisseScriptEngine * engine)
+void tCoroutineExceptionClass::ThrowCoroutineIsRunning(tScriptEngine * engine)
 {
-	tRisseTemporaryException * e =
-		new tRisseTemporaryException(ss_CoroutineException,
-					tRisseString(RISSE_WS_TR("coroutine is currently running")));
+	tTemporaryException * e =
+		new tTemporaryException(ss_CoroutineException,
+					tString(RISSE_WS_TR("coroutine is currently running")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------

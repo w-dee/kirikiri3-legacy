@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief tRisseVariantやtRisseObjectInterfaceのOperateメソッドのflags引数の処理
+//! @brief tVariantやtObjectInterfaceのOperateメソッドのflags引数の処理
 //---------------------------------------------------------------------------
 #ifndef risseOperateFlagsH
 #define risseOperateFlagsH
@@ -20,7 +20,7 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseOperateFlags : public tRisseCollectee
+class tOperateFlags : public tCollectee
 {
 	risse_uint32 Flags; //!< フラグの値
 public:
@@ -40,46 +40,46 @@ public:
 
 public:
 	//! @brief		デフォルトコンストラクタ
-	tRisseOperateFlags() { Flags = 0; }
+	tOperateFlags() { Flags = 0; }
 
-	//! @brief		コンストラクタ (tRisseMemberAttribute から)
+	//! @brief		コンストラクタ (tMemberAttribute から)
 	//! @param		attrib		メンバ属性
-	tRisseOperateFlags(tRisseMemberAttribute attrib)
+	tOperateFlags(tMemberAttribute attrib)
 		{ Flags = (risse_uint32)attrib; }
 
 	//! @brief		コンストラクタ (フラグ/risse_uint32から)
 	//! @param		flags		フラグ
-	tRisseOperateFlags(risse_uint32 flags)
+	tOperateFlags(risse_uint32 flags)
 		{ Flags = flags; }
 
 	//! @brief		| 演算子
 	//! @param		rhs		右辺
-	tRisseOperateFlags operator | (risse_uint32 rhs) const { return tRisseOperateFlags(Flags | rhs); }
+	tOperateFlags operator | (risse_uint32 rhs) const { return tOperateFlags(Flags | rhs); }
 
 	//! @brief		& 演算子
 	//! @param		rhs		右辺
-	tRisseOperateFlags operator & (risse_uint32 rhs) const { return tRisseOperateFlags(Flags & rhs); }
+	tOperateFlags operator & (risse_uint32 rhs) const { return tOperateFlags(Flags & rhs); }
 
 	//! @brief		bool へのキャスト
 	operator bool () const { return Flags != 0; }
 
-	//! @brief		tRisseMemberAttributeへのキャスト
-	operator tRisseMemberAttribute () const { return tRisseMemberAttribute(Flags); }
+	//! @brief		tMemberAttributeへのキャスト
+	operator tMemberAttribute () const { return tMemberAttribute(Flags); }
 
 	//! @brief		risse_uint32 へのキャスト
 	operator risse_uint32() const { return Flags; }
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	変更性
-	bool Has(tRisseMemberAttribute::tVariableControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
+	bool Has(tMemberAttribute::tVariableControl v) const { return tMemberAttribute(Flags).Has(v); }
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	オーバーライド性
-	bool Has(tRisseMemberAttribute::tOverrideControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
+	bool Has(tMemberAttribute::tOverrideControl v) const { return tMemberAttribute(Flags).Has(v); }
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	プロパティアクセス方法
-	bool Has(tRisseMemberAttribute::tPropertyControl v) const { return tRisseMemberAttribute(Flags).Has(v); }
+	bool Has(tMemberAttribute::tPropertyControl v) const { return tMemberAttribute(Flags).Has(v); }
 
 	//! @brief		フラグを持っているかどうかを調べる
 	//! @param		v	フラグ
@@ -87,7 +87,7 @@ public:
 
 	//! @brief		フラグを文字列化する
 	//! @return		文字列化されたフラグ
-	tRisseString AsString() const;
+	tString AsString() const;
 
 
 };

@@ -22,14 +22,14 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(24795,6838,687,16805,21894,40786,6545,48673);
 
 //---------------------------------------------------------------------------
-//! @brief		tRisseThread の内部的な実装
+//! @brief		tThread の内部的な実装
 //---------------------------------------------------------------------------
-class tRisseThreadInternal : public wxThread
+class tThreadInternal : public wxThread
 {
-	tRisseThread * Owner;
+	tThread * Owner;
 public:
-	tRisseThreadInternal(tRisseThread * owner);
-	~tRisseThreadInternal(); // virtual
+	tThreadInternal(tThread * owner);
+	~tThreadInternal(); // virtual
 
 private:
 	ExitCode Entry();
@@ -40,7 +40,7 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisseThreadInternal::tRisseThreadInternal(tRisseThread * owner) :
+tThreadInternal::tThreadInternal(tThread * owner) :
 	wxThread(wxTHREAD_DETACHED)
 {
 	// フィールドの初期化
@@ -55,7 +55,7 @@ tRisseThreadInternal::tRisseThreadInternal(tRisseThread * owner) :
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisseThreadInternal::~tRisseThreadInternal()
+tThreadInternal::~tThreadInternal()
 {
 	// ミューテックスのロックを解除する
 	Owner->Internal = NULL; // 自分自身への参照を消す
@@ -67,7 +67,7 @@ tRisseThreadInternal::~tRisseThreadInternal()
 //---------------------------------------------------------------------------
 //! @brief		スレッドのエントリポイント
 //---------------------------------------------------------------------------
-wxThread::ExitCode tRisseThreadInternal::Entry()
+wxThread::ExitCode tThreadInternal::Entry()
 {
 	// ミューテックスをロックする
 	Owner->ThreadMutex.Lock();
@@ -93,18 +93,18 @@ wxThread::ExitCode tRisseThreadInternal::Entry()
 
 
 //---------------------------------------------------------------------------
-tRisseThread::tRisseThread()
+tThread::tThread()
 {
 	Started = false;
 	StartInitiated = false;
 	_Terminated = false;
-	Internal = new tRisseThreadInternal(this);
+	Internal = new tThreadInternal(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseThread::~tRisseThread()
+tThread::~tThread()
 {
 	//注意	このデストラクタはメインスレッド以外から非同期に呼ばれる可能性がある
 	if(Started) Wait();
@@ -115,10 +115,10 @@ tRisseThread::~tRisseThread()
 
 
 //---------------------------------------------------------------------------
-void tRisseThread::Run()
+void tThread::Run()
 {
 	{
-		volatile tRisseCriticalSection::tLocker lock(CS);
+		volatile tCriticalSection::tLocker lock(CS);
 		if(StartInitiated) {  /* already running */ return; }
 		StartInitiated = true;
 	}
@@ -128,7 +128,7 @@ void tRisseThread::Run()
 
 
 //---------------------------------------------------------------------------
-void tRisseThread::Wait()
+void tThread::Wait()
 {
 	// まだスレッドが開始していない場合は開始するまで待つ
 	while(!Started) { ::wxMilliSleep(1); } // あまりよい実装とは言えないが……
@@ -143,7 +143,7 @@ void tRisseThread::Wait()
 
 
 //---------------------------------------------------------------------------
-volatile bool tRisseThread::ShouldTerminate()
+volatile bool tThread::ShouldTerminate()
 {
 	return Get_Terminated() || Internal->TestDestroy();
 }

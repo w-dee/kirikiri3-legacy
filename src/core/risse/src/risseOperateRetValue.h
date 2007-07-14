@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief tRisseVariantやtRisseObjectInterfaceのOperateメソッドの戻り値処理
+//! @brief tVariantやtObjectInterfaceのOperateメソッドの戻り値処理
 //---------------------------------------------------------------------------
 #ifndef risseOperateRetValueH
 #define risseOperateRetValueH
@@ -18,7 +18,7 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseOperateRetValue
+class tOperateRetValue
 {
 public:
 	//! @brief		Operateメソッドの戻り値
@@ -36,13 +36,13 @@ public:
 	//! @param		エラーコード
 	//! @param		name	操作を行うメンバ名
 	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
-	static void RaiseError(tRetValue ret, const tRisseString & name);
+	static void RaiseError(tRetValue ret, const tString & name);
 
 	//! @brief		もし指定された値がエラーならば例外を発生させる
 	//! @param		エラーコード
 	//! @param		name	操作を行うメンバ名
 	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
-	static void RaiseIfError(tRetValue ret, const tRisseString & name)
+	static void RaiseIfError(tRetValue ret, const tString & name)
 	{
 		if(ret != rvNoError) RaiseError(ret, name);
 	}

@@ -28,17 +28,17 @@
 /*
 	コンパイルの単位
 
-・スクリプトブロック(tRisseScriptBlockInstance)
+・スクリプトブロック(tScriptBlockInstance)
   一つのスクリプトからなる固まり
 
-・関数グループ(tRisseCompilerFunctionGroup)
+・関数グループ(tCompilerFunctionGroup)
   入れ子の関数のように、複数の関数が一つの環境(共有変数など)を共有
   しうる単位
 
-・関数(tRisseCompilerFunction)
+・関数(tCompilerFunction)
   関数単位。中にスタックフレームを共有する複数のSSA形式が入る
 
-・SSA形式(tRisseSSAForm)
+・SSA形式(tSSAForm)
   SSA形式
 
 */
@@ -50,8 +50,8 @@ RISSE_DEFINE_SOURCE_ID(7695,16492,63400,17880,52365,22979,50413,3135);
 
 
 //---------------------------------------------------------------------------
-tRisseCompilerFunction::tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group,
-	tRisseCompilerFunction * parent, risse_size nestlevel, const tRisseString name)
+tCompilerFunction::tCompilerFunction(tCompilerFunctionGroup * function_group,
+	tCompilerFunction * parent, risse_size nestlevel, const tString name)
 {
 	Name = name;
 	Parent = parent;
@@ -73,7 +73,7 @@ tRisseCompilerFunction::tRisseCompilerFunction(tRisseCompilerFunctionGroup * fun
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::AddSSAForm(tRisseSSAForm * form)
+void tCompilerFunction::AddSSAForm(tSSAForm * form)
 {
 	SSAForms.push_back(form);
 }
@@ -81,14 +81,14 @@ void tRisseCompilerFunction::AddSSAForm(tRisseSSAForm * form)
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::CompleteSSAForm()
+void tCompilerFunction::CompleteSSAForm()
 {
 	// 未バインドのラベルを結線する
 	// goto のジャンプ先は子→親の順に見ていくので生成順とは逆に処理を行う
 	BindAllLabels();
 
 	// try 脱出時の分岐先を生成
-	for(gc_vector<tRisseSSAForm *>::reverse_iterator i = SSAForms.rbegin();
+	for(gc_vector<tSSAForm *>::reverse_iterator i = SSAForms.rbegin();
 		i != SSAForms.rend(); i++)
 		(*i)->AddCatchBranchTargets();
 
@@ -102,7 +102,7 @@ void tRisseCompilerFunction::CompleteSSAForm()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::RegisterSharedVariablesToCodeGenerator()
+void tCompilerFunction::RegisterSharedVariablesToCodeGenerator()
 {
 	// すべての共有されている変数をコードジェネレータに登録する
 	// いまのところ、コードジェネレータはそれよりも前段の各クラスとは情報が独立
@@ -124,34 +124,34 @@ void tRisseCompilerFunction::RegisterSharedVariablesToCodeGenerator()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::GenerateVMCode()
+void tCompilerFunction::GenerateVMCode()
 {
-	tRisseString str;
+	tString str;
 	// 関数名表示
-	RisseFPrint(stderr, (RISSE_WS("######################################\n")));
-	RisseFPrint(stderr, (RISSE_WS("function ") + Name +
-					RISSE_WS(" nest level ") + tRisseString::AsString((risse_int64)NestLevel) +
+	FPrint(stderr, (RISSE_WS("######################################\n")));
+	FPrint(stderr, (RISSE_WS("function ") + Name +
+					RISSE_WS(" nest level ") + tString::AsString((risse_int64)NestLevel) +
 					RISSE_WS("\n")).c_str());
-	RisseFPrint(stderr, (RISSE_WS("######################################\n")));
+	FPrint(stderr, (RISSE_WS("######################################\n")));
 
 
 	// 最適化とSSA形式からの逆変換
-	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+	for(gc_vector<tSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 		(*i)->OptimizeAndUnSSA();
 
 	// SSA 形式のダンプ
-	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+	for(gc_vector<tSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 	{
-		RisseFPrint(stderr,(	RISSE_WS("========== SSA (") + (*i)->GetName() +
+		FPrint(stderr,(	RISSE_WS("========== SSA (") + (*i)->GetName() +
 								RISSE_WS(") ==========\n")).c_str());
 		str = (*i)->Dump();
-		RisseFPrint(stderr, str.c_str());
+		FPrint(stderr, str.c_str());
 	}
 
 	// コードジェネレータの生成
-	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+	for(gc_vector<tSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 		(*i)->EnsureCodeGenerator();
 
@@ -159,16 +159,16 @@ void tRisseCompilerFunction::GenerateVMCode()
 	SSAForms.front()->GenerateCode();
 
 	// VMコードのダンプ
-	for(gc_vector<tRisseSSAForm *>::iterator i = SSAForms.begin();
+	for(gc_vector<tSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 	{
-		RisseFPrint(stderr,(	RISSE_WS("========== VM block #") +
-									tRisseString::AsString((risse_int64)(*i)->GetCodeBlockIndex()) +
+		FPrint(stderr,(	RISSE_WS("========== VM block #") +
+									tString::AsString((risse_int64)(*i)->GetCodeBlockIndex()) +
 								RISSE_WS(" (") + (*i)->GetName() +
 								RISSE_WS(") ==========\n")).c_str());
-		tRisseCodeBlock * cb = (*i)->GetCodeBlock();
+		tCodeBlock * cb = (*i)->GetCodeBlock();
 		str = cb->Dump();
-		RisseFPrint(stderr, str.c_str());
+		FPrint(stderr, str.c_str());
 	}
 
 }
@@ -176,7 +176,7 @@ void tRisseCompilerFunction::GenerateVMCode()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::SetSharedVariableNestCount()
+void tCompilerFunction::SetSharedVariableNestCount()
 {
 	SSAForms.front()->SetSharedVariableNestCount();
 }
@@ -184,8 +184,8 @@ void tRisseCompilerFunction::SetSharedVariableNestCount()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::AddPendingLabelJump(tRisseSSABlock * jump_block,
-			const tRisseString & labelname)
+void tCompilerFunction::AddPendingLabelJump(tSSABlock * jump_block,
+			const tString & labelname)
 {
 	// PendingLabelJump に追加
 	PendingLabelJumps.push_back(tPendingLabelJump(jump_block, labelname));
@@ -194,16 +194,16 @@ void tRisseCompilerFunction::AddPendingLabelJump(tRisseSSABlock * jump_block,
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block)
+void tCompilerFunction::AddLabelMap(const tString &labelname, tSSABlock * block)
 {
 	tLabelMap::iterator i = LabelMap.find(labelname);
 
 	if(i != LabelMap.end())
 	{
 		// すでにラベルがある
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			FunctionGroup->GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-			tRisseString(RISSE_WS_TR("label '%1' is already defined"), labelname),
+			tString(RISSE_WS_TR("label '%1' is already defined"), labelname),
 				FunctionGroup->GetCompiler()->GetScriptBlockInstance(), block->GetLastStatementPosition());
 	}
 
@@ -213,7 +213,7 @@ void tRisseCompilerFunction::AddLabelMap(const tRisseString &labelname, tRisseSS
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::ShareVariable(const tRisseString & n_name)
+void tCompilerFunction::ShareVariable(const tString & n_name)
 {
 	SharedVariableMap.insert(tSharedVariableMap::value_type(n_name, NULL));
 }
@@ -221,11 +221,11 @@ void tRisseCompilerFunction::ShareVariable(const tRisseString & n_name)
 
 
 //---------------------------------------------------------------------------
-bool tRisseCompilerFunction::GetShared(const tRisseString & n_name)
+bool tCompilerFunction::GetShared(const tString & n_name)
 {
 	bool result = SharedVariableMap.find(n_name) != SharedVariableMap.end();
 /*
-	RisseFPrint(stderr, (RISSE_WS("Checking shared status of ") + n_name +
+	FPrint(stderr, (RISSE_WS("Checking shared status of ") + n_name +
 				RISSE_WS(" : ") +
 				(result ? RISSE_WS("true"):RISSE_WS("false")) +
 				RISSE_WS("\n")).c_str() );
@@ -236,7 +236,7 @@ bool tRisseCompilerFunction::GetShared(const tRisseString & n_name)
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunction::BindAllLabels()
+void tCompilerFunction::BindAllLabels()
 {
 	for(tPendingLabelJumps::iterator i = PendingLabelJumps.begin();
 		i != PendingLabelJumps.end(); i++)
@@ -248,9 +248,9 @@ void tRisseCompilerFunction::BindAllLabels()
 		if(label_pair == LabelMap.end())
 		{
 			// ラベルは見つからなかった
-			tRisseCompileExceptionClass::Throw(
+			tCompileExceptionClass::Throw(
 				FunctionGroup->GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-				tRisseString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
+				tString(RISSE_WS_TR("label '%1' is not defined"), i->LabelName),
 					FunctionGroup->GetCompiler()->GetScriptBlockInstance(),
 						i->SourceBlock->GetLastStatementPosition());
 		}
@@ -258,15 +258,15 @@ void tRisseCompilerFunction::BindAllLabels()
 		// ラベルが見つかった
 
 		// ラベルのジャンプ元とジャンプ先のSSA形式の親子関係を調べる
-		tRisseSSAForm * source_form = i->SourceBlock->GetForm();
-		tRisseSSAForm * target_form = label_pair->second->GetForm();
+		tSSAForm * source_form = i->SourceBlock->GetForm();
+		tSSAForm * target_form = label_pair->second->GetForm();
 
 		if(source_form == target_form)
 		{
 			// 同じSSA形式インスタンス内
 			// ジャンプ文を生成
-			tRisseSSAStatement * stmt =
-				new tRisseSSAStatement(source_form,
+			tSSAStatement * stmt =
+				new tSSAStatement(source_form,
 					i->SourceBlock->GetLastStatementPosition(), ocJump);
 			i->SourceBlock->AddStatement(stmt);
 			stmt->SetJumpTarget(label_pair->second);
@@ -276,8 +276,8 @@ void tRisseCompilerFunction::BindAllLabels()
 			// 同じSSA形式インスタンスではない
 			// この場合は、source_form の親や先祖に target_form が無ければ
 			// ならない (浅いSSA形式から深いSSA形式へのジャンプはできない)
-			tRisseSSAForm * child = NULL;
-			tRisseSSAForm * form = source_form;
+			tSSAForm * child = NULL;
+			tSSAForm * form = source_form;
 			do
 			{
 				child = form;
@@ -288,17 +288,17 @@ void tRisseCompilerFunction::BindAllLabels()
 				{
 					// ジャンプ先のSSA形式が見つかった
 					// この try id まで例外で抜けるためのコードを生成
-					// tRisseSSAForm の AddReturnStatement と AddBreakStatement と AddContinueStatement
+					// tSSAForm の AddReturnStatement と AddBreakStatement と AddContinueStatement
 					// も参照のこと。
 
 					// _ の値を取得する
-					tRisseSSAVariable * var =
+					tSSAVariable * var =
 						i->SourceBlock->GetLocalNamespace()->Read(source_form,
 							i->SourceBlock->GetLastStatementPosition(), ss_lastEvalResultHiddenVarName);
 
 					// この try id まで例外で抜けるためのコードを生成
-					tRisseSSAStatement * stmt =
-						new tRisseSSAStatement(source_form,
+					tSSAStatement * stmt =
+						new tSSAStatement(source_form,
 							i->SourceBlock->GetLastStatementPosition(), ocExitTryException);
 					stmt->AddUsed(var);
 					i->SourceBlock->AddStatement(stmt);
@@ -316,9 +316,9 @@ void tRisseCompilerFunction::BindAllLabels()
 			{
 				// ジャンプ先ラベルはどうやら自分よりも深い場所にいるようだ
 				// そういうことは今のところできないのでエラーにする
-				tRisseCompileExceptionClass::Throw(
+				tCompileExceptionClass::Throw(
 					FunctionGroup->GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(RISSE_WS_TR("cannot jump into deeper try/synchronized/using/callback block")),
+					tString(RISSE_WS_TR("cannot jump into deeper try/synchronized/using/callback block")),
 						FunctionGroup->GetCompiler()->GetScriptBlockInstance(),
 							i->SourceBlock->GetLastStatementPosition());
 			}
@@ -341,8 +341,8 @@ void tRisseCompilerFunction::BindAllLabels()
 
 
 //---------------------------------------------------------------------------
-tRisseCompilerFunctionGroup::tRisseCompilerFunctionGroup(
-	tRisseCompiler * compiler, const tRisseString & name)
+tCompilerFunctionGroup::tCompilerFunctionGroup(
+	tCompiler * compiler, const tString & name)
 {
 	Compiler = compiler;
 	Name = name;
@@ -352,7 +352,7 @@ tRisseCompilerFunctionGroup::tRisseCompilerFunctionGroup(
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunctionGroup::AddFunction(tRisseCompilerFunction * function)
+void tCompilerFunctionGroup::AddFunction(tCompilerFunction * function)
 {
 	Functions.push_back(function);
 }
@@ -360,10 +360,10 @@ void tRisseCompilerFunctionGroup::AddFunction(tRisseCompilerFunction * function)
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunctionGroup::CompleteSSAForm()
+void tCompilerFunctionGroup::CompleteSSAForm()
 {
 	// このインスタンスが所有しているすべての関数に対して処理を行わせる
-	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
+	for(gc_vector<tCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
 		ri != Functions.rend(); ri++)
 	{
 		(*ri)->CompleteSSAForm();
@@ -373,17 +373,17 @@ void tRisseCompilerFunctionGroup::CompleteSSAForm()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompilerFunctionGroup::GenerateVMCode()
+void tCompilerFunctionGroup::GenerateVMCode()
 {
 	// コードジェネレータに各関数が保持している共有変数を登録する
-	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
+	for(gc_vector<tCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
 		ri != Functions.rend(); ri++)
 	{
 		(*ri)->RegisterSharedVariablesToCodeGenerator();
 	}
 
 	// 次にコードを生成する
-	for(gc_vector<tRisseCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
+	for(gc_vector<tCompilerFunction *>::reverse_iterator ri = Functions.rbegin();
 		ri != Functions.rend(); ri++)
 	{
 		(*ri)->GenerateVMCode();
@@ -407,17 +407,17 @@ void tRisseCompilerFunctionGroup::GenerateVMCode()
 
 
 //---------------------------------------------------------------------------
-void tRisseCompiler::Compile(tRisseASTNode * root, const tRisseBindingInfo & binding,
+void tCompiler::Compile(tASTNode * root, const tBindingInfo & binding,
 	bool need_result, bool is_expression)
 {
 	// (テスト) ASTのダンプを行う
-	RisseFPrint(stderr, RISSE_WS("========== AST ==========\n"));
-	tRisseString str;
+	FPrint(stderr, RISSE_WS("========== AST ==========\n"));
+	tString str;
 	root->Dump(str);
-	RisseFPrint(stderr, str.c_str());
+	FPrint(stderr, str.c_str());
 
 	// トップレベルのSSA形式インスタンスを作成する
-	tRisseSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("toplevel"),
+	tSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("toplevel"),
 		&binding, need_result, is_expression);
 
 	// トップレベルのSSA形式の内容を作成する
@@ -425,14 +425,14 @@ void tRisseCompiler::Compile(tRisseASTNode * root, const tRisseBindingInfo & bin
 	form->Generate(root);
 
 	// SSA形式を完結させる
-	for(gc_vector<tRisseCompilerFunctionGroup *>::iterator i = FunctionGroups.begin();
+	for(gc_vector<tCompilerFunctionGroup *>::iterator i = FunctionGroups.begin();
 		i != FunctionGroups.end(); i++)
 	{
 		(*i)->CompleteSSAForm();
 	}
 
 	// VMコード生成を行う
-	for(gc_vector<tRisseCompilerFunctionGroup *>::iterator i = FunctionGroups.begin();
+	for(gc_vector<tCompilerFunctionGroup *>::iterator i = FunctionGroups.begin();
 		i != FunctionGroups.end(); i++)
 	{
 		(*i)->GenerateVMCode();
@@ -442,7 +442,7 @@ void tRisseCompiler::Compile(tRisseASTNode * root, const tRisseBindingInfo & bin
 	ScriptBlockInstance->SetRootCodeBlock(form->GetCodeBlock());
 
 	// (テスト) 出力のフラッシュ
-	RisseFPrint(stderr, RISSE_WS("=========================\n"));
+	FPrint(stderr, RISSE_WS("=========================\n"));
 	fflush(stderr);
 	fflush(stdout);
 }
@@ -450,15 +450,15 @@ void tRisseCompiler::Compile(tRisseASTNode * root, const tRisseBindingInfo & bin
 
 
 //---------------------------------------------------------------------------
-void tRisseCompiler::CompileClass(const gc_vector<tRisseASTNode *> & roots, const tRisseString & name,
-	tRisseSSAForm * form, tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var, bool reg_super)
+void tCompiler::CompileClass(const gc_vector<tASTNode *> & roots, const tString & name,
+	tSSAForm * form, tSSAForm *& new_form, tSSAVariable *& block_var, bool reg_super)
 {
 	RISSE_ASSERT(roots.size() >= 1);
 	risse_size pos = roots[0]->GetPosition();
 
 	// クラスの内部名称を決める
-	tRisseString numbered_class_name = RISSE_WS("class ") + name + RISSE_WS(" ") +
-					tRisseString::AsString(GetUniqueNumber());
+	tString numbered_class_name = RISSE_WS("class ") + name + RISSE_WS(" ") +
+					tString::AsString(GetUniqueNumber());
 
 	// トップレベルのSSA形式インスタンスを作成する
 	new_form = CreateTopLevelSSAForm(pos, numbered_class_name, NULL, true, true);
@@ -472,8 +472,8 @@ void tRisseCompiler::CompileClass(const gc_vector<tRisseASTNode *> & roots, cons
 		// クラスの第一引数はスーパークラスなのでそれを変数 "super" に記録するための文を作成する。
 		// "super" は一番浅い位置の名前空間に配置されるが、通常この位置の名前空間には普通の
 		// 変数は記録されずに、この "super" のような特殊な変数が記録されることになる。
-		tRisseSSAVariable * param_var = NULL;
-		tRisseSSAStatement * assignparam_stmt = 
+		tSSAVariable * param_var = NULL;
+		tSSAStatement * assignparam_stmt = 
 			new_form->AddStatement(pos, ocAssignParam, &param_var);
 		assignparam_stmt->SetIndex(0);
 
@@ -486,7 +486,7 @@ void tRisseCompiler::CompileClass(const gc_vector<tRisseASTNode *> & roots, cons
 	new_form->Generate(roots);
 
 	// クラスを生成する文を追加する
-	tRisseSSAStatement * defineclass_stmt =
+	tSSAStatement * defineclass_stmt =
 		form->AddStatement(pos, ocDefineClass, &block_var);
 	defineclass_stmt->SetName(numbered_class_name);
 	defineclass_stmt->SetDefinedForm(new_form);
@@ -495,8 +495,8 @@ void tRisseCompiler::CompileClass(const gc_vector<tRisseASTNode *> & roots, cons
 
 
 //---------------------------------------------------------------------------
-tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
-	const tRisseString & name, const tRisseBindingInfo * binding,
+tSSAForm * tCompiler::CreateTopLevelSSAForm(risse_size pos,
+	const tString & name, const tBindingInfo * binding,
 	bool need_result, bool is_expression)
 {
 	// バインディングを元に、名前空間オブジェクトを作成する。
@@ -505,14 +505,14 @@ tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
 	// また同時に、バインディング内で用いられている最大の共有変数ネストレベルを求める。
 	// これからコンパイルされる関数に置いては、このネストレベルよりも深い値が用いられる。
 	risse_size nestlevel_start = 0;
-	tRisseSSALocalNamespace *ns = NULL;
+	tSSALocalNamespace *ns = NULL;
 	if(binding && binding->GetFrames())
 	{
-		ns = new tRisseSSALocalNamespace();
+		ns = new tSSALocalNamespace();
 		ns->Push(); // 名前空間を push
 		ns->SetCompiler(this); // コンパイラインスタンスを設定
-		const tRisseBindingInfo::tBindingMap & map = binding->GetBindingMap();
-		for(tRisseBindingInfo::tBindingMap::const_iterator i = map.begin(); i != map.end(); i++)
+		const tBindingInfo::tBindingMap & map = binding->GetBindingMap();
+		for(tBindingInfo::tBindingMap::const_iterator i = map.begin(); i != map.end(); i++)
 		{
 			ns->Add(i->first, NULL);
 			risse_size nestlevel = (i->second >> 16) + 1;
@@ -521,14 +521,14 @@ tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
 	}
 
 	// トップレベルの関数グループを作成する
-	tRisseCompilerFunctionGroup *top_function_group = new tRisseCompilerFunctionGroup(this, name);
+	tCompilerFunctionGroup *top_function_group = new tCompilerFunctionGroup(this, name);
 
 	// トップレベルの関数を作成する
-	tRisseCompilerFunction *top_function =
-		new tRisseCompilerFunction(top_function_group, NULL, nestlevel_start, name);
+	tCompilerFunction *top_function =
+		new tCompilerFunction(top_function_group, NULL, nestlevel_start, name);
 
 	// トップレベルのSSA形式を作成する
-	tRisseSSAForm * form = new tRisseSSAForm(pos, top_function, name, NULL, false);
+	tSSAForm * form = new tSSAForm(pos, top_function, name, NULL, false);
 
 	// トップレベルのSSA形式のローカル変数の名前空間の親に 先ほど作成した ns を設定する
 	if(ns) form->GetLocalNamespace()->SetParent(ns);
@@ -540,12 +540,12 @@ tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
 	// バインディングに登録されている変数を共有変数としてあらかじめコードジェネレータに登録する
 	if(binding && binding->GetFrames())
 	{
-		const tRisseBindingInfo::tBindingMap & map = binding->GetBindingMap();
-		for(tRisseBindingInfo::tBindingMap::const_iterator i = map.begin(); i != map.end(); i++)
+		const tBindingInfo::tBindingMap & map = binding->GetBindingMap();
+		for(tBindingInfo::tBindingMap::const_iterator i = map.begin(); i != map.end(); i++)
 		{
 			// i->first は番号なしの名前だが、共有変数には番号付きの名前でアクセス
 			// されるので、対応を ns からとってこなければならない。
-			tRisseString n_name;
+			tString n_name;
 			bool found = ns->Find(i->first, false, &n_name, NULL);
 			(void)found; // (found変数は代入されたのに使われていないという)警告を抑制
 			RISSE_ASSERT(found); // 変数は見つからなくてはならない
@@ -561,7 +561,7 @@ tRisseSSAForm * tRisseCompiler::CreateTopLevelSSAForm(risse_size pos,
 
 
 //---------------------------------------------------------------------------
-void tRisseCompiler::AddFunctionGroup(tRisseCompilerFunctionGroup * function_group)
+void tCompiler::AddFunctionGroup(tCompilerFunctionGroup * function_group)
 {
 	FunctionGroups.push_back(function_group);
 }
@@ -569,7 +569,7 @@ void tRisseCompiler::AddFunctionGroup(tRisseCompilerFunctionGroup * function_gro
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCompiler::AddCodeBlock(tRisseCodeBlock * block)
+risse_size tCompiler::AddCodeBlock(tCodeBlock * block)
 {
 	// コードブロックの管理はスクリプトブロックが行っている
 	return ScriptBlockInstance->AddCodeBlock(block);
@@ -579,16 +579,16 @@ risse_size tRisseCompiler::AddCodeBlock(tRisseCodeBlock * block)
 
 
 //---------------------------------------------------------------------------
-risse_int tRisseCompiler::GetUniqueNumber()
+risse_int tCompiler::GetUniqueNumber()
 {
 	UniqueNumber++;
 	// int のサイズにもよるが、32bit integer では 2^30 ぐらいまで。
 	// もちろんこれはそれほど変数が使われることは無いだろうという推測の元。
 	// コレを超えるとエラーになる。
 	if(UniqueNumber >= 1 << (sizeof(risse_int) * 8 - 2))
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			ScriptBlockInstance->GetScriptEngine(),
-			tRisseString(RISSE_WS_TR("too large source code; compiler internal number exhausted")));
+			tString(RISSE_WS_TR("too large source code; compiler internal number exhausted")));
 	return UniqueNumber;
 }
 //---------------------------------------------------------------------------

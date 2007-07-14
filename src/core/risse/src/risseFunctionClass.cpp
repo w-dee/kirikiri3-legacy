@@ -22,9 +22,9 @@
 
 	Function クラスは引数を一つ取り、関数の内容(文字列)あるいは関数インスタンスを渡す。
 
-	ネイティブ実装の関数あるいは tRisseCodeBlock クラスは実際に tRisseObjectInterface
+	ネイティブ実装の関数あるいは tCodeBlock クラスは実際に tObjectInterface
 	を実装しており、関数として動作できるのだが、そのままでは Function クラスのインスタンス
-	としての振る舞いをしない。そこで、この tRisseFunctionClass および tRisseFunctionInstance
+	としての振る舞いをしない。そこで、この tFunctionClass および tFunctionInstance
 	でそれらの「裸の」関数インスタンスをラップすることとなる。
 */
 
@@ -34,7 +34,7 @@ RISSE_DEFINE_SOURCE_ID(40031,39054,14544,17698,39309,64830,49090,60837);
 
 
 //---------------------------------------------------------------------------
-tRisseFunctionInstance::tRisseFunctionInstance()
+tFunctionInstance::tFunctionInstance()
 {
 	Body.Nullize();
 	Synchronized = false;
@@ -43,17 +43,17 @@ tRisseFunctionInstance::tRisseFunctionInstance()
 
 
 //---------------------------------------------------------------------------
-tRisseFunctionInstance::tRetValue tRisseFunctionInstance::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tFunctionInstance::tRetValue tFunctionInstance::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(name.IsEmpty())
 	{
 		if(code == ocFuncCall) // このオブジェクトに対するメソッド呼び出しか？
 		{
 			// synchronized メソッドの場合はロックを行う
-			tRisseVariant::tSynchronizer sync(Synchronized ? This : tRisseVariant::GetNullObject());
+			tVariant::tSynchronizer sync(Synchronized ? This : tVariant::GetNullObject());
 
 			// Body を呼び出す
-			Body.FuncCall_Object(result, tRisseString::GetEmptyString(), flags, args, This);
+			Body.FuncCall_Object(result, tString::GetEmptyString(), flags, args, This);
 			return rvNoError;
 		}
 	}
@@ -65,7 +65,7 @@ tRisseFunctionInstance::tRetValue tRisseFunctionInstance::Operate(RISSE_OBJECTIN
 
 
 //---------------------------------------------------------------------------
-void tRisseFunctionInstance::construct()
+void tFunctionInstance::construct()
 {
 	// 何もしない
 }
@@ -73,7 +73,7 @@ void tRisseFunctionInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseFunctionInstance::initialize(const tRisseNativeCallInfo & info)
+void tFunctionInstance::initialize(const tNativeCallInfo & info)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -93,8 +93,8 @@ void tRisseFunctionInstance::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseFunctionClass::tRisseFunctionClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Function, engine->ObjectClass)
+tFunctionClass::tFunctionClass(tScriptEngine * engine) :
+	tClassBase(ss_Function, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -102,7 +102,7 @@ tRisseFunctionClass::tRisseFunctionClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseFunctionClass::RegisterMembers()
+void tFunctionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -113,10 +113,10 @@ void tRisseFunctionClass::RegisterMembers()
 	// 呼ばれるため)うまくいかないので、
 	// たとえ仮であろうと ovulate メソッドを登録する。
 	// いったん ScriptEngine インスタンスの FunctionClass を NULL に設定すると
-	// RisseBindFunction は仮のメソッドインスタンスを用いるようになる。
-	tRisseFunctionClass * f_save = GetRTTI()->GetScriptEngine()->FunctionClass;
+	// BindFunction は仮のメソッドインスタンスを用いるようになる。
+	tFunctionClass * f_save = GetRTTI()->GetScriptEngine()->FunctionClass;
 	GetRTTI()->GetScriptEngine()->FunctionClass = NULL;
-	RisseBindFunction(this, ss_ovulate, &tRisseFunctionClass::ovulate);
+	BindFunction(this, ss_ovulate, &tFunctionClass::ovulate);
 	GetRTTI()->GetScriptEngine()->FunctionClass = f_save;
 
 	// クラスに必要なメソッドを登録する
@@ -124,19 +124,19 @@ void tRisseFunctionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate, &tRisseFunctionClass::ovulate);
-	RisseBindFunction(this, ss_construct, &tRisseFunctionInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseFunctionInstance::initialize);
-	RisseBindProperty(this, ss_synchronized,
-		&tRisseFunctionInstance::get_synchronized, &tRisseFunctionInstance::set_synchronized);
+	BindFunction(this, ss_ovulate, &tFunctionClass::ovulate);
+	BindFunction(this, ss_construct, &tFunctionInstance::construct);
+	BindFunction(this, ss_initialize, &tFunctionInstance::initialize);
+	BindProperty(this, ss_synchronized,
+		&tFunctionInstance::get_synchronized, &tFunctionInstance::set_synchronized);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseFunctionClass::ovulate()
+tVariant tFunctionClass::ovulate()
 {
-	return tRisseVariant(new tRisseFunctionInstance());
+	return tVariant(new tFunctionInstance());
 }
 //---------------------------------------------------------------------------
 

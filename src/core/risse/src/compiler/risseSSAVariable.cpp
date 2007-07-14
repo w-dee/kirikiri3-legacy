@@ -27,8 +27,8 @@ RISSE_DEFINE_SOURCE_ID(10364,52326,29794,19229,46468,33376,32183,16216);
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form, 
-	tRisseSSAStatement *stmt, const tRisseString & name)
+tSSAVariable::tSSAVariable(tSSAForm * form, 
+	tSSAStatement *stmt, const tString & name)
 {
 	// フィールドの初期化
 	Form = form;
@@ -36,7 +36,7 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 	FirstUsedStatement = NULL;
 	LastUsedStatement = NULL;
 	Value = NULL;
-	ValueType = tRisseVariant::vtVoid;
+	ValueType = tVariant::vtVoid;
 	Mark = NULL;
 
 	// この変数が定義された文の登録
@@ -49,7 +49,7 @@ tRisseSSAVariable::tRisseSSAVariable(tRisseSSAForm * form,
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariable::SetName(const tRisseString & name)
+void tSSAVariable::SetName(const tString & name)
 {
 	// 名前を設定する
 	Name = name;
@@ -61,29 +61,29 @@ void tRisseSSAVariable::SetName(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSAVariable::GetQualifiedName() const
+tString tSSAVariable::GetQualifiedName() const
 {
 	if(Name.IsEmpty())
 	{
 		// 一時変数の場合は _tmp@ の次にバージョン文字列
-		return tRisseString(RISSE_WS("_tmp@")) + tRisseString::AsString(Version);
+		return tString(RISSE_WS("_tmp@")) + tString::AsString(Version);
 	}
 	else
 	{
 		// NumberedName がある場合はそれを、Nameを使う
-		tRisseString n;
+		tString n;
 		if(!NumberedName.IsEmpty()) n = NumberedName; else n = Name;
 		// 普通の変数の場合は 変数名@バージョン文字列
-		return n + RISSE_WC('@') + tRisseString::AsString(Version);
+		return n + RISSE_WC('@') + tString::AsString(Version);
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariable::DeleteUsed(tRisseSSAStatement * stmt)
+void tSSAVariable::DeleteUsed(tSSAStatement * stmt)
 {
-	gc_vector<tRisseSSAStatement*>::iterator it =
+	gc_vector<tSSAStatement*>::iterator it =
 		std::find(Used.begin(), Used.end(), stmt);
 	if(it != Used.end()) Used.erase(it);
 }
@@ -91,19 +91,19 @@ void tRisseSSAVariable::DeleteUsed(tRisseSSAStatement * stmt)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tRisseString & name,
-			tRisseSSAVariable * param1,
-			tRisseSSAVariable * param2,
-			tRisseSSAVariable * param3)
+tSSAVariable * tSSAVariable::GenerateFuncCall(risse_size pos, const tString & name,
+			tSSAVariable * param1,
+			tSSAVariable * param2,
+			tSSAVariable * param3)
 {
-	tRisseSSAVariable * func_var = NULL;
+	tSSAVariable * func_var = NULL;
 
 	if(!name.IsEmpty())
 	{
 		// 関数名が指定されている場合
 
 		// メソッド名を置く
-		tRisseSSAVariable * method_name_var =
+		tSSAVariable * method_name_var =
 			Form->AddConstantValueStatement(pos, name);
 
 		// メソッドオブジェクトを得る
@@ -116,8 +116,8 @@ tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tR
 	}
 
 	// 関数呼び出し文を生成する
-	tRisseSSAVariable * ret_var = NULL;
-	tRisseSSAStatement * call_stmt =
+	tSSAVariable * ret_var = NULL;
+	tSSAStatement * call_stmt =
 		Form->AddStatement(pos, ocFuncCall, &ret_var, func_var, param1, param2, param3);
 	call_stmt->SetFuncExpandFlags(0);
 
@@ -128,9 +128,9 @@ tRisseSSAVariable * tRisseSSAVariable::GenerateFuncCall(risse_size pos, const tR
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariable::DeleteDeadStatements()
+void tSSAVariable::DeleteDeadStatements()
 {
-	for(gc_vector<tRisseSSAStatement*>::iterator it = Used.begin(); it != Used.end();)
+	for(gc_vector<tSSAStatement*>::iterator it = Used.begin(); it != Used.end();)
 	{
 		// この文が死んだ基本ブロックに属しているならば削除
 		if((*it)->GetBlock()->GetAlive())
@@ -150,7 +150,7 @@ void tRisseSSAVariable::DeleteDeadStatements()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariable::AnalyzeVariableStatementLiveness(tRisseSSAStatement * stmt)
+void tSSAVariable::AnalyzeVariableStatementLiveness(tSSAStatement * stmt)
 {
 	// ここでは命令の生成順(通し番号順)に比較を行うため、通し番号が
 	// すでに文についていなければならない
@@ -171,7 +171,7 @@ void tRisseSSAVariable::AnalyzeVariableStatementLiveness(tRisseSSAStatement * st
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSAVariable::Dump() const
+tString tSSAVariable::Dump() const
 {
 	return GetQualifiedName();
 }
@@ -179,21 +179,21 @@ tRisseString tRisseSSAVariable::Dump() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSAVariable::GetTypeComment() const
+tString tSSAVariable::GetTypeComment() const
 {
 	if(Value)
 	{
 		// 定数である
-		return tRisseString(RISSE_WS("constant ")) +
+		return tString(RISSE_WS("constant ")) +
 			Value->AsHumanReadable();
 	}
-	else if(ValueType != tRisseVariant::vtVoid)
+	else if(ValueType != tVariant::vtVoid)
 	{
 		// 型が決まっている
-		return tRisseString(RISSE_WS("always type ")) +
-			tRisseVariant::GetTypeString(ValueType);
+		return tString(RISSE_WS("always type ")) +
+			tVariant::GetTypeString(ValueType);
 	}
-	else return tRisseString();
+	else return tString();
 }
 //---------------------------------------------------------------------------
 

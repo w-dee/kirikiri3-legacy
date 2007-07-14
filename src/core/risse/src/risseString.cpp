@@ -22,12 +22,12 @@ RISSE_DEFINE_SOURCE_ID(45632,47818,10920,18335,63117,13582,59145,24628);
 
 
 //---------------------------------------------------------------------------
-risse_char tRisseStringData::EmptyBuffer[3] = { tRisseStringBlock::MightBeShared, 0, 0 };
+risse_char tStringData::EmptyBuffer[3] = { tStringBlock::MightBeShared, 0, 0 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock & ref,
+tStringBlock::tStringBlock(const tStringBlock & ref,
 	risse_size offset, risse_size length)
 {
 	if(length)
@@ -48,7 +48,7 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock & ref,
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
+tStringBlock::tStringBlock(const risse_char * ref, risse_size n)
 {
 	Length = n;
 	if(n == 0)
@@ -65,7 +65,7 @@ tRisseStringBlock::tRisseStringBlock(const risse_char * ref, risse_size n)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1)
+tStringBlock::tStringBlock(const tStringBlock &msg, const tStringBlock &r1)
 {
 	*this = msg.Replace(RISSE_WS("%1"), r1);
 }
@@ -73,8 +73,8 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
-				const tRisseStringBlock &r2)
+tStringBlock::tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
+				const tStringBlock &r2)
 {
 	*this = msg.
 			Replace(RISSE_WS("%1"), r1).
@@ -84,8 +84,8 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
-				const tRisseStringBlock &r2, const tRisseStringBlock &r3)
+tStringBlock::tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
+				const tStringBlock &r2, const tStringBlock &r3)
 {
 	*this = msg.
 			Replace(RISSE_WS("%1"), r1).
@@ -96,9 +96,9 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
-					const tRisseStringBlock &r2, const tRisseStringBlock &r3,
-					const tRisseStringBlock &r4)
+tStringBlock::tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
+					const tStringBlock &r2, const tStringBlock &r3,
+					const tStringBlock &r4)
 {
 	*this = msg.
 			Replace(RISSE_WS("%1"), r1).
@@ -110,9 +110,9 @@ tRisseStringBlock::tRisseStringBlock(const tRisseStringBlock &msg, const tRisseS
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
+tStringBlock & tStringBlock::operator = (const risse_char * ref)
 {
-	if((Length = Risse_strlen(ref)) == 0)
+	if((Length = ::Risse::strlen(ref)) == 0)
 	{
 		Buffer = RISSE_STRING_EMPTY_BUFFER;
 	}
@@ -121,7 +121,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 		Buffer = AllocateInternalBuffer(Length);
 		memcpy(Buffer, ref, Length * sizeof(risse_char));
 			// サイズがわかっているならば memcpy の方が若干早い
-//		Risse_strcpy(Buffer, ref);
+//		::Risse::strcpy(Buffer, ref);
 		Buffer[Length] = Buffer[Length+1] = 0; // null終端と hint をクリア
 	}
 	return *this;
@@ -130,7 +130,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char * ref)
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock & tRisseStringBlock::operator = (const risse_char ref)
+tStringBlock & tStringBlock::operator = (const risse_char ref)
 {
 	if(ref == 0)
 	{
@@ -151,11 +151,11 @@ tRisseStringBlock & tRisseStringBlock::operator = (const risse_char ref)
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 //---------------------------------------------------------------------------
-tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
+tStringBlock & tStringBlock::operator = (const wchar_t *str)
 {
 	risse_size org_len = wcslen(str);
 	Buffer = AllocateInternalBuffer(org_len);
-	risse_size new_len = RisseConvertUTF16ToRisseCharString(Buffer,
+	risse_size new_len = ConvertUTF16ToRisseCharString(Buffer,
 		reinterpret_cast<const risse_uint16 *>(str)); // UTF16 を UTF32 に変換
 	if(new_len)
 		Buffer[new_len] = Buffer[new_len+1] = 0; // null終端と hint をクリア
@@ -167,12 +167,12 @@ tRisseStringBlock & tRisseStringBlock::operator = (const wchar_t *str)
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
+tStringBlock & tStringBlock::operator = (const char * ref)
 {
-	Length = RisseUtf8ToRisseCharString(ref, NULL); // コードポイント数を得る
-	if(Length == risse_size_max) tRisseCharConversionExceptionClass::ThrowInvalidUTF8String();
+	Length = Utf8ToRisseCharString(ref, NULL); // コードポイント数を得る
+	if(Length == risse_size_max) tCharConversionExceptionClass::ThrowInvalidUTF8String();
 	Buffer = AllocateInternalBuffer(Length);
-	RisseUtf8ToRisseCharString(ref, Buffer);
+	Utf8ToRisseCharString(ref, Buffer);
 	Buffer[Length] = Buffer[Length + 1] = 0; // null終端と hint をクリア
 	return *this;
 }
@@ -180,7 +180,7 @@ tRisseStringBlock & tRisseStringBlock::operator = (const char * ref)
 
 
 //---------------------------------------------------------------------------
-risse_char * tRisseStringBlock::AllocateInternalBuffer(
+risse_char * tStringBlock::AllocateInternalBuffer(
 	risse_size n, risse_char *prevbuf)
 {
 	// バッファを確保
@@ -188,13 +188,13 @@ risse_char * tRisseStringBlock::AllocateInternalBuffer(
 	void *ptr;
 	if(!prevbuf)
 	{
-		ptr = RisseMallocAtomicCollectee(newbytes);
+		ptr = MallocAtomicCollectee(newbytes);
 	}
 	else
 	{
 		char * buffer_head = reinterpret_cast<char *>(prevbuf) -
 			 ( sizeof(risse_char) + sizeof(risse_size) );
-		ptr = RisseReallocCollectee(buffer_head, newbytes);
+		ptr = ReallocCollectee(buffer_head, newbytes);
 	}
 
 	// ２番目の文字を指すポインタを獲る
@@ -215,7 +215,7 @@ risse_char * tRisseStringBlock::AllocateInternalBuffer(
 
 
 //---------------------------------------------------------------------------
-risse_char * tRisseStringBlock::InternalIndepend() const
+risse_char * tStringBlock::InternalIndepend() const
 {
 	risse_char * newbuf = AllocateInternalBuffer(Length);
 	memcpy(newbuf, Buffer, sizeof(risse_char) * Length);
@@ -226,7 +226,7 @@ risse_char * tRisseStringBlock::InternalIndepend() const
 
 
 //---------------------------------------------------------------------------
-void tRisseStringBlock::Reserve(risse_size capacity) const
+void tStringBlock::Reserve(risse_size capacity) const
 {
 	if(capacity < Length) return; // 長さが容量より長い
 
@@ -261,7 +261,7 @@ void tRisseStringBlock::Reserve(risse_size capacity) const
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tRisseStringBlock::GetHash() const
+risse_uint32 tStringBlock::GetHash() const
 {
 	// the hash function used here is similar to one which used in perl 5.8,
 	// see also http://burtleburtle.net/bob/hash/doobs.html (One-at-a-Time Hash)
@@ -286,7 +286,7 @@ risse_uint32 tRisseStringBlock::GetHash() const
 
 
 //---------------------------------------------------------------------------
-bool tRisseStringBlock::operator == ( const risse_char *ptr ) const
+bool tStringBlock::operator == ( const risse_char *ptr ) const
 {
 	if(Length == 0) return ptr[0] == 0; // 空文字列 ?
 
@@ -311,7 +311,7 @@ bool tRisseStringBlock::operator == ( const risse_char *ptr ) const
 
 
 //---------------------------------------------------------------------------
-void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
+void tStringBlock::Append(const risse_char * buffer, risse_size length)
 {
 	if(length == 0) return; // 追加するものなし
 
@@ -355,12 +355,12 @@ void tRisseStringBlock::Append(const risse_char * buffer, risse_size length)
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::operator + (const tRisseStringBlock & ref) const
+tStringBlock tStringBlock::operator + (const tStringBlock & ref) const
 {
 	if(Length == 0) return ref;
 	if(ref.Length == 0) return *this;
 
-	tRisseStringBlock newblock;
+	tStringBlock newblock;
 	risse_size newsize = Length + ref.Length;
 	newblock.Allocate(newsize);
 	memcpy(newblock.Buffer, Buffer, Length * sizeof(risse_char));
@@ -372,14 +372,14 @@ tRisseStringBlock tRisseStringBlock::operator + (const tRisseStringBlock & ref) 
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::operator + (const risse_char * ref) const
+tStringBlock tStringBlock::operator + (const risse_char * ref) const
 {
 	if(Length == 0) return ref;
 	if(ref == NULL) return *this;
-	risse_size ref_length = Risse_strlen(ref);
+	risse_size ref_length = ::Risse::strlen(ref);
 	if(ref_length == 0) return *this;
 
-	tRisseStringBlock newblock;
+	tStringBlock newblock;
 	risse_size newsize = Length + ref_length;
 	newblock.Allocate(newsize);
 	memcpy(newblock.Buffer, Buffer, Length * sizeof(risse_char));
@@ -391,34 +391,34 @@ tRisseStringBlock tRisseStringBlock::operator + (const risse_char * ref) const
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::AsString(risse_int v)
+tStringBlock tStringBlock::AsString(risse_int v)
 {
 	risse_char num_str[40];
-	Risse_int_to_str(v, num_str);
-	return tRisseStringBlock(num_str);
+	::Risse::int_to_str(v, num_str);
+	return tStringBlock(num_str);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::AsString(risse_int64 v)
+tStringBlock tStringBlock::AsString(risse_int64 v)
 {
 	risse_char num_str[40];
-	Risse_int64_to_str(v, num_str);
-	return tRisseStringBlock(num_str);
+	::Risse::int64_to_str(v, num_str);
+	return tStringBlock(num_str);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
-		const tRisseStringBlock &new_str, bool replace_all) const
+tStringBlock tStringBlock::Replace(const tStringBlock &old_str,
+		const tStringBlock &new_str, bool replace_all) const
 {
 	// 長さチェック
 	if(GetLength() < old_str.GetLength()) return *this; // 置き換えられない
 
 	// old_str が最低1個分 new_str に変わると期待してバッファをあらかじめ確保
-	tRisseStringBlock ret;
+	tStringBlock ret;
 	ret.Reserve(GetLength() - old_str.GetLength() + new_str.GetLength());
 
 	// 置き換え
@@ -429,7 +429,7 @@ tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
 	for(;;)
 	{
 		const risse_char *p;
-		p = Risse_strstr(lp, old_c_str);
+		p = ::Risse::strstr(lp, old_c_str);
 		if(p)
 		{
 			ret.Append(lp, p - lp);
@@ -451,9 +451,9 @@ tRisseStringBlock tRisseStringBlock::Replace(const tRisseStringBlock &old_str,
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::Times(risse_size count)
+tStringBlock tStringBlock::Times(risse_size count)
 {
-	tRisseStringBlock ret;
+	tStringBlock ret;
 
 	// バッファを確保
 	risse_size target_length = count * Length;
@@ -476,12 +476,12 @@ tRisseStringBlock tRisseStringBlock::Times(risse_size count)
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
+tStringBlock tStringBlock::Escape(risse_size maxlen, bool quote) const
 {
 	const risse_char * hexchars = RISSE_WS("0123456789ABCDEF");
 
 	// 返値用のバッファを確保
-	tRisseStringBlock ret;
+	tStringBlock ret;
 	ret.Reserve((maxlen > Length ? Length : maxlen) + 4 + (quote?2:0));
 		// 最低でも今の文字列長以上にはなる (+4=余裕)
 
@@ -556,7 +556,7 @@ tRisseStringBlock tRisseStringBlock::Escape(risse_size maxlen, bool quote) const
 
 
 //---------------------------------------------------------------------------
-tRisseStringData tRisseStringBlock::EmptyStringData = { RISSE_STRING_EMPTY_BUFFER, 0 };
+tStringData tStringBlock::EmptyStringData = { RISSE_STRING_EMPTY_BUFFER, 0 };
 //---------------------------------------------------------------------------
 
 
@@ -564,13 +564,13 @@ tRisseStringData tRisseStringBlock::EmptyStringData = { RISSE_STRING_EMPTY_BUFFE
 
 
 //---------------------------------------------------------------------------
-tRisseStringBlock operator +(const risse_char *lhs, const tRisseStringBlock &rhs)
+tStringBlock operator +(const risse_char *lhs, const tStringBlock &rhs)
 {
-	risse_size lhs_length = Risse_strlen(lhs);
+	risse_size lhs_length = ::Risse::strlen(lhs);
 	if(lhs == NULL) return rhs;
 	if(lhs_length == 0) return rhs;
 
-	tRisseStringBlock newblock;
+	tStringBlock newblock;
 	risse_size newsize = lhs_length + rhs.Length;
 	newblock.Allocate(newsize);
 	memcpy(newblock.Buffer, lhs, lhs_length * sizeof(risse_char));

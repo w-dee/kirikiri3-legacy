@@ -24,29 +24,29 @@
 
 namespace Risse
 {
-class tRisseASTNode;
-class tRisseCodeBlock;
-class tRisseScriptEngine;
-class tRisseBindingInfo;
+class tASTNode;
+class tCodeBlock;
+class tScriptEngine;
+class tBindingInfo;
 //---------------------------------------------------------------------------
 //! @brief		スクリプトブロックの基底クラス
 //---------------------------------------------------------------------------
-class tRisseScriptBlockInstance : public tRisseObjectBase
+class tScriptBlockInstance : public tObjectBase
 {
 private:
-	tRisseString Script; //!< スクリプトの内容
-	tRisseString Name; //!< スクリプトブロックの名称(たいていはファイル名)
+	tString Script; //!< スクリプトの内容
+	tString Name; //!< スクリプトブロックの名称(たいていはファイル名)
 	risse_size LineOffset; //!< スクリプトの行オフセット (ドキュメント埋め込みスクリプト用)
 	mutable risse_size * LinesToPosition; //!< 各行の先頭に対応するコードポイント位置の配列
 	mutable risse_size LineCount; //!< スクリプトの行数
 
-	tRisseCodeBlock * RootCodeBlock; //!< ルート位置(主にグローバル位置) にあるコードブロック(一度実行されてしまえば要らないはず)
-	gc_vector<tRisseCodeBlock *> *CodeBlocks; //!< コードブロック配列(一度コンパイルが済めばクリアされる)
+	tCodeBlock * RootCodeBlock; //!< ルート位置(主にグローバル位置) にあるコードブロック(一度実行されてしまえば要らないはず)
+	gc_vector<tCodeBlock *> *CodeBlocks; //!< コードブロック配列(一度コンパイルが済めばクリアされる)
 	gc_vector<void *> *TryIdentifiers; //!< Tryを識別するための識別子(一度コンパイルが済めばクリアされる)
 
 protected:
 	//! @brief		コンストラクタ
-	tRisseScriptBlockInstance();
+	tScriptBlockInstance();
 
 	//! @brief		スクリプトと名前の設定
 	//! @param		script		スクリプトの内容
@@ -54,10 +54,10 @@ protected:
 	//! @param		lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
 	//!							スクリプトのオフセットを記録できる)
 	//! @note		構築直後に１回だけ呼ぶこと。
-	void SetScriptAndName(const tRisseString & script, const tRisseString & name, int lineofs);
+	void SetScriptAndName(const tString & script, const tString & name, int lineofs);
 
 	//! @brief		デストラクタ(呼ばれない)
-	virtual ~tRisseScriptBlockInstance() {;}
+	virtual ~tScriptBlockInstance() {;}
 
 	//! @brief		LinesToPosition の内容を作成する
 	void CreateLinesToPositionArary() const;
@@ -69,13 +69,13 @@ protected:
 public:
 	//! @brief		スクリプトエンジンを返す
 	//! @return		スクリプトエンジン
-	tRisseScriptEngine * GetScriptEngine() const { return GetRTTI()->GetScriptEngine(); }
+	tScriptEngine * GetScriptEngine() const { return GetRTTI()->GetScriptEngine(); }
 
 	//! @brief		スクリプトの内容を得る	@return スクリプトの内容
-	const tRisseString & GetScript() const { return Script; }
+	const tString & GetScript() const { return Script; }
 
 	//! @brief		スクリプトブロックの名称を得る	@return スクリプトブロックの名称
-	const tRisseString & GetName() const { return Name; }
+	const tString & GetName() const { return Name; }
 
 	//! @brief		スクリプトのコードポイント位置から行/桁位置への変換を行う
 	//! @param		pos			コードポイント位置
@@ -92,18 +92,18 @@ public:
 	//! @param		line		行位置(0～)
 	//! @return		その行にあるスクリプト(最後の改行記号は取り除かれる)
 	//! @note		line が範囲外だった場合は空文字列が帰る
-	tRisseString GetLineAt(risse_size line);
+	tString GetLineAt(risse_size line);
 
 	//! @brief		スクリプト上の位置から "%1 at %2" 形式のメッセージを組み立てる
 	//! @param		pos		スクリプト上の位置
 	//! @param		message	メッセージ
 	//! @return		組み立てられたメッセージ
-	tRisseString BuildMessageAt(risse_size pos, const tRisseString & message);
+	tString BuildMessageAt(risse_size pos, const tString & message);
 
 	//! @brief		警告を表示する
 	//! @param		pos		スクリプト上の位置
 	//! @param		message	メッセージ
-	void OutputWarning(risse_size pos, const tRisseString & message);
+	void OutputWarning(risse_size pos, const tString & message);
 
 protected:
 	//! @brief		ASTを元にコンパイルを行う
@@ -111,18 +111,18 @@ protected:
 	//! @param		binding		バインディング情報
 	//! @param		need_result		評価時に結果が必要かどうか
 	//! @param		is_expression	式評価モードかどうか
-	void Compile(tRisseASTNode * root, const tRisseBindingInfo & binding, bool need_result, bool is_expression);
+	void Compile(tASTNode * root, const tBindingInfo & binding, bool need_result, bool is_expression);
 
 
 public:
 	//! @brief		ルート位置にあるコードブロックを設定する
 	//! @param		codeblock		コードブロック
-	void SetRootCodeBlock(tRisseCodeBlock * codeblock) { RootCodeBlock = codeblock; }
+	void SetRootCodeBlock(tCodeBlock * codeblock) { RootCodeBlock = codeblock; }
 
 	//! @brief		コードブロックを追加する
 	//! @param		codeblock		コードブロック
 	//! @return		そのコードブロックのインデックス
-	risse_size AddCodeBlock(tRisseCodeBlock * codeblock);
+	risse_size AddCodeBlock(tCodeBlock * codeblock);
 
 	//! @brief		try識別子を追加する
 	//! @return		その識別子へのインデックス
@@ -139,7 +139,7 @@ public:
 	//! @brief		指定インデックスのコードブロックを得る
 	//! @param		index		インデックス
 	//! @return		そのインデックスにあるコードブロック
-	tRisseCodeBlock * GetCodeBlockAt(risse_size index) const;
+	tCodeBlock * GetCodeBlockAt(risse_size index) const;
 
 	//! @brief		指定インデックスのtry識別子を得る
 	//! @param		index		インデックス
@@ -155,25 +155,25 @@ public:
 	//!				Evaluate は評価に先立って Compile() を呼び、コンパイルを行う。
 	//!				その後、Fixup() を呼んでから RootCodeBlock を実行する。
 	//!				is_expression	は Risse のように文と式を区別しない言語では常にfalseでよい。
-	void Evaluate(const tRisseBindingInfo & binding, tRisseVariant * result = NULL, bool is_expression = false);
+	void Evaluate(const tBindingInfo & binding, tVariant * result = NULL, bool is_expression = false);
 
 protected:
 	//! @brief		AST のルートノードを取得する(下位クラスで実装すること)
 	//! @param		need_result		結果が必要かどうか
 	//! @param		is_expression	式モードかどうか
 	//! @return		AST ルートノード
-	virtual tRisseASTNode * GetASTRootNode(bool need_result = false, bool is_expression = false) = 0;
+	virtual tASTNode * GetASTRootNode(bool need_result = false, bool is_expression = false) = 0;
 
 
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(
-		const tRisseString &script, const tRisseString & name, risse_size lineofs,
-		const tRisseNativeCallInfo &info);
-	tRisseString mnString() { return GetScript(); }
-	tRisseString get_script() { return GetScript(); }
-	tRisseString get_name() { return GetName(); }
-	tRisseString getLineAt(risse_size line) { return GetLineAt(line); }
+		const tString &script, const tString & name, risse_size lineofs,
+		const tNativeCallInfo &info);
+	tString mnString() { return GetScript(); }
+	tString get_script() { return GetScript(); }
+	tString get_name() { return GetName(); }
+	tString getLineAt(risse_size line) { return GetLineAt(line); }
 	risse_size positionToLine(risse_size pos) { return PositionToLine(pos); }
 };
 //---------------------------------------------------------------------------
@@ -182,20 +182,20 @@ public: // Risse用メソッドなど
 //---------------------------------------------------------------------------
 //! @brief		"ScriptBlock" クラス
 //---------------------------------------------------------------------------
-class tRisseScriptBlockClass : public tRisseClassBase
+class tScriptBlockClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseScriptBlockClass(tRisseScriptEngine * engine);
+	tScriptBlockClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public:
 };

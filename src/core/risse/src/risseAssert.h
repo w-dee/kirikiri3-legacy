@@ -33,12 +33,12 @@ namespace Risse{
 	//! @param		message		メッセージ
 	//! @param		filename	assertion failed が発生したファイル名
 	//! @param		lineno		assertion failed が発生した行
-	void RisseAssert(const char * message, const char * filename, int lineno);
+	void Assert(const char * message, const char * filename, int lineno);
 }
 
 
 #ifdef RISSE_ASSERT_ENABLED
-	#define RISSE_ASSERT(X) ((void)( (!(bool)(X))?((void)::Risse::RisseAssert(#X, __FILE__, __LINE__)) : (void)0))
+	#define RISSE_ASSERT(X) ((void)( (!(bool)(X))?((void)::Risse::Assert(#X, __FILE__, __LINE__)) : (void)0))
 #else
 	#define RISSE_ASSERT(X) ((void)0)
 #endif

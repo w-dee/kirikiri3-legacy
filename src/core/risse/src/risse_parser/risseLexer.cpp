@@ -27,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID(26774,17704,8265,19906,55701,8958,30467,4610);
 
 
 //---------------------------------------------------------------------------
-tRisseLexer::tRisseLexer(tRisseScriptBlockInstance * sb)
+tLexer::tLexer(tScriptBlockInstance * sb)
 {
 	// フィールドを初期化
 	ScriptBlockInstance = sb;
@@ -49,7 +49,7 @@ tRisseLexer::tRisseLexer(tRisseScriptBlockInstance * sb)
 
 
 //---------------------------------------------------------------------------
-int tRisseLexer::GetToken(tRisseVariant & val)
+int tLexer::GetToken(tVariant & val)
 {
 	int id = T_NONE;
 
@@ -89,7 +89,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		// lexer はすでに /= や / を返したあとなので
 		// 前の位置にもどり、正規表現パターンの解析を行う。
 		Ptr = PtrLastTokenStart; // 前の解析位置に戻す
-		tRisseString pat, flags;
+		tString pat, flags;
 		if(!ParseRegExp(Ptr, pat, flags)) { id = -1; goto ret; }
 		// 一回には一回のトークンしか返すことができないので
 		// 最初にパターンを送り、次にフラグを送る
@@ -157,7 +157,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		// 現在位置にあるトークンを解析
 		const risse_char * ptr_start = PtrLastTokenStart = Ptr;
 
-		id = RisseMapToken(Ptr, val);
+		id = MapToken(Ptr, val);
 
 		// LBRACE ?
 		if(id != T_LBRACE)
@@ -172,7 +172,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		case 0:
 			{
 				// 認識できないトークン
-				tRisseCompileExceptionClass::Throw(RISSE_WS_TR("unrecognized token"));
+				tCompileExceptionClass::Throw(RISSE_WS_TR("unrecognized token"));
 				break;
 			}
 
@@ -182,7 +182,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 				// これは、 "}" の直前でセミコロンを省略できるようにするためである。
 				// 逆に、"}" の直前には文脈にかかわらず ";" が来るため、余分な ";" を
 				// 吸収する文法を定義しておかなければならない。
-				TokenFIFO.push_back(tTokenIdAndValue(T_RBRACE, tRisseVariant::GetVoidObject()));
+				TokenFIFO.push_back(tTokenIdAndValue(T_RBRACE, tVariant::GetVoidObject()));
 				return T_SEMICOLON;
 			}
 
@@ -213,10 +213,10 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 
 		case T_BEGIN_OCTET_LITERAL: // オクテット列リテラルの開始
 			{
-				tRisseOctet octet;
+				tOctet octet;
 				Ptr = ptr_start;
 				if(!ParseOctet(Ptr, octet))
-					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("invalid octet literal"));
+					tCompileExceptionClass::Throw(RISSE_WS_TR("invalid octet literal"));
 				val = octet;
 				id = T_CONSTVAL;
 				break;
@@ -226,7 +226,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 			{
 				Ptr = ptr_start;
 				if(!ParseNumber(Ptr, val))
-					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("invalid number literal"));
+					tCompileExceptionClass::Throw(RISSE_WS_TR("invalid number literal"));
 				id = T_CONSTVAL;
 				break;
 			}
@@ -234,7 +234,7 @@ int tRisseLexer::GetToken(tRisseVariant & val)
 		case T_ID: // 識別子
 			{
 				// ptr_start から Ptr までの範囲が記号である
-				val = tRisseString(ptr_start, Ptr - ptr_start);
+				val = tString(ptr_start, Ptr - ptr_start);
 				break;
 			}
 
@@ -253,7 +253,7 @@ ret:
 			// いったん改行を返してからスクリプトの終了ということにする
 			// (最終行に改行が入っていない場合への対処)
 			id = T_NL;
-			TokenFIFO.push_back(tTokenIdAndValue(-1, tRisseVariant::GetVoidObject()));
+			TokenFIFO.push_back(tTokenIdAndValue(-1, tVariant::GetVoidObject()));
 		}
 	}
 
@@ -264,7 +264,7 @@ ret:
 
 
 //---------------------------------------------------------------------------
-void tRisseLexer::NotifyStatementEndStyle(bool semicolon)
+void tLexer::NotifyStatementEndStyle(bool semicolon)
 {
 	if(NewLineRecogInfo.size() == 0) return;
 
@@ -302,7 +302,7 @@ void tRisseLexer::NotifyStatementEndStyle(bool semicolon)
 
 
 //---------------------------------------------------------------------------
-void tRisseLexer::SetFuncCallReduced()
+void tLexer::SetFuncCallReduced()
 {
 	FuncCallReduced = true;
 }
@@ -310,7 +310,7 @@ void tRisseLexer::SetFuncCallReduced()
 
 
 //---------------------------------------------------------------------------
-void tRisseLexer::CheckBlockAfterFunctionCall()
+void tLexer::CheckBlockAfterFunctionCall()
 {
 	// f()
 	// {
@@ -325,9 +325,9 @@ void tRisseLexer::CheckBlockAfterFunctionCall()
 
 
 //---------------------------------------------------------------------------
-int tRisseLexer::ParseEmbeddableString(tRisseVariant & val, risse_char delimiter)
+int tLexer::ParseEmbeddableString(tVariant & val, risse_char delimiter)
 {
-	tRisseString str;
+	tString str;
 	int id;
 	switch(ParseString(Ptr, str, delimiter, true))
 	{

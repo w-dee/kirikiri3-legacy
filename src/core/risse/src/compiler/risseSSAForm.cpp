@@ -30,8 +30,8 @@ RISSE_DEFINE_SOURCE_ID(7246,55563,12549,16650,3991,47135,2967,64968);
 
 
 //---------------------------------------------------------------------------
-tRisseBreakInfo::tRisseBreakInfo(tRisseSSAForm * form,
-	const tRisseString & label_prefix)
+tBreakInfo::tBreakInfo(tSSAForm * form,
+	const tString & label_prefix)
 {
 	Form = form;
 	IsBlock = false;
@@ -40,16 +40,16 @@ tRisseBreakInfo::tRisseBreakInfo(tRisseSSAForm * form,
 	// ターゲットブロックのラベル名を生成
 	JumpTargetLabel = 
 				(label_prefix.IsEmpty() ?
-					tRisseString(RISSE_WS("@break_or_continue")):label_prefix) +
+					tString(RISSE_WS("@break_or_continue")):label_prefix) +
 				RISSE_WS("_") +
-				tRisseString::AsString(Form->GetFunction()->GetFunctionGroup()->
+				tString::AsString(Form->GetFunction()->GetFunctionGroup()->
 									GetCompiler()->GetUniqueNumber());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBreakInfo::AddJump(tRisseSSABlock * jump_block)
+void tBreakInfo::AddJump(tSSABlock * jump_block)
 {
 	PendingJumpSourceBlocks.push_back(jump_block);
 }
@@ -57,7 +57,7 @@ void tRisseBreakInfo::AddJump(tRisseSSABlock * jump_block)
 
 
 //---------------------------------------------------------------------------
-void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
+void tBreakInfo::BindAll(tSSABlock * target)
 {
 	// ターゲットのブロックに対してラベルを設定する
 	Form->GetFunction()->AddLabelMap(JumpTargetLabel, target);
@@ -87,14 +87,14 @@ void tRisseBreakInfo::BindAll(tRisseSSABlock * target)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
-	const tRisseString & name, tRisseSSAForm * parent, bool useparentframe)
+tSSAForm::tSSAForm(risse_size pos, tCompilerFunction * function,
+	const tString & name, tSSAForm * parent, bool useparentframe)
 {
 	Function = function;
 	Parent = parent;
 	UseParentFrame = useparentframe; // ブロックの場合に真
 	Name = name;
-	LocalNamespace = new tRisseSSALocalNamespace();
+	LocalNamespace = new tSSALocalNamespace();
 	EntryBlock = NULL;
 	CurrentBlock = NULL;
 	CurrentSwitchInfo = NULL;
@@ -113,13 +113,13 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 
 	// コードジェネレータを作成する
 	RISSE_ASSERT(!(Parent && Parent->CodeGenerator == NULL));
-	CodeGenerator = new tRisseCodeGenerator(this, Parent ? Parent->CodeGenerator : NULL,
+	CodeGenerator = new tCodeGenerator(this, Parent ? Parent->CodeGenerator : NULL,
 							UseParentFrame, function->GetNestLevel());
-	CodeBlock = new tRisseCodeBlock(GetScriptBlockInstance());
+	CodeBlock = new tCodeBlock(GetScriptBlockInstance());
 	CodeBlockIndex = Function->GetFunctionGroup()->GetCompiler()->AddCodeBlock(CodeBlock);
 
 	// エントリー位置の基本ブロックを生成する
-	EntryBlock = new tRisseSSABlock(this, RISSE_WS("entry"), LocalNamespace);
+	EntryBlock = new tSSABlock(this, RISSE_WS("entry"), LocalNamespace);
 	LocalNamespace = EntryBlock->GetLocalNamespace();
 	CurrentBlock = EntryBlock;
 
@@ -128,14 +128,14 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 	//  この文も消えるはず)
 	// 注意! ThisProxyのオブジェクトはスタック上に配置される可能性があるため
 	// SSA形式間で共有したりしてはいけない (SSA形式ごとに毎回作成する)
-	tRisseSSAVariable * thisproxy = NULL;
+	tSSAVariable * thisproxy = NULL;
 	AddStatement(pos, ocAssignThisProxy, &thisproxy);
 	LocalNamespace->Add(ss_thisProxyHiddenVarName, NULL);
 	LocalNamespace->Write(this, pos, ss_thisProxyHiddenVarName, thisproxy);
 
 	// 一番浅い位置の名前空間に、変数 ss_lastEvalResultHiddenVarName を登録する
 	// 内容は void である
-	tRisseSSAVariable * voidvalue = AddConstantValueStatement(pos, tRisseVariant());
+	tSSAVariable * voidvalue = AddConstantValueStatement(pos, tVariant());
 	LocalNamespace->Add(ss_lastEvalResultHiddenVarName, NULL);
 	LocalNamespace->Write(this, pos, ss_lastEvalResultHiddenVarName, voidvalue);
 }
@@ -143,13 +143,13 @@ tRisseSSAForm::tRisseSSAForm(risse_size pos, tRisseCompilerFunction * function,
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::Generate(const gc_vector<tRisseASTNode *> & roots)
+void tSSAForm::Generate(const gc_vector<tASTNode *> & roots)
 {
 	// AST をたどり、それに対応する SSA 形式を作成する
 	RISSE_ASSERT(roots.size() >= 1);
 
 	// ルートノードを処理する
-	for(gc_vector<tRisseASTNode *>::const_iterator i = roots.begin(); i != roots.end(); i++)
+	for(gc_vector<tASTNode *>::const_iterator i = roots.begin(); i != roots.end(); i++)
 		(*i)->GenerateReadSSA(this);
 
 	// 実行ブロックの最後の return 文を生成する
@@ -159,7 +159,7 @@ void tRisseSSAForm::Generate(const gc_vector<tRisseASTNode *> & roots)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::Generate(const tRisseASTNode * root)
+void tSSAForm::Generate(const tASTNode * root)
 {
 	// AST をたどり、それに対応する SSA 形式を作成する
 
@@ -173,7 +173,7 @@ void tRisseSSAForm::Generate(const tRisseASTNode * root)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::OptimizeAndUnSSA()
+void tSSAForm::OptimizeAndUnSSA()
 {
 	// 到達しない基本ブロックからのパスを削除
 	LeapDeadBlocks();
@@ -194,7 +194,7 @@ void tRisseSSAForm::OptimizeAndUnSSA()
 
 
 //---------------------------------------------------------------------------
-tRisseScriptBlockInstance * tRisseSSAForm::GetScriptBlockInstance() const
+tScriptBlockInstance * tSSAForm::GetScriptBlockInstance() const
 {
 	return Function->GetFunctionGroup()->GetCompiler()->GetScriptBlockInstance();
 }
@@ -202,7 +202,7 @@ tRisseScriptBlockInstance * tRisseSSAForm::GetScriptBlockInstance() const
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseSSAForm::GetThisProxy(risse_size pos)
+tSSAVariable * tSSAForm::GetThisProxy(risse_size pos)
 {
 	return LocalNamespace->Read(this, pos, ss_thisProxyHiddenVarName);
 }
@@ -210,7 +210,7 @@ tRisseSSAVariable * tRisseSSAForm::GetThisProxy(risse_size pos)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::WriteLastEvalResult(risse_size pos, tRisseSSAVariable * value)
+void tSSAForm::WriteLastEvalResult(risse_size pos, tSSAVariable * value)
 {
 	if(value)
 	{
@@ -225,12 +225,12 @@ void tRisseSSAForm::WriteLastEvalResult(risse_size pos, tRisseSSAVariable * valu
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name,
-						const tRisseSSALocalNamespace * ns)
+tSSABlock * tSSAForm::CreateNewBlock(const tString & name,
+						const tSSALocalNamespace * ns)
 {
 	// 新しい基本ブロックを作成する
-	// (この際、tRisseSSABlock 内で ns あるいは LocalNamespace がコピーされる)
-	tRisseSSABlock * new_block = new tRisseSSABlock(this, name, ns ? ns : LocalNamespace);
+	// (この際、tSSABlock 内で ns あるいは LocalNamespace がコピーされる)
+	tSSABlock * new_block = new tSSABlock(this, name, ns ? ns : LocalNamespace);
 
 	// LocalNamespace を、新しい block のものを指すように更新
 	LocalNamespace = new_block->GetLocalNamespace();
@@ -246,9 +246,9 @@ tRisseSSABlock * tRisseSSAForm::CreateNewBlock(const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseSSAForm::InternalAddExitTryBranchTargetLabel(
+risse_size tSSAForm::InternalAddExitTryBranchTargetLabel(
 						tExitTryBranchTargetLabels * target_label, 
-						const tRisseString & label)
+						const tString & label)
 {
 	RISSE_ASSERT(target_label != NULL);
 
@@ -268,8 +268,8 @@ risse_size tRisseSSAForm::InternalAddExitTryBranchTargetLabel(
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseSSAForm::AddExitTryBranchTargetLabel(risse_size try_id,
-													const tRisseString & label)
+risse_size tSSAForm::AddExitTryBranchTargetLabel(risse_size try_id,
+													const tString & label)
 {
 	tCatchBranchAndExceptionMap::iterator i =
 		CatchBranchAndExceptionMap.find(try_id);
@@ -280,7 +280,7 @@ risse_size tRisseSSAForm::AddExitTryBranchTargetLabel(risse_size try_id,
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseSSAForm::AddExitTryBranchTargetLabel(const tRisseString & label)
+risse_size tSSAForm::AddExitTryBranchTargetLabel(const tString & label)
 {
 	RISSE_ASSERT(ExitTryBranchTargetLabels != NULL);
 	return InternalAddExitTryBranchTargetLabel(ExitTryBranchTargetLabels, label);
@@ -289,16 +289,16 @@ risse_size tRisseSSAForm::AddExitTryBranchTargetLabel(const tRisseString & label
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseSSAForm::AddConstantValueStatement(
+tSSAVariable * tSSAForm::AddConstantValueStatement(
 										risse_size pos,
-										const tRisseVariant & val)
+										const tVariant & val)
 {
 	// 文の作成
-	tRisseSSAStatement * stmt =
-		new tRisseSSAStatement(this, pos, ocAssignConstant);
+	tSSAStatement * stmt =
+		new tSSAStatement(this, pos, ocAssignConstant);
 	// 変数の作成
-	tRisseSSAVariable * var = new tRisseSSAVariable(this, stmt);
-	var->SetValue(new tRisseVariant(val));
+	tSSAVariable * var = new tSSAVariable(this, stmt);
+	var->SetValue(new tVariant(val));
 	// 文の追加
 	CurrentBlock->AddStatement(stmt);
 	// 戻る
@@ -308,22 +308,22 @@ tRisseSSAVariable * tRisseSSAForm::AddConstantValueStatement(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode code,
-		tRisseSSAVariable ** ret_var,
-			tRisseSSAVariable *using1,
-			tRisseSSAVariable *using2,
-			tRisseSSAVariable *using3,
-			tRisseSSAVariable *using4
+tSSAStatement * tSSAForm::AddStatement(risse_size pos, tOpCode code,
+		tSSAVariable ** ret_var,
+			tSSAVariable *using1,
+			tSSAVariable *using2,
+			tSSAVariable *using3,
+			tSSAVariable *using4
 			)
 {
 	// 文の作成
-	tRisseSSAStatement * stmt =
-		new tRisseSSAStatement(this, pos, code);
+	tSSAStatement * stmt =
+		new tSSAStatement(this, pos, code);
 
 	if(ret_var)
 	{
 		// 戻りの変数の作成
-		*ret_var = new tRisseSSAVariable(this, stmt);
+		*ret_var = new tSSAVariable(this, stmt);
 	}
 
 	// 文のSSAブロックへの追加
@@ -342,19 +342,19 @@ tRisseSSAStatement * tRisseSSAForm::AddStatement(risse_size pos, tRisseOpCode co
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
+void tSSAForm::AddReturnStatement(risse_size pos, tSSAVariable * var)
 {
 	// ***注意***
 	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
 	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
 	// 同様の変更点がないかを検討すること。
 	// AddExitTryBranchTargetLabel() を呼び出すところは
-	// tRisseCompilerFunction::BindAllLabels() にもある。
+	// tCompilerFunction::BindAllLabels() にもある。
 
 	if(var == NULL)
 	{
 		// 値が無い場合はvoidにする
-		var = AddConstantValueStatement(pos, tRisseVariant()); // void
+		var = AddConstantValueStatement(pos, tVariant()); // void
 	}
 
 	if(CanReturn)
@@ -370,15 +370,15 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 	{
 		// このSSA形式からreturn文で呼び出し元に戻るには例外を使って脱出を行うしかない
 		// return できるSSA形式を探す
-		tRisseSSAForm * child = this;
-		tRisseSSAForm * form = child->Parent;
+		tSSAForm * child = this;
+		tSSAForm * form = child->Parent;
 		do
 		{
 			if(form->CanReturn)
 			{
 				// このSSA形式は return文で抜けることができる
 				// この try id まで例外で抜けるためのコードを生成
-				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
+				tSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
 				risse_size label_idx = form->AddExitTryBranchTargetLabel(RISSE_WS("@return"));
 				stmt->SetTryIdentifierIndex(child->TryIdentifierIndex); // try id を設定
 				stmt->SetIndex(label_idx + 2); // インデックスを設定
@@ -398,18 +398,18 @@ void tRisseSSAForm::AddReturnStatement(risse_size pos, tRisseSSAVariable * var)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddBreakStatement(risse_size pos,
-											tRisseSSAVariable * var)
+void tSSAForm::AddBreakStatement(risse_size pos,
+											tSSAVariable * var)
 {
 	// ***注意***
 	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
 	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
 	// 同様の変更点がないかを検討すること。
 	// AddExitTryBranchTargetLabel() を呼び出すところは
-	// tRisseCompilerFunction::BindAllLabels() にもある。
+	// tCompilerFunction::BindAllLabels() にもある。
 
 	// このSSA形式インスタンスはbreakできるか？
-	tRisseBreakInfo * info = GetCurrentBreakInfo();
+	tBreakInfo * info = GetCurrentBreakInfo();
 	if(info)
 	{
 		// この SSA 形式は break できる
@@ -425,7 +425,7 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 			if(info->GetNonValueBreakShouldSetVoidToLastEvalValue())
 			{
 				// void を設定する
-				WriteLastEvalResult(pos, AddConstantValueStatement(pos, tRisseVariant()));
+				WriteLastEvalResult(pos, AddConstantValueStatement(pos, tVariant()));
 			}
 		}
 
@@ -438,8 +438,8 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 	else
 	{
 		// break できる SSA 形式を探す
-		tRisseSSAForm * child = NULL;
-		tRisseSSAForm * form = this;
+		tSSAForm * child = NULL;
+		tSSAForm * form = this;
 		do
 		{
 			if(form->CanReturn) { form = NULL; break; } // CanReturn な form を超えて break はできない
@@ -456,7 +456,7 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 					if(info->GetNonValueBreakShouldSetVoidToLastEvalValue())
 					{
 						// void を設定する
-						var = AddConstantValueStatement(pos, tRisseVariant());
+						var = AddConstantValueStatement(pos, tVariant());
 					}
 					else
 					{
@@ -467,12 +467,12 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 				if(var == NULL && info->GetIsBlock())
 				{
 					// 値を受け取ることができるのに値が無い場合はvoidにする
-					var = AddConstantValueStatement(pos, tRisseVariant()); // void
+					var = AddConstantValueStatement(pos, tVariant()); // void
 				}
 
 				// このSSA形式はbreak文を受け取ることができる
 				// この try id まで例外で抜けるためのコードを生成
-				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
+				tSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
 				risse_size label_idx = form->AddExitTryBranchTargetLabel(
 													info->GetJumpTargetLabel());
 				stmt->SetTryIdentifierIndex(child->TryIdentifierIndex); // try id を設定
@@ -488,10 +488,10 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 		if(form == NULL)
 		{
 			// break できないようだ
-			tRisseCompileExceptionClass::Throw(
+			tCompileExceptionClass::Throw(
 				Function->GetFunctionGroup()->
 					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-				tRisseString(RISSE_WS_TR("cannot place 'break' here")),
+				tString(RISSE_WS_TR("cannot place 'break' here")),
 					GetScriptBlockInstance(), pos);
 		}
 	}
@@ -500,28 +500,28 @@ void tRisseSSAForm::AddBreakStatement(risse_size pos,
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddContinueStatement(risse_size pos,
-											tRisseSSAVariable * var)
+void tSSAForm::AddContinueStatement(risse_size pos,
+											tSSAVariable * var)
 {
 	// ***注意***
 	// AddReturnStatement と AddBreakStatement と AddContinueStatement は
 	// 共通点が多い。もし一つ変更を加えるならば、ほかのメソッドも見て、
 	// 同様の変更点がないかを検討すること。
 	// AddExitTryBranchTargetLabel() を呼び出すところは
-	// tRisseCompilerFunction::BindAllLabels() にもある。
+	// tCompilerFunction::BindAllLabels() にもある。
 
 	// このSSA形式インスタンスはcontinueできるか？
-	tRisseBreakInfo * info = GetCurrentContinueInfo();
+	tBreakInfo * info = GetCurrentContinueInfo();
 	if(info)
 	{
 		// この SSA 形式は continue できる
 
 		// continue が値を伴ってできるかをチェック
 		if(var != NULL && !info->GetIsBlock())
-			tRisseCompileExceptionClass::Throw(
+			tCompileExceptionClass::Throw(
 				Function->GetFunctionGroup()->
 					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-				tRisseString(RISSE_WS_TR("cannot continue here with a value")),
+				tString(RISSE_WS_TR("cannot continue here with a value")),
 					GetScriptBlockInstance(), pos);
 
 		// ジャンプ文を info に登録
@@ -533,8 +533,8 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 	else
 	{
 		// continue できる SSA 形式を探す
-		tRisseSSAForm * child = NULL;
-		tRisseSSAForm * form = this;
+		tSSAForm * child = NULL;
+		tSSAForm * form = this;
 		do
 		{
 			if(form->CanReturn) { form = NULL; break; } // CanReturn な form を超えて continue はできない
@@ -547,16 +547,16 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 			{
 				// continue が値を伴ってできるかをチェック
 				if(var != NULL && !info->GetIsBlock())
-					tRisseCompileExceptionClass::Throw(
+					tCompileExceptionClass::Throw(
 						Function->GetFunctionGroup()->
 							GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-						tRisseString(RISSE_WS_TR("cannot continue here with a value")),
+						tString(RISSE_WS_TR("cannot continue here with a value")),
 							GetScriptBlockInstance(), pos);
 
 				if(var == NULL && info->GetIsBlock())
 				{
 					// 値を受け取ることができるのに値が無い場合はvoidにする
-					var = AddConstantValueStatement(pos, tRisseVariant()); // void
+					var = AddConstantValueStatement(pos, tVariant()); // void
 				}
 
 				// continue が値を伴える場合は return と同じ動作になる
@@ -573,7 +573,7 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 
 				// このSSA形式はcontinue文を受け取ることができる
 				// この try id まで例外で抜けるためのコードを生成
-				tRisseSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
+				tSSAStatement * stmt = AddStatement(pos, ocExitTryException, NULL, var);
 				risse_size label_idx = form->AddExitTryBranchTargetLabel(
 													info->GetJumpTargetLabel());
 				stmt->SetTryIdentifierIndex(child->TryIdentifierIndex); // try id を設定
@@ -589,10 +589,10 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 		if(form == NULL)
 		{
 			// continue できないようだ
-			tRisseCompileExceptionClass::Throw(
+			tCompileExceptionClass::Throw(
 				Function->GetFunctionGroup()->
 					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-				tRisseString(RISSE_WS_TR("cannot place 'continue' here")),
+				tString(RISSE_WS_TR("cannot place 'continue' here")),
 					GetScriptBlockInstance(), pos);
 		}
 	}
@@ -601,29 +601,29 @@ void tRisseSSAForm::AddContinueStatement(risse_size pos,
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branch_stmt,
-				tRisseSSAVariable * except_value, tExitTryBranchTargetLabels * target_labels)
+void tSSAForm::AddCatchBranchTargetsForOne(tSSAStatement * catch_branch_stmt,
+				tSSAVariable * except_value, tExitTryBranchTargetLabels * target_labels)
 {
 	RISSE_ASSERT(catch_branch_stmt->GetCode() == ocCatchBranch);
 	RISSE_ASSERT(catch_branch_stmt->GetTargetCount() >= 2);
 
 	// この処理の中では CurrentBlock や LocalNamespace が変更される
 	// 可能性があるのでいったん保存する
-	tRisseSSABlock * block_save = CurrentBlock;
-	tRisseSSALocalNamespace * ns_save = LocalNamespace;
+	tSSABlock * block_save = CurrentBlock;
+	tSSALocalNamespace * ns_save = LocalNamespace;
 
 	// すべての分岐先をリストアップ
-	gc_vector<tRisseString> targets;
-	targets.resize(target_labels->size(), tRisseString::GetEmptyString());
+	gc_vector<tString> targets;
+	targets.resize(target_labels->size(), tString::GetEmptyString());
 	for(tExitTryBranchTargetLabels::iterator i = target_labels->begin();
 		i != target_labels->end(); i++)
 		targets[i->second] = i->first;
 
 	// それぞれの分岐先に対してコードを生成
-	for(gc_vector<tRisseString>::iterator i = targets.begin(); i != targets.end(); i++)
+	for(gc_vector<tString>::iterator i = targets.begin(); i != targets.end(); i++)
 	{
 		RISSE_ASSERT(!i->IsEmpty());
-		tRisseSSABlock * target = NULL;
+		tSSABlock * target = NULL;
 
 		if(*i == RISSE_WS("@return"))
 		{
@@ -634,7 +634,7 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 					catch_branch_stmt->GetBlock()->GetLocalNamespace());
 
 			// 例外オブジェクトから値を取り出す
-			tRisseSSAVariable * ret_var = NULL;
+			tSSAVariable * ret_var = NULL;
 			AddStatement(catch_branch_stmt->GetPosition(),
 				ocGetExitTryValue, &ret_var, except_value);
 
@@ -663,7 +663,7 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 					catch_branch_stmt->GetBlock()->GetLocalNamespace());
 
 			// 例外オブジェクトから値を取り出す
-			tRisseSSAVariable * break_var = NULL;
+			tSSAVariable * break_var = NULL;
 			AddStatement(catch_branch_stmt->GetPosition(),
 				ocGetExitTryValue, &break_var, except_value);
 
@@ -688,7 +688,7 @@ void tRisseSSAForm::AddCatchBranchTargetsForOne(tRisseSSAStatement * catch_branc
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddCatchBranchTargets()
+void tSSAForm::AddCatchBranchTargets()
 {
 	for(tCatchBranchAndExceptionMap::iterator i =
 							CatchBranchAndExceptionMap.begin();
@@ -704,9 +704,9 @@ void tRisseSSAForm::AddCatchBranchTargets()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddCatchBranchAndExceptionValue(
-				tRisseSSAStatement * catch_branch_stmt,
-				tRisseSSAVariable * except_value)
+void tSSAForm::AddCatchBranchAndExceptionValue(
+				tSSAStatement * catch_branch_stmt,
+				tSSAVariable * except_value)
 {
 	RISSE_ASSERT(ExitTryBranchTargetLabels);
 	RISSE_ASSERT(catch_branch_stmt->GetCode() == ocCatchBranch);
@@ -726,43 +726,43 @@ void tRisseSSAForm::AddCatchBranchAndExceptionValue(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariableAccessMap * tRisseSSAForm::CreateAccessMap(risse_size pos)
+tSSAVariableAccessMap * tSSAForm::CreateAccessMap(risse_size pos)
 {
 	// 遅延評価ブロック内で発生したtry脱出用例外に備えて ExitTryBranchTargetLabels
 	// を作成する
 	// ここで作成した ExitTryBranchTargetLabels は AddCatchBranchAndExceptionValue()
 	// で CatchBranch とともに保存される
 	ExitTryBranchTargetLabels = new tExitTryBranchTargetLabels();
-	return new tRisseSSAVariableAccessMap(this, pos);
+	return new tSSAVariableAccessMap(this, pos);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basename,
-	bool sharevars, tRisseSSAVariableAccessMap * accessmap,
-	tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var)
+void * tSSAForm::CreateLazyBlock(risse_size pos, const tString & basename,
+	bool sharevars, tSSAVariableAccessMap * accessmap,
+	tSSAForm *& new_form, tSSAVariable *& block_var)
 {
 	// 遅延評価ブロックの名称を決める
-	tRisseString block_name = basename + RISSE_WS(" ") +
-		tRisseString::AsString(GetFunction()->
+	tString block_name = basename + RISSE_WS(" ") +
+		tString::AsString(GetFunction()->
 						GetFunctionGroup()->GetCompiler()->GetUniqueNumber());
 
 	// 遅延評価ブロックを生成
 	if(sharevars)
 	{
 		// 関数の場合
-		tRisseCompilerFunction *child_function =
-			new tRisseCompilerFunction(Function->GetFunctionGroup(),
+		tCompilerFunction *child_function =
+			new tCompilerFunction(Function->GetFunctionGroup(),
 				Function, risse_size_max, block_name);
 		new_form =
-			new tRisseSSAForm(pos, child_function, block_name, this, !sharevars);
+			new tSSAForm(pos, child_function, block_name, this, !sharevars);
 	}
 	else
 	{
 		// ブロックの場合
 		new_form =
-			new tRisseSSAForm(pos, Function, block_name, this, !sharevars);
+			new tSSAForm(pos, Function, block_name, this, !sharevars);
 	}
 
 	Children.push_back(new_form);
@@ -781,7 +781,7 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 	}
 
 	// 遅延評価ブロックを生成する文を追加する
-	tRisseSSAStatement * lazy_stmt =
+	tSSAStatement * lazy_stmt =
 		AddStatement(pos, ocDefineLazyBlock, &block_var);
 	lazy_stmt->SetName(block_name);
 	lazy_stmt->SetDefinedForm(new_form);
@@ -798,7 +798,7 @@ void * tRisseSSAForm::CreateLazyBlock(risse_size pos, const tRisseString & basen
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::ListVariablesForLazyBlock(risse_size pos, tRisseSSAVariableAccessMap * accessmap)
+void tSSAForm::ListVariablesForLazyBlock(risse_size pos, tSSAVariableAccessMap * accessmap)
 {
 	// 遅延評価ブロックで読み込みが起こった変数を処理する
 	accessmap->GenerateChildWrite(this, pos);
@@ -807,7 +807,7 @@ void tRisseSSAForm::ListVariablesForLazyBlock(risse_size pos, tRisseSSAVariableA
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::CleanupLazyBlock(void * param)
+void tSSAForm::CleanupLazyBlock(void * param)
 {
 	// param はtLazyBlockParam を表している
 	// tLazyBlockParam * info_param = reinterpret_cast<tLazyBlockParam *>(param);
@@ -816,7 +816,7 @@ void tRisseSSAForm::CleanupLazyBlock(void * param)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap * accessmap)
+void tSSAForm::CleanupAccessMap(risse_size pos, tSSAVariableAccessMap * accessmap)
 {
 	accessmap->GenerateChildRead(this, pos);
 
@@ -827,20 +827,20 @@ void tRisseSSAForm::CleanupAccessMap(risse_size pos, tRisseSSAVariableAccessMap 
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AddBindingMap(risse_size pos, tRisseSSAVariable * binding)
+void tSSAForm::AddBindingMap(risse_size pos, tSSAVariable * binding)
 {
 	// まず、このスコープから可視な変数をすべて共有するとしてマークする
 	LocalNamespace->ShareAllVisibleVariableNames();
 
 	// それぞれの変数のマッピングを追加する
-	tRisseSSALocalNamespace::tAliasMap names;
+	tSSALocalNamespace::tAliasMap names;
 	LocalNamespace->ListAllVisibleVariableNumberedNames(names);
-	for(tRisseSSALocalNamespace::tAliasMap::iterator i = names.begin(); i != names.end(); i++)
+	for(tSSALocalNamespace::tAliasMap::iterator i = names.begin(); i != names.end(); i++)
 	{
-		const tRisseString & name = i->first; // 装飾なしの名前
-		const tRisseString & nname = i->second; // 番号付きの名前
-		tRisseSSAVariable * name_var = AddConstantValueStatement(pos, name);
-		tRisseSSAStatement * stmt = AddStatement(pos, ocAddBindingMap, NULL, binding, name_var);
+		const tString & name = i->first; // 装飾なしの名前
+		const tString & nname = i->second; // 番号付きの名前
+		tSSAVariable * name_var = AddConstantValueStatement(pos, name);
+		tSSAStatement * stmt = AddStatement(pos, ocAddBindingMap, NULL, binding, name_var);
 		stmt->SetName(nname);
 	}
 }
@@ -848,13 +848,13 @@ void tRisseSSAForm::AddBindingMap(risse_size pos, tRisseSSAVariable * binding)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSAForm::Dump() const
+tString tSSAForm::Dump() const
 {
 	// この form の EntryBlock から到達可能な基本ブロックをすべてダンプする
-	gc_vector<tRisseSSABlock *> blocks;
+	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
-	tRisseString ret;
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	tString ret;
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		ret += (*i)->Dump();
 
 	return ret;
@@ -863,29 +863,29 @@ tRisseString tRisseSSAForm::Dump() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::GenerateLastReturn(const tRisseASTNode * root)
+void tSSAForm::GenerateLastReturn(const tASTNode * root)
 {
 	// 最後の return; 文がない場合に備え、これを補う。
 	// 実際に最後の return 文があった場合は単にこの文は実行されない物として
 	// 後続の LeapDeadBlocks() で破棄される。
 	// 返す値は '_' の値となる。
 	risse_size pos = root->SearchEndPosition();
-	tRisseSSAVariable * ret_var = LocalNamespace->Read(this, pos, ss_lastEvalResultHiddenVarName);
+	tSSAVariable * ret_var = LocalNamespace->Read(this, pos, ss_lastEvalResultHiddenVarName);
 	AddStatement(pos, ocReturn, NULL, ret_var);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::LeapDeadBlocks()
+void tSSAForm::LeapDeadBlocks()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得る
-	gc_vector<tRisseSSABlock *> blocks;
+	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
 	// EntryBlock から到達可能なすべての基本ブロックに 「生存」の印を付ける
 	// また、そこで宣言されている変数のマークをすべてクリアする
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 	{
 		(*i)->SetAlive();
 		(*i)->ClearVariableMarks();
@@ -893,78 +893,78 @@ void tRisseSSAForm::LeapDeadBlocks()
 
 	// EntryBlock から到達可能なすべての基本ブロックのうち、
 	// 到達できないブロックが Pred にあれば削除する
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->DeleteDeadPred();
 
 	// 各変数のうち、変数が使用されている文が所属しているブロックが死んでいる場合、
 	// その文を変数の使用リストから削除する
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->DeleteDeadStatementsFromVariables();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::ConvertSharedVariableAccess()
+void tSSAForm::ConvertSharedVariableAccess()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得る
-	gc_vector<tRisseSSABlock *> blocks;
+	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
 	// すべてのブロックに対して処理を行う
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->ConvertSharedVariableAccess();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AnalyzeVariableBlockLiveness()
+void tSSAForm::AnalyzeVariableBlockLiveness()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得て、マークをクリアする
 	// また、そこで宣言されている変数のマークをすべてクリアする
-	gc_vector<tRisseSSABlock *> blocks;
+	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 	{
 		(*i)->SetMark(NULL);
 		(*i)->ClearVariableMarks();
 	}
 
 	// LiveIn と LiveOut を作成する
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->CreateLiveInAndLiveOut();
 
 	// それぞれのブロック内にある変数に対して生存区間解析を行う
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->AnalyzeVariableBlockLiveness();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AnalyzeVariableBlockLiveness(tRisseSSAVariable * var)
+void tSSAForm::AnalyzeVariableBlockLiveness(tSSAVariable * var)
 {
 	// それぞれの 変数の使用位置について、変数の宣言か、この変数が使用されていると
 	// マークされている箇所にまで逆順にブロックをたどる
 	// (すでにたどったブロックはたどらない)
 
 	// この変数が宣言されている文
-	tRisseSSAStatement * decl_stmt = var->GetDeclared();
+	tSSAStatement * decl_stmt = var->GetDeclared();
 
 	// この変数が宣言されているブロック
-	tRisseSSABlock * decl_block = decl_stmt->GetBlock();
+	tSSABlock * decl_block = decl_stmt->GetBlock();
 
 	// この変数が使用されているそれぞれの文について
-	const gc_vector<tRisseSSAStatement *> & used = var->GetUsed();
-	for(gc_vector<tRisseSSAStatement *>::const_iterator si = used.begin();
+	const gc_vector<tSSAStatement *> & used = var->GetUsed();
+	for(gc_vector<tSSAStatement *>::const_iterator si = used.begin();
 		si != used.end(); si++)
 	{
 		// この文
-		tRisseSSAStatement * used_stmt = *si;
+		tSSAStatement * used_stmt = *si;
 
 		// この文のブロックは
-		tRisseSSABlock * used_block = used_stmt->GetBlock();
+		tSSABlock * used_block = used_stmt->GetBlock();
 		RISSE_ASSERT(used_block != NULL);
 
 		// ブロックを逆順にたどる
@@ -973,14 +973,14 @@ void tRisseSSAForm::AnalyzeVariableBlockLiveness(tRisseSSAVariable * var)
 		// ・変数の宣言されたブロックにたどり着いた場合
 		// ・すでにこの変数が使用されているとマークされているブロックにたどり着いた場合
 
-		gc_vector<tRisseSSABlock *> Stack;
+		gc_vector<tSSABlock *> Stack;
 		Stack.push_back(used_block); // 初期ノードを入れる
 		do
 		{
 			bool stop = false;
 
 			// スタックから値を取り出す
-			tRisseSSABlock * quest_block = Stack.back();
+			tSSABlock * quest_block = Stack.back();
 			Stack.pop_back();
 
 			// 変数が宣言されているブロックにたどり着いた場合は、そこでこのノード
@@ -1011,15 +1011,15 @@ void tRisseSSAForm::AnalyzeVariableBlockLiveness(tRisseSSAVariable * var)
 				if(used_stmt->GetCode() == ocPhi && used_block == quest_block)
 				{
 					// φ関数のused内でvarを探す
-					const gc_vector<tRisseSSAVariable *> & phi_used = used_stmt->GetUsed();
+					const gc_vector<tSSAVariable *> & phi_used = used_stmt->GetUsed();
 					risse_size idx = 0;
-					for(gc_vector<tRisseSSAVariable *>::const_iterator i = phi_used.begin();
+					for(gc_vector<tSSAVariable *>::const_iterator i = phi_used.begin();
 						i != phi_used.end(); i++, idx++)
 					{
 						if(*i == var)
 						{
 							// var が見つかったのでその方向へ探索を続ける
-							tRisseSSABlock * pred = quest_block->GetPred()[idx];
+							tSSABlock * pred = quest_block->GetPred()[idx];
 							pred->AddLiveness(var, true);
 							Stack.push_back(pred);
 							break;
@@ -1028,7 +1028,7 @@ void tRisseSSAForm::AnalyzeVariableBlockLiveness(tRisseSSAVariable * var)
 				}
 				else
 				{
-					for(gc_vector<tRisseSSABlock *>::const_iterator i =
+					for(gc_vector<tSSABlock *>::const_iterator i =
 										quest_block->GetPred().begin();
 						i != quest_block->GetPred().end(); i++)
 					{
@@ -1045,40 +1045,40 @@ void tRisseSSAForm::AnalyzeVariableBlockLiveness(tRisseSSAVariable * var)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::RemovePhiStatements()
+void tSSAForm::RemovePhiStatements()
 {
 	// 基本ブロックのリストを取得
-	gc_vector<tRisseSSABlock *> blocks;
+	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
 	// それぞれのブロックにつき処理
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->RemovePhiStatements();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::AnalyzeVariableStatementLiveness()
+void tSSAForm::AnalyzeVariableStatementLiveness()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得る
-	gc_vector<tRisseSSABlock *> blocks;
+	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
 	// すべての基本ブロック内の文に通し番号を設定する
 	risse_size order = 0;
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->SetOrder(order);
 
 	// 変数の詳細な生存範囲解析を行う
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->AnalyzeVariableStatementLiveness();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::EnsureCodeGenerator()
+void tSSAForm::EnsureCodeGenerator()
 {
 	// code generator は既にコンストラクタ内で作成されているので
 	// ここでは何もしない
@@ -1087,18 +1087,18 @@ void tRisseSSAForm::EnsureCodeGenerator()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::GenerateCode() const
+void tSSAForm::GenerateCode() const
 {
 	// バイトコードを生成する
 	RISSE_ASSERT(CodeGenerator != NULL);
 	CodeGenerator->SetRegisterBase();
 
 	// EntryBlock から到達可能なすべての基本ブロックを得る
-	gc_vector<tRisseSSABlock *> blocks;
+	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
 	// すべての基本ブロックに対してコード生成を行わせる
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->GenerateCode(CodeGenerator);
 
 	// コードを確定する
@@ -1114,7 +1114,7 @@ void tRisseSSAForm::GenerateCode() const
 	//		try...catchはその場で実行されるので、親コードブロックの「その時点」
 	//		でのレジスタの使用分の直後にtry...catchのスタックフレームが配置
 	//		できればよい
-	for(gc_vector<tRisseSSAForm *>::const_iterator i = Children.begin();
+	for(gc_vector<tSSAForm *>::const_iterator i = Children.begin();
 		i != Children.end(); i++)
 	{
 		RISSE_ASSERT((*i)->CodeGenerator != NULL);
@@ -1128,7 +1128,7 @@ void tRisseSSAForm::GenerateCode() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAForm::SetSharedVariableNestCount()
+void tSSAForm::SetSharedVariableNestCount()
 {
 	// コードブロックに最大の共有変数のネストカウントを通知する
 	risse_size nestcount = CodeGenerator->QuerySharedVariableNestCount();

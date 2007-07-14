@@ -20,7 +20,7 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseLexerUtility : public tRisseCollectee
+class tLexerUtility : public tCollectee
 {
 public: // public static members
 	//! @brief		ホワイトスペースのスキップ
@@ -119,14 +119,14 @@ public: // public static members
 	//! @param		embexpmode	埋め込み式モードかどうか (@つき文字列リテラルかどうか)
 	//! @return		内部ステータス
 	static tParseStringResult
-		ParseString(const risse_char * & ptr, tRisseString &val,
+		ParseString(const risse_char * & ptr, tString &val,
 			risse_char delim, bool embexpmode);
 
 	//! @brief		現在の解析位置にある文字列リテラルを解析する
 	//! @param		ptr		解析開始位置 ('\'' or '"' を指していないとならない)
 	//! @param		val		値の格納先
 	//! @return		値の解析に成功したかどうか
-	static bool ParseString(const risse_char * & ptr, tRisseString &val);
+	static bool ParseString(const risse_char * & ptr, tString &val);
 
 	//! @brief		数値として認識できるだけの文字列を ptr から切り出す
 	//! @param		ptr		解析開始位置(切り出し後は切り出した後まで移動している)
@@ -134,7 +134,7 @@ public: // public static members
 	//! @param		expmark	指数表記に使われる文字(2文字まで)
 	//! @param		isreal	実数を切り出したときに真に設定される(整数の場合は偽)
 	//! @return		切り出した文字列(切り出しに失敗した場合、空文字列が帰る)
-	static tRisseString ExtractNumber(
+	static tString ExtractNumber(
 		const risse_char * & ptr,
 		risse_int (*validdigits)(risse_char ch),
 		const risse_char *expmark,  bool &isreal);
@@ -163,7 +163,7 @@ public: // public static members
 	//! @param		validdigits	数値に使う文字集合を判定する関数
 	//! @param		basebits	基数
 	//! @return		変換に成功したかどうか
-	static bool ParseNonDecimalNumber(const risse_char * & ptr, tRisseVariant &val,
+	static bool ParseNonDecimalNumber(const risse_char * & ptr, tVariant &val,
 		risse_int (*validdigits)(risse_char ch), risse_int base);
 
 	//! @brief		10進実数を数値に変換する
@@ -183,27 +183,27 @@ private:
 	//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
 	//! @param 		val		結果格納先
 	//! @return		解析に成功したかどうか
-	static bool ParseNumber2(const risse_char * & ptr, tRisseVariant &val);
+	static bool ParseNumber2(const risse_char * & ptr, tVariant &val);
 
 public: // public static members
 	//! @brief		文字列を数値に変換する
 	//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
 	//! @param 		val		結果格納先
 	//! @return		解析に成功したかどうか
-	static bool ParseNumber(const risse_char * & ptr, tRisseVariant &val);
+	static bool ParseNumber(const risse_char * & ptr, tVariant &val);
 
 	//! @brief		オクテット列を解釈する
 	//! @param		ptr		解析開始位置 '<%' を示していること(解析終了後は終了点にまで移動している)
 	//! @param 		val		結果格納先
 	//! @return		解析に成功したかどうか
-	static bool ParseOctet(const risse_char * & ptr, tRisseOctet &val);
+	static bool ParseOctet(const risse_char * & ptr, tOctet &val);
 
 	//! @brief		正規表現リテラルを解析する
 	//! @param		ptr		解析開始位置(解析終了後は終了点にまで移動している)
 	//! @param		pat		パターンの格納先
 	//! @param		flags	フラグの格納先
 	//! @return		解析に成功したかどうか
-	static bool ParseRegExp(const risse_char * & ptr, tRisseString &pat, tRisseString &flags);
+	static bool ParseRegExp(const risse_char * & ptr, tString &pat, tString &flags);
 
 };
 

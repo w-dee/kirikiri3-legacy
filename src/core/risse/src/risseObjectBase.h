@@ -24,36 +24,36 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"Object" クラス
 //---------------------------------------------------------------------------
-class tRisseObjectBase : public tRisseObjectInterface
+class tObjectBase : public tObjectInterface
 {
 public:
 	//! @brief	メンバ情報を表す構造体
-	struct tMemberData : public tRisseCollectee
+	struct tMemberData : public tCollectee
 	{
-		tRisseVariant			Value;		//!< 値
-		tRisseMemberAttribute	Attribute; //!< メンバの属性
+		tVariant			Value;		//!< 値
+		tMemberAttribute	Attribute; //!< メンバの属性
 
 		//! @brief		コンストラクタ
 		//! @param		value		値
 		//! @param		attrib		メンバの属性
-		tMemberData(const tRisseVariant & value, tRisseMemberAttribute attrib) :
+		tMemberData(const tVariant & value, tMemberAttribute attrib) :
 			Value(value), Attribute(attrib) {;}
 	};
 
 protected:
-	typedef tRisseHashTable<tRisseString, tMemberData>
+	typedef tHashTable<tString, tMemberData>
 		tHashTable; //!< ハッシュ表の型
 	tHashTable HashTable; //!< ハッシュ表
-	const tRisseString & PrototypeName;
+	const tString & PrototypeName;
 		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクトの名前
-	const tRisseString & MembersName;
+	const tString & MembersName;
 		//!< Members名; ofUseMembersRule が指定された場合に読みに行く先のオブジェクトの名前
-	const tRisseVariant * DefaultMethodContext;
+	const tVariant * DefaultMethodContext;
 		//!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキスト(デフォルトのThis)
 
 public:
 	//! @brief		コンストラクタ
-	tRisseObjectBase();
+	tObjectBase();
 
 	//! @brief		コンストラクタ
 	//! @param		prototype_name			プロトタイプ名
@@ -62,7 +62,7 @@ public:
 	//! @param		members_name			Members名
 	//!										(内部でこれへの参照が保持されるので、
 	//!										スタック上の文字列を指定しないこと！！！)
-	tRisseObjectBase(const tRisseString & prototype_name, const tRisseString & members_name = tRisseString::GetEmptyString());
+	tObjectBase(const tString & prototype_name, const tString & members_name = tString::GetEmptyString());
 
 public:
 
@@ -75,8 +75,8 @@ public:
 	//! @note		このインスタンスが保持するハッシュ表以外を読みに行くようなことはない。
 	//! 			読み出そうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
-	tRetValue Read(const tRisseString & name, tRisseOperateFlags flags,
-				tRisseVariant &result, const tRisseVariant &This) const;
+	tRetValue Read(const tString & name, tOperateFlags flags,
+				tVariant &result, const tVariant &This) const;
 
 	//! @brief		メンバに書き込む
 	//! @param		name		メンバ名
@@ -87,14 +87,14 @@ public:
 	//! @note		このインスタンスが保持するハッシュ表以外を参照しに行くようなことはない。
 	//! 			書き込もうとしたメンバがプロパティの場合はプロパティメソッドを呼び出す。
 	//!				(ただしフラグでそれが抑制されていない場合)
-	tRetValue Write(const tRisseString & name, tRisseOperateFlags flags,
-				const tRisseVariant &value, const tRisseVariant &This);
+	tRetValue Write(const tString & name, tOperateFlags flags,
+				const tVariant &value, const tVariant &This);
 
 	//! @brief		メンバを削除する
 	//! @param		name		メンバ名
 	//! @param		flags		操作フラグ
 	//! @return		結果
-	tRetValue Delete(const tRisseString & name, tRisseOperateFlags flags);
+	tRetValue Delete(const tString & name, tOperateFlags flags);
 
 private:
 public:
@@ -106,10 +106,10 @@ public:
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//! @return		結果
 	tRetValue FuncCall(
-		tRisseVariantBlock * ret,
-		const tRisseString & name, risse_uint32 flags = 0,
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseVariant & This = tRisseVariant::GetNullObject());
+		tVariantBlock * ret,
+		const tString & name, risse_uint32 flags = 0,
+		const tMethodArgument & args = tMethodArgument::Empty(),
+		const tVariant & This = tVariant::GetNullObject());
 
 	//! @brief		(このオブジェクトのメンバあるいは自分自身に対する)インスタンスの作成		New
 	//! @param		name		メンバ名
@@ -119,10 +119,10 @@ public:
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//! @return		結果
 	tRetValue New(
-		tRisseVariantBlock * ret,
-		const tRisseString & name, risse_uint32 flags = 0,
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseVariant & This = tRisseVariant::GetNullObject());
+		tVariantBlock * ret,
+		const tString & name, risse_uint32 flags = 0,
+		const tMethodArgument & args = tMethodArgument::Empty(),
+		const tVariant & This = tVariant::GetNullObject());
 
 	//! @brief		(このオブジェクトのメンバに対する)属性設定		DSetAttrib
 	//! @param		name		メンバ名
@@ -130,8 +130,8 @@ public:
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//! @return		結果
 	tRetValue SetAttribute(
-		const tRisseString & name, tRisseOperateFlags flags = 0,
-			const tRisseVariant & This = tRisseVariant::GetNullObject());
+		const tString & name, tOperateFlags flags = 0,
+			const tVariant & This = tVariant::GetNullObject());
 
 	//! @brief		(このオブジェクトに対して)特定クラスのインスタンスかどうかを調べる InstanceOf
 	//! @param		RefClass	クラスオブジェクト
@@ -139,8 +139,8 @@ public:
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//! @return		特定クラスのインスタンスだった場合に真、そうでなければ偽
 	bool InstanceOf(
-		const tRisseVariant & RefClass, risse_uint32 flags = 0,
-		const tRisseVariant & This = tRisseVariant::GetNullObject()
+		const tVariant & RefClass, risse_uint32 flags = 0,
+		const tVariant & This = tVariant::GetNullObject()
 		);
 
 	//! @brief		オブジェクトに対して操作を行う
@@ -156,11 +156,11 @@ public:
 	//! @param		attrib		属性
 	//! @param		ismembers	members に登録する場合は true (membersがもしあるばあいのみ) 
 	//! @note		登録に失敗した場合は例外が発生する。
-	//!				フラグとしてはtRisseOperateFlags::ofMemberEnsure|
-	//!				tRisseOperateFlags::ofInstanceMemberOnlyが自動的に付加される。
-	void RegisterNormalMember(const tRisseString & name,
-						const tRisseVariant & value,
-						tRisseMemberAttribute attrib = tRisseMemberAttribute(), bool ismembers = false);
+	//!				フラグとしてはtOperateFlags::ofMemberEnsure|
+	//!				tOperateFlags::ofInstanceMemberOnlyが自動的に付加される。
+	void RegisterNormalMember(const tString & name,
+						const tVariant & value,
+						tMemberAttribute attrib = tMemberAttribute(), bool ismembers = false);
 
 	//! @brief		メンバを読み出す
 	//! @param		name		名前
@@ -168,14 +168,14 @@ public:
 	//! @return		読み出された内容
 	//! @note		読み出しに失敗した場合は例外が発生する。
 	//!				RegisterNormalMember() とは違い、flags はそのまま使われる。
-	tRisseVariant ReadMember(const tRisseString & name,
+	tVariant ReadMember(const tString & name,
 						risse_uint32 flags = 0) const;
 
 
 	//! @brief		プロパティ(や変数など) の読み込みを行う
 	//! @param		name		メンバ名
 	//! @param		flags		フラグ
-	tRisseVariant GetPropertyDirect(const tRisseString & name, risse_uint32 flags = 0);
+	tVariant GetPropertyDirect(const tString & name, risse_uint32 flags = 0);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

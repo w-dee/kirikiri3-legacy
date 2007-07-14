@@ -30,15 +30,15 @@ using namespace Risse;
 //---------------------------------------------------------------------------
 //! @brief		暫定 Script クラス
 //---------------------------------------------------------------------------
-class tRisseScriptClass : public tRisseClassBase
+class tScriptClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseScriptClass(tRisseScriptEngine * engine) :
-		tRisseClassBase(tRisseSS<'S','c','r','i','p','t'>(), engine->ObjectClass)
+	tScriptClass(tScriptEngine * engine) :
+		tClassBase(tSS<'S','c','r','i','p','t'>(), engine->ObjectClass)
 	{
 		RegisterMembers();
 	}
@@ -46,10 +46,10 @@ public:
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers()
 	{
-		RisseBindFunction(this, ss_construct, &tRisseScriptClass::construct);
-		RisseBindFunction(this, ss_initialize, &tRisseScriptClass::initialize);
-		RisseBindFunction(this, tRisseSS<'r','e','q','u','i','r','e'>(), &tRisseScriptClass::require);
-		RisseBindFunction(this, tRisseSS<'p','r','i','n','t'>(), &tRisseScriptClass::print);
+		BindFunction(this, ss_construct, &tScriptClass::construct);
+		BindFunction(this, ss_initialize, &tScriptClass::initialize);
+		BindFunction(this, tSS<'r','e','q','u','i','r','e'>(), &tScriptClass::require);
+		BindFunction(this, tSS<'p','r','i','n','t'>(), &tScriptClass::print);
 	}
 
 	static void construct()
@@ -60,7 +60,7 @@ public:
 	{
 	}
 
-	static void require(const tRisseString & name, tRisseScriptEngine * engine)
+	static void require(const tString & name, tScriptEngine * engine)
 	{
 		// name を取ってきて eval する
 		wxFile file;
@@ -75,7 +75,7 @@ public:
 			// 内容を評価する
 			fflush(stderr);
 			fflush(stdout);
-			engine->Evaluate((tRisseString)(buf), name, 0, NULL);
+			engine->Evaluate((tString)(buf), name, 0, NULL);
 			fflush(stderr);
 			fflush(stdout);
 		}
@@ -85,12 +85,12 @@ public:
 		}
 	}
 
-	static void print(const tRisseMethodArgument & args)
+	static void print(const tMethodArgument & args)
 	{
 		fflush(stderr);
 		fflush(stdout);
 		for(risse_size i = 0; i < args.GetArgumentCount(); i++)
-			RisseFPrint(stdout, args[i].operator tRisseString().c_str());
+			FPrint(stdout, args[i].operator tString().c_str());
 		fflush(stderr);
 		fflush(stdout);
 	}
@@ -110,15 +110,15 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		警告情報の出力先インターフェース
 //---------------------------------------------------------------------------
-class tRisseWarningOutput : public tRisseLineOutputInterface
+class tWarningOutput : public tLineOutputInterface
 {
-	void Output(const tRisseString & info)
+	void Output(const tString & info)
 	{
 		fflush(stderr);
 		fflush(stdout);
-		RisseFPrint(stderr, RISSE_WS("warning: "));
-		RisseFPrint(stderr, info.c_str());
-		RisseFPrint(stderr, RISSE_WS("\n"));
+		FPrint(stderr, RISSE_WS("warning: "));
+		FPrint(stderr, info.c_str());
+		FPrint(stderr, RISSE_WS("\n"));
 		fflush(stderr);
 	}
 };
@@ -175,12 +175,12 @@ int Application::OnRun()
 	// Risse スクリプトエンジンを作成する
 	try
 	{
-		tRisseScriptEngine engine;
+		tScriptEngine engine;
 
-		engine.SetWarningOutput(new tRisseWarningOutput());
+		engine.SetWarningOutput(new tWarningOutput());
 
 		// Script クラスを追加する
-		(new tRisseScriptClass(&engine))->
+		(new tScriptClass(&engine))->
 				RegisterClassInstance(engine.GetGlobalObject());
 
 		// 入力ファイルを開く
@@ -198,24 +198,24 @@ int Application::OnRun()
 			buf[length] = 0;
 
 			// 内容を評価する
-			tRisseVariant result;
-			engine.Evaluate((tRisseString)(buf), argv[1], 0, &result);
-			RisseFPrint(stderr,(RISSE_WS("========== Result ==========\n")));
+			tVariant result;
+			engine.Evaluate((tString)(buf), argv[1], 0, &result);
+			FPrint(stderr,(RISSE_WS("========== Result ==========\n")));
 			fflush(stderr);
 			fflush(stdout);
-			RisseFPrint(stdout, result.AsHumanReadable().c_str());
+			FPrint(stdout, result.AsHumanReadable().c_str());
 		}
 
 	}
-	catch(const tRisseTemporaryException * te)
+	catch(const tTemporaryException * te)
 	{
 		te->Dump();
 	}
-	catch(const tRisseVariant * e)
+	catch(const tVariant * e)
 	{
 		fflush(stderr);
 		fflush(stdout);
-		wxFprintf(stdout, wxT("exception: %s\n"), e->operator tRisseString().AsWxString().c_str());
+		wxFprintf(stdout, wxT("exception: %s\n"), e->operator tString().AsWxString().c_str());
 	}
 	return 0;
 }

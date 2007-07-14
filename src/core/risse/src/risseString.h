@@ -17,7 +17,7 @@
 /*! @note
 Risse 文字列について
 
-Risse 文字列は tRisseStringBlock クラスで表される。
+Risse 文字列は tStringBlock クラスで表される。
 このクラスは、risse_char * 型の文字列を保持する。この文字列は \0 を含むこ
 とはできない。
 
@@ -27,12 +27,12 @@ risse_char は 32bit サイズであることが求められる。
 
 ■ 構造
 
-	tRisseStringBlock は以下の二つのメンバを持っている。
+	tStringBlock は以下の二つのメンバを持っている。
 
 	risse_char  *	Buffer;	// 文字列バッファ
 	risse_size		Length;	// 文字列長 (最後の \0 は含めない)
 
-	tRisseStringBlock はこの二つのメンバを用い、「Bufferから始まるLength分の
+	tStringBlock はこの二つのメンバを用い、「Bufferから始まるLength分の
 	長さを持つ文字列」を表す。
 	長さのない (空の) 文字列の場合、Length は 0 になる (BufferがNULLになる
 	保証などはないので、Length が 0 であることをもって空文字列とすること)。
@@ -42,7 +42,7 @@ risse_char は 32bit サイズであることが求められる。
 
 	バッファは 最低でも (Length + 3) * sizeof(risse_char) + sizeof(risse_size)
 	を持つ。
-	tRisseStringBlock が任意の文字列を元に作成される場合、
+	tStringBlock が任意の文字列を元に作成される場合、
 	(Length + 3) * sizeof(risse_char) + sizeof(size_t) の長さのバッファがま
 	ず確保され、文字列中の各文字は以下のように配置される。
 
@@ -55,32 +55,32 @@ risse_char は 32bit サイズであることが求められる。
 	hint が続く。
 	capacity は、バッファの長さがぴったりであれば Length と同じになる。
 
-	tRisseStringBlock::Buffer は、最初の capacity や \0 ではなく、その次の
+	tStringBlock::Buffer は、最初の capacity や \0 ではなく、その次の
 	文字0(つまり文字列の先頭) を指すようになる。
 
-	cpacity の次の \0 は、 Buffer が他の tRisseStringBlock と共有されている
+	cpacity の次の \0 は、 Buffer が他の tStringBlock と共有されている
 	場合に \0 ではなくなる。最後の \0 は、終端が \0 であることを期待してい
 	る C 言語系の関数に渡す際に NULL終端 を表す。
 
 ■ バッファの共有
 
-	tRisseStringBlock のコピーコンストラクタや代入演算子は、バッファの中身は
+	tStringBlock のコピーコンストラクタや代入演算子は、バッファの中身は
 	コピーせず、Buffer と Length だけをコピーする。この際、バッファがすでに
 	共有されたことを表すため、Buffer[-1] が \0 でなければ、Buffer[-1] に
 	-1 を代入する。これはバッファが共有されている可能性を表す。
 
 ■ 部分文字列の共有
 
-	tRisseStringBlock は、他の文字列の一部を指し示すことができる。
+	tStringBlock は、他の文字列の一部を指し示すことができる。
 
-	tRisseStringBlock a が以下のバッファを持っている場合、
+	tStringBlock a が以下のバッファを持っている場合、
 
 	4 \0 文字0 文字1 文字2 文字3 \0 hint
 	    ↑
 	   Buffer
 	Length = 4
 
-	文字1 ～ 文字2 の２文字を表す tRisseStringBlock b は以下のように表すこ
+	文字1 ～ 文字2 の２文字を表す tStringBlock b は以下のように表すこ
 	とができる。
 
 	4 -1 文字0 文字1 文字2 文字3 \0 hint
@@ -93,18 +93,18 @@ risse_char は 32bit サイズであることが求められる。
 
 ■ バッファの共有の判定
 
-	tRisseStringBlock が他の tRisseStringBlock とバッファを共有している可能
+	tStringBlock が他の tStringBlock とバッファを共有している可能
 	性があるかどうかを判断するには、Buffer[-1] が \0 でないかどうかを見れば
 	よい。Buffer[-1] が 非 \0 であれはバッファは共有されている可能性がある。
 
-	tRisseStringBlock は文字列を共有する場合、Buffer[-1] が非 \0 の場合に
+	tStringBlock は文字列を共有する場合、Buffer[-1] が非 \0 の場合に
 	 -1 を代入するが、これによりバッファが共有されている可能性を表す。
 
-	tRisseStringBlock は部分文字列を共有する場合、母文字列は Buffer[-1] が
+	tStringBlock は部分文字列を共有する場合、母文字列は Buffer[-1] が
 	非 \0の場合に -1 を代入するし、部分文字列は Buffer[-1] は必然的に \0 に
 	なる。これは、部分文字列が母文字列の先頭から共有しているならば、Buffer[-1]
 	は母文字列と同じ -1 になるし、部分文字列が母文字列の途中から共有している
-	ならば、Buffer[-1] は直前の文字を表し、tRisseStringBlock は文字列中に
+	ならば、Buffer[-1] は直前の文字を表し、tStringBlock は文字列中に
 	\0 を含むことはないから、これは非 \0 となる。
 
 	これらは共有の可能性を表すだけである。可能性があっても実際は共有されてい
@@ -124,7 +124,7 @@ risse_char は 32bit サイズであることが求められる。
 
 ■ Independ
 
-	tRisseStringBlock::Independ() メソッドは、文字列がそのバッファを共有
+	tStringBlock::Independ() メソッドは、文字列がそのバッファを共有
 	している可能性がある場合、新たにバッファを確保し、内容をコピーする。
 	これにより、バッファに何か変更を書き込んでも、他の文字列に影響が及ばない
 	ようにすることができる。
@@ -132,11 +132,11 @@ risse_char は 32bit サイズであることが求められる。
 	Independ は新たに確保したバッファの先頭は \0 にするが、元のバッファの
 	内容には手を加えない。元のバッファの内容は、さらに他の文字列から共有
 	されている可能性があるが、実際に共有されているのか、あるいはされていな
-	いのかは、tRisseStringBlock が持っている情報からは判定できないからである。
+	いのかは、tStringBlock が持っている情報からは判定できないからである。
 
 ■ c_str()
 
-	tRisseStringBlock::c_str() は、多くの C 言語系 API が期待するような、
+	tStringBlock::c_str() は、多くの C 言語系 API が期待するような、
 	NULL 終端文字列を返す。文字列が他の文字列の部分文字列を表している場合、
 	文字列の最後が \0 である保証はないが、そのような場合は、c_str() は新たに
 	バッファを確保し、最後が \0 で終了しているバッファを作り、それを返す。
@@ -153,7 +153,7 @@ risse_char は 32bit サイズであることが求められる。
 	入っていると考えることができるが、正しいハッシュが入っている保証はない。
 	あくまでハッシュ表検索時の「ヒント」として扱うべきである。
 
-	tRisseStringBlock::GetHint() は、このヒント領域へのポインタを返す。
+	tStringBlock::GetHint() は、このヒント領域へのポインタを返す。
 	文字列が部分共有されている場合など、このヒント領域が存在しない場合は
 	このメソッドは NULL を返す。その場合はヒントは利用できない。
 
@@ -171,7 +171,7 @@ namespace Risse
 //! @brief	文字列用データ
 //! @note	この構造体を直接いじらないこと！
 //---------------------------------------------------------------------------
-struct tRisseStringData
+struct tStringData
 {
 	mutable risse_char  *	Buffer;	//!< 文字列バッファ
 	risse_size				Length;	//!< 文字列長 (最後の \0 は含めない)
@@ -183,7 +183,7 @@ public:
 	//! @brief -1, 0, 0 が入っている配列(空のバッファを表す)
 	static risse_char EmptyBuffer[3];
 
-	#define RISSE_STRING_EMPTY_BUFFER (tRisseStringData::EmptyBuffer+1)
+	#define RISSE_STRING_EMPTY_BUFFER (tStringData::EmptyBuffer+1)
 };
 //---------------------------------------------------------------------------
 
@@ -192,11 +192,11 @@ public:
 //! @brief	文字列ブロック
 //! @note	スレッド保護無し
 //---------------------------------------------------------------------------
-class tRisseStringBlock : protected tRisseStringData, public tRisseCollectee
+class tStringBlock : protected tStringData, public tCollectee
 {
 public:
 	//! @brief デフォルトコンストラクタ
-	tRisseStringBlock()
+	tStringBlock()
 	{
 		Buffer = RISSE_STRING_EMPTY_BUFFER;
 		Length = 0;
@@ -204,7 +204,7 @@ public:
 
 	//! @brief コピーコンストラクタ
 	//! @param ref コピー元オブジェクト
-	tRisseStringBlock(const tRisseStringBlock & ref)
+	tStringBlock(const tStringBlock & ref)
 	{
 		*this = ref;
 	}
@@ -213,12 +213,12 @@ public:
 	//! @param ref		コピー元オブジェクト
 	//! @param offset	切り出す開始位置
 	//! @param length	切り出す長さ
-	tRisseStringBlock(const tRisseStringBlock & ref,
+	tStringBlock(const tStringBlock & ref,
 		risse_size offset, risse_size length);
 
 	//! @brief		コンストラクタ(risse_char * から)
 	//! @param		ref		元の文字列
-	tRisseStringBlock(const risse_char * ref)
+	tStringBlock(const risse_char * ref)
 	{
 		*this = ref;
 	}
@@ -227,12 +227,12 @@ public:
 	//! @param		ref		元の文字列
 	//! @param		n		コードポイント数
 	//! @note		[ref, ref+n) の範囲には \0 がないこと
-	tRisseStringBlock(const risse_char * ref, risse_size n);
+	tStringBlock(const risse_char * ref, risse_size n);
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	//! @brief		コンストラクタ(wchar_t * から)
 	//! @param		ref		元の文字列
-	tRisseStringBlock(const wchar_t *ref)
+	tStringBlock(const wchar_t *ref)
 	{
 		*this = ref;
 	}
@@ -240,12 +240,12 @@ public:
 
 //#ifdef RISSE_SUPPORT_WX
 // TODO: パフォーマンス的に問題になりそうならばこれを実装すること
-//	tRisseStringBlock(const wxString & ref);
+//	tStringBlock(const wxString & ref);
 //#endif
 
 	//! @brief		コンストラクタ(char * から)
 	//! @param		ref		元の文字列
-	tRisseStringBlock(const char * ref)
+	tStringBlock(const char * ref)
 	{
 		*this = ref;
 	}
@@ -253,22 +253,22 @@ public:
 	//! @brief		コンストラクタ(メッセージのビルド)
 	//! @param		msg		メッセージ
 	//! @param		r1		メッセージ中の '%1' と置き換わる文字列
-	tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1);
+	tStringBlock(const tStringBlock &msg, const tStringBlock &r1);
 
 	//! @brief		コンストラクタ(メッセージのビルド)
 	//! @param		msg		メッセージ
 	//! @param		r1		メッセージ中の '%1' と置き換わる文字列
 	//! @param		r2		メッセージ中の '%2' と置き換わる文字列
-	tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
-					const tRisseStringBlock &r2);
+	tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
+					const tStringBlock &r2);
 
 	//! @brief		コンストラクタ(メッセージのビルド)
 	//! @param		msg		メッセージ
 	//! @param		r1		メッセージ中の '%1' と置き換わる文字列
 	//! @param		r2		メッセージ中の '%2' と置き換わる文字列
 	//! @param		r3		メッセージ中の '%3' と置き換わる文字列
-	tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
-					const tRisseStringBlock &r2, const tRisseStringBlock &r3);
+	tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
+					const tStringBlock &r2, const tStringBlock &r3);
 
 	//! @brief		コンストラクタ(メッセージのビルド)
 	//! @param		msg		メッセージ
@@ -276,18 +276,18 @@ public:
 	//! @param		r2		メッセージ中の '%2' と置き換わる文字列
 	//! @param		r3		メッセージ中の '%3' と置き換わる文字列
 	//! @param		r4		メッセージ中の '%4' と置き換わる文字列
-	tRisseStringBlock(const tRisseStringBlock &msg, const tRisseStringBlock &r1,
-					const tRisseStringBlock &r2, const tRisseStringBlock &r3,
-					const tRisseStringBlock &r4);
+	tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
+					const tStringBlock &r2, const tStringBlock &r3,
+					const tStringBlock &r4);
 
 	//! @brief		デストラクタ
 	//! @note		このデストラクタは通常は呼ばれないことに注意すること。
 	//!				また、ここに内容の破壊以外に意味のあるコードをかけることを期待しないこと。
-	//!				tRisseHashTable などは明示的にin-placeでデストラクタを
+	//!				tHashTable などは明示的にin-placeでデストラクタを
 	//!				呼ぶことにより内容が破壊され、メンバが参照しているポインタが
 	//!				破壊されることにより参照のリンクが切れることを期待するので、それに
 	//!				対応する。
-	~tRisseStringBlock()
+	~tStringBlock()
 	{
 		// 少なくとも、メンバとして持っているポインタが破壊できればよい
 		Buffer = NULL; // バッファを null に
@@ -296,7 +296,7 @@ public:
 	//! @brief	代入演算子
 	//! @param	ref	コピー元オブジェクト
 	//! @return	このオブジェクトへの参照
-	tRisseStringBlock & operator = (const tRisseStringBlock & ref)
+	tStringBlock & operator = (const tStringBlock & ref)
 	{
 		if(ref.Buffer[-1] == 0)
 			ref.Buffer[-1] = MightBeShared; // 共有可能性フラグをたてる
@@ -308,40 +308,40 @@ public:
 	//! @brief		代入演算子(risse_char * から)
 	//! @param		ref		元の文字列
 	//! @return		このオブジェクトへの参照
-	tRisseStringBlock & operator = (const risse_char * ref);
+	tStringBlock & operator = (const risse_char * ref);
 
 	//! @brief		代入演算子(risse_char から)
 	//! @param		ref		元の文字列
 	//! @return		このオブジェクトへの参照
-	tRisseStringBlock & operator = (const risse_char ref);
+	tStringBlock & operator = (const risse_char ref);
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	//! @brief		代入演算子(wchar_t * から)
 	//! @param		ref		元の文字列
 	//! @return		このオブジェクトへの参照
-	tRisseStringBlock & operator = (const wchar_t *ref);
+	tStringBlock & operator = (const wchar_t *ref);
 #endif
 
 //#ifdef RISSE_SUPPORT_WX
 // TODO: パフォーマンス的に問題になりそうならばこれを実装すること
-//	tRisseStringBlock & operator = (const wxString & ref);
+//	tStringBlock & operator = (const wxString & ref);
 //#endif
 
 	//! @brief		代入演算子(char * から)
 	//! @param		ref		元の文字列
 	//! @return		このオブジェクトへの参照
-	tRisseStringBlock & operator = (const char * ref);
+	tStringBlock & operator = (const char * ref);
 
-	//! @brief	バッファをコピーし、新しい tRisseStringBlock を返す
+	//! @brief	バッファをコピーし、新しい tStringBlock を返す
 	//! @param	ref	コピー元オブジェクト
-	//! @return	新しい tRisseStringBlock オブジェクト
+	//! @return	新しい tStringBlock オブジェクト
 	//! @note	このメソッドは、必ずバッファをコピーして返し、
 	//!			元の文字列 (この文字列) の共有状態などはいっさい
 	//!			変更しない。破壊を前提とした文字列を他の文字列
 	//!			から作成する場合などに効率的。
-	tRisseStringBlock MakeBufferCopy(const tRisseStringBlock & ref) const
+	tStringBlock MakeBufferCopy(const tStringBlock & ref) const
 	{
-		return tRisseStringBlock(Buffer, Length);
+		return tStringBlock(Buffer, Length);
 	}
 
 
@@ -389,13 +389,13 @@ public: // pointer
 	//! @brief 内部で持っている文字列の長さを、実際の長さに合わせる
 	void FixLength()
 	{
-		if((Length = Risse_strlen(Buffer)) == 0)
+		if((Length = ::Risse::strlen(Buffer)) == 0)
 			Buffer = RISSE_STRING_EMPTY_BUFFER;
 		Buffer[Length + 1] = 0; // hint をクリア
 	}
 
 	//! @brief C 言語スタイルのポインタを得る
-	//! @note  tRisseStringBlock は内部に保持しているバッファの最後が \0 で
+	//! @note  tStringBlock は内部に保持しているバッファの最後が \0 で
 	//! 終わってない場合は、バッファを新たにコピーして \0 で終わらせ、その
 	//! バッファのポインタを返す。また、空文字列の場合は NULL を返さずに
 	//! "" へのポインタを返す。
@@ -413,7 +413,7 @@ public: // pointer
 
 	//! @brief 文字列バッファをコピーし、独立させる
 	//! @return 内部バッファ
-	//! @note tRisseStringBlock は一つのバッファを複数の文字列インスタンスが
+	//! @note tStringBlock は一つのバッファを複数の文字列インスタンスが
 	//! 共有する場合があるが、このメソッドは共有を切り、文字列バッファを
 	//! 独立する。Risse の GC の特性上、その文字列がすでに独立しているかどうかを
 	//! 確実に知るすべはなく、このメソッドはかなりの確率でバッファをコピーするため、
@@ -534,38 +534,38 @@ public: // comparison
 	//! @brief < 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this<refかどうか
-	bool operator <  (const tRisseStringBlock & ref) const
+	bool operator <  (const tStringBlock & ref) const
 	{
-		return Risse_strcmp(Buffer, ref.Buffer) < 0;
+		return ::Risse::strcmp(Buffer, ref.Buffer) < 0;
 	}
 
 	//! @brief > 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this>refかどうか
-	bool operator >  (const tRisseStringBlock & ref) const
+	bool operator >  (const tStringBlock & ref) const
 		{ return ref < *this; }
 
 	//! @brief <= 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this<=refかどうか
-	bool operator <= (const tRisseStringBlock & ref) const
+	bool operator <= (const tStringBlock & ref) const
 		{ return ! (*this > ref); }
 
 	//! @brief >= 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this>=refかどうか
-	bool operator >= (const tRisseStringBlock & ref) const
+	bool operator >= (const tStringBlock & ref) const
 		{ return ! (*this < ref); }
 
 	//! @brief 同一比較
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this==refかどうか
-	bool operator == (const tRisseStringBlock & ref) const
+	bool operator == (const tStringBlock & ref) const
 	{
 		if(this == &ref) return true; // 同じポインタ
 		if(Length != ref.Length) return false; // 違う長さ
 		if(Buffer == ref.Buffer) return true; // 同じバッファ
-		return !Risse_strcmp(Buffer, ref.Buffer);
+		return !::Risse::strcmp(Buffer, ref.Buffer);
 	}
 
 	//! @brief 同一比較
@@ -576,7 +576,7 @@ public: // comparison
 	//! @brief 不一致判定
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this!=refかどうか
-	bool operator != (const tRisseStringBlock & ref) const
+	bool operator != (const tStringBlock & ref) const
 		{ return ! (*this == ref); }
 
 	//! @brief 不一致判定
@@ -594,7 +594,7 @@ public: // operators
 	//! @brief		文字列の連結
 	//! @param		ref		連結する文字列
 	//! @return		このオブジェクトへの参照
-	tRisseStringBlock & operator += (const tRisseStringBlock & ref)
+	tStringBlock & operator += (const tStringBlock & ref)
 	{
 		if(Length == 0) { *this = ref; return *this; }
 		Append(ref.Buffer, ref.Length);
@@ -604,7 +604,7 @@ public: // operators
 	//! @brief		文字の連結
 	//! @param		ref		連結する文字
 	//! @return		このオブジェクトへの参照
-	tRisseStringBlock & operator += (risse_char ref)
+	tStringBlock & operator += (risse_char ref)
 	{
 		if(ref == 0) { return *this; } // やることなし
 		if(Length == 0) { *this = ref; return *this; }
@@ -615,26 +615,26 @@ public: // operators
 	//! @brief		文字列の連結
 	//! @param		ref		連結する文字列
 	//! @return		新しく連結された文字列
-	tRisseStringBlock operator + (const tRisseStringBlock & ref) const;
+	tStringBlock operator + (const tStringBlock & ref) const;
 
 	//! @brief		文字列の連結
 	//! @param		ref		連結する文字列
 	//! @return		新しく連結された文字列
-	tRisseStringBlock operator + (const risse_char * ref) const;
+	tStringBlock operator + (const risse_char * ref) const;
 
 	//! @brief		文字の連結
 	//! @param		ref		連結する文字
 	//! @return		新しく連結された文字列
-	tRisseStringBlock operator + (const risse_char ref) const
+	tStringBlock operator + (const risse_char ref) const
 	{
 		risse_char tmp[2];
 		tmp[0] = ref; tmp[1] = 0;
 		return *this + tmp;
 	}
 
-	// + 演算子 (risse_char * と tRisseStringBlockの連結) を friend に
+	// + 演算子 (risse_char * と tStringBlockの連結) を friend に
 	// (定義と実装は下の方)
-	friend tRisseStringBlock operator +(const risse_char *lhs, const tRisseStringBlock &rhs);
+	friend tStringBlock operator +(const risse_char *lhs, const tStringBlock &rhs);
 
 	//! @brief [] 演算子
 	//! @param		n		位置
@@ -649,7 +649,7 @@ public: // conversion
 
 #ifdef RISSE_SUPPORT_WX
 	wxString AsWxString() const
-		{ return RisseCharToWxString(Buffer, Length); }
+		{ return CharToWxString(Buffer, Length); }
 	operator wxString() const
 		{ return AsWxString(); }
 #endif
@@ -660,7 +660,7 @@ public: // conversion
 	//! @note		このクラスにはrisse_charがint型と見誤りやすいという理由で
 	//!				整数型からの直接の構築や整数型の代入は定義されていない。
 	//!				整数型から文字列への変換はこのメソッドを使うと楽。
-	static tRisseStringBlock AsString(risse_int v);
+	static tStringBlock AsString(risse_int v);
 
 	//! @brief		数値を文字列に変換(64bit整数から)
 	//! @param		v		値
@@ -668,7 +668,7 @@ public: // conversion
 	//! @note		このクラスにはrisse_charがint型と見誤りやすいという理由で
 	//!				整数型からの直接の構築や整数型の代入は定義されていない。
 	//!				整数型から文字列への変換はこのメソッドを使うと楽。
-	static tRisseStringBlock AsString(risse_int64 v);
+	static tStringBlock AsString(risse_int64 v);
 
 public: // other utilities
 	//! @brief		文字列の置き換え
@@ -676,13 +676,13 @@ public: // other utilities
 	//! @param		new_str			置き換え先の文字列
 	//! @parma		replace_all		すべての一致を置き換えるかどうか
 	//! @return		置き換えられた文字列
-	tRisseStringBlock Replace(const tRisseStringBlock &old_str,
-		const tRisseStringBlock &new_str, bool replace_all = true) const;
+	tStringBlock Replace(const tStringBlock &old_str,
+		const tStringBlock &new_str, bool replace_all = true) const;
 
 	//! @brief		文字列の繰り返しを生成して返す
 	//! @param		count 繰り返し回数
 	//! @return		繰り返された文字列
-	tRisseStringBlock Times(risse_size count);
+	tStringBlock Times(risse_size count);
 
 	//! @brief		文字列リテラルとして解釈できるようなエスケープを行う
 	//! @param		maxlen		返値文字列のおおよその最大コードポイント数(risse_size_maxの場合は無制限)
@@ -692,36 +692,36 @@ public: // other utilities
 	//!				自分でつけるか ToTokenString を使うこと。
 	//!				返値 は maxlen 付近で切られるが、maxlen ぴったりである保証はない。
 	//!				maxlen 付近で切られた場合の省略記号 '...' は、quote が true の場合のみ付く。
-	tRisseStringBlock Escape(risse_size maxlen = risse_size_max, bool quote = false) const;
+	tStringBlock Escape(risse_size maxlen = risse_size_max, bool quote = false) const;
 
 	//! @brief		値を再パース可能な文字列に変換する
 	//! @return		再パース可能な文字列
-	tRisseStringBlock AsTokenString() const
+	tStringBlock AsTokenString() const
 	{ return Escape(risse_size_max, true); }
 
 	//! @brief		値を人間が読み取り可能な文字列に変換する
 	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は 
 	//!							省略記号 '...' が付く(risse_size_maxの場合は無制限)
 	//! @return		人間が読み取り可能な文字列
-	tRisseStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
+	tStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{ return Escape(maxlen, true); }
 
 private:
 	//! @brief		static な空文字列を表すデータ
-	static tRisseStringData EmptyStringData;
+	static tStringData EmptyStringData;
 
 public:
 	//! @brief		static な空文字列を得る
 	//! @return		static な空文字列
-	//! @note		tRisseString() は空文字列になるがstaticではない。
+	//! @note		tString() は空文字列になるがstaticではない。
 	//!				このメソッドは空文字列をstaticに保持しているデータへの
-	//!				参照を返す。よって単に空文字列が欲しい場合には tRisseString() 
+	//!				参照を返す。よって単に空文字列が欲しい場合には tString() 
 	//!				と比べて効率的。ただし、あくまでこれは参照を返すので、
-	//!				たとえば tRisseString GetXXX() { return tRisseString::GetEmptyString(); }
+	//!				たとえば tString GetXXX() { return tString::GetEmptyString(); }
 	//!				などとすると参照から実体が作られて、それが帰ることになるので非効率的。
-	//!				あくまで const tRisseString & の参照が求められている文脈でのみ使うこと。
-	static const tRisseStringBlock & GetEmptyString()
-		{ return *(const tRisseStringBlock*)(&EmptyStringData); }
+	//!				あくまで const tString & の参照が求められている文脈でのみ使うこと。
+	static const tStringBlock & GetEmptyString()
+		{ return *(const tStringBlock*)(&EmptyStringData); }
 
 };
 //---------------------------------------------------------------------------
@@ -733,10 +733,10 @@ public:
 //! @param		rhs		連結する文字列(右側)
 //! @return		新しく連結された文字列
 //---------------------------------------------------------------------------
-tRisseStringBlock operator +(const risse_char *lhs, const tRisseStringBlock &rhs);
+tStringBlock operator +(const risse_char *lhs, const tStringBlock &rhs);
 //---------------------------------------------------------------------------
 
-typedef tRisseStringBlock tRisseString; //!< いまのところ tRisseString は tRisseStringBlock と同じ
+typedef tStringBlock tString; //!< いまのところ tString は tStringBlock と同じ
 
 //---------------------------------------------------------------------------
 } // namespace Risse

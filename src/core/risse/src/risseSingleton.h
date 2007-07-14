@@ -32,16 +32,16 @@ namespace Risse
 //!			(デフォルトコンストラクタがprotectedで利用可能でなければならない)
 //---------------------------------------------------------------------------
 template <typename T>
-class tRisseSingleton
+class tSingleton
 {
-	tRisseSingleton(const tRisseSingleton &); //!< non-copyable
-	void operator = (const tRisseSingleton &); //!< non-copyable
+	tSingleton(const tSingleton &); //!< non-copyable
+	void operator = (const tSingleton &); //!< non-copyable
 
 	// インスタンスを保持する変数
 	static T * _instance;
 
 public:
-	tRisseSingleton(){;} //!< デフォルトコンストラクタ(何もしない)
+	tSingleton(){;} //!< デフォルトコンストラクタ(何もしない)
 
 	//! @brief		インスタンスを得る
 	//! @note		インスタンスが作成されていなければ作成を行う
@@ -55,7 +55,7 @@ public:
 	static bool GetInstanceAlive() { return _instance != NULL; }
 };
 template <typename T>
-T* tRisseSingleton<T>::_instance = NULL;
+T* tSingleton<T>::_instance = NULL;
 //---------------------------------------------------------------------------
 }
 #endif

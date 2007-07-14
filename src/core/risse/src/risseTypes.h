@@ -11,8 +11,8 @@
 /*! @brief Risse で使う型などの宣言                                          */
 /*---------------------------------------------------------------------------*/
 
-#ifndef __RisseTYPES_H__
-#define __RisseTYPES_H__
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
 #ifdef RISSE_SUPPORT_WX
 	#include <wx/defs.h>
@@ -204,12 +204,12 @@ s = sign,  negative if this is 1, otherwise positive.
 //! @brief	浮動小数点数のクラスを得る
 //! @param	r	調べたい値
 //! @return	クラス
-risse_uint32 RisseGetFPClass(risse_real r);
+risse_uint32 GetFPClass(risse_real r);
 
 
 //! @brief		正の quiet 型 NaN の値を得る
 //! @return		正の quiet 型 NaN
-static inline risse_real RisseGetNaN()
+static inline risse_real GetNaN()
 {
 	risse_uint64 tmp = RISSE_IEEE_D_P_NaN;
 	return *reinterpret_cast<risse_real*>(&tmp);
@@ -217,35 +217,35 @@ static inline risse_real RisseGetNaN()
 
 //! @brief		正の無限大 の値を得る
 //! @return		正の無限大
-static inline risse_real RisseGetInf()
+static inline risse_real GetInf()
 {
 	risse_uint64 tmp = RISSE_IEEE_D_P_INF;
 	return *reinterpret_cast<risse_real*>(&tmp);
 }
 
 template <int size>
-struct tRissePointerSizedInteger
+struct tPointerSizedInteger
 {
 	typedef long type;
 	typedef unsigned long utype;
 };
 template <>
-struct tRissePointerSizedInteger<8>
+struct tPointerSizedInteger<8>
 {
 	typedef risse_int64 type;
 	typedef risse_uint64 utype;
 };
 template <>
-struct tRissePointerSizedInteger<4>
+struct tPointerSizedInteger<4>
 {
 	typedef risse_int32 type;
 	typedef risse_uint32 utype;
 };
 
 //! @brief risse_ptrint は、ポインタと同じサイズを持つことが保証されている符号付き整数型
-typedef tRissePointerSizedInteger<sizeof(void*)>::type risse_ptrint;
+typedef tPointerSizedInteger<sizeof(void*)>::type risse_ptrint;
 //! @brief risse_ptruint は、ポインタと同じサイズを持つことが保証されている符号なし整数型
-typedef tRissePointerSizedInteger<sizeof(void*)>::utype risse_ptruint;
+typedef tPointerSizedInteger<sizeof(void*)>::utype risse_ptruint;
 
 
 

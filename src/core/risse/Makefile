@@ -112,7 +112,7 @@ BIN_DEPS += src/risse_parser/risseLexerMap.def
 src/risse_parser/risseLexerMap.def: \
 		src/risse_parser/words.txt \
 		tools/create_word_map.rb Makefile
-	ruby tools/create_word_map.rb src/risse_parser/words.txt RisseMapToken > \
+	ruby tools/create_word_map.rb src/risse_parser/words.txt MapToken > \
 		src/risse_parser/risseLexerMap.def
 
 # risseOpCodesEnum.inc と risseOpCodesDefs.def のコンパイル

@@ -27,38 +27,38 @@
 //---------------------------------------------------------------------------
 namespace Risse
 {
-class tRisseASTNode;
-class tRisseSSAForm;
-class tRisseCompilerFunctionGroup;
-class tRisseSSAVariable;
-class tRisseSSABlock;
-class tRisseBindingInfo;
+class tASTNode;
+class tSSAForm;
+class tCompilerFunctionGroup;
+class tSSAVariable;
+class tSSABlock;
+class tBindingInfo;
 //---------------------------------------------------------------------------
 //! @brief		関数クラス
 //---------------------------------------------------------------------------
-class tRisseCompilerFunction : public tRisseCollectee
+class tCompilerFunction : public tCollectee
 {
-	tRisseString Name; //!< 関数の名前(表示用)
-	tRisseCompilerFunction * Parent; //!< 親関数
-	tRisseCompilerFunctionGroup * FunctionGroup; //!< この関数を保持している関数グループクラスのインスタンス
-	gc_vector<tRisseSSAForm *> SSAForms; //!< この関数が保持しているSSA形式のリスト
+	tString Name; //!< 関数の名前(表示用)
+	tCompilerFunction * Parent; //!< 親関数
+	tCompilerFunctionGroup * FunctionGroup; //!< この関数を保持している関数グループクラスのインスタンス
+	gc_vector<tSSAForm *> SSAForms; //!< この関数が保持しているSSA形式のリスト
 	risse_size NestLevel; //!< 関数のネストレベル
-	typedef gc_map<tRisseString, tRisseSSAVariable *> tSharedVariableMap;
+	typedef gc_map<tString, tSSAVariable *> tSharedVariableMap;
 		//!< 子関数により共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
 	tSharedVariableMap SharedVariableMap; //!< 子関数(あるいはbinding)により共有されている変数のマップ
 
 public:
-	typedef gc_map<tRisseString, tRisseSSABlock *> tLabelMap;
+	typedef gc_map<tString, tSSABlock *> tLabelMap;
 		//!< ラベルのマップのtypedef
 
 	//! @brief		バインドがまだされていないラベルへのジャンプ
-	struct tPendingLabelJump : public tRisseCollectee
+	struct tPendingLabelJump : public tCollectee
 	{
-		tRisseSSABlock * SourceBlock; //!< ジャンプもとの基本ブロック
-		tRisseString LabelName; //!< ラベル名
+		tSSABlock * SourceBlock; //!< ジャンプもとの基本ブロック
+		tString LabelName; //!< ラベル名
 		tPendingLabelJump(
-			tRisseSSABlock * source_block,
-			const tRisseString & labelname)
+			tSSABlock * source_block,
+			const tString & labelname)
 		{
 			SourceBlock = source_block;
 			LabelName = labelname;
@@ -79,12 +79,12 @@ public:
 	//! @param		parent				親関数インスタンス
 	//! @param		nestlevel			ネストレベル(risse_size_max = 親関数インスタンス+1にする)
 	//! @param		name				関数名(表示用)
-	tRisseCompilerFunction(tRisseCompilerFunctionGroup * function_group,
-		tRisseCompilerFunction * parent, risse_size nestlevel, const tRisseString name);
+	tCompilerFunction(tCompilerFunctionGroup * function_group,
+		tCompilerFunction * parent, risse_size nestlevel, const tString name);
 
 	//! @brief		関数グループクラスのインスタンスを得る
 	//! @return		関数グループクラスのインスタンス
-	tRisseCompilerFunctionGroup * GetFunctionGroup() const { return FunctionGroup; }
+	tCompilerFunctionGroup * GetFunctionGroup() const { return FunctionGroup; }
 
 	//! @brief		ラベルのマップを得る
 	//! @return		ラベルのマップ
@@ -96,10 +96,10 @@ public:
 
 	//! @brief		SSA形式インスタンスを追加する
 	//! @param		form		SSA形式インスタンス
-	void AddSSAForm(tRisseSSAForm * form);
+	void AddSSAForm(tSSAForm * form);
 
 	//! @brief		先頭のSSA形式インスタンスを得る
-	tRisseSSAForm * GetTopSSAForm() const { return SSAForms.front(); }
+	tSSAForm * GetTopSSAForm() const { return SSAForms.front(); }
 
 	//! @brief		関数のネストレベルを得る @return 関数のネストレベル
 	risse_size GetNestLevel() const { return NestLevel; }
@@ -128,23 +128,23 @@ public:
 	//! @brief		未バインドのラベルジャンプを追加する
 	//! @param		jump_block		ジャンプもとの基本ブロック
 	//! @param		labelname		ジャンプ先のラベル名
-	void AddPendingLabelJump(tRisseSSABlock * jump_block,
-			const tRisseString & labelname);
+	void AddPendingLabelJump(tSSABlock * jump_block,
+			const tString & labelname);
 
 	//! @brief		ラベルマップを追加する
 	//! @param		labelname		ラベル名
 	//! @param		block			基本ブロック
 	//! @note		すでに同じ名前のラベルが存在していた場合は例外が発生する
-	void AddLabelMap(const tRisseString &labelname, tRisseSSABlock * block);
+	void AddLabelMap(const tString &labelname, tSSABlock * block);
 
 	//! @param		変数を共有する
 	//! @param		name		変数名(番号付き)
-	void ShareVariable(const tRisseString & name);
+	void ShareVariable(const tString & name);
 
 	//! @param		変数が共有されているかを得る
 	//! @param		name		変数名(番号付き)
 	//! @return		変数が共有されているかどうか
-	bool GetShared(const tRisseString & name);
+	bool GetShared(const tString & name);
 
 	//! @param		この関数のネストレベルが共有変数を持っているかどうかを返す
 	//! @return		この関数のネストレベルが共有変数を持っているかどうか
@@ -159,39 +159,39 @@ private:
 //---------------------------------------------------------------------------
 
 
-class tRisseCompiler;
-class tRisseCompilerFunction;
+class tCompiler;
+class tCompilerFunction;
 //---------------------------------------------------------------------------
 //! @brief		関数グループクラス
 //---------------------------------------------------------------------------
-class tRisseCompilerFunctionGroup : public tRisseCollectee
+class tCompilerFunctionGroup : public tCollectee
 {
-	tRisseCompiler * Compiler; //!< この関数グループを保持しているコンパイラクラスのインスタンス
-	gc_vector<tRisseCompilerFunction *> Functions; //!< この関数グループが保持している関数インスタンスのリスト
-	tRisseString Name; //!< 関数グループの名前(たいていの場合、クラス名+ユニーク番号)
-	tRisseString ClassName; //!< この関数グループがクラスかモジュールの場合、そのクラスかモジュール名 (それ以外の場合は空文字列)
+	tCompiler * Compiler; //!< この関数グループを保持しているコンパイラクラスのインスタンス
+	gc_vector<tCompilerFunction *> Functions; //!< この関数グループが保持している関数インスタンスのリスト
+	tString Name; //!< 関数グループの名前(たいていの場合、クラス名+ユニーク番号)
+	tString ClassName; //!< この関数グループがクラスかモジュールの場合、そのクラスかモジュール名 (それ以外の場合は空文字列)
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		compiler		コンパイラクラスのインスタンス
 	//! @param		name			関数グループの名前
-	tRisseCompilerFunctionGroup(tRisseCompiler * compiler, const tRisseString & name);
+	tCompilerFunctionGroup(tCompiler * compiler, const tString & name);
 
 	//! @brief		コンパイラクラスのインスタンスを得る
 	//! @param		コンパイラクラスのインスタンス
-	tRisseCompiler * GetCompiler() const { return Compiler; }
+	tCompiler * GetCompiler() const { return Compiler; }
 
 	//! @brief		クラス/モジュール名を設定する
 	//! @param		class_name		クラス/モジュール名
-	void SetClassName(const tRisseString class_name) { ClassName = class_name; }
+	void SetClassName(const tString class_name) { ClassName = class_name; }
 
 	//! @brief		クラス/モジュール名を得る
 	//! @return		クラス/モジュール名
-	const tRisseString & GetClassName() const { return ClassName; }
+	const tString & GetClassName() const { return ClassName; }
 
 	//! @brief		関数インスタンスを追加する
 	//! @param		function		関数インスタンス
-	void AddFunction(tRisseCompilerFunction * function);
+	void AddFunction(tCompilerFunction * function);
 
 	//! @brief		SSA形式を完結させる
 	//! @note		このメソッドは、一通りASTからの変換が終わった後に呼ばれる。
@@ -204,15 +204,15 @@ public:
 //---------------------------------------------------------------------------
 
 
-class tRisseCodeBlock;
-class tRisseScriptBlockInstance;
+class tCodeBlock;
+class tScriptBlockInstance;
 //---------------------------------------------------------------------------
 //! @brief		コンパイラクラス
 //---------------------------------------------------------------------------
-class tRisseCompiler : public tRisseCollectee
+class tCompiler : public tCollectee
 {
-	tRisseScriptBlockInstance * ScriptBlockInstance; //!< このコンパイラを保有しているスクリプトブロック
-	gc_vector<tRisseCompilerFunctionGroup *> FunctionGroups;
+	tScriptBlockInstance * ScriptBlockInstance; //!< このコンパイラを保有しているスクリプトブロック
+	gc_vector<tCompilerFunctionGroup *> FunctionGroups;
 		//!< この関数グループが保持している関数グループインスタンスのリスト
 
 	risse_int UniqueNumber; //!< ユニークな番号 (変数などのバージョン付けに用いる)
@@ -220,19 +220,19 @@ class tRisseCompiler : public tRisseCollectee
 public:
 	//! @brief		コンストラクタ
 	//! @param		scriptblock		スクリプトブロックインスタンス
-	tRisseCompiler(tRisseScriptBlockInstance * scriptblock)
+	tCompiler(tScriptBlockInstance * scriptblock)
 		{ ScriptBlockInstance = scriptblock; UniqueNumber = 0; }
 
 	//! @brief		スクリプトブロックインスタンスを得る
 	//! @return		スクリプトブロックインスタンス
-	tRisseScriptBlockInstance * GetScriptBlockInstance() const { return ScriptBlockInstance; }
+	tScriptBlockInstance * GetScriptBlockInstance() const { return ScriptBlockInstance; }
 
 	//! @brief		ASTを元にコンパイルを行う
 	//! @param		root		ルートASTノード
 	//! @param		binding		バインディング情報
 	//! @param		need_result		評価時に結果が必要かどうか
 	//! @param		is_expression	式評価モードかどうか
-	void Compile(tRisseASTNode * root, const tRisseBindingInfo & binding,
+	void Compile(tASTNode * root, const tBindingInfo & binding,
 		bool need_result, bool is_expression);
 
 	//! @brief		ASTを元にクラスのコンパイルを行う
@@ -242,9 +242,9 @@ public:
 	//! @param		new_form	新しく作成された(ルートの)SSA形式インスタンス
 	//! @param		block_var	そのクラスのSSA変数を格納する先
 	//! @param		reg_super	スーパークラス用の変数を追加するかどうか(moduleの場合は偽にする)
-	void CompileClass(const gc_vector<tRisseASTNode *> & roots,
-		const tRisseString & name, tRisseSSAForm * form,
-		tRisseSSAForm *& new_form, tRisseSSAVariable *& block_var, bool reg_super);
+	void CompileClass(const gc_vector<tASTNode *> & roots,
+		const tString & name, tSSAForm * form,
+		tSSAForm *& new_form, tSSAVariable *& block_var, bool reg_super);
 
 private:
 	//! @brief		(内部関数)トップレベルのSSA形式を作成する
@@ -254,19 +254,19 @@ private:
 	//! @param		need_result		評価時に結果が必要かどうか
 	//! @param		is_expression	式評価モードかどうか
 	//! @return		トップレベルのSSA形式インスタンス
-	tRisseSSAForm * CreateTopLevelSSAForm(risse_size pos, const tRisseString & name,
-		const tRisseBindingInfo * binding,
+	tSSAForm * CreateTopLevelSSAForm(risse_size pos, const tString & name,
+		const tBindingInfo * binding,
 		bool need_result, bool is_expression);
 
 public:
 	//! @brief		関数グループインスタンスを追加する
 	//! @param		function_group		関数グループインスタンス
-	void AddFunctionGroup(tRisseCompilerFunctionGroup * function_group);
+	void AddFunctionGroup(tCompilerFunctionGroup * function_group);
 
 	//! @brief		コードブロックを追加する
 	//! @param		block		コードブロック
 	//! @return		コードブロックのインデックス
-	risse_size AddCodeBlock(tRisseCodeBlock * block);
+	risse_size AddCodeBlock(tCodeBlock * block);
 
 
 public:

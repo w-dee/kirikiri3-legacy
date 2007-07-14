@@ -29,8 +29,8 @@ RISSE_DEFINE_SOURCE_ID(39234,49682,57279,16499,28574,56016,64030,59385);
 
 
 //---------------------------------------------------------------------------
-tRisseIntegerClass::tRisseIntegerClass(tRisseScriptEngine * engine) :
-	tRissePrimitiveClassBase(ss_Integer, engine->NumberClass)
+tIntegerClass::tIntegerClass(tScriptEngine * engine) :
+	tPrimitiveClassBase(ss_Integer, engine->NumberClass)
 {
 	RegisterMembers();
 }
@@ -38,7 +38,7 @@ tRisseIntegerClass::tRisseIntegerClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseIntegerClass::RegisterMembers()
+void tIntegerClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -48,30 +48,30 @@ void tRisseIntegerClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// construct は tRissePrimitiveClass 内ですでに登録されている
+	// construct は tPrimitiveClass 内ですでに登録されている
 
-	RisseBindFunction(this, ss_ovulate, &tRisseIntegerClass::ovulate,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
-	RisseBindFunction(this, ss_initialize,
-		&tRisseIntegerClass::initialize,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
-	RisseBindFunction(this, ss_times, &tRisseIntegerClass::times);
+	BindFunction(this, ss_ovulate, &tIntegerClass::ovulate,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
+	BindFunction(this, ss_initialize,
+		&tIntegerClass::initialize,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
+	BindFunction(this, ss_times, &tIntegerClass::times);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseIntegerClass::ovulate()
+tVariant tIntegerClass::ovulate()
 {
-	return tRisseVariant((risse_int64)0);
+	return tVariant((risse_int64)0);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIntegerClass::initialize(const tRisseNativeCallInfo & info)
+void tIntegerClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドは「呼び出されない」
 
@@ -79,13 +79,13 @@ void tRisseIntegerClass::initialize(const tRisseNativeCallInfo & info)
 	// 注意: いったん ovulate で作成されたオブジェクトの中身
 	//       を変更するため、const_cast を用いる
 	if(info.args.HasArgument(0))
-		*const_cast<tRisseVariant*>(&info.This) = info.args[0].operator risse_int64();
+		*const_cast<tVariant*>(&info.This) = info.args[0].operator risse_int64();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseIntegerClass::times(const tRisseNativeCallInfo & info)
+void tIntegerClass::times(const tNativeCallInfo & info)
 {
 	info.args.ExpectBlockArgumentCount(1);
 

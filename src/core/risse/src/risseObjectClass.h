@@ -21,13 +21,13 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseObjectClass : public tRisseClassBase
+class tObjectClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseObjectClass(tRisseScriptEngine * engine);
+	tObjectClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
@@ -35,27 +35,27 @@ public:
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize();
-	static bool DiscEqual(const tRisseNativeCallInfo & info, const tRisseVariant &rhs); // === 演算子
-	static bool isA(const tRisseVariant & Class,
-				const tRisseNativeCallInfo & info);
-	static void eval(const tRisseString & script,
-				const tRisseNativeCallInfo & info);
-	static tRisseVariant getInstanceMember(
-				const tRisseNativeCallInfo & info,
-				const tRisseString & membername);
+	static bool DiscEqual(const tNativeCallInfo & info, const tVariant &rhs); // === 演算子
+	static bool isA(const tVariant & Class,
+				const tNativeCallInfo & info);
+	static void eval(const tString & script,
+				const tNativeCallInfo & info);
+	static tVariant getInstanceMember(
+				const tNativeCallInfo & info,
+				const tString & membername);
 	static void setInstanceMember(
-				const tRisseNativeCallInfo & info,
-				const tRisseString & membername, const tRisseVariant & value);
-	static tRisseVariant toException(
-				const tRisseNativeCallInfo & info);
-	static void p(const tRisseMethodArgument & args);
+				const tNativeCallInfo & info,
+				const tString & membername, const tVariant & value);
+	static tVariant toException(
+				const tNativeCallInfo & info);
+	static void p(const tMethodArgument & args);
 
 public: // ユーティリティ
 	//! @brief		intf を Object クラスのインスタンスとしてマークする
 	//! @param		intf		マークする対象となるインスタンス
 	//! @note		いまだ Object クラスが初期化されていない時期に作成されたインスタンス
 	//!				に対してオブジェクトクラスとしての情報を付加するために用いる
-	void Bless(tRisseObjectInterface * intf);
+	void Bless(tObjectInterface * intf);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

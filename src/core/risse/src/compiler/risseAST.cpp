@@ -38,12 +38,12 @@ RISSE_DEFINE_SOURCE_ID(29091,1243,20617,17999,61570,21800,19479,2186);
 */
 
 //---------------------------------------------------------------------------
-void tRisseASTNode::Dump(tRisseString & result, risse_int level)
+void tASTNode::Dump(tString & result, risse_int level)
 {
-	result += RisseASTNodeTypeNames[Type];
-	tRisseString comment = GetDumpComment();
+	result += ASTNodeTypeNames[Type];
+	tString comment = GetDumpComment();
 	if(!comment.IsEmpty())
-		result += tRisseString(RISSE_WS(" (%1)"), comment);
+		result += tString(RISSE_WS(" (%1)"), comment);
 #ifdef RISSE_TEXT_OUT_CRLF
 	result += RISSE_WS("\r\n");
 #else
@@ -55,9 +55,9 @@ void tRisseASTNode::Dump(tRisseString & result, risse_int level)
 	risse_size child_count = GetChildCount();
 	for(risse_size i = 0; i < child_count; i++)
 	{
-		result += tRisseString(RISSE_WS(" ")).Times(level) + GetChildNameAt(i);
+		result += tString(RISSE_WS(" ")).Times(level) + GetChildNameAt(i);
 		result += RISSE_WC(':');
-		tRisseASTNode * child = GetChildAt(i);
+		tASTNode * child = GetChildAt(i);
 		if(child)
 			child->Dump(result, level);
 		else
@@ -72,38 +72,38 @@ void tRisseASTNode::Dump(tRisseString & result, risse_int level)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_List::GetChildNameAt(risse_size index) const
+tString tASTNode_List::GetChildNameAt(risse_size index) const
 {
 	if(index < Array.size())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("node")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("node")) + ::Risse::int64_to_str(index, buf);
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_OneExpression::GetChildNameAt(risse_size index) const
+tString tASTNode_OneExpression::GetChildNameAt(risse_size index) const
 {
-	if(index == 0) return RISSE_WS("expression"); else return tRisseString();
+	if(index == 0) return RISSE_WS("expression"); else return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Context::GetDumpComment() const
+tString tASTNode_Context::GetDumpComment() const
 {
-	return RisseASTContextTypeNames[ContextType];
+	return ASTContextTypeNames[ContextType];
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Factor::GetDumpComment() const
+tString tASTNode_Factor::GetDumpComment() const
 {
-	tRisseString ret = RisseASTFactorTypeNames[FactorType];
+	tString ret = ASTFactorTypeNames[FactorType];
 	if(FactorType == aftConstant)
 	{
 		ret += RISSE_WS(" ");
@@ -115,7 +115,7 @@ tRisseString tRisseASTNode_Factor::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Id::GetDumpComment() const
+tString tASTNode_Id::GetDumpComment() const
 {
 	if(IsPrivate)
 		return RISSE_WS("@ ") + Name.AsHumanReadable();
@@ -126,64 +126,64 @@ tRisseString tRisseASTNode_Id::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Trinary::GetDumpComment() const
+tString tASTNode_Trinary::GetDumpComment() const
 {
-	return RisseASTTrinaryTypeNames[TrinaryType];
+	return ASTTrinaryTypeNames[TrinaryType];
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_VarDecl::GetChildNameAt(risse_size index) const
+tString tASTNode_VarDecl::GetChildNameAt(risse_size index) const
 {
 	if(index < inherited::GetChildCount())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("item")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("item")) + ::Risse::int64_to_str(index, buf);
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_VarDeclPair::GetChildNameAt(risse_size index) const
+tString tASTNode_VarDeclPair::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
 	case 0: return RISSE_WS("name");
 	case 1: return RISSE_WS("initializer");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_MemberSel::GetChildNameAt(risse_size index) const
+tString tASTNode_MemberSel::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
 	case 0: return RISSE_WS("object");
 	case 1: return RISSE_WS("membername");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_MemberSel::GetDumpComment() const
+tString tASTNode_MemberSel::GetDumpComment() const
 {
-	tRisseString str = RisseASTMemberAccessTypeNames[AccessType];
-	tRisseString flags = Flags.AsString();
+	tString str = ASTMemberAccessTypeNames[AccessType];
+	tString flags = Flags.AsString();
 	if(!flags.IsEmpty())
 	{
 		str += RISSE_WS(" flags=<");
 		str += flags;
 		str += RISSE_WS(">");
 	}
-	tRisseString attribs = Attribute.AsString();
+	tString attribs = Attribute.AsString();
 	if(!attribs.IsEmpty())
 	{
 		str += RISSE_WS(" attribute=<");
@@ -196,46 +196,46 @@ tRisseString tRisseASTNode_MemberSel::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Unary::GetChildNameAt(risse_size index) const
+tString tASTNode_Unary::GetChildNameAt(risse_size index) const
 {
 	if(index == 0)
 		return RISSE_WS("child");
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Unary::GetDumpComment() const
+tString tASTNode_Unary::GetDumpComment() const
 {
-	return RisseASTUnaryTypeNames[UnaryType];
+	return ASTUnaryTypeNames[UnaryType];
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Binary::GetChildNameAt(risse_size index) const
+tString tASTNode_Binary::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
 	case 0: return RISSE_WS("child0");
 	case 1: return RISSE_WS("child1");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Binary::GetDumpComment() const
+tString tASTNode_Binary::GetDumpComment() const
 {
-	return RisseASTBinaryTypeNames[BinaryType];
+	return ASTBinaryTypeNames[BinaryType];
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Trinary::GetChildNameAt(risse_size index) const
+tString tASTNode_Trinary::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
@@ -243,28 +243,28 @@ tRisseString tRisseASTNode_Trinary::GetChildNameAt(risse_size index) const
 	case 1: return RISSE_WS("child1");
 	case 2: return RISSE_WS("child2");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_InContextOf::GetChildNameAt(risse_size index) const
+tString tASTNode_InContextOf::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
 	case 0: return RISSE_WS("instance");
 	case 1: return RISSE_WS("context");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_InContextOf::GetDumpComment() const
+tString tASTNode_InContextOf::GetDumpComment() const
 {
-	tRisseString ret;
+	tString ret;
 	if(Context == NULL) ret = RISSE_WS("dynamic");
 	return ret;
 }
@@ -272,7 +272,7 @@ tRisseString tRisseASTNode_InContextOf::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_Array::Strip()
+void tASTNode_Array::Strip()
 {
 	while(GetChildCount() > 0 && GetLastChild() == NULL) PopChild();
 }
@@ -280,55 +280,55 @@ void tRisseASTNode_Array::Strip()
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Array::GetChildNameAt(risse_size index) const
+tString tASTNode_Array::GetChildNameAt(risse_size index) const
 {
 	if(index < inherited::GetChildCount())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("item")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("item")) + ::Risse::int64_to_str(index, buf);
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Dict::GetChildNameAt(risse_size index) const
+tString tASTNode_Dict::GetChildNameAt(risse_size index) const
 {
 	if(index < inherited::GetChildCount())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("item")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("item")) + ::Risse::int64_to_str(index, buf);
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_DictPair::GetChildNameAt(risse_size index) const
+tString tASTNode_DictPair::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
 	case 0: return RISSE_WS("name");
 	case 1: return RISSE_WS("value");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_RegExp::GetDumpComment() const
+tString tASTNode_RegExp::GetDumpComment() const
 {
-	return tRisseString(RISSE_WS("pattern=")) + Pattern.AsHumanReadable() +
+	return tString(RISSE_WS("pattern=")) + Pattern.AsHumanReadable() +
 		RISSE_WS(", flags=") + Flags.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_If::GetChildNameAt(risse_size index) const
+tString tASTNode_If::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
@@ -336,36 +336,36 @@ tRisseString tRisseASTNode_If::GetChildNameAt(risse_size index) const
 	case 1: return RISSE_WS("true");
 	case 2: return RISSE_WS("false");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_While::GetChildNameAt(risse_size index) const
+tString tASTNode_While::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
 	case 0: return RISSE_WS("condition");
 	case 1: return RISSE_WS("body");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_While::GetDumpComment() const
+tString tASTNode_While::GetDumpComment() const
 {
 	if(SkipFirstCheck)
 		return RISSE_WS("SkipFirstCheck");
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_For::GetChildNameAt(risse_size index) const
+tString tASTNode_For::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
@@ -374,35 +374,35 @@ tRisseString tRisseASTNode_For::GetChildNameAt(risse_size index) const
 	case 2: return RISSE_WS("iterator");
 	case 3: return RISSE_WS("body");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_ExpressionBlock::GetChildNameAt(risse_size index) const
+tString tASTNode_ExpressionBlock::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
 	case 0: return RISSE_WS("object");
 	case 1: return RISSE_WS("body");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Case::GetDumpComment() const
+tString tASTNode_Case::GetDumpComment() const
 {
 	if(GetExpression() == NULL) return RISSE_WS("default");
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Try::GetChildNameAt(risse_size index) const
+tString tASTNode_Try::GetChildNameAt(risse_size index) const
 {
 	if(index == 0) return RISSE_WS("body");
 	if(index == inherited::GetChildCount() + 1) return RISSE_WS("finally");
@@ -410,59 +410,59 @@ tRisseString tRisseASTNode_Try::GetChildNameAt(risse_size index) const
 	if(index < inherited::GetChildCount())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("catch")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("catch")) + ::Risse::int64_to_str(index, buf);
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Catch::GetChildNameAt(risse_size index) const
+tString tASTNode_Catch::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
 	case 0: return RISSE_WS("condition");
 	case 1: return RISSE_WS("body");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_Catch::GetDumpComment() const
+tString tASTNode_Catch::GetDumpComment() const
 {
-	return tRisseString(RISSE_WS("variable=")) + Name.AsHumanReadable();
+	return tString(RISSE_WS("variable=")) + Name.AsHumanReadable();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncCall::GetChildNameAt(risse_size index) const
+tString tASTNode_FuncCall::GetChildNameAt(risse_size index) const
 {
 	if(index == 0) return RISSE_WS("function");
 	index --;
 	if(index < inherited::GetChildCount())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("argument")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("argument")) + ::Risse::int64_to_str(index, buf);
 	}
 	index -= inherited::GetChildCount();
 	if(index < Blocks.size())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("block")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("block")) + ::Risse::int64_to_str(index, buf);
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncCall::GetDumpComment() const
+tString tASTNode_FuncCall::GetDumpComment() const
 {
-	tRisseString ret;
+	tString ret;
 	if(CreateNew) ret += RISSE_WS("create_new");
 	if(Omit) { if(!ret.IsEmpty()) ret += RISSE_WC(' '); ret += RISSE_WS("omit_arg"); }
 	return ret;
@@ -471,49 +471,49 @@ tRisseString tRisseASTNode_FuncCall::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncCallArg::GetChildNameAt(risse_size index) const
+tString tASTNode_FuncCallArg::GetChildNameAt(risse_size index) const
 {
 	if(index == 0)
 		return RISSE_WS("expression");
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncCallArg::GetDumpComment() const
+tString tASTNode_FuncCallArg::GetDumpComment() const
 {
 	if(Expand)
 		return RISSE_WS("expand");
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncDecl::GetChildNameAt(risse_size index) const
+tString tASTNode_FuncDecl::GetChildNameAt(risse_size index) const
 {
 	if(index == inherited::GetChildCount() + Blocks.size()) return RISSE_WS("body");
 	if(index < inherited::GetChildCount())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("argument")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("argument")) + ::Risse::int64_to_str(index, buf);
 	}
 	index -= inherited::GetChildCount();
 	if(index < Blocks.size())
 	{
 		risse_char buf[40];
-		return tRisseString(RISSE_WS("block")) + Risse_int64_to_str(index, buf);
+		return tString(RISSE_WS("block")) + ::Risse::int64_to_str(index, buf);
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncDecl::GetDumpComment() const
+tString tASTNode_FuncDecl::GetDumpComment() const
 {
-	tRisseString attrib = Attribute.AsString();
+	tString attrib = Attribute.AsString();
 	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
 	if(Name.IsEmpty()) attrib += RISSE_WS("anonymous"); else attrib += Name;
 	if(IsBlock) attrib += RISSE_WS(" block");
@@ -523,19 +523,19 @@ tRisseString tRisseASTNode_FuncDecl::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncDeclArg::GetChildNameAt(risse_size index) const
+tString tASTNode_FuncDeclArg::GetChildNameAt(risse_size index) const
 {
 	if(index == 0)
 		return RISSE_WS("initializer");
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncDeclArg::GetDumpComment() const
+tString tASTNode_FuncDeclArg::GetDumpComment() const
 {
-	tRisseString ret = Name.AsHumanReadable();
+	tString ret = Name.AsHumanReadable();
 	if(Collapse)
 		ret += RISSE_WS(", collapse");
 	return ret;
@@ -544,7 +544,7 @@ tRisseString tRisseASTNode_FuncDeclArg::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_FuncDeclBlock::GetDumpComment() const
+tString tASTNode_FuncDeclBlock::GetDumpComment() const
 {
 	return Name.AsHumanReadable();
 }
@@ -552,23 +552,23 @@ tRisseString tRisseASTNode_FuncDeclBlock::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_PropDecl::GetChildNameAt(risse_size index) const
+tString tASTNode_PropDecl::GetChildNameAt(risse_size index) const
 {
 	switch(index)
 	{
-	case 0: return tRisseString(RISSE_WS("setter(argument=")) +
+	case 0: return tString(RISSE_WS("setter(argument=")) +
 			SetterArgumentName.AsHumanReadable() + RISSE_WS(")");
 	case 1: return RISSE_WS("getter");
 	}
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_PropDecl::GetDumpComment() const
+tString tASTNode_PropDecl::GetDumpComment() const
 {
-	tRisseString attrib = Attribute.AsString();
+	tString attrib = Attribute.AsString();
 	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
 	if(Name.IsEmpty()) return attrib + RISSE_WS("anonymous");
 	return attrib + Name;
@@ -577,22 +577,22 @@ tRisseString tRisseASTNode_PropDecl::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_ClassDecl::GetChildNameAt(risse_size index) const
+tString tASTNode_ClassDecl::GetChildNameAt(risse_size index) const
 {
 	if(index == 0) return RISSE_WS("super");
 	if(index == 1) return RISSE_WS("body");
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
+tString tASTNode_ClassDecl::GetDumpComment() const
 {
-	tRisseString type = IsModule ?
+	tString type = IsModule ?
 					RISSE_WS("module ") :
 					RISSE_WS("class ");
-	tRisseString attrib = Attribute.AsString();
+	tString attrib = Attribute.AsString();
 	if(!attrib.IsEmpty()) attrib += RISSE_WC(' ');
 	if(Name.IsEmpty()) return type + attrib + RISSE_WS("anonymous");
 	return type + attrib + Name;
@@ -630,38 +630,38 @@ tRisseString tRisseASTNode_ClassDecl::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseASTNode::GetAccessTargetId()
+tString tASTNode::GetAccessTargetId()
 {
-	if(!this) return tRisseString();
-	if(GetType() == antId) return reinterpret_cast<tRisseASTNode_Id*>(this)->GetName();
+	if(!this) return tString();
+	if(GetType() == antId) return reinterpret_cast<tASTNode_Id*>(this)->GetName();
 
 	// obj.mem.mem.mem ... 等の . 演算子 / :: 演算子をどんどんと右にたどっていき、
 	// id を見つける。見つかったらそれを返す。
-	tRisseASTNode * target = this;
+	tASTNode * target = this;
 	while(target->GetType() == antMemberSel)
 	{
-		tRisseASTNode * membername = reinterpret_cast<tRisseASTNode_MemberSel*>(target)->GetMemberName();
-		if(membername->GetType() == antId) return reinterpret_cast<tRisseASTNode_Id*>(membername)->GetName();
+		tASTNode * membername = reinterpret_cast<tASTNode_MemberSel*>(target)->GetMemberName();
+		if(membername->GetType() == antId) return reinterpret_cast<tASTNode_Id*>(membername)->GetName();
 		target = membername;
 	}
 
 	// 特定できない
-	return tRisseString();
+	return tString();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseASTNode::SearchEndPosition() const
+risse_size tASTNode::SearchEndPosition() const
 {
 	if(Type == antContext)
-		return ((const tRisseASTNode_Context*)this)->GetEndPosition();
+		return ((const tASTNode_Context*)this)->GetEndPosition();
 
 	risse_size pos = Position;
 	risse_size child_count = GetChildCount();
 	for(risse_size i = 0; i < child_count; i++)
 	{
-		tRisseASTNode * child = GetChildAt(i);
+		tASTNode * child = GetChildAt(i);
 		if(child)
 		{
 			risse_size child_end_pos = child->SearchEndPosition();
@@ -678,8 +678,8 @@ risse_size tRisseASTNode::SearchEndPosition() const
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Context::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// actTopLevel がトップレベルの場合は、SSA 生成においては、おおかたこのノードが
 	// 一番最初に呼ばれることになる。
@@ -715,13 +715,13 @@ tRisseSSAVariable * tRisseASTNode_Context::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_ExprStmt::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_ExprStmt::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// このノードは式を保持しているだけなので子ノードに処理をさせるだけ
 	// ただし、node は NULL の可能性がある(空文の場合)
-	tRisseASTNode * node = GetChildAt(0);
-	tRisseSSAVariable * res = NULL;
+	tASTNode * node = GetChildAt(0);
+	tSSAVariable * res = NULL;
 	if(node) res = node->GenerateReadSSA(form);
 
 	// このノードは子の答えを返す
@@ -732,8 +732,8 @@ tRisseSSAVariable * tRisseASTNode_ExprStmt::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Factor::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// "項"
 	switch(FactorType)
@@ -753,15 +753,15 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 		{
 			// 文を作成して戻る
 			// ローカル変数から "super" を探す
-			tRisseSSAVariable * ret_var =
+			tSSAVariable * ret_var =
 				form->GetLocalNamespace()->Read(form, GetPosition(), RISSE_WS("super"));
 			if(!ret_var)
 			{
 				// "super" がみつからない、すなわちそこには super キーワードをおけない
-				tRisseCompileExceptionClass::Throw(
+				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(
+					tString(
 					RISSE_WS_TR("cannot use 'super' keyword here")),
 						form->GetScriptBlockInstance(), GetPosition());
 			}
@@ -771,18 +771,18 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 	case aftGlobal:		// "global"
 		{
 			// 文を作成して戻る
-			tRisseSSAVariable * ret_var =
+			tSSAVariable * ret_var =
 				form->AddVariableWithStatement(GetPosition(), ocAssignGlobal);
-			ret_var->SetValueType(tRisseVariant::vtObject); // 結果は常に vtObject
+			ret_var->SetValueType(tVariant::vtObject); // 結果は常に vtObject
 			return ret_var;
 		}
 
 	case aftBinding:		// "(@)"
 		{
 			// 文を作成して戻る
-			tRisseSSAVariable * ret_var =
+			tSSAVariable * ret_var =
 				form->AddVariableWithStatement(GetPosition(), ocAssignNewBinding);
-			ret_var->SetValueType(tRisseVariant::vtObject); // 結果は常に vtObject
+			ret_var->SetValueType(tVariant::vtObject); // 結果は常に vtObject
 
 			// bindingオブジェクトに変数とそのレジスタ番号の対応を追加する
 			form->AddBindingMap(GetPosition(), ret_var);
@@ -791,19 +791,19 @@ tRisseSSAVariable * tRisseASTNode_Factor::DoReadSSA(
 		}
 	}
 	// ありえん
-	RISSE_ASSERT(!"at last at tRisseASTNode_Factor::DoReadSSA");
+	RISSE_ASSERT(!"at last at tASTNode_Factor::DoReadSSA");
 	return NULL;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_VarDecl::SetAttribute(tRisseDeclAttribute attrib)
+void tASTNode_VarDecl::SetAttribute(tDeclAttribute attrib)
 {
 	// 子に再帰する
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
-		tRisseASTNode_VarDeclPair * pair = reinterpret_cast<tRisseASTNode_VarDeclPair*>(GetChildAt(i));
+		tASTNode_VarDeclPair * pair = reinterpret_cast<tASTNode_VarDeclPair*>(GetChildAt(i));
 		RISSE_ASSERT(pair->GetType() == antVarDeclPair);
 		pair->SetAttribute(attrib);
 	}
@@ -812,12 +812,12 @@ void tRisseASTNode_VarDecl::SetAttribute(tRisseDeclAttribute attrib)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_VarDecl::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// 変数宣言
 	// 子に再帰する
-	tRisseSSAVariable * value;
+	tSSAVariable * value;
 	for(risse_size i = 0; i < GetChildCount(); i++)
 		value = GetChildAt(i)->GenerateReadSSA(form);
 
@@ -829,9 +829,9 @@ tRisseSSAVariable * tRisseASTNode_VarDecl::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseASTNode_VarDeclPair::tRisseASTNode_VarDeclPair(risse_size position,
-	tRisseASTNode * name, tRisseASTNode * initializer) :
-	tRisseASTNode(position, antVarDeclPair),
+tASTNode_VarDeclPair::tASTNode_VarDeclPair(risse_size position,
+	tASTNode * name, tASTNode * initializer) :
+	tASTNode(position, antVarDeclPair),
 		Name(name), Initializer(initializer)
 {
 	if(Name) Name->SetParent(this);
@@ -840,37 +840,37 @@ tRisseASTNode_VarDeclPair::tRisseASTNode_VarDeclPair(risse_size position,
 	if(Name->GetType() == antMemberSel)
 	{
 		// Name がメンバ選択演算子だった場合
-		tRisseASTNode_MemberSel * memsel =
-			reinterpret_cast<tRisseASTNode_MemberSel*>(Name);
+		tASTNode_MemberSel * memsel =
+			reinterpret_cast<tASTNode_MemberSel*>(Name);
 		// ofMemberEnsure を指定する
-		memsel->SetFlags(memsel->GetFlags() | tRisseOperateFlags::ofMemberEnsure);
+		memsel->SetFlags(memsel->GetFlags() | tOperateFlags::ofMemberEnsure);
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_VarDeclPair::SetAttribute(tRisseDeclAttribute attrib)
+void tASTNode_VarDeclPair::SetAttribute(tDeclAttribute attrib)
 {
 	Attribute = attrib;
 	if(Name->GetType() == antMemberSel)
 	{
 		// Name がメンバ選択演算子だった場合
-		reinterpret_cast<tRisseASTNode_MemberSel*>(Name)->SetAttribute(attrib);
+		reinterpret_cast<tASTNode_MemberSel*>(Name)->SetAttribute(attrib);
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_VarDeclPair::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// 変数宣言の準備
 	PrepareVarDecl(form, Name);
 
 	// 初期化値の準備
-	tRisseSSAVariable * init;
+	tSSAVariable * init;
 	if(Initializer)
 	{
 		// 初期化値がある
@@ -879,7 +879,7 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 	else
 	{
 		// void の定数値の作成
-		init = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+		init = form->AddConstantValueStatement(GetPosition(), tVariant());
 	}
 
 	// 変数宣言のSSA表現を生成する
@@ -892,14 +892,14 @@ tRisseSSAVariable * tRisseASTNode_VarDeclPair::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_VarDeclPair::PrepareVarDecl(tRisseSSAForm * form, const tRisseASTNode * name)
+void tASTNode_VarDeclPair::PrepareVarDecl(tSSAForm * form, const tASTNode * name)
 {
-	if(name->GetType() == antId && !reinterpret_cast<const tRisseASTNode_Id*>(name)->GetIsPrivate())
+	if(name->GetType() == antId && !reinterpret_cast<const tASTNode_Id*>(name)->GetIsPrivate())
 	{
 		// name ノードに id が直接来ている場合、かつプライベート (@付き) 変数ではない場合
 
 		// グローバル変数として作成すべきかどうかをチェック
-		tRisseString str_name = reinterpret_cast<const tRisseASTNode_Id*>(name)->GetName();
+		tString str_name = reinterpret_cast<const tASTNode_Id*>(name)->GetName();
 		if(form->GetLocalNamespace()->GetHasScope())
 		{
 			// ローカル変数として作成する
@@ -913,14 +913,14 @@ void tRisseASTNode_VarDeclPair::PrepareVarDecl(tRisseSSAForm * form, const tRiss
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
+void tASTNode_VarDeclPair::GenerateVarDecl(tSSAForm * form,
 	risse_size position,
-	const tRisseASTNode * name, tRisseSSAVariable * init, tRisseDeclAttribute attrib)
+	const tASTNode * name, tSSAVariable * init, tDeclAttribute attrib)
 {
-	if(name->GetType() == antId && !reinterpret_cast<const tRisseASTNode_Id*>(name)->GetIsPrivate())
+	if(name->GetType() == antId && !reinterpret_cast<const tASTNode_Id*>(name)->GetIsPrivate())
 	{
 		// name ノードに id が直接来ている場合、かつプライベート (@付き) 変数ではない場合
-		tRisseString str_name = reinterpret_cast<const tRisseASTNode_Id*>(name)->GetName();
+		tString str_name = reinterpret_cast<const tASTNode_Id*>(name)->GetName();
 
 		// グローバル変数として作成すべきかどうかをチェック
 		if(form->GetLocalNamespace()->GetHasScope())
@@ -934,14 +934,14 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 		{
 			// グローバル変数(あるいはクラス変数など)として作成する
 			// this 上に変数を作成するノードを一時的に作成
-			tRisseASTNode_MemberSel * write_node =
-				new tRisseASTNode_MemberSel(position,
-				new tRisseASTNode_Factor(position, aftThis),
-				new tRisseASTNode_Factor(position, aftConstant, str_name), matDirectThis,
+			tASTNode_MemberSel * write_node =
+				new tASTNode_MemberSel(position,
+				new tASTNode_Factor(position, aftThis),
+				new tASTNode_Factor(position, aftConstant, str_name), matDirectThis,
 
-					tRisseOperateFlags(
-						tRisseDeclAttribute(tRisseDeclAttribute::pcField)|
-						tRisseOperateFlags::ofMemberEnsure)
+					tOperateFlags(
+						tDeclAttribute(tDeclAttribute::pcField)|
+						tOperateFlags::ofMemberEnsure)
 						// 普通の変数アクセスかつメンバの作成
 					);
 			write_node->SetAttribute(attrib);
@@ -959,8 +959,8 @@ void tRisseASTNode_VarDeclPair::GenerateVarDecl(tRisseSSAForm * form,
 
 
 //---------------------------------------------------------------------------
-void * tRisseASTNode_MemberSel::PrepareSSA(
-		tRisseSSAForm *form, tPrepareMode mode) const
+void * tASTNode_MemberSel::PrepareSSA(
+		tSSAForm *form, tPrepareMode mode) const
 {
 	tPrepareSSA * pws = new tPrepareSSA;
 	// オブジェクトの式の値を得る
@@ -974,26 +974,26 @@ void * tRisseASTNode_MemberSel::PrepareSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_MemberSel::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_MemberSel::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// メンバ選択演算子
 	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
 	// 文の作成
-	tRisseSSAVariable * ret_var = NULL;
-	tRisseOpCode code = ocNoOperation;
-	tRisseOperateFlags new_flags = Flags;
+	tSSAVariable * ret_var = NULL;
+	tOpCode code = ocNoOperation;
+	tOperateFlags new_flags = Flags;
 	switch(AccessType)
 	{
 	case matDirect:		code = ocDGet;		break;
 	case matDirectThis:	code = ocDGet;
-			new_flags = new_flags | tRisseOperateFlags::ofUseClassMembersRule;	break;
+			new_flags = new_flags | tOperateFlags::ofUseClassMembersRule;	break;
 	case matIndirect:	code = ocIGet;		break;
 	}
 	RISSE_ASSERT(code != ocNoOperation);
 
-	tRisseSSAStatement * stmt =
+	tSSAStatement * stmt =
 		form->AddStatement(GetPosition(), code, &ret_var,
 							pws->ObjectVar, pws->MemberNameVar);
 	stmt->SetAccessFlags(new_flags);
@@ -1005,27 +1005,27 @@ tRisseSSAVariable * tRisseASTNode_MemberSel::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-bool tRisseASTNode_MemberSel::DoWriteSSA(
-		tRisseSSAForm *form, void * param, tRisseSSAVariable * value) const
+bool tASTNode_MemberSel::DoWriteSSA(
+		tSSAForm *form, void * param, tSSAVariable * value) const
 {
 	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
 
 	// 文の作成
-	tRisseOperateFlags new_flags = Flags;
-	tRisseOperateFlags attrib_flags;
-	tRisseOpCode code = ocNoOperation;
+	tOperateFlags new_flags = Flags;
+	tOperateFlags attrib_flags;
+	tOpCode code = ocNoOperation;
 	switch(AccessType)
 	{
 	case matDirect:		code = ocDSet;		break;
 	case matDirectThis:	code = ocDSet;
-			new_flags = new_flags | tRisseOperateFlags::ofUseClassMembersRule;
-			attrib_flags = attrib_flags | tRisseOperateFlags::ofUseClassMembersRule;
+			new_flags = new_flags | tOperateFlags::ofUseClassMembersRule;
+			attrib_flags = attrib_flags | tOperateFlags::ofUseClassMembersRule;
 			break;
 	case matIndirect:	code = ocISet;		break;
 	}
 	RISSE_ASSERT(code != ocNoOperation);
 
-	tRisseSSAStatement * stmt =
+	tSSAStatement * stmt =
 		form->AddStatement(GetPosition(), code, NULL,
 							pws->ObjectVar, pws->MemberNameVar, value);
 	stmt->SetAccessFlags(new_flags);
@@ -1034,7 +1034,7 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 	{
 		RISSE_ASSERT(AccessType == matDirect || AccessType == matDirectThis);
 		// 属性を持っている場合はそれを設定する文を作成する
-		tRisseSSAStatement * stmt =
+		tSSAStatement * stmt =
 			form->AddStatement(GetPosition(), ocDSetAttrib, NULL,
 							pws->ObjectVar, pws->MemberNameVar);
 		stmt->SetAccessFlags(attrib_flags| Attribute);
@@ -1046,8 +1046,8 @@ bool tRisseASTNode_MemberSel::DoWriteSSA(
 
 
 //---------------------------------------------------------------------------
-void * tRisseASTNode_Id::PrepareSSA(
-			tRisseSSAForm *form, tPrepareMode mode) const
+void * tASTNode_Id::PrepareSSA(
+			tSSAForm *form, tPrepareMode mode) const
 {
 	tPrepareSSA * pws = new tPrepareSSA;
 
@@ -1084,8 +1084,8 @@ void * tRisseASTNode_Id::PrepareSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Id::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Id::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// PrepareSSA と このメソッドの間でローカル変数の状態が変わると意図した
 	// 動作をしない可能性があるので注意
@@ -1111,9 +1111,9 @@ tRisseSSAVariable * tRisseASTNode_Id::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-bool tRisseASTNode_Id::DoWriteSSA(
-		tRisseSSAForm *form, void * param,
-		tRisseSSAVariable * value) const
+bool tASTNode_Id::DoWriteSSA(
+		tSSAForm *form, void * param,
+		tSSAVariable * value) const
 {
 	// PrepareSSA と このメソッドの間でローカル変数の状態が変わると意図した
 	// 動作をしない可能性があるので注意
@@ -1122,7 +1122,7 @@ bool tRisseASTNode_Id::DoWriteSSA(
 	if(pws->MemberSel)
 	{
 		// ローカル変数には見つからなかった
-		// tRisseASTNode_MemberSel::DoWriteSSA を呼ぶ
+		// tASTNode_MemberSel::DoWriteSSA を呼ぶ
 		pws->MemberSel->DoWriteSSA(form, pws->MemberSelParam, value);
 		return true;
 	}
@@ -1138,7 +1138,7 @@ bool tRisseASTNode_Id::DoWriteSSA(
 
 
 //---------------------------------------------------------------------------
-const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(const tRisseString & prefix, bool write) const
+const tASTNode_MemberSel * tASTNode_Id::CreatePrivateAccessNodeOnThis(const tString & prefix, bool write) const
 {
 	// private (@つき) 変数の場合は、クラス名 + '_' + 変数名を this 上において
 	// アクセスこととなる。
@@ -1146,31 +1146,31 @@ const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreatePrivateAccessNodeOnThis(
 	// 場合は GetClassName は空文字列が帰るため、その場合は単に '_' がプリフィクスと
 	// なる
 	return
-		new tRisseASTNode_MemberSel(GetPosition(),
-		new tRisseASTNode_Factor(GetPosition(), aftThis),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirectThis,
+		new tASTNode_MemberSel(GetPosition(),
+		new tASTNode_Factor(GetPosition(), aftThis),
+		new tASTNode_Factor(GetPosition(), aftConstant, prefix + Name), matDirectThis,
 			(
-			write ?	tRisseOperateFlags(tRisseOperateFlags::ofMemberEnsure) :
-					tRisseOperateFlags() )
+			write ?	tOperateFlags(tOperateFlags::ofMemberEnsure) :
+					tOperateFlags() )
 					);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-const tRisseASTNode_MemberSel * tRisseASTNode_Id::CreateAccessNodeOnThisProxy() const
+const tASTNode_MemberSel * tASTNode_Id::CreateAccessNodeOnThisProxy() const
 {
 	return
-		new tRisseASTNode_MemberSel(GetPosition(),
-		new tRisseASTNode_Factor(GetPosition(), aftThisProxy),
-		new tRisseASTNode_Factor(GetPosition(), aftConstant, Name), matDirectThis);
+		new tASTNode_MemberSel(GetPosition(),
+		new tASTNode_Factor(GetPosition(), aftThisProxy),
+		new tASTNode_Factor(GetPosition(), aftConstant, Name), matDirectThis);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Unary::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 
 	// 単項演算子
@@ -1182,11 +1182,11 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 	case autMinus:		// "-"
 		{
 			// 子の計算結果を得る
-			tRisseSSAVariable * child_var = Child->GenerateReadSSA(form);
+			tSSAVariable * child_var = Child->GenerateReadSSA(form);
 			RISSE_ASSERT(child_var != NULL);
 
 			// オペコードを決定
-			tRisseOpCode oc;
+			tOpCode oc;
 			switch(UnaryType)
 			{
 			case autLogNot:		oc = ocLogNot;	break;
@@ -1196,10 +1196,10 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 			default: oc = ocNoOperation;
 			}
 			// 文の作成
-			tRisseSSAVariable * ret_var = NULL;
+			tSSAVariable * ret_var = NULL;
 			form->AddStatement(GetPosition(), oc, &ret_var, child_var);
 
-		//	ret_var->SetValueType(tRisseVariant::vtBoolean); // 結果は常に vtBoolean
+		//	ret_var->SetValueType(tVariant::vtBoolean); // 結果は常に vtBoolean
 			//////////////////////////////////////////////////////////////////////////////////////////
 			// 演算子のオーバーロードによっては ! 演算子は bool を返さない可能性がある
 			// この仕様は後に変更の可能性アリ (! 演算子をオーバーロードできないようにする可能性がある)
@@ -1218,23 +1218,23 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 	case autOctet:		//!< "octet" cast to octet
 		{
 			// 子の計算結果を得る
-			tRisseSSAVariable * child_var = Child->GenerateReadSSA(form);
+			tSSAVariable * child_var = Child->GenerateReadSSA(form);
 			RISSE_ASSERT(child_var != NULL);
 
 			// オペコードを決定
-			tRisseOpCode oc;
-			tRisseVariant::tType rettype = tRisseVariant::vtVoid;
+			tOpCode oc;
+			tVariant::tType rettype = tVariant::vtVoid;
 			switch(UnaryType)
 			{
-			case autString:		oc = ocString;	rettype = tRisseVariant::vtString;		break;
-			case autBoolean:	oc = ocBoolean;	rettype = tRisseVariant::vtBoolean;		break;
-			case autReal:		oc = ocReal;	rettype = tRisseVariant::vtReal;		break;
-			case autInteger:	oc = ocInteger;	rettype = tRisseVariant::vtInteger;		break;
-			case autOctet:		oc = ocOctet;	rettype = tRisseVariant::vtOctet;		break;
+			case autString:		oc = ocString;	rettype = tVariant::vtString;		break;
+			case autBoolean:	oc = ocBoolean;	rettype = tVariant::vtBoolean;		break;
+			case autReal:		oc = ocReal;	rettype = tVariant::vtReal;		break;
+			case autInteger:	oc = ocInteger;	rettype = tVariant::vtInteger;		break;
+			case autOctet:		oc = ocOctet;	rettype = tVariant::vtOctet;		break;
 			default: oc = ocNoOperation;
 			}
 			// 文の作成
-			tRisseSSAVariable * ret_var = NULL;
+			tSSAVariable * ret_var = NULL;
 			form->AddStatement(GetPosition(), oc, &ret_var, child_var);
 
 			ret_var->SetValueType(rettype); // 結果は常にキャストした後の型になる
@@ -1250,7 +1250,7 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 		{
 			// オペレーションコードと前置、後置を得る
 			bool is_prepositioned; // 前置？
-			tRisseOpCode code; // オペレーションコード
+			tOpCode code; // オペレーションコード
 			switch(UnaryType)
 			{
 			case autPreDec:
@@ -1276,27 +1276,27 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 			// 減算するものとして扱われる
 			// (実際にそれを inc や dec の VM 命令にするのは CG や optimizer の仕事)
 			// 定数 1 を生成
-			tRisseSSAVariable * one_var =
+			tSSAVariable * one_var =
 				form->AddConstantValueStatement(
-						GetPosition(), tRisseVariant((risse_int64)1));
+						GetPosition(), tVariant((risse_int64)1));
 
 			// 子ノードを準備
 			void * child_param = Child->PrepareSSA(form, pmReadWrite);
 
 			// 子ノードの値を取得
-			tRisseSSAVariable * child_var = Child->DoReadSSA(form, child_param);
+			tSSAVariable * child_var = Child->DoReadSSA(form, child_param);
 
 			// 演算を行う文を生成
-			tRisseSSAVariable * processed_var = NULL;
+			tSSAVariable * processed_var = NULL;
 			form->AddStatement(GetPosition(), code, &processed_var, child_var, one_var);
 
 			// その結果を識別子に書き込む文を生成
 			if(!Child->DoWriteSSA(form, child_param, processed_var))
 			{
-				tRisseCompileExceptionClass::Throw(
+				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(
+					tString(
 					RISSE_WS_TR("writable expression expected as an increment/decrement operand")),
 						form->GetScriptBlockInstance(), GetPosition());
 			}
@@ -1309,15 +1309,15 @@ tRisseSSAVariable * tRisseASTNode_Unary::DoReadSSA(
 		;
 	}
 	// ありえない
-	RISSE_ASSERT(!"at last at tRisseASTNode_Unary::DoReadSSA");
+	RISSE_ASSERT(!"at last at tASTNode_Unary::DoReadSSA");
 	return NULL;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Binary::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// 演算子のタイプに従って分岐
 	switch(BinaryType)
@@ -1326,15 +1326,15 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 		{
 			// 単純代入
 			// 右辺の値を得る
-			tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
+			tSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
 
 			// 左辺に書き込む
 			if(!Child1->GenerateWriteSSA(form, rhs_var))
 			{
-				tRisseCompileExceptionClass::Throw(
+				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(RISSE_WS_TR("writable expression expected at left side of '='")),
+					tString(RISSE_WS_TR("writable expression expected at left side of '='")),
 						form->GetScriptBlockInstance(), GetPosition());
 			}
 
@@ -1358,7 +1358,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 		{
 			// 複合代入演算子
 			// オペレーションコードを得る
-			tRisseOpCode code; // オペレーションコード
+			tOpCode code; // オペレーションコード
 			switch(BinaryType)
 			{
 			case abtBitAndAssign:		code = ocBitAnd;		break; // &=
@@ -1384,25 +1384,25 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 
 
 			// 右辺の値を得る
-			tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
+			tSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
 
 			// 左辺を準備
 			void * lhs_param = Child1->PrepareSSA(form, pmReadWrite);
 
 			// 左辺の値を取得
-			tRisseSSAVariable * lhs_var = Child1->DoReadSSA(form, lhs_param);
+			tSSAVariable * lhs_var = Child1->DoReadSSA(form, lhs_param);
 
 			// 演算を行う文を生成
-			tRisseSSAVariable * ret_var = NULL;
+			tSSAVariable * ret_var = NULL;
 			form->AddStatement(GetPosition(), code, &ret_var, lhs_var, rhs_var);
 
 			// その結果を識別子に書き込む文を生成
 			if(!Child1->DoWriteSSA(form, lhs_param, ret_var))
 			{
-				tRisseCompileExceptionClass::Throw(
+				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(
+					tString(
 	RISSE_WS_TR("writable expression expected at left side of compound assignment operator")),
 						form->GetScriptBlockInstance(), GetPosition());
 
@@ -1425,18 +1425,18 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			void * rhs_param = Child2->PrepareSSA(form, pmReadWrite);
 
 			// 左辺の値を取得
-			tRisseSSAVariable * lhs_var = Child1->DoReadSSA(form, lhs_param);
+			tSSAVariable * lhs_var = Child1->DoReadSSA(form, lhs_param);
 
 			// 右辺の値を取得
-			tRisseSSAVariable * rhs_var = Child2->DoReadSSA(form, rhs_param);
+			tSSAVariable * rhs_var = Child2->DoReadSSA(form, rhs_param);
 
 			// 右辺の値を左辺に代入
 			if(!Child1->DoWriteSSA(form, lhs_param, rhs_var))
 			{
-				tRisseCompileExceptionClass::Throw(
+				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(
+					tString(
 					RISSE_WS_TR("writable expression expected at left side of '<->'")),
 						form->GetScriptBlockInstance(), GetPosition());
 			}
@@ -1444,10 +1444,10 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			// 左辺の値を右辺に代入
 			if(!Child2->DoWriteSSA(form, rhs_param, lhs_var))
 			{
-				tRisseCompileExceptionClass::Throw(
+				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(
+					tString(
 					RISSE_WS_TR("writable expression expected at right side of '<->'")),
 						form->GetScriptBlockInstance(), GetPosition());
 			}
@@ -1492,7 +1492,7 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			// 普通の２項演算子
 
 			// オペレーションコードを得る
-			tRisseOpCode code; // オペレーションコード
+			tOpCode code; // オペレーションコード
 			switch(BinaryType)
 			{
 			case abtBitOr:				code = ocBitOr;				break; // |
@@ -1524,12 +1524,12 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 			}
 
 			// 左辺の値を得る
-			tRisseSSAVariable * lhs_var = Child1->GenerateReadSSA(form);
+			tSSAVariable * lhs_var = Child1->GenerateReadSSA(form);
 			// 右辺の値を得る
-			tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
+			tSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
 
 			// 演算を行う文を生成
-			tRisseSSAVariable * ret_var = NULL;
+			tSSAVariable * ret_var = NULL;
 			form->AddStatement(GetPosition(), code, &ret_var, lhs_var, rhs_var);
 
 			// 戻る
@@ -1539,60 +1539,60 @@ tRisseSSAVariable * tRisseASTNode_Binary::DoReadSSA(
 	default:
 		return NULL;
 	}
-	RISSE_ASSERT(!"at last at tRisseASTNode_Binary::DoReadSSA");
+	RISSE_ASSERT(!"at last at tASTNode_Binary::DoReadSSA");
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Binary::GenerateLogicalAndOr(tRisseSSAForm *form) const
+tSSAVariable * tASTNode_Binary::GenerateLogicalAndOr(tSSAForm *form) const
 {
 	// && or || ?
 	RISSE_ASSERT(BinaryType == abtLogAnd || BinaryType == abtLogOr);
 	bool is_and = BinaryType == abtLogAnd;
 
 	// 左辺の値を得る
-	tRisseSSAVariable * lhs_var = Child1->GenerateReadSSA(form);
+	tSSAVariable * lhs_var = Child1->GenerateReadSSA(form);
 
 	// 分岐文を作成
-	tRisseSSAStatement * lhs_branch_stmt =
+	tSSAStatement * lhs_branch_stmt =
 		form->AddStatement(GetPosition(), ocBranch, NULL, lhs_var);
 
 	// ショートカットしないとき用の新しい基本ブロックを作成
 	// && の場合は 真の時にここに来て、右辺の評価を続行する
 	// || の場合は 偽の時にここにきて、右辺の評価を続行する
-	tRisseSSABlock * non_shortcut_block = form->CreateNewBlock(RISSE_WS("log_nonshortcut"));
+	tSSABlock * non_shortcut_block = form->CreateNewBlock(RISSE_WS("log_nonshortcut"));
 
 	// 右辺の値を得る
-	tRisseSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
+	tSSAVariable * rhs_var = Child2->GenerateReadSSA(form);
 
 	// 分岐文を作成
-	tRisseSSAStatement * rhs_branch_stmt =
+	tSSAStatement * rhs_branch_stmt =
 		form->AddStatement(GetPosition(), ocBranch, NULL, rhs_var);
 
 	// 結果が真の時にくる基本ブロックを作成
-	tRisseSSABlock * true_block = form->CreateNewBlock(RISSE_WS("log_true"));
+	tSSABlock * true_block = form->CreateNewBlock(RISSE_WS("log_true"));
 
 	// true の値を作成
-	tRisseSSAVariable * true_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant(true));
+	tSSAVariable * true_var = form->AddConstantValueStatement(GetPosition(), tVariant(true));
 
 	// ジャンプ文を作成
-	tRisseSSAStatement * true_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+	tSSAStatement * true_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 結果が偽の時にくる基本ブロックを作成
-	tRisseSSABlock * false_block = form->CreateNewBlock(RISSE_WS("log_false"));
+	tSSABlock * false_block = form->CreateNewBlock(RISSE_WS("log_false"));
 
 	// true の値を作成
-	tRisseSSAVariable * false_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant(false));
+	tSSAVariable * false_var = form->AddConstantValueStatement(GetPosition(), tVariant(false));
 
 	// ジャンプ文を作成
-	tRisseSSAStatement * false_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+	tSSAStatement * false_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 文を抜けるための基本ブロックを作成
-	tRisseSSABlock * exit_block = form->CreateNewBlock(RISSE_WS("log_exit"));
+	tSSABlock * exit_block = form->CreateNewBlock(RISSE_WS("log_exit"));
 
 	// 各ブロックの配線と、答えを返すための φ関数を作成する
-	tRisseSSAVariable * ret_var = NULL;
+	tSSAVariable * ret_var = NULL;
 	if(is_and)
 	{
 		// &&
@@ -1619,28 +1619,28 @@ tRisseSSAVariable * tRisseASTNode_Binary::GenerateLogicalAndOr(tRisseSSAForm *fo
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Trinary::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Trinary::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	RISSE_ASSERT(TrinaryType == attCondition);
-	return tRisseASTNode_If::InternalDoReadSSA(form, GetPosition(),
+	return tASTNode_If::InternalDoReadSSA(form, GetPosition(),
 		RISSE_WS("cond"), Child1, Child2, Child3, true);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_InContextOf::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_InContextOf::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 
 	// 左辺の値を得る
-	tRisseSSAVariable * lhs_var = Instance->GenerateReadSSA(form);
+	tSSAVariable * lhs_var = Instance->GenerateReadSSA(form);
 	// 右辺の値を得る
-	tRisseSSAVariable * rhs_var = Context ?  Context->GenerateReadSSA(form) : NULL;
+	tSSAVariable * rhs_var = Context ?  Context->GenerateReadSSA(form) : NULL;
 
 	// 演算を行う文を生成
-	tRisseSSAVariable * ret_var = NULL;
+	tSSAVariable * ret_var = NULL;
 	form->AddStatement(GetPosition(), ocInContextOf, &ret_var, lhs_var, rhs_var);
 		// Context が NULL の場合は rhs_var も NULL になるので注意
 
@@ -1651,7 +1651,7 @@ tRisseSSAVariable * tRisseASTNode_InContextOf::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-void * tRisseASTNode_Array::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const
+void * tASTNode_Array::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 {
 	// この数値を超える量の インデックス用数値定数はここでは作成しない
 	// (大量のインデックス用定数が変数領域を埋め尽くすのを避けるため)
@@ -1665,7 +1665,7 @@ void * tRisseASTNode_Array::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) c
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
 		// 各要素の準備
-		tRisseASTNode * child = GetChildAt(i);
+		tASTNode * child = GetChildAt(i);
 		if(child)
 			data->Elements.push_back(child->PrepareSSA(form, mode));
 		else
@@ -1681,7 +1681,7 @@ void * tRisseASTNode_Array::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) c
 		{
 			if(i < max_prepare_index)
 			{
-				tRisseSSAVariable * index_var =
+				tSSAVariable * index_var =
 					form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
 
 				data->Indices.push_back(index_var);
@@ -1695,22 +1695,22 @@ void * tRisseASTNode_Array::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) c
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Array::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Array::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// インライン配列からの読み出し (配列オブジェクトを作成し、初期化して返す)
 	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
 
 	// 配列オブジェクトを作成
-	tRisseSSAVariable * array_var = NULL;
+	tSSAVariable * array_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewArray, &array_var);
-	array_var->SetValueType(tRisseVariant::vtObject); // 結果は常に object
+	array_var->SetValueType(tVariant::vtObject); // 結果は常に object
 
 #if 0
 XXXX: Array は内部的に deque を使っているので配列の予約はできない(必要ない)
 	// 配列の reserve メソッドを呼び出し、配列数を予約する
 	if(GetChildCount() != 0)
 	{
-		tRisseSSAVariable * element_count_var =
+		tSSAVariable * element_count_var =
 			form->AddConstantValueStatement(GetPosition(), (risse_int64)GetChildCount());
 		array_var->GenerateFuncCall(GetPosition(), RISSE_WS("reserve"), element_count_var);
 	}
@@ -1721,16 +1721,16 @@ XXXX: Array は内部的に deque を使っているので配列の予約はで�
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
 		// 内容
-		tRisseSSAVariable * element_var;
-		tRisseASTNode * child = GetChildAt(i);
+		tSSAVariable * element_var;
+		tASTNode * child = GetChildAt(i);
 		if(child)
 			element_var = child->DoReadSSA(form, data->Elements[i]);
 		else
 			element_var =
-				form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+				form->AddConstantValueStatement(GetPosition(), tVariant());
 
 		// インデックス用数値定数
-		tRisseSSAVariable * index_var;
+		tSSAVariable * index_var;
 		if(i < data->Indices.size())
 			index_var = data->Indices[i]; // あらかじめインデックス用定数が用意されている
 		else
@@ -1749,8 +1749,8 @@ XXXX: Array は内部的に deque を使っているので配列の予約はで�
 
 
 //---------------------------------------------------------------------------
-bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
-		tRisseSSAVariable * value) const
+bool tASTNode_Array::DoWriteSSA(tSSAForm *form, void * param,
+		tSSAVariable * value) const
 {
 	// インライン配列への書き込み
 	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
@@ -1758,11 +1758,11 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 	RISSE_ASSERT(data->Elements.size() == GetChildCount());
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
-		tRisseASTNode * child = GetChildAt(i);
+		tASTNode * child = GetChildAt(i);
 		if(child)
 		{
 			// インデックス用数値定数
-			tRisseSSAVariable * index_var;
+			tSSAVariable * index_var;
 			if(i < data->Indices.size())
 				index_var = data->Indices[i]; // あらかじめインデックス用定数が用意されている
 			else
@@ -1770,7 +1770,7 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 					form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
 
 			// 要素の値を配列から得る
-			tRisseSSAVariable * elm_var = NULL;
+			tSSAVariable * elm_var = NULL;
 			form->AddStatement(GetPosition(), ocIGet, &elm_var, value, index_var);
 
 			// 各要素に対する代入文を生成
@@ -1778,11 +1778,11 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 			{
 				// 書き込みに失敗
 				risse_char i_str[40];
-				Risse_int_to_str(i, i_str);
-				tRisseCompileExceptionClass::Throw(
+				::Risse::int_to_str(i, i_str);
+				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(
+					tString(
 					RISSE_WS_TR("writable expression expected at array index %1"), i_str),
 						form->GetScriptBlockInstance(), GetPosition());
 			}
@@ -1794,7 +1794,7 @@ bool tRisseASTNode_Array::DoWriteSSA(tRisseSSAForm *form, void * param,
 
 
 //---------------------------------------------------------------------------
-void * tRisseASTNode_Dict::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) const
+void * tASTNode_Dict::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 {
 	// 辞書配列用の名前と値を準備
 	tPrepareSSA * data = new tPrepareSSA();
@@ -1805,8 +1805,8 @@ void * tRisseASTNode_Dict::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) co
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
 		RISSE_ASSERT(inherited::GetChildAt(i)->GetType() == antDictPair);
-		tRisseASTNode_DictPair * pair_node =
-			reinterpret_cast<tRisseASTNode_DictPair*>(GetChildAt(i));
+		tASTNode_DictPair * pair_node =
+			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
 
 		// 名前と値を準備
 		void * name_prep_data = pair_node->GetName()->PrepareSSA(form, pmRead);
@@ -1822,15 +1822,15 @@ void * tRisseASTNode_Dict::PrepareSSA(tRisseSSAForm *form, tPrepareMode mode) co
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Dict::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Dict::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// インライン辞書配列からの読み出し (辞書配列オブジェクトを作成し、初期化して返す)
 	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
 
 	// 辞書配列オブジェクトを作成
-	tRisseSSAVariable * dict_var = NULL;
+	tSSAVariable * dict_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewDict, &dict_var);
-	dict_var->SetValueType(tRisseVariant::vtObject); // 結果は常に object
+	dict_var->SetValueType(tVariant::vtObject); // 結果は常に object
 
 	RISSE_ASSERT(data->Names.size() == GetChildCount());
 	RISSE_ASSERT(data->Values.size() == GetChildCount());
@@ -1838,15 +1838,15 @@ tRisseSSAVariable * tRisseASTNode_Dict::DoReadSSA(tRisseSSAForm *form, void * pa
 	// 各要素に対して ...
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
-		tRisseASTNode_DictPair * pair_node =
-			reinterpret_cast<tRisseASTNode_DictPair*>(GetChildAt(i));
+		tASTNode_DictPair * pair_node =
+			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
 
 		// 名前の値を得る
-		tRisseSSAVariable * name_var =
+		tSSAVariable * name_var =
 			pair_node->GetName()->DoReadSSA(form, data->Names[i]);
 
 		// 値の値を得る
-		tRisseSSAVariable * value_var =
+		tSSAVariable * value_var =
 			pair_node->GetValue()->DoReadSSA(form, data->Values[i]);
 
 		// 代入文を生成
@@ -1859,8 +1859,8 @@ tRisseSSAVariable * tRisseASTNode_Dict::DoReadSSA(tRisseSSAForm *form, void * pa
 
 
 //---------------------------------------------------------------------------
-bool tRisseASTNode_Dict::DoWriteSSA(tRisseSSAForm *form, void * param,
-		tRisseSSAVariable * value) const
+bool tASTNode_Dict::DoWriteSSA(tSSAForm *form, void * param,
+		tSSAVariable * value) const
 {
 	// インライン辞書配列への書き込み (右辺値を辞書配列と見なし、値を設定する)
 	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
@@ -1871,15 +1871,15 @@ bool tRisseASTNode_Dict::DoWriteSSA(tRisseSSAForm *form, void * param,
 	// 各要素に対して ...
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
-		tRisseASTNode_DictPair * pair_node =
-			reinterpret_cast<tRisseASTNode_DictPair*>(GetChildAt(i));
+		tASTNode_DictPair * pair_node =
+			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
 
 		// 名前の値を得る
-		tRisseSSAVariable * name_var =
+		tSSAVariable * name_var =
 			pair_node->GetName()->DoReadSSA(form, data->Names[i]);
 
 		// その名前に対する値を得る
-		tRisseSSAVariable * value_var = NULL;
+		tSSAVariable * value_var = NULL;
 		form->AddStatement(GetPosition(), ocIGet, &value_var,
 								value, name_var);
 
@@ -1888,11 +1888,11 @@ bool tRisseASTNode_Dict::DoWriteSSA(tRisseSSAForm *form, void * param,
 		{
 			// 書き込みに失敗
 			risse_char i_str[40];
-			Risse_int_to_str(i, i_str);
-			tRisseCompileExceptionClass::Throw(
+			::Risse::int_to_str(i, i_str);
+			tCompileExceptionClass::Throw(
 				form->GetFunction()->GetFunctionGroup()->
 					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-				tRisseString(
+				tString(
 				RISSE_WS_TR("writable expression expected at value of dictionary element index %1"), i_str),
 					form->GetScriptBlockInstance(), GetPosition());
 		}
@@ -1903,58 +1903,58 @@ bool tRisseASTNode_Dict::DoWriteSSA(tRisseSSAForm *form, void * param,
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_RegExp::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_RegExp::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// 文字列定数を作成
-	tRisseSSAVariable * pattern_var =
+	tSSAVariable * pattern_var =
 			form->AddConstantValueStatement(GetPosition(), Pattern);
-	tRisseSSAVariable * flags_var =
+	tSSAVariable * flags_var =
 			form->AddConstantValueStatement(GetPosition(), Flags);
 	// 正規表現オブジェクトを作成する文を生成してその結果を返す
-	tRisseSSAVariable * regexp_var = NULL;
+	tSSAVariable * regexp_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewRegExp, &regexp_var,
 		pattern_var, flags_var);
-	regexp_var->SetValueType(tRisseVariant::vtObject); // 結果は常に object
+	regexp_var->SetValueType(tVariant::vtObject); // 結果は常に object
 	return regexp_var;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
+tSSAVariable * tASTNode_If::InternalDoReadSSA(tSSAForm *form,
 		risse_size pos,
-		const tRisseString &basename,
-		tRisseASTNode * condition,
-		tRisseASTNode * truenode,
-		tRisseASTNode * falsenode,
+		const tString &basename,
+		tASTNode * condition,
+		tASTNode * truenode,
+		tASTNode * falsenode,
 		bool needresult
 		)
 {
 	// 条件式の結果を得る
-	tRisseSSAVariable * cond_var = condition->GenerateReadSSA(form);
+	tSSAVariable * cond_var = condition->GenerateReadSSA(form);
 
 	// 分岐文を作成
-	tRisseSSAStatement * branch_stmt =
+	tSSAStatement * branch_stmt =
 		form->AddStatement(pos, ocBranch, NULL, cond_var);
 
 	// 新しい基本ブロックを作成(真の場合)
-	tRisseSSABlock * true_block = form->CreateNewBlock(basename + RISSE_WS("_true"));
+	tSSABlock * true_block = form->CreateNewBlock(basename + RISSE_WS("_true"));
 
 	// 真の場合に実行する内容を作成
-	tRisseSSAVariable * true_var = truenode->GenerateReadSSA(form);
+	tSSAVariable * true_var = truenode->GenerateReadSSA(form);
 
 	// もし 値を得られないような物であれば void を代わりに使う
-	if(!true_var) true_var = form->AddConstantValueStatement(pos, tRisseVariant());
+	if(!true_var) true_var = form->AddConstantValueStatement(pos, tVariant());
 
 	// ジャンプ文を作成
-	tRisseSSAStatement * true_exit_jump_stmt =
+	tSSAStatement * true_exit_jump_stmt =
 		form->AddStatement(pos, ocJump, NULL);
 
 	// 偽の場合に実行するノードがある場合のみ
-	tRisseSSABlock * false_last_block = NULL;
-	tRisseSSABlock * false_block = NULL;
-	tRisseSSAStatement * false_exit_jump_stmt = NULL;
-	tRisseSSAVariable * false_var = NULL;
+	tSSABlock * false_last_block = NULL;
+	tSSABlock * false_block = NULL;
+	tSSAStatement * false_exit_jump_stmt = NULL;
+	tSSAVariable * false_var = NULL;
 
 	if(falsenode)
 	{
@@ -1965,7 +1965,7 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 		false_var = falsenode->GenerateReadSSA(form);
 
 		// もし 値を得られないような物であれば void を代わりに使う
-		if(!false_var) false_var = form->AddConstantValueStatement(pos, tRisseVariant());
+		if(!false_var) false_var = form->AddConstantValueStatement(pos, tVariant());
 
 		false_last_block = form->GetCurrentBlock();
 
@@ -1984,7 +1984,7 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 			false_block = form->CreateNewBlock(basename + RISSE_WS("_pseudo_false"));
 
 			// 偽の場合に実行する内容を作成
-			false_var = form->AddConstantValueStatement(pos, tRisseVariant());
+			false_var = form->AddConstantValueStatement(pos, tVariant());
 			false_last_block = form->GetCurrentBlock();
 
 			// ジャンプ文を作成
@@ -1995,7 +1995,7 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 
 
 	// 新しい基本ブロックを作成(if文からの脱出)
-	tRisseSSABlock * if_exit_block;
+	tSSABlock * if_exit_block;
 	if_exit_block = form->CreateNewBlock(basename + RISSE_WS("_exit"));
 
 	// 分岐/ジャンプ文のジャンプ先を設定
@@ -2005,7 +2005,7 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 	if(false_exit_jump_stmt) false_exit_jump_stmt->SetJumpTarget(if_exit_block);
 
 	// もし答えが必要ならば、答えを返すための φ関数を作成する
-	tRisseSSAVariable * ret_var = NULL;
+	tSSAVariable * ret_var = NULL;
 	if(needresult)
 		form->AddStatement(pos, ocPhi, &ret_var, true_var, false_var);
 
@@ -2015,11 +2015,11 @@ tRisseSSAVariable * tRisseASTNode_If::InternalDoReadSSA(tRisseSSAForm *form,
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
-			tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_If::DoReadSSA(
+			tSSAForm *form, void * param) const
 {
 	// if文を作成
-	tRisseSSAVariable * res = 
+	tSSAVariable * res = 
 		InternalDoReadSSA(form, GetPosition(), RISSE_WS("if"), Condition,
 			True, False, true);
 
@@ -2031,56 +2031,56 @@ tRisseSSAVariable * tRisseASTNode_If::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_While::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// while ループ または do ～ while ループ
 
 	// break に関する情報を生成
-	tRisseBreakInfo * break_info = new tRisseBreakInfo(form);
+	tBreakInfo * break_info = new tBreakInfo(form);
 
 	// break に関する情報を form に設定
-	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
+	tBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
 
 	// continue に関する情報を生成
-	tRisseContinueInfo * continue_info = new tRisseContinueInfo(form);
+	tContinueInfo * continue_info = new tContinueInfo(form);
 
 	// continue に関する情報を form に設定
-	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
+	tContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
 
 	// 条件式または body にジャンプするための文を作成
-	tRisseSSAStatement * entry_jump_stmt =
+	tSSAStatement * entry_jump_stmt =
 		form->AddStatement(SkipFirstCheck?Body->GetPosition():Condition->GetPosition(), ocJump, NULL);
 
 	// 条件式を格納する基本ブロックを作成
-	tRisseSSABlock * while_cond_block =
+	tSSABlock * while_cond_block =
 		form->CreateNewBlock(RISSE_WS("while_cond"));
 
 	// 条件式の結果を得る
-	tRisseSSAVariable * cond_var = Condition->GenerateReadSSA(form);
+	tSSAVariable * cond_var = Condition->GenerateReadSSA(form);
 
 	// 分岐文を作成
-	tRisseSSAStatement * branch_stmt =
+	tSSAStatement * branch_stmt =
 		form->AddStatement(Condition->GetPosition(), ocBranch, NULL, cond_var);
 
 	// 新しい基本ブロックを作成(条件式が真の場合)
-	tRisseSSABlock * while_body_block =
+	tSSABlock * while_body_block =
 		form->CreateNewBlock(RISSE_WS("while_body"));
 
 	// while 文の body を生成
 	Body->GenerateReadSSA(form);
 
 	// ジャンプ文を作成
-	tRisseSSAStatement * while_body_jump_stmt =
+	tSSAStatement * while_body_jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 新しい基本ブロックを作成(while文からの脱出)
-	tRisseSSABlock * while_exit_block =
+	tSSABlock * while_exit_block =
 		form->CreateNewBlock(RISSE_WS("while_exit"));
 
 	// _ に void を代入 (値付き break で終了しないループの値は void )
 	form->WriteLastEvalResult(GetPosition(),
-		form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
-	tRisseSSAStatement * while_exit_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+		form->AddConstantValueStatement(GetPosition(), tVariant()));
+	tSSAStatement * while_exit_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 分岐/ジャンプ文のジャンプ先を設定
 	entry_jump_stmt->SetJumpTarget(SkipFirstCheck?while_body_block:while_cond_block);
@@ -2089,7 +2089,7 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 	branch_stmt->SetFalseBranch(while_exit_block);
 
 	// 新しい基本ブロックを作成(break文のターゲット)
-	tRisseSSABlock * while_break_target_block =
+	tSSABlock * while_break_target_block =
 		form->CreateNewBlock(RISSE_WS("while_break_target"));
 	while_exit_jump_stmt->SetJumpTarget(while_break_target_block);
 
@@ -2107,9 +2107,9 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 
 	// このノードは _ を返す。
 	// _ への書き込みは上の form->WriteLastEvalResult ですでに行われているか、
-	// あるいは break 文によって tRisseSSAForm::AddBreakOrContinueStatement() 内で
+	// あるいは break 文によって tSSAForm::AddBreakOrContinueStatement() 内で
 	// _ への書き込みが行われている。
-	tRisseSSAVariable * res = form->GetLocalNamespace()->Read(
+	tSSAVariable * res = form->GetLocalNamespace()->Read(
 					form, GetPosition(), ss_lastEvalResultHiddenVarName);
 	return res;
 }
@@ -2117,7 +2117,7 @@ tRisseSSAVariable * tRisseASTNode_While::DoReadSSA(tRisseSSAForm *form, void * p
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_For::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// for ループ
 	// for ループの第１節ではローカル変数を宣言する可能性があるので
@@ -2129,50 +2129,50 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 
 
 	// 条件式にジャンプするための文を作成
-	tRisseSSAStatement * entry_jump_stmt =
+	tSSAStatement * entry_jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 条件式を格納する基本ブロックを作成
-	tRisseSSABlock * for_cond_block =
+	tSSABlock * for_cond_block =
 		form->CreateNewBlock(RISSE_WS("for_cond"));
 
 	// break に関する情報を生成
-	tRisseBreakInfo * break_info = new tRisseBreakInfo(form);
+	tBreakInfo * break_info = new tBreakInfo(form);
 
 	// break に関する情報を form に設定
-	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
+	tBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
 
 	// continue に関する情報を生成
-	tRisseContinueInfo * continue_info = new tRisseContinueInfo(form);
+	tContinueInfo * continue_info = new tContinueInfo(form);
 
 	// continue に関する情報を form に設定
-	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
+	tContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
 
 	// 条件式の結果を得る (条件式が省略されている場合は常に真であると見なす)
-	tRisseSSAVariable * cond_var = NULL;
+	tSSAVariable * cond_var = NULL;
 	if(Condition)
 		cond_var = Condition->GenerateReadSSA(form);
 	else
-		cond_var = form->AddConstantValueStatement(GetPosition(), tRisseVariant(true));
+		cond_var = form->AddConstantValueStatement(GetPosition(), tVariant(true));
 
 	// 分岐文を作成
-	tRisseSSAStatement * branch_stmt =
+	tSSAStatement * branch_stmt =
 		form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
 
 	// 新しい基本ブロックを作成(条件式が真の場合)
-	tRisseSSABlock * for_body_block =
+	tSSABlock * for_body_block =
 		form->CreateNewBlock(RISSE_WS("for_body"));
 
 	// for 文の body を生成
 	Body->GenerateReadSSA(form);
 
 	// ジャンプ文を作成
-	tRisseSSAStatement * for_body_jump_stmt =
+	tSSAStatement * for_body_jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 新しい基本ブロックを作成(イテレータのため)
-	tRisseSSABlock * for_iter_block = NULL;
-	tRisseSSAStatement * for_iter_jump_stmt = NULL;
+	tSSABlock * for_iter_block = NULL;
+	tSSAStatement * for_iter_jump_stmt = NULL;
 	if(Iterator)
 	{
 		for_iter_block =
@@ -2187,13 +2187,13 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 	}
 
 	// 新しい基本ブロックを作成(for文からの脱出)
-	tRisseSSABlock * for_exit_block =
+	tSSABlock * for_exit_block =
 		form->CreateNewBlock(RISSE_WS("for_exit"));
 
 	// _ に void を代入 (値付き break で終了しないループの値は void )
 	form->WriteLastEvalResult(GetPosition(),
-		form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
-	tRisseSSAStatement * for_exit_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+		form->AddConstantValueStatement(GetPosition(), tVariant()));
+	tSSAStatement * for_exit_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 分岐/ジャンプ文のジャンプ先を設定
 	entry_jump_stmt->SetJumpTarget(for_cond_block);
@@ -2203,7 +2203,7 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 	branch_stmt->SetFalseBranch(for_exit_block);
 
 	// 新しい基本ブロックを作成(break文のターゲット)
-	tRisseSSABlock * for_break_target_block =
+	tSSABlock * for_break_target_block =
 		form->CreateNewBlock(RISSE_WS("for_break_target"));
 	for_exit_jump_stmt->SetJumpTarget(for_break_target_block);
 
@@ -2224,9 +2224,9 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 
 	// このノードは _ を返す。
 	// _ への書き込みは上の form->WriteLastEvalResult ですでに行われているか、
-	// あるいは break 文によって tRisseSSAForm::AddBreakOrContinueStatement() 内で
+	// あるいは break 文によって tSSAForm::AddBreakOrContinueStatement() 内で
 	// _ への書き込みが行われている。
-	tRisseSSAVariable * res = form->GetLocalNamespace()->Read(
+	tSSAVariable * res = form->GetLocalNamespace()->Read(
 					form, GetPosition(), ss_lastEvalResultHiddenVarName);
 	return res;
 }
@@ -2234,9 +2234,9 @@ tRisseSSAVariable * tRisseASTNode_For::DoReadSSA(tRisseSSAForm *form, void * par
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Return::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Return::DoReadSSA(tSSAForm *form, void * param) const
 {
-	tRisseSSAVariable * var;
+	tSSAVariable * var;
 	if(Expression)
 		var = Expression->GenerateReadSSA(form);// 戻りとなる値を作成する
 	else
@@ -2252,9 +2252,9 @@ tRisseSSAVariable * tRisseASTNode_Return::DoReadSSA(tRisseSSAForm *form, void * 
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Throw::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Throw::DoReadSSA(tSSAForm *form, void * param) const
 {
-	tRisseSSAVariable * var;
+	tSSAVariable * var;
 	if(Expression)
 	{
 		// 戻りとなる値を作成する
@@ -2264,7 +2264,7 @@ tRisseSSAVariable * tRisseASTNode_Throw::DoReadSSA(tRisseSSAForm *form, void * p
 	{
 		// 戻りとなる値は catch ブロックが受け取った値
 		// TODO: catchブロックが受け取った値を投げる
-		var = form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+		var = form->AddConstantValueStatement(GetPosition(), tVariant());
 	}
 
 	// return 文を作成
@@ -2280,10 +2280,10 @@ tRisseSSAVariable * tRisseASTNode_Throw::DoReadSSA(tRisseSSAForm *form, void * p
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
-									tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Break::DoReadSSA(
+									tSSAForm *form, void * param) const
 {
-	tRisseSSAVariable * var;
+	tSSAVariable * var;
 	if(Expression)
 		var = Expression->GenerateReadSSA(form);// 値を作成する
 	else
@@ -2299,10 +2299,10 @@ tRisseSSAVariable * tRisseASTNode_Break::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Continue::DoReadSSA(
-									tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Continue::DoReadSSA(
+									tSSAForm *form, void * param) const
 {
-	tRisseSSAVariable * var;
+	tSSAVariable * var;
 	if(Expression)
 		var = Expression->GenerateReadSSA(form);// 値を作成する
 	else
@@ -2318,18 +2318,18 @@ tRisseSSAVariable * tRisseASTNode_Continue::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Synchronized::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// ここの処理の中身は try ブロックによく似ているので注意
 
 	// ここでは synchronized や using ブロックのことを critical block と呼ぶことにする
 
 	// 式を評価
-	tRisseSSAVariable * object_var = GetObject()->GenerateReadSSA(form);
+	tSSAVariable * object_var = GetObject()->GenerateReadSSA(form);
 
 	// critical ブロックは、ブロックの中身を 遅延評価ブロックとして評価する
-	tRisseSSAVariable * lazyblock_var = NULL;
-	tRisseSSAForm * new_form = NULL;
+	tSSAVariable * lazyblock_var = NULL;
+	tSSAForm * new_form = NULL;
 
 	// スクリプトブロックより critical ブロックの通し番号を得る
 	// 各 critical ブロックは try ブロックと同じく
@@ -2338,7 +2338,7 @@ tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, v
 	risse_size try_id = form->GetScriptBlockInstance()->AddTryIdentifier();
 
 	// アクセスマップを作成する
-	tRisseSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
+	tSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
 
 	// 遅延評価ブロックを作成する
 	void * lazy_param = form->CreateLazyBlock(Body->GetPosition(),
@@ -2356,8 +2356,8 @@ tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, v
 
 	// 遅延評価ブロックを実行するためのSync文を作成
 	// 関数呼び出し文を生成する
-	tRisseSSAVariable * critical_block_ret_var = NULL;
-	tRisseSSAStatement * critical_block_call_stmt =
+	tSSAVariable * critical_block_ret_var = NULL;
+	tSSAStatement * critical_block_call_stmt =
 		form->AddStatement(GetPosition(), ocSync, &critical_block_ret_var, lazyblock_var);
 	critical_block_call_stmt->SetFuncExpandFlags(0);
 
@@ -2377,7 +2377,7 @@ tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, v
 	// どの様に結びつけられるのかはここでは関知しないが、
 	// 少なくとも critical_block_ret_var が ocCatchBranch を支配
 	// していることはここで示しておかなければならない。
-	tRisseSSAStatement * catch_branch_stmt =
+	tSSAStatement * catch_branch_stmt =
 		form->AddStatement(GetPosition(), ocCatchBranch, NULL, critical_block_ret_var);
 	catch_branch_stmt->SetTryIdentifierIndex(try_id); // try識別子を設定
 
@@ -2385,16 +2385,16 @@ tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, v
 	form->AddCatchBranchAndExceptionValue(catch_branch_stmt, critical_block_ret_var);
 
 	// 脱出用の新しい基本ブロックを作成
-	tRisseSSABlock * exit_critical_block =
+	tSSABlock * exit_critical_block =
 		form->CreateNewBlock(RISSE_WS("exit_critical"));
 
 	// critical ブロックの結果を _ に書き込むための文を生成
 	form->WriteLastEvalResult(GetPosition(), critical_block_ret_var);
-	tRisseSSAStatement * exit_critical_block_jump_stmt =
+	tSSAStatement * exit_critical_block_jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// catch用の新しい基本ブロックを作成
-	tRisseSSABlock * catch_encritical_block =
+	tSSABlock * catch_encritical_block =
 		form->CreateNewBlock(RISSE_WS("catch_entry"));
 
 	// catch に相当する部分は、例外をそのまま投げる。
@@ -2402,7 +2402,7 @@ tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, v
 	form->CreateNewBlock(RISSE_WS("disconnected_by_throw"));
 
 	// critical ブロックからの脱出用ブロックを作成
-	tRisseSSABlock * exit_block =
+	tSSABlock * exit_block =
 		form->CreateNewBlock(RISSE_WS("catch_exit"));
 
 	// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
@@ -2413,7 +2413,7 @@ tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, v
 	exit_critical_block_jump_stmt->SetJumpTarget(exit_block);
 
 	// ss_lastEvalResultHiddenVarName の値を取り出す
-	tRisseSSAVariable * last_value =
+	tSSAVariable * last_value =
 		form->GetLocalNamespace()->Read(form, GetPosition(), ss_lastEvalResultHiddenVarName);
 
 	// このノードは ss_lastEvalResultHiddenVarName を返す
@@ -2423,14 +2423,14 @@ tRisseSSAVariable * tRisseASTNode_Synchronized::DoReadSSA(tRisseSSAForm *form, v
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Label::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Label::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// ジャンプ文を作成
-	tRisseSSAStatement * jump_stmt =
+	tSSAStatement * jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 新しい基本ブロックを作成
-	tRisseSSABlock * label_block =
+	tSSABlock * label_block =
 		form->CreateNewBlock(Name);
 
 	// ジャンプ文のジャンプ先を設定
@@ -2446,7 +2446,7 @@ tRisseSSAVariable * tRisseASTNode_Label::DoReadSSA(tRisseSSAForm *form, void * p
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Goto::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Goto::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// form に登録
 	form->GetFunction()->AddPendingLabelJump(form->GetCurrentBlock(), Name);
@@ -2462,7 +2462,7 @@ tRisseSSAVariable * tRisseASTNode_Goto::DoReadSSA(tRisseSSAForm *form, void * pa
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Debugger::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Debugger::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// 文を作成
 	form->AddStatement(GetPosition(), ocDebugger, NULL);
@@ -2474,24 +2474,24 @@ tRisseSSAVariable * tRisseASTNode_Debugger::DoReadSSA(tRisseSSAForm *form, void 
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Switch::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// 基準式を生成する
-	tRisseSSAVariable * ref = Object->GenerateReadSSA(form);
+	tSSAVariable * ref = Object->GenerateReadSSA(form);
 
 	// switch に関する情報を生成
-	tRisseSwitchInfo * switch_info = new tRisseSwitchInfo(ref);
+	tSwitchInfo * switch_info = new tSwitchInfo(ref);
 
 	// switch に関する情報を form に設定
-	tRisseSwitchInfo * old_switch_info = form->SetCurrentSwitchInfo(switch_info);
+	tSwitchInfo * old_switch_info = form->SetCurrentSwitchInfo(switch_info);
 
 	// break に関する情報を生成
-	tRisseBreakInfo * break_info = new tRisseBreakInfo(form);
+	tBreakInfo * break_info = new tBreakInfo(form);
 	break_info->SetNonValueBreakShouldSetVoidToLastEvalValue(false);
 		// swtich 文での値なし break で _ の値が void になってしまうと困るため
 
 	// break に関する情報を form に設定
-	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
+	tBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
 
 	// ジャンプ文を作成
 	switch_info->SetLastBlock(form->GetCurrentBlock());
@@ -2504,16 +2504,16 @@ tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * 
 	Body->GenerateReadSSA(form);
 
 	// ジャンプ文を作成
-	tRisseSSAStatement * jump_stmt =
+	tSSAStatement * jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 新しい基本ブロックを作成(switch文からの脱出)
-	tRisseSSABlock * exit_switch_block =
+	tSSABlock * exit_switch_block =
 		form->CreateNewBlock(RISSE_WS("switch_exit"));
 	jump_stmt->SetJumpTarget(exit_switch_block);
 
 	// default / 最後のジャンプの処理
-	tRisseSSABlock * last_block =
+	tSSABlock * last_block =
 		switch_info->GetDefaultBlock() ? switch_info->GetDefaultBlock() : exit_switch_block;
 	if(switch_info->GetLastStatement()->GetCode() == ocJump)
 		switch_info->GetLastStatement()->SetJumpTarget(last_block); // ジャンプ
@@ -2536,25 +2536,25 @@ tRisseSSAVariable * tRisseASTNode_Switch::DoReadSSA(tRisseSSAForm *form, void * 
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Case::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// switch 文の中？
-	tRisseSwitchInfo * info = form->GetCurrentSwitchInfo();
+	tSwitchInfo * info = form->GetCurrentSwitchInfo();
 	if(info == NULL)
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			form->GetFunction()->GetFunctionGroup()->
 				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-			tRisseString(Expression ?
+			tString(Expression ?
 				RISSE_WS_TR("cannot place 'case' out of switch") :
 				RISSE_WS_TR("cannot 'default' out of switch")),
 				form->GetScriptBlockInstance(), GetPosition());
 
 	// ジャンプ文を作成
-	tRisseSSAStatement * jump_stmt =
+	tSSAStatement * jump_stmt =
 		form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 新しい基本ブロックを作成(ここに条件判断式などが入る)
-	tRisseSSABlock * case_block =
+	tSSABlock * case_block =
 		form->CreateNewBlock(Expression ?
 			RISSE_WS("switch_case") :
 			RISSE_WS("switch_default"));
@@ -2571,19 +2571,19 @@ tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * pa
 		jump_stmt->SetJumpTarget(case_block);
 
 		// 条件判断文を作成
-		tRisseSSAVariable * targ_var = Expression->GenerateReadSSA(form);
-		tRisseSSAVariable * comp_res = NULL;
+		tSSAVariable * targ_var = Expression->GenerateReadSSA(form);
+		tSSAVariable * comp_res = NULL;
 		form->AddStatement(GetPosition(), ocDiscEqual, &comp_res,
 			info->GetReference(), targ_var);
 
 		// 分岐文を作成
-		tRisseSSAStatement * branch_stmt =
+		tSSAStatement * branch_stmt =
 			form->AddStatement(GetPosition(), ocBranch, NULL, comp_res);
 		info->SetLastBlock(form->GetCurrentBlock());
 		info->SetLastStatement(branch_stmt);
 
 		// 新しい基本ブロックを作成(ここに内容が入る)
-		tRisseSSABlock * case_body_block =
+		tSSABlock * case_body_block =
 			form->CreateNewBlock(RISSE_WS("switch_case_body"));
 		branch_stmt->SetTrueBranch(case_body_block);
 	}
@@ -2593,10 +2593,10 @@ tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * pa
 
 		// default 文のあるブロックを登録する
 		if(info->GetDefaultBlock() != NULL)
-			tRisseCompileExceptionClass::Throw(
+			tCompileExceptionClass::Throw(
 				form->GetFunction()->GetFunctionGroup()->
 					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-				tRisseString(RISSE_WS_TR("cannot place multiple 'default' in a switch")),
+				tString(RISSE_WS_TR("cannot place multiple 'default' in a switch")),
 				form->GetScriptBlockInstance(), GetPosition());
 		info->SetDefaultBlock(case_block);
 
@@ -2611,9 +2611,9 @@ tRisseSSAVariable * tRisseASTNode_Case::DoReadSSA(tRisseSSAForm *form, void * pa
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_Try::DoReadSSA(tSSAForm *form, void * param) const
 {
-	tRisseSSAVariable * res;
+	tSSAVariable * res;
 	// try 文およびcatch文を作成する
 	if(!Finally)
 	{
@@ -2637,11 +2637,11 @@ tRisseSSAVariable * tRisseASTNode_Try::DoReadSSA(tRisseSSAForm *form, void * par
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *form,  bool is_finally) const
+tSSAVariable * tASTNode_Try::GenerateTryCatchOrFinally(tSSAForm *form,  bool is_finally) const
 {
 	// finallyがある？
-	tRisseSSABlock * finally_entry_block = NULL;
-	tRisseSSAStatement * finally_last_jump_stmt = NULL;
+	tSSABlock * finally_entry_block = NULL;
+	tSSAStatement * finally_last_jump_stmt = NULL;
 	if(is_finally)
 	{
 		// finally文がある
@@ -2659,7 +2659,7 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 		// 本来のtry ブロックの結果によって分岐を行う ocCatchBranch 文よりも前には
 		// 存在していなければならない(ocCatchBranchがどうなっても実行される文なので)が、
 		// その条件だといまここで遅延評価ブロックとして評価しなければならない
-		// (なぜならばtRisseSSAFormの現状の構造では 遅延評価ブロックの評価と
+		// (なぜならばtSSAFormの現状の構造では 遅延評価ブロックの評価と
 		// それに続く ocCatchBranch 文の間で他の遅延評価ブロックを評価できないので)
 		// 名前空間については各finallyブロック内では名前空間のpush/popを行い、
 		// 名前空間に影響を与えないので、finallyブロックの評価がtryのブロックの評価
@@ -2667,7 +2667,7 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 
 
 		// finally ブロックの後にジャンプするための文を生成
-		tRisseSSAStatement * skip_finally_jump_stmt =
+		tSSAStatement * skip_finally_jump_stmt =
 			form->AddStatement(GetPosition(), ocJump, NULL);
 
 		// 新しい基本ブロックを生成
@@ -2676,13 +2676,13 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 		// finally の中身を生成
 		//- finally の結果がない場合に備えて void を _ に代入する
 		form->WriteLastEvalResult(GetPosition(),
-				form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
+				form->AddConstantValueStatement(GetPosition(), tVariant()));
 		form->GetLocalNamespace()->Push(); // スコープを push
-		tRisseSSAVariable * finally_res_var = Finally->GenerateReadSSA(form);
+		tSSAVariable * finally_res_var = Finally->GenerateReadSSA(form);
 		//- finally の結果がない場合は void を _ に代入する(再度)
 		if(!finally_res_var)
 				form->WriteLastEvalResult(GetPosition(),
-					form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
+					form->AddConstantValueStatement(GetPosition(), tVariant()));
 		form->GetLocalNamespace()->Pop(); // スコープを pop
 
 		// finally ブロックの最後に jump 文を生成
@@ -2690,14 +2690,14 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 			form->AddStatement(GetPosition(), ocJump, NULL);
 
 		// 本来の try ブロック用の基本ブロックを作成
-		tRisseSSABlock * try_catch_entry_block =
+		tSSABlock * try_catch_entry_block =
 			form->CreateNewBlock(RISSE_WS("try_catch_entry"));
 		skip_finally_jump_stmt->SetJumpTarget(try_catch_entry_block);
 	}
 
 	// try ブロックの中身を 遅延評価ブロックとして評価する
-	tRisseSSAVariable * lazyblock_var = NULL;
-	tRisseSSAForm * new_form = NULL;
+	tSSAVariable * lazyblock_var = NULL;
+	tSSAForm * new_form = NULL;
 
 	// スクリプトブロックより try ブロックの通し番号を得る
 	// 各 try ブロックは固有の ID をもち、例外で実装された大域脱出を行う
@@ -2705,7 +2705,7 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 	risse_size try_id = form->GetScriptBlockInstance()->AddTryIdentifier();
 
 	// アクセスマップを作成する
-	tRisseSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
+	tSSAVariableAccessMap * access_map = form->CreateAccessMap(GetPosition());
 
 	// 遅延評価ブロックを作成する
 	void * lazy_param = form->CreateLazyBlock(Body->GetPosition(),
@@ -2723,8 +2723,8 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 	else
 	{
 		GenerateTryCatchOrFinally(new_form, false); // try-catch を生成する
-		tRisseSSAVariable * void_ret_var =
-			new_form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+		tSSAVariable * void_ret_var =
+			new_form->AddConstantValueStatement(GetPosition(), tVariant());
 		new_form->AddStatement(GetPosition(), ocReturn, NULL, void_ret_var);
 	}
 
@@ -2733,8 +2733,8 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 
 	// 遅延評価ブロックを実行するためのTryFuncCall文を作成
 	// 関数呼び出し文を生成する
-	tRisseSSAVariable * try_block_ret_var = NULL;
-	tRisseSSAStatement * try_block_call_stmt =
+	tSSAVariable * try_block_ret_var = NULL;
+	tSSAStatement * try_block_call_stmt =
 		form->AddStatement(GetPosition(), ocTryFuncCall, &try_block_ret_var, lazyblock_var);
 	try_block_call_stmt->SetFuncExpandFlags(0);
 
@@ -2747,10 +2747,10 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 	if(is_finally)
 	{
 		// ここで finally の中身を呼び出す
-		tRisseSSAStatement * finally_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+		tSSAStatement * finally_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
 
 		// ocCatchBranch用の基本ブロックを作成
-		tRisseSSABlock * catch_branch_block =
+		tSSABlock * catch_branch_block =
 			form->CreateNewBlock(RISSE_WS("catch_branch"));
 		finally_last_jump_stmt->SetJumpTarget(catch_branch_block);
 
@@ -2763,7 +2763,7 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 	// どの様に結びつけられるのかはここでは関知しないが、
 	// 少なくとも try_block_ret_var が ocCatchBranch を支配
 	// していることはここで示しておかなければならない。
-	tRisseSSAStatement * catch_branch_stmt =
+	tSSAStatement * catch_branch_stmt =
 		form->AddStatement(GetPosition(), ocCatchBranch, NULL, try_block_ret_var);
 	catch_branch_stmt->SetTryIdentifierIndex(try_id); // try識別子を設定
 
@@ -2773,15 +2773,15 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 	if(!is_finally)
 	{
 		// 脱出用の新しい基本ブロックを作成
-		tRisseSSABlock * exit_try_block =
+		tSSABlock * exit_try_block =
 			form->CreateNewBlock(RISSE_WS("exit_try"));
 		// try ブロックの結果を _ に書き込むための文を生成
 		form->WriteLastEvalResult(GetPosition(), try_block_ret_var);
-		tRisseSSAStatement * exit_try_block_jump_stmt =
+		tSSAStatement * exit_try_block_jump_stmt =
 			form->AddStatement(GetPosition(), ocJump, NULL);
 
 		// catch用の新しい基本ブロックを作成
-		tRisseSSABlock * catch_entry_block =
+		tSSABlock * catch_entry_block =
 			form->CreateNewBlock(RISSE_WS("catch_entry"));
 
 		// catch ブロックを生成
@@ -2798,12 +2798,12 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 	{
 		// catch用の新しい基本ブロックを作成
 		// catch した例外はそのまま投げる
-		tRisseSSABlock * catch_entry_block =
+		tSSABlock * catch_entry_block =
 			form->CreateNewBlock(RISSE_WS("try_catch_entry"));
 		form->AddStatement(GetPosition(), ocThrow, NULL, try_block_ret_var);
 
 		// 脱出用の新しい基本ブロックを作成
-		tRisseSSABlock * exit_try_block =
+		tSSABlock * exit_try_block =
 			form->CreateNewBlock(RISSE_WS("exit_try_entry"));
 
 		// 遅延評価ブロックを実行するためのTryFuncCall文 の分岐先を設定
@@ -2812,7 +2812,7 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 	}
 
 	// ss_lastEvalResultHiddenVarName の値を取り出す
-	tRisseSSAVariable * last_value =
+	tSSAVariable * last_value =
 		form->GetLocalNamespace()->Read(form, GetPosition(), ss_lastEvalResultHiddenVarName);
 
 	// このノードは ss_lastEvalResultHiddenVarName を返す
@@ -2822,22 +2822,22 @@ tRisseSSAVariable * tRisseASTNode_Try::GenerateTryCatchOrFinally(tRisseSSAForm *
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
-	tRisseSSAVariable * try_block_ret_var) const
+void tASTNode_Try::GenerateCatchBlock(tSSAForm * form,
+	tSSAVariable * try_block_ret_var) const
 {
 	// catchブロックを順々に処理
-	gc_vector<tRisseSSAStatement *> catch_exit_jumps;
-	tRisseSSAStatement * branch_stmt = NULL;
+	gc_vector<tSSAStatement *> catch_exit_jumps;
+	tSSAStatement * branch_stmt = NULL;
 	if(inherited::GetChildCount() > 0)
 	{
 		// catch文がある場合
 		for(risse_size i = 0; i < inherited::GetChildCount(); i++)
 		{
 			RISSE_ASSERT(inherited::GetChildAt(i)->GetType() == antCatch);
-			tRisseASTNode_Catch * catch_node =
-				reinterpret_cast<tRisseASTNode_Catch*>(inherited::GetChildAt(i));
+			tASTNode_Catch * catch_node =
+				reinterpret_cast<tASTNode_Catch*>(inherited::GetChildAt(i));
 
-			tRisseASTNode * condition = catch_node->GetCondition();
+			tASTNode * condition = catch_node->GetCondition();
 
 			// ローカル変数の名前空間を push
 			form->GetLocalNamespace()->Push(); // スコープを push
@@ -2854,7 +2854,7 @@ void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
 			}
 
 			// 例外 catch の条件式の処理
-			tRisseSSAVariable * cond_var;
+			tSSAVariable * cond_var;
 			if(condition)
 			{
 				// 条件判断文を作成
@@ -2867,15 +2867,15 @@ void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
 				// ある場合にのみ受け取るという条件文を作成する
 
 				// global.Exception を表す AST ノードを作成
-				tRisseASTNode_Factor * global = new tRisseASTNode_Factor(GetPosition(), aftGlobal);
-				tRisseASTNode_Factor * Exception =
-					new tRisseASTNode_Factor(GetPosition(), aftConstant,
-						tRisseVariant(tRisseString(RISSE_WS("Exception"))));
-				tRisseASTNode_MemberSel * global_Exception_node =
-					new tRisseASTNode_MemberSel(GetPosition(), global, Exception, matDirect);
+				tASTNode_Factor * global = new tASTNode_Factor(GetPosition(), aftGlobal);
+				tASTNode_Factor * Exception =
+					new tASTNode_Factor(GetPosition(), aftConstant,
+						tVariant(tString(RISSE_WS("Exception"))));
+				tASTNode_MemberSel * global_Exception_node =
+					new tASTNode_MemberSel(GetPosition(), global, Exception, matDirect);
 
 				// global.Exception を取得
-				tRisseSSAVariable * global_Exception = global_Exception_node->GenerateReadSSA(form);
+				tSSAVariable * global_Exception = global_Exception_node->GenerateReadSSA(form);
 
 				// instanceof
 				form->AddStatement(GetPosition(), ocInstanceOf, &cond_var,
@@ -2887,25 +2887,25 @@ void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
 				form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
 
 			// 新しい基本ブロックを作成
-			tRisseSSABlock * catch_body_block =
+			tSSABlock * catch_body_block =
 				form->CreateNewBlock(RISSE_WS("catch_block"));
 
 			branch_stmt->SetTrueBranch(catch_body_block);
 
 			// catch の内容がなかった場合に備えて void を _ に代入する
 			form->WriteLastEvalResult(GetPosition(),
-					form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
+					form->AddConstantValueStatement(GetPosition(), tVariant()));
 
 			// catch の内容を生成
-			tRisseSSAVariable * catch_result_var = catch_node->GetBody()->GenerateReadSSA(form);
+			tSSAVariable * catch_result_var = catch_node->GetBody()->GenerateReadSSA(form);
 
 			// catch の結果がない場合は void を _ に代入する(再度)
 			if(!catch_result_var)
 				form->WriteLastEvalResult(GetPosition(),
-					form->AddConstantValueStatement(GetPosition(), tRisseVariant()));
+					form->AddConstantValueStatement(GetPosition(), tVariant()));
 
 			// catch の終了用のジャンプ文を生成
-			tRisseSSAStatement * catch_exit_jump_stmt =
+			tSSAStatement * catch_exit_jump_stmt =
 				form->AddStatement(GetPosition(), ocJump, NULL);
 			catch_exit_jumps.push_back(catch_exit_jump_stmt);
 
@@ -2913,7 +2913,7 @@ void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
 			form->GetLocalNamespace()->Pop(); // スコープを pop
 
 			// 新しい基本ブロックを作成
-			tRisseSSABlock * catch_next_block =
+			tSSABlock * catch_next_block =
 				form->CreateNewBlock(RISSE_WS("catch_next"));
 			if(branch_stmt) branch_stmt->SetFalseBranch(catch_next_block);
 		}
@@ -2934,10 +2934,10 @@ void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
 
 
 	// 各catchブロックからの脱出を行うジャンプ先を設定
-	tRisseSSABlock * catch_exit_block =
+	tSSABlock * catch_exit_block =
 		form->CreateNewBlock(RISSE_WS("catch_exit"));
 
-	for(gc_vector<tRisseSSAStatement *>::iterator i = catch_exit_jumps.begin();
+	for(gc_vector<tSSAStatement *>::iterator i = catch_exit_jumps.begin();
 			i != catch_exit_jumps.end(); i++)
 		(*i)->SetJumpTarget(catch_exit_block);
 }
@@ -2945,36 +2945,36 @@ void tRisseASTNode_Try::GenerateCatchBlock(tRisseSSAForm * form,
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
-							tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_FuncCall::DoReadSSA(
+							tSSAForm *form, void * param) const
 {
 	// ブロック付きかどうかを得る
 	bool with_block = Blocks.size() > 0;
 	RISSE_ASSERT(!(CreateNew && with_block)); // new に対してブロックは現状指定できない
 
 	// 関数を表す式を得る
-	tRisseSSAVariable * func_var = Expression->GenerateReadSSA(form);
+	tSSAVariable * func_var = Expression->GenerateReadSSA(form);
 
 	// 引数の列挙用配列
-	gc_vector<tRisseSSAVariable *> arg_vec;
+	gc_vector<tSSAVariable *> arg_vec;
 	arg_vec.reserve(GetChildCount());
 
 	// break に関する情報を生成
-	tRisseBreakInfo * break_info = new tRisseBreakInfo(form, RISSE_WS("#block_break"));
-		// tRisseSSAForm::AddCatchBranchTargetsForOne は ラベル名の先頭の文字で種別を
+	tBreakInfo * break_info = new tBreakInfo(form, RISSE_WS("#block_break"));
+		// tSSAForm::AddCatchBranchTargetsForOne は ラベル名の先頭の文字で種別を
 		// 判断する。ラベル名の先頭が # の場合はすでにコード生成済みのラベルジャンプ先
 		// として扱われる。
 	break_info->SetIsBlock(true);
 
 	// break に関する情報を form に設定
-	tRisseBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
+	tBreakInfo * old_break_info = form->SetCurrentBreakInfo(break_info);
 
 	// continue に関する情報を生成
-	tRisseContinueInfo * continue_info = new tRisseContinueInfo(form);
+	tContinueInfo * continue_info = new tContinueInfo(form);
 	continue_info->SetIsBlock(true);
 
 	// continue に関する情報を form に設定
-	tRisseContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
+	tContinueInfo * old_continue_info = form->SetCurrentContinueInfo(continue_info);
 
 	// ... が指定されていなければ引数を処理
 	risse_uint32 exp_flag = 0; // 展開フラグ
@@ -2984,26 +2984,26 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		risse_uint32 exp_flag_bit = 1; // 展開フラグ用ビット
 		for(risse_size i = 0; i < inherited::GetChildCount(); i++, exp_flag_bit <<= 1)
 		{
-			if(i >= RisseMaxArgCount)
+			if(i >= MaxArgCount)
 			{
-				// 現状、関数の引数に列挙できる数はRisseMaxArgCount個までとなっている
+				// 現状、関数の引数に列挙できる数はMaxArgCount個までとなっている
 				// ので、それを超えるとエラーになる
-				tRisseCompileExceptionClass::Throw(
+				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-					tRisseString(RISSE_WS_TR("too many function arguments")),
+					tString(RISSE_WS_TR("too many function arguments")),
 						form->GetScriptBlockInstance(), GetPosition());
 			}
 
 			RISSE_ASSERT(!(inherited::GetChildAt(i) &&
 				inherited::GetChildAt(i)->GetType() != antFuncCallArg));
-			tRisseASTNode_FuncCallArg * arg =
-				reinterpret_cast<tRisseASTNode_FuncCallArg *>(
+			tASTNode_FuncCallArg * arg =
+				reinterpret_cast<tASTNode_FuncCallArg *>(
 												inherited::GetChildAt(i));
 			if(arg)
 			{
 				// 引数が省略されていない
-				tRisseSSAVariable * arg_var;
+				tSSAVariable * arg_var;
 
 				if(arg->GetExpression())
 				{
@@ -3024,10 +3024,10 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 					if(!arg_var)
 					{
 						// 関数宣言の引数に無名の * が無い
-						tRisseCompileExceptionClass::Throw(
+						tCompileExceptionClass::Throw(
 							form->GetFunction()->GetFunctionGroup()->
 								GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-							tRisseString(
+							tString(
 							RISSE_WS_TR("no anonymous collapsed arguments defined in this method")),
 								form->GetScriptBlockInstance(), GetPosition());
 					}
@@ -3039,8 +3039,8 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 			else
 			{
 				// 引数が省略されているので void を追加する
-				tRisseSSAVariable * void_var =
-					form->AddConstantValueStatement(GetPosition(), tRisseVariant());
+				tSSAVariable * void_var =
+					form->AddConstantValueStatement(GetPosition(), tVariant());
 
 				// 関数呼び出し文の Used に追加するために配列に追加
 				arg_vec.push_back(void_var);
@@ -3049,20 +3049,20 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	}
 	else
 	{
-		exp_flag = RisseFuncCallFlag_Omitted; //  関数呼び出しは ... を伴っている
+		exp_flag = FuncCallFlag_Omitted; //  関数呼び出しは ... を伴っている
 	}
 
 	// ブロック引数のうち、関数宣言やブロックでないものはここで先に内容を行ってしまう。
 	// これは、ブロック式中に入れ子のブロックがあった場合にアクセスマップが混乱するため。
 	// また、引数の並び順とそれらが評価される順序は同一でない可能性があるということ。
-	gc_vector<tRisseSSAVariable *> non_func_block_arg_vec;
-	for(tRisseASTArray::const_reverse_iterator i = Blocks.rbegin();
+	gc_vector<tSSAVariable *> non_func_block_arg_vec;
+	for(tASTArray::const_reverse_iterator i = Blocks.rbegin();
 		i != Blocks.rend(); i++) // あとで取り出しやすいようにここでは逆順に処理する
 	{
 		if((*i)->GetType() != antFuncDecl)
 		{
 			// 普通の式
-			tRisseSSAVariable * arg_var =
+			tSSAVariable * arg_var =
 					(*i)->GenerateReadSSA(form);
 
 			// 配列にpush
@@ -3071,7 +3071,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	}
 
 	// ブロック引数を処理
-	tRisseSSAVariableAccessMap * access_map = NULL;
+	tSSAVariableAccessMap * access_map = NULL;
 	risse_size break_try_idx = risse_size_max;
 	if(with_block)
 	{
@@ -3079,12 +3079,12 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		// ブロックを調べ、ブロックの中に一つでもいわゆる「ブロック」
 		// (匿名関数ではない物) があれば access_map を作成する
 		bool block_found = false;
-		for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
+		for(tASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
 		{
 			if((*i)->GetType() == antFuncDecl)
 			{
-				tRisseASTNode_FuncDecl * block_arg =
-					reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
+				tASTNode_FuncDecl * block_arg =
+					reinterpret_cast<tASTNode_FuncDecl*>(*i);
 				if(block_arg->GetIsBlock()) { block_found = true; break; }
 			}
 		}
@@ -3101,17 +3101,17 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		}
 	}
 
-	if(Blocks.size() > RisseMaxArgCount)
+	if(Blocks.size() > MaxArgCount)
 	{
 		// 現状、関数のブロック引数に列挙できる数は
-		// RisseMaxArgCount 個までとなっている
+		// MaxArgCount 個までとなっている
 		// (普通の引数と違って本来ブロック引数の数には制限が無いはずだが
 		//  将来的にブロック引数にも普通の引数のように展開フラグなどを
 		//  つけるかもしれないので、普通の引数と同じ制限を付ける)
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			form->GetFunction()->GetFunctionGroup()->
 				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-			tRisseString(RISSE_WS_TR("too many function block arguments")),
+			tString(RISSE_WS_TR("too many function block arguments")),
 				form->GetScriptBlockInstance(), GetPosition());
 	}
 
@@ -3119,15 +3119,15 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	risse_size try_id = form->GetScriptBlockInstance()->AddTryIdentifier();
 
 	// 各ブロックの内容を生成
-	for(tRisseASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
+	for(tASTArray::const_iterator i = Blocks.begin(); i != Blocks.end(); i++)
 	{
 		if((*i)->GetType() == antFuncDecl)
 		{
-			tRisseASTNode_FuncDecl * block_arg =
-				reinterpret_cast<tRisseASTNode_FuncDecl*>(*i);
+			tASTNode_FuncDecl * block_arg =
+				reinterpret_cast<tASTNode_FuncDecl*>(*i);
 
 			// ブロックの中身を 遅延評価ブロックとして評価する
-			tRisseSSAVariable * lazyblock_var =
+			tSSAVariable * lazyblock_var =
 				block_arg->GenerateFuncDecl(form, access_map, try_id);
 
 			// 配列にpush
@@ -3137,7 +3137,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		{
 			// すでに先に作成しておいた物から引っ張ってくる
 			RISSE_ASSERT(non_func_block_arg_vec.size() != 0);
-			tRisseSSAVariable * arg_var = non_func_block_arg_vec.back();
+			tSSAVariable * arg_var = non_func_block_arg_vec.back();
 			non_func_block_arg_vec.pop_back();
 
 			// 配列にpush
@@ -3153,8 +3153,8 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 
 	// 関数呼び出しの文を生成する
 	// ブロック付きの文の場合は ocTryFuncCall を用いる
-	tRisseSSAVariable * returned_var = NULL;
-	tRisseSSAStatement * call_stmt =
+	tSSAVariable * returned_var = NULL;
+	tSSAStatement * call_stmt =
 		form->AddStatement(GetPosition(),
 			CreateNew ? ocNew : (access_map?ocTryFuncCall:ocFuncCall),
 			&returned_var, func_var);
@@ -3162,7 +3162,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	call_stmt->SetFuncExpandFlags(exp_flag);
 	call_stmt->SetBlockCount(Blocks.size());
 
-	for(gc_vector<tRisseSSAVariable *>::iterator i = arg_vec.begin();
+	for(gc_vector<tSSAVariable *>::iterator i = arg_vec.begin();
 		i != arg_vec.end(); i++)
 	{
 		call_stmt->AddUsed(*i);
@@ -3175,34 +3175,34 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 	// 作成する
 	if(access_map)
 	{
-		tRisseSSAStatement * catch_branch_stmt =
+		tSSAStatement * catch_branch_stmt =
 			form->AddStatement(GetPosition(), ocCatchBranch, NULL, returned_var);
 		catch_branch_stmt->SetTryIdentifierIndex(try_id); // try識別子を設定
 
 		// catch用の新しい基本ブロックを作成
-		tRisseSSABlock * trycall_catch_block =
+		tSSABlock * trycall_catch_block =
 			form->CreateNewBlock(RISSE_WS("trycall_catch"));
 
 		// catch した例外はそのまま投げる
 		form->AddStatement(GetPosition(), ocThrow, NULL, returned_var);
 
 		// break 用の新しい基本ブロックを作成
-		tRisseSSABlock * break_exit_block =
+		tSSABlock * break_exit_block =
 			form->CreateNewBlock(RISSE_WS("break_exit"));
 
 		// break - 例外オブジェクトから値を取り出す
-		tRisseSSAVariable * break_ret_var = NULL;
+		tSSAVariable * break_ret_var = NULL;
 		form->AddStatement(GetPosition(),
 			ocGetExitTryValue, &break_ret_var, returned_var);
 
 		// ジャンプ文を作成
-		tRisseSSAStatement * break_exit_jump_stmt =
+		tSSAStatement * break_exit_jump_stmt =
 			form->AddStatement(GetPosition(), ocJump, NULL);
 
 		// exit用の新しい基本ブロックを作成
-		tRisseSSABlock * trycall_exit_block =
+		tSSABlock * trycall_exit_block =
 			form->CreateNewBlock(RISSE_WS("trycall_exit"));
-		tRisseSSAStatement * trycall_exit_jump_stmt =
+		tSSAStatement * trycall_exit_jump_stmt =
 			form->AddStatement(GetPosition(), ocJump, NULL);
 
 		// TryFuncCall文 の分岐先を設定
@@ -3210,20 +3210,20 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 		catch_branch_stmt->SetTryCatchTarget(trycall_catch_block);
 		catch_branch_stmt->AddTarget(break_exit_block);
 			// catc_branch_stmt に登録した break_exit_block は
-			// tRisseSSAForm::AddCatchBranchTargetsForOne() の処理中では
+			// tSSAForm::AddCatchBranchTargetsForOne() の処理中では
 			// 無視される(ラベル名の先頭が '#' なので)
 
 		// あとで例外の分岐先を設定できるように
 		form->AddCatchBranchAndExceptionValue(catch_branch_stmt, returned_var);
 
 		// trycallの終了用の新しい基本ブロックを作成
-		tRisseSSABlock * trycall_fin_block =
+		tSSABlock * trycall_fin_block =
 			form->CreateNewBlock(RISSE_WS("trycall_fin"));
 		trycall_exit_jump_stmt->SetJumpTarget(trycall_fin_block);
 
 		// break から来るパスと exit から来るパス用にφ関数を作成する
 		break_exit_jump_stmt->SetJumpTarget(trycall_fin_block);
-		tRisseSSAVariable * phi_ret_var = NULL;
+		tSSAVariable * phi_ret_var = NULL;
 		form->AddStatement(GetPosition(), ocPhi, &phi_ret_var,
 								returned_var, break_ret_var);
 
@@ -3243,7 +3243,7 @@ tRisseSSAVariable * tRisseASTNode_FuncCall::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_FuncDecl::DoReadSSA(tSSAForm *form, void * param) const
 {
 	return GenerateFuncDecl(form);
 }
@@ -3251,15 +3251,15 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::DoReadSSA(tRisseSSAForm *form, void 
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form,
-		tRisseSSAVariableAccessMap *access_map, risse_size try_id) const
+tSSAVariable * tASTNode_FuncDecl::GenerateFuncDecl(tSSAForm *form,
+		tSSAVariableAccessMap *access_map, risse_size try_id) const
 {
 	// 関数の中身を 遅延評価ブロックとして評価する
 	RISSE_ASSERT(!(IsBlock && !access_map));
 
-	tRisseSSAVariable * lazyblock_var = NULL;
-	tRisseSSAForm * new_form = NULL;
-	tRisseString display_name = Name;
+	tSSAVariable * lazyblock_var = NULL;
+	tSSAForm * new_form = NULL;
+	tString display_name = Name;
 	if(display_name.IsEmpty()) display_name = RISSE_WS("<not determinate>");
 	void * lazy_param = form->CreateLazyBlock(
 							GetPosition(),
@@ -3273,48 +3273,48 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 	// 引数を処理する
 	for(risse_size i = 0; i < inherited::GetChildCount(); i++)
 	{
-		tRisseASTNode_FuncDeclArg * child =
-			reinterpret_cast<tRisseASTNode_FuncDeclArg*>(inherited::GetChildAt(i));
+		tASTNode_FuncDeclArg * child =
+			reinterpret_cast<tASTNode_FuncDeclArg*>(inherited::GetChildAt(i));
 		RISSE_ASSERT(child->GetType() == antFuncDeclArg);
 		RISSE_ASSERT(child->GetCollapse() == false); // TODO: 配列圧縮
 
-		tRisseSSAVariable * param_var = NULL;
+		tSSAVariable * param_var = NULL;
 
 		// パラメータ内容の取得
-		tRisseSSAStatement * assignparam_stmt = 
+		tSSAStatement * assignparam_stmt = 
 			new_form->AddStatement(GetPosition(), ocAssignParam, &param_var);
 		assignparam_stmt->SetIndex(i);
 
 		// デフォルト引数の処理
 		// if(param_var === void) { param_var = デフォルト引数の式; }
 		// のようになる
-		tRisseASTNode * init_node = child->GetInitializer();
+		tASTNode * init_node = child->GetInitializer();
 		if(init_node)
 		{
 			// param_var が void と同じかどうかを調べる
-			tRisseSSAVariable * void_var =
-				new_form->AddConstantValueStatement(GetPosition(), tRisseVariant());
-			tRisseSSAVariable * cond_var = NULL;
+			tSSAVariable * void_var =
+				new_form->AddConstantValueStatement(GetPosition(), tVariant());
+			tSSAVariable * cond_var = NULL;
 			new_form->AddStatement(GetPosition(), ocDiscEqual, &cond_var,
 				param_var, void_var);
 
 			// 分岐文を作成
-			tRisseSSAStatement *branch_stmt =
+			tSSAStatement *branch_stmt =
 				new_form->AddStatement(GetPosition(), ocBranch, NULL, cond_var);
 
 			// 新しい基本ブロックを作成(条件式が真の場合)
-			tRisseSSABlock * init_block =
+			tSSABlock * init_block =
 				new_form->CreateNewBlock(RISSE_WS("param_init"));
 
 			// 初期化式を作成
-			tRisseSSAVariable * init_var = init_node->GenerateReadSSA(new_form);
+			tSSAVariable * init_var = init_node->GenerateReadSSA(new_form);
 
 			// ジャンプ文を作成(初期化式を含むブロックからその次のブロックへ)
-			tRisseSSAStatement * init_exit_jump_stmt =
+			tSSAStatement * init_exit_jump_stmt =
 				new_form->AddStatement(GetPosition(), ocJump, NULL);
 
 			// 新しい基本ブロックを作成(変数へ代入)
-			tRisseSSABlock * init_exit_block =
+			tSSABlock * init_exit_block =
 				new_form->CreateNewBlock(RISSE_WS("param_subst"));
 
 			// 分岐/ジャンプ文のジャンプ先を設定
@@ -3323,7 +3323,7 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 			init_exit_jump_stmt->SetJumpTarget(init_exit_block);
 
 			// φ関数を作成
-			tRisseSSAVariable * phi_ret_var = NULL;
+			tSSAVariable * phi_ret_var = NULL;
 			new_form->AddStatement(GetPosition(), ocPhi, &phi_ret_var,
 									param_var, init_var);
 
@@ -3341,14 +3341,14 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 	// ブロック引数を処理する
 	for(risse_size i = 0; i < Blocks.size(); i++)
 	{
-		tRisseASTNode_FuncDeclArg * child =
-			reinterpret_cast<tRisseASTNode_FuncDeclArg*>(Blocks[i]);
+		tASTNode_FuncDeclArg * child =
+			reinterpret_cast<tASTNode_FuncDeclArg*>(Blocks[i]);
 		RISSE_ASSERT(child->GetType() == antFuncDeclBlock);
 
-		tRisseSSAVariable * param_var = NULL;
+		tSSAVariable * param_var = NULL;
 
 		// パラメータ内容の取得
-		tRisseSSAStatement * assignparam_stmt = 
+		tSSAStatement * assignparam_stmt = 
 			new_form->AddStatement(GetPosition(), ocAssignBlockParam, &param_var);
 		assignparam_stmt->SetIndex(i);
 
@@ -3367,12 +3367,12 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 	form->CleanupLazyBlock(lazy_param);
 
 	// 関数インスタンスをFunctionクラスでラップするための命令を置く
-	tRisseSSAVariable * wrapped_lazyblock_var = NULL;
+	tSSAVariable * wrapped_lazyblock_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewFunction, &wrapped_lazyblock_var, lazyblock_var);
 
 	// 属性を適用する
-	tRisseSSAVariable * final_var = wrapped_lazyblock_var;
-	tRisseASTNode_FuncDecl::ApplyMethodAttribute(form, GetPosition(), final_var, Attribute);
+	tSSAVariable * final_var = wrapped_lazyblock_var;
+	tASTNode_FuncDecl::ApplyMethodAttribute(form, GetPosition(), final_var, Attribute);
 
 	// このノードはラップされた方の関数(メソッド)を返す
 	return final_var;
@@ -3381,43 +3381,43 @@ tRisseSSAVariable * tRisseASTNode_FuncDecl::GenerateFuncDecl(tRisseSSAForm *form
 
 
 //---------------------------------------------------------------------------
-void tRisseASTNode_FuncDecl::ApplyMethodAttribute(
-	tRisseSSAForm * form, risse_size position,
-	tRisseSSAVariable *& function, tRisseDeclAttribute attrib)
+void tASTNode_FuncDecl::ApplyMethodAttribute(
+	tSSAForm * form, risse_size position,
+	tSSAVariable *& function, tDeclAttribute attrib)
 {
 	// static 指定がついていれば this にバインドするための命令を置く
-	if(attrib.Has(tRisseDeclAttribute::ccStatic))
+	if(attrib.Has(tDeclAttribute::ccStatic))
 	{
-		tRisseSSAVariable * this_var = NULL;
+		tSSAVariable * this_var = NULL;
 		form->AddStatement(position, ocAssignThis, &this_var);
 
-		tRisseSSAVariable * input_function = function;
+		tSSAVariable * input_function = function;
 		form->AddStatement(position,
 			ocInContextOf, &function, input_function, this_var);
 	}
 
 	// synchronized 指定が付いていれば synchronized プロパティを真に設定する命令を置く
-	if(attrib.Has(tRisseDeclAttribute::scSynchronized))
+	if(attrib.Has(tDeclAttribute::scSynchronized))
 	{
-		tRisseSSAVariable * true_var =
-				form->AddConstantValueStatement(position, tRisseVariant(true));
+		tSSAVariable * true_var =
+				form->AddConstantValueStatement(position, tVariant(true));
 
-		tRisseSSAVariable * synchronized_var =
-				form->AddConstantValueStatement(position, tRisseVariant(ss_synchronized));
+		tSSAVariable * synchronized_var =
+				form->AddConstantValueStatement(position, tVariant(ss_synchronized));
 
-		tRisseSSAVariable * method_var = function;
+		tSSAVariable * method_var = function;
 
-		tRisseSSAStatement * stmt =
+		tSSAStatement * stmt =
 			form->AddStatement(position, ocDSet, NULL,
 								method_var, synchronized_var, true_var);
-		stmt->SetAccessFlags(tRisseOperateFlags());
+		stmt->SetAccessFlags(tOperateFlags());
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_PropDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_PropDecl::DoReadSSA(tSSAForm *form, void * param) const
 {
 	return GeneratePropertyDecl(form);
 	// TODO: プロパティがローカル名前空間に作成されてもかなり意味がないのでどうするか
@@ -3426,16 +3426,16 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::DoReadSSA(tRisseSSAForm *form, void 
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *form) const
+tSSAVariable * tASTNode_PropDecl::GeneratePropertyDecl(tSSAForm *form) const
 {
-	tRisseString display_name = Name;
+	tString display_name = Name;
 
 	// ゲッタノードを処理
-	tRisseSSAVariable * getter_var = NULL;
+	tSSAVariable * getter_var = NULL;
 	if(Getter)
 	{
-		tRisseSSAVariable * lazyblock_var = NULL;
-		tRisseSSAForm * new_form = NULL;
+		tSSAVariable * lazyblock_var = NULL;
+		tSSAForm * new_form = NULL;
 		if(display_name.IsEmpty()) display_name = RISSE_WS("<nondetermined>");
 		void * lazy_param = form->CreateLazyBlock(
 								GetPosition(),
@@ -3454,15 +3454,15 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 	else
 	{
 		getter_var = 
-			form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
+			form->AddConstantValueStatement(GetPosition(), tVariant::GetNullObject());
 	}
 
 	// セッタノードを処理
-	tRisseSSAVariable * setter_var = NULL;
+	tSSAVariable * setter_var = NULL;
 	if(Setter)
 	{
-		tRisseSSAVariable * lazyblock_var = NULL;
-		tRisseSSAForm * new_form = NULL;
+		tSSAVariable * lazyblock_var = NULL;
+		tSSAForm * new_form = NULL;
 		void * lazy_param = form->CreateLazyBlock(
 								GetPosition(),
 								Name.IsEmpty() ?
@@ -3472,8 +3472,8 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 
 
 		// パラメータ内容の取得
-		tRisseSSAVariable * param_var = NULL;
-		tRisseSSAStatement * assignparam_stmt = 
+		tSSAVariable * param_var = NULL;
+		tSSAStatement * assignparam_stmt = 
 			new_form->AddStatement(GetPosition(), ocAssignParam, &param_var);
 		assignparam_stmt->SetIndex(0);
 
@@ -3495,19 +3495,19 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 	else
 	{
 		setter_var = 
-			form->AddConstantValueStatement(GetPosition(), tRisseVariant::GetNullObject());
+			form->AddConstantValueStatement(GetPosition(), tVariant::GetNullObject());
 	}
 
 	// プロパティオブジェクトを作成する
-	tRisseSSAVariable * property_instance_var = NULL;
+	tSSAVariable * property_instance_var = NULL;
 	form->AddStatement(GetPosition(),
 		ocAssignNewProperty, &property_instance_var,
 		getter_var, setter_var);
 
 
 	// 属性を適用する
-	tRisseSSAVariable * final_var = property_instance_var;
-	tRisseASTNode_FuncDecl::ApplyMethodAttribute(form, GetPosition(), final_var, Attribute);
+	tSSAVariable * final_var = property_instance_var;
+	tASTNode_FuncDecl::ApplyMethodAttribute(form, GetPosition(), final_var, Attribute);
 
 	// プロパティオブジェクトを返す
 	return final_var;
@@ -3516,7 +3516,7 @@ tRisseSSAVariable * tRisseASTNode_PropDecl::GeneratePropertyDecl(tRisseSSAForm *
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_ClassDecl::DoReadSSA(tRisseSSAForm *form, void * param) const
+tSSAVariable * tASTNode_ClassDecl::DoReadSSA(tSSAForm *form, void * param) const
 {
 	return GenerateClassDecl(form);
 }
@@ -3524,29 +3524,29 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::DoReadSSA(tRisseSSAForm *form, void
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *form) const
+tSSAVariable * tASTNode_ClassDecl::GenerateClassDecl(tSSAForm *form) const
 {
 	// Body は antContext かつ actTopLevel でなくてはならない
 	RISSE_ASSERT(Body->GetType() == antContext);
-	RISSE_ASSERT(reinterpret_cast<tRisseASTNode_Context*>(Body)->GetContextType() == actTopLevel);
+	RISSE_ASSERT(reinterpret_cast<tASTNode_Context*>(Body)->GetContextType() == actTopLevel);
 
 	// モジュールはスーパークラスを持つことはできない
 	RISSE_ASSERT(!(IsModule && SuperClass));
 
 
 	// クラス/モジュール名を決める
-	tRisseString display_name = Name;
+	tString display_name = Name;
 	if(display_name.IsEmpty()) display_name = RISSE_WS("nondetermined");
-	tRisseString class_name = Name.IsEmpty() ? tRisseString(RISSE_WS("anonymous")) : display_name;
+	tString class_name = Name.IsEmpty() ? tString(RISSE_WS("anonymous")) : display_name;
 
 	// クラス/モジュール名を定数として作る
-	tRisseSSAVariable * class_name_var =
-		form->AddConstantValueStatement(GetPosition(), tRisseVariant(class_name));
+	tSSAVariable * class_name_var =
+		form->AddConstantValueStatement(GetPosition(), tVariant(class_name));
 
 
 	// クラスの場合とモジュールの場合で違う処理
-	tRisseSSAVariable * class_instance_var = NULL;
-	tRisseSSAVariable * super_class_var = NULL;
+	tSSAVariable * class_instance_var = NULL;
+	tSSAVariable * super_class_var = NULL;
 	if(!IsModule)
 	{
 		// クラスの場合
@@ -3562,12 +3562,12 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 		{
 			// スーパークラスが指定されていないので global.Object を
 			// 使う
-			tRisseASTNode_Factor * global = new tRisseASTNode_Factor(GetPosition(), aftGlobal);
-			tRisseASTNode_Factor * Object =
-				new tRisseASTNode_Factor(GetPosition(), aftConstant,
-					tRisseVariant(tRisseString(RISSE_WS("Object"))));
-			tRisseASTNode_MemberSel * global_Object =
-				new tRisseASTNode_MemberSel(GetPosition(), global, Object, matDirect);
+			tASTNode_Factor * global = new tASTNode_Factor(GetPosition(), aftGlobal);
+			tASTNode_Factor * Object =
+				new tASTNode_Factor(GetPosition(), aftConstant,
+					tVariant(tString(RISSE_WS("Object"))));
+			tASTNode_MemberSel * global_Object =
+				new tASTNode_MemberSel(GetPosition(), global, Object, matDirect);
 
 			super_class_var = global_Object->GenerateReadSSA(form);
 		}
@@ -3587,10 +3587,10 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	}
 
 	// クラス/モジュールの中身を作成する
-	tRisseCompiler * compiler = form->GetFunction()->GetFunctionGroup()->GetCompiler();
-	tRisseSSAVariable * classblock_var = NULL;
-	tRisseSSAForm * new_form = NULL;
-	gc_vector<tRisseASTNode *> roots;
+	tCompiler * compiler = form->GetFunction()->GetFunctionGroup()->GetCompiler();
+	tSSAVariable * classblock_var = NULL;
+	tSSAForm * new_form = NULL;
+	gc_vector<tASTNode *> roots;
 
 	if(!IsModule)
 	{
@@ -3613,8 +3613,8 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 	// class  {    } の中身はそれが実行されることにより、クラス/モジュールインスタンスへの
 	// メンバの登録などが行われる。
 	// 関数呼び出しの文を生成する
-	tRisseSSAVariable * funccall_result = NULL;
-	tRisseSSAStatement * call_stmt;
+	tSSAVariable * funccall_result = NULL;
+	tSSAStatement * call_stmt;
 
 	call_stmt = form->AddStatement(GetPosition(),
 		ocFuncCall, &funccall_result, classblock_var, super_class_var);
@@ -3631,35 +3631,35 @@ tRisseSSAVariable * tRisseASTNode_ClassDecl::GenerateClassDecl(tRisseSSAForm *fo
 
 
 //---------------------------------------------------------------------------
-tRisseASTNode * tRisseASTNode_ClassDecl::GenerateDefaultInitializeAST(risse_size pos)
+tASTNode * tASTNode_ClassDecl::GenerateDefaultInitializeAST(risse_size pos)
 {
 	// function initialize() { super::initialize(...); }
 	// を表すASTノードを生成して返す
 
 	// super::initialize() の部分を作成
-	tRisseASTNode_Factor * super = new tRisseASTNode_Factor(pos, aftSuper);
-	tRisseASTNode_Factor * initialize =
-		new tRisseASTNode_Factor(pos, aftConstant,
-			tRisseVariant(tRisseString(RISSE_WS("initialize"))));
-	tRisseASTNode_MemberSel * super_initialize =
-		new tRisseASTNode_MemberSel(pos, super, initialize, matDirectThis);
+	tASTNode_Factor * super = new tASTNode_Factor(pos, aftSuper);
+	tASTNode_Factor * initialize =
+		new tASTNode_Factor(pos, aftConstant,
+			tVariant(tString(RISSE_WS("initialize"))));
+	tASTNode_MemberSel * super_initialize =
+		new tASTNode_MemberSel(pos, super, initialize, matDirectThis);
 
-	tRisseASTNode_FuncCall * funccall = new tRisseASTNode_FuncCall(pos, true);
+	tASTNode_FuncCall * funccall = new tASTNode_FuncCall(pos, true);
 	funccall->SetExpression(super_initialize);
 
-	tRisseASTNode_ExprStmt * funccall_expr = new tRisseASTNode_ExprStmt(pos, funccall);
+	tASTNode_ExprStmt * funccall_expr = new tASTNode_ExprStmt(pos, funccall);
 
 	// function 定義のブロックを作成
-	tRisseASTNode_Context * body = new tRisseASTNode_Context(pos, actBlock, RISSE_WS("Block"));
+	tASTNode_Context * body = new tASTNode_Context(pos, actBlock, RISSE_WS("Block"));
 	body->AddChild(funccall_expr);
 
 	// function 定義を作成
-	tRisseASTNode_FuncDecl * funcdecl = new tRisseASTNode_FuncDecl(pos);
+	tASTNode_FuncDecl * funcdecl = new tASTNode_FuncDecl(pos);
 	funcdecl->SetBody(body);
 	funcdecl->SetName(RISSE_WS("initialize"));
-	tRisseASTNode_VarDecl * funcvardecl = new tRisseASTNode_VarDecl(pos);
-	tRisseASTNode_VarDeclPair * funcvardeclpair = new tRisseASTNode_VarDeclPair(
-			pos, new tRisseASTNode_Id(pos, RISSE_WS("initialize"), false), funcdecl);
+	tASTNode_VarDecl * funcvardecl = new tASTNode_VarDecl(pos);
+	tASTNode_VarDeclPair * funcvardeclpair = new tASTNode_VarDeclPair(
+			pos, new tASTNode_Id(pos, RISSE_WS("initialize"), false), funcdecl);
 	funcvardecl->AddChild(funcvardeclpair);
 
 	// var 定義を返す
@@ -3669,21 +3669,21 @@ tRisseASTNode * tRisseASTNode_ClassDecl::GenerateDefaultInitializeAST(risse_size
 
 
 //---------------------------------------------------------------------------
-tRisseASTNode * tRisseASTNode_ClassDecl::GenerateDefaultConstructAST(risse_size pos)
+tASTNode * tASTNode_ClassDecl::GenerateDefaultConstructAST(risse_size pos)
 {
 	// function construct() { }
 	// を表すASTノードを生成して返す
 
 	// function 定義のブロックを作成
-	tRisseASTNode_Context * body = new tRisseASTNode_Context(pos, actBlock, RISSE_WS("Block"));
+	tASTNode_Context * body = new tASTNode_Context(pos, actBlock, RISSE_WS("Block"));
 
 	// function 定義を作成
-	tRisseASTNode_FuncDecl * funcdecl = new tRisseASTNode_FuncDecl(pos);
+	tASTNode_FuncDecl * funcdecl = new tASTNode_FuncDecl(pos);
 	funcdecl->SetBody(body);
 	funcdecl->SetName(RISSE_WS("construct"));
-	tRisseASTNode_VarDecl * funcvardecl = new tRisseASTNode_VarDecl(pos);
-	tRisseASTNode_VarDeclPair * funcvardeclpair = new tRisseASTNode_VarDeclPair(
-			pos, new tRisseASTNode_Id(pos, RISSE_WS("construct"), false), funcdecl);
+	tASTNode_VarDecl * funcvardecl = new tASTNode_VarDecl(pos);
+	tASTNode_VarDeclPair * funcvardeclpair = new tASTNode_VarDeclPair(
+			pos, new tASTNode_Id(pos, RISSE_WS("construct"), false), funcdecl);
 	funcvardecl->AddChild(funcvardeclpair);
 	funcdecl->SetBody(body);
 

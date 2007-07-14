@@ -31,25 +31,25 @@ namespace Risse
 //! @brief		コルーチンの初期化
 //! @note		GC_init の直後に呼ばれる必要がある
 //---------------------------------------------------------------------------
-void RisseInitCoroutine();
+void InitCoroutine();
 //---------------------------------------------------------------------------
 
 
-class tRisseCoroutineImpl;
-class tRisseCoroutinePtr;
+class tCoroutineImpl;
+class tCoroutinePtr;
 //---------------------------------------------------------------------------
 //! @brief		コルーチンの実装クラス
 //! @note		コルーチンに関する実装はすべてこのクラス内で隠蔽することにする
 //---------------------------------------------------------------------------
-class tRisseCoroutine : public tRisseCollectee
+class tCoroutine : public tCollectee
 {
-	friend class tRisseCoroutineImpl;
+	friend class tCoroutineImpl;
 
-	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
-	tRisseCoroutinePtr * Ptr; //!< 実装クラス
-	tRisseVariant Function; //!< 呼び出し先の関数
-	tRisseVariant FunctionArg; //!< 呼び出し先関数の2番目の引数
-	const tRisseVariant * ExceptionValue; //!< コルーチン中で例外が発生した場合、その値
+	tScriptEngine * Engine; //!< スクリプトエンジンインスタンス
+	tCoroutinePtr * Ptr; //!< 実装クラス
+	tVariant Function; //!< 呼び出し先の関数
+	tVariant FunctionArg; //!< 呼び出し先関数の2番目の引数
+	const tVariant * ExceptionValue; //!< コルーチン中で例外が発生した場合、その値
 
 public:
 	//! @brief		コンストラクタ
@@ -58,23 +58,23 @@ public:
 	//! @param		arg			呼び出される関数の2番目の引数
 	//! @note		関数の引数は、1番目に初回の Resume 呼び出しの引数、2番目にargが
 	//! 			渡される。
-	tRisseCoroutine(tRisseScriptEngine * engine, const tRisseVariant & function, const tRisseVariant arg);
+	tCoroutine(tScriptEngine * engine, const tVariant & function, const tVariant arg);
 
 	//! @brief		呼び出し先の関数を設定する
 	//! @param		function	呼び出し先の関数
-	void SetFunction(const tRisseVariant & function) { Function = function; }
+	void SetFunction(const tVariant & function) { Function = function; }
 
 	//! @brief		コルーチンを実行する
 	//! @param		arg		呼び出される関数の２番目の引数、あるいは yield メソッドの
 	//!						戻り値となる値
 	//! @return		DoYield() メソッドの戻り値 (実行が終了した場合は void が帰る)
-	tRisseVariant Resume(const tRisseVariant &arg);
+	tVariant Resume(const tVariant &arg);
 
 	//! @brief		コルーチンからyieldする
 	//! @param		arg		Resume() メソッドの戻り値となる値
 	//! @return		Resume() メソッドの引数
 	//! @note		なんか Yield がどこかでマクロとして定義されているらしいので DoYield にする
-	tRisseVariant DoYield(const tRisseVariant &arg);
+	tVariant DoYield(const tVariant &arg);
 
 	//! @brief		コルーチンが生存しているかどうかを得る
 	//! @param		コルーチンが生存しているかどうか

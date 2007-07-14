@@ -25,43 +25,43 @@ namespace Risse {
 #include "risseParser.inc"
 
 
-class tRisseScriptBlockInstance;
+class tScriptBlockInstance;
 //---------------------------------------------------------------------------
 //! @brief		Risse パーサクラス
 //---------------------------------------------------------------------------
-class tRisseParser : public tRisseCollectee
+class tParser : public tCollectee
 {
-	tRisseScriptBlockInstance * ScriptBlockInstance; //!< スクリプトブロック
-	tRisseASTNode * Root; //!< ルートノード
-	tRisseLexer * Lexer; //!< 字句解析器
+	tScriptBlockInstance * ScriptBlockInstance; //!< スクリプトブロック
+	tASTNode * Root; //!< ルートノード
+	tLexer * Lexer; //!< 字句解析器
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		sb			スクリプトブロック
 	//! @param		lexer		字句解析器へのポインタ
-	tRisseParser(tRisseScriptBlockInstance * sb, tRisseLexer * lexer);
+	tParser(tScriptBlockInstance * sb, tLexer * lexer);
 
 public:
 	//! @brief		スクリプトブロックを得る
 	//! @return		スクリプトブロック
-	tRisseScriptBlockInstance * GetScriptBlockInstance() const { return ScriptBlockInstance; }
+	tScriptBlockInstance * GetScriptBlockInstance() const { return ScriptBlockInstance; }
 
 	//! @brief		字句解析を一つ進める
 	//! @param		トークンの値を格納する先
 	//! @return		トークンID
-	int GetToken(tRisseVariant & value);
+	int GetToken(tVariant & value);
 
 	//! @brief		Lexerを得る
 	//! @return		Lexer
-	tRisseLexer * GetLexer() const { return Lexer; }
+	tLexer * GetLexer() const { return Lexer; }
 
 	//! @brief		ルートノードを設定する
 	//! @param		root		ルートノード
-	void SetRootNode(tRisseASTNode * root);
+	void SetRootNode(tASTNode * root);
 
 	//! @brief		ルートノードを得る
 	//! @return		ルートノード
-	tRisseASTNode * GetRoot() const { return Root; }
+	tASTNode * GetRoot() const { return Root; }
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

@@ -46,16 +46,16 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 
 	- wxCriticalSection				問題あり
 	- boost::recursive_mutex		とくに問題なし
-	- Risse::tRisseCiriticalSection	問題なし
+	- Risse::tCiriticalSection	問題なし
 
 	wxCriticalSection は、再帰的な(再入可能な)クリティカルセクションを実現できる
 	保証がない。boost::recursive_mutex はその名の通り再入可能な mutex だが、
 	たとえば Windows の提供する CriticalSection よりは効率が悪い。
-	Risse::tRisseCiriticalSection は、プラットフォームネイティブな
+	Risse::tCiriticalSection は、プラットフォームネイティブな
 	クリティカルセクションを利用できる場合は利用するようになっているので
 	もっとも効率がよい。
 
-	ここでは、tRisseCriticalSection を typedef したものを tRisseCriticalSection
+	ここでは、tCriticalSection を typedef したものを tCriticalSection
 	として用いて使うこととする。
 
 
@@ -108,15 +108,15 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 	namespace Risse
 	{
 	//! @brief クリティカルセクションの実装
-	class tRisseCriticalSection : public tRisseDestructee
+	class tCriticalSection : public tDestructee
 	{
 		CRITICAL_SECTION CS; //!< Win32 クリティカルセクションオブジェクト
 	public:
-		tRisseCriticalSection() { InitializeCriticalSection(&CS); } //!< コンストラクタ
-		~tRisseCriticalSection() { DeleteCriticalSection(&CS); } //!< デストラクタ
+		tCriticalSection() { InitializeCriticalSection(&CS); } //!< コンストラクタ
+		~tCriticalSection() { DeleteCriticalSection(&CS); } //!< デストラクタ
 
 	private:
-		tRisseCriticalSection(const tRisseCriticalSection &); // non-copyable
+		tCriticalSection(const tCriticalSection &); // non-copyable
 
 	private:
 		void Enter() { EnterCriticalSection(&CS); } //!< クリティカルセクションに入る
@@ -124,11 +124,11 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 
 	public:
 		//! @brief  クリティカルセクション用ロッカー
-		class tLocker : public tRisseCollectee
+		class tLocker : public tCollectee
 		{
-			tRisseCriticalSection & CS;
+			tCriticalSection & CS;
 		public:
-			tLocker(tRisseCriticalSection & cs) : CS(cs)
+			tLocker(tCriticalSection & cs) : CS(cs)
 			{
 				CS.Enter();
 			}
@@ -141,14 +141,14 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		};
 
 		//! @brief  「条件によってはロックを行わない」クリティカルセクション用ロッカー
-		class tConditionalLocker : public tRisseCollectee
+		class tConditionalLocker : public tCollectee
 		{
 			char Locker[sizeof(tLocker)]; // !< tLockerを格納する先
 			bool Locked; //!< 実際にロックが行われたかどうか
 		public:
 			//! @brief	コンストラクタ
 			//! @param	cs		クリティカルセクションオブジェクトへのポインタ(NULLの場合はロックを行わない)
-			tConditionalLocker(tRisseCriticalSection * cs)
+			tConditionalLocker(tCriticalSection * cs)
 			{
 				if(cs)
 				{
@@ -183,36 +183,36 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 	namespace Risse
 	{
 	//! @brief クリティカルセクションの実装
-	class tRisseCriticalSection : public tRisseDestructee
+	class tCriticalSection : public tDestructee
 	{
 		boost::recursive_mutex mutex; //!< boost::recursive_mutex mutexオブジェクト
 	public:
-		tRisseCriticalSection() { ; } //!< コンストラクタ
-		~tRisseCriticalSection() { ; } //!< デストラクタ
+		tCriticalSection() { ; } //!< コンストラクタ
+		~tCriticalSection() { ; } //!< デストラクタ
 
 	private:
-		tRisseCriticalSection(const tRisseCriticalSection &); // non-copyable
+		tCriticalSection(const tCriticalSection &); // non-copyable
 
 	public:
 		//! @brief  クリティカルセクション用ロッカー
-		class tLocker : public tRisseCollectee
+		class tLocker : public tCollectee
 		{
 			boost::recursive_mutex::scoped_lock lock;
 		public:
-			tLocker(tRisseCriticalSection & cs) : lock(cs.mutex) {;}
+			tLocker(tCriticalSection & cs) : lock(cs.mutex) {;}
 		private:
 			tLocker(const tLocker &); // non-copyable
 		};
 
 		//! @brief  「条件によってはロックを行わない」クリティカルセクション用ロッカー
-		class tConditionalLocker : public tRisseCollectee
+		class tConditionalLocker : public tCollectee
 		{
-			char Storage[sizeof(tRisseCriticalSection)]; // !< tLockerを格納する先
+			char Storage[sizeof(tCriticalSection)]; // !< tLockerを格納する先
 			bool Locked; //!< 実際にロックが行われたかどうか
 		public:
 			//! @brief	コンストラクタ
 			//! @param	cs		クリティカルセクションオブジェクトへのポインタ(NULLの場合はロックを行わない)
-			tConditionalLocker(tRisseCriticalSection * cs)
+			tConditionalLocker(tCriticalSection * cs)
 			{
 				if(cs)
 				{
@@ -248,27 +248,27 @@ namespace Risse
 {
 //---------------------------------------------------------------------------
 
-// スレッドをサポートしない場合は何もしない tRisseCriticalSection を定義する
+// スレッドをサポートしない場合は何もしない tCriticalSection を定義する
 
 	//! @brief クリティカルセクションの実装
-	class tRisseCriticalSection : public tRisseDestructee
+	class tCriticalSection : public tDestructee
 	{
 	public:
-		tRisseCriticalSection() { ; } //!< コンストラクタ
-		~tRisseCriticalSection() { ; } //!< デストラクタ
+		tCriticalSection() { ; } //!< コンストラクタ
+		~tCriticalSection() { ; } //!< デストラクタ
 
 	private:
-		tRisseCriticalSection(const tRisseCriticalSection &); // non-copyable
+		tCriticalSection(const tCriticalSection &); // non-copyable
 
 	private:
 		void Enter() { ; } //!< クリティカルセクションに入る
 		void Leave() { ; } //!< クリティカルセクションから出る
 
 	public:
-		class tLocker : public tRisseCollectee
+		class tLocker : public tCollectee
 		{
 		public:
-			tLocker(tRisseCriticalSection & cs)
+			tLocker(tCriticalSection & cs)
 			{
 			}
 			~tLocker()
@@ -300,15 +300,15 @@ namespace Risse
 //---------------------------------------------------------------------------
 
 
-class tRisseThreadInternal;
+class tThreadInternal;
 //---------------------------------------------------------------------------
 //! @brief		スレッドの基本クラス
 //---------------------------------------------------------------------------
-class tRisseThread : public tRisseDestructee
+class tThread : public tDestructee
 {
-	friend class tRisseThreadInternal;
+	friend class tThreadInternal;
 
-	tRisseCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	volatile bool StartInitiated; //!< スレッドの開始指示をしたかどうか
 	volatile bool Started; //!< スレッドが実際に開始したかどうか
@@ -316,17 +316,17 @@ class tRisseThread : public tRisseDestructee
 	volatile bool Get_Terminated() const { return _Terminated; }
 	volatile void Set_Terminated(bool b) { _Terminated = b; }
 	wxMutex ThreadMutex; //!< スレッドが終了するまで保持されるロック
-	tRisseThreadInternal * Internal; //!< 内部スレッドの実装
-	tRisseString Name; //!< スレッドの名前
+	tThreadInternal * Internal; //!< 内部スレッドの実装
+	tString Name; //!< スレッドの名前
 
 public:
 	//! @brief		コンストラクタ
-	tRisseThread();
+	tThread();
 
 	//! @brief		デストラクタ
-	virtual ~tRisseThread();
+	virtual ~tThread();
 
-	const tRisseString GetName() const { return Name; } //!< スレッドの名前を得る
+	const tString GetName() const { return Name; } //!< スレッドの名前を得る
 
 	//! @brief		スレッドの実行を開始する
 	void Run();
@@ -367,7 +367,7 @@ protected:
 //---------------------------------------------------------------------------
 //! @brief		スレッドイベントクラス
 /*! @note
- tRisseThreadEvent はカウント上限が1のセマフォをカプセル化したもの。はっきり
+ tThreadEvent はカウント上限が1のセマフォをカプセル化したもの。はっきり
  言ってこれぐらいではカプセル化する意味は無いかもしれないが、吉里吉里２が
  このタイプのスレッドイベントを多用していた影響でこのクラスを提供する。
  セマフォではなく Mutexでも良いのかもしれないが wxMutex はタイムアウト付きの
@@ -386,15 +386,15 @@ protected:
  を使うこと。
 */
 //---------------------------------------------------------------------------
-class tRisseThreadEvent : public tRisseDestructee
+class tThreadEvent : public tDestructee
 {
 	wxSemaphore Semaphore; //!< セマフォオブジェクト
 public:
 	//! @brief コンストラクタ
-	tRisseThreadEvent() : Semaphore(0, 1) {;}
+	tThreadEvent() : Semaphore(0, 1) {;}
 
 	//! @brief デストラクタ
-	~tRisseThreadEvent() {;}
+	~tThreadEvent() {;}
 
 	//! @brief どれか一つの待ちスレッドを解放する
 	void Signal()

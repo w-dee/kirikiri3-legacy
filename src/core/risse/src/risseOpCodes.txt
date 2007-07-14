@@ -3,13 +3,13 @@
 // '#!<' は列挙型のコメントとして出力にも現れる
 
 // On の記号は以下の意味の通り
--On		R		tRisseVMInsnInfo::vifRegister
--On		C		tRisseVMInsnInfo::vifConstant
--On		N		tRisseVMInsnInfo::vifNumber
--On		A		tRisseVMInsnInfo::vifAddress
--On		P		tRisseVMInsnInfo::vifParameter
--On		S		tRisseVMInsnInfo::vifShared
--On		O		tRisseVMInsnInfo::vifOthers
+-On		R		tVMInsnInfo::vifRegister
+-On		C		tVMInsnInfo::vifConstant
+-On		N		tVMInsnInfo::vifNumber
+-On		A		tVMInsnInfo::vifAddress
+-On		P		tVMInsnInfo::vifParameter
+-On		S		tVMInsnInfo::vifShared
+-On		O		tVMInsnInfo::vifOthers
 
 
 //	ニーモニックに関するメモ:
@@ -131,7 +131,7 @@ ISet					iset		R,R,R,-,-,-		[]=			#!< set [ ]
 // DGet のデフォルトのフラグは 0 (何も指定なし)だが、DSet のデフォルトのフラグは
 // ofMemberEnsure (メンバがなければ作成する) なので注意
 
-// tRisseObjectInterfaceにおいて、
+// tObjectInterfaceにおいて、
 // プロパティハンドラが起動されるときは、プロパティの読み出しの場合は
 // そのプロパティインスタンスに対し、
 // 関数呼び出し(ocFuncCall) が引数なし、メンバ名なしで呼ばれる。

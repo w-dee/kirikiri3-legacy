@@ -24,7 +24,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(11177,27394,4689,17315,52629,65112,64194,51762);
 
 //---------------------------------------------------------------------------
-tRisseRisseScriptBlockInstance::tRisseRisseScriptBlockInstance()
+tRisseScriptBlockInstance::tRisseScriptBlockInstance()
 {
 	;
 }
@@ -32,14 +32,14 @@ tRisseRisseScriptBlockInstance::tRisseRisseScriptBlockInstance()
 
 
 //---------------------------------------------------------------------------
-tRisseASTNode * tRisseRisseScriptBlockInstance::GetASTRootNode(bool need_result, bool is_expression)
+tASTNode * tRisseScriptBlockInstance::GetASTRootNode(bool need_result, bool is_expression)
 {
 	// Lexer を準備する
-	tRisseLexer *lexer = new tRisseLexer(this);
+	tLexer *lexer = new tLexer(this);
 
 	// Parser を準備する
 	// パースする
-	tRisseParser *parser = new tRisseParser(this, lexer);
+	tParser *parser = new tParser(this, lexer);
 
 	return parser->GetRoot();
 }
@@ -47,7 +47,7 @@ tRisseASTNode * tRisseRisseScriptBlockInstance::GetASTRootNode(bool need_result,
 
 
 //---------------------------------------------------------------------------
-void tRisseRisseScriptBlockInstance::construct()
+void tRisseScriptBlockInstance::construct()
 {
 	// 特に何もしない
 }
@@ -55,9 +55,9 @@ void tRisseRisseScriptBlockInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseRisseScriptBlockInstance::initialize(
-	const tRisseString &script, const tRisseString & name, risse_size lineofs,
-	const tRisseNativeCallInfo &info)
+void tRisseScriptBlockInstance::initialize(
+	const tString &script, const tString & name, risse_size lineofs,
+	const tNativeCallInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
 	// 引数はそのまま渡す
@@ -75,8 +75,8 @@ void tRisseRisseScriptBlockInstance::initialize(
 
 
 //---------------------------------------------------------------------------
-tRisseRisseScriptBlockClass::tRisseRisseScriptBlockClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_RisseScriptBlock, engine->ScriptBlockClass)
+tRisseScriptBlockClass::tRisseScriptBlockClass(tScriptEngine * engine) :
+	tClassBase(ss_RisseScriptBlock, engine->ScriptBlockClass)
 {
 	RegisterMembers();
 }
@@ -84,7 +84,7 @@ tRisseRisseScriptBlockClass::tRisseRisseScriptBlockClass(tRisseScriptEngine * en
 
 
 //---------------------------------------------------------------------------
-void tRisseRisseScriptBlockClass::RegisterMembers()
+void tRisseScriptBlockClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -94,17 +94,17 @@ void tRisseRisseScriptBlockClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate, &tRisseRisseScriptBlockClass::ovulate);
-	RisseBindFunction(this, ss_construct, &tRisseRisseScriptBlockInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseRisseScriptBlockInstance::initialize);
+	BindFunction(this, ss_ovulate, &tRisseScriptBlockClass::ovulate);
+	BindFunction(this, ss_construct, &tRisseScriptBlockInstance::construct);
+	BindFunction(this, ss_initialize, &tRisseScriptBlockInstance::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseRisseScriptBlockClass::ovulate()
+tVariant tRisseScriptBlockClass::ovulate()
 {
-	return tRisseVariant(new tRisseRisseScriptBlockInstance());
+	return tVariant(new tRisseScriptBlockInstance());
 }
 //---------------------------------------------------------------------------
 

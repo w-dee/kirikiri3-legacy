@@ -10,8 +10,8 @@
 //! @file
 //! @brief ハッシュ表の実装
 //---------------------------------------------------------------------------
-#ifndef RisseHashTableH
-#define RisseHashTableH
+#ifndef HashTableH
+#define HashTableH
 
 #include "risseTypes.h"
 #include "risseGC.h"
@@ -31,14 +31,14 @@ namespace Risse
 //!				ハッシュを作成するものであり、通常は使うべきではない。@r
 //!				たとえ単純な構造体であっても、この関数オブジェクトはパディングと
 //!				して使われている構造体のなかのゴミビットを拾ってしまう可能性がある。@r
-//!				通常は、tRisseHashTraits のテンプレートを特化させるか、あるいは
+//!				通常は、tHashTraits のテンプレートを特化させるか、あるいは
 //!				他のハッシュ関数オブジェクトを使うこと。@r
 //!				このクラスは Make() と GetHint() と SetHint() と HasHint を実装
 //!				する必要がある。
 //!				スレッド保護はない
 //---------------------------------------------------------------------------
 template <typename T>
-class tRisseHashTraits
+class tHashTraits
 {
 public:
 
@@ -97,12 +97,12 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュ関数の特性クラス(tRisseString用)
+//! @brief		ハッシュ関数の特性クラス(tString用)
 //---------------------------------------------------------------------------
 template <>
-class tRisseHashTraits<tRisseString>
+class tHashTraits<tString>
 {
-	typedef tRisseString T;
+	typedef tString T;
 public:
 	//! @brief		ハッシュを作成する
 	//! @param		val		値
@@ -149,14 +149,14 @@ template <
 	typename KeyT,
 	typename ValueT
 		>
-struct tRisseHashTableElement : public tRisseCollectee
+struct tHashTableElement : public tCollectee
 {
 	risse_uint32 Hash; //!< ハッシュの値
 	risse_uint32 Flags; //!< management flag
 	char Key[sizeof(KeyT)]; // !< キーを保存するためのストレージ
 	char Value[sizeof(ValueT)]; //!< 値を保存するためのストレージ
-	tRisseHashTableElement *Prev; //!< previous chain item
-	tRisseHashTableElement *Next; //!< next chain item
+	tHashTableElement *Prev; //!< previous chain item
+	tHashTableElement *Next; //!< next chain item
 };
 //---------------------------------------------------------------------------
 
@@ -167,10 +167,10 @@ struct tRisseHashTableElement : public tRisseCollectee
 template <
 	typename KeyT,
 	typename ValueT,
-	typename HashTraitsT = tRisseHashTraits<KeyT>,
-	typename ElementT = tRisseHashTableElement<KeyT, ValueT>
+	typename HashTraitsT = tHashTraits<KeyT>,
+	typename ElementT = tHashTableElement<KeyT, ValueT>
 		>
-class tRisseHashTableBase : public tRisseCollectee
+class tHashTableBase : public tCollectee
 {
 public:
 	typedef ElementT tElement; //!< 要素型のtypedef
@@ -190,14 +190,14 @@ public:
 	//! @brief	イテレータクラス
 	//! @note	非常に限定的かつ非効率的。一方向へのイテレーションしかサポートしない。
 	//! 		高速なイテレーションが必要ならば順序付きハッシュ表の仕様を検討すること
-	class tDefaultIterator : public tRisseCollectee
+	class tDefaultIterator : public tCollectee
 	{
-		const tRisseHashTableBase * Table; //!< ハッシュ表
+		const tHashTableBase * Table; //!< ハッシュ表
 		const tElement * Element; //!<現在操作中の要素
 		risse_size Slot; //!< 現在操作中のlv1スロットのインデックス
 	public:
 		tDefaultIterator() { Table = NULL; Element = NULL; Slot = 0; }
-		tDefaultIterator(const tRisseHashTableBase & table)
+		tDefaultIterator(const tHashTableBase & table)
 		{
 			// 最初の要素を探す
 			Table = &table;
@@ -270,7 +270,7 @@ public:
 
 public:
 	//! @brief		コンストラクタ
-	tRisseHashTableBase()
+	tHashTableBase()
 	{
 		HashMask = InitialHashMask;
 		Elms = new tElement[HashMask + 1];
@@ -507,9 +507,9 @@ template <
 	typename KeyT,
 	typename ValueT
 		>
-struct tRisseOrderedHashTableElement : public tRisseHashTableElement<KeyT, ValueT>
+struct tOrderedHashTableElement : public tHashTableElement<KeyT, ValueT>
 {
-	typedef tRisseHashTableElement<KeyT, ValueT> inherited;
+	typedef tHashTableElement<KeyT, ValueT> inherited;
 	inherited *NPrev; //!< 順序付き要素チェーンにおける前の要素
 	inherited *NNext; //!< 順序付き要素チェーンにおける後ろの要素
 };
@@ -524,14 +524,14 @@ struct tRisseOrderedHashTableElement : public tRisseHashTableElement<KeyT, Value
 template <
 	typename KeyT,
 	typename ValueT,
-	typename HashTraitsT = tRisseHashTraits<KeyT>,
-	typename ElementT = tRisseOrderedHashTableElement<KeyT, ValueT>
+	typename HashTraitsT = tHashTraits<KeyT>,
+	typename ElementT = tOrderedHashTableElement<KeyT, ValueT>
 		>
-class tRisseOrderedHashTableBase :
-	public tRisseHashTableBase<KeyT, ValueT, HashTraitsT, ElementT >
+class tOrderedHashTableBase :
+	public tHashTableBase<KeyT, ValueT, HashTraitsT, ElementT >
 {
 	typedef
-		tRisseHashTableBase<KeyT, ValueT, HashTraitsT, ElementT >
+		tHashTableBase<KeyT, ValueT, HashTraitsT, ElementT >
 			inherited;
 public:
 	typedef ElementT tElement; //!< 要素型のtypedef
@@ -542,13 +542,13 @@ protected:
 
 public:
 	//! @brief	イテレータクラス
-	class tOrderedIterator : public tRisseCollectee // this differs a bit from STL's iterator
+	class tOrderedIterator : public tCollectee // this differs a bit from STL's iterator
 	{
 		tElement * elm;
 	public:
 		tOrderedIterator() { elm = NULL; }
 
-		tOrderedIterator(const tRisseOrderedHashTableBase & table)
+		tOrderedIterator(const tOrderedHashTableBase & table)
 		{ elm = table.NFirst; }
 
 		tOrderedIterator(tElement * r_elm)
@@ -593,7 +593,7 @@ public:
 
 public:
 	//! @brief		コンストラクタ
-	tRisseOrderedHashTableBase()
+	tOrderedHashTableBase()
 	{
 		NFirst = NLast = NULL;
 	}
@@ -745,18 +745,18 @@ protected:
 template <
 	typename KeyT,
 	typename ValueT,
-	typename HashTraitsT = tRisseHashTraits<KeyT>,
-	typename ElementT = tRisseHashTableElement<KeyT, ValueT>,
-	typename BaseClassT = tRisseHashTableBase<KeyT, ValueT, HashTraitsT, ElementT>
+	typename HashTraitsT = tHashTraits<KeyT>,
+	typename ElementT = tHashTableElement<KeyT, ValueT>,
+	typename BaseClassT = tHashTableBase<KeyT, ValueT, HashTraitsT, ElementT>
 		>
-class tRisseHashTable : public BaseClassT
+class tHashTable : public BaseClassT
 {
 	typedef BaseClassT inherited;
 	typedef ElementT tElement;  //!< 要素型のtypedef
 
 public:
 	//! @brief		コンストラクタ
-	tRisseHashTable()
+	tHashTable()
 	{
 	}
 
@@ -884,18 +884,18 @@ public:
 template <
 	typename KeyT,
 	typename ValueT,
-	typename HashTraitsT = tRisseHashTraits<KeyT>,
-	typename ElementT = tRisseOrderedHashTableElement<KeyT, ValueT>,
-	typename BaseClassT = tRisseHashTable<KeyT, ValueT, HashTraitsT, ElementT, tRisseOrderedHashTableBase<KeyT, ValueT, HashTraitsT, ElementT> >
+	typename HashTraitsT = tHashTraits<KeyT>,
+	typename ElementT = tOrderedHashTableElement<KeyT, ValueT>,
+	typename BaseClassT = tHashTable<KeyT, ValueT, HashTraitsT, ElementT, tOrderedHashTableBase<KeyT, ValueT, HashTraitsT, ElementT> >
 		>
-class tRisseOrderedHashTable : public BaseClassT
+class tOrderedHashTable : public BaseClassT
 {
 	typedef BaseClassT inherited;
 	typedef ElementT tElement;  //!< 要素型のtypedef
 
 public:
 	//! @brief		コンストラクタ
-	tRisseOrderedHashTable()
+	tOrderedHashTable()
 	{
 	}
 

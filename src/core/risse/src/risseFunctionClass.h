@@ -27,29 +27,29 @@ namespace Risse
 //!				ゲートウェイとして使う。Risseで"Function"クラスのインスタンスである
 //!				と見せかけるための仕掛け。
 //---------------------------------------------------------------------------
-class tRisseFunctionInstance : public tRisseObjectBase
+class tFunctionInstance : public tObjectBase
 {
-	typedef tRisseObjectBase inherited; //!< 親クラスの typedef
+	typedef tObjectBase inherited; //!< 親クラスの typedef
 
 private:
-	tRisseVariant Body; //!< 関数のBodyを表すオブジェクト
+	tVariant Body; //!< 関数のBodyを表すオブジェクト
 	bool Synchronized; //!< synchronized メソッドかどうか
 
 public:
 	//! @brief		コンストラクタ
-	tRisseFunctionInstance();
+	tFunctionInstance();
 
 	//! @brief		関数のBodyを表すオブジェクトを取得する
 	//! @return		関数のBodyを表すオブジェクト
-	tRisseVariant & GetBody() { return Body; }
+	tVariant & GetBody() { return Body; }
 
 	//! @brief		関数のBodyを表すオブジェクトを設定する
 	//! @param		m		関数のBodyを表すオブジェクト
-	void SetBody(const tRisseVariant & m) { Body = m; }
+	void SetBody(const tVariant & m) { Body = m; }
 
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
-	virtual ~tRisseFunctionInstance() {;}
+	virtual ~tFunctionInstance() {;}
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
@@ -65,7 +65,7 @@ public:
 
 public: // Risse用メソッドとか
 	void construct();
-	void initialize(const tRisseNativeCallInfo & info);
+	void initialize(const tNativeCallInfo & info);
 	bool get_synchronized() const { return GetSynchronized(); }
 	void set_synchronized(bool b) { SetSynchronized(b); }
 };
@@ -75,20 +75,20 @@ public: // Risse用メソッドとか
 //---------------------------------------------------------------------------
 //! @brief		"Function" クラス
 //---------------------------------------------------------------------------
-class tRisseFunctionClass : public tRisseClassBase
+class tFunctionClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseFunctionClass(tRisseScriptEngine * engine);
+	tFunctionClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

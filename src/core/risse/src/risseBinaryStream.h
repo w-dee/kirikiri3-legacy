@@ -26,11 +26,11 @@ namespace Risse
 //! @note		このクラスではシークが不可能な、本当の意味での「ストリーム」は扱わない
 //! @note		各メソッドはスレッド保護されていない。
 //---------------------------------------------------------------------------
-class tRisseBinaryStream : public tRisseDestructee
+class tBinaryStream : public tDestructee
 	/* ストリームは通常「閉じる」必要があるためデストラクタを呼ぶようにする */
 {
 private:
-	tRisseString Name; //!< ストリームの名前
+	tString Name; //!< ストリームの名前
 
 public:
 	//! @param		基準位置の列挙
@@ -46,11 +46,11 @@ public:
 	//! @param		name		名前
 	//! @note		このクラス内ではこの名前は例外生成時に使用するだけであるが、
 	//!				例外をユーザフレンドリーにするために、なるべく名前は設定するべき
-	void SetName(const tRisseString & name) { Name = name; }
+	void SetName(const tString & name) { Name = name; }
 
 	//! @brief		ストリームの名前を取得する
 	//! @return		ストリームの名前を取得する
-	const tRisseString & GetName() { return Name; }
+	const tString & GetName() { return Name; }
 
 	//! @brief		指定位置にシークする
 	//! @param		offset			基準位置からのオフセット (正の数 = ファイルの後ろの方)
@@ -87,7 +87,7 @@ public:
 	virtual risse_uint64 GetSize();
 
 	//! @brief		デストラクタ
-	virtual ~tRisseBinaryStream() {;}
+	virtual ~tBinaryStream() {;}
 
 
 public: // ユーティリティ

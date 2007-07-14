@@ -32,19 +32,19 @@ RISSE_DEFINE_SOURCE_ID(65360,34010,1527,19914,27817,35057,17111,22724);
 
 
 //---------------------------------------------------------------------------
-void tRisseArrayInstance::construct()
+void tArrayInstance::construct()
 {
 	// default メンバを追加 (デフォルトではvoid)
-	RegisterNormalMember(ss_default, tRisseVariant::GetVoidObject());
+	RegisterNormalMember(ss_default, tVariant::GetVoidObject());
 
 	// filler メンバを追加 (デフォルトではvoid)
-	RegisterNormalMember(ss_filler, tRisseVariant::GetVoidObject());
+	RegisterNormalMember(ss_filler, tVariant::GetVoidObject());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseArrayInstance::initialize(const tRisseNativeCallInfo &info)
+void tArrayInstance::initialize(const tNativeCallInfo &info)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -60,7 +60,7 @@ void tRisseArrayInstance::initialize(const tRisseNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index)
+tVariant tArrayInstance::iget(risse_offset ofs_index)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -81,7 +81,7 @@ tRisseVariant tRisseArrayInstance::iget(risse_offset ofs_index)
 
 
 //---------------------------------------------------------------------------
-void tRisseArrayInstance::iset(const tRisseVariant & value, risse_offset ofs_index)
+void tArrayInstance::iset(const tVariant & value, risse_offset ofs_index)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -118,7 +118,7 @@ void tRisseArrayInstance::iset(const tRisseVariant & value, risse_offset ofs_ind
 
 
 //---------------------------------------------------------------------------
-void tRisseArrayInstance::push(const tRisseMethodArgument & args)
+void tArrayInstance::push(const tMethodArgument & args)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -129,13 +129,13 @@ void tRisseArrayInstance::push(const tRisseMethodArgument & args)
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseArrayInstance::pop()
+tVariant tArrayInstance::pop()
 {
 	volatile tSynchronizer sync(this); // sync
 
 	if(Array.size() > 0)
 	{
-		tRisseVariant val;
+		tVariant val;
 		val = Array.back();
 		Array.pop_back();
 		return val;
@@ -149,7 +149,7 @@ tRisseVariant tRisseArrayInstance::pop()
 
 
 //---------------------------------------------------------------------------
-void tRisseArrayInstance::unshift(const tRisseMethodArgument & args)
+void tArrayInstance::unshift(const tMethodArgument & args)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -160,13 +160,13 @@ void tRisseArrayInstance::unshift(const tRisseMethodArgument & args)
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseArrayInstance::shift()
+tVariant tArrayInstance::shift()
 {
 	volatile tSynchronizer sync(this); // sync
 
 	if(Array.size() > 0)
 	{
-		tRisseVariant val;
+		tVariant val;
 		val = Array.front();
 		Array.pop_front();
 		return val;
@@ -180,7 +180,7 @@ tRisseVariant tRisseArrayInstance::shift()
 
 
 //---------------------------------------------------------------------------
-size_t tRisseArrayInstance::get_length() const
+size_t tArrayInstance::get_length() const
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -190,7 +190,7 @@ size_t tRisseArrayInstance::get_length() const
 
 
 //---------------------------------------------------------------------------
-void tRisseArrayInstance::set_length(size_t new_size)
+void tArrayInstance::set_length(size_t new_size)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -217,8 +217,8 @@ void tRisseArrayInstance::set_length(size_t new_size)
 
 
 //---------------------------------------------------------------------------
-tRisseArrayClass::tRisseArrayClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Array, engine->ObjectClass)
+tArrayClass::tArrayClass(tScriptEngine * engine) :
+	tClassBase(ss_Array, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -226,7 +226,7 @@ tRisseArrayClass::tRisseArrayClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseArrayClass::RegisterMembers()
+void tArrayClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -236,24 +236,24 @@ void tRisseArrayClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate, &tRisseArrayClass::ovulate);
-	RisseBindFunction(this, ss_construct, &tRisseArrayInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseArrayInstance::initialize);
-	RisseBindFunction(this, mnIGet, &tRisseArrayInstance::iget);
-	RisseBindFunction(this, mnISet, &tRisseArrayInstance::iset);
-	RisseBindFunction(this, ss_push, &tRisseArrayInstance::push);
-	RisseBindFunction(this, ss_pop, &tRisseArrayInstance::pop);
-	RisseBindFunction(this, ss_unshift, &tRisseArrayInstance::unshift);
-	RisseBindFunction(this, ss_shift, &tRisseArrayInstance::shift);
-	RisseBindProperty(this, ss_length, &tRisseArrayInstance::get_length, &tRisseArrayInstance::set_length);
+	BindFunction(this, ss_ovulate, &tArrayClass::ovulate);
+	BindFunction(this, ss_construct, &tArrayInstance::construct);
+	BindFunction(this, ss_initialize, &tArrayInstance::initialize);
+	BindFunction(this, mnIGet, &tArrayInstance::iget);
+	BindFunction(this, mnISet, &tArrayInstance::iset);
+	BindFunction(this, ss_push, &tArrayInstance::push);
+	BindFunction(this, ss_pop, &tArrayInstance::pop);
+	BindFunction(this, ss_unshift, &tArrayInstance::unshift);
+	BindFunction(this, ss_shift, &tArrayInstance::shift);
+	BindProperty(this, ss_length, &tArrayInstance::get_length, &tArrayInstance::set_length);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseArrayClass::ovulate()
+tVariant tArrayClass::ovulate()
 {
-	return tRisseVariant(new tRisseArrayInstance());
+	return tVariant(new tArrayInstance());
 }
 //---------------------------------------------------------------------------
 

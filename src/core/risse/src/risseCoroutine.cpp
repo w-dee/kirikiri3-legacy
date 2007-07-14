@@ -145,17 +145,17 @@ struct fiber_data
 #ifdef RISSE_TRACK_FIBERS
 typedef std::vector<fiber_data *> fibers_t;
 static fibers_t fibers;
-static tRisseCriticalSection *fibers_critical_section = NULL;
+static tCriticalSection *fibers_critical_section = NULL;
 
 static void register_fiber(fiber_data * data)
 {
-	tRisseCriticalSection::tLocker lock(*fibers_critical_section);
+	tCriticalSection::tLocker lock(*fibers_critical_section);
 	fibers.push_back(data);
 }
 
 static void unregister_fiber(fiber_data * data)
 {
-	tRisseCriticalSection::tLocker lock(*fibers_critical_section);
+	tCriticalSection::tLocker lock(*fibers_critical_section);
 	fibers_t::iterator i = std::find(fibers.begin(), fibers.end(), data);
 	RISSE_ASSERT(i != fibers.end());
 	fibers.erase(i);
@@ -208,7 +208,7 @@ WINBASEAPI LPVOID WINAPI RISSE_NEW_CreateFiber(
 		fflush(stdout); fflush(stderr);
 #endif
 	}
-	tRisseInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine();
+	tInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine();
 	return NULL; // 失敗...
 }
 
@@ -232,12 +232,12 @@ WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
 #endif
 
 // typedef など
-typedef fiber_data tRisseCoroutineContext;
+typedef fiber_data tCoroutineContext;
 
 //! @brief 現在実行中のコルーチンコンテキストを得る
-tRisseCoroutineContext * RisseGetCurrentCoroutineContext()
+tCoroutineContext * GetCurrentCoroutineContext()
 {
-	tRisseCoroutineContext * p = (tRisseCoroutineContext*)GetCurrentFiber();
+	tCoroutineContext * p = (tCoroutineContext*)GetCurrentFiber();
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "fiber context %p created\n", p);
@@ -249,8 +249,8 @@ tRisseCoroutineContext * RisseGetCurrentCoroutineContext()
 }
 
 //! @brief コルーチンコンテキストの内容をGCに対してプッシュする
-struct GC_ms_entry *RisseMarkCoroutineContext(
-									tRisseCoroutineContext * co_context,
+struct GC_ms_entry *MarkCoroutineContext(
+									tCoroutineContext * co_context,
 									struct GC_ms_entry *mark_sp,
 									struct GC_ms_entry *mark_sp_limit)
 {
@@ -304,7 +304,7 @@ struct GC_ms_entry *RisseMarkCoroutineContext(
 
 	// スタックの push
 
-	if((tRisseCoroutineContext*)GetCurrentFiber() == co_context)
+	if((tCoroutineContext*)GetCurrentFiber() == co_context)
 	{
 		// 現在 push しようとしているファイバが現在のファイバの場合、
 		// sp が変な値になっているので、スタック上のダミーの変数のアドレスに
@@ -370,10 +370,10 @@ namespace Risse
 {
 
 //---------------------------------------------------------------------------
-void RisseInitCoroutine()
+void InitCoroutine()
 {
 #ifdef RISSE_TRACK_FIBERS
-	fibers_critical_section = new tRisseCriticalSection();
+	fibers_critical_section = new tCriticalSection();
 #endif
 }
 //---------------------------------------------------------------------------
@@ -384,18 +384,18 @@ void RisseInitCoroutine()
 //! @note		注意: このクラスのデストラクタはメインスレッド以外から非同期
 //!				に呼ばれる可能性があることに注意
 //---------------------------------------------------------------------------
-class tRisseCoroutineImpl : public tRisseDestructee /* デストラクタが呼ばれなければならない */
+class tCoroutineImpl : public tDestructee /* デストラクタが呼ばれなければならない */
 {
 public:
-	typedef coro::coroutine<tRisseVariant (tRisseCoroutineImpl * coroimpl, tRisseCoroutine * coro, tRisseVariant)> coroutine_type;
+	typedef coro::coroutine<tVariant (tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant)> coroutine_type;
 	coroutine_type Coroutine;
 
 	coroutine_type::self * CoroutineSelf;
-	tRisseCoroutineContext * Context;
+	tCoroutineContext * Context;
 	bool Alive;
 	bool Running;
 
-	tRisseCoroutineImpl() : Coroutine(Body)
+	tCoroutineImpl() : Coroutine(Body)
 	{
 		CoroutineSelf = NULL;
 		Context = NULL;
@@ -403,11 +403,11 @@ public:
 		Running = false;
 	}
 
-	~tRisseCoroutineImpl()
+	~tCoroutineImpl()
 	{
 #ifdef RISSE_COROUTINE_DEBUG
 		fflush(stdout); fflush(stderr);
-		fprintf(stdout, "tRisseCoroutineImpl %p destructed\n", this);
+		fprintf(stdout, "tCoroutineImpl %p destructed\n", this);
 		fflush(stdout); fflush(stderr);
 #endif
 	}
@@ -416,41 +416,41 @@ public:
 	void Dump()
 	{
 		fflush(stdout); fflush(stderr);
-		fprintf(stdout, "tRisseCoroutineImpl %p : Alive(%s), Running(%s)\n", this, Alive?"true":"false", Running?"true":"false");
+		fprintf(stdout, "tCoroutineImpl %p : Alive(%s), Running(%s)\n", this, Alive?"true":"false", Running?"true":"false");
 		fflush(stdout); fflush(stderr);
 	}
 #endif
 
 private:
-	static tRisseVariant Body(coroutine_type::self &self, tRisseCoroutineImpl * coroimpl, tRisseCoroutine * coro, tRisseVariant arg)
+	static tVariant Body(coroutine_type::self &self, tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant arg)
 	{
 		coroimpl->CoroutineSelf = &self;
-		coroimpl->Context = RisseGetCurrentCoroutineContext();
-		tRisseVariant ret;
+		coroimpl->Context = GetCurrentCoroutineContext();
+		tVariant ret;
 
 		try
 		{
 			if(!coro->Function.IsNull())
 			{
 				coro->Function.FuncCall(
-					coro->Engine, &ret, tRisseString::GetEmptyString(), 0,
-					tRisseMethodArgument::New(arg, coro->FunctionArg),
+					coro->Engine, &ret, tString::GetEmptyString(), 0,
+					tMethodArgument::New(arg, coro->FunctionArg),
 					coro->FunctionArg);
 			}
 		}
-		catch(const tRisseVariant * e)
+		catch(const tVariant * e)
 		{
 #ifdef RISSE_COROUTINE_DEBUG
 			fflush(stdout); fflush(stderr);
-			fprintf(stdout, "tRisseCoroutineImpl %p caught an exception tRisseVariant: ", coroimpl);
-			RisseFPrint(stdout, e->operator tRisseString().c_str());
-			RisseFPrint(stdout, RISSE_WS("\n"));
+			fprintf(stdout, "tCoroutineImpl %p caught an exception tVariant: ", coroimpl);
+			FPrint(stdout, e->operator tString().c_str());
+			FPrint(stdout, RISSE_WS("\n"));
 			coroimpl->Dump();
 			fflush(stdout); fflush(stderr);
 #endif
 #ifdef RISSE_COROUTINE_DEBUG
 			fflush(stdout); fflush(stderr);
-			fprintf(stdout, "tRisseCoroutineImpl %p finished\n", coroimpl);
+			fprintf(stdout, "tCoroutineImpl %p finished\n", coroimpl);
 			coroimpl->Dump();
 			fflush(stdout); fflush(stderr);
 #endif
@@ -464,13 +464,13 @@ private:
 		{
 #ifdef RISSE_COROUTINE_DEBUG
 			fflush(stdout); fflush(stderr);
-			fprintf(stdout, "tRisseCoroutineImpl %p caught an unknown exception\n", coroimpl);
+			fprintf(stdout, "tCoroutineImpl %p caught an unknown exception\n", coroimpl);
 			coroimpl->Dump();
 			fflush(stdout); fflush(stderr);
 #endif
 #ifdef RISSE_COROUTINE_DEBUG
 			fflush(stdout); fflush(stderr);
-			fprintf(stdout, "tRisseCoroutineImpl %p finished\n", coroimpl);
+			fprintf(stdout, "tCoroutineImpl %p finished\n", coroimpl);
 			fflush(stdout); fflush(stderr);
 #endif
 			coroimpl->Alive = false;
@@ -482,7 +482,7 @@ private:
 
 #ifdef RISSE_COROUTINE_DEBUG
 			fflush(stdout); fflush(stderr);
-			fprintf(stdout, "tRisseCoroutineImpl %p finished\n", coroimpl);
+			fprintf(stdout, "tCoroutineImpl %p finished\n", coroimpl);
 			coroimpl->Dump();
 			fflush(stdout); fflush(stderr);
 #endif
@@ -499,47 +499,47 @@ private:
 
 
 //---------------------------------------------------------------------------
-// tRisseCoroutineImpl へのポインタを含む特殊な構造体
+// tCoroutineImpl へのポインタを含む特殊な構造体
 //---------------------------------------------------------------------------
 /*
 	この構造体は GC_generic_malloc により割り当てられ、特殊なマーカーである
-	RisseMarkCoroutinePtr によりスキャンされる。このマーカーは コルーチンのRisse用
-	実装クラスである tRisseCoroutineImpl のポインタと、それが持つコルーチンの
+	MarkCoroutinePtr によりスキャンされる。このマーカーは コルーチンのRisse用
+	実装クラスである tCoroutineImpl のポインタと、それが持つコルーチンの
 	コンテキスト情報中の有用そうなポインタをマークする。
 */
 
 // forward declaration
-struct GC_ms_entry *RisseMarkCoroutinePtr(GC_word *addr,
+struct GC_ms_entry *MarkCoroutinePtr(GC_word *addr,
 						struct GC_ms_entry *mark_sp,
 						struct GC_ms_entry *mark_sp_limit,
 						GC_word env);
 
 //! @brief	GC用kind情報を保持する構造体
-struct tRisseCoroutineGCKind : public tRisseCollectee
+struct tCoroutineGCKind : public tCollectee
 {
 	void ** FreeList;
 	int MarkProc;
 	int Kind;
 
-	tRisseCoroutineGCKind()
+	tCoroutineGCKind()
 	{
 		FreeList = GC_new_free_list();
-		MarkProc = GC_new_proc(RisseMarkCoroutinePtr);
+		MarkProc = GC_new_proc(MarkCoroutinePtr);
 		Kind = GC_new_kind(FreeList,
 						GC_MAKE_PROC(MarkProc, 0), 0, 0);
 	}
 };
 
-//! @brief tRisseCoroutineImpl へのポインタを含む特殊な構造体
-struct tRisseCoroutinePtr
+//! @brief tCoroutineImpl へのポインタを含む特殊な構造体
+struct tCoroutinePtr
 {
-	static tRisseCoroutineGCKind * Kind;
-	tRisseCoroutineImpl * Impl; //!< tRisseCoroutineImpl へのポインタ
+	static tCoroutineGCKind * Kind;
+	tCoroutineImpl * Impl; //!< tCoroutineImpl へのポインタ
 
 	//! @brief		コンストラクタ
-	tRisseCoroutinePtr()
+	tCoroutinePtr()
 	{
-		Impl = new tRisseCoroutineImpl();
+		Impl = new tCoroutineImpl();
 	}
 
 	//! @brief		new 演算子
@@ -552,7 +552,7 @@ struct tRisseCoroutinePtr
 			// スレッド保護はしない。運が悪いとこのインスタンスが
 			// 複数個作られることになるが、最終的にはどれかが使われる。
 			// 非常に楽観的。
-			Kind = new tRisseCoroutineGCKind();
+			Kind = new tCoroutineGCKind();
 		}
 
 		return GC_generic_malloc(size, Kind->Kind);
@@ -561,22 +561,22 @@ struct tRisseCoroutinePtr
 	void * operator new [] (size_t size); // not yet implemented
 };
 
-tRisseCoroutineGCKind * tRisseCoroutinePtr::Kind = NULL;
+tCoroutineGCKind * tCoroutinePtr::Kind = NULL;
 
 
-//! @brief		tRisseCoroutinePtr 用のマーク関数
-struct GC_ms_entry *RisseMarkCoroutinePtr(GC_word *addr,
+//! @brief		tCoroutinePtr 用のマーク関数
+struct GC_ms_entry *MarkCoroutinePtr(GC_word *addr,
                                   struct GC_ms_entry *mark_sp,
                                   struct GC_ms_entry *mark_sp_limit,
                                   GC_word env)
 {
-	tRisseCoroutinePtr * a = (tRisseCoroutinePtr*)addr;
+	tCoroutinePtr * a = (tCoroutinePtr*)addr;
 
 	if(a->Impl)
 	{
 #ifdef RISSE_COROUTINE_DEBUG
 		fflush(stdout); fflush(stderr);
-		fprintf(stdout, "marking Ptr %p, tRisseCoroutineImpl %p\n", a, a->Impl);
+		fprintf(stdout, "marking Ptr %p, tCoroutineImpl %p\n", a, a->Impl);
 		a->Impl->Dump();
 		fprintf(stdout, "GC_least_plausible_heap_addr %p, GC_greatest_plausible_heap_addr %p\n",
 			GC_least_plausible_heap_addr, GC_greatest_plausible_heap_addr);
@@ -589,7 +589,7 @@ struct GC_ms_entry *RisseMarkCoroutinePtr(GC_word *addr,
 		if(a->Impl->Context)
 		{
 			// Context の内容 (スタックエリアだとかCPUレジスタだとか) を push する
-			mark_sp = RisseMarkCoroutineContext(a->Impl->Context, mark_sp, mark_sp_limit);
+			mark_sp = MarkCoroutineContext(a->Impl->Context, mark_sp, mark_sp_limit);
 		}
 	}
 
@@ -602,12 +602,12 @@ struct GC_ms_entry *RisseMarkCoroutinePtr(GC_word *addr,
 
 
 //---------------------------------------------------------------------------
-tRisseCoroutine::tRisseCoroutine(tRisseScriptEngine * engine,
-	const tRisseVariant & function, const tRisseVariant arg)
+tCoroutine::tCoroutine(tScriptEngine * engine,
+	const tVariant & function, const tVariant arg)
 {
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
-	fprintf(stdout, "made tRisseCoroutine %p\n", this);
+	fprintf(stdout, "made tCoroutine %p\n", this);
 	fflush(stdout); fflush(stderr);
 #endif
 
@@ -615,11 +615,11 @@ tRisseCoroutine::tRisseCoroutine(tRisseScriptEngine * engine,
 	Function = function;
 	FunctionArg = arg;
 
-	Ptr = new tRisseCoroutinePtr();
+	Ptr = new tCoroutinePtr();
 
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
-	fprintf(stdout, "made Ptr %p, tRisseCoroutineImpl %p\n", Ptr, Ptr->Impl);
+	fprintf(stdout, "made Ptr %p, tCoroutineImpl %p\n", Ptr, Ptr->Impl);
 	fflush(stdout); fflush(stderr);
 #endif
 }
@@ -627,22 +627,22 @@ tRisseCoroutine::tRisseCoroutine(tRisseScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCoroutine::Resume(const tRisseVariant &arg)
+tVariant tCoroutine::Resume(const tVariant &arg)
 {
 	if(!GetAlive())
 	{
 		// コルーチンは無効
-		tRisseCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited();
+		tCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited();
 	}
 
 	if(Ptr->Impl->Running)
 	{
 		// コルーチンはすでに実行中
-		tRisseCoroutineExceptionClass::ThrowCoroutineIsRunning();
+		tCoroutineExceptionClass::ThrowCoroutineIsRunning();
 	}
 
 	Ptr->Impl->Running = true;
-	tRisseVariant ret;
+	tVariant ret;
 	try
 	{
 		// コルーチンの実行
@@ -666,30 +666,30 @@ tRisseVariant tRisseCoroutine::Resume(const tRisseVariant &arg)
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCoroutine::DoYield(const tRisseVariant &arg)
+tVariant tCoroutine::DoYield(const tVariant &arg)
 {
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
-	fprintf(stdout, "in tRisseCoroutine::DoYield: tRisseCoroutineImpl %p: Alive(%s), Running(%s)\n", Ptr->Impl, Ptr->Impl->Alive?"true":"false", Ptr->Impl->Running?"true":"false");
+	fprintf(stdout, "in tCoroutine::DoYield: tCoroutineImpl %p: Alive(%s), Running(%s)\n", Ptr->Impl, Ptr->Impl->Alive?"true":"false", Ptr->Impl->Running?"true":"false");
 	fflush(stdout); fflush(stderr);
 #endif
 
 	if(!GetAlive())
 	{
 		// コルーチンは無効
-		tRisseCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited();
+		tCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited();
 	}
 
 	if(!Ptr->Impl->CoroutineSelf)
 	{
 		// コルーチンは開始していない
-		tRisseCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet();
+		tCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet();
 	}
 
 	if(!Ptr->Impl->Running)
 	{
 		// コルーチンは待ちの状態 (実行中でない)
-		tRisseCoroutineExceptionClass::ThrowCoroutineIsNotRunning();
+		tCoroutineExceptionClass::ThrowCoroutineIsNotRunning();
 	}
 
 	return Ptr->Impl->CoroutineSelf->yield(arg).get<2>();
@@ -699,7 +699,7 @@ tRisseVariant tRisseCoroutine::DoYield(const tRisseVariant &arg)
 
 
 //---------------------------------------------------------------------------
-bool tRisseCoroutine::GetAlive() const
+bool tCoroutine::GetAlive() const
 {
 	return Ptr && Ptr->Impl->Alive;
 }
@@ -707,7 +707,7 @@ bool tRisseCoroutine::GetAlive() const
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutine::Dispose()
+void tCoroutine::Dispose()
 {
 	if(GetAlive())
 	{
@@ -715,7 +715,7 @@ void tRisseCoroutine::Dispose()
 		{
 			// コルーチンはすでに実行中
 			// 実行中のコルーチンは dispose できない
-			tRisseCoroutineExceptionClass::ThrowCoroutineIsRunning();
+			tCoroutineExceptionClass::ThrowCoroutineIsRunning();
 		}
 		delete Ptr->Impl;
 		Ptr = NULL; // Ptr のデストラクタは今のところ呼んではならない

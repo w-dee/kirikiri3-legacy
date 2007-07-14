@@ -26,7 +26,7 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(25338,19169,41250,19084,53674,59044,24121,36918);
 //---------------------------------------------------------------------------
-tRisseCoroutineInstance::tRisseCoroutineInstance()
+tCoroutineInstance::tCoroutineInstance()
 {
 	Coroutine = NULL;
 }
@@ -34,13 +34,13 @@ tRisseCoroutineInstance::tRisseCoroutineInstance()
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineInstance::construct()
+void tCoroutineInstance::construct()
 {
 	volatile tSynchronizer sync(this); // sync
 
 	// コルーチンの実装オブジェクトを作成
-	Coroutine = new tRisseCoroutine(GetRTTI()->GetScriptEngine(),
-		tRisseVariant::GetNullObject(), tRisseVariant(this));
+	Coroutine = new tCoroutine(GetRTTI()->GetScriptEngine(),
+		tVariant::GetNullObject(), tVariant(this));
 
 	// デフォルトでは run メソッドを実行するようにする
 	Coroutine->SetFunction(GetPropertyDirect(ss_run));
@@ -49,7 +49,7 @@ void tRisseCoroutineInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineInstance::initialize(const tRisseNativeCallInfo & info)
+void tCoroutineInstance::initialize(const tNativeCallInfo & info)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -64,7 +64,7 @@ void tRisseCoroutineInstance::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineInstance::run() const
+void tCoroutineInstance::run() const
 {
 	// デフォルトでは何もしない
 }
@@ -72,48 +72,48 @@ void tRisseCoroutineInstance::run() const
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCoroutineInstance::resume(const tRisseMethodArgument & args) const
+tVariant tCoroutineInstance::resume(const tMethodArgument & args) const
 {
 	volatile tSynchronizer sync(this); // sync
 
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
-	fprintf(stdout, "in tRisseCoroutineInstance::resume b: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
+	fprintf(stdout, "in tCoroutineInstance::resume b: tCoroutine %p: tCoroutineInstance %p\n",
 					Coroutine, this);
 	fflush(stdout); fflush(stderr);
 #endif
 
-	return Coroutine->Resume(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
+	return Coroutine->Resume(args.HasArgument(0)?args[0]:tVariant::GetVoidObject());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCoroutineInstance::yield(const tRisseMethodArgument & args) const
+tVariant tCoroutineInstance::yield(const tMethodArgument & args) const
 {
 	volatile tSynchronizer sync(this); // sync
 
 #ifdef RISSE_COROUTINE_DEBUG
 	fflush(stdout); fflush(stderr);
-	fprintf(stdout, "in tRisseCoroutineInstance::yield b: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
+	fprintf(stdout, "in tCoroutineInstance::yield b: tCoroutine %p: tCoroutineInstance %p\n",
 					Coroutine, this);
 	fflush(stdout); fflush(stderr);
 
 	GC_gcollect();
 
 	fflush(stdout); fflush(stderr);
-	fprintf(stdout, "in tRisseCoroutineInstance::yield a: tRisseCoroutine %p: tRisseCoroutineInstance %p\n",
+	fprintf(stdout, "in tCoroutineInstance::yield a: tCoroutine %p: tCoroutineInstance %p\n",
 					Coroutine, this);
 	fflush(stdout); fflush(stderr);
 #endif
 
-	return Coroutine->DoYield(args.HasArgument(0)?args[0]:tRisseVariant::GetVoidObject());
+	return Coroutine->DoYield(args.HasArgument(0)?args[0]:tVariant::GetVoidObject());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineInstance::dispose() const
+void tCoroutineInstance::dispose() const
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -123,7 +123,7 @@ void tRisseCoroutineInstance::dispose() const
 
 
 //---------------------------------------------------------------------------
-bool tRisseCoroutineInstance::get_alive() const
+bool tCoroutineInstance::get_alive() const
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -136,8 +136,8 @@ bool tRisseCoroutineInstance::get_alive() const
 
 
 //---------------------------------------------------------------------------
-tRisseCoroutineClass::tRisseCoroutineClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Coroutine, engine->ObjectClass)
+tCoroutineClass::tCoroutineClass(tScriptEngine * engine) :
+	tClassBase(ss_Coroutine, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -145,7 +145,7 @@ tRisseCoroutineClass::tRisseCoroutineClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseCoroutineClass::RegisterMembers()
+void tCoroutineClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -155,22 +155,22 @@ void tRisseCoroutineClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate, &tRisseCoroutineClass::ovulate);
-	RisseBindFunction(this, ss_construct, &tRisseCoroutineInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseCoroutineInstance::initialize);
-	RisseBindFunction(this, ss_run, &tRisseCoroutineInstance::run);
-	RisseBindFunction(this, ss_resume, &tRisseCoroutineInstance::resume);
-	RisseBindFunction(this, ss_yield, &tRisseCoroutineInstance::yield);
-	RisseBindFunction(this, ss_dispose, &tRisseCoroutineInstance::dispose);
-	RisseBindProperty(this, ss_alive, &tRisseCoroutineInstance::get_alive);
+	BindFunction(this, ss_ovulate, &tCoroutineClass::ovulate);
+	BindFunction(this, ss_construct, &tCoroutineInstance::construct);
+	BindFunction(this, ss_initialize, &tCoroutineInstance::initialize);
+	BindFunction(this, ss_run, &tCoroutineInstance::run);
+	BindFunction(this, ss_resume, &tCoroutineInstance::resume);
+	BindFunction(this, ss_yield, &tCoroutineInstance::yield);
+	BindFunction(this, ss_dispose, &tCoroutineInstance::dispose);
+	BindProperty(this, ss_alive, &tCoroutineInstance::get_alive);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCoroutineClass::ovulate()
+tVariant tCoroutineClass::ovulate()
 {
-	return tRisseVariant(new tRisseCoroutineInstance());
+	return tVariant(new tCoroutineInstance());
 }
 //---------------------------------------------------------------------------
 

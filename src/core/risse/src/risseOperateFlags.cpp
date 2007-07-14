@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief tRisseVariantやtRisseObjectInterfaceのOperateメソッドのflags引数の処理
+//! @brief tVariantやtObjectInterfaceのOperateメソッドのflags引数の処理
 //---------------------------------------------------------------------------
 #include "prec.h"
 
@@ -18,10 +18,10 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(3457,57732,10831,20390,36015,12637,53921,25070);
 //---------------------------------------------------------------------------
-tRisseString tRisseOperateFlags::AsString() const
+tString tOperateFlags::AsString() const
 {
 	// まず属性を文字列化
-	tRisseString str = tRisseMemberAttribute(Flags).AsString();
+	tString str = tMemberAttribute(Flags).AsString();
 
 	// フラグを文字列化
 	if(Flags & ofMemberEnsure)

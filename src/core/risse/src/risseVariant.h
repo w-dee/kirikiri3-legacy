@@ -21,14 +21,14 @@
 
 namespace Risse
 {
-class tRisseScriptBlockInstance;
-class tRisseScriptEngine;
+class tScriptBlockInstance;
+class tScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
-//! @note	tRisseVariantData よりも高度な動作をここで定義する
+//! @note	tVariantData よりも高度な動作をここで定義する
 //! @note	スレッド保護無し
 //---------------------------------------------------------------------------
-class tRisseVariantBlock : public tRisseVariantData, public tRisseOperateRetValue
+class tVariantBlock : public tVariantData, public tOperateRetValue
 {
 private:
 	//! @brief		CannotCreateInstanceFromNonClassObjectException を投げる
@@ -45,7 +45,7 @@ private:
 	//! @param		name		メンバ名
 	//! @note		本来 risseExceptionClass.h に書いてある物だが
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
-	static void ThrowNoSuchMemberException(const tRisseString & name);
+	static void ThrowNoSuchMemberException(const tString & name);
 
 
 private: // static オブジェクト
@@ -63,9 +63,9 @@ private: // static オブジェクト
 	struct tStaticObject
 	{
 		risse_ptruint Intf; //!< オブジェクトインターフェースへのポインタ
-		const tRisseVariantBlock * Context; //!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
+		const tVariantBlock * Context; //!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
 						//!< 指しているとして)メソッドが動作するコンテキスト
-		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint) - sizeof(const tRisseVariantBlock *)];
+		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint) - sizeof(const tVariantBlock *)];
 			//!< 残り(0で埋める) パディングは問題にならないはず
 	};
 	static tStaticObject DynamicContext;
@@ -73,22 +73,22 @@ private: // static オブジェクト
 public: // static オブジェクト
 	//! @brief		void オブジェクトを得る
 	//! @return		void オブジェクトへのstaticなconst参照
-	static const tRisseVariantBlock & GetVoidObject()
+	static const tVariantBlock & GetVoidObject()
 	{
-		return *reinterpret_cast<tRisseVariantBlock*>(&VoidObject);
+		return *reinterpret_cast<tVariantBlock*>(&VoidObject);
 	}
 
 	//! @brief		null オブジェクトを得る
 	//! @return		null オブジェクトへのstaticなconst参照
-	static const tRisseVariantBlock & GetNullObject()
+	static const tVariantBlock & GetNullObject()
 	{
-		return *reinterpret_cast<tRisseVariantBlock*>(&NullObject);
+		return *reinterpret_cast<tVariantBlock*>(&NullObject);
 	}
 
 	//! @brief		DynamicContext オブジェクトを得る
-	static const tRisseVariantBlock * GetDynamicContext()
+	static const tVariantBlock * GetDynamicContext()
 	{
-		return reinterpret_cast<tRisseVariantBlock*>(&DynamicContext);
+		return reinterpret_cast<tVariantBlock*>(&DynamicContext);
 	}
 
 public: // バリアントタイプ
@@ -105,21 +105,21 @@ public: // バリアントタイプ
 public: // コンストラクタ/代入演算子
 
 	//! @brief デフォルトコンストラクタ(void型を作成)
-	tRisseVariantBlock()
+	tVariantBlock()
 	{
 		Clear();
 	}
 
 	//! @brief		コピーコンストラクタ
 	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock(const tRisseVariantBlock & ref)
+	tVariantBlock(const tVariantBlock & ref)
 	{
 		* this = ref;
 	}
 
 	//! @brief		単純代入
 	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock & operator = (const tRisseVariantBlock & ref)
+	tVariantBlock & operator = (const tVariantBlock & ref)
 	{
 		switch(ref.GetType())
 		{
@@ -137,14 +137,14 @@ public: // コンストラクタ/代入演算子
 
 	//! @brief		コンストラクタ(integer型を作成)
 	//! @param		ref		元となる整数
-	tRisseVariantBlock(const risse_int64 ref)
+	tVariantBlock(const risse_int64 ref)
 	{
 		* this = ref;
 	}
 
 	//! @brief		代入演算子(integer型を代入)
 	//! @param		ref		元となる整数
-	tRisseVariantBlock & operator = (const risse_int64 ref)
+	tVariantBlock & operator = (const risse_int64 ref)
 	{
 		Type = vtInteger;
 		AsInteger() = ref;
@@ -153,14 +153,14 @@ public: // コンストラクタ/代入演算子
 
 	//! @brief		コンストラクタ(real型を作成)
 	//! @param		ref		元となる実数
-	tRisseVariantBlock(const risse_real ref)
+	tVariantBlock(const risse_real ref)
 	{
 		* this = ref;
 	}
 
 	//! @brief		代入演算子(real型を代入)
 	//! @param		ref		元となる実数
-	tRisseVariantBlock & operator = (const risse_real ref)
+	tVariantBlock & operator = (const risse_real ref)
 	{
 		Type = vtReal;
 		AsReal() = ref;
@@ -169,14 +169,14 @@ public: // コンストラクタ/代入演算子
 
 	//! @brief		コンストラクタ(bool型を作成)
 	//! @param		ref		元となる真偽値
-	tRisseVariantBlock(const bool ref)
+	tVariantBlock(const bool ref)
 	{
 		* this = ref;
 	}
 
 	//! @brief		代入演算子(bool型を代入)
 	//! @param		ref		元となる真偽値
-	tRisseVariantBlock & operator = (const bool ref)
+	tVariantBlock & operator = (const bool ref)
 	{
 		Type = ref?BooleanTrue:BooleanFalse;
 		Ptr = 0;
@@ -185,7 +185,7 @@ public: // コンストラクタ/代入演算子
 
 	//! @brief		コンストラクタ(string型を作成)
 	//! @param		ref		元となる文字列
-	tRisseVariantBlock(const tRisseString & ref)
+	tVariantBlock(const tString & ref)
 	{
 		* this = ref;
 	}
@@ -193,7 +193,7 @@ public: // コンストラクタ/代入演算子
 	//! @brief		代入演算子(string型を代入)
 	//! @param		ref		元となる文字列
 	//! @return		このオブジェクトへの参照
-	tRisseVariantBlock & operator = (const tRisseString & ref)
+	tVariantBlock & operator = (const tString & ref)
 	{
 		// Type の設定は必要なし
 		AsString() = ref;
@@ -202,7 +202,7 @@ public: // コンストラクタ/代入演算子
 
 	//! @brief		コンストラクタ(string型を作成)
 	//! @param		ref		元となる文字列
-	tRisseVariantBlock(const risse_char * ref)
+	tVariantBlock(const risse_char * ref)
 	{
 		* this = ref;
 	}
@@ -210,40 +210,40 @@ public: // コンストラクタ/代入演算子
 	//! @brief		代入演算子(string型を代入)
 	//! @param		ref		元となる文字列
 	//! @return		このオブジェクトへの参照
-	tRisseVariantBlock & operator = (const risse_char * ref)
+	tVariantBlock & operator = (const risse_char * ref)
 	{
 		// Type の設定は必要なし
-		AsString() = tRisseString(ref);
+		AsString() = tString(ref);
 		return *this;
 	}
 
 	//! @brief		コンストラクタ(octet型を作成)
 	//! @param		ref		元となるオクテット列
-	tRisseVariantBlock(const tRisseOctet & ref)
+	tVariantBlock(const tOctet & ref)
 	{
 		* this = ref;
 	}
 
 	//! @brief		代入演算子(octet型を代入)
 	//! @param		ref		元となるオクテット列
-	tRisseVariantBlock & operator = (const tRisseOctet & ref)
+	tVariantBlock & operator = (const tOctet & ref)
 	{
 		// Type の設定は必要なし
 		AsOctet() = ref;
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(tRisseObjectInterface*型より)
+	//! @brief		コンストラクタ(tObjectInterface*型より)
 	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock(tRisseObjectInterface * ref)
+	tVariantBlock(tObjectInterface * ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		コンストラクタ(tRisseObjectInterface*型とコンテキストを表すtRisseVariant型より)
+	//! @brief		コンストラクタ(tObjectInterface*型とコンテキストを表すtVariant型より)
 	//! @param		ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
 	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストオブジェクトを表す
-	tRisseVariantBlock(tRisseObjectInterface * ref, const tRisseVariantBlock * context)
+	tVariantBlock(tObjectInterface * ref, const tVariantBlock * context)
 	{
 		Type = vtObject;
 		SetObjectIntf(ref);
@@ -251,9 +251,9 @@ public: // コンストラクタ/代入演算子
 		AsObject().Context = context;
 	}
 
-	//! @brief		代入演算子(tRisseObjectInterface*型を代入)
+	//! @brief		代入演算子(tObjectInterface*型を代入)
 	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock & operator = (tRisseObjectInterface * ref)
+	tVariantBlock & operator = (tObjectInterface * ref)
 	{
 		// これはちょっと特殊
 		Type = vtObject;
@@ -264,7 +264,7 @@ public: // コンストラクタ/代入演算子
 
 	//! @brief		代入演算子(tObject型を代入)
 	//! @param		ref		元となるオブジェクト
-	tRisseVariantBlock & operator = (const tObject & ref)
+	tVariantBlock & operator = (const tObject & ref)
 	{
 		Type = vtObject;
 		AsObject() = ref;
@@ -275,14 +275,14 @@ public: // デストラクタ
 	//! @brief		デストラクタ
 	//! @note		このデストラクタは通常は呼ばれないことに注意すること。
 	//!				また、ここに内容の破壊以外に意味のあるコードをかけることを期待しないこと。
-	//!				tRisseHashTable などは明示的にin-placeでデストラクタを
+	//!				tHashTable などは明示的にin-placeでデストラクタを
 	//!				呼ぶことにより内容が破壊され、メンバが参照しているポインタが
 	//!				破壊されることにより参照のリンクが切れることを期待するので、それに
 	//!				対応する。
-	~tRisseVariantBlock()
+	~tVariantBlock()
 	{
 		// TODO: デストラクタがあるとスタック巻き戻しのための例外処理コードが追加
-		//		されてしまうのであまりよくない。tRisseHashTable などが明示的に
+		//		されてしまうのであまりよくない。tHashTable などが明示的に
 		//		何らかのクリアコードを呼ぶように改造すべき。このデストラクタは
 		//		なくなるべき。
 		Clear();
@@ -305,7 +305,7 @@ public: // String関連
 public: // Primitive関連
 	//! @brief		プリミティブ型に即してプリミティブ型クラスを得る
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRissePrimitiveClassBase * GetPrimitiveClass(tRisseScriptEngine * engine) const;
+	tPrimitiveClassBase * GetPrimitiveClass(tScriptEngine * engine) const;
 
 public: // Object関連
 	//! @brief		オブジェクトインターフェースがマッチするかどうかを調べる
@@ -313,7 +313,7 @@ public: // Object関連
 	//! @return		マッチしたかどうか
 	//! @note		このメソッドは、(1)thisとrhsが両方ともvtObjectかつ(2)オブジェクトインターフェース
 	//!				ポインタが同一であるかどうかを調べる
-	bool ObjectInterfaceMatch(const tRisseVariant & rhs) const
+	bool ObjectInterfaceMatch(const tVariant & rhs) const
 	{
 		if(GetType() != vtObject) return false;
 		if(rhs.GetType() != vtObject) return false;
@@ -326,7 +326,7 @@ public: // Object関連
 	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
 	//!				チェックしないので注意すること。@n
 	//!				DynamicContextを指定する場合はGetDynamicContext()の戻りを指定すること。
-	void SetContext(const tRisseVariantBlock * context)
+	void SetContext(const tVariantBlock * context)
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
 		RISSE_ASSERT(context != NULL);
@@ -339,17 +339,17 @@ public: // Object関連
 	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
 	//!				チェックしないので注意すること。@n
 	//!				DynamicContextを指定する場合はGetDynamicContext()の戻りを指定すること。@n
-	//!				このメソッドは const tRisseVariantBlock * context を引数に取る版とちがい、
+	//!				このメソッドは const tVariantBlock * context を引数に取る版とちがい、
 	//!				context がどうやら dynamic コンテキストらしい場合は自動的に
 	//!				GetDynamicContext() の戻りに変換する。そうでない場合は
-	//!				tRisseVariantBlock を new してそのポインタを SetContext() で設定する。
-	void SetContext(const tRisseVariantBlock &context);
+	//!				tVariantBlock を new してそのポインタを SetContext() で設定する。
+	void SetContext(const tVariantBlock &context);
 
 	//! @brief		コンテキストを取得する
 	//! @return		そのメソッドやプロパティが実行されるべきコンテキスト
 	//! @note		このメソッドはvtがvtObjectかどうかを
 	//!				チェックしないので注意すること
-	const tRisseVariantBlock * GetContext() const
+	const tVariantBlock * GetContext() const
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
 		return AsObject().Context;
@@ -379,7 +379,7 @@ public: // Object関連
 	//! @param		context	上書きするコンテキスト
 	//! @note		このメソッドはvtがvtObject以外の場合はなにもしない。コンテキストの上書きは、
 	//!				このオブジェクトのコンテキストが設定されいていない場合のみに発生する。
-	void OverwriteContext(const tRisseVariantBlock * context)
+	void OverwriteContext(const tVariantBlock * context)
 	{
 		RISSE_ASSERT(context != NULL);
 		if(!HasContext()) SetContext(context);
@@ -392,10 +392,10 @@ public: // Object関連
 	//! @note		このメソッドはvtがvtObjectかどうかをチェックしないので注意。
 	//!				この値がコンテキストを持っていればそのコンテキストを返すが、そうでない場合は This を返す。
 	//!				ただし、フラグに ofUseClassMembersRule が指定されていた場合は常に This を返す
-	const tRisseVariantBlock & SelectContext(risse_uint32 flags, const tRisseVariantBlock & This) const
+	const tVariantBlock & SelectContext(risse_uint32 flags, const tVariantBlock & This) const
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
-		if(!(flags & tRisseOperateFlags::ofUseClassMembersRule))
+		if(!(flags & tOperateFlags::ofUseClassMembersRule))
 		{
 			const tObject & obj = AsObject();
 			RISSE_ASSERT(obj.Context != NULL);
@@ -418,7 +418,7 @@ public: // operate
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
 	//!				エラーコードなどの戻り値はない
-	void Do(tRisseScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+	void Do(tScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		tRetValue ret = Operate(engine, RISSE_OBJECTINTERFACE_PASS_ARG);
 		if(ret != rvNoError) RaiseError(ret, name);
@@ -436,7 +436,7 @@ public: // operate
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @return		エラーコード
 	tRetValue
-		Operate(tRisseScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+		Operate(tScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		if(!name.IsEmpty())
 		{
@@ -665,7 +665,7 @@ public: // operate
 	//! @note		Operate() メソッドがname付きで呼ばれた場合にこのメソッドが呼ばれる
 	//! @return		エラーコード
 	tRetValue
-		OperateForMember(tRisseScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+		OperateForMember(tScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 public: // 演算子
 
@@ -682,9 +682,9 @@ public: // 演算子
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//! @return		プロパティ取得の結果
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock GetPropertyDirect(tRisseScriptEngine * engine, const tRisseString & name,
+	tVariantBlock GetPropertyDirect(tScriptEngine * engine, const tString & name,
 		risse_uint32 flags = 0,
-		const tRisseVariant & This = tRisseVariant::GetNullObject()) const
+		const tVariant & This = tVariant::GetNullObject()) const
 	{
 		switch(GetType())
 		{
@@ -699,11 +699,11 @@ public: // 演算子
 		case vtObject:
 			return GetPropertyDirect_Object   (        name, flags, This);
 		}
-		return tRisseVariant();
+		return tVariant();
 	}
 
-	tRisseVariantBlock GetPropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags = 0, const tRisseVariant & This = tRisseVariant::GetNullObject()) const ;
-	tRisseVariantBlock GetPropertyDirect_Object   (                             const tRisseString & name, risse_uint32 flags = 0, const tRisseVariant & This = tRisseVariant::GetNullObject()) const ;
+	tVariantBlock GetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
+	tVariantBlock GetPropertyDirect_Object   (                             const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
 
 	//-----------------------------------------------------------------------
 	//! @brief		直接プロパティ設定		SetPropertyDirect dset
@@ -713,8 +713,8 @@ public: // 演算子
 	//! @param		flags		フラグ
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
-	void SetPropertyDirect(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags,
-		const tRisseVariantBlock & value, const tRisseVariant & This = tRisseVariant::GetNullObject()) const
+	void SetPropertyDirect(tScriptEngine * engine, const tString & name, risse_uint32 flags,
+		const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const
 	{
 		switch(GetType())
 		{
@@ -731,15 +731,15 @@ public: // 演算子
 		}
 	}
 
-	void SetPropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
-	void SetPropertyDirect_Object   (                             const tRisseString & name, risse_uint32 flags, const tRisseVariantBlock & value, const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
+	void SetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags, const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const;
+	void SetPropertyDirect_Object   (                             const tString & name, risse_uint32 flags, const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		間接プロパティ取得		IGet iget
 	//! @param		key		キー
 	//! @return		プロパティ取得の結果
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock IGet(const tRisseVariantBlock & key) const
+	tVariantBlock IGet(const tVariantBlock & key) const
 	{
 		switch(GetType())
 		{
@@ -752,24 +752,24 @@ public: // 演算子
 		case vtBoolean:	return IGet_Boolean  (key);
 		case vtObject:	return IGet_Object   (key);
 		}
-		return tRisseVariant();
+		return tVariant();
 	}
 
-	tRisseVariantBlock IGet_Void    (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock IGet_Integer (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock IGet_Real    (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock IGet_Null    (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock IGet_String  (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock IGet_Octet   (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock IGet_Boolean (const tRisseVariantBlock & key) const { return tRisseVariant(); /* incomplete */ }
-	tRisseVariantBlock IGet_Object  (const tRisseVariantBlock & key) const { return Invoke_Object(mnIGet, key); }
+	tVariantBlock IGet_Void    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_Integer (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_Real    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_Null    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_String  (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_Octet   (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIGet, key); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		間接プロパティ設定		ISet iset
 	//! @param		key			キー
 	//! @param		value		設定する値
 	//-----------------------------------------------------------------------
-	void ISet(const tRisseVariantBlock & key, const tRisseVariantBlock & value) const
+	void ISet(const tVariantBlock & key, const tVariantBlock & value) const
 	{
 		switch(GetType())
 		{
@@ -784,14 +784,14 @@ public: // 演算子
 		}
 	}
 
-	void ISet_Void    (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Integer (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Real    (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Null    (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_String  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Octet   (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Boolean (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Object  (const tRisseVariantBlock & key, const tRisseVariantBlock & value) const { Invoke_Object(mnISet, value, key);
+	void ISet_Void    (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Integer (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Real    (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Null    (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_String  (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Octet   (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Boolean (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Object  (const tVariantBlock & key, const tVariantBlock & value) const { Invoke_Object(mnISet, value, key);
 		/* 注意!!! ISet がメソッド呼び出しに変換される場合、value が先に来て key が後に来る。これは将来的に
 		複数の key を使用可能にする可能性があるためである */ }
 
@@ -801,7 +801,7 @@ public: // 演算子
 	//! @param		name		メンバ名
 	//! @param		flags		フラグ
 	//-----------------------------------------------------------------------
-	void DeletePropertyDirect(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags) const
+	void DeletePropertyDirect(tScriptEngine * engine, const tString & name, risse_uint32 flags) const
 	{
 		switch(GetType())
 		{
@@ -818,8 +818,8 @@ public: // 演算子
 		}
 	}
 
-	void DeletePropertyDirect_Primitive(tRisseScriptEngine * engine, const tRisseString & name, risse_uint32 flags) const;
-	void DeletePropertyDirect_Object   (                             const tRisseString & name, risse_uint32 flags) const;
+	void DeletePropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags) const;
+	void DeletePropertyDirect_Object   (                             const tString & name, risse_uint32 flags) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
@@ -829,9 +829,9 @@ public: // 演算子
 	//! @param		args		引数
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
-	void FuncCall(tRisseScriptEngine * engine, tRisseVariantBlock * ret = NULL, risse_uint32 flags = 0,
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
+	void FuncCall(tScriptEngine * engine, tVariantBlock * ret = NULL, risse_uint32 flags = 0,
+		const tMethodArgument & args = tMethodArgument::Empty(),
+		const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
@@ -843,11 +843,11 @@ public: // 演算子
 	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
 	//-----------------------------------------------------------------------
 	void FuncCall(
-		tRisseScriptEngine * engine,
-		tRisseVariantBlock * ret,
-		const tRisseString & name, risse_uint32 flags = 0,
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseVariant & This = tRisseVariant::GetNullObject()) const
+		tScriptEngine * engine,
+		tVariantBlock * ret,
+		const tString & name, risse_uint32 flags = 0,
+		const tMethodArgument & args = tMethodArgument::Empty(),
+		const tVariant & This = tVariant::GetNullObject()) const
 	{
 		switch(GetType())
 		{
@@ -864,8 +864,8 @@ public: // 演算子
 		}
 	}
 
-	void FuncCall_Primitive(tRisseScriptEngine * engine, tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags = 0, const tRisseMethodArgument & args = tRisseMethodArgument::Empty(), const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
-	void FuncCall_Object   (                             tRisseVariantBlock * ret, const tRisseString & name, risse_uint32 flags = 0, const tRisseMethodArgument & args = tRisseMethodArgument::Empty(), const tRisseVariant & This = tRisseVariant::GetNullObject()) const;
+	void FuncCall_Primitive(tScriptEngine * engine, tVariantBlock * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
+	void FuncCall_Object   (                             tVariantBlock * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -873,8 +873,8 @@ public: // 演算子
 	//! @param		membername	メンバ名
 	//! @return		戻り値
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Invoke(tRisseScriptEngine * engine,
-		const tRisseString & membername) const
+	tVariantBlock Invoke(tScriptEngine * engine,
+		const tString & membername) const
 	{
 		switch(GetType())
 		{
@@ -889,11 +889,11 @@ public: // 演算子
 		case vtObject:
 			return Invoke_Object   (        membername);
 		}
-		return tRisseVariantBlock();
+		return tVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername) const;
-	tRisseVariantBlock Invoke_Object   (                             const tRisseString & membername) const;
+	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername) const;
+	tVariantBlock Invoke_Object   (                             const tString & membername) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -902,10 +902,10 @@ public: // 演算子
 	//! @param		arg1		引数
 	//! @return		戻り値
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Invoke(
-		tRisseScriptEngine * engine,
-		const tRisseString & membername,
-		const tRisseVariant & arg1) const
+	tVariantBlock Invoke(
+		tScriptEngine * engine,
+		const tString & membername,
+		const tVariant & arg1) const
 	{
 		switch(GetType())
 		{
@@ -920,11 +920,11 @@ public: // 演算子
 		case vtObject:
 			return Invoke_Object   (        membername,arg1);
 		}
-		return tRisseVariantBlock();
+		return tVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername,const tRisseVariant & arg1) const;
-	tRisseVariantBlock Invoke_Object   (                             const tRisseString & membername,const tRisseVariant & arg1) const;
+	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1) const;
+	tVariantBlock Invoke_Object   (                             const tString & membername,const tVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -934,11 +934,11 @@ public: // 演算子
 	//! @param		arg2		引数
 	//! @return		戻り値
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Invoke(
-		tRisseScriptEngine * engine,
-		const tRisseString & membername,
-		const tRisseVariant & arg1,
-		const tRisseVariant & arg2
+	tVariantBlock Invoke(
+		tScriptEngine * engine,
+		const tString & membername,
+		const tVariant & arg1,
+		const tVariant & arg2
 		) const
 	{
 		switch(GetType())
@@ -954,11 +954,11 @@ public: // 演算子
 		case vtObject:
 			return Invoke_Object   (        membername,arg1,arg2);
 		}
-		return tRisseVariantBlock();
+		return tVariantBlock();
 	}
 
-	tRisseVariantBlock Invoke_Primitive(tRisseScriptEngine * engine, const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
-	tRisseVariantBlock Invoke_Object   (                             const tRisseString & membername,const tRisseVariant & arg1,const tRisseVariant & arg2) const;
+	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
+	tVariantBlock Invoke_Object   (                             const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
 
 public:
 	//-----------------------------------------------------------------------
@@ -967,19 +967,19 @@ public:
 	//! @param		args		引数
 	//! @return		新しいインスタンス
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock New(risse_uint32 flags = 0,
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty()) const // TODO: あれ、Thisは？
+	tVariantBlock New(risse_uint32 flags = 0,
+		const tMethodArgument & args = tMethodArgument::Empty()) const // TODO: あれ、Thisは？
 	{
 		// Object 以外はクラスとしては機能しないため
 		// すべて 例外を発生する
 		switch(GetType())
 		{
-		case vtObject:	return New_Object   (tRisseString::GetEmptyString(), flags, args);
+		case vtObject:	return New_Object   (tString::GetEmptyString(), flags, args);
 
 		default:
 			ThrowCannotCreateInstanceFromNonClassObjectException(); break;
 		}
-		return tRisseVariantBlock();
+		return tVariantBlock();
 	}
 
 	//-----------------------------------------------------------------------
@@ -989,9 +989,9 @@ public:
 	//! @param		args		引数
 	//! @return		新しいインスタンス
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock New(
-		const tRisseString & name, risse_uint32 flags = 0,
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty()) const
+	tVariantBlock New(
+		const tString & name, risse_uint32 flags = 0,
+		const tMethodArgument & args = tMethodArgument::Empty()) const
 	{
 		switch(GetType())
 		{
@@ -1006,14 +1006,14 @@ public:
 		}
 	}
 
-	tRisseVariantBlock New_Void    (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock New_Integer (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock New_Real    (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock New_Null    (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock New_String  (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock New_Octet   (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock New_Boolean (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock New_Object  (const tRisseString & name, risse_uint32 flags, const tRisseMethodArgument & args) const;
+	tVariantBlock New_Void    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_Integer (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_Real    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_Null    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_String  (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_Octet   (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_Boolean (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_Object  (const tString & name, risse_uint32 flags, const tMethodArgument & args) const;
 
 
 	//-----------------------------------------------------------------------
@@ -1041,7 +1041,7 @@ public:
 	//! @brief		単項 ~ 演算子		BitNot
 	//! @return		演算結果(通常、integerへのキャストのビットを反転させた物)
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock BitNot() const
+	tVariantBlock BitNot() const
 	{
 		switch(GetType())
 		{
@@ -1054,10 +1054,10 @@ public:
 		case vtBoolean:	return BitNot_Boolean  ();
 		case vtObject:	return BitNot_Object   ();
 		}
-		return tRisseVariantBlock();
+		return tVariantBlock();
 	}
 
-	tRisseVariantBlock operator ~() const { return BitNot(); }
+	tVariantBlock operator ~() const { return BitNot(); }
 
 	// vtObject 以外は常に integer へのキャストのビットを反転させた物を返す。
 	// vtObject に関してはオブジェクトによっては演算子をオーバーロードしている可能性が
@@ -1071,13 +1071,13 @@ public:
 	risse_int64        BitNot_String   () const { return ~CastToInteger_String(); }
 	risse_int64        BitNot_Octet    () const { return ~CastToInteger_Octet(); }
 	risse_int64        BitNot_Boolean  () const { return ~CastToInteger_Boolean(); }
-	tRisseVariantBlock BitNot_Object   () const { return Invoke_Object(mnBitNot); }
+	tVariantBlock BitNot_Object   () const { return Invoke_Object(mnBitNot); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		++ 演算子			Inc
 	//! @return		演算結果(通常、+1 をした数値)
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & Inc()
+	tVariantBlock & Inc()
 	{
 		switch(GetType())
 		{
@@ -1093,23 +1093,23 @@ public:
 		return *this;
 	}
 
-	tRisseVariantBlock & operator ++()    { /*前置*/ return Inc(); }
-	tRisseVariantBlock   operator ++(int) { /*後置*/ tRisseVariantBlock t = *this; Inc(); return t;}
+	tVariantBlock & operator ++()    { /*前置*/ return Inc(); }
+	tVariantBlock   operator ++(int) { /*後置*/ tVariantBlock t = *this; Inc(); return t;}
 
-	tRisseVariantBlock & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
-	tRisseVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
-	tRisseVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
-	tRisseVariantBlock & Inc_Null     () { ThrowNoSuchMemberException(mnAdd); return *this; }
-	tRisseVariantBlock & Inc_String   () { *this = tRisseVariantBlock((risse_int64)1).Add_Integer(Plus_String()); return *this; }
-	tRisseVariantBlock & Inc_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
-	tRisseVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() + 1); return *this; }
-	tRisseVariantBlock & Inc_Object   () { *this = Invoke_Object(mnAdd, tRisseVariantBlock((risse_int64)1)); return *this; }
+	tVariantBlock & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
+	tVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
+	tVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
+	tVariantBlock & Inc_Null     () { ThrowNoSuchMemberException(mnAdd); return *this; }
+	tVariantBlock & Inc_String   () { *this = tVariantBlock((risse_int64)1).Add_Integer(Plus_String()); return *this; }
+	tVariantBlock & Inc_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
+	tVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() + 1); return *this; }
+	tVariantBlock & Inc_Object   () { *this = Invoke_Object(mnAdd, tVariantBlock((risse_int64)1)); return *this; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		-- 演算子			Dec
 	//! @return		演算結果(通常、-1 をした数値)
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & Dec()
+	tVariantBlock & Dec()
 	{
 		switch(GetType())
 		{
@@ -1125,24 +1125,24 @@ public:
 		return *this;
 	}
 
-	tRisseVariantBlock & operator --()    { /*前置*/ return Dec(); }
-	tRisseVariantBlock   operator --(int) { /*後置*/ tRisseVariantBlock t = *this; Dec(); return t;}
+	tVariantBlock & operator --()    { /*前置*/ return Dec(); }
+	tVariantBlock   operator --(int) { /*後置*/ tVariantBlock t = *this; Dec(); return t;}
 
-	tRisseVariantBlock & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
-	tRisseVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
-	tRisseVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
-	tRisseVariantBlock & Dec_Null     () { ThrowNoSuchMemberException(mnSub); return *this; }
-	tRisseVariantBlock & Dec_String   () { *this = tRisseVariantBlock((risse_int64)-1).Add_Integer(Plus_String()); return *this; }
-	tRisseVariantBlock & Dec_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
-	tRisseVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() - 1); return *this; }
-	tRisseVariantBlock & Dec_Object   () { *this = Invoke_Object(mnSub, tRisseVariantBlock((risse_int64)1)); return *this; }
+	tVariantBlock & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
+	tVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
+	tVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
+	tVariantBlock & Dec_Null     () { ThrowNoSuchMemberException(mnSub); return *this; }
+	tVariantBlock & Dec_String   () { *this = tVariantBlock((risse_int64)-1).Add_Integer(Plus_String()); return *this; }
+	tVariantBlock & Dec_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
+	tVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() - 1); return *this; }
+	tVariantBlock & Dec_Object   () { *this = Invoke_Object(mnSub, tVariantBlock((risse_int64)1)); return *this; }
 
 
 	//-----------------------------------------------------------------------
 	//! @brief		単項 + 演算子		Plus
 	//! @return		演算結果(通常、数値へのキャスト)
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Plus() const
+	tVariantBlock Plus() const
 	{
 		switch(GetType())
 		{
@@ -1155,25 +1155,25 @@ public:
 		case vtBoolean:	return Plus_Boolean  ();
 		case vtObject:	return Plus_Object   ();
 		}
-		return tRisseVariantBlock();
+		return tVariantBlock();
 	}
 
-	tRisseVariantBlock operator +() const { return Plus(); }
+	tVariantBlock operator +() const { return Plus(); }
 
-	tRisseVariantBlock Plus_Void     () const { return (risse_int64)0; /* void は 整数の 0 */ }
-	tRisseVariantBlock Plus_Integer  () const { return *this; }
-	tRisseVariantBlock Plus_Real     () const { return *this; }
-	tRisseVariantBlock Plus_Null     () const { ThrowNoSuchMemberException(mnPlus); return *this; }
-	tRisseVariantBlock Plus_String   () const;
-	tRisseVariantBlock Plus_Octet    () const { ThrowNoSuchMemberException(mnPlus); return *this; }
-	tRisseVariantBlock Plus_Boolean  () const { return CastToBoolean_Boolean() != false; /* boolean は 0 か 1 かに変換される */ }
-	tRisseVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
+	tVariantBlock Plus_Void     () const { return (risse_int64)0; /* void は 整数の 0 */ }
+	tVariantBlock Plus_Integer  () const { return *this; }
+	tVariantBlock Plus_Real     () const { return *this; }
+	tVariantBlock Plus_Null     () const { ThrowNoSuchMemberException(mnPlus); return *this; }
+	tVariantBlock Plus_String   () const;
+	tVariantBlock Plus_Octet    () const { ThrowNoSuchMemberException(mnPlus); return *this; }
+	tVariantBlock Plus_Boolean  () const { return CastToBoolean_Boolean() != false; /* boolean は 0 か 1 かに変換される */ }
+	tVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		単項 - 演算子		Minus
 	//! @return		演算結果(通常、符号が反転した物)
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Minus() const
+	tVariantBlock Minus() const
 	{
 		switch(GetType())
 		{
@@ -1186,19 +1186,19 @@ public:
 		case vtBoolean:	return Minus_Boolean  ();
 		case vtObject:	return Minus_Object   ();
 		}
-		return tRisseVariantBlock();
+		return tVariantBlock();
 	}
 
-	tRisseVariantBlock operator -() const { return Minus(); }
+	tVariantBlock operator -() const { return Minus(); }
 
-	tRisseVariantBlock Minus_Void     () const { return (risse_int64)0; }
-	tRisseVariantBlock Minus_Integer  () const { return -AsInteger(); }
-	tRisseVariantBlock Minus_Real     () const { return -AsReal(); }
-	tRisseVariantBlock Minus_Null     () const { ThrowNoSuchMemberException(mnMinus); return *this; }
-	tRisseVariantBlock Minus_String   () const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock Minus_Octet    () const { return tRisseVariantBlock(); /* incomplete */ }
-	tRisseVariantBlock Minus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean()?-1:0); }
-	tRisseVariantBlock Minus_Object   () const { return Invoke_Object(mnMinus); }
+	tVariantBlock Minus_Void     () const { return (risse_int64)0; }
+	tVariantBlock Minus_Integer  () const { return -AsInteger(); }
+	tVariantBlock Minus_Real     () const { return -AsReal(); }
+	tVariantBlock Minus_Null     () const { ThrowNoSuchMemberException(mnMinus); return *this; }
+	tVariantBlock Minus_String   () const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock Minus_Octet    () const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock Minus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean()?-1:0); }
+	tVariantBlock Minus_Object   () const { return Invoke_Object(mnMinus); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		|| 演算子		LogOr
@@ -1207,27 +1207,27 @@ public:
 	//!				右辺は評価されない
 	//! @note		この演算子の戻り値は常に bool
 	//-----------------------------------------------------------------------
-	bool LogOr(const tRisseVariantBlock & rhs) const
+	bool LogOr(const tVariantBlock & rhs) const
 	{
 		return (bool)*this || (bool)rhs; // 短絡を行う
 	}
 
-	bool operator ||(const tRisseVariantBlock & rhs) const { return LogOr(rhs); }
+	bool operator ||(const tVariantBlock & rhs) const { return LogOr(rhs); }
 
-	bool LogOr_Void     (const tRisseVariantBlock & rhs) const { return rhs.operator bool(); }
-	bool LogOr_Integer  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Integer() || rhs.operator bool(); }
-	bool LogOr_Real     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Real   () || rhs.operator bool(); }
-	bool LogOr_Null     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Null   () || rhs.operator bool(); }
-	bool LogOr_String   (const tRisseVariantBlock & rhs) const { return CastToBoolean_String () || rhs.operator bool(); }
-	bool LogOr_Octet    (const tRisseVariantBlock & rhs) const { return CastToBoolean_Octet  () || rhs.operator bool(); }
-	bool LogOr_Boolean  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
-	bool LogOr_Object   (const tRisseVariantBlock & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
+	bool LogOr_Void     (const tVariantBlock & rhs) const { return rhs.operator bool(); }
+	bool LogOr_Integer  (const tVariantBlock & rhs) const { return CastToBoolean_Integer() || rhs.operator bool(); }
+	bool LogOr_Real     (const tVariantBlock & rhs) const { return CastToBoolean_Real   () || rhs.operator bool(); }
+	bool LogOr_Null     (const tVariantBlock & rhs) const { return CastToBoolean_Null   () || rhs.operator bool(); }
+	bool LogOr_String   (const tVariantBlock & rhs) const { return CastToBoolean_String () || rhs.operator bool(); }
+	bool LogOr_Octet    (const tVariantBlock & rhs) const { return CastToBoolean_Octet  () || rhs.operator bool(); }
+	bool LogOr_Boolean  (const tVariantBlock & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
+	bool LogOr_Object   (const tVariantBlock & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		||= 演算子		LogOrAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & LogOrAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & LogOrAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->LogOr(rhs);
@@ -1241,27 +1241,27 @@ public:
 	//!				右辺は評価されない
 	//! @note		この演算子の戻り値は常に bool
 	//-----------------------------------------------------------------------
-	bool LogAnd(const tRisseVariantBlock & rhs) const
+	bool LogAnd(const tVariantBlock & rhs) const
 	{
 		return (bool)*this && (bool)rhs; // 短絡を行う
 	}
 
-	bool operator &&(const tRisseVariantBlock & rhs) const { return LogAnd(rhs); }
+	bool operator &&(const tVariantBlock & rhs) const { return LogAnd(rhs); }
 
-	bool LogAnd_Void     (const tRisseVariantBlock & rhs) const { return false; }
-	bool LogAnd_Integer  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Integer() && rhs.operator bool(); }
-	bool LogAnd_Real     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Real   () && rhs.operator bool(); }
-	bool LogAnd_Null     (const tRisseVariantBlock & rhs) const { return CastToBoolean_Null   () && rhs.operator bool(); }
-	bool LogAnd_String   (const tRisseVariantBlock & rhs) const { return CastToBoolean_String () && rhs.operator bool(); }
-	bool LogAnd_Octet    (const tRisseVariantBlock & rhs) const { return CastToBoolean_Octet  () && rhs.operator bool(); }
-	bool LogAnd_Boolean  (const tRisseVariantBlock & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
-	bool LogAnd_Object   (const tRisseVariantBlock & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
+	bool LogAnd_Void     (const tVariantBlock & rhs) const { return false; }
+	bool LogAnd_Integer  (const tVariantBlock & rhs) const { return CastToBoolean_Integer() && rhs.operator bool(); }
+	bool LogAnd_Real     (const tVariantBlock & rhs) const { return CastToBoolean_Real   () && rhs.operator bool(); }
+	bool LogAnd_Null     (const tVariantBlock & rhs) const { return CastToBoolean_Null   () && rhs.operator bool(); }
+	bool LogAnd_String   (const tVariantBlock & rhs) const { return CastToBoolean_String () && rhs.operator bool(); }
+	bool LogAnd_Octet    (const tVariantBlock & rhs) const { return CastToBoolean_Octet  () && rhs.operator bool(); }
+	bool LogAnd_Boolean  (const tVariantBlock & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
+	bool LogAnd_Object   (const tVariantBlock & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		&&= 演算子		LogAndAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & LogAndAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & LogAndAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->LogAnd(rhs);
@@ -1272,7 +1272,7 @@ public:
 	//! @brief		| 演算子		BitOr
 	//! @return		演算結果(通常、双方のintegerキャストのビット和)
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock BitOr(const tRisseVariantBlock & rhs) const
+	tVariantBlock BitOr(const tVariantBlock & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
 		// 戻り値は integer ではないかもしれない。
@@ -1290,35 +1290,35 @@ public:
 		return (risse_int64)0;
 	}
 
-	tRisseVariantBlock operator |(const tRisseVariantBlock & rhs) const { return BitOr(rhs); }
+	tVariantBlock operator |(const tVariantBlock & rhs) const { return BitOr(rhs); }
 
-	tRisseVariantBlock BitOr_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitOr_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitOr_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitOr_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitOr_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitOr_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitOr_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitOr_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitOr, rhs); }
+	tVariantBlock BitOr_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_String   (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitOr, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		|= 演算子		BitOrAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & BitOrAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & BitOrAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->BitOr(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator |=(const tRisseVariantBlock & rhs) { return BitOrAssign(rhs); }
+	tVariantBlock & operator |=(const tVariantBlock & rhs) { return BitOrAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		^ 演算子		BitXor
 	//! @return		演算結果(通常、双方のintegerキャストのビット排他的論理和)
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock BitXor(const tRisseVariantBlock & rhs) const
+	tVariantBlock BitXor(const tVariantBlock & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
 		// 戻り値は integer ではないかもしれない。
@@ -1336,35 +1336,35 @@ public:
 		return (risse_int64)0;
 	}
 
-	tRisseVariantBlock operator ^(const tRisseVariantBlock & rhs) const { return BitXor(rhs); }
+	tVariantBlock operator ^(const tVariantBlock & rhs) const { return BitXor(rhs); }
 
-	tRisseVariantBlock BitXor_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitXor_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitXor_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitXor_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitXor_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitXor_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitXor_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitXor_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitXor, rhs); }
+	tVariantBlock BitXor_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_String   (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitXor, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		^= 演算子		BitXorAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & BitXorAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & BitXorAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->BitXor(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator ^=(const tRisseVariantBlock & rhs) { return BitXorAssign(rhs); }
+	tVariantBlock & operator ^=(const tVariantBlock & rhs) { return BitXorAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		& 演算子		BitAnd
 	//! @return		演算結果(通常、双方のintegerキャストのビット論理積)
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock BitAnd(const tRisseVariantBlock & rhs) const
+	tVariantBlock BitAnd(const tVariantBlock & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
 		// 戻り値は integer ではないかもしれない。
@@ -1382,36 +1382,36 @@ public:
 		return (risse_int64)0;
 	}
 
-	tRisseVariantBlock operator &(const tRisseVariantBlock & rhs) const { return BitAnd(rhs); }
+	tVariantBlock operator &(const tVariantBlock & rhs) const { return BitAnd(rhs); }
 
-	tRisseVariantBlock BitAnd_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitAnd_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitAnd_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitAnd_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitAnd_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitAnd_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitAnd_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock BitAnd_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnBitAnd, rhs); }
+	tVariantBlock BitAnd_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_String   (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitAnd, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		&= 演算子		BitAndAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & BitAndAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & BitAndAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->BitAnd(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator &=(const tRisseVariantBlock & rhs) { return BitAndAssign(rhs); }
+	tVariantBlock & operator &=(const tVariantBlock & rhs) { return BitAndAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		!= 演算子		NotEqual
 	//! @return		演算結果
 	//! @note		この演算子の戻り値は常に bool
 	//-----------------------------------------------------------------------
-	bool NotEqual(const tRisseVariantBlock & rhs) const
+	bool NotEqual(const tVariantBlock & rhs) const
 	{
 		// vtObject 以外は == 演算子の真偽を逆にした物である
 		// vtObject の場合はオブジェクトによって振る舞いが異なる(ように定義できる)
@@ -1423,23 +1423,23 @@ public:
 		}
 	}
 
-	bool operator !=(const tRisseVariantBlock & rhs) const { return NotEqual(rhs); }
+	bool operator !=(const tVariantBlock & rhs) const { return NotEqual(rhs); }
 
-	bool NotEqual_Void     (const tRisseVariantBlock & rhs) const { return !Equal_Void   (rhs); }
-	bool NotEqual_Integer  (const tRisseVariantBlock & rhs) const { return !Equal_Integer(rhs); }
-	bool NotEqual_Real     (const tRisseVariantBlock & rhs) const { return !Equal_Real   (rhs); }
-	bool NotEqual_Null     (const tRisseVariantBlock & rhs) const { return !Equal_Null   (rhs); }
-	bool NotEqual_String   (const tRisseVariantBlock & rhs) const { return !Equal_String (rhs); }
-	bool NotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
-	bool NotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
-	bool NotEqual_Object   (const tRisseVariantBlock & rhs) const { return !Equal_Object (rhs); }
+	bool NotEqual_Void     (const tVariantBlock & rhs) const { return !Equal_Void   (rhs); }
+	bool NotEqual_Integer  (const tVariantBlock & rhs) const { return !Equal_Integer(rhs); }
+	bool NotEqual_Real     (const tVariantBlock & rhs) const { return !Equal_Real   (rhs); }
+	bool NotEqual_Null     (const tVariantBlock & rhs) const { return !Equal_Null   (rhs); }
+	bool NotEqual_String   (const tVariantBlock & rhs) const { return !Equal_String (rhs); }
+	bool NotEqual_Octet    (const tVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
+	bool NotEqual_Boolean  (const tVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
+	bool NotEqual_Object   (const tVariantBlock & rhs) const { return !Equal_Object (rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		== 演算子		Equal
 	//! @return		演算結果
 	//! @note		この演算子の戻り値は常に bool
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Equal(const tRisseVariantBlock & rhs) const
+	tVariantBlock Equal(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1455,23 +1455,23 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock operator ==(const tRisseVariantBlock & rhs) const { return Equal(rhs); }
+	tVariantBlock operator ==(const tVariantBlock & rhs) const { return Equal(rhs); }
 
-	bool Equal_Void     (const tRisseVariantBlock & rhs) const;
-	bool Equal_Integer  (const tRisseVariantBlock & rhs) const;
-	bool Equal_Real     (const tRisseVariantBlock & rhs) const;
-	bool Equal_Null     (const tRisseVariantBlock & rhs) const;
-	bool Equal_String   (const tRisseVariantBlock & rhs) const;
-	bool Equal_Octet    (const tRisseVariantBlock & rhs) const;
-	bool Equal_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool Equal_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnEqual, rhs); }
+	bool Equal_Void     (const tVariantBlock & rhs) const;
+	bool Equal_Integer  (const tVariantBlock & rhs) const;
+	bool Equal_Real     (const tVariantBlock & rhs) const;
+	bool Equal_Null     (const tVariantBlock & rhs) const;
+	bool Equal_String   (const tVariantBlock & rhs) const;
+	bool Equal_Octet    (const tVariantBlock & rhs) const;
+	bool Equal_Boolean  (const tVariantBlock & rhs) const;
+	bool Equal_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		!== 演算子		DiscNotEqual
 	//! @return		演算結果
 	//! @note		この演算子の戻り値は常に bool
 	//-----------------------------------------------------------------------
-	bool DiscNotEqual(const tRisseVariantBlock & rhs) const
+	bool DiscNotEqual(const tVariantBlock & rhs) const
 	{
 		// vtObject 以外は === 演算子の真偽を逆にした物である
 		// vtObject の場合はオブジェクトによって振る舞いが異なる(ように定義できる)
@@ -1483,21 +1483,21 @@ public:
 		}
 	}
 
-	bool DiscNotEqual_Void     (const tRisseVariantBlock & rhs) const { return !DiscEqual_Void   (rhs); }
-	bool DiscNotEqual_Integer  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Integer(rhs); }
-	bool DiscNotEqual_Real     (const tRisseVariantBlock & rhs) const { return !DiscEqual_Real   (rhs); }
-	bool DiscNotEqual_Null     (const tRisseVariantBlock & rhs) const { return !DiscEqual_Null   (rhs); }
-	bool DiscNotEqual_String   (const tRisseVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
-	bool DiscNotEqual_Octet    (const tRisseVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
-	bool DiscNotEqual_Boolean  (const tRisseVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
-	bool DiscNotEqual_Object   (const tRisseVariantBlock & rhs) const { return !DiscEqual_Object (rhs); }
+	bool DiscNotEqual_Void     (const tVariantBlock & rhs) const { return !DiscEqual_Void   (rhs); }
+	bool DiscNotEqual_Integer  (const tVariantBlock & rhs) const { return !DiscEqual_Integer(rhs); }
+	bool DiscNotEqual_Real     (const tVariantBlock & rhs) const { return !DiscEqual_Real   (rhs); }
+	bool DiscNotEqual_Null     (const tVariantBlock & rhs) const { return !DiscEqual_Null   (rhs); }
+	bool DiscNotEqual_String   (const tVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
+	bool DiscNotEqual_Octet    (const tVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
+	bool DiscNotEqual_Boolean  (const tVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
+	bool DiscNotEqual_Object   (const tVariantBlock & rhs) const { return !DiscEqual_Object (rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		識別 === 演算子		DiscEqual
 	//! @param		rhs			右辺
 	//! @return		識別の結果、同一ならば真、そうでなければ偽
 	//-----------------------------------------------------------------------
-	bool DiscEqual(const tRisseVariantBlock & rhs) const
+	bool DiscEqual(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1513,21 +1513,21 @@ public:
 		return false;
 	}
 
-	bool DiscEqual_Void     (const tRisseVariantBlock & rhs) const
+	bool DiscEqual_Void     (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtVoid; }
-	bool DiscEqual_Integer  (const tRisseVariantBlock & rhs) const
+	bool DiscEqual_Integer  (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtInteger && rhs.AsInteger() == AsInteger(); }
-	bool DiscEqual_Real     (const tRisseVariantBlock & rhs) const
+	bool DiscEqual_Real     (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtReal && rhs.AsReal() == AsReal(); }
-	bool DiscEqual_Null     (const tRisseVariantBlock & rhs) const
+	bool DiscEqual_Null     (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtNull; }
-	bool DiscEqual_String   (const tRisseVariantBlock & rhs) const
+	bool DiscEqual_String   (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); }
-	bool DiscEqual_Octet    (const tRisseVariantBlock & rhs) const
+	bool DiscEqual_Octet    (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtOctet && rhs.AsOctet() == AsOctet(); }
-	bool DiscEqual_Boolean  (const tRisseVariantBlock & rhs) const
+	bool DiscEqual_Boolean  (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
-	bool DiscEqual_Object   (const tRisseVariantBlock & rhs) const
+	bool DiscEqual_Object   (const tVariantBlock & rhs) const
 			{ if(IsNull()) { return rhs.IsNull(); } return Invoke_Object(mnDiscEqual, rhs); }
 
 	//-----------------------------------------------------------------------
@@ -1535,7 +1535,7 @@ public:
 	//! @param		rhs			右辺
 	//! @return		*this < rhs ならば真
 	//-----------------------------------------------------------------------
-	bool Lesser(const tRisseVariantBlock & rhs) const
+	bool Lesser(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1551,23 +1551,23 @@ public:
 		return false;
 	}
 
-	bool operator < (const tRisseVariantBlock & rhs) const { return Lesser(rhs); }
+	bool operator < (const tVariantBlock & rhs) const { return Lesser(rhs); }
 
-	bool Lesser_Void     (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Integer  (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Real     (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Null     (const tRisseVariantBlock & rhs) const;
-	bool Lesser_String   (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Octet    (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool Lesser_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLesser, rhs); }
+	bool Lesser_Void     (const tVariantBlock & rhs) const;
+	bool Lesser_Integer  (const tVariantBlock & rhs) const;
+	bool Lesser_Real     (const tVariantBlock & rhs) const;
+	bool Lesser_Null     (const tVariantBlock & rhs) const;
+	bool Lesser_String   (const tVariantBlock & rhs) const;
+	bool Lesser_Octet    (const tVariantBlock & rhs) const;
+	bool Lesser_Boolean  (const tVariantBlock & rhs) const;
+	bool Lesser_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLesser, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		> 演算子		Greater
 	//! @param		rhs			右辺
 	//! @return		*this > rhs ならば真
 	//-----------------------------------------------------------------------
-	bool Greater(const tRisseVariantBlock & rhs) const
+	bool Greater(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1583,23 +1583,23 @@ public:
 		return false;
 	}
 
-	bool operator > (const tRisseVariantBlock & rhs) const { return Greater(rhs); }
+	bool operator > (const tVariantBlock & rhs) const { return Greater(rhs); }
 
-	bool Greater_Void     (const tRisseVariantBlock & rhs) const;
-	bool Greater_Integer  (const tRisseVariantBlock & rhs) const;
-	bool Greater_Real     (const tRisseVariantBlock & rhs) const;
-	bool Greater_Null     (const tRisseVariantBlock & rhs) const;
-	bool Greater_String   (const tRisseVariantBlock & rhs) const;
-	bool Greater_Octet    (const tRisseVariantBlock & rhs) const;
-	bool Greater_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool Greater_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnGreater, rhs); }
+	bool Greater_Void     (const tVariantBlock & rhs) const;
+	bool Greater_Integer  (const tVariantBlock & rhs) const;
+	bool Greater_Real     (const tVariantBlock & rhs) const;
+	bool Greater_Null     (const tVariantBlock & rhs) const;
+	bool Greater_String   (const tVariantBlock & rhs) const;
+	bool Greater_Octet    (const tVariantBlock & rhs) const;
+	bool Greater_Boolean  (const tVariantBlock & rhs) const;
+	bool Greater_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnGreater, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		<= 演算子		LesserOrEqual
 	//! @param		rhs			右辺
 	//! @return		*this < rhs ならば真
 	//-----------------------------------------------------------------------
-	bool LesserOrEqual(const tRisseVariantBlock & rhs) const
+	bool LesserOrEqual(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1615,16 +1615,16 @@ public:
 		return false;
 	}
 
-	bool operator <= (const tRisseVariantBlock & rhs) const { return LesserOrEqual(rhs); }
+	bool operator <= (const tVariantBlock & rhs) const { return LesserOrEqual(rhs); }
 
-	bool LesserOrEqual_Void     (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Real     (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Null     (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_String   (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Octet    (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool LesserOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLesserOrEqual, rhs); }
+	bool LesserOrEqual_Void     (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_Integer  (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_Real     (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_Null     (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_String   (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_Octet    (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_Boolean  (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLesserOrEqual, rhs); }
 
 
 	//-----------------------------------------------------------------------
@@ -1632,7 +1632,7 @@ public:
 	//! @param		rhs			右辺
 	//! @return		*this < rhs ならば真
 	//-----------------------------------------------------------------------
-	bool GreaterOrEqual(const tRisseVariantBlock & rhs) const
+	bool GreaterOrEqual(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1648,16 +1648,16 @@ public:
 		return false;
 	}
 
-	bool operator >= (const tRisseVariantBlock & rhs) const { return GreaterOrEqual(rhs); }
+	bool operator >= (const tVariantBlock & rhs) const { return GreaterOrEqual(rhs); }
 
-	bool GreaterOrEqual_Void     (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Integer  (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Real     (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Null     (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_String   (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Octet    (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Boolean  (const tRisseVariantBlock & rhs) const;
-	bool GreaterOrEqual_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnGreaterOrEqual, rhs); }
+	bool GreaterOrEqual_Void     (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_Integer  (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_Real     (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_Null     (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_String   (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_Octet    (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_Boolean  (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnGreaterOrEqual, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>> 演算子(符号なし右シフト)		RBitShift
@@ -1666,7 +1666,7 @@ public:
 	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
 	//!				戻り値が integer だとは限らない
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock RBitShift(const tRisseVariantBlock & rhs) const
+	tVariantBlock RBitShift(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1682,20 +1682,20 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock RBitShift_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RBitShift_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RBitShift_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RBitShift_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RBitShift_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RBitShift_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RBitShift_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RBitShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnRBitShift, rhs); }
+	tVariantBlock RBitShift_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_String   (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnRBitShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>>= 演算子		RBitShiftAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & RBitShiftAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & RBitShiftAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->RBitShift(rhs);
@@ -1711,7 +1711,7 @@ public:
 	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
 	//!				戻り値が integer だとは限らない
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock LShift(const tRisseVariantBlock & rhs) const
+	tVariantBlock LShift(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1727,29 +1727,29 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock operator << (const tRisseVariantBlock & rhs) const { return LShift(rhs); }
+	tVariantBlock operator << (const tVariantBlock & rhs) const { return LShift(rhs); }
 
-	tRisseVariantBlock LShift_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock LShift_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock LShift_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock LShift_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock LShift_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock LShift_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock LShift_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock LShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnLShift, rhs); }
+	tVariantBlock LShift_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_String   (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		<<= 演算子		LShiftAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & LShiftAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & LShiftAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->LShift(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator <<=(const tRisseVariantBlock & rhs) { return LShiftAssign(rhs); }
+	tVariantBlock & operator <<=(const tVariantBlock & rhs) { return LShiftAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>> 演算子(符号つき右シフト)		RShift
@@ -1758,7 +1758,7 @@ public:
 	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
 	//!				戻り値が integer だとは限らない
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock RShift(const tRisseVariantBlock & rhs) const
+	tVariantBlock RShift(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1774,29 +1774,29 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock operator >> (const tRisseVariantBlock & rhs) const { return RShift(rhs); }
+	tVariantBlock operator >> (const tVariantBlock & rhs) const { return RShift(rhs); }
 
-	tRisseVariantBlock RShift_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RShift_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RShift_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RShift_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RShift_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RShift_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RShift_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock RShift_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnRShift, rhs); }
+	tVariantBlock RShift_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_String   (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnRShift, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>= 演算子		RShiftAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & RShiftAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & RShiftAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->RShift(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator >>=(const tRisseVariantBlock & rhs) { return RShiftAssign(rhs); }
+	tVariantBlock & operator >>=(const tVariantBlock & rhs) { return RShiftAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		% 演算子(剰余)		Mod
@@ -1805,7 +1805,7 @@ public:
 	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
 	//!				戻り値が integer だとは限らない
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Mod(const tRisseVariantBlock & rhs) const
+	tVariantBlock Mod(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1821,29 +1821,29 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock operator % (const tRisseVariantBlock & rhs) const { return Mod(rhs); }
+	tVariantBlock operator % (const tVariantBlock & rhs) const { return Mod(rhs); }
 
-	tRisseVariantBlock Mod_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mod_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mod_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mod_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mod_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mod_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mod_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mod_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnMod, rhs); }
+	tVariantBlock Mod_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_String   (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnMod, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		%= 演算子		ModAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & ModAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & ModAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Mod(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator %=(const tRisseVariantBlock & rhs) { return ModAssign(rhs); }
+	tVariantBlock & operator %=(const tVariantBlock & rhs) { return ModAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		/ 演算子(剰余)		Div
@@ -1852,7 +1852,7 @@ public:
 	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
 	//!				戻り値が real だとは限らない
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Div(const tRisseVariantBlock & rhs) const
+	tVariantBlock Div(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1868,29 +1868,29 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock operator / (const tRisseVariantBlock & rhs) const { return Div(rhs); }
+	tVariantBlock operator / (const tVariantBlock & rhs) const { return Div(rhs); }
 
-	tRisseVariantBlock Div_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Div_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Div_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Div_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Div_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Div_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Div_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Div_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnDiv, rhs); }
+	tVariantBlock Div_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock Div_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock Div_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock Div_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Div_String   (const tVariantBlock & rhs) const;
+	tVariantBlock Div_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock Div_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Div_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnDiv, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		/= 演算子		DivAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & DivAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & DivAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Div(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator /=(const tRisseVariantBlock & rhs) { return DivAssign(rhs); }
+	tVariantBlock & operator /=(const tVariantBlock & rhs) { return DivAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		\ 演算子(整数除算)		Idiv
@@ -1899,7 +1899,7 @@ public:
 	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
 	//!				戻り値が integer だとは限らない
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Idiv(const tRisseVariantBlock & rhs) const
+	tVariantBlock Idiv(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1915,20 +1915,20 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock Idiv_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Idiv_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Idiv_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Idiv_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Idiv_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Idiv_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Idiv_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Idiv_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnIdiv, rhs); }
+	tVariantBlock Idiv_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_String   (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnIdiv, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		\= 演算子		IdivAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & IdivAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & IdivAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Idiv(rhs);
@@ -1944,7 +1944,7 @@ public:
 	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
 	//!				戻り値が integerやreal だとは限らない
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Mul(const tRisseVariantBlock & rhs) const
+	tVariantBlock Mul(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -1960,36 +1960,36 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock operator * (const tRisseVariantBlock & rhs) const { return Mul(rhs); }
+	tVariantBlock operator * (const tVariantBlock & rhs) const { return Mul(rhs); }
 
-	tRisseVariantBlock Mul_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Mul_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnMul, rhs); }
+	tVariantBlock Mul_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_String   (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnMul, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		*= 演算子		MulAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & MulAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & MulAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Mul(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator *=(const tRisseVariantBlock & rhs) { return MulAssign(rhs); }
+	tVariantBlock & operator *=(const tVariantBlock & rhs) { return MulAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		+ 演算子(加算)		Add
 	//! @param		rhs			右辺
 	//! @return		左辺に右辺を加算した物
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Add(const tRisseVariantBlock & rhs) const
+	tVariantBlock Add(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2005,36 +2005,36 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock operator + (const tRisseVariantBlock & rhs) const { return Add(rhs); }
+	tVariantBlock operator + (const tVariantBlock & rhs) const { return Add(rhs); }
 
-	tRisseVariantBlock Add_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Add_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnAdd, rhs); }
+	tVariantBlock Add_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock Add_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock Add_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock Add_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Add_String   (const tVariantBlock & rhs) const;
+	tVariantBlock Add_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock Add_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Add_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnAdd, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		+= 演算子		AddAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & AddAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & AddAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Add(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator +=(const tRisseVariantBlock & rhs) { return AddAssign(rhs); }
+	tVariantBlock & operator +=(const tVariantBlock & rhs) { return AddAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		- 演算子(減算)		Sub
 	//! @param		rhs			右辺
 	//! @return		左辺から右辺を減算した物
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock Sub(const tRisseVariantBlock & rhs) const
+	tVariantBlock Sub(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2050,29 +2050,29 @@ public:
 		return false;
 	}
 
-	tRisseVariantBlock operator - (const tRisseVariantBlock & rhs) const { return Sub(rhs); }
+	tVariantBlock operator - (const tVariantBlock & rhs) const { return Sub(rhs); }
 
-	tRisseVariantBlock Sub_Void     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Integer  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Real     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Null     (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_String   (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Octet    (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Boolean  (const tRisseVariantBlock & rhs) const;
-	tRisseVariantBlock Sub_Object   (const tRisseVariantBlock & rhs) const { return Invoke_Object(mnSub, rhs); }
+	tVariantBlock Sub_Void     (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_Integer  (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_Real     (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_String   (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_Octet    (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnSub, rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		-= 演算子		SubAssign
 	//! @return		演算後の*thisへの参照
 	//-----------------------------------------------------------------------
-	tRisseVariantBlock & SubAssign(const tRisseVariantBlock & rhs)
+	tVariantBlock & SubAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Sub(rhs);
 		return *this;
 	}
 
-	tRisseVariantBlock & operator -=(const tRisseVariantBlock & rhs) { return SubAssign(rhs); }
+	tVariantBlock & operator -=(const tVariantBlock & rhs) { return SubAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		instanceof 演算子(instanceof)		InstanceOf
@@ -2080,7 +2080,7 @@ public:
 	//! @param		rhs			右辺
 	//! @return		左辺が右辺で示したクラスのインスタンスならば真
 	//-----------------------------------------------------------------------
-	bool InstanceOf(tRisseScriptEngine * engine, const tRisseVariantBlock & rhs) const;
+	bool InstanceOf(tScriptEngine * engine, const tVariantBlock & rhs) const;
 
 
 public: // キャスト
@@ -2181,7 +2181,7 @@ public: // キャスト
 	//! @brief		文字列に変換
 	//! @return		文字列
 	//-----------------------------------------------------------------------
-	operator tRisseString() const
+	operator tString() const
 	{
 		switch(GetType())
 		{
@@ -2194,25 +2194,25 @@ public: // キャスト
 		case vtBoolean:	return CastToString_Boolean  ();
 		case vtObject:	return CastToString_Object   ();
 		}
-		return tRisseString();
+		return tString();
 	}
 
-	tRisseString CastToString          () const { return operator tRisseString(); }
+	tString CastToString          () const { return operator tString(); }
 
-	tRisseString CastToString_Void     () const { return tRisseString(); }
-	tRisseString CastToString_Integer  () const;
-	tRisseString CastToString_Real     () const;
-	tRisseString CastToString_Null     () const;
-	tRisseString CastToString_String   () const { return AsString(); }
-	tRisseString CastToString_Octet    () const { return AsOctet().AsHumanReadable();  }
-	tRisseString CastToString_Boolean  () const;
-	tRisseString CastToString_Object   () const { return Invoke_Object(mnString); }
+	tString CastToString_Void     () const { return tString(); }
+	tString CastToString_Integer  () const;
+	tString CastToString_Real     () const;
+	tString CastToString_Null     () const;
+	tString CastToString_String   () const { return AsString(); }
+	tString CastToString_Octet    () const { return AsOctet().AsHumanReadable();  }
+	tString CastToString_Boolean  () const;
+	tString CastToString_Object   () const { return Invoke_Object(mnString); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		オクテット列に変換
 	//! @return		オクテット列
 	//-----------------------------------------------------------------------
-	operator tRisseOctet() const
+	operator tOctet() const
 	{
 		switch(GetType())
 		{
@@ -2225,19 +2225,19 @@ public: // キャスト
 		case vtBoolean:	return CastToOctet_Boolean  ();
 		case vtObject:	return CastToOctet_Object   ();
 		}
-		return tRisseOctet();
+		return tOctet();
 	}
 
-	tRisseOctet CastToOctet          () const { return operator tRisseOctet(); }
+	tOctet CastToOctet          () const { return operator tOctet(); }
 
-	tRisseOctet CastToOctet_Void     () const { return tRisseOctet(); }
-	tRisseOctet CastToOctet_Integer  () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
-	tRisseOctet CastToOctet_Real     () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
-	tRisseOctet CastToOctet_Null     () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
-	tRisseOctet CastToOctet_String   () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
-	tRisseOctet CastToOctet_Octet    () const { return AsOctet();  }
-	tRisseOctet CastToOctet_Boolean  () const { ThrowNoSuchMemberException(mnReal); return tRisseOctet(); }
-	tRisseOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet); }
+	tOctet CastToOctet_Void     () const { return tOctet(); }
+	tOctet CastToOctet_Integer  () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
+	tOctet CastToOctet_Real     () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
+	tOctet CastToOctet_Null     () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
+	tOctet CastToOctet_String   () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
+	tOctet CastToOctet_Octet    () const { return AsOctet();  }
+	tOctet CastToOctet_Boolean  () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
+	tOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet); }
 
 public: // スレッド同期
 
@@ -2248,10 +2248,10 @@ public: // スレッド同期
 		void operator = (const tSynchronizer &); //!< コピー不可です
 		void * operator new(size_t); //!< ヒープ上に置かないでください
 		void * operator new [] (size_t); //!< ヒープ上に置かないでください
-		char Synchronizer[sizeof(void*)+sizeof(void*)]; //!< tRisseObjectInterface::tSynchronizer を作成する先
+		char Synchronizer[sizeof(void*)+sizeof(void*)]; //!< tObjectInterface::tSynchronizer を作成する先
 	public:
 		//! @brief		コンストラクタ
-		tSynchronizer(const tRisseVariant & object);
+		tSynchronizer(const tVariant & object);
 
 		//! @brief		デストラクタ
 		~tSynchronizer();
@@ -2266,7 +2266,7 @@ public: // ユーティリティ
 	//!							を指定すると制限なし
 	//! @return		人間が可読な文字列
 	//-----------------------------------------------------------------------
-	tRisseString AsHumanReadable(risse_size maxlen = risse_size_max) const
+	tString AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{
 		switch(GetType())
 		{
@@ -2279,32 +2279,32 @@ public: // ユーティリティ
 		case vtBoolean:	return AsHumanReadable_Boolean  (maxlen);
 		case vtObject:	return AsHumanReadable_Object   (maxlen);
 		}
-		return tRisseString();
+		return tString();
 	}
 
-	tRisseString AsHumanReadable_Void     (risse_size maxlen) const;
-	tRisseString AsHumanReadable_Integer  (risse_size maxlen) const
+	tString AsHumanReadable_Void     (risse_size maxlen) const;
+	tString AsHumanReadable_Integer  (risse_size maxlen) const
 					{ return CastToString_Integer(); }
-	tRisseString AsHumanReadable_Real     (risse_size maxlen) const
+	tString AsHumanReadable_Real     (risse_size maxlen) const
 					{ return CastToString_Real(); }
-	tRisseString AsHumanReadable_Null     (risse_size maxlen) const;
-	tRisseString AsHumanReadable_String   (risse_size maxlen) const
+	tString AsHumanReadable_Null     (risse_size maxlen) const;
+	tString AsHumanReadable_String   (risse_size maxlen) const
 					{ return AsString().AsHumanReadable(maxlen); }
-	tRisseString AsHumanReadable_Octet    (risse_size maxlen) const
+	tString AsHumanReadable_Octet    (risse_size maxlen) const
 					{ return AsOctet().AsHumanReadable(maxlen); }
-	tRisseString AsHumanReadable_Boolean  (risse_size maxlen) const
+	tString AsHumanReadable_Boolean  (risse_size maxlen) const
 					{ return CastToString_Boolean(); }
-	tRisseString AsHumanReadable_Object   (risse_size maxlen) const
-					{ return tRisseString(); /* incomplete */ }
+	tString AsHumanReadable_Object   (risse_size maxlen) const
+					{ return tString(); /* incomplete */ }
 
 	//! @brief		Object型に対するtypeチェック
 	//! @param		cls		クラスオブジェクトインスタンス
 	//! @note		バリアントが期待したタイプであるかどうかをチェックし
 	//!				またそのオブジェクトインターフェースを得る。
 	//!				期待した値でなければ「"期待したクラスではありません"」例外を発生する。
-	//!				テンプレートパラメータのObjectTはtRisseObjectBaseの派生クラス、
-	//!				clsにはtRisseClassBaseの派生クラスのインスタンスを指定すること。
-	//!				ClassT には通常 tRisseClassBaseを指定する。
+	//!				テンプレートパラメータのObjectTはtObjectBaseの派生クラス、
+	//!				clsにはtClassBaseの派生クラスのインスタンスを指定すること。
+	//!				ClassT には通常 tClassBaseを指定する。
 	template <typename ObjectT, typename ClassT>
 	ObjectT * CheckAndGetObjectInterafce(ClassT * cls) const
 	{
@@ -2321,7 +2321,7 @@ public: // ユーティリティ
 	//!						この情報が必要ない場合は NULL を指定する。
 	//! @return		型名(文字列)   型名が不明な場合は <unknown>, 匿名クラスの場合は <anomymous> が帰る
 	//! @note		この値の型名を得る。たとえば整数ならば "Integer" など
-	tRisseString GetClassName(bool * got = NULL) const;
+	tString GetClassName(bool * got = NULL) const;
 
 	//! @brief		トレースを追加する
 	//! @param		sb			スクリプトブロック
@@ -2329,7 +2329,7 @@ public: // ユーティリティ
 	//! @note		この variant に Throwable クラスのインスタンスが入っているとみなし、
 	//!				指定されたトレースを追加する。sb が null の場合は
 	//!				トレースは追加されない。
-	void AddTrace(const tRisseScriptBlockInstance * sb, risse_size pos) const;
+	void AddTrace(const tScriptBlockInstance * sb, risse_size pos) const;
 
 	//! @brief		デバッグ用ダンプ(標準出力に出力する)
 	void DebugDump() const;
@@ -2337,11 +2337,11 @@ public: // ユーティリティ
 	//! @brief		デバッグ用各種構造体サイズ表示
 	void prtsizes() const
 	{
-		fprintf(stderr, "tRisseVariantBlock: %d\n", sizeof(tRisseVariantBlock));
+		fprintf(stderr, "tVariantBlock: %d\n", sizeof(tVariantBlock));
 		fprintf(stderr, "Storage: %d\n", sizeof(Storage));
 		fprintf(stderr, "risse_ptruint: %d\n", sizeof(risse_ptruint));
-		fprintf(stderr, "tRisseString: %d\n", sizeof(tRisseString));
-		fprintf(stderr, "tRisseOctet: %d\n", sizeof(tRisseOctet));
+		fprintf(stderr, "tString: %d\n", sizeof(tString));
+		fprintf(stderr, "tOctet: %d\n", sizeof(tOctet));
 		fprintf(stderr, "tObject: %d\n", sizeof(tObject));
 		fprintf(stderr, "tVoid: %d\n", sizeof(tVoid));
 		fprintf(stderr, "tInteger: %d\n", sizeof(tInteger));
@@ -2352,7 +2352,7 @@ public: // ユーティリティ
 
 };
 //---------------------------------------------------------------------------
-typedef tRisseVariantBlock tRisseVariant;
+typedef tVariantBlock tVariant;
 //---------------------------------------------------------------------------
 
 

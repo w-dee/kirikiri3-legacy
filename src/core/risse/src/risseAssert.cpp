@@ -21,7 +21,7 @@ RISSE_DEFINE_SOURCE_ID(10710,4962,63524,19088,28325,47284,39725,62590);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-void RisseAssert(const char * message, const char * filename, int lineno)
+void Assert(const char * message, const char * filename, int lineno)
 {
 	fflush(stderr);
 	fflush(stdout);
@@ -31,11 +31,11 @@ void RisseAssert(const char * message, const char * filename, int lineno)
 	fflush(stderr);
 	fflush(stdout);
 
-	tRisseAssertionErrorClass::Throw(
-		tRisseString(RISSE_WS("assertion failed: '%1' failed at source %2 line %3"),
-						tRisseString(message),
-						tRisseString(filename),
-						tRisseString::AsString((risse_int)lineno)));
+	tAssertionErrorClass::Throw(
+		tString(RISSE_WS("assertion failed: '%1' failed at source %2 line %3"),
+						tString(message),
+						tString(filename),
+						tString::AsString((risse_int)lineno)));
 }
 //---------------------------------------------------------------------------
 }

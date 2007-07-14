@@ -23,30 +23,30 @@
 //---------------------------------------------------------------------------
 namespace Risse
 {
-class tRisseSSAStatement;
-class tRisseSSAForm;
+class tSSAStatement;
+class tSSAForm;
 //---------------------------------------------------------------------------
 //! @brief	SSA形式における「変数」
 //---------------------------------------------------------------------------
-class tRisseSSAVariable : public tRisseCollectee
+class tSSAVariable : public tCollectee
 {
-	tRisseSSAForm * Form; //!< この変数が属している SSA 形式インスタンス
-	tRisseString Name; //!< 変数名(バージョンなし, 番号なし)
-	tRisseString NumberedName; //!< 変数名(バージョンなし、番号つき)
+	tSSAForm * Form; //!< この変数が属している SSA 形式インスタンス
+	tString Name; //!< 変数名(バージョンなし, 番号なし)
+	tString NumberedName; //!< 変数名(バージョンなし、番号つき)
 	risse_int Version; //!< 変数のバージョン
-	tRisseSSAStatement * Declared; //!< この変数が定義された文
-	gc_vector<tRisseSSAStatement*> Used; //!< この変数が使用されている文のリスト
+	tSSAStatement * Declared; //!< この変数が定義された文
+	gc_vector<tSSAStatement*> Used; //!< この変数が使用されている文のリスト
 
-	tRisseSSAStatement * FirstUsedStatement; //!< 文の通し番号順で最初にこの変数が使用された文
-	tRisseSSAStatement * LastUsedStatement; //!< 文の通し番号順で最後にこの変数が使用された文
+	tSSAStatement * FirstUsedStatement; //!< 文の通し番号順で最初にこの変数が使用された文
+	tSSAStatement * LastUsedStatement; //!< 文の通し番号順で最後にこの変数が使用された文
 
-	const tRisseVariant *Value; //!< この変数がとりうる値(NULL=決まった値がない)
-	tRisseVariant::tType ValueType; //!< この変数がとりうる型(void = どんな型でも取りうる)
+	const tVariant *Value; //!< この変数がとりうる値(NULL=決まった値がない)
+	tVariant::tType ValueType; //!< この変数がとりうる型(void = どんな型でも取りうる)
 	void * Mark; //!< マーク
 
 public:
-	static tRisseSSAVariable * GetUninitialized()
-		{ return reinterpret_cast<tRisseSSAVariable *>(1); }
+	static tSSAVariable * GetUninitialized()
+		{ return reinterpret_cast<tSSAVariable *>(1); }
 		//!< 定義されてはいるが、値が代入されていないということを表すための特殊なインスタンスの値を返す。
 		//!< 1 というアドレスを new などが返すわけがないのでこの値は十分に他の値と区別できる
 
@@ -56,87 +56,87 @@ public:
 	//! @param		stmt	この変数が定義された文
 	//! @param		name	変数名
 	//!						一時変数については空文字列を渡すこと
-	tRisseSSAVariable(tRisseSSAForm * form, tRisseSSAStatement *stmt = NULL,
-						const tRisseString & name = tRisseString::GetEmptyString());
+	tSSAVariable(tSSAForm * form, tSSAStatement *stmt = NULL,
+						const tString & name = tString::GetEmptyString());
 
 	//! @brief		この変数が属している SSA 形式インスタンスを取得する
 	//! @return		この変数が属している SSA 形式インスタンス
-	tRisseSSAForm * GetForm() const { return Form; }
+	tSSAForm * GetForm() const { return Form; }
 
 	//! @brief		この変数の名前を設定する
 	//! @param		name		変数名
 	//! @note		変数名を設定するたびに Version はユニークな値になる
-	void SetName(const tRisseString & name);
+	void SetName(const tString & name);
 
 	//! @brief		この変数の名前を返す
 	//! @return		変数の名前
-	const tRisseString & GetName() const { return Name; }
+	const tString & GetName() const { return Name; }
 
 	//! @brief		この変数の番号付きの名前を設定する
 	//! @param		n_name		この変数の番号付きの名前
-	void SetNumberedName(const tRisseString & n_name) { NumberedName = n_name; }
+	void SetNumberedName(const tString & n_name) { NumberedName = n_name; }
 
 	//! @brief		この変数の番号付きの名前を返す
 	//! @return		この変数の番号付きの名前
-	const tRisseString & GetNumberedName() const { return NumberedName; }
+	const tString & GetNumberedName() const { return NumberedName; }
 
 	//! @brief		この変数の修飾名を返す
 	//! @return		変数の修飾名
-	tRisseString GetQualifiedName() const;
+	tString GetQualifiedName() const;
 
 	//! @brief		この変数が定義された文を設定する
 	//! @param		declared	この変数が定義された文
-	void SetDeclared(tRisseSSAStatement * declared) { Declared = declared; }
+	void SetDeclared(tSSAStatement * declared) { Declared = declared; }
 
 	//! @brief		この変数が定義された文を取得する
 	//! @return		この変数が定義された文
-	tRisseSSAStatement * GetDeclared() const { return Declared; }
+	tSSAStatement * GetDeclared() const { return Declared; }
 
 	//! @brief		この変数が使用されている文を登録する
 	//! @param		stmt	この変数が使用されている文
-	void AddUsed(tRisseSSAStatement * stmt)
+	void AddUsed(tSSAStatement * stmt)
 	{
 		Used.push_back(stmt);
 	}
 
 	//! @brief		この変数が使用されている文を削除する
 	//! @param		stmt	この変数が使用されている文
-	void DeleteUsed(tRisseSSAStatement * stmt);
+	void DeleteUsed(tSSAStatement * stmt);
 
 	//! @brief		この変数で使用されている文のリストを得る
-	const gc_vector<tRisseSSAStatement *> & GetUsed() const { return Used; }
+	const gc_vector<tSSAStatement *> & GetUsed() const { return Used; }
 
 	//! @brief		文の通し番号順で最初にこの変数が使用された文を得る
 	//! @return		文の通し番号順で最初にこの変数が使用された文
-	tRisseSSAStatement * GetFirstUsedStatement() const { return FirstUsedStatement; }
+	tSSAStatement * GetFirstUsedStatement() const { return FirstUsedStatement; }
 
 	//! @brief		文の通し番号順で最後にこの変数が使用された文を得る
 	//! @return		文の通し番号順で最後にこの変数が使用された文
-	tRisseSSAStatement * GetLastUsedStatement() const { return LastUsedStatement; }
+	tSSAStatement * GetLastUsedStatement() const { return LastUsedStatement; }
 
 	//! @brief		この変数がとりうる値を設定する
 	//! @param		value		この変数がとりうる値
 	//! @note		ValueType も、この value にあわせて設定される
-	void SetValue(const tRisseVariant * value)
+	void SetValue(const tVariant * value)
 	{
 		Value = value;
 		if(value)
 			SetValueType(value->GetType());
 		else
-			SetValueType(tRisseVariant::vtVoid);
+			SetValueType(tVariant::vtVoid);
 	}
 
 	//! @brief		この変数がとりうる値を取得する
 	//! @return		この変数がとりうる値
-	const tRisseVariant * GetValue() const { return Value; }
+	const tVariant * GetValue() const { return Value; }
 
 	//! @brief		この変数がとりうる型を設定する
 	//! @param		type		この変数がとりうる型
-	void SetValueType(tRisseVariant::tType type) { ValueType = type; }
+	void SetValueType(tVariant::tType type) { ValueType = type; }
 
 	//! @brief		この変数がとりうる型を取得する
 	//! @return		この変数がとりうる型
-	tRisseVariant::tType GetValueType() const { return ValueType; }
+	tVariant::tType GetValueType() const { return ValueType; }
 
 	//! @brief		この変数のメソッド(固定名)を呼び出すSSA形式を生成する
 	//! @param		pos		ソースコード上の位置
@@ -145,10 +145,10 @@ public:
 	//! @param		param2	引数2
 	//! @param		param3	引数3
 	//! @return		関数の戻り値
-	tRisseSSAVariable * GenerateFuncCall(risse_size pos, const tRisseString & name,
-				tRisseSSAVariable * param1 = NULL,
-				tRisseSSAVariable * param2 = NULL,
-				tRisseSSAVariable * param3 = NULL);
+	tSSAVariable * GenerateFuncCall(risse_size pos, const tString & name,
+				tSSAVariable * param1 = NULL,
+				tSSAVariable * param2 = NULL,
+				tSSAVariable * param3 = NULL);
 
 	//! @brief		「マーク」フラグを設定する
 	//! @param		m		マーク
@@ -171,16 +171,16 @@ public:
 	//! @brief		この変数が使用された文が与えられるので、
 	//!				FirstUsedStatement と LastUsedStatement を設定する
 	//! @param		stmt	この変数が使用/宣言された文
-	//! @note		このメソッドを呼ぶ前に、tRisseSSABlock::SetOrder() で文に
+	//! @note		このメソッドを呼ぶ前に、tSSABlock::SetOrder() で文に
 	//!				通し番号を設定すること
-	void AnalyzeVariableStatementLiveness(tRisseSSAStatement * stmt);
+	void AnalyzeVariableStatementLiveness(tSSAStatement * stmt);
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
-	tRisseString Dump() const;
+	tString Dump() const;
 
 	//! @brief		この変数の型や定数に関するコメントを得る
-	tRisseString GetTypeComment() const;
+	tString GetTypeComment() const;
 };
 //---------------------------------------------------------------------------
 

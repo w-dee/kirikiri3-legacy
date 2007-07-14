@@ -25,7 +25,7 @@ RISSE_DEFINE_SOURCE_ID(13739,40903,3219,19310,50086,28697,53693,30185);
 
 
 //---------------------------------------------------------------------------
-tRisseCodeBlock::tRisseCodeBlock(tRisseScriptBlockInstance * sb)
+tCodeBlock::tCodeBlock(tScriptBlockInstance * sb)
 {
 	ScriptBlockInstance = sb;
 	Code = NULL;
@@ -47,7 +47,7 @@ tRisseCodeBlock::tRisseCodeBlock(tRisseScriptBlockInstance * sb)
 
 //---------------------------------------------------------------------------
 //! @brief		CodeToSourcePosition をソートするための比較関数
-struct tRisseCodeToSourcePositionComparator
+struct tCodeToSourcePositionComparator
 {
 	bool operator () (const std::pair<risse_size, risse_size> & a, const std::pair<risse_size, risse_size> & b)
 		{ return a.first < b.first; }
@@ -56,7 +56,7 @@ struct tRisseCodeToSourcePositionComparator
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
+void tCodeBlock::Assign(const tCodeGenerator *gen)
 {
 	// gen からいろいろ情報をコピー
 	risse_size ind;
@@ -65,9 +65,9 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 	const gc_vector<risse_uint32> & gen_code = gen->GetCode();
 	CodeSize = gen_code.size();
 	Code = reinterpret_cast<risse_uint32*>(
-		RisseMallocAtomicCollectee(CodeSize * sizeof(risse_uint32)));
+		MallocAtomicCollectee(CodeSize * sizeof(risse_uint32)));
 		// 注意
-		// RisseMallocAtomicCollectee を使って Code 領域を確保しているため、
+		// MallocAtomicCollectee を使って Code 領域を確保しているため、
 		// Code 領域中にポインタを含ませるばあいは相応の対処をすること。
 	ind = 0;
 	for(gc_vector<risse_uint32>::const_iterator i = gen_code.begin();
@@ -75,11 +75,11 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 		Code[ind] = *i;
 
 	// 定数領域のコピー
-	const gc_vector<tRisseVariant> & gen_consts = gen->GetConsts();
+	const gc_vector<tVariant> & gen_consts = gen->GetConsts();
 	ConstsSize = gen_consts.size();
-	Consts = new tRisseVariant[ConstsSize];
+	Consts = new tVariant[ConstsSize];
 	ind = 0;
-	for(gc_vector<tRisseVariant>::const_iterator i = gen_consts.begin();
+	for(gc_vector<tVariant>::const_iterator i = gen_consts.begin();
 		i != gen_consts.end(); i++, ind++)
 		Consts[ind] = *i;
 
@@ -117,16 +117,16 @@ void tRisseCodeBlock::Assign(const tRisseCodeGenerator *gen)
 
 	//- 一応 CodeToSourcePosition はこの時点でバイトコード順に sort されているハズだが、そういう保証はないので
 	//- stable_sort でソートし直す(あとで二分検索を行うため)
-	std::sort(CodeToSourcePosition, CodeToSourcePosition + CodeToSourcePositionSize, tRisseCodeToSourcePositionComparator());
+	std::sort(CodeToSourcePosition, CodeToSourcePosition + CodeToSourcePositionSize, tCodeToSourcePositionComparator());
 
 	// Executor を作成
-	Executor = new tRisseCodeInterpreter(this);
+	Executor = new tCodeInterpreter(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeBlock::SetSharedVariableNestCount(risse_size level)
+void tCodeBlock::SetSharedVariableNestCount(risse_size level)
 {
 	SharedVariableNestCount = level;
 }
@@ -134,7 +134,7 @@ void tRisseCodeBlock::SetSharedVariableNestCount(risse_size level)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeBlock::Fixup()
+void tCodeBlock::Fixup()
 {
 	RISSE_ASSERT(CodeBlockRelocations != NULL); // 二度以上このメソッドを呼べない
 	RISSE_ASSERT(TryIdentifierRelocations != NULL); // 二度以上このメソッドを呼べない
@@ -147,11 +147,11 @@ void tRisseCodeBlock::Fixup()
 	{
 		Consts[TryIdentifierRelocations[i].first].Clear();
 		Consts[TryIdentifierRelocations[i].first] =
-			reinterpret_cast<tRisseObjectInterface *>
+			reinterpret_cast<tObjectInterface *>
 			(ScriptBlockInstance->GetTryIdentifierAt(TryIdentifierRelocations[i].second));
 				// 再配置を行う。GetTryIdentifierAt の戻りは void * で
-				// そのポインタは tRisseObjectInterface ではないが、
-				// 実装上の都合 void * を tRisseObjectInterface に
+				// そのポインタは tObjectInterface ではないが、
+				// 実装上の都合 void * を tObjectInterface に
 				// reinterpret_cast して使う。このポインタは識別子代わりに
 				// 使う物で、このポインタの指す先に実際にアクセスを行うような
 				// ことは行わないのでこれでよいが、注意のこと。
@@ -164,21 +164,21 @@ void tRisseCodeBlock::Fixup()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseCodeBlock::GetObject()
+tVariant tCodeBlock::GetObject()
 {
-	return tRisseVariant(this);
+	return tVariant(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseCodeBlock::Dump() const
+tString tCodeBlock::Dump() const
 {
 	static const risse_size display_line_back_count = 3; // この行数文前から表示する
 	static const risse_size skip_count = 5; // この行数以上、前の行と離れる場合は中間をスキップする
 
-	tRisseString ret;
-	tRisseVMCodeIterator iterator(Code, 0);
+	tString ret;
+	tVMCodeIterator iterator(Code, 0);
 	risse_size last_line = risse_size_max; // 最後に表示した行番号
 	risse_size max_last_line = 0; // 最後に表示した行番号のうち、もっとも大きいもの
 	while((const risse_uint32*)iterator != CodeSize + Code)
@@ -247,7 +247,7 @@ tRisseString tRisseCodeBlock::Dump() const
 			{
 				char line_string[22];
 				sprintf(line_string, "#(%d) ", start+1);
-				ret += tRisseString(line_string) + ScriptBlockInstance->GetLineAt(start) + RISSE_WS("\n");
+				ret += tString(line_string) + ScriptBlockInstance->GetLineAt(start) + RISSE_WS("\n");
 
 				start ++;
 			}
@@ -258,7 +258,7 @@ tRisseString tRisseCodeBlock::Dump() const
 		sprintf(address_string, "%05d ", address);
 
 		// VMコードのダンプを組み立てる
-		ret += tRisseString(address_string) + iterator.Dump(Consts) + RISSE_WS("\n");
+		ret += tString(address_string) + iterator.Dump(Consts) + RISSE_WS("\n");
 		++iterator;
 	}
 	return ret;
@@ -267,7 +267,7 @@ tRisseString tRisseCodeBlock::Dump() const
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeBlock::CodePositionToSourcePosition(risse_size pos) const
+risse_size tCodeBlock::CodePositionToSourcePosition(risse_size pos) const
 {
 	risse_size s = 0;
 	risse_size e = CodeToSourcePositionSize;
@@ -288,7 +288,7 @@ risse_size tRisseCodeBlock::CodePositionToSourcePosition(risse_size pos) const
 
 
 //---------------------------------------------------------------------------
-tRisseObjectInterface::tRetValue tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tObjectInterface::tRetValue tCodeBlock::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
@@ -307,7 +307,7 @@ tRisseObjectInterface::tRetValue tRisseCodeBlock::Operate(RISSE_OBJECTINTERFACE_
 
 
 //---------------------------------------------------------------------------
-tRisseSharedVariableFrames::tRisseSharedVariableFrames(const tRisseSharedVariableFramesOverlay & ref) :
+tSharedVariableFrames::tSharedVariableFrames(const tSharedVariableFramesOverlay & ref) :
 	Frames(ref.Frames->Frames), CS(ref.Frames->CS)
 {
 	if(ref.OverlayedFrame)
@@ -326,8 +326,8 @@ tRisseSharedVariableFrames::tRisseSharedVariableFrames(const tRisseSharedVariabl
 
 
 //---------------------------------------------------------------------------
-tRisseCodeBlockStackAdapter::tRetValue
-	tRisseCodeBlockStackAdapter::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tCodeBlockStackAdapter::tRetValue
+	tCodeBlockStackAdapter::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())

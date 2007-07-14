@@ -26,7 +26,7 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(26307,13927,24599,16690,19605,20552,47176,34884);
 
 //---------------------------------------------------------------------------
-tRissePropertyInstance::tRissePropertyInstance()
+tPropertyInstance::tPropertyInstance()
 {
 	Getter.Nullize();
 	Setter.Nullize();
@@ -35,30 +35,30 @@ tRissePropertyInstance::tRissePropertyInstance()
 
 
 //---------------------------------------------------------------------------
-tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tPropertyInstance::tRetValue tPropertyInstance::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(name.IsEmpty())
 	{
 		if(code == ocFuncCall) // このオブジェクトに対するプロパティ読み込みか？
 		{
 			// synchronized メソッドの場合はロックを行う
-			tRisseVariant::tSynchronizer sync(Synchronized ? This : tRisseVariant::GetVoidObject());
+			tVariant::tSynchronizer sync(Synchronized ? This : tVariant::GetVoidObject());
 
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(Getter.IsNull()) return rvPropertyCannotBeRead;
-			Getter.FuncCall_Object(result, tRisseString::GetEmptyString(),
-							flags, tRisseMethodArgument::Empty(), This);
+			Getter.FuncCall_Object(result, tString::GetEmptyString(),
+							flags, tMethodArgument::Empty(), This);
 			return rvNoError;
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
 			// synchronized メソッドの場合はロックを行う
-			tRisseVariant::tSynchronizer sync(Synchronized ? This : tRisseVariant::GetVoidObject());
+			tVariant::tSynchronizer sync(Synchronized ? This : tVariant::GetVoidObject());
 
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			args.ExpectArgumentCount(1);
 			if(Setter.IsNull()) return rvPropertyCannotBeWritten;
-			Setter.FuncCall_Object(NULL, tRisseString::GetEmptyString(),
+			Setter.FuncCall_Object(NULL, tString::GetEmptyString(),
 							flags, args, This);
 			return rvNoError;
 		}
@@ -71,7 +71,7 @@ tRissePropertyInstance::tRetValue tRissePropertyInstance::Operate(RISSE_OBJECTIN
 
 
 //---------------------------------------------------------------------------
-void tRissePropertyInstance::construct()
+void tPropertyInstance::construct()
 {
 	// なにもしない
 }
@@ -79,7 +79,7 @@ void tRissePropertyInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRissePropertyInstance::initialize(const tRisseNativeCallInfo & info)
+void tPropertyInstance::initialize(const tNativeCallInfo & info)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -98,8 +98,8 @@ void tRissePropertyInstance::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRissePropertyClass::tRissePropertyClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Property, engine->ObjectClass)
+tPropertyClass::tPropertyClass(tScriptEngine * engine) :
+	tClassBase(ss_Property, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -107,7 +107,7 @@ tRissePropertyClass::tRissePropertyClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRissePropertyClass::RegisterMembers()
+void tPropertyClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -118,10 +118,10 @@ void tRissePropertyClass::RegisterMembers()
 	// 呼ばれるため)うまくいかないので、
 	// たとえ仮であろうと ovulate メソッドを登録する。
 	// いったん ScriptEngine インスタンスの PropertyClass を NULL に設定すると
-	// RisseBindProperty は仮のメソッドインスタンスを用いるようになる。
-	tRissePropertyClass * f_save = GetRTTI()->GetScriptEngine()->PropertyClass;
+	// BindProperty は仮のメソッドインスタンスを用いるようになる。
+	tPropertyClass * f_save = GetRTTI()->GetScriptEngine()->PropertyClass;
 	GetRTTI()->GetScriptEngine()->PropertyClass = NULL;
-	RisseBindFunction(this, ss_ovulate, &tRissePropertyClass::ovulate);
+	BindFunction(this, ss_ovulate, &tPropertyClass::ovulate);
 	GetRTTI()->GetScriptEngine()->PropertyClass = f_save;
 
 	// クラスに必要なメソッドを登録する
@@ -129,21 +129,21 @@ void tRissePropertyClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate, &tRissePropertyClass::ovulate);
-	RisseBindFunction(this, ss_construct, &tRissePropertyInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRissePropertyInstance::initialize);
-	RisseBindProperty(this, ss_getter, &tRissePropertyInstance::GetGetter);
-	RisseBindProperty(this, ss_setter, &tRissePropertyInstance::GetSetter);
-	RisseBindProperty(this, ss_synchronized,
-		&tRissePropertyInstance::get_synchronized, &tRissePropertyInstance::set_synchronized);
+	BindFunction(this, ss_ovulate, &tPropertyClass::ovulate);
+	BindFunction(this, ss_construct, &tPropertyInstance::construct);
+	BindFunction(this, ss_initialize, &tPropertyInstance::initialize);
+	BindProperty(this, ss_getter, &tPropertyInstance::GetGetter);
+	BindProperty(this, ss_setter, &tPropertyInstance::GetSetter);
+	BindProperty(this, ss_synchronized,
+		&tPropertyInstance::get_synchronized, &tPropertyInstance::set_synchronized);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRissePropertyClass::ovulate()
+tVariant tPropertyClass::ovulate()
 {
-	return tRisseVariant(new tRissePropertyInstance());
+	return tVariant(new tPropertyInstance());
 }
 //---------------------------------------------------------------------------
 

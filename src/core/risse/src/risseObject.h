@@ -27,30 +27,30 @@
 
 namespace Risse
 {
-class tRisseVariantBlock;
-typedef tRisseVariantBlock tRisseVariant;
-class tRisseRTTI;
+class tVariantBlock;
+typedef tVariantBlock tVariant;
+class tRTTI;
 //---------------------------------------------------------------------------
 //! @brief		Risseオブジェクトインターフェース
 //---------------------------------------------------------------------------
-class tRisseObjectInterface : public tRisseCollectee, public tRisseOperateRetValue
+class tObjectInterface : public tCollectee, public tOperateRetValue
 {
-	const tRisseRTTI * RTTI; //!< このオブジェクトインターフェースの「型」をC++レベルで
+	const tRTTI * RTTI; //!< このオブジェクトインターフェースの「型」をC++レベルで
 					//!< 識別するためのメンバ。簡易RTTI。とくに識別しない場合は
 					//!< NULLを入れておく。
-	tRisseCriticalSection * CS; //!< このオブジェクトを保護するためのクリティカルセクション
+	tCriticalSection * CS; //!< このオブジェクトを保護するためのクリティカルセクション
 
 public:
 	//! @brief		コンストラクタ
-	tRisseObjectInterface() { RTTI = NULL; CS = new tRisseCriticalSection();/*TODO: CSのキャッシュ*/}
+	tObjectInterface() { RTTI = NULL; CS = new tCriticalSection();/*TODO: CSのキャッシュ*/}
 
 	//! @brief		コンストラクタ(RTTIを指定)
 	//! @param		rtti		RTTI
-	tRisseObjectInterface(const tRisseRTTI * rtti) { RTTI = rtti; CS = new tRisseCriticalSection();/*TODO: CSのキャッシュ*/}
+	tObjectInterface(const tRTTI * rtti) { RTTI = rtti; CS = new tCriticalSection();/*TODO: CSのキャッシュ*/}
 
 	//! @brief		コンストラクタ(RTTIとCSを指定)
 	//! @param		rtti		RTTI
-	tRisseObjectInterface(const tRisseRTTI * rtti, tRisseCriticalSection * cs) { RTTI = rtti; CS = cs; }
+	tObjectInterface(const tRTTI * rtti, tCriticalSection * cs) { RTTI = rtti; CS = cs; }
 
 	//! @brief		オブジェクトに対して操作を行う
 	//! @param		code	オペレーションコード
@@ -85,11 +85,11 @@ public:
 
 	//! @brief		RTTI情報を得る
 	//! @param		RTTI情報
-	const tRisseRTTI * GetRTTI() const { return RTTI; }
+	const tRTTI * GetRTTI() const { return RTTI; }
 
 	//! @brief		RTTI情報を設定する
 	//! @param		rtti		RTTI情報
-	void SetRTTI(const tRisseRTTI * rtti) { RTTI = rtti; }
+	void SetRTTI(const tRTTI * rtti) { RTTI = rtti; }
 
 	//! @brief		CS を持っているかどうかを返す
 	bool HasCS() const { return CS != NULL; }
@@ -98,8 +98,8 @@ public:
 	class tSynchronizer
 	{
 	private:
-		char Locker[sizeof(tRisseCriticalSection::tLocker)]; //!< ロックオブジェクトを配置する先
-		tRisseCriticalSection * CS; //!< ロックが行うCS
+		char Locker[sizeof(tCriticalSection::tLocker)]; //!< ロックオブジェクトを配置する先
+		tCriticalSection * CS; //!< ロックが行うCS
 			//!< (たんにロックが行われたかどうかを表すbool値でもよいのだが
 			//!<  この構造体のサイズを推測しなければならない理由が risseVariant.h にあり
 			//!< 推測しやすいポインタサイズとした (bool はパディングがどうなるかが分かりづらい) )
@@ -110,11 +110,11 @@ public:
 	public:
 		//! @brief	コンストラクタ
 		//! @param	intf	オブジェクトインターフェース
-		tSynchronizer(const tRisseObjectInterface * intf)
+		tSynchronizer(const tObjectInterface * intf)
 		{
 			// intf が非 null かつ intf が CS を持っている場合のみに
 			// ロックを行う。
-			// tRisseCriticalSection::tLocker はコンストラクタでロックを
+			// tCriticalSection::tLocker はコンストラクタでロックを
 			// 行い、デストラクタでロックの解除をするため、ロックを行う
 			// 必要がある場合はプレースメント new でロックを行う。解除は
 			// 同様にデストラクタを個別に呼び出すことで実現する。
@@ -122,8 +122,8 @@ public:
 			{
 				// ロックを行う
 				CS = intf->CS;
-				new (reinterpret_cast<tRisseCriticalSection::tLocker*>(Locker))
-					tRisseCriticalSection::tLocker(*(intf->CS));
+				new (reinterpret_cast<tCriticalSection::tLocker*>(Locker))
+					tCriticalSection::tLocker(*(intf->CS));
 			}
 			else
 			{
@@ -136,7 +136,7 @@ public:
 		{
 			if(CS)
 			{
-				(reinterpret_cast<tRisseCriticalSection::tLocker*>(Locker))->
+				(reinterpret_cast<tCriticalSection::tLocker*>(Locker))->
 						~tLocker();
 			}
 		}
@@ -150,14 +150,14 @@ public:
 
 //---------------------------------------------------------------------------
 //! @brief		識別用クラス
-//! @note		このクラスは tRisseObjectInterface を継承するが、なにも
-//!				実装をおこなわない。このインスタンスを作り、tRisseVariantに
+//! @note		このクラスは tObjectInterface を継承するが、なにも
+//!				実装をおこなわない。このインスタンスを作り、tVariantに
 //!				のせることができるが、インスタンスによる区別を行いたい場合のみに作る
 //---------------------------------------------------------------------------
-class tRisseIdentifyObject : public tRisseObjectInterface
+class tIdentifyObject : public tObjectInterface
 {
 public:
-	tRisseIdentifyObject() : tRisseObjectInterface((const tRisseRTTI *)NULL, (tRisseCriticalSection *)NULL) {;}
+	tIdentifyObject() : tObjectInterface((const tRTTI *)NULL, (tCriticalSection *)NULL) {;}
 
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };

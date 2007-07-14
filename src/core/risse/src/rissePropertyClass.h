@@ -24,38 +24,38 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"Property" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
-class tRissePropertyInstance : public tRisseObjectBase
+class tPropertyInstance : public tObjectBase
 {
-	typedef tRisseObjectBase inherited; //!< 親クラスの typedef
+	typedef tObjectBase inherited; //!< 親クラスの typedef
 
 private:
-	tRisseVariant Getter; //!< ゲッタメソッド
-	tRisseVariant Setter; //!< セッタメソッド
+	tVariant Getter; //!< ゲッタメソッド
+	tVariant Setter; //!< セッタメソッド
 	bool Synchronized; //!< synchronized メソッドかどうか
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRissePropertyInstance();
+	tPropertyInstance();
 
 	//! @brief		ゲッタメソッドを取得する
 	//! @return		ゲッタメソッド
-	tRisseVariant & GetGetter() { return Getter; }
+	tVariant & GetGetter() { return Getter; }
 
 	//! @brief		ゲッタメソッドを設定する
 	//! @param		m		ゲッタメソッド
-	void SetGetter(const tRisseVariant & m) { Getter = m; }
+	void SetGetter(const tVariant & m) { Getter = m; }
 
 	//! @brief		セッタメソッドを取得する
 	//! @return		セッタメソッド
-	tRisseVariant & GetSetter() { return Setter; }
+	tVariant & GetSetter() { return Setter; }
 
 	//! @brief		セッタメソッドを設定する
 	//! @param		m		セッタメソッド
-	void SetSetter(const tRisseVariant & m) { Setter = m; }
+	void SetSetter(const tVariant & m) { Setter = m; }
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
-	virtual ~tRissePropertyInstance() {;}
+	virtual ~tPropertyInstance() {;}
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
@@ -71,7 +71,7 @@ public:
 
 public: // Risse用オブジェクトなど
 	void construct();
-	void initialize(const tRisseNativeCallInfo & info);
+	void initialize(const tNativeCallInfo & info);
 	bool get_synchronized() const { return GetSynchronized(); }
 	void set_synchronized(bool b) { SetSynchronized(b); }
 };
@@ -81,19 +81,19 @@ public: // Risse用オブジェクトなど
 //---------------------------------------------------------------------------
 //! @brief		"Property" クラス
 //---------------------------------------------------------------------------
-class tRissePropertyClass : public tRisseClassBase
+class tPropertyClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRissePropertyClass(tRisseScriptEngine * engine);
+	tPropertyClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

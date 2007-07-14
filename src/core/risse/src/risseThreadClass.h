@@ -20,38 +20,38 @@
 
 namespace Risse
 {
-class tRisseScriptThread;
+class tScriptThread;
 //---------------------------------------------------------------------------
 //! @brief		"Thread" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
-class tRisseThreadInstance : public tRisseObjectBase
+class tThreadInstance : public tObjectBase
 {
 private:
-	tRisseScriptThread * Thread; //!< スレッドの実装
+	tScriptThread * Thread; //!< スレッドの実装
 
-	tRisseVariant Method; //!< 実行するメソッド
-	tRisseVariant Context; //!< 実行するメソッドのコンテキスト
-	tRisseVariant Ret; //!< Execute メソッドの戻り値
-	const tRisseVariant *Exception; //!< 例外が発生した場合の例外オブジェクト
+	tVariant Method; //!< 実行するメソッド
+	tVariant Context; //!< 実行するメソッドのコンテキスト
+	tVariant Ret; //!< Execute メソッドの戻り値
+	const tVariant *Exception; //!< 例外が発生した場合の例外オブジェクト
 
 public:
 	//! @brief		コンストラクタ
-	tRisseThreadInstance();
+	tThreadInstance();
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
-	virtual ~tRisseThreadInstance() {;}
+	virtual ~tThreadInstance() {;}
 
 public: // Risse用メソッドなど
 	void construct();
-	void initialize(const tRisseNativeCallInfo & info);
+	void initialize(const tNativeCallInfo & info);
 	void run() const;
 	void start();
-	tRisseVariant join() const;
+	tVariant join() const;
 	bool sleep(risse_int64 timeout);
 	void wakeup();
 
 	// friend 指定
-	friend class tRisseScriptThread;
+	friend class tScriptThread;
 };
 //---------------------------------------------------------------------------
 
@@ -59,20 +59,20 @@ public: // Risse用メソッドなど
 //---------------------------------------------------------------------------
 //! @brief		"Thread" クラス
 //---------------------------------------------------------------------------
-class tRisseThreadClass : public tRisseClassBase
+class tThreadClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseThreadClass(tRisseScriptEngine * engine);
+	tThreadClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public:
 };

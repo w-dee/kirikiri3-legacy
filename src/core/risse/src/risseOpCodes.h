@@ -25,13 +25,13 @@ namespace Risse
 //---------------------------------------------------------------------------
 // 各種定数
 //---------------------------------------------------------------------------
-static const int RisseMaxVMInsnOperand = 6;
+static const int MaxVMInsnOperand = 6;
 	//!< 命令のオペランドの最大数(ただし可変オペランド部分をのぞく)
-static const risse_uint32 RisseFuncCallFlag_Omitted = 0x80000000L;
+static const risse_uint32 FuncCallFlag_Omitted = 0x80000000L;
 	//!< call などのフラグの定数 - 関数呼び出しは ... を伴っているか (引数省略されているか)
-static const risse_uint32 RisseInvalidRegNum = (risse_uint32)0xffffffff;
+static const risse_uint32 InvalidRegNum = (risse_uint32)0xffffffff;
 	//!< 無効なレジスタを表す値
-static const risse_size RisseMaxArgCount = 30;
+static const risse_size MaxArgCount = 30;
 	//!< 引数の最大個数
 //---------------------------------------------------------------------------
 
@@ -43,9 +43,9 @@ static const risse_size RisseMaxArgCount = 30;
 //---------------------------------------------------------------------------
 //! @brief		VM命令の情報を表す構造体
 //---------------------------------------------------------------------------
-struct tRisseVMInsnInfo
+struct tVMInsnInfo
 {
-	//! @brief		tRisseVMInsnInfoで使用されるフラグ
+	//! @brief		tVMInsnInfoで使用されるフラグ
 	enum tInsnFlag
 	{
 		vifVoid =0, 	//!< V このオペランドは存在しない
@@ -61,14 +61,14 @@ struct tRisseVMInsnInfo
 
 	const char * Name;							//!< 命令名
 	const char * Mnemonic;						//!< ニーモニック
-	tInsnFlag Flags[RisseMaxVMInsnOperand];		//!< オペランドnに対するフラグ
+	tInsnFlag Flags[MaxVMInsnOperand];		//!< オペランドnに対するフラグ
 
-	const tRisseStringData RawMemberName;		//!< オブジェクトの演算子メンバ名
+	const tStringData RawMemberName;		//!< オブジェクトの演算子メンバ名
 
-	//! @brief 演算子メンバ名に対応するtRisseStringオブジェクトを返す
-	const tRisseString & GetMemberName() const
+	//! @brief 演算子メンバ名に対応するtStringオブジェクトを返す
+	const tString & GetMemberName() const
 	{
-		return *reinterpret_cast<const tRisseString *>(&RawMemberName);
+		return *reinterpret_cast<const tString *>(&RawMemberName);
 	}
 };
 //---------------------------------------------------------------------------
@@ -79,7 +79,7 @@ struct tRisseVMInsnInfo
 //---------------------------------------------------------------------------
 //! @brief オペーレーションコードの名前の配列
 //---------------------------------------------------------------------------
-extern const tRisseVMInsnInfo RisseVMInsnInfo[];
+extern const tVMInsnInfo VMInsnInfo[];
 //---------------------------------------------------------------------------
 
 
@@ -92,12 +92,12 @@ extern const tRisseVMInsnInfo RisseVMInsnInfo[];
 
 
 
-class tRisseVariantBlock;
-typedef tRisseVariantBlock tRisseVariant;
+class tVariantBlock;
+typedef tVariantBlock tVariant;
 //---------------------------------------------------------------------------
 //! @brief		VMコード用イテレータ
 //---------------------------------------------------------------------------
-class tRisseVMCodeIterator : public tRisseCollectee
+class tVMCodeIterator : public tCollectee
 {
 	const risse_uint32 *CodePointer; //!< コードへのポインタ
 	risse_size Address; //!< 論理アドレス(risse_size_maxの場合は論理アドレス指定無し)
@@ -106,7 +106,7 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		codepointer	コードへのポインタ
 	//! @param		address		論理アドレス
-	tRisseVMCodeIterator(const risse_uint32 *codepointer, risse_size address = risse_size_max)
+	tVMCodeIterator(const risse_uint32 *codepointer, risse_size address = risse_size_max)
 	{
 		CodePointer = codepointer;
 		Address = address;
@@ -114,7 +114,7 @@ public:
 
 	//! @brief		コピーコンストラクタ
 	//! @param		ref			コピーもとオブジェクト
-	tRisseVMCodeIterator(const tRisseVMCodeIterator & ref)
+	tVMCodeIterator(const tVMCodeIterator & ref)
 	{
 		CodePointer = ref.CodePointer;
 		Address = ref.Address;
@@ -125,7 +125,7 @@ public:
 	//! @return		このオブジェクトへの参照
 	//! @note		論理アドレスは「指定無し」にリセットされる。
 	//!				論理アドレスもともに指定したい場合は SetCodePointer() を使うこと
-	tRisseVMCodeIterator & operator = (const risse_uint32 *codepointer)
+	tVMCodeIterator & operator = (const risse_uint32 *codepointer)
 	{
 		CodePointer = codepointer;
 		Address = risse_size_max;
@@ -169,12 +169,12 @@ public:
 
 	//! @brief		このイテレータの示す命令をダンプ(逆アセンブル)する
 	//! @return		ダンプ結果
-	tRisseString Dump() const;
+	tString Dump() const;
 
 	//! @brief		このイテレータの示す命令をコメント付きでダンプ(逆アセンブル)する
 	//! @param		consts		定数領域(コメントを表示するために必要)
 	//! @return		ダンプ結果
-	tRisseString Dump(const tRisseVariant * consts) const;
+	tString Dump(const tVariant * consts) const;
 };
 //---------------------------------------------------------------------------
 

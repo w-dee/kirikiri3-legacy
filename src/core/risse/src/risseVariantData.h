@@ -24,17 +24,17 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseObjectInterface;
-class tRissePrimitiveClassBase;
-class tRisseVariantBlock;
+class tObjectInterface;
+class tPrimitiveClassBase;
+class tVariantBlock;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型のデータ部
 /*! @note
 
-tRisseStringData, tRisseVariantBlock::tObject, tRisseOctetData の各先頭
+tStringData, tVariantBlock::tObject, tOctetData の各先頭
 のメンバは必ず何かのポインタである。それらはメンバ Type とストレージを共有
 する。このメンバ Type と共有を行ってる書くポインタはこれらは実際にはそれぞれ
-tRisseString, tRisseObject, tRisseOctetとして扱われるが、データメンバのレイ
+tString, tObject, tOctetとして扱われるが、データメンバのレイ
 アウトは同一である。
 
 各ポインタは4の倍数のアドレスにしか配置されないことがメモリアロケータの仕様
@@ -42,17 +42,17 @@ tRisseString, tRisseObject, tRisseOctetとして扱われるが、データメ�
 んでいることになる。また、0x100 未満のような極端に低い番地にこれらのポインタ
 が配置されることはあり得ない。
 
-そのため、tRisseVariant::GetType() を見ればわかるとおり、Type が 4 以上
+そのため、tVariant::GetType() を見ればわかるとおり、Type が 4 以上
 ならば下位2ビット+4を Type とし、4 未満ならばそれをそのまま Type として返
 している。ここら辺は ruby の実装からヒントを得た物。
 
-tRisseString, tRisseVariantBlock::tObject, tRisseOctet 内にある各の「本当
+tString, tVariantBlock::tObject, tOctet 内にある各の「本当
 の」ポインタを選るには、~0x03 との bit and をとればよい。
 
-tRisseString の内部ポインタが指し示している場所は、文字列を保持しているバッ
+tString の内部ポインタが指し示している場所は、文字列を保持しているバッ
 ファである。RisseではUTF-32文字列を対象とするため、このポインタが 32bit境界
 にそろわないことはない。デバッガなどでそのまま UTF-32 文字列を表示したい用
-途がある。tRisseString の Type の条件は 0x04 以上かつ下位2ビットが00
+途がある。tString の Type の条件は 0x04 以上かつ下位2ビットが00
 であるため、内部ポインタの値と本来指し示しているポインタは同じになる。これに
 より、内部ポインタが指し示すポインタがそのまま文字列バッファのポインタとなり、
 そのままデバッガなどで内容を表示できる。
@@ -60,10 +60,10 @@ tRisseString の内部ポインタが指し示している場所は、文字列�
 とりあえず tRiseVariant のサイズを抑えたいがための苦肉の策。こんなことをしな
 い方が速いかもしれないし、こうした方が速いかもしれない。 
 
-tRisseVariant はパフォーマンスの関係上、ILP32 システムでは 3 * 32bit, LP64 シス
+tVariant はパフォーマンスの関係上、ILP32 システムでは 3 * 32bit, LP64 シス
 テムでは 2 * 64bit に収まるようにすること。
 
-tRisseVariantData::tVoid や tRisseVariantData::tNull, tRisseVariantData::tBoolean
+tVariantData::tVoid や tVariantData::tNull, tVariantData::tBoolean
 の Ptr は、tObject においてポインタが入っている所である。
 void や null や boolean にしたとき、ここにポインタが入っていると
 GCによりマークし続けられてしまう。そのため、void や integer , boolean に
@@ -72,7 +72,7 @@ GCによりマークし続けられてしまう。そのため、void や intege
 スレッド保護はない。
 */
 //---------------------------------------------------------------------------
-class tRisseVariantData : public tRisseCollectee
+class tVariantData : public tCollectee
 {
 protected:
 
@@ -122,8 +122,8 @@ protected:
 	//! @brief object ストレージ型
 	struct tObject
 	{
-		tRisseObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常にObjectPointerBias)
-		const tRisseVariantBlock * Context;
+		tObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常にObjectPointerBias)
+		const tVariantBlock * Context;
 						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
 						//!< 指しているとして)メソッドが動作するコンテキスト
 	};
@@ -142,14 +142,14 @@ protected:
 	const risse_real & AsReal() const { RISSE_ASSERT(GetType() == vtReal); return reinterpret_cast<const tReal*>(Storage)->Value; }
 
 	//! @brief String型への参照を取得 @return String型フィールドへの参照
-	tRisseString & AsString() { return *reinterpret_cast<tRisseString*>(Storage); }
+	tString & AsString() { return *reinterpret_cast<tString*>(Storage); }
 	//! @brief String型へのconst参照を取得 @return String型フィールドへのconst参照
-	const tRisseString & AsString() const { RISSE_ASSERT(GetType() == vtString); return *reinterpret_cast<const tRisseString*>(Storage); }
+	const tString & AsString() const { RISSE_ASSERT(GetType() == vtString); return *reinterpret_cast<const tString*>(Storage); }
 
 	//! @brief Octet型への参照を取得 @return Octet型フィールドへの参照
-	tRisseOctet & AsOctet() { return *reinterpret_cast<tRisseOctet*>(Storage); }
+	tOctet & AsOctet() { return *reinterpret_cast<tOctet*>(Storage); }
 	//! @brief Octet型へのconst参照を取得 @return Octet型フィールドへのconst参照
-	const tRisseOctet & AsOctet() const { RISSE_ASSERT(GetType() == vtOctet); return *reinterpret_cast<const tRisseOctet*>(Storage); }
+	const tOctet & AsOctet() const { RISSE_ASSERT(GetType() == vtOctet); return *reinterpret_cast<const tOctet*>(Storage); }
 
 	//! @brief Object型への参照を取得 @return Object型フィールドへの参照
 	tObject & AsObject() { return *reinterpret_cast<tObject*>(Storage); }
@@ -163,12 +163,12 @@ protected:
 
 
 public:
-	//! @brief tRisseObjectInterfaceへのポインタを取得 @return tRisseObjectInterfaceへのポインタ
+	//! @brief tObjectInterfaceへのポインタを取得 @return tObjectInterfaceへのポインタ
 	//! @note Intfをいじる場合は常にこのメソッドを使うこと
-	tRisseObjectInterface * GetObjectInterface() const
+	tObjectInterface * GetObjectInterface() const
 	{
 		RISSE_ASSERT(GetType() == vtObject);
-		tRisseObjectInterface * ret = reinterpret_cast<tRisseObjectInterface*>(
+		tObjectInterface * ret = reinterpret_cast<tObjectInterface*>(
 			reinterpret_cast<risse_ptruint>(AsObject().Intf) - ObjectPointerBias);
 		// 2 = Intf の下位2ビットは常にObjectPointerBiasなので、これを元に戻す
 		RISSE_ASSERT(ret != NULL);
@@ -176,12 +176,12 @@ public:
 	}
 
 protected:
-	//! @brief tRisseObjectInterfaceへのポインタを設定 @param intf tRisseObjectInterfaceへのポインタ
+	//! @brief tObjectInterfaceへのポインタを設定 @param intf tObjectInterfaceへのポインタ
 	//! @note Intfをいじる場合は常にこのメソッドを使うこと
-	void SetObjectIntf(tRisseObjectInterface * intf)
+	void SetObjectIntf(tObjectInterface * intf)
 	{
 		RISSE_ASSERT(GetType() == vtObject);
-		AsObject().Intf = reinterpret_cast<tRisseObjectInterface*>(
+		AsObject().Intf = reinterpret_cast<tObjectInterface*>(
 			reinterpret_cast<risse_ptruint>(intf) + ObjectPointerBias);
 		// 2 = Intf の下位2ビットは常にObjectPointerBiasなので、これをたす
 	}
@@ -195,8 +195,8 @@ protected:
 			RV_SIZE_MAX(sizeof(tInteger),     \
 			RV_SIZE_MAX(sizeof(tReal),        \
 			RV_SIZE_MAX(sizeof(tNull),        \
-			RV_SIZE_MAX(sizeof(tRisseString), \
-			RV_SIZE_MAX(sizeof(tRisseOctet),  \
+			RV_SIZE_MAX(sizeof(tString), \
+			RV_SIZE_MAX(sizeof(tOctet),  \
 			RV_SIZE_MAX(sizeof(tBoolean),     \
 			RV_SIZE_MAX(sizeof(tObject),      \
 					4                         \

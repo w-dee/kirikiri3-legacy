@@ -17,26 +17,26 @@
 
 namespace Risse
 {
-class tRisseScriptEngine;
+class tScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		this-proxyクラス (オブジェクトAにメンバがなければオブジェクトBを見に行く特殊なオブジェクト)
 //---------------------------------------------------------------------------
-class tRisseThisProxy : public tRisseObjectInterface
+class tThisProxy : public tObjectInterface
 {
-	tRisseVariant & A; //!< オブジェクトA
-	tRisseVariant & B; //!< オブジェクトB
-	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
+	tVariant & A; //!< オブジェクトA
+	tVariant & B; //!< オブジェクトB
+	tScriptEngine * Engine; //!< スクリプトエンジンインスタンス
 public:
 	//! @brief		コンストラクタ
 	//! @param		a		オブジェクトA
 	//! @param		b		オブジェクトB
 	//! @param		engine	スクリプトエンジンインスタンス
-	tRisseThisProxy(tRisseVariant & a, tRisseVariant & b, tRisseScriptEngine * engine) :
+	tThisProxy(tVariant & a, tVariant & b, tScriptEngine * engine) :
 		A(a), B(b), Engine(engine)
 	{
 	}
 
-	//! @brief		tRisseObjectInterface::Operate() オーバーライド
+	//! @brief		tObjectInterface::Operate() オーバーライド
 	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		// まず A をみる

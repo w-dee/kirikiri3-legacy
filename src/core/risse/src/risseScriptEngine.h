@@ -22,17 +22,17 @@
 
 namespace Risse
 {
-class tRisseBindingInfo;
+class tBindingInfo;
 //---------------------------------------------------------------------------
 //! @brief		警告情報等の通知インターフェース
 //---------------------------------------------------------------------------
-class tRisseLineOutputInterface : public tRisseCollectee
+class tLineOutputInterface : public tCollectee
 {
 public:
 	//! @brief		情報を通知する
 	//! @param		info		情報
 	//! @note		警告情報は複数スレッドから同時に出力される可能性があるので注意
-	virtual void Output(const tRisseString & info) = 0;
+	virtual void Output(const tString & info) = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -40,20 +40,20 @@ public:
 
 
 // クラスの前方定義を行う
-#define RISSE_INTERNALCLASSES_CLASS(X) class tRisse##X##Class;
+#define RISSE_INTERNALCLASSES_CLASS(X) class t##X##Class;
 #include "risseInternalClasses.inc"
 #undef RISSE_INTERNALCLASSES_CLASS
 
 //---------------------------------------------------------------------------
 //! @brief		スクリプトエンジンクラス
 //---------------------------------------------------------------------------
-class tRisseScriptEngine : public tRisseCollectee
+class tScriptEngine : public tCollectee
 {
 public:
 	void * StartSentinel; //!< クラスインスタンスの開始位置
 
 	// 各クラスインスタンスへのポインタを定義する
-	#define RISSE_INTERNALCLASSES_CLASS(X) tRisse##X##Class * X##Class;
+	#define RISSE_INTERNALCLASSES_CLASS(X) t##X##Class * X##Class;
 	#include "risseInternalClasses.inc"
 	#undef RISSE_INTERNALCLASSES_CLASS
 
@@ -63,15 +63,15 @@ private:
 	static bool CommonObjectsInitialized;
 
 protected:
-	tRisseVariant GlobalObject; //!< グローバルオブジェクト
-	tRisseLineOutputInterface *WarningOutput; //!< 警告情報の出力先
+	tVariant GlobalObject; //!< グローバルオブジェクト
+	tLineOutputInterface *WarningOutput; //!< 警告情報の出力先
 
 public:
 	//! @brief		コンストラクタ
-	tRisseScriptEngine();
+	tScriptEngine();
 
 	//! @brief		グローバルオブジェクトを得る
-	tRisseVariant & GetGlobalObject() { return GlobalObject; }
+	tVariant & GetGlobalObject() { return GlobalObject; }
 
 	//! @brief		スクリプトを評価する
 	//! @param		script			スクリプトの内容
@@ -82,23 +82,23 @@ public:
 	//! @param		binding			バインディング情報(NULLの場合はグローバルバインディング)
 	//! @param		is_expression	式モードかどうか(Risseのように文と式の区別を
 	//!								する必要がない言語ではfalseでよい)
-	void Evaluate(const tRisseString & script, const tRisseString & name,
+	void Evaluate(const tString & script, const tString & name,
 					risse_size lineofs = 0,
-					tRisseVariant * result = NULL,
-					const tRisseBindingInfo * binding = NULL, bool is_expression = false);
+					tVariant * result = NULL,
+					const tBindingInfo * binding = NULL, bool is_expression = false);
 
 	//! @brief		警告情報の出力先を設定する
 	//! @param		output		警告情報の出力先
 	//! @note		警告情報は複数スレッドから同時に出力される可能性があるので注意
-	void SetWarningOutput(tRisseLineOutputInterface * output)  { WarningOutput = output; }
+	void SetWarningOutput(tLineOutputInterface * output)  { WarningOutput = output; }
 
 	//! @brief		警告情報の出力先を取得する
 	//! @return		警告情報の出力先
-	tRisseLineOutputInterface * GetWarningOutput() const  { return WarningOutput; }
+	tLineOutputInterface * GetWarningOutput() const  { return WarningOutput; }
 
 	//! @brief		警告情報を出力する
 	//! @param		info	警告情報
-	void OutputWarning(const tRisseString & info) const
+	void OutputWarning(const tString & info) const
 	{
 		if(WarningOutput) WarningOutput->Output(info);
 	}

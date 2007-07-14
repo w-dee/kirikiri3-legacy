@@ -26,8 +26,8 @@ RISSE_DEFINE_SOURCE_ID(52364,51758,14226,19534,54934,29340,32493,12680);
 
 
 //---------------------------------------------------------------------------
-tRisseCodeGenerator::tRisseCodeGenerator(tRisseSSAForm * form,
-	tRisseCodeGenerator * parent, bool useparentframe, risse_size nestlevel)
+tCodeGenerator::tCodeGenerator(tSSAForm * form,
+	tCodeGenerator * parent, bool useparentframe, risse_size nestlevel)
 {
 	Form = form;
 	Parent = parent;
@@ -45,7 +45,7 @@ tRisseCodeGenerator::tRisseCodeGenerator(tRisseSSAForm * form,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::SetRegisterBase()
+void tCodeGenerator::SetRegisterBase()
 {
 	if(Parent)
 	{
@@ -65,7 +65,7 @@ void tRisseCodeGenerator::SetRegisterBase()
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddBlockMap(const tRisseSSABlock * block)
+void tCodeGenerator::AddBlockMap(const tSSABlock * block)
 {
 	BlockMap.insert(tBlockMap::value_type(block, Code.size()));
 }
@@ -73,7 +73,7 @@ void tRisseCodeGenerator::AddBlockMap(const tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddPendingBlockJump(const tRisseSSABlock * block, risse_size insn_pos)
+void tCodeGenerator::AddPendingBlockJump(const tSSABlock * block, risse_size insn_pos)
 {
 	PendingBlockJumps.push_back(tPendingBlockJump(block, Code.size(), insn_pos));
 }
@@ -81,7 +81,7 @@ void tRisseCodeGenerator::AddPendingBlockJump(const tRisseSSABlock * block, riss
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindConst(const tRisseVariant & value)
+risse_size tCodeGenerator::FindConst(const tVariant & value)
 {
 	// 直近のMaxConstSearch個をConstsから探し、一致すればそのインデックスを返す
 	risse_size const_size = Consts.size();
@@ -100,7 +100,7 @@ risse_size tRisseCodeGenerator::FindConst(const tRisseVariant & value)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
+risse_size tCodeGenerator::FindRegMap(const tSSAVariable * var)
 {
 	// RegMap から指定された変数を探す
 	// 指定された変数が無ければ変数の空きマップからさがし、変数を割り当てる
@@ -121,7 +121,7 @@ risse_size tRisseCodeGenerator::FindRegMap(const tRisseSSAVariable * var)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::UpdateMaxNumUsedRegs(risse_size max)
+void tCodeGenerator::UpdateMaxNumUsedRegs(risse_size max)
 {
 	if(MaxNumUsedRegs < max) MaxNumUsedRegs = max; // 最大値を更新
 	if(Parent && UseParentFrame) Parent->UpdateMaxNumUsedRegs(max); // 再帰
@@ -130,7 +130,7 @@ void tRisseCodeGenerator::UpdateMaxNumUsedRegs(risse_size max)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::AllocateRegister()
+risse_size tCodeGenerator::AllocateRegister()
 {
 	// 空きレジスタを探す
 	risse_size assigned_reg;
@@ -155,7 +155,7 @@ risse_size tRisseCodeGenerator::AllocateRegister()
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::FreeRegister(risse_size reg)
+void tCodeGenerator::FreeRegister(risse_size reg)
 {
 	RegFreeMap.push_back(reg); // 変数を空き配列に追加
 	NumUsedRegs --;
@@ -164,7 +164,7 @@ void tRisseCodeGenerator::FreeRegister(risse_size reg)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::FreeRegister(const tRisseSSAVariable *var)
+void tCodeGenerator::FreeRegister(const tSSAVariable *var)
 {
 	// RegMap から指定された変数を開放する
 	tRegMap::iterator f = RegMap.find(var);
@@ -176,7 +176,7 @@ void tRisseCodeGenerator::FreeRegister(const tRisseSSAVariable *var)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name, risse_uint16 &nestlevel, risse_uint16 &regnum)
+void tCodeGenerator::FindSharedRegNameMap(const tString & name, risse_uint16 &nestlevel, risse_uint16 &regnum)
 {
 	tNamedRegMap::iterator f = SharedRegNameMap->find(name);
 	if(f != SharedRegNameMap->end())
@@ -196,11 +196,11 @@ void tRisseCodeGenerator::FindSharedRegNameMap(const tRisseString & name, risse_
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
+void tCodeGenerator::AddSharedRegNameMap(const tString & name)
 {
-	RisseFPrint(stderr, (RISSE_WS("Adding ") + name +
+	FPrint(stderr, (RISSE_WS("Adding ") + name +
 		RISSE_WS(" at nestlevel ") +
-		tRisseString::AsString(risse_int64(NestLevel)) + RISSE_WS("\n")).c_str() );
+		tString::AsString(risse_int64(NestLevel)) + RISSE_WS("\n")).c_str() );
 
 	RISSE_ASSERT(SharedRegNameMap->find(name) == SharedRegNameMap->end()); // 二重挿入は許されない
 
@@ -208,18 +208,18 @@ void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 	// それぞれ 32bit 整数の 上位16bitと下位16ビットを使うので、
 	// それぞれがその16bitの上限を超えることができない。
 	if(NestLevel > 0xffff)
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			Form->GetFunction()->GetFunctionGroup()->
 				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-			tRisseString(RISSE_WS_TR("too deep function nest level")), Form->GetScriptBlockInstance(),
+			tString(RISSE_WS_TR("too deep function nest level")), Form->GetScriptBlockInstance(),
 				GetSourceCodePosition()); // まずあり得ないと思うが ...
 
 	risse_size reg_num = SharedRegCount;
 	if(reg_num > 0xffff)
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			Form->GetFunction()->GetFunctionGroup()->
 				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-			tRisseString(RISSE_WS_TR("too many shared variables")), Form->GetScriptBlockInstance(),
+			tString(RISSE_WS_TR("too many shared variables")), Form->GetScriptBlockInstance(),
 				GetSourceCodePosition()); // まずあり得ないと思うが ...
 
 	SharedRegNameMap->insert(tNamedRegMap::value_type(name, (NestLevel<<16) + reg_num));
@@ -229,13 +229,13 @@ void tRisseCodeGenerator::AddSharedRegNameMap(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::AddBindingRegNameMap(const tRisseString & name,
+void tCodeGenerator::AddBindingRegNameMap(const tString & name,
 								risse_uint16 nestlevel, risse_uint16 regnum)
 {
-	RisseFPrint(stderr, (RISSE_WS("Adding binding ") + name +
+	FPrint(stderr, (RISSE_WS("Adding binding ") + name +
 		RISSE_WS(" at nestlevel ") +
-		tRisseString::AsString(risse_int64(nestlevel)) + RISSE_WS(", regnum ") +
-		tRisseString::AsString(risse_int64(regnum)) +  RISSE_WS("\n")).c_str() );
+		tString::AsString(risse_int64(nestlevel)) + RISSE_WS(", regnum ") +
+		tString::AsString(risse_int64(regnum)) +  RISSE_WS("\n")).c_str() );
 
 	RISSE_ASSERT(SharedRegNameMap->find(name) == SharedRegNameMap->end()); // 二重挿入は許されない
 
@@ -248,7 +248,7 @@ void tRisseCodeGenerator::AddBindingRegNameMap(const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::GetSharedRegCount() const
+risse_size tCodeGenerator::GetSharedRegCount() const
 {
 	return SharedRegCount;
 }
@@ -256,7 +256,7 @@ risse_size tRisseCodeGenerator::GetSharedRegCount() const
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::QuerySharedVariableNestCount() const
+risse_size tCodeGenerator::QuerySharedVariableNestCount() const
 {
 	risse_size max_nest_count = 0;
 	for(tNamedRegMap::const_iterator i = SharedRegNameMap->begin();
@@ -275,7 +275,7 @@ risse_size tRisseCodeGenerator::QuerySharedVariableNestCount() const
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindOrRegisterVariableMapForChildren(const tRisseString & name)
+risse_size tCodeGenerator::FindOrRegisterVariableMapForChildren(const tString & name)
 {
 	// VariableMapForChildren から指定された変数を探す
 	// 指定された変数が無ければ変数の空きマップからさがし、変数を割り当てる
@@ -296,7 +296,7 @@ risse_size tRisseCodeGenerator::FindOrRegisterVariableMapForChildren(const tRiss
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::FindVariableMapForChildren(const tRisseString & name)
+risse_size tCodeGenerator::FindVariableMapForChildren(const tString & name)
 {
 	// VariableMapForChildren から指定された変数を探す
 	tNamedRegMap::iterator f = VariableMapForChildren.find(name);
@@ -307,7 +307,7 @@ risse_size tRisseCodeGenerator::FindVariableMapForChildren(const tRisseString & 
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::FreeVariableMapForChildren()
+void tCodeGenerator::FreeVariableMapForChildren()
 {
 	// VariableMapForChildrenにある変数を自分からすべて開放する
 	for(tNamedRegMap::iterator i = VariableMapForChildren.begin(); i != VariableMapForChildren.end(); i++)
@@ -317,14 +317,14 @@ void tRisseCodeGenerator::FreeVariableMapForChildren()
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::FixCode()
+void tCodeGenerator::FixCode()
 {
 	// サイズをチェック
 	if(Code.size() != static_cast<risse_uint32>(Code.size()))
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			Form->GetFunction()->GetFunctionGroup()->
 				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-			tRisseString(RISSE_WS_TR("too large code size")),
+			tString(RISSE_WS_TR("too large code size")),
 			Form->GetScriptBlockInstance(), 0); // まずあり得ないと思うが ...
 
 	// ジャンプアドレスのfixup
@@ -345,7 +345,7 @@ void tRisseCodeGenerator::FixCode()
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::SetSourceCodePosition(risse_size pos)
+void tCodeGenerator::SetSourceCodePosition(risse_size pos)
 {
 	if(CodeToSourcePosition.size() > 0 &&
 		CodeToSourcePosition.back().second == pos) return;
@@ -356,7 +356,7 @@ void tRisseCodeGenerator::SetSourceCodePosition(risse_size pos)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseCodeGenerator::GetSourceCodePosition() const
+risse_size tCodeGenerator::GetSourceCodePosition() const
 {
 	if(CodeToSourcePosition.size() > 0) return CodeToSourcePosition.back().second;
 	return risse_size_max;
@@ -365,7 +365,7 @@ risse_size tRisseCodeGenerator::GetSourceCodePosition() const
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutNoOperation()
+void tCodeGenerator::PutNoOperation()
 {
 	PutWord(ocNoOperation);
 }
@@ -373,7 +373,7 @@ void tRisseCodeGenerator::PutNoOperation()
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisseSSAVariable * src)
+void tCodeGenerator::PutAssign(const tSSAVariable * dest, const tSSAVariable * src)
 {
 	PutWord(ocAssign);
 	PutWord(FindRegMap(dest));
@@ -383,7 +383,7 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisse
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssign(risse_size dest, const tRisseSSAVariable * src)
+void tCodeGenerator::PutAssign(risse_size dest, const tSSAVariable * src)
 {
 	PutWord(ocAssign);
 	PutWord(dest);
@@ -393,7 +393,7 @@ void tRisseCodeGenerator::PutAssign(risse_size dest, const tRisseSSAVariable * s
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, risse_size src)
+void tCodeGenerator::PutAssign(const tSSAVariable * dest, risse_size src)
 {
 	PutWord(ocAssign);
 	PutWord(FindRegMap(dest));
@@ -403,7 +403,7 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, risse_size s
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisseVariant & value)
+void tCodeGenerator::PutAssign(const tSSAVariable * dest, const tVariant & value)
 {
 	PutWord(ocAssignConstant);
 	PutWord(FindRegMap(dest));
@@ -413,11 +413,11 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, const tRisse
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, tRisseOpCode code)
+void tCodeGenerator::PutAssign(const tSSAVariable * dest, tOpCode code)
 {
 	// 一応 code を assert (完全ではない)
-	RISSE_ASSERT(RisseVMInsnInfo[code].Flags[0] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[code].Flags[1] == tRisseVMInsnInfo::vifVoid);
+	RISSE_ASSERT(VMInsnInfo[code].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[code].Flags[1] == tVMInsnInfo::vifVoid);
 
 	PutWord(static_cast<risse_uint32>(code));
 	PutWord(FindRegMap(dest));
@@ -426,8 +426,8 @@ void tRisseCodeGenerator::PutAssign(const tRisseSSAVariable * dest, tRisseOpCode
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssignNewRegExp(const tRisseSSAVariable * dest,
-			const tRisseSSAVariable * pattern, const tRisseSSAVariable * flags)
+void tCodeGenerator::PutAssignNewRegExp(const tSSAVariable * dest,
+			const tSSAVariable * pattern, const tSSAVariable * flags)
 {
 	PutWord(ocAssignNewRegExp);
 	PutWord(FindRegMap(dest));
@@ -438,8 +438,8 @@ void tRisseCodeGenerator::PutAssignNewRegExp(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssignNewFunction(const tRisseSSAVariable * dest,
-			const tRisseSSAVariable * body)
+void tCodeGenerator::PutAssignNewFunction(const tSSAVariable * dest,
+			const tSSAVariable * body)
 {
 	PutWord(ocAssignNewFunction);
 	PutWord(FindRegMap(dest));
@@ -449,8 +449,8 @@ void tRisseCodeGenerator::PutAssignNewFunction(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssignNewProperty(const tRisseSSAVariable * dest,
-			const tRisseSSAVariable * getter, const tRisseSSAVariable * setter)
+void tCodeGenerator::PutAssignNewProperty(const tSSAVariable * dest,
+			const tSSAVariable * getter, const tSSAVariable * setter)
 {
 	PutWord(ocAssignNewProperty);
 	PutWord(FindRegMap(dest));
@@ -461,8 +461,8 @@ void tRisseCodeGenerator::PutAssignNewProperty(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssignNewClass(const tRisseSSAVariable * dest,
-			const tRisseSSAVariable * super, const tRisseSSAVariable * name)
+void tCodeGenerator::PutAssignNewClass(const tSSAVariable * dest,
+			const tSSAVariable * super, const tSSAVariable * name)
 {
 	PutWord(ocAssignNewClass);
 	PutWord(FindRegMap(dest));
@@ -473,8 +473,8 @@ void tRisseCodeGenerator::PutAssignNewClass(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssignNewModule(const tRisseSSAVariable * dest,
-			const tRisseSSAVariable * name)
+void tCodeGenerator::PutAssignNewModule(const tSSAVariable * dest,
+			const tSSAVariable * name)
 {
 	PutWord(ocAssignNewModule);
 	PutWord(FindRegMap(dest));
@@ -484,30 +484,30 @@ void tRisseCodeGenerator::PutAssignNewModule(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssignParam(const tRisseSSAVariable * dest, risse_size index)
+void tCodeGenerator::PutAssignParam(const tSSAVariable * dest, risse_size index)
 {
 	PutWord(ocAssignParam);
 	PutWord(FindRegMap(dest));
 	PutWord(static_cast<risse_uint32>(index));
-	// index の最大値は RisseMaxArgCount で確実に risse_uint32 で表現できる範囲のため安全にキャストできる
+	// index の最大値は MaxArgCount で確実に risse_uint32 で表現できる範囲のため安全にキャストできる
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAssignBlockParam(const tRisseSSAVariable * dest, risse_size index)
+void tCodeGenerator::PutAssignBlockParam(const tSSAVariable * dest, risse_size index)
 {
 	PutWord(ocAssignBlockParam);
 	PutWord(FindRegMap(dest));
 	PutWord(static_cast<risse_uint32>(index));
-	// index の最大値は RisseMaxArgCount で確実に risse_uint32 で表現できる範囲のため安全にキャストできる
+	// index の最大値は MaxArgCount で確実に risse_uint32 で表現できる範囲のため安全にキャストできる
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutAddBindingMap(const tRisseSSAVariable * map,
-	const tRisseSSAVariable *name, const tRisseString &nname)
+void tCodeGenerator::PutAddBindingMap(const tSSAVariable * map,
+	const tSSAVariable *name, const tString &nname)
 {
 	risse_uint16 nestlevel = 0, regnum = 0;
 	FindSharedRegNameMap(nname, nestlevel, regnum);
@@ -520,7 +520,7 @@ void tRisseCodeGenerator::PutAddBindingMap(const tRisseSSAVariable * map,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutWrite(const tRisseString & dest, const tRisseSSAVariable * src)
+void tCodeGenerator::PutWrite(const tString & dest, const tSSAVariable * src)
 {
 	risse_uint16 nestlevel = 0, regnum = 0;
 	FindSharedRegNameMap(dest, nestlevel, regnum);
@@ -532,7 +532,7 @@ void tRisseCodeGenerator::PutWrite(const tRisseString & dest, const tRisseSSAVar
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutRead(const tRisseSSAVariable * dest, const tRisseString & src)
+void tCodeGenerator::PutRead(const tSSAVariable * dest, const tString & src)
 {
 	risse_uint16 nestlevel = 0, regnum = 0;
 	FindSharedRegNameMap(src, nestlevel, regnum);
@@ -544,11 +544,11 @@ void tRisseCodeGenerator::PutRead(const tRisseSSAVariable * dest, const tRisseSt
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutCodeBlockRelocatee(const tRisseSSAVariable * dest, risse_size index)
+void tCodeGenerator::PutCodeBlockRelocatee(const tSSAVariable * dest, risse_size index)
 {
 	// 定数領域に仮の値をpushする
-	tRisseVariant value(tRisseString(RISSE_WS("<VM block #%1>"),
-		tRisseString::AsString((risse_int64)index)));
+	tVariant value(tString(RISSE_WS("<VM block #%1>"),
+		tString::AsString((risse_int64)index)));
 	risse_size reloc_pos = Consts.size();
 	Consts.push_back(value);
 
@@ -564,7 +564,7 @@ void tRisseCodeGenerator::PutCodeBlockRelocatee(const tRisseSSAVariable * dest, 
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutSetFrame(const tRisseSSAVariable * dest)
+void tCodeGenerator::PutSetFrame(const tSSAVariable * dest)
 {
 	PutWord(ocSetFrame);
 	PutWord(FindRegMap(dest));
@@ -573,7 +573,7 @@ void tRisseCodeGenerator::PutSetFrame(const tRisseSSAVariable * dest)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutSetShare(const tRisseSSAVariable * dest)
+void tCodeGenerator::PutSetShare(const tSSAVariable * dest)
 {
 	PutWord(ocSetShare);
 	PutWord(FindRegMap(dest));
@@ -582,14 +582,14 @@ void tRisseCodeGenerator::PutSetShare(const tRisseSSAVariable * dest)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * func,
-		tRisseOpCode code, risse_uint32 expbit,
-		const gc_vector<const tRisseSSAVariable *> & args,
-		const gc_vector<const tRisseSSAVariable *> & blocks)
+void tCodeGenerator::PutFunctionCall(const tSSAVariable * dest,
+		const tSSAVariable * func,
+		tOpCode code, risse_uint32 expbit,
+		const gc_vector<const tSSAVariable *> & args,
+		const gc_vector<const tSSAVariable *> & blocks)
 {
 	RISSE_ASSERT(!(code == ocNew && blocks.size() != 0)); // ブロック付き new はない
-	RISSE_ASSERT(!((expbit & RisseFuncCallFlag_Omitted) && args.size() != 0));
+	RISSE_ASSERT(!((expbit & FuncCallFlag_Omitted) && args.size() != 0));
 		// omit なのに引数があるということはない
 	RISSE_ASSERT(code == ocNew || code == ocFuncCall || code == ocTryFuncCall);
 
@@ -611,11 +611,11 @@ void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 			// ブロックがあっても無くてもかならずブロックの個数を入れる
 
 	// 引数をput
-	for(gc_vector<const tRisseSSAVariable *>::const_iterator i = args.begin();
+	for(gc_vector<const tSSAVariable *>::const_iterator i = args.begin();
 		i != args.end(); i++)
 		PutWord(FindRegMap(*i));
 	// ブロックをput
-	for(gc_vector<const tRisseSSAVariable *>::const_iterator i = blocks.begin();
+	for(gc_vector<const tSSAVariable *>::const_iterator i = blocks.begin();
 		i != blocks.end(); i++)
 		PutWord(FindRegMap(*i));
 }
@@ -623,8 +623,8 @@ void tRisseCodeGenerator::PutFunctionCall(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutSync(const tRisseSSAVariable * dest,
-	const tRisseSSAVariable * func, const tRisseSSAVariable * lockee)
+void tCodeGenerator::PutSync(const tSSAVariable * dest,
+	const tSSAVariable * func, const tSSAVariable * lockee)
 {
 	PutWord(ocSync);
 	PutWord(FindRegMap(dest));
@@ -635,7 +635,7 @@ void tRisseCodeGenerator::PutSync(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutJump(const tRisseSSABlock * target)
+void tCodeGenerator::PutJump(const tSSABlock * target)
 {
 	risse_size insn_pos = Code.size();
 	PutWord(ocJump);
@@ -646,8 +646,8 @@ void tRisseCodeGenerator::PutJump(const tRisseSSABlock * target)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutBranch(const tRisseSSAVariable * ref,
-		const tRisseSSABlock * truetarget, const tRisseSSABlock * falsetarget)
+void tCodeGenerator::PutBranch(const tSSAVariable * ref,
+		const tSSABlock * truetarget, const tSSABlock * falsetarget)
 {
 	risse_size insn_pos = Code.size();
 	PutWord(ocBranch);
@@ -661,16 +661,16 @@ void tRisseCodeGenerator::PutBranch(const tRisseSSAVariable * ref,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutCatchBranch(const tRisseSSAVariable * ref,
+void tCodeGenerator::PutCatchBranch(const tSSAVariable * ref,
 		risse_size try_id_idx,
-		const gc_vector<tRisseSSABlock *> & targets)
+		const gc_vector<tSSABlock *> & targets)
 {
 	RISSE_ASSERT(targets.size() >= 2);
 		// 少なくとも何事も無かった場合と例外が発生した場合のジャンプ先を含む
 
 	// Try識別子用に定数領域に仮の値をpushする
-	tRisseVariant cvalue(tRisseString(RISSE_WS("<try id #%1>"),
-		tRisseString::AsString((risse_int64)try_id_idx)));
+	tVariant cvalue(tString(RISSE_WS("<try id #%1>"),
+		tString::AsString((risse_int64)try_id_idx)));
 	risse_size reloc_pos = Consts.size();
 	Consts.push_back(cvalue);
 	TryIdentifierRelocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, try_id_idx));
@@ -686,7 +686,7 @@ void tRisseCodeGenerator::PutCatchBranch(const tRisseSSAVariable * ref,
 		// TODO: 例外の発生
 	}
 	PutWord(static_cast<risse_uint32>(targets.size()));
-	for(gc_vector<tRisseSSABlock *>::const_iterator i = targets.begin();
+	for(gc_vector<tSSABlock *>::const_iterator i = targets.begin();
 		i != targets.end(); i ++)
 	{
 		AddPendingBlockJump(*i, insn_pos);
@@ -697,7 +697,7 @@ void tRisseCodeGenerator::PutCatchBranch(const tRisseSSAVariable * ref,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutDebugger()
+void tCodeGenerator::PutDebugger()
 {
 	PutWord(ocDebugger);
 }
@@ -705,7 +705,7 @@ void tRisseCodeGenerator::PutDebugger()
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutThrow(const tRisseSSAVariable * throwee)
+void tCodeGenerator::PutThrow(const tSSAVariable * throwee)
 {
 	PutWord(ocThrow);
 	PutWord(FindRegMap(throwee));
@@ -714,7 +714,7 @@ void tRisseCodeGenerator::PutThrow(const tRisseSSAVariable * throwee)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutReturn(const tRisseSSAVariable * value)
+void tCodeGenerator::PutReturn(const tSSAVariable * value)
 {
 	PutWord(ocReturn);
 	PutWord(FindRegMap(value));
@@ -723,19 +723,19 @@ void tRisseCodeGenerator::PutReturn(const tRisseSSAVariable * value)
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutExitTryException(const tRisseSSAVariable * value,
+void tCodeGenerator::PutExitTryException(const tSSAVariable * value,
 		risse_size try_id_idx, risse_size idx)
 {
 	// Try識別子用に定数領域に仮の値をpushする
-	tRisseVariant cvalue(tRisseString(RISSE_WS("<try id #%1>"),
-		tRisseString::AsString((risse_int64)try_id_idx)));
+	tVariant cvalue(tString(RISSE_WS("<try id #%1>"),
+		tString::AsString((risse_int64)try_id_idx)));
 	risse_size reloc_pos = Consts.size();
 	Consts.push_back(cvalue);
 	TryIdentifierRelocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, try_id_idx));
 
 	// ocExitTryException 命令を書く
 	PutWord(ocExitTryException);
-	PutWord(value?FindRegMap(value):RisseInvalidRegNum);
+	PutWord(value?FindRegMap(value):InvalidRegNum);
 	PutWord(static_cast<risse_uint32>(reloc_pos));
 	PutWord(static_cast<risse_uint32>(idx));
 }
@@ -743,8 +743,8 @@ void tRisseCodeGenerator::PutExitTryException(const tRisseSSAVariable * value,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutGetExitTryValue(const tRisseSSAVariable * dest,
-											const tRisseSSAVariable * src)
+void tCodeGenerator::PutGetExitTryValue(const tSSAVariable * dest,
+											const tSSAVariable * src)
 {
 	PutWord(ocGetExitTryValue);
 	PutWord(FindRegMap(dest));
@@ -754,13 +754,13 @@ void tRisseCodeGenerator::PutGetExitTryValue(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * arg1)
+void tCodeGenerator::PutOperator(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * arg1)
 {
 	// 一応 op を assert (完全ではない)
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[0] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[1] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[2] == tRisseVMInsnInfo::vifVoid);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[1] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[2] == tVMInsnInfo::vifVoid);
 
 	PutWord(static_cast<risse_uint32>(op));
 	PutWord(FindRegMap(dest));
@@ -770,14 +770,14 @@ void tRisseCodeGenerator::PutOperator(tRisseOpCode op, const tRisseSSAVariable *
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * arg1, const tRisseSSAVariable * arg2)
+void tCodeGenerator::PutOperator(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * arg1, const tSSAVariable * arg2)
 {
 	// 一応 code を assert (完全ではない)
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[0] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[1] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[2] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[3] == tRisseVMInsnInfo::vifVoid);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[1] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[2] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifVoid);
 
 	PutWord(static_cast<risse_uint32>(op));
 	PutWord(FindRegMap(dest));
@@ -788,15 +788,15 @@ void tRisseCodeGenerator::PutOperator(tRisseOpCode op, const tRisseSSAVariable *
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * arg1, const tRisseSSAVariable * arg2, const tRisseSSAVariable * arg3)
+void tCodeGenerator::PutOperator(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * arg1, const tSSAVariable * arg2, const tSSAVariable * arg3)
 {
 	// 一応 code を assert (完全ではない)
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[0] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[1] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[2] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[3] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[3] == tRisseVMInsnInfo::vifVoid);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[1] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[2] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifVoid);
 
 	PutWord(static_cast<risse_uint32>(op));
 	PutWord(FindRegMap(dest));
@@ -808,8 +808,8 @@ void tRisseCodeGenerator::PutOperator(tRisseOpCode op, const tRisseSSAVariable *
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutInContextOf(const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * instance, const tRisseSSAVariable * context)
+void tCodeGenerator::PutInContextOf(const tSSAVariable * dest,
+		const tSSAVariable * instance, const tSSAVariable * context)
 {
 	PutWord(static_cast<risse_uint32>(context ? ocInContextOf : ocInContextOfDyn));
 	PutWord(FindRegMap(dest));
@@ -820,14 +820,14 @@ void tRisseCodeGenerator::PutInContextOf(const tRisseSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutGet(tRisseOpCode op, const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * obj, const tRisseSSAVariable * name, risse_uint32 flags)
+void tCodeGenerator::PutGet(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * obj, const tSSAVariable * name, risse_uint32 flags)
 {
 	// 一応 code を assert (完全ではない)
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[0] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[1] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[2] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[3] == tRisseVMInsnInfo::vifVoid);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[1] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[2] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifVoid);
 
 	RISSE_ASSERT(!(op == ocIGet && flags != 0)); // フラグをもてるのはocDGetのみ
 
@@ -842,14 +842,14 @@ void tRisseCodeGenerator::PutGet(tRisseOpCode op, const tRisseSSAVariable * dest
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
-		const tRisseSSAVariable * name, const tRisseSSAVariable * value, risse_uint32 flags)
+void tCodeGenerator::PutSet(tOpCode op, const tSSAVariable * obj,
+		const tSSAVariable * name, const tSSAVariable * value, risse_uint32 flags)
 {
 	// 一応 code を assert (完全ではない)
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[0] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[1] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[2] == tRisseVMInsnInfo::vifRegister);
-	RISSE_ASSERT(RisseVMInsnInfo[op].Flags[3] == tRisseVMInsnInfo::vifVoid);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[1] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[2] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifVoid);
 
 	RISSE_ASSERT(!(op == ocISet && flags != 0));
 		// フラグをもてるのはocDSetFのみ
@@ -866,8 +866,8 @@ void tRisseCodeGenerator::PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeGenerator::PutSetAttribute(const tRisseSSAVariable * obj,
-		const tRisseSSAVariable * name, risse_uint32 attrib)
+void tCodeGenerator::PutSetAttribute(const tSSAVariable * obj,
+		const tSSAVariable * name, risse_uint32 attrib)
 {
 	// 一応 code を assert (完全ではない)
 	PutWord(static_cast<risse_uint32>(ocDSetAttrib));

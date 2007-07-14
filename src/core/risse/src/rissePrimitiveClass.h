@@ -24,20 +24,20 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		プリミティブ型用クラスの基底クラス
 //---------------------------------------------------------------------------
-class tRissePrimitiveClassBase : public tRisseClassBase
+class tPrimitiveClassBase : public tClassBase
 {
-	tRisseVariant Gateway;
+	tVariant Gateway;
 		//!< ゲートウェイアクセス用の代表オブジェクト(すべてのプリミティブへのアクセスは
 		//!< このオブジェクトを経由して行われる
 public:
 	//! @brief		コンストラクタ
 	//! @param		name			クラス名
 	//! @param		super_class		スーパークラス
-	tRissePrimitiveClassBase(const tRisseString & name, tRisseClassBase * super_class);
+	tPrimitiveClassBase(const tString & name, tClassBase * super_class);
 
 	//! @brief		ゲートウェイアクセス用の代表オブジェクトを得る
 	//! @return		ゲートウェイアクセス用の代表オブジェクト
-	tRisseVariant & GetGateway() { return Gateway; }
+	tVariant & GetGateway() { return Gateway; }
 
 
 public: // Risse用メソッドなど
@@ -49,27 +49,27 @@ public: // Risse用メソッドなど
 
 //---------------------------------------------------------------------------
 //! @brief		プリミティブ型用クラスの基底クラス(Risse用)
-//! @note		tRissePrimitiveClassBase と tRissePrimitiveClass を混同しないこと。
+//! @note		tPrimitiveClassBase と tPrimitiveClass を混同しないこと。
 //!				前者はC++のクラス階層において各プリミティブクラスの親クラスになり、
 //!				後者はRisseのクラス階層において各プリミティブクラスの親クラスになる。
 //---------------------------------------------------------------------------
-class tRissePrimitiveClass : public tRisseClassBase
+class tPrimitiveClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRissePrimitiveClass(tRisseScriptEngine * engine);
+	tPrimitiveClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public: // Risse用メソッドなど
 	static void construct();
-	static tRisseVariant toString(const tRisseNativeCallInfo & info); // toString
+	static tVariant toString(const tNativeCallInfo & info); // toString
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

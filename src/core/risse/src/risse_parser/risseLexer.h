@@ -10,20 +10,20 @@
 //! @file
 //! @brief Risse レキシカル・アナライザ(字句解析器)の実装
 //---------------------------------------------------------------------------
-#ifndef RisseLexerH
-#define RisseLexerH
+#ifndef LexerH
+#define LexerH
 
 #include "../risseLexerUtils.h"
 #include "../risseString.h"
 
 namespace Risse
 {
-class tRisseScriptBlockInstance;
+class tScriptBlockInstance;
 //---------------------------------------------------------------------------
-class tRisseLexer : public tRisseLexerUtility
+class tLexer : public tLexerUtility
 {
-	tRisseScriptBlockInstance * ScriptBlockInstance; //!< スクリプトブロック
-	tRisseString Script; //!< スクリプト
+	tScriptBlockInstance * ScriptBlockInstance; //!< スクリプトブロック
+	tString Script; //!< スクリプト
 	const risse_char * Ptr; //!< 解析ポインタの現在位置
 	const risse_char * PtrOrigin; //!< 解析ポインタの先頭
 	const risse_char * PtrLastTokenStart; //!< 最後に返したトークンの先頭位置
@@ -31,15 +31,15 @@ class tRisseLexer : public tRisseLexerUtility
 	risse_size NewLineRunningCount; //!< 改行が連続した回数
 
 	//! @brief		トークンIDと値の組
-	struct tTokenIdAndValue : public tRisseCollectee
+	struct tTokenIdAndValue : public tCollectee
 	{
 		int				Id;		//!< ID
-		tRisseVariant	Value;	//!< 値
+		tVariant	Value;	//!< 値
 
 		//! @brief		コンストラクタ
 		//! @param		id		Id
 		//! @param		value	値
-		tTokenIdAndValue(int id, const tRisseVariant & value)
+		tTokenIdAndValue(int id, const tVariant & value)
 			{ Id = id; Value = value; }
 	};
 
@@ -53,7 +53,7 @@ class tRisseLexer : public tRisseLexerUtility
 	bool FuncCallReduced; //!< 関数の呼び出しが還元し終わったか
 
 	//! @brief		改行の取り扱いに関する情報
-	struct tNewLineRecogInfo : public tRisseCollectee
+	struct tNewLineRecogInfo : public tCollectee
 	{
 		bool			Ignore;		//!< 改行を無視するかどうか
 		//! @brief		セミコロンで文が終わったか、改行で文が終わったかの状態
@@ -78,12 +78,12 @@ class tRisseLexer : public tRisseLexerUtility
 public:
 	//! @brief		コンストラクタ
 	//! @param		sb		スクリプトブロック
-	tRisseLexer(tRisseScriptBlockInstance * sb);
+	tLexer(tScriptBlockInstance * sb);
 
 	//! @brief		トークンを得る
 	//! @param		val		トークンの値の格納先
 	//! @return		トークンID
-	int GetToken(tRisseVariant & val);
+	int GetToken(tVariant & val);
 
 	//! @brief		現在の解析位置を得る
 	//! @return		現在の解析位置
@@ -157,7 +157,7 @@ private:
 	//! @param		val		トークンの値の格納先
 	//! @param		delimiter		デリミタ ( '"' か '\'' )
 	//! @return		トークンID
-	int ParseEmbeddableString(tRisseVariant & val, risse_char delimiter);
+	int ParseEmbeddableString(tVariant & val, risse_char delimiter);
 };
 //---------------------------------------------------------------------------
 

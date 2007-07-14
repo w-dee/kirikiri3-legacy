@@ -24,23 +24,23 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		モジュール用クラスの基底クラス(Risse用)
 //---------------------------------------------------------------------------
-class tRisseModuleClass : public tRisseClassBase
+class tModuleClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
 	// ! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseModuleClass(tRisseScriptEngine * engine);
+	tModuleClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate(const tRisseNativeCallInfo &info);
+	static tVariant ovulate(const tNativeCallInfo &info);
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeCallInfo &info);
+	static void initialize(const tNativeCallInfo &info);
 
 public: // ユーティリティ
 	//! @brief		members 用のオブジェクトを作成する
@@ -48,10 +48,10 @@ public: // ユーティリティ
 	//! @param		proto		members の prototype が見に行く先
 	//! @note		ここで作成されるオブジェクトには、それが Object クラスの
 	//!				インスタンスであるという情報が付かないため、必要ならば
-	//!				tRisseObjectClass::Bless でクラス情報を付加すること。
+	//!				tObjectClass::Bless でクラス情報を付加すること。
 	//!				(このメソッドが呼ばれる時点ではまだ Object クラスが有効
 	//!				でない可能性があるため)
-	static tRisseVariant CreateMembersObject(tRisseScriptEngine * engine, const tRisseVariant proto);
+	static tVariant CreateMembersObject(tScriptEngine * engine, const tVariant proto);
 };
 //---------------------------------------------------------------------------
 }

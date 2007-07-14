@@ -30,16 +30,16 @@ RISSE_DEFINE_SOURCE_ID(49117,34809,57976,16815,63634,40614,38058,11038);
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariableAccessMap::tRisseSSAVariableAccessMap(tRisseSSAForm * form, risse_size pos)
+tSSAVariableAccessMap::tSSAVariableAccessMap(tSSAForm * form, risse_size pos)
 {
-	tRisseSSAVariable * var = NULL;
+	tSSAVariable * var = NULL;
 	form->AddStatement(pos, ocDefineAccessMap, &var);
 	Variable = var;
 }
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariableAccessMap::SetUsed(const tRisseString & name, bool write)
+void tSSAVariableAccessMap::SetUsed(const tString & name, bool write)
 {
 	tMap::iterator i = Map.find(name);
 	if(i == Map.end()) i = Map.insert(tMap::value_type(name, tInfo())).first;
@@ -53,7 +53,7 @@ void tRisseSSAVariableAccessMap::SetUsed(const tRisseString & name, bool write)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_size pos)
+void tSSAVariableAccessMap::GenerateChildWrite(tSSAForm * form, risse_size pos)
 {
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
@@ -66,7 +66,7 @@ void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_
 			// 処理の後、子名前空間から親名前空間に書き戻すため)。
 			// そもそも読み込みと書き込みを区別して記録しているのは、読み込みのみしか
 			// 行われなかった変数は、親の名前空間内に書き戻す必要がないため。
-			tRisseSSAVariable * var =
+			tSSAVariable * var =
 				form->GetLocalNamespace()->Read(form, pos, i->first);
 			form->AddStatement(pos, ocChildWrite, NULL, Variable, var)->SetName(i->first);
 		}
@@ -76,14 +76,14 @@ void tRisseSSAVariableAccessMap::GenerateChildWrite(tRisseSSAForm * form, risse_
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_size pos)
+void tSSAVariableAccessMap::GenerateChildRead(tSSAForm * form, risse_size pos)
 {
 	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
 	{
 		if(i->second.Write)
 		{
 			// 書き込みが発生している
-			tRisseSSAVariable * var = NULL;
+			tSSAVariable * var = NULL;
 			form->AddStatement(pos, ocChildRead, &var, Variable)->SetName(i->first);
 			form->GetLocalNamespace()->Write(form, pos, i->first, var);
 		}
@@ -109,7 +109,7 @@ void tRisseSSAVariableAccessMap::GenerateChildRead(tRisseSSAForm * form, risse_s
 
 
 //---------------------------------------------------------------------------
-tRisseSSALocalNamespace::tRisseSSALocalNamespace()
+tSSALocalNamespace::tSSALocalNamespace()
 {
 	Compiler = NULL;
 	Block = NULL;
@@ -120,7 +120,7 @@ tRisseSSALocalNamespace::tRisseSSALocalNamespace()
 
 
 //---------------------------------------------------------------------------
-tRisseSSALocalNamespace::tRisseSSALocalNamespace(const tRisseSSALocalNamespace &ref)
+tSSALocalNamespace::tSSALocalNamespace(const tSSALocalNamespace &ref)
 {
 	Block = ref.Block;
 	AccessMap = ref.AccessMap;
@@ -136,17 +136,17 @@ tRisseSSALocalNamespace::tRisseSSALocalNamespace(const tRisseSSALocalNamespace &
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSALocalNamespace::GetNumberedName(
-				const tRisseString & name, risse_int num)
+tString tSSALocalNamespace::GetNumberedName(
+				const tString & name, risse_int num)
 {
 	// num を文字列化
-	return name + RISSE_WC('#') + tRisseString::AsString(num);
+	return name + RISSE_WC('#') + tString::AsString(num);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::SetBlock(tRisseSSABlock * block)
+void tSSALocalNamespace::SetBlock(tSSABlock * block)
 {
 	Block = block;
 	Compiler = block->GetForm()->GetFunction()->GetFunctionGroup()->GetCompiler();
@@ -155,7 +155,7 @@ void tRisseSSALocalNamespace::SetBlock(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::SetCompiler(tRisseCompiler * compiler)
+void tSSALocalNamespace::SetCompiler(tCompiler * compiler)
 {
 	Compiler = compiler;
 }
@@ -163,7 +163,7 @@ void tRisseSSALocalNamespace::SetCompiler(tRisseCompiler * compiler)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::Push()
+void tSSALocalNamespace::Push()
 {
 	Scopes.push_back(new tScope());
 }
@@ -171,7 +171,7 @@ void tRisseSSALocalNamespace::Push()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::Pop()
+void tSSALocalNamespace::Pop()
 {
 	Scopes.pop_back();
 }
@@ -179,13 +179,13 @@ void tRisseSSALocalNamespace::Pop()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable * where)
+void tSSALocalNamespace::Add(const tString & name, tSSAVariable * where)
 {
 	RISSE_ASSERT(Scopes.size() != 0); // スコープが一つもない場合は何もできない(このメソッドは呼ばれてはいけない)
 
 	// 番号を決める
 	risse_int num = Compiler->GetUniqueNumber(); // ここで Compiler を使う
-	tRisseString n_name = GetNumberedName(name, num);
+	tString n_name = GetNumberedName(name, num);
 
 	// 一番深いレベルのスコープにエイリアスを追加/上書きする
 	tAliasMap::iterator i = Scopes.back()->AliasMap.find(name);
@@ -197,8 +197,8 @@ void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable *
 
 	// 番号付きの名前を登録する
 	Scopes.back()->VariableMap.insert(tVariableMap::value_type(
-				n_name, where ? where : tRisseSSAVariable::GetUninitialized()));
-		// where が NULL の場合は tRisseSSAVariable::GetUninitialized() が入るので注意する
+				n_name, where ? where : tSSAVariable::GetUninitialized()));
+		// where が NULL の場合は tSSAVariable::GetUninitialized() が入るので注意する
 
 	// 名前と番号付きの名前を where に設定する
 	if(where)
@@ -211,15 +211,15 @@ void tRisseSSALocalNamespace::Add(const tRisseString & name, tRisseSSAVariable *
 
 
 //---------------------------------------------------------------------------
-bool tRisseSSALocalNamespace::Find(const tRisseString & name,
-	bool is_num, tRisseString *n_name,
-	tRisseSSAVariable *** var) const
+bool tSSALocalNamespace::Find(const tString & name,
+	bool is_num, tString *n_name,
+	tSSAVariable *** var) const
 {
 	// Scopes を頭から見ていき、最初に見つかった変数を返す
 	// (スコープによる変数の可視・不可視のルールに従う)
 	for(tScopes::const_reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
 	{
-		tRisseString name_to_find;
+		tString name_to_find;
 		if(!is_num)
 		{
 			// 番号付きの名前が分からない場合はエイリアスを検索する
@@ -250,12 +250,12 @@ bool tRisseSSALocalNamespace::Find(const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
-bool tRisseSSALocalNamespace::IsAvailable(const tRisseString & name) const
+bool tSSALocalNamespace::IsAvailable(const tString & name) const
 {
 	if(Find(name)) return true;
 
 	//「チェーンされた」名前空間も探す
-	tRisseSSALocalNamespace * parent = Parent;
+	tSSALocalNamespace * parent = Parent;
 	while(parent)
 	{
 		if(parent->Find(name)) return true;
@@ -269,7 +269,7 @@ bool tRisseSSALocalNamespace::IsAvailable(const tRisseString & name) const
 
 
 //---------------------------------------------------------------------------
-bool tRisseSSALocalNamespace::Delete(const tRisseString & name)
+bool tSSALocalNamespace::Delete(const tString & name)
 {
 	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
 	{
@@ -292,12 +292,12 @@ bool tRisseSSALocalNamespace::Delete(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
-					risse_size pos, const tRisseString & name, const tRisseString & n_name)
+tSSAVariable * tSSALocalNamespace::MakePhiFunction(
+					risse_size pos, const tString & name, const tString & n_name)
 {
 	RISSE_ASSERT(Block != NULL);
-	tRisseSSAVariable ** var = NULL;
-	tRisseString n_name_found;
+	tSSAVariable ** var = NULL;
+	tString n_name_found;
 	bool found;
 	if(n_name.IsEmpty())
 	{
@@ -311,12 +311,12 @@ tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
 
 	if(!found) return NULL; // 見つからなかった
 
-	if(*var == tRisseSSAVariable::GetUninitialized())
+	if(*var == tSSAVariable::GetUninitialized())
 	{
 		// 値が初期化されていない(不定な)変数から読み込もうとした
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			Compiler->GetScriptBlockInstance()->GetScriptEngine(),
-			tRisseString(
+			tString(
 				RISSE_WS_TR("attempt to read uninitialized variable '%1'"),
 				name),
 				Block->GetForm()->GetScriptBlockInstance(), pos);
@@ -333,7 +333,7 @@ tRisseSSAVariable * tRisseSSALocalNamespace::MakePhiFunction(
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::MarkToCreatePhi()
+void tSSALocalNamespace::MarkToCreatePhi()
 {
 	for(tScopes::reverse_iterator ri = Scopes.rbegin(); ri != Scopes.rend(); ri++)
 	{
@@ -346,15 +346,15 @@ void tRisseSSALocalNamespace::MarkToCreatePhi()
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
-							risse_size pos, const tRisseString & name)
+tSSAVariable * tSSALocalNamespace::Read(tSSAForm * form,
+							risse_size pos, const tString & name)
 {
-	tRisseSSAVariable * ret = MakePhiFunction(pos, name);
+	tSSAVariable * ret = MakePhiFunction(pos, name);
 	if(ret)
 	{
 		// 文の作成
-		tRisseSSAVariable * ret_var = NULL;
-		tRisseSSAStatement *stmt = form->AddStatement(pos, ocReadVar, &ret_var, ret);
+		tSSAVariable * ret_var = NULL;
+		tSSAStatement *stmt = form->AddStatement(pos, ocReadVar, &ret_var, ret);
 		stmt->SetName(ret->GetNumberedName());
 		ret = ret_var;
 		return ret;
@@ -365,15 +365,15 @@ tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
 		if(Parent)
 		{
 			// AccessMap が NULL の場合は親名前空間内で共有する
-			tRisseString n_name;
+			tString n_name;
 			bool is_shared = false;;
 			if(Parent->AccessFromChild(name, false, AccessMap == NULL, this, &n_name, &is_shared))
 			{
 				// この時点でn_name は番号付きの名前になっている
 				// 共有変数領域からの読み込み文または
 				// 親名前空間からの読み込み文を生成する
-				tRisseSSAVariable * ret_var = NULL;
-				tRisseSSAStatement *stmt = form->AddStatement(pos,
+				tSSAVariable * ret_var = NULL;
+				tSSAStatement *stmt = form->AddStatement(pos,
 								is_shared ? ocRead : ocParentRead, &ret_var);
 				stmt->SetName(is_shared ? n_name : name);
 				ret = ret_var;
@@ -388,8 +388,8 @@ tRisseSSAVariable * tRisseSSALocalNamespace::Read(tRisseSSAForm * form,
 
 
 //---------------------------------------------------------------------------
-bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
-					const tRisseString & name, tRisseSSAVariable * value)
+bool tSSALocalNamespace::Write(tSSAForm * form, risse_size pos,
+					const tString & name, tSSAVariable * value)
 {
 	// ローカル変数に上書きする
 	RISSE_ASSERT(value != NULL);
@@ -401,15 +401,15 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 		if(i != (*ri)->AliasMap.end())
 		{
 			// 見つかった
-			tRisseString n_name = i->second; // 番号付き変数名
+			tString n_name = i->second; // 番号付き変数名
 
 			// 同じスコープ内に番号付きの名前があるはず
 			tVariableMap::iterator vi = (*ri)->VariableMap.find(n_name);
 			RISSE_ASSERT(vi != (*ri)->VariableMap.end()); // 同じスコープ内にあるよね
 
 			// 文の作成
-			tRisseSSAVariable * ret_var = NULL;
-			tRisseSSAStatement *stmt = form->AddStatement(pos, ocWriteVar, &ret_var, value);
+			tSSAVariable * ret_var = NULL;
+			tSSAStatement *stmt = form->AddStatement(pos, ocWriteVar, &ret_var, value);
 			stmt->SetName(n_name);
 
 			// 変数の上書き
@@ -427,7 +427,7 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 	// AccessMap が NULL の場合は親名前空間内で共有する
 	if(Parent)
 	{
-		tRisseString n_name;
+		tString n_name;
 			bool is_shared = false;;
 		if(Parent->AccessFromChild(name, true, AccessMap == NULL, this, &n_name, &is_shared))
 		{
@@ -435,7 +435,7 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 			// この時点でn_name は番号付きの名前になっている
 			// 共有変数領域への書き込み文または
 			// 親名前空間への書き込み文を生成する
-			tRisseSSAStatement *stmt = form->AddStatement(pos,
+			tSSAStatement *stmt = form->AddStatement(pos,
 							is_shared ? ocWrite : ocParentWrite, NULL, value);
 			stmt->SetName(is_shared ? n_name : name);
 			return true;
@@ -448,11 +448,11 @@ bool tRisseSSALocalNamespace::Write(tRisseSSAForm * form, risse_size pos,
 
 
 //---------------------------------------------------------------------------
-bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
-	bool access, bool should_share, tRisseSSALocalNamespace * child, 
-	tRisseString * ret_n_name, bool * is_shared)
+bool tSSALocalNamespace::AccessFromChild(const tString & name,
+	bool access, bool should_share, tSSALocalNamespace * child, 
+	tString * ret_n_name, bool * is_shared)
 {
-	tRisseString n_name;
+	tString n_name;
 	if(Find(name, false, &n_name))
 	{
 		// 変数が見つかった
@@ -463,9 +463,9 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 			if(should_share)
 			{
 /*
-				RisseFPrint(stderr,
+				FPrint(stderr,
 					((access ? RISSE_WS("W name:") : RISSE_WS("R name:")) + name +
-					 " nestlevel:" + tRisseString::AsString(risse_int64(Block->GetForm()->GetFunction()->GetNestLevel())) +
+					 " nestlevel:" + tString::AsString(risse_int64(Block->GetForm()->GetFunction()->GetNestLevel())) +
 					 RISSE_WS("\n")).c_str());
 */
 				*is_shared = true;
@@ -500,7 +500,7 @@ bool tRisseSSALocalNamespace::AccessFromChild(const tRisseString & name,
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::InternalListAllVisibleVariableNumberedNames(tAliasMap & map) const
+void tSSALocalNamespace::InternalListAllVisibleVariableNumberedNames(tAliasMap & map) const
 {
 	// 親に再帰
 	if(Parent) Parent->InternalListAllVisibleVariableNumberedNames(map);
@@ -529,7 +529,7 @@ void tRisseSSALocalNamespace::InternalListAllVisibleVariableNumberedNames(tAlias
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::ListAllVisibleVariableNumberedNames(tAliasMap & dest) const
+void tSSALocalNamespace::ListAllVisibleVariableNumberedNames(tAliasMap & dest) const
 {
 	// InternalListAllVisibleVariableNames を呼び出す
 	dest.clear();
@@ -539,7 +539,7 @@ void tRisseSSALocalNamespace::ListAllVisibleVariableNumberedNames(tAliasMap & de
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::InternalShareAllVisibleVariableNames(tAliasMap & names) const
+void tSSALocalNamespace::InternalShareAllVisibleVariableNames(tAliasMap & names) const
 {
 	if(!Block) return;
 		// ↑ Block がない名前空間の場合は何もしない。
@@ -575,7 +575,7 @@ void tRisseSSALocalNamespace::InternalShareAllVisibleVariableNames(tAliasMap & n
 
 
 //---------------------------------------------------------------------------
-void tRisseSSALocalNamespace::ShareAllVisibleVariableNames() const
+void tSSALocalNamespace::ShareAllVisibleVariableNames() const
 {
 	tAliasMap names;
 	InternalShareAllVisibleVariableNames(names);
@@ -584,13 +584,13 @@ void tRisseSSALocalNamespace::ShareAllVisibleVariableNames() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSALocalNamespace::Dump() const
+tString tSSALocalNamespace::Dump() const
 {
-	tRisseString str;
+	tString str;
 	risse_size scope_idx = 0;
 	for(tScopes::const_iterator i = Scopes.begin(); i != Scopes.end(); i++, scope_idx++)
 	{
-		str += RISSE_WS("=== scope #") + tRisseString::AsString((risse_int64)scope_idx) +
+		str += RISSE_WS("=== scope #") + tString::AsString((risse_int64)scope_idx) +
 			RISSE_WS(" ===\n");
 		const tVariableMap & vmap = (*i)->VariableMap;
 		const tAliasMap & amap = (*i)->AliasMap;

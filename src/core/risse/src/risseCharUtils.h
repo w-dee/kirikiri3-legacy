@@ -26,42 +26,42 @@ namespace Risse
 */
 
 //! @brief		risse_char 版 atoi
-risse_int Risse_atoi(const risse_char *s);
+risse_int atoi(const risse_char *s);
 
 //! @brief		risse_int を risse_char 文字列に変換する
 //! @param		value     変換したい値
 //! @param		string    出力先文字列バッファ
 //! @return		string パラメータで指定した出力先文字列バッファがそのまま帰る
 //! @note		string には十分な余裕があることが前提
-risse_char * Risse_int_to_str(risse_int value, risse_char *string);
+risse_char * int_to_str(risse_int value, risse_char *string);
 
 //! @brief		risse_int64 を risse_char 文字列に変換する
 //! @param		value     変換したい値
 //! @param		string    出力先文字列バッファ
 //! @return		string パラメータで指定した出力先文字列バッファがそのまま帰る
 //! @note		string には十分な余裕があることが前提
-risse_char * Risse_int64_to_str(risse_int64 value, risse_char *string);
+risse_char * int64_to_str(risse_int64 value, risse_char *string);
 
 //! @brief		risse_real を risse_char 文字列に変換する
 //! @param		value     変換したい値
 //! @param		string    出力先文字列バッファ
 //! @return		string パラメータで指定した出力先文字列バッファがそのまま帰る
 //! @note		string には十分な余裕があることが前提
-risse_char * Risse_real_to_str(risse_real value, risse_char *string);
+risse_char * real_to_str(risse_real value, risse_char *string);
 
 //! @brief		ポインタを risse_char 文字列に変換する
 //! @param		value     変換したい値
 //! @param		string    出力先文字列バッファ
 //! @return		string パラメータで指定した出力先文字列バッファがそのまま帰る
 //! @note		string には十分な余裕があることが前提
-risse_char * Risse_pointer_to_str(const void *value, risse_char *string);
+risse_char * pointer_to_str(const void *value, risse_char *string);
 
 //! @brief		文字列のASCII英字の大文字・小文字同一視比較
 //! @param		s1     値1
 //! @param		s2     値2
 //! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
 //! @note		この関数は ASCII 英字のみを同一視比較する
-risse_int Risse_straicmp(const risse_char *s1, const risse_char *s2);
+risse_int straicmp(const risse_char *s1, const risse_char *s2);
 
 //! @brief		最大で指定コードポイント数分だけ文字列をコピー
 //! @param		d    格納先バッファ
@@ -72,57 +72,57 @@ risse_int Risse_straicmp(const risse_char *s1, const risse_char *s2);
 //!				つまり、d は最低、len + 1 コードポイントの領域が確保されて
 //!				いなければならない。また、s が len に達していない場合、
 //!				d の残りは null では埋められない。
-void Risse_strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len);
+void strcpy_maxlen(risse_char *d, const risse_char *s, risse_size len);
 
 //! @brief		文字列コピー
 //! @param		d    格納先バッファ
 //! @param		s    コピー元バッファ
-void Risse_strcpy(risse_char *d, const risse_char *s);
+void strcpy(risse_char *d, const risse_char *s);
 
 //! @brief		文字列の長さを得る
 //! @param		d    文字列
 //! @return		文字列長
-risse_size Risse_strlen(const risse_char *d);
+risse_size strlen(const risse_char *d);
 
 //! @brief		UTF16文字列をrisse_char(UTF-32文字列) に変換
 //! @param		out 出力文字列 (最低でもinと同じ要素数を持つこと) null終端は書き込まれる
 //! @param		in  入力文字列
 //! @return		出力バッファのサイズ (null終端を含まず, risse_char単位)
-risse_size RisseConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in);
+risse_size ConvertUTF16ToRisseCharString(risse_char * out, const risse_uint16 * in);
 
 //! @brief		risse_char(UTF-32文字列) をUTF16文字列に変換
 //! @param		out 出力文字列(NULL可)  null終端は書き込まれる
 //! @param		in  入力文字列
 //! @param		in_len 入力文字列のサイズ (risse_size_max の場合は自動判定)
 //! @return		出力バッファのサイズ (null終端を含まず, risse_uint16単位)
-risse_size RisseConvertRisseCharToUTF16String(risse_uint16 * out, const risse_char * in,
+risse_size ConvertRisseCharToUTF16String(risse_uint16 * out, const risse_char * in,
 						risse_size in_len = risse_size_max);
 
 //! @brief		UTF-8 文字列を risse_char 文字列に変換する
 //! @param		in   入力 UTF-8 文字列
 //! @param		out  出力 risse_char 文字列 (NULL可)
 //! @return		変換後の risse_char のコードポイント数 (null-terminatorを含まず)
-risse_size RisseUtf8ToRisseCharString(const char * in, risse_char *out);
+risse_size Utf8ToRisseCharString(const char * in, risse_char *out);
 
 //! @brief		risse_char 文字列を UTF-8 文字列に変換する
 //! @param		in   入力 risse_char 文字列
 //! @param		out  出力 UTF-8 文字列 (NULL可)
 //! @return		変換後の UTF-8 のバイト数 (null-terminatorを含まず)
-risse_size RisseRisseCharToUtf8String(const risse_char *in, char * out);
+risse_size CharToUtf8String(const risse_char *in, char * out);
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	//! @brief		文字列を比較する
 	//! @param		s1   文字列その1
 	//! @param		s2   文字列その2
 	//! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
-	int Risse_strcmp(const risse_char *s1, const risse_char *s2);
+	int strcmp(const risse_char *s1, const risse_char *s2);
 
 	//! @brief		文字列を最大でnコードポイントまで比較する
 	//! @param		s1   文字列その1
 	//! @param		s2   文字列その2
 	//! @param		n    最大コードポイント数
 	//! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
-	int Risse_strncmp(const risse_char *s1, const risse_char *s2, risse_size n);
+	int strncmp(const risse_char *s1, const risse_char *s2, risse_size n);
 
 	//! @brief		最大で指定コードポイント数分だけ文字列をコピー
 	//! @param		d    格納先バッファ
@@ -130,46 +130,46 @@ risse_size RisseRisseCharToUtf8String(const risse_char *in, char * out);
 	//! @param		len  コピーする最大コードポイント数
 	//! @return		d が返る
 	//! @note		動作については strncpy と同じ
-	risse_char *Risse_strncpy(risse_char *d, const risse_char *s, risse_size len);
+	risse_char *strncpy(risse_char *d, const risse_char *s, risse_size len);
 
 	//! @brief		文字列の連結
 	//! @param		d    格納先バッファ
 	//! @param		s    コピー元バッファ
 	//! @return		d が返る
 	//! @note		動作については strcat と同じ
-	risse_char *Risse_strcat(risse_char *d, const risse_char *s);
+	risse_char *strcat(risse_char *d, const risse_char *s);
 
 	//! @brief		文字列中の部分文字列の検索
 	//! @param		s1 検索対象文字列(target)
 	//! @param		s2 検索する文字列(substring)
 	//! @return		s1 中の見つかった位置。見つからなかった場合は NULL
-	risse_char *Risse_strstr(const risse_char *s1, const risse_char *s2);
+	risse_char *strstr(const risse_char *s1, const risse_char *s2);
 
 	//! @brief		文字列中のコードポイントの検索
 	//! @param		s  検索対象文字列(target)
 	//! @param		c  検索するコードポイント
 	//! @return		s  中の見つかった位置。見つからなかった場合は NULL
-	risse_char *Risse_strchr(const risse_char *s, int c);
+	risse_char *strchr(const risse_char *s, int c);
 
 	//! @brief		数値を表す文字列をdoubleに変換
 	//! @param		nptr    文字列
 	//! @param		endptr  数値を表す文字列の次の文字を表すポインタがここに格納される (NULL可)
 	//! @return		変換された数値
-	double Risse_strtod(const risse_char *nptr, risse_char **endptr);
+	double strtod(const risse_char *nptr, risse_char **endptr);
 #else
-	#define Risse_strcmp			wcscmp
-	#define Risse_strncmp			wcsncmp
-	#define Risse_strncpy			wcsncpy
-	#define Risse_strcat			wcscat
-	#define Risse_strstr			wcsstr
-	#define Risse_strchr			wcschr
-	#define Risse_strtod			wcstod
+	#define RISSE_strcmp			wcscmp
+	#define RISSE_strncmp			wcsncmp
+	#define RISSE_strncpy			wcsncpy
+	#define RISSE_strcat			wcscat
+	#define RISSE_strstr			wcsstr
+	#define RISSE_strchr			wcschr
+	#define RISSE_strtod			wcstod
 #endif
 
 //! @brief		指定された文字列を FILE ストリームに出力する
 //! @param		output	出力先のストリーム
 //! @param		str		文字列
-void RisseFPrint(FILE * output, const risse_char * str);
+void FPrint(FILE * output, const risse_char * str);
 
 
 #ifdef RISSE_SUPPORT_WX
@@ -178,7 +178,7 @@ void RisseFPrint(FILE * output, const risse_char * str);
 //! @param		str  risse_char*型の文字列
 //! @param		len  文字列の長さ(コードポイント単位) risse_size_max = 自動判別
 //! @return		wxString型の文字列
-wxString RisseCharToWxString(const risse_char * str, risse_size length = risse_size_max);
+wxString CharToWxString(const risse_char * str, risse_size length = risse_size_max);
 #endif
 
 
@@ -199,7 +199,7 @@ wxString RisseCharToWxString(const risse_char * str, risse_size length = risse_s
 //! @param		ch		文字
 //! @return		ホワイトスペース類の時に真
 //---------------------------------------------------------------------------
-static bool inline Risse_iswspace_nc(risse_char ch)
+static bool inline iswspace_nc(risse_char ch)
 {
 	return ch <= 0x20;
 }
@@ -211,7 +211,7 @@ static bool inline Risse_iswspace_nc(risse_char ch)
 //! @param		ch		文字
 //! @return		数値類の時に真
 //---------------------------------------------------------------------------
-static bool inline Risse_iswdigit_nc(risse_char ch)
+static bool inline iswdigit_nc(risse_char ch)
 {
 	return ch >='0' && ch <= '9';
 }
@@ -224,7 +224,7 @@ static bool inline Risse_iswdigit_nc(risse_char ch)
 //! @return		アルファベットの時に真
 //! @note		ここでは 0x80 以上の文字はすべてアルファベットと同じ扱いとする
 //---------------------------------------------------------------------------
-static bool inline Risse_iswalpha_nc(risse_char ch)
+static bool inline iswalpha_nc(risse_char ch)
 {
 	return
 		ch >= 'a' && ch <= 'z' ||
@@ -240,9 +240,9 @@ static bool inline Risse_iswalpha_nc(risse_char ch)
 //! @return		アルファベットの時に真
 //! @note		ここでは 0x80 以上の文字はすべてアルファベットと同じ扱いとする
 //---------------------------------------------------------------------------
-static bool inline Risse_iswordcha_nc(risse_char ch)
+static bool inline iswordcha_nc(risse_char ch)
 {
-	return Risse_iswdigit_nc(ch) || Risse_iswalpha_nc(ch) || ch == '_';
+	return iswdigit_nc(ch) || iswalpha_nc(ch) || ch == '_';
 }
 //---------------------------------------------------------------------------
 
@@ -266,24 +266,24 @@ static bool inline Risse_iswordcha_nc(risse_char ch)
 #ifdef RISSE_CHARUTILS_DEBUG
 	#define RISSE_DEFINE_SOURCE_ID(x1,x2,x3,x4,x5,x6,x7,x8) \
 		bool RISSE_SOURCE_ID_DUPLICATION_CHECK_##x1##_##x2##_##x3##_##x4##_##x5##_##x6##_##x7##_##x8 = false; \
-		static const int RisseUSN1 = x1;\
-		static const int RisseUSN2 = x2;\
-		static const int RisseUSN3 = x3;\
-		static const int RisseUSN4 = x4;\
-		static const int RisseUSN5 = x5;\
-		static const int RisseUSN6 = x6;\
-		static const int RisseUSN7 = x7;\
-		static const int RisseUSN8 = x8
+		static const int USN1 = x1;\
+		static const int USN2 = x2;\
+		static const int USN3 = x3;\
+		static const int USN4 = x4;\
+		static const int USN5 = x5;\
+		static const int USN6 = x6;\
+		static const int USN7 = x7;\
+		static const int USN8 = x8
 #else
 	#define RISSE_DEFINE_SOURCE_ID(x1,x2,x3,x4,x5,x6,x7,x8) \
-		static const int RisseUSN1 = x1;\
-		static const int RisseUSN2 = x2;\
-		static const int RisseUSN3 = x3;\
-		static const int RisseUSN4 = x4;\
-		static const int RisseUSN5 = x5;\
-		static const int RisseUSN6 = x6;\
-		static const int RisseUSN7 = x7;\
-		static const int RisseUSN8 = x8
+		static const int USN1 = x1;\
+		static const int USN2 = x2;\
+		static const int USN3 = x3;\
+		static const int USN4 = x4;\
+		static const int USN5 = x5;\
+		static const int USN6 = x6;\
+		static const int USN7 = x7;\
+		static const int USN8 = x8
 #endif
 
 
@@ -305,7 +305,7 @@ static bool inline Risse_iswordcha_nc(risse_char ch)
 	// 下記のようなトリッキーなテンプレートを使うことになる。
 
 	// VC++ で
-	// error C2975: 'UNIQ2' : 'tRisseUtf16ToUtf32' に対するテンプレート引数が無効です。
+	// error C2975: 'UNIQ2' : 'tUtf16ToUtf32' に対するテンプレート引数が無効です。
 	//                        コンパイル時に評価可能な定数式が必要です。
 	// のようなエラーが出る場合は、オプション /ZI (エディット・コンティニュー用のプログラムデータベース)
 	// を /Zi (プログラムデータベースを使用) に変えること。
@@ -327,17 +327,17 @@ static bool inline Risse_iswordcha_nc(risse_char ch)
 	// 際に例外が発生する(ただしデバッグビルド時のみ)。
 	// 一行中に複数のRISSE_WSを書きたい場合は、２個目以降をRISSE_WS2、RISSE_WS3にする。
 
-	// ちなみにこれは UTF32 リテラルを生成するだけに用いる。静的な tRisseString クラスのインスタンス
+	// ちなみにこれは UTF32 リテラルを生成するだけに用いる。静的な tString クラスのインスタンス
 	// が欲しければ、risseStaticStrings の利用を検討すること。
 
 	#ifdef RISSE_CHARUTILS_DEBUG
 	//! @brief		一行中に複数の RISSE_WS を使用した場合に例外を送出する関数
-	void RisseThrowWSAssertionFailure(const wchar_t * source, risse_int line);
+	void ThrowWSAssertionFailure(const wchar_t * source, risse_int line);
 	#endif
 
 	//! @brief UTF-32 リテラル文字列を保持するクラス
 	template<risse_size SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
-	class tRisseUtf16ToUtf32
+	class tUtf16ToUtf32
 	{
 		static risse_char Utf32Array[SIZE];
 		static bool Converted;
@@ -347,19 +347,19 @@ static bool inline Risse_iswordcha_nc(risse_char ch)
 
 	public:
 	#ifdef RISSE_CHARUTILS_DEBUG
-		tRisseUtf16ToUtf32(const wchar_t * utf16, const wchar_t *sourcefile)
+		tUtf16ToUtf32(const wchar_t * utf16, const wchar_t *sourcefile)
 	#else
-		tRisseUtf16ToUtf32(const wchar_t * utf16)
+		tUtf16ToUtf32(const wchar_t * utf16)
 	#endif
 		{
 	#ifdef RISSE_CHARUTILS_DEBUG
 			if(SourceString && utf16 != SourceString)
-				RisseThrowWSAssertionFailure(sourcefile, SOURCELINE);
+				ThrowWSAssertionFailure(sourcefile, SOURCELINE);
 	#endif
 			if(!Converted)
 			{
 				Converted = true;
-				RisseConvertUTF16ToRisseCharString(Utf32Array,
+				ConvertUTF16ToRisseCharString(Utf32Array,
 					reinterpret_cast<const risse_uint16 *>(utf16));
 	#ifdef RISSE_CHARUTILS_DEBUG
 				SourceString = utf16;
@@ -371,41 +371,41 @@ static bool inline Risse_iswordcha_nc(risse_char ch)
 
 
 	template<risse_size SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
-		bool tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::Converted = false;
+		bool tUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::Converted = false;
 
 	template<risse_size SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
-	risse_char tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::Utf32Array[SIZE] = {0};
+	risse_char tUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::Utf32Array[SIZE] = {0};
 
 	#ifdef RISSE_CHARUTILS_DEBUG
 	template<risse_size SIZE, int SID1, int SID2, int SID3, int SID4, int SID5, int SID6, int SID7, int SID8, int SOURCELINE, int SEQID>
-	const wchar_t * tRisseUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::SourceString = NULL;
+	const wchar_t * tUtf16ToUtf32<SIZE, SID1, SID2, SID3, SID4, SID5, SID6, SID7, SID8, SOURCELINE, SEQID>::SourceString = NULL;
 	#endif
 
 
 	#ifdef RISSE_CHARUTILS_DEBUG
 		#define _RISSE_TO_WCHAR_STRING(X) (L##X)
 		#define RISSE_TO_WCHAR_STRING(X) _RISSE_TO_WCHAR_STRING(X)
-		#define RISSE_WS(X)  ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 0>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS1(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 1>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS2(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 2>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS3(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 3>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS4(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 4>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS5(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 5>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS6(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 6>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS7(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 7>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS8(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 8>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
-		#define RISSE_WS9(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 9>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS(X)  ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 0>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS1(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 1>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS2(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 2>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS3(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 3>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS4(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 4>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS5(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 5>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS6(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 6>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS7(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 7>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS8(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 8>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
+		#define RISSE_WS9(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 9>(L##X, RISSE_TO_WCHAR_STRING(__FILE__)))
 	#else
-		#define RISSE_WS(X)  ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 0>(L##X))
-		#define RISSE_WS1(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 1>(L##X))
-		#define RISSE_WS2(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 2>(L##X))
-		#define RISSE_WS3(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 3>(L##X))
-		#define RISSE_WS4(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 4>(L##X))
-		#define RISSE_WS5(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 5>(L##X))
-		#define RISSE_WS6(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 6>(L##X))
-		#define RISSE_WS7(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 7>(L##X))
-		#define RISSE_WS8(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 8>(L##X))
-		#define RISSE_WS9(X) ((const risse_char *)tRisseUtf16ToUtf32<sizeof(X), RisseUSN1,RisseUSN2,RisseUSN3,RisseUSN4,RisseUSN5,RisseUSN6,RisseUSN7,RisseUSN8, __LINE__, 9>(L##X))
+		#define RISSE_WS(X)  ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 0>(L##X))
+		#define RISSE_WS1(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 1>(L##X))
+		#define RISSE_WS2(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 2>(L##X))
+		#define RISSE_WS3(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 3>(L##X))
+		#define RISSE_WS4(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 4>(L##X))
+		#define RISSE_WS5(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 5>(L##X))
+		#define RISSE_WS6(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 6>(L##X))
+		#define RISSE_WS7(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 7>(L##X))
+		#define RISSE_WS8(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 8>(L##X))
+		#define RISSE_WS9(X) ((const risse_char *)tUtf16ToUtf32<sizeof(X), USN1,USN2,USN3,USN4,USN5,USN6,USN7,USN8, __LINE__, 9>(L##X))
 	#endif
 
 #endif

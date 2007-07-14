@@ -24,10 +24,10 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"Array" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
-class tRisseArrayInstance : public tRisseObjectBase
+class tArrayInstance : public tObjectBase
 {
 public:
-	typedef gc_deque<tRisseVariant> tArray; //!< 配列の中身のtypedef
+	typedef gc_deque<tVariant> tArray; //!< 配列の中身のtypedef
 
 private:
 	tArray Array; //!< 配列の中身
@@ -38,18 +38,18 @@ public:
 	tArray & GetArray() { return Array; }
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
-	virtual ~tRisseArrayInstance() {;}
+	virtual ~tArrayInstance() {;}
 
 public: // Risse用メソッドなど
 
 	void construct();
-	void initialize(const tRisseNativeCallInfo &info);
-	tRisseVariant iget(risse_offset ofs_index);
-	void iset(const tRisseVariant & value, risse_offset ofs_index);
-	void push(const tRisseMethodArgument & args);
-	tRisseVariant pop();
-	void unshift(const tRisseMethodArgument & args);
-	tRisseVariant shift();
+	void initialize(const tNativeCallInfo &info);
+	tVariant iget(risse_offset ofs_index);
+	void iset(const tVariant & value, risse_offset ofs_index);
+	void push(const tMethodArgument & args);
+	tVariant pop();
+	void unshift(const tMethodArgument & args);
+	tVariant shift();
 	size_t get_length() const;
 	void set_length(size_t new_size);
 };
@@ -59,20 +59,20 @@ public: // Risse用メソッドなど
 //---------------------------------------------------------------------------
 //! @brief		"Array" クラス
 //---------------------------------------------------------------------------
-class tRisseArrayClass : public tRisseClassBase
+class tArrayClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseArrayClass(tRisseScriptEngine * engine);
+	tArrayClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public:
 };

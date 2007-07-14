@@ -29,8 +29,8 @@ RISSE_DEFINE_SOURCE_ID(60941,39465,30047,17348,4512,31235,57590,9843);
 
 
 //---------------------------------------------------------------------------
-tRisseBooleanClass::tRisseBooleanClass(tRisseScriptEngine * engine) :
-	tRissePrimitiveClassBase(ss_Boolean, engine->PrimitiveClass)
+tBooleanClass::tBooleanClass(tScriptEngine * engine) :
+	tPrimitiveClassBase(ss_Boolean, engine->PrimitiveClass)
 {
 	RegisterMembers();
 }
@@ -38,7 +38,7 @@ tRisseBooleanClass::tRisseBooleanClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseBooleanClass::RegisterMembers()
+void tBooleanClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -48,30 +48,30 @@ void tRisseBooleanClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	// construct は tRissePrimitiveClass 内ですでに登録されている
+	// construct は tPrimitiveClass 内ですでに登録されている
 
-	RisseBindFunction(this, ss_ovulate, &tRisseBooleanClass::ovulate,
-		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
-	RisseBindFunction(this, ss_initialize, &tRisseBooleanClass::initialize,
-		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
-	RisseBindFunction(this, mnString, &tRisseBooleanClass::toString,
-		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
-	RisseBindFunction(this, ss_dump, &tRisseBooleanClass::dump,
-		tRisseMemberAttribute().Set(tRisseMemberAttribute::vcConst).Set(tRisseMemberAttribute::ocFinal));
+	BindFunction(this, ss_ovulate, &tBooleanClass::ovulate,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
+	BindFunction(this, ss_initialize, &tBooleanClass::initialize,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
+	BindFunction(this, mnString, &tBooleanClass::toString,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
+	BindFunction(this, ss_dump, &tBooleanClass::dump,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseBooleanClass::ovulate()
+tVariant tBooleanClass::ovulate()
 {
-	return tRisseVariant();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBooleanClass::initialize(const tRisseNativeCallInfo & info)
+void tBooleanClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドは「呼び出されない」
 }
@@ -79,7 +79,7 @@ void tRisseBooleanClass::initialize(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseBooleanClass::toString(const tRisseNativeCallInfo & info)
+tString tBooleanClass::toString(const tNativeCallInfo & info)
 {
 	return info.This.operator bool() ? ss_true : ss_false;
 }
@@ -87,7 +87,7 @@ tRisseString tRisseBooleanClass::toString(const tRisseNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseBooleanClass::dump(const tRisseNativeCallInfo & info)
+tString tBooleanClass::dump(const tNativeCallInfo & info)
 {
 	return info.This.operator bool() ? ss_true : ss_false;
 }

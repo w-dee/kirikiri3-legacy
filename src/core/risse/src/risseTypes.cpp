@@ -22,21 +22,21 @@ namespace Risse
 /*
  some sanity checking
 */
-template<bool x> struct tRisseStaticAsserter;
-template<> struct tRisseStaticAsserter<true>  { int hoge; };
+template<bool x> struct tStaticAsserter;
+template<> struct tStaticAsserter<true>  { int hoge; };
 
 // risse_int の有効ビット数は32bit符号付き？
-enum { RisseIntSizeAsserter = sizeof (tRisseStaticAsserter<
+enum { IntSizeAsserter = sizeof (tStaticAsserter<
 	std::numeric_limits<risse_int>::is_signed && 
 	std::numeric_limits<risse_int>::digits >= 31 > ) };
 
 // char の有効ビット数は8bit符号付き？
-enum { RisseCharSizeAsserter = sizeof (tRisseStaticAsserter<
+enum { CharSizeAsserter = sizeof (tStaticAsserter<
 	std::numeric_limits<char>::is_signed && 
 	std::numeric_limits<char>::digits == 7 > ) };
 
 // unsigned char の有効ビット数は8bit符号なし？
-enum { RisseUCharSizeAsserter = sizeof (tRisseStaticAsserter<
+enum { UCharSizeAsserter = sizeof (tStaticAsserter<
 	!std::numeric_limits<unsigned char>::is_signed && 
 	std::numeric_limits<unsigned char>::digits == 8 > ) };
 //---------------------------------------------------------------------------
@@ -45,7 +45,7 @@ enum { RisseUCharSizeAsserter = sizeof (tRisseStaticAsserter<
 
 
 //---------------------------------------------------------------------------
-risse_uint32 RisseGetFPClass(risse_real r)
+risse_uint32 GetFPClass(risse_real r)
 {
 	risse_uint64 *ui64 = (risse_uint64*)&r;
 

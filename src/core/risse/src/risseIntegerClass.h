@@ -24,23 +24,23 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"Integer" クラス
 //---------------------------------------------------------------------------
-class tRisseIntegerClass : public tRissePrimitiveClassBase
+class tIntegerClass : public tPrimitiveClassBase
 {
-	typedef tRissePrimitiveClassBase inherited; //!< 親クラスの typedef
+	typedef tPrimitiveClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseIntegerClass(tRisseScriptEngine * engine);
+	tIntegerClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public: // Risse用メソッドなど
-	static void initialize(const tRisseNativeCallInfo & info);
-	static void times(const tRisseNativeCallInfo & info);
+	static void initialize(const tNativeCallInfo & info);
+	static void times(const tNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

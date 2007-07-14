@@ -27,18 +27,18 @@ RISSE_DEFINE_SOURCE_ID(49805,54699,17434,18495,59306,19776,3233,9707);
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::SkipSpace(const risse_char * & ptr)
+bool tLexerUtility::SkipSpace(const risse_char * & ptr)
 {
-	while(*ptr && Risse_iswspace_nc(*ptr)) ptr ++;
+	while(*ptr && ::Risse::iswspace_nc(*ptr)) ptr ++;
 	return *ptr != 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::SkipSpaceExceptForNewLine(const risse_char * & ptr)
+bool tLexerUtility::SkipSpaceExceptForNewLine(const risse_char * & ptr)
 {
-	while(*ptr && Risse_iswspace_nc(*ptr) &&
+	while(*ptr && ::Risse::iswspace_nc(*ptr) &&
 		!IsNewLineChar(*ptr)) ptr ++;
 	return *ptr != 0;
 }
@@ -46,7 +46,7 @@ bool tRisseLexerUtility::SkipSpaceExceptForNewLine(const risse_char * & ptr)
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::StepNewLineChar(const risse_char * & ptr)
+bool tLexerUtility::StepNewLineChar(const risse_char * & ptr)
 {
 	if(ptr[0] == RISSE_WC('\r') && ptr[1] == RISSE_WC('\n'))
 		ptr += 2; // CR LF
@@ -60,7 +60,7 @@ bool tRisseLexerUtility::StepNewLineChar(const risse_char * & ptr)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::SkipToBeforeNewLineChar(const risse_char * & ptr)
+bool tLexerUtility::SkipToBeforeNewLineChar(const risse_char * & ptr)
 {
 	while(*ptr && !IsNewLineChar(*ptr)) ptr++;
 	if(*ptr == 0) return false;
@@ -70,7 +70,7 @@ bool tRisseLexerUtility::SkipToBeforeNewLineChar(const risse_char * & ptr)
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::SkipToLineEnd(const risse_char * & ptr)
+bool tLexerUtility::SkipToLineEnd(const risse_char * & ptr)
 {
 	if(!SkipToBeforeNewLineChar(ptr)) return false;
 	return StepNewLineChar(ptr);
@@ -79,7 +79,7 @@ bool tRisseLexerUtility::SkipToLineEnd(const risse_char * & ptr)
 
 
 //---------------------------------------------------------------------------
-risse_int tRisseLexerUtility::HexNum(risse_char ch)
+risse_int tLexerUtility::HexNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('a') && ch<=RISSE_WC('f')) return ch-RISSE_WC('a')+10;
 	if(ch>=RISSE_WC('A') && ch<=RISSE_WC('F')) return ch-RISSE_WC('A')+10;
@@ -90,7 +90,7 @@ risse_int tRisseLexerUtility::HexNum(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-risse_int tRisseLexerUtility::OctNum(risse_char ch)
+risse_int tLexerUtility::OctNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('0') && ch<=RISSE_WC('7')) return ch-RISSE_WC('0');
 	return -1;
@@ -99,7 +99,7 @@ risse_int tRisseLexerUtility::OctNum(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-risse_int tRisseLexerUtility::DecNum(risse_char ch)
+risse_int tLexerUtility::DecNum(risse_char ch)
 {
 	if(ch>=RISSE_WC('0') && ch<=RISSE_WC('9')) return ch-RISSE_WC('0');
 	return -1;
@@ -108,7 +108,7 @@ risse_int tRisseLexerUtility::DecNum(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-risse_int tRisseLexerUtility::BinNum(risse_char ch)
+risse_int tLexerUtility::BinNum(risse_char ch)
 {
 	if(ch==RISSE_WC('0')) return 0;
 	if(ch==RISSE_WC('1')) return 1;
@@ -119,7 +119,7 @@ risse_int tRisseLexerUtility::BinNum(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-risse_int tRisseLexerUtility::UnescapeBackSlash(risse_char ch)
+risse_int tLexerUtility::UnescapeBackSlash(risse_char ch)
 {
 	// convert "\?"
 	// ch must indicate "?"
@@ -139,8 +139,8 @@ risse_int tRisseLexerUtility::UnescapeBackSlash(risse_char ch)
 
 
 //---------------------------------------------------------------------------
-tRisseLexerUtility::tSkipCommentResult
-	tRisseLexerUtility::SkipComment(const risse_char * & ptr)
+tLexerUtility::tSkipCommentResult
+	tLexerUtility::SkipComment(const risse_char * & ptr)
 {
 	if(ptr[0] != RISSE_WC('/')) return scrNotComment;
 
@@ -156,7 +156,7 @@ tRisseLexerUtility::tSkipCommentResult
 	{
 		// block comment; skip to the next '*' '/'
 		ptr += 2;
-		if(*ptr == 0) tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
+		if(*ptr == 0) tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
 		risse_int level = 0;
 		for(;;)
 		{
@@ -175,7 +175,7 @@ tRisseLexerUtility::tSkipCommentResult
 				}
 				level --;
 			}
-			if(!*(++ptr)) tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
+			if(!*(++ptr)) tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
 		}
 		if(*ptr ==0) return scrEnded;
 
@@ -188,7 +188,7 @@ tRisseLexerUtility::tSkipCommentResult
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::StringMatch(const risse_char * & ptr, const risse_char *wrd, bool isword)
+bool tLexerUtility::StringMatch(const risse_char * & ptr, const risse_char *wrd, bool isword)
 {
 	// compare string with a script starting from sc and wrd.
 	// word matching is processed if isword is true.
@@ -203,7 +203,7 @@ bool tRisseLexerUtility::StringMatch(const risse_char * & ptr, const risse_char 
 	if(*wrd) { ptr=save; return false; }
 	if(isword)
 	{
-		if(Risse_iswalpha_nc(*ptr) || *ptr == RISSE_WC('_'))
+		if(::Risse::iswalpha_nc(*ptr) || *ptr == RISSE_WC('_'))
 			{ ptr=save; return false; }
 	}
 	return true;
@@ -212,10 +212,10 @@ bool tRisseLexerUtility::StringMatch(const risse_char * & ptr, const risse_char 
 
 
 //---------------------------------------------------------------------------
-tRisseLexerUtility::tParseStringResult
-	tRisseLexerUtility::ParseString(
+tLexerUtility::tParseStringResult
+	tLexerUtility::ParseString(
 		const risse_char * & ptr, 
-		tRisseString &val,
+		tString &val,
 		risse_char delim, bool embexpmode)
 {
 	// delim1 must be '\'' or '"'
@@ -223,7 +223,7 @@ tRisseLexerUtility::tParseStringResult
 
 	// TODO: 改行がリテラル中にあった場合はソースの改行コードにかかわらず常に \n とするように
 
-	tRisseString str;
+	tString str;
 
 	tParseStringResult status = psrNone;
 
@@ -258,7 +258,7 @@ tRisseLexerUtility::tParseStringResult
 				// ビットは使用できない (エラー状態を表す用途に使われる
 				// 可能性があるため )
 				if(code == 0 || (code & (1 << (sizeof(risse_char)*8 - 1))))
-					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("UTF-32 code out of range"));
+					tCompileExceptionClass::Throw(RISSE_WS_TR("UTF-32 code out of range"));
 
 				str += (risse_char)code;
 			}
@@ -281,7 +281,7 @@ tRisseLexerUtility::tParseStringResult
 				// ビットは使用できない (エラー状態を表す用途に使われる
 				// 可能性があるため )
 				if(code == 0 || (code & (1 << (sizeof(risse_char)*8 - 1))))
-					tRisseCompileExceptionClass::Throw(RISSE_WS_TR("UTF-32 code out of range"));
+					tCompileExceptionClass::Throw(RISSE_WS_TR("UTF-32 code out of range"));
 
 				str += (risse_char)code;
 			}
@@ -345,7 +345,7 @@ tRisseLexerUtility::tParseStringResult
 	if(status == psrNone)
 	{
 		// error
-		tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed string literal"));
+		tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed string literal"));
 	}
 
 	str.Fit();
@@ -357,7 +357,7 @@ tRisseLexerUtility::tParseStringResult
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseString(const risse_char * & ptr, tRisseString &val)
+bool tLexerUtility::ParseString(const risse_char * & ptr, tString &val)
 {
 	// Ptr は '\'' or '"' を指していないとならない
 
@@ -372,12 +372,12 @@ bool tRisseLexerUtility::ParseString(const risse_char * & ptr, tRisseString &val
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseLexerUtility::ExtractNumber(
+tString tLexerUtility::ExtractNumber(
 	const risse_char * & ptr,
 	risse_int (*validdigits)(risse_char ch),
 	const risse_char *expmark, bool &isreal)
 {
-	tRisseString tmp;
+	tString tmp;
 
 	bool point_found = false;
 	bool exp_found = false;
@@ -427,7 +427,7 @@ tRisseString tRisseLexerUtility::ExtractNumber(
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseNonDecimalReal(
+bool tLexerUtility::ParseNonDecimalReal(
 	const risse_char * ptr, risse_real &val,
 	risse_int (*validdigits)(risse_char ch), risse_int basebits)
 {
@@ -565,7 +565,7 @@ bool tRisseLexerUtility::ParseNonDecimalReal(
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int64 &val, 
+bool tLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int64 &val, 
 	risse_int (*validdigits)(risse_char ch), risse_int basebits)
 {
 	risse_int64 v = 0;
@@ -582,11 +582,11 @@ bool tRisseLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseNonDecimalNumber(const risse_char * & ptr, tRisseVariant &val,
+bool tLexerUtility::ParseNonDecimalNumber(const risse_char * & ptr, tVariant &val,
 	risse_int (*validdigits)(risse_char ch), risse_int base)
 {
 	bool isreal = false;
-	tRisseString tmp(ExtractNumber(ptr, validdigits, RISSE_WS("Pp"), isreal));
+	tString tmp(ExtractNumber(ptr, validdigits, RISSE_WS("Pp"), isreal));
 
 	if(tmp.IsEmpty()) return false;
 
@@ -611,16 +611,16 @@ bool tRisseLexerUtility::ParseNonDecimalNumber(const risse_char * & ptr, tRisseV
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseDecimalReal(const risse_char * ptr, risse_real &val)
+bool tLexerUtility::ParseDecimalReal(const risse_char * ptr, risse_real &val)
 {
-	val = static_cast<risse_real>(Risse_strtod(ptr, NULL));
+	val = static_cast<risse_real>(::Risse::strtod(ptr, NULL));
 	return true;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseDecimalInteger(const risse_char * ptr, risse_int64 &val)
+bool tLexerUtility::ParseDecimalInteger(const risse_char * ptr, risse_int64 &val)
 {
 	int n;
 	risse_int64 num = 0;
@@ -637,7 +637,7 @@ bool tRisseLexerUtility::ParseDecimalInteger(const risse_char * ptr, risse_int64
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseNumber2(const risse_char * & ptr, tRisseVariant &val)
+bool tLexerUtility::ParseNumber2(const risse_char * & ptr, tVariant &val)
 {
 	// stage 2
 
@@ -722,7 +722,7 @@ bool tRisseLexerUtility::ParseNumber2(const risse_char * & ptr, tRisseVariant &v
 	// integer decimal or real decimal
 decimal:
 	bool isreal = false;
-	tRisseString tmp(ExtractNumber(ptr, DecNum, RISSE_WS("Ee"), isreal));
+	tString tmp(ExtractNumber(ptr, DecNum, RISSE_WS("Ee"), isreal));
 
 	if(tmp.IsEmpty()) return false;
 
@@ -747,7 +747,7 @@ decimal:
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseNumber(const risse_char * & ptr, tRisseVariant &val)
+bool tLexerUtility::ParseNumber(const risse_char * & ptr, tVariant &val)
 {
 	// parse a number pointed by ptr
 
@@ -779,7 +779,7 @@ bool tRisseLexerUtility::ParseNumber(const risse_char * & ptr, tRisseVariant &va
 
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
+bool tLexerUtility::ParseOctet(const risse_char * & ptr, tOctet &val)
 {
 	// parse a octet literal;
 	// syntax is:
@@ -790,19 +790,19 @@ bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 	bool leading = true;
 	risse_uint8 cur = 0;
 
-	tRisseOctet ret;
+	tOctet ret;
 
 	for(;*ptr;)
 	{
 		// 空白をスキップ
 		if(!SkipSpace(ptr))
-			tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
 
 		// コメントをスキップ
 		switch(SkipComment(ptr))
 		{
 		case scrEnded:
-			tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
 		case scrContinue:
 		case scrNotComment:
 			;
@@ -810,7 +810,7 @@ bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 
 		// 空白をスキップ
 		if(!SkipSpace(ptr))
-			tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
 
 		// 次の一文字へのポインタを得る
 		const risse_char *next = ptr;
@@ -868,14 +868,14 @@ bool tRisseLexerUtility::ParseOctet(const risse_char * & ptr, tRisseOctet &val)
 	}
 
 	// error
-	tRisseCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
+	tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
 
 	return false;
 }
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-bool tRisseLexerUtility::ParseRegExp(const risse_char * & ptr, tRisseString &pat, tRisseString &flags)
+bool tLexerUtility::ParseRegExp(const risse_char * & ptr, tString &pat, tString &flags)
 {
 	// parse a regular expression pointed by 'ptr'.
 	// this is essencially the same as string parsing, except for
@@ -885,8 +885,8 @@ bool tRisseLexerUtility::ParseRegExp(const risse_char * & ptr, tRisseString &pat
 
 	bool ok = false;
 	bool lastbackslash = false;
-	tRisseString str;
-	tRisseString flg;
+	tString str;
+	tString flg;
 
 	risse_char delimiter = *ptr; // デリミタを読む
 	if(!*(++ptr)) return false;
@@ -930,7 +930,7 @@ bool tRisseLexerUtility::ParseRegExp(const risse_char * & ptr, tRisseString &pat
 	if(!ok)
 	{
 		// error
-		tRisseCompileExceptionClass::Throw("Unclosed regular expression literal");
+		tCompileExceptionClass::Throw("Unclosed regular expression literal");
 	}
 
 	pat = str;

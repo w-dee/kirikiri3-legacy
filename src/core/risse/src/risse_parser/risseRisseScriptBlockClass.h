@@ -10,32 +10,32 @@
 //! @file
 //! @brief Risse スクリプトブロックの実装
 //---------------------------------------------------------------------------
-#ifndef RisseScriptBlockH
-#define RisseScriptBlockH
+#ifndef ScriptBlockH
+#define ScriptBlockH
 
 #include "../risseScriptBlockClass.h"
 
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseRisseScriptBlockInstance : public tRisseScriptBlockInstance
+class tRisseScriptBlockInstance : public tScriptBlockInstance
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseRisseScriptBlockInstance();
+	tRisseScriptBlockInstance();
 
 	//! @brief		AST のルートノードを取得する(下位クラスで実装すること)
 	//! @param		need_result		結果が必要かどうか
 	//! @param		is_expression	式モードかどうか
 	//! @return		AST ルートノード
-	tRisseASTNode * GetASTRootNode(bool need_result = false, bool is_expression = false);
+	tASTNode * GetASTRootNode(bool need_result = false, bool is_expression = false);
 
 
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(
-		const tRisseString &script, const tRisseString & name, risse_size lineofs,
-		const tRisseNativeCallInfo &info);
+		const tString &script, const tString & name, risse_size lineofs,
+		const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
 
@@ -44,22 +44,22 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"RisseScriptBlock" クラス
+//! @brief		"ScriptBlock" クラス
 //---------------------------------------------------------------------------
-class tRisseRisseScriptBlockClass : public tRisseClassBase
+class tRisseScriptBlockClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseRisseScriptBlockClass(tRisseScriptEngine * engine);
+	tRisseScriptBlockClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public:
 };

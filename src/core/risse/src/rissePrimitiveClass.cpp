@@ -26,20 +26,20 @@ RISSE_DEFINE_SOURCE_ID(46147,47929,28573,19337,17834,3423,43968,61532);
 
 
 //---------------------------------------------------------------------------
-tRissePrimitiveClassBase::tRissePrimitiveClassBase(const tRisseString & name, tRisseClassBase * super_class) :
-	tRisseClassBase(name, super_class)
+tPrimitiveClassBase::tPrimitiveClassBase(const tString & name, tClassBase * super_class) :
+	tClassBase(name, super_class)
 {
 	// ゲートウェイインターフェースを構築する
-	tRisseObjectBase * gateway_obj = new tRisseObjectBase();
-	gateway_obj->SetRTTI(new tRisseRTTI(super_class->GetRTTI()->GetScriptEngine()));
+	tObjectBase * gateway_obj = new tObjectBase();
+	gateway_obj->SetRTTI(new tRTTI(super_class->GetRTTI()->GetScriptEngine()));
 	Gateway = gateway_obj;
 
 	// そのオブジェクトにクラス情報を設定する
 	// ここではclassメンバに「自分のクラス」を追加する
 	Gateway.SetPropertyDirect_Object(ss_class,
-		tRisseOperateFlags(tRisseMemberAttribute::GetDefault()) |
-		tRisseOperateFlags::ofMemberEnsure|tRisseOperateFlags::ofInstanceMemberOnly,
-		tRisseVariant(this), Gateway);
+		tOperateFlags(tMemberAttribute::GetDefault()) |
+		tOperateFlags::ofMemberEnsure|tOperateFlags::ofInstanceMemberOnly,
+		tVariant(this), Gateway);
 
 	// クラスに必要なメソッドを登録する
 	// 基本的に ss_construct と ss_initialize は各クラスごとに
@@ -51,16 +51,16 @@ tRissePrimitiveClassBase::tRissePrimitiveClassBase(const tRisseString & name, tR
 	// construct, initialize などは新しいオブジェクトのコンテキスト上で実行されるので
 	// コンテキストとしては null を指定する
 
-	RisseBindFunction(this, ss_construct,
-		&tRissePrimitiveClassBase::construct,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
+	BindFunction(this, ss_construct,
+		&tPrimitiveClassBase::construct,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRissePrimitiveClassBase::construct()
+void tPrimitiveClassBase::construct()
 {
 	// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
 	// デフォルトでは何もしない
@@ -82,8 +82,8 @@ void tRissePrimitiveClassBase::construct()
 
 
 //---------------------------------------------------------------------------
-tRissePrimitiveClass::tRissePrimitiveClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Primitive, engine->ObjectClass)
+tPrimitiveClass::tPrimitiveClass(tScriptEngine * engine) :
+	tClassBase(ss_Primitive, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -91,41 +91,41 @@ tRissePrimitiveClass::tRissePrimitiveClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRissePrimitiveClass::RegisterMembers()
+void tPrimitiveClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
 
 	// クラスに必要なメソッドを登録する
 
-	RisseBindFunction(this, ss_ovulate,
-		&tRissePrimitiveClass::ovulate,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
-	RisseBindFunction(this, ss_construct,
-		&tRissePrimitiveClass::construct,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
-	RisseBindFunction(this, mnString,
-		&tRissePrimitiveClass::toString,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
+	BindFunction(this, ss_ovulate,
+		&tPrimitiveClass::ovulate,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
+	BindFunction(this, ss_construct,
+		&tPrimitiveClass::construct,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
+	BindFunction(this, mnString,
+		&tPrimitiveClass::toString,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRissePrimitiveClass::ovulate()
+tVariant tPrimitiveClass::ovulate()
 {
 	// このクラスのインスタンスは作成できないので例外を投げる
-	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tRisseVariant();
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRissePrimitiveClass::construct()
+void tPrimitiveClass::construct()
 {
 	// Primitive な各クラスは final クラスであり、サブクラスを作ることはできない。
 	// デフォルトでは何もしない
@@ -134,9 +134,9 @@ void tRissePrimitiveClass::construct()
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRissePrimitiveClass::toString(const tRisseNativeCallInfo & info)
+tVariant tPrimitiveClass::toString(const tNativeCallInfo & info)
 {
-	return info.This.operator tRisseString();
+	return info.This.operator tString();
 }
 //---------------------------------------------------------------------------
 

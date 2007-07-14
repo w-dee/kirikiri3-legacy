@@ -39,8 +39,8 @@ RISSE_DEFINE_SOURCE_ID(38733,31388,53292,19613,29887,64791,9160,61431);
 
 
 //---------------------------------------------------------------------------
-tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
-	tRisseCodeExecutor(cb)
+tCodeInterpreter::tCodeInterpreter(tCodeBlock *cb) :
+	tCodeExecutor(cb)
 {
 	
 }
@@ -48,17 +48,17 @@ tRisseCodeInterpreter::tRisseCodeInterpreter(tRisseCodeBlock *cb) :
 
 
 //---------------------------------------------------------------------------
-void tRisseCodeInterpreter::Execute(
-		const tRisseMethodArgument & args,
-		const tRisseVariant & This,
-		tRisseVariant * frame, tRisseSharedVariableFrames * shared,
-		tRisseVariant * result)
+void tCodeInterpreter::Execute(
+		const tMethodArgument & args,
+		const tVariant & This,
+		tVariant * frame, tSharedVariableFrames * shared,
+		tVariant * result)
 {
 	// context でスタックフレームが指定されていない場合、スタックを割り当てる
 	// TODO: スタックフレームの再利用など
 	// 毎回スタックを new で割り当てるのは効率が悪い？
 	if(frame == NULL)
-		frame = new tRisseVariant[CodeBlock->GetNumRegs()];
+		frame = new tVariant[CodeBlock->GetNumRegs()];
 
 	// 共有変数領域の割り当て
 	if(CodeBlock->GetSharedVariableNestCount() != risse_size_max)
@@ -66,18 +66,18 @@ void tRisseCodeInterpreter::Execute(
 		if(!shared)
 		{
 			// 新規割り当て
-			shared = new tRisseSharedVariableFrames(CodeBlock->GetSharedVariableNestCount());
+			shared = new tSharedVariableFrames(CodeBlock->GetSharedVariableNestCount());
 		}
 		else
 		{
 			// 拡張
 			// eval は既存の共有変数領域を拡張することがある
-			shared = new tRisseSharedVariableFrames(*shared, CodeBlock->GetSharedVariableNestCount());
+			shared = new tSharedVariableFrames(*shared, CodeBlock->GetSharedVariableNestCount());
 		}
 	}
 	RISSE_ASSERT(shared != NULL);
 
-	tRisseSharedVariableFramesOverlay shared_overlay(shared,
+	tSharedVariableFramesOverlay shared_overlay(shared,
 				CodeBlock->GetNestLevel(), CodeBlock->GetNumSharedVars());
 		// 共有フレームのうち、CodeBlock->GetNestLevel() にある共有フレームを
 		// 新しく置き換えるためのオブジェクトを準備する。
@@ -93,12 +93,12 @@ void tRisseCodeInterpreter::Execute(
 #ifdef RISSE_ASSERT_ENABLED
 	risse_size codesize = CodeBlock->GetCodeSize();
 #endif
-	const tRisseVariant * consts = CodeBlock->GetConsts();
+	const tVariant * consts = CodeBlock->GetConsts();
 #ifdef RISSE_ASSERT_ENABLED
 	risse_size constssize = CodeBlock->GetConstsSize();
 #endif
 
-	tRisseScriptEngine * engine = CodeBlock->GetScriptBlockInstance()->GetScriptEngine();
+	tScriptEngine * engine = CodeBlock->GetScriptBlockInstance()->GetScriptEngine();
 
 	try
 	{
@@ -106,7 +106,7 @@ void tRisseCodeInterpreter::Execute(
 		スタックフレームと定数領域へのアクセスなど以下のマクロを使うこと。
 		frame[num] のように書くと num に毎回 sizeof(frame[0]) の乗算が発生するため、
 		将来的に、あらかじめ num は乗算を済ましておき、
-		*(tRisseVariant*)((risse_uint8*)frame + (num)) のようなマクロに置き換える
+		*(tVariant*)((risse_uint8*)frame + (num)) のようなマクロに置き換える
 		可能性がある。
 		*/
 		//! @brief		スタックフレームにアクセス
@@ -121,10 +121,10 @@ void tRisseCodeInterpreter::Execute(
 		// スタック上に配置する。ただし、必要ない場合はこれを
 		// 生成する必要はないため、この時点ではストレージを確保しておくだけにする。
 		// (まぁそんなこといってもこいつの生成コストなどたかがしれているはずなのだが)
-		union tThisProxy
+		union tLocalThisProxy
 		{
 			unsigned long dummy; // 強制的にこの共用体のアラインメントを合わせるために
-			char Storage[sizeof(tRisseThisProxy)];
+			char Storage[sizeof(tThisProxy)];
 		} ThisProxy;
 
 		// ループ
@@ -153,11 +153,11 @@ void tRisseCodeInterpreter::Execute(
 			case ocAssignNewBinding: // binding	= 新しいバインディングオブジェクトの代入
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(engine->BindingClass).
-								New(0, tRisseMethodArgument::Empty());
-				tRisseBindingInstance * obj =
-					AR(code[1]).CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
-				obj->SetInfo(new tRisseBindingInfo(This, new tRisseSharedVariableFrames(shared_overlay)));
+					tVariant(engine->BindingClass).
+								New(0, tMethodArgument::Empty());
+				tBindingInstance * obj =
+					AR(code[1]).CheckAndGetObjectInterafce<tBindingInstance, tClassBase>(engine->BindingClass);
+				obj->SetInfo(new tBindingInfo(This, new tSharedVariableFrames(shared_overlay)));
 				code += 2;
 				break;
 
@@ -169,9 +169,9 @@ void tRisseCodeInterpreter::Execute(
 
 			case ocAssignThisProxy		: // this	 = this-proxyの代入
 				RISSE_ASSERT(CI(code[1]) < framesize);
-				AR(code[1]) = tRisseVariant(
-					new((tRisseThisProxy*)(&ThisProxy.Storage[0])) tRisseThisProxy(
-						const_cast<tRisseVariant&>(This), engine->GetGlobalObject(), engine));
+				AR(code[1]) = tVariant(
+					new((tThisProxy*)(&ThisProxy.Storage[0])) tThisProxy(
+						const_cast<tVariant&>(This), engine->GetGlobalObject(), engine));
 				code += 2;
 				break;
 
@@ -189,7 +189,7 @@ void tRisseCodeInterpreter::Execute(
 
 			case ocAssignNewArray	: // array	 = 新しい配列オブジェクトの代入
 				RISSE_ASSERT(CI(code[1]) < framesize);
-				AR(code[1]) = tRisseVariant(engine->ArrayClass).New();
+				AR(code[1]) = tVariant(engine->ArrayClass).New();
 				code += 2;
 				break;
 
@@ -211,8 +211,8 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(engine->FunctionClass).
-								New(0, tRisseMethodArgument::New(AR(code[2])));
+					tVariant(engine->FunctionClass).
+								New(0, tMethodArgument::New(AR(code[2])));
 				code += 3;
 				break;
 
@@ -221,8 +221,8 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(engine->PropertyClass).
-								New(0, tRisseMethodArgument::New(AR(code[2]), AR(code[3])));
+					tVariant(engine->PropertyClass).
+								New(0, tMethodArgument::New(AR(code[2]), AR(code[3])));
 				code += 4;
 				break;
 
@@ -232,8 +232,8 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(engine->ClassClass).
-								New(0, tRisseMethodArgument::New(AR(code[2]), AR(code[3])));
+					tVariant(engine->ClassClass).
+								New(0, tMethodArgument::New(AR(code[2]), AR(code[3])));
 				code += 4;
 				break;
 
@@ -242,8 +242,8 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				AR(code[1]) =
-					tRisseVariant(engine->ModuleClass).
-								New(0, tRisseMethodArgument::New(AR(code[2])));
+					tVariant(engine->ModuleClass).
+								New(0, tMethodArgument::New(AR(code[2])));
 				code += 3;
 				break;
 
@@ -268,7 +268,7 @@ void tRisseCodeInterpreter::Execute(
 			case ocAddBindingMap: // bindmap	ローカル変数のバインディング情報を追加
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
-				tRisseBindingInstance::AddMap(AR(code[1]), AR(code[2]), code[3]);
+				tBindingInstance::AddMap(AR(code[1]), AR(code[2]), code[3]);
 				code += 4;
 				break;
 
@@ -297,15 +297,15 @@ void tRisseCodeInterpreter::Execute(
 				{
 					RISSE_ASSERT(CI(code[1]) < framesize);
 					RISSE_ASSERT(CI(code[2]) < framesize);
-					// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+					// code[1] = 結果格納先 InvalidRegNum の場合は結果は要らない
 					// code[2] = メソッドオブジェクト
 					// code[3] = フラグ
 					// code[4] = 引数の数
 					// code[5] ～   引数
 					// TODO: 引数展開など
-					RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-					tRisseVariant new_obj;
-					if(code[3] & RisseFuncCallFlag_Omitted)
+					RISSE_ASSERT(code[4] < MaxArgCount); // 引数は最大MaxArgCount個まで
+					tVariant new_obj;
+					if(code[3] & FuncCallFlag_Omitted)
 					{
 						// 引数の省略
 						new_obj = AR(code[2]).New(0, args);
@@ -313,12 +313,12 @@ void tRisseCodeInterpreter::Execute(
 					else
 					{
 						// 引数の省略はなし
-						tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(code[4]);
+						tMethodArgument & new_args = tMethodArgument::Allocate(code[4]);
 						for(risse_uint32 i = 0; i < code[4]; i++)
 							new_args.SetArgument(i, AR(code[i+5]));
 						new_obj = AR(code[2]).New(0, new_args);
 					}
-					if(code[1]!=RisseInvalidRegNum) AR(code[1]) = new_obj;
+					if(code[1]!=InvalidRegNum) AR(code[1]) = new_obj;
 					code += code[4] + 5;
 					break;
 				}
@@ -329,21 +329,21 @@ void tRisseCodeInterpreter::Execute(
 					RISSE_ASSERT(CI(code[1]) < framesize);
 					RISSE_ASSERT(CI(code[2]) < framesize);
 
-					// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+					// code[1] = 結果格納先 InvalidRegNum の場合は結果は要らない
 					// code[2] = メソッドオブジェクト
 					// code[3] = フラグ
 					// code[4] = 引数の数
 					// code[5] = ブロック引数の数
 					// code[6] ～   引数
 					// TODO: 引数展開など
-					RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-					if(code[1]!=RisseInvalidRegNum) AR(code[1]).Clear();
+					RISSE_ASSERT(code[4] < MaxArgCount); // 引数は最大MaxArgCount個まで
+					if(code[1]!=InvalidRegNum) AR(code[1]).Clear();
 					bool raised = false;
-					tRisseVariant val;
+					tVariant val;
 
 					try
 					{
-						if(code[3] & RisseFuncCallFlag_Omitted)
+						if(code[3] & FuncCallFlag_Omitted)
 						{
 							// 引数の省略
 							AR(code[2]).FuncCall(engine, &val, 0, args, This);
@@ -351,8 +351,8 @@ void tRisseCodeInterpreter::Execute(
 						else
 						{
 							// 引数の省略はなし
-							tRisseMethodArgument & new_args =
-								tRisseMethodArgument::Allocate(code[4], code[5]);
+							tMethodArgument & new_args =
+								tMethodArgument::Allocate(code[4], code[5]);
 
 							for(risse_uint32 i = 0; i < code[4]; i++)
 								new_args.SetArgument(i, AR(code[i+6]));
@@ -362,7 +362,7 @@ void tRisseCodeInterpreter::Execute(
 							AR(code[2]).FuncCall(engine, &val, 0, new_args, This);
 						}
 					}
-					catch(const tRisseVariant * e)
+					catch(const tVariant * e)
 					{
 						val = *e;
 						raised = true;
@@ -372,8 +372,8 @@ void tRisseCodeInterpreter::Execute(
 						raised = true;
 					}
 
-					if(code[1]!=RisseInvalidRegNum)
-						AR(code[1]) = new tRisseTryFuncCallReturnObject(val, raised);
+					if(code[1]!=InvalidRegNum)
+						AR(code[1]) = new tTryFuncCallReturnObject(val, raised);
 					code += code[4] + code[5] + 6;
 					break;
 				}
@@ -385,23 +385,23 @@ void tRisseCodeInterpreter::Execute(
 					RISSE_ASSERT(CI(code[2]) < framesize);
 					RISSE_ASSERT(CI(code[3]) < framesize);
 
-					// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+					// code[1] = 結果格納先 InvalidRegNum の場合は結果は要らない
 					// code[2] = メソッドオブジェクト
 					// code[3] = 同期オブジェクト
 
-					if(code[1]!=RisseInvalidRegNum) AR(code[1]).Clear();
+					if(code[1]!=InvalidRegNum) AR(code[1]).Clear();
 					bool raised = false;
-					tRisseVariant val;
+					tVariant val;
 
 					try
 					{
 						// ロックをかける
-						volatile tRisseVariant::tSynchronizer sync(AR(code[3]));
+						volatile tVariant::tSynchronizer sync(AR(code[3]));
 
 						// メソッドオブジェクトを呼ぶ
 						AR(code[2]).FuncCall(engine, &val, 0, args, This);
 					}
-					catch(const tRisseVariant * e)
+					catch(const tVariant * e)
 					{
 						val = *e;
 						raised = true;
@@ -411,8 +411,8 @@ void tRisseCodeInterpreter::Execute(
 						raised = true;
 					}
 
-					if(code[1]!=RisseInvalidRegNum)
-						AR(code[1]) = new tRisseTryFuncCallReturnObject(val, raised);
+					if(code[1]!=InvalidRegNum)
+						AR(code[1]) = new tTryFuncCallReturnObject(val, raised);
 					code += 4;
 					break;
 				}
@@ -422,28 +422,28 @@ void tRisseCodeInterpreter::Execute(
 				{
 					RISSE_ASSERT(CI(code[1]) < framesize);
 					RISSE_ASSERT(CI(code[2]) < framesize);
-					// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+					// code[1] = 結果格納先 InvalidRegNum の場合は結果は要らない
 					// code[2] = メソッドオブジェクト
 					// code[3] = フラグ
 					// code[4] = 引数の数
 					// code[5] ～   引数
 					// TODO: 引数展開など
-					RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-					if(code[3] & RisseFuncCallFlag_Omitted)
+					RISSE_ASSERT(code[4] < MaxArgCount); // 引数は最大MaxArgCount個まで
+					if(code[3] & FuncCallFlag_Omitted)
 					{
 						// 引数の省略
-						AR(code[2]).FuncCall(engine, code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						AR(code[2]).FuncCall(engine, code[1]==InvalidRegNum?NULL:&AR(code[1]),
 							0, args, This);
 					}
 					else
 					{
 						// 引数の省略はなし
-						tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(code[4]);
+						tMethodArgument & new_args = tMethodArgument::Allocate(code[4]);
 
 						for(risse_uint32 i = 0; i < code[4]; i++)
 							new_args.SetArgument(i, AR(code[i+5]));
 
-						AR(code[2]).FuncCall(engine, code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						AR(code[2]).FuncCall(engine, code[1]==InvalidRegNum?NULL:&AR(code[1]),
 							0, new_args, This);
 					}
 					code += code[4] + 5;
@@ -458,31 +458,31 @@ void tRisseCodeInterpreter::Execute(
 				{
 					RISSE_ASSERT(CI(code[1]) < framesize);
 					RISSE_ASSERT(CI(code[2]) < framesize);
-					// code[1] = 結果格納先 RisseInvalidRegNum の場合は結果は要らない
+					// code[1] = 結果格納先 InvalidRegNum の場合は結果は要らない
 					// code[2] = メソッドオブジェクト
 					// code[3] = フラグ
 					// code[4] = 引数の数
 					// code[5] = ブロック引数の数
 					// code[6] ～   引数
 					// TODO: 引数展開など
-					RISSE_ASSERT(code[4] < RisseMaxArgCount); // 引数は最大RisseMaxArgCount個まで
-					if(code[3] & RisseFuncCallFlag_Omitted)
+					RISSE_ASSERT(code[4] < MaxArgCount); // 引数は最大MaxArgCount個まで
+					if(code[3] & FuncCallFlag_Omitted)
 					{
 						// 引数の省略
-						AR(code[2]).FuncCall(engine, code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						AR(code[2]).FuncCall(engine, code[1]==InvalidRegNum?NULL:&AR(code[1]),
 							0, args, This);
 					}
 					else
 					{
 						// 引数の省略はなし
-						tRisseMethodArgument & new_args = tRisseMethodArgument::Allocate(code[4], code[5]);
+						tMethodArgument & new_args = tMethodArgument::Allocate(code[4], code[5]);
 
 						for(risse_uint32 i = 0; i < code[4]; i++)
 							new_args.SetArgument(i, AR(code[i+6]));
 						for(risse_uint32 i = 0; i < code[5]; i++)
 							new_args.SetBlockArgument(i, AR(code[i+6+code[4]]));
 
-						AR(code[2]).FuncCall(engine, code[1]==RisseInvalidRegNum?NULL:&AR(code[1]),
+						AR(code[2]).FuncCall(engine, code[1]==InvalidRegNum?NULL:&AR(code[1]),
 							0, new_args, This);
 					}
 					code += code[4] + code[5] + 6;
@@ -492,16 +492,16 @@ void tRisseCodeInterpreter::Execute(
 			case ocSetFrame		: // sfrm	 thisとスタックフレームと共有空間を設定する
 				{
 					RISSE_ASSERT(CI(code[1]) < framesize);
-					RISSE_ASSERT(AR(code[1]).GetType() == tRisseVariant::vtObject);
+					RISSE_ASSERT(AR(code[1]).GetType() == tVariant::vtObject);
 
-					tRisseCodeBlock * codeblock =
-						reinterpret_cast<tRisseCodeBlock*>(AR(code[1]).GetObjectInterface());
-					RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
-					tRisseCodeBlockStackAdapter * adapter =
-						new tRisseCodeBlockStackAdapter(codeblock, frame, shared_overlay);
+					tCodeBlock * codeblock =
+						reinterpret_cast<tCodeBlock*>(AR(code[1]).GetObjectInterface());
+					RISSE_ASSERT(dynamic_cast<tCodeBlock*>(codeblock) != NULL);
+					tCodeBlockStackAdapter * adapter =
+						new tCodeBlockStackAdapter(codeblock, frame, shared_overlay);
 							// 注: ここで shared_overlay の中の Frames 配列は新しい
-							// tRisseCodeBlockStackAdapter にコピーされることになる
-					AR(code[1]) = tRisseVariant(adapter, new tRisseVariant(This));
+							// tCodeBlockStackAdapter にコピーされることになる
+					AR(code[1]) = tVariant(adapter, new tVariant(This));
 					code += 2;
 				}
 				break;
@@ -509,16 +509,16 @@ void tRisseCodeInterpreter::Execute(
 			case ocSetShare		: // sshare	 共有空間のみ設定する(thisは設定しないので注意)
 				{
 					RISSE_ASSERT(CI(code[1]) < framesize);
-					RISSE_ASSERT(AR(code[1]).GetType() == tRisseVariant::vtObject);
+					RISSE_ASSERT(AR(code[1]).GetType() == tVariant::vtObject);
 
-					tRisseCodeBlock * codeblock =
-						reinterpret_cast<tRisseCodeBlock*>(AR(code[1]).GetObjectInterface());
-					RISSE_ASSERT(dynamic_cast<tRisseCodeBlock*>(codeblock) != NULL);
-					tRisseCodeBlockStackAdapter * adapter =
-						new tRisseCodeBlockStackAdapter(codeblock, NULL, shared_overlay);
+					tCodeBlock * codeblock =
+						reinterpret_cast<tCodeBlock*>(AR(code[1]).GetObjectInterface());
+					RISSE_ASSERT(dynamic_cast<tCodeBlock*>(codeblock) != NULL);
+					tCodeBlockStackAdapter * adapter =
+						new tCodeBlockStackAdapter(codeblock, NULL, shared_overlay);
 							// 注: ここで shared_overlay の中の Frames 配列は新しい
-							// tRisseCodeBlockStackAdapter にコピーされることになる
-					AR(code[1]) = tRisseVariant(adapter);
+							// tCodeBlockStackAdapter にコピーされることになる
+					AR(code[1]) = tVariant(adapter);
 					code += 2;
 				}
 				break;
@@ -539,15 +539,15 @@ void tRisseCodeInterpreter::Execute(
 			case ocCatchBranch		: // cbranch 例外catch用の分岐
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < constssize);
-				RISSE_ASSERT(AC(code[2]).GetType() == tRisseVariant::vtObject);
+				RISSE_ASSERT(AC(code[2]).GetType() == tVariant::vtObject);
 				RISSE_ASSERT(AC(code[2]).GetObjectInterface() != NULL);
 				RISSE_ASSERT(code[3] >= 2);
 
 				{
 					// code[1] ( = ocTryFuncCall で作成されたオブジェクト ) から例外が
 					// 発生したかどうかとその値を受け取る
-					tRisseTryFuncCallReturnObject * try_ret =
-						reinterpret_cast<tRisseTryFuncCallReturnObject*>(
+					tTryFuncCallReturnObject * try_ret =
+						reinterpret_cast<tTryFuncCallReturnObject*>(
 										AR(code[1]).GetObjectInterface());
 
 					bool raised = try_ret->GetRaised();
@@ -555,25 +555,25 @@ void tRisseCodeInterpreter::Execute(
 
 					// 分岐ターゲットのインデックスを決定する
 					risse_uint32 target_index = static_cast<risse_uint32>(-1L);
-					tRisseVariant::tType except_obj_type = AR(code[1]).GetType();
+					tVariant::tType except_obj_type = AR(code[1]).GetType();
 					if(!raised)
 					{
 						// 直前の ocTryFuncCall では例外は発生しなかった
 						target_index = 0; // 例外が発生しなかった場合の飛び先
 					}
-					else if(except_obj_type == tRisseVariant::vtObject)
+					else if(except_obj_type == tVariant::vtObject)
 					{
 						// オブジェクト型
 						try
 						{
 							// オブジェクトのクラスを調べる
 							if(AR(code[1]).InstanceOf(engine,
-								tRisseVariant(engine->BlockExitExceptionClass)))
+								tVariant(engine->BlockExitExceptionClass)))
 							{
 								// 例外オブジェクトは BlockExitException のサブクラス。
 								// try 識別子が この branch の try 識別子と
 								// 一致するかどうかを調べる
-								tRisseVariant identifier =
+								tVariant identifier =
 									AR(code[1]).GetPropertyDirect_Object(ss_identifier);
 								if(AC(code[2]).ObjectInterfaceMatch(identifier))
 								{
@@ -599,7 +599,7 @@ void tRisseCodeInterpreter::Execute(
 						}
 
 						if(target_index == static_cast<risse_uint32>(-1L))
-							throw new tRisseVariant(AR(code[1]));
+							throw new tVariant(AR(code[1]));
 					}
 					else
 					{
@@ -618,28 +618,28 @@ void tRisseCodeInterpreter::Execute(
 				return; // 呼び出し元にそのまま戻る
 	#endif
 			case ocReturn			: // ret	 return ステートメント
-				RISSE_ASSERT(code[1] == RisseInvalidRegNum || CI(code[1]) < framesize);
-				if(code[1] != RisseInvalidRegNum && result) *result = AR(code[1]);
+				RISSE_ASSERT(code[1] == InvalidRegNum || CI(code[1]) < framesize);
+				if(code[1] != InvalidRegNum && result) *result = AR(code[1]);
 				//code += 2;
 				return;
 
 			case ocExitTryException	: // returne	return 例外を発生させる
-				RISSE_ASSERT(CI(code[1]) == RisseInvalidRegNum || CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[1]) == InvalidRegNum || CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < constssize);
 				{
 					// 暫定実装
-					const tRisseVariant & try_id = AC(code[2]);
-					RISSE_ASSERT(try_id.GetType() == tRisseVariant::vtObject);
+					const tVariant & try_id = AC(code[2]);
+					RISSE_ASSERT(try_id.GetType() == tVariant::vtObject);
 					RISSE_ASSERT(try_id.GetObjectInterface() != NULL);
 					throw new 
-						tRisseVariant(
-							tRisseVariant(engine->BlockExitExceptionClass).New(
+						tVariant(
+							tVariant(engine->BlockExitExceptionClass).New(
 								0,
-								tRisseMethodArgument::New(
+								tMethodArgument::New(
 									try_id,
-									tRisseVariant((risse_int64)code[3]), 
-									CI(code[1]) == RisseInvalidRegNum ?
-										tRisseVariant::GetNullObject() : AR(code[1]) ))
+									tVariant((risse_int64)code[3]), 
+									CI(code[1]) == InvalidRegNum ?
+										tVariant::GetNullObject() : AR(code[1]) ))
 						);
 				}
 				break;
@@ -649,11 +649,11 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				{
 					// 暫定実装
-					// code[2] は tRisseBlockExitExceptionClass であると見なして良い
-					tRisseVariant v;
-					RISSE_ASSERT(AR(code[2]).GetType() == tRisseVariant::vtObject);
+					// code[2] は tBlockExitExceptionClass であると見なして良い
+					tVariant v;
+					RISSE_ASSERT(AR(code[2]).GetType() == tVariant::vtObject);
 					RISSE_ASSERT(AR(code[2]).InstanceOf(engine,
-						tRisseVariant(engine->BlockExitExceptionClass)));
+						tVariant(engine->BlockExitExceptionClass)));
 					v = AR(code[2]).GetPropertyDirect_Object(ss_value);
 					AR(code[1]) = v;
 					code += 3;
@@ -665,17 +665,17 @@ void tRisseCodeInterpreter::Execute(
 				{
 					risse_size framesize = CodeBlock->GetNumRegs();
 					fflush(stdout); fflush(stderr);
-					RisseFPrint(stderr, RISSE_WS("Dumping@frame "));
+					FPrint(stderr, RISSE_WS("Dumping@frame "));
 					fprintf(stderr, "%p", frame);
-					RisseFPrint(stderr, (RISSE_WS(" ip:") +
-						tRisseString::AsString((risse_int64)(code - code_origin))).c_str());
-					RisseFPrint(stderr, RISSE_WS(" this:"));
+					FPrint(stderr, (RISSE_WS(" ip:") +
+						tString::AsString((risse_int64)(code - code_origin))).c_str());
+					FPrint(stderr, RISSE_WS(" this:"));
 					fflush(stdout); fflush(stderr);
 					This.DebugDump();
 					for(risse_size n = 0; n < framesize; n++)
 					{
-						RisseFPrint(stderr, tRisseString::AsString((risse_int64)n).c_str());
-						RisseFPrint(stderr, RISSE_WS(" = "));
+						FPrint(stderr, tString::AsString((risse_int64)n).c_str());
+						FPrint(stderr, RISSE_WS(" = "));
 						AR(n).DebugDump();
 					}
 					fflush(stdout); fflush(stderr);
@@ -688,9 +688,9 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				{
 					// AR(code[1]) の toException() を呼び出し、その結果を投げる
-					tRisseVariant exception_object = AR(code[1]).Invoke(engine, ss_toException);
+					tVariant exception_object = AR(code[1]).Invoke(engine, ss_toException);
 					// TODO: exception_object が Throwable のインスタンスであることをチェックするように
-					throw new tRisseVariant(exception_object);
+					throw new tVariant(exception_object);
 				}
 				code += 2;
 				break;
@@ -957,7 +957,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]) = AR(code[2]);
-				if(AR(code[1]).GetType() == tRisseVariant::vtObject)
+				if(AR(code[1]).GetType() == tVariant::vtObject)
 				{
 					// 今のところ AR(code[2]) が vtObject でなかった場合は
 					// この操作は単に無視される
@@ -970,11 +970,11 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				AR(code[1]) = AR(code[2]);
-				if(AR(code[1]).GetType() == tRisseVariant::vtObject)
+				if(AR(code[1]).GetType() == tVariant::vtObject)
 				{
 					// 今のところ AR(code[2]) が vtObject でなかった場合は
 					// この操作は単に無視される
-					AR(code[1]).SetContext(tRisseVariant::GetDynamicContext());
+					AR(code[1]).SetContext(tVariant::GetDynamicContext());
 				}
 				code += 3;
 				break;
@@ -1031,7 +1031,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]).Do(engine, ocDSet, NULL, AR(code[2]),
-					0, tRisseMethodArgument::New(AR(code[3])));
+					0, tMethodArgument::New(AR(code[3])));
 				code += 4;
 				break;
 
@@ -1040,7 +1040,7 @@ void tRisseCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]).Do(engine, ocDSet, NULL, AR(code[2]), code[4],
-					tRisseMethodArgument::New(AR(code[3])));
+					tMethodArgument::New(AR(code[3])));
 				code += 5;
 				break;
 
@@ -1060,9 +1060,9 @@ void tRisseCodeInterpreter::Execute(
 		}
 
 	} // try
-	catch(const tRisseTemporaryException * te)
+	catch(const tTemporaryException * te)
 	{
-		const tRisseVariant * e = te->Convert(engine);
+		const tVariant * e = te->Convert(engine);
 
 		// この例外は位置情報を持っていない可能性がある
 		RISSE_ASSERT(e->InstanceOf(engine, engine->ThrowableClass));
@@ -1073,7 +1073,7 @@ void tRisseCodeInterpreter::Execute(
 		// 投げ直す
 		throw e;
 	}
-	catch(const tRisseVariant * e)
+	catch(const tVariant * e)
 	{
 		// この例外は位置情報を持っていない可能性がある
 		RISSE_ASSERT(e->InstanceOf(engine, engine->ThrowableClass));

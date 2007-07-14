@@ -35,24 +35,24 @@ namespace Risse
 	使用してスクリプトエンジンインスタンスを特定する必要が無くなる。
 */
 
-class tRisseScriptEngine;
+class tScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		簡易RTTI
 //---------------------------------------------------------------------------
-class tRisseRTTI : public tRisseCollectee
+class tRTTI : public tCollectee
 {
-	tRisseScriptEngine * Engine; //!< スクリプトエンジンインスタンス
+	tScriptEngine * Engine; //!< スクリプトエンジンインスタンス
 	gc_vector<void*> Ids; //!< クラスIdの配列
 
 public:
 	//! @brief		Ids の中の特定のインデックスにマッチする構造体
-	struct tMatcher : public tRisseCollectee
+	struct tMatcher : public tCollectee
 	{
 		risse_size Index; //!< Classes 内のインデックス
 		void * Id; //!< クラスId
 
 		//! @brief		この構造体が RTTI にマッチするかどうかを調べる
-		bool Match(const tRisseRTTI * rtti) const
+		bool Match(const tRTTI * rtti) const
 		{
 			if(!rtti) return false; // RTTIがない
 			if(rtti->Ids.size() <= Index) return false; // インデックスを超えてる
@@ -62,14 +62,14 @@ public:
 
 public:
 	//! @brief		コンストラクタ
-	tRisseRTTI()
+	tRTTI()
 	{
 		Engine = NULL;
 	}
 
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseRTTI(tRisseScriptEngine * engine)
+	tRTTI(tScriptEngine * engine)
 	{
 		Engine = engine;
 	}
@@ -92,11 +92,11 @@ public:
 public:
 	//! @param		スクリプトエンジンインスタンスを取得する
 	//! @return		スクリプトエンジンインスタンス
-	tRisseScriptEngine * GetScriptEngine() const { return Engine; }
+	tScriptEngine * GetScriptEngine() const { return Engine; }
 
 	//! @param		スクリプトエンジンインスタンスを設定する
 	//! @param		engine		スクリプトエンジンインスタンス
-	void SetScriptEngine(tRisseScriptEngine * engine) { Engine = engine; }
+	void SetScriptEngine(tScriptEngine * engine) { Engine = engine; }
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

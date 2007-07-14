@@ -24,19 +24,19 @@ namespace Risse
 {
 //---------------------------------------------------------------------------
 //! @brief		クラス用クラスの基底クラス(Risse用)
-//! @note		tRisseClassBase と tRisseClassClass を混同しないこと。
+//! @note		tClassBase と tClassClass を混同しないこと。
 //!				前者はC++のクラス階層において各クラスの親クラスになり、
 //!				後者はRisseスクリプトで各クラスインスタンスを生成するための
 //!				クラスになる。
 //---------------------------------------------------------------------------
-class tRisseClassClass : public tRisseClassBase
+class tClassClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseClassClass(tRisseScriptEngine * engine);
+	tClassClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
@@ -45,27 +45,27 @@ public:
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate(const tRisseNativeCallInfo &info);
+	static tVariant ovulate(const tNativeCallInfo &info);
 
 public: // Risse用メソッドなど
 	static void construct();
-	static void initialize(const tRisseNativeCallInfo &info);
+	static void initialize(const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		クラスインスタンス用クラス(Risse用)
-//! @note		tRisseClassInstance と tRisseClassClass を混同しないこと。
+//! @note		tClassInstance と tClassClass を混同しないこと。
 //---------------------------------------------------------------------------
-class tRisseClassInstance : public tRisseClassClass
+class tClassInstance : public tClassClass
 {
-	typedef tRisseClassClass inherited; //!< 親クラスの typedef
+	typedef tClassClass inherited; //!< 親クラスの typedef
 
 public:
 	// ! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseClassInstance(tRisseScriptEngine * engine);
+	tClassInstance(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

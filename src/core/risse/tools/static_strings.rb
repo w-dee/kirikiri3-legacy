@@ -62,9 +62,9 @@ EOS
 	# static string への実体の externとエイリアスを書き出す
 	defs.each_index do |index|
 		item = defs[index]
-		file.puts("extern tRisseStringData data_#{item[:id]};")
-		file.puts("static const tRisseString & #{item[:id]} = "+
-			"*reinterpret_cast<const tRisseString *>(&data_#{item[:id]});"+
+		file.puts("extern tStringData data_#{item[:id]};")
+		file.puts("static const tString & #{item[:id]} = "+
+			"*reinterpret_cast<const tString *>(&data_#{item[:id]});"+
 			" //!< (static string) #{item[:def_comment]}")
 	end
 end
@@ -80,14 +80,14 @@ file.puts <<EOS
 
 EOS
 
-	# static strings の tRisseString ストレージを書き出す
+	# static strings の tString ストレージを書き出す
 	offset = 0
 	file.puts "// static strings の文字列領域"
-	file.puts "// この領域は tRisseString の文字列ポインタが指す先と"
+	file.puts "// この領域は tString の文字列ポインタが指す先と"
 	file.puts "// 同じレイアウトになっている"
-	file.puts "// tRisseSS の data がそもそも tRisseStringData であり"
+	file.puts "// tSS の data がそもそも tStringData であり"
 	file.puts "// それと重複するものをここで定義しており冗長に見えるが"
-	file.puts "// ヘッダ側に tRisseSS の実装(長ったらしいテンプレート)"
+	file.puts "// ヘッダ側に tSS の実装(長ったらしいテンプレート)"
 	file.puts "// を見せたくなかったのでこうしている"
 
 	defs.each_index do |index|
@@ -96,8 +96,8 @@ EOS
 
 		item = defs[index]
 		name = item[:string]
-		file.print "tRisseStringData data_#{item[:id]} = { "
-		file.print "tRisseSS<"
+		file.print "tStringData data_#{item[:id]} = { "
+		file.print "tSS<"
 		chars = ''
 		name.each_byte do |byte|
 			chars << ',' if chars != ''

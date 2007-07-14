@@ -31,34 +31,34 @@ namespace Risse
 #include "risseOpCodesDefs.def"
 
 //---------------------------------------------------------------------------
-risse_size tRisseVMCodeIterator::GetInsnSize() const
+risse_size tVMCodeIterator::GetInsnSize() const
 {
 	// 命令コード
-	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+	tOpCode insn_code = static_cast<tOpCode>(*CodePointer);
 	RISSE_ASSERT(insn_code < ocVMCodeLast);
 
-	// RisseVMInsnInfo 内の該当するエントリ
-	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];
+	// VMInsnInfo 内の該当するエントリ
+	const tVMInsnInfo & entry = VMInsnInfo[insn_code];
 
 	// enty.Flags をスキャン
 	risse_size insn_size = 1; // 1 = 命令コードの分
-	for(int i = 0; i < RisseMaxVMInsnOperand; i++)
+	for(int i = 0; i < MaxVMInsnOperand; i++)
 	{
 		switch(entry.Flags[i])
 		{
-		case tRisseVMInsnInfo::vifVoid:
+		case tVMInsnInfo::vifVoid:
 			break;
 
-		case tRisseVMInsnInfo::vifNumber:
+		case tVMInsnInfo::vifNumber:
 			insn_size += 1 + CodePointer[i+1]; // 追加のワード数はここに書いてある
 			break;
 
-		case tRisseVMInsnInfo::vifConstant:
-		case tRisseVMInsnInfo::vifRegister:
-		case tRisseVMInsnInfo::vifAddress:
-		case tRisseVMInsnInfo::vifParameter:
-		case tRisseVMInsnInfo::vifShared:
-		case tRisseVMInsnInfo::vifOthers:
+		case tVMInsnInfo::vifConstant:
+		case tVMInsnInfo::vifRegister:
+		case tVMInsnInfo::vifAddress:
+		case tVMInsnInfo::vifParameter:
+		case tVMInsnInfo::vifShared:
+		case tVMInsnInfo::vifOthers:
 			insn_size ++;
 			break;
 		}
@@ -69,44 +69,44 @@ risse_size tRisseVMCodeIterator::GetInsnSize() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseVMCodeIterator::Dump() const
+tString tVMCodeIterator::Dump() const
 {
 	// 命令コード
-	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+	tOpCode insn_code = static_cast<tOpCode>(*CodePointer);
 	RISSE_ASSERT(insn_code < ocVMCodeLast);
 
-	// RisseVMInsnInfo 内の該当するエントリ
-	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];
+	// VMInsnInfo 内の該当するエントリ
+	const tVMInsnInfo & entry = VMInsnInfo[insn_code];
 
 	// 命令名部分
-	tRisseString ret(entry.Mnemonic);
+	tString ret(entry.Mnemonic);
 	ret += RISSE_WC(' ');
 
 	// 命令コードの処理はある程度形式化されているのでそれに従う
-	for(int i = 0; i < RisseMaxVMInsnOperand; i++)
+	for(int i = 0; i < MaxVMInsnOperand; i++)
 	{
-		if(entry.Flags[i] == tRisseVMInsnInfo::vifVoid) break;
+		if(entry.Flags[i] == tVMInsnInfo::vifVoid) break;
 		switch(entry.Flags[i])
 		{
-		case tRisseVMInsnInfo::vifVoid:
+		case tVMInsnInfo::vifVoid:
 			break;
 
-		case tRisseVMInsnInfo::vifNumber:
-		case tRisseVMInsnInfo::vifOthers:
+		case tVMInsnInfo::vifNumber:
+		case tVMInsnInfo::vifOthers:
 			// nothing to do; simply skip
 			break;
 
-		case tRisseVMInsnInfo::vifConstant:
+		case tVMInsnInfo::vifConstant:
 			if(i != 0) ret += RISSE_WS(", ");
-			ret += RISSE_WS("*") + tRisseString::AsString((int)CodePointer[i+1]);
+			ret += RISSE_WS("*") + tString::AsString((int)CodePointer[i+1]);
 			break;
 
-		case tRisseVMInsnInfo::vifRegister:
+		case tVMInsnInfo::vifRegister:
 			if(i != 0) ret += RISSE_WS(", ");
-			ret += RISSE_WS("%") + tRisseString::AsString((int)CodePointer[i+1]);
+			ret += RISSE_WS("%") + tString::AsString((int)CodePointer[i+1]);
 			break;
 
-		case tRisseVMInsnInfo::vifAddress:
+		case tVMInsnInfo::vifAddress:
 			{
 				if(i != 0) ret += RISSE_WS(", ");
 				char address[22];
@@ -114,21 +114,21 @@ tRisseString tRisseVMCodeIterator::Dump() const
 					sprintf(address, "%05d", static_cast<int>(Address + CodePointer[i+1]));
 				else
 					sprintf(address, "%d", static_cast<int>(static_cast<risse_int32>(CodePointer[i+1])));
-				ret += tRisseString(address);
+				ret += tString(address);
 			}
 			break;
 
-		case tRisseVMInsnInfo::vifParameter:
+		case tVMInsnInfo::vifParameter:
 			if(i != 0) ret += RISSE_WS(", ");
-			ret += RISSE_WS("(") + tRisseString::AsString((int)CodePointer[i+1]) +
+			ret += RISSE_WS("(") + tString::AsString((int)CodePointer[i+1]) +
 				RISSE_WS(")");
 			break;
 
-		case tRisseVMInsnInfo::vifShared:
+		case tVMInsnInfo::vifShared:
 			// shared の上位16ビットはネストレベル、下位16ビットはレジスタ番号である
 			if(i != 0) ret += RISSE_WS(", ");
-			ret += RISSE_WS("[") + tRisseString::AsString((int)((CodePointer[i+1]>>16)&0xffff)) +
-					RISSE_WS(":") + tRisseString::AsString((int)((CodePointer[i+1])&0xffff)) +
+			ret += RISSE_WS("[") + tString::AsString((int)((CodePointer[i+1]>>16)&0xffff)) +
+					RISSE_WS(":") + tString::AsString((int)((CodePointer[i+1])&0xffff)) +
 						RISSE_WS("]");
 			break;
 
@@ -151,11 +151,11 @@ tRisseString tRisseVMCodeIterator::Dump() const
 			risse_uint32 num_args = 0;
 			risse_uint32 num_blocks = 0;
 			bool args_found = false;
-			for(i = 0; i < RisseMaxVMInsnOperand; i++)
+			for(i = 0; i < MaxVMInsnOperand; i++)
 			{
 				switch(entry.Flags[i])
 				{
-				case tRisseVMInsnInfo::vifNumber:
+				case tVMInsnInfo::vifNumber:
 					if(!args_found)
 					{
 						args_found = true;
@@ -166,14 +166,14 @@ tRisseString tRisseVMCodeIterator::Dump() const
 						num_blocks = CodePointer[i+1];
 					}
 					break;
-				case tRisseVMInsnInfo::vifOthers:
+				case tVMInsnInfo::vifOthers:
 					flags = CodePointer[i+1]; // フラグ
 					break;
-				case tRisseVMInsnInfo::vifVoid:
+				case tVMInsnInfo::vifVoid:
 					break;
 				default: ;
 				}
-				if(entry.Flags[i] == tRisseVMInsnInfo::vifVoid) break;
+				if(entry.Flags[i] == tVMInsnInfo::vifVoid) break;
 			}
 			int arg_start = i;
 			// 引数を列挙
@@ -182,7 +182,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 			{
 				if(n != 0) ret += RISSE_WS(", ");
 				ret += RISSE_WS("%") +
-					tRisseString::AsString((int)CodePointer[arg_start + n +1]);
+					tString::AsString((int)CodePointer[arg_start + n +1]);
 				if(flags & (1 << n)) ret += RISSE_WC('*'); // 引数展開の場合
 			}
 			ret += RISSE_WC(')');
@@ -194,7 +194,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 				{
 					if(n != 0) ret += RISSE_WS(", ");
 					ret += RISSE_WS("%") +
-						tRisseString::AsString((int)CodePointer[arg_start + num_args + n +1]);
+						tString::AsString((int)CodePointer[arg_start + num_args + n +1]);
 				}
 			}
 		}
@@ -211,7 +211,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 					sprintf(address, "%05d", static_cast<int>(Address + CodePointer[n+4]));
 				else
 					sprintf(address, "%d", static_cast<int>(static_cast<risse_int32>(CodePointer[n+4])));
-				ret += tRisseString(address);
+				ret += tString(address);
 			}
 		}
 		break;
@@ -219,7 +219,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 	case ocExitTryException:
 		{
 			ret += RISSE_WS(", ");
-			ret += tRisseString::AsString(static_cast<int>(CodePointer[3]));
+			ret += tString::AsString(static_cast<int>(CodePointer[3]));
 		};
 		break;
 
@@ -227,7 +227,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 	case ocDGetF:
 		{
 			ret += RISSE_WS(" <");
-			ret += tRisseOperateFlags(CodePointer[4]).AsString();
+			ret += tOperateFlags(CodePointer[4]).AsString();
 			ret += RISSE_WS(">");
 		}
 		break;
@@ -235,7 +235,7 @@ tRisseString tRisseVMCodeIterator::Dump() const
 	case ocDSetAttrib:
 		{
 			ret += RISSE_WS(" <");
-			ret += tRisseOperateFlags(CodePointer[3]).AsString();
+			ret += tOperateFlags(CodePointer[3]).AsString();
 			ret += RISSE_WS(">");
 		}
 		break;
@@ -247,29 +247,29 @@ tRisseString tRisseVMCodeIterator::Dump() const
 	return ret;
 }
 //---------------------------------------------------------------------------
-tRisseString tRisseVMCodeIterator::Dump(const tRisseVariant * consts) const
+tString tVMCodeIterator::Dump(const tVariant * consts) const
 {
-	tRisseString ret(Dump());
+	tString ret(Dump());
 
 	// 命令中の定数領域についてコメントを追加する
 	// 命令コード
-	tRisseOpCode insn_code = static_cast<tRisseOpCode>(*CodePointer);
+	tOpCode insn_code = static_cast<tOpCode>(*CodePointer);
 	RISSE_ASSERT(insn_code < ocVMCodeLast);
 
-	// RisseVMInsnInfo 内の該当するエントリ
-	const tRisseVMInsnInfo & entry = RisseVMInsnInfo[insn_code];
+	// VMInsnInfo 内の該当するエントリ
+	const tVMInsnInfo & entry = VMInsnInfo[insn_code];
 
 	// 定数領域を示しているオペランドを探す
 	bool first = true;
-	for(int i = 0; i < RisseMaxVMInsnOperand; i++)
+	for(int i = 0; i < MaxVMInsnOperand; i++)
 	{
-		if(entry.Flags[i] == tRisseVMInsnInfo::vifConstant)
+		if(entry.Flags[i] == tVMInsnInfo::vifConstant)
 		{
 			if(first)
 				ret += RISSE_WS(" // ");
 			else
 				ret += RISSE_WS(", ");
-			ret += RISSE_WS("*") + tRisseString::AsString((int)CodePointer[i+1]) + 
+			ret += RISSE_WS("*") + tString::AsString((int)CodePointer[i+1]) + 
 				RISSE_WS("=") + consts[CodePointer[i+1]].AsHumanReadable(100);
 		}
 	}

@@ -23,34 +23,34 @@
 //---------------------------------------------------------------------------
 namespace Risse
 {
-class tRisseSSAStatement;
-class tRisseSSALocalNamespace;
-class tRisseSSABlock;
-class tRisseSSAForm;
-class tRisseCodeGenerator;
+class tSSAStatement;
+class tSSALocalNamespace;
+class tSSABlock;
+class tSSAForm;
+class tCodeGenerator;
 //---------------------------------------------------------------------------
 //! @brief	SSA形式における「基本ブロック」
 //---------------------------------------------------------------------------
-class tRisseSSABlock : public tRisseCollectee
+class tSSABlock : public tCollectee
 {
-	tRisseSSAForm * Form; //!< この基本ブロックを保持する SSA 形式インスタンス
-	tRisseString Name; //!< 基本ブロック名(人間が読みやすい名前)
-	gc_vector<tRisseSSABlock *> Pred; //!< 直前の基本ブロックのリスト
-	gc_vector<tRisseSSABlock *> Succ; //!< 直後の基本ブロックのリスト
-	tRisseSSAStatement * FirstStatement; //!< 文のリストの先頭
-	tRisseSSAStatement * LastStatement; //!< 文のリストの最後
-	tRisseSSALocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
+	tSSAForm * Form; //!< この基本ブロックを保持する SSA 形式インスタンス
+	tString Name; //!< 基本ブロック名(人間が読みやすい名前)
+	gc_vector<tSSABlock *> Pred; //!< 直前の基本ブロックのリスト
+	gc_vector<tSSABlock *> Succ; //!< 直後の基本ブロックのリスト
+	tSSAStatement * FirstStatement; //!< 文のリストの先頭
+	tSSAStatement * LastStatement; //!< 文のリストの最後
+	tSSALocalNamespace * LocalNamespace; //!< この基本ブロックの最後における名前空間のスナップショット
 	risse_size LastStatementPosition; //!< 最後の文のスクリプト上の位置
 
 public:
-	typedef gc_map<const tRisseSSAVariable *, void *> tLiveVariableMap; //!< 生存している変数のリスト
+	typedef gc_map<const tSSAVariable *, void *> tLiveVariableMap; //!< 生存している変数のリスト
 private:
 	tLiveVariableMap * LiveIn; //!< このブロックの開始時点で生存している変数のリスト
 	tLiveVariableMap * LiveOut; //!< このブロックの終了時点で生存している変数のリスト
 	mutable void * Mark; //!< マーク
 	mutable bool Traversing; //!< トラバース中かどうか
 	bool Alive; //!< この基本ブロックが生きているかどうか
-		//!< (tRisseSSAForm::LeapDeadBlocks() 後に有効;それ以前は生存している・していないにかかわらず常に偽なので注意)
+		//!< (tSSAForm::LeapDeadBlocks() 後に有効;それ以前は生存している・していないにかかわらず常に偽なので注意)
 
 public:
 	//! @brief		コンストラクタ
@@ -58,15 +58,15 @@ public:
 	//! @param		name		この基本ブロックの名前(実際にはこれに _ が続き連番がつく)
 	//! @param		ns			この基本ブロックが引き継ぐローカル名前空間
 	//!							(内容はコピーされ、コピーされた内容をこのインスタンスが保持する)
-	tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name, const tRisseSSALocalNamespace * ns);
+	tSSABlock(tSSAForm * form, const tString & name, const tSSALocalNamespace * ns);
 
 	//! @brief		この基本ブロックが属している SSA 形式インスタンスを取得する
 	//! @return		この基本ブロックが属している SSA 形式インスタンス
-	tRisseSSAForm * GetForm() const { return Form; }
+	tSSAForm * GetForm() const { return Form; }
 
 	//! @brief		基本ブロック名を得る
 	//! @return		基本ブロック名
-	tRisseString GetName() const { return Name; }
+	tString GetName() const { return Name; }
 
 	//! @brief		InsertStatement() メソッドでの関数挿入位置
 	enum tStatementInsertPoint
@@ -96,24 +96,24 @@ public:
 
 	//! @brief		文を追加する
 	//! @param		stmt	文
-	void AddStatement(tRisseSSAStatement * stmt)
+	void AddStatement(tSSAStatement * stmt)
 	{ InsertStatement(stmt, sipTail); }
 
 	//! @brief		文を挿入する
 	//! @param		stmt		挿入する文
 	//! @param		point		挿入する場所
-	void InsertStatement(tRisseSSAStatement * stmt, tStatementInsertPoint point);
+	void InsertStatement(tSSAStatement * stmt, tStatementInsertPoint point);
 
 	//! @brief		文を削除する
 	//! @param		stmt		削除する文
 	//! @note		文で使用されていた変数の使用リストは変更を行わない
-	void DeleteStatement(tRisseSSAStatement * stmt);
+	void DeleteStatement(tSSAStatement * stmt);
 
 	//! @brief		文を置き換える
 	//! @param		old_stmt		置き換えられる古い文
 	//! @param		new_stmt		新しくそこに配置される文
 	//! @note		文で使用されていた変数の使用リストは変更を行わない
-	void ReplaceStatement(tRisseSSAStatement * old_stmt, tRisseSSAStatement * new_stmt);
+	void ReplaceStatement(tSSAStatement * old_stmt, tSSAStatement * new_stmt);
 
 	//! @brief		ブロックをまたがってφ関数を追加する
 	//! @param		pos			スクリプト上の位置
@@ -123,8 +123,8 @@ public:
 	//! @note		var は 名前空間の 名前 - 変数のペアのうちの「変数」部分を
 	//!				指す参照を渡すこと。内部で再度名前空間を参照する前に
 	//!				名前空間の該当ペアには値が書き込まれなければならないため。
-	void AddPhiFunctionToBlocks(risse_size pos, const tRisseString & name,
-		const tRisseString & n_name, tRisseSSAVariable *& var);
+	void AddPhiFunctionToBlocks(risse_size pos, const tString & name,
+		const tString & n_name, tSSAVariable *& var);
 
 private:
 	//! @brief		φ関数を追加し、Pred を stack に追加する
@@ -134,17 +134,17 @@ private:
 	//! @param		block_stack	ブロックスタック
 	//! @param		phi_stmt_stack	φ関数スタック
 	//! @return		φ関数の戻り値
-	tRisseSSAVariable * AddPhiFunction(risse_size pos, const tRisseString & name,
-		const tRisseString & n_name,
-			gc_vector<tRisseSSABlock *> & block_stack,
-			gc_vector<tRisseSSAStatement *> & phi_stmt_stack);
+	tSSAVariable * AddPhiFunction(risse_size pos, const tString & name,
+		const tString & n_name,
+			gc_vector<tSSABlock *> & block_stack,
+			gc_vector<tSSAStatement *> & phi_stmt_stack);
 public:
 
 	//! @brief		直前の基本ブロックを追加する
 	//! @param		block	基本ブロック
 	//! @note		このメソッドは、block->AddSucc(this) を呼び出し、
 	//!				block の直後ブロックを設定する
-	void AddPred(tRisseSSABlock * block);
+	void AddPred(tSSABlock * block);
 
 	//! @brief		直前の基本ブロックを削除する
 	//! @param		index		基本ブロックのインデックス(0～)
@@ -154,15 +154,15 @@ public:
 
 	//! @brief		直後の基本ブロックを追加する
 	//! @param		block	基本ブロック
-	void AddSucc(tRisseSSABlock * block);
+	void AddSucc(tSSABlock * block);
 
 	//! @brief		直前の基本ブロックのリストを取得する
 	//! @return		直前の基本ブロックのリスト
-	const gc_vector<tRisseSSABlock *> & GetPred() const { return Pred; }
+	const gc_vector<tSSABlock *> & GetPred() const { return Pred; }
 
 	//! @brief		直後の基本ブロックのリストを取得する
 	//! @return		直後の基本ブロックのリスト
-	const gc_vector<tRisseSSABlock *> & GetSucc() const { return Succ; }
+	const gc_vector<tSSABlock *> & GetSucc() const { return Succ; }
 
 	//! @brief		死んでいるPredがあれば削除する
 	void DeleteDeadPred();
@@ -173,18 +173,18 @@ public:
 
 	//! @brief		ローカル名前空間を得る
 	//! @return		ローカル名前空間
-	tRisseSSALocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
+	tSSALocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
 
 	//! @brief		LiveIn/Outに変数を追加する
 	//! @param		var		追加する変数
 	//! @param		out		真の場合 LiveOut を対象にし、偽の場合 LiveIn を対象にする
-	void AddLiveness(const tRisseSSAVariable * var, bool out = true);
+	void AddLiveness(const tSSAVariable * var, bool out = true);
 
 	//! @brief		LiveIn/Outに変数があるかどうかを得る
 	//! @param		var		探す変数
 	//! @param		out		真の場合 LiveOut を対象にし、偽の場合 LiveIn を対象にする
 	//! @return		変数が見つかれば真
-	bool GetLiveness(const tRisseSSAVariable * var, bool out = true) const;
+	bool GetLiveness(const tSSAVariable * var, bool out = true) const;
 
 	//! @brief		「マーク」フラグをクリアする
 	void ClearMark() const;
@@ -205,7 +205,7 @@ public:
 
 	//! @brief		この基本ブロックを起点にして基本ブロックをたどり、そのリストを得る
 	//! @param		blocks		基本ブロックのリストの格納先
-	void Traverse(gc_vector<tRisseSSABlock *> & blocks) const;
+	void Traverse(gc_vector<tSSABlock *> & blocks) const;
 
 	//! @brief		すべての変数のマークを解除する
 	void ClearVariableMarks();
@@ -232,11 +232,11 @@ public:
 
 	//! @brief		バイトコードを生成する
 	//! @param		gen		バイトコードジェネレータ
-	void GenerateCode(tRisseCodeGenerator * gen) const;
+	void GenerateCode(tCodeGenerator * gen) const;
 
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
-	tRisseString Dump() const;
+	tString Dump() const;
 };
 //---------------------------------------------------------------------------
 

@@ -20,24 +20,24 @@
 //---------------------------------------------------------------------------
 namespace Risse
 {
-class tRisseCodeBlock;
-class tRisseScriptEngine;
+class tCodeBlock;
+class tScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		バイトコード実行クラスの基底クラス
 //---------------------------------------------------------------------------
-class tRisseCodeExecutor : public tRisseCollectee
+class tCodeExecutor : public tCollectee
 {
 protected:
-	tRisseCodeBlock * CodeBlock; //!< コードブロック
+	tCodeBlock * CodeBlock; //!< コードブロック
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		cb		コードブロック
-	tRisseCodeExecutor(tRisseCodeBlock *cb) { CodeBlock = cb; }
+	tCodeExecutor(tCodeBlock *cb) { CodeBlock = cb; }
 
 	//! @brief		デストラクタ
 	//! @note		このデストラクタは呼ばれないかもしれない
-	virtual ~tRisseCodeExecutor() {;}
+	virtual ~tCodeExecutor() {;}
 
 	//! @brief		コードを実行する
 	//! @brief		args	引数
@@ -49,10 +49,10 @@ public:
 	//!						(NULL=共有フレームを指定しない場合)
 	//! @param		result		戻りの値を格納する先
 	virtual void Execute(
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseVariant & This = tRisseVariant::GetNullObject(),
-		tRisseVariant * frame = NULL, tRisseSharedVariableFrames * shared = NULL,
-		tRisseVariant * result = NULL) = 0;
+		const tMethodArgument & args = tMethodArgument::Empty(),
+		const tVariant & This = tVariant::GetNullObject(),
+		tVariant * frame = NULL, tSharedVariableFrames * shared = NULL,
+		tVariant * result = NULL) = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -61,19 +61,19 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		バイトコードインタプリタ
 //---------------------------------------------------------------------------
-class tRisseCodeInterpreter : public tRisseCodeExecutor
+class tCodeInterpreter : public tCodeExecutor
 {
 public:
 	//! @brief		コンストラクタ
 	//! @param		cb		コードブロック
-	tRisseCodeInterpreter(tRisseCodeBlock *cb);
+	tCodeInterpreter(tCodeBlock *cb);
 
 
 	void Execute(
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(),
-		const tRisseVariant & This = tRisseVariant::GetNullObject(),
-		tRisseVariant * frame = NULL, tRisseSharedVariableFrames * shared = NULL,
-		tRisseVariant * result = NULL);
+		const tMethodArgument & args = tMethodArgument::Empty(),
+		const tVariant & This = tVariant::GetNullObject(),
+		tVariant * frame = NULL, tSharedVariableFrames * shared = NULL,
+		tVariant * result = NULL);
 };
 //---------------------------------------------------------------------------
 
@@ -85,26 +85,26 @@ public:
 //!				(ocCatchBranchはこのオブジェクトが入ったレジスタをocTryFuncCall
 //!				の戻り値で置き換えてしまう)
 //---------------------------------------------------------------------------
-class tRisseTryFuncCallReturnObject : public tRisseObjectInterface
+class tTryFuncCallReturnObject : public tObjectInterface
 {
 private:
-	tRisseVariant Value; //!< 例外/戻り値の値
+	tVariant Value; //!< 例外/戻り値の値
 	bool Raised; // 例外が発生したかどうか
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		value		例外/戻り値の値
 	//! @param		raised		例外が発生したかどうか
-	tRisseTryFuncCallReturnObject(const tRisseVariant &value, bool raised)
+	tTryFuncCallReturnObject(const tVariant &value, bool raised)
 		{ Value = value; Raised = raised; }
 
 	//! @brief		デストラクタ
 	//! @note		このデストラクタは呼ばれないかもしれない
-	virtual ~tRisseTryFuncCallReturnObject() {;}
+	virtual ~tTryFuncCallReturnObject() {;}
 
 	//! @brief		例外/戻り値の値を得る
 	//! @return		例外/戻り値の値
-	const tRisseVariant & GetValue() const { return Value; }
+	const tVariant & GetValue() const { return Value; }
 
 	//! @brief		例外が発生したかどうかを得る
 	//! @return		例外が発生したかどうか

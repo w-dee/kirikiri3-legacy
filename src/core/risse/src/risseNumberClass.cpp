@@ -23,8 +23,8 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(2098,51592,31991,16696,47274,13601,12452,21741);
 //---------------------------------------------------------------------------
-tRisseNumberClass::tRisseNumberClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Number, engine->PrimitiveClass)
+tNumberClass::tNumberClass(tScriptEngine * engine) :
+	tClassBase(ss_Number, engine->PrimitiveClass)
 {
 	RegisterMembers();
 }
@@ -32,7 +32,7 @@ tRisseNumberClass::tRisseNumberClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseNumberClass::RegisterMembers()
+void tNumberClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -42,33 +42,33 @@ void tRisseNumberClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate,
-		&tRisseNumberClass::ovulate,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
-	RisseBindFunction(this, ss_construct,
-		&tRisseNumberClass::construct,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
-	RisseBindProperty(this, ss_isNaN, &tRisseNumberClass::isNaN,
-		tRisseMemberAttribute(	tRisseMemberAttribute(tRisseMemberAttribute::vcConst)|
-								tRisseMemberAttribute(tRisseMemberAttribute::ocFinal)) );
+	BindFunction(this, ss_ovulate,
+		&tNumberClass::ovulate,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
+	BindFunction(this, ss_construct,
+		&tNumberClass::construct,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
+	BindProperty(this, ss_isNaN, &tNumberClass::isNaN,
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseNumberClass::ovulate()
+tVariant tNumberClass::ovulate()
 {
 	// このクラスのインスタンスは作成できないので例外を投げる
-	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tRisseVariant();
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseNumberClass::construct()
+void tNumberClass::construct()
 {
 	// デフォルトでは何もしない
 }
@@ -76,18 +76,18 @@ void tRisseNumberClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseNumberClass::isNaN(const tRisseNativePropGetInfo & info)
+void tNumberClass::isNaN(const tNativePropGetInfo & info)
 {
-	tRisseVariant num = info.This.Plus();
+	tVariant num = info.This.Plus();
 
 	bool result;
 	switch(num.GetType())
 	{
-	case tRisseVariant::vtReal:
-		result = (bool)RISSE_FC_IS_NAN(RisseGetFPClass(num.operator risse_real()));
+	case tVariant::vtReal:
+		result = (bool)RISSE_FC_IS_NAN(GetFPClass(num.operator risse_real()));
 		break;
 
-	case tRisseVariant::vtInteger:
+	case tVariant::vtInteger:
 	default:
 		// 整数の場合やそのほかの場合は偽を返す
 		result = false;

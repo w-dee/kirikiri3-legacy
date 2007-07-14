@@ -21,44 +21,44 @@
 
 namespace Risse
 {
-class tRisseScriptEngine;
-class tRisseNativeCallInfo;
+class tScriptEngine;
+class tNativeCallInfo;
 //---------------------------------------------------------------------------
 //! @brief		Risseクラスの実装
 //---------------------------------------------------------------------------
-class tRisseClassBase : public tRisseObjectBase
+class tClassBase : public tObjectBase
 {
 	//! @brief		親クラスのtypedef
-	typedef tRisseObjectBase inherited;
+	typedef tObjectBase inherited;
 
 private:
-	tRisseRTTI ClassRTTI; //!< RTTI 参照用データ(このクラスから作成されたインスタンスはこのRTTIを持つ)
-	tRisseRTTI::tMatcher RTTIMatcher; //!< ClassRTTI にマッチするための情報
+	tRTTI ClassRTTI; //!< RTTI 参照用データ(このクラスから作成されたインスタンスはこのRTTIを持つ)
+	tRTTI::tMatcher RTTIMatcher; //!< ClassRTTI にマッチするための情報
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		name			クラス名
 	//! @param		super_class		スーパークラスを表すオブジェクト
 	//! @param		extensible		extensible の場合に真
-	tRisseClassBase(const tRisseString & name, tRisseClassBase * super_class, bool extensible = true);
+	tClassBase(const tString & name, tClassBase * super_class, bool extensible = true);
 
 	//! @brief		コンストラクタ(Objectクラス用)
 	//! @param		engine			スクリプトエンジンインスタンス
 	//! @param		extensible		extensible の場合に真
-	tRisseClassBase(tRisseScriptEngine * engine);
+	tClassBase(tScriptEngine * engine);
 
 	//! @brief		このインスタンスの RTTI に Class クラスの RTTI を設定する
 	//! @param		engine			スクリプトエンジンインスタンス
-	void SetClassClassRTTI(tRisseScriptEngine * engine);
+	void SetClassClassRTTI(tScriptEngine * engine);
 
 	//! @brief		このインスタンスの ClassRTTI を取得する
 	//! @return		このインスタンスの ClassRTTI
-	tRisseRTTI & GetClassRTTI() { return ClassRTTI; }
+	tRTTI & GetClassRTTI() { return ClassRTTI; }
 
 	//! @brief		クラスインスタンスを登録するためのユーティリティメソッド
 	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
 	//! @param		name		登録名
-	void RegisterClassInstance(tRisseVariant & target);
+	void RegisterClassInstance(tVariant & target);
 
 public:
 	//! @brief		各メンバをインスタンスに追加する
@@ -74,11 +74,11 @@ public:
 
 public:
 	//! @brief		ダミーのデストラクタ(たぶん呼ばれない)
-	virtual ~tRisseClassBase() {;}
+	virtual ~tClassBase() {;}
 
 	//! @brief		RTTIにマッチするための情報を得る
 	//! @return		RTTIにマッチするための情報
-	const tRisseRTTI::tMatcher & GetRTTIMatcher() const { return RTTIMatcher; }
+	const tRTTI::tMatcher & GetRTTIMatcher() const { return RTTIMatcher; }
 
 	//! @brief		オブジェクトに対して操作を行う
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
@@ -91,14 +91,14 @@ public:
 	//! @param		args		引数
 	//! @param		This		メソッドが実行されるべき"Thisオブジェクト"
 	void CallSuperClassMethod(
-		tRisseVariantBlock * ret, const tRisseString & name,
-		risse_uint32 flags, const tRisseMethodArgument & args, const tRisseVariant & This);
+		tVariantBlock * ret, const tString & name,
+		risse_uint32 flags, const tMethodArgument & args, const tVariant & This);
 
 public: // Risse用メソッドなど
-	static void risse_new(const tRisseNativeCallInfo &info);
-	static void fertilize(const tRisseVariant & instance, const tRisseNativeCallInfo &info);
-	static void include(const tRisseMethodArgument & args, const tRisseNativeCallInfo &info);
-	static tRisseVariant ovulate();
+	static void risse_new(const tNativeCallInfo &info);
+	static void fertilize(const tVariant & instance, const tNativeCallInfo &info);
+	static void include(const tMethodArgument & args, const tNativeCallInfo &info);
+	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------
 

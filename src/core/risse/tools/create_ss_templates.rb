@@ -33,19 +33,19 @@ def hash_func(n)
 	i = 0
 
 	while(i < n-(8-1))
-		e = "tRisseSSS8<#{e},c#{i},c#{i+1},c#{i+2},c#{i+3},c#{i+4},c#{i+5},c#{i+6},c#{i+7}>::r"
+		e = "tSSS8<#{e},c#{i},c#{i+1},c#{i+2},c#{i+3},c#{i+4},c#{i+5},c#{i+6},c#{i+7}>::r"
 		i = i + 8
 	end
 	while(i < n-(4-1))
-		e = "tRisseSSS4<#{e},c#{i},c#{i+1},c#{i+2},c#{i+3}>::r"
+		e = "tSSS4<#{e},c#{i},c#{i+1},c#{i+2},c#{i+3}>::r"
 		i = i + 4
 	end
 	while(i < n)
-		e = "tRisseSSS<#{e},c#{i}>::r"
+		e = "tSSS<#{e},c#{i}>::r"
 		i = i + 1
 	end
 
-	e = "tRisseSSN<#{e}>::r"
+	e = "tSSN<#{e}>::r"
 	e
 end
 
@@ -55,7 +55,7 @@ STDOUT.print "
 
 // ハッシュ計算用テンプレート
 template <risse_uint32 e, risse_uint32 c>
-struct tRisseSSS { 
+struct tSSS { 
 	enum { r0 = (e + c)&0xffffffff };
 	enum { r1 = (r0 + ((r0<<10)&0xffffffff) ) & 0xffffffff };
 	enum { r2 = (r1 ^ ((risse_uint32)(r1&0xffffffff)>>6)) & 0xffffffff };
@@ -63,24 +63,24 @@ struct tRisseSSS {
 };
 
 template <risse_uint32 e, risse_uint32 c0,risse_uint32 c1,risse_uint32 c2,risse_uint32 c3>
-struct tRisseSSS4 { 
-	enum { r0 = tRisseSSS< e,c0>::r };
-	enum { r1 = tRisseSSS<r0,c1>::r };
-	enum { r2 = tRisseSSS<r1,c2>::r };
-	enum { r3 = tRisseSSS<r2,c3>::r };
+struct tSSS4 { 
+	enum { r0 = tSSS< e,c0>::r };
+	enum { r1 = tSSS<r0,c1>::r };
+	enum { r2 = tSSS<r1,c2>::r };
+	enum { r3 = tSSS<r2,c3>::r };
 	enum { r = r3 };
 };
 
 template <risse_uint32 e, risse_uint32 c0,risse_uint32 c1,risse_uint32 c2,risse_uint32 c3,
 			risse_uint32 c4,risse_uint32 c5,risse_uint32 c6,risse_uint32 c7>
-struct tRisseSSS8 { 
-	enum { r0 = tRisseSSS4< e,c0,c1,c2,c3>::r };
-	enum { r1 = tRisseSSS4<r0,c4,c5,c6,c7>::r };
+struct tSSS8 { 
+	enum { r0 = tSSS4< e,c0,c1,c2,c3>::r };
+	enum { r1 = tSSS4<r0,c4,c5,c6,c7>::r };
 	enum { r = r1 };
 };
 
 template <risse_uint32 e>
-struct tRisseSSN { 
+struct tSSN { 
 	enum { r0 = e };
 	enum { r1 = (r0 + ((r0 << 3)&0xffffffff)) & 0xffffffff };
 	enum { r2 = r1 ^ ((risse_uint32)(r1&0xffffffff)>>11) };
@@ -98,20 +98,20 @@ def t(cnt)
 
 
 		template <#{(cnt).join{|n| "risse_char c#{n}#{(cnt==COUNT)?'=0':''}"}}>
-		struct tRisseSS#{(cnt==COUNT)?'':"<#{(cnt).join{|n| "c#{n}"}}#{(COUNT-cnt).append{"0"}}>"}
+		struct tSS#{(cnt==COUNT)?'':"<#{(cnt).join{|n| "c#{n}"}}#{(COUNT-cnt).append{"0"}}>"}
 		{
-			static tRisseStringData data;
+			static tStringData data;
 			static risse_char string[#{cnt}+3];
 		public:
-			operator const tRisseString & ()
-			{ return *reinterpret_cast<const tRisseString *>(&data); }
+			operator const tString & ()
+			{ return *reinterpret_cast<const tString *>(&data); }
 		};
 		template <#{(cnt).join{|n| "risse_char c#{n}"}}>
-		risse_char tRisseSS<#{(cnt).join{|n| "c#{n}"}}#{(COUNT-cnt).append{"0"}}>::string[#{cnt}+3]=
-		{tRisseStringData::MightBeShared,#{cnt.join{|n| "c#{n}"}},0,#{hash_func(cnt)}};
+		risse_char tSS<#{(cnt).join{|n| "c#{n}"}}#{(COUNT-cnt).append{"0"}}>::string[#{cnt}+3]=
+		{tStringData::MightBeShared,#{cnt.join{|n| "c#{n}"}},0,#{hash_func(cnt)}};
 		template <#{(cnt).join{|n| "risse_char c#{n}"}}>
-		tRisseStringData tRisseSS<#{(cnt).join{|n| "c#{n}"}}#{(COUNT-cnt).append{"0"}}>::data =
-		{ tRisseSS<#{(cnt).join{|n| "c#{n}"}}#{(COUNT-cnt).append{"0"}}>::string + 1, #{cnt}};
+		tStringData tSS<#{(cnt).join{|n| "c#{n}"}}#{(COUNT-cnt).append{"0"}}>::data =
+		{ tSS<#{(cnt).join{|n| "c#{n}"}}#{(COUNT-cnt).append{"0"}}>::string + 1, #{cnt}};
 "
 
 

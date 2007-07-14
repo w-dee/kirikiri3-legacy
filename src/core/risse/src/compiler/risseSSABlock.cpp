@@ -32,12 +32,12 @@ RISSE_DEFINE_SOURCE_ID(35032,16995,23933,19143,62087,6357,32511,34753);
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name,
-	const tRisseSSALocalNamespace * ns)
+tSSABlock::tSSABlock(tSSAForm * form, const tString & name,
+	const tSSALocalNamespace * ns)
 {
 	Form = form;
 	FirstStatement = LastStatement = NULL;
-	LocalNamespace = new tRisseSSALocalNamespace(*ns);
+	LocalNamespace = new tSSALocalNamespace(*ns);
 	LocalNamespace->SetBlock(this);
 	Mark = NULL;
 	Traversing = false;
@@ -47,14 +47,14 @@ tRisseSSABlock::tRisseSSABlock(tRisseSSAForm * form, const tRisseString & name,
 
 	// 通し番号の準備
 	Name = name + RISSE_WC('_') +
-		tRisseString::AsString(form->GetFunction()->GetFunctionGroup()->
+		tString::AsString(form->GetFunction()->GetFunctionGroup()->
 								GetCompiler()->GetUniqueNumber());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::SetLastStatementPosition()
+void tSSABlock::SetLastStatementPosition()
 {
 	if(!LastStatement)
 		LastStatementPosition = risse_size_max;
@@ -65,9 +65,9 @@ void tRisseSSABlock::SetLastStatementPosition()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::InsertStatement(tRisseSSAStatement * stmt, tStatementInsertPoint point)
+void tSSABlock::InsertStatement(tSSAStatement * stmt, tStatementInsertPoint point)
 {
-	tRisseSSAStatement * cs = NULL;
+	tSSAStatement * cs = NULL;
 	switch(point)
 	{
 	case sipHead:
@@ -82,7 +82,7 @@ void tRisseSSABlock::InsertStatement(tRisseSSAStatement * stmt, tStatementInsert
 
 	case sipBeforeBranch:
 		{
-			tRisseSSAStatement * i;
+			tSSAStatement * i;
 			cs = NULL;
 			for(i = LastStatement; i != NULL; i = i->GetPred())
 			{
@@ -102,7 +102,7 @@ void tRisseSSABlock::InsertStatement(tRisseSSAStatement * stmt, tStatementInsert
 
 	// この時点で cs は挿入したい文の直後の文
 	// cs==NULLの場合は最後に追加
-	tRisseSSAStatement * cs_pred = cs ? cs->GetPred() : LastStatement;
+	tSSAStatement * cs_pred = cs ? cs->GetPred() : LastStatement;
 	if(cs_pred)	cs_pred->SetSucc(stmt);
 	if(cs)		cs->SetPred(stmt);
 	stmt->SetPred(cs_pred);
@@ -118,10 +118,10 @@ void tRisseSSABlock::InsertStatement(tRisseSSAStatement * stmt, tStatementInsert
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::DeleteStatement(tRisseSSAStatement * stmt)
+void tSSABlock::DeleteStatement(tSSAStatement * stmt)
 {
-	tRisseSSAStatement * stmt_pred = stmt->GetPred();
-	tRisseSSAStatement * stmt_succ = stmt->GetSucc();
+	tSSAStatement * stmt_pred = stmt->GetPred();
+	tSSAStatement * stmt_succ = stmt->GetSucc();
 	if(stmt_pred) stmt_pred->SetSucc(stmt_succ);
 	if(stmt_pred == NULL) FirstStatement = stmt_succ;
 	if(stmt_succ) stmt_succ->SetPred(stmt_pred);
@@ -132,14 +132,14 @@ void tRisseSSABlock::DeleteStatement(tRisseSSAStatement * stmt)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::ReplaceStatement(tRisseSSAStatement * old_stmt,
-	tRisseSSAStatement * new_stmt)
+void tSSABlock::ReplaceStatement(tSSAStatement * old_stmt,
+	tSSAStatement * new_stmt)
 {
 	RISSE_ASSERT(old_stmt->GetBlock() == this);
 	if(FirstStatement == old_stmt) FirstStatement = new_stmt;
 	if(LastStatement == old_stmt) LastStatement = new_stmt;
-	tRisseSSAStatement * pred = old_stmt->GetPred();
-	tRisseSSAStatement * succ = old_stmt->GetSucc();
+	tSSAStatement * pred = old_stmt->GetPred();
+	tSSAStatement * succ = old_stmt->GetSucc();
 	new_stmt->SetPred(pred);
 	new_stmt->SetSucc(succ);
 	if(pred) pred->SetSucc(new_stmt);
@@ -151,13 +151,13 @@ void tRisseSSABlock::ReplaceStatement(tRisseSSAStatement * old_stmt,
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AddPhiFunctionToBlocks(
-	risse_size pos, const tRisseString & name,
-	const tRisseString & n_name, tRisseSSAVariable *& last_phi_var)
+void tSSABlock::AddPhiFunctionToBlocks(
+	risse_size pos, const tString & name,
+	const tString & n_name, tSSAVariable *& last_phi_var)
 {
 	// 見つかったがφ関数を作成する必要がある場合
-	gc_vector<tRisseSSABlock *> block_stack;
-	gc_vector<tRisseSSAStatement *> phi_stmt_stack;
+	gc_vector<tSSABlock *> block_stack;
+	gc_vector<tSSAStatement *> phi_stmt_stack;
 
 	// φ関数を追加する
 	last_phi_var =
@@ -166,13 +166,13 @@ void tRisseSSABlock::AddPhiFunctionToBlocks(
 	while(block_stack.size() > 0)
 	{
 		// スタックからpop
-		tRisseSSABlock * quest_block = block_stack.back();
+		tSSABlock * quest_block = block_stack.back();
 		block_stack.pop_back();
-		tRisseSSAStatement * quest_phi_stmt = phi_stmt_stack.back();
+		tSSAStatement * quest_phi_stmt = phi_stmt_stack.back();
 		phi_stmt_stack.pop_back();
 
 		// quest_block の LocalNamespace から変数を検索
-		tRisseSSAVariable **var = NULL;
+		tSSAVariable **var = NULL;
 		RISSE_ASSERT(quest_block->LocalNamespace);
 		bool found = quest_block->LocalNamespace->Find(n_name, true, NULL, &var);
 
@@ -181,10 +181,10 @@ void tRisseSSABlock::AddPhiFunctionToBlocks(
 			// 変数が見つからない
 			// エラーにする
 			// TODO: もっと親切なエラーメッセージ
-			tRisseCompileExceptionClass::Throw(
+			tCompileExceptionClass::Throw(
 				Form->GetFunction()->GetFunctionGroup()->GetCompiler()->
 					GetScriptBlockInstance()->GetScriptEngine(),
-				tRisseString(
+				tString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
 					name),
 					quest_block->Form->GetScriptBlockInstance(), quest_phi_stmt->GetPosition());
@@ -205,23 +205,23 @@ void tRisseSSABlock::AddPhiFunctionToBlocks(
 
 
 //---------------------------------------------------------------------------
-tRisseSSAVariable * tRisseSSABlock::AddPhiFunction(
-		risse_size pos, const tRisseString & name,
-		const tRisseString & n_name,
-			gc_vector<tRisseSSABlock *> & block_stack,
-			gc_vector<tRisseSSAStatement *> & phi_stmt_stack)
+tSSAVariable * tSSABlock::AddPhiFunction(
+		risse_size pos, const tString & name,
+		const tString & n_name,
+			gc_vector<tSSABlock *> & block_stack,
+			gc_vector<tSSAStatement *> & phi_stmt_stack)
 {
-	tRisseSSAVariable *ret_var;
+	tSSAVariable *ret_var;
 	// φ関数を追加する
-	tRisseSSAStatement * phi_stmt = new tRisseSSAStatement(Form, pos, ocPhi);
+	tSSAStatement * phi_stmt = new tSSAStatement(Form, pos, ocPhi);
 	// 戻りの変数を作成し、*var に入れる
-	ret_var = new tRisseSSAVariable(Form, phi_stmt, name);
+	ret_var = new tSSAVariable(Form, phi_stmt, name);
 	ret_var->SetNumberedName(n_name);
 	// φ関数は必ずブロックの先頭に追加される
-	InsertStatement(phi_stmt, tRisseSSABlock::sipHead);
+	InsertStatement(phi_stmt, tSSABlock::sipHead);
 
 	// pred に対して再帰するためにスタックにPredを積む
-	for(gc_vector<tRisseSSABlock *>::reverse_iterator i = Pred.rbegin();
+	for(gc_vector<tSSABlock *>::reverse_iterator i = Pred.rbegin();
 			i != Pred.rend(); i ++)
 	{
 		block_stack.push_back(*i);
@@ -236,7 +236,7 @@ tRisseSSAVariable * tRisseSSABlock::AddPhiFunction(
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AddPred(tRisseSSABlock * block)
+void tSSABlock::AddPred(tSSABlock * block)
 {
 	// 直前の基本ブロックを追加する
 	Pred.push_back(block);
@@ -245,16 +245,16 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 	block->AddSucc(this);
 
 	// 既存のφ関数は、すべて再調整しなければならない
-	tRisseSSAStatement *stmt = FirstStatement;
+	tSSAStatement *stmt = FirstStatement;
 	while(stmt)
 	{
 		if(stmt->GetCode() != ocPhi) break;
 		RISSE_ASSERT(!stmt->GetDeclared()->GetName().IsEmpty());
 		RISSE_ASSERT(block->LocalNamespace != NULL);
 
-		tRisseSSAVariable * decl_var = stmt->GetDeclared();
+		tSSAVariable * decl_var = stmt->GetDeclared();
 
-		tRisseSSAVariable * found_var =
+		tSSAVariable * found_var =
 			block->LocalNamespace->MakePhiFunction(stmt->GetPosition(),
 				decl_var->GetName(), decl_var->GetNumberedName());
 		if(!found_var)
@@ -262,10 +262,10 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 			// 変数が見つからない
 			// エラーにする
 			// TODO: もっと親切なエラーメッセージ
-			tRisseCompileExceptionClass::Throw(
+			tCompileExceptionClass::Throw(
 				Form->GetFunction()->GetFunctionGroup()->
 					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
-				tRisseString(
+				tString(
 					RISSE_WS_TR("local variable '%1' is from out of scope"),
 					decl_var->GetName()),
 					Form->GetScriptBlockInstance(), stmt->GetPosition());
@@ -279,14 +279,14 @@ void tRisseSSABlock::AddPred(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::DeletePred(risse_size index)
+void tSSABlock::DeletePred(risse_size index)
 {
 	// 直前の基本ブロックを削除する
 	RISSE_ASSERT(Pred.size() > 0);
 	Pred.erase(Pred.begin() + index);
 
 	// 既存のφ関数からも削除する
-	tRisseSSAStatement *stmt = FirstStatement;
+	tSSAStatement *stmt = FirstStatement;
 	while(stmt)
 	{
 		if(stmt->GetCode() != ocPhi) break;
@@ -302,7 +302,7 @@ void tRisseSSABlock::DeletePred(risse_size index)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AddSucc(tRisseSSABlock * block)
+void tSSABlock::AddSucc(tSSABlock * block)
 {
 	Succ.push_back(block);
 }
@@ -310,7 +310,7 @@ void tRisseSSABlock::AddSucc(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::DeleteDeadPred()
+void tSSABlock::DeleteDeadPred()
 {
 	// Pred は削除の効率を考え、逆順に見ていく
 	if(Pred.size() > 0)
@@ -329,18 +329,18 @@ void tRisseSSABlock::DeleteDeadPred()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::DeleteDeadStatementsFromVariables()
+void tSSABlock::DeleteDeadStatementsFromVariables()
 {
 	// すべてのマークされていない変数に対して処理を行う
 
 	// すべての文を検査し、それぞれの文で宣言されている「変数」について解析を行う
 	// 「文」につく「マーク」は 文のポインタそのもの
-	tRisseSSAStatement *stmt;
+	tSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt;
 		stmt = stmt->GetSucc())
 	{
-		tRisseSSAVariable * decl_var = stmt->GetDeclared();
+		tSSAVariable * decl_var = stmt->GetDeclared();
 		if(decl_var != NULL)
 		{
 			if(decl_var->GetMark() != stmt)
@@ -355,7 +355,7 @@ void tRisseSSABlock::DeleteDeadStatementsFromVariables()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AddLiveness(const tRisseSSAVariable * var, bool out)
+void tSSABlock::AddLiveness(const tSSAVariable * var, bool out)
 {
 	tLiveVariableMap * map = out ? LiveOut : LiveIn;
 	RISSE_ASSERT(map != NULL);
@@ -365,7 +365,7 @@ void tRisseSSABlock::AddLiveness(const tRisseSSAVariable * var, bool out)
 
 
 //---------------------------------------------------------------------------
-bool tRisseSSABlock::GetLiveness(const tRisseSSAVariable * var, bool out) const
+bool tSSABlock::GetLiveness(const tSSAVariable * var, bool out) const
 {
 	tLiveVariableMap * map = out ? LiveOut : LiveIn;
 	RISSE_ASSERT(map != NULL);
@@ -375,23 +375,23 @@ bool tRisseSSABlock::GetLiveness(const tRisseSSAVariable * var, bool out) const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::ClearMark() const
+void tSSABlock::ClearMark() const
 {
-	gc_vector<tRisseSSABlock *> blocks;
+	gc_vector<tSSABlock *> blocks;
 	Traverse(blocks);
-	for(gc_vector<tRisseSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->SetMark(NULL);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::Traverse(gc_vector<tRisseSSABlock *> & blocks) const
+void tSSABlock::Traverse(gc_vector<tSSABlock *> & blocks) const
 {
 	risse_size new_start = 0;
 	risse_size new_count = 1;
 	// 自分自身を blocks に追加
-	blocks.push_back(const_cast<tRisseSSABlock*>(this));
+	blocks.push_back(const_cast<tSSABlock*>(this));
 	Traversing = true;
 
 	// new_count が 0 で無い限り繰り返す(幅優先探索)
@@ -402,7 +402,7 @@ void tRisseSSABlock::Traverse(gc_vector<tRisseSSABlock *> & blocks) const
 		for(risse_size n = new_start; n < new_start + new_count; n++)
 		{
 			blocks.reserve(blocks.size() + blocks[n]->Succ.size());
-			for(gc_vector<tRisseSSABlock *>::iterator
+			for(gc_vector<tSSABlock *>::iterator
 				i = blocks[n]->Succ.begin(); i != blocks[n]->Succ.end(); i++)
 			{
 				if(!(*i)->Traversing)
@@ -417,21 +417,21 @@ void tRisseSSABlock::Traverse(gc_vector<tRisseSSABlock *> & blocks) const
 	}
 
 	// Traversing フラグを倒す
-	for(gc_vector<tRisseSSABlock *>::iterator
+	for(gc_vector<tSSABlock *>::iterator
 		i = blocks.begin(); i != blocks.end(); i++) (*i)->Traversing = false;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::ClearVariableMarks()
+void tSSABlock::ClearVariableMarks()
 {
-	tRisseSSAStatement *stmt;
+	tSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt;
 		stmt = stmt->GetSucc())
 	{
-		tRisseSSAVariable * decl_var = stmt->GetDeclared();
+		tSSAVariable * decl_var = stmt->GetDeclared();
 		if(decl_var != NULL)
 		{
 			decl_var->SetMark(NULL);
@@ -442,23 +442,23 @@ void tRisseSSABlock::ClearVariableMarks()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::ConvertSharedVariableAccess()
+void tSSABlock::ConvertSharedVariableAccess()
 {
 	// すべての文について
-	tRisseSSAStatement *stmt;
+	tSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt;
 		stmt = stmt->GetSucc())
 	{
 		// ocReadVar と ocWriteVar を探し、共有されていなければ普通の
 		// ocAssign に、共有されていれば ocRead と ocWrite にそれぞれ変換する
-		tRisseOpCode code = stmt->GetCode();
+		tOpCode code = stmt->GetCode();
 		if(code == ocReadVar)
 		{
 			if(Form->GetFunction()->GetShared(stmt->GetName()))
 			{
-				tRisseSSAStatement *new_stmt = new
-					tRisseSSAStatement(Form, stmt->GetPosition(), ocRead);
+				tSSAStatement *new_stmt = new
+					tSSAStatement(Form, stmt->GetPosition(), ocRead);
 				new_stmt->SetName(stmt->GetName());
 				new_stmt->SetDeclared(stmt->GetDeclared());
 				// stmt は消えるため、stmt の Used をすべて解放しなければならない
@@ -476,8 +476,8 @@ void tRisseSSABlock::ConvertSharedVariableAccess()
 		{
 			if(Form->GetFunction()->GetShared(stmt->GetName()))
 			{
-				tRisseSSAStatement *new_stmt = new
-					tRisseSSAStatement(Form, stmt->GetPosition(), ocWrite);
+				tSSAStatement *new_stmt = new
+					tSSAStatement(Form, stmt->GetPosition(), ocWrite);
 				new_stmt->SetName(stmt->GetName());
 				new_stmt->AddUsed(stmt->GetUsed()[0]);
 				// stmt は消えるため、stmt の Used をすべて解放しなければならない
@@ -504,7 +504,7 @@ void tRisseSSABlock::ConvertSharedVariableAccess()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::CreateLiveInAndLiveOut()
+void tSSABlock::CreateLiveInAndLiveOut()
 {
 	if(!LiveIn)  LiveIn  = new tLiveVariableMap();
 	if(!LiveOut) LiveOut = new tLiveVariableMap();
@@ -513,7 +513,7 @@ void tRisseSSABlock::CreateLiveInAndLiveOut()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AnalyzeVariableBlockLiveness()
+void tSSABlock::AnalyzeVariableBlockLiveness()
 {
 	// すべてのマークされていない変数に対して生存区間解析を行う
 	// なぜマークをするのかと言えば、一度すでに生存解析を行った文を二度と解析しないようにするため。
@@ -521,12 +521,12 @@ void tRisseSSABlock::AnalyzeVariableBlockLiveness()
 
 	// すべての文を検査し、それぞれの文で宣言されている「変数」について解析を行う
 	// 「文」につく「マーク」は 文のポインタそのもの
-	tRisseSSAStatement *stmt;
+	tSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt;
 		stmt = stmt->GetSucc())
 	{
-		tRisseSSAVariable * decl_var = stmt->GetDeclared();
+		tSSAVariable * decl_var = stmt->GetDeclared();
 		if(decl_var != NULL)
 		{
 			if(decl_var->GetMark() != stmt)
@@ -541,12 +541,12 @@ void tRisseSSABlock::AnalyzeVariableBlockLiveness()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::AnalyzeVariableStatementLiveness()
+void tSSABlock::AnalyzeVariableStatementLiveness()
 {
 	// すべての文で宣言された変数について文単位の有効範囲解析を行う
 	// この時点では状態はすでにSSAではない; phi関数の削除などにより、
 	// 変数のDeclaredが一カ所ではなくて複数箇所になっている場合があるので注意
-	tRisseSSAStatement *stmt;
+	tSSAStatement *stmt;
 	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
 		stmt->AnalyzeVariableStatementLiveness();
 }
@@ -554,10 +554,10 @@ void tRisseSSABlock::AnalyzeVariableStatementLiveness()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::RemovePhiStatements()
+void tSSABlock::RemovePhiStatements()
 {
 	// すべてのφ関数について処理
-	tRisseSSAStatement *stmt;
+	tSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt && stmt->GetCode() == ocPhi;
 		stmt = FirstStatement)
@@ -576,14 +576,14 @@ void tRisseSSABlock::RemovePhiStatements()
 		// 文を挿入することで生存範囲の干渉を避ける。
 
 		// stmt の used の配列
-		const gc_vector<tRisseSSAVariable *> phi_used = stmt->GetUsed();
+		const gc_vector<tSSAVariable *> phi_used = stmt->GetUsed();
 
 		// stmt で宣言された変数
-		tRisseSSAVariable * stmt_decld = stmt->GetDeclared();
+		tSSAVariable * stmt_decld = stmt->GetDeclared();
 
 		// pred をたどる
 		bool var_used = false;
-		for(gc_vector<tRisseSSABlock *>::iterator i = Pred.begin();
+		for(gc_vector<tSSABlock *>::iterator i = Pred.begin();
 			i != Pred.end(); i++)
 		{
 			// pred の最後で stmt_decld が存在しているかどうかを調べる
@@ -594,20 +594,20 @@ void tRisseSSABlock::RemovePhiStatements()
 		if(var_used)
 		{
 			// TODO: 変数の干渉が見つかった場合の処理
-			RisseFPrint(stderr, tRisseString(RISSE_WS("variable interference found at block %1\n"), Dump()).c_str());
+			FPrint(stderr, tString(RISSE_WS("variable interference found at block %1\n"), Dump()).c_str());
 			RISSE_ASSERT(!"variable interference found");
 		}
 
 		// 各 pred の分岐文の直前に 代入文を生成する
 		for(risse_size index = 0; index < Pred.size(); index ++)
 		{
-			tRisseSSAStatement * new_stmt =
-				new tRisseSSAStatement(Form, Pred[index]->GetLastStatementPosition(), ocAssign);
-			new_stmt->AddUsed(const_cast<tRisseSSAVariable*>(phi_used[index]));
+			tSSAStatement * new_stmt =
+				new tSSAStatement(Form, Pred[index]->GetLastStatementPosition(), ocAssign);
+			new_stmt->AddUsed(const_cast<tSSAVariable*>(phi_used[index]));
 			new_stmt->SetDeclared(stmt_decld);
 			stmt_decld->SetDeclared(new_stmt); // 一応代入
 				/* 注意
-					「この変数が宣言された位置」(tRisseSSAVariable::Declared) は
+					「この変数が宣言された位置」(tSSAVariable::Declared) は
 					φ関数を削除した後は意味がなくなる。φ関数の削除により、一つの変数
 					への代入が複数箇所になり、SSA性が保持されなくなるため。
 				*/
@@ -629,9 +629,9 @@ void tRisseSSABlock::RemovePhiStatements()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::SetOrder(risse_size & order)
+void tSSABlock::SetOrder(risse_size & order)
 {
-	tRisseSSAStatement *stmt;
+	tSSAStatement *stmt;
 	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
 	{
 		stmt->SetOrder(order);
@@ -642,13 +642,13 @@ void tRisseSSABlock::SetOrder(risse_size & order)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSABlock::GenerateCode(tRisseCodeGenerator * gen) const
+void tSSABlock::GenerateCode(tCodeGenerator * gen) const
 {
 	// この基本ブロックを gen に登録する
 	gen->AddBlockMap(this);
 
 	// それぞれの文についてコードを生成させる
-	tRisseSSAStatement *stmt;
+	tSSAStatement *stmt;
 	for(stmt = FirstStatement;
 		stmt;
 		stmt = stmt->GetSucc())
@@ -660,16 +660,16 @@ void tRisseSSABlock::GenerateCode(tRisseCodeGenerator * gen) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSABlock::Dump() const
+tString tSSABlock::Dump() const
 {
-	tRisseString ret;
+	tString ret;
 
 	// ラベル名と直前のブロックを列挙
 	ret +=  + RISSE_WS("*") + Name;
 	if(Pred.size() != 0)
 	{
 		ret += RISSE_WS(" // pred: ");
-		for(gc_vector<tRisseSSABlock *>::const_iterator i = Pred.begin();
+		for(gc_vector<tSSABlock *>::const_iterator i = Pred.begin();
 										i != Pred.end(); i ++)
 		{
 			if(i != Pred.begin()) ret += RISSE_WS(", ");
@@ -699,16 +699,16 @@ tRisseString tRisseSSABlock::Dump() const
 	else
 	{
 		// すべての文をダンプ
-		for(tRisseSSAStatement * stmt = FirstStatement; stmt != NULL; stmt = stmt->GetSucc())
+		for(tSSAStatement * stmt = FirstStatement; stmt != NULL; stmt = stmt->GetSucc())
 		{
-			tRisseString vars;
+			tString vars;
 			// この文で使用が開始された変数
 			vars = stmt->DumpVariableStatementLiveness(true);
 			if(!vars.IsEmpty()) ret += RISSE_WS("// Use start: ") + vars +
 																RISSE_WS("\n");
 			// 文本体
 			if(stmt->GetOrder() != risse_size_max)
-				ret += RISSE_WS("[") + tRisseString::AsString((risse_int64)stmt->GetOrder()) +
+				ret += RISSE_WS("[") + tString::AsString((risse_int64)stmt->GetOrder()) +
 					RISSE_WS("] ");
 			ret += stmt->Dump() + RISSE_WS("\n");
 			// この文で使用が終了した変数

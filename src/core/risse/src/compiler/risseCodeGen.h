@@ -23,30 +23,30 @@
 namespace Risse
 {
 
-class tRisseSSABlock;
-class tRisseSSAForm;
+class tSSABlock;
+class tSSAForm;
 //---------------------------------------------------------------------------
 //! @brief		コードジェネレータクラス
 //---------------------------------------------------------------------------
-class tRisseCodeGenerator : public tRisseCollectee
+class tCodeGenerator : public tCollectee
 {
 	static const risse_size MaxConstSearch = 5; // 定数領域で同じ値を探す最大値
 
-	tRisseSSAForm * Form; //!< このコードジェネレータを作成した SSA 形式インスタンス
-	tRisseCodeGenerator * Parent; //!< 親のコードジェネレータ
+	tSSAForm * Form; //!< このコードジェネレータを作成した SSA 形式インスタンス
+	tCodeGenerator * Parent; //!< 親のコードジェネレータ
 	bool UseParentFrame; //!< 親のコードジェネレータのフレームを使うかどうか
 	risse_size NestLevel;		//!< 関数のネストレベル
 	risse_size RegisterBase; //!< レジスタの基本値
 
 	gc_vector<risse_uint32> Code; //!< コード
-	gc_vector<tRisseVariant> Consts; //!< 定数領域
+	gc_vector<tVariant> Consts; //!< 定数領域
 	gc_vector<risse_size> RegFreeMap; // 空きレジスタの配列
 	risse_size NumUsedRegs; // 使用中のレジスタの数
 	risse_size MaxNumUsedRegs; // 使用中のレジスタの最大数
 public:
-	typedef gc_map<tRisseString, risse_size> tNamedRegMap;
+	typedef gc_map<tString, risse_size> tNamedRegMap;
 		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
-	typedef gc_map<const tRisseSSAVariable *, risse_size> tRegMap;
+	typedef gc_map<const tSSAVariable *, risse_size> tRegMap;
 		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
 private:
 	tNamedRegMap *SharedRegNameMap; //!< 共有変数名とそれに対応するレジスタ番号のマップ(一連の関数グループ内ではこれを共有する)
@@ -55,17 +55,17 @@ private:
 	tNamedRegMap VariableMapForChildren; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
 	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	//! @brief		未解決のジャンプを表す構造体
-	struct tPendingBlockJump : public tRisseCollectee
+	struct tPendingBlockJump : public tCollectee
 	{
-		const tRisseSSABlock *	Block; //!< 基本ブロック
+		const tSSABlock *	Block; //!< 基本ブロック
 		risse_size			EmitPosition; //!< オフセットを入れ込む位置
 		risse_size			InsnPosition; //!< 命令位置
-		tPendingBlockJump(const tRisseSSABlock * block, risse_size emit_pos, risse_size insn_pos)
+		tPendingBlockJump(const tSSABlock * block, risse_size emit_pos, risse_size insn_pos)
 			: Block(block), EmitPosition(emit_pos), InsnPosition(insn_pos) {;}
 	};
 	gc_vector<tPendingBlockJump> PendingBlockJumps;
 			//!< 未解決のジャンプとその基本ブロックのリスト
-	typedef gc_map<const tRisseSSABlock *, risse_size> tBlockMap;
+	typedef gc_map<const tSSABlock *, risse_size> tBlockMap;
 			//!< 基本ブロックとそれが対応するアドレスの typedef
 	tBlockMap BlockMap; //!< 変数とそれに対応するレジスタ番号のマップ
 
@@ -79,12 +79,12 @@ public:
 	//! @param		parent			親コードジェネレータ
 	//! @param		useparentframe	親コードジェネレータのフレームを使うかどうか
 	//! @param		nestlevel		関数のネストレベル
-	tRisseCodeGenerator(tRisseSSAForm * form, tRisseCodeGenerator * parent, bool useparentframe, risse_size nestlevel);
+	tCodeGenerator(tSSAForm * form, tCodeGenerator * parent, bool useparentframe, risse_size nestlevel);
 
 public:
 	//! @brief	親のコードジェネレータを得る
 	//! @return	親のコードジェネレータを得る
-	tRisseCodeGenerator * GetParent() const { return Parent; }
+	tCodeGenerator * GetParent() const { return Parent; }
 
 	//! @brief	レジスタの基本値を得る @return レジスタの基本値
 	risse_size GetRegisterBase() const { return RegisterBase; }
@@ -96,7 +96,7 @@ public:
 	const gc_vector<risse_uint32> & GetCode() const { return Code; }
 
 	//! @brief	定数領域の配列を得る @return 定数領域の配列
-	const gc_vector<tRisseVariant> & GetConsts() const { return Consts; }
+	const gc_vector<tVariant> & GetConsts() const { return Consts; }
 
 	//! @brief	ネストレベルを得る @return ネストレベル
 	risse_size GetNestLevel() const { return NestLevel; }
@@ -125,25 +125,25 @@ public:
 	//! @brief		基本ブロックとアドレスのマップを追加する
 	//! @param		block		基本ブロック
 	//! @note		アドレスとしては現在の命令書き込み位置が用いられる
-	void AddBlockMap(const tRisseSSABlock * block);
+	void AddBlockMap(const tSSABlock * block);
 
 	//! @brief		未解決のジャンプとその基本ブロックを追加する
 	//! @param		block		基本ブロック
 	//! @param		insn_pos	ジャンプ命令の開始位置
 	//! @note		ジャンプ先アドレスを入れ込むアドレスとしては現在の命令書き込み位置が用いられる
-	void AddPendingBlockJump(const tRisseSSABlock * block, risse_size insn_pos);
+	void AddPendingBlockJump(const tSSABlock * block, risse_size insn_pos);
 
 	//! @brief		定数領域から値を見つけ、その値を返す
 	//! @param		value		定数値
 	//! @return		その定数のインデックス
-	risse_size FindConst(const tRisseVariant & value);
+	risse_size FindConst(const tVariant & value);
 
 	//! @brief		レジスタのマップを変数で探す
 	//! @param		var			変数
 	//! @return		そのレジスタのインデックス
 	//! @note		varがマップ内に見つからなかったときはレジスタを割り当て
 	//!				そのレジスタのインデックスを返す
-	risse_size FindRegMap(const tRisseSSAVariable * var);
+	risse_size FindRegMap(const tSSAVariable * var);
 
 	//! @brief		使用中のレジスタの最大値を更新する
 	//! @param		max		レジスタの最大値
@@ -165,7 +165,7 @@ public:
 	//! @brief		レジスタを一つ解放する(変数インスタンスより)
 	//! @param		var		変数
 	//! @note		変数はレジスタマップ内に存在しないとならない
-	void FreeRegister(const tRisseSSAVariable *var);
+	void FreeRegister(const tSSAVariable *var);
 
 	//! @brief		共有されたレジスタのマップを変数名で探す
 	//! @param		name			変数名
@@ -173,11 +173,11 @@ public:
 	//! @param		regnum			レジスタ番号
 	//! @note		nameがマップ内に見つからなかった場合は(デバッグモード時は)
 	//!				親コードジェネレータを探し、それでも見つからなければASSERTに失敗となる
-	void FindSharedRegNameMap(const tRisseString & name, risse_uint16 &nestlevel, risse_uint16 &regnum);
+	void FindSharedRegNameMap(const tString & name, risse_uint16 &nestlevel, risse_uint16 &regnum);
 
 	//! @brief		共有されたレジスタのマップに変数名を追加する
 	//! @param		name			変数名
-	void AddSharedRegNameMap(const tRisseString & name);
+	void AddSharedRegNameMap(const tString & name);
 
 	//! @brief		共有されたレジスタのマップにバインディング変数名とレジスタを追加する
 	//! @param		name			変数名
@@ -185,7 +185,7 @@ public:
 	//! @param		regnum			レジスタ番号
 	//! @note		このメソッドは、バインディング情報中の変数を登録するためにある。
 	//!				つまり、関数グループ内の共有変数をこのメソッドで追加してはならない。
-	void AddBindingRegNameMap(const tRisseString & name, risse_uint16 nestlevel, risse_uint16 regnum);
+	void AddBindingRegNameMap(const tString & name, risse_uint16 nestlevel, risse_uint16 regnum);
 
 	//! @brief		指定されたネストレベルに対する共有されたレジスタの個数を得る
 	//! @return		共有されたレジスタの個数
@@ -204,14 +204,14 @@ public:
 	//! @return		そのレジスタのインデックス
 	//! @note		nameがマップ内に見つからなかったときはレジスタを割り当て
 	//!				そのレジスタのインデックスを返す
-	risse_size FindOrRegisterVariableMapForChildren(const tRisseString & name);
+	risse_size FindOrRegisterVariableMapForChildren(const tString & name);
 
 	//! @brief		VariableMapForChildren 内で変数を探す
 	//! @param		name		変数名
 	//! @return		そのレジスタのインデックス
 	//! @note		nameがマップ内に見つからなかったときは(デバッグ時は)
 	//!				ASSERTに失敗する
-	risse_size FindVariableMapForChildren(const tRisseString & name);
+	risse_size FindVariableMapForChildren(const tString & name);
 
 	//! @brief		VariableMapForChildren にある変数をすべて開放する
 	//! @note		変数は開放するが、マップそのものはクリアしない。
@@ -240,95 +240,95 @@ public:
 	//! @brief		Assignコードを置く
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数
-	void PutAssign(const tRisseSSAVariable * dest, const tRisseSSAVariable * src);
+	void PutAssign(const tSSAVariable * dest, const tSSAVariable * src);
 
 	//! @brief		Assignコードを置く(このメソッドは削除の予定;使わないこと)
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数
-	void PutAssign(risse_size dest, const tRisseSSAVariable * src);
+	void PutAssign(risse_size dest, const tSSAVariable * src);
 
 	//! @brief		Assignコードを置く(このメソッドは削除の予定;使わないこと)
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数
-	void PutAssign(const tRisseSSAVariable * dest, risse_size src);
+	void PutAssign(const tSSAVariable * dest, risse_size src);
 
 	//! @brief		AssignConstantコードを置く
 	//! @param		dest	変数コピー先変数
 	//! @param		value	値
-	void PutAssign(const tRisseSSAVariable * dest, const tRisseVariant & value);
+	void PutAssign(const tSSAVariable * dest, const tVariant & value);
 
 	//! @brief		オブジェクトを Assign するコードを置く(AssignThis, AssignSuper等)
 	//! @param		dest	変数コピー先変数
 	//! @param		code	オペレーションコード
-	void PutAssign(const tRisseSSAVariable * dest, tRisseOpCode code);
+	void PutAssign(const tSSAVariable * dest, tOpCode code);
 
 	//! @brief		新しい正規表現オブジェクトを Assign するコードを置く
 	//! @param		dest	Assign先変数
 	//! @param		pattern	正規表現パターンを表す変数
 	//! @param		flags	正規表現フラグを表す変数
-	void PutAssignNewRegExp(const tRisseSSAVariable * dest, const tRisseSSAVariable * pattern, const tRisseSSAVariable * flags);
+	void PutAssignNewRegExp(const tSSAVariable * dest, const tSSAVariable * pattern, const tSSAVariable * flags);
 
 	//! @brief		新しい関数インスタンスを Assign するコードを置く
 	//! @param		dest	Assign先変数
 	//! @param		body	「裸の」関数インスタンス
-	void PutAssignNewFunction(const tRisseSSAVariable * dest, const tRisseSSAVariable * body);
+	void PutAssignNewFunction(const tSSAVariable * dest, const tSSAVariable * body);
 
 	//! @brief		新しいプロパティインスタンスを Assign するコードを置く
 	//! @param		dest	Assign先変数
 	//! @param		getter	ゲッタを表す変数
 	//! @param		setter	セッタを表す変数
-	void PutAssignNewProperty(const tRisseSSAVariable * dest, const tRisseSSAVariable * getter, const tRisseSSAVariable * setter);
+	void PutAssignNewProperty(const tSSAVariable * dest, const tSSAVariable * getter, const tSSAVariable * setter);
 
 	//! @brief		新しいクラスインスタンスを Assign するコードを置く
 	//! @param		dest	Assign先変数
 	//! @param		super	親クラスを表す変数
 	//! @param		name	クラス名を表す変数
-	void PutAssignNewClass(const tRisseSSAVariable * dest, const tRisseSSAVariable * super, const tRisseSSAVariable * name);
+	void PutAssignNewClass(const tSSAVariable * dest, const tSSAVariable * super, const tSSAVariable * name);
 
 	//! @brief		新しいモジュールインスタンスを Assign するコードを置く
 	//! @param		dest	Assign先変数
 	//! @param		name	モジュール名を表す変数
-	void PutAssignNewModule(const tRisseSSAVariable * dest, const tRisseSSAVariable * name);
+	void PutAssignNewModule(const tSSAVariable * dest, const tSSAVariable * name);
 
 	//! @brief		メソッドへの引数を assign するコードを置く
 	//! @param		dest	変数コピー先変数
 	//! @param		index	引数インデックス
-	void PutAssignParam(const tRisseSSAVariable * dest, risse_size index);
+	void PutAssignParam(const tSSAVariable * dest, risse_size index);
 
 	//! @brief		メソッドへのブロック引数を assign するコードを置く
 	//! @param		dest	変数コピー先変数
 	//! @param		index	ブロック引数インデックス
-	void PutAssignBlockParam(const tRisseSSAVariable * dest, risse_size index);
+	void PutAssignBlockParam(const tSSAVariable * dest, risse_size index);
 
 	//! @brief		ローカル変数のバインディング情報を追加するコードを置く
 	//! @param		map		マップ
 	//! @param		name	変数名(装飾無し)を表すSSA形式変数
 	//! @param		nname	共有変数名(番号付き)
-	void PutAddBindingMap(const tRisseSSAVariable * map, const tRisseSSAVariable *name,
-					const tRisseString &nname);
+	void PutAddBindingMap(const tSSAVariable * map, const tSSAVariable *name,
+					const tString &nname);
 
 	//! @brief		Writeコード(共有空間への書き込み)を置く
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数
-	void PutWrite(const tRisseString & dest, const tRisseSSAVariable * src);
+	void PutWrite(const tString & dest, const tSSAVariable * src);
 
 	//! @brief		Readコード(共有空間からの読み込み)を置く
 	//! @param		dest	変数コピー先変数
 	//! @param		src		変数コピー元変数
-	void PutRead(const tRisseSSAVariable * dest, const tRisseString & src);
+	void PutRead(const tSSAVariable * dest, const tString & src);
 
 	//! @brief		他のコードブロックへの再配置用コードを置く
 	//! @param		dest	格納先変数
 	//! @param		index	コードブロックのインデックス
-	void PutCodeBlockRelocatee(const tRisseSSAVariable * dest, risse_size index);
+	void PutCodeBlockRelocatee(const tSSAVariable * dest, risse_size index);
 
 	//! @brief		スタックフレームと共有空間の書き換え用コードを置く
 	//! @param		dest	書き換え先変数
-	void PutSetFrame(const tRisseSSAVariable * dest);
+	void PutSetFrame(const tSSAVariable * dest);
 
 	//! @brief		共有空間の書き換え用コードを置く
 	//! @param		dest	書き換え先変数
-	void PutSetShare(const tRisseSSAVariable * dest);
+	void PutSetShare(const tSSAVariable * dest);
 
 	//! @brief		FuncCall あるいは New コード または TryFuncCall を置く
 	//! @param		dest	関数結果格納先
@@ -337,75 +337,75 @@ public:
 	//! @param		expbit	それぞれの引数が展開を行うかどうかを表すビット列
 	//! @param		args	引数
 	//! @param		blocks	遅延評価ブロック
-	void PutFunctionCall(const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * func,
-		tRisseOpCode code, risse_uint32 expbit,
-		const gc_vector<const tRisseSSAVariable *> & args,
-		const gc_vector<const tRisseSSAVariable *> & blocks);
+	void PutFunctionCall(const tSSAVariable * dest,
+		const tSSAVariable * func,
+		tOpCode code, risse_uint32 expbit,
+		const gc_vector<const tSSAVariable *> & args,
+		const gc_vector<const tSSAVariable *> & blocks);
 
 	//! @brief		sync コードを奥
 	//! @param		dest	sync ブロックの結果格納先
 	//! @param		func	sync ブロックを表す変数
 	//! @param		lockee	sync するためのオブジェクト
-	void PutSync(const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * func, const tRisseSSAVariable * lockee);
+	void PutSync(const tSSAVariable * dest,
+		const tSSAVariable * func, const tSSAVariable * lockee);
 
 	//! @brief		Jump コードを置く
 	//! @param		target	ジャンプ先基本ブロック
-	void PutJump(const tRisseSSABlock * target);
+	void PutJump(const tSSABlock * target);
 
 	//! @brief		Branch コードを置く
 	//! @param		ref		調べる変数
 	//! @param		truetarget	真の時にジャンプする先
 	//! @param		falsetarget	偽の時にジャンプする先
-	void PutBranch(const tRisseSSAVariable * ref,
-		const tRisseSSABlock * truetarget, const tRisseSSABlock * falsetarget);
+	void PutBranch(const tSSAVariable * ref,
+		const tSSABlock * truetarget, const tSSABlock * falsetarget);
 
 	//! @brief		CatchBranch コードを置く
 	//! @param		ref			調べる変数
 	//! @param		try_id_idx	try識別子のインデックス
 	//! @param		targets		ジャンプ先配列
-	void PutCatchBranch(const tRisseSSAVariable * ref,
+	void PutCatchBranch(const tSSAVariable * ref,
 		risse_size try_id_idx,
-		const gc_vector<tRisseSSABlock *> & targets);
+		const gc_vector<tSSABlock *> & targets);
 
 	//! @brief		Debugger コードを置く
 	void PutDebugger();
 
 	//! @brief		Throw コードを置く
 	//! @param		throwee		投げる例外オブジェクトが入っている変数
-	void PutThrow(const tRisseSSAVariable * throwee);
+	void PutThrow(const tSSAVariable * throwee);
 
 	//! @brief		Return コードを置く
 	//! @param		value		返す値が入っている変数
-	void PutReturn(const tRisseSSAVariable * value);
+	void PutReturn(const tSSAVariable * value);
 
 	//! @brief		例外によるtry脱出コードを置く
 	//! @param		value		返す値が入っている変数(NULL=値はない場合)
 	//! @param		try_id_idx	Try 識別子番号
 	//! @param		idx			分岐先ID
-	void PutExitTryException(const tRisseSSAVariable * value,
+	void PutExitTryException(const tSSAVariable * value,
 		risse_size try_id_idx, risse_size idx);
 
 	//! @brief		例外による脱出系の例外オブジェクトから「値」を取り出す
 	//! @param		dest		「値」を格納する先の変数
 	//! @param		src			「値」を得る例外オブジェクトが入ってる変数
-	void PutGetExitTryValue(const tRisseSSAVariable * dest, const tRisseSSAVariable * src);
+	void PutGetExitTryValue(const tSSAVariable * dest, const tSSAVariable * src);
 
 	//! @brief		dest = op(arg1) 系コードを置く
 	//! @param		op		オペレーションコード
 	//! @param		dest	結果を格納する変数
 	//! @param		arg1	パラメータ
-	void PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * arg1);
+	void PutOperator(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * arg1);
 
 	//! @brief		dest = op(arg1, arg2) 系コードを置く
 	//! @param		op		オペレーションコード
 	//! @param		dest	結果を格納する変数
 	//! @param		arg1	パラメータ1
 	//! @param		arg2	パラメータ2
-	void PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * arg1, const tRisseSSAVariable * arg2);
+	void PutOperator(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * arg1, const tSSAVariable * arg2);
 
 	//! @brief		dest = op(arg1, arg2, arg3) 系コードを置く
 	//! @param		op		オペレーションコード
@@ -413,15 +413,15 @@ public:
 	//! @param		arg1	パラメータ1
 	//! @param		arg2	パラメータ2
 	//! @param		arg3	パラメータ3
-	void PutOperator(tRisseOpCode op, const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * arg1, const tRisseSSAVariable * arg2, const tRisseSSAVariable * arg3);
+	void PutOperator(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * arg1, const tSSAVariable * arg2, const tSSAVariable * arg3);
 
 	//! @brief		InContextOf コードを置く
 	//! @param		dest	結果を格納する変数
 	//! @param		instance	インスタンスを表す変数
 	//! @param		context		コンテキストを表す変数(NULLの場合はdynamicコンテキスト)
-	void PutInContextOf(const tRisseSSAVariable * dest,
-		const tRisseSSAVariable * instance, const tRisseSSAVariable * context);
+	void PutInContextOf(const tSSAVariable * dest,
+		const tSSAVariable * instance, const tSSAVariable * context);
 
 	//! @brief		DGetとIGetのコードを置く
 	//! @param		op		オペレーションコード
@@ -429,8 +429,8 @@ public:
 	//! @param		obj		オブジェクトを表す変数
 	//! @param		name	メンバ名を表す変数
 	//! @param		flags	アクセスフラグ
-	void PutGet(tRisseOpCode op, const tRisseSSAVariable * obj,
-		const tRisseSSAVariable * name, const tRisseSSAVariable * value, risse_uint32 flags);
+	void PutGet(tOpCode op, const tSSAVariable * obj,
+		const tSSAVariable * name, const tSSAVariable * value, risse_uint32 flags);
 
 	//! @brief		DSetとISetのコードを置く
 	//! @param		op		オペレーションコード
@@ -438,15 +438,15 @@ public:
 	//! @param		name	メンバ名を表す変数
 	//! @param		value	格納する変数
 	//! @param		flags	アクセスフラグ
-	void PutSet(tRisseOpCode op, const tRisseSSAVariable * obj,
-		const tRisseSSAVariable * name, const tRisseSSAVariable * value, risse_uint32 flags);
+	void PutSet(tOpCode op, const tSSAVariable * obj,
+		const tSSAVariable * name, const tSSAVariable * value, risse_uint32 flags);
 
 	//! @brief		DSetAttribのコードを置く
 	//! @param		obj		オブジェクトを表す変数
 	//! @param		name	メンバ名を表す変数
 	//! @param		attrib	属性
-	void PutSetAttribute(const tRisseSSAVariable * obj,
-		const tRisseSSAVariable * name, risse_uint32 attrib);
+	void PutSetAttribute(const tSSAVariable * obj,
+		const tSSAVariable * name, risse_uint32 attrib);
 };
 //---------------------------------------------------------------------------
 

@@ -25,8 +25,8 @@ RISSE_DEFINE_SOURCE_ID(33139,58829,49251,19299,61572,36837,14859,14043);
 
 
 //---------------------------------------------------------------------------
-tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
-	risse_size position, tRisseOpCode code)
+tSSAStatement::tSSAStatement(tSSAForm * form,
+	risse_size position, tOpCode code)
 {
 	// フィールドの初期化
 	Form = form;
@@ -43,7 +43,7 @@ tRisseSSAStatement::tRisseSSAStatement(tRisseSSAForm * form,
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::AddUsed(tRisseSSAVariable * var)
+void tSSAStatement::AddUsed(tSSAVariable * var)
 {
 	var->AddUsed(this);
 	Used.push_back(var);
@@ -52,10 +52,10 @@ void tRisseSSAStatement::AddUsed(tRisseSSAVariable * var)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::DeleteUsed(risse_size index)
+void tSSAStatement::DeleteUsed(risse_size index)
 {
 	RISSE_ASSERT(Used.size() > index);
-	tRisseSSAVariable * var = Used[index];
+	tSSAVariable * var = Used[index];
 	Used.erase(Used.begin() + index);
 	var->DeleteUsed(this);
 }
@@ -63,7 +63,7 @@ void tRisseSSAStatement::DeleteUsed(risse_size index)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::DeleteUsed()
+void tSSAStatement::DeleteUsed()
 {
 	risse_size i = Used.size();
 	while(i > 0)
@@ -77,7 +77,7 @@ void tRisseSSAStatement::DeleteUsed()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::SetTrueBranch(tRisseSSABlock * block)
+void tSSAStatement::SetTrueBranch(tSSABlock * block)
 {
 	RISSE_ASSERT(Code == ocBranch);
 	if(Targets.size() != 2) Targets.resize(2, NULL);
@@ -88,7 +88,7 @@ void tRisseSSAStatement::SetTrueBranch(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock * tRisseSSAStatement::GetTrueBranch() const
+tSSABlock * tSSAStatement::GetTrueBranch() const
 {
 	RISSE_ASSERT(Code == ocBranch);
 	RISSE_ASSERT(Targets.size() == 2);
@@ -98,7 +98,7 @@ tRisseSSABlock * tRisseSSAStatement::GetTrueBranch() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::SetFalseBranch(tRisseSSABlock * block)
+void tSSAStatement::SetFalseBranch(tSSABlock * block)
 {
 	RISSE_ASSERT(Code == ocBranch);
 	if(Targets.size() != 2) Targets.resize(2, NULL);
@@ -109,7 +109,7 @@ void tRisseSSAStatement::SetFalseBranch(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock * tRisseSSAStatement::GetFalseBranch() const
+tSSABlock * tSSAStatement::GetFalseBranch() const
 {
 	RISSE_ASSERT(Code == ocBranch);
 	RISSE_ASSERT(Targets.size() == 2);
@@ -119,7 +119,7 @@ tRisseSSABlock * tRisseSSAStatement::GetFalseBranch() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::SetJumpTarget(tRisseSSABlock * block)
+void tSSAStatement::SetJumpTarget(tSSABlock * block)
 {
 	RISSE_ASSERT(Code == ocJump);
 	if(Targets.size() != 1) Targets.resize(1, NULL);
@@ -130,7 +130,7 @@ void tRisseSSAStatement::SetJumpTarget(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock * tRisseSSAStatement::GetJumpTarget() const
+tSSABlock * tSSAStatement::GetJumpTarget() const
 {
 	RISSE_ASSERT(Code == ocJump);
 	RISSE_ASSERT(Targets.size() == 1);
@@ -140,7 +140,7 @@ tRisseSSABlock * tRisseSSAStatement::GetJumpTarget() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::SetTryExitTarget(tRisseSSABlock * block)
+void tSSAStatement::SetTryExitTarget(tSSABlock * block)
 {
 	RISSE_ASSERT(Code == ocCatchBranch);
 	if(Targets.size() < 2) Targets.resize(2, NULL);
@@ -151,7 +151,7 @@ void tRisseSSAStatement::SetTryExitTarget(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock * tRisseSSAStatement::GetTryExitTarget() const
+tSSABlock * tSSAStatement::GetTryExitTarget() const
 {
 	RISSE_ASSERT(Code == ocCatchBranch);
 	RISSE_ASSERT(Targets.size() >= 2);
@@ -161,7 +161,7 @@ tRisseSSABlock * tRisseSSAStatement::GetTryExitTarget() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::SetTryCatchTarget(tRisseSSABlock * block)
+void tSSAStatement::SetTryCatchTarget(tSSABlock * block)
 {
 	RISSE_ASSERT(Code == ocCatchBranch);
 	if(Targets.size() < 2) Targets.resize(2, NULL);
@@ -172,7 +172,7 @@ void tRisseSSAStatement::SetTryCatchTarget(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-tRisseSSABlock * tRisseSSAStatement::GetTryCatchTarget() const
+tSSABlock * tSSAStatement::GetTryCatchTarget() const
 {
 	RISSE_ASSERT(Code == ocCatchBranch);
 	RISSE_ASSERT(Targets.size() >= 2);
@@ -182,7 +182,7 @@ tRisseSSABlock * tRisseSSAStatement::GetTryCatchTarget() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::AddTarget(tRisseSSABlock * block)
+void tSSAStatement::AddTarget(tSSABlock * block)
 {
 	RISSE_ASSERT(Code == ocCatchBranch);
 	RISSE_ASSERT(Targets.size() >= 2);
@@ -193,7 +193,7 @@ void tRisseSSAStatement::AddTarget(tRisseSSABlock * block)
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::SetName(const tRisseString & name)
+void tSSAStatement::SetName(const tString & name)
 {
 	RISSE_ASSERT(
 			Code == ocParentRead || Code == ocParentWrite ||
@@ -201,13 +201,13 @@ void tRisseSSAStatement::SetName(const tRisseString & name)
 			Code == ocReadVar || Code == ocWriteVar ||
 			Code == ocRead || Code == ocWrite ||
 			Code == ocDefineLazyBlock || Code == ocDefineClass || Code == ocAddBindingMap);
-	Name = new tRisseString(name);
+	Name = new tString(name);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-const tRisseString & tRisseSSAStatement::GetName() const
+const tString & tSSAStatement::GetName() const
 {
 	RISSE_ASSERT(
 			Code == ocParentRead || Code == ocParentWrite ||
@@ -222,10 +222,10 @@ const tRisseString & tRisseSSAStatement::GetName() const
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::AnalyzeVariableStatementLiveness()
+void tSSAStatement::AnalyzeVariableStatementLiveness()
 {
 	if(Declared) Declared->AnalyzeVariableStatementLiveness(this);
-	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
 		i != Used.end(); i++)
 		(*i)->AnalyzeVariableStatementLiveness(this);
 }
@@ -233,7 +233,7 @@ void tRisseSSAStatement::AnalyzeVariableStatementLiveness()
 
 
 //---------------------------------------------------------------------------
-void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
+void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 {
 	bool free_unused_var = true;
 
@@ -335,7 +335,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 		RISSE_ASSERT(Used.size() >= 1);
 
 		{
-			gc_vector<const tRisseSSAVariable *> args, blocks;
+			gc_vector<const tSSAVariable *> args, blocks;
 
 			risse_size arg_count = Used.size() - 1 - BlockCount;
 			risse_size block_count = BlockCount;
@@ -478,12 +478,12 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			// してる物を探し、そこで使用されている名前で gen の VariableMapForChildren に
 			// マップを作成する
 			// (実際の変数へのアクセスは後の ocChildWrite や ocChildRead で処理する)
-			const gc_vector<tRisseSSAStatement *> & child_access_stmts =
+			const gc_vector<tSSAStatement *> & child_access_stmts =
 				Declared->GetUsed();
-			for(gc_vector<tRisseSSAStatement *>::const_iterator i =
+			for(gc_vector<tSSAStatement *>::const_iterator i =
 				child_access_stmts.begin(); i != child_access_stmts.end(); i++)
 			{
-				tRisseSSAStatement * stmt = *i;
+				tSSAStatement * stmt = *i;
 				switch((*i)->Code)
 				{
 				case ocChildWrite:
@@ -498,7 +498,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 
 	case ocDefineLazyBlock:
 		{
-			tRisseSSAForm * child_form = DefinedForm;
+			tSSAForm * child_form = DefinedForm;
 			RISSE_ASSERT(child_form != NULL);
 			RISSE_ASSERT(Declared != NULL);
 			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
@@ -513,7 +513,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 
 	case ocDefineClass:
 		{
-			tRisseSSAForm * class_form = DefinedForm;
+			tSSAForm * class_form = DefinedForm;
 			RISSE_ASSERT(class_form != NULL);
 			RISSE_ASSERT(Declared != NULL);
 			// この文のDeclaredは、子SSA形式を作成して返すようになっているが、
@@ -529,7 +529,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			// Used[0] が define された文は ocDefineAccessMap であるはずである
 			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
 			//       現状の実装は暫定的なもの。
-			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
+			tSSAStatement * lazy_stmt = Used[0]->GetDeclared();
 			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineAccessMap);
 			gen->PutAssign(gen->FindVariableMapForChildren(*Name), Used[1]);
 		}
@@ -542,7 +542,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			// Used[0] が define された文は ocDefineAccessMap であるはずである
 			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
 			//       現状の実装は暫定的なもの。
-			tRisseSSAStatement * lazy_stmt = Used[0]->GetDeclared();
+			tSSAStatement * lazy_stmt = Used[0]->GetDeclared();
 			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineAccessMap);
 			gen->PutAssign(Declared, gen->FindVariableMapForChildren(*Name));
 		}
@@ -592,7 +592,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 			if(Declared->GetLastUsedStatement() == this)
 				gen->FreeRegister(Declared);
 		}
-		for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+		for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
 				i != Used.end(); i++)
 		{
 			if((*i)->GetLastUsedStatement() == this)
@@ -604,7 +604,7 @@ void tRisseSSAStatement::GenerateCode(tRisseCodeGenerator * gen) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSAStatement::Dump() const
+tString tSSAStatement::Dump() const
 {
 	switch(Code)
 	{
@@ -613,14 +613,14 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	case ocPhi:		// φ関数
 		{
-			tRisseString ret;
+			tString ret;
 
 			RISSE_ASSERT(Declared != NULL);
 			ret += Declared->Dump() + RISSE_WS(" = PHI(");
 
 			// φ関数の引数を追加
-			tRisseString used;
-			for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+			tString used;
+			for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
 					i != Used.end(); i++)
 			{
 				if(!used.IsEmpty()) used += RISSE_WS(", ");
@@ -630,7 +630,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			ret += used + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -639,7 +639,7 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	case ocAssignNewRegExp: // 新しい正規表現オブジェクト
 		{
-			tRisseString ret;
+			tString ret;
 			RISSE_ASSERT(Used.size() == 2);
 			ret += Declared->Dump() + RISSE_WS(" = AssignNewRegExp(");
 
@@ -647,7 +647,7 @@ tRisseString tRisseSSAStatement::Dump() const
 					Used[1]->Dump() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -656,14 +656,14 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	case ocAssignNewFunction: // 新しい関数インスタンス
 		{
-			tRisseString ret;
+			tString ret;
 			RISSE_ASSERT(Used.size() == 1);
 			ret += Declared->Dump() + RISSE_WS(" = AssignNewFunction(");
 
 			ret +=	Used[0]->Dump() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -672,7 +672,7 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	case ocAssignNewProperty: // 新しいプロパティインスタンス
 		{
-			tRisseString ret;
+			tString ret;
 			RISSE_ASSERT(Used.size() == 2);
 			ret += Declared->Dump() + RISSE_WS(" = AssignNewProperty(");
 
@@ -680,7 +680,7 @@ tRisseString tRisseSSAStatement::Dump() const
 					Used[1]->Dump() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -689,7 +689,7 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	case ocAssignNewClass: // 新しいクラスインスタンス
 		{
-			tRisseString ret;
+			tString ret;
 			RISSE_ASSERT(Used.size() == 2);
 			ret += Declared->Dump() + RISSE_WS(" = AssignNewClass(");
 
@@ -697,7 +697,7 @@ tRisseString tRisseSSAStatement::Dump() const
 					Used[1]->Dump() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -706,14 +706,14 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	case ocAssignNewModule: // 新しいモジュールインスタンス
 		{
-			tRisseString ret;
+			tString ret;
 			RISSE_ASSERT(Used.size() == 1);
 			ret += Declared->Dump() + RISSE_WS(" = AssignNewModule(");
 
 			ret +=	Used[0]->Dump() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -722,10 +722,10 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	case ocAssignParam:
 		{
-			tRisseString ret;
+			tString ret;
 			RISSE_ASSERT(Used.size() == 0);
 			ret += Declared->Dump() + RISSE_WS(" = AssignParam(") +
-				tRisseString::AsString((risse_int)Index) + RISSE_WS(")");
+				tString::AsString((risse_int)Index) + RISSE_WS(")");
 			return ret;
 		}
 
@@ -751,16 +751,16 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(GetTryExitTarget() != NULL);
 			RISSE_ASSERT(GetTryCatchTarget() != NULL);
 			RISSE_ASSERT(Used.size() == 1);
-			tRisseString ret =
+			tString ret =
 					RISSE_WS("catch branch (try id=") +
-					tRisseString::AsString((risse_int64)(TryIdentifierIndex)) +
+					tString::AsString((risse_int64)(TryIdentifierIndex)) +
 					RISSE_WS(") ") +
 					(*Used.begin())->Dump() + 
 					RISSE_WS(" exit:*") + GetTryExitTarget()->GetName() +
 					RISSE_WS(" catch:*") + GetTryCatchTarget()->GetName();
 			for(risse_size n = 2; n < Targets.size(); n++)
 			{
-				ret += RISSE_WS(" ") + tRisseString::AsString((risse_int64)(n)) +
+				ret += RISSE_WS(" ") + tString::AsString((risse_int64)(n)) +
 					RISSE_WS(": *") + Targets[n]->GetName();
 			}
 			return ret;
@@ -769,13 +769,13 @@ tRisseString tRisseSSAStatement::Dump() const
 	case ocExitTryException:
 		{
 			RISSE_ASSERT(Used.size() <= 1);
-			tRisseString ret;
+			tString ret;
 			ret = RISSE_WS("ExitTryException(") +
-				((Used.size() >= 1)?(Used[0]->Dump()):tRisseString(RISSE_WS("<none>"))) +
+				((Used.size() >= 1)?(Used[0]->Dump()):tString(RISSE_WS("<none>"))) +
 				RISSE_WS(", try_id=")+
-				tRisseString::AsString((risse_int64)(TryIdentifierIndex)) +
+				tString::AsString((risse_int64)(TryIdentifierIndex)) +
 				RISSE_WS(", index=")+
-				tRisseString::AsString((risse_int64)(Index)) +
+				tString::AsString((risse_int64)(Index)) +
 				RISSE_WS(")");
 			return ret;
 		}
@@ -786,7 +786,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(Name != NULL);
 			RISSE_ASSERT(Declared != NULL);
 
-			tRisseString ret;
+			tString ret;
 			ret += Declared->Dump() +
 				(Code == ocDefineLazyBlock ?
 					RISSE_WS(" = DefineLazyBlock(") :
@@ -795,7 +795,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -815,13 +815,13 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(Name != NULL);
 			RISSE_ASSERT(Declared != NULL);
 
-			tRisseString ret;
+			tString ret;
 			ret += Declared->Dump() + RISSE_WS(" = ParentRead(");
 
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -843,13 +843,13 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(Declared != NULL);
 			RISSE_ASSERT(Used.size() == 1);
 
-			tRisseString ret;
+			tString ret;
 			ret += Declared->Dump() + RISSE_WS(" = ") + Used[0]->Dump();
 			ret += RISSE_WS(".ChildRead(");
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -871,13 +871,13 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(Declared != NULL);
 			RISSE_ASSERT(Used.size() == 0);
 
-			tRisseString ret;
+			tString ret;
 			ret += Declared->Dump() + RISSE_WS(" = ");
 			ret += RISSE_WS("Read(");
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -889,14 +889,14 @@ tRisseString tRisseSSAStatement::Dump() const
 			RISSE_ASSERT(Used.size() == 2);
 			RISSE_ASSERT(Declared != NULL);
 
-			tRisseString ret;
+			tString ret;
 			ret += Declared->Dump() + RISSE_WS(" = ");
 			ret += Used[0]->Dump() + RISSE_WS("()");
 			ret += RISSE_WS(" Synchronized(") + Used[1]->Dump() + 
 				RISSE_WS(")");
 
 			// 変数のコメントを追加
-			tRisseString comment = Declared->GetTypeComment();
+			tString comment = Declared->GetTypeComment();
 			if(!comment.IsEmpty())
 				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 
@@ -916,7 +916,7 @@ tRisseString tRisseSSAStatement::Dump() const
 
 	default:
 		{
-			tRisseString ret;
+			tString ret;
 
 			// 変数の宣言
 			if(Declared)
@@ -946,10 +946,10 @@ tRisseString tRisseSSAStatement::Dump() const
 					ret += (*Used.begin())->Dump() + RISSE_WC('.');
 
 				// オペレーションコード
-				ret += tRisseString(RisseVMInsnInfo[Code].Name);
+				ret += tString(VMInsnInfo[Code].Name);
 
 				// 使用している引数
-				if(is_funccall && (FuncExpandFlags & RisseFuncCallFlag_Omitted))
+				if(is_funccall && (FuncExpandFlags & FuncCallFlag_Omitted))
 				{
 					// 関数呼び出しかnew
 					ret += RISSE_WS("(...)");
@@ -957,9 +957,9 @@ tRisseString tRisseSSAStatement::Dump() const
 				else if(Used.size() >= 2)
 				{
 					// 引数がある
-					tRisseString used;
+					tString used;
 					risse_int arg_index = 0;
-					for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin() + 1;
+					for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin() + 1;
 							i != Used.end(); i++, arg_index++)
 					{
 						if(!used.IsEmpty()) used += RISSE_WS(", ");
@@ -980,7 +980,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			// 変数の宣言に関してコメントがあればそれを追加
 			if(Declared)
 			{
-				tRisseString comment = Declared->GetTypeComment();
+				tString comment = Declared->GetTypeComment();
 				if(!comment.IsEmpty())
 					ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
 			}
@@ -990,7 +990,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			{
 				ret +=
 					RISSE_WS(" Flags=(") +
-					tRisseOperateFlags(OperateFlagsValue).AsString() +
+					tOperateFlags(OperateFlagsValue).AsString() +
 					RISSE_WS(")");
 			}
 
@@ -999,7 +999,7 @@ tRisseString tRisseSSAStatement::Dump() const
 			{
 				ret +=
 					RISSE_WS(" Flags=(") +
-					tRisseOperateFlags(OperateFlagsValue).AsString() +
+					tOperateFlags(OperateFlagsValue).AsString() +
 					RISSE_WS(")");
 			}
 
@@ -1011,16 +1011,16 @@ tRisseString tRisseSSAStatement::Dump() const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseSSAStatement::DumpVariableStatementLiveness(bool is_start) const
+tString tSSAStatement::DumpVariableStatementLiveness(bool is_start) const
 {
-	tRisseString ret;
-	tRisseSSAVariable *var;
+	tString ret;
+	tSSAVariable *var;
 	var = Declared;
 	if(var)
 		if((is_start?var->GetFirstUsedStatement():var->GetLastUsedStatement()) == this)
 			ret += var->GetQualifiedName();
 
-	for(gc_vector<tRisseSSAVariable*>::const_iterator i = Used.begin();
+	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
 			i != Used.end(); i++)
 	{
 		var = *i;

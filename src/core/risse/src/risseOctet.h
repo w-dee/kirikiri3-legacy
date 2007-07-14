@@ -17,7 +17,7 @@
 /*! @note
 Risse オクテット列について
 
-Risse オクテット列は tRisseOctetBlock クラスで表される。
+Risse オクテット列は tOctetBlock クラスで表される。
 
 */
 
@@ -33,7 +33,7 @@ namespace Risse
 //! @brief	オクテット列ブロック
 //! @note	これ単体に対するスレッド保護はない
 //---------------------------------------------------------------------------
-class tRisseOctetBlock : public tRisseCollectee
+class tOctetBlock : public tCollectee
 {
 	mutable risse_uint8  *	Buffer;	//!< オクテット列バッファ (NULL = 0オクテット長)
 	mutable risse_size Capacity; //!< 確保容量 ( 0 = バッファ共有中 )
@@ -41,7 +41,7 @@ class tRisseOctetBlock : public tRisseCollectee
 
 public:
 	//! @brief デフォルトコンストラクタ
-	tRisseOctetBlock()
+	tOctetBlock()
 	{
 		Buffer = 0;
 		Capacity = Length = 0;
@@ -51,18 +51,18 @@ public:
 	//! @brief		コンストラクタ(const risse_uint8 *から)
 	//! @param		buf		入力バッファ
 	//! @param		length	長さ
-	tRisseOctetBlock(const risse_uint8 * buf, risse_size length);
+	tOctetBlock(const risse_uint8 * buf, risse_size length);
 
 	//! @brief 部分オクテット列を作るためのコンストラクタ
 	//! @param ref		コピー元オブジェクト
 	//! @param offset	切り出す開始位置
 	//! @param length	切り出す長さ
-	tRisseOctetBlock(const tRisseOctetBlock & ref,
+	tOctetBlock(const tOctetBlock & ref,
 			risse_size offset, risse_size length);
 
 	//! @brief コピーコンストラクタ
 	//! @param ref コピー元オブジェクト
-	tRisseOctetBlock(const tRisseOctetBlock & ref)
+	tOctetBlock(const tOctetBlock & ref)
 	{
 		*this = ref;
 	}
@@ -70,7 +70,7 @@ public:
 	//! @brief	代入演算子
 	//! @param	ref	コピー元オブジェクト
 	//! @return	このオブジェクトへの参照
-	tRisseOctetBlock & operator = (const tRisseOctetBlock & ref)
+	tOctetBlock & operator = (const tOctetBlock & ref)
 	{
 		ref.Capacity = Capacity = 0;
 		Buffer = ref.Buffer;
@@ -116,8 +116,8 @@ private: // storage
 	static risse_uint8 * AllocateInternalBuffer(risse_size n, risse_uint8 * prevbuf = NULL)
 	{
 		return prevbuf ?
-			reinterpret_cast<risse_uint8*>(RisseReallocCollectee(prevbuf, n)):
-			reinterpret_cast<risse_uint8*>(RisseMallocAtomicCollectee(n));
+			reinterpret_cast<risse_uint8*>(ReallocCollectee(prevbuf, n)):
+			reinterpret_cast<risse_uint8*>(MallocAtomicCollectee(n));
 	}
 
 public: // comparison
@@ -125,7 +125,7 @@ public: // comparison
 	//! @brief	同一比較
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this==refかどうか
-	bool operator == (const tRisseOctetBlock & ref) const
+	bool operator == (const tOctetBlock & ref) const
 	{
 		if(this == &ref) return true; // 同じポインタ
 		if(Length != ref.Length) return false; // 違う長さ
@@ -136,19 +136,19 @@ public: // comparison
 	//! @brief	不一致判定
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this!=refかどうか
-	bool operator != (const tRisseOctetBlock & ref) const
+	bool operator != (const tOctetBlock & ref) const
 		{ return ! (*this == ref); }
 
 
 	//! @brief	< 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this < refかどうか
-	bool operator < (const tRisseOctetBlock & ref) const;
+	bool operator < (const tOctetBlock & ref) const;
 
 	//! @brief	> 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this > refかどうか
-	bool operator > (const tRisseOctetBlock & ref) const
+	bool operator > (const tOctetBlock & ref) const
 	{
 		return ref.operator < (*this);
 	}
@@ -156,7 +156,7 @@ public: // comparison
 	//! @brief	<= 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this <= refかどうか
-	bool operator <= (const tRisseOctetBlock & ref) const
+	bool operator <= (const tOctetBlock & ref) const
 	{
 		return !(operator >(ref));
 	}
@@ -164,7 +164,7 @@ public: // comparison
 	//! @brief	>= 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this >= refかどうか
-	bool operator >= (const tRisseOctetBlock & ref) const
+	bool operator >= (const tOctetBlock & ref) const
 	{
 		return !(operator <(ref));
 	}
@@ -180,12 +180,12 @@ public: // operators
 	//! @brief		オクテット列の追加
 	//! @param		ref		追加するオクテット列
 	//! @return		このオブジェクト
-	tRisseOctetBlock & operator += (const tRisseOctetBlock & ref);
+	tOctetBlock & operator += (const tOctetBlock & ref);
 
 	//! @brief		１バイトの追加
 	//! @param		one_byte	追加するバイト
 	//! @return		このオブジェクト
-	tRisseOctetBlock & operator += (risse_uint8 one_byte)
+	tOctetBlock & operator += (risse_uint8 one_byte)
 	{
 		Append(&one_byte, 1);
 		return *this;
@@ -194,12 +194,12 @@ public: // operators
 	//! @brief		オクテット列の連結
 	//! @param		ref		連結するオクテット列
 	//! @return		新しく連結されたオクテット列
-	tRisseOctetBlock operator + (const tRisseOctetBlock & ref) const;
+	tOctetBlock operator + (const tOctetBlock & ref) const;
 
 	//! @brief		オクテット列の連結
 	//! @param		dest	連結されたオクテット列が格納される先(*this + ref がここに入る)
 	//! @param		ref		連結するオクテット列
-	void Concat(tRisseOctetBlock * dest, const tRisseOctetBlock & ref) const;
+	void Concat(tOctetBlock * dest, const tOctetBlock & ref) const;
 
 	//! @brief [] 演算子
 	//! @param		n		位置
@@ -214,7 +214,7 @@ public: // pointer
 
 	//! @brief バッファをコピーし、独立させる
 	//! @return 内部バッファ
-	//! @note tRisseOctetBlock は一つのバッファを複数のオクテット列インスタンスが
+	//! @note tOctetBlock は一つのバッファを複数のオクテット列インスタンスが
 	//! 共有する場合があるが、このメソッドは共有を切り、オクテット列バッファを
 	//! 独立する。Risse の GC の特性上、そのオクテット列がすでに独立しているかどうかを
 	//! 確実に知るすべはなく、このメソッドはかなりの確率でバッファをコピーするため、
@@ -249,14 +249,14 @@ private:
 public: // utilities
 	//! @brief		値を再パース可能な文字列に変換する
 	//! @return		再パース可能な文字列
-	tRisseString AsTokenString() const
+	tString AsTokenString() const
 	{ return AsHumanReadable(risse_size_max); }
 
 	//! @brief		値を人間が読み取り可能な文字列に変換する
 	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は 
 	//!							省略記号 '...' が付く(risse_size_maxの場合は無制限)
 	//! @return		人間が読み取り可能な文字列
-	tRisseStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const;
+	tStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const;
 };
 //---------------------------------------------------------------------------
 
@@ -266,19 +266,19 @@ public: // utilities
 //! @note
 //! ポインタの最下位の2ビットが常に 01 なのは、このポインタが Octet列であることを
 //! 表している。ポインタは常に少なくとも 32bit 境界に配置されるため、最下位の２ビットは
-//! オブジェクトのタイプを表すのに利用されている。tRisseVariantを参照。
+//! オブジェクトのタイプを表すのに利用されている。tVariantを参照。
 //---------------------------------------------------------------------------
-class tRisseOctetData : public tRisseCollectee
+class tOctetData : public tCollectee
 {
-	tRisseOctetBlock * Block; //!< ブロックへのポインタ (最下位の2ビットは常に01なので注意)
+	tOctetBlock * Block; //!< ブロックへのポインタ (最下位の2ビットは常に01なので注意)
 							//!< アクセス時は必ず GetBlock, SetBlock を用いること
 
 protected: // Block pointer operation
-	void SetBlock(tRisseOctetBlock * block)
-		{ Block = reinterpret_cast<tRisseOctetBlock*>(reinterpret_cast<risse_ptruint>(block) + 1); }
+	void SetBlock(tOctetBlock * block)
+		{ Block = reinterpret_cast<tOctetBlock*>(reinterpret_cast<risse_ptruint>(block) + 1); }
 
-	tRisseOctetBlock * GetBlock() const
-		{ return reinterpret_cast<tRisseOctetBlock*>(reinterpret_cast<risse_ptruint>(Block) - 1); }
+	tOctetBlock * GetBlock() const
+		{ return reinterpret_cast<tOctetBlock*>(reinterpret_cast<risse_ptruint>(Block) - 1); }
 };
 //---------------------------------------------------------------------------
 
@@ -287,36 +287,36 @@ protected: // Block pointer operation
 //! @brief	オクテット列
 //! @note	全体的に高速化の必要がある
 //---------------------------------------------------------------------------
-class tRisseOctet : protected tRisseOctetData
+class tOctet : protected tOctetData
 {
 public:
 	//! @brief デフォルトコンストラクタ
-	tRisseOctet()
+	tOctet()
 	{
-		SetBlock(new tRisseOctetBlock());
+		SetBlock(new tOctetBlock());
 	}
 
 	//! @brief		コンストラクタ(const risse_uint8 *から)
 	//! @param		buf		入力バッファ
 	//! @param		length	長さ
-	tRisseOctet(const risse_uint8 * buf, risse_size length)
+	tOctet(const risse_uint8 * buf, risse_size length)
 	{
-		SetBlock(new tRisseOctetBlock(buf, length));
+		SetBlock(new tOctetBlock(buf, length));
 	}
 
 	//! @brief 部分オクテット列を作るためのコンストラクタ
 	//! @param ref		コピー元オブジェクト
 	//! @param offset	切り出す開始位置
 	//! @param length	切り出す長さ
-	tRisseOctet(const tRisseOctet & ref,
+	tOctet(const tOctet & ref,
 			risse_size offset, risse_size length)
 	{
-		SetBlock(new tRisseOctetBlock(*ref.GetBlock(), offset, length));
+		SetBlock(new tOctetBlock(*ref.GetBlock(), offset, length));
 	}
 
 	//! @brief コピーコンストラクタ
 	//! @param ref コピー元オブジェクト
-	tRisseOctet(const tRisseOctet & ref)
+	tOctet(const tOctet & ref)
 	{
 		*this = ref;
 	}
@@ -324,9 +324,9 @@ public:
 	//! @brief	代入演算子
 	//! @param	ref	コピー元オブジェクト
 	//! @return	このオブジェクトへの参照
-	tRisseOctet & operator = (const tRisseOctet & ref)
+	tOctet & operator = (const tOctet & ref)
 	{
-		SetBlock(new tRisseOctetBlock(*ref.GetBlock()));
+		SetBlock(new tOctetBlock(*ref.GetBlock()));
 		return *this;
 	}
 
@@ -362,7 +362,7 @@ public: // comparison
 	//! @brief 同一比較
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this==refかどうか
-	bool operator == (const tRisseOctet & ref) const
+	bool operator == (const tOctet & ref) const
 	{
 		return *GetBlock() == *ref.GetBlock();
 	}
@@ -370,31 +370,31 @@ public: // comparison
 	//! @brief 不一致判定
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this!=refかどうか
-	bool operator != (const tRisseOctet & ref) const
+	bool operator != (const tOctet & ref) const
 		{ return ! (*this == ref); }
 
 	//! @brief	< 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this < refかどうか
-	bool operator < (const tRisseOctet & ref) const
+	bool operator < (const tOctet & ref) const
 		{ return *GetBlock() < *ref.GetBlock(); }
 
 	//! @brief	> 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this > refかどうか
-	bool operator > (const tRisseOctet & ref) const
+	bool operator > (const tOctet & ref) const
 		{ return *GetBlock() > *ref.GetBlock(); }
 
 	//! @brief	<= 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this <= refかどうか
-	bool operator <= (const tRisseOctet & ref) const
+	bool operator <= (const tOctet & ref) const
 		{ return *GetBlock() <= *ref.GetBlock(); }
 
 	//! @brief	>= 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this >= refかどうか
-	bool operator >= (const tRisseOctet & ref) const
+	bool operator >= (const tOctet & ref) const
 		{ return *GetBlock() >= *ref.GetBlock(); }
 
 
@@ -410,7 +410,7 @@ public: // operators
 	//! @brief		オクテット列の追加
 	//! @param		ref		追加するオクテット列
 	//! @return		このオブジェクト
-	tRisseOctet & operator += (const tRisseOctet & ref)
+	tOctet & operator += (const tOctet & ref)
 	{
 		*GetBlock() += *ref.GetBlock();
 		return *this;
@@ -419,7 +419,7 @@ public: // operators
 	//! @brief		１バイトの追加
 	//! @param		one_byte	追加するバイト
 	//! @return		このオブジェクト
-	tRisseOctet & operator += (risse_uint8 one_byte)
+	tOctet & operator += (risse_uint8 one_byte)
 	{
 		*GetBlock() += one_byte;
 		return *this;
@@ -428,9 +428,9 @@ public: // operators
 	//! @brief		オクテット列の連結
 	//! @param		ref		連結するオクテット列
 	//! @return		新しく連結されたオクテット列
-	tRisseOctet operator + (const tRisseOctet & ref) const
+	tOctet operator + (const tOctet & ref) const
 	{
-		tRisseOctet ret;
+		tOctet ret;
 		GetBlock()->Concat(ret.GetBlock(), *ref.GetBlock());
 		return ret;
 	}
@@ -447,7 +447,7 @@ public: // pointer
 
 	//! @brief バッファをコピーし、独立させる
 	//! @return 内部バッファ
-	//! @note tRisseOctetBlock::Independ() を参照
+	//! @note tOctetBlock::Independ() を参照
 	risse_uint8 * Independ() const
 	{
 		return GetBlock()->Independ();
@@ -466,14 +466,14 @@ public: // pointer
 public: // utilities
 	//! @brief		値を再パース可能な文字列に変換する
 	//! @return		再パース可能な文字列
-	tRisseString AsTokenString() const
+	tString AsTokenString() const
 	{ return GetBlock()->AsTokenString(); }
 
 	//! @brief		値を人間が読み取り可能な文字列に変換する
 	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は 
 	//!							省略記号 '...' が付く(risse_size_maxの場合は無制限)
 	//! @return		人間が読み取り可能な文字列
-	tRisseStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
+	tStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{ return GetBlock()->AsHumanReadable(maxlen); }
 
 };

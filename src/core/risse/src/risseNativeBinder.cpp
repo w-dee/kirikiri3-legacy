@@ -25,7 +25,7 @@ RISSE_DEFINE_SOURCE_ID(50153,12161,23237,20278,22942,17690,37012,37765);
 
 
 //---------------------------------------------------------------------------
-void tRisseNativeCallInfo::InitializeSuperClass(const tRisseMethodArgument & args) const
+void tNativeCallInfo::InitializeSuperClass(const tMethodArgument & args) const
 {
 	Class->CallSuperClassMethod(NULL, ss_initialize, 0, args, This);
 }
@@ -37,13 +37,13 @@ void tRisseNativeCallInfo::InitializeSuperClass(const tRisseMethodArgument & arg
 
 //---------------------------------------------------------------------------
 template <typename TT>
-tRisseObjectInterface::tRetValue tRisseNativeBindFunction<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tObjectInterface::tRetValue tNativeBindFunction<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	// このオブジェクトに対する関数呼び出しか？
 	if(code == ocFuncCall && name.IsEmpty())
 	{
 		// このオブジェクトに対する関数呼び出しなので Callee を呼ぶ
-		tRisseNativeCallInfo info(
+		tNativeCallInfo info(
 			GetRTTI()->GetScriptEngine(), result, flags, args, This, Class);
 		Callee(TargetFunction, info);
 		return rvNoError;
@@ -57,33 +57,33 @@ tRisseObjectInterface::tRetValue tRisseNativeBindFunction<TT>::Operate(RISSE_OBJ
 
 //---------------------------------------------------------------------------
 template <typename TT>
-tRisseObjectInterface * tRisseNativeBindFunction<TT>::New(tRisseScriptEngine * engine,
-	tRisseClassBase * class_, TT target, tCallee callee)
+tObjectInterface * tNativeBindFunction<TT>::New(tScriptEngine * engine,
+	tClassBase * class_, TT target, tCallee callee)
 {
-	// tRisseFunctionClass がまだ登録されていない場合は仮のメソッドを
+	// tFunctionClass がまだ登録されていない場合は仮のメソッドを
 	// 作成して登録する (のちに正式なメソッドオブジェクトに置き換えられる)
 	if(engine->FunctionClass)
 	{
-		tRisseVariant v = tRisseVariant(engine->FunctionClass).New(
-				0, tRisseMethodArgument::New(new tRisseNativeBindFunction(engine, class_, target, callee)));
+		tVariant v = tVariant(engine->FunctionClass).New(
+				0, tMethodArgument::New(new tNativeBindFunction(engine, class_, target, callee)));
 
-		RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
-		RISSE_ASSERT(dynamic_cast<tRisseFunctionInstance*>(v.GetObjectInterface()) != NULL);
+		RISSE_ASSERT(v.GetType() == tVariant::vtObject);
+		RISSE_ASSERT(dynamic_cast<tFunctionInstance*>(v.GetObjectInterface()) != NULL);
 
 		return v.GetObjectInterface();
 	}
 	else
 	{
 		// 仮実装
-		return (tRisseFunctionInstance *)(new tRisseNativeBindFunction(engine, class_, target, callee));
+		return (tFunctionInstance *)(new tNativeBindFunction(engine, class_, target, callee));
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-template class tRisseNativeBindFunction<void (tRisseObjectBase::*)()>; // メンバ関数用
-template class tRisseNativeBindFunction<void (*)()>; // staticメンバ関数用
+template class tNativeBindFunction<void (tObjectBase::*)()>; // メンバ関数用
+template class tNativeBindFunction<void (*)()>; // staticメンバ関数用
 //---------------------------------------------------------------------------
 
 
@@ -96,7 +96,7 @@ template class tRisseNativeBindFunction<void (*)()>; // staticメンバ関数用
 
 //---------------------------------------------------------------------------
 template <typename TT>
-tRisseObjectInterface::tRetValue tRisseNativeBindPropertyGetter<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tObjectInterface::tRetValue tNativeBindPropertyGetter<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(name.IsEmpty())
 	{
@@ -104,7 +104,7 @@ tRisseObjectInterface::tRetValue tRisseNativeBindPropertyGetter<TT>::Operate(RIS
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(!Getter) return rvPropertyCannotBeRead;
-			tRisseNativePropGetInfo info(
+			tNativePropGetInfo info(
 				GetRTTI()->GetScriptEngine(), result, flags, This, Class);
 			Getter(TargetFunction, info);
 			return rvNoError;
@@ -119,7 +119,7 @@ tRisseObjectInterface::tRetValue tRisseNativeBindPropertyGetter<TT>::Operate(RIS
 
 //---------------------------------------------------------------------------
 template <typename TT>
-tRisseObjectInterface::tRetValue tRisseNativeBindPropertySetter<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tObjectInterface::tRetValue tNativeBindPropertySetter<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(name.IsEmpty())
 	{
@@ -128,7 +128,7 @@ tRisseObjectInterface::tRetValue tRisseNativeBindPropertySetter<TT>::Operate(RIS
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			args.ExpectArgumentCount(1);
 			if(!Setter) return rvPropertyCannotBeWritten;
-			tRisseNativePropSetInfo info(
+			tNativePropSetInfo info(
 				GetRTTI()->GetScriptEngine(), args[0], flags, This, Class);
 			Setter(TargetFunction, info);
 			return rvNoError;
@@ -144,7 +144,7 @@ tRisseObjectInterface::tRetValue tRisseNativeBindPropertySetter<TT>::Operate(RIS
 
 //---------------------------------------------------------------------------
 template <typename TT>
-tRisseObjectInterface::tRetValue tRisseNativeBindProperty<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tObjectInterface::tRetValue tNativeBindProperty<TT>::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	if(name.IsEmpty())
 	{
@@ -152,14 +152,14 @@ tRisseObjectInterface::tRetValue tRisseNativeBindProperty<TT>::Operate(RISSE_OBJ
 		{
 			// このオブジェクトに対するプロパティ読み込みなので Getter を呼ぶ
 			if(!Getter) return rvPropertyCannotBeRead;
-			return Getter->Operate(ocFuncCall, result, tRisseString::GetEmptyString(), flags, args, This);
+			return Getter->Operate(ocFuncCall, result, tString::GetEmptyString(), flags, args, This);
 		}
 		else if(code == ocDSet) // このオブジェクトに対するプロパティ書き込みか？
 		{
 			// このオブジェクトに対するプロパティ書き込みなので Setter を呼ぶ
 			args.ExpectArgumentCount(1);
 			if(!Setter) return rvPropertyCannotBeWritten;
-			return Setter->Operate(ocFuncCall, result, tRisseString::GetEmptyString(), flags, args, This);
+			return Setter->Operate(ocFuncCall, result, tString::GetEmptyString(), flags, args, This);
 		}
 	}
 
@@ -171,37 +171,37 @@ tRisseObjectInterface::tRetValue tRisseNativeBindProperty<TT>::Operate(RISSE_OBJ
 
 //---------------------------------------------------------------------------
 template <typename TT>
-tRisseObjectInterface * tRisseNativeBindProperty<TT>::New(tRisseScriptEngine * engine,
-		tRisseClassBase * Class,
-		TT gettertarget, typename tRisseNativeBindPropertyGetter<TT>::tGetter getter,
-		TT settertarget, typename tRisseNativeBindPropertySetter<TT>::tSetter setter)
+tObjectInterface * tNativeBindProperty<TT>::New(tScriptEngine * engine,
+		tClassBase * Class,
+		TT gettertarget, typename tNativeBindPropertyGetter<TT>::tGetter getter,
+		TT settertarget, typename tNativeBindPropertySetter<TT>::tSetter setter)
 {
-	// tRissePropertyClass がまだ登録されていない場合は仮のプロパティオブジェクトを
+	// tPropertyClass がまだ登録されていない場合は仮のプロパティオブジェクトを
 	// 作成して登録する (のちに正式なプロパティオブジェクトに置き換えられる)
 	if(engine->PropertyClass)
 	{
 		// 正式なプロパティオブジェクトを登録する
-		tRisseVariant v = tRisseVariant(engine->PropertyClass).New(
-				0, tRisseMethodArgument::New(
+		tVariant v = tVariant(engine->PropertyClass).New(
+				0, tMethodArgument::New(
 					getter ?
-						tRisseVariant(new tRisseNativeBindPropertyGetter<TT>(
+						tVariant(new tNativeBindPropertyGetter<TT>(
 												engine, Class, gettertarget, getter)):
-						tRisseVariant::GetNullObject(),
+						tVariant::GetNullObject(),
 					setter ?
-						tRisseVariant(new tRisseNativeBindPropertySetter<TT>(
+						tVariant(new tNativeBindPropertySetter<TT>(
 												engine, Class, settertarget, setter)):
-						tRisseVariant::GetNullObject()
+						tVariant::GetNullObject()
 						));
 
-		RISSE_ASSERT(v.GetType() == tRisseVariant::vtObject);
-		RISSE_ASSERT(dynamic_cast<tRissePropertyInstance*>(v.GetObjectInterface()) != NULL);
+		RISSE_ASSERT(v.GetType() == tVariant::vtObject);
+		RISSE_ASSERT(dynamic_cast<tPropertyInstance*>(v.GetObjectInterface()) != NULL);
 
 		return v.GetObjectInterface();
 	}
 	else
 	{
 		// 仮実装
-		return (tRissePropertyInstance *)(new tRisseNativeBindProperty<TT>(engine,
+		return (tPropertyInstance *)(new tNativeBindProperty<TT>(engine,
 			Class, gettertarget, getter, settertarget, setter));
 	}
 }
@@ -209,12 +209,12 @@ tRisseObjectInterface * tRisseNativeBindProperty<TT>::New(tRisseScriptEngine * e
 
 
 //---------------------------------------------------------------------------
-template class tRisseNativeBindPropertyGetter<void (tRisseObjectBase::*)()>; // メンバ関数用
-template class tRisseNativeBindPropertyGetter<void (*)()>; // staticメンバ関数用
-template class tRisseNativeBindPropertySetter<void (tRisseObjectBase::*)()>; // メンバ関数用
-template class tRisseNativeBindPropertySetter<void (*)()>; // staticメンバ関数用
-template class tRisseNativeBindProperty<void (tRisseObjectBase::*)()>; // メンバ関数用
-template class tRisseNativeBindProperty<void (*)()>; // staticメンバ関数用
+template class tNativeBindPropertyGetter<void (tObjectBase::*)()>; // メンバ関数用
+template class tNativeBindPropertyGetter<void (*)()>; // staticメンバ関数用
+template class tNativeBindPropertySetter<void (tObjectBase::*)()>; // メンバ関数用
+template class tNativeBindPropertySetter<void (*)()>; // staticメンバ関数用
+template class tNativeBindProperty<void (tObjectBase::*)()>; // メンバ関数用
+template class tNativeBindProperty<void (*)()>; // staticメンバ関数用
 //---------------------------------------------------------------------------
 
 

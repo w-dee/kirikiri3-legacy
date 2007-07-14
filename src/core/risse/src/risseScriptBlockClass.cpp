@@ -27,20 +27,20 @@ RISSE_DEFINE_SOURCE_ID(10462,6972,23868,17748,24487,5141,43296,28534);
 
 
 //---------------------------------------------------------------------------
-tRisseScriptBlockInstance::tRisseScriptBlockInstance()
+tScriptBlockInstance::tScriptBlockInstance()
 {
 	// フィールドの初期化
 	LinesToPosition = NULL;
 	LineOffset = 0;
 	RootCodeBlock = NULL;
-	CodeBlocks = new gc_vector<tRisseCodeBlock *>();
+	CodeBlocks = new gc_vector<tCodeBlock *>();
 	TryIdentifiers = new gc_vector<void *>();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::SetScriptAndName(const tRisseString & script, const tRisseString & name, int lineofs)
+void tScriptBlockInstance::SetScriptAndName(const tString & script, const tString & name, int lineofs)
 {
 	Script = script;
 	Name = name;
@@ -50,7 +50,7 @@ void tRisseScriptBlockInstance::SetScriptAndName(const tRisseString & script, co
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::CreateLinesToPositionArary() const
+void tScriptBlockInstance::CreateLinesToPositionArary() const
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -113,7 +113,7 @@ void tRisseScriptBlockInstance::CreateLinesToPositionArary() const
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::PositionToLineAndColumn(risse_size pos,
+void tScriptBlockInstance::PositionToLineAndColumn(risse_size pos,
 						risse_size *line, risse_size *col) const
 {
 	volatile tSynchronizer sync(this); // sync
@@ -143,7 +143,7 @@ void tRisseScriptBlockInstance::PositionToLineAndColumn(risse_size pos,
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseScriptBlockInstance::PositionToLine(risse_size pos) const
+risse_size tScriptBlockInstance::PositionToLine(risse_size pos) const
 {
 	risse_size line;
 	PositionToLineAndColumn(pos, &line, NULL);
@@ -153,11 +153,11 @@ risse_size tRisseScriptBlockInstance::PositionToLine(risse_size pos) const
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseScriptBlockInstance::GetLineAt(risse_size line)
+tString tScriptBlockInstance::GetLineAt(risse_size line)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(line > LineCount) return tRisseString::GetEmptyString(); // 行が範囲外
+	if(line > LineCount) return tString::GetEmptyString(); // 行が範囲外
 
 	// 改行記号か文字列の終端を探し、そこまでを切り取って返す
 	risse_size n, start;
@@ -166,22 +166,22 @@ tRisseString tRisseScriptBlockInstance::GetLineAt(risse_size line)
 		Script[n] != RISSE_WC('\n') &&
 		Script[n] != RISSE_WC('\r')) n++;
 
-	return tRisseString(Script, start, n - start);
+	return tString(Script, start, n - start);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseScriptBlockInstance::BuildMessageAt(risse_size pos, const tRisseString & message)
+tString tScriptBlockInstance::BuildMessageAt(risse_size pos, const tString & message)
 {
-	return tRisseString(RISSE_WS("%1 at %2:%3"),
-		message, GetName(), tRisseString::AsString((risse_int64)(1 + PositionToLine(pos))));
+	return tString(RISSE_WS("%1 at %2:%3"),
+		message, GetName(), tString::AsString((risse_int64)(1 + PositionToLine(pos))));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::OutputWarning(risse_size pos, const tRisseString & message)
+void tScriptBlockInstance::OutputWarning(risse_size pos, const tString & message)
 {
 	GetRTTI()->GetScriptEngine()->OutputWarning(BuildMessageAt(pos, message));
 }
@@ -189,19 +189,19 @@ void tRisseScriptBlockInstance::OutputWarning(risse_size pos, const tRisseString
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::Compile(tRisseASTNode * root, const tRisseBindingInfo & binding, bool need_result, bool is_expression)
+void tScriptBlockInstance::Compile(tASTNode * root, const tBindingInfo & binding, bool need_result, bool is_expression)
 {
 	volatile tSynchronizer sync(this); // sync
 
 	// コンパイラオブジェクトを作成してコンパイルを行う
-	tRisseCompiler * compiler = new tRisseCompiler(this);
+	tCompiler * compiler = new tCompiler(this);
 	compiler->Compile(root, binding, need_result, is_expression);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseScriptBlockInstance::AddCodeBlock(tRisseCodeBlock * codeblock)
+risse_size tScriptBlockInstance::AddCodeBlock(tCodeBlock * codeblock)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -213,7 +213,7 @@ risse_size tRisseScriptBlockInstance::AddCodeBlock(tRisseCodeBlock * codeblock)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisseScriptBlockInstance::AddTryIdentifier()
+risse_size tScriptBlockInstance::AddTryIdentifier()
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -223,10 +223,10 @@ risse_size tRisseScriptBlockInstance::AddTryIdentifier()
 		// TryIdentifiers に追加している。これにより、TryIdentifiers は独立した
 		// ポインタをそれぞれが持つことになり、識別に使える。これは、
 		//  * new で確保される値は常に独立したポインタの値になる
-		//  * ポインタとしては vtObject のときに tRisseObjectInterface へのポインタを
+		//  * ポインタとしては vtObject のときに tObjectInterface へのポインタを
 		//    持つ頃ができる
 		// という理由による。
-		// tRisseString も新規確保した文字列は独立した値になるが
+		// tString も新規確保した文字列は独立した値になるが
 		// 同じ文字列インスタンスが常に同じポインタを持ち続けるかという保証がないので
 		// (とはいっても現時点ではそれは保証されているが将来的に保証があるかわからないので)
 		// つかわない。
@@ -236,7 +236,7 @@ risse_size tRisseScriptBlockInstance::AddTryIdentifier()
 
 
 //---------------------------------------------------------------------------
-tRisseCodeBlock * tRisseScriptBlockInstance::GetCodeBlockAt(risse_size index) const
+tCodeBlock * tScriptBlockInstance::GetCodeBlockAt(risse_size index) const
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -248,7 +248,7 @@ tRisseCodeBlock * tRisseScriptBlockInstance::GetCodeBlockAt(risse_size index) co
 
 
 //---------------------------------------------------------------------------
-void * tRisseScriptBlockInstance::GetTryIdentifierAt(risse_size index) const
+void * tScriptBlockInstance::GetTryIdentifierAt(risse_size index) const
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -260,12 +260,12 @@ void * tRisseScriptBlockInstance::GetTryIdentifierAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::Fixup()
+void tScriptBlockInstance::Fixup()
 {
 	volatile tSynchronizer sync(this); // sync
 
 	// すべてのコードブロックの Fixup() を呼ぶ
-	for(gc_vector<tRisseCodeBlock *>::iterator i = CodeBlocks->begin();
+	for(gc_vector<tCodeBlock *>::iterator i = CodeBlocks->begin();
 		i != CodeBlocks->end(); i++)
 		(*i)->Fixup();
 
@@ -278,9 +278,9 @@ void tRisseScriptBlockInstance::Fixup()
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::Evaluate(const tRisseBindingInfo & binding, tRisseVariant * result, bool is_expression)
+void tScriptBlockInstance::Evaluate(const tBindingInfo & binding, tVariant * result, bool is_expression)
 {
-	tRisseCodeExecutor *executor;
+	tCodeExecutor *executor;
 
 	{
 		volatile tSynchronizer sync(this); // sync
@@ -289,7 +289,7 @@ void tRisseScriptBlockInstance::Evaluate(const tRisseBindingInfo & binding, tRis
 		// (TODO: スクリプトブロックのキャッシュ対策)
 
 		// AST ノードを用意する
-		tRisseASTNode * root_node = GetASTRootNode(result != NULL);
+		tASTNode * root_node = GetASTRootNode(result != NULL);
 
 		// コンパイルする
 		Compile(root_node, binding, result != NULL, is_expression);
@@ -304,7 +304,7 @@ void tRisseScriptBlockInstance::Evaluate(const tRisseBindingInfo & binding, tRis
 	// テスト実行
 	RISSE_ASSERT(RootCodeBlock != NULL);
 	executor->Execute(
-				tRisseMethodArgument::Empty(),
+				tMethodArgument::Empty(),
 				binding.GetThis(),
 				NULL,
 				binding.GetFrames(),
@@ -314,7 +314,7 @@ void tRisseScriptBlockInstance::Evaluate(const tRisseBindingInfo & binding, tRis
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::construct()
+void tScriptBlockInstance::construct()
 {
 	// 特に何もしない
 }
@@ -322,9 +322,9 @@ void tRisseScriptBlockInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockInstance::initialize(
-	const tRisseString &script, const tRisseString & name, risse_size lineofs,
-	const tRisseNativeCallInfo &info)
+void tScriptBlockInstance::initialize(
+	const tString &script, const tString & name, risse_size lineofs,
+	const tNativeCallInfo &info)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -353,8 +353,8 @@ void tRisseScriptBlockInstance::initialize(
 
 
 //---------------------------------------------------------------------------
-tRisseScriptBlockClass::tRisseScriptBlockClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_ScriptBlock, engine->ObjectClass)
+tScriptBlockClass::tScriptBlockClass(tScriptEngine * engine) :
+	tClassBase(ss_ScriptBlock, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -362,7 +362,7 @@ tRisseScriptBlockClass::tRisseScriptBlockClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseScriptBlockClass::RegisterMembers()
+void tScriptBlockClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -372,24 +372,24 @@ void tRisseScriptBlockClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate, &tRisseScriptBlockClass::ovulate);
-	RisseBindFunction(this, ss_construct, &tRisseScriptBlockInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseScriptBlockInstance::initialize);
-	RisseBindFunction(this, mnString, &tRisseScriptBlockInstance::mnString);
-	RisseBindProperty(this, ss_script, &tRisseScriptBlockInstance::get_script);
-	RisseBindProperty(this, ss_name, &tRisseScriptBlockInstance::get_name);
-	RisseBindFunction(this, ss_getLineAt, &tRisseScriptBlockInstance::getLineAt);
-	RisseBindFunction(this, ss_positionToLine, &tRisseScriptBlockInstance::positionToLine);
+	BindFunction(this, ss_ovulate, &tScriptBlockClass::ovulate);
+	BindFunction(this, ss_construct, &tScriptBlockInstance::construct);
+	BindFunction(this, ss_initialize, &tScriptBlockInstance::initialize);
+	BindFunction(this, mnString, &tScriptBlockInstance::mnString);
+	BindProperty(this, ss_script, &tScriptBlockInstance::get_script);
+	BindProperty(this, ss_name, &tScriptBlockInstance::get_name);
+	BindFunction(this, ss_getLineAt, &tScriptBlockInstance::getLineAt);
+	BindFunction(this, ss_positionToLine, &tScriptBlockInstance::positionToLine);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseScriptBlockClass::ovulate()
+tVariant tScriptBlockClass::ovulate()
 {
 	// このクラスのインスタンスは作成できないので例外を投げる
-	tRisseInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tRisseVariant();
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 

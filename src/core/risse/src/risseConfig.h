@@ -51,42 +51,42 @@ namespace Risse
 // #define RISSE_WITH_IS_NOT_RESERVED_WORD
 
 
-#define Risse_malloc			malloc
-#define Risse_free			free
-#define Risse_realloc			realloc
-#define Risse_nsprintf		sprintf
-#define Risse_nstrcpy			strcpy
-#define Risse_nstrcat			strcat
-#define Risse_nstrlen			strlen
-#define Risse_octetcpy		memcpy
-#define Risse_octetcmp		memcmp
+#define RISSE_malloc			malloc
+#define RISSE_free			free
+#define RISSE_realloc			realloc
+#define RISSE_nsprintf		sprintf
+#define RISSE_nstrcpy			strcpy
+#define RISSE_nstrcat			strcat
+#define RISSE_nstrlen			strlen
+#define RISSE_octetcpy		memcpy
+#define RISSE_octetcmp		memcmp
 
 
 #if defined(__GNUC__)
-	#define Risse_cdecl
-	#define Risse_timezone timezone
-	#define Risse_rand rand
+	#define RISSE_cdecl
+	#define RISSE_timezone timezone
+	#define RISSE_rand rand
 	#define RISSE_RAND_MAX RAND_MAX
 #elif __WIN32__
-	#define Risse_cdecl __cdecl
-	#define Risse_timezone _timezone
-	#define Risse_rand _lrand
+	#define RISSE_cdecl __cdecl
+	#define RISSE_timezone _timezone
+	#define RISSE_rand _lrand
 	#define RISSE_RAND_MAX LRAND_MAX
 #elif _MSC_VER
-	#define Risse_cdecl __cdecl
-	#define Risse_vsnprintf		_vsnwprintf
-	#define Risse_sprintf			swprintf
-	#define Risse_timezone _timezone
-	#define Risse_rand rand
+	#define RISSE_cdecl __cdecl
+	#define RISSE_vsnprintf		_vsnwprintf
+	#define RISSE_sprintf			swprintf
+	#define RISSE_timezone _timezone
+	#define RISSE_rand rand
 	#define RISSE_RAND_MAX RAND_MAX
 #endif
 
-void Risse_debug_out(const risse_char *format, ...);
+void RISSE_debug_out(const risse_char *format, ...);
 
-extern void RisseNativeDebuggerBreak();
+extern void NativeDebuggerBreak();
 
-extern void RisseSetFPUE();
-extern void RisseRestoreFPUE();
+extern void SetFPUE();
+extern void RestoreFPUE();
 
 
 

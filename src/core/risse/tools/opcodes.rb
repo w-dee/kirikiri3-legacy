@@ -7,7 +7,7 @@
 # 入力ファイルを開いて一行ずつ処理をする
 errorcount = 0
 linecount = 0
-On_defs = {'-' => '(tRisseVMInsnInfo::tInsnFlag)(0)'}
+On_defs = {'-' => '(tVMInsnInfo::tInsnFlag)(0)'}
 defs = []
 File.open(ARGV[0]).readlines.each do |line|
 	linecount += 1
@@ -51,7 +51,7 @@ EOS
 	# 列挙型を書き出す
 	enumcount = 0
 	file.puts "//! @brief オペレーションコードの列挙型"
-	file.puts "enum tRisseOpCode {"
+	file.puts "enum tOpCode {"
 	defs.each do |item|
 #		file.printf "/* %3d */ ", enumcount
 		file.puts "oc#{item[:long_id]} /*!<#{item[:def_comment]} */,"
@@ -64,8 +64,8 @@ EOS
 	defs.each do |item|
 		name = item[:member_name]
 		if name != '----'
-			file.puts("static const tRisseString & mn#{item[:long_id]} = "+
-				"*reinterpret_cast<const tRisseString *>(&RisseVMInsnInfo[oc#{item[:long_id]}].RawMemberName);"+
+			file.puts("static const tString & mn#{item[:long_id]} = "+
+				"*reinterpret_cast<const tString *>(&VMInsnInfo[oc#{item[:long_id]}].RawMemberName);"+
 				" //!< (演算子メンバ名) #{item[:def_comment]}")
 		end
 	end
@@ -82,16 +82,16 @@ file.puts <<EOS
 
 EOS
 
-	# RisseVMInsnInfo の tRisseString ストレージを書き出す
+	# tVMInsnInfo の tString ストレージを書き出す
 	enumcount = 0
 	offset = 0
-	file.puts "// RawMemberNameの領域は tRisseString の文字列ポインタが指す先と"
+	file.puts "// RawMemberNameの領域は tString の文字列ポインタが指す先と"
 	file.puts "//       同じレイアウトになっている"
 	file.puts "// risseStaticStrings も似た実装になっているので参照のこと"
 
-	# tRisseVMInsnInfo の構造体を書き出す
+	# tVMInsnInfo の構造体を書き出す
 	enumcount = 0
-	file.puts "const tRisseVMInsnInfo RisseVMInsnInfo[] = {"
+	file.puts "const tVMInsnInfo VMInsnInfo[] = {"
 	defs.each do |item|
 #		file.printf "/* %3d */", enumcount
 		file.printf "{"
@@ -101,7 +101,7 @@ EOS
 			file.print "{RISSE_STRING_EMPTY_BUFFER,0}"
 		else
 			file.print "{"
-			file.print "tRisseSS<"
+			file.print "tSS<"
 			chars = ''
 			item[:member_name].each_byte do |byte|
 				chars << ',' if chars != ''

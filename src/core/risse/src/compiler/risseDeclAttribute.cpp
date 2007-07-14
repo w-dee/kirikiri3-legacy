@@ -20,9 +20,9 @@ RISSE_DEFINE_SOURCE_ID(59144,28247,41947,16395,152,20119,4221,27137);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-bool tRisseDeclAttribute::Overwrite(const tRisseDeclAttribute & rhs)
+bool tDeclAttribute::Overwrite(const tDeclAttribute & rhs)
 {
-	bool mem_overwritten = tRisseMemberAttribute::Overwrite(rhs);
+	bool mem_overwritten = tMemberAttribute::Overwrite(rhs);
 	bool overwritten = false;
 
 	if(rhs.Context != ccNone)
@@ -43,9 +43,9 @@ bool tRisseDeclAttribute::Overwrite(const tRisseDeclAttribute & rhs)
 
 
 //---------------------------------------------------------------------------
-tRisseString tRisseDeclAttribute::AsString() const
+tString tDeclAttribute::AsString() const
 {
-	tRisseString str = tRisseMemberAttribute::AsString();
+	tString str = tMemberAttribute::AsString();
 	if(Context != ccNone)
 	{
 		if(!str.IsEmpty()) str += RISSE_WC(' ');

@@ -32,19 +32,19 @@ RISSE_DEFINE_SOURCE_ID(26427,5348,61020,19015,38284,853,37508,24976);
 
 
 //---------------------------------------------------------------------------
-void tRisseBindingInstance::AddMap(tRisseVariant &This, const tRisseString &name, risse_uint32 reg)
+void tBindingInstance::AddMap(tVariant &This, const tString &name, risse_uint32 reg)
 {
-	RISSE_ASSERT(This.GetType() == tRisseVariant::vtObject);
-	tRisseScriptEngine * engine = This.GetObjectInterface()->GetRTTI()->GetScriptEngine();
-	tRisseBindingInstance * obj =
-		This.CheckAndGetObjectInterafce<tRisseBindingInstance, tRisseClassBase>(engine->BindingClass);
-	obj->GetBindingMap().insert(tRisseBindingInfo::tBindingMap::value_type(name, reg));
+	RISSE_ASSERT(This.GetType() == tVariant::vtObject);
+	tScriptEngine * engine = This.GetObjectInterface()->GetRTTI()->GetScriptEngine();
+	tBindingInstance * obj =
+		This.CheckAndGetObjectInterafce<tBindingInstance, tClassBase>(engine->BindingClass);
+	obj->GetBindingMap().insert(tBindingInfo::tBindingMap::value_type(name, reg));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBindingInstance::construct()
+void tBindingInstance::construct()
 {
 	// デフォルトでは何もしない
 }
@@ -52,7 +52,7 @@ void tRisseBindingInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisseBindingInstance::initialize(const tRisseNativeCallInfo &info)
+void tBindingInstance::initialize(const tNativeCallInfo &info)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -62,13 +62,13 @@ void tRisseBindingInstance::initialize(const tRisseNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-void tRisseBindingInstance::eval(const tRisseString & script,
-			const tRisseNativeCallInfo &info) const
+void tBindingInstance::eval(const tString & script,
+			const tNativeCallInfo &info) const
 {
 	// ロックしない
 
-	tRisseString name = info.args.HasArgument(1) ?
-					tRisseString(info.args[1]) : tRisseString(RISSE_WS("(anonymous)"));
+	tString name = info.args.HasArgument(1) ?
+					tString(info.args[1]) : tString(RISSE_WS("(anonymous)"));
 	risse_size lineofs = info.args.HasArgument(2) ? (risse_size)(risse_int64)info.args[2] : (risse_size)0;
 
 	GetRTTI()->GetScriptEngine()->Evaluate(script, name, lineofs, info.result, GetInfo(), true);
@@ -77,17 +77,17 @@ void tRisseBindingInstance::eval(const tRisseString & script,
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseBindingInstance::iget(const tRisseString & name) const
+tVariant tBindingInstance::iget(const tString & name) const
 {
 	volatile tSynchronizer sync(this); // sync
 
-	tRisseBindingInfo::tBindingMap & map = GetBindingMap();
-	tRisseBindingInfo::tBindingMap::iterator i = map.find(name);
+	tBindingInfo::tBindingMap & map = GetBindingMap();
+	tBindingInfo::tBindingMap::iterator i = map.find(name);
 	if(i == map.end())
 	{
 		// 見つからなかった
 		// とりあえず void を返す
-		return tRisseVariant::GetVoidObject();
+		return tVariant::GetVoidObject();
 	}
 	else
 	{
@@ -101,12 +101,12 @@ tRisseVariant tRisseBindingInstance::iget(const tRisseString & name) const
 
 
 //---------------------------------------------------------------------------
-void tRisseBindingInstance::iset(const tRisseVariant & value, const tRisseString & name)
+void tBindingInstance::iset(const tVariant & value, const tString & name)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	tRisseBindingInfo::tBindingMap & map = GetBindingMap();
-	tRisseBindingInfo::tBindingMap::iterator i = map.find(name);
+	tBindingInfo::tBindingMap & map = GetBindingMap();
+	tBindingInfo::tBindingMap::iterator i = map.find(name);
 	if(i == map.end())
 	{
 		// 見つからなかった
@@ -131,8 +131,8 @@ void tRisseBindingInstance::iset(const tRisseVariant & value, const tRisseString
 
 
 //---------------------------------------------------------------------------
-tRisseBindingClass::tRisseBindingClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(ss_Binding, engine->ObjectClass)
+tBindingClass::tBindingClass(tScriptEngine * engine) :
+	tClassBase(ss_Binding, engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -140,7 +140,7 @@ tRisseBindingClass::tRisseBindingClass(tRisseScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisseBindingClass::RegisterMembers()
+void tBindingClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -150,20 +150,20 @@ void tRisseBindingClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_ovulate, &tRisseBindingClass::ovulate);
-	RisseBindFunction(this, ss_construct, &tRisseBindingInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRisseBindingInstance::initialize);
-	RisseBindFunction(this, ss_eval, &tRisseBindingInstance::eval);
-	RisseBindFunction(this, mnIGet, &tRisseBindingInstance::iget);
-	RisseBindFunction(this, mnISet, &tRisseBindingInstance::iset);
+	BindFunction(this, ss_ovulate, &tBindingClass::ovulate);
+	BindFunction(this, ss_construct, &tBindingInstance::construct);
+	BindFunction(this, ss_initialize, &tBindingInstance::initialize);
+	BindFunction(this, ss_eval, &tBindingInstance::eval);
+	BindFunction(this, mnIGet, &tBindingInstance::iget);
+	BindFunction(this, mnISet, &tBindingInstance::iset);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisseBindingClass::ovulate()
+tVariant tBindingClass::ovulate()
 {
-	return tRisseVariant(new tRisseBindingInstance());
+	return tVariant(new tBindingInstance());
 }
 //---------------------------------------------------------------------------
 

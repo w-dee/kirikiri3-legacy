@@ -21,15 +21,15 @@ RISSE_DEFINE_SOURCE_ID(1709,46737,4438,20346,9893,20339,39302,25230);
 namespace Risse
 {
 //---------------------------------------------------------------------------
-void tRisseBinaryStream::Truncate()
+void tBinaryStream::Truncate()
 {
-	tRisseIOExceptionClass::ThrowTruncateError(Name, GetPosition());
+	tIOExceptionClass::ThrowTruncateError(Name, GetPosition());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tRisseBinaryStream::GetSize()
+risse_uint64 tBinaryStream::GetSize()
 {
 	risse_uint64 orgpos = GetPosition();
 	Seek(0, soEnd);
@@ -41,36 +41,36 @@ risse_uint64 tRisseBinaryStream::GetSize()
 
 
 //---------------------------------------------------------------------------
-void tRisseBinaryStream::SetPosition(risse_uint64 pos)
+void tBinaryStream::SetPosition(risse_uint64 pos)
 {
 	if(!Seek(pos, soSet))
-		tRisseIOExceptionClass::ThrowSeekError(Name, pos);
+		tIOExceptionClass::ThrowSeekError(Name, pos);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBinaryStream::ReadBuffer(void *buffer, risse_size read_size)
+void tBinaryStream::ReadBuffer(void *buffer, risse_size read_size)
 {
 	risse_size actual_read = Read(buffer, read_size);
 	if(actual_read != read_size)
-		tRisseIOExceptionClass::ThrowReadError(Name);
+		tIOExceptionClass::ThrowReadError(Name);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseBinaryStream::WriteBuffer(const void *buffer, risse_size write_size)
+void tBinaryStream::WriteBuffer(const void *buffer, risse_size write_size)
 {
 	risse_size actual_written = Write(buffer, write_size);
 	if(actual_written != write_size)
-		tRisseIOExceptionClass::ThrowWriteError(Name);
+		tIOExceptionClass::ThrowWriteError(Name);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tRisseBinaryStream::ReadI64LE()
+risse_uint64 tBinaryStream::ReadI64LE()
 {
 	risse_uint64 buf;
 	ReadBuffer(reinterpret_cast<void*>(&buf), sizeof(buf));
@@ -89,7 +89,7 @@ risse_uint64 tRisseBinaryStream::ReadI64LE()
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tRisseBinaryStream::ReadI32LE()
+risse_uint32 tBinaryStream::ReadI32LE()
 {
 	risse_uint32 buf;
 	ReadBuffer(reinterpret_cast<void*>(&buf), sizeof(buf));
@@ -107,7 +107,7 @@ risse_uint32 tRisseBinaryStream::ReadI32LE()
 
 
 //---------------------------------------------------------------------------
-risse_uint16 tRisseBinaryStream::ReadI16LE()
+risse_uint16 tBinaryStream::ReadI16LE()
 {
 	risse_uint16 buf;
 	ReadBuffer(reinterpret_cast<void*>(&buf), sizeof(buf));
@@ -124,7 +124,7 @@ risse_uint16 tRisseBinaryStream::ReadI16LE()
 
 
 //---------------------------------------------------------------------------
-risse_uint8 tRisseBinaryStream::ReadI8LE()
+risse_uint8 tBinaryStream::ReadI8LE()
 {
 	risse_uint8 buf;
 	ReadBuffer(reinterpret_cast<void*>(&buf), sizeof(buf));

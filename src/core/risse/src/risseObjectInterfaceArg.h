@@ -18,9 +18,9 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tRisseVariantBlock;
-typedef tRisseVariantBlock tRisseVariant;
-class tRisseStackFrameContext;
+class tVariantBlock;
+typedef tVariantBlock tVariant;
+class tStackFrameContext;
 //---------------------------------------------------------------------------
 //! @brief		Operate/Doメソッドへの引数(クラス宣言用)
 //!	@note		Operate/Doメソッドの引数が変わるたびにすべてのOperate/Doメソッドの
@@ -28,21 +28,21 @@ class tRisseStackFrameContext;
 //! 			あまりマクロは使いたくないが、それにしても
 //!				インターフェースの仕様が固まるまではこうしたい
 #define RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG \
-		tRisseOpCode code,                                                 \
-		tRisseVariant * result = NULL,                                     \
-		const tRisseString & name = tRisseString::GetEmptyString(),        \
-		tRisseOperateFlags flags = tRisseOperateFlags(),                   \
-		const tRisseMethodArgument & args = tRisseMethodArgument::Empty(), \
-		const tRisseVariant &This = tRisseVariant::GetNullObject()
+		tOpCode code,                                                 \
+		tVariant * result = NULL,                                     \
+		const tString & name = tString::GetEmptyString(),        \
+		tOperateFlags flags = tOperateFlags(),                   \
+		const tMethodArgument & args = tMethodArgument::Empty(), \
+		const tVariant &This = tVariant::GetNullObject()
 
 //! @brief		Operate/Doメソッドへの引数(実装用)
 #define RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG \
-		tRisseOpCode code,                     \
-		tRisseVariant * result,                \
-		const tRisseString & name,             \
-		tRisseOperateFlags flags,              \
-		const tRisseMethodArgument & args,     \
-		const tRisseVariant &This
+		tOpCode code,                     \
+		tVariant * result,                \
+		const tString & name,             \
+		tOperateFlags flags,              \
+		const tMethodArgument & args,     \
+		const tVariant &This
 
 //! @brief		Operate/Doメソッドの引数一覧
 #define RISSE_OBJECTINTERFACE_PASS_ARG \

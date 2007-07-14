@@ -31,30 +31,30 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 
 /* メモリ確保は Risse のインターフェースを使うように */
-#define YYMALLOC	RisseMallocCollectee
-#define YYREALLOC	RisseReallocCollectee
-#define YYFREE		RisseFreeCollectee
+#define YYMALLOC	MallocCollectee
+#define YYREALLOC	ReallocCollectee
+#define YYFREE		FreeCollectee
 
 /* 最大深さ */
 #define YYMAXDEPTH 20000
 
 /*! パーサへのアクセス */
-#define PR (reinterpret_cast<tRisseParser*>(pr))
+#define PR (reinterpret_cast<tParser*>(pr))
 
 /*! 字句解析器 */
 #define LX (PR->GetLexer())
 
-/* new tRisseASTNode_XXXX の省略形 */
+/* new tASTNode_XXXX の省略形 */
 #ifdef N
  #undef N
 #endif
-#define N(XXXX) new tRisseASTNode_##XXXX
+#define N(XXXX) new tASTNode_##XXXX
 
-/* tRisseASTNode_XXXX へのキャスト */
+/* tASTNode_XXXX へのキャスト */
 #ifdef C
  #undef C
 #endif
-#define C(XXXX, EXP) (RISSE_ASSERT((EXP)->GetType() == ant##XXXX), reinterpret_cast<tRisseASTNode_##XXXX *>(EXP))
+#define C(XXXX, EXP) (RISSE_ASSERT((EXP)->GetType() == ant##XXXX), reinterpret_cast<tASTNode_##XXXX *>(EXP))
 
 /* 改行の無視/認識区間を字句解析器に伝えるマクロ */
 #define BR (LX->PushRecognizeNewLine())
@@ -63,12 +63,12 @@ RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 #define EI (LX->PopIgnoreNewLine())
 
 /* 位置情報を表す定義 */
-struct RisseYYLTYPE
+struct tYYLTYPE
 {
 	risse_size first;
 	risse_size last;
 };
-#define YYLTYPE RisseYYLTYPE
+#define YYLTYPE tYYLTYPE
 
 /* 位置情報のマージ */
 
@@ -106,10 +106,10 @@ int raise_yyerror(const char * msg, void *pr, YYLTYPE *loc);
 	@param	node		式ノード
 	@return	連結を表すノード
 */
-static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
-		const tRisseVariant & conststr, tRisseASTNode * node)
+static tASTNode * AddExprConstStr(risse_size lp,
+		const tVariant & conststr, tASTNode * node)
 {
-	if(((tRisseString)(conststr)).IsEmpty())
+	if(((tString)(conststr)).IsEmpty())
 		return N(Unary)(lp, autString, node); // 文字列リテラルが空文字列
 	return N(Binary)(lp, abtAdd, N(Factor)(lp, aftConstant, conststr), N(Unary)(lp, autString, node));
 }
@@ -122,10 +122,10 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	@param	node		式ノード
 	@return	連結を表すノード
 */
-static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
-		tRisseASTNode * node, const tRisseVariant & conststr)
+static tASTNode * AddExprConstStr(risse_size lp,
+		tASTNode * node, const tVariant & conststr)
 {
-	if(((tRisseString)(conststr)).IsEmpty())
+	if(((tString)(conststr)).IsEmpty())
 		return N(Unary)(lp, autString, node); // 文字列リテラルが空文字列
 	return N(Binary)(lp, abtAdd, N(Unary)(lp, autString, node), N(Factor)(lp, aftConstant, conststr));
 }
@@ -138,12 +138,12 @@ static tRisseASTNode * RisseAddExprConstStr(risse_size lp,
 	@return		結果
 	@note	矛盾した属性を上書きしようとすると例外を発する
 */
-static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
-	tRisseParser * pr, risse_size pos,
-	tRisseDeclAttribute * l, const tRisseDeclAttribute * r)
+static tDeclAttribute * OverwriteDeclAttribute(
+	tParser * pr, risse_size pos,
+	tDeclAttribute * l, const tDeclAttribute * r)
 {
 	if(l->Overwrite(*r))
-		tRisseCompileExceptionClass::Throw(
+		tCompileExceptionClass::Throw(
 			pr->GetScriptBlockInstance()->GetScriptEngine(),
 			RISSE_WS_TR("duplicated attribute specifier"),
 			pr->GetScriptBlockInstance(), pos);
@@ -175,10 +175,10 @@ static tRisseDeclAttribute * RisseOverwriteDeclAttribute(
 
 /* union 定義 */
 %union{
-	tRisseVariant * value;
-	tRisseASTNode * np;
-	tRisseDeclAttribute * attr;
-	tRisseASTArray * array;
+	tVariant * value;
+	tASTNode * np;
+	tDeclAttribute * attr;
+	tASTArray * array;
 }
 
 /* トークン定義 */
@@ -638,8 +638,8 @@ variable_def_no_semicolon
 	: "var" onl variable_id_list			{ $$ = $3; }
 	| "const" onl variable_id_list			{ $$ = $3;
 											  C(VarDecl, $$)->SetAttribute(
-											  	tRisseDeclAttribute(
-											  	tRisseDeclAttribute::vcConst)); }
+											  	tDeclAttribute(
+											  	tDeclAttribute::vcConst)); }
 ;
 
 /* list for the variable definition */
@@ -686,14 +686,14 @@ catch_head
 catch
 	: catch_head onl ")" {EI} onl
 	  block_or_statement 						{ $$ = N(Catch)(
-												  	@1.first, tRisseString::GetEmptyString(), NULL, $6); }
+												  	@1.first, tString::GetEmptyString(), NULL, $6); }
 	| catch_head onl T_ID onl ")" {EI} onl
 	  block_or_statement 						{ $$ = N(Catch)(@1.first, *$3, NULL, $8); }
 	| catch_head onl T_ID onl "if" onl expr onl ")" {EI} onl
 	  block_or_statement						{ $$ = N(Catch)(@1.first, *$3, $7, $12); }
 	| catch_head onl "if" onl expr onl ")" {EI} onl
 	  block_or_statement 						{ $$ = N(Catch)(
-												  	@1.first, tRisseString::GetEmptyString(), $5, $10); }
+												  	@1.first, tString::GetEmptyString(), $5, $10); }
 ;
 
 
@@ -727,13 +727,13 @@ func_def
 
 func_def_inner
 	: "function" onl decl_name_expr onl func_decl_arg
-	  block	onl				/*%dprec 2*/	{ tRisseASTNode * func_decl = $5;
+	  block	onl				/*%dprec 2*/	{ tASTNode * func_decl = $5;
 	  										  C(FuncDecl, func_decl)->SetName($3->GetAccessTargetId());
 	  										  C(FuncDecl, func_decl)->SetBody($6/*<-*/);
 	  										  func_decl->SetPosition(@1.first);
 	  										  $$ = N(VarDeclPair)(@1.first, $3, func_decl); }
 	| "function" onl decl_name_expr onl
-	  block	onl				/*%dprec 1*/	{ tRisseASTNode * func_decl = N(FuncDecl)(@1.first);
+	  block	onl				/*%dprec 1*/	{ tASTNode * func_decl = N(FuncDecl)(@1.first);
 	  										  C(FuncDecl, func_decl)->SetName($3->GetAccessTargetId());
 	  										  C(FuncDecl, func_decl)->SetBody($5/*<-*/);
 	  										  func_decl->SetPosition(@1.first);
@@ -792,7 +792,7 @@ func_decl_arg_elm
 ;
 
 func_decl_arg_elm_collapse
-	: onl "*" onl							{ $$ = N(FuncDeclArg)(@2.first, tRisseString::GetEmptyString(), NULL, true); }
+	: onl "*" onl							{ $$ = N(FuncDeclArg)(@2.first, tString::GetEmptyString(), NULL, true); }
 	| onl T_ID "*"	onl						{ $$ = N(FuncDeclArg)(@2.first, *$2, NULL, true); }
 /*
 	These are currently not supported
@@ -813,14 +813,14 @@ func_decl_block_list
 ;
 
 func_decl_block_at_least_one
-	: T_ID onl								{ $$ = new tRisseASTArray();
+	: T_ID onl								{ $$ = new tASTArray();
 											  $$->push_back(N(FuncDeclBlock)(@1.first, *$1)); }
 	| func_decl_block_at_least_one T_ID onl	{ $$ = $1;
 											  $$->push_back(N(FuncDeclBlock)(@2.first, *$2)); }
 ;
 
 func_decl_block_at_least_one_comma
-	: T_ID onl								{ $$ = new tRisseASTArray();
+	: T_ID onl								{ $$ = new tASTArray();
 											  $$->push_back(N(FuncDeclBlock)(@1.first, *$1)); }
 	| func_decl_block_at_least_one "," onl T_ID onl
 											{ $$ = $1;
@@ -837,17 +837,17 @@ property_def
 	: method_attr_list property_def_inner
 	  onl									{ $$ = N(VarDecl)(@1.first);
 											  C(VarDecl, $$)->AddChild($2/*<-*/);
-											  tRisseDeclAttribute attrib;
+											  tDeclAttribute attrib;
 											  attrib.Overwrite(*$1);
-											  attrib.Set(tRisseDeclAttribute::pcProperty);
+											  attrib.Set(tDeclAttribute::pcProperty);
 											  C(VarDecl, $$)->SetAttribute(attrib);
 											  C(PropDecl, C(VarDeclPair, $2/*<-*/)->GetInitializer())->
 											  	SetAttribute(
-											  		tRisseDeclAttribute(*$1)); }
+											  		tDeclAttribute(*$1)); }
 	| property_def_inner	onl				{ $$ = N(VarDecl)(@1.first);
 											  C(VarDecl, $$)->AddChild($1/*<-*/);
-											  tRisseDeclAttribute attrib;
-											  attrib.Set(tRisseDeclAttribute::pcProperty);
+											  tDeclAttribute attrib;
+											  attrib.Set(tDeclAttribute::pcProperty);
 											  C(VarDecl, $$)->SetAttribute(attrib); }
 ;
 
@@ -856,7 +856,7 @@ property_def_inner
 	  "{" {BR}
 	  property_handler_def_list
 	  ";" "}" {ER} /* "}" の前のセミコロンに注意 */
-	  										{ tRisseASTNode * prop_decl = $7;
+	  										{ tASTNode * prop_decl = $7;
 	  										  C(PropDecl, prop_decl)->SetName($3->GetAccessTargetId());
 	  										  prop_decl->SetPosition(@1.first);
 	  										  $$ = N(VarDeclPair)(@1.first, $3, prop_decl); }
@@ -867,7 +867,7 @@ property_expr_def
 	: method_attr_list property_expr_def_inner
 											{ $$ = $2;
 											  C(PropDecl, $$)->SetAttribute(
-											  	tRisseDeclAttribute(*$1)); }
+											  	tDeclAttribute(*$1)); }
 	| property_expr_def_inner				{ $$ = $1; }
 ;
 
@@ -921,7 +921,7 @@ class_module_def
 	: "class" onl decl_name_expr
 	  class_extender
 	  "{" {BR} onl toplevel_def_list "}" {ER}	onl
-											{ tRisseASTNode_ClassDecl * class_decl = C(ClassDecl, $4);
+											{ tASTNode_ClassDecl * class_decl = C(ClassDecl, $4);
 											  class_decl->SetPosition(@1.first);
 											  class_decl->SetBody($8);
 											  class_decl->SetName($3->GetAccessTargetId());
@@ -930,7 +930,7 @@ class_module_def
 											}
 	| "module" onl decl_name_expr onl
 	  "{" {BR} onl toplevel_def_list "}" {ER}	onl
-											{ tRisseASTNode_ClassDecl * class_decl = N(ClassDecl)(@1.first, true, NULL);
+											{ tASTNode_ClassDecl * class_decl = N(ClassDecl)(@1.first, true, NULL);
 											  class_decl->SetBody($8);
 											  class_decl->SetName($3->GetAccessTargetId());
 											  $$ = N(VarDecl)(@1.first);
@@ -979,7 +979,7 @@ definition
 
 decl_attr_list
 	: decl_attr								{ $$ = $1; }
-	| decl_attr_list decl_attr				{ $$ = RisseOverwriteDeclAttribute(PR, @1.first, $1, $2); }
+	| decl_attr_list decl_attr				{ $$ = OverwriteDeclAttribute(PR, @1.first, $1, $2); }
 ;
 
 decl_attr
@@ -989,21 +989,21 @@ decl_attr
 /* attribute specifiers */
 
 decl_attr_variable
-	: "const"	onl 						{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::vcConst); }
+	: "const"	onl 						{ $$ = new tDeclAttribute(tDeclAttribute::vcConst); }
 ;
 
 decl_attr_override
-	: "final"	onl 						{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::ocFinal); }
+	: "final"	onl 						{ $$ = new tDeclAttribute(tDeclAttribute::ocFinal); }
 ;
 
 method_attr_list
 	: method_attr							{ $$ = $1; }
-	| method_attr_list method_attr			{ $$ = RisseOverwriteDeclAttribute(PR, @1.first, $1, $2); }
+	| method_attr_list method_attr			{ $$ = OverwriteDeclAttribute(PR, @1.first, $1, $2); }
 ;
 
 method_attr
-	: "static" onl							{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::ccStatic); }
-	| "synchronized" onl					{ $$ = new tRisseDeclAttribute(tRisseDeclAttribute::scSynchronized); }
+	: "static" onl							{ $$ = new tDeclAttribute(tDeclAttribute::ccStatic); }
+	| "synchronized" onl					{ $$ = new tDeclAttribute(tDeclAttribute::scSynchronized); }
 ;
 
 
@@ -1018,115 +1018,115 @@ method_attr
 
 member_name
 	: T_ID									{ $$ = $1; }
-	| "~"									{ $$ = new tRisseVariant(mnBitNot); }
-	| "--"									{ $$ = new tRisseVariant(mnDecAssign); }
-	| "++"									{ $$ = new tRisseVariant(mnIncAssign); }
-	| "+" "@"								{ $$ = new tRisseVariant(mnPlus); }
-	| "-" "@"								{ $$ = new tRisseVariant(mnMinus); }
-	| "||"									{ $$ = new tRisseVariant(mnLogOr); }
-	| "&&"									{ $$ = new tRisseVariant(mnLogAnd); }
-	| "|"									{ $$ = new tRisseVariant(mnBitOr); }
-	| "^"									{ $$ = new tRisseVariant(mnBitXor); }
-	| "&"									{ $$ = new tRisseVariant(mnBitAnd); }
-	| "!="									{ $$ = new tRisseVariant(mnNotEqual); }
-	| "=="									{ $$ = new tRisseVariant(mnEqual); }
-	| "!=="									{ $$ = new tRisseVariant(mnDiscNotEqual); }
-	| "<"									{ $$ = new tRisseVariant(mnLesser); }
-	| ">"									{ $$ = new tRisseVariant(mnGreater); }
-	| "<="									{ $$ = new tRisseVariant(mnLesserOrEqual); }
-	| ">="									{ $$ = new tRisseVariant(mnGreaterOrEqual); }
-	| ">>>"									{ $$ = new tRisseVariant(mnRBitShift); }
-	| "<<"									{ $$ = new tRisseVariant(mnLShift); }
-	| ">>"									{ $$ = new tRisseVariant(mnRShift); }
-	| "%"									{ $$ = new tRisseVariant(mnMod); }
-	| "/"									{ $$ = new tRisseVariant(mnDiv); }
-	| "\\"									{ $$ = new tRisseVariant(mnIdiv); }
-	| "*"									{ $$ = new tRisseVariant(mnMul); }
-	| "+"									{ $$ = new tRisseVariant(mnAdd); }
-	| "-"									{ $$ = new tRisseVariant(mnSub); }
-	| "[" "]"								{ $$ = new tRisseVariant(mnIGet); }
-	| "delete" "[" "]"						{ $$ = new tRisseVariant(mnIDelete); }
-	| "[" "]" "="							{ $$ = new tRisseVariant(mnISet); }
-	| "(" ")"								{ $$ = new tRisseVariant(mnFuncCall); }
+	| "~"									{ $$ = new tVariant(mnBitNot); }
+	| "--"									{ $$ = new tVariant(mnDecAssign); }
+	| "++"									{ $$ = new tVariant(mnIncAssign); }
+	| "+" "@"								{ $$ = new tVariant(mnPlus); }
+	| "-" "@"								{ $$ = new tVariant(mnMinus); }
+	| "||"									{ $$ = new tVariant(mnLogOr); }
+	| "&&"									{ $$ = new tVariant(mnLogAnd); }
+	| "|"									{ $$ = new tVariant(mnBitOr); }
+	| "^"									{ $$ = new tVariant(mnBitXor); }
+	| "&"									{ $$ = new tVariant(mnBitAnd); }
+	| "!="									{ $$ = new tVariant(mnNotEqual); }
+	| "=="									{ $$ = new tVariant(mnEqual); }
+	| "!=="									{ $$ = new tVariant(mnDiscNotEqual); }
+	| "<"									{ $$ = new tVariant(mnLesser); }
+	| ">"									{ $$ = new tVariant(mnGreater); }
+	| "<="									{ $$ = new tVariant(mnLesserOrEqual); }
+	| ">="									{ $$ = new tVariant(mnGreaterOrEqual); }
+	| ">>>"									{ $$ = new tVariant(mnRBitShift); }
+	| "<<"									{ $$ = new tVariant(mnLShift); }
+	| ">>"									{ $$ = new tVariant(mnRShift); }
+	| "%"									{ $$ = new tVariant(mnMod); }
+	| "/"									{ $$ = new tVariant(mnDiv); }
+	| "\\"									{ $$ = new tVariant(mnIdiv); }
+	| "*"									{ $$ = new tVariant(mnMul); }
+	| "+"									{ $$ = new tVariant(mnAdd); }
+	| "-"									{ $$ = new tVariant(mnSub); }
+	| "[" "]"								{ $$ = new tVariant(mnIGet); }
+	| "delete" "[" "]"						{ $$ = new tVariant(mnIDelete); }
+	| "[" "]" "="							{ $$ = new tVariant(mnISet); }
+	| "(" ")"								{ $$ = new tVariant(mnFuncCall); }
 
 /* 以下は words.txt と同期させること */
-	| "bool"								{ $$ = new tRisseVariant(ss_bool           ); }
-	| "boolean"                             { $$ = new tRisseVariant(ss_boolean        ); }
-	| "break"								{ $$ = new tRisseVariant(ss_break          ); }
-	| "continue"							{ $$ = new tRisseVariant(ss_continue       ); }
-	| "const"								{ $$ = new tRisseVariant(ss_const          ); }
-	| "catch"								{ $$ = new tRisseVariant(ss_catch          ); }
-	| "class"								{ $$ = new tRisseVariant(ss_class          ); }
-	| "case"								{ $$ = new tRisseVariant(ss_case           ); }
-	| "debugger"							{ $$ = new tRisseVariant(ss_debugger       ); }
-	| "default"								{ $$ = new tRisseVariant(ss_default        ); }
-	| "delete"								{ $$ = new tRisseVariant(ss_delete         ); }
-	| "do"									{ $$ = new tRisseVariant(ss_do             ); }
-	| "dynamic"								{ $$ = new tRisseVariant(ss_dynamic        ); }
-	| "extends"								{ $$ = new tRisseVariant(ss_extends        ); }
-	| "export"								{ $$ = new tRisseVariant(ss_export         ); }
-	| "enum"								{ $$ = new tRisseVariant(ss_enum           ); }
-	| "else"								{ $$ = new tRisseVariant(ss_else           ); }
-	| "function"							{ $$ = new tRisseVariant(ss_function       ); }
-	| "finally"								{ $$ = new tRisseVariant(ss_finally        ); }
-	| "final"								{ $$ = new tRisseVariant(ss_final          ); }
-	| "for"									{ $$ = new tRisseVariant(ss_for            ); }
-	| "global"								{ $$ = new tRisseVariant(ss_global         ); }
-	| "getter"								{ $$ = new tRisseVariant(ss_getter         ); }
-	| "goto"								{ $$ = new tRisseVariant(ss_goto           ); }
-	| "incontextof"							{ $$ = new tRisseVariant(ss_incontextof    ); }
-	| "invalidate"							{ $$ = new tRisseVariant(ss_invalidate     ); }
-	| "instanceof"							{ $$ = new tRisseVariant(ss_instanceof     ); }
-	| "isvalid"								{ $$ = new tRisseVariant(ss_isvalid        ); }
-	| "import"								{ $$ = new tRisseVariant(ss_import         ); }
-	| "int"									{ $$ = new tRisseVariant(ss_int            ); }
-	| "integer"								{ $$ = new tRisseVariant(ss_integer        ); }
-	| "internal"							{ $$ = new tRisseVariant(ss_internal       ); }
-	| "in"									{ $$ = new tRisseVariant(ss_in             ); }
-	| "if"									{ $$ = new tRisseVariant(ss_if             ); }
-	| "module"								{ $$ = new tRisseVariant(ss_module         ); }
-	| "new"									{ $$ = new tRisseVariant(ss_new            ); }
-	| "octet"								{ $$ = new tRisseVariant(ss_octet          ); }
-	| "protected"							{ $$ = new tRisseVariant(ss_protected      ); }
-	| "property"							{ $$ = new tRisseVariant(ss_property       ); }
-	| "private"								{ $$ = new tRisseVariant(ss_private        ); }
-	| "public"								{ $$ = new tRisseVariant(ss_public         ); }
-	| "return"								{ $$ = new tRisseVariant(ss_return         ); }
-	| "real"								{ $$ = new tRisseVariant(ss_real           ); }
-	| "synchronized"						{ $$ = new tRisseVariant(ss_synchronized   ); }
-	| "switch"								{ $$ = new tRisseVariant(ss_switch         ); }
-	| "static"								{ $$ = new tRisseVariant(ss_static         ); }
-	| "setter"								{ $$ = new tRisseVariant(ss_setter         ); }
-	| "string"								{ $$ = new tRisseVariant(ss_string         ); }
-	| "super"								{ $$ = new tRisseVariant(ss_super          ); }
-	| "typeof"								{ $$ = new tRisseVariant(ss_typeof         ); }
-	| "throw"								{ $$ = new tRisseVariant(ss_throw          ); }
-	| "this"								{ $$ = new tRisseVariant(ss_this           ); }
-	| "try"									{ $$ = new tRisseVariant(ss_try            ); }
-	| "using"								{ $$ = new tRisseVariant(ss_using          ); }
-	| "var"									{ $$ = new tRisseVariant(ss_var            ); }
-	| "while"								{ $$ = new tRisseVariant(ss_while          ); }
-	| "with"								{ $$ = new tRisseVariant(ss_with           ); }
-	| "as"									{ $$ = new tRisseVariant(ss_as             ); }
-	| "use"									{ $$ = new tRisseVariant(ss_use            ); }
-	| "abstract"							{ $$ = new tRisseVariant(ss_abstract       ); }
-	| "implements"							{ $$ = new tRisseVariant(ss_implements     ); }
-	| "interface"							{ $$ = new tRisseVariant(ss_interface      ); }
-	| "native"								{ $$ = new tRisseVariant(ss_native         ); }
-	| "throws"								{ $$ = new tRisseVariant(ss_throws         ); }
-	| "transient"							{ $$ = new tRisseVariant(ss_transient      ); }
-	| "volatile"							{ $$ = new tRisseVariant(ss_volatile       ); }
-	| "enumerable"							{ $$ = new tRisseVariant(ss_enumerable     ); }
-	| "hidden"								{ $$ = new tRisseVariant(ss_hidden         ); }
-	| "virtual"								{ $$ = new tRisseVariant(ss_virtual        ); }
-	| "field"								{ $$ = new tRisseVariant(ss_field          ); }
+	| "bool"								{ $$ = new tVariant(ss_bool           ); }
+	| "boolean"                             { $$ = new tVariant(ss_boolean        ); }
+	| "break"								{ $$ = new tVariant(ss_break          ); }
+	| "continue"							{ $$ = new tVariant(ss_continue       ); }
+	| "const"								{ $$ = new tVariant(ss_const          ); }
+	| "catch"								{ $$ = new tVariant(ss_catch          ); }
+	| "class"								{ $$ = new tVariant(ss_class          ); }
+	| "case"								{ $$ = new tVariant(ss_case           ); }
+	| "debugger"							{ $$ = new tVariant(ss_debugger       ); }
+	| "default"								{ $$ = new tVariant(ss_default        ); }
+	| "delete"								{ $$ = new tVariant(ss_delete         ); }
+	| "do"									{ $$ = new tVariant(ss_do             ); }
+	| "dynamic"								{ $$ = new tVariant(ss_dynamic        ); }
+	| "extends"								{ $$ = new tVariant(ss_extends        ); }
+	| "export"								{ $$ = new tVariant(ss_export         ); }
+	| "enum"								{ $$ = new tVariant(ss_enum           ); }
+	| "else"								{ $$ = new tVariant(ss_else           ); }
+	| "function"							{ $$ = new tVariant(ss_function       ); }
+	| "finally"								{ $$ = new tVariant(ss_finally        ); }
+	| "final"								{ $$ = new tVariant(ss_final          ); }
+	| "for"									{ $$ = new tVariant(ss_for            ); }
+	| "global"								{ $$ = new tVariant(ss_global         ); }
+	| "getter"								{ $$ = new tVariant(ss_getter         ); }
+	| "goto"								{ $$ = new tVariant(ss_goto           ); }
+	| "incontextof"							{ $$ = new tVariant(ss_incontextof    ); }
+	| "invalidate"							{ $$ = new tVariant(ss_invalidate     ); }
+	| "instanceof"							{ $$ = new tVariant(ss_instanceof     ); }
+	| "isvalid"								{ $$ = new tVariant(ss_isvalid        ); }
+	| "import"								{ $$ = new tVariant(ss_import         ); }
+	| "int"									{ $$ = new tVariant(ss_int            ); }
+	| "integer"								{ $$ = new tVariant(ss_integer        ); }
+	| "internal"							{ $$ = new tVariant(ss_internal       ); }
+	| "in"									{ $$ = new tVariant(ss_in             ); }
+	| "if"									{ $$ = new tVariant(ss_if             ); }
+	| "module"								{ $$ = new tVariant(ss_module         ); }
+	| "new"									{ $$ = new tVariant(ss_new            ); }
+	| "octet"								{ $$ = new tVariant(ss_octet          ); }
+	| "protected"							{ $$ = new tVariant(ss_protected      ); }
+	| "property"							{ $$ = new tVariant(ss_property       ); }
+	| "private"								{ $$ = new tVariant(ss_private        ); }
+	| "public"								{ $$ = new tVariant(ss_public         ); }
+	| "return"								{ $$ = new tVariant(ss_return         ); }
+	| "real"								{ $$ = new tVariant(ss_real           ); }
+	| "synchronized"						{ $$ = new tVariant(ss_synchronized   ); }
+	| "switch"								{ $$ = new tVariant(ss_switch         ); }
+	| "static"								{ $$ = new tVariant(ss_static         ); }
+	| "setter"								{ $$ = new tVariant(ss_setter         ); }
+	| "string"								{ $$ = new tVariant(ss_string         ); }
+	| "super"								{ $$ = new tVariant(ss_super          ); }
+	| "typeof"								{ $$ = new tVariant(ss_typeof         ); }
+	| "throw"								{ $$ = new tVariant(ss_throw          ); }
+	| "this"								{ $$ = new tVariant(ss_this           ); }
+	| "try"									{ $$ = new tVariant(ss_try            ); }
+	| "using"								{ $$ = new tVariant(ss_using          ); }
+	| "var"									{ $$ = new tVariant(ss_var            ); }
+	| "while"								{ $$ = new tVariant(ss_while          ); }
+	| "with"								{ $$ = new tVariant(ss_with           ); }
+	| "as"									{ $$ = new tVariant(ss_as             ); }
+	| "use"									{ $$ = new tVariant(ss_use            ); }
+	| "abstract"							{ $$ = new tVariant(ss_abstract       ); }
+	| "implements"							{ $$ = new tVariant(ss_implements     ); }
+	| "interface"							{ $$ = new tVariant(ss_interface      ); }
+	| "native"								{ $$ = new tVariant(ss_native         ); }
+	| "throws"								{ $$ = new tVariant(ss_throws         ); }
+	| "transient"							{ $$ = new tVariant(ss_transient      ); }
+	| "volatile"							{ $$ = new tVariant(ss_volatile       ); }
+	| "enumerable"							{ $$ = new tVariant(ss_enumerable     ); }
+	| "hidden"								{ $$ = new tVariant(ss_hidden         ); }
+	| "virtual"								{ $$ = new tVariant(ss_virtual        ); }
+	| "field"								{ $$ = new tVariant(ss_field          ); }
 
-	| "void"								{ $$ = new tRisseVariant(ss_void           ); }
-	| "null"								{ $$ = new tRisseVariant(ss_null           ); }
-	| "true"								{ $$ = new tRisseVariant(ss_true           ); }
-	| "false"								{ $$ = new tRisseVariant(ss_false          ); }
-	| "NaN"									{ $$ = new tRisseVariant(ss_NaN            ); }
-	| "Infinity"							{ $$ = new tRisseVariant(ss_Infinity       ); }
+	| "void"								{ $$ = new tVariant(ss_void           ); }
+	| "null"								{ $$ = new tVariant(ss_null           ); }
+	| "true"								{ $$ = new tVariant(ss_true           ); }
+	| "false"								{ $$ = new tVariant(ss_false          ); }
+	| "NaN"									{ $$ = new tVariant(ss_NaN            ); }
+	| "Infinity"							{ $$ = new tVariant(ss_Infinity       ); }
 ;
 
 
@@ -1337,7 +1337,7 @@ call_block_alt_list_opt
 ;
 
 call_block_alt_list
-	: call_block_alt_arg				{ $$ = new tRisseASTArray(); $$->push_back($1); }
+	: call_block_alt_arg				{ $$ = new tASTArray(); $$->push_back($1); }
 	| call_block_alt_list ","
 	  call_block_alt_arg				{ $$ = $1; $$->push_back($3); }
 ;
@@ -1356,7 +1356,7 @@ call_block_list_opt
 ;
 
 call_block_list
-	: call_block						{ $$ = new tRisseASTArray(); $$->push_back($1); }
+	: call_block						{ $$ = new tASTArray(); $$->push_back($1); }
 	| call_block_list  call_block		{ $$ = $1; $$->push_back($2); }
 ;
 
@@ -1459,8 +1459,8 @@ dummy_elm_opt
    Lexer はこれを受け、再び文字列リテラルの解析モードに入る。
 */
 embeddable_string
-	: embeddable_string_d T_CONSTVAL { $$ = RisseAddExprConstStr(@1.first, $1, *$2); }
-	| embeddable_string_s T_CONSTVAL { $$ = RisseAddExprConstStr(@1.first, $1, *$2); }
+	: embeddable_string_d T_CONSTVAL { $$ = AddExprConstStr(@1.first, $1, *$2); }
+	| embeddable_string_s T_CONSTVAL { $$ = AddExprConstStr(@1.first, $1, *$2); }
 ;
 
 /* 埋め込み可能な文字列リテラル(ダブルクオーテーション) */
@@ -1471,7 +1471,7 @@ embeddable_string_d
 
 embeddable_string_d_unit
 	: T_EMSTRING_D  {BI}  expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
-												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
+												{ EI; $$ = AddExprConstStr(@1.first, *$1, $3);
 													LX->SetContinueEmbeddableString(RISSE_WC('"')); }
 ;
 
@@ -1483,7 +1483,7 @@ embeddable_string_s
 
 embeddable_string_s_unit
 	: T_EMSTRING_S {BI} expr_with_comma ";" "}" /* "}" の前のセミコロンに注意 */
-												{ EI; $$ = RisseAddExprConstStr(@1.first, *$1, $3);
+												{ EI; $$ = AddExprConstStr(@1.first, *$1, $3);
 													LX->SetContinueEmbeddableString(RISSE_WC('\'')); }
 ;
 
@@ -1508,7 +1508,7 @@ snl
 //---------------------------------------------------------------------------
 int yylex(YYSTYPE * value, YYLTYPE * llocp, void *pr)
 {
-	value->value = new tRisseVariant();
+	value->value = new tVariant();
 	int token = PR->GetToken(*(value->value));
 	llocp->first = LX->GetLastTokenStart();
 	llocp->last = LX->GetPosition();
@@ -1521,15 +1521,15 @@ int yylex(YYSTYPE * value, YYLTYPE * llocp, void *pr)
 //---------------------------------------------------------------------------
 int raise_yyerror(const char * msg, void *pr, YYLTYPE *loc)
 {
-	tRisseCompileExceptionClass::Throw(PR->GetScriptBlockInstance()->GetScriptEngine(),
-		tRisseString(msg), PR->GetScriptBlockInstance(), loc->first);
+	tCompileExceptionClass::Throw(PR->GetScriptBlockInstance()->GetScriptEngine(),
+		tString(msg), PR->GetScriptBlockInstance(), loc->first);
 	return 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseParser::tRisseParser(tRisseScriptBlockInstance * sb, tRisseLexer * lexer)
+tParser::tParser(tScriptBlockInstance * sb, tLexer * lexer)
 {
 	ScriptBlockInstance = sb;
 	Root = NULL;
@@ -1541,7 +1541,7 @@ tRisseParser::tRisseParser(tRisseScriptBlockInstance * sb, tRisseLexer * lexer)
 
 
 //---------------------------------------------------------------------------
-int tRisseParser::GetToken(tRisseVariant & value)
+int tParser::GetToken(tVariant & value)
 {
 	// lexer 中に発生するかもしれない例外をキャッチする
 	// これらには位置情報が含まれていない可能性があるため、トレース情報として
@@ -1552,18 +1552,18 @@ int tRisseParser::GetToken(tRisseVariant & value)
 		{
 			return Lexer->GetToken(value);
 		}
-		catch(const tRisseTemporaryException * e)
+		catch(const tTemporaryException * e)
 		{
 			e->ThrowConverted(ScriptBlockInstance->GetScriptEngine());
 		}
 	}
-	catch(const tRisseTemporaryException * te)
+	catch(const tTemporaryException * te)
 	{
-		const tRisseVariant * e = te->Convert(ScriptBlockInstance->GetScriptEngine());
+		const tVariant * e = te->Convert(ScriptBlockInstance->GetScriptEngine());
 		e->AddTrace(ScriptBlockInstance, Lexer->GetPosition());
 		throw e;
 	}
-	catch(const tRisseVariant * e)
+	catch(const tVariant * e)
 	{
 		e->AddTrace(ScriptBlockInstance, Lexer->GetPosition());
 		throw e;
@@ -1578,7 +1578,7 @@ int tRisseParser::GetToken(tRisseVariant & value)
 
 
 //---------------------------------------------------------------------------
-void tRisseParser::SetRootNode(tRisseASTNode * root)
+void tParser::SetRootNode(tASTNode * root)
 {
 	Root = root;
 }

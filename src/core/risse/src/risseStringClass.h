@@ -25,24 +25,24 @@ namespace Risse
 //---------------------------------------------------------------------------
 //! @brief		"String" クラス
 //---------------------------------------------------------------------------
-class tRisseStringClass : public tRissePrimitiveClassBase
+class tStringClass : public tPrimitiveClassBase
 {
-	typedef tRissePrimitiveClassBase inherited; //!< 親クラスの typedef
+	typedef tPrimitiveClassBase inherited; //!< 親クラスの typedef
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisseStringClass(tRisseScriptEngine * engine);
+	tStringClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tRisseVariant ovulate();
+	static tVariant ovulate();
 
 public: // Risse用メソッドなど
-	static void initialize(const tRisseNativeCallInfo & info);
-	static void charAt(const tRisseNativeCallInfo & info, risse_offset index);
-	static void get_length(const tRisseNativePropGetInfo & info);
+	static void initialize(const tNativeCallInfo & info);
+	static void charAt(const tNativeCallInfo & info, risse_offset index);
+	static void get_length(const tNativePropGetInfo & info);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

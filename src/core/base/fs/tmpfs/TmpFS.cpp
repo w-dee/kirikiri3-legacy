@@ -21,7 +21,7 @@ RISSE_DEFINE_SOURCE_ID(20965,62764,62977,19688,31398,64150,8840,17077);
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType type,
+tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 							const tString & name) :
 	Parent(parent),
 	Type(type),
@@ -30,31 +30,31 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 	if(Type == ntDirectory)
 	{
 		// ディレクトリのノードなので ハッシュ表を作成
-		Directory = new tHashTable<tString, tRisaTmpFSNode *>();
+		Directory = new tHashTable<tString, tTmpFSNode *>();
 	}
 	else
 	{
 		// ファイルのノードなので Block を作成
-		File = new tRisaMemoryStreamBlock();
+		File = new tMemoryStreamBlock();
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType type,
+tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 	tBinaryStream * src) :
 	Parent(parent)
 {
 	if(Type == ntDirectory)
 	{
 		// ディレクトリのノードなので ハッシュ表を作成
-		Directory = new tHashTable<tString, tRisaTmpFSNode *>();
+		Directory = new tHashTable<tString, tTmpFSNode *>();
 	}
 	else
 	{
 		// ファイルのノードなので Block を作成
-		File = new tRisaMemoryStreamBlock();
+		File = new tMemoryStreamBlock();
 	}
 
 	// メタデータを読み取る
@@ -96,14 +96,14 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 			// サブノードのタイプを読み取る
 			unsigned char nodetypeid;
 			src->ReadBuffer(&nodetypeid, 1);
-			tRisaTmpFSNode * subnode = NULL;
+			tTmpFSNode * subnode = NULL;
 			switch(nodetypeid)
 			{
 			case 0x80: // ディレクトリ
-				subnode = new tRisaTmpFSNode(this, ntDirectory, src);
+				subnode = new tTmpFSNode(this, ntDirectory, src);
 				break;
 			case 0x81: // ファイル
-				subnode = new tRisaTmpFSNode(this, ntFile, src);
+				subnode = new tTmpFSNode(this, ntFile, src);
 				break;
 			case 0x88: // ディレクトリ終了
 				done = true;
@@ -136,7 +136,7 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode::~tRisaTmpFSNode()
+tTmpFSNode::~tTmpFSNode()
 {
 	// デストラクタ
 	// デストラクタは、保持しているノードを「すべて」解放するので注意
@@ -145,7 +145,7 @@ tRisaTmpFSNode::~tRisaTmpFSNode()
 	{
 		// このノードはディレクトリ
 		// Directory が保持しているすべての要素を解放する
-		tHashTable<tString, tRisaTmpFSNode *>::tIterator i;
+		tHashTable<tString, tTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
 			delete (i.GetValue());
@@ -165,7 +165,7 @@ tRisaTmpFSNode::~tRisaTmpFSNode()
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFSNode::Serialize(tBinaryStream * dest) const
+void tTmpFSNode::Serialize(tBinaryStream * dest) const
 {
 	// ノードのタイプを記録
 	if(Type == ntDirectory)
@@ -190,7 +190,7 @@ void tRisaTmpFSNode::Serialize(tBinaryStream * dest) const
 		dest->WriteBuffer("\0", 1); // メタデータの終わりとディレクトリの開始
 
 		// 全ての子要素に対して再帰する
-		tHashTable<tString, tRisaTmpFSNode *>::tIterator i;
+		tHashTable<tString, tTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
 			i.GetValue()->Serialize(dest);
@@ -203,7 +203,7 @@ void tRisaTmpFSNode::Serialize(tBinaryStream * dest) const
 		// ファイル
 		dest->WriteBuffer("\x0", 1); // メタデータの終わりとファイルの中身の開始
 		wxUint64 i64;
-		volatile tRisaCriticalSection::tLocker  holder(File->GetCS());
+		volatile tCriticalSection::tLocker  holder(File->GetCS());
 		i64 = wxUINT64_SWAP_ON_BE(File->GetSize());
 		dest->WriteBuffer(&i64, sizeof(i64));
 		dest->WriteBuffer(File->GetBlock(), File->GetSize());
@@ -213,11 +213,11 @@ void tRisaTmpFSNode::Serialize(tBinaryStream * dest) const
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode * tRisaTmpFSNode::GetSubNode(const tString & name)
+tTmpFSNode * tTmpFSNode::GetSubNode(const tString & name)
 {
 	if(Type != ntDirectory) return NULL;
 
-	tRisaTmpFSNode ** node = Directory->Find(name);
+	tTmpFSNode ** node = Directory->Find(name);
 	if(!node) return NULL;
 	return * node;
 }
@@ -225,10 +225,10 @@ tRisaTmpFSNode * tRisaTmpFSNode::GetSubNode(const tString & name)
 
 
 //---------------------------------------------------------------------------
-bool tRisaTmpFSNode::DeleteSubNodeByName(const tString & name)
+bool tTmpFSNode::DeleteSubNodeByName(const tString & name)
 {
 	if(Type != ntDirectory) return false;
-	tRisaTmpFSNode * node = GetSubNode(name);
+	tTmpFSNode * node = GetSubNode(name);
 	if(node)
 	{
 		delete node;
@@ -241,11 +241,11 @@ bool tRisaTmpFSNode::DeleteSubNodeByName(const tString & name)
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode * tRisaTmpFSNode::CreateDirectory(const tString & name)
+tTmpFSNode * tTmpFSNode::CreateDirectory(const tString & name)
 {
 	if(Type != ntDirectory) return false;
 	if(GetSubNode(name)) return NULL; // すでにそこに何かがある
-	tRisaTmpFSNode *newnode = new tRisaTmpFSNode(this, ntDirectory, name);
+	tTmpFSNode *newnode = new tTmpFSNode(this, ntDirectory, name);
 	Directory->Add(name, newnode);
 	return newnode;
 }
@@ -253,11 +253,11 @@ tRisaTmpFSNode * tRisaTmpFSNode::CreateDirectory(const tString & name)
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode * tRisaTmpFSNode::CreateFile(const tString & name)
+tTmpFSNode * tTmpFSNode::CreateFile(const tString & name)
 {
 	if(Type != ntDirectory) return false;
 	if(GetSubNode(name)) return NULL; // すでにそこに何かがある
-	tRisaTmpFSNode *newnode = new tRisaTmpFSNode(this, ntFile, name);
+	tTmpFSNode *newnode = new tTmpFSNode(this, ntFile, name);
 	Directory->Add(name, newnode);
 	return newnode;
 }
@@ -265,7 +265,7 @@ tRisaTmpFSNode * tRisaTmpFSNode::CreateFile(const tString & name)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisaTmpFSNode::GetSize() const
+risse_size tTmpFSNode::GetSize() const
 {
 	if(Type == ntDirectory) return 0;
 	if(Type == ntFile) return File->GetSize();
@@ -275,11 +275,11 @@ risse_size tRisaTmpFSNode::GetSize() const
 
 
 //---------------------------------------------------------------------------
-size_t tRisaTmpFSNode::Iterate(tRisaFileSystemIterationCallback * callback)
+size_t tTmpFSNode::Iterate(tFileSystemIterationCallback * callback)
 {
 	if(Type != ntDirectory) return 0;
 	size_t count = 0;
-	tHashTable<tString, tRisaTmpFSNode *>::tIterator i;
+	tHashTable<tString, tTmpFSNode *>::tIterator i;
 	for(i = Directory->GetFirst(); !i.IsNull(); i++)
 	{
 		count ++;
@@ -312,7 +312,7 @@ size_t tRisaTmpFSNode::Iterate(tRisaFileSystemIterationCallback * callback)
 
 
 //---------------------------------------------------------------------------
-const unsigned char tRisaTmpFS::SerializeMagic[] = {
+const unsigned char tTmpFS::SerializeMagic[] = {
 	't', 'm' , 'p', 'f', 's', 0x1a,
 	0x00, // ファイルレイアウトバージョン
 	0x00  // reserved
@@ -321,7 +321,7 @@ const unsigned char tRisaTmpFS::SerializeMagic[] = {
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFS::tRisaTmpFS()
+tTmpFS::tTmpFS()
 {
 	// 変数初期化
 	CreateRoot();
@@ -330,7 +330,7 @@ tRisaTmpFS::tRisaTmpFS()
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFS::~tRisaTmpFS()
+tTmpFS::~tTmpFS()
 {
 	RemoveRoot();
 }
@@ -338,13 +338,13 @@ tRisaTmpFS::~tRisaTmpFS()
 
 
 //---------------------------------------------------------------------------
-size_t tRisaTmpFS::GetFileListAt(const tString & dirname,
-	tRisaFileSystemIterationCallback * callback)
+size_t tTmpFS::GetFileListAt(const tString & dirname,
+	tFileSystemIterationCallback * callback)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
-	tRisaTmpFSNode * node = GetNodeAt(dirname);
-	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	tTmpFSNode * node = GetNodeAt(dirname);
+	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 	if(!node->IsDirectory()) eRisaException::Throw(RISSE_WS_TR("specified name is not a directory"));
 
 	return node->Iterate(callback);
@@ -353,11 +353,11 @@ size_t tRisaTmpFS::GetFileListAt(const tString & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tRisaTmpFS::FileExists(const tString & filename)
+bool tTmpFS::FileExists(const tString & filename)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
-	tRisaTmpFSNode * node = GetNodeAt(filename);
+	tTmpFSNode * node = GetNodeAt(filename);
 	if(!node) return false;
 	if(!node->IsFile()) return false; // それがファイルではない場合も false
 	return true;
@@ -366,11 +366,11 @@ bool tRisaTmpFS::FileExists(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-bool tRisaTmpFS::DirectoryExists(const tString & dirname)
+bool tTmpFS::DirectoryExists(const tString & dirname)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
-	tRisaTmpFSNode * node = GetNodeAt(dirname);
+	tTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) return false;
 	if(!node->IsDirectory()) return false; // それがディレクトリではない場合も false
 	return true;
@@ -379,16 +379,16 @@ bool tRisaTmpFS::DirectoryExists(const tString & dirname)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::RemoveFile(const tString & filename)
+void tTmpFS::RemoveFile(const tString & filename)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
-	tRisaTmpFSNode * node = GetNodeAt(filename);
-	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	tTmpFSNode * node = GetNodeAt(filename);
+	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 	if(!node->IsFile()) eRisaException::Throw(RISSE_WS_TR("specified name is not a file"));
 
 	// 親ノードから切り離す
-	tRisaTmpFSNode * parent = node->GetParent();
+	tTmpFSNode * parent = node->GetParent();
 	if(!parent) return; // parent が null なのは root ノードだけなのでこれはあり得ないが...
 	parent->DeleteSubNodeByName(node->GetName());
 }
@@ -396,12 +396,12 @@ void tRisaTmpFS::RemoveFile(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::RemoveDirectory(const tString & dirname, bool recursive)
+void tTmpFS::RemoveDirectory(const tString & dirname, bool recursive)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
-	tRisaTmpFSNode * node = GetNodeAt(dirname);
-	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	tTmpFSNode * node = GetNodeAt(dirname);
+	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 	if(!node->IsDirectory()) eRisaException::Throw(RISSE_WS_TR("specified name is not a directory"));
 
 	if(!recursive)
@@ -422,7 +422,7 @@ void tRisaTmpFS::RemoveDirectory(const tString & dirname, bool recursive)
 	// 親ノードから切り離す
 	if(node != Root)
 	{
-		tRisaTmpFSNode * parent = node->GetParent();
+		tTmpFSNode * parent = node->GetParent();
 		if(parent) parent->DeleteSubNodeByName(node->GetName());
 	}
 	else
@@ -435,9 +435,9 @@ void tRisaTmpFS::RemoveDirectory(const tString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::CreateDirectory(const tString & dirname, bool recursive)
+void tTmpFS::CreateDirectory(const tString & dirname, bool recursive)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 
 	if(recursive)
@@ -447,14 +447,14 @@ void tRisaTmpFS::CreateDirectory(const tString & dirname, bool recursive)
 		const risse_char * p = dirname.c_str();
 		const risse_char *pp = p;
 
-		tRisaTmpFSNode *node = Root;
+		tTmpFSNode *node = Root;
 		while(*p)
 		{
 			while(*p != RISSE_WC('/') && *p != 0) p++;
 			if(p != pp)
 			{
 				// '/' で挟まれた区間が得られた
-				tRisaTmpFSNode *parent = node;
+				tTmpFSNode *parent = node;
 				tString partname(p, p - pp);
 				node = node->GetSubNode(partname);
 				if(!node)
@@ -486,12 +486,12 @@ void tRisaTmpFS::CreateDirectory(const tString & dirname, bool recursive)
 		// 最終的なディレクトリ名となる名前を取得する
 
 		tString path(dirname);
-		tRisaFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
+		tFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
 		tString parentdir, name;
-		tRisaFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
+		tFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
 
-		tRisaTmpFSNode * parentnode = GetNodeAt(parentdir);
-		if(!parentnode) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		tTmpFSNode * parentnode = GetNodeAt(parentdir);
+		if(!parentnode) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 		parentnode->CreateDirectory(name);
 	}
 
@@ -500,15 +500,15 @@ void tRisaTmpFS::CreateDirectory(const tString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::Stat(const tString & filename, tRisaStatStruc & struc)
+void tTmpFS::Stat(const tString & filename, tStatStruc & struc)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// XXX: MACタイムは現バージョンでは保存していない
 	struc.Clear();
 
-	tRisaTmpFSNode * node = GetNodeAt(filename);
-	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	tTmpFSNode * node = GetNodeAt(filename);
+	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	struc.Size = node->GetSize();
 }
@@ -516,23 +516,23 @@ void tRisaTmpFS::Stat(const tString & filename, tRisaStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tRisaTmpFS::CreateStream(const tString & filename, risse_uint32 flags)
+tBinaryStream * tTmpFS::CreateStream(const tString & filename, risse_uint32 flags)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
-	tRisaTmpFSNode * node = GetNodeAt(filename);
-	if(!node) tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	tTmpFSNode * node = GetNodeAt(filename);
+	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 	if(!node->IsFile()) eRisaException::Throw(RISSE_WS_TR("specified name is not a file"));
 
-	return new tRisaMemoryStream(flags, node->GetMemoryStreamBlockNoAddRef());
+	return new tMemoryStream(flags, node->GetMemoryStreamBlockNoAddRef());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::SerializeTo(tBinaryStream * dest)
+void tTmpFS::SerializeTo(tBinaryStream * dest)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// マジックを書き込む
 	dest->WriteBuffer(SerializeMagic, 8);
@@ -545,10 +545,10 @@ void tRisaTmpFS::SerializeTo(tBinaryStream * dest)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::SerializeTo(const tString & filename)
+void tTmpFS::SerializeTo(const tString & filename)
 {
 	std::auto_ptr<tBinaryStream>
-		stream(tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_WRITE));
+		stream(tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_WRITE));
 
 	SerializeTo(stream.get());
 }
@@ -556,9 +556,9 @@ void tRisaTmpFS::SerializeTo(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::UnserializeFrom(tBinaryStream * src)
+void tTmpFS::UnserializeFrom(tBinaryStream * src)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// マジックを読み込み、比較する
 	unsigned char magic[8];
@@ -572,16 +572,16 @@ void tRisaTmpFS::UnserializeFrom(tBinaryStream * src)
 		eRisaException::Throw(RISSE_WS_TR("not a tmpfs archive"));
 
 	// 再帰的に内容を読み込む
-	Root = new tRisaTmpFSNode(NULL, tRisaTmpFSNode::ntDirectory, src);
+	Root = new tTmpFSNode(NULL, tTmpFSNode::ntDirectory, src);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::UnserializeFrom(const tString & filename)
+void tTmpFS::UnserializeFrom(const tString & filename)
 {
 	std::auto_ptr<tBinaryStream>
-		stream(tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
+		stream(tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
 
 	UnserializeFrom(stream.get());
 }
@@ -589,13 +589,13 @@ void tRisaTmpFS::UnserializeFrom(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode * tRisaTmpFS::GetNodeAt(const tString & name)
+tTmpFSNode * tTmpFS::GetNodeAt(const tString & name)
 {
 	// '/' で name を区切り、順に root からノードをたどっていく
 	const risse_char * p = name.c_str();
 	const risse_char *pp = p;
 
-	tRisaTmpFSNode *node = Root;
+	tTmpFSNode *node = Root;
 
 	while(*p)
 	{
@@ -622,18 +622,18 @@ tRisaTmpFSNode * tRisaTmpFS::GetNodeAt(const tString & name)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::CreateRoot()
+void tTmpFS::CreateRoot()
 {
 	if(Root) return;
 
 	// ルートノードを作成
-	Root = new tRisaTmpFSNode(NULL, tRisaTmpFSNode::ntDirectory, tString());
+	Root = new tTmpFSNode(NULL, tTmpFSNode::ntDirectory, tString());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::RemoveRoot()
+void tTmpFS::RemoveRoot()
 {
 	// root ノードを削除
 	delete Root, Root = NULL;
@@ -642,7 +642,7 @@ void tRisaTmpFS::RemoveRoot()
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::Clear()
+void tTmpFS::Clear()
 {
 	RemoveRoot();
 	CreateRoot();

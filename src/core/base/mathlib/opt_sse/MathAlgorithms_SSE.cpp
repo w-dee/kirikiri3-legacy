@@ -58,7 +58,7 @@ _ALIGN16(const risse_uint32) RISA_V_I32_1[4] = { 1, 1, 1, 1 };
 
 
 //---------------------------------------------------------------------------
-static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
+static void _DeinterleaveApplyingWindow(float * dest[], const float * src,
 					float * win, int numch, size_t destofs, size_t len)
 {
 	size_t n;
@@ -68,9 +68,9 @@ static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 		{
 			float * dest0 = dest[0] + destofs;
 			int condition = 
-				(RisaIsAlignedTo128bits(dest0) ? 0:4) + 
-				(RisaIsAlignedTo128bits(src)   ? 0:2) +
-				(RisaIsAlignedTo128bits(win)   ? 0:1 );
+				(IsAlignedTo128bits(dest0) ? 0:4) + 
+				(IsAlignedTo128bits(src)   ? 0:2) +
+				(IsAlignedTo128bits(win)   ? 0:1 );
 
 #define R(cond, destf, srcf, winf) \
 			case cond: \
@@ -110,10 +110,10 @@ static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 			float * dest1 = dest[1] + destofs;
 
 			int condition = 
-				( (RisaIsAlignedTo128bits(dest0)&&
-				   RisaIsAlignedTo128bits(dest1)) ? 0:4) + 
-				(RisaIsAlignedTo128bits(src)      ? 0:2) +
-				(RisaIsAlignedTo128bits(win)      ? 0:1);
+				( (IsAlignedTo128bits(dest0)&&
+				   IsAlignedTo128bits(dest1)) ? 0:4) + 
+				(IsAlignedTo128bits(src)      ? 0:2) +
+				(IsAlignedTo128bits(win)      ? 0:1);
 
 #define R(cond, destf, srcf, winf) \
 			case cond: \
@@ -173,14 +173,14 @@ static void _RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 
 //---------------------------------------------------------------------------
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, RisaDeinterleaveApplyingWindow, (float * dest[], const float * src,
+	void, DeinterleaveApplyingWindow, (float * dest[], const float * src,
 					float * win, int numch, size_t destofs, size_t len),
-	_RisaDeinterleaveApplyingWindow, (dest, src, win, numch, destofs, len) )
+	_DeinterleaveApplyingWindow, (dest, src, win, numch, destofs, len) )
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-static void  _RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
+static void  _InterleaveOverlappingWindow(float * dest, const float * const * src,
 					float * win, int numch, size_t srcofs, size_t len)
 {
 	size_t n;
@@ -191,9 +191,9 @@ static void  _RisaInterleaveOverlappingWindow(float * dest, const float * const 
 			const float * src0 = src[0] + srcofs;
 
 			int condition = 
-				(RisaIsAlignedTo128bits(dest)  ? 0:4) + 
-				(RisaIsAlignedTo128bits(src0)  ? 0:2) +
-				(RisaIsAlignedTo128bits(win)   ? 0:1 );
+				(IsAlignedTo128bits(dest)  ? 0:4) + 
+				(IsAlignedTo128bits(src0)  ? 0:2) +
+				(IsAlignedTo128bits(win)   ? 0:1 );
 
 #define R(cond, destf, destlf, srcf, winf) \
 			case cond: \
@@ -230,10 +230,10 @@ static void  _RisaInterleaveOverlappingWindow(float * dest, const float * const 
 			const float * src1 = src[1] + srcofs;
 
 			int condition = 
-				(RisaIsAlignedTo128bits(dest)  ? 0:4) + 
-				((RisaIsAlignedTo128bits(src0) &&
-				  RisaIsAlignedTo128bits(src1))? 0:2) +
-				(RisaIsAlignedTo128bits(win)   ? 0:1 );
+				(IsAlignedTo128bits(dest)  ? 0:4) + 
+				((IsAlignedTo128bits(src0) &&
+				  IsAlignedTo128bits(src1))? 0:2) +
+				(IsAlignedTo128bits(win)   ? 0:1 );
 
 #define R(cond, destf, destlf, srcf, winf) \
 			case cond: \
@@ -293,9 +293,9 @@ static void  _RisaInterleaveOverlappingWindow(float * dest, const float * const 
 
 //---------------------------------------------------------------------------
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, RisaInterleaveOverlappingWindow, (float * dest, const float * const * src,
+	void, InterleaveOverlappingWindow, (float * dest, const float * const * src,
 					float * win, int numch, size_t srcofs, size_t len),
-	_RisaInterleaveOverlappingWindow, (dest, src, win, numch, srcofs, len) )
+	_InterleaveOverlappingWindow, (dest, src, win, numch, srcofs, len) )
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------

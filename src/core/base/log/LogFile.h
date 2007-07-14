@@ -16,7 +16,7 @@
 
 /*!
 @brief
-	tRisaLogFile はシングルトンオブジェクトとしてシステム内に常駐するが、
+	tLogFile はシングルトンオブジェクトとしてシステム内に常駐するが、
 	実際にファイルにログを採るようになるのは Begin メソッドを呼んだあとだけ
 	となる。
 */
@@ -33,25 +33,25 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-class tRisaLogReceiver;
+class tLogReceiver;
 
 //---------------------------------------------------------------------------
 //! @brief		ログファイルクラス(シングルトン)
 //---------------------------------------------------------------------------
-class tRisaLogFile : public singleton_base<tRisaLogFile>, protected depends_on<tRisaLogger>
+class tLogFile : public singleton_base<tLogFile>, protected depends_on<tLogger>
 {
 	static const size_t NumLastLog  = 50; //!< ファイルへのログ記録を開始した際に出力する LastLog の行数
 
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	//! @brief ログを受け取るためのレシーバークラス
-	class tReceiver : public tRisaLogReceiver
+	class tReceiver : public tLogReceiver
 	{
-		tRisaLogFile & Owner; //!< tRisaLogFile へのポインタ
+		tLogFile & Owner; //!< tLogFile へのポインタ
 	public:
-		tReceiver(tRisaLogFile & owner) : Owner(owner) {;} //!< コンストラクタ
+		tReceiver(tLogFile & owner) : Owner(owner) {;} //!< コンストラクタ
 		//! @brief ログアイテムを記録するとき
-		void OnLog(const tRisaLogger::tItem & item)
+		void OnLog(const tLogger::tItem & item)
 		{
 			Owner.OnLog(item);
 		}
@@ -63,10 +63,10 @@ public:
 
 public:
 	//! @brief		コンストラクタ
-	tRisaLogFile();
+	tLogFile();
 
 	//! @brief		デストラクタ
-	~tRisaLogFile();
+	~tLogFile();
 
 private:
 	//! @brief		行を一行出力する
@@ -75,7 +75,7 @@ private:
 
 	//! @brief		ログが追加されるとき
 	//! @param		item  ログアイテム
-	void OnLog(const tRisaLogger::tItem & item);
+	void OnLog(const tLogger::tItem & item);
 
 public:
 	//! @brief		ログのファイルへの記録を開始する

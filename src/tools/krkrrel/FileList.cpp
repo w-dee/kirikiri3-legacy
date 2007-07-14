@@ -39,7 +39,7 @@ namespace Risa {
 // たとえば、c のリストをクリアしたい場合は a:. を指定する
 // たとえば、e のリストをクリアしたい場合は i:. を指定する
 
-static wxChar const  * const RisaXP4DefaultClassList[] = {
+static wxChar const  * const XP4DefaultClassList[] = {
 	//-- 圧縮を行うファイルのリスト
 	wxT("C:\\.wav$"),
 	wxT("C:\\.dll$"),
@@ -91,10 +91,10 @@ static wxChar const  * const RisaXP4DefaultClassList[] = {
 //! @brief		デフォルトの分類リストを配列にして返す
 //! @param		dest 格納先配列(内容はクリアされる)
 //---------------------------------------------------------------------------
-void RisaXP4GetDefaultClassList(wxArrayString & dest)
+void XP4GetDefaultClassList(wxArrayString & dest)
 {
 	dest.clear();
-	wxChar const * const * p = RisaXP4DefaultClassList;
+	wxChar const * const * p = XP4DefaultClassList;
 	while(*p)
 	{
 		dest.Add(*p);
@@ -114,9 +114,9 @@ void RisaXP4GetDefaultClassList(wxArrayString & dest)
 //! @param		basedir ベースディレクトリ
 //! @param		dest 格納先配列
 //---------------------------------------------------------------------------
-static void RisaInternalGetFileListAt(iRisaProgressCallback * callback,
+static void InternalGetFileListAt(iRisaProgressCallback * callback,
 	const wxString & dir, const wxString & basedir,
-	std::vector<tRisaXP4WriterInputFile> & dest)
+	std::vector<tXP4WriterInputFile> & dest)
 {
 	wxArrayString tmp;
 
@@ -169,8 +169,8 @@ static void RisaInternalGetFileListAt(iRisaProgressCallback * callback,
 		callback->OnProgress(i * 100 / files.GetCount());
 		wxString item_name = files[i].c_str() + basedir.Length();
 		wxFileName itemfile(files[i]);
-		dest.push_back(tRisaXP4WriterInputFile(
-			RisaNormalizeXP4ArchiveStorageName(item_name),
+		dest.push_back(tXP4WriterInputFile(
+			NormalizeXP4ArchiveStorageName(item_name),
 			0,
 			itemfile.GetModificationTime(),
 			item_name,
@@ -187,8 +187,8 @@ static void RisaInternalGetFileListAt(iRisaProgressCallback * callback,
 //! @param		dir 対象ディレクトリ
 //! @param		dest 格納先配列(内容はクリアされる)
 //---------------------------------------------------------------------------
-void RisaGetFileListAt(iRisaProgressCallback * callback,
-	const wxString & dir, std::vector<tRisaXP4WriterInputFile> & dest)
+void GetFileListAt(iRisaProgressCallback * callback,
+	const wxString & dir, std::vector<tXP4WriterInputFile> & dest)
 {
 	// 格納先 vector のクリア
 	dest.clear();
@@ -202,7 +202,7 @@ void RisaGetFileListAt(iRisaProgressCallback * callback,
 	// 対象ディレクトリを再帰的に探る
 	// callback は全てのディレクトリに一様にファイルが入っているわけではないので
 	// ほとんど意味をなさない(正確な進捗報告をするのは無理)
-	RisaInternalGetFileListAt(callback, target_dir, target_dir, dest);
+	InternalGetFileListAt(callback, target_dir, target_dir, dest);
 }
 //---------------------------------------------------------------------------
 
@@ -213,9 +213,9 @@ void RisaGetFileListAt(iRisaProgressCallback * callback,
 //! @param		pattern パターン
 //! @param		dest 格納先配列
 //---------------------------------------------------------------------------
-void RisaXP4ClassifyFiles(iRisaProgressCallback * callback,
+void XP4ClassifyFiles(iRisaProgressCallback * callback,
 	const wxArrayString & pattern,
-	std::vector<tRisaXP4WriterInputFile> &  dest
+	std::vector<tXP4WriterInputFile> &  dest
 	)
 {
 	// 正規表現パターンをコンパイルする
@@ -269,7 +269,7 @@ void RisaXP4ClassifyFiles(iRisaProgressCallback * callback,
 		}
 
 		// リストを元に分類を行う
-		for(std::vector<tRisaXP4WriterInputFile>::iterator i = dest.begin();
+		for(std::vector<tXP4WriterInputFile>::iterator i = dest.begin();
 			i != dest.end(); )
 		{
 			// 進捗を報告
@@ -332,7 +332,7 @@ void RisaXP4ClassifyFiles(iRisaProgressCallback * callback,
 //! @param		name 正規化したいストレージ名
 //! @return		正規化したストレージ名
 //---------------------------------------------------------------------------
-wxString RisaNormalizeXP4ArchiveStorageName(const wxString & name)
+wxString NormalizeXP4ArchiveStorageName(const wxString & name)
 {
 	// TODO: UNICODE 正規化
 
@@ -355,23 +355,23 @@ wxString RisaNormalizeXP4ArchiveStorageName(const wxString & name)
 
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaXP4MetadataReaderArchive から得た input 内の項目を map に追加する
+//! @brief		tXP4MetadataReaderArchive から得た input 内の項目を map に追加する
 //! @param		callback 進捗コールバックオブジェクト
 //! @param		map 追加先map
 //! @param		input 入力配列
 //! @note		すでに追加先に存在していた場合は追加先を書き換える。
 //!				削除すべき場合は削除する。
 //---------------------------------------------------------------------------
-void RisaApplyXP4StorageNameMap(
+void ApplyXP4StorageNameMap(
 	iRisaProgressCallback * callback,
-	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &map,
-	const std::vector<tRisaXP4MetadataReaderStorageItem> &input)
+	std::map<wxString, tXP4MetadataReaderStorageItem> &map,
+	const std::vector<tXP4MetadataReaderStorageItem> &input)
 {
-	for(std::vector<tRisaXP4MetadataReaderStorageItem>::const_iterator i =
+	for(std::vector<tXP4MetadataReaderStorageItem>::const_iterator i =
 		input.begin(); i != input.end(); i++)
 	{
 		if(callback) callback->OnProgress((i - input.begin()) * 100 / input.size());
-		std::map<wxString, tRisaXP4MetadataReaderStorageItem>::iterator mi;
+		std::map<wxString, tXP4MetadataReaderStorageItem>::iterator mi;
 		mi = map.find(i->GetInArchiveName());
 		if((i->GetFlags() & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED)
 		{
@@ -384,11 +384,11 @@ void RisaApplyXP4StorageNameMap(
 			if(mi != map.end()) map.erase(mi); // 旧データは削除する
 
 			// 追加する
-			tRisaXP4MetadataReaderStorageItem item(*i);
+			tXP4MetadataReaderStorageItem item(*i);
 			item.SetFlags((item.GetFlags() & ~ RISA__XP4_FILE_STATE_MASK) |
 									RISA__XP4_FILE_STATE_NONE);
 											// 状態をクリア
-			map.insert(std::pair<wxString, tRisaXP4MetadataReaderStorageItem>
+			map.insert(std::pair<wxString, tXP4MetadataReaderStorageItem>
 				(i->GetInArchiveName(), item));
 		}
 	}
@@ -403,7 +403,7 @@ void RisaApplyXP4StorageNameMap(
 //! @note		この関数を呼ぶ時点では archivename に対応するファイルは存在している
 //!				ことが確認できていなければならない
 //---------------------------------------------------------------------------
-void RisaEnumerateArchiveFiles(const wxString & archivename,
+void EnumerateArchiveFiles(const wxString & archivename,
 	std::vector<wxString> & archives)
 {
 	// archives の内容をクリア
@@ -451,11 +451,11 @@ void RisaEnumerateArchiveFiles(const wxString & archivename,
 //! @brief		指定されたアーカイブファイル名をベースとするすべてのアーカイブファイルを削除する
 //! @param		archivename アーカイブファイル名
 //---------------------------------------------------------------------------
-void RisaDeleteArchiveSet(const wxString & archivename)
+void DeleteArchiveSet(const wxString & archivename)
 {
 	// アーカイブファイルを列挙
 	std::vector<wxString> archives;
-	RisaEnumerateArchiveFiles(archivename, archives);
+	EnumerateArchiveFiles(archivename, archives);
 
 	// アーカイブファイルを削除
 	for(std::vector<wxString>::iterator i = archives.begin();
@@ -478,10 +478,10 @@ void RisaDeleteArchiveSet(const wxString & archivename)
 //! @param		dest 格納先マップ(内容はクリアされる)
 //! @param		targetdir このアーカイブセットが元にした対象ディレクトリを格納するポインタ(null可)
 //---------------------------------------------------------------------------
-void RisaReadXP4Metadata(
+void ReadXP4Metadata(
 	iRisaProgressCallback * callback,
 	const wxString & archivename,
-	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &dest,
+	std::map<wxString, tXP4MetadataReaderStorageItem> &dest,
 	wxString * targetdir)
 {
 	// dest の内容をクリア
@@ -492,16 +492,16 @@ void RisaReadXP4Metadata(
 
 	// ファイルを列挙
 	std::vector<wxString> archives;
-	RisaEnumerateArchiveFiles(archivename, archives);
+	EnumerateArchiveFiles(archivename, archives);
 
 	// ファイル名順にアーカイブを読み込み、map に追加
 	for(std::vector<wxString>::iterator i = archives.begin(); i != archives.end(); i++)
 	{
-		tRisaProgressCallbackAggregator agg(callback,
+		tProgressCallbackAggregator agg(callback,
 				(i - archives.begin()    )* 100 / archives.size(),
 				(i - archives.begin() + 1)* 100 / archives.size());
-		tRisaXP4MetadataReaderArchive archive(*i);
-		RisaApplyXP4StorageNameMap(&agg, dest, archive.GetItemVector());
+		tXP4MetadataReaderArchive archive(*i);
+		ApplyXP4StorageNameMap(&agg, dest, archive.GetItemVector());
 
 		// targetdir を取得
 		if(targetdir)
@@ -523,10 +523,10 @@ void RisaReadXP4Metadata(
 //! @param		arc アーカイブ内の既存ファイルを現すmap
 //! @param		ref ターゲットディレクトリから取得したファイル一覧
 //---------------------------------------------------------------------------
-void RisaCompareXP4StorageNameMap(
+void CompareXP4StorageNameMap(
 	iRisaProgressCallback * callback,
-	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &arc,
-	std::vector<tRisaXP4WriterInputFile> & ref)
+	std::map<wxString, tXP4MetadataReaderStorageItem> &arc,
+	std::vector<tXP4WriterInputFile> & ref)
 {
 	size_t ref_size = ref.size();
 	size_t arc_size = arc.size();
@@ -534,16 +534,16 @@ void RisaCompareXP4StorageNameMap(
 	// ref のアイテムごとに処理をする
 	callback->OnProgress(0);
 	size_t ref_idx = 0;
-	for(std::vector<tRisaXP4WriterInputFile>::iterator i = ref.begin();
+	for(std::vector<tXP4WriterInputFile>::iterator i = ref.begin();
 		i != ref.end(); i++, ref_idx ++)
 	{
 		if(callback) callback->OnProgress(ref_idx * 100 / (ref_size + arc_size));
-		tRisaProgressCallbackAggregator agg(callback,
+		tProgressCallbackAggregator agg(callback,
 				(ref_idx    ) * 100 / (ref_size + arc_size),
 				(ref_idx + 1) * 100 / (ref_size + arc_size));
 
 		// arc 内に i が存在するか？
-		std::map<wxString, tRisaXP4MetadataReaderStorageItem>::iterator mi;
+		std::map<wxString, tXP4MetadataReaderStorageItem>::iterator mi;
 		mi = arc.find(i->GetInArchiveName());
 		if(mi != arc.end())
 		{
@@ -610,7 +610,7 @@ void RisaCompareXP4StorageNameMap(
 	// arc のうち、RISA__XP4_FILE_MARKED のフラグがついていないファイルは
 	// ターゲットディレクトリに存在せず、削除されたファイルである
 	size_t arc_index = 0;
-	for(std::map<wxString, tRisaXP4MetadataReaderStorageItem>::iterator i = arc.begin();
+	for(std::map<wxString, tXP4MetadataReaderStorageItem>::iterator i = arc.begin();
 		i != arc.end(); i++, arc_index++)
 	{
 		if(callback) callback->OnProgress((arc_index + ref_size) * 100 / (ref_size + arc_size));
@@ -618,12 +618,12 @@ void RisaCompareXP4StorageNameMap(
 		{
 			// マークされていない
 			// ref に「削除」として追加する
-			ref.push_back(tRisaXP4WriterInputFile(i->first, RISA__XP4_FILE_STATE_DELETED));
+			ref.push_back(tXP4WriterInputFile(i->first, RISA__XP4_FILE_STATE_DELETED));
 		}
 	}
 
 	// マークの付いていないファイルを ref から削除
-	for(std::vector<tRisaXP4WriterInputFile>::iterator i = ref.begin();
+	for(std::vector<tXP4WriterInputFile>::iterator i = ref.begin();
 		i != ref.end(); )
 	{
 		if((i->GetFlags() & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_NONE)
@@ -636,23 +636,23 @@ void RisaCompareXP4StorageNameMap(
 
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaXP4MetadataReaderStorageItem の配列を tRisaXP4WriterInputFile に変換する
-//! @param		input 入力 tRisaXP4MetadataReaderStorageItem の map
-//! @param		output 出力 tRisaXP4WriterInputFile の配列(内容はクリアされる)
+//! @brief		tXP4MetadataReaderStorageItem の配列を tXP4WriterInputFile に変換する
+//! @param		input 入力 tXP4MetadataReaderStorageItem の map
+//! @param		output 出力 tXP4WriterInputFile の配列(内容はクリアされる)
 //---------------------------------------------------------------------------
-void RisaXP4MetadataReaderStorageItemToXP4WriterInputFile(
-	const std::map<wxString, tRisaXP4MetadataReaderStorageItem> & input,
-	std::vector<tRisaXP4WriterInputFile> & output)
+void XP4MetadataReaderStorageItemToXP4WriterInputFile(
+	const std::map<wxString, tXP4MetadataReaderStorageItem> & input,
+	std::vector<tXP4WriterInputFile> & output)
 {
 	// output の内容をクリア
 	output.clear();
 	output.reserve(input.size());
 
 	// input の内容を変換しながら output に追加
-	for(std::map<wxString, tRisaXP4MetadataReaderStorageItem>::const_iterator i = input.begin();
+	for(std::map<wxString, tXP4MetadataReaderStorageItem>::const_iterator i = input.begin();
 		i != input.end(); i++)
 	{
-		output.push_back(tRisaXP4WriterInputFile((i->second)));
+		output.push_back(tXP4WriterInputFile((i->second)));
 	}
 }
 //---------------------------------------------------------------------------

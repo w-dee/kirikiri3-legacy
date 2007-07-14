@@ -10,7 +10,7 @@
 //! @file
 //! @brief fontconfig 経由でのFreeType Face
 //! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
-//! tRisaFreeTypeFace もプラットフォームごとに異なった実装となる。
+//! tFreeTypeFace もプラットフォームごとに異なった実装となる。
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "NativeFreeTypeFace.h"
@@ -45,7 +45,7 @@ namespace Risa {
 //! @param		fontname フォント名
 //! @param		options オプション
 //---------------------------------------------------------------------------
-tRisaNativeFreeTypeFace::tRisaNativeFreeTypeFace(const wxString &fontname,
+tNativeFreeTypeFace::tNativeFreeTypeFace(const wxString &fontname,
 	risse_uint32 options)
 	:FaceName(fontname)
 {
@@ -83,8 +83,8 @@ tRisaNativeFreeTypeFace::tRisaNativeFreeTypeFace(const wxString &fontname,
 	}
 
 	// TrueType ライブラリをフック
-	tRisaFreeTypeLibrary::AddRef();
-	FT_Error err = FT_New_Face( tRisaFreeTypeLibrary::Get(), reinterpret_cast<char const*>(filename), 0, &Face );
+	tFreeTypeLibrary::AddRef();
+	FT_Error err = FT_New_Face( tFreeTypeLibrary::Get(), reinterpret_cast<char const*>(filename), 0, &Face );
 
 	if ( err != 0 ) {
 		wxString msg;
@@ -98,10 +98,10 @@ tRisaNativeFreeTypeFace::tRisaNativeFreeTypeFace(const wxString &fontname,
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaNativeFreeTypeFace::~tRisaNativeFreeTypeFace()
+tNativeFreeTypeFace::~tNativeFreeTypeFace()
 {
 	Clear();
-	tRisaFreeTypeLibrary::Release();
+	tFreeTypeLibrary::Release();
 }
 //---------------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ tRisaNativeFreeTypeFace::~tRisaNativeFreeTypeFace()
 //---------------------------------------------------------------------------
 //! @brief		FreeType の Face オブジェクトを返す
 //---------------------------------------------------------------------------
-FT_Face tRisaNativeFreeTypeFace::GetFTFace() const
+FT_Face tNativeFreeTypeFace::GetFTFace() const
 {
 	return Face;
 }
@@ -120,7 +120,7 @@ FT_Face tRisaNativeFreeTypeFace::GetFTFace() const
 //! @brief		このフォントファイルが持っているフォントを配列として返す
 //! @param		dest 格納先配列
 //---------------------------------------------------------------------------
-void tRisaNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
+void tNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 {
 	// このFaceの場合、既にFaceは特定されているため、利用可能な
 	// Face 数は常に1で、フォント名はこのオブジェクトが構築された際に渡された
@@ -135,7 +135,7 @@ void tRisaNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 //---------------------------------------------------------------------------
 //! @brief		全てのオブジェクトを解放する
 //---------------------------------------------------------------------------
-void tRisaNativeFreeTypeFace::Clear()
+void tNativeFreeTypeFace::Clear()
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
 }

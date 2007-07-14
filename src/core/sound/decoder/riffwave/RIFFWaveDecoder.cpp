@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/decoder/riffwave/RIFFWaveDecoder.h"
-#include "base/exception/RisaException.h"
+#include "base/exception/Exception.h"
 #include "base/fs/common/FSManager.h"
 
 
@@ -50,9 +50,9 @@ static risse_uint8 RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
 
 
 //---------------------------------------------------------------------------
-tRisaRIFFWaveDecoder::tRisaRIFFWaveDecoder(const tString & filename)
+tRIFFWaveDecoder::tRIFFWaveDecoder(const tString & filename)
 {
-	Stream = tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
+	Stream = tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
 
 	try
 	{
@@ -70,7 +70,7 @@ tRisaRIFFWaveDecoder::tRisaRIFFWaveDecoder(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-tRisaRIFFWaveDecoder::~tRisaRIFFWaveDecoder()
+tRIFFWaveDecoder::~tRIFFWaveDecoder()
 {
 	delete Stream;
 }
@@ -78,7 +78,7 @@ tRisaRIFFWaveDecoder::~tRisaRIFFWaveDecoder()
 
 
 //---------------------------------------------------------------------------
-void tRisaRIFFWaveDecoder::GetFormat(tRisaWaveFileInfo & fileinfo)
+void tRIFFWaveDecoder::GetFormat(tWaveFileInfo & fileinfo)
 {
 	fileinfo = FileInfo;
 }
@@ -86,7 +86,7 @@ void tRisaRIFFWaveDecoder::GetFormat(tRisaWaveFileInfo & fileinfo)
 
 
 //---------------------------------------------------------------------------
-bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
+bool tRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
 {
 	risse_uint64 remain = FileInfo.TotalSampleGranules - CurrentPos;
 	risse_uint writesamples = bufsamplelen < remain ? bufsamplelen : (risse_uint)remain;
@@ -104,7 +104,7 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 	// endian-ness conversion
 	switch(FileInfo.PCMType)
 	{
-	tRisaPCMTypes::ti16:
+	tPCMTypes::ti16:
 		{
 			risse_uint16 *p = (risse_uint16 *)buf;
 			risse_uint16 *plim = (risse_uint16 *)( (risse_uint8*)buf + read);
@@ -115,7 +115,7 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 			}
 		}
 		break;
-	tRisaPCMTypes::ti24:
+	tPCMTypes::ti24:
 		{
 			risse_uint8 *p = (risse_uint8 *)buf;
 			risse_uint8 *plim = (risse_uint8 *)( (risse_uint8*)buf + read);
@@ -128,8 +128,8 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 			}
 		}
 		break;
-	tRisaPCMTypes::ti32:
-	tRisaPCMTypes::tf32:
+	tPCMTypes::ti32:
+	tPCMTypes::tf32:
 		{
 			risse_uint32 *p = (risse_uint32 *)buf;
 			risse_uint32 *plim = (risse_uint32 *)( (risse_uint8*)buf + read);
@@ -161,7 +161,7 @@ bool tRisaRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint
 
 
 //---------------------------------------------------------------------------
-bool tRisaRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
+bool tRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
 {
 	if(FileInfo.TotalSampleGranules <= samplepos) return false;
 
@@ -182,7 +182,7 @@ bool tRisaRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
 
 
 //---------------------------------------------------------------------------
-bool tRisaRIFFWaveDecoder::Open()
+bool tRIFFWaveDecoder::Open()
 {
 	// Stream を RIFF Wave サウンドとして開く
 
@@ -264,15 +264,15 @@ bool tRisaRIFFWaveDecoder::Open()
 	}
 
 	if(is_float && bits_per_sample == 32)
-		FileInfo.PCMType = tRisaPCMTypes::tf32;
+		FileInfo.PCMType = tPCMTypes::tf32;
 	else if(!is_float && bits_per_sample == 32)
-		FileInfo.PCMType = tRisaPCMTypes::ti32;
+		FileInfo.PCMType = tPCMTypes::ti32;
 	else if(!is_float && bits_per_sample == 24)
-		FileInfo.PCMType = tRisaPCMTypes::ti24;
+		FileInfo.PCMType = tPCMTypes::ti24;
 	else if(!is_float && bits_per_sample == 16)
-		FileInfo.PCMType = tRisaPCMTypes::ti16;
+		FileInfo.PCMType = tPCMTypes::ti16;
 	else if(!is_float && bits_per_sample == 8)
-		FileInfo.PCMType = tRisaPCMTypes::ti8;
+		FileInfo.PCMType = tPCMTypes::ti8;
 	else
 		return false;
 
@@ -306,7 +306,7 @@ bool tRisaRIFFWaveDecoder::Open()
 
 
 //---------------------------------------------------------------------------
-bool tRisaRIFFWaveDecoder::FindRIFFChunk(tBinaryStream * stream, const risse_uint8 *chunk)
+bool tRIFFWaveDecoder::FindRIFFChunk(tBinaryStream * stream, const risse_uint8 *chunk)
 {
 	risse_uint8 buf[4];
 	while(true)
@@ -335,14 +335,14 @@ bool tRisaRIFFWaveDecoder::FindRIFFChunk(tBinaryStream * stream, const risse_uin
 //---------------------------------------------------------------------------
 //! @brief		デコーダファクトリクラス
 //---------------------------------------------------------------------------
-class tRisaRIFFWaveWaveDecoderFactory : public tRisaWaveDecoderFactory
+class tRIFFWaveWaveDecoderFactory : public tWaveDecoderFactory
 {
 public:
 	//! @brief デコーダを作成する
-	boost::shared_ptr<tRisaWaveDecoder> Create(const tString & filename)
+	boost::shared_ptr<tWaveDecoder> Create(const tString & filename)
 	{
-		boost::shared_ptr<tRisaWaveDecoder>
-			decoder(new tRisaRIFFWaveDecoder(filename));
+		boost::shared_ptr<tWaveDecoder>
+			decoder(new tRIFFWaveDecoder(filename));
 		return decoder;
 	}
 };
@@ -355,22 +355,22 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		デコーダファクトリレジストラ
 //---------------------------------------------------------------------------
-class tRisaRIFFWaveWaveDecoderFactoryRegisterer :
-	public singleton_base<tRisaRIFFWaveWaveDecoderFactoryRegisterer>,
-	protected depends_on<tRisaWaveDecoderFactoryManager>
+class tRIFFWaveWaveDecoderFactoryRegisterer :
+	public singleton_base<tRIFFWaveWaveDecoderFactoryRegisterer>,
+	protected depends_on<tWaveDecoderFactoryManager>
 {
 public:
 	//! @brief コンストラクタ
-	tRisaRIFFWaveWaveDecoderFactoryRegisterer()
+	tRIFFWaveWaveDecoderFactoryRegisterer()
 	{
-		boost::shared_ptr<tRisaWaveDecoderFactory>
-			factory(new tRisaRIFFWaveWaveDecoderFactory());
-		depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Register(RISSE_WS(".wav"), factory);
+		boost::shared_ptr<tWaveDecoderFactory>
+			factory(new tRIFFWaveWaveDecoderFactory());
+		depends_on<tWaveDecoderFactoryManager>::locked_instance()->Register(RISSE_WS(".wav"), factory);
 	}
 	//! @brief デストラクタ
-	~tRisaRIFFWaveWaveDecoderFactoryRegisterer()
+	~tRIFFWaveWaveDecoderFactoryRegisterer()
 	{
-		depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Unregister(RISSE_WS(".wav"));
+		depends_on<tWaveDecoderFactoryManager>::locked_instance()->Unregister(RISSE_WS(".wav"));
 	}
 };
 //---------------------------------------------------------------------------

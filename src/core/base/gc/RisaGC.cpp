@@ -28,7 +28,7 @@ RISSE_DEFINE_SOURCE_ID(13921,35495,35132,18542,18346,21061,47449,62904);
 	フェースを提供する
 
 
-	tRisaCollectorThread は現在の所、ファイナライザをサブスレッドで実行する
+	tCollectorThread は現在の所、ファイナライザをサブスレッドで実行する
 	ためのものである。
 
 	GC は GC_finalize_on_demand を 非0 にしない限り、コレクタ内から
@@ -59,12 +59,12 @@ RISSE_DEFINE_SOURCE_ID(13921,35495,35132,18542,18346,21061,47449,62904);
 	この場合、実際に GC がファイナライザを呼ぶのは、明示的に GC_invoke_finalizers
 	を呼んだ場合のみとなる。
 
-	tRisaCollectorThread は、GC_finalizer_notifier をフックし、これが呼ばれると
+	tCollectorThread は、GC_finalizer_notifier をフックし、これが呼ばれると
 	専用のスレッドで GC_invoke_finalizers() を呼ぶようになる。これならば上記のよう
 	なデッドロックの心配はない。
 
 	結局、ファイナライザがメインスレッド以外から呼ばれることになるが、これは
-	別に tRisaCollectorThread を使わなくても同じ事である。ファイナライザの
+	別に tCollectorThread を使わなくても同じ事である。ファイナライザの
 	呼び出しを無期限に延期するわけにもいかないし、仕方がない。
 
 	ファイナライザが呼ばれるスレッドはもっぱらこのスレッドになるが、このスレッド
@@ -81,7 +81,7 @@ static volatile bool ThreadExpired = false; // コレクタスレッドがもう
 
 
 //---------------------------------------------------------------------------
-tRisaCollectorThread::tThread::tThread(tRisaCollectorThread & owner) : Owner(owner)
+tCollectorThread::tThreadImpl::tThreadImpl(tCollectorThread & owner) : Owner(owner)
 {
 	Run(); // スレッドの実行を開始
 }
@@ -89,7 +89,7 @@ tRisaCollectorThread::tThread::tThread(tRisaCollectorThread & owner) : Owner(own
 
 
 //---------------------------------------------------------------------------
-tRisaCollectorThread::tThread::~tThread()
+tCollectorThread::tThreadImpl::~tThreadImpl()
 {
 	Terminate(); // スレッドの終了を伝える
 	Event.Signal(); // スレッドをたたき起こす
@@ -98,7 +98,7 @@ tRisaCollectorThread::tThread::~tThread()
 
 
 //---------------------------------------------------------------------------
-void tRisaCollectorThread::tThread::Execute()
+void tCollectorThread::tThreadImpl::Execute()
 {
 	while(!ShouldTerminate())
 	{
@@ -121,7 +121,7 @@ void tRisaCollectorThread::tThread::Execute()
 
 
 //---------------------------------------------------------------------------
-tRisaCollectorThread::tRisaCollectorThread()
+tCollectorThread::tCollectorThread()
 {
 	// GC の初期化
 	GC_init();
@@ -133,13 +133,13 @@ tRisaCollectorThread::tRisaCollectorThread()
 	GC_finalizer_notifier = &FinalizerNotifier;
 
 	// コレクタスレッドを起動
-	Thread = new tThread(*this);
+	Thread = new tThreadImpl(*this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaCollectorThread::~tRisaCollectorThread()
+tCollectorThread::~tCollectorThread()
 {
 	// スレッドはもう動作停止
 	ThreadExpired = true;
@@ -151,14 +151,14 @@ tRisaCollectorThread::~tRisaCollectorThread()
 
 
 //---------------------------------------------------------------------------
-void tRisaCollectorThread::FinalizerNotifier()
+void tCollectorThread::FinalizerNotifier()
 {
 	// スレッドはもう動作停止しているか？
 	if(ThreadExpired) return; // 動作を停止しているので何もしない
 
 	// コレクタスレッドをたたき起こす
-	tRisaCollectorThread * instance = tRisaCollectorThread::instance();
-	if(instance) tRisaCollectorThread::instance()->Thread->Wakeup();
+	tCollectorThread * instance = tCollectorThread::instance();
+	if(instance) tCollectorThread::instance()->Thread->Wakeup();
 }
 //---------------------------------------------------------------------------
 

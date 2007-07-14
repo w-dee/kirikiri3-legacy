@@ -7,19 +7,19 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-// "tRisaFont" definition
+// "tFont" definition
 //---------------------------------------------------------------------------
 
-#ifndef __RisaFONTSTRUC_H__
-#define __RisaFONTSTRUC_H__
+#ifndef __FONTSTRUC_H__
+#define __FONTSTRUC_H__
 
 namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-// tRisaFont definition
+// tFont definition
 //---------------------------------------------------------------------------
-struct tRisaFont
+struct tFont
 {
 	risse_int Height; // height of text
 	risse_uint32 Flags;
@@ -27,7 +27,7 @@ struct tRisaFont
 
 	ttstr Face; // font name
 
-	bool operator == (const tRisaFont & rhs) const
+	bool operator == (const tFont & rhs) const
 	{
 		return Height == rhs.Height &&
 			Flags == rhs.Flags &&

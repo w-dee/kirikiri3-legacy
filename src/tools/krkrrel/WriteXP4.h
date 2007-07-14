@@ -25,8 +25,8 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		ストレージ内の各セグメントを表すクラス
 //---------------------------------------------------------------------------
-class tRisaXP4WriterStorage;
-class tRisaXP4WriterSegment
+class tXP4WriterStorage;
+class tXP4WriterSegment
 {
 	wxFileOffset Offset; //!< (非圧縮時の)ストレージ先頭からのオフセット
 	wxFileOffset Size; //!< (非圧縮時の)サイズ
@@ -36,12 +36,12 @@ class tRisaXP4WriterSegment
 	wxFileOffset StoreSize; //!< (実際に格納されている)サイズ  無圧縮の場合は Size と同じ
 
 public:
-	tRisaXP4WriterSegment(
+	tXP4WriterSegment(
 		wxFileOffset offset,
 		wxFileOffset size,
 		bool iscompressed);
 
-	~tRisaXP4WriterSegment();
+	~tXP4WriterSegment();
 
 	wxFileOffset GetStoreOffset() const //!< (実際に格納された)オフセットを得る
 		{ return StoreOffset; }
@@ -59,20 +59,20 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		XP4アーカイブへ格納するファイルのアイテム
 //---------------------------------------------------------------------------
-class tRisaXP4WriterInputFile : public tRisaXP4MetadataReaderStorageItem
+class tXP4WriterInputFile : public tXP4MetadataReaderStorageItem
 {
 protected:
 	wxString InputName; //!< 入力ファイル名(ベースディレクトリ名部分をのぞく)
 	wxString BaseDirName; //!< 入力ファイルのベースディレクトリ名
 
 public:
-	tRisaXP4WriterInputFile(
+	tXP4WriterInputFile(
 		const wxString & inarchivename,
 		wxUint16 flags = 0,
 		const wxDateTime & time = wxDateTime(),
 		const wxString & inputname = wxEmptyString,
 		const wxString & basedirname = wxEmptyString) :
-				tRisaXP4MetadataReaderStorageItem(
+				tXP4MetadataReaderStorageItem(
 						inarchivename,
 						flags,
 						(flags & RISA__XP4_FILE_STATE_MASK) ==
@@ -82,11 +82,11 @@ public:
 				InputName(inputname),
 				BaseDirName(basedirname)
 				 {;}  //!< コンストラクタ
-	tRisaXP4WriterInputFile(const tRisaXP4MetadataReaderStorageItem & ref) :
-		tRisaXP4MetadataReaderStorageItem(ref)
+	tXP4WriterInputFile(const tXP4MetadataReaderStorageItem & ref) :
+		tXP4MetadataReaderStorageItem(ref)
 				 {;} //!< コンストラクタ
 
-	bool operator < (const tRisaXP4WriterInputFile & rhs) const
+	bool operator < (const tXP4WriterInputFile & rhs) const
 	{
 		// 比較用演算子
 		return InArchiveName < rhs.InArchiveName;
@@ -103,18 +103,18 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		アーカイブ内のストレージアイテムを表すクラス
 //---------------------------------------------------------------------------
-class tRisaXP4WriterStorage : public tRisaXP4WriterInputFile
+class tXP4WriterStorage : public tXP4WriterInputFile
 {
-	std::vector<tRisaXP4WriterSegment> SegmentVector; //!< セグメントの配列
+	std::vector<tXP4WriterSegment> SegmentVector; //!< セグメントの配列
 	bool IsReference; //!< 他のストレージアイテムを参照している場合は 真
 
 public:
-	tRisaXP4WriterStorage(
-		const tRisaXP4WriterInputFile & inputfile);
+	tXP4WriterStorage(
+		const tXP4WriterInputFile & inputfile);
 
-	tRisaXP4WriterStorage(
-		const tRisaXP4WriterInputFile & inputfile,
-		const tRisaXP4WriterStorage & ref);
+	tXP4WriterStorage(
+		const tXP4WriterInputFile & inputfile,
+		const tXP4WriterStorage & ref);
 
 	void MakeHash(iRisaProgressCallback * callback);
 
@@ -123,7 +123,7 @@ public:
 	void WriteMetaData(wxMemoryBuffer & buf);
 
 	//! @brief ソート用比較関数
-	bool operator < (const tRisaXP4WriterStorage &rhs) const
+	bool operator < (const tXP4WriterStorage &rhs) const
 	{
 		// サイズにおいて降順でソートするための関数
 		// サイズは 2MB 単位で比較する
@@ -138,22 +138,22 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		アーカイブを表すクラス
 //---------------------------------------------------------------------------
-class tRisaXP4WriterArchive
+class tXP4WriterArchive
 {
-	std::vector<tRisaXP4WriterStorage> StorageVector; //!< このアーカイブ内に含まれるtRisaXP4WriterStorage の配列
+	std::vector<tXP4WriterStorage> StorageVector; //!< このアーカイブ内に含まれるtXP4WriterStorage の配列
 	wxFileOffset Size; //!< アーカイブのサイズ
 	wxString FileName; //!< アーカイブファイル名
 	wxString TargetDir; //!< アーカイブに格納されるファイルの元となったディレクトリ名
 	bool ArchiveOk; //!< アーカイブが正常に作成されたかどうか
 
 public:
-	tRisaXP4WriterArchive(const wxString & filename, const wxString & targetdir);
-	~tRisaXP4WriterArchive();
+	tXP4WriterArchive(const wxString & filename, const wxString & targetdir);
+	~tXP4WriterArchive();
 	wxFileOffset GetSize() const { return Size; } //!< アーカイブのファイルサイズを得る
-	const tRisaXP4WriterStorage & GetStorageItem(size_t idx)
+	const tXP4WriterStorage & GetStorageItem(size_t idx)
 		{ return StorageVector[idx]; } //!< 指定されたインデックスにあるストレージオブジェクトを得る
 	size_t AddAndWriteBody(iRisaProgressCallback * callback,
-		const tRisaXP4WriterStorage & storage);
+		const tXP4WriterStorage & storage);
 	void WriteMetaData(iRisaProgressCallback * callback, bool compress);
 	void SetArchiveOk() { ArchiveOk = true; } //!< アーカイブを確定する
 };
@@ -163,25 +163,25 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		XP4アーカイブへの書き込みを管理するクラス
 //---------------------------------------------------------------------------
-class tRisaXP4Writer
+class tXP4Writer
 {
 	iRisaProgressCallback * ProgressCallback; //!< コールバック用オブジェクト
 	wxString BaseFileName;	//!< ベースファイル名(パス付きだが拡張子をのぞく)
 	wxFileOffset  SplitLimit;	//!< 分割する際のファイルサイズの上限(バイト単位) 0=分割なし
-	std::vector<tRisaXP4WriterInputFile> List; //!< 入力ファイルのリスト
-	std::vector<tRisaXP4WriterArchive *> ArchiveVector; //!< 各ボリュームファイルを表す配列
+	std::vector<tXP4WriterInputFile> List; //!< 入力ファイルのリスト
+	std::vector<tXP4WriterArchive *> ArchiveVector; //!< 各ボリュームファイルを表す配列
 	wxString TargetDir; //!< アーカイブに格納されるファイルの元となったディレクトリ名
 
 	unsigned int NewArchive();
 
 public:
-	tRisaXP4Writer(
+	tXP4Writer(
 		iRisaProgressCallback * callback,
 		const wxString & basefilename,
 		wxFileOffset splitlimit,
-		const std::vector<tRisaXP4WriterInputFile> & list,
+		const std::vector<tXP4WriterInputFile> & list,
 		const wxString & targetdir);
-	~tRisaXP4Writer();
+	~tXP4Writer();
 
 	void MakeArchive();
 };

@@ -30,14 +30,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		サブの処理のパーセント進捗をトータルのパーセント進捗として報告するクラス
 //---------------------------------------------------------------------------
-class tRisaProgressCallbackAggregator : public iRisaProgressCallback
+class tProgressCallbackAggregator : public iRisaProgressCallback
 {
 	iRisaProgressCallback * Destination;
 	int PercentLow;
 	int PercentHigh;
 
 public:
-	tRisaProgressCallbackAggregator(
+	tProgressCallbackAggregator(
 		iRisaProgressCallback *destination,
 		int percentlow, int percenthigh
 				) :

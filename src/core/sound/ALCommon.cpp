@@ -11,7 +11,7 @@
 //! @brief OpenAL 共通
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/exception/RisaException.h"
+#include "base/exception/Exception.h"
 #include "sound/WaveDecoder.h"
 #include "sound/ALCommon.h"
 
@@ -21,7 +21,7 @@ RISSE_DEFINE_SOURCE_ID(9828,18466,5910,19138,44164,25475,18182,51394);
 
 
 //---------------------------------------------------------------------------
-tRisaOpenAL::tRisaOpenAL()
+tOpenAL::tOpenAL()
 {
 	// フィールドの初期化
 	Device = NULL;
@@ -54,7 +54,7 @@ tRisaOpenAL::tRisaOpenAL()
 
 
 //---------------------------------------------------------------------------
-tRisaOpenAL::~tRisaOpenAL()
+tOpenAL::~tOpenAL()
 {
 	Clear();
 }
@@ -62,7 +62,7 @@ tRisaOpenAL::~tRisaOpenAL()
 
 
 //---------------------------------------------------------------------------
-void tRisaOpenAL::Clear()
+void tOpenAL::Clear()
 {
 	if(Context)
 	{
@@ -79,7 +79,7 @@ void tRisaOpenAL::Clear()
 
 
 //---------------------------------------------------------------------------
-void tRisaOpenAL::ThrowIfError(const risse_char * message)
+void tOpenAL::ThrowIfError(const risse_char * message)
 {
 	ALCenum err = alGetError();
 	if(err == AL_NO_ERROR) return ; // エラーはなにも起きていない
@@ -92,7 +92,7 @@ void tRisaOpenAL::ThrowIfError(const risse_char * message)
 
 
 //---------------------------------------------------------------------------
-void tRisaOpenAL::ClearErrorState()
+void tOpenAL::ClearErrorState()
 {
 	alGetError();
 }

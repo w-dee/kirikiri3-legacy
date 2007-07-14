@@ -105,7 +105,7 @@ foreach $key (sort keys %cmap)
 	if($prev_group != $group)
 	{
 		printf FH ("};\n\n") if($prev_group != -1);
-		printf FH "static const risse_uint16 RisaSJIS2UNICODE_Submap_map_%02X[%d]={\n/* 0x%02X%02X - 0x%02X%02X */\n",
+		printf FH "static const risse_uint16 SJIS2UNICODE_Submap_map_%02X[%d]={\n/* 0x%02X%02X - 0x%02X%02X */\n",
 			$group, $high[$group] - $low[$group] + 1,
 			$group, $low[$group] , $group, $high[$group];
 		$count = 0;
@@ -128,7 +128,7 @@ print FH <<EOF;
 //---------------------------------------------------------------------------
 //! \@brief		CP932 ( = Shift-JIS) -> UNICODE table lookup structure
 //---------------------------------------------------------------------------
-struct tRisaSJIS2UNICODE_Submap
+struct tSJIS2UNICODE_Submap
 {
 	risse_uint8	low;
 	risse_uint8	high;
@@ -140,7 +140,7 @@ struct tRisaSJIS2UNICODE_Submap
 //---------------------------------------------------------------------------
 //! \@brief		CP932 ( = Shift-JIS) -> UNICODE table
 //---------------------------------------------------------------------------
-static const tRisaSJIS2UNICODE_Submap RisaSJIS2UNICODE_Submap[128] = {
+static const tSJIS2UNICODE_Submap SJIS2UNICODE_Submap[128] = {
 EOF
 
 
@@ -153,7 +153,7 @@ for($i = 128; $i < 256; $i++)
 	}
 	else
 	{
-		printf FH "{ 0x%02X, 0x%02X, RisaSJIS2UNICODE_Submap_map_%02X },\n",
+		printf FH "{ 0x%02X, 0x%02X, SJIS2UNICODE_Submap_map_%02X },\n",
 			$low[$i], $high[$i], $i;
 	}
 }
@@ -175,7 +175,7 @@ static bool inline _RisaSJISToUnicode(const char * & in, risse_char *out)
 	const unsigned char * & p = (const unsigned char * &)in;
 
 	// 1 byte 文字をチェック
-	risse_uint16 ch = RisaSJIS2UNICODE_Submap_map_00[p[0]];
+	risse_uint16 ch = SJIS2UNICODE_Submap_map_00[p[0]];
 	if(ch != 0x0000U)
 	{
 		// 1byte
@@ -186,8 +186,8 @@ static bool inline _RisaSJISToUnicode(const char * & in, risse_char *out)
 
 	if(p[0] >= 0x80)
 	{
-		 const tRisaSJIS2UNICODE_Submap & submap =
-		 	RisaSJIS2UNICODE_Submap[p[0]-0x80];
+		 const tSJIS2UNICODE_Submap & submap =
+		 	SJIS2UNICODE_Submap[p[0]-0x80];
 		if(submap.submap && submap.low <= p[1] && submap.high >= p[1])
 		{
 			ch = submap.submap[p[1]-submap.low];
@@ -212,7 +212,7 @@ static bool inline _RisaSJISToUnicode(const char * & in, risse_char *out)
 //! \@param		in 入力 sjisコード  例: '漢' = 0x8abf  '0' = 0x0030
 //! \@return		出力 UNICODE (wchar_t) 変換に失敗すれば 0
 //---------------------------------------------------------------------------
-risse_char RisaSJISToUnicode(risse_uint sjis)
+risse_char SJISToUnicode(risse_uint sjis)
 {
 	char buf[3];
 	const char * p = buf;
@@ -243,7 +243,7 @@ risse_char RisaSJISToUnicode(risse_uint sjis)
 //!				(最後に\\0は書き込まれないしその文字数も含まれないので注意)
 //!				(risse_size)-1 = 異常な文字が見つかった
 //---------------------------------------------------------------------------
-risse_size RisaSJISToUnicodeString(const char * in, risse_char *out)
+risse_size SJISToUnicodeString(const char * in, risse_char *out)
 {
 	// convert input Shift-JIS (CP932) string to output wide string
 	int count = 0;
@@ -281,8 +281,8 @@ print HH <<EOF;
 namespace Risa {
 //---------------------------------------------------------------------------
 
-risse_size RisaSJISToUnicodeString(const char * in, risse_char *out);
-risse_char RisaSJISToUnicode(risse_uint sjis);
+risse_size SJISToUnicodeString(const char * in, risse_char *out);
+risse_char SJISToUnicode(risse_uint sjis);
 
 //---------------------------------------------------------------------------
 } // namespace Risa

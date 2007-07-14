@@ -27,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID(57103,491,17401,17369,5283,30429,30396,3005);
 
 //---------------------------------------------------------------------------
 tNI_FileSystemNativeInstance::tNI_FileSystemNativeInstance(
-					boost::shared_ptr<tRisaFileSystem> filesystem,
+					boost::shared_ptr<tFileSystem> filesystem,
 					iRisseDispatch2 * owner) :
 						FileSystem(filesystem),
 						Owner(owner)
@@ -43,7 +43,7 @@ void tNI_FileSystemNativeInstance::Invalidate()
 	// ただしファイルシステムマネージャがシャットダウン中にこの関数が
 	// 呼ばれるときは、すでにアンマウントされることが決定しているので
 	// 呼ばない。
-	if(tRisaFileSystemManager::pointer r = tRisaFileSystemManager::instance())
+	if(tFileSystemManager::pointer r = tFileSystemManager::instance())
 		r->Unmount(Owner);
 
 	// FileSystem にこれ以上アクセスできないようにreset
@@ -78,9 +78,9 @@ void tNI_BaseFileSystem::Invalidate()
 //---------------------------------------------------------------------------
 void tNI_BaseFileSystem::RegisterFileSystemNativeInstance(
 		iRisseDispatch2 * risse_obj,
-		tRisaFileSystem * fs_obj)
+		tFileSystem * fs_obj)
 {
-	boost::shared_ptr<tRisaFileSystem> filesystem(fs_obj);
+	boost::shared_ptr<tFileSystem> filesystem(fs_obj);
 	FileSystem = filesystem;
 
 	// tNI_FileSystemNativeInstance オブジェクトの生成
@@ -142,7 +142,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/chopExt)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tRisaFileSystemManager::instance()->ChopExtension(*param[0]);
+		*result = tFileSystemManager::instance()->ChopExtension(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/chopExt)
@@ -166,7 +166,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractExt)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tRisaFileSystemManager::instance()->ExtractExtension(*param[0]);
+		*result = tFileSystemManager::instance()->ExtractExtension(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractExt)
@@ -186,7 +186,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractName)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tRisaFileSystemManager::instance()->ExtractName(*param[0]);
+		*result = tFileSystemManager::instance()->ExtractName(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractName)
@@ -206,7 +206,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/extractPath)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tRisaFileSystemManager::instance()->ExtractPath(*param[0]);
+		*result = tFileSystemManager::instance()->ExtractPath(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/extractPath)
@@ -229,7 +229,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 	if(result)
-		*result = tRisaFileSystemManager::instance()->GetFullPath(*param[0]);
+		*result = tFileSystemManager::instance()->GetFullPath(*param[0]);
 	return RISSE_S_OK;
 }
 RISSE_END_NATIVE_METHOD_DECL(/*func. name*/getFullPath)
@@ -266,7 +266,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
 
 	tString mountpoint = *param[0];
 	iRisseDispatch2 * dsp = param[1]->AsObjectNoAddRef();
-	tRisaFileSystemManager::instance()->Mount(mountpoint, dsp);
+	tFileSystemManager::instance()->Mount(mountpoint, dsp);
 
 	return RISSE_S_OK;
 }
@@ -287,7 +287,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
 
 	tString mountpoint = *param[0];
 
-	tRisaFileSystemManager::instance()->Unmount(mountpoint);
+	tFileSystemManager::instance()->Unmount(mountpoint);
 
 	return RISSE_S_OK;
 }
@@ -310,14 +310,14 @@ RISSE_BEGIN_NATIVE_PROP_DECL(cwd)
 	*/
 	RISSE_BEGIN_NATIVE_PROP_GETTER
 	{
-		if(result) *result = tRisaFileSystemManager::instance()->GetCurrentDirectory();
+		if(result) *result = tFileSystemManager::instance()->GetCurrentDirectory();
 		return RISSE_S_OK;
 	}
 	RISSE_END_NATIVE_PROP_GETTER
 
 	RISSE_BEGIN_NATIVE_PROP_SETTER
 	{
-		tRisaFileSystemManager::instance()->SetCurrentDirectory(*param);
+		tFileSystemManager::instance()->SetCurrentDirectory(*param);
 		return RISSE_S_OK;
 	}
 	RISSE_END_NATIVE_PROP_SETTER
@@ -338,12 +338,12 @@ RISSE_END_NATIVE_PROP_DECL(cwd)
 
 
 //---------------------------------------------------------------------------
-tRisaFileSystemRegisterer::tRisaFileSystemRegisterer()
+tFileSystemRegisterer::tFileSystemRegisterer()
 {
 	FileSystemClass = new tNC_FileSystem();
 	try
 	{
-		depends_on<tRisaRisseScriptEngine>::locked_instance()->RegisterGlobalObject(RISSE_WS("FileSystem"), FileSystemClass);
+		depends_on<tRisseScriptEngine>::locked_instance()->RegisterGlobalObject(RISSE_WS("FileSystem"), FileSystemClass);
 	}
 	catch(...)
 	{
@@ -355,7 +355,7 @@ tRisaFileSystemRegisterer::tRisaFileSystemRegisterer()
 
 
 //---------------------------------------------------------------------------
-tRisaFileSystemRegisterer::~tRisaFileSystemRegisterer()
+tFileSystemRegisterer::~tFileSystemRegisterer()
 {
 	FileSystemClass->Release();
 }
@@ -363,7 +363,7 @@ tRisaFileSystemRegisterer::~tRisaFileSystemRegisterer()
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemRegisterer::RegisterClassObject(const risse_char *name,
+void tFileSystemRegisterer::RegisterClassObject(const risse_char *name,
 											iRisseDispatch2 * object)
 {
 	tVariant val(object, NULL);

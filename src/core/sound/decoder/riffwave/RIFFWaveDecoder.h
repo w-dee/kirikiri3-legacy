@@ -23,27 +23,27 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief	 RIFF Wave デコーダ
 //---------------------------------------------------------------------------
-class tRisaRIFFWaveDecoder : public tRisaWaveDecoder
+class tRIFFWaveDecoder : public tWaveDecoder
 {
 	tBinaryStream * Stream; //!< 入力ストリーム
-	tRisaWaveFileInfo FileInfo; //!< サウンド形式
+	tWaveFileInfo FileInfo; //!< サウンド形式
 	risse_uint64 DataStart; //!< ファイル中でのデータの開始位置
 	risse_uint64 CurrentPos; //!< ファイル中でのデータの読み込み位置
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		filename   ファイル名
-	tRisaRIFFWaveDecoder(const tString & filename);
+	tRIFFWaveDecoder(const tString & filename);
 
-	// tRisaWaveDecoder をオーバーライドするもの
+	// tWaveDecoder をオーバーライドするもの
 	//! @brief		デストラクタ
-	virtual ~tRisaRIFFWaveDecoder();
+	virtual ~tRIFFWaveDecoder();
 
-	virtual void SuggestFormat(const tRisaWaveFormat & format) {;}
+	virtual void SuggestFormat(const tWaveFormat & format) {;}
 
 	//! @brief		サウンド情報を得る
 	//! @param		fileinfo   情報を格納するための構造体
-	virtual void GetFormat(tRisaWaveFileInfo & format);
+	virtual void GetFormat(tWaveFileInfo & format);
 
 	//! @brief		サウンドをレンダリングする
 	//! @param		buf					データ格納先バッファ

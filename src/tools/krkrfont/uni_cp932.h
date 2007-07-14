@@ -19,7 +19,7 @@
 
 namespace Risa {
 //---------------------------------------------------------------------------
-risse_uint RisaUnicodeToSJIS(risse_char in);
+risse_uint UnicodeToSJIS(risse_char in);
 //---------------------------------------------------------------------------
 } // namespace Risa
 

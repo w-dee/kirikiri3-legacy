@@ -20,37 +20,37 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-void RisaXP4GetDefaultClassList(wxArrayString & dest);
+void XP4GetDefaultClassList(wxArrayString & dest);
 
-void RisaGetFileListAt(iRisaProgressCallback * callback,
-	const wxString & dir, std::vector<tRisaXP4WriterInputFile> & dest);
+void GetFileListAt(iRisaProgressCallback * callback,
+	const wxString & dir, std::vector<tXP4WriterInputFile> & dest);
 
-void RisaXP4ClassifyFiles(iRisaProgressCallback * callback,
+void XP4ClassifyFiles(iRisaProgressCallback * callback,
 	const wxArrayString & pattern,
-	std::vector<tRisaXP4WriterInputFile> &  dest
+	std::vector<tXP4WriterInputFile> &  dest
 	);
 
-wxString RisaNormalizeXP4ArchiveStorageName(const wxString & name);
+wxString NormalizeXP4ArchiveStorageName(const wxString & name);
 
-void RisaEnumerateArchiveFiles(const wxString & archivename,
+void EnumerateArchiveFiles(const wxString & archivename,
 	std::vector<wxString> & archives);
 
-void RisaReadXP4Metadata(
+void ReadXP4Metadata(
 	iRisaProgressCallback * callback,
 	const wxString & archivename,
-	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &dest,
+	std::map<wxString, tXP4MetadataReaderStorageItem> &dest,
 	wxString * targetdir = NULL);
 
-void RisaCompareXP4StorageNameMap(
+void CompareXP4StorageNameMap(
 	iRisaProgressCallback * callback,
-	std::map<wxString, tRisaXP4MetadataReaderStorageItem> &arc,
-	std::vector<tRisaXP4WriterInputFile> & ref);
+	std::map<wxString, tXP4MetadataReaderStorageItem> &arc,
+	std::vector<tXP4WriterInputFile> & ref);
 
-void RisaXP4MetadataReaderStorageItemToXP4WriterInputFile(
-	const std::map<wxString, tRisaXP4MetadataReaderStorageItem> & input,
-	std::vector<tRisaXP4WriterInputFile> & output);
+void XP4MetadataReaderStorageItemToXP4WriterInputFile(
+	const std::map<wxString, tXP4MetadataReaderStorageItem> & input,
+	std::vector<tXP4WriterInputFile> & output);
 
-void RisaDeleteArchiveSet(const wxString & archivename);
+void DeleteArchiveSet(const wxString & archivename);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------

@@ -10,8 +10,8 @@
 //! @file
 //! @brief ガーベジ・コレクション
 //---------------------------------------------------------------------------
-#ifndef _RisaGCH_
-#define _RisaGCH_
+#ifndef _GCH_
+#define _GCH_
 
 #include "base/utils/Singleton.h"
 #include "base/utils/RisaThread.h"
@@ -24,23 +24,23 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		ガーベジコレクタ用スレッド
 //---------------------------------------------------------------------------
-class tRisaCollectorThread : public singleton_base<tRisaCollectorThread>
+class tCollectorThread : public singleton_base<tCollectorThread>
 {
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	//! @brief	コレクタスレッドのクラス
-	class tThread : public tRisaThread
+	class tThreadImpl : public tThread
 	{
-		tRisaThreadEvent Event; //!< イベントオブジェクト
-		tRisaCollectorThread & Owner;
+		tThreadEvent Event; //!< イベントオブジェクト
+		tCollectorThread & Owner;
 	public:
 
 		//! @brief		コンストラクタ
-		//! @param		owner		このオブジェクトを所有する tRisaCollectorThread オブジェクト
-		tThread(tRisaCollectorThread & owner);
+		//! @param		owner		このオブジェクトを所有する tCollectorThread オブジェクト
+		tThreadImpl(tCollectorThread & owner);
 
 		//! @brief		デストラクタ
-		~tThread();
+		~tThreadImpl();
 
 		//! @brief		スレッドのエントリーポイント
 		void Execute();
@@ -49,14 +49,14 @@ class tRisaCollectorThread : public singleton_base<tRisaCollectorThread>
 		void Wakeup() { Event.Signal(); }
 	};
 
-	tThread *Thread; //!< コレクタスレッド
+	tThreadImpl *Thread; //!< コレクタスレッド
 
 public:
 	//! @brief		コンストラクタ
-	tRisaCollectorThread();
+	tCollectorThread();
 
 	//! @brief		デストラクタ
-	~tRisaCollectorThread();
+	~tCollectorThread();
 
 private:
 	//! @brief		ファイナライズすべきオブジェクトがあった場合に

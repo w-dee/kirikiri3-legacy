@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief BFF (Risa3 Bitmap Font File) の書き出し
+//! @brief BFF (3 Bitmap Font File) の書き出し
 //---------------------------------------------------------------------------
 #include <prec.h>
 #include <wx/progdlg.h>
@@ -30,7 +30,7 @@ namespace Risa {
 //! @note		このアルゴリズムは最悪の場合で入力データを 2 倍 + 1にする
 //! 			そのため、out には in_size の 2 倍 + 1のデータ領域を確保すること
 //---------------------------------------------------------------------------
-static void RisaCompressGlyphBitmap(const risse_uint8 * in,
+static void CompressGlyphBitmap(const risse_uint8 * in,
 	risse_uint in_w, risse_uint in_h,
 	risse_int in_pitch,
 	risse_uint8 * out, risse_uint *out_size)
@@ -106,19 +106,19 @@ static void RisaCompressGlyphBitmap(const risse_uint8 * in,
 //! @param		write_kerning_vector カーニング情報を出力するかどうか
 //! @param		parent ダイアログボックスの親ウィンドウ
 //---------------------------------------------------------------------------
-void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
+void WriteGlyphBitmap(tFreeTypeFace * face, const wxString & out_file,
 	bool write_bitmap,
 	bool write_kerning_vector, wxWindow * parent)
 {
-	tRisaBFFHeader header;
+	tBFFHeader header;
 	risse_uint num_files = 0;
-	tRisaBFFDirectory directory[3];
-	tRisaBFFDirectory * char_map_directory = directory + 0;
-	tRisaBFFDirectory * bitmap_directory = directory + 1;
-//	tRisaBFFDirectory * kern_vector_directory = directory + 2;
-	tRisaBFFCharacterMap *map = NULL;
-	tRisaBFFKerningVector *kern_vector = NULL;
-	tRisaGlyphBitmap * bitmap = NULL;
+	tBFFDirectory directory[3];
+	tBFFDirectory * char_map_directory = directory + 0;
+	tBFFDirectory * bitmap_directory = directory + 1;
+//	tBFFDirectory * kern_vector_directory = directory + 2;
+	tBFFCharacterMap *map = NULL;
+	tBFFKerningVector *kern_vector = NULL;
+	tGlyphBitmap * bitmap = NULL;
 	risse_uint8 * bitmap_tmp = NULL;
 	bool canceled = false;
 
@@ -149,7 +149,7 @@ void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 	try
 	{
 		// map のメモリを確保
-		map = new tRisaBFFCharacterMap[total_glyph_count];
+		map = new tBFFCharacterMap[total_glyph_count];
 
 		// ディレクトリを準備する
 		// ただしディレクトリ中のサイズオフセットについてはまたあとで修正して書き込む
@@ -190,7 +190,7 @@ void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 
 		// ディレクトリを書き込む
 		wxFileOffset directory_offset = file.Tell();
-		file.Write(directory, sizeof(tRisaBFFDirectory) * num_files);
+		file.Write(directory, sizeof(tBFFDirectory) * num_files);
 
 		// ファイルポインタを 4 byte 境界にアラインメントする
 		{
@@ -240,8 +240,8 @@ void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 				map[actual_glyph_count].Offset =
 					wxUINT32_SWAP_ON_BE(static_cast<risse_uint32>(file.Tell() - bitmap_offset));
 
-				// tRisaBFFBitmapHeader に情報を書き込む
-				tRisaBFFBitmapHeader header;
+				// tBFFBitmapHeader に情報を書き込む
+				tBFFBitmapHeader header;
 				header.Flags     = wxUINT16_SWAP_ON_BE(0);
 				header.OriginX   = wxINT16_SWAP_ON_BE (bitmap->GetOriginX());
 				header.OriginY   = wxINT16_SWAP_ON_BE (bitmap->GetOriginY());
@@ -252,7 +252,7 @@ void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 				bitmap_tmp = new risse_uint8[
 					bitmap->GetBlackBoxW() * bitmap->GetBlackBoxH() * 2 + 2];
 				risse_uint bitmap_comp_size = 0;
-				RisaCompressGlyphBitmap(bitmap->GetData(),
+				CompressGlyphBitmap(bitmap->GetData(),
 					bitmap->GetBlackBoxW(),
 					bitmap->GetBlackBoxH(),
 					bitmap->GetPitch(),
@@ -273,7 +273,7 @@ void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 			else
 			{
 				// ビットマップを書き込まない場合
-				tRisaGlyphMetrics metrics;
+				tGlyphMetrics metrics;
 				if(!face->GetGlyphMetricsFromCharcode(charcode, metrics))
 					continue; // 寸法を得られなかった
 
@@ -315,7 +315,7 @@ void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 
 			// 文字マップのファイルサイズを修正
 			char_map_directory->Size =
-				wxUINT32_SWAP_ON_BE(sizeof(tRisaBFFCharacterMap) * actual_glyph_count); // 修正
+				wxUINT32_SWAP_ON_BE(sizeof(tBFFCharacterMap) * actual_glyph_count); // 修正
 
 			// 文字マップを書き込む
 			//- ファイルポインタを 16 byte 境界にアラインメントする
@@ -327,7 +327,7 @@ void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 			char_map_directory->Offset =
 				wxUINT32_SWAP_ON_BE(static_cast<risse_uint32>(file.Tell())); // 修正
 
-			file.Write(map, sizeof(tRisaBFFCharacterMap) * actual_glyph_count);
+			file.Write(map, sizeof(tBFFCharacterMap) * actual_glyph_count);
 
 			if(write_kerning_vector)
 			{
@@ -345,7 +345,7 @@ void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
 
 			// 修正されたディレクトリをもう一度書く
 			file.Seek(directory_offset);
-			file.Write(directory, sizeof(tRisaBFFDirectory) * num_files);
+			file.Write(directory, sizeof(tBFFDirectory) * num_files);
 		}
 	}
 	catch(...)

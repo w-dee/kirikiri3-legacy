@@ -26,7 +26,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		Soundネイティブインスタンス
 //---------------------------------------------------------------------------
-class tNI_Sound : public tNativeInstance, public tRisaSound
+class tNI_Sound : public tNativeInstance, public tSound
 {
 	iRisseDispatch2 * Owner; //!< オーナーとなるRisseオブジェクト
 
@@ -37,7 +37,7 @@ public:
 		tVariant **param, iRisseDispatch2 *risse_obj);
 	void Invalidate();
 
-	void OnStatusChanged(tStatus status); //  from tRisaSound
+	void OnStatusChanged(tStatus status); //  from tSound
 
 	tString GetStatusString() const;
 
@@ -427,17 +427,17 @@ tNativeInstance *tNC_Sound::CreateNativeInstance()
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaSoundRegisterer :
-			public singleton_base<tRisaSoundRegisterer>,
-			protected depends_on<tRisaRisseScriptEngine>
+class tSoundRegisterer :
+			public singleton_base<tSoundRegisterer>,
+			protected depends_on<tRisseScriptEngine>
 {
 public:
-	tRisaSoundRegisterer()
+	tSoundRegisterer()
 	{
 		iRisseDispatch2 * cls =  new tNC_Sound();
 		try
 		{
-			depends_on<tRisaRisseScriptEngine>::locked_instance()->
+			depends_on<tRisseScriptEngine>::locked_instance()->
 				RegisterGlobalObject(RISSE_WS("Sound"), cls);
 		}
 		catch(...)

@@ -23,13 +23,13 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //!@brief		圧縮ストリームを展開された状態で保持するオブジェクト
 //---------------------------------------------------------------------------
-class tRisaDecompressedHolder
+class tDecompressedHolder
 {
 private:
 	risse_size Size; //!< このデータが保持する(無圧縮状態の)サイズ
 	risse_uint8 * Data; //!< このデータが保持する(無圧縮状態の)データブロック
 
-	tRisaDecompressedHolder::tRisaDecompressedHolder(const tRisaDecompressedHolder & ref) {;} // コピー禁止
+	tDecompressedHolder::tDecompressedHolder(const tDecompressedHolder & ref) {;} // コピー禁止
 
 public:
 	enum tMethod 
@@ -42,7 +42,7 @@ public:
 	//! @param		indata 入力データ
 	//! @param		insize 入力データのサイズ
 	//! @param		uncomp_size 入力データを展開した際のサイズ
-	tRisaDecompressedHolder(tMethod method, const risse_uint8 * indata, risse_size insize, 
+	tDecompressedHolder(tMethod method, const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size);
 
 	//! @brief		コンストラクタ(ストリーム上のデータを展開する場合)
@@ -50,11 +50,11 @@ public:
 	//! @param		indata 入力ストリーム
 	//! @param		insize 入力データのサイズ
 	//! @param		uncomp_size 入力データを展開した際のサイズ
-	tRisaDecompressedHolder(tMethod method, tBinaryStream * instream, risse_size insize, 
+	tDecompressedHolder(tMethod method, tBinaryStream * instream, risse_size insize, 
 		risse_size uncomp_size);
 
 	//!@brief		デストラクタ
-	~tRisaDecompressedHolder();
+	~tDecompressedHolder();
 
 	risse_size GetSize() const { return Size; } //!< サイズを返す
 	risse_uint8 * GetData() const { return Data; } //!< データブロックを返す

@@ -23,9 +23,9 @@ namespace Risa {
 //! @note		このメモリブロックは、複数のストリームで共有される可能性があり、
 //!				複数スレッドから同時アクセスされる可能性がある
 //---------------------------------------------------------------------------
-class tRisaMemoryStreamBlock
+class tMemoryStreamBlock
 {
-	tRisaCriticalSection CS; //!< このメモリブロックへのアクセスを保護するクリティカルセクション
+	tCriticalSection CS; //!< このメモリブロックへのアクセスを保護するクリティカルセクション
 	void * Block;			//!< メモリブロック
 	risse_size Size;			//!< メモリブロックのデータが入っている部分のサイズ
 	risse_size AllocSize;		//!< メモリブロックのアロケートしているサイズ( Size <= AllocSize )
@@ -33,10 +33,10 @@ class tRisaMemoryStreamBlock
 
 public:
 	//! @brief		コンストラクタ
-	tRisaMemoryStreamBlock();
+	tMemoryStreamBlock();
 protected:
 	//! @brief		デストラクタ
-	~tRisaMemoryStreamBlock();
+	~tMemoryStreamBlock();
 public:
 	//! @brief		参照カウンタを一つ増やす
 	void AddRef();
@@ -56,7 +56,7 @@ public:
 
 	void * GetBlock() { return Block; } //!< ブロックを得る
 
-	tRisaCriticalSection & GetCS( ) { return CS; } //!< クリティカルセクションオブジェクトを得る
+	tCriticalSection & GetCS( ) { return CS; } //!< クリティカルセクションオブジェクトを得る
 	risse_size GetSize() const { return Size; } //!< ブロックのサイズを得る
 };
 //---------------------------------------------------------------------------
@@ -69,25 +69,25 @@ public:
 /*
 	this class provides a tBinaryStream based access method for a memory block.
 */
-class tRisaMemoryStream : public tBinaryStream
+class tMemoryStream : public tBinaryStream
 {
 protected:
-	tRisaMemoryStreamBlock * Block; //!< メモリブロック
+	tMemoryStreamBlock * Block; //!< メモリブロック
 	risse_size CurrentPos;		//!< 現在のポインタ
 	risse_uint32 Flags;			//!< アクセスフラグ
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		flags アクセスフラグ
-	tRisaMemoryStream(risse_uint32 flags);
+	tMemoryStream(risse_uint32 flags);
 
 	//! @brief		コンストラクタ(他のメモリブロックを参照する場合)
 	//! @param		flags アクセスフラグ
 	//! @param		block メモリブロック
-	tRisaMemoryStream(risse_uint32 flags, tRisaMemoryStreamBlock * block);
+	tMemoryStream(risse_uint32 flags, tMemoryStreamBlock * block);
 
 	//! @brief		デストラクタ
-	~tRisaMemoryStream();
+	~tMemoryStream();
 
 	//! @brief		シーク
 	//! @param		offset 移動オフセット

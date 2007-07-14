@@ -23,7 +23,7 @@ RISSE_DEFINE_SOURCE_ID(32746,62447,35688,17903,39609,14867,42943,32667);
 //---------------------------------------------------------------------------
 //! @brief		iRisseTextReadStream の実装
 //---------------------------------------------------------------------------
-class tRisaTextReadStream : public iRisseTextReadStream
+class tTextReadStream : public iRisseTextReadStream
 {
 	static const size_t BufferSize = 2048; //!< バッファとして確保するコードポイント数
 
@@ -46,8 +46,8 @@ class tRisaTextReadStream : public iRisseTextReadStream
 	tString FileName; //!< ファイル名
 
 public:
-	tRisaTextReadStream(const tString & name, const tString & modestr);
-	virtual ~tRisaTextReadStream();
+	tTextReadStream(const tString & name, const tString & modestr);
+	virtual ~tTextReadStream();
 	risse_uint Read(tString & targ, risse_uint size);
 
 private:
@@ -61,7 +61,7 @@ private:
 //! @param		name		入力ファイル名
 //! @param		modestr		モード文字列
 //---------------------------------------------------------------------------
-tRisaTextReadStream::tRisaTextReadStream(const tString & name, const tString & modestr)
+tTextReadStream::tTextReadStream(const tString & name, const tString & modestr)
 {
 	// フィールドの初期化
 	Stream = NULL;
@@ -69,7 +69,7 @@ tRisaTextReadStream::tRisaTextReadStream(const tString & name, const tString & m
 	FileName = name;
 
 	// ストリームを開く
-	Stream = tRisaFileSystemManager::instance()->CreateStream(name, RISSE_BS_READ);
+	Stream = tFileSystemManager::instance()->CreateStream(name, RISSE_BS_READ);
 
 	// 'o' モードをチェック
 	risse_uint64 ofs = 0;
@@ -157,7 +157,7 @@ tRisaTextReadStream::tRisaTextReadStream(const tString & name, const tString & m
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaTextReadStream::~tRisaTextReadStream()
+tTextReadStream::~tTextReadStream()
 {
 	if(Stream) delete Stream;
 }
@@ -170,7 +170,7 @@ tRisaTextReadStream::~tRisaTextReadStream()
 //! @param		読み込むサイズ (コードポイント数)  0 = 全部
 //! @return		読み込まれたコードポイント数
 //---------------------------------------------------------------------------
-risse_size tRisaTextReadStream::Read(tString & targ, risse_size size)
+risse_size tTextReadStream::Read(tString & targ, risse_size size)
 {
 	if(size != 0)
 	{
@@ -217,7 +217,7 @@ risse_size tRisaTextReadStream::Read(tString & targ, risse_size size)
 //---------------------------------------------------------------------------
 //! @brief		バッファにデータを読み込む
 //---------------------------------------------------------------------------
-void tRisaTextReadStream::ReadBuffer()
+void tTextReadStream::ReadBuffer()
 {
 	// この関数を読み込む時点では BufferRemain は 0 であること
 	BufferReadPos = 0; // BufferReadPos を 0 に
@@ -299,13 +299,13 @@ void tRisaTextReadStream::ReadBuffer()
 //---------------------------------------------------------------------------
 //! @brief		iRisseTextWriteStream の実装
 //---------------------------------------------------------------------------
-class tRisaTextWriteStream : public iRisseTextWriteStream
+class tTextWriteStream : public iRisseTextWriteStream
 {
 	tBinaryStream * Stream; //!< ストリーム
 
 public:
-	tRisaTextWriteStream(const tString & name, const tString &modestr);
-	virtual ~tRisaTextWriteStream();
+	tTextWriteStream(const tString & name, const tString &modestr);
+	virtual ~tTextWriteStream();
 	void Write(const tString & targ);
 };
 //---------------------------------------------------------------------------
@@ -314,7 +314,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisaTextWriteStream::tRisaTextWriteStream(const tString & name, const tString &modestr)
+tTextWriteStream::tTextWriteStream(const tString & name, const tString &modestr)
 {
 	Stream = NULL;
 
@@ -339,12 +339,12 @@ tRisaTextWriteStream::tRisaTextWriteStream(const tString & name, const tString &
 		}
 		buf[i] = 0;
 		ofs = tString(buf).AsInteger();
-		Stream = tRisaFileSystemManager::instance()->CreateStream(name, RISSE_BS_UPDATE);
+		Stream = tFileSystemManager::instance()->CreateStream(name, RISSE_BS_UPDATE);
 		Stream->SetPosition(ofs);
 	}
 	else
 	{
-		Stream = tRisaFileSystemManager::instance()->CreateStream(name, RISSE_BS_WRITE);
+		Stream = tFileSystemManager::instance()->CreateStream(name, RISSE_BS_WRITE);
 	}
 
 }
@@ -354,7 +354,7 @@ tRisaTextWriteStream::tRisaTextWriteStream(const tString & name, const tString &
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaTextWriteStream::~tRisaTextWriteStream()
+tTextWriteStream::~tTextWriteStream()
 {
 	if(Stream) delete Stream;
 }
@@ -365,7 +365,7 @@ tRisaTextWriteStream::~tRisaTextWriteStream()
 //! @brief		ストリームに書き込む
 //! @param		targ		書き込みたい文字列
 //---------------------------------------------------------------------------
-void tRisaTextWriteStream::Write(const tString & targ)
+void tTextWriteStream::Write(const tString & targ)
 {
 	for(;;)
 	{
@@ -413,7 +413,7 @@ void tRisaTextWriteStream::Write(const tString & targ)
 
 
 //---------------------------------------------------------------------------
-tRisaTextStreamRegisterer::tRisaTextStreamRegisterer()
+tTextStreamRegisterer::tTextStreamRegisterer()
 {
 	CreateTextStreamForRead = CreateForRead;
 	CreateTextStreamForWrite = CreateForWrite;
@@ -422,7 +422,7 @@ tRisaTextStreamRegisterer::tRisaTextStreamRegisterer()
 
 
 //---------------------------------------------------------------------------
-tRisaTextStreamRegisterer::~tRisaTextStreamRegisterer()
+tTextStreamRegisterer::~tTextStreamRegisterer()
 {
 	CreateTextStreamForRead = NULL;
 	CreateTextStreamForWrite = NULL;
@@ -431,19 +431,19 @@ tRisaTextStreamRegisterer::~tRisaTextStreamRegisterer()
 
 
 //---------------------------------------------------------------------------
-iRisseTextReadStream * tRisaTextStreamRegisterer::CreateForRead(const tString &name,
+iRisseTextReadStream * tTextStreamRegisterer::CreateForRead(const tString &name,
 		const tString &modestr)
 {
-	return new tRisaTextReadStream(name, modestr);
+	return new tTextReadStream(name, modestr);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-iRisseTextWriteStream * tRisaTextStreamRegisterer::CreateForWrite(const tString &name,
+iRisseTextWriteStream * tTextStreamRegisterer::CreateForWrite(const tString &name,
 		const tString &modestr)
 {
-	return new tRisaTextWriteStream(name, modestr);
+	return new tTextWriteStream(name, modestr);
 }
 //---------------------------------------------------------------------------
 

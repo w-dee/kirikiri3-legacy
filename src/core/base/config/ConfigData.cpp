@@ -27,7 +27,7 @@ RISSE_DEFINE_SOURCE_ID(7464,23094,50611,20409,11701,31915,19285,41427);
 // TODO: Config data のスレッド保護
 
 //---------------------------------------------------------------------------
-tRisaConfigData::tRisaConfigData(const wxString & filename) :
+tConfigData::tConfigData(const wxString & filename) :
 	wxFileConfig(wxEmptyString, wxEmptyString, filename,
 							wxEmptyString, wxCONFIG_USE_LOCAL_FILE)
 {
@@ -36,7 +36,7 @@ tRisaConfigData::tRisaConfigData(const wxString & filename) :
 
 
 //---------------------------------------------------------------------------
-tRisaConfigData::~tRisaConfigData()
+tConfigData::~tConfigData()
 {
 }
 //---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ tRisaConfigData::~tRisaConfigData()
 
 
 //---------------------------------------------------------------------------
-tRisaConfig::tRisaConfig() :
+tConfig::tConfig() :
 	Variable(GetConfigFileName(wxT("variable"))),
 	System  (GetConfigFileName(wxT("system")))
 {
@@ -63,14 +63,14 @@ tRisaConfig::tRisaConfig() :
 
 
 //---------------------------------------------------------------------------
-tRisaConfig::~tRisaConfig()
+tConfig::~tConfig()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-wxString tRisaConfig::GetConfigFileName(const wxString &realm)
+wxString tConfig::GetConfigFileName(const wxString &realm)
 {
 	// 設定ファイルはどこからとってくるかについては議論の余地があるが、
 	// System   realm: (実行可能ファイルのパス)/../etc/k3.ini

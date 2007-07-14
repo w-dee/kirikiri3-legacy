@@ -25,15 +25,15 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		fontconfig 経由でのFreeType Face クラス
 //---------------------------------------------------------------------------
-class tRisaNativeFreeTypeFace : public tRisaBaseFreeTypeFace
+class tNativeFreeTypeFace : public tBaseFreeTypeFace
 {
 protected:
 	wxString FaceName;	//!< Face名 = フォント名
 	FT_Face Face;		//!< FreeType face オブジェクト
 
 public:
-	tRisaNativeFreeTypeFace(const wxString &fontname, risse_uint32 options);
-	virtual ~tRisaNativeFreeTypeFace();
+	tNativeFreeTypeFace(const wxString &fontname, risse_uint32 options);
+	virtual ~tNativeFreeTypeFace();
 
 	virtual FT_Face GetFTFace() const;
 	virtual void GetFaceNameList(wxArrayString & dest) const; 

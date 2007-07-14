@@ -33,7 +33,7 @@ RISSE_DEFINE_SOURCE_ID(57835,14019,1274,20023,25994,43742,64617,60148);
 
 
 //---------------------------------------------------------------------------
-tRisaFileSystemManager::tRisaFileSystemManager()
+tFileSystemManager::tFileSystemManager()
 {
 	// カレントディレクトリを / に設定
 	CurrentDirectory = RISSE_WS("/");
@@ -42,9 +42,9 @@ tRisaFileSystemManager::tRisaFileSystemManager()
 
 
 //---------------------------------------------------------------------------
-tRisaFileSystemManager::~tRisaFileSystemManager()
+tFileSystemManager::~tFileSystemManager()
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// 全てのマウントポイントをアンマウントする
 	// 全てのRisseオブジェクトをvectorにとり、最後にこれが削除されることにより
@@ -77,7 +77,7 @@ tRisaFileSystemManager::~tRisaFileSystemManager()
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::Mount(const tString & point,
+void tFileSystemManager::Mount(const tString & point,
 	iRisseDispatch2 * fs_risseobj)
 {
 	// risse_obj がファイルシステムのインスタンスを持っているかどうかを
@@ -98,7 +98,7 @@ void tRisaFileSystemManager::Mount(const tString & point,
 	if(!path.EndsWith(RISSE_WC('/'))) path += RISSE_WC('/');
 
 	// スレッド保護
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// すでにその場所にマウントが行われているかどうかをチェックする
 	tFileSystemInfo * item = MountPoints.Find(path);
@@ -116,7 +116,7 @@ void tRisaFileSystemManager::Mount(const tString & point,
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::Unmount(const tString & point)
+void tFileSystemManager::Unmount(const tString & point)
 {
 	// マウントポイントは / で始まって / で終わる (つまりディレクトリ) を
 	// 表していなければならない。そうでない場合はその形式にする
@@ -124,7 +124,7 @@ void tRisaFileSystemManager::Unmount(const tString & point)
 	if(!path.EndsWith(RISSE_WC('/'))) path += RISSE_WC('/');
 
 	// スレッド保護
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// その場所にマウントが行われているかどうかをチェックする
 	tFileSystemInfo * item = MountPoints.Find(path);
@@ -149,9 +149,9 @@ void tRisaFileSystemManager::Unmount(const tString & point)
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
+void tFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// そのファイルシステムがマウントされているマウントポイントを調べる
 	gc_vector<tString> points;
@@ -173,7 +173,7 @@ void tRisaFileSystemManager::Unmount(iRisseDispatch2 * fs_risseobj)
 
 
 //---------------------------------------------------------------------------
-tString tRisaFileSystemManager::NormalizePath(const tString & path)
+tString tFileSystemManager::NormalizePath(const tString & path)
 {
 	tString ret(path);
 
@@ -182,7 +182,7 @@ tString tRisaFileSystemManager::NormalizePath(const tString & path)
 	// を挿入する
 	if(ret[0] != RISSE_WC('/'))
 	{
-		volatile tRisaCriticalSection::tLocker holder(CS);
+		volatile tCriticalSection::tLocker holder(CS);
 		ret = CurrentDirectory + ret;
 	}
 
@@ -246,8 +246,8 @@ tString tRisaFileSystemManager::NormalizePath(const tString & path)
 
 
 //---------------------------------------------------------------------------
-size_t tRisaFileSystemManager::GetFileListAt(const tString & dirname,
-	tRisaFileSystemIterationCallback * callback, bool recursive)
+size_t tFileSystemManager::GetFileListAt(const tString & dirname,
+	tFileSystemIterationCallback * callback, bool recursive)
 {
 	tString path(NormalizePath(dirname));
 
@@ -258,16 +258,16 @@ size_t tRisaFileSystemManager::GetFileListAt(const tString & dirname,
 	}
 
 	// 再帰をする場合
-	class tIteratorCallback : public tRisaFileSystemIterationCallback
+	class tIteratorCallback : public tFileSystemIterationCallback
 	{
 		gc_vector<tString> & List;
-		tRisaFileSystemIterationCallback *Destination;
+		tFileSystemIterationCallback *Destination;
 		size_t Count;
 		tString CurrentDirectory;
 
 	public:
 		tIteratorCallback(gc_vector<tString> &list,
-			tRisaFileSystemIterationCallback *destination)
+			tFileSystemIterationCallback *destination)
 				: List(list), Destination(destination), Count(0)
 		{
 			;
@@ -310,13 +310,13 @@ size_t tRisaFileSystemManager::GetFileListAt(const tString & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tRisaFileSystemManager::FileExists(const tString & filename)
+bool tFileSystemManager::FileExists(const tString & filename)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	tString fspath;
 	tString fullpath(NormalizePath(filename));
-	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(filename);
 	try
 	{
@@ -333,13 +333,13 @@ bool tRisaFileSystemManager::FileExists(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-bool tRisaFileSystemManager::DirectoryExists(const tString & dirname)
+bool tFileSystemManager::DirectoryExists(const tString & dirname)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	tString fspath;
 	tString fullpath(NormalizePath(dirname));
-	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -356,13 +356,13 @@ bool tRisaFileSystemManager::DirectoryExists(const tString & dirname)
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::RemoveFile(const tString & filename)
+void tFileSystemManager::RemoveFile(const tString & filename)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	tString fspath;
 	tString fullpath(NormalizePath(filename));
-	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -378,13 +378,13 @@ void tRisaFileSystemManager::RemoveFile(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::RemoveDirectory(const tString & dirname, bool recursive)
+void tFileSystemManager::RemoveDirectory(const tString & dirname, bool recursive)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	tString fspath;
 	tString fullpath(NormalizePath(dirname));
-	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -400,13 +400,13 @@ void tRisaFileSystemManager::RemoveDirectory(const tString & dirname, bool recur
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::CreateDirectory(const tString & dirname, bool recursive)
+void tFileSystemManager::CreateDirectory(const tString & dirname, bool recursive)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	tString fspath;
 	tString fullpath(NormalizePath(dirname));
-	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -422,13 +422,13 @@ void tRisaFileSystemManager::CreateDirectory(const tString & dirname, bool recur
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::Stat(const tString & filename, tRisaStatStruc & struc)
+void tFileSystemManager::Stat(const tString & filename, tStatStruc & struc)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	tString fspath;
 	tString fullpath(NormalizePath(filename));
-	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -444,22 +444,22 @@ void tRisaFileSystemManager::Stat(const tString & filename, tRisaStatStruc & str
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tRisaFileSystemManager::CreateStream(const tString & filename,
+tBinaryStream * tFileSystemManager::CreateStream(const tString & filename,
 	risse_uint32 flags)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// 先頭が native: で始まる場合は OSFS ストリーム経由で直接アクセスする
 	if(filename.StartsWith(RISSE_WS("native:")))
 	{
 		// +7 = "native:" の文字数
-		return new tRisaOSNativeStream(tString(filename.c_str() + 7).AsWxString(), flags);
+		return new tOSNativeStream(tString(filename.c_str() + 7).AsWxString(), flags);
 	}
 
 	// 通常のファイルシステム経由のストリームの作成
 	tString fspath;
 	tString fullpath(NormalizePath(filename));
-	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
+	boost::shared_ptr<tFileSystem> fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	try
 	{
@@ -476,14 +476,14 @@ tBinaryStream * tRisaFileSystemManager::CreateStream(const tString & filename,
 
 
 //---------------------------------------------------------------------------
-size_t tRisaFileSystemManager::InternalGetFileListAt(
+size_t tFileSystemManager::InternalGetFileListAt(
 	const tString & dirname,
-	tRisaFileSystemIterationCallback * callback)
+	tFileSystemIterationCallback * callback)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	tString fspath;
-	boost::shared_ptr<tRisaFileSystem> fs = GetFileSystemAt(dirname, &fspath);
+	boost::shared_ptr<tFileSystem> fs = GetFileSystemAt(dirname, &fspath);
 	if(!fs) ThrowNoFileSystemError(dirname);
 
 	try
@@ -501,7 +501,7 @@ size_t tRisaFileSystemManager::InternalGetFileListAt(
 
 
 //---------------------------------------------------------------------------
-boost::shared_ptr<tRisaFileSystem> tRisaFileSystemManager::GetFileSystemAt(
+boost::shared_ptr<tFileSystem> tFileSystemManager::GetFileSystemAt(
 					const tString & fullpath, tString * fspath)
 {
 	// フルパスの最後からディレクトリを削りながら見ていき、最初に
@@ -554,13 +554,13 @@ boost::shared_ptr<tRisaFileSystem> tRisaFileSystemManager::GetFileSystemAt(
 	if(fullpath.GetLen() != 0)
 		eRisaException::Throw(
 			RISSE_WS_TR("Could not find the root filesystem"));
-	return boost::shared_ptr<tRisaFileSystem>();
+	return boost::shared_ptr<tFileSystem>();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::ThrowNoFileSystemError(const tString & filename)
+void tFileSystemManager::ThrowNoFileSystemError(const tString & filename)
 {
 	eRisaException::Throw(
 		RISSE_WS_TR("Could not find filesystem at path '%1'"), filename);
@@ -569,7 +569,7 @@ void tRisaFileSystemManager::ThrowNoFileSystemError(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError()
+void tFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 {
 	eRisaException::Throw(
 		RISSE_WS_TR("no such file or directory"));
@@ -578,7 +578,7 @@ void tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::SplitExtension(const tString & in, tString * other, tString * ext)
+void tFileSystemManager::SplitExtension(const tString & in, tString * other, tString * ext)
 {
 	const risse_char * p = in.c_str() + in.GetLen();
 	const risse_char * start = in.c_str();
@@ -611,7 +611,7 @@ void tRisaFileSystemManager::SplitExtension(const tString & in, tString * other,
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::SplitPathAndName(const tString & in, tString * path, tString * name)
+void tFileSystemManager::SplitPathAndName(const tString & in, tString * path, tString * name)
 {
 	const risse_char * p = in.c_str() + in.GetLen();
 	const risse_char * start = in.c_str();
@@ -627,7 +627,7 @@ void tRisaFileSystemManager::SplitPathAndName(const tString & in, tString * path
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::TrimLastPathDelimiter(tString & path)
+void tFileSystemManager::TrimLastPathDelimiter(tString & path)
 {
 	if(path.EndsWith(RISSE_WC('/')))
 	{
@@ -643,7 +643,7 @@ void tRisaFileSystemManager::TrimLastPathDelimiter(tString & path)
 
 
 //---------------------------------------------------------------------------
-tString tRisaFileSystemManager::ChopExtension(const tString & in)
+tString tFileSystemManager::ChopExtension(const tString & in)
 {
 	tString ret;
 	SplitExtension(in, &ret, NULL);
@@ -653,7 +653,7 @@ tString tRisaFileSystemManager::ChopExtension(const tString & in)
 
 
 //---------------------------------------------------------------------------
-tString tRisaFileSystemManager::ExtractExtension(const tString & in)
+tString tFileSystemManager::ExtractExtension(const tString & in)
 {
 	tString ret;
 	SplitExtension(in, NULL, &ret);
@@ -663,7 +663,7 @@ tString tRisaFileSystemManager::ExtractExtension(const tString & in)
 
 
 //---------------------------------------------------------------------------
-tString tRisaFileSystemManager::ExtractName(const tString & in)
+tString tFileSystemManager::ExtractName(const tString & in)
 {
 	tString ret;
 	SplitPathAndName(in, NULL, &ret);
@@ -673,7 +673,7 @@ tString tRisaFileSystemManager::ExtractName(const tString & in)
 
 
 //---------------------------------------------------------------------------
-tString tRisaFileSystemManager::ExtractPath(const tString & in)
+tString tFileSystemManager::ExtractPath(const tString & in)
 {
 	tString ret;
 	SplitPathAndName(in, &ret, NULL);
@@ -683,9 +683,9 @@ tString tRisaFileSystemManager::ExtractPath(const tString & in)
 
 
 //---------------------------------------------------------------------------
-const tString & tRisaFileSystemManager::GetCurrentDirectory()
+const tString & tFileSystemManager::GetCurrentDirectory()
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	return CurrentDirectory;
 }
@@ -693,9 +693,9 @@ const tString & tRisaFileSystemManager::GetCurrentDirectory()
 
 
 //---------------------------------------------------------------------------
-void tRisaFileSystemManager::SetCurrentDirectory(const tString &dir)
+void tFileSystemManager::SetCurrentDirectory(const tString &dir)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	if(dir.EndsWith(RISSE_WC('/')))
 		CurrentDirectory = dir;

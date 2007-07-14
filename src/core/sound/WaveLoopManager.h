@@ -16,7 +16,7 @@
 //---------------------------------------------------------------------------
 
 #include "risse/include/risseTypes.h"
-#include "base/utils/RisaThread.h"
+#include "base/utils/Thread.h"
 #include "sound/WaveFilter.h"
 #include "sound/WaveDecoder.h"
 #include <vector>
@@ -28,11 +28,11 @@ namespace Risa {
 
 //---------------------------------------------------------------------------
 #ifdef RISA_IN_LOOP_TUNER
-	typedef AnsiString tRisaLabelStringType;
-	typedef char   tRisaLabelCharType;
+	typedef AnsiString tLabelStringType;
+	typedef char   tLabelCharType;
 #else
-	typedef tString tRisaLabelStringType;
-	typedef risse_char tRisaLabelCharType;
+	typedef tString tLabelStringType;
+	typedef risse_char tLabelCharType;
 #endif
 //---------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief リンクを表す構造体
 //---------------------------------------------------------------------------
-struct tRisaWaveLoopLink
+struct tWaveLoopLink
 {
 	//! @brief リンクの条件を表す列挙型
 	enum tLinkCondition
@@ -70,8 +70,8 @@ struct tRisaWaveLoopLink
 	struct tSortByDistanceFuncObj
 	{
 		bool operator()(
-			const tRisaWaveLoopLink &lhs,
-			const tRisaWaveLoopLink &rhs) const
+			const tWaveLoopLink &lhs,
+			const tWaveLoopLink &rhs) const
 		{
 			risse_int64 lhs_dist = lhs.From - lhs.To;
 			if(lhs_dist < 0) lhs_dist = -lhs_dist;
@@ -84,8 +84,8 @@ struct tRisaWaveLoopLink
 	struct tSortByIndexFuncObj
 	{
 		bool operator()(
-			const tRisaWaveLoopLink &lhs,
-			const tRisaWaveLoopLink &rhs) const
+			const tWaveLoopLink &lhs,
+			const tWaveLoopLink &rhs) const
 		{
 			return lhs.Index < rhs.Index;
 		}
@@ -93,7 +93,7 @@ struct tRisaWaveLoopLink
 #endif
 
 	//! @brief コンストラクタ
-	tRisaWaveLoopLink()
+	tWaveLoopLink()
 	{
 		From = To = 0;
 		Smooth = false;
@@ -120,7 +120,7 @@ struct tRisaWaveLoopLink
 //! @param		rhs		演算子の右側
 //! @return		lhs < rhs の場合真、それ以外の場合は偽
 //---------------------------------------------------------------------------
-bool inline operator < (const tRisaWaveLoopLink & lhs, const tRisaWaveLoopLink & rhs)
+bool inline operator < (const tWaveLoopLink & lhs, const tWaveLoopLink & rhs)
 {
 	if(lhs.From < rhs.From) return true;
 	if(lhs.From == rhs.From)
@@ -139,7 +139,7 @@ bool inline operator < (const tRisaWaveLoopLink & lhs, const tRisaWaveLoopLink &
 //---------------------------------------------------------------------------
 //! @brief		ラベルを表す構造体
 //---------------------------------------------------------------------------
-struct tRisaWaveLabel : public tRisaWaveEvent
+struct tWaveLabel : public tWaveEvent
 {
 #ifdef RISA_IN_LOOP_TUNER
 	// these are only used by the loop tuner
@@ -150,8 +150,8 @@ struct tRisaWaveLabel : public tRisaWaveEvent
 	struct tSortByPositionFuncObj
 	{
 		bool operator()(
-			const tRisaWaveLabel &lhs,
-			const tRisaWaveLabel &rhs) const
+			const tWaveLabel &lhs,
+			const tWaveLabel &rhs) const
 		{
 			return lhs.Position < rhs.Position;
 		}
@@ -161,8 +161,8 @@ struct tRisaWaveLabel : public tRisaWaveEvent
 	struct tSortByIndexFuncObj
 	{
 		bool operator()(
-			const tRisaWaveLabel &lhs,
-			const tRisaWaveLabel &rhs) const
+			const tWaveLabel &lhs,
+			const tWaveLabel &rhs) const
 		{
 			return lhs.Index < rhs.Index;
 		}
@@ -170,7 +170,7 @@ struct tRisaWaveLabel : public tRisaWaveEvent
 #endif
 
 	//! @brief コンストラクタ
-	tRisaWaveLabel()
+	tWaveLabel()
 	{
 #ifdef RISA_IN_LOOP_TUNER
 		NameWidth = 0;
@@ -188,7 +188,7 @@ struct tRisaWaveLabel : public tRisaWaveEvent
 //! @param		rhs		演算子の右側
 //! @return		lhs < rhs の場合真、それ以外の場合は偽
 //---------------------------------------------------------------------------
-bool inline operator < (const tRisaWaveLabel & lhs, const tRisaWaveLabel & rhs)
+bool inline operator < (const tWaveLabel & lhs, const tWaveLabel & rhs)
 {
 	return lhs.Position < rhs.Position;
 }
@@ -203,16 +203,16 @@ bool inline operator < (const tRisaWaveLabel & lhs, const tRisaWaveLabel & rhs)
 //---------------------------------------------------------------------------
 //! @brief		Wave ループマネージャ
 //---------------------------------------------------------------------------
-class tRisaWaveDecoder;
-class tRisaWaveFileInfo;
-class tRisaWaveLoopManager : public tRisaWaveFilter
+class tWaveDecoder;
+class tWaveFileInfo;
+class tWaveLoopManager : public tWaveFilter
 {
 public:
 	// 定数
-	static const int RisaWaveLoopLinkGiveUpCount = 10;
+	static const int WaveLoopLinkGiveUpCount = 10;
 		/*!< This is for preventing infinite loop caused by recursive links.
 		 If the decoding point does not change when the loop manager follows the
-		 links, after 'RisaWaveLoopLinkGiveUpCount' times the loop manager
+		 links, after 'WaveLoopLinkGiveUpCount' times the loop manager
 		 will give up the decoding.*/
 
 	static const int MaxFlags = 16; //!< フラグの最大数
@@ -222,14 +222,14 @@ public:
 	static const int MaxIDLen = 16; //!< 識別子の最大長
 
 private:
-	tRisaCriticalSection FlagsCS; //!< CS to protect flags/links/labels
+	tCriticalSection FlagsCS; //!< CS to protect flags/links/labels
 	int Flags[MaxFlags]; //!< フラグ
 	bool FlagsModifiedByLabelExpression; //!< true if the flags are modified by EvalLabelExpression
-	gc_vector<tRisaWaveLoopLink> Links; //!< リンクの配列
-	gc_vector<tRisaWaveLabel> Labels; //!< ラベルの配列
-	tRisaCriticalSection DataCS; // CS to protect other members
-	tRisaWaveFileInfo * FileInfo; //!< デコーダのファイル情報
-	boost::shared_ptr<tRisaWaveDecoder> Decoder; //!< デコーダ
+	gc_vector<tWaveLoopLink> Links; //!< リンクの配列
+	gc_vector<tWaveLabel> Labels; //!< ラベルの配列
+	tCriticalSection DataCS; // CS to protect other members
+	tWaveFileInfo * FileInfo; //!< デコーダのファイル情報
+	boost::shared_ptr<tWaveDecoder> Decoder; //!< デコーダ
 	bool FirstRendered; //!< 最初のサンプルをレンダリングしたかどうか
 
 	risse_int ShortCrossFadeHalfSamples;
@@ -252,15 +252,15 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> decoder);
+	tWaveLoopManager(boost::shared_ptr<tWaveDecoder> decoder);
 
 	//! @brief		デストラクタ
-	virtual ~tRisaWaveLoopManager();
+	virtual ~tWaveLoopManager();
 
 private:
 	//! @brief		デコーダを設定する
 	//! @param		decoder		デコーダ
-	void SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decoder);
+	void SetDecoder(boost::shared_ptr<tWaveDecoder> decoder);
 
 public:
 	//! @brief		指定インデックスのフラグを得る
@@ -291,19 +291,19 @@ public:
 
 	//! @brief		リンクの配列を得る
 	//! @return		リンクの配列への参照
-	const gc_vector<tRisaWaveLoopLink> & GetLinks() const;
+	const gc_vector<tWaveLoopLink> & GetLinks() const;
 
 	//! @brief		ラベルの配列を得る
 	//! @return		ラベルの配列への参照
-	const gc_vector<tRisaWaveLabel> & GetLabels() const;
+	const gc_vector<tWaveLabel> & GetLabels() const;
 
 	//! @brief		リンクの配列を設定する
 	//! @param		links		設定したい配列
-	void SetLinks(const gc_vector<tRisaWaveLoopLink> & links);
+	void SetLinks(const gc_vector<tWaveLoopLink> & links);
 
 	//! @brief		ラベルの配列を設定する
 	//! @param		links		設定したい配列
-	void SetLabels(const gc_vector<tRisaWaveLabel> & labels);
+	void SetLabels(const gc_vector<tWaveLabel> & labels);
 
 	//! @brief		リンクを無視しながら再生しているかどうかを返す
 	//! @return		リンクを無視しながら再生しているかどうか
@@ -324,14 +324,14 @@ public:
 	bool GetLooping() const { return Looping; } //!< ループ情報を読み込んでいないときにループを行うかどうかを得る
 	void SetLooping(bool b) { Looping = b; } //!< ループ情報を読み込んでいないときにループを行うかどうかを設定する
 
-	//------- tRisaWaveFilter メソッド  ここから
-	void Reset() {;} //!< @note tRisaWaveLoopManager ではなにもしない
-	void SetInput(boost::shared_ptr<tRisaWaveFilter> input) {;}
-		//!< @note tRisaWaveLoopManager には入力するフィルタがないのでこのメソッドはなにもしない
+	//------- tWaveFilter メソッド  ここから
+	void Reset() {;} //!< @note tWaveLoopManager ではなにもしない
+	void SetInput(boost::shared_ptr<tWaveFilter> input) {;}
+		//!< @note tWaveLoopManager には入力するフィルタがないのでこのメソッドはなにもしない
 
 	//! @brief		PCMフォーマットを提案する
 	//! @param		format   PCMフォーマット
-	void SuggestFormat(const tRisaWaveFormat & format);
+	void SuggestFormat(const tWaveFormat & format);
 
 	//! @brief		デコードを行う
 	//! @param		dest		デコード結果を格納するバッファ
@@ -340,12 +340,12 @@ public:
 	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 	//! @return		まだデコードすべきデータが残っているかどうか
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
-		tRisaWaveSegmentQueue & segmentqueue);
+		tWaveSegmentQueue & segmentqueue);
 
 	//! @brief		PCM形式を返す
 	//! @return		PCM形式への参照
-	const tRisaWaveFormat & GetFormat();
-	//------- tRisaWaveFilter メソッド  ここまで
+	const tWaveFormat & GetFormat();
+	//------- tWaveFilter メソッド  ここまで
 
 private:
 	//! @brief		指定位置以降で、指定位置にもっとも近いリンクの始点を探す
@@ -354,14 +354,14 @@ private:
 	//! @param		ignore_conditions	リンク条件を無視して検索を行うかどうか
 	//! @return		リンクが見つかれば真、見つからなければ偽
 	bool GetNearestLink(risse_int64 current,
-		tRisaWaveLoopLink & link, bool ignore_conditions);
+		tWaveLoopLink & link, bool ignore_conditions);
 
 	//! @brief		指定位置以降で指定位置未満の中のイベント(ラベル)を取得する
 	//! @param		from		検索開始位置
 	//! @param		to			検索終了位置
 	//! @param		events		結果を格納する配列
 	void GetEventAt(risse_int64 from, risse_int64 to,
-		gc_deque<tRisaWaveEvent> & labels);
+		gc_deque<tWaveEvent> & labels);
 
 	//! @brief		クロスフェードを行う
 	//! @param		dest		結果格納先
@@ -399,7 +399,7 @@ public:
 	//! @param		rv			右辺値
 	//! @param		is_rv_indirect	右辺値が間接参照の場合は真、そうでない場合は偽が格納される
 	//! @param		解析に成功すれば真、式が間違っているなどで失敗したら偽
-	static bool GetLabelExpression(const tRisaLabelStringType &label,
+	static bool GetLabelExpression(const tLabelStringType &label,
 		tExpressionToken * ope = NULL,
 		risse_int *lv = NULL,
 		risse_int *rv = NULL, bool *is_rv_indirect = NULL);
@@ -407,19 +407,19 @@ private:
 	//! @brief		ラベル式を評価する
 	//! @param		label		ラベル
 	//! @return		評価に成功すれば真、失敗すれば偽
-	bool EvalLabelExpression(const tRisaLabelStringType &label);
+	bool EvalLabelExpression(const tLabelStringType &label);
 
 	//! @brief		ラベル式のトークンを切り出して返す
 	//! @param		p		切り出し開始位置
 	//! @param		value	トークンの値を格納する変数へのアドレス
 	//! @return		トークンのタイプ
-	static tExpressionToken GetExpressionToken(const tRisaLabelCharType * &  p , risse_int * value);
+	static tExpressionToken GetExpressionToken(const tLabelCharType * &  p , risse_int * value);
 
 	//! @brief		ラベル式から整数値を得る
 	//! @param		s		解析開始位置
 	//! @param		v		値を格納する変数
 	//! @return		解析に成功すれば真
-	static bool GetLabelCharInt(const tRisaLabelCharType *s, risse_int &v);
+	static bool GetLabelCharInt(const tLabelCharType *s, risse_int &v);
 
 
 //--- loop information input/output stuff
@@ -446,13 +446,13 @@ private:
 	//! @param		s		解析開始位置
 	//! @param		v		値を格納する変数
 	//! @return		解析に成功すれば真
-	static bool GetCondition(char *s, tRisaWaveLoopLink::tLinkCondition &v);
+	static bool GetCondition(char *s, tWaveLoopLink::tLinkCondition &v);
 
 	//! @brief		文字列リテラルを取得する
 	//! @param		s		解析開始位置
 	//! @param		v		値を格納する変数
 	//! @return		解析に成功すれば真
-	static bool GetString(char *s, tRisaLabelStringType &v);
+	static bool GetString(char *s, tLabelStringType &v);
 
 	//! @brief		name=value の形式になっている name と value を取得する
 	//! @param		p		解析開始位置
@@ -467,13 +467,13 @@ private:
 	//! @param		p		読み取り開始位置
 	//! @param		link	情報格納先クラス
 	//! @return		読み取りに成功すれば真
-	static bool ReadLinkInformation(char * & p, tRisaWaveLoopLink &link);
+	static bool ReadLinkInformation(char * & p, tWaveLoopLink &link);
 
 	//! @brief		ラベル情報を文字列から読み取る
 	//! @param		p		読み取り開始位置
 	//! @param		link	情報格納先クラス
 	//! @return		読み取りに成功すれば真
-	static bool ReadLabelInformation(char * & p, tRisaWaveLabel &label);
+	static bool ReadLabelInformation(char * & p, tWaveLabel &label);
 public:
 	//! @brief		リンク情報やラベル情報を文字列から読み取る
 	//! @param		p		読み取り開始位置
@@ -486,8 +486,8 @@ private:
 	static void PutInt(AnsiString &s, risse_int v);
 	static void PutInt64(AnsiString &s, risse_int64 v);
 	static void PutBool(AnsiString &s, bool v);
-	static void PutCondition(AnsiString &s, tRisaWaveLoopLink::tLinkCondition v);
-	static void PutString(AnsiString &s, tRisaLabelStringType v);
+	static void PutCondition(AnsiString &s, tWaveLoopLink::tLinkCondition v);
+	static void PutString(AnsiString &s, tLabelStringType v);
 	static void DoSpacing(AnsiString &l, int col);
 public:
 	void WriteInformation(AnsiString &s);

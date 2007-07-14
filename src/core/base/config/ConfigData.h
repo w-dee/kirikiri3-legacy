@@ -10,8 +10,8 @@
 //! @file
 //! @brief 設定情報管理
 //---------------------------------------------------------------------------
-#ifndef _RisaConfigH_
-#define _RisaConfigH_
+#ifndef _ConfigH_
+#define _ConfigH_
 
 #include "base/utils/Singleton.h"
 #include <wx/fileconf.h>
@@ -39,23 +39,23 @@ namespace Risa {
 
 
 
-class tRisaConfig;
+class tConfig;
 //---------------------------------------------------------------------------
 //! @brief		設定情報のデータを管理するクラス
 //! @note		このクラスは GC 管理下ではないのでインスタンスを明示的にdeleteする必要あり
 //---------------------------------------------------------------------------
-class tRisaConfigData : public wxFileConfig
+class tConfigData : public wxFileConfig
 {
-	friend class tRisaConfig;
+	friend class tConfig;
 
 protected:
 
 	//! @brief		コンストラクタ
 	//! @param		filename ファイル名
-	tRisaConfigData(const wxString & filename);
+	tConfigData(const wxString & filename);
 
 	//! @brief		デストラクタ
-	~tRisaConfigData();
+	~tConfigData();
 
 private:
 };
@@ -66,21 +66,21 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		設定情報管理クラス
 //---------------------------------------------------------------------------
-class tRisaConfig : public singleton_base<tRisaConfig>
+class tConfig : public singleton_base<tConfig>
 {
-	tRisaConfigData Variable; //!< Variable設定情報
-	tRisaConfigData System; //!< System設定情報
+	tConfigData Variable; //!< Variable設定情報
+	tConfigData System; //!< System設定情報
 
 public:
 	//! @brief		コンストラクタ
-	tRisaConfig();
+	tConfig();
 
 	//! @brief		デストラクタ
-	~tRisaConfig();
+	~tConfig();
 
 public:
-	tRisaConfigData & GetVariableConfig() { return Variable; } //!< Variable設定情報を返す
-	tRisaConfigData & GetSystemConfig()   { return System;   } //!< System設定情報を返す
+	tConfigData & GetVariableConfig() { return Variable; } //!< Variable設定情報を返す
+	tConfigData & GetSystemConfig()   { return System;   } //!< System設定情報を返す
 
 private:
 	//! @brief		設定ファイルのファイル名を得る

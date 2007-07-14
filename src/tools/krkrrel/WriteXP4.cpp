@@ -59,7 +59,7 @@ namespace Risa {
 //!				コピーされた分だけ進んでいる)
 //---------------------------------------------------------------------------
 #define RISA__COPY_BUF_SIZE 65536
-static wxFileOffset RisaCopyFile(iRisaProgressCallback * callback,
+static wxFileOffset CopyFile(iRisaProgressCallback * callback,
 	wxFileEx & src, wxFileEx & dest, wxFileOffset size)
 {
 	wxFileOffset copied = 0;
@@ -101,7 +101,7 @@ static wxFileOffset RisaCopyFile(iRisaProgressCallback * callback,
 //! @param		size  (非圧縮時の)サイズ
 //! @param		iscompressed ZLIB 圧縮の際に真
 //---------------------------------------------------------------------------
-tRisaXP4WriterSegment::tRisaXP4WriterSegment(
+tXP4WriterSegment::tXP4WriterSegment(
 		wxFileOffset offset,
 		wxFileOffset size,
 		bool iscompressed)
@@ -117,7 +117,7 @@ tRisaXP4WriterSegment::tRisaXP4WriterSegment(
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaXP4WriterSegment::~tRisaXP4WriterSegment()
+tXP4WriterSegment::~tXP4WriterSegment()
 {
 }
 //---------------------------------------------------------------------------
@@ -129,7 +129,7 @@ tRisaXP4WriterSegment::~tRisaXP4WriterSegment()
 //! @param		input 入力ファイル
 //! @param		file アーカイブファイル
 //---------------------------------------------------------------------------
-void tRisaXP4WriterSegment::WriteBody(iRisaProgressCallback * callback,
+void tXP4WriterSegment::WriteBody(iRisaProgressCallback * callback,
 		wxFileEx & input, wxFileEx & file)
 {
 	// コールバックを呼ぶ
@@ -195,7 +195,7 @@ void tRisaXP4WriterSegment::WriteBody(iRisaProgressCallback * callback,
 
 		// 入力から出力へコピー
 		StoreOffset = file.Tell();
-		RisaCopyFile(callback, input, file, Size);
+		CopyFile(callback, input, file, Size);
 		StoreSize = Size;
 	}
 
@@ -209,7 +209,7 @@ void tRisaXP4WriterSegment::WriteBody(iRisaProgressCallback * callback,
 //! @brief		メタデータを書き込む
 //! @param		buf 出力メモリバッファ
 //---------------------------------------------------------------------------
-void tRisaXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
+void tXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
 {
 	// このセグメントに対応するメタデータをbufに書き込む
 	// データ構造(全てLE)
@@ -257,9 +257,9 @@ void tRisaXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
 //! @param		basedirlength アーカイブ対象ディレクトリのベース部分の長さ
 //---------------------------------------------------------------------------
 #define COMPRESS_SPLIT_UNIT 256*1024 //!< 圧縮時の分割バイト数
-tRisaXP4WriterStorage::tRisaXP4WriterStorage(
-		const tRisaXP4WriterInputFile & inputfile)
-			: tRisaXP4WriterInputFile(inputfile)
+tXP4WriterStorage::tXP4WriterStorage(
+		const tXP4WriterInputFile & inputfile)
+			: tXP4WriterInputFile(inputfile)
 {
 	IsReference = false;
 }
@@ -272,10 +272,10 @@ tRisaXP4WriterStorage::tRisaXP4WriterStorage(
 //! @param		basedirlength アーカイブ対象ディレクトリのベース部分の長さ
 //! @param		ref 参照アイテム
 //---------------------------------------------------------------------------
-tRisaXP4WriterStorage::tRisaXP4WriterStorage(
-	const tRisaXP4WriterInputFile & inputfile,
-	const tRisaXP4WriterStorage & ref)
-		: tRisaXP4WriterInputFile(inputfile)
+tXP4WriterStorage::tXP4WriterStorage(
+	const tXP4WriterInputFile & inputfile,
+	const tXP4WriterStorage & ref)
+		: tXP4WriterInputFile(inputfile)
 {
 	IsReference = true; // 参照
 
@@ -290,7 +290,7 @@ tRisaXP4WriterStorage::tRisaXP4WriterStorage(
 //---------------------------------------------------------------------------
 //! @brief		ファイルのハッシュを得る
 //---------------------------------------------------------------------------
-void tRisaXP4WriterStorage::MakeHash(iRisaProgressCallback * callback)
+void tXP4WriterStorage::MakeHash(iRisaProgressCallback * callback)
 {
 	if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
 	{
@@ -309,7 +309,7 @@ void tRisaXP4WriterStorage::MakeHash(iRisaProgressCallback * callback)
 //! @param		callback 進捗コールバックオブジェクト
 //! @param		archive アーカイブファイルオブジェクト
 //---------------------------------------------------------------------------
-void tRisaXP4WriterStorage::WriteBody(
+void tXP4WriterStorage::WriteBody(
 	iRisaProgressCallback * callback, wxFileEx & archive)
 {
 	if(IsReference) return;
@@ -332,7 +332,7 @@ void tRisaXP4WriterStorage::WriteBody(
 			wxFileOffset onesize =
 				left > COMPRESS_SPLIT_UNIT ? COMPRESS_SPLIT_UNIT : left;
 			SegmentVector.push_back(
-				tRisaXP4WriterSegment(offset, onesize, true));
+				tXP4WriterSegment(offset, onesize, true));
 			offset += onesize;
 			left -= onesize;
 		}
@@ -342,7 +342,7 @@ void tRisaXP4WriterStorage::WriteBody(
 		// ファイルは圧縮されていない
 		// ファイル一個まるごとを表すセグメントを一個追加する
 		SegmentVector.push_back(
-			tRisaXP4WriterSegment(0, Size, false));
+			tXP4WriterSegment(0, Size, false));
 	}
 
 	// 入力ファイルを開く
@@ -351,10 +351,10 @@ void tRisaXP4WriterStorage::WriteBody(
 	// すべてのセグメントに対して body 書き込みを行わせる
 	size_t idx = 0;
 	size_t segment_count = SegmentVector.size();
-	for(std::vector<tRisaXP4WriterSegment>::iterator i = SegmentVector.begin();
+	for(std::vector<tXP4WriterSegment>::iterator i = SegmentVector.begin();
 		i != SegmentVector.end(); i++, idx++)
 	{
-		tRisaProgressCallbackAggregator agg(
+		tProgressCallbackAggregator agg(
 			callback,
 			(idx    ) * 100 / segment_count,
 			(idx + 1) * 100 / segment_count);
@@ -368,7 +368,7 @@ void tRisaXP4WriterStorage::WriteBody(
 //! @brief		メタデータを書き込む
 //! @param		buf 出力メモリバッファ
 //---------------------------------------------------------------------------
-void tRisaXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
+void tXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 {
 	// メタデータを buf に書き込む
 	wxMemoryBuffer newbuf;
@@ -379,7 +379,7 @@ void tRisaXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 	{
 		// 「削除」されたファイルではない場合
 		wxMemoryBuffer segmentsbuf;
-		for(std::vector<tRisaXP4WriterSegment>::iterator i = SegmentVector.begin();
+		for(std::vector<tXP4WriterSegment>::iterator i = SegmentVector.begin();
 			i != SegmentVector.end(); i++)
 		{
 			i->WriteMetaData(segmentsbuf);
@@ -392,7 +392,7 @@ void tRisaXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 		newbuf.AppendData(segmentsbuf.GetData(), segmentsbuf.GetDataLen());
 
 		// hash チャンクの書き込み
-		newbuf.AppendData(tRisaXP4Hash::GetHashChunkName(), 4);
+		newbuf.AppendData(tXP4Hash::GetHashChunkName(), 4);
 		i32 = wxUINT32_SWAP_ON_BE(Hash.GetSize());
 		newbuf.AppendData(&i32, sizeof(i32));
 		newbuf.AppendData(const_cast<unsigned char *>((const unsigned char *)Hash),
@@ -457,7 +457,7 @@ void tRisaXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 //! @param		filename アーカイブファイルのファイル名
 //! @param		targetdir アーカイブに格納されるファイルの元となったディレクトリ名
 //---------------------------------------------------------------------------
-tRisaXP4WriterArchive::tRisaXP4WriterArchive(
+tXP4WriterArchive::tXP4WriterArchive(
 	const wxString & filename,
 	const wxString & targetdir) :
 		FileName(filename),
@@ -492,7 +492,7 @@ tRisaXP4WriterArchive::tRisaXP4WriterArchive(
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaXP4WriterArchive::~tRisaXP4WriterArchive()
+tXP4WriterArchive::~tXP4WriterArchive()
 {
 	if(!ArchiveOk)
 	{
@@ -509,8 +509,8 @@ tRisaXP4WriterArchive::~tRisaXP4WriterArchive()
 //! @param		storage 書き込むファイル
 //! @return		格納されたアーカイブ内のストレージのインデックス
 //---------------------------------------------------------------------------
-size_t tRisaXP4WriterArchive::AddAndWriteBody(iRisaProgressCallback * callback,
-	const tRisaXP4WriterStorage & storage)
+size_t tXP4WriterArchive::AddAndWriteBody(iRisaProgressCallback * callback,
+	const tXP4WriterStorage & storage)
 {
 	StorageVector.push_back(storage);
 	wxFileEx file(FileName, wxFile::write_append);
@@ -528,14 +528,14 @@ size_t tRisaXP4WriterArchive::AddAndWriteBody(iRisaProgressCallback * callback,
 //! @param		callback 進捗コールバックオブジェクト
 //! @param		compress インデックスを圧縮するかどうか
 //---------------------------------------------------------------------------
-void tRisaXP4WriterArchive::WriteMetaData(iRisaProgressCallback * callback,
+void tXP4WriterArchive::WriteMetaData(iRisaProgressCallback * callback,
 	bool compress)
 {
 	wxUint8 i8;
 	wxUint32 i32;
 	size_t storage_count;
 
-	tRisaProgressCallbackAggregator agg(callback, 0, 50);
+	tProgressCallbackAggregator agg(callback, 0, 50);
 	wxMemoryBuffer buf;
 
 	{
@@ -544,7 +544,7 @@ void tRisaXP4WriterArchive::WriteMetaData(iRisaProgressCallback * callback,
 		wxMemoryBuffer meta_buf;
 		size_t idx = 0;
 		storage_count = StorageVector.size();
-		for(std::vector<tRisaXP4WriterStorage>::iterator i = StorageVector.begin();
+		for(std::vector<tXP4WriterStorage>::iterator i = StorageVector.begin();
 			i != StorageVector.end(); i++, idx++)
 		{
 			agg.OnProgress(idx * 100 / storage_count);
@@ -664,11 +664,11 @@ void tRisaXP4WriterArchive::WriteMetaData(iRisaProgressCallback * callback,
 //! @param		list 入力ファイルのリスト
 //! @param		targetdir アーカイブに格納されるファイルの元となったディレクトリ名
 //---------------------------------------------------------------------------
-tRisaXP4Writer::tRisaXP4Writer(
+tXP4Writer::tXP4Writer(
 	iRisaProgressCallback * callback,
 	const wxString & basefilename,
 	wxFileOffset splitlimit,
-	const std::vector<tRisaXP4WriterInputFile> & list,
+	const std::vector<tXP4WriterInputFile> & list,
 	const wxString &targetdir
 		) :
 		ProgressCallback(callback),
@@ -686,9 +686,9 @@ tRisaXP4Writer::tRisaXP4Writer(
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaXP4Writer::~tRisaXP4Writer()
+tXP4Writer::~tXP4Writer()
 {
-	for(std::vector<tRisaXP4WriterArchive *>::iterator i = 
+	for(std::vector<tXP4WriterArchive *>::iterator i = 
 		ArchiveVector.begin(); i != ArchiveVector.end(); i++)
 	{
 		delete *i;
@@ -701,7 +701,7 @@ tRisaXP4Writer::~tRisaXP4Writer()
 //! @brief		新しいアーカイブボリュームファイルを作成する
 //! @return		新しいアーカイブボリューム番号
 //---------------------------------------------------------------------------
-unsigned int tRisaXP4Writer::NewArchive()
+unsigned int tXP4Writer::NewArchive()
 {
 	// アーカイブボリュームファイル名は
 	// volnum = 0 の場合は BaseFileName + ".xp4"
@@ -719,7 +719,7 @@ unsigned int tRisaXP4Writer::NewArchive()
 	else
 		filename = BaseFileName + wxString::Format(wxT(".%03u.xp4"), volnum);
 
-	ArchiveVector.push_back(new tRisaXP4WriterArchive(filename, TargetDir));
+	ArchiveVector.push_back(new tXP4WriterArchive(filename, TargetDir));
 
 	return volnum;
 }
@@ -729,29 +729,29 @@ unsigned int tRisaXP4Writer::NewArchive()
 //---------------------------------------------------------------------------
 //! @brief		アーカイブファイルを作成する
 //---------------------------------------------------------------------------
-void tRisaXP4Writer::MakeArchive()
+void tXP4Writer::MakeArchive()
 {
-	std::vector<tRisaXP4WriterStorage> sorted_list;
+	std::vector<tXP4WriterStorage> sorted_list;
 
 	// どのファイルがどのアーカイブに入っているかをハッシュから求めるmap
-	std::map<tRisaXP4Hash, std::pair<size_t, size_t> > storage_archive_map;
+	std::map<tXP4Hash, std::pair<size_t, size_t> > storage_archive_map;
 
 	// 進捗コールバックアグリゲータ
-	tRisaProgressCallbackAggregator agg(ProgressCallback, 0, 22);
+	tProgressCallbackAggregator agg(ProgressCallback, 0, 22);
 
 	// ファイルサイズ・ハッシュを得ながら sorted_list に追加する
 	// 0 ～ 22% 区間
 	sorted_list.reserve(List.size());
 	size_t file_count = List.size();
 	size_t idx = 0;
-	for(std::vector<tRisaXP4WriterInputFile>::iterator i = List.begin();
+	for(std::vector<tXP4WriterInputFile>::iterator i = List.begin();
 		i != List.end(); i++, idx++)
 	{
-		tRisaProgressCallbackAggregator agg2(
+		tProgressCallbackAggregator agg2(
 			&agg,
 			(idx    ) * 100 / file_count,
 			(idx + 1) * 100 / file_count);
-		sorted_list.push_back(tRisaXP4WriterStorage(*i));
+		sorted_list.push_back(tXP4WriterStorage(*i));
 		sorted_list[idx].MakeHash(&agg2);
 	}
 
@@ -769,10 +769,10 @@ void tRisaXP4Writer::MakeArchive()
 
 	file_count = sorted_list.size();
 	idx = 0;
-	for(std::vector<tRisaXP4WriterStorage>::iterator i = sorted_list.begin();
+	for(std::vector<tXP4WriterStorage>::iterator i = sorted_list.begin();
 		i != sorted_list.end(); i++, idx++)
 	{
-		tRisaProgressCallbackAggregator agg2(
+		tProgressCallbackAggregator agg2(
 			&agg,
 			(idx    ) * 100 / file_count,
 			(idx + 1) * 100 / file_count);
@@ -792,7 +792,7 @@ void tRisaXP4Writer::MakeArchive()
 		size_t storage_idx = 0;
 
 		// map を参照する
-		std::map<tRisaXP4Hash, std::pair<size_t, size_t> >::iterator ih;
+		std::map<tXP4Hash, std::pair<size_t, size_t> >::iterator ih;
 		ih = storage_archive_map.find(i->GetHash());
 		if(ih != storage_archive_map.end())
 		{
@@ -803,8 +803,8 @@ void tRisaXP4Writer::MakeArchive()
 			storage_idx = ih->second.second;
 			ArchiveVector[volnum]->AddAndWriteBody(
 				&agg2,
-				tRisaXP4WriterStorage(
-					*static_cast<tRisaXP4WriterInputFile*>(&(*i)),
+				tXP4WriterStorage(
+					*static_cast<tXP4WriterInputFile*>(&(*i)),
 					ArchiveVector[volnum]->GetStorageItem(storage_idx)));
 			continue; //------------------------------------- ↑ continue
 		}
@@ -823,7 +823,7 @@ void tRisaXP4Writer::MakeArchive()
 			{
 				// 容量があいてそうなアーカイブを探す
 				volnum = 0;
-				std::vector<tRisaXP4WriterArchive *>::iterator a;
+				std::vector<tXP4WriterArchive *>::iterator a;
 				for(a = ArchiveVector.begin(); a != ArchiveVector.end(); a++, volnum++)
 				{
 					if(SplitLimit - (*a)->GetSize() > i->GetSize())
@@ -852,7 +852,7 @@ void tRisaXP4Writer::MakeArchive()
 
 		// map に追加
 		storage_archive_map.insert(
-			std::pair<tRisaXP4Hash, std::pair<size_t, size_t> >
+			std::pair<tXP4Hash, std::pair<size_t, size_t> >
 					(i->GetHash(),
 					std::pair<size_t, size_t>(volnum, storage_idx)));
 	}
@@ -861,10 +861,10 @@ void tRisaXP4Writer::MakeArchive()
 	agg.SetRange(99, 100); // 98 ～ 100% 区間
 	size_t archive_count = ArchiveVector.size();
 	idx = 0;
-	for(std::vector<tRisaXP4WriterArchive *>::iterator i = ArchiveVector.begin();
+	for(std::vector<tXP4WriterArchive *>::iterator i = ArchiveVector.begin();
 		i != ArchiveVector.end(); i++)
 	{
-		tRisaProgressCallbackAggregator agg2(
+		tProgressCallbackAggregator agg2(
 			&agg,
 			(idx    ) * 100 / archive_count,
 			(idx + 1) * 100 / archive_count);
@@ -874,7 +874,7 @@ void tRisaXP4Writer::MakeArchive()
 
 	// すべてのアーカイブを確定する
 	// (この処理を行わないとアーカイブファイルが削除されてしまう)
-	for(std::vector<tRisaXP4WriterArchive *>::iterator i = ArchiveVector.begin();
+	for(std::vector<tXP4WriterArchive *>::iterator i = ArchiveVector.begin();
 		i != ArchiveVector.end(); i++)
 	{
 		(*i)->SetArchiveOk();

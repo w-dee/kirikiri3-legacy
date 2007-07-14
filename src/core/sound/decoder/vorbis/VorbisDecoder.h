@@ -25,30 +25,30 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief	 OggVorbis デコーダ
 //---------------------------------------------------------------------------
-class tRisaOggVorbisDecoder : public tRisaWaveDecoder
+class tOggVorbisDecoder : public tWaveDecoder
 {
 	tBinaryStream * Stream; //!< 入力ストリーム
-	tRisaWaveFileInfo FileInfo; //!< サウンドファイル情報
+	tWaveFileInfo FileInfo; //!< サウンドファイル情報
 	OggVorbis_File InputFile; //!< OggVorbis_File instance
 	int CurrentSection;
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		filename   ファイル名
-	tRisaOggVorbisDecoder(const tString & filename);
+	tOggVorbisDecoder(const tString & filename);
 
-	// tRisaWaveDecoder をオーバーライドするもの
+	// tWaveDecoder をオーバーライドするもの
 	//! @brief		デストラクタ
 	//! @param		filename   ファイル名
-	virtual ~tRisaOggVorbisDecoder();
+	virtual ~tOggVorbisDecoder();
 
 	//! @brief		PCMフォーマットを提案する
 	//! @param		format   PCMフォーマット
-	virtual void SuggestFormat(const tRisaWaveFormat & format);
+	virtual void SuggestFormat(const tWaveFormat & format);
 
 	//! @brief		サウンド情報を得る
 	//! @param		fileinfo   情報を格納するための構造体
-	virtual void GetFormat(tRisaWaveFileInfo & fileinfo);
+	virtual void GetFormat(tWaveFileInfo & fileinfo);
 
 	//! @brief		サウンドをレンダリングする
 	//! @param		buf					データ格納先バッファ

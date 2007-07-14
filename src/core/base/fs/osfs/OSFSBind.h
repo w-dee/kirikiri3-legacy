@@ -38,9 +38,9 @@ public:
 	//! @brief		Risse 無効化関数
 	void Invalidate();
 
-	tRisaOSFS * GetFileSystem() 
+	tOSFS * GetFileSystem() 
 	{
-		return reinterpret_cast<tRisaOSFS*>(
+		return reinterpret_cast<tOSFS*>(
 			tNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
@@ -74,14 +74,14 @@ private:
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaOSFSRegisterer :
-	public singleton_base<tRisaOSFSRegisterer>,
-	protected depends_on<tRisaRisseScriptEngine>,
-	protected depends_on<tRisaFileSystemRegisterer>
+class tOSFSRegisterer :
+	public singleton_base<tOSFSRegisterer>,
+	protected depends_on<tRisseScriptEngine>,
+	protected depends_on<tFileSystemRegisterer>
 {
 public:
 	//! @brief		コンストラクタ
-	tRisaOSFSRegisterer();
+	tOSFSRegisterer();
 };
 //---------------------------------------------------------------------------
 

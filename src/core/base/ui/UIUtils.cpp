@@ -20,7 +20,7 @@ RISSE_DEFINE_SOURCE_ID(23912,37381,23527,19276,1668,15249,42569,48188);
 
 
 //---------------------------------------------------------------------------
-tRisaUIFrame::tRisaUIFrame(const wxString & id, const wxString & title) :
+tUIFrame::tUIFrame(const wxString & id, const wxString & title) :
 		wxFrame(NULL, wxID_ANY, title, GetStoredPosition(id), GetStoredSize(id),
 		wxDEFAULT_FRAME_STYLE),
 		FrameId(id)
@@ -30,10 +30,10 @@ tRisaUIFrame::tRisaUIFrame(const wxString & id, const wxString & title) :
 
 
 //---------------------------------------------------------------------------
-tRisaUIFrame::~tRisaUIFrame()
+tUIFrame::~tUIFrame()
 {
 	// サイズを config に格納する
-	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
+	tConfigData & config = tConfig::instance()->GetVariableConfig();
 
 	wxPoint pos = GetPosition();
 	wxSize  size= GetSize();
@@ -47,9 +47,9 @@ tRisaUIFrame::~tRisaUIFrame()
 
 
 //---------------------------------------------------------------------------
-wxPoint tRisaUIFrame::GetStoredPosition(const wxString & id)
+wxPoint tUIFrame::GetStoredPosition(const wxString & id)
 {
-	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
+	tConfigData & config = tConfig::instance()->GetVariableConfig();
 	wxPoint ret;
 	long x, y;
 	if( config.Read(id + wxT("/left"), &x) &&
@@ -75,9 +75,9 @@ wxPoint tRisaUIFrame::GetStoredPosition(const wxString & id)
 
 
 //---------------------------------------------------------------------------
-wxSize tRisaUIFrame::GetStoredSize(const wxString & id)
+wxSize tUIFrame::GetStoredSize(const wxString & id)
 {
-	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
+	tConfigData & config = tConfig::instance()->GetVariableConfig();
 	wxSize ret;
 	long w, h;
 	if( config.Read(id + wxT("/width"),  &w) &&

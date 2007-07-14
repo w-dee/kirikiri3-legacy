@@ -24,13 +24,13 @@ namespace Risa {
 //---------------------------------------------------------------------------
 class wxMainDialog:public wxMainDialog_Base
 {
-	tRisaFreeTypeFace *Face; //!< Faceオブジェクト
+	tFreeTypeFace *Face; //!< Faceオブジェクト
 
 public:
 	wxMainDialog();
 	~wxMainDialog();
 
-	tRisaFreeTypeFace * GetFace() { return Face; } 	
+	tFreeTypeFace * GetFace() { return Face; } 	
 
 private:
 	void UpdateFace();

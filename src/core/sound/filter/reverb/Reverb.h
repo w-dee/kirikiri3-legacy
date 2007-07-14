@@ -23,7 +23,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief リバーブフィルタクラス
 //---------------------------------------------------------------------------
-class tRisaReverb : public tRisaBasicWaveFilter
+class tReverb : public tBasicWaveFilter
 {
 	static const size_t NumBufferSampleGranules = 4096;
 
@@ -33,10 +33,10 @@ class tRisaReverb : public tRisaBasicWaveFilter
 
 public:
 	//! @brief		コンストラクタ
-	tRisaReverb();
+	tReverb();
 
 	//! @brief		デストラクタ
-	~tRisaReverb();
+	~tReverb();
 
 private:
 	//! @brief		入力となるフィルタが変わったとき、あるいはリセットされるとき

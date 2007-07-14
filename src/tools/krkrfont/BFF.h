@@ -21,7 +21,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		BFF ファイルタグ
 //---------------------------------------------------------------------------
-enum tRisaBFFFileTags
+enum tBFFFileTags
 {
 	bftCharacteMap		= 0x4d524843,		//!< "CHRM" 文字マップ
 	bftKerningVector	= 0x564e524b,		//!< "KRNV" カーニングベクタ
@@ -34,11 +34,11 @@ enum tRisaBFFFileTags
 //! @brief		BFF ファイルヘッダ
 //! @note		ここで定義される構造体は実際にファイル中のバイト表現と同じ。
 //!				ただし、ファイル中の各整数値の表現は Little Endian なので注意。
-//!				この構造体の直後に tRisaBFFDirectory 構造体が、NumFiles メンバで
+//!				この構造体の直後に tBFFDirectory 構造体が、NumFiles メンバで
 //!				指定された個数分続く。
 //---------------------------------------------------------------------------
 #pragma pack(push, 1)
-struct tRisaBFFHeader
+struct tBFFHeader
 {
 	risse_uint8 Magic[4];		//!< マジック("BFF\0"固定)
 	risse_uint8 Version[1]; 	//!< バージョン(現在は1)
@@ -55,9 +55,9 @@ struct tRisaBFFHeader
 //!				ただし、ファイル中の各整数値の表現は Little Endian なので注意。
 //---------------------------------------------------------------------------
 #pragma pack(push, 1)
-struct tRisaBFFDirectory
+struct tBFFDirectory
 {
-	risse_uint32 Tag;			//!< タグ(4バイト) tRisaBFFFileTags のいずれか
+	risse_uint32 Tag;			//!< タグ(4バイト) tBFFFileTags のいずれか
 	risse_uint32 Size;			//!< アイテムサイズ
 	risse_uint32 Offset;		//!< アイテムオフセット (BFFファイル先頭から)
 	risse_uint32 Reserved;		//!< 予備(0にすること)
@@ -72,7 +72,7 @@ struct tRisaBFFDirectory
 //!				ただし、ファイル中の各整数値の表現は Little Endian なので注意。
 //---------------------------------------------------------------------------
 #pragma pack(push, 1)
-struct tRisaBFFCharacterMap
+struct tBFFCharacterMap
 {
 	risse_uint32 Unicode;		//!< Unicode 文字
 	risse_int32  CellIncX;		//!< 一文字進めるの必要なX方向のピクセル数(64倍されている数値なので注意)
@@ -89,7 +89,7 @@ struct tRisaBFFCharacterMap
 //!				ただし、ファイル中の各整数値の表現は Little Endian なので注意。
 //---------------------------------------------------------------------------
 #pragma pack(push, 1)
-struct tRisaBFFKerningVector
+struct tBFFKerningVector
 {
 	risse_uint32 Unicode1;		//!< 前の文字
 	risse_uint32 Unicode2;		//!< 次の文字
@@ -110,7 +110,7 @@ struct tRisaBFFKerningVector
 //!				この構造体の直後には圧縮されたビットマップデータが来る。
 //---------------------------------------------------------------------------
 #pragma pack(push, 1)
-struct tRisaBFFBitmapHeader
+struct tBFFBitmapHeader
 {
 	risse_uint16 Flags;			//!< 未定義: 常に 0 であること(将来的にはビットマップ形式とか圧縮形式とかを表すのに使う)
 	risse_int16  OriginX;		//!< 描画点からブラックボックスの左端までの位置

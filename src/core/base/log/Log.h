@@ -22,11 +22,11 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-class tRisaLogReceiver;
+class tLogReceiver;
 //---------------------------------------------------------------------------
 //! @brief		ロガークラス(シングルトン)
 //---------------------------------------------------------------------------
-class tRisaLogger : public singleton_base<tRisaLogger>
+class tLogger : public singleton_base<tLogger>
 {
 public:
 	//! @brief ログアイテムのレベル(ログレベル)
@@ -51,44 +51,44 @@ public:
 	};
 
 private:
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	const static size_t MaxLogItems = 2048; //!< 最大のログ行数
 	const static tLevel LogPreserveMinLevel = llError; //!< PreserveBuffer に入れる最小のログレベル
 
 
-	tRisaRingBuffer<tItem> Buffer; //!< ログを格納するためのリングバッファ
+	tRingBuffer<tItem> Buffer; //!< ログを格納するためのリングバッファ
 	gc_vector<tItem> PreserveBuffer; //!< ログからあふれたアイテムを保持し続けるバッファ
-	gc_vector<tRisaLogReceiver*> Receivers; //!< ログを受信するオブジェクト(レシーバ)の配列
+	gc_vector<tLogReceiver*> Receivers; //!< ログを受信するオブジェクト(レシーバ)の配列
 	bool LogSending; //!< レシーバにログを送っている最中に真
 
 public:
 	//! @brief		コンストラクタ
-	tRisaLogger();
+	tLogger();
 
 	//! @brief		デストラクタ
-	~tRisaLogger();
+	~tLogger();
 
 public:
-	const tRisaRingBuffer<tItem> & GetBuffer() const 
+	const tRingBuffer<tItem> & GetBuffer() const 
 		{ return Buffer; } //!< Buffer への参照を得る
 
-	//! @brief		PreserveBuffer の内容を指定のtRisaLogReceiverに送る
+	//! @brief		PreserveBuffer の内容を指定のtLogReceiverに送る
 	//! @param		target		ログの送り先となるレシーバオブジェクト
-	void SendPreservedLogs(tRisaLogReceiver *target);
+	void SendPreservedLogs(tLogReceiver *target);
 
-	//! @brief		指定行分のログを指定のtRisaLogReceiverに送る
+	//! @brief		指定行分のログを指定のtLogReceiverに送る
 	//! @param		target		ログの送り先となるレシーバオブジェクト
-	//! @param		maxitems	送るログの最大行数 (これよりもtRisaLoggerが保持している
+	//! @param		maxitems	送るログの最大行数 (これよりもtLoggerが保持している
 	//!							ログのサイズが大きい場合は、最後の maxitems 個が送られる)
-	void SendLogs(tRisaLogReceiver *target, size_t maxitems = static_cast<size_t>(-1L));
+	void SendLogs(tLogReceiver *target, size_t maxitems = static_cast<size_t>(-1L));
 
-	//! @brief		ログを受信するための tRisaLogReceiver を登録する
+	//! @brief		ログを受信するための tLogReceiver を登録する
 	//! @param		receiver	レシーバオブジェクト
-	void RegisterReceiver(tRisaLogReceiver * receiver);
+	void RegisterReceiver(tLogReceiver * receiver);
 
-	//! @brief		ログを受信するための tRisaLogReceiver の登録を解除する
+	//! @brief		ログを受信するための tLogReceiver の登録を解除する
 	//! @param		receiver	レシーバオブジェクト
-	void UnregisterReceiver(tRisaLogReceiver * receiver);
+	void UnregisterReceiver(tLogReceiver * receiver);
 
 private:
 	//! @brief		ログを記録する
@@ -104,29 +104,29 @@ public:
 	static void Log(const tString & content, tLevel level = llInfo,
 		const tString & linkinfo = tString::GetEmptyString())
 	{
-		if(tRisaLogger::alive())
-			tRisaLogger::instance()->InternalLog(content, level, linkinfo);
+		if(tLogger::alive())
+			tLogger::instance()->InternalLog(content, level, linkinfo);
 	}
 };
 //---------------------------------------------------------------------------
 
 
-class tRisaLogger;
+class tLogger;
 //---------------------------------------------------------------------------
 //! @brief		ログを受け取るためのインターフェース
 //---------------------------------------------------------------------------
-class tRisaLogReceiver
+class tLogReceiver
 {
 public:
 	//! @brief ログが追加されるとき
 	//! @param	item  ログアイテム
 	//! @note  このメソッドは複数のスレッドから呼ばれることがある。
 	//!			ただし、このメソッドが複数のスレッドから
-	//!			「同時には呼ばれない」ことは tRisaLogger が保証する。
+	//!			「同時には呼ばれない」ことは tLogger が保証する。
 	//!			(もっとも他のメソッドは複数のスレッドから同時に呼ばれる
 	//!			可能性はあるので、どっちにしろ厳重なスレッド保護を行った
 	//!			ほうがよい)
-	virtual void OnLog(const tRisaLogger::tItem & item) = 0;
+	virtual void OnLog(const tLogger::tItem & item) = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -137,26 +137,26 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		wxWidgets のログを Risa のログ機構に流し込むためのクラス
 //---------------------------------------------------------------------------
-class tRisaWxLogProxy :
+class tWxLogProxy :
 	public wxLog,
-	public singleton_base<tRisaWxLogProxy>,
-	protected depends_on<tRisaLogger>
+	public singleton_base<tWxLogProxy>,
+	protected depends_on<tLogger>
 {
 	wxLog * OldLog; //!< このオブジェクトが作成される前に存在していたActiveなログ
 
 public:
 	//! @brief		コンストラクタ
-	tRisaWxLogProxy();
+	tWxLogProxy();
 
 	//! @brief		デストラクタ
-	~tRisaWxLogProxy();
+	~tWxLogProxy();
 
 protected:
 	//! @brief		ログを行う
 	//! @note		wxWidgets の wxLog クラスの説明を参照のこと
 	virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
 
-	DECLARE_NO_COPY_CLASS(tRisaWxLogProxy)
+	DECLARE_NO_COPY_CLASS(tWxLogProxy)
 };
 //---------------------------------------------------------------------------
 

@@ -21,7 +21,7 @@ RISSE_DEFINE_SOURCE_ID(47081,32049,45767,18248,53175,52305,56890,58573);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisaDecompressedHolder::tRisaDecompressedHolder(tRisaDecompressedHolder::tMethod method,
+tDecompressedHolder::tDecompressedHolder(tDecompressedHolder::tMethod method,
 		const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size)
 {
@@ -35,7 +35,7 @@ tRisaDecompressedHolder::tRisaDecompressedHolder(tRisaDecompressedHolder::tMetho
 
 
 //---------------------------------------------------------------------------
-tRisaDecompressedHolder::tRisaDecompressedHolder(tMethod method,
+tDecompressedHolder::tDecompressedHolder(tMethod method,
 		tBinaryStream * instream, risse_size insize, 
 		risse_size uncomp_size)
 {
@@ -56,7 +56,7 @@ tRisaDecompressedHolder::tRisaDecompressedHolder(tMethod method,
 
 
 //---------------------------------------------------------------------------
-tRisaDecompressedHolder::~tRisaDecompressedHolder()
+tDecompressedHolder::~tDecompressedHolder()
 {
 	delete (PointerFreeGC) [] Data;
 }
@@ -64,7 +64,7 @@ tRisaDecompressedHolder::~tRisaDecompressedHolder()
 
 
 //---------------------------------------------------------------------------
-void tRisaDecompressedHolder::Decompress(tRisaDecompressedHolder::tMethod method, const risse_uint8 * indata, risse_size insize, 
+void tDecompressedHolder::Decompress(tDecompressedHolder::tMethod method, const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size)
 {
 	// すでにメモリブロックが割り当てられていた場合はメモリブロックを解放
@@ -72,7 +72,7 @@ void tRisaDecompressedHolder::Decompress(tRisaDecompressedHolder::tMethod method
 	Size = 0;
 
 	// メソッドをチェック (現在はzlibのみ)
-	if(method != dhmZLib) RisaThrowInternalError;
+	if(method != dhmZLib) ThrowInternalError;
 
 	// 出力メモリブロックを確保
 	Size = uncomp_size;

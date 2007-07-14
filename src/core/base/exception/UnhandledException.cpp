@@ -30,18 +30,18 @@ RISSE_DEFINE_SOURCE_ID(28545,30194,3434,19984,56458,2209,37707,53134);
 //! @brief		スクリプト例外を表示する
 //! @param		e		例外オブジェクト
 //---------------------------------------------------------------------------
-void tRisaUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
+void tUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 {
 	// イベント配信を無効に
-	tRisaEventSystem::instance()->SetCanDeliverEvents(false);
+	tEventSystem::instance()->SetCanDeliverEvents(false);
 
 	// ログ
 	tString message = e->operator tString();
 
-	tRisaLogger::Log(
-		RISSE_WS_TR("An exception had been occured"), tRisaLogger::llError);
-	tRisaLogger::Log(
-		message, tRisaLogger::llError);
+	tLogger::Log(
+		RISSE_WS_TR("An exception had been occured"), tLogger::llError);
+	tLogger::Log(
+		message, tLogger::llError);
 
 	// 例外オブジェクトはトレースを持っているか？
 	tVariant trace_array = e->GetPropertyDirect_Object(ss_trace);
@@ -58,7 +58,7 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 		risse_size line = (risse_int64)sb.Invoke(engine, ss_positionToLine, position);
 
 		// スクリプトエディタを表示
-		tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
+		tScriptEditorFrame *editor = new tScriptEditorFrame();
 		editor->SetContent(script.AsWxString());
 		editor->SetReadOnly(true);
 		editor->SetLinePosition(line);
@@ -79,26 +79,26 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 //! @brief		スクリプト例外を表示する
 //! @param		e		例外オブジェクト
 //---------------------------------------------------------------------------
-void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
+void tUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 {
 	// イベント配信を無効に
-	if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
+	if(tEventSystem::pointer r = tEventSystem::instance())
 		r->SetCanDeliverEvents(false);
 
 	// ログ
-	if(tRisaLogger::alive())
+	if(tLogger::alive())
 	{
-		tRisaLogger::Log(
-			RISSE_WS_TR("An exception had been occured"), tRisaLogger::llError);
-		tRisaLogger::Log(
-			e.GetMessageString(), tRisaLogger::llError);
+		tLogger::Log(
+			RISSE_WS_TR("An exception had been occured"), tLogger::llError);
+		tLogger::Log(
+			e.GetMessageString(), tLogger::llError);
 		if(e.GetTrace().GetLen() != 0)
-			tRisaLogger::Log(
-				tString(RISSE_WS_TR("Trace: ")) + e.GetTrace(), tRisaLogger::llError);
+			tLogger::Log(
+				tString(RISSE_WS_TR("Trace: ")) + e.GetTrace(), tLogger::llError);
 	}
 
 	// スクリプトエディタを表示
-	tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
+	tScriptEditorFrame *editor = new tScriptEditorFrame();
 	editor->SetContent(tString(e.GetBlockNoAddRef()->GetScript()).AsWxString());
 	editor->SetReadOnly(true);
 	editor->SetLinePosition(e.GetBlockNoAddRef()->SrcPosToLine(e.GetPosition() )
@@ -120,7 +120,7 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 //!				例外オブジェクトを取得するstart～例外オブジェクトを取得するend
 //!				間の記述内容が違うだけである。
 //---------------------------------------------------------------------------
-void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
+void tUnhandledExceptionHandler::Process(eRisseScriptException &e)
 {
 	bool result = false;
 	tVariantClosure clo;
@@ -131,8 +131,8 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 		try
 		{
 			// スクリプトエンジンを取得する
-			tRisaRisseScriptEngine::pointer script_engine = tRisaRisseScriptEngine::instance();
-			tRisaSystemRegisterer::pointer system_registerer = tRisaSystemRegisterer::instance();
+			tRisseScriptEngine::pointer script_engine = tRisseScriptEngine::instance();
+			tSystemRegisterer::pointer system_registerer = tSystemRegisterer::instance();
 			if(!script_engine) break; // スクリプトエンジンはすでに終了
 			if(!system_registerer) break; // "System" レジストラも終了
 
@@ -187,7 +187,7 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 //! @brief		ハンドルされなかった例外を処理する
 //! @param		e		例外オブジェクト
 //---------------------------------------------------------------------------
-void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
+void tUnhandledExceptionHandler::Process(eRisseScriptError &e)
 {
 	bool result = false;
 	tVariantClosure clo;
@@ -198,8 +198,8 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 		try
 		{
 			// スクリプトエンジンを取得する
-			tRisaRisseScriptEngine::pointer script_engine = tRisaRisseScriptEngine::instance();
-			tRisaSystemRegisterer::pointer system_registerer = tRisaSystemRegisterer::instance();
+			tRisseScriptEngine::pointer script_engine = tRisseScriptEngine::instance();
+			tSystemRegisterer::pointer system_registerer = tSystemRegisterer::instance();
 			if(!script_engine) break; // スクリプトエンジンはすでに終了
 			if(!system_registerer) break; // "System" レジストラも終了
 
@@ -254,7 +254,7 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 //! @brief		ハンドルされなかった例外を処理する
 //! @param		e		例外オブジェクト
 //---------------------------------------------------------------------------
-void tRisaUnhandledExceptionHandler::Process(eRisse &e)
+void tUnhandledExceptionHandler::Process(eRisse &e)
 {
 	bool result = false;
 	tVariantClosure clo;
@@ -265,8 +265,8 @@ void tRisaUnhandledExceptionHandler::Process(eRisse &e)
 		try
 		{
 			// スクリプトエンジンを取得する
-			tRisaRisseScriptEngine::pointer script_engine = tRisaRisseScriptEngine::instance();
-			tRisaSystemRegisterer::pointer system_registerer = tRisaSystemRegisterer::instance();
+			tRisseScriptEngine::pointer script_engine = tRisseScriptEngine::instance();
+			tSystemRegisterer::pointer system_registerer = tSystemRegisterer::instance();
 			if(!script_engine) break; // スクリプトエンジンはすでに終了
 			if(!system_registerer) break; // "System" レジストラも終了
 

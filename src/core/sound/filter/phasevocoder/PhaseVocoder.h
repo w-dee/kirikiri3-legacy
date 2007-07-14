@@ -23,26 +23,26 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief フェーズボコーダフィルタクラス
 //---------------------------------------------------------------------------
-class tRisaPhaseVocoder : public tRisaBasicWaveFilter
+class tPhaseVocoder : public tBasicWaveFilter
 {
 	static const int DEFAULT_FRAME_SIZE = 128; //!< default frame size
 	static const int DEFAULT_OVERSAMPLING = 4; //!< default oversampling factor
 
-	tRisaPhaseVocoderDSP * DSP; //!< PhaseVocoder DSP
+	tPhaseVocoderDSP * DSP; //!< PhaseVocoder DSP
 
 	int FrameSize; //!< フレームサイズ
 	int OverSampling; //!< オーバーサンプリング係数
 	float	TimeScale; //!< 時間軸方向のスケール(出力/入力)
 	float	FrequencyScale; //!< 周波数方向のスケール(出力/入力)
 
-	tRisaWaveSegmentQueue SegmentQueue;
+	tWaveSegmentQueue SegmentQueue;
 
 public:
 	//! @brief		コンストラクタ
-	tRisaPhaseVocoder();
+	tPhaseVocoder();
 
 	//! @brief		デストラクタ
-	~tRisaPhaseVocoder();
+	~tPhaseVocoder();
 
 	//! @brief		FFTフレームサイズを得る
 	//! @return		FFTフレームサイズ

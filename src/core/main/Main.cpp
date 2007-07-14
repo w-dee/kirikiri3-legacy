@@ -30,16 +30,16 @@ RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
 //---------------------------------------------------------------------------
 //! @brief	GC を初期化するための構造体
 //! @note	GC を初期化するためのstaticな構造体。この構造体の初期化がmain前に
-//!			呼ばれることにより、tRisaApplication の構築が正常に終了する
+//!			呼ばれることにより、tApplication の構築が正常に終了する
 //!			ことを期待する。C++ においてstatic な構造体の初期化順序は不定なので、
 //!			これよりも先に他の場所でクローバルな構造体があり、その中で GC の機能を
 //!			使用した場合の定義は未定義である。基本的にはグローバルに置かれた初期化が
 //!			必要な構造体は使用しないこと。
 //---------------------------------------------------------------------------
-struct tRisaGCInitializer
+struct tGCInitializer
 {
-	tRisaGCInitializer() { GC_init(); }
-} RisaGCInitializer;
+	tGCInitializer() { GC_init(); }
+} GCInitializer;
 //---------------------------------------------------------------------------
 
 
@@ -48,7 +48,7 @@ struct tRisaGCInitializer
 //! @note	このクラスのインスタンスへのポインタは wxTheApp に登録されるため、
 //!			GC が見つけ出すことが出来るはず。
 //---------------------------------------------------------------------------
-class tRisaApplication : public wxApp/*, public tCollectee*/
+class tApplication : public wxApp/*, public tCollectee*/
 {
 public:
 	bool OnInit();
@@ -67,7 +67,7 @@ private:
 //---------------------------------------------------------------------------
 // アプリケーションメインルーチン定義
 //---------------------------------------------------------------------------
-IMPLEMENT_APP(tRisaApplication)
+IMPLEMENT_APP(tApplication)
 wxLocale locale;
 //---------------------------------------------------------------------------
 
@@ -75,9 +75,9 @@ wxLocale locale;
 //---------------------------------------------------------------------------
 // アプリケーションイベントテーブル
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tRisaApplication, wxApp)
-	EVT_ACTIVATE(			tRisaApplication::OnActivate)
-	EVT_ACTIVATE_APP(		tRisaApplication::OnActivateApp)
+BEGIN_EVENT_TABLE(tApplication, wxApp)
+	EVT_ACTIVATE(			tApplication::OnActivate)
+	EVT_ACTIVATE_APP(		tApplication::OnActivateApp)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 //! @brief		アプリケーションが開始するとき
 //---------------------------------------------------------------------------
-bool tRisaApplication::OnInit()
+bool tApplication::OnInit()
 {
 	// アプリケーションのディレクトリを得て、その下にある locale か、
 	// <アプリケーションのあるディレクトリ>../share/locale をメッセージカタログ
@@ -110,8 +110,8 @@ bool tRisaApplication::OnInit()
 	try
 	{
 		// 先だって初期化しておきたい物
-		tRisaCollectorThread::ensure();
-		tRisaWxLogProxy::ensure();
+		tCollectorThread::ensure();
+		tWxLogProxy::ensure();
 
 		// 残り全てのシングルトンインスタンスを初期化
 		singleton_manager::init_all();
@@ -125,15 +125,15 @@ bool tRisaApplication::OnInit()
 
 	//---- ↓↓テストコード↓↓ ----
 	// ファイルシステムのルートにカレントディレクトリをマウント
-//	tRisaRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
+//	tRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
 //		RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
 //		NULL, NULL, NULL);
 
 	// コンソールをメインウィンドウとして表示
-	tRisaConsoleFrame *console = new tRisaConsoleFrame();
+	tConsoleFrame *console = new tConsoleFrame();
 	console->Show(true);
 
-	tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
+	tScriptEditorFrame *editor = new tScriptEditorFrame();
 	editor->Show(true);
 
 
@@ -148,12 +148,12 @@ bool tRisaApplication::OnInit()
 //---------------------------------------------------------------------------
 //! @brief		アプリケーションが終了するとき
 //---------------------------------------------------------------------------
-int tRisaApplication::OnExit()
+int tApplication::OnExit()
 {
-	printf("tRisaApplication::OnExit entered\n");
+	printf("tApplication::OnExit entered\n");
 
 	// スクリプトエンジンをシャットダウンする
-//	tRisaRisseScriptEngine::instance()->Shutdown();
+//	tRisseScriptEngine::instance()->Shutdown();
 
 	// すべてのシングルトンインスタンスへの参照を切る
 	singleton_manager::disconnect_all();
@@ -163,7 +163,7 @@ int tRisaApplication::OnExit()
 	// まだシステムに残っているシングルトンインスタンスを表示する
 	singleton_manager::report_alive_objects();
 
-	printf("tRisaApplication::OnExit ended\n");
+	printf("tApplication::OnExit ended\n");
 
 	return 0;
 }
@@ -173,12 +173,12 @@ int tRisaApplication::OnExit()
 //---------------------------------------------------------------------------
 //! @brief		Idleイベントを処理するとき
 //---------------------------------------------------------------------------
-bool tRisaApplication::ProcessIdle()
+bool tApplication::ProcessIdle()
 {
 	bool cont = false;
 /*
 	TODO: handle this
-	if(tRisaTickCount::pointer tick_count = tRisaTickCount::instance())
+	if(tTickCount::pointer tick_count = tTickCount::instance())
 	{
 		// この回で呼び出すハンドラに渡すtickを得る
 		risse_uint64 tick = tick_count->Get();
@@ -186,11 +186,11 @@ bool tRisaApplication::ProcessIdle()
 		// 各サブシステムを呼び出す
 
 		// イベントの配信
-		if(tRisaEventSystem::pointer r = tRisaEventSystem::instance())
+		if(tEventSystem::pointer r = tEventSystem::instance())
 			cont = r->ProcessEvents(tick) || cont;
 
 		// アイドルイベントの配信
-		if(tRisaIdleEventManager::pointer r = tRisaIdleEventManager::instance())
+		if(tIdleEventManager::pointer r = tIdleEventManager::instance())
 			cont = r->Deliver(tick) || cont;
 	}
 */
@@ -203,13 +203,13 @@ bool tRisaApplication::ProcessIdle()
 //---------------------------------------------------------------------------
 //! @brief		ウィンドウなどがアクティブ化/非アクティブ化したとき
 //---------------------------------------------------------------------------
-void tRisaApplication::OnActivate(wxActivateEvent & event)
+void tApplication::OnActivate(wxActivateEvent & event)
 {
 /*
 	TODO: handle this
 	if(!event.GetActive())
 	{
-		if(tRisaCompactEventManager::pointer r = tRisaCompactEventManager::instance())
+		if(tCompactEventManager::pointer r = tCompactEventManager::instance())
 			r->OnDeactivate();
 	}
 */
@@ -220,13 +220,13 @@ void tRisaApplication::OnActivate(wxActivateEvent & event)
 //---------------------------------------------------------------------------
 //! @brief		アプリケーションがアクティブ化/非アクティブ化したとき
 //---------------------------------------------------------------------------
-void tRisaApplication::OnActivateApp(wxActivateEvent & event)
+void tApplication::OnActivateApp(wxActivateEvent & event)
 {
 /*
 	TODO: handle this
 	if(!event.GetActive())
 	{
-		if(tRisaCompactEventManager::pointer r = tRisaCompactEventManager::instance())
+		if(tCompactEventManager::pointer r = tCompactEventManager::instance())
 			r->OnDeactivateApp();
 	}
 */

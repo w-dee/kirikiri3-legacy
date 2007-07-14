@@ -40,7 +40,7 @@ risse_error tNI_TmpFS::Construct(risse_int numparams,
 	*/
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(risse_obj, new tRisaTmpFS());
+	RegisterFileSystemNativeInstance(risse_obj, new tTmpFS());
 
 	return RISSE_S_OK;
 }
@@ -153,13 +153,13 @@ tNativeInstance *tNC_TmpFS::CreateNativeInstance()
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSRegisterer::tRisaTmpFSRegisterer()
+tTmpFSRegisterer::tTmpFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
 	iRisseDispatch2 * cls = new tNC_TmpFS();
 	try
 	{
-		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(
+		depends_on<tFileSystemRegisterer>::locked_instance()->RegisterClassObject(
 							RISSE_WS("TmpFS"), cls);
 	}
 	catch(...)

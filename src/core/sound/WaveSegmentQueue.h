@@ -22,12 +22,12 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief 再生セグメント情報
 //---------------------------------------------------------------------------
-struct tRisaWaveSegment
+struct tWaveSegment
 {
 	//! @brief コンストラクタ
-	tRisaWaveSegment(risse_int64 start, risse_int64 length)
+	tWaveSegment(risse_int64 start, risse_int64 length)
 		{ Start = start; Length = FilteredLength = length; }
-	tRisaWaveSegment(risse_int64 start, risse_int64 length, risse_int64 filteredlength)
+	tWaveSegment(risse_int64 start, risse_int64 length, risse_int64 filteredlength)
 		{ Start = start; Length = length; FilteredLength = filteredlength; }
 	risse_int64 Start; //!< オリジナルデコーダ上でのセグメントのスタート位置 (PCM サンプルグラニュール数単位)
 	risse_int64 Length; //!< オリジナルデコーダ上でのセグメントの長さ (PCM サンプルグラニュール数単位)
@@ -39,7 +39,7 @@ struct tRisaWaveSegment
 //---------------------------------------------------------------------------
 //! @brief 再生イベント情報
 //---------------------------------------------------------------------------
-struct tRisaWaveEvent
+struct tWaveEvent
 {
 	//! @brief コンストラクタ
 	risse_int64 Position; //!< オリジナルデコーダ上でのラベル位置 (PCM サンプルグラニュール数単位)
@@ -47,12 +47,12 @@ struct tRisaWaveEvent
 	risse_int Offset;
 		/*!< オフセット
 			@note
-			This member will be set in tRisaWaveLoopManager::Render,
+			This member will be set in tWaveLoopManager::Render,
 			and will contain the sample granule offset from first decoding
-			point at call of tRisaWaveLoopManager::Render().
+			point at call of tWaveLoopManager::Render().
 		*/
 	//! @brief コンストラクタ
-	tRisaWaveEvent()
+	tWaveEvent()
 	{
 		Position = 0;
 		Offset = 0;
@@ -65,43 +65,43 @@ struct tRisaWaveEvent
 //---------------------------------------------------------------------------
 //! @brief Waveのセグメント・イベントのキューを管理するクラス
 //---------------------------------------------------------------------------
-class tRisaWaveSegmentQueue
+class tWaveSegmentQueue
 {
 	// deque による Segments と Events の配列。
 	// 実用上は、これらの配列に大量のデータが入ることはまずないので
 	// vector で十分なのかもしれないが ...
-	gc_deque<tRisaWaveSegment> Segments; //!< セグメントの配列
-	gc_deque<tRisaWaveEvent> Events; //!< イベントの配列
+	gc_deque<tWaveSegment> Segments; //!< セグメントの配列
+	gc_deque<tWaveEvent> Events; //!< イベントの配列
 
 public:
 	//! @brief		内容をクリアする
 	void Clear();
 
-	//! @brief		tRisaWaveSegmentQueueをエンキューする
-	//! @param		queue		エンキューしたいtRisaWaveSegmentQueueオブジェクト
-	void Enqueue(const tRisaWaveSegmentQueue & queue);
+	//! @brief		tWaveSegmentQueueをエンキューする
+	//! @param		queue		エンキューしたいtWaveSegmentQueueオブジェクト
+	void Enqueue(const tWaveSegmentQueue & queue);
 
-	//! @brief		tRisaWaveSegmentをエンキューする
-	//! @param		queue		エンキューしたいtRisaWaveSegmentオブジェクト
-	void Enqueue(const tRisaWaveSegment & segment);
+	//! @brief		tWaveSegmentをエンキューする
+	//! @param		queue		エンキューしたいtWaveSegmentオブジェクト
+	void Enqueue(const tWaveSegment & segment);
 
-	//! @brief		tRisaWaveEventをエンキューする
-	//! @param		queue		エンキューしたいtRisaWaveEventオブジェクト
+	//! @brief		tWaveEventをエンキューする
+	//! @param		queue		エンキューしたいtWaveEventオブジェクト
 	//! @note		Offset は修正されないので注意
-	void Enqueue(const tRisaWaveEvent & event);
+	void Enqueue(const tWaveEvent & event);
 
-	//! @brief		tRisaWaveSegmentの配列をエンキューする
-	//! @param		queue		エンキューしたい std::dequeue<tRisaWaveSegment>オブジェクト
-	void Enqueue(const gc_deque<tRisaWaveSegment> & segments);
+	//! @brief		tWaveSegmentの配列をエンキューする
+	//! @param		queue		エンキューしたい std::dequeue<tWaveSegment>オブジェクト
+	void Enqueue(const gc_deque<tWaveSegment> & segments);
 
-	//! @brief		tRisaWaveEventの配列をエンキューする
-	//! @param		queue		エンキューしたい std::dequeue<tRisaWaveEvent>オブジェクト
-	void Enqueue(const gc_deque<tRisaWaveEvent> & events);
+	//! @brief		tWaveEventの配列をエンキューする
+	//! @param		queue		エンキューしたい std::dequeue<tWaveEvent>オブジェクト
+	void Enqueue(const gc_deque<tWaveEvent> & events);
 
 	//! @brief		先頭から指定長さ分をデキューする
 	//! @param		dest		格納先キュー(内容はクリアされる)
 	//! @param		length		切り出す長さ(サンプルグラニュール単位)
-	void Dequeue(tRisaWaveSegmentQueue & dest, risse_int64 length);
+	void Dequeue(tWaveSegmentQueue & dest, risse_int64 length);
 
 	//! @brief		このキューの全体の長さを得る
 	//! @return		このキューの長さ (サンプルグラニュール単位)

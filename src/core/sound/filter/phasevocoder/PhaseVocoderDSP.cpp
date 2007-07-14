@@ -42,7 +42,7 @@ RISSE_DEFINE_SOURCE_ID(46678,10832,40512,19852,21662,48847,10996,40273);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
+tPhaseVocoderDSP::tPhaseVocoderDSP(
 				unsigned int framesize,
 				unsigned int frequency, unsigned int channels) :
 					InputBuffer(framesize * 4 * channels),
@@ -137,7 +137,7 @@ tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(
 
 
 //---------------------------------------------------------------------------
-tRisaPhaseVocoderDSP::~tRisaPhaseVocoderDSP()
+tPhaseVocoderDSP::~tPhaseVocoderDSP()
 {
 	Clear();
 }
@@ -145,7 +145,7 @@ tRisaPhaseVocoderDSP::~tRisaPhaseVocoderDSP()
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::SetTimeScale(float v)
+void tPhaseVocoderDSP::SetTimeScale(float v)
 {
 	if(TimeScale != v)
 	{
@@ -163,7 +163,7 @@ void tRisaPhaseVocoderDSP::SetTimeScale(float v)
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::SetFrequencyScale(float v)
+void tPhaseVocoderDSP::SetFrequencyScale(float v)
 {
 	if(FrequencyScale != v)
 	{
@@ -175,7 +175,7 @@ void tRisaPhaseVocoderDSP::SetFrequencyScale(float v)
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::SetOverSampling(unsigned int v)
+void tPhaseVocoderDSP::SetOverSampling(unsigned int v)
 {
 	if(v == 0)
 	{
@@ -192,7 +192,7 @@ void tRisaPhaseVocoderDSP::SetOverSampling(unsigned int v)
 		OverSampling = v;
 		InputHopSize = OutputHopSize = FrameSize / OverSampling;
 		OutputHopSize = static_cast<unsigned int>(InputHopSize * TimeScale) & ~1;
-		// ここのOutputHopSizeの計算については tRisaPhaseVocoderDSP::SetTimeScale
+		// ここのOutputHopSizeの計算については tPhaseVocoderDSP::SetTimeScale
 		// も参照のこと
 		RebuildParams = true;
 	}
@@ -201,7 +201,7 @@ void tRisaPhaseVocoderDSP::SetOverSampling(unsigned int v)
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::Clear()
+void tPhaseVocoderDSP::Clear()
 {
 	// 全てのバッファなどを解放する
 	if(AnalWork)
@@ -237,7 +237,7 @@ void tRisaPhaseVocoderDSP::Clear()
 
 
 //---------------------------------------------------------------------------
-size_t tRisaPhaseVocoderDSP::GetInputFreeSize()
+size_t tPhaseVocoderDSP::GetInputFreeSize()
 {
 	return InputBuffer.GetFreeSize() / Channels;
 }
@@ -245,7 +245,7 @@ size_t tRisaPhaseVocoderDSP::GetInputFreeSize()
 
 
 //---------------------------------------------------------------------------
-bool tRisaPhaseVocoderDSP::GetInputBuffer(
+bool tPhaseVocoderDSP::GetInputBuffer(
 	size_t numsamplegranules,
 	float * & p1, size_t & p1size,
 	float * & p2, size_t & p2size)
@@ -267,7 +267,7 @@ bool tRisaPhaseVocoderDSP::GetInputBuffer(
 
 
 //---------------------------------------------------------------------------
-size_t tRisaPhaseVocoderDSP::GetOutputReadySize()
+size_t tPhaseVocoderDSP::GetOutputReadySize()
 {
 	return OutputBuffer.GetDataSize() / Channels;
 }
@@ -275,7 +275,7 @@ size_t tRisaPhaseVocoderDSP::GetOutputReadySize()
 
 
 //---------------------------------------------------------------------------
-bool tRisaPhaseVocoderDSP::GetOutputBuffer(
+bool tPhaseVocoderDSP::GetOutputBuffer(
 	size_t numsamplegranules,
 	const float * & p1, size_t & p1size,
 	const float * & p2, size_t & p2size)
@@ -297,7 +297,7 @@ bool tRisaPhaseVocoderDSP::GetOutputBuffer(
 
 
 //---------------------------------------------------------------------------
-tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
+tPhaseVocoderDSP::tStatus tPhaseVocoderDSP::Process()
 {
 	// パラメータの再計算の必要がある場合は再計算をする
 	if(RebuildParams)
@@ -357,9 +357,9 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 		InputBuffer.GetReadPointer(FrameSize*Channels, p1, p1len, p2, p2len);
 		p1len /= Channels;
 		p2len /= Channels;
-		RisaDeinterleaveApplyingWindow(AnalWork, p1, InputWindow, Channels, 0, p1len);
+		DeinterleaveApplyingWindow(AnalWork, p1, InputWindow, Channels, 0, p1len);
 		if(p2)
-			RisaDeinterleaveApplyingWindow(AnalWork, p2, InputWindow + p1len, Channels, p1len, p2len);
+			DeinterleaveApplyingWindow(AnalWork, p2, InputWindow + p1len, Channels, p1len, p2len);
 	}
 
 	// チャンネルごとに処理
@@ -381,9 +381,9 @@ tRisaPhaseVocoderDSP::tStatus tRisaPhaseVocoderDSP::Process()
 		OutputBuffer.GetWritePointer(FrameSize*Channels, p1, p1len, p2, p2len);
 		p1len /= Channels;
 		p2len /= Channels;
-		RisaInterleaveOverlappingWindow(p1, SynthWork, OutputWindow, Channels, 0, p1len);
+		InterleaveOverlappingWindow(p1, SynthWork, OutputWindow, Channels, 0, p1len);
 		if(p2)
-			RisaInterleaveOverlappingWindow(p2, SynthWork, OutputWindow + p1len, Channels, p1len, p2len);
+			InterleaveOverlappingWindow(p2, SynthWork, OutputWindow + p1len, Channels, p1len, p2len);
 	}
 
 	// LastSynthPhase を再調整するか

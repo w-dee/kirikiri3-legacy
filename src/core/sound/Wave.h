@@ -27,17 +27,17 @@ namespace Risa {
 	注意
 
 	これらの型はコンパイラのパディング次第では、想定した長さにならない。
-	たとえば、tRisaPCMTypes::i24 は 24bit linear PCM 型だが、本来の長さである
+	たとえば、tPCMTypes::i24 は 24bit linear PCM 型だが、本来の長さである
 	3バイトではなく、コンパイラはおそらくこれに1バイトのパディングを足し、
 	これを4バイトのサイズとして扱う。
-	そのためこれらの型をそのまま配列にしないこと (tRisaPCMTypes::i24 [1024]
+	そのためこれらの型をそのまま配列にしないこと (tPCMTypes::i24 [1024]
 	のような型は正常に動作しない )。また、イテレーションを行う場合は
 	size メンバのサイズ(バイト単位)を参照しながらポインタをバイト単位で
 	加算していくこと (TODO:イテレータでも作ろうか)
 */
 
 //! @brief  PCMサンプル型
-struct tRisaPCMTypes
+struct tPCMTypes
 {
 	enum tType
 	{
@@ -231,12 +231,12 @@ struct tRisaPCMTypes
 //---------------------------------------------------------------------------
 //! @brief		PCM データフォーマット (内部用)
 //---------------------------------------------------------------------------
-struct tRisaWaveFormat
+struct tWaveFormat
 {
 	risse_uint Frequency;				//!< sample granule per sec
 	risse_uint Channels;				//!< number of channels (1=Mono, 2=Stereo ... etc)
 	risse_uint32 SpeakerConfig;			//!< bitwise OR of SPEAKER_* constants (0=default)
-	tRisaPCMTypes::tType PCMType;			//!< PCM type
+	tPCMTypes::tType PCMType;			//!< PCM type
 
 	/*
 		SuggestFormat でPCM形式を提案する場合は、
@@ -245,7 +245,7 @@ struct tRisaWaveFormat
 		・Channels, SpeakerConfig
 		  特に指定しない場合は両方とも0を指定する
 		・PCMType
-		  tRisaPCMTypes::tunknown にする
+		  tPCMTypes::tunknown にする
 	*/
 
 	//! @brief		構造体のメンバを「特に指定しない」状態にする
@@ -254,13 +254,13 @@ struct tRisaWaveFormat
 		Frequency = 0;
 		Channels = 0;
 		SpeakerConfig = 0;
-		PCMType = tRisaPCMTypes::tunknown;
+		PCMType = tPCMTypes::tunknown;
 	}
 
 	//! @brief 1サンプルグラニュールあたりのバイト数を得る
 	size_t GetSampleGranuleSize() const
 	{
-		return tRisaPCMTypes::TypeToSampleBytes(PCMType) * Channels;
+		return tPCMTypes::TypeToSampleBytes(PCMType) * Channels;
 	}
 
 };
@@ -270,7 +270,7 @@ struct tRisaWaveFormat
 //---------------------------------------------------------------------------
 //! @brief		Wave入力ファイルの情報
 //---------------------------------------------------------------------------
-struct tRisaWaveFileInfo : public tRisaWaveFormat
+struct tWaveFileInfo : public tWaveFormat
 {
 	risse_uint64 TotalSampleGranules;	//!< total samples in sample granule; unknown for zero
 	risse_uint64 TotalTime;				//!< in ms; unknown for zero

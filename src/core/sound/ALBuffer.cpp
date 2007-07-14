@@ -11,7 +11,7 @@
 //! @brief OpenAL バッファ管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/exception/RisaException.h"
+#include "base/exception/Exception.h"
 #include "sound/ALCommon.h"
 #include "sound/ALBuffer.h"
 #include "sound/WaveFormatConverter.h"
@@ -23,7 +23,7 @@ RISSE_DEFINE_SOURCE_ID(24518,55437,60218,19380,17845,8848,1743,50558);
 
 
 //---------------------------------------------------------------------------
-tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool streaming)
+tALBuffer::tALBuffer(boost::shared_ptr<tWaveFilter> filter, bool streaming)
 {
 	// フィールドの初期化
 	BufferAllocatedCount  = 0;
@@ -37,9 +37,9 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool str
 	ALFormat = 0;
 
 	// filter のチェック
-	// tRisaALBuffer は常に 16bit の OpenAL バッファを使う
-	// (他の形式の場合は tRisaALBuffer 内部で変換を行うため)
-	const tRisaWaveFormat & format = Filter->GetFormat();
+	// tALBuffer は常に 16bit の OpenAL バッファを使う
+	// (他の形式の場合は tALBuffer 内部で変換を行うため)
+	const tWaveFormat & format = Filter->GetFormat();
 	if     (format.Channels == 1)
 		ALFormat = AL_FORMAT_MONO16;
 	else if(format.Channels == 2)
@@ -53,12 +53,12 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool str
 
 	try
 	{
-		volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+		volatile tOpenAL::tCriticalSectionHolder cs_holder;
 
 		// バッファの生成
 		risse_uint alloc_count = Streaming ? MAX_NUM_BUFFERS : 1;
 		alGenBuffers(alloc_count, Buffers);
-		depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alGenBuffers"));
+		depends_on<tOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alGenBuffers"));
 		BufferAllocatedCount = alloc_count;
 
 		// 非ストリーミングの場合はここで全てをデコードする
@@ -85,21 +85,21 @@ tRisaALBuffer::tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> filter, bool str
 
 
 //---------------------------------------------------------------------------
-tRisaALBuffer::~tRisaALBuffer()
+tALBuffer::~tALBuffer()
 {
-	tRisaCriticalSection::tLocker lock(CS);
+	tCriticalSection::tLocker lock(CS);
 	Clear();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaALBuffer::Clear()
+void tALBuffer::Clear()
 {
-	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+	volatile tOpenAL::tCriticalSectionHolder cs_holder;
 
 	alDeleteBuffers(BufferAllocatedCount, Buffers);
-	depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alDeleteBuffers"));
+	depends_on<tOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alDeleteBuffers"));
 	BufferAllocatedCount = 0;
 	FreeBufferCount = 0;
 
@@ -109,7 +109,7 @@ void tRisaALBuffer::Clear()
 
 
 //---------------------------------------------------------------------------
-void tRisaALBuffer::FreeTempBuffers()
+void tALBuffer::FreeTempBuffers()
 {
 	FreeCollectee(RenderBuffer), RenderBuffer = NULL;
 	RenderBufferSize = 0;
@@ -120,8 +120,8 @@ void tRisaALBuffer::FreeTempBuffers()
 
 
 //---------------------------------------------------------------------------
-bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
-	tRisaWaveSegmentQueue & segmentqueue)
+bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
+	tWaveSegmentQueue & segmentqueue)
 {
 	// バッファにデータをレンダリングする
 	segmentqueue.Clear(); // queue はここでクリアされるので注意
@@ -138,7 +138,7 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 		risse_uint one_want = remain;
 
 		// フィルタの現在のフォーマット形式をチェックする
-		const tRisaWaveFormat & format = Filter->GetFormat();
+		const tWaveFormat & format = Filter->GetFormat();
 
 		if(format.Frequency != ALFrequency)
 			cont = false; // 周波数が変わった
@@ -147,7 +147,7 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 			ALFormat == AL_FORMAT_MONO16   && format.Channels != 1)
 			cont = false; // チャンネル数が変わった
 
-		tRisaPCMTypes::tType filter_pcm_type = tRisaPCMTypes::tunknown;
+		tPCMTypes::tType filter_pcm_type = tPCMTypes::tunknown;
 		risse_uint filter_sample_granule_bytes = 0;
 
 		if(cont)
@@ -164,7 +164,7 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 		}
 
 		// 形式変換の必要は？
-		bool need_convert = filter_pcm_type != tRisaPCMTypes::ti16;
+		bool need_convert = filter_pcm_type != tPCMTypes::ti16;
 
 		// ところで書き込み先バッファのサイズは十分？
 		if(cont)
@@ -249,7 +249,7 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 		// PCM 形式の変換
 		if(need_convert)
 		{
-			tRisaWaveFormatConverter::Convert(tRisaPCMTypes::ti16,
+			tWaveFormatConverter::Convert(tPCMTypes::ti16,
 				RenderBuffer + rendered * ALSampleGranuleBytes,
 				filter_pcm_type,
 				ConvertBuffer,
@@ -277,13 +277,13 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 
 	// バッファにデータを割り当てる
 
-	volatile tRisaOpenAL::tCriticalSectionHolder cs_holder;
+	volatile tOpenAL::tCriticalSectionHolder cs_holder;
 
 //	wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
 //			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
 	alBufferData(buffer, ALFormat, RenderBuffer,
 		rendered * ALSampleGranuleBytes, ALFrequency);
-	depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alBufferData"));
+	depends_on<tOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alBufferData"));
 
 	return true;
 }
@@ -291,9 +291,9 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 
 
 //---------------------------------------------------------------------------
-void tRisaALBuffer::PushFreeBuffer(ALuint buffer)
+void tALBuffer::PushFreeBuffer(ALuint buffer)
 {
-	tRisaCriticalSection::tLocker lock(CS);
+	tCriticalSection::tLocker lock(CS);
 
 	FreeBuffers[FreeBufferCount++] = buffer;
 }
@@ -301,9 +301,9 @@ void tRisaALBuffer::PushFreeBuffer(ALuint buffer)
 
 
 //---------------------------------------------------------------------------
-bool tRisaALBuffer::HasFreeBuffer()
+bool tALBuffer::HasFreeBuffer()
 {
-	tRisaCriticalSection::tLocker lock(CS);
+	tCriticalSection::tLocker lock(CS);
 
 	return FreeBufferCount > 0;
 }
@@ -311,9 +311,9 @@ bool tRisaALBuffer::HasFreeBuffer()
 
 
 //---------------------------------------------------------------------------
-bool tRisaALBuffer::PopFilledBuffer(ALuint & buffer, tRisaWaveSegmentQueue & segmentqueue)
+bool tALBuffer::PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueue)
 {
-	tRisaCriticalSection::tLocker lock(CS);
+	tCriticalSection::tLocker lock(CS);
 
 	// ストリーミングではない場合はそのまま返る
 	if(!Streaming) return false;
@@ -334,9 +334,9 @@ bool tRisaALBuffer::PopFilledBuffer(ALuint & buffer, tRisaWaveSegmentQueue & seg
 
 
 //---------------------------------------------------------------------------
-void tRisaALBuffer::FreeAllBuffers()
+void tALBuffer::FreeAllBuffers()
 {
-	tRisaCriticalSection::tLocker lock(CS);
+	tCriticalSection::tLocker lock(CS);
 
 	// すべてのバッファを解放したことにする
 	memcpy(FreeBuffers, Buffers, sizeof(ALuint) * BufferAllocatedCount);
@@ -346,16 +346,16 @@ void tRisaALBuffer::FreeAllBuffers()
 
 
 //---------------------------------------------------------------------------
-void tRisaALBuffer::Load()
+void tALBuffer::Load()
 {
-	tRisaCriticalSection::tLocker lock(CS);
+	tCriticalSection::tLocker lock(CS);
 
 	// OpenAL バッファに Filter からの入力を「すべて」デコードし、入れる
 
 	// TODO: WaveLoopManager のリンク無効化 (そうしないと延々とサウンドを
 	//       メモリが無くなるまでデコードし続ける)
 	// TODO: segments と events のハンドリング
-	tRisaWaveSegmentQueue segumentqueue;
+	tWaveSegmentQueue segumentqueue;
 	bool filled = FillALBuffer(Buffers[0], 0, segumentqueue);
 
 	if(!filled)

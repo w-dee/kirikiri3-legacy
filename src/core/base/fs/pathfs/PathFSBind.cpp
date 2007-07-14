@@ -40,7 +40,7 @@ risse_error tNI_PathFS::Construct(risse_int numparams,
 	*/
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(risse_obj, new tRisaPathFS());
+	RegisterFileSystemNativeInstance(risse_obj, new tPathFS());
 
 	return RISSE_S_OK;
 }
@@ -152,13 +152,13 @@ tNativeInstance *tNC_PathFS::CreateNativeInstance()
 
 
 //---------------------------------------------------------------------------
-tRisaPathFSRegisterer::tRisaPathFSRegisterer()
+tPathFSRegisterer::tPathFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
 	iRisseDispatch2 * cls = new tNC_PathFS();
 	try
 	{
-		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(
+		depends_on<tFileSystemRegisterer>::locked_instance()->RegisterClassObject(
 							RISSE_WS("PathFS"), cls);
 	}
 	catch(...)

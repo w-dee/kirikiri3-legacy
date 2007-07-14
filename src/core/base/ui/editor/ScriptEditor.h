@@ -18,12 +18,12 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-class tRisaScriptEditorTextCtrl;
-class tRisaScriptEditorStatusBar;
+class tScriptEditorTextCtrl;
+class tScriptEditorStatusBar;
 //---------------------------------------------------------------------------
 //! @brief		スクリプトエディタのフレーム
 //---------------------------------------------------------------------------
-class tRisaScriptEditorFrame : public tRisaUIFrame
+class tScriptEditorFrame : public tUIFrame
 {
 public:
 	enum
@@ -36,7 +36,7 @@ public:
 
 public:
 	//! @brief		コンストラクタ
-	tRisaScriptEditorFrame();
+	tScriptEditorFrame();
 
 public:
 	//! @brief		編集内容を設定する
@@ -58,11 +58,11 @@ public:
 private:
 	//! @brief		「実行」メニューや実行ボタンが選択されたとき
 	//! @param		event イベントオブジェクト
-	tRisaScriptEditorTextCtrl *TextCtrl;
+	tScriptEditorTextCtrl *TextCtrl;
 
 	//! @brief		TextCtrl の UI アップデートイベントが発生したとき
 	//! @param		event イベントオブジェクト
-	tRisaScriptEditorStatusBar *StatusBar;
+	tScriptEditorStatusBar *StatusBar;
 
 	void OnCommandExecute(wxCommandEvent & event);
 	void OnTextCtrlUpdateUI(wxUpdateUIEvent & event);

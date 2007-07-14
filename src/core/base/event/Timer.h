@@ -19,7 +19,7 @@
 	(例: Windowsでは分解能は50msが限度)。
 	分解能の高いタイマーを汎用的にどのように実現するかは難しいところであるが、
 	ここではタイミングを制御するスレッドを一つ作成し、そのスレッド内でセマフォ
-	待ちがタイムアウトするのと、tRisaTickCount クラスからのティックカウントを
+	待ちがタイムアウトするのと、tTickCount クラスからのティックカウントを
 	リファレンスとしてタイマーを実現する。
 	これはおおよそOSのコンテキストスイッチの精度に依存するが、10ms程度の
 	分解能を提供できるはずである。
@@ -39,46 +39,46 @@ namespace Risa {
 
 
 
-class tRisaTimerConsumer;
+class tTimerConsumer;
 
 //---------------------------------------------------------------------------
 //! @brief		タイマーのタイミングを管理するクラス(スケジューラ)
 //---------------------------------------------------------------------------
-class tRisaTimerScheduler : protected depends_on<tRisaTickCount>,
-							public tRisaThread
+class tTimerScheduler : protected depends_on<tTickCount>,
+							public tThread
 {
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-	tRisaThreadEvent Event; //!< イベント
-	typedef gc_vector<tRisaTimerConsumer*> tConsumers; //!< tRisaTimerConsumer の配列 の typedef
-	tConsumers Consumers; //!< tRisaTimerConsumer の配列
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tThreadEvent Event; //!< イベント
+	typedef gc_vector<tTimerConsumer*> tConsumers; //!< tTimerConsumer の配列 の typedef
+	tConsumers Consumers; //!< tTimerConsumer の配列
 
-	risse_uint64 NearestTick; //!< もっとも時間的に近い位置にあるTick (tRisaTickCount::InvalidTickCount の場合は無効)
+	risse_uint64 NearestTick; //!< もっとも時間的に近い位置にあるTick (tTickCount::InvalidTickCount の場合は無効)
 	size_t NearestIndex; //!< もっちも時間的に近い位置にある Consumer のConsumers内におけるインデックス
 	volatile bool NearestInfoValid; //!< Nearest* のメンバの情報が有効かどうか
 	volatile bool NeedRescheduleOnPeriodChange;
-		//!< tRisaTimerConsumer::SetNextTick内でReschedule()が呼ばれたときに
+		//!< tTimerConsumer::SetNextTick内でReschedule()が呼ばれたときに
 		//!< 本当にRescheduleする必要があるかどうか
 
 public:
 	//! @brief		コンストラクタ
-	tRisaTimerScheduler();
+	tTimerScheduler();
 
 	//! @brief		デストラクタ
-	~tRisaTimerScheduler();
+	~tTimerScheduler();
 
 
 private:
-	friend class tRisaTimerConsumer;
+	friend class tTimerConsumer;
 
 	//! @brief		consumerを登録する
 	//! @param		consumer コールバックを発生させるコンシューマオブジェクト
 	//! @note		すでにそのconsumerが登録されてるかどうかなどはチェックしない
-	void Register(tRisaTimerConsumer * consumer);
+	void Register(tTimerConsumer * consumer);
 
 	//! @brief		consumerの登録を解除する
 	//! @param		consumer コールバックを発生させるコンシューマオブジェクト
 	//! @note		そのconsumerが見つからない場合は何もしない
-	void Unregister(tRisaTimerConsumer * consumer);
+	void Unregister(tTimerConsumer * consumer);
 
 	//! @brief		スケジュールをやり直す
 	void Reschedule();
@@ -106,25 +106,25 @@ protected:
 //! @note		このクラスおよびこの派生クラスのデストラクタは、
 //!				メインスレッド以外から非同期に呼ばれる可能性があるので注意すること
 //---------------------------------------------------------------------------
-class tRisaTimerConsumer : public tDestructee
+class tTimerConsumer : public tDestructee
 {
-	tRisaTimerScheduler * Owner;
+	tTimerScheduler * Owner;
 	risse_uint64 NextTick; // 次に OnPeriod を呼ぶべき絶対Tick
 protected:
 	//! @brief		コンストラクタ
-	tRisaTimerConsumer(tRisaTimerScheduler * owner);
+	tTimerConsumer(tTimerScheduler * owner);
 
 	//! @brief		デストラクタ
-	virtual ~tRisaTimerConsumer();
+	virtual ~tTimerConsumer();
 public:
 	risse_uint64 GetNextTick() const { return NextTick; } //!< 次にOnPeriodをコールバックすべき絶対TickCountを返す
 
 	//! @brief		次にOnPeriodをコールバックすべき絶対tickを設定する
-	//! @param		nexttick 絶対TickCount (呼んで欲しくない場合はtRisaTickCount::InvalidTickCount)
+	//! @param		nexttick 絶対TickCount (呼んで欲しくない場合はtTickCount::InvalidTickCount)
 	//! @note		nexttick が現在あるいはすでに過去だった場合は即座に OnPeriodが呼ばれる。
-	//! @note		ここでいう「絶対TickCount」とは tRisaTickCount が返すようなTickCountのことである。
+	//! @note		ここでいう「絶対TickCount」とは tTickCount が返すようなTickCountのことである。
 	//!				たとえば5秒後にOnPeriodを呼びたいならば、
-	//!				SetNextTick(tRisaTickCount::instance()->Get() + 5000) とする。
+	//!				SetNextTick(tTickCount::instance()->Get() + 5000) とする。
 	void SetNextTick(risse_uint64 nexttick);
 
 	//! @brief	指定されたTickCountに達したときに呼び出される
@@ -155,16 +155,16 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		イベントタイマースケジューラ
 //! @note		Risaのイベントシステムと協調して動作するスケジューラ。
-//!				素の tRisaTimerScheduler/tRisaTimerConsumer は マルチスレッド
+//!				素の tTimerScheduler/tTimerConsumer は マルチスレッド
 //!				で動作するので少々扱いづらいが、
 //!				イベントタイマーはイベントシステムを使って、イベントハンドラが
 //!				メインスレッドから呼ばれることを確実にするほか、いくつかの機能
 //!				のカプセル化も行う。
 //---------------------------------------------------------------------------
-class tRisaEventTimerScheduler :
-				public tRisaTimerScheduler,
-				public singleton_base<tRisaEventTimerScheduler>, // このクラスはシングルトンオブジェクト
-				manual_start<tRisaEventTimerScheduler> // このクラスのインスタンスは手動起動
+class tEventTimerScheduler :
+				public tTimerScheduler,
+				public singleton_base<tEventTimerScheduler>, // このクラスはシングルトンオブジェクト
+				manual_start<tEventTimerScheduler> // このクラスのインスタンスは手動起動
 {
 };
 //---------------------------------------------------------------------------
@@ -177,16 +177,16 @@ class tRisaEventTimerScheduler :
 //---------------------------------------------------------------------------
 //! @brief		イベントタイマーコンシューマ
 //---------------------------------------------------------------------------
-class tRisaEventTimerConsumer :
-	public tRisaTimerConsumer,
-	public tRisaEventDestination,
-	protected depends_on<tRisaEventTimerScheduler>, // このクラスは tRisaEventTimerScheduler に依存
-	protected depends_on<tRisaEventSystem>, // イベント管理システムに依存
-	protected depends_on<tRisaTickCount> // このクラスは tRisaTickCount に依存
+class tEventTimerConsumer :
+	public tTimerConsumer,
+	public tEventDestination,
+	protected depends_on<tEventTimerScheduler>, // このクラスは tEventTimerScheduler に依存
+	protected depends_on<tEventSystem>, // イベント管理システムに依存
+	protected depends_on<tTickCount> // このクラスは tTickCount に依存
 {
 	static const size_t DefaultCapacity = 6; //!< Capacity のデフォルトの値
 
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	bool Enabled; //!< タイマーが有効かどうか
 	risse_uint64 Interval; //!< タイマー周期
 	risse_uint64 ReferenceTick; //!< 周期の基準となるTick
@@ -195,10 +195,10 @@ class tRisaEventTimerConsumer :
 
 protected:
 	//! @brief		コンストラクタ
-	tRisaEventTimerConsumer();
+	tEventTimerConsumer();
 
 	//! @brief		デストラクタ
-	~tRisaEventTimerConsumer();
+	~tEventTimerConsumer();
 
 public:
 	bool GetEnabled() const { return Enabled; } //!< 有効かどうかを得る
@@ -228,11 +228,11 @@ private:
 	//! @brief		指定されたTickCountに達したときに呼び出される
 	//! @param	scheduled_tick GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
 	//! @param	current_tick この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
-	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick); // from tRisaScriptTimerConsumer
+	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick); // from tScriptTimerConsumer
 
 	//! @brief	イベントが配信されるとき
 	//! @param	info イベント情報
-	virtual void OnEvent(tRisaEventInfo * info); // from tRisaEventDestination
+	virtual void OnEvent(tEventInfo * info); // from tEventDestination
 
 public:
 	virtual void OnTimer() = 0; //!< タイマイベントが発生した

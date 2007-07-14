@@ -10,7 +10,7 @@
 //! @file
 //! @brief fontconfig 経由でのFreeType Driver
 //! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
-//! tRisaFreeTypeDriver もプラットフォームごとに異なった実装となる。
+//! tFreeTypeDriver もプラットフォームごとに異なった実装となる。
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "NativeFreeTypeDriver.h"
@@ -22,7 +22,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisaBaseFreeTypeFontDriver::tRisaBaseFreeTypeFontDriver()
+tBaseFreeTypeFontDriver::tBaseFreeTypeFontDriver()
 {
 }
 //---------------------------------------------------------------------------
@@ -30,7 +30,7 @@ tRisaBaseFreeTypeFontDriver::tRisaBaseFreeTypeFontDriver()
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaBaseFreeTypeFontDriver::~tRisaBaseFreeTypeFontDriver()
+tBaseFreeTypeFontDriver::~tBaseFreeTypeFontDriver()
 {
 }
 //---------------------------------------------------------------------------
@@ -44,7 +44,7 @@ tRisaBaseFreeTypeFontDriver::~tRisaBaseFreeTypeFontDriver()
 //!				使うことができる。
 //!				flags に指定できるのは、RISA__FSF_FIXEDPITCH 、 RISA__FSF_NOVERTICAL のみ。
 //---------------------------------------------------------------------------
-void tRisaBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
+void tBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 		risse_uint32 flags, wxFontEncoding encoding)
 {
 	dest.Clear();

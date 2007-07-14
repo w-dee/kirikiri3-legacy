@@ -23,21 +23,21 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-class tRisaSound;
+class tSound;
 //---------------------------------------------------------------------------
-//! @brief		OpenALイベントの発生先を tRisaSound に固定した OpenAL ソースクラス
+//! @brief		OpenALイベントの発生先を tSound に固定した OpenAL ソースクラス
 //---------------------------------------------------------------------------
-class tRisaSoundALSource : public tRisaALSource
+class tSoundALSource : public tALSource
 {
-	tRisaSound * Owner;
+	tSound * Owner;
 
 public:
 	//! @brief		コンストラクタ
-	tRisaSoundALSource(tRisaSound * owner, boost::shared_ptr<tRisaALBuffer> buffer,
-		boost::shared_ptr<tRisaWaveLoopManager> loopmanager);
+	tSoundALSource(tSound * owner, boost::shared_ptr<tALBuffer> buffer,
+		boost::shared_ptr<tWaveLoopManager> loopmanager);
 
 	//! @brief		コンストラクタ
-	tRisaSoundALSource(tRisaSound * owner, const tRisaALSource * ref);
+	tSoundALSource(tSound * owner, const tALSource * ref);
 
 protected:
 	//! @brief		ステータスが変更された
@@ -55,30 +55,30 @@ protected:
 //---------------------------------------------------------------------------
 //! @brief		サウンドクラス
 //---------------------------------------------------------------------------
-class tRisaSound :
-	protected depends_on<tRisaOpenAL>,
-	protected depends_on<tRisaWaveDecoderFactoryManager>,
-	public tRisaALSourceStatus
+class tSound :
+	protected depends_on<tOpenAL>,
+	protected depends_on<tWaveDecoderFactoryManager>,
+	public tALSourceStatus
 {
-	friend class tRisaSoundALSource;
+	friend class tSoundALSource;
 
 	tStatus Status; //!< 直前のステータス
 
-	boost::shared_ptr<tRisaSoundALSource> Source;
-	boost::shared_ptr<tRisaALBuffer> Buffer;
-	gc_vector<boost::shared_ptr<tRisaWaveFilter> > Filters;
-	boost::shared_ptr<tRisaWaveLoopManager> LoopManager;
-	boost::shared_ptr<tRisaWaveDecoder> Decoder;
+	boost::shared_ptr<tSoundALSource> Source;
+	boost::shared_ptr<tALBuffer> Buffer;
+	gc_vector<boost::shared_ptr<tWaveFilter> > Filters;
+	boost::shared_ptr<tWaveLoopManager> LoopManager;
+	boost::shared_ptr<tWaveDecoder> Decoder;
 
 public:
 	//! @brief		コンストラクタ
-	tRisaSound();
+	tSound();
 
 	//! @brief		ファイル名を指定してのコンストラクタ
-	tRisaSound(const tString & filename);
+	tSound(const tString & filename);
 
 	//! @brief		デストラクタ
-	virtual ~tRisaSound();
+	virtual ~tSound();
 
 private:
 	//! @brief		内部状態の初期化

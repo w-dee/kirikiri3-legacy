@@ -23,12 +23,12 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		FreeType Face の基底クラス
 //---------------------------------------------------------------------------
-class tRisaBaseFreeTypeFace
+class tBaseFreeTypeFace
 {
 public:
 	virtual FT_Face GetFTFace() const = 0; //!< FreeType の Face オブジェクトを返す
 	virtual void GetFaceNameList(wxArrayString & dest) const = 0; //!< このフォントファイルが持っているフォントを配列として返す
-	virtual ~tRisaBaseFreeTypeFace() {;}
+	virtual ~tBaseFreeTypeFace() {;}
 };
 //---------------------------------------------------------------------------
 

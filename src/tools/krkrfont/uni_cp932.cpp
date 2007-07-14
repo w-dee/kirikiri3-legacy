@@ -21,7 +21,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		UNICODEとShiftJISコードの組を表す型
 //---------------------------------------------------------------------------
-struct tRisaUnicodeAndSJISPair
+struct tUnicodeAndSJISPair
 {
 	risse_uint16 Unicode;
 	risse_uint16 SJIS;
@@ -31,7 +31,7 @@ struct tRisaUnicodeAndSJISPair
 //---------------------------------------------------------------------------
 //! @brief		UNICODEとShiftJISコードの組(UNICODEでソート済み)
 //---------------------------------------------------------------------------
-static const tRisaUnicodeAndSJISPair RisaUnicodeAndSJISPair[] = {
+static const tUnicodeAndSJISPair UnicodeAndSJISPair[] = {
 { 0x0000U, 0x0000U },{ 0x0001U, 0x0001U },{ 0x0002U, 0x0002U },
 { 0x0003U, 0x0003U },{ 0x0004U, 0x0004U },{ 0x0005U, 0x0005U },
 { 0x0006U, 0x0006U },{ 0x0007U, 0x0007U },{ 0x0008U, 0x0008U },
@@ -2542,8 +2542,8 @@ static const tRisaUnicodeAndSJISPair RisaUnicodeAndSJISPair[] = {
 //---------------------------------------------------------------------------
 //! @brief		UNICODEとShiftJISコードの組の数
 //---------------------------------------------------------------------------
-#define RisaNumUnicodeAndSJISPair \
-	(sizeof(RisaUnicodeAndSJISPair) / sizeof(RisaUnicodeAndSJISPair[0]))
+#define NumUnicodeAndSJISPair \
+	(sizeof(UnicodeAndSJISPair) / sizeof(UnicodeAndSJISPair[0]))
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
@@ -2554,23 +2554,23 @@ static const tRisaUnicodeAndSJISPair RisaUnicodeAndSJISPair[] = {
 //! @note		が、いわゆる半角文字の場合は上位8ビットは0、いわゆる全角文字は
 //! @note		ShiftJISコードがそのまま入る。
 //---------------------------------------------------------------------------
-risse_uint RisaUnicodeToSJIS(risse_char in)
+risse_uint UnicodeToSJIS(risse_char in)
 {
-	// RisaUnicodeAndSJISPair に対して二分検索を行う
+	// UnicodeAndSJISPair に対して二分検索を行う
 	if(in >= 0x10000) return 0;
 		// 0x10000 以上のコードポイントに対してはSJIS文字変換は定義されていない
 
-	risse_uint s = 0, e = RisaNumUnicodeAndSJISPair;
+	risse_uint s = 0, e = NumUnicodeAndSJISPair;
 	while(e - s > 1)
 	{
 		risse_int m = (s + e) / 2;
-		if(RisaUnicodeAndSJISPair[m].Unicode <= static_cast<risse_uint16>(in))
+		if(UnicodeAndSJISPair[m].Unicode <= static_cast<risse_uint16>(in))
 			s = m;
 		else
 			e = m;
 	}
-	if(RisaUnicodeAndSJISPair[s].Unicode == static_cast<risse_uint16>(in))
-		return RisaUnicodeAndSJISPair[s].SJIS; // 見つかった
+	if(UnicodeAndSJISPair[s].Unicode == static_cast<risse_uint16>(in))
+		return UnicodeAndSJISPair[s].SJIS; // 見つかった
 	return 0;
 }
 //---------------------------------------------------------------------------
@@ -2586,9 +2586,9 @@ int main(void)
 {
 	for(risse_uint i = 1; i < 65536; i++)
 	{
-		risse_uint sjis = RisaUnicodeToSJIS(i);
+		risse_uint sjis = UnicodeToSJIS(i);
 		if(sjis == 0) continue;
-		risse_uint uni_out = RisaSJISToUnicode(sjis);
+		risse_uint uni_out = SJISToUnicode(sjis);
 		if(uni_out != i)
 		{
 			printf("fail: uni input:%x, sjis:%x, uni output:%x\n",

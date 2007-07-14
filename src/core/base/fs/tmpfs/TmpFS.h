@@ -23,35 +23,35 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief ノードを表すクラス
 //---------------------------------------------------------------------------
-class tRisaTmpFSNode
+class tTmpFSNode
 {
 public:
 	enum tType { ntDirectory, ntFile  };
 
 private:
-	tRisaTmpFSNode * Parent; //!< 親へのリンク
+	tTmpFSNode * Parent; //!< 親へのリンク
 	tType Type; //!< ノードのタイプ
 	tString Name;
 	union
 	{
-		tHashTable<tString, tRisaTmpFSNode *> * Directory; //!< ディレクトリ
-		tRisaMemoryStreamBlock * File; //!< ファイル
+		tHashTable<tString, tTmpFSNode *> * Directory; //!< ディレクトリ
+		tMemoryStreamBlock * File; //!< ファイル
 	};
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent 親ノード
 	//! @param		type ノードタイプ
 	//! @param		name ノードの名前
-	tRisaTmpFSNode(tRisaTmpFSNode *parent, tType type, const tString & name);
+	tTmpFSNode(tTmpFSNode *parent, tType type, const tString & name);
 
 	//! @brief		シリアライズされたデータを読み取るコンストラクタ
 	//! @param		parent 親ノード
 	//! @param		type ノードタイプ
 	//! @param		src 入力もとストリーム
-	tRisaTmpFSNode(tRisaTmpFSNode *parent, tType type, tBinaryStream * src);
+	tTmpFSNode(tTmpFSNode *parent, tType type, tBinaryStream * src);
 
 	//! @brief		デストラクタ
-	~tRisaTmpFSNode();
+	~tTmpFSNode();
 
 public:
 	//! @brief		内容をシリアライズする
@@ -62,7 +62,7 @@ public:
 	//! @param		name 名前
 	//! @return		ノード(ノードが見つからない場合は NULL)
 	//! @note		このノードが File を表す場合も NULL が返る
-	tRisaTmpFSNode * GetSubNode(const tString & name);
+	tTmpFSNode * GetSubNode(const tString & name);
 
 	//! @brief		指定された名前を持つサブノードを削除する
 	//! @param		name 名前
@@ -73,19 +73,19 @@ public:
 	//! @param		name 名前
 	//! @return		新規に作成されたディレクトリノード
 	//! @note		すでにその名前を持つノードがあった場合は何もしないで NULL を返すので注意
-	tRisaTmpFSNode * CreateDirectory(const tString & name);
+	tTmpFSNode * CreateDirectory(const tString & name);
 
 	//! @brief		指定された名前を持つファイルを作成する
 	//! @param		name 名前
 	//! @return		新規に作成されたファイルノード
 	//! @note		すでにその名前を持つノードがあった場合は何もしないで NULL を返すので注意
-	tRisaTmpFSNode * CreateFile(const tString & name);
+	tTmpFSNode * CreateFile(const tString & name);
 
 	tType GetType() const { return Type; }
 	bool IsFile() const { return Type == ntFile; }
 	bool IsDirectory() const { return Type == ntDirectory; }
-	tRisaMemoryStreamBlock * GetMemoryStreamBlockNoAddRef() { return File; } 
-	tRisaTmpFSNode * GetParent() { return Parent; }
+	tMemoryStreamBlock * GetMemoryStreamBlockNoAddRef() { return File; } 
+	tTmpFSNode * GetParent() { return Parent; }
 	const tString & GetName() const { return Name; }
 	bool HasSubNode() const { return Type == ntDirectory &&
 							Directory->GetCount() != 0; }
@@ -96,7 +96,7 @@ public:
 
 	//! @brief		すべての子要素に対して callback を呼び出す
 	//! @return		callback を呼び出した回数
-	size_t Iterate(tRisaFileSystemIterationCallback * callback);
+	size_t Iterate(tFileSystemIterationCallback * callback);
 
 };
 //---------------------------------------------------------------------------
@@ -105,28 +105,28 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		tmp ファイルシステム
 //---------------------------------------------------------------------------
-class tRisaTmpFS : public tRisaFileSystem
+class tTmpFS : public tFileSystem
 {
-	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
-	tRisaTmpFSNode * Root; //!< ルートノード
+	tCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tTmpFSNode * Root; //!< ルートノード
 
 	//! @brief		シリアライズ時のファイルの先頭に着くマジック
 	static const unsigned char SerializeMagic[];
 
 public:
 	//! @brief		コンストラクタ
-	tRisaTmpFS();
+	tTmpFS();
 
-	//-- tRisaFileSystem メンバ
+	//-- tFileSystem メンバ
 	//! @brief		デストラクタ
-	~tRisaTmpFS();
+	~tTmpFS();
 
 	//! @brief		ファイル一覧を取得する
 	//! @param		dirname ディレクトリ名
 	//! @param		callback コールバックオブジェクト
 	//! @return		取得できたファイル数
 	size_t GetFileListAt(const tString & dirname,
-		tRisaFileSystemIterationCallback * callback);
+		tFileSystemIterationCallback * callback);
 
 	//! @brief		ファイルが存在するかどうかを得る
 	//! @param		filename ファイル名
@@ -155,14 +155,14 @@ public:
 	//! @brief		指定されたファイルの stat を得る
 	//! @param		filename ファイル名
 	//! @param		struc stat 結果の出力先
-	void Stat(const tString & filename, tRisaStatStruc & struc);
+	void Stat(const tString & filename, tStatStruc & struc);
 
 	//! @brief		指定されたファイルのストリームを得る
 	//! @param		filename ファイル名
 	//! @param		flags フラグ
 	//! @return		ストリームオブジェクト
 	tBinaryStream * CreateStream(const tString & filename, risse_uint32 flags);
-	//-- tRisaFileSystem メンバ ここまで
+	//-- tFileSystem メンバ ここまで
 
 	//! @brief		指定されたストリームに内容をシリアライズする
 	//! @param		dest 出力先ストリーム
@@ -184,7 +184,7 @@ private:
 	//! @brief		指定された位置のノードを得る
 	//! @param		name ノード
 	//! @return		その位置にあるノード。その位置が見つからない場合は NULL
-	tRisaTmpFSNode * GetNodeAt(const tString & name);
+	tTmpFSNode * GetNodeAt(const tString & name);
 
 	//! @brief		ルートディレクトリを作成する
 	void CreateRoot();

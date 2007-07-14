@@ -22,42 +22,42 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief WaveFilterの基本動作の実装
 //---------------------------------------------------------------------------
-class tRisaBasicWaveFilter : public tRisaWaveFilter
+class tBasicWaveFilter : public tWaveFilter
 {
 protected:
 	// フィルタ管理
-	boost::shared_ptr<tRisaWaveFilter> Input; //!< チェーンの前につながっているフィルタ
-	tRisaWaveFormat InputFormat; //!< 入力フォーマット
-	tRisaWaveFormat OutputFormat; //!< 出力フォーマット
+	boost::shared_ptr<tWaveFilter> Input; //!< チェーンの前につながっているフィルタ
+	tWaveFormat InputFormat; //!< 入力フォーマット
+	tWaveFormat OutputFormat; //!< 出力フォーマット
 
 	// 入力フォーマット変換関連
 	risse_uint8 * ConvertBuffer; //!< 変換バッファ
 	size_t ConvertBufferSize; //!< 変換バッファのサイズ
 
 	// 出力バッファ(キュー)管理
-	tRisaPCMTypes::tType DesiredOutputType; //!< 出力PCMタイプ
+	tPCMTypes::tType DesiredOutputType; //!< 出力PCMタイプ
 	risse_uint8 * QueuedData; //!< キューされた PCM データ
 	risse_uint QueuedDataAllocSize; //!< キューに割り当てられたメモリサイズ(バイト単位)
 	risse_uint QueuedSampleGranuleCount; //!< キューに入っている全体のサンプルグラニュール数
 	risse_uint QueuedSampleGranuleRemain; //!< キューに入っている残りのサンプルグラニュール数
-	tRisaWaveSegmentQueue SegmentQueue; //!< キューに入っているセグメント
+	tWaveSegmentQueue SegmentQueue; //!< キューに入っているセグメント
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		desired_output_type    サブクラスが望む PCM 形式
-	tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_type);
+	tBasicWaveFilter(tPCMTypes::tType desired_output_type);
 
 	//! @brief		デストラクタ
-	~tRisaBasicWaveFilter();
+	~tBasicWaveFilter();
 
 	//! @brief		フィルタをリセットする際に呼ばれる
 	void Reset();
 
 	//! @brief		フィルタの入力を設定する
 	//! @param		input  入力となるフィルタ
-	void SetInput(boost::shared_ptr<tRisaWaveFilter> input);
+	void SetInput(boost::shared_ptr<tWaveFilter> input);
 
-	void SuggestFormat(const tRisaWaveFormat & format) {;}
+	void SuggestFormat(const tWaveFormat & format) {;}
 		//!< @note ここではなにもしない。必要ならばサブクラスで実装すること。
 
 	//! @brief		デコードを行う
@@ -67,11 +67,11 @@ public:
 	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 	//! @return		まだデコードすべきデータが残っているかどうか
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
-		tRisaWaveSegmentQueue & segmentqueue);
+		tWaveSegmentQueue & segmentqueue);
 
 	//! @brief		PCM形式を返す
 	//! @return		PCM形式への参照
-	const tRisaWaveFormat & GetFormat();
+	const tWaveFormat & GetFormat();
 
 protected:
 
@@ -84,7 +84,7 @@ protected:
 	//! @param		numsamplegranules	サンプル数
 	//! @param		segmentqueue	再生セグメントキュー情報
 	void Queue(risse_uint numsamplegranules,
-		const tRisaWaveSegmentQueue & segmentqueue);
+		const tWaveSegmentQueue & segmentqueue);
 
 	//! @brief		指定されたバッファに入力フィルタから情報を読み出し、書き込む
 	//! @param		dest				書き込みたいバッファ
@@ -93,9 +93,9 @@ protected:
 	//! @param		fill_silence		欲しいサンプルグラニュール数に入力が満たないとき、残りを無音で埋めるかどうか
 	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 	//! @return		実際に書き込まれたサンプルグラニュール数
-	risse_uint Fill(void * dest, risse_uint numsamplegranules, tRisaPCMTypes::tType desired_type,
+	risse_uint Fill(void * dest, risse_uint numsamplegranules, tPCMTypes::tType desired_type,
 		bool fill_silence,
-		tRisaWaveSegmentQueue & segmentqueue);
+		tWaveSegmentQueue & segmentqueue);
 
 
 

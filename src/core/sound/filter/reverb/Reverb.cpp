@@ -19,8 +19,8 @@ RISSE_DEFINE_SOURCE_ID(8600,37386,12503,16952,7601,59827,19639,49324);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisaReverb::tRisaReverb() :
-	tRisaBasicWaveFilter(tRisaPCMTypes::tf32)
+tReverb::tReverb() :
+	tBasicWaveFilter(tPCMTypes::tf32)
 {
 	Buffer = NULL;
 }
@@ -28,7 +28,7 @@ tRisaReverb::tRisaReverb() :
 
 
 //---------------------------------------------------------------------------
-tRisaReverb::~tRisaReverb()
+tReverb::~tReverb()
 {
 	delete (PointerFreeGC) [] Buffer;
 }
@@ -36,24 +36,24 @@ tRisaReverb::~tRisaReverb()
 
 
 //---------------------------------------------------------------------------
-void tRisaReverb::InputChanged()
+void tReverb::InputChanged()
 {
 	Model.mute();
 
 	// Input に PCM 形式を提案する
-	tRisaWaveFormat format;
+	tWaveFormat format;
 	format.Reset();
-	format.PCMType = tRisaPCMTypes::tf32; // float がいい！できれば float にして！！
+	format.PCMType = tPCMTypes::tf32; // float がいい！できれば float にして！！
 	Input->SuggestFormat(format);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaReverb::Filter()
+void tReverb::Filter()
 {
 	// Buffer にデータを読み込む
-	tRisaWaveSegmentQueue segmentqueue;
+	tWaveSegmentQueue segmentqueue;
 
 	const risse_uint channels = InputFormat.Channels;
 	if(channels != 2) return; // チャンネルは 2 (stereo)以外は今のところ対応していない
@@ -66,7 +66,7 @@ void tRisaReverb::Filter()
 	if(!dest_buf) return;
 
 	// 入力からデータを読み取る
-	risse_uint filled = Fill(Buffer, NumBufferSampleGranules, tRisaPCMTypes::tf32, true, segmentqueue);
+	risse_uint filled = Fill(Buffer, NumBufferSampleGranules, tPCMTypes::tf32, true, segmentqueue);
 
 	if(filled == 0) return;
 

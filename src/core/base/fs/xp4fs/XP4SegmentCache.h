@@ -28,12 +28,12 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //!@brief		セグメントキャッシュクラス
 //---------------------------------------------------------------------------
-class tRisaXP4SegmentCache : public singleton_base<tRisaXP4SegmentCache>
+class tXP4SegmentCache : public singleton_base<tXP4SegmentCache>
 {
 	static const risse_size ONE_LIMIT = 1024*1024; //!< これを超えるセグメントはキャッシュしない
 	static const risse_size TOTAL_LIMIT = 1024*1024; //!< トータルでこれ以上はキャッシュしない
 
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_size TotalBytes; //!< このクラスが保持しているトータルのバイト数
 
 	//! @brief キャッシュアイテムのkeyとなる構造体
@@ -64,7 +64,7 @@ class tRisaXP4SegmentCache : public singleton_base<tRisaXP4SegmentCache>
 	};
 
 public:
-	typedef boost::shared_ptr<tRisaDecompressedHolder> tDataBlock; //!< キャッシュアイテムのvalueのtypedef
+	typedef boost::shared_ptr<tDecompressedHolder> tDataBlock; //!< キャッシュアイテムのvalueのtypedef
 
 private:
 	typedef tHashTable<tKey, tDataBlock, tKeyHasher> tHashTable; //!< ハッシュテーブルのtypedef
@@ -73,10 +73,10 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tRisaXP4SegmentCache();
+	tXP4SegmentCache();
 
 	//! @brief		デストラクタ
-	~tRisaXP4SegmentCache();
+	~tXP4SegmentCache();
 
 public:
 	//! @brief		キャッシュの上限に達していないかどうかをチェックし、はみ出た分を削除

@@ -26,7 +26,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		コマンドラインオプションの定義を返す
 //---------------------------------------------------------------------------
-static wxCmdLineEntryDesc * RisaGetCmdLineEntryDesc()
+static wxCmdLineEntryDesc * GetCmdLineEntryDesc()
 {
 	static wxCmdLineEntryDesc cmdlinedesc[] =
 	{
@@ -75,7 +75,7 @@ public:
 
 protected:
 	static void LoadClassList(const wxString & filename, wxArrayString &pattern);
-	static void ListArchiveItems(const std::vector<tRisaXP4WriterInputFile> & files);
+	static void ListArchiveItems(const std::vector<tXP4WriterInputFile> & files);
 };
 //---------------------------------------------------------------------------
 
@@ -99,10 +99,10 @@ wxLocale locale;
 //---------------------------------------------------------------------------
 //! @brief		シグナルハンドラ
 //---------------------------------------------------------------------------
-static volatile sig_atomic_t RisaInterrupted = false;
-static void RisaSigInt(int sig)
+static volatile sig_atomic_t Interrupted = false;
+static void SigInt(int sig)
 {
-	RisaInterrupted = true;
+	Interrupted = true;
 }
 //---------------------------------------------------------------------------
 
@@ -115,12 +115,12 @@ static void RisaSigInt(int sig)
 //---------------------------------------------------------------------------
 //! @brief		進捗を表示するクラス
 //---------------------------------------------------------------------------
-class tRisaProgressCallback : public iRisaProgressCallback
+class tProgressCallback : public iRisaProgressCallback
 {
 	bool Show;
 	int PrevPercent;
 public:
-	tRisaProgressCallback(bool show = true) : Show(show), PrevPercent(-1) {;}
+	tProgressCallback(bool show = true) : Show(show), PrevPercent(-1) {;}
 	void OnProgress(int percent); // パーセント単位での達成率
 };
 //---------------------------------------------------------------------------
@@ -129,9 +129,9 @@ public:
 //---------------------------------------------------------------------------
 // 進捗を表示する
 //---------------------------------------------------------------------------
-void tRisaProgressCallback::OnProgress(int percent)
+void tProgressCallback::OnProgress(int percent)
 {
-	if(RisaInterrupted) throw wxString(_("operation was interrupted"));
+	if(Interrupted) throw wxString(_("operation was interrupted"));
 	if(Show)
 	{
 		if(PrevPercent != percent)
@@ -185,10 +185,10 @@ int wxKrkrReleaserConsoleApp::OnRun()
 	try
 	{
 		// シグナルハンドラの設定
-		signal(SIGINT, RisaSigInt);
+		signal(SIGINT, SigInt);
 
 		// コマンドラインパーサーオブジェクトを作成
-		wxCmdLineParser parser(RisaGetCmdLineEntryDesc(), argc, argv);
+		wxCmdLineParser parser(GetCmdLineEntryDesc(), argc, argv);
 
 		// --show-default-class を検索
 		for(int i = 1; i < argc; i++)
@@ -196,7 +196,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			if(!wxStrcmp(argv[i], wxT("--show-default-class")))
 			{
 				wxArrayString patterns;
-				RisaXP4GetDefaultClassList(patterns);
+				XP4GetDefaultClassList(patterns);
 				for(size_t i = 0; i < patterns.GetCount(); i++)
 					wxPrintf(wxT("%s\n"), patterns[i].c_str());
 				return 0;
@@ -217,11 +217,11 @@ int wxKrkrReleaserConsoleApp::OnRun()
 
 		// フラグなど
 		bool show_progress = parser.Found(wxT("p"));
-		tRisaProgressCallback callback(show_progress);
-		tRisaProgressCallbackAggregator agg(&callback, 0, 20);
+		tProgressCallback callback(show_progress);
+		tProgressCallbackAggregator agg(&callback, 0, 20);
 
-		std::vector<tRisaXP4WriterInputFile> filelist;
-		std::map<wxString, tRisaXP4MetadataReaderStorageItem> in_archive_items_map;
+		std::vector<tXP4WriterInputFile> filelist;
+		std::map<wxString, tXP4MetadataReaderStorageItem> in_archive_items_map;
 		wxString archive_base_name;
 		archive_base_name = parser.GetParam();
 
@@ -238,7 +238,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			{
 				// 既存のアーカイブファイルを削除する
 				if(!parser.Found(wxT("d"))) // dry-run 時はファイルを削除しない
-					RisaDeleteArchiveSet(archive_base_name);
+					DeleteArchiveSet(archive_base_name);
 			}
 			make_new_archive = true;
 		}
@@ -254,7 +254,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			// アーカイブファイルの残渣が残ってないことを確実にするために
 			// 関連するファイルをすべて削除する
 			if(!parser.Found(wxT("d"))) // dry-run 時はファイルを削除しない
-				RisaDeleteArchiveSet(archive_base_name);
+				DeleteArchiveSet(archive_base_name);
 			make_new_archive = true;
 		}
 
@@ -269,8 +269,8 @@ int wxKrkrReleaserConsoleApp::OnRun()
 				{
 					// パッチ履歴を表示しない場合
 					// 最新のデータのみを表示して終了
-					RisaReadXP4Metadata(NULL, archive_base_name, in_archive_items_map);
-					RisaXP4MetadataReaderStorageItemToXP4WriterInputFile(
+					ReadXP4Metadata(NULL, archive_base_name, in_archive_items_map);
+					XP4MetadataReaderStorageItemToXP4WriterInputFile(
 											in_archive_items_map, filelist);
 					ListArchiveItems(filelist);
 					return 0;
@@ -280,15 +280,15 @@ int wxKrkrReleaserConsoleApp::OnRun()
 					// パッチ履歴を表示する場合
 					// 個々のアーカイブファイルのパッチを表示
 					std::vector<wxString> archive_list;
-					RisaEnumerateArchiveFiles(archive_base_name, archive_list);
+					EnumerateArchiveFiles(archive_base_name, archive_list);
 					for(std::vector<wxString>::iterator i = archive_list.begin();
 						i != archive_list.end(); i++)
 					{
-						tRisaXP4MetadataReaderArchive arc(*i);
-						std::vector<tRisaXP4WriterInputFile> filelist;
-						for(std::vector<tRisaXP4MetadataReaderStorageItem>::const_iterator 
+						tXP4MetadataReaderArchive arc(*i);
+						std::vector<tXP4WriterInputFile> filelist;
+						for(std::vector<tXP4MetadataReaderStorageItem>::const_iterator 
 								j = arc.GetItemVector().begin(); j != arc.GetItemVector().end(); j++)
-							filelist.push_back(tRisaXP4WriterInputFile(*j));
+							filelist.push_back(tXP4WriterInputFile(*j));
 						wxPrintf(wxT("archive %s\n"), i->c_str());
 						wxPrintf(wxT("from    %s\n"), arc.GetTargetDir().c_str());
 						ListArchiveItems(filelist);
@@ -299,7 +299,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			else
 			{
 				wxString target_dir_from_archive;
-				RisaReadXP4Metadata(NULL, archive_base_name, in_archive_items_map,
+				ReadXP4Metadata(NULL, archive_base_name, in_archive_items_map,
 					&target_dir_from_archive);
 
 				if(parser.Found(wxT("u")))
@@ -322,7 +322,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 			throw wxString(_("please specify target 'dir'"));
 						// 対象ディレクトリが指定されていない
 
-		RisaGetFileListAt(&agg, target_dir, filelist);
+		GetFileListAt(&agg, target_dir, filelist);
 
 		if(filelist.size() == 0)
 		{
@@ -333,7 +333,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		// パターンを用意
 		//- デフォルトのパターン
 		wxArrayString patterns;
-		RisaXP4GetDefaultClassList(patterns);
+		XP4GetDefaultClassList(patterns);
 
 		//- パターンをさらにファイルから読むように指定されていた場合
 		wxString filename;
@@ -345,7 +345,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 
 		// パターンに従ってリストを分類
 		agg.SetRange(20, 25);
-		RisaXP4ClassifyFiles(&agg, patterns, filelist);
+		XP4ClassifyFiles(&agg, patterns, filelist);
 
 		// アーカイブファイルの分割情報を得る
 		wxFileOffset split_limit = 0;
@@ -379,7 +379,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 
 		// 既存のアーカイブと ディレクトリから読み取った情報を比較
 		agg.SetRange(25, 30);
-		RisaCompareXP4StorageNameMap(&agg, in_archive_items_map, filelist);
+		CompareXP4StorageNameMap(&agg, in_archive_items_map, filelist);
 
 		if(filelist.size() == 0)
 		{
@@ -391,7 +391,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 		if(!parser.Found(wxT("d"))) // dry-run で無ければ
 		{
 			agg.SetRange(30, 100);
-			tRisaXP4Writer writer(
+			tXP4Writer writer(
 				&agg,
 				archive_base_name,
 				split_limit,
@@ -444,14 +444,14 @@ void wxKrkrReleaserConsoleApp::LoadClassList(const wxString & filename,
 //! @param		files ファイルリスト
 //---------------------------------------------------------------------------
 void wxKrkrReleaserConsoleApp::ListArchiveItems(
-	const std::vector<tRisaXP4WriterInputFile> & files)
+	const std::vector<tXP4WriterInputFile> & files)
 {
 	// リストをソート
-	std::vector<tRisaXP4WriterInputFile> sorted_files(files);
+	std::vector<tXP4WriterInputFile> sorted_files(files);
 	std::sort(sorted_files.begin(), sorted_files.end());
 
 	// 順番に表示
-	for(std::vector<tRisaXP4WriterInputFile>::iterator i = sorted_files.begin();
+	for(std::vector<tXP4WriterInputFile>::iterator i = sorted_files.begin();
 		i != sorted_files.end(); i++)
 	{
 		// 各行の先頭には

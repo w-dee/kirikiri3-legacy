@@ -52,7 +52,7 @@ wxMainDialog::wxMainDialog()
 
 	// 使用可能なフォントを列挙する
 	wxArrayString array;
-	tRisaFreeTypeFontDriver::EnumerateFonts(array, 0);
+	tFreeTypeFontDriver::EnumerateFonts(array, 0);
 	int n = array.Count();
 	for(int i = 0; i < n; i++)
 		SelectFontChoice->Append(array[i]);
@@ -150,13 +150,13 @@ void wxMainDialog::UpdateFaceIndex()
 		if(SelectFileRadioButton->GetValue())
 		{
 			// ファイルによる指定
-			Face = new tRisaFreeTypeFace(
+			Face = new tFreeTypeFace(
 				SelectFileEdit->GetLabel(), options | RISA__FACE_OPTIONS_FILE);
 		}
 		else
 		{
 			// フォント名による指定
-			Face = new tRisaFreeTypeFace(
+			Face = new tFreeTypeFace(
 				SelectFontChoice->GetStringSelection(), options);
 		}
 	}
@@ -266,7 +266,7 @@ void wxMainDialog::GenerateButtonClick(wxCommandEvent& event)
 			if(OutputFileNameEdit->GetLabel().IsEmpty()) return;
 		}
 
-		RisaWriteGlyphBitmap(Face, OutputFileNameEdit->GetLabel(),
+		WriteGlyphBitmap(Face, OutputFileNameEdit->GetLabel(),
 			!GenerateFontMetricsOnlyCheckBox->GetValue(), false,
 			this);
 	}

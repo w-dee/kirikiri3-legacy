@@ -10,8 +10,8 @@
 //! @file
 //! @brief Phase Vocoder の実装
 //---------------------------------------------------------------------------
-#ifndef RisaPhaseVocoderH
-#define RisaPhaseVocoderH
+#ifndef PhaseVocoderH
+#define PhaseVocoderH
 
 #include "base/utils/RingBuffer.h"
 
@@ -21,7 +21,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief Phase Vocoder DSP クラス
 //---------------------------------------------------------------------------
-class tRisaPhaseVocoderDSP
+class tPhaseVocoderDSP
 {
 protected:
 	float ** AnalWork; //!< 解析(Analyze)用バッファ(FrameSize個) 名前で笑わないように
@@ -53,8 +53,8 @@ protected:
 	float ExactTimeScale; //!< 厳密なTimeScale = OutputHopSize / InputHopSize
 	// 再構築されるパラメータ、ここまで
 
-	tRisaRingBuffer<float> InputBuffer; //!< 入力用リングバッファ
-	tRisaRingBuffer<float> OutputBuffer; //!< 出力用リングバッファ
+	tRingBuffer<float> InputBuffer; //!< 入力用リングバッファ
+	tRingBuffer<float> OutputBuffer; //!< 出力用リングバッファ
 
 	bool	RebuildParams; //!< 内部的なパラメータなどを再構築しなければならないときに真
 
@@ -79,11 +79,11 @@ public:
 	//! @param		channels		入力PCMのチャンネル数
 	//! @note		音楽用ではframesize=4096ぐらいがよく、
 	//! @note		ボイス用ではframesize=256ぐらいがよい。
-	tRisaPhaseVocoderDSP(unsigned int framesize,
+	tPhaseVocoderDSP(unsigned int framesize,
 					unsigned int frequency, unsigned int channels);
 
 	//! @brief		デストラクタ
-	~tRisaPhaseVocoderDSP();
+	~tPhaseVocoderDSP();
 
 	float GetTimeScale() const { return TimeScale; } //!< 時間軸方向のスケールを得る
 

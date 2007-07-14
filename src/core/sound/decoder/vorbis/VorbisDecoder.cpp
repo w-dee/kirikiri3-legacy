@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/decoder/vorbis/VorbisDecoder.h"
-#include "base/exception/RisaException.h"
+#include "base/exception/Exception.h"
 #include "base/fs/common/FSManager.h"
 #include <vorbis/vorbisfile.h>
 
@@ -24,10 +24,10 @@ RISSE_DEFINE_SOURCE_ID(11001,39824,8006,19566,26243,29715,33801,62487);
 
 
 //---------------------------------------------------------------------------
-tRisaOggVorbisDecoder::tRisaOggVorbisDecoder(const tString & filename)
+tOggVorbisDecoder::tOggVorbisDecoder(const tString & filename)
 {
 	CurrentSection = -1;
-	Stream = tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
+	Stream = tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
 
 	try
 	{
@@ -45,7 +45,7 @@ tRisaOggVorbisDecoder::tRisaOggVorbisDecoder(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-tRisaOggVorbisDecoder::~tRisaOggVorbisDecoder()
+tOggVorbisDecoder::~tOggVorbisDecoder()
 {
 	ov_clear(&InputFile);
 	delete Stream;
@@ -54,17 +54,17 @@ tRisaOggVorbisDecoder::~tRisaOggVorbisDecoder()
 
 
 //---------------------------------------------------------------------------
-void tRisaOggVorbisDecoder::SuggestFormat(const tRisaWaveFormat & format)
+void tOggVorbisDecoder::SuggestFormat(const tWaveFormat & format)
 {
 	// float が求められている場合は float にする
-	if(format.PCMType == tRisaPCMTypes::tf32)
-		FileInfo.PCMType = tRisaPCMTypes::tf32;
+	if(format.PCMType == tPCMTypes::tf32)
+		FileInfo.PCMType = tPCMTypes::tf32;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaOggVorbisDecoder::GetFormat(tRisaWaveFileInfo & fileinfo)
+void tOggVorbisDecoder::GetFormat(tWaveFileInfo & fileinfo)
 {
 	fileinfo = FileInfo;
 }
@@ -72,14 +72,14 @@ void tRisaOggVorbisDecoder::GetFormat(tRisaWaveFileInfo & fileinfo)
 
 
 //---------------------------------------------------------------------------
-bool tRisaOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
+bool tOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& rendered)
 {
 	// render output PCM
 
 	long res;
 	risse_uint pos = 0; // decoded PCM (in bytes)
 
-	if(FileInfo.PCMType == tRisaPCMTypes::ti16)
+	if(FileInfo.PCMType == tPCMTypes::ti16)
 	{
 		// 16bit 整数 PCM 出力の場合
 		int pcmsize = 2;
@@ -106,7 +106,7 @@ bool tRisaOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uin
 		}
 		pos /= (FileInfo.Channels * pcmsize); // convert to PCM position
 	}
-	else if(FileInfo.PCMType == tRisaPCMTypes::tf32)
+	else if(FileInfo.PCMType == tPCMTypes::tf32)
 	{
 		// 32bit float PCM 出力の場合
 		float **pcm;
@@ -148,7 +148,7 @@ bool tRisaOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uin
 
 
 //---------------------------------------------------------------------------
-bool tRisaOggVorbisDecoder::SetPosition(risse_uint64 samplepos)
+bool tOggVorbisDecoder::SetPosition(risse_uint64 samplepos)
 {
 	if(0 != ov_pcm_seek(&InputFile, samplepos))
 		return false;
@@ -158,7 +158,7 @@ bool tRisaOggVorbisDecoder::SetPosition(risse_uint64 samplepos)
 
 
 //---------------------------------------------------------------------------
-bool tRisaOggVorbisDecoder::Open()
+bool tOggVorbisDecoder::Open()
 {
 	// コールバック関数の容易
 	ov_callbacks callbacks = {read_func, seek_func, close_func, tell_func};
@@ -183,7 +183,7 @@ bool tRisaOggVorbisDecoder::Open()
 	// set FileInfo up
 	FileInfo.Frequency = vi->rate;
 	FileInfo.Channels = vi->channels;
-	FileInfo.PCMType = tRisaPCMTypes::tf32; // とりあえず整数 16bit
+	FileInfo.PCMType = tPCMTypes::tf32; // とりあえず整数 16bit
 
 	bool seekable = true;
 
@@ -206,11 +206,11 @@ bool tRisaOggVorbisDecoder::Open()
 
 
 //---------------------------------------------------------------------------
-size_t tRisaOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, void *datasource)
+size_t tOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
 	// read function (wrapper for tBinaryStream)
 
-	tRisaOggVorbisDecoder * decoder = reinterpret_cast<tRisaOggVorbisDecoder*>(datasource);
+	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
 
 	risse_uint bytesread = decoder->Stream->Read(ptr, risse_uint(size * nmemb));
 
@@ -220,11 +220,11 @@ size_t tRisaOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, vo
 
 
 //---------------------------------------------------------------------------
-int tRisaOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int whence)
+int tOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int whence)
 {
 	// seek function (wrapper for tBinaryStream)
 
-	tRisaOggVorbisDecoder * decoder = reinterpret_cast<tRisaOggVorbisDecoder*>(datasource);
+	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
 
 	risse_int seek_type = RISSE_BS_SEEK_SET;
 
@@ -256,7 +256,7 @@ int tRisaOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int w
 
 
 //---------------------------------------------------------------------------
-int tRisaOggVorbisDecoder::close_func(void *datasource)
+int tOggVorbisDecoder::close_func(void *datasource)
 {
 	// close function (wrapper for tBinaryStream)
 
@@ -268,11 +268,11 @@ int tRisaOggVorbisDecoder::close_func(void *datasource)
 
 
 //---------------------------------------------------------------------------
-long tRisaOggVorbisDecoder::tell_func(void *datasource)
+long tOggVorbisDecoder::tell_func(void *datasource)
 {
 	// tell function (wrapper for tBinaryStream)
 
-	tRisaOggVorbisDecoder * decoder = reinterpret_cast<tRisaOggVorbisDecoder*>(datasource);
+	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
 
 	return decoder->Stream->GetPosition();
 }
@@ -290,14 +290,14 @@ long tRisaOggVorbisDecoder::tell_func(void *datasource)
 //---------------------------------------------------------------------------
 //! @brief		デコーダファクトリクラス
 //---------------------------------------------------------------------------
-class tRisaOggVorbisWaveDecoderFactory : public tRisaWaveDecoderFactory
+class tOggVorbisWaveDecoderFactory : public tWaveDecoderFactory
 {
 public:
 	//! @brief デコーダを作成する
-	boost::shared_ptr<tRisaWaveDecoder> Create(const tString & filename)
+	boost::shared_ptr<tWaveDecoder> Create(const tString & filename)
 	{
-		boost::shared_ptr<tRisaWaveDecoder>
-			decoder(new tRisaOggVorbisDecoder(filename));
+		boost::shared_ptr<tWaveDecoder>
+			decoder(new tOggVorbisDecoder(filename));
 		return decoder;
 	}
 };
@@ -309,22 +309,22 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		デコーダファクトリレジストラ
 //---------------------------------------------------------------------------
-class tRisaOggVorbisWaveDecoderFactoryRegisterer :
-	public singleton_base<tRisaOggVorbisWaveDecoderFactoryRegisterer>,
-	protected depends_on<tRisaWaveDecoderFactoryManager>
+class tOggVorbisWaveDecoderFactoryRegisterer :
+	public singleton_base<tOggVorbisWaveDecoderFactoryRegisterer>,
+	protected depends_on<tWaveDecoderFactoryManager>
 {
 public:
 	//! @brief コンストラクタ
-	tRisaOggVorbisWaveDecoderFactoryRegisterer()
+	tOggVorbisWaveDecoderFactoryRegisterer()
 	{
-		boost::shared_ptr<tRisaWaveDecoderFactory>
-			factory(new tRisaOggVorbisWaveDecoderFactory());
-		depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Register(RISSE_WS(".ogg"), factory);
+		boost::shared_ptr<tWaveDecoderFactory>
+			factory(new tOggVorbisWaveDecoderFactory());
+		depends_on<tWaveDecoderFactoryManager>::locked_instance()->Register(RISSE_WS(".ogg"), factory);
 	}
 	//! @brief デストラクタ
-	~tRisaOggVorbisWaveDecoderFactoryRegisterer()
+	~tOggVorbisWaveDecoderFactoryRegisterer()
 	{
-		depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Unregister(RISSE_WS(".ogg"));
+		depends_on<tWaveDecoderFactoryManager>::locked_instance()->Unregister(RISSE_WS(".ogg"));
 	}
 };
 //---------------------------------------------------------------------------

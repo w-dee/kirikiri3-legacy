@@ -19,7 +19,7 @@ RISSE_DEFINE_SOURCE_ID(53503,8125,25269,17586,20367,40881,26023,16793);
 
 
 //---------------------------------------------------------------------------
-tRisaLogger::tRisaLogger() : Buffer(MaxLogItems)
+tLogger::tLogger() : Buffer(MaxLogItems)
 {
 	LogSending = false;
 }
@@ -27,16 +27,16 @@ tRisaLogger::tRisaLogger() : Buffer(MaxLogItems)
 
 
 //---------------------------------------------------------------------------
-tRisaLogger::~tRisaLogger()
+tLogger::~tLogger()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaLogger::SendPreservedLogs(tRisaLogReceiver *target)
+void tLogger::SendPreservedLogs(tLogReceiver *target)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// ログを送信中にログの記録は行わない
 	// 捨てない方がいいのかもしれないが...
@@ -63,9 +63,9 @@ void tRisaLogger::SendPreservedLogs(tRisaLogReceiver *target)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogger::SendLogs(tRisaLogReceiver *target, size_t maxitems)
+void tLogger::SendLogs(tLogReceiver *target, size_t maxitems)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// ログを送信中にログの記録は行わない
 	// 捨てない方がいいのかもしれないが...
@@ -98,9 +98,9 @@ void tRisaLogger::SendLogs(tRisaLogReceiver *target, size_t maxitems)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogger::RegisterReceiver(tRisaLogReceiver * receiver)
+void tLogger::RegisterReceiver(tLogReceiver * receiver)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	if(std::find(Receivers.begin(), Receivers.end(), receiver) == Receivers.end())
 		Receivers.push_back(receiver);
@@ -109,11 +109,11 @@ void tRisaLogger::RegisterReceiver(tRisaLogReceiver * receiver)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
+void tLogger::UnregisterReceiver(tLogReceiver * receiver)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
-	gc_vector<tRisaLogReceiver*>::iterator i;
+	gc_vector<tLogReceiver*>::iterator i;
 	i = std::find(Receivers.begin(), Receivers.end(), receiver);
 	if(i != Receivers.end())
 		Receivers.erase(i);
@@ -122,11 +122,11 @@ void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogger::InternalLog(const tString & content,
-	tRisaLogger::tLevel level,
+void tLogger::InternalLog(const tString & content,
+	tLogger::tLevel level,
 	const tString & linkinfo)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// ログを送信中にログの記録は行わない
 	// 捨てない方がいいのかもしれないが...
@@ -173,7 +173,7 @@ void tRisaLogger::InternalLog(const tString & content,
 	LogSending = true;
 	try
 	{
-		for(gc_vector<tRisaLogReceiver*>::iterator i = Receivers.begin();
+		for(gc_vector<tLogReceiver*>::iterator i = Receivers.begin();
 			i != Receivers.end(); i++)
 		{
 			(*i)->OnLog(item);
@@ -222,7 +222,7 @@ void tRisaLogger::InternalLog(const tString & content,
 
 
 //---------------------------------------------------------------------------
-tRisaWxLogProxy::tRisaWxLogProxy()
+tWxLogProxy::tWxLogProxy()
 {
 	OldLog = wxLog::SetActiveTarget(this);
 }
@@ -230,7 +230,7 @@ tRisaWxLogProxy::tRisaWxLogProxy()
 
 
 //---------------------------------------------------------------------------
-tRisaWxLogProxy::~tRisaWxLogProxy()
+tWxLogProxy::~tWxLogProxy()
 {
 	wxLog::SetActiveTarget(OldLog);
 }
@@ -238,45 +238,45 @@ tRisaWxLogProxy::~tRisaWxLogProxy()
 
 
 //---------------------------------------------------------------------------
-void tRisaWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
+void tWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 {
 	// wxWidgets のログレベルを Risa のログレベルにマッピングする
-	tRisaLogger::tLevel risa_level = tRisaLogger::llDebug; // default notice ??
+	tLogger::tLevel risa_level = tLogger::llDebug; // default notice ??
 	switch(level)
 	{
 	case wxLOG_FatalError: // program can't continue, abort immediately
-		risa_level = tRisaLogger::llCritical;
+		risa_level = tLogger::llCritical;
 		break;
 	case wxLOG_Error:      // a serious error, user must be informed about it
-		risa_level = tRisaLogger::llError;
+		risa_level = tLogger::llError;
 		break;
 	case wxLOG_Warning:    // user is normally informed about it but may be ignored
-		risa_level = tRisaLogger::llWarning;
+		risa_level = tLogger::llWarning;
 		break;
 	case wxLOG_Message:    // normal message (i.e. normal output of a non GUI app)
-		risa_level = tRisaLogger::llNotice;
+		risa_level = tLogger::llNotice;
 		break;
 	case wxLOG_Status:     // informational: might go to the status line of GUI app
 	case wxLOG_Info:       // informational message (a.k.a. 'Verbose')
-		risa_level = tRisaLogger::llInfo;
+		risa_level = tLogger::llInfo;
 		break;
 	case wxLOG_Debug:      // never shown to the user, disabled in release mode
 	case wxLOG_Trace:      // trace messages are also only enabled in debug mode
 	case wxLOG_Progress:   // used for progress indicator (not yet)
-		risa_level = tRisaLogger::llDebug;
+		risa_level = tLogger::llDebug;
 		break;
 	default:
 		;
 	}
 
 	// Risa のログ機構に流し込む
-	tRisaLogger::Log(RISSE_WS("(wx) ") + tString(szString), risa_level);
+	tLogger::Log(RISSE_WS("(wx) ") + tString(szString), risa_level);
 
 	// OldLog に流し込む
 	if(OldLog)
 	{
 		// 気持ち悪いキャストだが wxLogChain の実装がこうなってるので倣う
-		((tRisaWxLogProxy *)OldLog)->DoLog(level, szString, t);
+		((tWxLogProxy *)OldLog)->DoLog(level, szString, t);
 	}
 }
 //---------------------------------------------------------------------------

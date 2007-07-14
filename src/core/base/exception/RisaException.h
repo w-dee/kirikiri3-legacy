@@ -10,8 +10,8 @@
 //! @file
 //! @brief Risaで内部的に用いている例外クラスの管理など
 //---------------------------------------------------------------------------
-#ifndef _RisaExceptionH_
-#define _RisaExceptionH_
+#ifndef _ExceptionH_
+#define _ExceptionH_
 
 #include "risse/include/risseExceptionClass.h"
 #include "base/exception/UnhandledException.h"
@@ -60,7 +60,7 @@ public:
 	//! @brief		内部エラー例外を発生させる
 	//! @param		line     エラーの起こった行
 	//! @param		filename エラーの起こったファイル名
-	static void ThrowInternalError(int line, const char * filename);
+	static void ThrowInternalErrorException(int line, const char * filename);
 };
 //---------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		内部エラーをthrowするマクロ
 //---------------------------------------------------------------------------
-#define RisaThrowInternalError eRisaException::ThrowInternalError(__LINE__, __FILE__)
+#define ThrowInternalError eRisaException::ThrowInternalErrorException(__LINE__, __FILE__)
 //---------------------------------------------------------------------------
 
 
@@ -85,7 +85,7 @@ public:
 #define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(origin) \
 	catch(const tVariant * e) \
 	{ \
-		tRisaUnhandledExceptionHandler::ShowScriptException(e); \
+		tUnhandledExceptionHandler::ShowScriptException(e); \
 	} \
 
 
@@ -93,16 +93,16 @@ public:
 	catch(eRisseScriptException &e) \
 	{ \
 		e.AddTrace(tString(origin)); \
-		tRisaUnhandledExceptionHandler::Process(e); \
+		tUnhandledExceptionHandler::Process(e); \
 	} \
 	catch(eRisseScriptError &e) \
 	{ \
 		e.AddTrace(tString(origin)); \
-		tRisaUnhandledExceptionHandler::Process(e); \
+		tUnhandledExceptionHandler::Process(e); \
 	} \
 	catch(eRisse &e) \
 	{ \
-		tRisaUnhandledExceptionHandler::Process(e); \
+		tUnhandledExceptionHandler::Process(e); \
 	} \
 	catch(...) \
 	{ \
@@ -122,11 +122,11 @@ public:
 	catch(eRisseScriptError &e) \
 	{ \
 		e.AddTrace(tString(origin)); \
-		tRisaUnhandledExceptionHandler::ShowScriptException(e); \
+		tUnhandledExceptionHandler::ShowScriptException(e); \
 	} \
 	catch(eRisse &e) \
 	{ \
-		tRisaUnhandledExceptionHandler::ShowScriptException(e); \
+		tUnhandledExceptionHandler::ShowScriptException(e); \
 	} \
 	catch(...) \
 	{ \

@@ -46,7 +46,7 @@ risse_error tNI_XP4FS::Construct(risse_int numparams,
 	tString filename = *param[0];
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(risse_obj, new tRisaXP4FS(filename));
+	RegisterFileSystemNativeInstance(risse_obj, new tXP4FS(filename));
 
 	return RISSE_S_OK;
 }
@@ -102,13 +102,13 @@ tNativeInstance *tNC_XP4FS::CreateNativeInstance()
 
 
 //---------------------------------------------------------------------------
-tRisaXP4FSRegisterer::tRisaXP4FSRegisterer()
+tXP4FSRegisterer::tXP4FSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
 	iRisseDispatch2 * cls = new tNC_XP4FS();
 	try
 	{
-		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(
+		depends_on<tFileSystemRegisterer>::locked_instance()->RegisterClassObject(
 							RISSE_WS("XP4FS"), cls);
 	}
 	catch(...)

@@ -30,7 +30,7 @@ namespace Risa {
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
-void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
+void DeinterleaveApplyingWindow(float * dest[], const float * src,
 					float * win, int numch, size_t destofs, size_t len);
 //---------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
-void  RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
+void  InterleaveOverlappingWindow(float * dest, const float * const * src,
 					float * win, int numch, size_t srcofs, size_t len);
 //---------------------------------------------------------------------------
 

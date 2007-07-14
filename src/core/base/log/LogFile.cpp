@@ -19,25 +19,25 @@ RISSE_DEFINE_SOURCE_ID(21694,41961,63193,16833,55703,53629,46747,60830);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisaLogFile::tRisaLogFile() : Receiver(*this)
+tLogFile::tLogFile() : Receiver(*this)
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaLogFile::~tRisaLogFile()
+tLogFile::~tLogFile()
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	if(LogFile.IsOpened())
-		tRisaLogger::instance()->UnregisterReceiver(&Receiver);
+		tLogger::instance()->UnregisterReceiver(&Receiver);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaLogFile::OutputOneLine(const tString & str)
+void tLogFile::OutputOneLine(const tString & str)
 {
 /*
 	TODO: handle this
@@ -85,9 +85,9 @@ void tRisaLogFile::OutputOneLine(const tString & str)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogFile::OnLog(const tRisaLogger::tItem & item)
+void tLogFile::OnLog(const tLogger::tItem & item)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	if(!LogFile.IsOpened()) return;
 
@@ -100,19 +100,19 @@ void tRisaLogFile::OnLog(const tRisaLogger::tItem & item)
 	// ログレベル
 	switch(item.Level)
 	{
-	case tRisaLogger::llDebug:
+	case tLogger::llDebug:
 		logline += RISSE_WS("[D] "); break; // [D]ebug
-	case tRisaLogger::llInfo:
+	case tLogger::llInfo:
 		logline += RISSE_WS("[I] "); break; // [I]nformation
-	case tRisaLogger::llNotice:
+	case tLogger::llNotice:
 		logline += RISSE_WS("[N] "); break; // [N]otice
-	case tRisaLogger::llWarning:
+	case tLogger::llWarning:
 		logline += RISSE_WS("[W] "); break; // [W]arning
-	case tRisaLogger::llError:
+	case tLogger::llError:
 		logline += RISSE_WS("[E] "); break; // [E]rror
-	case tRisaLogger::llRecord:
+	case tLogger::llRecord:
 		logline += RISSE_WS("[R] "); break; // [R]ecord
-	case tRisaLogger::llCritical:
+	case tLogger::llCritical:
 		logline += RISSE_WS("[C] "); break; // [C]ritical
 	}
 
@@ -125,9 +125,9 @@ void tRisaLogFile::OnLog(const tRisaLogger::tItem & item)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogFile::Begin()
+void tLogFile::Begin()
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// すでに Begin している場合は戻る
 	if(LogFile.IsOpened()) return;
@@ -140,7 +140,7 @@ void tRisaLogFile::Begin()
 	if(!LogFile.IsOpened()) return;
 
 	// レシーバを登録
-	tRisaLogger::instance()->UnregisterReceiver(&Receiver);
+	tLogger::instance()->UnregisterReceiver(&Receiver);
 
 	// ログファイルの最後に移動
 	wxFileOffset write_start = LogFile.SeekEnd();
@@ -159,8 +159,8 @@ void tRisaLogFile::Begin()
 	OutputOneLine(tString::GetEmptyString());
 
 	// LastLogを出力
-	tRisaLogger::instance()->SendPreservedLogs(&Receiver);
-	tRisaLogger::instance()->SendLogs(&Receiver, NumLastLog);
+	tLogger::instance()->SendPreservedLogs(&Receiver);
+	tLogger::instance()->SendLogs(&Receiver, NumLastLog);
 
 	// セパレータを出力
 	const risse_char * sep2 = 

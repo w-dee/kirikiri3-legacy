@@ -19,10 +19,10 @@ RISSE_DEFINE_SOURCE_ID(3263,62535,57591,17893,921,30607,15180,25430);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisaTimerScheduler::tRisaTimerScheduler()
+tTimerScheduler::tTimerScheduler()
 {
 	// フィールドの初期化
-	NearestTick = tRisaTickCount::InvalidTickCount;
+	NearestTick = tTickCount::InvalidTickCount;
 	NearestInfoValid = false;
 	NeedRescheduleOnPeriodChange = true;
 
@@ -33,7 +33,7 @@ tRisaTimerScheduler::tRisaTimerScheduler()
 
 
 //---------------------------------------------------------------------------
-tRisaTimerScheduler::~tRisaTimerScheduler()
+tTimerScheduler::~tTimerScheduler()
 {
 	// スレッドの削除
 	Terminate(); // 終了フラグをたてる
@@ -43,9 +43,9 @@ tRisaTimerScheduler::~tRisaTimerScheduler()
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerScheduler::Register(tRisaTimerConsumer * consumer)
+void tTimerScheduler::Register(tTimerConsumer * consumer)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	Consumers.push_back(consumer);
 	Reschedule(); // スケジュールし直す
@@ -54,9 +54,9 @@ void tRisaTimerScheduler::Register(tRisaTimerConsumer * consumer)
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerScheduler::Unregister(tRisaTimerConsumer * consumer)
+void tTimerScheduler::Unregister(tTimerConsumer * consumer)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	tConsumers::iterator i = std::find(Consumers.begin(), Consumers.end(), consumer);
 	if(i != Consumers.end())
@@ -69,7 +69,7 @@ void tRisaTimerScheduler::Unregister(tRisaTimerConsumer * consumer)
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerScheduler::Reschedule()
+void tTimerScheduler::Reschedule()
 {
 	NearestInfoValid = false; // NearestInfo をもう一度検索するように
 	Event.Signal(); // スレッドをたたき起こす
@@ -78,10 +78,10 @@ void tRisaTimerScheduler::Reschedule()
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerScheduler::GetNearestInfo()
+void tTimerScheduler::GetNearestInfo()
 {
 	size_t nearest_index = static_cast<size_t>(-1L);
-	risse_uint64 nearest_tick = tRisaTickCount::InvalidTickCount;
+	risse_uint64 nearest_tick = tTickCount::InvalidTickCount;
 
 	// もっちも近い位置にある (もっとも値の小さいtickをもつ)Consumerを探す
 	size_t index = 0;
@@ -89,9 +89,9 @@ void tRisaTimerScheduler::GetNearestInfo()
 		i != Consumers.end(); i++, index++)
 	{
 		risse_uint64 tick = (*i)->GetNextTick();
-		if(tick != tRisaTickCount::InvalidTickCount)
+		if(tick != tTickCount::InvalidTickCount)
 		{
-			if(nearest_tick == tRisaTickCount::InvalidTickCount ||
+			if(nearest_tick == tTickCount::InvalidTickCount ||
 				nearest_tick > tick)
 			{
 				nearest_index = index;
@@ -108,21 +108,21 @@ void tRisaTimerScheduler::GetNearestInfo()
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerScheduler::Execute()
+void tTimerScheduler::Execute()
 {
 	while(!ShouldTerminate())
 	{
 		risse_int64 sleep_ms; // どれぐらい sleep すればよいか
 		while(true)
 		{
-			risse_uint64 current_tick = tRisaTickCount::instance()->Get();
+			risse_uint64 current_tick = tTickCount::instance()->Get();
 
 			// 直近のTickを持つConsumerを探し、何ms後に起きれば良いのかを計算する
 			{
-				volatile tRisaCriticalSection::tLocker cs_holder(CS);
+				volatile tCriticalSection::tLocker cs_holder(CS);
 				if(!NearestInfoValid) GetNearestInfo();
 
-				if(NearestTick == tRisaTickCount::InvalidTickCount)
+				if(NearestTick == tTickCount::InvalidTickCount)
 				{
 					sleep_ms = -1L;
 					break; // 直近のTickを持つConsumerが居ない
@@ -181,10 +181,10 @@ void tRisaTimerScheduler::Execute()
 
 
 //---------------------------------------------------------------------------
-tRisaTimerConsumer::tRisaTimerConsumer(tRisaTimerScheduler * owner) : Owner(owner)
+tTimerConsumer::tTimerConsumer(tTimerScheduler * owner) : Owner(owner)
 {
 	// フィールドの初期化
-	NextTick = tRisaTickCount::InvalidTickCount;
+	NextTick = tTickCount::InvalidTickCount;
 
 	// スケジューラにコンシューマを登録
 	Owner->Register(this);
@@ -193,7 +193,7 @@ tRisaTimerConsumer::tRisaTimerConsumer(tRisaTimerScheduler * owner) : Owner(owne
 
 
 //---------------------------------------------------------------------------
-tRisaTimerConsumer::~tRisaTimerConsumer()
+tTimerConsumer::~tTimerConsumer()
 {
 	// スケジューラからコンシューマを削除
 	Owner->Unregister(this);
@@ -202,11 +202,11 @@ tRisaTimerConsumer::~tRisaTimerConsumer()
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerConsumer::SetNextTick(risse_uint64 nexttick)
+void tTimerConsumer::SetNextTick(risse_uint64 nexttick)
 {
 	if(Owner->NeedRescheduleOnPeriodChange)
 	{
-		volatile tRisaCriticalSection::tLocker cs_holder(Owner->CS);
+		volatile tCriticalSection::tLocker cs_holder(Owner->CS);
 
 		NextTick = nexttick;
 		Owner->Reschedule(); // スケジュールをやり直すように
@@ -236,29 +236,29 @@ void tRisaTimerConsumer::SetNextTick(risse_uint64 nexttick)
 
 
 //---------------------------------------------------------------------------
-tRisaEventTimerConsumer::tRisaEventTimerConsumer() :
-		tRisaTimerConsumer(tRisaEventTimerScheduler::instance())
+tEventTimerConsumer::tEventTimerConsumer() :
+		tTimerConsumer(tEventTimerScheduler::instance())
 {
 	// フィールドの初期化
 	Enabled = false;
 	Capacity = DefaultCapacity;
 	Interval = 0;
-	ReferenceTick = tRisaTickCount::InvalidTickCount;
+	ReferenceTick = tTickCount::InvalidTickCount;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaEventTimerConsumer::~tRisaEventTimerConsumer()
+tEventTimerConsumer::~tEventTimerConsumer()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaEventTimerConsumer::SetEnabled(bool enabled)
+void tEventTimerConsumer::SetEnabled(bool enabled)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	if(Enabled != enabled)
 	{
@@ -271,9 +271,9 @@ void tRisaEventTimerConsumer::SetEnabled(bool enabled)
 
 
 //---------------------------------------------------------------------------
-void tRisaEventTimerConsumer::SetInterval(risse_uint64 interval)
+void tEventTimerConsumer::SetInterval(risse_uint64 interval)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	if(Interval != interval)
 	{
@@ -285,9 +285,9 @@ void tRisaEventTimerConsumer::SetInterval(risse_uint64 interval)
 
 
 //---------------------------------------------------------------------------
-void tRisaEventTimerConsumer::Reset()
+void tEventTimerConsumer::Reset()
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	ResetInterval();
 }
@@ -295,9 +295,9 @@ void tRisaEventTimerConsumer::Reset()
 
 
 //---------------------------------------------------------------------------
-void tRisaEventTimerConsumer::SetCapacity(size_t capa)
+void tEventTimerConsumer::SetCapacity(size_t capa)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	Capacity = capa;
 }
@@ -305,41 +305,41 @@ void tRisaEventTimerConsumer::SetCapacity(size_t capa)
 
 
 //---------------------------------------------------------------------------
-void tRisaEventTimerConsumer::ResetInterval()
+void tEventTimerConsumer::ResetInterval()
 {
 	// 時間原点をこのメソッドが呼ばれた時点に設定する
 
-	if(Enabled && Interval != tRisaTickCount::InvalidTickCount)
+	if(Enabled && Interval != tTickCount::InvalidTickCount)
 	{
 		// 有効の場合
-		ReferenceTick = tRisaTickCount::instance()->Get() + Interval;
+		ReferenceTick = tTickCount::instance()->Get() + Interval;
 		SetNextTick(ReferenceTick);
 	}
 	else
 	{
 		// 無効の場合
-		SetNextTick(tRisaTickCount::InvalidTickCount);
+		SetNextTick(tTickCount::InvalidTickCount);
 	}
 
-	tRisaEventSystem::instance()->CancelEvents(this); // pending なイベントはすべてキャンセル
+	tEventSystem::instance()->CancelEvents(this); // pending なイベントはすべてキャンセル
 	QueueCount = 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick)
+void tEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
-	if(Enabled && Interval != tRisaTickCount::InvalidTickCount)
+	if(Enabled && Interval != tTickCount::InvalidTickCount)
 	{
 		// キュー中に入るべきイベントの量は問題ないか？
 		if(Capacity == 0 || QueueCount < Capacity)
 		{
 			// イベント管理システムにイベントをPostする
-			tRisaEventSystem::instance()->PostEvent(
-				new tRisaEventInfo(
+			tEventSystem::instance()->PostEvent(
+				new tEventInfo(
 					0, // id
 					this, // source
 					this // destination
@@ -353,22 +353,22 @@ void tRisaEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64
 	}
 	else
 	{
-		SetNextTick(tRisaTickCount::InvalidTickCount);
+		SetNextTick(tTickCount::InvalidTickCount);
 	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaEventTimerConsumer::OnEvent(tRisaEventInfo * info)
+void tEventTimerConsumer::OnEvent(tEventInfo * info)
 {
 	{
 		// キューカウンタを減らす
-		volatile tRisaCriticalSection::tLocker cs_holder(CS);
+		volatile tCriticalSection::tLocker cs_holder(CS);
 		QueueCount --;
 	}
 
-	if(Enabled && Interval != tRisaTickCount::InvalidTickCount)
+	if(Enabled && Interval != tTickCount::InvalidTickCount)
 		OnTimer();
 }
 //---------------------------------------------------------------------------

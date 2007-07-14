@@ -13,7 +13,7 @@
 #include "prec.h"
 #include "sound/WaveDecoder.h"
 #include "base/fs/common/FSManager.h"
-#include "base/exception/RisaException.h"
+#include "base/exception/Exception.h"
 
 
 namespace Risa {
@@ -21,32 +21,32 @@ RISSE_DEFINE_SOURCE_ID(17086,16655,38940,19271,28579,15284,53763,63856);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisaWaveDecoderFactoryManager::tRisaWaveDecoderFactoryManager()
+tWaveDecoderFactoryManager::tWaveDecoderFactoryManager()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaWaveDecoderFactoryManager::~tRisaWaveDecoderFactoryManager()
+tWaveDecoderFactoryManager::~tWaveDecoderFactoryManager()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveDecoderFactoryManager::Register(const tString & extension,
-	boost::shared_ptr<tRisaWaveDecoderFactory> factory)
+void tWaveDecoderFactoryManager::Register(const tString & extension,
+	boost::shared_ptr<tWaveDecoderFactory> factory)
 {
 	Map.insert(
-		std::pair<tString, boost::shared_ptr<tRisaWaveDecoderFactory> >(
+		std::pair<tString, boost::shared_ptr<tWaveDecoderFactory> >(
 														extension, factory));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveDecoderFactoryManager::Unregister(const tString & extension)
+void tWaveDecoderFactoryManager::Unregister(const tString & extension)
 {
 	Map.erase(extension);
 }
@@ -54,11 +54,11 @@ void tRisaWaveDecoderFactoryManager::Unregister(const tString & extension)
 
 
 //---------------------------------------------------------------------------
-boost::shared_ptr<tRisaWaveDecoder>
-	tRisaWaveDecoderFactoryManager::Create(const tString & filename)
+boost::shared_ptr<tWaveDecoder>
+	tWaveDecoderFactoryManager::Create(const tString & filename)
 {
 	// 拡張子を取り出す
-	tString ext = tRisaFileSystemManager::ExtractExtension(filename);
+	tString ext = tFileSystemManager::ExtractExtension(filename);
 	ext.ToLowerCase();
 
 	// ファクトリを探す
@@ -66,7 +66,7 @@ boost::shared_ptr<tRisaWaveDecoder>
 	if(factory != Map.end())
 	{
 		// ファクトリが見つかった
-		boost::shared_ptr<tRisaWaveDecoder> decoder;
+		boost::shared_ptr<tWaveDecoder> decoder;
 		decoder = factory->second->Create(filename);
 		return decoder;
 	}
@@ -75,7 +75,7 @@ boost::shared_ptr<tRisaWaveDecoder>
 		// ファクトリは見つからなかった
 		eRisaException::Throw(
 			RISSE_WS_TR("'%1' has non-supported file extension"), filename);
-		return boost::shared_ptr<tRisaWaveDecoder>(); // これは実行されない
+		return boost::shared_ptr<tWaveDecoder>(); // これは実行されない
 	}
 }
 //---------------------------------------------------------------------------

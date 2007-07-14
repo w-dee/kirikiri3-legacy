@@ -26,16 +26,16 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		XP4 In-Archive Stream Implmentation
 //---------------------------------------------------------------------------
-class tRisaXP4ArchiveStream : public tBinaryStream,
-	protected depends_on<tRisaXP4StreamCache>,
-	protected depends_on<tRisaXP4SegmentCache>
+class tXP4ArchiveStream : public tBinaryStream,
+	protected depends_on<tXP4StreamCache>,
+	protected depends_on<tXP4SegmentCache>
 {
-	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
-	boost::shared_ptr<tRisaXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
+	boost::shared_ptr<tXP4Archive> Owner; //!< このアーカイブストリームが属するアーカイブ
 	risse_size FileIndex; //!< アーカイブ中でのインデックス
-	const tRisaXP4Archive::tFile & FileInfo; //!< ファイル情報
-	const tRisaXP4Archive::tSegment * SegmentInfo; //!< セグメント情報
+	const tXP4Archive::tFile & FileInfo; //!< ファイル情報
+	const tXP4Archive::tSegment * SegmentInfo; //!< セグメント情報
 
 	tBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
 	risse_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号(0～)
@@ -44,19 +44,19 @@ class tRisaXP4ArchiveStream : public tBinaryStream,
 	risse_uint64 CurPos; //!< current position in absolute file position
 	risse_uint64 SegmentRemain; //!< remain bytes in current segment
 	risse_uint64 SegmentPos; //!< offset from current segment's start
-	tRisaXP4SegmentCache::tDataBlock DecompressedData; // decompressed segment data
+	tXP4SegmentCache::tDataBlock DecompressedData; // decompressed segment data
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		ptr tRisaArchive インスタンスへのスマートポインタ
+	//! @param		ptr tArchive インスタンスへのスマートポインタ
 	//! @param		idx アーカイブ内でのファイルのインデックス
 	//! @param		flags アクセスフラグ
-	tRisaXP4ArchiveStream(
-			boost::shared_ptr<tRisaXP4Archive> ptr,
+	tXP4ArchiveStream(
+			boost::shared_ptr<tXP4Archive> ptr,
 			risse_size idx, risse_uint32 flags);
 
 	//! @brief		デストラクタ
-	~tRisaXP4ArchiveStream();
+	~tXP4ArchiveStream();
 
 private:
 	//! @brief		現在のセグメントが開かれていることを確実にする

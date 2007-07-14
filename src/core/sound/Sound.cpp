@@ -21,24 +21,24 @@ RISSE_DEFINE_SOURCE_ID(47626,3140,27936,19656,12175,17772,57131,58681);
 
 
 //---------------------------------------------------------------------------
-tRisaSoundALSource::tRisaSoundALSource(tRisaSound * owner,
-	boost::shared_ptr<tRisaALBuffer> buffer, boost::shared_ptr<tRisaWaveLoopManager> loopmanager) :
-	tRisaALSource(buffer, loopmanager), Owner(owner)
+tSoundALSource::tSoundALSource(tSound * owner,
+	boost::shared_ptr<tALBuffer> buffer, boost::shared_ptr<tWaveLoopManager> loopmanager) :
+	tALSource(buffer, loopmanager), Owner(owner)
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaSoundALSource::tRisaSoundALSource(tRisaSound * owner, const tRisaALSource * ref) :
-	tRisaALSource(ref), Owner(owner)
+tSoundALSource::tSoundALSource(tSound * owner, const tALSource * ref) :
+	tALSource(ref), Owner(owner)
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaSoundALSource::OnStatusChanged(tStatus status)
+void tSoundALSource::OnStatusChanged(tStatus status)
 {
 	Owner->CallOnStatusChanged(status);
 }
@@ -54,18 +54,18 @@ void tRisaSoundALSource::OnStatusChanged(tStatus status)
 	メモ
 	データの流れ
 
-	tRisaALSource <-- tRisaALBuffer (<-- tRisaWaveFilter)* <-- tRisaWaveLoopManager <-- tRisaWaveDecoder
+	tALSource <-- tALBuffer (<-- tWaveFilter)* <-- tWaveLoopManager <-- tWaveDecoder
 
-	・複数の tRisaALSource は 一つの tRisaALBuffer を共有できる
-	  (ただし、tRisaALBuffer が非ストリーミングバッファの場合)
-	・ストリーミング時にバッファを fill するのは tRisaALSource の責任
-	・tRisaWaveFilter は あってもなくてもOK、複数個が直列する場合もある
-	・tRisaWaveLoopManager は一つ tRisaWaveDecoder を入力にとる
+	・複数の tALSource は 一つの tALBuffer を共有できる
+	  (ただし、tALBuffer が非ストリーミングバッファの場合)
+	・ストリーミング時にバッファを fill するのは tALSource の責任
+	・tWaveFilter は あってもなくてもOK、複数個が直列する場合もある
+	・tWaveLoopManager は一つ tWaveDecoder を入力にとる
 */
 
 
 //---------------------------------------------------------------------------
-tRisaSound::tRisaSound()
+tSound::tSound()
 {
 	Init();
 }
@@ -73,7 +73,7 @@ tRisaSound::tRisaSound()
 
 
 //---------------------------------------------------------------------------
-tRisaSound::tRisaSound(const tString & filename)
+tSound::tSound(const tString & filename)
 {
 	Init();
 	Open(filename);
@@ -82,7 +82,7 @@ tRisaSound::tRisaSound(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-tRisaSound::~tRisaSound()
+tSound::~tSound()
 {
 	Clear();
 }
@@ -90,7 +90,7 @@ tRisaSound::~tRisaSound()
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::Init()
+void tSound::Init()
 {
 	Status = ssUnload;
 }
@@ -98,7 +98,7 @@ void tRisaSound::Init()
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::Clear()
+void tSound::Clear()
 {
 	// 再生を停止
 	if(Source) Source->Stop();
@@ -117,7 +117,7 @@ void tRisaSound::Clear()
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::CallOnStatusChanged(tStatus status)
+void tSound::CallOnStatusChanged(tStatus status)
 {
 	if(Status != status)
 	{
@@ -129,7 +129,7 @@ void tRisaSound::CallOnStatusChanged(tStatus status)
 
 #include "sound/filter/phasevocoder/PhaseVocoder.h"
 //---------------------------------------------------------------------------
-void tRisaSound::Open(const tString & filename)
+void tSound::Open(const tString & filename)
 {
 	// メディアを開くのに先立って内部状態をクリア
 	Clear();
@@ -138,14 +138,14 @@ void tRisaSound::Open(const tString & filename)
 	try
 	{
 		// デコーダを作成
-		Decoder = depends_on<tRisaWaveDecoderFactoryManager>::locked_instance()->Create(filename);
+		Decoder = depends_on<tWaveDecoderFactoryManager>::locked_instance()->Create(filename);
 
 		// LoopManager を作成
 		LoopManager =
-			boost::shared_ptr<tRisaWaveLoopManager>(new tRisaWaveLoopManager(Decoder));
+			boost::shared_ptr<tWaveLoopManager>(new tWaveLoopManager(Decoder));
 
 		// pv
-		boost::shared_ptr<tRisaPhaseVocoder> filter(new tRisaPhaseVocoder());
+		boost::shared_ptr<tPhaseVocoder> filter(new tPhaseVocoder());
 		filter->SetOverSampling(16);
 		filter->SetFrameSize(4096);
 		filter->SetTimeScale(1.6);
@@ -153,10 +153,10 @@ void tRisaSound::Open(const tString & filename)
 		filter->SetInput(LoopManager);
 
 		// バッファを作成
-		Buffer = boost::shared_ptr<tRisaALBuffer>(new tRisaALBuffer(filter, true));
+		Buffer = boost::shared_ptr<tALBuffer>(new tALBuffer(filter, true));
 
 		// ソースを作成
-		Source = boost::shared_ptr<tRisaSoundALSource>(new tRisaSoundALSource(this, Buffer, LoopManager));
+		Source = boost::shared_ptr<tSoundALSource>(new tSoundALSource(this, Buffer, LoopManager));
 
 		// ステータスを更新
 		CallOnStatusChanged(ssStop);
@@ -172,7 +172,7 @@ void tRisaSound::Open(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::Close()
+void tSound::Close()
 {
 	Clear();
 }
@@ -180,7 +180,7 @@ void tRisaSound::Close()
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::Play()
+void tSound::Play()
 {
 	if(!Source) return; // ソースがないので再生を開始できない
 	Source->Play(); // 再生を開始
@@ -189,7 +189,7 @@ void tRisaSound::Play()
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::Stop()
+void tSound::Stop()
 {
 	if(!Source) return; // ソースがないので再生を停止できない
 	Source->Stop(); // 再生を停止
@@ -198,7 +198,7 @@ void tRisaSound::Stop()
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::Pause()
+void tSound::Pause()
 {
 	if(!Source) return; // ソースがないので再生を一時停止できない
 	Source->Pause(); // 再生を一時停止
@@ -207,7 +207,7 @@ void tRisaSound::Pause()
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tRisaSound::GetSamplePosition()
+risse_uint64 tSound::GetSamplePosition()
 {
 	if(!Source) return 0; // ソースがないので再生位置を取得できない
 	return Source->GetPosition();
@@ -216,7 +216,7 @@ risse_uint64 tRisaSound::GetSamplePosition()
 
 
 //---------------------------------------------------------------------------
-double tRisaSound::GetTimePosition()
+double tSound::GetTimePosition()
 {
 	if(!Source) return 0; // ソースがないので再生位置を取得できない
 	return Source->GetPosition() * 1000 / LoopManager->GetFormat().Frequency;
@@ -225,7 +225,7 @@ double tRisaSound::GetTimePosition()
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::SetSamplePosition(risse_uint64 pos)
+void tSound::SetSamplePosition(risse_uint64 pos)
 {
 	if(!Source) return; // ソースがないので再生位置を変更できない
 	Source->SetPosition(pos);
@@ -234,7 +234,7 @@ void tRisaSound::SetSamplePosition(risse_uint64 pos)
 
 
 //---------------------------------------------------------------------------
-void tRisaSound::SetTimePosition(double pos)
+void tSound::SetTimePosition(double pos)
 {
 	if(!Source) return; // ソースがないので再生位置を変更できない
 	Source->SetPosition(static_cast<risse_uint64>(pos *  LoopManager->GetFormat().Frequency / 1000));

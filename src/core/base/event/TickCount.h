@@ -14,7 +14,7 @@
 #define _TICKCOUNT_H
 
 /*! @note
-	tRisaTickCount は 64bit 整数によるミリ秒単位のティックカウントを
+	tTickCount は 64bit 整数によるミリ秒単位のティックカウントを
 	提供する。
 
 	ティックカウントは任意時間ごとにカウントアップされていく値であり、
@@ -26,14 +26,14 @@
 	ティックカウントの値はRisaの実行開始時からの経過時間であったり、
 	UNIX epoch からの経過時間だったりする(実装依存)。
 	基本的には、二点間の時間的距離を計測する用途に用いるが、
-	tRisaTimerSchedulerなどではこのtRisaTickCountが返すティックカウント
+	tTimerSchedulerなどではこのtTickCountが返すティックカウント
 	を「絶対TickCount」とよび、時間の基準としている。
 
-	tRisaTickCount が拠り所としているクロック源はシステムのWall-Clock
-	(日付時刻)とは異なる場合がある。長期間計測を行うと、tRisaTickCountが
+	tTickCount が拠り所としているクロック源はシステムのWall-Clock
+	(日付時刻)とは異なる場合がある。長期間計測を行うと、tTickCountが
 	返す時間と日付時刻取得関数(たとえばRisseのDateクラスなど)が水晶発振子の
 	誤差などによりずれてくる可能性があるということである。
-	tRisaTickCountを拠り所としているtRisaTimerSchedulerもWall-Clockに対して
+	tTickCountを拠り所としているtTimerSchedulerもWall-Clockに対して
 	ずれる可能性がある。
 
 	wxWidgets は wxStopWatch でミリ秒単位の経過時刻情報を提供するが、
@@ -59,7 +59,7 @@
 			GetTickCount を使う (DWORDの周回の監視を行う)
 
 		timeGettime/GetTickCount を使うときはタイマの分解能に注意する
-		( TickCount.h にある tRisaWinTimerResolutionAdjuster を参照のこと )
+		( TickCount.h にある tWinTimerResolutionAdjuster を参照のこと )
 
 	・それ以外
 
@@ -74,13 +74,13 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 #ifdef __WXMSW__
-	#define RISA_DECLARE_TYPEDEF typedef DWORD tRisaTickCountBasicType;
+	#define RISA_DECLARE_TYPEDEF typedef DWORD tTickCountBasicType;
 	#define RISA_TICKCOUNT_NEED_WRAP_WATCH
 	#include <windows.h>
 	#if defined(__WIN64__) || defined(__WIN32__)
-		#define RISA_DECLARE_GETTICK tRisaTickCountBasicType GetTick() { return ::timeGetTime(); }
+		#define RISA_DECLARE_GETTICK tTickCountBasicType GetTick() { return ::timeGetTime(); }
 		#include <mmsystem.h>
-		#define RISA_TICKCOUNT_DEPENDS_ON depends_on<tRisaWinTimerResolutionAdjuster>
+		#define RISA_TICKCOUNT_DEPENDS_ON depends_on<tWinTimerResolutionAdjuster>
 		//! @brief Win32/Win64? でタイマの分解能を最低でも10msにするクラス
 		//! @note
 		//! いくつかの環境(おそらく性能の低いコンピュータ)ではタイマの分解能が
@@ -88,12 +88,12 @@ namespace Risa {
 		//! サウンドなどのサービスの中にはタイマの分解能に敏感な
 		//! 物があるため、最低でも10msの精度に合わせる。ちなみにこの分解能を
 		//! 上げると、どうやらコンテキストスイッチングの時間制度も上がる模様。
-		class tRisaWinTimerResolutionAdjuster :
-			public singleton_base<tRisaWinTimerResolutionAdjuster>
+		class tWinTimerResolutionAdjuster :
+			public singleton_base<tWinTimerResolutionAdjuster>
 		{
 			UINT TimerPrecision;
 		public:
-			tRisaWinTimerResolutionAdjuster()
+			tWinTimerResolutionAdjuster()
 			{
 				TimerPrecision = 10;
 				// retrieve minimum timer resolution
@@ -107,18 +107,18 @@ namespace Risa {
 				timeBeginPeriod(TimerPrecision);
 			}
 
-			~tRisaWinTimerResolutionAdjuster()
+			~tWinTimerResolutionAdjuster()
 			{
 				timeEndPeriod(TimerPrecision);
 			}
 		};
 	#else
-		#define RISA_DECLARE_GETTICK tRisaTickCountBasicType GetTick() \
+		#define RISA_DECLARE_GETTICK tTickCountBasicType GetTick() \
 						{ return ::GetTickCount(); }
 	#endif
 #else
-	#define RISA_DECLARE_TYPEDEF typedef risse_uint64 tRisaTickCountBasicType;
-	#define RISA_DECLARE_GETTICK tRisaTickCountBasicType GetTick() \
+	#define RISA_DECLARE_TYPEDEF typedef risse_uint64 tTickCountBasicType;
+	#define RISA_DECLARE_GETTICK tTickCountBasicType GetTick() \
 						{ return ::wxGetLocalTimeMillis().GetValue() ; }
 	#include <wx/timer.h>
 #endif
@@ -127,27 +127,27 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		Tickcountを提供するクラス
 //---------------------------------------------------------------------------
-class tRisaTickCount : public singleton_base<tRisaTickCount>
+class tTickCount : public singleton_base<tTickCount>
 	#ifdef RISA_TICKCOUNT_DEPENDS_ON
 		, RISA_TICKCOUNT_DEPENDS_ON
 	#endif
 {
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	RISA_DECLARE_TYPEDEF
 	RISA_DECLARE_GETTICK
 
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
 	//! @brief	tickcount の wraparound を検出するためのスレッドのクラス
-	class tWatcher : public tRisaThread
+	class tWatcher : public tThread
 	{
-		tRisaThreadEvent Event; //!< イベントオブジェクト
-		tRisaTickCount & Owner;
+		tThreadEvent Event; //!< イベントオブジェクト
+		tTickCount & Owner;
 	public:
 
 		//! @brief		コンストラクタ
-		//! @param		owner		このオブジェクトを所有する tRisaTickCount オブジェクト
-		tWatcher(tRisaTickCount & owner);
+		//! @param		owner		このオブジェクトを所有する tTickCount オブジェクト
+		tWatcher(tTickCount & owner);
 
 		//! @brief		デストラクタ
 		~tWatcher();
@@ -159,7 +159,7 @@ class tRisaTickCount : public singleton_base<tRisaTickCount>
 	tWatcher *Watcher; //!< tickcount の wraparound を検出するためのスレッド
 
 	risse_uint64 Value; //!< 現在の tick
-	tRisaTickCountBasicType LastTick; //!< 最後に取得した リファレンスのtick
+	tTickCountBasicType LastTick; //!< 最後に取得した リファレンスのtick
 #endif
 
 public:
@@ -167,10 +167,10 @@ public:
 		//!< 無効な tick を表す値
 
 	//! @brief		コンストラクタ
-	tRisaTickCount();
+	tTickCount();
 
 	//! @brief		デストラクタ
-	~tRisaTickCount();
+	~tTickCount();
 
 	//! @brief		Tick Count を得る
 	risse_uint64 Get();

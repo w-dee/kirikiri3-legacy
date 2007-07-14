@@ -27,7 +27,7 @@ namespace Risa {
 //!				オブジェクトは指定しないこと。
 //---------------------------------------------------------------------------
 template <typename T>
-class tRisaRingBuffer : public tCollectee
+class tRingBuffer : public tCollectee
 {
 	T * Buffer; //!< バッファ
 	size_t Size; //!< バッファのサイズ
@@ -37,7 +37,7 @@ class tRisaRingBuffer : public tCollectee
 
 public:
 	//! @brief コンストラクタ
-	tRisaRingBuffer(size_t size)
+	tRingBuffer(size_t size)
 	{
 		Size = size;
 		Buffer = new (GC) T[Size];
@@ -46,7 +46,7 @@ public:
 	}
 /*
 	//! @brief デストラクタ
-	~tRisaRingBuffer()
+	~tRingBuffer()
 	{
 		delete [] Buffer;
 	}

@@ -45,27 +45,27 @@ DEFINE_EVENT_TYPE(wxEVT_DO_ROTATION_REFRESH)
 
 
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tRisaLogScrollView, wxPanel)
-	EVT_COMMAND(wxID_ANY,				wxEVT_LINE_ADDED, tRisaLogScrollView::OnLineAdded)
-	EVT_COMMAND(wxID_ANY,				wxEVT_DO_ROTATION_REFRESH, tRisaLogScrollView::OnDoRotationRefresh)
+BEGIN_EVENT_TABLE(tLogScrollView, wxPanel)
+	EVT_COMMAND(wxID_ANY,				wxEVT_LINE_ADDED, tLogScrollView::OnLineAdded)
+	EVT_COMMAND(wxID_ANY,				wxEVT_DO_ROTATION_REFRESH, tLogScrollView::OnDoRotationRefresh)
 
-	EVT_PAINT(							tRisaLogScrollView::OnPaint)
-	EVT_CHAR(							tRisaLogScrollView::OnChar)
-	EVT_SCROLLWIN(						tRisaLogScrollView::OnScroll)
-	EVT_MOUSEWHEEL(						tRisaLogScrollView::OnMouseWheel)
-	EVT_SIZE(							tRisaLogScrollView::OnSize)
-	EVT_LEFT_DOWN(						tRisaLogScrollView::OnLeftDown)
-	EVT_LEFT_UP(						tRisaLogScrollView::OnLeftUp)
-	EVT_MOTION(							tRisaLogScrollView::OnMotion)
-	EVT_CHAR(							tRisaLogScrollView::OnChar)
+	EVT_PAINT(							tLogScrollView::OnPaint)
+	EVT_CHAR(							tLogScrollView::OnChar)
+	EVT_SCROLLWIN(						tLogScrollView::OnScroll)
+	EVT_MOUSEWHEEL(						tLogScrollView::OnMouseWheel)
+	EVT_SIZE(							tLogScrollView::OnSize)
+	EVT_LEFT_DOWN(						tLogScrollView::OnLeftDown)
+	EVT_LEFT_UP(						tLogScrollView::OnLeftUp)
+	EVT_MOTION(							tLogScrollView::OnMotion)
+	EVT_CHAR(							tLogScrollView::OnChar)
 
-	EVT_MENU(ID_Menu_Copy,				tRisaLogScrollView::OnMenuCopy)
-	EVT_MENU(ID_Menu_SelectAll,			tRisaLogScrollView::OnMenuSelectAll)
+	EVT_MENU(ID_Menu_Copy,				tLogScrollView::OnMenuCopy)
+	EVT_MENU(ID_Menu_SelectAll,			tLogScrollView::OnMenuSelectAll)
 
 #if USE_CONTEXT_MENU
-	EVT_CONTEXT_MENU(					tRisaLogScrollView::OnContextMenu)
+	EVT_CONTEXT_MENU(					tLogScrollView::OnContextMenu)
 #else
-	EVT_RIGHT_UP(						tRisaLogScrollView::OnRightUp)
+	EVT_RIGHT_UP(						tLogScrollView::OnRightUp)
 #endif
 
 END_EVENT_TABLE()
@@ -73,7 +73,7 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
+tLogScrollView::tLogScrollView(wxWindow * parent)	:
 	wxPanel(parent, wxID_ANY,
                             wxDefaultPosition, wxDefaultSize,
                             wxSUNKEN_BORDER|wxVSCROLL),
@@ -100,21 +100,21 @@ tRisaLogScrollView::tRisaLogScrollView(wxWindow * parent)	:
 	Show();
 
 	// 既存のログをレイアウトする
-	tRisaLogger::instance()->SendLogs(this, RotateTo);
+	tLogger::instance()->SendLogs(this, RotateTo);
 
 	// レシーバとしてこのオブジェクトを登録する
-	tRisaLogger::instance()->RegisterReceiver(this);
+	tLogger::instance()->RegisterReceiver(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaLogScrollView::~tRisaLogScrollView()
+tLogScrollView::~tLogScrollView()
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// レシーバとしてこのオブジェクトを登録解除する
-	tRisaLogger::instance()->UnregisterReceiver(this);
+	tLogger::instance()->UnregisterReceiver(this);
 
 	// キャプチャを保持している場合はリリース
 	if(HasCapture()) ReleaseMouse();
@@ -126,27 +126,27 @@ tRisaLogScrollView::~tRisaLogScrollView()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::GetFontFromLogItemLevel(tRisaLogger::tLevel level,
+void tLogScrollView::GetFontFromLogItemLevel(tLogger::tLevel level,
 		bool & bold, wxColour &colour)
 {
 	switch(level)
 	{
-	case tRisaLogger::llDebug:		//!< デバッグに関する物
+	case tLogger::llDebug:		//!< デバッグに関する物
 		{ static wxColour c(0xa0, 0xa0, 0xa0); colour = c; bold = false; }
 		break;
-	case tRisaLogger::llInfo:		//!< 通知
+	case tLogger::llInfo:		//!< 通知
 		{ static wxColour c(0xff, 0xff, 0xff); colour = c; bold = false; }
 		break;
-	case tRisaLogger::llNotice:		//!< 通常状態だが大事な情報
+	case tLogger::llNotice:		//!< 通常状態だが大事な情報
 		{ static wxColour c(0x00, 0xff, 0x00); colour = c; bold = false; }
 		break;
-	case tRisaLogger::llWarning:	//!< 警告
+	case tLogger::llWarning:	//!< 警告
 		{ static wxColour c(0xff, 0xff, 0x00); colour = c; bold = false; }
 		break;
-	case tRisaLogger::llError:		//!< 通常のエラー
+	case tLogger::llError:		//!< 通常のエラー
 		{ static wxColour c(0xff, 0x80, 0x80); colour = c; bold = false; }
 		break;
-	case tRisaLogger::llCritical:	//!< 致命的なエラー
+	case tLogger::llCritical:	//!< 致命的なエラー
 		{ static wxColour c(0xff, 0x00, 0x00); colour = c; bold = true;  }
 		break;
 	default:
@@ -158,7 +158,7 @@ void tRisaLogScrollView::GetFontFromLogItemLevel(tRisaLogger::tLevel level,
 
 
 //---------------------------------------------------------------------------
-wxColour tRisaLogScrollView::GetBackgroundColour()
+wxColour tLogScrollView::GetBackgroundColour()
 {
 		{ static wxColour c(0x00, 0x00, 0x00); return c; }
 }
@@ -166,7 +166,7 @@ wxColour tRisaLogScrollView::GetBackgroundColour()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::Rotate()
+void tLogScrollView::Rotate()
 {
 	if(LogicalLines.size() < RotateLimit) return; // まだローテーションするほどではない
 	if(MouseSelecting) return; // 範囲選択中はローテーションを行わない
@@ -233,7 +233,7 @@ void tRisaLogScrollView::Rotate()
 
 
 //---------------------------------------------------------------------------
-bool tRisaLogScrollView::FixupSelection(
+bool tLogScrollView::FixupSelection(
 	tCharacterPosition &sel1, tCharacterPosition &sel2, size_t log_num_delete_items)
 {
 	// GUI へのアクセスなし
@@ -277,7 +277,7 @@ bool tRisaLogScrollView::FixupSelection(
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::LayoutOneLine(size_t log_index)
+void tLogScrollView::LayoutOneLine(size_t log_index)
 {
 	// TODO: Right to Left (like Arabic) support, complex layout support
 
@@ -329,7 +329,7 @@ void tRisaLogScrollView::LayoutOneLine(size_t log_index)
 
 
 //---------------------------------------------------------------------------
-wxString tRisaLogScrollView::CreateOneLineString(const tRisaLogger::tItem & item)
+wxString tLogScrollView::CreateOneLineString(const tLogger::tItem & item)
 {
 	// 表示形式は
 	// 時刻 ログレベル メッセージ
@@ -340,19 +340,19 @@ wxString tRisaLogScrollView::CreateOneLineString(const tRisaLogger::tItem & item
 	// ログレベル
 	switch(item.Level)
 	{
-	case tRisaLogger::llDebug:
+	case tLogger::llDebug:
 		logline += _("[D] "); break; // [D]ebug
-	case tRisaLogger::llInfo:
+	case tLogger::llInfo:
 		logline += _("[I] "); break; // [I]nformation
-	case tRisaLogger::llNotice:
+	case tLogger::llNotice:
 		logline += _("[N] "); break; // [N]otice
-	case tRisaLogger::llWarning:
+	case tLogger::llWarning:
 		logline += _("[W] "); break; // [W]arning
-	case tRisaLogger::llError:
+	case tLogger::llError:
 		logline += _("[E] "); break; // [E]rror
-	case tRisaLogger::llRecord:
+	case tLogger::llRecord:
 		logline += _("[R] "); break; // [R]ecord
-	case tRisaLogger::llCritical:
+	case tLogger::llCritical:
 		logline += _("[C] "); break; // [C]ritical
 	}
 
@@ -365,7 +365,7 @@ wxString tRisaLogScrollView::CreateOneLineString(const tRisaLogger::tItem & item
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::LayoutAllLines()
+void tLogScrollView::LayoutAllLines()
 {
 	// DisplayLines はいったん全てクリア
 	DisplayLines.clear();
@@ -385,7 +385,7 @@ void tRisaLogScrollView::LayoutAllLines()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
+void tLogScrollView::AddLine(const tLogger::tItem & logger_item)
 {
 	// このメソッドはメインスレッド以外から呼ばれる可能性があるので注意すること
 
@@ -417,7 +417,7 @@ void tRisaLogScrollView::AddLine(const tRisaLogger::tItem & logger_item)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::DoScroll(risse_int amount, bool absolute)
+void tLogScrollView::DoScroll(risse_int amount, bool absolute)
 {
 	if(!absolute && amount == 0) return ; // スクロールしない
 
@@ -444,7 +444,7 @@ void tRisaLogScrollView::DoScroll(risse_int amount, bool absolute)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::SetScrollBarInfo(risse_int anchor)
+void tLogScrollView::SetScrollBarInfo(risse_int anchor)
 {
 	// スクロールバーの調整
 	risse_int old_top = GetScrollPos(wxVERTICAL);
@@ -465,7 +465,7 @@ void tRisaLogScrollView::SetScrollBarInfo(risse_int anchor)
 
 
 //---------------------------------------------------------------------------
-risse_int tRisaLogScrollView::GetScrollAnchor()
+risse_int tLogScrollView::GetScrollAnchor()
 {
 	// ログの最後を表示しているかどうかを判定
 	risse_int top = GetScrollPos(wxVERTICAL);
@@ -477,7 +477,7 @@ risse_int tRisaLogScrollView::GetScrollAnchor()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::ScrollView(risse_int old_top, risse_int new_top)
+void tLogScrollView::ScrollView(risse_int old_top, risse_int new_top)
 {
 	if(old_top != new_top)
 	{
@@ -500,7 +500,7 @@ void tRisaLogScrollView::ScrollView(risse_int old_top, risse_int new_top)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::RefreshDisplayLine(size_t index, risse_int range)
+void tLogScrollView::RefreshDisplayLine(size_t index, risse_int range)
 {
 	// index は表示可能範囲内かどうかはチェックしない
 	size_t top = GetScrollPos(wxVERTICAL);
@@ -513,7 +513,7 @@ void tRisaLogScrollView::RefreshDisplayLine(size_t index, risse_int range)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::ViewPositionToCharacterPosition(risse_int x,
+void tLogScrollView::ViewPositionToCharacterPosition(risse_int x,
 	risse_int y, tCharacterPosition & charpos, size_t *charlength)
 {
 	// あらかじめ charlength に 0 を入れておく
@@ -595,7 +595,7 @@ void tRisaLogScrollView::ViewPositionToCharacterPosition(risse_int x,
 
 
 //---------------------------------------------------------------------------
-bool tRisaLogScrollView::IsViewPositionInSelection(risse_int x, risse_int y)
+bool tLogScrollView::IsViewPositionInSelection(risse_int x, risse_int y)
 {
 	if(!SelStart.IsValid() || !SelEnd.IsValid()) return false;
 	tCharacterPosition charpos;
@@ -607,7 +607,7 @@ bool tRisaLogScrollView::IsViewPositionInSelection(risse_int x, risse_int y)
 
 
 //---------------------------------------------------------------------------
-bool tRisaLogScrollView::AnySelected()
+bool tLogScrollView::AnySelected()
 {
 	return SelStart.IsValid() && SelEnd.IsValid();
 }
@@ -615,7 +615,7 @@ bool tRisaLogScrollView::AnySelected()
 
 
 //---------------------------------------------------------------------------
-wxString tRisaLogScrollView::GetSelectionString()
+wxString tLogScrollView::GetSelectionString()
 {
 	if(!SelStart.IsValid() || !SelEnd.IsValid()) return wxEmptyString;
 
@@ -644,7 +644,7 @@ wxString tRisaLogScrollView::GetSelectionString()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::SetSelection(
+void tLogScrollView::SetSelection(
 	const tCharacterPosition & pos1, const tCharacterPosition & pos2, const tCharacterPosition & pos3)
 {
 	// 新しい SelStart と SelEnd を決定
@@ -705,7 +705,7 @@ void tRisaLogScrollView::SetSelection(
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::SelectAll()
+void tLogScrollView::SelectAll()
 {
 	if(LogicalLines.size() == 0) return;
 	tCharacterPosition start(0, 0);
@@ -717,7 +717,7 @@ void tRisaLogScrollView::SelectAll()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::RefreshSelection(const tCharacterPosition & pos1, const tCharacterPosition & pos2)
+void tLogScrollView::RefreshSelection(const tCharacterPosition & pos1, const tCharacterPosition & pos2)
 {
 	// 厳密には指定された領域を文字単位で再描画することになるが、
 	// ここでは簡略化のため、行単位で再描画を行う
@@ -738,7 +738,7 @@ void tRisaLogScrollView::RefreshSelection(const tCharacterPosition & pos1, const
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::LogicalPositionToDisplayPosition(const tCharacterPosition & log_pos,
+void tLogScrollView::LogicalPositionToDisplayPosition(const tCharacterPosition & log_pos,
 				tCharacterPosition & disp_pos)
 {
 	disp_pos.Invalidate();
@@ -766,7 +766,7 @@ void tRisaLogScrollView::LogicalPositionToDisplayPosition(const tCharacterPositi
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::ScrollByTimer()
+void tLogScrollView::ScrollByTimer()
 {
 	DoScroll(ScrollTimerScrollAmount, false);
 }
@@ -774,12 +774,12 @@ void tRisaLogScrollView::ScrollByTimer()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::ShowContextMenu(const wxPoint & pos)
+void tLogScrollView::ShowContextMenu(const wxPoint & pos)
 {
 	wxMenu menu;
 
 	{
-		volatile tRisaCriticalSection::tLocker holder(CS);
+		volatile tCriticalSection::tLocker holder(CS);
 
 		// context menu of console log viewer
 		wxMenuItem *item = new wxMenuItem(&menu, ID_Menu_Copy, _("&Copy"));
@@ -797,9 +797,9 @@ void tRisaLogScrollView::ShowContextMenu(const wxPoint & pos)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnLog(const tRisaLogger::tItem & logger_item)
+void tLogScrollView::OnLog(const tLogger::tItem & logger_item)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	AddLine(logger_item);
 }
@@ -807,9 +807,9 @@ void tRisaLogScrollView::OnLog(const tRisaLogger::tItem & logger_item)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnLineAdded(wxCommandEvent& event)
+void tLogScrollView::OnLineAdded(wxCommandEvent& event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	if(LayoutRequested)
 	{
@@ -830,9 +830,9 @@ void tRisaLogScrollView::OnLineAdded(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnDoRotationRefresh(wxCommandEvent& event)
+void tLogScrollView::OnDoRotationRefresh(wxCommandEvent& event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// スクロールバーの位置を調整
 	int anchor = GetScrollAnchor();
@@ -859,11 +859,11 @@ void tRisaLogScrollView::OnDoRotationRefresh(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
+void tLogScrollView::OnPaint(wxPaintEvent& event)
 {
 	wxPaintDC dc(this);
 
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// 表示行を取得
 	size_t lineFirst = GetScrollPos(wxVERTICAL);
@@ -964,9 +964,9 @@ void tRisaLogScrollView::OnPaint(wxPaintEvent& event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnChar(wxKeyEvent & event)
+void tLogScrollView::OnChar(wxKeyEvent & event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	int keycode = event.GetKeyCode();
 
@@ -995,7 +995,7 @@ void tRisaLogScrollView::OnChar(wxKeyEvent & event)
 				// テキストコントロールにフォーカスを合わせる
 				wxWindow * top = GetParent();
 				while(top->GetParent()) top = top->GetParent(); // トップレベルウィンドウを探す
-				reinterpret_cast<tRisaConsoleFrame*>(top)->SetFocusToTextCtrl(keycode);
+				reinterpret_cast<tConsoleFrame*>(top)->SetFocusToTextCtrl(keycode);
 				break;
 			}
 			else
@@ -1011,9 +1011,9 @@ void tRisaLogScrollView::OnChar(wxKeyEvent & event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnScroll(wxScrollWinEvent& event)
+void tLogScrollView::OnScroll(wxScrollWinEvent& event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// イベントをスキップ
 	event.Skip();
@@ -1043,9 +1043,9 @@ void tRisaLogScrollView::OnScroll(wxScrollWinEvent& event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnMouseWheel(wxMouseEvent& event)
+void tLogScrollView::OnMouseWheel(wxMouseEvent& event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// イベントをスキップ
 	event.Skip();
@@ -1060,9 +1060,9 @@ void tRisaLogScrollView::OnMouseWheel(wxMouseEvent& event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnSize(wxSizeEvent& event)
+void tLogScrollView::OnSize(wxSizeEvent& event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// クライアントサイズを取得
 	risse_int cw = 0, ch = 0;
@@ -1090,7 +1090,7 @@ void tRisaLogScrollView::OnSize(wxSizeEvent& event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
+void tLogScrollView::OnLeftDown(wxMouseEvent & event)
 {
 #if wxUSE_DRAG_AND_DROP
 	if(event.GetX() >= ViewOriginX &&
@@ -1105,7 +1105,7 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 		wxString selection;
 
 		{
-			volatile tRisaCriticalSection::tLocker holder(CS);
+			volatile tCriticalSection::tLocker holder(CS);
 			selection = GetSelectionString();
 		}
 
@@ -1120,7 +1120,7 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 	else
 #endif
 	{
-		volatile tRisaCriticalSection::tLocker holder(CS);
+		volatile tCriticalSection::tLocker holder(CS);
 
 		tCharacterPosition pos;
 		size_t charlength;
@@ -1158,9 +1158,9 @@ void tRisaLogScrollView::OnLeftDown(wxMouseEvent & event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnLeftUp(wxMouseEvent & event)
+void tLogScrollView::OnLeftUp(wxMouseEvent & event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	tCharacterPosition pos;
 	ViewPositionToCharacterPosition(event.GetX(), event.GetY(), pos);
@@ -1180,9 +1180,9 @@ void tRisaLogScrollView::OnLeftUp(wxMouseEvent & event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnMotion(wxMouseEvent & event)
+void tLogScrollView::OnMotion(wxMouseEvent & event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// マウスカーソルの形状を決定
 	if(event.GetX() < ViewOriginX)
@@ -1225,9 +1225,9 @@ void tRisaLogScrollView::OnMotion(wxMouseEvent & event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnMenuCopy(wxCommandEvent &event)
+void tLogScrollView::OnMenuCopy(wxCommandEvent &event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// 選択範囲をコピーする
 	if (wxTheClipboard->Open())
@@ -1239,7 +1239,7 @@ void tRisaLogScrollView::OnMenuCopy(wxCommandEvent &event)
 		wxString selection;
 
 		{
-			volatile tRisaCriticalSection::tLocker holder(CS);
+			volatile tCriticalSection::tLocker holder(CS);
 			selection = GetSelectionString();
 		}
 
@@ -1251,9 +1251,9 @@ void tRisaLogScrollView::OnMenuCopy(wxCommandEvent &event)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnMenuSelectAll(wxCommandEvent &event)
+void tLogScrollView::OnMenuSelectAll(wxCommandEvent &event)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	SelectAll();
 }
@@ -1262,7 +1262,7 @@ void tRisaLogScrollView::OnMenuSelectAll(wxCommandEvent &event)
 
 #if USE_CONTEXT_MENU
 //---------------------------------------------------------------------------
-void tRisaLogScrollView::OnContextMenu(wxContextMenuEvent& event)
+void tLogScrollView::OnContextMenu(wxContextMenuEvent& event)
 {
 	wxPoint point = event.GetPosition();
 	// If from keyboard

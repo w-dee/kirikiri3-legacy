@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/filter/BasicWaveFilter.h"
-#include "base/exception/RisaException.h"
+#include "base/exception/Exception.h"
 #include "sound/WaveFormatConverter.h"
 
 namespace Risa {
@@ -20,7 +20,7 @@ RISSE_DEFINE_SOURCE_ID(35549,59301,21418,20212,56467,33012,49239,37291);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisaBasicWaveFilter::tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_type)
+tBasicWaveFilter::tBasicWaveFilter(tPCMTypes::tType desired_output_type)
 {
 	QueuedData = NULL;
 	QueuedDataAllocSize = 0;
@@ -34,7 +34,7 @@ tRisaBasicWaveFilter::tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_t
 
 
 //---------------------------------------------------------------------------
-tRisaBasicWaveFilter::~tRisaBasicWaveFilter()
+tBasicWaveFilter::~tBasicWaveFilter()
 {
 	if(ConvertBuffer) FreeCollectee(ConvertBuffer);
 	if(QueuedData) FreeCollectee(QueuedData);
@@ -43,7 +43,7 @@ tRisaBasicWaveFilter::~tRisaBasicWaveFilter()
 
 
 //---------------------------------------------------------------------------
-void tRisaBasicWaveFilter::Reset()
+void tBasicWaveFilter::Reset()
 {
 	InputChanged();
 	Input->Reset(); // 入力フィルタの Reset メソッドも呼び出す
@@ -52,7 +52,7 @@ void tRisaBasicWaveFilter::Reset()
 
 
 //---------------------------------------------------------------------------
-void tRisaBasicWaveFilter::SetInput(boost::shared_ptr<tRisaWaveFilter> input)
+void tBasicWaveFilter::SetInput(boost::shared_ptr<tWaveFilter> input)
 {
 	Input = input;
 	InputFormat = input->GetFormat();
@@ -71,8 +71,8 @@ void tRisaBasicWaveFilter::SetInput(boost::shared_ptr<tRisaWaveFilter> input)
 
 
 //---------------------------------------------------------------------------
-bool tRisaBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &written,
-	tRisaWaveSegmentQueue & segmentqueue)
+bool tBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &written,
+	tWaveSegmentQueue & segmentqueue)
 {
 	written = 0;
 	risse_uint8 * dest_buf = reinterpret_cast<risse_uint8*>(dest);
@@ -113,7 +113,7 @@ bool tRisaBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &wr
 
 
 //---------------------------------------------------------------------------
-const tRisaWaveFormat & tRisaBasicWaveFilter::GetFormat()
+const tWaveFormat & tBasicWaveFilter::GetFormat()
 {
 	if(!Input)
 		eRisaException::Throw(RISSE_WS_TR("The filter input is not yet connected"));
@@ -123,7 +123,7 @@ const tRisaWaveFormat & tRisaBasicWaveFilter::GetFormat()
 
 
 //---------------------------------------------------------------------------
-void * tRisaBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
+void * tBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 {
 	// キューを準備する
 	risse_uint buffer_size_needed = numsamplegranules * OutputFormat.GetSampleGranuleSize();
@@ -156,8 +156,8 @@ void * tRisaBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 
 
 //---------------------------------------------------------------------------
-void tRisaBasicWaveFilter::Queue(risse_uint numsamplegranules,
-		const tRisaWaveSegmentQueue & segmentqueue)
+void tBasicWaveFilter::Queue(risse_uint numsamplegranules,
+		const tWaveSegmentQueue & segmentqueue)
 {
 	// 出力キューにデータをおく
 	QueuedSampleGranuleCount = numsamplegranules;
@@ -168,16 +168,16 @@ void tRisaBasicWaveFilter::Queue(risse_uint numsamplegranules,
 
 
 //---------------------------------------------------------------------------
-risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
-	tRisaPCMTypes::tType desired_type, 
+risse_uint tBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
+	tPCMTypes::tType desired_type, 
 	bool fill_silence,
-	tRisaWaveSegmentQueue & segmentqueue)
+	tWaveSegmentQueue & segmentqueue)
 {
 	// バッファにデータをレンダリングする
 	if(!Input) return 0; // Input が無い
 
 	risse_uint desired_type_samplegranule_bytes =
-		tRisaPCMTypes::TypeToSampleBytes(desired_type) * InputFormat.Channels;
+		tPCMTypes::TypeToSampleBytes(desired_type) * InputFormat.Channels;
 	risse_uint8 * render_buffer = reinterpret_cast<risse_uint8*>(dest);
 	risse_uint remain = numsamplegranules;
 	if(remain == 0)
@@ -191,14 +191,14 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 		risse_uint one_want = remain;
 
 		// フィルタの現在のフォーマット形式をチェックする
-		const tRisaWaveFormat & format = Input->GetFormat();
+		const tWaveFormat & format = Input->GetFormat();
 
 		if(InputFormat.Frequency != format.Frequency)
 			break; // 周波数が変わった
 		else if(InputFormat.Channels != format.Channels)
 			break; // チャンネル数が変わった
 
-		tRisaPCMTypes::tType filter_pcm_type = tRisaPCMTypes::tunknown;
+		tPCMTypes::tType filter_pcm_type = tPCMTypes::tunknown;
 		risse_uint filter_sample_granule_bytes = 0;
 
 		if(cont)
@@ -281,7 +281,7 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 		// PCM 形式の変換
 		if(need_convert)
 		{
-			tRisaWaveFormatConverter::Convert(
+			tWaveFormatConverter::Convert(
 				desired_type,
 				render_buffer + rendered * desired_type_samplegranule_bytes,
 				filter_pcm_type,
@@ -304,7 +304,7 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 	if(fill_silence && rendered < numsamplegranules)
 	{
 		// 残りを無音で埋める
-		int sil_value = tRisaPCMTypes::GetSilenceValueFromType(desired_type);
+		int sil_value = tPCMTypes::GetSilenceValueFromType(desired_type);
 		memset(render_buffer + rendered * desired_type_samplegranule_bytes,
 			sil_value,
 			desired_type_samplegranule_bytes * (numsamplegranules - rendered));

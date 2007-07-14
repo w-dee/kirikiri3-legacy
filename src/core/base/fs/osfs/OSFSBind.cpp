@@ -46,7 +46,7 @@ risse_error tNI_OSFS::Construct(risse_int numparams,
 	bool checkcase = RISSE_PARAM_EXIST(1) ? (risse_int)*param[1] : true;
 
 	// filesystem オブジェクトの生成と登録
-	RegisterFileSystemNativeInstance(risse_obj, new tRisaOSFS(basedir, checkcase));
+	RegisterFileSystemNativeInstance(risse_obj, new tOSFS(basedir, checkcase));
 
 	return RISSE_S_OK;
 }
@@ -104,13 +104,13 @@ tNativeInstance *tNC_OSFS::CreateNativeInstance()
 
 
 //---------------------------------------------------------------------------
-tRisaOSFSRegisterer::tRisaOSFSRegisterer()
+tOSFSRegisterer::tOSFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
 	iRisseDispatch2 * cls = new tNC_OSFS();
 	try
 	{
-		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(
+		depends_on<tFileSystemRegisterer>::locked_instance()->RegisterClassObject(
 							RISSE_WS("OSFS"), cls);
 	}
 	catch(...)

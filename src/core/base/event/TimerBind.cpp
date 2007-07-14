@@ -30,14 +30,14 @@ RISSE_DEFINE_SOURCE_ID(25021,49177,9141,20257,35249,61240,44766,27087);
 //---------------------------------------------------------------------------
 //! @brief		Timerのイベントを受け取るクラス
 //---------------------------------------------------------------------------
-class tRisaTimerBindingConsumer : public tRisaEventTimerConsumer
+class tTimerBindingConsumer : public tEventTimerConsumer
 {
 	tScriptEngine * ScriptEngine; //!< スクリプトエンジンインスタンス
 	tObjectInterface * Target; //!< イベントの送り先
 
 public:
 	//! @brief		コンストラクタ
-	tRisaTimerBindingConsumer() { ScriptEngine = NULL; }
+	tTimerBindingConsumer() { ScriptEngine = NULL; }
 
 	//! @brief		スクリプトエンジンとターゲットを設定する
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -62,16 +62,16 @@ protected:
 //---------------------------------------------------------------------------
 //! @brief		"Timer" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
-class tRisaTimerInstance : public tObjectBase
+class tTimerInstance : public tObjectBase
 {
-	tRisaTimerBindingConsumer * Consumer; //!< Timer のイベントを受け取るインスタンス
+	tTimerBindingConsumer * Consumer; //!< Timer のイベントを受け取るインスタンス
 
 public:
 	//! @brief		コンストラクタ
-	tRisaTimerInstance();
+	tTimerInstance();
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
-	virtual ~tRisaTimerInstance() {;}
+	virtual ~tTimerInstance() {;}
 
 public: // Risse用メソッドなど
 	void construct();
@@ -91,7 +91,7 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-tRisaTimerInstance::tRisaTimerInstance()
+tTimerInstance::tTimerInstance()
 {
 	Consumer = NULL;
 }
@@ -99,16 +99,16 @@ tRisaTimerInstance::tRisaTimerInstance()
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerInstance::construct()
+void tTimerInstance::construct()
 {
-	Consumer = new tRisaTimerBindingConsumer();
+	Consumer = new tTimerBindingConsumer();
 	Consumer->SetTarget(GetRTTI()->GetScriptEngine(), this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerInstance::initialize(const tNativeCallInfo &info)
+void tTimerInstance::initialize(const tNativeCallInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
@@ -117,7 +117,7 @@ void tRisaTimerInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerInstance::set_enabled(bool b)
+void tTimerInstance::set_enabled(bool b)
 {
 	Consumer->SetEnabled(b);
 }
@@ -125,7 +125,7 @@ void tRisaTimerInstance::set_enabled(bool b)
 
 
 //---------------------------------------------------------------------------
-bool tRisaTimerInstance::get_enabled() const
+bool tTimerInstance::get_enabled() const
 {
 	return Consumer->GetEnabled();
 }
@@ -133,7 +133,7 @@ bool tRisaTimerInstance::get_enabled() const
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerInstance::set_interval(risse_uint64 interval)
+void tTimerInstance::set_interval(risse_uint64 interval)
 {
 	Consumer->SetInterval(interval);
 }
@@ -141,7 +141,7 @@ void tRisaTimerInstance::set_interval(risse_uint64 interval)
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tRisaTimerInstance::get_interval() const
+risse_uint64 tTimerInstance::get_interval() const
 {
 	return Consumer->GetInterval();
 }
@@ -149,7 +149,7 @@ risse_uint64 tRisaTimerInstance::get_interval() const
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerInstance::set_capacity(risse_size capa)
+void tTimerInstance::set_capacity(risse_size capa)
 {
 	Consumer->SetCapacity(capa);
 }
@@ -157,7 +157,7 @@ void tRisaTimerInstance::set_capacity(risse_size capa)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisaTimerInstance::get_capacity() const
+risse_size tTimerInstance::get_capacity() const
 {
 	return Consumer->GetCapacity();
 }
@@ -165,7 +165,7 @@ risse_size tRisaTimerInstance::get_capacity() const
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerInstance::reset()
+void tTimerInstance::reset()
 {
 	Consumer->Reset();
 }
@@ -173,7 +173,7 @@ void tRisaTimerInstance::reset()
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerInstance::onTimer()
+void tTimerInstance::onTimer()
 {
 	// Timer.onTimer は何もしない
 }
@@ -197,14 +197,14 @@ void tRisaTimerInstance::onTimer()
 //---------------------------------------------------------------------------
 //! @brief		"Timer" クラス
 //---------------------------------------------------------------------------
-class tRisaTimerClass : public tClassBase
+class tTimerClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaTimerClass(tScriptEngine * engine);
+	tTimerClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
@@ -223,7 +223,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-tRisaTimerClass::tRisaTimerClass(tScriptEngine * engine) :
+tTimerClass::tTimerClass(tScriptEngine * engine) :
 	tClassBase(tSS<'T','i','m','e','r'>(), engine->ObjectClass)
 {
 	RegisterMembers();
@@ -232,7 +232,7 @@ tRisaTimerClass::tRisaTimerClass(tScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerClass::RegisterMembers()
+void tTimerClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -242,22 +242,22 @@ void tRisaTimerClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	BindFunction(this, ss_ovulate, &tRisaTimerClass::ovulate);
-	BindFunction(this, ss_construct, &tRisaTimerInstance::construct);
-	BindFunction(this, ss_initialize, &tRisaTimerInstance::initialize);
-	BindProperty(this, tSS<'e','n','a','b','l','e','d'>(), &tRisaTimerInstance::get_enabled, &tRisaTimerInstance::set_enabled);
-	BindProperty(this, tSS<'i','n','t','e','r','v','a','l'>(), &tRisaTimerInstance::get_interval, &tRisaTimerInstance::set_interval);
-	BindProperty(this, tSS<'c','a','p','a','c','i','t','y'>(), &tRisaTimerInstance::get_capacity, &tRisaTimerInstance::set_capacity);
-	BindFunction(this, tSS<'r','e','s','e','t'>(), &tRisaTimerInstance::reset);
-	BindFunction(this, tSS<'o','n','T','i','m','e','r'>(), &tRisaTimerInstance::onTimer);
+	BindFunction(this, ss_ovulate, &tTimerClass::ovulate);
+	BindFunction(this, ss_construct, &tTimerInstance::construct);
+	BindFunction(this, ss_initialize, &tTimerInstance::initialize);
+	BindProperty(this, tSS<'e','n','a','b','l','e','d'>(), &tTimerInstance::get_enabled, &tTimerInstance::set_enabled);
+	BindProperty(this, tSS<'i','n','t','e','r','v','a','l'>(), &tTimerInstance::get_interval, &tTimerInstance::set_interval);
+	BindProperty(this, tSS<'c','a','p','a','c','i','t','y'>(), &tTimerInstance::get_capacity, &tTimerInstance::set_capacity);
+	BindFunction(this, tSS<'r','e','s','e','t'>(), &tTimerInstance::reset);
+	BindFunction(this, tSS<'o','n','T','i','m','e','r'>(), &tTimerInstance::onTimer);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tVariant tRisaTimerClass::ovulate()
+tVariant tTimerClass::ovulate()
 {
-	return tVariant(new tRisaTimerInstance());
+	return tVariant(new tTimerInstance());
 }
 //---------------------------------------------------------------------------
 
@@ -266,7 +266,7 @@ tVariant tRisaTimerClass::ovulate()
 
 //---------------------------------------------------------------------------
 //! @brief		Timer クラスレジストラ
-template class tRisaRisseClassRegisterer<tRisaTimerClass>;
+template class tRisseClassRegisterer<tTimerClass>;
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------

@@ -30,7 +30,7 @@ RISSE_DEFINE_SOURCE_ID(42206,11515,36168,20323,34721,49407,49922,37589);
 //---------------------------------------------------------------------------
 //! @brief		コンソール用のヒストリ付きカスタムテキストコントロール
 //---------------------------------------------------------------------------
-class tRisaHistoryTextCtrl :  public wxTextCtrl, protected depends_on<tRisaConfig>
+class tHistoryTextCtrl :  public wxTextCtrl, protected depends_on<tConfig>
 {
 	const static size_t MaxNumHistoryItems = 100; //!< ヒストリの最大個数
 	const static size_t InvalidIndex = static_cast<size_t>(-1L); //!< 無効なインデックス値
@@ -38,8 +38,8 @@ class tRisaHistoryTextCtrl :  public wxTextCtrl, protected depends_on<tRisaConfi
 	size_t HistoryIndex; //!< 現在選択中のヒストリインデックス
 
 public:
-	tRisaHistoryTextCtrl(wxWindow *parent);
-	~tRisaHistoryTextCtrl();
+	tHistoryTextCtrl(wxWindow *parent);
+	~tHistoryTextCtrl();
 
 private:
 	void WriteConfig();
@@ -57,9 +57,9 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		イベントテーブル
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tRisaHistoryTextCtrl, wxTextCtrl)
-	EVT_TEXT_ENTER(wxID_ANY,	tRisaHistoryTextCtrl::OnEnter)
-	EVT_CHAR(					tRisaHistoryTextCtrl::OnChar)
+BEGIN_EVENT_TABLE(tHistoryTextCtrl, wxTextCtrl)
+	EVT_TEXT_ENTER(wxID_ANY,	tHistoryTextCtrl::OnEnter)
+	EVT_CHAR(					tHistoryTextCtrl::OnChar)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ END_EVENT_TABLE()
 //! @brief		コンストラクタ
 //! @param		parent 親ウィンドウ
 //---------------------------------------------------------------------------
-tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
+tHistoryTextCtrl::tHistoryTextCtrl(wxWindow *parent):
 	wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
 		wxTE_PROCESS_ENTER)
 {
@@ -76,7 +76,7 @@ tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
 	DiscardEdits();
 
 	// ヒストリなどを設定情報から読み出す
-	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
+	tConfigData & config = tConfig::instance()->GetVariableConfig();
 	for(int cnt = 0;;cnt++)
 	{
 		wxString item;
@@ -93,7 +93,7 @@ tRisaHistoryTextCtrl::tRisaHistoryTextCtrl(wxWindow *parent):
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaHistoryTextCtrl::~tRisaHistoryTextCtrl()
+tHistoryTextCtrl::~tHistoryTextCtrl()
 {
 	// ヒストリなどを設定情報に書き出す
 	WriteConfig();
@@ -104,9 +104,9 @@ tRisaHistoryTextCtrl::~tRisaHistoryTextCtrl()
 //---------------------------------------------------------------------------
 //! @brief		ヒストリを設定情報に書き出す
 //---------------------------------------------------------------------------
-void tRisaHistoryTextCtrl::WriteConfig()
+void tHistoryTextCtrl::WriteConfig()
 {
-	tRisaConfigData & config = tRisaConfig::instance()->GetVariableConfig();
+	tConfigData & config = tConfig::instance()->GetVariableConfig();
 
 	config.DeleteGroup(wxT("ui/console/history"));
 	int cnt = 0;
@@ -123,7 +123,7 @@ void tRisaHistoryTextCtrl::WriteConfig()
 //! @brief		式をヒストリに入れる
 //! @param		item	式
 //---------------------------------------------------------------------------
-void tRisaHistoryTextCtrl::PushHistory(const wxString & item)
+void tHistoryTextCtrl::PushHistory(const wxString & item)
 {
 	History.push_front(item);
 
@@ -140,16 +140,16 @@ void tRisaHistoryTextCtrl::PushHistory(const wxString & item)
 //! @brief		Enterキーが押されたとき
 //! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
-void tRisaHistoryTextCtrl::OnEnter(wxCommandEvent & event)
+void tHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 {
 	// ヒストリの内容をファイルに保存する
 	WriteConfig();
-	tRisaConfig::instance()->GetVariableConfig().Flush();
+	tConfig::instance()->GetVariableConfig().Flush();
 
 	// Risse に式を評価させ、結果をコンソールに表示する
 	wxString value = event.GetString();
 
-	tRisaRisseScriptEngine::instance()->
+	tRisseScriptEngine::instance()->
 		EvaluateExpresisonAndPrintResultToConsole(tString(value));
 
 	// 入力をヒストリに入れる
@@ -171,7 +171,7 @@ void tRisaHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 //! @brief		文字が入力されたとき
 //! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
-void tRisaHistoryTextCtrl::OnChar(wxKeyEvent & event)
+void tHistoryTextCtrl::OnChar(wxKeyEvent & event)
 {
 	switch ( event.GetKeyCode() )
 	{
@@ -239,7 +239,7 @@ void tRisaHistoryTextCtrl::OnChar(wxKeyEvent & event)
 			// ログビューアにフォーカスを合わせる
 			wxWindow * top = GetParent();
 			while(top->GetParent()) top = top->GetParent(); // トップレベルウィンドウを探す
-			reinterpret_cast<tRisaConsoleFrame*>(top)->SetFocusToLogViewer();
+			reinterpret_cast<tConsoleFrame*>(top)->SetFocusToLogViewer();
 			break;
 
 		default:
@@ -277,13 +277,13 @@ void tRisaHistoryTextCtrl::OnChar(wxKeyEvent & event)
 //---------------------------------------------------------------------------
 //! @brief		コンソール用のカスタムステータスバー
 //---------------------------------------------------------------------------
-class tRisaLogViewerStatusBar : public wxStatusBar
+class tLogViewerStatusBar : public wxStatusBar
 {
-	tRisaHistoryTextCtrl * TextCtrl; //!< テキストコントロール
+	tHistoryTextCtrl * TextCtrl; //!< テキストコントロール
 
 public:
-	tRisaLogViewerStatusBar(wxWindow *parent);
-	virtual ~tRisaLogViewerStatusBar();
+	tLogViewerStatusBar(wxWindow *parent);
+	virtual ~tLogViewerStatusBar();
 
 	void FocusToTextCtrl(int insert_code);
 
@@ -299,8 +299,8 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		ログビューア用のカスタムステータスバー用のイベントテーブル
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tRisaLogViewerStatusBar, wxStatusBar)
-	EVT_SIZE(					tRisaLogViewerStatusBar::OnSize)
+BEGIN_EVENT_TABLE(tLogViewerStatusBar, wxStatusBar)
+	EVT_SIZE(					tLogViewerStatusBar::OnSize)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -309,7 +309,7 @@ END_EVENT_TABLE()
 //! @brief		コンストラクタ
 //! @param		parent 親ウィンドウ
 //---------------------------------------------------------------------------
-tRisaLogViewerStatusBar::tRisaLogViewerStatusBar(wxWindow *parent)
+tLogViewerStatusBar::tLogViewerStatusBar(wxWindow *parent)
 		   : wxStatusBar(parent, wxID_ANY)
 {
 	SetFieldsCount(1);
@@ -317,7 +317,7 @@ tRisaLogViewerStatusBar::tRisaLogViewerStatusBar(wxWindow *parent)
 	wxClientDC dc(this);
 	int lineheight = dc.GetCharHeight();
 
-	TextCtrl = new tRisaHistoryTextCtrl(this);
+	TextCtrl = new tHistoryTextCtrl(this);
 	SetSize(-1, -1, -1, lineheight + 10); // XXX 10?
 
 	AdjustControlSize();
@@ -328,7 +328,7 @@ tRisaLogViewerStatusBar::tRisaLogViewerStatusBar(wxWindow *parent)
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaLogViewerStatusBar::~tRisaLogViewerStatusBar()
+tLogViewerStatusBar::~tLogViewerStatusBar()
 {
 }
 //---------------------------------------------------------------------------
@@ -339,7 +339,7 @@ tRisaLogViewerStatusBar::~tRisaLogViewerStatusBar()
 //! @param		insert_code		テキストコントロールにフォーカスを合わせた際に
 //!								押されたキー (必要ならばこれを挿入する)
 //---------------------------------------------------------------------------
-void tRisaLogViewerStatusBar::FocusToTextCtrl(int insert_code)
+void tLogViewerStatusBar::FocusToTextCtrl(int insert_code)
 {
 	TextCtrl->SetFocus();
 	if(insert_code >= 0x20)
@@ -351,7 +351,7 @@ void tRisaLogViewerStatusBar::FocusToTextCtrl(int insert_code)
 //---------------------------------------------------------------------------
 //! @brief		コントロールのサイズを調整する
 //---------------------------------------------------------------------------
-void tRisaLogViewerStatusBar::AdjustControlSize()
+void tLogViewerStatusBar::AdjustControlSize()
 {
 	wxRect rect;
 	GetFieldRect(0, rect);
@@ -365,7 +365,7 @@ void tRisaLogViewerStatusBar::AdjustControlSize()
 //! @brief		サイズが変更されたとき
 //! @param		event イベントオブジェクト
 //---------------------------------------------------------------------------
-void tRisaLogViewerStatusBar::OnSize(wxSizeEvent& event)
+void tLogViewerStatusBar::OnSize(wxSizeEvent& event)
 {
 	AdjustControlSize();
 
@@ -401,16 +401,16 @@ void tRisaLogViewerStatusBar::OnSize(wxSizeEvent& event)
 
 
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tRisaConsoleFrame, tRisaUIFrame)
-	EVT_TOOL(ID_Event,				tRisaConsoleFrame::OnEventTool)
-	EVT_UPDATE_UI(wxID_ANY,			tRisaConsoleFrame::OnUpdateUI)
+BEGIN_EVENT_TABLE(tConsoleFrame, tUIFrame)
+	EVT_TOOL(ID_Event,				tConsoleFrame::OnEventTool)
+	EVT_UPDATE_UI(wxID_ANY,			tConsoleFrame::OnUpdateUI)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaConsoleFrame::tRisaConsoleFrame() :
-	tRisaUIFrame(wxT("ui/console"), _("Console"))
+tConsoleFrame::tConsoleFrame() :
+	tUIFrame(wxT("ui/console"), _("Console"))
 {
 	// UI アップデートイベントの受け取り
 	SetExtraStyle(GetExtraStyle()|wxWS_EX_PROCESS_UI_UPDATES);
@@ -418,15 +418,15 @@ tRisaConsoleFrame::tRisaConsoleFrame() :
 	// ツールバーを追加
 	CreateToolBar();
 	GetToolBar()->AddCheckTool(ID_Event, _("Deliver events"),
-		wxArtProvider::GetBitmap(wxT("RisaEvent"), wxART_TOOLBAR),
+		wxArtProvider::GetBitmap(wxT("Event"), wxART_TOOLBAR),
 		wxNullBitmap, _("Whether to deliver events"));
 	GetToolBar()->Realize();
 
 	// ログビューアを追加
-	ScrollView = new tRisaLogScrollView(this);
+	ScrollView = new tLogScrollView(this);
 
 	// ステータスバーを追加
-	StatusBar = new tRisaLogViewerStatusBar(this);
+	StatusBar = new tLogViewerStatusBar(this);
 	SetStatusBar(StatusBar);
 
 	// ステータスバー内のテキストコントロールにフォーカスを設定
@@ -436,7 +436,7 @@ tRisaConsoleFrame::tRisaConsoleFrame() :
 
 
 //---------------------------------------------------------------------------
-void tRisaConsoleFrame::SetFocusToLogViewer()
+void tConsoleFrame::SetFocusToLogViewer()
 {
 	ScrollView->SetFocus();
 }
@@ -444,7 +444,7 @@ void tRisaConsoleFrame::SetFocusToLogViewer()
 
 
 //---------------------------------------------------------------------------
-void tRisaConsoleFrame::SetFocusToTextCtrl(int insert_code)
+void tConsoleFrame::SetFocusToTextCtrl(int insert_code)
 {
 	StatusBar->FocusToTextCtrl(insert_code);
 }
@@ -452,28 +452,28 @@ void tRisaConsoleFrame::SetFocusToTextCtrl(int insert_code)
 
 
 //---------------------------------------------------------------------------
-void tRisaConsoleFrame::OnEventTool(wxCommandEvent & event)
+void tConsoleFrame::OnEventTool(wxCommandEvent & event)
 {
 /*
 	TODO: handle this
 	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
-	tRisaEventSystem::instance()->SetCanDeliverEvents(event_enabled);
+	tEventSystem::instance()->SetCanDeliverEvents(event_enabled);
 */
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaConsoleFrame::OnUpdateUI(wxUpdateUIEvent & event)
+void tConsoleFrame::OnUpdateUI(wxUpdateUIEvent & event)
 {
 /*
 	TODO: handle this
 	// "Event" ボタンの状態を更新
 	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
-	if(event_enabled != tRisaEventSystem::instance()->GetCanDeliverEvents())
+	if(event_enabled != tEventSystem::instance()->GetCanDeliverEvents())
 	{
 		GetToolBar()->ToggleTool(ID_Event,
-			tRisaEventSystem::instance()->GetCanDeliverEvents());
+			tEventSystem::instance()->GetCanDeliverEvents());
 	}
 
 	event.Skip(false);

@@ -37,7 +37,7 @@ public:
 	static const risse_int32 ClassID = -2011;
 
 private:
-	boost::shared_ptr<tRisaFileSystem> FileSystem; //!< ファイルシステムオブジェクト
+	boost::shared_ptr<tFileSystem> FileSystem; //!< ファイルシステムオブジェクト
 	iRisseDispatch2 * Owner; //!< このインスタンスを保持している Risse オブジェクト(AddRefしないこと)
 
 public:
@@ -45,14 +45,14 @@ public:
 	//! @param		filesystem  ファイルシステムオブジェクト
 	//! @param		owner       このインスタンスを保持している Risse オブジェクト
 	tNI_FileSystemNativeInstance(
-		boost::shared_ptr<tRisaFileSystem> filesystem,
+		boost::shared_ptr<tFileSystem> filesystem,
 		iRisseDispatch2 * owner);
 
 	//! @brief		Risse 無効化関数
 	void Invalidate();
 
 	//! @brief		ファイルシステムをオブジェクトを得る
-	boost::shared_ptr<tRisaFileSystem> GetFileSystem() { return FileSystem; }
+	boost::shared_ptr<tFileSystem> GetFileSystem() { return FileSystem; }
 
 private:
 };
@@ -73,7 +73,7 @@ public:
 	void Invalidate();
 
 	//! @brief		ファイルシステムをオブジェクトを得る
-	boost::shared_ptr<tRisaFileSystem> & GetFileSystem() { return FileSystem; }
+	boost::shared_ptr<tFileSystem> & GetFileSystem() { return FileSystem; }
 
 protected:
 	//! @brief		tNI_FileSystemNativeInstance をファイルシステムから構築し、
@@ -81,17 +81,17 @@ protected:
 	//! @param		risse_obj		登録先Risseオブジェクト
 	//! @param		fs_obj		ファイルシステムオブジェクト
 	void RegisterFileSystemNativeInstance(iRisseDispatch2 * risse_obj,
-		tRisaFileSystem * filesystem);
+		tFileSystem * filesystem);
 
 private:
-	boost::shared_ptr<tRisaFileSystem> FileSystem; //!< ファイルシステムオブジェクト
+	boost::shared_ptr<tFileSystem> FileSystem; //!< ファイルシステムオブジェクト
 };
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-//! @brief		FileSystem ネイティブクラス (tRisaFileSystemManager のバインディング)
+//! @brief		FileSystem ネイティブクラス (tFileSystemManager のバインディング)
 //! @note		Risseでのクラス名は FileSystem であるためこのように "FileSystem"
 //!				の名が付いているが、実際は ファイルシステムマネージャへのバインディング
 //!				であってファイルシステムへのバインディングではないので注意
@@ -118,18 +118,18 @@ public:
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaFileSystemRegisterer :
-		public singleton_base<tRisaFileSystemRegisterer>,
-		protected depends_on<tRisaRisseScriptEngine>
+class tFileSystemRegisterer :
+		public singleton_base<tFileSystemRegisterer>,
+		protected depends_on<tRisseScriptEngine>
 {
 	iRisseDispatch2 * FileSystemClass;
 
 public:
 	//! @brief		コンストラクタ
-	tRisaFileSystemRegisterer();
+	tFileSystemRegisterer();
 
 	//! @brief		デストラクタ
-	~tRisaFileSystemRegisterer();
+	~tFileSystemRegisterer();
 
 	//! @brief		ファイルシステムにクラスオブジェクトを登録する
 	//! @param		name    クラス名

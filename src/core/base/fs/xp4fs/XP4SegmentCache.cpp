@@ -31,7 +31,7 @@ RISSE_DEFINE_SOURCE_ID(49735,29532,60918,17253,28305,59876,22175,55631);
 
 
 //---------------------------------------------------------------------------
-tRisaXP4SegmentCache::tRisaXP4SegmentCache()
+tXP4SegmentCache::tXP4SegmentCache()
 {
 	TotalBytes = 0;
 }
@@ -39,16 +39,16 @@ tRisaXP4SegmentCache::tRisaXP4SegmentCache()
 
 
 //---------------------------------------------------------------------------
-tRisaXP4SegmentCache::~tRisaXP4SegmentCache()
+tXP4SegmentCache::~tXP4SegmentCache()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4SegmentCache::CheckLimit()
+void tXP4SegmentCache::CheckLimit()
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	// TotalBytes が TOTAL_LIMIT 以下になるまでキャッシュの最後
 	// を削除する
@@ -73,9 +73,9 @@ void tRisaXP4SegmentCache::CheckLimit()
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4SegmentCache::Clear()
+void tXP4SegmentCache::Clear()
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	HashTable.Clear();
 	TotalBytes = 0;
@@ -84,8 +84,8 @@ void tRisaXP4SegmentCache::Clear()
 
 
 //---------------------------------------------------------------------------
-tRisaXP4SegmentCache::tDataBlock
-	tRisaXP4SegmentCache::Find(void * pointer, risse_size storage_index,
+tXP4SegmentCache::tDataBlock
+	tXP4SegmentCache::Find(void * pointer, risse_size storage_index,
 		risse_size segment_index,
 		tBinaryStream * instream, risse_uint64 dataofs, risse_size insize,
 		risse_size uncomp_size)
@@ -100,10 +100,10 @@ tRisaXP4SegmentCache::tDataBlock
 	risse_uint32 hash = tKeyHasher::Make(key);
 
 	// これ以降をスレッド保護
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	// ハッシュテーブルを検索する
-	boost::shared_ptr<tRisaDecompressedHolder> * ptr = 
+	boost::shared_ptr<tDecompressedHolder> * ptr = 
 		HashTable.FindAndTouchWithHash(key, hash);
 	if(ptr)
 	{
@@ -117,8 +117,8 @@ tRisaXP4SegmentCache::tDataBlock
 
 	// データブロックを新たに作成
 	tDataBlock block(
-		new tRisaDecompressedHolder(
-			tRisaDecompressedHolder::dhmZLib,
+		new tDecompressedHolder(
+			tDecompressedHolder::dhmZLib,
 			instream,
 			insize,
 			uncomp_size));

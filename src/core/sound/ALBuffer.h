@@ -23,22 +23,22 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		OpenALバッファ
 //---------------------------------------------------------------------------
-class tRisaALBuffer : protected depends_on<tRisaOpenAL>
+class tALBuffer : protected depends_on<tOpenAL>
 {
 public:
 	// 定数など
 	static const risse_uint STREAMING_BUFFER_HZ = 8; //!< ストリーミング時の1/(一つのバッファの時間)(調整可)
 	static const risse_uint STREAMING_CHECK_SLEEP_MS = 70; //!< ストリーミング時のバッファをチェックする間隔(調整可)
-	static const risse_uint MAX_NUM_BUFFERS = 16; //!< 一つの tRisaALBuffer が保持する最大のバッファ数
+	static const risse_uint MAX_NUM_BUFFERS = 16; //!< 一つの tALBuffer が保持する最大のバッファ数
 
 private:
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	ALuint Buffers[MAX_NUM_BUFFERS]; //!< OpenAL バッファ
 	risse_uint BufferAllocatedCount; //!< OpenAL バッファに実際に割り当てられたバッファ数
 	ALuint FreeBuffers[MAX_NUM_BUFFERS]; //!< フリーのバッファ
 	risse_uint FreeBufferCount; //!< フリーのバッファの数
 	bool Streaming; //!< ストリーミングを行うかどうか
-	boost::shared_ptr<tRisaWaveFilter> Filter; //!< 入力フィルタ
+	boost::shared_ptr<tWaveFilter> Filter; //!< 入力フィルタ
 	ALenum ALFormat; //!< OpenAL バッファの Format
 	risse_uint ALFrequency; //!< OpenAL バッファのサンプリングレート
 	risse_uint ALSampleGranuleBytes; //!< OpenAL バッファのbytes/sg
@@ -54,12 +54,12 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		filter 入力フィルタ
 	//! @param		streaming	ストリーミング再生を行うかどうか
-	tRisaALBuffer(boost::shared_ptr<tRisaWaveFilter> Filter, bool streaming);
+	tALBuffer(boost::shared_ptr<tWaveFilter> Filter, bool streaming);
 
 	//! @brief		デストラクタ
-	~tRisaALBuffer();
+	~tALBuffer();
 
-	boost::shared_ptr<tRisaWaveFilter> & GetFilter() { return Filter; } //!< 入力フィルタを得る
+	boost::shared_ptr<tWaveFilter> & GetFilter() { return Filter; } //!< 入力フィルタを得る
 
 private:
 	//! @brief		バッファに関するオブジェクトの解放などのクリーンアップ処理
@@ -74,7 +74,7 @@ private:
 	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 	//! @return		バッファにデータが入ったら真
 	bool FillALBuffer(ALuint buffer, risse_uint samples,
-		tRisaWaveSegmentQueue & segmentqueue);
+		tWaveSegmentQueue & segmentqueue);
 
 public:
 	//! @brief		フリーになったバッファを FreeBuffers に push する
@@ -88,7 +88,7 @@ public:
 	//! @param		buffer バッファ番号を格納する変数
 	//! @param		segmentqueue セグメントキュー
 	//! @return		fill に成功したか
-	bool PopFilledBuffer(ALuint & buffer, tRisaWaveSegmentQueue & segmentqueue);
+	bool PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueue);
 
 	//! @brief		全てのバッファを解放する
 	void FreeAllBuffers();

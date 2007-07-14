@@ -50,7 +50,7 @@ extern const risse_uint32 RISA_V_I32_1[4];
 //! @note		精度はあまり良くない。10bitぐらい。 @r
 //!				原典: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
 //---------------------------------------------------------------------------
-static inline __m128 RisaVFast_arctan2_F4_SSE(__m128 y, __m128 x)
+static inline __m128 VFast_arctan2_F4_SSE(__m128 y, __m128 x)
 {
 	__m128 abs_y = _mm_add_ps(_mm_and_ps(y, PM128(PABSMASK)), PM128(RISA_VFASTATAN2_E));
 //   float abs_y = fabs(y)+1e-10;     // kludge to prevent 0/0 condition
@@ -97,7 +97,7 @@ static inline __m128 RisaVFast_arctan2_F4_SSE(__m128 y, __m128 x)
 //!				があるので注意すること。そのような場合は再びこれを呼び出して
 //!				丸めモードを再設定すること。
 //---------------------------------------------------------------------------
-STIN void RisaSetRoundingModeToNearest_SSE()
+STIN void SetRoundingModeToNearest_SSE()
 {
 	_MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
 }
@@ -109,7 +109,7 @@ STIN void RisaSetRoundingModeToNearest_SSE()
 //! @note		原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf  @r
 //!				呼び出しに先立って Risa_SetRoundingModeToNearest_SSE を呼ぶこと。
 //---------------------------------------------------------------------------
-STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
+STIN void VFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 {
 	__m128 s1, s2, c1, c2, fixmag1;
 
@@ -199,7 +199,7 @@ STIN void RisaVFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 //---------------------------------------------------------------------------
 //! @brief		Phase Wrapping(radianを-PI～PIにラップする) (4x float, SSE版)
 //---------------------------------------------------------------------------
-STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
+STIN __m128 Wrap_Pi_F4_SSE(__m128 v)
 {
 	// v を M_PI で割る
 	__m128 v_quant = _mm_mul_ps(v, PM128(RISA_V_R_PI)); // v_quant = v/M_PI
@@ -269,7 +269,7 @@ STIN __m128 RisaWrap_Pi_F4_SSE(__m128 v)
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
-void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
+void DeinterleaveApplyingWindow(float * dest[], const float * src,
 					float * win, int numch, size_t destofs, size_t len);
 //---------------------------------------------------------------------------
 
@@ -285,7 +285,7 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
-void  RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
+void  InterleaveOverlappingWindow(float * dest, const float * const * src,
 					float * win, int numch, size_t srcofs, size_t len);
 //---------------------------------------------------------------------------
 

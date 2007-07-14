@@ -25,7 +25,7 @@ RISSE_DEFINE_SOURCE_ID(9133,5164,36031,18883,4749,40441,40379,56790);
 
 
 //---------------------------------------------------------------------------
-tRisaXP4FS::tRisaXP4FS(const tString & name)
+tXP4FS::tXP4FS(const tString & name)
 {
 	// まず、nameで示されたディレクトリにあるすべてのパッチアーカイブを列挙する
 	gc_vector<tString> archive_names;
@@ -34,15 +34,15 @@ tRisaXP4FS::tRisaXP4FS(const tString & name)
 	tString name_nopath; // name からパスを取り除いた物
 
 	//- 入力ファイル名を分解
-	tRisaFileSystemManager::SplitPathAndName(name, &path, &name_nopath);
-	tRisaFileSystemManager::SplitExtension(name_nopath, &name_noext, NULL);
+	tFileSystemManager::SplitPathAndName(name, &path, &name_nopath);
+	tFileSystemManager::SplitExtension(name_nopath, &name_noext, NULL);
 
 	//- archive_names の先頭に name を追加
 	archive_names.push_back(name);
 
 	//- ディレクトリ中にあるファイルを列挙し、name_noext に合致する
 	//- ファイルを archive_names に追加する
-	class tLister : public tRisaFileSystemIterationCallback
+	class tLister : public tFileSystemIterationCallback
 	{
 		gc_vector<tString>& archive_names;
 		const tString & name_noext;
@@ -78,7 +78,7 @@ tRisaXP4FS::tRisaXP4FS(const tString & name)
 		}
 	} lister(archive_names, name_noext, name_nopath, path);
 
-	tRisaFileSystemManager::instance()->GetFileListAt(path, &lister);
+	tFileSystemManager::instance()->GetFileListAt(path, &lister);
 
 	//- archive_names の先頭の要素以外を名前順に並べ替え
 	std::sort(archive_names.begin() + 1, archive_names.end());
@@ -86,7 +86,7 @@ tRisaXP4FS::tRisaXP4FS(const tString & name)
 	// パッチリビジョンを追うためのマップを作成
 	gc_map<tString, tFileItemBasicInfo> map;
 
-	class tMapper : public tRisaXP4Archive::iMapCallback
+	class tMapper : public tXP4Archive::iMapCallback
 	{
 		gc_map<tString, tFileItemBasicInfo> & Map;
 		risse_size CurrentArchiveIndex;
@@ -127,7 +127,7 @@ tRisaXP4FS::tRisaXP4FS(const tString & name)
 		i != archive_names.end(); i++)
 	{
 		mapper.SetArchiveIndex(i - archive_names.begin());
-		boost::shared_ptr<tRisaXP4Archive> arc(new tRisaXP4Archive(*i, mapper));
+		boost::shared_ptr<tXP4Archive> arc(new tXP4Archive(*i, mapper));
 		Archives.push_back(arc);
 	}
 
@@ -147,17 +147,17 @@ tRisaXP4FS::tRisaXP4FS(const tString & name)
 
 
 //---------------------------------------------------------------------------
-tRisaXP4FS::~tRisaXP4FS()
+tXP4FS::~tXP4FS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-size_t tRisaXP4FS::GetFileListAt(const tString & dirname,
-	tRisaFileSystemIterationCallback * callback)
+size_t tXP4FS::GetFileListAt(const tString & dirname,
+	tFileSystemIterationCallback * callback)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// dir_name の最後に '/' がついていなければ追加
 	tString dir_name(dirname);
@@ -203,9 +203,9 @@ size_t tRisaXP4FS::GetFileListAt(const tString & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tRisaXP4FS::FileExists(const tString & filename)
+bool tXP4FS::FileExists(const tString & filename)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	if(filename.EndsWith(RISSE_WC('/'))) return false; // ディレクトリは違う
 
@@ -215,9 +215,9 @@ bool tRisaXP4FS::FileExists(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-bool tRisaXP4FS::DirectoryExists(const tString & dirname)
+bool tXP4FS::DirectoryExists(const tString & dirname)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	// dir_name の最後に '/' がついていなければ追加
 	tString dir_name(dirname);
@@ -229,7 +229,7 @@ bool tRisaXP4FS::DirectoryExists(const tString & dirname)
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4FS::RemoveFile(const tString & filename)
+void tXP4FS::RemoveFile(const tString & filename)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
 }
@@ -237,7 +237,7 @@ void tRisaXP4FS::RemoveFile(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4FS::RemoveDirectory(const tString & dirname, bool recursive)
+void tXP4FS::RemoveDirectory(const tString & dirname, bool recursive)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
 }
@@ -245,7 +245,7 @@ void tRisaXP4FS::RemoveDirectory(const tString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4FS::CreateDirectory(const tString & dirname, bool recursive)
+void tXP4FS::CreateDirectory(const tString & dirname, bool recursive)
 {
 	eRisaException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
 }
@@ -253,13 +253,13 @@ void tRisaXP4FS::CreateDirectory(const tString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4FS::Stat(const tString & filename, tRisaStatStruc & struc)
+void tXP4FS::Stat(const tString & filename, tStatStruc & struc)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	risse_size idx = GetFileItemIndex(filename);
 	if(idx == static_cast<risse_size>(-1))
-		tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	Archives[FileItems[idx].ArchiveIndex]->Stat(FileItems[idx].FileIndex, struc);
 }
@@ -267,13 +267,13 @@ void tRisaXP4FS::Stat(const tString & filename, tRisaStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tRisaXP4FS::CreateStream(const tString & filename, risse_uint32 flags)
+tBinaryStream * tXP4FS::CreateStream(const tString & filename, risse_uint32 flags)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	risse_size idx = GetFileItemIndex(filename);
 	if(idx == static_cast<risse_size>(-1))
-		tRisaFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	// 書き込みを伴う動作はできない
 	if(flags & RISSE_BS_ACCESS_WRITE_BIT)
@@ -282,14 +282,14 @@ tBinaryStream * tRisaXP4FS::CreateStream(const tString & filename, risse_uint32 
 	return Archives[FileItems[idx].ArchiveIndex]->
 		CreateStream(Archives[FileItems[idx].ArchiveIndex],
 		FileItems[idx].FileIndex, flags);
-			// boost::shared_ptr<tRisaArchive> を持ってるのはこのクラスだけなので
+			// boost::shared_ptr<tArchive> を持ってるのはこのクラスだけなので
 			// これ経由でこのスマートポインタを渡してやらなければならない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tRisaXP4FS::GetFileItemStartIndex(const tString & name)
+risse_size tXP4FS::GetFileItemStartIndex(const tString & name)
 {
 	// returns first index which have 'name' at start of the name.
 	// returns -1 if the target is not found.
@@ -325,7 +325,7 @@ risse_size tRisaXP4FS::GetFileItemStartIndex(const tString & name)
 
 
 //---------------------------------------------------------------------------
-risse_size tRisaXP4FS::GetFileItemIndex(const tString & name)
+risse_size tXP4FS::GetFileItemIndex(const tString & name)
 {
 	risse_size total_count = FileItems.size();
 	risse_size s = 0, e = total_count;

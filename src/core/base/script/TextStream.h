@@ -24,7 +24,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		テキストストリームをスクリプトエンジンに登録するクラス
 //---------------------------------------------------------------------------
-class tRisaTextStreamRegisterer : public singleton_base<tRisaTextStreamRegisterer>, protected depends_on<tRisaRisseScriptEngine>
+class tTextStreamRegisterer : public singleton_base<tTextStreamRegisterer>, protected depends_on<tRisseScriptEngine>
 {
 	//! @brief		読み込み用テキストストリームを作成して返す
 	static iRisseTextReadStream * CreateForRead(const tString &name,
@@ -36,10 +36,10 @@ class tRisaTextStreamRegisterer : public singleton_base<tRisaTextStreamRegistere
 
 public:
 	//! @brief		コンストラクタ
-	tRisaTextStreamRegisterer();
+	tTextStreamRegisterer();
 
 	//! @brief		デストラクタ
-	~tRisaTextStreamRegisterer();
+	~tTextStreamRegisterer();
 };
 //---------------------------------------------------------------------------
 

@@ -23,16 +23,16 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		Risseスクリプトエンジンへのインターフェース
 //---------------------------------------------------------------------------
-class tRisaRisseScriptEngine : public singleton_base<tRisaRisseScriptEngine>
+class tRisseScriptEngine : public singleton_base<tRisseScriptEngine>
 {
 	tScriptEngine *ScriptEngine; //!< スクリプトエンジンインスタンス
 
 public:
 	//! @brief		コンストラクタ
-	tRisaRisseScriptEngine();
+	tRisseScriptEngine();
 
 	//! @brief		デストラクタ
-	~tRisaRisseScriptEngine();
+	~tRisseScriptEngine();
 
 	//! @brief		シャットダウン
 	void Shutdown();
@@ -74,16 +74,16 @@ public:
 //! @brief		インスタンスをスクリプトエンジンに登録するためのテンプレートクラス
 //---------------------------------------------------------------------------
 template <typename ClassT>
-class tRisaRisseClassRegisterer :
-	public singleton_base<tRisaRisseClassRegisterer<ClassT> >,
-	depends_on<tRisaRisseScriptEngine>
+class tRisseClassRegisterer :
+	public singleton_base<tRisseClassRegisterer<ClassT> >,
+	depends_on<tRisseScriptEngine>
 {
 public:
 	//! @brief		コンストラクタ
-	tRisaRisseClassRegisterer()
+	tRisseClassRegisterer()
 	{
 		// ここらへんのプロセスについては tScriptEngine のコンストラクタも参照のこと
-		tScriptEngine * engine = tRisaRisseScriptEngine::instance()->GetScriptEngine();
+		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 		ClassT *class_instance = new ClassT(engine);
 		class_instance->RegisterClassInstance(engine->GetGlobalObject());
 		class_instance->RegisterMembers();

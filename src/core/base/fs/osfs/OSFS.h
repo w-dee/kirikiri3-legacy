@@ -23,17 +23,17 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		OS ネイティブファイルストリーム
 //---------------------------------------------------------------------------
-class tRisaOSNativeStream : public tBinaryStream
+class tOSNativeStream : public tBinaryStream
 {
 protected:
 	wxFile File;
 
 public:
 	//! @brief		コンストラクタ
-	tRisaOSNativeStream(const wxString & filename, risse_uint32 flags);
+	tOSNativeStream(const wxString & filename, risse_uint32 flags);
 
 	//! @brief		デストラクタ
-	~tRisaOSNativeStream();
+	~tOSNativeStream();
 
 	//! @brief		シーク
 	//! @param		offset 移動オフセット
@@ -68,21 +68,21 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		OS ファイルシステム
 //---------------------------------------------------------------------------
-class tRisaOSFS : public tRisaFileSystem
+class tOSFS : public tFileSystem
 {
-	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
 	wxString BaseDirectory; //!< このファイルシステムがマウントしているOSのディレクトリ
 	bool CheckCase; //!< ファイル名の大文字・小文字をチェックする場合は真
 
 public:
 	//! @brief		コンストラクタ
-	tRisaOSFS(const tString & basedir, bool checkcase = true);
+	tOSFS(const tString & basedir, bool checkcase = true);
 
-	//-- tRisaFileSystem メンバ
+	//-- tFileSystem メンバ
 
 	//! @brief		デストラクタ
-	~tRisaOSFS();
+	~tOSFS();
 
 
 	//! @brief		ファイル一覧を取得する
@@ -90,7 +90,7 @@ public:
 	//! @param		callback コールバックオブジェクト
 	//! @return		取得できたファイル数
 	size_t GetFileListAt(const tString & dirname,
-		tRisaFileSystemIterationCallback * callback);
+		tFileSystemIterationCallback * callback);
 
 	//! @brief		ファイルが存在するかどうかを得る
 	//! @param		filename ファイル名
@@ -119,7 +119,7 @@ public:
 	//! @brief		指定されたファイルの stat を得る
 	//! @param		filename ファイル名
 	//! @param		struc stat 結果の出力先
-	void Stat(const tString & filename, tRisaStatStruc & struc);
+	void Stat(const tString & filename, tStatStruc & struc);
 
 	//! @brief		指定されたファイルのストリームを得る
 	//! @param		filename ファイル名
@@ -127,7 +127,7 @@ public:
 	//! @return		ストリームオブジェクト
 	tBinaryStream * CreateStream(const tString & filename, risse_uint32 flags);
 
-	//-- tRisaFileSystem メンバ ここまで
+	//-- tFileSystem メンバ ここまで
 private:
 	//! @brief		path中に含まれる'/'を、OSネイティブなパス区切り記号に変更する
 	//! @param		path パス名

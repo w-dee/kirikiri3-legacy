@@ -10,7 +10,7 @@
 //! @file
 //! @brief Win32 GDI 経由でのFreeType Face
 //! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
-//! tRisaFreeTypeFace もプラットフォームごとに異なった実装となる。
+//! tFreeTypeFace もプラットフォームごとに異なった実装となる。
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "NativeFreeTypeFace.h"
@@ -33,7 +33,7 @@ namespace Risa {
 //! @param		fontname フォント名
 //! @param		options オプション
 //---------------------------------------------------------------------------
-tRisaNativeFreeTypeFace::tRisaNativeFreeTypeFace(const wxString &fontname,
+tNativeFreeTypeFace::tNativeFreeTypeFace(const wxString &fontname,
 	risse_uint32 options)
 {
 	// フィールドのクリア
@@ -49,7 +49,7 @@ tRisaNativeFreeTypeFace::tRisaNativeFreeTypeFace(const wxString &fontname,
 	risse_size name_content_size;
 
 	// TrueType ライブラリをフック
-	tRisaFreeTypeLibrary::AddRef();
+	tFreeTypeLibrary::AddRef();
 	try
 	{
 		// 指定のフォントを持ったデバイスコンテキストを作成する
@@ -218,7 +218,7 @@ tRisaNativeFreeTypeFace::tRisaNativeFreeTypeFace(const wxString &fontname,
 		Clear();
 		if(name_content) delete [] name_content;
 		if(name_content_ft) delete [] name_content_ft;
-		tRisaFreeTypeLibrary::Release();
+		tFreeTypeLibrary::Release();
 		throw;
 	}
 	delete [] name_content;
@@ -231,10 +231,10 @@ tRisaNativeFreeTypeFace::tRisaNativeFreeTypeFace(const wxString &fontname,
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaNativeFreeTypeFace::~tRisaNativeFreeTypeFace()
+tNativeFreeTypeFace::~tNativeFreeTypeFace()
 {
 	Clear();
-	tRisaFreeTypeLibrary::Release();
+	tFreeTypeLibrary::Release();
 }
 //---------------------------------------------------------------------------
 
@@ -242,7 +242,7 @@ tRisaNativeFreeTypeFace::~tRisaNativeFreeTypeFace()
 //---------------------------------------------------------------------------
 //! @brief		FreeType の Face オブジェクトを返す
 //---------------------------------------------------------------------------
-FT_Face tRisaNativeFreeTypeFace::GetFTFace() const
+FT_Face tNativeFreeTypeFace::GetFTFace() const
 {
 	return Face;
 }
@@ -253,7 +253,7 @@ FT_Face tRisaNativeFreeTypeFace::GetFTFace() const
 //! @brief		このフォントファイルが持っているフォントを配列として返す
 //! @param		dest 格納先配列
 //---------------------------------------------------------------------------
-void tRisaNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
+void tNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 {
 	// このFaceの場合、既にFaceは特定されているため、利用可能な
 	// Face 数は常に1で、フォント名はこのオブジェクトが構築された際に渡された
@@ -268,7 +268,7 @@ void tRisaNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 //---------------------------------------------------------------------------
 //! @brief		全てのオブジェクトを解放する
 //---------------------------------------------------------------------------
-void tRisaNativeFreeTypeFace::Clear()
+void tNativeFreeTypeFace::Clear()
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
 	if(OldFont && DC)
@@ -291,7 +291,7 @@ void tRisaNativeFreeTypeFace::Clear()
 //! @param		count  読み出すバイト数
 //! @return		何バイト読み込まれたか
 //---------------------------------------------------------------------------
-unsigned long tRisaNativeFreeTypeFace::IoFunc(
+unsigned long tNativeFreeTypeFace::IoFunc(
 			FT_Stream stream,
 			unsigned long   offset,
 			unsigned char*  buffer,
@@ -299,8 +299,8 @@ unsigned long tRisaNativeFreeTypeFace::IoFunc(
 {
 	if(count != 0)
 	{
-		tRisaNativeFreeTypeFace * _this =
-			static_cast<tRisaNativeFreeTypeFace*>(stream->descriptor.pointer);
+		tNativeFreeTypeFace * _this =
+			static_cast<tNativeFreeTypeFace*>(stream->descriptor.pointer);
 		DWORD result = GetFontData(_this->DC, 
 				_this->IsTTC ? RISA__TT_TABLE_ttcf : 0,
 				offset, buffer, count);
@@ -320,7 +320,7 @@ unsigned long tRisaNativeFreeTypeFace::IoFunc(
 //! @brief		FreeType 用 ストリーム削除関数
 //! @param		stream FT_Streamへのポインタ
 //---------------------------------------------------------------------------
-void tRisaNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
+void tNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
 {
 	// 何もしない
 }
@@ -332,7 +332,7 @@ void tRisaNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
 //! @param		index	開くindex
 //! @return		Faceを開ければ true そうでなければ false
 //---------------------------------------------------------------------------
-bool tRisaNativeFreeTypeFace::OpenFaceByIndex(int index)
+bool tNativeFreeTypeFace::OpenFaceByIndex(int index)
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
 
@@ -348,7 +348,7 @@ bool tRisaNativeFreeTypeFace::OpenFaceByIndex(int index)
 	args.num_params = 1;
 	args.params = parameters;
 
-	FT_Error err = FT_Open_Face(tRisaFreeTypeLibrary::Get(), &args, index, &Face);
+	FT_Error err = FT_Open_Face(tFreeTypeLibrary::Get(), &args, index, &Face);
 	return err == 0;
 }
 //---------------------------------------------------------------------------

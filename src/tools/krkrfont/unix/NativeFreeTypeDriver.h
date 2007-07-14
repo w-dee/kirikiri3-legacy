@@ -22,11 +22,11 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		FreeType フォントドライバ基底クラス
 //---------------------------------------------------------------------------
-class tRisaBaseFreeTypeFontDriver
+class tBaseFreeTypeFontDriver
 {
 public:
-	tRisaBaseFreeTypeFontDriver();
-	~tRisaBaseFreeTypeFontDriver();
+	tBaseFreeTypeFontDriver();
+	~tBaseFreeTypeFontDriver();
 
 	static void EnumerateFonts(wxArrayString & dest,
 		risse_uint32 flags,

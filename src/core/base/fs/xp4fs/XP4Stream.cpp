@@ -26,8 +26,8 @@ RISSE_DEFINE_SOURCE_ID(9282,1527,60023,18507,43687,60046,2141,35691);
 
 
 //---------------------------------------------------------------------------
-tRisaXP4ArchiveStream::tRisaXP4ArchiveStream(
-			boost::shared_ptr<tRisaXP4Archive> ptr,
+tXP4ArchiveStream::tXP4ArchiveStream(
+			boost::shared_ptr<tXP4Archive> ptr,
 			risse_size idx, risse_uint32 flags)
 				: Owner(ptr) , FileIndex(idx),
 				FileInfo(ptr->GetFileInfo(idx)),
@@ -40,23 +40,23 @@ tRisaXP4ArchiveStream::tRisaXP4ArchiveStream(
 	SegmentRemain = 0;
 	SegmentPos = 0;
 
-	Stream = depends_on<tRisaXP4StreamCache>::locked_instance()->GetStream(Owner.get(), ptr->GetFileName());
+	Stream = depends_on<tXP4StreamCache>::locked_instance()->GetStream(Owner.get(), ptr->GetFileName());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisaXP4ArchiveStream::~tRisaXP4ArchiveStream()
+tXP4ArchiveStream::~tXP4ArchiveStream()
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
-	depends_on<tRisaXP4StreamCache>::locked_instance()->ReleaseStream(Owner.get(), Stream);
+	depends_on<tXP4StreamCache>::locked_instance()->ReleaseStream(Owner.get(), Stream);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4ArchiveStream::EnsureSegment()
+void tXP4ArchiveStream::EnsureSegment()
 {
 	// ensure accessing to current segment
 	if(SegmentOpened) return; // すでにセグメントが開かれている場合は何もしない
@@ -75,7 +75,7 @@ void tRisaXP4ArchiveStream::EnsureSegment()
 	{
 		// a compressed segment
 		// セグメントキャッシュの中から探す
-		DecompressedData = depends_on<tRisaXP4SegmentCache>::locked_instance()->Find(
+		DecompressedData = depends_on<tXP4SegmentCache>::locked_instance()->Find(
 			Owner.get(), FileIndex, CurSegmentNum,
 			Stream, SegmentInfo[CurSegmentNum].StoreOffset,
 			SegmentInfo[CurSegmentNum].StoreSize,
@@ -94,7 +94,7 @@ void tRisaXP4ArchiveStream::EnsureSegment()
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
+void tXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
 {
 	// open segment at 'pos' and seek
 	// pos must between zero thru OrgSize
@@ -126,7 +126,7 @@ void tRisaXP4ArchiveStream::SeekToPosition(risse_uint64 pos)
 
 
 //---------------------------------------------------------------------------
-bool tRisaXP4ArchiveStream::OpenNextSegment()
+bool tXP4ArchiveStream::OpenNextSegment()
 {
 	// open next segment
 	if(CurSegmentNum == FileInfo.SegmentCount)
@@ -143,9 +143,9 @@ bool tRisaXP4ArchiveStream::OpenNextSegment()
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
+risse_uint64 tXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	risse_int64 newpos;
 	switch(whence)
@@ -180,9 +180,9 @@ risse_uint64 tRisaXP4ArchiveStream::Seek(risse_int64 offset, risse_int whence)
 
 
 //---------------------------------------------------------------------------
-risse_uint tRisaXP4ArchiveStream::Read(void *buffer, risse_size read_size)
+risse_uint tXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 {
-	volatile tRisaCriticalSection::tLocker holder(CS);
+	volatile tCriticalSection::tLocker holder(CS);
 
 	EnsureSegment();
 
@@ -225,7 +225,7 @@ risse_uint tRisaXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 
 
 //---------------------------------------------------------------------------
-risse_uint tRisaXP4ArchiveStream::Write(const void *buffer, risse_size write_size)
+risse_uint tXP4ArchiveStream::Write(const void *buffer, risse_size write_size)
 {
 	eRisaException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
 	return 0;
@@ -234,7 +234,7 @@ risse_uint tRisaXP4ArchiveStream::Write(const void *buffer, risse_size write_siz
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4ArchiveStream::SetEndOfFile()
+void tXP4ArchiveStream::SetEndOfFile()
 {
 	eRisaException::Throw(RISSE_WS_TR("access denied (filesystem is read-only)"));
 }
@@ -242,7 +242,7 @@ void tRisaXP4ArchiveStream::SetEndOfFile()
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tRisaXP4ArchiveStream::GetSize()
+risse_uint64 tXP4ArchiveStream::GetSize()
 {
 	return FileInfo.Size;
 }

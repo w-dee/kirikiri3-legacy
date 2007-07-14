@@ -39,24 +39,24 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 
-class tRisaIdleEventDestination;
+class tIdleEventDestination;
 //---------------------------------------------------------------------------
 //! @brief		アイドル時に発生するイベントを管理するクラス
 //---------------------------------------------------------------------------
-class tRisaIdleEventManager : public singleton_base<tRisaIdleEventManager>, depends_on<tRisaEventSystem>
+class tIdleEventManager : public singleton_base<tIdleEventManager>, depends_on<tEventSystem>
 {
-	friend class tRisaIdleEventDestination;
+	friend class tIdleEventDestination;
 
-	pointer_list<tRisaIdleEventDestination> Destinations; //!< イベントの配信先
+	pointer_list<tIdleEventDestination> Destinations; //!< イベントの配信先
 
 protected:
 	//! @brief		アイドルイベントの配信先を登録する
 	//! @param		item		配信先
-	void Register(tRisaIdleEventDestination * item);
+	void Register(tIdleEventDestination * item);
 
 	//! @brief		アイドルイベントの配信先の登録を解除する
 	//! @param		item		配信先
-	void Unregister(tRisaIdleEventDestination * item);
+	void Unregister(tIdleEventDestination * item);
 
 public:
 	//! @brief		アイドルイベントを配信する
@@ -73,17 +73,17 @@ public:
 //!				このクラスのインスタンスのデストラクタは、メインスレッド以外から非同期に
 //!				呼ばれる可能性があるので注意すること (シングルトンクラスならば問題ない)
 //---------------------------------------------------------------------------
-class tRisaIdleEventDestination : protected depends_on<tRisaIdleEventManager>,
+class tIdleEventDestination : protected depends_on<tIdleEventManager>,
 	public tDestructee
 {
 	bool Receiving; //!< イベント配信が有効かどうか
 
 public:
 	//! @brief		コンストラクタ
-	tRisaIdleEventDestination();
+	tIdleEventDestination();
 
 	//! @brief		デストラクタ
-	virtual ~tRisaIdleEventDestination();
+	virtual ~tIdleEventDestination();
 
 	//! @brief		アイドルイベントの受信を開始する
 	void StartReceiveIdle();
@@ -103,7 +103,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		列挙型の名前空間用のためのクラス
 //---------------------------------------------------------------------------
-class tRisaCompactEventEnum
+class tCompactEventEnum
 {
 public:
 	enum tCompactLevel
@@ -116,30 +116,30 @@ public:
 //---------------------------------------------------------------------------
 
 
-class tRisaCompactEventDestination;
+class tCompactEventDestination;
 //---------------------------------------------------------------------------
 //! @brief		コンパクト時に発生するイベントを管理するクラス
 //---------------------------------------------------------------------------
-class tRisaCompactEventManager : public singleton_base<tRisaCompactEventManager>,
-								public tRisaCompactEventEnum,
+class tCompactEventManager : public singleton_base<tCompactEventManager>,
+								public tCompactEventEnum,
 								protected wxTimer
 {
-	friend class tRisaCompactEventDestination;
+	friend class tCompactEventDestination;
 
-	pointer_list<tRisaCompactEventDestination> Destinations; //!< イベントの配信先
+	pointer_list<tCompactEventDestination> Destinations; //!< イベントの配信先
 
 public:
 	//! @brief		コンストラクタ
-	tRisaCompactEventManager();
+	tCompactEventManager();
 
 protected:
 	//! @brief		コンパクトイベントの配信先を登録する
 	//! @param		item		配信先
-	void Register(tRisaCompactEventDestination * item);
+	void Register(tCompactEventDestination * item);
 
 	//! @brief		コンパクトイベントの配信先の登録を解除する
 	//! @param		item		配信先
-	void Unregister(tRisaCompactEventDestination * item);
+	void Unregister(tCompactEventDestination * item);
 
 	//! @brief		コンパクトイベントを配信する
 	//! @param		level		レベル
@@ -164,14 +164,14 @@ public:
 //!				このクラスのインスタンスのデストラクタは、メインスレッド以外から非同期に
 //!				呼ばれる可能性があるので注意すること (シングルトンクラスならば問題ない)
 //---------------------------------------------------------------------------
-class tRisaCompactEventDestination : protected depends_on<tRisaCompactEventManager>,
-								public tRisaCompactEventEnum, public tDestructee
+class tCompactEventDestination : protected depends_on<tCompactEventManager>,
+								public tCompactEventEnum, public tDestructee
 {
 public:
-	tRisaCompactEventDestination()
-	{ tRisaCompactEventManager::instance()->Register(this); }
-	virtual ~tRisaCompactEventDestination()
-	{ tRisaCompactEventManager::instance()->Unregister(this); }
+	tCompactEventDestination()
+	{ tCompactEventManager::instance()->Register(this); }
+	virtual ~tCompactEventDestination()
+	{ tCompactEventManager::instance()->Unregister(this); }
 
 public:
 	//! @brief		コンパクトイベントが配信されるとき

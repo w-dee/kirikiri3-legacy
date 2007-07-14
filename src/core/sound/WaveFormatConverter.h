@@ -21,7 +21,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-class tRisaWaveFormatConverter
+class tWaveFormatConverter
 {
 public:
 	//! @brief		PCM形式の変換を行う
@@ -32,8 +32,8 @@ public:
 	//! @param		channels		チャンネル数
 	//! @param		numsamples		処理を行うサンプルグラニュール数
 	static void Convert(
-		tRisaPCMTypes::tType outformat, risse_restricted void * outdata,
-		tRisaPCMTypes::tType informat, risse_restricted const void * indata,
+		tPCMTypes::tType outformat, risse_restricted void * outdata,
+		tPCMTypes::tType informat, risse_restricted const void * indata,
 		risse_int channels, size_t numsamples);
 };
 //---------------------------------------------------------------------------

@@ -28,17 +28,17 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		アーカイブ内のストレージアイテムを現すクラス
 //---------------------------------------------------------------------------
-class tRisaXP4MetadataReaderStorageItem
+class tXP4MetadataReaderStorageItem
 {
 protected:
 	wxString InArchiveName; //!< ストレージ名
 	wxUint16 Flags; //!< フラグ
 	wxFileOffset Size; //!< (無圧縮時の)ファイルサイズ
 	wxDateTime Time; //!< タイムスタンプ
-	tRisaXP4Hash Hash; //!< ハッシュ
+	tXP4Hash Hash; //!< ハッシュ
 
 public:
-	tRisaXP4MetadataReaderStorageItem(
+	tXP4MetadataReaderStorageItem(
 		const wxString & inarchivename,
 		wxUint16 flags = 0,
 		wxFileOffset size = -1,
@@ -49,15 +49,15 @@ public:
 		Time(time)
 		{;} //!< コンストラクタ
 
-	tRisaXP4MetadataReaderStorageItem(const unsigned char * meta, size_t metasize);
+	tXP4MetadataReaderStorageItem(const unsigned char * meta, size_t metasize);
 
 	const wxString & GetInArchiveName() const { return InArchiveName; } //!< ストレージ名を得る
 	wxFileOffset GetSize() const { return Size; } //!< サイズを得る
 	wxUint16 GetFlags() const { return Flags; } //!< フラグを得る
 	const wxDateTime & GetTime() const { return Time; } //!< タイムスタンプを得る
 	void SetFlags(wxUint16 flags) { Flags = flags; } 
-	const tRisaXP4Hash & GetHash() const { return Hash; } //!< ハッシュを得る
-	tRisaXP4Hash & GetHash() { return Hash; } //!< ハッシュを得る
+	const tXP4Hash & GetHash() const { return Hash; } //!< ハッシュを得る
+	tXP4Hash & GetHash() { return Hash; } //!< ハッシュを得る
 };
 //---------------------------------------------------------------------------
 
@@ -65,15 +65,15 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		一つのアーカイブを現すクラス
 //---------------------------------------------------------------------------
-class tRisaXP4MetadataReaderArchive
+class tXP4MetadataReaderArchive
 {
 	wxString TargetDir;
-	std::vector<tRisaXP4MetadataReaderStorageItem> ItemVector; //!< ストレージの配列
+	std::vector<tXP4MetadataReaderStorageItem> ItemVector; //!< ストレージの配列
 
 public:
-	tRisaXP4MetadataReaderArchive(const wxString & filename);
+	tXP4MetadataReaderArchive(const wxString & filename);
 
-	const std::vector<tRisaXP4MetadataReaderStorageItem> &
+	const std::vector<tXP4MetadataReaderStorageItem> &
 		GetItemVector() const { return ItemVector; } //!< ストレージの配列を得る
 
 	const wxString & GetTargetDir() const

@@ -26,15 +26,15 @@ RisaのWaveフィルタについて
 ■ アーキテクチャ
 
   RisaのWaveフィルタは、複数のフィルタを直列して接続することができるインサー
-  ションフィルタである。すべてのフィルタは tRisaWaveFilter インターフェース
+  ションフィルタである。すべてのフィルタは tWaveFilter インターフェース
   を実装する。
 
   フィルタは、デコーダを駆動してPCMデータを読み出し、ループ等の制御を行う
-  tRisaWaveLoopManager と、OpenAL の Buffer にデータを流し込む
-  tRisaOpenALBuffer の中間に挟まれて動作する。
+  tWaveLoopManager と、OpenAL の Buffer にデータを流し込む
+  tOpenALBuffer の中間に挟まれて動作する。
 
-  tRisaWaveLoopManager も tRisaWaveFilter インターフェースを実装しており、
-  ほかの tRisaWaveFilter や tRisaOpenALBuffer からは一つのフィルタとして見
+  tWaveLoopManager も tWaveFilter インターフェースを実装しており、
+  ほかの tWaveFilter や tOpenALBuffer からは一つのフィルタとして見
   える。
 
 ■ データの流れ
@@ -43,17 +43,17 @@ RisaのWaveフィルタについて
   タチェーンは下図のようになる。
 
   +----------------------+    +-----------------+    +------------------+
-  | tRisaWaveLoopManager | -> | tRisaWaveFilter | -> | tRisaOpenALBuffer|
+  | tWaveLoopManager | -> | tWaveFilter | -> | tOpenALBuffer|
   +----------------------+    +-----------------+    +------------------+
 
-  tRisaOpenALBuffer はバッファに流し込むデータの要求が発生すると、データを
-  直前にある tRisaWaveFilter のインスタンスに要求する。tRisaWaveFilter の
-  インスタンスは、より直前にある tRisaWaveFilter のインスタンスに要求を
+  tOpenALBuffer はバッファに流し込むデータの要求が発生すると、データを
+  直前にある tWaveFilter のインスタンスに要求する。tWaveFilter の
+  インスタンスは、より直前にある tWaveFilter のインスタンスに要求を
   渡す。このようにして、要求はチェーンをさかのぼる形で(データの流れとは逆に)
   順次行われる。
 
-  データは、tRisaWaveLoopManager から順にチェーンをたどる方向で渡され、
-  最終的に tRisaOpenALBuffer に渡される。
+  データは、tWaveLoopManager から順にチェーンをたどる方向で渡され、
+  最終的に tOpenALBuffer に渡される。
 
   フィルタはすべて SetInputメソッドをもち、どのフィルタにデータを要求すれば
   よいかはこのメソッドで設定される。
@@ -63,20 +63,20 @@ RisaのWaveフィルタについて
   フィルタチェーン間を流れるPCMのフォーマットは、すべて「そのデータを送り出
   す側の」フィルタが決定してよい。どのようなPCMフォーマットになるかは、
   そのフィルタのGetFormatメソッドを呼ぶことにより知ることが出来る。
-  フィルタや tRisaOpenALBuffer は、Render メソッドによりデータを要求する
+  フィルタや tOpenALBuffer は、Render メソッドによりデータを要求する
   前には必ず 直前のフィルタに対して GetFormat を呼び出して形式をチェック
   しなければならない。もしFormatの変更に対応できないならば、Render メソッド
   でfalseを返し、それ以上処理を続行できないことを示してよい。その場合は再生
   は中断する。
 
-  tRisaOpenALBuffer は、OpenAL 側の制限により、再生中に周波数やチャンネル数
+  tOpenALBuffer は、OpenAL 側の制限により、再生中に周波数やチャンネル数
   を変えることが出来ない。そのため、これらが変わったときは再生は中断する。
   ただし、PCMフォーマットの形式 (8bit か16bitか、整数かfloatか等) は変わっ
-  てもtRisaOpenALBuffer側で変換を行うため、再生が中断されることはない。
+  てもtOpenALBuffer側で変換を行うため、再生が中断されることはない。
 
 ■ Renderメソッドについて
 
-  tRisaOpenALBuffer は、ストリーミング再生時は約0.125秒ごと、非ストリーミング
+  tOpenALBuffer は、ストリーミング再生時は約0.125秒ごと、非ストリーミング
   再生時は 約512KBごとのPCMデータを要求する。
   フィルタの Render メソッドには、要求するサンプルグラニュール数としてsamples
   パラメータが渡され、実際に書き込まれたサンプルグラニュール数としてwritten
@@ -102,15 +102,15 @@ RisaのWaveフィルタについて
   ければならない。
 
 
-■ tRisaWaveSegmentQueue
+■ tWaveSegmentQueue
 
-  tRisaWaveSegmentQueue はサウンドの断片が、それがもともとのPCMファイルの
+  tWaveSegmentQueue はサウンドの断片が、それがもともとのPCMファイルの
   どの位置にあったデータなのかや、どの位置にイベント (Waveサウンド上に
   自由に設定できる、ループチューナで言うところのラベル)があるかを
   保持している。
-  tRisaOpenALBuffer はサウンドの再生位置情報を取得するため、
-  tRisaWaveSegmentQueueを利用する。この情報はtRisaWaveLoopManagerで生成され、
-  フィルタを通って最終的にtRisaOpenALBufferに行き着く。
+  tOpenALBuffer はサウンドの再生位置情報を取得するため、
+  tWaveSegmentQueueを利用する。この情報はtWaveLoopManagerで生成され、
+  フィルタを通って最終的にtOpenALBufferに行き着く。
 
   
 
@@ -123,22 +123,22 @@ RisaのWaveフィルタについて
 //---------------------------------------------------------------------------
 //! @brief	 フィルタインターフェース
 //---------------------------------------------------------------------------
-class tRisaWaveFilter
+class tWaveFilter
 {
 public:
-	virtual ~tRisaWaveFilter() {;}
+	virtual ~tWaveFilter() {;}
 
 	virtual void Reset() = 0;
 		/*!<
 			@brief	フィルタのリセット
 		*/
 
-	virtual void SetInput(boost::shared_ptr<tRisaWaveFilter> input) = 0;
+	virtual void SetInput(boost::shared_ptr<tWaveFilter> input) = 0;
 		/*!<
 			@brief	入力フィルタの設定
 		*/
 
-	virtual void SuggestFormat(const tRisaWaveFormat & format) = 0;
+	virtual void SuggestFormat(const tWaveFormat & format) = 0;
 		/*!<
 			@brief PCM形式を提案する
 			@note フィルタを利用する側にとって利用しやすいタイプのPCM形式を
@@ -148,7 +148,7 @@ public:
 		*/
 
 	virtual bool Render(void *dest, risse_uint samples, risse_uint &written,
-		tRisaWaveSegmentQueue & segmentqueue) = 0;
+		tWaveSegmentQueue & segmentqueue) = 0;
 		/*!<
 			@brief	デコードを行う
 			@return まだデータが残っているかどうか
@@ -157,7 +157,7 @@ public:
 				変わっていないかどうかを検証すること。
 		*/
 
-	virtual const tRisaWaveFormat & GetFormat() = 0;
+	virtual const tWaveFormat & GetFormat() = 0;
 		/*!<
 			@brief PCM形式を取得する
 			@return PCM形式への参照

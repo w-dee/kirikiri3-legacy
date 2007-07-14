@@ -33,12 +33,12 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		スタックアラインメント調整用のダミークラス
 //---------------------------------------------------------------------------
-class tRisaPhaseVocoderDSP_SSE_Trampoline : public tRisaPhaseVocoderDSP
+class tPhaseVocoderDSP_SSE_Trampoline : public tPhaseVocoderDSP
 {
 public:
-	tRisaPhaseVocoderDSP_SSE_Trampoline(unsigned int framesize,
+	tPhaseVocoderDSP_SSE_Trampoline(unsigned int framesize,
 					unsigned int frequency, unsigned int channels) :
-				tRisaPhaseVocoderDSP(framesize, frequency, channels) {;}
+				tPhaseVocoderDSP(framesize, frequency, channels) {;}
 
 
 	void __ProcessCore(int ch);
@@ -50,25 +50,25 @@ public:
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::ProcessCore(int ch)
+void tPhaseVocoderDSP::ProcessCore(int ch)
 {
 	// トランポリンを呼ぶ
-	// 結果的に tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore() が
+	// 結果的に tPhaseVocoderDSP_SSE_Trampoline::__ProcessCore() が
 	// スタックのアラインメントを調整した上で呼ばれることになる
-	((tRisaPhaseVocoderDSP_SSE_Trampoline*)this)->_ProcessCore(ch);
+	((tPhaseVocoderDSP_SSE_Trampoline*)this)->_ProcessCore(ch);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
+void tPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 {
 	unsigned int framesize_d2 = FrameSize / 2;
 	float * analwork = AnalWork[ch];
 	float * synthwork = SynthWork[ch];
 
 	// 丸めモードを設定
-	RisaSetRoundingModeToNearest_SSE();
+	SetRoundingModeToNearest_SSE();
 
 	// FFT を実行する
 	rdft(FrameSize, 1, analwork, FFTWorkIp, FFTWorkW); // Real DFT
@@ -94,7 +94,7 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 			__m128 im3210 = _mm_shuffle_ps(aw3120, aw7654, _MM_SHUFFLE(3,1,3,1));
 
 			__m128 mag = _mm_sqrt_ps(re3210 * re3210 + im3210 * im3210);
-			__m128 ang = RisaVFast_arctan2_F4_SSE(im3210, re3210);
+			__m128 ang = VFast_arctan2_F4_SSE(im3210, re3210);
 
 			// 前回の位相との差をとる
 			__m128 lastp = *(__m128*)(LastAnalPhase[ch] + i);
@@ -111,7 +111,7 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 			ang -= phase_shift;
 
 			// unwrapping をする
-			ang = RisaWrap_Pi_F4_SSE(ang);
+			ang = Wrap_Pi_F4_SSE(ang);
 
 			// -M_PI～+M_PIを-1.0～+1.0の変位に変換
 			ang *= over_sampling_radian_recp;
@@ -210,7 +210,7 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 
 			// 極座標系→直交座標系
 			__m128 sin, cos;
-			RisaVFast_sincos_F4_SSE(ang, sin, cos);
+			VFast_sincos_F4_SSE(ang, sin, cos);
 			__m128 re3210 = mag * cos;
 			__m128 im3210 = mag * sin;
 
@@ -237,7 +237,7 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 			__m128 im3210 = _mm_shuffle_ps(aw3120, aw7654, _MM_SHUFFLE(3,1,3,1));
 
 			__m128 mag = _mm_sqrt_ps(re3210 * re3210 + im3210 * im3210);
-			__m128 ang = RisaVFast_arctan2_F4_SSE(im3210, re3210);
+			__m128 ang = VFast_arctan2_F4_SSE(im3210, re3210);
 
 			// 前回の位相との差をとる
 			__m128 lastp = *(__m128*)(LastAnalPhase[ch] + i);
@@ -254,7 +254,7 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 			ang -= phase_shift;
 
 			// unwrapping をする
-			ang = RisaWrap_Pi_F4_SSE(ang);
+			ang = Wrap_Pi_F4_SSE(ang);
 
 			// OverSampling による位相の補正
 			ang += phase_shift;
@@ -269,7 +269,7 @@ void tRisaPhaseVocoderDSP_SSE_Trampoline::__ProcessCore(int ch)
 
 			// 極座標系→直交座標系
 			__m128 sin, cos;
-			RisaVFast_sincos_F4_SSE(ang, sin, cos);
+			VFast_sincos_F4_SSE(ang, sin, cos);
 			re3210 = mag * cos;
 			im3210 = mag * sin;
 

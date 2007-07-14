@@ -18,8 +18,8 @@ RISSE_DEFINE_SOURCE_ID(38521,252,49793,17297,63880,47889,47025,34954);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tRisaPhaseVocoder::tRisaPhaseVocoder() :
-	tRisaBasicWaveFilter(tRisaPCMTypes::tf32)
+tPhaseVocoder::tPhaseVocoder() :
+	tBasicWaveFilter(tPCMTypes::tf32)
 {
 	DSP = NULL;
 	FrameSize = DEFAULT_FRAME_SIZE;
@@ -31,7 +31,7 @@ tRisaPhaseVocoder::tRisaPhaseVocoder() :
 
 
 //---------------------------------------------------------------------------
-tRisaPhaseVocoder::~tRisaPhaseVocoder()
+tPhaseVocoder::~tPhaseVocoder()
 {
 	Clear();
 }
@@ -39,7 +39,7 @@ tRisaPhaseVocoder::~tRisaPhaseVocoder()
 
 
 //---------------------------------------------------------------------------
-int tRisaPhaseVocoder::GetFrameSize() const
+int tPhaseVocoder::GetFrameSize() const
 {
 	return FrameSize;
 }
@@ -47,7 +47,7 @@ int tRisaPhaseVocoder::GetFrameSize() const
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoder::SetFrameSize(int v)
+void tPhaseVocoder::SetFrameSize(int v)
 {
 	FrameSize = v;
 	if(DSP) RebuildDSP(); // DSP は作り直す
@@ -56,7 +56,7 @@ void tRisaPhaseVocoder::SetFrameSize(int v)
 
 
 //---------------------------------------------------------------------------
-int tRisaPhaseVocoder::GetOverSampling() const
+int tPhaseVocoder::GetOverSampling() const
 {
 	return OverSampling;
 }
@@ -64,7 +64,7 @@ int tRisaPhaseVocoder::GetOverSampling() const
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoder::SetOverSampling(int v)
+void tPhaseVocoder::SetOverSampling(int v)
 {
 	OverSampling = v;
 	if(DSP) RebuildDSP(); // DSP は作り直す
@@ -73,7 +73,7 @@ void tRisaPhaseVocoder::SetOverSampling(int v)
 
 
 //---------------------------------------------------------------------------
-float tRisaPhaseVocoder::GetTimeScale() const
+float tPhaseVocoder::GetTimeScale() const
 {
 	return TimeScale;
 }
@@ -81,7 +81,7 @@ float tRisaPhaseVocoder::GetTimeScale() const
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoder::SetTimeScale(float v)
+void tPhaseVocoder::SetTimeScale(float v)
 {
 	TimeScale = v;
 	if(DSP) DSP->SetTimeScale(v);
@@ -90,7 +90,7 @@ void tRisaPhaseVocoder::SetTimeScale(float v)
 
 
 //---------------------------------------------------------------------------
-float tRisaPhaseVocoder::GetFrequencyScale() const
+float tPhaseVocoder::GetFrequencyScale() const
 {
 	return FrequencyScale;
 }
@@ -98,7 +98,7 @@ float tRisaPhaseVocoder::GetFrequencyScale() const
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoder::SetFrequencyScale(float v)
+void tPhaseVocoder::SetFrequencyScale(float v)
 {
 	FrequencyScale = v;
 	if(DSP) DSP->SetFrequencyScale(v);
@@ -107,7 +107,7 @@ void tRisaPhaseVocoder::SetFrequencyScale(float v)
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoder::Clear()
+void tPhaseVocoder::Clear()
 {
 	delete DSP, DSP = NULL;
 }
@@ -115,10 +115,10 @@ void tRisaPhaseVocoder::Clear()
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoder::RebuildDSP()
+void tPhaseVocoder::RebuildDSP()
 {
 	if(DSP) delete DSP, DSP = NULL;
-	DSP = new tRisaPhaseVocoderDSP(FrameSize,
+	DSP = new tPhaseVocoderDSP(FrameSize,
 		InputFormat.Frequency, InputFormat.Channels);
 	DSP->SetTimeScale(TimeScale);
 	DSP->SetFrequencyScale(FrequencyScale);
@@ -128,25 +128,25 @@ void tRisaPhaseVocoder::RebuildDSP()
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoder::InputChanged()
+void tPhaseVocoder::InputChanged()
 {
 	Clear();
 	RebuildDSP();
 	SegmentQueue.Clear();
 
 	// Input に PCM 形式を提案する
-	tRisaWaveFormat format;
+	tWaveFormat format;
 	format.Reset();
-	format.PCMType = tRisaPCMTypes::tf32; // float がいい！できれば float にして！！
+	format.PCMType = tPCMTypes::tf32; // float がいい！できれば float にして！！
 	Input->SuggestFormat(format);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoder::Filter()
+void tPhaseVocoder::Filter()
 {
-	tRisaWaveSegmentQueue newqueue;
+	tWaveSegmentQueue newqueue;
 
 	// DSP の入力空きを調べる
 	size_t inputfree = DSP->GetInputFreeSize();
@@ -157,8 +157,8 @@ void tRisaPhaseVocoder::Filter()
 		size_t p1len, p2len;
 		DSP->GetInputBuffer(inputfree, p1, p1len, p2, p2len);
 		size_t filled = 0;
-		filled += Fill(p1, p1len, tRisaPCMTypes::tf32, true, SegmentQueue);
-		if(p2) filled += Fill(p2, p2len, tRisaPCMTypes::tf32, true, SegmentQueue);
+		filled += Fill(p1, p1len, tPCMTypes::tf32, true, SegmentQueue);
+		if(p2) filled += Fill(p2, p2len, tPCMTypes::tf32, true, SegmentQueue);
 		if(filled == 0) return ; // もうデータがない
 	}
 

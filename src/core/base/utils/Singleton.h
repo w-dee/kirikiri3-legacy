@@ -10,8 +10,8 @@
 //! @file
 //! @brief シングルトンを実現する自家製テンプレートクラス
 //---------------------------------------------------------------------------
-#ifndef RisaSINGLETONH
-#define RisaSINGLETONH
+#ifndef SINGLETONH
+#define SINGLETONH
 
 /*!
 	@note

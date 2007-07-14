@@ -39,9 +39,9 @@ public:
 	//! @brief		Risse 無効化関数
 	void Invalidate();
 
-	tRisaTmpFS * GetFileSystem() 
+	tTmpFS * GetFileSystem() 
 	{
-		return reinterpret_cast<tRisaTmpFS*>(
+		return reinterpret_cast<tTmpFS*>(
 			tNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
@@ -82,14 +82,14 @@ private:
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaTmpFSRegisterer :
-	public singleton_base<tRisaTmpFSRegisterer>,
-	protected depends_on<tRisaRisseScriptEngine>,
-	protected depends_on<tRisaFileSystemRegisterer>
+class tTmpFSRegisterer :
+	public singleton_base<tTmpFSRegisterer>,
+	protected depends_on<tRisseScriptEngine>,
+	protected depends_on<tFileSystemRegisterer>
 {
 public:
 	//! @brief		コンストラクタ
-	tRisaTmpFSRegisterer();
+	tTmpFSRegisterer();
 };
 //---------------------------------------------------------------------------
 

@@ -22,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(37180,40935,47171,16902,29833,29636,3244,55820);
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
 
 //---------------------------------------------------------------------------
-tRisaTickCount::tWatcher::tWatcher(tRisaTickCount & owner) : Owner(owner)
+tTickCount::tWatcher::tWatcher(tTickCount & owner) : Owner(owner)
 {
 	Run(); // スレッドの実行を開始
 }
@@ -30,7 +30,7 @@ tRisaTickCount::tWatcher::tWatcher(tRisaTickCount & owner) : Owner(owner)
 
 
 //---------------------------------------------------------------------------
-tRisaTickCount::tWatcher::~tWatcher()
+tTickCount::tWatcher::~tWatcher()
 {
 	Terminate(); // スレッドの終了を伝える
 	Event.Signal(); // スレッドをたたき起こす
@@ -39,7 +39,7 @@ tRisaTickCount::tWatcher::~tWatcher()
 
 
 //---------------------------------------------------------------------------
-void tRisaTickCount::tWatcher::Execute()
+void tTickCount::tWatcher::Execute()
 {
 	while(!ShouldTerminate())
 	{
@@ -70,7 +70,7 @@ void tRisaTickCount::tWatcher::Execute()
 
 
 //---------------------------------------------------------------------------
-tRisaTickCount::tRisaTickCount()
+tTickCount::tTickCount()
 {
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
 	// フィールドの初期化
@@ -86,7 +86,7 @@ tRisaTickCount::tRisaTickCount()
 
 
 //---------------------------------------------------------------------------
-tRisaTickCount::~tRisaTickCount()
+tTickCount::~tTickCount()
 {
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
 	// スレッドの停止
@@ -97,16 +97,16 @@ tRisaTickCount::~tRisaTickCount()
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tRisaTickCount::Get()
+risse_uint64 tTickCount::Get()
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
 	// 現在の tick と前回取得した tick の差を Value に追加する。
-	// 現在の tick と前回取得した tick の差が tRisaTickCountBasicType型 の
+	// 現在の tick と前回取得した tick の差が tTickCountBasicType型 の
 	// 最大値を上回らないことは、それを上回らない程度に このメソッドが
 	// Watcher のスレッドから定期的に呼ばれることで保証されている。
-	tRisaTickCountBasicType nowtick = GetTick();
+	tTickCountBasicType nowtick = GetTick();
 	Value += nowtick - LastTick;
 	LastTick = nowtick;
 	return Value;

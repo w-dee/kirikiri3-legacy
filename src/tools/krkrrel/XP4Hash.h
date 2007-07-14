@@ -41,24 +41,24 @@ namespace Risa {
 //---------------------------------------------------------------------------
 // ハッシュを表すクラス
 //---------------------------------------------------------------------------
-class tRisaXP4Hash
+class tXP4Hash
 {
 	unsigned char Hash[RISA__XP4_HASH_SIZE];
 	bool HasHash;
 public:
-	tRisaXP4Hash() { HasHash = false; memset(Hash, 0, RISA__XP4_HASH_SIZE); }
+	tXP4Hash() { HasHash = false; memset(Hash, 0, RISA__XP4_HASH_SIZE); }
 
 	operator unsigned char *() { return Hash; }
-	bool operator < (const tRisaXP4Hash & rhs) const
+	bool operator < (const tXP4Hash & rhs) const
 	{
 		return memcmp(Hash, rhs.Hash, sizeof(Hash)) < 0;
 	}
-	bool operator == (const tRisaXP4Hash & rhs) const
+	bool operator == (const tXP4Hash & rhs) const
 	{
 		return HasHash == rhs.HasHash && 
 			!memcmp(Hash, rhs.Hash, sizeof(Hash));
 	}
-	bool operator != (const tRisaXP4Hash & rhs) const
+	bool operator != (const tXP4Hash & rhs) const
 	{
 		return !(operator ==(rhs));
 	}

@@ -25,7 +25,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-void tRisaPhaseVocoderDSP::ProcessCore(int ch)
+void tPhaseVocoderDSP::ProcessCore(int ch)
 {
 	unsigned int framesize_d2 = FrameSize / 2;
 	float * analwork = AnalWork[ch];
@@ -50,7 +50,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 			float im = analwork[i*2+1];
 
 			float mag = sqrt(re*re + im*im); // mag = √(re^2+im^2)
-			float ang = RisaVFast_arctan2(im, re); // ang = atan(im/re)
+			float ang = VFast_arctan2(im, re); // ang = atan(im/re)
 
 			// 前回の位相との差をとる
 			// --注意: ここで使用しているFFTパッケージは、
@@ -69,7 +69,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 
 			// unwrapping をする
 			// -- tmp が -M_PI ～ +M_PI の範囲に収まるようにする
-			tmp = RisaWrapPi_F1(tmp);
+			tmp = WrapPi_F1(tmp);
 
 			// -M_PI～+M_PIを-1.0～+1.0の変位に変換
 			tmp =  tmp * OverSamplingRadianRecp;
@@ -160,7 +160,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 
 			// 極座標系→直交座標系
 			float c, s;
-			RisaVFast_sincos(ang, s, c);
+			VFast_sincos(ang, s, c);
 			synthwork[i*2  ] = mag * c;
 			synthwork[i*2+1] = mag * s;
 		}
@@ -182,7 +182,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 			float im = analwork[i*2+1];
 
 			float mag = sqrt(re*re + im*im); // mag = √(re^2+im^2)
-			float ang = RisaVFast_arctan2(im, re); // ang = atan(im/re)
+			float ang = VFast_arctan2(im, re); // ang = atan(im/re)
 
 			// 前回の位相との差をとる
 			// --注意: ここで使用しているFFTパッケージは、
@@ -204,7 +204,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 
 			// unwrapping をする
 			// -- tmp が -M_PI ～ +M_PI の範囲に収まるようにする
-			tmp = RisaWrapPi_F1(tmp);
+			tmp = WrapPi_F1(tmp);
 
 //--
 			// OverSampling による位相の補正
@@ -222,7 +222,7 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 
 			// 極座標系→直交座標系
 			float c, s;
-			RisaVFast_sincos(ang, s, c);
+			VFast_sincos(ang, s, c);
 			synthwork[i*2  ] = mag * c;
 			synthwork[i*2+1] = mag * s;
 		}

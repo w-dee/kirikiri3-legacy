@@ -19,44 +19,44 @@
 #include "sound/ALBuffer.h"
 #include "sound/WaveSegmentQueue.h"
 #include "sound/WaveLoopManager.h"
-#include "base/utils/RisaThread.h"
+#include "base/utils/Thread.h"
 #include "base/utils/Singleton.h"
 #include "base/event/Event.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
 
-class tRisaALSource;
+class tALSource;
 //---------------------------------------------------------------------------
 //! @brief		監視用スレッド
 //! @note		監視用スレッドは、約50ms周期のコールバックをすべての
 //!				ソースに発生させる。ソースではいくつかポーリングを
 //!				行わなければならない場面でこのコールバックを利用する。
 //---------------------------------------------------------------------------
-class tRisaWaveWatchThread :
-	public singleton_base<tRisaWaveWatchThread>,
-	manual_start<tRisaWaveWatchThread>,
-	public tRisaThread
+class tWaveWatchThread :
+	public singleton_base<tWaveWatchThread>,
+	manual_start<tWaveWatchThread>,
+	public tThread
 {
-	tRisaThreadEvent Event; //!< スレッドをたたき起こすため/スレッドを眠らせるためのイベント
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tThreadEvent Event; //!< スレッドをたたき起こすため/スレッドを眠らせるためのイベント
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	gc_vector<tRisaALSource*> Sources; //!< Source の配列
+	gc_vector<tALSource*> Sources; //!< Source の配列
 
 public:
 	//! @brief		コンストラクタ
-	tRisaWaveWatchThread();
+	tWaveWatchThread();
 
 	//! @brief		デストラクタ
-	~tRisaWaveWatchThread();
+	~tWaveWatchThread();
 
 	//! @brief		ソースを登録する
 	//! @param		source ソース
-	void RegisterSource(tRisaALSource * source);
+	void RegisterSource(tALSource * source);
 
 	//! @brief		ソースの登録を解除する
 	//! @param		source ソース
-	void UnregisterSource(tRisaALSource * source);
+	void UnregisterSource(tALSource * source);
 
 protected:
 	//! @brief		スレッドのエントリーポイント
@@ -68,15 +68,15 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaALSourceのステータスを含むクラス
+//! @brief		tALSourceのステータスを含むクラス
 //---------------------------------------------------------------------------
-class tRisaALSourceStatus
+class tALSourceStatus
 {
 public:
 	//! @brief	サウンドソースの状態
 	enum tStatus
 	{
-		ssUnload, //!< data is not specified (tRisaALSourceではこの状態は存在しない)
+		ssUnload, //!< data is not specified (tALSourceではこの状態は存在しない)
 		ssStop, //!< stopping
 		ssPlay, //!< playing
 		ssPause, //!< pausing
@@ -86,22 +86,22 @@ public:
 
 
 
-class tRisaWaveDecodeThread;
+class tWaveDecodeThread;
 //---------------------------------------------------------------------------
 //! @brief		OpenALソース
 //---------------------------------------------------------------------------
-class tRisaALSource :
-				protected depends_on<tRisaOpenAL>,
-				protected depends_on<tRisaWaveWatchThread>,
-				protected depends_on<tRisaEventSystem>,
-				protected tRisaEventDestination,
-				public tRisaALSourceStatus
+class tALSource :
+				protected depends_on<tOpenAL>,
+				protected depends_on<tWaveWatchThread>,
+				protected depends_on<tEventSystem>,
+				protected tEventDestination,
+				public tALSourceStatus
 {
-	friend class tRisaWaveDecodeThread;
-	friend class tRisaWaveWatchThread;
+	friend class tWaveDecodeThread;
+	friend class tWaveWatchThread;
 public:
 	// 定数など
-	static const risse_uint STREAMING_NUM_BUFFERS = tRisaALBuffer::MAX_NUM_BUFFERS; //!< ストリーミング時のバッファの数(調整可)
+	static const risse_uint STREAMING_NUM_BUFFERS = tALBuffer::MAX_NUM_BUFFERS; //!< ストリーミング時のバッファの数(調整可)
 	static const risse_uint STREAMING_PREPARE_BUFFERS = 4; //!< 再生開始前にソースにキューしておくバッファの数
 
 private:
@@ -111,35 +111,35 @@ private:
 		eiStatusChanged, // ステータスが変更された
 	};
 
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_uint NumBuffersQueued; //!< キューに入っているバッファの数
 	ALuint Source; //!< OpenAL ソース
 	bool SourceAllocated; //!< Source がすでに割り当てられているかどうか
-	boost::shared_ptr<tRisaALBuffer> Buffer; //!< バッファ
-	boost::shared_ptr<tRisaWaveLoopManager> LoopManager; //!< ループマネージャ
+	boost::shared_ptr<tALBuffer> Buffer; //!< バッファ
+	boost::shared_ptr<tWaveLoopManager> LoopManager; //!< ループマネージャ
 	bool NeedRewind; //!< リワインド (巻き戻し) が必要な場合に真
-	tRisaWaveDecodeThread * DecodeThread; //!< デコードスレッド
+	tWaveDecodeThread * DecodeThread; //!< デコードスレッド
 	tStatus Status; //!< サウンドステータス
 	tStatus PrevStatus; //!< 直前のサウンドステータス
-	gc_deque<tRisaWaveSegmentQueue> SegmentQueues; //!< セグメントキューの配列
+	gc_deque<tWaveSegmentQueue> SegmentQueues; //!< セグメントキューの配列
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		buffer		OpenAL バッファを管理する tRisaALBuffer インスタンス
-	tRisaALSource(boost::shared_ptr<tRisaALBuffer> buffer,
-		boost::shared_ptr<tRisaWaveLoopManager> loopmanager = boost::shared_ptr<tRisaWaveLoopManager>());
+	//! @param		buffer		OpenAL バッファを管理する tALBuffer インスタンス
+	tALSource(boost::shared_ptr<tALBuffer> buffer,
+		boost::shared_ptr<tWaveLoopManager> loopmanager = boost::shared_ptr<tWaveLoopManager>());
 
-	//! @brief		コンストラクタ(ほかのtRisaALSourceとバッファを共有する場合)
+	//! @brief		コンストラクタ(ほかのtALSourceとバッファを共有する場合)
 	//! @param		ref		コピー元ソース
-	tRisaALSource(const tRisaALSource * ref);
+	tALSource(const tALSource * ref);
 
 	//! @brief		デストラクタ
-	virtual ~tRisaALSource();
+	virtual ~tALSource();
 
 private:
 	//! @brief		オブジェクトを初期化する
-	//! @param		buffer		OpenAL バッファを管理する tRisaALBuffer インスタンス
-	void Init(boost::shared_ptr<tRisaALBuffer> buffer);
+	//! @param		buffer		OpenAL バッファを管理する tALBuffer インスタンス
+	void Init(boost::shared_ptr<tALBuffer> buffer);
 
 public:
 	ALuint GetSource() const { return Source; } //!< Source を得る
@@ -160,7 +160,7 @@ private: //---- queue/buffer management
 	void QueueBuffer();
 
 private:
-	//! @brief		監視用コールバック(tRisaWaveWatchThreadから約50msごとに呼ばれる)
+	//! @brief		監視用コールバック(tWaveWatchThreadから約50msごとに呼ばれる)
 	void WatchCallback();
 
 	//! @brief		前回とステータスが変わっていたら OnStatusChanged を呼ぶ
@@ -170,7 +170,7 @@ private:
 protected:
 	//! @brief		イベントが発生したとき
 	//! @param		info  イベント情報
-	void OnEvent(tRisaEventInfo * info);
+	void OnEvent(tEventInfo * info);
 
 public:
 	//! @brief		再生の開始
@@ -179,7 +179,7 @@ public:
 	//! @brief		再生の停止
 	//! @note		このメソッドはメディアの巻き戻しを行わない(ソースはそこら辺を
 	//!				管理しているループマネージャがどこにあるかを知らないので)
-	//!				巻き戻しの処理は現在tRisaSound内で行われている
+	//!				巻き戻しの処理は現在tSound内で行われている
 	void Stop();
 
 	//! @brief		再生の一時停止

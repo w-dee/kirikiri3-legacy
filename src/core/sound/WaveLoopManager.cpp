@@ -39,7 +39,7 @@ RISSE_DEFINE_SOURCE_ID(8592,58083,15398,17259,37009,18155,50172,63359);
 //! @param		channels	対象PCMのチャンネル数
 //---------------------------------------------------------------------------
 template <typename T>
-static void RisaCrossFadeBlend(void *dest, void *src1, void *src2,
+static void CrossFadeBlend(void *dest, void *src1, void *src2,
 	risse_int ratiostart, risse_int ratioend,
 	risse_int samples, risse_int channels)
 {
@@ -77,7 +77,7 @@ static void RisaCrossFadeBlend(void *dest, void *src1, void *src2,
 
 
 //---------------------------------------------------------------------------
-tRisaWaveLoopManager::tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> decoder)
+tWaveLoopManager::tWaveLoopManager(boost::shared_ptr<tWaveDecoder> decoder)
 {
 	Position = 0;
 	IsLinksSorted = false;
@@ -87,7 +87,7 @@ tRisaWaveLoopManager::tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> d
 	CrossFadePosition = 0;
 	IgnoreLinks = false;
 	Looping = false;
-	FileInfo = new tRisaWaveFileInfo;
+	FileInfo = new tWaveFileInfo;
 	memset(FileInfo, 0, sizeof(*FileInfo));
 	FirstRendered = false;
 
@@ -100,7 +100,7 @@ tRisaWaveLoopManager::tRisaWaveLoopManager(boost::shared_ptr<tRisaWaveDecoder> d
 
 
 //---------------------------------------------------------------------------
-tRisaWaveLoopManager::~tRisaWaveLoopManager()
+tWaveLoopManager::~tWaveLoopManager()
 {
 	ClearCrossFadeInformation();
 	delete FileInfo;
@@ -109,7 +109,7 @@ tRisaWaveLoopManager::~tRisaWaveLoopManager()
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decoder)
+void tWaveLoopManager::SetDecoder(boost::shared_ptr<tWaveDecoder> decoder)
 {
 	// set decoder
 	Decoder = decoder;
@@ -119,18 +119,18 @@ void tRisaWaveLoopManager::SetDecoder(boost::shared_ptr<tRisaWaveDecoder> decode
 
 
 //---------------------------------------------------------------------------
-int tRisaWaveLoopManager::GetFlag(risse_int index)
+int tWaveLoopManager::GetFlag(risse_int index)
 {
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	return Flags[index];
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::CopyFlags(risse_int *dest)
+void tWaveLoopManager::CopyFlags(risse_int *dest)
 {
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	// copy flags into dest, and clear FlagsModifiedByLabelExpression
 	memcpy(dest, Flags, sizeof(Flags));
 	FlagsModifiedByLabelExpression = false;
@@ -139,18 +139,18 @@ void tRisaWaveLoopManager::CopyFlags(risse_int *dest)
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetFlagsModifiedByLabelExpression()
+bool tWaveLoopManager::GetFlagsModifiedByLabelExpression()
 {
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	return FlagsModifiedByLabelExpression;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetFlag(risse_int index, risse_int f)
+void tWaveLoopManager::SetFlag(risse_int index, risse_int f)
 {
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	if(f < 0) f = 0;
 	if(f > MaxFlagValue) f = MaxFlagValue;
 	Flags[index] = f;
@@ -159,19 +159,19 @@ void tRisaWaveLoopManager::SetFlag(risse_int index, risse_int f)
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::ClearFlags()
+void tWaveLoopManager::ClearFlags()
 {
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	for(risse_int i = 0; i < MaxFlags; i++) Flags[i] = 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::ClearLinksAndLabels()
+void tWaveLoopManager::ClearLinksAndLabels()
 {
 	// clear links and labels
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	Labels.clear();
 	Links.clear();
 	IsLinksSorted = false;
@@ -181,29 +181,29 @@ void tRisaWaveLoopManager::ClearLinksAndLabels()
 
 
 //---------------------------------------------------------------------------
-const gc_vector<tRisaWaveLoopLink> & tRisaWaveLoopManager::GetLinks() const
+const gc_vector<tWaveLoopLink> & tWaveLoopManager::GetLinks() const
 {
-	volatile tRisaCriticalSection::tLocker
-		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
+	volatile tCriticalSection::tLocker
+		CS(const_cast<tWaveLoopManager*>(this)->FlagsCS);
 	return Links;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-const gc_vector<tRisaWaveLabel> & tRisaWaveLoopManager::GetLabels() const
+const gc_vector<tWaveLabel> & tWaveLoopManager::GetLabels() const
 {
-	volatile tRisaCriticalSection::tLocker
-		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
+	volatile tCriticalSection::tLocker
+		CS(const_cast<tWaveLoopManager*>(this)->FlagsCS);
 	return Labels;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetLinks(const gc_vector<tRisaWaveLoopLink> & links)
+void tWaveLoopManager::SetLinks(const gc_vector<tWaveLoopLink> & links)
 {
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	Links = links;
 	IsLinksSorted = false;
 }
@@ -211,9 +211,9 @@ void tRisaWaveLoopManager::SetLinks(const gc_vector<tRisaWaveLoopLink> & links)
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetLabels(const gc_vector<tRisaWaveLabel> & labels)
+void tWaveLoopManager::SetLabels(const gc_vector<tWaveLabel> & labels)
 {
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	Labels = labels;
 	IsLabelsSorted = false;
 }
@@ -221,39 +221,39 @@ void tRisaWaveLoopManager::SetLabels(const gc_vector<tRisaWaveLabel> & labels)
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetIgnoreLinks() const
+bool tWaveLoopManager::GetIgnoreLinks() const
 {
-	volatile tRisaCriticalSection::tLocker
-		CS(const_cast<tRisaWaveLoopManager*>(this)->DataCS);
+	volatile tCriticalSection::tLocker
+		CS(const_cast<tWaveLoopManager*>(this)->DataCS);
 	return IgnoreLinks;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetIgnoreLinks(bool b)
+void tWaveLoopManager::SetIgnoreLinks(bool b)
 {
-	volatile tRisaCriticalSection::tLocker CS(DataCS);
+	volatile tCriticalSection::tLocker CS(DataCS);
 	IgnoreLinks = b;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_int64 tRisaWaveLoopManager::GetPosition() const
+risse_int64 tWaveLoopManager::GetPosition() const
 {
 	// we cannot assume that the 64bit data access is truely atomic on 32bit machines.
-	volatile tRisaCriticalSection::tLocker
-		CS(const_cast<tRisaWaveLoopManager*>(this)->FlagsCS);
+	volatile tCriticalSection::tLocker
+		CS(const_cast<tWaveLoopManager*>(this)->FlagsCS);
 	return Position;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SetPosition(risse_int64 pos)
+void tWaveLoopManager::SetPosition(risse_int64 pos)
 {
-	volatile tRisaCriticalSection::tLocker CS(DataCS);
+	volatile tCriticalSection::tLocker CS(DataCS);
 	Position = pos;
 	ClearCrossFadeInformation();
 	Decoder->SetPosition(pos);
@@ -262,8 +262,8 @@ void tRisaWaveLoopManager::SetPosition(risse_int64 pos)
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &written,
-		tRisaWaveSegmentQueue & segmentqueue)
+bool tWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &written,
+		tWaveSegmentQueue & segmentqueue)
 {
 	// check if this is the first try to render
 	if(!FirstRendered)
@@ -278,14 +278,14 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 	}
 
 	// decode from current position
-	volatile tRisaCriticalSection::tLocker CS(DataCS);
+	volatile tCriticalSection::tLocker CS(DataCS);
 
 	written = 0;
 	risse_uint8 *d = (risse_uint8*)dest;
 
 	risse_int give_up_count = 0;
 
-	gc_deque<tRisaWaveEvent> events;
+	gc_deque<tWaveEvent> events;
 
 	while(written != samples/* && Position < FileInfo->TotalSamples*/)
 	{
@@ -298,7 +298,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 		risse_int before_count;
 
 		// check nearest link
-		tRisaWaveLoopLink link;
+		tWaveLoopLink link;
 		if(!IgnoreLinks && GetNearestLink(Position, link, false))
 		{
 			// nearest link found ...
@@ -306,7 +306,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 			{
 				// do jump
 				give_up_count ++;
-				if(give_up_count >= RisaWaveLoopLinkGiveUpCount)
+				if(give_up_count >= WaveLoopLinkGiveUpCount)
 					break; // give up decoding
 
 				Position = link.To;
@@ -347,7 +347,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 					if(FileInfo->TotalSampleGranules - link.To < static_cast<risse_uint64>(after_count))
 						after_count =
 							(risse_int)(FileInfo->TotalSampleGranules - link.To);
-					tRisaWaveLoopLink over_to_link;
+					tWaveLoopLink over_to_link;
 					if(GetNearestLink(link.To, over_to_link, true))
 					{
 						if(over_to_link.From - link.To < after_count)
@@ -440,7 +440,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 		// evaluate each label
 		GetEventAt(Position, Position + one_unit, events);
-		for(gc_deque<tRisaWaveEvent>::iterator i = events.begin();
+		for(gc_deque<tWaveEvent>::iterator i = events.begin();
 			i != events.end(); i++)
 		{
 			if(i->Name.c_str()[0] == ':')
@@ -451,7 +451,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 		}
 
 		// calculate each label offset
-		for(gc_deque<tRisaWaveEvent>::iterator i = events.begin();
+		for(gc_deque<tWaveEvent>::iterator i = events.begin();
 			i != events.end(); i++)
 			i->Offset = (risse_int)(i->Position - Position) + written;
 
@@ -459,7 +459,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 		segmentqueue.Enqueue(events);
 
 		// enqueue segment
-		segmentqueue.Enqueue(tRisaWaveSegment(Position, one_unit));
+		segmentqueue.Enqueue(tWaveSegment(Position, one_unit));
 
 		// decode or copy
 		if(!CrossFadeSamples)
@@ -510,7 +510,7 @@ bool tRisaWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &wr
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::SuggestFormat(const tRisaWaveFormat & format)
+void tWaveLoopManager::SuggestFormat(const tWaveFormat & format)
 {
 	// PCM 形式の変更は、最初に Render が呼ばれるよりも前でなければならない
 	if(!FirstRendered)
@@ -523,7 +523,7 @@ void tRisaWaveLoopManager::SuggestFormat(const tRisaWaveFormat & format)
 
 
 //---------------------------------------------------------------------------
-const tRisaWaveFormat & tRisaWaveLoopManager::GetFormat()
+const tWaveFormat & tWaveLoopManager::GetFormat()
 {
 	if(!FirstRendered)
 	{
@@ -537,8 +537,8 @@ const tRisaWaveFormat & tRisaWaveLoopManager::GetFormat()
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetNearestLink(risse_int64 current,
-		tRisaWaveLoopLink & link, bool ignore_conditions)
+bool tWaveLoopManager::GetNearestLink(risse_int64 current,
+		tWaveLoopLink & link, bool ignore_conditions)
 {
 	// search nearest event in future, from current.
 	// this checks conditions unless ignore_conditions is true.
@@ -590,24 +590,24 @@ bool tRisaWaveLoopManager::GetNearestLink(risse_int64 current,
 				bool match = false;
 				switch(Links[s].Condition)
 				{
-				case tRisaWaveLoopLink::llcNone:
+				case tWaveLoopLink::llcNone:
 					match = true; break;
-				case tRisaWaveLoopLink::llcEqual:
+				case tWaveLoopLink::llcEqual:
 					if(Links[s].RefValue == Flags[Links[s].CondVar]) match = true;
 					break;
-				case tRisaWaveLoopLink::llcNotEqual:
+				case tWaveLoopLink::llcNotEqual:
 					if(Links[s].RefValue != Flags[Links[s].CondVar]) match = true;
 					break;
-				case tRisaWaveLoopLink::llcGreater:
+				case tWaveLoopLink::llcGreater:
 					if(Links[s].RefValue <  Flags[Links[s].CondVar]) match = true;
 					break;
-				case tRisaWaveLoopLink::llcGreaterOrEqual:
+				case tWaveLoopLink::llcGreaterOrEqual:
 					if(Links[s].RefValue <= Flags[Links[s].CondVar]) match = true;
 					break;
-				case tRisaWaveLoopLink::llcLesser:
+				case tWaveLoopLink::llcLesser:
 					if(Links[s].RefValue >  Flags[Links[s].CondVar]) match = true;
 					break;
-				case tRisaWaveLoopLink::llcLesserOrEqual:
+				case tWaveLoopLink::llcLesserOrEqual:
 					if(Links[s].RefValue >= Flags[Links[s].CondVar]) match = true;
 					break;
 				default:
@@ -637,8 +637,8 @@ bool tRisaWaveLoopManager::GetNearestLink(risse_int64 current,
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
-		gc_deque<tRisaWaveEvent> & events)
+void tWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
+		gc_deque<tWaveEvent> & events)
 {
 	if(Labels.size() == 0) return; // no labels found
 	if(!IsLabelsSorted)
@@ -680,7 +680,7 @@ void tRisaWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
 	for(; s < (int)Labels.size(); s++)
 	{
 		if(Labels[s].Position >= from && Labels[s].Position < to)
-			events.push_back(*reinterpret_cast<tRisaWaveEvent*>(&(Labels[s])));
+			events.push_back(*reinterpret_cast<tWaveEvent*>(&(Labels[s])));
 		else
 			break;
 	}
@@ -689,7 +689,7 @@ void tRisaWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::DoCrossFade(void *dest, void *src1,
+void tWaveLoopManager::DoCrossFade(void *dest, void *src1,
 	void *src2, risse_int samples, risse_int ratiostart, risse_int ratioend)
 {
 	// do on-memory wave crossfade
@@ -698,24 +698,24 @@ void tRisaWaveLoopManager::DoCrossFade(void *dest, void *src1,
 
 	switch(FileInfo->PCMType)
 	{
-	case tRisaPCMTypes::ti8 :			//!< 8bit integer linear PCM type
-		RisaCrossFadeBlend<tRisaPCMTypes::i8>(dest, src1, src2,
+	case tPCMTypes::ti8 :			//!< 8bit integer linear PCM type
+		CrossFadeBlend<tPCMTypes::i8>(dest, src1, src2,
 			ratiostart, ratioend, samples, FileInfo->Channels);
 		break;
-	case tRisaPCMTypes::ti16:			//!< 16bit integer linear PCM type
-		RisaCrossFadeBlend<tRisaPCMTypes::i16>(dest, src1, src2,
+	case tPCMTypes::ti16:			//!< 16bit integer linear PCM type
+		CrossFadeBlend<tPCMTypes::i16>(dest, src1, src2,
 			ratiostart, ratioend, samples, FileInfo->Channels);
 		break;
-	case tRisaPCMTypes::ti24:			//!< 24bit integer linear PCM type
-		RisaCrossFadeBlend<tRisaPCMTypes::i24>(dest, src1, src2,
+	case tPCMTypes::ti24:			//!< 24bit integer linear PCM type
+		CrossFadeBlend<tPCMTypes::i24>(dest, src1, src2,
 			ratiostart, ratioend, samples, FileInfo->Channels);
 		break;
-	case tRisaPCMTypes::ti32:			//!< 32bit integer linear PCM type
-		RisaCrossFadeBlend<tRisaPCMTypes::i32>(dest, src1, src2,
+	case tPCMTypes::ti32:			//!< 32bit integer linear PCM type
+		CrossFadeBlend<tPCMTypes::i32>(dest, src1, src2,
 			ratiostart, ratioend, samples, FileInfo->Channels);
 		break;
-	case tRisaPCMTypes::tf32:			//!< 32bit float linear PCM type
-		RisaCrossFadeBlend<tRisaPCMTypes::f32>(dest, src1, src2,
+	case tPCMTypes::tf32:			//!< 32bit float linear PCM type
+		CrossFadeBlend<tPCMTypes::f32>(dest, src1, src2,
 			ratiostart, ratioend, samples, FileInfo->Channels);
 		break;
 	default:
@@ -726,7 +726,7 @@ void tRisaWaveLoopManager::DoCrossFade(void *dest, void *src1,
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::ClearCrossFadeInformation()
+void tWaveLoopManager::ClearCrossFadeInformation()
 {
 	if(CrossFadeSamples) delete (PointerFreeGC) [] CrossFadeSamples, CrossFadeSamples = NULL;
 }
@@ -734,12 +734,12 @@ void tRisaWaveLoopManager::ClearCrossFadeInformation()
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetLabelExpression(const tRisaLabelStringType &label,
-	tRisaWaveLoopManager::tExpressionToken * ope,
+bool tWaveLoopManager::GetLabelExpression(const tLabelStringType &label,
+	tWaveLoopManager::tExpressionToken * ope,
 	risse_int *lv,
 	risse_int *rv, bool *is_rv_indirect)
 {
-	const tRisaLabelCharType * p = label.c_str();
+	const tLabelCharType * p = label.c_str();
 	tExpressionToken token;
 	tExpressionToken operation;
 	risse_int value  = 0;
@@ -813,12 +813,12 @@ bool tRisaWaveLoopManager::GetLabelExpression(const tRisaLabelStringType &label,
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::EvalLabelExpression(const tRisaLabelStringType &label)
+bool tWaveLoopManager::EvalLabelExpression(const tLabelStringType &label)
 {
 	// eval expression specified by 'label'
 	// commit the result when 'commit' is true.
 	// returns whether the label syntax is correct.
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 
 	tExpressionToken operation;
 	risse_int lvalue;
@@ -865,8 +865,8 @@ bool tRisaWaveLoopManager::EvalLabelExpression(const tRisaLabelStringType &label
 
 
 //---------------------------------------------------------------------------
-tRisaWaveLoopManager::tExpressionToken
-	tRisaWaveLoopManager::GetExpressionToken(const tRisaLabelCharType *  & p, risse_int * value)
+tWaveLoopManager::tExpressionToken
+	tWaveLoopManager::GetExpressionToken(const tLabelCharType *  & p, risse_int * value)
 {
 	// get token at pointer 'p'
 
@@ -915,7 +915,7 @@ tRisaWaveLoopManager::tExpressionToken
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetLabelCharInt(const tRisaLabelCharType *s, risse_int &v)
+bool tWaveLoopManager::GetLabelCharInt(const tLabelCharType *s, risse_int &v)
 {
 	// convert string to integer
 	risse_int r = 0;
@@ -944,7 +944,7 @@ bool tRisaWaveLoopManager::GetLabelCharInt(const tRisaLabelCharType *s, risse_in
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetInt(char *s, risse_int &v)
+bool tWaveLoopManager::GetInt(char *s, risse_int &v)
 {
 	// convert string to integer
 	risse_int r = 0;
@@ -973,7 +973,7 @@ bool tRisaWaveLoopManager::GetInt(char *s, risse_int &v)
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetInt64(char *s, risse_int64 &v)
+bool tWaveLoopManager::GetInt64(char *s, risse_int64 &v)
 {
 	// convert string to integer
 	risse_int64 r = 0;
@@ -1002,7 +1002,7 @@ bool tRisaWaveLoopManager::GetInt64(char *s, risse_int64 &v)
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetBool(char *s, bool &v)
+bool tWaveLoopManager::GetBool(char *s, bool &v)
 {
 	// convert string to boolean
 	if(!strcasecmp(s, "True"))		{	v = true;	return true;	}
@@ -1015,36 +1015,36 @@ bool tRisaWaveLoopManager::GetBool(char *s, bool &v)
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetCondition(char *s, tRisaWaveLoopLink::tLinkCondition &v)
+bool tWaveLoopManager::GetCondition(char *s, tWaveLoopLink::tLinkCondition &v)
 {
 	// get condition value
-	if(!strcasecmp(s, "no")) { v = tRisaWaveLoopLink::llcNone;				return true;	}
-	if(!strcasecmp(s, "eq")) { v = tRisaWaveLoopLink::llcEqual;				return true;	}
-	if(!strcasecmp(s, "ne")) { v = tRisaWaveLoopLink::llcNotEqual;			return true;	}
-	if(!strcasecmp(s, "gt")) { v = tRisaWaveLoopLink::llcGreater;			return true;	}
-	if(!strcasecmp(s, "ge")) { v = tRisaWaveLoopLink::llcGreaterOrEqual;	return true;	}
-	if(!strcasecmp(s, "lt")) { v = tRisaWaveLoopLink::llcLesser;			return true;	}
-	if(!strcasecmp(s, "le")) { v = tRisaWaveLoopLink::llcLesserOrEqual;		return true;	}
+	if(!strcasecmp(s, "no")) { v = tWaveLoopLink::llcNone;				return true;	}
+	if(!strcasecmp(s, "eq")) { v = tWaveLoopLink::llcEqual;				return true;	}
+	if(!strcasecmp(s, "ne")) { v = tWaveLoopLink::llcNotEqual;			return true;	}
+	if(!strcasecmp(s, "gt")) { v = tWaveLoopLink::llcGreater;			return true;	}
+	if(!strcasecmp(s, "ge")) { v = tWaveLoopLink::llcGreaterOrEqual;	return true;	}
+	if(!strcasecmp(s, "lt")) { v = tWaveLoopLink::llcLesser;			return true;	}
+	if(!strcasecmp(s, "le")) { v = tWaveLoopLink::llcLesserOrEqual;		return true;	}
 	return false;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
+bool tWaveLoopManager::GetString(char *s, tLabelStringType &v)
 {
 	// convert utf-8 string s to v
 #ifdef RISA_IN_LOOP_TUNER
 
 	// compute output (unicode) size
-	risse_int size = RisaUtf8ToWideCharString(s, NULL);
+	risse_int size = Utf8ToWideCharString(s, NULL);
 	if(size == -1) return false; // not able to convert the string
 
 	// allocate output buffer
 	risse_char *us = new (PointerFreeGC) risse_char[size + 1];
 	try
 	{
-		RisaUtf8ToWideCharString(s, us);
+		Utf8ToWideCharString(s, us);
 		us[size] = RISSE_W('\0');
 
 		// convert us (an array of wchar_t) to AnsiString
@@ -1067,7 +1067,7 @@ bool tRisaWaveLoopManager::GetString(char *s, tRisaLabelStringType &v)
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)
+bool tWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)
 {
 	// get name=value string at 'p'.
 	// returns whether the token can be got or not.
@@ -1140,7 +1140,7 @@ bool tRisaWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::ReadLinkInformation(char * & p, tRisaWaveLoopLink &link)
+bool tWaveLoopManager::ReadLinkInformation(char * & p, tWaveLoopLink &link)
 {
 	// read link information from 'p'.
 	// p must point '{' , which indicates start of the block.
@@ -1196,7 +1196,7 @@ bool tRisaWaveLoopManager::ReadLinkInformation(char * & p, tRisaWaveLoopLink &li
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::ReadLabelInformation(char * & p, tRisaWaveLabel &label)
+bool tWaveLoopManager::ReadLabelInformation(char * & p, tWaveLabel &label)
 {
 	// read label information from 'p'.
 	// p must point '{' , which indicates start of the block.
@@ -1244,10 +1244,10 @@ bool tRisaWaveLoopManager::ReadLabelInformation(char * & p, tRisaWaveLabel &labe
 
 
 //---------------------------------------------------------------------------
-bool tRisaWaveLoopManager::ReadInformation(char * p)
+bool tWaveLoopManager::ReadInformation(char * p)
 {
 	// read information from 'p'
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 
 	char *p_org = p;
 	Links.clear();
@@ -1260,9 +1260,9 @@ bool tRisaWaveLoopManager::ReadInformation(char * p)
 		char *p_length = strstr(p, "LoopLength=");
 		char *p_start  = strstr(p, "LoopStart=");
 		if(!p_length || !p_start) return false; // read error
-		tRisaWaveLoopLink link;
+		tWaveLoopLink link;
 		link.Smooth = false;
-		link.Condition = tRisaWaveLoopLink::llcNone;
+		link.Condition = tWaveLoopLink::llcNone;
 		link.RefValue = 0;
 		link.CondVar = 0;
 		risse_int64 start;
@@ -1302,7 +1302,7 @@ bool tRisaWaveLoopManager::ReadInformation(char * p)
 				p += 4;
 				while(isspace(*p)) p++;
 				if(!*p) return false;
-				tRisaWaveLoopLink link;
+				tWaveLoopLink link;
 				if(!ReadLinkInformation(p, link)) return false;
 				Links.push_back(link);
 			}
@@ -1311,7 +1311,7 @@ bool tRisaWaveLoopManager::ReadInformation(char * p)
 				p += 5;
 				while(isspace(*p)) p++;
 				if(!*p) return false;
-				tRisaWaveLabel label;
+				tWaveLabel label;
 				if(!ReadLabelInformation(p, label)) return false;
 				Labels.push_back(label);
 			}
@@ -1340,36 +1340,36 @@ bool tRisaWaveLoopManager::ReadInformation(char * p)
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::PutInt(AnsiString &s, risse_int v)
+void tWaveLoopManager::PutInt(AnsiString &s, risse_int v)
 {
 	s += AnsiString((int)v);
 }
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::PutInt64(AnsiString &s, risse_int64 v)
+void tWaveLoopManager::PutInt64(AnsiString &s, risse_int64 v)
 {
 	s += AnsiString((__int64)v);
 }
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::PutBool(AnsiString &s, bool v)
+void tWaveLoopManager::PutBool(AnsiString &s, bool v)
 {
 	s += v ? "True" : "False";
 }
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::PutCondition(AnsiString &s, tRisaWaveLoopLink::tLinkCondition v)
+void tWaveLoopManager::PutCondition(AnsiString &s, tWaveLoopLink::tLinkCondition v)
 {
 	switch(v)
 	{
-		case tRisaWaveLoopLink::llcNone:             s += "no" ; break;
-		case tRisaWaveLoopLink::llcEqual:            s += "eq" ; break;
-		case tRisaWaveLoopLink::llcNotEqual:         s += "ne" ; break;
-		case tRisaWaveLoopLink::llcGreater:          s += "gt" ; break;
-		case tRisaWaveLoopLink::llcGreaterOrEqual:   s += "ge" ; break;
-		case tRisaWaveLoopLink::llcLesser:           s += "lt" ; break;
-		case tRisaWaveLoopLink::llcLesserOrEqual:    s += "le" ; break;
+		case tWaveLoopLink::llcNone:             s += "no" ; break;
+		case tWaveLoopLink::llcEqual:            s += "eq" ; break;
+		case tWaveLoopLink::llcNotEqual:         s += "ne" ; break;
+		case tWaveLoopLink::llcGreater:          s += "gt" ; break;
+		case tWaveLoopLink::llcGreaterOrEqual:   s += "ge" ; break;
+		case tWaveLoopLink::llcLesser:           s += "lt" ; break;
+		case tWaveLoopLink::llcLesserOrEqual:    s += "le" ; break;
 	}
 }
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::PutString(AnsiString &s, tRisaLabelStringType v)
+void tWaveLoopManager::PutString(AnsiString &s, tLabelStringType v)
 {
 	// convert v to a utf-8 string
 	const risse_char *pi;
@@ -1382,13 +1382,13 @@ void tRisaWaveLoopManager::PutString(AnsiString &s, tRisaLabelStringType v)
 #endif
 
 	// count output bytes
-	int size = RisaWideCharToUtf8String(pi, NULL);
+	int size = WideCharToUtf8String(pi, NULL);
 
 	char * out = new (PointerFreeGC) char [size + 1];
 	try
 	{
 		// convert the string
-		RisaWideCharToUtf8String(pi, out);
+		WideCharToUtf8String(pi, out);
 		out[size] = '\0';
 
 		// append the string with quotation
@@ -1402,7 +1402,7 @@ void tRisaWaveLoopManager::PutString(AnsiString &s, tRisaLabelStringType v)
 	delete (PointerFreeGC) [] out;
 }
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::DoSpacing(AnsiString &l, int col)
+void tWaveLoopManager::DoSpacing(AnsiString &l, int col)
 {
 	// fill space until the string becomes specified length
 	static const char * spaces16 = "                ";
@@ -1419,10 +1419,10 @@ void tRisaWaveLoopManager::DoSpacing(AnsiString &l, int col)
 	}
 }
 //---------------------------------------------------------------------------
-void tRisaWaveLoopManager::WriteInformation(AnsiString &s)
+void tWaveLoopManager::WriteInformation(AnsiString &s)
 {
 	// write current link/label information into s
-	volatile tRisaCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 
 	// write banner
 	s = "#2.00\n# Sound Loop Information (utf-8)\n"
@@ -1432,7 +1432,7 @@ void tRisaWaveLoopManager::WriteInformation(AnsiString &s)
 /*
 Link { From=0000000000000000; To=0000000000000000; Smooth=False; Condition=ne; RefValue=444444444; CondVar=99; }
 */
-	for(gc_vector<tRisaWaveLoopLink>::iterator i = Links.begin();
+	for(gc_vector<tWaveLoopLink>::iterator i = Links.begin();
 		i != Links.end(); i++)
 	{
 		AnsiString l;
@@ -1477,7 +1477,7 @@ Link { From=0000000000000000; To=0000000000000000; Smooth=False; Condition=ne; R
 /*
 Label { Position=0000000000000000; name="                                         "; }
 */
-	for(gc_vector<tRisaWaveLabel>::iterator i = Labels.begin();
+	for(gc_vector<tWaveLabel>::iterator i = Labels.begin();
 		i != Labels.end(); i++)
 	{
 		AnsiString l;

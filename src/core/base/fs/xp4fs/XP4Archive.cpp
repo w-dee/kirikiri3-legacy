@@ -28,7 +28,7 @@ RISSE_DEFINE_SOURCE_ID(63449,40639,29098,17674,37258,38306,59594,20366);
 //! @brief		指定された位置のメモリから16bit LE整数を読み込む
 //! @param		mem メモリ
 //---------------------------------------------------------------------------
-static inline wxUint16 RisaReadI16LEFromMem(const unsigned char *mem)
+static inline wxUint16 ReadI16LEFromMem(const unsigned char *mem)
 {
 	return static_cast<wxUint16>(mem[0]) + (static_cast<wxUint16>(mem[1]) << 8);
 }
@@ -39,7 +39,7 @@ static inline wxUint16 RisaReadI16LEFromMem(const unsigned char *mem)
 //! @brief		指定された位置のメモリから32bit LE整数を読み込む
 //! @param		mem メモリ
 //---------------------------------------------------------------------------
-static inline wxUint32 RisaReadI32LEFromMem(const unsigned char *mem)
+static inline wxUint32 ReadI32LEFromMem(const unsigned char *mem)
 {
 	return static_cast<wxUint32>(mem[0]) + (static_cast<wxUint32>(mem[1]) << 8) +
 		(static_cast<wxUint32>(mem[2]) << 16) + (static_cast<wxUint32>(mem[3]) << 24);
@@ -51,10 +51,10 @@ static inline wxUint32 RisaReadI32LEFromMem(const unsigned char *mem)
 //! @brief		指定された位置のメモリから64bit LE整数を読み込む
 //! @param		mem メモリ
 //---------------------------------------------------------------------------
-static inline wxUint64 RisaReadI64LEFromMem(const unsigned char *mem)
+static inline wxUint64 ReadI64LEFromMem(const unsigned char *mem)
 {
-	wxUint32 low  = RisaReadI32LEFromMem(mem);
-	wxUint32 high = RisaReadI32LEFromMem(mem + 4);
+	wxUint32 low  = ReadI32LEFromMem(mem);
+	wxUint32 high = ReadI32LEFromMem(mem + 4);
 	return (static_cast<wxUint64>(high) << 32) | (static_cast<wxUint64>(low));
 }
 //---------------------------------------------------------------------------
@@ -69,7 +69,7 @@ static inline wxUint64 RisaReadI64LEFromMem(const unsigned char *mem)
 //! @param		chunksize チャンクが見つかった場合、そのチャンクのサイズが入る
 //! @return		チャンクが見つかった場合に 真、見つからなかった場合は偽
 //---------------------------------------------------------------------------
-static bool RisaFindChunk(const unsigned char * chunkname,
+static bool FindChunk(const unsigned char * chunkname,
 	const unsigned char *mem, size_t memsize,
 	const unsigned char ** chunkcontent, size_t * chunksize)
 {
@@ -83,11 +83,11 @@ static bool RisaFindChunk(const unsigned char * chunkname,
 			mem[i+3] == chunkname[3])
 		{
 			// チャンクが見つかった
-			if(chunksize) *chunksize = RisaReadI32LEFromMem(mem + i + 4);
+			if(chunksize) *chunksize = ReadI32LEFromMem(mem + i + 4);
 			if(chunkcontent) *chunkcontent = mem + i + 8;
 			return true;
 		}
-		i += RisaReadI32LEFromMem(mem + i + 4) + 8;
+		i += ReadI32LEFromMem(mem + i + 4) + 8;
 	}
 	return false; // チャンクが見つからなかった
 }
@@ -101,7 +101,7 @@ static bool RisaFindChunk(const unsigned char * chunkname,
 
 
 //---------------------------------------------------------------------------
-tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta,
+tXP4Archive::tFile::tFile(tXP4Archive *owner, const unsigned char * meta,
 	size_t metasize, tString & inarchivename, bool &deleted)
 {
 	// この時点で meta, metasize は File チャンクの先頭 'File' の
@@ -111,21 +111,21 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 
 	// info チャンクを探す
 	static unsigned char chunkname_info[] = { 'i', 'n', 'f', 'o' };
-	if(!RisaFindChunk(chunkname_info, meta, metasize, &chunk, &chunksize))
+	if(!FindChunk(chunkname_info, meta, metasize, &chunk, &chunksize))
 	{
 		// info チャンクが見つからなかった
 		eRisaException::Throw(RISSE_WS_TR("chunk 'info' not found"));
 	}
 
 	// info チャンクから情報を読み取る
-	Flags = RisaReadI16LEFromMem(chunk + 0);
+	Flags = ReadI16LEFromMem(chunk + 0);
 	Flags &=~ RISA__XP4_FILE_MARKED; // MARKED はクリア
 	inarchivename = tString(wxString(reinterpret_cast<const char *>(chunk + 2), wxConvUTF8));
 	deleted = (Flags & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED ;
 
 	// time チャンクを探す
 	static unsigned char chunkname_time[] = { 't', 'i', 'm', 'e' };
-	if(RisaFindChunk(chunkname_time, meta, metasize, &chunk, &chunksize))
+	if(FindChunk(chunkname_time, meta, metasize, &chunk, &chunksize))
 	{
 		// time チャンクから情報を読み取る
 		// time チャンクは ファイルが '削除' とマークされている場合は
@@ -137,11 +137,11 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 		Time.Set(
 			chunk[3], // day
 			monthes[static_cast<int>(chunk[2]) >= 12 ? 0 : static_cast<int>(chunk[2])], // month
-			RisaReadI16LEFromMem(chunk + 0), // year
+			ReadI16LEFromMem(chunk + 0), // year
 			chunk[4], // hour
 			chunk[5], // minute
 			chunk[6], // second
-			RisaReadI16LEFromMem(chunk + 7) // millisecond
+			ReadI16LEFromMem(chunk + 7) // millisecond
 			 );
 	}
 	else
@@ -152,7 +152,7 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 
 	// Segm チャンクを探す
 	static unsigned char chunkname_Segm[] = { 'S', 'e', 'g', 'm' };
-	if(RisaFindChunk(chunkname_Segm, meta, metasize, &chunk, &chunksize))
+	if(FindChunk(chunkname_Segm, meta, metasize, &chunk, &chunksize))
 	{
 		Size = 0;
 		SegmentStart = owner->GetSegments().size();
@@ -163,21 +163,21 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 		size_t subchunksize;
 		const unsigned char *chunk_limit = chunk + chunksize;
 		size_t left = chunk_limit - chunk;
-		while(RisaFindChunk(chunkname_segm, chunk, left, &subchunk, &subchunksize))
+		while(FindChunk(chunkname_segm, chunk, left, &subchunk, &subchunksize))
 		{
 			// Segm チャンクが見つかった
-			Size += RisaReadI64LEFromMem(subchunk + 9);
+			Size += ReadI64LEFromMem(subchunk + 9);
 			chunk = subchunk + subchunksize;
 			left = chunk_limit - chunk;
 			SegmentCount ++;
 
 			// owner にセグメントの情報をpush
-			tRisaXP4Archive::tSegment segment;
+			tXP4Archive::tSegment segment;
 			segment.Flags       = static_cast<wxUint8>(subchunk[0]);
-			segment.Offset      = RisaReadI64LEFromMem(subchunk + 1);
-			segment.Size        = RisaReadI64LEFromMem(subchunk + 9);
-			segment.StoreOffset = RisaReadI64LEFromMem(subchunk + 17);
-			segment.StoreSize   = RisaReadI64LEFromMem(subchunk + 25);
+			segment.Offset      = ReadI64LEFromMem(subchunk + 1);
+			segment.Size        = ReadI64LEFromMem(subchunk + 9);
+			segment.StoreOffset = ReadI64LEFromMem(subchunk + 17);
+			segment.StoreSize   = ReadI64LEFromMem(subchunk + 25);
 			owner->GetSegments().push_back(segment);
 		}
 	}
@@ -189,7 +189,7 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 
 	// ハッシュ用 チャンクを探す(現状はsha1固定)
 	static unsigned char chunkname_sha1[] = { 's', 'h', 'a', '1' };
-	if(RisaFindChunk(chunkname_sha1, meta,
+	if(FindChunk(chunkname_sha1, meta,
 		metasize, &chunk, &chunksize))
 	{
 		if(chunksize != sizeof(Hash))
@@ -206,14 +206,14 @@ tRisaXP4Archive::tFile::tFile(tRisaXP4Archive *owner, const unsigned char * meta
 
 
 //---------------------------------------------------------------------------
-tRisaXP4Archive::tRisaXP4Archive(const tString & filename, iMapCallback & callback)
+tXP4Archive::tXP4Archive(const tString & filename, iMapCallback & callback)
 {
 	// アーカイブファイルを読み込む
 	FileName = filename;
 
 	// アーカイブファイルを開く
 	std::auto_ptr<tBinaryStream>
-		stream(tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
+		stream(tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
 
 	// ヘッダのシグニチャをチェック
 	static unsigned char XP4Mark1[] = // 8bytes
@@ -291,7 +291,7 @@ tRisaXP4Archive::tRisaXP4Archive(const tString & filename, iMapCallback & callba
 	const unsigned char *chunk;
 	size_t chunksize;
 	static unsigned char chunkname_Item[] = { 'I', 't', 'e', 'm' };
-	if(!RisaFindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
+	if(!FindChunk(chunkname_Item, raw_index, raw_index_size, &chunk, &chunksize))
 	{
 		eRisaException::Throw(tString(wxString::Format(
 			RISSE_WS_TR("chunk 'Item' not found in file '%s'"),
@@ -306,7 +306,7 @@ tRisaXP4Archive::tRisaXP4Archive(const tString & filename, iMapCallback & callba
 	static unsigned char chunkname_File[] = { 'F', 'i', 'l', 'e' };
 	tString inarchivename;
 	bool deleted;
-	while(RisaFindChunk(chunkname_File, mem, left, &chunk, &chunksize))
+	while(FindChunk(chunkname_File, mem, left, &chunk, &chunksize))
 	{
 		// File チャンクが見つかった
 		risse_size idx = Files.size();
@@ -324,13 +324,13 @@ tRisaXP4Archive::tRisaXP4Archive(const tString & filename, iMapCallback & callba
 	/*
 		// Meta チャンクを探す
 		static unsigned char chunkname_Meta[] = { 'M', 'e', 't', 'a' };
-		if(RisaFindChunk(chunkname_Meta, raw_index, raw_index_size, &chunk, &chunksize))
+		if(FindChunk(chunkname_Meta, raw_index, raw_index_size, &chunk, &chunksize))
 		{
 			// targ サブチャンクを探す
 			static unsigned char chunkname_targ[] = { 't', 'a', 'r', 'g' };
 			const unsigned char *targ_chunk;
 			size_t targ_chunksize;
-			if(RisaFindChunk(chunkname_targ, chunk, chunksize, &targ_chunk, &targ_chunksize))
+			if(FindChunk(chunkname_targ, chunk, chunksize, &targ_chunk, &targ_chunksize))
 			{
 				// これはアーカイブの元となったファイル名
 				TargetDir = wxString(reinterpret_cast<const char *>(targ_chunk), wxConvUTF8);
@@ -345,19 +345,19 @@ tRisaXP4Archive::tRisaXP4Archive(const tString & filename, iMapCallback & callba
 
 
 //---------------------------------------------------------------------------
-tRisaXP4Archive::~tRisaXP4Archive()
+tXP4Archive::~tXP4Archive()
 {
 	// キャッシュをクリアする
 	// このアーカイブに関連したキャッシュのみを解放できるように実装することも
 	// できるが、処理の単純化のためにすべてキャッシュをクリアしてしまうことにする
-	depends_on<tRisaXP4SegmentCache>::locked_instance()->Clear();
-	depends_on<tRisaXP4StreamCache>::locked_instance()->Clear();
+	depends_on<tXP4SegmentCache>::locked_instance()->Clear();
+	depends_on<tXP4StreamCache>::locked_instance()->Clear();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4Archive::Stat(risse_size idx, tRisaStatStruc & struc)
+void tXP4Archive::Stat(risse_size idx, tStatStruc & struc)
 {
 	struc.Clear();
 
@@ -370,11 +370,11 @@ void tRisaXP4Archive::Stat(risse_size idx, tRisaStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tRisaXP4Archive::CreateStream(
-			boost::shared_ptr<tRisaXP4Archive> ptr,
+tBinaryStream * tXP4Archive::CreateStream(
+			boost::shared_ptr<tXP4Archive> ptr,
 			risse_size idx, risse_uint32 flags)
 {
-	return new tRisaXP4ArchiveStream(ptr, idx, flags);
+	return new tXP4ArchiveStream(ptr, idx, flags);
 }
 //---------------------------------------------------------------------------
 

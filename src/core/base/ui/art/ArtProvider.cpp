@@ -32,7 +32,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief Risa用ArtProvider
 //---------------------------------------------------------------------------
-class tRisaArtProvider : public wxArtProvider
+class tArtProvider : public wxArtProvider
 {
 protected:
 	virtual wxBitmap CreateBitmap(const wxArtID& id, const wxArtClient& client,
@@ -44,18 +44,18 @@ protected:
 //---------------------------------------------------------------------------
 //! @brief ビットマップを作成して返す
 //---------------------------------------------------------------------------
-wxBitmap tRisaArtProvider::CreateBitmap(const wxArtID& id,
+wxBitmap tArtProvider::CreateBitmap(const wxArtID& id,
 									 const wxArtClient& client,
 									 const wxSize& size)
 {
-	if(id == wxT("RisaRightTriangle"))
+	if(id == wxT("RightTriangle"))
 	{
 		if(size != wxDefaultSize && size.GetWidth() <= 12 && size.GetHeight() <= 12)
 			return wxBitmap(right_triangle_small_xpm);
 		else
 			return wxBitmap(right_triangle_xpm);
 	}
-	if(id == wxT("RisaEvent"))
+	if(id == wxT("Event"))
 	{
 		return wxBitmap(event_xpm);
 	}
@@ -65,16 +65,16 @@ wxBitmap tRisaArtProvider::CreateBitmap(const wxArtID& id,
 
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaArtProvider を登録するためのシングルトン
+//! @brief		tArtProvider を登録するためのシングルトン
 //---------------------------------------------------------------------------
-class tRisaArtProviderRegisterer : public singleton_base<tRisaArtProviderRegisterer>
+class tArtProviderRegisterer : public singleton_base<tArtProviderRegisterer>
 {
-	tRisaArtProvider * Provider;
+	tArtProvider * Provider;
 public:
 	//! @brief コンストラクタ
-	tRisaArtProviderRegisterer()
+	tArtProviderRegisterer()
 	{
-		Provider = new tRisaArtProvider;
+		Provider = new tArtProvider;
 		wxArtProvider::Push(Provider);
 	}
 };

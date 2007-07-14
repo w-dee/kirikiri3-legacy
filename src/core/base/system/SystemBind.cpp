@@ -104,12 +104,12 @@ RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/System)
 
 
 //---------------------------------------------------------------------------
-tRisaSystemRegisterer::tRisaSystemRegisterer()
+tSystemRegisterer::tSystemRegisterer()
 {
 	SystemClass =  new tNC_System();
 	try
 	{
-		depends_on<tRisaRisseScriptEngine>::locked_instance()->
+		depends_on<tRisseScriptEngine>::locked_instance()->
 			RegisterGlobalObject(RISSE_WS("System"), SystemClass);
 	}
 	catch(...)
@@ -122,7 +122,7 @@ tRisaSystemRegisterer::tRisaSystemRegisterer()
 
 
 //---------------------------------------------------------------------------
-tRisaSystemRegisterer::~tRisaSystemRegisterer()
+tSystemRegisterer::~tSystemRegisterer()
 {
 	SystemClass->Release();
 }
@@ -130,7 +130,7 @@ tRisaSystemRegisterer::~tRisaSystemRegisterer()
 
 
 //---------------------------------------------------------------------------
-bool tRisaSystemRegisterer::GetExceptionHandlerObject(tVariantClosure & dest)
+bool tSystemRegisterer::GetExceptionHandlerObject(tVariantClosure & dest)
 {
 	tVariant val;
 

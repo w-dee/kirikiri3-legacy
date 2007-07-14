@@ -26,9 +26,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		XP4FS の実装
 //---------------------------------------------------------------------------
-class tRisaXP4FS : public tRisaFileSystem
+class tXP4FS : public tFileSystem
 {
-	tRisaCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
+	tCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 
 	//! @brief ファイル一個一個の情報
 	struct tFileItemBasicInfo
@@ -47,23 +47,23 @@ class tRisaXP4FS : public tRisaFileSystem
 			{ return Name < rhs.Name; } //!< 比較関数
 	};
 
-	gc_vector<boost::shared_ptr<tRisaXP4Archive> > Archives; //!< アーカイブの配列
+	gc_vector<boost::shared_ptr<tXP4Archive> > Archives; //!< アーカイブの配列
 	gc_vector<tFileItemInfo> FileItems; //! ファイルの情報の配列
 
 public:
 	//! @brief		コンストラクタ
-	tRisaXP4FS(const tString & name);
+	tXP4FS(const tString & name);
 
-	//-- tRisaFileSystem メンバ
+	//-- tFileSystem メンバ
 	//! @brief		デストラクタ
-	~tRisaXP4FS();
+	~tXP4FS();
 
 	//! @brief		ファイル一覧を取得する
 	//! @param		dirname ディレクトリ名
 	//! @param		callback コールバックオブジェクト
 	//! @return		取得できたファイル数
 	size_t GetFileListAt(const tString & dirname,
-		tRisaFileSystemIterationCallback * callback);
+		tFileSystemIterationCallback * callback);
 
 	//! @brief		ファイルが存在するかどうかを得る
 	//! @param		filename ファイル名
@@ -92,7 +92,7 @@ public:
 	//! @brief		指定されたファイルの stat を得る
 	//! @param		filename ファイル名
 	//! @param		struc stat 結果の出力先
-	void Stat(const tString & filename, tRisaStatStruc & struc);
+	void Stat(const tString & filename, tStatStruc & struc);
 
 	//! @brief		指定されたファイルのストリームを得る
 	//! @param		filename ファイル名
@@ -100,7 +100,7 @@ public:
 	//! @return		ストリームオブジェクト
 	tBinaryStream * CreateStream(const tString & filename, risse_uint32 flags);
 
-	//-- tRisaFileSystem メンバ ここまで
+	//-- tFileSystem メンバ ここまで
 private:
 	//! @brief		name ファイル名で始まる最初の FileItems内のインデックスを得る
 	//! @param		name 名前

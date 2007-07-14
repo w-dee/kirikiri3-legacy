@@ -23,16 +23,16 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		Risa UI 用フレームの基本クラス
 //---------------------------------------------------------------------------
-class tRisaUIFrame : public wxFrame, protected depends_on<tRisaConfig>
+class tUIFrame : public wxFrame, protected depends_on<tConfig>
 {
 	wxString FrameId; //!< フレームの Id (位置を記録したりするのに使う)
 
 public:
 	//! @brief		コンストラクタ
-	tRisaUIFrame(const wxString & id, const wxString & title);
+	tUIFrame(const wxString & id, const wxString & title);
 
 	//! @brief		デストラクタ
-	~tRisaUIFrame();
+	~tUIFrame();
 
 private:
 	//! @brief		config に格納された位置情報を読み出す

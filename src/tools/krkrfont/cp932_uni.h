@@ -20,8 +20,8 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-risse_size RisaSJISToUnicodeString(const char * in, risse_char *out);
-risse_char RisaSJISToUnicode(risse_uint sjis);
+risse_size SJISToUnicodeString(const char * in, risse_char *out);
+risse_char SJISToUnicode(risse_uint sjis);
 
 //---------------------------------------------------------------------------
 } // namespace Risa

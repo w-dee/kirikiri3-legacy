@@ -27,12 +27,12 @@ namespace Risa {
 //! @param		metrics メトリック
 //! @note		入力ビットマップのサイズは blackboxw と blackboxh で指定
 //---------------------------------------------------------------------------
-tRisaGlyphBitmap::tRisaGlyphBitmap(
+tGlyphBitmap::tGlyphBitmap(
 	risse_uint8 * indata,
 	risse_int inpitch,
 	risse_int originx, risse_int originy,
 	risse_uint blackboxw, risse_uint blackboxh,
-	const tRisaGlyphMetrics & metrics)
+	const tGlyphMetrics & metrics)
 {
 	// フィールドのクリア
 	RefCount = 1; // 参照カウンタの初期値は 1
@@ -83,11 +83,11 @@ tRisaGlyphBitmap::tRisaGlyphBitmap(
 //! @brief		コピーコンストラクタ
 //! @param		ref 参照オブジェクト
 //---------------------------------------------------------------------------
-tRisaGlyphBitmap::tRisaGlyphBitmap(const tRisaGlyphBitmap & ref)
+tGlyphBitmap::tGlyphBitmap(const tGlyphBitmap & ref)
 {
 	// コピーコンストラクタは未サポート
 	// TODO: ちゃんとした例外オブジェクトを投げよう
-	throw "unimplemented: tRisaGlyphBitmap::tRisaGlyphBitmap(const tRisaGlyphBitmap & ref)";
+	throw "unimplemented: tGlyphBitmap::tGlyphBitmap(const tGlyphBitmap & ref)";
 }
 //---------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ tRisaGlyphBitmap::tRisaGlyphBitmap(const tRisaGlyphBitmap & ref)
 //---------------------------------------------------------------------------
 //! @brief		デストラクタ
 //---------------------------------------------------------------------------
-tRisaGlyphBitmap::~tRisaGlyphBitmap()
+tGlyphBitmap::~tGlyphBitmap()
 {
 	if(Data) delete [] Data;
 }
@@ -105,7 +105,7 @@ tRisaGlyphBitmap::~tRisaGlyphBitmap()
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを一つ増やす
 //---------------------------------------------------------------------------
-void tRisaGlyphBitmap::AddRef()
+void tGlyphBitmap::AddRef()
 {
 	++RefCount;
 }
@@ -115,7 +115,7 @@ void tRisaGlyphBitmap::AddRef()
 //---------------------------------------------------------------------------
 //! @brief		参照カウンタを一つ減らし、0になればオブジェクトを消滅させる
 //---------------------------------------------------------------------------
-void tRisaGlyphBitmap::Release()
+void tGlyphBitmap::Release()
 {
 	if(--RefCount == 0)
 		delete this;

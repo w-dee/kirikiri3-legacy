@@ -29,14 +29,14 @@ _ALIGN16(const float) RISA_V_VEC_MAGNIFY[4] =
 //---------------------------------------------------------------------------
 //! @brief		int16→float32変換
 //---------------------------------------------------------------------------
-void _RisaPCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples)
+void _PCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples)
 {
 	float * d = reinterpret_cast<float*>(dest);
 	const risse_int16 * s = reinterpret_cast<const risse_int16*>(src);
 	size_t n;
 
 	// d がアラインメントされるまで一つずつ処理をする
-	for(n = 0  ; n < numsamples && !RisaIsAlignedTo128bits(d+n); n ++)
+	for(n = 0  ; n < numsamples && !IsAlignedTo128bits(d+n); n ++)
 	{
 		d[n] = s[n] * (1.0f/32767.0f);
 	}
@@ -63,22 +63,22 @@ void _RisaPCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restr
 
 //---------------------------------------------------------------------------
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, RisaPCMConvertLoopInt16ToFloat32, (risse_restricted void * dest, risse_restricted const void * src, size_t numsamples),
-	_RisaPCMConvertLoopInt16ToFloat32, (dest, src, numsamples) )
+	void, PCMConvertLoopInt16ToFloat32, (risse_restricted void * dest, risse_restricted const void * src, size_t numsamples),
+	_PCMConvertLoopInt16ToFloat32, (dest, src, numsamples) )
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		float32→int16変換
 //---------------------------------------------------------------------------
-void _RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples)
+void _PCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples)
 {
 	risse_uint16 * d = reinterpret_cast<risse_uint16*>(dest);
 	const float * s = reinterpret_cast<const float*>(src);
 	size_t n;
 
 	// s がアラインメントされるまで一つずつ処理をする
-	for(n = 0; n < numsamples && !RisaIsAlignedTo128bits(s+n); n ++)
+	for(n = 0; n < numsamples && !IsAlignedTo128bits(s+n); n ++)
 	{
 		float v = s[n] * 32767.0;
 		d[n] = 
@@ -90,7 +90,7 @@ void _RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restr
 	// メインの部分
 	if(numsamples >= 8)
 	{
-		RisaSetRoundingModeToNearest_SSE();
+		SetRoundingModeToNearest_SSE();
 		for(     ; n < numsamples - 7; n += 8)
 		{
 			*(__m64*)(d + n + 0) = _mm_cvtps_pi16(*(__m128*)(s + n + 0)*PM128(RISA_V_VEC_MAGNIFY));
@@ -113,8 +113,8 @@ void _RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restr
 
 //---------------------------------------------------------------------------
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, RisaPCMConvertLoopFloat32ToInt16, (risse_restricted void * dest, risse_restricted const void * src, size_t numsamples),
-	_RisaPCMConvertLoopFloat32ToInt16, (dest, src, numsamples) )
+	void, PCMConvertLoopFloat32ToInt16, (risse_restricted void * dest, risse_restricted const void * src, size_t numsamples),
+	_PCMConvertLoopFloat32ToInt16, (dest, src, numsamples) )
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------

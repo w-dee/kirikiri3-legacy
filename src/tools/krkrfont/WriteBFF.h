@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief BFF (Risa3 Bitmap Font File) の書き出し
+//! @brief BFF (3 Bitmap Font File) の書き出し
 //---------------------------------------------------------------------------
 
 #ifndef _WRITEBFF_H_
@@ -17,7 +17,7 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-void RisaWriteGlyphBitmap(tRisaFreeTypeFace * face, const wxString & out_file,
+void WriteGlyphBitmap(tFreeTypeFace * face, const wxString & out_file,
 	bool write_bitmap,
 	bool write_kerning_vector, wxWindow * parent);
 

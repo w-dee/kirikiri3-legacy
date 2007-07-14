@@ -70,14 +70,14 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 
-class tRisaEventInfo;
+class tEventInfo;
 //---------------------------------------------------------------------------
 //! @brief		イベントの発生先インターフェース
 //---------------------------------------------------------------------------
-class tRisaEventDestination
+class tEventDestination
 {
 public:
-	virtual void OnEvent(tRisaEventInfo * info) = 0; //!< イベントが配信されるとき
+	virtual void OnEvent(tEventInfo * info) = 0; //!< イベントが配信されるとき
 };
 //---------------------------------------------------------------------------
 
@@ -85,9 +85,9 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		イベント情報クラス
 //---------------------------------------------------------------------------
-class tRisaEventInfo : public tCollectee
+class tEventInfo : public tCollectee
 {
-	friend class tRisaEventSystem;
+	friend class tEventSystem;
 public:
 	//! @brief  イベントの優先度
 	enum tPriority
@@ -105,7 +105,7 @@ public:
 private:
 	int Id; //!< イベントID (Source固有)
 	void * Source; //!< イベントの発生元
-	tRisaEventDestination * Destination; //!< イベントの配信先 Risse オブジェクト
+	tEventDestination * Destination; //!< イベントの配信先 Risse オブジェクト
 	tPriority Priority; //!< イベントの優先度
 	risse_uint64 Tick; //!< イベントが配信される tick
 
@@ -116,10 +116,10 @@ protected:
 
 public:
 	//! @brief コンストラクタ
-	tRisaEventInfo(
+	tEventInfo(
 		int id,
 		void * source = NULL,
-		tRisaEventDestination * destination = NULL,
+		tEventDestination * destination = NULL,
 		tPriority prio = epNormal) :
 			Id(id),
 			Source(source),
@@ -131,7 +131,7 @@ public:
 	int GetId() const { return Id; } //!< IDを得る
 	void * GetSource() { return Source; } //!< イベント発生源を得る
 	risse_uint64 GetTick() const { return Tick; } //!< Tick を得る
-	tRisaEventDestination * GetDestination() { return Destination; } //!< イベント配信先を得る
+	tEventDestination * GetDestination() { return Destination; } //!< イベント配信先を得る
 	tPriority GetPriority() const { return Priority; } //!< イベントの優先順位を得る
 
 };
@@ -142,7 +142,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		イベント管理システム
 //---------------------------------------------------------------------------
-class tRisaEventSystem : public singleton_base<tRisaEventSystem>
+class tEventSystem : public singleton_base<tEventSystem>
 {
 public:
 	//! @brief イベントのタイプ
@@ -154,26 +154,26 @@ public:
 	};
 
 private:
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	typedef gc_deque<tRisaEventInfo *> tQueue; //!< キュー用コンテナの typedef
-	tQueue Queues[tRisaEventInfo::epMax + 1]; //!< イベント用キュー
+	typedef gc_deque<tEventInfo *> tQueue; //!< キュー用コンテナの typedef
+	tQueue Queues[tEventInfo::epMax + 1]; //!< イベント用キュー
 	bool CanDeliverEvents; //!< イベントを配信可能かどうか
 	bool HasPendingEvents; //!< post してから処理されていないイベントが存在する場合に真
 
 public:
 	//! @brief		コンストラクタ
-	tRisaEventSystem();
+	tEventSystem();
 
 	//! @brief		デストラクタ
-	~tRisaEventSystem();
+	~tEventSystem();
 
 private:
 	//! @brief		指定された優先度のキューの中のイベントを配信する
 	//! @param		prio		優先度
-	//! @note		prio!=tRisaEventInfo::epExclusiveの場合、epExclusiveのイベントが
+	//! @note		prio!=tEventInfo::epExclusiveの場合、epExclusiveのイベントが
 	//!				ポストされたり、CanDeliverEvents が偽になった場合は即座に戻る。
-	void DeliverQueue(tRisaEventInfo::tPriority prio, risse_uint64 mastertick);
+	void DeliverQueue(tEventInfo::tPriority prio, risse_uint64 mastertick);
 
 	//! @brief		すべてのイベントを配信する
 	//! @param		mastertick	マスタ・ティックカウント
@@ -193,7 +193,7 @@ public:
 	//! @brief		イベントをポストする
 	//! @param		event		イベント
 	//! @param		type		イベントタイプ
-	void PostEvent(tRisaEventInfo * event, tEventType type = etDefault);
+	void PostEvent(tEventInfo * event, tEventType type = etDefault);
 
 
 	//! @brief		指定されたイベントがすでにキューに入っている数を数える
@@ -203,7 +203,7 @@ public:
 	//! @param		limit		数え上げる最大値(0=全部数える)
 	//! @return		name と source と prio が一致するイベントがすでにキューにあるかどうか
 	size_t CountEventsInQueue(int id,
-		void * source, tRisaEventInfo::tPriority prio, size_t limit = 1);
+		void * source, tEventInfo::tPriority prio, size_t limit = 1);
 
 	//! @brief		イベントをキャンセルする
 	//! @param		source		キャンセルしたいイベントの発生元

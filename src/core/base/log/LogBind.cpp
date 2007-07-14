@@ -26,14 +26,14 @@ RISSE_DEFINE_SOURCE_ID(17391,44513,60617,19121,16540,39031,65356,19696);
 //---------------------------------------------------------------------------
 //! @brief		"Log" クラス
 //---------------------------------------------------------------------------
-class tRisaLogClass : public tClassBase, depends_on<tRisaLogger>
+class tLogClass : public tClassBase, depends_on<tLogger>
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaLogClass(tScriptEngine * engine) :
+	tLogClass(tScriptEngine * engine) :
 		tClassBase(tSS<'L','o','g'>(), engine->ObjectClass)
 	{
 		RegisterMembers();
@@ -49,16 +49,16 @@ public:
 		// このクラスのインスタンスは作られないのでinitializeメソッドはないが、
 		// construct メソッドはある (finalであることを表す)
 
-		BindFunction(this, ss_construct, &tRisaLogClass::construct,
+		BindFunction(this, ss_construct, &tLogClass::construct,
 			tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
 									tMemberAttribute(tMemberAttribute::ocFinal)) );
-		BindFunction(this, tSS<'d','e','b','u','g'>(), &tRisaLogClass::debug);
-		BindFunction(this, tSS<'i','n','f','o'>(), &tRisaLogClass::info);
-		BindFunction(this, tSS<'n','o','t','i','c','e'>(), &tRisaLogClass::notice);
-		BindFunction(this, tSS<'w','a','r','n','i','n','g'>(), &tRisaLogClass::warning);
-		BindFunction(this, tSS<'e','r','r','o','r'>(), &tRisaLogClass::error);
-		BindFunction(this, tSS<'r','e','c','o','r','d'>(), &tRisaLogClass::record);
-		BindFunction(this, tSS<'c','r','i','t','i','c','a','l'>(), &tRisaLogClass::critical);
+		BindFunction(this, tSS<'d','e','b','u','g'>(), &tLogClass::debug);
+		BindFunction(this, tSS<'i','n','f','o'>(), &tLogClass::info);
+		BindFunction(this, tSS<'n','o','t','i','c','e'>(), &tLogClass::notice);
+		BindFunction(this, tSS<'w','a','r','n','i','n','g'>(), &tLogClass::warning);
+		BindFunction(this, tSS<'e','r','r','o','r'>(), &tLogClass::error);
+		BindFunction(this, tSS<'r','e','c','o','r','d'>(), &tLogClass::record);
+		BindFunction(this, tSS<'c','r','i','t','i','c','a','l'>(), &tLogClass::critical);
 	}
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
@@ -77,37 +77,37 @@ public: // Risse 用メソッドなど
 
 	static void debug(const tString & content) //!< debug メッセージ出力
 	{
-		tRisaLogger::instance()->Log(content, tRisaLogger::llDebug);
+		tLogger::instance()->Log(content, tLogger::llDebug);
 	}
 
 	static void info(const tString & content) //!< info メッセージ出力
 	{
-		tRisaLogger::instance()->Log(content, tRisaLogger::llInfo);
+		tLogger::instance()->Log(content, tLogger::llInfo);
 	}
 
 	static void notice(const tString & content) //!< notice メッセージ出力
 	{
-		tRisaLogger::instance()->Log(content, tRisaLogger::llNotice);
+		tLogger::instance()->Log(content, tLogger::llNotice);
 	}
 
 	static void warning(const tString & content) //!< warning メッセージ出力
 	{
-		tRisaLogger::instance()->Log(content, tRisaLogger::llWarning);
+		tLogger::instance()->Log(content, tLogger::llWarning);
 	}
 
 	static void error(const tString & content) //!< error メッセージ出力
 	{
-		tRisaLogger::instance()->Log(content, tRisaLogger::llError);
+		tLogger::instance()->Log(content, tLogger::llError);
 	}
 
 	static void record(const tString & content) //!< record メッセージ出力
 	{
-		tRisaLogger::instance()->Log(content, tRisaLogger::llRecord);
+		tLogger::instance()->Log(content, tLogger::llRecord);
 	}
 
 	static void critical(const tString & content) //!< critical メッセージ出力
 	{
-		tRisaLogger::instance()->Log(content, tRisaLogger::llCritical);
+		tLogger::instance()->Log(content, tLogger::llCritical);
 	}
 
 };
@@ -117,7 +117,7 @@ public: // Risse 用メソッドなど
 
 //---------------------------------------------------------------------------
 //! @brief		Log クラスレジストラ
-template class tRisaRisseClassRegisterer<tRisaLogClass>;
+template class tRisseClassRegisterer<tLogClass>;
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------

@@ -24,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(49404,13781,19467,19024,25758,42474,10136,44880);
 
 
 //---------------------------------------------------------------------------
-tRisaXP4StreamCache::tRisaXP4StreamCache()
+tXP4StreamCache::tXP4StreamCache()
 {
 	// 変数を初期化
 	Age = 0;
@@ -39,7 +39,7 @@ tRisaXP4StreamCache::tRisaXP4StreamCache()
 
 
 //---------------------------------------------------------------------------
-tRisaXP4StreamCache::~tRisaXP4StreamCache()
+tXP4StreamCache::~tXP4StreamCache()
 {
 	ReleaseAll(); // すべてを解放
 }
@@ -47,9 +47,9 @@ tRisaXP4StreamCache::~tRisaXP4StreamCache()
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const tString & name)
+tBinaryStream * tXP4StreamCache::GetStream(void * pointer, const tString & name)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	// linear search wiil be enough here because the 
 	// RISA__MAX_ARCHIVE_Stream_CACHE is relatively small
@@ -67,15 +67,15 @@ tBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const tString & n
 
 	// not found in the pool
 	// simply create a stream and return it
-	return tRisaFileSystemManager::instance()->CreateStream(name, RISSE_BS_READ);
+	return tFileSystemManager::instance()->CreateStream(name, RISSE_BS_READ);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4StreamCache::ReleaseStream(void * pointer, tBinaryStream * stream)
+void tXP4StreamCache::ReleaseStream(void * pointer, tBinaryStream * stream)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	// search empty cell in the pool
 	risse_uint oldest_age = 0;
@@ -99,7 +99,7 @@ void tRisaXP4StreamCache::ReleaseStream(void * pointer, tBinaryStream * stream)
 
 	// empty cell not found
 	// free oldest cell and fill it.
-	// counter overflow in RisaArchiveStreamCacheAge
+	// counter overflow in ArchiveStreamCacheAge
 	// is not so a big problem.
 	// counter overflow can worsen the cache performance,
 	// but it occurs only when the counter is overflowed
@@ -114,9 +114,9 @@ void tRisaXP4StreamCache::ReleaseStream(void * pointer, tBinaryStream * stream)
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4StreamCache::ReleaseStreamByPointer(void * pointer)
+void tXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	for(risse_int i = 0; i < MAX_ITEM; i++)
 	{
@@ -133,9 +133,9 @@ void tRisaXP4StreamCache::ReleaseStreamByPointer(void * pointer)
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4StreamCache::ReleaseAll()
+void tXP4StreamCache::ReleaseAll()
 {
-	volatile tRisaCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	for(risse_int i = 0; i < MAX_ITEM; i++)
 	{

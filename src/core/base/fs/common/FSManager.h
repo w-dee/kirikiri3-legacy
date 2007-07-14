@@ -27,12 +27,12 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaFileSystem::GetFileListAt で用いられるコールバックインターフェース
+//! @brief		tFileSystem::GetFileListAt で用いられるコールバックインターフェース
 //---------------------------------------------------------------------------
-class tRisaFileSystemIterationCallback
+class tFileSystemIterationCallback
 {
 public:
-	virtual ~tRisaFileSystemIterationCallback() {;}
+	virtual ~tFileSystemIterationCallback() {;}
 	virtual bool OnFile(const tString & filename) = 0;
 	virtual bool OnDirectory(const tString & dirname) = 0;
 };
@@ -40,16 +40,16 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		tRisaFileSystem::Stat で返される構造体
+//! @brief		tFileSystem::Stat で返される構造体
 //---------------------------------------------------------------------------
-struct tRisaStatStruc
+struct tStatStruc
 {
 	wxFileOffset	Size;	//!< ファイルサイズ (wxFileOffset)-1 の場合は無効
 	wxDateTime		MTime;	//!< ファイル修正時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 	wxDateTime		ATime;	//!< アクセス時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 	wxDateTime		CTime;	//!< 作成時刻 (wxDateTime::IsValidで有効性をチェックのこと)
 
-	tRisaStatStruc() { Clear(); }
+	tStatStruc() { Clear(); }
 	void Clear() {  Size = (wxFileOffset) - 1; MTime = ATime = CTime = wxDateTime(); }
 };
 //---------------------------------------------------------------------------
@@ -58,7 +58,7 @@ struct tRisaStatStruc
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステム基底クラス
 //---------------------------------------------------------------------------
-class tRisaFileSystem
+class tFileSystem
 {
 	//---------- このクラスで実装する物
 protected:
@@ -67,16 +67,16 @@ public:
 
 	//---------- 各サブクラスで(も)実装すべき物
 public:
-	virtual ~tRisaFileSystem() {;}
+	virtual ~tFileSystem() {;}
 
 	virtual size_t GetFileListAt(const tString & dirname,
-		tRisaFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
+		tFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
 	virtual bool FileExists(const tString & filename) = 0; //!< ファイルが存在するかどうかを得る
 	virtual bool DirectoryExists(const tString & dirname) = 0; //!< ディレクトリが存在するかどうかを得る
 	virtual void RemoveFile(const tString & filename) = 0; //!< ファイルを削除する
 	virtual void RemoveDirectory(const tString & dirname, bool recursive = false) = 0; //!< ディレクトリを削除する
 	virtual void CreateDirectory(const tString & dirname, bool recursive = false) = 0; //!< ディレクトリを作成する
-	virtual void Stat(const tString & filename, tRisaStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
+	virtual void Stat(const tString & filename, tStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
 	virtual tBinaryStream * CreateStream(const tString & filename, risse_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
 };
 //---------------------------------------------------------------------------
@@ -85,9 +85,9 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
-class tRisaFileSystemManager :
-	public singleton_base<tRisaFileSystemManager>,
-	protected depends_on<tRisaRisseScriptEngine>
+class tFileSystemManager :
+	public singleton_base<tFileSystemManager>,
+	protected depends_on<tRisseScriptEngine>
 {
 	//! @brief ファイルシステムマネージャ内で管理されるファイルシステムの情報
 	struct tFileSystemInfo
@@ -100,14 +100,14 @@ class tRisaFileSystemManager :
 	tHashTable<tString, tFileSystemInfo> MountPoints; //!< マウントポイントのハッシュ表
 	tString CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
 
-	tRisaCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
+	tCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
 
 public:
 	//! @brief		コンストラクタ
-	tRisaFileSystemManager();
+	tFileSystemManager();
 
 	//! @brief		デストラクタ
-	~tRisaFileSystemManager();
+	~tFileSystemManager();
 
 public:
 	//! @brief		ファイルシステムをマウントする
@@ -137,7 +137,7 @@ public:
 	//! @param		recursive 再帰的にファイル一覧を得るかどうか
 	//! @return		取得できたファイル数
 	size_t GetFileListAt(const tString & dirname,
-		tRisaFileSystemIterationCallback * callback, bool recursive = false);
+		tFileSystemIterationCallback * callback, bool recursive = false);
 
 	//! @brief		ファイルが存在するかどうかを得る
 	//! @param		filename ファイル名
@@ -166,7 +166,7 @@ public:
 	//! @brief		指定されたファイルの stat を得る
 	//! @param		filename ファイル名
 	//! @param		struc stat 結果の出力先
-	void Stat(const tString & filename, tRisaStatStruc & struc);
+	void Stat(const tString & filename, tStatStruc & struc);
 
 	//! @brief		指定されたファイルのストリームを得る
 	//! @param		filename ファイル名
@@ -180,7 +180,7 @@ private:
 	//! @param		callback コールバック先
 	//! @callback	コールバックオブジェクト
 	size_t InternalGetFileListAt(const tString & dirname,
-		tRisaFileSystemIterationCallback * callback);
+		tFileSystemIterationCallback * callback);
 
 	//! @brief		指定された正規フルパスに対応するファイルシステムを得る
 	//! @param		fullpath 正規フルパス
@@ -188,7 +188,7 @@ private:
 	//! @return		ファイルシステムインスタンス
 	//! @note		このメソッドはスレッド保護されていないため、このメソッドを呼ぶ場合は
 	//!				CriticalSection 内で呼ぶこと！
-	boost::shared_ptr<tRisaFileSystem> GetFileSystemAt(const tString & fullpath, tString * fspath = NULL);
+	boost::shared_ptr<tFileSystem> GetFileSystemAt(const tString & fullpath, tString * fspath = NULL);
 
 	//! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる
 	//! @param		filename  マウントポイント

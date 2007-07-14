@@ -25,7 +25,7 @@ RISSE_DEFINE_SOURCE_ID(58504,55707,27606,20246,35200,16274,28002,46284);
 
 
 //---------------------------------------------------------------------------
-void tRisaIdleEventManager::Register(tRisaIdleEventDestination * item)
+void tIdleEventManager::Register(tIdleEventDestination * item)
 {
 	Destinations.add(item);
 }
@@ -33,7 +33,7 @@ void tRisaIdleEventManager::Register(tRisaIdleEventDestination * item)
 
 
 //---------------------------------------------------------------------------
-void tRisaIdleEventManager::Unregister(tRisaIdleEventDestination * item)
+void tIdleEventManager::Unregister(tIdleEventDestination * item)
 {
 	Destinations.remove(item);
 }
@@ -41,15 +41,15 @@ void tRisaIdleEventManager::Unregister(tRisaIdleEventDestination * item)
 
 
 //---------------------------------------------------------------------------
-bool tRisaIdleEventManager::Deliver(risse_uint64 mastertick)
+bool tIdleEventManager::Deliver(risse_uint64 mastertick)
 {
 	bool need_more = false;
 
-	tRisaEventSystem * r = tRisaEventSystem::instance();
+	tEventSystem * r = tEventSystem::instance();
 	if(r->GetCanDeliverEvents())
 	{
 		// イベントを配信する
-		pointer_list<tRisaIdleEventDestination>::scoped_lock lock(Destinations);
+		pointer_list<tIdleEventDestination>::scoped_lock lock(Destinations);
 		for(size_t i = 0; i < Destinations.get_locked_count(); i++)
 		{
 			if(Destinations.get_locked(i)->OnIdle(mastertick))
@@ -73,7 +73,7 @@ bool tRisaIdleEventManager::Deliver(risse_uint64 mastertick)
 
 
 //---------------------------------------------------------------------------
-tRisaIdleEventDestination::tRisaIdleEventDestination()
+tIdleEventDestination::tIdleEventDestination()
 {
 	Receiving = false;
 }
@@ -81,20 +81,20 @@ tRisaIdleEventDestination::tRisaIdleEventDestination()
 
 
 //---------------------------------------------------------------------------
-tRisaIdleEventDestination::~tRisaIdleEventDestination()
+tIdleEventDestination::~tIdleEventDestination()
 {
-	if(Receiving) tRisaIdleEventManager::instance()->Unregister(this);
+	if(Receiving) tIdleEventManager::instance()->Unregister(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaIdleEventDestination::StartReceiveIdle()
+void tIdleEventDestination::StartReceiveIdle()
 {
 	// TODO: ここのスレッド保護
 	if(!Receiving)
 	{
-		tRisaIdleEventManager::instance()->Register(this);
+		tIdleEventManager::instance()->Register(this);
 		Receiving = true;
 	}
 }
@@ -102,12 +102,12 @@ void tRisaIdleEventDestination::StartReceiveIdle()
 
 
 //---------------------------------------------------------------------------
-void tRisaIdleEventDestination::EndReceiveIdle()
+void tIdleEventDestination::EndReceiveIdle()
 {
 	// TODO: ここのスレッド保護
 	if(Receiving)
 	{
-		tRisaIdleEventManager::instance()->Unregister(this);
+		tIdleEventManager::instance()->Unregister(this);
 		Receiving = false;
 	}
 }
@@ -145,7 +145,7 @@ void tRisaIdleEventDestination::EndReceiveIdle()
 
 
 //---------------------------------------------------------------------------
-tRisaCompactEventManager::tRisaCompactEventManager()
+tCompactEventManager::tCompactEventManager()
 {
 	wxTimer::Start(5000); // 5秒周期のタイマーをスタートする
 }
@@ -153,7 +153,7 @@ tRisaCompactEventManager::tRisaCompactEventManager()
 
 
 //---------------------------------------------------------------------------
-void tRisaCompactEventManager::Register(tRisaCompactEventDestination * item)
+void tCompactEventManager::Register(tCompactEventDestination * item)
 {
 	Destinations.add(item);
 }
@@ -161,7 +161,7 @@ void tRisaCompactEventManager::Register(tRisaCompactEventDestination * item)
 
 
 //---------------------------------------------------------------------------
-void tRisaCompactEventManager::Unregister(tRisaCompactEventDestination * item)
+void tCompactEventManager::Unregister(tCompactEventDestination * item)
 {
 	Destinations.remove(item);
 }
@@ -169,9 +169,9 @@ void tRisaCompactEventManager::Unregister(tRisaCompactEventDestination * item)
 
 
 //---------------------------------------------------------------------------
-void tRisaCompactEventManager::Deliver(tCompactLevel level)
+void tCompactEventManager::Deliver(tCompactLevel level)
 {
-	pointer_list<tRisaCompactEventDestination>::scoped_lock lock(Destinations);
+	pointer_list<tCompactEventDestination>::scoped_lock lock(Destinations);
 	for(size_t i = 0; i < Destinations.get_locked_count(); i++)
 		Destinations.get_locked(i)->OnCompact(level);
 }
@@ -179,7 +179,7 @@ void tRisaCompactEventManager::Deliver(tCompactLevel level)
 
 
 //---------------------------------------------------------------------------
-void tRisaCompactEventManager::Notify()
+void tCompactEventManager::Notify()
 {
 	Deliver(clSlowBeat);
 }
@@ -187,7 +187,7 @@ void tRisaCompactEventManager::Notify()
 
 
 //---------------------------------------------------------------------------
-void tRisaCompactEventManager::OnDeactivate()
+void tCompactEventManager::OnDeactivate()
 {
 	Deliver(clDeactivate);
 }
@@ -195,7 +195,7 @@ void tRisaCompactEventManager::OnDeactivate()
 
 
 //---------------------------------------------------------------------------
-void tRisaCompactEventManager::OnDeactivateApp()
+void tCompactEventManager::OnDeactivateApp()
 {
 	Deliver(clDeactivateApp);
 }

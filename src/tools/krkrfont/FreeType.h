@@ -27,10 +27,10 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		FreeType フォント face
 //---------------------------------------------------------------------------
-class tRisaFreeTypeFace
+class tFreeTypeFace
 {
 	wxString FontName;		//!< フォント名
-	tRisaBaseFreeTypeFace * Face; //!< Face オブジェクト
+	tBaseFreeTypeFace * Face; //!< Face オブジェクト
 	FT_Face FTFace; //!< FreeType Face オブジェクト
 	risse_uint32 Options; //!< フラグ
 
@@ -42,8 +42,8 @@ class tRisaFreeTypeFace
 	risse_char (*LocalCharToUnicode)(risse_uint in); //!< UnicodeをSJISなどに変換する関数
 
 public:
-	tRisaFreeTypeFace(const wxString &fontname, risse_uint32 options);
-	~tRisaFreeTypeFace();
+	tFreeTypeFace(const wxString &fontname, risse_uint32 options);
+	~tFreeTypeFace();
 
 	risse_uint GetGlyphCount();
 	risse_char GetCharcodeFromGlyphIndex(risse_uint index);
@@ -53,8 +53,8 @@ public:
 	risse_int GetHeight() { return Height; }
 	void SetHeight(int height);
 
-	tRisaGlyphBitmap * GetGlyphFromCharcode(risse_char code);
-	bool GetGlyphMetricsFromCharcode(risse_char code, tRisaGlyphMetrics & metrics);
+	tGlyphBitmap * GetGlyphFromCharcode(risse_char code);
+	bool GetGlyphMetricsFromCharcode(risse_char code, tGlyphMetrics & metrics);
 
 private:
 	bool LoadGlyphSlotFromCharcode(risse_char code);
@@ -68,9 +68,9 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		FreeType ライブラリラッパー(singleton)
 //---------------------------------------------------------------------------
-class tRisaFreeTypeLibrary
+class tFreeTypeLibrary
 {
-	static tRisaFreeTypeLibrary * GlobalLibrary;	//!< FreeType ライブラリ
+	static tFreeTypeLibrary * GlobalLibrary;	//!< FreeType ライブラリ
 
 	risse_int RefCount;	//!< 参照カウンタ
 	FT_Library Library;	//!< FreeType ライブラリ
@@ -85,8 +85,8 @@ public:
 								return GlobalLibrary->Library; }
 
 private:
-	tRisaFreeTypeLibrary();
-	~tRisaFreeTypeLibrary();
+	tFreeTypeLibrary();
+	~tFreeTypeLibrary();
 
 	void Hook();
 	risse_int Unhook();
@@ -102,11 +102,11 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		FreeType フォントドライバ
 //---------------------------------------------------------------------------
-class tRisaFreeTypeFontDriver : public tRisaBaseFreeTypeFontDriver
+class tFreeTypeFontDriver : public tBaseFreeTypeFontDriver
 {
 public:
-	tRisaFreeTypeFontDriver();
-	~tRisaFreeTypeFontDriver();
+	tFreeTypeFontDriver();
+	~tFreeTypeFontDriver();
 
 private:
 };

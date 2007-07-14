@@ -229,7 +229,7 @@ void wxPreviewScrolledWindow::PrintCharacter(risse_char ch, int x, int y)
 	wxCoord char_size = FACE->GetHeight() * Magnify + margin * 2;
 	dc.DrawRectangle(x, y, char_size, char_size);
 
-	tRisaGlyphBitmap * srcbmp = FACE->GetGlyphFromCharcode(ch);
+	tGlyphBitmap * srcbmp = FACE->GetGlyphFromCharcode(ch);
 	if(!srcbmp) return; // 文字が不正か、グリフが空なので表示できない
 	if(!srcbmp->GetBlackBoxW() || !srcbmp->GetBlackBoxH())
 	{

@@ -16,16 +16,16 @@
 
 /*!
 @note
-	tRisaLogger は Risa 内部でのログを保持する一方、tRisaLogViewer は
-	それを表示する役割を担う。tRisaLogger は Risa 内の様々なコンポーネント
+	tLogger は Risa 内部でのログを保持する一方、tLogViewer は
+	それを表示する役割を担う。tLogger は Risa 内の様々なコンポーネント
 	から出力されるログを効率よく、確実に保持・記録することに特化している。
-	一方、tRisaLogViewer はその内容を画面に表示するにすぎない。
-	tRisaLogViewer の tRisaLogger への影響がなるべく少なくなるよう、
-	tRisaLogViewer では tRisaLogger とは別にログ内容を保持するように
+	一方、tLogViewer はその内容を画面に表示するにすぎない。
+	tLogViewer の tLogger への影響がなるべく少なくなるよう、
+	tLogViewer では tLogger とは別にログ内容を保持するように
 	する。
-	また、tRisaLogViewer は非表示の場合はログ内容を保持しない。表示状態
-	になったときにいったん tRisaLogger からログ内容をすべて取得し、
-	あとは tRisaLogger にログが追加されれば、tRisaLogViewer もそのログを追加
+	また、tLogViewer は非表示の場合はログ内容を保持しない。表示状態
+	になったときにいったん tLogger からログ内容をすべて取得し、
+	あとは tLogger にログが追加されれば、tLogViewer もそのログを追加
 	するといった同期動作を行う。再び非表示状態になれば同期動作をしなくなる。
 */
 
@@ -40,7 +40,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		ログビューアウィンドウ
 //---------------------------------------------------------------------------
-class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
+class tLogScrollView : public wxPanel, public tLogReceiver
 {
 	static const size_t RotateLimit = 2100; //!< この論理行数を超えるとローテーションを行う
 	static const size_t RotateTo    = 2000; //!< 一回のローテーションではこの論理行数までにログを減らす
@@ -54,7 +54,7 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 		ID_Last
 	};
 
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 	struct tLogicalLine
 	{
@@ -159,9 +159,9 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 	//! @brief マウスで選択中にスクロールを行うためのタイマークラス
 	class tScrollTimer : public wxTimer
 	{
-		tRisaLogScrollView * View;
+		tLogScrollView * View;
 	public:
-		tScrollTimer(tRisaLogScrollView * view)
+		tScrollTimer(tLogScrollView * view)
 		{
 			View = view;
 			Start(100);
@@ -178,17 +178,17 @@ class tRisaLogScrollView : public wxPanel, public tRisaLogReceiver
 
 public:
 	//! @brief		コンストラクタ
-	tRisaLogScrollView(wxWindow * parent);
+	tLogScrollView(wxWindow * parent);
 
 	//! @brief		デストラクタ
-	~tRisaLogScrollView();
+	~tLogScrollView();
 
 private:
 	//! @brief		ログアイテムの種別からフォントを得る
 	//! @param		level		ログレベル
 	//! @param		bold		太字にするかどうか
 	//! @param		colour		wxColor クラスへの参照
-	void GetFontFromLogItemLevel(tRisaLogger::tLevel level,
+	void GetFontFromLogItemLevel(tLogger::tLevel level,
 		bool & bold, wxColour &colour);
 
 	//! @brief		背景色を得る
@@ -212,14 +212,14 @@ private:
 	//! @brief		一行分の表示内容を作成する
 	//! @param		item  ログアイテム
 	//! @return		表示内容
-	wxString CreateOneLineString(const tRisaLogger::tItem & item);
+	wxString CreateOneLineString(const tLogger::tItem & item);
 
 	//! @brief		全てのログの行のレイアウトをし直す
 	void LayoutAllLines();
 
 	//! @brief		一行分をDisplayLinesに追加し、レイアウトを行う
-	//! @param		logger_item  tRisaLogger::tItem 型
-	void AddLine(const tRisaLogger::tItem & logger_item);
+	//! @param		logger_item  tLogger::tItem 型
+	void AddLine(const tLogger::tItem & logger_item);
 
 	//! @brief		スクロールを行う
 	//! @param		amount スクロール量
@@ -296,10 +296,10 @@ private:
 	void ShowContextMenu(const wxPoint & pos);
 
 public:
-	//! @brief		tRisaLogReceiver::OnLog のオーバーライド
-	//! @param		logger_item  tRisaLogger::tItem 型
+	//! @brief		tLogReceiver::OnLog のオーバーライド
+	//! @param		logger_item  tLogger::tItem 型
 	//! @note		このメソッドはメインスレッド以外から呼ばれる可能性がある
-	void OnLog(const tRisaLogger::tItem & logger_item); // tRisaLogReceiver の override
+	void OnLog(const tLogger::tItem & logger_item); // tLogReceiver の override
 
 private:
 	//! @brief		行が追加されたとき

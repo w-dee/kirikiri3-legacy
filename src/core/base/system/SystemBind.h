@@ -23,18 +23,18 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaSystemRegisterer :
-			public singleton_base<tRisaSystemRegisterer>,
-			protected depends_on<tRisaRisseScriptEngine>
+class tSystemRegisterer :
+			public singleton_base<tSystemRegisterer>,
+			protected depends_on<tRisseScriptEngine>
 {
 	iRisseDispatch2 * SystemClass;
 
 public:
 	//! @brief		コンストラクタ
-	tRisaSystemRegisterer();
+	tSystemRegisterer();
 
 	//! @brief デストラクタ
-	~tRisaSystemRegisterer();
+	~tSystemRegisterer();
 
 	//! @brief		System.exceptionHandler を得る
 	//! @param		dest		exceptionHandler を格納するクロージャ

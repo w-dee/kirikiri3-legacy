@@ -17,7 +17,7 @@
 #include <al.h>
 #include <alc.h>
 #include "base/utils/Singleton.h"
-#include "base/utils/RisaThread.h"
+#include "base/utils/Thread.h"
 
 
 /*
@@ -25,15 +25,15 @@
 
 	OpenAL API を実行するときは基本的に
 
-	tRisaOpenAL::tCriticalSectionHolder cs_holder;
+	tOpenAL::tCriticalSectionHolder cs_holder;
 
 	で OpenAL API を保護し、その後
 
-	tRisaOpenAL::instance()->ThrowIfError();
+	tOpenAL::instance()->ThrowIfError();
 
 	でエラーをチェックするという方法をとること。
 	( depends_on でインスタンスの存在を確実にできる場合は
-	 depends_on<tRisaOpenAL>::locked_instance()->ThrowIfError())
+	 depends_on<tOpenAL>::locked_instance()->ThrowIfError())
 	 の方が効率がよい )
 
 	OpenAL の API は API 実行後に alGetError でエラーコードを取得するという
@@ -48,17 +48,17 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		OpenAL管理クラス
 //---------------------------------------------------------------------------
-class tRisaOpenAL : public singleton_base<tRisaOpenAL>, manual_start<tRisaOpenAL>
+class tOpenAL : public singleton_base<tOpenAL>, manual_start<tOpenAL>
 {
 public:
 	//! @brief OpenAL APIを保護するためのクリティカルセクションホルダ
-	struct tCriticalSectionHolder : protected depends_on<tRisaOpenAL>
+	struct tCriticalSectionHolder : protected depends_on<tOpenAL>
 	{
-		tRisaCriticalSection::tLocker holder;
-		tCriticalSectionHolder() : holder(depends_on<tRisaOpenAL>::locked_instance()->GetCS())
+		tCriticalSection::tLocker holder;
+		tCriticalSectionHolder() : holder(depends_on<tOpenAL>::locked_instance()->GetCS())
 		{
 			// エラー状態をクリアする
-			depends_on<tRisaOpenAL>::locked_instance()->ClearErrorState();
+			depends_on<tOpenAL>::locked_instance()->ClearErrorState();
 		}
 		~tCriticalSectionHolder()
 		{
@@ -70,15 +70,15 @@ private:
 	ALCdevice * Device; //!< デバイス
 	ALCcontext * Context; //!< コンテキスト
 
-	tRisaCriticalSection CS; //!< OpenAL API を保護する CS
+	tCriticalSection CS; //!< OpenAL API を保護する CS
 
 
 public:
 	//! @brief		コンストラクタ
-	tRisaOpenAL();
+	tOpenAL();
 
 	//! @brief		デストラクタ
-	~tRisaOpenAL();
+	~tOpenAL();
 
 private:
 	//! @brief		クリーンアップ処理
@@ -93,7 +93,7 @@ public:
 	//! @brief		OpenAL のエラー状態をクリアする
 	void ClearErrorState();
 
-	tRisaCriticalSection & GetCS() { return CS; } //!< このオブジェクトを保護しているCSを得る
+	tCriticalSection & GetCS() { return CS; } //!< このオブジェクトを保護しているCSを得る
 };
 //---------------------------------------------------------------------------
 

@@ -19,7 +19,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		１グリフのメトリックを表す構造体
 //---------------------------------------------------------------------------
-struct tRisaGlyphMetrics
+struct tGlyphMetrics
 {
 	risse_int CellIncX;		//!< 一文字進めるの必要なX方向のピクセル数(64倍されている数値なので注意)
 	risse_int CellIncY;		//!< 一文字進めるの必要なY方向のピクセル数(64倍されている数値なので注意)
@@ -30,7 +30,7 @@ struct tRisaGlyphMetrics
 //---------------------------------------------------------------------------
 //! @brief		１グリフを表すクラス
 //---------------------------------------------------------------------------
-class tRisaGlyphBitmap
+class tGlyphBitmap
 {
 	risse_uint RefCount;				//!< 参照カウンタ
 	risse_uint8 * Data;				//!< ビットマップデータ(8bpp, グレースケール)
@@ -39,20 +39,20 @@ class tRisaGlyphBitmap
 	risse_int OriginY;				//!< 描画点からブラックボックスの上端までの位置
 	risse_uint BlackBoxW;				//!< ブラックボックスの幅
 	risse_uint BlackBoxH;				//!< ブラックボックスの高さ
-	tRisaGlyphMetrics	Metrics;	//!< メトリック
+	tGlyphMetrics	Metrics;	//!< メトリック
 
 public:
-	tRisaGlyphBitmap(
+	tGlyphBitmap(
 		risse_uint8 * indata,
 		risse_int inpitch,
 		risse_int originx, risse_int originy,
 		risse_uint blackboxw, risse_uint blackboxh,
-		const tRisaGlyphMetrics & metrics);
-	tRisaGlyphBitmap(const tRisaGlyphBitmap & ref);
+		const tGlyphMetrics & metrics);
+	tGlyphBitmap(const tGlyphBitmap & ref);
 
 private:
 	// デストラクタはprivate
-	~tRisaGlyphBitmap();
+	~tGlyphBitmap();
 
 public:
 	void AddRef();
@@ -66,7 +66,7 @@ public:
 	risse_int GetOriginY() const { return OriginY; }
 	risse_uint GetBlackBoxW() const { return BlackBoxW; }
 	risse_uint GetBlackBoxH() const { return BlackBoxH; }
-	const tRisaGlyphMetrics & GetMetrics() const { return Metrics; }
+	const tGlyphMetrics & GetMetrics() const { return Metrics; }
 };
 //---------------------------------------------------------------------------
 

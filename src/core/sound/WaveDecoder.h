@@ -33,12 +33,12 @@ namespace Risa {
 	できないし、許されない。
 */
 //---------------------------------------------------------------------------
-class tRisaWaveDecoder
+class tWaveDecoder
 {
 public:
-	virtual ~tRisaWaveDecoder() {};
+	virtual ~tWaveDecoder() {};
 
-	virtual void SuggestFormat(const tRisaWaveFormat & format) = 0;
+	virtual void SuggestFormat(const tWaveFormat & format) = 0;
 		/*!< @brief Wave形式を提案する
 			@note
 			このインターフェースを利用する側が欲しいPCM形式を
@@ -47,7 +47,7 @@ public:
 			ならない。
 		*/
 
-	virtual void GetFormat(tRisaWaveFileInfo & fileinfo) = 0;
+	virtual void GetFormat(tWaveFileInfo & fileinfo) = 0;
 		/*!< @brief ファイル情報を取得する
 			@note
 			Retrieve PCM format, etc. */
@@ -77,12 +77,12 @@ public:
 //---------------------------------------------------------------------------
 //! @brief	 	デコーダファクトリ
 //! @note		Risa は 拡張子で音楽形式を判断する。ファクトリの登録は
-//!				tRisaWaveDecoderFactoryManager を通して行うこと。
+//!				tWaveDecoderFactoryManager を通して行うこと。
 //---------------------------------------------------------------------------
-class tRisaWaveDecoderFactory
+class tWaveDecoderFactory
 {
 public:
-	virtual boost::shared_ptr<tRisaWaveDecoder> Create(const tString & filename) = 0; //!< デコーダを作成する
+	virtual boost::shared_ptr<tWaveDecoder> Create(const tString & filename) = 0; //!< デコーダを作成する
 };
 //---------------------------------------------------------------------------
 
@@ -90,22 +90,22 @@ public:
 //---------------------------------------------------------------------------
 //! @brief	 	デコーダファクトリーマネージャ
 //---------------------------------------------------------------------------
-class tRisaWaveDecoderFactoryManager : public singleton_base<tRisaWaveDecoderFactoryManager>
+class tWaveDecoderFactoryManager : public singleton_base<tWaveDecoderFactoryManager>
 {
-	typedef gc_map<tString, boost::shared_ptr<tRisaWaveDecoderFactory> >  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
+	typedef gc_map<tString, boost::shared_ptr<tWaveDecoderFactory> >  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
 	tMap Map; //!< 拡張子→ファクトリのマップ
 
 public:
 	//! @brief	 	コンストラクタ
-	tRisaWaveDecoderFactoryManager();
+	tWaveDecoderFactoryManager();
 
 	//! @brief	 	デストラクタ
-	~tRisaWaveDecoderFactoryManager();
+	~tWaveDecoderFactoryManager();
 
 	//! @brief	 	ファクトリを登録する
 	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
 	//! @param		factory		ファクトリ
-	void Register(const tString & extension, boost::shared_ptr<tRisaWaveDecoderFactory> factory);
+	void Register(const tString & extension, boost::shared_ptr<tWaveDecoderFactory> factory);
 
 	//! @brief	 	ファクトリの登録を解除する
 	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
@@ -114,7 +114,7 @@ public:
 	//! @brief	 	デコーダを作成する
 	//! @param		filename ファイル名
 	//! @return		作成されたデコーダの shared_ptr
-	boost::shared_ptr<tRisaWaveDecoder> Create(const tString & filename);
+	boost::shared_ptr<tWaveDecoder> Create(const tString & filename);
 };
 //---------------------------------------------------------------------------
 

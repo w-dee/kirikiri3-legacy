@@ -22,9 +22,9 @@ namespace Risa {
 //! @brief ハンドルされなかった例外のハンドルを行うクラス
 //---------------------------------------------------------------------------
 // TODO: 一時的に無効化
-class tRisaUnhandledExceptionHandler
+class tUnhandledExceptionHandler
 {
-	tRisaUnhandledExceptionHandler(); //!< このクラスのインスタンスは作成できない
+	tUnhandledExceptionHandler(); //!< このクラスのインスタンスは作成できない
 public:
 	static void ShowScriptException(const tVariant * e);
 #if 0

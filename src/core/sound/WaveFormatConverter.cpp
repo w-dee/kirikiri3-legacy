@@ -14,7 +14,7 @@
 #include "prec.h"
 #include <algorithm>
 #include "sound/WaveFormatConverter.h"
-#include "base/exception/RisaException.h"
+#include "base/exception/Exception.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(58054,38608,61255,17526,21894,38819,54476,53804);
@@ -24,8 +24,8 @@ RISSE_DEFINE_SOURCE_ID(58054,38608,61255,17526,21894,38819,54476,53804);
 /*
 	(opt_CPU)/WaveFormatConverter_CPU.cpp にある関数のプロトタイプ
 */
-void RisaPCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples);
-void RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples);
+void PCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples);
+void PCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples);
 
 
 
@@ -33,7 +33,7 @@ void RisaPCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restri
 //! @brief		汎用変換ループのテンプレート実装
 //---------------------------------------------------------------------------
 template <typename DESTTYPE, typename SRCTYPE>
-static void RisaPCMConvertLoop(risse_restricted void * dest, const risse_restricted void * src, size_t numsamples)
+static void PCMConvertLoop(risse_restricted void * dest, const risse_restricted void * src, size_t numsamples)
 {
 	if(DESTTYPE::id == SRCTYPE::id)
 	{
@@ -63,10 +63,10 @@ static void RisaPCMConvertLoop(risse_restricted void * dest, const risse_restric
 //! @brief		int16→float32のテンプレート特化 (よくつかう)
 //---------------------------------------------------------------------------
 template <>
-static void RisaPCMConvertLoop<tRisaPCMTypes::f32, tRisaPCMTypes::i16>
+static void PCMConvertLoop<tPCMTypes::f32, tPCMTypes::i16>
 				(void * dest, const void * src, size_t numsamples)
 {
-	RisaPCMConvertLoopInt16ToFloat32(dest, src, numsamples);
+	PCMConvertLoopInt16ToFloat32(dest, src, numsamples);
 }
 //---------------------------------------------------------------------------
 
@@ -75,10 +75,10 @@ static void RisaPCMConvertLoop<tRisaPCMTypes::f32, tRisaPCMTypes::i16>
 //! @brief		float32→int16のテンプレート特化 (よくつかう)
 //---------------------------------------------------------------------------
 template <>
-static void RisaPCMConvertLoop<tRisaPCMTypes::i16, tRisaPCMTypes::f32>
+static void PCMConvertLoop<tPCMTypes::i16, tPCMTypes::f32>
 				(void * dest, const void * src, size_t numsamples)
 {
-	RisaPCMConvertLoopFloat32ToInt16(dest, src, numsamples);
+	PCMConvertLoopFloat32ToInt16(dest, src, numsamples);
 }
 //---------------------------------------------------------------------------
 
@@ -87,30 +87,30 @@ static void RisaPCMConvertLoop<tRisaPCMTypes::i16, tRisaPCMTypes::f32>
 
 
 //---------------------------------------------------------------------------
-void tRisaWaveFormatConverter::Convert(
-		tRisaPCMTypes::tType outformat, risse_restricted void * outdata,
-		tRisaPCMTypes::tType informat, risse_restricted const void * indata,
+void tWaveFormatConverter::Convert(
+		tPCMTypes::tType outformat, risse_restricted void * outdata,
+		tPCMTypes::tType informat, risse_restricted const void * indata,
 		risse_int channels, size_t numsamples)
 {
 	// チャンネルはインターリーブされているので、numsamples にチャンネル数を掛ける
 	numsamples *= channels;
 
 	// 形式の特定を行う
-	if(outformat == tRisaPCMTypes::tunknown)
+	if(outformat == tPCMTypes::tunknown)
 		eRisaException::Throw(
-			RISSE_WS_TR("tRisaWaveFormatConverter::Convert: unsupported destination format"));
+			RISSE_WS_TR("tWaveFormatConverter::Convert: unsupported destination format"));
 
-	if(informat == tRisaPCMTypes::tunknown)
+	if(informat == tPCMTypes::tunknown)
 		eRisaException::Throw(
-			RISSE_WS_TR("tRisaWaveFormatConverter::Convert: unsupported source format"));
+			RISSE_WS_TR("tWaveFormatConverter::Convert: unsupported source format"));
 
 	// 変換ループ用テーブル
 	typedef void (*func_t)(void * dest, const void * src, size_t numsamples);
 	#ifdef R
 		#undef R
 	#endif
-	#define R(d, s) &RisaPCMConvertLoop<tRisaPCMTypes::d, tRisaPCMTypes::s>
-	static func_t table[tRisaPCMTypes::tnum][tRisaPCMTypes::tnum] = {
+	#define R(d, s) &PCMConvertLoop<tPCMTypes::d, tPCMTypes::s>
+	static func_t table[tPCMTypes::tnum][tPCMTypes::tnum] = {
 	{ R( i8,i8),R( i8,i16),R( i8,i24),R( i8,i32),R( i8,f32), },
 	{ R(i16,i8),R(i16,i16),R(i16,i24),R(i16,i32),R(i16,f32), },
 	{ R(i24,i8),R(i24,i16),R(i24,i24),R(i24,i32),R(i24,f32), },

@@ -24,11 +24,11 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //!@brief		ストリームキャッシュクラス
 //---------------------------------------------------------------------------
-class tRisaXP4StreamCache : public singleton_base<tRisaXP4StreamCache>
+class tXP4StreamCache : public singleton_base<tXP4StreamCache>
 {
 	static const int MAX_ITEM = 8; //!< キャッシュするハンドル数
 
-	tRisaCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_uint Age; //!< キャッシュ世代
 
 	//!@brief キャッシュアイテムの構造体
@@ -41,10 +41,10 @@ class tRisaXP4StreamCache : public singleton_base<tRisaXP4StreamCache>
 
 public:
 	//! @brief		コンストラクタ
-	tRisaXP4StreamCache();
+	tXP4StreamCache();
 
 	//! @brief		デストラクタ
-	~tRisaXP4StreamCache();
+	~tXP4StreamCache();
 
 public:
 	//! @brief		ストリームを取得する

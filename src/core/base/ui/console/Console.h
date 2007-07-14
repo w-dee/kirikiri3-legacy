@@ -19,13 +19,13 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-class tRisaLogScrollView;
-class tRisaLogViewerStatusBar;
+class tLogScrollView;
+class tLogViewerStatusBar;
 //---------------------------------------------------------------------------
 //! @brief		コンソールのフレーム
 //---------------------------------------------------------------------------
-class tRisaConsoleFrame : public tRisaUIFrame/*, TODO: handle this 
-						depends_on<tRisaEventSystem> */
+class tConsoleFrame : public tUIFrame/*, TODO: handle this 
+						depends_on<tEventSystem> */
 {
 	enum
 	{
@@ -34,7 +34,7 @@ class tRisaConsoleFrame : public tRisaUIFrame/*, TODO: handle this
 	};
 public:
 	//! @brief		コンストラクタ
-	tRisaConsoleFrame();
+	tConsoleFrame();
 
 	//! @brief		ログビューアにフォーカスを合わせる
 	void SetFocusToLogViewer();
@@ -45,8 +45,8 @@ public:
 	void SetFocusToTextCtrl(int insert_code = 0);
 
 private:
-	tRisaLogScrollView *ScrollView; //!< スクロールエリア
-	tRisaLogViewerStatusBar *StatusBar; //!< ステータスバー
+	tLogScrollView *ScrollView; //!< スクロールエリア
+	tLogViewerStatusBar *StatusBar; //!< ステータスバー
 
 	//! @brief		"Event" ボタンが押された
 	//! @param		event イベントオブジェクト

@@ -259,7 +259,7 @@ STIN float _mm_min_horz(__m128 x)
 //! @brief 128ビット境界にポインタがアラインメントされているかどうか
 //! @param	p		ポインタ
 //! @return			128ビット境界にポインタがアラインメントされているかどうか
-inline bool RisaIsAlignedTo128bits(const void * p)
+inline bool IsAlignedTo128bits(const void * p)
 {
 	return !(reinterpret_cast<risse_offset>(p) & 0xf);
 }

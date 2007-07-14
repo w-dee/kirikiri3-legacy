@@ -20,15 +20,15 @@ RISSE_DEFINE_SOURCE_ID(5731,26202,12507,18005,22157,59190,3112,30254);
 
 #if 0
 //---------------------------------------------------------------------------
-tRisseNI_OSFS::tRisseNI_OSFS()
+tNI_OSFS::tNI_OSFS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_error tRisseNI_OSFS::Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj)
+risse_error tNI_OSFS::Construct(risse_int numparams,
+		tVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		OSFS.OSFS
@@ -40,7 +40,7 @@ risse_error tRisseNI_OSFS::Construct(risse_int numparams,
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
-	tRisseString basedir = *param[0];
+	tString basedir = *param[0];
 	bool checkcase = RISSE_PARAM_EXIST(1) ? (risse_int)*param[1] : true;
 
 	// filesystem オブジェクトの生成と登録
@@ -52,7 +52,7 @@ risse_error tRisseNI_OSFS::Construct(risse_int numparams,
 
 
 //---------------------------------------------------------------------------
-void tRisseNI_OSFS::Invalidate()
+void tNI_OSFS::Invalidate()
 {
 }
 //---------------------------------------------------------------------------
@@ -63,20 +63,20 @@ void tRisseNI_OSFS::Invalidate()
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tRisseNC_OSFS::ClassID = (risse_uint32)-1;
+risse_uint32 tNC_OSFS::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseNC_OSFS::tRisseNC_OSFS() :
-	tRisseNativeClass(RISSE_WS("OSFS"))
+tNC_OSFS::tNC_OSFS() :
+	tNativeClass(RISSE_WS("OSFS"))
 {
 	// class constructor
 
 	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/OSFS)
 	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_OSFS,
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tNI_OSFS,
 	/*Risse class name*/ OSFS)
 {
 	return RISSE_S_OK;
@@ -89,9 +89,9 @@ RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/OSFS)
 
 
 //---------------------------------------------------------------------------
-tRisseNativeInstance *tRisseNC_OSFS::CreateNativeInstance()
+tNativeInstance *tNC_OSFS::CreateNativeInstance()
 {
-	return new tRisseNI_OSFS();
+	return new tNI_OSFS();
 }
 //---------------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ tRisseNativeInstance *tRisseNC_OSFS::CreateNativeInstance()
 tRisaOSFSRegisterer::tRisaOSFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
-	iRisseDispatch2 * cls = new tRisseNC_OSFS();
+	iRisseDispatch2 * cls = new tNC_OSFS();
 	try
 	{
 		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(

@@ -43,7 +43,7 @@ public:
 		//! @param		inarchivename このアーカイブアイテムの名前を格納する先
 		//! @param		deleted ファイルが削除されている時に真に設定される
 		tFile(tRisaXP4Archive *owner, const unsigned char * meta,
-							size_t metasize, tRisseString & inarchivename, bool &deleted);
+							size_t metasize, tString & inarchivename, bool &deleted);
 	};
 
 	struct tSegment
@@ -62,21 +62,21 @@ public:
 	class iMapCallback
 	{
 	public:
-		virtual void operator () (const tRisseString & name, risse_size file_index) = 0; //!< 追加/置き換えの場合
-		virtual void operator () (const tRisseString & name) = 0; //!< 削除の場合
+		virtual void operator () (const tString & name, risse_size file_index) = 0; //!< 追加/置き換えの場合
+		virtual void operator () (const tString & name) = 0; //!< 削除の場合
 	};
 
 private:
 	gc_vector<tFile> Files; //!< ファイルの配列
 	gc_vector<tSegment> Segments; //!< セグメントの配列
 
-	tRisseString FileName;
+	tString FileName;
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		filename アーカイブファイル名
 	//! @param		callback ファイル名とアーカイブ内インデックスの対応をpushするコールバック
-	tRisaXP4Archive(const tRisseString & filename, iMapCallback & callback);
+	tRisaXP4Archive(const tString & filename, iMapCallback & callback);
 
 	//! @brief		デストラクタ
 	~tRisaXP4Archive();
@@ -91,7 +91,7 @@ public:
 	//! @param		idx ファイルのインデックス
 	//! @param		flags フラグ
 	//! @return		ストリームオブジェクト
-	tRisseBinaryStream * CreateStream(
+	tBinaryStream * CreateStream(
 				boost::shared_ptr<tRisaXP4Archive> ptr,
 				risse_size idx, risse_uint32 flags);
 
@@ -102,7 +102,7 @@ public:
 		{ return Files[idx]; } //!< idx に対応する tFile 構造体を返す
 	const tSegment * GetSegmentInfo(risse_size idx) const
 		{ return &(Segments[Files[idx].SegmentStart]); } //!< idx に対応するセグメント情報を返す
-	const tRisseString & GetFileName() const
+	const tString & GetFileName() const
 		{ return FileName; } //!< ファイル名を返す
 };
 //---------------------------------------------------------------------------

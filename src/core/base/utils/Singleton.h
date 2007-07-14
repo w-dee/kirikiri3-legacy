@@ -67,7 +67,7 @@ using namespace Risse;
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト管理用クラス
 //---------------------------------------------------------------------------
-class singleton_manager : public tRisseCollectee
+class singleton_manager : public tCollectee
 {
 	typedef void (*handler_t)(); //!< ensure/disconnect 関数のtypedef
 	typedef const char * (*get_name_function_t)(); //!< get_name 関数のtypedef
@@ -122,7 +122,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト用クラス
 //! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス。
-//!			すべてのシングルトンクラスは同時に tRisseCollectee のサブクラスとなり、
+//!			すべてのシングルトンクラスは同時に tCollectee のサブクラスとなり、
 //!			つまり GC reachable である。
 //!			destruct という仮想関数があり、これが
 //!			singleton_manager::disconnect_all の時点で呼ばれる事になっているので
@@ -134,7 +134,7 @@ public:
 //!			注意しなければならない。
 //---------------------------------------------------------------------------
 template <typename T>
-class singleton_base : public tRisseCollectee
+class singleton_base : public tCollectee
 {
 	singleton_base(const singleton_base &); //!< non-copyable
 	void operator = (const singleton_base &); //!< non-copyable
@@ -248,7 +248,7 @@ class singleton_base : public tRisseCollectee
 		if(demangled)
 		{
 			// GC の管理下のバッファに文字列をコピーする
-			char *p = (char*)RisseMallocAtomicCollectee(strlen(demangled)+1);
+			char *p = (char*)MallocAtomicCollectee(strlen(demangled)+1);
 			strcpy(p, demangled);
 			free(demangled);
 			return p;

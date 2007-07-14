@@ -70,7 +70,7 @@ public:
 //!				呼ばれる可能性があるので注意すること (シングルトンクラスならば問題ない)
 //---------------------------------------------------------------------------
 class tRisaIdleEventDestination : protected depends_on<tRisaIdleEventManager>,
-	public tRisseDestructee
+	public tDestructee
 {
 	bool Receiving; //!< イベント配信が有効かどうか
 
@@ -161,7 +161,7 @@ public:
 //!				呼ばれる可能性があるので注意すること (シングルトンクラスならば問題ない)
 //---------------------------------------------------------------------------
 class tRisaCompactEventDestination : protected depends_on<tRisaCompactEventManager>,
-								public tRisaCompactEventEnum, public tRisseDestructee
+								public tRisaCompactEventEnum, public tDestructee
 {
 public:
 	tRisaCompactEventDestination()

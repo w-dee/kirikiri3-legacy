@@ -120,9 +120,9 @@ void tRisaLogger::UnregisterReceiver(tRisaLogReceiver * receiver)
 
 
 //---------------------------------------------------------------------------
-void tRisaLogger::InternalLog(const tRisseString & content,
+void tRisaLogger::InternalLog(const tString & content,
 	tRisaLogger::tLevel level,
-	const tRisseString & linkinfo)
+	const tString & linkinfo)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -268,7 +268,7 @@ void tRisaWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 	}
 
 	// Risa のログ機構に流し込む
-	tRisaLogger::Log(RISSE_WS("(wx) ") + tRisseString(szString), risa_level);
+	tRisaLogger::Log(RISSE_WS("(wx) ") + tString(szString), risa_level);
 
 	// OldLog に流し込む
 	if(OldLog)

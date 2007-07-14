@@ -22,12 +22,12 @@
 
 //---------------------------------------------------------------------------
 //! @brief ファイルシステム ネイティブインスタンス
-//! @note  このクラスは、RisseのオブジェクトにNativeInstanceとして(tRisseNI_BaseFileSystemとは別に)
+//! @note  このクラスは、RisseのオブジェクトにNativeInstanceとして(tNI_BaseFileSystemとは別に)
 //         登録する。
-//!        下にあるtRisseNI_BaseFileSystemと混同しないこと。
+//!        下にあるtNI_BaseFileSystemと混同しないこと。
 //!        クラスIDは-2011 (固定) が割り当てられている
 //---------------------------------------------------------------------------
-class tRisseNI_FileSystemNativeInstance : public tRisseNativeInstance
+class tNI_FileSystemNativeInstance : public tNativeInstance
 {
 public:
 	static const risse_int32 ClassID = -2011;
@@ -40,7 +40,7 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		filesystem  ファイルシステムオブジェクト
 	//! @param		owner       このインスタンスを保持している Risse オブジェクト
-	tRisseNI_FileSystemNativeInstance(
+	tNI_FileSystemNativeInstance(
 		boost::shared_ptr<tRisaFileSystem> filesystem,
 		iRisseDispatch2 * owner);
 
@@ -59,11 +59,11 @@ private:
 //! @brief ファイルシステム 基底ネイティブインスタンス
 //! @note	各ファイルシステムのRisseネイティブインスタンスはこれを継承して用いる
 //---------------------------------------------------------------------------
-class tRisseNI_BaseFileSystem : public tRisseNativeInstance
+class tNI_BaseFileSystem : public tNativeInstance
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseNI_BaseFileSystem();
+	tNI_BaseFileSystem();
 
 	//! @brief		Risse 無効化関数
 	void Invalidate();
@@ -72,7 +72,7 @@ public:
 	boost::shared_ptr<tRisaFileSystem> & GetFileSystem() { return FileSystem; }
 
 protected:
-	//! @brief		tRisseNI_FileSystemNativeInstance をファイルシステムから構築し、
+	//! @brief		tNI_FileSystemNativeInstance をファイルシステムから構築し、
 	//!             オブジェクトに登録する
 	//! @param		risse_obj		登録先Risseオブジェクト
 	//! @param		fs_obj		ファイルシステムオブジェクト
@@ -92,11 +92,11 @@ private:
 //!				の名が付いているが、実際は ファイルシステムマネージャへのバインディング
 //!				であってファイルシステムへのバインディングではないので注意
 //---------------------------------------------------------------------------
-class tRisseNC_FileSystem : public tRisseNativeClass
+class tNC_FileSystem : public tNativeClass
 {
 public:
 	//! @brief   コンストラクタ
-	tRisseNC_FileSystem();
+	tNC_FileSystem();
 
 	//! @brief   FileSystemクラスID
 	static risse_uint32 ClassID;

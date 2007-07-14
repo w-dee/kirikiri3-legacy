@@ -352,12 +352,12 @@ void tRisaScriptEditorTextCtrl::Execute()
 	tRisaConfig::instance()->GetVariableConfig().Flush();
 
 	// Risse に実行させる
-	tRisseString block_name("Script Editor");
+	tString block_name("Script Editor");
 
 	try
 	{
 		tRisaRisseScriptEngine::instance()->
-			Evaluate(tRisseString(GetValue()), block_name, 0, NULL, NULL, false);
+			Evaluate(tString(GetValue()), block_name, 0, NULL, NULL, false);
 	}
 	RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(block_name)
 }

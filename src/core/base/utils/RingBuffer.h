@@ -25,7 +25,7 @@
 //!				オブジェクトは指定しないこと。
 //---------------------------------------------------------------------------
 template <typename T>
-class tRisaRingBuffer : public tRisseCollectee
+class tRisaRingBuffer : public tCollectee
 {
 	T * Buffer; //!< バッファ
 	size_t Size; //!< バッファのサイズ

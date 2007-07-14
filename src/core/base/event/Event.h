@@ -82,7 +82,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		イベント情報クラス
 //---------------------------------------------------------------------------
-class tRisaEventInfo : public tRisseCollectee
+class tRisaEventInfo : public tCollectee
 {
 	friend class tRisaEventSystem;
 public:

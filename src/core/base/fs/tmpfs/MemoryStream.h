@@ -65,9 +65,9 @@ public:
 //! @brief		メモリストリーム
 //---------------------------------------------------------------------------
 /*
-	this class provides a tRisseBinaryStream based access method for a memory block.
+	this class provides a tBinaryStream based access method for a memory block.
 */
-class tRisaMemoryStream : public tRisseBinaryStream
+class tRisaMemoryStream : public tBinaryStream
 {
 protected:
 	tRisaMemoryStreamBlock * Block; //!< メモリブロック
@@ -110,7 +110,7 @@ public:
 
 	risse_uint64 GetSize() { return Block->GetSize(); }
 
-	// non-tRisseBinaryStream based methods
+	// non-tBinaryStream based methods
 	void * GetInternalBuffer()  const { return Block->GetBlock(); }
 };
 //---------------------------------------------------------------------------

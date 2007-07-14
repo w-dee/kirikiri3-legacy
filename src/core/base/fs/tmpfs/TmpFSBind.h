@@ -23,15 +23,15 @@
 //---------------------------------------------------------------------------
 //! @brief TmpFS ネイティブインスタンス
 //---------------------------------------------------------------------------
-class tRisseNI_TmpFS : public tRisseNI_BaseFileSystem
+class tNI_TmpFS : public tNI_BaseFileSystem
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseNI_TmpFS();
+	tNI_TmpFS();
 
 	//! @brief		Risse コンストラクタ
 	risse_error Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj);
+		tVariant **param, iRisseDispatch2 *risse_obj);
 
 	//! @brief		Risse 無効化関数
 	void Invalidate();
@@ -39,7 +39,7 @@ public:
 	tRisaTmpFS * GetFileSystem() 
 	{
 		return reinterpret_cast<tRisaTmpFS*>(
-			tRisseNI_BaseFileSystem::GetFileSystem().get());
+			tNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
 private:
@@ -54,11 +54,11 @@ private:
 //---------------------------------------------------------------------------
 //! @brief TmpFS ネイティブクラス
 //---------------------------------------------------------------------------
-class tRisseNC_TmpFS : public tRisseNativeClass
+class tNC_TmpFS : public tNativeClass
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseNC_TmpFS();
+	tNC_TmpFS();
 
 	//! @brief		TmpFS クラスID
 	static risse_uint32 ClassID;
@@ -66,7 +66,7 @@ public:
 private:
 	//! @brief		ネイティブインスタンスを作成して返す
 	//! @return		ネイティブインスタンス
-	tRisseNativeInstance *CreateNativeInstance();
+	tNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 

@@ -24,22 +24,22 @@ RISSE_DEFINE_SOURCE_ID(38428,3640,56667,17105,48032,55694,30447,43980);
 //---------------------------------------------------------------------------
 //! @brief		Soundネイティブインスタンス
 //---------------------------------------------------------------------------
-class tRisseNI_Sound : public tRisseNativeInstance, public tRisaSound
+class tNI_Sound : public tNativeInstance, public tRisaSound
 {
 	iRisseDispatch2 * Owner; //!< オーナーとなるRisseオブジェクト
 
 public:
-	tRisseNI_Sound();
+	tNI_Sound();
 
 	risse_error Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj);
+		tVariant **param, iRisseDispatch2 *risse_obj);
 	void Invalidate();
 
 	void OnStatusChanged(tStatus status); //  from tRisaSound
 
-	tRisseString GetStatusString() const;
+	tString GetStatusString() const;
 
-	static tRisseString StatusToString(tStatus status);
+	static tString StatusToString(tStatus status);
 };
 //---------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisseNI_Sound::tRisseNI_Sound()
+tNI_Sound::tNI_Sound()
 {
 	// フィールドの初期化
 	Owner = NULL;
@@ -58,8 +58,8 @@ tRisseNI_Sound::tRisseNI_Sound()
 //---------------------------------------------------------------------------
 //! @brief		Risse コンストラクタ
 //---------------------------------------------------------------------------
-risse_error tRisseNI_Sound::Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj)
+risse_error tNI_Sound::Construct(risse_int numparams,
+		tVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		Sound.Sound
@@ -74,7 +74,7 @@ risse_error tRisseNI_Sound::Construct(risse_int numparams,
 //---------------------------------------------------------------------------
 //! @brief		Risse 無効化関数
 //---------------------------------------------------------------------------
-void tRisseNI_Sound::Invalidate()
+void tNI_Sound::Invalidate()
 {
 	// Owner を NULL に
 	Owner = NULL;
@@ -89,14 +89,14 @@ void tRisseNI_Sound::Invalidate()
 //! @brief		ステータスが変わった
 //! @param		status  ステータス
 //---------------------------------------------------------------------------
-void tRisseNI_Sound::OnStatusChanged(tStatus status)
+void tNI_Sound::OnStatusChanged(tStatus status)
 {
 	// イベント関数を呼ぶ
 	if(Owner)
 	{
-		static tRisseString onStatusChanged_name(RISSE_WS("onStatusChanged"));
-		tRisseVariant val(StatusToString(status));
-		tRisseVariant *params[] = {&val};
+		static tString onStatusChanged_name(RISSE_WS("onStatusChanged"));
+		tVariant val(StatusToString(status));
+		tVariant *params[] = {&val};
 		Owner->FuncCall(
 			0, // flag
 			onStatusChanged_name.c_str(), // name
@@ -114,7 +114,7 @@ void tRisseNI_Sound::OnStatusChanged(tStatus status)
 //---------------------------------------------------------------------------
 //! @brief		ステータス文字列を得る
 //---------------------------------------------------------------------------
-tRisseString tRisseNI_Sound::GetStatusString() const
+tString tNI_Sound::GetStatusString() const
 {
 	return StatusToString(GetStatus());
 }
@@ -126,13 +126,13 @@ tRisseString tRisseNI_Sound::GetStatusString() const
 //! @param		status ステータス
 //! @return		ステータス文字列
 //---------------------------------------------------------------------------
-tRisseString tRisseNI_Sound::StatusToString(tStatus status)
+tString tNI_Sound::StatusToString(tStatus status)
 {
-	static tRisseString unload(RISSE_WS("unload"));
-	static tRisseString play  (RISSE_WS("play"));
-	static tRisseString stop  (RISSE_WS("stop"));
-	static tRisseString pause (RISSE_WS("pause"));
-	static tRisseString unknown (RISSE_WS("unknown"));
+	static tString unload(RISSE_WS("unload"));
+	static tString play  (RISSE_WS("play"));
+	static tString stop  (RISSE_WS("stop"));
+	static tString pause (RISSE_WS("pause"));
+	static tString unknown (RISSE_WS("unknown"));
 
 	switch(status)
 	{
@@ -168,15 +168,15 @@ tRisseString tRisseNI_Sound::StatusToString(tStatus status)
 //---------------------------------------------------------------------------
 //! @brief		Soundネイティブクラス
 //---------------------------------------------------------------------------
-class tRisseNC_Sound : public tRisseNativeClass
+class tNC_Sound : public tNativeClass
 {
 public:
-	tRisseNC_Sound();
+	tNC_Sound();
 
 	static risse_uint32 ClassID;
 
 private:
-	tRisseNativeInstance *CreateNativeInstance();
+	tNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 
@@ -184,22 +184,22 @@ private:
 //---------------------------------------------------------------------------
 //! @brief		SoundクラスID
 //---------------------------------------------------------------------------
-risse_uint32 tRisseNC_Sound::ClassID = (risse_uint32)-1;
+risse_uint32 tNC_Sound::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisseNC_Sound::tRisseNC_Sound() :
-	tRisseNativeClass(RISSE_WS("Sound"))
+tNC_Sound::tNC_Sound() :
+	tNativeClass(RISSE_WS("Sound"))
 {
 	// class constructor
 
 	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/Sound)
 	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_Sound,
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tNI_Sound,
 	/*Risse class name*/ Sound)
 {
 	return RISSE_S_OK;
@@ -216,7 +216,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/open)
 			指定されたファイルを開きます
 		</p>
 	*/
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
@@ -236,7 +236,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/close)
 			再生は開始できません。
 		</p>
 	*/
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 
 	_this->Close();
 
@@ -253,7 +253,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/play)
 			再生を開始します。
 		</p>
 	*/
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 
 	_this->Play();
 
@@ -270,7 +270,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/stop)
 			再生を停止します。
 		</p>
 	*/
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 
 	_this->Stop();
 
@@ -287,7 +287,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/pause)
 			再生を一時停止します。
 		</p>
 	*/
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 
 	_this->Pause();
 
@@ -329,7 +329,7 @@ RISSE_BEGIN_NATIVE_PROP_DECL(status)
 	*/
 	RISSE_BEGIN_NATIVE_PROP_GETTER
 	{
-		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 		if(result) *result = _this->GetStatusString();
 		return RISSE_S_OK;
 	}
@@ -350,7 +350,7 @@ RISSE_BEGIN_NATIVE_PROP_DECL(samplePosition)
 	*/
 	RISSE_BEGIN_NATIVE_PROP_GETTER
 	{
-		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 		if(result) *result = (tTVInteger)_this->GetSamplePosition();
 		return RISSE_S_OK;
 	}
@@ -358,7 +358,7 @@ RISSE_BEGIN_NATIVE_PROP_DECL(samplePosition)
 
 	RISSE_BEGIN_NATIVE_PROP_SETTER
 	{
-		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 		_this->SetSamplePosition((tTVInteger)*param);
 		return RISSE_S_OK;
 	}
@@ -377,7 +377,7 @@ RISSE_BEGIN_NATIVE_PROP_DECL(position)
 	*/
 	RISSE_BEGIN_NATIVE_PROP_GETTER
 	{
-		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 		if(result) *result = _this->GetTimePosition();
 		return RISSE_S_OK;
 	}
@@ -385,7 +385,7 @@ RISSE_BEGIN_NATIVE_PROP_DECL(position)
 
 	RISSE_BEGIN_NATIVE_PROP_SETTER
 	{
-		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_Sound);
+		RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_Sound);
 		_this->SetTimePosition((double)*param);
 		return RISSE_S_OK;
 	}
@@ -404,9 +404,9 @@ RISSE_END_NATIVE_PROP_DECL(position)
 //! @brief		ネイティブインスタンスを作成して返す
 //! @return		ネイティブインスタンス
 //---------------------------------------------------------------------------
-tRisseNativeInstance *tRisseNC_Sound::CreateNativeInstance()
+tNativeInstance *tNC_Sound::CreateNativeInstance()
 {
-	return new tRisseNI_Sound();
+	return new tNI_Sound();
 }
 //---------------------------------------------------------------------------
 
@@ -432,7 +432,7 @@ class tRisaSoundRegisterer :
 public:
 	tRisaSoundRegisterer()
 	{
-		iRisseDispatch2 * cls =  new tRisseNC_Sound();
+		iRisseDispatch2 * cls =  new tNC_Sound();
 		try
 		{
 			depends_on<tRisaRisseScriptEngine>::locked_instance()->

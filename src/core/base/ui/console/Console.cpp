@@ -148,7 +148,7 @@ void tRisaHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 	wxString value = event.GetString();
 
 	tRisaRisseScriptEngine::instance()->
-		EvaluateExpresisonAndPrintResultToConsole(tRisseString(value));
+		EvaluateExpresisonAndPrintResultToConsole(tString(value));
 
 	// 入力をヒストリに入れる
 	if(History.size() == 0 || History[0] != value)

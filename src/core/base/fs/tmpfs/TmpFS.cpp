@@ -20,7 +20,7 @@ RISSE_DEFINE_SOURCE_ID(20965,62764,62977,19688,31398,64150,8840,17077);
 
 //---------------------------------------------------------------------------
 tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType type,
-							const tRisseString & name) :
+							const tString & name) :
 	Parent(parent),
 	Type(type),
 	Name(name)
@@ -28,7 +28,7 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 	if(Type == ntDirectory)
 	{
 		// ディレクトリのノードなので ハッシュ表を作成
-		Directory = new tRisseHashTable<tRisseString, tRisaTmpFSNode *>();
+		Directory = new tHashTable<tString, tRisaTmpFSNode *>();
 	}
 	else
 	{
@@ -41,13 +41,13 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 
 //---------------------------------------------------------------------------
 tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType type,
-	tRisseBinaryStream * src) :
+	tBinaryStream * src) :
 	Parent(parent)
 {
 	if(Type == ntDirectory)
 	{
 		// ディレクトリのノードなので ハッシュ表を作成
-		Directory = new tRisseHashTable<tRisseString, tRisaTmpFSNode *>();
+		Directory = new tHashTable<tString, tRisaTmpFSNode *>();
 	}
 	else
 	{
@@ -75,7 +75,7 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 			unsigned char * p = new (PointerFreeGC) unsigned char [metalen];
 			src->ReadBuffer(p, metalen);
 			p[metalen - 1] = 0;
-			Name = tRisseString(wxString(reinterpret_cast<char*>(p), wxConvUTF8));
+			Name = tString(wxString(reinterpret_cast<char*>(p), wxConvUTF8));
 		}
 		else
 		{
@@ -107,7 +107,7 @@ tRisaTmpFSNode::tRisaTmpFSNode(tRisaTmpFSNode *parent, tRisaTmpFSNode::tType typ
 				done = true;
 				break;
 			default:
-				eRisaException::Throw(tRisseString(
+				eRisaException::Throw(tString(
 						wxString::Format(RISSE_WS_TR("unsupported node id %x"),
 						static_cast<int>(nodetypeid))));
 			}
@@ -143,7 +143,7 @@ tRisaTmpFSNode::~tRisaTmpFSNode()
 	{
 		// このノードはディレクトリ
 		// Directory が保持しているすべての要素を解放する
-		tRisseHashTable<tRisseString, tRisaTmpFSNode *>::tIterator i;
+		tHashTable<tString, tRisaTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
 			delete (i.GetValue());
@@ -163,7 +163,7 @@ tRisaTmpFSNode::~tRisaTmpFSNode()
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFSNode::Serialize(tRisseBinaryStream * dest) const
+void tRisaTmpFSNode::Serialize(tBinaryStream * dest) const
 {
 	// ノードのタイプを記録
 	if(Type == ntDirectory)
@@ -188,7 +188,7 @@ void tRisaTmpFSNode::Serialize(tRisseBinaryStream * dest) const
 		dest->WriteBuffer("\0", 1); // メタデータの終わりとディレクトリの開始
 
 		// 全ての子要素に対して再帰する
-		tRisseHashTable<tRisseString, tRisaTmpFSNode *>::tIterator i;
+		tHashTable<tString, tRisaTmpFSNode *>::tIterator i;
 		for(i = Directory->GetFirst(); !i.IsNull(); i++)
 		{
 			i.GetValue()->Serialize(dest);
@@ -211,7 +211,7 @@ void tRisaTmpFSNode::Serialize(tRisseBinaryStream * dest) const
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode * tRisaTmpFSNode::GetSubNode(const tRisseString & name)
+tRisaTmpFSNode * tRisaTmpFSNode::GetSubNode(const tString & name)
 {
 	if(Type != ntDirectory) return NULL;
 
@@ -223,7 +223,7 @@ tRisaTmpFSNode * tRisaTmpFSNode::GetSubNode(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-bool tRisaTmpFSNode::DeleteSubNodeByName(const tRisseString & name)
+bool tRisaTmpFSNode::DeleteSubNodeByName(const tString & name)
 {
 	if(Type != ntDirectory) return false;
 	tRisaTmpFSNode * node = GetSubNode(name);
@@ -239,7 +239,7 @@ bool tRisaTmpFSNode::DeleteSubNodeByName(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode * tRisaTmpFSNode::CreateDirectory(const tRisseString & name)
+tRisaTmpFSNode * tRisaTmpFSNode::CreateDirectory(const tString & name)
 {
 	if(Type != ntDirectory) return false;
 	if(GetSubNode(name)) return NULL; // すでにそこに何かがある
@@ -251,7 +251,7 @@ tRisaTmpFSNode * tRisaTmpFSNode::CreateDirectory(const tRisseString & name)
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode * tRisaTmpFSNode::CreateFile(const tRisseString & name)
+tRisaTmpFSNode * tRisaTmpFSNode::CreateFile(const tString & name)
 {
 	if(Type != ntDirectory) return false;
 	if(GetSubNode(name)) return NULL; // すでにそこに何かがある
@@ -277,7 +277,7 @@ size_t tRisaTmpFSNode::Iterate(tRisaFileSystemIterationCallback * callback)
 {
 	if(Type != ntDirectory) return 0;
 	size_t count = 0;
-	tRisseHashTable<tRisseString, tRisaTmpFSNode *>::tIterator i;
+	tHashTable<tString, tRisaTmpFSNode *>::tIterator i;
 	for(i = Directory->GetFirst(); !i.IsNull(); i++)
 	{
 		count ++;
@@ -336,7 +336,7 @@ tRisaTmpFS::~tRisaTmpFS()
 
 
 //---------------------------------------------------------------------------
-size_t tRisaTmpFS::GetFileListAt(const tRisseString & dirname,
+size_t tRisaTmpFS::GetFileListAt(const tString & dirname,
 	tRisaFileSystemIterationCallback * callback)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
@@ -351,7 +351,7 @@ size_t tRisaTmpFS::GetFileListAt(const tRisseString & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tRisaTmpFS::FileExists(const tRisseString & filename)
+bool tRisaTmpFS::FileExists(const tString & filename)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -364,7 +364,7 @@ bool tRisaTmpFS::FileExists(const tRisseString & filename)
 
 
 //---------------------------------------------------------------------------
-bool tRisaTmpFS::DirectoryExists(const tRisseString & dirname)
+bool tRisaTmpFS::DirectoryExists(const tString & dirname)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -377,7 +377,7 @@ bool tRisaTmpFS::DirectoryExists(const tRisseString & dirname)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::RemoveFile(const tRisseString & filename)
+void tRisaTmpFS::RemoveFile(const tString & filename)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -394,7 +394,7 @@ void tRisaTmpFS::RemoveFile(const tRisseString & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::RemoveDirectory(const tRisseString & dirname, bool recursive)
+void tRisaTmpFS::RemoveDirectory(const tString & dirname, bool recursive)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -433,7 +433,7 @@ void tRisaTmpFS::RemoveDirectory(const tRisseString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::CreateDirectory(const tRisseString & dirname, bool recursive)
+void tRisaTmpFS::CreateDirectory(const tString & dirname, bool recursive)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -453,7 +453,7 @@ void tRisaTmpFS::CreateDirectory(const tRisseString & dirname, bool recursive)
 			{
 				// '/' で挟まれた区間が得られた
 				tRisaTmpFSNode *parent = node;
-				tRisseString partname(p, p - pp);
+				tString partname(p, p - pp);
 				node = node->GetSubNode(partname);
 				if(!node)
 				{
@@ -483,9 +483,9 @@ void tRisaTmpFS::CreateDirectory(const tRisseString & dirname, bool recursive)
 		// 再帰的にはディレクトリを作成しない場合
 		// 最終的なディレクトリ名となる名前を取得する
 
-		tRisseString path(dirname);
+		tString path(dirname);
 		tRisaFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
-		tRisseString parentdir, name;
+		tString parentdir, name;
 		tRisaFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
 
 		tRisaTmpFSNode * parentnode = GetNodeAt(parentdir);
@@ -498,7 +498,7 @@ void tRisaTmpFS::CreateDirectory(const tRisseString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::Stat(const tRisseString & filename, tRisaStatStruc & struc)
+void tRisaTmpFS::Stat(const tString & filename, tRisaStatStruc & struc)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -514,7 +514,7 @@ void tRisaTmpFS::Stat(const tRisseString & filename, tRisaStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tRisaTmpFS::CreateStream(const tRisseString & filename, risse_uint32 flags)
+tBinaryStream * tRisaTmpFS::CreateStream(const tString & filename, risse_uint32 flags)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -528,7 +528,7 @@ tRisseBinaryStream * tRisaTmpFS::CreateStream(const tRisseString & filename, ris
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::SerializeTo(tRisseBinaryStream * dest)
+void tRisaTmpFS::SerializeTo(tBinaryStream * dest)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -543,9 +543,9 @@ void tRisaTmpFS::SerializeTo(tRisseBinaryStream * dest)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::SerializeTo(const tRisseString & filename)
+void tRisaTmpFS::SerializeTo(const tString & filename)
 {
-	std::auto_ptr<tRisseBinaryStream>
+	std::auto_ptr<tBinaryStream>
 		stream(tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_WRITE));
 
 	SerializeTo(stream.get());
@@ -554,7 +554,7 @@ void tRisaTmpFS::SerializeTo(const tRisseString & filename)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::UnserializeFrom(tRisseBinaryStream * src)
+void tRisaTmpFS::UnserializeFrom(tBinaryStream * src)
 {
 	volatile tRisaCriticalSection::tLocker holder(CS);
 
@@ -576,9 +576,9 @@ void tRisaTmpFS::UnserializeFrom(tRisseBinaryStream * src)
 
 
 //---------------------------------------------------------------------------
-void tRisaTmpFS::UnserializeFrom(const tRisseString & filename)
+void tRisaTmpFS::UnserializeFrom(const tString & filename)
 {
-	std::auto_ptr<tRisseBinaryStream>
+	std::auto_ptr<tBinaryStream>
 		stream(tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
 
 	UnserializeFrom(stream.get());
@@ -587,7 +587,7 @@ void tRisaTmpFS::UnserializeFrom(const tRisseString & filename)
 
 
 //---------------------------------------------------------------------------
-tRisaTmpFSNode * tRisaTmpFS::GetNodeAt(const tRisseString & name)
+tRisaTmpFSNode * tRisaTmpFS::GetNodeAt(const tString & name)
 {
 	// '/' で name を区切り、順に root からノードをたどっていく
 	const risse_char * p = name.c_str();
@@ -601,7 +601,7 @@ tRisaTmpFSNode * tRisaTmpFS::GetNodeAt(const tRisseString & name)
 		if(p != pp)
 		{
 			// '/' で挟まれた区間が得られた
-			node = node->GetSubNode(tRisseString(p, p - pp));
+			node = node->GetSubNode(tString(p, p - pp));
 			if(!node) return NULL;
 		}
 		pp = p;
@@ -625,7 +625,7 @@ void tRisaTmpFS::CreateRoot()
 	if(Root) return;
 
 	// ルートノードを作成
-	Root = new tRisaTmpFSNode(NULL, tRisaTmpFSNode::ntDirectory, tRisseString());
+	Root = new tRisaTmpFSNode(NULL, tRisaTmpFSNode::ntDirectory, tString());
 }
 //---------------------------------------------------------------------------
 

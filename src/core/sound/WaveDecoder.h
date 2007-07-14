@@ -79,7 +79,7 @@ public:
 class tRisaWaveDecoderFactory
 {
 public:
-	virtual boost::shared_ptr<tRisaWaveDecoder> Create(const tRisseString & filename) = 0; //!< デコーダを作成する
+	virtual boost::shared_ptr<tRisaWaveDecoder> Create(const tString & filename) = 0; //!< デコーダを作成する
 };
 //---------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ public:
 //---------------------------------------------------------------------------
 class tRisaWaveDecoderFactoryManager : public singleton_base<tRisaWaveDecoderFactoryManager>
 {
-	typedef gc_map<tRisseString, boost::shared_ptr<tRisaWaveDecoderFactory> >  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
+	typedef gc_map<tString, boost::shared_ptr<tRisaWaveDecoderFactory> >  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
 	tMap Map; //!< 拡張子→ファクトリのマップ
 
 public:
@@ -102,16 +102,16 @@ public:
 	//! @brief	 	ファクトリを登録する
 	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
 	//! @param		factory		ファクトリ
-	void Register(const tRisseString & extension, boost::shared_ptr<tRisaWaveDecoderFactory> factory);
+	void Register(const tString & extension, boost::shared_ptr<tRisaWaveDecoderFactory> factory);
 
 	//! @brief	 	ファクトリの登録を解除する
 	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
-	void Unregister(const tRisseString & extension);
+	void Unregister(const tString & extension);
 
 	//! @brief	 	デコーダを作成する
 	//! @param		filename ファイル名
 	//! @return		作成されたデコーダの shared_ptr
-	boost::shared_ptr<tRisaWaveDecoder> Create(const tRisseString & filename);
+	boost::shared_ptr<tRisaWaveDecoder> Create(const tString & filename);
 };
 //---------------------------------------------------------------------------
 

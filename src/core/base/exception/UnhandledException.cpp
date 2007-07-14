@@ -28,13 +28,13 @@ RISSE_DEFINE_SOURCE_ID(28545,30194,3434,19984,56458,2209,37707,53134);
 //! @brief		スクリプト例外を表示する
 //! @param		e		例外オブジェクト
 //---------------------------------------------------------------------------
-void tRisaUnhandledExceptionHandler::ShowScriptException(const tRisseVariant * e)
+void tRisaUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 {
 	// イベント配信を無効に
 	tRisaEventSystem::instance()->SetCanDeliverEvents(false);
 
 	// ログ
-	tRisseString message = e->operator tRisseString();
+	tString message = e->operator tString();
 
 	tRisaLogger::Log(
 		RISSE_WS_TR("An exception had been occured"), tRisaLogger::llError);
@@ -42,17 +42,17 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(const tRisseVariant * e
 		message, tRisaLogger::llError);
 
 	// 例外オブジェクトはトレースを持っているか？
-	tRisseVariant trace_array = e->GetPropertyDirect_Object(ss_trace);
-	tRisseVariant top_sp = trace_array.Invoke_Object(mnIGet, risse_int64(0));
+	tVariant trace_array = e->GetPropertyDirect_Object(ss_trace);
+	tVariant top_sp = trace_array.Invoke_Object(mnIGet, risse_int64(0));
 		// 先頭の source point
 
-	if(!top_sp.IsVoid() && top_sp.GetType() == tRisseVariant::vtObject)
+	if(!top_sp.IsVoid() && top_sp.GetType() == tVariant::vtObject)
 	{
 		// トレースを持っている
-		tRisseScriptEngine * engine = top_sp.GetObjectInterface()->GetRTTI()->GetScriptEngine();
-		tRisseVariant sb = top_sp.GetPropertyDirect(engine, ss_scriptBlock);
-		tRisseString script = (tRisseString)sb.GetPropertyDirect(engine, ss_script);
-		tRisseVariant position = top_sp.GetPropertyDirect(engine, ss_position);
+		tScriptEngine * engine = top_sp.GetObjectInterface()->GetRTTI()->GetScriptEngine();
+		tVariant sb = top_sp.GetPropertyDirect(engine, ss_scriptBlock);
+		tString script = (tString)sb.GetPropertyDirect(engine, ss_script);
+		tVariant position = top_sp.GetPropertyDirect(engine, ss_position);
 		risse_size line = (risse_int64)sb.Invoke(engine, ss_positionToLine, position);
 
 		// スクリプトエディタを表示
@@ -92,12 +92,12 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 			e.GetMessageString(), tRisaLogger::llError);
 		if(e.GetTrace().GetLen() != 0)
 			tRisaLogger::Log(
-				tRisseString(RISSE_WS_TR("Trace: ")) + e.GetTrace(), tRisaLogger::llError);
+				tString(RISSE_WS_TR("Trace: ")) + e.GetTrace(), tRisaLogger::llError);
 	}
 
 	// スクリプトエディタを表示
 	tRisaScriptEditorFrame *editor = new tRisaScriptEditorFrame();
-	editor->SetContent(tRisseString(e.GetBlockNoAddRef()->GetScript()).AsWxString());
+	editor->SetContent(tString(e.GetBlockNoAddRef()->GetScript()).AsWxString());
 	editor->SetReadOnly(true);
 	editor->SetLinePosition(e.GetBlockNoAddRef()->SrcPosToLine(e.GetPosition() )
 			- e.GetBlockNoAddRef()->GetLineOffset());
@@ -121,7 +121,7 @@ void tRisaUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
 void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 {
 	bool result = false;
-	tRisseVariantClosure clo;
+	tVariantClosure clo;
 	clo.Object = clo.ObjThis = NULL;
 
 	do
@@ -139,18 +139,18 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 				break; // System.exceptionHandler cannot be retrieved
 
 			//---- 例外オブジェクトを取得するstart ----
-			tRisseVariant obj;
-			tRisseVariant msg(e.GetMessageString());
-			tRisseVariant trace(e.GetTrace());
-			RisseGetExceptionObject(
+			tVariant obj;
+			tVariant msg(e.GetMessageString());
+			tVariant trace(e.GetTrace());
+			GetExceptionObject(
 						script_engine->GetEngineNoAddRef(),
 						&obj, msg, &trace);
 			//---- 例外オブジェクトを取得するend ----
 
 			// execute clo
-			tRisseVariant *pval[] =  { &obj };
+			tVariant *pval[] =  { &obj };
 
-			tRisseVariant res;
+			tVariant res;
 
 			clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
 
@@ -188,7 +188,7 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptException &e)
 void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 {
 	bool result = false;
-	tRisseVariantClosure clo;
+	tVariantClosure clo;
 	clo.Object = clo.ObjThis = NULL;
 
 	do
@@ -206,18 +206,18 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 				break; // System.exceptionHandler cannot be retrieved
 
 			//---- 例外オブジェクトを取得するstart ----
-			tRisseVariant obj;
-			tRisseVariant msg(e.GetMessageString());
-			tRisseVariant trace(e.GetTrace());
-			RisseGetExceptionObject(
+			tVariant obj;
+			tVariant msg(e.GetMessageString());
+			tVariant trace(e.GetTrace());
+			GetExceptionObject(
 					script_engine->GetEngineNoAddRef(),
 					&obj, msg);
 			//---- 例外オブジェクトを取得するend ----
 
 			// execute clo
-			tRisseVariant *pval[] =  { &obj };
+			tVariant *pval[] =  { &obj };
 
-			tRisseVariant res;
+			tVariant res;
 
 			clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
 
@@ -255,7 +255,7 @@ void tRisaUnhandledExceptionHandler::Process(eRisseScriptError &e)
 void tRisaUnhandledExceptionHandler::Process(eRisse &e)
 {
 	bool result = false;
-	tRisseVariantClosure clo;
+	tVariantClosure clo;
 	clo.Object = clo.ObjThis = NULL;
 
 	do
@@ -273,17 +273,17 @@ void tRisaUnhandledExceptionHandler::Process(eRisse &e)
 				break; // System.exceptionHandler cannot be retrieved
 
 			//---- 例外オブジェクトを取得するstart ----
-			tRisseVariant obj;
-			tRisseVariant msg(e.GetMessageString());
-			RisseGetExceptionObject(
+			tVariant obj;
+			tVariant msg(e.GetMessageString());
+			GetExceptionObject(
 				script_engine->GetEngineNoAddRef(),
 				&obj, msg);
 			//---- 例外オブジェクトを取得するend ----
 
 			// execute clo
-			tRisseVariant *pval[] =  { &obj };
+			tVariant *pval[] =  { &obj };
 
-			tRisseVariant res;
+			tVariant res;
 
 			clo.FuncCall(0, NULL, NULL, &res, 1, pval, NULL);
 

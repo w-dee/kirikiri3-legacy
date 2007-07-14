@@ -22,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);
 //---------------------------------------------------------------------------
 tRisaRisseScriptEngine::tRisaRisseScriptEngine()
 {
-	ScriptEngine = new tRisseScriptEngine();
+	ScriptEngine = new tScriptEngine();
 }
 //---------------------------------------------------------------------------
 
@@ -42,32 +42,32 @@ void tRisaRisseScriptEngine::Shutdown()
 
 
 //---------------------------------------------------------------------------
-void tRisaRisseScriptEngine::RegisterGlobalObject(const tRisseString & name, const tRisseVariant & object)
+void tRisaRisseScriptEngine::RegisterGlobalObject(const tString & name, const tVariant & object)
 {
 	if(!ScriptEngine) return;
-	// グローバルオブジェクトは tRisseObjectBase のはず・・・
-	RISSE_ASSERT(dynamic_cast<tRisseObjectBase *>(ScriptEngine->GetGlobalObject().GetObjectInterface()) != NULL);
-	static_cast<tRisseObjectBase *>(ScriptEngine->GetGlobalObject().GetObjectInterface())->RegisterNormalMember(name, object);
+	// グローバルオブジェクトは tObjectBase のはず・・・
+	RISSE_ASSERT(dynamic_cast<tObjectBase *>(ScriptEngine->GetGlobalObject().GetObjectInterface()) != NULL);
+	static_cast<tObjectBase *>(ScriptEngine->GetGlobalObject().GetObjectInterface())->RegisterNormalMember(name, object);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaRisseScriptEngine::EvaluateExpresisonAndPrintResultToConsole(const tRisseString & expression)
+void tRisaRisseScriptEngine::EvaluateExpresisonAndPrintResultToConsole(const tString & expression)
 {
 	// execute the expression
-	tRisseString result_str;
-	tRisseVariant result;
+	tString result_str;
+	tVariant result;
 	try
 	{
 		ScriptEngine->Evaluate(expression, RISSE_WS_TR("console"), 0, &result, NULL, true);
 	}
-	catch(const tRisseVariant * e)
+	catch(const tVariant * e)
 	{
 		// An exception had been occured in console quick Risse expression evaluation
-		result_str = tRisseString(RISSE_WS_TR("(Console)")) + expression +
-			tRisseString(RISSE_WS_TR(" = (exception) ")) +
-			e->operator tRisseString();
+		result_str = tString(RISSE_WS_TR("(Console)")) + expression +
+			tString(RISSE_WS_TR(" = (exception) ")) +
+			e->operator tString();
 		tRisaLogger::Log(result_str, tRisaLogger::llError);
 		return;
 	}
@@ -77,18 +77,18 @@ void tRisaRisseScriptEngine::EvaluateExpresisonAndPrintResultToConsole(const tRi
 	}
 
 	// success in console quick Risse expression evaluation
-	result_str = tRisseString(RISSE_WS_TR("(Console) ")) + expression +
-		tRisseString(RISSE_WS_TR(" = ")) + result.AsHumanReadable();
+	result_str = tString(RISSE_WS_TR("(Console) ")) + expression +
+		tString(RISSE_WS_TR(" = ")) + result.AsHumanReadable();
 	tRisaLogger::Log(result_str);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisaRisseScriptEngine::Evaluate(const tRisseString & script, const tRisseString & name,
+void tRisaRisseScriptEngine::Evaluate(const tString & script, const tString & name,
 				risse_size lineofs,
-				tRisseVariant * result,
-				const tRisseBindingInfo * binding, bool is_expression)
+				tVariant * result,
+				const tBindingInfo * binding, bool is_expression)
 {
 	ScriptEngine->Evaluate(script, name, lineofs, result, binding, is_expression);
 }

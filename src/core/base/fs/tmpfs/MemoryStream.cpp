@@ -31,7 +31,7 @@ tRisaMemoryStreamBlock::tRisaMemoryStreamBlock()
 //---------------------------------------------------------------------------
 tRisaMemoryStreamBlock::~tRisaMemoryStreamBlock()
 {
-	if(Block) RisseFreeCollectee(Block);
+	if(Block) FreeCollectee(Block);
 }
 //---------------------------------------------------------------------------
 
@@ -88,9 +88,9 @@ void tRisaMemoryStreamBlock::ChangeSize(risse_size size)
 
 	// メモリを確保する
 	if(Block == NULL)
-		Block = RisseMallocAtomicCollectee(AllocSize);
+		Block = MallocAtomicCollectee(AllocSize);
 	else
-		Block = RisseReallocCollectee(Block, AllocSize);
+		Block = ReallocCollectee(Block, AllocSize);
 
 	if(AllocSize && !Block)
 		eRisaException::Throw(RISSE_WS_TR("insufficient memory"));
@@ -113,9 +113,9 @@ void tRisaMemoryStreamBlock::Fit()
 	if(Size != AllocSize)
 	{
 		if(Block == NULL)
-			Block = RisseMallocAtomicCollectee(Size);
+			Block = MallocAtomicCollectee(Size);
 		else
-			Block = RisseReallocCollectee(Block, Size);
+			Block = ReallocCollectee(Block, Size);
 		if(Size && !Block)
 			eRisaException::Throw(RISSE_WS_TR("insufficient memory"));
 		AllocSize = Size;

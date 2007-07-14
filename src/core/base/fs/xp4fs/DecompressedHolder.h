@@ -48,7 +48,7 @@ public:
 	//! @param		indata 入力ストリーム
 	//! @param		insize 入力データのサイズ
 	//! @param		uncomp_size 入力データを展開した際のサイズ
-	tRisaDecompressedHolder(tMethod method, tRisseBinaryStream * instream, risse_size insize, 
+	tRisaDecompressedHolder(tMethod method, tBinaryStream * instream, risse_size insize, 
 		risse_size uncomp_size);
 
 	//!@brief		デストラクタ

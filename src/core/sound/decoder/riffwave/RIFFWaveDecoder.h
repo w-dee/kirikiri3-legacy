@@ -22,7 +22,7 @@
 //---------------------------------------------------------------------------
 class tRisaRIFFWaveDecoder : public tRisaWaveDecoder
 {
-	tRisseBinaryStream * Stream; //!< 入力ストリーム
+	tBinaryStream * Stream; //!< 入力ストリーム
 	tRisaWaveFileInfo FileInfo; //!< サウンド形式
 	risse_uint64 DataStart; //!< ファイル中でのデータの開始位置
 	risse_uint64 CurrentPos; //!< ファイル中でのデータの読み込み位置
@@ -30,7 +30,7 @@ class tRisaRIFFWaveDecoder : public tRisaWaveDecoder
 public:
 	//! @brief		コンストラクタ
 	//! @param		filename   ファイル名
-	tRisaRIFFWaveDecoder(const tRisseString & filename);
+	tRisaRIFFWaveDecoder(const tString & filename);
 
 	// tRisaWaveDecoder をオーバーライドするもの
 	//! @brief		デストラクタ
@@ -66,7 +66,7 @@ private:
 	//! @param		stream		ストリーム(このストリームの現在位置から検索が始まる)
 	//! @param		chunk		探したいチャンク
 	//! @return		指定された RIFF チャンクが見つかれば真
-	static bool FindRIFFChunk(tRisseBinaryStream * stream, const risse_uint8 *chunk);
+	static bool FindRIFFChunk(tBinaryStream * stream, const risse_uint8 *chunk);
 };
 //---------------------------------------------------------------------------
 

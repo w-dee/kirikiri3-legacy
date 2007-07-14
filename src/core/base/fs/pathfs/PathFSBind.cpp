@@ -21,15 +21,15 @@ RISSE_DEFINE_SOURCE_ID(7556,48904,60264,18196,46767,10992,26980,15305);
 
 
 //---------------------------------------------------------------------------
-tRisseNI_PathFS::tRisseNI_PathFS()
+tNI_PathFS::tNI_PathFS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_error tRisseNI_PathFS::Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj)
+risse_error tNI_PathFS::Construct(risse_int numparams,
+		tVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		PathFS.PathFS
@@ -45,7 +45,7 @@ risse_error tRisseNI_PathFS::Construct(risse_int numparams,
 
 
 //---------------------------------------------------------------------------
-void tRisseNI_PathFS::Invalidate()
+void tNI_PathFS::Invalidate()
 {
 }
 //---------------------------------------------------------------------------
@@ -56,20 +56,20 @@ void tRisseNI_PathFS::Invalidate()
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tRisseNC_PathFS::ClassID = (risse_uint32)-1;
+risse_uint32 tNC_PathFS::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseNC_PathFS::tRisseNC_PathFS() :
-	tRisseNativeClass(RISSE_WS("PathFS"))
+tNC_PathFS::tNC_PathFS() :
+	tNativeClass(RISSE_WS("PathFS"))
 {
 	// class constructor
 
 	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/PathFS)
 	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_PathFS,
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tNI_PathFS,
 	/*Risse class name*/ PathFS)
 {
 	return RISSE_S_OK;
@@ -101,10 +101,10 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/add)
 		</p>
 	*/
 
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_PathFS);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_PathFS);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	tRisseString dir = *param[0];
+	tString dir = *param[0];
 	bool recursive = RISSE_PARAM_EXIST(1) ? (risse_int)*param[1] : false;
 
 	_this->GetFileSystem()->Add(dir, recursive);
@@ -121,10 +121,10 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/remove)
 		@note
 	*/
 
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_PathFS);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_PathFS);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	tRisseString dir = *param[0];
+	tString dir = *param[0];
 
 	_this->GetFileSystem()->Remove(dir);
 
@@ -138,9 +138,9 @@ RISSE_END_NATIVE_METHOD_DECL(/*func. name*/remove)
 
 
 //---------------------------------------------------------------------------
-tRisseNativeInstance *tRisseNC_PathFS::CreateNativeInstance()
+tNativeInstance *tNC_PathFS::CreateNativeInstance()
 {
-	return new tRisseNI_PathFS();
+	return new tNI_PathFS();
 }
 //---------------------------------------------------------------------------
 
@@ -152,7 +152,7 @@ tRisseNativeInstance *tRisseNC_PathFS::CreateNativeInstance()
 tRisaPathFSRegisterer::tRisaPathFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
-	iRisseDispatch2 * cls = new tRisseNC_PathFS();
+	iRisseDispatch2 * cls = new tNC_PathFS();
 	try
 	{
 		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(

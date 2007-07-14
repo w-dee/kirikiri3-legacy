@@ -109,9 +109,9 @@ void tRisaALBuffer::Clear()
 //---------------------------------------------------------------------------
 void tRisaALBuffer::FreeTempBuffers()
 {
-	RisseFreeCollectee(RenderBuffer), RenderBuffer = NULL;
+	FreeCollectee(RenderBuffer), RenderBuffer = NULL;
 	RenderBufferSize = 0;
-	RisseFreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
+	FreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
 	ConvertBufferSize = 0;
 }
 //---------------------------------------------------------------------------
@@ -173,12 +173,12 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 			{
 				void * newbuffer;
 				if(RenderBuffer == NULL)
-					newbuffer = RisseMallocAtomicCollectee(RenderBuffer);
+					newbuffer = MallocAtomicCollectee(RenderBuffer);
 				else
-					newbuffer = RisseReallocCollectee(RenderBuffer, buffer_size_needed);
+					newbuffer = ReallocCollectee(RenderBuffer, buffer_size_needed);
 				if(!newbuffer)
 				{
-					RisseFreeCollectee(RenderBuffer), RenderBuffer = NULL;
+					FreeCollectee(RenderBuffer), RenderBuffer = NULL;
 					RenderBufferSize = 0;
 					cont = false;
 				}
@@ -197,12 +197,12 @@ bool tRisaALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 				{
 					void * newbuffer;
 					if(ConvertBuffer == NULL)
-						newbuffer = RisseMallocAtomicCollectee(ConvertBuffer);
+						newbuffer = MallocAtomicCollectee(ConvertBuffer);
 					else
-						newbuffer = RisseReallocCollectee(ConvertBuffer, buffer_size_needed);
+						newbuffer = ReallocCollectee(ConvertBuffer, buffer_size_needed);
 					if(!newbuffer)
 					{
-						RisseFreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
+						FreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
 						ConvertBufferSize = 0;
 						cont = false;
 					}

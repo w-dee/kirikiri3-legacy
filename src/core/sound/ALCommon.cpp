@@ -83,8 +83,8 @@ void tRisaOpenAL::ThrowIfError(const risse_char * message)
 	if(err == AL_NO_ERROR) return ; // エラーはなにも起きていない
 	const ALCchar *msg = alcGetString(Device, err);
 	eRisaException::Throw(RISSE_WS_TR("OpenAL error in %1 : %2"),
-		tRisseString(message),
-		tRisseString(wxString(msg, wxConvUTF8)));
+		tString(message),
+		tString(wxString(msg, wxConvUTF8)));
 }
 //---------------------------------------------------------------------------
 

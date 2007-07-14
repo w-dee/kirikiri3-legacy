@@ -24,7 +24,7 @@
 //---------------------------------------------------------------------------
 //! @brief		XP4 In-Archive Stream Implmentation
 //---------------------------------------------------------------------------
-class tRisaXP4ArchiveStream : public tRisseBinaryStream,
+class tRisaXP4ArchiveStream : public tBinaryStream,
 	protected depends_on<tRisaXP4StreamCache>,
 	protected depends_on<tRisaXP4SegmentCache>
 {
@@ -35,7 +35,7 @@ class tRisaXP4ArchiveStream : public tRisseBinaryStream,
 	const tRisaXP4Archive::tFile & FileInfo; //!< ファイル情報
 	const tRisaXP4Archive::tSegment * SegmentInfo; //!< セグメント情報
 
-	tRisseBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
+	tBinaryStream * Stream; //!< 内容にアクセスするためのバイナリストリーム
 	risse_size CurSegmentNum; //!< 現在のファイルポインタのあるセグメント番号(0～)
 	risse_size LastOpenedSegmentNum; //!< 最後に開いていたセグメント番号(0～)
 	bool SegmentOpened; //!< セグメントが開かれているかどうか

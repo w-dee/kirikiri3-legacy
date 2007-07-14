@@ -41,7 +41,7 @@ struct tRisaWaveEvent
 {
 	//! @brief コンストラクタ
 	risse_int64 Position; //!< オリジナルデコーダ上でのラベル位置 (PCM サンプルグラニュール数単位)
-	tRisseString Name; //!< イベント名
+	tString Name; //!< イベント名
 	risse_int Offset;
 		/*!< オフセット
 			@note

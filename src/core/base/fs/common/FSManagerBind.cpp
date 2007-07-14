@@ -24,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(57103,491,17401,17369,5283,30429,30396,3005);
 
 
 //---------------------------------------------------------------------------
-tRisseNI_FileSystemNativeInstance::tRisseNI_FileSystemNativeInstance(
+tNI_FileSystemNativeInstance::tNI_FileSystemNativeInstance(
 					boost::shared_ptr<tRisaFileSystem> filesystem,
 					iRisseDispatch2 * owner) :
 						FileSystem(filesystem),
@@ -35,7 +35,7 @@ tRisseNI_FileSystemNativeInstance::tRisseNI_FileSystemNativeInstance(
 
 
 //---------------------------------------------------------------------------
-void tRisseNI_FileSystemNativeInstance::Invalidate()
+void tNI_FileSystemNativeInstance::Invalidate()
 {
 	// ファイルシステムマネージャからこのファイルシステムをアンマウントする
 	// ただしファイルシステムマネージャがシャットダウン中にこの関数が
@@ -58,14 +58,14 @@ void tRisseNI_FileSystemNativeInstance::Invalidate()
 
 
 //---------------------------------------------------------------------------
-tRisseNI_BaseFileSystem::tRisseNI_BaseFileSystem()
+tNI_BaseFileSystem::tNI_BaseFileSystem()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRisseNI_BaseFileSystem::Invalidate()
+void tNI_BaseFileSystem::Invalidate()
 {
 	// FileSystem にこれ以上アクセスできないようにreset
 	FileSystem.reset();
@@ -74,21 +74,21 @@ void tRisseNI_BaseFileSystem::Invalidate()
 
 
 //---------------------------------------------------------------------------
-void tRisseNI_BaseFileSystem::RegisterFileSystemNativeInstance(
+void tNI_BaseFileSystem::RegisterFileSystemNativeInstance(
 		iRisseDispatch2 * risse_obj,
 		tRisaFileSystem * fs_obj)
 {
 	boost::shared_ptr<tRisaFileSystem> filesystem(fs_obj);
 	FileSystem = filesystem;
 
-	// tRisseNI_FileSystemNativeInstance オブジェクトの生成
-	tRisseNI_FileSystemNativeInstance *ni =
-		new tRisseNI_FileSystemNativeInstance(filesystem, risse_obj);
+	// tNI_FileSystemNativeInstance オブジェクトの生成
+	tNI_FileSystemNativeInstance *ni =
+		new tNI_FileSystemNativeInstance(filesystem, risse_obj);
 	try
 	{
-		// tRisseNI_FileSystemNativeInstance オブジェクトを risse_obj に登録
+		// tNI_FileSystemNativeInstance オブジェクトを risse_obj に登録
 		risse_obj->NativeInstanceSupport(RISSE_NIS_REGISTER,
-			tRisseNI_FileSystemNativeInstance::ClassID,
+			tNI_FileSystemNativeInstance::ClassID,
 				(iRisseNativeInstance**)&ni);
 	}
 	catch(...)
@@ -103,13 +103,13 @@ void tRisseNI_BaseFileSystem::RegisterFileSystemNativeInstance(
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tRisseNC_FileSystem::ClassID = (risse_uint32)-1;
+risse_uint32 tNC_FileSystem::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseNC_FileSystem::tRisseNC_FileSystem() :
-	tRisseNativeClass(RISSE_WS("FileSystem"))
+tNC_FileSystem::tNC_FileSystem() :
+	tNativeClass(RISSE_WS("FileSystem"))
 {
 	// class constructor
 
@@ -262,7 +262,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/mount)
 
 	if(numparams < 2) return RISSE_E_BADPARAMCOUNT;
 
-	tRisseString mountpoint = *param[0];
+	tString mountpoint = *param[0];
 	iRisseDispatch2 * dsp = param[1]->AsObjectNoAddRef();
 	tRisaFileSystemManager::instance()->Mount(mountpoint, dsp);
 
@@ -283,7 +283,7 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unmount)
 	*/
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
-	tRisseString mountpoint = *param[0];
+	tString mountpoint = *param[0];
 
 	tRisaFileSystemManager::instance()->Unmount(mountpoint);
 
@@ -338,7 +338,7 @@ RISSE_END_NATIVE_PROP_DECL(cwd)
 //---------------------------------------------------------------------------
 tRisaFileSystemRegisterer::tRisaFileSystemRegisterer()
 {
-	FileSystemClass = new tRisseNC_FileSystem();
+	FileSystemClass = new tNC_FileSystem();
 	try
 	{
 		depends_on<tRisaRisseScriptEngine>::locked_instance()->RegisterGlobalObject(RISSE_WS("FileSystem"), FileSystemClass);
@@ -364,11 +364,11 @@ tRisaFileSystemRegisterer::~tRisaFileSystemRegisterer()
 void tRisaFileSystemRegisterer::RegisterClassObject(const risse_char *name,
 											iRisseDispatch2 * object)
 {
-	tRisseVariant val(object, NULL);
+	tVariant val(object, NULL);
 	risse_error er;
 	er = FileSystemClass->PropSet(RISSE_MEMBERENSURE, name, NULL, &val, FileSystemClass);
 	if(RISSE_FAILED(er))
-		RisseThrowFrom_risse_error(er, name);
+		ThrowFrom_risse_error(er, name);
 }
 //---------------------------------------------------------------------------
 

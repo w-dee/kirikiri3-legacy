@@ -34,7 +34,7 @@ tRisaDecompressedHolder::tRisaDecompressedHolder(tRisaDecompressedHolder::tMetho
 
 //---------------------------------------------------------------------------
 tRisaDecompressedHolder::tRisaDecompressedHolder(tMethod method,
-		tRisseBinaryStream * instream, risse_size insize, 
+		tBinaryStream * instream, risse_size insize, 
 		risse_size uncomp_size)
 {
 	Size = 0;

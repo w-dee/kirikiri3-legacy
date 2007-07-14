@@ -17,41 +17,41 @@
 RISSE_DEFINE_SOURCE_ID(51314,64088,22515,17558,46471,30589,44752,43930);
 
 //---------------------------------------------------------------------------
-void eRisaException::Throw(const tRisseString &str)
+void eRisaException::Throw(const tString &str)
 {
-	throw new tRisseTemporaryException(ss_RuntimeException, str);
+	throw new tTemporaryException(ss_RuntimeException, str);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void eRisaException::Throw(const tRisseString &str, const tRisseString & s1)
+void eRisaException::Throw(const tString &str, const tString & s1)
 {
-	throw new tRisseTemporaryException(ss_RuntimeException, tRisseString(str, s1));
+	throw new tTemporaryException(ss_RuntimeException, tString(str, s1));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void eRisaException::Throw(const tRisseString &str, const tRisseString & s1, const tRisseString & s2)
+void eRisaException::Throw(const tString &str, const tString & s1, const tString & s2)
 {
-	throw new tRisseTemporaryException(ss_RuntimeException, tRisseString(str, s1, s2));
+	throw new tTemporaryException(ss_RuntimeException, tString(str, s1, s2));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void eRisaException::Throw(const tRisseString &str, const tRisseString & s1, const tRisseString & s2, const tRisseString & s3)
+void eRisaException::Throw(const tString &str, const tString & s1, const tString & s2, const tString & s3)
 {
-	throw new tRisseTemporaryException(ss_RuntimeException, tRisseString(str, s1, s2, s3));
+	throw new tTemporaryException(ss_RuntimeException, tString(str, s1, s2, s3));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void eRisaException::Throw(const tRisseString &str, const tRisseString & s1, const tRisseString & s2, const tRisseString & s3, const tRisseString & s4)
+void eRisaException::Throw(const tString &str, const tString & s1, const tString & s2, const tString & s3, const tString & s4)
 {
-	throw new tRisseTemporaryException(ss_RuntimeException, tRisseString(str, s1, s2, s3, s4));
+	throw new tTemporaryException(ss_RuntimeException, tString(str, s1, s2, s3, s4));
 }
 //---------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ void eRisaException::Throw(const tRisseString &str, const tRisseString & s1, con
 //---------------------------------------------------------------------------
 void eRisaException::ThrowInternalError(int line, const char * filename)
 {
-	Throw(RISSE_WS_TR("Internal error at %2 line %1"), tRisseString::AsString(line), tRisseString(wxString(filename, wxConvUTF8)));
+	Throw(RISSE_WS_TR("Internal error at %2 line %1"), tString::AsString(line), tString(wxString(filename, wxConvUTF8)));
 }
 //---------------------------------------------------------------------------
 

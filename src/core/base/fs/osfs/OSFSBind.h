@@ -22,15 +22,15 @@
 //---------------------------------------------------------------------------
 //! @brief OSFS ネイティブインスタンス
 //---------------------------------------------------------------------------
-class tRisseNI_OSFS : public tRisseNI_BaseFileSystem
+class tNI_OSFS : public tNI_BaseFileSystem
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseNI_OSFS();
+	tNI_OSFS();
 
 	//! @brief		Risse コンストラクタ
 	risse_error Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj);
+		tVariant **param, iRisseDispatch2 *risse_obj);
 
 	//! @brief		Risse 無効化関数
 	void Invalidate();
@@ -38,7 +38,7 @@ public:
 	tRisaOSFS * GetFileSystem() 
 	{
 		return reinterpret_cast<tRisaOSFS*>(
-			tRisseNI_BaseFileSystem::GetFileSystem().get());
+			tNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
 private:
@@ -49,11 +49,11 @@ private:
 //---------------------------------------------------------------------------
 //! @brief OSFS ネイティブクラス
 //---------------------------------------------------------------------------
-class tRisseNC_OSFS : public tRisseNativeClass
+class tNC_OSFS : public tNativeClass
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseNC_OSFS();
+	tNC_OSFS();
 
 	//! @brief		OSFS クラスID
 	static risse_uint32 ClassID;
@@ -61,7 +61,7 @@ public:
 private:
 	//! @brief		ネイティブインスタンスを作成して返す
 	//! @return		ネイティブインスタンス
-	tRisseNativeInstance *CreateNativeInstance();
+	tNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 

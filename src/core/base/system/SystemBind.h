@@ -37,7 +37,7 @@ public:
 	//! @brief		System.exceptionHandler を得る
 	//! @param		dest		exceptionHandler を格納するクロージャ
 	//! @return		正常な exceptionHandler を得られれば真、得られなければ偽
-	bool GetExceptionHandlerObject(tRisseVariantClosure & dest);
+	bool GetExceptionHandlerObject(tVariantClosure & dest);
 };
 //---------------------------------------------------------------------------
 

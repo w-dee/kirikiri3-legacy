@@ -46,7 +46,7 @@ struct tRisaGCInitializer
 //! @note	このクラスのインスタンスへのポインタは wxTheApp に登録されるため、
 //!			GC が見つけ出すことが出来るはず。
 //---------------------------------------------------------------------------
-class tRisaApplication : public wxApp/*, public tRisseCollectee*/
+class tRisaApplication : public wxApp/*, public tCollectee*/
 {
 public:
 	bool OnInit();

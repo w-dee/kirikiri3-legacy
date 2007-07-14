@@ -10,8 +10,8 @@
 //! @file
 //! @brief Risseスクリプトエンジンの開始・終了・スクリプト実行などのインターフェース
 //---------------------------------------------------------------------------
-#ifndef RisseENGINEH
-#define RisseENGINEH
+#ifndef ENGINEH
+#define ENGINEH
 
 #include "risse/include/risseScriptEngine.h"
 #include "base/utils/Singleton.h"
@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 class tRisaRisseScriptEngine : public singleton_base<tRisaRisseScriptEngine>
 {
-	tRisseScriptEngine *ScriptEngine; //!< スクリプトエンジンインスタンス
+	tScriptEngine *ScriptEngine; //!< スクリプトエンジンインスタンス
 
 public:
 	//! @brief		コンストラクタ
@@ -33,21 +33,21 @@ public:
 	//! @brief		シャットダウン
 	void Shutdown();
 
-	tRisseScriptEngine * GetScriptEngine() { return ScriptEngine; } //!< スクリプトエンジンを返す
+	tScriptEngine * GetScriptEngine() { return ScriptEngine; } //!< スクリプトエンジンを返す
 
-	const tRisseVariant & GetGlobalObject()
-		{ if(!ScriptEngine) return tRisseVariant::GetNullObject();
+	const tVariant & GetGlobalObject()
+		{ if(!ScriptEngine) return tVariant::GetNullObject();
 		  return ScriptEngine->GetGlobalObject(); }
 		//!< グローバルオブジェクトを返す
 
 	//! @brief		グローバルにオブジェクトを登録する
 	//! @param		name    オブジェクトにつけたい名前
 	//! @param		object  その名前で登録したいオブジェクト
-	void RegisterGlobalObject(const tRisseString & name, const tRisseVariant & object);
+	void RegisterGlobalObject(const tString & name, const tVariant & object);
 
 	//! @brief		式を評価して結果をコンソールに表示する
 	//! @param		expression 式
-	void EvaluateExpresisonAndPrintResultToConsole(const tRisseString & expression);
+	void EvaluateExpresisonAndPrintResultToConsole(const tString & expression);
 
 	//! @brief		スクリプトを評価する
 	//! @param		script			スクリプトの内容
@@ -58,10 +58,10 @@ public:
 	//! @param		binding			バインディング情報(NULLの場合はグローバルバインディング)
 	//! @param		is_expression	式モードかどうか(Risseのように文と式の区別を
 	//!								する必要がない言語ではfalseでよい)
-	void Evaluate(const tRisseString & script, const tRisseString & name,
+	void Evaluate(const tString & script, const tString & name,
 					risse_size lineofs = 0,
-					tRisseVariant * result = NULL,
-					const tRisseBindingInfo * binding = NULL, bool is_expression = false);
+					tVariant * result = NULL,
+					const tBindingInfo * binding = NULL, bool is_expression = false);
 };
 //---------------------------------------------------------------------------
 
@@ -69,19 +69,19 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		インスタンスをスクリプトエンジンに登録するためのテンプレートクラス
 //---------------------------------------------------------------------------
-template <typename ClassT, typename ClassNameT>
+template <typename ClassT>
 class tRisaRisseClassRegisterer :
-	public singleton_base<tRisaRisseClassRegisterer<ClassT, ClassNameT> >,
+	public singleton_base<tRisaRisseClassRegisterer<ClassT> >,
 	depends_on<tRisaRisseScriptEngine>
 {
 public:
 	//! @brief		コンストラクタ
 	tRisaRisseClassRegisterer()
 	{
-		// ここらへんのプロセスについては tRisseScriptEngine のコンストラクタも参照のこと
-		tRisseScriptEngine * engine = tRisaRisseScriptEngine::instance()->GetScriptEngine();
+		// ここらへんのプロセスについては tScriptEngine のコンストラクタも参照のこと
+		tScriptEngine * engine = tRisaRisseScriptEngine::instance()->GetScriptEngine();
 		ClassT *class_instance = new ClassT(engine);
-		class_instance->RegisterClassInstance(engine->GetGlobalObject(), ClassNameT());
+		class_instance->RegisterClassInstance(engine->GetGlobalObject());
 		class_instance->RegisterMembers();
 	}
 };

@@ -85,7 +85,7 @@ void tRisaXP4SegmentCache::Clear()
 tRisaXP4SegmentCache::tDataBlock
 	tRisaXP4SegmentCache::Find(void * pointer, risse_size storage_index,
 		risse_size segment_index,
-		tRisseBinaryStream * instream, risse_uint64 dataofs, risse_size insize,
+		tBinaryStream * instream, risse_uint64 dataofs, risse_size insize,
 		risse_size uncomp_size)
 {
 	// 検索キーを作る

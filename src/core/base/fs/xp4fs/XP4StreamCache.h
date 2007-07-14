@@ -31,7 +31,7 @@ class tRisaXP4StreamCache : public singleton_base<tRisaXP4StreamCache>
 	struct tItem
 	{
 		void * Pointer; //!< アーカイブインスタンスへのポインタ
-		tRisseBinaryStream * Stream; //!< 入力ストリームオブジェクト
+		tBinaryStream * Stream; //!< 入力ストリームオブジェクト
 		risse_uint Age; //!< キャッシュ世代
 	} Pool[MAX_ITEM];
 
@@ -47,12 +47,12 @@ public:
 	//! @param		pointer アーカイブインスタンスへのポインタ (識別に用いられる)
 	//! @param		name アーカイブファイル名
 	//! @return		ストリーム
-	tRisseBinaryStream * GetStream(void * pointer, const tRisseString & name);
+	tBinaryStream * GetStream(void * pointer, const tString & name);
 
 	//! @brief		ストリームを解放する
 	//! @param		pointer アーカイブインスタンスへのポインタ
 	//! @param		stream ストリーム
-	void ReleaseStream(void * pointer, tRisseBinaryStream * stream);
+	void ReleaseStream(void * pointer, tBinaryStream * stream);
 
 	//! @brief		指定されたポインタを持つストリームをすべて解放する
 	//! @param		pointer アーカイブインスタンスへのポインタ

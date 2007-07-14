@@ -21,15 +21,15 @@ RISSE_DEFINE_SOURCE_ID(9275,55924,36625,18920,3221,39026,35386,15362);
 
 
 //---------------------------------------------------------------------------
-tRisseNI_XP4FS::tRisseNI_XP4FS()
+tNI_XP4FS::tNI_XP4FS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_error tRisseNI_XP4FS::Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj)
+risse_error tNI_XP4FS::Construct(risse_int numparams,
+		tVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		XP4FS.XP4FS
@@ -39,7 +39,7 @@ risse_error tRisseNI_XP4FS::Construct(risse_int numparams,
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
 
-	tRisseString filename = *param[0];
+	tString filename = *param[0];
 
 	// filesystem オブジェクトの生成と登録
 	RegisterFileSystemNativeInstance(risse_obj, new tRisaXP4FS(filename));
@@ -50,7 +50,7 @@ risse_error tRisseNI_XP4FS::Construct(risse_int numparams,
 
 
 //---------------------------------------------------------------------------
-void tRisseNI_XP4FS::Invalidate()
+void tNI_XP4FS::Invalidate()
 {
 }
 //---------------------------------------------------------------------------
@@ -61,20 +61,20 @@ void tRisseNI_XP4FS::Invalidate()
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tRisseNC_XP4FS::ClassID = (risse_uint32)-1;
+risse_uint32 tNC_XP4FS::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseNC_XP4FS::tRisseNC_XP4FS() :
-	tRisseNativeClass(RISSE_WS("XP4FS"))
+tNC_XP4FS::tNC_XP4FS() :
+	tNativeClass(RISSE_WS("XP4FS"))
 {
 	// class constructor
 
 	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/XP4FS)
 	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_XP4FS,
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tNI_XP4FS,
 	/*Risse class name*/ XP4FS)
 {
 	return RISSE_S_OK;
@@ -88,9 +88,9 @@ RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/XP4FS)
 
 
 //---------------------------------------------------------------------------
-tRisseNativeInstance *tRisseNC_XP4FS::CreateNativeInstance()
+tNativeInstance *tNC_XP4FS::CreateNativeInstance()
 {
-	return new tRisseNI_XP4FS();
+	return new tNI_XP4FS();
 }
 //---------------------------------------------------------------------------
 
@@ -101,7 +101,7 @@ tRisseNativeInstance *tRisseNC_XP4FS::CreateNativeInstance()
 tRisaXP4FSRegisterer::tRisaXP4FSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
-	iRisseDispatch2 * cls = new tRisseNC_XP4FS();
+	iRisseDispatch2 * cls = new tNC_XP4FS();
 	try
 	{
 		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(

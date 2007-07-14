@@ -1,16 +1,16 @@
 /*---------------------------------------------------------------------------*/
 /*
-	Risse2 Script Engine
+	2 Script Engine
 	Copyright (C) 2000-2007 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
-/* "Risse2" type definitions                                                   */
+/* "2" type definitions                                                   */
 /*---------------------------------------------------------------------------*/
 
-#ifndef __RisseTYPES_H__
-#define __RisseTYPES_H__
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
 
 
@@ -98,7 +98,7 @@
 	#ifndef RISSE_INTF_METHOD
 		#define RISSE_INTF_METHOD __cdecl
 			/* RISSE_INTF_METHOD is "cdecl" (by default)
-				since Risse2 2.4.14 (kirikir2 2.25 beta 1) */
+				since 2 2.4.14 (kirikir2 2.25 beta 1) */
 	#endif
 
 	#define RISSE_USERENTRY __cdecl

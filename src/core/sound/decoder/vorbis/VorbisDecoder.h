@@ -24,7 +24,7 @@
 //---------------------------------------------------------------------------
 class tRisaOggVorbisDecoder : public tRisaWaveDecoder
 {
-	tRisseBinaryStream * Stream; //!< 入力ストリーム
+	tBinaryStream * Stream; //!< 入力ストリーム
 	tRisaWaveFileInfo FileInfo; //!< サウンドファイル情報
 	OggVorbis_File InputFile; //!< OggVorbis_File instance
 	int CurrentSection;
@@ -32,7 +32,7 @@ class tRisaOggVorbisDecoder : public tRisaWaveDecoder
 public:
 	//! @brief		コンストラクタ
 	//! @param		filename   ファイル名
-	tRisaOggVorbisDecoder(const tRisseString & filename);
+	tRisaOggVorbisDecoder(const tString & filename);
 
 	// tRisaWaveDecoder をオーバーライドするもの
 	//! @brief		デストラクタ

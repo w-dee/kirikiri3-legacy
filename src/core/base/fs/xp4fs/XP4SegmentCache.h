@@ -65,7 +65,7 @@ public:
 	typedef boost::shared_ptr<tRisaDecompressedHolder> tDataBlock; //!< キャッシュアイテムのvalueのtypedef
 
 private:
-	typedef tRisseHashTable<tKey, tDataBlock, tKeyHasher> tHashTable; //!< ハッシュテーブルのtypedef
+	typedef tHashTable<tKey, tDataBlock, tKeyHasher> tHashTable; //!< ハッシュテーブルのtypedef
 
 	tHashTable HashTable; //!< ハッシュテーブル
 
@@ -94,7 +94,7 @@ public:
 	//! @return		展開されたデータブロック
 	tDataBlock
 		Find(void * pointer, risse_size storage_index, risse_size segment_index,
-			tRisseBinaryStream * instream, risse_uint64 dataofs, risse_size insize,
+			tBinaryStream * instream, risse_uint64 dataofs, risse_size insize,
 			risse_size uncomp_size);
 };
 //---------------------------------------------------------------------------

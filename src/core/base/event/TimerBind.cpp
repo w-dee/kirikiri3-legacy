@@ -30,8 +30,8 @@ RISSE_DEFINE_SOURCE_ID(25021,49177,9141,20257,35249,61240,44766,27087);
 //---------------------------------------------------------------------------
 class tRisaTimerBindingConsumer : public tRisaEventTimerConsumer
 {
-	tRisseScriptEngine * ScriptEngine; //!< スクリプトエンジンインスタンス
-	tRisseObjectInterface * Target; //!< イベントの送り先
+	tScriptEngine * ScriptEngine; //!< スクリプトエンジンインスタンス
+	tObjectInterface * Target; //!< イベントの送り先
 
 public:
 	//! @brief		コンストラクタ
@@ -40,15 +40,15 @@ public:
 	//! @brief		スクリプトエンジンとターゲットを設定する
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		target		イベントの送り先
-	void SetTarget(tRisseScriptEngine * engine, 
-		tRisseObjectInterface * target)  { ScriptEngine = engine; Target = target; }
+	void SetTarget(tScriptEngine * engine, 
+		tObjectInterface * target)  { ScriptEngine = engine; Target = target; }
 
 protected:
 	void OnTimer()
 	{
 		// Target の onTimer を呼び出す
 		if(ScriptEngine)
-			Target->Operate(ocFuncCall, NULL, tRisseSS<'o','n','T','i','m','e','r'>());
+			Target->Operate(ocFuncCall, NULL, tSS<'o','n','T','i','m','e','r'>());
 	}
 };
 //---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ protected:
 //---------------------------------------------------------------------------
 //! @brief		"Timer" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
-class tRisaTimerInstance : public tRisseObjectBase
+class tRisaTimerInstance : public tObjectBase
 {
 	tRisaTimerBindingConsumer * Consumer; //!< Timer のイベントを受け取るインスタンス
 
@@ -73,7 +73,7 @@ public:
 
 public: // Risse用メソッドなど
 	void construct();
-	void initialize(const tRisseNativeCallInfo &info);
+	void initialize(const tNativeCallInfo &info);
 	void set_enabled(bool b);
 	bool get_enabled() const;
 	void set_interval(risse_uint64 interval);
@@ -106,7 +106,7 @@ void tRisaTimerInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRisaTimerInstance::initialize(const tRisseNativeCallInfo &info)
+void tRisaTimerInstance::initialize(const tNativeCallInfo &info)
 {
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
@@ -195,20 +195,20 @@ void tRisaTimerInstance::onTimer()
 //---------------------------------------------------------------------------
 //! @brief		"Timer" クラス
 //---------------------------------------------------------------------------
-class tRisaTimerClass : public tRisseClassBase
+class tRisaTimerClass : public tClassBase
 {
-	typedef tRisseClassBase inherited; //!< 親クラスの typedef
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaTimerClass(tRisseScriptEngine * engine);
+	tRisaTimerClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 
 	//! @brief		newの際の新しいオブジェクトを作成して返す
-	tRisseVariant CreateNewObjectBase();
+	static tVariant ovulate();
 
 public:
 };
@@ -221,8 +221,8 @@ public:
 
 
 //---------------------------------------------------------------------------
-tRisaTimerClass::tRisaTimerClass(tRisseScriptEngine * engine) :
-	tRisseClassBase(engine->ObjectClass)
+tRisaTimerClass::tRisaTimerClass(tScriptEngine * engine) :
+	tClassBase(tSS<'T','i','m','e','r'>(), engine->ObjectClass)
 {
 	RegisterMembers();
 }
@@ -240,21 +240,22 @@ void tRisaTimerClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	RisseBindFunction(this, ss_construct, &tRisaTimerInstance::construct);
-	RisseBindFunction(this, ss_initialize, &tRisaTimerInstance::initialize);
-	RisseBindProperty(this, tRisseSS<'e','n','a','b','l','e','d'>(), &tRisaTimerInstance::get_enabled, &tRisaTimerInstance::set_enabled);
-	RisseBindProperty(this, tRisseSS<'i','n','t','e','r','v','a','l'>(), &tRisaTimerInstance::get_interval, &tRisaTimerInstance::set_interval);
-	RisseBindProperty(this, tRisseSS<'c','a','p','a','c','i','t','y'>(), &tRisaTimerInstance::get_capacity, &tRisaTimerInstance::set_capacity);
-	RisseBindFunction(this, tRisseSS<'r','e','s','e','t'>(), &tRisaTimerInstance::reset);
-	RisseBindFunction(this, tRisseSS<'o','n','T','i','m','e','r'>(), &tRisaTimerInstance::onTimer);
+	BindFunction(this, ss_ovulate, &tRisaTimerClass::ovulate);
+	BindFunction(this, ss_construct, &tRisaTimerInstance::construct);
+	BindFunction(this, ss_initialize, &tRisaTimerInstance::initialize);
+	BindProperty(this, tSS<'e','n','a','b','l','e','d'>(), &tRisaTimerInstance::get_enabled, &tRisaTimerInstance::set_enabled);
+	BindProperty(this, tSS<'i','n','t','e','r','v','a','l'>(), &tRisaTimerInstance::get_interval, &tRisaTimerInstance::set_interval);
+	BindProperty(this, tSS<'c','a','p','a','c','i','t','y'>(), &tRisaTimerInstance::get_capacity, &tRisaTimerInstance::set_capacity);
+	BindFunction(this, tSS<'r','e','s','e','t'>(), &tRisaTimerInstance::reset);
+	BindFunction(this, tSS<'o','n','T','i','m','e','r'>(), &tRisaTimerInstance::onTimer);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseVariant tRisaTimerClass::CreateNewObjectBase()
+tVariant tRisaTimerClass::ovulate()
 {
-	return tRisseVariant(new tRisaTimerInstance());
+	return tVariant(new tRisaTimerInstance());
 }
 //---------------------------------------------------------------------------
 
@@ -263,5 +264,5 @@ tRisseVariant tRisaTimerClass::CreateNewObjectBase()
 
 //---------------------------------------------------------------------------
 //! @brief		Timer クラスレジストラ
-template class tRisaRisseClassRegisterer<tRisaTimerClass, tRisseSS<'T','i','m','e','r'> >;
+template class tRisaRisseClassRegisterer<tRisaTimerClass>;
 //---------------------------------------------------------------------------

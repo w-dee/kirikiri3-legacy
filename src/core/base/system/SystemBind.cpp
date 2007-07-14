@@ -44,10 +44,10 @@ RISSE_DEFINE_SOURCE_ID(42003,44071,47107,17145,37820,23105,1673,13784);
 //---------------------------------------------------------------------------
 //! @brief		Systemネイティブクラス
 //---------------------------------------------------------------------------
-class tRisseNC_System : public tRisseNativeClass
+class tNC_System : public tNativeClass
 {
 public:
-	tRisseNC_System();
+	tNC_System();
 
 	static risse_uint32 ClassID;
 };
@@ -57,15 +57,15 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		SystemクラスID
 //---------------------------------------------------------------------------
-risse_uint32 tRisseNC_System::ClassID = (risse_uint32)-1;
+risse_uint32 tNC_System::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		コンストラクタ
 //---------------------------------------------------------------------------
-tRisseNC_System::tRisseNC_System() :
-	tRisseNativeClass(RISSE_WS("System"))
+tNC_System::tNC_System() :
+	tNativeClass(RISSE_WS("System"))
 {
 	// class constructor
 
@@ -85,7 +85,7 @@ RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/System)
 	RISSE_END_NATIVE_MEMBERS
 
 	// register default "exceptionHandler" member
-	tRisseVariant val((iRisseDispatch2*)NULL, (iRisseDispatch2*)NULL);
+	tVariant val((iRisseDispatch2*)NULL, (iRisseDispatch2*)NULL);
 	PropSet(RISSE_MEMBERENSURE, RISSE_WS("exceptionHandler"), NULL, &val, this);
 }
 //---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ RISSE_END_NATIVE_CONSTRUCTOR_DECL(/*Risse class name*/System)
 //---------------------------------------------------------------------------
 tRisaSystemRegisterer::tRisaSystemRegisterer()
 {
-	SystemClass =  new tRisseNC_System();
+	SystemClass =  new tNC_System();
 	try
 	{
 		depends_on<tRisaRisseScriptEngine>::locked_instance()->
@@ -128,9 +128,9 @@ tRisaSystemRegisterer::~tRisaSystemRegisterer()
 
 
 //---------------------------------------------------------------------------
-bool tRisaSystemRegisterer::GetExceptionHandlerObject(tRisseVariantClosure & dest)
+bool tRisaSystemRegisterer::GetExceptionHandlerObject(tVariantClosure & dest)
 {
-	tRisseVariant val;
+	tVariant val;
 
 	if(RISSE_FAILED(SystemClass->PropGet(
 			RISSE_MEMBERMUSTEXIST, RISSE_WS("exceptionHandler"),

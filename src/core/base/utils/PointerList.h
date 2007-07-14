@@ -36,24 +36,24 @@
 //---------------------------------------------------------------------------
 //! @brief  ダミーのクリティカルセクションの実装
 //---------------------------------------------------------------------------
-class tRisseDummyCriticalSection : public tRisseCollectee
+class tDummyCriticalSection : public tCollectee
 {
 public:
-	tRisseDummyCriticalSection() { ; } //!< コンストラクタ
-	~tRisseDummyCriticalSection() { ; } //!< デストラクタ
+	tDummyCriticalSection() { ; } //!< コンストラクタ
+	~tDummyCriticalSection() { ; } //!< デストラクタ
 
 private:
-	tRisseDummyCriticalSection(const tRisseDummyCriticalSection &); // non-copyable
+	tDummyCriticalSection(const tDummyCriticalSection &); // non-copyable
 
 private:
 	void Enter() { ; } //!< クリティカルセクションに入る
 	void Leave() { ; } //!< クリティカルセクションから出る
 
 public:
-	class tLocker : public tRisseCollectee
+	class tLocker : public tCollectee
 	{
 	public:
-		tLocker(tRisseDummyCriticalSection & cs) { }
+		tLocker(tDummyCriticalSection & cs) { }
 		~tLocker() { }
 	private:
 		tLocker(const tLocker &); // non-copyable
@@ -66,7 +66,7 @@ public:
 //! @brief  void * オブジェクトポインタリスト
 //---------------------------------------------------------------------------
 template <typename CST>
-class void_pointer_list : public tRisseDestructee
+class void_pointer_list : public tDestructee
 {
 	CST CS; //!< クリティカルセクション
 	gc_vector<void *> m_list; //!< ポインタリスト
@@ -286,15 +286,15 @@ private:
 //! @brief  任意型のオブジェクトポインタリスト
 //---------------------------------------------------------------------------
 template <typename T>
-class pointer_list : public tRisseCollectee
+class pointer_list : public tCollectee
 {
-	void_pointer_list<tRisseCriticalSection> m_list;
+	void_pointer_list<tCriticalSection> m_list;
 
 public:
 	//! @brief 配列のロックを行うための scoped_lock
 	class scoped_lock
 	{
-		void_pointer_list<tRisseCriticalSection>::scoped_lock m_lock;
+		void_pointer_list<tCriticalSection>::scoped_lock m_lock;
 	public:
 		scoped_lock(pointer_list<T> & list) : m_lock(list.m_list) {;}
 	};

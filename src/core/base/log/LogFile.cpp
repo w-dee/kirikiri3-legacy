@@ -35,7 +35,7 @@ tRisaLogFile::~tRisaLogFile()
 
 
 //---------------------------------------------------------------------------
-void tRisaLogFile::OutputOneLine(const tRisseString & str)
+void tRisaLogFile::OutputOneLine(const tString & str)
 {
 /*
 	TODO: handle this
@@ -93,7 +93,7 @@ void tRisaLogFile::OnLog(const tRisaLogger::tItem & item)
 	// 時刻 ログレベル メッセージ
 
 	// 時刻
-	tRisseString logline = tRisseString(item.Timestamp.Format()) + RISSE_WS(" ");
+	tString logline = tString(item.Timestamp.Format()) + RISSE_WS(" ");
 
 	// ログレベル
 	switch(item.Level)
@@ -145,7 +145,7 @@ void tRisaLogFile::Begin()
 
 	// セパレータを出力
 	if(write_start != 0)
-		for(int i = 0; i < 10; i++) OutputOneLine(tRisseString::GetEmptyString());
+		for(int i = 0; i < 10; i++) OutputOneLine(tString::GetEmptyString());
 
 	const risse_char * sep = 
 	RISSE_WS(
@@ -154,7 +154,7 @@ void tRisaLogFile::Begin()
 
 	for(int i = 0; i < 2; i++) OutputOneLine(sep);
 
-	OutputOneLine(tRisseString::GetEmptyString());
+	OutputOneLine(tString::GetEmptyString());
 
 	// LastLogを出力
 	tRisaLogger::instance()->SendPreservedLogs(&Receiver);
@@ -166,7 +166,7 @@ void tRisaLogFile::Begin()
 		"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 		);
 	OutputOneLine(sep2);
-	OutputOneLine(tRisseString::GetEmptyString());
+	OutputOneLine(tString::GetEmptyString());
 
 }
 //---------------------------------------------------------------------------

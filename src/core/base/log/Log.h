@@ -40,11 +40,11 @@ public:
 	};
 
 	//! @brief ログの１アイテム(１行) を表す構造体
-	struct tItem : public tRisseCollectee
+	struct tItem : public tCollectee
 	{
 		wxDateTime Timestamp; //!< ログが行われた日付時刻
-		tRisseString Content; //!< ログの内容
-		tRisseString Link; //!< リンク情報
+		tString Content; //!< ログの内容
+		tString Link; //!< リンク情報
 		tLevel Level; //!< ログレベル
 	};
 
@@ -93,14 +93,14 @@ private:
 	//! @param		content		ログの内容
 	//! @param		level		ログレベル
 	//! @param		linkinfo	リンク情報
-	void InternalLog(const tRisseString & content, tLevel level = llInfo,
-		const tRisseString & linkinfo = tRisseString::GetEmptyString());
+	void InternalLog(const tString & content, tLevel level = llInfo,
+		const tString & linkinfo = tString::GetEmptyString());
 
 public:
 	//! @brief ログを行う
 	//! @note 通常のログ記録にはこちらを使うこと
-	static void Log(const tRisseString & content, tLevel level = llInfo,
-		const tRisseString & linkinfo = tRisseString::GetEmptyString())
+	static void Log(const tString & content, tLevel level = llInfo,
+		const tString & linkinfo = tString::GetEmptyString())
 	{
 		if(tRisaLogger::alive())
 			tRisaLogger::instance()->InternalLog(content, level, linkinfo);

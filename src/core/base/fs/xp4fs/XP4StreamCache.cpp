@@ -45,7 +45,7 @@ tRisaXP4StreamCache::~tRisaXP4StreamCache()
 
 
 //---------------------------------------------------------------------------
-tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const tRisseString & name)
+tBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const tString & name)
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 
@@ -57,7 +57,7 @@ tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const tRisse
 		if(item->Stream && item->Pointer == pointer)
 		{
 			// found in the pool
-			tRisseBinaryStream * stream = item->Stream;
+			tBinaryStream * stream = item->Stream;
 			item->Stream = NULL;
 			return stream;
 		}
@@ -71,7 +71,7 @@ tRisseBinaryStream * tRisaXP4StreamCache::GetStream(void * pointer, const tRisse
 
 
 //---------------------------------------------------------------------------
-void tRisaXP4StreamCache::ReleaseStream(void * pointer, tRisseBinaryStream * stream)
+void tRisaXP4StreamCache::ReleaseStream(void * pointer, tBinaryStream * stream)
 {
 	volatile tRisaCriticalSection::tLocker cs_holder(CS);
 

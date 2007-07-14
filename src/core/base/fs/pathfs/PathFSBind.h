@@ -21,15 +21,15 @@
 //---------------------------------------------------------------------------
 //! @brief PathFS ネイティブインスタンス
 //---------------------------------------------------------------------------
-class tRisseNI_PathFS : public tRisseNI_BaseFileSystem
+class tNI_PathFS : public tNI_BaseFileSystem
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseNI_PathFS();
+	tNI_PathFS();
 
 	//! @brief		Risse コンストラクタ
 	risse_error Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj);
+		tVariant **param, iRisseDispatch2 *risse_obj);
 
 	//! @brief		Risse 無効化関数
 	void Invalidate();
@@ -37,7 +37,7 @@ public:
 	tRisaPathFS * GetFileSystem() 
 	{
 		return reinterpret_cast<tRisaPathFS*>(
-			tRisseNI_BaseFileSystem::GetFileSystem().get());
+			tNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 
 private:
@@ -48,11 +48,11 @@ private:
 //---------------------------------------------------------------------------
 //! @brief PathFS ネイティブクラス
 //---------------------------------------------------------------------------
-class tRisseNC_PathFS : public tRisseNativeClass
+class tNC_PathFS : public tNativeClass
 {
 public:
 	//! @brief		コンストラクタ
-	tRisseNC_PathFS();
+	tNC_PathFS();
 
 	//! @brief		PathFS クラスID
 	static risse_uint32 ClassID;
@@ -60,7 +60,7 @@ public:
 private:
 	//! @brief		ネイティブインスタンスを作成して返す
 	//! @return		ネイティブインスタンス
-	tRisseNativeInstance *CreateNativeInstance();
+	tNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 

@@ -23,7 +23,7 @@ class tRisaUnhandledExceptionHandler
 {
 	tRisaUnhandledExceptionHandler(); //!< このクラスのインスタンスは作成できない
 public:
-	static void ShowScriptException(const tRisseVariant * e);
+	static void ShowScriptException(const tVariant * e);
 #if 0
 	static void ShowScriptException(eRisseScriptError &e);
 

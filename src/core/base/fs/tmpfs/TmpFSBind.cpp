@@ -22,15 +22,15 @@ RISSE_DEFINE_SOURCE_ID(8315,58560,35490,17582,45491,52576,20915,60482);
 
 
 //---------------------------------------------------------------------------
-tRisseNI_TmpFS::tRisseNI_TmpFS()
+tNI_TmpFS::tNI_TmpFS()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_error tRisseNI_TmpFS::Construct(risse_int numparams,
-		tRisseVariant **param, iRisseDispatch2 *risse_obj)
+risse_error tNI_TmpFS::Construct(risse_int numparams,
+		tVariant **param, iRisseDispatch2 *risse_obj)
 {
 	/*%
 		@fn		TmpFS.TmpFS
@@ -46,7 +46,7 @@ risse_error tRisseNI_TmpFS::Construct(risse_int numparams,
 
 
 //---------------------------------------------------------------------------
-void tRisseNI_TmpFS::Invalidate()
+void tNI_TmpFS::Invalidate()
 {
 }
 //---------------------------------------------------------------------------
@@ -57,20 +57,20 @@ void tRisseNI_TmpFS::Invalidate()
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tRisseNC_TmpFS::ClassID = (risse_uint32)-1;
+risse_uint32 tNC_TmpFS::ClassID = (risse_uint32)-1;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tRisseNC_TmpFS::tRisseNC_TmpFS() :
-	tRisseNativeClass(RISSE_WS("TmpFS"))
+tNC_TmpFS::tNC_TmpFS() :
+	tNativeClass(RISSE_WS("TmpFS"))
 {
 	// class constructor
 
 	RISSE_BEGIN_NATIVE_MEMBERS(/*Risse class name*/TmpFS)
 	RISSE_DECL_EMPTY_FINALIZE_METHOD
 //----------------------------------------------------------------------
-RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tRisseNI_TmpFS,
+RISSE_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var. name*/_this, /*var. type*/tNI_TmpFS,
 	/*Risse class name*/ TmpFS)
 {
 	return RISSE_S_OK;
@@ -93,10 +93,10 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/save)
 		</p>
 	*/
 
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_TmpFS);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_TmpFS);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	tRisseString filename = *param[0];
+	tString filename = *param[0];
 
 	_this->GetFileSystem()->SerializeTo(filename);
 
@@ -120,10 +120,10 @@ RISSE_BEGIN_NATIVE_METHOD_DECL(/*func. name*/load)
 		</p>
 	*/
 
-	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tRisseNI_TmpFS);
+	RISSE_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tNI_TmpFS);
 
 	if(numparams < 1) return RISSE_E_BADPARAMCOUNT;
-	tRisseString filename = *param[0];
+	tString filename = *param[0];
 
 	_this->GetFileSystem()->UnserializeFrom(filename);
 
@@ -137,9 +137,9 @@ RISSE_END_NATIVE_METHOD_DECL(/*func. name*/load)
 
 
 //---------------------------------------------------------------------------
-tRisseNativeInstance *tRisseNC_TmpFS::CreateNativeInstance()
+tNativeInstance *tNC_TmpFS::CreateNativeInstance()
 {
-	return new tRisseNI_TmpFS();
+	return new tNI_TmpFS();
 }
 //---------------------------------------------------------------------------
 
@@ -154,7 +154,7 @@ tRisseNativeInstance *tRisseNC_TmpFS::CreateNativeInstance()
 tRisaTmpFSRegisterer::tRisaTmpFSRegisterer()
 {
 	// ファイルシステムクラスオブジェクトの下にクラスオブジェクトを登録する
-	iRisseDispatch2 * cls = new tRisseNC_TmpFS();
+	iRisseDispatch2 * cls = new tNC_TmpFS();
 	try
 	{
 		depends_on<tRisaFileSystemRegisterer>::locked_instance()->RegisterClassObject(

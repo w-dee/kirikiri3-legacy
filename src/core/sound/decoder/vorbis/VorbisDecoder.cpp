@@ -22,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(11001,39824,8006,19566,26243,29715,33801,62487);
 
 
 //---------------------------------------------------------------------------
-tRisaOggVorbisDecoder::tRisaOggVorbisDecoder(const tRisseString & filename)
+tRisaOggVorbisDecoder::tRisaOggVorbisDecoder(const tString & filename)
 {
 	CurrentSection = -1;
 	Stream = tRisaFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
@@ -206,7 +206,7 @@ bool tRisaOggVorbisDecoder::Open()
 //---------------------------------------------------------------------------
 size_t tRisaOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-	// read function (wrapper for tRisseBinaryStream)
+	// read function (wrapper for tBinaryStream)
 
 	tRisaOggVorbisDecoder * decoder = reinterpret_cast<tRisaOggVorbisDecoder*>(datasource);
 
@@ -220,7 +220,7 @@ size_t tRisaOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, vo
 //---------------------------------------------------------------------------
 int tRisaOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int whence)
 {
-	// seek function (wrapper for tRisseBinaryStream)
+	// seek function (wrapper for tBinaryStream)
 
 	tRisaOggVorbisDecoder * decoder = reinterpret_cast<tRisaOggVorbisDecoder*>(datasource);
 
@@ -256,7 +256,7 @@ int tRisaOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int w
 //---------------------------------------------------------------------------
 int tRisaOggVorbisDecoder::close_func(void *datasource)
 {
-	// close function (wrapper for tRisseBinaryStream)
+	// close function (wrapper for tBinaryStream)
 
 	// なにもしない
 
@@ -268,7 +268,7 @@ int tRisaOggVorbisDecoder::close_func(void *datasource)
 //---------------------------------------------------------------------------
 long tRisaOggVorbisDecoder::tell_func(void *datasource)
 {
-	// tell function (wrapper for tRisseBinaryStream)
+	// tell function (wrapper for tBinaryStream)
 
 	tRisaOggVorbisDecoder * decoder = reinterpret_cast<tRisaOggVorbisDecoder*>(datasource);
 
@@ -292,7 +292,7 @@ class tRisaOggVorbisWaveDecoderFactory : public tRisaWaveDecoderFactory
 {
 public:
 	//! @brief デコーダを作成する
-	boost::shared_ptr<tRisaWaveDecoder> Create(const tRisseString & filename)
+	boost::shared_ptr<tRisaWaveDecoder> Create(const tString & filename)
 	{
 		boost::shared_ptr<tRisaWaveDecoder>
 			decoder(new tRisaOggVorbisDecoder(filename));

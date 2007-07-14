@@ -20,9 +20,11 @@
 #include "risse/include/risseStaticStrings.h"
 #include "risse/include/risseObjectClass.h"
 
+
+
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(25021,49177,9141,20257,35249,61240,44766,27087);
-
-
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -266,3 +268,7 @@ tVariant tRisaTimerClass::ovulate()
 //! @brief		Timer クラスレジストラ
 template class tRisaRisseClassRegisterer<tRisaTimerClass>;
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+

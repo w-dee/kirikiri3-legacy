@@ -15,6 +15,9 @@
 #include "base/cpu/opt_sse/xmmlib.h"
 #include "base/mathlib/opt_sse/MathAlgorithms_SSE.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 
 #define vat_c1 (M_PI /4)
@@ -294,5 +297,9 @@ RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
 					float * win, int numch, size_t srcofs, size_t len),
 	_RisaInterleaveOverlappingWindow, (dest, src, win, numch, srcofs, len) )
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 

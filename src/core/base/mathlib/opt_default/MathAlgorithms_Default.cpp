@@ -13,6 +13,8 @@
 
 #include <stdlib.h>
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
@@ -101,4 +103,8 @@ void  RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
 	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

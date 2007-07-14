@@ -16,7 +16,9 @@
 #include "base/fs/common/FSManager.h"
 #include "base/script/TextStream.h"
 
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(32746,62447,35688,17903,39609,14867,42943,32667);
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 //! @brief		iRisseTextReadStream の実装
@@ -444,4 +446,8 @@ iRisseTextWriteStream * tRisaTextStreamRegisterer::CreateForWrite(const tString 
 	return new tRisaTextWriteStream(name, modestr);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

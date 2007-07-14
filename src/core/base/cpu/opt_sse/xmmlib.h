@@ -46,6 +46,10 @@
 #include "risse/include/risseTypes.h"
 #include <malloc.h>
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
+
 #if	defined(__GNUC__)||defined(_MSC_VER)
 #else
 #error "Not supported System."
@@ -287,5 +291,7 @@ inline bool RisaIsAlignedTo128bits(const void * p)
 
 #endif
 
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 #endif /* _XMMLIB_H_INCLUDED */

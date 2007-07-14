@@ -15,7 +15,11 @@
 #include "base/fs/xp4fs/XP4FSBind.h"
 #include "base/exception/RisaException.h"
 
+
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(9275,55924,36625,18920,3221,39026,35386,15362);
+//---------------------------------------------------------------------------
+
 
 #if 0
 
@@ -115,5 +119,9 @@ tRisaXP4FSRegisterer::tRisaXP4FSRegisterer()
 	cls->Release();
 }
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 #endif

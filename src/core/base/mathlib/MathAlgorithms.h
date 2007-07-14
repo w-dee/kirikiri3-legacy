@@ -11,6 +11,9 @@
 //! @brief 数学関数群
 //---------------------------------------------------------------------------
 
+#ifndef RISA_MATHALGOLITHMS_H
+#define RISA_MATHALGOLITHMS_H
+
 #include <math.h>
 #include "risse/include/risse.h"
 #include "risse/include/risseError.h"
@@ -23,6 +26,8 @@
 #endif
 
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 // 共通
 
@@ -133,5 +138,9 @@ static inline float RisaWrapPi_F1(float v)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 
+
+#endif

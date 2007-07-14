@@ -16,6 +16,8 @@
 #include "base/ui/UIUtils.h"
 #include "base/event/Event.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 class tRisaLogScrollView;
 class tRisaLogViewerStatusBar;
@@ -58,6 +60,10 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 
 #endif

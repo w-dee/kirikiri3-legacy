@@ -15,8 +15,10 @@
 #include "base/exception/RisaException.h"
 #include <zlib.h>
 
-RISSE_DEFINE_SOURCE_ID(47081,32049,45767,18248,53175,52305,56890,58573);
 
+namespace Risa {
+RISSE_DEFINE_SOURCE_ID(47081,32049,45767,18248,53175,52305,56890,58573);
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 tRisaDecompressedHolder::tRisaDecompressedHolder(tRisaDecompressedHolder::tMethod method,
@@ -84,4 +86,8 @@ void tRisaDecompressedHolder::Decompress(tRisaDecompressedHolder::tMethod method
 		eRisaException::Throw(RISSE_WS_TR("Decompression failed. Data may be corrupted."));
 }
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 

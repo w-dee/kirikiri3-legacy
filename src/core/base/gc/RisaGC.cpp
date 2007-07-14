@@ -16,7 +16,11 @@
 #include "gc.h"
 #include "risse/include/risseGC.h"
 
+
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(13921,35495,35132,18542,18346,21061,47449,62904);
+//---------------------------------------------------------------------------
+
 
 
 /*
@@ -157,3 +161,7 @@ void tRisaCollectorThread::FinalizerNotifier()
 	if(instance) tRisaCollectorThread::instance()->Thread->Wakeup();
 }
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+

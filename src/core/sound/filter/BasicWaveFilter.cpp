@@ -15,7 +15,9 @@
 #include "base/exception/RisaException.h"
 #include "sound/WaveFormatConverter.h"
 
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(35549,59301,21418,20212,56467,33012,49239,37291);
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 tRisaBasicWaveFilter::tRisaBasicWaveFilter(tRisaPCMTypes::tType desired_output_type)
@@ -312,4 +314,8 @@ risse_uint tRisaBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 }
 //---------------------------------------------------------------------------
 
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

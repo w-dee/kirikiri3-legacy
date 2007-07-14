@@ -15,6 +15,10 @@
 
 #include <stdlib.h>
 
+
+namespace Risa {
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 //! @brief		窓関数を適用しながらのインターリーブ解除
 //! @param		dest	格納先(複数)
@@ -45,6 +49,10 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 void  RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
 					float * win, int numch, size_t srcofs, size_t len);
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 
 #endif

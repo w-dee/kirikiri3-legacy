@@ -17,7 +17,10 @@
 #include <algorithm>
 #include <map>
 
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(9133,5164,36031,18883,4749,40441,40379,56790);
+//---------------------------------------------------------------------------
+
 
 
 
@@ -361,6 +364,10 @@ risse_size tRisaXP4FS::GetFileItemIndex(const tString & name)
 
 
 
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 
 

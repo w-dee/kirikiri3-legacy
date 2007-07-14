@@ -17,11 +17,13 @@
 #include "base/fs/common/FSManagerBind.h"
 #include <vector>
 
+
+
+
+
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(57835,14019,1274,20023,25994,43742,64617,60148);
-
-
-
-
+//---------------------------------------------------------------------------
 
 
 
@@ -701,3 +703,7 @@ void tRisaFileSystemManager::SetCurrentDirectory(const tString &dir)
 		CurrentDirectory = dir + RISSE_WS("/");
 }
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+

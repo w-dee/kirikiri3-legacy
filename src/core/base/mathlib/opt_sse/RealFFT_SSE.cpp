@@ -39,6 +39,8 @@
 
 #include "base/cpu/opt_sse/xmmlib.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 STIN void cft1st(int n, float *a, float *w)
 {
@@ -949,6 +951,10 @@ RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
 
 
 
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 
 

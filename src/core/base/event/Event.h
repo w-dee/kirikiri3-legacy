@@ -18,6 +18,7 @@
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
 
+
 /* @note
 Risa のイベントシステムについて
 
@@ -65,6 +66,8 @@ Risa のイベントシステムについて
   れていなければ)キューには入らないイベント。
 
 */
+namespace Risa {
+//---------------------------------------------------------------------------
 
 
 class tRisaEventInfo;
@@ -210,6 +213,10 @@ public:
 	void SetCanDeliverEvents(bool b) { CanDeliverEvents = b; } //!< イベントを配信可能かどうかを設定する
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 
 #endif

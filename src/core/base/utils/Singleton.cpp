@@ -14,6 +14,8 @@
 #include "base/utils/Singleton.h"
 #include <algorithm>
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 gc_vector<singleton_manager::register_info_t> * singleton_manager::functions = NULL;
@@ -131,4 +133,8 @@ void singleton_manager::report_alive_objects()
 	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

@@ -16,6 +16,8 @@
 		http://momonga.t.u-tokyo.ac.jp/~ooura/fft-j.html
 */
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 static void cft1st(int n, float *a, float *w)
 {
@@ -595,5 +597,9 @@ void rdft(int n, int isgn, float *a, int *ip, float *w)
 
 
 
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 

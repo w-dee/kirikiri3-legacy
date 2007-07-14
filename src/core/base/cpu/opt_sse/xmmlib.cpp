@@ -48,6 +48,10 @@
 #include <malloc.h>
 #include "base/cpu/opt_sse/xmmlib.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
+
 _ALIGN16(const risse_uint32) PCS_NNRN[4]	 = {0x00000000, 0x80000000, 0x00000000, 0x00000000};
 _ALIGN16(const risse_uint32) PCS_NNRR[4]	 = {0x80000000, 0x80000000, 0x00000000, 0x00000000};
 _ALIGN16(const risse_uint32) PCS_NRNN[4]	 = {0x00000000, 0x00000000, 0x80000000, 0x00000000};
@@ -95,3 +99,6 @@ _ALIGN16(const float) PFV_4[4]		 = {4.0f,	4.0f,	4.0f,	4.0f};
 _ALIGN16(const float) PFV_8[4]		 = {8.0f,	8.0f,	8.0f,	8.0f};
 _ALIGN16(const float) PFV_INIT[4]		 = {0.0f,	1.0f,	2.0f,	3.0f};
 _ALIGN16(const float) PFV_0P5[4]		 = {0.5f,	0.5f,	0.5f,	0.5f};
+
+//---------------------------------------------------------------------------
+} // namespace Risa

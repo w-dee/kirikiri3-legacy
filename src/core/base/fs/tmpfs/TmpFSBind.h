@@ -15,6 +15,9 @@
 
 #if 0
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 #include "base/fs/common/FSManagerBind.h"
 #include "base/fs/tmpfs/TmpFS.h"
 #include "risse/include/risseNative.h"
@@ -89,6 +92,10 @@ public:
 	tRisaTmpFSRegisterer();
 };
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 #endif
 

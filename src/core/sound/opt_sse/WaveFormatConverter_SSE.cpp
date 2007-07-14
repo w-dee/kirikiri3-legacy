@@ -16,6 +16,9 @@
 #include "base/cpu/opt_sse/xmmlib.h"
 #include "base/mathlib/opt_sse/MathAlgorithms_SSE.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 _ALIGN16(const float) RISA_V_VEC_REDUCE[4] =
 	{ 1.0f/32767.0f, 1.0f/32767.0f, 1.0f/32767.0f, 1.0f/32767.0f };
 _ALIGN16(const float) RISA_V_VEC_MAGNIFY[4] =
@@ -113,6 +116,10 @@ RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
 	void, RisaPCMConvertLoopFloat32ToInt16, (risse_restricted void * dest, risse_restricted const void * src, size_t numsamples),
 	_RisaPCMConvertLoopFloat32ToInt16, (dest, src, numsamples) )
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 
 

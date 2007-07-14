@@ -15,6 +15,8 @@
 #define XP4ArchiveDefsH
 
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 #define RISA__XP4_INDEX_ENCODE_METHOD_MASK 0x03
 #define RISA__XP4_INDEX_ENCODE_RAW      0
@@ -35,5 +37,9 @@
 #define RISA__XP4_FILE_STATE_DELETED	2
 #define RISA__XP4_FILE_STATE_MODIFIED	3
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 #endif

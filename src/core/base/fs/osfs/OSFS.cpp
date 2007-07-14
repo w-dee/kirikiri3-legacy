@@ -17,9 +17,11 @@
 #include <wx/filename.h>
 #include <wx/dir.h>
 
+
+
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(49572,65271,56057,18682,27296,33314,20965,8152);
-
-
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 tRisaOSNativeStream::tRisaOSNativeStream(const wxString & filename, risse_uint32 flags)
@@ -422,4 +424,8 @@ bool tRisaOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 	return true;
 }
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 

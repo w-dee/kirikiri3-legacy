@@ -14,7 +14,12 @@
 #include "risse/include/risseStaticStrings.h"
 #include "base/exception/RisaException.h"
 
+
+
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(51314,64088,22515,17558,46471,30589,44752,43930);
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 void eRisaException::Throw(const tString &str)
@@ -62,4 +67,8 @@ void eRisaException::ThrowInternalError(int line, const char * filename)
 	Throw(RISSE_WS_TR("Internal error at %2 line %1"), tString::AsString(line), tString(wxString(filename, wxConvUTF8)));
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

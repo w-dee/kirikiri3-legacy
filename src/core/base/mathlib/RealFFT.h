@@ -22,8 +22,14 @@
 			http://homepage3.nifty.com/blacksword/
 */
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
     void rdft(int, int, float *, int *, float *);
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 
 #endif

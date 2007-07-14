@@ -13,7 +13,9 @@
 #include "prec.h"
 #include "sound/filter/phasevocoder/Phasevocoder.h"
 
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(38521,252,49793,17297,63880,47889,47025,34954);
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 tRisaPhaseVocoder::tRisaPhaseVocoder() :

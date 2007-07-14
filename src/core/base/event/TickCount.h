@@ -70,6 +70,9 @@
 #include "base/utils/Singleton.h"
 #include "base/utils/RisaThread.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
+
 #ifdef __WXMSW__
 	#define RISA_DECLARE_TYPEDEF typedef DWORD tRisaTickCountBasicType;
 	#define RISA_TICKCOUNT_NEED_WRAP_WATCH
@@ -173,5 +176,9 @@ public:
 	risse_uint64 Get();
 };
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 #endif

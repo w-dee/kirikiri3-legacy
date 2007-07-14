@@ -15,8 +15,10 @@
 #include "base/log/Log.h"
 #include "risse/include/risseObjectBase.h"
 
-
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------
@@ -93,4 +95,8 @@ void tRisaRisseScriptEngine::Evaluate(const tString & script, const tString & na
 	ScriptEngine->Evaluate(script, name, lineofs, result, binding, is_expression);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

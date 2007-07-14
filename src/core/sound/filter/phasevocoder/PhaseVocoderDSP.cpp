@@ -37,7 +37,9 @@
 #include <string.h>
 #include "risseUtils.h"
 
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(46678,10832,40512,19852,21662,48847,10996,40273);
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 tRisaPhaseVocoderDSP::tRisaPhaseVocoderDSP(

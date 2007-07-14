@@ -19,7 +19,9 @@
 #include "risse/include/risseObjectClass.h"
 #include "risse/include/risseExceptionClass.h"
 
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(17391,44513,60617,19121,16540,39031,65356,19696);
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 //! @brief		"Log" クラス
@@ -117,3 +119,7 @@ public: // Risse 用メソッドなど
 //! @brief		Log クラスレジストラ
 template class tRisaRisseClassRegisterer<tRisaLogClass>;
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+

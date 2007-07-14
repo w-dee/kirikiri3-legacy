@@ -15,6 +15,8 @@
 
 #include "base/ui/UIUtils.h"
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 class tRisaScriptEditorTextCtrl;
 class tRisaScriptEditorStatusBar;
@@ -69,6 +71,10 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 
 #endif

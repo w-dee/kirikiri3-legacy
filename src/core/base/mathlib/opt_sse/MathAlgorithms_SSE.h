@@ -18,6 +18,10 @@
 #include "risse/include/risseTypes.h"
 #include "base/cpu/opt_sse/xmmlib.h"
 
+
+namespace Risa {
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 // 定数など
 //---------------------------------------------------------------------------
@@ -284,6 +288,10 @@ void RisaDeinterleaveApplyingWindow(float * dest[], const float * src,
 void  RisaInterleaveOverlappingWindow(float * dest, const float * const * src,
 					float * win, int numch, size_t srcofs, size_t len);
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 
 
 #endif

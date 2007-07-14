@@ -16,7 +16,9 @@
 #include "sound/ALBuffer.h"
 #include "sound/WaveFormatConverter.h"
 
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(24518,55437,60218,19380,17845,8848,1743,50558);
+//---------------------------------------------------------------------------
 
 
 
@@ -360,3 +362,7 @@ void tRisaALBuffer::Load()
 		eRisaException::Throw(RISSE_WS_TR("no data to play"));
 }
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+

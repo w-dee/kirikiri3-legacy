@@ -21,6 +21,8 @@
 
 
 
+namespace Risa {
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 void tRisaPhaseVocoderDSP::ProcessCore(int ch)
@@ -231,4 +233,8 @@ void tRisaPhaseVocoderDSP::ProcessCore(int ch)
 	rdft(FrameSize, -1, SynthWork[ch], FFTWorkIp, FFTWorkW); // Inverse Real DFT
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
 

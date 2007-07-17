@@ -15,6 +15,12 @@
 
 #include "risse/include/risseScriptEngine.h"
 #include "base/utils/Singleton.h"
+#include "risse/include/risseObjectBase.h"
+#include "risse/include/risseNativeBinder.h"
+#include "risse/include/risseStaticStrings.h"
+#include "risse/include/risseStringTemplate.h"
+#include "risse/include/risseClass.h"
+#include "risse/include/risseObjectClass.h"
 
 
 namespace Risa {

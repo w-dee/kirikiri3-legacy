@@ -17,6 +17,7 @@
 #include <boost/array.hpp>
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
+#include "base/script/RisseEngine.h"
 
 
 /* @note
@@ -82,12 +83,16 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		イベント情報クラス
 //---------------------------------------------------------------------------
 class tEventInfo : public tCollectee
 {
-	friend class tEventSystem;
+	friend class tEventQueueInstance;
 public:
 	//! @brief  イベントの優先度
 	enum tPriority
@@ -139,10 +144,33 @@ public:
 
 
 
+
+
 //---------------------------------------------------------------------------
-//! @brief		イベント管理システム
+//! @brief		イベントシステム
+//! @note		イベントシステム共通の設定を保持したり、共通の設定を行ったりする
 //---------------------------------------------------------------------------
 class tEventSystem : public singleton_base<tEventSystem>
+{
+	bool CanDeliverEvents; //!< イベントを配信可能かどうか
+
+public:
+	//! @brief		コンストラクタ
+	tEventSystem() { CanDeliverEvents = true; }
+
+	bool GetCanDeliverEvents() const { return CanDeliverEvents; } //!< イベントを配信可能かどうかを返す
+	void SetCanDeliverEvents(bool b) { CanDeliverEvents = b; } //!< イベントを配信可能かどうかを設定する
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"EventQueue" クラスのインスタンス用 C++クラス
+//---------------------------------------------------------------------------
+class tEventQueueInstance : public tObjectBase, depends_on<tEventSystem>
 {
 public:
 	//! @brief イベントのタイプ
@@ -154,19 +182,16 @@ public:
 	};
 
 private:
-	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-
 	typedef gc_deque<tEventInfo *> tQueue; //!< キュー用コンテナの typedef
 	tQueue Queues[tEventInfo::epMax + 1]; //!< イベント用キュー
-	bool CanDeliverEvents; //!< イベントを配信可能かどうか
 	bool HasPendingEvents; //!< post してから処理されていないイベントが存在する場合に真
 
 public:
 	//! @brief		コンストラクタ
-	tEventSystem();
+	tEventQueueInstance();
 
-	//! @brief		デストラクタ
-	~tEventSystem();
+	//! @brief		デストラクタ(呼ばれることはない)
+	virtual ~tEventQueueInstance() {;}
 
 private:
 	//! @brief		指定された優先度のキューの中のイベントを配信する
@@ -209,10 +234,129 @@ public:
 	//! @param		source		キャンセルしたいイベントの発生元
 	void CancelEvents(void * source);
 
-	bool GetCanDeliverEvents() const { return CanDeliverEvents; } //!< イベントを配信可能かどうかを返す
-	void SetCanDeliverEvents(bool b) { CanDeliverEvents = b; } //!< イベントを配信可能かどうかを設定する
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
+
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"EventQueue" クラス
+//---------------------------------------------------------------------------
+class tEventQueueClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tEventQueueClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		メインスレッドの(デフォルトの)イベントキューを作成するシングルトンクラス
+//---------------------------------------------------------------------------
+class tMainEventQueue : public singleton_base<tMainEventQueue>,
+	depends_on<tRisseScriptEngine>,
+	depends_on<tRisseClassRegisterer<tEventQueueClass> >
+{
+	tVariant Instance; //!< Risseインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	tMainEventQueue();
+
+	//! @brief		メインのイベントキューインスタンスを取得する
+	tVariant & GetEventQueueInstance() { return Instance; }
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		イベントの発生となるRisseインスタンスの共通クラス
+//---------------------------------------------------------------------------
+class tEventSourceInstance : public tObjectBase
+{
+	tVariant DestEventQueue; //!< 配信先のイベントキュー
+public:
+	tEventSourceInstance(); // コンストラクタ
+	virtual ~tEventSourceInstance() {;} // デストラクタ (おそらく呼ばれない)
+
+	//! @brief		配送先のイベントキューを得る
+	//! @return		配送先のイベントキュー
+	tVariant & GetDestEventQueue() { return DestEventQueue; }
+
+	//! @brief		配送先のイベントキューを設定する
+	//! @param		queue		配送先のイベントキュー
+	void SetDestEventQueue(const tVariant & queue) { DestEventQueue = queue; }
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
+	tVariant & get_queue() { return GetDestEventQueue(); }
+	void set_queue(const tVariant & v) { SetDestEventQueue(v); }
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"EventSource" クラス
+//---------------------------------------------------------------------------
+class tEventSourceClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tEventSourceClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------

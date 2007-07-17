@@ -424,9 +424,10 @@ tALSource::tALSource(const tALSource * ref)
 //---------------------------------------------------------------------------
 tALSource::~tALSource()
 {
-	depends_on<tEventSystem>::locked_instance()->CancelEvents(this); // pending のイベントを削除する
+	// TODO: ここでイベントをクリアする意味は？
+//	depends_on<tEventSystem>::locked_instance()->CancelEvents(this); // pending のイベントを削除する
 	Clear();
-	depends_on<tEventSystem>::locked_instance()->CancelEvents(this); // 念のため ...
+//	depends_on<tEventSystem>::locked_instance()->CancelEvents(this); // 念のため ...
 }
 //---------------------------------------------------------------------------
 

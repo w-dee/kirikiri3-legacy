@@ -186,7 +186,7 @@ bool tApplication::ProcessIdle()
 		// 各サブシステムを呼び出す
 
 		// イベントの配信
-		if(tEventSystem::pointer r = tEventSystem::instance())
+		if(tMainEventQueue::pointer r = tMainEventQueue::instance())
 			cont = r->ProcessEvents(tick) || cont;
 
 		// アイドルイベントの配信

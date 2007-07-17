@@ -24,27 +24,16 @@ RISSE_DEFINE_SOURCE_ID(1676,31212,48005,18878,7819,32358,49817,14499);
 
 
 //---------------------------------------------------------------------------
-tEventSystem::tEventSystem()
+tEventQueueInstance::tEventQueueInstance()
 {
 	// フィールドの初期化
-	CanDeliverEvents = true;
 	HasPendingEvents = false;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tEventSystem::~tEventSystem()
-{
-	// キューをすべて破棄する
-	for(int i = tEventInfo::epMin; i <= tEventInfo::epMax; i++)
-		DiscardQueue(Queues[i]);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tEventSystem::DeliverQueue(tEventInfo::tPriority prio, risse_uint64 mastertick)
+void tEventQueueInstance::DeliverQueue(tEventInfo::tPriority prio, risse_uint64 mastertick)
 {
 	tQueue & queue = Queues[prio];
 	while(true)
@@ -54,7 +43,8 @@ void tEventSystem::DeliverQueue(tEventInfo::tPriority prio, risse_uint64 mastert
 		// キューからイベントを一つ拾ってくる
 		// ここは複数スレッドからのアクセスから保護する
 		{
-			volatile tCriticalSection::tLocker holder(CS);
+			volatile tSynchronizer sync(this); // sync
+
 			if(queue.size() == 0) break;
 			event = queue.front();
 			if(!event) break; // イベントがNULLなのでpopせずに戻る
@@ -83,14 +73,14 @@ void tEventSystem::DeliverQueue(tEventInfo::tPriority prio, risse_uint64 mastert
 
 		// ここは複数スレッドからのアクセスから保護する
 		{
-			volatile tCriticalSection::tLocker holder(CS);
+			volatile tSynchronizer sync(this); // sync
 
 			// キューに epExclusive のイベントがpostされたら戻る
 			if(prio != tEventInfo::epExclusive &&
 				Queues[tEventInfo::epExclusive].size() != 0) break;
 
 			// CanDeliverEvents が偽になったら戻る
-			if(!CanDeliverEvents) break;
+			if(!tEventSystem::instance()->GetCanDeliverEvents()) break;
 		}
 	}
 }
@@ -98,16 +88,16 @@ void tEventSystem::DeliverQueue(tEventInfo::tPriority prio, risse_uint64 mastert
 
 
 //---------------------------------------------------------------------------
-void tEventSystem::DeliverEvents(risse_uint64 mastertick)
+void tEventQueueInstance::DeliverEvents(risse_uint64 mastertick)
 {
 	// 一回で配信するイベントの量を、現時点でのイベントまでに
 	// 制限するため、イベントのセンチネルとして null を各キュー(ただしepExclusive以外)
 	// に入れる
 	// ここは複数スレッドからのアクセスから保護する
 	{
-		volatile tCriticalSection::tLocker holder(CS);
+		volatile tSynchronizer sync(this); // sync
 
-		if(!CanDeliverEvents) return; // イベントを配信できない
+		if(!tEventSystem::instance()->GetCanDeliverEvents()) return; // イベントを配信できない
 
 		if(!HasPendingEvents) return; // 未配信のイベントはない
 		HasPendingEvents = false; // いったんこのフラグはここで偽に
@@ -130,7 +120,7 @@ void tEventSystem::DeliverEvents(risse_uint64 mastertick)
 
 			// ここは複数スレッドからのアクセスから保護する
 			{
-				volatile tCriticalSection::tLocker holder(CS);
+				volatile tSynchronizer sync(this); // sync
 
 				// キューに epExclusive のイベントがpostされたら
 				// もう一度最初から
@@ -145,15 +135,15 @@ void tEventSystem::DeliverEvents(risse_uint64 mastertick)
 				}
 
 				// CanDeliverEvents が偽になったら戻る
-				if(!CanDeliverEvents) break;
+				if(!tEventSystem::instance()->GetCanDeliverEvents()) break;
 			}
 		}
-	} while(CanDeliverEvents && events_in_exclusive);
+	} while(tEventSystem::instance()->GetCanDeliverEvents() && events_in_exclusive);
 
 	// 最初に挿入したセンチネルを取り除く
 	// ここは複数スレッドからのアクセスから保護する
 	{
-		volatile tCriticalSection::tLocker holder(CS);
+		volatile tSynchronizer sync(this); // sync
 		for(int i = tEventInfo::epMin;
 			i <= tEventInfo::epMax; i++)
 		{
@@ -181,7 +171,7 @@ void tEventSystem::DeliverEvents(risse_uint64 mastertick)
 
 
 //---------------------------------------------------------------------------
-bool tEventSystem::ProcessEvents(risse_uint64 mastertick)
+bool tEventQueueInstance::ProcessEvents(risse_uint64 mastertick)
 {
 	DeliverEvents(mastertick);
 	return HasPendingEvents;
@@ -190,9 +180,9 @@ bool tEventSystem::ProcessEvents(risse_uint64 mastertick)
 
 
 //---------------------------------------------------------------------------
-void tEventSystem::DiscardQueue(tQueue & queue)
+void tEventQueueInstance::DiscardQueue(tQueue & queue)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	// キュー中のイベントをすべて削除する
 	for(tQueue::iterator i = queue.begin(); i != queue.end(); i++)
@@ -209,14 +199,14 @@ void tEventSystem::DiscardQueue(tQueue & queue)
 
 
 //---------------------------------------------------------------------------
-void tEventSystem::PostEvent(tEventInfo * event, tEventType type)
+void tEventQueueInstance::PostEvent(tEventInfo * event, tEventType type)
 {
 	if(!tEventInfo::IsPriorityValid(event->GetPriority())) return; // 優先度が無効
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	// type をチェック
-	if((type & etDiscardable) && !CanDeliverEvents)
+	if((type & etDiscardable) && !tEventSystem::instance()->GetCanDeliverEvents())
 	{
 		// イベントを破棄可能で、かつイベントを配信できない状態の場合
 		delete event; // イベントを削除して
@@ -253,12 +243,12 @@ void tEventSystem::PostEvent(tEventInfo * event, tEventType type)
 
 
 //---------------------------------------------------------------------------
-size_t tEventSystem::CountEventsInQueue(
+size_t tEventQueueInstance::CountEventsInQueue(
 	int id, void * source, tEventInfo::tPriority prio, size_t limit)
 {
 	if(!tEventInfo::IsPriorityValid(prio)) return false; // 優先度が無効
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	// キューを検索する
 	size_t count = 0;
@@ -278,9 +268,9 @@ size_t tEventSystem::CountEventsInQueue(
 
 
 //---------------------------------------------------------------------------
-void tEventSystem::CancelEvents(void * source)
+void tEventQueueInstance::CancelEvents(void * source)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	for(int n = tEventInfo::epMin; n <= tEventInfo::epMax; n++)
 	{
@@ -301,6 +291,195 @@ void tEventSystem::CancelEvents(void * source)
 	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tEventQueueInstance::construct()
+{
+	// デフォルトではなにもしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tEventQueueInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// 親クラスの同名メソッドを呼び出す
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tEventQueueClass::tEventQueueClass(tScriptEngine * engine) :
+	tClassBase(tSS<'E','v','e','n','t','Q','u','e','u','e'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tEventQueueClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tEventQueueClass::ovulate);
+	BindFunction(this, ss_construct, &tEventQueueInstance::construct);
+	BindFunction(this, ss_initialize, &tEventQueueInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tEventQueueClass::ovulate()
+{
+	return tVariant(new tEventQueueInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		EventQueue クラスレジストラ
+template class tRisseClassRegisterer<tEventQueueClass>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tMainEventQueue::tMainEventQueue()
+{
+	// イベントキューインスタンスを作成する
+	// スクリプトエンジンの取得、グローバルオブジェクトの取得、イベントキュークラスの
+	// 取得、イベントキューインスタンスの作成、イベントキューインスタンスからの
+	// オブジェクトインターフェースの取得を順に行う
+	tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
+	tVariant global_object = engine->GetGlobalObject();
+	tVariant eventqueue_class = global_object.GetPropertyDirect(engine,
+						tSS<'E','v','e','n','t','Q','u','e','u','e'>());
+	tVariant instance_v = eventqueue_class.New();
+	RISSE_ASSERT(instance_v.GetType() == tVariant::vtObject);
+	Instance = instance_v.GetObjectInterface();
+
+	// EventQueue::mainQueue にインスタンスを登録する
+	eventqueue_class.SetPropertyDirect_Object(tSS<'m','a','i','n','Q','u','e','u','e'>(),
+								tOperateFlags::ofUseClassMembersRule|
+								tOperateFlags::ofMemberEnsure,
+								instance_v);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tEventSourceInstance::tEventSourceInstance()
+{
+	// デフォルトのイベントの配信先をメインのイベントキューに設定する
+	DestEventQueue = tMainEventQueue::instance()->GetEventQueueInstance();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tEventSourceInstance::construct()
+{
+	// デフォルトではなにもしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tEventSourceInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// 親クラスの同名メソッドを呼び出す
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tEventSourceClass::tEventSourceClass(tScriptEngine * engine) :
+	tClassBase(tSS<'E','v','e','n','t','S','o','u','r','c','e'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tEventSourceClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tEventSourceClass::ovulate);
+	BindFunction(this, ss_construct, &tEventSourceInstance::construct);
+	BindFunction(this, ss_initialize, &tEventSourceInstance::initialize);
+	BindProperty(this, tSS<'q','u','e','u','e'>(),
+			&tEventSourceInstance::get_queue, &tEventSourceInstance::set_queue);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tEventSourceClass::ovulate()
+{
+	// このクラスのインスタンスは作成できないので例外を投げる
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		EventSource クラスレジストラ
+template class tRisseClassRegisterer<tEventSourceClass>;
+//---------------------------------------------------------------------------
+
+
+
 
 
 //---------------------------------------------------------------------------

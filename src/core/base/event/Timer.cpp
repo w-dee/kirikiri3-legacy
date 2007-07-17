@@ -321,7 +321,7 @@ void tEventTimerConsumer::ResetInterval()
 		SetNextTick(tTickCount::InvalidTickCount);
 	}
 
-	tEventSystem::instance()->CancelEvents(this); // pending なイベントはすべてキャンセル
+	tEventQueue::instance()->CancelEvents(this); // pending なイベントはすべてキャンセル
 	QueueCount = 0;
 }
 //---------------------------------------------------------------------------
@@ -338,7 +338,7 @@ void tEventTimerConsumer::OnPeriod(risse_uint64 scheduled_tick, risse_uint64 cur
 		if(Capacity == 0 || QueueCount < Capacity)
 		{
 			// イベント管理システムにイベントをPostする
-			tEventSystem::instance()->PostEvent(
+			tEventQueue::instance()->PostEvent(
 				new tEventInfo(
 					0, // id
 					this, // source

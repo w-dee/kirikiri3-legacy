@@ -21,6 +21,7 @@
 #include "risse/include/risseStringTemplate.h"
 #include "risse/include/risseClass.h"
 #include "risse/include/risseObjectClass.h"
+#include "risse/include/risseExceptionClass.h"
 
 
 namespace Risa {

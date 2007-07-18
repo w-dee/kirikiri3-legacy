@@ -295,8 +295,8 @@ extern tStringData data_ss_expression;
 static const tString & ss_expression = *reinterpret_cast<const tString *>(&data_ss_expression); //!< (static string)  "expression" インスタンス変数/プロパティ名
 extern tStringData data_ss_NullObjectException;
 static const tString & ss_NullObjectException = *reinterpret_cast<const tString *>(&data_ss_NullObjectException); //!< (static string)  "NullObjectException" クラス名
-extern tStringData data_ss_IllegalArgumentTypeException;
-static const tString & ss_IllegalArgumentTypeException = *reinterpret_cast<const tString *>(&data_ss_IllegalArgumentTypeException); //!< (static string)  "IllegalArgumentTypeException" クラス名
+extern tStringData data_ss_IllegalArgumentClassException;
+static const tString & ss_IllegalArgumentClassException = *reinterpret_cast<const tString *>(&data_ss_IllegalArgumentClassException); //!< (static string)  "IllegalArgumentClassException" クラス名
 extern tStringData data_ss_CompileException;
 static const tString & ss_CompileException = *reinterpret_cast<const tString *>(&data_ss_CompileException); //!< (static string)  "CompileException" クラス名
 extern tStringData data_ss_ArithmeticException;

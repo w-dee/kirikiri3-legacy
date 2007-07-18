@@ -822,16 +822,16 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		"IllegalArgumentTypeException" クラス
+//! @brief		"IllegalArgumentClassException" クラス
 //---------------------------------------------------------------------------
-class tIllegalArgumentTypeExceptionClass : public tClassBase
+class tIllegalArgumentClassExceptionClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tIllegalArgumentTypeExceptionClass(tScriptEngine * engine);
+	tIllegalArgumentClassExceptionClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
@@ -841,17 +841,30 @@ public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 
 public:
-	//! @brief		「methodに型typeは受け入れられない」例外を発生
+	//! @brief		「method_nameにクラスclass_nameは受け入れられない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		method_name	メソッド名
-	//! @param		type_name	型名
-	static void ThrowNonAcceptableType(tScriptEngine * engine,
-		const tString & method_name, const tString & type_name);
-	//! @brief		「methodに型typeは受け入れられない」例外を発生
+	//! @param		type_name	クラス名
+	static void ThrowNonAcceptableClass(tScriptEngine * engine,
+		const tString & method_name, const tString & class_name);
+	//! @brief		「method_nameにクラスclass_nameは受け入れられない」例外を発生
 	//! @param		method_name	メソッド名
 	//! @param		type_name	型名
-	static void ThrowNonAcceptableType(const tString & method_name, const tString & type_name)
-		{ ThrowNonAcceptableType(NULL, method_name, type_name); }
+	static void ThrowNonAcceptableClass(const tString & method_name, const tString & class_name)
+		{ ThrowNonAcceptableClass(NULL, method_name, class_name); }
+
+	//! @brief		「クラスclass_nameのインスタンスを指定すべし」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		class_name	クラス名
+	static void ThrowSpecifyInstanceOfClass(tScriptEngine * engine,
+		const tString & class_name);
+	//! @brief		「クラスclass_nameのインスタンスを指定すべし」例外を発生
+	//! @param		method_name	メソッド名
+	//! @param		class_name	クラス名
+	static void ThrowSpecifyInstanceOfClass(const tString & class_name)
+		{ ThrowSpecifyInstanceOfClass(NULL, class_name); }
+
+
 };
 //---------------------------------------------------------------------------
 

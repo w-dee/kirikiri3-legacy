@@ -23,6 +23,7 @@ namespace Risse
 {
 class tScriptBlockInstance;
 class tScriptEngine;
+class tClassBase;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 //! @note	tVariantData よりも高度な動作をここで定義する
@@ -46,6 +47,12 @@ private:
 	//! @note		本来 risseExceptionClass.h に書いてある物だが
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
 	static void ThrowNoSuchMemberException(const tString & name);
+
+	//! @brief		IllegalArgumentClassException を投げる
+	//! @param		class_name			クラス名
+	//! @note		本来 risseExceptionClass.h に書いてある物だが
+	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	static void ThrowIllegalArgumentClassException(const tString & class_name);
 
 
 private: // static オブジェクト
@@ -2314,6 +2321,11 @@ public: // ユーティリティ
 			ThrowBadContextException();
 		return intf;
 	}
+
+	//! @brief		インスタンスチェック(指定されたクラスのインスタンスかどうかをチェック)
+	//! @param		cls		クラスオブジェクトインスタンス
+	//! @note		指定されたクラスのインスタンスでないばあいは IllegalArgumentClassException 例外が発生する)
+	void AssertClass(tClassBase * cls) const;
 
 	//! @brief		型名を得る
 	//! @param		got		型名が正常に取得できた場合に 真、

@@ -82,7 +82,7 @@ ss_ClassDefinitionException			ClassDefinitionException		#!< "ClassDefinitionExce
 ss_InstantiationException			InstantiationException			#!< "InstantiationException" クラス名
 ss_expression						expression						#!< "expression" インスタンス変数/プロパティ名
 ss_NullObjectException				NullObjectException				#!< "NullObjectException" クラス名
-ss_IllegalArgumentTypeException		IllegalArgumentTypeException	#!< "IllegalArgumentTypeException" クラス名
+ss_IllegalArgumentClassException	IllegalArgumentClassException	#!< "IllegalArgumentClassException" クラス名
 ss_CompileException					CompileException				#!< "CompileException" クラス名
 ss_ArithmeticException				ArithmeticException				#!< "ArithmeticException" クラス名
 ss_extensible						extensible						#!< "extensible" プロパティ名

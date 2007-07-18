@@ -46,7 +46,7 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
        ArgumentException
          IllegalArgumentException
            NullObjectException
-           InvalidTypeException
+           IllegalArgumentClassException
          BadArgumentCountException
        MemberAccessException
          NoSuchMemberException
@@ -1442,8 +1442,8 @@ void tNullObjectExceptionClass::Throw(tScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
-tIllegalArgumentTypeExceptionClass::tIllegalArgumentTypeExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_IllegalArgumentTypeException, engine->IllegalArgumentExceptionClass)
+tIllegalArgumentClassExceptionClass::tIllegalArgumentClassExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_IllegalArgumentClassException, engine->IllegalArgumentExceptionClass)
 {
 	RegisterMembers();
 }
@@ -1451,7 +1451,7 @@ tIllegalArgumentTypeExceptionClass::tIllegalArgumentTypeExceptionClass(tScriptEn
 
 
 //---------------------------------------------------------------------------
-void tIllegalArgumentTypeExceptionClass::RegisterMembers()
+void tIllegalArgumentClassExceptionClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -1461,14 +1461,14 @@ void tIllegalArgumentTypeExceptionClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	BindFunction(this, ss_construct, &tIllegalArgumentTypeExceptionClass::construct);
-	BindFunction(this, ss_initialize, &tIllegalArgumentTypeExceptionClass::initialize);
+	BindFunction(this, ss_construct, &tIllegalArgumentClassExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tIllegalArgumentClassExceptionClass::initialize);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tIllegalArgumentTypeExceptionClass::construct()
+void tIllegalArgumentClassExceptionClass::construct()
 {
 	// 特にやることはない
 }
@@ -1476,7 +1476,7 @@ void tIllegalArgumentTypeExceptionClass::construct()
 
 
 //---------------------------------------------------------------------------
-void tIllegalArgumentTypeExceptionClass::initialize(const tNativeCallInfo & info)
+void tIllegalArgumentClassExceptionClass::initialize(const tNativeCallInfo & info)
 {
 	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
 	info.InitializeSuperClass(info.args);
@@ -1485,17 +1485,29 @@ void tIllegalArgumentTypeExceptionClass::initialize(const tNativeCallInfo & info
 
 
 //---------------------------------------------------------------------------
-void tIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType(tScriptEngine * engine,
-		const tString & method_name, const tString & type_name)
+void tIllegalArgumentClassExceptionClass::ThrowNonAcceptableClass(tScriptEngine * engine,
+		const tString & method_name, const tString & class_name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalArgumentTypeException,
-			tString(RISSE_WS_TR("cannot accept type %2 as argument for method %1()"),
-				method_name, type_name));
+		new tTemporaryException(ss_IllegalArgumentClassException,
+			tString(RISSE_WS_TR("cannot accept instance of class %2 as argument for method %1()"),
+				method_name, class_name));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tIllegalArgumentClassExceptionClass::ThrowSpecifyInstanceOfClass(tScriptEngine * engine,
+	const tString & class_name)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_IllegalArgumentClassException,
+			tString(RISSE_WS_TR("specify instance of class %1"),
+				class_name));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
 
 
 

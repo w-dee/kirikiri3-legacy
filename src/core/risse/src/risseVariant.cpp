@@ -33,16 +33,16 @@ RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 
 
 //---------------------------------------------------------------------------
-// tIllegalArgumentTypeExceptionClass を投げるためのマクロ
+// tIllegalArgumentClassExceptionClass を投げるためのマクロ
 // この中では this と rhs を使い、tVariant を帰す。
 #define RISSE_THROW_ILLEGAL_ARG_TYPE(method_name) \
-	tIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType( \
+	tIllegalArgumentClassExceptionClass::ThrowNonAcceptableClass( \
 			GetClassName() + ss_doubleColon + (method_name), rhs.GetClassName()); \
 			return tVariant::GetVoidObject();
 
 // 上のマクロとは違い false を返す。
 #define RISSE_THROW_ILLEGAL_ARG_TYPE_B(method_name) \
-	tIllegalArgumentTypeExceptionClass::ThrowNonAcceptableType( \
+	tIllegalArgumentClassExceptionClass::ThrowNonAcceptableClass( \
 			GetClassName() + ss_doubleColon + (method_name), rhs.GetClassName()); \
 			return false;
 //---------------------------------------------------------------------------
@@ -71,6 +71,13 @@ void tVariantBlock::ThrowNoSuchMemberException(const tString &name)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tVariantBlock::ThrowIllegalArgumentClassException(const tString & class_name)
+{
+	tIllegalArgumentClassExceptionClass::ThrowSpecifyInstanceOfClass(class_name);
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -2764,6 +2771,23 @@ void tVariantBlock::AddTrace(const tScriptBlockInstance * sb, risse_size pos) co
 				tVariant(const_cast<tScriptBlockInstance *>(sb)),
 				(risse_int64)pos));
 		Invoke_Object(ss_addTrace, source_point);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tVariantBlock::AssertClass(tClassBase * cls) const
+{
+	if(GetType() == vtObject)
+	{
+		if(!cls->GetRTTIMatcher().Match(GetObjectInterface()->GetRTTI()))
+			ThrowIllegalArgumentClassException(cls->GetPropertyDirect(ss_name));
+	}
+	else
+	{
+		if(!InstanceOf(cls->GetRTTI()->GetScriptEngine(), tVariant((tObjectInterface*)cls)))
+			ThrowIllegalArgumentClassException(cls->GetPropertyDirect(ss_name));
 	}
 }
 //---------------------------------------------------------------------------

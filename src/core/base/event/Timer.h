@@ -53,7 +53,7 @@ class tTimerScheduler : protected depends_on<tTickCount>,
 	tConsumers Consumers; //!< tTimerConsumer の配列
 
 	risse_uint64 NearestTick; //!< もっとも時間的に近い位置にあるTick (tTickCount::InvalidTickCount の場合は無効)
-	size_t NearestIndex; //!< もっちも時間的に近い位置にある Consumer のConsumers内におけるインデックス
+	size_t NearestIndex; //!< もっとも時間的に近い位置にある Consumer のConsumers内におけるインデックス
 	volatile bool NearestInfoValid; //!< Nearest* のメンバの情報が有効かどうか
 	volatile bool NeedRescheduleOnPeriodChange;
 		//!< tTimerConsumer::SetNextTick内でReschedule()が呼ばれたときに
@@ -66,6 +66,9 @@ public:
 	//! @brief		デストラクタ
 	~tTimerScheduler();
 
+	//! @brief		このオブジェクトを保護するクリティカルセクションを得る
+	//! @return		このオブジェクトを保護するクリティカルセクション
+	tCriticalSection & GetCS() { return CS; }
 
 private:
 	friend class tTimerConsumer;
@@ -103,21 +106,29 @@ protected:
 
 //---------------------------------------------------------------------------
 //! @brief		タイマーのタイミング発生先となるクラス
-//! @note		このクラスおよびこの派生クラスのデストラクタは、
-//!				メインスレッド以外から非同期に呼ばれる可能性があるので注意すること
+//! @note		SetEnabled(true) を行うと、このオブジェクトは tTimerScheduler
+//!				に登録され、OnPeriod が実行されるようになる。
+//!				SetEnabled(false) を行わない限り、tTimerScheduler がこのオブジェクトを
+//!				参照し続けるので開放されないので注意。
 //---------------------------------------------------------------------------
-class tTimerConsumer : public tDestructee
+class tTimerConsumer : public tCollectee
 {
 	tTimerScheduler * Owner;
 	risse_uint64 NextTick; // 次に OnPeriod を呼ぶべき絶対Tick
+	bool Enabled; //!< タイマーが有効かどうか
 protected:
 	//! @brief		コンストラクタ
 	tTimerConsumer(tTimerScheduler * owner);
 
-	//! @brief		デストラクタ
-	virtual ~tTimerConsumer();
+	//! @brief		デストラクタ (おそらく呼ばれない)
+	virtual ~tTimerConsumer() {;}
 public:
+	bool GetEnabled() const { return Enabled; } //!< タイマーが有効かどうかを返す
+	void SetEnabled(bool b); //!< タイマーが有効かどうかを設定する。
+
 	risse_uint64 GetNextTick() const { return NextTick; } //!< 次にOnPeriodをコールバックすべき絶対TickCountを返す
+
+	tTimerScheduler * GetOwner() const { return Owner; } //!< Owner を得る
 
 	//! @brief		次にOnPeriodをコールバックすべき絶対tickを設定する
 	//! @param		nexttick 絶対TickCount (呼んで欲しくない場合はtTickCount::InvalidTickCount)
@@ -141,6 +152,60 @@ public:
 	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick) = 0;
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		周期的なタイマーのタイミング発生先となるクラス
+//---------------------------------------------------------------------------
+class tPeriodicTimerConsumer : public tTimerConsumer
+{
+	risse_uint64 Interval; //!< タイマー周期
+	risse_uint64 ReferenceTick; //!< 周期の基準となるTick
+
+protected:
+	//! @brief		コンストラクタ
+	tPeriodicTimerConsumer(tTimerScheduler * owner);
+
+	//! @brief		デストラクタ (おそらく呼ばれない)
+	virtual ~tPeriodicTimerConsumer() {;}
+
+public:
+	//! @brief		有効か無効かを設定する(オーバーライド)
+	//! @param		enabled 有効か無効か
+	void SetEnabled(bool enabled);
+
+	risse_uint64 GetInterval() const { return Interval; } //!< タイマー周期を得る
+
+	//! @brief		タイマー周期を設定する
+	//! @param		interval タイマー周期
+	void SetInterval(risse_uint64 interval);
+
+	//! @brief		タイマーをリセットする
+	void Reset();
+
+private:
+	//! @brief		時間原点をリセットし、このメソッドが呼ばれた時点に設定する
+	void ResetInterval();
+
+public:
+
+	//! @brief		指定されたTickCountに達したときに呼び出される
+	//! @param	scheduled_tick GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
+	//! @param	current_tick この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
+	//! @note	このメソッドをオーバーライドしたら、このクラスのメソッドも呼ぶこと(そうしないと次のtickが設定されない)
+	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick); // from tScriptTimerConsumer
+
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 
@@ -175,10 +240,11 @@ class tEventTimerScheduler :
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントタイマーコンシューマ
+//! @brief		イベントタイマー(Risseの"Timer"クラスのインスタンス)
 //---------------------------------------------------------------------------
 class tEventTimerConsumer :
-	public tTimerConsumer,
+	public tEventSourceInstance,
+	public tPeriodicTimerConsumer,
 	public tEventDestination,
 	protected depends_on<tEventTimerScheduler>, // このクラスは tEventTimerScheduler に依存
 	protected depends_on<tEventSystem>, // イベント管理システムに依存
@@ -186,10 +252,6 @@ class tEventTimerConsumer :
 {
 	static const size_t DefaultCapacity = 6; //!< Capacity のデフォルトの値
 
-	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-	bool Enabled; //!< タイマーが有効かどうか
-	risse_uint64 Interval; //!< タイマー周期
-	risse_uint64 ReferenceTick; //!< 周期の基準となるTick
 	size_t Capacity; //!< 一度にイベントキューにためることのできる量(0=制限無し)
 	size_t QueueCount; //!< キューにたまっているイベントの数
 
@@ -197,33 +259,26 @@ protected:
 	//! @brief		コンストラクタ
 	tEventTimerConsumer();
 
-	//! @brief		デストラクタ
-	~tEventTimerConsumer();
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tEventTimerConsumer() {;}
 
 public:
-	bool GetEnabled() const { return Enabled; } //!< 有効かどうかを得る
-
-	//! @brief		有効か無効かを設定する
+	//! @brief		有効か無効かを設定する(オーバーライド)
 	//! @param		enabled 有効か無効か
 	void SetEnabled(bool enabled);
 
-	risse_uint64 GetInterval() const { return Interval; } //!< タイマー周期を得る
-
-	//! @brief		タイマー周期を設定する
+	//! @brief		タイマー周期を設定する(オーバーライド)
 	//! @param		interval タイマー周期
 	void SetInterval(risse_uint64 interval);
-
-	//! @brief		タイマーをリセットする
-	void Reset();
 
 	//! @brief		容量(一度にイベントキューにためることのできるイベントの数)を設定する
 	void SetCapacity(size_t capa);
 
 	size_t GetCapacity() const { return Capacity; } //!< 容量を得る
 
-private:
-	//! @brief		タイマー周期をリセットする
-	void ResetInterval();
+protected:
+	//! @brief		キューをクリアする
+	void ClearQueue();
 
 	//! @brief		指定されたTickCountに達したときに呼び出される
 	//! @param	scheduled_tick GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)

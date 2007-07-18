@@ -314,7 +314,15 @@ public:
 
 	//! @brief		配送先のイベントキューを設定する
 	//! @param		queue		配送先のイベントキュー
-	void SetDestEventQueue(const tVariant & queue) { DestEventQueue = queue; }
+	void SetDestEventQueue(const tVariant & queue);
+
+	//! @brief		配送先のイベントキューインスタンスを得る
+	tEventQueueInstance * GetDestEventQueueInstance() const
+	{
+		// DestEventQueue が tEventQueueInstance を表しているということは
+		// SetDestEventQueue() 内で assert 済み
+		return (tEventQueueInstance*)DestEventQueue.GetObjectInterface();
+	}
 
 public: // Risse用メソッドなど
 	void construct();

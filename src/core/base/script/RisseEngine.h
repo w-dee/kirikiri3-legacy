@@ -85,6 +85,7 @@ class tRisseClassRegisterer :
 	public singleton_base<tRisseClassRegisterer<ClassT> >,
 	depends_on<tRisseScriptEngine>
 {
+	ClassT * ClassInstance;
 public:
 	//! @brief		コンストラクタ
 	tRisseClassRegisterer()
@@ -92,9 +93,12 @@ public:
 		// ここらへんのプロセスについては tScriptEngine のコンストラクタも参照のこと
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 		ClassT *class_instance = new ClassT(engine);
+		ClassInstance = class_instance;
 		class_instance->RegisterClassInstance(engine->GetGlobalObject());
 		class_instance->RegisterMembers();
 	}
+
+	ClassT * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る
 };
 //---------------------------------------------------------------------------
 

@@ -424,6 +424,13 @@ void tEventSourceInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tEventSourceInstance::SetDestEventQueue(const tVariant & queue)
+{
+	DestEventQueue.AssertClass(tRisseClassRegisterer<tEventQueueClass>::instance()->GetClassInstance());
+	DestEventQueue = queue;
+}
+//---------------------------------------------------------------------------
 
 
 

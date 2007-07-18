@@ -380,7 +380,7 @@ tMainEventQueue::tMainEventQueue()
 						tSS<'E','v','e','n','t','Q','u','e','u','e'>());
 	tVariant instance_v = eventqueue_class.New();
 	RISSE_ASSERT(instance_v.GetType() == tVariant::vtObject);
-	Instance = instance_v.GetObjectInterface();
+	EventQueue = instance_v.GetObjectInterface();
 
 	// EventQueue::mainQueue にインスタンスを登録する
 	eventqueue_class.SetPropertyDirect_Object(tSS<'m','a','i','n','Q','u','e','u','e'>(),
@@ -400,7 +400,7 @@ tMainEventQueue::tMainEventQueue()
 tEventSourceInstance::tEventSourceInstance()
 {
 	// デフォルトのイベントの配信先をメインのイベントキューに設定する
-	DestEventQueue = tMainEventQueue::instance()->GetEventQueueInstance();
+	DestEventQueue = tMainEventQueue::instance()->GetEventQueue();
 }
 //---------------------------------------------------------------------------
 

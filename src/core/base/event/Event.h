@@ -279,14 +279,20 @@ class tMainEventQueue : public singleton_base<tMainEventQueue>,
 	depends_on<tRisseScriptEngine>,
 	depends_on<tRisseClassRegisterer<tEventQueueClass> >
 {
-	tVariant Instance; //!< Risseインスタンス
+	tVariant EventQueue; //!< Risseインスタンス
 
 public:
 	//! @brief		コンストラクタ
 	tMainEventQueue();
 
-	//! @brief		メインのイベントキューインスタンスを取得する
-	tVariant & GetEventQueueInstance() { return Instance; }
+	//! @brief		メインのイベントキューを取得する
+	tVariant & GetEventQueue() { return EventQueue; }
+
+	//! @brief		メインのイベントキューインスタンスを得る
+	tEventQueueInstance * GetEventQueueInstance() const
+	{
+		return (tEventQueueInstance*)EventQueue.GetObjectInterface();
+	}
 };
 //---------------------------------------------------------------------------
 

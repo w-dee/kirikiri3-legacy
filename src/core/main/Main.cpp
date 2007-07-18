@@ -176,25 +176,23 @@ int tApplication::OnExit()
 bool tApplication::ProcessIdle()
 {
 	bool cont = false;
-/*
-	TODO: handle this
-	if(tTickCount::pointer tick_count = tTickCount::instance())
+
+	if(	tTickCount::alive() && tEventSystem::alive() &&
+		tMainEventQueue::alive() && tIdleEventManager::alive())
 	{
 		// この回で呼び出すハンドラに渡すtickを得る
-		risse_uint64 tick = tick_count->Get();
+		risse_uint64 tick = tTickCount::instance()->Get();
 
 		// 各サブシステムを呼び出す
 
 		// イベントの配信
-		if(tMainEventQueue::pointer r = tMainEventQueue::instance())
-			cont = r->ProcessEvents(tick) || cont;
+		cont = tMainEventQueue::instance()->GetEventQueueInstance()->ProcessEvents(tick) || cont;
 
 		// アイドルイベントの配信
-		if(tIdleEventManager::pointer r = tIdleEventManager::instance())
-			cont = r->Deliver(tick) || cont;
+		cont = tIdleEventManager::instance()->Deliver(tick) || cont;
 	}
-*/
-	cont = wxApp::ProcessIdle()/* || cont*/;
+
+	cont = wxApp::ProcessIdle() || cont;
 	return cont;
 }
 //---------------------------------------------------------------------------

@@ -6,7 +6,7 @@ var labels =  [    "V"   ,   "I"    ,   "R"    ,   "N"    ,   "S"    ,   "O"    
 var values1 = [ void     ,   0b110  ,  0b110p0 ,    null  ,   "a"    , <%01%>   , true     ,  false  ,  new Object() ];
 var values2 = [ void     ,   0b101  ,  0b101p0 ,    null  ,   "b"    , <%02%>   , true     ,  false  ,  new Object() ];
 
-var eT = IllegalArgumentTypeException;
+var eT = IllegalArgumentClassException;
 var eM = NoSuchMemberException;
 
 var expects =

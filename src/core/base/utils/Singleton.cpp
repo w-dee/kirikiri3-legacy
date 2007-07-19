@@ -21,6 +21,7 @@ namespace Risa {
 gc_vector<singleton_manager::register_info_t> * singleton_manager::functions = NULL;
 gc_vector<singleton_manager::handler_t> * singleton_manager::disconnectors = NULL;
 gc_vector<singleton_manager::handler_t> * singleton_manager::manual_starts = NULL;
+tCriticalSection * singleton_manager::CS = NULL;
 //---------------------------------------------------------------------------
 
 
@@ -31,6 +32,9 @@ void singleton_manager::register_info(const singleton_manager::register_info_t &
 	// 必ず。
 	GC_init();
 
+	// ここはマルチスレッドからの保護は必要ない (main以前によばれるので)
+
+	if(CS == NULL) CS = new tCriticalSection();
 //	fprintf(stderr, "singleton %s\n", info.get_name());
 
 	if(functions == NULL)
@@ -44,6 +48,7 @@ void singleton_manager::register_info(const singleton_manager::register_info_t &
 //---------------------------------------------------------------------------
 void singleton_manager::register_manual_start(handler_t func)
 {
+	// ここもマルチスレッドからの保護は必要ない (main以前によばれるので)
 	if(manual_starts == NULL)
 		manual_starts = new gc_vector<handler_t>();
 	manual_starts->push_back(func);
@@ -54,6 +59,8 @@ void singleton_manager::register_manual_start(handler_t func)
 //---------------------------------------------------------------------------
 void singleton_manager::register_disconnector(handler_t func)
 {
+	// ここはマルチスレッドからの保護が必要だが、これを呼ぶ
+	// singleton_base<T>::make_instance 内ですでに保護されている
 	if(disconnectors == NULL)
 		disconnectors = new gc_vector<handler_t>();
 	disconnectors->push_back(func);

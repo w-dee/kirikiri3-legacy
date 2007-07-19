@@ -56,11 +56,13 @@ TODO: 使用例をここに書く
 #include <string.h>
 #include <typeinfo>
 #include "risse/include/risseGC.h"
+#include "base/utils/RisaThread.h"
 
 #define HAVE_CXXABI_H
 #ifdef HAVE_CXXABI_H
 	#include <cxxabi.h>
 #endif
+
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -86,6 +88,7 @@ class singleton_manager : public tCollectee
 	static gc_vector<register_info_t> * functions; //!< ensure関数の配列
 	static gc_vector<handler_t> * disconnectors; //!< disconnect関数の配列
 	static gc_vector<handler_t> * manual_starts; //!< 手動起動をするクラスのensure関数の配列
+	static tCriticalSection * CS; //!< いろんなものを保護するためのクリティカルセクション
 
 public:
 	//! @brief		シングルトン情報を登録する
@@ -119,6 +122,9 @@ public:
 
 	//! @brief		削除されずに残っているオブジェクトを標準エラー出力に表示する
 	static void report_alive_objects();
+
+	//! @brief		クリティカルセクションオブジェクトを得る
+	static tCriticalSection & GetCS() { return *CS; }
 };
 //---------------------------------------------------------------------------
 
@@ -184,58 +190,21 @@ class singleton_base : public tCollectee
 	static object_registerer register_object; //!< object_registerer のstatic変数
 
 
-	//! @brief オブジェクトを保持する構造体
-	//! @note
-	//! このクラスのコンストラクタは manipulate_object 内のローカルスコープにある static 変数
-	//! が初めて作成される際に呼ばれ、マネージャに disconnect メソッドを登録する。
-	//! この関数が呼ばれるのは必ず依存先→依存元の順番となるため、マネージャは
-	//! disconnect をこれとは逆順に呼ぶことで依存関係を保ったまま destruct の
-	//! 呼び出しを行おうとする。
-	struct object_holder
-	{
-		T * object; //!< オブジェクトインスタンス
-		object_holder() : object(create())
-		{
-			singleton_manager::register_disconnector(&singleton_base<T>::disconnect);
-			singleton_base<T>::object_created = true;
-			fprintf(stderr, "created %s\n", singleton_base<T>::get_name());
-			fflush(stderr);
-		}
-		static T* create()
-		{
-			fprintf(stderr, "creating %s\n", singleton_base<T>::get_name());
-			fflush(stderr);
-			return new T();
-		}
-	};
-
-	//! @brief オブジェクトが作成されたかどうか
-	static bool object_created;
-
-	//! @brief オブジェクトを操作するメソッド
-	//! @note
-	//! このメソッドはローカルに object_holder 型のオブジェクトを
-	//! static で持つ。
-	//! reset が true の場合は object.object を reset することによって
-	//! 参照を切る。is_alive が非nullの場合は、object.weak_object を
-	//! 参照することによりシングルトンオブジェクトが有効かどうかを*is_aliveに
-	//! 書き込む。
-	static T * manipulate_object(bool reset=false, bool * is_alive = NULL)
-	{
-		static object_holder holder;
-		register_object.do_nothing();
-		if(reset) holder.object = NULL;
-		if(is_alive) *is_alive = holder.object;
-		return holder.object;
-	}
+	//! @brief オブジェクトインスタンス
+	static T * volatile object_instance;
 
 	//! @brief オブジェクトへの参照を切る
 	static void disconnect()
 	{
 		fprintf(stderr, "disconnecting %s\n", get_name());
 		fflush(stderr);
-		if(alive()) instance()->destruct();
-		(void) manipulate_object(true);
+		if(object_instance)
+		{
+			volatile tCriticalSection::tLocker lock(singleton_manager::GetCS());
+
+			if(object_instance) instance()->destruct();
+			object_instance = NULL;
+		}
 	}
 
 	//! @brief	オブジェクトの消滅を行う仮想関数(下位クラスでオーバーライドすること)
@@ -276,17 +245,43 @@ protected:
 	//! @brief	デストラクタ
 	virtual ~singleton_base() {;}
 
+private:
+	//! @brief オブジェクトが存在することを確かにする (内部関数)
+	RISSE_NOINLINE static void make_instance()
+	{
+		volatile tCriticalSection::tLocker lock(singleton_manager::GetCS());
+		if(!object_instance)
+		{
+			fprintf(stderr, "creating %s\n", get_name());
+			fflush(stderr);
+			object_instance = new T();
+			singleton_manager::register_disconnector(&singleton_base<T>::disconnect);
+			fprintf(stderr, "created %s\n", get_name());
+			fflush(stderr);
+		}
+	}
+
 public:
 	//! @brief オブジェクトが存在することを確かにする
+	//! @note
+	//! このクラスのコンストラクタははじめて ensure() が呼ばれる際に作成される。
+	//! この際、マネージャに disconnect メソッドを登録する。
+	//! この関数が呼ばれるのは必ず依存先→依存元の順番となるため、マネージャは
+	//! disconnect をこれとは逆順に呼ぶことで依存関係を保ったまま destruct の
+	//! 呼び出しを行おうとする。
 	static void ensure()
 	{
-		(void) manipulate_object();
+		if(!object_instance)
+		{
+			make_instance();
+		}
 	}
 
 	//! @brief シングルトンオブジェクトのインスタンスを返す
 	static T* instance()
 	{
-		return manipulate_object();
+		ensure();
+		return object_instance;
 	}
 
 	//! @brief オブジェクトが有効かどうかを得る
@@ -298,16 +293,13 @@ public:
 	//! 呼ばれた場合だけなのであまり考えなくてよいかもしれない
 	static bool alive()
 	{
-		if(!object_created) return false;
-		bool alive;
-		(void) manipulate_object(false, &alive);
-		return alive;
+		return object_instance;
 	}
 };
 template <typename T>
 typename singleton_base<T>::object_registerer singleton_base<T>::register_object;
 template <typename T>
-bool singleton_base<T>::object_created = false;
+T * volatile singleton_base<T>::object_instance = NULL;
 //---------------------------------------------------------------------------
 
 

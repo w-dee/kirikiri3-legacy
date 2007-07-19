@@ -983,7 +983,8 @@ void tCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				AR(code[2]).Do(engine, ocDGet, &AR(code[1]), AR(code[3]), 0);
+				AR(code[2]).Do(engine, ocDGet, &AR(code[1]), AR(code[3]), 0,
+					tMethodArgument::Empty(), This);
 				code += 4;
 				break;
 
@@ -991,7 +992,8 @@ void tCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				AR(code[2]).Do(engine, ocDGet, &AR(code[1]), AR(code[3]), code[4]);
+				AR(code[2]).Do(engine, ocDGet, &AR(code[1]), AR(code[3]), code[4],
+					tMethodArgument::Empty(), This);
 				code += 5;
 				break;
 
@@ -1031,7 +1033,7 @@ void tCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]).Do(engine, ocDSet, NULL, AR(code[2]),
-					0, tMethodArgument::New(AR(code[3])));
+					0, tMethodArgument::New(AR(code[3])), This);
 				code += 4;
 				break;
 
@@ -1040,7 +1042,7 @@ void tCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
 				AR(code[1]).Do(engine, ocDSet, NULL, AR(code[2]), code[4],
-					tMethodArgument::New(AR(code[3])));
+					tMethodArgument::New(AR(code[3])), This);
 				code += 5;
 				break;
 

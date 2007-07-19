@@ -23,6 +23,74 @@ RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
 using namespace Risse;
 
 
+//---------------------------------------------------------------------------
+//! @brief		テスト用ネイティブ実装インスタンス
+//---------------------------------------------------------------------------
+class tTestInstance : public tObjectBase
+{
+	tString str;
+
+	virtual ~tTestInstance() {;} //!< おそらく呼ばれないデストラクタ
+
+public:
+	void construct() {;}
+	void initialize(const tNativeCallInfo & info)
+	{
+		// 親クラスの同名メソッドを呼び出す
+		info.InitializeSuperClass();
+	}
+
+	const tString & getString() { return str; }
+	const tString & get_propString() const { return str; }
+	void set_propString(const tString & v) { str = v; }
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Test" クラス
+//---------------------------------------------------------------------------
+class tTestClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tTestClass(tScriptEngine * engine) :
+		tClassBase(tSS<'T','e','s','t'>(), engine->ObjectClass)
+	{
+		RegisterMembers();
+	}
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers()
+	{
+		// 親クラスの RegisterMembers を呼ぶ
+		inherited::RegisterMembers();
+
+		// クラスに必要なメソッドを登録する
+		// 基本的に ss_construct と ss_initialize は各クラスごとに
+		// 記述すること。たとえ construct の中身が空、あるいは initialize の
+		// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+		BindFunction(this, ss_ovulate, &tTestClass::ovulate);
+		BindFunction(this, ss_construct, &tTestInstance::construct);
+		BindFunction(this, ss_initialize, &tTestInstance::initialize);
+		BindFunction(this, tSS<'g','e','t','S','t','r','i','n','g'>(), &tTestInstance::getString);
+		BindProperty(this, tSS<'p','r','o','p','S','t','r','i','n','g'>(),
+			&tTestInstance::get_propString, &tTestInstance::set_propString);
+	}
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate()
+	{
+		return tVariant(new tTestInstance());
+	}
+public:
+};
+//---------------------------------------------------------------------------
 
 
 
@@ -181,6 +249,10 @@ int Application::OnRun()
 
 		// Script クラスを追加する
 		(new tScriptClass(&engine))->
+				RegisterClassInstance(engine.GetGlobalObject());
+
+		// Test クラスを追加する
+		(new tTestClass(&engine))->
 				RegisterClassInstance(engine.GetGlobalObject());
 
 		// 入力ファイルを開く

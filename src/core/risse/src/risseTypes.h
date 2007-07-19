@@ -115,6 +115,21 @@ namespace Risse
 #endif
 
 
+// noinline
+#ifdef __GNUC__
+ // GNU C 3.1 or later has this no-inline attribute specifier
+ #if (__GNUC__ == 3 && __GNUC_MINOR__ > 0 ) || __GNUC__ > 3
+  #define RISSE_NOINLINE __attribute__ ((noinline))
+ #endif
+#endif
+
+#ifndef RISSE_NOINLINE
+ #define RISSE_NOINLINE
+#endif
+
+
+
+
 //! @brief risse_size の最大値
 // std::numeric_limits<risse_size>::max() を使おうかと思ったがstatic constではない
 // 可能性がある

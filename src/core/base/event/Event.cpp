@@ -28,6 +28,7 @@ tEventQueueInstance::tEventQueueInstance()
 {
 	// フィールドの初期化
 	HasPendingEvents = false;
+	WakeIdleUp = false;
 }
 //---------------------------------------------------------------------------
 
@@ -372,15 +373,18 @@ tMainEventQueue::tMainEventQueue()
 {
 	// イベントキューインスタンスを作成する
 	// スクリプトエンジンの取得、グローバルオブジェクトの取得、イベントキュークラスの
-	// 取得、イベントキューインスタンスの作成、イベントキューインスタンスからの
-	// オブジェクトインターフェースの取得を順に行う
+	// 取得、イベントキューインスタンスの作成を順に行う
 	tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 	tVariant global_object = engine->GetGlobalObject();
 	tVariant eventqueue_class = global_object.GetPropertyDirect(engine,
 						tSS<'E','v','e','n','t','Q','u','e','u','e'>());
 	tVariant instance_v = eventqueue_class.New();
 	RISSE_ASSERT(instance_v.GetType() == tVariant::vtObject);
-	EventQueue = instance_v.GetObjectInterface();
+	EventQueue = instance_v;
+	((tEventQueueInstance*)EventQueue.GetObjectInterface())->SetWakeIdleUp(true);
+		// メインのイベントキューはメインスレッド(GUIスレッド)にて
+		// アイドルイベントを利用して配信されるため、
+		// イベントキューにイベントが入ったらアイドルイベントを起動するように設定する
 
 	// EventQueue::mainQueue にインスタンスを登録する
 	eventqueue_class.SetPropertyDirect_Object(tSS<'m','a','i','n','Q','u','e','u','e'>(),

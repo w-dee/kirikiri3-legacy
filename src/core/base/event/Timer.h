@@ -188,7 +188,9 @@ public:
 
 private:
 	//! @brief		時間原点をリセットし、このメソッドが呼ばれた時点に設定する
-	void ResetInterval();
+	//! @param		force	通常、このメソッドはタイマが有効かどうかをチェックするが、force
+	//!						を指定すると強制的に有効である物と見なされる
+	void ResetInterval(bool force = false);
 
 public:
 

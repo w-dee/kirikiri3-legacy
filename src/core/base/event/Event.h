@@ -185,6 +185,7 @@ private:
 	typedef gc_deque<tEventInfo *> tQueue; //!< キュー用コンテナの typedef
 	tQueue Queues[tEventInfo::epMax + 1]; //!< イベント用キュー
 	bool HasPendingEvents; //!< post してから処理されていないイベントが存在する場合に真
+	bool WakeIdleUp; //!< イベントがポストされたらアイドルイベントを起動するかどうか
 
 public:
 	//! @brief		コンストラクタ
@@ -208,7 +209,14 @@ private:
 	//! @param		queue		キュー
 	void DiscardQueue(tQueue & queue);
 
+	//! @brief		イベントがポストされたらアイドルイベントを起動するかどうかを設定する
+	//! @param		wakeidleup	イベントがポストされたらアイドルイベントを起動するかどうか
+	//! @note		メインのイベントキューにのみ用いる。通常はこのメソッドを利用しないこと。
+	void SetWakeIdleUp(bool wakeidleup) { WakeIdleUp = wakeidleup; }
+
+	friend class tMainEventQueue;
 public:
+
 	//! @brief		イベントの配信処理を行う
 	//! @param		mastertick	マスタ・ティックカウント
 	//! @return		まだ処理すべきイベントがあるかどうか

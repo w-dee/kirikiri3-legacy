@@ -250,7 +250,7 @@ void tPeriodicTimerConsumer::SetEnabled(bool enabled)
 	// 親クラスのsetenabled をオーバーライド
 	volatile tCriticalSection::tLocker cs_holder(GetOwner()->GetCS());
 
-	if(enabled) Reset();
+	if(enabled) ResetInterval(true);
 
 	tTimerConsumer::SetEnabled(enabled);
 }
@@ -265,7 +265,7 @@ void tPeriodicTimerConsumer::SetInterval(risse_uint64 interval)
 	if(Interval != interval)
 	{
 		Interval = interval;
-		Reset();
+		ResetInterval();
 	}
 }
 //---------------------------------------------------------------------------
@@ -282,11 +282,11 @@ void tPeriodicTimerConsumer::Reset()
 
 
 //---------------------------------------------------------------------------
-void tPeriodicTimerConsumer::ResetInterval()
+void tPeriodicTimerConsumer::ResetInterval(bool force)
 {
 	// 時間原点をこのメソッドが呼ばれた時点に設定する
 
-	if(GetEnabled() && Interval != tTickCount::InvalidTickCount)
+	if(force || (GetEnabled() && Interval != tTickCount::InvalidTickCount))
 	{
 		// 有効の場合
 		ReferenceTick = tTickCount::instance()->Get() + Interval;

@@ -136,7 +136,7 @@ tObjectBase::tRetValue tObjectBase::Read(const tString & name, tOperateFlags fla
 					flags|tOperateFlags::ofUseClassMembersRule,
 					tMethodArgument::Empty(),
 					(DefaultMethodContext && !flags.Has(tOperateFlags::ofUseClassMembersRule)) ? *DefaultMethodContext:This);
-		if(rv != rvNoError) return rv; // なにかエラーがおこあったらここで戻る
+		if(rv != rvNoError) return rv; // なにかエラーがおこったらここで戻る
 
 		if(!flags.Has(tOperateFlags::ofUseClassMembersRule))
 		{
@@ -172,7 +172,7 @@ tObjectBase::tRetValue tObjectBase::Read(const tString & name, tOperateFlags fla
 			ocFuncCall, &result, tString::GetEmptyString(),
 			flags & ~tOperateFlags::ofUseClassMembersRule, tMethodArgument::Empty(),
 			(DefaultMethodContext && !flags.Has(tOperateFlags::ofUseClassMembersRule)) ? *DefaultMethodContext:This);
-		if(rv != rvNoError && rv != rvMemberNotFound) return rv; // rvMemberNotFound以外のなにかエラーがおこあったらここで戻る
+		if(rv != rvNoError && rv != rvMemberNotFound) return rv; // rvMemberNotFound以外のなにかエラーがおこったらここで戻る
 		break;
 	}
 

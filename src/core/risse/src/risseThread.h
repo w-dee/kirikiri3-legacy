@@ -46,7 +46,7 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 
 	- wxCriticalSection				問題あり
 	- boost::recursive_mutex		とくに問題なし
-	- Risse::tCiriticalSection	問題なし
+	- Risse::tCiriticalSection		問題なし
 
 	wxCriticalSection は、再帰的な(再入可能な)クリティカルセクションを実現できる
 	保証がない。boost::recursive_mutex はその名の通り再入可能な mutex だが、
@@ -62,7 +62,8 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 	CriticalSection は、プログラム終了時までに正常に破棄される保証はない
 	(破棄されるよりも前にプログラムが終了する可能性がある)。通常は OS が
 	mutex などを回収するし、Windows の CriticalSection にあっては特に回収
-	すべき物など本来はないので問題は起きないと思われる。
+	すべき物など本来はない(←半分嘘、mutexを内部に持っている場合がある)
+	ので問題は起きないと思われる。
 */
 
 #ifdef RISSE_SUPPORT_THREADS
@@ -81,11 +82,11 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 #include <wx/thread.h>
 #include "risseTypes.h"
 #include "risseString.h"
-
+#include "risseGC.h"
 
 
 //---------------------------------------------------------------------------
-// クリティカルセクション
+// クリティカルセクションとアトミックカウンタ
 //---------------------------------------------------------------------------
 
 /*
@@ -232,10 +233,83 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		};
 	};
 
-	} // namespace Risse
-
 #endif
 
+
+	namespace Risse
+	{
+	//---------------------------------------------------------------------------
+	// アトミックカウンタ
+	//---------------------------------------------------------------------------
+	// boost::detail::atomic_count を参考にした
+	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+		// Windows 用実装
+		// TODO: Win64は？
+
+		//! @brief		アトミックカウンタ
+		class tAtomicCounter : public tAtomicCollectee
+		{
+			long v; //!< 値
+			tAtomicCounter(const tAtomicCounter &); //!< non-copyable
+			tAtomicCounter & operator = (const tAtomicCounter &); //!< non copyable
+
+		public:
+			//! @brief		コンストラクタ
+			//! @param		v		初期値
+			explicit tAtomicCounter(long v_) : v(v_) { }
+
+			//! @brief		インクリメントを行う(前置インクリメント演算子)
+			long operator ++() { return ::InterlockedIncrement(&v); }
+
+			//! @brief		デクリメントを行う(前置デクリメント演算子)
+			long operator --() { return ::InterlockedDecrement(&v); }
+
+			//! @brief		long へのキャスト
+			operator long() const { return static_cast<long const volatile &>(v); }
+		};
+
+	#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+		// GCC (GLIBCPP) 版
+
+		#ifdef __GLIBCXX__
+			using __gnu_cxx::__atomic_add;
+			using __gnu_cxx::__exchange_and_add;
+		#endif
+
+		//! @brief		アトミックカウンタ
+		class tAtomicCounter : public tAtomicCollectee
+		{
+			mutable _Atomic_word v; //!< 値
+			tAtomicCounter(const tAtomicCounter &); //!< non-copyable
+			tAtomicCounter & operator = (const tAtomicCounter &); //!< non copyable
+
+		public:
+			//! @brief		コンストラクタ
+			//! @param		v		初期値
+			explicit tAtomicCounter(long v_) : v(v_) { }
+
+			//! @brief		インクリメントを行う(前置インクリメント演算子)
+			long operator ++() { return __exchange_and_add(&v, 1) + 1; }
+
+			//! @brief		デクリメントを行う(前置デクリメント演算子)
+			long operator --() { return __exchange_and_add(&v, -1) - 1; }
+
+			//! @brief		long へのキャスト
+			operator long() const { return __exchange_and_add(&v, 0); }
+		};
+
+	#else
+		#error "non-supported platform; write your own atomic-counter implementation here"
+		/*
+			実装に当たっては:
+			デストラクタによる後処理が必要なクラスにしないでください。
+			(boost の pthread 版 atomic_count がそのような困る例)
+		*/
+	#endif
+	//---------------------------------------------------------------------------
+
+
+	} // namespace Risse
 
 
 //---------------------------------------------------------------------------
@@ -280,6 +354,14 @@ namespace Risse
 	};
 
 //---------------------------------------------------------------------------
+
+
+// スレッドをサポートしない場合は何もしない tAtomicCounter を定義する
+	typedef long tAtomicCounter;
+
+
+//---------------------------------------------------------------------------
+
 }  // namespace Risse
 
 #endif // #ifdef RISSE_SUPPORT_THREADS
@@ -310,11 +392,11 @@ class tThread : public tDestructee
 
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	volatile bool StartInitiated; //!< スレッドの開始指示をしたかどうか
-	volatile bool Started; //!< スレッドが実際に開始したかどうか
-	volatile bool _Terminated; //!< スレッドが終了すべきかどうか
-	volatile bool Get_Terminated() const { return _Terminated; }
-	volatile void Set_Terminated(bool b) { _Terminated = b; }
+	tAtomicCounter StartInitiated; //!< スレッドの開始指示をしたかどうか
+	tAtomicCounter Started; //!< スレッドが実際に開始したかどうか
+	tAtomicCounter _Terminated; //!< スレッドが終了すべきかどうか
+	bool Get_Terminated() const { return (long)_Terminated != 0; }
+	void Set_Terminated() { if(++_Terminated >= 2) --_Terminated; }
 	wxMutex ThreadMutex; //!< スレッドが終了するまで保持されるロック
 	tThreadInternal * Internal; //!< 内部スレッドの実装
 	tString Name; //!< スレッドの名前
@@ -337,7 +419,7 @@ public:
 	//!				注意。
 	void Wait();
 
-	void Terminate() { Set_Terminated(true); } //!< スレッドに終了を通知する
+	void Terminate() { Set_Terminated(); } //!< スレッドに終了を通知する
 
 protected:
 	//! @brief		スレッドが終了すべきかどうかを得る
@@ -420,9 +502,6 @@ public:
 	}
 };
 //---------------------------------------------------------------------------
-
-
-
 
 } // namespace Risse
 

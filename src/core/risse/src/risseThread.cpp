@@ -73,7 +73,7 @@ wxThread::ExitCode tThreadInternal::Entry()
 	Owner->ThreadMutex.Lock();
 
 	// スレッドが実際に開始したことを表す
-	Owner->Started = true;
+	++Owner->Started;
 
 	// スレッドのメイン関数を実行する
 	// 例外が発生するかも。
@@ -93,11 +93,8 @@ wxThread::ExitCode tThreadInternal::Entry()
 
 
 //---------------------------------------------------------------------------
-tThread::tThread()
+tThread::tThread() : StartInitiated(0), Started(0), _Terminated(0)
 {
-	Started = false;
-	StartInitiated = false;
-	_Terminated = false;
 	Internal = new tThreadInternal(this);
 }
 //---------------------------------------------------------------------------
@@ -107,7 +104,7 @@ tThread::tThread()
 tThread::~tThread()
 {
 	//注意	このデストラクタはメインスレッド以外から非同期に呼ばれる可能性がある
-	if(Started) Wait();
+	if((long)Started || (long)StartInitiated) Wait();
 
 	// Internal は自分で自分自身を解放するのでここでは解放しない
 }
@@ -117,10 +114,12 @@ tThread::~tThread()
 //---------------------------------------------------------------------------
 void tThread::Run()
 {
+	if(++StartInitiated >= 2)
 	{
-		volatile tCriticalSection::tLocker lock(CS);
-		if(StartInitiated) {  /* already running */ return; }
-		StartInitiated = true;
+		// StartInitiated が 2以上になったと言うことは
+		// すでにスレッドが開始されていると言うこと
+		--StartInitiated; // 一応もどしておく
+		return;
 	}
 	Internal->Run();
 }
@@ -131,7 +130,7 @@ void tThread::Run()
 void tThread::Wait()
 {
 	// まだスレッドが開始していない場合は開始するまで待つ
-	while(!Started) { ::wxMilliSleep(1); } // あまりよい実装とは言えないが……
+	while((long)Started == 0) { ::wxMilliSleep(1); } // あまりよい実装とは言えないが……
 
 	// 終了指示
 	Terminate();

@@ -22,6 +22,7 @@ gc_vector<singleton_manager::register_info_t> * singleton_manager::functions = N
 gc_vector<singleton_manager::handler_t> * singleton_manager::disconnectors = NULL;
 gc_vector<singleton_manager::handler_t> * singleton_manager::manual_starts = NULL;
 tCriticalSection * singleton_manager::CS = NULL;
+tCriticalSection * singleton_manager::DummyCS = NULL;
 //---------------------------------------------------------------------------
 
 
@@ -35,6 +36,11 @@ void singleton_manager::register_info(const singleton_manager::register_info_t &
 	// ここはマルチスレッドからの保護は必要ない (main以前によばれるので)
 
 	if(CS == NULL) CS = new tCriticalSection();
+	if(DummyCS == NULL) DummyCS = new tCriticalSection();
+
+	// ここで書かれた CS へのポインタは、どっちみちほかのスレッドが作成される際には
+	// 他のプロセッサに対して可視になっているのでたぶん大丈夫
+
 //	fprintf(stderr, "singleton %s\n", info.get_name());
 
 	if(functions == NULL)

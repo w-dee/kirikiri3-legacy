@@ -89,6 +89,7 @@ class singleton_manager : public tCollectee
 	static gc_vector<handler_t> * disconnectors; //!< disconnect関数の配列
 	static gc_vector<handler_t> * manual_starts; //!< 手動起動をするクラスのensure関数の配列
 	static tCriticalSection * CS; //!< いろんなものを保護するためのクリティカルセクション
+	static tCriticalSection * DummyCS; //!< メモリバリアを行うためのダミーのCS
 
 public:
 	//! @brief		シングルトン情報を登録する
@@ -125,6 +126,9 @@ public:
 
 	//! @brief		クリティカルセクションオブジェクトを得る
 	static tCriticalSection & GetCS() { return *CS; }
+
+	//! @brief		ダミーのクリティカルセクションオブジェクトを得る
+	static tCriticalSection & GetDummyCS() { return *DummyCS; }
 };
 //---------------------------------------------------------------------------
 
@@ -246,15 +250,48 @@ protected:
 	virtual ~singleton_base() {;}
 
 private:
-	//! @brief オブジェクトが存在することを確かにする (内部関数)
+	//! @brief	object_instance に対して値を書き込む
+	RISSE_NOINLINE static void set_object_instance(T * v)
+	{
+		object_instance = v;
+	}
+
+	//! @brief	オブジェクトが存在することを確かにする (内部関数)
 	RISSE_NOINLINE static void make_instance()
 	{
+		/*
+			double-checked lock アルゴリズムに関する覚え書き
+
+			コンパイラによる最適化により、new T() の実行が完了する前に
+			object_instance に値が書き込まれる可能性があるが、これは
+			volatile により(おそらく解決)。
+			new T() によって初期化された内容が他のプロセッサに見える前に
+			object_instance が他のプロセッサに見えてしまう問題
+			(memory ordering 問題) は、クリティカルセクションやミュー
+			テックスがメモリの可視性の同期を行うことを利用して解決。
+			そのため、new T() した直後にいったんダミーのクリティカル
+			セクションに入ることにする。
+			( x86/windows の実装で言えば、EnterCriticalSection 内で
+			使われている lock xchg の lock プリフィックスがメモリの同期を
+			行うことになる)
+			パフォーマンスを優先するのであればちゃんとメモリバリア命令を
+			使うところであろうが、そうでもないのでダミーのクリティカルセクション
+			という手に。
+
+			object_instance に値を設定した後に明示的な同期はしていないが、
+			もしほかのプロセッサがいったん object_instance が NULL なので
+			このメソッドに入ったとしても、このメソッドの最初の
+			クリティカルセクションへの侵入で同期が行われ、再度 object_instance
+			のチェックが行われるので問題はない。
+		*/
 		volatile tCriticalSection::tLocker lock(singleton_manager::GetCS());
 		if(!object_instance)
 		{
 			fprintf(stderr, "creating %s\n", get_name());
 			fflush(stderr);
-			object_instance = new T();
+			T * volatile _instance = new T();
+			{ volatile tCriticalSection::tLocker lock(singleton_manager::GetDummyCS()); }
+			set_object_instance(_instance);
 			singleton_manager::register_disconnector(&singleton_base<T>::disconnect);
 			fprintf(stderr, "created %s\n", get_name());
 			fflush(stderr);

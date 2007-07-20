@@ -43,27 +43,33 @@ void tUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 	tLogger::Log(
 		message, tLogger::llError);
 
-	// 例外オブジェクトはトレースを持っているか？
-	tVariant trace_array = e->GetPropertyDirect_Object(ss_trace);
-	tVariant top_sp = trace_array.Invoke_Object(mnIGet, risse_int64(0));
-		// 先頭の source point
-
-	if(!top_sp.IsVoid() && top_sp.GetType() == tVariant::vtObject)
+	// スクリプトエディタはメインスレッドから投げられた例外のみに対して表示
+	// (そのほかはログに表示するのみとする)
+	if(::wxIsMainThread())
 	{
-		// トレースを持っている
-		tScriptEngine * engine = top_sp.GetObjectInterface()->GetRTTI()->GetScriptEngine();
-		tVariant sb = top_sp.GetPropertyDirect(engine, ss_scriptBlock);
-		tString script = (tString)sb.GetPropertyDirect(engine, ss_script);
-		tVariant position = top_sp.GetPropertyDirect(engine, ss_position);
-		risse_size line = (risse_int64)sb.Invoke(engine, ss_positionToLine, position);
+		// 例外オブジェクトはトレースを持っているか？
+		// 持っていればスクリプトエディタ
+		tVariant trace_array = e->GetPropertyDirect_Object(ss_trace);
+		tVariant top_sp = trace_array.Invoke_Object(mnIGet, risse_int64(0));
+			// 先頭の source point
 
-		// スクリプトエディタを表示
-		tScriptEditorFrame *editor = new tScriptEditorFrame();
-		editor->SetContent(script.AsWxString());
-		editor->SetReadOnly(true);
-		editor->SetLinePosition(line);
-		editor->SetStatusString(message.AsWxString());
-		editor->Show(true);
+		if(!top_sp.IsVoid() && top_sp.GetType() == tVariant::vtObject)
+		{
+			// トレースを持っている
+			tScriptEngine * engine = top_sp.GetObjectInterface()->GetRTTI()->GetScriptEngine();
+			tVariant sb = top_sp.GetPropertyDirect(engine, ss_scriptBlock);
+			tString script = (tString)sb.GetPropertyDirect(engine, ss_script);
+			tVariant position = top_sp.GetPropertyDirect(engine, ss_position);
+			risse_size line = (risse_int64)sb.Invoke(engine, ss_positionToLine, position);
+
+			// スクリプトエディタを表示
+			tScriptEditorFrame *editor = new tScriptEditorFrame();
+			editor->SetContent(script.AsWxString());
+			editor->SetReadOnly(true);
+			editor->SetLinePosition(line);
+			editor->SetStatusString(message.AsWxString());
+			editor->Show(true);
+		}
 	}
 
 	// メッセージボックスを表示
@@ -73,46 +79,7 @@ void tUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 }
 //---------------------------------------------------------------------------
 
-
 #if 0
-//---------------------------------------------------------------------------
-//! @brief		スクリプト例外を表示する
-//! @param		e		例外オブジェクト
-//---------------------------------------------------------------------------
-void tUnhandledExceptionHandler::ShowScriptException(eRisseScriptError &e)
-{
-	// イベント配信を無効に
-	if(tEventSystem::pointer r = tEventSystem::instance())
-		r->SetCanDeliverEvents(false);
-
-	// ログ
-	if(tLogger::alive())
-	{
-		tLogger::Log(
-			RISSE_WS_TR("An exception had been occured"), tLogger::llError);
-		tLogger::Log(
-			e.GetMessageString(), tLogger::llError);
-		if(e.GetTrace().GetLen() != 0)
-			tLogger::Log(
-				tString(RISSE_WS_TR("Trace: ")) + e.GetTrace(), tLogger::llError);
-	}
-
-	// スクリプトエディタを表示
-	tScriptEditorFrame *editor = new tScriptEditorFrame();
-	editor->SetContent(tString(e.GetBlockNoAddRef()->GetScript()).AsWxString());
-	editor->SetReadOnly(true);
-	editor->SetLinePosition(e.GetBlockNoAddRef()->SrcPosToLine(e.GetPosition() )
-			- e.GetBlockNoAddRef()->GetLineOffset());
-	editor->SetStatusString(e.GetMessageString().AsWxString());
-	editor->Show(true);
-
-	// メッセージボックスを表示
-	wxMessageBox(wxString(_("An exception had been occured")) + wxT("\n") +
-		e.GetMessageString().AsWxString(), _("Exception"), wxICON_ERROR);
-}
-//---------------------------------------------------------------------------
-
-
 //---------------------------------------------------------------------------
 //! @brief		ハンドルされなかった例外を処理する
 //! @param		e		例外オブジェクト

@@ -18,6 +18,7 @@
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
 #include "base/script/RisseEngine.h"
+#include "base/exception/RisaException.h"
 
 
 /* @note
@@ -69,6 +70,10 @@ Risa のイベントシステムについて
 */
 namespace Risa {
 //---------------------------------------------------------------------------
+
+
+
+
 
 
 class tEventInfo;
@@ -185,7 +190,9 @@ private:
 	typedef gc_deque<tEventInfo *> tQueue; //!< キュー用コンテナの typedef
 	tQueue Queues[tEventInfo::epMax + 1]; //!< イベント用キュー
 	bool HasPendingEvents; //!< post してから処理されていないイベントが存在する場合に真
-	bool WakeIdleUp; //!< イベントがポストされたらアイドルイベントを起動するかどうか
+	bool QuitEventFound; //!< Quit イベントが見つかった場合に真
+	bool IsMainThreadQueue; //!< メインスレッド用のキューかどうか
+	tThreadEvent * EventNotifier; //!< イベントが到着したことを知らせる ThreadEvent (メインスレッド用でないキュー用)
 
 public:
 	//! @brief		コンストラクタ
@@ -209,10 +216,10 @@ private:
 	//! @param		queue		キュー
 	void DiscardQueue(tQueue & queue);
 
-	//! @brief		イベントがポストされたらアイドルイベントを起動するかどうかを設定する
-	//! @param		wakeidleup	イベントがポストされたらアイドルイベントを起動するかどうか
+	//! @brief		メインスレッド用のキューかどうか
+	//! @param		b	メインスレッド用のキューかどうか
 	//! @note		メインのイベントキューにのみ用いる。通常はこのメソッドを利用しないこと。
-	void SetWakeIdleUp(bool wakeidleup) { WakeIdleUp = wakeidleup; }
+	void SetIsMainThreadQueue(bool b) { IsMainThreadQueue = b; }
 
 	friend class tMainEventQueue;
 public:
@@ -242,10 +249,24 @@ public:
 	//! @param		source		キャンセルしたいイベントの発生元
 	void CancelEvents(void * source);
 
+	//! @brief		イベントループに入る
+	//! @note		メインのイベントキューの場合は例外が発生する。
+	void Loop();
+
+	//! @brief		イベントループから抜ける
+	//! @note		イベントループから抜けるための特殊なイベントが自分自身に追加される。
+	//!				通常、それ以前にポストされたすべてのイベントを処理し終わってから
+	//!				イベントループから抜ける。それ以降にポストされたイベントは
+	//!				無視される。メインのイベントキューに対して呼ばれた場合は例外が発生する。
+	//!				このメソッドを実行したからと言ってすぐにイベントループから抜ける
+	//!				保証はない。
+	void QuitLoop();
+
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
-
+	void loop() { Loop(); }
+	void quit() { QuitLoop(); }
 };
 //---------------------------------------------------------------------------
 

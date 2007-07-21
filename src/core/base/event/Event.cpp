@@ -12,12 +12,31 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/event/Event.h"
+#include "base/event/TickCount.h"
 #include "base/exception/RisaException.h"
 #include <wx/app.h>
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(1676,31212,48005,18878,7819,32358,49817,14499);
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief	イベントキュー用例外クラス
+//---------------------------------------------------------------------------
+RISA_DEFINE_EXCEPTION_SUBCLASS(tEventQueueExceptionClass,
+	(tSS<'E','v','e','n','t','Q','u','e','u','e','E','x','c','e','p','t','i','o','n'>()),
+	tRisseScriptEngine::instance()->GetScriptEngine()->RuntimeExceptionClass)
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 
@@ -28,7 +47,9 @@ tEventQueueInstance::tEventQueueInstance()
 {
 	// フィールドの初期化
 	HasPendingEvents = false;
-	WakeIdleUp = false;
+	QuitEventFound = false;
+	IsMainThreadQueue = false;
+	EventNotifier = new tThreadEvent();
 }
 //---------------------------------------------------------------------------
 
@@ -49,9 +70,13 @@ void tEventQueueInstance::DeliverQueue(tEventInfo::tPriority prio, risse_uint64 
 			if(queue.size() == 0) break;
 			event = queue.front();
 			if(!event) break; // イベントがNULLなのでpopせずに戻る
-			queue.pop_front();
+			queue.pop_front(); // pop
+			if(event->GetId() == 0 && event->GetSource() == this)
+			{
+				QuitEventFound = true;
+				break; // これは quit イベントなのでpopしてから戻る
+			}
 		}
-
 		// イベントを配信する
 		if(event)
 		{
@@ -102,6 +127,7 @@ void tEventQueueInstance::DeliverEvents(risse_uint64 mastertick)
 
 		if(!HasPendingEvents) return; // 未配信のイベントはない
 		HasPendingEvents = false; // いったんこのフラグはここで偽に
+		QuitEventFound = false; // このフラグもここで偽に
 
 		for(int i = tEventInfo::epMin; i <= tEventInfo::epMax; i++)
 		{
@@ -123,6 +149,9 @@ void tEventQueueInstance::DeliverEvents(risse_uint64 mastertick)
 			{
 				volatile tSynchronizer sync(this); // sync
 
+				// QuitEventFound だったら中断
+				if(QuitEventFound) break;
+
 				// キューに epExclusive のイベントがpostされたら
 				// もう一度最初から
 				if(Queues[tEventInfo::epExclusive].size() != 0)
@@ -139,7 +168,7 @@ void tEventQueueInstance::DeliverEvents(risse_uint64 mastertick)
 				if(!tEventSystem::instance()->GetCanDeliverEvents()) break;
 			}
 		}
-	} while(tEventSystem::instance()->GetCanDeliverEvents() && events_in_exclusive);
+	} while(tEventSystem::instance()->GetCanDeliverEvents() && events_in_exclusive && !QuitEventFound);
 
 	// 最初に挿入したセンチネルを取り除く
 	// ここは複数スレッドからのアクセスから保護する
@@ -237,7 +266,10 @@ void tEventQueueInstance::PostEvent(tEventInfo * event, tEventType type)
 	if(!HasPendingEvents)
 	{
 		HasPendingEvents = true;
-		::wxWakeUpIdle();
+		if(IsMainThreadQueue)
+			::wxWakeUpIdle();
+		else
+			EventNotifier->Signal();
 	}
 }
 //---------------------------------------------------------------------------
@@ -295,6 +327,38 @@ void tEventQueueInstance::CancelEvents(void * source)
 
 
 //---------------------------------------------------------------------------
+void tEventQueueInstance::Loop()
+{
+	if(IsMainThreadQueue)
+		tEventQueueExceptionClass::Throw(
+					RISSE_WS_TR("Use this method for non-main queue"));
+	for(;;)
+	{
+		risse_uint64 tick = tTickCount::instance()->Get();
+		bool has_pending = ProcessEvents(tick);
+		if(QuitEventFound) break;
+		if(!has_pending)
+		{
+			// イベントが来るまで待機
+			EventNotifier->Wait();
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tEventQueueInstance::QuitLoop()
+{
+	if(IsMainThreadQueue)
+		tEventQueueExceptionClass::Throw(
+					RISSE_WS_TR("Use this method for non-main queue"));
+	PostEvent(new tEventInfo(0, this), etDefault); // this が source のイベントは特殊なイベント
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tEventQueueInstance::construct()
 {
 	// デフォルトではなにもしない
@@ -342,6 +406,8 @@ void tEventQueueClass::RegisterMembers()
 	BindFunction(this, ss_ovulate, &tEventQueueClass::ovulate);
 	BindFunction(this, ss_construct, &tEventQueueInstance::construct);
 	BindFunction(this, ss_initialize, &tEventQueueInstance::initialize);
+	BindFunction(this, tSS<'l','o','o','p'>(), &tEventQueueInstance::loop);
+	BindFunction(this, tSS<'q','u','i','t'>(), &tEventQueueInstance::quit);
 }
 //---------------------------------------------------------------------------
 
@@ -381,7 +447,7 @@ tMainEventQueue::tMainEventQueue()
 	tVariant instance_v = eventqueue_class.New();
 	RISSE_ASSERT(instance_v.GetType() == tVariant::vtObject);
 	EventQueue = instance_v;
-	((tEventQueueInstance*)EventQueue.GetObjectInterface())->SetWakeIdleUp(true);
+	((tEventQueueInstance*)EventQueue.GetObjectInterface())->SetIsMainThreadQueue(true);
 		// メインのイベントキューはメインスレッド(GUIスレッド)にて
 		// アイドルイベントを利用して配信されるため、
 		// イベントキューにイベントが入ったらアイドルイベントを起動するように設定する

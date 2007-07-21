@@ -121,6 +121,8 @@ class tAtomicCollectee
 public:
 	void * operator new(size_t n) { return MallocAtomicCollectee(n); }
 	void * operator new [] (size_t n) { return MallocAtomicCollectee(n); }
+	void operator delete(void *obj) { FreeCollectee(obj); }
+	void operator delete [] (void *obj) { FreeCollectee(obj); }
 };
 //---------------------------------------------------------------------------
 

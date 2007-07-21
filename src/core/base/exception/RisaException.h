@@ -21,6 +21,7 @@ namespace Risa {
 
 //---------------------------------------------------------------------------
 //! @brief		Risa用の汎用例外クラス
+//! @note		暫定的な利用。最終的にはこれは無くす。
 //---------------------------------------------------------------------------
 class eRisaException
 {
@@ -134,6 +135,42 @@ public:
 	}*/
 // TODO: implement this
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		既存の例外クラスから新しい例外クラスを派生させるためのマクロ
+//---------------------------------------------------------------------------
+#define RISA_DEFINE_EXCEPTION_SUBCLASS(CPP_CLASSNAME, RISSE_CLASSNAME_STRING, PARENT_CLASS) \
+class CPP_CLASSNAME : public tClassBase       {                                   \
+	typedef tClassBase inherited;                                                 \
+public:                                                                           \
+	CPP_CLASSNAME(tScriptEngine * engine) :                                       \
+		tClassBase(RISSE_CLASSNAME_STRING, PARENT_CLASS) { RegisterMembers(); }   \
+	void RegisterMembers()  {                                                     \
+		inherited::RegisterMembers();                                             \
+		BindFunction(this, ss_construct, &CPP_CLASSNAME::construct);              \
+		BindFunction(this, ss_initialize, &CPP_CLASSNAME::initialize);            \
+	}                                                                             \
+public:                                                                           \
+	static void construct(const tNativeCallInfo & info){}                         \
+	static void initialize(const tNativeCallInfo & info)                          \
+		{info.InitializeSuperClass(info.args);}                                   \
+public:                                                                           \
+	static void Throw(tScriptEngine * engine, const tString &msg) {               \
+		tTemporaryException * e =                                                 \
+			new tTemporaryException(RISSE_CLASSNAME_STRING, msg);                 \
+		if(engine) e->ThrowConverted(engine); else throw e;                       \
+	}                                                                             \
+	static void Throw(const tString &msg) { Throw(NULL, msg); }                   \
+};                                                                                \
+template class tRisseClassRegisterer<CPP_CLASSNAME>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------

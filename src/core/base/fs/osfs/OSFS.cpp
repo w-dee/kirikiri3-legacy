@@ -28,13 +28,13 @@ tOSNativeStream::tOSNativeStream(const wxString & filename, risse_uint32 flags)
 {
 	// モードを決定する
 	wxFile::OpenMode mode;
-	switch(flags & RISSE_BS_ACCESS_MASK)
+	switch(flags & tFileSystem::omAccessMask)
 	{
-	case RISSE_BS_READ:
+	case tFileSystem::omRead:
 		mode = wxFile::read; break;
-	case RISSE_BS_WRITE:
+	case tFileSystem::omWrite:
 		mode = wxFile::write; break;
-	case RISSE_BS_UPDATE:
+	case tFileSystem::omUpdate:
 		mode = wxFile::read_write; break;
 	default:
 		mode = wxFile::read;
@@ -46,7 +46,7 @@ tOSNativeStream::tOSNativeStream(const wxString & filename, risse_uint32 flags)
 			filename.c_str())));
 
 	// APPEND の場合はファイルポインタを最後に移動する
-	if(flags & RISSE_BS_ACCESS_APPEND_BIT)
+	if(flags & tFileSystem::omAppendBit)
 		File.SeekEnd();
 }
 //---------------------------------------------------------------------------
@@ -60,22 +60,30 @@ tOSNativeStream::~tOSNativeStream()
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tOSNativeStream::Seek(risse_int64 offset, risse_int whence)
+bool tOSNativeStream::Seek(risse_int64 offset, tOrigin whence)
 {
 	wxSeekMode mode = wxFromCurrent;
 	switch(whence)
 	{
-	case RISSE_BS_SEEK_SET: mode = wxFromStart;   break;
-	case RISSE_BS_SEEK_CUR: mode = wxFromCurrent; break;
-	case RISSE_BS_SEEK_END: mode = wxFromEnd;     break;
+	case soSet: mode = wxFromStart;   break;
+	case soCur: mode = wxFromCurrent; break;
+	case soEnd: mode = wxFromEnd;     break;
 	default: offset = 0;
 	}
 
 	wxFileOffset newpos = File.Seek(offset, mode);
 	if(newpos == wxInvalidOffset)
-		eRisaException::Throw(RISSE_WS_TR("seek failed"));
+		return false;
 
-	return newpos;
+	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint64 tOSNativeStream::Tell()
+{
+	return File.Tell();
 }
 //---------------------------------------------------------------------------
 
@@ -97,10 +105,10 @@ risse_size tOSNativeStream::Write(const void *buffer, risse_size write_size)
 
 
 //---------------------------------------------------------------------------
-void tOSNativeStream::SetEndOfFile()
+void tOSNativeStream::Truncate()
 {
 	// TODO: implement this 
-	eRisaException::Throw(RISSE_WS_TR("tOSNativeStream::SetEndOfFile not implemented"));
+	tIOExceptionClass::Throw(RISSE_WS_TR("tOSNativeStream::Truncate not implemented"));
 }
 //---------------------------------------------------------------------------
 
@@ -124,31 +132,29 @@ risse_uint64 tOSNativeStream::GetSize()
 
 
 //---------------------------------------------------------------------------
-tOSFS::tOSFS(const tString & basedir, bool checkcase) : 
-	BaseDirectory(basedir.AsWxString()), CheckCase(checkcase)
+tOSFS::tOSFS(const tString & basedir, bool checkcase)
 {
+	CheckCase = checkcase;
+
 	// ベースディレクトリのパス区切りをネイティブなものに変更
-	BaseDirectory = ConvertToNativePathDelimiter(BaseDirectory);
+	wxString base_directory;
+	base_directory = ConvertToNativePathDelimiter(basedir.AsWxString());
 
 	// ベースディレクトリ名の最後がパスデリミタでおわっていなけばそれを追加
-	if(!wxFileName::IsPathSeparator(BaseDirectory.Last()))
-		BaseDirectory += wxFileName::GetPathSeparator();
+	if(!wxFileName::IsPathSeparator(base_directory.Last()))
+		base_directory += wxFileName::GetPathSeparator();
 
 	// ベースディレクトリ名を正規化
-	wxFileName normalized(BaseDirectory);
+	wxFileName normalized(base_directory);
 	normalized.Normalize();
-	BaseDirectory = normalized.GetFullPath();
+	base_directory = normalized.GetFullPath();
 
 	// ベースディレクトリ名の最後がパスデリミタでおわっていなけばそれを追加
-	if(!wxFileName::IsPathSeparator(BaseDirectory.Last()))
-		BaseDirectory += wxFileName::GetPathSeparator();
-}
-//---------------------------------------------------------------------------
+	if(!wxFileName::IsPathSeparator(base_directory.Last()))
+		base_directory += wxFileName::GetPathSeparator();
 
-
-//---------------------------------------------------------------------------
-tOSFS::~tOSFS()
-{
+	// ベースディレクトリを保存
+	BaseDirectory = base_directory;
 }
 //---------------------------------------------------------------------------
 
@@ -161,9 +167,9 @@ size_t tOSFS::GetFileListAt(const tString & dirname,
 
 	CheckFileNameCase(wxdirname);
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter((wxString)wxdirname));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter((wxString)wxdirname));
 
 	wxDir dir;
 	size_t count = 0;
@@ -217,9 +223,9 @@ bool tOSFS::FileExists(const tString & filename)
 
 	if(!CheckFileNameCase(wxfilename, false)) return false;
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
 
 	return wxFileName::FileExists(native_name);
 }
@@ -233,9 +239,9 @@ bool tOSFS::DirectoryExists(const tString & dirname)
 
 	if(!CheckFileNameCase(wxdirname, false)) return false;
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
 
 	return wxFileName::DirExists(native_name);
 }
@@ -249,9 +255,9 @@ void tOSFS::RemoveFile(const tString & filename)
 
 	CheckFileNameCase(wxfilename);
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
 
 	if(!::wxRemoveFile(native_name))
 		eRisaException::Throw(tString(wxString::Format(RISSE_WS_TR("can not remove file '%s'"), native_name.c_str())));
@@ -266,9 +272,9 @@ void tOSFS::RemoveDirectory(const tString & dirname, bool recursive)
 
 	CheckFileNameCase(wxdirname);
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
 
 	if(recursive)
 		eRisaException::Throw(
@@ -287,9 +293,9 @@ void tOSFS::CreateDirectory(const tString & dirname, bool recursive)
 
 	CheckFileNameCase(wxdirname);
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxdirname));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
 
 	if(!wxFileName::Mkdir(native_name, 0777, recursive?wxPATH_MKDIR_FULL:0))
 		eRisaException::Throw(tString(wxString::Format(RISSE_WS_TR("can not create directory '%s'"), native_name.c_str())));
@@ -304,9 +310,9 @@ void tOSFS::Stat(const tString & filename, tStatStruc & struc)
 
 	CheckFileNameCase(wxfilename);
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
 
 	// 格納先構造体をクリア
 	struc.Clear();
@@ -334,9 +340,9 @@ tBinaryStream * tOSFS::CreateStream(const tString & filename, risse_uint32 flags
 
 	CheckFileNameCase(wxfilename);
 
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory + ConvertToNativePathDelimiter(wxfilename));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
 
 	return new tOSNativeStream(native_name, flags);
 }

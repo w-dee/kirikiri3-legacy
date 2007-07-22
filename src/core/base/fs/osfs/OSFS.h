@@ -15,6 +15,8 @@
 
 #include "base/fs/common/FSManager.h"
 #include "base/utils/RisaThread.h"
+#include "risse/include/risseBinaryStream.h"
+#include "risse/include/risseWCString.h"
 #include <wx/file.h>
 
 namespace Risa {
@@ -33,32 +35,36 @@ public:
 	tOSNativeStream(const wxString & filename, risse_uint32 flags);
 
 	//! @brief		デストラクタ
-	~tOSNativeStream();
+	virtual ~tOSNativeStream();
 
-	//! @brief		シーク
-	//! @param		offset 移動オフセット
-	//! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
-	//! @return		移動後のファイルポインタ
-	risse_uint64 Seek(risse_int64 offset, risse_int whence);
+	//! @brief		指定位置にシークする
+	//! @param		offset			基準位置からのオフセット (正の数 = ファイルの後ろの方)
+	//! @param		whence			基準位置
+	//! @return		このメソッドは成功すれば真、失敗すれば偽を返す
+	virtual bool Seek(risse_int64 offset, tOrigin whence);
 
-	//! @brief		読み込み
-	//! @param		buffer 読み込み先バッファ
-	//! @param		read_size 読み込むバイト数
-	//! @return		実際に読み込まれたバイト数
-	risse_size Read(void *buffer, risse_size read_size);
+	//! @brief		現在位置を取得する
+	//! @return		現在位置(先頭からのオフセット)
+	virtual risse_uint64 Tell();
 
-	//! @brief		書き込み
-	//! @param		buffer 書き込むバッファ
-	//! @param		read_size 書き込みたいバイト数
-	//! @return		実際に書き込まれたバイト数
-	risse_size Write(const void *buffer, risse_size write_size);
+	//! @brief		ストリームから読み込む
+	//! @param		buffer		読み込んだデータを書き込む先のポインタ
+	//! @param		read_size	読み込むサイズ
+	//! @return		実際に読み込まれたサイズ
+	virtual risse_size Read(void *buffer, risse_size read_size);
 
-	//! @brief		ファイルの終わりを現在のポインタに設定する
-	void SetEndOfFile();
+	//! @brief		ストリームに書き込む
+	//! @param		buffer		書き込むデータを表すポインタ
+	//! @param		read_size	書き込むサイズ
+	//! @return		実際に書き込まれたサイズ
+	virtual risse_uint Write(const void *buffer, risse_uint write_size);
+
+	//! @brief		ストリームを現在位置で切りつめる
+	virtual void Truncate();
 
 	//! @brief		サイズを得る
 	//! @return		このストリームのサイズ
-	risse_uint64 GetSize();
+	virtual risse_uint64 GetSize();
 };
 //---------------------------------------------------------------------------
 
@@ -68,22 +74,20 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		OS ファイルシステム
 //---------------------------------------------------------------------------
-class tOSFS : public tFileSystem
+class tOSFS : public tFileSystemInstance
 {
-	tCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
-
-	wxString BaseDirectory; //!< このファイルシステムがマウントしているOSのディレクトリ
+	tWCString BaseDirectory; //!< このファイルシステムがマウントしているOSのディレクトリ
 	bool CheckCase; //!< ファイル名の大文字・小文字をチェックする場合は真
 
 public:
 	//! @brief		コンストラクタ
 	tOSFS(const tString & basedir, bool checkcase = true);
 
+
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tOSFS() {;}
+
 	//-- tFileSystem メンバ
-
-	//! @brief		デストラクタ
-	~tOSFS();
-
 
 	//! @brief		ファイル一覧を取得する
 	//! @param		dirname ディレクトリ名

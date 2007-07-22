@@ -13,7 +13,6 @@
 #ifndef _FSMANAGER_H_
 #define _FSMANAGER_H_
 
-#include "basetypes.h"
 #include <wx/file.h>
 #include <wx/datetime.h>
 #include "risse/include/risseHashTable.h"
@@ -21,63 +20,17 @@
 #include "base/utils/RisaThread.h"
 #include "base/script/RisseEngine.h"
 #include "risse/include/risseString.h"
-#include <boost/smart_ptr.hpp>
+#include "risse/include/risseBinaryStream.h"
 
 namespace Risa {
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-//! @brief		tFileSystem::GetFileListAt で用いられるコールバックインターフェース
-//---------------------------------------------------------------------------
-class tFileSystemIterationCallback
-{
-public:
-	virtual ~tFileSystemIterationCallback() {;}
-	virtual bool OnFile(const tString & filename) = 0;
-	virtual bool OnDirectory(const tString & dirname) = 0;
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		tFileSystem::Stat で返される構造体
-//---------------------------------------------------------------------------
-struct tStatStruc
-{
-	wxFileOffset	Size;	//!< ファイルサイズ (wxFileOffset)-1 の場合は無効
-	wxDateTime		MTime;	//!< ファイル修正時刻 (wxDateTime::IsValidで有効性をチェックのこと)
-	wxDateTime		ATime;	//!< アクセス時刻 (wxDateTime::IsValidで有効性をチェックのこと)
-	wxDateTime		CTime;	//!< 作成時刻 (wxDateTime::IsValidで有効性をチェックのこと)
-
-	tStatStruc() { Clear(); }
-	void Clear() {  Size = (wxFileOffset) - 1; MTime = ATime = CTime = wxDateTime(); }
-};
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステム基底クラス
 //---------------------------------------------------------------------------
-class tFileSystem
+class tFileSystemInstance : public tObjectBase, public tFileSystem
 {
-	//---------- このクラスで実装する物
-protected:
-
-public:
-
-	//---------- 各サブクラスで(も)実装すべき物
-public:
-	virtual ~tFileSystem() {;}
-
-	virtual size_t GetFileListAt(const tString & dirname,
-		tFileSystemIterationCallback * callback) = 0; //!< ファイル一覧を取得する
-	virtual bool FileExists(const tString & filename) = 0; //!< ファイルが存在するかどうかを得る
-	virtual bool DirectoryExists(const tString & dirname) = 0; //!< ディレクトリが存在するかどうかを得る
-	virtual void RemoveFile(const tString & filename) = 0; //!< ファイルを削除する
-	virtual void RemoveDirectory(const tString & dirname, bool recursive = false) = 0; //!< ディレクトリを削除する
-	virtual void CreateDirectory(const tString & dirname, bool recursive = false) = 0; //!< ディレクトリを作成する
-	virtual void Stat(const tString & filename, tStatStruc & struc) = 0; //!< 指定されたファイルの stat を得る
-	virtual tBinaryStream * CreateStream(const tString & filename, risse_uint32 flags) = 0; //!< 指定されたファイルのストリームを得る
 };
 //---------------------------------------------------------------------------
 
@@ -89,15 +42,7 @@ class tFileSystemManager :
 	public singleton_base<tFileSystemManager>,
 	protected depends_on<tRisseScriptEngine>
 {
-	//! @brief ファイルシステムマネージャ内で管理されるファイルシステムの情報
-	struct tFileSystemInfo
-	{
-		tRefHolder<iRisseDispatch2> Object; //!< Risseオブジェクト
-		tFileSystemInfo(iRisseDispatch2 *risse_obj) : 
-			Object(risse_obj)  {;} //!< コンストラクタ
-	};
-
-	tHashTable<tString, tFileSystemInfo> MountPoints; //!< マウントポイントのハッシュ表
+	tHashTable<tString, tFileSystemInstance *> MountPoints; //!< マウントポイントのハッシュ表
 	tString CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
 
 	tCriticalSection CS; //!< このファイルシステムマネージャを保護するクリティカルセクション
@@ -106,15 +51,15 @@ public:
 	//! @brief		コンストラクタ
 	tFileSystemManager();
 
-	//! @brief		デストラクタ
-	~tFileSystemManager();
+	//! @brief		デストラクタ(呼ばれることはない)
+	virtual ~tFileSystemManager() {;}
 
 public:
 	//! @brief		ファイルシステムをマウントする
 	//! @param		point マウントポイント
 	//! @param		fs_risseobj ファイルシステムオブジェクトを表すRisseオブジェクト
 	//! @note		メインスレッド以外から呼び出さないこと
-	void Mount(const tString & point, iRisseDispatch2 * fs_risseobj);
+	void Mount(const tString & point, tFileSystemInstance * fs_risseobj);
 
 	//! @brief		ファイルシステムをアンマウントする
 	//! @param		point マウントポイント
@@ -124,7 +69,7 @@ public:
 	//! @brief		ファイルシステムをアンマウントする
 	//! @param		fs_risseobj アンマウントしたいファイルシステムを表すRisseオブジェクト
 	//! @note		メインスレッド以外から呼び出さないこと
-	void Unmount(iRisseDispatch2 * fs_risseobj);
+	void Unmount(tFileSystemInstance * fs_risseobj);
 
 	//! @brief		パスを正規化する
 	//! @param		path 正規化したいパス
@@ -188,7 +133,7 @@ private:
 	//! @return		ファイルシステムインスタンス
 	//! @note		このメソッドはスレッド保護されていないため、このメソッドを呼ぶ場合は
 	//!				CriticalSection 内で呼ぶこと！
-	boost::shared_ptr<tFileSystem> GetFileSystemAt(const tString & fullpath, tString * fspath = NULL);
+	tFileSystemInstance * GetFileSystemAt(const tString & fullpath, tString * fspath = NULL);
 
 	//! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる
 	//! @param		filename  マウントポイント

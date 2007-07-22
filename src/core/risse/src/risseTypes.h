@@ -136,6 +136,9 @@ namespace Risse
 // char サイズが 8bit なのは下にある sanity checking で保証する
 static const risse_size risse_size_max = ((((1UL << ((sizeof(risse_size) * 8) -1))-1)<<1)+1);
 
+//! @brief risse_uint64 の最大値
+static const risse_uint64 risse_uint64_max = ((((RISSE_UI64_VAL(1) << ((sizeof(risse_uint64) * 8) -1))-1)<<1)+1);
+
 typedef risse_int32 risse_error;
 
 /* IEEE double manipulation support

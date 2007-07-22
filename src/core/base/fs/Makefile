@@ -14,21 +14,22 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 #-----------------------------------------
 CPPFILES = \
 		common/FSManager.cpp                     \
-		common/FSManagerBind.cpp                 \
-		osfs/OSFS.cpp                            \
-		osfs/OSFSBind.cpp                        \
-		pathfs/PathFS.cpp                        \
-		pathfs/PathFSBind.cpp                    \
-		tmpfs/MemoryStream.cpp                   \
-		tmpfs/TmpFS.cpp                          \
-		tmpfs/TmpFSBind.cpp                      \
-		xp4fs/DecompressedHolder.cpp             \
-		xp4fs/XP4Archive.cpp                     \
-		xp4fs/XP4FS.cpp                          \
-		xp4fs/XP4SegmentCache.cpp                \
-		xp4fs/XP4Stream.cpp                      \
-		xp4fs/XP4StreamCache.cpp                 \
-		xp4fs/XP4FSBind.cpp                      
+		osfs/OSFS.cpp                            
+
+#		common/FSManagerBind.cpp                 \
+#		osfs/OSFSBind.cpp                        \
+#		pathfs/PathFS.cpp                        \
+#		pathfs/PathFSBind.cpp                    \
+#		tmpfs/MemoryStream.cpp                   \
+#		tmpfs/TmpFS.cpp                          \
+#		tmpfs/TmpFSBind.cpp                      \
+#		xp4fs/DecompressedHolder.cpp             \
+#		xp4fs/XP4Archive.cpp                     \
+#		xp4fs/XP4FS.cpp                          \
+#		xp4fs/XP4SegmentCache.cpp                \
+#		xp4fs/XP4Stream.cpp                      \
+#		xp4fs/XP4StreamCache.cpp                 \
+#		xp4fs/XP4FSBind.cpp                      
 
 
 #-----------------------------------------

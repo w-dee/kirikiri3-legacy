@@ -21,7 +21,7 @@ RISSE_DEFINE_SOURCE_ID(8159,12638,3849,19901,12983,59012,32772,31241);
 
 
 //---------------------------------------------------------------------------
-tWCString::tWCString(const tString & ref)
+tWCString & tWCString::operator = (const tString & ref)
 {
 	if(ref.IsEmpty())
 	{
@@ -31,13 +31,14 @@ tWCString::tWCString(const tString & ref)
 	{
 		Buffer = CharToWCStringBuffer(ref.Pointer(), ref.GetLength());
 	}
+	return *this;
 }
 //---------------------------------------------------------------------------
 
 
 #ifdef RISSE_SUPPORT_WX
 //---------------------------------------------------------------------------
-tWCString::tWCString(const wxString & ref)
+tWCString & tWCString::operator = (const wxString & ref)
 {
 	// wxString はすでに wxChar ( = wchar_t ) ベースのはずなので
 	// バッファを単純にコピーする
@@ -45,6 +46,7 @@ tWCString::tWCString(const wxString & ref)
 	size_t ref_len = ref.length();
 	Buffer = new (PointerFreeGC) wchar_t[ref_len + 1];
 	memcpy(Buffer, ref_buf, sizeof(wchar_t) * (ref_len + 1));
+	return *this;
 }
 //---------------------------------------------------------------------------
 #endif

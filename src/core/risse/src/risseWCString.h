@@ -54,20 +54,37 @@ public:
 
 	//! @brief		コピーコンストラクタ
 	//! @param		ref		基準となる文字列
-	explicit tWCString(const tWCString & ref) { Buffer = ref.Buffer; }
+	explicit tWCString(const tWCString & ref) { operator = (ref); }
 
 	//! @brief		コンストラクタ(tStringから)
 	//! @param		ref		基準となる文字列
-	explicit tWCString(const tString & ref);
+	explicit tWCString(const tString & ref) { operator = (ref); }
 
 #ifdef RISSE_SUPPORT_WX
 	//! @brief		コンストラクタ(wxStringから)
 	//! @param		ref		基準となる文字列
-	explicit tWCString(const wxString & ref);
+	explicit tWCString(const wxString & ref) { operator = (ref); }
+#endif
+
+	//! @brief		= 演算子
+	//! @param		ref		基準となる文字列
+	tWCString & operator = (const tWCString & ref) { Buffer = ref.Buffer; return *this; }
+
+	//! @brief		= 演算子
+	//! @param		ref		基準となる文字列
+	tWCString & operator = (const tString & ref);
+
+#ifdef RISSE_SUPPORT_WX
+	//! @brief		= 演算子
+	//! @param		ref		基準となる文字列
+	tWCString & operator = (const wxString & ref);
 #endif
 
 	//! @brief		wchar_t への変換
 	operator const wchar_t * () const { return Buffer; }
+
+	//! @brief		wchar_t への変換
+	const wchar_t * c_str() const { return Buffer; }
 
 	//! @brief		tString への変換
 	operator tString () const { return tString(Buffer); }

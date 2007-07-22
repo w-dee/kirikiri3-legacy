@@ -202,6 +202,13 @@ public:
 		Length = 0;
 	}
 
+	//! @brief 空文字列を設定する
+	void Clear()
+	{
+		Buffer = RISSE_STRING_EMPTY_BUFFER;
+		Length = 0;
+	}
+
 	//! @brief コピーコンストラクタ
 	//! @param ref コピー元オブジェクト
 	tStringBlock(const tStringBlock & ref)
@@ -584,6 +591,59 @@ public: // comparison
 	//! @return	*this!=ptrかどうか
 	bool operator != (const risse_char *ptr) const
 		{ return ! (*this == ptr); }
+
+	//! @brief		指定された文字で始まっているか
+	//! @param		ch		比較する文字
+	//! @return		文字列が ch で始まっていれば真、そうでなければ偽
+	bool StartsWith(risse_char ch) const
+		{ if(GetLength() == 0 || ch == 0) return false; return Buffer[0] == ch; }
+
+	//! @brief	指定された文字で終わっているか
+	//! @param		ch		比較する文字
+	//! @return		文字列が ch で終わっていれば真、そうでなければ偽
+	bool EndsWith(risse_char ch) const
+		{ if(GetLength() == 0 || ch == 0) return false; return Buffer[Length-1] == ch; }
+
+	//! @brief	指定された文字列で始まっているか
+	//! @param	str		比較する文字列
+	//! @return	文字列が str で始まっていれば真、そうでなければ偽
+	bool StartsWith(const tStringBlock & str) const
+	{ return InternalStartsWidth(str.Buffer, str.Length); }
+
+	//! @brief	指定された文字列で始まっているか
+	//! @param	str		比較する文字列
+	//! @return	文字列が str で始まっていれば真、そうでなければ偽
+	bool StartsWith(const risse_char * str) const
+	{ return InternalStartsWidth(str, ::Risse::strlen(str)); }
+
+	//! @brief	指定された文字列で終わっているか
+	//! @param	str		比較する文字列
+	//! @return	文字列が str で終わっていれば真、そうでなければ偽
+	bool EndsWith(const tStringBlock & str) const
+	{ return InternalEndsWidth(str.Buffer, str.Length); }
+
+	//! @brief	指定された文字列で終わっているか
+	//! @param	str		比較する文字列
+	//! @return	文字列が str で終わっていれば真、そうでなければ偽
+	bool EndsWith(const risse_char * str) const
+	{ return InternalEndsWidth(str, ::Risse::strlen(str)); }
+
+private:
+	//! @brief	指定された文字列で始まっているか(内部関数)
+	bool InternalStartsWidth(const risse_char * p, risse_size plen) const
+	{
+		if(Length < plen) return false;
+		if(plen == 0) return true; // 任意の文字列は空文字列から始まっていると見なすことができる
+		return !memcmp(Buffer, p, sizeof(risse_char) * plen);
+	}
+
+	//! @brief	指定された文字列で終わっているか(内部関数)
+	bool InternalEndsWidth(const risse_char * p, risse_size plen) const
+	{
+		if(Length < plen) return false;
+		if(plen == 0) return true; // 任意の文字列は空文字列で終わっていると見なすことができる
+		return !memcmp(Buffer + Length - plen, p, sizeof(risse_char) * plen);
+	}
 
 public: // operators
 	//! @brief		文字列の追加

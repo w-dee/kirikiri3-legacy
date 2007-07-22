@@ -26,15 +26,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		ファイルシステム基底クラス
-//---------------------------------------------------------------------------
-class tFileSystemInstance : public tObjectBase, public tFileSystem
-{
-};
-//---------------------------------------------------------------------------
-
-
+class tFileSystemInstance;
 //---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
@@ -196,6 +188,101 @@ public:
 	void SetCurrentDirectory(const tString &dir);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ファイルシステム基底インスタンス("FileSystem" クラス)
+//---------------------------------------------------------------------------
+class tFileSystemInstance : public tObjectBase, public tFileSystem
+{
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		"FileSystem" クラス
+//---------------------------------------------------------------------------
+class tFileSystemClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tFileSystemClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"File" クラス
+//---------------------------------------------------------------------------
+class tFileClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tFileClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+	static void construct() { }
+	static void initialize() { }
+
+	static void mount(const tString & point, const tVariant & fs);
+	static void unmount(const tString & point)
+		{ tFileSystemManager::instance()->Unmount(point); }
+	static tString normalize(const tString & path)
+		{ return tFileSystemManager::instance()->NormalizePath(path); }
+	static bool exists(const tString & filename)
+		{ return tFileSystemManager::instance()->FileExists(filename) ||
+			tFileSystemManager::instance()->DirectoryExists(filename); }
+	static bool isFile(const tString & filename)
+		{ return tFileSystemManager::instance()->FileExists(filename); }
+	static bool isDirectory(const tString & dirname)
+		{ return tFileSystemManager::instance()->DirectoryExists(dirname); }
+	static tString chopExtension(const tString & filename)
+		{ return tFileSystemManager::instance()->ChopExtension(filename); }
+	static tString extractExtension(const tString & filename)
+		{ return tFileSystemManager::instance()->ExtractExtension(filename); }
+	static tString extractName(const tString & filename)
+		{ return tFileSystemManager::instance()->ExtractName(filename); }
+	static tString get_cwd()
+		{ return tFileSystemManager::instance()->GetCurrentDirectory(); }
+	static void set_cwd(const tString & dirname)
+		{ tFileSystemManager::instance()->SetCurrentDirectory(dirname); }
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 } // namespace Risa

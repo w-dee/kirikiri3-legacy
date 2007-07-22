@@ -692,6 +692,178 @@ void tFileSystemManager::SetCurrentDirectory(const tString &dir)
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tFileSystemInstance::construct()
+{
+	// デフォルトではなにもしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tFileSystemInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// 親クラスの同名メソッドを呼び出す
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tFileSystemClass::tFileSystemClass(tScriptEngine * engine) :
+	tClassBase(tSS<'F','i','l','e','S','y','s','t','e','m'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tFileSystemClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tFileSystemClass::ovulate);
+	BindFunction(this, ss_construct, &tFileSystemInstance::construct);
+	BindFunction(this, ss_initialize, &tFileSystemInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tFileSystemClass::ovulate()
+{
+	// このクラスのインスタンスは作成できないので例外を投げる
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		FileSystem クラスレジストラ
+template class tRisseClassRegisterer<tFileSystemClass>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tFileClass::tFileClass(tScriptEngine * engine) :
+	tClassBase(tSS<'F','i','l','e'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tFileClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tFileClass::ovulate);
+	BindFunction(this, ss_construct, &tFileClass::construct);
+	BindFunction(this, ss_initialize, &tFileClass::initialize);
+
+	BindFunction(this, tSS<'m','o','u','n','t'>(), &tFileClass::mount);
+	BindFunction(this, tSS<'u','n','m','o','u','n','t'>(), &tFileClass::unmount);
+	BindFunction(this, tSS<'n','o','r','m','a','l','i','z','e'>(), &tFileClass::normalize);
+	BindFunction(this, tSS<'e','x','i','s','t','s'>(), &tFileClass::exists);
+	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tFileClass::isFile);
+	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tFileClass::isDirectory);
+	BindFunction(this, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tFileClass::chopExtension);
+	BindFunction(this, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tFileClass::extractExtension);
+	BindFunction(this, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tFileClass::extractName);
+	BindProperty(this, tSS<'c','w','d'>(), &tFileClass::get_cwd, &tFileClass::set_cwd);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tFileClass::ovulate()
+{
+	// このクラスのインスタンスは作成できないので例外を投げる
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tFileClass::mount(const tString & point, const tVariant & fs)
+{
+	fs.AssertClass(tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance());
+	tFileSystemManager::instance()->Mount(point, reinterpret_cast<tFileSystemInstance *>(fs.GetObjectInterface()));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		File クラスレジストラ
+template class tRisseClassRegisterer<tFileClass>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 } // namespace Risa
 

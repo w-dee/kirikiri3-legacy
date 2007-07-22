@@ -755,6 +755,17 @@ void tIOExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
+void tIOExceptionClass::Throw(tScriptEngine * engine,
+							const tString & message)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_IOException, message);
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tIOExceptionClass::ThrowReadError(tScriptEngine * engine,
 							const tString & name)
 {

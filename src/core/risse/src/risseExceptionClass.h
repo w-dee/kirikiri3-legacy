@@ -393,6 +393,14 @@ public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 
 public:
+	//! @brief		例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		msg			例外メッセージ
+	static void Throw(tScriptEngine * engine, const tString & message);
+	//! @brief		「読み込みエラーが発生した」例外を発生
+	static void Throw(const tString & message)
+		{ Throw(NULL, message); }
+
 	//! @brief		「読み込みエラーが発生した」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		ストリームなどの名前

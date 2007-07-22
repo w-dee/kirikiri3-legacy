@@ -172,6 +172,13 @@ risse_size CharToUtf8String(const risse_char *in, char * out);
 void FPrint(FILE * output, const risse_char * str);
 
 
+//! @brief		risse_char 型の文字列を wchar_t 配列 に変換する
+//! @param		str  risse_char*型の文字列
+//! @param		len  文字列の長さ(コードポイント単位) risse_size_max = 自動判別
+//! @return		wchar_t 配列 (ヒープ上に確保されるが GC の回収対象)
+wchar_t * CharToWCStringBuffer(const risse_char * str, risse_size len = risse_size_max);
+
+
 #ifdef RISSE_SUPPORT_WX
 
 //! @brief		risse_char 型の文字列を wxString に変換する

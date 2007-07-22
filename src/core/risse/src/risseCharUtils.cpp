@@ -630,6 +630,43 @@ void FPrint(FILE * output, const risse_char * str)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+wchar_t * CharToWCStringBuffer(const risse_char * str, risse_size len)
+{
+	if(!str) return NULL;
+	if(str[0] == 0) return NULL;
+#ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
+	// UTF-32 から UTF-16 への変換が必要
+
+	// 変換後の文字列長を取得
+	risse_size converted_size =
+		ConvertRisseCharToUTF16String(NULL, str, len); // lenは-1になりうるので注意
+
+	if(converted_size == risse_size_max)
+		return NULL; // failed to convert
+
+	// 変換後の文字列を一時的に格納するバッファを確保
+	wchar_t *buf = new (PointerFreeGC) wchar_t[converted_size + 1];
+
+	// 変換
+	if(ConvertRisseCharToUTF16String(
+			reinterpret_cast<risse_uint16*>(buf), str, len)
+					== risse_size_max)
+		return NULL;
+
+	return buf;
+#else
+	// 新しく確保した配列にコピー
+	if(len == risse_size_max) len = ::Risse::strlen(str);
+	wchar_t * buf = new (PointerFreeGC) [len + 1];
+	memcpy(buf, str, sizeof(wchar_t) * len);
+	buf[len] = 0;
+	return buf;
+#endif
+}
+//---------------------------------------------------------------------------
+
+
 #ifdef RISSE_SUPPORT_WX
 //---------------------------------------------------------------------------
 wxString CharToWxString(const risse_char * str, risse_size len)

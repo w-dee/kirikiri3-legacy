@@ -125,9 +125,9 @@ bool tApplication::OnInit()
 
 	//---- ↓↓テストコード↓↓ ----
 	// ファイルシステムのルートにカレントディレクトリをマウント
-//	tRisseScriptEngine::instance()->GetEngineNoAddRef()->EvalExpression(
-//		RISSE_WS("FileSystem.mount('/', new FileSystem.OSFS('.'))"),
-//		NULL, NULL, NULL);
+	tRisseScriptEngine::instance()->
+		EvaluateExpresisonAndPrintResultToConsole(
+			RISSE_WS("File::mount('/', new FileSystem::OSFS('.'))"));
 
 	// コンソールをメインウィンドウとして表示
 	tConsoleFrame *console = new tConsoleFrame();

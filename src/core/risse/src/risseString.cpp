@@ -294,7 +294,6 @@ bool tStringBlock::operator <  (const tStringBlock & ref) const
 		// this の方が短い
 		// Length まで比較したとき、this の方が小さい、あるいは
 		// 同一だったばあいは、this の方が「小さい」と見なすことができる
-		if(Length == 0) return true; // 自分の方が絶対に小さい場合
 		return strbufcmp(Buffer, ref.Buffer, Length) <= 0;
 	}
 	else if(Length > ref.Length)
@@ -302,7 +301,6 @@ bool tStringBlock::operator <  (const tStringBlock & ref) const
 		// ref の方が短い
 		// ref.Length まで比較したとき、this の方が小さい場合のみ「小さい」と見なすことが
 		// できる(そこまで比較して同一だった場合は、ref の方が長いのでrefが「大きい」)
-		if(ref.Length == 0) return false; // 自分の方が絶対に大きい場合
 		return strbufcmp(Buffer, ref.Buffer, ref.Length) < 0;
 	}
 	else
@@ -310,7 +308,6 @@ bool tStringBlock::operator <  (const tStringBlock & ref) const
 		// this の長さと ref の長さが一緒の場合
 		// ref.Length まで比較したとき、this の方が小さい場合のみ「小さい」と見なすことが
 		// できる(同一だった場合は両方とも同一の文字列である)
-		if(Length == 0) return false; // 両方とも空文字列の場合はthisとrefが同一
 		return strbufcmp(Buffer, ref.Buffer, Length) < 0;
 	}
 }

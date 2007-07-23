@@ -569,7 +569,6 @@ public: // comparison
 		if(this == &ref) return true; // 同じポインタ
 		if(Length != ref.Length) return false; // 違う長さ
 		if(Buffer == ref.Buffer) return true; // 同じバッファ
-		if(Length == 0) return true; // 空文字列==空文字列は真
 		return !strbufcmp(Buffer, ref.Buffer, Length);
 	}
 

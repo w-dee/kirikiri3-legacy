@@ -502,7 +502,7 @@ tFileSystemInstance * tFileSystemManager::GetFileSystemAt(
 	// マウントポイントに一致したディレクトリが本当に存在するかや、
 	// fullpath で指定したディレクトリが本当に存在するかどうかは
 	// チェックしない。
-	const risse_char *start = fullpath.c_str();
+	const risse_char *start = fullpath.Pointer();
 	const risse_char *p = start + fullpath.GetLength();
 
 	while(p >= start)
@@ -510,7 +510,13 @@ tFileSystemInstance * tFileSystemManager::GetFileSystemAt(
 		if(*p == RISSE_WC('/'))
 		{
 			// p が スラッシュ
-			tString subpath(start, p - start + 1);
+			tString subpath(fullpath, 0, p - start + 1);
+/*
+fflush(stderr);
+FPrint(stderr, subpath.c_str());
+FPrint(stderr, RISSE_WS("\n"));
+fflush(stderr);
+*/
 			tFileSystemInstance ** item =
 				MountPoints.Find(subpath);
 			if(item)
@@ -520,7 +526,6 @@ tFileSystemInstance * tFileSystemManager::GetFileSystemAt(
 
 				return *item;
 			}
-			break;
 		}
 		p--;
 	}
@@ -531,7 +536,7 @@ tFileSystemInstance * tFileSystemManager::GetFileSystemAt(
 	// ・  fullpath にが渡された
 
 	if(fullpath.GetLength() != 0)
-		eRisaException::Throw(
+		tFileSystemExceptionClass::Throw(
 			RISSE_WS_TR("Could not find the root filesystem"));
 	return NULL;
 }

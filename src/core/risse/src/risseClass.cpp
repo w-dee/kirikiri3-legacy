@@ -134,7 +134,9 @@ void tClassBase::RegisterClassInstance(tVariant & target)
 	tString name = GetPropertyDirect(ss_name);
 	target.SetPropertyDirect_Object(name,
 		tOperateFlags(tMemberAttribute::GetDefault()) |
-		tOperateFlags::ofMemberEnsure | tOperateFlags::ofInstanceMemberOnly,
+		tOperateFlags::ofMemberEnsure |
+		tOperateFlags::ofInstanceMemberOnly |
+		tOperateFlags::ofUseClassMembersRule,
 				tVariant(this));
 }
 //---------------------------------------------------------------------------

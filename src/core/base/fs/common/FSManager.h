@@ -197,6 +197,9 @@ public:
 //---------------------------------------------------------------------------
 class tFileSystemInstance : public tObjectBase, public tFileSystem
 {
+public: // コンストラクタ
+	tFileSystemInstance() {;}
+
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
@@ -280,6 +283,33 @@ public: // Risse 用メソッドなど
 
 
 
+
+//---------------------------------------------------------------------------
+//! @brief		ファイルシステムクラスインスタンスをFileSystem以下に登録するためのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename ClassT>
+class tRisseFSClassRegisterer :
+	public singleton_base<tRisseFSClassRegisterer<ClassT> >,
+	depends_on<tRisseClassRegisterer<tFileSystemClass> >
+{
+	ClassT * ClassInstance;
+public:
+	//! @brief		コンストラクタ
+	tRisseFSClassRegisterer()
+	{
+		// ここらへんのプロセスについては tRisseClassRegisterer のコンストラクタも参照のこと
+		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
+		ClassT *class_instance = new ClassT(engine);
+		ClassInstance = class_instance;
+		tVariant FileSystem = engine->GetGlobalObject().
+			GetPropertyDirect_Object(tSS<'F','i','l','e','S','y','s','t','e','m'>());
+		class_instance->RegisterClassInstance(FileSystem);
+		class_instance->RegisterMembers();
+	}
+
+	ClassT * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る
+};
+//---------------------------------------------------------------------------
 
 
 

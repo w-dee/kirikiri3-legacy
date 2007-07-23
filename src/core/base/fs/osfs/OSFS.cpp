@@ -12,7 +12,6 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/fs/osfs/OSFS.h"
-#include "base/fs/osfs/OSFSBind.h"
 #include "base/exception/RisaException.h"
 #include <wx/filename.h>
 #include <wx/dir.h>
@@ -132,7 +131,15 @@ risse_uint64 tOSNativeStream::GetSize()
 
 
 //---------------------------------------------------------------------------
-tOSFS::tOSFS(const tString & basedir, bool checkcase)
+tOSFSInstance::tOSFSInstance()
+{
+	CheckCase = true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOSFSInstance::SetOptions(const tString & basedir, bool checkcase)
 {
 	CheckCase = checkcase;
 
@@ -160,7 +167,7 @@ tOSFS::tOSFS(const tString & basedir, bool checkcase)
 
 
 //---------------------------------------------------------------------------
-size_t tOSFS::GetFileListAt(const tString & dirname,
+size_t tOSFSInstance::GetFileListAt(const tString & dirname,
 	tFileSystemIterationCallback * callback)
 {
 	wxString wxdirname(dirname.AsWxString());
@@ -217,7 +224,7 @@ size_t tOSFS::GetFileListAt(const tString & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tOSFS::FileExists(const tString & filename)
+bool tOSFSInstance::FileExists(const tString & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -233,7 +240,7 @@ bool tOSFS::FileExists(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-bool tOSFS::DirectoryExists(const tString & dirname)
+bool tOSFSInstance::DirectoryExists(const tString & dirname)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -249,7 +256,7 @@ bool tOSFS::DirectoryExists(const tString & dirname)
 
 
 //---------------------------------------------------------------------------
-void tOSFS::RemoveFile(const tString & filename)
+void tOSFSInstance::RemoveFile(const tString & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -266,7 +273,7 @@ void tOSFS::RemoveFile(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-void tOSFS::RemoveDirectory(const tString & dirname, bool recursive)
+void tOSFSInstance::RemoveDirectory(const tString & dirname, bool recursive)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -287,7 +294,7 @@ void tOSFS::RemoveDirectory(const tString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tOSFS::CreateDirectory(const tString & dirname, bool recursive)
+void tOSFSInstance::CreateDirectory(const tString & dirname, bool recursive)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -304,7 +311,7 @@ void tOSFS::CreateDirectory(const tString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tOSFS::Stat(const tString & filename, tStatStruc & struc)
+void tOSFSInstance::Stat(const tString & filename, tStatStruc & struc)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -334,7 +341,7 @@ void tOSFS::Stat(const tString & filename, tStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tOSFS::CreateStream(const tString & filename, risse_uint32 flags)
+tBinaryStream * tOSFSInstance::CreateStream(const tString & filename, risse_uint32 flags)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -350,7 +357,7 @@ tBinaryStream * tOSFS::CreateStream(const tString & filename, risse_uint32 flags
 
 
 //---------------------------------------------------------------------------
-wxString tOSFS::ConvertToNativePathDelimiter(const wxString & path)
+wxString tOSFSInstance::ConvertToNativePathDelimiter(const wxString & path)
 {
 	wxString ret(path);
 	if(ret.Length() > 0)
@@ -368,7 +375,7 @@ wxString tOSFS::ConvertToNativePathDelimiter(const wxString & path)
 
 
 //---------------------------------------------------------------------------
-bool tOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
+bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise)
 {
 	// TODO: UNIX系OSでのチェック
 	if(!CheckCase) return true; // 大文字・小文字をチェックしない場合はそのまま帰る
@@ -429,6 +436,91 @@ bool tOSFS::CheckFileNameCase(const wxString & path_to_check, bool raise)
 	// エラーは見つからなかった
 	return true;
 }
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOSFSInstance::construct()
+{
+	// とくにやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOSFSInstance::initialize(const tString & base_dir, const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// 親クラスの同名メソッドを呼び出す
+	info.InitializeSuperClass();
+
+	// SetOptions を呼ぶ
+	bool check_case = info.args.HasArgument(1) ? (bool)info.args[1] : true;
+	SetOptions(base_dir, check_case);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"OSFS" クラス
+//---------------------------------------------------------------------------
+class tOSFSClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tOSFSClass(tScriptEngine * engine) :
+	tClassBase(tSS<'O','S','F','S'>(),
+			tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance())
+	{
+		RegisterMembers();
+	}
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers()
+	{
+		// 親クラスの RegisterMembers を呼ぶ
+		inherited::RegisterMembers();
+
+		// クラスに必要なメソッドを登録する
+		// 基本的に ss_construct と ss_initialize は各クラスごとに
+		// 記述すること。たとえ construct の中身が空、あるいは initialize の
+		// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+		BindFunction(this, ss_ovulate, &tOSFSClass::ovulate);
+		BindFunction(this, ss_construct, &tOSFSInstance::construct);
+		BindFunction(this, ss_initialize, &tOSFSInstance::initialize);
+	}
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate()
+	{
+		return tVariant(new tOSFSInstance());
+	}
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		OSFS クラスレジストラ
+template class tRisseFSClassRegisterer<tOSFSClass>;
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------

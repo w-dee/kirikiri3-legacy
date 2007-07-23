@@ -74,18 +74,27 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		OS ファイルシステム
 //---------------------------------------------------------------------------
-class tOSFS : public tFileSystemInstance
+class tOSFSInstance : public tFileSystemInstance
 {
 	tWCString BaseDirectory; //!< このファイルシステムがマウントしているOSのディレクトリ
 	bool CheckCase; //!< ファイル名の大文字・小文字をチェックする場合は真
 
 public:
 	//! @brief		コンストラクタ
-	tOSFS(const tString & basedir, bool checkcase = true);
+	tOSFSInstance();
 
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
-	virtual ~tOSFS() {;}
+	virtual ~tOSFSInstance() {;}
+
+	//! @brief		オプションを設定する
+	//! @param		basedir		ベースとなる OS ファイルシステム上のディレクトリ
+	//! @param		checkcase	大文字と小文字を強制的に区別するかどうか
+	//!							(trueを指定するとWindowsのような環境でも
+	//!							大文字と小文字の区別をするようになる。しかし
+	//!							falseにしたからといってUNIXのような環境で大文字と
+	//!							小文字を区別しないようになるわけではない)
+	void SetOptions(const tString & basedir, bool checkcase = true);
 
 	//-- tFileSystem メンバ
 
@@ -144,8 +153,21 @@ private:
 	//! @return		一致した場合に真、しなかった場合に偽
 	//! @note		ファイルが「見つからない」場合は真が帰るので注意
 	bool CheckFileNameCase(const wxString & path_to_check, bool raise = true);
+
+public: // Risse 用メソッドなど
+	void construct();
+	void initialize(const tString & base_dir, const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+
+
 
 
 //---------------------------------------------------------------------------

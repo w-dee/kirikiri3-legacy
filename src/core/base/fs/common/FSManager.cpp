@@ -511,18 +511,13 @@ tFileSystemInstance * tFileSystemManager::GetFileSystemAt(
 		{
 			// p が スラッシュ
 			tString subpath(fullpath, 0, p - start + 1);
-/*
-fflush(stderr);
-FPrint(stderr, subpath.c_str());
-FPrint(stderr, RISSE_WS("\n"));
-fflush(stderr);
-*/
 			tFileSystemInstance ** item =
 				MountPoints.Find(subpath);
 			if(item)
 			{
-				// TODO: ここの最適化(tStringの部分文字列共有機能を使えばもっと高速化出来る)
-				if(fspath) *fspath = start + subpath.GetLength();
+				if(fspath)
+					*fspath =
+						tString(fullpath, p-start, fullpath.GetLength() - (p-start));
 
 				return *item;
 			}

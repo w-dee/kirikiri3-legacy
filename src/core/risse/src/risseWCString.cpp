@@ -20,6 +20,12 @@ namespace Risse
 RISSE_DEFINE_SOURCE_ID(8159,12638,3849,19901,12983,59012,32772,31241);
 
 
+
+//---------------------------------------------------------------------------
+const wchar_t * tWCString::EmptyString = L"";
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 tWCString & tWCString::operator = (const tString & ref)
 {
@@ -44,8 +50,9 @@ tWCString & tWCString::operator = (const wxString & ref)
 	// バッファを単純にコピーする
 	const wchar_t * ref_buf = ref.c_str();
 	size_t ref_len = ref.length();
-	Buffer = new (PointerFreeGC) wchar_t[ref_len + 1];
-	memcpy(Buffer, ref_buf, sizeof(wchar_t) * (ref_len + 1));
+	wchar_t * new_buffer = new (PointerFreeGC) wchar_t[ref_len + 1];
+	memcpy(new_buffer, ref_buf, sizeof(wchar_t) * (ref_len + 1));
+	Buffer = new_buffer;
 	return *this;
 }
 //---------------------------------------------------------------------------

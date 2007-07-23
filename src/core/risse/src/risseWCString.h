@@ -46,11 +46,13 @@ namespace Risse
 //---------------------------------------------------------------------------
 class tWCString : public tCollectee
 {
-	wchar_t * Buffer; //!< バッファ
+	const wchar_t * Buffer; //!< バッファ
+
+	static const wchar_t * EmptyString;
 
 public:
 	//! @brief		コンストラクタ
-	tWCString() { Buffer = 0; }
+	tWCString() { Buffer = EmptyString; }
 
 	//! @brief		コピーコンストラクタ
 	//! @param		ref		基準となる文字列

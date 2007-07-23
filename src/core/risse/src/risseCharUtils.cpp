@@ -206,6 +206,22 @@ risse_size strlen(const risse_char *d)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+int strbufcmp(const risse_char *s1, const risse_char *s2, risse_size n)
+{
+	// これ unsigned 比較だったっけなぁ………
+	while(n--)
+	{
+		int diff = *s1 - *s2;
+		if(diff) return diff;
+		s1++;
+		s2++;
+	}
+	return 0;
+}
+//---------------------------------------------------------------------------
+
+
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 
 //---------------------------------------------------------------------------
@@ -214,11 +230,8 @@ int strcmp(const risse_char *s1, const risse_char *s2)
 	for(;;)
 	{
 		if(!*s1) return (!*s2) ? 0 : -1;
-		if(*s1 != *s2)
-		{
-			if(*s1 < *s2) return -1;
-			return 1;
-		}
+		int diff = *s1 - *s2;
+		if(diff != 0) return diff;
 		s1++;
 		s2++;
 	}
@@ -229,18 +242,15 @@ int strcmp(const risse_char *s1, const risse_char *s2)
 //---------------------------------------------------------------------------
 int strncmp(const risse_char *s1, const risse_char *s2, risse_size n)
 {
-	for(;;)
+	while(n--)
 	{
 		if(!*s1) return (!*s2) ? 0 : -1;
-		if(*s1 != *s2)
-		{
-			if(*s1 < *s2) return -1;
-			return 1;
-		}
-		if(--n) return 0;
+		int diff = *s1 - *s2;
+		if(diff != 0) return diff;
 		s1++;
 		s2++;
 	}
+	return 0;
 }
 //---------------------------------------------------------------------------
 

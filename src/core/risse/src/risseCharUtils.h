@@ -110,6 +110,16 @@ risse_size Utf8ToRisseCharString(const char * in, risse_char *out);
 //! @return		変換後の UTF-8 のバイト数 (null-terminatorを含まず)
 risse_size CharToUtf8String(const risse_char *in, char * out);
 
+
+//! @brief		memcmp の risse_char 版。risse_char 単位で比較する。途中にある\0は文字列の終端としては扱わない。
+//! @param		s1   文字列その1
+//! @param		s2   文字列その2
+//! @param		n    コードポイント数
+//! @return		s1 < s2 ? -1 : s1 > s2 ? 1 : 0
+//! @note		n が 0 の場合は 0 が帰ることは保証されている。
+int strbufcmp(const risse_char *s1, const risse_char *s2, risse_size n);
+
+
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	//! @brief		文字列を比較する
 	//! @param		s1   文字列その1

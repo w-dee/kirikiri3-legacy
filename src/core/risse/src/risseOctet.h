@@ -130,7 +130,13 @@ public: // comparison
 		if(this == &ref) return true; // 同じポインタ
 		if(Length != ref.Length) return false; // 違う長さ
 		if(Buffer == ref.Buffer) return true; // 同じバッファ
-		return !memcmp(Buffer, ref.Buffer, Length);
+		if(Length == 0) return true; // 両方とも長さ 0
+		/*
+			::memcmp が長さが 0 の場合は真となってくれればよいのだが、
+			すこし探してみたがそのようなことが保証されているとする
+			ドキュメントが見つからなかった。
+		*/
+		return !::memcmp(Buffer, ref.Buffer, Length);
 	}
 
 	//! @brief	不一致判定

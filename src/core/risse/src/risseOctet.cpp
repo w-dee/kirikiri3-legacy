@@ -63,7 +63,7 @@ bool tOctetBlock::operator < (const tOctetBlock & ref) const
 
 	// まずは、this と ref のどちらか短い方までの範囲で比較を行う
 	size_t size_min = Length < ref.Length ? Length : ref.Length;
-	int cmp_result = size_min == 0 ? 0 : memcmp(Buffer, ref.Buffer, size_min);
+	int cmp_result = size_min == 0 ? 0 : ::memcmp(Buffer, ref.Buffer, size_min);
 	if(cmp_result < 0) return true; // この時点で this<ref だったり this>ref だったら即帰る
 	if(cmp_result > 0) return false;
 

@@ -38,10 +38,11 @@ void tUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 	// ログ
 	tString message = e->operator tString();
 
-	tLogger::Log(
-		RISSE_WS_TR("An exception had been occured"), tLogger::llError);
-	tLogger::Log(
-		message, tLogger::llError);
+	tString exception_head =
+		tString(RISSE_WS_TR("An exception %1 had been occured"), e->GetClassName());
+
+	tLogger::Log(exception_head, tLogger::llError);
+	tLogger::Log(message, tLogger::llError);
 
 	// スクリプトエディタはメインスレッドから投げられた例外のみに対して表示
 	// (そのほかはログに表示するのみとする)
@@ -73,7 +74,7 @@ void tUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 	}
 
 	// メッセージボックスを表示
-	wxMessageBox(wxString(_("An exception had been occured")) + wxT("\n") +
+	wxMessageBox(exception_head.AsWxString() + wxT("\n") +
 		message.AsWxString(), _("Exception"), wxICON_ERROR);
 
 }

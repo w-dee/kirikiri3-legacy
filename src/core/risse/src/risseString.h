@@ -541,10 +541,7 @@ public: // comparison
 	//! @brief < 演算子
 	//! @param	ref		比較するオブジェクト
 	//! @return	*this<refかどうか
-	bool operator <  (const tStringBlock & ref) const
-	{
-		return ::Risse::strcmp(Buffer, ref.Buffer) < 0;
-	}
+	bool operator <  (const tStringBlock & ref) const;
 
 	//! @brief > 演算子
 	//! @param	ref		比較するオブジェクト
@@ -572,7 +569,7 @@ public: // comparison
 		if(this == &ref) return true; // 同じポインタ
 		if(Length != ref.Length) return false; // 違う長さ
 		if(Buffer == ref.Buffer) return true; // 同じバッファ
-		return !::Risse::strcmp(Buffer, ref.Buffer);
+		return !::memcmp(Buffer, ref.Buffer, sizeof(risse_char)*Length);
 	}
 
 	//! @brief 同一比較

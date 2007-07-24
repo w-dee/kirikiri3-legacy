@@ -30,9 +30,14 @@ risse_char tStringData::EmptyBuffer[3] = { tStringBlock::MightBeShared, 0, 0 };
 tStringBlock::tStringBlock(const tStringBlock & ref,
 	risse_size offset, risse_size length)
 {
-	if(length)
+	if(length != 0 && offset < ref.Length)
 	{
-		RISSE_ASSERT(ref.Length - offset >= length);
+		// length には risse_size_max がわたってくることがあるので注意。
+		// その場合は length+offset は折り返して小さな数になる可能性がある
+		// ので、length + offset > ref.Length だけではなくて
+		// length > ref.Length の条件もチェックする
+		if(length > ref.Length || length + offset > ref.Length)
+			length = ref.Length - offset;
 		if(ref.Buffer[-1] == 0)
 			ref.Buffer[-1] = MightBeShared; // 共有可能性フラグをたてる
 		Buffer = ref.Buffer + offset;

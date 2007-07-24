@@ -517,7 +517,7 @@ tFileSystemInstance * tFileSystemManager::GetFileSystemAt(
 			{
 				if(fspath)
 					*fspath =
-						tString(fullpath, p-start, fullpath.GetLength() - (p-start));
+						tString(fullpath, p - start, risse_size_max);
 
 				return *item;
 			}
@@ -559,10 +559,16 @@ void tFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 //---------------------------------------------------------------------------
 void tFileSystemManager::SplitExtension(const tString & in, tString * other, tString * ext)
 {
-	// TODO: ここの最適化(tStringの部分文字列共有機能を使えばもっと高速化出来る)
+	if(in.IsEmpty())
+	{
+		// in が空文字列なので分解できない
+		if(other) other->Clear();
+		if(ext) ext->Clear();
+		return;
+	}
 
-	const risse_char * p = in.c_str() + in.GetLength();
-	const risse_char * start = in.c_str();
+	const risse_char * start = in.Pointer();
+	const risse_char * p = start + in.GetLength();
 
 	// パス名を最後からスキャン
 	while(true)
@@ -580,8 +586,8 @@ void tFileSystemManager::SplitExtension(const tString & in, tString * other, tSt
 		if(*p == RISSE_WC('.'))
 		{
 			// * '.' にぶつかった
-			if(other) *other = tString(start, p - start);
-			if(ext)   *ext   = tString(p);
+			if(other) *other = tString(in, 0, p - start);
+			if(ext)   *ext   = tString(in, p - start, risse_size_max);
 			return;
 		}
 
@@ -594,17 +600,24 @@ void tFileSystemManager::SplitExtension(const tString & in, tString * other, tSt
 //---------------------------------------------------------------------------
 void tFileSystemManager::SplitPathAndName(const tString & in, tString * path, tString * name)
 {
-	// TODO: ここの最適化(tStringの部分文字列共有機能を使えばもっと高速化出来る)
+	if(in.IsEmpty())
+	{
+		// in が空文字列なので分解できない
+		if(path) path->Clear();
+		if(name) name->Clear();
+		return;
+	}
 
-	const risse_char * p = in.c_str() + in.GetLength();
-	const risse_char * start = in.c_str();
+	const risse_char * start = in.Pointer();
+	const risse_char * p = start + in.GetLength();
+
 	p --;
 	while(p > start && *p != RISSE_WC('/')) p--;
 
 	if(*p == RISSE_WC('/')) p++;
 
-	if(path) *path = tString(start, p - start);
-	if(name) *name = tString(p);
+	if(path) *path = tString(in, 0, p - start);
+	if(name) *name = tString(in, p - start, risse_size_max);
 }
 //---------------------------------------------------------------------------
 
@@ -612,16 +625,13 @@ void tFileSystemManager::SplitPathAndName(const tString & in, tString * path, tS
 //---------------------------------------------------------------------------
 void tFileSystemManager::TrimLastPathDelimiter(tString & path)
 {
-	// TODO: ここの最適化(tStringの部分文字列共有機能を使えばもっと高速化出来る)
-
 	if(path.EndsWith(RISSE_WC('/')))
 	{
-		risse_char *s = path.Independ();
-		risse_char *p = s + path.GetLength() - 1;
+		const risse_char *s = path.Pointer();
+		const risse_char *p = s + path.GetLength() - 1;
 		while(p >= s && *p == RISSE_WC('/')) p--;
 		p++;
-		*p = 0;
-		path.FixLength();
+		path = tString(path, 0, p - s);
 	}
 }
 //---------------------------------------------------------------------------
@@ -630,8 +640,6 @@ void tFileSystemManager::TrimLastPathDelimiter(tString & path)
 //---------------------------------------------------------------------------
 tString tFileSystemManager::ChopExtension(const tString & in)
 {
-	// TODO: ここの最適化(tStringの部分文字列共有機能を使えばもっと高速化出来る)
-
 	tString ret;
 	SplitExtension(in, &ret, NULL);
 	return ret;
@@ -829,6 +837,7 @@ void tFileClass::RegisterMembers()
 	BindFunction(this, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tFileClass::chopExtension);
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tFileClass::extractExtension);
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tFileClass::extractName);
+	BindFunction(this, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tFileClass::extractPath);
 	BindProperty(this, tSS<'c','w','d'>(), &tFileClass::get_cwd, &tFileClass::set_cwd);
 }
 //---------------------------------------------------------------------------

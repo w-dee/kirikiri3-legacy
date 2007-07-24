@@ -220,6 +220,11 @@ public:
 	//! @param ref		コピー元オブジェクト
 	//! @param offset	切り出す開始位置
 	//! @param length	切り出す長さ
+	//! @note	切り出す開始位置が文字列長を超えていた場合は空文字列になる。
+	//!			切り出す開始位置+切り出す長さが実際の文字列長よりも
+	//!			長い場合は、切り出す長さは元の文字列の長さを超えない。
+	//!			(そのため、lengthにrisse_size_maxを指定すると offset 以降
+	//!			すべてを得ることができる)
 	tStringBlock(const tStringBlock & ref,
 		risse_size offset, risse_size length);
 

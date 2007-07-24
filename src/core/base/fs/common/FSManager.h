@@ -273,6 +273,8 @@ public: // Risse 用メソッドなど
 		{ return tFileSystemManager::instance()->ExtractExtension(filename); }
 	static tString extractName(const tString & filename)
 		{ return tFileSystemManager::instance()->ExtractName(filename); }
+	static tString extractPath(const tString & filename)
+		{ return tFileSystemManager::instance()->ExtractPath(filename); }
 	static tString get_cwd()
 		{ return tFileSystemManager::instance()->GetCurrentDirectory(); }
 	static void set_cwd(const tString & dirname)

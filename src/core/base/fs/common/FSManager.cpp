@@ -436,17 +436,10 @@ void tFileSystemManager::Stat(const tString & filename, tStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tFileSystemManager::CreateStream(const tString & filename,
+tStreamInstance * tFileSystemManager::CreateStream(const tString & filename,
 	risse_uint32 flags)
 {
 	volatile tCriticalSection::tLocker holder(CS);
-
-	// 先頭が native: で始まる場合は OSFS ストリーム経由で直接アクセスする
-	if(filename.StartsWith(tSS<'n','a','t','i','v','e',':'>()))
-	{
-		// +7 = "native:" の文字数
-		return new tOSNativeStream(tString(filename.c_str() + 7).AsWxString(), flags);
-	}
 
 	// 通常のファイルシステム経由のストリームの作成
 	tString fspath;

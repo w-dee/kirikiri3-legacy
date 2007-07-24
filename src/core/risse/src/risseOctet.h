@@ -246,6 +246,17 @@ public: // pointer
 		return Buffer;
 	}
 
+	//! @brief 内部バッファへのポインタを獲る
+	//! @return 内部バッファ
+	//! @note	このメソッドは、内部バッファへの読み込み専用のポインタを獲る。
+	//!			まれに ( Stream::read のような用途で) このバッファを書き込みように
+	//!			使うことがあるが、アブノーマルな使い方なので通常はそのような
+	//!			使い方をしてはならない。
+	const risse_uint8 * Pointer() const
+	{
+		return Buffer;
+	}
+
 	//! @brief バッファの長さを実際の長さに合わせる
 	//! @note
 	//! += 演算子などは、バッファの容量増加に備え、バッファの確保容量を
@@ -474,6 +485,14 @@ public: // pointer
 	risse_uint8 * Independ() const
 	{
 		return GetBlock()->Independ();
+	}
+
+	//! @brief 内部バッファへのポインタを獲る
+	//! @return 内部バッファ
+	//! @note tOctetBlock::Pointer() を参照
+	const risse_uint8 * Pointer() const
+	{
+		return GetBlock()->Pointer();
 	}
 
 	//! @brief バッファの長さを実際の長さに合わせる

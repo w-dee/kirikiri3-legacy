@@ -15,58 +15,111 @@
 
 #include "base/fs/common/FSManager.h"
 #include "base/utils/RisaThread.h"
-#include "risse/include/risseBinaryStream.h"
+#include "risse/include/risseStream.h"
 #include "risse/include/risseWCString.h"
+#include "risse/include/risseStreamClass.h"
 #include <wx/file.h>
 
 namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		OS ネイティブファイルストリーム
+//! @brief		OS ネイティブファイルストリーム(OSNativeStreamクラス)
 //---------------------------------------------------------------------------
-class tOSNativeStream : public tBinaryStream
+class tOSNativeStreamInstance : public tStreamInstance
 {
 protected:
-	wxFile File;
+	//! @brief		内部情報用構造体(GCの対象で、回収に際してデストラクタが呼ばれる)
+	struct tInternal : public tDestructee
+	{
+		wxFile File;
+	} * Internal;
 
 public:
 	//! @brief		コンストラクタ
-	tOSNativeStream(const wxString & filename, risse_uint32 flags);
+	tOSNativeStreamInstance() { Internal = NULL; }
 
-	//! @brief		デストラクタ
-	virtual ~tOSNativeStream();
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tOSNativeStreamInstance();
+
+public: // risse 用メソッドとか
+	void construct() {;}
+	void initialize(const tString & path, risse_uint32 flags, const tNativeCallInfo &info);
+
+	//! @brief		ストリームを閉じる
+	//! @note		基本的にはこれでストリームを閉じること。
+	//!				このメソッドでストリームを閉じなかった場合の動作は
+	//!				「未定義」である
+	void dispose();
 
 	//! @brief		指定位置にシークする
 	//! @param		offset			基準位置からのオフセット (正の数 = ファイルの後ろの方)
 	//! @param		whence			基準位置
 	//! @return		このメソッドは成功すれば真、失敗すれば偽を返す
-	virtual bool Seek(risse_int64 offset, tOrigin whence);
+	bool seek(risse_int64 offset, tOrigin whence);
 
 	//! @brief		現在位置を取得する
 	//! @return		現在位置(先頭からのオフセット)
-	virtual risse_uint64 Tell();
+	risse_uint64 tell();
 
 	//! @brief		ストリームから読み込む
-	//! @param		buffer		読み込んだデータを書き込む先のポインタ
-	//! @param		read_size	読み込むサイズ
+	//! @param		buf		読み込んだデータを書き込む先
 	//! @return		実際に読み込まれたサイズ
-	virtual risse_size Read(void *buffer, risse_size read_size);
+	risse_size read(const tOctet & buf);
 
 	//! @brief		ストリームに書き込む
-	//! @param		buffer		書き込むデータを表すポインタ
-	//! @param		read_size	書き込むサイズ
+	//! @param		buf		書き込むデータ
 	//! @return		実際に書き込まれたサイズ
-	virtual risse_uint Write(const void *buffer, risse_uint write_size);
+	risse_uint write(const tOctet & buf);
 
 	//! @brief		ストリームを現在位置で切りつめる
-	virtual void Truncate();
+	void truncate();
 
 	//! @brief		サイズを得る
 	//! @return		このストリームのサイズ
-	virtual risse_uint64 GetSize();
+	risse_uint64 get_size();
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"OSNativeStream" クラス
+//---------------------------------------------------------------------------
+class tOSNativeStreamClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tOSNativeStreamClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -138,7 +191,7 @@ public:
 	//! @param		filename ファイル名
 	//! @param		flags フラグ
 	//! @return		ストリームオブジェクト
-	tBinaryStream * CreateStream(const tString & filename, risse_uint32 flags);
+	tStreamInstance * CreateStream(const tString & filename, risse_uint32 flags);
 
 	//-- tFileSystem メンバ ここまで
 private:
@@ -163,9 +216,32 @@ public: // Risse 用メソッドなど
 
 
 //---------------------------------------------------------------------------
-
-
+//! @brief		"OSFS" クラス
 //---------------------------------------------------------------------------
+class tOSFSClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+	tOSNativeStreamClass * OSNativeStreamClass; //!< OSNativeStream クラスインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tOSFSClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public:
+
+	//! @brief OSNativeStreamClass クラスインスタンスを得る
+	tOSNativeStreamClass * GetOSNativeStreamClass() const { return OSNativeStreamClass; }
+};
+//---------------------------------------------------------------------------
+
 
 
 

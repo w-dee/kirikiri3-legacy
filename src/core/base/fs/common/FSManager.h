@@ -20,7 +20,8 @@
 #include "base/utils/RisaThread.h"
 #include "base/script/RisseEngine.h"
 #include "risse/include/risseString.h"
-#include "risse/include/risseBinaryStream.h"
+#include "risse/include/risseStream.h"
+#include "risse/include/risseStreamClass.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -109,7 +110,7 @@ public:
 	//! @param		filename ファイル名
 	//! @param		flags フラグ
 	//! @return		ストリームオブジェクト
-	tBinaryStream * CreateStream(const tString & filename, risse_uint32 flags);
+	tStreamInstance * CreateStream(const tString & filename, risse_uint32 flags);
 
 private:
 	//! @brief		ファイル一覧を取得する(内部関数)
@@ -306,7 +307,6 @@ public:
 		tVariant FileSystem = engine->GetGlobalObject().
 			GetPropertyDirect_Object(tSS<'F','i','l','e','S','y','s','t','e','m'>());
 		class_instance->RegisterClassInstance(FileSystem);
-		class_instance->RegisterMembers();
 	}
 
 	ClassT * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る

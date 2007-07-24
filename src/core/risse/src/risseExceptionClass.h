@@ -439,10 +439,20 @@ public:
 	static void ThrowTruncateError(tScriptEngine * engine,
 		const tString & name = tString::GetEmptyString(),
 		risse_size pos = risse_size_max);
-	//! @brief		「シークエラーが発生した」例外を発生
+	//! @brief		「ファイルの切りつめに失敗した」例外を発生
 	static void ThrowTruncateError(const tString & name =
 		tString::GetEmptyString(), risse_size pos = risse_size_max)
 		{ ThrowTruncateError(NULL, name, pos); }
+
+	//! @brief		「ストリームは閉じられている」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		ストリームなどの名前
+	static void ThrowStreamIsClosed(tScriptEngine * engine,
+		const tString & name = tString::GetEmptyString());
+	//! @brief		「ストリームは閉じられている」例外を発生
+	static void ThrowStreamIsClosed(const tString & name =
+		tString::GetEmptyString())
+		{ ThrowStreamIsClosed(NULL, name); }
 
 };
 //---------------------------------------------------------------------------

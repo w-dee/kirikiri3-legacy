@@ -13,6 +13,8 @@
 #include "prec.h"
 #include "base/fs/osfs/OSFS.h"
 #include "base/exception/RisaException.h"
+#include "risse/include/risseExceptionClass.h"
+#include "risse/include/risseStaticStrings.h"
 #include <wx/filename.h>
 #include <wx/dir.h>
 
@@ -22,9 +24,12 @@ namespace Risa {
 RISSE_DEFINE_SOURCE_ID(49572,65271,56057,18682,27296,33314,20965,8152);
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
-tOSNativeStream::tOSNativeStream(const wxString & filename, risse_uint32 flags)
+void tOSNativeStreamInstance::initialize(const tString & path, risse_uint32 flags, const tNativeCallInfo &info)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// モードを決定する
 	wxFile::OpenMode mode;
 	switch(flags & tFileSystem::omAccessMask)
@@ -40,27 +45,47 @@ tOSNativeStream::tOSNativeStream(const wxString & filename, risse_uint32 flags)
 	}
 
 	// ファイルを開く
-	if(!File.Open(filename))
-		eRisaException::Throw(tString(wxString::Format(RISSE_WS_TR("can not open file '%s'"),
-			filename.c_str())));
+	Internal = new tInternal();
+	if(!Internal->File.Open(path.AsWxString()))
+	{
+		delete Internal; Internal = NULL;
+		tIOExceptionClass::Throw(
+			tString(RISSE_WS_TR("can not open file %1"), path));
+	}
+
+	// 名前を
 
 	// APPEND の場合はファイルポインタを最後に移動する
 	if(flags & tFileSystem::omAppendBit)
-		File.SeekEnd();
+		Internal->File.SeekEnd();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tOSNativeStream::~tOSNativeStream()
+tOSNativeStreamInstance::~tOSNativeStreamInstance()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-bool tOSNativeStream::Seek(risse_int64 offset, tOrigin whence)
+void tOSNativeStreamInstance::dispose()
 {
+	volatile tSynchronizer sync(this); // sync
+	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+	delete Internal; Internal = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tOSNativeStreamInstance::seek(risse_int64 offset, tOrigin whence)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+
 	wxSeekMode mode = wxFromCurrent;
 	switch(whence)
 	{
@@ -70,7 +95,7 @@ bool tOSNativeStream::Seek(risse_int64 offset, tOrigin whence)
 	default: offset = 0;
 	}
 
-	wxFileOffset newpos = File.Seek(offset, mode);
+	wxFileOffset newpos = Internal->File.Seek(offset, mode);
 	if(newpos == wxInvalidOffset)
 		return false;
 
@@ -80,44 +105,120 @@ bool tOSNativeStream::Seek(risse_int64 offset, tOrigin whence)
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tOSNativeStream::Tell()
+risse_uint64 tOSNativeStreamInstance::tell()
 {
-	return File.Tell();
+	volatile tSynchronizer sync(this); // sync
+
+	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+
+	return Internal->File.Tell();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tOSNativeStream::Read(void *buffer, risse_size read_size)
+risse_size tOSNativeStreamInstance::read(const tOctet & buf)
 {
-	return File.Read(buffer, read_size);
+	volatile tSynchronizer sync(this); // sync
+
+	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+
+	// buf の示すポインタに「直接」書き込みを行う。
+	// tOctet をメモリバッファとして使うかなり危ない使い方だが、
+	// これに限ってはこういう使い方をすると言うことになっている。
+	// というかそうした。
+
+	return Internal->File.Read(const_cast<risse_uint8*>(buf.Pointer()), buf.GetLength());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tOSNativeStream::Write(const void *buffer, risse_size write_size)
+risse_size tOSNativeStreamInstance::write(const tOctet & buf)
 {
-	return File.Write(buffer, write_size);
+	volatile tSynchronizer sync(this); // sync
+
+	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+
+	return Internal->File.Write(buf.Pointer(), buf.GetLength());
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tOSNativeStream::Truncate()
+void tOSNativeStreamInstance::truncate()
 {
 	// TODO: implement this 
-	tIOExceptionClass::Throw(RISSE_WS_TR("tOSNativeStream::Truncate not implemented"));
+	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+
+	tIOExceptionClass::Throw(RISSE_WS_TR("tOSNativeStreamInstance::Truncate not implemented"));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tOSNativeStream::GetSize()
+risse_uint64 tOSNativeStreamInstance::get_size()
 {
-	return File.Length();
+	volatile tSynchronizer sync(this); // sync
+
+	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+
+	return Internal->File.Length();
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tOSNativeStreamClass::tOSNativeStreamClass(tScriptEngine * engine) :
+	tClassBase(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(), engine->StreamClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOSNativeStreamClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tOSNativeStreamClass::ovulate);
+	BindFunction(this, ss_construct, &tOSNativeStreamInstance::construct);
+	BindFunction(this, ss_initialize, &tOSNativeStreamInstance::initialize);
+	BindFunction(this, ss_dispose, &tOSNativeStreamInstance::dispose);
+	BindFunction(this, ss_seek, &tOSNativeStreamInstance::seek);
+	BindFunction(this, ss_tell, &tOSNativeStreamInstance::tell);
+	BindFunction(this, ss_read, &tOSNativeStreamInstance::read);
+	BindFunction(this, ss_write, &tOSNativeStreamInstance::write);
+	BindFunction(this, ss_truncate, &tOSNativeStreamInstance::truncate);
+	BindProperty(this, ss_size, &tOSNativeStreamInstance::get_size);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tOSNativeStreamClass::ovulate()
+{
+	return tVariant(new tOSNativeStreamInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -341,7 +442,7 @@ void tOSFSInstance::Stat(const tString & filename, tStatStruc & struc)
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tOSFSInstance::CreateStream(const tString & filename, risse_uint32 flags)
+tStreamInstance * tOSFSInstance::CreateStream(const tString & filename, risse_uint32 flags)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -351,7 +452,13 @@ tBinaryStream * tOSFSInstance::CreateStream(const tString & filename, risse_uint
 
 	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
 
-	return new tOSNativeStream(native_name, flags);
+	// OSNativeStreamClass からインスタンスを生成して返す
+	tVariant obj =
+		tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()->
+			GetOSNativeStreamClass()->Invoke(ss_new, native_name.c_str(), (risse_int64)flags);
+	obj.AssertClass(tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()->
+									GetOSNativeStreamClass());
+	return reinterpret_cast<tStreamInstance *>(obj.GetObjectInterface());
 }
 //---------------------------------------------------------------------------
 
@@ -469,46 +576,43 @@ void tOSFSInstance::initialize(const tString & base_dir, const tNativeCallInfo &
 
 
 //---------------------------------------------------------------------------
-//! @brief		"OSFS" クラス
-//---------------------------------------------------------------------------
-class tOSFSClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tOSFSClass(tScriptEngine * engine) :
+tOSFSClass::tOSFSClass(tScriptEngine * engine) :
 	tClassBase(tSS<'O','S','F','S'>(),
-			tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance())
-	{
-		RegisterMembers();
-	}
+		tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance())
+{
+	OSNativeStreamClass = new tOSNativeStreamClass(engine);
 
-	//! @brief		各メンバをインスタンスに追加する
-	void RegisterMembers()
-	{
-		// 親クラスの RegisterMembers を呼ぶ
-		inherited::RegisterMembers();
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
 
-		// クラスに必要なメソッドを登録する
-		// 基本的に ss_construct と ss_initialize は各クラスごとに
-		// 記述すること。たとえ construct の中身が空、あるいは initialize の
-		// 中身が親クラスを呼び出すだけだとしても、記述すること。
+//---------------------------------------------------------------------------
+void tOSFSClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
 
-		BindFunction(this, ss_ovulate, &tOSFSClass::ovulate);
-		BindFunction(this, ss_construct, &tOSFSInstance::construct);
-		BindFunction(this, ss_initialize, &tOSFSInstance::initialize);
-	}
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tVariant ovulate()
-	{
-		return tVariant(new tOSFSInstance());
-	}
+	BindFunction(this, ss_ovulate, &tOSFSClass::ovulate);
+	BindFunction(this, ss_construct, &tOSFSInstance::construct);
+	BindFunction(this, ss_initialize, &tOSFSInstance::initialize);
 
-public:
-};
+	// OSNativeStream を登録する
+	RegisterNormalMember(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),
+			tVariant(OSNativeStreamClass), tMemberAttribute(), true);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tOSFSClass::ovulate()
+{
+	return tVariant(new tOSFSInstance());
+}
 //---------------------------------------------------------------------------
 
 

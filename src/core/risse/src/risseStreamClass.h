@@ -23,6 +23,20 @@
 
 namespace Risse
 {
+
+//---------------------------------------------------------------------------
+//! @brief		NativeBinder 用の Variant -> tStreamConstants::tOrigin 変換定義
+//---------------------------------------------------------------------------
+template <>
+inline tStreamConstants::tOrigin FromVariant<tStreamConstants::tOrigin>(const tVariant & v)
+{
+	return (tStreamConstants::tOrigin)(int)(risse_int64)v;
+}
+//---------------------------------------------------------------------------
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		ストリームインスタンス ("Stream" クラスのインスタンス) の基本クラス
 //! @note		このクラスではシークが不可能な、本当の意味での「ストリーム」は扱わない
@@ -77,7 +91,7 @@ public: // risse 用メソッドとか
 	//! @return		このメソッドは成功すれば真、失敗すれば偽を返す
 	//! @note		このメソッドは下位クラスで実装しなければならない。
 	//!				エラーが発生した場合は、シーク位置を変えず、現在位置を保つべき
-	bool seek(risse_int64 offset, int whence) { return false; }
+	bool seek(risse_int64 offset, tOrigin whence) { return false; }
 
 	//! @brief		現在位置を取得する
 	//! @return		現在位置(先頭からのオフセット)

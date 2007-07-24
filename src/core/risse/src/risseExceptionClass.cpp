@@ -827,6 +827,18 @@ void tIOExceptionClass::ThrowTruncateError(tScriptEngine * engine,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tIOExceptionClass::ThrowStreamIsClosed(tScriptEngine * engine, const tString & name)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_IOException,
+			name.IsEmpty() ? tString(RISSE_WS_TR("stream is closed")) :
+							 tString(RISSE_WS_TR("stream %1 is closed"), name)
+			);
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
 
 
 

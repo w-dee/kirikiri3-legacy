@@ -25,6 +25,7 @@
 #include "risseExceptionClass.h"
 #include "risseBindingClass.h"
 #include "risseScriptBlockClass.h"
+#include "risseStreamClass.h"
 #include "risseThreadClass.h"
 #include "risse_parser/risseRisseScriptBlockClass.h"
 
@@ -52,6 +53,7 @@ RISSE_INTERNALCLASSES_CLASS(Integer                         )
 RISSE_INTERNALCLASSES_CLASS(Real                            )
 RISSE_INTERNALCLASSES_CLASS(Thread                          )
 RISSE_INTERNALCLASSES_CLASS(Coroutine                       )
+RISSE_INTERNALCLASSES_CLASS(Stream                          )
 RISSE_INTERNALCLASSES_CLASS(SourcePoint                     )
 RISSE_INTERNALCLASSES_CLASS(Throwable                       )
 RISSE_INTERNALCLASSES_CLASS(Error                           )

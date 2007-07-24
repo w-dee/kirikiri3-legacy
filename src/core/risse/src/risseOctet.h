@@ -51,6 +51,7 @@ public:
 	//! @brief		コンストラクタ(const risse_uint8 *から)
 	//! @param		buf		入力バッファ
 	//! @param		length	長さ
+	//! @note		内容はコピーされる
 	tOctetBlock(const risse_uint8 * buf, risse_size length);
 
 	//! @brief 部分オクテット列を作るためのコンストラクタ
@@ -106,6 +107,16 @@ public: // pointer
 	{
 		Capacity = Length = n;
 		return Buffer = AllocateInternalBuffer(n);
+	}
+
+	//! @brief	既存のメモリ領域を「参照」するオクテット列を新規に作成して帰す
+	static tOctetBlock MakeReference(const risse_uint8 * ptr, risse_size len)
+	{
+		tOctetBlock block;
+		block.Capacity = 0;
+		block.Length = len;
+		block.Buffer = const_cast<risse_uint8 *>(ptr);
+		return block;
 	}
 
 private: // storage
@@ -300,6 +311,12 @@ public:
 	tOctet()
 	{
 		SetBlock(new tOctetBlock());
+	}
+
+	//! @brief コンストラクタ(tOctetBlockより)
+	tOctet(tOctetBlock * block)
+	{
+		SetBlock(block);
 	}
 
 	//! @brief		コンストラクタ(const risse_uint8 *から)

@@ -176,6 +176,37 @@ public:
 	//! @param		name		メンバ名
 	//! @param		flags		フラグ
 	tVariant GetPropertyDirect(const tString & name, risse_uint32 flags = 0);
+
+	//! @brief		プロパティ(や変数など) の書き込みを行う
+	//! @param		name		メンバ名
+	//! @param		flags		フラグ
+	//! @param		val			値
+	void SetPropertyDirect(const tString & name, risse_uint32 flags, const tVariant &val);
+
+	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		membername	メンバ名
+	//! @return		戻り値
+	tVariantBlock Invoke(const tString & membername);
+
+	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		membername	メンバ名
+	//! @param		arg1		引数
+	//! @return		戻り値
+	tVariantBlock Invoke(
+		const tString & membername,
+		const tVariant & arg1);
+
+	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		membername	メンバ名
+	//! @param		arg1		引数
+	//! @param		arg2		引数
+	//! @return		戻り値
+	tVariantBlock Invoke(
+		const tString & membername,
+		const tVariant & arg1,
+		const tVariant & arg2
+		);
+
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

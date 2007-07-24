@@ -694,5 +694,47 @@ tVariant tObjectBase::GetPropertyDirect(const tString & name, risse_uint32 flags
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tObjectBase::SetPropertyDirect(const tString & name, risse_uint32 flags, const tVariant &val)
+{
+	Do(ocDSet, NULL, name, flags, tMethodArgument::New(val));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tObjectBase::Invoke(const tString & membername)
+{
+	tVariant value;
+	Do(ocFuncCall, &value, membername, 0, tMethodArgument::Empty());
+	return value;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tObjectBase::Invoke(
+	const tString & membername,
+	const tVariant & arg1)
+{
+	tVariant value;
+	Do(ocFuncCall, &value, membername, 0, tMethodArgument::New(arg1));
+	return value;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tObjectBase::Invoke(
+	const tString & membername,
+	const tVariant & arg1,
+	const tVariant & arg2)
+{
+	tVariant value;
+	Do(ocFuncCall, &value, membername, 0, tMethodArgument::New(arg1, arg2));
+	return value;
+}
+//---------------------------------------------------------------------------
+
 } /* namespace Risse */
 

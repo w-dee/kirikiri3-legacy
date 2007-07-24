@@ -353,3 +353,27 @@ extern tStringData data_ss_Octet;
 static const tString & ss_Octet = *reinterpret_cast<const tString *>(&data_ss_Octet); //!< (static string)  "Octet" クラス名
 extern tStringData data_ss_Null;
 static const tString & ss_Null = *reinterpret_cast<const tString *>(&data_ss_Null); //!< (static string)  "Null" クラス名
+extern tStringData data_ss_Stream;
+static const tString & ss_Stream = *reinterpret_cast<const tString *>(&data_ss_Stream); //!< (static string)  "Stream" クラス名
+extern tStringData data_ss_seek;
+static const tString & ss_seek = *reinterpret_cast<const tString *>(&data_ss_seek); //!< (static string)  "seek" メソッド名
+extern tStringData data_ss_tell;
+static const tString & ss_tell = *reinterpret_cast<const tString *>(&data_ss_tell); //!< (static string)  "tell" メソッド名
+extern tStringData data_ss_read;
+static const tString & ss_read = *reinterpret_cast<const tString *>(&data_ss_read); //!< (static string)  "read" メソッド名
+extern tStringData data_ss_write;
+static const tString & ss_write = *reinterpret_cast<const tString *>(&data_ss_write); //!< (static string)  "write" メソッド名
+extern tStringData data_ss_truncate;
+static const tString & ss_truncate = *reinterpret_cast<const tString *>(&data_ss_truncate); //!< (static string)  "truncate" メソッド名
+extern tStringData data_ss_size;
+static const tString & ss_size = *reinterpret_cast<const tString *>(&data_ss_size); //!< (static string)  "size" プロパティ名
+extern tStringData data_ss_readBuffer;
+static const tString & ss_readBuffer = *reinterpret_cast<const tString *>(&data_ss_readBuffer); //!< (static string)  "readBuffer" メソッド名
+extern tStringData data_ss_writeBuffer;
+static const tString & ss_writeBuffer = *reinterpret_cast<const tString *>(&data_ss_writeBuffer); //!< (static string)  "writeBuffer" メソッド名
+extern tStringData data_ss_soSet;
+static const tString & ss_soSet = *reinterpret_cast<const tString *>(&data_ss_soSet); //!< (static string)  "soSet" 定数名
+extern tStringData data_ss_soCur;
+static const tString & ss_soCur = *reinterpret_cast<const tString *>(&data_ss_soCur); //!< (static string)  "soCur" 定数名
+extern tStringData data_ss_soEnd;
+static const tString & ss_soEnd = *reinterpret_cast<const tString *>(&data_ss_soEnd); //!< (static string)  "soEnd" 定数名

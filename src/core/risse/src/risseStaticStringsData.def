@@ -184,5 +184,17 @@ tStringData data_ss_dump = { tSS<'d','u','m','p'>::data.Buffer,4 }; /*  "dump" �
 tStringData data_ss_Boolean = { tSS<'B','o','o','l','e','a','n'>::data.Buffer,7 }; /*  "Boolean" クラス名 */
 tStringData data_ss_Octet = { tSS<'O','c','t','e','t'>::data.Buffer,5 }; /*  "Octet" クラス名 */
 tStringData data_ss_Null = { tSS<'N','u','l','l'>::data.Buffer,4 }; /*  "Null" クラス名 */
+tStringData data_ss_Stream = { tSS<'S','t','r','e','a','m'>::data.Buffer,6 }; /*  "Stream" クラス名 */
+tStringData data_ss_seek = { tSS<'s','e','e','k'>::data.Buffer,4 }; /*  "seek" メソッド名 */
+tStringData data_ss_tell = { tSS<'t','e','l','l'>::data.Buffer,4 }; /*  "tell" メソッド名 */
+tStringData data_ss_read = { tSS<'r','e','a','d'>::data.Buffer,4 }; /*  "read" メソッド名 */
+tStringData data_ss_write = { tSS<'w','r','i','t','e'>::data.Buffer,5 }; /*  "write" メソッド名 */
+tStringData data_ss_truncate = { tSS<'t','r','u','n','c','a','t','e'>::data.Buffer,8 }; /*  "truncate" メソッド名 */
+tStringData data_ss_size = { tSS<'s','i','z','e'>::data.Buffer,4 }; /*  "size" プロパティ名 */
+tStringData data_ss_readBuffer = { tSS<'r','e','a','d','B','u','f','f','e','r'>::data.Buffer,10 }; /*  "readBuffer" メソッド名 */
+tStringData data_ss_writeBuffer = { tSS<'w','r','i','t','e','B','u','f','f','e','r'>::data.Buffer,11 }; /*  "writeBuffer" メソッド名 */
+tStringData data_ss_soSet = { tSS<'s','o','S','e','t'>::data.Buffer,5 }; /*  "soSet" 定数名 */
+tStringData data_ss_soCur = { tSS<'s','o','C','u','r'>::data.Buffer,5 }; /*  "soCur" 定数名 */
+tStringData data_ss_soEnd = { tSS<'s','o','E','n','d'>::data.Buffer,5 }; /*  "soEnd" 定数名 */
 
 

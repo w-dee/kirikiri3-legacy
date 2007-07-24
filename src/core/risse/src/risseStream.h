@@ -11,12 +11,13 @@
 //! @brief バイナリストリーム
 //---------------------------------------------------------------------------
 
-#ifndef risseBinaryStreamH
-#define risseBinaryStreamH
+#ifndef risseStreamH
+#define risseStreamH
 
 #include "risseTypes.h"
 #include "risseGC.h"
 #include "risseString.h"
+#include "risseVariant.h"
 
 #ifdef RISSE_SUPPORT_WX
 	#include <wx/file.h>
@@ -25,8 +26,7 @@
 
 namespace Risse
 {
-class tBinaryStream;
-
+class tStreamInstance;
 //---------------------------------------------------------------------------
 //! @brief		tFileSystem::GetFileListAt で用いられるコールバックインターフェース
 //---------------------------------------------------------------------------
@@ -138,23 +138,19 @@ public:
 	//! @param		filename ファイル名
 	//! @param		flags フラグ
 	//! @return		ストリームオブジェクト
-	virtual tBinaryStream * CreateStream(const tString & filename,
+	virtual tStreamInstance * CreateStream(const tString & filename,
 		risse_uint32 flags) = 0;
 };
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		バイナリストリームの基本クラス
-//! @note		このクラスではシークが不可能な、本当の意味での「ストリーム」は扱わない
-//! @note		各メソッドはスレッド保護されていない。
-//---------------------------------------------------------------------------
-class tBinaryStream : public tDestructee
-	/* ストリームは通常「閉じる」必要があるためデストラクタを呼ぶようにする */
-{
-private:
-	tString Name; //!< ストリームの名前
 
+
+//---------------------------------------------------------------------------
+//! @brief		ストリームに関連する定数など
+//---------------------------------------------------------------------------
+class tStreamConstants
+{
 public:
 	//! @param		基準位置の列挙
 	enum tOrigin
@@ -164,16 +160,39 @@ public:
 		soEnd, //!< ストリームの終端
 		soCur = soCurrent //!< ストリームの現在位置
 	};
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		Stream クラスのインスタンスを扱いやすくするためのアダプタ
+//! @note		tStreamInstance ( extends tObjectBase ) 内の各メソッドを呼ぶためには
+//!				Operate メソッドの呼び出しなどいろいろ煩雑である。このアダプタを
+//!				使えば、メソッドの呼び出しなどはこれが代理して行うようになるので、
+//!				扱いが簡単になる。
+//---------------------------------------------------------------------------
+class tStreamAdapter : public tCollectee, public tStreamConstants
+{
+	tStreamInstance * Stream; //!< Stream クラスのインスタンス
+public:
+	//! @brief		コンストラクタ(tStreamInstanceから)
+	//! @param		stream		tStreamInstanceのインスタンス
+	tStreamAdapter(tStreamInstance * stream) { Stream = stream; }
+
+	//! @brief		コンストラクタ(tVariantから)
+	//! @param		stream		tStreamInstanceのインスタンスを含む値
+	tStreamAdapter(const tVariant & stream);
 
 	//! @brief		ストリームの名前を設定する
 	//! @param		name		名前
 	//! @note		このクラス内ではこの名前は例外生成時に使用するだけであるが、
 	//!				例外をユーザフレンドリーにするために、なるべく名前は設定するべき
-	void SetName(const tString & name) { Name = name; }
+	void SetName(const tString & name);
 
 	//! @brief		ストリームの名前を取得する
 	//! @return		ストリームの名前を取得する
-	const tString & GetName() { return Name; }
+	tString GetName();
 
 	//! @brief		指定位置にシークする
 	//! @param		offset			基準位置からのオフセット (正の数 = ファイルの後ろの方)
@@ -181,42 +200,39 @@ public:
 	//! @return		このメソッドは成功すれば真、失敗すれば偽を返す
 	//! @note		このメソッドは下位クラスで実装しなければならない。
 	//!				エラーが発生した場合は、シーク位置を変えず、現在位置を保つべき
-	virtual bool Seek(risse_int64 offset, tOrigin whence) { return false; }
+	bool Seek(risse_int64 offset, tOrigin whence);
 
 	//! @brief		現在位置を取得する
 	//! @return		現在位置(先頭からのオフセット)
-	virtual risse_uint64 Tell() = 0;
+	risse_uint64 Tell();
 
 	//! @brief		ストリームから読み込む
 	//! @param		buffer		読み込んだデータを書き込む先のポインタ
 	//! @param		read_size	読み込むサイズ
 	//! @return		実際に読み込まれたサイズ
-	virtual risse_size Read(void *buffer, risse_size read_size) { return 0; }
+	risse_size Read(void *buffer, risse_size read_size);
 
 	//! @brief		ストリームに書き込む
 	//! @param		buffer		書き込むデータを表すポインタ
 	//! @param		read_size	書き込むサイズ
 	//! @return		実際に書き込まれたサイズ
-	virtual risse_uint Write(const void *buffer, risse_uint write_size) { return 0; }
+	risse_size Write(const void *buffer, risse_size write_size);
 
 	//! @brief		ストリームを現在位置で切りつめる
 	//! @note		これを実装しない場合は例外が発生する
-	virtual void Truncate();
+	void Truncate();
 
 	//! @brief		ストリームのサイズを得る
 	//! @return		ストリームのサイズ
 	//! @note		実装しなくても良いが、
 	//!				実装した方が高いパフォーマンスを得られるようならば実装すべき
-	virtual risse_uint64 GetSize();
-
-	//! @brief		デストラクタ
-	virtual ~tBinaryStream() {;}
+	risse_uint64 GetSize();
 
 
 public: // ユーティリティ
 	//! @brief		現在位置を得る
 	//! @return		現在位置
-	risse_uint64 GetPosition() { return Tell(); }
+	risse_uint64 GetPosition();
 
 	//! @brief		現在位置を設定する
 	//! @param		pos		現在位置

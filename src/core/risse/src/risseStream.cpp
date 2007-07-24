@@ -57,6 +57,14 @@ tString tStreamAdapter::GetName()
 
 
 //---------------------------------------------------------------------------
+void tStreamAdapter::Dispose()
+{
+	Stream->Do(ocFuncCall, NULL, ss_dispose, 0, tMethodArgument::Empty());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tStreamAdapter::Seek(risse_int64 offset, tOrigin whence)
 {
 	return Stream->Invoke(ss_seek, offset, (risse_int64)whence);

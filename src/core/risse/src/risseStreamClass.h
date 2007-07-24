@@ -44,6 +44,12 @@ public: // risse 用メソッドとか
 	void construct() {;}
 	void initialize(const tNativeCallInfo &info) {info.InitializeSuperClass();}
 
+	//! @brief		ストリームを閉じる
+	//! @note		基本的にはこれでストリームを閉じること。
+	//!				このメソッドでストリームを閉じなかった場合の動作は
+	//!				「未定義」である
+	void dispose() {;}
+
 	//! @brief		ストリームの名前を設定する
 	//! @param		name		名前
 	//! @note		このクラス内ではこの名前は例外生成時に使用するだけであるが、

@@ -117,8 +117,8 @@ void tStreamClass::RegisterMembers()
 	BindFunction(this, ss_ovulate, &tStreamClass::ovulate);
 	BindFunction(this, ss_construct, &tStreamInstance::construct);
 	BindFunction(this, ss_initialize, &tStreamInstance::initialize);
+	BindFunction(this, ss_dispose, &tStreamInstance::dispose);
 	BindProperty(this, ss_name, &tStreamInstance::get_name, &tStreamInstance::set_name);
-
 	BindFunction(this, ss_seek, &tStreamInstance::seek);
 	BindFunction(this, ss_tell, &tStreamInstance::tell);
 	BindFunction(this, ss_read, &tStreamInstance::read);

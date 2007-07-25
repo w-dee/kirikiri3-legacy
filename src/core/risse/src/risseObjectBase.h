@@ -160,7 +160,26 @@ public:
 	//!				tOperateFlags::ofInstanceMemberOnlyが自動的に付加される。
 	void RegisterNormalMember(const tString & name,
 						const tVariant & value,
-						tMemberAttribute attrib = tMemberAttribute(), bool ismembers = false);
+						tMemberAttribute attrib = tMemberAttribute(), bool ismembers = true);
+
+
+	//! @brief		final const なメンバ(メソッドや変数、プロパティなど)をインスタンスに登録する(既存のメンバば上書きされる)
+	//! @param		name		名前
+	//! @param		value		値
+	//! @param		ismembers	members に登録する場合は true (membersがもしあるばあいのみ) 
+	//! @note		登録に失敗した場合は例外が発生する。
+	//!				フラグとしてはtOperateFlags::ofMemberEnsure|
+	//!				tOperateFlags::ofInstanceMemberOnlyが自動的に付加される。
+	void RegisterFinalConstMember(const tString & name,
+						const tVariant & value,
+						bool ismembers = true)
+	{
+		RegisterNormalMember(name, value,
+			tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal),
+			ismembers);
+	}
+
+
 
 	//! @brief		メンバを読み出す
 	//! @param		name		名前

@@ -78,7 +78,8 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		クラスインスタンスをスクリプトエンジンに登録するためのテンプレートクラス
+//! @brief		クラスインスタンスやモジュールインスタンスを
+//!				スクリプトエンジンに登録するためのテンプレートクラス
 //---------------------------------------------------------------------------
 template <typename ClassT>
 class tRisseClassRegisterer :
@@ -94,7 +95,7 @@ public:
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 		ClassT *class_instance = new ClassT(engine);
 		ClassInstance = class_instance;
-		class_instance->RegisterClassInstance(engine->GetGlobalObject());
+		class_instance->RegisterInstance(engine->GetGlobalObject());
 	}
 
 	ClassT * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る

@@ -149,51 +149,54 @@ public:
 	//!							小文字を区別しないようになるわけではない)
 	void SetOptions(const tString & basedir, bool checkcase = true);
 
-	//-- tFileSystem メンバ
+	//-- FileSystem メンバ
 
-	//! @brief		ファイル一覧を取得する
+	//! @brief		ファイル一覧をコールバックで受け取る
 	//! @param		dirname ディレクトリ名
-	//! @param		callback コールバックオブジェクト
+	//! @param		args 追加パラメータ(ブロック引数としてコールバック関数オブジェクト)
 	//! @return		取得できたファイル数
-	size_t GetFileListAt(const tString & dirname,
-		tFileSystemIterationCallback * callback);
+	size_t walkAt(const tString & dirname,
+		const tMethodArgument &args);
 
 	//! @brief		ファイルが存在するかどうかを得る
 	//! @param		filename ファイル名
 	//! @return		ファイルが存在する場合真
-	bool FileExists(const tString & filename);
+	bool isFile(const tString & filename);
 
 	//! @brief		ディレクトリが存在するかどうかを得る
 	//! @param		dirname ディレクトリ名
 	//! @return		ディレクトリが存在する場合真
-	bool DirectoryExists(const tString & dirname);
+	bool isDirectory(const tString & dirname);
 
 	//! @brief		ファイルを削除する
 	//! @param		filename ファイル名
-	void RemoveFile(const tString & filename);
+	void removeFile(const tString & filename);
 
 	//! @brief		ディレクトリを削除する
 	//! @param		dirname ディレクトリ名
-	//! @param		recursive 再帰的にディレクトリを削除するかどうか
-	void RemoveDirectory(const tString & dirname, bool recursive = false);
+	//! @param		args 追加パラメータ(再帰的にディレクトリを削除するかどうか)
+	void removeDirectory(const tString & dirname,
+		const tMethodArgument &args);
 
 	//! @brief		ディレクトリを作成する
 	//! @param		dirname ディレクトリ名
-	//! @param		recursive 再帰的にディレクトリを作成するかどうか
-	void CreateDirectory(const tString & dirname, bool recursive = false);
+	//  @param		args 追加パラメータ(再帰的にディレクトリを削除するかどうか)
+	void createDirectory(const tString & dirname,
+		const tMethodArgument &args);
 
 	//! @brief		指定されたファイルの stat を得る
 	//! @param		filename ファイル名
-	//! @param		struc stat 結果の出力先
-	void Stat(const tString & filename, tStatStruc & struc);
+	//! @return		stat の結果を表す辞書配列
+	tObjectInterface * stat(const tString & filename);
 
 	//! @brief		指定されたファイルのストリームを得る
 	//! @param		filename ファイル名
 	//! @param		flags フラグ
 	//! @return		ストリームオブジェクト
-	tStreamInstance * CreateStream(const tString & filename, risse_uint32 flags);
+	tStreamInstance * open(const tString & filename,
+		risse_uint32 flags);
 
-	//-- tFileSystem メンバ ここまで
+	//-- FileSystem メンバ ここまで
 private:
 	//! @brief		path中に含まれる'/'を、OSネイティブなパス区切り記号に変更する
 	//! @param		path パス名

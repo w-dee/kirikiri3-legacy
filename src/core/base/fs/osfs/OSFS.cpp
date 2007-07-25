@@ -32,13 +32,13 @@ void tOSNativeStreamInstance::initialize(const tString & path, risse_uint32 flag
 
 	// モードを決定する
 	wxFile::OpenMode mode;
-	switch(flags & tFileSystem::omAccessMask)
+	switch(flags & tFileOpenModes::omAccessMask)
 	{
-	case tFileSystem::omRead:
+	case tFileOpenModes::omRead:
 		mode = wxFile::read; break;
-	case tFileSystem::omWrite:
+	case tFileOpenModes::omWrite:
 		mode = wxFile::write; break;
-	case tFileSystem::omUpdate:
+	case tFileOpenModes::omUpdate:
 		mode = wxFile::read_write; break;
 	default:
 		mode = wxFile::read;
@@ -56,7 +56,7 @@ void tOSNativeStreamInstance::initialize(const tString & path, risse_uint32 flag
 	// 名前を
 
 	// APPEND の場合はファイルポインタを最後に移動する
-	if(flags & tFileSystem::omAppendBit)
+	if(flags & tFileOpenModes::omAppendBit)
 		Internal->File.SeekEnd();
 }
 //---------------------------------------------------------------------------
@@ -268,14 +268,16 @@ void tOSFSInstance::SetOptions(const tString & basedir, bool checkcase)
 
 
 //---------------------------------------------------------------------------
-size_t tOSFSInstance::GetFileListAt(const tString & dirname,
-	tFileSystemIterationCallback * callback)
+size_t tOSFSInstance::walkAt(const tString & dirname,
+	const tMethodArgument &args)
 {
 	wxString wxdirname(dirname.AsWxString());
 
 	CheckFileNameCase(wxdirname);
 
 	volatile tSynchronizer sync(this); // sync
+
+	args.ExpectBlockArgumentCount(1); // ブロック引数が一つなければならない
 
 	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter((wxString)wxdirname));
 
@@ -284,22 +286,23 @@ size_t tOSFSInstance::GetFileListAt(const tString & dirname,
 	wxString filename;
 	bool cont;
 
+	tVariant callback(args.GetBlockArgument(0));
+
 	// ディレクトリの存在をチェック
 	if(!wxFileName::DirExists(native_name)
 		|| !dir.Open(native_name))
-			eRisaException::Throw(tString(wxString::Format(
-				RISSE_WS_TR("can not open directory '%s'"), native_name.c_str())));
+			tIOExceptionClass::Throw(tString(
+				RISSE_WS_TR("can not open directory '%1'"), native_name.c_str()));
 
 	// ファイルを列挙
 	cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
 	while(cont)
 	{
 		count ++;
-		if(callback)
-		{
-			if(!callback->OnFile(tString(filename)))
-				return count;
-		}
+		callback.Do(GetRTTI()->GetScriptEngine(),
+			ocFuncCall, NULL, tString::GetEmptyString(), 0,
+			tMethodArgument::New(tString(filename), false));
+
 		cont = dir.GetNext(&filename);
 	}
 
@@ -310,11 +313,9 @@ size_t tOSFSInstance::GetFileListAt(const tString & dirname,
 		if(filename != wxT("..") && filename != wxT("."))
 		{
 			count ++;
-			if(callback)
-			{
-				if(!callback->OnDirectory(tString(filename)))
-					return count;
-			}
+			callback.Do(GetRTTI()->GetScriptEngine(),
+				ocFuncCall, NULL, tString::GetEmptyString(), 0,
+				tMethodArgument::New(tString(filename), true));
 		}
 		cont = dir.GetNext(&filename);
 	}
@@ -325,7 +326,7 @@ size_t tOSFSInstance::GetFileListAt(const tString & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tOSFSInstance::FileExists(const tString & filename)
+bool tOSFSInstance::isFile(const tString & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -341,7 +342,7 @@ bool tOSFSInstance::FileExists(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-bool tOSFSInstance::DirectoryExists(const tString & dirname)
+bool tOSFSInstance::isDirectory(const tString & dirname)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -357,7 +358,7 @@ bool tOSFSInstance::DirectoryExists(const tString & dirname)
 
 
 //---------------------------------------------------------------------------
-void tOSFSInstance::RemoveFile(const tString & filename)
+void tOSFSInstance::removeFile(const tString & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -368,13 +369,14 @@ void tOSFSInstance::RemoveFile(const tString & filename)
 	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
 
 	if(!::wxRemoveFile(native_name))
-		eRisaException::Throw(tString(wxString::Format(RISSE_WS_TR("can not remove file '%s'"), native_name.c_str())));
+		tIOExceptionClass::Throw(tString(
+				RISSE_WS_TR("can not remove file '%1'"), native_name.c_str()));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tOSFSInstance::RemoveDirectory(const tString & dirname, bool recursive)
+void tOSFSInstance::removeDirectory(const tString & dirname, const tMethodArgument &args)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -384,35 +386,41 @@ void tOSFSInstance::RemoveDirectory(const tString & dirname, bool recursive)
 
 	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
 
+	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+
 	if(recursive)
-		eRisaException::Throw(
+		tIOExceptionClass::Throw(
 			RISSE_WS_TR("recursive directory remove is not yet implemented"));
 
 	if(::wxRmdir(native_name))
-		eRisaException::Throw(tString(wxString::Format(RISSE_WS_TR("can not remove directory '%s'"), native_name.c_str())));
+		tIOExceptionClass::Throw(tString(
+			RISSE_WS_TR("can not remove directory '%1'"), native_name.c_str()));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tOSFSInstance::CreateDirectory(const tString & dirname, bool recursive)
+void tOSFSInstance::createDirectory(const tString & dirname, const tMethodArgument &args)
 {
 	wxString wxdirname(dirname.AsWxString());
 
 	CheckFileNameCase(wxdirname);
 
 	volatile tSynchronizer sync(this); // sync
+
+	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
 
 	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
 
 	if(!wxFileName::Mkdir(native_name, 0777, recursive?wxPATH_MKDIR_FULL:0))
-		eRisaException::Throw(tString(wxString::Format(RISSE_WS_TR("can not create directory '%s'"), native_name.c_str())));
+		tIOExceptionClass::Throw(tString(
+			RISSE_WS_TR("can not create directory '%1'"), native_name.c_str()));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tOSFSInstance::Stat(const tString & filename, tStatStruc & struc)
+tObjectInterface * tOSFSInstance::stat(const tString & filename)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -420,6 +428,10 @@ void tOSFSInstance::Stat(const tString & filename, tStatStruc & struc)
 
 	volatile tSynchronizer sync(this); // sync
 
+	tIOExceptionClass::Throw(tString(RISSE_WS_TR("stat is not yet implemented")));
+
+	return NULL;
+/*
 	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
 
 	// 格納先構造体をクリア
@@ -429,20 +441,21 @@ void tOSFSInstance::Stat(const tString & filename, tStatStruc & struc)
 	wxFileName filename_obj(native_name);
 
 	if(!filename_obj.GetTimes(&struc.ATime, &struc.MTime, &struc.CTime))
-		eRisaException::Throw(tString(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
+		tIOExceptionClass::Throw(tString(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
 
 	// サイズを取得
 	wxFile file;
 	if(!file.Open(native_name))
-		eRisaException::Throw(tString(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
+		tIOExceptionClass::Throw(tString(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
 
 	struc.Size = file.Length();
+*/
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tStreamInstance * tOSFSInstance::CreateStream(const tString & filename, risse_uint32 flags)
+tStreamInstance * tOSFSInstance::open(const tString & filename, risse_uint32 flags)
 {
 	wxString wxfilename(filename.AsWxString());
 
@@ -489,7 +502,7 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 
 	// うーん、VMS 形式のパスは相手にすべきなのだろうか
 
-	const wxChar * msg = RISSE_WS_TR("file '%s' does not exist (but '%s' exists, you mean this?");
+	const wxChar * msg = RISSE_WS_TR("file '%1' does not exist (but '%2' exists, you mean this?");
 
 	// パスを分解する
 	wxString existing;
@@ -511,8 +524,8 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 			{
 				// ファイル名が違う
 				if(raise)
-					eRisaException::Throw(tString(wxString::Format(msg, path_to_check.c_str(),
-						(subpath + existing).c_str())));
+					tIOExceptionClass::Throw(tString(msg, path_to_check.c_str(),
+						(subpath + existing).c_str()));
 				else
 					return false;
 			}
@@ -531,8 +544,8 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 			{
 				// ファイル名が違う
 				if(raise)
-					eRisaException::Throw(tString(wxString::Format(msg, testpath.GetFullPath().c_str(),
-						(subpath + existing).c_str())));
+					tIOExceptionClass::Throw(tString(msg, testpath.GetFullPath().c_str(),
+						(subpath + existing).c_str()));
 				else
 					return false;
 			}
@@ -600,6 +613,15 @@ void tOSFSClass::RegisterMembers()
 	BindFunction(this, ss_ovulate, &tOSFSClass::ovulate);
 	BindFunction(this, ss_construct, &tOSFSInstance::construct);
 	BindFunction(this, ss_initialize, &tOSFSInstance::initialize);
+
+	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tFileSystemInstance::walkAt);
+	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tOSFSInstance::isFile);
+	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tOSFSInstance::isDirectory);
+	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tOSFSInstance::removeFile);
+	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tOSFSInstance::removeDirectory);
+	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tOSFSInstance::createDirectory);
+	BindFunction(this, tSS<'s','t','a','t'>(), &tOSFSInstance::stat);
+	BindFunction(this, tSS<'o','p','e','n'>(), &tOSFSInstance::open);
 
 	// OSNativeStream を登録する
 	RegisterNormalMember(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),

@@ -29,11 +29,105 @@ namespace Risa {
 
 class tFileSystemInstance;
 //---------------------------------------------------------------------------
+//! @brief		tFileSystem::List で用いられるコールバックインターフェース
+//---------------------------------------------------------------------------
+class tFileSystemIterationCallback : public tObjectInterface
+{
+public:
+	//! @brief		Operate メソッド
+	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+
+protected:
+	//! @brief		ファイルが見つかった際に呼ばれる
+	//! @param		filename		ファイル名
+	virtual void OnFile(const tString & filename) = 0;
+
+	//! @brief		ディレクトリが見つかった際に呼ばれる
+	//! @param		filename		ディレクトリ名
+	virtual void OnDirectory(const tString & dirname) = 0;
+};
+//---------------------------------------------------------------------------
+
+
+#if 0
+//---------------------------------------------------------------------------
+//! @brief		tFileSystem::Stat で返される構造体
+//---------------------------------------------------------------------------
+struct tStatStruc : public tAtomicCollectee
+{
+	risse_uint64	Size;	//!< ファイルサイズ。 risse_uint64_maxの場合は無効
+	wxDateTime		MTime;	//!< ファイル修正時刻 (wxDateTime::IsValidで有効性をチェックのこと)
+	wxDateTime		ATime;	//!< アクセス時刻 (wxDateTime::IsValidで有効性をチェックのこと)
+	wxDateTime		CTime;	//!< 作成時刻 (wxDateTime::IsValidで有効性をチェックのこと)
+
+	tStatStruc() { Clear(); }
+	void Clear()
+	{
+		Size = risse_uint64_max;
+		MTime = ATime = CTime = wxDateTime();
+	}
+};
+//---------------------------------------------------------------------------
+#endif
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		オープンモード定数を含む構造体
+//---------------------------------------------------------------------------
+struct tFileOpenModes
+{
+	//! @param		ファイルオープンモード
+	enum tOpenMode
+	{
+		omRead = 1, //!< 読み込みのみ(対象ファイルが無い場合は失敗する)
+		omWrite = 2, //!< 書き込みのみ(対象ファイルが無い場合は新規に作成される)
+		omUpdate = 3, //!< 読み込みと書き込み(対象ファイルが無い場合は失敗する)
+
+		omAccessMask = 0x03, //!< アクセス方法に対するマスク
+
+		omAppend = 7, //!< 追加書き込み(対象ファイルが無い場合は新規に作成される)
+
+		omReadBit = 1, //!< 読み込み
+		omWriteBit = 2, //!< 書き込み
+		omAppendBit = 3 //!< 追加
+	};
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		オープンモード定数用モジュール
+//---------------------------------------------------------------------------
+class tFileOpenModeConstsModule : public tModuleBase, public tFileOpenModes
+{
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tFileOpenModeConstsModule(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		ファイルシステムマネージャクラス
 //---------------------------------------------------------------------------
 class tFileSystemManager :
 	public singleton_base<tFileSystemManager>,
-	protected depends_on<tRisseScriptEngine>
+	protected depends_on<tRisseScriptEngine>, public tFileOpenModes
 {
 	tHashTable<tString, tFileSystemInstance *> MountPoints; //!< マウントポイントのハッシュ表
 	tString CurrentDirectory; //!< カレントディレクトリ (パスの最後に '/' を含む)
@@ -74,18 +168,18 @@ public:
 	//! @param		callback コールバックオブジェクト
 	//! @param		recursive 再帰的にファイル一覧を得るかどうか
 	//! @return		取得できたファイル数
-	size_t GetFileListAt(const tString & dirname,
+	size_t WalkAt(const tString & dirname,
 		tFileSystemIterationCallback * callback, bool recursive = false);
 
 	//! @brief		ファイルが存在するかどうかを得る
 	//! @param		filename ファイル名
-	//! @return		ファイルが存在する場合真
-	bool FileExists(const tString & filename);
+	//! @return		ファイルが存在する場合真、見つかったのがファイルでない場合や存在しない場合は偽
+	bool IsFile(const tString & filename);
 
 	//! @brief		ディレクトリが存在するかどうかを得る
 	//! @param		dirname ディレクトリ名
-	//! @return		ディレクトリが存在する場合真
-	bool DirectoryExists(const tString & dirname);
+	//! @return		ディレクトリが存在する場合真、見つかったのがディレクトリでない場合や存在しない場合は偽
+	bool IsDirectory(const tString & dirname);
 
 	//! @brief		ファイルを削除する
 	//! @param		filename ファイル名
@@ -104,20 +198,20 @@ public:
 	//! @brief		指定されたファイルの stat を得る
 	//! @param		filename ファイル名
 	//! @param		struc stat 結果の出力先
-	void Stat(const tString & filename, tStatStruc & struc);
+	tObjectInterface * Stat(const tString & filename);
 
 	//! @brief		指定されたファイルのストリームを得る
 	//! @param		filename ファイル名
 	//! @param		flags フラグ
 	//! @return		ストリームオブジェクト
-	tStreamInstance * CreateStream(const tString & filename, risse_uint32 flags);
+	tStreamInstance * Open(const tString & filename, risse_uint32 flags);
 
 private:
 	//! @brief		ファイル一覧を取得する(内部関数)
 	//! @param		dirname ディレクトリ名(正規化されているべきこと)
 	//! @param		callback コールバック先
 	//! @callback	コールバックオブジェクト
-	size_t InternalGetFileListAt(const tString & dirname,
+	size_t InternalList(const tString & dirname,
 		tFileSystemIterationCallback * callback);
 
 	//! @brief		指定された正規フルパスに対応するファイルシステムを得る
@@ -193,19 +287,80 @@ public:
 
 
 
+
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		ファイルシステム基底インスタンス("FileSystem" クラス)
+//! @brief		ファイルシステム基底インスタンス("FileSystem" クラスのインスタンス)
 //---------------------------------------------------------------------------
-class tFileSystemInstance : public tObjectBase, public tFileSystem
+class tFileSystemInstance : public tObjectBase, public tFileOpenModes
 {
 public: // コンストラクタ
 	tFileSystemInstance() {;}
 
+public: // 定数など
+
+
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
+
+	//-- サブクラスで実装すべき物
+
+	//! @brief		ファイル一覧をコールバックで受け取る
+	//! @param		dirname ディレクトリ名
+	//! @param		args 追加パラメータ(ブロック引数としてコールバック関数オブジェクト)
+	//! @return		取得できたファイル数
+	size_t walkAt(const tString & dirname,
+		const tMethodArgument &args);
+
+	//! @brief		ファイルが存在するかどうかを得る
+	//! @param		filename ファイル名
+	//! @return		ファイルが存在する場合真
+	bool isFile(const tString & filename);
+
+	//! @brief		ディレクトリが存在するかどうかを得る
+	//! @param		dirname ディレクトリ名
+	//! @return		ディレクトリが存在する場合真
+	bool isDirectory(const tString & dirname);
+
+	//! @brief		ファイルを削除する
+	//! @param		filename ファイル名
+	void removeFile(const tString & filename);
+
+	//! @brief		ディレクトリを削除する
+	//! @param		dirname ディレクトリ名
+	//! @param		args 追加パラメータ(再帰的にディレクトリを削除するかどうか)
+	void removeDirectory(const tString & dirname,
+		const tMethodArgument &args);
+
+	//! @brief		ディレクトリを作成する
+	//! @param		dirname ディレクトリ名
+	//  @param		args 追加パラメータ(再帰的にディレクトリを削除するかどうか)
+	void createDirectory(const tString & dirname,
+		const tMethodArgument &args);
+
+	//! @brief		指定されたファイルの stat を得る
+	//! @param		filename ファイル名
+	//! @return		stat の結果を表す辞書配列
+	tObjectInterface * stat(const tString & filename);
+
+	//! @brief		指定されたファイルのストリームを得る
+	//! @param		filename ファイル名
+	//! @param		flags フラグ
+	//! @return		ストリームオブジェクト
+	tStreamInstance * open(const tString & filename,
+		risse_uint32 flags);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -262,12 +417,12 @@ public: // Risse 用メソッドなど
 	static tString normalize(const tString & path)
 		{ return tFileSystemManager::instance()->NormalizePath(path); }
 	static bool exists(const tString & filename)
-		{ return tFileSystemManager::instance()->FileExists(filename) ||
-			tFileSystemManager::instance()->DirectoryExists(filename); }
+		{ return tFileSystemManager::instance()->IsFile(filename) ||
+			tFileSystemManager::instance()->IsDirectory(filename); }
 	static bool isFile(const tString & filename)
-		{ return tFileSystemManager::instance()->FileExists(filename); }
+		{ return tFileSystemManager::instance()->IsFile(filename); }
 	static bool isDirectory(const tString & dirname)
-		{ return tFileSystemManager::instance()->DirectoryExists(dirname); }
+		{ return tFileSystemManager::instance()->IsDirectory(dirname); }
 	static tString chopExtension(const tString & filename)
 		{ return tFileSystemManager::instance()->ChopExtension(filename); }
 	static tString extractExtension(const tString & filename)
@@ -306,7 +461,7 @@ public:
 		ClassInstance = class_instance;
 		tVariant FileSystem = engine->GetGlobalObject().
 			GetPropertyDirect_Object(tSS<'F','i','l','e','S','y','s','t','e','m'>());
-		class_instance->RegisterClassInstance(FileSystem);
+		class_instance->RegisterInstance(FileSystem);
 	}
 
 	ClassT * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る

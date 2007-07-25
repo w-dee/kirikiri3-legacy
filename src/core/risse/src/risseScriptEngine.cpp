@@ -95,7 +95,7 @@ tScriptEngine::tScriptEngine()
 	tModuleBase * module;
 	module = new tStreamConstsModule(this);
 	module->RegisterInstance(GlobalObject);
-	StreamClass->Do(ocFuncCall, NULL, ss_include, 0, tMethodArgument::New(tVariant(module)));
+	StreamClass->Do(ocFuncCall, NULL, ss_include, 0, tMethodArgument::New(tVariant(module->GetInstance())));
 
 }
 //---------------------------------------------------------------------------

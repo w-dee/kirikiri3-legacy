@@ -249,11 +249,11 @@ int Application::OnRun()
 
 		// Script クラスを追加する
 		(new tScriptClass(&engine))->
-				RegisterClassInstance(engine.GetGlobalObject());
+				RegisterInstance(engine.GetGlobalObject());
 
 		// Test クラスを追加する
 		(new tTestClass(&engine))->
-				RegisterClassInstance(engine.GetGlobalObject());
+				RegisterInstance(engine.GetGlobalObject());
 
 		// 入力ファイルを開く
 		wxFile file;

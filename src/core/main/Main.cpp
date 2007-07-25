@@ -110,11 +110,28 @@ bool tApplication::OnInit()
 	try
 	{
 		// 先だって初期化しておきたい物
-		tCollectorThread::ensure();
-		tWxLogProxy::ensure();
+		tRisseScriptEngine::ensure();
 
-		// 残り全てのシングルトンインスタンスを初期化
-		singleton_manager::init_all();
+		try
+		{
+			tCollectorThread::ensure();
+			tWxLogProxy::ensure();
+
+			// 残り全てのシングルトンインスタンスを初期化
+			singleton_manager::init_all();
+		}
+		catch(const tTemporaryException * te)
+		{
+			// tTemporaryException は変換しないと tVariant * にならない
+			te->ThrowConverted(tRisseScriptEngine::instance()->GetScriptEngine());
+		}
+	}
+	catch(const tVariant * e)
+	{
+		wxFprintf(stderr, wxT("tVariant exception caught : %s (%s)\n"),
+			e->operator tString().AsWxString().c_str(),
+			e->GetClassName().AsWxString().c_str());
+		return false;
 	}
 	catch(...)
 	{

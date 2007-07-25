@@ -160,7 +160,7 @@ public:
 	//!				tOperateFlags::ofInstanceMemberOnlyが自動的に付加される。
 	void RegisterNormalMember(const tString & name,
 						const tVariant & value,
-						tMemberAttribute attrib = tMemberAttribute(), bool ismembers = true);
+						tMemberAttribute attrib = tMemberAttribute(), bool ismembers = false);
 
 
 	//! @brief		final const なメンバ(メソッドや変数、プロパティなど)をインスタンスに登録する(既存のメンバば上書きされる)
@@ -172,7 +172,7 @@ public:
 	//!				tOperateFlags::ofInstanceMemberOnlyが自動的に付加される。
 	void RegisterFinalConstMember(const tString & name,
 						const tVariant & value,
-						bool ismembers = true)
+						bool ismembers = false)
 	{
 		RegisterNormalMember(name, value,
 			tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal),

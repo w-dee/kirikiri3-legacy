@@ -89,28 +89,28 @@ void tFileOpenModeConstsModule::RegisterMembers()
 {
 	GetInstance()->RegisterFinalConstMember(
 			tSS<'o','m','R','e','a','d'>(),
-			tVariant((risse_int64)omRead));
+			tVariant((risse_int64)omRead), true);
 	GetInstance()->RegisterFinalConstMember(
 			tSS<'o','m','W','r','i','t','e'>(),
-			tVariant((risse_int64)omWrite));
+			tVariant((risse_int64)omWrite), true);
 	GetInstance()->RegisterFinalConstMember(
 			tSS<'o','m','U','p','d','a','t','e'>(),
-			tVariant((risse_int64)omUpdate));
+			tVariant((risse_int64)omUpdate), true);
 	GetInstance()->RegisterFinalConstMember(
 			tSS<'o','m','A','c','c','e','s','s','M','a','s','k'>(),
-			tVariant((risse_int64)omAccessMask));
+			tVariant((risse_int64)omAccessMask), true);
 	GetInstance()->RegisterFinalConstMember(
 			tSS<'o','m','A','p','p','e','n','d'>(),
-			tVariant((risse_int64)omAppend));
+			tVariant((risse_int64)omAppend), true);
 	GetInstance()->RegisterFinalConstMember(
 			tSS<'o','m','R','e','a','d','B','i','t'>(),
-			tVariant((risse_int64)omReadBit));
+			tVariant((risse_int64)omReadBit), true);
 	GetInstance()->RegisterFinalConstMember(
 			tSS<'o','m','W','r','i','t','e','B','i','t'>(),
-			tVariant((risse_int64)omWriteBit));
+			tVariant((risse_int64)omWriteBit), true);
 	GetInstance()->RegisterFinalConstMember(
 			tSS<'o','m','A','p','p','e','n','d','B','i','t'>(),
-			tVariant((risse_int64)omAppendBit));
+			tVariant((risse_int64)omAppendBit), true);
 }
 //---------------------------------------------------------------------------
 

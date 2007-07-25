@@ -41,9 +41,9 @@ tStreamConstsModule::tStreamConstsModule(tScriptEngine * engine) :
 //---------------------------------------------------------------------------
 void tStreamConstsModule::RegisterMembers()
 {
-	GetInstance()->RegisterFinalConstMember(ss_soSet, tVariant((risse_int64)tStreamInstance::soSet));
-	GetInstance()->RegisterFinalConstMember(ss_soCur, tVariant((risse_int64)tStreamInstance::soCur));
-	GetInstance()->RegisterFinalConstMember(ss_soEnd, tVariant((risse_int64)tStreamInstance::soEnd));
+	GetInstance()->RegisterFinalConstMember(ss_soSet, tVariant((risse_int64)tStreamInstance::soSet), true);
+	GetInstance()->RegisterFinalConstMember(ss_soCur, tVariant((risse_int64)tStreamInstance::soCur), true);
+	GetInstance()->RegisterFinalConstMember(ss_soEnd, tVariant((risse_int64)tStreamInstance::soEnd), true);
 }
 //---------------------------------------------------------------------------
 

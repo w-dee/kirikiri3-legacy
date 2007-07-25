@@ -20,6 +20,7 @@
 #include "risse/include/risseStaticStrings.h"
 #include "risse/include/risseStringTemplate.h"
 #include "risse/include/risseClass.h"
+#include "risse/include/risseModule.h"
 #include "risse/include/risseObjectClass.h"
 #include "risse/include/risseExceptionClass.h"
 
@@ -78,7 +79,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		クラスインスタンスやモジュールインスタンスを
+//! @brief		クラスインスタンスを
 //!				スクリプトエンジンに登録するためのテンプレートクラス
 //---------------------------------------------------------------------------
 template <typename ClassT>
@@ -86,7 +87,7 @@ class tRisseClassRegisterer :
 	public singleton_base<tRisseClassRegisterer<ClassT> >,
 	depends_on<tRisseScriptEngine>
 {
-	ClassT * ClassInstance;
+	tClassBase * ClassInstance;
 public:
 	//! @brief		コンストラクタ
 	tRisseClassRegisterer()
@@ -98,7 +99,33 @@ public:
 		class_instance->RegisterInstance(engine->GetGlobalObject());
 	}
 
-	ClassT * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る
+	tClassBase * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		モジュールインスタンスを
+//!				スクリプトエンジンに登録するためのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename ModuleT>
+class tRisseModuleRegisterer :
+	public singleton_base<tRisseModuleRegisterer<ModuleT> >,
+	depends_on<tRisseScriptEngine>
+{
+	tObjectBase * ModuleInstance;
+public:
+	//! @brief		コンストラクタ
+	tRisseModuleRegisterer()
+	{
+		// ここらへんのプロセスについては tScriptEngine のコンストラクタも参照のこと
+		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
+		ModuleT *module_instance = new ModuleT(engine);
+		ModuleInstance = module_instance->GetInstance();
+		module_instance->RegisterInstance(engine->GetGlobalObject());
+	}
+
+	tObjectBase * GetModuleInstance() const { return ModuleInstance; } //!< モジュールインスタンスを得る
 };
 //---------------------------------------------------------------------------
 

@@ -118,8 +118,8 @@ void tFileOpenModeConstsModule::RegisterMembers()
 
 
 //---------------------------------------------------------------------------
-//! @brief		FileSystem モジュールレジストラ
-template class tRisseClassRegisterer<tFileOpenModeConstsModule>;
+//! @brief		FileOpenModeConsts モジュールレジストラ
+template class tRisseModuleRegisterer<tFileOpenModeConstsModule>;
 //---------------------------------------------------------------------------
 
 
@@ -891,7 +891,7 @@ tFileSystemClass::tFileSystemClass(tScriptEngine * engine) :
 	// FileOpenModeConsts を include する
 	Do(ocFuncCall, NULL, ss_include, 0,
 		tMethodArgument::New(
-			tRisseClassRegisterer<tFileOpenModeConstsModule>::instance()->GetClassInstance()));
+			tRisseModuleRegisterer<tFileOpenModeConstsModule>::instance()->GetModuleInstance()));
 }
 //---------------------------------------------------------------------------
 
@@ -963,7 +963,7 @@ tFileClass::tFileClass(tScriptEngine * engine) :
 	// FileOpenModeConsts を include する
 	Do(ocFuncCall, NULL, ss_include, 0,
 		tMethodArgument::New(
-			tRisseClassRegisterer<tFileOpenModeConstsModule>::instance()->GetClassInstance()));
+			tRisseModuleRegisterer<tFileOpenModeConstsModule>::instance()->GetModuleInstance()));
 }
 //---------------------------------------------------------------------------
 

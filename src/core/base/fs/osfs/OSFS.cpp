@@ -468,7 +468,7 @@ tStreamInstance * tOSFSInstance::open(const tString & filename, risse_uint32 fla
 	// OSNativeStreamClass からインスタンスを生成して返す
 	tVariant obj =
 		tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()->
-			GetOSNativeStreamClass()->Invoke(ss_new, native_name.c_str(), (risse_int64)flags);
+			GetOSNativeStreamClass()->Invoke(ss_new, tString(native_name.c_str()), (risse_int64)flags);
 	obj.AssertClass(tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()->
 									GetOSNativeStreamClass());
 	return reinterpret_cast<tStreamInstance *>(obj.GetObjectInterface());

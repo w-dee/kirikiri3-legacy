@@ -17,6 +17,8 @@
 #include "risseStaticStrings.h"
 #include "risse_parser/risseRisseScriptBlockClass.h"
 
+#include "risseStreamClass.h" // for StreamConsts
+
 // 各クラスの new に必要なインクルードファイルをインクルードする
 #define RISSE_INTERNALCLASSES_INCLUDE
 #include "risseInternalClasses.inc"
@@ -71,7 +73,7 @@ tScriptEngine::tScriptEngine()
 	GlobalObject = tVariant(ObjectClass).New();
 
 	// 各クラスをグローバルオブジェクトに登録する
-	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterClassInstance(GlobalObject);
+	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterInstance(GlobalObject);
 	#include "risseInternalClasses.inc"
 	#undef RISSE_INTERNALCLASSES_CLASS
 
@@ -87,6 +89,13 @@ tScriptEngine::tScriptEngine()
 	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterMembers();
 	#include "risseInternalClasses.inc"
 	#undef RISSE_INTERNALCLASSES_CLASS
+
+
+	// いくつかのモジュールの作成と include
+	tModuleBase * module;
+	module = new tStreamConstsModule(this);
+	module->RegisterInstance(GlobalObject);
+	StreamClass->Do(ocFuncCall, NULL, ss_include, 0, tMethodArgument::New(tVariant(module)));
 
 }
 //---------------------------------------------------------------------------

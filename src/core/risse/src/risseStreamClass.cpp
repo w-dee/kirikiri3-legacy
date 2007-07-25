@@ -25,6 +25,39 @@ RISSE_DEFINE_SOURCE_ID(42888,25529,18022,19240,53128,12574,40093,31909);
 namespace Risse
 {
 //---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+tStreamConstsModule::tStreamConstsModule(tScriptEngine * engine) :
+	tModuleBase(ss_StreamConsts, engine)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tStreamConstsModule::RegisterMembers()
+{
+	GetInstance()->RegisterFinalConstMember(ss_soSet, tVariant((risse_int64)tStreamInstance::soSet));
+	GetInstance()->RegisterFinalConstMember(ss_soCur, tVariant((risse_int64)tStreamInstance::soCur));
+	GetInstance()->RegisterFinalConstMember(ss_soEnd, tVariant((risse_int64)tStreamInstance::soEnd));
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
 void tStreamInstance::truncate()
 {
 	tIOExceptionClass::ThrowTruncateError(Name, tStreamAdapter(this).GetPosition());
@@ -128,13 +161,6 @@ void tStreamClass::RegisterMembers()
 	BindProperty(this, ss_position, &tStreamInstance::get_position, &tStreamInstance::set_position);
 	BindFunction(this, ss_readBuffer, &tStreamInstance::readBuffer);
 	BindFunction(this, ss_writeBuffer, &tStreamInstance::writeBuffer);
-
-	RegisterNormalMember(ss_soSet, tVariant((risse_int64)tStreamInstance::soSet), 
-		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal), true);
-	RegisterNormalMember(ss_soCur, tVariant((risse_int64)tStreamInstance::soCur), 
-		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal), true);
-	RegisterNormalMember(ss_soEnd, tVariant((risse_int64)tStreamInstance::soEnd), 
-		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal), true);
 }
 //---------------------------------------------------------------------------
 

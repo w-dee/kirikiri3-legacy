@@ -37,6 +37,29 @@ inline tStreamConstants::tOrigin FromVariant<tStreamConstants::tOrigin>(const tV
 
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		ストリームに関連する定数などを保持するモジュール
+//---------------------------------------------------------------------------
+class tStreamConstsModule : public tModuleBase, public tStreamConstants
+{
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tStreamConstsModule(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		ストリームインスタンス ("Stream" クラスのインスタンス) の基本クラス
 //! @note		このクラスではシークが不可能な、本当の意味での「ストリーム」は扱わない

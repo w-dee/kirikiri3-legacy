@@ -18,134 +18,11 @@
 #include "risseGC.h"
 #include "risseString.h"
 #include "risseVariant.h"
-
-#ifdef RISSE_SUPPORT_WX
-	#include <wx/file.h>
-	#include <wx/datetime.h>
-#endif
+#include "risseModule.h"
 
 namespace Risse
 {
 class tStreamInstance;
-//---------------------------------------------------------------------------
-//! @brief		tFileSystem::GetFileListAt で用いられるコールバックインターフェース
-//---------------------------------------------------------------------------
-class tFileSystemIterationCallback
-{
-public:
-	//! @brief		ファイルが見つかった際に呼ばれる
-	//! @param		filename		ファイル名
-	//! @return		探索を続行する場合に真、中断したい場合に偽
-	virtual bool OnFile(const tString & filename) = 0;
-
-	//! @brief		ディレクトリが見つかった際に呼ばれる
-	//! @param		filename		ディレクトリ名
-	//! @return		探索を続行する場合に真、中断したい場合に偽
-	virtual bool OnDirectory(const tString & dirname) = 0;
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		tFileSystem::Stat で返される構造体
-//---------------------------------------------------------------------------
-struct tStatStruc : public tAtomicCollectee
-{
-	// TODO: 今のところ wxWidgets にここが依存しているので注意
-	risse_uint64	Size;	//!< ファイルサイズ。 risse_uint64_maxの場合は無効
-#ifdef RISSE_SUPPORT_WX
-	wxDateTime		MTime;	//!< ファイル修正時刻 (wxDateTime::IsValidで有効性をチェックのこと)
-	wxDateTime		ATime;	//!< アクセス時刻 (wxDateTime::IsValidで有効性をチェックのこと)
-	wxDateTime		CTime;	//!< 作成時刻 (wxDateTime::IsValidで有効性をチェックのこと)
-#endif
-
-	tStatStruc() { Clear(); }
-	void Clear()
-	{
-		Size = risse_uint64_max;
-#ifdef RISSE_SUPPORT_WX
-		MTime = ATime = CTime = wxDateTime();
-#endif
-	}
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		ファイルシステムインターフェースクラス
-//---------------------------------------------------------------------------
-class tFileSystem
-{
-public: // 定数など
-	//! @param		ファイルオープンモード
-	enum tOpenMode
-	{
-		omRead = 1, //!< 読み込みのみ(対象ファイルが無い場合は失敗する)
-		omWrite = 2, //!< 書き込みのみ(対象ファイルが無い場合は新規に作成される)
-		omUpdate = 3, //!< 読み込みと書き込み(対象ファイルが無い場合は失敗する)
-
-		omAccessMask = 0x03, //!< アクセス方法に対するマスク
-
-		omAppend = 7, //!< 追加書き込み(対象ファイルが無い場合は新規に作成される)
-
-		omReadBit = 1, //!< 読み込み
-		omWriteBit = 2, //!< 書き込み
-		omAppendBit = 3 //!< 追加
-	};
-
-
-public:
-	//! @brief		ファイル一覧を取得する
-	//! @param		dirname ディレクトリ名
-	//! @param		callback コールバックオブジェクト
-	//! @return		取得できたファイル数
-	virtual size_t GetFileListAt(const tString & dirname,
-		tFileSystemIterationCallback * callback) = 0;
-
-	//! @brief		ファイルが存在するかどうかを得る
-	//! @param		filename ファイル名
-	//! @return		ファイルが存在する場合真
-	virtual bool FileExists(const tString & filename) = 0;
-
-	//! @brief		ディレクトリが存在するかどうかを得る
-	//! @param		dirname ディレクトリ名
-	//! @return		ディレクトリが存在する場合真
-	virtual bool DirectoryExists(const tString & dirname) = 0;
-
-	//! @brief		ファイルを削除する
-	//! @param		filename ファイル名
-	virtual void RemoveFile(const tString & filename) = 0;
-
-	//! @brief		ディレクトリを削除する
-	//! @param		dirname ディレクトリ名
-	//! @param		recursive 再帰的にディレクトリを削除するかどうか
-	virtual void RemoveDirectory(const tString & dirname,
-		bool recursive = false) = 0;
-
-	//! @brief		ディレクトリを作成する
-	//! @param		dirname ディレクトリ名
-	//! @param		recursive 再帰的にディレクトリを作成するかどうか
-	virtual void CreateDirectory(const tString & dirname,
-		bool recursive = false) = 0;
-
-	//! @brief		指定されたファイルの stat を得る
-	//! @param		filename ファイル名
-	//! @param		struc stat 結果の出力先
-	virtual void Stat(const tString & filename,
-		tStatStruc & struc) = 0;
-
-	//! @brief		指定されたファイルのストリームを得る
-	//! @param		filename ファイル名
-	//! @param		flags フラグ
-	//! @return		ストリームオブジェクト
-	virtual tStreamInstance * CreateStream(const tString & filename,
-		risse_uint32 flags) = 0;
-};
-//---------------------------------------------------------------------------
-
-
-
-
 //---------------------------------------------------------------------------
 //! @brief		ストリームに関連する定数など
 //---------------------------------------------------------------------------
@@ -162,6 +39,15 @@ public:
 	};
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 
 

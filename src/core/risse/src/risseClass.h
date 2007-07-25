@@ -58,7 +58,7 @@ public:
 	//! @brief		クラスインスタンスを登録するためのユーティリティメソッド
 	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
 	//! @param		name		登録名
-	void RegisterClassInstance(tVariant & target);
+	void RegisterInstance(tVariant & target);
 
 public:
 	//! @brief		各メンバをインスタンスに追加する

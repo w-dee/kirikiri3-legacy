@@ -371,6 +371,8 @@ extern tStringData data_ss_readBuffer;
 static const tString & ss_readBuffer = *reinterpret_cast<const tString *>(&data_ss_readBuffer); //!< (static string)  "readBuffer" メソッド名
 extern tStringData data_ss_writeBuffer;
 static const tString & ss_writeBuffer = *reinterpret_cast<const tString *>(&data_ss_writeBuffer); //!< (static string)  "writeBuffer" メソッド名
+extern tStringData data_ss_StreamConsts;
+static const tString & ss_StreamConsts = *reinterpret_cast<const tString *>(&data_ss_StreamConsts); //!< (static string)  "StreamConsts" モジュール名
 extern tStringData data_ss_soSet;
 static const tString & ss_soSet = *reinterpret_cast<const tString *>(&data_ss_soSet); //!< (static string)  "soSet" 定数名
 extern tStringData data_ss_soCur;

@@ -129,7 +129,7 @@ void tClassBase::SetClassClassRTTI(tScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
-void tClassBase::RegisterClassInstance(tVariant & target)
+void tClassBase::RegisterInstance(tVariant & target)
 {
 	tString name = GetPropertyDirect(ss_name);
 	target.SetPropertyDirect_Object(name,

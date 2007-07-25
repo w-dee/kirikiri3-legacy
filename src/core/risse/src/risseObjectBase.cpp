@@ -390,12 +390,12 @@ tObjectBase::tRetValue tObjectBase::Delete(const tString & name, tOperateFlags f
 	{
 		// ofUseClassMembersRule が指定されているのでそちらを見に行く
 		tVariant members;
-		tRetValue members_rv = Read(ss_members, tOperateFlags::ofInstanceMemberOnly, members, tVariant::GetDynamicContext());
+		tRetValue members_rv = Read(ss_members, tOperateFlags::ofInstanceMemberOnly, members, *tVariant::GetDynamicContext());
 		if(members_rv == rvNoError)
 		{
 			// 要求を members にリダイレクトする
 			return members.OperateForMember(GetRTTI()->GetScriptEngine(), ocDDelete, NULL, name,
-				flags, tMethodArgument::Empty(), tVariant::GetDynamicContext());
+				flags, tMethodArgument::Empty(), *tVariant::GetDynamicContext());
 		}
 	}
 
@@ -409,12 +409,12 @@ tObjectBase::tRetValue tObjectBase::Delete(const tString & name, tOperateFlags f
 		// クラスを探す
 		tVariant Class;
 		RaiseIfError(Read(PrototypeName, tOperateFlags::ofInstanceMemberOnly,
-			Class, tVariant::GetDynamicContext()), PrototypeName);
+			Class, *tVariant::GetDynamicContext()), PrototypeName);
 		if(Class.IsNull()) return rvMemberNotFound; // クラスが null
 
 		// クラスに対して削除を行う
 		tRetValue rv = Class.OperateForMember(GetRTTI()->GetScriptEngine(), ocDDelete, NULL, name, flags,
-					tMethodArgument::Empty(), tVariant::GetDynamicContext());
+					tMethodArgument::Empty(), *tVariant::GetDynamicContext());
 		return rv;
 	}
 
@@ -678,7 +678,7 @@ tVariant tObjectBase::ReadMember(const tString & name,
 					risse_uint32 flags) const
 {
 	tVariant result;
-	RaiseIfError(Read(name, flags, result, tVariant(this)), name);
+	RaiseIfError(Read(name, flags, result, tVariant(const_cast<tObjectBase *>(this))), name);
 	return result;
 }
 //---------------------------------------------------------------------------

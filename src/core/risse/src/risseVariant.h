@@ -142,6 +142,30 @@ public: // コンストラクタ/代入演算子
 		return *this;
 	}
 
+private:
+	//! @brief		コンストラクタ(const void * から)
+	//! @param		ref		値
+	//! @note		tObjectInterface に変換できない任意のポインタを
+	//!				ここで引っかけるためのコンストラクタ。ここで
+	//!				引っかかった場合はコードを見直すこと。
+	//!				おそらく、
+	//!				 1. なにか関係のないポインタを tVariant に突っ込もうとした
+	//!				 2. 確かに tObjectInterface 派生クラスだが
+	//!				    必要な情報を include してないためにコンパイラがダウンキャスト
+	//!				    に失敗している
+	//!				 3. const な tObjectInterface へのポインタを渡そうとした
+	//!				    (非const な tObjectInterface * しか受け付けない)
+	tVariantBlock(const void * ref);
+
+	//! @brief		代入演算子(const void * を代入)
+	//! @param		ref		値
+	//! @note		tObjectInterface に変換できない任意のポインタを
+	//!				ここで引っかけるための代入演算子。
+	//!				ここで引っかかったた場合はコードを見直すこと。
+	//!				(tVariantBlock(const void * )も参照)
+	void operator = (const void * ref);
+
+public:
 	//! @brief		コンストラクタ(integer型を作成)
 	//! @param		ref		元となる整数
 	tVariantBlock(const risse_int64 ref)

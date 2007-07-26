@@ -416,6 +416,8 @@ public: // Risse 用メソッドなど
 		{ tFileSystemManager::instance()->Unmount(point); }
 	static tString normalize(const tString & path)
 		{ return tFileSystemManager::instance()->NormalizePath(path); }
+	static size_t walkAt(const tString & dirname,
+		const tMethodArgument &args, tScriptEngine * engine);
 	static bool exists(const tString & filename)
 		{ return tFileSystemManager::instance()->IsFile(filename) ||
 			tFileSystemManager::instance()->IsDirectory(filename); }
@@ -423,6 +425,14 @@ public: // Risse 用メソッドなど
 		{ return tFileSystemManager::instance()->IsFile(filename); }
 	static bool isDirectory(const tString & dirname)
 		{ return tFileSystemManager::instance()->IsDirectory(dirname); }
+	static void removeFile(const tString & filename)
+		{ return tFileSystemManager::instance()->RemoveFile(filename); }
+	static void removeDirectory(const tString & dirname, const tMethodArgument &args);
+	static void createDirectory(const tString & dirname, const tMethodArgument &args);
+	static tObjectInterface * stat(const tString & filename)
+		{ return tFileSystemManager::instance()->Stat(filename); }
+	static tStreamInstance * open(const tString & filename, risse_uint32 flags)
+		{ return tFileSystemManager::instance()->Open(filename, flags); }
 	static tString chopExtension(const tString & filename)
 		{ return tFileSystemManager::instance()->ChopExtension(filename); }
 	static tString extractExtension(const tString & filename)

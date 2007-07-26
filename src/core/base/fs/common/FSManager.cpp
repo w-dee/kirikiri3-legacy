@@ -986,9 +986,15 @@ void tFileClass::RegisterMembers()
 	BindFunction(this, tSS<'m','o','u','n','t'>(), &tFileClass::mount);
 	BindFunction(this, tSS<'u','n','m','o','u','n','t'>(), &tFileClass::unmount);
 	BindFunction(this, tSS<'n','o','r','m','a','l','i','z','e'>(), &tFileClass::normalize);
+	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tFileClass::walkAt);
 	BindFunction(this, tSS<'e','x','i','s','t','s'>(), &tFileClass::exists);
 	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tFileClass::isFile);
 	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tFileClass::isDirectory);
+	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tFileClass::removeFile);
+	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::removeDirectory);
+	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::removeDirectory);
+	BindFunction(this, tSS<'s','t','a','t'>(), &tFileClass::stat);
+	BindFunction(this, tSS<'o','p','e','n'>(), &tFileClass::open);
 	BindFunction(this, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tFileClass::chopExtension);
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tFileClass::extractExtension);
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tFileClass::extractName);
@@ -1015,6 +1021,69 @@ void tFileClass::mount(const tString & point, const tVariant & fs)
 	tFileSystemManager::instance()->Mount(point, reinterpret_cast<tFileSystemInstance *>(fs.GetObjectInterface()));
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+size_t tFileClass::walkAt(const tString & dirname,
+	const tMethodArgument &args, tScriptEngine * engine)
+{
+	// オプションをとってくる
+	args.ExpectBlockArgumentCount(1);
+	tVariant callback = args.GetBlockArgument(0);
+	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+
+	// tFileSystemManager::WalkAt が受け取るのは tFileSystemIterationCallback *
+	// なので、そのままでは tVariant callback を渡せないので、変換させる
+	class tCallbackGW : public tFileSystemIterationCallback
+	{
+		tScriptEngine * engine;
+		tVariant & callback;
+	public:
+		tCallbackGW(tScriptEngine * eng, tVariant & cb) : engine(eng), callback(cb) {;}
+	protected:
+		void OnFile(const tString & filename)
+		{
+			callback.Do(engine,
+				ocFuncCall, NULL, tString::GetEmptyString(), 0,
+				tMethodArgument::New(tString(filename), false));
+		}
+		void OnDirectory(const tString & dirname)
+		{
+			callback.Do(engine,
+				ocFuncCall, NULL, tString::GetEmptyString(), 0,
+				tMethodArgument::New(tString(dirname), true));
+		}
+	};
+
+	tCallbackGW gw(engine, callback);
+
+	// tFileSystemManager::WalkAt を呼ぶ
+	return tFileSystemManager::instance()->WalkAt(dirname, &gw, recursive);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tFileClass::removeDirectory(const tString & dirname, const tMethodArgument &args)
+{
+	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+	tFileSystemManager::instance()->RemoveDirectory(dirname, recursive);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tFileClass::createDirectory(const tString & dirname, const tMethodArgument &args)
+{
+	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+	tFileSystemManager::instance()->CreateDirectory(dirname, recursive);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------

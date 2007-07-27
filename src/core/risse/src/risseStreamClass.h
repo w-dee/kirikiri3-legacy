@@ -105,6 +105,7 @@ public: // risse 用メソッドとか
 	read *
 	write *
 	truncate *
+	flush *
 	サブクラスでは以下のプロパティを実装すること ( * = optional )
 	size *
 */
@@ -140,6 +141,8 @@ public: // risse 用メソッドとか
 	//!				実装した方が高いパフォーマンスを得られるようならば実装すべき
 	risse_uint64 get_size();
 
+	//! @brief		ストリームをフラッシュする(書き込みバッファをフラッシュする)
+	void flush();
 
 	//! @brief		現在位置を得る
 	//! @return		現在位置

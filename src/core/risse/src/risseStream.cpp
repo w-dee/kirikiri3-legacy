@@ -118,6 +118,14 @@ risse_uint64 tStreamAdapter::GetSize()
 
 
 //---------------------------------------------------------------------------
+void tStreamAdapter::Flush()
+{
+	Stream->Do(ocFuncCall, NULL, ss_flush, 0, tMethodArgument::Empty());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_uint64 tStreamAdapter::GetPosition()
 {
 	return (risse_int64)Stream->GetPropertyDirect(ss_position);

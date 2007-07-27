@@ -864,6 +864,16 @@ tStreamInstance * tFileSystemInstance::open(const tString & filename,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tFileSystemInstance::flush()
+{
+	// 標準の flush メソッドは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -911,6 +921,7 @@ void tFileSystemClass::RegisterMembers()
 	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tFileSystemInstance::createDirectory);
 	BindFunction(this, tSS<'s','t','a','t'>(), &tFileSystemInstance::stat);
 	BindFunction(this, tSS<'o','p','e','n'>(), &tFileSystemInstance::open);
+	BindFunction(this, tSS<'f','l','u','s','h'>(), &tFileSystemInstance::flush);
 }
 //---------------------------------------------------------------------------
 

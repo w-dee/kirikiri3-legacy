@@ -313,6 +313,12 @@ risse_uint64 tMemoryStreamInstance::get_size()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tMemoryStreamInstance::flush()
+{
+	// なにもしない
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -353,6 +359,7 @@ void tMemoryStreamClass::RegisterMembers()
 	BindFunction(this, ss_write, &tMemoryStreamInstance::write);
 	BindFunction(this, ss_truncate, &tMemoryStreamInstance::truncate);
 	BindProperty(this, ss_size, &tMemoryStreamInstance::get_size);
+	BindFunction(this, ss_flush, &tMemoryStreamInstance::flush);
 }
 //---------------------------------------------------------------------------
 

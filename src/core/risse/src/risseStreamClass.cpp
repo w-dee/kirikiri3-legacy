@@ -78,6 +78,14 @@ risse_uint64 tStreamInstance::get_size()
 
 
 //---------------------------------------------------------------------------
+void tStreamInstance::flush()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_uint64 tStreamInstance::get_position()
 {
 	return tStreamAdapter(this).Tell();
@@ -158,6 +166,7 @@ void tStreamClass::RegisterMembers()
 	BindFunction(this, ss_write, &tStreamInstance::write);
 	BindFunction(this, ss_truncate, &tStreamInstance::truncate);
 	BindProperty(this, ss_size, &tStreamInstance::get_size);
+	BindFunction(this, ss_flush, &tStreamInstance::flush);
 	BindProperty(this, ss_position, &tStreamInstance::get_position, &tStreamInstance::set_position);
 	BindFunction(this, ss_readBuffer, &tStreamInstance::readBuffer);
 	BindFunction(this, ss_writeBuffer, &tStreamInstance::writeBuffer);

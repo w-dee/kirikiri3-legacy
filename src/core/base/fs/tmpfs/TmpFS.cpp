@@ -621,6 +621,14 @@ tStreamInstance * tTmpFSInstance::open(const tString & filename,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tTmpFSInstance::flush()
+{
+	// やることなし
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -660,6 +668,7 @@ void tTmpFSClass::RegisterMembers()
 	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tTmpFSInstance::createDirectory);
 	BindFunction(this, tSS<'s','t','a','t'>(), &tTmpFSInstance::stat);
 	BindFunction(this, tSS<'o','p','e','n'>(), &tTmpFSInstance::open);
+	BindFunction(this, tSS<'f','l','u','s','h'>(), &tTmpFSInstance::flush);
 
 	// MemoryStream を登録する
 	RegisterNormalMember(tSS<'M','e','m','o','r','y','S','t','r','e','a','m'>(),

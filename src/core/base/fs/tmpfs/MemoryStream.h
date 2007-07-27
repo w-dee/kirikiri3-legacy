@@ -121,6 +121,9 @@ public: // risse 用メソッドとか
 	//! @return		このストリームのサイズ
 	risse_uint64 get_size();
 
+	//! @brief		ストリームをフラッシュする(書き込みバッファをフラッシュする)
+	void flush();
+
 	// non-tBinaryStream based methods
 	void * GetInternalBuffer()  const { return Block->GetBlock(); }
 };

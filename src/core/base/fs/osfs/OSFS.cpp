@@ -170,6 +170,16 @@ risse_uint64 tOSNativeStreamInstance::get_size()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tOSNativeStreamInstance::flush()
+{
+	volatile tSynchronizer sync(this); // sync
+
+	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+
+	Internal->File.Flush();
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -207,6 +217,7 @@ void tOSNativeStreamClass::RegisterMembers()
 	BindFunction(this, ss_write, &tOSNativeStreamInstance::write);
 	BindFunction(this, ss_truncate, &tOSNativeStreamInstance::truncate);
 	BindProperty(this, ss_size, &tOSNativeStreamInstance::get_size);
+	BindFunction(this, ss_flush, &tOSNativeStreamInstance::flush);
 }
 //---------------------------------------------------------------------------
 
@@ -479,6 +490,15 @@ tStreamInstance * tOSFSInstance::open(const tString & filename, risse_uint32 fla
 
 
 //---------------------------------------------------------------------------
+void tOSFSInstance::flush()
+{
+	// 現状、何もしない。
+	// 本当は sync() を発行したほうがいいのかもしれないけれども………
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 wxString tOSFSInstance::ConvertToNativePathDelimiter(const wxString & path)
 {
 	wxString ret(path);
@@ -625,6 +645,7 @@ void tOSFSClass::RegisterMembers()
 	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tOSFSInstance::createDirectory);
 	BindFunction(this, tSS<'s','t','a','t'>(), &tOSFSInstance::stat);
 	BindFunction(this, tSS<'o','p','e','n'>(), &tOSFSInstance::open);
+	BindFunction(this, tSS<'f','l','u','s','h'>(), &tOSFSInstance::flush);
 
 	// OSNativeStream を登録する
 	RegisterNormalMember(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),

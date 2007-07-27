@@ -367,6 +367,8 @@ extern tStringData data_ss_truncate;
 static const tString & ss_truncate = *reinterpret_cast<const tString *>(&data_ss_truncate); //!< (static string)  "truncate" メソッド名
 extern tStringData data_ss_size;
 static const tString & ss_size = *reinterpret_cast<const tString *>(&data_ss_size); //!< (static string)  "size" プロパティ名
+extern tStringData data_ss_flush;
+static const tString & ss_flush = *reinterpret_cast<const tString *>(&data_ss_flush); //!< (static string)  "flush" メソッド名
 extern tStringData data_ss_readBuffer;
 static const tString & ss_readBuffer = *reinterpret_cast<const tString *>(&data_ss_readBuffer); //!< (static string)  "readBuffer" メソッド名
 extern tStringData data_ss_writeBuffer;

@@ -191,6 +191,7 @@ tStringData data_ss_read = { tSS<'r','e','a','d'>::data.Buffer,4 }; /*  "read" �
 tStringData data_ss_write = { tSS<'w','r','i','t','e'>::data.Buffer,5 }; /*  "write" メソッド名 */
 tStringData data_ss_truncate = { tSS<'t','r','u','n','c','a','t','e'>::data.Buffer,8 }; /*  "truncate" メソッド名 */
 tStringData data_ss_size = { tSS<'s','i','z','e'>::data.Buffer,4 }; /*  "size" プロパティ名 */
+tStringData data_ss_flush = { tSS<'f','l','u','s','h'>::data.Buffer,5 }; /*  "flush" メソッド名 */
 tStringData data_ss_readBuffer = { tSS<'r','e','a','d','B','u','f','f','e','r'>::data.Buffer,10 }; /*  "readBuffer" メソッド名 */
 tStringData data_ss_writeBuffer = { tSS<'w','r','i','t','e','B','u','f','f','e','r'>::data.Buffer,11 }; /*  "writeBuffer" メソッド名 */
 tStringData data_ss_StreamConsts = { tSS<'S','t','r','e','a','m','C','o','n','s','t','s'>::data.Buffer,12 }; /*  "StreamConsts" モジュール名 */

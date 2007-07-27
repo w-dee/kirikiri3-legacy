@@ -265,6 +265,12 @@ public:
 		// return GetType() == vtNull;
 	}
 
+	//! @brief		ポインタ部分を破壊する
+	void DestructPointer()
+	{
+		Ptr = 0;
+	}
+
 	//! @brief		内容を初期化する (void にする)
 	void Clear()
 	{

@@ -783,14 +783,6 @@ void tFileSystemInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 
 
-
-
-
-
-
-
-
-
 //---------------------------------------------------------------------------
 size_t tFileSystemInstance::walkAt(const tString & dirname,
 	const tMethodArgument &args)

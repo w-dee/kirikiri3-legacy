@@ -30,6 +30,8 @@ void tOSNativeStreamInstance::initialize(const tString & path, risse_uint32 flag
 {
 	volatile tSynchronizer sync(this); // sync
 
+	info.InitializeSuperClass();
+
 	// モードを決定する
 	wxFile::OpenMode mode;
 	switch(flags & tFileOpenModes::omAccessMask)
@@ -73,8 +75,8 @@ tOSNativeStreamInstance::~tOSNativeStreamInstance()
 void tOSNativeStreamInstance::dispose()
 {
 	volatile tSynchronizer sync(this); // sync
-	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
-	delete Internal; Internal = NULL;
+	if(Internal)
+		delete Internal, Internal = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -599,6 +601,7 @@ tOSFSClass::tOSFSClass(tScriptEngine * engine) :
 }
 //---------------------------------------------------------------------------
 
+
 //---------------------------------------------------------------------------
 void tOSFSClass::RegisterMembers()
 {
@@ -614,7 +617,7 @@ void tOSFSClass::RegisterMembers()
 	BindFunction(this, ss_construct, &tOSFSInstance::construct);
 	BindFunction(this, ss_initialize, &tOSFSInstance::initialize);
 
-	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tFileSystemInstance::walkAt);
+	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tOSFSInstance::walkAt);
 	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tOSFSInstance::isFile);
 	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tOSFSInstance::isDirectory);
 	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tOSFSInstance::removeFile);

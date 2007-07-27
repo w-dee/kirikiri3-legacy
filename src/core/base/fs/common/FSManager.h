@@ -34,6 +34,12 @@ class tFileSystemInstance;
 class tFileSystemIterationCallback : public tObjectInterface
 {
 public:
+	//! @brief		コンストラクタ
+	tFileSystemIterationCallback() :
+		tObjectInterface(tRisseScriptEngine::instance()->GetDefaultRTTI(), NULL)
+	{
+	}
+
 	//! @brief		Operate メソッド
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 

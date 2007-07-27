@@ -14,6 +14,8 @@
 #define MemoryStreamH
 
 #include "base/utils/RisaThread.h"
+#include "base/fs/common/FSManager.h"
+#include "base/gc/RisaGC.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -23,13 +25,12 @@ namespace Risa {
 //! @note		このメモリブロックは、複数のストリームで共有される可能性があり、
 //!				複数スレッドから同時アクセスされる可能性がある
 //---------------------------------------------------------------------------
-class tMemoryStreamBlock
+class tMemoryStreamBlock : public tDestructee
 {
-	tCriticalSection CS; //!< このメモリブロックへのアクセスを保護するクリティカルセクション
+	tCriticalSection CS;	//!< このメモリブロックへのアクセスを保護するクリティカルセクション
 	void * Block;			//!< メモリブロック
-	risse_size Size;			//!< メモリブロックのデータが入っている部分のサイズ
-	risse_size AllocSize;		//!< メモリブロックのアロケートしているサイズ( Size <= AllocSize )
-	risse_uint RefCount;		//!< 参照カウント
+	risse_size Size;		//!< メモリブロックのデータが入っている部分のサイズ
+	risse_size AllocSize;	//!< メモリブロックのアロケートしているサイズ( Size <= AllocSize )
 
 public:
 	//! @brief		コンストラクタ
@@ -38,11 +39,6 @@ protected:
 	//! @brief		デストラクタ
 	~tMemoryStreamBlock();
 public:
-	//! @brief		参照カウンタを一つ増やす
-	void AddRef();
-
-	//! @brief		参照カウンタを一つ減らす
-	void Release();
 
 	//! @brief		メモリブロックのサイズを変更する
 	//! @param		size 新しいサイズ
@@ -69,7 +65,7 @@ public:
 /*
 	this class provides a tBinaryStream based access method for a memory block.
 */
-class tMemoryStream : public tBinaryStream
+class tMemoryStreamInstance : public tStreamInstance
 {
 protected:
 	tMemoryStreamBlock * Block; //!< メモリブロック
@@ -79,44 +75,81 @@ protected:
 public:
 	//! @brief		コンストラクタ
 	//! @param		flags アクセスフラグ
-	tMemoryStream(risse_uint32 flags);
+	tMemoryStreamInstance();
 
-	//! @brief		コンストラクタ(他のメモリブロックを参照する場合)
-	//! @param		flags アクセスフラグ
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	~tMemoryStreamInstance() {;}
+
+	//! @brief		メモリブロックを設定する
 	//! @param		block メモリブロック
-	tMemoryStream(risse_uint32 flags, tMemoryStreamBlock * block);
+	void SetMemoryBlock(tMemoryStreamBlock * block) { Block = block; }
 
-	//! @brief		デストラクタ
-	~tMemoryStream();
+public: // risse 用メソッドとか
+	void construct() {;}
+	void initialize(risse_uint32 flags, const tNativeCallInfo &info);
 
-	//! @brief		シーク
-	//! @param		offset 移動オフセット
-	//! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
-	//! @return		移動後のファイルポインタ
-	risse_uint64 Seek(risse_int64 offset, risse_int whence);
+	//! @brief		ストリームを閉じる
+	//! @note		基本的にはこれでストリームを閉じること。
+	//!				このメソッドでストリームを閉じなかった場合の動作は
+	//!				「未定義」である
+	void dispose();
 
-	//! @brief		読み込み
-	//! @param		buffer 読み込み先バッファ
-	//! @param		read_size 読み込むバイト数
-	//! @return		実際に読み込まれたバイト数
-	risse_size Read(void *buffer, risse_size read_size);
+	//! @brief		指定位置にシークする
+	//! @param		offset			基準位置からのオフセット (正の数 = ファイルの後ろの方)
+	//! @param		whence			基準位置
+	//! @return		このメソッドは成功すれば真、失敗すれば偽を返す
+	bool seek(risse_int64 offset, tOrigin whence);
 
-	//! @brief		書き込み
-	//! @param		buffer 書き込むバッファ
-	//! @param		read_size 書き込みたいバイト数
-	//! @return		実際に書き込まれたバイト数
-	risse_size Write(const void *buffer, risse_size write_size);
+	//! @brief		現在位置を取得する
+	//! @return		現在位置(先頭からのオフセット)
+	risse_uint64 tell();
 
-	//! @brief		ファイルの終わりを現在のポインタに設定する
-	void SetEndOfFile();
+	//! @brief		ストリームから読み込む
+	//! @param		buf		読み込んだデータを書き込む先
+	//! @return		実際に読み込まれたサイズ
+	risse_size read(const tOctet & buf);
 
-	risse_uint64 GetSize() { return Block->GetSize(); }
+	//! @brief		ストリームに書き込む
+	//! @param		buf		書き込むデータ
+	//! @return		実際に書き込まれたサイズ
+	risse_uint write(const tOctet & buf);
+
+	//! @brief		ストリームを現在位置で切りつめる
+	void truncate();
+
+	//! @brief		サイズを得る
+	//! @return		このストリームのサイズ
+	risse_uint64 get_size();
 
 	// non-tBinaryStream based methods
 	void * GetInternalBuffer()  const { return Block->GetBlock(); }
 };
 //---------------------------------------------------------------------------
 
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"MemoryStream" クラス
+//---------------------------------------------------------------------------
+class tMemoryStreamClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tMemoryStreamClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public:
+};
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 } // namespace Risa

@@ -34,6 +34,7 @@ namespace Risa {
 class tRisseScriptEngine : public singleton_base<tRisseScriptEngine>
 {
 	tScriptEngine *ScriptEngine; //!< スクリプトエンジンインスタンス
+	const tRTTI * DefaultRTTI; //!< デフォルトの RTTI (スクリプトエンジンへのポインタを含んでいるだけ)
 
 public:
 	//! @brief		コンストラクタ
@@ -51,6 +52,9 @@ public:
 		{ if(!ScriptEngine) return tVariant::GetNullObject();
 		  return ScriptEngine->GetGlobalObject(); }
 		//!< グローバルオブジェクトを返す
+
+	const tRTTI * GetDefaultRTTI() const { return DefaultRTTI; }
+		//!< デフォルトの RTTI を帰す
 
 	//! @brief		グローバルにオブジェクトを登録する
 	//! @param		name    オブジェクトにつけたい名前

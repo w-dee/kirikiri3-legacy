@@ -43,7 +43,7 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 
 //---------------------------------------------------------------------------
 tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
-	tBinaryStream * src) :
+	tStreamAdapter * src) :
 	Parent(parent)
 {
 	if(Type == ntDirectory)
@@ -69,7 +69,7 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 		src->ReadBuffer(&metalen, sizeof(metalen));
 		metalen = wxUINT32_SWAP_ON_BE(metalen);
 		if(metalen == 0)
-			eRisaException::Throw(RISSE_WS_TR("invalid metadata length (data may be corrupted)"));
+			tIOExceptionClass::Throw(RISSE_WS_TR("invalid metadata length (data may be corrupted)"));
 
 		if(metadataid == 0x01)
 		{
@@ -109,7 +109,7 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 				done = true;
 				break;
 			default:
-				eRisaException::Throw(tString(
+				tIOExceptionClass::Throw(tString(
 						wxString::Format(RISSE_WS_TR("unsupported node id %x"),
 						static_cast<int>(nodetypeid))));
 			}
@@ -122,7 +122,7 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 		src->ReadBuffer(&blocksize, sizeof(blocksize));
 		blocksize = wxUINT64_SWAP_ON_BE(blocksize);
 		if(static_cast<size_t>(blocksize) != blocksize)
-				eRisaException::Throw(RISSE_WS_TR("too big block size"));
+				tIOExceptionClass::Throw(RISSE_WS_TR("too big block size"));
 		File->ChangeSize(static_cast<size_t>(blocksize));
 		File->Fit();
 		src->ReadBuffer(File->GetBlock(), static_cast<size_t>(blocksize));
@@ -136,36 +136,7 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 
 
 //---------------------------------------------------------------------------
-tTmpFSNode::~tTmpFSNode()
-{
-	// デストラクタ
-	// デストラクタは、保持しているノードを「すべて」解放するので注意
-	// 要するに、このノード以下のすべてのノードも連鎖的に一緒に消滅する
-	if(Type == ntDirectory)
-	{
-		// このノードはディレクトリ
-		// Directory が保持しているすべての要素を解放する
-		tHashTable<tString, tTmpFSNode *>::tIterator i;
-		for(i = Directory->GetFirst(); !i.IsNull(); i++)
-		{
-			delete (i.GetValue());
-			i.GetValue() = NULL;
-		}
-
-		// Directory も解放する
-		delete Directory, Directory = NULL;
-	}
-	else if(Type == ntFile)
-	{
-		// このノードはファイル
-		File->Release(), File = NULL;
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTmpFSNode::Serialize(tBinaryStream * dest) const
+void tTmpFSNode::Serialize(tStreamAdapter * dest) const
 {
 	// ノードのタイプを記録
 	if(Type == ntDirectory)
@@ -190,8 +161,8 @@ void tTmpFSNode::Serialize(tBinaryStream * dest) const
 		dest->WriteBuffer("\0", 1); // メタデータの終わりとディレクトリの開始
 
 		// 全ての子要素に対して再帰する
-		tHashTable<tString, tTmpFSNode *>::tIterator i;
-		for(i = Directory->GetFirst(); !i.IsNull(); i++)
+		tHashTable<tString, tTmpFSNode *>::tIterator i(*Directory);
+		for(; !i.End(); i++)
 		{
 			i.GetValue()->Serialize(dest);
 		}
@@ -228,14 +199,8 @@ tTmpFSNode * tTmpFSNode::GetSubNode(const tString & name)
 bool tTmpFSNode::DeleteSubNodeByName(const tString & name)
 {
 	if(Type != ntDirectory) return false;
-	tTmpFSNode * node = GetSubNode(name);
-	if(node)
-	{
-		delete node;
-		Directory->Delete(name);
-		return true;
-	}
-	return false;
+
+	return Directory->Delete(name);
 }
 //---------------------------------------------------------------------------
 
@@ -275,27 +240,25 @@ risse_size tTmpFSNode::GetSize() const
 
 
 //---------------------------------------------------------------------------
-size_t tTmpFSNode::Iterate(tFileSystemIterationCallback * callback)
+size_t tTmpFSNode::Iterate(tVariant & callback)
 {
 	if(Type != ntDirectory) return 0;
 	size_t count = 0;
-	tHashTable<tString, tTmpFSNode *>::tIterator i;
-	for(i = Directory->GetFirst(); !i.IsNull(); i++)
+	tHashTable<tString, tTmpFSNode *>::tIterator i(*Directory);
+	for(; !i.End(); i++)
 	{
 		count ++;
 		if(i.GetValue()->Type == ntDirectory)
 		{
-			if(callback)
-			{
-				if(!callback->OnDirectory(i.GetValue()->Name)) break;
-			}
+			callback.Do(tRisseScriptEngine::instance()->GetScriptEngine(),
+				ocFuncCall, NULL, tString::GetEmptyString(), 0,
+				tMethodArgument::New(i.GetValue()->Name, false));
 		}
 		else if(i.GetValue()->Type == ntFile)
 		{
-			if(callback)
-			{
-				if(!callback->OnFile(i.GetValue()->Name)) break;
-			}
+			callback.Do(tRisseScriptEngine::instance()->GetScriptEngine(),
+				ocFuncCall, NULL, tString::GetEmptyString(), 0,
+				tMethodArgument::New(i.GetValue()->Name, true));
 		}
 	}
 	return count;
@@ -312,7 +275,7 @@ size_t tTmpFSNode::Iterate(tFileSystemIterationCallback * callback)
 
 
 //---------------------------------------------------------------------------
-const unsigned char tTmpFS::SerializeMagic[] = {
+const unsigned char tTmpFSInstance::SerializeMagic[] = {
 	't', 'm' , 'p', 'f', 's', 0x1a,
 	0x00, // ファイルレイアウトバージョン
 	0x00  // reserved
@@ -321,7 +284,7 @@ const unsigned char tTmpFS::SerializeMagic[] = {
 
 
 //---------------------------------------------------------------------------
-tTmpFS::tTmpFS()
+tTmpFSInstance::tTmpFSInstance()
 {
 	// 変数初期化
 	CreateRoot();
@@ -330,22 +293,127 @@ tTmpFS::tTmpFS()
 
 
 //---------------------------------------------------------------------------
-tTmpFS::~tTmpFS()
+void tTmpFSInstance::SerializeTo(tStreamAdapter * dest)
 {
-	RemoveRoot();
+	volatile tSynchronizer sync(this); // sync
+
+	// マジックを書き込む
+	dest->WriteBuffer(SerializeMagic, 8);
+
+	// root に対して内容Serialize
+	// (すると後は自動的に全てのノードがシリアライズされる)
+	Root->Serialize(dest);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-size_t tTmpFS::GetFileListAt(const tString & dirname,
-	tFileSystemIterationCallback * callback)
+void tTmpFSInstance::SerializeTo(const tString & filename)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	tStreamAdapter adapter(tFileSystemManager::instance()->Open(filename, tFileOpenModes::omRead));
+
+	SerializeTo(&adapter);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tTmpFSInstance::UnserializeFrom(tStreamAdapter * src)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// マジックを読み込み、比較する
+	unsigned char magic[8];
+	src->ReadBuffer(magic, 8);
+
+	unsigned char firstnodetype;
+	src->ReadBuffer(&firstnodetype, 1);
+		// 最初のノードタイプ(ディレクトリを表す 0x80 になってないとおかしい)
+
+	if(memcmp(magic, SerializeMagic, 8) || firstnodetype != 0x80)
+		tIOExceptionClass::Throw(RISSE_WS_TR("not a tmpfs archive"));
+
+	// 再帰的に内容を読み込む
+	Root = new tTmpFSNode(NULL, tTmpFSNode::ntDirectory, src);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tTmpFSInstance::UnserializeFrom(const tString & filename)
+{
+	tStreamAdapter adapter(tFileSystemManager::instance()->Open(filename, tFileOpenModes::omWrite));
+
+	UnserializeFrom(&adapter);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tTmpFSNode * tTmpFSInstance::GetNodeAt(const tString & name)
+{
+	// '/' で name を区切り、順に root からノードをたどっていく
+	const risse_char * p = name.c_str();
+	const risse_char *pp = p;
+
+	tTmpFSNode *node = Root;
+
+	while(*p)
+	{
+		while(*p != RISSE_WC('/') && *p != 0) p++;
+		if(p != pp)
+		{
+			// '/' で挟まれた区間が得られた
+			node = node->GetSubNode(tString(p, p - pp));
+			if(!node) return NULL;
+		}
+		pp = p;
+	}
+
+	if(name.EndsWith(RISSE_WC('/')) && !node->IsDirectory())
+	{
+		// 名前の最後が '/' で終わっている (つまり、ディレクトリである
+		// ことを期待している) がノードがディレクトリではない
+		return NULL; // null を返す
+	}
+
+	return node;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tTmpFSInstance::CreateRoot()
+{
+	if(Root) return;
+
+	// ルートノードを作成
+	Root = new tTmpFSNode(NULL, tTmpFSNode::ntDirectory, tString());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tTmpFSInstance::Clear()
+{
+	Root = NULL;
+	CreateRoot();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+size_t tTmpFSInstance::walkAt(const tString & dirname,
+		const tMethodArgument &args)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	args.ExpectBlockArgumentCount(1); // ブロック引数が一つなければならない
+	tVariant callback(args.GetBlockArgument(0));
 
 	tTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsDirectory()) eRisaException::Throw(RISSE_WS_TR("specified name is not a directory"));
+	if(!node->IsDirectory()) tIOExceptionClass::Throw(RISSE_WS_TR("specified name is not a directory"));
 
 	return node->Iterate(callback);
 }
@@ -353,9 +421,9 @@ size_t tTmpFS::GetFileListAt(const tString & dirname,
 
 
 //---------------------------------------------------------------------------
-bool tTmpFS::FileExists(const tString & filename)
+bool tTmpFSInstance::isFile(const tString & filename)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	tTmpFSNode * node = GetNodeAt(filename);
 	if(!node) return false;
@@ -366,9 +434,9 @@ bool tTmpFS::FileExists(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-bool tTmpFS::DirectoryExists(const tString & dirname)
+bool tTmpFSInstance::isDirectory(const tString & dirname)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	tTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) return false;
@@ -379,13 +447,13 @@ bool tTmpFS::DirectoryExists(const tString & dirname)
 
 
 //---------------------------------------------------------------------------
-void tTmpFS::RemoveFile(const tString & filename)
+void tTmpFSInstance::removeFile(const tString & filename)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	tTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) eRisaException::Throw(RISSE_WS_TR("specified name is not a file"));
+	if(!node->IsFile()) tIOExceptionClass::Throw(RISSE_WS_TR("specified name is not a file"));
 
 	// 親ノードから切り離す
 	tTmpFSNode * parent = node->GetParent();
@@ -396,23 +464,26 @@ void tTmpFS::RemoveFile(const tString & filename)
 
 
 //---------------------------------------------------------------------------
-void tTmpFS::RemoveDirectory(const tString & dirname, bool recursive)
+void tTmpFSInstance::removeDirectory(const tString & dirname,
+		const tMethodArgument &args)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	tTmpFSNode * node = GetNodeAt(dirname);
 	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsDirectory()) eRisaException::Throw(RISSE_WS_TR("specified name is not a directory"));
+	if(!node->IsDirectory()) tIOExceptionClass::Throw(RISSE_WS_TR("specified name is not a directory"));
+
+	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
 
 	if(!recursive)
 	{
 		// recursive が false の場合、消そうとしたディレクトリが空で無ければ
 		// 失敗する。
 
-		if(node->HasSubNode()) eRisaException::Throw(RISSE_WS_TR("specified directory is not empty"));
+		if(node->HasSubNode()) tIOExceptionClass::Throw(RISSE_WS_TR("specified directory is not empty"));
 
 		// root ノードは消すことはできない
-		if(node == Root) eRisaException::Throw(RISSE_WS_TR("can not remove file system root directory"));
+		if(node == Root) tIOExceptionClass::Throw(RISSE_WS_TR("can not remove file system root directory"));
 	}
 	else
 	{
@@ -435,10 +506,12 @@ void tTmpFS::RemoveDirectory(const tString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tTmpFS::CreateDirectory(const tString & dirname, bool recursive)
+void tTmpFSInstance::createDirectory(const tString & dirname,
+		const tMethodArgument &args)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
+	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
 
 	if(recursive)
 	{
@@ -473,7 +546,7 @@ void tTmpFS::CreateDirectory(const tString & dirname, bool recursive)
 					if(node->IsFile())
 					{
 						// ファイルだったりする
-						eRisaException::Throw(RISSE_WS_TR("about to create file on "));
+						tIOExceptionClass::Throw(RISSE_WS_TR("can not create directory on file"));
 					}
 				}
 			}
@@ -500,10 +573,14 @@ void tTmpFS::CreateDirectory(const tString & dirname, bool recursive)
 
 
 //---------------------------------------------------------------------------
-void tTmpFS::Stat(const tString & filename, tStatStruc & struc)
+tObjectInterface * tTmpFSInstance::stat(const tString & filename)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
+	tIOExceptionClass::Throw(tString(RISSE_WS_TR("stat is not yet implemented")));
+
+	return NULL;
+/*
 	// XXX: MACタイムは現バージョンでは保存していない
 	struc.Clear();
 
@@ -511,142 +588,103 @@ void tTmpFS::Stat(const tString & filename, tStatStruc & struc)
 	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 
 	struc.Size = node->GetSize();
+*/
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tBinaryStream * tTmpFS::CreateStream(const tString & filename, risse_uint32 flags)
+tStreamInstance * tTmpFSInstance::open(const tString & filename,
+		risse_uint32 flags)
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	volatile tSynchronizer sync(this); // sync
 
 	tTmpFSNode * node = GetNodeAt(filename);
 	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) eRisaException::Throw(RISSE_WS_TR("specified name is not a file"));
+	if(!node->IsFile()) tIOExceptionClass::Throw(RISSE_WS_TR("specified name is not a file"));
 
-	return new tMemoryStream(flags, node->GetMemoryStreamBlockNoAddRef());
+	// MemoryStreamClass からインスタンスを生成して返す
+	tVariant obj =
+		tRisseFSClassRegisterer<tTmpFSClass>::instance()->GetClassInstance()->
+			GetMemoryStreamClass()->Invoke(ss_new, (risse_int64)flags, true);
+				// 第２引数の true は、ストリームになんらメモリブロックがアタッチ
+				// されずにストリームが作成されることを表す(下でアタッチする)
+	obj.AssertClass(tRisseFSClassRegisterer<tTmpFSClass>::instance()->GetClassInstance()->
+									GetMemoryStreamClass());
+	tMemoryStreamInstance *memstream = 
+		reinterpret_cast<tMemoryStreamInstance *>(obj.GetObjectInterface());
+
+	memstream->SetMemoryBlock(node->GetMemoryStreamBlock());
+
+	return memstream;
 }
 //---------------------------------------------------------------------------
 
 
+
+
+
+
 //---------------------------------------------------------------------------
-void tTmpFS::SerializeTo(tBinaryStream * dest)
+tTmpFSClass::tTmpFSClass(tScriptEngine * engine) :
+	tClassBase(tSS<'T','m','p','F','S'>(),
+		tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance())
 {
-	volatile tCriticalSection::tLocker holder(CS);
+	MemoryStreamClass = new tMemoryStreamClass(engine);
 
-	// マジックを書き込む
-	dest->WriteBuffer(SerializeMagic, 8);
-
-	// root に対して内容Serialize
-	// (すると後は自動的に全てのノードがシリアライズされる)
-	Root->Serialize(dest);
+	RegisterMembers();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTmpFS::SerializeTo(const tString & filename)
+void tTmpFSClass::RegisterMembers()
 {
-	std::auto_ptr<tBinaryStream>
-		stream(tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_WRITE));
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
 
-	SerializeTo(stream.get());
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tTmpFSClass::ovulate);
+	BindFunction(this, ss_construct, &tTmpFSInstance::construct);
+	BindFunction(this, ss_initialize, &tTmpFSInstance::initialize);
+
+	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tTmpFSInstance::walkAt);
+	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tTmpFSInstance::isFile);
+	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tTmpFSInstance::isDirectory);
+	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tTmpFSInstance::removeFile);
+	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tTmpFSInstance::removeDirectory);
+	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tTmpFSInstance::createDirectory);
+	BindFunction(this, tSS<'s','t','a','t'>(), &tTmpFSInstance::stat);
+	BindFunction(this, tSS<'o','p','e','n'>(), &tTmpFSInstance::open);
+
+	// MemoryStream を登録する
+	RegisterNormalMember(tSS<'M','e','m','o','r','y','S','t','r','e','a','m'>(),
+			tVariant(MemoryStreamClass), tMemberAttribute(), true);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTmpFS::UnserializeFrom(tBinaryStream * src)
+tVariant tTmpFSClass::ovulate()
 {
-	volatile tCriticalSection::tLocker holder(CS);
-
-	// マジックを読み込み、比較する
-	unsigned char magic[8];
-	src->ReadBuffer(magic, 8);
-
-	unsigned char firstnodetype;
-	src->ReadBuffer(&firstnodetype, 1);
-		// 最初のノードタイプ(ディレクトリを表す 0x80 になってないとおかしい)
-
-	if(memcmp(magic, SerializeMagic, 8) || firstnodetype != 0x80)
-		eRisaException::Throw(RISSE_WS_TR("not a tmpfs archive"));
-
-	// 再帰的に内容を読み込む
-	Root = new tTmpFSNode(NULL, tTmpFSNode::ntDirectory, src);
+	return tVariant(new tTmpFSInstance());
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-void tTmpFS::UnserializeFrom(const tString & filename)
-{
-	std::auto_ptr<tBinaryStream>
-		stream(tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ));
 
-	UnserializeFrom(stream.get());
-}
-//---------------------------------------------------------------------------
+
+
+
 
 
 //---------------------------------------------------------------------------
-tTmpFSNode * tTmpFS::GetNodeAt(const tString & name)
-{
-	// '/' で name を区切り、順に root からノードをたどっていく
-	const risse_char * p = name.c_str();
-	const risse_char *pp = p;
-
-	tTmpFSNode *node = Root;
-
-	while(*p)
-	{
-		while(*p != RISSE_WC('/') && *p != 0) p++;
-		if(p != pp)
-		{
-			// '/' で挟まれた区間が得られた
-			node = node->GetSubNode(tString(p, p - pp));
-			if(!node) return NULL;
-		}
-		pp = p;
-	}
-
-	if(name.EndsWith(RISSE_WC('/')) && !node->IsDirectory())
-	{
-		// 名前の最後が '/' で終わっている (つまり、ディレクトリである
-		// ことを期待している) がノードがディレクトリではない
-		return NULL; // null を返す
-	}
-
-	return node;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTmpFS::CreateRoot()
-{
-	if(Root) return;
-
-	// ルートノードを作成
-	Root = new tTmpFSNode(NULL, tTmpFSNode::ntDirectory, tString());
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTmpFS::RemoveRoot()
-{
-	// root ノードを削除
-	delete Root, Root = NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTmpFS::Clear()
-{
-	RemoveRoot();
-	CreateRoot();
-}
+//! @brief		TmpFS クラスレジストラ
+template class tRisseFSClassRegisterer<tTmpFSClass>;
 //---------------------------------------------------------------------------
 
 

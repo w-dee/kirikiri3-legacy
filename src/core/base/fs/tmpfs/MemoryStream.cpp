@@ -19,13 +19,18 @@ namespace Risa {
 RISSE_DEFINE_SOURCE_ID(64253,18417,33137,18368,23694,7632,14591,23108);
 //---------------------------------------------------------------------------
 
+
+/*
+	将来的にはここは別の、もっと効率のよい固定ブロックベースのアロケータに変える予定。
+*/
+
+
 //---------------------------------------------------------------------------
 tMemoryStreamBlock::tMemoryStreamBlock()
 {
 	Block = NULL;
 	Size = 0;
 	AllocSize = 0;
-	RefCount = 1;
 }
 //---------------------------------------------------------------------------
 
@@ -33,34 +38,7 @@ tMemoryStreamBlock::tMemoryStreamBlock()
 //---------------------------------------------------------------------------
 tMemoryStreamBlock::~tMemoryStreamBlock()
 {
-	if(Block) FreeCollectee(Block);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tMemoryStreamBlock::AddRef()
-{
-	volatile tCriticalSection::tLocker holder(CS);
-
-	RefCount ++;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tMemoryStreamBlock::Release()
-{
-	risse_uint decremented_count;
-
-	{
-		volatile tCriticalSection::tLocker holder(CS);
-
-		RefCount --;
-		decremented_count = RefCount;
-	}
-
-	if(decremented_count == 0) delete this;
+	if(Block) FreeCollectee(Block), Block = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -81,11 +59,14 @@ void tMemoryStreamBlock::ChangeSize(risse_size size)
 	// ならない場合
 
 	// 確保するサイズを決定する
+	// XXX: おそらく間違いなく、ReallocCollectee では新しいメモリブロックの
+	// 確保と、そこへのメモリブロックのコピーが発生する。
+	// したがって非効率的。
 	risse_size onesize;
 	if(AllocSize < 64*1024) onesize = 4*1024;
 	else if(AllocSize < 512*1024) onesize = 16*1024;
 	else if(AllocSize < 4096*1024) onesize = 256*1024;
-	else onesize = 2024*1024;
+	else onesize = 512*1024;
 	AllocSize = size + onesize;
 
 	// メモリを確保する
@@ -95,7 +76,7 @@ void tMemoryStreamBlock::ChangeSize(risse_size size)
 		Block = ReallocCollectee(Block, AllocSize);
 
 	if(AllocSize && !Block)
-		eRisaException::Throw(RISSE_WS_TR("insufficient memory"));
+		tIOExceptionClass::Throw(RISSE_WS_TR("insufficient memory"));
 		// this exception cannot be repaird; a fatal error.
 
 	AllocSize = Size = size;
@@ -119,7 +100,7 @@ void tMemoryStreamBlock::Fit()
 		else
 			Block = ReallocCollectee(Block, Size);
 		if(Size && !Block)
-			eRisaException::Throw(RISSE_WS_TR("insufficient memory"));
+			tIOExceptionClass::Throw(RISSE_WS_TR("insufficient memory"));
 		AllocSize = Size;
 	}
 }
@@ -131,138 +112,260 @@ void tMemoryStreamBlock::Fit()
 
 
 //---------------------------------------------------------------------------
-tMemoryStream::tMemoryStream(risse_uint32 flags)
+tMemoryStreamInstance::tMemoryStreamInstance()
 {
-	Flags = flags;
-	Block = new tMemoryStreamBlock();
-
-	volatile tCriticalSection::tLocker holder(Block->GetCS());
-	CurrentPos = flags & RISSE_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
+	Flags = 0;
+	Block = NULL;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tMemoryStream::tMemoryStream(risse_uint32 flags, tMemoryStreamBlock * block)
+void tMemoryStreamInstance::initialize(risse_uint32 flags, const tNativeCallInfo &info)
 {
-	Flags = flags;
-	Block = block;
-
-	volatile tCriticalSection::tLocker holder(Block->GetCS());
-	Block->AddRef();
-	CurrentPos = flags & RISSE_BS_ACCESS_APPEND_BIT ? Block->GetSize() : 0;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tMemoryStream::~tMemoryStream()
-{
-	Block->Fit(); // メモリブロックのよけいな余裕を解放
-	Block->Release();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_uint64 tMemoryStream::Seek(risse_int64 offset, risse_int whence)
-{
-	volatile tCriticalSection::tLocker holder(Block->GetCS());
-
-	risse_int64 newpos;
-	switch(whence)
+	volatile tSynchronizer sync(this); // sync
 	{
-	case RISSE_BS_SEEK_SET:
-		if(offset >= 0)
-		{
-			if(offset <= Block->GetSize()) CurrentPos = offset;
-		}
-		return CurrentPos;
+		info.InitializeSuperClass(); // スーパークラスのコンストラクタを呼ぶ
 
-	case RISSE_BS_SEEK_CUR:
-		if((newpos = offset + static_cast<risse_int64>(CurrentPos)) >= 0)
-		{
-			risse_uint np = static_cast<risse_uint>(newpos);
-			if(np <= Block->GetSize()) CurrentPos = np;
-		}
-		return CurrentPos;
+		bool open_stream = info.args.HasArgument(1) ? (bool)info.args[1] : true;
 
-	case RISSE_BS_SEEK_END:
-		if((newpos = offset + static_cast<risse_int64>(Block->GetSize())) >= 0)
+		Flags = flags;
+		CurrentPos = 0;
+		Block = NULL;
+
+		if(open_stream)
 		{
-			risse_uint np = static_cast<risse_uint>(newpos);
-			if(np <= Block->GetSize()) CurrentPos = np;
+			// open_stream が true の場合は空のストリームを作る
+			Block = new tMemoryStreamBlock();
 		}
+
+		if(Block)
+		{
+			volatile tCriticalSection::tLocker holder(Block->GetCS());
+			CurrentPos = flags & tFileOpenModes::omAppendBit ? Block->GetSize() : 0;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tMemoryStreamInstance::dispose()
+{
+	volatile tSynchronizer sync(this); // sync
+	{
+		if(Block)
+		{
+			Block->Fit(); // メモリブロックのよけいな余裕を解放
+			Block = NULL;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tMemoryStreamInstance::seek(risse_int64 offset, tOrigin whence)
+{
+	volatile tSynchronizer sync(this); // sync
+	{
+		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+
+		volatile tCriticalSection::tLocker holder(Block->GetCS());
+
+		risse_int64 newpos;
+		switch(whence)
+		{
+		case tStreamConstants::soSet:
+			newpos = offset;
+			break;
+
+		case tStreamConstants::soCur:
+			newpos = static_cast<risse_int64>(CurrentPos) + offset;
+			break;
+
+		case tStreamConstants::soEnd:
+			newpos = static_cast<risse_int64>(Block->GetSize()) + offset;
+			break;
+		}
+
+		if(newpos >= 0 && newpos <= Block->GetSize())
+		{
+			CurrentPos = newpos;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint64 tMemoryStreamInstance::tell()
+{
+	volatile tSynchronizer sync(this); // sync
+	{
+		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+
 		return CurrentPos;
 	}
-	return CurrentPos;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tMemoryStream::Read(void *buffer, risse_size read_size)
+risse_size tMemoryStreamInstance::read(const tOctet & buf)
 {
-	volatile tCriticalSection::tLocker holder(Block->GetCS());
-
-	if(!(Flags & RISSE_BS_ACCESS_READ_BIT))
-		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no read-access)"));
-
-	if(CurrentPos > Block->GetSize()) return 0; // can not read from there
-
-	if(CurrentPos + read_size >= Block->GetSize())
+	volatile tSynchronizer sync(this); // sync
 	{
-		read_size = Block->GetSize() - CurrentPos;
+		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+
+		volatile tCriticalSection::tLocker holder(Block->GetCS());
+
+		if(!(Flags & tFileOpenModes::omReadBit))
+			tIOExceptionClass::Throw(RISSE_WS_TR("access denied (stream has no read-access)"));
+
+		if(CurrentPos >= Block->GetSize()) return 0; // can not read from there
+
+		risse_size read_size = buf.GetLength();
+
+		if(CurrentPos + read_size >= Block->GetSize())
+		{
+			read_size = Block->GetSize() - CurrentPos;
+		}
+
+		memcpy(const_cast<risse_uint8*>(buf.Pointer()),
+			reinterpret_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos,
+			read_size);
+
+		CurrentPos += read_size;
+
+		return read_size;
 	}
-
-	memcpy(buffer, reinterpret_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos, read_size);
-
-	CurrentPos += read_size;
-
-	return read_size;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tMemoryStream::Write(const void *buffer, risse_size write_size)
+risse_uint tMemoryStreamInstance::write(const tOctet & buf)
 {
-	volatile tCriticalSection::tLocker holder(Block->GetCS());
-
-	if(!(Flags & RISSE_BS_ACCESS_WRITE_BIT))
-		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
-
-	// adjust current file pointer
-	if(CurrentPos > Block->GetSize()) return 0; // can not write there
-
-	// writing may increase the internal buffer size.
-	risse_uint newpos = CurrentPos + write_size;
-	if(newpos >= Block->GetSize())
+	volatile tSynchronizer sync(this); // sync
 	{
-		// exceeds Size
-		Block->ChangeSize(newpos);
+		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+
+		volatile tCriticalSection::tLocker holder(Block->GetCS());
+
+		if(!(Flags & tFileOpenModes::omWriteBit))
+			tIOExceptionClass::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
+
+		// writing may increase the internal buffer size.
+		risse_size write_size = buf.GetLength();
+
+		risse_uint newpos = CurrentPos + write_size;
+		if(newpos >= Block->GetSize())
+		{
+			// exceeds Size
+			Block->ChangeSize(newpos);
+		}
+
+		memcpy(reinterpret_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos,
+			buf.Pointer(), write_size);
+
+		CurrentPos = newpos;
+
+		return write_size;
 	}
-
-	memcpy(reinterpret_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos, buffer, write_size);
-
-	CurrentPos = newpos;
-
-	return write_size;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tMemoryStream::SetEndOfFile()
+void tMemoryStreamInstance::truncate()
 {
+	volatile tSynchronizer sync(this); // sync
+	if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+
 	volatile tCriticalSection::tLocker holder(Block->GetCS());
 
-	if(!(Flags & RISSE_BS_ACCESS_WRITE_BIT))
-		eRisaException::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
+	if(!(Flags & tFileOpenModes::omWriteBit))
+		tIOExceptionClass::Throw(RISSE_WS_TR("access denied (stream has no write-access)"));
 
 	Block->ChangeSize(CurrentPos);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint64 tMemoryStreamInstance::get_size()
+{
+	volatile tSynchronizer sync(this); // sync
+	{
+		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+
+		volatile tCriticalSection::tLocker holder(Block->GetCS());
+
+		return Block->GetSize();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tMemoryStreamClass::tMemoryStreamClass(tScriptEngine * engine) :
+	tClassBase(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(), engine->StreamClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tMemoryStreamClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tMemoryStreamClass::ovulate);
+	BindFunction(this, ss_construct, &tMemoryStreamInstance::construct);
+	BindFunction(this, ss_initialize, &tMemoryStreamInstance::initialize);
+	BindFunction(this, ss_dispose, &tMemoryStreamInstance::dispose);
+	BindFunction(this, ss_seek, &tMemoryStreamInstance::seek);
+	BindFunction(this, ss_tell, &tMemoryStreamInstance::tell);
+	BindFunction(this, ss_read, &tMemoryStreamInstance::read);
+	BindFunction(this, ss_write, &tMemoryStreamInstance::write);
+	BindFunction(this, ss_truncate, &tMemoryStreamInstance::truncate);
+	BindProperty(this, ss_size, &tMemoryStreamInstance::get_size);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tMemoryStreamClass::ovulate()
+{
+	return tVariant(new tMemoryStreamInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 

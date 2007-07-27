@@ -23,7 +23,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief ノードを表すクラス
 //---------------------------------------------------------------------------
-class tTmpFSNode
+class tTmpFSNode : public tCollectee
 {
 public:
 	enum tType { ntDirectory, ntFile  };
@@ -48,15 +48,12 @@ public:
 	//! @param		parent 親ノード
 	//! @param		type ノードタイプ
 	//! @param		src 入力もとストリーム
-	tTmpFSNode(tTmpFSNode *parent, tType type, tBinaryStream * src);
-
-	//! @brief		デストラクタ
-	~tTmpFSNode();
+	tTmpFSNode(tTmpFSNode *parent, tType type, tStreamAdapter * src);
 
 public:
 	//! @brief		内容をシリアライズする
 	//! @param		dest 出力先ストリーム
-	void Serialize(tBinaryStream * dest) const;
+	void Serialize(tStreamAdapter * dest) const;
 
 	//! @brief		指定された名前を持つノードを返す
 	//! @param		name 名前
@@ -84,7 +81,7 @@ public:
 	tType GetType() const { return Type; }
 	bool IsFile() const { return Type == ntFile; }
 	bool IsDirectory() const { return Type == ntDirectory; }
-	tMemoryStreamBlock * GetMemoryStreamBlockNoAddRef() { return File; } 
+	tMemoryStreamBlock * GetMemoryStreamBlock() { return File; } 
 	tTmpFSNode * GetParent() { return Parent; }
 	const tString & GetName() const { return Name; }
 	bool HasSubNode() const { return Type == ntDirectory &&
@@ -96,7 +93,7 @@ public:
 
 	//! @brief		すべての子要素に対して callback を呼び出す
 	//! @return		callback を呼び出した回数
-	size_t Iterate(tFileSystemIterationCallback * callback);
+	size_t Iterate(tVariant & callback);
 
 };
 //---------------------------------------------------------------------------
@@ -105,9 +102,8 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		tmp ファイルシステム
 //---------------------------------------------------------------------------
-class tTmpFS : public tFileSystem
+class tTmpFSInstance : public tFileSystemInstance
 {
-	tCriticalSection CS; //!< このファイルシステムを保護するクリティカルセクション
 	tTmpFSNode * Root; //!< ルートノード
 
 	//! @brief		シリアライズ時のファイルの先頭に着くマジック
@@ -115,58 +111,12 @@ class tTmpFS : public tFileSystem
 
 public:
 	//! @brief		コンストラクタ
-	tTmpFS();
+	tTmpFSInstance();
 
-	//-- tFileSystem メンバ
-	//! @brief		デストラクタ
-	~tTmpFS();
-
-	//! @brief		ファイル一覧を取得する
-	//! @param		dirname ディレクトリ名
-	//! @param		callback コールバックオブジェクト
-	//! @return		取得できたファイル数
-	size_t GetFileListAt(const tString & dirname,
-		tFileSystemIterationCallback * callback);
-
-	//! @brief		ファイルが存在するかどうかを得る
-	//! @param		filename ファイル名
-	//! @return		ファイルが存在する場合真
-	bool FileExists(const tString & filename);
-
-	//! @brief		ディレクトリが存在するかどうかを得る
-	//! @param		dirname ディレクトリ名
-	//! @return		ディレクトリが存在する場合真
-	bool DirectoryExists(const tString & dirname);
-
-	//! @brief		ファイルを削除する
-	//! @param		filename ファイル名
-	void RemoveFile(const tString & filename);
-
-	//! @brief		ディレクトリを削除する
-	//! @param		dirname ディレクトリ名
-	//! @param		recursive 再帰的にディレクトリを削除するかどうか
-	void RemoveDirectory(const tString & dirname, bool recursive = false);
-
-	//! @brief		ディレクトリを作成する
-	//! @param		dirname ディレクトリ名
-	//! @param		recursive 再帰的にディレクトリを作成するかどうか
-	void CreateDirectory(const tString & dirname, bool recursive = false);
-
-	//! @brief		指定されたファイルの stat を得る
-	//! @param		filename ファイル名
-	//! @param		struc stat 結果の出力先
-	void Stat(const tString & filename, tStatStruc & struc);
-
-	//! @brief		指定されたファイルのストリームを得る
-	//! @param		filename ファイル名
-	//! @param		flags フラグ
-	//! @return		ストリームオブジェクト
-	tBinaryStream * CreateStream(const tString & filename, risse_uint32 flags);
-	//-- tFileSystem メンバ ここまで
-
+private:
 	//! @brief		指定されたストリームに内容をシリアライズする
 	//! @param		dest 出力先ストリーム
-	void SerializeTo(tBinaryStream * dest);
+	void SerializeTo(tStreamAdapter * dest);
 
 	//! @brief		指定されたファイルに内容をシリアライズする
 	//! @param		filename 出力先ファイル名
@@ -174,13 +124,12 @@ public:
 
 	//! @brief		指定されたストリームから内容を復元する
 	//! @param		src 入力元ストリーム
-	void UnserializeFrom(tBinaryStream * src);
+	void UnserializeFrom(tStreamAdapter * src);
 
 	//! @brief		指定されたファイルから内容を復元する
 	//! @param		filename 入力元ファイル
 	void UnserializeFrom(const tString & filename);
 
-private:
 	//! @brief		指定された位置のノードを得る
 	//! @param		name ノード
 	//! @return		その位置にあるノード。その位置が見つからない場合は NULL
@@ -189,14 +138,90 @@ private:
 	//! @brief		ルートディレクトリを作成する
 	void CreateRoot();
 
-	//! @brief		ルートディレクトリを削除する
-	void RemoveRoot();
-
 	//! @brief		内容をすべてクリアする
 	void Clear();
+
+public:
+
+	//-- FileSystem メンバ
+	//! @brief		ファイル一覧をコールバックで受け取る
+	//! @param		dirname ディレクトリ名
+	//! @param		args 追加パラメータ(ブロック引数としてコールバック関数オブジェクト)
+	//! @return		取得できたファイル数
+	size_t walkAt(const tString & dirname,
+		const tMethodArgument &args);
+
+	//! @brief		ファイルが存在するかどうかを得る
+	//! @param		filename ファイル名
+	//! @return		ファイルが存在する場合真
+	bool isFile(const tString & filename);
+
+	//! @brief		ディレクトリが存在するかどうかを得る
+	//! @param		dirname ディレクトリ名
+	//! @return		ディレクトリが存在する場合真
+	bool isDirectory(const tString & dirname);
+
+	//! @brief		ファイルを削除する
+	//! @param		filename ファイル名
+	void removeFile(const tString & filename);
+
+	//! @brief		ディレクトリを削除する
+	//! @param		dirname ディレクトリ名
+	//! @param		args 追加パラメータ(再帰的にディレクトリを削除するかどうか)
+	void removeDirectory(const tString & dirname,
+		const tMethodArgument &args);
+
+	//! @brief		ディレクトリを作成する
+	//! @param		dirname ディレクトリ名
+	//  @param		args 追加パラメータ(再帰的にディレクトリを削除するかどうか)
+	void createDirectory(const tString & dirname,
+		const tMethodArgument &args);
+
+	//! @brief		指定されたファイルの stat を得る
+	//! @param		filename ファイル名
+	//! @return		stat の結果を表す辞書配列
+	tObjectInterface * stat(const tString & filename);
+
+	//! @brief		指定されたファイルのストリームを得る
+	//! @param		filename ファイル名
+	//! @param		flags フラグ
+	//! @return		ストリームオブジェクト
+	tStreamInstance * open(const tString & filename,
+		risse_uint32 flags);
+	//-- FileSystem メンバ ここまで
+
+
 };
 //---------------------------------------------------------------------------
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		"TmpFS" クラス
+//---------------------------------------------------------------------------
+class tTmpFSClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+	tMemoryStreamClass * MemoryStreamClass; //!< MemoryStream クラスインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tTmpFSClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public:
+
+	//! @brief MemoryStream クラスインスタンスを得る
+	tMemoryStreamClass * GetMemoryStreamClass() const { return MemoryStreamClass; }
+};
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 } // namespace Risa

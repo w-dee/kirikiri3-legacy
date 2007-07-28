@@ -171,14 +171,11 @@ public: // Risse 用メソッドなど
 	//! @brief		ディレクトリを削除する
 	//! @param		dirname ディレクトリ名
 	//! @param		args 追加パラメータ(再帰的にディレクトリを削除するかどうか)
-	void removeDirectory(const tString & dirname,
-		const tMethodArgument &args);
+	void removeDirectory(const tString & dirname, const tMethodArgument &args);
 
 	//! @brief		ディレクトリを作成する
 	//! @param		dirname ディレクトリ名
-	//  @param		args 追加パラメータ(再帰的にディレクトリを削除するかどうか)
-	void createDirectory(const tString & dirname,
-		const tMethodArgument &args);
+	void createDirectory(const tString & dirname);
 
 	//! @brief		指定されたファイルの stat を得る
 	//! @param		filename ファイル名

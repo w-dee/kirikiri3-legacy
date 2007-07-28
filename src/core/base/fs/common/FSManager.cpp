@@ -147,6 +147,10 @@ void tFileSystemManager::Mount(const tString & point,
 	// スレッド保護
 	volatile tCriticalSection::tLocker holder(CS);
 
+	// その場所がディレクトリかどうかをチェックする
+	if(!IsDirectory(path))
+		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("can not mount filesystem: the mount point '%1' is not directory"), path));
+
 	// すでにその場所にマウントが行われているかどうかをチェックする
 	tFileSystemInstance ** item = MountPoints.Find(path);
 	if(item)
@@ -288,6 +292,7 @@ size_t tFileSystemManager::WalkAt(const tString & dirname,
 	tFileSystemIterationCallback * callback, bool recursive)
 {
 	tString path(NormalizePath(dirname));
+	if(!path.EndsWith(RISSE_WC('/'))) path += RISSE_WC('/');
 
 	if(!recursive)
 	{
@@ -379,6 +384,7 @@ bool tFileSystemManager::IsDirectory(const tString & dirname)
 	tString fullpath(NormalizePath(dirname));
 	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
+	TrimLastPathDelimiter(fullpath);
 //	try
 //	{
 		return fs->Invoke(tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), fspath);
@@ -423,8 +429,34 @@ void tFileSystemManager::RemoveDirectory(const tString & dirname, bool recursive
 
 	tString fspath;
 	tString fullpath(NormalizePath(dirname));
+	if(!fullpath.EndsWith(RISSE_WC('/'))) fullpath += RISSE_WC('/');
 	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
+
+	// ディレクトリを削除する際、マウントポイントをまたがる場合があるので
+	// 注意が必要。
+	// ディレクトリを削除する場合、マウントポイントを削除しようと
+	// した場合は、何も削除しようとせずにエラーにする。
+	if(fspath.IsEmpty())
+	{
+		// fs 内のパスが空文字列ということは、ファイルシステムのルートを
+		// 削除しようとしていると言うこと
+		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("can not remove mount point '%1'"),
+			fullpath));
+	}
+
+	if(recursive)
+	{
+		// 削除しようとしているディレクトリ以下にマウントポイントがあるかどうかを探す
+		tHashTable<tString, tFileSystemInstance *>::tIterator i(MountPoints);
+		for(; !i.End(); ++i)
+		{
+			if(i.GetKey().StartsWith(fullpath))
+				tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("can not remove mount point '%1'"),
+					i.GetKey()));
+		}
+	}
+
 //	try
 //	{
 		fs->Do(ocFuncCall, NULL, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(),
@@ -444,20 +476,55 @@ void tFileSystemManager::CreateDirectory(const tString & dirname, bool recursive
 {
 	volatile tCriticalSection::tLocker holder(CS);
 
-	tString fspath;
 	tString fullpath(NormalizePath(dirname));
-	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
-	if(!fs) ThrowNoFileSystemError(fullpath);
-//	try
-//	{
-		fs->Do(ocFuncCall, NULL, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(),
-			0, tMethodArgument::New(fspath, recursive));
-//	}
-//	catch(const eRisseError &e)
-//	{
-//		eRisaException::Throw(RISSE_WS_TR("failed to create directory '%1' : %2"),
-//			fullpath, e.GetMessageString());
-//	}
+	TrimLastPathDelimiter(fullpath);
+
+	if(!recursive)
+	{
+		// 再帰をしない場合
+		tString fspath;
+		tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
+		if(!fs) ThrowNoFileSystemError(fullpath);
+	//	try
+	//	{
+			fs->Do(ocFuncCall, NULL, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(),
+				0, tMethodArgument::New(fspath, recursive));
+	//	}
+	//	catch(const eRisseError &e)
+	//	{
+	//		eRisaException::Throw(RISSE_WS_TR("failed to create directory '%1' : %2"),
+	//			fullpath, e.GetMessageString());
+	//	}
+	}
+	else
+	{
+		// 再帰する場合
+		// / から順にトラバースする
+		const risse_char *p = fullpath.Pointer();
+		const risse_char *p_start = p;
+		const risse_char *p_limit = p + fullpath.GetLength();
+		const risse_char *pp = p;
+		RISSE_ASSERT(*p == '/');
+		p++;
+		pp++; // skip first '/'
+
+		while( p < p_limit )
+		{
+			while(p < p_limit && *p != RISSE_WC('/')) p++; // 次の / までスキップ
+			if(pp != p)
+			{
+				// この時点で:
+				// p_start と pp の間  作成しようとするディレクトリの親ディレクトリ名の終わり
+				// pp と p の間        作成しようとするディレクトリ名
+				// すこし効率が悪いが、この関数を自分自身で呼び出してディレクトリを作成する
+				tString n_dirname(fullpath, 0, p - p_start);
+				if(!IsDirectory(n_dirname))
+					CreateDirectory(fullpath, false);
+			}
+			p ++; // skip '/'
+			pp = p;
+		}
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -834,8 +901,7 @@ void tFileSystemInstance::removeDirectory(const tString & dirname,
 
 
 //---------------------------------------------------------------------------
-void tFileSystemInstance::createDirectory(const tString & dirname,
-	const tMethodArgument &args)
+void tFileSystemInstance::createDirectory(const tString & dirname)
 {
 	// 実装されていない; 下位の Risse クラスで実装すること
 	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();

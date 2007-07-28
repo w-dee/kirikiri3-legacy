@@ -436,7 +436,7 @@ void tOSFSInstance::removeDirectory(const tString & dirname, const tMethodArgume
 
 
 //---------------------------------------------------------------------------
-void tOSFSInstance::createDirectory(const tString & dirname, const tMethodArgument &args)
+void tOSFSInstance::createDirectory(const tString & dirname)
 {
 	wxString wxdirname(dirname.AsWxString());
 
@@ -444,11 +444,9 @@ void tOSFSInstance::createDirectory(const tString & dirname, const tMethodArgume
 
 	volatile tSynchronizer sync(this); // sync
 
-	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
-
 	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
 
-	if(!wxFileName::Mkdir(native_name, 0777, recursive?wxPATH_MKDIR_FULL:0))
+	if(!wxFileName::Mkdir(native_name, 0777, 0))
 		tIOExceptionClass::Throw(tString(
 			RISSE_WS_TR("can not create directory '%1'"), native_name.c_str()));
 }

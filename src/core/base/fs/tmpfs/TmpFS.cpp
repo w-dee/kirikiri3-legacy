@@ -527,68 +527,21 @@ void tTmpFSInstance::removeDirectory(const tString & dirname,
 
 
 //---------------------------------------------------------------------------
-void tTmpFSInstance::createDirectory(const tString & dirname,
-		const tMethodArgument &args)
+void tTmpFSInstance::createDirectory(const tString & dirname)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+	// 再帰的にはディレクトリを作成しない場合
+	// 最終的なディレクトリ名となる名前を取得する
 
-	if(recursive)
-	{
-		// 再帰的にディレクトリを作成する場合
-		// '/' で name を区切り、順に root からノードをたどっていく
-		const risse_char * p = dirname.c_str();
-		const risse_char *pp = p;
+	tString path(dirname);
+	tFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
+	tString parentdir, name;
+	tFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
 
-		tTmpFSNode *node = Root;
-		while(*p)
-		{
-			while(*p != RISSE_WC('/') && *p != 0) p++;
-			if(p != pp)
-			{
-				// '/' で挟まれた区間が得られた
-				tTmpFSNode *parent = node;
-				tString partname(p, p - pp);
-				node = node->GetSubNode(partname);
-				if(!node)
-				{
-					// そのノードは見つからなかった
-					if(recursive)
-					{
-						// 再帰的にディレクトリを作成するならば
-						// ディレクトリをそこに作成する
-						node = parent->CreateDirectory(partname);
-					}
-				}
-				else
-				{
-					// ノードは見つかったが
-					if(node->IsFile())
-					{
-						// ファイルだったりする
-						tIOExceptionClass::Throw(RISSE_WS_TR("can not create directory on file"));
-					}
-				}
-			}
-			pp = p;
-		}
-	}
-	else
-	{
-		// 再帰的にはディレクトリを作成しない場合
-		// 最終的なディレクトリ名となる名前を取得する
-
-		tString path(dirname);
-		tFileSystemManager::TrimLastPathDelimiter(path); // dirname の最後の '/' は取り去る
-		tString parentdir, name;
-		tFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
-
-		tTmpFSNode * parentnode = GetNodeAt(parentdir);
-		if(!parentnode) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-		parentnode->CreateDirectory(name);
-	}
-
+	tTmpFSNode * parentnode = GetNodeAt(parentdir);
+	if(!parentnode) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+	parentnode->CreateDirectory(name);
 }
 //---------------------------------------------------------------------------
 

@@ -123,10 +123,10 @@ void tClassClass::initialize(const tNativeCallInfo &info)
 
 		// 親クラスの ClassRTTI を引き継ぐ
 		tClassBase * this_class_intf =
-			info.This.CheckAndGetObjectInterafce<tClassBase, tClassBase>(
+			info.This.CheckAndGetObjectInterafce<tClassBase>(
 				info.engine->ClassClass);
 		tClassBase * super_class_intf =
-			super_class.CheckAndGetObjectInterafce<tClassBase, tClassBase>(
+			super_class.CheckAndGetObjectInterafce<tClassBase>(
 				info.engine->ClassClass);
 
 		this_class_intf->GetClassRTTI() = super_class_intf->GetClassRTTI();

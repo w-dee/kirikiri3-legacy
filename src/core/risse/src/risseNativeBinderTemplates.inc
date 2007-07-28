@@ -53,7 +53,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))());
 			else
@@ -71,7 +71,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))();
 		}
@@ -155,7 +155,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info)));
 			else
@@ -173,7 +173,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info));
 		}
@@ -258,7 +258,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info)));
 			else
@@ -276,7 +276,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info));
 		}
@@ -362,7 +362,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info)));
 			else
@@ -380,7 +380,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info));
 		}
@@ -467,7 +467,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info)));
 			else
@@ -485,7 +485,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info));
 		}
@@ -573,7 +573,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info)));
 			else
@@ -591,7 +591,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info));
 		}
@@ -680,7 +680,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info)));
 			else
@@ -698,7 +698,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info));
 		}
@@ -788,7 +788,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info),tFVoC<T6, Cs::AI6>::Cnv(info)));
 			else
@@ -806,7 +806,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info),tFVoC<T6, Cs::AI6>::Cnv(info));
 		}
@@ -897,7 +897,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info),tFVoC<T6, Cs::AI6>::Cnv(info),tFVoC<T7, Cs::AI7>::Cnv(info)));
 			else
@@ -915,7 +915,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info),tFVoC<T6, Cs::AI6>::Cnv(info),tFVoC<T7, Cs::AI7>::Cnv(info));
 		}
@@ -1007,7 +1007,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info),tFVoC<T6, Cs::AI6>::Cnv(info),tFVoC<T7, Cs::AI7>::Cnv(info),tFVoC<T8, Cs::AI8>::Cnv(info)));
 			else
@@ -1025,7 +1025,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info),tFVoC<T6, Cs::AI6>::Cnv(info),tFVoC<T7, Cs::AI7>::Cnv(info),tFVoC<T8, Cs::AI8>::Cnv(info));
 		}
@@ -1118,7 +1118,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info),tFVoC<T6, Cs::AI6>::Cnv(info),tFVoC<T7, Cs::AI7>::Cnv(info),tFVoC<T8, Cs::AI8>::Cnv(info),tFVoC<T9, Cs::AI9>::Cnv(info)));
 			else
@@ -1136,7 +1136,7 @@
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+			IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(tFVoC<T0, Cs::AI0>::Cnv(info),tFVoC<T1, Cs::AI1>::Cnv(info),tFVoC<T2, Cs::AI2>::Cnv(info),tFVoC<T3, Cs::AI3>::Cnv(info),tFVoC<T4, Cs::AI4>::Cnv(info),tFVoC<T5, Cs::AI5>::Cnv(info),tFVoC<T6, Cs::AI6>::Cnv(info),tFVoC<T7, Cs::AI7>::Cnv(info),tFVoC<T8, Cs::AI8>::Cnv(info),tFVoC<T9, Cs::AI9>::Cnv(info));
 		}

@@ -27,6 +27,9 @@ namespace Risse
 class tObjectBase : public tObjectInterface
 {
 public:
+	//! @brief	tClassBase のtypedef
+	typedef ::Risse::tClassBase tClassBase;
+
 	//! @brief	メンバ情報を表す構造体
 	struct tMemberData : public tCollectee
 	{

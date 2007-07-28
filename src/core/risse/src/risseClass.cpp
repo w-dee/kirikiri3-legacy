@@ -240,7 +240,7 @@ void tClassBase::risse_new(const tNativeCallInfo &info)
 
 		// This はクラスのはずだよなぁ
 		tClassBase * class_intf =
-			info.This.CheckAndGetObjectInterafce<tClassBase, tClassBase>(
+			info.This.CheckAndGetObjectInterafce<tClassBase>(
 				info.engine->ClassClass);
 
 		// プリミティブ型でなければ

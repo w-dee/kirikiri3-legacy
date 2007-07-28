@@ -2314,16 +2314,19 @@ public: // ユーティリティ
 	tString AsHumanReadable_Object   (risse_size maxlen) const
 					{ return tString(); /* incomplete */ }
 
-	//! @brief		Object型に対するtypeチェック
+	//! @brief		Object型に対するtypeチェック(コンテキストチェック用)
 	//! @param		cls		クラスオブジェクトインスタンス
 	//! @note		バリアントが期待したタイプであるかどうかをチェックし
 	//!				またそのオブジェクトインターフェースを得る。
 	//!				期待した値でなければ「"期待したクラスではありません"」例外を発生する。
 	//!				テンプレートパラメータのObjectTはtObjectBaseの派生クラス、
 	//!				clsにはtClassBaseの派生クラスのインスタンスを指定すること。
-	//!				ClassT には通常 tClassBaseを指定する。
-	template <typename ObjectT, typename ClassT>
-	ObjectT * CheckAndGetObjectInterafce(ClassT * cls) const
+	//!				ObjectT::tClassBase というのは tObjectBase の定義を見れば分かるが
+	//!				単に tClassBase の typedef で、このテンプレート内には tClassBase の
+	//!				完全な定義がないと解釈できない部分があるが、その解釈を実際の
+	//!				実体化の時まで遅らせるための処置。
+	template <typename ObjectT>
+	ObjectT * CheckAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
 	{
 		if(GetType() != vtObject) ThrowBadContextException();
 		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
@@ -2336,6 +2339,17 @@ public: // ユーティリティ
 	//! @param		cls		クラスオブジェクトインスタンス
 	//! @note		指定されたクラスのインスタンスでないばあいは IllegalArgumentClassException 例外が発生する)
 	void AssertClass(tClassBase * cls) const;
+
+	//! @brief		Object型に対するtypeチェック(引数チェック用)
+	//! @param		cls		クラスオブジェクトインスタンス
+	//! @note		CheckAndGetObjectInterafce に似ているが、型が違ったときの
+	//!				発生する例外が違う。
+	template <typename ObjectT>
+	ObjectT * AssertAndGetObjectInterafce(tClassBase * cls) const
+	{
+		AssertClass(cls);
+		return reinterpret_cast<ObjectT*>(GetObjectInterface());
+	}
 
 	//! @brief		型名を得る
 	//! @param		got		型名が正常に取得できた場合に 真、

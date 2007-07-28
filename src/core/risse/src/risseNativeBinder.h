@@ -592,7 +592,7 @@ public:
 	static void Call(void (tObjectBase::*f)(),
 		const tNativePropGetInfo & info)
 	{
-		IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+		IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 		if(info.result)
 			*info.result = ToVariant((instance->*((tFunc)f))());
 		else
@@ -620,7 +620,7 @@ public:
 	static void Call(void (tObjectBase::*f)(),
 		const tNativePropGetInfo & info)
 	{
-		IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+		IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 		(instance->*((tFunc)f))(info);
 	}
 };
@@ -645,7 +645,7 @@ public:
 	static void Call(void (tObjectBase::*f)(),
 		const tNativePropSetInfo & info)
 	{
-		IC * instance = info.This.CheckAndGetObjectInterafce<IC, CC>((CC*)info.Class);
+		IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
 		(instance->*((tFunc)f))(FromVariant<ST>(info.value));
 	}
 };
@@ -704,7 +704,7 @@ void BindProperty(CC * _class, const tString & name,
 	tMemberAttribute attribute = tMemberAttribute(),
 	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
-	BindProperty<CC, GIC, tObjectInterface, GR, const tVariant &>(
+	BindProperty<CC, GIC, tObjectBase, GR, const tVariant &>(
 		_class, name, getter, NULL, attribute, context, is_members);
 }
 
@@ -763,7 +763,7 @@ void BindProperty(CC * _class, const tString & name,
 	tMemberAttribute attribute = tMemberAttribute(),
 	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
-	BindProperty<CC, GIC, tObjectInterface, const tVariant &>(
+	BindProperty<CC, GIC, tObjectBase, const tVariant &>(
 		_class, name, getter, NULL, attribute, context, is_members);
 }
 

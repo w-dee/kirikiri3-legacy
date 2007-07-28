@@ -118,8 +118,7 @@ void tScriptEngine::Evaluate(const tString & script, const tString & name,
 				New(0, tMethodArgument::New(script, name, (risse_int64)lineofs));
 
 		block =
-			sb.CheckAndGetObjectInterafce<tRisseScriptBlockInstance, tRisseScriptBlockClass>(
-																			RisseScriptBlockClass);
+			sb.AssertAndGetObjectInterafce<tRisseScriptBlockInstance>(RisseScriptBlockClass);
 
 		// スクリプトを実行
 		block->Evaluate(binding == NULL ? (tBindingInfo(GlobalObject)) : *binding,

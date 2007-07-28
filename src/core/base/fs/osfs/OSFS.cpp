@@ -281,6 +281,29 @@ void tOSFSInstance::SetOptions(const tString & basedir, bool checkcase)
 
 
 //---------------------------------------------------------------------------
+void tOSFSInstance::construct()
+{
+	// とくにやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOSFSInstance::initialize(const tString & base_dir, const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// 親クラスの同名メソッドを呼び出す
+	info.InitializeSuperClass();
+
+	// SetOptions を呼ぶ
+	bool check_case = info.args.HasArgument(1) ? (bool)info.args[1] : true;
+	SetOptions(base_dir, check_case);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 size_t tOSFSInstance::walkAt(const tString & dirname,
 	const tMethodArgument &args)
 {
@@ -577,29 +600,6 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 
 	// エラーは見つからなかった
 	return true;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOSFSInstance::construct()
-{
-	// とくにやることはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOSFSInstance::initialize(const tString & base_dir, const tNativeCallInfo &info)
-{
-	volatile tSynchronizer sync(this); // sync
-
-	// 親クラスの同名メソッドを呼び出す
-	info.InitializeSuperClass();
-
-	// SetOptions を呼ぶ
-	bool check_case = info.args.HasArgument(1) ? (bool)info.args[1] : true;
-	SetOptions(base_dir, check_case);
 }
 //---------------------------------------------------------------------------
 

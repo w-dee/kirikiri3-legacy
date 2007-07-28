@@ -152,6 +152,10 @@ public:
 	//!							小文字を区別しないようになるわけではない)
 	void SetOptions(const tString & basedir, bool checkcase = true);
 
+public: // Risse 用メソッドなど
+	void construct();
+	void initialize(const tString & base_dir, const tNativeCallInfo &info);
+
 	//-- FileSystem メンバ
 
 	//! @brief		ファイル一覧をコールバックで受け取る
@@ -223,9 +227,6 @@ private:
 	//! @note		ファイルが「見つからない」場合は真が帰るので注意
 	bool CheckFileNameCase(const wxString & path_to_check, bool raise = true);
 
-public: // Risse 用メソッドなど
-	void construct();
-	void initialize(const tString & base_dir, const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
 

@@ -141,7 +141,10 @@ private:
 	//! @brief		内容をすべてクリアする
 	void Clear();
 
-public:
+public: // Risse 用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
+
 
 	//-- FileSystem メンバ
 	//! @brief		ファイル一覧をコールバックで受け取る

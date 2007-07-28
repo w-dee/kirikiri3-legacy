@@ -21,6 +21,9 @@
 #include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
 #include "base/log/Log.h"
+#include "base/fs/common/FSManager.h"
+#include "base/fs/osfs/OSFS.h"
+#include "base/fs/tmpfs/TmpFS.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
@@ -106,7 +109,22 @@ bool tApplication::OnInit()
 	wxIdleEvent::SetMode(wxIDLE_PROCESS_SPECIFIED);
 	wxUpdateUIEvent::SetMode(wxUPDATE_UI_PROCESS_SPECIFIED);
 
-	// すべてのシングルトンインスタンスを初期化する
+	// 引数を取得 (実行するスクリプト名が指定されているか？)
+	// (暫定実装)
+	wxFileName script_filename;
+	bool script_filename_set = false;
+	for(int i = 1; i < argc; i++)
+	{
+		// 先頭が - で始まっていないオプションを探し、それを
+		// 実行するスクリプト名であると見なす
+		if(argv[i][0] != wxT('-'))
+		{
+			script_filename = wxFileName(argv[i]);
+			script_filename_set = true;
+		}
+	}
+
+	// すべてのシングルトンインスタンスの作成や残りの設定を行う
 	try
 	{
 		// 先だって初期化しておきたい物
@@ -119,6 +137,33 @@ bool tApplication::OnInit()
 
 			// 残り全てのシングルトンインスタンスを初期化
 			singleton_manager::init_all();
+
+			// / に TmpFS をマウント
+			tFileSystemManager::instance()->Mount(tSS<'/'>(),
+				tRisseFSClassRegisterer<tTmpFSClass>::instance()->
+					GetClassInstance()->Invoke(ss_new).
+						AssertAndGetObjectInterafce<tFileSystemInstance>(
+							tRisseFSClassRegisterer<tTmpFSClass>::instance()->GetClassInstance()
+						)
+			);
+
+			if(script_filename_set)
+			{
+				wxString script_dir = script_filename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
+
+				// /boot を作成する
+				tFileSystemManager::instance()->CreateDirectory(tSS<'/','b','o','o','t'>(), false);
+
+				// /boot に 引数で与えられたファイル名が存在するディレクトリをマウントする
+				tFileSystemManager::instance()->Mount(tSS<'/','b','o','o','t'>(),
+					tRisseFSClassRegisterer<tOSFSClass>::instance()->
+						GetClassInstance()->Invoke(ss_new, tString(script_dir), true).
+							AssertAndGetObjectInterafce<tFileSystemInstance>(
+								tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()
+							)
+				);
+			}
+
 		}
 		catch(const tTemporaryException * te)
 		{
@@ -140,12 +185,8 @@ bool tApplication::OnInit()
 		return false;
 	}
 
-	//---- ↓↓テストコード↓↓ ----
-	// ファイルシステムのルートにカレントディレクトリをマウント
-	tRisseScriptEngine::instance()->
-		EvaluateExpresisonAndPrintResultToConsole(
-			RISSE_WS("File::mount('/', new FileSystem::OSFS('.'))"));
 
+	//---- ↓↓テストコード↓↓ ----
 	// コンソールをメインウィンドウとして表示
 	tConsoleFrame *console = new tConsoleFrame();
 	console->Show(true);

@@ -353,20 +353,23 @@ void tTmpFSInstance::UnserializeFrom(const tString & filename)
 tTmpFSNode * tTmpFSInstance::GetNodeAt(const tString & name)
 {
 	// '/' で name を区切り、順に root からノードをたどっていく
-	const risse_char * p = name.c_str();
+	const risse_char * p = name.Pointer();
+	const risse_char * p_start = p;
 	const risse_char *pp = p;
+	const risse_char * p_limit = p + name.GetLength();
 
 	tTmpFSNode *node = Root;
 
-	while(*p)
+	while(p < p_limit)
 	{
-		while(*p != RISSE_WC('/') && *p != 0) p++;
+		while(*p != RISSE_WC('/') && p < p_limit) p++;
 		if(p != pp)
 		{
 			// '/' で挟まれた区間が得られた
-			node = node->GetSubNode(tString(p, p - pp));
+			node = node->GetSubNode(tString(name, pp - p_start, p - pp));
 			if(!node) return NULL;
 		}
+		p ++; // skip '/'
 		pp = p;
 	}
 

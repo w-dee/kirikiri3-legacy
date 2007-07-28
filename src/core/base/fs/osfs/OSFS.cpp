@@ -545,7 +545,7 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 
 	// うーん、VMS 形式のパスは相手にすべきなのだろうか
 
-	const wxChar * msg = RISSE_WS_TR("file '%1' does not exist (but '%2' exists, you mean this?");
+	const wxChar * msg = RISSE_WS_TR("file or directory '%1' does not exist (but '%2' exists, did you mean this?");
 
 	// パスを分解する
 	wxString existing;

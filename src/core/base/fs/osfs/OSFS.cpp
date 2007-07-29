@@ -130,7 +130,11 @@ risse_size tOSNativeStreamInstance::read(const tOctet & buf)
 	// これに限ってはこういう使い方をすると言うことになっている。
 	// というかそうした。
 
-	return Internal->File.Read(const_cast<risse_uint8*>(buf.Pointer()), buf.GetLength());
+	ssize_t read = Internal->File.Read(const_cast<risse_uint8*>(buf.Pointer()), buf.GetLength());
+
+	if(read < 0 || read == wxInvalidOffset) read = 0; // エラーと見なす
+
+	return read;
 }
 //---------------------------------------------------------------------------
 

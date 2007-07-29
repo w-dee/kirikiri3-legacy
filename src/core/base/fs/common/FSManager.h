@@ -97,7 +97,7 @@ struct tFileOpenModes
 
 		omReadBit = 1, //!< 読み込み
 		omWriteBit = 2, //!< 書き込み
-		omAppendBit = 3 //!< 追加
+		omAppendBit = 4 //!< 追加
 	};
 };
 //---------------------------------------------------------------------------

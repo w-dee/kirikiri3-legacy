@@ -78,6 +78,17 @@ public:
 					risse_size lineofs = 0,
 					tVariant * result = NULL,
 					const tBindingInfo * binding = NULL, bool is_expression = false);
+
+
+	//! @brief		スクリプトファイルを評価する
+	//! @param		script			スクリプトの内容
+	//! @param		result			実行の結果(NULL可)
+	//! @param		binding			バインディング情報(NULLの場合はグローバルバインディング)
+	//! @param		is_expression	式モードかどうか(Risseのように文と式の区別を
+	//!								する必要がない言語ではfalseでよい)
+	void EvaluateFile(const tString & filename,
+					tVariant * result = NULL,
+					const tBindingInfo * binding = NULL, bool is_expression = false);
 };
 //---------------------------------------------------------------------------
 

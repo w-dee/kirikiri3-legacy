@@ -148,8 +148,11 @@ void tFileSystemManager::Mount(const tString & point,
 	volatile tCriticalSection::tLocker holder(CS);
 
 	// その場所がディレクトリかどうかをチェックする
-	if(!IsDirectory(path))
-		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("can not mount filesystem: the mount point '%1' is not directory"), path));
+	if(path != tSS<'/'>())
+	{
+		if(!IsDirectory(path))
+			tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("can not mount filesystem: the mount point '%1' is not directory"), path));
+	}
 
 	// すでにその場所にマウントが行われているかどうかをチェックする
 	tFileSystemInstance ** item = MountPoints.Find(path);

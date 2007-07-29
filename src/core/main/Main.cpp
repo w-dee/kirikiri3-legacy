@@ -164,6 +164,29 @@ bool tApplication::OnInit()
 				);
 			}
 
+			if(!script_filename_set)
+			{
+				//---- ↓↓テストコード↓↓ ----
+				// コンソールをメインウィンドウとして表示
+				tConsoleFrame *console = new tConsoleFrame();
+				console->Show(true);
+
+				tScriptEditorFrame *editor = new tScriptEditorFrame();
+				editor->Show(true);
+
+				//---- ↑↑テストコード↑↑ ----
+			}
+			else
+			{
+				// スクリプトを実行する
+				tRisseScriptEngine::instance()->EvaluateFile(
+					tSS<'/','b','o','o','t','/'>().operator const tString &() +
+						tString(script_filename.GetFullName()));
+
+				// TODO: ウィンドウが何も表示されないならば終了するように
+				return false; // すぐにアプリケーションを終了させる
+			}
+
 		}
 		catch(const tTemporaryException * te)
 		{
@@ -186,16 +209,6 @@ bool tApplication::OnInit()
 	}
 
 
-	//---- ↓↓テストコード↓↓ ----
-	// コンソールをメインウィンドウとして表示
-	tConsoleFrame *console = new tConsoleFrame();
-	console->Show(true);
-
-	tScriptEditorFrame *editor = new tScriptEditorFrame();
-	editor->Show(true);
-
-
-	//---- ↑↑テストコード↑↑ ----
 
 	return true;
 }

@@ -172,6 +172,11 @@ public: // risse 用メソッドとか
 	//! @param		buf		書き込むデータ
 	//! @note		書き込みに失敗した場合は例外が発生する
 	void writeBuffer(const tOctet & buf);
+
+	//! @brief		文字列を出力する
+	//! @param		str		文字列
+	//! @note		文字列は現バージョンではUTF-8として出力される
+	void print(const tString & str);
 };
 //---------------------------------------------------------------------------
 

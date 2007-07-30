@@ -124,6 +124,7 @@ ss_put								put								#!< "put" メソッド名
 ss_readBuffer						readBuffer						#!< "readBuffer" メソッド名
 ss_writeBuffer						writeBuffer						#!< "writeBuffer" メソッド名
 ss_StreamConsts						StreamConsts					#!< "StreamConsts" モジュール名
+ss_print							print							#!< "print" メソッド名
 ss_soSet							soSet							#!< "soSet" 定数名
 ss_soCur							soCur							#!< "soCur" 定数名
 ss_soEnd							soEnd							#!< "soEnd" 定数名

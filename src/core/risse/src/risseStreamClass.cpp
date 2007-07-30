@@ -147,6 +147,15 @@ void tStreamInstance::writeBuffer(const tOctet & buf)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tStreamInstance::print(const tString & str)
+{
+	const risse_uint8 * ptr;
+	risse_size size = 0;
+	ptr = reinterpret_cast<const risse_uint8*>(str.AsNarrowString(&size));
+	tStreamAdapter(this).WriteBuffer(ptr, size);
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -197,6 +206,7 @@ void tStreamClass::RegisterMembers()
 	BindProperty(this, ss_position, &tStreamInstance::get_position, &tStreamInstance::set_position);
 	BindFunction(this, ss_readBuffer, &tStreamInstance::readBuffer);
 	BindFunction(this, ss_writeBuffer, &tStreamInstance::writeBuffer);
+	BindFunction(this, ss_print, &tStreamInstance::print);
 }
 //---------------------------------------------------------------------------
 

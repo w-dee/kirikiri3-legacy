@@ -2691,6 +2691,37 @@ tString tVariantBlock::CastToString_Real     () const
 
 
 //---------------------------------------------------------------------------
+tString tVariantBlock::CastToString_Boolean  () const
+{
+	return CastToBoolean_Boolean()?
+		RISSE_WS("true"):
+		RISSE_WS("false");
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tString tVariantBlock::CastToString_Null     () const
+{
+	ThrowNoSuchMemberException(mnString);
+	return tString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tOctet tVariantBlock::CastToOctet_String   () const
+{
+	// String -> Octet 変換
+	// 暗黙のこの変換においては、UTF-8 形式にて octet 列に変換を行う
+	risse_size sz = 0;
+	char * p = AsString().AsNarrowString(&sz);
+	return tOctet(reinterpret_cast<risse_uint8*>(p), sz);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock::tSynchronizer::tSynchronizer(const tVariant & object)
 {
 	// この ASSERT は、 tObjectInterface::tSynchronizer のサイズが
@@ -2720,25 +2751,6 @@ tVariantBlock::tSynchronizer::~tSynchronizer()
 {
 	// ロックオブジェクトを消滅させる
 	(reinterpret_cast<tObjectInterface::tSynchronizer*>(Synchronizer))->~tSynchronizer();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tString tVariantBlock::CastToString_Null     () const
-{
-	ThrowNoSuchMemberException(mnString);
-	return tString();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tString tVariantBlock::CastToString_Boolean  () const
-{
-	return CastToBoolean_Boolean()?
-		RISSE_WS("true"):
-		RISSE_WS("false");
 }
 //---------------------------------------------------------------------------
 

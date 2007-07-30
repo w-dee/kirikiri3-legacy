@@ -174,10 +174,10 @@ tStringBlock & tStringBlock::operator = (const wchar_t *str)
 //---------------------------------------------------------------------------
 tStringBlock & tStringBlock::operator = (const char * ref)
 {
-	Length = Utf8ToRisseCharString(ref, NULL); // コードポイント数を得る
+	Length = ConvertUtf8ToRisseCharString(NULL, ref); // コードポイント数を得る
 	if(Length == risse_size_max) tCharConversionExceptionClass::ThrowInvalidUTF8String();
 	Buffer = AllocateInternalBuffer(Length);
-	Utf8ToRisseCharString(ref, Buffer);
+	ConvertUtf8ToRisseCharString(Buffer, ref);
 	Buffer[Length] = Buffer[Length + 1] = 0; // null終端と hint をクリア
 	return *this;
 }
@@ -420,6 +420,19 @@ tStringBlock tStringBlock::operator + (const risse_char * ref) const
 	memcpy(newblock.Buffer + Length, ref, ref_length * sizeof(risse_char));
 
 	return newblock;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+char * tStringBlock::AsNarrowString(risse_size * out_size) const
+{
+	risse_size out_sz = ConvertCharToUtf8String(NULL, Buffer, Length);
+	char * outbuf = new (PointerFreeGC) char[out_sz+1];
+	ConvertCharToUtf8String(outbuf, Buffer, Length);
+	outbuf[out_sz] = '\0';
+	if(out_size) *out_size = out_sz;
+	return outbuf;
 }
 //---------------------------------------------------------------------------
 

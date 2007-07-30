@@ -99,16 +99,18 @@ risse_size ConvertRisseCharToUTF16String(risse_uint16 * out, const risse_char * 
 						risse_size in_len = risse_size_max);
 
 //! @brief		UTF-8 文字列を risse_char 文字列に変換する
-//! @param		in   入力 UTF-8 文字列
 //! @param		out  出力 risse_char 文字列 (NULL可)
-//! @return		変換後の risse_char のコードポイント数 (null-terminatorを含まず)
-risse_size Utf8ToRisseCharString(const char * in, risse_char *out);
+//! @param		in   入力 UTF-8 文字列
+//! @return		変換後の risse_char のコードポイント数 (null-terminatorを含まず)。
+//!				変換に失敗した場合は risse_size_max が帰る
+risse_size ConvertUtf8ToRisseCharString(risse_char *out, const char * in);
 
 //! @brief		risse_char 文字列を UTF-8 文字列に変換する
-//! @param		in   入力 risse_char 文字列
 //! @param		out  出力 UTF-8 文字列 (NULL可)
+//! @param		in   入力 risse_char 文字列
+//! @param		in_len 入力文字列のサイズ (risse_size_max の場合は自動判定)
 //! @return		変換後の UTF-8 のバイト数 (null-terminatorを含まず)
-risse_size CharToUtf8String(const risse_char *in, char * out);
+risse_size ConvertCharToUtf8String(char * out, const risse_char *in, risse_size in_len = risse_size_max);
 
 
 //! @brief		memcmp の risse_char 版。risse_char 単位で比較する。途中にある\0は文字列の終端としては扱わない。

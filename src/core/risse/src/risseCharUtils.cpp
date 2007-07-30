@@ -553,7 +553,7 @@ static bool Utf8ToRisseChar(const char * & in, risse_char *out)
 
 
 //---------------------------------------------------------------------------
-risse_size Utf8ToRisseCharString(const char * in, risse_char *out)
+risse_size ConvertUtf8ToRisseCharString(risse_char *out, const char * in)
 {
 	// convert input utf-8 string to output wide string
 	risse_size count = 0;
@@ -579,11 +579,11 @@ risse_size Utf8ToRisseCharString(const char * in, risse_char *out)
 
 
 //---------------------------------------------------------------------------
-risse_size CharToUtf8String(const risse_char * in, char * out)
+risse_size ConvertCharToUtf8String(char * out, const risse_char * in, risse_size in_len)
 {
 	// convert input wide string to output utf-8 string
 	risse_size count = 0;
-	while(*in)
+	while(in_len && *in)
 	{
 		risse_int n;
 		if(out)
@@ -603,6 +603,7 @@ risse_size CharToUtf8String(const risse_char * in, char * out)
 		if(n == -1) return risse_size_max; // invalid character found
 		count += n;
 		in++;
+		in_len --;
 	}
 	return count;
 }

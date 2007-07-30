@@ -703,6 +703,12 @@ public: // operators
 
 public: // conversion
 
+	//! @brief		ナロー文字列への変換を行う
+	//! @param		out_size   出力文字列の長さ(char単位、nullターミネータを含まず)。必要なければnullでよい
+	//! @return		ナロー文字列
+	//! @note		現バージョンでは UTF-8 への変換のみ対応 (TODO:ほかのエンコーディング/文字コードへの対応)
+	char * AsNarrowString(risse_size * out_size = NULL) const;
+
 #ifdef RISSE_SUPPORT_WX
 	wxString AsWxString() const
 		{ return CharToWxString(Buffer, Length); }

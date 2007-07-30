@@ -2251,7 +2251,7 @@ public: // キャスト
 	tOctet CastToOctet_Integer  () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
 	tOctet CastToOctet_Real     () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
 	tOctet CastToOctet_Null     () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
-	tOctet CastToOctet_String   () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
+	tOctet CastToOctet_String   () const;
 	tOctet CastToOctet_Octet    () const { return AsOctet();  }
 	tOctet CastToOctet_Boolean  () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
 	tOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet); }

@@ -112,7 +112,7 @@ public: // risse 用メソッドとか
 	//! @brief		ストリームに書き込む
 	//! @param		buf		書き込むデータ
 	//! @return		実際に書き込まれたサイズ
-	risse_uint put(const tOctet & buf);
+	risse_size put(const tOctet & buf);
 
 	//! @brief		ストリームを現在位置で切りつめる
 	void truncate();

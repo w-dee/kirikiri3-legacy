@@ -250,7 +250,7 @@ risse_size tMemoryStreamInstance::get(const tOctet & buf)
 
 
 //---------------------------------------------------------------------------
-risse_uint tMemoryStreamInstance::put(const tOctet & buf)
+risse_size tMemoryStreamInstance::put(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 	{

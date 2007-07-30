@@ -649,7 +649,7 @@ void tOSFSClass::RegisterMembers()
 	BindFunction(this, tSS<'o','p','e','n'>(), &tOSFSInstance::open);
 	BindFunction(this, tSS<'f','l','u','s','h'>(), &tOSFSInstance::flush);
 
-	BindProperty(this, tSS<'o','r','i','g','i','n'>(), &tOSFSInstance::get_origin);
+	BindProperty(this, tSS<'s','o','u','r','c','e'>(), &tOSFSInstance::get_source);
 
 	// OSNativeStream を登録する
 	RegisterNormalMember(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),

@@ -213,7 +213,7 @@ public: // Risse 用メソッドなど
 
 	//-- FileSystem メンバ ここまで
 
-	const tString & get_origin() { return BaseDirectory; }
+	const tString & get_source() { return BaseDirectory; }
 
 private:
 	//! @brief		path中に含まれる'/'を、OSネイティブなパス区切り記号に変更する

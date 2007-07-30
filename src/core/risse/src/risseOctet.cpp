@@ -37,6 +37,18 @@ tOctetBlock::tOctetBlock(const risse_uint8 * buf, risse_size length)
 
 
 //---------------------------------------------------------------------------
+tOctetBlock::tOctetBlock(risse_size length)
+{
+	Capacity = Length = length;
+	if(length)
+		Buffer = AllocateInternalBuffer(length);
+	else
+		Buffer = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tOctetBlock::tOctetBlock(const tOctetBlock & ref,
 	risse_size offset, risse_size length)
 {

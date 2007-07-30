@@ -65,12 +65,12 @@ public: // risse 用メソッドとか
 	//! @brief		ストリームから読み込む
 	//! @param		buf		読み込んだデータを書き込む先
 	//! @return		実際に読み込まれたサイズ
-	risse_size read(const tOctet & buf);
+	risse_size get(const tOctet & buf);
 
 	//! @brief		ストリームに書き込む
 	//! @param		buf		書き込むデータ
 	//! @return		実際に書き込まれたサイズ
-	risse_uint write(const tOctet & buf);
+	risse_uint put(const tOctet & buf);
 
 	//! @brief		ストリームを現在位置で切りつめる
 	void truncate();
@@ -212,6 +212,9 @@ public: // Risse 用メソッドなど
 	void flush();
 
 	//-- FileSystem メンバ ここまで
+
+	const tString & get_origin() { return BaseDirectory; }
+
 private:
 	//! @brief		path中に含まれる'/'を、OSネイティブなパス区切り記号に変更する
 	//! @param		path パス名

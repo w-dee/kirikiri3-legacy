@@ -54,6 +54,11 @@ public:
 	//! @note		内容はコピーされる
 	tOctetBlock(const risse_uint8 * buf, risse_size length);
 
+	//! @brief		コンストラクタ(長さから)
+	//! @param		length	長さ
+	//! @note		バッファの内容は不定になる
+	explicit tOctetBlock(risse_size length);
+
 	//! @brief 部分オクテット列を作るためのコンストラクタ
 	//! @param ref		コピー元オブジェクト
 	//! @param offset	切り出す開始位置
@@ -325,7 +330,7 @@ public:
 	}
 
 	//! @brief コンストラクタ(tOctetBlockより)
-	tOctet(tOctetBlock * block)
+	explicit tOctet(tOctetBlock * block)
 	{
 		SetBlock(block);
 	}

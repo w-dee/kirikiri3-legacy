@@ -103,11 +103,36 @@ void tStreamInstance::set_position(risse_uint64 pos)
 
 
 //---------------------------------------------------------------------------
-void tStreamInstance::readBuffer(const tOctet & buf)
+tOctet tStreamInstance::read(risse_size size)
 {
-	risse_size actual_read = (risse_int64)Invoke(ss_read, buf);
-	if(actual_read != buf.GetLength())
+	tOctet buf;
+	buf.Allocate(size);
+	tVariant buf_v(buf);
+	risse_size read_bytes = (risse_size)(risse_int64)Invoke(ss_get, buf_v);
+	buf.SetLength(read_bytes);
+	return buf;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tStreamInstance::write(const tOctet & buf)
+{
+	return (risse_size)(risse_int64)Invoke(ss_put, tVariant(buf));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tOctet tStreamInstance::readBuffer(risse_size size)
+{
+	tOctet buf;
+	buf.Allocate(size);
+	tVariant buf_v(buf);
+	risse_size read_bytes = (risse_size)(risse_int64)Invoke(ss_get, buf_v);
+	if(read_bytes != size)
 		tIOExceptionClass::ThrowReadError(Name);
+	return buf;
 }
 //---------------------------------------------------------------------------
 
@@ -115,7 +140,7 @@ void tStreamInstance::readBuffer(const tOctet & buf)
 //---------------------------------------------------------------------------
 void tStreamInstance::writeBuffer(const tOctet & buf)
 {
-	risse_size actual_written = (risse_int64)Invoke(ss_write, buf);
+	risse_size actual_written = (risse_int64)Invoke(ss_put, buf);
 	if(actual_written != buf.GetLength())
 		tIOExceptionClass::ThrowWriteError(Name);
 }
@@ -164,6 +189,8 @@ void tStreamClass::RegisterMembers()
 	BindFunction(this, ss_tell, &tStreamInstance::tell);
 	BindFunction(this, ss_read, &tStreamInstance::read);
 	BindFunction(this, ss_write, &tStreamInstance::write);
+	BindFunction(this, ss_get, &tStreamInstance::get);
+	BindFunction(this, ss_put, &tStreamInstance::put);
 	BindFunction(this, ss_truncate, &tStreamInstance::truncate);
 	BindProperty(this, ss_size, &tStreamInstance::get_size);
 	BindFunction(this, ss_flush, &tStreamInstance::flush);

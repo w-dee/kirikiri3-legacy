@@ -217,7 +217,7 @@ risse_uint64 tMemoryStreamInstance::tell()
 
 
 //---------------------------------------------------------------------------
-risse_size tMemoryStreamInstance::read(const tOctet & buf)
+risse_size tMemoryStreamInstance::get(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 	{
@@ -250,7 +250,7 @@ risse_size tMemoryStreamInstance::read(const tOctet & buf)
 
 
 //---------------------------------------------------------------------------
-risse_uint tMemoryStreamInstance::write(const tOctet & buf)
+risse_uint tMemoryStreamInstance::put(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 	{
@@ -355,8 +355,8 @@ void tMemoryStreamClass::RegisterMembers()
 	BindFunction(this, ss_dispose, &tMemoryStreamInstance::dispose);
 	BindFunction(this, ss_seek, &tMemoryStreamInstance::seek);
 	BindFunction(this, ss_tell, &tMemoryStreamInstance::tell);
-	BindFunction(this, ss_read, &tMemoryStreamInstance::read);
-	BindFunction(this, ss_write, &tMemoryStreamInstance::write);
+	BindFunction(this, ss_get, &tMemoryStreamInstance::get);
+	BindFunction(this, ss_put, &tMemoryStreamInstance::put);
 	BindFunction(this, ss_truncate, &tMemoryStreamInstance::truncate);
 	BindProperty(this, ss_size, &tMemoryStreamInstance::get_size);
 	BindFunction(this, ss_flush, &tMemoryStreamInstance::flush);

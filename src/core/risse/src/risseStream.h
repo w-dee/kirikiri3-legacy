@@ -102,12 +102,16 @@ public:
 	//! @param		buffer		読み込んだデータを書き込む先のポインタ
 	//! @param		read_size	読み込むサイズ
 	//! @return		実際に読み込まれたサイズ
+	//! @note		このメソッドは Risse メソッドの read のラッパーではなくて
+	//!				get のラッパーなので注意すること
 	risse_size Read(void *buffer, risse_size read_size);
 
 	//! @brief		ストリームに書き込む
 	//! @param		buffer		書き込むデータを表すポインタ
 	//! @param		read_size	書き込むサイズ
 	//! @return		実際に書き込まれたサイズ
+	//! @note		このメソッドは Risse メソッドの write のラッパーではなくて
+	//!				put のラッパーなので注意すること
 	risse_size Write(const void *buffer, risse_size write_size);
 
 	//! @brief		ストリームを現在位置で切りつめる
@@ -138,12 +142,16 @@ public: // ユーティリティ
 	//! @param		buffer		読み込んだデータを書き込む先のポインタ
 	//! @param		read_size	読み込むサイズ
 	//! @note		読み込みに失敗した場合は例外が発生する
+	//! @note		このメソッドは Risse メソッドの readBuffer のラッパーではなくて
+	//!				get のラッパーなので注意すること
 	void ReadBuffer(void *buffer, risse_size read_size);
 
 	//! @brief		ストリームに書き込む
 	//! @param		buffer		書き込むデータを表すポインタ
 	//! @param		read_size	書き込むサイズ
 	//! @note		書き込みに失敗した場合は例外が発生する
+	//! @note		このメソッドは Risse メソッドの writeBuffer のラッパーではなくて
+	//!				put のラッパーなので注意すること
 	void WriteBuffer(const void *buffer, risse_size write_size);
 
 	//! @brief		ストリームから64bit little endian 整数を読み込んで返す

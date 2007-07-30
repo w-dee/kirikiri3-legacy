@@ -119,6 +119,8 @@ ss_write							write							#!< "write" メソッド名
 ss_truncate							truncate						#!< "truncate" メソッド名
 ss_size								size							#!< "size" プロパティ名
 ss_flush							flush							#!< "flush" メソッド名
+ss_get								get								#!< "get" メソッド名
+ss_put								put								#!< "put" メソッド名
 ss_readBuffer						readBuffer						#!< "readBuffer" メソッド名
 ss_writeBuffer						writeBuffer						#!< "writeBuffer" メソッド名
 ss_StreamConsts						StreamConsts					#!< "StreamConsts" モジュール名

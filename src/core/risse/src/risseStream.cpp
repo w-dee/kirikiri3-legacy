@@ -85,7 +85,7 @@ risse_size tStreamAdapter::Read(void *buffer, risse_size read_size)
 {
 	tOctetBlock ref_blk(tOctetBlock::MakeReference(reinterpret_cast<risse_uint8*>(buffer), read_size));
 	tOctet ref(&ref_blk);
-	return (risse_int64)Stream->Invoke(ss_read, tVariant(ref));
+	return (risse_int64)Stream->Invoke(ss_get, tVariant(ref));
 }
 //---------------------------------------------------------------------------
 
@@ -96,7 +96,7 @@ risse_size tStreamAdapter::Write(const void *buffer, risse_size write_size)
 	tOctetBlock ref_blk(tOctetBlock::MakeReference(
 				reinterpret_cast<const risse_uint8*>(buffer), write_size));
 	tOctet ref(&ref_blk);
-	return (risse_int64)Stream->Invoke(ss_write, tVariant(ref));
+	return (risse_int64)Stream->Invoke(ss_put, tVariant(ref));
 }
 //---------------------------------------------------------------------------
 
@@ -144,9 +144,8 @@ void tStreamAdapter::SetPosition(risse_uint64 pos)
 //---------------------------------------------------------------------------
 void tStreamAdapter::ReadBuffer(void *buffer, risse_size read_size)
 {
-	tOctetBlock ref_blk(tOctetBlock::MakeReference(reinterpret_cast<risse_uint8*>(buffer), read_size));
-	tOctet ref(&ref_blk);
-	Stream->Do(ocFuncCall, NULL, ss_readBuffer, 0, tMethodArgument::New(tVariant(ref)));
+	if(Read(buffer, read_size) != read_size)
+		tIOExceptionClass::ThrowReadError(GetName());
 }
 //---------------------------------------------------------------------------
 
@@ -154,10 +153,8 @@ void tStreamAdapter::ReadBuffer(void *buffer, risse_size read_size)
 //---------------------------------------------------------------------------
 void tStreamAdapter::WriteBuffer(const void *buffer, risse_size write_size)
 {
-	tOctetBlock ref_blk(tOctetBlock::MakeReference(
-				reinterpret_cast<const risse_uint8*>(buffer), write_size));
-	tOctet ref(&ref_blk);
-	Stream->Do(ocFuncCall, NULL, ss_writeBuffer, 0, tMethodArgument::New(tVariant(ref)));
+	if(Write(buffer, write_size) != write_size)
+		tIOExceptionClass::ThrowWriteError(GetName());
 }
 //---------------------------------------------------------------------------
 

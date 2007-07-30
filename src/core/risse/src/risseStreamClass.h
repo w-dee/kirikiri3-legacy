@@ -102,8 +102,8 @@ public: // risse 用メソッドとか
 	サブクラスでは以下のメソッドを実装すること ( * = optional )
 	seek *
 	tell *
-	read *
-	write *
+	get *
+	put *
 	truncate *
 	flush *
 	サブクラスでは以下のプロパティを実装すること ( * = optional )
@@ -124,12 +124,12 @@ public: // risse 用メソッドとか
 	//! @brief		ストリームから読み込む
 	//! @param		buf		読み込んだデータを書き込む先
 	//! @return		実際に読み込まれたサイズ
-	risse_size read(const tOctet & buf) { return 0; }
+	risse_size get(const tOctet & buf) { return 0; }
 
 	//! @brief		ストリームに書き込む
 	//! @param		buf		書き込むデータ
 	//! @return		実際に書き込まれたサイズ
-	risse_size write(const tOctet & buf) { return 0; }
+	risse_size put(const tOctet & buf) { return 0; }
 
 	//! @brief		ストリームを現在位置で切りつめる
 	//! @note		これを実装しない場合は例外が発生する
@@ -154,9 +154,19 @@ public: // risse 用メソッドとか
 	void set_position(risse_uint64 pos);
 
 	//! @brief		ストリームから読み込む
-	//! @param		buf		読み込んだデータを書き込む先
+	//! @param		size	読み込むサイズ
+	//! @return		読み込まれた内容を含むオクテット列
+	tOctet read(risse_size size);
+
+	//! @brief		ストリームに書き込む
+	//! @param		buf		書き込むデータ
+	risse_size write(const tOctet & buf);
+
+	//! @brief		ストリームから読み込む
+	//! @param		size	読み込むサイズ
+	//! @return		読み込まれた内容を含むオクテット列
 	//! @note		読み込みに失敗した場合は例外が発生する
-	void readBuffer(const tOctet & buf);
+	tOctet readBuffer(risse_size size);
 
 	//! @brief		ストリームに書き込む
 	//! @param		buf		書き込むデータ

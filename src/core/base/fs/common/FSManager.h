@@ -212,6 +212,11 @@ public:
 	//! @return		ストリームオブジェクト
 	tStreamInstance * Open(const tString & filename, risse_uint32 flags);
 
+	//! @brief		指定された位置にあるファイルシステムインスタンスを得る
+	//! @param		path   パス
+	//! @return		ファイルシステムインスタンス
+	tFileSystemInstance * GetFileSystemAt(const tString & path);
+
 private:
 	//! @brief		ファイル一覧を取得する(内部関数)
 	//! @param		dirname ディレクトリ名(正規化されているべきこと)
@@ -226,7 +231,7 @@ private:
 	//! @return		ファイルシステムインスタンス
 	//! @note		このメソッドはスレッド保護されていないため、このメソッドを呼ぶ場合は
 	//!				CriticalSection 内で呼ぶこと！
-	tFileSystemInstance * GetFileSystemAt(const tString & fullpath, tString * fspath = NULL);
+	tFileSystemInstance * FindFileSystemAt(const tString & fullpath, tString * fspath = NULL);
 
 	//! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる
 	//! @param		filename  マウントポイント
@@ -447,6 +452,8 @@ public: // Risse 用メソッドなど
 		{ return tFileSystemManager::instance()->Stat(filename); }
 	static tStreamInstance * open(const tString & filename, risse_uint32 flags)
 		{ return tFileSystemManager::instance()->Open(filename, flags); }
+	static tFileSystemInstance * getFileSystemAt(const tString & path)
+		{ return tFileSystemManager::instance()->GetFileSystemAt(path); }
 	static tString chopExtension(const tString & filename)
 		{ return tFileSystemManager::instance()->ChopExtension(filename); }
 	static tString extractExtension(const tString & filename)

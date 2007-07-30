@@ -362,7 +362,7 @@ bool tFileSystemManager::IsFile(const tString & filename)
 
 	tString fspath;
 	tString fullpath(NormalizePath(filename));
-	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
+	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(filename);
 //	try
 //	{
@@ -385,7 +385,7 @@ bool tFileSystemManager::IsDirectory(const tString & dirname)
 
 	tString fspath;
 	tString fullpath(NormalizePath(dirname));
-	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
+	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	TrimLastPathDelimiter(fullpath);
 //	try
@@ -409,7 +409,7 @@ void tFileSystemManager::RemoveFile(const tString & filename)
 
 	tString fspath;
 	tString fullpath(NormalizePath(filename));
-	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
+	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 //	try
 //	{
@@ -433,7 +433,7 @@ void tFileSystemManager::RemoveDirectory(const tString & dirname, bool recursive
 	tString fspath;
 	tString fullpath(NormalizePath(dirname));
 	if(!fullpath.EndsWith(RISSE_WC('/'))) fullpath += RISSE_WC('/');
-	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
+	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 
 	// ディレクトリを削除する際、マウントポイントをまたがる場合があるので
@@ -486,7 +486,7 @@ void tFileSystemManager::CreateDirectory(const tString & dirname, bool recursive
 	{
 		// 再帰をしない場合
 		tString fspath;
-		tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
+		tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 		if(!fs) ThrowNoFileSystemError(fullpath);
 	//	try
 	//	{
@@ -539,7 +539,7 @@ tObjectInterface * tFileSystemManager::Stat(const tString & filename)
 
 	tString fspath;
 	tString fullpath(NormalizePath(filename));
-	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
+	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 //	try
 //	{
@@ -563,7 +563,7 @@ tStreamInstance * tFileSystemManager::Open(const tString & filename,
 	// 通常のファイルシステム経由のストリームの作成
 	tString fspath;
 	tString fullpath(NormalizePath(filename));
-	tFileSystemInstance * fs = GetFileSystemAt(fullpath, &fspath);
+	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	tVariant val;
 //	try
@@ -582,6 +582,19 @@ tStreamInstance * tFileSystemManager::Open(const tString & filename,
 
 
 //---------------------------------------------------------------------------
+tFileSystemInstance * tFileSystemManager::GetFileSystemAt(const tString & path)
+{
+	volatile tCriticalSection::tLocker holder(CS);
+
+	tString fullpath(NormalizePath(path));
+	tFileSystemInstance * fs = FindFileSystemAt(fullpath, NULL);
+
+	return fs;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 size_t tFileSystemManager::InternalList(
 	const tString & dirname,
 	tFileSystemIterationCallback * callback)
@@ -589,7 +602,7 @@ size_t tFileSystemManager::InternalList(
 	volatile tCriticalSection::tLocker holder(CS);
 
 	tString fspath;
-	tFileSystemInstance * fs = GetFileSystemAt(dirname, &fspath);
+	tFileSystemInstance * fs = FindFileSystemAt(dirname, &fspath);
 	if(!fs) ThrowNoFileSystemError(dirname);
 
 //	try
@@ -612,7 +625,7 @@ size_t tFileSystemManager::InternalList(
 
 
 //---------------------------------------------------------------------------
-tFileSystemInstance * tFileSystemManager::GetFileSystemAt(
+tFileSystemInstance * tFileSystemManager::FindFileSystemAt(
 					const tString & fullpath, tString * fspath)
 {
 	// フルパスの最後からディレクトリを削りながら見ていき、最初に
@@ -647,7 +660,7 @@ tFileSystemInstance * tFileSystemManager::GetFileSystemAt(
 	// 通常はここにこない
 	// ここにくるのは以下のどちらか
 	// ・  / (ルート) に割り当てられているファイルシステムが見つからない
-	// ・  fullpath にが渡された
+	// ・  fullpath に空文字が渡された
 
 	if(fullpath.GetLength() != 0)
 		tFileSystemExceptionClass::Throw(
@@ -1064,9 +1077,10 @@ void tFileClass::RegisterMembers()
 	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tFileClass::isDirectory);
 	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tFileClass::removeFile);
 	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::removeDirectory);
-	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::removeDirectory);
+	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::createDirectory);
 	BindFunction(this, tSS<'s','t','a','t'>(), &tFileClass::stat);
 	BindFunction(this, tSS<'o','p','e','n'>(), &tFileClass::open);
+	BindFunction(this, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tFileClass::getFileSystemAt);
 	BindFunction(this, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tFileClass::chopExtension);
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tFileClass::extractExtension);
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tFileClass::extractName);

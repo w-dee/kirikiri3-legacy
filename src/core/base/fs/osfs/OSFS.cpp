@@ -119,7 +119,7 @@ risse_uint64 tOSNativeStreamInstance::tell()
 
 
 //---------------------------------------------------------------------------
-risse_size tOSNativeStreamInstance::read(const tOctet & buf)
+risse_size tOSNativeStreamInstance::get(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -140,7 +140,7 @@ risse_size tOSNativeStreamInstance::read(const tOctet & buf)
 
 
 //---------------------------------------------------------------------------
-risse_size tOSNativeStreamInstance::write(const tOctet & buf)
+risse_size tOSNativeStreamInstance::put(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -217,8 +217,8 @@ void tOSNativeStreamClass::RegisterMembers()
 	BindFunction(this, ss_dispose, &tOSNativeStreamInstance::dispose);
 	BindFunction(this, ss_seek, &tOSNativeStreamInstance::seek);
 	BindFunction(this, ss_tell, &tOSNativeStreamInstance::tell);
-	BindFunction(this, ss_read, &tOSNativeStreamInstance::read);
-	BindFunction(this, ss_write, &tOSNativeStreamInstance::write);
+	BindFunction(this, ss_get, &tOSNativeStreamInstance::get);
+	BindFunction(this, ss_put, &tOSNativeStreamInstance::put);
 	BindFunction(this, ss_truncate, &tOSNativeStreamInstance::truncate);
 	BindProperty(this, ss_size, &tOSNativeStreamInstance::get_size);
 	BindFunction(this, ss_flush, &tOSNativeStreamInstance::flush);
@@ -648,6 +648,8 @@ void tOSFSClass::RegisterMembers()
 	BindFunction(this, tSS<'s','t','a','t'>(), &tOSFSInstance::stat);
 	BindFunction(this, tSS<'o','p','e','n'>(), &tOSFSInstance::open);
 	BindFunction(this, tSS<'f','l','u','s','h'>(), &tOSFSInstance::flush);
+
+	BindProperty(this, tSS<'o','r','i','g','i','n'>(), &tOSFSInstance::get_origin);
 
 	// OSNativeStream を登録する
 	RegisterNormalMember(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),

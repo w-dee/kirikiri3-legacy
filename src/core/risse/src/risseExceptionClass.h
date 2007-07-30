@@ -912,6 +912,16 @@ public:
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
+
+public:
+	//! @brief		例外を投げる
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		message		メッセージ
+	static void Throw(tScriptEngine * engine, const tString & message);
+	//! @brief		例外を投げる
+	//! @param		message		期メッセージ
+	static void Throw(const tString & message)
+		{ Throw(NULL, message); }
 };
 //---------------------------------------------------------------------------
 

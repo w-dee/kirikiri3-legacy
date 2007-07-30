@@ -1580,6 +1580,16 @@ void tIllegalArgumentExceptionClass::initialize(const tNativeCallInfo & info)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tIllegalArgumentExceptionClass::Throw(tScriptEngine * engine, const tString & message)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_IllegalArgumentException, message);
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
 
 
 

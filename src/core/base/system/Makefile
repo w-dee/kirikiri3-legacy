@@ -12,7 +12,8 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 # このディレクトリにあるソースファイルを列挙
 #-----------------------------------------
 CPPFILES=\
-	SystemBind.cpp              
+	SystemClass.cpp              \
+	StandardIO.cpp               
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

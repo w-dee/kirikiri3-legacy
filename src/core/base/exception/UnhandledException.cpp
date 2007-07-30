@@ -15,7 +15,6 @@
 #include "base/script/RisseEngine.h"
 #include "base/exception/RisaException.h"
 #include "base/exception/UnhandledException.h"
-#include "base/system/SystemBind.h"
 #include "base/event/Event.h"
 #include "base/log/Log.h"
 #include "base/ui/editor/ScriptEditor.h"

@@ -8,46 +8,53 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief System クラス バインディング
+//! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
-#ifndef _SYSTEMBIND_H
-#define _SYSTEMBIND_H
+#ifndef _SYSTEMCLASS_H_
+#define _SYSTEMCLASS_H_
 
-#if 0
-#include "base/script/RisseEngine.h"
-#include "risse/include/risseNative.h"
+#include "base/gc/RisaGC.h"
+#include "risse/include/risseNativeBinder.h"
+#include "risse/include/risseClass.h"
+
 
 namespace Risa {
 //---------------------------------------------------------------------------
 
+
+
+
+
 //---------------------------------------------------------------------------
-//! @brief クラスレジストラ
+//! @brief		"System" クラス
 //---------------------------------------------------------------------------
-class tSystemRegisterer :
-			public singleton_base<tSystemRegisterer>,
-			protected depends_on<tRisseScriptEngine>
+class tSystemClass : public tClassBase
 {
-	iRisseDispatch2 * SystemClass;
+	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
-	tSystemRegisterer();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tSystemClass(tScriptEngine * engine);
 
-	//! @brief デストラクタ
-	~tSystemRegisterer();
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
 
-	//! @brief		System.exceptionHandler を得る
-	//! @param		dest		exceptionHandler を格納するクロージャ
-	//! @return		正常な exceptionHandler を得られれば真、得られなければ偽
-	bool GetExceptionHandlerObject(tVariantClosure & dest);
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+	static void construct() { }
+	static void initialize() { }
 };
 //---------------------------------------------------------------------------
+
+
+
+
 
 //---------------------------------------------------------------------------
 } // namespace Risa
 
 
 #endif
-
-#endif
-

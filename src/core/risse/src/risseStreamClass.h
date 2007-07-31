@@ -154,9 +154,9 @@ public: // risse 用メソッドとか
 	void set_position(risse_uint64 pos);
 
 	//! @brief		ストリームから読み込む
-	//! @param		size	読み込むサイズ
+	//! @param		args	引数配列 (optionalな size	読み込むサイズを含む)
 	//! @return		読み込まれた内容を含むオクテット列
-	tOctet read(risse_size size);
+	tOctet read(const tMethodArgument &args);
 
 	//! @brief		ストリームに書き込む
 	//! @param		buf		書き込むデータ

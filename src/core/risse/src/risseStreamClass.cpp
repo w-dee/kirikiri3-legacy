@@ -103,14 +103,40 @@ void tStreamInstance::set_position(risse_uint64 pos)
 
 
 //---------------------------------------------------------------------------
-tOctet tStreamInstance::read(risse_size size)
+tOctet tStreamInstance::read(const tMethodArgument &args)
 {
-	tOctet buf;
-	buf.Allocate(size);
-	tVariant buf_v(buf);
-	risse_size read_bytes = (risse_size)(risse_int64)Invoke(ss_get, buf_v);
-	buf.SetLength(read_bytes);
-	return buf;
+	if(args.HasArgument(0))
+	{
+		// サイズが渡されているとき
+		risse_size size = (risse_size)(risse_int64)args[0];
+		tOctet buf;
+		buf.Allocate(size);
+		tVariant buf_v(buf);
+		risse_size read_bytes = (risse_size)(risse_int64)Invoke(ss_get, buf_v);
+		buf.SetLength(read_bytes);
+		return buf;
+	}
+	else
+	{
+		// サイズが渡されていないとき
+		// この場合は何回かに分けて読み込むしかない
+		static const risse_size one_max_size = 64*1024; // 一度には64kbずつ
+		tOctet buf;
+		tOctet one_buf;
+		for(;;)
+		{
+			if(one_buf.GetLength() != one_max_size)
+				one_buf.Allocate(one_max_size);
+
+			tVariant one_buf_v(one_buf);
+			risse_size read_bytes = (risse_size)(risse_int64)Invoke(ss_get, one_buf_v);
+			if(read_bytes == 0) break; // すでにすべて読み込んだ
+
+			one_buf.SetLength(read_bytes);
+			buf += one_buf;
+		}
+		return buf;
+	}
 }
 //---------------------------------------------------------------------------
 

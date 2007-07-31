@@ -878,6 +878,18 @@ void tCodeGenerator::PutSetAttribute(const tSSAVariable * obj,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tCodeGenerator::PutAssert(const tSSAVariable *cond, const tString & msg)
+{
+	// assertion コードを置く
+	RISSE_ASSERT(VMInsnInfo[ocAssert].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[ocAssert].Flags[1] == tVMInsnInfo::vifConstant);
+	PutWord(ocAssert);
+	PutWord(FindRegMap(cond));
+	PutWord(FindConst(msg));
+}
+//---------------------------------------------------------------------------
+
 
 
 

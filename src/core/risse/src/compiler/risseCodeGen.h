@@ -447,6 +447,11 @@ public:
 	//! @param		attrib	属性
 	void PutSetAttribute(const tSSAVariable * obj,
 		const tSSAVariable * name, risse_uint32 attrib);
+
+	//! @brief		Assertion のコードを置く
+	//! @param		cond	条件を表す変数
+	//! @param		msg		条件が偽の時に投げるメッセージ
+	void PutAssert(const tSSAVariable *cond, const tString & msg);
 };
 //---------------------------------------------------------------------------
 

@@ -244,7 +244,7 @@ int Application::OnRun()
 	try
 	{
 		tScriptEngine engine;
-
+		engine.SetAssertionEnabled(true);
 		engine.SetWarningOutput(new tWarningOutput());
 
 		// Script クラスを追加する

@@ -67,6 +67,28 @@ protected:
 	tLineOutputInterface *WarningOutput; //!< 警告情報の出力先
 
 public:
+	//! @brief		スクリプトエンジンの動作オプション用構造体
+	struct tOptions
+	{
+		bool AssertEnabled;  //!< assert によるテストが有効かどうか
+
+		//! @brief		デフォルトコンストラクタ
+		tOptions()
+		{
+			AssertEnabled = false;
+		}
+
+		//! @brief		比較演算子
+		bool operator ==(const tOptions & rhs) const
+		{
+			return AssertEnabled == rhs.AssertEnabled;
+		}
+	};
+
+private:
+	tOptions Options; //!< オプション
+
+public:
 	//! @brief		コンストラクタ
 	tScriptEngine();
 
@@ -102,6 +124,17 @@ public:
 	{
 		if(WarningOutput) WarningOutput->Output(info);
 	}
+
+	//! @brief		オプション情報を得る
+	const tOptions & GetOptions() const { return Options; }
+
+	//! @brief		assertion が有効かどうかを得る
+	//! @return		assertion が有効かどうか
+	bool GetAssertionEnabled() const { return Options.AssertEnabled; }
+
+	//! @brief		assertion が有効かどうかを設定する
+	//! @param		b		asssrtion が有効かどうか
+	void SetAssertionEnabled(bool b) { Options.AssertEnabled = b; }
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

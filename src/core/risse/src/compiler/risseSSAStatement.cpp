@@ -471,6 +471,11 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 		gen->PutSetAttribute(Used[0], Used[1], OperateFlagsValue);
 		break;
 
+	case ocAssert:
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutAssert(Used[0], GetMessage());
+		break;
+
 	case ocDefineAccessMap:
 		{
 			RISSE_ASSERT(Declared != NULL);

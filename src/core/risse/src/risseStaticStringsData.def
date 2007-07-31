@@ -8,6 +8,7 @@
 // それと重複するものをここで定義しており冗長に見えるが
 // ヘッダ側に tSS の実装(長ったらしいテンプレート)
 // を見せたくなかったのでこうしている
+tStringData data_ss_assert = { tSS<'a','s','s','e','r','t'>::data.Buffer,6 }; /* トークンの値 assert */
 tStringData data_ss_bool = { tSS<'b','o','o','l'>::data.Buffer,4 }; /* トークンの値 bool */
 tStringData data_ss_boolean = { tSS<'b','o','o','l','e','a','n'>::data.Buffer,7 }; /* トークンの値 boolean */
 tStringData data_ss_break = { tSS<'b','r','e','a','k'>::data.Buffer,5 }; /* トークンの値 break */

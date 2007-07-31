@@ -21,6 +21,7 @@
 #include "../risseExceptionClass.h"
 #include "../risseScriptBlockClass.h"
 #include "../risseStaticStrings.h"
+#include "../risseScriptEngine.h"
 
 // 名前表の読み込み
 #undef risseASTH
@@ -710,6 +711,28 @@ tSSAVariable * tASTNode_Context::DoReadSSA(
 
 	// このノードは ss_lastEvalResultHiddenVarName を返す
 	return form->GetLocalNamespace()->Read(form, GetEndPosition(), ss_lastEvalResultHiddenVarName);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tSSAVariable * tASTNode_Assert::DoReadSSA(tSSAForm *form, void * param) const
+{
+	// このノードは、スクリプトエンジンインスタンスの AssertionEnabled が
+	// 真の場合のみ、assert 用コードを出力する。
+	tScriptEngine * engine = form->GetFunction()->GetFunctionGroup()->
+						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine();
+	if(engine->GetAssertionEnabled())
+	{
+		// 式を評価する
+		tSSAVariable * res = GetExpression()->GenerateReadSSA(form);
+
+		// assert 命令を置く
+		tSSAStatement * stmt = form->AddStatement(GetPosition(), ocAssert, NULL, res);
+		stmt->SetMessage(ExpressionString); // メッセージを設定
+	}
+
+	return NULL; // このノードは答えを返さない
 }
 //---------------------------------------------------------------------------
 

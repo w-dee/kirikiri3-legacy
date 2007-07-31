@@ -137,6 +137,9 @@ ISet					iset		R,R,R,-,-,-		[]=			#!< set [ ]
 // 関数呼び出し(ocFuncCall) が引数なし、メンバ名なしで呼ばれる。
 // 書き込みの場合は DSet がメンバ名なしで呼ばれる。
 
+// assertion
+Assert					assert		R,C,-,-,-,-		----		#!< assertion check
+
 // 代入演算子の類
 BitAndAssign			ERR			-,-,-,-,-,-		&=			#!< &=
 BitOrAssign				ERR			-,-,-,-,-,-		|=			#!< |=

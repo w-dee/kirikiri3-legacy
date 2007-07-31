@@ -82,6 +82,7 @@ $               T_DOLLAR                 - false false
 ##### これはこの「文字類」にリストされている物+下の定数
 ##### にリストされている、アルファベットのみで構成されている
 ##### 単語に相当する。
+assert              T_ASSERT       - true false
 bool                T_BOOL         - true false
 boolean             T_BOOLEAN      - true false
 break               T_BREAK        - true false

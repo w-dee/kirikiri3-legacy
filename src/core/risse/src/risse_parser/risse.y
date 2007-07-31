@@ -290,6 +290,7 @@ static tDeclAttribute * OverwriteDeclAttribute(
 	T_ELSE					"else"
 	T_CATCH					"catch"
 	T_OMIT					"..."
+	T_ASSERT				"assert"
 	T_SYNCHRONIZED			"synchronized"
 	T_WITH					"with"
 	T_USING					"using"
@@ -356,6 +357,7 @@ static tDeclAttribute * OverwriteDeclAttribute(
 	func_call_expr func_call_expr_head func_call_expr_body
 	inline_array array_elm_list array_elm
 	inline_dic dic_elm dic_elm_list
+	assert
 	if if_head
 	block block_or_statement statement
 	while do_while
@@ -464,6 +466,7 @@ statement
 	: ";" nl								{ $$ = N(ExprStmt)(@1.first, NULL); }
 	| ";"									{ $$ = N(ExprStmt)(@1.first, NULL); }
 	| expr_with_comma snl					{ $$ = N(ExprStmt)(@1.first, $1); }
+	| assert
 	| if
 	| while
 	| do_while
@@ -481,6 +484,16 @@ statement
 	| label
 	| goto
 	| definition
+;
+
+/*---------------------------------------------------------------------------
+  assertion
+  ---------------------------------------------------------------------------*/
+
+assert
+	: "assert" onl
+	  expr_with_comma snl					{ $$ = N(Assert)(@1.first, $3,
+	  										  tString(LX->GetScript(), @3.first, @3.last - @3.first)); }
 ;
 
 /*---------------------------------------------------------------------------
@@ -1050,6 +1063,7 @@ member_name
 	| "(" ")"								{ $$ = new tVariant(mnFuncCall); }
 
 /* 以下は words.txt と同期させること */
+	| "assert"								{ $$ = new tVariant(ss_assert         ); }
 	| "bool"								{ $$ = new tVariant(ss_bool           ); }
 	| "boolean"                             { $$ = new tVariant(ss_boolean        ); }
 	| "break"								{ $$ = new tVariant(ss_break          ); }

@@ -64,6 +64,7 @@ namespace Risse
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Context		)		//!< コンテキスト
+	RISSE_AST_ENUM_ITEM(ant, Assert			)		//!< assert 文
 	RISSE_AST_ENUM_ITEM(ant, ExprStmt		)		//!< 式のみのステートメント
 	RISSE_AST_ENUM_ITEM(ant, Factor			)		//!< 項
 	RISSE_AST_ENUM_ITEM(ant, VarDecl		)		//!< 変数宣言
@@ -580,6 +581,37 @@ public:
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
 	tString GetDumpComment() const;
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	assert文(type=antAssert)
+//---------------------------------------------------------------------------
+class tASTNode_Assert : public tASTNode_OneExpression
+{
+	tString		ExpressionString; //!< assert文の式(文字列)
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position			ソースコード上の位置
+	//! @param		expression			式ノード
+	//! @param		expression_string	式を表す文字列
+	tASTNode_Assert(risse_size position,
+		tASTNode * expression, const tString & expression_string) :
+		tASTNode_OneExpression(position, antAssert, expression),
+		ExpressionString(expression_string)
+	{
+	}
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tString GetDumpComment() const { return ExpressionString; }
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス

@@ -1054,6 +1054,15 @@ void tCodeInterpreter::Execute(
 				code += 4;
 				break;
 
+			case ocAssert		: // assertion
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < constssize);
+				if(!(bool)AR(code[1]))
+					tAssertionErrorClass::Throw(engine,
+						tString(RISSE_WS_TR("assertion failed: %1"), (tString)AC(code[2])));
+				code += 3;
+				break;
+
 			default:
 				// TODO: 本当はASSERTではなくて例外を発生した方がいい
 				RISSE_ASSERT(!"unknown instruction code");

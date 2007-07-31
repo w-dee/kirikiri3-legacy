@@ -55,6 +55,7 @@ class tSSAStatement : public tCollectee
 		risse_uint32 FuncExpandFlags; //!< ocFuncCall/ocNew; 配列展開のビットマスク(1=配列を展開する)
 		tString * Name; //!< 名前
 		risse_size Index; //!< インデックス
+		tString * Message; //!< Assert時のメッセージ
 	};
 	union
 	{
@@ -222,6 +223,14 @@ public:
 	//! @brief		名前を取得する
 	//! @return		名前
 	const tString & GetName() const;
+
+	//! @brief		メッセージを設定する
+	//! @param		name		メッセージ
+	void SetMessage(const tString & msg) { Message = new tString(msg); }
+
+	//! @brief		メッセージを取得する
+	//! @return		メッセージ
+	const tString & GetMessage() const { return * Message; }
 
 	//! @brief		インデックスを設定する
 	//! @param		index		インデックス

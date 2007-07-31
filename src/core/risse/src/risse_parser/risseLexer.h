@@ -80,6 +80,9 @@ public:
 	//! @param		sb		スクリプトブロック
 	tLexer(tScriptBlockInstance * sb);
 
+	//! @brief		スクリプトを得る
+	const tString & GetScript() const { return Script; }
+
 	//! @brief		トークンを得る
 	//! @param		val		トークンの値の格納先
 	//! @return		トークンID

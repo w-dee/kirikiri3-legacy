@@ -113,6 +113,7 @@ bool tApplication::OnInit()
 	// (暫定実装)
 	wxFileName script_filename;
 	bool script_filename_set = false;
+	bool assertion_enabled = false;
 	for(int i = 1; i < argc; i++)
 	{
 		// 先頭が - で始まっていないオプションを探し、それを
@@ -122,6 +123,15 @@ bool tApplication::OnInit()
 			script_filename = wxFileName(argv[i]);
 			script_filename_set = true;
 		}
+		else
+		{
+			// 先頭が '-' で始まっている → オプション
+			if(argv[i][1] == wxT('a'))
+			{
+				// -a オプション : Risse の assert 文を有効にする
+				assertion_enabled = true;
+			}
+		}
 	}
 
 	// すべてのシングルトンインスタンスの作成や残りの設定を行う
@@ -129,6 +139,7 @@ bool tApplication::OnInit()
 	{
 		// 先だって初期化しておきたい物
 		tRisseScriptEngine::ensure();
+		tRisseScriptEngine::instance()->GetScriptEngine()->SetAssertionEnabled(assertion_enabled);
 
 		try
 		{

@@ -183,6 +183,73 @@ static int MapToken(const risse_char * & ptr, tVariant &value)
   }
   p += 1;
   goto cut_word;
+ case 'a':
+  switch(p[1]) {
+  case 'b':
+   switch(p[2]) {
+   case 's':
+    switch(p[3]) {
+    case 't':
+     switch(p[4]) {
+     case 'r':
+      switch(p[5]) {
+      case 'a':
+       switch(p[6]) {
+       case 'c':
+        switch(p[7]) {
+        case 't':
+         p += 8;
+         if(!::Risse::iswordcha_nc(*p)) { ptr = p; return T_ABSTRACT; }
+         goto cut_word;
+        }
+        p += 7;
+        goto cut_word;
+       }
+       p += 6;
+       goto cut_word;
+      }
+      p += 5;
+      goto cut_word;
+     }
+     p += 4;
+     goto cut_word;
+    }
+    p += 3;
+    goto cut_word;
+   }
+   p += 2;
+   goto cut_word;
+  case 's':
+   switch(p[2]) {
+   default:
+    p += 2;
+    if(!::Risse::iswordcha_nc(*p)) { ptr = p; return T_AS; }
+    goto cut_word;
+   case 's':
+    switch(p[3]) {
+    case 'e':
+     switch(p[4]) {
+     case 'r':
+      switch(p[5]) {
+      case 't':
+       p += 6;
+       if(!::Risse::iswordcha_nc(*p)) { ptr = p; return T_ASSERT; }
+       goto cut_word;
+      }
+      p += 5;
+      goto cut_word;
+     }
+     p += 4;
+     goto cut_word;
+    }
+    p += 3;
+    goto cut_word;
+   }
+   p += 2;
+   goto cut_word;
+  }
+  p += 1;
+  goto cut_word;
  case 'o':
   switch(p[1]) {
   case 'c':
@@ -1189,49 +1256,6 @@ static int MapToken(const risse_char * & ptr, tVariant &value)
        case 'n':
         p += 7;
         if(!::Risse::iswordcha_nc(*p)) { ptr = p; return T_BOOLEAN; }
-        goto cut_word;
-       }
-       p += 6;
-       goto cut_word;
-      }
-      p += 5;
-      goto cut_word;
-     }
-     p += 4;
-     goto cut_word;
-    }
-    p += 3;
-    goto cut_word;
-   }
-   p += 2;
-   goto cut_word;
-  }
-  p += 1;
-  goto cut_word;
- case 'a':
-  switch(p[1]) {
-  case 's':
-   p += 2;
-   if(!::Risse::iswordcha_nc(*p)) { ptr = p; return T_AS; }
-   goto cut_word;
-  case 'b':
-   switch(p[2]) {
-   case 's':
-    switch(p[3]) {
-    case 't':
-     switch(p[4]) {
-     case 'r':
-      switch(p[5]) {
-      case 'a':
-       switch(p[6]) {
-       case 'c':
-        switch(p[7]) {
-        case 't':
-         p += 8;
-         if(!::Risse::iswordcha_nc(*p)) { ptr = p; return T_ABSTRACT; }
-         goto cut_word;
-        }
-        p += 7;
         goto cut_word;
        }
        p += 6;

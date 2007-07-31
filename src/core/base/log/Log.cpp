@@ -273,12 +273,15 @@ void tWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 	// Risa のログ機構に流し込む
 	tLogger::Log(RISSE_WS("(wx) ") + tString(szString), risa_level);
 
+/*
+	TOOD: ここうまくうごいてないので直すこと (いまのままだと終了時にSEGVする)
 	// OldLog に流し込む
 	if(OldLog)
 	{
 		// 気持ち悪いキャストだが wxLogChain の実装がこうなってるので倣う
 		((tWxLogProxy *)OldLog)->DoLog(level, szString, t);
 	}
+*/
 }
 //---------------------------------------------------------------------------
 

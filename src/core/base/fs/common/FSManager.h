@@ -450,8 +450,7 @@ public: // Risse 用メソッドなど
 	static void createDirectory(const tString & dirname, const tMethodArgument &args);
 	static tObjectInterface * stat(const tString & filename)
 		{ return tFileSystemManager::instance()->Stat(filename); }
-	static tStreamInstance * open(const tString & filename, risse_uint32 flags)
-		{ return tFileSystemManager::instance()->Open(filename, flags); }
+	static tStreamInstance * open(const tString & filename, const tMethodArgument & args);
 	static tFileSystemInstance * getFileSystemAt(const tString & path)
 		{ return tFileSystemManager::instance()->GetFileSystemAt(path); }
 	static tString chopExtension(const tString & filename)

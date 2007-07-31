@@ -659,7 +659,7 @@ tFileSystemInstance * tFileSystemManager::FindFileSystemAt(
 			{
 				if(fspath)
 					*fspath =
-						tString(fullpath, p - start, risse_size_max);
+						tString(fullpath, p - start + 1, risse_size_max);
 
 				return *item;
 			}
@@ -1176,6 +1176,15 @@ void tFileClass::createDirectory(const tString & dirname, const tMethodArgument 
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tStreamInstance * tFileClass::open(const tString & filename, const tMethodArgument & args)
+{
+	risse_uint32 flags = args.HasArgument(1) ?
+		(risse_uint32)(risse_int64)args[1] : tFileOpenModes::omRead;
+	return tFileSystemManager::instance()->Open(filename, flags);
+}
+//---------------------------------------------------------------------------
 
 
 

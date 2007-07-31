@@ -48,7 +48,7 @@ void tOSNativeStreamInstance::initialize(const tString & path, risse_uint32 flag
 
 	// ファイルを開く
 	Internal = new tInternal();
-	if(!Internal->File.Open(path.AsWxString()))
+	if(!Internal->File.Open(path.AsWxString(), mode))
 	{
 		delete Internal; Internal = NULL;
 		tIOExceptionClass::Throw(
@@ -279,6 +279,7 @@ void tOSFSInstance::SetOptions(const tString & basedir, bool checkcase)
 		base_directory += wxFileName::GetPathSeparator();
 
 	// ベースディレクトリを保存
+	BaseDirectoryLengthWx = base_directory.length();
 	BaseDirectory = base_directory;
 }
 //---------------------------------------------------------------------------
@@ -495,13 +496,10 @@ tObjectInterface * tOSFSInstance::stat(const tString & filename)
 //---------------------------------------------------------------------------
 tStreamInstance * tOSFSInstance::open(const tString & filename, risse_uint32 flags)
 {
-	wxString wxfilename(filename.AsWxString());
-
-	CheckFileNameCase(wxfilename);
-
 	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(filename.AsWxString()));
+	CheckFileNameCase(native_name);
 
 	// OSNativeStreamClass からインスタンスを生成して返す
 	tVariant obj =
@@ -549,55 +547,41 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 
 	// うーん、VMS 形式のパスは相手にすべきなのだろうか
 
-	const wxChar * msg = RISSE_WS_TR("file or directory '%1' does not exist (but '%2' exists, did you mean this?");
+	const wxChar * msg = RISSE_WS_TR("file or directory '%1' does not exist (but '%2' exists, did you mean this?)");
 
 	// パスを分解する
-	wxString existing;
-	wxString volume, path, name;
 	wxFileName testpath(path_to_check);
+	testpath.Normalize();
+	wxString normalized_path = testpath.GetFullPath();
+
+	// ここでは自前でパスの分解を行う
 	wxDir dir;
+	const wxChar * start = normalized_path.c_str();
+	const wxChar * p = normalized_path.c_str() + BaseDirectoryLengthWx;
+	const wxChar * pp = p;
 
-	wxFileName::SplitPath(path_to_check, &volume, &path, NULL, NULL);
-	name = testpath.GetFullName();
-
-	// まずファイル名をチェック
-	if(!name.IsEmpty())
+	for(;;)
 	{
-		wxString subpath(testpath.GetPath(wxPATH_GET_SEPARATOR));
-		if(wxFileName::DirExists(subpath) &&
-			dir.Open(subpath) && dir.GetFirst(&existing, name))
+		while(*p && !wxFileName::IsPathSeparator(*p)) p++;
+		// この時点で p は \0 か パスデリミタ
+		// pp から p までがパスコンポーネント
+		// start から pp までがパスコンポーネントを含むディレクトリ
+		if(!dir.Open(wxString(start, pp - start))) return true; // ディレクトリをオープンできなかった
+		wxString existing;
+		wxString path_comp(p, p - pp);
+		if(!dir.GetFirst(&existing, path_comp)) return true; // 見つからなかった
+		if(existing != path_comp)
 		{
-			if(existing != name)
-			{
-				// ファイル名が違う
-				if(raise)
-					tIOExceptionClass::Throw(tString(msg, path_to_check.c_str(),
-						(subpath + existing).c_str()));
-				else
-					return false;
-			}
+			// 大文字と小文字が違う
+			if(raise)
+				tIOExceptionClass::Throw(tString(msg, wxString(start, p - start).c_str(),
+								(wxString(start, pp - start) + existing).c_str()));
+			else
+				return false;
 		}
-	}
-
-	// ディレクトリをチェック
-	testpath.Assign(testpath.GetPath());
-	while(testpath.GetDirCount())
-	{
-		wxString subpath(testpath.GetPath(wxPATH_GET_SEPARATOR));
-		if(wxFileName::DirExists(subpath) &&
-			dir.Open(subpath) && dir.GetFirst(&existing, testpath.GetFullName()))
-		{
-			if(existing != name)
-			{
-				// ファイル名が違う
-				if(raise)
-					tIOExceptionClass::Throw(tString(msg, testpath.GetFullPath().c_str(),
-						(subpath + existing).c_str()));
-				else
-					return false;
-			}
-		}
-		testpath.RemoveLastDir();
+		if(!*p) break;
+		p++;
+		pp = p + 1;
 	}
 
 	// エラーは見つからなかった

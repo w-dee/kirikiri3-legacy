@@ -132,7 +132,8 @@ public:
 //---------------------------------------------------------------------------
 class tOSFSInstance : public tFileSystemInstance
 {
-	tWCString BaseDirectory; //!< このファイルシステムがマウントしているOSのディレクトリ
+	tWCString BaseDirectory; //!< このファイルシステムがマウントしているOSのディレクトリ(最後にパスデリミタを含む)
+	risse_size BaseDirectoryLengthWx; //!< (wxStringにおける) ベースディレクトリ名の長さ
 	bool CheckCase; //!< ファイル名の大文字・小文字をチェックする場合は真
 
 public:

@@ -162,9 +162,6 @@ bool tApplication::OnInit()
 			{
 				wxString script_dir = script_filename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
 
-				// /boot を作成する
-				tFileSystemManager::instance()->CreateDirectory(tSS<'/','b','o','o','t'>(), false);
-
 				// /boot に 引数で与えられたファイル名が存在するディレクトリをマウントする
 				tFileSystemManager::instance()->Mount(tSS<'/','b','o','o','t'>(),
 					tRisseFSClassRegisterer<tOSFSClass>::instance()->

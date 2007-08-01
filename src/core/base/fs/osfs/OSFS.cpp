@@ -546,18 +546,14 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 	if(!CheckCase) return true; // 大文字・小文字をチェックしない場合はそのまま帰る
 
 	// うーん、VMS 形式のパスは相手にすべきなのだろうか
+	// 今のところ相手してない
 
-	const wxChar * msg = RISSE_WS_TR("file or directory '%1' does not exist (but '%2' exists, did you mean this?)");
-
-	// パスを分解する
-	wxFileName testpath(path_to_check);
-	testpath.Normalize();
-	wxString normalized_path = testpath.GetFullPath();
+	const wxChar * msg = RISSE_WS_TR("file or directory '%1' does not exist (but '%2' exists)");
 
 	// ここでは自前でパスの分解を行う
 	wxDir dir;
-	const wxChar * start = normalized_path.c_str();
-	const wxChar * p = normalized_path.c_str() + BaseDirectoryLengthWx;
+	const wxChar * start = path_to_check.c_str();
+	const wxChar * p = path_to_check.c_str() + BaseDirectoryLengthWx;
 	const wxChar * pp = p;
 
 	for(;;)
@@ -568,7 +564,7 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 		// start から pp までがパスコンポーネントを含むディレクトリ
 		if(!dir.Open(wxString(start, pp - start))) return true; // ディレクトリをオープンできなかった
 		wxString existing;
-		wxString path_comp(p, p - pp);
+		wxString path_comp(pp, p - pp);
 		if(!dir.GetFirst(&existing, path_comp)) return true; // 見つからなかった
 		if(existing != path_comp)
 		{

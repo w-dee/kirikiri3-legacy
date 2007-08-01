@@ -315,7 +315,7 @@ void tCodeInterpreter::Execute(
 						// 引数の省略はなし
 						tMethodArgument & new_args = tMethodArgument::Allocate(code[4]);
 						for(risse_uint32 i = 0; i < code[4]; i++)
-							new_args.SetArgument(i, AR(code[i+5]));
+							new_args.SetArgument(i, &AR(code[i+5]));
 						new_obj = AR(code[2]).New(0, new_args);
 					}
 					if(code[1]!=InvalidRegNum) AR(code[1]) = new_obj;
@@ -355,9 +355,9 @@ void tCodeInterpreter::Execute(
 								tMethodArgument::Allocate(code[4], code[5]);
 
 							for(risse_uint32 i = 0; i < code[4]; i++)
-								new_args.SetArgument(i, AR(code[i+6]));
+								new_args.SetArgument(i, &AR(code[i+6]));
 							for(risse_uint32 i = 0; i < code[5]; i++)
-								new_args.SetBlockArgument(i, AR(code[i+6+code[4]]));
+								new_args.SetBlockArgument(i, &AR(code[i+6+code[4]]));
 
 							AR(code[2]).FuncCall(engine, &val, 0, new_args, This);
 						}
@@ -453,7 +453,7 @@ void tCodeInterpreter::Execute(
 						tMethodArgument & new_args = tMethodArgument::Allocate(code[4]);
 
 						for(risse_uint32 i = 0; i < code[4]; i++)
-							new_args.SetArgument(i, AR(code[i+5]));
+							new_args.SetArgument(i, &AR(code[i+5]));
 
 						AR(code[2]).FuncCall(engine, code[1]==InvalidRegNum?NULL:&AR(code[1]),
 							0, new_args, This);
@@ -490,9 +490,9 @@ void tCodeInterpreter::Execute(
 						tMethodArgument & new_args = tMethodArgument::Allocate(code[4], code[5]);
 
 						for(risse_uint32 i = 0; i < code[4]; i++)
-							new_args.SetArgument(i, AR(code[i+6]));
+							new_args.SetArgument(i, &AR(code[i+6]));
 						for(risse_uint32 i = 0; i < code[5]; i++)
-							new_args.SetBlockArgument(i, AR(code[i+6+code[4]]));
+							new_args.SetBlockArgument(i, &AR(code[i+6+code[4]]));
 
 						AR(code[2]).FuncCall(engine, code[1]==InvalidRegNum?NULL:&AR(code[1]),
 							0, new_args, This);

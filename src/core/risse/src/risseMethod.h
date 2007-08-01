@@ -95,17 +95,21 @@ public:
 	//! @brief		普通の引数へ値への参照をセットする
 	//! @param		n		パラメータ位置
 	//! @param		v		(パラメータの値)
-	void SetArgument(risse_size n, const tVariant &v)
+	//! @note		tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
+	//!				値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	void SetArgument(risse_size n, const tVariant *v)
 	{
-		Arguments[n] = &v;
+		Arguments[n] = v;
 	}
 
 	//! @brief		ブロック引数へ値への参照をセットする
 	//! @param		n		パラメータ位置
 	//! @param		v		(パラメータの値)
-	void SetBlockArgument(risse_size n, const tVariant &v)
+	//! @note		tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
+	//!				値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	void SetBlockArgument(risse_size n, const tVariant *v)
 	{
-		Arguments[n+ArgumentCount] = &v;
+		Arguments[n+ArgumentCount] = v;
 	}
 
 	//! @brief		普通の引数が想定した数未満の場合に例外を発生させる
@@ -185,7 +189,7 @@ public:
 	static const tMethodArgumentOf<1> New(const tVariant &a0)
 	{
 		tMethodArgumentOf<1> arg;
-		arg.SetArgument(0, a0);
+		arg.SetArgument(0, &a0);
 		return arg;
 	}
 
@@ -198,8 +202,8 @@ public:
 								const tVariant &a1)
 	{
 		tMethodArgumentOf<2> arg;
-		arg.SetArgument(0, a0);
-		arg.SetArgument(1, a1);
+		arg.SetArgument(0, &a0);
+		arg.SetArgument(1, &a1);
 		return arg;
 	}
 
@@ -213,9 +217,9 @@ public:
 								const tVariant &a1, const tVariant &a2)
 	{
 		tMethodArgumentOf<3> arg;
-		arg.SetArgument(0, a0);
-		arg.SetArgument(1, a1);
-		arg.SetArgument(2, a2);
+		arg.SetArgument(0, &a0);
+		arg.SetArgument(1, &a1);
+		arg.SetArgument(2, &a2);
 		return arg;
 	}
 
@@ -256,17 +260,21 @@ public:
 	//! @brief		普通の引数へ値への参照をセットする
 	//! @param		n		パラメータ位置
 	//! @param		v		(パラメータの値)
-	void SetArgument(risse_size n, const tVariant &v)
+	//! @note		tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
+	//!				値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	void SetArgument(risse_size n, const tVariant *v)
 	{
-		Arguments[n] = &v;
+		Arguments[n] = v;
 	}
 
 	//! @brief		ブロック引数へ値への参照をセットする
 	//! @param		n		パラメータ位置
 	//! @param		v		(パラメータの値)
-	void SetBlockArgument(risse_size n, const tVariant &v)
+	//! @note		tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
+	//!				値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	void SetBlockArgument(risse_size n, const tVariant *v)
 	{
-		Arguments[n+ArgumentCount] = &v;
+		Arguments[n+ArgumentCount] = v;
 	}
 
 	//! @brief		引数が存在するかどうかを得る

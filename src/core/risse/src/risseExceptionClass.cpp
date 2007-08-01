@@ -116,7 +116,7 @@ tVariant * tTemporaryException::Convert(tScriptEngine * engine) const
 	tMethodArgument & new_args = tMethodArgument::Allocate(Arguments.size());
 
 	for(risse_size i = 0; i < Arguments.size(); i++)
-		new_args.SetArgument(i, Arguments[i]);
+		new_args.SetArgument(i, &Arguments[i]);
 
 	// New を呼び出し、それを返す
 	return new tVariant(cls.New(0, new_args));

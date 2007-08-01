@@ -61,6 +61,8 @@ tFileSystemIterationCallback::tRetValue
 			else
 				OnFile(name);
 			if(result) *result = ret;
+
+			return rvNoError;
 		}
 	}
 
@@ -618,8 +620,10 @@ size_t tFileSystemManager::InternalList(
 //	try
 //	{
 		tMethodArgumentOf<1,1> args;
-		args.SetArgument(0, fspath);
-		args.SetBlockArgument(0, callback);
+		tVariant fspath_v(fspath);
+		tVariant callback_v(callback);
+		args.SetArgument(0, &fspath_v);
+		args.SetBlockArgument(0, &callback_v);
 		tVariant ret;
 		fs->Do(ocFuncCall, &ret, tSS<'w','a','l','k','A','t'>(), 0, args);
 		return ret.operator risse_int64();

@@ -362,6 +362,12 @@ void tCodeInterpreter::Execute(
 							AR(code[2]).FuncCall(engine, &val, 0, new_args, This);
 						}
 					}
+					catch(const tTemporaryException * te)
+					{
+						const tVariant * e = te->Convert(engine);
+						val = *e;
+						raised = true;
+					}
 					catch(const tVariant * e)
 					{
 						val = *e;
@@ -400,6 +406,12 @@ void tCodeInterpreter::Execute(
 
 						// メソッドオブジェクトを呼ぶ
 						AR(code[2]).FuncCall(engine, &val, 0, args, This);
+					}
+					catch(const tTemporaryException * te)
+					{
+						const tVariant * e = te->Convert(engine);
+						val = *e;
+						raised = true;
 					}
 					catch(const tVariant * e)
 					{

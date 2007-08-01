@@ -312,15 +312,12 @@ void tOSFSInstance::initialize(const tString & base_dir, const tNativeCallInfo &
 size_t tOSFSInstance::walkAt(const tString & dirname,
 	const tMethodArgument &args)
 {
-	wxString wxdirname(dirname.AsWxString());
-
-	CheckFileNameCase(wxdirname);
-
 	volatile tSynchronizer sync(this); // sync
 
 	args.ExpectBlockArgumentCount(1); // ブロック引数が一つなければならない
 
-	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter((wxString)wxdirname));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(dirname.AsWxString()));
+	CheckFileNameCase(native_name);
 
 	wxDir dir;
 	size_t count = 0;
@@ -369,13 +366,10 @@ size_t tOSFSInstance::walkAt(const tString & dirname,
 //---------------------------------------------------------------------------
 bool tOSFSInstance::isFile(const tString & filename)
 {
-	wxString wxfilename(filename.AsWxString());
-
-	if(!CheckFileNameCase(wxfilename, false)) return false;
-
 	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(filename.AsWxString()));
+	CheckFileNameCase(native_name);
 
 	return wxFileName::FileExists(native_name);
 }
@@ -385,13 +379,10 @@ bool tOSFSInstance::isFile(const tString & filename)
 //---------------------------------------------------------------------------
 bool tOSFSInstance::isDirectory(const tString & dirname)
 {
-	wxString wxdirname(dirname.AsWxString());
-
-	if(!CheckFileNameCase(wxdirname, false)) return false;
-
 	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(dirname.AsWxString()));
+	CheckFileNameCase(native_name);
 
 	return wxFileName::DirExists(native_name);
 }
@@ -401,13 +392,10 @@ bool tOSFSInstance::isDirectory(const tString & dirname)
 //---------------------------------------------------------------------------
 void tOSFSInstance::removeFile(const tString & filename)
 {
-	wxString wxfilename(filename.AsWxString());
-
-	CheckFileNameCase(wxfilename);
-
 	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxfilename));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(filename.AsWxString()));
+	CheckFileNameCase(native_name);
 
 	if(!::wxRemoveFile(native_name))
 		tIOExceptionClass::Throw(tString(
@@ -419,13 +407,10 @@ void tOSFSInstance::removeFile(const tString & filename)
 //---------------------------------------------------------------------------
 void tOSFSInstance::removeDirectory(const tString & dirname, const tMethodArgument &args)
 {
-	wxString wxdirname(dirname.AsWxString());
-
-	CheckFileNameCase(wxdirname);
-
 	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(dirname.AsWxString()));
+	CheckFileNameCase(native_name);
 
 	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
 
@@ -443,13 +428,10 @@ void tOSFSInstance::removeDirectory(const tString & dirname, const tMethodArgume
 //---------------------------------------------------------------------------
 void tOSFSInstance::createDirectory(const tString & dirname)
 {
-	wxString wxdirname(dirname.AsWxString());
-
-	CheckFileNameCase(wxdirname);
-
 	volatile tSynchronizer sync(this); // sync
 
-	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(wxdirname));
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(dirname.AsWxString()));
+	CheckFileNameCase(native_name);
 
 	if(!wxFileName::Mkdir(native_name, 0777, 0))
 		tIOExceptionClass::Throw(tString(
@@ -461,11 +443,10 @@ void tOSFSInstance::createDirectory(const tString & dirname)
 //---------------------------------------------------------------------------
 tObjectInterface * tOSFSInstance::stat(const tString & filename)
 {
-	wxString wxfilename(filename.AsWxString());
-
-	CheckFileNameCase(wxfilename);
-
 	volatile tSynchronizer sync(this); // sync
+
+	wxString native_name(BaseDirectory.c_str() + ConvertToNativePathDelimiter(filename.AsWxString()));
+	CheckFileNameCase(native_name);
 
 	tIOExceptionClass::Throw(tString(RISSE_WS_TR("stat is not yet implemented")));
 
@@ -562,22 +543,25 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 		// この時点で p は \0 か パスデリミタ
 		// pp から p までがパスコンポーネント
 		// start から pp までがパスコンポーネントを含むディレクトリ
-		if(!dir.Open(wxString(start, pp - start))) return true; // ディレクトリをオープンできなかった
-		wxString existing;
-		wxString path_comp(pp, p - pp);
-		if(!dir.GetFirst(&existing, path_comp)) return true; // 見つからなかった
-		if(existing != path_comp)
+		if(p - pp > 0)
 		{
-			// 大文字と小文字が違う
-			if(raise)
-				tIOExceptionClass::Throw(tString(msg, wxString(start, p - start).c_str(),
-								(wxString(start, pp - start) + existing).c_str()));
-			else
-				return false;
+			if(!dir.Open(wxString(start, pp - start))) return true; // ディレクトリをオープンできなかった
+			wxString existing;
+			wxString path_comp(pp, p - pp);
+			if(!dir.GetFirst(&existing, path_comp)) return true; // 見つからなかった
+			if(existing != path_comp)
+			{
+				// 大文字と小文字が違う
+				if(raise)
+					tIOExceptionClass::Throw(tString(msg, wxString(start, p - start).c_str(),
+									(wxString(start, pp - start) + existing).c_str()));
+				else
+					return false;
+			}
 		}
 		if(!*p) break;
 		p++;
-		pp = p + 1;
+		pp = p;
 	}
 
 	// エラーは見つからなかった

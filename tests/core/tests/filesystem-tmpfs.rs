@@ -2,9 +2,13 @@
 
 var boot_script_source = File::getFileSystemAt('/boot/').source;
 
-// boot_script_source/../tmp を /tmp にマウントする
+// boot_script_source/../tmp を /data にマウントする
 
-File::mount('/tmp', new FileSystem::OSFS("\{boot_script_source}/../tmp", true));
+File::mount('/data', new FileSystem::OSFS("\{boot_script_source}/../tmp", true));
+
+// /tmp に TmpFS をマウントする
+
+File::mount('/tmp', new FileSystem::TmpFS());
 
 // ファイルを作成して書き込んでみる
 File::open('/tmp/test.txt', File::omWrite).print("Hello world!").dispose();

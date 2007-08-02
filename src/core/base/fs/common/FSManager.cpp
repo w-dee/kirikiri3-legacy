@@ -691,7 +691,7 @@ tFileSystemInstance * tFileSystemManager::FindFileSystemAt(
 void tFileSystemManager::ThrowNoFileSystemError(const tString & filename)
 {
 	tFileSystemExceptionClass::Throw(
-		tString(RISSE_WS_TR("Could not find filesystem at path '%1'"), filename));
+		tString(RISSE_WS_TR("could not find filesystem at path '%1'"), filename));
 }
 //---------------------------------------------------------------------------
 
@@ -699,7 +699,7 @@ void tFileSystemManager::ThrowNoFileSystemError(const tString & filename)
 //---------------------------------------------------------------------------
 void tFileSystemManager::RaiseNoSuchFileOrDirectoryError()
 {
-	tFileSystemExceptionClass::Throw(
+	tIOExceptionClass::Throw(
 		tString(RISSE_WS_TR("no such file or directory")));
 }
 //---------------------------------------------------------------------------

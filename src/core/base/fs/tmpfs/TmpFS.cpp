@@ -252,13 +252,13 @@ size_t tTmpFSNode::Iterate(tVariant & callback)
 		{
 			callback.Do(tRisseScriptEngine::instance()->GetScriptEngine(),
 				ocFuncCall, NULL, tString::GetEmptyString(), 0,
-				tMethodArgument::New(i.GetValue()->Name, false));
+				tMethodArgument::New(i.GetValue()->Name, true));
 		}
 		else if(i.GetValue()->Type == ntFile)
 		{
 			callback.Do(tRisseScriptEngine::instance()->GetScriptEngine(),
 				ocFuncCall, NULL, tString::GetEmptyString(), 0,
-				tMethodArgument::New(i.GetValue()->Name, true));
+				tMethodArgument::New(i.GetValue()->Name, false));
 		}
 	}
 	return count;
@@ -573,9 +573,25 @@ tStreamInstance * tTmpFSInstance::open(const tString & filename,
 {
 	volatile tSynchronizer sync(this); // sync
 
-	tTmpFSNode * node = GetNodeAt(filename);
-	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
-	if(!node->IsFile()) tIOExceptionClass::Throw(RISSE_WS_TR("specified name is not a file"));
+	tTmpFSNode * node;
+
+	if((flags & tFileOpenModes::omAccessMask) == tFileOpenModes::omWrite)
+	{
+		// もしノードが存在しなければ新規作成する
+		tString path(filename);
+		tString parentdir, name;
+		tFileSystemManager::SplitPathAndName(path, &parentdir, &name); // パスを分離
+		tTmpFSNode * parentnode = GetNodeAt(parentdir);
+		if(!parentnode) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		node = parentnode->CreateFile(name);
+		if(!node) tIOExceptionClass::Throw(RISSE_WS_TR("failed to create file"));
+	}
+	else
+	{
+		node = GetNodeAt(filename);
+		if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
+		if(!node->IsFile()) tIOExceptionClass::Throw(RISSE_WS_TR("specified name is not a file"));
+	}
 
 	// MemoryStreamClass からインスタンスを生成して返す
 	tVariant obj =
@@ -588,7 +604,13 @@ tStreamInstance * tTmpFSInstance::open(const tString & filename,
 	tMemoryStreamInstance *memstream = 
 		reinterpret_cast<tMemoryStreamInstance *>(obj.GetObjectInterface());
 
-	memstream->SetMemoryBlock(node->GetMemoryStreamBlock());
+	memstream->SetMemoryBlock(node->GetMemoryStreamBlock()); // ここでアタッチ
+
+	if(flags & tFileOpenModes::omAppendBit)
+	{
+		// 最後に移動
+		memstream->SeekEnd();
+	}
 
 	return memstream;
 }

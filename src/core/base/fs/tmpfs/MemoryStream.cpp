@@ -115,7 +115,23 @@ void tMemoryStreamBlock::Fit()
 tMemoryStreamInstance::tMemoryStreamInstance()
 {
 	Flags = 0;
+	CurrentPos = 0;
 	Block = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tMemoryStreamInstance::SeekEnd()
+{
+	volatile tSynchronizer sync(this); // sync
+	{
+		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+
+		volatile tCriticalSection::tLocker holder(Block->GetCS());
+
+		CurrentPos = Block->GetSize();
+	}
 }
 //---------------------------------------------------------------------------
 

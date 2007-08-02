@@ -84,6 +84,13 @@ public:
 	//! @param		block メモリブロック
 	void SetMemoryBlock(tMemoryStreamBlock * block) { Block = block; }
 
+	//! @brief		アクセスフラグを設定する
+	//! @param		flags		アクセスフラグ
+	void SetAccessFlags(risse_uint32 flags) { Flags = flags; }
+
+	//! @brief		ポインタを最後に移動する
+	void SeekEnd();
+
 public: // risse 用メソッドとか
 	void construct() {;}
 	void initialize(risse_uint32 flags, const tNativeCallInfo &info);

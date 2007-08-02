@@ -233,14 +233,14 @@ private:
 	//!				CriticalSection 内で呼ぶこと！
 	tFileSystemInstance * FindFileSystemAt(const tString & fullpath, tString * fspath = NULL);
 
-	//! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる
+	//! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる(FileSystemException)
 	//! @param		filename  マウントポイント
 	//! @note		この関数は例外を発生させるため呼び出し元には戻らない
 	static void ThrowNoFileSystemError(const tString & filename);
 
 public:
 
-	//! @brief		「そのようなファイルやディレクトリは無い」例外を発生させる
+	//! @brief		「そのようなファイルやディレクトリは無い」例外を発生させる(IOException)
 	static void RaiseNoSuchFileOrDirectoryError();
 
 	//! @brief		パス名を拡張子より前と拡張子に分離する ( /path/to/file.ext を /path/to/file と .ext に分離する )

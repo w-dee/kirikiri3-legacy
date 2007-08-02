@@ -290,6 +290,16 @@ public:
 		return !reinterpret_cast<const tVariantData*>(Arguments[n])->IsVoid();
 	}
 
+	//! @brief		ブロック引数が存在するかどうかを得る
+	//! @param		n		パラメータ位置
+	//! @return		ブロック引数が存在するかどうか
+	bool HasBlockArgument(risse_size n) const
+	{
+		if(GetBlockArgumentCount() <= n) return false;
+		// HasArgument の説明を参照のこと
+		return !reinterpret_cast<const tVariantData*>(Arguments[n+ArgumentCount])->IsVoid();
+	}
+
 	//! @brief		普通の引数が想定した数未満の場合に例外を発生させる
 	//! @param		n		想定したパラメータの数
 	void ExpectArgumentCount(risse_size n) const

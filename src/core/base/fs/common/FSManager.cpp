@@ -1173,7 +1173,8 @@ void tFileClass::removeDirectory(const tString & dirname, const tMethodArgument 
 
 
 //---------------------------------------------------------------------------
-void tFileClass::createDirectory(const tString & dirname, const tMethodArgument &args)
+void tFileClass::createDirectory(const tString & dirname,
+			const tMethodArgument &args)
 {
 	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
 	tFileSystemManager::instance()->CreateDirectory(dirname, recursive);
@@ -1182,11 +1183,35 @@ void tFileClass::createDirectory(const tString & dirname, const tMethodArgument 
 
 
 //---------------------------------------------------------------------------
-tStreamInstance * tFileClass::open(const tString & filename, const tMethodArgument & args)
+tVariant tFileClass::open(const tString & filename, const tNativeCallInfo &info)
 {
-	risse_uint32 flags = args.HasArgument(1) ?
-		(risse_uint32)(risse_int64)args[1] : tFileOpenModes::omRead;
-	return tFileSystemManager::instance()->Open(filename, flags);
+	risse_uint32 flags = info.args.HasArgument(1) ?
+		(risse_uint32)(risse_int64)info.args[1] : tFileOpenModes::omRead;
+	tVariant stream_v(tFileSystemManager::instance()->Open(filename, flags));
+	if(info.args.HasBlockArgument(0))
+	{
+		// ブロック付き呼び出しの場合は、ブロックを呼び出し、呼んだら
+		// stream_v の dispose メソッドを呼ぶ
+		try
+		{
+			tVariant block(info.args.GetBlockArgument(0));
+			block.Do(info.engine,
+					ocFuncCall, NULL, tString::GetEmptyString(), 0,
+					tMethodArgument::New(stream_v));
+		}
+		catch(...)
+		{
+			stream_v.Do(info.engine, ocFuncCall, NULL, ss_dispose);
+			throw;
+		}
+		stream_v.Do(info.engine, ocFuncCall, NULL, ss_dispose);
+		return info.This; // this を帰す
+	}
+	else
+	{
+		// ブロック無し呼び出しの場合は、オープンしたオブジェクトをそのまま帰す
+		return stream_v;
+	}
 }
 //---------------------------------------------------------------------------
 

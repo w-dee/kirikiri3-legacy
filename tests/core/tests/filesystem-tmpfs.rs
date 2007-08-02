@@ -135,6 +135,16 @@ assert(!File::isFile('/tmp/subdir/subfolder/subtree/test5.txt'));
 File::removeDirectory('/tmp/subdir/subfolder/subtree');
 assert(!File::isDirectory('/tmp/subdir/subfolder/subtree'));
 
+// 空でないディレクトリを削除しようとしてみる
+var raised = false;
+try {
+	File::removeDirectory('/tmp/subdir/subfolder/subtree');
+} catch(e) {
+	assert(e.class === IOException);
+	raised = true;
+}
+assert(raised);
+
 // ファイルの削除とディレクトリの削除
 File::removeFile('/tmp/subdir/subfolder/test4.txt');
 File::removeDirectory('/tmp/subdir/subfolder/');

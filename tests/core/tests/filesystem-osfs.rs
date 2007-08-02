@@ -40,15 +40,72 @@ assert(File::isFile('/tmp/subdir/test2.txt'));
 assert(!File::isDirectory('/tmp/subdir/test2.txt'));
 assert(File::isFile('/tmp/subdir//test2.txt')); // 一応 legal
 
+// もう一個ファイルを作ってみる(今度はブロック付きで)
+File::open('/tmp/subdir/test3.txt', File::omWrite) { |stream| stream.print("Hello world!?\n") };
+
+
+
+// サブディレクトリを作る
+File::createDirectory('/tmp/subdir/subfolder');
+
+// ディレクトリは作られたか？
+assert(File::isDirectory('/tmp/subdir/subfolder'));
+assert(File::isDirectory('/tmp/subdir//subfolder'));
+
 // もう一個ファイルを作ってみる
-File::open('/tmp/subdir/test3.txt', File::omWrite).print("Hello world!?\n").dispose();
+File::open('/tmp/subdir/subfolder/test4.txt', File::omWrite) { |stream| stream.print("Hello world!!?\n") };
+
+// もう一個サブディレクトリを作る
+File::createDirectory('/tmp/subdir/subfolder/subtree');
+
+// もう一個ファイルを作ってみる
+File::open('/tmp/subdir/subfolder/subtree/test5.txt', File::omWrite) { |stream| stream.print("Hello world!!!?\n") };
 
 
 // トラバースしてみる
-var files = '';
-File::walkAt('/tmp/subdir') { |name| files += ':' + name }
-p(files);
+var file_expected = 3;
+var count = File::walkAt('/tmp/subdir') { |name, is_dir|
+	if     (name == 'test2.txt' && !is_dir) file_expected--;
+	else if(name == 'test3.txt' && !is_dir) file_expected--;
+	else if(name == 'subfolder' &&  is_dir) file_expected--;
+	else file_expected = -1;
+}
+assert(file_expected == 0);
+assert(count == 3);
 
 
+// 再帰的にトラバースしてみる
+var file_expected = 6;
+var count = File::walkAt('/tmp/subdir', true) { |name, is_dir|
+	if     (name == 'test2.txt' && !is_dir) file_expected--;
+	else if(name == 'test3.txt' && !is_dir) file_expected--;
+	else if(name == 'subfolder' &&  is_dir) file_expected--;
+	else if(name == 'subfolder/test4.txt' && !is_dir) file_expected--;
+	else if(name == 'subfolder/subtree' && is_dir) file_expected--;
+	else if(name == 'subfolder/subtree/test5.txt' && !is_dir) file_expected--;
+	else file_expected = -1;
+}
+assert(file_expected == 0);
+assert(count == 6);
 
-//=> ok
+// ファイルの削除
+File::removeFile('/tmp/subdir/test2.txt');
+File::removeFile('/tmp/subdir/subfolder/subtree/test5.txt');
+assert(!File::isFile('/tmp/subdir/test2.txt'));
+assert(!File::isFile('/tmp/subdir/subfolder/subtree/test5.txt'));
+
+// ディレクトリの削除
+File::removeDirectory('/tmp/subdir/subfolder/subtree');
+assert(!File::isDirectory('/tmp/subdir/subfolder/subtree'));
+
+// ファイルの削除とディレクトリの削除
+File::removeFile('/tmp/subdir/subfolder/test4.txt');
+File::removeDirectory('/tmp/subdir/subfolder/');
+assert(!File::isDirectory('/tmp/subdir/subfolder/'));
+
+// クリーンナップ。
+// OSFS は安全のため、ファイルの再帰的な削除はサポートされていない。
+File::removeFile('/tmp/subdir/test3.txt');
+File::removeDirectory('/tmp/subdir');
+
+System::stdout.print("ok"); //=> ok

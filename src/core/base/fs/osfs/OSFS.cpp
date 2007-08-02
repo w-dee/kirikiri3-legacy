@@ -418,7 +418,7 @@ void tOSFSInstance::removeDirectory(const tString & dirname, const tMethodArgume
 		tIOExceptionClass::Throw(
 			RISSE_WS_TR("recursive directory remove is not yet implemented"));
 
-	if(::wxRmdir(native_name))
+	if(!::wxRmdir(native_name))
 		tIOExceptionClass::Throw(tString(
 			RISSE_WS_TR("can not remove directory '%1'"), native_name.c_str()));
 }

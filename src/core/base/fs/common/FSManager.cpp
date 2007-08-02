@@ -333,6 +333,8 @@ size_t tFileSystemManager::WalkAt(const tString & dirname,
 
 		virtual ~tIteratorCallback() {;}
 
+		void SetCurrentDirectory(const tString & dir) { CurrentDirectory = dir; }
+
 		void OnFile(const tString & filename)
 		{
 			Count ++;
@@ -342,10 +344,9 @@ size_t tFileSystemManager::WalkAt(const tString & dirname,
 		void OnDirectory(const tString & dirname)
 		{
 			Count ++;
-			tString dir(CurrentDirectory  + dirname);
-			List.push_back(dir); // ディレクトリを list に push
+			List.push_back(CurrentDirectory + dirname + tSS<'/'>()); // ディレクトリ名を list に push
 			Destination->Do(ocFuncCall, NULL, tString::GetEmptyString(), 0,
-				tMethodArgument::New(dir, true));
+				tMethodArgument::New(CurrentDirectory + dirname, true));
 		}
 
 		size_t GetCount() const { return Count; }
@@ -357,8 +358,10 @@ size_t tFileSystemManager::WalkAt(const tString & dirname,
 
 	while(list.size()) // ディレクトリのリストに残りがある限り繰り返す
 	{
-		tString dir(path + list.back());
+		tString relative_dir(list.back());
+		tString dir(path + relative_dir);
 		list.pop_back();
+		localcallback.SetCurrentDirectory(relative_dir);
 		InternalList(dir, &localcallback);
 	}
 

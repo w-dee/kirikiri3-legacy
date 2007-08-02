@@ -150,9 +150,8 @@ File::removeFile('/tmp/subdir/subfolder/test4.txt');
 File::removeDirectory('/tmp/subdir/subfolder/');
 assert(!File::isDirectory('/tmp/subdir/subfolder/'));
 
-// クリーンナップ。
-// OSFS は安全のため、ファイルの再帰的な削除はサポートされていない。
-File::removeFile('/tmp/subdir/test3.txt');
-File::removeDirectory('/tmp/subdir');
+// クリーンナップ
+File::removeDirectory('/tmp/subdir', true); // 再帰削除
+assert(!File::isFile('/tmp/subdir/test3.txt')); // 削除されているはず
 
 System::stdout.print("ok"); //=> ok

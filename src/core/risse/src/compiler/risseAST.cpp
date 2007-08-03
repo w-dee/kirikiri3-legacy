@@ -2591,7 +2591,6 @@ tSSAVariable * tASTNode_Case::DoReadSSA(tSSAForm *form, void * param) const
 			info->GetLastStatement()->SetJumpTarget(case_block); // ジャンプ
 		else
 			info->GetLastStatement()->SetFalseBranch(case_block); // 分岐
-		jump_stmt->SetJumpTarget(case_block);
 
 		// 条件判断文を作成
 		tSSAVariable * targ_var = Expression->GenerateReadSSA(form);
@@ -2609,6 +2608,7 @@ tSSAVariable * tASTNode_Case::DoReadSSA(tSSAForm *form, void * param) const
 		tSSABlock * case_body_block =
 			form->CreateNewBlock(RISSE_WS("switch_case_body"));
 		branch_stmt->SetTrueBranch(case_body_block);
+		jump_stmt->SetJumpTarget(case_body_block);
 	}
 	else
 	{

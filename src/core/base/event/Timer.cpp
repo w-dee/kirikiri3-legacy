@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/event/Timer.h"
+#include "base/event/TickCount.h"
 
 
 namespace Risa {
@@ -533,7 +534,8 @@ public:
 	//! @brief		newの際の新しいオブジェクトを作成して返す
 	static tVariant ovulate();
 
-public:
+public: // Risse 用メソッドとか
+	static risse_uint64 getTickCount() { return tTickCount::instance()->Get(); }
 };
 //---------------------------------------------------------------------------
 
@@ -572,6 +574,8 @@ void tTimerClass::RegisterMembers()
 	BindProperty(this, tSS<'c','a','p','a','c','i','t','y'>(), &tTimerInstance::get_capacity, &tTimerInstance::set_capacity);
 	BindFunction(this, tSS<'r','e','s','e','t'>(), &tTimerInstance::reset);
 	BindFunction(this, tSS<'o','n','T','i','m','e','r'>(), &tTimerInstance::onTimer);
+
+	BindFunction(this, tSS<'g','e','t','T','i','c','k','C','o','u','n','t'>(), &tTimerClass::getTickCount);
 }
 //---------------------------------------------------------------------------
 

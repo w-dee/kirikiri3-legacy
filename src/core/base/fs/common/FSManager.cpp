@@ -268,11 +268,15 @@ tString tFileSystemManager::NormalizePath(const tString & path)
 			else if(s[1] == RISSE_WC('.') && s[2] == RISSE_WC('.') &&
 				(s[3] == 0 || s[3] == RISSE_WC('/')))
 			{
-				// s[2] 以降が ..
+				// /.. で終わっている、または /../ がある
 				s += 3;
 				// d を巻き戻す
-				while(d > start && *d != RISSE_WC('/')) d--;
-				// この時点で d は '/' を指している
+				if(d > start)
+				{
+					d --;
+					while(d > start && *d != RISSE_WC('/')) d--;
+					// この時点で d は '/' を指している
+				}
 			}
 			else if(s[1] == RISSE_WC('.') &&
 				(s[2] == 0 || s[2] == RISSE_WC('/')))
@@ -860,10 +864,12 @@ void tFileSystemManager::SetCurrentDirectory(const tString &dir)
 {
 	volatile tCriticalSection::tLocker holder(CS);
 
-	if(dir.EndsWith(RISSE_WC('/')))
-		CurrentDirectory = dir;
+	tString fullpath(NormalizePath(dir));
+
+	if(fullpath.EndsWith(RISSE_WC('/')))
+		CurrentDirectory = fullpath;
 	else
-		CurrentDirectory = dir + RISSE_WS("/");
+		CurrentDirectory = fullpath + RISSE_WS("/");
 }
 //---------------------------------------------------------------------------
 
@@ -1123,7 +1129,8 @@ void tFileClass::RegisterMembers()
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tFileClass::extractExtension, final_const);
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tFileClass::extractName, final_const);
 	BindFunction(this, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tFileClass::extractPath, final_const);
-	BindProperty(this, tSS<'c','w','d'>(), &tFileClass::get_cwd, &tFileClass::set_cwd, final_const);
+	BindProperty(this, tSS<'c','w','d'>(), &tFileClass::get_cwd, &tFileClass::set_cwd/*, final_const*/);
+		// TODO: final_const なプロパティってちゃんと動作してる？
 }
 //---------------------------------------------------------------------------
 

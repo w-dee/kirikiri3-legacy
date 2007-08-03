@@ -1085,24 +1085,26 @@ void tFileClass::RegisterMembers()
 	BindFunction(this, ss_construct, &tFileClass::construct);
 	BindFunction(this, ss_initialize, &tFileClass::initialize);
 
-	BindFunction(this, tSS<'m','o','u','n','t'>(), &tFileClass::mount);
-	BindFunction(this, tSS<'u','n','m','o','u','n','t'>(), &tFileClass::unmount);
-	BindFunction(this, tSS<'n','o','r','m','a','l','i','z','e'>(), &tFileClass::normalize);
-	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tFileClass::walkAt);
-	BindFunction(this, tSS<'e','x','i','s','t','s'>(), &tFileClass::exists);
-	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tFileClass::isFile);
-	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tFileClass::isDirectory);
-	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tFileClass::removeFile);
-	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::removeDirectory);
-	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::createDirectory);
-	BindFunction(this, tSS<'s','t','a','t'>(), &tFileClass::stat);
-	BindFunction(this, tSS<'o','p','e','n'>(), &tFileClass::open);
-	BindFunction(this, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tFileClass::getFileSystemAt);
-	BindFunction(this, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tFileClass::chopExtension);
-	BindFunction(this, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tFileClass::extractExtension);
-	BindFunction(this, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tFileClass::extractName);
-	BindFunction(this, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tFileClass::extractPath);
-	BindProperty(this, tSS<'c','w','d'>(), &tFileClass::get_cwd, &tFileClass::set_cwd);
+	tMemberAttribute final_const (	tMemberAttribute(tMemberAttribute::vcConst)|
+								tMemberAttribute(tMemberAttribute::ocFinal));
+	BindFunction(this, tSS<'m','o','u','n','t'>(), &tFileClass::mount, final_const);
+	BindFunction(this, tSS<'u','n','m','o','u','n','t'>(), &tFileClass::unmount, final_const);
+	BindFunction(this, tSS<'n','o','r','m','a','l','i','z','e'>(), &tFileClass::normalize, final_const);
+	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tFileClass::walkAt, final_const);
+	BindFunction(this, tSS<'e','x','i','s','t','s'>(), &tFileClass::exists, final_const);
+	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tFileClass::isFile, final_const);
+	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tFileClass::isDirectory, final_const);
+	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tFileClass::removeFile, final_const);
+	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::removeDirectory, final_const);
+	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::createDirectory, final_const);
+	BindFunction(this, tSS<'s','t','a','t'>(), &tFileClass::stat, final_const);
+	BindFunction(this, tSS<'o','p','e','n'>(), &tFileClass::open, final_const);
+	BindFunction(this, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tFileClass::getFileSystemAt, final_const);
+	BindFunction(this, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tFileClass::chopExtension, final_const);
+	BindFunction(this, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tFileClass::extractExtension, final_const);
+	BindFunction(this, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tFileClass::extractName, final_const);
+	BindFunction(this, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tFileClass::extractPath, final_const);
+	BindProperty(this, tSS<'c','w','d'>(), &tFileClass::get_cwd, &tFileClass::set_cwd, final_const);
 }
 //---------------------------------------------------------------------------
 

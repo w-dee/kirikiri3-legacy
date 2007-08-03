@@ -597,6 +597,25 @@ tStreamInstance * tFileSystemManager::Open(const tString & filename,
 
 
 //---------------------------------------------------------------------------
+tStreamInstance * tFileSystemManager::Open(const tVariant & filename, risse_uint32 flags)
+{
+	if(filename.InstanceOf(tRisseScriptEngine::instance()->GetScriptEngine(),
+		tVariant(tRisseScriptEngine::instance()->GetScriptEngine()->StreamClass)))
+	{
+		// filename は Stream クラスのインスタンス
+		// そのまま帰す
+		return reinterpret_cast<tStreamInstance*>(filename.GetObjectInterface());
+	}
+	else
+	{
+		// filename を文字列化して Open に渡す
+		return Open((tString)filename, flags);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tFileSystemInstance * tFileSystemManager::GetFileSystemAt(const tString & path)
 {
 	volatile tCriticalSection::tLocker holder(CS);

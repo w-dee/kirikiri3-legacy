@@ -7,8 +7,8 @@ var boot_script_source = File::getFileSystemAt('/boot/').source;
 File::mount('/data', new FileSystem::OSFS("\{boot_script_source}/../tmp", true));
 
 // /tmp に TmpFS をマウントする
-
-File::mount('/tmp', new FileSystem::TmpFS());
+var tmpfs = new FileSystem::TmpFS();
+File::mount('/tmp', tmpfs);
 
 // ファイルを作成して書き込んでみる
 File::open('/tmp/test.txt', File::omWrite).print("Hello world!").dispose();
@@ -96,7 +96,7 @@ File::open('/tmp/subdir/subfolder/test4.txt', File::omWrite) { |stream| stream.p
 File::createDirectory('/tmp/subdir/subfolder/subtree');
 
 // もう一個ファイルを作ってみる
-File::open('/tmp/subdir/subfolder/subtree/test5.txt', File::omWrite) { |stream| stream.print("Hello world!!!?\n") };
+File::open('/tmp/subdir/subfolder/subtree/test5.txt', File::omWrite) { |stream| stream.print("Hello world!!!?-\n") };
 
 
 // トラバースしてみる
@@ -110,6 +110,11 @@ var count = File::walkAt('/tmp/subdir') { |name, is_dir|
 assert(file_expected == 0);
 assert(count == 3);
 
+// ファイルシステムを保存してみる
+tmpfs.save('/data/content.arc');
+
+// 保存したファイルシステムを読み込んでみる
+tmpfs.load('/data/content.arc');
 
 // 再帰的にトラバースしてみる
 var file_expected = 6;

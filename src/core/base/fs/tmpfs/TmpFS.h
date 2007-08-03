@@ -48,12 +48,12 @@ public:
 	//! @param		parent 親ノード
 	//! @param		type ノードタイプ
 	//! @param		src 入力もとストリーム
-	tTmpFSNode(tTmpFSNode *parent, tType type, tStreamAdapter * src);
+	tTmpFSNode(tTmpFSNode *parent, tType type, tStreamAdapter src);
 
 public:
 	//! @brief		内容をシリアライズする
 	//! @param		dest 出力先ストリーム
-	void Serialize(tStreamAdapter * dest) const;
+	void Serialize(tStreamAdapter dest) const;
 
 	//! @brief		指定された名前を持つノードを返す
 	//! @param		name 名前
@@ -116,19 +116,11 @@ public:
 private:
 	//! @brief		指定されたストリームに内容をシリアライズする
 	//! @param		dest 出力先ストリーム
-	void SerializeTo(tStreamAdapter * dest);
-
-	//! @brief		指定されたファイルに内容をシリアライズする
-	//! @param		filename 出力先ファイル名
-	void SerializeTo(const tString & filename);
+	void SerializeTo(tStreamAdapter dest);
 
 	//! @brief		指定されたストリームから内容を復元する
 	//! @param		src 入力元ストリーム
-	void UnserializeFrom(tStreamAdapter * src);
-
-	//! @brief		指定されたファイルから内容を復元する
-	//! @param		filename 入力元ファイル
-	void UnserializeFrom(const tString & filename);
+	void UnserializeFrom(tStreamAdapter src);
 
 	//! @brief		指定された位置のノードを得る
 	//! @param		name ノード
@@ -201,7 +193,13 @@ public: // Risse 用メソッドなど
 
 	//-- FileSystem メンバ ここまで
 
+	//! @brief		内容をファイルに保存する
+	//! @param		filename	保存先のストリームまたはファイル名
+	void save(const tVariant & filename);
 
+	//! @brief		内容をファイルから読み出す
+	//! @param		filename	読み込むストリームまたはファイル名
+	void load(const tVariant & filename);
 };
 //---------------------------------------------------------------------------
 

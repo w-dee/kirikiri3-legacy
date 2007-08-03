@@ -212,6 +212,15 @@ public:
 	//! @return		ストリームオブジェクト
 	tStreamInstance * Open(const tString & filename, risse_uint32 flags);
 
+	//! @brief		指定されたファイルのストリームを得る(タイプチェックあり)
+	//! @param		filename ファイル名またはストリーム
+	//! @param		flags	フラグ
+	//! @return		ストリームオブジェクト
+	//! @note		filename がストリームオブジェクトのインスタンスを表していれば、
+	//!				それを帰す。そうでなければ、それを文字列化したものをファイル名と
+	//!				みなし、flags に従って open して帰す。
+	tStreamInstance * Open(const tVariant & filename, risse_uint32 flags);
+
 	//! @brief		指定された位置にあるファイルシステムインスタンスを得る
 	//! @param		path   パス
 	//! @return		ファイルシステムインスタンス
@@ -233,7 +242,7 @@ private:
 	//!				CriticalSection 内で呼ぶこと！
 	tFileSystemInstance * FindFileSystemAt(const tString & fullpath, tString * fspath = NULL);
 
-	//! @brief		「ファイルシステムが指定されたパスはない」例外を発生させる(FileSystemException)
+	//! @brief		「ファイルシステムが指定されたパスにはない」例外を発生させる(FileSystemException)
 	//! @param		filename  マウントポイント
 	//! @note		この関数は例外を発生させるため呼び出し元には戻らない
 	static void ThrowNoFileSystemError(const tString & filename);

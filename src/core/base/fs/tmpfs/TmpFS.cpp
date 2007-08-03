@@ -43,8 +43,9 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 
 //---------------------------------------------------------------------------
 tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
-	tStreamAdapter * src) :
-	Parent(parent)
+	tStreamAdapter src) :
+	Parent(parent),
+	Type(type)
 {
 	if(Type == ntDirectory)
 	{
@@ -61,12 +62,12 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 	while(true)
 	{
 		unsigned char metadataid;
-		src->ReadBuffer(&metadataid, 1);
+		src.ReadBuffer(&metadataid, 1);
 
-		if(metadataid == 0) break;
+		if(metadataid == 0) break; // メタデータの終わりの場合はループをぬける
 
 		wxUint32 metalen;
-		src->ReadBuffer(&metalen, sizeof(metalen));
+		src.ReadBuffer(&metalen, sizeof(metalen));
 		metalen = wxUINT32_SWAP_ON_BE(metalen);
 		if(metalen == 0)
 			tIOExceptionClass::Throw(RISSE_WS_TR("invalid metadata length (data may be corrupted)"));
@@ -75,14 +76,14 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 		{
 			// ファイル名
 			unsigned char * p = new (PointerFreeGC) unsigned char [metalen];
-			src->ReadBuffer(p, metalen);
+			src.ReadBuffer(p, metalen);
 			p[metalen - 1] = 0;
 			Name = tString(wxString(reinterpret_cast<char*>(p), wxConvUTF8));
 		}
 		else
 		{
 			// 未知のメタデータなので読み飛ばす
-			src->SetPosition(src->GetPosition() + metalen);
+			src.SetPosition(src.GetPosition() + metalen);
 		}
 	}
 
@@ -95,7 +96,7 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 		{
 			// サブノードのタイプを読み取る
 			unsigned char nodetypeid;
-			src->ReadBuffer(&nodetypeid, 1);
+			src.ReadBuffer(&nodetypeid, 1);
 			tTmpFSNode * subnode = NULL;
 			switch(nodetypeid)
 			{
@@ -119,13 +120,13 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 	{
 		// ファイル
 		wxUint64 blocksize;
-		src->ReadBuffer(&blocksize, sizeof(blocksize));
+		src.ReadBuffer(&blocksize, sizeof(blocksize));
 		blocksize = wxUINT64_SWAP_ON_BE(blocksize);
 		if(static_cast<size_t>(blocksize) != blocksize)
 				tIOExceptionClass::Throw(RISSE_WS_TR("too big block size"));
 		File->ChangeSize(static_cast<size_t>(blocksize));
 		File->Fit();
-		src->ReadBuffer(File->GetBlock(), static_cast<size_t>(blocksize));
+		src.ReadBuffer(File->GetBlock(), static_cast<size_t>(blocksize));
 	}
 
 	// 親に自分を登録
@@ -136,29 +137,29 @@ tTmpFSNode::tTmpFSNode(tTmpFSNode *parent, tTmpFSNode::tType type,
 
 
 //---------------------------------------------------------------------------
-void tTmpFSNode::Serialize(tStreamAdapter * dest) const
+void tTmpFSNode::Serialize(tStreamAdapter dest) const
 {
 	// ノードのタイプを記録
 	if(Type == ntDirectory)
-		dest->WriteBuffer("\x80", 1); // ディレクトリを表す
+		dest.WriteBuffer("\x80", 1); // ディレクトリを表す
 	else if(Type == ntFile)
-		dest->WriteBuffer("\x81", 1); // ファイルを表す
+		dest.WriteBuffer("\x81", 1); // ファイルを表す
 
 	// 名前を格納
-	dest->WriteBuffer("\1", 1); // ファイル名
+	dest.WriteBuffer("\1", 1); // ファイル名
 
 	wxCharBuffer utf8name = Name.AsWxString().mb_str(wxConvUTF8);
 	size_t utf8name_len = strlen(utf8name);
 
 	wxUint32 i32;
 	i32 = wxUINT32_SWAP_ON_BE(static_cast<wxUint32>(utf8name_len + 1));
-	dest->WriteBuffer(&i32, sizeof(i32));
-	dest->WriteBuffer(utf8name, utf8name_len + 1);
+	dest.WriteBuffer(&i32, sizeof(i32));
+	dest.WriteBuffer(utf8name, utf8name_len + 1);
 
 	if(Type == ntDirectory)
 	{
 		// ディレクトリ
-		dest->WriteBuffer("\0", 1); // メタデータの終わりとディレクトリの開始
+		dest.WriteBuffer("\0", 1); // メタデータの終わりとディレクトリの開始
 
 		// 全ての子要素に対して再帰する
 		tHashTable<tString, tTmpFSNode *>::tIterator i(*Directory);
@@ -167,17 +168,17 @@ void tTmpFSNode::Serialize(tStreamAdapter * dest) const
 			i.GetValue()->Serialize(dest);
 		}
 
-		dest->WriteBuffer("\x88", 1); // ディレクトリの終わりを表す
+		dest.WriteBuffer("\x88", 1); // ディレクトリの終わりを表す
 	}
 	else if(Type == ntFile)
 	{
 		// ファイル
-		dest->WriteBuffer("\x0", 1); // メタデータの終わりとファイルの中身の開始
+		dest.WriteBuffer("\x0", 1); // メタデータの終わりとファイルの中身の開始
 		wxUint64 i64;
 		volatile tCriticalSection::tLocker  holder(File->GetCS());
 		i64 = wxUINT64_SWAP_ON_BE(File->GetSize());
-		dest->WriteBuffer(&i64, sizeof(i64));
-		dest->WriteBuffer(File->GetBlock(), File->GetSize());
+		dest.WriteBuffer(&i64, sizeof(i64));
+		dest.WriteBuffer(File->GetBlock(), File->GetSize());
 	}
 }
 //---------------------------------------------------------------------------
@@ -293,12 +294,12 @@ tTmpFSInstance::tTmpFSInstance()
 
 
 //---------------------------------------------------------------------------
-void tTmpFSInstance::SerializeTo(tStreamAdapter * dest)
+void tTmpFSInstance::SerializeTo(tStreamAdapter dest)
 {
 	volatile tSynchronizer sync(this); // sync
 
 	// マジックを書き込む
-	dest->WriteBuffer(SerializeMagic, 8);
+	dest.WriteBuffer(SerializeMagic, 8);
 
 	// root に対して内容Serialize
 	// (すると後は自動的に全てのノードがシリアライズされる)
@@ -308,26 +309,16 @@ void tTmpFSInstance::SerializeTo(tStreamAdapter * dest)
 
 
 //---------------------------------------------------------------------------
-void tTmpFSInstance::SerializeTo(const tString & filename)
-{
-	tStreamAdapter adapter(tFileSystemManager::instance()->Open(filename, tFileOpenModes::omRead));
-
-	SerializeTo(&adapter);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTmpFSInstance::UnserializeFrom(tStreamAdapter * src)
+void tTmpFSInstance::UnserializeFrom(tStreamAdapter src)
 {
 	volatile tSynchronizer sync(this); // sync
 
 	// マジックを読み込み、比較する
 	unsigned char magic[8];
-	src->ReadBuffer(magic, 8);
+	src.ReadBuffer(magic, 8);
 
 	unsigned char firstnodetype;
-	src->ReadBuffer(&firstnodetype, 1);
+	src.ReadBuffer(&firstnodetype, 1);
 		// 最初のノードタイプ(ディレクトリを表す 0x80 になってないとおかしい)
 
 	if(memcmp(magic, SerializeMagic, 8) || firstnodetype != 0x80)
@@ -335,16 +326,6 @@ void tTmpFSInstance::UnserializeFrom(tStreamAdapter * src)
 
 	// 再帰的に内容を読み込む
 	Root = new tTmpFSNode(NULL, tTmpFSNode::ntDirectory, src);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTmpFSInstance::UnserializeFrom(const tString & filename)
-{
-	tStreamAdapter adapter(tFileSystemManager::instance()->Open(filename, tFileOpenModes::omWrite));
-
-	UnserializeFrom(&adapter);
 }
 //---------------------------------------------------------------------------
 
@@ -625,6 +606,24 @@ void tTmpFSInstance::flush()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tTmpFSInstance::save(const tVariant & filename)
+{
+	tStreamInstance * stream = tFileSystemManager::instance()->Open(filename, tFileOpenModes::omWrite);
+
+	SerializeTo(tStreamAdapter(stream));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tTmpFSInstance::load(const tVariant & filename)
+{
+	tStreamInstance * stream = tFileSystemManager::instance()->Open(filename, tFileOpenModes::omRead);
+
+	UnserializeFrom(tStreamAdapter(stream));
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -665,6 +664,9 @@ void tTmpFSClass::RegisterMembers()
 	BindFunction(this, tSS<'s','t','a','t'>(), &tTmpFSInstance::stat);
 	BindFunction(this, tSS<'o','p','e','n'>(), &tTmpFSInstance::open);
 	BindFunction(this, tSS<'f','l','u','s','h'>(), &tTmpFSInstance::flush);
+
+	BindFunction(this, tSS<'s','a','v','e'>(), &tTmpFSInstance::save);
+	BindFunction(this, tSS<'l','o','a','d'>(), &tTmpFSInstance::load);
 
 	// MemoryStream を登録する
 	RegisterNormalMember(tSS<'M','e','m','o','r','y','S','t','r','e','a','m'>(),

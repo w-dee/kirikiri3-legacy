@@ -537,7 +537,7 @@ void tFileSystemManager::CreateDirectory(const tString & dirname, bool recursive
 				// すこし効率が悪いが、この関数を自分自身で呼び出してディレクトリを作成する
 				tString n_dirname(fullpath, 0, p - p_start);
 				if(!IsDirectory(n_dirname))
-					CreateDirectory(fullpath, false);
+					CreateDirectory(n_dirname, false);
 			}
 			p ++; // skip '/'
 			pp = p;

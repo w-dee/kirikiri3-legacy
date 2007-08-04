@@ -292,7 +292,7 @@ protected:
 	virtual void OnEvent(tEventInfo * info); // from tEventDestination
 
 public:
-	virtual void OnTimer() = 0; //!< タイマイベントが発生した
+	virtual void OnTimer(risse_uint64 tick) = 0; //!< タイマイベントが発生した
 
 };
 //---------------------------------------------------------------------------

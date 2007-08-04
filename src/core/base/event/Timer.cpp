@@ -431,7 +431,7 @@ void tEventTimerConsumer::OnEvent(tEventInfo * info)
 	}
 
 	if(GetEnabled() && GetInterval() != tTickCount::InvalidTickCount)
-		OnTimer();
+		OnTimer(info->GetTick());
 }
 //---------------------------------------------------------------------------
 
@@ -459,10 +459,11 @@ public:
 	virtual ~tTimerInstance() {;}
 
 	// tEventTimerConsumer::OnTimer 実装
-	void OnTimer()
+	void OnTimer(risse_uint64 tick)
 	{
 		// onTimer を呼び出す
-		Operate(ocFuncCall, NULL, tSS<'o','n','T','i','m','e','r'>());
+		Operate(ocFuncCall, NULL, tSS<'o','n','T','i','m','e','r'>(),
+				0, tMethodArgument::New((risse_int64)tick));
 	}
 
 public: // Risse用メソッドなど
@@ -475,7 +476,7 @@ public: // Risse用メソッドなど
 	void set_capacity(risse_size capa) { SetCapacity(capa); }
 	risse_size get_capacity() const { return GetCapacity(); }
 	void reset() { ClearQueue(); }
-	void onTimer() { ;/* デフォルトでは何もしない */ }
+	void onTimer(risse_uint64 tick) { (void)tick;/* デフォルトでは何もしない */ }
 
 };
 //---------------------------------------------------------------------------

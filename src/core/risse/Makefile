@@ -118,6 +118,15 @@ src/risse_parser/risseLexerMap.def: \
 	ruby tools/create_word_map.rb src/risse_parser/words.txt MapToken > \
 		src/risse_parser/risseLexerMap.def
 
+# risseDateLexerMap.def のコンパイル
+BIN_DEPS += src/risseDateLexerMap.def
+
+src/risseDateLexerMap.def: \
+		src/risseDateLexerWords.txt \
+		tools/create_word_map.rb Makefile
+	ruby tools/create_word_map.rb src/risseDateLexerWords.txt MapToken > \
+		src/risseDateLexerMap.def
+
 # risseOpCodesEnum.inc と risseOpCodesDefs.def のコンパイル
 BIN_DEPS += src/risseOpCodesEnum.inc src/risseOpCodesDefs.def
 
@@ -180,6 +189,32 @@ src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 			echo "**********************************************************"; ) \
 	)
 
+# risseDateParser.cpp と risseDateParser.inc のコンパイル
+BIN_DEPS += src/risseDateParser.inc
+
+src/risseDateParser.cpp src/risseDateParser.inc: \
+		src/risseDateParser.y Makefile
+	@echo Compiling src/risseDateParser.y
+	@(set -e ;\
+		cd src ;\
+		bison -v --name-prefix=rissedp risseDateParser.y ;\
+		cat risseDateParser.tab.c | \
+			sed -e "s|risseDateParser.tab.h|src/risseDateParser.inc|" \
+				-e "s|risseDateParser.tab.c|src/risseDateParser.cpp|" \
+				-e "s|risseDateParser\.y|src/risseDateParser.y|" \
+				>  risseDateParser.cpp ;\
+		ruby ../tools/extract_yytokentype.rb risseDateParser.tab.c > risseDateParser.inc; \
+		rm risseDateParser.tab.c ;\
+		(grep -i "As a special exception" risseDateParser.cpp > /dev/null) || (\
+			echo "**********************************************************"; \
+			echo "The bison output file seems not to contain a term which"; \
+			echo "permits the parser is to be used in non-GPL software."; \
+			echo "This isn't a problem when you use Risse script engine"; \
+			echo "in GPLed software, otherwise you should update your"; \
+			echo "bison 1.24 or above (which permits use in non-GPL software). "; \
+			echo "**********************************************************"; ) \
+	)
+
 #----------------------------#
 
 # 設定ファイルを書き出す
@@ -200,7 +235,7 @@ $(Risse_BIN_OUTPUT_DIR)/risse-config: Makefile risse-config.in
 	)
 	chmod +x $(Risse_BIN_OUTPUT_DIR)/risse-config
 
-BIN_DEPS = $(Risse_BIN_OUTPUT_DIR)/risse-config
+BIN_DEPS += $(Risse_BIN_OUTPUT_DIR)/risse-config
 
 #----------------------------#
 

@@ -1,0 +1,183 @@
+##### Risse の Date の Lexer 用の単語帳
+##### 5個の '#' より後はコメントとして見なされる
+
+##### 先頭から順に
+#####  トークン   トークンID   値    単語マッチ?    大文字小文字を無視?
+
+
+##### タイムゾーン
+
+jst    DP_TZ  900   true true
+ut     DP_TZ  0     true true
+utc    DP_TZ  0     true true
+gmt    DP_TZ  0     true true
+est    DP_TZ  -500  true true
+edt    DP_TZ  -400  true true
+cst    DP_TZ  -600  true true
+cdt    DP_TZ  -500  true true
+mst    DP_TZ  -700  true true
+mdt    DP_TZ  -600  true true
+pst    DP_TZ  -800  true true
+pdt    DP_TZ  -700  true true
+z      DP_TZ  0     true true
+a      DP_TZ  -100  true true
+m      DP_TZ  -1200 true true
+n      DP_TZ  100   true true
+y      DP_TZ  1200  true true
+nzdt   DP_TZ  1300  true true
+idle   DP_TZ  1200  true true
+nzst   DP_TZ  1200  true true
+nzt    DP_TZ  1200  true true
+aesst  DP_TZ  1100  true true
+acsst  DP_TZ  1030  true true
+cadt   DP_TZ  1030  true true
+sadt   DP_TZ  1030  true true
+aest   DP_TZ  1000  true true
+east   DP_TZ  1000  true true
+gst    DP_TZ  1000  true true
+ligt   DP_TZ  1000  true true
+acst   DP_TZ  930   true true
+sast   DP_TZ  930   true true
+cast   DP_TZ  930   true true
+awsst  DP_TZ  900   true true
+kst    DP_TZ  900   true true
+wdt    DP_TZ  900   true true
+mt     DP_TZ  830   true true
+awst   DP_TZ  800   true true
+cct    DP_TZ  800   true true
+wadt   DP_TZ  800   true true
+wst    DP_TZ  800   true true
+jt     DP_TZ  730   true true
+wast   DP_TZ  700   true true
+it     DP_TZ  330   true true
+bt     DP_TZ  300   true true
+eetdst DP_TZ  300   true true
+cetdst DP_TZ  200   true true
+eet    DP_TZ  200   true true
+fwt    DP_TZ  200   true true
+ist    DP_TZ  200   true true
+mest   DP_TZ  200   true true
+metdst DP_TZ  200   true true
+sst    DP_TZ  200   true true
+bst    DP_TZ  100   true true
+cet    DP_TZ  100   true true
+dnt    DP_TZ  100   true true
+fst    DP_TZ  100   true true
+met    DP_TZ  100   true true
+mewt   DP_TZ  100   true true
+mez    DP_TZ  100   true true
+nor    DP_TZ  100   true true
+set    DP_TZ  100   true true
+swt    DP_TZ  100   true true
+wetdst DP_TZ  100   true true
+wet    DP_TZ  0     true true
+wat    DP_TZ  -100  true true
+ndt    DP_TZ  -230  true true
+adt    DP_TZ  -300  true true
+nft    DP_TZ  -330  true true
+nst    DP_TZ  -330  true true
+ast    DP_TZ  -400  true true
+ydt    DP_TZ  -800  true true
+hdt    DP_TZ  -900  true true
+ahst   DP_TZ  -1000 true true
+cat    DP_TZ  -1000 true true
+nt     DP_TZ  -1100 true true
+idlw   DP_TZ  -1200 true true
+
+##### 曜日の名前
+
+sun        DP_WDAY 0 true true
+sun.       DP_WDAY 0 true true
+sunday     DP_WDAY 0 true true
+mon        DP_WDAY 1 true true
+mon.       DP_WDAY 1 true true
+monday     DP_WDAY 1 true true
+tue        DP_WDAY 2 true true
+tue.       DP_WDAY 2 true true
+tues       DP_WDAY 2 true true
+tues.      DP_WDAY 2 true true
+tuesday    DP_WDAY 2 true true
+wed        DP_WDAY 3 true true
+wed.       DP_WDAY 3 true true
+wednesday  DP_WDAY 3 true true
+thu        DP_WDAY 4 true true
+thu.       DP_WDAY 4 true true
+thurs      DP_WDAY 4 true true
+thurs.     DP_WDAY 4 true true
+thursday   DP_WDAY 4 true true
+fri        DP_WDAY 5 true true
+fri.       DP_WDAY 5 true true
+friday     DP_WDAY 5 true true
+sat        DP_WDAY 6 true true
+sat.       DP_WDAY 6 true true
+saturday   DP_WDAY 6 true true
+
+##### 月の名前
+
+jan        DP_MONTH 0  true true
+jan.       DP_MONTH 0  true true
+january    DP_MONTH 0  true true
+feb        DP_MONTH 1  true true
+feb.       DP_MONTH 1  true true
+february   DP_MONTH 1  true true
+mar        DP_MONTH 2  true true
+mar.       DP_MONTH 2  true true
+march      DP_MONTH 2  true true
+apr        DP_MONTH 3  true true
+apr.       DP_MONTH 3  true true
+april      DP_MONTH 3  true true
+may        DP_MONTH 4  true true
+ju         DP_MONTH 5  true true
+ju.        DP_MONTH 5  true true
+jun        DP_MONTH 5  true true
+jun.       DP_MONTH 5  true true
+june       DP_MONTH 5  true true
+jul        DP_MONTH 6  true true
+jul.       DP_MONTH 6  true true
+july       DP_MONTH 6  true true
+aug        DP_MONTH 7  true true
+aug.       DP_MONTH 7  true true
+august     DP_MONTH 7  true true
+sep        DP_MONTH 8  true true
+sep.       DP_MONTH 8  true true
+sept       DP_MONTH 8  true true
+sept.      DP_MONTH 8  true true
+september  DP_MONTH 8  true true
+oct        DP_MONTH 9  true true
+oct.       DP_MONTH 9  true true
+october    DP_MONTH 9  true true
+nov        DP_MONTH 10 true true
+nov.       DP_MONTH 10 true true
+november   DP_MONTH 10 true true
+dec        DP_MONTH 11 true true
+dec.       DP_MONTH 11 true true
+december   DP_MONTH 11 true true
+
+##### 午前・午後
+
+am         DP_AM 0 true true
+pm         DP_PM 0 true true
+
+##### 記号類
+
++          DP_PLUS          - false false
+-          DP_MINUS         - false false
+:          DP_COLON         - false false
+(          DP_LPARENTHESIS  - false false
+)          DP_RPARANTHESIS  - false false
+,          DP_COMMA         - false false
+/          DP_SLASH         - false false
+.          DP_DOT           - false false
+
+
+##### 数値
+0          DP_NUMBER  - false false
+1          DP_NUMBER  - false false
+2          DP_NUMBER  - false false
+3          DP_NUMBER  - false false
+4          DP_NUMBER  - false false
+5          DP_NUMBER  - false false
+6          DP_NUMBER  - false false
+7          DP_NUMBER  - false false
+8          DP_NUMBER  - false false
+9          DP_NUMBER  - false false

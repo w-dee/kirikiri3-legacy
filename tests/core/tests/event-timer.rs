@@ -49,13 +49,12 @@ for(var i = 1; i < ticks.length; i++)
 {
 	var tick = ticks[i];
 	var error = tick_ref + i*20 - tick;
-	if(error < 0) error = -error;
 	jitter += error * error;
 }
 
-if(jitter <= 100)
+if(jitter <= 4000)
 {
-	// たぶん 100 以内だったら大丈夫
+	// たぶん 4000 以内だったら大丈夫
 	System::stdout.print("ok");
 }
 else

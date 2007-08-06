@@ -265,9 +265,8 @@ tDateParser::tDateParser(const tString & str) : Input(str)
 //---------------------------------------------------------------------------
 int tDateParser::GetToken(int & val)
 {
-	if(!SkipSpace(Ptr)) return -1; // EOF
-
 restart:
+	if(!SkipSpace(Ptr)) return -1; // EOF
 	const risse_char *ptr_save = Ptr;
 	int id = MapToken(Ptr, val);
 	if(id == 0) return -1;
@@ -301,13 +300,9 @@ restart:
 	}
 	else if(id == DP_LPARENTHESIS)
 	{
-		// DP_RPARENTHESIS までスキップ
-		while(true)
-		{
-			if(!SkipSpace(Ptr)) return -1; // EOF
-			int id = MapToken(Ptr, val);
-			if(id == DP_RPARENTHESIS) break;
-		}
+		// DP_RPARENTHESIS ………ではなくて次の ')' までスキップ
+		while(*Ptr != ')' && *Ptr != 0) Ptr++;
+		if(*Ptr != 0) Ptr ++;
 		goto restart;
 	}
 	return id;

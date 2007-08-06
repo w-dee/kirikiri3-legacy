@@ -164,11 +164,11 @@ pm         DP_PM 0 true true
 -          DP_MINUS         - false false
 :          DP_COLON         - false false
 (          DP_LPARENTHESIS  - false false
-)          DP_RPARANTHESIS  - false false
+)          DP_RPARENTHESIS  - false false
 ,          DP_COMMA         - false false
 /          DP_SLASH         - false false
 .          DP_DOT           - false false
-
+T          DP_T             - true  true
 
 ##### 数値
 0          DP_NUMBER  - false false

@@ -57,6 +57,8 @@ CPPFILES =  \
 			src/risseConfig.cpp                      \
 			src/risseCoroutine.cpp                   \
 			src/risseCoroutineClass.cpp              \
+			src/risseDateClass.cpp                   \
+			src/risseDateParser.cpp                  \
 			src/risseExceptionClass.cpp              \
 			src/risseFunctionClass.cpp               \
 			src/risseIntegerClass.cpp                \
@@ -115,7 +117,7 @@ BIN_DEPS += src/risse_parser/risseLexerMap.def
 src/risse_parser/risseLexerMap.def: \
 		src/risse_parser/words.txt \
 		tools/create_word_map.rb Makefile
-	ruby tools/create_word_map.rb src/risse_parser/words.txt MapToken > \
+	ruby tools/create_word_map.rb src/risse_parser/words.txt MapToken tVariant > \
 		src/risse_parser/risseLexerMap.def
 
 # risseDateLexerMap.def のコンパイル
@@ -124,7 +126,7 @@ BIN_DEPS += src/risseDateLexerMap.def
 src/risseDateLexerMap.def: \
 		src/risseDateLexerWords.txt \
 		tools/create_word_map.rb Makefile
-	ruby tools/create_word_map.rb src/risseDateLexerWords.txt MapToken > \
+	ruby tools/create_word_map.rb src/risseDateLexerWords.txt MapToken int > \
 		src/risseDateLexerMap.def
 
 # risseOpCodesEnum.inc と risseOpCodesDefs.def のコンパイル

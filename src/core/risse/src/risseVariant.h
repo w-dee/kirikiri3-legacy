@@ -2316,6 +2316,20 @@ public: // ユーティリティ
 
 	//! @brief		Object型に対するtypeチェック(コンテキストチェック用)
 	//! @param		cls		クラスオブジェクトインスタンス
+	//! @note		AssertAndGetObjectInterafce() に似るが、チェックに失敗した場合は
+	//!				例外が発生せずに NULL が帰る。
+	template <typename ObjectT>
+	ObjectT * CheckAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
+	{
+		if(GetType() != vtObject) return NULL;
+		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
+		if(!cls->GetRTTIMatcher().Match(intf->GetRTTI()))
+			return NULL;
+		return intf;
+	}
+
+	//! @brief		Object型に対するtypeチェック(コンテキストチェック用)
+	//! @param		cls		クラスオブジェクトインスタンス
 	//! @note		バリアントが期待したタイプであるかどうかをチェックし
 	//!				またそのオブジェクトインターフェースを得る。
 	//!				期待した値でなければ「"期待したクラスではありません"」例外を発生する。
@@ -2325,8 +2339,10 @@ public: // ユーティリティ
 	//!				単に tClassBase の typedef で、このテンプレート内には tClassBase の
 	//!				完全な定義がないと解釈できない部分があるが、その解釈を実際の
 	//!				実体化の時まで遅らせるための処置。
+	//!				ちなみに InstanceOf はモジュールもチェックするが、
+	//!				これはモジュールまではチェックしないというかモジュールはチェックのしようがない。
 	template <typename ObjectT>
-	ObjectT * CheckAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
+	ObjectT * AssertAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
 	{
 		if(GetType() != vtObject) ThrowBadContextException();
 		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
@@ -2342,10 +2358,10 @@ public: // ユーティリティ
 
 	//! @brief		Object型に対するtypeチェック(引数チェック用)
 	//! @param		cls		クラスオブジェクトインスタンス
-	//! @note		CheckAndGetObjectInterafce に似ているが、型が違ったときの
+	//! @note		AssertAndGetObjectInterafce に似ているが、型が違ったときの
 	//!				発生する例外が違う。
 	template <typename ObjectT>
-	ObjectT * AssertAndGetObjectInterafce(tClassBase * cls) const
+	ObjectT * ExpectAndGetObjectInterafce(tClassBase * cls) const
 	{
 		AssertClass(cls);
 		return reinterpret_cast<ObjectT*>(GetObjectInterface());

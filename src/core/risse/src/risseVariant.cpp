@@ -2791,6 +2791,7 @@ void tVariantBlock::AddTrace(const tScriptBlockInstance * sb, risse_size pos) co
 //---------------------------------------------------------------------------
 void tVariantBlock::AssertClass(tClassBase * cls) const
 {
+	// CheckClass も同じ構造をしているので、修正の際はよく見比べること。
 	if(GetType() == vtObject)
 	{
 		if(!cls->GetRTTIMatcher().Match(GetObjectInterface()->GetRTTI()))

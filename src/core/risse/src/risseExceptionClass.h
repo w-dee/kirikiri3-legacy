@@ -919,9 +919,15 @@ public:
 	//! @param		message		メッセージ
 	static void Throw(tScriptEngine * engine, const tString & message);
 	//! @brief		例外を投げる
-	//! @param		message		期メッセージ
+	//! @param		message		メッセージ
 	static void Throw(const tString & message)
 		{ Throw(NULL, message); }
+
+	//! @brief		「無効な日付文字列」例外を投げる
+	//! @param		engine		スクリプトエンジンインスタンス	
+	static void ThrowInvalidDateString(tScriptEngine * engine);
+	//! @brief		「無効な日付文字列」例外を投げる
+	static void ThrowInvalidDateString() { ThrowInvalidDateString(NULL); }
 };
 //---------------------------------------------------------------------------
 

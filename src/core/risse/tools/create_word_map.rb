@@ -186,7 +186,7 @@ end
 # プロローグを書き出す
 
 print <<EOS
-static int #{ARGV[1]}(const risse_char * & ptr, tVariant &value)
+static int #{ARGV[1]}(const risse_char * & ptr, #{ARGV[2]} &value)
 {
  const risse_char * p = ptr;
 

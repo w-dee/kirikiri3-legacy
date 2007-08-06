@@ -8,7 +8,7 @@
 	See details of license at "license.txt"
 */
 /*---------------------------------------------------------------------------*/
-/*! @brief   Risse 日付parser bison 入力ファイル (文法定義) */
+/*! @brief   Risse 日付parser bison 入力ファイル */
 /* rissDateParsere.y */
 /* Risse date parser bison input file */
 
@@ -18,15 +18,15 @@
 #include <string.h>
 #include "risseTypes.h"
 #include "risseGC.h"
-#include "risseObject.h"
-#include "risseExceptionClass.h"
-#include "risseOpCodes.h"
-#include "risseStaticStrings.h"
+#include "risseDateParser.h"
 
 /* 名前空間を Risse に */
 namespace Risse
 {
-RISSE_DEFINE_SOURCE_ID();
+RISSE_DEFINE_SOURCE_ID(61520,32259,31684,19117,29118,20416,49765,257);
+
+/* token マッパーを include */
+#include "risseDateLexerMap.def"
 
 /* メモリ確保は Risse のインターフェースを使うように */
 #define YYMALLOC	MallocCollectee
@@ -35,6 +35,22 @@ RISSE_DEFINE_SOURCE_ID();
 
 /* 最大深さ */
 #define YYMAXDEPTH 20000
+
+/*! パーサへのアクセス */
+#define PR (pr)
+
+/* YYSTYPE の前方参照用定義 */
+union YYSTYPE;
+
+/* yylex のプロトタイプ */
+int yylex(YYSTYPE * value, tDateParser *pr);
+
+/* yyerror のプロトタイプ */
+int raise_dperror(const char * msg, tDateParser *pr);
+
+/* yyerror のリダイレクト */
+#define rissedperror(pr, X) raise_dperror(X, pr);
+
 
 
 %}
@@ -48,11 +64,12 @@ RISSE_DEFINE_SOURCE_ID();
 /* 再入可能なパーサを出力 */
 %pure-parser
 
-/* 詳細なエラー出力 */
-%error-verbose
-
 /* GLR parser */
 %glr-parser
+
+/* 型 */
+%parse-param {tDateParser * pr}
+%lex-param   {tDateParser * pr}
 
 /* union 定義 */
 %union{
@@ -60,7 +77,10 @@ RISSE_DEFINE_SOURCE_ID();
 }
 
 /* トークン定義 */
-%token				DP_AM			"am"
+%token
+					DP_NONE
+					DP_NUMBER
+					DP_AM			"am"
 					DP_PM			"pm"
 					DP_PLUS			"+"
 					DP_MINUS		"-"
@@ -70,14 +90,23 @@ RISSE_DEFINE_SOURCE_ID();
 					DP_COMMA		","
 					DP_DOT			"."
 					DP_SLASH		"/"
-%token <val>		DP_NUMBER
+					DP_T			"T"
 %token <val>		DP_MONTH
 %token <val>		DP_WDAY
 %token <val>		DP_TZ
 
+%token <val>		DP_NUMBER1
+%token <val>		DP_NUMBER2
+%token <val>		DP_NUMBER3
+%token <val>		DP_NUMBER4
+%token <val>		DP_NUMBER5
+%token <val>		DP_NUMBER6
+%token <val>		DP_NUMBER7
+%token <val>		DP_NUMBER8
 
-/* expect */
-%expect 1
+
+%type <val>			number_1to2 number_3to4
+
 
 
 %%
@@ -101,57 +130,77 @@ minus_opt
 
 /* year */
 year
-	: DP_NUMBER								{ PR->SetYear($1); }
+	: DP_NUMBER4							{ PR->Year = $1, PR->YearSet = true; }
 ;
 
 /* day of the week, ommitable */
 day_of_the_week_opt
 	: /*empty*/
-	| DP_WDAY comma_opt						{ PR->SetDayOfTheWeek($1); }
+	| DP_WDAY comma_opt						{ PR->Day = $1, PR->DaySet = true; }
 ;
 
 /* day and month spec */
 day_and_month
-	: DP_NUMBER minus_opt DP_MONTH			{ PR->SetMDay($1); PR->SetMonth($3-1); }
-	| DP_MONTH minus_opt DP_NUMBER			{ PR->SetMDay($3); PR->SetMonth($1-1); }
+	: number_1to2 minus_opt DP_MONTH		{ PR->Date = $1, PR->DateSet = true;
+											  PR->Month = $3, PR->MonthSet = true; }
+	| DP_MONTH minus_opt number_1to2		{ PR->Date = $3, PR->DateSet = true;
+											  PR->Month = $1, PR->MonthSet = true; }
 ;
 
 /* time */
 time
-	: time_hms am_pm_opt
-	| am_pm_opt time_hms
+	: time_hms am_pm
+	| time_hms
+	| am_pm time_hms
 ;
 
 time_hms
-	: DP_NUMBER ":" DP_NUMBER								{ PR->SetHour($1); PR->SetMinute($3); }
-	| DP_NUMBER ":" DP_NUMBER ":" DP_NUMBER					{ PR->SetHour($1); PR->SetMinute($3); PR->SetSecond($5); }
-	| DP_NUMBER ":" DP_NUMBER ":" DP_NUMBER "." DP_NUMBER	{ PR->SetHour($1); PR->SetMinute($3); PR->SetSecond($5);
-															  PR->SetSubSecond($7); }
+	: number_1to2 ":" number_1to2			{ PR->Hours = $1, PR->HoursSet = true;
+											  PR->Minutes = $3, PR->MinutesSet = true; }
+	| number_1to2 ":" number_1to2 ":"
+	  number_1to2							{ PR->Hours = $1, PR->HoursSet = true;
+											  PR->Minutes = $3, PR->MinutesSet = true;
+											  PR->Seconds = $5, PR->SecondsSet = true; }
+	| number_1to2 ":" number_1to2 ":"
+	  number_1to2 "." subsecond				{ PR->Hours = $1, PR->HoursSet = true;
+											  PR->Minutes = $3, PR->MinutesSet = true;
+											  PR->Seconds = $5, PR->SecondsSet = true; }
 ;
 
+subsecond
+	: DP_NUMBER1							{ PR->Milliseconds = $1*100, PR->MillisecondsSet = true; }
+	| DP_NUMBER2							{ PR->Milliseconds = $1*10 , PR->MillisecondsSet = true; }
+	| DP_NUMBER3							{ PR->Milliseconds = $1    , PR->MillisecondsSet = true; }
+	| DP_NUMBER4							{ PR->Milliseconds = $1/10 , PR->MillisecondsSet = true; }
+	| DP_NUMBER5							{ PR->Milliseconds = $1/100, PR->MillisecondsSet = true; }
+;
 
-am_pm_opt
-	: "am"									{ PR->SetAM(); }
-	| "pm"									{ PR->SetPM(); }
-	| /* empty */
+am_pm
+	: "am"									{ PR->AMPM = false, PR->AMPMSet = true; }
+	| "pm"									{ PR->AMPM = true , PR->AMPMSet = true; }
 ;
 
 /* timezones */
 tz_name_omittable
-	:	DP_TZ											{ dp->SetTimeZone($1); }
+	:	DP_TZ								{ PR->Timezone = $1, PR->TimezoneSet = true; }
 	|	/* empty */
 ;
 
 tz_offset_omittable
-	:	'+' DP_NUMBER									{ dp->SetTimeZoneOffset($2); }
-	|	'-' DP_NUMBER									{ dp->SetTimeZoneOffset(-$2); }
+	:	"+" number_3to4						{ PR->TimezoneOffset = $2, PR->TimezoneOffsetSet = true; }
+	|	"-" number_3to4						{ PR->TimezoneOffset =-$2, PR->TimezoneOffsetSet = true; }
 	|	/* empty */
 ;
 
 tz_omittable
-	:	tz_name_omittable
-		tz_offset_omittable
+	:	tz_name_omittable tz_offset_omittable
 ;
+
+
+
+/* numbers */
+number_1to2 : DP_NUMBER1 | DP_NUMBER2 ;
+number_3to4 : DP_NUMBER3 | DP_NUMBER4 ;
 
 
 /*###########################################################################*/
@@ -159,34 +208,54 @@ tz_omittable
 %%
 
 //---------------------------------------------------------------------------
-int yylex(YYSTYPE * value, void *pr)
+int yylex(YYSTYPE * value, tDateParser *pr)
 {
-	value->value = new tVariant();
-	int token = PR->GetToken(*(value->value));
-	llocp->first = LX->GetLastTokenStart();
-	llocp->last = LX->GetPosition();
-//	fprintf(stderr, "token : %d\n", token);
+	int token = PR->GetToken(value->val);
 	return token;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int raise_yyerror(const char * msg, void *pr)
+int raise_dperror(char const * p, tDateParser *pr)
 {
-	tCompileExceptionClass::Throw(PR->GetScriptBlockInstance()->GetScriptEngine(),
-		tString(msg), PR->GetScriptBlockInstance(), loc->first);
+	(void)p;
+	PR->HasError = true;
 	return 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tDateParser::tDateParser()
+tDateParser::tDateParser(const tString & str) : Input(str)
 {
-	ScriptBlockInstance = sb;
-	Root = NULL;
-	Lexer = lexer;
+	Ptr = Input.c_str();
+
+	Year = 1970; // 年
+	Month = 0; // 月
+	Date = 1; // 日
+	Day = 4; // 曜日
+	Hours = 0; // 時
+	Minutes = 0; // 分
+	Seconds = 0; // 秒
+	Milliseconds = 0; // ミリ秒
+	Timezone = 0; // タイムゾーン(普通は) -1159 ～ 1159 
+	TimezoneOffset = 0; // タイムゾーンに対するオフセット
+	AMPM = false; // AM(false), PM(true)
+
+	YearSet = false; // 年が記述されていたか？
+	MonthSet = false; // 月が記述されていたか？
+	DateSet = false; // 日が記述されていたか？
+	DaySet = false; // 曜日が記述されていたか？
+	HoursSet = false; // 時が記述されていたか？
+	MinutesSet = false; // 分が記述されていたか？
+	SecondsSet = false; // 秒が記述されていたか？
+	MillisecondsSet = false; // ミリ秒が記述されていたか？
+	TimezoneSet = false; // タイムゾーンが記述されていたか？
+	TimezoneOffsetSet = false; // タイムゾーンに対するオフセットが記述されていたか？
+	AMPMSet = false; // AM/PM が記述されていたか？
+
+	HasError = false; // エラーが発生したか？
 
 	yyparse(this);
 }
@@ -194,48 +263,57 @@ tDateParser::tDateParser()
 
 
 //---------------------------------------------------------------------------
-int tParser::GetToken(tVariant & value)
+int tDateParser::GetToken(int & val)
 {
-	// lexer 中に発生するかもしれない例外をキャッチする
-	// これらには位置情報が含まれていない可能性があるため、トレース情報として
-	// 追加する。
-	try
+	if(!SkipSpace(Ptr)) return -1; // EOF
+
+restart:
+	const risse_char *ptr_save = Ptr;
+	int id = MapToken(Ptr, val);
+	if(id == 0) return -1;
+	if(id == DP_NUMBER)
 	{
-		try
+		// 数値の始まり
+		Ptr = ptr_save;
+		int n = 0;
+		int v = 0;
+		while(iswdigit_nc(*Ptr))
 		{
-			return Lexer->GetToken(value);
+			v *= 10; v += *Ptr - '0';
+			n ++;
+			Ptr ++;
 		}
-		catch(const tTemporaryException * e)
+		val = v;
+
+		// 桁数に応じて返すIDが違う。
+		switch(n)
 		{
-			e->ThrowConverted(ScriptBlockInstance->GetScriptEngine());
+		case 1: id = DP_NUMBER1; break;
+		case 2: id = DP_NUMBER2; break;
+		case 3: id = DP_NUMBER3; break;
+		case 4: id = DP_NUMBER4; break;
+		case 5: id = DP_NUMBER5; break;
+		case 6: id = DP_NUMBER6; break;
+		case 7: id = DP_NUMBER7; break;
+		case 8: id = DP_NUMBER8; break;
+		default: return -1;
 		}
 	}
-	catch(const tTemporaryException * te)
+	else if(id == DP_LPARENTHESIS)
 	{
-		const tVariant * e = te->Convert(ScriptBlockInstance->GetScriptEngine());
-		e->AddTrace(ScriptBlockInstance, Lexer->GetPosition());
-		throw e;
+		// DP_RPARENTHESIS までスキップ
+		while(true)
+		{
+			if(!SkipSpace(Ptr)) return -1; // EOF
+			int id = MapToken(Ptr, val);
+			if(id == DP_RPARENTHESIS) break;
+		}
+		goto restart;
 	}
-	catch(const tVariant * e)
-	{
-		e->AddTrace(ScriptBlockInstance, Lexer->GetPosition());
-		throw e;
-	}
-	catch(...)
-	{
-		throw;
-	}
-	return -1;
+	return id;
 }
 //---------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
-void tParser::SetRootNode(tASTNode * root)
-{
-	Root = root;
-}
-//---------------------------------------------------------------------------
 
 
 } // namespace Risse

@@ -153,7 +153,7 @@ bool tApplication::OnInit()
 			tFileSystemManager::instance()->Mount(tSS<'/'>(),
 				tRisseFSClassRegisterer<tTmpFSClass>::instance()->
 					GetClassInstance()->Invoke(ss_new).
-						AssertAndGetObjectInterafce<tFileSystemInstance>(
+						ExpectAndGetObjectInterafce<tFileSystemInstance>(
 							tRisseFSClassRegisterer<tTmpFSClass>::instance()->GetClassInstance()
 						)
 			);
@@ -166,7 +166,7 @@ bool tApplication::OnInit()
 				tFileSystemManager::instance()->Mount(tSS<'/','b','o','o','t'>(),
 					tRisseFSClassRegisterer<tOSFSClass>::instance()->
 						GetClassInstance()->Invoke(ss_new, tString(script_dir), true).
-							AssertAndGetObjectInterafce<tFileSystemInstance>(
+							ExpectAndGetObjectInterafce<tFileSystemInstance>(
 								tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()
 							)
 				);

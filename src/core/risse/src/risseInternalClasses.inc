@@ -27,6 +27,7 @@
 #include "risseScriptBlockClass.h"
 #include "risseStreamClass.h"
 #include "risseThreadClass.h"
+#include "risseDateClass.h"
 #include "risse_parser/risseRisseScriptBlockClass.h"
 
 #else
@@ -51,6 +52,7 @@ RISSE_INTERNALCLASSES_CLASS(String                          )
 RISSE_INTERNALCLASSES_CLASS(Number                          )
 RISSE_INTERNALCLASSES_CLASS(Integer                         )
 RISSE_INTERNALCLASSES_CLASS(Real                            )
+RISSE_INTERNALCLASSES_CLASS(Date                            )
 RISSE_INTERNALCLASSES_CLASS(Thread                          )
 RISSE_INTERNALCLASSES_CLASS(Coroutine                       )
 RISSE_INTERNALCLASSES_CLASS(Stream                          )

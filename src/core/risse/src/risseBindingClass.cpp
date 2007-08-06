@@ -37,7 +37,7 @@ void tBindingInstance::AddMap(tVariant &This, const tString &name, risse_uint32 
 	RISSE_ASSERT(This.GetType() == tVariant::vtObject);
 	tScriptEngine * engine = This.GetObjectInterface()->GetRTTI()->GetScriptEngine();
 	tBindingInstance * obj =
-		This.CheckAndGetObjectInterafce<tBindingInstance>(engine->BindingClass);
+		This.AssertAndGetObjectInterafce<tBindingInstance>(engine->BindingClass);
 	obj->GetBindingMap().insert(tBindingInfo::tBindingMap::value_type(name, reg));
 }
 //---------------------------------------------------------------------------

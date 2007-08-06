@@ -592,7 +592,7 @@ public:
 	static void Call(void (tObjectBase::*f)(),
 		const tNativePropGetInfo & info)
 	{
-		IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
+		IC * instance = info.This.AssertAndGetObjectInterafce<IC>((CC*)info.Class);
 		if(info.result)
 			*info.result = ToVariant((instance->*((tFunc)f))());
 		else
@@ -620,7 +620,7 @@ public:
 	static void Call(void (tObjectBase::*f)(),
 		const tNativePropGetInfo & info)
 	{
-		IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
+		IC * instance = info.This.AssertAndGetObjectInterafce<IC>((CC*)info.Class);
 		(instance->*((tFunc)f))(info);
 	}
 };
@@ -645,7 +645,7 @@ public:
 	static void Call(void (tObjectBase::*f)(),
 		const tNativePropSetInfo & info)
 	{
-		IC * instance = info.This.CheckAndGetObjectInterafce<IC>((CC*)info.Class);
+		IC * instance = info.This.AssertAndGetObjectInterafce<IC>((CC*)info.Class);
 		(instance->*((tFunc)f))(FromVariant<ST>(info.value));
 	}
 };

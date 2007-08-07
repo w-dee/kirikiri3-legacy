@@ -25,4 +25,4 @@ d.setMilliseconds(d.getMilliseconds());
 
 assert(d == d2); // 内容が変わっていないことを確認
 
-
+"ok"; //=> "ok"

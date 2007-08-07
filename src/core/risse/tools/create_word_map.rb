@@ -23,7 +23,7 @@ def node_last(level, word, is_default)
 	ret << indent
 
 	if word[:match_word] == 'true' then
-		ret << "if(!::Risse::iswordcha_nc(*p)) "
+		ret << "if(!#{ARGV[3]}(*p)) "
 	end
 
 	ret << "{ ptr = p; "
@@ -132,7 +132,7 @@ def gen(level, words, history, is_default)
 	# $cut_unmatched_word のとき
 	if $cut_unmatched_word != nil && level == 0 then
 		ret << "#{indent}default:\n"
-		ret << "#{indent} if(iswordcha_nc(p[0])) { p++; goto cut_word; }\n"
+		ret << "#{indent} if(#{ARGV[3]}) { p++; goto cut_word; }\n"
 	end
 
 	# switch 文の終わりを生成
@@ -205,7 +205,7 @@ EOS
 if $cut_unmatched_word != nil then
 	print <<-EOS
 cut_word:
- while(::Risse::iswordcha_nc(*p)) p++;
+ while(#{ARGV[3]}(*p)) p++;
  ptr = p;
  return #{$cut_unmatched_word};
 	EOS

@@ -168,7 +168,7 @@ pm         DP_PM 0 true true
 ,          DP_COMMA         - false false
 /          DP_SLASH         - false false
 .          DP_DOT           - false false
-T          DP_T             - true  true
+t          DP_T             - true  true
 
 ##### 数値
 0          DP_NUMBER  - false false

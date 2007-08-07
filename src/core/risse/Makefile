@@ -117,7 +117,7 @@ BIN_DEPS += src/risse_parser/risseLexerMap.def
 src/risse_parser/risseLexerMap.def: \
 		src/risse_parser/words.txt \
 		tools/create_word_map.rb Makefile
-	ruby tools/create_word_map.rb src/risse_parser/words.txt MapToken tVariant > \
+	ruby tools/create_word_map.rb src/risse_parser/words.txt MapToken tVariant ::Risse::iswordcha_nc > \
 		src/risse_parser/risseLexerMap.def
 
 # risseDateLexerMap.def のコンパイル
@@ -126,7 +126,7 @@ BIN_DEPS += src/risseDateLexerMap.def
 src/risseDateLexerMap.def: \
 		src/risseDateLexerWords.txt \
 		tools/create_word_map.rb Makefile
-	ruby tools/create_word_map.rb src/risseDateLexerWords.txt MapToken long > \
+	ruby tools/create_word_map.rb src/risseDateLexerWords.txt MapToken long ::Risse::iswalpha_nc > \
 		src/risseDateLexerMap.def
 
 # risseOpCodesEnum.inc と risseOpCodesDefs.def のコンパイル

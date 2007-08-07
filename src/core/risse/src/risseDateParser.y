@@ -117,18 +117,20 @@ int raise_dperror(const char * msg, tDateParser *pr);
 /* the program */
 input
 	: day_of_the_week day_and_month
-	  minus_opt year_time_tz /* RFC822 or strftime style */
+	  date_sep year_time_tz /* RFC822 or strftime style */
 	| day_and_month
-	  minus_opt year_time_tz /* RFC822 or strftime style */
+	  date_sep year_time_tz /* RFC822 or strftime style */
 	| year
 	| year date_sep n_month
-	| n_month
-	| year date_sep n_month date_sep day
+	| n_month_and_year
+	| year date_sep n_month_and_day
+	| year date_sep day_and_named_month
 	| compact_date
-	| n_month_sep day
-	| year date_sep n_month date_sep day t_opt time tz_omittable
+	| day_and_month
+	| day_and_month date_sep year
+	| year date_sep n_month_and_day t_opt time tz_omittable
+	| year date_sep day_and_named_month t_opt time tz_omittable
 	| compact_date t_opt time tz_omittable
-	| n_month_sep day t_opt time tz_omittable
 			/* above are RFC 3339 5.6. Internet Date/Time Format style */
 ;
 
@@ -147,13 +149,9 @@ comma_opt
 /* 小数点表記が場合によってはカンマ */
 comma_or_dot : "," | "." ;
 
-/* minus or hyphen, ommitable */
-minus_opt
-	: "-" | /*empty*/
-;
 
 /* hyphen or slash */
-date_sep : "-" | "/" | "." ;
+date_sep : "-" | "/" | "." | /*empty*/ ;
 
 /* T ommitable */
 /* RFC3339 では 日付と時刻を区切る "T" の代わりに空白が認められている?? */
@@ -167,32 +165,43 @@ year
 	| DP_NUMBER5							{ PR->Year = $1, PR->YearSet = true; }
 ;
 
-/* day of the week, ommitable */
+/* day of the week */
 day_of_the_week
 	: DP_WDAY comma_opt						{ PR->Day = $1, PR->DaySet = true; }
 ;
 
-/* numeric month */
+/* numeric month or named month */
 n_month
 	: number_1to2							{ PR->Month = $1 - 1, PR->MonthSet = true; }
+	| DP_MONTH								{ PR->Month = $1, PR->MonthSet = true; }
 ;
 
-/* numeric month and separator */
-n_month_sep
-	: number_1to2 date_sep					{ PR->Month = $1 - 1, PR->MonthSet = true; }
+/* numeric month or named month, and day */
+n_month_and_day
+	: number_1to2 date_sep number_1to2		{ PR->Month = $1 - 1, PR->MonthSet = true;
+											  PR->Date = $3, PR->DateSet = true; }
+	| DP_MONTH date_sep number_1to2			{ PR->Month = $1, PR->MonthSet = true;
+											  PR->Date = $3, PR->DateSet = true; }
+;
+
+/* day and named month */
+day_and_named_month
+	: number_1to2 date_sep DP_MONTH			{ PR->Date = $1, PR->DateSet = true;
+											  PR->Month = $3, PR->MonthSet = true; }
+;
+
+/* numeric month or named month and year */
+n_month_and_year
+	: number_1to2 date_sep year				{ PR->Month = $1 - 1, PR->MonthSet = true; }
+	| DP_MONTH date_sep year				{ PR->Month = $1, PR->MonthSet = true; }
 ;
 
 /* day and month spec */
 day_and_month
-	: number_1to2 minus_opt DP_MONTH		{ PR->Date = $1, PR->DateSet = true;
+	: number_1to2 date_sep DP_MONTH			{ PR->Date = $1, PR->DateSet = true;
 											  PR->Month = $3, PR->MonthSet = true; }
-	| DP_MONTH minus_opt number_1to2		{ PR->Date = $3, PR->DateSet = true;
+	| DP_MONTH date_sep number_1to2			{ PR->Date = $3, PR->DateSet = true;
 											  PR->Month = $1, PR->MonthSet = true; }
-;
-
-/* day */
-day
-	: number_1to2							{ PR->Date = $1, PR->DateSet = true; }
 ;
 
 /* compact date */
@@ -242,7 +251,7 @@ am_pm
 compact_time
 	: DP_NUMBER6							{ PR->Hours = $1 / 10000, PR->HoursSet = true;
 											  PR->Minutes = $1 / 100 % 100, PR->MinutesSet = true;
-											  PR->SecondsSet = $1 % 100, PR->SecondsSet = true; }
+											  PR->Seconds = $1 % 100, PR->SecondsSet = true; }
 ;
 
 /* timezones */
@@ -277,6 +286,8 @@ number_8to9 : DP_NUMBER8 | DP_NUMBER9 ;
 int yylex(YYSTYPE * value, tDateParser *pr)
 {
 	int token = PR->GetToken(value->val);
+//fprintf(stderr, "%d\n", token);
+//fflush(stderr);
 	return token;
 }
 //---------------------------------------------------------------------------

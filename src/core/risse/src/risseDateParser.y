@@ -73,7 +73,7 @@ int raise_dperror(const char * msg, tDateParser *pr);
 
 /* union 定義 */
 %union{
-	int			val;
+	long			val;
 }
 
 /* トークン定義 */
@@ -103,9 +103,10 @@ int raise_dperror(const char * msg, tDateParser *pr);
 %token <val>		DP_NUMBER6
 %token <val>		DP_NUMBER7
 %token <val>		DP_NUMBER8
+%token <val>		DP_NUMBER9
 
 
-%type <val>			number_1to2 number_3to4
+%type <val>			number_1to2 number_3to4 number_8to9
 
 
 
@@ -115,28 +116,70 @@ int raise_dperror(const char * msg, tDateParser *pr);
 
 /* the program */
 input
-	: day_of_the_week_opt day_and_month minus_opt year time tz_omittable
+	: day_of_the_week day_and_month
+	  minus_opt year_time_tz /* RFC822 or strftime style */
+	| day_and_month
+	  minus_opt year_time_tz /* RFC822 or strftime style */
+	| year
+	| year date_sep n_month
+	| n_month
+	| year date_sep n_month date_sep day
+	| compact_date
+	| n_month_sep day
+	| year date_sep n_month date_sep day t_opt time tz_omittable
+	| compact_date t_opt time tz_omittable
+	| n_month_sep day t_opt time tz_omittable
+			/* above are RFC 3339 5.6. Internet Date/Time Format style */
 ;
+
+year_time_tz
+	: year time tz_omittable
+	| time tz_omittable year
+;
+
 
 /* comma, ommitable */
 comma_opt
 	: "," | /*empty*/
 ;
 
+/* comma or dot */
+/* 小数点表記が場合によってはカンマ */
+comma_or_dot : "," | "." ;
+
 /* minus or hyphen, ommitable */
 minus_opt
 	: "-" | /*empty*/
 ;
 
+/* hyphen or slash */
+date_sep : "-" | "/" | "." ;
+
+/* T ommitable */
+/* RFC3339 では 日付と時刻を区切る "T" の代わりに空白が認められている?? */
+t_opt
+	: "T" | /*empty*/
+;
+
 /* year */
 year
 	: DP_NUMBER4							{ PR->Year = $1, PR->YearSet = true; }
+	| DP_NUMBER5							{ PR->Year = $1, PR->YearSet = true; }
 ;
 
 /* day of the week, ommitable */
-day_of_the_week_opt
-	: /*empty*/
-	| DP_WDAY comma_opt						{ PR->Day = $1, PR->DaySet = true; }
+day_of_the_week
+	: DP_WDAY comma_opt						{ PR->Day = $1, PR->DaySet = true; }
+;
+
+/* numeric month */
+n_month
+	: number_1to2							{ PR->Month = $1 - 1, PR->MonthSet = true; }
+;
+
+/* numeric month and separator */
+n_month_sep
+	: number_1to2 date_sep					{ PR->Month = $1 - 1, PR->MonthSet = true; }
 ;
 
 /* day and month spec */
@@ -147,11 +190,25 @@ day_and_month
 											  PR->Month = $1, PR->MonthSet = true; }
 ;
 
+/* day */
+day
+	: number_1to2							{ PR->Date = $1, PR->DateSet = true; }
+;
+
+/* compact date */
+compact_date
+	: number_8to9							{ PR->Year = $1 / 10000, PR->YearSet = true;
+											  PR->Month = $1 / 100 % 100 - 1, PR->MonthSet = true;
+											  PR->Date = $1 % 100, PR->DateSet = true; }
+;
+
 /* time */
 time
 	: time_hms am_pm
 	| time_hms
 	| am_pm time_hms
+	| compact_time
+	| compact_time comma_or_dot subsecond
 ;
 
 time_hms
@@ -162,22 +219,30 @@ time_hms
 											  PR->Minutes = $3, PR->MinutesSet = true;
 											  PR->Seconds = $5, PR->SecondsSet = true; }
 	| number_1to2 ":" number_1to2 ":"
-	  number_1to2 "." subsecond				{ PR->Hours = $1, PR->HoursSet = true;
+	  number_1to2 comma_or_dot subsecond	{ PR->Hours = $1, PR->HoursSet = true;
 											  PR->Minutes = $3, PR->MinutesSet = true;
 											  PR->Seconds = $5, PR->SecondsSet = true; }
 ;
 
 subsecond
-	: DP_NUMBER1							{ PR->Milliseconds = $1*100, PR->MillisecondsSet = true; }
-	| DP_NUMBER2							{ PR->Milliseconds = $1*10 , PR->MillisecondsSet = true; }
-	| DP_NUMBER3							{ PR->Milliseconds = $1    , PR->MillisecondsSet = true; }
-	| DP_NUMBER4							{ PR->Milliseconds = $1/10 , PR->MillisecondsSet = true; }
-	| DP_NUMBER5							{ PR->Milliseconds = $1/100, PR->MillisecondsSet = true; }
+	: DP_NUMBER1							{ PR->Milliseconds = $1*100  , PR->MillisecondsSet = true; }
+	| DP_NUMBER2							{ PR->Milliseconds = $1*10   , PR->MillisecondsSet = true; }
+	| DP_NUMBER3							{ PR->Milliseconds = $1      , PR->MillisecondsSet = true; }
+	| DP_NUMBER4							{ PR->Milliseconds = $1/10   , PR->MillisecondsSet = true; }
+	| DP_NUMBER5							{ PR->Milliseconds = $1/100  , PR->MillisecondsSet = true; }
+	| DP_NUMBER6							{ PR->Milliseconds = $1/1000 , PR->MillisecondsSet = true; }
+	| DP_NUMBER7							{ PR->Milliseconds = $1/10000, PR->MillisecondsSet = true; }
 ;
 
 am_pm
 	: "am"									{ PR->AMPM = false, PR->AMPMSet = true; }
 	| "pm"									{ PR->AMPM = true , PR->AMPMSet = true; }
+;
+
+compact_time
+	: DP_NUMBER6							{ PR->Hours = $1 / 10000, PR->HoursSet = true;
+											  PR->Minutes = $1 / 100 % 100, PR->MinutesSet = true;
+											  PR->SecondsSet = $1 % 100, PR->SecondsSet = true; }
 ;
 
 /* timezones */
@@ -201,6 +266,7 @@ tz_omittable
 /* numbers */
 number_1to2 : DP_NUMBER1 | DP_NUMBER2 ;
 number_3to4 : DP_NUMBER3 | DP_NUMBER4 ;
+number_8to9 : DP_NUMBER8 | DP_NUMBER9 ;
 
 
 /*###########################################################################*/
@@ -263,7 +329,7 @@ tDateParser::tDateParser(const tString & str) : Input(str)
 
 
 //---------------------------------------------------------------------------
-int tDateParser::GetToken(int & val)
+int tDateParser::GetToken(long & val)
 {
 restart:
 	if(!SkipSpace(Ptr)) return -1; // EOF
@@ -274,14 +340,20 @@ restart:
 	{
 		// 数値の始まり
 		Ptr = ptr_save;
-		int n = 0;
-		int v = 0;
+		long n = 0;
+		long v = 0;
 		while(iswdigit_nc(*Ptr))
 		{
 			v *= 10; v += *Ptr - '0';
 			n ++;
 			Ptr ++;
+			if(n == 9) break; // 8 桁まで読む
 		}
+		while(iswdigit_nc(*Ptr)) Ptr ++; // それ以降は読み飛ばす
+			/* 7桁より大きな数値は結局のところsubsecondsでしか
+			   用いられない。W3C の日付フォーマットではsubsecondsの
+			   桁数に制限がないがここでは7桁までの対応となる
+			   (実際はparser内部で3桁にさらに丸めている) */
 		val = v;
 
 		// 桁数に応じて返すIDが違う。
@@ -295,6 +367,7 @@ restart:
 		case 6: id = DP_NUMBER6; break;
 		case 7: id = DP_NUMBER7; break;
 		case 8: id = DP_NUMBER8; break;
+		case 9: id = DP_NUMBER9; break;
 		default: return -1;
 		}
 	}

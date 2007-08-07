@@ -147,34 +147,73 @@ void tDateInstance::Parse(const tString & str)
 	} now;
 
 	// パラメータの取得と調整
-	int year;
-	if(parser.YearSet) year = parser.Year; else year = now.get().year;
-	wxDateTime::Month month;
-	if(parser.MonthSet) month = (wxDateTime::Month)parser.Month; else month = now.get().mon;
-	wxDateTime::wxDateTime_t date;
-	if(parser.DateSet) date = (wxDateTime::wxDateTime_t)parser.Date; else date = now.get().mday;
+	// 上位の単位が指定されていない状態が連続している場合は現在時刻を代入するが、
+	// そうでなければ 0 (あるいは時間原点の値) を代入する
 
-	// いまのところ曜日の指定は無視。
+	bool omit = true; // 値の省略が連続しているか？
+
+	int year;
+	if(parser.YearSet)
+		year = parser.Year, omit = false;
+	else
+		year = now.get().year;
+
+	wxDateTime::Month month;
+	if(parser.MonthSet)
+		month = (wxDateTime::Month)parser.Month, omit = false;
+	else
+		month = omit ? now.get().mon : wxDateTime::Jan;
+
+	wxDateTime::wxDateTime_t date;
+	if(parser.DateSet)
+		date = (wxDateTime::wxDateTime_t)parser.Date, omit = false;
+	else
+		date = omit ? now.get().mday : 1;
+
+	// - いまのところ曜日の指定は無視。
 
 	wxDateTime::wxDateTime_t hours;
-	if(parser.HoursSet) hours = (wxDateTime::wxDateTime_t)parser.Hours; else hours = 0;
-	wxDateTime::wxDateTime_t minutes;
-	if(parser.MinutesSet) minutes = (wxDateTime::wxDateTime_t)parser.Minutes; else minutes = 0;
-	wxDateTime::wxDateTime_t seconds;
-	if(parser.SecondsSet) seconds = (wxDateTime::wxDateTime_t)parser.Seconds; else seconds = 0;
-	wxDateTime::wxDateTime_t milliseconds;
-	if(parser.MillisecondsSet) milliseconds = (wxDateTime::wxDateTime_t)parser.Milliseconds; else milliseconds = 0;
+	if(parser.HoursSet)
+		hours = (wxDateTime::wxDateTime_t)parser.Hours, omit = false;
+	else
+		hours = omit ? now.get().hour : 0;
 
-	int timezone = (parser.TimezoneSet ? parser.Timezone : 0);
-	if(timezone < 0)
-		timezone = - (-timezone / 100 * 3600 + (-timezone) % 100 * 60);
+	wxDateTime::wxDateTime_t minutes;
+	if(parser.MinutesSet)
+		minutes = (wxDateTime::wxDateTime_t)parser.Minutes, omit = false;
 	else
-		timezone =   ( timezone / 100 * 3600 + ( timezone) % 100 * 60);
-	int tzofs = (parser.TimezoneOffsetSet ? parser.TimezoneOffset : 0);
-	if(tzofs < 0)
-		tzofs = - (-tzofs / 100 * 3600 + (-tzofs) % 100 * 60);
+		minutes = omit ? now.get().min : 0;
+
+	wxDateTime::wxDateTime_t seconds;
+	if(parser.SecondsSet)
+		seconds = (wxDateTime::wxDateTime_t)parser.Seconds, omit = false;
 	else
-		tzofs =   ( tzofs / 100 * 3600 + ( tzofs) % 100 * 60);
+		seconds = omit ? now.get().sec : 0;
+
+	wxDateTime::wxDateTime_t milliseconds;
+	if(parser.MillisecondsSet)
+		milliseconds = (wxDateTime::wxDateTime_t)parser.Milliseconds, omit = false;
+	else
+		milliseconds = omit ? now.get().msec : 0;
+
+	// タイムゾーンと AM/PM
+	bool adjust_timezone = false;
+	int timezone;
+	if(parser.TimezoneSet || parser.TimezoneOffsetSet)
+	{
+		timezone = (parser.TimezoneSet ? parser.Timezone : 0);
+		if(timezone < 0)
+			timezone = - (-timezone / 100 * 3600 + (-timezone) % 100 * 60);
+		else
+			timezone =   ( timezone / 100 * 3600 + ( timezone) % 100 * 60);
+		int tzofs = (parser.TimezoneOffsetSet ? parser.TimezoneOffset : 0);
+		if(tzofs < 0)
+			tzofs = - (-tzofs / 100 * 3600 + (-tzofs) % 100 * 60);
+		else
+			tzofs =   ( tzofs / 100 * 3600 + ( tzofs) % 100 * 60);
+		timezone += tzofs;
+		adjust_timezone = true;
+	}
 
 	if(parser.AMPMSet)
 	{
@@ -200,7 +239,8 @@ void tDateInstance::Parse(const tString & str)
 
 	// DateTime に値を設定する
 	DateTime.Set(date, (wxDateTime::Month)month, year, hours, minutes, seconds, milliseconds);
-	DateTime = DateTime.ToTimezone(wxDateTime::TimeZone((wxDateTime::wxDateTime_t)(timezone + tzofs)));
+	if(adjust_timezone)
+		DateTime = DateTime.ToTimezone(wxDateTime::TimeZone((wxDateTime::wxDateTime_t)(timezone)));
 }
 //---------------------------------------------------------------------------
 

@@ -126,7 +126,7 @@ BIN_DEPS += src/risseDateLexerMap.def
 src/risseDateLexerMap.def: \
 		src/risseDateLexerWords.txt \
 		tools/create_word_map.rb Makefile
-	ruby tools/create_word_map.rb src/risseDateLexerWords.txt MapToken int > \
+	ruby tools/create_word_map.rb src/risseDateLexerWords.txt MapToken long > \
 		src/risseDateLexerMap.def
 
 # risseOpCodesEnum.inc と risseOpCodesDefs.def のコンパイル

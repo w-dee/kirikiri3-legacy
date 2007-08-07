@@ -62,7 +62,7 @@ public:
 	//! @brief		トークンを得る
 	//! @param		value		値の格納先
 	//! @return		トークンID
-	int GetToken(int & val);
+	int GetToken(long & val);
 
 };
 //---------------------------------------------------------------------------

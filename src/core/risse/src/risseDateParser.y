@@ -239,13 +239,15 @@ time_hms
 ;
 
 subsecond
-	: DP_NUMBER1							{ PR->Milliseconds = $1*100  , PR->MillisecondsSet = true; }
-	| DP_NUMBER2							{ PR->Milliseconds = $1*10   , PR->MillisecondsSet = true; }
-	| DP_NUMBER3							{ PR->Milliseconds = $1      , PR->MillisecondsSet = true; }
-	| DP_NUMBER4							{ PR->Milliseconds = $1/10   , PR->MillisecondsSet = true; }
-	| DP_NUMBER5							{ PR->Milliseconds = $1/100  , PR->MillisecondsSet = true; }
-	| DP_NUMBER6							{ PR->Milliseconds = $1/1000 , PR->MillisecondsSet = true; }
-	| DP_NUMBER7							{ PR->Milliseconds = $1/10000, PR->MillisecondsSet = true; }
+	: DP_NUMBER1							{ PR->Milliseconds = $1*100     , PR->MillisecondsSet = true; }
+	| DP_NUMBER2							{ PR->Milliseconds = $1*10      , PR->MillisecondsSet = true; }
+	| DP_NUMBER3							{ PR->Milliseconds = $1         , PR->MillisecondsSet = true; }
+	| DP_NUMBER4							{ PR->Milliseconds = $1/10      , PR->MillisecondsSet = true; }
+	| DP_NUMBER5							{ PR->Milliseconds = $1/100     , PR->MillisecondsSet = true; }
+	| DP_NUMBER6							{ PR->Milliseconds = $1/1000    , PR->MillisecondsSet = true; }
+	| DP_NUMBER7							{ PR->Milliseconds = $1/10000   , PR->MillisecondsSet = true; }
+	| DP_NUMBER8							{ PR->Milliseconds = $1/100000L , PR->MillisecondsSet = true; }
+	| DP_NUMBER9							{ PR->Milliseconds = $1/1000000L, PR->MillisecondsSet = true; }
 ;
 
 am_pm

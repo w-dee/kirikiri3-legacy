@@ -64,9 +64,6 @@ int raise_dperror(const char * msg, tDateParser *pr);
 /* 再入可能なパーサを出力 */
 %pure-parser
 
-/* GLR parser */
-%glr-parser
-
 /* 型 */
 %parse-param {tDateParser * pr}
 %lex-param   {tDateParser * pr}

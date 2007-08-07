@@ -149,21 +149,21 @@ void tDateInstance::Parse(const tString & str)
 	// パラメータの取得と調整
 	int year;
 	if(parser.YearSet) year = parser.Year; else year = now.get().year;
-	int month;
-	if(parser.MonthSet) month = parser.Month; else month = now.get().mon;
-	int date;
-	if(parser.DateSet) date = parser.Date; else date = now.get().mday;
+	wxDateTime::Month month;
+	if(parser.MonthSet) month = (wxDateTime::Month)parser.Month; else month = now.get().mon;
+	wxDateTime::wxDateTime_t date;
+	if(parser.DateSet) date = (wxDateTime::wxDateTime_t)parser.Date; else date = now.get().mday;
 
 	// いまのところ曜日の指定は無視。
 
-	int hours;
-	if(parser.HoursSet) hours = parser.Hours; else hours = 0;
-	int minutes;
-	if(parser.MinutesSet) minutes = parser.Minutes; else minutes = 0;
-	int seconds;
-	if(parser.SecondsSet) seconds = parser.Seconds; else seconds = 0;
-	int milliseconds;
-	if(parser.MillisecondsSet) milliseconds = parser.Milliseconds; else milliseconds = 0;
+	wxDateTime::wxDateTime_t hours;
+	if(parser.HoursSet) hours = (wxDateTime::wxDateTime_t)parser.Hours; else hours = 0;
+	wxDateTime::wxDateTime_t minutes;
+	if(parser.MinutesSet) minutes = (wxDateTime::wxDateTime_t)parser.Minutes; else minutes = 0;
+	wxDateTime::wxDateTime_t seconds;
+	if(parser.SecondsSet) seconds = (wxDateTime::wxDateTime_t)parser.Seconds; else seconds = 0;
+	wxDateTime::wxDateTime_t milliseconds;
+	if(parser.MillisecondsSet) milliseconds = (wxDateTime::wxDateTime_t)parser.Milliseconds; else milliseconds = 0;
 
 	int timezone = (parser.TimezoneSet ? parser.Timezone : 0);
 	if(timezone < 0)
@@ -189,6 +189,14 @@ void tDateInstance::Parse(const tString & str)
 			hours = hours % 12 + 12;
 		}
 	}
+
+	// 一応範囲チェック。これをやっておかないと wxWidgets が assert エラーを出すため。
+	// しかしライブラリ側が例外機構によるエラー通知機能持ってないとつらいね
+	if(hours >= 24 || seconds >= 62 || minutes >= 60 || milliseconds >= 1000)
+		tIllegalArgumentExceptionClass::ThrowInvalidDateString(GetRTTI()->GetScriptEngine());
+
+	if(date <= 0 || date > wxDateTime::GetNumberOfDays(month, year))
+		tIllegalArgumentExceptionClass::ThrowInvalidDateString(GetRTTI()->GetScriptEngine());
 
 	// DateTime に値を設定する
 	DateTime.Set(date, (wxDateTime::Month)month, year, hours, minutes, seconds, milliseconds);

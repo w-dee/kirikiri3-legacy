@@ -130,4 +130,16 @@ assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
 var d = new Date("2006/2/May 12:23:34");
 assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
 
+var d = new Date("2006 2 May, 12:23:34");
+assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
+var d = new Date("2006 May 2, 12:23:34");
+assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
+var d = new Date("may 2 2006 12:23:34");
+assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
+var d = new Date("may 2 2006, 12:23:34");
+assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
 "ok"; //=> "ok"

@@ -135,7 +135,7 @@ input
 ;
 
 year_time_tz
-	: year2to5 time tz_omittable
+	: year2to5 t_opt time tz_omittable
 	| time tz_omittable year2to5
 ;
 
@@ -150,13 +150,13 @@ comma_opt
 comma_or_dot : "," | "." ;
 
 
-/* hyphen or slash */
-date_sep : "-" | "/" | "." | /*empty*/ ;
+/* separators for date */
+date_sep : "-" | "/" | "." | "," | /*empty*/ ;
 
-/* T ommitable */
+/* separator for date and time */
 /* RFC3339 では 日付と時刻を区切る "T" の代わりに空白が認められている?? */
 t_opt
-	: "T" | /*empty*/
+	: "T" | "," | /*empty*/
 ;
 
 /* year, 4 or 5 digits  */

@@ -58,7 +58,8 @@ void tStringClass::RegisterMembers()
 		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
 	BindProperty(this, ss_length, &tStringClass::get_length,
 		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
-
+	BindFunction(this, ss_substr, &tStringClass::substr,
+		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
 }
 //---------------------------------------------------------------------------
 
@@ -105,6 +106,33 @@ void tStringClass::charAt(const tNativeCallInfo & info, risse_offset index)
 void tStringClass::get_length(const tNativePropGetInfo & info)
 {
 	if(info.result) *info.result = (risse_int64)info.This.operator tString().GetLength();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tStringClass::substr(risse_offset start, const tNativeCallInfo & info)
+{
+	if(info.result)
+	{
+		const tString & str = info.This.operator tString();
+		if(start < 0) start += str.GetLength();
+		if(start < 0 || static_cast<risse_size>(start) >= str.GetLength())
+		{
+			info.result->Clear(); // 値が範囲外なので void を返す
+		}
+		else
+		{
+			// 第２引数が与えられた場合はその長さ、与えられなければ文字列の最後
+			// まで切り取る
+			risse_size len = info.args.HasArgument(1) ?
+				(risse_size)(risse_int64)info.args[1] : risse_size_max;
+
+			risse_size avail_len = str.GetLength() - start;
+			if(len > avail_len) len = avail_len;
+			*info.result = tString(str, static_cast<risse_size>(start), len);
+		}
+	}
 }
 //---------------------------------------------------------------------------
 

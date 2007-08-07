@@ -120,23 +120,23 @@ input
 	  date_sep year_time_tz /* RFC822 or strftime style */
 	| day_and_month
 	  date_sep year_time_tz /* RFC822 or strftime style */
-	| year
-	| year date_sep n_month
+	| year4
+	| year4 date_sep n_month
 	| n_month_and_year
-	| year date_sep n_month_and_day
-	| year date_sep day_and_named_month
+	| year4 date_sep n_month_and_day
+	| year4 date_sep day_and_named_month
 	| compact_date
 	| day_and_month
-	| day_and_month date_sep year
-	| year date_sep n_month_and_day t_opt time tz_omittable
-	| year date_sep day_and_named_month t_opt time tz_omittable
+	| day_and_month date_sep year4
+	| year4 date_sep n_month_and_day t_opt time tz_omittable
+	| year4 date_sep day_and_named_month t_opt time tz_omittable
 	| compact_date t_opt time tz_omittable
 			/* above are RFC 3339 5.6. Internet Date/Time Format style */
 ;
 
 year_time_tz
-	: year time tz_omittable
-	| time tz_omittable year
+	: year2to5 time tz_omittable
+	| time tz_omittable year2to5
 ;
 
 
@@ -159,9 +159,17 @@ t_opt
 	: "T" | /*empty*/
 ;
 
-/* year */
-year
+/* year, 4 or 5 digits  */
+year4
 	: DP_NUMBER4							{ PR->Year = $1, PR->YearSet = true; }
+	| DP_NUMBER5							{ PR->Year = $1, PR->YearSet = true; }
+;
+
+/* year, 2 to 5 digits  */
+year2to5
+	: DP_NUMBER2							{ PR->Year = ($1<70)?($1+2000):($1+1900), PR->YearSet = true; }
+	| DP_NUMBER3							{ PR->Year = $1+1900, PR->YearSet = true; }
+	| DP_NUMBER4							{ PR->Year = $1, PR->YearSet = true; }
 	| DP_NUMBER5							{ PR->Year = $1, PR->YearSet = true; }
 ;
 
@@ -192,8 +200,8 @@ day_and_named_month
 
 /* numeric month or named month and year */
 n_month_and_year
-	: number_1to2 date_sep year				{ PR->Month = $1 - 1, PR->MonthSet = true; }
-	| DP_MONTH date_sep year				{ PR->Month = $1, PR->MonthSet = true; }
+	: number_1to2 date_sep year4			{ PR->Month = $1 - 1, PR->MonthSet = true; }
+	| DP_MONTH date_sep year4				{ PR->Month = $1, PR->MonthSet = true; }
 ;
 
 /* day and month spec */

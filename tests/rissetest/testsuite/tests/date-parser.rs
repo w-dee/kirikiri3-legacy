@@ -64,6 +64,15 @@ assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
 var d = new Date("Tue, 02 May 2006 12:23:34 GMT\{tz}");
 assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
 
+var d = new Date("Tue, 02 May 06 12:23:34 GMT\{tz}");
+assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
+var d = new Date("Tue, 02 May 106 12:23:34 GMT\{tz}");
+assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
+var d = new Date("Sun, 02 May 99 12:23:34 GMT\{tz}");
+assert(d.toString() == "Sun, 02 May 1999 12:23:34 GMT\{tz}");
+
 var d = new Date("Tue, 02 (uh?)May 2006 (?) 12:23:34 GMT\{tz} (untarakantara)");
 assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
 
@@ -78,6 +87,15 @@ assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
 
 var d = new Date("Tue May 2 12:23:34 GMT\{tz} 2006");
 assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
+var d = new Date("Tue May 2 12:23:34 GMT\{tz} 06");
+assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
+var d = new Date("Tue May 2 12:23:34 GMT\{tz} 106");
+assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");
+
+var d = new Date("Sun May 2 12:23:34 GMT\{tz} 99");
+assert(d.toString() == "Sun, 02 May 1999 12:23:34 GMT\{tz}");
 
 var d = new Date("2006/5/2 12:23:34");
 assert(d.toString() == "Tue, 02 May 2006 12:23:34 GMT\{tz}");

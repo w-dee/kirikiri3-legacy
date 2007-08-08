@@ -22,7 +22,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief 再生セグメント情報
 //---------------------------------------------------------------------------
-struct tWaveSegment
+struct tWaveSegment : public tAtomicCollectee
 {
 	//! @brief コンストラクタ
 	tWaveSegment(risse_int64 start, risse_int64 length)
@@ -39,7 +39,7 @@ struct tWaveSegment
 //---------------------------------------------------------------------------
 //! @brief 再生イベント情報
 //---------------------------------------------------------------------------
-struct tWaveEvent
+struct tWaveEvent : public tAtomicCollectee
 {
 	//! @brief コンストラクタ
 	risse_int64 Position; //!< オリジナルデコーダ上でのラベル位置 (PCM サンプルグラニュール数単位)
@@ -65,7 +65,7 @@ struct tWaveEvent
 //---------------------------------------------------------------------------
 //! @brief Waveのセグメント・イベントのキューを管理するクラス
 //---------------------------------------------------------------------------
-class tWaveSegmentQueue
+class tWaveSegmentQueue : public tCollectee
 {
 	// deque による Segments と Events の配列。
 	// 実用上は、これらの配列に大量のデータが入ることはまずないので

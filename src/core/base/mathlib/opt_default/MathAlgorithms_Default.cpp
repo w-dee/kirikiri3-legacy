@@ -17,8 +17,8 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-void DeinterleaveApplyingWindow(float * dest[], const float * src,
-					float * win, int numch, size_t destofs, size_t len)
+void DeinterleaveApplyingWindow(RISSE_RESTRICT float * dest[], RISSE_RESTRICT const float * src,
+					RISSE_RESTRICT float * win, int numch, size_t destofs, size_t len)
 {
 	size_t n;
 	switch(numch)
@@ -62,8 +62,8 @@ void DeinterleaveApplyingWindow(float * dest[], const float * src,
 
 
 //---------------------------------------------------------------------------
-void  InterleaveOverlappingWindow(float * dest, const float * const * src,
-					float * win, int numch, size_t srcofs, size_t len)
+void  InterleaveOverlappingWindow(RISSE_RESTRICT float * dest, RISSE_RESTRICT const float * const * src,
+					RISSE_RESTRICT float * win, int numch, size_t srcofs, size_t len)
 {
 	size_t n;
 	switch(numch)

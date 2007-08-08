@@ -29,7 +29,7 @@ _ALIGN16(const float) RISA_V_VEC_MAGNIFY[4] =
 //---------------------------------------------------------------------------
 //! @brief		int16→float32変換
 //---------------------------------------------------------------------------
-void _PCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples)
+void _PCMConvertLoopInt16ToFloat32(RISSE_RESTRICT void * dest, RISSE_RESTRICT const void * src, size_t numsamples)
 {
 	float * d = reinterpret_cast<float*>(dest);
 	const risse_int16 * s = reinterpret_cast<const risse_int16*>(src);
@@ -63,7 +63,7 @@ void _PCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restricte
 
 //---------------------------------------------------------------------------
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, PCMConvertLoopInt16ToFloat32, (risse_restricted void * dest, risse_restricted const void * src, size_t numsamples),
+	void, PCMConvertLoopInt16ToFloat32, (RISSE_RESTRICT void * dest, RISSE_RESTRICT const void * src, size_t numsamples),
 	_PCMConvertLoopInt16ToFloat32, (dest, src, numsamples) )
 //---------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
 //---------------------------------------------------------------------------
 //! @brief		float32→int16変換
 //---------------------------------------------------------------------------
-void _PCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples)
+void _PCMConvertLoopFloat32ToInt16(RISSE_RESTRICT void * dest, RISSE_RESTRICT const void * src, size_t numsamples)
 {
 	risse_uint16 * d = reinterpret_cast<risse_uint16*>(dest);
 	const float * s = reinterpret_cast<const float*>(src);
@@ -113,7 +113,7 @@ void _PCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricte
 
 //---------------------------------------------------------------------------
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, PCMConvertLoopFloat32ToInt16, (risse_restricted void * dest, risse_restricted const void * src, size_t numsamples),
+	void, PCMConvertLoopFloat32ToInt16, (RISSE_RESTRICT void * dest, RISSE_RESTRICT const void * src, size_t numsamples),
 	_PCMConvertLoopFloat32ToInt16, (dest, src, numsamples) )
 //---------------------------------------------------------------------------
 

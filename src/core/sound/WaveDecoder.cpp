@@ -13,7 +13,6 @@
 #include "prec.h"
 #include "sound/WaveDecoder.h"
 #include "base/fs/common/FSManager.h"
-#include "base/exception/Exception.h"
 
 
 namespace Risa {
@@ -36,10 +35,10 @@ tWaveDecoderFactoryManager::~tWaveDecoderFactoryManager()
 
 //---------------------------------------------------------------------------
 void tWaveDecoderFactoryManager::Register(const tString & extension,
-	boost::shared_ptr<tWaveDecoderFactory> factory)
+	tWaveDecoderFactory * factory)
 {
 	Map.insert(
-		std::pair<tString, boost::shared_ptr<tWaveDecoderFactory> >(
+		std::pair<tString, tWaveDecoderFactory* >(
 														extension, factory));
 }
 //---------------------------------------------------------------------------
@@ -54,8 +53,7 @@ void tWaveDecoderFactoryManager::Unregister(const tString & extension)
 
 
 //---------------------------------------------------------------------------
-boost::shared_ptr<tWaveDecoder>
-	tWaveDecoderFactoryManager::Create(const tString & filename)
+tWaveDecoder * tWaveDecoderFactoryManager::Create(const tString & filename)
 {
 	// 拡張子を取り出す
 	tString ext = tFileSystemManager::ExtractExtension(filename);
@@ -66,16 +64,16 @@ boost::shared_ptr<tWaveDecoder>
 	if(factory != Map.end())
 	{
 		// ファクトリが見つかった
-		boost::shared_ptr<tWaveDecoder> decoder;
+		tWaveDecoder * decoder;
 		decoder = factory->second->Create(filename);
 		return decoder;
 	}
 	else
 	{
 		// ファクトリは見つからなかった
-		eRisaException::Throw(
-			RISSE_WS_TR("'%1' has non-supported file extension"), filename);
-		return boost::shared_ptr<tWaveDecoder>(); // これは実行されない
+		tSoundExceptionClass::Throw(tString(
+			RISSE_WS_TR("'%1' has non-supported file extension"), filename));
+		return NULL; // これは実行されない
 	}
 }
 //---------------------------------------------------------------------------

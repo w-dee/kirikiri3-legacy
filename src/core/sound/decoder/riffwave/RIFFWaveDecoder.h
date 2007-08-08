@@ -15,7 +15,6 @@
 #define RIFFWAVEDECODERH
 
 #include "sound/WaveDecoder.h"
-#include "risse/include/risse.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

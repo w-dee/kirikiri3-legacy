@@ -16,7 +16,7 @@
 //---------------------------------------------------------------------------
 
 #include "risse/include/risseTypes.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include "sound/WaveFilter.h"
 #include "sound/WaveDecoder.h"
 #include <vector>
@@ -40,7 +40,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief リンクを表す構造体
 //---------------------------------------------------------------------------
-struct tWaveLoopLink
+struct tWaveLoopLink : public tAtomicCollectee
 {
 	//! @brief リンクの条件を表す列挙型
 	enum tLinkCondition
@@ -67,7 +67,7 @@ struct tWaveLoopLink
 	risse_int ToTier;		//!< display tier of vertical 'to' allow line
 	risse_int Index;		//!< link index
 
-	struct tSortByDistanceFuncObj
+	struct tSortByDistanceFuncObj : public tCollectee
 	{
 		bool operator()(
 			const tWaveLoopLink &lhs,
@@ -81,7 +81,7 @@ struct tWaveLoopLink
 		}
 	};
 
-	struct tSortByIndexFuncObj
+	struct tSortByIndexFuncObj : public tCollectee
 	{
 		bool operator()(
 			const tWaveLoopLink &lhs,
@@ -222,14 +222,14 @@ public:
 	static const int MaxIDLen = 16; //!< 識別子の最大長
 
 private:
-	tCriticalSection FlagsCS; //!< CS to protect flags/links/labels
+	tCriticalSection * FlagsCS; //!< CS to protect flags/links/labels
 	int Flags[MaxFlags]; //!< フラグ
 	bool FlagsModifiedByLabelExpression; //!< true if the flags are modified by EvalLabelExpression
 	gc_vector<tWaveLoopLink> Links; //!< リンクの配列
 	gc_vector<tWaveLabel> Labels; //!< ラベルの配列
-	tCriticalSection DataCS; // CS to protect other members
+	tCriticalSection * DataCS; // CS to protect other members
 	tWaveFileInfo * FileInfo; //!< デコーダのファイル情報
-	boost::shared_ptr<tWaveDecoder> Decoder; //!< デコーダ
+	tWaveDecoder * Decoder; //!< デコーダ
 	bool FirstRendered; //!< 最初のサンプルをレンダリングしたかどうか
 
 	risse_int ShortCrossFadeHalfSamples;
@@ -252,15 +252,12 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tWaveLoopManager(boost::shared_ptr<tWaveDecoder> decoder);
-
-	//! @brief		デストラクタ
-	virtual ~tWaveLoopManager();
+	tWaveLoopManager(tWaveDecoder * decoder);
 
 private:
 	//! @brief		デコーダを設定する
 	//! @param		decoder		デコーダ
-	void SetDecoder(boost::shared_ptr<tWaveDecoder> decoder);
+	void SetDecoder(tWaveDecoder * decoder);
 
 public:
 	//! @brief		指定インデックスのフラグを得る
@@ -326,7 +323,7 @@ public:
 
 	//------- tWaveFilter メソッド  ここから
 	void Reset() {;} //!< @note tWaveLoopManager ではなにもしない
-	void SetInput(boost::shared_ptr<tWaveFilter> input) {;}
+	void SetInput(tWaveFilter * input) {;}
 		//!< @note tWaveLoopManager には入力するフィルタがないのでこのメソッドはなにもしない
 
 	//! @brief		PCMフォーマットを提案する

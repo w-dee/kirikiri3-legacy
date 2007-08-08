@@ -11,8 +11,8 @@
 /*! @brief Risse で使う型などの宣言                                          */
 /*---------------------------------------------------------------------------*/
 
-#ifndef __TYPES_H__
-#define __TYPES_H__
+#ifndef __RISSETYPES_H__
+#define __RISSETYPES_H__
 
 #ifdef RISSE_SUPPORT_WX
 	#include <wx/defs.h>
@@ -127,6 +127,15 @@ namespace Risse
  #define RISSE_NOINLINE
 #endif
 
+// restricted pointers
+#if (__GNUC__ == 3 && __GNUC_MINOR__ > 4 ) || __GNUC__ > 3
+	#define RISSE_RESTRICT __restrict__
+	// CHECK THIS!!!
+	// what version of gcc extactly began to support this ??
+#endif
+#ifndef RISSE_RESTRICT
+	#define RISSE_RESTRICT
+#endif
 
 
 

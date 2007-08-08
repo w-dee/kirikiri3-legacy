@@ -42,9 +42,9 @@ RisaのWaveフィルタについて
   この一連のフィルタがつながった物をフィルタチェーンと呼ぶ。典型的なフィル
   タチェーンは下図のようになる。
 
-  +----------------------+    +-----------------+    +------------------+
-  | tWaveLoopManager | -> | tWaveFilter | -> | tOpenALBuffer|
-  +----------------------+    +-----------------+    +------------------+
+  +------------------+    +-------------+    +---------------+
+  | tWaveLoopManager | -> | tWaveFilter | -> | tOpenALBuffer |
+  +------------------+    +-------------+    +---------------+
 
   tOpenALBuffer はバッファに流し込むデータの要求が発生すると、データを
   直前にある tWaveFilter のインスタンスに要求する。tWaveFilter の
@@ -123,7 +123,7 @@ RisaのWaveフィルタについて
 //---------------------------------------------------------------------------
 //! @brief	 フィルタインターフェース
 //---------------------------------------------------------------------------
-class tWaveFilter
+class tWaveFilter : public tCollectee
 {
 public:
 	virtual ~tWaveFilter() {;}
@@ -133,7 +133,7 @@ public:
 			@brief	フィルタのリセット
 		*/
 
-	virtual void SetInput(boost::shared_ptr<tWaveFilter> input) = 0;
+	virtual void SetInput(tWaveFilter * input) = 0;
 		/*!<
 			@brief	入力フィルタの設定
 		*/

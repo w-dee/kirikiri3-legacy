@@ -22,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(47626,3140,27936,19656,12175,17772,57131,58681);
 
 //---------------------------------------------------------------------------
 tSoundALSource::tSoundALSource(tSound * owner,
-	boost::shared_ptr<tALBuffer> buffer, boost::shared_ptr<tWaveLoopManager> loopmanager) :
+	tALBuffer * buffer, tWaveLoopManager * loopmanager) :
 	tALSource(buffer, loopmanager), Owner(owner)
 {
 }
@@ -104,10 +104,10 @@ void tSound::Clear()
 	if(Source) Source->Stop();
 
 	// すべてのフィルタなどをリセット
-	Decoder.reset();
-	LoopManager.reset();
-	Filters.clear();
-	Buffer.reset();
+	Decoder.Dispose();
+	LoopManager.Dispose();
+//	Filters.clear();
+	Buffer = NULL;
 	Source.reset();
 
 	// ステータスを unload に
@@ -138,14 +138,13 @@ void tSound::Open(const tString & filename)
 	try
 	{
 		// デコーダを作成
-		Decoder = depends_on<tWaveDecoderFactoryManager>::locked_instance()->Create(filename);
+		Decoder = tWaveDecoderFactoryManager::instance()->Create(filename);
 
 		// LoopManager を作成
-		LoopManager =
-			boost::shared_ptr<tWaveLoopManager>(new tWaveLoopManager(Decoder));
+		LoopManager = new tWaveLoopManager(Decoder);
 
 		// pv
-		boost::shared_ptr<tPhaseVocoder> filter(new tPhaseVocoder());
+		tPhaseVocoder * filter = new tPhaseVocoder();
 		filter->SetOverSampling(16);
 		filter->SetFrameSize(4096);
 		filter->SetTimeScale(1.6);
@@ -153,10 +152,10 @@ void tSound::Open(const tString & filename)
 		filter->SetInput(LoopManager);
 
 		// バッファを作成
-		Buffer = boost::shared_ptr<tALBuffer>(new tALBuffer(filter, true));
+		Buffer = new tALBuffer(filter, true);
 
 		// ソースを作成
-		Source = boost::shared_ptr<tSoundALSource>(new tSoundALSource(this, Buffer, LoopManager));
+		Source = new tSoundALSource(this, Buffer, LoopManager);
 
 		// ステータスを更新
 		CallOnStatusChanged(ssStop);

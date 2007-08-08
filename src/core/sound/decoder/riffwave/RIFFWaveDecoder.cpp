@@ -12,7 +12,6 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/decoder/riffwave/RIFFWaveDecoder.h"
-#include "base/exception/Exception.h"
 #include "base/fs/common/FSManager.h"
 
 
@@ -57,7 +56,7 @@ tRIFFWaveDecoder::tRIFFWaveDecoder(const tString & filename)
 	try
 	{
 		if(!Open())
-			eRisaException::Throw(RISSE_WS_TR("can not open file '%1' : invalid format"),
+			tSoundExceptionClass::Throw(RISSE_WS_TR("can not open file '%1' : invalid format"),
 				filename);
 	}
 	catch(...)
@@ -339,11 +338,9 @@ class tRIFFWaveWaveDecoderFactory : public tWaveDecoderFactory
 {
 public:
 	//! @brief デコーダを作成する
-	boost::shared_ptr<tWaveDecoder> Create(const tString & filename)
+	tWaveDecoder * Create(const tString & filename)
 	{
-		boost::shared_ptr<tWaveDecoder>
-			decoder(new tRIFFWaveDecoder(filename));
-		return decoder;
+		return new tRIFFWaveDecoder(filename);
 	}
 };
 //---------------------------------------------------------------------------
@@ -363,14 +360,13 @@ public:
 	//! @brief コンストラクタ
 	tRIFFWaveWaveDecoderFactoryRegisterer()
 	{
-		boost::shared_ptr<tWaveDecoderFactory>
-			factory(new tRIFFWaveWaveDecoderFactory());
-		depends_on<tWaveDecoderFactoryManager>::locked_instance()->Register(RISSE_WS(".wav"), factory);
+		tWaveDecoderFactory * factory = new tRIFFWaveWaveDecoderFactory();
+		tWaveDecoderFactoryManager::instance()->Register(RISSE_WS(".wav"), factory);
 	}
 	//! @brief デストラクタ
 	~tRIFFWaveWaveDecoderFactoryRegisterer()
 	{
-		depends_on<tWaveDecoderFactoryManager>::locked_instance()->Unregister(RISSE_WS(".wav"));
+		tWaveDecoderFactoryManager::instance()->Unregister(RISSE_WS(".wav"));
 	}
 };
 //---------------------------------------------------------------------------

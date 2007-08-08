@@ -269,8 +269,8 @@ STIN __m128 Wrap_Pi_F4_SSE(__m128 v)
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
-void DeinterleaveApplyingWindow(float * dest[], const float * src,
-					float * win, int numch, size_t destofs, size_t len);
+void DeinterleaveApplyingWindow(RISSE_RESTRICT float * dest[], RISSE_RESTRICT const float * src,
+					RISSE_RESTRICT float * win, int numch, size_t destofs, size_t len);
 //---------------------------------------------------------------------------
 
 
@@ -285,8 +285,8 @@ void DeinterleaveApplyingWindow(float * dest[], const float * src,
 //!						(各チャンネルごとの数; 実際に処理されるサンプル
 //!						数の総計はlen*numchになる)
 //---------------------------------------------------------------------------
-void  InterleaveOverlappingWindow(float * dest, const float * const * src,
-					float * win, int numch, size_t srcofs, size_t len);
+void  InterleaveOverlappingWindow(RISSE_RESTRICT float * dest, RISSE_RESTRICT const float * const * src,
+					RISSE_RESTRICT float * win, int numch, size_t srcofs, size_t len);
 //---------------------------------------------------------------------------
 
 

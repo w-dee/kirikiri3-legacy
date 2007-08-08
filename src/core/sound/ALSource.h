@@ -13,13 +13,13 @@
 #ifndef ALSourceH
 #define ALSourceH
 
-#include <al.h>
-#include <alc.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 #include "sound/ALCommon.h"
 #include "sound/ALBuffer.h"
 #include "sound/WaveSegmentQueue.h"
 #include "sound/WaveLoopManager.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
 #include "base/event/Event.h"
 
@@ -39,9 +39,6 @@ class tWaveWatchThread :
 	public tThread
 {
 	tThreadEvent Event; //!< スレッドをたたき起こすため/スレッドを眠らせるためのイベント
-	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-
-	gc_vector<tALSource*> Sources; //!< Source の配列
 
 public:
 	//! @brief		コンストラクタ
@@ -50,13 +47,8 @@ public:
 	//! @brief		デストラクタ
 	~tWaveWatchThread();
 
-	//! @brief		ソースを登録する
-	//! @param		source ソース
-	void RegisterSource(tALSource * source);
-
-	//! @brief		ソースの登録を解除する
-	//! @param		source ソース
-	void UnregisterSource(tALSource * source);
+	//! @brief		眠っているスレッドを叩き起こす
+	void Wakeup();
 
 protected:
 	//! @brief		スレッドのエントリーポイント
@@ -91,6 +83,7 @@ class tWaveDecodeThread;
 //! @brief		OpenALソース
 //---------------------------------------------------------------------------
 class tALSource :
+				public tDestructee,
 				protected depends_on<tOpenAL>,
 				protected depends_on<tWaveWatchThread>,
 				protected depends_on<tEventSystem>,
@@ -111,12 +104,19 @@ private:
 		eiStatusChanged, // ステータスが変更された
 	};
 
-	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	//! OpenAL Source を保持するための構造体
+	struct tInternalSource : public tDestructee
+	{
+		ALuint Source; //!< OpenAL ソース
+		tInternalSource(); //!< コンストラクタ
+		~tInternalSource(); //!< デストラクタ
+	};
+
+	tCriticalSection * CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_uint NumBuffersQueued; //!< キューに入っているバッファの数
-	ALuint Source; //!< OpenAL ソース
-	bool SourceAllocated; //!< Source がすでに割り当てられているかどうか
-	boost::shared_ptr<tALBuffer> Buffer; //!< バッファ
-	boost::shared_ptr<tWaveLoopManager> LoopManager; //!< ループマネージャ
+	tInternalSource * Source;
+	tALBuffer * Buffer; //!< バッファ
+	tWaveLoopManager * LoopManager; //!< ループマネージャ
 	bool NeedRewind; //!< リワインド (巻き戻し) が必要な場合に真
 	tWaveDecodeThread * DecodeThread; //!< デコードスレッド
 	tStatus Status; //!< サウンドステータス
@@ -126,27 +126,23 @@ private:
 public:
 	//! @brief		コンストラクタ
 	//! @param		buffer		OpenAL バッファを管理する tALBuffer インスタンス
-	tALSource(boost::shared_ptr<tALBuffer> buffer,
-		boost::shared_ptr<tWaveLoopManager> loopmanager = boost::shared_ptr<tWaveLoopManager>());
+	tALSource(tALBuffer * buffer,
+		tWaveLoopManager * loopmanager = NULL);
 
 	//! @brief		コンストラクタ(ほかのtALSourceとバッファを共有する場合)
 	//! @param		ref		コピー元ソース
 	tALSource(const tALSource * ref);
 
 	//! @brief		デストラクタ
-	virtual ~tALSource();
+	virtual ~tALSource() {;}
 
 private:
 	//! @brief		オブジェクトを初期化する
 	//! @param		buffer		OpenAL バッファを管理する tALBuffer インスタンス
-	void Init(boost::shared_ptr<tALBuffer> buffer);
+	void Init(tALBuffer * buffer);
 
 public:
-	ALuint GetSource() const { return Source; } //!< Source を得る
-
-private:
-	//! @brief		バッファに関するオブジェクトの解放などのクリーンアップ処理
-	void Clear();
+	ALuint GetSource() const { if(Source) return Source->Source; else return 0; } //!< Source を得る
 
 private: //---- queue/buffer management
 	//! @brief		バッファのデータを埋める

@@ -42,7 +42,7 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-STIN void cft1st(int n, float *a, float *w)
+STIN void cft1st(int n, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w)
 {
 	int		j, k1, k2;
 	
@@ -211,7 +211,7 @@ STIN void cft1st(int n, float *a, float *w)
 }
 
 
-STIN void cftmdl(int n, int l, float *a, float *w)
+STIN void cftmdl(int n, int l, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w)
 {
 	int j, j1, j2, j3, k, k1, k2, m, m2;
 	float wk1r, wk1i, wk2r, wk2i, wk3r, wk3i;
@@ -486,7 +486,7 @@ STIN void cftmdl(int n, int l, float *a, float *w)
 }
 
 
-STIN void bitrv2(int n, int *ip, float *a)
+STIN void bitrv2(int n, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *a)
 {
 	int j, j1, k, k1, l, m, m2;
 	float xr, xi, yr, yi;
@@ -559,7 +559,7 @@ STIN void bitrv2(int n, int *ip, float *a)
 	}
 }
 
-STIN void cftfsub(int n, float *a, float *w)
+STIN void cftfsub(int n, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w)
 {
 	int j, j1, j2, j3, l;
 	
@@ -649,7 +649,7 @@ STIN void cftfsub(int n, float *a, float *w)
 	}
 }
 
-STIN void rftfsub(int n, float *a, int nc, float *c)
+STIN void rftfsub(int n, RISSE_RESTRICT float *a, int nc, RISSE_RESTRICT float *c)
 {
 	int		j, k, kk, ks, m;
 	
@@ -714,10 +714,10 @@ STIN void rftfsub(int n, float *a, int nc, float *c)
 	}
 }
 
-STIN void cftbsub(int n, float *a, float *w)
+STIN void cftbsub(int n, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w)
 {
-	void cft1st(int n, float *a, float *w);
-	void cftmdl(int n, int l, float *a, float *w);
+	void cft1st(int n, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w);
+	void cftmdl(int n, int l, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w);
 	int j, j1, j2, j3, l;
 	float x0r, x0i;
 	
@@ -824,7 +824,7 @@ STIN void cftbsub(int n, float *a, float *w)
 
 }
 
-static void rftbsub(int n, float *a, int nc, float *c)
+static void rftbsub(int n, RISSE_RESTRICT float *a, int nc, RISSE_RESTRICT float *c)
 {
 	int j, k, kk, ks, m;
 	float wkr, wki, xr, xi, yr, yi;
@@ -857,9 +857,9 @@ static void rftbsub(int n, float *a, int nc, float *c)
 
 #include <math.h>
 
-void makewt(int nw, int *ip, float *w)
+void makewt(int nw, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *w)
 {
-	void bitrv2(int n, int *ip, float *a);
+	void bitrv2(int n, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *a);
 	int j, nwh;
 	float delta, x, y;
 	
@@ -906,7 +906,7 @@ void makect(int nc, int *ip, float *c)
 }
 
 
-static void _rdft(int n, int isgn, float *a, int *ip, float *w)
+static void _rdft(int n, int isgn, RISSE_RESTRICT float *a, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *w)
 {
 	int nw, nc;
 	float xi;
@@ -946,7 +946,7 @@ static void _rdft(int n, int isgn, float *a, int *ip, float *w)
 }
 
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, rdft, (int n, int isgn, float *a, int *ip, float *w),
+	void, rdft, (int n, int isgn, RISSE_RESTRICT float *a, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *w),
 	_rdft, (n, isgn, a, ip, w) )
 
 

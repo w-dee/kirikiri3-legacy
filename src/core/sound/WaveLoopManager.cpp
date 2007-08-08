@@ -77,8 +77,10 @@ static void CrossFadeBlend(void *dest, void *src1, void *src2,
 
 
 //---------------------------------------------------------------------------
-tWaveLoopManager::tWaveLoopManager(boost::shared_ptr<tWaveDecoder> decoder)
+tWaveLoopManager::tWaveLoopManager(tWaveDecoder * decoder)
 {
+	FlagsCS = new tCriticalSection();
+	DataCS = new tCriticalSection();
 	Position = 0;
 	IsLinksSorted = false;
 	IsLabelsSorted = false;
@@ -100,16 +102,7 @@ tWaveLoopManager::tWaveLoopManager(boost::shared_ptr<tWaveDecoder> decoder)
 
 
 //---------------------------------------------------------------------------
-tWaveLoopManager::~tWaveLoopManager()
-{
-	ClearCrossFadeInformation();
-	delete FileInfo;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWaveLoopManager::SetDecoder(boost::shared_ptr<tWaveDecoder> decoder)
+void tWaveLoopManager::SetDecoder(tWaveDecoder * decoder)
 {
 	// set decoder
 	Decoder = decoder;
@@ -121,7 +114,7 @@ void tWaveLoopManager::SetDecoder(boost::shared_ptr<tWaveDecoder> decoder)
 //---------------------------------------------------------------------------
 int tWaveLoopManager::GetFlag(risse_int index)
 {
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	return Flags[index];
 }
 //---------------------------------------------------------------------------
@@ -130,7 +123,7 @@ int tWaveLoopManager::GetFlag(risse_int index)
 //---------------------------------------------------------------------------
 void tWaveLoopManager::CopyFlags(risse_int *dest)
 {
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	// copy flags into dest, and clear FlagsModifiedByLabelExpression
 	memcpy(dest, Flags, sizeof(Flags));
 	FlagsModifiedByLabelExpression = false;
@@ -141,7 +134,7 @@ void tWaveLoopManager::CopyFlags(risse_int *dest)
 //---------------------------------------------------------------------------
 bool tWaveLoopManager::GetFlagsModifiedByLabelExpression()
 {
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	return FlagsModifiedByLabelExpression;
 }
 //---------------------------------------------------------------------------
@@ -150,7 +143,7 @@ bool tWaveLoopManager::GetFlagsModifiedByLabelExpression()
 //---------------------------------------------------------------------------
 void tWaveLoopManager::SetFlag(risse_int index, risse_int f)
 {
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	if(f < 0) f = 0;
 	if(f > MaxFlagValue) f = MaxFlagValue;
 	Flags[index] = f;
@@ -161,7 +154,7 @@ void tWaveLoopManager::SetFlag(risse_int index, risse_int f)
 //---------------------------------------------------------------------------
 void tWaveLoopManager::ClearFlags()
 {
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	for(risse_int i = 0; i < MaxFlags; i++) Flags[i] = 0;
 }
 //---------------------------------------------------------------------------
@@ -171,7 +164,7 @@ void tWaveLoopManager::ClearFlags()
 void tWaveLoopManager::ClearLinksAndLabels()
 {
 	// clear links and labels
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	Labels.clear();
 	Links.clear();
 	IsLinksSorted = false;
@@ -184,7 +177,7 @@ void tWaveLoopManager::ClearLinksAndLabels()
 const gc_vector<tWaveLoopLink> & tWaveLoopManager::GetLinks() const
 {
 	volatile tCriticalSection::tLocker
-		CS(const_cast<tWaveLoopManager*>(this)->FlagsCS);
+		CS(const_cast<tWaveLoopManager*>(this)->*FlagsCS);
 	return Links;
 }
 //---------------------------------------------------------------------------
@@ -193,8 +186,7 @@ const gc_vector<tWaveLoopLink> & tWaveLoopManager::GetLinks() const
 //---------------------------------------------------------------------------
 const gc_vector<tWaveLabel> & tWaveLoopManager::GetLabels() const
 {
-	volatile tCriticalSection::tLocker
-		CS(const_cast<tWaveLoopManager*>(this)->FlagsCS);
+	volatile tCriticalSection::tLocker CS(FlagsCS);
 	return Labels;
 }
 //---------------------------------------------------------------------------
@@ -203,7 +195,7 @@ const gc_vector<tWaveLabel> & tWaveLoopManager::GetLabels() const
 //---------------------------------------------------------------------------
 void tWaveLoopManager::SetLinks(const gc_vector<tWaveLoopLink> & links)
 {
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	Links = links;
 	IsLinksSorted = false;
 }
@@ -213,7 +205,7 @@ void tWaveLoopManager::SetLinks(const gc_vector<tWaveLoopLink> & links)
 //---------------------------------------------------------------------------
 void tWaveLoopManager::SetLabels(const gc_vector<tWaveLabel> & labels)
 {
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	Labels = labels;
 	IsLabelsSorted = false;
 }
@@ -223,8 +215,7 @@ void tWaveLoopManager::SetLabels(const gc_vector<tWaveLabel> & labels)
 //---------------------------------------------------------------------------
 bool tWaveLoopManager::GetIgnoreLinks() const
 {
-	volatile tCriticalSection::tLocker
-		CS(const_cast<tWaveLoopManager*>(this)->DataCS);
+	volatile tCriticalSection::tLocker CS(*DataCS);
 	return IgnoreLinks;
 }
 //---------------------------------------------------------------------------
@@ -243,8 +234,7 @@ void tWaveLoopManager::SetIgnoreLinks(bool b)
 risse_int64 tWaveLoopManager::GetPosition() const
 {
 	// we cannot assume that the 64bit data access is truely atomic on 32bit machines.
-	volatile tCriticalSection::tLocker
-		CS(const_cast<tWaveLoopManager*>(this)->FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	return Position;
 }
 //---------------------------------------------------------------------------
@@ -253,7 +243,7 @@ risse_int64 tWaveLoopManager::GetPosition() const
 //---------------------------------------------------------------------------
 void tWaveLoopManager::SetPosition(risse_int64 pos)
 {
-	volatile tCriticalSection::tLocker CS(DataCS);
+	volatile tCriticalSection::tLocker CS(*DataCS);
 	Position = pos;
 	ClearCrossFadeInformation();
 	Decoder->SetPosition(pos);
@@ -278,7 +268,7 @@ bool tWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &writte
 	}
 
 	// decode from current position
-	volatile tCriticalSection::tLocker CS(DataCS);
+	volatile tCriticalSection::tLocker CS(*DataCS);
 
 	written = 0;
 	risse_uint8 *d = (risse_uint8*)dest;
@@ -818,7 +808,7 @@ bool tWaveLoopManager::EvalLabelExpression(const tLabelStringType &label)
 	// eval expression specified by 'label'
 	// commit the result when 'commit' is true.
 	// returns whether the label syntax is correct.
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 
 	tExpressionToken operation;
 	risse_int lvalue;
@@ -1247,7 +1237,7 @@ bool tWaveLoopManager::ReadLabelInformation(char * & p, tWaveLabel &label)
 bool tWaveLoopManager::ReadInformation(char * p)
 {
 	// read information from 'p'
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 
 	char *p_org = p;
 	Links.clear();
@@ -1422,7 +1412,7 @@ void tWaveLoopManager::DoSpacing(AnsiString &l, int col)
 void tWaveLoopManager::WriteInformation(AnsiString &s)
 {
 	// write current link/label information into s
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 
 	// write banner
 	s = "#2.00\n# Sound Loop Information (utf-8)\n"

@@ -13,8 +13,8 @@
 #ifndef ALBufferH
 #define ALBufferH
 
-#include <al.h>
-#include <alc.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 #include "sound/WaveFilter.h"
 
 namespace Risa {
@@ -23,7 +23,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief		OpenALバッファ
 //---------------------------------------------------------------------------
-class tALBuffer : protected depends_on<tOpenAL>
+class tALBuffer : public tCollectee, protected depends_on<tOpenAL>
 {
 public:
 	// 定数など
@@ -32,13 +32,21 @@ public:
 	static const risse_uint MAX_NUM_BUFFERS = 16; //!< 一つの tALBuffer が保持する最大のバッファ数
 
 private:
-	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-	ALuint Buffers[MAX_NUM_BUFFERS]; //!< OpenAL バッファ
-	risse_uint BufferAllocatedCount; //!< OpenAL バッファに実際に割り当てられたバッファ数
+	struct tInternalBuffers : public tDestructee
+	{
+		ALuint Buffers[MAX_NUM_BUFFERS]; //!< OpenAL バッファ
+		risse_uint BufferAllocatedCount; //!< OpenAL バッファに実際に割り当てられたバッファ数
+		tInternalBuffers(risse_uint alloc_count); //!< コンストラクタ
+		~tInternalBuffers(); //!< デストラクタ
+	};
+
+
+	tCriticalSection * CS; //!< このオブジェクトを保護するクリティカルセクション
+	tInternalBuffers * Buffers; //!< バッファ
 	ALuint FreeBuffers[MAX_NUM_BUFFERS]; //!< フリーのバッファ
 	risse_uint FreeBufferCount; //!< フリーのバッファの数
 	bool Streaming; //!< ストリーミングを行うかどうか
-	boost::shared_ptr<tWaveFilter> Filter; //!< 入力フィルタ
+	tWaveFilter * Filter; //!< 入力フィルタ
 	ALenum ALFormat; //!< OpenAL バッファの Format
 	risse_uint ALFrequency; //!< OpenAL バッファのサンプリングレート
 	risse_uint ALSampleGranuleBytes; //!< OpenAL バッファのbytes/sg
@@ -54,12 +62,9 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		filter 入力フィルタ
 	//! @param		streaming	ストリーミング再生を行うかどうか
-	tALBuffer(boost::shared_ptr<tWaveFilter> Filter, bool streaming);
+	tALBuffer(tWaveFilter * Filter, bool streaming);
 
-	//! @brief		デストラクタ
-	~tALBuffer();
-
-	boost::shared_ptr<tWaveFilter> & GetFilter() { return Filter; } //!< 入力フィルタを得る
+	tWaveFilter * GetFilter() { return Filter; } //!< 入力フィルタを得る
 
 private:
 	//! @brief		バッファに関するオブジェクトの解放などのクリーンアップ処理
@@ -97,7 +102,7 @@ public:
 	void Load();
 
 	bool GetStreaming() const { return Streaming; }
-	ALuint GetBuffer() const { return Buffers[0]; } // 非ストリーミング用
+	ALuint GetBuffer() const { return Buffers->Buffers[0]; } // 非ストリーミング用
 
 	risse_uint GetOneBufferRenderUnit() const { return ALOneBufferRenderUnit; }
 };

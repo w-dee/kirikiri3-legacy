@@ -33,7 +33,7 @@ namespace Risa {
 	できないし、許されない。
 */
 //---------------------------------------------------------------------------
-class tWaveDecoder
+class tWaveDecoder : public tCollectee
 {
 public:
 	virtual ~tWaveDecoder() {};
@@ -79,10 +79,10 @@ public:
 //! @note		Risa は 拡張子で音楽形式を判断する。ファクトリの登録は
 //!				tWaveDecoderFactoryManager を通して行うこと。
 //---------------------------------------------------------------------------
-class tWaveDecoderFactory
+class tWaveDecoderFactory : public tCollectee
 {
 public:
-	virtual boost::shared_ptr<tWaveDecoder> Create(const tString & filename) = 0; //!< デコーダを作成する
+	virtual tWaveDecoder * Create(const tString & filename) = 0; //!< デコーダを作成する
 };
 //---------------------------------------------------------------------------
 
@@ -92,7 +92,7 @@ public:
 //---------------------------------------------------------------------------
 class tWaveDecoderFactoryManager : public singleton_base<tWaveDecoderFactoryManager>
 {
-	typedef gc_map<tString, boost::shared_ptr<tWaveDecoderFactory> >  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
+	typedef gc_map<tString, tWaveDecoderFactory *>  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
 	tMap Map; //!< 拡張子→ファクトリのマップ
 
 public:
@@ -105,7 +105,7 @@ public:
 	//! @brief	 	ファクトリを登録する
 	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
 	//! @param		factory		ファクトリ
-	void Register(const tString & extension, boost::shared_ptr<tWaveDecoderFactory> factory);
+	void Register(const tString & extension, tWaveDecoderFactory * factory);
 
 	//! @brief	 	ファクトリの登録を解除する
 	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
@@ -113,8 +113,8 @@ public:
 
 	//! @brief	 	デコーダを作成する
 	//! @param		filename ファイル名
-	//! @return		作成されたデコーダの shared_ptr
-	boost::shared_ptr<tWaveDecoder> Create(const tString & filename);
+	//! @return		作成されたデコーダ
+	tWaveDecoder * Create(const tString & filename);
 };
 //---------------------------------------------------------------------------
 

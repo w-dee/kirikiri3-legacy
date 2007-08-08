@@ -14,10 +14,10 @@
 #define ALCommonH
 
 #include "sound/WaveDecoder.h"
-#include <al.h>
-#include <alc.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 #include "base/utils/Singleton.h"
-#include "base/utils/Thread.h"
+#include "base/utils/RisaThread.h"
 
 
 /*
@@ -32,9 +32,6 @@
 	tOpenAL::instance()->ThrowIfError();
 
 	でエラーをチェックするという方法をとること。
-	( depends_on でインスタンスの存在を確実にできる場合は
-	 depends_on<tOpenAL>::locked_instance()->ThrowIfError())
-	 の方が効率がよい )
 
 	OpenAL の API は API 実行後に alGetError でエラーコードを取得するという
 	方法をとるが、API 実行とalGetErrorの間に、ほかのスレッドが他の API を
@@ -55,10 +52,10 @@ public:
 	struct tCriticalSectionHolder : protected depends_on<tOpenAL>
 	{
 		tCriticalSection::tLocker holder;
-		tCriticalSectionHolder() : holder(depends_on<tOpenAL>::locked_instance()->GetCS())
+		tCriticalSectionHolder() : holder(tOpenAL::instance()->GetCS())
 		{
 			// エラー状態をクリアする
-			depends_on<tOpenAL>::locked_instance()->ClearErrorState();
+			tOpenAL::instance()->ClearErrorState();
 		}
 		~tCriticalSectionHolder()
 		{

@@ -12,7 +12,6 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/decoder/vorbis/VorbisDecoder.h"
-#include "base/exception/Exception.h"
 #include "base/fs/common/FSManager.h"
 #include <vorbis/vorbisfile.h>
 
@@ -32,7 +31,7 @@ tOggVorbisDecoder::tOggVorbisDecoder(const tString & filename)
 	try
 	{
 		if(!Open())
-			eRisaException::Throw(RISSE_WS_TR("can not open file '%1' : invalid format"),
+			tSoundExceptionClass::Throw(RISSE_WS_TR("can not open file '%1' : invalid format"),
 				filename);
 	}
 	catch(...)
@@ -294,11 +293,9 @@ class tOggVorbisWaveDecoderFactory : public tWaveDecoderFactory
 {
 public:
 	//! @brief デコーダを作成する
-	boost::shared_ptr<tWaveDecoder> Create(const tString & filename)
+	tWaveDecoder * Create(const tString & filename)
 	{
-		boost::shared_ptr<tWaveDecoder>
-			decoder(new tOggVorbisDecoder(filename));
-		return decoder;
+		return new tOggVorbisDecoder(filename);
 	}
 };
 //---------------------------------------------------------------------------
@@ -317,14 +314,13 @@ public:
 	//! @brief コンストラクタ
 	tOggVorbisWaveDecoderFactoryRegisterer()
 	{
-		boost::shared_ptr<tWaveDecoderFactory>
-			factory(new tOggVorbisWaveDecoderFactory());
-		depends_on<tWaveDecoderFactoryManager>::locked_instance()->Register(RISSE_WS(".ogg"), factory);
+		tWaveDecoderFactory * factory = new tOggVorbisWaveDecoderFactory();
+		tWaveDecoderFactoryManager::instance()->Register(RISSE_WS(".ogg"), factory);
 	}
 	//! @brief デストラクタ
 	~tOggVorbisWaveDecoderFactoryRegisterer()
 	{
-		depends_on<tWaveDecoderFactoryManager>::locked_instance()->Unregister(RISSE_WS(".ogg"));
+		tWaveDecoderFactoryManager::instance()->Unregister(RISSE_WS(".ogg"));
 	}
 };
 //---------------------------------------------------------------------------

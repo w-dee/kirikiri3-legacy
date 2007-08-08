@@ -15,7 +15,6 @@
 #define OGGVORBISDECODERH
 
 #include "sound/WaveDecoder.h"
-#include "risse/include/risse.h"
 #include <ogg/ogg.h>
 #include <vorbis/vorbisfile.h>
 

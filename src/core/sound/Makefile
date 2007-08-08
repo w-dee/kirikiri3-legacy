@@ -16,7 +16,6 @@ CPPFILES=\
 		ALCommon.cpp                               \
 		ALSource.cpp                               \
 		Sound.cpp                                  \
-		SoundBind.cpp                              \
 		WaveDecoder.cpp                            \
 		WaveFormatConverter.cpp                    \
 		WaveLoopManager.cpp                        \

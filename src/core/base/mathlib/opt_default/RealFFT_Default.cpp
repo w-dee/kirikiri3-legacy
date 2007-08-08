@@ -19,7 +19,7 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-static void cft1st(int n, float *a, float *w)
+static void cft1st(int n, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w)
 {
 	int j, k1, k2;
 	float wk1r, wk1i, wk2r, wk2i, wk3r, wk3i;
@@ -125,7 +125,7 @@ static void cft1st(int n, float *a, float *w)
 
 
 
-static void cftmdl(int n, int l, float *a, float *w)
+static void cftmdl(int n, int l, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w)
 {
 	int j, j1, j2, j3, k, k1, k2, m, m2;
 	float wk1r, wk1i, wk2r, wk2i, wk3r, wk3i;
@@ -251,7 +251,7 @@ static void cftmdl(int n, int l, float *a, float *w)
 	}
 }
 
-static void bitrv2(int n, int *ip, float *a)
+static void bitrv2(int n, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *a)
 {
 	int j, j1, k, k1, l, m, m2;
 	float xr, xi, yr, yi;
@@ -350,7 +350,7 @@ static void bitrv2(int n, int *ip, float *a)
 	}
 }
 
-static void rftfsub(int n, float *a, int nc, float *c)
+static void rftfsub(int n, RISSE_RESTRICT float *a, int nc, RISSE_RESTRICT float *c)
 {
 	int j, k, kk, ks, m;
 	float wkr, wki, xr, xi, yr, yi;
@@ -374,7 +374,7 @@ static void rftfsub(int n, float *a, int nc, float *c)
 	}
 }
 
-static void cftfsub(int n, float *a, float *w)
+static void cftfsub(int n, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w)
 {
 	int j, j1, j2, j3, l;
 	float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
@@ -424,7 +424,7 @@ static void cftfsub(int n, float *a, float *w)
 }
 
 
-static void cftbsub(int n, float *a, float *w)
+static void cftbsub(int n, RISSE_RESTRICT float *a, RISSE_RESTRICT float *w)
 {
 	int j, j1, j2, j3, l;
 	float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
@@ -474,7 +474,7 @@ static void cftbsub(int n, float *a, float *w)
 }
 
 
-static void rftbsub(int n, float *a, int nc, float *c)
+static void rftbsub(int n, RISSE_RESTRICT float *a, int nc, RISSE_RESTRICT float *c)
 {
 	int j, k, kk, ks, m;
 	float wkr, wki, xr, xi, yr, yi;
@@ -505,7 +505,7 @@ static void rftbsub(int n, float *a, int nc, float *c)
 
 #include <math.h>
 
-void makewt(int nw, int *ip, float *w)
+void makewt(int nw, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *w)
 {
 	int j, nwh;
 	float delta, x, y;
@@ -534,7 +534,7 @@ void makewt(int nw, int *ip, float *w)
 }
 
 
-void makect(int nc, int *ip, float *c)
+void makect(int nc, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *c)
 {
 	int j, nch;
 	float delta;
@@ -556,7 +556,7 @@ void makect(int nc, int *ip, float *c)
 
 
 
-void rdft(int n, int isgn, float *a, int *ip, float *w)
+void rdft(int n, int isgn, RISSE_RESTRICT float *a, RISSE_RESTRICT int *ip, RISSE_RESTRICT float *w)
 {
 	int nw, nc;
 	float xi;

@@ -26,7 +26,7 @@ class tBasicWaveFilter : public tWaveFilter
 {
 protected:
 	// フィルタ管理
-	boost::shared_ptr<tWaveFilter> Input; //!< チェーンの前につながっているフィルタ
+	tWaveFilter * Input; //!< チェーンの前につながっているフィルタ
 	tWaveFormat InputFormat; //!< 入力フォーマット
 	tWaveFormat OutputFormat; //!< 出力フォーマット
 
@@ -55,7 +55,7 @@ public:
 
 	//! @brief		フィルタの入力を設定する
 	//! @param		input  入力となるフィルタ
-	void SetInput(boost::shared_ptr<tWaveFilter> input);
+	void SetInput(tWaveFilter * input);
 
 	void SuggestFormat(const tWaveFormat & format) {;}
 		//!< @note ここではなにもしない。必要ならばサブクラスで実装すること。

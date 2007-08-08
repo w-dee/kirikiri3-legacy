@@ -19,9 +19,26 @@
 #include "sound/WaveDecoder.h"
 #include "sound/WaveLoopManager.h"
 #include "sound/WaveFilter.h"
+#include "base/exception/RisaException.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	サウンド用例外クラス
+/*! @note
+	ファイルシステム関連の例外クラスとしては、ここの FileSystemException
+	(extends RuntimeException) 以外に、IOException がある(Risseエンジン内で定義)。
+*/
+//---------------------------------------------------------------------------
+RISA_DEFINE_EXCEPTION_SUBCLASS(tSoundExceptionClass,
+	(tSS<'S','o','u','n','d','E','x','c','e','p','t','i','o','n'>()),
+	tRisseScriptEngine::instance()->GetScriptEngine()->ExceptionClass)
+//---------------------------------------------------------------------------
+
+
+
 
 class tSound;
 //---------------------------------------------------------------------------
@@ -33,8 +50,8 @@ class tSoundALSource : public tALSource
 
 public:
 	//! @brief		コンストラクタ
-	tSoundALSource(tSound * owner, boost::shared_ptr<tALBuffer> buffer,
-		boost::shared_ptr<tWaveLoopManager> loopmanager);
+	tSoundALSource(tSound * owner, tALBuffer * buffer,
+		tWaveLoopManager * loopmanager);
 
 	//! @brief		コンストラクタ
 	tSoundALSource(tSound * owner, const tALSource * ref);
@@ -56,6 +73,7 @@ protected:
 //! @brief		サウンドクラス
 //---------------------------------------------------------------------------
 class tSound :
+	public tCollectee,
 	protected depends_on<tOpenAL>,
 	protected depends_on<tWaveDecoderFactoryManager>,
 	public tALSourceStatus
@@ -64,11 +82,11 @@ class tSound :
 
 	tStatus Status; //!< 直前のステータス
 
-	boost::shared_ptr<tSoundALSource> Source;
-	boost::shared_ptr<tALBuffer> Buffer;
-	gc_vector<boost::shared_ptr<tWaveFilter> > Filters;
-	boost::shared_ptr<tWaveLoopManager> LoopManager;
-	boost::shared_ptr<tWaveDecoder> Decoder;
+	tSoundALSource * Source;
+	tALBuffer * Buffer;
+//	tArrayInstance * Filters;
+	tWaveLoopManager * LoopManager;
+	tWaveDecoder * Decoder;
 
 public:
 	//! @brief		コンストラクタ

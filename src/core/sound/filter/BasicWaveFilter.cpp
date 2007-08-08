@@ -12,7 +12,6 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/filter/BasicWaveFilter.h"
-#include "base/exception/Exception.h"
 #include "sound/WaveFormatConverter.h"
 
 namespace Risa {
@@ -52,7 +51,7 @@ void tBasicWaveFilter::Reset()
 
 
 //---------------------------------------------------------------------------
-void tBasicWaveFilter::SetInput(boost::shared_ptr<tWaveFilter> input)
+void tBasicWaveFilter::SetInput(tWaveFilter * input)
 {
 	Input = input;
 	InputFormat = input->GetFormat();
@@ -116,7 +115,7 @@ bool tBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &writte
 const tWaveFormat & tBasicWaveFilter::GetFormat()
 {
 	if(!Input)
-		eRisaException::Throw(RISSE_WS_TR("The filter input is not yet connected"));
+		tSoundExceptionClass::Throw(RISSE_WS_TR("The filter input is not yet connected"));
 	return OutputFormat;
 }
 //---------------------------------------------------------------------------

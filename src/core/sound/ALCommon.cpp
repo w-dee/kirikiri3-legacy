@@ -11,7 +11,6 @@
 //! @brief OpenAL 共通
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/exception/Exception.h"
 #include "sound/WaveDecoder.h"
 #include "sound/ALCommon.h"
 
@@ -32,7 +31,7 @@ tOpenAL::tOpenAL()
 		// TODO: デバイスの選択と null デバイスへのフォールバック
 
 	if(!Device)
-		eRisaException::Throw(RISSE_WS_TR("failed to create OpenAL device"));
+		tSoundExceptionClass::Throw(RISSE_WS_TR("failed to create OpenAL device"));
 
 	try
 	{
@@ -84,9 +83,9 @@ void tOpenAL::ThrowIfError(const risse_char * message)
 	ALCenum err = alGetError();
 	if(err == AL_NO_ERROR) return ; // エラーはなにも起きていない
 	const ALCchar *msg = alcGetString(Device, err);
-	eRisaException::Throw(RISSE_WS_TR("OpenAL error in %1 : %2"),
+	tSoundExceptionClass::Throw(tString(RISSE_WS_TR("OpenAL error in %1 : %2"),
 		tString(message),
-		tString(wxString(msg, wxConvUTF8)));
+		tString(wxString(msg, wxConvUTF8))));
 }
 //---------------------------------------------------------------------------
 

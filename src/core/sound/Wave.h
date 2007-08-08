@@ -231,7 +231,7 @@ struct tPCMTypes
 //---------------------------------------------------------------------------
 //! @brief		PCM データフォーマット (内部用)
 //---------------------------------------------------------------------------
-struct tWaveFormat
+struct tWaveFormat : public tAtomicCollectee
 {
 	risse_uint Frequency;				//!< sample granule per sec
 	risse_uint Channels;				//!< number of channels (1=Mono, 2=Stereo ... etc)

@@ -11,22 +11,45 @@
 //! @brief OpenAL バッファ管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/exception/Exception.h"
 #include "sound/ALCommon.h"
 #include "sound/ALBuffer.h"
 #include "sound/WaveFormatConverter.h"
+#include "sound/Sound.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(24518,55437,60218,19380,17845,8848,1743,50558);
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tALBuffer::tInternalBuffers::tInternalBuffers(risse_uint alloc_count)
+{
+	volatile tOpenAL::tCriticalSectionHolder cs_holder;
+	alGenBuffers(alloc_count, Buffers);
+	tOpenAL::instance()->ThrowIfError(RISSE_WS("alGenBuffers"));
+	BufferAllocatedCount = alloc_count;
+}
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
-tALBuffer::tALBuffer(boost::shared_ptr<tWaveFilter> filter, bool streaming)
+tALBuffer::tInternalBuffers::~tInternalBuffers()
+{
+	volatile tOpenAL::tCriticalSectionHolder cs_holder;
+	alDeleteBuffers(BufferAllocatedCount, Buffers);
+//	tOpenAL::instance()->ThrowIfError(RISSE_WS("alDeleteBuffers"));
+	// destructors should not raise errors ...
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+tALBuffer::tALBuffer(tWaveFilter * filter, bool streaming)
 {
 	// フィールドの初期化
-	BufferAllocatedCount  = 0;
+	CS = new tCriticalSection();
+	Buffers = NULL;
 	FreeBufferCount = 0;
 	RenderBuffer = NULL;
 	RenderBufferSize = 0;
@@ -45,7 +68,7 @@ tALBuffer::tALBuffer(boost::shared_ptr<tWaveFilter> filter, bool streaming)
 	else if(format.Channels == 2)
 		ALFormat = AL_FORMAT_STEREO16;
 	else
-		eRisaException::Throw(RISSE_WS_TR("not acceptable PCM channels (must be stereo or mono)"));
+		tSoundExceptionClass::Throw(RISSE_WS_TR("not acceptable PCM channels (must be stereo or mono)"));
 
 	ALFrequency = format.Frequency;
 	ALSampleGranuleBytes = format.Channels * sizeof(risse_uint16);
@@ -57,22 +80,20 @@ tALBuffer::tALBuffer(boost::shared_ptr<tWaveFilter> filter, bool streaming)
 
 		// バッファの生成
 		risse_uint alloc_count = Streaming ? MAX_NUM_BUFFERS : 1;
-		alGenBuffers(alloc_count, Buffers);
-		depends_on<tOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alGenBuffers"));
-		BufferAllocatedCount = alloc_count;
+		Buffers = new tInternalBuffers(alloc_count);
 
 		// 非ストリーミングの場合はここで全てをデコードする
 		if(!Streaming)
 		{
 			Load();
-			Filter.reset(); // もうフィルタは要らない
+			Filter = NULL; // TODO: Dispose(); // もうフィルタは要らない
 			FreeTempBuffers(); // 一時的に割り当てられたバッファも解放
 		}
 		else
 		{
 			// FreeBuffers にコピー
-			memcpy(FreeBuffers, Buffers, sizeof(ALuint) * BufferAllocatedCount);
-			FreeBufferCount = BufferAllocatedCount;
+			memcpy(FreeBuffers, Buffers->Buffers, sizeof(ALuint) * Buffers->BufferAllocatedCount);
+			FreeBufferCount = Buffers->BufferAllocatedCount;
 		}
 	}
 	catch(...)
@@ -85,22 +106,11 @@ tALBuffer::tALBuffer(boost::shared_ptr<tWaveFilter> filter, bool streaming)
 
 
 //---------------------------------------------------------------------------
-tALBuffer::~tALBuffer()
-{
-	tCriticalSection::tLocker lock(CS);
-	Clear();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tALBuffer::Clear()
 {
 	volatile tOpenAL::tCriticalSectionHolder cs_holder;
 
-	alDeleteBuffers(BufferAllocatedCount, Buffers);
-	depends_on<tOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alDeleteBuffers"));
-	BufferAllocatedCount = 0;
+	delete Buffers, Buffers = NULL;
 	FreeBufferCount = 0;
 
 	FreeTempBuffers();
@@ -175,7 +185,7 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 			{
 				void * newbuffer;
 				if(RenderBuffer == NULL)
-					newbuffer = MallocAtomicCollectee(RenderBuffer);
+					newbuffer = MallocAtomicCollectee(buffer_size_needed);
 				else
 					newbuffer = ReallocCollectee(RenderBuffer, buffer_size_needed);
 				if(!newbuffer)
@@ -199,7 +209,7 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 				{
 					void * newbuffer;
 					if(ConvertBuffer == NULL)
-						newbuffer = MallocAtomicCollectee(ConvertBuffer);
+						newbuffer = MallocAtomicCollectee(buffer_size_needed);
 					else
 						newbuffer = ReallocCollectee(ConvertBuffer, buffer_size_needed);
 					if(!newbuffer)
@@ -283,7 +293,7 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 //			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
 	alBufferData(buffer, ALFormat, RenderBuffer,
 		rendered * ALSampleGranuleBytes, ALFrequency);
-	depends_on<tOpenAL>::locked_instance()->ThrowIfError(RISSE_WS("alBufferData"));
+	tOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));
 
 	return true;
 }
@@ -293,7 +303,7 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 //---------------------------------------------------------------------------
 void tALBuffer::PushFreeBuffer(ALuint buffer)
 {
-	tCriticalSection::tLocker lock(CS);
+	volatile tCriticalSection::tLocker lock(*CS);
 
 	FreeBuffers[FreeBufferCount++] = buffer;
 }
@@ -303,7 +313,7 @@ void tALBuffer::PushFreeBuffer(ALuint buffer)
 //---------------------------------------------------------------------------
 bool tALBuffer::HasFreeBuffer()
 {
-	tCriticalSection::tLocker lock(CS);
+	volatile tCriticalSection::tLocker lock(*CS);
 
 	return FreeBufferCount > 0;
 }
@@ -313,7 +323,7 @@ bool tALBuffer::HasFreeBuffer()
 //---------------------------------------------------------------------------
 bool tALBuffer::PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueue)
 {
-	tCriticalSection::tLocker lock(CS);
+	volatile tCriticalSection::tLocker lock(*CS);
 
 	// ストリーミングではない場合はそのまま返る
 	if(!Streaming) return false;
@@ -336,11 +346,11 @@ bool tALBuffer::PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueu
 //---------------------------------------------------------------------------
 void tALBuffer::FreeAllBuffers()
 {
-	tCriticalSection::tLocker lock(CS);
+	volatile tCriticalSection::tLocker lock(*CS);
 
 	// すべてのバッファを解放したことにする
-	memcpy(FreeBuffers, Buffers, sizeof(ALuint) * BufferAllocatedCount);
-	FreeBufferCount = BufferAllocatedCount;
+	memcpy(FreeBuffers, Buffers->Buffers, sizeof(ALuint) * Buffers->BufferAllocatedCount);
+	FreeBufferCount = Buffers->BufferAllocatedCount;
 }
 //---------------------------------------------------------------------------
 
@@ -348,7 +358,7 @@ void tALBuffer::FreeAllBuffers()
 //---------------------------------------------------------------------------
 void tALBuffer::Load()
 {
-	tCriticalSection::tLocker lock(CS);
+	volatile tCriticalSection::tLocker lock(*CS);
 
 	// OpenAL バッファに Filter からの入力を「すべて」デコードし、入れる
 
@@ -356,10 +366,10 @@ void tALBuffer::Load()
 	//       メモリが無くなるまでデコードし続ける)
 	// TODO: segments と events のハンドリング
 	tWaveSegmentQueue segumentqueue;
-	bool filled = FillALBuffer(Buffers[0], 0, segumentqueue);
+	bool filled = FillALBuffer(Buffers->Buffers[0], 0, segumentqueue);
 
 	if(!filled)
-		eRisaException::Throw(RISSE_WS_TR("no data to play"));
+		tSoundExceptionClass::Throw(RISSE_WS_TR("no data to play"));
 }
 //---------------------------------------------------------------------------
 

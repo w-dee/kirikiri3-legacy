@@ -14,7 +14,6 @@
 #include "prec.h"
 #include <algorithm>
 #include "sound/WaveFormatConverter.h"
-#include "base/exception/Exception.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(58054,38608,61255,17526,21894,38819,54476,53804);
@@ -24,8 +23,8 @@ RISSE_DEFINE_SOURCE_ID(58054,38608,61255,17526,21894,38819,54476,53804);
 /*
 	(opt_CPU)/WaveFormatConverter_CPU.cpp にある関数のプロトタイプ
 */
-void PCMConvertLoopInt16ToFloat32(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples);
-void PCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted const void * src, size_t numsamples);
+void PCMConvertLoopInt16ToFloat32(RISSE_RESTRICT void * dest, RISSE_RESTRICT const void * src, size_t numsamples);
+void PCMConvertLoopFloat32ToInt16(RISSE_RESTRICT void * dest, RISSE_RESTRICT const void * src, size_t numsamples);
 
 
 
@@ -33,7 +32,7 @@ void PCMConvertLoopFloat32ToInt16(risse_restricted void * dest, risse_restricted
 //! @brief		汎用変換ループのテンプレート実装
 //---------------------------------------------------------------------------
 template <typename DESTTYPE, typename SRCTYPE>
-static void PCMConvertLoop(risse_restricted void * dest, const risse_restricted void * src, size_t numsamples)
+static void PCMConvertLoop(RISSE_RESTRICT void * dest, const RISSE_RESTRICT void * src, size_t numsamples)
 {
 	if(DESTTYPE::id == SRCTYPE::id)
 	{
@@ -88,8 +87,8 @@ static void PCMConvertLoop<tPCMTypes::i16, tPCMTypes::f32>
 
 //---------------------------------------------------------------------------
 void tWaveFormatConverter::Convert(
-		tPCMTypes::tType outformat, risse_restricted void * outdata,
-		tPCMTypes::tType informat, risse_restricted const void * indata,
+		tPCMTypes::tType outformat, RISSE_RESTRICT void * outdata,
+		tPCMTypes::tType informat, RISSE_RESTRICT const void * indata,
 		risse_int channels, size_t numsamples)
 {
 	// チャンネルはインターリーブされているので、numsamples にチャンネル数を掛ける
@@ -97,11 +96,11 @@ void tWaveFormatConverter::Convert(
 
 	// 形式の特定を行う
 	if(outformat == tPCMTypes::tunknown)
-		eRisaException::Throw(
+		tSoundExceptionClass::Throw(
 			RISSE_WS_TR("tWaveFormatConverter::Convert: unsupported destination format"));
 
 	if(informat == tPCMTypes::tunknown)
-		eRisaException::Throw(
+		tSoundExceptionClass::Throw(
 			RISSE_WS_TR("tWaveFormatConverter::Convert: unsupported source format"));
 
 	// 変換ループ用テーブル

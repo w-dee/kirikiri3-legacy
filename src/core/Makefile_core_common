@@ -5,6 +5,7 @@ include $(TOP_DIR)/Makefile_filenames
 # subsys.o のある(subsys.oが作成される)サブディレクトリの定義
 
 SUBSYS_DIRS=\
+	$(CORE_DIR)/sound              \
 	$(CORE_DIR)/base/config        \
 	$(CORE_DIR)/base/system        \
 	$(CORE_DIR)/base/fs            \
@@ -16,8 +17,7 @@ SUBSYS_DIRS=\
 	$(CORE_DIR)/base/event         \
 	$(CORE_DIR)/base/log           \
 	$(CORE_DIR)/base/script        \
-	$(CORE_DIR)/base/gc            \
-#	$(CORE_DIR)/sound              
+	$(CORE_DIR)/base/gc            
 
 # makefile のあるサブディレクトリの定義
 # (順番に注意)

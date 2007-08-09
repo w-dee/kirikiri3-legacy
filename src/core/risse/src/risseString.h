@@ -768,6 +768,14 @@ public: // other utilities
 	tStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{ return Escape(maxlen, true); }
 
+	//! @param		大文字を小文字に変換する(コレーションなし)
+	//! @note		[A-Z] を [a-z] に変換する。これ以外の文字については変換 *しない*。
+	void ToLowerCaseNC();
+
+	//! @param		子文字を大文字に変換する(コレーションなし)
+	//! @note		[a-z] を [A-Z] に変換する。これ以外の文字については変換 *しない*。
+	void ToUpperCaseNC();
+
 private:
 	//! @brief		static な空文字列を表すデータ
 	static tStringData EmptyStringData;

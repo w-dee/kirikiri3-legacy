@@ -603,6 +603,39 @@ tStringBlock tStringBlock::Escape(risse_size maxlen, bool quote) const
 
 
 //---------------------------------------------------------------------------
+void tStringBlock::ToLowerCaseNC()
+{
+	risse_char * ptr = Independ();
+	risse_size length = GetLength();
+	for(risse_size i = 0; i < length; i++)
+	{
+		if(ptr[i] >= RISSE_WC('A') && ptr[i] <= RISSE_WC('Z'))
+			ptr[i] += (risse_char)RISSE_WC('a') - (risse_char)RISSE_WC('A');
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tStringBlock::ToUpperCaseNC()
+{
+	risse_char * ptr = Independ();
+	risse_size length = GetLength();
+	for(risse_size i = 0; i < length; i++)
+	{
+		if(ptr[i] >= RISSE_WC('a') && ptr[i] <= RISSE_WC('z'))
+			ptr[i] += (risse_char)RISSE_WC('A') - (risse_char)RISSE_WC('a');
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
 tStringData tStringBlock::EmptyStringData = { RISSE_STRING_EMPTY_BUFFER, 0 };
 //---------------------------------------------------------------------------
 

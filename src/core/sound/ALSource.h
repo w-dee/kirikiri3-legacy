@@ -22,6 +22,7 @@
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
 #include "base/event/Event.h"
+#include "risse/include/risseNativeBinder.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -59,6 +60,8 @@ protected:
 
 
 
+
+
 //---------------------------------------------------------------------------
 //! @brief		tALSourceのステータスを含むクラス
 //---------------------------------------------------------------------------
@@ -75,6 +78,22 @@ public:
 	};
 };
 //---------------------------------------------------------------------------
+
+
+}
+namespace Risse {
+//---------------------------------------------------------------------------
+//! @brief		NativeBinder 用の Variant -> tALSourceStatus::tStatus 変換定義
+//---------------------------------------------------------------------------
+template <>
+inline Risa::tALSourceStatus::tStatus FromVariant<Risa::tALSourceStatus::tStatus>(const tVariant & v)
+{
+	return (Risa::tALSourceStatus::tStatus)(int)(risse_int64)v;
+}
+//---------------------------------------------------------------------------
+}
+namespace Risa {
+
 
 
 
@@ -154,8 +173,10 @@ public:
 
 private:
 	//! @brief		前回とステータスが変わっていたら OnStatusChanged を呼ぶ
-	//! @note		必ずメインスレッドから呼び出すこと
-	void CallStatusChanged();
+	//! @param		async		非同期イベントかどうか
+	//! @note		このメソッド内でロックは行わないので、呼び出し元が
+	//!				ちゃんとロックを行っているかどうかを確認すること。
+	void CallStatusChanged(bool async);
 
 public:
 	//! @brief		再生の開始
@@ -183,7 +204,25 @@ public:
 	void SetPosition(risse_uint64 pos);
 
 public:
+	//! @brief		ステータスの変更を通知する
+	//! @param		status		ステータス
+	//! @note		OnStatusChangedAsync は非同期イベント用。
+	//!				OnStatusChanged 同士や OnStatusChangedAsync 同士、
+	//!				あるいはそれぞれ同士の呼び出しが重ならないことは
+	//!				このクラスが保証している。
+	//!				OnStatusChangedAsync は OnStatusChanged を呼んだ
+	//!				スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
 	virtual void OnStatusChanged(tStatus status) {;}
+
+	//! @brief		ステータスの変更を非同期に通知する
+	//! @param		status		ステータス
+	//! @note		OnStatusChangedAsync は非同期イベント用。
+	//!				OnStatusChanged 同士や OnStatusChangedAsync 同士、
+	//!				あるいはそれぞれ同士の呼び出しが重ならないことは
+	//!				このクラスが保証している。
+	//!				OnStatusChangedAsync は OnStatusChanged を呼んだ
+	//!				スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
+	virtual void OnStatusChangedAsync(tStatus status) {;}
 };
 //---------------------------------------------------------------------------
 

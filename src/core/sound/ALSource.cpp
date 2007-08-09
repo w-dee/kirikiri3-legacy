@@ -590,7 +590,7 @@ void tALSource::WatchCallback()
 			if(DecodeThread)
 				tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
 			// ステータスの変更を通知する
-			CallStatusChanged();
+			CallStatusChanged(true);
 			// 次回再生開始前に巻き戻しが必要
 			NeedRewind = true;
 		}
@@ -600,11 +600,14 @@ void tALSource::WatchCallback()
 
 
 //---------------------------------------------------------------------------
-void tALSource::CallStatusChanged()
+void tALSource::CallStatusChanged(bool async)
 {
 	if(PrevStatus != Status)
 	{
-		OnStatusChanged(Status);
+		if(async)
+			OnStatusChangedAsync(Status);
+		else
+			OnStatusChanged(Status);
 		PrevStatus = Status;
 	}
 }
@@ -654,7 +657,7 @@ void tALSource::Play()
 
 	// ステータスの変更を通知
 	Status = ssPlay;
-	CallStatusChanged();
+	CallStatusChanged(false);
 }
 //---------------------------------------------------------------------------
 
@@ -682,7 +685,7 @@ void tALSource::Stop()
 
 	// ステータスの変更を通知
 	Status = ssStop;
-	CallStatusChanged();
+	CallStatusChanged(false);
 
 	// 全てのバッファを unqueueする
 	if(Buffer->GetStreaming())
@@ -714,7 +717,7 @@ void tALSource::Pause()
 
 		// ステータスの変更を通知
 		Status = ssPause;
-		CallStatusChanged();
+		CallStatusChanged(false);
 	}
 }
 //---------------------------------------------------------------------------

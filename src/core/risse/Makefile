@@ -61,6 +61,7 @@ CPPFILES =  \
 			src/risseDateParser.cpp                  \
 			src/risseExceptionClass.cpp              \
 			src/risseFunctionClass.cpp               \
+			src/risseGC.cpp                          \
 			src/risseIntegerClass.cpp                \
 			src/risseLexerUtils.cpp                  \
 			src/risseMemberAttribute.cpp             \

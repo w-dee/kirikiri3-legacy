@@ -17,6 +17,7 @@
 
 #include "prec.h"
 #include <algorithm>
+#include "base/gc/RisaGC.h"
 #include "sound/WaveLoopManager.h"
 
 
@@ -176,8 +177,7 @@ void tWaveLoopManager::ClearLinksAndLabels()
 //---------------------------------------------------------------------------
 const gc_vector<tWaveLoopLink> & tWaveLoopManager::GetLinks() const
 {
-	volatile tCriticalSection::tLocker
-		CS(const_cast<tWaveLoopManager*>(this)->*FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	return Links;
 }
 //---------------------------------------------------------------------------
@@ -186,7 +186,7 @@ const gc_vector<tWaveLoopLink> & tWaveLoopManager::GetLinks() const
 //---------------------------------------------------------------------------
 const gc_vector<tWaveLabel> & tWaveLoopManager::GetLabels() const
 {
-	volatile tCriticalSection::tLocker CS(FlagsCS);
+	volatile tCriticalSection::tLocker CS(*FlagsCS);
 	return Labels;
 }
 //---------------------------------------------------------------------------
@@ -224,7 +224,7 @@ bool tWaveLoopManager::GetIgnoreLinks() const
 //---------------------------------------------------------------------------
 void tWaveLoopManager::SetIgnoreLinks(bool b)
 {
-	volatile tCriticalSection::tLocker CS(DataCS);
+	volatile tCriticalSection::tLocker CS(*DataCS);
 	IgnoreLinks = b;
 }
 //---------------------------------------------------------------------------
@@ -348,25 +348,14 @@ bool tWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &writte
 					// allocate memory
 					risse_uint8 *src1 = NULL;
 					risse_uint8 *src2 = NULL;
-					try
-					{
-						risse_int alloc_size =
-							(before_count + after_count) * 
-								FileInfo->GetSampleGranuleSize();
-						CrossFadeSamples = new (PointerFreeGC) risse_uint8[alloc_size];
-						src1 = new (PointerFreeGC) risse_uint8[alloc_size];
-						src2 = new (PointerFreeGC) risse_uint8[alloc_size];
-					}
-					catch(...)
-					{
-						// memory allocation failed. perform normal link.
-						if(CrossFadeSamples)
-							delete (PointerFreeGC) [] CrossFadeSamples,
-								CrossFadeSamples = NULL;
-						if(src1) delete (PointerFreeGC) [] src1;
-						if(src2) delete (PointerFreeGC) [] src2;
-						next_event_pos = link.From;
-					}
+
+					risse_int alloc_size =
+						(before_count + after_count) * 
+							FileInfo->GetSampleGranuleSize();
+					CrossFadeSamples = (risse_uint8*)MallocAtomicCollectee(alloc_size);
+					src1 = (risse_uint8*)MallocAtomicCollectee(alloc_size*2);
+					src2 = src1 + alloc_size;
+
 					if(CrossFadeSamples)
 					{
 						// decode samples
@@ -389,8 +378,7 @@ bool tWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &writte
 						DoCrossFade(CrossFadeSamples + after_offset,
 							src1 + after_offset, src2 + after_offset,
 								after_count, 50, 100);
-						delete (PointerFreeGC) [] src1;
-						delete (PointerFreeGC) [] src2;
+						FreeCollectee(src1);
 						// reset CrossFadePosition and CrossFadeLen
 						CrossFadePosition = 0;
 						CrossFadeLen = before_count + after_count;
@@ -718,7 +706,7 @@ void tWaveLoopManager::DoCrossFade(void *dest, void *src1,
 //---------------------------------------------------------------------------
 void tWaveLoopManager::ClearCrossFadeInformation()
 {
-	if(CrossFadeSamples) delete (PointerFreeGC) [] CrossFadeSamples, CrossFadeSamples = NULL;
+	if(CrossFadeSamples) FreeCollectee(CrossFadeSamples), CrossFadeSamples = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -1032,21 +1020,13 @@ bool tWaveLoopManager::GetString(char *s, tLabelStringType &v)
 
 	// allocate output buffer
 	risse_char *us = new (PointerFreeGC) risse_char[size + 1];
-	try
-	{
-		Utf8ToWideCharString(s, us);
-		us[size] = RISSE_W('\0');
 
-		// convert us (an array of wchar_t) to AnsiString
-		v = AnsiString(us);
+	Utf8ToWideCharString(s, us);
+	us[size] = RISSE_W('\0');
 
-	}
-	catch(...)
-	{
-		delete (PointerFreeGC) [] us;
-		throw;
-	}
-	delete (PointerFreeGC) [] us;
+	// convert us (an array of wchar_t) to AnsiString
+	v = AnsiString(us);
+
 	return true;
 #else
 	v = tString(wxString(s, wxConvUTF8));
@@ -1375,21 +1355,13 @@ void tWaveLoopManager::PutString(AnsiString &s, tLabelStringType v)
 	int size = WideCharToUtf8String(pi, NULL);
 
 	char * out = new (PointerFreeGC) char [size + 1];
-	try
-	{
-		// convert the string
-		WideCharToUtf8String(pi, out);
-		out[size] = '\0';
 
-		// append the string with quotation
-		s += "\'" + AnsiString(out) + "\'";
-	}
-	catch(...)
-	{
-		delete (PointerFreeGC) [] out;
-		throw;
-	}
-	delete (PointerFreeGC) [] out;
+	// convert the string
+	WideCharToUtf8String(pi, out);
+	out[size] = '\0';
+
+	// append the string with quotation
+	s += "\'" + AnsiString(out) + "\'";
 }
 //---------------------------------------------------------------------------
 void tWaveLoopManager::DoSpacing(AnsiString &l, int col)

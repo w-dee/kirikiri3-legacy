@@ -83,11 +83,10 @@ class tWaveDecodeThread;
 //! @brief		OpenALソース
 //---------------------------------------------------------------------------
 class tALSource :
-				public tDestructee,
+				public tCollectee,
 				protected depends_on<tOpenAL>,
 				protected depends_on<tWaveWatchThread>,
 				protected depends_on<tEventSystem>,
-				protected tEventDestination,
 				public tALSourceStatus
 {
 	friend class tWaveDecodeThread;
@@ -98,12 +97,6 @@ public:
 	static const risse_uint STREAMING_PREPARE_BUFFERS = 4; //!< 再生開始前にソースにキューしておくバッファの数
 
 private:
-	//! @brief	イベントのID
-	enum tEventId
-	{
-		eiStatusChanged, // ステータスが変更された
-	};
-
 	//! OpenAL Source を保持するための構造体
 	struct tInternalSource : public tDestructee
 	{
@@ -155,18 +148,14 @@ private: //---- queue/buffer management
 	//! @note		キューできない場合は何もしない
 	void QueueBuffer();
 
-private:
+public:
 	//! @brief		監視用コールバック(tWaveWatchThreadから約50msごとに呼ばれる)
 	void WatchCallback();
 
+private:
 	//! @brief		前回とステータスが変わっていたら OnStatusChanged を呼ぶ
 	//! @note		必ずメインスレッドから呼び出すこと
 	void CallStatusChanged();
-
-protected:
-	//! @brief		イベントが発生したとき
-	//! @param		info  イベント情報
-	void OnEvent(tEventInfo * info);
 
 public:
 	//! @brief		再生の開始

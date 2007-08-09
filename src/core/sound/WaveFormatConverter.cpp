@@ -13,6 +13,7 @@
 
 #include "prec.h"
 #include <algorithm>
+#include "sound/Sound.h"
 #include "sound/WaveFormatConverter.h"
 
 namespace Risa {

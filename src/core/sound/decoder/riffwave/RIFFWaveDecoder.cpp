@@ -13,7 +13,7 @@
 #include "prec.h"
 #include "sound/decoder/riffwave/RIFFWaveDecoder.h"
 #include "base/fs/common/FSManager.h"
-
+#include "sound/Sound.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(17161,14775,60981,18892,4009,20341,33502,766);
@@ -49,29 +49,20 @@ static risse_uint8 RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
 
 
 //---------------------------------------------------------------------------
-tRIFFWaveDecoder::tRIFFWaveDecoder(const tString & filename)
+tRIFFWaveDecoder::tRIFFWaveDecoder(const tString & filename) :
+	Stream(tFileSystemManager::instance()->Open(filename, tFileOpenModes::omRead))
 {
-	Stream = tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
-
 	try
 	{
 		if(!Open())
-			tSoundExceptionClass::Throw(RISSE_WS_TR("can not open file '%1' : invalid format"),
-				filename);
+			tSoundExceptionClass::Throw(tString(RISSE_WS_TR("can not open file '%1' : invalid format"),
+				filename));
 	}
 	catch(...)
 	{
-		delete Stream;
+		Stream.Dispose();
 		throw;
 	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRIFFWaveDecoder::~tRIFFWaveDecoder()
-{
-	delete Stream;
 }
 //---------------------------------------------------------------------------
 
@@ -97,7 +88,7 @@ bool tRIFFWaveDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& re
 	}
 
 	risse_uint readsize = writesamples * FileInfo.GetSampleGranuleSize();
-	risse_uint read = Stream->Read(buf, readsize);
+	risse_uint read = Stream.Read(buf, readsize);
 
 #if RISSE_HOST_IS_BIG_ENDIAN
 	// endian-ness conversion
@@ -165,12 +156,12 @@ bool tRIFFWaveDecoder::SetPosition(risse_uint64 samplepos)
 	if(FileInfo.TotalSampleGranules <= samplepos) return false;
 
 	risse_uint64 streampos = DataStart + samplepos * FileInfo.GetSampleGranuleSize();
-	risse_uint64 possave = Stream->GetPosition();
+	risse_uint64 possave = Stream.GetPosition();
 
-	if(streampos != Stream->Seek(streampos, RISSE_BS_SEEK_SET))
+	if(!Stream.Seek(streampos, tStreamConstants::soSet))
 	{
 		// seek failed
-		Stream->Seek(possave, RISSE_BS_SEEK_SET);
+		Stream.Seek(possave, tStreamConstants::soSet);
 		return false;
 	}
 
@@ -199,48 +190,48 @@ bool tRIFFWaveDecoder::Open()
 
 	// check RIFF mark
 	risse_uint8 buf[4];
-	if(4 != Stream->Read(buf, 4)) return false;
+	if(4 != Stream.Read(buf, 4)) return false;
 	if(memcmp(buf, riff_mark, 4)) return false;
 
-	if(4 != Stream->Read(buf, 4)) return false; // RIFF chunk size; discard
+	if(4 != Stream.Read(buf, 4)) return false; // RIFF chunk size; discard
 
 	// check WAVE subid
-	if(4 != Stream->Read(buf, 4)) return false;
+	if(4 != Stream.Read(buf, 4)) return false;
 	if(memcmp(buf, wave_mark, 4)) return false;
 
 	// find fmt chunk
 	if(!FindRIFFChunk(Stream, fmt_mark)) return false;
 
-	size = Stream->ReadI32LE();
-	next = Stream->GetPosition() + size;
+	size = Stream.ReadI32LE();
+	next = Stream.GetPosition() + size;
 
 	// read FileInfo
-	risse_uint16 format_tag = Stream->ReadI16LE(); // wFormatTag
+	risse_uint16 format_tag = Stream.ReadI16LE(); // wFormatTag
 	if(format_tag != WAVE_FORMAT_PCM &&
 		format_tag != WAVE_FORMAT_IEEE_FLOAT &&
 		format_tag != WAVE_FORMAT_EXTENSIBLE) return false;
 
 
-	FileInfo.Channels = Stream->ReadI16LE(); // nChannels
-	FileInfo.Frequency = Stream->ReadI32LE(); // nSamplesPerSec
+	FileInfo.Channels = Stream.ReadI16LE(); // nChannels
+	FileInfo.Frequency = Stream.ReadI32LE(); // nSamplesPerSec
 
-	if(4 != Stream->Read(buf, 4)) return false; // nAvgBytesPerSec; discard
+	if(4 != Stream.Read(buf, 4)) return false; // nAvgBytesPerSec; discard
 
-	risse_uint16 block_align = Stream->ReadI16LE(); // nBlockAlign
+	risse_uint16 block_align = Stream.ReadI16LE(); // nBlockAlign
 
-	int bits_per_sample = Stream->ReadI16LE(); // wBitsPerSample
+	int bits_per_sample = Stream.ReadI16LE(); // wBitsPerSample
 	bool is_float = false;
 
-	risse_uint16 ext_size = Stream->ReadI16LE(); // cbSize
+	risse_uint16 ext_size = Stream.ReadI16LE(); // cbSize
 	if(format_tag == WAVE_FORMAT_EXTENSIBLE)
 	{
 		if(ext_size != 22) return false; // invalid extension length
 		if(bits_per_sample & 0x07) return false;  // not integer multiply by 8
-		Stream->ReadI16LE(); // wValidBitsPerSample; discard
-		FileInfo.SpeakerConfig = Stream->ReadI32LE(); // dwChannelMask
+		Stream.ReadI16LE(); // wValidBitsPerSample; discard
+		FileInfo.SpeakerConfig = Stream.ReadI32LE(); // dwChannelMask
 
 		risse_uint8 guid[16];
-		if(16 != Stream->Read(guid, 16)) return false;
+		if(16 != Stream.Read(guid, 16)) return false;
 		if(!memcmp(guid, RISA__GUID_KSDATAFORMAT_SUBTYPE_PCM, 16))
 			is_float = false;
 		else if(!memcmp(guid, RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 16))
@@ -278,17 +269,17 @@ bool tRIFFWaveDecoder::Open()
 	if((risse_int) block_align != (risse_int)((bits_per_sample / 8) * FileInfo.Channels))
 		return false; // invalid align
 
-	if(next != Stream->Seek(next, RISSE_BS_SEEK_SET)) return false;
+	if(!Stream.Seek(next, tStreamConstants::soSet)) return false;
 
 	// find data chunk
 	if(!FindRIFFChunk(Stream, data_mark)) return false;
 
-	size = Stream->ReadI32LE();
+	size = Stream.ReadI32LE();
 
 	risse_int64 datastart;
 
-	risse_int64 remain_size = Stream->GetSize() -
-		(datastart = Stream->GetPosition());
+	risse_int64 remain_size = Stream.GetSize() -
+		(datastart = Stream.GetPosition());
 	if(size > remain_size) return false;
 		// data ends before "size" described in the header
 
@@ -305,18 +296,18 @@ bool tRIFFWaveDecoder::Open()
 
 
 //---------------------------------------------------------------------------
-bool tRIFFWaveDecoder::FindRIFFChunk(tBinaryStream * stream, const risse_uint8 *chunk)
+bool tRIFFWaveDecoder::FindRIFFChunk(tStreamAdapter stream, const risse_uint8 *chunk)
 {
 	risse_uint8 buf[4];
 	while(true)
 	{
-		if(4 != stream->Read(buf, 4)) return false;
+		if(4 != stream.Read(buf, 4)) return false;
 		if(memcmp(buf, chunk, 4))
 		{
 			// skip to next chunk
-			risse_uint32 chunksize = stream->ReadI32LE();
-			risse_uint64 next = stream->GetPosition() + chunksize;
-			if(next != stream->Seek(next, RISSE_BS_SEEK_SET)) return false;
+			risse_uint32 chunksize = stream.ReadI32LE();
+			risse_uint64 next = stream.GetPosition() + chunksize;
+			if(!stream.Seek(next, tStreamConstants::soSet)) return false;
 		}
 		else
 		{

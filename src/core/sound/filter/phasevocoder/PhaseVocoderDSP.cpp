@@ -35,7 +35,6 @@
 #include "sound/filter/phasevocoder/PhaseVocoderDSP.h"
 #include "base/mathlib/MathAlgorithms.h"
 #include <string.h>
-#include "risseUtils.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(46678,10832,40512,19852,21662,48847,10996,40273);
@@ -77,39 +76,39 @@ tPhaseVocoderDSP::tPhaseVocoderDSP(
 	try
 	{
 		// ワークなどの確保
-		AnalWork  = (float **)AlignedAlloc(sizeof(float *) * Channels, 4);
-		SynthWork = (float **)AlignedAlloc(sizeof(float *) * Channels, 4);
+		AnalWork  = (float **)AlignedMallocAtomicCollectee(sizeof(float *) * Channels, 4);
+		SynthWork = (float **)AlignedMallocAtomicCollectee(sizeof(float *) * Channels, 4);
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			AnalWork[ch] = NULL, SynthWork[ch] = NULL;
 		for(unsigned int ch = 0; ch < Channels; ch++)
 		{
-			AnalWork[ch]  = (float *)AlignedAlloc(sizeof(float) * (FrameSize), 4);
-			SynthWork[ch] = (float *)AlignedAlloc(sizeof(float) * (FrameSize), 4);
+			AnalWork[ch]  = (float *)AlignedMallocAtomicCollectee(sizeof(float) * (FrameSize), 4);
+			SynthWork[ch] = (float *)AlignedMallocAtomicCollectee(sizeof(float) * (FrameSize), 4);
 		}
 
-		LastAnalPhase = (float **)AlignedAlloc(sizeof(float *) * Channels, 4);
+		LastAnalPhase = (float **)AlignedMallocAtomicCollectee(sizeof(float *) * Channels, 4);
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			LastAnalPhase[ch] = NULL;
 		for(unsigned int ch = 0; ch < Channels; ch++)
 		{
-			LastAnalPhase[ch] = (float *)AlignedAlloc(sizeof(float) * (FrameSize/2), 4);
+			LastAnalPhase[ch] = (float *)AlignedMallocAtomicCollectee(sizeof(float) * (FrameSize/2), 4);
 			memset(LastAnalPhase[ch], 0, FrameSize/2 * sizeof(float)); // 0 でクリア
 		}
 
-		LastSynthPhase = (float **)AlignedAlloc(sizeof(float *) * Channels, 4);
+		LastSynthPhase = (float **)AlignedMallocAtomicCollectee(sizeof(float *) * Channels, 4);
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			LastSynthPhase[ch] = NULL;
 		for(unsigned int ch = 0; ch < Channels; ch++)
 		{
-			LastSynthPhase[ch] = (float *)AlignedAlloc(sizeof(float) * (FrameSize/2), 4);
+			LastSynthPhase[ch] = (float *)AlignedMallocAtomicCollectee(sizeof(float) * (FrameSize/2), 4);
 			memset(LastSynthPhase[ch], 0, FrameSize/2 * sizeof(float)); // 0 でクリア
 		}
 
-		FFTWorkIp = (int *)AlignedAlloc(sizeof(int) * (static_cast<int>(2+sqrt((double)FrameSize/4))), 4);
+		FFTWorkIp = (int *)AlignedMallocAtomicCollectee(sizeof(int) * (static_cast<int>(2+sqrt((double)FrameSize/4))), 4);
 		FFTWorkIp[0] = FFTWorkIp[1] = 0;
-		FFTWorkW = (float *)AlignedAlloc(sizeof(float) * (FrameSize/2), 4);
-		InputWindow = (float *)AlignedAlloc(sizeof(float) * FrameSize, 4);
-		OutputWindow = (float *)AlignedAlloc(sizeof(float) * FrameSize, 4);
+		FFTWorkW = (float *)AlignedMallocAtomicCollectee(sizeof(float) * (FrameSize/2), 4);
+		InputWindow = (float *)AlignedMallocAtomicCollectee(sizeof(float) * FrameSize, 4);
+		OutputWindow = (float *)AlignedMallocAtomicCollectee(sizeof(float) * FrameSize, 4);
 	}
 	catch(...)
 	{
@@ -207,31 +206,31 @@ void tPhaseVocoderDSP::Clear()
 	if(AnalWork)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
-			AlignedDealloc(AnalWork[ch]), AnalWork[ch] = NULL;
-		AlignedDealloc(AnalWork), AnalWork = NULL;
+			AlignedFreeCollectee(AnalWork[ch]), AnalWork[ch] = NULL;
+		AlignedFreeCollectee(AnalWork), AnalWork = NULL;
 	}
 	if(SynthWork)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
-			AlignedDealloc(SynthWork[ch]), SynthWork[ch] = NULL;
-		AlignedDealloc(SynthWork), SynthWork = NULL;
+			AlignedFreeCollectee(SynthWork[ch]), SynthWork[ch] = NULL;
+		AlignedFreeCollectee(SynthWork), SynthWork = NULL;
 	}
 	if(LastAnalPhase)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
-			AlignedDealloc(LastAnalPhase[ch]), LastAnalPhase[ch] = NULL;
-		AlignedDealloc(LastAnalPhase), LastAnalPhase = NULL;
+			AlignedFreeCollectee(LastAnalPhase[ch]), LastAnalPhase[ch] = NULL;
+		AlignedFreeCollectee(LastAnalPhase), LastAnalPhase = NULL;
 	}
 	if(LastSynthPhase)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
-			AlignedDealloc(LastSynthPhase[ch]), LastSynthPhase[ch] = NULL;
-		AlignedDealloc(LastSynthPhase), LastSynthPhase = NULL;
+			AlignedFreeCollectee(LastSynthPhase[ch]), LastSynthPhase[ch] = NULL;
+		AlignedFreeCollectee(LastSynthPhase), LastSynthPhase = NULL;
 	}
-	AlignedDealloc(FFTWorkIp), FFTWorkIp = NULL;
-	AlignedDealloc(FFTWorkW), FFTWorkW = NULL;
-	AlignedDealloc(InputWindow), InputWindow = NULL;
-	AlignedDealloc(OutputWindow), OutputWindow = NULL;
+	AlignedFreeCollectee(FFTWorkIp), FFTWorkIp = NULL;
+	AlignedFreeCollectee(FFTWorkW), FFTWorkW = NULL;
+	AlignedFreeCollectee(InputWindow), InputWindow = NULL;
+	AlignedFreeCollectee(OutputWindow), OutputWindow = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -418,3 +417,7 @@ tPhaseVocoderDSP::tStatus tPhaseVocoderDSP::Process()
 	return psNoError;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa

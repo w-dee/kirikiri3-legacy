@@ -18,6 +18,7 @@
 #include "base/event/TickCount.h"
 #include "base/event/IdleEvent.h"
 #include "base/utils/PointerList.h"
+#include "sound/Sound.h"
 
 
 namespace Risa {
@@ -42,6 +43,7 @@ public:
 	~tWaveDecodeThread();
 
 	void SetSource(tALSource * source);
+	tALSource * GetSource() const { return Source; }
 
 protected:
 	void Execute(void);
@@ -98,7 +100,7 @@ void tWaveDecodeThread::Execute(void)
 		}
 		else
 		{
-			risse_uint64 start_tick = tTickCountinstance()->Get();
+			risse_uint64 start_tick = tTickCount::instance()->Get();
 			// ソースが割り当てられている
 			{
 				volatile tCriticalSection::tLocker cs_holder(CS);
@@ -168,7 +170,7 @@ protected:
 	void OnCompact(tCompactLevel level);
 
 public:
-	tWaveDecodeThread * Acquire();
+	tWaveDecodeThread * Acquire(tALSource * source);
 	void Unacquire(tWaveDecodeThread * buffer);
 	bool CallWatchCallbacks();
 };
@@ -202,7 +204,7 @@ tWaveDecodeThreadPool::~tWaveDecodeThreadPool()
 //---------------------------------------------------------------------------
 void tWaveDecodeThreadPool::OnCompact(tCompactLevel level)
 {
-	volatile tCriticalSection::tLocker cs_holder(*CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	if(level >= clSlowBeat)
 	{
@@ -220,9 +222,9 @@ void tWaveDecodeThreadPool::OnCompact(tCompactLevel level)
 //! @brief		スレッドを一つ得る
 //! @return		スレッド
 //---------------------------------------------------------------------------
-tWaveDecodeThread * tWaveDecodeThreadPool::Acquire()
+tWaveDecodeThread * tWaveDecodeThreadPool::Acquire(tALSource * source)
 {
-	volatile tCriticalSection::tLocker cs_holder(*CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	// Free が空か？
 	tWaveDecodeThread * newthread;
@@ -240,13 +242,14 @@ tWaveDecodeThread * tWaveDecodeThreadPool::Acquire()
 	}
 
 	// UsingThreads に追加
-	UsingThreads.add(th);
-	th->SetSource(source);
+	UsingThreads.add(newthread);
 
 	// tWaveWatchThread をたたき起こす
 	tWaveWatchThread::instance()->Wakeup();
 
-	return th;
+	// newthread を帰す
+	newthread->SetSource(source);
+	return newthread;
 }
 //---------------------------------------------------------------------------
 
@@ -257,7 +260,7 @@ tWaveDecodeThread * tWaveDecodeThreadPool::Acquire()
 //---------------------------------------------------------------------------
 void tWaveDecodeThreadPool::Unacquire(tWaveDecodeThread * thread)
 {
-	volatile tCriticalSection::tLocker cs_holder(*CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	thread->SetSource(NULL); // source を null に
 
@@ -276,12 +279,14 @@ void tWaveDecodeThreadPool::Unacquire(tWaveDecodeThread * thread)
 //---------------------------------------------------------------------------
 bool tWaveDecodeThreadPool::CallWatchCallbacks()
 {
-	volatile tCriticalSection::tLocker cs_holder(*CS);
+	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
 	size_t count = UsingThreads.get_locked_count();
 	for(size_t i = 0; i < count; i++)
-		get_locked(i)->WatchCallback(); // この中で Unacquire が呼ばれる可能性があるので注意
+		UsingThreads.get_locked(i)->GetSource()->WatchCallback();
+			// この中で Unacquire が呼ばれる可能性があるので注意
+			// (pointer_list はそういう状況でもうまく扱うことができるので問題ない)
 	return count != 0;
 }
 //---------------------------------------------------------------------------
@@ -377,7 +382,7 @@ tALSource::tInternalSource::tInternalSource()
 tALSource::tInternalSource::~tInternalSource()
 {
 	volatile tOpenAL::tCriticalSectionHolder al_cs_holder;
-	if(SourceAllocated) alDeleteSources(1, &Source);
+	alDeleteSources(1, &Source);
 	tOpenAL::instance()->ThrowIfError(RISSE_WS("alDeleteSources"));
 }
 //---------------------------------------------------------------------------
@@ -398,7 +403,7 @@ tALSource::tALSource(tALBuffer * buffer,
 	if(!Buffer->GetStreaming())
 	{
 		// バッファが非ストリーミングの場合は LoopManager は必要ないので解放する
-		LoopManager.Dispose();
+		LoopManager = NULL; // TODO: real .Dispose();
 	}
 }
 //---------------------------------------------------------------------------
@@ -421,7 +426,6 @@ tALSource::tALSource(const tALSource * ref)
 void tALSource::Init(tALBuffer * buffer)
 {
 	// フィールドの初期化
-	SourceAllocated = false;
 	DecodeThread = NULL;
 	Status = PrevStatus = ssStop;
 	NeedRewind = false;
@@ -429,31 +433,23 @@ void tALSource::Init(tALBuffer * buffer)
 	// スレッドプールを作成
 	tWaveDecodeThreadPool::ensure();
 
-	try
-	{
-		volatile tCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(*CS);
 
+	{
+		volatile tOpenAL::tCriticalSectionHolder cs_holder;
+
+		// ソースの生成
+		Source = new tInternalSource();
+
+		alSourcei(Source->Source, AL_LOOPING, AL_FALSE);
+		tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
+
+		// ストリーミングを行わない場合は、バッファをソースにアタッチ
+		if(!Buffer->GetStreaming())
 		{
-			volatile tOpenAL::tCriticalSectionHolder cs_holder;
-
-			// ソースの生成
-			Source = new tInternalSource();
-
-			alSourcei(Source->Source, AL_LOOPING, AL_FALSE);
-			tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
-
-			// ストリーミングを行わない場合は、バッファをソースにアタッチ
-			if(!Buffer->GetStreaming())
-			{
-				alSourcei(Source->Source, AL_BUFFER, Buffer->GetBuffer());
-				tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_BUFFER)"));
-			}
+			alSourcei(Source->Source, AL_BUFFER, Buffer->GetBuffer());
+			tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_BUFFER)"));
 		}
-	}
-	catch(...)
-	{
-		Clear();
-		throw;
 	}
 }
 //---------------------------------------------------------------------------
@@ -533,7 +529,7 @@ void tALSource::QueueBuffer()
 			Buffer->PushFreeBuffer(buffer); // アンキューしたバッファを返す
 
 			{
-				volatile tCriticalSection::tLocker cs_holder(CS);
+				volatile tCriticalSection::tLocker cs_holder(*CS);
 				SegmentQueues.pop_front(); // セグメントキューからも削除
 			}
 		}
@@ -559,7 +555,7 @@ void tALSource::QueueBuffer()
 		// セグメントキューに追加
 		if(filled)
 		{
-			volatile tCriticalSection::tLocker cs_holder(CS);
+			volatile tCriticalSection::tLocker cs_holder(*CS);
 			SegmentQueues.push_back(segmentqueue);
 //			fprintf(stderr, "queue : ");
 //			segmentqueue.Dump();
@@ -572,7 +568,7 @@ void tALSource::QueueBuffer()
 //---------------------------------------------------------------------------
 void tALSource::WatchCallback()
 {
-	volatile tCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	if(Status == ssPlay)
 	{
@@ -593,9 +589,8 @@ void tALSource::WatchCallback()
 			// デコードスレッドも返す
 			if(DecodeThread)
 				tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
-			// イベントシステムにコールバックの発生を指示する
-			tEventSystem::instance()->PostEvent(
-				new tEventInfo(eiStatusChanged, this, this));
+			// ステータスの変更を通知する
+			CallStatusChanged();
 			// 次回再生開始前に巻き戻しが必要
 			NeedRewind = true;
 		}
@@ -617,24 +612,9 @@ void tALSource::CallStatusChanged()
 
 
 //---------------------------------------------------------------------------
-void tALSource::OnEvent(tEventInfo * info)
-{
-	volatile tCriticalSection::tLocker cs_holder(CS);
-
-	switch(static_cast<tEventId>(info->GetId()))
-	{
-	case eiStatusChanged: // ステータスの変更を伝えるとき
-		CallStatusChanged();
-		break;
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tALSource::Play()
 {
-	volatile tCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	if(Status == ssPlay) return; // すでに再生している場合は再生をしない
 
@@ -642,7 +622,7 @@ void tALSource::Play()
 	{
 		// もし仮にデコードスレッドがあったとしても
 		// ここで解放する
-		if(DecodeThread) tWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
+		if(DecodeThread) tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
 
 		// 巻き戻しを行う
 		if(NeedRewind)
@@ -682,12 +662,12 @@ void tALSource::Play()
 //---------------------------------------------------------------------------
 void tALSource::Stop()
 {
-	volatile tCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	// デコードスレッドを削除する
 	if(Buffer->GetStreaming())
 	{
-		if(DecodeThread) tWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
+		if(DecodeThread) tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
 		// デコードスレッドを削除した時点で
 		// FillBuffer は呼ばれなくなる
 	}
@@ -719,7 +699,7 @@ void tALSource::Stop()
 //---------------------------------------------------------------------------
 void tALSource::Pause()
 {
-	volatile tCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	// 再生中の場合は
 	if(Status == ssPlay)
@@ -743,7 +723,7 @@ void tALSource::Pause()
 //---------------------------------------------------------------------------
 risse_uint64 tALSource::GetPosition()
 {
-	volatile tCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	// 再生中や一時停止中でない場合は 0 を返す
 	if(Status != ssPlay && Status != ssPause) return 0;
@@ -784,14 +764,14 @@ risse_uint64 tALSource::GetPosition()
 //---------------------------------------------------------------------------
 void tALSource::SetPosition(risse_uint64 pos)
 {
-	volatile tCriticalSection::tLocker cs_holder(CS);
+	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	if(Buffer->GetStreaming())
 	{
 		if(Status == ssPlay || Status == ssPause)
 		{
 			// デコードスレッドをいったん削除する
-			if(DecodeThread) tWaveDecodeThreadPool::Free(DecodeThread), DecodeThread = NULL;
+			if(DecodeThread) tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
 					// デコードスレッドを削除した時点で
 					// FillBuffer は呼ばれなくなる
 

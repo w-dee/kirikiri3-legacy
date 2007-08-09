@@ -13,6 +13,8 @@
 #ifndef REALFFT_H
 #define REALFFT_H
 
+#include "risse/include/risseTypes.h"
+
 /*
 	Based on
 		Real Discrete FFT package from

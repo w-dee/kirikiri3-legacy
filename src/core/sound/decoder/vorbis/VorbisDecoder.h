@@ -15,6 +15,7 @@
 #define OGGVORBISDECODERH
 
 #include "sound/WaveDecoder.h"
+#include "base/fs/common/FSManager.h"
 #include <ogg/ogg.h>
 #include <vorbis/vorbisfile.h>
 
@@ -26,9 +27,20 @@ namespace Risa {
 //---------------------------------------------------------------------------
 class tOggVorbisDecoder : public tWaveDecoder
 {
-	tBinaryStream * Stream; //!< 入力ストリーム
+	tStreamAdapter Stream; //!< 入力ストリーム
 	tWaveFileInfo FileInfo; //!< サウンドファイル情報
-	OggVorbis_File InputFile; //!< OggVorbis_File instance
+
+	//! @brief		OggVorbis_File を保持するための構造体
+	struct tOggVorbisFile : public tDestructee
+	{
+		OggVorbis_File InputFile; //!< OggVorbis_File instance
+		bool NeedClear;
+		tOggVorbisFile(){ NeedClear = false;}
+		~tOggVorbisFile();
+	};
+
+	tOggVorbisFile * OggVorbisFile;
+
 	int CurrentSection;
 
 public:
@@ -39,7 +51,7 @@ public:
 	// tWaveDecoder をオーバーライドするもの
 	//! @brief		デストラクタ
 	//! @param		filename   ファイル名
-	virtual ~tOggVorbisDecoder();
+	virtual ~tOggVorbisDecoder() {;} // おそらく呼ばれない
 
 	//! @brief		PCMフォーマットを提案する
 	//! @param		format   PCMフォーマット

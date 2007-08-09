@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "sound/filter/BasicWaveFilter.h"
 #include "sound/WaveFormatConverter.h"
+#include "sound/Sound.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(35549,59301,21418,20212,56467,33012,49239,37291);
@@ -130,7 +131,7 @@ void * tBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 	{
 		void * newbuffer;
 		if(QueuedData == NULL)
-			newbuffer = MallocAtomicCollectee(QueuedData, buffer_size_needed);
+			newbuffer = MallocAtomicCollectee(buffer_size_needed);
 		else
 			newbuffer = ReallocCollectee(QueuedData, buffer_size_needed);
 		if(!newbuffer)
@@ -227,7 +228,7 @@ risse_uint tBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 				{
 					void * newbuffer;
 					if(ConvertBuffer == NULL)
-						newbuffer = MallocAtomicCollectee(ConvertBuffer);
+						newbuffer = MallocAtomicCollectee(buffer_size_needed);
 					else
 						newbuffer = ReallocCollectee(ConvertBuffer, buffer_size_needed);
 					if(!newbuffer)

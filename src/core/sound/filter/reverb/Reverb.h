@@ -35,8 +35,8 @@ public:
 	//! @brief		コンストラクタ
 	tReverb();
 
-	//! @brief		デストラクタ
-	~tReverb();
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	~tReverb() {;}
 
 private:
 	//! @brief		入力となるフィルタが変わったとき、あるいはリセットされるとき

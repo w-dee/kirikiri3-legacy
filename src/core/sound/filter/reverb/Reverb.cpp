@@ -28,14 +28,6 @@ tReverb::tReverb() :
 
 
 //---------------------------------------------------------------------------
-tReverb::~tReverb()
-{
-	delete (PointerFreeGC) [] Buffer;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tReverb::InputChanged()
 {
 	Model.mute();
@@ -59,7 +51,8 @@ void tReverb::Filter()
 	if(channels != 2) return; // チャンネルは 2 (stereo)以外は今のところ対応していない
 
 	// 入力バッファを確保
-	if(!Buffer) Buffer = new (PointerFreeGC) float[NumBufferSampleGranules * InputFormat.Channels];
+	if(!Buffer) Buffer = reinterpret_cast<float*>(MallocAtomicCollectee(
+					sizeof(float) * NumBufferSampleGranules * InputFormat.Channels));
 
 	// 出力バッファを確保
 	float * dest_buf = reinterpret_cast<float*>(PrepareQueue(NumBufferSampleGranules));

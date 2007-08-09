@@ -15,6 +15,9 @@
 
 
 
+#include "sound/filter/phasevocoder/PhaseVocoder.h"
+
+
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(47626,3140,27936,19656,12175,17772,57131,58681);
 //---------------------------------------------------------------------------
@@ -104,11 +107,12 @@ void tSound::Clear()
 	if(Source) Source->Stop();
 
 	// すべてのフィルタなどをリセット
-	Decoder.Dispose();
-	LoopManager.Dispose();
+	// TODO: 各インスタンスの正しいリセット
+	Decoder = NULL; //.Dispose();
+	LoopManager = NULL; //.Dispose();
 //	Filters.clear();
 	Buffer = NULL;
-	Source.reset();
+	Source = NULL; //reset();
 
 	// ステータスを unload に
 	CallOnStatusChanged(ssUnload);
@@ -127,7 +131,7 @@ void tSound::CallOnStatusChanged(tStatus status)
 }
 //---------------------------------------------------------------------------
 
-#include "sound/filter/phasevocoder/PhaseVocoder.h"
+
 //---------------------------------------------------------------------------
 void tSound::Open(const tString & filename)
 {

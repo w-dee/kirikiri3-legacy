@@ -15,6 +15,7 @@
 #define RIFFWAVEDECODERH
 
 #include "sound/WaveDecoder.h"
+#include "base/fs/common/FSManager.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -24,7 +25,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 class tRIFFWaveDecoder : public tWaveDecoder
 {
-	tBinaryStream * Stream; //!< 入力ストリーム
+	tStreamAdapter Stream; //!< 入力ストリーム
 	tWaveFileInfo FileInfo; //!< サウンド形式
 	risse_uint64 DataStart; //!< ファイル中でのデータの開始位置
 	risse_uint64 CurrentPos; //!< ファイル中でのデータの読み込み位置
@@ -35,8 +36,9 @@ public:
 	tRIFFWaveDecoder(const tString & filename);
 
 	// tWaveDecoder をオーバーライドするもの
-	//! @brief		デストラクタ
-	virtual ~tRIFFWaveDecoder();
+
+	//! @brief		デストラクタ(たぶんよばれない)
+	virtual ~tRIFFWaveDecoder() {;}
 
 	virtual void SuggestFormat(const tWaveFormat & format) {;}
 
@@ -68,7 +70,7 @@ private:
 	//! @param		stream		ストリーム(このストリームの現在位置から検索が始まる)
 	//! @param		chunk		探したいチャンク
 	//! @return		指定された RIFF チャンクが見つかれば真
-	static bool FindRIFFChunk(tBinaryStream * stream, const risse_uint8 *chunk);
+	static bool FindRIFFChunk(tStreamAdapter stream, const risse_uint8 *chunk);
 };
 //---------------------------------------------------------------------------
 

@@ -143,6 +143,8 @@ public:
 	//! @param		pos		再生位置(ミリ秒単位)
 	void SetTimePosition(double pos);
 
+	//! @brief		ステータスが変更された
+	//! @param		このメソッドは非同期に別スレッドから呼ばれることがあるので注意。
 	virtual void OnStatusChanged(tStatus status) {;}
 
 	tStatus GetStatus() const { return Status; } //!< ステータスを返す

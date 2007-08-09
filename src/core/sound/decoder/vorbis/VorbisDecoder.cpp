@@ -14,7 +14,7 @@
 #include "sound/decoder/vorbis/VorbisDecoder.h"
 #include "base/fs/common/FSManager.h"
 #include <vorbis/vorbisfile.h>
-
+#include "sound/Sound.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(11001,39824,8006,19566,26243,29715,33801,62487);
@@ -22,32 +22,36 @@ RISSE_DEFINE_SOURCE_ID(11001,39824,8006,19566,26243,29715,33801,62487);
 
 
 
-//---------------------------------------------------------------------------
-tOggVorbisDecoder::tOggVorbisDecoder(const tString & filename)
-{
-	CurrentSection = -1;
-	Stream = tFileSystemManager::instance()->CreateStream(filename, RISSE_BS_READ);
 
-	try
-	{
-		if(!Open())
-			tSoundExceptionClass::Throw(RISSE_WS_TR("can not open file '%1' : invalid format"),
-				filename);
-	}
-	catch(...)
-	{
-		delete Stream;
-		throw;
-	}
+
+//---------------------------------------------------------------------------
+tOggVorbisDecoder::tOggVorbisFile::~tOggVorbisFile()
+{
+	if(NeedClear) ov_clear(&InputFile);
 }
 //---------------------------------------------------------------------------
 
 
+
+
 //---------------------------------------------------------------------------
-tOggVorbisDecoder::~tOggVorbisDecoder()
+tOggVorbisDecoder::tOggVorbisDecoder(const tString & filename) :
+	Stream(tFileSystemManager::instance()->Open(filename, tFileOpenModes::omRead))
 {
-	ov_clear(&InputFile);
-	delete Stream;
+	OggVorbisFile = new tOggVorbisFile();
+	CurrentSection = -1;
+
+	try
+	{
+		if(!Open())
+			tSoundExceptionClass::Throw(tString(RISSE_WS_TR("can not open file '%1' : invalid format"),
+				filename));
+	}
+	catch(...)
+	{
+		Stream.Dispose();
+		throw;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -95,7 +99,7 @@ bool tOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& r
 		{
 			do
 			{
-				res = ov_read(&InputFile, ((char*)buf + pos), remain,
+				res = ov_read(&OggVorbisFile->InputFile, ((char*)buf + pos), remain,
 					endianp, pcmsize, 1, &CurrentSection); // decode via ov_read
 			} while(res<0); // ov_read would return a negative number
 							// if the decoding is not ready
@@ -116,7 +120,7 @@ bool tOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& r
 		{
 			do
 			{
-				res = ov_read_float(&InputFile, &pcm, remain, &CurrentSection); // decode via ov_read_float
+				res = ov_read_float(&OggVorbisFile->InputFile, &pcm, remain, &CurrentSection); // decode via ov_read_float
 			} while(res<0); // ov_read would return a negative number
 							// if the decoding is not ready
 			if(res==0) break;
@@ -149,7 +153,7 @@ bool tOggVorbisDecoder::Render(void *buf, risse_uint bufsamplelen, risse_uint& r
 //---------------------------------------------------------------------------
 bool tOggVorbisDecoder::SetPosition(risse_uint64 samplepos)
 {
-	if(0 != ov_pcm_seek(&InputFile, samplepos))
+	if(0 != ov_pcm_seek(&OggVorbisFile->InputFile, samplepos))
 		return false;
 	return true;
 }
@@ -164,7 +168,7 @@ bool tOggVorbisDecoder::Open()
 		// callback functions
 
 	// 開く
-	if(ov_open_callbacks(this, &InputFile, NULL, 0, callbacks) < 0)
+	if(ov_open_callbacks(this, &OggVorbisFile->InputFile, NULL, 0, callbacks) < 0)
 	{
 		// 失敗
 		return false;
@@ -172,10 +176,10 @@ bool tOggVorbisDecoder::Open()
 
 	// retrieve PCM information
 	vorbis_info *vi;
-	vi = ov_info(&InputFile, -1);
+	vi = ov_info(&OggVorbisFile->InputFile, -1);
 	if(!vi)
 	{
-		ov_clear(&InputFile);
+		ov_clear(&OggVorbisFile->InputFile);
 		return E_FAIL;
 	}
 
@@ -186,11 +190,11 @@ bool tOggVorbisDecoder::Open()
 
 	bool seekable = true;
 
-	risse_int64 pcmtotal = ov_pcm_total(&InputFile, -1); // PCM total samples
+	risse_int64 pcmtotal = ov_pcm_total(&OggVorbisFile->InputFile, -1); // PCM total samples
 	if(pcmtotal<0) seekable = false, pcmtotal = 0;
 	FileInfo.TotalSampleGranules = pcmtotal;
 
-	double timetotal = ov_time_total(&InputFile, -1); // total time in sec.
+	double timetotal = ov_time_total(&OggVorbisFile->InputFile, -1); // total time in sec.
 	if(timetotal<0)
 		seekable = false, FileInfo.TotalTime = 0;
 	else
@@ -211,7 +215,7 @@ size_t tOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, void *
 
 	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
 
-	risse_uint bytesread = decoder->Stream->Read(ptr, risse_uint(size * nmemb));
+	risse_uint bytesread = decoder->Stream.Read(ptr, risse_uint(size * nmemb));
 
 	return bytesread / size;
 }
@@ -225,24 +229,24 @@ int tOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int whenc
 
 	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
 
-	risse_int seek_type = RISSE_BS_SEEK_SET;
+	tStreamConstants::tOrigin seek_type = tStreamConstants::soSet;
 
 	switch(whence)
 	{
 	case SEEK_SET:
-		seek_type = RISSE_BS_SEEK_SET;
+		seek_type = tStreamConstants::soSet;
 		break;
 	case SEEK_CUR:
-		seek_type = RISSE_BS_SEEK_CUR;
+		seek_type = tStreamConstants::soCur;
 		break;
 	case SEEK_END:
-		seek_type = RISSE_BS_SEEK_END;
+		seek_type = tStreamConstants::soEnd;
 		break;
 	}
 
 	try
 	{
-		decoder->Stream->Seek(offset, seek_type);
+		if(!decoder->Stream.Seek(offset, seek_type)) return -1;
 	}
 	catch(...)
 	{
@@ -273,7 +277,7 @@ long tOggVorbisDecoder::tell_func(void *datasource)
 
 	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
 
-	return decoder->Stream->GetPosition();
+	return decoder->Stream.GetPosition();
 }
 //---------------------------------------------------------------------------
 

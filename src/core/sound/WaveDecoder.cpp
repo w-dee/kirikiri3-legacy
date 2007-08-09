@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "sound/WaveDecoder.h"
 #include "base/fs/common/FSManager.h"
+#include "sound/Sound.h"
 
 
 namespace Risa {
@@ -57,7 +58,7 @@ tWaveDecoder * tWaveDecoderFactoryManager::Create(const tString & filename)
 {
 	// 拡張子を取り出す
 	tString ext = tFileSystemManager::ExtractExtension(filename);
-	ext.ToLowerCase();
+	ext.ToLowerCaseNC();
 
 	// ファクトリを探す
 	tMap::iterator factory = Map.find(ext);

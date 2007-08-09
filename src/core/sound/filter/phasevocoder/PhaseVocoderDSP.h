@@ -10,8 +10,8 @@
 //! @file
 //! @brief Phase Vocoder の実装
 //---------------------------------------------------------------------------
-#ifndef PhaseVocoderH
-#define PhaseVocoderH
+#ifndef PhaseVocoderDSPH
+#define PhaseVocoderDSPH
 
 #include "base/utils/RingBuffer.h"
 
@@ -21,7 +21,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief Phase Vocoder DSP クラス
 //---------------------------------------------------------------------------
-class tPhaseVocoderDSP
+class tPhaseVocoderDSP : public tCollectee
 {
 protected:
 	float ** AnalWork; //!< 解析(Analyze)用バッファ(FrameSize個) 名前で笑わないように
@@ -163,5 +163,10 @@ public:
 	void ProcessCore(int ch);
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+} // namespace Risa
+
 
 #endif

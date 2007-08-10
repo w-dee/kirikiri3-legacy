@@ -191,10 +191,19 @@ tWaveDecodeThreadPool::tWaveDecodeThreadPool()
 //---------------------------------------------------------------------------
 tWaveDecodeThreadPool::~tWaveDecodeThreadPool()
 {
+	volatile tCriticalSection::tLocker cs_holder(CS);
+
 	// FreeThreads を解放する
 	for(gc_vector<tWaveDecodeThread*>::iterator i = FreeThreads.begin();
 		i != FreeThreads.end(); i++)
 		delete (*i);
+
+	// すべての UsingThreads の Source を stop する
+
+	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
+	size_t count = UsingThreads.get_locked_count();
+	for(size_t i = 0; i < count; i++)
+		UsingThreads.get_locked(i)->GetSource()->Stop(false);
 }
 //---------------------------------------------------------------------------
 
@@ -397,7 +406,7 @@ tALSource::tInternalSource::~tInternalSource()
 //---------------------------------------------------------------------------
 tALSource::tALSource(tALBuffer * buffer,
 	tWaveLoopManager * loopmanager) :
-	Buffer(buffer), LoopManager(loopmanager)
+	CS(new tCriticalSection()), Buffer(buffer), LoopManager(loopmanager)
 {
 	Init(buffer);
 	if(!Buffer->GetStreaming())
@@ -410,7 +419,7 @@ tALSource::tALSource(tALBuffer * buffer,
 
 
 //---------------------------------------------------------------------------
-tALSource::tALSource(const tALSource * ref)
+tALSource::tALSource(const tALSource * ref) : CS(new tCriticalSection())
 {
 	// 他のソースと Buffer を共有したい場合に使う。
 	// Buffer は 非Streaming バッファでなければならない。
@@ -663,7 +672,7 @@ void tALSource::Play()
 
 
 //---------------------------------------------------------------------------
-void tALSource::Stop()
+void tALSource::Stop(bool notify)
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
 
@@ -685,7 +694,8 @@ void tALSource::Stop()
 
 	// ステータスの変更を通知
 	Status = ssStop;
-	CallStatusChanged(false);
+	if(notify)
+		CallStatusChanged(false);
 
 	// 全てのバッファを unqueueする
 	if(Buffer->GetStreaming())

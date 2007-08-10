@@ -426,6 +426,11 @@ protected:
 	//! @return		スレッドが終了すべきであれば真
 	volatile bool ShouldTerminate();
 
+	//! @brief		スレッドのメイン関数を呼ぶ
+	//! @note		Execute() メソッドを呼ぶこと。
+	//!				下位クラスでオーバーライドする事も出来る。
+	virtual void CallExecute() { Execute(); }
+
 	//! @brief		スレッドのメイン関数(サブクラスで実装する)
 	//! @note		以下のような形式で記述する
 	//! <code>

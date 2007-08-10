@@ -104,6 +104,7 @@ public:
 	static void Log(const tString & content, tLevel level = llInfo,
 		const tString & linkinfo = tString::GetEmptyString())
 	{
+		volatile tLogger::tLocker lock;
 		if(tLogger::alive())
 			tLogger::instance()->InternalLog(content, level, linkinfo);
 	}

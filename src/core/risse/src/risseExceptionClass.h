@@ -73,6 +73,9 @@ public:
 	//! @param		engine		スクリプトエンジン
 	void ThrowConverted(tScriptEngine * engine) const { throw Convert(engine); }
 
+	//! @brief		例外クラス名を得る
+	const tString & GetExceptionClassName() const { return ExceptionClassName; }
+
 	//! @brief		内容を標準エラー出力にダンプする
 	void Dump() const;
 };

@@ -36,7 +36,14 @@ typedef Risse::tCriticalSection tCriticalSection;
 //---------------------------------------------------------------------------
 //! @brief		スレッドの基本クラス
 //---------------------------------------------------------------------------
-typedef Risse::tThread tThread;
+class tThread : public Risse::tThread
+{
+public:
+	tThread() : Risse::tThread() {;}
+
+public:
+	virtual void CallExecute(); // オーバーライド
+};
 //---------------------------------------------------------------------------
 
 

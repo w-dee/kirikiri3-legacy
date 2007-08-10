@@ -41,7 +41,8 @@ tOpenAL::tOpenAL()
 		ThrowIfError(RISSE_WS("alcCreateContext"));
 
 		// コンテキストを選択する
-		alcMakeContextCurrent(Context);
+		if(!alcMakeContextCurrent(Context))
+			tSoundExceptionClass::Throw(RISSE_WS_TR("failed to select OpenAL context"));
 		ThrowIfError(RISSE_WS("alcMakeContextCurrent"));
 	}
 	catch(...)

@@ -77,7 +77,7 @@ wxThread::ExitCode tThreadInternal::Entry()
 
 	// スレッドのメイン関数を実行する
 	// 例外が発生するかも。
-	Owner->Execute();
+	Owner->CallExecute();
 
 
 	return 0;

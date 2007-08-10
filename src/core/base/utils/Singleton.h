@@ -197,6 +197,9 @@ class singleton_base : public tCollectee
 	//! @brief オブジェクトインスタンス
 	static T * volatile object_instance;
 
+	//! @brief	オブジェクトが消滅したかどうか
+	static bool object_shutdown;
+
 	//! @brief オブジェクトへの参照を切る
 	static void disconnect()
 	{
@@ -208,6 +211,7 @@ class singleton_base : public tCollectee
 
 			if(object_instance) instance()->destruct();
 			object_instance = NULL;
+			object_shutdown = true;
 		}
 	}
 
@@ -287,14 +291,24 @@ private:
 		volatile tCriticalSection::tLocker lock(singleton_manager::GetCS());
 		if(!object_instance)
 		{
-			fprintf(stderr, "creating %s\n", get_name());
-			fflush(stderr);
-			T * volatile _instance = new T();
-			{ volatile tCriticalSection::tLocker lock(singleton_manager::GetDummyCS()); }
-			set_object_instance(_instance);
-			singleton_manager::register_disconnector(&singleton_base<T>::disconnect);
-			fprintf(stderr, "created %s\n", get_name());
-			fflush(stderr);
+			if(object_shutdown)
+			{
+				fprintf(stderr, "ERROR!! singleton %s is already disconnected!\n", get_name());
+				fprintf(stderr, "Returning null as instance pointer, will cause program crash ...\n");
+				fflush(stderr);
+				set_object_instance(NULL);
+			}
+			else
+			{
+				fprintf(stderr, "creating %s\n", get_name());
+				fflush(stderr);
+				T * volatile _instance = new T();
+				{ volatile tCriticalSection::tLocker lock(singleton_manager::GetDummyCS()); }
+				set_object_instance(_instance);
+				singleton_manager::register_disconnector(&singleton_base<T>::disconnect);
+				fprintf(stderr, "created %s\n", get_name());
+				fflush(stderr);
+			}
 		}
 	}
 
@@ -315,6 +329,7 @@ public:
 	}
 
 	//! @brief シングルトンオブジェクトのインスタンスを返す
+	//! @note	シングルトンインスタンスがすでに消滅している場合は NULL が帰るので注意
 	static T* instance()
 	{
 		ensure();
@@ -332,11 +347,28 @@ public:
 	{
 		return object_instance;
 	}
+
+	//! @brief	シングルトン機構のロック
+	//! @note	これが存在する限りは、このシングルトンに関する
+	//!			生成や消滅が行われないことを保証する。
+	//!			この中で instance() を用いて得たインスタンスは
+	//!			これを抜けるまで消滅しない。ただし、現バージョンでは
+	//!			このシングルトンに対してのみではなく、すべてのシングルトン
+	//!			インスタンスに対してロックを行ってしまうので注意。
+	class tLocker
+	{
+		tCriticalSection::tLocker lock;
+	public:
+		tLocker() : lock(singleton_manager::GetCS()){;}
+		~tLocker() {;}
+	};
 };
 template <typename T>
 typename singleton_base<T>::object_registerer singleton_base<T>::register_object;
 template <typename T>
 T * volatile singleton_base<T>::object_instance = NULL;
+template <typename T>
+bool singleton_base<T>::object_shutdown = false;
 //---------------------------------------------------------------------------
 
 

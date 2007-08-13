@@ -9,6 +9,7 @@ build_lib: build_completed
 copy_complated: Makefile
 	rm -rf src_temp
 	svn export src src_temp || cp -pR src src_temp
+	if [ "x`ls src_temp`" = "x" ]; then rm -rf src_temp; cp -pR src src_temp; fi
 	touch copy_complated
 
 build_completed: Makefile copy_complated

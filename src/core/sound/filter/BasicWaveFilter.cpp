@@ -45,6 +45,14 @@ tBasicWaveFilter::~tBasicWaveFilter()
 //---------------------------------------------------------------------------
 void tBasicWaveFilter::Reset()
 {
+	if(ConvertBuffer) FreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
+	if(QueuedData) FreeCollectee(QueuedData), QueuedData = NULL;
+	QueuedDataAllocSize = 0;
+	QueuedSampleGranuleCount = 0;
+	QueuedSampleGranuleRemain = 0;
+	ConvertBufferSize = 0;
+
+	SegmentQueue.Clear();
 	InputChanged();
 	Input->Reset(); // 入力フィルタの Reset メソッドも呼び出す
 }

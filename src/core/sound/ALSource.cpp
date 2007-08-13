@@ -93,33 +93,44 @@ void tWaveDecodeThread::Execute(void)
 {
 	while(!ShouldTerminate())
 	{
-		if(!Source)
-		{
-			// まだソースが割り当てられていない
-			Event.Wait(60*1000); // 適当な時間待つ
-		}
-		else
-		{
-			risse_uint64 start_tick = tTickCount::instance()->Get();
-			// ソースが割り当てられている
-			{
-				volatile tCriticalSection::tLocker cs_holder(CS);
-				Source->FillBuffer(); // デコードを行う
-			}
+		int sleep_ms  = 0;
+		tALSource * source;
 
-			// 眠るべき時間を計算する
-			// ここでは大まかに FillBuffer が tALBuffer::STREAMING_CHECK_SLEEP_MS
-			// 周期で実行されるように調整する。
-			// 楽観的なアルゴリズムなので Sleep 精度は問題にはならない。
-			risse_uint64 end_tick = tTickCount::instance()->Get();
-			int sleep_ms = 
-				tALBuffer::STREAMING_CHECK_SLEEP_MS -
-					static_cast<int>(end_tick - start_tick);
-			if(sleep_ms < 0) sleep_ms = 1; // 0 を指定すると無限に待ってしまうので
-			if(static_cast<unsigned int>(sleep_ms ) > tALBuffer::STREAMING_CHECK_SLEEP_MS)
-				sleep_ms = tALBuffer::STREAMING_CHECK_SLEEP_MS;
-			Event.Wait(sleep_ms); // 眠る
+		{ // entering critical section
+			volatile tCriticalSection::tLocker cs_holder(CS);
+			source = Source;
 		}
+
+		{
+			if(!source)
+			{
+				// まだソースが割り当てられていない
+				sleep_ms = 60*1000; // 適当な時間待つ
+			}
+			else
+			{
+				// ソースが割り当てられている
+				risse_uint64 start_tick = tTickCount::instance()->Get();
+
+				source->FillBuffer();
+					// デコードを行う(このメソッドは、本来呼び出されるべきで
+					// ない場合に呼び出されても単に無視するはず)
+
+				// 眠るべき時間を計算する
+				// ここでは大まかに FillBuffer が tALBuffer::STREAMING_CHECK_SLEEP_MS
+				// 周期で実行されるように調整する。
+				// 楽観的なアルゴリズムなので Sleep 精度は問題にはならない。
+				risse_uint64 end_tick = tTickCount::instance()->Get();
+				sleep_ms = 
+					tALBuffer::STREAMING_CHECK_SLEEP_MS -
+						static_cast<int>(end_tick - start_tick);
+				if(sleep_ms < 0) sleep_ms = 1; // 0 を指定すると無限に待ってしまうので
+				if(static_cast<unsigned int>(sleep_ms ) > tALBuffer::STREAMING_CHECK_SLEEP_MS)
+					sleep_ms = tALBuffer::STREAMING_CHECK_SLEEP_MS;
+			}
+		} // end of critical section
+
+		Event.Wait(sleep_ms); // 眠る
 	}
 }
 //---------------------------------------------------------------------------
@@ -203,7 +214,10 @@ tWaveDecodeThreadPool::~tWaveDecodeThreadPool()
 	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
 	size_t count = UsingThreads.get_locked_count();
 	for(size_t i = 0; i < count; i++)
-		UsingThreads.get_locked(i)->GetSource()->Stop(false);
+	{
+		tWaveDecodeThread * th = UsingThreads.get_locked(i);
+		if(th) th->GetSource()->Stop(false);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -293,9 +307,12 @@ bool tWaveDecodeThreadPool::CallWatchCallbacks()
 	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
 	size_t count = UsingThreads.get_locked_count();
 	for(size_t i = 0; i < count; i++)
-		UsingThreads.get_locked(i)->GetSource()->WatchCallback();
+	{
+		tWaveDecodeThread * th = UsingThreads.get_locked(i);
+		if(th) th->GetSource()->WatchCallback();
 			// この中で Unacquire が呼ばれる可能性があるので注意
 			// (pointer_list はそういう状況でもうまく扱うことができるので問題ない)
+	}
 	return count != 0;
 }
 //---------------------------------------------------------------------------
@@ -419,7 +436,8 @@ tALSource::tALSource(tALBuffer * buffer,
 
 
 //---------------------------------------------------------------------------
-tALSource::tALSource(const tALSource * ref) : CS(new tCriticalSection())
+tALSource::tALSource(const tALSource * ref) :
+	CS(new tCriticalSection())
 {
 	// 他のソースと Buffer を共有したい場合に使う。
 	// Buffer は 非Streaming バッファでなければならない。
@@ -438,6 +456,7 @@ void tALSource::Init(tALBuffer * buffer)
 	DecodeThread = NULL;
 	Status = PrevStatus = ssStop;
 	NeedRewind = false;
+	Buffer = buffer; // 一応再設定
 
 	// スレッドプールを作成
 	tWaveDecodeThreadPool::ensure();
@@ -467,10 +486,9 @@ void tALSource::Init(tALBuffer * buffer)
 //---------------------------------------------------------------------------
 void tALSource::FillBuffer()
 {
-	// ここはクリティカルセクションでは保護しない！！！！！！！！！
-	// (処理が長時間かかる場合があるので)
-	// Buffer がアクセス不可の時にここが呼ばれないようにするのは
-	// 他の箇所で保証すること
+	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	if(!DecodeThread) return ; // デコードスレッドが使用不可なので呼び出さない
 
 	if(Buffer->GetStreaming())
 	{
@@ -483,6 +501,8 @@ void tALSource::FillBuffer()
 //---------------------------------------------------------------------------
 void tALSource::UnqueueAllBuffers()
 {
+	volatile tCriticalSection::tLocker cs_holder(*CS);
+
 	// ソースにキューされているバッファの数を得る
 	ALint queued;
 	alGetSourcei(Source->Source, AL_BUFFERS_QUEUED, &queued);
@@ -598,6 +618,7 @@ void tALSource::WatchCallback()
 			// デコードスレッドも返す
 			if(DecodeThread)
 				tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
+
 			// ステータスの変更を通知する
 			CallStatusChanged(true);
 			// 次回再生開始前に巻き戻しが必要
@@ -634,7 +655,9 @@ void tALSource::Play()
 	{
 		// もし仮にデコードスレッドがあったとしても
 		// ここで解放する
-		if(DecodeThread) tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
+		if(DecodeThread)
+			tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
+
 
 		// 巻き戻しを行う
 		if(NeedRewind)
@@ -679,8 +702,9 @@ void tALSource::Stop(bool notify)
 	// デコードスレッドを削除する
 	if(Buffer->GetStreaming())
 	{
-		if(DecodeThread) tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
-		// デコードスレッドを削除した時点で
+		if(DecodeThread)
+			tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
+		// この時点で
 		// FillBuffer は呼ばれなくなる
 	}
 
@@ -784,9 +808,10 @@ void tALSource::SetPosition(risse_uint64 pos)
 		if(Status == ssPlay || Status == ssPause)
 		{
 			// デコードスレッドをいったん削除する
-			if(DecodeThread) tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
-					// デコードスレッドを削除した時点で
-					// FillBuffer は呼ばれなくなる
+			if(DecodeThread)
+				tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
+			// この時点で
+			// FillBuffer は呼ばれなくなる
 
 			// 再生を停止する
 			{

@@ -125,6 +125,7 @@ private:
 	};
 
 	tCriticalSection * CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection * BufferCS; //!< バッファへのキューイングを保護するクリティカルセクション
 	risse_uint NumBuffersQueued; //!< キューに入っているバッファの数
 	tInternalSource * Source;
 	tALBuffer * Buffer; //!< バッファ

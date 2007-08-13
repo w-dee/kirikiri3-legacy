@@ -137,7 +137,7 @@ void tSoundInstance::Open(const tString & filename)
 
 		// LoopManager を作成
 		LoopManager = new tWaveLoopManager(Decoder);
-
+/*
 		// pv
 		tPhaseVocoder * filter = new tPhaseVocoder();
 		filter->SetOverSampling(16);
@@ -145,9 +145,9 @@ void tSoundInstance::Open(const tString & filename)
 		filter->SetTimeScale(1.6);
 		filter->SetFrequencyScale(1.0);
 		filter->SetInput(LoopManager);
-
+*/
 		// バッファを作成
-		Buffer = new tALBuffer(filter, true);
+		Buffer = new tALBuffer(LoopManager, true);
 
 		// ソースを作成
 		Source = new tSoundALSource(this, Buffer, LoopManager);

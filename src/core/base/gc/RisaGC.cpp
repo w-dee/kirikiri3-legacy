@@ -13,7 +13,6 @@
 #include "prec.h"
 #include "base/gc/RisaGC.h"
 
-#include "gc.h"
 #include "risse/include/risseGC.h"
 
 namespace Risa {

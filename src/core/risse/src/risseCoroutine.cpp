@@ -198,10 +198,12 @@ WINBASEAPI LPVOID WINAPI RISSE_NEW_CreateFiber(
 		}
 		GC_gcollect(); // コレクトしてみる
 		GC_invoke_finalizers(); // ファイナライザを呼び出してみる
+/*
 #ifdef GC_DEBUG
 		GC_dump();
 		GC_generate_random_backtrace();
 #endif
+*/
 #ifdef RISSE_COROUTINE_DEBUG
 		fflush(stdout); fflush(stderr);
 		fprintf(stderr, "CreateFiber failed. fibers=%d, retried (%d)\n", (int)fibers.size(), (int)(i+1));

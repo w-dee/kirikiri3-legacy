@@ -64,7 +64,7 @@ class gc_map : public std::map<T1, T2, std::less<T1>, gc_allocator<std::pair<T1,
 //---------------------------------------------------------------------------
 static inline void * MallocCollectee(size_t size)
 {
-	return GC_malloc(size);
+	return GC_MALLOC(size);
 }
 //---------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ static inline void * MallocCollectee(size_t size)
 //---------------------------------------------------------------------------
 static inline void * MallocAtomicCollectee(size_t size)
 {
-	return GC_malloc_atomic(size);
+	return GC_MALLOC_ATOMIC(size);
 }
 //---------------------------------------------------------------------------
 
@@ -96,7 +96,7 @@ static inline void * MallocAtomicCollectee(size_t size)
 //---------------------------------------------------------------------------
 static inline void * ReallocCollectee(void * old_block, size_t size)
 {
-	return GC_realloc(old_block, size);
+	return GC_REALLOC(old_block, size);
 }
 //---------------------------------------------------------------------------
 
@@ -107,7 +107,7 @@ static inline void * ReallocCollectee(void * old_block, size_t size)
 //---------------------------------------------------------------------------
 static inline void FreeCollectee(void * block)
 {
-	GC_free(block);
+	GC_FREE(block);
 }
 //---------------------------------------------------------------------------
 
@@ -129,7 +129,7 @@ void * AlignedMallocAtomicCollectee(size_t size, int align);
 //---------------------------------------------------------------------------
 static inline void AlignedFreeCollectee(void * ptr)
 {
-	GC_free((reinterpret_cast<void**>(ptr))[-1]);
+	GC_FREE((reinterpret_cast<void**>(ptr))[-1]);
 }
 //---------------------------------------------------------------------------
 

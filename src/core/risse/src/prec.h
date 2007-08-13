@@ -32,9 +32,7 @@
 #include <string>
 #include <stdexcept>
 
-#include <gc.h>
-#include <gc_cpp.h>
-#include <gc_allocator.h>
+#include "risseGC.h"
 
 #endif
 //---------------------------------------------------------------------------

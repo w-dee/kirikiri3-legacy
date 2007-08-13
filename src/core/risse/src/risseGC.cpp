@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 
-#include <gc.h>
+#include "risseGC.h"
 #include "risseTypes.h"
 
 
@@ -23,7 +23,7 @@ void * AlignedMallocAtomicCollectee(size_t size, int align)
 {
 	// aligned memory allocation is to be used to gain performance on some processors.
 	align = 1 << align;
-	void *ptr = GC_malloc_atomic(size + align + sizeof(void*));
+	void *ptr = GC_MALLOC_ATOMIC(size + align + sizeof(void*));
 	void *org_ptr = ptr;
 	risse_ptruint *iptr =
 		reinterpret_cast<risse_ptruint *>(&ptr);

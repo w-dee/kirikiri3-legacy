@@ -24,6 +24,9 @@ CFLAGS=                           \
 	-DATOMIC_UNCOLLECTABLE=1      \
 	-DGC_DLL=1                    \
 	-DGC_BUILD=1                  \
+	-DGC_CAN_SAVE_CALL_STACKS     \
+	-DGC_ADD_CALLER               \
+	"-DGC_RETURN_ADDR=(GC_word)__builtin_return_address(0)" \
 	-I./include                   \
 	-fexceptions                  \
 	-g                            \
@@ -101,12 +104,19 @@ $(DEF): $(LIB) Makefile
 # ライブラリを利用する側には GC_DLL マクロの定義を使わない。
 # declspec(dllimport) の属性を使わずに DLL からインポートするため。
 
+# また、MinGW で呼び出し関数名ポインタをトラッキングするための定義も追加する
+
+
 $(RENAME_H): $(LIB) Makefile
 	echo "" > $@
 	for sym in `nm $< | grep '^........ [BCDR] _' | sed 's/[^_]*_//' |\
 				 grep -v '^_' | sort | uniq`; do \
 		echo "#define $$sym	(*_imp__$$sym)"	>> $@; \
 	done
+	echo "#define GC_CAN_SAVE_CALL_STACKS" >> $@
+	echo "#define GC_ADD_CALLER"           >> $@
+	echo "#define GC_RETURN_ADDR (GC_word)__builtin_return_address(0)" >> $@
+
 
 $(DLL): $(DEF) $(LIB) Makefile
 	dllwrap -mno-cygwin -k -def $(DEF) --driver-name g++ -o $(DLL) $(LIB) --implib $(IMPLIB)

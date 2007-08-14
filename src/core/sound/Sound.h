@@ -61,11 +61,11 @@ public:
 protected:
 	//! @brief		ステータスの変更を通知する
 	//! @param		status		ステータス
-	virtual void OnStatusChanged(tStatus status) {;}
+	virtual void OnStatusChanged(tStatus status);
 
 	//! @brief		ステータスの変更を非同期に通知する
 	//! @param		status		ステータス
-	virtual void OnStatusChangedAsync(tStatus status) {;}
+	virtual void OnStatusChangedAsync(tStatus status);
 };
 //---------------------------------------------------------------------------
 
@@ -80,6 +80,7 @@ protected:
 //---------------------------------------------------------------------------
 class tSoundInstance :
 	public tEventSourceInstance,
+	public tEventDestination,
 	protected depends_on<tOpenAL>,
 	protected depends_on<tWaveDecoderFactoryManager>,
 	public tALSourceStatus
@@ -108,10 +109,6 @@ private:
 protected:
 	//! @brief		内部状態のクリア
 	void Clear();
-
-	//! @brief		OnStatusChanged を呼ぶ
-	//! @param		status ステータス
-	void CallOnStatusChanged(tStatus status) {;}
 
 public:
 	//! @brief		メディアを開く
@@ -147,13 +144,18 @@ public:
 	void SetTimePosition(double pos);
 
 	//! @brief		ステータスが変更された
-	//! @param		このメソッドは非同期に別スレッドから呼ばれることがあるので注意。
-	virtual void OnStatusChanged(tStatus status){;}
+	virtual void OnStatusChanged(tStatus status);
 
 	//! @brief		ステータスが変更された
 	//! @param		このメソッドは非同期に別スレッドから呼ばれることがあるので注意。
-	virtual void OnStatusChangedAsync(tStatus status){;}
+	virtual void OnStatusChangedAsync(tStatus status);
 
+protected:
+	//! @brief	イベントが配信されるとき
+	//! @param	info イベント情報
+	virtual void OnEvent(tEventInfo * info); // from tEventDestination
+
+public:
 	tStatus GetStatus() const { return Status; } //!< ステータスを返す
 
 public: // Risse用メソッドなど

@@ -40,7 +40,7 @@ tSoundALSource::tSoundALSource(tSoundInstance * owner, const tALSource * ref) :
 }
 //---------------------------------------------------------------------------
 
-/*
+
 //---------------------------------------------------------------------------
 void tSoundALSource::OnStatusChanged(tStatus status)
 {
@@ -55,7 +55,7 @@ void tSoundALSource::OnStatusChangedAsync(tStatus status)
 	Owner->OnStatusChangedAsync(status);
 }
 //---------------------------------------------------------------------------
-*/
+
 
 
 
@@ -95,6 +95,8 @@ void tSoundInstance::Init()
 //---------------------------------------------------------------------------
 void tSoundInstance::Clear()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// 再生を停止
 	if(Source) Source->Stop();
 
@@ -127,6 +129,8 @@ void tSoundInstance::CallOnStatusChanged(tStatus status)
 //---------------------------------------------------------------------------
 void tSoundInstance::Open(const tString & filename)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// メディアを開くのに先立って内部状態をクリア
 	Clear();
 
@@ -139,6 +143,7 @@ void tSoundInstance::Open(const tString & filename)
 		// LoopManager を作成
 		LoopManager = new tWaveLoopManager(Decoder);
 
+/*
 		// pv
 		tPhaseVocoder * filter = new tPhaseVocoder();
 		filter->SetOverSampling(16);
@@ -146,19 +151,20 @@ void tSoundInstance::Open(const tString & filename)
 		filter->SetTimeScale(1.6);
 		filter->SetFrequencyScale(1.0);
 		filter->SetInput(LoopManager);
-/*
+
 		// rev
 		tReverb * filter = new tReverb();
 		filter->SetInput(LoopManager);
 */
+
 		// バッファを作成
-		Buffer = new tALBuffer(filter, true);
+		Buffer = new tALBuffer(LoopManager, true);
 
 		// ソースを作成
 		Source = new tSoundALSource(this, Buffer, LoopManager);
 
 		// ステータスを更新
-		CallOnStatusChanged(ssStop);
+		OnStatusChanged(ssStop);
 	}
 	catch(...)
 	{
@@ -173,6 +179,8 @@ void tSoundInstance::Open(const tString & filename)
 //---------------------------------------------------------------------------
 void tSoundInstance::Close()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	Clear();
 }
 //---------------------------------------------------------------------------
@@ -181,6 +189,8 @@ void tSoundInstance::Close()
 //---------------------------------------------------------------------------
 void tSoundInstance::Play()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(!Source) return; // ソースがないので再生を開始できない
 	Source->Play(); // 再生を開始
 }
@@ -190,6 +200,8 @@ void tSoundInstance::Play()
 //---------------------------------------------------------------------------
 void tSoundInstance::Stop()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(!Source) return; // ソースがないので再生を停止できない
 	Source->Stop(); // 再生を停止
 }
@@ -199,6 +211,8 @@ void tSoundInstance::Stop()
 //---------------------------------------------------------------------------
 void tSoundInstance::Pause()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(!Source) return; // ソースがないので再生を一時停止できない
 	Source->Pause(); // 再生を一時停止
 }
@@ -217,6 +231,8 @@ risse_uint64 tSoundInstance::GetSamplePosition()
 //---------------------------------------------------------------------------
 double tSoundInstance::GetTimePosition()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(!Source) return 0; // ソースがないので再生位置を取得できない
 	return Source->GetPosition() * 1000 / LoopManager->GetFormat().Frequency;
 }
@@ -226,6 +242,8 @@ double tSoundInstance::GetTimePosition()
 //---------------------------------------------------------------------------
 void tSoundInstance::SetSamplePosition(risse_uint64 pos)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(!Source) return; // ソースがないので再生位置を変更できない
 	Source->SetPosition(pos);
 }
@@ -235,8 +253,60 @@ void tSoundInstance::SetSamplePosition(risse_uint64 pos)
 //---------------------------------------------------------------------------
 void tSoundInstance::SetTimePosition(double pos)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(!Source) return; // ソースがないので再生位置を変更できない
 	Source->SetPosition(static_cast<risse_uint64>(pos *  LoopManager->GetFormat().Frequency / 1000));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSoundInstance::OnStatusChanged(tStatus status)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	if(Status != status)
+	{
+		// 以前に発生させた非同期イベントのうち、配信されていないイベントはすべて削除する
+		GetDestEventQueueInstance()->CancelEvents(this);
+
+		// onStatusChanged を呼ぶ
+		Operate(ocFuncCall, NULL, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
+				0, tMethodArgument::New((risse_int64)(int)status));
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSoundInstance::OnStatusChangedAsync(tStatus status)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	if(Status != status)
+	{
+		Status = status;
+		GetDestEventQueueInstance()->PostEvent(
+			new tEventInfo(
+				(int)status, // id
+				this, // source
+				this // destination
+				) );
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSoundInstance::OnEvent(tEventInfo * info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// onStatusChanged イベント
+	// onStatusChanged を呼ぶ
+	Operate(ocFuncCall, NULL, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
+			0, tMethodArgument::New((risse_int64)info->GetId()));
 }
 //---------------------------------------------------------------------------
 
@@ -252,6 +322,8 @@ void tSoundInstance::construct()
 //---------------------------------------------------------------------------
 void tSoundInstance::initialize(const tNativeCallInfo &info)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
 }

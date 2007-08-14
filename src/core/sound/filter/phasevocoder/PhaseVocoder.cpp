@@ -101,7 +101,7 @@ void tPhaseVocoder::SetFrequencyScale(float v)
 //---------------------------------------------------------------------------
 void tPhaseVocoder::Clear()
 {
-	delete DSP, DSP = NULL;
+	if(DSP) delete DSP, DSP = NULL;
 }
 //---------------------------------------------------------------------------
 

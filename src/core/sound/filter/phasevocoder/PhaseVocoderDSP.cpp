@@ -76,8 +76,8 @@ tPhaseVocoderDSP::tPhaseVocoderDSP(
 	try
 	{
 		// ワークなどの確保
-		AnalWork  = (float **)AlignedMallocAtomicCollectee(sizeof(float *) * Channels, 4);
-		SynthWork = (float **)AlignedMallocAtomicCollectee(sizeof(float *) * Channels, 4);
+		AnalWork  = (float **)MallocCollectee(sizeof(float *) * Channels);
+		SynthWork = (float **)MallocCollectee(sizeof(float *) * Channels);
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			AnalWork[ch] = NULL, SynthWork[ch] = NULL;
 		for(unsigned int ch = 0; ch < Channels; ch++)
@@ -86,7 +86,7 @@ tPhaseVocoderDSP::tPhaseVocoderDSP(
 			SynthWork[ch] = (float *)AlignedMallocAtomicCollectee(sizeof(float) * (FrameSize), 4);
 		}
 
-		LastAnalPhase = (float **)AlignedMallocAtomicCollectee(sizeof(float *) * Channels, 4);
+		LastAnalPhase = (float **)MallocCollectee(sizeof(float *) * Channels);
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			LastAnalPhase[ch] = NULL;
 		for(unsigned int ch = 0; ch < Channels; ch++)
@@ -95,7 +95,7 @@ tPhaseVocoderDSP::tPhaseVocoderDSP(
 			memset(LastAnalPhase[ch], 0, FrameSize/2 * sizeof(float)); // 0 でクリア
 		}
 
-		LastSynthPhase = (float **)AlignedMallocAtomicCollectee(sizeof(float *) * Channels, 4);
+		LastSynthPhase = (float **)MallocCollectee(sizeof(float *) * Channels);
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			LastSynthPhase[ch] = NULL;
 		for(unsigned int ch = 0; ch < Channels; ch++)
@@ -207,25 +207,25 @@ void tPhaseVocoderDSP::Clear()
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			AlignedFreeCollectee(AnalWork[ch]), AnalWork[ch] = NULL;
-		AlignedFreeCollectee(AnalWork), AnalWork = NULL;
+		FreeCollectee(AnalWork), AnalWork = NULL;
 	}
 	if(SynthWork)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			AlignedFreeCollectee(SynthWork[ch]), SynthWork[ch] = NULL;
-		AlignedFreeCollectee(SynthWork), SynthWork = NULL;
+		FreeCollectee(SynthWork), SynthWork = NULL;
 	}
 	if(LastAnalPhase)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			AlignedFreeCollectee(LastAnalPhase[ch]), LastAnalPhase[ch] = NULL;
-		AlignedFreeCollectee(LastAnalPhase), LastAnalPhase = NULL;
+		FreeCollectee(LastAnalPhase), LastAnalPhase = NULL;
 	}
 	if(LastSynthPhase)
 	{
 		for(unsigned int ch = 0; ch < Channels; ch++)
 			AlignedFreeCollectee(LastSynthPhase[ch]), LastSynthPhase[ch] = NULL;
-		AlignedFreeCollectee(LastSynthPhase), LastSynthPhase = NULL;
+		FreeCollectee(LastSynthPhase), LastSynthPhase = NULL;
 	}
 	AlignedFreeCollectee(FFTWorkIp), FFTWorkIp = NULL;
 	AlignedFreeCollectee(FFTWorkW), FFTWorkW = NULL;

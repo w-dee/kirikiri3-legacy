@@ -19,20 +19,48 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-void * AlignedMallocAtomicCollectee(size_t size, int align)
+void * _AlignedMallocCollectee(size_t size, size_t align, bool atomic)
 {
-	// aligned memory allocation is to be used to gain performance on some processors.
+	// aligned memory allocation is to be used (or mandatory) to
+	// gain performance on some processors.
+
+	// アラインメントを変換する (例: align が 4 ならば 1<<4 = 16 (bytes) )
 	align = 1 << align;
-	void *ptr = GC_MALLOC_ATOMIC(size + align + sizeof(void*));
+
+	// アラインメントのチェック
+	// sizeof(void*) 未満 のアラインメントは行わない。
+	if(align < sizeof(void*)) align = sizeof(void*);
+
+	// メモリブロックを確保する。アラインメント分と、
+	// オリジナルのメモリブロックのポインタを格納する為の
+	// 領域もくわえた分を確保する。
+	void *ptr = atomic ?
+		GC_MALLOC_ATOMIC(size + align + sizeof(void*)) :
+		GC_MALLOC       (size + align + sizeof(void*));
 	void *org_ptr = ptr;
+
+	// ptr を整数値としてアクセスするために、整数によるエイリアスを
+	// 作成する
 	risse_ptruint *iptr =
 		reinterpret_cast<risse_ptruint *>(&ptr);
+
+	// *iptr にアラインメント分と sizeof(void*) を加算
 	*iptr += align + sizeof(void*);
+
+	// *iptr をアラインメントに合わせる
+	// align-1 の not を iptr に and すると言うことはすなわち
+	// *iptr を超えない、もっとも大きなアラインメントされたアドレスに
+	// *iptr が調整されるということ
 	*iptr &= ~(risse_ptruint)(align - 1);
+
+	// ptr の直前に、オリジナルのメモリブロックのポインタを格納する
 	(reinterpret_cast<void**>(ptr))[-1] = org_ptr;
+
+	// ptr を返す
 	return ptr;
 }
 //---------------------------------------------------------------------------
+
 
 } /* namespace Risse */
 

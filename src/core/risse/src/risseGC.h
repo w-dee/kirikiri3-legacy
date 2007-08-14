@@ -117,9 +117,35 @@ static inline void FreeCollectee(void * block)
 //! @brief	指定バイトでアラインメントされた MallocAtomicCollectee
 //! @param	size	確保するサイズ
 //! @param	align	アラインメント
+//! @param	atomic	atomic な (pointer freeな) メモリ領域を確保するかどうか
+//---------------------------------------------------------------------------
+void * _AlignedMallocCollectee(size_t size, size_t align, bool atomic);
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	指定バイトでアラインメントされた MallocCollectee
+//! @param	size	確保するサイズ
+//! @param	align	アラインメント
 //!					(1<<align バイト境界にアラインメントされる; 4 ならば 1<<4 = 16 = 16バイト境界)
 //---------------------------------------------------------------------------
-void * AlignedMallocAtomicCollectee(size_t size, int align);
+static inline void * AlignedMallocCollectee(size_t size, size_t align)
+{
+	return _AlignedMallocCollectee(size, align, false);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	指定バイトでアラインメントされた MallocAtomicCollectee
+//! @param	size	確保するサイズ
+//! @param	align	アラインメント
+//!					(1<<align バイト境界にアラインメントされる; 4 ならば 1<<4 = 16 = 16バイト境界)
+//---------------------------------------------------------------------------
+static inline void * AlignedMallocAtomicCollectee(size_t size, size_t align)
+{
+	return _AlignedMallocCollectee(size, align, true);
+}
 //---------------------------------------------------------------------------
 
 
@@ -131,6 +157,7 @@ static inline void AlignedFreeCollectee(void * ptr)
 {
 	GC_FREE((reinterpret_cast<void**>(ptr))[-1]);
 }
+
 //---------------------------------------------------------------------------
 
 

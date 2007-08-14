@@ -16,6 +16,7 @@
 
 
 #include "sound/filter/phasevocoder/PhaseVocoder.h"
+#include "sound/filter/reverb/Reverb.h"
 
 
 namespace Risa {
@@ -137,7 +138,7 @@ void tSoundInstance::Open(const tString & filename)
 
 		// LoopManager を作成
 		LoopManager = new tWaveLoopManager(Decoder);
-/*
+
 		// pv
 		tPhaseVocoder * filter = new tPhaseVocoder();
 		filter->SetOverSampling(16);
@@ -145,9 +146,13 @@ void tSoundInstance::Open(const tString & filename)
 		filter->SetTimeScale(1.6);
 		filter->SetFrequencyScale(1.0);
 		filter->SetInput(LoopManager);
+/*
+		// rev
+		tReverb * filter = new tReverb();
+		filter->SetInput(LoopManager);
 */
 		// バッファを作成
-		Buffer = new tALBuffer(LoopManager, true);
+		Buffer = new tALBuffer(filter, true);
 
 		// ソースを作成
 		Source = new tSoundALSource(this, Buffer, LoopManager);

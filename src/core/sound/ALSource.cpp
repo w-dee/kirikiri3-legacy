@@ -43,7 +43,7 @@ public:
 	~tWaveDecodeThread();
 
 	void SetSource(tALSource * source);
-	tALSource * GetSource() const { return Source; }
+	tALSource * GetSource() { volatile tCriticalSection::tLocker cs_holder(CS);  return Source; }
 
 protected:
 	void Execute(void);
@@ -302,16 +302,21 @@ void tWaveDecodeThreadPool::Unacquire(tWaveDecodeThread * thread)
 //---------------------------------------------------------------------------
 bool tWaveDecodeThreadPool::CallWatchCallbacks()
 {
-	volatile tCriticalSection::tLocker cs_holder(CS);
+	// ここで使用している pointer_list は自分でスレッド保護を行うので
+	// 明示的なロックはここでは必要ない。
 
 	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
 	size_t count = UsingThreads.get_locked_count();
 	for(size_t i = 0; i < count; i++)
 	{
 		tWaveDecodeThread * th = UsingThreads.get_locked(i);
-		if(th) th->GetSource()->WatchCallback();
+		if(th)
+		{
+			tALSource * source = th->GetSource();
+			if(source) source->WatchCallback();
 			// この中で Unacquire が呼ばれる可能性があるので注意
 			// (pointer_list はそういう状況でもうまく扱うことができるので問題ない)
+		}
 	}
 	return count != 0;
 }

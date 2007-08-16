@@ -396,14 +396,19 @@ void tLogViewerStatusBar::OnSize(wxSizeEvent& event)
 
 
 
-
+//---------------------------------------------------------------------------
+// イベントが配信可能かどうかが変化したことを伝えるイベントタイプを定義
+//---------------------------------------------------------------------------
+DECLARE_EVENT_TYPE(wxEVT_EVENT_STATUS_CHANGED, -1)
+DEFINE_EVENT_TYPE(wxEVT_EVENT_STATUS_CHANGED)
+//---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tConsoleFrame, tUIFrame)
+	EVT_COMMAND(wxID_ANY,			wxEVT_EVENT_STATUS_CHANGED, tConsoleFrame::OnEventStatusChanged)
 	EVT_TOOL(ID_Event,				tConsoleFrame::OnEventTool)
-	EVT_UPDATE_UI(wxID_ANY,			tConsoleFrame::OnUpdateUI)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -412,9 +417,6 @@ END_EVENT_TABLE()
 tConsoleFrame::tConsoleFrame() :
 	tUIFrame(wxT("ui/console"), _("Console"))
 {
-	// UI アップデートイベントの受け取り
-	SetExtraStyle(GetExtraStyle()|wxWS_EX_PROCESS_UI_UPDATES);
-
 	// ツールバーを追加
 	CreateToolBar();
 	GetToolBar()->AddCheckTool(ID_Event, _("Deliver events"),
@@ -431,6 +433,22 @@ tConsoleFrame::tConsoleFrame() :
 
 	// ステータスバー内のテキストコントロールにフォーカスを設定
 	SetFocusToTextCtrl();
+
+	// イベント状態を反映
+	GetToolBar()->ToggleTool(ID_Event,
+		tEventSystem::instance()->GetCanDeliverEvents());
+
+	// イベント状態リスナに登録
+	tEventSystem::instance()->GetStateListeners().add(this);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tConsoleFrame::~tConsoleFrame()
+{
+	// イベント状態リスナから削除
+	tEventSystem::instance()->GetStateListeners().remove(this);
 }
 //---------------------------------------------------------------------------
 
@@ -452,34 +470,38 @@ void tConsoleFrame::SetFocusToTextCtrl(int insert_code)
 
 
 //---------------------------------------------------------------------------
+void tConsoleFrame::OnCanDeliverEventsChanged(bool b)
+{
+	// ここは様々なスレッドから呼ばれるが、UI の処理は UI 用の
+	// スレッドで行わなければならない。ここでは UI の状態を更新するために
+	// いったん UI 用のイベントキューにイベントを post する
+	wxCommandEvent evt(wxEVT_EVENT_STATUS_CHANGED);
+	GetEventHandler()->AddPendingEvent(evt);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tConsoleFrame::OnEventTool(wxCommandEvent & event)
 {
-/*
-	TODO: handle this
 	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
 	tEventSystem::instance()->SetCanDeliverEvents(event_enabled);
-*/
+	// これは OnCanDeliverEventsChanged を呼び、結果的に後に
+	// OnEventStatusChanged も呼ぶことになるが、おそらく問題ない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tConsoleFrame::OnUpdateUI(wxUpdateUIEvent & event)
+void tConsoleFrame::OnEventStatusChanged(wxCommandEvent & event)
 {
-/*
-	TODO: handle this
-	// "Event" ボタンの状態を更新
-	bool event_enabled = GetToolBar()->GetToolState(ID_Event);
-	if(event_enabled != tEventSystem::instance()->GetCanDeliverEvents())
-	{
-		GetToolBar()->ToggleTool(ID_Event,
-			tEventSystem::instance()->GetCanDeliverEvents());
-	}
-
-	event.Skip(false);
-*/
+	// イベントの状態が変化した場合に、OnCanDeliverEventsChanged が Post した
+	// イベントに呼応して呼ばれる
+	GetToolBar()->ToggleTool(ID_Event,
+		tEventSystem::instance()->GetCanDeliverEvents());
 }
 //---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

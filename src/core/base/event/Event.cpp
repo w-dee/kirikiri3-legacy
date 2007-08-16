@@ -35,6 +35,25 @@ RISA_DEFINE_EXCEPTION_SUBCLASS(tEventQueueExceptionClass,
 
 
 
+//---------------------------------------------------------------------------
+void tEventSystem::SetCanDeliverEvents(bool b)
+{
+	volatile tCriticalSection::tLocker cs_holder(CS);
+
+	if(CanDeliverEvents != b)
+	{
+		CanDeliverEvents = b;
+
+		volatile pointer_list<tStateListener>::scoped_lock lock(StateListeners);
+		size_t count = StateListeners.get_locked_count();
+		for(size_t i = 0; i < count; i++)
+		{
+			tStateListener * listener = StateListeners.get_locked(i);
+			if(listener) listener->OnCanDeliverEventsChanged(b);
+		}
+	}
+}
+//---------------------------------------------------------------------------
 
 
 

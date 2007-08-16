@@ -17,6 +17,7 @@
 #include <boost/array.hpp>
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
+#include "base/utils/PointerList.h"
 #include "base/script/RisseEngine.h"
 #include "base/exception/RisaException.h"
 
@@ -158,13 +159,33 @@ public:
 class tEventSystem : public singleton_base<tEventSystem>
 {
 	bool CanDeliverEvents; //!< イベントを配信可能かどうか
+	mutable tCriticalSection CS; //!< このインスタンスを保護するためのCS
+
+public:
+	//! @brief	イベントシステムの状態が変わった場合に呼び出されるコールバック
+	class tStateListener
+	{
+	public:
+		//! @brief		イベントを配信可能かどうかのステータスが変わった際に
+		//!				呼ばれる
+		//! @param		b		イベントを配信可能かどうか
+		//! @note		様々なスレッドから呼ばれる可能性があるので注意すること
+		virtual void OnCanDeliverEventsChanged(bool b) {;}
+	};
+
+private:
+	pointer_list<tStateListener> StateListeners; //!< イベント状態リスナ
 
 public:
 	//! @brief		コンストラクタ
 	tEventSystem() { CanDeliverEvents = true; }
 
-	bool GetCanDeliverEvents() const { return CanDeliverEvents; } //!< イベントを配信可能かどうかを返す
-	void SetCanDeliverEvents(bool b) { CanDeliverEvents = b; } //!< イベントを配信可能かどうかを設定する
+	bool GetCanDeliverEvents() const
+	{ volatile tCriticalSection::tLocker cs_holder(CS);
+	  return CanDeliverEvents; } //!< イベントを配信可能かどうかを返す
+	void SetCanDeliverEvents(bool b); //!< イベントを配信可能かどうかを設定する
+
+	pointer_list<tStateListener> & GetStateListeners() { return StateListeners; } //!< イベント状態リスナを得る
 };
 //---------------------------------------------------------------------------
 

@@ -24,8 +24,9 @@ class tLogViewerStatusBar;
 //---------------------------------------------------------------------------
 //! @brief		コンソールのフレーム
 //---------------------------------------------------------------------------
-class tConsoleFrame : public tUIFrame/*, TODO: handle this 
-						depends_on<tEventSystem> */
+class tConsoleFrame : public tUIFrame,
+					 public tEventSystem::tStateListener,
+						depends_on<tEventSystem>
 {
 	enum
 	{
@@ -36,6 +37,9 @@ public:
 	//! @brief		コンストラクタ
 	tConsoleFrame();
 
+	//! @brief		デストラクタ
+	~tConsoleFrame();
+
 	//! @brief		ログビューアにフォーカスを合わせる
 	void SetFocusToLogViewer();
 
@@ -43,6 +47,9 @@ public:
 	//! @param		insert_code		テキストコントロールにフォーカスを合わせた際に
 	//!								押されたキー (必要ならばこれを挿入する)
 	void SetFocusToTextCtrl(int insert_code = 0);
+
+protected: // tEventSystem::tStateListener
+	void OnCanDeliverEventsChanged(bool b);
 
 private:
 	tLogScrollView *ScrollView; //!< スクロールエリア
@@ -52,9 +59,9 @@ private:
 	//! @param		event イベントオブジェクト
 	void OnEventTool(wxCommandEvent & event);
 
-	//! @brief		UI アップデートイベントが発生したとき
+	//! @brief		イベントの状態が変化した
 	//! @param		event イベントオブジェクト
-	void OnUpdateUI(wxUpdateUIEvent & event);
+	void OnEventStatusChanged(wxCommandEvent & event);
 
 	//! @brief		イベントテーブルの定義
 	DECLARE_EVENT_TABLE()

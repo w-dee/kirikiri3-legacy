@@ -39,7 +39,7 @@ struct tWaveSegment : public tAtomicCollectee
 //---------------------------------------------------------------------------
 //! @brief 再生イベント情報
 //---------------------------------------------------------------------------
-struct tWaveEvent : public tAtomicCollectee
+struct tWaveEvent : public tCollectee
 {
 	//! @brief コンストラクタ
 	risse_int64 Position; //!< オリジナルデコーダ上でのラベル位置 (PCM サンプルグラニュール数単位)

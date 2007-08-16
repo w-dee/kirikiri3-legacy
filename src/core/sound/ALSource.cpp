@@ -600,10 +600,8 @@ void tALSource::QueueBuffer()
 
 
 //---------------------------------------------------------------------------
-void tALSource::WatchCallback()
+void tALSource::RecheckStatus()
 {
-	volatile tCriticalSection::tLocker cs_holder(*CS);
-
 	if(Status == ssPlay)
 	{
 		ALint state;
@@ -635,6 +633,16 @@ void tALSource::WatchCallback()
 
 
 //---------------------------------------------------------------------------
+void tALSource::WatchCallback()
+{
+	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	RecheckStatus();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tALSource::CallStatusChanged(bool async)
 {
 	if(PrevStatus != Status)
@@ -653,6 +661,8 @@ void tALSource::CallStatusChanged(bool async)
 void tALSource::Play()
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	RecheckStatus();
 
 	if(Status == ssPlay) return; // すでに再生している場合は再生をしない
 
@@ -704,6 +714,8 @@ void tALSource::Stop(bool notify)
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
 
+	RecheckStatus();
+
 	// デコードスレッドを削除する
 	if(Buffer->GetStreaming())
 	{
@@ -743,6 +755,8 @@ void tALSource::Pause()
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
 
+	RecheckStatus();
+
 	// 再生中の場合は
 	if(Status == ssPlay)
 	{
@@ -766,6 +780,8 @@ void tALSource::Pause()
 risse_uint64 tALSource::GetPosition()
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	RecheckStatus();
 
 	// 再生中や一時停止中でない場合は 0 を返す
 	if(Status != ssPlay && Status != ssPause) return 0;
@@ -807,6 +823,8 @@ risse_uint64 tALSource::GetPosition()
 void tALSource::SetPosition(risse_uint64 pos)
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	RecheckStatus();
 
 	if(Buffer->GetStreaming())
 	{

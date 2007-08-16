@@ -179,6 +179,12 @@ private: //---- queue/buffer management
 	//! @note		キューできない場合は何もしない
 	void QueueBuffer();
 
+	//! @brief		状態をチェックする
+	//! @note		OpenAL による実際の再生状況と、このクラス内の管理情報が
+	//!				異なる場合がある(特に再生停止時)ため、その状態を再度チェックするためにある。
+	//!				クリティカルセクションによる保護は別の場所で行うこと。
+	void RecheckStatus();
+
 public:
 	//! @brief		監視用コールバック(tWaveWatchThreadから約50msごとに呼ばれる)
 	void WatchCallback();

@@ -91,6 +91,17 @@ inline Risa::tALSourceStatus::tStatus FromVariant<Risa::tALSourceStatus::tStatus
 	return (Risa::tALSourceStatus::tStatus)(int)(risse_int64)v;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		NativeBinder 用の tALSourceStatus::tStatus -> Variant 変換定義
+//---------------------------------------------------------------------------
+template <>
+inline tVariant ToVariant<Risa::tALSourceStatus::tStatus>(Risa::tALSourceStatus::tStatus s)
+{
+	return tVariant((risse_int64)(int)s);
+}
+//---------------------------------------------------------------------------
 }
 namespace Risa {
 

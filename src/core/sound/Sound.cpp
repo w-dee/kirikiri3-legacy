@@ -113,18 +113,6 @@ void tSoundInstance::Clear()
 }
 //---------------------------------------------------------------------------
 
-/*
-//---------------------------------------------------------------------------
-void tSoundInstance::CallOnStatusChanged(tStatus status)
-{
-	if(Status != status)
-	{
-		Status = status;
-		OnStatusChanged(status);
-	}
-}
-//---------------------------------------------------------------------------
-*/
 
 //---------------------------------------------------------------------------
 void tSoundInstance::Open(const tString & filename)
@@ -268,6 +256,8 @@ void tSoundInstance::OnStatusChanged(tStatus status)
 
 	if(Status != status)
 	{
+		Status = status;
+
 		// 以前に発生させた非同期イベントのうち、配信されていないイベントはすべて削除する
 		GetDestEventQueueInstance()->CancelEvents(this);
 
@@ -307,6 +297,16 @@ void tSoundInstance::OnEvent(tEventInfo * info)
 	// onStatusChanged を呼ぶ
 	Operate(ocFuncCall, NULL, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
 			0, tMethodArgument::New((risse_int64)info->GetId()));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tSoundInstance::tStatus tSoundInstance::GetStatus() const
+{
+	volatile tSynchronizer sync(this); // sync
+
+	return Status;
 }
 //---------------------------------------------------------------------------
 
@@ -393,6 +393,7 @@ void tSoundClass::RegisterMembers()
 			&tSoundInstance::get_samplePosition, &tSoundInstance::set_samplePosition);
 	BindProperty(this, tSS<'p','o','s','i','t','i','o','n'>(),
 			&tSoundInstance::get_position, &tSoundInstance::set_position);
+	BindProperty(this, tSS<'s','t','a','t','u','s'>(), &tSoundInstance::get_status);
 	BindFunction(this, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
 			&tSoundInstance::onStatusChanged);
 }

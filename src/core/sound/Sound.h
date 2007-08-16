@@ -156,7 +156,7 @@ protected:
 	virtual void OnEvent(tEventInfo * info); // from tEventDestination
 
 public:
-	tStatus GetStatus() const { return Status; } //!< ステータスを返す
+	tStatus GetStatus() const; //!< ステータスを返す
 
 public: // Risse用メソッドなど
 	void construct();
@@ -171,6 +171,7 @@ public: // Risse用メソッドなど
 	void set_samplePosition(risse_uint64 pos) { SetSamplePosition(pos); }
 	double get_position() { return GetTimePosition(); }
 	void set_position(double pos) { SetTimePosition(pos); }
+	tStatus get_status() { return GetStatus(); }
 	void onStatusChanged(tStatus status) {;}
 };
 //---------------------------------------------------------------------------

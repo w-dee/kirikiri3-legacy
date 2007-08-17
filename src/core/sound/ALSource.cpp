@@ -405,6 +405,9 @@ tALSource::tInternalSource::tInternalSource()
 	// ソースの生成
 	alGenSources(1, &Source);
 	tOpenAL::instance()->ThrowIfError(RISSE_WS("alGenSources"));
+
+	alSourcei(Source, AL_LOOPING, AL_FALSE);
+	tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
 }
 //---------------------------------------------------------------------------
 
@@ -469,17 +472,13 @@ void tALSource::Init(tALBuffer * buffer)
 	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	{
-		volatile tOpenAL::tCriticalSectionHolder cs_holder;
-
 		// ソースの生成
 		Source = new tInternalSource();
-
-		alSourcei(Source->Source, AL_LOOPING, AL_FALSE);
-		tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_LOOPING)"));
 
 		// ストリーミングを行わない場合は、バッファをソースにアタッチ
 		if(!Buffer->GetStreaming())
 		{
+			volatile tOpenAL::tCriticalSectionHolder cs_holder;
 			alSourcei(Source->Source, AL_BUFFER, Buffer->GetBuffer());
 			tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcei(AL_BUFFER)"));
 		}
@@ -492,6 +491,8 @@ void tALSource::Init(tALBuffer * buffer)
 void tALSource::FillBuffer()
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	RecheckStatus();
 
 	if(!DecodeThread) return ; // デコードスレッドが使用不可なので呼び出さない
 
@@ -508,6 +509,21 @@ void tALSource::UnqueueAllBuffers()
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
 
+	RISSE_ASSERT(Buffer->GetStreaming());
+
+	// ソースの削除と再生成を行う
+	if(Source) delete Source, Source = NULL;
+	Source = new tInternalSource();
+
+/*
+	下記のようにバッファの内容をいったんすべて alSourceUnqueueBuffers を使って
+	アンキューする方法は、なぜか alGetSourcei(AL_BUFFERS_QUEUED) が 1 を返し、
+	alSourceUnqueueBuffers でそのバッファをアンキューしようとしてもエラーに
+	なる事がある。なので、上記のようにいったんソースを削除し、作成し直す
+	事にする。
+*/
+
+/*
 	// ソースにキューされているバッファの数を得る
 	ALint queued;
 	alGetSourcei(Source->Source, AL_BUFFERS_QUEUED, &queued);
@@ -523,7 +539,7 @@ void tALSource::UnqueueAllBuffers()
 		tOpenAL::instance()->ThrowIfError(
 			RISSE_WS("alSourceUnqueueBuffers at tALSource::UnqueueAllBuffers"));
 	}
-
+*/
 	// バッファもすべてアンキュー
 	Buffer->FreeAllBuffers();
 
@@ -563,8 +579,10 @@ void tALSource::QueueBuffer()
 			Buffer->PushFreeBuffer(buffer); // アンキューしたバッファを返す
 
 			{
-				volatile tCriticalSection::tLocker cs_holder(*CS);
-				SegmentQueues.pop_front(); // セグメントキューからも削除
+				if(SegmentQueues.size() > 0)
+					SegmentQueues.pop_front(); // セグメントキューからも削除
+				else
+					fprintf(stderr, "!!! none to popup from SegmentQueues\n"); fflush(stderr);
 			}
 		}
 	}
@@ -589,7 +607,6 @@ void tALSource::QueueBuffer()
 		// セグメントキューに追加
 		if(filled)
 		{
-			volatile tCriticalSection::tLocker cs_holder(*CS);
 			SegmentQueues.push_back(segmentqueue);
 //			fprintf(stderr, "queue : ");
 //			segmentqueue.Dump();
@@ -616,16 +633,7 @@ void tALSource::RecheckStatus()
 		{
 			// Playing が真を表しているにもかかわらず、OpenAL のソースは再生を
 			// 停止している
-			// 状態を修正
-			Status = ssStop;
-			// デコードスレッドも返す
-			if(DecodeThread)
-				tWaveDecodeThreadPool::instance()->Unacquire(DecodeThread), DecodeThread = NULL;
-
-			// ステータスの変更を通知する
-			CallStatusChanged(true);
-			// 次回再生開始前に巻き戻しが必要
-			NeedRewind = true;
+			InternalStop(); // 再生を停止
 		}
 	}
 }
@@ -710,12 +718,8 @@ void tALSource::Play()
 
 
 //---------------------------------------------------------------------------
-void tALSource::Stop(bool notify)
+void tALSource::InternalStop(bool notify)
 {
-	volatile tCriticalSection::tLocker cs_holder(*CS);
-
-	RecheckStatus();
-
 	// デコードスレッドを削除する
 	if(Buffer->GetStreaming())
 	{
@@ -746,6 +750,18 @@ void tALSource::Stop(bool notify)
 
 	// 次回再生開始前に巻き戻しが必要
 	NeedRewind = true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tALSource::Stop(bool notify)
+{
+	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	RecheckStatus();
+
+	InternalStop();
 }
 //---------------------------------------------------------------------------
 

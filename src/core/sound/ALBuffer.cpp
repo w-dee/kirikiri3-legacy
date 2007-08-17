@@ -305,6 +305,7 @@ void tALBuffer::PushFreeBuffer(ALuint buffer)
 {
 	volatile tCriticalSection::tLocker lock(*CS);
 
+	RISSE_ASSERT(FreeBufferCount < Buffers->BufferAllocatedCount);
 	FreeBuffers[FreeBufferCount++] = buffer;
 }
 //---------------------------------------------------------------------------

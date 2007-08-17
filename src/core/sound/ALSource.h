@@ -200,6 +200,12 @@ public:
 	//! @brief		再生の開始
 	void Play();
 
+protected:
+	//! @brief		再生の停止(内部関数)
+	//! @param		notify		OnStatusChanged で通知をするかどうか
+	void InternalStop(bool notify = true);
+
+public:
 	//! @brief		再生の停止
 	//! @param		notify		OnStatusChanged で通知をするかどうか
 	//! @note		このメソッドはメディアの巻き戻しを行わない(ソースはそこら辺を

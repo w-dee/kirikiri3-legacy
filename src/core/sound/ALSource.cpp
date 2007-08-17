@@ -19,7 +19,7 @@
 #include "base/event/IdleEvent.h"
 #include "base/utils/PointerList.h"
 #include "sound/Sound.h"
-
+#include "base/log/Log.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(51552,26074,48813,19041,30653,39645,11297,33602);
@@ -803,6 +803,22 @@ risse_uint64 tALSource::GetPosition()
 	if(Status != ssPlay && Status != ssPause) return 0;
 	if(SegmentQueues.size() == 0) return 0;
 
+	unsigned int unit = Buffer->GetOneBufferRenderUnit();
+
+/*---- debug ----*/
+{
+	ALint queued;
+	alGetSourcei(Source->Source, AL_BUFFERS_QUEUED, &queued);
+	tOpenAL::instance()->ThrowIfError(
+		RISSE_WS("alGetSourcei(AL_BUFFERS_QUEUED) at tALSource::UnqueueAllBuffers"));
+	if(queued != (ALint) SegmentQueues.size())
+		fprintf(stderr, "segment count does not match (al %d risa %d)\n", (int)queued, (int)SegmentQueues.size());
+}
+/*---- debug ----*/
+
+	unsigned int queue_index;
+	unsigned int queue_offset;
+
 	// 再生位置を取得する
 	ALint pos = 0;
 	{
@@ -810,21 +826,21 @@ risse_uint64 tALSource::GetPosition()
 
 		alGetSourcei(Source->Source, AL_SAMPLE_OFFSET, &pos);
 		tOpenAL::instance()->ThrowIfError(RISSE_WS("alGetSourcei(AL_SAMPLE_OFFSET)"));
+
+//		tLogger::Log(RISSE_WS("al pos : ") + tString::AsString(pos));
 	}
+
+	// ときどき、 alGetSourcei(AL_SAMPLE_OFFSET) はキューされているバッファを
+	// 超えるような変なオフセットを返す。
+	// どうも折り返させれば OK なようなのでそうする。正常なオフセットを返さないのは
+	// OpenAL の実装のバグかとおもわれるが、それを回避する。
+	ALint size_max = (unsigned int)SegmentQueues.size() * unit;
+	while(pos >= size_max) pos -= size_max;
 
 	// 返された値は キューの先頭からの再生オフセットなので、該当する
 	// キューを探す
-	unsigned int unit = Buffer->GetOneBufferRenderUnit();
-	unsigned int queue_index  = pos / unit;
-	unsigned int queue_offset = pos % unit;
-
-	// キューの範囲をはみ出していないか？
-	if(queue_index >= SegmentQueues.size())
-	{
-		// はみ出している
-		fprintf(stderr, "segment count ran out\n");
-		return 0;
-	}
+	queue_index  = pos / unit;
+	queue_offset = pos % unit;
 
 //	fprintf(stderr, "get position queue in offset %d at queue index %d : ", queue_offset, queue_index);
 //	SegmentQueues[queue_index].Dump();

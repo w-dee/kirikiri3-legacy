@@ -2383,6 +2383,13 @@ public: // ユーティリティ
 	//!				トレースは追加されない。
 	void AddTrace(const tScriptBlockInstance * sb, risse_size pos) const;
 
+	//! @brief		メッセージにプレフィックスを追加する
+	//! @param		sb			スクリプトブロック
+	//! @param		pos			スクリプト上の位置
+	//! @note		この variant に Throwable クラスのインスタンスが入っているとみなし、
+	//!				message プロパティの前に指定されたメッセージを追加する。
+	void PrependMessage(const tString & message) const;
+
 	//! @brief		デバッグ用ダンプ(標準出力に出力する)
 	void DebugDump() const;
 

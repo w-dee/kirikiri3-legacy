@@ -2789,6 +2789,16 @@ void tVariantBlock::AddTrace(const tScriptBlockInstance * sb, risse_size pos) co
 
 
 //---------------------------------------------------------------------------
+void tVariantBlock::PrependMessage(const tString & message) const
+{
+	RISSE_ASSERT(GetType() == vtObject);
+	SetPropertyDirect_Object(ss_message, 0,
+		tVariant(message + (tString)GetPropertyDirect_Object(ss_message)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tVariantBlock::AssertClass(tClassBase * cls) const
 {
 	// CheckClass も同じ構造をしているので、修正の際はよく見比べること。

@@ -23,7 +23,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief フェーズボコーダフィルタクラス
 //---------------------------------------------------------------------------
-class tPhaseVocoder : public tBasicWaveFilter
+class tPhaseVocoderInstance : public tWaveFilterInstance
 {
 	static const int DEFAULT_FRAME_SIZE = 128; //!< default frame size
 	static const int DEFAULT_OVERSAMPLING = 4; //!< default oversampling factor
@@ -39,10 +39,10 @@ class tPhaseVocoder : public tBasicWaveFilter
 
 public:
 	//! @brief		コンストラクタ
-	tPhaseVocoder();
+	tPhaseVocoderInstance();
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
-	~tPhaseVocoder() {;}
+	~tPhaseVocoderInstance() {;}
 
 	//! @brief		FFTフレームサイズを得る
 	//! @return		FFTフレームサイズ
@@ -89,8 +89,46 @@ private:
 	//! @brief		フィルタ動作を行うとき
 	void Filter();
 
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
+
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"PhaseVocoder" クラス
+//---------------------------------------------------------------------------
+class tPhaseVocoderClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tPhaseVocoderClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------

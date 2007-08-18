@@ -20,7 +20,7 @@ RISSE_DEFINE_SOURCE_ID(35549,59301,21418,20212,56467,33012,49239,37291);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tBasicWaveFilter::tBasicWaveFilter(tPCMTypes::tType desired_output_type)
+tWaveFilterInstance::tWaveFilterInstance(tPCMTypes::tType desired_output_type)
 {
 	QueuedData = NULL;
 	QueuedDataAllocSize = 0;
@@ -34,7 +34,7 @@ tBasicWaveFilter::tBasicWaveFilter(tPCMTypes::tType desired_output_type)
 
 
 //---------------------------------------------------------------------------
-tBasicWaveFilter::~tBasicWaveFilter()
+tWaveFilterInstance::~tWaveFilterInstance()
 {
 	if(ConvertBuffer) FreeCollectee(ConvertBuffer);
 	if(QueuedData) FreeCollectee(QueuedData);
@@ -43,7 +43,7 @@ tBasicWaveFilter::~tBasicWaveFilter()
 
 
 //---------------------------------------------------------------------------
-void tBasicWaveFilter::Reset()
+void tWaveFilterInstance::Reset()
 {
 	if(ConvertBuffer) FreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
 	if(QueuedData) FreeCollectee(QueuedData), QueuedData = NULL;
@@ -60,7 +60,7 @@ void tBasicWaveFilter::Reset()
 
 
 //---------------------------------------------------------------------------
-void tBasicWaveFilter::SetInput(tWaveFilter * input)
+void tWaveFilterInstance::SetInput(tWaveFilter * input)
 {
 	Input = input;
 	InputFormat = input->GetFormat();
@@ -79,7 +79,7 @@ void tBasicWaveFilter::SetInput(tWaveFilter * input)
 
 
 //---------------------------------------------------------------------------
-bool tBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &written,
+bool tWaveFilterInstance::Render(void *dest, risse_uint samples, risse_uint &written,
 	tWaveSegmentQueue & segmentqueue)
 {
 	written = 0;
@@ -121,7 +121,7 @@ bool tBasicWaveFilter::Render(void *dest, risse_uint samples, risse_uint &writte
 
 
 //---------------------------------------------------------------------------
-const tWaveFormat & tBasicWaveFilter::GetFormat()
+const tWaveFormat & tWaveFilterInstance::GetFormat()
 {
 	if(!Input)
 		tSoundExceptionClass::Throw(RISSE_WS_TR("The filter input is not yet connected"));
@@ -131,7 +131,7 @@ const tWaveFormat & tBasicWaveFilter::GetFormat()
 
 
 //---------------------------------------------------------------------------
-void * tBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
+void * tWaveFilterInstance::PrepareQueue(risse_uint numsamplegranules)
 {
 	// キューを準備する
 	risse_uint buffer_size_needed = numsamplegranules * OutputFormat.GetSampleGranuleSize();
@@ -164,7 +164,7 @@ void * tBasicWaveFilter::PrepareQueue(risse_uint numsamplegranules)
 
 
 //---------------------------------------------------------------------------
-void tBasicWaveFilter::Queue(risse_uint numsamplegranules,
+void tWaveFilterInstance::Queue(risse_uint numsamplegranules,
 		const tWaveSegmentQueue & segmentqueue)
 {
 	// 出力キューにデータをおく
@@ -176,7 +176,7 @@ void tBasicWaveFilter::Queue(risse_uint numsamplegranules,
 
 
 //---------------------------------------------------------------------------
-risse_uint tBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
+risse_uint tWaveFilterInstance::Fill(void * dest, risse_uint numsamplegranules,
 	tPCMTypes::tType desired_type, 
 	bool fill_silence,
 	tWaveSegmentQueue & segmentqueue)
@@ -322,6 +322,79 @@ risse_uint tBasicWaveFilter::Fill(void * dest, risse_uint numsamplegranules,
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tWaveFilterInstance::construct()
+{
+	// デフォルトではなにもしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWaveFilterInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// 親クラスの同名メソッドを呼び出す
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tWaveFilterClass::tWaveFilterClass(tScriptEngine * engine) :
+	tClassBase(tSS<'W','a','v','e','F','i','l','t','e','r'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWaveFilterClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tWaveFilterClass::ovulate);
+	BindFunction(this, ss_construct, &tWaveFilterInstance::construct);
+	BindFunction(this, ss_initialize, &tWaveFilterInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tWaveFilterClass::ovulate()
+{
+	// このクラスのインスタンスは作成できないので例外を投げる
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		WaveFilter クラスレジストラ
+template class tRisseClassRegisterer<tWaveFilterClass>;
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

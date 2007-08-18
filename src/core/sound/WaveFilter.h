@@ -21,6 +21,14 @@ namespace Risa {
 
 /*
 
+※ 名称に注意
+   Risse 用クラスの WaveFilter は filter/BasicWaveFilter.h 内で定義されている。
+   Risse 用クラスで WaveFilter と言った場合は、実際には tWaveFilterInstance の
+   派生クラスである。
+   C++ クラスの tWaveFilter はより上位のインターフェースであり、PhaseVocoder や
+   Reverb にとどまらずに WaveLoopManager もこれを継承するものである。
+
+
 RisaのWaveフィルタについて
 
 ■ アーキテクチャ

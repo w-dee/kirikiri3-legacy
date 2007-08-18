@@ -19,8 +19,8 @@ RISSE_DEFINE_SOURCE_ID(8600,37386,12503,16952,7601,59827,19639,49324);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tReverb::tReverb() :
-	tBasicWaveFilter(tPCMTypes::tf32)
+tReverbInstance::tReverbInstance() :
+	tWaveFilterInstance(tPCMTypes::tf32)
 {
 	Buffer = NULL;
 }
@@ -28,7 +28,7 @@ tReverb::tReverb() :
 
 
 //---------------------------------------------------------------------------
-void tReverb::InputChanged()
+void tReverbInstance::InputChanged()
 {
 	Model.mute();
 
@@ -42,7 +42,7 @@ void tReverb::InputChanged()
 
 
 //---------------------------------------------------------------------------
-void tReverb::Filter()
+void tReverbInstance::Filter()
 {
 	// Buffer にデータを読み込む
 	tWaveSegmentQueue segmentqueue;
@@ -72,7 +72,66 @@ void tReverb::Filter()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tReverbInstance::construct()
+{
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tReverbInstance::initialize(const tNativeCallInfo &info)
+{
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tReverbClass::tReverbClass(tScriptEngine * engine) :
+	tClassBase(tSS<'R','e','v','e','r','b'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tReverbClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tReverbClass::ovulate);
+	BindFunction(this, ss_construct, &tReverbInstance::construct);
+	BindFunction(this, ss_initialize, &tReverbInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tReverbClass::ovulate()
+{
+	return tVariant(new tReverbInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		Reverb クラスレジストラ
+template class tRisseWFClassRegisterer<tReverbClass>;
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 } // namespace Risa

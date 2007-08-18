@@ -18,8 +18,8 @@ RISSE_DEFINE_SOURCE_ID(38521,252,49793,17297,63880,47889,47025,34954);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tPhaseVocoder::tPhaseVocoder() :
-	tBasicWaveFilter(tPCMTypes::tf32)
+tPhaseVocoderInstance::tPhaseVocoderInstance() :
+	tWaveFilterInstance(tPCMTypes::tf32)
 {
 	DSP = NULL;
 	FrameSize = DEFAULT_FRAME_SIZE;
@@ -31,7 +31,7 @@ tPhaseVocoder::tPhaseVocoder() :
 
 
 //---------------------------------------------------------------------------
-int tPhaseVocoder::GetFrameSize() const
+int tPhaseVocoderInstance::GetFrameSize() const
 {
 	return FrameSize;
 }
@@ -39,7 +39,7 @@ int tPhaseVocoder::GetFrameSize() const
 
 
 //---------------------------------------------------------------------------
-void tPhaseVocoder::SetFrameSize(int v)
+void tPhaseVocoderInstance::SetFrameSize(int v)
 {
 	FrameSize = v;
 	if(DSP) RebuildDSP(); // DSP は作り直す
@@ -48,7 +48,7 @@ void tPhaseVocoder::SetFrameSize(int v)
 
 
 //---------------------------------------------------------------------------
-int tPhaseVocoder::GetOverSampling() const
+int tPhaseVocoderInstance::GetOverSampling() const
 {
 	return OverSampling;
 }
@@ -56,7 +56,7 @@ int tPhaseVocoder::GetOverSampling() const
 
 
 //---------------------------------------------------------------------------
-void tPhaseVocoder::SetOverSampling(int v)
+void tPhaseVocoderInstance::SetOverSampling(int v)
 {
 	OverSampling = v;
 	if(DSP) RebuildDSP(); // DSP は作り直す
@@ -65,7 +65,7 @@ void tPhaseVocoder::SetOverSampling(int v)
 
 
 //---------------------------------------------------------------------------
-float tPhaseVocoder::GetTimeScale() const
+float tPhaseVocoderInstance::GetTimeScale() const
 {
 	return TimeScale;
 }
@@ -73,7 +73,7 @@ float tPhaseVocoder::GetTimeScale() const
 
 
 //---------------------------------------------------------------------------
-void tPhaseVocoder::SetTimeScale(float v)
+void tPhaseVocoderInstance::SetTimeScale(float v)
 {
 	TimeScale = v;
 	if(DSP) DSP->SetTimeScale(v);
@@ -82,7 +82,7 @@ void tPhaseVocoder::SetTimeScale(float v)
 
 
 //---------------------------------------------------------------------------
-float tPhaseVocoder::GetFrequencyScale() const
+float tPhaseVocoderInstance::GetFrequencyScale() const
 {
 	return FrequencyScale;
 }
@@ -90,7 +90,7 @@ float tPhaseVocoder::GetFrequencyScale() const
 
 
 //---------------------------------------------------------------------------
-void tPhaseVocoder::SetFrequencyScale(float v)
+void tPhaseVocoderInstance::SetFrequencyScale(float v)
 {
 	FrequencyScale = v;
 	if(DSP) DSP->SetFrequencyScale(v);
@@ -99,7 +99,7 @@ void tPhaseVocoder::SetFrequencyScale(float v)
 
 
 //---------------------------------------------------------------------------
-void tPhaseVocoder::Clear()
+void tPhaseVocoderInstance::Clear()
 {
 	if(DSP) delete DSP, DSP = NULL;
 }
@@ -107,7 +107,7 @@ void tPhaseVocoder::Clear()
 
 
 //---------------------------------------------------------------------------
-void tPhaseVocoder::RebuildDSP()
+void tPhaseVocoderInstance::RebuildDSP()
 {
 	if(DSP) delete DSP, DSP = NULL;
 	DSP = new tPhaseVocoderDSP(FrameSize,
@@ -120,7 +120,7 @@ void tPhaseVocoder::RebuildDSP()
 
 
 //---------------------------------------------------------------------------
-void tPhaseVocoder::InputChanged()
+void tPhaseVocoderInstance::InputChanged()
 {
 	Clear();
 	RebuildDSP();
@@ -136,7 +136,7 @@ void tPhaseVocoder::InputChanged()
 
 
 //---------------------------------------------------------------------------
-void tPhaseVocoder::Filter()
+void tPhaseVocoderInstance::Filter()
 {
 	tWaveSegmentQueue newqueue;
 
@@ -188,6 +188,75 @@ void tPhaseVocoder::Filter()
 		Queue(outputready, newqueue);
 	}
 }
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPhaseVocoderInstance::construct()
+{
+	// デフォルトではなにもしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPhaseVocoderInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// 親クラスの同名メソッドを呼び出す
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tPhaseVocoderClass::tPhaseVocoderClass(tScriptEngine * engine) :
+	tClassBase(tSS<'P','h','a','s','e','V','o','c','o','d','e','r'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPhaseVocoderClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tPhaseVocoderClass::ovulate);
+	BindFunction(this, ss_construct, &tPhaseVocoderInstance::construct);
+	BindFunction(this, ss_initialize, &tPhaseVocoderInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tPhaseVocoderClass::ovulate()
+{
+	return tVariant(new tPhaseVocoderInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		PhaseVocoder クラスレジストラ
+template class tRisseWFClassRegisterer<tPhaseVocoderClass>;
 //---------------------------------------------------------------------------
 
 

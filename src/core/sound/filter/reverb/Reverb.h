@@ -23,7 +23,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief リバーブフィルタクラス
 //---------------------------------------------------------------------------
-class tReverb : public tBasicWaveFilter
+class tReverbInstance : public tWaveFilterInstance
 {
 	static const size_t NumBufferSampleGranules = 4096;
 
@@ -33,10 +33,10 @@ class tReverb : public tBasicWaveFilter
 
 public:
 	//! @brief		コンストラクタ
-	tReverb();
+	tReverbInstance();
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
-	~tReverb() {;}
+	~tReverbInstance() {;}
 
 private:
 	//! @brief		入力となるフィルタが変わったとき、あるいはリセットされるとき
@@ -44,8 +44,51 @@ private:
 
 	//! @brief		フィルタ動作を行うとき
 	void Filter();
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Reverb" クラス
+//---------------------------------------------------------------------------
+class tReverbClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tReverbClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 } // namespace Risa

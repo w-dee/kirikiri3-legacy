@@ -15,6 +15,10 @@
 #define BasicWaveFilterH
 
 #include "sound/WaveFilter.h"
+#include "risse/include/risseNativeBinder.h"
+#include "risse/include/risseClass.h"
+#include "risse/include/risseObjectBase.h"
+#include "base/script/RisseEngine.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -22,7 +26,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 //! @brief WaveFilterの基本動作の実装
 //---------------------------------------------------------------------------
-class tBasicWaveFilter : public tWaveFilter
+class tWaveFilterInstance : public tObjectBase, public tWaveFilter
 {
 protected:
 	// フィルタ管理
@@ -45,10 +49,10 @@ protected:
 public:
 	//! @brief		コンストラクタ
 	//! @param		desired_output_type    サブクラスが望む PCM 形式
-	tBasicWaveFilter(tPCMTypes::tType desired_output_type);
+	tWaveFilterInstance(tPCMTypes::tType desired_output_type);
 
-	//! @brief		デストラクタ
-	~tBasicWaveFilter();
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	~tWaveFilterInstance();
 
 	//! @brief		フィルタをリセットする際に呼ばれる
 	void Reset();
@@ -104,8 +108,75 @@ protected:
 	virtual void InputChanged() = 0; // 入力が変更された時やリセットされたときに呼ばれる
 	virtual void Filter() = 0; // フィルタ動作が必要な時に呼ばれる
 
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
+
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"WaveFilter" クラス
+//---------------------------------------------------------------------------
+class tWaveFilterClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tWaveFilterClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		WaveフィルタクラスインスタンスをWaveFilter以下に登録するためのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename ClassT>
+class tRisseWFClassRegisterer :
+	public singleton_base<tRisseWFClassRegisterer<ClassT> >,
+	depends_on<tRisseClassRegisterer<tWaveFilterClass> >
+{
+	ClassT * ClassInstance;
+public:
+	//! @brief		コンストラクタ
+	tRisseWFClassRegisterer()
+	{
+		// ここらへんのプロセスについては tRisseClassRegisterer のコンストラクタも参照のこと
+		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
+		ClassT *class_instance = new ClassT(engine);
+		ClassInstance = class_instance;
+		tVariant WaveFilter = engine->GetGlobalObject().
+			GetPropertyDirect_Object(tSS<'W','a','v','e','F','i','l','t','e','r'>());
+		class_instance->RegisterInstance(WaveFilter);
+	}
+
+	ClassT * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る
+};
+//---------------------------------------------------------------------------
+
+
+
 
 //---------------------------------------------------------------------------
 } // namespace Risa

@@ -914,6 +914,7 @@ void tALSource::SetPosition(risse_uint64 pos)
 
 		// 全てのバッファを unqueueする
 		UnqueueAllBuffers();
+		EnsureSource();
 
 		// 再生位置の変更を行う
 		NeedRewind = false;

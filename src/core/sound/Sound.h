@@ -89,11 +89,11 @@ class tSoundInstance :
 
 	tStatus Status; //!< 直前のステータス
 
-	tSoundALSource * Source;
-	tALBuffer * Buffer;
-//	tArrayInstance * Filters;
-	tWaveLoopManager * LoopManager;
-	tWaveDecoder * Decoder;
+	tSoundALSource * Source; //!< OpenAL ソース
+	tALBuffer * Buffer; //!< OpenAL バッファ
+	tVariant Filters; //!< フィルタ配列
+	tWaveLoopManager * LoopManager; //!< ループマネージャ
+	tWaveDecoder * Decoder; //!< デコーダ
 
 public:
 	//! @brief		コンストラクタ
@@ -143,6 +143,10 @@ public:
 	//! @param		pos		再生位置(ミリ秒単位)
 	void SetTimePosition(double pos);
 
+	//! @brief		フィルタ配列を得る
+	tVariant & GetFilters();
+
+public:
 	//! @brief		ステータスが変更された
 	virtual void OnStatusChanged(tStatus status);
 
@@ -171,6 +175,7 @@ public: // Risse用メソッドなど
 	void set_samplePosition(risse_uint64 pos) { SetSamplePosition(pos); }
 	double get_position() { return GetTimePosition(); }
 	void set_position(double pos) { SetTimePosition(pos); }
+	const tVariant & get_filters() { return GetFilters(); }
 	tStatus get_status() { return GetStatus(); }
 	void onStatusChanged(tStatus status) {;}
 };

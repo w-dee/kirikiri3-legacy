@@ -94,7 +94,8 @@ void tReverbInstance::initialize(const tNativeCallInfo &info)
 
 //---------------------------------------------------------------------------
 tReverbClass::tReverbClass(tScriptEngine * engine) :
-	tClassBase(tSS<'R','e','v','e','r','b'>(), engine->ObjectClass)
+	tClassBase(tSS<'R','e','v','e','r','b'>(),
+		tRisseClassRegisterer<tWaveFilterClass>::instance()->GetClassInstance())
 {
 	RegisterMembers();
 }

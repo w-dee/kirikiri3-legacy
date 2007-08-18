@@ -220,7 +220,8 @@ void tPhaseVocoderInstance::initialize(const tNativeCallInfo &info)
 
 //---------------------------------------------------------------------------
 tPhaseVocoderClass::tPhaseVocoderClass(tScriptEngine * engine) :
-	tClassBase(tSS<'P','h','a','s','e','V','o','c','o','d','e','r'>(), engine->ObjectClass)
+	tClassBase(tSS<'P','h','a','s','e','V','o','c','o','d','e','r'>(),
+		tRisseClassRegisterer<tWaveFilterClass>::instance()->GetClassInstance())
 {
 	RegisterMembers();
 }

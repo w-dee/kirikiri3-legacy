@@ -12,11 +12,9 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/Sound.h"
-
-
-
-#include "sound/filter/phasevocoder/PhaseVocoder.h"
-#include "sound/filter/reverb/Reverb.h"
+#include "sound/filter/BasicWaveFilter.h"
+#include "risse/include/risseStaticStrings.h"
+#include "risse/include/risseArrayClass.h"
 
 
 namespace Risa {
@@ -131,22 +129,48 @@ void tSoundInstance::Open(const tString & filename)
 		// LoopManager を作成
 		LoopManager = new tWaveLoopManager(Decoder);
 
-/*
-		// pv
-		tPhaseVocoder * filter = new tPhaseVocoder();
-		filter->SetOverSampling(16);
-		filter->SetFrameSize(4096);
-		filter->SetTimeScale(1.6);
-		filter->SetFrequencyScale(1.0);
-		filter->SetInput(LoopManager);
+		// フィルタ配列からフィルタチェーンを作成する
+		tWaveFilter * last_filter = LoopManager;
+		if(Filters.GetType() != tVariant::vtVoid)
+		{
+			tScriptEngine * engine = GetRTTI()->GetScriptEngine();
 
-		// rev
-		tReverb * filter = new tReverb();
-		filter->SetInput(LoopManager);
-*/
+			// フィルタ配列の要素ごとに処理
+			risse_size filter_count = (risse_int64)Filters.GetPropertyDirect(engine, ss_length);
+			for(risse_size i = 0; i < filter_count; i++)
+			{
+				tVariant item = Filters.Invoke(engine, mnIGet, tVariant((risse_int64)i));
+				if(item.GetType() == tVariant::vtVoid) continue;
+
+				// フィルタ配列のインスタンスを得て、その SetInput メソッドを呼んで
+				// 直前のフィルタや LoopManager と接続する
+				try
+				{
+					try
+					{
+						tWaveFilterInstance * filter =
+							item.ExpectAndGetObjectInterafce<tWaveFilterInstance>(
+								tRisseClassRegisterer<tWaveFilterClass>::instance()->GetClassInstance());
+						filter->SetInput(last_filter);
+						last_filter = filter;
+					}
+					catch(const tTemporaryException * te)
+					{
+						te->ThrowConverted(engine);
+					}
+				}
+				catch(const tVariant * e)
+				{
+					e->PrependMessage(
+						tString(RISSE_WS_TR("Failed to connect filter index %1: "),
+							tString::AsString((risse_int64)i)));
+					throw e;
+				}
+			}
+		}
 
 		// バッファを作成
-		Buffer = new tALBuffer(LoopManager, true);
+		Buffer = new tALBuffer(last_filter, true);
 
 		// ソースを作成
 		Source = new tSoundALSource(this, Buffer, LoopManager);
@@ -245,6 +269,22 @@ void tSoundInstance::SetTimePosition(double pos)
 
 	if(!Source) return; // ソースがないので再生位置を変更できない
 	Source->SetPosition(static_cast<risse_uint64>(pos *  LoopManager->GetFormat().Frequency / 1000));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant & tSoundInstance::GetFilters()
+{
+	volatile tSynchronizer sync(this); // sync
+
+	if(Filters.GetType() == tVariant::vtVoid)
+	{
+		// まだフィルタ配列が出来ていないので作成する
+		Filters = GetRTTI()->GetScriptEngine()->ArrayClass->Invoke(mnNew);
+	}
+
+	return Filters;
 }
 //---------------------------------------------------------------------------
 
@@ -393,6 +433,7 @@ void tSoundClass::RegisterMembers()
 			&tSoundInstance::get_samplePosition, &tSoundInstance::set_samplePosition);
 	BindProperty(this, tSS<'p','o','s','i','t','i','o','n'>(),
 			&tSoundInstance::get_position, &tSoundInstance::set_position);
+	BindProperty(this, tSS<'f','i','l','t','e','r','s'>(), &tSoundInstance::get_filters);
 	BindProperty(this, tSS<'s','t','a','t','u','s'>(), &tSoundInstance::get_status);
 	BindFunction(this, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
 			&tSoundInstance::onStatusChanged);

@@ -144,28 +144,17 @@ void tSoundInstance::Open(const tString & filename)
 
 				// フィルタ配列のインスタンスを得て、その SetInput メソッドを呼んで
 				// 直前のフィルタや LoopManager と接続する
-				try
+				RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
 				{
-					try
-					{
-						tWaveFilterInstance * filter =
+					tWaveFilterInstance * filter =
 							item.ExpectAndGetObjectInterafce<tWaveFilterInstance>(
 								tRisseClassRegisterer<tWaveFilterClass>::instance()->GetClassInstance());
 						filter->SetInput(last_filter);
 						last_filter = filter;
-					}
-					catch(const tTemporaryException * te)
-					{
-						te->ThrowConverted(engine);
-					}
 				}
-				catch(const tVariant * e)
-				{
-					e->PrependMessage(
+				RISA_PREPEND_EXCEPTION_MESSAGE_END(engine, 
 						tString(RISSE_WS_TR("Failed to connect filter index %1: "),
-							tString::AsString((risse_int64)i)));
-					throw e;
-				}
+							tString::AsString((risse_int64)i)))
 			}
 		}
 

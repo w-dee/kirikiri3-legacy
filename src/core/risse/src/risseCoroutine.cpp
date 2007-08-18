@@ -196,8 +196,7 @@ WINBASEAPI LPVOID WINAPI RISSE_NEW_CreateFiber(
 #endif
 			return ret;
 		}
-		GC_gcollect(); // コレクトしてみる
-		GC_invoke_finalizers(); // ファイナライザを呼び出してみる
+		CollectGarbage();
 /*
 #ifdef GC_DEBUG
 		GC_dump();

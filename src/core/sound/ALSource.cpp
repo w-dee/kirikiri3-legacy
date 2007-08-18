@@ -488,7 +488,7 @@ void tALSource::EnsureSource()
 		catch(...)
 		{
 			if(retry_count == 0) throw; // リトライ失敗
-			GC_gcollect(); // ソースはリソースなので、いったん GC による回収を試みる
+			CollectGarbage(); // GC
 		}
 	}
 

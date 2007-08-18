@@ -14,7 +14,15 @@
 #ifndef __GC_H__
 #define __GC_H__
 
-//#define GC_DEBUG
+#include "risseAssert.h"
+
+// マクロ NDEBUG が定義されていない場合 (デバッグビルドの場合)
+// GC のデバッグ機能を有効にする
+// (risseAssert.hにはNDEBUGに関する定義が入っている)
+#ifndef NDEBUG
+ #define GC_DEBUG
+#endif
+
 #include <gc.h>
 #include <gc_cpp.h>
 #include <gc_allocator.h>

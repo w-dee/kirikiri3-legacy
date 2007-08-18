@@ -659,7 +659,7 @@ void tALSource::RecheckStatus()
 		{
 			// Playing が真を表しているにもかかわらず、OpenAL のソースは再生を
 			// 停止している
-			InternalStop(); // 再生を停止
+			InternalStop(2); // 再生を停止, イベントは非同期イベントとして通知
 		}
 	}
 }
@@ -746,7 +746,7 @@ void tALSource::Play()
 
 
 //---------------------------------------------------------------------------
-void tALSource::InternalStop(bool notify)
+void tALSource::InternalStop(int notify)
 {
 	// デコードスレッドを削除する
 	if(Buffer->GetStreaming())
@@ -768,8 +768,8 @@ void tALSource::InternalStop(bool notify)
 
 	// ステータスの変更を通知
 	Status = ssStop;
-	if(notify)
-		CallStatusChanged(false);
+	if(notify != 0)
+		CallStatusChanged(notify == 2);
 
 	// 全てのバッファを unqueueする
 	if(Source && Buffer->GetStreaming())
@@ -784,13 +784,13 @@ void tALSource::InternalStop(bool notify)
 
 
 //---------------------------------------------------------------------------
-void tALSource::Stop(bool notify)
+void tALSource::Stop(int notify)
 {
 	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	RecheckStatus();
 
-	InternalStop();
+	InternalStop(notify);
 }
 //---------------------------------------------------------------------------
 

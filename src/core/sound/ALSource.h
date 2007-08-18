@@ -209,15 +209,17 @@ public:
 protected:
 	//! @brief		再生の停止(内部関数)
 	//! @param		notify		OnStatusChanged で通知をするかどうか
-	void InternalStop(bool notify = true);
+	//!				0=通知しない 1=同期イベントとして通知 2=非同期イベントとして通知
+	void InternalStop(int notify);
 
 public:
 	//! @brief		再生の停止
 	//! @param		notify		OnStatusChanged で通知をするかどうか
+	//!				0=通知しない 1=同期イベントとして通知 2=非同期イベントとして通知
 	//! @note		このメソッドはメディアの巻き戻しを行わない(ソースはそこら辺を
 	//!				管理しているループマネージャがどこにあるかを知らないので)
 	//!				巻き戻しの処理は現在tSound内で行われている
-	void Stop(bool notify = true);
+	void Stop(int notify = 1);
 
 	//! @brief		再生の一時停止
 	void Pause();

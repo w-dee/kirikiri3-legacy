@@ -15,6 +15,7 @@
 #include "sound/filter/BasicWaveFilter.h"
 #include "risse/include/risseStaticStrings.h"
 #include "risse/include/risseArrayClass.h"
+#include "base/fs/common/FSManager.h"
 
 
 namespace Risa {
@@ -128,6 +129,25 @@ void tSoundInstance::Open(const tString & filename)
 
 		// LoopManager を作成
 		LoopManager = new tWaveLoopManager(Decoder);
+
+		// .sli ファイルがあるかどうか？
+		tString sli_filename = filename + tSS<'.','s','l','i'>();
+		if(tFileSystemManager::instance()->IsFile(sli_filename))
+		{
+			// LoopManager にそれを読ませる
+			// いったん全体をファイルに読み込む
+			tStreamAdapter sli_stream(
+				tFileSystemManager::instance()->Open(sli_filename,
+					tFileOpenModes::omRead));
+			risse_size sli_stream_size = sli_stream.GetSize();
+			char * sli_content = new (GC) char[sli_stream_size + 1];
+			sli_stream.Read(sli_content, sli_stream_size);
+			sli_content[sli_stream_size] = '\0';
+			sli_stream.Dispose();
+			// LoopManager にそれを読ませる
+			if(!LoopManager->ReadInformation(sli_content))
+				tSoundExceptionClass::Throw(RISSE_WS_TR("failed to read sound loop information: loop information syntax error"));
+		}
 
 		// フィルタ配列からフィルタチェーンを作成する
 		tWaveFilter * last_filter = LoopManager;

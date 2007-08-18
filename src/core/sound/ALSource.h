@@ -165,6 +165,12 @@ private:
 	//! @param		buffer		OpenAL バッファを管理する tALBuffer インスタンス
 	void Init(tALBuffer * buffer);
 
+	//! @brief		Source の存在を確実にする
+	void EnsureSource();
+
+	//! @brief		Source を強制的に削除する
+	void DeleteSource();
+
 public:
 	ALuint GetSource() const { if(Source) return Source->Source; else return 0; } //!< Source を得る
 

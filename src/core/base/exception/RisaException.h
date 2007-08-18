@@ -10,8 +10,8 @@
 //! @file
 //! @brief Risaで内部的に用いている例外クラスの管理など
 //---------------------------------------------------------------------------
-#ifndef _ExceptionH_
-#define _ExceptionH_
+#ifndef _RISAExceptionH_
+#define _RISAExceptionH_
 
 #include "risse/include/risseExceptionClass.h"
 #include "base/exception/UnhandledException.h"
@@ -166,6 +166,18 @@ public:                                                                         
 template class tRisseClassRegisterer<CPP_CLASSNAME>;
 //---------------------------------------------------------------------------
 
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		例外を捕捉し、例外メッセージの先頭に指定のメッセージを追加するためのマクロ
+//---------------------------------------------------------------------------
+#define RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN() try{try{
+
+#define RISA_PREPEND_EXCEPTION_MESSAGE_END(ENGINE, MESSAGE) \
+	} catch(const tTemporaryException * te) { te->ThrowConverted(ENGINE); } \
+	} catch(const tVariant * e) { e->PrependMessage(MESSAGE); throw e; }
+//---------------------------------------------------------------------------
 
 
 

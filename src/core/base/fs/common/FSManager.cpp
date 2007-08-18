@@ -15,10 +15,6 @@
 #include "base/fs/osfs/OSFS.h"
 #include "base/exception/RisaException.h"
 #include "risse/include/risseStreamClass.h"
-#include <vector>
-
-
-
 
 
 namespace Risa {
@@ -383,15 +379,14 @@ bool tFileSystemManager::IsFile(const tString & filename)
 	tString fullpath(NormalizePath(filename));
 	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(filename);
-//	try
-//	{
+
+	RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
+	{
 		return fs->Invoke(tSS<'i','s','F','i','l','e'>(), fspath);
-//	}
-//	catch(const tVariant * e)
-//	{
-//		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("failed to retrieve existence of file '%1' : %2"),
-//			fullpath, e->operator tString())); // this method never returns
-//	}
+	}
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+			tString(RISSE_WS_TR("failed to retrieve existence of file '%1': "), fullpath))
+
 	return false;
 }
 //---------------------------------------------------------------------------
@@ -407,15 +402,14 @@ bool tFileSystemManager::IsDirectory(const tString & dirname)
 	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	TrimLastPathDelimiter(fullpath);
-//	try
-//	{
+
+	RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
+	{
 		return fs->Invoke(tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), fspath);
-//	}
-//	catch(const tVariant * e)
-//	{
-//		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("failed to retrieve existence of directory '%1' : %2"),
-//			fullpath, e.GetMessageString())); // this method never returns
-//	}
+	}
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+			tString(RISSE_WS_TR("failed to retrieve existence of directory '%1': "), fullpath))
+
 	return false;
 }
 //---------------------------------------------------------------------------
@@ -430,16 +424,14 @@ void tFileSystemManager::RemoveFile(const tString & filename)
 	tString fullpath(NormalizePath(filename));
 	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
-//	try
-//	{
+
+	RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
+	{
 		fs->Do(ocFuncCall, NULL, tSS<'r','e','m','o','v','e','F','i','l','e'>(),
 			0, tMethodArgument::New(fspath));
-//	}
-//	catch(const tVariant * e)
-//	{
-//		tFileSystemExceptionClass::Throw(RISSE_WS_TR("failed to remove file '%1' : %2"),
-//			fullpath, e.GetMessageString());
-//	}
+	}
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+			tString(RISSE_WS_TR("Failed to remove file '%1': "), fullpath))
 }
 //---------------------------------------------------------------------------
 
@@ -479,16 +471,13 @@ void tFileSystemManager::RemoveDirectory(const tString & dirname, bool recursive
 		}
 	}
 
-//	try
-//	{
+	RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
+	{
 		fs->Do(ocFuncCall, NULL, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(),
 			0, tMethodArgument::New(fspath, recursive));
-//	}
-//	catch(const eRisseError &e)
-//	{
-//		eRisaException::Throw(RISSE_WS_TR("failed to remove directory '%1' : %2"),
-//			fullpath, e.GetMessageString());
-//	}
+	}
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+			tString(RISSE_WS_TR("failed to remove directory '%1': "), fullpath))
 }
 //---------------------------------------------------------------------------
 
@@ -507,16 +496,13 @@ void tFileSystemManager::CreateDirectory(const tString & dirname, bool recursive
 		tString fspath;
 		tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 		if(!fs) ThrowNoFileSystemError(fullpath);
-	//	try
-	//	{
+		RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
+		{
 			fs->Do(ocFuncCall, NULL, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(),
 				0, tMethodArgument::New(fspath, recursive));
-	//	}
-	//	catch(const eRisseError &e)
-	//	{
-	//		eRisaException::Throw(RISSE_WS_TR("failed to create directory '%1' : %2"),
-	//			fullpath, e.GetMessageString());
-	//	}
+		}
+		RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+				tString(RISSE_WS_TR("failed to create directory '%1': "), fullpath))
 	}
 	else
 	{
@@ -560,15 +546,14 @@ tObjectInterface * tFileSystemManager::Stat(const tString & filename)
 	tString fullpath(NormalizePath(filename));
 	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
-//	try
-//	{
+
+	RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
+	{
 		return fs->Invoke(tSS<'s','t','a','t'>(), fspath).GetObjectInterface();
-//	}
-//	catch(const eRisseError &e)
-//	{
-//		eRisaException::Throw(RISSE_WS_TR("failed to stat '%1' : %2"),
-//			fullpath, e.GetMessageString());
-//	}
+	}
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+			tString(RISSE_WS_TR("failed to stat '%1': "), fullpath))
+	return NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -585,15 +570,14 @@ tStreamInstance * tFileSystemManager::Open(const tString & filename,
 	tFileSystemInstance * fs = FindFileSystemAt(fullpath, &fspath);
 	if(!fs) ThrowNoFileSystemError(fullpath);
 	tVariant val;
-//	try
-//	{
+
+	RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
+	{
 		val = fs->Invoke(tSS<'o','p','e','n'>(), fspath, (risse_int64)flags);
-//	}
-//	catch(const eRisseError &e)
-//	{
-//		eRisaException::Throw(RISSE_WS_TR("failed to create stream of '%1' : %2"),
-//			fullpath, e.GetMessageString());
-//	}
+	}
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+			tString(RISSE_WS_TR("failed to open '%1': "), fullpath))
+
 	val.AssertClass(tRisseScriptEngine::instance()->GetScriptEngine()->StreamClass);
 	return reinterpret_cast<tStreamInstance*>(val.GetObjectInterface());
 }
@@ -643,8 +627,8 @@ size_t tFileSystemManager::InternalList(
 	tFileSystemInstance * fs = FindFileSystemAt(dirname, &fspath);
 	if(!fs) ThrowNoFileSystemError(dirname);
 
-//	try
-//	{
+	RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
+	{
 		tMethodArgumentOf<1,1> args;
 		tVariant fspath_v(fspath);
 		tVariant callback_v(callback);
@@ -653,12 +637,10 @@ size_t tFileSystemManager::InternalList(
 		tVariant ret;
 		fs->Do(ocFuncCall, &ret, tSS<'w','a','l','k','A','t'>(), 0, args);
 		return ret.operator risse_int64();
-//	}
-//	catch(const eRisseError &e)
-//	{
-//		eRisaException::Throw(RISSE_WS_TR("failed to list files in directory '%1' : %2"),
-//			dirname, e.GetMessageString());
-//	}
+	}
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+			tString(RISSE_WS_TR("failed to list '%1': "), dirname))
+
 	return 0;
 }
 //---------------------------------------------------------------------------

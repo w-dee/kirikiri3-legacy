@@ -447,7 +447,7 @@ inline tVariant ToVariant(T s)
 }
 
 //---------------------------------------------------------------------------
-// 整数系
+// 数値系
 template <>
 inline tVariant ToVariant<risse_size>(risse_size s)
 {
@@ -462,6 +462,11 @@ template <>
 inline tVariant ToVariant<risse_offset>(risse_offset s)
 {
 	return tVariant((risse_int64)s);
+}
+template <>
+inline tVariant ToVariant<float>(float s)
+{
+	return tVariant((double)s);
 }
 //---------------------------------------------------------------------------
 
@@ -480,7 +485,7 @@ inline typename tRemoveReference<T>::type FromVariant(const tVariant & v)
 }
 
 //---------------------------------------------------------------------------
-// 整数系
+// 数値系
 template <>
 inline risse_size FromVariant<risse_size>(const tVariant & v)
 {
@@ -495,6 +500,11 @@ template <>
 inline risse_offset FromVariant<risse_offset>(const tVariant & v)
 {
 	return (risse_offset)(risse_int64)v;
+}
+template <>
+inline float FromVariant<float>(const tVariant & v)
+{
+	return (float)(double)v;
 }
 //---------------------------------------------------------------------------
 

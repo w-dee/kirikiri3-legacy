@@ -334,7 +334,7 @@ public:
 	//! @param		dest		デコード結果を格納するバッファ
 	//! @param		samples		デコードを行いたいサンプル数
 	//! @param		written		実際にデコード出来たサンプル数
-	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
+	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先(内容はクリアされずに追加される)
 	//! @return		まだデコードすべきデータが残っているかどうか
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
 		tWaveSegmentQueue & segmentqueue);

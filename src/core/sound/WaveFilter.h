@@ -159,6 +159,10 @@ public:
 		tWaveSegmentQueue & segmentqueue) = 0;
 		/*!<
 			@brief	デコードを行う
+			@param	dest		PCMサンプル格納先バッファ
+			@param	samples		格納するサンプルグラニュール数
+			@param	written		実際にどれだけのサンプルグラニュール数が書き込まれたのかを返す
+			@param	segmentqueue	セグメントキューの書き込み先。内容はクリアされずに追加される。
 			@return まだデータが残っているかどうか
 			@note
 				このメソッドを呼ぶ前に毎回 GetFormat を呼んで、フォーマットが

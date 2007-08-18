@@ -86,6 +86,8 @@ bool tWaveFilterInstance::Render(void *dest, risse_uint samples, risse_uint &wri
 	risse_uint8 * dest_buf = reinterpret_cast<risse_uint8*>(dest);
 	risse_uint sample_granule_bytes = OutputFormat.GetSampleGranuleSize();
 
+	tWaveSegmentQueue new_segmentqueue;
+
 	while(samples > 0)
 	{
 		if(QueuedSampleGranuleRemain == 0)
@@ -107,7 +109,9 @@ bool tWaveFilterInstance::Render(void *dest, risse_uint samples, risse_uint &wri
 			one_unit * sample_granule_bytes);
 
 		// SegmentQueue の先頭から one_unit 分を segmentqueue にコピー
-		SegmentQueue.Dequeue(segmentqueue, one_unit);
+		SegmentQueue.Dequeue(new_segmentqueue, one_unit);
+			// Dequeue は格納先キューをクリアするのでいったん別のキューにとる
+		segmentqueue.Enqueue(new_segmentqueue);
 
 		// カウンタの調整
 		QueuedSampleGranuleRemain -= one_unit;

@@ -95,7 +95,7 @@ protected:
 	//! @param		numsamplegranules	欲しいサンプルグラニュール数
 	//! @param		desired_type		欲しいPCM形式
 	//! @param		fill_silence		欲しいサンプルグラニュール数に入力が満たないとき、残りを無音で埋めるかどうか
-	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
+	//! @param		segmentqueue		再生セグメントキュー情報を書き込む先(内容はクリアされずに追加される)
 	//! @return		実際に書き込まれたサンプルグラニュール数
 	risse_uint Fill(void * dest, risse_uint numsamplegranules, tPCMTypes::tType desired_type,
 		bool fill_silence,

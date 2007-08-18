@@ -12,10 +12,13 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/filter/phasevocoder/Phasevocoder.h"
+#include "sound/Sound.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(38521,252,49793,17297,63880,47889,47025,34954);
 //---------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------
 tPhaseVocoderInstance::tPhaseVocoderInstance() :
@@ -33,6 +36,8 @@ tPhaseVocoderInstance::tPhaseVocoderInstance() :
 //---------------------------------------------------------------------------
 int tPhaseVocoderInstance::GetFrameSize() const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	return FrameSize;
 }
 //---------------------------------------------------------------------------
@@ -41,6 +46,16 @@ int tPhaseVocoderInstance::GetFrameSize() const
 //---------------------------------------------------------------------------
 void tPhaseVocoderInstance::SetFrameSize(int v)
 {
+	volatile tSynchronizer sync(this); // sync
+
+	switch(v)
+	{
+	case 64: case 128: case 256: case 512: case 1024: case 2048: case 4096: case 8192:
+	case 16384: case 32768:
+		break;
+	default:
+		tSoundExceptionClass::Throw(RISSE_WS_TR("window size must be power of 2, in 64 to 32768"));
+	}
 	FrameSize = v;
 	if(DSP) RebuildDSP(); // DSP は作り直す
 }
@@ -50,6 +65,8 @@ void tPhaseVocoderInstance::SetFrameSize(int v)
 //---------------------------------------------------------------------------
 int tPhaseVocoderInstance::GetOverSampling() const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	return OverSampling;
 }
 //---------------------------------------------------------------------------
@@ -58,8 +75,18 @@ int tPhaseVocoderInstance::GetOverSampling() const
 //---------------------------------------------------------------------------
 void tPhaseVocoderInstance::SetOverSampling(int v)
 {
+	volatile tSynchronizer sync(this); // sync
+
+	switch(v)
+	{
+	case 0:
+	case 2: case 4: case 8: case 16: case 32:
+		break;
+	default:
+		tSoundExceptionClass::Throw(RISSE_WS_TR("overlap count must be power of 2, in 2 to 32"));
+	}
 	OverSampling = v;
-	if(DSP) RebuildDSP(); // DSP は作り直す
+	if(DSP) DSP->SetOverSampling(v); // DSP は作り直す
 }
 //---------------------------------------------------------------------------
 
@@ -67,6 +94,8 @@ void tPhaseVocoderInstance::SetOverSampling(int v)
 //---------------------------------------------------------------------------
 float tPhaseVocoderInstance::GetTimeScale() const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	return TimeScale;
 }
 //---------------------------------------------------------------------------
@@ -75,8 +104,16 @@ float tPhaseVocoderInstance::GetTimeScale() const
 //---------------------------------------------------------------------------
 void tPhaseVocoderInstance::SetTimeScale(float v)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	TimeScale = v;
-	if(DSP) DSP->SetTimeScale(v);
+	if(DSP)
+	{
+		DSP->SetTimeScale(v);
+		DSP->SetOverSampling(OverSampling);
+			// TimeScaleにしたがってOverSampling が自動的に決定される場合があるので、
+			// TimeScale の設定の際に OverSampling ももう一度設定し直す。
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -84,6 +121,8 @@ void tPhaseVocoderInstance::SetTimeScale(float v)
 //---------------------------------------------------------------------------
 float tPhaseVocoderInstance::GetFrequencyScale() const
 {
+	volatile tSynchronizer sync(this); // sync
+
 	return FrequencyScale;
 }
 //---------------------------------------------------------------------------
@@ -92,6 +131,8 @@ float tPhaseVocoderInstance::GetFrequencyScale() const
 //---------------------------------------------------------------------------
 void tPhaseVocoderInstance::SetFrequencyScale(float v)
 {
+	volatile tSynchronizer sync(this); // sync
+
 	FrequencyScale = v;
 	if(DSP) DSP->SetFrequencyScale(v);
 }
@@ -101,6 +142,8 @@ void tPhaseVocoderInstance::SetFrequencyScale(float v)
 //---------------------------------------------------------------------------
 void tPhaseVocoderInstance::Clear()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(DSP) delete DSP, DSP = NULL;
 }
 //---------------------------------------------------------------------------
@@ -109,12 +152,26 @@ void tPhaseVocoderInstance::Clear()
 //---------------------------------------------------------------------------
 void tPhaseVocoderInstance::RebuildDSP()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	if(DSP) delete DSP, DSP = NULL;
-	DSP = new tPhaseVocoderDSP(FrameSize,
-		InputFormat.Frequency, InputFormat.Channels);
-	DSP->SetTimeScale(TimeScale);
-	DSP->SetFrequencyScale(FrequencyScale);
-	DSP->SetOverSampling(OverSampling);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPhaseVocoderInstance::EnsureDSP()
+{
+	volatile tSynchronizer sync(this); // sync
+
+	if(!DSP)
+	{
+		DSP = new tPhaseVocoderDSP(FrameSize,
+			InputFormat.Frequency, InputFormat.Channels);
+		DSP->SetTimeScale(TimeScale);
+		DSP->SetFrequencyScale(FrequencyScale);
+		DSP->SetOverSampling(OverSampling);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -122,6 +179,8 @@ void tPhaseVocoderInstance::RebuildDSP()
 //---------------------------------------------------------------------------
 void tPhaseVocoderInstance::InputChanged()
 {
+	volatile tSynchronizer sync(this); // sync
+
 	Clear();
 	RebuildDSP();
 	SegmentQueue.Clear();
@@ -138,6 +197,10 @@ void tPhaseVocoderInstance::InputChanged()
 //---------------------------------------------------------------------------
 void tPhaseVocoderInstance::Filter()
 {
+	volatile tSynchronizer sync(this); // sync
+
+	EnsureDSP();
+
 	tWaveSegmentQueue newqueue;
 
 	// DSP の入力空きを調べる
@@ -242,6 +305,11 @@ void tPhaseVocoderClass::RegisterMembers()
 	BindFunction(this, ss_ovulate, &tPhaseVocoderClass::ovulate);
 	BindFunction(this, ss_construct, &tPhaseVocoderInstance::construct);
 	BindFunction(this, ss_initialize, &tPhaseVocoderInstance::initialize);
+
+	BindProperty(this, tSS<'w','i','n','d','o','w'>(), &tPhaseVocoderInstance::get_window, &tPhaseVocoderInstance::set_window);
+	BindProperty(this, tSS<'o','v','e','r','a','l','p'>(), &tPhaseVocoderInstance::get_overlap, &tPhaseVocoderInstance::set_overlap);
+	BindProperty(this, tSS<'t','i','m','e'>(), &tPhaseVocoderInstance::get_time, &tPhaseVocoderInstance::set_time);
+	BindProperty(this, tSS<'p','i','t','c','h'>(), &tPhaseVocoderInstance::get_pitch, &tPhaseVocoderInstance::set_pitch);
 }
 //---------------------------------------------------------------------------
 

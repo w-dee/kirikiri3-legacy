@@ -25,13 +25,13 @@ namespace Risa {
 //---------------------------------------------------------------------------
 class tPhaseVocoderInstance : public tWaveFilterInstance
 {
-	static const int DEFAULT_FRAME_SIZE = 128; //!< default frame size
-	static const int DEFAULT_OVERSAMPLING = 4; //!< default oversampling factor
+	static const int DEFAULT_FRAME_SIZE = 4096; //!< default frame size
+	static const int DEFAULT_OVERSAMPLING = 0; //!< default oversampling factor
 
 	tPhaseVocoderDSP * DSP; //!< PhaseVocoder DSP
 
-	int FrameSize; //!< フレームサイズ
-	int OverSampling; //!< オーバーサンプリング係数
+	int FrameSize; //!< フレームサイズ(ウィンドウサイズ)
+	int OverSampling; //!< オーバーサンプリング係数(オーバーラップ)
 	float	TimeScale; //!< 時間軸方向のスケール(出力/入力)
 	float	FrequencyScale; //!< 周波数方向のスケール(出力/入力)
 
@@ -44,20 +44,20 @@ public:
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	~tPhaseVocoderInstance() {;}
 
-	//! @brief		FFTフレームサイズを得る
-	//! @return		FFTフレームサイズ
+	//! @brief		FFTフレームサイズ(ウィンドウサイズ)を得る
+	//! @return		FFTフレームサイズ(ウィンドウサイズ)
 	int GetFrameSize() const;
 
-	//! @brief		FFTフレームサイズを設定する
-	//! @param		v FFTフレームサイズ
+	//! @brief		FFTフレームサイズ(ウィンドウサイズ)を設定する
+	//! @param		v FFTフレームサイズ(ウィンドウサイズ)
 	void SetFrameSize(int v);
 
-	//! @brief		オーバーサンプリング係数を得る
-	//! @return		オーバーサンプリング係数
+	//! @brief		オーバーサンプリング係数(オーバーラップ)を得る
+	//! @return		オーバーサンプリング係数(オーバーラップ)
 	int GetOverSampling() const;
 
-	//! @brief		オーバーサンプリング係数を設定する
-	//! @param		v オーバーサンプリング係数
+	//! @brief		オーバーサンプリング係数(オーバーラップ)を設定する
+	//! @param		v オーバーサンプリング係数(オーバーラップ)
 	void SetOverSampling(int v);
 
 	//! @brief		時間軸方向のスケールを得る
@@ -83,6 +83,9 @@ private:
 	//! @brief		DSPオブジェクトを作り直す
 	void RebuildDSP();
 
+	//! @brief		DSPオブジェクトの存在を確かにする
+	void EnsureDSP();
+
 	//! @brief		入力となるフィルタが変わったとき、あるいはリセットされるとき
 	void InputChanged();
 
@@ -93,6 +96,14 @@ public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
 
+	int get_window() { return GetFrameSize(); }
+	void set_window(int v) { SetFrameSize(v); }
+	int get_overlap() { return GetOverSampling(); }
+	void set_overlap(int v) { SetOverSampling(v); }
+	float get_time() { return GetTimeScale(); }
+	void set_time(float v) { SetTimeScale(v); }
+	float get_pitch() { return GetFrequencyScale(); }
+	void set_pitch(float v) { SetFrequencyScale(v); }
 };
 //---------------------------------------------------------------------------
 

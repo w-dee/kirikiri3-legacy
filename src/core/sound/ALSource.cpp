@@ -25,6 +25,14 @@ namespace Risa {
 RISSE_DEFINE_SOURCE_ID(51552,26074,48813,19041,30653,39645,11297,33602);
 //---------------------------------------------------------------------------
 
+/*
+	TODO: デコードスレッドが比較的低いプライオリティで走ってるときは
+	なかなかデコードスレッドがクリティカルセクションから抜けてくれないことがある。
+	それへの対処。
+	PhaseVocoder などのパラメータ設定も同様の問題があるので、デコードスレッドに
+	ロック区間から速く抜けて欲しいときのための機構を用意するべき。
+*/
+
 
 
 //---------------------------------------------------------------------------
@@ -717,12 +725,16 @@ void tALSource::Play()
 			// NeedRewind が真の時にしかここでは巻き戻しを行わない
 			NeedRewind = false;
 			LoopManager->SetPosition(0); // 再生位置を最初に
-			Buffer->GetFilter()->Reset(); // フィルタをリセット
 		}
 
-		// 初期サンプルをいくつか queue する
-		for(risse_uint n = 0; n < STREAMING_PREPARE_BUFFERS; n++)
-			QueueBuffer();
+		if(Status != ssPause)
+		{
+			Buffer->GetFilter()->Reset(); // ポーズからのplayではない場合はフィルタをリセット
+
+			// 初期サンプルをいくつか queue する
+			for(risse_uint n = 0; n < STREAMING_PREPARE_BUFFERS; n++)
+				QueueBuffer();
+		}
 
 		// デコードスレッドを作成する
 		if(!DecodeThread) DecodeThread = tWaveDecodeThreadPool::instance()->Acquire(this);

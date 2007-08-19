@@ -724,6 +724,7 @@ void tALSource::Play()
 			// すべての状況で巻き戻しが必要なわけではないので
 			// NeedRewind が真の時にしかここでは巻き戻しを行わない
 			NeedRewind = false;
+			LoopManager->ClearFlags(); // フラグをすべて 0 にする
 			LoopManager->SetPosition(0); // 再生位置を最初に
 		}
 

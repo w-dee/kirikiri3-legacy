@@ -130,7 +130,8 @@ void tALBuffer::FreeTempBuffers()
 
 
 //---------------------------------------------------------------------------
-bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
+bool tALBuffer::FillRenderBuffer(risse_uint8 * & render_buffer, size_t & render_buffer_size,
+	risse_uint & samples,
 	tWaveSegmentQueue & segmentqueue)
 {
 	// バッファにデータをレンダリングする
@@ -179,25 +180,25 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 		// ところで書き込み先バッファのサイズは十分？
 		if(cont)
 		{
-			// RenderBuffer のサイズをチェック
+			// render_buffer のサイズをチェック
 			size_t buffer_size_needed = ( rendered + one_want ) * ALSampleGranuleBytes;
-			if(RenderBufferSize < buffer_size_needed)
+			if(render_buffer_size < buffer_size_needed)
 			{
 				void * newbuffer;
-				if(RenderBuffer == NULL)
+				if(render_buffer == NULL)
 					newbuffer = MallocAtomicCollectee(buffer_size_needed);
 				else
-					newbuffer = ReallocCollectee(RenderBuffer, buffer_size_needed);
+					newbuffer = ReallocCollectee(render_buffer, buffer_size_needed);
 				if(!newbuffer)
 				{
-					FreeCollectee(RenderBuffer), RenderBuffer = NULL;
-					RenderBufferSize = 0;
+					FreeCollectee(render_buffer), render_buffer = NULL;
+					render_buffer_size = 0;
 					cont = false;
 				}
 				else
 				{
-					RenderBuffer = reinterpret_cast<risse_uint8 *>(newbuffer);
-					RenderBufferSize = buffer_size_needed;
+					render_buffer = reinterpret_cast<risse_uint8 *>(newbuffer);
+					render_buffer_size = buffer_size_needed;
 				}
 			}
 
@@ -234,7 +235,7 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 			if(!need_convert)
 			{
 				// フィルタの出力タイプが 整数 16bit なので直接出力バッファに書き込む
-				filter_destination = RenderBuffer + rendered * ALSampleGranuleBytes;
+				filter_destination = render_buffer + rendered * ALSampleGranuleBytes;
 			}
 			else
 			{
@@ -260,7 +261,7 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 		if(need_convert)
 		{
 			tWaveFormatConverter::Convert(tPCMTypes::ti16,
-				RenderBuffer + rendered * ALSampleGranuleBytes,
+				render_buffer + rendered * ALSampleGranuleBytes,
 				filter_pcm_type,
 				ConvertBuffer,
 				ALFormat == AL_FORMAT_STEREO16 ? 2 : ALFormat == AL_FORMAT_MONO16 ? 1 : 0,
@@ -278,26 +279,43 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 			if(samples != 0)
 			{
 				memset(
-					RenderBuffer + rendered * ALSampleGranuleBytes,
+					render_buffer + rendered * ALSampleGranuleBytes,
 					0x00, remain * ALSampleGranuleBytes); // 無音は 0
 			}
 			break;
 		}
 	}
 
-	// バッファにデータを割り当てる
-
-	volatile tOpenAL::tCriticalSectionHolder cs_holder;
-
-//	wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
-//			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
-	alBufferData(buffer, ALFormat, RenderBuffer,
-		rendered * ALSampleGranuleBytes, ALFrequency);
-	tOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));
+	samples = rendered;
 
 	return true;
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
+	tWaveSegmentQueue & segmentqueue)
+{
+	if(FillRenderBuffer(RenderBuffer, RenderBufferSize, samples, segmentqueue))
+	{
+		// バッファにデータを割り当てる
+
+		volatile tOpenAL::tCriticalSectionHolder cs_holder;
+
+	//	wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
+	//			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
+		alBufferData(buffer, ALFormat, RenderBuffer,
+			samples * ALSampleGranuleBytes, ALFrequency);
+		tOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));
+
+		return true;
+	}
+
+	return false;
+}
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------
@@ -366,11 +384,32 @@ void tALBuffer::Load()
 	// TODO: WaveLoopManager のリンク無効化 (そうしないと延々とサウンドを
 	//       メモリが無くなるまでデコードし続ける)
 	// TODO: segments と events のハンドリング
-	tWaveSegmentQueue segumentqueue;
-	bool filled = FillALBuffer(Buffers->Buffers[0], 0, segumentqueue);
+	tWaveSegmentQueue segmentqueue;
 
-	if(!filled)
+	risse_uint8 * render_buffer = NULL; //!< レンダリング用のテンポラリバッファ
+	size_t render_buffer_size = 0; //!< RenderBuffer に割り当てられたサイズ(バイト単位)
+
+	risse_uint samples = 0;
+
+	if(FillRenderBuffer(render_buffer, render_buffer_size, samples, segmentqueue))
+	{
+		// バッファにデータを割り当てる
+
+		volatile tOpenAL::tCriticalSectionHolder cs_holder;
+
+	//	wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
+	//			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
+		alBufferData(Buffers->Buffers[0], ALFormat, render_buffer,
+			samples * ALSampleGranuleBytes, ALFrequency);
+		tOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));
+
+		if(render_buffer) FreeCollectee(render_buffer), render_buffer = NULL;
+			// render_buffer は要らないので強制的に開放
+	}
+	else
+	{
 		tSoundExceptionClass::Throw(RISSE_WS_TR("no data to play"));
+	}
 }
 //---------------------------------------------------------------------------
 

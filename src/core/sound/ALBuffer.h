@@ -29,7 +29,8 @@ public:
 	// 定数など
 	static const risse_uint STREAMING_BUFFER_HZ = 8; //!< ストリーミング時の1/(一つのバッファの時間)(調整可)
 	static const risse_uint STREAMING_CHECK_SLEEP_MS = 70; //!< ストリーミング時のバッファをチェックする間隔(調整可)
-	static const risse_uint MAX_NUM_BUFFERS = 16; //!< 一つの tALBuffer が保持する最大のバッファ数
+	static const risse_uint MAX_NUM_BUFFERS = 4; //!< 一つの tALBuffer が保持する最大のバッファ数
+	static const risse_uint MAX_NUM_RENDERBUFFERS = 16; //!< RenderBuffer の数
 
 private:
 	struct tInternalBuffers : public tDestructee
@@ -72,6 +73,18 @@ private:
 
 	//! @brief		一時的に割り当てられたバッファの解放
 	void FreeTempBuffers();
+
+	//! @brief		レンダリング用のテンポラリバッファにデータを詰める
+	//! @param		render_buffer	レンダリング用のテンポラリバッファ
+	//! @param		render_buffer_size	レンダリング用のテンポラリバッファのサイズ
+	//! @param		samples		最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
+	//!							戻り値trueで関数が戻ればここには実際にデコードされたサンプル数が入っている
+	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
+	//! @return		バッファにデータが入ったら真
+	bool FillRenderBuffer(
+		risse_uint8 * & render_buffer, size_t & render_buffer_size,
+		risse_uint & samples,
+		tWaveSegmentQueue & segmentqueue);
 
 	//! @brief		OpenALバッファにデータを詰める
 	//! @param		buffer		対象とする OpenAL バッファ

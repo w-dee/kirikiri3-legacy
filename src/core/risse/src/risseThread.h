@@ -249,11 +249,15 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		//! @brief		アトミックカウンタ
 		class tAtomicCounter : public tAtomicCollectee
 		{
-			long v; //!< 値
+			mutable long v; //!< 値
 			tAtomicCounter(const tAtomicCounter &); //!< non-copyable
 			tAtomicCounter & operator = (const tAtomicCounter &); //!< non copyable
 
 		public:
+			//! @brief		デフォルトコンストラクタ
+			//! @param		v		初期値
+			explicit tAtomicCounter() : v(0) { }
+
 			//! @brief		コンストラクタ
 			//! @param		v		初期値
 			explicit tAtomicCounter(long v_) : v(v_) { }
@@ -265,7 +269,7 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			long operator --() { return ::InterlockedDecrement(&v); }
 
 			//! @brief		long へのキャスト
-			operator long() const { return static_cast<long const volatile &>(v); }
+			operator long() const { return ::InterlockedExchangeAdd(&v, 0); }
 		};
 
 	#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
@@ -284,6 +288,10 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			tAtomicCounter & operator = (const tAtomicCounter &); //!< non copyable
 
 		public:
+			//! @brief		デフォルトコンストラクタ
+			//! @param		v		初期値
+			explicit tAtomicCounter() : v(0) { }
+
 			//! @brief		コンストラクタ
 			//! @param		v		初期値
 			explicit tAtomicCounter(long v_) : v(v_) { }
